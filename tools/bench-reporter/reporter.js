@@ -33,6 +33,13 @@ const outDir = args.out ?? './bench-report';
 
 const NOISE_FLOOR = 2; // percent — matches autoSampleConditions
 
+// Metrics whose per-sample variance exceeds ±2% even at true delta 0.
+// These DO resolve under real perf changes (CI widens but the delta is
+// larger than the CI), so keeping ["2%"] globally is correct. Flagged
+// here so reviewers/agents don't read their "unsure" verdict on
+// zero-delta PRs as a regression.
+const KNOWN_HIGH_VARIANCE = new Set(['clear', 'remove-last', 'select']);
+
 const metrics = loadAllMetrics(resultsDir);
 const report = buildReport(metrics);
 const markdown = renderMarkdown(report);
@@ -91,14 +98,15 @@ function loadAllMetrics(dir) {
 
 /**
  * Classify + summarize. Status rule (NOISE_FLOOR = 2%):
- *   faster        — CI entirely below -2% (this-change consistently shorter)
- *   slower        — CI entirely above +2%
- *   within-noise  — CI entirely inside [-2%, +2%]
- *   unsure        — CI straddles a ±2% boundary
+ *   faster         — CI entirely below -2% (this-change consistently shorter)
+ *   slower         — CI entirely above +2%
+ *   within-noise   — CI entirely inside [-2%, +2%]
+ *   high-variance  — CI straddles ±2% AND metric is on the known-high-variance list
+ *   unsure         — CI straddles ±2% for any other reason (boundary case)
  */
 function buildReport(metrics) {
-  const classified = metrics.map((m) => ({ ...m, status: classify(m.percentDelta) }));
-  const summary = { faster: 0, slower: 0, 'within-noise': 0, unsure: 0 };
+  const classified = metrics.map((m) => ({ ...m, status: classify(m.percentDelta, m.name) }));
+  const summary = { faster: 0, slower: 0, 'within-noise': 0, unsure: 0, 'high-variance': 0 };
   for (const m of classified) { summary[m.status]++; }
   return {
     head: { sha, msg, ref: process.env.GITHUB_HEAD_REF || '' },
@@ -110,11 +118,11 @@ function buildReport(metrics) {
   };
 }
 
-function classify([low, high]) {
+function classify([low, high], name) {
   if (high < -NOISE_FLOOR) { return 'faster'; }
   if (low > NOISE_FLOOR) { return 'slower'; }
   if (low > -NOISE_FLOOR && high < NOISE_FLOOR) { return 'within-noise'; }
-  return 'unsure';
+  return KNOWN_HIGH_VARIANCE.has(name) ? 'high-variance' : 'unsure';
 }
 
 function toJsonMetric(m) {
@@ -129,35 +137,50 @@ function toJsonMetric(m) {
 }
 
 /**
- * Markdown renderer. Three sections:
- *   1. Header — SHA + commit msg + run link + one-line summary
- *   2. Significant changes — faster/slower, sorted by |mean delta|
- *   3. Collapsed sections — within-noise and unsure (longer, less interesting)
+ * Markdown renderer. Section order:
+ *   1. Header — SHA + commit msg + base + run link
+ *   2. One-line summary
+ *   3. Significant changes (if any) — headline when there IS a change
+ *   4. Confirmed within ±2% — positive signal; auto-expanded on zero-delta PRs
+ *   5. Unsure — boundary cases; smaller, de-emphasized
+ *   6. Known high-variance — separate bucket; reviewers shouldn't chase
  */
 function renderMarkdown(report) {
   const shortSha = report.head.sha.slice(0, 7);
-  const shortBase = report.base.sha ? report.base.sha.slice(0, 7) : report.base.ref;
-  const runLink = report.run.url ? ` · [run ↗](${report.run.url})` : '';
   const msgSuffix = report.head.msg ? ` · ${escape(report.head.msg)}` : '';
+  const runLink = report.run.url ? ` · [run ↗](${report.run.url})` : '';
+
+  // Base header: show short SHA when we have one, otherwise just the ref.
+  // Avoids the "`main` (main)" duplication when no --base-sha is passed.
+  const hasBaseSha = report.base.sha && report.base.sha.slice(0, 7) !== report.base.ref;
+  const baseLabel = hasBaseSha
+    ? `\`${report.base.sha.slice(0, 7)}\` (${report.base.ref})`
+    : `\`${report.base.ref}\``;
 
   const lines = [];
   lines.push(`## 📊 Bench — \`${shortSha}\`${msgSuffix}`);
-  lines.push(`**Base:** \`${shortBase}\` (${report.base.ref})${runLink}`);
+  lines.push(`**Base:** ${baseLabel}${runLink}`);
   lines.push('');
-  lines.push(
-    `**${report.summary.faster} faster** · `
-      + `**${report.summary.slower} slower** · `
-      + `${report.summary['within-noise']} within ±${NOISE_FLOOR}% · `
-      + `${report.summary.unsure} unsure`,
-  );
+
+  const summaryParts = [
+    `**${report.summary.faster} faster**`,
+    `**${report.summary.slower} slower**`,
+    `${report.summary['within-noise']} within ±${NOISE_FLOOR}%`,
+    `${report.summary.unsure} unsure`,
+  ];
+  if (report.summary['high-variance'] > 0) {
+    summaryParts.push(`${report.summary['high-variance']} high-variance`);
+  }
+  lines.push(summaryParts.join(' · '));
   lines.push('');
 
   const faster = report.metrics.filter((m) => m.status === 'faster');
   const slower = report.metrics.filter((m) => m.status === 'slower');
   const noise = report.metrics.filter((m) => m.status === 'within-noise');
   const unsure = report.metrics.filter((m) => m.status === 'unsure');
+  const highVar = report.metrics.filter((m) => m.status === 'high-variance');
 
-  // Significant changes, sorted by absolute mid-delta descending
+  // Significant changes, sorted by |Δ| descending — headline when present
   const significant = [...faster, ...slower].sort(
     (a, b) => Math.abs(mid(b.percent_change_ci)) - Math.abs(mid(a.percent_change_ci)),
   );
@@ -176,11 +199,33 @@ function renderMarkdown(report) {
     lines.push('');
   }
 
+  // Within-noise: the positive "confirmed unchanged" signal. Expand by
+  // default when there are no significant changes (this is the story on
+  // zero-delta PRs). Collapse when significant exist (less interesting).
+  if (noise.length > 0) {
+    const open = significant.length === 0 ? ' open' : '';
+    lines.push('<details' + open + '>');
+    lines.push(
+      `<summary>${noise.length} metric${
+        noise.length === 1 ? '' : 's'
+      } confirmed within ±${NOISE_FLOOR}% (no meaningful change)</summary>`,
+    );
+    lines.push('');
+    lines.push('| metric | Δ% CI |');
+    lines.push('|---|---|');
+    for (const m of noise) {
+      lines.push(`| \`${m.name}\` | ${fmtPctRange(m.percent_change_ci)} |`);
+    }
+    lines.push('');
+    lines.push('</details>');
+    lines.push('');
+  }
+
   if (unsure.length > 0) {
-    lines.push('### Unsure (CI straddles ±2%)');
+    lines.push(`### Unsure (CI straddles ±${NOISE_FLOOR}%)`);
     lines.push('');
     lines.push(
-      'These are boundary cases — the true delta is close to ±2% and tachometer could not place the CI entirely on one side. Longer sampling may resolve them.',
+      `True delta is likely near the ±${NOISE_FLOOR}% noise floor; the CI straddles the threshold. Not indicative of a problem.`,
     );
     lines.push('');
     lines.push('| metric | Δ% CI | Δms CI |');
@@ -191,21 +236,18 @@ function renderMarkdown(report) {
     lines.push('');
   }
 
-  if (noise.length > 0) {
-    lines.push('<details>');
+  if (highVar.length > 0) {
+    lines.push('### Known high-variance');
+    lines.push('');
     lines.push(
-      `<summary>${noise.length} metric${
-        noise.length === 1 ? '' : 's'
-      } within ±${NOISE_FLOOR}% (no meaningful change)</summary>`,
+      `Per-sample variance on these metrics exceeds ±${NOISE_FLOOR}%. They resolve under real perf changes (large deltas clear the noise) but will show unsure on zero-delta PRs. Not a signal.`,
     );
     lines.push('');
-    lines.push('| metric | Δ% CI |');
-    lines.push('|---|---|');
-    for (const m of noise) {
-      lines.push(`| \`${m.name}\` | ${fmtPctRange(m.percent_change_ci)} |`);
+    lines.push('| metric | Δ% CI | Δms CI |');
+    lines.push('|---|---|---|');
+    for (const m of highVar) {
+      lines.push(`| \`${m.name}\` | ${fmtPctRange(m.percent_change_ci)} | ${fmtMsRange(m.absolute_ms_ci)} |`);
     }
-    lines.push('');
-    lines.push('</details>');
     lines.push('');
   }
 
@@ -224,9 +266,7 @@ function fmtPctRange([low, high]) {
 }
 
 function fmtMsRange([low, high]) {
-  const lowMs = Math.abs(low) < 0.01 ? '0' : low.toFixed(2);
-  const highMs = Math.abs(high) < 0.01 ? '0' : high.toFixed(2);
-  return `${signPrefix(low)}${lowMs}ms – ${signPrefix(high)}${highMs}ms`;
+  return `${signPrefix(low)}${low.toFixed(2)}ms – ${signPrefix(high)}${high.toFixed(2)}ms`;
 }
 
 function signed(n) {

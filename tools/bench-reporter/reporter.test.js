@@ -87,15 +87,25 @@ test('real-delta fixture — markdown structure', () => {
   assert.ok(markdown.includes('[run ↗](https://example.test/run/42)'), 'run URL linked');
   assert.ok(markdown.includes('### Significant changes'), 'significant section present');
   assert.ok(markdown.includes('### Unsure'), 'unsure section present');
-  assert.ok(markdown.includes('<details>'), 'within-noise collapsed');
+  assert.ok(markdown.includes('<details>'), 'within-noise present as <details>');
+  assert.ok(!markdown.includes('<details open>'), 'within-noise collapsed when significant changes exist');
 
   // Significant changes should sort by |Δ| descending → update-10th appears before toggle-10
   const updateIdx = markdown.indexOf('| `update-10th` |');
   const toggleIdx = markdown.indexOf('| `toggle-10` |');
   assert.ok(updateIdx > 0 && toggleIdx > 0 && updateIdx < toggleIdx, 'sorted by magnitude');
+
+  // Within-noise section should come AFTER significant changes
+  const sigIdx = markdown.indexOf('### Significant changes');
+  const noiseIdx = markdown.indexOf('<details>');
+  assert.ok(sigIdx < noiseIdx, 'significant before within-noise');
+
+  // Unsure section should come AFTER within-noise
+  const unsureIdx = markdown.indexOf('### Unsure');
+  assert.ok(noiseIdx < unsureIdx, 'within-noise before unsure');
 });
 
-test('zero-delta fixture — 0 faster, 0 slower, everything boundary or noise', () => {
+test('zero-delta fixture — 0 faster, 0 slower, correct categorisation', () => {
   const { report, markdown } = runReporter({
     fixture: 'zero-delta',
     sha: 'd57409c71',
@@ -105,13 +115,45 @@ test('zero-delta fixture — 0 faster, 0 slower, everything boundary or noise', 
 
   assert.equal(report.summary.faster, 0, 'zero-delta: no faster verdicts');
   assert.equal(report.summary.slower, 0, 'zero-delta: no slower verdicts');
-  assert.equal(
-    report.summary.faster + report.summary.slower + report.summary['within-noise'] + report.summary.unsure,
-    21,
-  );
+  const total = report.summary.faster
+    + report.summary.slower
+    + report.summary['within-noise']
+    + report.summary.unsure
+    + report.summary['high-variance'];
+  assert.equal(total, 21, 'all 21 metrics classified');
+
+  // Known high-variance metrics land in their own bucket, not `unsure`
+  assert.equal(report.summary['high-variance'], 3, 'clear/remove-last/select bucketed');
+  const clear = report.metrics.find((m) => m.name === 'clear');
+  assert.equal(clear.status, 'high-variance');
 
   // With 0 significant changes, the Significant Changes section should be absent
   assert.ok(!markdown.includes('### Significant changes'));
+  // Within-noise <details> should be open-by-default when there are no significant changes
+  assert.ok(markdown.includes('<details open>'), 'within-noise expanded on zero-delta');
+  // High-variance section rendered
+  assert.ok(markdown.includes('### Known high-variance'), 'high-variance section present');
+});
+
+test('base header — shows only ref when no base-sha passed', () => {
+  const { markdown } = runReporter({
+    fixture: 'zero-delta',
+    sha: 'deadbeef',
+    msg: 'test',
+    baseSha: '',
+  });
+  assert.ok(markdown.includes('**Base:** `main`'), 'renders just the ref');
+  assert.ok(!markdown.includes('`main` (main)'), 'no paren duplication');
+});
+
+test('base header — shows sha + ref when base-sha differs', () => {
+  const { markdown } = runReporter({
+    fixture: 'zero-delta',
+    sha: 'deadbeef',
+    msg: 'test',
+    baseSha: '1234567',
+  });
+  assert.ok(markdown.includes('`1234567` (main)'), 'renders sha + ref');
 });
 
 test('classify boundary behavior', async () => {
