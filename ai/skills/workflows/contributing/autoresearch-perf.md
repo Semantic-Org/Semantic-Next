@@ -38,7 +38,7 @@ This workflow is the autonomous variant of `improve-performance`. Use it when yo
 - You already know the fix — just implement it and measure
 - The regression has one confirmed cause that's already been analyzed
 - The benchmark suite can't isolate what you're optimizing (no local signal)
-- CI is your only measurement surface (CI tachometer runs take 25-35 min per iteration — too slow for a loop)
+- CI is your only measurement surface (tachometer in CI is too slow for a tight iteration loop even after parallelization — iterating requires a local runner)
 
 ---
 
@@ -119,9 +119,9 @@ Fast, cheap, unforgiving. Run the full suite, not the filtered subset. A filtere
 
 A target-only verdict is incomplete. The full suite's verdict is what ships.
 
-**Case study — iter-2, shallow props snapshot.** Target `update-10th` went from +14% to -51.7% (a 65pp improvement, confident CI). But the non-target `toggle-all` regressed by +30pp: every item mutates on toggle-all, so the new per-reconcile snapshot allocation ran 1000× and dominated the bench. Without the regression gate, this would have shipped as "net positive." With the gate, it was marked Refine; iter-3 eliminated the allocation via in-place refresh and kept the primary win while narrowing (not eliminating) the toggle-all loss.
+**Case study — iter-2, shallow props snapshot.** The hypothesis closed the primary target confidently but regressed a non-target metric well beyond gate threshold: every item mutates on the non-target's scenario, so the new per-reconcile snapshot allocation dominated that bench. Without the regression gate, this would have shipped as "net positive." With the gate, it was marked Refine; the next iteration eliminated the allocation via in-place refresh and kept the primary win while narrowing the non-target loss.
 
-**Threshold choice.** >3pp is a good default — tight enough to catch real regressions, loose enough to absorb noise on small-absolute-time benches. Adjust based on the measured noise floor of your local runner.
+**Threshold choice.** The gate threshold sits above the bench's inherent noise floor. Short benches have larger inherent variance than long benches — the reporter exposes a duration-derived Expected Noise per metric, and a regression is "real" when it clears that floor. In the absence of Expected Noise, a blanket few-percentage-point threshold works as a starting default; revisit when the reporter's per-bench noise estimate is available.
 
 ### Measurement gate
 
@@ -241,6 +241,10 @@ When to **revert**: the hypothesis was wrong. Two flavors:
 
 When to **promote**: a kept iteration has all three gates clear AND improves the target set AND doesn't regress any non-target beyond threshold. The best-known snapshot updates. Previous best-known is archived (kept as `<file>.best-iterK.js` for history, never deleted mid-loop).
 
+### Reporter vocabulary as loop vocabulary
+
+Once the PR-comment reporter is in place, its classification buckets map directly onto loop verdicts. A target metric classified as a confident improvement with no non-target classified as a confident regression is a gate-passed iteration. A target metric that the reporter marks Unsure — Too Fast to Measure Precisely is a metric the loop cannot make progress on at that bench's duration. A non-target metric classified as a confident regression is a regression-gate violation regardless of how good the target looks. Prefer the reporter's taxonomy over ad-hoc pp thresholds once it's available — same decisions, better-anchored vocabulary.
+
 ---
 
 ## Failure Modes Observed in Practice
@@ -271,7 +275,7 @@ Local tachometer shows one result; CI shows a significantly different one for th
 
 **Signal**: a confident-magnitude flip between local and CI. **Fix**: document both. Trust CI for the ship decision; use local for iteration feedback. Don't tune the loop to local-only signal if the CI result will contradict.
 
-**Case study**: iter-0's `clear` benchmark measured +31% locally vs -36% in CI for the same commit — a complete sign inversion. Both measurements were technically correct; the environments differed. The loop continued using local for speed, with the understanding that the final verdict was CI's.
+**Case study**: one benchmark measured confidently positive locally vs confidently negative in CI for the same commit — a complete sign inversion. Both measurements were technically correct; the environments differed. The loop continued using local for speed, with the understanding that the final verdict was CI's.
 
 ### Collapsing to "noise" too quickly
 
@@ -284,6 +288,12 @@ A small result (±2-3pp) gets labeled "noise" and the iteration is marked null. 
 Iteration N's change lands cleanly. The agent reasons: "while I'm here, I may as well fix the adjacent thing." Iteration N+1's change now bundles two mechanisms.
 
 **Signal**: an iter-N.md `## Change` section spans two distinct mechanisms. **Fix**: one hypothesis per iteration, always. If two are genuinely coupled, name the coupling explicitly and call it one mechanism; otherwise split into two iterations.
+
+### Extrapolating from undersampled plan data
+
+Before launching the loop, an agent looks at past per-commit tachometer tables and decides "these benchmarks move in lockstep — collapse them" or "this metric is always noisy — ignore it." The decision is reasonable given the small dataset. When the loop runs against real deltas, the pattern reverses: benchmarks that correlated across a few commits show independent sensitivity to the actual change; "always noisy" benchmarks resolve cleanly when the delta is large enough.
+
+**Signal**: a pre-loop call to restructure the suite, skip a bench, or adjust thresholds based on patterns observed in a handful of past runs. **Fix**: validate the pre-loop reasoning against real-delta data before committing to it — either run the loop against a commit with known non-trivial deltas first, or let the restructure ride a separate PR that can be reverted if the assumption was wrong. Pattern-matching on a small sample is reasoning-from-an-undersampled-corner, the opposite of what the loop is meant to do.
 
 ---
 

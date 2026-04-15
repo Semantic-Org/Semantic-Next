@@ -6,6 +6,14 @@ on:
       - 'packages/**'
       - '.github/workflows/benchmarks.yml'
       - '.github/workflows/benchmarks-report.yml'
+  # Bench every merge commit on main so bench-history.json accumulates
+  # absolute CIs per commit. These runs aren't gated against anything —
+  # the report workflow branches on event type and appends history instead
+  # of posting a PR comment.
+  push:
+    branches: [main]
+    paths:
+      - 'packages/**'
 
 concurrency:
   group: bench-${{ github.workflow }}-${{ github.ref }}
@@ -31,23 +39,32 @@ jobs:
       - name: Build matrix
         id: matrix
         run: |
-          base=origin/${{ github.event.pull_request.base.ref }}
-
-          # If a benchmark workflow or bench harness changed, we need to
-          # validate CI itself — run against every benchmarked package.
-          ci_changed=$(git diff --name-only "$base"...HEAD \
-            | grep -E '^(\.github/workflows/benchmarks.*\.yml|packages/[^/]+/bench/tachometer/)' \
-            | head -1)
-
-          if [ -n "$ci_changed" ]; then
+          # Push to main: archive every benchmarkable package — we need the
+          # full absolute-CI snapshot for bench-history regardless of what
+          # changed in this commit.
+          if [ '${{ github.event_name }}' = 'push' ]; then
             changed=$(find packages -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' \
               | cut -d/ -f2 \
               | sort -u)
           else
-            changed=$(git diff --name-only "$base"...HEAD \
-              | grep '^packages/' \
-              | cut -d/ -f2 \
-              | sort -u)
+            base=origin/${{ github.event.pull_request.base.ref }}
+
+            # If a benchmark workflow or bench harness changed, we need to
+            # validate CI itself — run against every benchmarked package.
+            ci_changed=$(git diff --name-only "$base"...HEAD \
+              | grep -E '^(\.github/workflows/benchmarks.*\.yml|packages/[^/]+/bench/tachometer/)' \
+              | head -1)
+
+            if [ -n "$ci_changed" ]; then
+              changed=$(find packages -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' \
+                | cut -d/ -f2 \
+                | sort -u)
+            else
+              changed=$(git diff --name-only "$base"...HEAD \
+                | grep '^packages/' \
+                | cut -d/ -f2 \
+                | sort -u)
+            fi
           fi
 
           # For each changed package, emit one entry per tachometer-ci*.json
@@ -108,11 +125,21 @@ jobs:
       - name: Build current
         run: node packages/${{ matrix.entry.package }}/bench/tachometer/build-ci.js current
 
-      # Swap source to base branch and build baseline bundles
+      # Swap source to the appropriate baseline and build baseline bundles.
+      # PR: baseline = base branch tip.
+      # Push to main: baseline = this commit's parent (so the delta captures
+      #   the merged commit's effect; bench-history indexes the current
+      #   commit's absolute CI).
       - name: Build baseline
         run: |
-          git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
-          git checkout FETCH_HEAD -- packages/*/src/
+          if [ '${{ github.event_name }}' = 'push' ]; then
+            # Fetch enough history to reach the parent commit locally.
+            git fetch origin main --depth=2
+            git checkout HEAD~1 -- packages/*/src/
+          else
+            git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+            git checkout FETCH_HEAD -- packages/*/src/
+          fi
           node packages/${{ matrix.entry.package }}/bench/tachometer/build-ci.js baseline
           git checkout HEAD -- packages/*/src/
 
