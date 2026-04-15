@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/nicolo-ribaudo.github.io/HEAD/nicolo-ribaudo.github.io/src/assets/tachometer.schema.json",
+  "root": "../../../..",
+  "sampleSize": 50,
+  "timeout": 3,
+  "autoSampleConditions": ["2%"],
+  "benchmarks": [
+    {
+      "name": "this-change",
+      "url": "ci-current-signal.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "signal-reactive-fanout-500x1200" },
+        { "mode": "performance", "entryName": "signal-computed-chain-10x30k" },
+        { "mode": "performance", "entryName": "signal-reactive-multi-read-5x80k" },
+        { "mode": "performance", "entryName": "signal-reactive-list-replace-1000x500" },
+        { "mode": "performance", "entryName": "signal-reactive-list-filter-1000x300" },
+        { "mode": "performance", "entryName": "signal-reactive-push-1000x20" },
+        { "mode": "performance", "entryName": "signal-reactive-set-index-300" },
+        { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-100" }
+      ]
+    },
+    {
+      "name": "tip-of-tree",
+      "url": "ci-baseline-signal.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "signal-reactive-fanout-500x1200" },
+        { "mode": "performance", "entryName": "signal-computed-chain-10x30k" },
+        { "mode": "performance", "entryName": "signal-reactive-multi-read-5x80k" },
+        { "mode": "performance", "entryName": "signal-reactive-list-replace-1000x500" },
+        { "mode": "performance", "entryName": "signal-reactive-list-filter-1000x300" },
+        { "mode": "performance", "entryName": "signal-reactive-push-1000x20" },
+        { "mode": "performance", "entryName": "signal-reactive-set-index-300" },
+        { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-100" }
+      ]
+    }
+  ]
+}
