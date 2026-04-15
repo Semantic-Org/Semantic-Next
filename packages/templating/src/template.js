@@ -136,11 +136,6 @@ export const Template = class Template {
   }
 
   setDataContext(data, { rerender = true } = {}) {
-    // Thaw lazily if the incoming context arrived frozen (signal-backed data).
-    // Runs at most once per template instance; subsequent calls mutate in place.
-    if (Object.isFrozen(this.data)) {
-      this.data = { ...this.data };
-    }
     const changed = assignInPlace(this.data, data, { returnChanged: true });
     if (changed) {
       this.dataReplaced = true;
