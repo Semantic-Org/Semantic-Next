@@ -10,9 +10,10 @@
       --sha <sha>             current commit SHA
       --msg <text>            current commit subject line
       --run-url <url>         link to the triggering workflow run
+      --run-id <id>           numeric workflow_run id (used as link label)
       --base-ref <ref>        base branch name (e.g. "main")
       --base-sha <sha>        base commit SHA
-      --repo <owner/name>     GitHub repo slug — enables metric source-code links
+      --repo <owner/name>     GitHub repo slug (falls back to $GITHUB_REPOSITORY)
       --repo-root <dir>       filesystem root for resolving bench sources (default: cwd)
       --wall-clock <seconds>  total bench run duration — footer metadata
       --out <dir>             output directory (default: ./bench-report)
@@ -30,9 +31,13 @@ const resultsDir = required(args, 'results');
 const sha = required(args, 'sha');
 const msg = args.msg ?? '';
 const runUrl = args['run-url'] ?? '';
+const runId = args['run-id'] ?? '';
 const baseRef = args['base-ref'] ?? 'main';
 const baseSha = args['base-sha'] ?? '';
-const repo = args.repo ?? '';
+// Fall back to GITHUB_REPOSITORY so commit links work without an explicit
+// --repo when running under Actions. Still honors --repo override when
+// someone needs to pin a different repo (e.g. cross-fork comparison).
+const repo = args.repo ?? process.env.GITHUB_REPOSITORY ?? '';
 const repoRoot = args['repo-root'] ?? process.cwd();
 const wallClockSec = args['wall-clock'] ? Number(args['wall-clock']) : null;
 const outDir = args.out ?? './bench-report';
@@ -168,7 +173,7 @@ function buildReport(metrics) {
   return {
     head: { sha, msg, ref: process.env.GITHUB_HEAD_REF || '' },
     base: { sha: baseSha, ref: baseRef },
-    run: { url: runUrl },
+    run: { url: runUrl, id: runId || extractRunIdFromUrl(runUrl) },
     repo,
     wall_clock_seconds: wallClockSec,
     noise_floor_percent: NOISE_FLOOR,
@@ -236,7 +241,12 @@ function renderMarkdown(report) {
   const metaParts = [];
   metaParts.push(`**Base:** ${baseLinkFor(report)}`);
   if (report.run.url) {
-    metaParts.push(`**Action:** [run ↗](${report.run.url})`);
+    // Label the run link with its numeric id — useful for `gh run view <id>`
+    // copy-paste and avoids the ↗ arrow's valign drift. Falls back to "run"
+    // if the URL shape doesn't parse (unlikely under workflow_run trigger).
+    const runId = report.run.id || extractRunIdFromUrl(report.run.url);
+    const runLabel = runId ? `#${runId}` : 'run';
+    metaParts.push(`**Action:** [${runLabel}](${report.run.url})`);
     metaParts.push(`**Raw:** [\`bench-report.json\`](${report.run.url}/artifacts)`);
   }
   lines.push(metaParts.join(' · '));
@@ -475,12 +485,29 @@ function metricLink(m, report) {
   return `[${label}](https://github.com/${report.repo}/blob/${report.head.sha}/${m.source.path}${hashPart})`;
 }
 
-/** Base link: `[main](commit-url)` when sha + repo present, else `` `main` ``. */
+/**
+ * Base link. Prefers the specific commit SHA when known (stable permalink);
+ * falls back to the branch tree view when only the ref is available. Always
+ * a hyperlink when repo is present — the ref is obvious but linking keeps
+ * visual symmetry with the linked head SHA in the heading.
+ */
 function baseLinkFor(report) {
-  if (report.repo && report.base.sha) {
-    return `[${report.base.ref}](https://github.com/${report.repo}/commit/${report.base.sha})`;
-  }
-  return `\`${report.base.ref}\``;
+  if (!report.repo) { return `\`${report.base.ref}\``; }
+  const target = report.base.sha
+    ? `https://github.com/${report.repo}/commit/${report.base.sha}`
+    : `https://github.com/${report.repo}/tree/${report.base.ref}`;
+  return `[${report.base.ref}](${target})`;
+}
+
+/**
+ * Extract the numeric run id from a workflow_run URL.
+ *   `https://github.com/<org>/<repo>/actions/runs/<id>` → `<id>`
+ * Returns `''` if the URL doesn't match. Used as a label fallback when
+ * --run-id isn't passed explicitly.
+ */
+function extractRunIdFromUrl(url) {
+  const match = /\/actions\/runs\/(\d+)/.exec(url ?? '');
+  return match ? match[1] : '';
 }
 
 /** Auto-discover packages/*\/bench/tachometer/ dirs relative to repoRoot. */

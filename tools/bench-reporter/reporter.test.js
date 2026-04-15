@@ -94,7 +94,7 @@ test('real-delta fixture — rubric markdown structure', () => {
     sha: 'abcdef012345678',
     msg: 'Perf: Gate each phase-3 notify',
     baseSha: '0873084',
-    runUrl: 'https://example.test/run/42',
+    runUrl: 'https://github.com/Semantic-Org/Semantic-Next/actions/runs/42',
     repo: 'Semantic-Org/Semantic-Next',
     wallClock: '642',
   });
@@ -110,10 +110,16 @@ test('real-delta fixture — rubric markdown structure', () => {
     'commit SHA linked to GitHub',
   );
 
-  // Metadata line includes Base / Action / Raw links
+  // Metadata line includes Base / Action / Raw links. Action uses the run id
+  // as the label (`#42`) so `gh run view 42` copy-paste works and the label
+  // doesn't carry the ↗ arrow's valign drift.
   assert.ok(markdown.includes('**Base:** [main](https://github.com/Semantic-Org/Semantic-Next/commit/0873084)'));
-  assert.ok(markdown.includes('**Action:** [run ↗](https://example.test/run/42)'));
-  assert.ok(markdown.includes('**Raw:** [`bench-report.json`](https://example.test/run/42/artifacts)'));
+  assert.ok(markdown.includes('**Action:** [#42](https://github.com/Semantic-Org/Semantic-Next/actions/runs/42)'));
+  assert.ok(
+    markdown.includes(
+      '**Raw:** [`bench-report.json`](https://github.com/Semantic-Org/Semantic-Next/actions/runs/42/artifacts)',
+    ),
+  );
 
   // Commit msg renders as <sup>
   assert.ok(markdown.includes('<sup>Perf: Gate each phase-3 notify</sup>'));

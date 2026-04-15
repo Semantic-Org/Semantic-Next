@@ -68,6 +68,7 @@ jobs:
             --sha '${{ github.event.workflow_run.head_sha }}' \
             --msg '${{ github.event.workflow_run.display_title }}' \
             --run-url '${{ github.event.workflow_run.html_url }}' \
+            --run-id '${{ github.event.workflow_run.id }}' \
             --base-ref 'main' \
             --repo '${{ github.repository }}' \
             --wall-clock "$WALL_CLOCK" \
