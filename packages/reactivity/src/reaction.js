@@ -1,6 +1,6 @@
 import { clone, isEqual } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
-import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
+import { captureStack, config } from './helpers.js';
 import { Scheduler } from './scheduler.js';
 
 export class Reaction {
@@ -17,14 +17,14 @@ export class Reaction {
     this.dependencies = new Set();
     this.firstRun = true;
     this.active = true;
-    if (context && isTracing()) {
+    if (context && config.mode !== 'off') {
       this.setContext(context);
     }
     this.boundRun = this.run.bind(this);
   }
 
   setContext(additionalContext = {}) {
-    if (!isTracing()) {
+    if (config.mode === 'off') {
       return;
     }
     const defaultContext = {
@@ -41,7 +41,7 @@ export class Reaction {
   }
 
   addContext(additionalContext = {}) {
-    if (!isTracing()) {
+    if (config.mode === 'off') {
       return;
     }
     if (!this.context) {
@@ -57,7 +57,7 @@ export class Reaction {
     if (!this.active) {
       return;
     }
-    if (isTracing()) {
+    if (config.mode !== 'off') {
       this.addContext({
         firstRun: this.firstRun,
       });
@@ -107,10 +107,6 @@ export class Reaction {
   static scheduleFlush = Scheduler.scheduleFlush;
   static afterFlush = Scheduler.afterFlush;
   static getSource = Scheduler.getSource;
-  static setTracing = setTracing;
-  static isTracing = isTracing;
-  static setStackCapture = setStackCapture;
-  static isStackCapture = isStackCapture;
 
   static nonreactive(func) {
     const previousReaction = Scheduler.current;

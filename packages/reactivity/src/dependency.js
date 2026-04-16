@@ -1,10 +1,10 @@
-import { captureStack, isTracing } from './helpers.js';
+import { captureStack, config } from './helpers.js';
 import { Scheduler } from './scheduler.js';
 
 export class Dependency {
   constructor(...metadata) {
     this.subscribers = new Set();
-    if (isTracing()) {
+    if (config.mode !== 'off') {
       this.setContext(metadata);
     }
   }
@@ -18,7 +18,7 @@ export class Dependency {
 
   // Cheap context naming on tracing; stack capture only on stack mode.
   setContext(context) {
-    if (!isTracing()) {
+    if (config.mode === 'off') {
       return;
     }
     this.context = context || {};
@@ -26,7 +26,7 @@ export class Dependency {
   }
 
   changed(context) {
-    if (isTracing()) {
+    if (config.mode !== 'off') {
       if (context) {
         this.context = context;
       }

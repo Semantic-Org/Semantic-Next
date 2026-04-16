@@ -11,103 +11,44 @@ import {
 } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
-import {
-  captureStack,
-  getDefaultSafety,
-  isStackCapture,
-  isTracing,
-  setDefaultSafety,
-  setStackCapture,
-  setTracing,
-} from './helpers.js';
+import { captureStack, config } from './helpers.js';
 import { Reaction } from './reaction.js';
 
+// Module-local only because it's used as a computed class member key
+// (`[IS_SIGNAL]`), which is evaluated before static fields initialize.
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
-const NO_EQUALITY = () => false;
 
 export class Signal {
+  // Brand check — allows cross-realm and prototype-created instances to pass
+  // instanceof. Paired with the prototype getter below (not a static field,
+  // so the check survives subclassing and prototype-based construction).
   static [Symbol.hasInstance](instance) {
     return !!instance?.[IS_SIGNAL];
   }
 
-  // Private backing for equalityFunction / cloneFunction so the public
-  // accessors below can validate assignments.
-  static #equalityFunction = isEqual;
-  static #cloneFunction = clone;
-
-  static get equalityFunction() {
-    return Signal.#equalityFunction;
-  }
-  static set equalityFunction(fn) {
-    if (typeof fn !== 'function') {
-      throw new TypeError('Signal.equalityFunction must be a function');
-    }
-    Signal.#equalityFunction = fn;
+  get [IS_SIGNAL]() {
+    return true;
   }
 
-  static get cloneFunction() {
-    return Signal.#cloneFunction;
-  }
-  static set cloneFunction(fn) {
-    if (typeof fn !== 'function') {
-      throw new TypeError('Signal.cloneFunction must be a function');
-    }
-    Signal.#cloneFunction = fn;
-  }
+  // Library-wide defaults for new signals. Assign to change:
+  //   Signal.defaultEquality = myEq
+  // Wrong values fail at first call rather than at assignment.
+  static defaultEquality = isEqual;
+  static defaultClone = clone;
 
-  static get safety() {
-    return getDefaultSafety();
-  }
-  static set safety(preset) {
-    setDefaultSafety(preset);
-  }
+  // Shared fn for safety:'none' — a single reference across all such signals
+  // instead of a fresh closure per construction. Replace with utils
+  // `returnsFalse` when the utils-modernization plan ships.
+  static noEquality = () => false;
 
-  static get tracing() {
-    return isTracing();
-  }
-  static set tracing(enabled) {
-    setTracing(enabled);
-  }
-
-  static get stackCapture() {
-    return isStackCapture();
-  }
-  static set stackCapture(enabled) {
-    setStackCapture(enabled);
-  }
-
-  // Bulk config — forwards each key through its accessor so validation runs.
-  static configure({ safety, tracing, stackCapture, equalityFunction, cloneFunction } = {}) {
-    if (safety !== undefined) { Signal.safety = safety; }
-    if (tracing !== undefined) { Signal.tracing = tracing; }
-    if (stackCapture !== undefined) { Signal.stackCapture = stackCapture; }
-    if (equalityFunction !== undefined) { Signal.equalityFunction = equalityFunction; }
-    if (cloneFunction !== undefined) { Signal.cloneFunction = cloneFunction; }
-  }
-
-  // Snapshot of current defaults — discoverable via console.log(Signal.defaults).
-  static get defaults() {
-    return {
-      safety: getDefaultSafety(),
-      tracing: isTracing(),
-      stackCapture: isStackCapture(),
-      equalityFunction: Signal.#equalityFunction,
-      cloneFunction: Signal.#cloneFunction,
-    };
-  }
-
+  // Factory for signals computed from other signals.
   static computed(computeFn, options = {}) {
     const computedSignal = new Signal(undefined, options);
     const reaction = Reaction.create(() => {
-      const result = computeFn();
-      computedSignal.set(result);
+      computedSignal.set(computeFn());
     });
     computedSignal._computedReaction = reaction;
     return computedSignal;
-  }
-
-  get [IS_SIGNAL]() {
-    return true;
   }
 
   constructor(initialValue, options = {}) {
@@ -118,15 +59,15 @@ export class Signal {
       value: initialValue,
     });
 
-    this.safety = safety ?? (allowClone === false ? 'reference' : getDefaultSafety());
+    this.safety = safety ?? (allowClone === false ? 'reference' : config.safety);
 
     this.equalityFunction = equalityFunction
       ? wrapFunction(equalityFunction)
-      : (this.safety === 'none' ? NO_EQUALITY : Signal.equalityFunction);
+      : (this.safety === 'none' ? Signal.noEquality : Signal.defaultEquality);
 
     this.cloneFunction = cloneFunction
       ? wrapFunction(cloneFunction)
-      : Signal.cloneFunction;
+      : Signal.defaultClone;
 
     this.currentValue = this.protect(initialValue);
 
@@ -134,7 +75,7 @@ export class Signal {
   }
 
   setContext(additionalContext = {}) {
-    if (!isTracing()) { return; }
+    if (config.mode === 'off') { return; }
     const defaultContext = {
       value: this.currentValue,
     };
@@ -145,7 +86,7 @@ export class Signal {
   }
 
   addContext(additionalContext = {}) {
-    if (!isTracing()) { return; }
+    if (config.mode === 'off') { return; }
     if (!this.context) { this.context = {}; }
     for (const key in additionalContext) {
       this.context[key] = additionalContext[key];
@@ -240,15 +181,29 @@ export class Signal {
     return this.set(undefined);
   }
 
-  // Under 'freeze', the fn receives a frozen value and must return a new value
-  // (in-place mutation throws). Under 'reference'/'none', fn may mutate in place
-  // and return undefined — notify fires either way.
+  // Under 'freeze', fn receives a frozen value and must return a new value
+  // (in-place mutation throws). Undefined return notifies unconditionally —
+  // the freeze guarantee makes the snapshot/equality dance unnecessary.
+  // Under 'reference'/'none', fn may mutate in place; we snapshot before
+  // the call and dedupe via equalityFunction so no-op mutates don't fire
+  // subscribers ('none' keeps event-stream semantics via NO_EQUALITY).
   mutate(fn) {
+    if (this.safety === 'freeze') {
+      const result = fn(this.currentValue);
+      if (result !== undefined) {
+        this.value = result;
+      }
+      else {
+        this.notify();
+      }
+      return;
+    }
+    const before = this.cloneFunction(this.currentValue);
     const result = fn(this.currentValue);
     if (result !== undefined) {
       this.value = result;
     }
-    else {
+    else if (!this.equalityFunction(before, this.currentValue)) {
       this.notify();
     }
   }
@@ -430,5 +385,49 @@ export class Signal {
 
   removeItem(id) {
     return this.removeIndex(this.getItemIndex(id));
+  }
+
+  /*-------------------------------------------------------------
+    Runtime configuration — shared library-wide defaults.
+
+    Direct assignment is the primary API:
+      Signal.safety = 'freeze'
+      Signal.tracing = true
+      Signal.defaultEquality = myEq
+    Bulk via Signal.configure({...}).
+  -------------------------------------------------------------*/
+
+  static get safety() {
+    return config.safety;
+  }
+  static set safety(preset) {
+    if (preset !== 'freeze' && preset !== 'reference' && preset !== 'none') {
+      throw new Error(`Invalid Signal.safety: ${preset}. Must be 'freeze', 'reference', or 'none'.`);
+    }
+    config.safety = preset;
+  }
+
+  static get tracing() {
+    return config.mode !== 'off';
+  }
+  static set tracing(enabled) {
+    if (enabled && config.mode === 'off') { config.mode = 'context'; }
+    else if (!enabled) { config.mode = 'off'; }
+  }
+
+  static get stackCapture() {
+    return config.mode === 'stack';
+  }
+  static set stackCapture(enabled) {
+    if (enabled) { config.mode = 'stack'; }
+    else if (config.mode === 'stack') { config.mode = 'context'; }
+  }
+
+  static configure({ safety, tracing, stackCapture, defaultEquality, defaultClone } = {}) {
+    if (safety !== undefined) { Signal.safety = safety; }
+    if (tracing !== undefined) { Signal.tracing = tracing; }
+    if (stackCapture !== undefined) { Signal.stackCapture = stackCapture; }
+    if (defaultEquality !== undefined) { Signal.defaultEquality = defaultEquality; }
+    if (defaultClone !== undefined) { Signal.defaultClone = defaultClone; }
   }
 }

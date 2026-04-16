@@ -1,4 +1,4 @@
-import { Reaction, Scheduler, setTracing, Signal } from '@semantic-ui/reactivity';
+import { Reaction, Scheduler, Signal } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('Reaction', () => {
@@ -327,7 +327,7 @@ describe('Reaction', () => {
 
   describe('Debugging', () => {
     it('Reaction should track current context for debugging', () => {
-      setTracing(true);
+      Signal.tracing = true;
       try {
         const callback = vi.fn();
         let signal = new Signal(1);
@@ -343,7 +343,7 @@ describe('Reaction', () => {
         expect(callback).toHaveBeenCalledWith(2);
       }
       finally {
-        setTracing(false);
+        Signal.tracing = false;
       }
     });
 
