@@ -83,15 +83,26 @@ Trace validation:
 
 **The only mechanism that can replace the native message**: wrap frozen values in a dev-only `Proxy` on `.get()`. The Proxy's set/delete/defineProperty traps fire before the native freeze check, so they can throw SUI-authored errors instead.
 
-Approach — route wrapping into the `value` getter, not `get()`. `Signal.prototype.get` currently delegates to `get value()`; templates compile to `.value` access via the expression evaluator. Wrapping only `get()` would leave `.value` returning the raw frozen value, bypassing dev protection on the hot template path. Wrap at `value` and `get()` inherits automatically:
+Approach — route wrapping into the `value` getter, not `get()`. `Signal.prototype.get` currently delegates to `get value()`; templates compile to `.value` access via the expression evaluator. Wrapping only `get()` would leave `.value` returning the raw frozen value, bypassing dev protection on the hot template path. Wrap at `value` and `get()` inherits automatically.
+
+**Gate the wrapping to match what `deepFreeze` actually froze.** Two gates beyond `config.mode`:
+
+1. `this.safety === 'freeze'` — reference and none modes have documented silent-mutation semantics (see preset table above); wrapping them would break contract.
+2. `isArray(val) || isPlainObject(val)` — mirrors `deepFreeze`'s `isPlainObject` gate in `cloning.js:31`. `deepFreeze` skips Date/Map/Set/RegExp/class instances, so they aren't frozen — wrapping them would cause read-only methods like `get().getTime()` or `get().has(k)` to throw in dev ("incompatible receiver") while succeeding in prod. That's dev behavior being *wrong*, not *stricter*.
 
 ```js
+import { isArray, isPlainObject } from '@semantic-ui/utils';
+
 const devProxyCache = new WeakMap();
 
 get value() {
   this.depend();
   const val = this.currentValue;
-  if (config.mode === 'off' || val === null || typeof val !== 'object') {
+  if (config.mode === 'off'
+      || this.safety !== 'freeze'
+      || val === null
+      || typeof val !== 'object'
+      || (!isArray(val) && !isPlainObject(val))) {
     return val;
   }
   let proxy = devProxyCache.get(val);
@@ -169,14 +180,24 @@ Placement: near the top, not buried. This is the first-order surprise users will
 
 Drop the compat branch in `signal.js:26`. Audit callsites:
 
+**Code:**
 - `packages/renderer/bench/tachometer/bench.js` (2 sites)
 - `packages/renderer/bench/tachometer/bench-todo.js` (1 site)
 - `docs/src/examples/reactivity/variables/reactive-clone/index.js`
 - `docs/src/examples/reactivity/advanced/reactive-notify/index.js`
 - `ai/workspace/autoresearch/*.js` (3 sites — check if still relevant or can be deleted)
-- `tools/mcp/api/mcp.js` (may be a bundled artifact)
+- `tools/mcp/api/mcp.js` (may be a bundled artifact — verify before touching)
 
-Migrate each to `{ safety: 'reference' }` or `{ safety: 'none' }` based on the original intent.
+**User-facing documentation (must be updated or removed, not just code):**
+- `docs/src/pages/docs/api/reactivity/signal.mdx` (~5 references)
+- `docs/src/pages/docs/api/reactivity/signal-options.mdx` (~2 references)
+- Any other `docs/src/pages/docs/*/reactivity*.mdx` hits (grep to confirm)
+
+**Agent-facing skills (teach new patterns):**
+- `ai/skills/authoring/*` — any skills that reference `allowClone` in guidance or examples
+- `ai/skills/contributing/internals.md` — internals doc may reference the old option
+
+Migrate each code site to `{ safety: 'reference' }` or `{ safety: 'none' }` based on the original intent. For docs and skills, rewrite the guidance around the `safety` preset and the third-party-reference heuristic from Item 5 — don't leave dual documentation of both APIs. Grep pass (`grep -r allowClone`) before committing to confirm no references linger.
 
 **Baseline rebuild**: tachometer currently compares PR against main with `allowClone: false` on both sides. After removing the shim, the baseline needs to be rebuilt on a reference that has only `safety: 'reference'`. Commit the baseline rebuild explicitly so the next engineer chasing a regression understands the history shift.
 
@@ -239,6 +260,12 @@ If all five land, present measurements and propose default flip for 1.1.
 - **Item 3 trap completeness** — `setPrototypeOf` added to trap list; `preventExtensions` omitted as no-op on already-frozen target.
 - **Item 3 error message** — interpolate the offending property name for agent-legible diagnosis.
 - **Item 3 identity divergence** — documented `get() === peek()` divergence in dev vs prod as a known asymmetry.
+
+## Resolved (post-review round 3)
+
+- **Item 3 safety-mode gate** — only wrap when `this.safety === 'freeze'`. `reference` and `none` modes have documented silent-mutation semantics; wrapping them would break contract.
+- **Item 3 type gate** — only wrap arrays and plain objects, mirroring `deepFreeze`'s `isPlainObject` gate. Wrapping Map/Set/Date/class would cause read-only methods to throw in dev while succeeding in prod (dev-wrong, not dev-stricter).
+- **Item 6 audit expansion** — `allowClone` migration extends to user-facing docs (`signal.mdx`, `signal-options.mdx`) and agent-facing skills (`ai/skills/authoring/*`, `internals.md`), not just code. Confirm with `grep -r allowClone` pass before committing.
 
 ## Open questions
 
