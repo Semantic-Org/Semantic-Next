@@ -142,10 +142,13 @@ export class RenderTemplateDirective extends AsyncDirective {
   }
 
   unpackData(dataObj) {
-    if (isFunction(dataObj)) {
-      return dataObj();
-    }
-    return mapObject(dataObj, (val) => val());
+    const raw = isFunction(dataObj) ? dataObj() : mapObject(dataObj, (val) => val());
+    // Subtemplate uses the result as a mutable container for setDataContext
+    // merges. Signal values under safety: 'freeze' come in frozen, so
+    // shallow-copy plain objects and arrays on the way through.
+    if (raw === null || typeof raw !== 'object') { return raw; }
+    if (Array.isArray(raw)) { return [...raw]; }
+    return { ...raw };
   }
 
   update(part, settings) {
