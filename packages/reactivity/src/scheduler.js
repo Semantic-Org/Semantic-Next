@@ -1,25 +1,10 @@
 import { microtask } from '@semantic-ui/utils';
 
-const flushTask = () => Scheduler.flush();
-
 export class Scheduler {
   static current = null;
   static pendingReactions = new Set();
   static afterFlushCallbacks = [];
   static isFlushScheduled = false;
-
-  static scheduleReaction(reaction) {
-    Scheduler.pendingReactions.add(reaction);
-    Scheduler.scheduleFlush();
-  }
-
-  static scheduleFlush() {
-    if (!Scheduler.isFlushScheduled) {
-      Scheduler.isFlushScheduled = true;
-      microtask(flushTask);
-    }
-  }
-
   static maxFlushIterations = 100;
 
   static flush() {
@@ -45,9 +30,29 @@ export class Scheduler {
     }
   }
 
+  /*-------------------
+         Helpers
+  --------------------*/
+
   static afterFlush(callback) {
     Scheduler.afterFlushCallbacks.push(callback);
   }
+
+  static scheduleReaction(reaction) {
+    Scheduler.pendingReactions.add(reaction);
+    Scheduler.scheduleFlush();
+  }
+
+  static scheduleFlush() {
+    if (!Scheduler.isFlushScheduled) {
+      Scheduler.isFlushScheduled = true;
+      microtask(Scheduler.flush);
+    }
+  }
+
+  /*-------------------
+         Tracing
+  --------------------*/
 
   static getSource() {
     if (!Scheduler.current) {

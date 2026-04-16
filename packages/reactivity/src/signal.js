@@ -11,46 +11,10 @@ import {
 } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
-import { captureStack, config } from './helpers.js';
+import { captureStack, config, signalTag } from './helpers.js';
 import { Reaction } from './reaction.js';
 
-// Module-local only because it's used as a computed class member key
-// (`[IS_SIGNAL]`), which is evaluated before static fields initialize.
-const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
-
 export class Signal {
-  // Brand check — allows cross-realm and prototype-created instances to pass
-  // instanceof. Paired with the prototype getter below (not a static field,
-  // so the check survives subclassing and prototype-based construction).
-  static [Symbol.hasInstance](instance) {
-    return !!instance?.[IS_SIGNAL];
-  }
-
-  get [IS_SIGNAL]() {
-    return true;
-  }
-
-  // Library-wide defaults for new signals. Assign to change:
-  //   Signal.defaultEquality = myEq
-  // Wrong values fail at first call rather than at assignment.
-  static defaultEquality = isEqual;
-  static defaultClone = clone;
-
-  // Shared fn for safety:'none' — a single reference across all such signals
-  // instead of a fresh closure per construction. Replace with utils
-  // `returnsFalse` when the utils-modernization plan ships.
-  static noEquality = () => false;
-
-  // Factory for signals computed from other signals.
-  static computed(computeFn, options = {}) {
-    const computedSignal = new Signal(undefined, options);
-    const reaction = Reaction.create(() => {
-      computedSignal.set(computeFn());
-    });
-    computedSignal._computedReaction = reaction;
-    return computedSignal;
-  }
-
   constructor(initialValue, options = {}) {
     const { context, safety, equalityFunction, cloneFunction, allowClone } = options;
 
@@ -74,30 +38,9 @@ export class Signal {
     this.setContext(context);
   }
 
-  setContext(additionalContext = {}) {
-    if (config.mode === 'off') { return; }
-    const defaultContext = {
-      value: this.currentValue,
-    };
-    this.context = {
-      ...defaultContext,
-      ...additionalContext,
-    };
-  }
-
-  addContext(additionalContext = {}) {
-    if (config.mode === 'off') { return; }
-    if (!this.context) { this.context = {}; }
-    for (const key in additionalContext) {
-      this.context[key] = additionalContext[key];
-    }
-  }
-
-  // Stack trace capture is gated separately because Error.captureStackTrace
-  // costs ~10-100× a context spread, paid per Signal.notify in tracing-on dev.
-  setTrace() {
-    captureStack(this, this.setTrace);
-  }
+  /*-------------------
+          Core
+  --------------------*/
 
   protect(value) {
     if (value === null || typeof value !== 'object') { return value; }
@@ -139,30 +82,6 @@ export class Signal {
     });
   }
 
-  // derive a new signal from this signal's value
-  derive(computeFn, options = {}) {
-    const derivedSignal = new Signal(undefined, options);
-
-    // check if signal has been garbage collected
-    // if it has we need to clean up reaction
-    const sourceRef = new WeakRef(this);
-
-    // Create reaction that updates the derived signal
-    const reaction = Reaction.create(() => {
-      const source = sourceRef.deref();
-      if (!source) {
-        reaction.stop(); // Auto-cleanup if source is gone
-        return;
-      }
-      const result = computeFn(source.get());
-      derivedSignal.set(result);
-    });
-
-    derivedSignal._derivedReaction = reaction;
-
-    return derivedSignal;
-  }
-
   depend() {
     this.dependency.depend();
   }
@@ -181,13 +100,46 @@ export class Signal {
     return this.set(undefined);
   }
 
-  // Under 'freeze', fn receives a frozen value and must return a new value
-  // (in-place mutation throws). Undefined return notifies unconditionally —
-  // the freeze guarantee makes the snapshot/equality dance unnecessary.
-  // Under 'reference'/'none', fn may mutate in place; we snapshot before
-  // the call and dedupe via equalityFunction so no-op mutates don't fire
-  // subscribers ('none' keeps event-stream semantics via NO_EQUALITY).
+  /*-------------------
+         Complex
+  --------------------*/
+
+  static computed(computeFn, options = {}) {
+    const computedSignal = new Signal(undefined, options);
+    const reaction = Reaction.create(() => {
+      computedSignal.set(computeFn());
+    });
+    computedSignal._computedReaction = reaction;
+    return computedSignal;
+  }
+
+  derive(computeFn, options = {}) {
+    const derivedSignal = new Signal(undefined, options);
+    // WeakRef lets the derived reaction self-stop when the source is GC'd
+    const sourceRef = new WeakRef(this);
+
+    const reaction = Reaction.create(() => {
+      const source = sourceRef.deref();
+      if (!source) {
+        reaction.stop();
+        return;
+      }
+      const result = computeFn(source.get());
+      derivedSignal.set(result);
+    });
+
+    derivedSignal._derivedReaction = reaction;
+
+    return derivedSignal;
+  }
+
+  /*-------------------
+     Mutation Helpers
+  --------------------*/
+
   mutate(fn) {
+    // freeze: fn must return a new value (in-place throws).
+    // reference/none: fn may mutate in place; dedupe via equalityFunction.
     if (this.safety === 'freeze') {
       const result = fn(this.currentValue);
       if (result !== undefined) {
@@ -387,15 +339,53 @@ export class Signal {
     return this.removeIndex(this.getItemIndex(id));
   }
 
-  /*-------------------------------------------------------------
-    Runtime configuration — shared library-wide defaults.
+  /*-------------------
+         Tracing
+  --------------------*/
 
-    Direct assignment is the primary API:
-      Signal.safety = 'freeze'
-      Signal.tracing = true
-      Signal.defaultEquality = myEq
-    Bulk via Signal.configure({...}).
-  -------------------------------------------------------------*/
+  setContext(additionalContext = {}) {
+    if (config.mode === 'off') { return; }
+    const defaultContext = {
+      value: this.currentValue,
+    };
+    this.context = {
+      ...defaultContext,
+      ...additionalContext,
+    };
+  }
+
+  addContext(additionalContext = {}) {
+    if (config.mode === 'off') { return; }
+    if (!this.context) { this.context = {}; }
+    for (const key in additionalContext) {
+      this.context[key] = additionalContext[key];
+    }
+  }
+
+  // Error.captureStackTrace is 10-100× a context spread; gated on stack mode.
+  setTrace() {
+    captureStack(this, this.setTrace);
+  }
+
+  /*-------------------
+      Instance of
+  --------------------*/
+
+  static [Symbol.hasInstance](instance) {
+    return !!instance?.[signalTag];
+  }
+
+  get [signalTag]() {
+    return true;
+  }
+
+  /*-------------------
+      Configuration
+  --------------------*/
+
+  static defaultEquality = isEqual;
+  static defaultClone = clone;
+  static noEquality = () => false;
 
   static get safety() {
     return config.safety;

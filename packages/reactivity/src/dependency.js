@@ -16,15 +16,6 @@ export class Dependency {
     }
   }
 
-  // Cheap context naming on tracing; stack capture only on stack mode.
-  setContext(context) {
-    if (config.mode === 'off') {
-      return;
-    }
-    this.context = context || {};
-    captureStack(this, this.setContext);
-  }
-
   changed(context) {
     if (config.mode !== 'off') {
       if (context) {
@@ -40,13 +31,23 @@ export class Dependency {
     }
   }
 
-  // called after flush
   cleanUp(reaction) {
     this.subscribers.delete(reaction);
   }
 
-  // identical for now but called from stop()
   unsubscribe(reaction) {
     this.subscribers.delete(reaction);
+  }
+
+  /*-------------------
+         Tracing
+  --------------------*/
+
+  setContext(context) {
+    if (config.mode === 'off') {
+      return;
+    }
+    this.context = context || {};
+    captureStack(this, this.setContext);
   }
 }

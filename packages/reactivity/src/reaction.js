@@ -1,4 +1,4 @@
-import { clone, isEqual } from '@semantic-ui/utils';
+import { isEqual } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
 import { captureStack, config } from './helpers.js';
 import { Scheduler } from './scheduler.js';
@@ -23,23 +23,6 @@ export class Reaction {
     this.boundRun = this.run.bind(this);
   }
 
-  setContext(additionalContext = {}) {
-    if (config.mode === 'off') {
-      return;
-    }
-    const defaultContext = {
-      firstRun: this.firstRun,
-    };
-    this.context = {
-      ...defaultContext,
-      ...additionalContext,
-    };
-  }
-
-  setTrace() {
-    captureStack(this, this.setTrace);
-  }
-
   addContext(additionalContext = {}) {
     if (config.mode === 'off') {
       return;
@@ -53,7 +36,6 @@ export class Reaction {
   }
 
   run() {
-    // only run this reaction is marked as active
     if (!this.active) {
       return;
     }
@@ -77,15 +59,12 @@ export class Reaction {
   }
 
   invalidate(context) {
-    // Set this reaction as active and about to be run
     this.active = true;
 
-    // Pass through trace for debugging
     if (context) {
       this.addContext(context);
     }
 
-    // Schedule this reaction to occur in the next flush
     Scheduler.scheduleReaction(this);
   }
 
@@ -97,12 +76,14 @@ export class Reaction {
     this.dependencies.forEach(dep => dep.unsubscribe(this));
   }
 
-  // Static proxies for developer experience
   static get current() {
     return Scheduler.current;
   }
 
-  // DX pass throughs
+  /*-------------------
+        Helpers
+  --------------------*/
+
   static flush = Scheduler.flush;
   static scheduleFlush = Scheduler.scheduleFlush;
   static afterFlush = Scheduler.afterFlush;
@@ -135,5 +116,26 @@ export class Reaction {
     });
     comp.run();
     return newValue;
+  }
+
+  /*-------------------
+         Tracing
+  --------------------*/
+
+  setContext(additionalContext = {}) {
+    if (config.mode === 'off') {
+      return;
+    }
+    const defaultContext = {
+      firstRun: this.firstRun,
+    };
+    this.context = {
+      ...defaultContext,
+      ...additionalContext,
+    };
+  }
+
+  setTrace() {
+    captureStack(this, this.setTrace);
   }
 }
