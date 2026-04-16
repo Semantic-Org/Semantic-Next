@@ -19,6 +19,14 @@ const makeRecords = (n) => {
   return out;
 };
 
+// CI baseline rebuilds from base branch's src with THIS bench file. Dual-shape
+// options keep the comparison apples-to-apples: base-branch Signal reads
+// `allowClone: false` (no clone-on-read) and ignores `safety`; this-change
+// Signal reads `safety: 'reference'` (no freeze, no clone) and ignores the
+// legacy keys. Both keep isEqual dedupe. Object-holding signals need this —
+// scalar signals don't clone anyway, so options don't matter there.
+const OBJECT_OPTS = { safety: 'reference', allowClone: false };
+
 let sink = null;
 
 /*******************************
@@ -87,7 +95,7 @@ let sink = null;
 
 // signal-reactive-list-replace-1000x500
 {
-  const items = new Signal(makeRecords(1000));
+  const items = new Signal(makeRecords(1000), OBJECT_OPTS);
   const r = Reaction.create(() => {
     const list = items.get();
     let active = 0;
@@ -107,7 +115,7 @@ let sink = null;
 
 // signal-reactive-list-filter-1000x300
 {
-  const items = new Signal(makeRecords(1000));
+  const items = new Signal(makeRecords(1000), OBJECT_OPTS);
   const search = new Signal('');
   const r = Reaction.create(() => {
     const list = items.get();
@@ -133,7 +141,7 @@ let sink = null;
 
 // signal-reactive-push-1000x20 — reset cycles bound array size
 {
-  const sig = new Signal([]);
+  const sig = new Signal([], OBJECT_OPTS);
   const r = Reaction.create(() => {
     const list = sig.get();
     let count = 0;
@@ -157,7 +165,7 @@ let sink = null;
 
 // signal-reactive-set-index-300
 {
-  const sig = new Signal(makeRecords(1000));
+  const sig = new Signal(makeRecords(1000), OBJECT_OPTS);
   const r = Reaction.create(() => {
     const list = sig.get();
     let active = 0;
@@ -182,7 +190,7 @@ let sink = null;
 
 // signal-reactive-set-property-by-id-100 — alternating front/back averages N/2 scan
 {
-  const sig = new Signal(makeRecords(1000));
+  const sig = new Signal(makeRecords(1000), OBJECT_OPTS);
   const r = Reaction.create(() => {
     const list = sig.get();
     let active = 0;
