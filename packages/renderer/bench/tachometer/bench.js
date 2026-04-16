@@ -86,11 +86,9 @@ defineComponent({
       </tr>
     {/each}
   </tbody></table>`,
-  // See bench-todo.js — dual-option shape keeps base-branch Signal from
-  // falling back to clone-on-read + isEqual dedupe when CI rebuilds baseline.
   defaultState: {
-    items: { value: [], options: { safety: 'none', allowClone: false, equalityFunction: () => false } },
-    selected: { value: 0, options: { safety: 'none', allowClone: false, equalityFunction: () => false } },
+    items: { value: [], options: { allowClone: false, equalityFunction: () => false } },
+    selected: { value: 0, options: { allowClone: false, equalityFunction: () => false } },
   },
   createComponent({ state }) {
     return {

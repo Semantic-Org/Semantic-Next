@@ -62,12 +62,7 @@ defineComponent({
   `,
   subTemplates: { todoItem },
   defaultState: {
-    // CI baseline rebuilds from base branch's src with THIS bench file. Include
-    // both new (`safety`) and legacy (`allowClone`, `equalityFunction`) option
-    // shapes so a base-branch Signal that doesn't know `safety` doesn't silently
-    // fall back to expensive defaults (clone-on-read + isEqual dedupe), which
-    // would inflate the reported regression.
-    todos: { value: [], options: { safety: 'none', allowClone: false, equalityFunction: () => false } },
+    todos: { value: [], options: { allowClone: false, equalityFunction: () => false } },
     filter: 'all',
     editingId: null,
   },

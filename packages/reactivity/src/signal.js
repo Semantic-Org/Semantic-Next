@@ -111,14 +111,14 @@ export class Signal {
   }
 
   constructor(initialValue, options = {}) {
-    const { context, safety, equalityFunction, cloneFunction } = options;
+    const { context, safety, equalityFunction, cloneFunction, allowClone } = options;
 
     this.dependency = new Dependency({
       firstRun: true,
       value: initialValue,
     });
 
-    this.safety = safety ?? getDefaultSafety();
+    this.safety = safety ?? (allowClone === false ? 'reference' : getDefaultSafety());
 
     this.equalityFunction = equalityFunction
       ? wrapFunction(equalityFunction)
