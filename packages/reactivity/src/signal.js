@@ -6,6 +6,7 @@ import {
   isEqual,
   isNumber,
   isObject,
+  isPlainObject,
   unique,
   wrapFunction,
 } from '@semantic-ui/utils';
@@ -13,6 +14,37 @@ import {
 import { Dependency } from './dependency.js';
 import { captureStack, config, signalTag } from './helpers.js';
 import { Reaction } from './reaction.js';
+
+const devProxyCache = new WeakMap();
+
+const frozenTraps = {
+  set(_, prop) {
+    throw frozenError(prop);
+  },
+  deleteProperty(_, prop) {
+    throw frozenError(prop);
+  },
+  defineProperty(_, prop) {
+    throw frozenError(prop);
+  },
+  setPrototypeOf() {
+    throw frozenError('[[Prototype]]');
+  },
+};
+
+function frozenError(prop) {
+  return new TypeError(
+    `Signal value is frozen — cannot set property \`${String(prop)}\`. `
+      + `Use signal.set(newValue), a mutation helper (push, splice, setProperty), `
+      + `or construct with { safety: 'reference' } if storing third-party data.`,
+  );
+}
+
+function devProxyFor(val) {
+  let proxy = devProxyCache.get(val);
+  if (!proxy) { devProxyCache.set(val, proxy = new Proxy(val, frozenTraps)); }
+  return proxy;
+}
 
 export class Signal {
   constructor(initialValue, options = {}) {
@@ -49,7 +81,10 @@ export class Signal {
 
   get value() {
     this.depend();
-    return this.currentValue;
+    const val = this.currentValue;
+    if (config.mode === 'off' || this.safety !== 'freeze') { return val; }
+    if (isArray(val) || isPlainObject(val)) { return devProxyFor(val); }
+    return val;
   }
 
   set value(newValue) {

@@ -968,4 +968,69 @@ describe.concurrent('Signal', () => {
       expect(fake instanceof Signal).toBe(true);
     });
   });
+
+  describe('Dev-mode freeze error decoration', () => {
+    // Sequential describe — toggling Signal.tracing is global state.
+
+    it('returns raw frozen value when tracing is off', () => {
+      const signal = new Signal({ a: 1 });
+      expect(signal.get()).toBe(signal.peek());
+    });
+
+    it('returns a proxy with a framework-authored error when tracing is on', () => {
+      Signal.tracing = true;
+      try {
+        const signal = new Signal({ a: 1 });
+        const proxy = signal.get();
+        expect(proxy).not.toBe(signal.peek());
+        expect(() => {
+          proxy.a = 2;
+        }).toThrow(/Signal value is frozen.*`a`/s);
+        expect(() => {
+          delete proxy.a;
+        }).toThrow(/Signal value is frozen/);
+      }
+      finally {
+        Signal.tracing = false;
+      }
+    });
+
+    it('caches the proxy per raw value so get() === get()', () => {
+      Signal.tracing = true;
+      try {
+        const signal = new Signal({ a: 1 });
+        expect(signal.get()).toBe(signal.get());
+      }
+      finally {
+        Signal.tracing = false;
+      }
+    });
+
+    it('returns raw for reference-safety signals even in dev', () => {
+      Signal.tracing = true;
+      try {
+        const signal = new Signal({ a: 1 }, { safety: 'reference' });
+        const value = signal.get();
+        expect(value).toBe(signal.peek());
+        expect(() => {
+          value.a = 2;
+        }).not.toThrow();
+      }
+      finally {
+        Signal.tracing = false;
+      }
+    });
+
+    it('returns raw for Map/Set/Date/class values (outside deepFreeze scope)', () => {
+      Signal.tracing = true;
+      try {
+        const map = new Map();
+        const signal = new Signal(map);
+        expect(signal.get()).toBe(map);
+      }
+      finally {
+        Signal.tracing = false;
+      }
+    });
+  });
 });
