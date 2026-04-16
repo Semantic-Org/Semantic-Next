@@ -346,10 +346,13 @@ export class Signal {
     }
     else {
       const arr = this.currentValue;
-      for (let i = 0; i < arr.length; i++) {
-        if (index === 'all' || i === index) {
+      if (index === 'all') {
+        for (let i = 0; i < arr.length; i++) {
           arr[i][property] = value;
         }
+      }
+      else {
+        arr[index][property] = value;
       }
       this.notify();
     }
