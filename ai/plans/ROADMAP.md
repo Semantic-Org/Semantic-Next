@@ -172,6 +172,7 @@ Post-pipeline. Write docs when there's something to document. Build wrappers whe
 | P4 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
 | P5 | CSS Token Extraction | 16-24h (2-3d) | pair | `getThemingCSS` util + MCP tool. Blocked on token finalization. |
 | P6 | MCP Improvements (remaining 3 tools) | 8-16h (1-2d) | agent | `get_theming_css`, `get_global_tokens`, `get_token_usage`. Blocked on token extraction. |
+| P7 | [Utils Modernization](utils-modernization.md) | 4-8h + codemod | pair | Remove `any`/`onlyKeys` aliases, fix `first`/`last` return-type polymorphism, add `pipe`/`attempt`/`tap`. `initial` scope — 5 quick design calls. |
 
 ---
 

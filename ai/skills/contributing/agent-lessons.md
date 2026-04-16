@@ -68,14 +68,76 @@ This applies to naming functions (elicit usage patterns before picking names), c
 
 ---
 
-## Delegate to Fresh Perspectives
+## Quiet Code Over Ornamented Code
 
-When stuck in a solution direction, delegating to a fresh agent (or pair of agents) reading the problem from scratch produces better results than pushing harder yourself. Rules that worked:
+Training data pushes toward a particular visual dialect: `SCREAMING_CAPS` for module-level values, `_underscore` prefixes for "private" properties, dispatcher functions that route to shared refs via if-ladders, options objects where direct literals would do. Each is borrowed from a different language or era. None earn their weight in modern JS — they add visual ceremony that signals "I'm being rigorous" without conveying more information.
 
-- Describe the problem and symptoms, not the diagnosis
-- Give all relevant file paths — don't make them search
-- Let failing tests with correct expectations count as valid findings
-- Independent convergence on the same fix is the highest-confidence signal
+`MAX_RETRIES = 3` doesn't tell the reader more than `maxRetries = 3`; `const` already declares immutability. `_privateCache` doesn't tell the reader more than `privateCache`; JS has no language-level convention here. A `constant(value)` dispatcher that routes to `ALWAYS_TRUE`/`ALWAYS_FALSE` via an if-ladder doesn't tell the reader more than seven flat exports — `returnsTrue`, `returnsFalse`, `returnsNull`, `returnsSelf`, etc. — sitting next to each other. In each case the quiet form is strictly more legible: intent lives in the name, at the value level, not in a scaffolding layer above it.
+
+Specific tells to notice in your own output:
+
+- `SCREAMING_CAPS` module-level constants
+- `_underscore`-prefixed "private" names (not SUI convention — see `feedback_no_underscore_vars`)
+- Dispatcher functions that route to shared refs via if/switch — prefer N direct flat exports
+- Options objects for configuration that never varies
+- "Extensibility for the future" when the future isn't real
+- Factories that construct what could be literals
+
+The test: if this code had only one user and no hypothetical future callers, would it still have this shape? Usually the ornamented version collapses to something simpler. In the framework author's words, ornament "obscures the elegance and semantic intent."
+
+---
+
+## You Are an Orchestrator, Not an Investigator
+
+The default failure mode for agents on hard diagnostic tasks is treating them as solo work — reading, hypothesizing, implementing, measuring, all in the main conversation. This is roughly an order of magnitude slower than it needs to be, and it accumulates anchoring bias as your own theories color each subsequent step.
+
+Reframe the role: **you deploy investigators; you don't investigate**. Diagnostic work is inherently parallelizable, and fresh subagents produce independent reads of evidence without carrying your prior theories.
+
+### Parallelize by default
+
+Any moment you catch yourself saying "let me go read X and figure out Y," check whether the read-and-figure-out could be done by a fresh agent with a self-contained brief. Usually it can. Common patterns where parallel agents dominate solo investigation:
+
+- **Branching hypotheses** — "Is the regression in path A or path B?" → one agent per path.
+- **Multi-angle investigation** — profile + diff + aggregate artifacts + call-chain audit + grep-for-callsites are five distinct angles on the same symptom, all suitable for parallel fresh agents.
+- **Unfamiliar code exploration** — "How does reconcile phase 3 work?" → dispatch an Explore agent with a narrow question, move on.
+- **Independent validation of a fix** — after a change, dispatch an agent to verify the fix resolves the original symptoms without regressing adjacent behavior.
+
+Five parallel agents at ~10 minutes each = 10 minutes of wall clock for 50 agent-minutes of work. The cost-benefit versus solo investigation is lopsided almost always.
+
+### Synthesis, not aggregation
+
+Your job when reports come back isn't to concatenate them. It's to:
+
+- **Identify convergence** — two independent agents reaching the same conclusion via different paths is the highest-confidence signal available. Stop hedging, move on.
+- **Identify divergence** — disagreement between agents flags ambiguous evidence. Next move: targeted third agent to resolve, or in-context examination of the specific disagreement point.
+- **Reject weak findings** — "X might be the issue but I'm not sure" is a hypothesis, not evidence. Treat it as a pointer to the next investigation, not a conclusion.
+
+### Briefing discipline
+
+Fresh agents start with zero context. Every brief must be self-contained:
+
+- **State the problem and symptoms** — not your diagnosis.
+- **List exact file paths** — line numbers if you have them. Don't make the agent search.
+- **Choose prescribed-hypothesis vs open-ended** with intent. Prescribing produces confirmation bias; open-ended produces independent judgment. Both are useful in different situations.
+- **Specify the deliverable** — report, profile output, code change, measurement. Include format ("under 300 words", "return the top 10 hot frames by tick count").
+- **Tell them whether to write code or only investigate.** Unclear here is a common churn source.
+
+See the `fresh-take` skill for the deeper bias-isolation technique when delegating a single careful evaluation (distinct from the parallel-investigation pattern here).
+
+### When NOT to parallelize
+
+In-context work is better when:
+
+- The task is mechanical and fast (reading one file, running one command).
+- The task requires accumulated conversation context (an in-progress refactor, iterative review).
+- The task requires user judgment mid-flight (design decisions, scope trade-offs).
+- The deliverable is a code change the user needs to diff-review before commit.
+
+Rule of thumb: if the work is **investigative** (reading, profiling, analyzing, summarizing), default to subagent. If the work is **productive or interactive** (writing production code, reviewing with user, navigating a tricky refactor), default to in-context.
+
+### The "let me think about this" tell
+
+More than ~60 seconds reasoning about a diagnostic problem without executing anything is almost always the moment to dispatch an agent instead. Solo reasoning on ambiguous diagnostic questions produces anchoring, not answers. Parallel fresh agents produce evidence.
 
 ---
 
@@ -96,8 +158,10 @@ Ask "what's the actual cost?" before investing energy in reducing it. The user w
 | Deferring work that should be finished now | Read the room — the user may see the full arc |
 | Applying training-data assumptions | Verify against actual codebase behavior |
 | Optimizing for hypothetical costs | Ask about the real cost model first |
-| Pushing harder when stuck | Delegate to a fresh perspective |
+| Investigating solo | Orchestrate — dispatch parallel fresh agents, synthesize findings |
+| Reasoning >60s without executing | Dispatch an agent instead of thinking harder |
 | Adding semantic abstraction early | Start literal, promote with evidence |
+| Decorating code with training-data visual conventions | Quiet form wins — flat direct names over SCREAMING_CAPS, underscores, dispatcher layers |
 
 ---
 
@@ -107,4 +171,5 @@ Ask "what's the actual cost?" before investing energy in reducing it. The user w
 |-------|---------|-------------|
 | **Mental Model** | `mental-model` | Understanding the framework's core concepts |
 | **Build System** | `build-system` | Working with the build pipeline |
+| **Fresh Take** | `fresh-take` | Careful bias-isolated delegation for a single deep evaluation (complements the parallel-orchestration pattern above) |
 | **Agent Guestbook** | `agent-guestbook` | Reading the full stories behind these lessons |
