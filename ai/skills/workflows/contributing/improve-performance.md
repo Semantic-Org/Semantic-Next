@@ -160,6 +160,64 @@ Consequences:
 - **Don't tune thresholds to what you wish you could detect.** Tune to what the measurement actually supports. Asking for ±1% resolution on a 2ms bench means the metric is permanently "unsure" regardless of sampling time.
 - **The in-house reporter exposes this as a per-metric `Expected Noise`** column. When a metric shows Unsure with CI width similar to the expected-noise estimate, the bench is running at its physical floor — more samples don't help. When the CI width is wider than the estimate, the metric is genuinely variable beyond its duration's predicted floor and more samples may resolve it.
 
+### Recognizing the "Challenge the Tests" Failure Mode
+
+When perf investigation gets hard, agents reliably pivot from "diagnose the code" to "question the measurement." This section exists because the pivot happens in nearly every session that uses CI as a baseline, and because specific evidence against it is available.
+
+The failure shape:
+1. Investigation doesn't quickly yield a root cause.
+2. Agent reframes results as noise, bench design flaws, or measurement instability.
+3. Agent proposes changing the test harness rather than the code.
+
+Challenging the harness is sometimes correct. But it requires evidence. Here is the evidence this harness has already produced.
+
+#### "These confident regressions are probably noise"
+
+**The harness has been empirically validated against null changes.** Null PRs (build-tool polish, workflow YAML edits) produce exactly zero confident regressions:
+
+- PR #143 ([comment](https://github.com/Semantic-Org/Semantic-Next/pull/143#issuecomment-4253067182)) — "Build: Reporter polish" — reports `✅ 0 faster · ❌ 0 slower · 🔍 15 unsure · ⚪ 8 no change`
+- PR #149 ([bench comment](https://github.com/Semantic-Org/Semantic-Next/pull/149)) — "Build: Discover runs all benchmarkable packages" — reports `✅ 0 faster · ❌ 0 slower · 🔍 18 unsure · ⚪ 13 no change`
+
+Two independent null changes, two reports of zero-in-each-confident-bucket. The reporter's "Confidently slower" classification is not prone to false positives on this hardware at 50 samples.
+
+The reporter does acknowledge the noise floor separately — it has a "Too Fast to Measure Precisely" bucket with per-metric CI width and expected-noise columns. That's where noise-dominated benches land. If a metric is in the *confident* bucket, it has already passed that check.
+
+If a bench is confidently regressed, the regression is real signal regardless of absolute magnitude. Diagnose it.
+
+#### "The regressions keep rotating between benches — that's noise"
+
+Classification can rotate because the CI width straddles the 2% floor differently across runs. The underlying delta does not.
+
+Download `bench-report.json` artifacts for multiple runs:
+```bash
+gh run download <run_id> -R <owner>/<repo>
+```
+
+Compute per-bench means across runs (each artifact has `benchmarks[].samples[]` with 50+ measurements). Real noise produces random-signed deltas around zero. A real regression produces same-signed deltas with a stable central tendency.
+
+Example from PR #148 session: `toggle-middle` showed PR-slower by +11.2%, +8.9%, +11.3% across three consecutive runs. The confidence *classification* fluctuated between runs, but the underlying delta was a stable ~10%. Aggregating artifacts revealed it as real; reading summaries alone would have supported the "rotating noise" interpretation.
+
+This aggregation is minutes of work once the artifacts are downloaded. Do it before concluding the pattern is noise.
+
+#### "Main baseline is drifting between runs — the measurement is unreliable"
+
+Tip-of-tree absolute times often vary 20-100% across runs due to CI-host variance (thermal, noisy neighbors, JIT state). This does not invalidate anything.
+
+Tachometer computes delta within a single run on the same host with interleaved samples. The relevant quantity is `(PR_mean - tip_mean) / tip_mean` per run. Inter-run baseline drift is cancelled by this structure. That main runs 60% faster on Tuesday than Thursday says nothing about whether your PR is faster or slower than main on either day.
+
+#### "Let me scale the bench up to make the signal cleaner"
+
+Valid for some cases, not others:
+
+- **Valid**: A bench in the "Too Fast to Measure Precisely" bucket with ±15% expected noise can't resolve a 3% delta. Scaling 10x moves it into a regime where small real deltas resolve cleanly. Use scaling when you suspect a real small delta underneath high-noise measurement.
+- **Not a fix**: A bench in the confident-regressed bucket will remain confidently regressed at 10x scale — only the absolute ms delta grows. Scaling does not erase a real regression; it makes the regression harder to miss.
+
+When proposing a scale change, state up front: which bucket is the bench currently in, what resolution is needed, what the scaling should change. If you find yourself scaling a confident-bucket bench, stop and re-examine the motivation.
+
+#### The general principle
+
+When the harness starts feeling like the enemy, the move is to name the specific property you're challenging, produce evidence that contradicts it, and only then discuss harness changes. The default stance is: the harness is correct, the code has a regression, your job is to find it.
+
 ### Gotchas
 
 **Stale Chrome/chromedriver processes.** Tachometer launches chromedriver and Chrome headless. If a run is killed mid-flight, these processes persist and block the next run. Kill them before retrying:
