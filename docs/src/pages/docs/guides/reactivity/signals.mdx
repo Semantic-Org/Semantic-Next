@@ -67,6 +67,44 @@ counter.increment(); // Equivalent to counter.set(counter.peek() + 1)
 console.log(counter.get()); // Output: 2
 ```
 
+## Signals and Foreign References
+
+By default, Signals deep-freeze object and array values on `set()`. This catches the most common reactivity bug — mutating a value in place without notifying subscribers — by throwing a `TypeError` at the mutation site instead of silently dropping the update.
+
+Deep-freezing has one important caveat: if the object you store is *also held internally by a library*, freezing it will break that library the next time it mutates its own reference.
+
+> **When you need `{ safety: 'reference' }`**: if you're storing an object in a signal that you did not construct yourself — anything returned from a library, fetched from an API, or passed through a callback — default to `safety: 'reference'`. Freeze is the right default for state your own code owns end-to-end. For borrowed data, `reference` avoids poisoning the lender's internal references.
+
+### Worked Example: Search Index
+
+Pagefind returns result objects and continues to use them internally — subsequent `.data()` calls on each result mutate pagefind's own cached state. Storing the results under the default freeze mode freezes pagefind's internal objects and later crashes its loader:
+
+```javascript
+const defaultState = {
+  // ❌ default freeze — pagefind's internal mutation of the stored objects will throw
+  rawResults: [],
+};
+```
+
+Opt this specific signal out of freeze:
+
+```javascript
+const defaultState = {
+  // ✓ signal holds third-party-owned data; don't freeze
+  rawResults: { value: [], options: { safety: 'reference' } },
+};
+```
+
+The rest of your component state keeps the default freeze protection — only the signal carrying borrowed data opts out.
+
+### Ad-hoc Construction
+
+For signals created outside a `defaultState` declaration, pass the preset as the second argument:
+
+```javascript
+const results = new Signal(pagefindData, { safety: 'reference' });
+```
+
 ## Creating Derived Signals
 
 Signals can be transformed and combined to create new reactive values:

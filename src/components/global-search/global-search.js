@@ -14,7 +14,8 @@ const defaultSettings = {
 };
 
 const defaultState = {
-  rawResults: [],
+  // pagefind holds internal references to result objects and mutates them on .data() — freeze would poison its cache
+  rawResults: { value: [], options: { safety: 'reference' } },
   results: [],
   displayResults: [],
   selectedIndex: 0,
