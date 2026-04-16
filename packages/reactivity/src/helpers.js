@@ -9,7 +9,7 @@ export const config = {
   //   'reference' — no protection; dedupe via isEqual
   //   'freeze'    — deepFreeze on set; downstream mutations throw
   //   'none'      — no protection, no dedupe (event-stream semantics)
-  safety: 'reference',
+  safety: 'freeze',
 };
 
 // `caller` is passed to Error.captureStackTrace so the framework frame is trimmed from the trace
