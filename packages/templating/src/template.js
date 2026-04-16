@@ -79,7 +79,10 @@ export const Template = class Template {
     this.keys = keys || {};
     this.ast = ast;
     this.css = css;
-    this.data = data || {};
+    // Shallow-copy data so a frozen source (e.g. a Signal's value under
+    // safety='freeze') doesn't propagate non-extensibility into our mutable
+    // working copy that setDataContext/assignInPlace later writes into.
+    this.data = data ? { ...data } : {};
     this.reactions = [];
     this.abortController = new AbortController();
     this.abortSignal = this.abortController.signal;
