@@ -28,10 +28,10 @@ export const isTracing = () => mode !== 'off';
 export const isStackCapture = () => mode === 'stack';
 
 // Safety preset controls value protection on set.
-//   'freeze'    — deepFreeze; downstream mutations throw
-//   'reference' — no protection; dedupe via isEqual
+//   'reference' — no protection; dedupe via isEqual (default, standard signals model)
+//   'freeze'    — deepFreeze on set; downstream mutations throw
 //   'none'      — no protection, no dedupe (event-stream semantics)
-let defaultSafety = 'freeze';
+let defaultSafety = 'reference';
 const VALID_SAFETY = new Set(['freeze', 'reference', 'none']);
 
 export const getDefaultSafety = () => defaultSafety;
