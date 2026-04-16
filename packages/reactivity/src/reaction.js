@@ -61,7 +61,7 @@ export class Reaction {
   invalidate(context) {
     this.active = true;
 
-    if (context) {
+    if (context && config.mode !== 'off') {
       this.addContext(context);
     }
 

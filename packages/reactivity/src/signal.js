@@ -56,6 +56,15 @@ export class Signal {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.currentValue = this.protect(newValue);
       this.notify();
+      return;
+    }
+    if (config.mode !== 'off' && isObject(newValue) && newValue === this.currentValue) {
+      console.warn(
+        'Signal.set() called with the same reference as the current value. '
+          + 'If you mutated in place, the reactive update is lost. '
+          + 'Use signal.push/splice/setProperty, or return a new value from mutate(). '
+          + 'If this was intentional, construct a new value and set that instead.',
+      );
     }
   }
 
@@ -87,8 +96,10 @@ export class Signal {
   }
 
   notify() {
-    this.setContext();
-    this.setTrace();
+    if (config.mode !== 'off') {
+      this.setContext();
+      this.setTrace();
+    }
     this.dependency.changed(this.context);
   }
 
