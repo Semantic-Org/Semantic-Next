@@ -79,10 +79,7 @@ export const Template = class Template {
     this.keys = keys || {};
     this.ast = ast;
     this.css = css;
-    // Shallow-copy data so a frozen source (e.g. a Signal's value under
-    // safety='freeze') doesn't propagate non-extensibility into our mutable
-    // working copy that setDataContext/assignInPlace later writes into.
-    this.data = data ? { ...data } : {};
+    this.data = data || {};
     this.reactions = [];
     this.abortController = new AbortController();
     this.abortSignal = this.abortController.signal;
@@ -139,6 +136,11 @@ export const Template = class Template {
   }
 
   setDataContext(data, { rerender = true } = {}) {
+    // Frozen signal values may flow into this.data via the constructor;
+    // replace with an extensible copy on first write.
+    if (!Object.isExtensible(this.data)) {
+      this.data = {};
+    }
     const changed = assignInPlace(this.data, data, { returnChanged: true });
     if (changed) {
       this.dataReplaced = true;

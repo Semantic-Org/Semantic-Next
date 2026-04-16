@@ -42,41 +42,24 @@ export const mapObject = (obj, callback) => {
 */
 export const extend = (obj, ...sources) => {
   sources.forEach((source) => {
-    let srcDesc, tgtDesc, prop;
     if (source) {
-      for (prop in source) {
-        srcDesc = Object.getOwnPropertyDescriptor(source, prop);
-        // Accessor source — preserve the getter/setter on target.
-        if (srcDesc && (srcDesc.get || srcDesc.set)) {
-          Object.defineProperty(obj, prop, srcDesc);
-          continue;
+      for (const prop in source) {
+        const desc = Object.getOwnPropertyDescriptor(source, prop);
+        if (desc?.get || desc?.set) {
+          Object.defineProperty(obj, prop, desc);
         }
-        // Non-writable data source (frozen/sealed) — install a fresh writable
-        // descriptor. Source's lifecycle state shouldn't bleed into the merge.
-        if (srcDesc && !srcDesc.writable) {
+        else if (prop in obj) {
+          // Existing target prop may be accessor from a prior source
           Object.defineProperty(obj, prop, {
             value: source[prop],
             writable: true,
             enumerable: true,
             configurable: true,
           });
-          continue;
         }
-        // Target already has an accessor — plain assignment would fail on
-        // getter-only or throw in strict mode. Install a fresh writable data
-        // descriptor so the "later source wins" ordering holds.
-        tgtDesc = Object.getOwnPropertyDescriptor(obj, prop);
-        if (tgtDesc && (tgtDesc.get || tgtDesc.set)) {
-          Object.defineProperty(obj, prop, {
-            value: source[prop],
-            writable: true,
-            enumerable: true,
-            configurable: true,
-          });
-          continue;
+        else {
+          obj[prop] = source[prop];
         }
-        // Common case: normal data merge — plain assignment is the fast path.
-        obj[prop] = source[prop];
       }
     }
   });

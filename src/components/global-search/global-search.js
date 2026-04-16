@@ -73,7 +73,7 @@ const createComponent = ({ self, el, bindKey, reaction, state, isRendered, setti
 
   async calculateResults() {
     reaction(async (reaction) => {
-      const rawResults = state.rawResults.get();
+      const rawResults = state.rawResults.clone();
       const startIndex = state.resultOffset.get();
       const endIndex = startIndex + settings.resultsPerPage;
       if (reaction.firstRun) {
