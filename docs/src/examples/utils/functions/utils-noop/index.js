@@ -1,15 +1,14 @@
 import { noop } from '@semantic-ui/utils';
 
-const value = 'hello';
-const result = noop(value);
-console.log(result);
+// noop swallows arguments and returns undefined
+console.log(noop()); // undefined
+console.log(noop(1, 2, 3)); // undefined
 
-// common use case - default callback
+// common use case - default callback that is safe to invoke
 function processData(data, callback = noop) {
   const processed = data.toUpperCase();
   callback(processed);
   return processed;
 }
 
-const data = processData('test');
-console.log(data);
+console.log(processData('test')); // 'TEST'
