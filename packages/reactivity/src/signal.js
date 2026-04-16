@@ -170,7 +170,9 @@ export class Signal {
 
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = this.protect(newValue);
+      this.currentValue = (this.safety === 'freeze' && newValue !== null && typeof newValue === 'object')
+        ? deepFreeze(newValue)
+        : newValue;
       this.notify();
     }
   }
