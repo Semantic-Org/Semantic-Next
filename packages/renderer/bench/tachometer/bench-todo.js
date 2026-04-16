@@ -212,22 +212,28 @@ destroy();
 
 const el4 = await setup(100);
 performance.mark(startMark('toggle-first'));
-el4.component.toggleTodo(getTodos(el4)[0].id);
-await flush();
+for (let k = 0; k < 10; k++) {
+  el4.component.toggleTodo(getTodos(el4)[0].id);
+  await flush();
+}
 performance.measure('toggle-first', startMark('toggle-first'));
 destroy();
 
 const el5 = await setup(100);
 performance.mark(startMark('toggle-last'));
-el5.component.toggleTodo(getTodos(el5)[99].id);
-await flush();
+for (let k = 0; k < 10; k++) {
+  el5.component.toggleTodo(getTodos(el5)[99].id);
+  await flush();
+}
 performance.measure('toggle-last', startMark('toggle-last'));
 destroy();
 
 const el6 = await setup(100);
 performance.mark(startMark('toggle-middle'));
-el6.component.toggleTodo(getTodos(el6)[49].id);
-await flush();
+for (let k = 0; k < 10; k++) {
+  el6.component.toggleTodo(getTodos(el6)[49].id);
+  await flush();
+}
 performance.measure('toggle-middle', startMark('toggle-middle'));
 destroy();
 
@@ -261,24 +267,32 @@ destroy();
       Single Removal
 *******************************/
 
-const el9 = await setup(100);
+const el9 = await setup(200);
 performance.mark(startMark('remove-first'));
-el9.component.deleteTodo(getTodos(el9)[0].id);
-await flush();
+for (let k = 0; k < 10; k++) {
+  el9.component.deleteTodo(getTodos(el9)[0].id);
+  await flush();
+}
 performance.measure('remove-first', startMark('remove-first'));
 destroy();
 
-const el10 = await setup(100);
+const el10 = await setup(200);
 performance.mark(startMark('remove-middle'));
-el10.component.deleteTodo(getTodos(el10)[49].id);
-await flush();
+for (let k = 0; k < 10; k++) {
+  const todos = getTodos(el10);
+  el10.component.deleteTodo(todos[Math.floor(todos.length / 2)].id);
+  await flush();
+}
 performance.measure('remove-middle', startMark('remove-middle'));
 destroy();
 
-const el10b = await setup(100);
+const el10b = await setup(200);
 performance.mark(startMark('remove-last'));
-el10b.component.deleteTodo(getTodos(el10b)[99].id);
-await flush();
+for (let k = 0; k < 10; k++) {
+  const todos = getTodos(el10b);
+  el10b.component.deleteTodo(todos[todos.length - 1].id);
+  await flush();
+}
 performance.measure('remove-last', startMark('remove-last'));
 destroy();
 
@@ -356,16 +370,23 @@ destroy();
 *******************************/
 
 const el14 = await setup(100);
-const editId = getTodos(el14)[49].id;
 
 performance.mark(startMark('edit-start'));
-el14.component.editTodo(editId);
-await flush();
+for (let k = 0; k < 10; k++) {
+  const id = getTodos(el14)[40 + k].id;
+  el14.component.editTodo(id);
+  await flush();
+}
 performance.measure('edit-start', startMark('edit-start'));
 
 performance.mark(startMark('edit-save'));
-el14.component.saveTodo(editId, 'Updated todo item');
-await flush();
+for (let k = 0; k < 10; k++) {
+  const id = getTodos(el14)[40 + k].id;
+  el14.component.editTodo(id);
+  await flush();
+  el14.component.saveTodo(id, `Updated todo item ${k}`);
+  await flush();
+}
 performance.measure('edit-save', startMark('edit-save'));
 destroy();
 

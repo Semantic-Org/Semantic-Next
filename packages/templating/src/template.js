@@ -136,11 +136,6 @@ export const Template = class Template {
   }
 
   setDataContext(data, { rerender = true } = {}) {
-    // Frozen signal values may flow into this.data via the constructor;
-    // replace with an extensible copy on first write.
-    if (!Object.isExtensible(this.data)) {
-      this.data = {};
-    }
     const changed = assignInPlace(this.data, data, { returnChanged: true });
     if (changed) {
       this.dataReplaced = true;

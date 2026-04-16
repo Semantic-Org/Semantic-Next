@@ -170,9 +170,7 @@ export class Signal {
 
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = (this.safety === 'freeze' && newValue !== null && typeof newValue === 'object')
-        ? deepFreeze(newValue)
-        : newValue;
+      this.currentValue = this.protect(newValue);
       this.notify();
     }
   }
@@ -348,13 +346,10 @@ export class Signal {
     }
     else {
       const arr = this.currentValue;
-      if (index === 'all') {
-        for (let i = 0; i < arr.length; i++) {
+      for (let i = 0; i < arr.length; i++) {
+        if (index === 'all' || i === index) {
           arr[i][property] = value;
         }
-      }
-      else {
-        arr[index][property] = value;
       }
       this.notify();
     }
