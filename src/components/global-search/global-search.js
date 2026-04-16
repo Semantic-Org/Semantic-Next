@@ -13,13 +13,16 @@ const defaultSettings = {
   debounceTime: 200,
 };
 
+// All pagefind-derived signals: pagefind caches fragment objects internally and mutates
+// them on later .data() calls, so freeze would poison its cache on subsequent searches.
+const pagefindHeld = { options: { safety: 'reference' } };
+
 const defaultState = {
-  // pagefind holds internal references to result objects and mutates them on .data() — freeze would poison its cache
-  rawResults: { value: [], options: { safety: 'reference' } },
-  results: [],
-  displayResults: [],
+  rawResults: { value: [], ...pagefindHeld },
+  results: { value: [], ...pagefindHeld },
+  displayResults: { value: [], ...pagefindHeld },
+  selectedResult: { value: undefined, ...pagefindHeld },
   selectedIndex: 0,
-  selectedResult: undefined,
   resultOffset: 0,
   searchTerm: '',
   noResults: false,
