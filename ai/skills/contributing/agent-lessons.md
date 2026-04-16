@@ -85,6 +85,8 @@ Specific tells to notice in your own output:
 
 The test: if this code had only one user and no hypothetical future callers, would it still have this shape? Usually the ornamented version collapses to something simpler. In the framework author's words, ornament "obscures the elegance and semantic intent."
 
+**Apply this as a review lens, not just a write-time check.** The quiet form is rarely what lands on the first pass — it's what emerges when you re-read the diff with "can this be quieter?" as the question. Example: a `Signal.configure` that ran a 5-line if-ladder to forward keys into setters survived the write pass; the review pass collapsed it to `Object.assign(Signal, config)` because bracket assignment already routes through setters. Before finalizing any changeset, re-read with the lens — the Object.assign instinct has to be yours by default, not the reviewer's.
+
 ---
 
 ## You Are an Orchestrator, Not an Investigator

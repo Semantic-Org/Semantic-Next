@@ -423,11 +423,7 @@ export class Signal {
     else if (config.mode === 'stack') { config.mode = 'context'; }
   }
 
-  static configure({ safety, tracing, stackCapture, defaultEquality, defaultClone } = {}) {
-    if (safety !== undefined) { Signal.safety = safety; }
-    if (tracing !== undefined) { Signal.tracing = tracing; }
-    if (stackCapture !== undefined) { Signal.stackCapture = stackCapture; }
-    if (defaultEquality !== undefined) { Signal.defaultEquality = defaultEquality; }
-    if (defaultClone !== undefined) { Signal.defaultClone = defaultClone; }
+  static configure(config = {}) {
+    Object.assign(Signal, config);
   }
 }
