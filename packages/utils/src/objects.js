@@ -1,5 +1,4 @@
 import { clone } from './cloning.js';
-import { noop } from './functions.js';
 import { each } from './loops.js';
 import { escapeRegExp } from './regexp.js';
 import { isArray, isObject, isPlainObject, isString } from './types.js';
@@ -38,7 +37,9 @@ export const mapObject = (obj, callback) => {
 };
 
 /*
-  Handles properly copying getter/setters
+  Shallow-merge sources into target. Preserves source accessors (unlike
+  Object.assign, which snapshots getter values) and preserves target
+  extensibility (a frozen/sealed source does not lock down target props).
 */
 export const extend = (obj, ...sources) => {
   sources.forEach((source) => {
@@ -248,7 +249,7 @@ export const get = function(obj, path = '') {
 /* This is useful for callbacks or other scenarios where you want to avoid the
    values of a reference object becoming stale when a source object changes
 */
-export const proxyObject = (sourceObj = noop, referenceObj = {}) => {
+export const proxyObject = (sourceObj = () => ({}), referenceObj = {}) => {
   return new Proxy(referenceObj, {
     get: (target, property) => {
       const propKey = typeof property === 'symbol' ? property.toString() : property;
@@ -267,11 +268,10 @@ export const onlyKeys = (obj, keysToKeep) => {
 };
 
 /*
-  Return true if non-inherited property
+  Return true if non-inherited property. Thin re-export of Object.hasOwn
+  (ES2022) — safe on Object.create(null) and objects that shadow hasOwnProperty.
 */
-export const hasProperty = (obj, prop) => {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
-};
+export const hasProperty = Object.hasOwn;
 
 /*
   Reverses a lookup object
