@@ -79,10 +79,11 @@ export const Template = class Template {
     this.keys = keys || {};
     this.ast = ast;
     this.css = css;
-    // Shallow-copy into our own mutable container — incoming data may be
-    // frozen (from a signal under safety: 'freeze') but setDataContext
-    // mutates this.data in place via assignInPlace.
-    this.data = data ? { ...data } : {};
+    // Our own mutable container — incoming data may be frozen (from a
+    // signal under safety: 'freeze') but setDataContext mutates this.data
+    // in place via assignInPlace. extend preserves source accessors
+    // (spread would snapshot them, breaking live getter reads).
+    this.data = extend({}, data);
     this.reactions = [];
     this.abortController = new AbortController();
     this.abortSignal = this.abortController.signal;
