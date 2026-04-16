@@ -79,7 +79,10 @@ export const Template = class Template {
     this.keys = keys || {};
     this.ast = ast;
     this.css = css;
-    this.data = data || {};
+    // Shallow-copy into our own mutable container — incoming data may be
+    // frozen (from a signal under safety: 'freeze') but setDataContext
+    // mutates this.data in place via assignInPlace.
+    this.data = data ? { ...data } : {};
     this.reactions = [];
     this.abortController = new AbortController();
     this.abortSignal = this.abortController.signal;
@@ -944,7 +947,8 @@ export const Template = class Template {
         if (property in target) {
           let signal = template.settingsVars.get(property);
           if (!signal) {
-            signal = new Signal(target[property]);
+            // Framework-internal signal over user-owned settings — don't freeze
+            signal = new Signal(target[property], { safety: 'reference' });
             template.settingsVars.set(property, signal);
           }
           signal.get(); // track dependency
@@ -962,7 +966,7 @@ export const Template = class Template {
           signal.set(value);
         }
         else {
-          signal = new Signal(value);
+          signal = new Signal(value, { safety: 'reference' });
           template.settingsVars.set(property, signal);
         }
         return true;

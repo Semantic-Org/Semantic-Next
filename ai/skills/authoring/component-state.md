@@ -314,12 +314,12 @@ const defaultState = { counter: 0, isOpen: false };
 // signal() in createComponent — needed when you want signal options or
 // to create signals dynamically
 const createComponent = ({ signal }) => ({
-  element: signal(null, { allowClone: false }),  // custom options
-  count: signal(0),                               // explicit signal
+  element: signal(null, { safety: 'reference' }),  // custom options
+  count: signal(0),                                // explicit signal
 });
 ```
 
-Use `defaultState` by default. Use `signal()` when you need `allowClone: false`, custom equality, or signals created conditionally.
+Use `defaultState` by default. Use `signal()` when you need a non-default safety preset (e.g. `safety: 'reference'` for third-party data), custom equality, or signals created conditionally.
 
 ---
 

@@ -233,7 +233,7 @@ Signal.set(newValue)
 
 **Dependency tracking**: `Signal.get()` calls `Dependency.depend()`. If `Scheduler.current` is set (meaning we're inside a Reaction's `run()`), the Reaction is added to the Dependency's subscriber set, and the Dependency is added to the Reaction's dependency set. This bidirectional link enables cleanup.
 
-**Clone by default**: `Signal.set()` and `Signal.get()` clone values for objects and arrays (via `maybeClone`). This prevents mutation-without-notification bugs. Class instances are not cloned (detected via `isClassInstance`). Opt out with `{ allowClone: false }`.
+**Freeze by default**: `Signal.set()` deep-freezes plain objects and arrays (via `deepFreeze`). In-place mutation on a `.get()` result throws `TypeError` at the call site, catching the mutate-without-notify class of bugs. Date/Map/Set/RegExp/class-instances are skipped (they aren't plain objects and freezing them would break their semantics). Opt out per-signal with `{ safety: 'reference' }` for borrowed data, or `{ safety: 'none' }` for event-stream semantics.
 
 **Scheduler batching**: Multiple `Signal.set()` calls in the same synchronous block schedule one microtask flush. All pending Reactions run in the next microtask, ensuring consistent state.
 

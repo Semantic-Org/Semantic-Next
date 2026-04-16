@@ -62,7 +62,7 @@ defineComponent({
   `,
   subTemplates: { todoItem },
   defaultState: {
-    todos: { value: [], options: { allowClone: false, equalityFunction: () => false } },
+    todos: { value: [], options: { safety: 'none' } },
     filter: 'all',
     editingId: null,
   },

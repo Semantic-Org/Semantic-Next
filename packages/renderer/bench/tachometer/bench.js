@@ -87,8 +87,8 @@ defineComponent({
     {/each}
   </tbody></table>`,
   defaultState: {
-    items: { value: [], options: { allowClone: false, equalityFunction: () => false } },
-    selected: { value: 0, options: { allowClone: false, equalityFunction: () => false } },
+    items: { value: [], options: { safety: 'none' } },
+    selected: { value: 0, options: { safety: 'none' } },
   },
   createComponent({ state }) {
     return {

@@ -48,14 +48,14 @@ function devProxyFor(val) {
 
 export class Signal {
   constructor(initialValue, options = {}) {
-    const { context, safety, equalityFunction, cloneFunction, allowClone } = options;
+    const { context, safety, equalityFunction, cloneFunction } = options;
 
     this.dependency = new Dependency({
       firstRun: true,
       value: initialValue,
     });
 
-    this.safety = safety ?? (allowClone === false ? 'reference' : config.safety);
+    this.safety = safety ?? config.safety;
 
     this.equalityFunction = equalityFunction
       ? wrapFunction(equalityFunction)

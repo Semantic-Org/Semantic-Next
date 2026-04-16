@@ -48,17 +48,17 @@ new Signal(initialValue, options)
 - `initialValue`: Any - The initial value for the signal
 - `options`: Object (optional)
   - `context`: Object - Debugging context metadata
+  - `safety`: `'freeze'` | `'reference'` | `'none'` - Value protection preset (default: `'freeze'`)
   - `equalityFunction`: Function - Custom equality comparison (default: deep equality)
-  - `allowClone`: Boolean - Whether to clone values (default: true)
-  - `cloneFunction`: Function - Custom cloning function (default: deep clone)
+  - `cloneFunction`: Function - Custom cloning function used by `signal.clone()` (default: deep clone)
 
 **Examples**:
 ```javascript
-// Basic signal
+// Basic signal (default safety: 'freeze')
 const count = new Signal(0);
 
-// Signal with no cloning (for performance or object identity)
-const element = new Signal(domElement, { allowClone: false });
+// Signal for DOM or third-party objects — don't freeze borrowed references
+const element = new Signal(domElement, { safety: 'reference' });
 
 // Signal with custom equality
 const user = new Signal(userData, {
@@ -188,19 +188,20 @@ const user = new Signal(userData, {
 });
 ```
 
-#### Cloning Control
+#### Safety Presets
 ```javascript
-// Disable cloning for performance or object identity preservation
-const expensiveObject = new Signal(largeDataStructure, {
-  allowClone: false  // No cloning, use object as-is
-});
+// Default — deep-freeze on set; in-place mutation throws at the call site
+const config = new Signal({ theme: 'dark' });
 
-// Custom cloning function
+// Opt out for signals holding borrowed data (libraries, APIs, callbacks)
+const pagefindResults = new Signal([], { safety: 'reference' });
+
+// Event-stream semantics — every set notifies, even if value is equal
+const pulse = new Signal(null, { safety: 'none' });
+
+// Custom clone function used by signal.clone()
 const customSignal = new Signal(data, {
-  cloneFunction: (value) => {
-    // Custom cloning logic
-    return JSON.parse(JSON.stringify(value));
-  }
+  cloneFunction: value => JSON.parse(JSON.stringify(value)),
 });
 ```
 
