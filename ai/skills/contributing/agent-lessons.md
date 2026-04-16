@@ -87,6 +87,39 @@ The test: if this code had only one user and no hypothetical future callers, wou
 
 **Apply this as a review lens, not just a write-time check.** The quiet form is rarely what lands on the first pass — it's what emerges when you re-read the diff with "can this be quieter?" as the question. Example: a `Signal.configure` that ran a 5-line if-ladder to forward keys into setters survived the write pass; the review pass collapsed it to `Object.assign(Signal, config)` because bracket assignment already routes through setters. Before finalizing any changeset, re-read with the lens — the Object.assign instinct has to be yours by default, not the reviewer's.
 
+### Comments: the OSS bar
+
+The same discipline applies to comments, and this is a repeated failure point for AI defaults — both directions. On the first pass, agents tend to narrate (`// loop through items`, `// set the value`, `// Factory for signals computed from other signals`). On the review pass, agents tend to over-prune and strip load-bearing WHY notes alongside the narration. Both miss the target.
+
+**The bar**: a comment earns its place only if it documents something **non-obvious to someone who doesn't know the codebase** — a weird trick, a hidden constraint, a problem the code is defending against, a performance choice backed by numbers.
+
+Compare:
+
+❌ **Narration / internal rationale** (remove):
+```js
+// Module-local only because it's used as a computed class member key
+// (`[IS_SIGNAL]`), which is evaluated before static fields initialize.
+const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
+```
+This explains the internal engineering decision (where it lives) to readers who weren't asking. Dead weight.
+
+✅ **Problem being solved** (keep):
+```js
+// solves 'instanceof Signal' checks if across realms or package duplication
+const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
+```
+A reader sees `Symbol.for` + `[Symbol.hasInstance]` and wonders *why not just `instanceof`*. The comment answers that — points at the observable failure this technique defends against. That's the bar.
+
+Other load-bearing categories:
+- **Performance numbers**: `// Error.captureStackTrace is 10-100× a context spread; gated on stack mode`
+- **Behavioral variance by state**: the block above `Signal.prototype.mutate` explaining freeze vs. reference/none semantics
+- **Weird-trick explanations**: `// WeakRef lets the derived reaction self-stop when the source is GC'd`
+- **Config / enum value docs**: `// 'off' — zero cost; 'context' — attach bags; 'stack' — captureStackTrace per notify` inline on a config object. Readers using the config need the semantics somewhere, and the config site is where they look.
+
+What the above examples share: a future reader sees the code, asks a specific question, and the comment answers that question in one line. Never restate what the code does. Never announce internal plans ("replace with X when Y ships"). Never document API contracts that belong in JSDoc or types.
+
+**Section dividers are a separate case.** "No section labels" is the right instinct for single-declaration labels like `// DX pass throughs` above one static assignment. It's the wrong instinct for multi-method conceptual clusters in a large file — the SUI codebase uses a canonical three-level comment hierarchy for large CSS files, config files, and organized JS files (see the `code-formatting` skill). Level-2 dividers (`/*---  Core  ---*/`, `/*---  Mutation Helpers  ---*/`, `/*---  Configuration  ---*/`) are the correct tool for grouping ~10 related methods as navigation aids. Test: does the divider label a conceptual cluster a reader wants to scan past or jump to? Follow the three-level hierarchy. If it labels one thing the name already conveys, remove.
+
 ---
 
 ## You Are an Orchestrator, Not an Investigator
