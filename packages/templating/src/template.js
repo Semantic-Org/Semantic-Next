@@ -944,7 +944,7 @@ export const Template = class Template {
         if (property in target) {
           let signal = template.settingsVars.get(property);
           if (!signal) {
-            signal = new Signal(target[property], { safety: 'reference' });
+            signal = new Signal(target[property]);
             template.settingsVars.set(property, signal);
           }
           signal.get(); // track dependency
@@ -962,7 +962,7 @@ export const Template = class Template {
           signal.set(value);
         }
         else {
-          signal = new Signal(value, { safety: 'reference' });
+          signal = new Signal(value);
           template.settingsVars.set(property, signal);
         }
         return true;

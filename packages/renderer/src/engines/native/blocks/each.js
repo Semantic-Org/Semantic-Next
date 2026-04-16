@@ -218,7 +218,7 @@ function disposeRecordDOM(record) {
 function createRecord({ key, item, index, collectionType, node, data, scope, renderAST, isSVG }) {
   const eachData = getEachData(item, index, collectionType, node);
   const itemScope = scope.child();
-  const itemSignal = new Signal(eachData, { safety: 'reference' });
+  const itemSignal = new Signal(eachData);
   const itemProxy = createItemDataProxy(data, itemSignal);
   const fragment = renderAST({ ast: node.content, data: itemProxy, scope: itemScope, isSVG });
   // Marker-bounded item range: startMarker ... [item content] ... endMarker.
@@ -552,7 +552,7 @@ function adoptServerItems({
       usedKeys.add(key);
       const eachData = getEachData(item, i, collectionType, node);
       const itemScope = scope.child();
-      const itemSignal = new Signal(eachData, { safety: 'reference' });
+      const itemSignal = new Signal(eachData);
       const itemProxy = createItemDataProxy(data, itemSignal);
 
       // Wire per-item reactivity on the existing DOM. hydrateInnerContent
