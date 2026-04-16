@@ -43,7 +43,6 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
         menu = [];
       }
     }
-    menu = clone(menu) || [];
     menu = self.filterVisibleSections(menu);
     if (self.isSearching()) {
       menu = self.filterBySearchTerm(menu);
