@@ -42,6 +42,15 @@ jobs:
         with:
           node-version: 24
 
+      # Pin reporter to main. The PR cannot author the tool that renders
+      # its own bench comment — classification thresholds, output format,
+      # and peak attribution must be author-neutral. Overlaid before any
+      # downstream step that reads tools/bench-reporter/.
+      - name: Overlay reporter from main
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- tools/bench-reporter/ 2>/dev/null || true
+
       # Overlay main's bench-history.json onto the PR checkout so the
       # reporter's peak-attribution runs against the freshest history,
       # not whatever version was on the PR's branch point. `|| true` keeps
