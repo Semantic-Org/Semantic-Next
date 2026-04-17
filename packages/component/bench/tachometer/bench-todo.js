@@ -62,7 +62,10 @@ defineComponent({
   `,
   subTemplates: { todoItem },
   defaultState: {
-    todos: { value: [], options: { allowClone: false, equalityFunction: () => false } },
+    // Dual-option compat — both the pre-refactor API (allowClone) and
+    // the post-refactor API (safety) hit the reference fast path, so the
+    // bench measures the impl, not the knob-activation semantics.
+    todos: { value: [], options: { allowClone: false, equalityFunction: () => false, safety: 'reference' } },
     filter: 'all',
     editingId: null,
   },
@@ -163,13 +166,16 @@ async function setup(n) {
   return el;
 }
 
-// Setup helper — toggle every Nth todo as completed
+// Setup helper — toggle every Nth todo as completed. Single flush at the
+// end; a per-iteration RAF wait would tax every sample by ~15ms × N, which
+// amplifies across every metric since tachometer re-runs the full script
+// per sample.
 async function markEveryNth(el, n) {
   const todos = getTodos(el);
   for (let i = 0; i < todos.length; i += n) {
     el.component.toggleTodo(todos[i].id);
-    await flush();
   }
+  await flush();
 }
 
 /*******************************

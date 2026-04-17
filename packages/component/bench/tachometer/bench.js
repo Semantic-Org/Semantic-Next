@@ -87,8 +87,11 @@ defineComponent({
     {/each}
   </tbody></table>`,
   defaultState: {
-    items: { value: [], options: { allowClone: false, equalityFunction: () => false } },
-    selected: { value: 0, options: { allowClone: false, equalityFunction: () => false } },
+    // Dual-option compat — both the pre-refactor API (allowClone) and
+    // the post-refactor API (safety) hit the reference fast path, so the
+    // bench measures the impl, not the knob-activation semantics.
+    items: { value: [], options: { allowClone: false, equalityFunction: () => false, safety: 'reference' } },
+    selected: { value: 0, options: { allowClone: false, equalityFunction: () => false, safety: 'reference' } },
   },
   createComponent({ state }) {
     return {
