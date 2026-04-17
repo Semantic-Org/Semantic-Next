@@ -21,7 +21,7 @@ type: skill
 Add one only if at least one of these holds:
 
 - **A current or near-future perf initiative needs to gate on it.** The bench proves the feature does what it claims and catches regressions later. Ship it with the feature PR, not speculatively.
-- **A hot path has no coverage.** The existing suite covers rendering throughput, reactivity, and list-structural ops. Before adding, check `packages/renderer/bench/tachometer/tachometer-ci*.json` to see if something close already exists.
+- **A hot path has no coverage.** The existing suite covers rendering throughput, reactivity, and list-structural ops. Before adding, check `packages/*/bench/tachometer/tachometer-ci*.json` to see if something close already exists. Benches live alongside the package they primarily exercise: component benches in `packages/component/bench/tachometer/`, signal benches in `packages/reactivity/bench/tachometer/`.
 
 **Do not add a bench just because a workload seems interesting.** Every bench costs ~1 min of CI time (initial samples at N=50 + some auto-sample tail) and more comment surface area for reviewers. Benches without a failure mode they actually gate against are noise.
 
@@ -191,7 +191,7 @@ Naming convention for amplified workloads: suffix with the iteration count (`sig
 Run the bench locally to confirm it works:
 
 ```sh
-cd packages/renderer/bench/tachometer
+cd packages/<pkg>/bench/tachometer   # e.g. packages/component or packages/reactivity
 node build-ci.js current
 node build-ci.js baseline  # same source both sides for a dry-run; zero-delta
 npx tachometer --config tachometer-ci-<suite>.json
@@ -212,8 +212,8 @@ If the local run works, push. CI will run the same config in matrix form and the
 
 **Files to touch for an extension to an existing suite:**
 
-1. `packages/renderer/bench/tachometer/bench-<existing>.js` — add `mark`/`measure` pair
-2. `packages/renderer/bench/tachometer/tachometer-ci-<suite>.json` — add `{ mode: 'performance', entryName: '<metric>' }` to BOTH `this-change` and `tip-of-tree` measurement arrays
+1. `packages/<pkg>/bench/tachometer/bench-<existing>.js` — add `mark`/`measure` pair
+2. `packages/<pkg>/bench/tachometer/tachometer-ci-<suite>.json` — add `{ mode: 'performance', entryName: '<metric>' }` to BOTH `this-change` and `tip-of-tree` measurement arrays
 
 **Files to touch for a new bench file:**
 
