@@ -16,7 +16,7 @@
         { "mode": "performance", "entryName": "remove-first" },
         { "mode": "performance", "entryName": "remove-middle" },
         { "mode": "performance", "entryName": "remove-last" },
-        { "mode": "performance", "entryName": "filter-completed" },
+        { "mode": "performance", "entryName": "filter-cycle-20" },
         { "mode": "performance", "entryName": "edit-start" },
         { "mode": "performance", "entryName": "edit-save" }
       ]
@@ -32,7 +32,7 @@
         { "mode": "performance", "entryName": "remove-first" },
         { "mode": "performance", "entryName": "remove-middle" },
         { "mode": "performance", "entryName": "remove-last" },
-        { "mode": "performance", "entryName": "filter-completed" },
+        { "mode": "performance", "entryName": "filter-cycle-20" },
         { "mode": "performance", "entryName": "edit-start" },
         { "mode": "performance", "entryName": "edit-save" }
       ]

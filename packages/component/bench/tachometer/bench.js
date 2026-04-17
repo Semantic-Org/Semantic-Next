@@ -183,34 +183,41 @@ await updateComplete();
 performance.measure('update-10th', startMark('update-10th'));
 destroy();
 
-// Select row
+// Select row — 20 selects across different ids, amplified so the
+// total duration clears the σ≈2ms per-sample noise floor on CI.
 const el5 = await mount();
 el5.component.create(1000);
 await updateComplete();
-performance.mark(startMark('select'));
-el5.component.select(500);
-await updateComplete();
-performance.measure('select', startMark('select'));
+performance.mark(startMark('select-20'));
+for (let i = 0; i < 20; i++) {
+  el5.component.select(100 + i * 50);
+  await updateComplete();
+}
+performance.measure('select-20', startMark('select-20'));
 destroy();
 
-// Swap rows
+// Swap rows — 20 alternating swaps so the amplified duration clears the
+// σ≈2ms per-sample noise floor on CI.
 const el6 = await mount();
 el6.component.create(1000);
 await updateComplete();
-performance.mark(startMark('swap-rows'));
-el6.component.swapRows();
-await updateComplete();
-performance.measure('swap-rows', startMark('swap-rows'));
+performance.mark(startMark('swap-rows-20'));
+for (let i = 0; i < 20; i++) {
+  el6.component.swapRows();
+  await updateComplete();
+}
+performance.measure('swap-rows-20', startMark('swap-rows-20'));
 destroy();
 
-// Clear rows
+// Clear rows — list scaled to 5k so tree destruction is large enough to
+// clear the σ≈2ms per-sample noise floor on CI.
 const el7 = await mount();
-el7.component.create(1000);
+el7.component.create(5000);
 await updateComplete();
-performance.mark(startMark('clear'));
+performance.mark(startMark('clear-5k'));
 el7.component.clear();
 await updateComplete();
-performance.measure('clear', startMark('clear'));
+performance.measure('clear-5k', startMark('clear-5k'));
 destroy();
 
 // Log results

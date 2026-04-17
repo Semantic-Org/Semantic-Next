@@ -178,10 +178,10 @@ async function markEveryNth(el, n) {
 *******************************/
 
 const el1 = await mount();
-performance.mark(startMark('bulk-add-50'));
-el1.component.addBulk(50);
+performance.mark(startMark('bulk-add-500'));
+el1.component.addBulk(500);
 await flush();
-performance.measure('bulk-add-50', startMark('bulk-add-50'));
+performance.measure('bulk-add-500', startMark('bulk-add-500'));
 destroy();
 
 const el2 = await mount();
@@ -250,11 +250,15 @@ destroy();
       (one user action, all items)
 *******************************/
 
+// 20 alternating toggle-all invocations on a 100-item list — amplified
+// so the measurement clears the σ≈2ms per-sample noise floor on CI.
 const el8 = await setup(100);
-performance.mark(startMark('toggle-all'));
-el8.component.toggleAll();
-await flush();
-performance.measure('toggle-all', startMark('toggle-all'));
+performance.mark(startMark('toggle-all-20'));
+for (let i = 0; i < 20; i++) {
+  el8.component.toggleAll();
+  await flush();
+}
+performance.measure('toggle-all-20', startMark('toggle-all-20'));
 destroy();
 
 /*******************************
@@ -319,12 +323,14 @@ destroy();
       Bulk Removal
 *******************************/
 
-const el12 = await setup(100);
+// List scaled to 500 (250 marked completed) so the single clearCompleted
+// operation is large enough to clear the σ≈2ms per-sample noise floor.
+const el12 = await setup(500);
 await markEveryNth(el12, 2);
-performance.mark(startMark('clear-completed'));
+performance.mark(startMark('clear-completed-250'));
 el12.component.clearCompleted();
 await flush();
-performance.measure('clear-completed', startMark('clear-completed'));
+performance.measure('clear-completed-250', startMark('clear-completed-250'));
 destroy();
 
 /*******************************
@@ -332,23 +338,20 @@ destroy();
       (parent Signal change only)
 *******************************/
 
+// 20 filter transitions cycling active → completed → all — single
+// amplified metric replaces the prior three single-shot filter metrics
+// (filter-active, filter-completed, filter-all) which each landed in
+// the noise-floor-limited bucket.
 const el13 = await setup(100);
 await markEveryNth(el13, 3);
 
-performance.mark(startMark('filter-active'));
-el13.component.setFilter('active');
-await flush();
-performance.measure('filter-active', startMark('filter-active'));
-
-performance.mark(startMark('filter-completed'));
-el13.component.setFilter('completed');
-await flush();
-performance.measure('filter-completed', startMark('filter-completed'));
-
-performance.mark(startMark('filter-all'));
-el13.component.setFilter('all');
-await flush();
-performance.measure('filter-all', startMark('filter-all'));
+const filters = ['active', 'completed', 'all'];
+performance.mark(startMark('filter-cycle-20'));
+for (let i = 0; i < 20; i++) {
+  el13.component.setFilter(filters[i % 3]);
+  await flush();
+}
+performance.measure('filter-cycle-20', startMark('filter-cycle-20'));
 destroy();
 
 /*******************************
