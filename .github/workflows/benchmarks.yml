@@ -44,45 +44,39 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Pin bench harness to main so matrix composition is driven by main's
-      # set of tachometer-ci*.json configs, not the PR's. Test-taker can't
-      # author the test: harness changes land on main in their own PR.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Pin bench harness to main. Matrix composition (tools/bench-matrix,
+      # bench source, tachometer configs, reporter) is author-neutral —
+      # test-taker can't widen or narrow its own scope, rewrite discover.js,
+      # or add a rigged config. Harness changes land on main first.
       - name: Overlay bench harness from main
         run: |
           git fetch origin main --depth=1
-          git checkout origin/main -- packages/*/bench/ tools/bench-reporter/ 2>/dev/null || true
+          git checkout origin/main -- packages/*/bench/ tools/bench-reporter/ tools/bench-matrix/ 2>/dev/null || true
+
+      # Collect the PR's changed-file set vs base; discover.js filters the
+      # matrix to configs whose owning package's @semantic-ui/* dep closure
+      # intersects the diff. Push to main writes an empty file — discover.js
+      # falls through to "run everything" for bench-history continuity.
+      - name: Collect changed files
+        run: |
+          if [ '${{ github.event_name }}' = 'pull_request' ]; then
+            git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+            git diff --name-only FETCH_HEAD...HEAD > /tmp/changed-files.txt
+          else
+            : > /tmp/changed-files.txt
+          fi
+          echo 'Changed files:'
+          cat /tmp/changed-files.txt
 
       - name: Build matrix
         id: matrix
-        run: |
-          # Any trigger that reaches this workflow — push to main, or a
-          # pull_request whose diff matched our path filter — runs every
-          # benchmarkable package's configs. Tachometer configs only live
-          # under `packages/renderer/` today, but a change in any other
-          # package (reactivity, templating, etc.) can absolutely move
-          # renderer's bench numbers via workspace imports. Per-package
-          # scoping of the matrix was premature: the benches are end-to-end
-          # measurements that pull the whole framework through; treat the
-          # set of benchmarkable packages as a single target suite.
-          entries=()
-          while IFS= read -r config; do
-            [ -z "$config" ] && continue
-            pkg=$(echo "$config" | cut -d/ -f2)
-            name=$(basename "$config" .json)
-            entries+=("{\"config\":\"$config\",\"name\":\"$name\",\"package\":\"$pkg\"}")
-          done < <(find packages -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' 2>/dev/null | sort)
-
-          if [ ${#entries[@]} -eq 0 ]; then
-            matrix="[]"
-            has=false
-          else
-            matrix="[$(IFS=,; echo "${entries[*]}")]"
-            has=true
-          fi
-
-          echo "result=$matrix" >> "$GITHUB_OUTPUT"
-          echo "has-benchmarks=$has" >> "$GITHUB_OUTPUT"
-          echo "Benchmark matrix: $matrix"
+        env:
+          CHANGED_FILES_PATH: /tmp/changed-files.txt
+        run: node tools/bench-matrix/discover.js
 
   benchmarks:
     needs: discover
