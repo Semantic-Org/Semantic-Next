@@ -62,7 +62,8 @@ defineComponent({
   `,
   subTemplates: { todoItem },
   defaultState: {
-    todos: { value: [], options: { safety: 'none' } },
+    // dual options so main (allowClone) and this branch (safety) both reach the reference fast path
+    todos: { value: [], options: { allowClone: false, equalityFunction: () => false, safety: 'none' } },
     filter: 'all',
     editingId: null,
   },

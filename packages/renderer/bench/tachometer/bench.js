@@ -87,8 +87,9 @@ defineComponent({
     {/each}
   </tbody></table>`,
   defaultState: {
-    items: { value: [], options: { safety: 'none' } },
-    selected: { value: 0, options: { safety: 'none' } },
+    // dual options so main (allowClone) and this branch (safety) both reach the reference fast path
+    items: { value: [], options: { allowClone: false, equalityFunction: () => false, safety: 'none' } },
+    selected: { value: 0, options: { allowClone: false, equalityFunction: () => false, safety: 'none' } },
   },
   createComponent({ state }) {
     return {
