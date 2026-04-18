@@ -118,7 +118,9 @@ performance.measure('toggle-middle', startMark('toggle-middle'));
 
 ## Decision: Extend an Existing Bench File or Create a New One?
 
-**Extend existing if the workload fits an existing bench's fixture.** Most new metrics add to `bench-todo.js` (TodoMVC-style list operations) or `bench.js` (krausest table workload). Add the `mark`/`measure` pair to the JS file, add the `entryName` to the appropriate `tachometer-ci*.json`. Done in 5 minutes.
+**Extend existing if the workload fits an existing bench's fixture.** Most new metrics add to `bench-todo.js` (TodoMVC-style list operations) or `bench-krausest.js` (krausest js-framework-benchmark parity workload). Add the `mark`/`measure` pair to the JS file, add the `entryName` to the appropriate `tachometer-ci*.json`. Done in 5 minutes.
+
+**`bench-krausest.js` has a special contract.** It mirrors `tools/benchmark/src/main.js` (the externally-served krausest contestant) and pins `safety: 'reference'` on its signals so the bench always measures the perf fast path regardless of `Signal.defaultSafety`. New metrics here must use SUI-idiomatic helpers (`push`, `map`, `removeItem`, new-ref `set`) — no mutate-then-set-same-ref patterns, which would silently no-op under reference equality. If you find yourself reaching for `equalityFunction: () => false` to make a new metric fire, the metric belongs in `bench-todo.js` instead.
 
 **Create a new bench file if the workload is orthogonal.** E.g., a hydration bench needs its own fixture setup; a signal micro-bench has a different harness shape. Then you need:
 
@@ -177,12 +179,12 @@ Naming convention for amplified workloads: suffix with the iteration count (`sig
 
 ### ❌ Name collision across configs
 
-`tachometer-ci.json` has `clear` (table-clear workload).
-`tachometer-ci-todo.json` also wants `clear` (todo-list clear). **Don't** — rename one to `clear-completed` or `clear-table`.
+`tachometer-ci-krausest.json` has `clear-10k` (table-clear workload).
+`tachometer-ci-todo.json` also wants `clear` (todo-list clear). **Don't** reuse a bare `clear` — pick a disambiguated name.
 
 ### ✅ Disambiguated names
 
-`clear` (krausest table clear) and `clear-completed` (TodoMVC clear-completed button).
+`clear-10k` (krausest table clear after runlots) and `clear-completed-250` (TodoMVC clear-completed button at 250-item scale).
 
 ---
 

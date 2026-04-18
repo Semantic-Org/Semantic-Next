@@ -62,10 +62,14 @@ defineComponent({
   `,
   subTemplates: { todoItem },
   defaultState: {
-    // Dual-option compat — both the pre-refactor API (allowClone) and
-    // the post-refactor API (safety) hit the reference fast path, so the
-    // bench measures the impl, not the knob-activation semantics.
-    todos: { value: [], options: { allowClone: false, equalityFunction: () => false, safety: 'reference' } },
+    // Pinned to safety: 'reference' so the bench tracks the reference fast
+    // path regardless of Signal.defaultSafety. Dual-key shape (allowClone +
+    // safety) keeps the in-flight signal-API refactor compatible without
+    // touching the bench. Mutations use the SUI-canonical helpers below
+    // (push/replaceItem/removeItem/setProperty/filter/setArrayProperty),
+    // which bypass equality or produce new refs — no equalityFunction
+    // override needed.
+    todos: { value: [], options: { allowClone: false, safety: 'reference' } },
     filter: 'all',
     editingId: null,
   },
