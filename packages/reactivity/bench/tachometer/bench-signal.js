@@ -180,7 +180,10 @@ let sink = null;
   r.stop();
 }
 
-// signal-reactive-set-property-by-id-100 — alternating front/back averages N/2 scan
+// signal-reactive-set-property-by-id-200 — alternating front/back averages N/2 scan.
+// 100 iterations landed at ~113ms with observed CI ~2.5× expected (straddled
+// ±2%); 200 doubles the workload to ~225ms so per-sample jitter becomes a
+// smaller fraction of the total and the CI resolves.
 {
   const sig = new Signal(makeRecords(1000));
   const r = Reaction.create(() => {
@@ -191,17 +194,17 @@ let sink = null;
     }
     sink = active;
   });
-  const ids = new Array(100);
-  for (let i = 0; i < 100; i++) {
+  const ids = new Array(200);
+  for (let i = 0; i < 200; i++) {
     const idx = (i % 2 === 0) ? (i / 2) % 1000 : 999 - (((i - 1) / 2) % 1000);
     ids[i] = `rec-${idx}`;
   }
-  performance.mark(startMark('signal-reactive-set-property-by-id-100'));
-  for (let i = 0; i < 100; i++) {
+  performance.mark(startMark('signal-reactive-set-property-by-id-200'));
+  for (let i = 0; i < 200; i++) {
     sig.setProperty(ids[i], 'active', i % 2 === 0);
     Reaction.flush();
   }
-  performance.measure('signal-reactive-set-property-by-id-100', startMark('signal-reactive-set-property-by-id-100'));
+  performance.measure('signal-reactive-set-property-by-id-200', startMark('signal-reactive-set-property-by-id-200'));
   r.stop();
 }
 

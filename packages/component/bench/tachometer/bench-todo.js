@@ -330,14 +330,17 @@ for (let i = 0; i < 5; i++) {
 performance.measure('remove-5-front', startMark('remove-5-front'));
 destroy();
 
+// 10× loop (vs 5× for the front/back variants) — middle removal's
+// O(N/2) scan has wider per-sample variance, so 5× landed at ~74ms
+// with observed CI straddling ±2%. 10× brings it to ~148ms / ±1%.
 const el11b = await setup(100);
-performance.mark(startMark('remove-5-middle'));
-for (let i = 0; i < 5; i++) {
+performance.mark(startMark('remove-10-middle'));
+for (let i = 0; i < 10; i++) {
   const todos = getTodos(el11b);
   el11b.component.deleteTodo(todos[Math.floor(todos.length / 2)].id);
   await flush();
 }
-performance.measure('remove-5-middle', startMark('remove-5-middle'));
+performance.measure('remove-10-middle', startMark('remove-10-middle'));
 destroy();
 
 const el11c = await setup(100);

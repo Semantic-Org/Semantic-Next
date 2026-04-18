@@ -17,7 +17,7 @@
         { "mode": "performance", "entryName": "signal-reactive-list-filter-1000x300" },
         { "mode": "performance", "entryName": "signal-reactive-push-1000x20" },
         { "mode": "performance", "entryName": "signal-reactive-set-index-300" },
-        { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-100" }
+        { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-200" }
       ]
     },
     {
@@ -32,7 +32,7 @@
         { "mode": "performance", "entryName": "signal-reactive-list-filter-1000x300" },
         { "mode": "performance", "entryName": "signal-reactive-push-1000x20" },
         { "mode": "performance", "entryName": "signal-reactive-set-index-300" },
-        { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-100" }
+        { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-200" }
       ]
     }
   ]

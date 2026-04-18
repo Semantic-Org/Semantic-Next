@@ -15,7 +15,7 @@
         { "mode": "performance", "entryName": "toggle-10" },
         { "mode": "performance", "entryName": "toggle-all-20" },
         { "mode": "performance", "entryName": "remove-5-front" },
-        { "mode": "performance", "entryName": "remove-5-middle" },
+        { "mode": "performance", "entryName": "remove-10-middle" },
         { "mode": "performance", "entryName": "remove-5-back" },
         { "mode": "performance", "entryName": "clear-completed-250" }
       ]
@@ -30,7 +30,7 @@
         { "mode": "performance", "entryName": "toggle-10" },
         { "mode": "performance", "entryName": "toggle-all-20" },
         { "mode": "performance", "entryName": "remove-5-front" },
-        { "mode": "performance", "entryName": "remove-5-middle" },
+        { "mode": "performance", "entryName": "remove-10-middle" },
         { "mode": "performance", "entryName": "remove-5-back" },
         { "mode": "performance", "entryName": "clear-completed-250" }
       ]
