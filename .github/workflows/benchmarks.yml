@@ -8,13 +8,12 @@ on:
       # bench workflow itself — changes here take effect on this PR's own
       # run (pull_request uses PR-head YAML), so self-test
       - '.github/workflows/benchmarks.yml'
-      # reporter scripts — runs from PR-head via the report workflow's
-      # checkout step, so a PR that only changes reporter.js still gets
-      # its output rendered on its own bench comment. Note: we deliberately
-      # DON'T include `.github/workflows/benchmarks-report.yml` here — that
-      # file runs from main's copy (workflow_run constraint), so modifying
-      # it on a PR doesn't exercise the change until after merge.
-      - 'tools/bench-reporter/**'
+      # Bench source (bench-*.js, tachometer-ci*.json, build-ci.js) and
+      # reporter (tools/bench-reporter/**) are deliberately NOT listed here.
+      # The discover and benchmarks jobs overlay main's copy of both before
+      # every run, so PR-side edits have no effect on the PR's own comment.
+      # Harness changes land on main in a separate PR; test-taker cannot
+      # author the test.
   # Bench every merge commit on main so bench-history.json accumulates
   # absolute CIs per commit. These runs aren't gated against anything —
   # the report workflow branches on event type and appends history instead
@@ -45,37 +44,39 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Pin bench harness to main. Matrix composition (tools/bench-matrix,
+      # bench source, tachometer configs, reporter) is author-neutral —
+      # test-taker can't widen or narrow its own scope, rewrite discover.js,
+      # or add a rigged config. Harness changes land on main first.
+      - name: Overlay bench harness from main
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- packages/*/bench/ tools/bench-reporter/ tools/bench-matrix/ 2>/dev/null || true
+
+      # Collect the PR's changed-file set vs base; discover.js filters the
+      # matrix to configs whose owning package's @semantic-ui/* dep closure
+      # intersects the diff. Push to main writes an empty file — discover.js
+      # falls through to "run everything" for bench-history continuity.
+      - name: Collect changed files
+        run: |
+          if [ '${{ github.event_name }}' = 'pull_request' ]; then
+            git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+            git diff --name-only FETCH_HEAD...HEAD > /tmp/changed-files.txt
+          else
+            : > /tmp/changed-files.txt
+          fi
+          echo 'Changed files:'
+          cat /tmp/changed-files.txt
+
       - name: Build matrix
         id: matrix
-        run: |
-          # Any trigger that reaches this workflow — push to main, or a
-          # pull_request whose diff matched our path filter — runs every
-          # benchmarkable package's configs. Tachometer configs only live
-          # under `packages/renderer/` today, but a change in any other
-          # package (reactivity, templating, etc.) can absolutely move
-          # renderer's bench numbers via workspace imports. Per-package
-          # scoping of the matrix was premature: the benches are end-to-end
-          # measurements that pull the whole framework through; treat the
-          # set of benchmarkable packages as a single target suite.
-          entries=()
-          while IFS= read -r config; do
-            [ -z "$config" ] && continue
-            pkg=$(echo "$config" | cut -d/ -f2)
-            name=$(basename "$config" .json)
-            entries+=("{\"config\":\"$config\",\"name\":\"$name\",\"package\":\"$pkg\"}")
-          done < <(find packages -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' 2>/dev/null | sort)
-
-          if [ ${#entries[@]} -eq 0 ]; then
-            matrix="[]"
-            has=false
-          else
-            matrix="[$(IFS=,; echo "${entries[*]}")]"
-            has=true
-          fi
-
-          echo "result=$matrix" >> "$GITHUB_OUTPUT"
-          echo "has-benchmarks=$has" >> "$GITHUB_OUTPUT"
-          echo "Benchmark matrix: $matrix"
+        env:
+          CHANGED_FILES_PATH: /tmp/changed-files.txt
+        run: node tools/bench-matrix/discover.js
 
   benchmarks:
     needs: discover
@@ -86,11 +87,11 @@ jobs:
         entry: ${{ fromJson(needs.discover.outputs.matrix) }}
     name: bench-${{ matrix.entry.name }}
     runs-on: ubuntu-latest
-    # Old suite at sampleSize: 50 and timeout: 5 runs ~10-11 min per config
-    # including setup. 15-min cap gives safety margin without letting any
-    # single cell run forever. PR B's knob tuning (["2%"], 2-min auto-sample
-    # cap) will bring real times to ~5-7 min.
-    timeout-minutes: 15
+    # With amplified metrics (Bench: Amplify… commits), a typical run lands
+    # at 12-14 min — initial sampling dominates, ~9 min at N=50 × 2 benches ×
+    # N metrics, then auto-sample usually converges in 2-3 min. 20-min cap
+    # gives a few minutes of margin over the observed ceiling.
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
@@ -108,6 +109,15 @@ jobs:
         run: |
           CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
           npm install chromedriver@${CHROME_VERSION} --no-save
+
+      # Pin bench harness to main for both current and baseline builds.
+      # The PR only contributes packages/*/src/; bench code, tachometer
+      # configs, and build-ci.js always come from main so the measurement
+      # is author-neutral.
+      - name: Overlay bench harness from main
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- packages/*/bench/ tools/bench-reporter/ 2>/dev/null || true
 
       # Build current branch benchmark bundles
       - name: Build current
