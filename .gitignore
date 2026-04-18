@@ -19,6 +19,7 @@ ai/meta/agent-guestbook.md
 ai/meta/jisei.md
 ai/trash
 .claude/worktrees/
+.claude/scheduled_tasks.lock
 
 # Numerous always-ignore extensions
 *.diff

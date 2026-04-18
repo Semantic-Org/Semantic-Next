@@ -1,4 +1,266 @@
 {
   "schema_version": 1,
-  "commits": []
+  "commits": [
+    {
+      "sha": "9a9db17f7df9607795b07320a1d326d284458a61",
+      "msg": "Bench: Harden against PR-authored gaming and amplify short benches (#…",
+      "parent_sha": "5073f4ef5706ac96d3c2d2dbf9fd4755d0825b17",
+      "timestamp": "2026-04-18T04:27:10Z",
+      "pr": null,
+      "metrics": {
+        "create-1k": {
+          "ci": [
+            132.0894,
+            133.6734
+          ],
+          "mean_ms": 132.8814
+        },
+        "create-10k": {
+          "ci": [
+            1129.326,
+            1133.994
+          ],
+          "mean_ms": 1131.66
+        },
+        "replace-1k": {
+          "ci": [
+            105.0825,
+            106.3689
+          ],
+          "mean_ms": 105.7257
+        },
+        "append-1k": {
+          "ci": [
+            117.123,
+            120.5541
+          ],
+          "mean_ms": 118.8386
+        },
+        "update-10th-10": {
+          "ci": [
+            175.9073,
+            179.6984
+          ],
+          "mean_ms": 177.8029
+        },
+        "select-40": {
+          "ci": [
+            720.8028,
+            730.7715
+          ],
+          "mean_ms": 725.7871
+        },
+        "swap-rows-20": {
+          "ci": [
+            973.9431,
+            981.1683
+          ],
+          "mean_ms": 977.5557
+        },
+        "remove-row-front-20": {
+          "ci": [
+            666.3791,
+            673.9952
+          ],
+          "mean_ms": 670.1871
+        },
+        "remove-row-middle-20": {
+          "ci": [
+            366.2978,
+            372.8794
+          ],
+          "mean_ms": 369.5886
+        },
+        "remove-row-back-10": {
+          "ci": [
+            155.6664,
+            156.885
+          ],
+          "mean_ms": 156.2757
+        },
+        "clear-10k": {
+          "ci": [
+            154.6596,
+            160.689
+          ],
+          "mean_ms": 157.6743
+        },
+        "signal-reactive-fanout-500x1200": {
+          "ci": [
+            71.1405,
+            72.4395
+          ],
+          "mean_ms": 71.79
+        },
+        "signal-computed-chain-10x60k": {
+          "ci": [
+            160.073,
+            161.6287
+          ],
+          "mean_ms": 160.8508
+        },
+        "signal-reactive-multi-read-5x160k": {
+          "ci": [
+            161.6434,
+            163.4849
+          ],
+          "mean_ms": 162.5642
+        },
+        "signal-reactive-list-replace-1000x1000": {
+          "ci": [
+            247.1402,
+            249.1565
+          ],
+          "mean_ms": 248.1483
+        },
+        "signal-reactive-list-filter-1000x300": {
+          "ci": [
+            87.2396,
+            89.0854
+          ],
+          "mean_ms": 88.1625
+        },
+        "signal-reactive-push-2000x20": {
+          "ci": [
+            170.415,
+            173.7433
+          ],
+          "mean_ms": 172.0792
+        },
+        "signal-reactive-set-index-300": {
+          "ci": [
+            79.9497,
+            80.772
+          ],
+          "mean_ms": 80.3608
+        },
+        "signal-reactive-set-property-by-id-200": {
+          "ci": [
+            158.7703,
+            160.2547
+          ],
+          "mean_ms": 159.5125
+        },
+        "bulk-add-500": {
+          "ci": [
+            230.805,
+            232.355
+          ],
+          "mean_ms": 231.58
+        },
+        "add-20": {
+          "ci": [
+            332.93,
+            333.1775
+          ],
+          "mean_ms": 333.0537
+        },
+        "toggle-10": {
+          "ci": [
+            158.9467,
+            159.5583
+          ],
+          "mean_ms": 159.2525
+        },
+        "toggle-all-20": {
+          "ci": [
+            327.7712,
+            328.3438
+          ],
+          "mean_ms": 328.0575
+        },
+        "remove-5-front": {
+          "ci": [
+            84.0102,
+            87.2673
+          ],
+          "mean_ms": 85.6388
+        },
+        "remove-10-middle": {
+          "ci": [
+            157.333,
+            158.722
+          ],
+          "mean_ms": 158.0275
+        },
+        "remove-5-back": {
+          "ci": [
+            71.6982,
+            74.5968
+          ],
+          "mean_ms": 73.1475
+        },
+        "clear-completed-250": {
+          "ci": [
+            56.0405,
+            56.757
+          ],
+          "mean_ms": 56.3988
+        },
+        "toggle-first-10": {
+          "ci": [
+            160.151,
+            160.774
+          ],
+          "mean_ms": 160.4625
+        },
+        "toggle-middle-10": {
+          "ci": [
+            160.1048,
+            160.8652
+          ],
+          "mean_ms": 160.485
+        },
+        "toggle-last-10": {
+          "ci": [
+            158.0281,
+            158.6769
+          ],
+          "mean_ms": 158.3525
+        },
+        "remove-first-10": {
+          "ci": [
+            180.5551,
+            183.3924
+          ],
+          "mean_ms": 181.9737
+        },
+        "remove-middle-10": {
+          "ci": [
+            160.9466,
+            162.3759
+          ],
+          "mean_ms": 161.6612
+        },
+        "remove-last-10": {
+          "ci": [
+            161.1027,
+            161.6223
+          ],
+          "mean_ms": 161.3625
+        },
+        "filter-cycle-20": {
+          "ci": [
+            464.8641,
+            472.4334
+          ],
+          "mean_ms": 468.6487
+        },
+        "edit-start-10": {
+          "ci": [
+            163.2351,
+            166.6574
+          ],
+          "mean_ms": 164.9463
+        },
+        "edit-cycle-5": {
+          "ci": [
+            163.3843,
+            164.7382
+          ],
+          "mean_ms": 164.0612
+        }
+      }
+    }
+  ]
 }

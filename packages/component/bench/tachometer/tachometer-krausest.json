@@ -12,11 +12,15 @@
       "measurement": [
         { "mode": "performance", "entryName": "create-1k" },
         { "mode": "performance", "entryName": "create-10k" },
+        { "mode": "performance", "entryName": "replace-1k" },
         { "mode": "performance", "entryName": "append-1k" },
-        { "mode": "performance", "entryName": "update-10th" },
-        { "mode": "performance", "entryName": "select" },
-        { "mode": "performance", "entryName": "swap-rows" },
-        { "mode": "performance", "entryName": "clear" }
+        { "mode": "performance", "entryName": "update-10th-10" },
+        { "mode": "performance", "entryName": "select-40" },
+        { "mode": "performance", "entryName": "swap-rows-20" },
+        { "mode": "performance", "entryName": "remove-row-front-20" },
+        { "mode": "performance", "entryName": "remove-row-middle-20" },
+        { "mode": "performance", "entryName": "remove-row-back-10" },
+        { "mode": "performance", "entryName": "clear-10k" }
       ]
     }
   ]

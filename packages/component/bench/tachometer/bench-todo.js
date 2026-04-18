@@ -62,7 +62,14 @@ defineComponent({
   `,
   subTemplates: { todoItem },
   defaultState: {
-    todos: { value: [], options: { allowClone: false, equalityFunction: () => false } },
+    // Pinned to safety: 'reference' so the bench tracks the reference fast
+    // path regardless of Signal.defaultSafety. Dual-key shape (allowClone +
+    // safety) keeps the in-flight signal-API refactor compatible without
+    // touching the bench. Mutations use the SUI-canonical helpers below
+    // (push/replaceItem/removeItem/setProperty/filter/setArrayProperty),
+    // which bypass equality or produce new refs — no equalityFunction
+    // override needed.
+    todos: { value: [], options: { allowClone: false, safety: 'reference' } },
     filter: 'all',
     editingId: null,
   },
@@ -163,13 +170,16 @@ async function setup(n) {
   return el;
 }
 
-// Setup helper — toggle every Nth todo as completed
+// Setup helper — toggle every Nth todo as completed. Single flush at the
+// end; a per-iteration RAF wait would tax every sample by ~15ms × N, which
+// amplifies across every metric since tachometer re-runs the full script
+// per sample.
 async function markEveryNth(el, n) {
   const todos = getTodos(el);
   for (let i = 0; i < todos.length; i += n) {
     el.component.toggleTodo(todos[i].id);
-    await flush();
   }
+  await flush();
 }
 
 /*******************************
@@ -178,10 +188,10 @@ async function markEveryNth(el, n) {
 *******************************/
 
 const el1 = await mount();
-performance.mark(startMark('bulk-add-50'));
-el1.component.addBulk(50);
+performance.mark(startMark('bulk-add-500'));
+el1.component.addBulk(500);
 await flush();
-performance.measure('bulk-add-50', startMark('bulk-add-50'));
+performance.measure('bulk-add-500', startMark('bulk-add-500'));
 destroy();
 
 const el2 = await mount();
@@ -210,31 +220,36 @@ destroy();
       (one user click)
 *******************************/
 
+// 10× loop per index; same id every iter so signal alternates true/false.
+// Metric averages toggle-on + toggle-off cost — if those diverge (class
+// adds vs removes may do different DOM work), the number mixes two
+// workloads. Both legs run every iter so regression detection is sound,
+// but this is not a pure "single toggle" measurement.
 const el4 = await setup(100);
-performance.mark(startMark('toggle-first'));
-for (let k = 0; k < 10; k++) {
+performance.mark(startMark('toggle-first-10'));
+for (let i = 0; i < 10; i++) {
   el4.component.toggleTodo(getTodos(el4)[0].id);
   await flush();
 }
-performance.measure('toggle-first', startMark('toggle-first'));
+performance.measure('toggle-first-10', startMark('toggle-first-10'));
 destroy();
 
 const el5 = await setup(100);
-performance.mark(startMark('toggle-last'));
-for (let k = 0; k < 10; k++) {
+performance.mark(startMark('toggle-last-10'));
+for (let i = 0; i < 10; i++) {
   el5.component.toggleTodo(getTodos(el5)[99].id);
   await flush();
 }
-performance.measure('toggle-last', startMark('toggle-last'));
+performance.measure('toggle-last-10', startMark('toggle-last-10'));
 destroy();
 
 const el6 = await setup(100);
-performance.mark(startMark('toggle-middle'));
-for (let k = 0; k < 10; k++) {
+performance.mark(startMark('toggle-middle-10'));
+for (let i = 0; i < 10; i++) {
   el6.component.toggleTodo(getTodos(el6)[49].id);
   await flush();
 }
-performance.measure('toggle-middle', startMark('toggle-middle'));
+performance.measure('toggle-middle-10', startMark('toggle-middle-10'));
 destroy();
 
 /*******************************
@@ -256,44 +271,50 @@ destroy();
       (one user action, all items)
 *******************************/
 
+// 20 alternating toggle-all invocations on a 100-item list — amplified
+// so the measurement clears the σ≈2ms per-sample noise floor on CI.
 const el8 = await setup(100);
-performance.mark(startMark('toggle-all'));
-el8.component.toggleAll();
-await flush();
-performance.measure('toggle-all', startMark('toggle-all'));
+performance.mark(startMark('toggle-all-20'));
+for (let i = 0; i < 20; i++) {
+  el8.component.toggleAll();
+  await flush();
+}
+performance.measure('toggle-all-20', startMark('toggle-all-20'));
 destroy();
 
 /*******************************
       Single Removal
 *******************************/
 
-const el9 = await setup(200);
-performance.mark(startMark('remove-first'));
-for (let k = 0; k < 10; k++) {
+// 10× loop per position; re-fetch each iter since the list shrinks.
+// Each position's ~10ms per-delete workload clears the σ≈2ms floor.
+const el9 = await setup(100);
+performance.mark(startMark('remove-first-10'));
+for (let i = 0; i < 10; i++) {
   el9.component.deleteTodo(getTodos(el9)[0].id);
   await flush();
 }
-performance.measure('remove-first', startMark('remove-first'));
+performance.measure('remove-first-10', startMark('remove-first-10'));
 destroy();
 
-const el10 = await setup(200);
-performance.mark(startMark('remove-middle'));
-for (let k = 0; k < 10; k++) {
+const el10 = await setup(100);
+performance.mark(startMark('remove-middle-10'));
+for (let i = 0; i < 10; i++) {
   const todos = getTodos(el10);
   el10.component.deleteTodo(todos[Math.floor(todos.length / 2)].id);
   await flush();
 }
-performance.measure('remove-middle', startMark('remove-middle'));
+performance.measure('remove-middle-10', startMark('remove-middle-10'));
 destroy();
 
-const el10b = await setup(200);
-performance.mark(startMark('remove-last'));
-for (let k = 0; k < 10; k++) {
+const el10b = await setup(100);
+performance.mark(startMark('remove-last-10'));
+for (let i = 0; i < 10; i++) {
   const todos = getTodos(el10b);
   el10b.component.deleteTodo(todos[todos.length - 1].id);
   await flush();
 }
-performance.measure('remove-last', startMark('remove-last'));
+performance.measure('remove-last-10', startMark('remove-last-10'));
 destroy();
 
 /*******************************
@@ -309,14 +330,17 @@ for (let i = 0; i < 5; i++) {
 performance.measure('remove-5-front', startMark('remove-5-front'));
 destroy();
 
+// 10× loop (vs 5× for the front/back variants) — middle removal's
+// O(N/2) scan has wider per-sample variance, so 5× landed at ~74ms
+// with observed CI straddling ±2%. 10× brings it to ~148ms / ±1%.
 const el11b = await setup(100);
-performance.mark(startMark('remove-5-middle'));
-for (let i = 0; i < 5; i++) {
+performance.mark(startMark('remove-10-middle'));
+for (let i = 0; i < 10; i++) {
   const todos = getTodos(el11b);
   el11b.component.deleteTodo(todos[Math.floor(todos.length / 2)].id);
   await flush();
 }
-performance.measure('remove-5-middle', startMark('remove-5-middle'));
+performance.measure('remove-10-middle', startMark('remove-10-middle'));
 destroy();
 
 const el11c = await setup(100);
@@ -333,12 +357,14 @@ destroy();
       Bulk Removal
 *******************************/
 
-const el12 = await setup(100);
+// List scaled to 500 (250 marked completed) so the single clearCompleted
+// operation is large enough to clear the σ≈2ms per-sample noise floor.
+const el12 = await setup(500);
 await markEveryNth(el12, 2);
-performance.mark(startMark('clear-completed'));
+performance.mark(startMark('clear-completed-250'));
 el12.component.clearCompleted();
 await flush();
-performance.measure('clear-completed', startMark('clear-completed'));
+performance.measure('clear-completed-250', startMark('clear-completed-250'));
 destroy();
 
 /*******************************
@@ -346,48 +372,51 @@ destroy();
       (parent Signal change only)
 *******************************/
 
+// 20 filter transitions cycling active → completed → all — single
+// amplified metric replaces the prior three single-shot filter metrics
+// (filter-active, filter-completed, filter-all) which each landed in
+// the noise-floor-limited bucket.
 const el13 = await setup(100);
 await markEveryNth(el13, 3);
 
-performance.mark(startMark('filter-active'));
-el13.component.setFilter('active');
-await flush();
-performance.measure('filter-active', startMark('filter-active'));
-
-performance.mark(startMark('filter-completed'));
-el13.component.setFilter('completed');
-await flush();
-performance.measure('filter-completed', startMark('filter-completed'));
-
-performance.mark(startMark('filter-all'));
-el13.component.setFilter('all');
-await flush();
-performance.measure('filter-all', startMark('filter-all'));
+const filters = ['active', 'completed', 'all'];
+performance.mark(startMark('filter-cycle-20'));
+for (let i = 0; i < 20; i++) {
+  el13.component.setFilter(filters[i % 3]);
+  await flush();
+}
+performance.measure('filter-cycle-20', startMark('filter-cycle-20'));
 destroy();
 
 /*******************************
       Edit Flow
 *******************************/
 
+// edit-start-10: 10 consecutive edit transitions cycling different ids
+// (editingId must change each iter or the signal equality short-circuits).
 const el14 = await setup(100);
-
-performance.mark(startMark('edit-start'));
-for (let k = 0; k < 10; k++) {
-  const id = getTodos(el14)[40 + k].id;
-  el14.component.editTodo(id);
+performance.mark(startMark('edit-start-10'));
+for (let i = 0; i < 10; i++) {
+  el14.component.editTodo(getTodos(el14)[40 + i].id);
   await flush();
 }
-performance.measure('edit-start', startMark('edit-start'));
+performance.measure('edit-start-10', startMark('edit-start-10'));
+destroy();
 
-performance.mark(startMark('edit-save'));
-for (let k = 0; k < 10; k++) {
-  const id = getTodos(el14)[40 + k].id;
-  el14.component.editTodo(id);
+// edit-cycle-5: 5 full edit+save cycles (10 ops + 10 RAFs total). Fresh
+// mount so the first iter sees editingId=null, not the residual from
+// edit-start-10's last iter — otherwise that first transition is an
+// edit→edit hop, which is a different workload than the others.
+const el15 = await setup(100);
+performance.mark(startMark('edit-cycle-5'));
+for (let i = 0; i < 5; i++) {
+  const id = getTodos(el15)[40 + i].id;
+  el15.component.editTodo(id);
   await flush();
-  el14.component.saveTodo(id, `Updated todo item ${k}`);
+  el15.component.saveTodo(id, `Updated item ${i}`);
   await flush();
 }
-performance.measure('edit-save', startMark('edit-save'));
+performance.measure('edit-cycle-5', startMark('edit-cycle-5'));
 destroy();
 
 /*******************************
