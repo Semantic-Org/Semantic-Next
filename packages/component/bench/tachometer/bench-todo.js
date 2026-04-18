@@ -216,25 +216,34 @@ destroy();
       (one user click)
 *******************************/
 
+// 10× loop per index so each position's ~10ms per-toggle cost clears the
+// σ≈2ms noise floor. Same id every iteration; signal alternates true/false
+// so each notifies.
 const el4 = await setup(100);
-performance.mark(startMark('toggle-first'));
-el4.component.toggleTodo(getTodos(el4)[0].id);
-await flush();
-performance.measure('toggle-first', startMark('toggle-first'));
+performance.mark(startMark('toggle-first-10'));
+for (let i = 0; i < 10; i++) {
+  el4.component.toggleTodo(getTodos(el4)[0].id);
+  await flush();
+}
+performance.measure('toggle-first-10', startMark('toggle-first-10'));
 destroy();
 
 const el5 = await setup(100);
-performance.mark(startMark('toggle-last'));
-el5.component.toggleTodo(getTodos(el5)[99].id);
-await flush();
-performance.measure('toggle-last', startMark('toggle-last'));
+performance.mark(startMark('toggle-last-10'));
+for (let i = 0; i < 10; i++) {
+  el5.component.toggleTodo(getTodos(el5)[99].id);
+  await flush();
+}
+performance.measure('toggle-last-10', startMark('toggle-last-10'));
 destroy();
 
 const el6 = await setup(100);
-performance.mark(startMark('toggle-middle'));
-el6.component.toggleTodo(getTodos(el6)[49].id);
-await flush();
-performance.measure('toggle-middle', startMark('toggle-middle'));
+performance.mark(startMark('toggle-middle-10'));
+for (let i = 0; i < 10; i++) {
+  el6.component.toggleTodo(getTodos(el6)[49].id);
+  await flush();
+}
+performance.measure('toggle-middle-10', startMark('toggle-middle-10'));
 destroy();
 
 /*******************************
@@ -271,25 +280,35 @@ destroy();
       Single Removal
 *******************************/
 
+// 10× loop per position; re-fetch each iter since the list shrinks.
+// Each position's ~10ms per-delete workload clears the σ≈2ms floor.
 const el9 = await setup(100);
-performance.mark(startMark('remove-first'));
-el9.component.deleteTodo(getTodos(el9)[0].id);
-await flush();
-performance.measure('remove-first', startMark('remove-first'));
+performance.mark(startMark('remove-first-10'));
+for (let i = 0; i < 10; i++) {
+  el9.component.deleteTodo(getTodos(el9)[0].id);
+  await flush();
+}
+performance.measure('remove-first-10', startMark('remove-first-10'));
 destroy();
 
 const el10 = await setup(100);
-performance.mark(startMark('remove-middle'));
-el10.component.deleteTodo(getTodos(el10)[49].id);
-await flush();
-performance.measure('remove-middle', startMark('remove-middle'));
+performance.mark(startMark('remove-middle-10'));
+for (let i = 0; i < 10; i++) {
+  const todos = getTodos(el10);
+  el10.component.deleteTodo(todos[Math.floor(todos.length / 2)].id);
+  await flush();
+}
+performance.measure('remove-middle-10', startMark('remove-middle-10'));
 destroy();
 
 const el10b = await setup(100);
-performance.mark(startMark('remove-last'));
-el10b.component.deleteTodo(getTodos(el10b)[99].id);
-await flush();
-performance.measure('remove-last', startMark('remove-last'));
+performance.mark(startMark('remove-last-10'));
+for (let i = 0; i < 10; i++) {
+  const todos = getTodos(el10b);
+  el10b.component.deleteTodo(todos[todos.length - 1].id);
+  await flush();
+}
+performance.measure('remove-last-10', startMark('remove-last-10'));
 destroy();
 
 /*******************************
@@ -364,18 +383,28 @@ destroy();
       Edit Flow
 *******************************/
 
+// edit-start-10: 10 consecutive edit transitions cycling different ids
+// (editingId must change each iter or the signal equality short-circuits).
+// edit-save-5: 5 full edit+save cycles — each iter is 2 ops + 2 flushes, so
+// 5 iters ≈ 10 flushes, matching edit-start-10's total frame count.
 const el14 = await setup(100);
-const editId = getTodos(el14)[49].id;
 
-performance.mark(startMark('edit-start'));
-el14.component.editTodo(editId);
-await flush();
-performance.measure('edit-start', startMark('edit-start'));
+performance.mark(startMark('edit-start-10'));
+for (let i = 0; i < 10; i++) {
+  el14.component.editTodo(getTodos(el14)[40 + i].id);
+  await flush();
+}
+performance.measure('edit-start-10', startMark('edit-start-10'));
 
-performance.mark(startMark('edit-save'));
-el14.component.saveTodo(editId, 'Updated todo item');
-await flush();
-performance.measure('edit-save', startMark('edit-save'));
+performance.mark(startMark('edit-save-5'));
+for (let i = 0; i < 5; i++) {
+  const id = getTodos(el14)[50 + i].id;
+  el14.component.editTodo(id);
+  await flush();
+  el14.component.saveTodo(id, `Updated item ${i}`);
+  await flush();
+}
+performance.measure('edit-save-5', startMark('edit-save-5'));
 destroy();
 
 /*******************************

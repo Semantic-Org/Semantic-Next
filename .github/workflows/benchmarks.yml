@@ -87,11 +87,11 @@ jobs:
         entry: ${{ fromJson(needs.discover.outputs.matrix) }}
     name: bench-${{ matrix.entry.name }}
     runs-on: ubuntu-latest
-    # Old suite at sampleSize: 50 and timeout: 5 runs ~10-11 min per config
-    # including setup. 15-min cap gives safety margin without letting any
-    # single cell run forever. PR B's knob tuning (["2%"], 2-min auto-sample
-    # cap) will bring real times to ~5-7 min.
-    timeout-minutes: 15
+    # With amplified metrics (Bench: Amplify… commits), a typical run lands
+    # at 12-14 min — initial sampling dominates, ~9 min at N=50 × 2 benches ×
+    # N metrics, then auto-sample usually converges in 2-3 min. 20-min cap
+    # gives a few minutes of margin over the observed ceiling.
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4

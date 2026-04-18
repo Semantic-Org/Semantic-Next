@@ -13,7 +13,7 @@
         { "mode": "performance", "entryName": "create-1k" },
         { "mode": "performance", "entryName": "create-10k" },
         { "mode": "performance", "entryName": "append-1k" },
-        { "mode": "performance", "entryName": "update-10th" },
+        { "mode": "performance", "entryName": "update-10th-3" },
         { "mode": "performance", "entryName": "select-20" },
         { "mode": "performance", "entryName": "swap-rows-20" },
         { "mode": "performance", "entryName": "clear-5k" }
