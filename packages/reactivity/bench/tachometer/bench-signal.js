@@ -85,7 +85,9 @@ let sink = null;
       Large array-of-objects
 *******************************/
 
-// signal-reactive-list-replace-1000x500
+// signal-reactive-list-replace-1000x1000 — doubled iterations from 500
+// to 1000 so the per-sample allocator/GC variance averages out.
+// Previous 500-iter runs held Inconclusive (observed CI ~5-7× expected).
 {
   const items = new Signal(makeRecords(1000));
   const r = Reaction.create(() => {
@@ -96,12 +98,12 @@ let sink = null;
     }
     sink = active;
   });
-  performance.mark(startMark('signal-reactive-list-replace-1000x500'));
-  for (let i = 0; i < 500; i++) {
+  performance.mark(startMark('signal-reactive-list-replace-1000x1000'));
+  for (let i = 0; i < 1000; i++) {
     items.set(makeRecords(1000));
     Reaction.flush();
   }
-  performance.measure('signal-reactive-list-replace-1000x500', startMark('signal-reactive-list-replace-1000x500'));
+  performance.measure('signal-reactive-list-replace-1000x1000', startMark('signal-reactive-list-replace-1000x1000'));
   r.stop();
 }
 
@@ -131,7 +133,9 @@ let sink = null;
       Helpers with subscriber
 *******************************/
 
-// signal-reactive-push-1000x20 — reset cycles bound array size
+// signal-reactive-push-2000x20 — doubled outer reset cycles from 1000
+// to 2000 so each push op's cost is averaged across more iterations.
+// Previous 1000-cycle run held at ±2.3% (Inconclusive at ±1% expected).
 {
   const sig = new Signal([]);
   const r = Reaction.create(() => {
@@ -142,8 +146,8 @@ let sink = null;
     }
     sink = count;
   });
-  performance.mark(startMark('signal-reactive-push-1000x20'));
-  for (let c = 0; c < 1000; c++) {
+  performance.mark(startMark('signal-reactive-push-2000x20'));
+  for (let c = 0; c < 2000; c++) {
     sig.set([]);
     Reaction.flush();
     for (let p = 0; p < 20; p++) {
@@ -151,7 +155,7 @@ let sink = null;
       Reaction.flush();
     }
   }
-  performance.measure('signal-reactive-push-1000x20', startMark('signal-reactive-push-1000x20'));
+  performance.measure('signal-reactive-push-2000x20', startMark('signal-reactive-push-2000x20'));
   r.stop();
 }
 

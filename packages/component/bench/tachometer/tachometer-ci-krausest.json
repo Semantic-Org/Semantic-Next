@@ -14,11 +14,11 @@
         { "mode": "performance", "entryName": "create-10k" },
         { "mode": "performance", "entryName": "replace-1k" },
         { "mode": "performance", "entryName": "append-1k" },
-        { "mode": "performance", "entryName": "update-10th-5" },
+        { "mode": "performance", "entryName": "update-10th-10" },
         { "mode": "performance", "entryName": "select-20" },
         { "mode": "performance", "entryName": "swap-rows-20" },
-        { "mode": "performance", "entryName": "remove-row-front-10" },
-        { "mode": "performance", "entryName": "remove-row-middle-10" },
+        { "mode": "performance", "entryName": "remove-row-front-20" },
+        { "mode": "performance", "entryName": "remove-row-middle-20" },
         { "mode": "performance", "entryName": "remove-row-back-10" },
         { "mode": "performance", "entryName": "clear-10k" }
       ]
@@ -32,11 +32,11 @@
         { "mode": "performance", "entryName": "create-10k" },
         { "mode": "performance", "entryName": "replace-1k" },
         { "mode": "performance", "entryName": "append-1k" },
-        { "mode": "performance", "entryName": "update-10th-5" },
+        { "mode": "performance", "entryName": "update-10th-10" },
         { "mode": "performance", "entryName": "select-20" },
         { "mode": "performance", "entryName": "swap-rows-20" },
-        { "mode": "performance", "entryName": "remove-row-front-10" },
-        { "mode": "performance", "entryName": "remove-row-middle-10" },
+        { "mode": "performance", "entryName": "remove-row-front-20" },
+        { "mode": "performance", "entryName": "remove-row-middle-20" },
         { "mode": "performance", "entryName": "remove-row-back-10" },
         { "mode": "performance", "entryName": "clear-10k" }
       ]

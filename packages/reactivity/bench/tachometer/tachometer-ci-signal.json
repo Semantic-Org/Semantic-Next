@@ -13,9 +13,9 @@
         { "mode": "performance", "entryName": "signal-reactive-fanout-500x1200" },
         { "mode": "performance", "entryName": "signal-computed-chain-10x30k" },
         { "mode": "performance", "entryName": "signal-reactive-multi-read-5x80k" },
-        { "mode": "performance", "entryName": "signal-reactive-list-replace-1000x500" },
+        { "mode": "performance", "entryName": "signal-reactive-list-replace-1000x1000" },
         { "mode": "performance", "entryName": "signal-reactive-list-filter-1000x300" },
-        { "mode": "performance", "entryName": "signal-reactive-push-1000x20" },
+        { "mode": "performance", "entryName": "signal-reactive-push-2000x20" },
         { "mode": "performance", "entryName": "signal-reactive-set-index-300" },
         { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-200" }
       ]
@@ -28,9 +28,9 @@
         { "mode": "performance", "entryName": "signal-reactive-fanout-500x1200" },
         { "mode": "performance", "entryName": "signal-computed-chain-10x30k" },
         { "mode": "performance", "entryName": "signal-reactive-multi-read-5x80k" },
-        { "mode": "performance", "entryName": "signal-reactive-list-replace-1000x500" },
+        { "mode": "performance", "entryName": "signal-reactive-list-replace-1000x1000" },
         { "mode": "performance", "entryName": "signal-reactive-list-filter-1000x300" },
-        { "mode": "performance", "entryName": "signal-reactive-push-1000x20" },
+        { "mode": "performance", "entryName": "signal-reactive-push-2000x20" },
         { "mode": "performance", "entryName": "signal-reactive-set-index-300" },
         { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-200" }
       ]

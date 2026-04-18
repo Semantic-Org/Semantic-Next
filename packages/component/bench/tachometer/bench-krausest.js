@@ -245,19 +245,20 @@ destroy();
 /*******************************
       Partial Update
       (krausest 04_update)
-      5× amplified so the ~24ms per-call workload sits well above the
-      σ≈2ms per-sample noise floor (~120ms mean → ±1.5%).
+      10× amplified — 5× landed at ~85ms on GHA and straddled the ±2%
+      resolution floor. 10× brings the mean to ~170ms (±1.2% expected),
+      comfortably below the floor.
 *******************************/
 
 const el5 = await mount();
 el5.component.run(1000);
 await flush();
-performance.mark(startMark('update-10th-5'));
-for (let i = 0; i < 5; i++) {
+performance.mark(startMark('update-10th-10'));
+for (let i = 0; i < 10; i++) {
   el5.component.update();
   await flush();
 }
-performance.measure('update-10th-5', startMark('update-10th-5'));
+performance.measure('update-10th-10', startMark('update-10th-10'));
 destroy();
 
 /*******************************
@@ -302,27 +303,31 @@ destroy();
       target id is re-fetched each iteration.
 *******************************/
 
+// Front + middle amplified to 20× (back stays at 10× — it resolved
+// cleanly). Front and middle both do O(N) array-splice memmoves and
+// showed higher intrinsic variance than back on GHA at 10×; doubling
+// averages more of that variance into each sample.
 const el8 = await mount();
 el8.component.run(1000);
 await flush();
-performance.mark(startMark('remove-row-front-10'));
-for (let i = 0; i < 10; i++) {
+performance.mark(startMark('remove-row-front-20'));
+for (let i = 0; i < 20; i++) {
   el8.component.removeRow(getRows(el8)[0].id);
   await flush();
 }
-performance.measure('remove-row-front-10', startMark('remove-row-front-10'));
+performance.measure('remove-row-front-20', startMark('remove-row-front-20'));
 destroy();
 
 const el9 = await mount();
 el9.component.run(1000);
 await flush();
-performance.mark(startMark('remove-row-middle-10'));
-for (let i = 0; i < 10; i++) {
+performance.mark(startMark('remove-row-middle-20'));
+for (let i = 0; i < 20; i++) {
   const rows = getRows(el9);
   el9.component.removeRow(rows[Math.floor(rows.length / 2)].id);
   await flush();
 }
-performance.measure('remove-row-middle-10', startMark('remove-row-middle-10'));
+performance.measure('remove-row-middle-20', startMark('remove-row-middle-20'));
 destroy();
 
 const el10 = await mount();
