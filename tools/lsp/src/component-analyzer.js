@@ -252,7 +252,10 @@ function unwrapSignalConfig(node) {
   if (!node || node.type !== 'ObjectExpression') { return node; }
   const props = node.properties.filter(p => p.type === 'Property');
   const keys = props.map(getPropertyName);
-  if (!keys.includes('value') || !keys.includes('options')) { return node; }
+  if (!keys.includes('value')) { return node; }
+  const hasOptions = keys.includes('options')
+    || node.properties.some(p => p.type === 'SpreadElement');
+  if (!hasOptions) { return node; }
   const valueProp = props.find(p => getPropertyName(p) === 'value');
   return valueProp?.value ?? node;
 }
