@@ -216,9 +216,11 @@ destroy();
       (one user click)
 *******************************/
 
-// 10× loop per index so each position's ~10ms per-toggle cost clears the
-// σ≈2ms noise floor. Same id every iteration; signal alternates true/false
-// so each notifies.
+// 10× loop per index; same id every iter so signal alternates true/false.
+// Metric averages toggle-on + toggle-off cost — if those diverge (class
+// adds vs removes may do different DOM work), the number mixes two
+// workloads. Both legs run every iter so regression detection is sound,
+// but this is not a pure "single toggle" measurement.
 const el4 = await setup(100);
 performance.mark(startMark('toggle-first-10'));
 for (let i = 0; i < 10; i++) {
@@ -385,26 +387,29 @@ destroy();
 
 // edit-start-10: 10 consecutive edit transitions cycling different ids
 // (editingId must change each iter or the signal equality short-circuits).
-// edit-save-5: 5 full edit+save cycles — each iter is 2 ops + 2 flushes, so
-// 5 iters ≈ 10 flushes, matching edit-start-10's total frame count.
 const el14 = await setup(100);
-
 performance.mark(startMark('edit-start-10'));
 for (let i = 0; i < 10; i++) {
   el14.component.editTodo(getTodos(el14)[40 + i].id);
   await flush();
 }
 performance.measure('edit-start-10', startMark('edit-start-10'));
+destroy();
 
-performance.mark(startMark('edit-save-5'));
+// edit-cycle-5: 5 full edit+save cycles (10 ops + 10 RAFs total). Fresh
+// mount so the first iter sees editingId=null, not the residual from
+// edit-start-10's last iter — otherwise that first transition is an
+// edit→edit hop, which is a different workload than the others.
+const el15 = await setup(100);
+performance.mark(startMark('edit-cycle-5'));
 for (let i = 0; i < 5; i++) {
-  const id = getTodos(el14)[50 + i].id;
-  el14.component.editTodo(id);
+  const id = getTodos(el15)[40 + i].id;
+  el15.component.editTodo(id);
   await flush();
-  el14.component.saveTodo(id, `Updated item ${i}`);
+  el15.component.saveTodo(id, `Updated item ${i}`);
   await flush();
 }
-performance.measure('edit-save-5', startMark('edit-save-5'));
+performance.measure('edit-cycle-5', startMark('edit-cycle-5'));
 destroy();
 
 /*******************************

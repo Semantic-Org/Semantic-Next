@@ -18,7 +18,7 @@
         { "mode": "performance", "entryName": "remove-last-10" },
         { "mode": "performance", "entryName": "filter-cycle-20" },
         { "mode": "performance", "entryName": "edit-start-10" },
-        { "mode": "performance", "entryName": "edit-save-5" }
+        { "mode": "performance", "entryName": "edit-cycle-5" }
       ]
     },
     {
@@ -34,7 +34,7 @@
         { "mode": "performance", "entryName": "remove-last-10" },
         { "mode": "performance", "entryName": "filter-cycle-20" },
         { "mode": "performance", "entryName": "edit-start-10" },
-        { "mode": "performance", "entryName": "edit-save-5" }
+        { "mode": "performance", "entryName": "edit-cycle-5" }
       ]
     }
   ]

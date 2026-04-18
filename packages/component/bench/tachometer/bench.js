@@ -176,18 +176,19 @@ await updateComplete();
 performance.measure('append-1k', startMark('append-1k'));
 destroy();
 
-// Update every 10th row — 3× loop so the ~24ms per-call workload clears
-// the σ≈2ms per-sample noise floor (±7% expected noise at 24ms → ±2% at
-// ~78ms).
+// Update every 10th row — 5× loop so the ~24ms per-call workload sits
+// well above the σ≈2ms per-sample noise floor (~120ms mean → ±1.5%
+// expected). 3× landed right at the resolution floor in the first pass;
+// over-amplifying costs ~5s across 100 samples and buys headroom.
 const el4 = await mount();
 el4.component.create(1000);
 await updateComplete();
-performance.mark(startMark('update-10th-3'));
-for (let i = 0; i < 3; i++) {
+performance.mark(startMark('update-10th-5'));
+for (let i = 0; i < 5; i++) {
   el4.component.update10th();
   await updateComplete();
 }
-performance.measure('update-10th-3', startMark('update-10th-3'));
+performance.measure('update-10th-5', startMark('update-10th-5'));
 destroy();
 
 // Select row — 20 selects across different ids, amplified so the
