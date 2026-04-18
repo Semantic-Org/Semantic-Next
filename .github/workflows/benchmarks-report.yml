@@ -84,6 +84,21 @@ jobs:
           echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
           echo "Resolved PR number: $NUMBER"
 
+      # Walk prior successful bench runs on this PR's branch and build a
+      # per-iteration history. The reporter merges this with bench-history.json
+      # (main commits) so peak attribution spans BOTH main AND this PR's
+      # iterations — an agent sees "iteration 3 was the best on update-10th;
+      # your current iteration regressed from that."
+      - name: Fetch PR iteration history
+        env:
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+        run: |
+          node tools/bench-reporter/fetch-pr-history.js \
+            --branch '${{ github.event.workflow_run.head_branch }}' \
+            --repo '${{ github.repository }}' \
+            --current-run-id '${{ github.event.workflow_run.id }}' \
+            --out pr-history.json
+
       - name: Generate report
         env:
           STARTED: ${{ github.event.workflow_run.created_at }}
@@ -98,6 +113,7 @@ jobs:
             --run-id '${{ github.event.workflow_run.id }}' \
             --base-ref 'main' \
             --repo '${{ github.repository }}' \
+            --pr-history pr-history.json \
             --wall-clock "$WALL_CLOCK" \
             --out bench-report
 

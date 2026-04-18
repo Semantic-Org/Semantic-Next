@@ -17,6 +17,7 @@
       --repo-root <dir>       filesystem root for resolving bench sources (default: cwd)
       --wall-clock <seconds>  total bench run duration — footer metadata
       --history <path>        bench-history.json path (default: <repo-root>/bench-history.json)
+      --pr-history <path>     PR-iteration history from fetch-pr-history.js (merged with --history)
       --out <dir>             output directory (default: ./bench-report)
 
   Cross-run taxonomy (WIN / TIED-PEAK / REOPENED) engages automatically once
@@ -42,6 +43,7 @@ const repo = args.repo ?? process.env.GITHUB_REPOSITORY ?? '';
 const repoRoot = args['repo-root'] ?? process.cwd();
 const wallClockSec = args['wall-clock'] ? Number(args['wall-clock']) : null;
 const historyPath = args.history ?? path.join(repoRoot, 'bench-history.json');
+const prHistoryPath = args['pr-history'] ?? '';
 const outDir = args.out ?? './bench-report';
 
 const NOISE_FLOOR = 2; // percent — matches autoSampleConditions
@@ -88,7 +90,9 @@ function expectedNoisePp(meanMs) {
 }
 
 const benchDirs = findBenchDirs(repoRoot);
-const history = loadHistory(historyPath);
+const mainHistory = loadHistory(historyPath);
+const prHistory = loadHistory(prHistoryPath);
+const history = mergeHistories(mainHistory, prHistory);
 const metrics = loadAllMetrics(resultsDir);
 const report = buildReport(metrics);
 const markdown = renderMarkdown(report);
@@ -668,6 +672,30 @@ function formatWallClock(sec) {
   const m = Math.floor(sec / 60);
   const s = Math.round(sec % 60);
   return m > 0 ? `${m}m${s.toString().padStart(2, '0')}s` : `${s}s`;
+}
+
+/**
+ * Merge main-commit history (bench-history.json) with PR-iteration
+ * history (pr-history.json) into a single timeline sorted by timestamp.
+ * Peak attribution then looks across BOTH main AND this PR's iterations
+ * to find the best-ever CI per metric.
+ */
+function mergeHistories(mainHist, prHist) {
+  if (!mainHist && !prHist) { return null; }
+  const commits = [
+    ...(mainHist?.commits ?? []),
+    ...(prHist?.commits ?? []),
+  ];
+  // Deduplicate by SHA (same commit shouldn't appear twice)
+  const seen = new Set();
+  const deduped = commits.filter((c) => {
+    if (seen.has(c.sha)) { return false; }
+    seen.add(c.sha);
+    return true;
+  });
+  // Chronological order so bisect candidates are in causal sequence
+  deduped.sort((a, b) => (a.timestamp ?? '').localeCompare(b.timestamp ?? ''));
+  return { schema_version: 1, commits: deduped };
 }
 
 /**
