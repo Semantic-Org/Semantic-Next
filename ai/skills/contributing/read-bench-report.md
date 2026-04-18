@@ -200,7 +200,7 @@ The `bench-report.json` artifact (linked from the **Raw:** line in the metadata 
       "mean_ms": 8.35,
       "expected_noise_pp": 0.94,
       "observed_noise_ratio": 2.87,
-      "source": { "path": "packages/renderer/bench/tachometer/bench.js", "line": 180 }
+      "source": { "path": "packages/component/bench/tachometer/bench.js", "line": 180 }
     }
   ]
 }

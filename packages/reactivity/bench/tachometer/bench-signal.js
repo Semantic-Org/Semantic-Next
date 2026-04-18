@@ -43,7 +43,8 @@ let sink = null;
   for (let i = 0; i < 500; i++) { reactions[i].stop(); }
 }
 
-// signal-computed-chain-10x30k
+// signal-computed-chain-10x60k — doubled outer iterations (30k → 60k)
+// after the 30k run showed run-to-run boundary variance.
 {
   const root = new Signal(0);
   const chain = [root];
@@ -55,29 +56,31 @@ let sink = null;
   const observer = Reaction.create(() => {
     sink = end.get();
   });
-  performance.mark(startMark('signal-computed-chain-10x30k'));
-  for (let i = 0; i < 30_000; i++) {
+  performance.mark(startMark('signal-computed-chain-10x60k'));
+  for (let i = 0; i < 60_000; i++) {
     root.set(i + 1);
     Reaction.flush();
   }
-  performance.measure('signal-computed-chain-10x30k', startMark('signal-computed-chain-10x30k'));
+  performance.measure('signal-computed-chain-10x60k', startMark('signal-computed-chain-10x60k'));
   observer.stop();
 }
 
-// signal-reactive-multi-read-5x80k
+// signal-reactive-multi-read-5x160k — doubled outer iterations (16k → 32k,
+// so 5 signals × 32k = 160k total flushes) after the 80k variant showed
+// run-to-run boundary variance.
 {
   const sigs = [new Signal(0), new Signal(0), new Signal(0), new Signal(0), new Signal(0)];
   const r = Reaction.create(() => {
     sink = sigs[0].get() + sigs[1].get() + sigs[2].get() + sigs[3].get() + sigs[4].get();
   });
-  performance.mark(startMark('signal-reactive-multi-read-5x80k'));
-  for (let i = 0; i < 16_000; i++) {
+  performance.mark(startMark('signal-reactive-multi-read-5x160k'));
+  for (let i = 0; i < 32_000; i++) {
     for (let j = 0; j < 5; j++) {
       sigs[j].set(i * 5 + j);
       Reaction.flush();
     }
   }
-  performance.measure('signal-reactive-multi-read-5x80k', startMark('signal-reactive-multi-read-5x80k'));
+  performance.measure('signal-reactive-multi-read-5x160k', startMark('signal-reactive-multi-read-5x160k'));
   r.stop();
 }
 
@@ -85,7 +88,9 @@ let sink = null;
       Large array-of-objects
 *******************************/
 
-// signal-reactive-list-replace-1000x500
+// signal-reactive-list-replace-1000x1000 — doubled iterations from 500
+// to 1000 so the per-sample allocator/GC variance averages out.
+// Previous 500-iter runs held Inconclusive (observed CI ~5-7× expected).
 {
   const items = new Signal(makeRecords(1000));
   const r = Reaction.create(() => {
@@ -96,12 +101,12 @@ let sink = null;
     }
     sink = active;
   });
-  performance.mark(startMark('signal-reactive-list-replace-1000x500'));
-  for (let i = 0; i < 500; i++) {
+  performance.mark(startMark('signal-reactive-list-replace-1000x1000'));
+  for (let i = 0; i < 1000; i++) {
     items.set(makeRecords(1000));
     Reaction.flush();
   }
-  performance.measure('signal-reactive-list-replace-1000x500', startMark('signal-reactive-list-replace-1000x500'));
+  performance.measure('signal-reactive-list-replace-1000x1000', startMark('signal-reactive-list-replace-1000x1000'));
   r.stop();
 }
 
@@ -131,7 +136,9 @@ let sink = null;
       Helpers with subscriber
 *******************************/
 
-// signal-reactive-push-1000x20 — reset cycles bound array size
+// signal-reactive-push-2000x20 — doubled outer reset cycles from 1000
+// to 2000 so each push op's cost is averaged across more iterations.
+// Previous 1000-cycle run held at ±2.3% (Inconclusive at ±1% expected).
 {
   const sig = new Signal([]);
   const r = Reaction.create(() => {
@@ -142,8 +149,8 @@ let sink = null;
     }
     sink = count;
   });
-  performance.mark(startMark('signal-reactive-push-1000x20'));
-  for (let c = 0; c < 1000; c++) {
+  performance.mark(startMark('signal-reactive-push-2000x20'));
+  for (let c = 0; c < 2000; c++) {
     sig.set([]);
     Reaction.flush();
     for (let p = 0; p < 20; p++) {
@@ -151,7 +158,7 @@ let sink = null;
       Reaction.flush();
     }
   }
-  performance.measure('signal-reactive-push-1000x20', startMark('signal-reactive-push-1000x20'));
+  performance.measure('signal-reactive-push-2000x20', startMark('signal-reactive-push-2000x20'));
   r.stop();
 }
 
@@ -180,7 +187,10 @@ let sink = null;
   r.stop();
 }
 
-// signal-reactive-set-property-by-id-100 — alternating front/back averages N/2 scan
+// signal-reactive-set-property-by-id-200 — alternating front/back averages N/2 scan.
+// 100 iterations landed at ~113ms with observed CI ~2.5× expected (straddled
+// ±2%); 200 doubles the workload to ~225ms so per-sample jitter becomes a
+// smaller fraction of the total and the CI resolves.
 {
   const sig = new Signal(makeRecords(1000));
   const r = Reaction.create(() => {
@@ -191,17 +201,17 @@ let sink = null;
     }
     sink = active;
   });
-  const ids = new Array(100);
-  for (let i = 0; i < 100; i++) {
+  const ids = new Array(200);
+  for (let i = 0; i < 200; i++) {
     const idx = (i % 2 === 0) ? (i / 2) % 1000 : 999 - (((i - 1) / 2) % 1000);
     ids[i] = `rec-${idx}`;
   }
-  performance.mark(startMark('signal-reactive-set-property-by-id-100'));
-  for (let i = 0; i < 100; i++) {
+  performance.mark(startMark('signal-reactive-set-property-by-id-200'));
+  for (let i = 0; i < 200; i++) {
     sig.setProperty(ids[i], 'active', i % 2 === 0);
     Reaction.flush();
   }
-  performance.measure('signal-reactive-set-property-by-id-100', startMark('signal-reactive-set-property-by-id-100'));
+  performance.measure('signal-reactive-set-property-by-id-200', startMark('signal-reactive-set-property-by-id-200'));
   r.stop();
 }
 

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/nicolo-ribaudo.github.io/HEAD/nicolo-ribaudo.github.io/src/assets/tachometer.schema.json",
+  "root": "../../../..",
+  "sampleSize": 50,
+  "timeout": 3,
+  "autoSampleConditions": ["2%"],
+  "benchmarks": [
+    {
+      "name": "this-change",
+      "url": "ci-current-krausest.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "create-1k" },
+        { "mode": "performance", "entryName": "create-10k" },
+        { "mode": "performance", "entryName": "replace-1k" },
+        { "mode": "performance", "entryName": "append-1k" },
+        { "mode": "performance", "entryName": "update-10th-10" },
+        { "mode": "performance", "entryName": "select-40" },
+        { "mode": "performance", "entryName": "swap-rows-20" },
+        { "mode": "performance", "entryName": "remove-row-front-20" },
+        { "mode": "performance", "entryName": "remove-row-middle-20" },
+        { "mode": "performance", "entryName": "remove-row-back-10" },
+        { "mode": "performance", "entryName": "clear-10k" }
+      ]
+    },
+    {
+      "name": "tip-of-tree",
+      "url": "ci-baseline-krausest.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "create-1k" },
+        { "mode": "performance", "entryName": "create-10k" },
+        { "mode": "performance", "entryName": "replace-1k" },
+        { "mode": "performance", "entryName": "append-1k" },
+        { "mode": "performance", "entryName": "update-10th-10" },
+        { "mode": "performance", "entryName": "select-40" },
+        { "mode": "performance", "entryName": "swap-rows-20" },
+        { "mode": "performance", "entryName": "remove-row-front-20" },
+        { "mode": "performance", "entryName": "remove-row-middle-20" },
+        { "mode": "performance", "entryName": "remove-row-back-10" },
+        { "mode": "performance", "entryName": "clear-10k" }
+      ]
+    }
+  ]
+}

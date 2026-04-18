@@ -21,7 +21,7 @@ type: skill
 Add one only if at least one of these holds:
 
 - **A current or near-future perf initiative needs to gate on it.** The bench proves the feature does what it claims and catches regressions later. Ship it with the feature PR, not speculatively.
-- **A hot path has no coverage.** The existing suite covers rendering throughput, reactivity, and list-structural ops. Before adding, check `packages/renderer/bench/tachometer/tachometer-ci*.json` to see if something close already exists.
+- **A hot path has no coverage.** The existing suite covers rendering throughput, reactivity, and list-structural ops. Before adding, check `packages/*/bench/tachometer/tachometer-ci*.json` to see if something close already exists. Benches live alongside the package they primarily exercise: component benches in `packages/component/bench/tachometer/`, signal benches in `packages/reactivity/bench/tachometer/`.
 
 **Do not add a bench just because a workload seems interesting.** Every bench costs ~1 min of CI time (initial samples at N=50 + some auto-sample tail) and more comment surface area for reviewers. Benches without a failure mode they actually gate against are noise.
 
@@ -118,7 +118,9 @@ performance.measure('toggle-middle', startMark('toggle-middle'));
 
 ## Decision: Extend an Existing Bench File or Create a New One?
 
-**Extend existing if the workload fits an existing bench's fixture.** Most new metrics add to `bench-todo.js` (TodoMVC-style list operations) or `bench.js` (krausest table workload). Add the `mark`/`measure` pair to the JS file, add the `entryName` to the appropriate `tachometer-ci*.json`. Done in 5 minutes.
+**Extend existing if the workload fits an existing bench's fixture.** Most new metrics add to `bench-todo.js` (TodoMVC-style list operations) or `bench-krausest.js` (krausest js-framework-benchmark parity workload). Add the `mark`/`measure` pair to the JS file, add the `entryName` to the appropriate `tachometer-ci*.json`. Done in 5 minutes.
+
+**`bench-krausest.js` has a special contract.** It mirrors `tools/benchmark/src/main.js` (the externally-served krausest contestant) and pins `safety: 'reference'` on its signals so the bench always measures the perf fast path regardless of `Signal.defaultSafety`. New metrics here must use SUI-idiomatic helpers (`push`, `map`, `removeItem`, new-ref `set`) — no mutate-then-set-same-ref patterns, which would silently no-op under reference equality. If you find yourself reaching for `equalityFunction: () => false` to make a new metric fire, the metric belongs in `bench-todo.js` instead.
 
 **Create a new bench file if the workload is orthogonal.** E.g., a hydration bench needs its own fixture setup; a signal micro-bench has a different harness shape. Then you need:
 
@@ -177,12 +179,12 @@ Naming convention for amplified workloads: suffix with the iteration count (`sig
 
 ### ❌ Name collision across configs
 
-`tachometer-ci.json` has `clear` (table-clear workload).
-`tachometer-ci-todo.json` also wants `clear` (todo-list clear). **Don't** — rename one to `clear-completed` or `clear-table`.
+`tachometer-ci-krausest.json` has `clear-10k` (table-clear workload).
+`tachometer-ci-todo.json` also wants `clear` (todo-list clear). **Don't** reuse a bare `clear` — pick a disambiguated name.
 
 ### ✅ Disambiguated names
 
-`clear` (krausest table clear) and `clear-completed` (TodoMVC clear-completed button).
+`clear-10k` (krausest table clear after runlots) and `clear-completed-250` (TodoMVC clear-completed button at 250-item scale).
 
 ---
 
@@ -191,7 +193,7 @@ Naming convention for amplified workloads: suffix with the iteration count (`sig
 Run the bench locally to confirm it works:
 
 ```sh
-cd packages/renderer/bench/tachometer
+cd packages/<pkg>/bench/tachometer   # e.g. packages/component or packages/reactivity
 node build-ci.js current
 node build-ci.js baseline  # same source both sides for a dry-run; zero-delta
 npx tachometer --config tachometer-ci-<suite>.json
@@ -212,8 +214,8 @@ If the local run works, push. CI will run the same config in matrix form and the
 
 **Files to touch for an extension to an existing suite:**
 
-1. `packages/renderer/bench/tachometer/bench-<existing>.js` — add `mark`/`measure` pair
-2. `packages/renderer/bench/tachometer/tachometer-ci-<suite>.json` — add `{ mode: 'performance', entryName: '<metric>' }` to BOTH `this-change` and `tip-of-tree` measurement arrays
+1. `packages/<pkg>/bench/tachometer/bench-<existing>.js` — add `mark`/`measure` pair
+2. `packages/<pkg>/bench/tachometer/tachometer-ci-<suite>.json` — add `{ mode: 'performance', entryName: '<metric>' }` to BOTH `this-change` and `tip-of-tree` measurement arrays
 
 **Files to touch for a new bench file:**
 

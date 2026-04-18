@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/nicolo-ribaudo.github.io/HEAD/nicolo-ribaudo.github.io/src/assets/tachometer.schema.json",
+  "root": "../../../..",
+  "sampleSize": 50,
+  "timeout": 3,
+  "autoSampleConditions": ["2%"],
+  "benchmarks": [
+    {
+      "name": "this-change",
+      "url": "ci-current-todo.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "toggle-first-10" },
+        { "mode": "performance", "entryName": "toggle-middle-10" },
+        { "mode": "performance", "entryName": "toggle-last-10" },
+        { "mode": "performance", "entryName": "remove-first-10" },
+        { "mode": "performance", "entryName": "remove-middle-10" },
+        { "mode": "performance", "entryName": "remove-last-10" },
+        { "mode": "performance", "entryName": "filter-cycle-20" },
+        { "mode": "performance", "entryName": "edit-start-10" },
+        { "mode": "performance", "entryName": "edit-cycle-5" }
+      ]
+    },
+    {
+      "name": "tip-of-tree",
+      "url": "ci-baseline-todo.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "toggle-first-10" },
+        { "mode": "performance", "entryName": "toggle-middle-10" },
+        { "mode": "performance", "entryName": "toggle-last-10" },
+        { "mode": "performance", "entryName": "remove-first-10" },
+        { "mode": "performance", "entryName": "remove-middle-10" },
+        { "mode": "performance", "entryName": "remove-last-10" },
+        { "mode": "performance", "entryName": "filter-cycle-20" },
+        { "mode": "performance", "entryName": "edit-start-10" },
+        { "mode": "performance", "entryName": "edit-cycle-5" }
+      ]
+    }
+  ]
+}
