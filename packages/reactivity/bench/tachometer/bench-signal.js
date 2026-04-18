@@ -43,7 +43,8 @@ let sink = null;
   for (let i = 0; i < 500; i++) { reactions[i].stop(); }
 }
 
-// signal-computed-chain-10x30k
+// signal-computed-chain-10x60k — doubled outer iterations (30k → 60k)
+// after the 30k run showed run-to-run boundary variance.
 {
   const root = new Signal(0);
   const chain = [root];
@@ -55,29 +56,31 @@ let sink = null;
   const observer = Reaction.create(() => {
     sink = end.get();
   });
-  performance.mark(startMark('signal-computed-chain-10x30k'));
-  for (let i = 0; i < 30_000; i++) {
+  performance.mark(startMark('signal-computed-chain-10x60k'));
+  for (let i = 0; i < 60_000; i++) {
     root.set(i + 1);
     Reaction.flush();
   }
-  performance.measure('signal-computed-chain-10x30k', startMark('signal-computed-chain-10x30k'));
+  performance.measure('signal-computed-chain-10x60k', startMark('signal-computed-chain-10x60k'));
   observer.stop();
 }
 
-// signal-reactive-multi-read-5x80k
+// signal-reactive-multi-read-5x160k — doubled outer iterations (16k → 32k,
+// so 5 signals × 32k = 160k total flushes) after the 80k variant showed
+// run-to-run boundary variance.
 {
   const sigs = [new Signal(0), new Signal(0), new Signal(0), new Signal(0), new Signal(0)];
   const r = Reaction.create(() => {
     sink = sigs[0].get() + sigs[1].get() + sigs[2].get() + sigs[3].get() + sigs[4].get();
   });
-  performance.mark(startMark('signal-reactive-multi-read-5x80k'));
-  for (let i = 0; i < 16_000; i++) {
+  performance.mark(startMark('signal-reactive-multi-read-5x160k'));
+  for (let i = 0; i < 32_000; i++) {
     for (let j = 0; j < 5; j++) {
       sigs[j].set(i * 5 + j);
       Reaction.flush();
     }
   }
-  performance.measure('signal-reactive-multi-read-5x80k', startMark('signal-reactive-multi-read-5x80k'));
+  performance.measure('signal-reactive-multi-read-5x160k', startMark('signal-reactive-multi-read-5x160k'));
   r.stop();
 }
 

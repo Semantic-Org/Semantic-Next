@@ -268,15 +268,17 @@ destroy();
       single-shot, amplified here for SNR.
 *******************************/
 
+// 40 selects spread across the 1k list — doubled from 20 after select-20
+// showed run-to-run boundary variance (observed ±4.6% vs expected ±1.5%).
 const el6 = await mount();
 el6.component.run(1000);
 await flush();
-performance.mark(startMark('select-20'));
-for (let i = 0; i < 20; i++) {
-  el6.component.select(100 + i * 50);
+performance.mark(startMark('select-40'));
+for (let i = 0; i < 40; i++) {
+  el6.component.select(i * 25);
   await flush();
 }
-performance.measure('select-20', startMark('select-20'));
+performance.measure('select-40', startMark('select-40'));
 destroy();
 
 /*******************************
