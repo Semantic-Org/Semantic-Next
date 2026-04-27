@@ -1,0 +1,40 @@
+{
+  "name": "@semantic-ui/astro",
+  "version": "0.1.0",
+  "description": "Astro integration for Semantic UI",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "license": "MIT",
+  "homepage": "https://next.semantic-ui.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Semantic-Org/Semantic-Next.git",
+    "directory": "integrations/astro"
+  },
+  "keywords": [
+    "astro-integration",
+    "semantic-ui",
+    "ssr",
+    "web-components"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./src/index.js",
+    "./server": "./src/server.js",
+    "./client": "./src/client.js"
+  },
+  "peerDependencies": {
+    "astro": ">=5"
+  },
+  "dependencies": {
+    "@semantic-ui/component": "*",
+    "@semantic-ui/renderer": "*",
+    "@semantic-ui/templating": "*",
+    "@semantic-ui/utils": "*"
+  }
+}

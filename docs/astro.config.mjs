@@ -1,10 +1,10 @@
 import mdx from '@astrojs/mdx';
 import starlight from '@astrojs/starlight';
+import semanticUI from '@semantic-ui/astro';
 import lit from '@semantic-ui/astro-lit';
 import astroExpressiveCode from 'astro-expressive-code';
 import { defineConfig } from 'astro/config';
 import fs from 'fs';
-import semanticUI from '../internal-packages/astro/index.js';
 
 // Load the package version from parent package.json
 const packageJson = JSON.parse(fs.readFileSync('../package.json', 'utf-8'));
