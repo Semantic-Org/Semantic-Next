@@ -210,7 +210,8 @@
     "ci:test": "vitest --c tests/configs/vitest/ci-test-all.config.js",
     "ci:test:unit": "vitest --c tests/configs/vitest/ci-test-unit.config.js",
     "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js",
-    "test:cdn": "cd tools/cdn && npx vitest run --config vitest.config.js"
+    "test:cdn": "cd tools/cdn && npx vitest run --config vitest.config.js",
+    "postinstall": "npx simple-git-hooks"
   },
   "wireit": {
     "dev": {
@@ -346,8 +347,6 @@
     "@pagefind/modular-ui": "^1.3.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.5.0",
-    "@commitlint/config-conventional": "^20.5.0",
     "@types/node": "^25.6.0",
     "@typescript-eslint/eslint-plugin": "^8.58.1",
     "@typescript-eslint/parser": "^8.58.1",
@@ -386,8 +385,8 @@
     "tools/cdn"
   ],
   "simple-git-hooks": {
-    "pre-commit": "STAGED=$(git diff --cached --name-only --diff-filter=ACM); npx dprint fmt --staged && echo \"$STAGED\" | xargs -r git add",
-    "commit-msg": "if grep -qi 'Co-Authored-By:' \"$1\"; then echo 'Error: Commit messages must not contain Co-Authored-By lines.'; exit 1; fi"
+    "pre-commit": "bash tools/hooks/pre-commit",
+    "commit-msg": "bash tools/hooks/commit-msg \"$1\""
   },
   "overrides": {
     "vite": "^7",
