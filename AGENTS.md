@@ -106,7 +106,7 @@
   `Bug: Fix race condition in async when stale promises fire late`
   `Docs: Rewrite specs guide`
   `Chore: Rebuild bundle`
-  `AI: Update context loading instructions`
+  `Harness: Tighten framing for agents on PR merges`
   `Test: Add subtemplate settings tests`
   `Perf: Rewrite weightedObjectSearch`
   `Refactor: Update todo-list to use canonical subtemplate patterns`
@@ -114,7 +114,8 @@
   `Feat/Bug: Add protectedKeys to prevent clobbering of each/async vars`
 
   Settle on: `Bug` not `Fix`/`Bugs`, `Test` not `Tests`/`Testing`, `Build` not `Tools`/`Tooling`.
-  Compound prefixes like `Feat/Bug:` or `AI/Docs:` are fine for cross-cutting changes.
+  `Harness:` covers the AI harness — agent skills, workflows, AGENTS.md, hooks, settings.json, MCP config. Anything shaping how agents operate in this repo (not the published framework itself).
+  Compound prefixes like `Feat/Bug:` or `Bug/Test:` are fine for cross-cutting changes.
   Optional monorepo scope: `Bug(reactivity): Fix race condition`. Scope is lowercase.
 
   PR titles follow this same format — they become the squash commit subject in `main` (with `(#NNN)` appended). Squash body is empty by repo setting; rich context belongs in the PR description (lives on github.com), not in commit bodies.
