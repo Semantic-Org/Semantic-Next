@@ -211,7 +211,7 @@
     "ci:test:unit": "vitest --c tests/configs/vitest/ci-test-unit.config.js",
     "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js",
     "test:cdn": "cd tools/cdn && npx vitest run --config vitest.config.js",
-    "postinstall": "npx simple-git-hooks"
+    "setup": "npx simple-git-hooks"
   },
   "wireit": {
     "dev": {
