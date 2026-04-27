@@ -35,7 +35,7 @@ jobs:
       ui: ${{ steps.filter.outputs.ui }}
       packages: ${{ steps.filter.outputs.packages }}
     steps:
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Node.js
         uses: actions/setup-node@v6
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Node.js
         uses: actions/setup-node@v6
@@ -103,7 +103,7 @@ jobs:
         run: npm ci
 
       - name: Cache Playwright
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
           path: ~/.cache/ms-playwright
@@ -136,7 +136,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Node.js
         uses: actions/setup-node@v6
@@ -151,7 +151,7 @@ jobs:
         run: npm ci
 
       - name: Cache Playwright
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
           path: ~/.cache/ms-playwright
