@@ -16,7 +16,7 @@
       --repo <owner/name>     GitHub repo slug (falls back to $GITHUB_REPOSITORY)
       --repo-root <dir>       filesystem root for resolving bench sources (default: cwd)
       --wall-clock <seconds>  total bench run duration — footer metadata
-      --history <path>        bench-history.json path (default: <repo-root>/bench-history.json)
+      --history <path>        bench-history.json path (default: <repo-root>/tools/ci/bench/reporter/bench-history.json)
       --pr-history <path>     PR-iteration history from fetch-pr-history.js (merged with --history)
       --out <dir>             output directory (default: ./bench-report)
 
@@ -42,7 +42,7 @@ const baseSha = args['base-sha'] ?? '';
 const repo = args.repo ?? process.env.GITHUB_REPOSITORY ?? '';
 const repoRoot = args['repo-root'] ?? process.cwd();
 const wallClockSec = args['wall-clock'] ? Number(args['wall-clock']) : null;
-const historyPath = args.history ?? path.join(repoRoot, 'bench-history.json');
+const historyPath = args.history ?? path.join(repoRoot, 'tools/ci/bench/reporter/bench-history.json');
 const prHistoryPath = args['pr-history'] ?? '';
 const outDir = args.out ?? './bench-report';
 

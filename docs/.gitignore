@@ -20,3 +20,8 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# local-dev SSL certs (generate with `npm run cert`)
+cert/*.pem
+cert/*.pfx
+cert/*.srl

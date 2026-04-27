@@ -14,7 +14,7 @@
       --msg <text>          commit subject line
       --parent-sha <sha>    parent commit SHA
       --timestamp <iso>     commit timestamp (ISO 8601); defaults to now
-      --history <path>      bench-history.json path (default: ./bench-history.json)
+      --history <path>      bench-history.json path (default: ./bench-history.json — relative to CWD)
 
   Idempotency: if the same SHA already exists in the file, the entry is
   replaced. Lets a re-run of the workflow (e.g. after a flaky first pass)

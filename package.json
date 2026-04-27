@@ -187,8 +187,6 @@
     "build:specs": "wireit",
     "build:icons": "wireit",
     "dev": "wireit",
-    "dev:workspace": "node ./internal-packages/scripts/src/build-ai-workspace.js --serve",
-    "mcp": "wireit",
     "deploy:mcp": "wireit",
     "build:docs": "wireit",
     "build:docs-packages": "wireit",
@@ -210,7 +208,7 @@
     "ci:test:unit": "vitest --c tests/configs/vitest/ci-test-unit.config.js",
     "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js",
     "test:cdn": "cd tools/cdn && npx vitest run --config vitest.config.js",
-    "postinstall": "npx simple-git-hooks"
+    "setup": "npx simple-git-hooks"
   },
   "wireit": {
     "dev": {
@@ -319,10 +317,6 @@
     "update-version": {
       "command": "node ./scripts/update-versions.js"
     },
-    "mcp": {
-      "command": "cd ai/mcp && node agents-server.js",
-      "service": true
-    },
     "deploy:mcp": {
       "dependencies": [
         "./tools/mcp:deploy"
@@ -374,11 +368,11 @@
   },
   "workspaces": [
     "internal-packages/*",
+    "integrations/*",
     "packages/*",
     "docs/*",
     "examples/*",
     "tools/mcp",
-    "tools/devtools",
     "tools/lsp",
     "tools/benchmark",
     "tools/cdn"
