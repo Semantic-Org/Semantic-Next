@@ -126,11 +126,16 @@
 
   ## Tiers
 
-  Pick the smallest tier that fits. Round up when unsure.
+  Tier by what the reviewer has to do, not by line count. A 500-line docs PR is Small; a 30-line change to the renderer's hot path is Large.
 
-  - **Small** — single concern, <50 LOC, no user-visible behavior change. Chores, docs, dep bumps, dead-code removal.
-  - **Medium** — user-visible behavior change OR multi-file refactor with bounded blast radius.
-  - **Large** — implements a plan, crosses package boundaries, or touches load-bearing internals (renderer, reactivity, templating).
+  - **Small** — no code behavior change. Reviewer can rubber-stamp. Chores, docs, harness, comments, dead-code removal, dep bumps with no API change, content additions.
+  - **Medium** — code change with user-visible effect bounded to one feature or module. Reviewer reads the diff carefully but doesn't need to think about systemic failure modes.
+  - **Large** — implements a plan, crosses package boundaries, touches load-bearing internals (renderer, reactivity, templating, compiler), or changes a public API. Reviewer should slow down and consider named failure modes.
+
+  Self-test, in order:
+
+  - If you can't name a failure mode worth listing, it's not Large.
+  - If you can't name a user-facing behavior change, it's not Medium.
 
   ## Titles
 
