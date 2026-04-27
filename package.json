@@ -199,7 +199,6 @@
     "update-version": "wireit",
     "test:case": "wireit",
     "prepublishOnly": "wireit",
-    "prettify": "prettierx ./ --write --ignore-unknown",
     "format": "npx dprint fmt",
     "test": "vitest --c tests/configs/vitest/vitest.config.js",
     "test:watch": "vitest --c tests/configs/vitest/vitest-watch.config.js",
