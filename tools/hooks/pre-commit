@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+if [ -n "$CLAUDECODE" ]; then
+  branch=$(git rev-parse --abbrev-ref HEAD)
+  if [ "$branch" = "main" ]; then
+    echo "Error: Agents cannot commit directly to main. Switch to a branch first."
+    echo "Bypass: SKIP_SIMPLE_GIT_HOOKS=1 (only when explicitly delegated)"
+    exit 1
+  fi
+fi
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+npx dprint fmt --staged && echo "$STAGED" | xargs -r git add
