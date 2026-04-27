@@ -45,11 +45,11 @@ jobs:
       # Pin reporter to main. The PR cannot author the tool that renders
       # its own bench comment — classification thresholds, output format,
       # and peak attribution must be author-neutral. Overlaid before any
-      # downstream step that reads tools/bench-reporter/.
+      # downstream step that reads tools/ci/bench/reporter/.
       - name: Overlay reporter from main
         run: |
           git fetch origin main --depth=1
-          git checkout origin/main -- tools/bench-reporter/ 2>/dev/null || true
+          git checkout origin/main -- tools/ci/bench/reporter/ 2>/dev/null || true
 
       # Overlay main's bench-history.json onto the PR checkout so the
       # reporter's peak-attribution runs against the freshest history,
@@ -58,7 +58,7 @@ jobs:
       - name: Fetch latest bench-history.json from main
         run: |
           git fetch origin main --depth=1
-          git show origin/main:bench-history.json > bench-history.json 2>/dev/null || true
+          git show origin/main:tools/ci/bench/reporter/bench-history.json > tools/ci/bench/reporter/bench-history.json 2>/dev/null || true
 
       - name: Download bench artifacts
         uses: dawidd6/action-download-artifact@v2
@@ -93,7 +93,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
         run: |
-          node tools/bench-reporter/fetch-pr-history.js \
+          node tools/ci/bench/reporter/fetch-pr-history.js \
             --branch '${{ github.event.workflow_run.head_branch }}' \
             --repo '${{ github.repository }}' \
             --current-run-id '${{ github.event.workflow_run.id }}' \
@@ -105,7 +105,7 @@ jobs:
           ENDED: ${{ github.event.workflow_run.updated_at }}
         run: |
           WALL_CLOCK=$(( $(date -d "$ENDED" +%s) - $(date -d "$STARTED" +%s) ))
-          node tools/bench-reporter/reporter.js \
+          node tools/ci/bench/reporter/reporter.js \
             --results results \
             --sha '${{ github.event.workflow_run.head_sha }}' \
             --msg '${{ github.event.workflow_run.display_title }}' \
@@ -196,13 +196,13 @@ jobs:
           # when the commit landed.
           BENCHED_SHA='${{ github.event.workflow_run.head_sha }}'
           PARENT_SHA=$(git rev-parse "$BENCHED_SHA^" 2>/dev/null || echo '')
-          node tools/bench-reporter/append-history.js \
+          node tools/ci/bench/reporter/append-history.js \
             --results results \
             --sha "$BENCHED_SHA" \
             --msg '${{ github.event.workflow_run.display_title }}' \
             --parent-sha "$PARENT_SHA" \
             --timestamp '${{ github.event.workflow_run.updated_at }}' \
-            --history bench-history.json
+            --history tools/ci/bench/reporter/bench-history.json
 
       - name: Commit + push
         env:
@@ -217,13 +217,13 @@ jobs:
           git config user.email '${{ secrets.SEMANTIC_PERF_BOT_APP_ID }}+semantic-performance-bot[bot]@users.noreply.github.com'
           # If nothing changed (e.g. a re-run for a SHA already archived with
           # identical numbers), skip rather than making an empty commit.
-          if git diff --quiet bench-history.json; then
+          if git diff --quiet tools/ci/bench/reporter/bench-history.json; then
             echo 'No change to bench-history.json; skipping commit.'
             exit 0
           fi
           BENCHED_SHA='${{ github.event.workflow_run.head_sha }}'
           SHORT_SHA=${BENCHED_SHA:0:7}
-          git add bench-history.json
+          git add tools/ci/bench/reporter/bench-history.json
           git commit -m "Chore: Archive bench history for $SHORT_SHA [skip ci]"
           # Narrow race: another merge may have landed on main while we were
           # running benches. Try push; if it's rejected as non-fast-forward,
