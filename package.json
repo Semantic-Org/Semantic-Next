@@ -375,6 +375,7 @@
   },
   "workspaces": [
     "internal-packages/*",
+    "integrations/*",
     "packages/*",
     "docs/*",
     "examples/*",
