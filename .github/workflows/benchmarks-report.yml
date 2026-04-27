@@ -38,7 +38,7 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
 
@@ -173,7 +173,7 @@ jobs:
           fetch-depth: 2  # need HEAD~1 for parent_sha lookup
           token: ${{ steps.bot-token.outputs.token }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
 
