@@ -9,7 +9,7 @@ fi
 
 if [ -n "$CLAUDECODE" ]; then
   subject=$(head -1 "$MSG_FILE")
-  vocab='Feat|Bug|Docs|Chore|AI|Test|Perf|Refactor|Build|BREAKING'
+  vocab='Feat|Bug|Docs|Chore|Harness|Test|Perf|Refactor|Build|BREAKING'
   pattern="^(${vocab})(/(${vocab}))?(\\([a-z][a-z0-9-]*\\))?: [A-Z].*[^.]\$"
   if ! echo "$subject" | grep -qE "$pattern"; then
     cat <<EOF
@@ -18,7 +18,7 @@ Got:      $subject
 Expected: Feat: Add cache for subtemplate renders
           Feat(reactivity): Add foo                  (with monorepo scope)
           Feat/Bug: Add protectedKeys to prevent X   (compound, rare)
-Vocabulary: Feat, Bug, Docs, Chore, AI, Test, Perf, Refactor, Build, BREAKING
+Vocabulary: Feat, Bug, Docs, Chore, Harness, Test, Perf, Refactor, Build, BREAKING
 Both category and description capitalized. No trailing period.
 EOF
     exit 1
