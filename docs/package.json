@@ -2,6 +2,9 @@
   "name": "@semantic-ui/docs",
   "type": "module",
   "version": "0.10.5",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
