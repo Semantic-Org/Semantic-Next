@@ -51,16 +51,24 @@ export default defineConfig({
     },
     assetsInclude: ['**/*.html'],
     server: {
-      // SSL for localhost and dev.semantic-ui.com
-      // add '127.0.0.1 dev.semantic-ui.com ' to your 'etc/hosts' file to use
-      https: {
-        key: fs.readFileSync('./cert/dev.semantic-ui.com-key.pem'),
-        cert: fs.readFileSync('./cert/dev.semantic-ui.com.pem'),
-      },
-      hmr: {
-        host: 'dev.semantic-ui.com',
-        protocol: 'wss',
-      },
+      // SSL for localhost and dev.semantic-ui.com.
+      // Add '127.0.0.1 dev.semantic-ui.com' to /etc/hosts and run `npm run cert` to generate certs.
+      // Without certs, dev runs over HTTP and the REPL won't work.
+      ...(fs.existsSync('./cert/dev.semantic-ui.com-key.pem') && fs.existsSync('./cert/dev.semantic-ui.com.pem')
+        ? {
+          https: {
+            key: fs.readFileSync('./cert/dev.semantic-ui.com-key.pem'),
+            cert: fs.readFileSync('./cert/dev.semantic-ui.com.pem'),
+          },
+          hmr: {
+            host: 'dev.semantic-ui.com',
+            protocol: 'wss',
+          },
+        }
+        : (console.warn(
+          '[docs] HTTPS dev server disabled — run `npm run cert` in docs/ to enable. REPL requires HTTPS.',
+        ),
+          {})),
       fs: {
         allow: ['..'],
       },
