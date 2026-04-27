@@ -92,7 +92,7 @@ Light DOM second because it determines which components are architecturally poss
 | # | What | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
 | 1a | SSR Data Binding Markers | TBD | pair | initial | Clean hydration on clean directive architecture. Versioned markers, mismatch detection, text node splitting. |
-| 1b | [Light DOM Pre-render Pipeline](light-dom-prerender.html) | TBD | pair | scoped | Phase 0: CSS utilities (`prerenderCSS`, `@scope` rewriting). Phase 1: Non-reactive render mode (`Reaction.nonreactive()`). Phase 2: Slot projection. Phase 3: Upgrade detection in `defineComponent`. Phase 4: Entry point + CDN loader integration. |
+| 1b | [Light DOM Pre-render Pipeline](light-dom-prerender.md) | TBD | pair | scoped | Phase 0: CSS utilities (`prerenderCSS`, `@scope` rewriting). Phase 1: Non-reactive render mode (`Reaction.nonreactive()`). Phase 2: Slot projection. Phase 3: Upgrade detection in `defineComponent`. Phase 4: Entry point + CDN loader integration. |
 
 ---
 
