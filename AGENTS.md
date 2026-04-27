@@ -121,6 +121,88 @@
   PR titles follow this same format — they become the squash commit subject in `main` (with `(#NNN)` appended). Squash body is empty by repo setting; rich context belongs in the PR description (lives on github.com), not in commit bodies.
 </commit_format>
 
+<pr_format>
+  PR descriptions are read by a stranger who didn't watch you build it. They want to know what is now true in the codebase — not what changed in the repo, not how you got here, not whether you verified it. The diff defends itself; process narration belongs in the conversation log.
+
+  ## Tiers
+
+  Pick the smallest tier that fits. Round up when unsure.
+
+  - **Small** — single concern, <50 LOC, no user-visible behavior change. Chores, docs, dep bumps, dead-code removal.
+  - **Medium** — user-visible behavior change OR multi-file refactor with bounded blast radius.
+  - **Large** — implements a plan, crosses package boundaries, or touches load-bearing internals (renderer, reactivity, templating).
+
+  ## Titles
+
+  Title format follows `<commit_format>`. Additional rules:
+
+  - 3–5 words after the prefix. After drafting, cut every word that doesn't carry meaning.
+  - Concept names, not literal paths: `Make Integrations Folder`, not `Move integrations/astro/src/`.
+  - Concrete verbs: Make, Move, Swap, Group, Add. Prefer Remove over Drop. Avoid Relocate, Re-anchor, Configure.
+  - Title is the primary change only. Secondary work goes in body bullets, not in `X and Y` titles.
+
+  | Before | After |
+  |---|---|
+  | Refactor: Relocate astro integration to integrations/ and prep for publish | Chore: Make Integrations Folder and Move Astro |
+  | Build: Move bench tooling under tools/ci/bench/ and relocate bench-history.json | Chore: Group CI Bench Tools |
+  | Chore: Remove broken package.json refs | Chore: Remove Vestigial package.json Entries |
+
+  ## Body by tier
+
+  ### Small
+
+  One or two sentences of intent. `## Changes` is optional; omit when the title says it all.
+
+  ### Medium
+
+  ```
+  [One sentence — why this PR exists.]
+
+  ## Changes
+  - [Outcome bullet]
+  - [Outcome bullet]
+
+  ## Risk
+  N/10 — [one-line reason].
+  Failure modes: [bulleted list — only when score ≥5 or blast radius is non-obvious]
+
+  ## How to Test
+  - [Deviations from standard only. Skip "rerun tests" / "CI passes" — those are assumed.]
+  ```
+
+  ### Large
+
+  Same as Medium, plus:
+
+  - If plan-driven, lead the framing sentence with `Implements [plan name](permalink-at-PR-creation-SHA)`. Get the SHA via `git log -1 --format=%H ai/plans/foo.md` and form `https://github.com/Semantic-Org/Semantic-Next/blob/<sha>/ai/plans/foo.md`.
+  - `## Risk` failure-modes list is mandatory.
+  - Body may be longer, but bullets still describe outcomes, not mechanisms.
+
+  ## Risk score is routing metadata
+
+  The score tells the reviewer (or a code-review subagent / `/ultrareview`) how much attention to spend. A 2/10 Medium says "review this fast." A 7/10 Large says "slow down — look at the failure modes." It is not a confidence performance; keep it honest.
+
+  ## Hotlinking
+
+  Default: don't. Mentioned files do not need links — reviewers can find them.
+
+  Exceptions:
+  - Plan-driven Large PRs always link the plan at the PR-creation SHA.
+  - Large PRs may link a specific line (`...#L123`) when a reviewer should look at one place specifically — e.g. a breaking-change site.
+
+  Package names (`@semantic-ui/astro`) and shell commands (`npm test`) stay backticked, never linked.
+
+  ## Anti-patterns — do not write these
+
+  - Process narration: "verified", "ensured", "tested", "I considered X but went with Y", "to accomplish this"
+  - Parenthetical proofs: "(verified — zero diff on main)", "(per discussion)"
+  - Pre-filled test-plan checkboxes
+  - `## Out of scope` sections — they pre-empt a question that may not be asked
+  - Hedging: "note that", "important to call out", "worth flagging"
+  - Listing every file or knob touched. A bullet at the right concept level often covers many file changes.
+  - Word imprecision: "broken" when the right word is "vestigial" or "stale"
+</pr_format>
+
 <agent_workspace>
   You have access to an agent workspace in `/ai/workspace/`. Use it for scratch files, drafts, and intermediate outputs as needed. Loose files in the workspace root are fine for active work.
 
