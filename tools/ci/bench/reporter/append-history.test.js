@@ -1,6 +1,6 @@
 /*
   Unit tests for append-history.js.
-  Run with: node --test tools/bench-reporter/append-history.test.js
+  Run with: node --test tools/ci/bench/reporter/append-history.test.js
 */
 
 import assert from 'node:assert/strict';
