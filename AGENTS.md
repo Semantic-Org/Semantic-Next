@@ -115,6 +115,9 @@
 
   Settle on: `Bug` not `Fix`/`Bugs`, `Test` not `Tests`/`Testing`, `Build` not `Tools`/`Tooling`.
   Compound prefixes like `Feat/Bug:` or `AI/Docs:` are fine for cross-cutting changes.
+  Optional monorepo scope: `Bug(reactivity): Fix race condition`. Scope is lowercase.
+
+  PR titles follow this same format — they become the squash commit subject in `main` (with `(#NNN)` appended). Squash body is empty by repo setting; rich context belongs in the PR description (lives on github.com), not in commit bodies.
 </commit_format>
 
 <agent_workspace>
