@@ -62,5 +62,6 @@ tools/lsp/editors/vscode/*.vsix
 tools/lsp/editors/vscode/server/
 tools/lsp/editors/vscode/test-grammar/
 
-# Ephemeral agent scratch
-ai/workspace/tmp/
+# Agent workspace (per-user scratch — only README is tracked)
+ai/workspace/*
+!ai/workspace/README.md
