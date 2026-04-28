@@ -211,7 +211,7 @@
 <ai_folder_layout>
   The `/ai/` directory holds AI-collaboration infrastructure for this project. Four homes:
 
-  - `/ai/skills/` — MCP-served skills, context, and workflows. Organized by audience subdirectory (e.g. `contributing/`, `authoring/`).
+  - `/ai/skills/` — MCP-served skills, context, and workflows. Organized by audience subdirectory (e.g. `contributing/`, `authoring/`). See the `ai-author-context` skill for authoring conventions.
   - `/ai/research/` — Independent research corpus (cross-framework UI primitive analysis, etc.). Not served via MCP.
   - `/ai/plans/` — Canonical implementation plans tracked by `ROADMAP.md`. Completed plans archive to `/ai/plans/archive/`; deferred to `/ai/plans/deferred/`. See the `manage-roadmap` skill for the planning workflow.
   - `/ai/workspace/` — Per-user scratch (gitignored). See `<agent_workspace>` below.
