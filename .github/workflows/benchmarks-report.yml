@@ -29,9 +29,9 @@ jobs:
       # surface as GITHUB_TOKEN; branded, not widened.
       - name: Generate bot token
         id: bot-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.SEMANTIC_PERF_BOT_APP_ID }}
+          client-id: ${{ secrets.SEMANTIC_PERF_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_PERF_BOT_PRIVATE_KEY }}
 
       - uses: actions/checkout@v6
@@ -40,7 +40,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: '.node-version'
 
       # Pin reporter to main. The PR cannot author the tool that renders
       # its own bench comment — classification thresholds, output format,
@@ -61,7 +61,7 @@ jobs:
           git show origin/main:tools/ci/bench/reporter/bench-history.json > tools/ci/bench/reporter/bench-history.json 2>/dev/null || true
 
       - name: Download bench artifacts
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v21
         with:
           github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
@@ -69,6 +69,7 @@ jobs:
           name_is_regexp: true
           name: results-.*
           path: results
+          allow_forks: true
 
       - name: Resolve PR number
         id: pr
@@ -118,7 +119,7 @@ jobs:
             --out bench-report
 
       - name: Upload bench-report.json adjunct
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bench-report
           path: bench-report/bench-report.json
@@ -159,9 +160,9 @@ jobs:
       # by Semantic Performance Bot rather than github-actions[bot].
       - name: Generate bot token
         id: bot-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.SEMANTIC_PERF_BOT_APP_ID }}
+          client-id: ${{ secrets.SEMANTIC_PERF_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_PERF_BOT_PRIVATE_KEY }}
 
       # Check out main's tip for the commit target. We push back to main,
@@ -175,10 +176,10 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: '.node-version'
 
       - name: Download bench artifacts
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v21
         with:
           github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
@@ -186,6 +187,7 @@ jobs:
           name_is_regexp: true
           name: results-.*
           path: results
+          allow_forks: true
 
       - name: Append history entry
         run: |
