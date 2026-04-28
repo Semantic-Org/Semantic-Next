@@ -496,6 +496,9 @@
   --icon-webhook: url('./svg/webhook.svg');
   --icon-workflow: url('./svg/workflow.svg');
 
+  /* Brand */
+  --icon-github: url('./svg/github.svg');
+
   /* Gamification */
   --icon-award: url('./svg/award.svg');
   --icon-crown: url('./svg/crown.svg');
