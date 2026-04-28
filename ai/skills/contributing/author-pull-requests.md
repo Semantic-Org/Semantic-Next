@@ -69,6 +69,7 @@ After the prefix:
 - **Concept names, not paths.** `Make Integrations Folder`, not `Move integrations/astro/src/`. Paths belong in body bullets if they help; titles work at concept level.
 - **Concrete verbs.** Make / Move / Swap / Group / Add / Remove. Avoid Relocate / Re-anchor / Configure (formal/abstract). Avoid Drop (SQL connotations).
 - **Title is the primary change only.** Secondary work goes in body bullets — never `X and Y` titles.
+- **Don't lead with `BREAKING:` even for breaking changes.** The Risk score + changelog automation already signal the breaking nature. Use the prefix that describes the change *kind* — `Refactor:`, `Perf:`, `Feat:` — and let the Risk/changelog do the warning work.
 
 ### Worked examples (real PRs from this project)
 
@@ -125,17 +126,117 @@ Same as Medium, plus:
 
 ---
 
-## Bullets describe outcomes, not mechanisms
+## Terseness — match how humans actually write
 
-The most common drift is listing the knobs you turned instead of the state that's now true. Reviewers can see the knobs in the diff — they read the body to learn what *exists* now.
+The single most common drift in AI-authored bullets is verbosity. A bullet that takes 15 words to say what 5 words could say is performing thoroughness. Humans don't write that way when describing state — they say the thing and stop.
 
-| ❌ Mechanism (the diff) | ✅ Outcome (what's now true) |
+### Three terseness rules
+
+**1. Cut justification clauses.** When you remove something, don't explain why in the bullet. The "why" goes in the commit message or PR conversation if it matters. Bullets just name the thing.
+
+| ❌ Justifies the change | ✅ Just names it |
 |---|---|
-| Drop `private`, add publish metadata + `peerDependencies: { astro: ">=5" }` | Set up astro integration to be published as `@semantic-ui/astro` |
-| Update `.gitignore`, `git rm -r --cached ai/workspace/`, add `ai/workspace/README.md` | Workspace becomes per-user scratch — only the README is tracked |
-| Rename `light-dom-prerender.html` → `.md`; remove duplicate `-tdd.html`; update ROADMAP link | (don't list — bundle into a higher-level "stale dotfiles" bullet, or omit) |
+| Remove the `_studio.yml` workflow now that Astro Studio is sunset | Remove Astro Studio workflow |
+| Drop the root `prettify` script that called an uninstalled binary | Drop vestigial `prettify` script |
+| Remove `.env` since it only contained `OCO_*` opencommit vars | Remove `.env` |
 
-A useful test: read each bullet aloud. If it describes work you performed (verbs of editing — *update, add, drop, edit, rename*), rewrite it to describe state (verbs of being — *use, support, become, expose*) or to describe a completed action at a higher level (*set up, replace, group*).
+The "now that X is sunset" / "that called Y" / "since Z" clauses are all the same instinct: defending the removal. Cut them.
+
+**2. Cut scaffolding bullets.** A bullet that's *implied* by the bullets above it is scaffolding. Reviewers see the implication; spelling it out is padding.
+
+| ❌ Scaffolding | ✅ Removed |
+|---|---|
+| - Move `bench-matrix` and `bench-reporter` under `tools/ci/bench/`<br>- Move `bench-history.json` next to the reporter<br>- **Update workflow and script path references to match** | Three bullets become two — the path-update bullet is implied by the moves and visible in the diff |
+
+If a bullet's outcome is the obvious consequence of bullets above it, drop it.
+
+**3. Tight framing sentences.** Don't pad the framing line with explanatory tail clauses.
+
+| ❌ Padded | ✅ Tight |
+|---|---|
+| Routine refresh of direct deps in `docs/` and root, plus the lockfile churn that follows. | Routine dep refresh in `docs/` and root, plus lockfile. |
+| CI-only bench tooling lives under `tools/ci/bench/` so the top-level `tools/` directory only contains developer-runnable harnesses. | CI bench tooling lives under `tools/ci/bench/`. |
+
+If the framing sentence has a "so that" / "plus the X that follows" / "in order to" tail, the tail is usually padding.
+
+### Bullet shape
+
+Bullets should be noun phrases or short verb phrases. Most under 10 words. Full sentences in bullets is an AI tell.
+
+```
+❌ "Remove the throwaway profiling and screenshot artifacts from the repo root."
+✅ "Remove root profiling/screenshot artifacts"
+```
+
+---
+
+## Selectivity — don't bullet everything
+
+A bullet should answer one question: **what does the reviewer take away that the diff doesn't make obvious?** Trivial cleanup that accompanies the main change goes silently in the diff. If a reviewer would shrug and say "yeah obviously," the bullet shouldn't exist.
+
+| ❌ Bulleting trivia | ✅ Selective |
+|---|---|
+| - Remove unused linter configs<br>- Remove sunset Astro Studio workflow<br>- Remove root profiling/screenshot artifacts<br>- Drop vestigial `prettify` script<br>- **Convert `light-dom-prerender` plan to `.md` and drop duplicate `-tdd.html`** | Same four bullets without the last one — the rename is incidental cleanup that lives in the diff, not in the body |
+
+When in doubt: if a bullet is a different *kind* of action than the others (rename amid removals; doc-link fix amid moves), it's probably trivia. Cut it or roll it up.
+
+### Roll up bullets that share an action
+
+Five "Remove …" bullets describing the same kind of cleanup should collapse to one. Reviewers learn nothing extra from the splits.
+
+| ❌ Split | ✅ Rolled up |
+|---|---|
+| - Remove `.eslintrc.cjs`<br>- Remove `biome.json`<br>- Remove `.commitlintrc.cjs`<br>- Remove `.prettierrc.json`<br>- Remove `.prettierignore` | - Remove unused linter/formatter dotfiles |
+
+The list of specific files belongs in the diff. The bullet's job is to tell the reviewer the *category* of cleanup.
+
+---
+
+## Intent over state, state over mechanism
+
+There are three layers a bullet can sit at. Reach for the highest one that's still accurate.
+
+| Layer | Example (the bench reorg PR) | Why |
+|---|---|---|
+| ❌ Mechanism | Update path references across 4 workflow YAMLs and 6 scripts | Restates the diff |
+| ✅ State | Move `bench-matrix` and `bench-reporter` under `tools/ci/bench/` | Describes what's now true |
+| ✅✅ Intent | Create `tools/ci/` for CI-only tooling; add bench tools under it | Captures the developer's purpose — what the change *was for* |
+
+When you can name the *why* in one short clause, lead with that. State bullets are fine when intent isn't crisp — but if the intent is clear (you're creating a category, simplifying a surface, separating concerns), the bullet should *say* it.
+
+A useful test: read each bullet aloud. If it describes work you performed (verbs of editing — *update, add, drop, edit, rename*), rewrite to describe state. Then ask: "is there an intent-level rephrasing that captures the *why*?" If yes, prefer that.
+
+### Explain the reasoning, not the failure of the previous mode
+
+A subtle bullet drift: writing the change as "X no longer does Y" or "Y is now Z" describes the delta — what flipped. That's a step better than mechanism, but the strongest version explains *the reasoning that produced the change*: the technique, the design choice, the insight.
+
+| Layer | Example (perf rewrite of `weightedObjectSearch`) |
+|---|---|
+| ❌ Delta | Equal-weight items no longer return in first-seen order |
+| ✅ State | Equal-weight items now return in randomized order |
+| ✅✅ Reasoning | Implements a single-pass weighted reservoir; equal-weight tie order is random as a consequence of the algorithm |
+
+The reasoning version tells the reviewer *why* (the algorithm choice) and *what falls out* (the tie-order shift) in one breath. The delta version frames the same change as the prior code's failure.
+
+### Lead with the headline
+
+If the PR has a single headline metric or fact (a measured perf win, a removed dependency, an API consolidation), lead the framing sentence with it. Don't bury it in a bullet.
+
+| ❌ Buried | ✅ Lede |
+|---|---|
+| *Framing:* Replace the O(n²) ranking scan with a single-pass weighted reservoir.<br>- Single-pass weighted reservoir replaces the quadratic scan<br>- 8× faster on 1k lists, 50× on 10k | *Framing:* 8× faster on 1k-item lists, 50× on 10k. Single-pass weighted reservoir replaces the O(n²) ranking scan in `weightedObjectSearch`. |
+
+The reviewer's eye should land on the headline first.
+
+### When a bullet sounds weird, investigate before polishing
+
+A meta-principle: if a bullet you're about to write makes you ask "wait, why is that the case?" (e.g., "the function now returns in random order" — *why would anyone want that?*), that's a signal the change itself needs investigation, not a sentence to polish around. Either:
+
+- Justify the trade-off explicitly (deliberate)
+- Flag it as a humility check in failure-modes
+- Or fix the underlying issue before the PR ships
+
+Authors who polish suspicious bullets into smooth prose ship subtle bugs. Reviewers who read smooth prose without questioning it merge them.
 
 ---
 
@@ -148,7 +249,30 @@ When you write a Risk score, you're telling the reviewer (or `/ultrareview`) **h
 
 Don't pad the number to look responsible; don't deflate it to look confident. A correct low score is more useful than a high one. The score is a signal, not a posture.
 
-The failure-modes list: include when score ≥ 5, OR when blast radius is non-obvious. For low-risk PRs, the list is noise.
+## Failure modes are humility checks, not breaking-change rehash
+
+The failure-modes list serves a specific purpose: **giving a red-team reviewer a map of where you might have made a mistake.** It's a humility artifact — "I think I did everything, but if I didn't, here's the blast radius."
+
+It is not:
+- A list of predictable consequences of breaking changes (those go in the Changes list)
+- User-impact warnings ("downstream importers break at module load")
+- Things the diff already makes obvious
+
+It *is*:
+- Subtle behavior shifts you can't fully prove out (e.g., "subtle reactivity changes in the component renderer due to signal ergonomics — worth a careful read of the renderer's hot path")
+- Areas where the test surface is thin and you're relying on intuition
+- Latent bugs you know about but couldn't fix in this PR
+- Performance regressions you observed but couldn't fully characterize
+
+Test: for each failure mode, ask "would this give a reviewer a useful place to focus critical attention?" If it's just restating a Changes bullet at the user-impact layer, drop it.
+
+| ❌ Breaking-change rehash | ✅ Humility check |
+|---|---|
+| Downstream code importing removed tracing helpers breaks at module load | Class-instance signals under `mutate()` reference mode have a known latent bug — followup at `ai/plans/X.md` |
+| Subclasses overriding `equalityFunction` silently fall back to default | Bulk list-replacement perf regresses vs clone-on-read; under investigation |
+| Code relying on old clone-on-read semantics now mutates shared references | Subtle reactivity changes in the component renderer due to signal-ergonomics shift — worth a careful read of the renderer's hot path |
+
+Include the failure-modes list when the score ≥ 5 OR when there are real humility checks worth naming. For low-risk PRs with no humility-check items, the list is noise — skip it.
 
 ---
 
@@ -211,7 +335,16 @@ Listing every file or knob touched performs thoroughness the diff already shows.
    - Move `bench-history.json` next to the reporter
 ```
 
-### 6. Word imprecision
+### 6. Conversational offers
+
+PR descriptions state facts, not offers. Phrases like *happy to add as a follow-up*, *let me know if you want*, *would you like me to*, *feel free to* read as conversational AI. They have no place in a PR body. If a follow-up is worth mentioning, state it as a fact.
+
+```
+❌ "A `seed` parameter would restore determinism — happy to add as a follow-up."
+✅ "Determinism via a `seed` parameter is a possible follow-up."
+```
+
+### 7. Word imprecision
 
 Pick the word that matches the *actual nature* of the change. AI writing reaches for stronger or more generic words; precision builds trust.
 
@@ -257,10 +390,16 @@ Title at concept level (the *destination concept*, not the literal new path). Bu
 In order:
 
 1. **Hemingway pass on the title.** Cut every word that doesn't carry meaning.
-2. **Re-read each bullet.** Is it describing the *outcome* (state now true) or the *mechanism* (work performed)? Rewrite mechanism bullets.
-3. **Search for AI tells.** Look for: *verified, ensured, considered, note that, important to flag, in summary, this PR introduces, all tests pass, fully tested*.
-4. **Check tier appropriateness.** Did you reach for Medium/Large machinery (Risk score, How to Test) on a Small PR? If yes, drop them.
-5. **Honest question:** if a colleague wrote this PR and pinged you, would the body sound like them, or like a corporate document? If the latter, you're still in AI-prose mode.
+2. **Bullet shape sweep.** Are bullets noun phrases or short verb phrases under ~10 words? Rewrite long ones to be tighter.
+3. **Selectivity sweep.** For each bullet ask: would a reviewer learn this from the diff alone? If yes, the bullet is trivia — drop it. Especially watch for incidental cleanup (a rename mixed with removals, a link fix mixed with moves) — those usually belong silently in the diff.
+4. **Roll-up sweep.** Multiple bullets sharing the same action ("Remove A", "Remove B", "Remove C") should collapse to one ("Remove unused tooling configs (A, B, C)").
+5. **Intent rewrite.** For each bullet ask: is there an intent-level rephrasing that captures *why* the change exists? "Move X to Y" describes state; "Create Y for grouping X-class things" describes intent. Prefer intent when the why is crisp.
+6. **Cut justifications.** Search bullets for "now that", "since", "to satisfy", "because", "that doesn't" — usually defensive padding.
+7. **Cut scaffolding bullets.** If a bullet states the obvious consequence of bullets above it ("update path references to match"), drop it.
+8. **Trim framing sentence tails.** "so that…", "plus the X that follows", "in order to…" — usually padding.
+9. **Search for AI tells.** Look for: *verified, ensured, considered, note that, important to flag, in summary, this PR introduces, all tests pass, fully tested*.
+10. **Check tier appropriateness.** Did you reach for Medium/Large machinery on a Small PR? If yes, drop them.
+11. **Honest question:** if a colleague wrote this PR and pinged you, would the body sound like them, or like a corporate document? If the latter, you're still in AI-prose mode.
 
 ---
 
