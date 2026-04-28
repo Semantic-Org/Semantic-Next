@@ -208,21 +208,31 @@
   - Word imprecision: "broken" when the right word is "vestigial" or "stale"
 </pr_format>
 
+<ai_folder_layout>
+  The `/ai/` directory holds AI-collaboration infrastructure for this project. Four homes:
+
+  - `/ai/skills/` — MCP-served skills, context, and workflows. Organized by audience subdirectory (e.g. `contributing/`, `authoring/`).
+  - `/ai/research/` — Independent research corpus (cross-framework UI primitive analysis, etc.). Not served via MCP.
+  - `/ai/plans/` — Canonical implementation plans tracked by `ROADMAP.md`. Completed plans archive to `/ai/plans/archive/`; deferred to `/ai/plans/deferred/`. See the `manage-roadmap` skill for the planning workflow.
+  - `/ai/workspace/` — Per-user scratch (gitignored). See `<agent_workspace>` below.
+
+  **Do not create new top-level directories** in `/ai/`. New work fits into one of the above.
+</ai_folder_layout>
+
 <agent_workspace>
-  You have access to an agent workspace in `/ai/workspace/`. Use it for scratch files, drafts, and intermediate outputs as needed. Loose files in the workspace root are fine for active work.
+  `/ai/workspace/` is per-user scratch — not tracked by git, no shared structure imposed. Two audiences use it:
 
-  **Do not create new top-level directories** in `ai/workspace/` or `ai/`. Use the existing structure:
+  - **Agents** create files as work proceeds: drafts, intermediate outputs, perf traces, evaluation reports.
+  - **Humans** drop reference files for agents to consume: screenshots, external snapshots, PDFs, ad-hoc notes.
 
-  - `/ai/skills/` — All MCP-served content (skills, context, workflows). Organized by audience subdirectory.
-  - `/ai/research/` — Independent research corpus. Not served via MCP.
-  - `/ai/plans/` — Canonical implementation plans. Drafts live in `/ai/plans/draft/`; promote to `/ai/plans/*.md` when agreed, `/ai/plans/archive/` when complete, `/ai/plans/deferred/` if shelved.
-  - `/ai/workspace/` — Per-user scratch. Not tracked by git. Suggested organization (vary as needed):
-    - `plans/` — Drafts in development before promoting to `/ai/plans/draft/`
-    - `artifacts/` — Reports, evaluations, intermediate outputs
-    - `reference/` — Screenshots, external snapshots, research input
-    - `tmp/` — Truly ephemeral; cleanup-anytime safe
+  Suggested organization (tidiness hints, not rules):
 
-  **Promotion** — Anything worth keeping moves out of `/ai/workspace/` into a canonical home above. The workspace is gitignored — any file inside it stays local to your machine.
+  - `plans/` — Drafts in development. Promote to `/ai/plans/{plan}.md` via the `manage-roadmap` skill once a plan is adopted on the roadmap.
+  - `artifacts/` — Reports, evaluations, intermediate outputs.
+  - `reference/` — Screenshots, external snapshots, research input.
+  - `tmp/` — Truly ephemeral; cleanup-anytime safe.
+
+  Anything worth keeping moves out of `/ai/workspace/` into a canonical home (`/ai/skills/`, `/ai/research/`, or `/ai/plans/`). The workspace is gitignored — files inside stay local to your machine.
 </agent_workspace>
 
 <tool_gotchas>
