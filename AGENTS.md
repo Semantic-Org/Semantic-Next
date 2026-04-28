@@ -209,18 +209,15 @@
 </pr_format>
 
 <agent_workspace>
-  You have access to an agent workspace in `/ai/workspace/`. Use it for scratch files, drafts, and intermediate outputs as needed. Loose files in the workspace root are fine for active work.
+  You have a private workspace at `/ai/workspace/`. Treat it like a VM home — drop scratch files, drafts, reports anywhere, in any structure that suits the work. Nothing inside is tracked by git.
 
-  **Do not create new top-level directories** in `ai/workspace/` or `ai/`. Use the existing structure:
+  To make work persist into the repo, file it into a canonical home:
 
-  - `/ai/skills/` — All MCP-served content (skills, context, workflows). Organized by audience subdirectory.
-  - `/ai/research/` — Independent research corpus. Not served via MCP.
-  - `/ai/workspace/plans/` — Implementation plans. Always put plans here so they can be tracked with this repository.
-  - `/ai/workspace/artifacts/` — Agent work product: drafts, intermediate outputs, generated content.
-  - `/ai/workspace/reference/` — User-provided input: screenshots, external docs, snapshots.
-  - `/ai/workspace/tmp/` — Truly ephemeral files (intermediate outputs, scratch calculations, pipeline artifacts). Can be cleaned up at any time without review.
+  - **Plans in development** → `/ai/plans/draft/` (promote to `/ai/plans/*.md` when canonical, `/ai/plans/archive/` when done, `/ai/plans/deferred/` if shelved).
+  - **Reusable agent context** → `/ai/skills/` (MCP-served).
+  - **Cross-framework UI primitive research** → `/ai/research/`.
 
-  **Housekeeping** — When a task or project is finished, move its workspace artifacts to the appropriate subdirectory in `/ai/trash/`. Completed plans go to `/ai/trash/plans/`, investigations to `/ai/trash/investigations/`, etc. This keeps the workspace focused on active work.
+  Don't try to commit anything inside `/ai/workspace/` — the repo will refuse via gitignore.
 </agent_workspace>
 
 <tool_gotchas>
