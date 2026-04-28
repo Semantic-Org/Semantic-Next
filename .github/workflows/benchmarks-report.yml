@@ -31,7 +31,7 @@ jobs:
         id: bot-token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.SEMANTIC_PERF_BOT_APP_ID }}
+          client-id: ${{ secrets.SEMANTIC_PERF_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_PERF_BOT_PRIVATE_KEY }}
 
       - uses: actions/checkout@v6
@@ -40,7 +40,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: '.node-version'
 
       # Pin reporter to main. The PR cannot author the tool that renders
       # its own bench comment — classification thresholds, output format,
@@ -162,7 +162,7 @@ jobs:
         id: bot-token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.SEMANTIC_PERF_BOT_APP_ID }}
+          client-id: ${{ secrets.SEMANTIC_PERF_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_PERF_BOT_PRIVATE_KEY }}
 
       # Check out main's tip for the commit target. We push back to main,
@@ -176,7 +176,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: '.node-version'
 
       - name: Download bench artifacts
         uses: dawidd6/action-download-artifact@v20
