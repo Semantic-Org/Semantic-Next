@@ -13,10 +13,7 @@
     "README.md"
   ],
   "exports": {
-    ".": {
-      "import": "./src/index.js",
-      "default": "./dist/index.min.js"
-    }
+    ".": "./src/index.js"
   },
   "sideEffects": false,
   "scripts": {
@@ -24,7 +21,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/semantic-org/esbuild-resolve-bare-imports.git"
+    "url": "git+https://github.com/Semantic-Org/Semantic-Next.git",
+    "directory": "internal-packages/esbuild-resolve-bare-imports"
   },
   "keywords": [
     "esbuild",
