@@ -9,7 +9,7 @@ on:
       # run (pull_request uses PR-head YAML), so self-test
       - '.github/workflows/benchmarks.yml'
       # Bench source (bench-*.js, tachometer-ci*.json, build-ci.js) and
-      # reporter (tools/bench-reporter/**) are deliberately NOT listed here.
+      # reporter (tools/ci/bench/reporter/**) are deliberately NOT listed here.
       # The discover and benchmarks jobs overlay main's copy of both before
       # every run, so PR-side edits have no effect on the PR's own comment.
       # Harness changes land on main in a separate PR; test-taker cannot
@@ -40,22 +40,22 @@ jobs:
       matrix: ${{ steps.matrix.outputs.result }}
       has-benchmarks: ${{ steps.matrix.outputs.has-benchmarks }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
 
-      # Pin bench harness to main. Matrix composition (tools/bench-matrix,
+      # Pin bench harness to main. Matrix composition (tools/ci/bench/matrix,
       # bench source, tachometer configs, reporter) is author-neutral —
       # test-taker can't widen or narrow its own scope, rewrite discover.js,
       # or add a rigged config. Harness changes land on main first.
       - name: Overlay bench harness from main
         run: |
           git fetch origin main --depth=1
-          git checkout origin/main -- packages/*/bench/ tools/bench-reporter/ tools/bench-matrix/ 2>/dev/null || true
+          git checkout origin/main -- packages/*/bench/ tools/ci/bench/reporter/ tools/ci/bench/matrix/ 2>/dev/null || true
 
       # Collect the PR's changed-file set vs base; discover.js filters the
       # matrix to configs whose owning package's @semantic-ui/* dep closure
@@ -76,7 +76,7 @@ jobs:
         id: matrix
         env:
           CHANGED_FILES_PATH: /tmp/changed-files.txt
-        run: node tools/bench-matrix/discover.js
+        run: node tools/ci/bench/matrix/discover.js
 
   benchmarks:
     needs: discover
@@ -94,9 +94,9 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: 'npm'
@@ -117,7 +117,7 @@ jobs:
       - name: Overlay bench harness from main
         run: |
           git fetch origin main --depth=1
-          git checkout origin/main -- packages/*/bench/ tools/bench-reporter/ 2>/dev/null || true
+          git checkout origin/main -- packages/*/bench/ tools/ci/bench/reporter/ 2>/dev/null || true
 
       # Build current branch benchmark bundles
       - name: Build current

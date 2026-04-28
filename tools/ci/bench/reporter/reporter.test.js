@@ -1,6 +1,6 @@
 /*
   Unit tests for reporter.js.
-  Run with: node --test tools/bench-reporter/reporter.test.js
+  Run with: node --test tools/ci/bench/reporter/reporter.test.js
 
   Fixture snapshots act as regression tests: the markdown and JSON output
   for two real runs (one with meaningful multi-magnitude delta, one with
@@ -52,11 +52,11 @@ function runReporter({
   if (wallClock) { argv.push('--wall-clock', wallClock); }
   // Point history at a known fixture path OR a deliberate non-existent
   // path to exercise the graceful-degrade branch. Default (no --history)
-  // resolves to <cwd>/bench-history.json which will typically exist on a
-  // D3a-landed checkout; tests opt in to a specific fixture.
+  // resolves to <repo-root>/tools/ci/bench/reporter/bench-history.json;
+  // tests opt in to a specific fixture.
   if (history) { argv.push('--history', history); }
   // Run from repo root so resolveMetricSource can find packages/.../bench/tachometer
-  const cwd = path.resolve(__dirname, '..', '..');
+  const cwd = path.resolve(__dirname, '..', '..', '..', '..');
   execFileSync('node', argv, { stdio: ['ignore', 'pipe', 'inherit'], cwd });
   const report = JSON.parse(fs.readFileSync(path.join(tmp, 'bench-report.json'), 'utf8'));
   const markdown = fs.readFileSync(path.join(tmp, 'comment.md'), 'utf8');

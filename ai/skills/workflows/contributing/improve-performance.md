@@ -68,7 +68,7 @@ Three tools serve different purposes. Using the wrong one for the job produces m
 
 ### How tachometer output reaches a reviewer
 
-Tachometer emits JSON. In this repo, CI hands that JSON to an in-house reporter (`tools/bench-reporter/`) that renders a PR comment with per-metric verdicts (faster/slower/no change/unsure) and uploads a structured `bench-report.json` artifact for agent consumption. The reporter is the human-readable surface; the JSON adjunct is the agent-readable one. Both derive from the same tachometer output — no parallel data paths.
+Tachometer emits JSON. In this repo, CI hands that JSON to an in-house reporter (`tools/ci/bench/reporter/`) that renders a PR comment with per-metric verdicts (faster/slower/no change/unsure) and uploads a structured `bench-report.json` artifact for agent consumption. The reporter is the human-readable surface; the JSON adjunct is the agent-readable one. Both derive from the same tachometer output — no parallel data paths.
 
 ### Tachometer in monorepos
 

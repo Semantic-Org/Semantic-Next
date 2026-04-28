@@ -29,8 +29,8 @@ const packagesDir = path.join(root, 'packages');
 const harnessTriggers = [
   '.github/workflows/benchmarks.yml',
   '.github/workflows/benchmarks-report.yml',
-  'tools/bench-reporter/',
-  'tools/bench-matrix/',
+  'tools/ci/bench/reporter/',
+  'tools/ci/bench/matrix/',
 ];
 
 function findConfigs() {

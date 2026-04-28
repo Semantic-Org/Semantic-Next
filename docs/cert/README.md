@@ -1,23 +1,33 @@
-# Development SSL Certificates
+# Local-Dev SSL Certs
 
-CA-signed certificates for `https://dev.semantic-ui.com`. See `docs/README.md` for installation instructions.
+Self-signed CA and server cert for `https://dev.semantic-ui.com`. Required for the docs site's REPL.
 
-## Regenerating Certificates
+## Setup
+
+From `docs/`:
 
 ```bash
-# Generate CA (10 year validity)
-openssl genrsa -out ca-key.pem 2048
-openssl req -new -x509 -key ca-key.pem -out ca.pem -days 3650 -subj "/CN=Semantic UI Dev CA/O=Semantic UI LLC"
-
-# Generate server cert signed by CA
-openssl genrsa -out dev.semantic-ui.com-key.pem 2048
-openssl req -new -key dev.semantic-ui.com-key.pem -out temp.csr -subj "/CN=dev.semantic-ui.com/O=Semantic UI LLC"
-echo "subjectAltName=DNS:dev.semantic-ui.com,DNS:localhost" > /tmp/san.ext
-openssl x509 -req -in temp.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out dev.semantic-ui.com.pem -days 3650 -extfile /tmp/san.ext
-rm temp.csr /tmp/san.ext ca.srl
-
-# Generate .pfx for Windows (no password)
-openssl pkcs12 -export -nokeys -in ca.pem -out ca.pfx -passout pass:
+npm run cert
 ```
 
-All developers must reinstall the CA after regeneration.
+This populates `docs/cert/` with:
+
+- `ca.pem`, `ca-key.pem` — local CA (10 year validity)
+- `ca.pfx` — Windows-trust-store form of the CA
+- `dev.semantic-ui.com.pem`, `dev.semantic-ui.com-key.pem` — server cert
+
+## Trust the CA
+
+- **macOS**: open Keychain Access → drag `ca.pem` into the System keychain → set "Always Trust" for SSL.
+- **Windows**: double-click `ca.pfx` → install into "Trusted Root Certification Authorities".
+- **Linux**: `sudo cp ca.pem /usr/local/share/ca-certificates/semantic-ui-dev-ca.crt && sudo update-ca-certificates`.
+
+## Add to hosts
+
+`/etc/hosts` (macOS/Linux) or `C:\Windows\System32\drivers\etc\hosts` (Windows):
+
+```
+127.0.0.1 dev.semantic-ui.com
+```
+
+Restart the dev server and visit `https://dev.semantic-ui.com`.
