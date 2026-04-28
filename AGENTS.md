@@ -232,7 +232,7 @@
   - `reference/` — Screenshots, external snapshots, research input.
   - `tmp/` — Truly ephemeral; cleanup-anytime safe.
 
-  Anything worth keeping moves out of `/ai/workspace/` into a canonical home (`/ai/skills/`, `/ai/research/`, or `/ai/plans/`). The workspace is gitignored — files inside stay local to your machine.
+  Promotion to a canonical home (`/ai/skills/`, `/ai/research/`, `/ai/plans/`) is user-initiated. When asked to promote a draft, follow the relevant skill workflow (e.g. `manage-roadmap` for plans). Otherwise, files in `/ai/workspace/` stay local — the workspace is gitignored.
 </agent_workspace>
 
 <tool_gotchas>
