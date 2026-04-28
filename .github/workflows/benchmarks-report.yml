@@ -61,7 +61,7 @@ jobs:
           git show origin/main:tools/ci/bench/reporter/bench-history.json > tools/ci/bench/reporter/bench-history.json 2>/dev/null || true
 
       - name: Download bench artifacts
-        uses: dawidd6/action-download-artifact@v20
+        uses: dawidd6/action-download-artifact@v21
         with:
           github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
@@ -179,7 +179,7 @@ jobs:
           node-version-file: '.node-version'
 
       - name: Download bench artifacts
-        uses: dawidd6/action-download-artifact@v20
+        uses: dawidd6/action-download-artifact@v21
         with:
           github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
