@@ -209,15 +209,20 @@
 </pr_format>
 
 <agent_workspace>
-  You have a private workspace at `/ai/workspace/`. Treat it like a VM home — drop scratch files, drafts, reports anywhere, in any structure that suits the work. Nothing inside is tracked by git.
+  You have access to an agent workspace in `/ai/workspace/`. Use it for scratch files, drafts, and intermediate outputs as needed. Loose files in the workspace root are fine for active work.
 
-  To make work persist into the repo, file it into a canonical home:
+  **Do not create new top-level directories** in `ai/workspace/` or `ai/`. Use the existing structure:
 
-  - **Plans in development** → `/ai/plans/draft/` (promote to `/ai/plans/*.md` when canonical, `/ai/plans/archive/` when done, `/ai/plans/deferred/` if shelved).
-  - **Reusable agent context** → `/ai/skills/` (MCP-served).
-  - **Cross-framework UI primitive research** → `/ai/research/`.
+  - `/ai/skills/` — All MCP-served content (skills, context, workflows). Organized by audience subdirectory.
+  - `/ai/research/` — Independent research corpus. Not served via MCP.
+  - `/ai/plans/` — Canonical implementation plans. Drafts live in `/ai/plans/draft/`; promote to `/ai/plans/*.md` when agreed, `/ai/plans/archive/` when complete, `/ai/plans/deferred/` if shelved.
+  - `/ai/workspace/` — Per-user scratch. Not tracked by git. Suggested organization (vary as needed):
+    - `plans/` — Drafts in development before promoting to `/ai/plans/draft/`
+    - `artifacts/` — Reports, evaluations, intermediate outputs
+    - `reference/` — Screenshots, external snapshots, research input
+    - `tmp/` — Truly ephemeral; cleanup-anytime safe
 
-  Don't try to commit anything inside `/ai/workspace/` — the repo will refuse via gitignore.
+  **Promotion** — Anything worth keeping moves out of `/ai/workspace/` into a canonical home above. The workspace is gitignored — any file inside it stays local to your machine.
 </agent_workspace>
 
 <tool_gotchas>
