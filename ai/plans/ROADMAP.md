@@ -118,6 +118,7 @@ Behavioral changes and API contracts that downstream agents and consumers will t
 | 2c | [State from Settings](state-from-settings.md) | 8h | pair | scoped | `{ default: 'all', from: 'setting' }` in `defaultState`. Eliminates manual shadowing for components that accept initial values from attributes but own them as state. |
 | 2d | [Subtemplate Settings](subtemplate-settings.md) | 8-12h | pair | initial | Reactive `defaultSettings` on subtemplates with merged proxy over parent web component settings. Same upgrade path: add `tagName` and the subtemplate becomes a web component with no API change. |
 | 2e | [Template Match Blocks](template-match-blocks.md) | 8-16h (1-2d) | pair | scoped | `{#match}`/`{is}`/`{else}` — value-based branching. Replaces verbose `{#if is x 'a'}...{else if is x 'b'}` chains. |
+| 2f | [Internationalization](i18n.md) | TBD | pair | initial | i18n as a built-in framework primitive — locale, formatters, RTL, language switching. Lands before Phase 4 to avoid retrofitting 60+ components. Pair session needed to scope. |
 
 ---
 
