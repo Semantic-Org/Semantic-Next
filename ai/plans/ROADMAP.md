@@ -191,6 +191,7 @@ Match blocks are prioritized in Phase 2. The remaining items ship when real comp
 Plans drafted but not on the active roadmap. See `ai/plans/icebox/` for files.
 
 - [Block Runtime Diagnostics](icebox/block-runtime-diagnostics.md) — resolution-trail capture in evaluator + public `report()` API for block authors.
+- [WASM Renderer](icebox/wasm-renderer.md) — Rust/WASM server renderer for the docs-site hot path. Open questions on streaming, bundle size, AST caching.
 - [Signals TC39 Integration](icebox/signals-tc39-integration.md) — adopt native `Signal.State`/`Signal.Computed` as backing primitives when TC39 ships. Blocked on TC39 Stage 3+.
 - [Add Icon Stroke Width](icebox/add-icon-stroke-width.md) — power-user feature, post-1.0.
 - [Audit Fix Continuation](icebox/audit-fix-continuation.md) — process work for follow-up audits.

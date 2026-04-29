@@ -358,3 +358,21 @@ This is the hardest step. Currently a method on the Renderer class with coupling
 ## Status
 
 Scoped. Phase 1 (JS reference implementation) ready to execute. Phase 2 (Rust/WASM) scoped pending Phase 1 completion.
+
+## Completion
+
+- **Status:** Phase 1 (JS reference implementation) shipped in full. Phase 2 (Rust/WASM renderer) extracted to a follow-up plan in icebox.
+
+### Shipped per spec — Phase 1
+
+- `buildHTMLString` extracted as a pure function (`packages/renderer/src/build-html-string.js`) returning `{ htmlString, entries, snippets }`.
+- Versioned markers — `sui:v1:N` (text), `sui-block:v1:N` (block), `__suiN__` (attribute).
+- JS `renderToString` — `packages/component/src/render-to-string.js` plus `ServerRenderer` in `packages/renderer/src/engines/native/server.js`.
+- `hydrateMarkers` in the native renderer with the Plan-04 `data-sui-bind` fast path that eliminates the reference-DOM parallel walker.
+- DSD detection in `WebComponentBase.connectedCallback` with marker version check; falls back to full render on mismatch.
+- `isHydrating` flag exposed via `Template.callParams` to `createComponent` callbacks.
+- Per-item server markers (`sui-item:v1:KEY`) for each-block adoption — landed alongside the native-renderer-blocks decomposition.
+
+### Deferred — extracted to follow-up plan
+
+- **Rust/WASM server renderer (Phase 2)** → [WASM Renderer](../icebox/wasm-renderer.md) (icebox). Carries the open questions on streaming, bundle size, and AST caching.

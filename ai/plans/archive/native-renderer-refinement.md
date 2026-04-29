@@ -214,3 +214,24 @@ Items 1-4 are about making the code match the architecture's intent. Items 5-8 a
 ## Status
 
 Ready whenever someone picks it up. Each item is independent — they can be done in any order without conflicts.
+
+## Completion
+
+- **Status:** Most items shipped during the broader native-renderer + decomposition + perf work. Two remaining items are minor polish not worth tracking separately; one item is covered by ROADMAP `2f Expression Error Surfacing`.
+
+### Shipped per spec
+
+- **Item 1 — PreparedTemplate caching.** `cachedBuildHTMLString` WeakMap (keyed on AST) plus `templateCache` LRU for parsed `<template>` elements.
+- **Item 2 — `__isItemProxy` removal.** Replaced with a module-scoped `itemContextProxies` WeakSet plus `isItemContext` function exported from `each.js`. Same intent (tell `unpackNodeData` whether to wrap in `Reaction.nonreactive`); cleaner mechanism — no metadata leak through the data context.
+- **Item 3 — Selective `dataVersion` tracking.** `Renderer.lookupExpression` only depends on `dataDep` when `receivesData: true`. Top-level component renderers skip the dep registration.
+- **Item 6 — `buildHTMLString` as static.** Pure exported function in `build-html-string.js`. No Renderer instance needed; SSR imports it directly.
+- **Item 7 — Snippet registration as output.** `buildHTMLString` returns `{ htmlString, entries, snippets }`; no instance mutation.
+
+### Not shipped — not worth tracking separately
+
+- **Item 4 — Reuse comment markers as anchors.** `DynamicRegion` still creates an empty text node and replaces the marker with it. Saves one DOM operation per block plus a small DX win in DevTools. Small enough to absorb in any future region-management refactor.
+- **Item 8 — DynamicRegion simplification.** Constructor still takes `(parentNode, marker)` rather than just `(anchor)`. Cosmetic, no functional change.
+
+### Covered by other plans
+
+- **Item 5 — Error boundaries for expression evaluation.** Covered by ROADMAP `2f Expression Error Surfacing`.

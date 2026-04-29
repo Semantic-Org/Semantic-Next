@@ -177,3 +177,16 @@ The docs site imports `LitRenderer` once in its entry point. All 14 primitives c
 ## Status
 
 Scoped. Ready to execute. ~6-8h agent.
+
+## Completion
+
+- **Status:** Fully shipped per spec. Predates the formal completion-tracking convention; landed as part of the broader engine-architecture work alongside Lit removal.
+
+### Shipped
+
+- `packages/renderer/src/engine-registry.js` — `registerEngine` / `getEngine`.
+- `packages/renderer/src/engines/{native,lit}/` — engine source trees.
+- `packages/component/src/engines/{native,lit}/` — base classes + factories.
+- `LitRenderer` exported from `@semantic-ui/component` with side-effect registration; tree-shakes when not imported.
+- `defineComponent` and `Template.initialize()` resolve renderer/factory from engine object or registry name.
+- Examples drop `renderingEngine: 'native'` since native is the default.
