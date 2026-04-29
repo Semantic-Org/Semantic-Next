@@ -13,13 +13,13 @@ Two independent selection passes were run in parallel by separate Claude instanc
 ### Pass 1A: Exhaustive Vibe Pass (827 icons)
 - **Approach**: 5 parallel sub-agents each processed ~335 icons from the full Lucide set (1,668 primary icons, aliases excluded). Each agent independently appended icons that "felt essential" for common UI work.
 - **Criteria**: Broad category coverage (navigation, status, communication, commerce, data, dev tools, AI/ML). Skip niche/domain-specific icons.
-- **Result**: `pass-1-exhaustive-827.txt` — high recall, low precision. Committees expand.
+- **Result**: `selection-exhaustive.txt` — high recall, low precision. Committees expand.
 - **Weakness**: No dedup discipline. Shipped `cog`, `settings`, and `settings-2`. No consistent family boundaries.
 
 ### Pass 1B: Editorial Dedup Pass (341 icons)
 - **Approach**: Single agent, single pass. "Deduplicate concepts that overlap in training data."
 - **Criteria**: One icon per concept. If two icons map to the same mental concept, only the better glyph survives.
-- **Result**: `pass-1-editorial-341.txt` — high precision, some recall gaps.
+- **Result**: `selection-editorial.txt` — high precision, some recall gaps.
 - **Weakness**: Missed font-size icons (`a-arrow-down/up`), ascending sort counterpart, `car`, `hand`, `hard-drive`, grid icons, `graduation-cap`, emotion spectrum (`frown`/`meh`).
 
 ### Adversarial Review
@@ -32,7 +32,7 @@ The two agents exchanged arguments through a human mediator. Key points of conve
 This produced the **semantic name test**: if an icon earns a distinct, intuitive `<ui-icon name>` that an agent would reach for, it belongs. If it's a synonym or container variant of an existing concept, it doesn't.
 
 ### Pass 2: Expansion Review (341 → 433)
-Agent B applied the semantic name test to Agent A's 501 extras. 92 passed, 409 were rejected. Every decision is documented with rationale in `expansion-review.md`.
+Agent B applied the semantic name test to Agent A's 501 extras. 92 passed, 409 were rejected. Every decision is documented with rationale in `inclusion-rationale.md`.
 
 Biggest expansion categories:
 - Panels/layout (+13): sidebar open/close, drawer open/close, alignment family
@@ -76,17 +76,17 @@ Both Agent A and Agent B signed off on all 30 additions.
 
 ## Final Result
 
-Converged Lucide-based vocabulary in `final-list.txt`, fed into `mappings.js` as the canonical name set. Estimated ~97%+ first-pass agent hit rate across dashboard, chat, e-commerce, dev tools, rich text editor, design tool, IoT, and admin panel contexts.
+Converged Lucide-based vocabulary in `canonical-roster.txt`, fed into `mappings.js` as the canonical name set. Estimated ~97%+ first-pass agent hit rate across dashboard, chat, e-commerce, dev tools, rich text editor, design tool, IoT, and admin panel contexts.
 
 ## Files
 
 | File | Description |
 |------|-------------|
-| `final-list.txt` | The converged icon list (ship this) |
-| `pass-1-exhaustive-827.txt` | Agent A's broad vibe pass |
-| `pass-1-editorial-341.txt` | Agent B's tight editorial pass |
-| `expansion-review.md` | Every addition/rejection with rationale and proposed semantic names |
-| `reconciliation-audit.md` | Independent auditor's three-way reconciliation review |
+| `canonical-roster.txt` | The converged icon list (ship this) |
+| `selection-exhaustive.txt` | Agent A's broad vibe pass |
+| `selection-editorial.txt` | Agent B's tight editorial pass |
+| `inclusion-rationale.md` | Every addition/rejection with rationale and proposed semantic names |
+| `roster-audit.md` | Independent auditor's three-way reconciliation review |
 
 ## Key Insight
 

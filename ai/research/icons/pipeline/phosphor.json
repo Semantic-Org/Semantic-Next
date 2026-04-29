@@ -1,0 +1,1154 @@
+{
+  "close": {
+    "value": "x",
+    "reason": "Phosphor's 'x' icon is the standard close/dismiss glyph"
+  },
+  "back": {
+    "value": "arrow-left",
+    "reason": "Direct arrow-left icon for navigating back"
+  },
+  "next": {
+    "value": "arrow-right",
+    "reason": "Direct arrow-right icon for navigating forward"
+  },
+  "up": {
+    "value": "arrow-up",
+    "reason": "Direct arrow-up icon"
+  },
+  "down": {
+    "value": "arrow-down",
+    "reason": "Direct arrow-down icon"
+  },
+  "external-link": {
+    "value": "arrow-square-out",
+    "reason": "Phosphor uses 'arrow-square-out' for the external link concept (arrow exiting a square). Confirmed in Phosphor releases."
+  },
+  "chevron-right": {
+    "value": "caret-right",
+    "reason": "Phosphor uses 'caret-right' rather than 'chevron-right'. Confirmed in Phosphor icon set."
+  },
+  "chevron-down": {
+    "value": "caret-down",
+    "reason": "Phosphor uses 'caret-down' for the chevron-down concept"
+  },
+  "chevron-up": {
+    "value": "caret-up",
+    "reason": "Phosphor uses 'caret-up' for the chevron-up concept"
+  },
+  "chevron-left": {
+    "value": "caret-left",
+    "reason": "Phosphor uses 'caret-left' for the chevron-left concept"
+  },
+  "more": {
+    "value": "dots-three",
+    "reason": "Phosphor's 'dots-three' is a horizontal three-dot ellipsis icon for more options"
+  },
+  "more-options": {
+    "value": "dots-three-vertical",
+    "reason": "Phosphor's 'dots-three-vertical' is the vertical kebab menu icon"
+  },
+  "sidebar": {
+    "value": "sidebar-simple",
+    "reason": "Phosphor has 'sidebar-simple' for a panel/drawer toggle. Preferred over 'sidebar' which shows a more complex layout."
+  },
+  "columns": {
+    "value": "columns",
+    "reason": "Phosphor has a direct 'columns' icon for column layout views"
+  },
+  "anchor": {
+    "value": "anchor-simple",
+    "reason": "Phosphor has 'anchor-simple' which is a cleaner anchor glyph suitable for anchor links. Also has 'anchor' but 'anchor-simple' is more minimal."
+  },
+  "user": {
+    "value": "user",
+    "reason": "Direct match. Phosphor has a 'user' icon depicting a single person silhouette."
+  },
+  "avatar": {
+    "value": "user-circle",
+    "reason": "Phosphor's 'user-circle' shows a user silhouette inside a circle, matching the avatar/account concept"
+  },
+  "users": {
+    "value": "users",
+    "reason": "Direct match. Phosphor has a 'users' icon showing multiple people."
+  },
+  "add-user": {
+    "value": "user-plus",
+    "reason": "Phosphor's 'user-plus' icon shows a user with a plus sign. Confirmed in release notes."
+  },
+  "remove-user": {
+    "value": "user-minus",
+    "reason": "Phosphor's 'user-minus' icon shows a user with a minus sign. Confirmed in release notes."
+  },
+  "assigned": {
+    "value": "user-check",
+    "reason": "Phosphor's 'user-check' icon shows a user with a checkmark, suitable for verified/assigned user"
+  },
+  "admin": {
+    "value": "shield-check",
+    "reason": "Phosphor has no 'user-shield' icon. 'shield-check' conveys protected/admin status. Candidates: 'crown' (too regal), 'user-circle-gear' (too settings-like). 'shield-check' is the best available match for admin authority."
+  },
+  "user-settings": {
+    "value": "user-gear",
+    "reason": "Phosphor's 'user-gear' icon shows a user with a gear, directly matching user settings. Confirmed in release notes."
+  },
+  "anonymous": {
+    "value": "detective",
+    "reason": "Phosphor's 'detective' icon shows a figure with hat and magnifying glass, conveying incognito/anonymous. Confirmed in Phosphor set."
+  },
+  "roles": {
+    "value": "identification-badge",
+    "reason": "Phosphor's 'identification-badge' is a badge/ID card icon. Best fit for roles/permissions since Phosphor has no dedicated roles icon. Candidates: 'identification-card' (too literal for ID), 'user-list' (too many users). Badge conveys assigned identity/role."
+  },
+  "login": {
+    "value": "sign-in",
+    "reason": "Phosphor's 'sign-in' icon shows an arrow entering a boundary, directly matching the login concept"
+  },
+  "logout": {
+    "value": "sign-out",
+    "reason": "Phosphor's 'sign-out' icon shows an arrow exiting a boundary, directly matching the logout concept"
+  },
+  "fingerprint": {
+    "value": "fingerprint",
+    "reason": "Direct match. Phosphor has a 'fingerprint' icon for biometric authentication."
+  },
+  "add": {
+    "value": "plus",
+    "reason": "Phosphor's 'plus' icon is the standard add/create glyph"
+  },
+  "edit": {
+    "value": "pencil-simple",
+    "reason": "Phosphor's 'pencil-simple' is a clean pencil icon for editing. Preferred over 'pencil' which has more detail."
+  },
+  "delete": {
+    "value": "trash",
+    "reason": "Direct match. Phosphor has a 'trash' icon for delete/remove."
+  },
+  "save": {
+    "value": "floppy-disk",
+    "reason": "Phosphor's 'floppy-disk' is the standard save icon. Confirmed in release notes with front/back variants."
+  },
+  "check": {
+    "value": "check",
+    "reason": "Direct match. Phosphor has a 'check' icon for confirm/done actions."
+  },
+  "refresh": {
+    "value": "arrows-clockwise",
+    "reason": "Phosphor's 'arrows-clockwise' shows two arrows in a circular motion, ideal for refresh/sync. Candidates: 'arrow-clockwise' (single arrow, more like redo). 'arrows-clockwise' better conveys sync/refresh."
+  },
+  "undo": {
+    "value": "arrow-counter-clockwise",
+    "reason": "Phosphor's 'arrow-counter-clockwise' is a counter-clockwise curved arrow, the standard undo glyph"
+  },
+  "redo": {
+    "value": "arrow-clockwise",
+    "reason": "Phosphor's 'arrow-clockwise' is a clockwise curved arrow, the standard redo glyph"
+  },
+  "copy": {
+    "value": "copy",
+    "reason": "Direct match. Phosphor has a 'copy' icon showing overlapping documents."
+  },
+  "clipboard": {
+    "value": "clipboard",
+    "reason": "Direct match. Phosphor has a 'clipboard' icon."
+  },
+  "copied": {
+    "value": "clipboard-check",
+    "reason": "Phosphor has 'clipboard-check' showing a clipboard with a checkmark, indicating copied/confirmed state"
+  },
+  "paste": {
+    "value": "clipboard-text",
+    "reason": "Phosphor's 'clipboard-text' shows a clipboard with text content, the best match for paste. Phosphor has no dedicated 'paste' icon."
+  },
+  "cut": {
+    "value": "scissors",
+    "reason": "Direct match. Phosphor has a 'scissors' icon for the cut action."
+  },
+  "move": {
+    "value": "arrows-out-cardinal",
+    "reason": "Phosphor's 'arrows-out-cardinal' shows four arrows pointing outward in cardinal directions, conveying movement/repositioning"
+  },
+  "drag-handle": {
+    "value": "dots-six-vertical",
+    "reason": "Phosphor's 'dots-six-vertical' shows a 2x3 grid of dots, the standard drag handle/grip pattern. Confirmed in release notes as a new addition."
+  },
+  "upload": {
+    "value": "upload-simple",
+    "reason": "Phosphor's 'upload-simple' is a clean upward arrow with a line, the standard upload glyph. Preferred over 'upload' which may have a tray."
+  },
+  "download": {
+    "value": "download-simple",
+    "reason": "Phosphor's 'download-simple' is a clean downward arrow with a line, the standard download glyph. Preferred over 'download' which may have a tray."
+  },
+  "import": {
+    "value": "sign-in",
+    "reason": "Phosphor has no dedicated 'import' icon. 'sign-in' (arrow entering a boundary) conveys bringing data in. Candidates: 'arrow-line-down' (too generic), 'download-simple' (conflicts with download). 'sign-in' is the best available match for importing data."
+  },
+  "export": {
+    "value": "sign-out",
+    "reason": "Phosphor has no dedicated 'export' icon. 'sign-out' (arrow exiting a boundary) conveys sending data out. Candidates: 'arrow-line-up' (too generic), 'upload-simple' (conflicts with upload). 'sign-out' is the best available match for exporting data."
+  },
+  "print": {
+    "value": "printer",
+    "reason": "Direct match. Phosphor has a 'printer' icon."
+  },
+  "share": {
+    "value": "share-network",
+    "reason": "Phosphor's 'share-network' shows connected nodes forming a share graph, the standard share icon pattern. Phosphor also has 'share' but 'share-network' is the more recognizable share glyph."
+  },
+  "send": {
+    "value": "paper-plane-tilt",
+    "reason": "Phosphor's 'paper-plane-tilt' is a tilted paper airplane, the standard send/submit icon. Preferred over 'paper-plane' for its more dynamic appearance."
+  },
+  "zap": {
+    "value": "lightning",
+    "reason": "Phosphor's 'lightning' icon is a lightning bolt, directly matching the fast/instant action concept"
+  },
+  "checkbox": {
+    "value": "check-square",
+    "reason": "Phosphor's 'check-square' shows a square with a checkmark inside, the standard checked checkbox"
+  },
+  "checkbox-empty": {
+    "value": "square",
+    "reason": "Phosphor's 'square' is an empty square, matching the unchecked checkbox state"
+  },
+  "toggle": {
+    "value": "toggle-right",
+    "reason": "Phosphor's 'toggle-right' shows a toggle switch in the on position (knob to the right)"
+  },
+  "toggle-off": {
+    "value": "toggle-left",
+    "reason": "Phosphor's 'toggle-left' shows a toggle switch in the off position (knob to the left)"
+  },
+  "file": {
+    "value": "file",
+    "reason": "Direct match; Phosphor has a base file icon representing a generic document"
+  },
+  "document": {
+    "value": "file-text",
+    "reason": "Phosphor's file-text icon shows a file with text lines, representing a text document"
+  },
+  "pdf": {
+    "value": "file-pdf",
+    "reason": "Direct match; Phosphor has a dedicated file-pdf icon for PDF documents"
+  },
+  "folder": {
+    "value": "folder",
+    "reason": "Direct match; Phosphor has a standard folder icon"
+  },
+  "new-folder": {
+    "value": "folder-plus",
+    "reason": "Direct match; Phosphor's folder-plus shows a folder with a plus sign for creating new folders"
+  },
+  "open-folder": {
+    "value": "folder-open",
+    "reason": "Direct match; Phosphor has a folder-open icon showing an opened folder"
+  },
+  "archive": {
+    "value": "archive",
+    "reason": "Direct match; Phosphor has an archive icon (box with lid) for archived items"
+  },
+  "zip": {
+    "value": "file-zip",
+    "reason": "Direct match; Phosphor has a file-zip icon representing compressed files"
+  },
+  "attachment": {
+    "value": "paperclip",
+    "reason": "Direct match; Phosphor has a paperclip icon representing file attachments"
+  },
+  "link": {
+    "value": "link",
+    "reason": "Direct match; Phosphor has a link icon showing chain links for URLs"
+  },
+  "unlink": {
+    "value": "link-break",
+    "reason": "Direct match; Phosphor's link-break shows broken chain links representing unlinking"
+  },
+  "image": {
+    "value": "image",
+    "reason": "Direct match; Phosphor has an image icon showing a landscape photo placeholder"
+  },
+  "gallery": {
+    "value": "images-square",
+    "reason": "Phosphor's images-square shows overlapping image frames, representing a photo gallery or collection"
+  },
+  "video": {
+    "value": "video-camera",
+    "reason": "Phosphor uses video-camera for the video/movie concept; a camcorder icon clearly conveys video"
+  },
+  "camera": {
+    "value": "camera",
+    "reason": "Direct match; Phosphor has a camera icon for photo capture"
+  },
+  "camera-off": {
+    "value": "camera-slash",
+    "reason": "Phosphor uses the -slash suffix convention; camera-slash shows a camera with a diagonal line through it"
+  },
+  "volume": {
+    "value": "speaker-high",
+    "reason": "Phosphor's speaker-high shows a speaker with full sound waves, representing volume on at normal/high level"
+  },
+  "volume-low": {
+    "value": "speaker-low",
+    "reason": "Direct match; Phosphor's speaker-low shows a speaker with reduced sound waves"
+  },
+  "mute": {
+    "value": "speaker-x",
+    "reason": "Phosphor's speaker-x shows a speaker with an X mark, representing muted audio"
+  },
+  "music": {
+    "value": "music-note",
+    "reason": "Phosphor's music-note shows a single musical note; clear representation of music/audio content"
+  },
+  "microphone": {
+    "value": "microphone",
+    "reason": "Direct match; Phosphor has a microphone icon for audio recording"
+  },
+  "microphone-off": {
+    "value": "microphone-slash",
+    "reason": "Phosphor uses the -slash suffix convention; microphone-slash shows a mic with a diagonal line through it"
+  },
+  "headphones": {
+    "value": "headphones",
+    "reason": "Direct match; Phosphor has a headphones icon for audio listening"
+  },
+  "podcast": {
+    "value": "podcast",
+    "reason": "Direct match; Phosphor has a dedicated podcast icon"
+  },
+  "broadcast": {
+    "value": "broadcast",
+    "reason": "Direct match; Phosphor has a broadcast icon showing signal waves for live/radio broadcasting"
+  },
+  "crop": {
+    "value": "crop",
+    "reason": "Direct match; Phosphor has a crop icon for image cropping"
+  },
+  "rotate": {
+    "value": "arrows-counter-clockwise",
+    "reason": "Phosphor's arrows-counter-clockwise shows circular arrows indicating rotation; best match for a rotate action"
+  },
+  "play": {
+    "value": "play",
+    "reason": "Direct match; Phosphor has a standard play triangle icon"
+  },
+  "pause": {
+    "value": "pause",
+    "reason": "Direct match; Phosphor has a standard pause icon with two vertical bars"
+  },
+  "stop": {
+    "value": "stop",
+    "reason": "Direct match; Phosphor has a standard stop square icon"
+  },
+  "skip-next": {
+    "value": "skip-forward",
+    "reason": "Phosphor uses skip-forward for the next track action; shows a forward skip triangle with bar"
+  },
+  "skip-previous": {
+    "value": "skip-back",
+    "reason": "Phosphor uses skip-back for the previous track action; shows a backward skip triangle with bar"
+  },
+  "fast-forward": {
+    "value": "fast-forward",
+    "reason": "Direct match; Phosphor has a fast-forward icon with double forward triangles"
+  },
+  "rewind": {
+    "value": "rewind",
+    "reason": "Direct match; Phosphor has a rewind icon with double backward triangles"
+  },
+  "shuffle": {
+    "value": "shuffle",
+    "reason": "Direct match; Phosphor has a shuffle icon showing crossing arrows for random playback"
+  },
+  "repeat": {
+    "value": "repeat",
+    "reason": "Direct match; Phosphor has a repeat icon showing looping arrows"
+  },
+  "record": {
+    "value": "record",
+    "reason": "Direct match; Phosphor has a record icon showing a filled circle"
+  },
+  "brush": {
+    "value": "paint-brush",
+    "reason": "Phosphor uses paint-brush for the brush/paint tool; shows a painting brush"
+  },
+  "pen": {
+    "value": "pen-nib",
+    "reason": "Phosphor's pen-nib shows a pen tip/nib for drawing; more visually distinct than the plain pen icon which resembles a ballpoint pen"
+  },
+  "color": {
+    "value": "eyedropper",
+    "reason": "Phosphor's eyedropper icon represents a color picker/sampling tool; standard metaphor for color selection"
+  },
+  "eraser": {
+    "value": "eraser",
+    "reason": "Direct match; Phosphor has an eraser icon for clearing/erasing content"
+  },
+  "filter": {
+    "value": "funnel",
+    "reason": "Phosphor's 'funnel' icon is the standard filter/funnel shape, direct semantic match for filtering results"
+  },
+  "sort": {
+    "value": "sort-ascending",
+    "reason": "Phosphor's 'sort-ascending' shows vertical bars in ascending order, the standard sort indicator"
+  },
+  "list": {
+    "value": "list-dashes",
+    "reason": "Phosphor's 'list-dashes' shows horizontal lines representing a list view, cleaner than 'list' which is more generic"
+  },
+  "table": {
+    "value": "table",
+    "reason": "Direct name match in Phosphor, shows a grid/table structure for spreadsheet or tabular data"
+  },
+  "grid": {
+    "value": "squares-four",
+    "reason": "Phosphor's 'squares-four' shows a 2x2 grid of squares, the standard grid/card view icon"
+  },
+  "chart-bar": {
+    "value": "chart-bar",
+    "reason": "Direct name match in Phosphor, shows vertical bars representing a bar chart"
+  },
+  "chart-line": {
+    "value": "chart-line-up",
+    "reason": "Phosphor's 'chart-line-up' shows a line trending upward on axes, the standard line chart/analytics icon"
+  },
+  "chart-pie": {
+    "value": "chart-pie-slice",
+    "reason": "Phosphor's 'chart-pie-slice' shows a pie chart with a separated slice, the standard pie chart/statistics icon"
+  },
+  "view": {
+    "value": "eye",
+    "reason": "Direct name match in Phosphor, the universal show/visible icon"
+  },
+  "hide": {
+    "value": "eye-slash",
+    "reason": "Phosphor's 'eye-slash' shows an eye with a diagonal line through it, the standard hide/invisible icon"
+  },
+  "search": {
+    "value": "magnifying-glass",
+    "reason": "Phosphor's 'magnifying-glass' is the standard search/find icon"
+  },
+  "zoom-in": {
+    "value": "magnifying-glass-plus",
+    "reason": "Phosphor's 'magnifying-glass-plus' shows a magnifying glass with a plus sign, standard zoom-in icon"
+  },
+  "zoom-out": {
+    "value": "magnifying-glass-minus",
+    "reason": "Phosphor's 'magnifying-glass-minus' shows a magnifying glass with a minus sign, standard zoom-out icon"
+  },
+  "fullscreen": {
+    "value": "arrows-out",
+    "reason": "Phosphor's 'arrows-out' shows four arrows pointing outward from center, the standard maximize/fullscreen icon"
+  },
+  "exit-fullscreen": {
+    "value": "arrows-in",
+    "reason": "Phosphor's 'arrows-in' shows four arrows pointing inward to center, the standard minimize/exit-fullscreen icon"
+  },
+  "board": {
+    "value": "kanban",
+    "reason": "Phosphor's 'kanban' shows a kanban board layout with columns and cards, direct semantic match"
+  },
+  "activity": {
+    "value": "pulse",
+    "reason": "Phosphor's 'pulse' shows an ECG/heartbeat-style waveform, the standard activity/pulse indicator"
+  },
+  "success": {
+    "value": "check-circle",
+    "reason": "Phosphor's 'check-circle' shows a checkmark inside a circle, the universal success indicator"
+  },
+  "error": {
+    "value": "x-circle",
+    "reason": "Phosphor's 'x-circle' shows an X inside a circle, the universal error/failure indicator"
+  },
+  "warning": {
+    "value": "warning",
+    "reason": "Direct name match in Phosphor, shows a triangle with an exclamation mark for caution/alert"
+  },
+  "info": {
+    "value": "info",
+    "reason": "Direct name match in Phosphor, shows a lowercase i inside a circle for informational messages"
+  },
+  "help": {
+    "value": "question",
+    "reason": "Phosphor's 'question' shows a question mark inside a circle, the standard help/FAQ icon"
+  },
+  "loading": {
+    "value": "spinner-gap",
+    "reason": "Phosphor's 'spinner-gap' shows a circular spinner with a gap, designed specifically as a loading indicator"
+  },
+  "filled-circle": {
+    "value": "circle",
+    "reason": "Phosphor's 'circle' in fill weight renders as a solid filled circle; as the base icon it represents the filled/active state"
+  },
+  "empty-circle": {
+    "value": "circle",
+    "reason": "Phosphor's 'circle' in regular weight renders as an empty circle outline, representing inactive/unselected state"
+  },
+  "verified": {
+    "value": "seal-check",
+    "reason": "Phosphor's 'seal-check' shows a badge/seal with a checkmark, the standard verified/certification icon"
+  },
+  "smile": {
+    "value": "smiley",
+    "reason": "Phosphor's 'smiley' shows a happy face emoji, the standard satisfied/happy mood icon"
+  },
+  "frown": {
+    "value": "smiley-sad",
+    "reason": "Phosphor's 'smiley-sad' shows a sad face emoji, the standard dissatisfied/unhappy mood icon"
+  },
+  "tip": {
+    "value": "lightbulb",
+    "reason": "Phosphor's 'lightbulb' represents ideas, tips, and hints - the universal icon for suggestions and insights"
+  },
+  "fire": {
+    "value": "fire",
+    "reason": "Direct name match in Phosphor, shows a flame icon for hot/trending content"
+  },
+  "support": {
+    "value": "lifebuoy",
+    "reason": "Phosphor's 'lifebuoy' shows a life preserver ring, the standard support/help desk icon"
+  },
+  "like": {
+    "value": "heart",
+    "reason": "Phosphor's 'heart' is the universal like/favorite icon, direct semantic match"
+  },
+  "unlike": {
+    "value": "heart-break",
+    "reason": "Phosphor's 'heart-break' shows a broken heart, the visual opposite of the heart/like icon"
+  },
+  "star": {
+    "value": "star",
+    "reason": "Direct name match in Phosphor, the standard star/favorite/rating icon"
+  },
+  "bookmark": {
+    "value": "bookmark-simple",
+    "reason": "Phosphor's 'bookmark-simple' shows a clean bookmark ribbon shape, ideal for save-for-later functionality"
+  },
+  "thumbs-up": {
+    "value": "thumbs-up",
+    "reason": "Direct name match in Phosphor, the universal upvote/approval icon"
+  },
+  "thumbs-down": {
+    "value": "thumbs-down",
+    "reason": "Direct name match in Phosphor, the universal downvote/disapproval icon"
+  },
+  "reply": {
+    "value": "arrow-bend-up-left",
+    "reason": "Phosphor's 'arrow-bend-up-left' shows a curved arrow going back and up, the standard reply icon shape"
+  },
+  "comment": {
+    "value": "chat-circle",
+    "reason": "Phosphor's 'chat-circle' shows a rounded speech bubble, the standard comment/message icon"
+  },
+  "comments": {
+    "value": "chats-circle",
+    "reason": "Phosphor's 'chats-circle' shows two overlapping rounded speech bubbles, representing multiple comments/discussion"
+  },
+  "typing": {
+    "value": "chat-circle-dots",
+    "reason": "Phosphor's 'chat-circle-dots' shows a speech bubble with three dots inside, the standard typing/composing indicator"
+  },
+  "mention": {
+    "value": "at",
+    "reason": "Phosphor's 'at' shows the @ symbol, the universal mention/at-sign icon"
+  },
+  "block": {
+    "value": "prohibit",
+    "reason": "Phosphor's 'prohibit' shows a circle with a diagonal line through it, the universal block/ban/restricted icon"
+  },
+  "flag": {
+    "value": "flag",
+    "reason": "Direct name match in Phosphor, the standard flag icon for reporting or flagging content"
+  },
+  "pin": {
+    "value": "push-pin",
+    "reason": "Phosphor's 'push-pin' shows a thumbtack/pushpin, the standard icon for pinning items"
+  },
+  "award": {
+    "value": "medal",
+    "reason": "Phosphor's 'medal' shows a medal on a ribbon, representing badges, awards, and achievements"
+  },
+  "trophy": {
+    "value": "trophy",
+    "reason": "Direct name match in Phosphor, the standard winner/achievement trophy icon"
+  },
+  "gift": {
+    "value": "gift",
+    "reason": "Direct name match in Phosphor, shows a wrapped gift box for rewards and presents"
+  },
+  "target": {
+    "value": "target",
+    "reason": "Direct name match in Phosphor, shows a bullseye target for goals and objectives"
+  },
+  "bold": {
+    "value": "text-b",
+    "reason": "Phosphor's 'text-b' shows a bold letter B, the standard bold text formatting icon"
+  },
+  "italic": {
+    "value": "text-italic",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows an italicized letter I for italic formatting"
+  },
+  "underline": {
+    "value": "text-underline",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows an underlined letter U for underline formatting"
+  },
+  "strikethrough": {
+    "value": "text-strikethrough",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows a letter S with a line through it for strikethrough"
+  },
+  "code": {
+    "value": "code",
+    "reason": "Direct name match in Phosphor, shows angle brackets <> representing code/markup"
+  },
+  "quote": {
+    "value": "quotes",
+    "reason": "Phosphor's 'quotes' shows quotation marks, the standard blockquote/citation icon"
+  },
+  "heading": {
+    "value": "text-h",
+    "reason": "Phosphor's 'text-h' shows a capital H, the standard heading/title formatting icon"
+  },
+  "paragraph": {
+    "value": "paragraph",
+    "reason": "Direct name match in Phosphor, shows the pilcrow paragraph symbol"
+  },
+  "bullet-list": {
+    "value": "list-bullets",
+    "reason": "Phosphor's 'list-bullets' shows lines with bullet points, the standard unordered/bullet list icon"
+  },
+  "numbered-list": {
+    "value": "list-numbers",
+    "reason": "Phosphor's 'list-numbers' shows lines with numbers, the standard ordered/numbered list icon"
+  },
+  "checklist": {
+    "value": "list-checks",
+    "reason": "Phosphor's 'list-checks' shows lines with checkmarks, the standard todo/checklist icon"
+  },
+  "indent": {
+    "value": "text-indent",
+    "reason": "Phosphor's 'text-indent' shows lines shifting to the right, the standard text indent icon"
+  },
+  "outdent": {
+    "value": "text-outdent",
+    "reason": "Phosphor's 'text-outdent' shows lines shifting to the left, the standard text outdent/dedent icon"
+  },
+  "align-left": {
+    "value": "text-align-left",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows left-aligned text lines"
+  },
+  "align-center": {
+    "value": "text-align-center",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows center-aligned text lines"
+  },
+  "align-right": {
+    "value": "text-align-right",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows right-aligned text lines"
+  },
+  "justify": {
+    "value": "text-align-justify",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows fully justified text lines"
+  },
+  "emoji": {
+    "value": "smiley-sticker",
+    "reason": "Phosphor's 'smiley-sticker' shows a smiley face with a folded corner like a sticker, representing an emoji picker"
+  },
+  "cart": {
+    "value": "shopping-cart",
+    "reason": "Phosphor's 'shopping-cart' is a cart with wheels, the standard e-commerce cart icon. Also has 'shopping-cart-simple' but the detailed version is more recognizable."
+  },
+  "add-to-cart": {
+    "value": "shopping-cart-simple",
+    "reason": "Phosphor has no 'shopping-cart-plus' icon. 'shopping-cart-simple' is a simplified cart that pairs with 'shopping-cart' for the add-to-cart action. No perfect match exists; this is the closest distinct cart variant."
+  },
+  "remove-from-cart": {
+    "value": null,
+    "reason": "Phosphor has no cart-minus or cart-remove icon. Using a generic cart variant would be ambiguous and indistinguishable from 'cart' or 'add-to-cart'."
+  },
+  "payment": {
+    "value": "credit-card",
+    "reason": "Phosphor's 'credit-card' is the standard payment card icon for billing and checkout flows"
+  },
+  "wallet": {
+    "value": "wallet",
+    "reason": "Direct name match in Phosphor, a folding wallet icon for digital wallet or payment concepts"
+  },
+  "money": {
+    "value": "currency-dollar",
+    "reason": "Phosphor's 'currency-dollar' shows a dollar sign, the standard money/currency icon. Also has 'currency-circle-dollar' but the bare symbol is more versatile."
+  },
+  "tag": {
+    "value": "tag",
+    "reason": "Direct name match in Phosphor, a price tag icon for labels and pricing"
+  },
+  "tags": {
+    "value": "tag",
+    "reason": "Phosphor has no plural 'tags' icon showing multiple tags. Falls back to the single 'tag' icon as the closest match."
+  },
+  "discount": {
+    "value": "percent",
+    "reason": "Phosphor's 'percent' is a percentage symbol icon, the standard discount/sale indicator"
+  },
+  "coupon": {
+    "value": "ticket",
+    "reason": "Phosphor's 'ticket' is a ticket/voucher icon, the closest match for coupon or promotional codes"
+  },
+  "package": {
+    "value": "package",
+    "reason": "Direct name match in Phosphor, a shipping box icon for packages and orders"
+  },
+  "shipping": {
+    "value": "truck",
+    "reason": "Phosphor's 'truck' is a delivery truck icon, the standard shipping/logistics symbol"
+  },
+  "delivery": {
+    "value": "truck",
+    "reason": "Same as shipping -- Phosphor's 'truck' icon is the universal delivery symbol. No distinct 'express delivery' icon exists in Phosphor."
+  },
+  "return": {
+    "value": "arrow-u-up-left",
+    "reason": "Phosphor's 'arrow-u-up-left' is a U-turn arrow pointing back, conveying the return/refund concept. Candidates: 'arrows-counter-clockwise' (more like sync), 'arrow-bend-up-left' (less clear). U-turn arrow is the most intuitive return metaphor."
+  },
+  "receipt": {
+    "value": "receipt",
+    "reason": "Direct name match in Phosphor, a receipt/bill icon for transaction records"
+  },
+  "invoice": {
+    "value": "invoice",
+    "reason": "Direct name match in Phosphor, an invoice document icon for billing"
+  },
+  "store": {
+    "value": "storefront",
+    "reason": "Phosphor's 'storefront' is a shop facade with an awning, the standard store/shop icon. Confirmed on Iconify and v0.app."
+  },
+  "shopping-bag": {
+    "value": "bag",
+    "reason": "Phosphor's 'bag' is a shopping bag icon. Also has 'handbag' and 'tote' but 'bag' is the most generic shopping bag match."
+  },
+  "calendar": {
+    "value": "calendar-blank",
+    "reason": "Phosphor's 'calendar-blank' is a clean calendar icon without date numbers, suitable as a generic calendar symbol. 'calendar' in Phosphor has a specific date shown."
+  },
+  "schedule": {
+    "value": "calendar-dots",
+    "reason": "Phosphor's 'calendar-dots' shows a calendar with event dots, conveying a schedule with multiple events. Candidates: 'calendar' (shows a single date), 'calendar-blank' (too plain). Dots suggest multiple scheduled items."
+  },
+  "scheduled": {
+    "value": "calendar-check",
+    "reason": "Phosphor's 'calendar-check' shows a calendar with a checkmark, conveying a confirmed scheduled date or completed due date"
+  },
+  "overdue": {
+    "value": "calendar-x",
+    "reason": "Phosphor's 'calendar-x' shows a calendar with an X, conveying a missed or cancelled date, suitable for overdue/deadline-passed states"
+  },
+  "time": {
+    "value": "clock",
+    "reason": "Phosphor's 'clock' is the standard clock/time icon. Confirmed on v0.app."
+  },
+  "timer": {
+    "value": "timer",
+    "reason": "Direct name match in Phosphor, a stopwatch/countdown timer icon. Confirmed on v0.app."
+  },
+  "watch": {
+    "value": "watch",
+    "reason": "Direct name match in Phosphor, a wristwatch icon for smartwatch or time-on-wrist concept"
+  },
+  "layers": {
+    "value": "stack",
+    "reason": "Phosphor's 'stack' shows stacked layers, representing layered content. Candidates: 'squares-four' (grid, not layers). 'stack' is the direct layer/stack metaphor."
+  },
+  "subtask": {
+    "value": "git-merge",
+    "reason": "Phosphor has no dedicated subtask/child-task icon. 'git-merge' shows a branching structure that visually conveys a parent-child relationship. Candidates: 'tree-structure' (too hierarchical), 'flow-arrow' (too abstract). 'git-merge' is the best available branching metaphor for subtasks."
+  },
+  "tree": {
+    "value": "tree-structure",
+    "reason": "Phosphor's 'tree-structure' shows a hierarchical tree diagram, directly matching org-chart/sitemap concepts. Confirmed on v0.app."
+  },
+  "progress": {
+    "value": "hourglass",
+    "reason": "Phosphor's 'hourglass' conveys in-progress/pending state. Candidates: 'spinner' (loading, not progress), 'circle-notch' (too generic). Hourglass is a widely recognized progress metaphor. Phosphor also has 'hourglass-low' and 'hourglass-simple' variants."
+  },
+  "milestone": {
+    "value": "flag-pennant",
+    "reason": "Phosphor's 'flag-pennant' is a triangular flag/pennant, commonly used to mark milestones and checkpoints in project management. Candidates: 'diamond' (too geometric), 'flag' (too generic). Pennant specifically evokes achievement milestones."
+  },
+  "tasks": {
+    "value": "list-checks",
+    "reason": "Phosphor's 'list-checks' shows a checklist with checkmarks, the standard task list / todo icon"
+  },
+  "location": {
+    "value": "map-pin",
+    "reason": "Phosphor's 'map-pin' is a teardrop-shaped location marker, the universal map pin. Also has 'map-pin-line' with a base line, but 'map-pin' is the standard."
+  },
+  "map": {
+    "value": "map-trifold",
+    "reason": "Phosphor's 'map-trifold' shows a folded map, the standard map view icon. Preferred over 'globe' which conveys world/language."
+  },
+  "directions": {
+    "value": "signpost",
+    "reason": "Phosphor's 'signpost' shows a directional signpost, conveying route directions. Confirmed on v0.app. Candidates: 'path' (abstract line), 'navigation-arrow' (compass needle). Signpost is the clearest directions metaphor."
+  },
+  "compass": {
+    "value": "compass",
+    "reason": "Direct name match in Phosphor, a compass rose icon for navigation and exploration"
+  },
+  "current-location": {
+    "value": "crosshair",
+    "reason": "Phosphor's 'crosshair' is a targeting crosshair, the standard 'my location' icon used in maps. Also has 'crosshair-simple' for a cleaner variant."
+  },
+  "measure": {
+    "value": "ruler",
+    "reason": "Phosphor's 'ruler' is a measurement ruler icon, directly matching the measure/distance concept"
+  },
+  "trending-up": {
+    "value": "trend-up",
+    "reason": "Phosphor's 'trend-up' shows an upward trending arrow, the standard growth/increase indicator. Confirmed on icon-icons.com."
+  },
+  "trending-down": {
+    "value": "trend-down",
+    "reason": "Phosphor's 'trend-down' shows a downward trending arrow, the standard decline/decrease indicator"
+  },
+  "balance": {
+    "value": "scales",
+    "reason": "Phosphor's 'scales' is a balance/justice scales icon, directly matching the balance concept. Confirmed on v0.app."
+  },
+  "swap": {
+    "value": "arrows-left-right",
+    "reason": "Phosphor's 'arrows-left-right' shows bidirectional horizontal arrows, conveying transfer/exchange/swap. Candidates: 'arrows-counter-clockwise' (more circular, like refresh), 'shuffle' (random). Bidirectional arrows are the standard swap metaphor."
+  },
+  "savings": {
+    "value": "piggy-bank",
+    "reason": "Phosphor's 'piggy-bank' is a piggy bank icon, the universal savings metaphor. Confirmed on v0.app with multiple weight variants."
+  },
+  "vault": {
+    "value": "vault",
+    "reason": "Phosphor has a 'vault' icon representing a secure safe/vault. This is a direct name match for the safe/vault concept."
+  },
+  "docs": {
+    "value": "book",
+    "reason": "Phosphor's 'book' is a closed book icon, the standard documentation/reference symbol"
+  },
+  "book-open": {
+    "value": "book-open",
+    "reason": "Direct name match in Phosphor, an open book icon for reading or active documentation"
+  },
+  "graduation": {
+    "value": "graduation-cap",
+    "reason": "Phosphor's 'graduation-cap' is a mortarboard graduation cap, the standard education/academic icon. Confirmed on Iconbolt. Also has 'student' as an alternative."
+  },
+  "briefcase": {
+    "value": "briefcase",
+    "reason": "Direct name match in Phosphor, a briefcase icon for work/business. Confirmed on v0.app."
+  },
+  "company": {
+    "value": "buildings",
+    "reason": "Phosphor's 'buildings' shows multiple office buildings, suitable for company/office concepts. Also has 'building-office' but 'buildings' conveys a broader corporate presence."
+  },
+  "organization": {
+    "value": "buildings",
+    "reason": "Same as company -- Phosphor's 'buildings' is the closest match for organization/corporate/enterprise. No distinct org-chart-people icon exists in Phosphor; 'tree-structure' is used for the 'tree' semantic icon already."
+  },
+  "news": {
+    "value": "newspaper",
+    "reason": "Phosphor's 'newspaper' is a folded newspaper icon for news/blog content. Also has 'newspaper-clipping' for a torn-out article variant, but 'newspaper' is the standard news icon."
+  },
+  "rss": {
+    "value": "rss",
+    "reason": "Direct name match in Phosphor, the RSS feed broadcast symbol. Also has 'rss-simple' for a cleaner variant. Confirmed on v0.app."
+  },
+  "settings": {
+    "value": "gear",
+    "reason": "Phosphor's 'gear' is the standard settings/preferences cog icon, direct semantic match"
+  },
+  "sliders": {
+    "value": "sliders",
+    "reason": "Direct name match in Phosphor, horizontal slider controls representing adjustments"
+  },
+  "theme": {
+    "value": "palette",
+    "reason": "Phosphor's 'palette' is an artist's palette icon, represents theme/colors/appearance"
+  },
+  "light-mode": {
+    "value": "sun",
+    "reason": "Phosphor's 'sun' is the universal light mode icon, direct semantic match"
+  },
+  "dark-mode": {
+    "value": "moon",
+    "reason": "Phosphor's 'moon' is the universal dark mode icon, direct semantic match"
+  },
+  "accessibility": {
+    "value": "wheelchair",
+    "reason": "Phosphor's 'wheelchair' is the standard accessibility symbol, widely recognized"
+  },
+  "plugin": {
+    "value": "puzzle-piece",
+    "reason": "Phosphor's 'puzzle-piece' represents a plugin/extension that fits into a larger system"
+  },
+  "webhook": {
+    "value": "webhooks-logo",
+    "reason": "Phosphor has a dedicated 'webhooks-logo' icon that exactly represents webhooks/API endpoints"
+  },
+  "globe": {
+    "value": "globe",
+    "reason": "Direct name match in Phosphor, a globe/world icon for language, public, or internationalization"
+  },
+  "desktop": {
+    "value": "desktop",
+    "reason": "Direct name match in Phosphor, a desktop monitor icon"
+  },
+  "laptop": {
+    "value": "laptop",
+    "reason": "Direct name match in Phosphor, a laptop computer icon"
+  },
+  "mobile": {
+    "value": "device-mobile",
+    "reason": "Phosphor uses 'device-mobile' for the smartphone icon, prefixed with 'device' for clarity"
+  },
+  "tablet": {
+    "value": "device-tablet-speaker",
+    "reason": "Phosphor's 'device-tablet-speaker' is a tablet device with speaker detail, the closest tablet icon available"
+  },
+  "keyboard": {
+    "value": "keyboard",
+    "reason": "Direct name match in Phosphor, a keyboard input device icon"
+  },
+  "cpu": {
+    "value": "cpu",
+    "reason": "Direct name match in Phosphor, a processor/chip icon"
+  },
+  "storage": {
+    "value": "hard-drives",
+    "reason": "Phosphor's 'hard-drives' shows stacked storage drives, representing storage/disk"
+  },
+  "usb": {
+    "value": "usb",
+    "reason": "Direct name match in Phosphor, the USB connection symbol"
+  },
+  "cast": {
+    "value": "screencast",
+    "reason": "Phosphor's 'screencast' shows a screen with broadcast waves, matching cast/stream concept"
+  },
+  "terminal": {
+    "value": "terminal",
+    "reason": "Direct name match in Phosphor, a terminal/command prompt window icon"
+  },
+  "database": {
+    "value": "database",
+    "reason": "Direct name match in Phosphor, the standard cylindrical database icon"
+  },
+  "server": {
+    "value": "hard-drives",
+    "reason": "Phosphor's 'hard-drives' shows stacked server/drive units; there is no dedicated server rack icon in Phosphor that is distinct enough"
+  },
+  "cloud": {
+    "value": "cloud",
+    "reason": "Direct name match in Phosphor, a cloud icon"
+  },
+  "cloud-upload": {
+    "value": "cloud-arrow-up",
+    "reason": "Phosphor uses 'cloud-arrow-up' for cloud upload, showing a cloud with an upward arrow"
+  },
+  "cloud-download": {
+    "value": "cloud-arrow-down",
+    "reason": "Phosphor uses 'cloud-arrow-down' for cloud download, showing a cloud with a downward arrow"
+  },
+  "bug": {
+    "value": "bug",
+    "reason": "Direct name match in Phosphor, a bug/insect icon representing software bugs"
+  },
+  "git": {
+    "value": "git-branch",
+    "reason": "Phosphor's 'git-branch' shows a branching version control diagram, the standard git icon"
+  },
+  "network": {
+    "value": "graph",
+    "reason": "Phosphor's 'graph' shows interconnected nodes, representing a network topology"
+  },
+  "wifi": {
+    "value": "wifi-high",
+    "reason": "Phosphor's 'wifi-high' shows full WiFi signal strength, the standard WiFi icon"
+  },
+  "bluetooth": {
+    "value": "bluetooth",
+    "reason": "Direct name match in Phosphor, the standard Bluetooth symbol"
+  },
+  "power": {
+    "value": "power",
+    "reason": "Direct name match in Phosphor, the standard power on/off circle-with-line icon"
+  },
+  "battery": {
+    "value": "battery-full",
+    "reason": "Phosphor's 'battery-full' shows a fully charged battery, the standard battery status icon"
+  },
+  "tool": {
+    "value": "wrench",
+    "reason": "Phosphor's 'wrench' is the standard tool/fix icon, a single wrench"
+  },
+  "tools": {
+    "value": "toolbox",
+    "reason": "Phosphor's 'toolbox' represents a collection of tools, matching the toolbox concept"
+  },
+  "qr-code": {
+    "value": "qr-code",
+    "reason": "Direct name match in Phosphor, the standard QR code pattern icon"
+  },
+  "barcode": {
+    "value": "barcode",
+    "reason": "Direct name match in Phosphor, vertical lines representing a barcode"
+  },
+  "calculator": {
+    "value": "calculator",
+    "reason": "Direct name match in Phosphor, a calculator device icon"
+  },
+  "random": {
+    "value": "dice-five",
+    "reason": "Phosphor's 'dice-five' is a die showing five dots, representing randomness/chance"
+  },
+  "history": {
+    "value": "clock-counter-clockwise",
+    "reason": "Phosphor's 'clock-counter-clockwise' shows a clock with a counter-clockwise arrow, the standard history/restore icon"
+  },
+  "rain": {
+    "value": "cloud-rain",
+    "reason": "Phosphor's 'cloud-rain' shows a cloud with rain drops, direct semantic match"
+  },
+  "storm": {
+    "value": "cloud-lightning",
+    "reason": "Phosphor's 'cloud-lightning' shows a cloud with a lightning bolt, representing a storm"
+  },
+  "snow": {
+    "value": "snowflake",
+    "reason": "Phosphor's 'snowflake' is the standard snow/cold weather icon"
+  },
+  "wind": {
+    "value": "wind",
+    "reason": "Direct name match in Phosphor, flowing lines representing wind"
+  },
+  "temperature": {
+    "value": "thermometer",
+    "reason": "Phosphor's 'thermometer' is the standard temperature measurement icon"
+  },
+  "water": {
+    "value": "drop",
+    "reason": "Phosphor's 'drop' is a water droplet icon, representing water/humidity"
+  },
+  "coffee": {
+    "value": "coffee",
+    "reason": "Direct name match in Phosphor, a coffee cup icon"
+  },
+  "infinity": {
+    "value": "infinity",
+    "reason": "Direct name match in Phosphor, the infinity/lemniscate symbol"
+  },
+  "eco": {
+    "value": "leaf",
+    "reason": "Phosphor's 'leaf' is a natural leaf icon, representing eco/nature/sustainability"
+  },
+  "hexagon": {
+    "value": "hexagon",
+    "reason": "Direct name match in Phosphor, a hexagon geometric shape"
+  },
+  "triangle": {
+    "value": "triangle",
+    "reason": "Direct name match in Phosphor, a triangle geometric shape"
+  },
+  "google": {
+    "value": "google-logo",
+    "reason": "Phosphor's 'google-logo' is a stylized Google brand icon following Phosphor's naming convention for brands"
+  },
+  "github": {
+    "value": "github-logo",
+    "reason": "Phosphor's 'github-logo' is the GitHub octocat brand icon"
+  },
+  "apple": {
+    "value": "apple-logo",
+    "reason": "Phosphor's 'apple-logo' is the Apple brand icon"
+  },
+  "facebook": {
+    "value": "facebook-logo",
+    "reason": "Phosphor's 'facebook-logo' is the Facebook brand icon"
+  },
+  "twitter": {
+    "value": "x-logo",
+    "reason": "Phosphor added 'x-logo' for the rebranded Twitter/X platform; 'twitter-logo' also exists but X is the current brand"
+  },
+  "linkedin": {
+    "value": "linkedin-logo",
+    "reason": "Phosphor's 'linkedin-logo' is the LinkedIn brand icon"
+  },
+  "microsoft": {
+    "value": "windows-logo",
+    "reason": "Phosphor's 'windows-logo' is the Microsoft Windows brand icon, the most recognizable Microsoft identifier"
+  },
+  "slack": {
+    "value": "slack-logo",
+    "reason": "Phosphor's 'slack-logo' is the Slack brand icon"
+  },
+  "discord": {
+    "value": "discord-logo",
+    "reason": "Phosphor's 'discord-logo' is the Discord brand icon"
+  },
+  "instagram": {
+    "value": "instagram-logo",
+    "reason": "Phosphor's 'instagram-logo' is the Instagram brand icon"
+  },
+  "youtube": {
+    "value": "youtube-logo",
+    "reason": "Phosphor's 'youtube-logo' is the YouTube brand icon"
+  },
+  "android": {
+    "value": "android-logo",
+    "reason": "Phosphor's 'android-logo' is the Android brand icon"
+  },
+  "sparkles": {
+    "value": "sparkle",
+    "reason": "Phosphor's 'sparkle' is a four-pointed star sparkle icon, representing AI/magic/new features"
+  },
+  "wand": {
+    "value": "magic-wand",
+    "reason": "Phosphor's 'magic-wand' is a wand with sparkle, representing auto-fix/wizard functionality"
+  },
+  "bot": {
+    "value": "robot",
+    "reason": "Phosphor's 'robot' is a robot face icon, representing bots/automation"
+  },
+  "notifications": {
+    "value": "bell",
+    "reason": "Phosphor's 'bell' is the universal notifications/alerts icon"
+  },
+  "email": {
+    "value": "envelope-simple",
+    "reason": "Phosphor's 'envelope-simple' is a clean envelope icon for email, preferred over the more detailed 'envelope'"
+  },
+  "inbox": {
+    "value": "tray",
+    "reason": "Phosphor's 'tray' is an inbox tray icon, representing an email inbox or collection point"
+  },
+  "phone": {
+    "value": "phone",
+    "reason": "Direct name match in Phosphor, a telephone handset for phone calls"
+  },
+  "contacts": {
+    "value": "address-book",
+    "reason": "Phosphor's 'address-book' is a contact list/address book icon, direct semantic match"
+  },
+  "lock": {
+    "value": "lock",
+    "reason": "Direct name match in Phosphor, a closed padlock icon representing locked/secure state"
+  },
+  "unlock": {
+    "value": "lock-open",
+    "reason": "Phosphor's 'lock-open' shows an open padlock, representing unlocked state"
+  },
+  "security": {
+    "value": "shield",
+    "reason": "Phosphor's 'shield' is a plain shield icon representing security/protection"
+  },
+  "secure": {
+    "value": "shield-check",
+    "reason": "Phosphor's 'shield-check' is a shield with a checkmark, representing verified security"
+  },
+  "key": {
+    "value": "key",
+    "reason": "Direct name match in Phosphor, a key icon representing passwords/access"
+  }
+}

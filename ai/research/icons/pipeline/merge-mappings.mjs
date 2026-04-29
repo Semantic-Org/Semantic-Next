@@ -1,6 +1,6 @@
-// Merge per-library cross-mapping fragments into packages/specs/src/icons/mappings.js.
+// Merge per-library cross-mapping data into packages/specs/src/icons/mappings.js.
 //
-// Inputs (default): _{library}-{A..E}.json fragments in this directory, format:
+// Inputs (default): {library}.json files in this directory, format:
 //   { "icon-name": { "value": "library-native-name", "reason": "..." } }
 //
 // Behavior:
@@ -42,28 +42,24 @@ if (onlyLib && !libraryFields[onlyLib]) {
   process.exit(1);
 }
 
-const groups = ['A', 'B', 'C', 'D', 'E'];
 const merged = {};
 
 for (const [prefix, field] of Object.entries(libraryFields)) {
   if (onlyLib && prefix !== onlyLib) { continue; }
   merged[field] = {};
-  for (const group of groups) {
-    const path = join(dir, `_${prefix}-${group}.json`);
-    if (!existsSync(path)) {
-      console.warn(`  MISSING: _${prefix}-${group}.json`);
-      continue;
-    }
-    const data = JSON.parse(readFileSync(path, 'utf8'));
-    for (const [icon, entry] of Object.entries(data)) {
-      const value = (typeof entry === 'object' && entry !== null)
-        ? (entry.value !== undefined ? entry.value : entry)
-        : entry;
-      merged[field][icon] = value;
-    }
-    console.log(`  Loaded _${prefix}-${group}.json (${Object.keys(data).length} icons)`);
+  const path = join(dir, `${prefix}.json`);
+  if (!existsSync(path)) {
+    console.warn(`  MISSING: ${prefix}.json`);
+    continue;
   }
-  console.log(`${field}: ${Object.keys(merged[field]).length} total icons\n`);
+  const data = JSON.parse(readFileSync(path, 'utf8'));
+  for (const [icon, entry] of Object.entries(data)) {
+    const value = (typeof entry === 'object' && entry !== null)
+      ? (entry.value !== undefined ? entry.value : entry)
+      : entry;
+    merged[field][icon] = value;
+  }
+  console.log(`Loaded ${prefix}.json: ${Object.keys(data).length} entries`);
 }
 
 let src = readFileSync(mappingsPath, 'utf8');

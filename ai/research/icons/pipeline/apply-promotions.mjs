@@ -9,7 +9,7 @@
 //
 // Usage:
 //   node apply-promotions.mjs [path/to/promotions.json]
-// Defaults to pass5-promotions.json next to this script.
+// Defaults to promotions.json next to this script.
 
 import { readFileSync, writeFileSync } from 'fs';
 import { dirname, isAbsolute, join, resolve } from 'path';
@@ -19,7 +19,7 @@ const dir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(dir, '../../../..');
 const mappingsPath = join(repoRoot, 'packages/specs/src/icons/mappings.js');
 
-const arg = process.argv[2] || join(dir, 'pass5-promotions.json');
+const arg = process.argv[2] || join(dir, 'promotions.json');
 const promotionsPath = isAbsolute(arg) ? arg : resolve(process.cwd(), arg);
 
 const { promotions } = JSON.parse(readFileSync(promotionsPath, 'utf8'));

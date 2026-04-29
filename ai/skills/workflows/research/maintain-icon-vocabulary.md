@@ -10,9 +10,9 @@ workflow: maintain-icon-vocabulary
 # Maintain Icon Vocabulary
 
 > **Workflow:** `maintain-icon-vocabulary`
-> **Purpose:** Concrete steps for the three maintenance scenarios. Read `icon-vocabulary` first for system context.
+> **Purpose:** Concrete steps for the four maintenance scenarios. Read `icon-vocabulary` first for system context.
 
-**Source of truth:** `packages/specs/src/icons/mappings.js`. Every script in `ai/research/icons/icon-mappings/` mutates this file. After any mutation, regenerate runtime artifacts:
+**Source of truth:** `packages/specs/src/icons/mappings.js`. Every script in `ai/research/icons/pipeline/` mutates this file. After any mutation, regenerate runtime artifacts:
 
 ```bash
 cd packages/specs && npm run build:icons
@@ -30,9 +30,9 @@ When Lucide releases a new version with new primaries, add the ones that pass th
    ```
    "lucide-static": "^X.Y.Z"
    ```
-2. **Refresh** `ai/research/icons/icon-mappings/lucide-primary-icons.csv` from Lucide upstream. (No automated source; copy the catalog manually.)
-3. **Selection** — run the curation methodology in `selection-process.md` against the new primaries. Two passes (exhaustive + editorial) plus an audit. Append accepted entries to `ai/research/icons/final-list.txt`.
-4. **Document the judgments** — append addition rationale to `expansion-review.md` so future readers can defend the inclusion.
+2. **Refresh** `ai/research/icons/pipeline/lucide-primary-icons.csv` from Lucide upstream. (No automated source; copy the catalog manually.)
+3. **Selection** — run the curation methodology in `selection-process.md` against the new primaries. Two passes (exhaustive + editorial) plus an audit. Append accepted entries to `ai/research/icons/canonical-roster.txt`.
+4. **Document the judgments** — append addition rationale to `inclusion-rationale.md` so future readers can defend the inclusion.
 5. **Add entries to `mappings.js`** with empty library fields:
    ```js
    'new-icon': {
@@ -48,10 +48,10 @@ When Lucide releases a new version with new primaries, add the ones that pass th
      heroicons: '',
    },
    ```
-6. **Cross-library lookup** — for each library, run a subagent against the library's icon catalog to fill `_{lib}-{A..E}.json` for the new entries. See `rebuild-plan.md` Pass 2.
+6. **Cross-library lookup** — for each library, run a subagent against the library's icon catalog to add the new canonical entries to `pipeline/{library}.json`. See `pipeline/methodology.md` Pass 2.
 7. **Merge** — fills the empty fields:
    ```bash
-   node ai/research/icons/icon-mappings/merge-mappings.mjs
+   node ai/research/icons/pipeline/merge-mappings.mjs
    ```
 8. **Aliases** — add by hand or with a Pass 3 subagent batch.
 9. **Build** — `cd packages/specs && npm run build:icons`.
@@ -61,10 +61,10 @@ When Lucide releases a new version with new primaries, add the ones that pass th
 When Phosphor (or any library) renames N icons, the `phosphor:` field on those entries goes stale.
 
 1. **Bump the dependency** in `packages/specs/package.json`.
-2. **Update the per-library batches** — edit `_phosphor-{A..E}.json` to reflect the new names for affected entries.
+2. **Update the per-library data** — edit `pipeline/phosphor.json` to reflect the new names for affected entries.
 3. **Merge in update mode** — overwrites stale values:
    ```bash
-   node ai/research/icons/icon-mappings/merge-mappings.mjs --library phosphor --update
+   node ai/research/icons/pipeline/merge-mappings.mjs --library phosphor --update
    ```
 4. **Build** — `cd packages/specs && npm run build:icons`.
 
@@ -79,10 +79,10 @@ When introducing a new library (e.g. Bootstrap Icons), every entry needs a new c
    - `packages/specs/scripts/build-icon-css.js` `libraries` table
    - `packages/specs/scripts/build-icon-svg.js` `libraries` table (with `pkg` and `svgPath`)
    - `tools/mcp/src/server.ts` `ICON_LIBRARIES` and `LIB_DISPLAY` constants
-3. **Extend the merge script** — add the new library to `libraryFields` in `ai/research/icons/icon-mappings/merge-mappings.mjs`.
-4. **Add the field to every entry in `mappings.js`** — bulk-add `bootstrapIcons: ''` (or null where no equivalent exists) to all 481 entries. Script this; do not edit by hand.
-5. **Cross-library research** — subagent fan-out per `rebuild-plan.md` Pass 2 to produce `_bootstrap-icons-{A..E}.json` covering all 481 canonicals.
-6. **Merge** — `node ai/research/icons/icon-mappings/merge-mappings.mjs --library bootstrapIcons`.
+3. **Extend the merge script** — add the new library to `libraryFields` in `ai/research/icons/pipeline/merge-mappings.mjs`.
+4. **Add the field to every entry in `mappings.js`** — bulk-add `bootstrapIcons: ''` (or null where no equivalent exists) to all canonical entries. Script this; do not edit by hand.
+5. **Cross-library research** — subagent fan-out per `pipeline/methodology.md` Pass 2 to produce `pipeline/bootstrap-icons.json` covering every canonical.
+6. **Merge** — `node ai/research/icons/pipeline/merge-mappings.mjs --library bootstrapIcons`.
 7. **Sets directory** — `mkdir src/primitives/icon/sets/bootstrap-icons` (the build will populate `bootstrap-icons.css` and `svg/`).
 8. **Document** — add a row to `src/primitives/icon/sets/README.md`.
 9. **Build** — `cd packages/specs && npm run build:icons`.
@@ -91,7 +91,7 @@ When introducing a new library (e.g. Bootstrap Icons), every entry needs a new c
 
 When a frequently-typed alias outweighs its current canonical (the descriptivist call):
 
-1. **Add a promotion entry** to a new JSON file (or extend an existing pass5 file):
+1. **Add a promotion entry** to a new JSON file (or extend the existing `pipeline/promotions.json`):
    ```json
    {
      "promotions": [
@@ -106,22 +106,22 @@ When a frequently-typed alias outweighs its current canonical (the descriptivist
    ```
 2. **Apply** — renames the canonical key, pushes the old name into the new entry's aliases, and renames family members:
    ```bash
-   node ai/research/icons/icon-mappings/apply-promotions.mjs path/to/your-promotions.json
+   node ai/research/icons/pipeline/apply-promotions.mjs path/to/your-promotions.json
    ```
-3. **Document the judgment** — append to `expansion-review.md` or a new judgment file. Promotions are a permanent rename; the descriptivist record matters.
+3. **Document the judgment** — append to `inclusion-rationale.md` or a new judgment file. Promotions are a permanent rename; the descriptivist record matters.
 4. **Build** — `cd packages/specs && npm run build:icons`.
 
 ## Quick reference
 
 ```bash
 # Fill new empty library fields after adding entries
-node ai/research/icons/icon-mappings/merge-mappings.mjs
+node ai/research/icons/pipeline/merge-mappings.mjs
 
 # Refresh one library's stale values
-node ai/research/icons/icon-mappings/merge-mappings.mjs --library phosphor --update
+node ai/research/icons/pipeline/merge-mappings.mjs --library phosphor --update
 
 # Apply a promotion table
-node ai/research/icons/icon-mappings/apply-promotions.mjs ai/research/icons/icon-mappings/pass5-promotions.json
+node ai/research/icons/pipeline/apply-promotions.mjs ai/research/icons/pipeline/promotions.json
 
 # Always finish with
 cd packages/specs && npm run build:icons

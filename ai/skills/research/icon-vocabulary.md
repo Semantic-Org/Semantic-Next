@@ -23,7 +23,7 @@ type: skill
 | System | Direction | Lives in |
 |---|---|---|
 | **Build** | `mappings.js` → runtime artifacts (`icons.meta.js`, `sets/{lib}/{lib}.css`, copied SVGs) | `packages/specs/scripts/build-icon-{meta,css,svg}.js` |
-| **Generation** | research data → `mappings.js` | `ai/research/icons/icon-mappings/` |
+| **Generation** | research data → `mappings.js` | `ai/research/icons/pipeline/` |
 
 The build pipeline runs every time mappings changes. The generation pipeline runs when the dictionary itself needs to be added to or refreshed.
 
@@ -35,7 +35,7 @@ The optimization target is **agent hit rate**: the names a developer or AI agent
 2. **Bridge naming gaps** — drives aliases. Library-native names from training data (`zap` → `bolt`, `house` → `home`), intent names (`delete` → `trash`, `edit` → `pencil`), shorthand (`down` → `arrow-down`).
 3. **Let agents pick correctly without seeing the glyph** — drives `visual` and `usage` fields, surfaced through the MCP `get_icon` tool.
 
-Where the descriptivist principle bites hardest is **promotion**: when the alias is what 90%+ of developers reach for and the upstream artifact name is just glyph description, the alias becomes canonical and the artifact becomes the alias. `pass5-promotions.json` is the worked example — 18 promotions including `house → home`, `circle-user → avatar`, `triangle-alert → warning`, `square-arrow-out-up-right → external-link`.
+Where the descriptivist principle bites hardest is **promotion**: when the alias is what 90%+ of developers reach for and the upstream artifact name is just glyph description, the alias becomes canonical and the artifact becomes the alias. `pipeline/promotions.json` is the worked example — 18 promotions including `house → home`, `circle-user → avatar`, `triangle-alert → warning`, `square-arrow-out-up-right → external-link`.
 
 ## The vocabulary research corpus
 
@@ -44,20 +44,20 @@ Under `ai/research/icons/`:
 | File | Role |
 |---|---|
 | `selection-process.md` | Methodology — three-pass adversarial curation (exhaustive → editorial → audit) |
-| `expansion-review.md` | Pass 2 per-icon judgments (additions and rejections with rationale) |
-| `reconciliation-audit.md` | Pass 4 third-party audit findings, including 21 mapping-integrity fixes |
+| `inclusion-rationale.md` | Per-icon judgments from the expansion review (additions and rejections with rationale) |
+| `roster-audit.md` | Third-party audit findings, including 21 mapping-integrity fixes |
 | `description-pipeline.md` | Methodology for the blind-vision pipeline producing `visual:` + `usage:` fields |
-| `final-list.txt` | Canonical roster |
+| `canonical-roster.txt` | Canonical roster |
 | `renames.csv` | Artifact-name → canonical rename rules (e.g. `trash-2 → trash`) |
-| `pass-1-{exhaustive,editorial}.txt` | Inputs to the reconciliation audit |
-| `icon-mappings/rebuild-plan.md` | Methodology for the 5-pass `mappings.js` build |
-| `icon-mappings/lucide-primary-icons.csv` | Lucide upstream tags used as Pass 1 input |
-| `icon-mappings/_{lib}-{A..E}.json` | Per-library cross-mapping batches with rationale (25 files) |
-| `icon-mappings/pass1-{A..E}.json` | Pass 1 worked example (category + description per entry) |
-| `icon-mappings/pass3-aliases-{1..5}.json` | Pass 3 worked example (alias generation per entry) |
-| `icon-mappings/pass5{,b}-promotions.json` | Promotion table — applied to `mappings.js` |
-| `icon-mappings/merge-mappings.mjs` | Merge cross-library fragments into `mappings.js` |
-| `icon-mappings/apply-promotions.mjs` | Apply a promotion table to `mappings.js` |
+| `selection-{exhaustive,editorial}.txt` | Initial selection passes that fed the audit |
+| `pipeline/methodology.md` | Methodology for the 5-pass `mappings.js` build |
+| `pipeline/lucide-primary-icons.csv` | Lucide upstream tags used as Pass 1 input |
+| `pipeline/{lucide,phosphor,tabler,material,heroicons}.json` | Per-library cross-mapping data with rationale |
+| `pipeline/classification.json` | Pass 1 worked example (category + description per entry) |
+| `pipeline/aliases.json` | Pass 3 worked example (alias generation per entry) |
+| `pipeline/promotions.json`, `pipeline/promotions-followup.json` | Promotion tables — applied to `mappings.js` |
+| `pipeline/merge-mappings.mjs` | Merge cross-library data into `mappings.js` |
+| `pipeline/apply-promotions.mjs` | Apply a promotion table to `mappings.js` |
 
 Every research output lands in `mappings.js` losslessly. The corpus is preserved as the audit trail (why this 482? why is `home` canonical and `house` the alias?) and as priors for future re-runs.
 
