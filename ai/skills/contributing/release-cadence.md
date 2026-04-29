@@ -154,6 +154,18 @@ The npm publish is what jsDelivr serves from. `cdn.jsdelivr.net/npm/@semantic-ui
 
 ---
 
+## At 1.0 — Domain Promotion
+
+When 1.0 ships, the domain layout shifts:
+
+- `next.semantic-ui.com` (current production) → `semantic-ui.com` (the canonical production surface).
+- `staging.semantic-ui.com` stays as staging (no change).
+- Classic SUI (the original framework, pre-rewrite) moves to a separate subdomain — likely `classic.semantic-ui.com` (TBD).
+
+This is a 1.0-only event. Pre-1.0 releases continue to deploy at `next.semantic-ui.com`. The promotion is a manual ops step at 1.0 release time, not an automated tag-deploy effect.
+
+---
+
 ## Risk and Rollback
 
 | Failure | Response |
@@ -196,6 +208,43 @@ A release is the publishing event, not the work. The roadmap is organized by pha
 - **Release shipped** = downstream consumers can `npm install` it.
 
 A phase isn't truly complete to outside observers until a release ships it. That's why long gaps between releases create the illusion of stalled work even when active development continues.
+
+---
+
+## Framework Policy
+
+Policies that govern releases and the framework's contract with consumers.
+
+### Performance Gate
+
+Tachometer determines significance via its own CI-overlap math — a regression is reported when HEAD's CI lower bound exceeds candidate-peak's CI upper bound (non-overlapping). Any tachometer-significant finding requires explicit acknowledgment in the PR (not silently ignored) and is **blocking on the user** until resolved — bisect, accept with rationale, or revert.
+
+No fixed percentage thresholds. The bench bot's `REGRESSED` status is the gate; the user decides whether a specific regression is acceptable for the release. PR #150's mixed results during 0.18.0 are the canonical example of how this plays out.
+
+### Deprecation (Pre-1.0)
+
+Pre-1.0, breaking changes ship in minor releases (0.18.0 → 0.19.0) without a formal deprecation cycle, with explicit changelog callouts and migration notes when the change requires consumer action.
+
+Post-1.0, deprecations get one minor cycle of advance notice (deprecated in 1.X, removed in 1.(X+1)) before removal. Breaking changes outside the deprecation cycle require a major version bump.
+
+The pre-1.0 freedom reflects that the framework is still iterating on core contracts (Value Schema, Signal Performance, Naming Conventions). Once those land and 1.0 ships, the deprecation cycle starts.
+
+### Version Skew
+
+All `@semantic-ui/*` packages publish at the same version per release. Consumers should:
+
+- Pin via the umbrella `@semantic-ui/core` (single dep, one resolved version), or
+- Pin all `@semantic-ui/*` packages to the same version explicitly.
+
+Mixing versions across packages (e.g. `@semantic-ui/component@0.18.0` with `@semantic-ui/reactivity@0.19.0`) is unsupported. The packages share runtime invariants — Signal protocol, render-pipeline contracts, expression evaluator — that aren't versioned independently. Consumers who mix versions are responsible for any breakage that results.
+
+### Browser Support
+
+The framework targets the **last 2 versions of Chrome, Firefox, and Safari**. Edge follows Chrome (Chromium-based, same cadence). No IE11.
+
+Safari occasionally lags newer CSS features (e.g. `@scope` adoption is delayed in Safari relative to Chrome/Firefox). Where Safari lacks a feature SUI uses, that feature is treated as progressive enhancement — graceful fallback on Safari, full behavior on Chrome/Firefox. Light DOM Pre-Render (Phase 1, plan `1b`) is one example.
+
+Mobile: latest Safari (iOS) and latest Chrome (Android). Same last-2 policy.
 
 ---
 

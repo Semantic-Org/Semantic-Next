@@ -196,7 +196,7 @@ Work happens on a feature branch, committed incrementally, merged via PR.
 
 5. **Run the full test suite** before opening the PR: `npm test` from the repo root. All tests must pass. If any fail, fix before proceeding.
 6. **Ask the user to push** — `git push` requires user permissions. Prompt: "Ready for PR — please push with `! git push -u origin feat/{branch}`". Wait for confirmation before proceeding.
-7. **Open a PR** using `gh pr create`. Write the description like a human would — short, plain outline of what changed and why. No verbose AI-style summaries, no exhaustive file lists, no "this PR introduces" preamble. Match the tone and length of a typical human-authored PR.
+7. **Open a PR** using `gh pr create`, following the [`author-pull-requests`](author-pull-requests.md) skill for title format, description conventions, and tier triage. The skill is the canonical procedure for PR shape; this step lands the PR for the plan you're executing. (Short, plain summary; no AI-style preamble; match human-authored tone.)
 
    **Once the PR is open, do the active ceremony:**
 
