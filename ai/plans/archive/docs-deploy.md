@@ -183,9 +183,11 @@ These require editing `menus.js` and/or a few content files. No new content need
 
 ## Completion
 
-- **Status:** Audit served its purpose — informed the menu trimming on `docs/shippable` branch and PR #122 ("Docs: Remove Unwritten Content Temporarily"). The live release-readiness question moves to ROADMAP `5a Docs Deploy 0.18.0` and PR #122.
+- **Status:** Audit served its purpose — informed the menu trimming on `docs/shippable` branch and PR #122 ("Docs: Remove Unwritten Content Temporarily"). The live release-readiness question lives in `release-0-18-0.md`; the trimming itself ships when PR #122 merges.
 
-### Shipped per spec — Tier 1
+### Drafted on `docs/shippable` per Tier 1 — pending merge
+
+The audit's Tier 1 trimming is implemented on `docs/shippable` (not yet on `main`):
 
 - Menu trimming: Getting Started, Ecosystems, Philosophy hidden from start sidebar.
 - Styling tab and Components/Behaviors tabs hidden from topbar.
@@ -194,5 +196,5 @@ These require editing `menus.js` and/or a few content files. No new content need
 
 ### Active
 
-- PR #122 (`docs/shippable`, opened 2026-03-26) is the implementation artifact. Open at archive time.
-- Doc stubs have continued accumulating since this 2025-03-25 audit. A fresh audit pass may be needed before tagging 0.18.0; the original audit is preserved here as the template for that pass.
+- PR #122 (`docs/shippable`, opened 2026-03-26) carries the work above. Open at archive time; the merge + tag decision lives in `release-0-18-0.md`.
+- Doc stubs have continued accumulating since this 2025-03-25 audit. A fresh audit pass is on the release plan's step list; the original audit is preserved here as the template for that pass.
