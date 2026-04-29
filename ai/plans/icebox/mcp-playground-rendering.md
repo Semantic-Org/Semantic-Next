@@ -76,4 +76,4 @@ None — this work is independent of the main roadmap. Phase 1 is already comple
 - Phase 2: Not started (initial scope). Important for standalone agentic dev — closes the iterative design loop where an agent writes component code, navigates to the rendered URL via Chrome DevTools MCP, and refines from a screenshot. No human in the loop.
 - Phase 3: Not started (initial scope). Shareable short URLs for AI-generated playgrounds.
 
-Iceboxed because the active roadmap doesn't gate on it. Promote when the agent pipeline (ROADMAP Phase 4) needs the closed-loop iteration Phase 2 enables, or when a real authoring session demonstrates the friction. The plan needs further scoping (open questions on KV TTL, auth, rate limiting) before promotion.
+Iceboxed because the active roadmap doesn't gate on it. Promote when the agent workflow (ROADMAP Phase 4) needs the closed-loop iteration Phase 2 enables, or when a real authoring session demonstrates the friction. The plan needs further scoping (open questions on KV TTL, auth, rate limiting) before promotion.
