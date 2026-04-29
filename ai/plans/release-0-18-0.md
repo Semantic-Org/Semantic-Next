@@ -1,5 +1,7 @@
 # Release 0.18.0
 
+> Instantiates the [`release-cadence`](../skills/contributing/release-cadence.md) skill against version 0.18.0. The skill carries the canonical procedure and reasoning; this file carries the version-specific decisions, in-flight PRs, and execution notes.
+
 ## Goal
 
 Ship the next tagged version of Semantic UI Next. The framework has accumulated significant work since 0.17.0 (November 2025) — compiler package extraction, native renderer + per-block decomposition, SSR + hydration adoption path, engine registry, signal-safety work-in-flight. Doc-completeness gates have stalled the release; this plan separates "ship the framework" from "complete every doc page" so the project resumes a release cadence.
