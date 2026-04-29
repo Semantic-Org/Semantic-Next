@@ -95,4 +95,4 @@ None hard. Sits on top of `define-block.js` and `expression-evaluator.js` as-is.
 
 ## Status
 
-`initial`. Iceboxed — promote when an actual debugging session demonstrates the gap, or when the agent pipeline produces components that fail in ways the current emitter doesn't help with.
+`initial`. Iceboxed — promote when an actual debugging session demonstrates the gap, or when the agent workflow produces components that fail in ways the current emitter doesn't help with.

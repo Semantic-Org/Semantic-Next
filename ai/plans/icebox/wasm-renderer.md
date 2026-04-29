@@ -76,4 +76,4 @@ packages/renderer/src/engines/rust/
 
 ## Status
 
-`initial` — direction is clear; three open investigations (bundle size, streaming, AST caching) gate scoping. Iceboxed because the JS server renderer is fast enough at current scale and the work doesn't block the agent pipeline. Promote when docs-site render perf or downstream consumers demand it, or when a benchmark on a real workload makes the win concrete.
+`initial` — direction is clear; three open investigations (bundle size, streaming, AST caching) gate scoping. Iceboxed because the JS server renderer is fast enough at current scale and the work doesn't block the agent workflow. Promote when docs-site render perf or downstream consumers demand it, or when a benchmark on a real workload makes the win concrete.
