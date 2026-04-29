@@ -253,7 +253,7 @@ Three layers of `ReactiveDataContext` stack via Proxy fallthrough: a snippet's c
 
 ## Dependencies
 
-- **[Signal Performance](signal-performance.md)** — lands first. The `safety` preset system this plan uses (`safety: 'none'` for internal per-key Signals) arrives with signal-performance. The migration-audit gating work that plan describes is orthogonal to this one, but the preset API needs to be in place before `ReactiveDataContext` is written against it.
+- **[Signal Performance](active/signal-performance.md)** — lands first. The `safety` preset system this plan uses (`safety: 'none'` for internal per-key Signals) arrives with signal-performance. The migration-audit gating work that plan describes is orthogonal to this one, but the preset API needs to be in place before `ReactiveDataContext` is written against it.
 - **Snippet zero-reactivity investigation** (open question 1) — blocks session 3 (snippet-site adoption) but not session 1 (each-site) or session 2 (subtemplate-site).
 
 ## Sessions (estimated)

@@ -1,6 +1,6 @@
 # Release 0.18.0
 
-> Instantiates the [`release-cadence`](../skills/contributing/release-cadence.md) skill against version 0.18.0. The skill carries the canonical procedure and reasoning; this file carries the version-specific decisions, in-flight PRs, and execution notes.
+> Instantiates the [`release-cadence`](../../skills/contributing/release-cadence.md) skill against version 0.18.0. The skill carries the canonical procedure and reasoning; this file carries the version-specific decisions, in-flight PRs, and execution notes.
 
 ## Goal
 
@@ -51,7 +51,7 @@ Resolved during scoping:
    - Spot-audit against `git log v0.16.2..HEAD` (or earliest 0.17 commit boundary if v0.17.0 was untagged) for user-facing changes the draft missed. Internal refactors and harness work don't belong here.
    - Verify the page still renders cleanly via the Astro Guide layout — it's the live "What's New?" doc.
 
-5. **Wire the staging canary playground** (~1–2h, agent). See [staging-canary-playground.md](staging-canary-playground.md). Slotted here on purpose — adds an `isStagingBuild` mode to `docs/src/pages/examples/importmap.json.js` pointing at `cdn.semantic-ui.com/<pkg>@canary`. Once it deploys, `staging.semantic-ui.com/playground` becomes a real pre-tag smoke surface running main-HEAD code. The next session uses it to verify the framework works end-to-end *before* publishing to npm — cheaper than discovering an export gap or broken bundle after the deprecate-and-patch cycle has started.
+5. **Wire the staging canary playground** (~1–2h, agent). See [staging-canary-playground.md](../staging-canary-playground.md). Slotted here on purpose — adds an `isStagingBuild` mode to `docs/src/pages/examples/importmap.json.js` pointing at `cdn.semantic-ui.com/<pkg>@canary`. Once it deploys, `staging.semantic-ui.com/playground` becomes a real pre-tag smoke surface running main-HEAD code. The next session uses it to verify the framework works end-to-end *before* publishing to npm — cheaper than discovering an export gap or broken bundle after the deprecate-and-patch cycle has started.
 
 6. **Version sweep.** Confirm all 9 framework packages and root sit at `0.18.0`. Bump `integrations/astro` from `0.1.0` to `0.18.0`. Verify `internal-packages/*` versions are intentional (private packages don't publish but should still version-bump if they're part of the dep graph). Run the existing `update-version` script if it exists; otherwise hand-edit and re-run `npm install` to refresh the lockfile.
 

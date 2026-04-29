@@ -73,7 +73,7 @@ No public API changes. No breaking changes. Users don't know the engine switched
 
 ## Dependencies
 
-- [Signal Performance](../signal-performance.md) — the `safety` preset system must ship first. It's the API surface that makes this transition clean.
+- [Signal Performance](../active/signal-performance.md) — the `safety` preset system must ship first. It's the API surface that makes this transition clean.
 - TC39 Signals reaching Stage 3+ with stable API
 
 ## Status

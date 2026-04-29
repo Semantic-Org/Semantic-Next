@@ -74,11 +74,12 @@ PHASE 0: RENDERER ARCHITECTURE  ✓ Complete
 
 ---
 
-## Do Next
+## Currently Open
 
-| # | Plan | Hours | Mode | Scope | Notes |
-|---|------|-------|------|-------|-------|
-| 1 | [Release 0.18.0](release-0-18-0.md) | TBD | pair | scoped | Ship the next tagged release. Last was 0.17.0 in November. PR #122 (`docs/shippable`) is the active artifact for menu trimming; needs a fresh audit pass for stubs added since. |
+Plans with an open PR or live pair work. Updated as ceremony when a PR opens; entries clear when the PR merges (plan archives) or closes without merge (plan returns to its phase). Mirrored by `ai/plans/active/`.
+
+- [Release 0.18.0](active/release-0-18-0.md) — [PR #122](https://github.com/Semantic-Org/Semantic-Next/pull/122) `docs/shippable` (menu trimming + audit pass pending). Ships the next tagged release; last was 0.17.0 in November.
+- [Signal Performance](active/signal-performance.md) — [PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) freeze-by-default. Perf story unresolved (see plan's Bench Results); release inclusion is the open call.
 
 ---
 
@@ -107,7 +108,7 @@ Behavioral changes and API contracts that downstream agents and consumers will t
 
 | # | Plan | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
-| 2a | [Signal Performance](signal-performance.md) | 4-5h + audit | pair | scoped | `safety` preset system (`freeze` / `reference` / `none`) replacing `allowClone`. Audit of `.get()` call sites for get-mutate-set patterns gates the default flip. |
+| 2a | [Signal Performance](active/signal-performance.md) | 4-5h + audit | pair | scoped | `safety` preset system (`freeze` / `reference` / `none`) replacing `allowClone`. Audit of `.get()` call sites for get-mutate-set patterns gates the default flip. |
 | 2a.1 | [Fine-Grained Reactivity](fine-grained-reactivity.md) | 6-8h | pair | initial | `ReactiveDataContext` — per-key Signal bag — at `{#each}` items, subtemplate `reactiveData`, snippet args. Eliminates the N×M coarse invalidation pattern. Lands after 2a. |
 | 2b | [Value Schema](value-schema.md) | 16-24h (2-3d) | pair | initial | Contract for ~20-30 form components. `value` setting + schema + `change` event. Gates form/form-field and the wrapper architecture. |
 | 2c | [State from Settings](state-from-settings.md) | 8h | pair | scoped | `{ default: 'all', from: 'setting' }` in `defaultState`. Eliminates manual shadowing for components that accept initial values from attributes but own them as state. |

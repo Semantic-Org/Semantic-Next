@@ -42,15 +42,7 @@ new Signal(data, { safety: 'none', equalityFunction: isEqual })        // no pro
 
 **Problem:** Every `.value` / `.get()` of an object or array deep-clones the entire value. `.get()` is the hottest path — called inside every reaction.
 
-**Benchmarked against real SUI component data:**
-
-| Shape | Single op | Set + 5 reads |
-|---|---|---|
-| Small state (1-6 keys) | 2-8x faster | 17-23x faster |
-| Medium settings (nested objects) | 3-4x faster | 15-16x faster |
-| Large settings (19 keys + callbacks) | 7x faster | 71x faster |
-| Spec objects (45+ map entries) | 4x faster | 28x faster |
-| Populated search results (20 items) | 3x faster | 21x faster |
+**Approach:** Trade clone-on-read for freeze-on-write. Reads become reference-returns; writes pay a one-time deep-freeze cost. The trade pays off when a value is read more than once on average — true for component state and settings, less obvious for short-lived list reallocation. See `## Bench Results` below for measured outcomes — wins on object reads, regressions on specific list-shape operations.
 
 **Integration points:**
 - `Signal.set value()` — `deepFreeze(newValue)` instead of `maybeClone(newValue)` (when safety is `freeze`)
@@ -89,7 +81,9 @@ new Signal(data, { safety: 'none', equalityFunction: isEqual })        // no pro
 
 ## Dependencies
 
-None — all items are independent of the broader roadmap.
+None upstream — all items are independent of the broader roadmap.
+
+**Downstream:** [Fine-Grained Reactivity](../fine-grained-reactivity.md) consumes the `safety: 'none'` preset for framework-internal per-key Signals. Land this first; Fine-Grained Reactivity slots in once the preset API is stable.
 
 ## Known callsites requiring `safety: 'none'`
 
@@ -110,6 +104,49 @@ None — all items are independent of the broader roadmap.
 | — | `dependency.changed()` → `signal.notify()` in renderer | `renderer.js` |
 | — | `dataVersion` Signal → raw `Dependency` | `renderer.js`, `expression-evaluator.js` |
 
+## Bench Results
+
+[PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) is the live implementation surface. Bench results have been mixed since the branch opened — meaningful wins on object reads, regressions on specific list-shape operations. The perf story has not been smooth; the default flip is gated on closing the regressions.
+
+### Microbench wins (object-shape reads)
+
+Object shapes representative of SUI component state and settings, measured locally:
+
+| Shape | Single op | Set + 5 reads |
+|---|---|---|
+| Small state (1-6 keys) | 2-8x faster | 17-23x faster |
+| Medium settings (nested objects) | 3-4x faster | 15-16x faster |
+| Large settings (19 keys + callbacks) | 7x faster | 71x faster |
+| Spec objects (45+ map entries) | 4x faster | 28x faster |
+| Populated search results (20 items) | 3x faster | 21x faster |
+
+Reads become reference-returns instead of clones. The win amortizes over multiple reads — the steady state in component reactions.
+
+### Regressions from the bench bot
+
+| Bench | Regression |
+|---|---|
+| `signal-reactive-list-replace-1000x1000` | +21% |
+| `remove-5-front` | +14% |
+
+Plus several peak regressions on adjacent benches worth bisecting.
+
+### Pattern
+
+Regressions cluster on **large list reallocation + structural-change ops**. The freeze cost on a freshly-replaced 1000-item list isn't amortized — the list is reallocated, frozen once, then read once. That's the worst case for the trade. Front-removal hits a similar shape: the array gets reallocated and re-frozen on every op.
+
+The microbench wins assume read amortization. Several real workloads don't hit it.
+
+### What this gates
+
+The default flip from `'clone'` to `'freeze'` cannot land while these regressions are unbisected. Options on the table:
+
+1. Bisect the regressing benches; identify whether freeze cost can be deferred or batched for these shapes.
+2. Accept that `'freeze'` is right for object reads but not list churn; ship the API with `'clone'` as default, document `'reference'` as the opt-out for list-heavy state, revisit the default flip later.
+3. Defer the default flip to 0.19.0; ship the `safety` preset API in 0.18.0 with `'clone'` as the default, give the perf investigation a release cycle.
+
+The release-vs-defer call is captured in `release-0-18-0.md`'s open decisions.
+
 ## Sessions (estimated)
 
 1. Implement `safety` preset system + `deepFreeze` utility, migrate Signal internals, verify all 83 reactivity tests pass (~2-3h pair)
@@ -117,4 +154,4 @@ None — all items are independent of the broader roadmap.
 
 ## Status
 
-Scoped. API design finalized. Implementation in flight via [PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) ("Feat: Freeze Signals by Default") — open, mixed perf results on the bench bot (microbenchmarks improve substantially; `signal-reactive-list-replace-1000x1000` regressed +21%, `remove-5-front` +14%; several peak-regressions worth bisecting). Plan stays open until the perf story closes; release inclusion (0.18.0 vs 0.19.0) is the open call captured in `release-0-18-0.md`.
+Scoped. API design finalized. Implementation in flight via [PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) ("Feat: Freeze Signals by Default") — open, perf story unresolved (see `## Bench Results`). The default flip from `'clone'` to `'freeze'` is gated on closing the regressions. Release inclusion (0.18.0 vs 0.19.0) is the open call captured in `release-0-18-0.md`.

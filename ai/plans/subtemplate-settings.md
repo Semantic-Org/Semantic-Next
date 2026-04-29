@@ -182,9 +182,9 @@ Verify all 228+ tests pass.
 
 ## Dependencies
 
-- **[Signal Performance](signal-performance.md)** — softly. The plan works without it, but the shadow-signal pattern wants `safety: 'none'` to avoid clone-on-read overhead. Reasonable to land subtemplate settings on top of the current API and migrate to `safety: 'none'` once the preset system ships.
+- **[Signal Performance](active/signal-performance.md)** — softly. The plan works without it, but the shadow-signal pattern wants `safety: 'none'` to avoid clone-on-read overhead. Reasonable to land subtemplate settings on top of the current API and migrate to `safety: 'none'` once the preset system ships.
 - Subtree caching fix — shipped; this plan addresses the staleness exposed by that work.
 
 ## Status
 
-`initial` — design is detailed and implementation steps are concrete, but the Tier 1/Tier 2 boundary and `safety: 'none'` interaction need a pair session to resolve. Promotion candidate after [Signal Performance](signal-performance.md) lands so the shadow signals can opt into the preset directly.
+`initial` — design is detailed and implementation steps are concrete, but the Tier 1/Tier 2 boundary and `safety: 'none'` interaction need a pair session to resolve. Promotion candidate after [Signal Performance](active/signal-performance.md) lands so the shadow signals can opt into the preset directly.

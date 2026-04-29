@@ -53,8 +53,8 @@ Plans live in one of these sections based on their current state:
 
 | Section | What goes here |
 |---|---|
-| **Do Next** | Unblocked and highest priority. Max ~5 items. The active work queue. |
-| **Up Next** | Unblocked but lower priority than "Do Next." |
+| **Currently Open** | Plans with an open PR or live pair work. Mirrored by `ai/plans/active/`. Updated as ceremony when a PR opens; entries clear when the PR merges or closes without merge. Typically 1-2 entries. |
+| **Phase tables** | The phase the plan belongs to, in priority order within the phase. |
 | **Blocked on [X]** | Waiting on a specific dependency. Group by blocker. |
 | **Parallel** | Slot in wherever there's a gap; not phase-gated. |
 | **Icebox** | Drafted but not on the active roadmap. Listed by name only — full plan files in `ai/plans/icebox/`. |
@@ -146,11 +146,12 @@ The ROADMAP.md table includes a `Scope` column. When a plan is upgraded from `in
 
 Ask these questions:
 
-1. **Is it blocked?** If yes, which section matches the blocker? Add it there.
-2. **Is it unblocked and urgent?** Add to "Do Next" — but only if there's room (max ~5). If "Do Next" is full, either bump something down or add to "Up Next."
-3. **Is it unblocked but not urgent?** Add to "Up Next."
+1. **Is it on a phase's critical path?** Add to the phase table, in the position that reflects priority within the phase.
+2. **Is it parallel to phase work?** Add to `Parallel` — slots in wherever there's a gap.
+3. **Is it blocked on something specific?** Add to a `Blocked on [X]` section, or note the blocker in the Notes column.
+4. **Is it captured but not yet ready for the active roadmap?** File it in the icebox — see Step 5.
 
-If the work is captured but not yet committed to the roadmap, file it in the icebox instead — see Step 5.
+When a plan starts execution (a PR opens, or pair work goes live), additionally surface it in `## Currently Open` and move the file into `ai/plans/active/`. See "When a PR opens" under Step 2.5.
 
 ### Add the entry
 
@@ -196,6 +197,19 @@ Work happens on a feature branch, committed incrementally, merged via PR.
 5. **Run the full test suite** before opening the PR: `npm test` from the repo root. All tests must pass. If any fail, fix before proceeding.
 6. **Ask the user to push** — `git push` requires user permissions. Prompt: "Ready for PR — please push with `! git push -u origin feat/{branch}`". Wait for confirmation before proceeding.
 7. **Open a PR** using `gh pr create`. Write the description like a human would — short, plain outline of what changed and why. No verbose AI-style summaries, no exhaustive file lists, no "this PR introduces" preamble. Match the tone and length of a typical human-authored PR.
+
+   **Once the PR is open, do the active ceremony:**
+
+   - `git mv ai/plans/{plan}.md ai/plans/active/{plan}.md` — moves the plan into the in-flight folder so GitHub directory browsing shows it as active.
+   - Update internal links in the moved file: sibling-plan refs (`other.md`) → `../other.md`; skill refs (`../skills/...`) → `../../skills/...`.
+   - Update other plans linking *to* the moved file: `{plan}.md` → `active/{plan}.md`.
+   - Add a one-line entry to ROADMAP's `## Currently Open`:
+
+     ```
+     - [Plan Name](active/plan-name.md) — [PR #N](https://github.com/Semantic-Org/Semantic-Next/pull/N) brief context.
+     ```
+
+   If the PR closes without merging, reverse all of the above. If the PR merges and the plan is complete, follow the archive flow below.
 8. **Self-review the PR** using the `contributing/code-review` skill. Run 5 parallel agents, fix findings, rerun until clean. See the skill for the full process — it covers agent lenses, scoring rubric, iterative loop, and what counts as a false positive.
 9. **Post-merge verification** (when applicable). Only relevant for work that affects live infrastructure — CI pipelines, CDN endpoints, MCP deploys, etc. After the user merges and CI runs, verify the live endpoints behave correctly. Not needed for pure source changes.
 

@@ -141,7 +141,7 @@ Silent `undefined`, matching today's `try/catch` in `evaluateJavascript`. No com
 
 - None blocking. Unblocked today.
 - Informs [Native SSR](archive/native-ssr.md) — resolves the `unsafe-eval` asterisk called out there.
-- Shares API-shape thinking with [Signal Performance](signal-performance.md) `safety` preset (may or may not want to share the vocabulary).
+- Shares API-shape thinking with [Signal Performance](active/signal-performance.md) `safety` preset (may or may not want to share the vocabulary).
 
 ## Sessions (estimated)
 

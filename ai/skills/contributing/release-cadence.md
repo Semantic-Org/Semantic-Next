@@ -10,7 +10,7 @@ type: skill
 # Release Cadence
 
 > **Skill:** `release-cadence`
-> **Purpose:** The canonical procedure for shipping a tagged release. Specific releases (e.g. `ai/plans/release-0-18-0.md`) follow this shape with version-specific details filled in.
+> **Purpose:** The canonical procedure for shipping a tagged release. Specific releases follow this shape with version-specific details filled in.
 
 ---
 
