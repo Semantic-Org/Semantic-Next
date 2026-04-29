@@ -10,7 +10,7 @@ Make final decisions on the CSS token system so it can be consumed by 70+ compon
 - Current: `--size-3xs` through `--size-3xl` in `sizing.css`
 - Open: Add `--size-*-em` variants? (planned but absent)
 - Open: Add short aliases (`--3xs`, `--relative-3xs`)? (planned but absent)
-- Reference: `sizing-system-reconcile.md` for plan vs reality divergence
+- Reference: `archive/sizing-system-reconcile.md` for plan vs reality divergence
 
 ### Spacing
 - Current: `--padding-*` (em) + `--margin-*` (rem) in `spacing.css`
@@ -47,7 +47,7 @@ Make final decisions on the CSS token system so it can be consumed by 70+ compon
 
 ## Related Plans
 
-- [Sizing System Reconcile](sizing-system-reconcile.md) — divergence between plan and implementation
+- [Sizing System Reconcile](archive/sizing-system-reconcile.md) — divergence between plan and implementation
 - [Token Migration](token-migration.md) — migrating consumers to new tokens
 - [CSS Token Extraction](css-token-extraction.md) — MCP tooling for token queries
 

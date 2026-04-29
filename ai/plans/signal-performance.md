@@ -117,4 +117,4 @@ None — all items are independent of the broader roadmap.
 
 ## Status
 
-Scoped. Benchmarking complete. API design finalized. 8 fixes already shipped on this branch.
+Scoped. API design finalized. Implementation in flight via [PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) ("Feat: Freeze Signals by Default") — open, mixed perf results on the bench bot (microbenchmarks improve substantially; `signal-reactive-list-replace-1000x1000` regressed +21%, `remove-5-front` +14%; several peak-regressions worth bisecting). Plan stays open until the perf story closes; release inclusion (0.18.0 vs 0.19.0) is the open call captured in `release-0-18-0.md`.
