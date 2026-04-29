@@ -75,6 +75,14 @@ PHASE 0: RENDERER ARCHITECTURE
 
 ---
 
+## Do Next
+
+| # | Plan | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| 1 | [Release 0.18.0](release-0-18-0.md) | TBD | pair | scoped | Ship the next tagged release. Last was 0.17.0 in November. PR #122 (`docs/shippable`) is the active artifact for menu trimming; needs a fresh audit pass for stubs added since. |
+
+---
+
 ## Phase 0 — Renderer Architecture
 
 **Status: Complete.** Native renderer decomposed into per-block files with `defineBlock` lifecycle, structured error machinery, and per-item server markers + adoption hydration.
@@ -144,7 +152,6 @@ Component research, specs, and the MCP server form the agent's interface to the 
 
 | # | Plan | Hours | Mode | Notes |
 |---|------|-------|------|-------|
-| 5a | Docs Deploy 0.18.0 | open | pair | Last release was 0.17.0 in November. Menu trimming on `docs/shippable` (PR #122, open). Stopping-point decision pending — new doc stubs have accumulated since the original audit. |
 | 5b | Getting Started Guides | 32-48h (4-6d) | pair | Three pages: using-ui, creating-ui, theming. |
 | 5c | Philosophy Pages | 16-24h (2-3d) | user | NL thesis + about project. Author's voice. |
 | 5d | Primitive/Component Docs | 56-80h (7-10d) | pair | Authored MDX per component. Specimen Explorer complete. CSS tab remaining. |
