@@ -131,16 +131,15 @@ Names and tokens lock before agent-driven component generation begins. Tag names
 
 ## Phase 4 — Agent Workflow
 
-Component research, specs, and the MCP server form the agent's interface to the framework. The **component-authoring workflow** is the convention an agent follows when building a component — research → spec → implementation → validation → review, with integrated tooling at each step. It's a specific instance of the broader workflow pattern catalogued under `ai/skills/workflows/`. Tier 1/2/3 rows execute via this workflow; their mode is `agent`, gated on `4a` defining the loop.
+Component research, specs, and the MCP server form the agent's interface to the framework. The **component-authoring workflow** is the convention an agent follows when building a component — research → spec → implementation → validation → review, with integrated tooling at each step. Operational steps live in `ai/skills/workflows/` (e.g. `research-component-patterns`, `primitive-scaffold`, `primitive-write-css`, `primitive-refine`). Tier 1/2/3 rows execute via this workflow; their mode is `agent`. Phase 4 readiness depends on the loop being explicit end-to-end — existing workflow skills cover most steps; spec, validation, and review skills are the open gaps that need pair-session work before component generation begins in earnest.
 
 | # | Plan | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
-| 4a | Agent Workflow Architecture | TBD | pair | initial | Define the research → spec → implementation → validation → review loop. |
-| 4b | [Component Wrapping Behavior](component-wrapping-behavior.md) | 16-24h (2-3d) | pair | initial | Canonical pattern for components wrapping behaviors (popup over popover, accordion, dropdown, tabs). |
-| 4c | Tier 1 Primitives | 16-40h each (2-5d) | agent | — | ~8 components via workflow: dropdown/select, checkbox, radio, switch, form, form-field, tabs, accordion. |
-| 4d | Tier 2 Primitives | 16-40h each (2-5d) | agent | — | ~8 components via workflow: popover, slider, textarea, toast, drawer, breadcrumb, pagination. |
-| 4e | Tier 3 Primitives | 16-40h each (2-5d) | agent | — | ~45 components via workflow — the long tail. |
-| 4f | [Primitive Completions](primitive-completions.md) | 40-80h (5-10d) | user/pair | initial | Finish table, dropdown, header, segment, divider. Table and header need light DOM. |
+| 4a | [Component Wrapping Behavior](component-wrapping-behavior.md) | 16-24h (2-3d) | pair | initial | Canonical pattern for components wrapping behaviors (popup over popover, accordion, dropdown, tabs). |
+| 4b | Tier 1 Primitives | 16-40h each (2-5d) | agent | — | ~8 components via workflow: dropdown/select, checkbox, radio, switch, form, form-field, tabs, accordion. |
+| 4c | Tier 2 Primitives | 16-40h each (2-5d) | agent | — | ~8 components via workflow: popover, slider, textarea, toast, drawer, breadcrumb, pagination. |
+| 4d | Tier 3 Primitives | 16-40h each (2-5d) | agent | — | ~45 components via workflow — the long tail. |
+| 4e | [Primitive Completions](primitive-completions.md) | 40-80h (5-10d) | user/pair | initial | Finish table, dropdown, header, segment, divider. Table and header need light DOM. |
 
 ---
 
