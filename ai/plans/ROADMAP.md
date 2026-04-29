@@ -114,7 +114,6 @@ Behavioral changes and API contracts that downstream agents and consumers will t
 | 2c | [State from Settings](state-from-settings.md) | 8h | pair | scoped | `{ default: 'all', from: 'setting' }` in `defaultState`. Eliminates manual shadowing for components that accept initial values from attributes but own them as state. |
 | 2d | [Subtemplate Settings](subtemplate-settings.md) | 8-12h | pair | initial | Reactive `defaultSettings` on subtemplates with merged proxy over parent web component settings. Same upgrade path: add `tagName` and the subtemplate becomes a web component with no API change. |
 | 2e | [Template Match Blocks](template-match-blocks.md) | 8-16h (1-2d) | pair | scoped | `{#match}`/`{is}`/`{else}` — value-based branching. Replaces verbose `{#if is x 'a'}...{else if is x 'b'}` chains. |
-| 2f | Expression Error Surfacing | 4h | pair | initial | Surface expression string, available data keys, and error message in development mode. Currently `evaluateJavascript` returns `undefined` silently on errors. |
 
 ---
 
@@ -191,7 +190,7 @@ Slot in wherever there's a gap; not phase-gated.
 
 Plans drafted but not on the active roadmap. See `ai/plans/icebox/` for files.
 
-- [Block Runtime Diagnostics](icebox/block-runtime-diagnostics.md) — resolution-trail capture in evaluator, public `report()` API for block authors, tracing default-on-in-dev, always-on breadcrumb on first block throw.
+- [Block Runtime Diagnostics](icebox/block-runtime-diagnostics.md) — resolution-trail capture for Lisp data paths, JS-eval error surfacing, public `report()` API for block authors, tracing default-on-in-dev, always-on breadcrumb on first block throw.
 - [Renderer + Evaluator Perf](icebox/renderer-evaluator-perf.md) — concrete hot-path optimizations: item-proxy clone elimination, `Signal.peek` non-cloning, comment-marker reuse as `DynamicRegion` anchor, V8-targeted `ExpressionEvaluator` rewrite.
 - [WASM Renderer](icebox/wasm-renderer.md) — Rust/WASM server renderer for the docs-site hot path. Open questions on streaming, bundle size, AST caching.
 - [MCP Playground Rendering](icebox/mcp-playground-rendering.md) — `render_component` MCP tool + Vercel KV short URLs. Closes the iterative design loop for standalone agentic dev. Phase 1 (hash URLs) complete.

@@ -2,7 +2,13 @@
 
 ## Goal
 
-Add two diagnostic capabilities to the existing `defineBlock` error machinery: evaluator resolution-trail capture (showing where in an expression chain a value became undefined) and a public `report()` API for block authors to emit soft warnings the compiler can't catch. Both items were deferred from the original native-renderer-blocks plan.
+Add diagnostic capabilities to the existing `defineBlock` error machinery, all routing through the same emitter pipeline:
+
+- **Resolution-trail capture** — for Lisp-style data-path failures (`{user.profile.name}` where `user.profile` is undefined), show where in the chain the value became undefined.
+- **JS-eval error surfacing** — for JS-style expression failures (`{count + foo()}` where `foo` throws), surface the expression string + available data keys + error message instead of silently returning `undefined`.
+- **Public `report()` API** — for block authors to emit soft warnings the compiler can't catch (non-iterable to `{#each}`, malformed AST shapes).
+
+The first and third items were deferred from the original native-renderer-blocks plan. The second item folded in from the dropped Phase 2 row `2f Expression Error Surfacing` — same theme, same emitter, naturally co-located.
 
 Iceboxed because the agentic-debugging UX win is real but not high priority — the existing emitter is already useful, and these additions pay off most when component-authoring agents are actively iterating against runtime failures.
 
@@ -44,6 +50,18 @@ Pairs with a public `report(field, expression, message, opts)` so blocks can emi
 `getDeepDataValue` (line 307) walks segments via `path.indexOf` / `path.substring`. On a return-undefined or throw path, capture `{ segment, resolved }` pairs into a small array attached to the thrown error or returned alongside the result.
 
 Cost is paid only on the failure path. Hot path unchanged. Verify negligible overhead during scoping.
+
+### JS-eval error surfacing — `packages/renderer/src/expression-evaluator.js`
+
+`evaluateJavascript` (the JS-style branch — `{count + 1}`, `{a ? b : c}`, helper calls inside JS expressions) wraps `new Function` and catches errors, returning `undefined` silently. The author has no way to see what failed.
+
+Route the catch path through the same emitter as resolution-trail and `report()`:
+
+- Capture the expression string, the available data keys at evaluation time, and the error message.
+- Emit at yellow severity — recoverable, the template renders with `undefined`, but the author should see it.
+- Dedup per `(block, expression)` so re-renders don't spam.
+
+Cost paid only on the throw path. Hot path unchanged.
 
 ### `report()` API — `packages/renderer/src/engines/native/define-block.js`
 
