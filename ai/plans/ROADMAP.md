@@ -135,20 +135,22 @@ Names and tokens lock before agent-driven component generation begins. Tag names
 
 ## Phase 4 — Agent Pipeline
 
-Component research, specs, and the MCP server form the agent's interface to the framework. Pipeline: research → spec → implementation → validation → review.
+Component research, specs, and the MCP server form the agent's interface to the framework. The **pipeline** here is the convention an agent follows when authoring a component — research → spec → implementation → validation → review, with integrated tooling at each step. Tier 1/2/3 rows execute via this convention; their mode is `agent`, gated on `4a` defining the loop.
 
 | # | Plan | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
 | 4a | Agent Pipeline Architecture | TBD | pair | initial | Define the research → spec → implementation → validation → review loop. |
 | 4b | [Component Wrapping Behavior](component-wrapping-behavior.md) | 16-24h (2-3d) | pair | initial | Canonical pattern for components wrapping behaviors (popup over popover, accordion, dropdown, tabs). |
-| 4c | Tier 1 Primitives | 16-40h each (2-5d) | pipeline | — | ~8 components: dropdown/select, checkbox, radio, switch, form, form-field, tabs, accordion. |
-| 4d | Tier 2 Primitives | 16-40h each (2-5d) | pipeline | — | ~8 components: popover, slider, textarea, toast, drawer, breadcrumb, pagination. |
-| 4e | Tier 3 Primitives | 16-40h each (2-5d) | pipeline | — | ~45 components — the long tail. |
+| 4c | Tier 1 Primitives | 16-40h each (2-5d) | agent | — | ~8 components via pipeline: dropdown/select, checkbox, radio, switch, form, form-field, tabs, accordion. |
+| 4d | Tier 2 Primitives | 16-40h each (2-5d) | agent | — | ~8 components via pipeline: popover, slider, textarea, toast, drawer, breadcrumb, pagination. |
+| 4e | Tier 3 Primitives | 16-40h each (2-5d) | agent | — | ~45 components via pipeline — the long tail. |
 | 4f | [Primitive Completions](primitive-completions.md) | 40-80h (5-10d) | user/pair | initial | Finish table, dropdown, header, segment, divider. Table and header need light DOM. |
 
 ---
 
 ## Phase 5 — Documentation + Ecosystem
+
+Authored content, framework wrappers, and developer tooling. Long-running and parallel — each item ships independently as the dependencies clear. Topology differs from earlier phases: less a sequential lockstep, more a portfolio of streams that mature on their own cadences.
 
 | # | Plan | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
