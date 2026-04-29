@@ -69,7 +69,6 @@ PHASE 0: RENDERER ARCHITECTURE  ✓ Complete
       ├─ Primitive/component docs, behavior docs
       ├─ Wrapper architecture + packages (React/Vue/Svelte)
       ├─ Ecosystem guides, learn courses
-      ├─ LSP & type intelligence
       └─ Homepage
 ```
 
@@ -112,11 +111,9 @@ Behavioral changes and API contracts that downstream agents and consumers will t
 | 2a.1 | [Fine-Grained Reactivity](fine-grained-reactivity.md) | 6-8h | pair | initial | `ReactiveDataContext` — per-key Signal bag — at `{#each}` items, subtemplate `reactiveData`, snippet args. Eliminates the N×M coarse invalidation pattern. Lands after 2a. |
 | 2b | [Value Schema](value-schema.md) | 16-24h (2-3d) | pair | initial | Contract for ~20-30 form components. `value` setting + schema + `change` event. Gates form/form-field and the wrapper architecture. |
 | 2c | [State from Settings](state-from-settings.md) | 8h | pair | scoped | `{ default: 'all', from: 'setting' }` in `defaultState`. Eliminates manual shadowing for components that accept initial values from attributes but own them as state. |
-| 2d | Subtemplate Settings | TBD | pair | initial | Data-shape contracts for tagless template units that have data context but no settings. |
+| 2d | [Subtemplate Settings](subtemplate-settings.md) | 8-12h | pair | initial | Reactive `defaultSettings` on subtemplates with merged proxy over parent web component settings. Same upgrade path: add `tagName` and the subtemplate becomes a web component with no API change. |
 | 2e | [Template Match Blocks](template-match-blocks.md) | 8-16h (1-2d) | pair | scoped | `{#match}`/`{is}`/`{else}` — value-based branching. Replaces verbose `{#if is x 'a'}...{else if is x 'b'}` chains. |
 | 2f | Expression Error Surfacing | 4h | pair | initial | Surface expression string, available data keys, and error message in development mode. Currently `evaluateJavascript` returns `undefined` silently on errors. |
-| 2g | [CSP-Compatible Expressions](csp-compatible-expressions.md) | 12-24h | pair | initial | Opt-in three-level flag on `defineComponent` — default / no-runtime-eval / lisp-only. Allows execution under strict CSP, Workers, MV3, Deno without `--allow-eval`. Tree-shakeable hand-rolled parser, no third-party deps. |
-| 2h | [Explicit Each Keys](each-explicit-keys.md) | 4-8h | pair | initial | `{#each item key=expr}` syntax. Defensibility for data shapes that don't match the heuristic key chain. Builds on per-item marker plumbing. |
 
 ---
 
@@ -129,7 +126,6 @@ Names and tokens lock before agent-driven component generation begins. Tag names
 | 3a | [Rename Tooltip → Popover](rename-tooltip-to-popover.md) | 4h | agent | scoped | Mechanical rename across ~40 files. Ships independently. |
 | 3b | [Naming Conventions](naming-conventions.md) | 8-16h (1-2d) | pair | initial | Lock tag names for ~80 components. Cross-framework research complete. |
 | 3c | [Token Finalization](token-finalization.md) | open | pair | initial | Open questions: color grades, borders (semantic vs numeric), dark mode inversion, surface colors. Decisions are interconnected; informed by Tier 1 primitive usage. |
-| 3d | Token Migration | 16-32h (2-4d) | pair/agent | scoped | ~3 primitives + ~65 docs files. Spacing → padding/margin/gap requires judgment. |
 
 ---
 
@@ -162,9 +158,8 @@ Authored content, framework wrappers, and developer tooling. Long-running and pa
 | 5f | [Wrapper Architecture](wrapper-architecture.md) | 40-56h (5-7d) | pair | initial | Generation pipeline for React/Vue/Svelte wrappers. Blocked on value schema. |
 | 5g | Wrapper Packages | 96-160h (12-20d) | pair | initial | `@semantic-ui/react`, `/vue`, `/svelte`. Blocked on wrapper architecture. |
 | 5h | Ecosystem Guides | 56-112h (7-14d) | pair | initial | Seven pages, one per framework. Raw web component version first; rewrite post-wrapper. |
-| 5i | [LSP & Type Intelligence](lsp-and-type-intelligence.md) | 88-128h (11-16d) | pair | scoped | VS Code extension: tmLanguage + template LSP + TS plugin. Phase 0 (.d.ts + tmLanguage) shippable in ~1d. |
-| 5j | Learn Courses 3xx-5xx | 80-120h (10-15d) | pair | initial | Three courses, ~8-12 lessons each. Blocked on components existing to teach. |
-| 5k | Homepage — final pass | 8-16h (1-2d) | user | initial | Polish + content finalization after everything converges. |
+| 5i | Learn Courses 3xx-5xx | 80-120h (10-15d) | pair | initial | Three courses, ~8-12 lessons each. Blocked on components existing to teach. |
+| 5j | Homepage — final pass | 8-16h (1-2d) | user | initial | Polish + content finalization after everything converges. |
 
 ---
 
@@ -181,18 +176,13 @@ Slot in wherever there's a gap; not phase-gated.
 | P5 | CSS Token Extraction | 16-24h (2-3d) | pair | initial | `getThemingCSS` util + MCP tool. Blocked on token finalization. |
 | P6 | MCP Improvements | 8-16h (1-2d) | agent | scoped | `get_theming_css`, `get_global_tokens`, `get_token_usage`. Blocked on token extraction. |
 | P7 | [Staging Canary Playground](staging-canary-playground.md) | 1-2h | agent | scoped | Wire the staging importmap to `cdn.semantic-ui.com/@canary` so the playground exercises main-HEAD code. Production stays on jsDelivr (free, redundant). **Slotted into 0.18.0 release as session 3** — gives the publish sitting a real pre-tag smoke surface. |
-
----
-
-## Template Language Enhancements
-
-Match blocks are prioritized in Phase 2. The remaining items ship when real component templates demonstrate clear need.
-
-| # | Plan | Hours | Mode | Scope | Notes |
-|---|------|-------|------|-------|-------|
-| T1 | [Template Spread Syntax](template-spread-syntax.md) | 4-8h | pair | scoped | `{>card ...friend}` — object spread in data passing. |
-| T2 | [Template Content Projection](template-wrapper-snippets.md) | 12-16h (1.5-2d) | pair | scoped | `{>content}` — content projection for snippets + subtemplates. |
-| T3 | [Template Let Bindings](template-let-bindings.md) | 10-14h (1-2d) | pair | scoped | `{#let}...{/let}` — snippet-for-vars. |
+| P8 | [CSP-Compatible Expressions](csp-compatible-expressions.md) | 12-24h | pair | initial | Opt-in three-level flag on `defineComponent` — `loose` / `strict` / `lisp-only`. Allows execution under strict CSP, Workers, MV3, Deno without `--allow-eval`. Tree-shakeable hand-rolled parser, no third-party deps. |
+| P9 | [Explicit Each Keys](each-explicit-keys.md) | 4-8h | pair | initial | `{#each item key=expr}` syntax. Defensibility for data shapes that don't match the heuristic key chain. Builds on per-item marker plumbing. |
+| P10 | [LSP & Type Intelligence](lsp-and-type-intelligence.md) | 88-128h (11-16d) | pair | scoped | VS Code extension: tmLanguage + template LSP + TS plugin. Phase 0 (.d.ts + tmLanguage) shipped; Phase 0.5 (template LSP + playground) shipped. Phase 1 (JS intelligence) next. |
+| P11 | [Icon Observed Attributes](icon-observed-attributes.md) | 4-8h | pair | scoped | Spec-level `observeOptions: false` — icon observed-attributes drop from 4,920 to 12. Largest perf bottleneck on docs pages. Compounds with [Icon Alias Audit](icon-alias-audit.md) (`P1`). |
+| P12 | [Template Spread Syntax](template-spread-syntax.md) | 4-8h | pair | scoped | `{>card ...friend}` — object spread in data passing. Ship when component templates demonstrate need. |
+| P13 | [Template Content Projection](template-wrapper-snippets.md) | 12-16h (1.5-2d) | pair | scoped | `{>content}` — content projection for snippets + subtemplates. Ship when component templates demonstrate need. |
+| P14 | [Template Let Bindings](template-let-bindings.md) | 10-14h (1-2d) | pair | scoped | `{#let}...{/let}` — snippet-for-vars. Ship when component templates demonstrate need. |
 
 ---
 
@@ -207,3 +197,4 @@ Plans drafted but not on the active roadmap. See `ai/plans/icebox/` for files.
 - [Signals TC39 Integration](icebox/signals-tc39-integration.md) — adopt native `Signal.State`/`Signal.Computed` as backing primitives when TC39 ships. Blocked on TC39 Stage 3+.
 - [Add Icon Stroke Width](icebox/add-icon-stroke-width.md) — power-user feature, post-1.0.
 - [Audit Fix Continuation](icebox/audit-fix-continuation.md) — process work for follow-up audits.
+- [Tachometer Overhaul — PR B remainder](icebox/tachometer-overhaul.md) — suite rationalization + knob tuning + new benches. PR A (CI parallelization) and PR C (in-house Node reporter) shipped; PR B is the only outstanding piece.
