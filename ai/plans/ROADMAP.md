@@ -75,11 +75,7 @@ PHASE 0: RENDERER ARCHITECTURE (make the foundation elegant)
 
 ## Phase 0 — Renderer Architecture
 
-The native renderer is 1700 lines of correct but repeated logic. Each block (conditional, each, async, rerender, subtemplate, snippet) hand-inlines the same ceremony: create region, wire reaction, branch on hydration vs render, handle updates, handle cleanup. The `defineBlock` refactor extracts this into the same destructured-callback pattern that `defineComponent` uses. This must land before SSR and light DOM work because both modify the render/hydrate lifecycle — surgical edits to individual block files vs modifications to a monolith.
-
-| # | What | Hours | Mode | Scope | Notes |
-|---|------|-------|------|-------|-------|
-| 0 | [Native Renderer Blocks](native-renderer-blocks.md) | TBD | pair | initial | `defineBlock` pattern. Each block (`{#if}`, `{#each}`, `{#async}`, etc.) becomes its own file with `create`/`render`/`hydrate`/`update`/`destroy`/`error` lifecycle. Baked-in reactivity tracing + agent-readable runtime error output. Reference shape: lit renderer's hand-authored ~500-line core. |
+**Status: ✅ Complete.** Native renderer decomposed into per-block files with `defineBlock` lifecycle, structured error machinery, and per-item server markers + adoption hydration. See Archive.
 
 ---
 
@@ -110,6 +106,7 @@ These are the foundational behavioral changes and API contracts that agents will
 | 2e | [Template Match Blocks](template-match-blocks.md) | 8-16h (1-2d) | pair | scoped | `{#match}`/`{is}`/`{else}` — value-based branching. Replaces verbose `{#if is x 'a'}...{else if is x 'b'}` chains. Agent-generated templates frequently need status/mode/view-type branching. |
 | 2f | Expression Error Surfacing | 4h | pair | initial | `evaluateJavascript` silently returns `undefined` on all errors. Surface the expression string, available data keys, and error message in development mode. Critical for agent-generated components where broken output looks intentionally empty. |
 | 2g | [CSP-Compatible Expressions](csp-compatible-expressions.md) | 12-24h | pair | initial | Opt-in three-level flag on `defineComponent` — default / no-runtime-eval / lisp-only. Lets SUI run under strict CSP, Workers, MV3, Deno without `--allow-eval`. Tree-shakeable hand-rolled parser (~200-300 LOC, zero-cost when unused), no third-party deps, no build step. Framing is platform compatibility, not safety theatre. |
+| 2h | [Explicit Each Keys](each-explicit-keys.md) | 4-8h | pair | initial | `{#each item key=expr}` syntax. Day-1 defensibility — heuristic key chain breaks when item shapes don't match. Builds on per-item marker plumbing already shipped. |
 
 ---
 
@@ -197,6 +194,14 @@ Plans in `ai/plans/deferred/`.
 
 ---
 
+## Icebox
+
+Plans drafted but not yet on the active roadmap. See `ai/plans/icebox/` for files.
+
+- [Block Runtime Diagnostics](icebox/block-runtime-diagnostics.md) — resolution-trail capture in evaluator + public `report()` API for block authors
+
+---
+
 ## Archive
 
 Completed or rejected plans in `ai/plans/archive/`.
@@ -212,6 +217,7 @@ Completed or rejected plans in `ai/plans/archive/`.
 - **CDN Load Endpoint** (1-2d est → ~6h actual) — `/load` with natural language attributes. Version-agnostic loader, CSS sub-layers, auto-injection, bare package attrs. 5 rounds of red-team.
 - **CDN Asset Sets** (1-2d est → ~6.5h actual) — Top-level `/icons` and `/fonts` routes. Absolute CDN URLs in CSS (custom property `url()` gotcha). Self-hosted Lato, 6 icon libraries, `dev` → `brands` rename, semver downgrade guard, interactive library switcher example.
 - **[Hydration Perf Pass](archive/hydration-perf-pass.md)** (~3-4h active → 5h45m wall clock) — Closed the `perf/native` decomposition branch's ~425 ms hydration regression on `/perf/hydrated` (1000-card PerfCards). Reverted step-9's per-item hydrate claim; landed plans 04 (`data-sui-bind`), 02 (defer `removeMarkers`), 08 (single-pass walker + fast-path depth fix), 09 (per-item markers + DOM-reusing first-mutation adoption); evaluated & deferred plan 12 (yielding); fixed the phantom-`flushTask` bug (spurious `itemSignal.notify()` on every fresh record during initial render). Tachometer: decomposition regressions from ~−60% on `select` recovered to +38% faster than main; most other client-render regressions within noise. Dev hydration 98 → ~80 ms; branch at parity-or-better with main on hydrated path.
+- **[Native Renderer Blocks](archive/native-renderer-blocks.md)** — `defineBlock` decomposition + structured error machinery + per-item server markers and adoption hydration. `renderer.js` 1696 → 718 lines (after subsequent perf work). Completed 2026-04-13.
 
 ---
 
