@@ -1,14 +1,14 @@
-# Block Error Machinery v2
+# Block Runtime Diagnostics
 
 ## Goal
 
-Extend the v1 `defineBlock` error machinery (structured logs, hydrate-throw fallthrough, custom `error` hook) with two items deferred from the original native-renderer-blocks plan: evaluator resolution-trail capture and a public `report()` API for block authors to emit soft warnings the compiler can't catch.
+Add two diagnostic capabilities to the existing `defineBlock` error machinery: evaluator resolution-trail capture (showing where in an expression chain a value became undefined) and a public `report()` API for block authors to emit soft warnings the compiler can't catch. Both items were deferred from the original native-renderer-blocks plan.
 
-Iceboxed because the agentic-debugging UX win is real but not high priority — v1's emitter is already useful, and the work pays off most when component-authoring agents are actively iterating against runtime failures.
+Iceboxed because the agentic-debugging UX win is real but not high priority — the existing emitter is already useful, and these additions pay off most when component-authoring agents are actively iterating against runtime failures.
 
 ## Why eventually
 
-The v1 emitter outputs:
+The current emitter outputs:
 
 ```
 🔴 conditional  {#if user.profile.name}
@@ -17,7 +17,7 @@ The v1 emitter outputs:
   ▸ stack
 ```
 
-Useful, but the agent debugging the failure still has to manually trace `user.profile` to discover where the chain broke. The v2 version captures the resolution trail during evaluation:
+Useful, but the agent debugging the failure still has to manually trace `user.profile` to discover where the chain broke. The resolution-trail addition captures the path the evaluator walked:
 
 ```
 🔴 conditional  {#if user.profile.name}
@@ -65,8 +65,8 @@ Both gated on `isDevelopment`; tree-shake to ~0 bytes in prod.
 
 ## Dependencies
 
-None hard. Sits on top of `define-block.js` v1 and `expression-evaluator.js` as-is.
+None hard. Sits on top of `define-block.js` and `expression-evaluator.js` as-is.
 
 ## Status
 
-`initial`. Iceboxed — promote when an actual debugging session demonstrates the gap, or when the agent pipeline produces components that fail in ways v1 doesn't help with.
+`initial`. Iceboxed — promote when an actual debugging session demonstrates the gap, or when the agent pipeline produces components that fail in ways the current emitter doesn't help with.
