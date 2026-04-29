@@ -211,11 +211,41 @@ Additional tests to add:
 
 Re-run the `/perf/hydrated` filter-keystroke scenario via Chrome DevTools. Before: every surviving item's bindings re-evaluate (N × M). After: only item bindings whose per-property signal changed should re-evaluate. If index-only-shift items still re-run (because `index` is a key), consider excluding `index` from per-key invalidation or just accepting that as out of scope (templates rarely read `index` in an each body).
 
+### Why not a new reactivity primitive?
+
+A tempting alternative is `Signal.scope({ keys })` or `ReactiveRecord` in `@semantic-ui/reactivity`. Rejected because:
+
+1. The behavior is fully expressible as N `Signal`s + a `Proxy`. A new primitive would be API surface for zero new reactivity semantic.
+2. The Proxy half is renderer-specific — it depends on `ExpressionEvaluator`'s auto-unwrap-Signals-in-data contract, which the reactivity package doesn't provide.
+3. The reactivity package stays lean (`Signal`, `Reaction`, `Dependency`, `Scheduler`). `ReactiveDataContext` is renderer-internal composition, not new reactivity surface.
+
+## Correctness hazards
+
+### Late-declared keys
+
+Per-key signals are created on first `setKey`. A reader that previously fell through to the parent for a key keeps its dependency on the parent's signal, not on the freshly-created per-key signal. Each-items can hit this because the key set comes from `getEachData`'s spread of `item` (author-provided). Mitigation: `ReactiveDataContext.ensureKey(key)` bumps the owning renderer's `dataDep` exactly once per new key — once-per-key-lifetime, not once-per-update. Subtemplate reactiveData and snippet args have static template-source-declared key sets and don't need it.
+
+### Conditional reads
+
+`{condition ? ctx.proxy.a : ctx.proxy.b}` works without special handling. `Reaction.run()` clears its dependency set at the start of every run, so old-branch deps drop on re-run. Standard reactivity.
+
+### Nested blocks (each inside if inside snippet)
+
+Three layers of `ReactiveDataContext` stack via Proxy fallthrough: a snippet's ctx wraps the parent renderer's data; `{#each}`'s ctx wraps the snippet's proxy; `{#if}` reuses its parent without introducing a layer. Reading `proxy.foo` registers a per-key dep at the layer that owns `foo`; reading a key not in the current layer falls through to the next. **No cross-layer invalidation.** Strictly tighter than today's `itemSignal.notify()` and `dataDep.changed()` broadcasts.
+
+### Spread and dynamic key access
+
+`{>snippet ...data}` compiles into the blob path (`node.data = 'data'`), not individual keys — it routes through `unpackBlobData` and equality-gates the whole blob, matching today's semantics. `{data[dynamicKey]}` reads through the Proxy `get` correctly: if `dynamicKey` resolves to a known signal key the Reaction registers a per-key dep; otherwise it falls through to the parent. `Object.keys(data)` returns own signal keys union parent keys via the Proxy's `ownKeys` trap.
+
+### In-place mutation (invariant e)
+
+`ctx.notifyKey(k)` for every key replaces today's single `itemSignal.notify()` for the same-ref mutation case. For an item with N keys and inner expressions reading a subset, broadcast cost is per-key — only readers of mutated keys re-fire, not every expression. Sibling items remain isolated. Net: same isolation as today, finer granularity within the mutated item.
+
 ## Open Questions
 
-1. **Snippet zero-reactivity at top-level** — the currently `it.skip`-marked snippet test fails not with "coarse invalidation" but with "no re-evaluation at all" (`expected 1 to be > 1`). Is this a test bug or a real gap distinct from the coarseness problem this plan addresses? Needs 20-minute investigation before the plan's snippet site can be validated. If it's a real pre-existing gap, add a preparatory commit that fixes it; then the fine-grained work sits on top.
+1. **Snippet args granularity gap is bounded to nested-in-subtemplate.** Top-level snippet args are already per-signal-granular — the lazy getter runs inside the inner Reaction and reaches through to parent expressions, and `lookupExpression` skips `dataDep` because the parent renderer has `receivesData: false`. The `it.skip`-marked test failure surfaces only when a snippet is invoked inside a subtemplate, where `receivesData: true` adds `dataDep.depend()` to every inner snippet-arg Reaction. The plan's snippet-site adoption layers a per-key signal between parent and inner Reaction so subtemplate `dataDep` pollution stops at the layer boundary.
 
-2. **`ensureKey` / one-time coarse bump on new keys** — agent's proposal includes an escape hatch for late-declared keys. My read of all three sites says the key set is statically determined (`getEachData`'s spread + index; template-source-declared reactiveData/snippet args). Confirm via code read that no path can introduce a new key mid-life. If confirmed, drop `ensureKey`.
+2. ~~**`ensureKey` / one-time coarse bump on new keys**~~ — Resolved: keep `ensureKey`. For each-items the per-key set is `getEachData`'s spread of `item` plus `index`, and `item` is author-provided — items can gain keys across updates. When a new key first appears for a record, `setKey` creates a fresh per-key signal, but readers that previously fell through to the parent for that key don't transparently re-subscribe. `ReactiveDataContext.ensureKey(key)` bumps the owning renderer's `dataDep` exactly once per new key — a once-per-key-lifetime cost, not once-per-update. Subtemplate reactiveData and snippet args have static template-source-declared key sets and don't need it.
 
 3. **Subtemplate `renderer.data` swap safety** — setupReactiveSubtemplate mutates `currentInstance.renderer.data` and calls `evaluator.setData(ctx.proxy)`. Audit who else holds references to `currentInstance.data` — `overlaySettingsSignals`, `getDataContext`, anything reachable via `template.element` — that could break if the reference changes. If any holder is invalidated by the swap, thread the proxy through construction instead of mutating post-hoc.
 
