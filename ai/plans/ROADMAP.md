@@ -42,7 +42,7 @@ Component research lives in `ai/research/components/` — pattern analysis acros
 Foundations first, then contracts, then production velocity.
 
 ```
-PHASE 0: RENDERER ARCHITECTURE
+PHASE 0: RENDERER ARCHITECTURE  ✓ Complete
 │
 ├─→ PHASE 1: SSR + LIGHT DOM
 │     ├─ SSR data binding markers
@@ -65,7 +65,7 @@ PHASE 0: RENDERER ARCHITECTURE
 │     └─ Tier 1 → Tier 2 → Tier 3 primitives
 │
 └─→ PHASE 5: DOCUMENTATION + ECOSYSTEM
-      ├─ Docs deploy, getting started, philosophy pages
+      ├─ Getting started, philosophy pages
       ├─ Primitive/component docs, behavior docs
       ├─ Wrapper architecture + packages (React/Vue/Svelte)
       ├─ Ecosystem guides, learn courses
@@ -150,19 +150,19 @@ Component research, specs, and the MCP server form the agent's interface to the 
 
 ## Phase 5 — Documentation + Ecosystem
 
-| # | Plan | Hours | Mode | Notes |
-|---|------|-------|------|-------|
-| 5b | Getting Started Guides | 32-48h (4-6d) | pair | Three pages: using-ui, creating-ui, theming. |
-| 5c | Philosophy Pages | 16-24h (2-3d) | user | NL thesis + about project. Author's voice. |
-| 5d | Primitive/Component Docs | 56-80h (7-10d) | pair | Authored MDX per component. Specimen Explorer complete. CSS tab remaining. |
-| 5e | Behavior Docs | 40-64h (5-8d) | pair | Four behaviors: attach, transition, escape, popover. |
-| 5f | CSS Token & Theming Docs | 40-56h (5-7d) | pair | 6 token pages + 6 styling concept pages. Blocked on token finalization. |
-| 5g | [Wrapper Architecture](wrapper-architecture.md) | 40-56h (5-7d) | pair | Generation pipeline for React/Vue/Svelte wrappers. Blocked on value schema. |
-| 5h | Wrapper Packages | 96-160h (12-20d) | pair | `@semantic-ui/react`, `/vue`, `/svelte`. Blocked on wrapper architecture. |
-| 5i | Ecosystem Guides | 56-112h (7-14d) | pair | Seven pages, one per framework. Raw web component version first; rewrite post-wrapper. |
-| 5j | [LSP & Type Intelligence](lsp-and-type-intelligence.md) | 88-128h (11-16d) | pair | VS Code extension: tmLanguage + template LSP + TS plugin. Phase 0 (.d.ts + tmLanguage) shippable in ~1d. |
-| 5k | Learn Courses 3xx-5xx | 80-120h (10-15d) | pair | Three courses, ~8-12 lessons each. Blocked on components existing to teach. |
-| 5l | Homepage — final pass | 8-16h (1-2d) | user | Polish + content finalization after everything converges. |
+| # | Plan | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| 5a | Getting Started Guides | 32-48h (4-6d) | pair | initial | Three pages: using-ui, creating-ui, theming. |
+| 5b | Philosophy Pages | 16-24h (2-3d) | user | initial | NL thesis + about project. Author's voice. |
+| 5c | Primitive/Component Docs | 56-80h (7-10d) | pair | initial | Authored MDX per component. Specimen Explorer complete. CSS tab remaining. |
+| 5d | Behavior Docs | 40-64h (5-8d) | pair | initial | Four behaviors: attach, transition, escape, popover. |
+| 5e | CSS Token & Theming Docs | 40-56h (5-7d) | pair | initial | 6 token pages + 6 styling concept pages. Blocked on token finalization. |
+| 5f | [Wrapper Architecture](wrapper-architecture.md) | 40-56h (5-7d) | pair | initial | Generation pipeline for React/Vue/Svelte wrappers. Blocked on value schema. |
+| 5g | Wrapper Packages | 96-160h (12-20d) | pair | initial | `@semantic-ui/react`, `/vue`, `/svelte`. Blocked on wrapper architecture. |
+| 5h | Ecosystem Guides | 56-112h (7-14d) | pair | initial | Seven pages, one per framework. Raw web component version first; rewrite post-wrapper. |
+| 5i | [LSP & Type Intelligence](lsp-and-type-intelligence.md) | 88-128h (11-16d) | pair | scoped | VS Code extension: tmLanguage + template LSP + TS plugin. Phase 0 (.d.ts + tmLanguage) shippable in ~1d. |
+| 5j | Learn Courses 3xx-5xx | 80-120h (10-15d) | pair | initial | Three courses, ~8-12 lessons each. Blocked on components existing to teach. |
+| 5k | Homepage — final pass | 8-16h (1-2d) | user | initial | Polish + content finalization after everything converges. |
 
 ---
 
@@ -170,15 +170,15 @@ Component research, specs, and the MCP server form the agent's interface to the 
 
 Slot in wherever there's a gap; not phase-gated.
 
-| # | Plan | Hours | Mode | Notes |
-|---|------|-------|------|-------|
-| P1 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel agent eval. |
-| P2 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | Trailing-slash HTML pages for package indexes. |
-| P3 | Roadmap Page Redesign | 8-16h (1-2d) | pair | — |
-| P4 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | Three PlaygroundExamples for templates / specs / components. |
-| P5 | CSS Token Extraction | 16-24h (2-3d) | pair | `getThemingCSS` util + MCP tool. Blocked on token finalization. |
-| P6 | MCP Improvements | 8-16h (1-2d) | agent | `get_theming_css`, `get_global_tokens`, `get_token_usage`. Blocked on token extraction. |
-| P7 | [Staging Canary Playground](staging-canary-playground.md) | 1-2h | agent | Wire the staging importmap to `cdn.semantic-ui.com/@canary` so the playground exercises main-HEAD code. Production stays on jsDelivr (free, redundant). **Slotted into 0.18.0 release as session 3** — gives the publish sitting a real pre-tag smoke surface. |
+| # | Plan | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| P1 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | scoped | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel agent eval. |
+| P2 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | scoped | Per-package dir pages and package file browsers remaining. Major dir pages live; build-time version injection still pending. |
+| P3 | Roadmap Page Redesign | 8-16h (1-2d) | pair | initial | — |
+| P4 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | initial | Three PlaygroundExamples for templates / specs / components. |
+| P5 | CSS Token Extraction | 16-24h (2-3d) | pair | initial | `getThemingCSS` util + MCP tool. Blocked on token finalization. |
+| P6 | MCP Improvements | 8-16h (1-2d) | agent | scoped | `get_theming_css`, `get_global_tokens`, `get_token_usage`. Blocked on token extraction. |
+| P7 | [Staging Canary Playground](staging-canary-playground.md) | 1-2h | agent | scoped | Wire the staging importmap to `cdn.semantic-ui.com/@canary` so the playground exercises main-HEAD code. Production stays on jsDelivr (free, redundant). **Slotted into 0.18.0 release as session 3** — gives the publish sitting a real pre-tag smoke surface. |
 
 ---
 
