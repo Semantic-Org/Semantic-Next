@@ -64,12 +64,16 @@ PHASE 0: RENDERER ARCHITECTURE  ✓ Complete
 │     ├─ Auto-research pattern
 │     └─ Tier 1 → Tier 2 → Tier 3 primitives
 │
-└─→ PHASE 5: DOCUMENTATION + ECOSYSTEM
-      ├─ Getting started, philosophy pages
-      ├─ Primitive/component docs, behavior docs
-      ├─ Wrapper architecture + packages (React/Vue/Svelte)
-      ├─ Ecosystem guides, learn courses
-      └─ Homepage
+├─→ PHASE 5: DOCUMENTATION
+│     ├─ Getting started, philosophy pages
+│     ├─ Primitive/component docs, behavior docs
+│     ├─ CSS token & theming docs
+│     ├─ Ecosystem guides, learn courses
+│     └─ Homepage
+│
+└─→ PHASE 6: FRAMEWORK INTEGRATION
+      ├─ Wrapper architecture
+      └─ Wrapper packages (React/Vue/Svelte)
 ```
 
 ---
@@ -143,9 +147,9 @@ Component research, specs, and the MCP server form the agent's interface to the 
 
 ---
 
-## Phase 5 — Documentation + Ecosystem
+## Phase 5 — Documentation
 
-Authored content, framework wrappers, and developer tooling. Long-running and parallel — each item ships independently as the dependencies clear. Topology differs from earlier phases: less a sequential lockstep, more a portfolio of streams that mature on their own cadences.
+Authored content for the framework: guides, primitive/component/behavior reference, theming, learn courses, homepage. Long-running and parallel — each item ships independently as dependencies clear.
 
 | # | Plan | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
@@ -154,11 +158,20 @@ Authored content, framework wrappers, and developer tooling. Long-running and pa
 | 5c | Primitive/Component Docs | 56-80h (7-10d) | pair | initial | Authored MDX per component. Specimen Explorer complete. CSS tab remaining. |
 | 5d | Behavior Docs | 40-64h (5-8d) | pair | initial | Four behaviors: attach, transition, escape, popover. |
 | 5e | CSS Token & Theming Docs | 40-56h (5-7d) | pair | initial | 6 token pages + 6 styling concept pages. Blocked on token finalization. |
-| 5f | [Wrapper Architecture](wrapper-architecture.md) | 40-56h (5-7d) | pair | initial | Generation pipeline for React/Vue/Svelte wrappers. Blocked on value schema. |
-| 5g | Wrapper Packages | 96-160h (12-20d) | pair | initial | `@semantic-ui/react`, `/vue`, `/svelte`. Blocked on wrapper architecture. |
-| 5h | Ecosystem Guides | 56-112h (7-14d) | pair | initial | Seven pages, one per framework. Raw web component version first; rewrite post-wrapper. |
-| 5i | Learn Courses 3xx-5xx | 80-120h (10-15d) | pair | initial | Three courses, ~8-12 lessons each. Blocked on components existing to teach. |
-| 5j | Homepage — final pass | 8-16h (1-2d) | user | initial | Polish + content finalization after everything converges. |
+| 5f | Ecosystem Guides | 56-112h (7-14d) | pair | initial | Seven pages, one per framework. Raw web component version first; rewrite post-wrapper. |
+| 5g | Learn Courses 3xx-5xx | 80-120h (10-15d) | pair | initial | Three courses, ~8-12 lessons each. Blocked on components existing to teach. |
+| 5h | Homepage — final pass | 8-16h (1-2d) | user | initial | Polish + content finalization after everything converges. |
+
+---
+
+## Phase 6 — Framework Integration
+
+Wrappers ship the framework into React/Vue/Svelte component models so consumers don't register web components manually or wire `value` / `change` plumbing themselves. Architecture defines the generation pipeline; per-framework packages are the artifacts that pipeline produces. Both blocked on Value Schema (2b) — the contract the wrappers translate.
+
+| # | Plan | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| 6a | [Wrapper Architecture](wrapper-architecture.md) | 40-56h (5-7d) | pair | initial | Generation pipeline for React/Vue/Svelte wrappers. Blocked on value schema. |
+| 6b | Wrapper Packages | 96-160h (12-20d) | pair | initial | `@semantic-ui/react`, `/vue`, `/svelte`. Blocked on wrapper architecture. |
 
 ---
 
