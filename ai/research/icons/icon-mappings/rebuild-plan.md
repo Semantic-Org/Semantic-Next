@@ -51,7 +51,7 @@ A merge script combines fragments → writes `mappings.js` with format:
 - The library's full icon list (need to source these — may need CSVs or directory listings from node_modules)
 - Any existing research matches as hints
 
-Output: `_pass2-{library}-{A-E}.json` with format `{ "semantic-name": { "value": "lib-icon-name", "reason": "..." } }`
+Output: `_{library}-{A-E}.json` with format `{ "semantic-name": { "value": "lib-icon-name", "reason": "..." } }`
 
 A merge script patches these into mappings.js. Icons with no match in a library get `null`.
 

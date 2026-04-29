@@ -86,16 +86,9 @@ The key insight between V1 and V2: agents writing icon descriptions for other ag
 
 - `visual` and `usage` fields on each entry in `packages/specs/src/icons/mappings.js`
 - Exposed via the `get_icon` MCP tool — agents searching by name, alias, or library-native name see the visual description in results
-- Human-readable artifact at `ai/workspace/artifacts/icon-descriptions.md`
 
 ## Reproducibility
 
-All intermediate artifacts are preserved in `ai/workspace/icon-visual-test/production/`:
-- `pngs/` — all 481 rendered PNGs
-- `batches/` — per-category directories with numbered PNGs, manifests, and description JSONs
-- `batch-index.json` — batch metadata
-- `verify-input.json` — collected descriptions for QA
-- `verification-results.json` — flagged mismatches
-- `fixes-v2.json` — targeted corrections
+Intermediate artifacts (rendered PNGs, per-category batches, verification results) live under `ai/workspace/icon-visual-test/` — gitignored per-user scratch. To re-run the pipeline against an updated icon set, regenerate the PNGs from the SVGs referenced in `mappings.js` and re-run the batch description + verification steps described above.
 
 The render script (`ai/workspace/icon-visual-test/render-all.js`) and merge script (`ai/workspace/icon-visual-test/merge-descriptions.js`) can re-run the pipeline if icons are added or changed.
