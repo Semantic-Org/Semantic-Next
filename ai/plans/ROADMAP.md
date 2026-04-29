@@ -64,16 +64,16 @@ PHASE 0: RENDERER ARCHITECTURE  ✓ Complete
 │     ├─ Auto-research pattern
 │     └─ Tier 1 → Tier 2 → Tier 3 primitives
 │
-├─→ PHASE 5: DOCUMENTATION
-│     ├─ Getting started, philosophy pages
-│     ├─ Primitive/component docs, behavior docs
-│     ├─ CSS token & theming docs
-│     ├─ Ecosystem guides, learn courses
-│     └─ Homepage
+├─→ PHASE 5: FRAMEWORK INTEGRATION
+│     ├─ Wrapper architecture
+│     └─ Wrapper packages (React/Vue/Svelte)
 │
-└─→ PHASE 6: FRAMEWORK INTEGRATION
-      ├─ Wrapper architecture
-      └─ Wrapper packages (React/Vue/Svelte)
+└─→ PHASE 6: DOCUMENTATION
+      ├─ Getting started, philosophy pages
+      ├─ Primitive/component docs, behavior docs
+      ├─ CSS token & theming docs
+      ├─ Ecosystem guides, learn courses
+      └─ Homepage
 ```
 
 ---
@@ -147,31 +147,31 @@ Component research, specs, and the MCP server form the agent's interface to the 
 
 ---
 
-## Phase 5 — Documentation
+## Phase 5 — Framework Integration
+
+Wrappers are the adoption surface for the majority of consumers — React/Vue/Svelte developers using `@semantic-ui/react` etc. rather than registering web components manually. Architecture defines the generation pipeline; per-framework packages are the artifacts. Blocked on Value Schema (2b); iterates alongside Phase 4 primitive generation. Sequenced ahead of authored documentation because adoption needs the wrappers — docs alone don't convert most users.
+
+| # | Plan | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| 5a | [Wrapper Architecture](wrapper-architecture.md) | 40-56h (5-7d) | pair | initial | Generation pipeline for React/Vue/Svelte wrappers. Blocked on value schema. |
+| 5b | Wrapper Packages | 96-160h (12-20d) | pair | initial | `@semantic-ui/react`, `/vue`, `/svelte`. Blocked on wrapper architecture. |
+
+---
+
+## Phase 6 — Documentation
 
 Authored content for the framework: guides, primitive/component/behavior reference, theming, learn courses, homepage. Long-running and parallel — each item ships independently as dependencies clear.
 
 | # | Plan | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
-| 5a | Getting Started Guides | 32-48h (4-6d) | pair | initial | Three pages: using-ui, creating-ui, theming. |
-| 5b | Philosophy Pages | 16-24h (2-3d) | user | initial | NL thesis + about project. Author's voice. |
-| 5c | Primitive/Component Docs | 56-80h (7-10d) | pair | initial | Authored MDX per component. Specimen Explorer complete. CSS tab remaining. |
-| 5d | Behavior Docs | 40-64h (5-8d) | pair | initial | Four behaviors: attach, transition, escape, popover. |
-| 5e | CSS Token & Theming Docs | 40-56h (5-7d) | pair | initial | 6 token pages + 6 styling concept pages. Blocked on token finalization. |
-| 5f | Ecosystem Guides | 56-112h (7-14d) | pair | initial | Seven pages, one per framework. Raw web component version first; rewrite post-wrapper. |
-| 5g | Learn Courses 3xx-5xx | 80-120h (10-15d) | pair | initial | Three courses, ~8-12 lessons each. Blocked on components existing to teach. |
-| 5h | Homepage — final pass | 8-16h (1-2d) | user | initial | Polish + content finalization after everything converges. |
-
----
-
-## Phase 6 — Framework Integration
-
-Wrappers ship the framework into React/Vue/Svelte component models so consumers don't register web components manually or wire `value` / `change` plumbing themselves. Architecture defines the generation pipeline; per-framework packages are the artifacts that pipeline produces. Both blocked on Value Schema (2b) — the contract the wrappers translate.
-
-| # | Plan | Hours | Mode | Scope | Notes |
-|---|------|-------|------|-------|-------|
-| 6a | [Wrapper Architecture](wrapper-architecture.md) | 40-56h (5-7d) | pair | initial | Generation pipeline for React/Vue/Svelte wrappers. Blocked on value schema. |
-| 6b | Wrapper Packages | 96-160h (12-20d) | pair | initial | `@semantic-ui/react`, `/vue`, `/svelte`. Blocked on wrapper architecture. |
+| 6a | Getting Started Guides | 32-48h (4-6d) | pair | initial | Three pages: using-ui, creating-ui, theming. |
+| 6b | Philosophy Pages | 16-24h (2-3d) | user | initial | NL thesis + about project. Author's voice. |
+| 6c | Primitive/Component Docs | 56-80h (7-10d) | pair | initial | Authored MDX per component. Specimen Explorer complete. CSS tab remaining. |
+| 6d | Behavior Docs | 40-64h (5-8d) | pair | initial | Four behaviors: attach, transition, escape, popover. |
+| 6e | CSS Token & Theming Docs | 40-56h (5-7d) | pair | initial | 6 token pages + 6 styling concept pages. Blocked on token finalization. |
+| 6f | Ecosystem Guides | 56-112h (7-14d) | pair | initial | Seven pages, one per framework. Raw web component version first; rewrite post-wrapper. |
+| 6g | Learn Courses 3xx-5xx | 80-120h (10-15d) | pair | initial | Three courses, ~8-12 lessons each. Blocked on components existing to teach. |
+| 6h | Homepage — final pass | 8-16h (1-2d) | user | initial | Polish + content finalization after everything converges. |
 
 ---
 
