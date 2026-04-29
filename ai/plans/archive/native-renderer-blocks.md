@@ -600,3 +600,32 @@ None blocking. The ServerRenderer per-item markers land in this same plan (step 
 ## Status
 
 **Scope: `scoped`.** Shape (`defineBlock` hooks, two-level context bag, error emitter), sequencing, verification, and the per-item marker emission point (server.js:225-250) are all concrete. Implementation details left to execution: exact `DynamicRegion` signature tweaks if any, exact `hydrateInnerContent` signature, whether the 8-key dispatch bag or 9-key author bag needs additions once real block code puts pressure on them.
+
+## Completion
+
+- **Estimated:** TBD pair (originally listed as Phase 0 plan #0 with no concrete hours).
+- **Actual:** Major work landed across two waves — initial decomposition completed 2026-04-12 with perf polish 2026-04-13. Per-item server markers + hydration adoption (step 9) shipped as part of the hydration-perf-pass (~5h45m wall clock per that plan's archive note).
+- **Completed:** 2026-04-13 (decomposition); 2026-04-15 (per-item adoption).
+
+### Shipped per spec
+
+- `define-block.js` with try/catch error machinery, structured `reportBlockError`, hydrate-throw fallthrough, reaction disposal on render/update throw, optional `error` hook
+- `blocks/registry.js` + side-effect imports from `blocks/index.js`
+- `reactive-data.js` — all expression-position bindings extracted
+- All 5 blocks in their own files: `rerender.js`, `conditional.js`, `async.js`, `each.js`, `template.js`
+- `lookupExpression` rename from `eval()`
+- `ReactionScope` 3rd-arg context support (`{ message, block, node }`)
+- Per-item `sui-item:v1:KEY` markers in `server.js`
+- `adoptServerItems` first-data-change DOM reuse path in `each.js`
+- `sample.js` — reference template for agents authoring new blocks (not in original plan; intentional addition)
+
+### Plan-vs-reality drift
+
+- `renderer.js` line count: target was under 400 lines; landed at 718 after subsequent perf work (Plan 04 `data-sui-bind` fast path, `cachedBuildHTMLString` WeakMap, single-pass walker). The wins justify the lines.
+- Step-1 signature-convention benchmark (`renderAST` destructured vs. positional, intended as a regression guard): no benchmark file present in the tree. Decision was made (current code uses destructured), but the regression guard didn't land.
+- `hydrateInnerContent` placement: plan said "exported from `define-block.js`"; reality routes through `Renderer.hydrateInnerContent` with `define-block.js` exposing a closure. Equivalent functionality, different file home.
+
+### Deferred — extracted to follow-up plans
+
+- **Resolution trail capture** in `getDeepDataValue` + public `report()` API → [Block Runtime Diagnostics](../icebox/block-runtime-diagnostics.md) (icebox).
+- **Explicit `key=expression` syntax** for `{#each}` → [Explicit Each Keys](../each-explicit-keys.md) (active; day-1 defensibility for users whose data doesn't match the heuristic chain).
