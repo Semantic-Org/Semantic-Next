@@ -135,15 +135,21 @@ Names and tokens lock before agent-driven component generation begins. Tag names
 
 ## Phase 4 — Agent Workflow
 
-Component research, specs, and the MCP server form the agent's interface to the framework. The **component-authoring workflow** is the convention an agent follows when building a component — research → spec → implementation → validation → review, with integrated tooling at each step. Operational steps live in `ai/skills/workflows/` (e.g. `research-component-patterns`, `primitive-scaffold`, `primitive-write-css`, `primitive-refine`). Tier 1/2/3 rows execute via this workflow; their mode is `agent`. Phase 4 readiness depends on the loop being explicit end-to-end — existing workflow skills cover most steps; spec, validation, and review skills are the open gaps that need pair-session work before component generation begins in earnest.
+Component research, specs, and the MCP server form the agent's interface to the framework. The **component-authoring workflow** is the convention an agent follows when building a component — research → spec → implementation → validation → review, with integrated tooling at each step. Operational steps live in `ai/skills/workflows/` (e.g. `research-component-patterns`, `primitive-scaffold`, `primitive-write-css`, `primitive-refine`). Tier 1/2/3 rows execute via this workflow; their mode is `agent`.
+
+An agent needs eyes and tooling to work in isolation. Phase 4 has two gates before autonomous component generation begins in earnest:
+
+1. **Eyes** — `4a` MCP Playground Rendering ships the `render_component` tool + Chrome DevTools loop so an agent can write code, see rendered output, and iterate without human verification at every step.
+2. **Tooling** — workflow skills cover most steps end-to-end; spec, validation, and review skills are the open gaps that need pair-session work.
 
 | # | Plan | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
-| 4a | [Component Wrapping Behavior](component-wrapping-behavior.md) | 16-24h (2-3d) | pair | initial | Canonical pattern for components wrapping behaviors (popup over popover, accordion, dropdown, tabs). |
-| 4b | Tier 1 Primitives | 16-40h each (2-5d) | agent | — | ~8 components via workflow: dropdown/select, checkbox, radio, switch, form, form-field, tabs, accordion. |
-| 4c | Tier 2 Primitives | 16-40h each (2-5d) | agent | — | ~8 components via workflow: popover, slider, textarea, toast, drawer, breadcrumb, pagination. |
-| 4d | Tier 3 Primitives | 16-40h each (2-5d) | agent | — | ~45 components via workflow — the long tail. |
-| 4e | [Primitive Completions](primitive-completions.md) | 40-80h (5-10d) | user/pair | initial | Finish table, dropdown, header, segment, divider. Table and header need light DOM. |
+| 4a | [MCP Playground Rendering](mcp-playground-rendering.md) | TBD | pair | initial | `render_component` MCP tool + Chrome DevTools loop. Closes the iterative design loop for autonomous dev. Phase 1 (hash URLs) shipped; Phase 2 is the eyes-gate. |
+| 4b | [Component Wrapping Behavior](component-wrapping-behavior.md) | 16-24h (2-3d) | pair | initial | Canonical pattern for components wrapping behaviors (popup over popover, accordion, dropdown, tabs). |
+| 4c | Tier 1 Primitives | 16-40h each (2-5d) | agent | — | ~8 components via workflow: dropdown/select, checkbox, radio, switch, form, form-field, tabs, accordion. |
+| 4d | Tier 2 Primitives | 16-40h each (2-5d) | agent | — | ~8 components via workflow: popover, slider, textarea, toast, drawer, breadcrumb, pagination. |
+| 4e | Tier 3 Primitives | 16-40h each (2-5d) | agent | — | ~45 components via workflow — the long tail. |
+| 4f | [Primitive Completions](primitive-completions.md) | 40-80h (5-10d) | user/pair | initial | Finish table, dropdown, header, segment, divider. Table and header need light DOM. |
 
 ---
 
@@ -205,7 +211,6 @@ Plans drafted but not on the active roadmap. See `ai/plans/icebox/` for files.
 - [Block Runtime Diagnostics](icebox/block-runtime-diagnostics.md) — resolution-trail capture for Lisp data paths, JS-eval error surfacing, public `report()` API for block authors, tracing default-on-in-dev, always-on breadcrumb on first block throw.
 - [Renderer + Evaluator Perf](icebox/renderer-evaluator-perf.md) — concrete hot-path optimizations: item-proxy clone elimination, `Signal.peek` non-cloning, comment-marker reuse as `DynamicRegion` anchor, V8-targeted `ExpressionEvaluator` rewrite.
 - [WASM Renderer](icebox/wasm-renderer.md) — Rust/WASM server renderer for the docs-site hot path. Open questions on streaming, bundle size, AST caching.
-- [MCP Playground Rendering](icebox/mcp-playground-rendering.md) — `render_component` MCP tool + Vercel KV short URLs. Closes the iterative design loop for standalone agentic dev. Phase 1 (hash URLs) complete.
 - [Signals TC39 Integration](icebox/signals-tc39-integration.md) — adopt native `Signal.State`/`Signal.Computed` as backing primitives when TC39 ships. Blocked on TC39 Stage 3+.
 - [Add Icon Stroke Width](icebox/add-icon-stroke-width.md) — power-user feature, post-1.0.
 - [Audit Fix Continuation](icebox/audit-fix-continuation.md) — process work for follow-up audits.

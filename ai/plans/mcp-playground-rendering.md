@@ -4,6 +4,13 @@
 
 Add an MCP tool that accepts component code from an AI agent and renders it in the browser via the existing playground infrastructure. This enables an iterative design loop: the AI writes code, sees the rendered result via Chrome DevTools MCP, and refines — all without human intervention.
 
+This serves two audiences equally:
+
+1. **First-party agent generation** — Phase 4 Tier 1/2/3 primitive authoring. Internal agents iterate via this loop.
+2. **End-user component authoring** — a downstream developer's agent generates a SUI component for their own app. Output is a web component that drops in naturally; framework wrappers (Phase 5) make it work in React/Svelte/whatever. This is likely the biggest driver of adoption — "my agent generates a useful component, it integrates as a web component, and works in any framework."
+
+Same MCP infrastructure serves both.
+
 Secondary goal: support shareable short URLs for playground links via Vercel KV, so AI-generated examples can be shared with humans.
 
 ## Design / Implementation
@@ -73,7 +80,7 @@ None — this work is independent of the main roadmap. Phase 1 is already comple
 ## Status
 
 - Phase 1: Complete (hash URLs + CDN link updates).
-- Phase 2: Not started (initial scope). Important for standalone agentic dev — closes the iterative design loop where an agent writes component code, navigates to the rendered URL via Chrome DevTools MCP, and refines from a screenshot. No human in the loop.
-- Phase 3: Not started (initial scope). Shareable short URLs for AI-generated playgrounds.
+- Phase 2: Not started, ready to scope. **The autonomous-dev gate.** An agent needs eyes and tooling to work in isolation. Phase 2 is the eyes — `render_component` MCP tool + Chrome DevTools navigation closes the iterative design loop where the agent writes component code, sees the rendered result, and refines without human intervention. Phase 4 component generation depends on this loop being live; without it, every agent iteration requires human-in-loop verification, which doesn't scale across 60+ components.
+- Phase 3: Future. Shareable short URLs via Vercel KV — bonus for sharing AI-generated playgrounds with humans, has open questions (TTL, auth, rate limiting). Not required for the autonomous loop.
 
-Iceboxed because the active roadmap doesn't gate on it. Promote when the agent workflow (ROADMAP Phase 4) needs the closed-loop iteration Phase 2 enables, or when a real authoring session demonstrates the friction. The plan needs further scoping (open questions on KV TTL, auth, rate limiting) before promotion.
+Promoted from icebox 2026-04-29 — recognized as the largest gate to autonomous component development. Phase 2 should ship before Phase 4 Tier 1 generation begins in earnest.
