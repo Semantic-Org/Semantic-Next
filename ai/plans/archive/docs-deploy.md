@@ -180,3 +180,19 @@ These require editing `menus.js` and/or a few content files. No new content need
 - Primitives: 13 spec-driven interactive pages via Definition layout + SpecimenExplorer
 - Homepage: Hero + AI demo + proof cards + showcase (minus tour ribbon)
 - Start section: Introduction, Why Semantic, Installation (4 pages), What's New, Roadmap (3 views)
+
+## Completion
+
+- **Status:** Audit served its purpose — informed the menu trimming on `docs/shippable` branch and PR #122 ("Docs: Remove Unwritten Content Temporarily"). The live release-readiness question moves to ROADMAP `5a Docs Deploy 0.18.0` and PR #122.
+
+### Shipped per spec — Tier 1
+
+- Menu trimming: Getting Started, Ecosystems, Philosophy hidden from start sidebar.
+- Styling tab and Components/Behaviors tabs hidden from topbar.
+- Dead Learn lesson links removed.
+- Draft component guide index variants (`index2.mdx`, `index3.mdx`) cleaned up.
+
+### Active
+
+- PR #122 (`docs/shippable`, opened 2026-03-26) is the implementation artifact. Open at archive time.
+- Doc stubs have continued accumulating since this 2025-03-25 audit. A fresh audit pass may be needed before tagging 0.18.0; the original audit is preserved here as the template for that pass.

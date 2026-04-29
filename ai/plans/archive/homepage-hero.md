@@ -130,3 +130,19 @@ Three cards (already exist):
 - The right-side graphic following the user down the page ties all three sections together as one continuous story: agent writes it (section 1) → templates give it power (section 2) → specs make it correct (section 3)
 - The hero makes the claim, the tour proves it
 - Runtime AST compilation is sub-millisecond for nearly all cases — this is a real no-build story, not "fast enough that you won't notice"
+
+## Completion
+
+- **Status:** Hero + AIPrompt section shipped; tour visuals are placeholders. The remaining tour-ribbon implementation lives in ROADMAP `P4 Homepage Tour Ribbon` — this doc is the design brief that informs it.
+
+### Shipped per spec
+
+- Hero H1 ("The UI Framework for the AI Era"), subhead, two-CTA layout.
+- AIPrompt component — full sequencer with typing, thinking, code transitions across the four-step script.
+- Three-section tour structure with scroll tracking.
+- Three proof cards below the fold.
+
+### Not shipped — tracked in ROADMAP P4
+
+- Tour-section visuals are placeholder `<div>`s. P4 (Homepage Tour Ribbon, ~16-24h pair) is the active slot for the three PlaygroundExamples.
+- Tour-section names diverged from plan: shipped as "Expressive Templates" / "Specs as Code Contracts" / "Runtime Components" rather than the plan's "Code Designed to Edit" / "Author Components" / "Specs as Code Contracts". Reconcile during P4.

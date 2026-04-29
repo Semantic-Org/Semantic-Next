@@ -144,7 +144,7 @@ Component research, specs, and the MCP server form the agent's interface to the 
 
 | # | Plan | Hours | Mode | Notes |
 |---|------|-------|------|-------|
-| 5a | Docs Deploy 0.18.0 | 4h | agent | Build + smoke test. Menu trimming complete on `docs/shippable`. |
+| 5a | Docs Deploy 0.18.0 | open | pair | Last release was 0.17.0 in November. Menu trimming on `docs/shippable` (PR #122, open). Stopping-point decision pending — new doc stubs have accumulated since the original audit. |
 | 5b | Getting Started Guides | 32-48h (4-6d) | pair | Three pages: using-ui, creating-ui, theming. |
 | 5c | Philosophy Pages | 16-24h (2-3d) | user | NL thesis + about project. Author's voice. |
 | 5d | Primitive/Component Docs | 56-80h (7-10d) | pair | Authored MDX per component. Specimen Explorer complete. CSS tab remaining. |
@@ -192,6 +192,7 @@ Plans drafted but not on the active roadmap. See `ai/plans/icebox/` for files.
 
 - [Block Runtime Diagnostics](icebox/block-runtime-diagnostics.md) — resolution-trail capture in evaluator + public `report()` API for block authors.
 - [WASM Renderer](icebox/wasm-renderer.md) — Rust/WASM server renderer for the docs-site hot path. Open questions on streaming, bundle size, AST caching.
+- [MCP Playground Rendering](icebox/mcp-playground-rendering.md) — `render_component` MCP tool + Vercel KV short URLs. Closes the iterative design loop for standalone agentic dev. Phase 1 (hash URLs) complete.
 - [Signals TC39 Integration](icebox/signals-tc39-integration.md) — adopt native `Signal.State`/`Signal.Computed` as backing primitives when TC39 ships. Blocked on TC39 Stage 3+.
 - [Add Icon Stroke Width](icebox/add-icon-stroke-width.md) — power-user feature, post-1.0.
 - [Audit Fix Continuation](icebox/audit-fix-continuation.md) — process work for follow-up audits.
