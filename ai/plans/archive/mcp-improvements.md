@@ -332,3 +332,20 @@ Review all existing tool descriptions against this format:
 - `tools/mcp/src/utils/cache.ts` - Slim list responses, relationship linking
 - `tools/mcp/src/utils/get-theming-css.ts` - New file for theming CSS lookup
 - `tools/mcp/src/utils/get-global-tokens.ts` - New file for global token queries
+
+## Completion
+
+- **Status:** Items 1-6 shipped during MCP server work. Items 7-9 (theming-related tools) folded into ROADMAP `P6 MCP Improvements`, blocked on `css-token-extraction.md`.
+
+### Shipped per spec
+
+- **Item 1 — Content relationship linking.** `findRelatedForDoc/Example/Spec()` in MCP cache (convention-based linking).
+- **Item 2 — Orientation/help tool.** Comprehensive `help` tool with Tailwind escape hatch.
+- **Item 3 — Batch fetching.** `get_*` tools accept `string | string[]`.
+- **Item 4 — Category discovery.** `list_examples` includes category names.
+- **Item 5 — Slim list responses.** Redundant `type` field removed.
+- **Item 6 — Skill vs context clarity.** Tool descriptions distinguish `use_skill` from `get_context`.
+
+### Deferred — captured in ROADMAP P6
+
+- Items 7-9 (`get_theming_css`, `get_global_tokens`, `get_token_usage`) depend on `css-token-extraction.md`. P6 carries them forward as a single line item.

@@ -139,3 +139,21 @@ Discuss findings with user before finalizing.
 4. [ ] New system implemented in src/css
 5. [ ] Comparison complete, gaps documented
 6. [ ] User approval
+
+## Completion
+
+- **Status:** Implemented with intentional divergence from plan. Goals achieved; final structure differs from the planned layout. Niche absent items not tracked — power-user convenience tokens that nobody has asked for and that can be added trivially if needed.
+
+### Shipped — goals achieved
+
+- Clear separation between rem-based tokens (layout rhythm) and em-based tokens (component-internal scaling).
+- Token files reorganized into `base.css`, `sizing.css`, `spacing.css`.
+- Pixel-value tokens (`--Xpx`, `--relative-Xpx`) consolidated in `base.css`.
+- Padding scale uses em (scales with component); spacing/margin use rem (fixed layout rhythm).
+- Margin scale extends beyond the originally-planned 3xl bound.
+
+### Plan-vs-reality drift (intentional)
+
+- Directory layout: planned `global/` + `computed/` subdirs; landed flat. Simpler.
+- `--size-*-em` variants absent. Existing `--relative-Xpx` and `--text-*` tokens cover the use case.
+- Short aliases (`--3xs`, `--relative-3xs`, etc.) absent. Long forms (`--size-3xs`) work fine.
