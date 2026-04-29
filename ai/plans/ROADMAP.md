@@ -178,6 +178,7 @@ Slot in wherever there's a gap; not phase-gated.
 | P4 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | Three PlaygroundExamples for templates / specs / components. |
 | P5 | CSS Token Extraction | 16-24h (2-3d) | pair | `getThemingCSS` util + MCP tool. Blocked on token finalization. |
 | P6 | MCP Improvements | 8-16h (1-2d) | agent | `get_theming_css`, `get_global_tokens`, `get_token_usage`. Blocked on token extraction. |
+| P7 | [Staging Canary Playground](staging-canary-playground.md) | 1-2h | agent | Wire the staging importmap to `cdn.semantic-ui.com/@canary` so the playground exercises main-HEAD code. Production stays on jsDelivr (free, redundant). **Slotted into 0.18.0 release as session 3** — gives the publish sitting a real pre-tag smoke surface. |
 
 ---
 
@@ -197,7 +198,8 @@ Match blocks are prioritized in Phase 2. The remaining items ship when real comp
 
 Plans drafted but not on the active roadmap. See `ai/plans/icebox/` for files.
 
-- [Block Runtime Diagnostics](icebox/block-runtime-diagnostics.md) — resolution-trail capture in evaluator + public `report()` API for block authors.
+- [Block Runtime Diagnostics](icebox/block-runtime-diagnostics.md) — resolution-trail capture in evaluator, public `report()` API for block authors, tracing default-on-in-dev, always-on breadcrumb on first block throw.
+- [Renderer + Evaluator Perf](icebox/renderer-evaluator-perf.md) — concrete hot-path optimizations: item-proxy clone elimination, `Signal.peek` non-cloning, comment-marker reuse as `DynamicRegion` anchor, V8-targeted `ExpressionEvaluator` rewrite.
 - [WASM Renderer](icebox/wasm-renderer.md) — Rust/WASM server renderer for the docs-site hot path. Open questions on streaming, bundle size, AST caching.
 - [MCP Playground Rendering](icebox/mcp-playground-rendering.md) — `render_component` MCP tool + Vercel KV short URLs. Closes the iterative design loop for standalone agentic dev. Phase 1 (hash URLs) complete.
 - [Signals TC39 Integration](icebox/signals-tc39-integration.md) — adopt native `Signal.State`/`Signal.Computed` as backing primitives when TC39 ships. Blocked on TC39 Stage 3+.

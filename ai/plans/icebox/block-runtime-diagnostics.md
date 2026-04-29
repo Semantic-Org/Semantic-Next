@@ -63,6 +63,32 @@ Per `(block, field, expression)` across re-renders so a broken signal doesn't sp
 
 Both gated on `isDevelopment`; tree-shake to ~0 bytes in prod.
 
+## Tracing default + always-on breadcrumb
+
+Two related items folded in from the native-renderer-blocks review actionables (15-16). They tighten the agent feedback loop around block runtime failures and pair naturally with the resolution-trail and `report()` API above.
+
+### Tracing default-on in dev
+
+The tracing flag in `@semantic-ui/reactivity/helpers.js` already supports the cheap-vs-expensive split — three modes (`off` → `context` → `stack`) controlled by `setTracing` and `setStackCapture`. The remaining work: default `setTracing(true)` on in development environments. The cheap path attaches `{ firstRun, value, ... }` context bags for naming; the expensive path adds `Error.captureStackTrace` per notify. Defaulting cheap-on gives agents and developers reaction-context names "for free" while keeping stack capture opt-in.
+
+This is the concrete fix for PR #136's tachometer regression, where reaction-context construction was paying for `captureStackTrace` on every mutation. Land alone, verify with a fresh tachometer baseline before bundling with anything else — bisectability matters here.
+
+Verification: run a tachometer pass with `setTracing(false)` vs `setTracing(true)` (both with `setStackCapture(false)`) on a 1000-item each-loop mutation burst. If V8 escape analysis doesn't eliminate the `{ ...defaultContext, ...additionalContext }` spread, lazy context construction (build only when read via getter on `this.context`) becomes the next refinement.
+
+Note: technically a breaking change for tooling that called `setTracing(true)` expecting both modes. Document in changelog. Decide whether `packages/component/src/helpers.js`'s `setTracing` should turn both flags on for back-compat while reactivity's stays cheap-only.
+
+### Always-on breadcrumb on first block throw
+
+A one-line hint that fires on the first uncaught error per `(block, component)` pair, regardless of tracing flag state. Sits in `define-block.js` alongside the existing `reportBlockError` (which stays gated on `isTracing()`).
+
+The breadcrumb's role: when an agent or developer sees a visibly broken region, the console hint points them to the next action — typically `Reaction.setTracing(true)` and reload to see the structured log. Without it, the broken region is silent and the next action isn't discoverable.
+
+**Critical: the breadcrumb must NOT be gated by the cheap `isTracing()` flag.** It exists to fire in the zero-overhead path when nothing else does. Gating defeats its bridge role.
+
+Dedup key: `${blockName}:${componentName}` where `componentName` is `element.localName` — the custom-element tag of the nearest enclosing component. Two sibling `<ui-list>` instances share the dedup; `<ui-list>` and `<ui-form>` each get their own. Avoid keying on instance ID, AST node ID, or rendered DOM ID — those over-fire at list scale or under-fire across instances. Cross-instance dedup is what makes the breadcrumb valuable inside a 1000-item `{#each}`.
+
+Implementation: module-level `Set` in `define-block.js` keyed on the dedup string; `Set.add` returns false-on-existing, gating the emit. Cleared on hot-reload boundaries if needed (typically not — dev-only and reload re-creates the module).
+
 ## Dependencies
 
 None hard. Sits on top of `define-block.js` and `expression-evaluator.js` as-is.
