@@ -1,8 +1,21 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
 import '@semantic-ui/component'; // registers the native rendering engine
+
+// Documented behaviors under test (see):
+//   docs/src/pages/docs/guides/templates/subtemplates.mdx
+//     - "Data Reactivity": data passed into subtemplates is reactive by default;
+//       individual props give surgical updates per key.
+//   docs/src/pages/docs/guides/components/settings.mdx
+//     - defaultSettings declares the configurable surface.
+//   ai/skills/authoring/component-templating.md
+//     - Flat data context lookup order (1=instance, 2=settings, 3=state,
+//       4=subtemplate data, 5=helpers).
+//   ai/skills/authoring/component-composition.md
+//     - "Template-as-Settings": subtemplates are Templates without tagName,
+//       declared via subTemplates and rendered with `{> template name=… data=…}`.
 
 let host;
 beforeEach(() => {
@@ -25,9 +38,7 @@ function makeParent({ parentSettings, parentElement } = {}) {
   });
 }
 
-// Build a subtemplate child of an existing parent. Element defaults to host
-// so the parent fallback path (this.element?.settings) is exercisable by
-// stubbing `host.settings` in the test.
+// Build a subtemplate child of an existing parent.
 function makeChild(parent, { defaultSettings, data, element } = {}) {
   return new Template({
     templateName: 'child',
@@ -41,11 +52,15 @@ function makeChild(parent, { defaultSettings, data, element } = {}) {
 
 describe('Template — subtemplate settings', () => {
   /*******************************
-      (A) createSubtemplateSettings — guards
+      Declaring settings
   *******************************/
 
-  describe('createSubtemplateSettings — only fires for subtemplates with non-empty defaultSettings', () => {
-    it('non-subtemplate template never gets a settings proxy', () => {
+  describe('declaring settings via defaultSettings', () => {
+    // A non-subtemplate Template (one with no parentTemplate) does not get a
+    // settings proxy — settings on a web component live on the element itself,
+    // not on the template. This is implied by define-component.js, which only
+    // assigns `defaultSettings` to the template when there's no `tagName`.
+    it('non-subtemplate template never receives a settings proxy', () => {
       const tpl = new Template({
         templateName: 'plain',
         template: '<div></div>',
@@ -54,43 +69,42 @@ describe('Template — subtemplate settings', () => {
       });
       tpl.initialize();
       expect(tpl.settings).toBeUndefined();
-      expect(tpl.settingsVars).toBeUndefined();
     });
 
-    it('subtemplate without defaultSettings does not create settings', () => {
+    it('subtemplate without defaultSettings has no settings proxy', () => {
       const parent = makeParent();
       parent.initialize();
       const child = makeChild(parent);
       child.initialize();
       expect(child.settings).toBeUndefined();
-      expect(child.settingsVars).toBeUndefined();
     });
 
-    it('subtemplate with empty defaultSettings: {} does not create settings', () => {
+    it('subtemplate with empty defaultSettings: {} has no settings proxy', () => {
       const parent = makeParent();
       parent.initialize();
       const child = makeChild(parent, { defaultSettings: {} });
       child.initialize();
       expect(child.settings).toBeUndefined();
-      expect(child.settingsVars).toBeUndefined();
     });
 
-    it('subtemplate with non-empty defaultSettings creates a settings proxy and settingsVars Map', () => {
+    it('subtemplate with non-empty defaultSettings exposes a settings object', () => {
       const parent = makeParent();
       parent.initialize();
       const child = makeChild(parent, { defaultSettings: { color: 'red' } });
       child.initialize();
       expect(child.settings).toBeDefined();
       expect(typeof child.settings).toBe('object');
-      expect(child.settingsVars).toBeInstanceOf(Map);
     });
   });
 
   /*******************************
-      (B) createSubtemplateSettings — initial values
+      Initial values: defaults + passed data
   *******************************/
 
-  describe('createSubtemplateSettings — initial values', () => {
+  // Subtemplates receive their data context from the parent template via
+  // shorthand props (`{> row row=row}`), data expressions (`{> row data=…}`),
+  // or verbose syntax. Whatever is passed becomes the subtemplate's data.
+  describe('initial values from defaults and passed data', () => {
     it('seeds settings from defaultSettings when no data is passed', () => {
       const parent = makeParent();
       parent.initialize();
@@ -102,7 +116,7 @@ describe('Template — subtemplate settings', () => {
       expect(child.settings.size).toBe(10);
     });
 
-    it('passed data overrides defaultSettings for matching keys', () => {
+    it('passed data overrides defaults for matching keys', () => {
       const parent = makeParent();
       parent.initialize();
       const child = makeChild(parent, {
@@ -113,7 +127,10 @@ describe('Template — subtemplate settings', () => {
       expect(child.settings.color).toBe('blue');
     });
 
-    it('data keys absent from defaultSettings are not pulled into ownSettings', () => {
+    // defaultSettings declares the public surface — undeclared keys aren't
+    // promoted to settings. (settings.mdx: "Default settings are specified by
+    // passing a defaultSettings object")
+    it('data keys not declared in defaultSettings are not surfaced as settings', () => {
       const parent = makeParent();
       parent.initialize();
       const child = makeChild(parent, {
@@ -121,13 +138,11 @@ describe('Template — subtemplate settings', () => {
         data: { extra: 'ignored' },
       });
       child.initialize();
-      // `extra` is not an own settings key — the get-trap has nothing in
-      // target and no parent settings on host either, so it returns undefined.
-      expect(child.settings.extra).toBeUndefined();
       expect(child.settings.color).toBe('red');
+      expect(child.settings.extra).toBeUndefined();
     });
 
-    it('only data values that are not undefined override defaults (line 933 guard)', () => {
+    it('explicit `undefined` in data preserves the declared default', () => {
       const parent = makeParent();
       parent.initialize();
       const child = makeChild(parent, {
@@ -140,14 +155,19 @@ describe('Template — subtemplate settings', () => {
   });
 
   /*******************************
-      (C) createSubtemplateSettings — Proxy get with parent fallback
+      Inheritance from the host component
   *******************************/
 
-  describe('createSubtemplateSettings — parent fallback', () => {
-    it('returns own settings when key exists in defaultSettings', () => {
+  // The flat data-context model (component-templating.md "Data Context") gives
+  // expressions access to the host component's settings. For subtemplates this
+  // means: a key not declared in the subtemplate's own defaultSettings can
+  // still resolve against the host element's settings. The
+  // subtemplates-reactivity example relies on this — `{company}` reads from
+  // the parent component's defaultSettings inside the row subtemplate.
+  describe('inheritance from host component settings', () => {
+    it('reads own settings when the key is declared in defaultSettings', () => {
       const parent = makeParent();
       parent.initialize();
-      // simulate the parent component exposing settings on the element
       host.settings = { brandColor: 'green' };
       const child = makeChild(parent, {
         defaultSettings: { localColor: 'red' },
@@ -156,22 +176,24 @@ describe('Template — subtemplate settings', () => {
       expect(child.settings.localColor).toBe('red');
     });
 
-    it('falls back to element.settings for keys not in defaultSettings', () => {
+    it('falls through to host component settings for undeclared keys', () => {
       const parent = makeParent();
       parent.initialize();
+      // simulate the host web component exposing settings on the element
       host.settings = { brandColor: 'green' };
       const child = makeChild(parent, {
         defaultSettings: { localColor: 'red' },
       });
       child.initialize();
-      // brandColor isn't in defaultSettings → proxy delegates to host.settings
+      // brandColor is not in the child's defaultSettings — looking it up
+      // resolves against the host component's settings.
       expect(child.settings.brandColor).toBe('green');
     });
 
-    it('returns undefined when neither own nor element.settings has the key', () => {
+    it('returns undefined when no own setting and no host fallback exist', () => {
       const parent = makeParent();
       parent.initialize();
-      // host.settings is undefined — no fallback target available
+      // host.settings is undefined — no fallback target
       const child = makeChild(parent, { defaultSettings: { color: 'red' } });
       child.initialize();
       expect(child.settings.missing).toBeUndefined();
@@ -179,116 +201,35 @@ describe('Template — subtemplate settings', () => {
   });
 
   /*******************************
-      (D) createSubtemplateSettings — Signal lazy creation + tracking
+      Mutation through settings
   *******************************/
 
-  describe('createSubtemplateSettings — Signal lazy creation', () => {
-    it('starts with an empty settingsVars Map (no signals until first read)', () => {
+  describe('mutating settings', () => {
+    it('updating a setting reflects on subsequent reads', () => {
       const parent = makeParent();
       parent.initialize();
-      const child = makeChild(parent, {
-        defaultSettings: { color: 'red', size: 10 },
-      });
+      const child = makeChild(parent, { defaultSettings: { color: 'red' } });
       child.initialize();
-      // The renderer construction (initialize → overlaySettingsSignals) reads
-      // every defaultSettings key, so signals are eagerly created during init.
-      // Build a *fresh* child without going through initialize to observe the
-      // pre-read state.
-      const child2 = makeChild(parent, {
-        defaultSettings: { color: 'red', size: 10 },
-      });
-      child2.createSubtemplateSettings();
-      expect(child2.settingsVars.size).toBe(0);
-    });
-
-    it('creates a Signal in settingsVars on first proxy read', () => {
-      const parent = makeParent();
-      parent.initialize();
-      const child = makeChild(parent, { defaultSettings: { color: 'red' } });
-      child.createSubtemplateSettings();
-
-      expect(child.settingsVars.has('color')).toBe(false);
-      // trigger lazy signal creation
-      void child.settings.color;
-      expect(child.settingsVars.has('color')).toBe(true);
-      expect(child.settingsVars.get('color')).toBeInstanceOf(Signal);
-      expect(child.settingsVars.get('color').get()).toBe('red');
-    });
-
-    it('reads inside a Reaction track the signal — external signal mutation re-runs the reaction', () => {
-      const parent = makeParent();
-      parent.initialize();
-      const child = makeChild(parent, { defaultSettings: { color: 'red' } });
-      child.createSubtemplateSettings();
-
-      let runs = 0;
-      let observed;
-      const reaction = Reaction.create(() => {
-        runs++;
-        observed = child.settings.color;
-      });
-      expect(runs).toBe(1);
-      expect(observed).toBe('red');
-
-      // Mutate the signal itself — should re-run the reaction.
-      child.settingsVars.get('color').set('blue');
-      Reaction.flush();
-      expect(runs).toBe(2);
-
-      reaction.stop();
-    });
-  });
-
-  /*******************************
-      (E) createSubtemplateSettings — Proxy set
-  *******************************/
-
-  describe('createSubtemplateSettings — Proxy set', () => {
-    it('updating an existing key reflects on subsequent reads', () => {
-      const parent = makeParent();
-      parent.initialize();
-      const child = makeChild(parent, { defaultSettings: { color: 'red' } });
-      child.createSubtemplateSettings();
 
       child.settings.color = 'blue';
       expect(child.settings.color).toBe('blue');
     });
+  });
 
-    it('updating an existing key updates the underlying signal', () => {
+  /*******************************
+      Reactivity
+  *******************************/
+
+  // subtemplates.mdx → "Data Reactivity": data passed into subtemplates is
+  // reactive by default. When the underlying data changes, the subtemplate
+  // updates automatically. Reactions are the substrate the renderer uses, so
+  // tracking them here proves the renderer will pick up the change.
+  describe('reactivity', () => {
+    it('reads inside a Reaction re-run when the setting is updated through the proxy', () => {
       const parent = makeParent();
       parent.initialize();
       const child = makeChild(parent, { defaultSettings: { color: 'red' } });
-      child.createSubtemplateSettings();
-
-      // prime the signal via a read
-      void child.settings.color;
-      const sig = child.settingsVars.get('color');
-      child.settings.color = 'blue';
-      expect(sig.get()).toBe('blue');
-      // same Signal reference is reused — set takes the existing-signal path.
-      expect(child.settingsVars.get('color')).toBe(sig);
-    });
-
-    it('setting a brand new key (not previously read) creates a Signal', () => {
-      const parent = makeParent();
-      parent.initialize();
-      const child = makeChild(parent, { defaultSettings: { color: 'red' } });
-      child.createSubtemplateSettings();
-
-      expect(child.settingsVars.has('newKey')).toBe(false);
-      child.settings.newKey = 'x';
-      expect(child.settingsVars.has('newKey')).toBe(true);
-      expect(child.settingsVars.get('newKey')).toBeInstanceOf(Signal);
-      expect(child.settingsVars.get('newKey').get()).toBe('x');
-      // and the proxy now reads it through own-target (since it was set into target)
-      expect(child.settings.newKey).toBe('x');
-    });
-
-    it('writes propagate to a tracking Reaction via the proxy', () => {
-      const parent = makeParent();
-      parent.initialize();
-      const child = makeChild(parent, { defaultSettings: { color: 'red' } });
-      child.createSubtemplateSettings();
+      child.initialize();
 
       let observed;
       let runs = 0;
@@ -306,68 +247,58 @@ describe('Template — subtemplate settings', () => {
 
       reaction.stop();
     });
-  });
 
-  /*******************************
-      (F) createSubtemplateSettings — symbol pass-through
-  *******************************/
-
-  describe('createSubtemplateSettings — symbol pass-through', () => {
-    it('symbol property reads bypass the parent fallback path', () => {
+    // subtemplates.mdx → "Surgical vs Coarse Updates": "Individual props give
+    // you surgical updates — each value is tracked independently. Changing
+    // `name` won't cause `age` to re-evaluate."
+    it('per-key reactivity — changing one setting does not re-run reactions on other settings', () => {
       const parent = makeParent();
       parent.initialize();
-      // host.settings has a value for the symbol — but the proxy must NOT
-      // consult the parent for symbol props (line 940-942 returns target[sym]).
-      const sym = Symbol.for('subtemplate-settings-test');
-      host.settings = { [sym]: 'from-parent' };
-      const child = makeChild(parent, { defaultSettings: { color: 'red' } });
-      child.createSubtemplateSettings();
-      // target was seeded with defaults — the symbol key isn't on it, so we
-      // get undefined (NOT 'from-parent') because the symbol branch returns
-      // target[symbol] directly.
-      expect(child.settings[sym]).toBeUndefined();
-    });
-  });
-
-  /*******************************
-      (G) createSubtemplateSettings — allowClone: false
-  *******************************/
-
-  describe('createSubtemplateSettings — allowClone: false', () => {
-    it('object values are stored by reference (no clone) on signal mutation', () => {
-      const parent = makeParent();
-      parent.initialize();
-      const child = makeChild(parent, { defaultSettings: { color: 'red' } });
-      child.createSubtemplateSettings();
-
-      const obj = { x: 1 };
-      child.settings.foo = obj;
-      // mutate the object after assigning — reference equality should hold
-      obj.x = 2;
-      expect(child.settings.foo).toBe(obj);
-      expect(child.settings.foo.x).toBe(2);
-    });
-
-    it('initial-default object values keep referential identity through the signal', () => {
-      const parent = makeParent();
-      parent.initialize();
-      const seed = { nested: 1 };
       const child = makeChild(parent, {
-        defaultSettings: { config: seed },
+        defaultSettings: { name: 'a', age: 1 },
       });
-      child.createSubtemplateSettings();
+      child.initialize();
 
-      // first read creates the Signal with allowClone:false → same reference
-      expect(child.settings.config).toBe(seed);
+      let nameRuns = 0;
+      let ageRuns = 0;
+      const nameReaction = Reaction.create(() => {
+        nameRuns++;
+        // read only `name`
+        void child.settings.name;
+      });
+      const ageReaction = Reaction.create(() => {
+        ageRuns++;
+        void child.settings.age;
+      });
+      expect(nameRuns).toBe(1);
+      expect(ageRuns).toBe(1);
+
+      child.settings.name = 'b';
+      Reaction.flush();
+      expect(nameRuns).toBe(2);
+      expect(ageRuns).toBe(1); // surgical — age reaction did not re-run
+
+      child.settings.age = 2;
+      Reaction.flush();
+      expect(nameRuns).toBe(2); // surgical — name reaction did not re-run
+      expect(ageRuns).toBe(2);
+
+      nameReaction.stop();
+      ageReaction.stop();
     });
   });
 
   /*******************************
-      (H) updateSubtemplateSettings
+      Parent-driven updates
   *******************************/
 
-  describe('updateSubtemplateSettings', () => {
-    it('updates an existing settings key when present in dataContext', () => {
+  // When the parent re-evaluates a subtemplate invocation (e.g. because a
+  // signal in `{> row name=user.name}` changed), the renderer pushes a fresh
+  // dataContext into the subtemplate via updateSubtemplateSettings. That call
+  // must reflect the new parent values into the subtemplate's settings,
+  // re-firing reactive readers (i.e. the subtemplate's rendered expressions).
+  describe('parent-driven updates (updateSubtemplateSettings)', () => {
+    it('updates an existing setting when the new dataContext provides it', () => {
       const parent = makeParent();
       parent.initialize();
       const child = makeChild(parent, { defaultSettings: { color: 'red' } });
@@ -377,7 +308,7 @@ describe('Template — subtemplate settings', () => {
       expect(child.settings.color).toBe('newvalue');
     });
 
-    it('only iterates defaultSettings — extra dataContext keys are ignored', () => {
+    it('ignores dataContext keys that are not declared in defaultSettings', () => {
       const parent = makeParent();
       parent.initialize();
       const child = makeChild(parent, { defaultSettings: { color: 'red' } });
@@ -385,11 +316,10 @@ describe('Template — subtemplate settings', () => {
 
       child.updateSubtemplateSettings({ color: 'blue', extra: 'ignored' });
       expect(child.settings.color).toBe('blue');
-      // extra was not in defaultSettings — must NOT be set on the target.
-      expect(child.settingsVars.has('extra')).toBe(false);
+      expect(child.settings.extra).toBeUndefined();
     });
 
-    it('does nothing when dataContext is missing the defaultSettings key', () => {
+    it('leaves the existing value when the dataContext omits a declared key', () => {
       const parent = makeParent();
       parent.initialize();
       const child = makeChild(parent, { defaultSettings: { color: 'red' } });
@@ -399,7 +329,7 @@ describe('Template — subtemplate settings', () => {
       expect(child.settings.color).toBe('red');
     });
 
-    it('is a no-op when settings is undefined (line 974 guard)', () => {
+    it('is a graceful no-op when the subtemplate declared no settings', () => {
       const parent = makeParent();
       parent.initialize();
       const child = makeChild(parent); // no defaultSettings
@@ -408,19 +338,7 @@ describe('Template — subtemplate settings', () => {
       expect(() => child.updateSubtemplateSettings({ x: 1 })).not.toThrow();
     });
 
-    it('is a no-op when defaultSettings is undefined', () => {
-      const parent = makeParent();
-      parent.initialize();
-      const child = makeChild(parent);
-      // hand-craft an artificial settings object but no defaultSettings —
-      // the guard short-circuits on either branch.
-      child.settings = { color: 'red' };
-      child.defaultSettings = undefined;
-      expect(() => child.updateSubtemplateSettings({ color: 'blue' })).not.toThrow();
-      expect(child.settings.color).toBe('red');
-    });
-
-    it('triggers reactivity on tracked reads after update', () => {
+    it('a parent-driven update re-runs reactions tracking that setting', () => {
       const parent = makeParent();
       parent.initialize();
       const child = makeChild(parent, { defaultSettings: { color: 'red' } });
@@ -441,184 +359,6 @@ describe('Template — subtemplate settings', () => {
       expect(observed).toBe('blue');
 
       reaction.stop();
-    });
-  });
-
-  /*******************************
-      (I) overlaySettingsSignals — subtemplate path
-  *******************************/
-
-  describe('overlaySettingsSignals — subtemplate path', () => {
-    it('overlays each settings signal onto the context object by name', () => {
-      const parent = makeParent();
-      parent.initialize();
-      const child = makeChild(parent, {
-        defaultSettings: { color: 'red', size: 10 },
-      });
-      child.createSubtemplateSettings();
-
-      const ctx = { existing: 1 };
-      const result = child.overlaySettingsSignals(ctx);
-      expect(result).toBe(ctx);
-      expect(ctx.existing).toBe(1);
-      // overlay attaches the Signal itself (not the value) at line 336
-      expect(ctx.color).toBeInstanceOf(Signal);
-      expect(ctx.color.get()).toBe('red');
-      expect(ctx.size).toBeInstanceOf(Signal);
-      expect(ctx.size.get()).toBe(10);
-    });
-
-    it('ensures shadow signal exists for every defaultSettings key (touches proxy)', () => {
-      const parent = makeParent();
-      parent.initialize();
-      const child = makeChild(parent, {
-        defaultSettings: { a: 1, b: 2 },
-      });
-      child.createSubtemplateSettings();
-
-      // before overlay — no signals created
-      expect(child.settingsVars.size).toBe(0);
-      child.overlaySettingsSignals({});
-      expect(child.settingsVars.has('a')).toBe(true);
-      expect(child.settingsVars.has('b')).toBe(true);
-    });
-
-    it('returns context unchanged when subtemplate has no settingsVars', () => {
-      const parent = makeParent();
-      parent.initialize();
-      const child = makeChild(parent); // no defaultSettings → no settingsVars
-      // do not call initialize — just verify the early return
-      const ctx = { foo: 1 };
-      const result = child.overlaySettingsSignals(ctx);
-      expect(result).toBe(ctx);
-      expect(Object.keys(ctx)).toEqual(['foo']);
-    });
-
-    it('returns context unchanged when subtemplate has settingsVars but no defaultSettings', () => {
-      const parent = makeParent();
-      parent.initialize();
-      const child = makeChild(parent);
-      // simulate a partial state — settingsVars present but defaultSettings absent
-      child.settingsVars = new Map([['leftover', new Signal(1)]]);
-      const ctx = {};
-      child.overlaySettingsSignals(ctx);
-      // line 331 requires BOTH settingsVars AND defaultSettings → early return
-      expect(ctx.leftover).toBeUndefined();
-    });
-  });
-
-  /*******************************
-      (J) overlaySettingsSignals — web component path
-  *******************************/
-
-  describe('overlaySettingsSignals — web component path', () => {
-    it('reads element.settings for every defaultSettings key and componentSpec.attribute', () => {
-      const tpl = new Template({
-        templateName: 'wc',
-        template: '<div></div>',
-        element: host,
-      });
-      // do NOT initialize — we attach the element-side fixtures by hand
-      // and exercise the method directly.
-      const seen = [];
-      const settingsVars = new Map();
-      host.settingsVars = settingsVars;
-      host.defaultSettings = { color: 'red' };
-      host.componentSpec = { attributes: ['size'] };
-      host.settings = new Proxy({ color: 'red', size: 'small' }, {
-        get(target, prop) {
-          seen.push(prop);
-          return target[prop];
-        },
-      });
-
-      tpl.overlaySettingsSignals({});
-      expect(seen).toContain('color'); // from defaultSettings loop
-      expect(seen).toContain('size'); // from componentSpec.attributes loop
-    });
-
-    it('overlays settingsVars Signals onto the context', () => {
-      const tpl = new Template({
-        templateName: 'wc',
-        template: '<div></div>',
-        element: host,
-      });
-      const colorSignal = new Signal('red');
-      host.settingsVars = new Map([['color', colorSignal]]);
-      host.defaultSettings = { color: 'red' };
-      host.settings = new Proxy({ color: 'red' }, { get: (t, p) => t[p] });
-
-      const ctx = {};
-      tpl.overlaySettingsSignals(ctx);
-      expect(ctx.color).toBe(colorSignal);
-    });
-
-    it('skips defaultSettings loop when defaultSettings is absent on element', () => {
-      const tpl = new Template({
-        templateName: 'wc',
-        template: '<div></div>',
-        element: host,
-      });
-      host.settingsVars = new Map([['x', new Signal(1)]]);
-      // no host.defaultSettings, no host.componentSpec, no host.settings
-      const ctx = {};
-      expect(() => tpl.overlaySettingsSignals(ctx)).not.toThrow();
-      // settingsVars still overlaid
-      expect(ctx.x).toBeInstanceOf(Signal);
-    });
-
-    it('skips attribute loop when componentSpec.attributes is absent', () => {
-      const tpl = new Template({
-        templateName: 'wc',
-        template: '<div></div>',
-        element: host,
-      });
-      const seen = [];
-      host.settingsVars = new Map();
-      host.defaultSettings = { color: 'red' };
-      host.settings = new Proxy({ color: 'red' }, {
-        get(t, p) {
-          seen.push(p);
-          return t[p];
-        },
-      });
-      // no componentSpec — only defaultSettings keys are read
-      tpl.overlaySettingsSignals({});
-      expect(seen).toEqual(['color']);
-    });
-  });
-
-  /*******************************
-      (K) overlaySettingsSignals — no element / no settingsVars
-  *******************************/
-
-  describe('overlaySettingsSignals — no element', () => {
-    it('returns context unchanged when element is undefined', () => {
-      const tpl = new Template({
-        templateName: 'no-el',
-        template: '<div></div>',
-      });
-      // tpl.element is undefined; not a subtemplate → web component branch
-      const ctx = { foo: 1 };
-      let result;
-      expect(() => {
-        result = tpl.overlaySettingsSignals(ctx);
-      }).not.toThrow();
-      expect(result).toBe(ctx);
-      expect(Object.keys(ctx)).toEqual(['foo']);
-    });
-
-    it('returns context unchanged when element has no settingsVars', () => {
-      const tpl = new Template({
-        templateName: 'no-vars',
-        template: '<div></div>',
-        element: host,
-      });
-      // host has no settingsVars → line 347 guard short-circuits
-      const ctx = { foo: 1 };
-      const result = tpl.overlaySettingsSignals(ctx);
-      expect(result).toBe(ctx);
-      expect(Object.keys(ctx)).toEqual(['foo']);
     });
   });
 });
