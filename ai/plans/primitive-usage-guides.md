@@ -505,13 +505,13 @@ guideSections:
 - [ ] Integrate SpecimenExplorer as the hero section
 - [ ] Build `getUsageMenu()` for rail navigation (auto-generated sections + MDX headings)
 
-### Phase 3: Usage Tab Default Template Polish
+### Phase 3a: Usage Tab Default Template Polish
 - [ ] Settings table component with proper formatting
 - [ ] Events table component
 - [ ] Framework import snippets (HTML, React, Vue, Angular)
 - [ ] "When To Use" section support (authored)
 
-### Phase 3: CSS Tab + Theme Spec
+### Phase 3b: CSS Tab + Theme Spec
 - [ ] Build barrel CSS parser (extract `@import` lines, follow paths, parse `--*` declarations)
 - [ ] Add theme spec generation to existing spec build pipeline (`button.theme.json`)
 - [ ] Build `CSSReference.astro` component consuming theme spec JSON
@@ -544,3 +544,17 @@ guideSections:
 4. **Existing definition page as default** — Should `usage` immediately become `tabs[0]`, or wait until content is authored?
 5. **CSS tab editorial split** — How much theming guidance goes on the CSS tab vs the existing `style-components` context doc?
 6. **`::part()` extraction** — Parse from component HTML template at build time, or maintain a list in the spec?
+
+## Status
+
+| Phase | State |
+|---|---|
+| 0 — Usage tab plumbing | Shipped |
+| 1 — Specimen Explorer | Shipped |
+| 2 — Auto-generated sections | Partial — `UsageImports`, `UsageSettings`, `UsageEvents` exist; `UsageGuide.astro` orchestrator and `getUsageMenu()` not built |
+| 3a — Default template polish | Partial — settings/events tables present; framework snippets and "When To Use" not built |
+| 3b — CSS tab + theme spec | Not started |
+| 4 — Authored content | Not started |
+| 5 — MCP integration | Not started |
+
+Companion design document: `primitive-usage-guides-context.md`.
