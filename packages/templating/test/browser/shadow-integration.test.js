@@ -153,10 +153,16 @@ describe('adoptStylesheet — idempotent on identical cssRules', () => {
     tplB.renderRoot = shadowRoot;
     await tplB.adoptStylesheet();
 
-    // isEqual on cssRules should match — no append
+    // Two distinct sheets with identical rules — implementation may dedupe;
+    // either way the shadowRoot should not accumulate redundant duplicates.
     expect(shadowRoot.adoptedStyleSheets.length).toBe(1);
   });
 
+  // Per docs (components/styling.mdx): "css is scoped to the component and will not
+  // affect nested web components or the page." A new component with DIFFERENT css
+  // attached to the same shadowRoot must produce its own adopted sheet — otherwise
+  // its scoped styles never apply. This currently fails because the source incorrectly
+  // dedupes via `isEqual(cssRules)` (cssRules of distinct sheets compare equal).
   it('appends a new sheet when its rules differ from the already-adopted sheet', async () => {
     const host = document.createElement('div');
     document.body.appendChild(host);
@@ -283,8 +289,8 @@ describe('isNodeInTemplate across shadow boundary', () => {
     tpl.startNode = start;
     tpl.endNode = end;
 
-    // Walking up from lightSibling reaches document, never the shadowRoot. getRootChild
-    // returns null (parentNode.parentNode === null without a host), so isNodeInRange(null) returns false.
+    // A node outside the shadow tree of the template should not be considered inside it.
+    // This is what gates event delegation away from siblings/ancestors that share a host.
     expect(tpl.isNodeInTemplate(lightSibling)).toBe(false);
   });
 });
@@ -556,7 +562,11 @@ describe('themechange wire-up', () => {
     expect(onThemeChanged).toHaveBeenCalled();
   });
 
-  it('fires onThemeChanged with detail in additionalData when themechange event is dispatched on <html>', async () => {
+  it('fires onThemeChanged with event detail merged into params when themechange dispatches on <html>', async () => {
+    // Doc (components/styling.mdx#triggering-theme-callback): pages dispatch a
+    // `themechange` event from <html> with detail like `{ theme, darkMode }`.
+    // Doc (lifecycle.mdx callback args): callbacks receive a destructurable params
+    // bag — so the dispatched detail should be reachable from inside the handler.
     const onThemeChanged = vi.fn();
     const tag = uniqueTag('theme-evt');
 
@@ -572,23 +582,22 @@ describe('themechange wire-up', () => {
     document.body.appendChild(el);
     await rendered;
 
-    // Dispatch a themechange CustomEvent on <html>
     document.documentElement.dispatchEvent(
-      new CustomEvent('themechange', { detail: { theme: 'dark' } }),
+      new CustomEvent('themechange', { detail: { theme: 'dark', darkMode: true } }),
     );
     await themeDebounceWait();
 
     expect(onThemeChanged).toHaveBeenCalled();
     const lastCall = onThemeChanged.mock.calls[onThemeChanged.mock.calls.length - 1][0];
-    // call() passes a params object; additionalData fields are merged into it
     expect(lastCall).toBeDefined();
+    // event.detail fields are forwarded to the handler params
     expect(lastCall.theme).toBe('dark');
     expect(lastCall.event).toBeInstanceOf(Event);
   });
 
-  it('does not wire up theme observer when onThemeChanged is the default noop', async () => {
-    // Sanity check — without an onThemeChanged callback, no observer is created
-    // (line 503 — `this.onThemeChangedCallback !== noop`).
+  it('does not fire any theme callback when onThemeChanged is not defined', async () => {
+    // Doc (lifecycle.mdx + components/styling.mdx): onThemeChanged is opt-in.
+    // A component that omits it should not crash on theme transitions.
     const tag = uniqueTag('theme-none');
 
     defineComponent({
@@ -608,5 +617,115 @@ describe('themechange wire-up', () => {
       document.documentElement.classList.add('dark');
     }).not.toThrow();
     await themeDebounceWait();
+  });
+});
+
+/*******************************
+   (I) slotted content + "deep" prefix across shadow boundary
+
+   Doc (components/events.mdx#deep-events, ~line 113):
+     "By default selectors will only match the DOM of your component's template.
+      This will prevent the handler from firing if the user slots content which
+      also matches your selectors."
+     "You can use the `deep` keyword to attach events to nested web components or
+      slotted content."
+
+   Slotted content lives in the LIGHT DOM of the host element — it's projected
+   into a <slot> in the component's shadow DOM but is not itself part of the
+   template's tree. The default delegation path must therefore exclude it; the
+   `deep` prefix must include it.
+
+   These tests are currently EXPECTED TO FAIL: empirical traces show
+   `isNodeInTemplate` is effectively a no-op for web component templates,
+   so default selectors incorrectly match slotted content.
+*******************************/
+
+describe('slotted content + deep prefix', () => {
+  it('default selector does NOT fire for clicks on slotted (light DOM) content', async () => {
+    const handler = vi.fn();
+    const tag = uniqueTag('slot-default');
+
+    defineComponent({
+      tagName: tag,
+      templateName: 'slot-default',
+      template: '<div class="frame">{>slot}</div>',
+      events: {
+        'click span'(...args) {
+          handler(...args);
+        },
+      },
+    });
+
+    const el = document.createElement(tag);
+    const rendered = $(el).onNext('rendered');
+    // Slotted span — lives in light DOM of <el>, projected into the default slot
+    const slotted = document.createElement('span');
+    slotted.textContent = 'slotted';
+    el.appendChild(slotted);
+    document.body.appendChild(el);
+    await rendered;
+
+    slotted.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+
+    // Per doc: default selectors should NOT match slotted content
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('"deep click span" DOES fire for clicks on slotted (light DOM) content', async () => {
+    const handler = vi.fn();
+    const tag = uniqueTag('slot-deep');
+
+    defineComponent({
+      tagName: tag,
+      templateName: 'slot-deep',
+      template: '<div class="frame">{>slot}</div>',
+      events: {
+        'deep click span'(...args) {
+          handler(...args);
+        },
+      },
+    });
+
+    const el = document.createElement(tag);
+    const rendered = $(el).onNext('rendered');
+    const slotted = document.createElement('span');
+    slotted.textContent = 'slotted';
+    el.appendChild(slotted);
+    document.body.appendChild(el);
+    await rendered;
+
+    slotted.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+
+    // Per doc: `deep` opts the handler in to slotted content + nested shadow DOMs
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it("default selector still fires for clicks on the component's OWN template content", async () => {
+    // Sanity check — guards against an over-correction that would silence
+    // the default delegation path entirely.
+    const handler = vi.fn();
+    const tag = uniqueTag('slot-own');
+
+    defineComponent({
+      tagName: tag,
+      templateName: 'slot-own',
+      template: '<div class="frame"><span class="own">own</span>{>slot}</div>',
+      events: {
+        'click span'(...args) {
+          handler(...args);
+        },
+      },
+    });
+
+    const el = document.createElement(tag);
+    const rendered = $(el).onNext('rendered');
+    document.body.appendChild(el);
+    await rendered;
+
+    const ownSpan = el.shadowRoot.querySelector('span.own');
+    expect(ownSpan).toBeTruthy();
+    ownSpan.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+
+    expect(handler).toHaveBeenCalledTimes(1);
   });
 });
