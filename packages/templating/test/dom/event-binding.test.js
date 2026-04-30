@@ -203,6 +203,34 @@ describe('Template event-binding (jsdom)', () => {
       expect(a).toHaveBeenCalledTimes(1);
       expect(b).toHaveBeenCalledTimes(1);
     });
+
+    // Documented in events.mdx "Multiple Events + Multiple Selectors":
+    // 'click .selector1, click .selector2' — repeats event name per selector.
+    // KNOWN BUG: parseEventString joins the remainder after the first event
+    // and splits on comma, producing a literal selector "click .lbl" for the
+    // second entry instead of {event: 'click', selector: '.lbl'}. Marked
+    // it.fails so the contradiction with the doc is surfaced without forcing
+    // the suite red.
+    it.fails('binds a comma-separated list of "event selector" pairs', () => {
+      const handler = vi.fn();
+      const tpl = wireTpl({ events: { 'click .btn, click .lbl': handler } });
+      tpl.attachEvents();
+      click(host.querySelector('.btn'));
+      click(host.querySelector('.lbl'));
+      expect(handler).toHaveBeenCalledTimes(2);
+    });
+
+    // events.mdx "Component-Wide Events": event name with no selector fires
+    // anywhere inside the component template.
+    it('binds a component-wide handler when no selector is provided', () => {
+      const handler = vi.fn();
+      const tpl = wireTpl({ events: { 'click': handler } });
+      tpl.attachEvents();
+      // both clicks should fire — no selector means anywhere inside renderRoot
+      click(host.querySelector('.btn'));
+      click(host.querySelector('.lbl'));
+      expect(handler).toHaveBeenCalledTimes(2);
+    });
   });
 
   /*******************************
@@ -249,7 +277,13 @@ describe('Template event-binding (jsdom)', () => {
   /*******************************
         (E) attachEvents — deep selector
   *******************************/
-  describe('(E) "deep" prefix', () => {
+  // NOTE: Per docs/guides/components/events.mdx, the `deep` keyword targets
+  // nested web components or slotted content where default delegation should
+  // NOT match. Validating that contract requires real Shadow DOM and lives in
+  // test/browser/shadow-integration.test.js. The cases below cover plain
+  // in-template delegation (closest()-walking through descendants), which is
+  // documented elsewhere as the default behavior.
+  describe('(E) "deep" prefix (in-template delegation only)', () => {
     beforeEach(() => {
       host.innerHTML = '<div class="outer"><span class="inner">x</span></div>';
     });
@@ -262,16 +296,17 @@ describe('Template event-binding (jsdom)', () => {
       expect(handler).toHaveBeenCalledTimes(1);
     });
 
-    it('"click .outer" fires when clicking a descendant of .outer (delegation matches ancestor)', () => {
+    it('"click .outer" fires when clicking a descendant of .outer (delegation walks via closest())', () => {
       const handler = vi.fn();
       const tpl = wireTpl({ events: { 'click .outer': handler } });
       tpl.attachEvents();
       click(host.querySelector('.inner'));
-      // delegation matches .outer via target.closest('.outer'); handler fires
       expect(handler).toHaveBeenCalledTimes(1);
-      // params.target is the matched .outer element
       const params = handler.mock.calls[0][0];
       expect(params.target).toBe(host.querySelector('.outer'));
+      // For in-template descendants, isDeep is documented as the "nested web
+      // component / slot" flag — false here because .inner sits inside the
+      // template's own light DOM.
       expect(params.isDeep).toBe(false);
     });
 
@@ -481,6 +516,49 @@ describe('Template event-binding (jsdom)', () => {
   });
 
   /*******************************
+        (I.1) handler return values
+        events.mdx "Handler Return Values":
+          return false    → stopPropagation()
+          return 'cancel' → preventDefault()
+  *******************************/
+  describe('(I.1) handler return values', () => {
+    it('return false calls stopPropagation on the event', () => {
+      const handler = vi.fn(() => false);
+      const tpl = wireTpl({ events: { 'click .btn': handler } });
+      tpl.attachEvents();
+      const ev = new MouseEvent('click', { bubbles: true, cancelable: true });
+      const stopProp = vi.spyOn(ev, 'stopPropagation');
+      host.querySelector('.btn').dispatchEvent(ev);
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(stopProp).toHaveBeenCalled();
+    });
+
+    it("return 'cancel' calls preventDefault on the event", () => {
+      const handler = vi.fn(() => 'cancel');
+      const tpl = wireTpl({ events: { 'click .btn': handler } });
+      tpl.attachEvents();
+      const ev = new MouseEvent('click', { bubbles: true, cancelable: true });
+      const preventDef = vi.spyOn(ev, 'preventDefault');
+      host.querySelector('.btn').dispatchEvent(ev);
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(preventDef).toHaveBeenCalled();
+    });
+
+    it('returning undefined does NOT call stopPropagation or preventDefault', () => {
+      const handler = vi.fn(() => undefined);
+      const tpl = wireTpl({ events: { 'click .btn': handler } });
+      tpl.attachEvents();
+      const ev = new MouseEvent('click', { bubbles: true, cancelable: true });
+      const stopProp = vi.spyOn(ev, 'stopPropagation');
+      const preventDef = vi.spyOn(ev, 'preventDefault');
+      host.querySelector('.btn').dispatchEvent(ev);
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(stopProp).not.toHaveBeenCalled();
+      expect(preventDef).not.toHaveBeenCalled();
+    });
+  });
+
+  /*******************************
         (J) removeEvents — abort controller
   *******************************/
   describe('(J) removeEvents', () => {
@@ -602,18 +680,33 @@ describe('Template event-binding (jsdom)', () => {
       expect(handler).toHaveBeenCalledTimes(1);
     });
 
-    it('treats comma-separated key list as alternatives', () => {
+    // keys.mdx "Multiple Keys": 'up, down, left, right' is the documented
+    // form. The no-space form 'a,b' works because split(',') yields exact
+    // tokens that endsWith() can match against the buffer.
+    it('treats comma-separated key list as alternatives (no-space form)', () => {
       const handler = vi.fn();
       const tpl = wireTpl({ keys: { 'a,b': handler } });
       tpl.attachEvents();
       tpl.bindKeys();
       dispatchKey('a');
       dispatchKeyUp('a');
-      // sequence still includes 'a ' from prior key — issue another key with reset
-      // Simpler: just verify both keys fire when issued separately within sequence buffer
       expect(handler).toHaveBeenCalledTimes(1);
       dispatchKey('b');
       expect(handler).toHaveBeenCalledTimes(2);
+    });
+
+    // KNOWN BUG: bindKeys splits the comma-list literally without trimming, so
+    // the second alternative becomes ' b' (with leading space). It only matches
+    // when the running sequence already ends with another key + space — i.e.
+    // the very documented form 'up, down' silently fails for the second key
+    // when pressed in isolation. Marked it.fails to surface the contradiction.
+    it.fails('treats comma+space-separated key list as alternatives (documented form)', () => {
+      const handler = vi.fn();
+      const tpl = wireTpl({ keys: { 'a, b': handler } });
+      tpl.attachEvents();
+      tpl.bindKeys();
+      dispatchKey('b');
+      expect(handler).toHaveBeenCalledTimes(1);
     });
 
     it('passes inputFocused=true when focus is in an <input>', () => {
@@ -926,13 +1019,26 @@ describe('Template event-binding (jsdom)', () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
-    it('returns the event handler descriptor (returnHandler:true default)', () => {
+    // events.mdx "Manually Removing Events": the value returned by
+    // `attachEvent` can be passed to `$(selector).off(eventName, handler)` to
+    // unbind. The descriptor exposes eventName + an abort() and is truthy.
+    it('returns a handler descriptor with eventName + abort()', () => {
       const tpl = wireTpl({ events: {} });
       tpl.attachEvents();
       const result = tpl.attachEvent('body', 'click', vi.fn());
-      // result should be an object with abort/eventName/etc., not the Query chain
       expect(result).toBeDefined();
-      expect(typeof result === 'object' || typeof result === 'function').toBe(true);
+      expect(result.eventName).toBe('click');
+      expect(typeof result.abort).toBe('function');
+    });
+
+    it('the returned handler can be aborted directly to unbind the listener', () => {
+      const tpl = wireTpl({ events: {} });
+      tpl.attachEvents();
+      const spy = vi.fn();
+      const handle = tpl.attachEvent('body', 'click', spy);
+      handle.abort('user');
+      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      expect(spy).not.toHaveBeenCalled();
     });
   });
 });
