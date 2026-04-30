@@ -92,6 +92,24 @@ export class Signal {
   static setStackCapture = setStackCapture;
   static isStackCapture = isStackCapture;
 
+  // Canonical priority order for identifying an item by one of its fields.
+  // Shared with the renderer's keyed-each adoption path so server SSR keys
+  // and client reconcile keys agree on which field wins. `id` precedes
+  // `_id` because `id` is canonical outside Mongo.
+  static IDENTITY_FIELDS = ['id', '_id', 'key', 'hash', '_hash', 'value'];
+
+  // First non-null IDENTITY_FIELDS value on `item`, or undefined for
+  // primitives / objects with no recognized identity field. Callers wrap
+  // this in their own positional fallback (each-block uses indexOrKey).
+  static identityOf(item) {
+    if (item == null || typeof item !== 'object') { return undefined; }
+    for (const field of Signal.IDENTITY_FIELDS) {
+      const v = item[field];
+      if (v != null) { return v; }
+    }
+    return undefined;
+  }
+
   get value() {
     // Record this Signal as a dependency if inside a Reaction computation
     this.depend();
@@ -319,7 +337,7 @@ export class Signal {
 
   getIDs(item) {
     if (isObject(item)) {
-      return unique([item?.id, item?._id, item?.hash, item?.key].filter(Boolean));
+      return unique(Signal.IDENTITY_FIELDS.map(f => item?.[f]).filter(Boolean));
     }
     return [item];
   }

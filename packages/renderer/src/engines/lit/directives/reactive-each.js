@@ -3,7 +3,7 @@ import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { Reaction } from '@semantic-ui/reactivity';
+import { Reaction, Signal } from '@semantic-ui/reactivity';
 import { clone, isEmpty, isEqual } from '@semantic-ui/utils';
 
 import { arrayFromObject, isArray, isClient, isPlainObject, isString } from '@semantic-ui/utils';
@@ -124,7 +124,7 @@ export class ReactiveEachDirective extends AsyncDirective {
       const key = (collectionType == 'object')
         ? indexOrKey
         : undefined;
-      return key || item.id || item._id || item.key || item.hash || item._hash || item.value || indexOrKey;
+      return key || Signal.identityOf(item) || indexOrKey;
     }
     if (isString(item)) {
       return item;

@@ -22,6 +22,8 @@ import {
   isString,
 } from '@semantic-ui/utils';
 
+import { Signal } from '@semantic-ui/reactivity';
+
 import { analyzePosition, BLOCK_MARKER, COMMENT_MARKER, DATA_SUI_BIND } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
 
@@ -528,16 +530,15 @@ export class ServerRenderer {
       Data Helpers
   *******************************/
 
-  // Mirrors blocks/each.js getItemID — keep in sync. Server and client
-  // must agree on identity or first-data-change adoption misses keys.
-  // Key = first non-empty of: object.{id, _id, key, hash, _hash, value},
-  // object-collection key, or positional index. Stringified to match
-  // the string-keyed Map the client builds from `<!--sui-item:v1:KEY-->`.
+  // Identity priority is shared with blocks/each.js via Signal.identityOf
+  // — server and client must agree or first-data-change adoption misses
+  // keys. Result is stringified to match the string-keyed Map the client
+  // builds from `<!--sui-item:v1:KEY-->`.
   getItemID(item, indexOrKey, collectionType) {
     let raw;
     if (isPlainObject(item)) {
       const key = (collectionType === 'object') ? indexOrKey : undefined;
-      raw = key || item.id || item._id || item.key || item.hash || item._hash || item.value || indexOrKey;
+      raw = key || Signal.identityOf(item) || indexOrKey;
     }
     else if (isString(item)) {
       raw = item + ':' + indexOrKey;
