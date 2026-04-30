@@ -157,11 +157,7 @@ describe('adoptStylesheet — idempotent on identical cssRules', () => {
     expect(shadowRoot.adoptedStyleSheets.length).toBe(1);
   });
 
-  it('skips adoption when any existing sheet appears equal under isEqual (cssRules quirk)', async () => {
-    // Documents observed behavior: isEqual() compares two CSSRuleList instances
-    // structurally — they share a prototype and have no enumerable own properties,
-    // so isEqual returns true for ANY pair of CSSRuleLists. Result: if the renderRoot
-    // already has any adopted sheet, adoptStylesheet's append branch is skipped.
+  it('appends a new sheet when its rules differ from the already-adopted sheet', async () => {
     const host = document.createElement('div');
     document.body.appendChild(host);
     const shadowRoot = host.attachShadow({ mode: 'open' });
@@ -179,11 +175,10 @@ describe('adoptStylesheet — idempotent on identical cssRules', () => {
     tpl.renderRoot = shadowRoot;
     await tpl.adoptStylesheet();
 
-    // tpl.stylesheet is created but NOT appended due to the isEqual quirk above.
     expect(tpl.stylesheet).toBeInstanceOf(CSSStyleSheet);
-    expect(shadowRoot.adoptedStyleSheets.length).toBe(1);
+    expect(shadowRoot.adoptedStyleSheets.length).toBe(2);
     expect(shadowRoot.adoptedStyleSheets).toContain(otherSheet);
-    expect(shadowRoot.adoptedStyleSheets).not.toContain(tpl.stylesheet);
+    expect(shadowRoot.adoptedStyleSheets).toContain(tpl.stylesheet);
   });
 });
 

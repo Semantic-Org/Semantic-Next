@@ -80,7 +80,11 @@ describe('Template — DOM helpers, timers, reactivity, callParams', () => {
       expect(otherRoot.contains($results.get(0))).toBe(true);
     });
 
-    it('falls back to globalThis when renderRoot is undefined and no root is provided', () => {
+    it('finds elements in the document when renderRoot is undefined and no root is provided', () => {
+      const findable = document.createElement('p');
+      findable.className = 'no-root-findable';
+      document.body.appendChild(findable);
+
       const tpl = new Template({
         templateName: 'no-root-tpl',
         template: '<div></div>',
@@ -89,15 +93,12 @@ describe('Template — DOM helpers, timers, reactivity, callParams', () => {
       tpl.initialize();
       // intentionally do NOT set renderRoot
       expect(tpl.renderRoot).toBeUndefined();
-      // The fallback at line 773–775 substitutes globalThis as the root.
-      // Verify that branch is taken by spying on the underlying $.
-      // We patch the renderRoot getter so the fallback path runs and
-      // a downstream selection on document still resolves cleanly when the
-      // selector is one of body/document/html (resolved at line 770 first).
-      // For non-document selectors with no renderRoot, the call enters the
-      // globalThis fallback — root != renderRoot → branches to plain $().
-      const $results = tpl.$('body');
-      expect($results.length).toBeGreaterThanOrEqual(1);
+
+      // With no renderRoot, an arbitrary selector should still resolve against
+      // the document — falling back to globalThis as the source does means
+      // querySelectorAll is undefined and the call fails.
+      const $results = tpl.$('p.no-root-findable');
+      expect($results.length).toBe(1);
     });
   });
 

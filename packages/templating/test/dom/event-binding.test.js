@@ -250,12 +250,6 @@ describe('Template event-binding (jsdom)', () => {
         (E) attachEvents — deep selector
   *******************************/
   describe('(E) "deep" prefix', () => {
-    // Note: with $.on(eventName, selector, handler) delegation, the handler
-    // is only called when event.target.closest(selector) matches. closest()
-    // includes the element itself. So clicking either the selector element
-    // OR a descendant whose ancestor matches will both fire and resolve to
-    // the matched ancestor. The "deep" semantics are largely a no-op in the
-    // delegated path — verified below.
     beforeEach(() => {
       host.innerHTML = '<div class="outer"><span class="inner">x</span></div>';
     });

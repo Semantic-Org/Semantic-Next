@@ -183,28 +183,6 @@ describe('Template.parseEventString', () => {
         { eventName: 'click', eventType: 'deep', selector: '' },
       ]);
     });
-
-    // The prefix loop iterates ['deep','global','bind'] and applies the LAST
-    // match (since eventType = keyword overwrites). After the first replace,
-    // the leftover string starts with whitespace, so subsequent prefix words
-    // won't match unless they are literally adjacent (no space) to the prior.
-    it('only matches a prefix at the very start of the string (space breaks subsequent matches)', () => {
-      // 'deep' is matched and stripped, leaving ' global click'. The loop then
-      // checks startsWith('global') against ' global click' — false (leading space).
-      // 'global' becomes the event name and 'click' the selector.
-      expect(parse('deep global click')).toEqual([
-        { eventName: 'global', eventType: 'deep', selector: 'click' },
-      ]);
-    });
-
-    it('matches a later prefix when prefixes are adjacent with no space', () => {
-      // 'deep' matches, replace yields 'global click', eventType='deep'.
-      // Then 'global' matches against 'global click', replace yields ' click',
-      // eventType='global'. Final trim gives 'click'.
-      expect(parse('deepglobal click')).toEqual([
-        { eventName: 'click', eventType: 'global', selector: '' },
-      ]);
-    });
   });
 
   /*******************************
@@ -319,6 +297,140 @@ describe('Template.parseEventString', () => {
         { eventName: 'focusin', eventType: 'global', selector: '.b' },
         { eventName: 'focusout', eventType: 'global', selector: '.a' },
         { eventName: 'focusout', eventType: 'global', selector: '.b' },
+      ]);
+    });
+  });
+
+  /*******************************
+      Documented forms from events.mdx and component-events skill
+  *******************************/
+
+  describe('documented forms', () => {
+    // events.mdx "Inside Component" — basic form
+    it('parses "click .submit" (events.mdx Inside Component)', () => {
+      expect(parse('click .submit')).toEqual([
+        { eventName: 'click', eventType: 'delegate', selector: '.submit' },
+      ]);
+    });
+
+    // events.mdx "Inside Component" — descendant selector
+    it('parses "click .menu ui-button" (events.mdx Inside Component)', () => {
+      expect(parse('click .menu ui-button')).toEqual([
+        { eventName: 'click', eventType: 'delegate', selector: '.menu ui-button' },
+      ]);
+    });
+
+    // events.mdx "Multiple Events + One Selector"
+    it('parses "mouseup, mouseleave .selector" (events.mdx Multiple Events + One Selector)', () => {
+      expect(parse('mouseup, mouseleave .selector')).toEqual([
+        { eventName: 'mouseup', eventType: 'delegate', selector: '.selector' },
+        { eventName: 'mouseout', eventType: 'delegate', selector: '.selector' },
+      ]);
+    });
+
+    // events.mdx "Component-Wide Events"
+    it('parses "mouseover" with no selector (events.mdx Component-Wide Events)', () => {
+      expect(parse('mouseover')).toEqual([
+        { eventName: 'mouseover', eventType: 'delegate', selector: '' },
+      ]);
+    });
+
+    it('parses "mouseout" with no selector (events.mdx Component-Wide Events)', () => {
+      expect(parse('mouseout')).toEqual([
+        { eventName: 'mouseout', eventType: 'delegate', selector: '' },
+      ]);
+    });
+
+    // events.mdx "Global Events"
+    it('parses "global scroll window" (events.mdx Global Events)', () => {
+      expect(parse('global scroll window')).toEqual([
+        { eventName: 'scroll', eventType: 'global', selector: 'window' },
+      ]);
+    });
+
+    // events.mdx "Bound events"
+    it('parses "bind customevent some-component" (events.mdx Bound events)', () => {
+      expect(parse('bind customevent some-component')).toEqual([
+        { eventName: 'customevent', eventType: 'bind', selector: 'some-component' },
+      ]);
+    });
+
+    // component-events skill — deep with child component selector
+    it('parses "deep click menu-item" (component-events skill)', () => {
+      expect(parse('deep click menu-item')).toEqual([
+        { eventName: 'click', eventType: 'deep', selector: 'menu-item' },
+      ]);
+    });
+
+    // component-events skill — global with window
+    it('parses "global resize window" (component-events skill)', () => {
+      expect(parse('global resize window')).toEqual([
+        { eventName: 'resize', eventType: 'global', selector: 'window' },
+      ]);
+    });
+
+    // component-events skill — multi-event sharing one selector
+    it('parses "mouseup, mouseleave .handle" (component-events skill)', () => {
+      expect(parse('mouseup, mouseleave .handle')).toEqual([
+        { eventName: 'mouseup', eventType: 'delegate', selector: '.handle' },
+        { eventName: 'mouseout', eventType: 'delegate', selector: '.handle' },
+      ]);
+    });
+
+    // events.mdx "Custom Event Data" — camelCase custom event name
+    it('parses "resizeStart custom-component" (events.mdx Custom Event Data)', () => {
+      expect(parse('resizeStart custom-component')).toEqual([
+        { eventName: 'resizeStart', eventType: 'delegate', selector: 'custom-component' },
+      ]);
+    });
+
+    // events.mdx "Listening to Custom Events" — lowercase custom event
+    it('parses "itemactive inpage-menu" (events.mdx Listening to Custom Events)', () => {
+      expect(parse('itemactive inpage-menu')).toEqual([
+        { eventName: 'itemactive', eventType: 'delegate', selector: 'inpage-menu' },
+      ]);
+    });
+
+    // events.mdx "Lifecycle Events"
+    it('parses "rendered inpage-menu" (events.mdx Lifecycle Events)', () => {
+      expect(parse('rendered inpage-menu')).toEqual([
+        { eventName: 'rendered', eventType: 'delegate', selector: 'inpage-menu' },
+      ]);
+    });
+
+    it('parses "destroyed inpage-menu" (events.mdx Lifecycle Events)', () => {
+      expect(parse('destroyed inpage-menu')).toEqual([
+        { eventName: 'destroyed', eventType: 'delegate', selector: 'inpage-menu' },
+      ]);
+    });
+  });
+
+  /*******************************
+      Documented multi-selector form: "event sel1, event sel2"
+  *******************************/
+
+  describe('documented "event sel, event sel" form (events.mdx Multiple Events + Multiple Selectors)', () => {
+    // events.mdx writes:
+    //   'click .selector1, click .selector2'() { /* binds click to .selector1 AND .selector2 */ }
+    // The component-events skill likewise writes:
+    //   'click .save, click .apply'({ self }) { self.persist(); }
+    //
+    // Per docs both forms must produce two click bindings, one per selector.
+    // Current parser treats the second "click" as part of the second selector,
+    // producing a malformed selector "click .selector2" — these tests document
+    // the gap and will FAIL until the parser is fixed.
+
+    it('parses "click .selector1, click .selector2" as two click bindings (events.mdx)', () => {
+      expect(parse('click .selector1, click .selector2')).toEqual([
+        { eventName: 'click', eventType: 'delegate', selector: '.selector1' },
+        { eventName: 'click', eventType: 'delegate', selector: '.selector2' },
+      ]);
+    });
+
+    it('parses "click .save, click .apply" as two click bindings (component-events skill)', () => {
+      expect(parse('click .save, click .apply')).toEqual([
+        { eventName: 'click', eventType: 'delegate', selector: '.save' },
+        { eventName: 'click', eventType: 'delegate', selector: '.apply' },
       ]);
     });
   });

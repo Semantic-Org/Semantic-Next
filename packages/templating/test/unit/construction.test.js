@@ -69,6 +69,8 @@ describe('Template construction & pure logic', () => {
     });
 
     it('honors explicit renderingEngine', () => {
+      // doc: api/templating/template.mdx — Constructor options table
+      // documents 'renderingEngine' as configurable.
       const tpl = new Template({ renderingEngine: 'lit' });
       expect(tpl.renderingEngine).toBe('lit');
     });
@@ -196,7 +198,13 @@ describe('Template construction & pure logic', () => {
       expect(tpl.state.count.get()).toBe(0);
     });
 
-    it('handles complex config with options', () => {
+    // The longhand `{value, options}` defaultState shape is an internal
+    // template.js:126 convenience for forwarding Signal options. User-facing
+    // docs (state.mdx, signal-options.mdx, component-state.md) document the
+    // shorthand `{key: value}` only and direct authors to `signal()` inside
+    // createComponent when Signal options are required. We test the longhand
+    // here because the templating package supports it directly.
+    it('handles complex config with options (internal longhand)', () => {
       const tpl = new Template({
         defaultState: {
           counter: { value: 5, options: { allowClone: false } },
@@ -207,12 +215,13 @@ describe('Template construction & pure logic', () => {
     });
 
     it('passes options through to underlying Signal (allowClone:false)', () => {
+      // doc: signal-options.mdx — `allowClone: false` disables value cloning
+      // so the same reference is returned and mutated.
       const tpl = new Template({
         defaultState: {
           obj: { value: { a: 1 }, options: { allowClone: false } },
         },
       });
-      // when allowClone is false, the same object reference is returned
       const initial = tpl.state.obj.get();
       expect(tpl.state.obj.allowClone).toBe(false);
       // mutating the returned reference would affect the stored value (no clone)
@@ -220,7 +229,16 @@ describe('Template construction & pure logic', () => {
       expect(tpl.state.obj.get().a).toBe(99);
     });
 
-    it('lets data override defaultState', () => {
+    // template.js:113 comment:
+    //   "we want to allow data context to override default state ... most
+    //    useful in subtemplates as state can be used as a substitute for
+    //    settings". This data→state seeding is internal initialization
+    //    behavior. State.mdx documents that defaultState becomes Signals;
+    //    component-state.md documents merge order in templates as
+    //    {...data, ...state, ...instance} (state wins in the data context).
+    //    The two are consistent: the data passed to the constructor seeds
+    //    defaults but the resulting Signals dominate at render time.
+    it('lets data override defaultState (initialization seeding)', () => {
       const tpl = new Template({
         defaultState: { name: 'default' },
         data: { name: 'override' },
@@ -228,10 +246,24 @@ describe('Template construction & pure logic', () => {
       expect(tpl.state.name.get()).toBe('override');
     });
 
-    it('does NOT override with falsy data values (current behavior)', () => {
+    // INTENT: explicit data values should beat defaultState even when falsy
+    // (empty string, 0, false). Source uses `if (dataValue)` so falsy data
+    // currently silently falls through to the default — leaving this test
+    // failing documents the gap. See template.js:117.
+    it('lets data override defaultState with falsy values', () => {
+      const tpl = new Template({
+        defaultState: { name: 'default', count: 5, active: true },
+        data: { name: '', count: 0, active: false },
+      });
+      expect(tpl.state.name.get()).toBe('');
+      expect(tpl.state.count.get()).toBe(0);
+      expect(tpl.state.active.get()).toBe(false);
+    });
+
+    it('does not override with undefined data values (undefined means "no override")', () => {
       const tpl = new Template({
         defaultState: { name: 'default' },
-        data: { name: '' },
+        data: { name: undefined },
       });
       expect(tpl.state.name.get()).toBe('default');
     });
