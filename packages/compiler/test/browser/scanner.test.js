@@ -21,18 +21,14 @@ describe('string scanner', () => {
       scanner.consumeUntil('{{/if}}');
 
       try {
-        expect(scanner.fatal('Unclosed if tag')).toThrow('Unclosed if tag');
+        expect(() => scanner.fatal('Unclosed if tag')).toThrow('Unclosed if tag');
+        expect(console.error).toHaveBeenCalled();
+        expect(document.body.innerHTML).toContain('<h3>');
       }
-      catch (e) {
-        // nothing
+      finally {
+        console.error = consoleError;
+        StringScanner.debugMode = false;
       }
-      expect(console.error).toHaveBeenCalled();
-
-      const html = document.body.innerHTML;
-      expect(html.search('h3')).toBeGreaterThan(-1);
-
-      console.error = consoleError;
-      StringScanner.debugMode = false;
     });
   });
 });

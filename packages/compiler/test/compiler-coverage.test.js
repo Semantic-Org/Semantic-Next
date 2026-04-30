@@ -742,8 +742,12 @@ describe('TemplateCompiler - Extended Coverage', () => {
       const compiler = new TemplateCompiler();
       const consoleError = console.error;
       console.error = vi.fn();
-      expect(() => compiler.compile(null)).toThrow();
-      console.error = consoleError;
+      try {
+        expect(() => compiler.compile(null)).toThrow();
+      }
+      finally {
+        console.error = consoleError;
+      }
     });
 
     it('should handle back-to-back expressions', () => {

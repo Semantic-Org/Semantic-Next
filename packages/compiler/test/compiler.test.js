@@ -2009,13 +2009,14 @@ describe('TemplateCompiler', () => {
           {else}
         </div>
       `;
+      const consoleError = console.error;
+      console.error = vi.fn();
       try {
-        const consoleError = console.error;
-        console.error = vi.fn();
         expect(() => compiler.compile(template)).toThrow();
+      }
+      finally {
         console.error = consoleError;
       }
-      catch (e) {}
     });
 
     it('should throw an error when an elseif included outside an if', () => {
@@ -2025,13 +2026,14 @@ describe('TemplateCompiler', () => {
           {elseif name}
         </div>
       `;
+      const consoleError = console.error;
+      console.error = vi.fn();
       try {
-        const consoleError = console.error;
-        console.error = vi.fn();
         expect(() => compiler.compile(template)).toThrow();
+      }
+      finally {
         console.error = consoleError;
       }
-      catch (e) {}
     });
 
     it('should throw an error when closing if tag is included without an if', () => {
@@ -2041,13 +2043,14 @@ describe('TemplateCompiler', () => {
           {/if}
         </div>
       `;
+      const consoleError = console.error;
+      console.error = vi.fn();
       try {
-        const consoleError = console.error;
-        console.error = vi.fn();
         expect(() => compiler.compile(template)).toThrow();
+      }
+      finally {
         console.error = consoleError;
       }
-      catch (e) {}
     });
   });
 });
