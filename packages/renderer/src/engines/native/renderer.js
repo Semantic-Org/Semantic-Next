@@ -45,10 +45,8 @@ function parseServerMeta(commentData, target) {
 
 // AST → { htmlString, entries, refRoot } cache. Keyed on the AST array,
 // which is immutable after compile, so entries never stale and GC
-// follows naturally. Each entry also holds a lazy `refRoot` — the parsed
-// reference <template>.content for the legacy hydration walker. Parse
-// cost dominates hydration on instance-heavy pages (e.g. 100-row lists),
-// so caching the parsed fragment is what makes the legacy walker viable.
+// follows naturally. Each entry also holds a lazy `refRoot` — the
+// parsed reference <template>.content for the legacy hydration walker.
 const buildStringCache = new WeakMap();
 
 function cachedBuildHTMLString(ast, options) {
