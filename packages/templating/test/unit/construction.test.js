@@ -185,6 +185,65 @@ describe('Template construction & pure logic', () => {
       const tpl = new Template();
       expect(tpl.reactions).toEqual([]);
     });
+
+    // doc: api/templating/template.mdx — Constructor options table lists
+    // `css`, `element`, `data`, `subTemplates`, `createComponent`, and the
+    // lifecycle callbacks. They are part of the published API surface and
+    // should be stored as fields on the template instance.
+
+    it('stores css option', () => {
+      const css = '.x { color: red; }';
+      const tpl = new Template({ css });
+      expect(tpl.css).toBe(css);
+    });
+
+    it('stores element option', () => {
+      const element = { tagName: 'fake-el' };
+      const tpl = new Template({ element });
+      expect(tpl.element).toBe(element);
+    });
+
+    it('stores explicit data option', () => {
+      const data = { name: 'John' };
+      const tpl = new Template({ data });
+      expect(tpl.data).toBe(data);
+    });
+
+    it('stores subTemplates option', () => {
+      const subTemplates = { row: new Template({ templateName: 'row' }) };
+      const tpl = new Template({ subTemplates });
+      expect(tpl.subTemplates).toBe(subTemplates);
+    });
+
+    it('stores createComponent option', () => {
+      const createComponent = () => ({});
+      const tpl = new Template({ createComponent });
+      expect(tpl.createComponent).toBe(createComponent);
+    });
+
+    it('stores defaultState option', () => {
+      const defaultState = { count: 0 };
+      const tpl = new Template({ defaultState });
+      expect(tpl.defaultState).toBe(defaultState);
+    });
+
+    it('stores defaultSettings option (used by subtemplates)', () => {
+      const defaultSettings = { color: 'blue' };
+      const tpl = new Template({ defaultSettings });
+      expect(tpl.defaultSettings).toBe(defaultSettings);
+    });
+
+    it('stores lifecycle callbacks (onCreated/onRendered/onDestroyed/onThemeChanged)', () => {
+      const onCreated = () => {};
+      const onRendered = () => {};
+      const onDestroyed = () => {};
+      const onThemeChanged = () => {};
+      const tpl = new Template({ onCreated, onRendered, onDestroyed, onThemeChanged });
+      expect(tpl.onCreatedCallback).toBe(onCreated);
+      expect(tpl.onRenderedCallback).toBe(onRendered);
+      expect(tpl.onDestroyedCallback).toBe(onDestroyed);
+      expect(tpl.onThemeChangedCallback).toBe(onThemeChanged);
+    });
   });
 
   /*******************************
@@ -323,6 +382,11 @@ describe('Template construction & pure logic', () => {
       expect(tpl.rendered).toBe(false);
     });
 
+    // doc: ai/skills/authoring/component-state.md — "The data context is
+    // flat. Settings, state, and the component instance are spread into a
+    // single namespace ... { ...this.data, ...this.state, ...this.instance }"
+    // and "State wins over settings for same-named keys because it spreads
+    // second." instance spreads last so it wins over state.
     it('getDataContext merges data, state, and instance', () => {
       const tpl = new Template();
       tpl.data = { a: 1 };
@@ -431,6 +495,62 @@ describe('Template construction & pure logic', () => {
       const base = makeBase();
       const copy = base.clone();
       expect(copy.id).not.toBe(base.id);
+    });
+
+    // doc: api/templating/template.mdx#clone — usage example
+    //   template.clone({ data: { name: 'Jane' } })
+    // demonstrates passing data through to the clone.
+    it('passes data through to the clone', () => {
+      const base = makeBase();
+      const copy = base.clone({ data: { name: 'Jane' } });
+      expect(copy.data).toEqual({ name: 'Jane' });
+    });
+
+    // doc: api/templating/template.mdx — clone returns "a new Template
+    // instance" with optional new settings. defaultState is preserved so
+    // the clone seeds its own fresh state Signals from the same defaults.
+    it('preserves defaultState reference for fresh state initialization', () => {
+      const base = makeBase();
+      const copy = base.clone();
+      expect(copy.defaultState).toBe(base.defaultState);
+    });
+
+    // doc: api/templating/template.mdx — Constructor options lists
+    // createComponent and subTemplates; cloning a prototype must preserve
+    // these so the cloned per-instance template has the same behavior.
+    it('preserves createComponent reference', () => {
+      const createComponent = () => ({ method: () => 1 });
+      const base = new Template({ templateName: 'base', createComponent });
+      const copy = base.clone();
+      expect(copy.createComponent).toBe(createComponent);
+    });
+
+    it('preserves subTemplates reference', () => {
+      const row = new Template({ templateName: 'row' });
+      const base = new Template({ templateName: 'base', subTemplates: { row } });
+      const copy = base.clone();
+      expect(copy.subTemplates).toBe(base.subTemplates);
+    });
+
+    // doc: api/templating/template.mdx — lifecycle callbacks on the
+    // Constructor options table; clone must carry them through.
+    it('preserves lifecycle callbacks', () => {
+      const onCreated = () => {};
+      const onRendered = () => {};
+      const onDestroyed = () => {};
+      const onThemeChanged = () => {};
+      const base = new Template({
+        templateName: 'base',
+        onCreated,
+        onRendered,
+        onDestroyed,
+        onThemeChanged,
+      });
+      const copy = base.clone();
+      expect(copy.onCreatedCallback).toBe(onCreated);
+      expect(copy.onRenderedCallback).toBe(onRendered);
+      expect(copy.onDestroyedCallback).toBe(onDestroyed);
+      expect(copy.onThemeChangedCallback).toBe(onThemeChanged);
     });
   });
 
