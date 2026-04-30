@@ -124,7 +124,7 @@ export class ReactiveEachDirective extends AsyncDirective {
       const key = (collectionType == 'object')
         ? indexOrKey
         : undefined;
-      return key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
+      return key || item.id || item._id || item.key || item.hash || item._hash || item.value || indexOrKey;
     }
     if (isString(item)) {
       return item;

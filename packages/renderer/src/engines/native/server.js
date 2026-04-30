@@ -530,14 +530,14 @@ export class ServerRenderer {
 
   // Mirrors blocks/each.js getItemID — keep in sync. Server and client
   // must agree on identity or first-data-change adoption misses keys.
-  // Key = first non-empty of: object.{_id, id, key, hash, _hash, value},
+  // Key = first non-empty of: object.{id, _id, key, hash, _hash, value},
   // object-collection key, or positional index. Stringified to match
   // the string-keyed Map the client builds from `<!--sui-item:v1:KEY-->`.
   getItemID(item, indexOrKey, collectionType) {
     let raw;
     if (isPlainObject(item)) {
       const key = (collectionType === 'object') ? indexOrKey : undefined;
-      raw = key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
+      raw = key || item.id || item._id || item.key || item.hash || item._hash || item.value || indexOrKey;
     }
     else if (isString(item)) {
       raw = item + ':' + indexOrKey;

@@ -48,7 +48,7 @@ function getItemID(item, indexOrKey, collectionType) {
   let raw;
   if (isPlainObject(item)) {
     const key = (collectionType === 'object') ? indexOrKey : undefined;
-    raw = key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
+    raw = key || item.id || item._id || item.key || item.hash || item._hash || item.value || indexOrKey;
   }
   else if (isString(item)) {
     raw = item + ':' + indexOrKey;
