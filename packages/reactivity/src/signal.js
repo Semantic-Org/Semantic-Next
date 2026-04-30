@@ -319,7 +319,7 @@ export class Signal {
 
   getIDs(item) {
     if (isObject(item)) {
-      return unique([item?._id, item?.id, item?.hash, item?.key].filter(Boolean));
+      return unique([item?.id, item?._id, item?.hash, item?.key].filter(Boolean));
     }
     return [item];
   }
