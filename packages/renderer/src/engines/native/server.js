@@ -407,12 +407,10 @@ export class ServerRenderer {
       html += this.renderNodes(node.elseContent, data);
     }
     else {
-      // Plan 09 — emit `<!--sui-item:v1:KEY-->` before each item's content
-      // so the client can adopt per-item DOM on first data change instead
-      // of nuking the whole list and re-rendering. The key is computed
-      // from the item via the same `getItemID` heuristic the client uses
-      // (`_id`/`id`/`key`/`hash`/`_hash`/`value`/index fallback), so
-      // server and client agree on identity.
+      // Emit `<!--sui-item:v1:KEY-->` before each item's content so the
+      // client can adopt per-item DOM on first data change instead of
+      // re-rendering the whole list. Key is computed via the same
+      // `getItemID` heuristic the client uses, so the two agree on identity.
       for (let i = 0; i < items.length; i++) {
         const eachData = this.getEachData(items[i], i, collectionType, node);
         const itemData = { ...data, ...eachData };
@@ -530,12 +528,11 @@ export class ServerRenderer {
       Data Helpers
   *******************************/
 
-  // Mirrors the client-side heuristic in blocks/each.js — prefer
-  // user-supplied identity fields, fall back to the positional index.
-  // Always stringified so server-emitted keys match the string-keyed
-  // Map the client builds from the `<!--sui-item:v1:KEY-->` extraction.
-  // Kept in sync manually; see ai/workspace/reference/perf/06-plans/
-  // 09-each-hydration-dom-reuse.md §Server.
+  // Mirrors blocks/each.js getItemID — keep in sync. Server and client
+  // must agree on identity or first-data-change adoption misses keys.
+  // Key = first non-empty of: object.{_id, id, key, hash, _hash, value},
+  // object-collection key, or positional index. Stringified to match
+  // the string-keyed Map the client builds from `<!--sui-item:v1:KEY-->`.
   getItemID(item, indexOrKey, collectionType) {
     let raw;
     if (isPlainObject(item)) {

@@ -36,9 +36,8 @@ const rerender = defineBlock({
       : '{#rerender}',
 
   create({ renderer }) {
-    // Capture evaluator so hooks can call lookupTokenValue for the single-
-    // token node.key path. The 9-key hook bag doesn't expose it; this is
-    // the create() seam the plan names.
+    // Capture evaluator so hooks can call lookupTokenValue for the
+    // single-token node.key path — the hook bag doesn't expose it.
     return { evaluator: renderer.evaluator };
   },
 
