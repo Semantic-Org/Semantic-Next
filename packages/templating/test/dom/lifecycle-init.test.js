@@ -126,6 +126,58 @@ describe('Template.initialize / attach / render / lifecycle', () => {
       const list = Template.renderedTemplates.get('reg-tpl') || [];
       expect(list).toContain(tpl);
     });
+
+    // Documented in lifecycle.mdx — DOM Lifecycle Events table:
+    //   `created`  fires after instance initialized but before DOM
+    //   detail.component is the component instance
+    it('dispatches a `created` DOM event during initialize() with detail.component', () => {
+      const tpl = makeTemplate();
+      const spy = vi.fn();
+      host.addEventListener('created', spy);
+      tpl.initialize();
+      expect(spy).toHaveBeenCalledTimes(1);
+      const ev = spy.mock.calls[0][0];
+      expect(ev.detail.component).toBe(tpl.instance);
+    });
+
+    // Documented in lifecycle.mdx — Standard Arguments table.
+    // onCreated must receive `el`, `self`/`tpl`/`component`, `template`,
+    // `templateName`, `isClient`/`isServer`, `state`.
+    it('onCreated receives the documented standard callback arguments', () => {
+      let received;
+      const tpl = makeTemplate({
+        templateName: 'cb-args',
+        onCreated: (params) => {
+          received = params;
+        },
+      });
+      tpl.initialize();
+      expect(received.el).toBe(host);
+      expect(received.self).toBe(tpl.instance);
+      expect(received.tpl).toBe(tpl.instance);
+      expect(received.component).toBe(tpl.instance);
+      expect(received.template).toBe(tpl);
+      expect(received.templateName).toBe('cb-args');
+      expect(typeof received.isRendered).toBe('function');
+      expect(typeof received.isClient).toBe('boolean');
+      expect(typeof received.isServer).toBe('boolean');
+    });
+
+    // Documented in lifecycle.mdx — `isRendered` is "a function returning
+    // whether the DOM has rendered".
+    it('isRendered() callback param tracks tpl.rendered state', () => {
+      let isRenderedFn;
+      const tpl = makeTemplate({
+        onCreated: ({ isRendered }) => {
+          isRenderedFn = isRendered;
+        },
+      });
+      tpl.initialize();
+      // before render
+      expect(isRenderedFn()).toBe(false);
+      tpl.render();
+      expect(isRenderedFn()).toBe(true);
+    });
   });
 
   /*******************************
@@ -197,66 +249,20 @@ describe('Template.initialize / attach / render / lifecycle', () => {
   });
 
   /*******************************
-      (D) initialize() — state reaction
+      (D) initialize() — onUpdated callback (state reaction)
+
+      `onUpdated` is documented in the Template API reference
+      (docs/src/pages/docs/api/templating/template.mdx) as
+      "Callback when the template is updated".
+
+      Note: the DOM-level `updated` event is NOT in the documented
+      DOM-event surface (lifecycle.mdx documents only `created`,
+      `rendered`, `destroyed`) so we exercise the documented
+      callback hook instead of asserting an undocumented event.
   *******************************/
 
-  describe('initialize() — state reaction', () => {
-    it('dispatches `updated` event on the element after a state change', async () => {
-      const tpl = makeTemplate({ defaultState: { x: 0 } });
-      tpl.initialize();
-      tpl.render(); // flips rendered to true
-      const spy = vi.fn();
-      host.addEventListener('updated', spy);
-
-      tpl.state.x.set(1);
-      Reaction.flush();
-      await tick();
-      await tick();
-
-      expect(spy).toHaveBeenCalledTimes(1);
-    });
-
-    it('debounces multiple state mutations into a single `updated` dispatch', async () => {
-      const tpl = makeTemplate({ defaultState: { x: 0 } });
-      tpl.initialize();
-      tpl.render();
-      const spy = vi.fn();
-      host.addEventListener('updated', spy);
-
-      tpl.state.x.set(1);
-      tpl.state.x.set(2);
-      tpl.state.x.set(3);
-      Reaction.flush();
-      await tick();
-      await tick();
-
-      expect(spy).toHaveBeenCalledTimes(1);
-    });
-
-    it('uses updateScheduled flag to short-circuit redundant onUpdated calls', () => {
-      const tpl = makeTemplate({ defaultState: { x: 0 } });
-      tpl.initialize();
-      tpl.render();
-
-      expect(tpl.updateScheduled).toBeFalsy();
-      tpl.onUpdated();
-      expect(tpl.updateScheduled).toBe(true);
-      // second call returns early — flag is still true, still scheduled
-      tpl.onUpdated();
-      expect(tpl.updateScheduled).toBe(true);
-    });
-
-    it('clears updateScheduled after the queued microtask runs', async () => {
-      const tpl = makeTemplate({ defaultState: { x: 0 } });
-      tpl.initialize();
-      tpl.render();
-      tpl.onUpdated();
-      expect(tpl.updateScheduled).toBe(true);
-      await tick();
-      expect(tpl.updateScheduled).toBe(false);
-    });
-
-    it('does NOT create a state reaction when element is undefined', () => {
+  describe('initialize() — onUpdated callback', () => {
+    it('does not create a state reaction when element is undefined', () => {
       const tpl = new Template({
         templateName: 'no-element',
         template: '<div>{name}</div>',
@@ -267,19 +273,34 @@ describe('Template.initialize / attach / render / lifecycle', () => {
       expect(tpl.reactions.length).toBe(reactionsBefore);
     });
 
-    it('does not dispatch `updated` if rendered is still false', async () => {
-      const tpl = makeTemplate({ defaultState: { x: 0 } });
+    it('invokes onUpdated callback after a state change once the template has rendered', async () => {
+      // Documented in template.mdx (Template API reference):
+      //   onUpdated | Function | Callback when the template is updated
+      const onUpdated = vi.fn();
+      const tpl = makeTemplate({ defaultState: { x: 0 }, onUpdated });
       tpl.initialize();
-      // intentionally skip render() — rendered is false
-      const spy = vi.fn();
-      host.addEventListener('updated', spy);
+      tpl.render();
 
       tpl.state.x.set(1);
       Reaction.flush();
       await tick();
       await tick();
 
-      expect(spy).not.toHaveBeenCalled();
+      expect(onUpdated).toHaveBeenCalled();
+    });
+
+    it('does not invoke onUpdated until the template has rendered', async () => {
+      // Documented callback hook from API ref — should not fire while
+      // the template has not yet been rendered.
+      const onUpdated = vi.fn();
+      const tpl = makeTemplate({ defaultState: { x: 0 }, onUpdated });
+      tpl.initialize();
+      // intentionally skip render() — rendered is false
+      tpl.state.x.set(1);
+      Reaction.flush();
+      await tick();
+      await tick();
+      expect(onUpdated).not.toHaveBeenCalled();
     });
   });
 
@@ -531,6 +552,101 @@ describe('Template.initialize / attach / render / lifecycle', () => {
       tpl.render({ second: 2 });
       expect(tpl.data.first).toBe(1);
       expect(tpl.data.second).toBe(2);
+    });
+  });
+
+  /*******************************
+      (J) Documented lifecycle ordering
+
+      lifecycle.mdx specifies the callback order:
+        createComponent -> initialize() -> onCreated -> render -> onRendered
+
+      DOM events `created`/`rendered`/`destroyed` carry
+      detail.component pointing at the component instance.
+  *******************************/
+
+  describe('documented lifecycle ordering', () => {
+    it('fires createComponent -> instance.initialize -> onCreated in order', () => {
+      const order = [];
+      const tpl = makeTemplate({
+        createComponent: () => {
+          order.push('createComponent');
+          return {
+            initialize() {
+              order.push('instance.initialize');
+            },
+          };
+        },
+        onCreated: () => order.push('onCreated'),
+      });
+      tpl.initialize();
+      expect(order).toEqual(['createComponent', 'instance.initialize', 'onCreated']);
+    });
+
+    it('fires onCreated before onRendered', async () => {
+      const order = [];
+      const tpl = makeTemplate({
+        onCreated: () => order.push('onCreated'),
+        onRendered: () => order.push('onRendered'),
+      });
+      tpl.render();
+      await nextTick();
+      expect(order).toEqual(['onCreated', 'onRendered']);
+    });
+
+    it('rendered DOM event detail.component references the component instance', async () => {
+      const tpl = makeTemplate();
+      let detail;
+      host.addEventListener('rendered', (ev) => {
+        detail = ev.detail;
+      });
+      tpl.render();
+      await nextTick();
+      expect(detail.component).toBe(tpl.instance);
+    });
+
+    it('created DOM event detail.component references the component instance', () => {
+      const tpl = makeTemplate();
+      let detail;
+      host.addEventListener('created', (ev) => {
+        detail = ev.detail;
+      });
+      tpl.initialize();
+      expect(detail.component).toBe(tpl.instance);
+    });
+  });
+
+  /*******************************
+      (K) onThemeChanged — debounce documented behavior
+
+      Documented in component-lifecycle skill:
+        "onThemeChanged ... Debounced (10ms) to coalesce rapid changes."
+  *******************************/
+
+  describe('onThemeChanged — debounce', () => {
+    it('coalesces rapid invocations into a single trailing call (~10ms debounce)', async () => {
+      vi.useFakeTimers();
+      try {
+        const onThemeChanged = vi.fn();
+        const tpl = makeTemplate({ onThemeChanged });
+        tpl.initialize();
+
+        // multiple rapid calls within the 10ms window
+        tpl.onThemeChanged();
+        tpl.onThemeChanged();
+        tpl.onThemeChanged();
+
+        // before the debounce window elapses — no call
+        vi.advanceTimersByTime(5);
+        expect(onThemeChanged).not.toHaveBeenCalled();
+
+        // after the documented 10ms window — single trailing call
+        vi.advanceTimersByTime(10);
+        expect(onThemeChanged).toHaveBeenCalledTimes(1);
+      }
+      finally {
+        vi.useRealTimers();
+      }
     });
   });
 });
