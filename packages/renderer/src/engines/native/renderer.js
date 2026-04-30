@@ -43,43 +43,13 @@ function parseServerMeta(commentData, target) {
   }
 }
 
-// buildHTMLStringPure is deterministic for a given (ast, isSVG) pair —
-// `snippets` is only echoed back in the result (build-html-string.js:76,
-// 202) and doesn't affect htmlString/entries. AST is immutable after
-// reaching the Renderer (compiler's optimizeAST runs pre-runtime;
-// collectSnippets only reads), so cache entries never go stale.
-// WeakMap keyed on the AST array — GC'd automatically when no renderer
-// holds the AST.
-//
-// The cache holds BOTH the string+entries AND a pre-parsed reference
-// <template>. Hydration's hot path (hydrateAttributes) reparses the same
-// htmlString into a reference DOM via `innerHTML =` — the parse itself
-// is ~648ms on a 100-card page per the profile, independent of whether
-// the string was cached. Caching the parsed template.content eliminates
-// the reparse entirely. Safe because hydrateAttributes only READS from
-// refRoot (parallel TreeWalker traversal, no mutations).
-//
-// Hot path: hydration recurses via hydrateInnerContent → hydrateMarkers
-// → hydrateAttributes, each of which needs both the string and parsed
-// ref-DOM for the same contentAST. For a 100-item {#each}, that's ~100
-// rebuilds + ~100 innerHTML parses of identical content per hydrate
-// pass without this cache.
+// AST → { htmlString, entries, refRoot } cache. Keyed on the AST array,
+// which is immutable after compile, so entries never stale and GC
+// follows naturally. Each entry also holds a lazy `refRoot` — the parsed
+// reference <template>.content for the legacy hydration walker. Parse
+// cost dominates hydration on instance-heavy pages (e.g. 100-row lists),
+// so caching the parsed fragment is what makes the legacy walker viable.
 const buildStringCache = new WeakMap();
-
-// Temporary diagnostic — hit/miss counters so we can verify cache
-// effectiveness. Expose via globalThis.__cbhCache for inspection.
-// TODO remove after perf investigation closes.
-const cacheDiag = { hits: 0, misses: 0, firstMissKeys: [] };
-if (typeof globalThis !== 'undefined') {
-  globalThis.__cbhCache = {
-    stats: () => ({ ...cacheDiag, ratio: cacheDiag.hits / (cacheDiag.hits + cacheDiag.misses || 1) }),
-    reset: () => {
-      cacheDiag.hits = 0;
-      cacheDiag.misses = 0;
-      cacheDiag.firstMissKeys.length = 0;
-    },
-  };
-}
 
 function cachedBuildHTMLString(ast, options) {
   let entry = buildStringCache.get(ast);
@@ -89,19 +59,11 @@ function cachedBuildHTMLString(ast, options) {
   }
   const slot = options.isSVG ? 'svg' : 'html';
   if (entry[slot] === null) {
-    cacheDiag.misses++;
-    if (cacheDiag.firstMissKeys.length < 10) {
-      cacheDiag.firstMissKeys.push({
-        astLen: Array.isArray(ast) ? ast.length : '?',
-        types: Array.isArray(ast) ? ast.slice(0, 3).map((n) => n?.type) : [],
-      });
-    }
     const built = buildHTMLStringPure(ast, options);
-    // refRoot is a lazy getter — the Plan-04 fast path in hydrateAttributes
-    // never reads it, and paying the `template.innerHTML = htmlString`
-    // parse per instance is the hydration hotspot we're trying to
-    // eliminate. Touch it only when the legacy reference-DOM fallback
-    // runs (older SSR output, or templates without data-sui-bind).
+    // refRoot is a lazy getter — the data-sui-bind fast path in
+    // hydrateAttributes never reads it, so we avoid the per-instance
+    // `template.innerHTML = htmlString` parse. Only the legacy
+    // reference-DOM fallback (templates without data-sui-bind) touches it.
     let refRoot = null;
     entry[slot] = {
       htmlString: built.htmlString,
@@ -116,9 +78,6 @@ function cachedBuildHTMLString(ast, options) {
         return refRoot;
       },
     };
-  }
-  else {
-    cacheDiag.hits++;
   }
   return entry[slot];
 }
@@ -150,11 +109,8 @@ export class Renderer {
     this.inheritsData = inheritsData;
     this.receivesData = receivesData;
     this.protectedKeys = protectedKeys;
-    // Lit uses hashCode({ ast, data, isSVG }) for subtree caching here.
-    // Native renderer doesn't cache subtrees yet, and fnv1a over the full
-    // AST + data context costs ~1.4ms per construction — visible in hydration
-    // flamecharts. Use a cheap sequential ID for debugging until subtree
-    // caching is implemented.
+    // Sequential debug ID. Subtree caching would key on hashCode(ast+data)
+    // but isn't implemented in the native engine.
     this.id = ++Renderer.nextId;
     this.dataDep = new Dependency();
     this.scope = new ReactionScope();
@@ -296,13 +252,10 @@ export class Renderer {
   bindMarkers(root, entries, data, scope, ast) {
     if (entries.length === 0) { return; }
 
-    // Plan 08 — single-pass walker over SHOW_ELEMENT | SHOW_COMMENT. Each
-    // node.nextSibling/firstChild in the walker does one DOM traversal
-    // instead of two, cutting the per-render walk cost roughly in half
-    // for large fragments (1000-row table, etc.). Attribute processing is
-    // safe inline (only touches the element's own attributes); comment
-    // processing is deferred because it mutates the tree structure
-    // (replace/remove) and would invalidate the live walker.
+    // Single-pass walker over SHOW_ELEMENT | SHOW_COMMENT. Attribute
+    // processing is safe inline (only touches the element's own
+    // attributes); comment processing is deferred because it mutates the
+    // tree structure (replace/remove) and would invalidate the live walker.
     const processedAttrIDs = new Set();
     const commentsToProcess = [];
     const walker = document.createTreeWalker(
@@ -331,11 +284,10 @@ export class Renderer {
         if (text.startsWith(COMMENT_MARKER)) {
           const markerID = parseInt(text.slice(COMMENT_MARKER.length));
           if (!isNaN(markerID)) {
-            // processedAttrIDs is finalized only *after* the walk completes,
-            // so defer the attr-ID filter to the processing loop below. In
-            // fresh-render shape (client:load), attribute markers and their
-            // owning elements are discovered in document order — the element
-            // is visited before any comment that would have shared an ID.
+            // Filter deferred until after the walk: elements visit before
+            // sibling comments in document order, so an attr-marker's
+            // owning element is always recorded before any comment that
+            // would share its ID.
             commentsToProcess.push({ comment: node, markerID, type: 'expression' });
           }
         }
@@ -374,7 +326,6 @@ export class Renderer {
       Raw Text Element Bindings
   *******************************/
 
-  // Raw-text element binding — delegates to reactive-data.js.
   bindRawTextContent(comment, entry, data, scope) {
     bindRawTextContentFn({ comment, entry, data, scope, renderer: this });
   }
@@ -412,7 +363,6 @@ export class Renderer {
         Text Bindings
   *******************************/
 
-  // Text-expression binding — delegates to reactive-data.js.
   bindTextExpression(comment, entry, data, scope) {
     bindTextExpressionFn({ comment, entry, data, scope, renderer: this });
   }
@@ -500,23 +450,19 @@ export class Renderer {
   }
 
   hydrateAttributes(root, entries, data, scope, ast) {
-    // Fast path — server stamped data-sui-bind on every element with
-    // dynamic bindings (Plan 04). Presence of the attribute anywhere in
-    // the tree tells us the server is Plan-04-aware; walk elements once,
-    // look up entries[id].attributeBinding for parts + classification,
-    // wire Reactions directly. No reference DOM, no parallel walker, no
-    // block-owned-element discovery pass.
+    // Fast path — server stamps data-sui-bind on every element with
+    // dynamic bindings. Walk elements once, look up
+    // entries[id].attributeBinding for parts + classification, wire
+    // Reactions directly. No reference DOM, no parallel walker.
     if (root.querySelector && root.querySelector(`[${DATA_SUI_BIND}]`)) {
       this.hydrateAttributesViaDataBind(root, entries, data, scope);
       return;
     }
 
-    // Legacy fallback — reference DOM parallel walk. Keeps older cached
-    // SSR content hydrating correctly during a rolling upgrade.
-    // Reference DOM is cached alongside the htmlString — parallel TreeWalker
-    // only reads attribute names off refEls, so sharing the cached fragment
-    // across calls is safe. Eliminates the ~648ms-per-page `innerHTML =`
-    // reparse that the profile identified as the hydration hotspot.
+    // Legacy fallback — reference DOM parallel walk for older SSR output
+    // without data-sui-bind. Reference DOM is cached alongside the
+    // htmlString; the parallel TreeWalker only reads attribute names off
+    // refEls, so sharing the cached fragment is safe.
     const { refRoot } = cachedBuildHTMLString(ast || this.ast, { snippets: this.snippets });
 
     // Build a set of real DOM elements owned by block regions so we can skip
@@ -573,17 +519,12 @@ export class Renderer {
     }
   }
 
-  // Plan 04 fast path — walk SHOW_ELEMENT | SHOW_COMMENT once, process
-  // `data-sui-bind` on elements at block-depth 0 and let block hydrate
-  // hooks recursively handle their own contents via hydrateInnerContent
-  // (which re-enters this method with the block's sub-AST entries). This
-  // matches the blockOwnedElements skip the legacy parallel walker
-  // performed, but without building a reference DOM or a separate Set —
-  // depth is tracked inline from the block markers we encounter.
-  //
-  // The data-sui-bind attribute itself is left on the element until the
-  // post-hydration cleanup pass (base.js removeMarkers, deferred to rAF
-  // per Plan 02) strips it along with comment markers.
+  // Walk SHOW_ELEMENT | SHOW_COMMENT once, process `data-sui-bind` on
+  // elements at block-depth 0, and let block hydrate hooks recurse into
+  // their own contents via hydrateInnerContent. Depth is tracked inline
+  // from the block markers we encounter; no reference DOM, no separate
+  // owned-element set. The data-sui-bind attribute itself is stripped by
+  // the post-hydration cleanup pass (base.js removeMarkers).
   hydrateAttributesViaDataBind(root, entries, data, scope) {
     const walker = document.createTreeWalker(
       root,
