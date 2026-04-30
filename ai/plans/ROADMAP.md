@@ -45,7 +45,6 @@ Foundations first, then contracts, then production velocity.
 PHASE 0: RENDERER ARCHITECTURE  ✓ Complete
 │
 ├─→ PHASE 1: SSR + LIGHT DOM
-│     ├─ SSR data binding markers
 │     └─ Light DOM pre-render pipeline
 │
 ├─→ PHASE 2: PERFORMANCE + API CONTRACTS
@@ -60,8 +59,8 @@ PHASE 0: RENDERER ARCHITECTURE  ✓ Complete
 │     └─ Token Finalization
 │
 ├─→ PHASE 4: AGENT WORKFLOW
-│     ├─ Managed Agents workflow
-│     ├─ Auto-research pattern
+│     ├─ MCP Playground Rendering (eyes-gate)
+│     ├─ Component Wrapping Behavior
 │     └─ Tier 1 → Tier 2 → Tier 3 primitives
 │
 ├─→ PHASE 5: FRAMEWORK INTEGRATION
@@ -101,8 +100,7 @@ Light DOM determines which components are architecturally possible. `@scope` wit
 
 | # | Plan | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
-| 1a | SSR Data Binding Markers | TBD | pair | initial | Versioned markers, mismatch detection, text node splitting. |
-| 1b | [Light DOM Pre-render Pipeline](light-dom-prerender.md) | TBD | pair | scoped | CSS utilities (`prerenderCSS`, `@scope` rewriting); non-reactive render mode; slot projection; upgrade detection in `defineComponent`; CDN loader integration. |
+| 1a | [Light DOM Pre-render Pipeline](light-dom-prerender.md) | 32-56h (4-7d) | pair | scoped | CSS utilities (`prerenderCSS`, `@scope` rewriting); non-reactive render mode; slot projection; upgrade detection in `defineComponent`; CDN loader integration. |
 
 ---
 
@@ -150,7 +148,7 @@ An agent needs eyes and tooling to work in isolation. Phase 4 has two gates befo
 | 4c | Tier 1 Primitives | 16-40h each (2-5d) | agent | — | ~8 components via workflow: dropdown/select, checkbox, radio, switch, form, form-field, tabs, accordion. |
 | 4d | Tier 2 Primitives | 16-40h each (2-5d) | agent | — | ~8 components via workflow: popover, slider, textarea, toast, drawer, breadcrumb, pagination. |
 | 4e | Tier 3 Primitives | 16-40h each (2-5d) | agent | — | ~45 components via workflow — the long tail. |
-| 4f | [Primitive Completions](primitive-completions.md) | 40-80h (5-10d) | user/pair | initial | Finish table, dropdown, header, segment, divider. Table and header need light DOM. |
+| 4f | [Primitive Completions](primitive-completions.md) | 40-80h (5-10d) | pair | initial | Finish table, header, segment, divider. Table and header need light DOM. (Dropdown is handled in 4c Tier 1 generation.) |
 
 ---
 
@@ -190,7 +188,7 @@ Slot in wherever there's a gap; not phase-gated.
 |---|------|-------|------|-------|-------|
 | P1 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | scoped | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel agent eval. |
 | P2 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | scoped | Per-package dir pages and package file browsers remaining. Major dir pages live; build-time version injection still pending. |
-| P3 | Roadmap Page Redesign | 8-16h (1-2d) | pair | initial | — |
+| P3 | Roadmap Page Redesign | 8-16h (1-2d) | pair | initial | Replace the auto-generated docs roadmap page with an authored phase-aware view that mirrors `ROADMAP.md` structure — phases, currently open, parallel, icebox. |
 | P4 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | initial | Three PlaygroundExamples for templates / specs / components. |
 | P5 | CSS Token Extraction | 16-24h (2-3d) | pair | initial | `getThemingCSS` util + MCP tool. Blocked on token finalization. |
 | P6 | MCP Improvements | 8-16h (1-2d) | agent | scoped | `get_theming_css`, `get_global_tokens`, `get_token_usage`. Blocked on token extraction. |
