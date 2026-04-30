@@ -44,11 +44,9 @@ function parseServerMeta(commentData, target) {
 }
 
 // AST → { htmlString, entries, refRoot } cache. Keyed on the AST array,
-// which is immutable after compile, so entries never stale and GC follows
-// naturally. Each entry also holds a lazy `refRoot` — the parsed reference
-// <template>.content for the legacy hydration walker. Parse cost dominates
-// legacy-fallback hydration; bench-hydrate guards the regression when this
-// cache stops landing (packages/component/bench/tachometer/bench-hydrate.js).
+// which is immutable after compile, so entries never stale and GC
+// follows naturally. Each entry also holds a lazy `refRoot` — the
+// parsed reference <template>.content for the legacy hydration walker.
 const buildStringCache = new WeakMap();
 
 function cachedBuildHTMLString(ast, options) {
