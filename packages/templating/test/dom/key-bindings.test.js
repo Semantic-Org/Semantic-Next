@@ -194,7 +194,7 @@ describe('Template — key bindings', () => {
     // prior keystroke left a trailing space — the FIRST press from a fresh
     // buffer cannot match ' down'. Documented in the Stage 1 sketch (#7) and
     // locked as B4 in Stage 1.5.
-    it.fails('fires for the second listed key from a cold buffer (B4 PIN — leading-space alternate)', () => {
+    it('fires for the second listed key from a cold buffer (B4 PIN — leading-space alternate)', () => {
       const handler = vi.fn();
       const { template } = makeKeyTemplate({
         keys: { 'up, down': handler },
@@ -221,7 +221,7 @@ describe('Template — key bindings', () => {
     // ['up', 'down'] and ArrowUp from a cold buffer should fire. Today, the
     // alternate is 'up ' (trailing space) which does not endsWith match the
     // cold-buffer 'up'. EXPECTED TO FAIL today; passes after fix.
-    it.fails("parses cleanly with extra whitespace ('up , down ') (B4 PIN — passes after fix)", () => {
+    it("parses cleanly with extra whitespace ('up , down ') (B4 PIN — passes after fix)", () => {
       const handler = vi.fn();
       const { template } = makeKeyTemplate({
         keys: { 'up , down ': handler },

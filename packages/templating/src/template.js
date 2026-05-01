@@ -651,7 +651,7 @@ export const Template = class Template {
         // check for key event
         each(this.keys, (handler, keySequence) => {
           keySequence = keySequence.replace(/\s*\+\s*/g, '+'); // remove space around +
-          const keySequences = keySequence.split(',');
+          const keySequences = keySequence.split(',').map(s => s.trim());
           if (any(keySequences, sequence => this.currentSequence.endsWith(sequence))) {
             const inputFocused = document.activeElement
               && (['input', 'select', 'textarea'].includes(document.activeElement.tagName.toLowerCase())
