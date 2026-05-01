@@ -12,6 +12,8 @@ type: skill
 > **Skill:** `testing`
 > **Purpose:** Repo-specific test conventions, environment selection, and patterns for writing tests in the Semantic UI monorepo
 
+> **Before designing tests:** This skill is mechanics — environments, runners, file placement. For _what_ to assert and how to derive expectations from user-facing intent, load `grounded-testing` first. The two skills are designed to be loaded together.
+
 ---
 
 ## Golden Rule
@@ -341,8 +343,6 @@ await expect.element(page.elementLocator(result)).toHaveTextContent('1');
 
 Available retriable matchers: `toHaveTextContent()`, `toBeVisible()`, `toBeDisabled()`, `toBeEnabled()`, `toBeInTheDocument()`.
 
-Reference file: `packages/component/test/browser/vitest4-example.js` (example only, not an active test).
-
 ---
 
 ## Quick Reference
@@ -385,6 +385,9 @@ import { page, userEvent } from 'vitest/browser';  // browser tests only
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
+| **Grounded Testing** | `grounded-testing` | Deriving test expectations from user-facing intent before reading source — load alongside this skill when designing tests |
+| **Red-Team Testing** | `red-team-testing` | Subagent methodology for post-PR gap analysis |
+| **Test Infrastructure** | `testing-internals` | Modifying test runner config, adding test utilities, or changing the CI test pipeline |
 | **Repo Guide** | `repo-guide` | Navigating the monorepo structure |
 | **Component Authoring** | `component-authoring` | Understanding component architecture before testing |
 | **Internals** | `internals` | Deep understanding of framework internals |
