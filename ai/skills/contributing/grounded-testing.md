@@ -1,7 +1,7 @@
 ---
 title: Grounded Testing
-description: Methodology for writing tests that verify what typical users care about regressing — common-path behavior promised by user docs, examples, and skills, gathered exclusively through the Semantic UI MCP server (never grep), triangulated against source with detective skepticism, and arbitrated by the test outcome itself when sources disagree. Lead with the cases the majority of users will hit; defer edge cases to `red-team-testing`. Use this skill whenever writing tests for any user-facing feature, and ESPECIALLY when broadly asked to "fill in testing gaps" — the canonical failure mode this skill exists to prevent. Pairs with `testing` (mechanics) and `red-team-testing` (frequency-scored edge-case analysis).
-keywords: [grounded testing, common-path testing, intent-first, MCP-first, triangulation, detective method, witness pool, labeled inference, test as arbiter, frequency heuristic, doc-code drift, tautological tests, fill the gap anti-pattern, TDD]
+description: Methodology for writing tests that verify what users care about regressing — by building a labeled understanding of intent from MCP-served sources (docs, examples, skills, plans) before reading source, and treating the test outcome itself as the arbiter when sources disagree. Lead with the typical use case (common path); include edge cases when documented; defer gap-finding and adversarial probing to `red-team-testing`. Use this skill whenever writing tests for any user-facing feature, and ESPECIALLY when broadly asked to "fill in testing gaps" — the canonical failure mode this skill exists to prevent. Pairs with `testing` (mechanics) and `red-team-testing` (gap-finding and questioning).
+keywords: [grounded testing, common-path-first, intent-first, MCP-first, witness pool, labeled inference, empty label slot, test as arbiter, doc-code drift, tautological tests, fill the gap anti-pattern, cross-framework priors, repo novelty]
 audience: contributing
 skill: grounded-testing
 type: skill
@@ -10,15 +10,15 @@ type: skill
 # Grounded Testing
 
 > **Skill:** `grounded-testing`
-> **Purpose:** Write tests grounded in what a typical user cares about regressing — by gathering context exclusively through the Semantic UI MCP server, building a labeled intent across docs, examples, and skills, verifying against source with skepticism, and using the test outcome itself as the arbiter when sources disagree.
+> **Purpose:** Write tests grounded in what a user cares about regressing — by building a labeled understanding of intent from MCP-served sources before reading implementation, and using the test outcome itself as the arbiter when sources disagree.
 
 ---
 
 ## Golden Rule
 
-**A test must verify behavior a typical user would notice if it broke.** Not internal returns. Not implementation paths. Not synthetic edge cases — those belong to `red-team-testing`. The bullseye is the common-path behavior the majority of users will actually hit, and would file a GitHub issue about if it stopped working.
+**A test must verify behavior a user would notice if it broke.** Not internal returns. Not implementation paths. Behavior visible to a downstream developer using the published packages — the kind of breakage that lands as a GitHub issue.
 
-To know what users notice, you have to know what was promised. To know what was promised, you triangulate: docs, API references, examples, authoring skills, source. All witnesses. None authoritative. Drift between them is the norm. Be skeptical of each. Let the test arbitrate.
+To know what users notice, you have to know what was promised. To know what was promised, you triangulate: docs, API references, examples, authoring skills, plans, source. All witnesses. None authoritative. Drift between them is the norm. Be skeptical of each. Let the test arbitrate.
 
 ---
 
@@ -38,25 +38,45 @@ If you can't answer in user terms — what a developer would observe, what a rel
 
 ---
 
-## Common Paths First (Edge Cases Belong to Red-Team)
+## Why This Is Hard (You Are Fighting Your Own Defaults)
 
-This skill's bullseye is the **majority case** — behavior most users of a feature will actually exercise. Edge cases (boundary conditions, unusual inputs, less-typical configurations) belong to `red-team-testing` and are scored there by frequency. The two skills are complementary, not overlapping.
+This codebase is novel in ways your training data doesn't cover. The `{#each}` reconciler uses a heuristic key chain (`_id || id || key || hash || _hash || value || index`) — not React's explicit `key={...}`. Reactivity is Tracker-style, not signals-as-React-hooks. Templates have a dual Lisp + JS expression dialect. Event DSL has `deep`/`global`/`bind` modifiers with subtle semantics. None of this maps cleanly to React, Vue, Svelte, or Lit — and your strongest priors are loudest precisely where the surface *looks* superficially similar.
 
-**The frequency heuristic.** When you find a candidate test or contradiction, ask:
+The defaults this skill is designed to override:
 
-> *"What percentage of end users will encounter this case?"*
+- **Grep over read.** Token efficiency favors fragments over whole files; produces shallow takes.
+- **"I know this" over verification.** Confident-completion bias produces fluent claims about features you've never fetched a doc for.
+- **Cross-framework imports.** When a surface looks React-shaped, React semantics leak in. (`@key` is not a thing here. Neither is `useEffect`-style cleanup.)
+- **Symmetric-looking output.** Producing a tidy table that *looks* structured isn't the same as having reasoned through whether the structure makes sense.
 
-| Frequency | Where it belongs |
-|---|---|
-| 80–100% — every user hits this | This skill. Test it. |
-| 50–79% — common but not universal | This skill, with judgment for severity |
-| 20–49% — occasional but legitimate | `red-team-testing` |
-| 5–19% — rare but real | `red-team-testing` |
-| 0–4% — theoretically possible | `red-team-testing` or document as known constraint |
+The skill leans on **structural** defenses against these defaults, not behavioral exhortations:
 
-**Why the calibration matters:** synthetic-looking contradictions are easy to discover and waste effort. A contradiction about behavior no typical user will observe (e.g., a parameter no developer in default mode would reach for) isn't a grounded-testing finding — it's a curiosity. The grounded-testing skill is for getting the bullseye right, not cataloguing every possible drift.
+1. **MCP gating** — you can't grep what you must fetch. The MCP-served directories (`docs/`, `ai/skills/`, `ai/research/`, `ai/plans/`) are off-limits to grep; whole-document fetches enforce thoroughness.
+2. **Labeled claims** — every assertion in your intent doc must carry a `[label]`. An unsourced claim shows up as an *empty label slot*, which is the trip-wire: stop, verify, or strike the claim.
+3. **Common-path-first ordering** — sketches lead with the typical use case, surfacing the load-bearing tests where they belong.
+4. **Source-after-intent rule** — once you've read implementation, you can't un-read it. The labeled intent is built first.
 
-If a contradiction fails the frequency check, **don't surface it as a grounded-testing finding** — note it for red-team or for documentation cleanup, and move on.
+These structural defenses only work if you actually use them. The Detective's Method below isn't a checklist of polite suggestions; it's a guard rail.
+
+---
+
+## Grounded vs. Red-Team: Same Space, Different Orientation
+
+Grounded-testing and `red-team-testing` operate on the same testable surface — both produce tests, both care about user-facing behavior. The difference is **orientation**:
+
+- **Grounded-testing** *uncovers what to test* from documented intent. You start from docs/examples/skills/plans, build a labeled understanding of the contract, and sketch tests that verify it. You lead with the cases the typical user will encounter (common path) and include edge cases that are clearly part of the documented contract.
+- **Red-team-testing** *questions and fills in*. It runs against the existing test surface and asks: where are the gaps? Which cases didn't the feature agent think about? It's frequency-scored to prioritize edge-case findings.
+
+"Common path first" is about **order within a feature**, not which features go where. A feature only 30% of users adopt still has a contract that grounded-testing verifies. The phrase means: when sketching tests, start with the typical use case, name it explicitly, and proceed to less-typical cases. Severity matters; pure synthetic edge cases (no real user would observe) get flagged or skipped.
+
+When you discover an edge case during grounded-testing:
+
+- **Documented contract** → include in the sketch (it's part of the bullseye)
+- **Real edge case, broad impact** → consider including; lean toward inclusion if severity is high
+- **Real edge case, narrow impact** → flag for red-team
+- **Purely synthetic (no real user would observe)** → note and skip
+
+These are judgment calls. There is no numerical partition between this skill and red-team.
 
 ---
 
@@ -64,7 +84,7 @@ If a contradiction fails the frequency check, **don't surface it as a grounded-t
 
 Use whenever you're writing tests for behavior with any user-facing surface:
 
-- Template syntax (helpers, modifiers, expression dialects)
+- Template syntax (helpers, modifiers, expression dialects, `{#each}` reconciliation)
 - Event DSL keywords (`deep`, `global`, `bind`)
 - Component lifecycle and `defineComponent` parameters
 - Signal/Reaction methods and options
@@ -78,7 +98,7 @@ And ESPECIALLY when given an open-ended request like *"fill in the testing gap i
 
 ## MCP-First Discipline
 
-You build the witness pool through the **Semantic UI MCP server**, not by reading directories or greping. MCP enforces what grep cannot: every fetch returns the *whole document*, and every `get_*` response includes a `related` field pointing at connected content. You build the pool by following relations until saturated. **This is non-negotiable** — agents who grep `docs/` or `ai/skills/` will miss the connective tissue (callouts, sibling concepts, contrast examples) that defines the contract.
+You build the witness pool through the **Semantic UI MCP server**, not by reading directories. MCP enforces what grep cannot: every fetch returns the *whole document*, and every `get_*` response includes a `related` field pointing at connected content. You build the pool by following relations until saturated. **Curated directories are off-limits to grep** — agents who grep `docs/` or `ai/skills/` miss the connective tissue (callouts, sibling concepts, contrast examples) that defines the contract.
 
 ### Start here
 
@@ -121,8 +141,8 @@ get_user_doc(["guides/components/events", "guides/templates/slots"])
   — Batch-fetch user docs. Always pass an array when you need more than one.
 
 get_example(["event-binding", "template-event-handlers", "global-events"])
-  — Batch-fetch examples. Look at the contrast examples (without the feature
-    you're testing) too — they show what the default behavior is.
+  — Batch-fetch examples. Look at contrast examples (without the feature
+    you're testing) too — they show what default behavior is.
 
 get_context("authoring/component-events")
   — Authoring/contributing skill content. More precise than user docs on subtleties.
@@ -141,6 +161,17 @@ use_skill("templating")
   — Load a comprehensive learning skill (returns a multi-page guide).
 ```
 
+### Plans — what's in flight
+
+```
+ls ai/plans/                    — index of active and recent plans
+Read("ai/plans/<plan>.md")     — read whole; plans describe in-flight features
+                                  (the explicit-keys plan would have caught the
+                                  "@key doesn't exist" hallucination immediately)
+```
+
+Plans are part of the witness pool when behavior is in flux or when a feature you're testing has a stated direction beyond what's currently shipped. Read whole, no grep on `ai/plans/`.
+
 ### Follow `related`
 
 Every `get_*` response includes a `related` field with pointers to connected content:
@@ -158,19 +189,26 @@ Every `get_*` response includes a `related` field with pointers to connected con
 
 **Always follow `related`** until you stop getting new material. This replaces the `grep -r` instinct and produces a more complete pool than keyword-search ever does.
 
-### Source code is different
+### Source code rules
 
-For implementation files (`packages/*/src/`), use `Read` — and read **whole files**, not greps. When the user names a file, read it in full. Grep on source for unknown symbols is acceptable; grep on source as a substitute for reading what was named is not.
+Implementation files (`packages/*/src/`):
+
+- **Read whole files** when learning a feature's shape, when the user names a file, or when verifying intent.
+- **Grep for known symbols** (e.g., `grep -n "getItemID" packages/renderer/src/engines/native/blocks/each.js`) when you already understand the file shape and need a specific definition. Source grep is legitimate and often the fastest path.
 
 ### Forbidden moves
 
 ```
 ❌  grep -r "deep" docs/
-❌  Greping ai/skills/ for an authoring skill name
+❌  grep -r "boundary" ai/skills/
+❌  grep on ai/plans/ or ai/research/
 ❌  Reading one MCP doc and stopping (ignoring `related`)
-❌  Greping packages/*/src/ to learn what a feature does (read the file)
+❌  Reading source before building labeled intent (contaminates the trace)
+❌  Asserting a feature exists or behaves like its analogue in another framework
+
 ✅  search("deep event binding") then batch-fetch the hits, then follow `related`
 ✅  Read the whole template.js when investigating event mechanics
+✅  grep -n "getItemID" packages/.../each.js when you know the symbol
 ```
 
 ---
@@ -179,14 +217,15 @@ For implementation files (`packages/*/src/`), use `Read` — and read **whole fi
 
 You are a detective. Every source is a witness with bias and incomplete information. Truth emerges from triangulation, not from any single source.
 
-### 1. Build the witness pool (via MCP)
+### 1. Build the witness pool
 
-Use the commands above. For every feature, gather:
+For every feature, gather (via the commands above):
 
 - **User-facing docs** — what was promised
 - **API reference pages** — params, types, returns
 - **Examples** — patterns the docs encourage, including contrast cases
-- **Authoring/contributing skills** — subtle rules
+- **Authoring/contributing skills** — subtle rules, internal patterns
+- **Plans** (`ai/plans/*.md`) — in-flight features, planned syntax, design constraints
 - **Source** (whole file) — what the implementation does today
 - **Recent commits** — `git log <file> | head -20` if behavior may have changed recently
 
@@ -199,6 +238,7 @@ Each kind of witness lies in characteristic ways:
 | Docs | Lag behind code; aspirational; vague language; oversimplified examples |
 | Examples | May reflect old patterns; may not show contrast cases |
 | Authoring skills | Often partial (covers one part of a feature, not all of it) |
+| Plans | Describe intended behavior, not necessarily shipped behavior |
 | Source | May have bugs; may not implement what was intended; comments may be stale |
 | Recent commits | Author-perspective; may omit subtle behavior changes |
 
@@ -206,23 +246,26 @@ No single witness is authoritative. Drift between any pair is the norm.
 
 ### 3. Articulate intent with labeled moves
 
-Don't write a paragraph saying "the feature does X." Build the intent claim by claim, **labeling the source of each claim**. The labels make your reasoning auditable, and force discipline — you can't smuggle a guess in as a doc claim.
+Don't write a paragraph saying "the feature does X." Build the intent claim by claim, **labeling the source of each claim**. The labels make your reasoning auditable, and force discipline — you can't smuggle a guess in as a doc claim, because there's no label for it.
 
 | Label | Meaning |
 |---|---|
 | `[doc]` | Direct quote or paraphrase from a user-facing doc page |
 | `[example]` | Pattern shown in a code example |
 | `[skill]` | Claim from an authoring/contributing skill |
+| `[plan]` | Claim from a plan file (`ai/plans/*`) — note this is intended, not necessarily shipped |
 | `[inference]` | Logical step from existing claims (e.g., "keyword exists to modify default → absence implies inverse") |
 | `[synthesis]` | Unified mental model abstracted from multiple claims |
 | `[source]` | Behavior observed in the implementation |
-| `[contradiction]` | Two witnesses disagree (subject to frequency check before becoming a finding) |
+| `[contradiction]` | Two witnesses disagree |
 
-The `[synthesis]` move is where testing gets powerful. Once you've named the unifying mental model — "boundary escape control," "lazy materialization," "structural equality" — you can derive cases the docs never enumerated. The synthesis predicts behavior; the test verifies the prediction.
+**The empty label slot is a trip-wire.** When you find yourself writing a confident assertion and no label fits — *that is the signal*. The claim is a prior, not a fact. STOP and verify via MCP, or strike the claim. The `@key` failure that prompted this skill's revision was an empty-slot moment that was not respected: a confident assertion (`@key` is the keying syntax) with no `[doc]`, no `[example]`, no `[skill]`, no `[source]` to back it. Just an unlabeled prior from React.
+
+The `[synthesis]` move is where testing gets powerful. Once you've named the unifying mental model — "boundary escape control," "heuristic-keyed reconciliation," "structural equality" — you can derive cases the docs never enumerated. The synthesis predicts behavior; the test verifies the prediction.
 
 ### 4. Trace common paths through the synthesis
 
-Walk concrete cases through your model and write down what you expect — **leading with the cases the majority of users will encounter.** Don't enumerate edge cases here; that's red-team's job.
+Walk concrete cases through your model and write down what you expect — **leading with the cases the typical user will encounter.** Less-typical cases earn their place by severity or by being clearly part of the documented contract.
 
 For `deep` synthesized as "boundary escape control":
 - Click on own-template element matching selector → fires (every author hits this)
@@ -231,17 +274,17 @@ For `deep` synthesized as "boundary escape control":
 - Click in nested child shadow DOM, default → does NOT fire (safety again)
 - Click in nested child shadow DOM, deep → fires
 
-Stop here. Cases like "what if the developer wraps deep in a try/catch" or "what if the selector is malformed" are red-team territory.
+If a case feels purely synthetic — no real user would observe it — flag it for red-team and don't include in the sketch.
 
 ### 5. Read source as verification, not authority
 
-You read source AFTER the labeled intent is built. **Compare; don't update silently.** Where source agrees with your trace, your understanding is reinforced. Where source disagrees on a common-path case, mark `[contradiction]` and let the test arbitrate. Where source disagrees on an edge case, note for red-team and move on.
+You read source AFTER the labeled intent is built. **Compare; don't update silently.** Where source agrees with your trace, your understanding is reinforced. Where source disagrees, mark `[contradiction]` and let the test arbitrate (or, for clearly-edge disagreements, flag for red-team or doc cleanup and move on).
 
-The order is intent → source → test → user (when needed). Never source → test → intent — that's the failure mode.
+The order is intent → source → test → user (when needed). Never source → test → intent — that's the failure mode this skill prevents.
 
 ### 6. Tests as arbiter
 
-Tests aren't confirmations. They're decisions. When trace and source disagree on a common path, the test outcome decides what the codebase actually promises:
+Tests aren't confirmations. They're decisions. When trace and source disagree on a documented contract, the test outcome decides what the codebase actually promises:
 
 - **Test passes when you expected fail** → your trace missed nuance. Update the trace; reflect on what you missed; the test guards future regressions.
 - **Test fails when you expected pass** → your trace was right; the implementation diverges. The test catches a real bug.
@@ -251,15 +294,17 @@ Both pass and fail teach. **Never silently rewrite an expectation to match what 
 
 ### 7. Surface only when it matters
 
-When a test outcome contradicts your traced expectation in a way that affects the contract for typical users — stop and surface before locking the test. Apply the frequency heuristic FIRST: would 50%+ of users actually hit this case? If not, it's not a grounded-testing surface — flag for red-team or doc cleanup.
+When a test outcome contradicts your traced expectation in a way that affects the contract — stop and surface before locking the test. The trigger is **contract ambiguity**, not numerical frequency: ask yourself, *"would a downstream developer be confused or surprised if it shipped this way?"*
 
-When the threshold is met, surface in plain user terms:
+- **Yes, on a documented behavior** → surface to the user; they decide whether to fix code, fix docs, or both
+- **Yes, on something docs don't speak to but users will reasonably expect** → surface, framed as "this isn't documented but here's what users will assume"
+- **No — disagreement is about something docs don't speak to and users won't reasonably notice** → flag for red-team or doc cleanup; don't escalate
 
-> "I traced from the events guide that without `deep`, slotted content does NOT trigger handlers — that's the safety contract. The test confirms this for `<button class='submit'>` slotted into a component with `'click .submit'` handler. Source agrees. No surface needed.
+When the threshold is met, surface in plain user terms, citing what doc/skill/plan grounded the expectation:
+
+> "I traced from the events guide that without `deep`, slotted content does NOT trigger handlers — that's the safety contract. Test confirms. Source agrees. No surface needed.
 >
-> Separately, I noticed the implementation filters out `isDeep=true` events for default-mode handlers — but a default-mode developer wouldn't be reading `isDeep` in the first place, so this is an edge case for red-team or doc cleanup, not a grounded-testing finding."
-
-The surface threshold: **common-path contract ambiguity**. The user knows what they intended; you don't. Mechanical drift below threshold can be noted in the PR description.
+> Separately: source filters out `isDeep=true` events for default-mode handlers, so a default-mode handler can never observe `isDeep=true`. A default-mode developer would have no reason to read `isDeep` (the parameter is meaningful only when escape is opted into) — flagging as a doc-cleanup item, not a grounded-testing surface."
 
 ---
 
@@ -283,7 +328,19 @@ The corrective is the orientation question: *"what user-visible behavior would I
 
 ## Other Anti-Patterns
 
+### Cross-framework priors
+
+Don't assume a feature exists or behaves a certain way based on similar frameworks (React, Vue, Svelte, Lit). The repo has genuinely novel features that look superficially similar but aren't:
+
+- **React's `key={...}` for keyed list rendering** → here, `{#each}` reconciles via a heuristic chain (`_id || id || key || hash || _hash || value || index`); `key` is also the iterator variable for object iteration. Explicit user-controlled keying is a planned feature with `key=expression` syntax (not `@key`).
+- **React's `useEffect` cleanup** → here, callbacks use AbortController auto-cleanup tied to component lifetime.
+- **Vue's `:key` / Svelte's `{#each items as item (key)}`** → not present; see the heuristic above.
+- **`@`-prefixed syntax** → reserved for events (`@click={fn}`); not generic markup metadata.
+
+The failure mode: a confident claim about a feature with no `[doc]`, `[example]`, `[skill]`, or `[source]` label. The empty label slot IS the signal. STOP and verify via MCP before proceeding.
+
 ### Implementation-vocabulary test names
+
 ```
 ❌  it('sets options.pierceShadow = true')
 ❌  it('returns when isDeepEnabled is false')
@@ -294,25 +351,28 @@ The corrective is the orientation question: *"what user-visible behavior would I
 A test name should read like a sentence from a release note.
 
 ### Mirror tests
+
 Asserting whatever the function returns. Passes by construction. Catches nothing.
 
 ### Skipping the negative case (on common paths)
+
 Testing only "with `deep`, slotted content fires" without "without `deep`, slotted content does NOT fire." Half a test. The negative case IS the contract — and on common paths, the negative case is *load-bearing*.
 
 ### Silently aligning with source
+
 Trace says A. Source does B. You write the test for B because that's what passes. The drift is now hidden in your test. Future readers can't tell.
 
 ### Reading source before building labeled intent
+
 Once you've read source, you can't un-read it. Your "expected" values silently become the function's outputs. Build the labeled intent first. Read source as verification, not as discovery.
 
+### Symmetric-looking structure substituting for reasoning
+
+Producing a tidy table or numbered list isn't the same as having reasoned through whether the structure maps to anything real. (The frequency-band table that previously sat in this file imported red-team's internal scoring and pretended it partitioned skills — it didn't, and the symmetry made the error harder to see.) When you're tempted to produce a clean partition, ask whether the partition reflects a real division or just looks like one.
+
 ### Ignoring the changelog
+
 Behavior may have changed recently. A doc that says X for a feature whose implementation just changed to Y is the most common drift in active codebases. Skim recent commits when the witness pool feels thin or the docs feel stale.
-
-### Greping when told to read
-When the user names a file, read it whole. Grep produces fragments without context.
-
-### Synthetic-edge-case findings
-A contradiction about behavior <20% of users will observe is noise from this skill's perspective. Flag it and move on. Don't lead a report with a synthetic-looking finding when the common-path tests are the actual story.
 
 ---
 
@@ -327,6 +387,7 @@ search("deep event binding")
 get_user_doc(["guides/components/events", "guides/templates/slots", "guides/query/shadow-dom"])
 get_example(["event-binding", "template-event-handlers", "global-events", "event-data"])
 get_context("authoring/component-events")
+ls ai/plans/   — none touching event DSL
 Read("packages/templating/src/template.js")
 git log --oneline -- packages/templating/src/template.js | head -20
 ```
@@ -376,7 +437,7 @@ Then follow `related` from each `get_*` response until no new material appears.
 
 All common-path cases align between trace and source.
 
-### Step 5 — Sketch tests (common path only)
+### Step 5 — Sketch tests (common path leads)
 
 ```js
 describe('deep keyword — boundary escape control', () => {
@@ -405,7 +466,7 @@ Tests run; common-path expectations all confirmed. The `isDeep` test for slotted
 
 > All common-path tests pass. The synthesized contract — `deep` controls whether events escape the component boundary — is upheld. The authoring skill's description of `isDeep` (omitting 'or slot') is partial; tests confirm the user-facing doc is accurate. Worth a follow-up to align the authoring skill, but not blocking.
 >
-> Separately: source filters out `isDeep=true` events for default-mode handlers, so a default-mode handler can never observe `isDeep=true`. Frequency check: a default-mode developer wouldn't reach for `isDeep` (the parameter is meaningful only when escape is opted into). <5% would hit this. Edge case for red-team or doc cleanup, not a grounded-testing surface.
+> Separately: source filters out `isDeep=true` events for default-mode handlers, so a default-mode handler can never observe `isDeep=true`. A default-mode developer would have no reason to read `isDeep` (the parameter is meaningful only when escape is opted into). Doc-cleanup item, not a grounded-testing surface.
 
 ---
 
@@ -413,13 +474,14 @@ Tests run; common-path expectations all confirmed. The `isDeep` test for slotted
 
 | Situation | Action |
 |---|---|
-| Common-path drift between docs and source (≥50% of users) | Surface to user — they decide whether to fix code or docs |
-| Authoring skill is partial but user-facing docs are accurate | Note in PR; offer to align the skill |
-| Edge-case drift (<20% of users) | Note for red-team or doc cleanup; don't surface as grounded-testing |
-| Trace expectations all met by source | Write tests; no surfacing needed |
+| Test outcome contradicts a documented contract | Surface — user decides whether to fix code, fix docs, or both |
+| Test outcome reveals undocumented behavior users would reasonably expect | Surface — frame as "not documented but here's what users will assume" |
+| Authoring skill is partial; user-facing doc is accurate | Note in PR; offer to align the skill |
+| Disagreement is about an edge case the docs don't speak to | Flag for red-team or doc cleanup; don't escalate |
 | Mechanical drift (param naming, internal vocab) | Below threshold; ignore |
+| Trace expectations all met by source | Write tests; no surfacing needed |
 
-The surface threshold is **common-path contract ambiguity**, not just any disagreement.
+The surface threshold is **contract ambiguity that affects user expectations**, not just any disagreement.
 
 ---
 
@@ -430,7 +492,7 @@ The strongest version is TDD-flavored: build the labeled intent, sketch tests, *
 Most work in this repo is brownfield. Same discipline applies:
 
 - **Greenfield (TDD):** Build labeled intent → sketch tests → write code → tests are the spec.
-- **Brownfield (existing code):** Build labeled intent from MCP-fetched docs/examples/skills *first*, including inference moves → read source as verification → run tests as arbiter → surface common-path contradictions.
+- **Brownfield (existing code):** Build labeled intent from MCP-fetched docs/examples/skills/plans *first*, including inference moves → read source as verification → run tests as arbiter → surface contradictions that affect contract.
 
 The rule both ways: **labeled intent precedes source reading.** If you read source first, the trace is contaminated.
 
@@ -440,12 +502,12 @@ The rule both ways: **labeled intent precedes source reading.** If you read sour
 
 | When... | Use... |
 |---|---|
-| You're verifying the common-path behavior most users hit | **`grounded-testing`** (this skill) |
-| You're hunting frequency-scored edge cases | `red-team-testing` |
+| You're uncovering what to test from documented intent | **`grounded-testing`** (this skill) |
+| You're questioning existing tests, finding gaps, hunting edge cases | `red-team-testing` |
 | You need test mechanics — environments, Vitest, file placement | `testing` |
 | You need test infrastructure — configs, CI, coverage | `testing-internals` |
 
-`grounded-testing` and `red-team-testing` are complementary — they divide the test-design space by frequency. This skill covers the bullseye (the 80%+ cases every user hits). `red-team-testing` covers the rim (frequency-scored edge cases, surfaced as a structured report).
+`grounded-testing` and `red-team-testing` operate on the same testable surface. The orientation differs: this skill establishes the test plan from documented intent (uncovers); red-team questions the plan and fills in gaps (hunts). Together they form the test-design loop.
 
 `testing` and `testing-internals` are about how to *run* tests. Load `grounded-testing` first when you're designing tests; load `testing` alongside it when you're translating sketches into runnable Vitest files.
 
@@ -455,7 +517,7 @@ The rule both ways: **labeled intent precedes source reading.** If you read sour
 
 **The orientation:** every test answers — *"what user-visible behavior would I notice regressing if this test failed?"*
 
-**MCP-first witness pool:**
+**MCP-first witness pool (curated directories — never grep):**
 ```
 help()                                          — orientation
 search("topic")                                 — wide net
@@ -466,19 +528,24 @@ get_api(method)                                 — method lookup
 list_components() / get_component([names])      — UI specs
 list_workflows() / get_workflow(id)             — procedures
 use_skill(name)                                 — comprehensive learning skill
+ls ai/plans/ + Read(plan)                       — in-flight features
 ```
-Follow `related` until no new material appears. **Never grep `docs/` or `ai/skills/`.**
+Follow `related` until no new material appears. **Never grep `docs/`, `ai/skills/`, `ai/research/`, `ai/plans/`.**
 
-**Source:** `Read` whole files. Never grep when told to read.
+**Source:** `Read` whole files when learning shape or when the user names a file. `grep` for known symbols when you already understand the file shape.
 
-**Labels:** `[doc]`, `[example]`, `[skill]`, `[inference]`, `[synthesis]`, `[source]`, `[contradiction]`. Every claim in your intent doc carries one.
+**Labels:** `[doc]`, `[example]`, `[skill]`, `[plan]`, `[inference]`, `[synthesis]`, `[source]`, `[contradiction]`. Every claim in your intent doc carries one. **An empty label slot is a trip-wire** — STOP, verify via MCP, or strike the claim.
+
+**Cross-framework priors are forbidden.** If a claim feels confident but you can't label it, it's a React/Vue/Svelte/Lit prior leaking in. Verify via MCP before proceeding.
 
 **The synthesis:** name the unifying mental model in one sentence ("`deep` controls whether events escape the component boundary"). Synthesis lets you derive cases the docs never enumerate.
 
-**Frequency heuristic:** ≥80% of users → test it; 50–79% → judgment; <50% → red-team or doc cleanup.
+**Test as arbiter:** when trace and source disagree on a documented contract, the test decides. Pass-when-expected-fail teaches; fail-when-expected-pass catches drift; both productive. Never silently rewrite expectations.
 
-**Test as arbiter:** when trace and source disagree on a common path, the test decides. Pass-when-expected-fail teaches; fail-when-expected-pass catches drift; both productive. Never silently rewrite expectations.
+**Surface trigger:** contract ambiguity that affects user expectations. Doc-vs-source disagreement on documented behavior → surface. Edge-case disagreement docs don't speak to → flag for red-team or doc cleanup.
 
-**Surface trigger:** common-path contract ambiguity AND ≥50% frequency. Below that, flag for red-team or doc cleanup; don't escalate.
+**Common path first** is about *order within a feature*, not which features go where. A 30%-adoption feature still has a contract this skill verifies; the typical use case leads the sketch.
+
+**Grounded vs. red-team:** same space, different orientation. Grounded uncovers what to test from documented intent. Red-team questions and fills gaps in coverage. No numerical partition between them.
 
 **The canonical anti-pattern:** "fill in the testing gap" → all-green tautological tests. Counter with the orientation question.
