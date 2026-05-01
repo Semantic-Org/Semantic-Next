@@ -15,6 +15,7 @@ import {
   isEqual,
   isFunction,
   isServer,
+  kebabToCamel,
   mapObject,
   noop,
   remove,
@@ -1033,10 +1034,10 @@ export const Template = class Template {
           Template Helpers
   *******************************/
 
-  findTemplate = (templateName) => Template.findTemplate(templateName);
-  findParent = (templateName) => Template.findParentTemplate(this, templateName);
-  findChild = (templateName) => Template.findChildTemplate(this, templateName);
-  findChildren = (templateName) => Template.findChildTemplates(this, templateName);
+  findTemplate = (name) => Template.findTemplate(name);
+  findParent = (name) => Template.findParentTemplate(this, name);
+  findChild = (name) => Template.findChildTemplate(this, name);
+  findChildren = (name) => Template.findChildTemplates(this, name);
 
   static renderedTemplates = new Map();
 
@@ -1060,6 +1061,7 @@ export const Template = class Template {
     return Template.renderedTemplates.get(templateName) || [];
   }
   static findTemplate(templateName) {
+    templateName = templateName && kebabToCamel(templateName);
     const template = Template.getTemplates(templateName)[0];
     if (!template) {
       return undefined;
@@ -1070,6 +1072,7 @@ export const Template = class Template {
     };
   }
   static findParentTemplate(template, templateName) {
+    templateName = templateName && kebabToCamel(templateName);
     // this matches on DOM (common)
     let match;
     const isMatch = (component) => {
@@ -1113,6 +1116,7 @@ export const Template = class Template {
   }
 
   static findChildTemplates(template, templateName) {
+    templateName = templateName && kebabToCamel(templateName);
     let result = [];
 
     const isMatch = (component) => {
