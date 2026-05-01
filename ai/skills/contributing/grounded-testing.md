@@ -48,6 +48,7 @@ The defaults this skill is designed to override:
 - **"I know this" over verification.** Confident-completion bias produces fluent claims about features you've never fetched a doc for.
 - **Cross-framework imports.** When a surface looks React-shaped, React semantics leak in. (`@key` is not a thing here. Neither is `useEffect`-style cleanup.)
 - **Symmetric-looking output.** Producing a tidy table that *looks* structured isn't the same as having reasoned through whether the structure makes sense.
+- **Synthesis-narrowing.** When a topic has a clean sub-feature with one tidy synthesis and a messier dominant surface with multiple sub-concepts, the agent reaches for the clean one. The dominant surface is what users hit; the clean sub-feature is a footnote. The doc's structure resolves this every time.
 
 The skill leans on **structural** defenses against these defaults, not behavioral exhortations:
 
@@ -64,10 +65,24 @@ These structural defenses only work if you actually use them. The Detective's Me
 
 Grounded-testing and `red-team-testing` operate on the same testable surface — both produce tests, both care about user-facing behavior. The difference is **orientation**:
 
-- **Grounded-testing** *uncovers what to test* from documented intent. You start from docs/examples/skills/plans, build a labeled understanding of the contract, and sketch tests that verify it. You lead with the cases the typical user will encounter (common path) and include edge cases that are clearly part of the documented contract.
+- **Grounded-testing** *uncovers what to test* from documented intent. You start from docs/examples/skills/plans, build a labeled understanding of the contract, and sketch tests that verify it. You cover the surface that the user-facing doc covers, in proportion to how the doc covers it.
 - **Red-team-testing** *questions and fills in*. It runs against the existing test surface and asks: where are the gaps? Which cases didn't the feature agent think about? It's frequency-scored to prioritize edge-case findings.
 
-"Common path first" is about **order within a feature**, not which features go where. A feature only 30% of users adopt still has a contract that grounded-testing verifies. The phrase means: when sketching tests, start with the typical use case, name it explicitly, and proceed to less-typical cases. Severity matters; pure synthetic edge cases (no real user would observe) get flagged or skipped.
+### The doc IS the priority order
+
+When the user prompt names a topic ("events," "loops," "reactivity"), the canonical user-facing doc for that topic *is* the priority specification. Read it top-to-bottom. Whatever the doc:
+
+- **leads with** is the most common path
+- **dedicates the most space to** is the dominant pattern
+- **shows the most code examples for** is what users will write
+- **covers in subsections** are first-class features within the topic
+- **mentions in passing or under "Inside Templates" / "Advanced"** is secondary
+
+A feature that occupies ten lines and one subsection of a doc that runs three hundred lines is **not** the common path, no matter how clean its synthesis is. If the feature you're considering scoping to occupies 5% of the doc, you've narrowed too far.
+
+**Concrete rule:** before deciding scope, read the primary user-facing doc straight through, in order. Then your scope must mirror the doc's coverage in rough proportion. If the doc gives 80% of its body to surface A and 20% to surface B, your test sketch covers both — not one.
+
+### Edge cases inside that scope
 
 When you discover an edge case during grounded-testing:
 
@@ -99,6 +114,17 @@ And ESPECIALLY when given an open-ended request like *"fill in the testing gap i
 ## MCP-First Discipline
 
 You build the witness pool through the **Semantic UI MCP server**, not by reading directories. MCP enforces what grep cannot: every fetch returns the *whole document*, and every `get_*` response includes a `related` field pointing at connected content. You build the pool by following relations until saturated. **Curated directories are off-limits to grep** — agents who grep `docs/` or `ai/skills/` miss the connective tissue (callouts, sibling concepts, contrast examples) that defines the contract.
+
+### Read the primary doc top-to-bottom — first, in order
+
+Before any batch-fetching or `related`-following, identify the canonical user-facing doc for the topic the prompt names ("events" → `guides/components/events`; "loops" → `guides/templates/loops`; etc.) and read it straight through. **The doc's structure encodes priority** — what it leads with, the volume of body it dedicates to each subsection, the number of code examples per topic, are all signals you need before deciding scope.
+
+```
+list_user_docs()                                — find the canonical doc for the topic
+get_user_doc("guides/components/events")        — READ TOP TO BOTTOM, IN ORDER
+```
+
+If you skip this step and jump straight into `search` + batch-fetch + follow-related, you lose the doc's priority signal. You'll have all the same content but no sense of what's leading and what's tucked into a subsection. That's how scope decisions get made backwards.
 
 ### Start here
 
@@ -219,13 +245,15 @@ You are a detective. Every source is a witness with bias and incomplete informat
 
 ### 1. Build the witness pool
 
-For every feature, gather (via the commands above):
+**Step 1a — Read the canonical user-facing doc top-to-bottom, first.** Identify it from the prompt's topic (events → `guides/components/events`, etc.) and read it in order before doing anything else. The doc's structure tells you what the priority order is. **Do not skip this** — the rest of the witness pool fills in around it.
+
+**Step 1b — Follow the trail.** With the priority order clear, expand:
 
 - **User-facing docs** — what was promised
 - **API reference pages** — params, types, returns
-- **Examples** — patterns the docs encourage, including contrast cases
+- **Examples** — patterns the docs encourage, including contrast cases. Look at every example tagged with the topic; volume of examples per pattern is a usage signal.
 - **Authoring/contributing skills** — subtle rules, internal patterns
-- **Plans** (`ai/plans/*.md`) — in-flight features, planned syntax, design constraints
+- **Plans** (`ai/plans/*.md`) — in-flight features, planned syntax, design constraints. **Always run `ls ai/plans/`** even when no plan seems relevant; an unread plan is a known failure mode.
 - **Source** (whole file) — what the implementation does today
 - **Recent commits** — `git log <file> | head -20` if behavior may have changed recently
 
@@ -265,7 +293,9 @@ The `[synthesis]` move is where testing gets powerful. Once you've named the uni
 
 ### 4. Trace common paths through the synthesis
 
-Walk concrete cases through your model and write down what you expect — **leading with the cases the typical user will encounter.** Less-typical cases earn their place by severity or by being clearly part of the documented contract.
+Walk concrete cases through your model and write down what you expect — **leading with the cases the typical user will encounter.** "Typical user" is anchored to the doc's structure (Step 1a), not your own sense of what's clean.
+
+**Scope must mirror the doc's coverage in rough proportion.** If the canonical doc gives 80% of its body to surface A and 20% to surface B, your test sketch covers both, with weight A:B ≈ doc's. If you find yourself scoping to a sub-feature that occupies <10% of the doc, stop — you've narrowed too far. Reread the doc; pick the dominant surface; widen.
 
 For `deep` synthesized as "boundary escape control":
 - Click on own-template element matching selector → fires (every author hits this)
@@ -273,6 +303,8 @@ For `deep` synthesized as "boundary escape control":
 - Click on slotted content, deep → fires (every author who uses `deep` hits this)
 - Click in nested child shadow DOM, default → does NOT fire (safety again)
 - Click in nested child shadow DOM, deep → fires
+
+(Note: this worked example is intentionally narrow because the prompt was about *one keyword* — `deep`. If the prompt had been "events," the scope would expand to cover the whole events surface in the doc's proportion.)
 
 If a case feels purely synthetic — no real user would observe it — flag it for red-team and don't include in the sketch.
 
@@ -327,6 +359,17 @@ The corrective is the orientation question: *"what user-visible behavior would I
 ---
 
 ## Other Anti-Patterns
+
+### Synthesis-narrowing — the canonical methodology failure
+
+"Pick the cleanest synthesis" is **not** the rule. The canonical failure mode of this skill is an agent who reads the doc, sees a multi-section topic, picks the smallest sub-section because its synthesis is cleanest or its coverage gap is most acute, and produces a methodologically tidy report on ~5% of the surface. Tidy report, useless test push.
+
+Recognize this when:
+- You're about to scope to a sub-feature occupying <10% of the canonical doc
+- Your justification is "the synthesis is cleanest here" or "the gap is most acute here"
+- The dominant doc surface has multiple sub-concepts (delegation, modifiers, lifecycle, etc.) and you'd have to write multiple `[synthesis]` lines instead of one
+
+The fix: widen. The synthesis can be plural. Multiple `[synthesis]` lines for a multi-section topic is normal — one per major sub-concept the doc highlights. The methodology serves the test push, not the other way around.
 
 ### Cross-framework priors
 
@@ -544,7 +587,7 @@ Follow `related` until no new material appears. **Never grep `docs/`, `ai/skills
 
 **Surface trigger:** contract ambiguity that affects user expectations. Doc-vs-source disagreement on documented behavior → surface. Edge-case disagreement docs don't speak to → flag for red-team or doc cleanup.
 
-**Common path first** is about *order within a feature*, not which features go where. A 30%-adoption feature still has a contract this skill verifies; the typical use case leads the sketch.
+**Common path first** is anchored to the canonical user-facing doc's structure. Read the doc top-to-bottom before scoping. Scope must mirror doc coverage in rough proportion — leading section ≫ trailing subsection. If you're scoping to <10% of the doc's content, you've narrowed too far.
 
 **Grounded vs. red-team:** same space, different orientation. Grounded uncovers what to test from documented intent. Red-team questions and fills gaps in coverage. No numerical partition between them.
 
