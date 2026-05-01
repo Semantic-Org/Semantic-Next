@@ -214,3 +214,5 @@ Plans drafted but not on the active roadmap. See `ai/plans/icebox/` for files.
 - [Add Icon Stroke Width](icebox/add-icon-stroke-width.md) — power-user feature, post-1.0.
 - [Audit Fix Continuation](icebox/audit-fix-continuation.md) — process work for follow-up audits.
 - [Tachometer Overhaul — PR B remainder](icebox/tachometer-overhaul.md) — suite rationalization + knob tuning + new benches. PR A (CI parallelization) and PR C (in-house Node reporter) shipped; PR B is the only outstanding piece.
+- [Contributing Surface](icebox/contributing-surface.md) — pre-1.0 stance + 1.0 graduation pass + post-1.0 triage flow (size + scope, GH-shaped vs md-shaped). Most icebox graduates at 1.0; the rest stays internal.
+- [Registry](icebox/registry.md) — community registry for components and behaviors, runtime + compile-time consumption from one source, author-namespaced publishing under `@sui-hub` with editorial canonical aliases above. Post-Phase 4.
