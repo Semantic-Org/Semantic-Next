@@ -209,7 +209,7 @@ describe('Template — lifecycle', () => {
       expect(typeof template.onUpdated).toBe('function');
     });
 
-    it('schedules onUpdated via state Reaction afterFlush after first render', async () => {
+    it('invokes the user onUpdated callback when the state Reaction fires after first render', async () => {
       const onUpdated = vi.fn();
       const fixture = await mountTemplate({
         template: '<span></span>',
@@ -224,10 +224,7 @@ describe('Template — lifecycle', () => {
         await Promise.resolve();
         await Promise.resolve();
 
-        // The user onUpdated callback is not invoked by the wrapper —
-        // the wrapper dispatches the 'updated' DOM event with
-        // triggerCallback:false. Observability is on the DOM event side.
-        expect(onUpdated).not.toHaveBeenCalled();
+        expect(onUpdated).toHaveBeenCalledTimes(1);
       }
       finally {
         fixture.cleanup();

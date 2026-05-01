@@ -96,6 +96,7 @@ export const Template = class Template {
     this.onRenderedCallback = onRendered;
     this.onDestroyedCallback = onDestroyed;
     this.onCreatedCallback = onCreated;
+    this.onUpdatedCallback = onUpdated;
     this.onThemeChangedCallback = onThemeChanged;
     this.id = generateID();
     this.isPrototype = isPrototype;
@@ -228,6 +229,12 @@ export const Template = class Template {
         this.dispatchEvent('rendered', { component: this.instance }, eventSettings, { triggerCallback: false });
       }
     };
+    // The state-Reaction below tracks `defaultState` Signals and fires this
+    // wrapper on change. It does NOT see fine-grained block-level reactivity
+    // (per-expression Reactions inside the renderer), so onUpdated is not a
+    // reliable "anything changed" hook — consumers that need universal
+    // coverage should observe the `updated` DOM event from outside or invoke
+    // this wrapper manually.
     this.onUpdated = () => {
       if (this.updateScheduled) { return; }
       this.updateScheduled = true;
@@ -236,6 +243,7 @@ export const Template = class Template {
         if (this.element) {
           this.element.updateScheduled = false;
         }
+        this.call(this.onUpdatedCallback);
         this.resolveLifecyclePromise('updated');
         this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
       });
