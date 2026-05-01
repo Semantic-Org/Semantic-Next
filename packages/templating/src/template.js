@@ -99,7 +99,11 @@ export const Template = class Template {
     this.onThemeChangedCallback = onThemeChanged;
     this.id = generateID();
     this.isPrototype = isPrototype;
-    this.parentTemplate = parentTemplate;
+    // parentTemplate is wired exclusively through setParent — single source
+    // of truth. clone() still receives parentTemplate, but each consumer that
+    // wants the wiring (the renderer's cloneInstance) calls setParent
+    // explicitly. Direct `new Template({ parentTemplate })` without setParent
+    // does not produce a subtemplate.
     this.attachStyles = attachStyles;
     this.element = element;
     this.renderingEngine = renderingEngine;
@@ -150,25 +154,32 @@ export const Template = class Template {
     return this.parentTemplate !== undefined;
   }
 
-  // when rendered as a partial/subtemplate
+  // when rendered as a partial/subtemplate. Idempotent on the same parent;
+  // re-parenting (X then Y) detaches from X first.
   setParent(parentTemplate) {
-    // add child templates to parent for searching with getChild
+    if (this.parentTemplate === parentTemplate) {
+      return;
+    }
+    if (this.parentTemplate) {
+      this.removeParent();
+    }
     if (!parentTemplate._childTemplates) {
       parentTemplate._childTemplates = [];
     }
     parentTemplate._childTemplates.push(this);
-
-    // add parent template to this element for searching with getParent
     this.parentTemplate = parentTemplate;
   }
 
   removeParent() {
-    if (!this.parentTemplate?._childTemplates) {
+    if (!this.parentTemplate) {
       return;
     }
-    this.parentTemplate._childTemplates = this.parentTemplate._childTemplates.filter(template => {
-      return template.id !== this.id;
-    });
+    if (this.parentTemplate._childTemplates) {
+      this.parentTemplate._childTemplates = this.parentTemplate._childTemplates.filter(template => {
+        return template.id !== this.id;
+      });
+    }
+    this.parentTemplate = undefined;
   }
 
   setElement(element) {

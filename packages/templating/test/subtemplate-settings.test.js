@@ -692,11 +692,13 @@ describe('Template.clone — prototype-to-instance manifestation', () => {
     expect(clone.onThemeChangedCallback).toBe(proto.onThemeChangedCallback);
   });
 
-  it('forwards parentTemplate from the prototype unless overridden', () => {
+  it('does NOT forward parentTemplate via the constructor (Option B: setParent is sole authority)', () => {
     const ancestor = new Template();
     const proto = makePrototype({ parentTemplate: ancestor });
     const clone = proto.clone({});
-    expect(clone.parentTemplate).toBe(ancestor);
+    // Constructor ignores parentTemplate; the renderer's cloneInstance
+    // calls setParent explicitly after constructing the clone.
+    expect(clone.parentTemplate).toBeUndefined();
   });
 
   it('lets settings overrides win over prototype defaults', () => {

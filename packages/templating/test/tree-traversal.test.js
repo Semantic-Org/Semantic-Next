@@ -814,10 +814,11 @@ describe('removeParent (B6 cross-test) — clears strong refs for GC', () => {
     const child = new Template({
       template: '<div></div>',
       renderingEngine: realEngine,
+      templateName: 'gone',
+      createComponent: () => ({ tag: 'gone' }),
     });
+    child.initialize();
     child.setParent(parent);
-    child.templateName = 'gone';
-    parent._childTemplates = [child]; // sync after rename
     expect(parent.findChild('gone')).toBeDefined();
     child.removeParent();
     expect(parent.findChild('gone')).toBeUndefined();
