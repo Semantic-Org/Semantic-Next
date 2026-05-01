@@ -1,19 +1,16 @@
 <!--
-Pick the tier that fits. Delete sections you don't need.
-Full spec: <pr_format> in CLAUDE.md.
-
-  Small  — title + one sentence of intent. Delete everything below.
-  Medium — keep all sections.
-  Large  — keep all sections; if plan-driven, lead with `Implements [plan name](SHA-pinned link)`.
+Thanks for the PR! Keep it short — a sentence of context plus a few bullets is usually plenty.
+Title format: `Category: Description` (e.g. `Bug: Fix race in async`).
+Skip any section that doesn't apply.
 -->
 
-[One sentence — why this PR exists.]
+[One sentence on why this PR exists.]
 
 ## Changes
 -
 
 ## Risk
-N/10 — [one-line reason].
+<!-- Rate N/10 with a one-line reason. Skip for routine changes. -->
 
 ## How to Test
-- [Deviations from standard only. Skip "rerun tests" / "CI passes" — those are assumed.]
+<!-- Anything a reviewer should do beyond running tests / waiting on CI. Skip if there's nothing special. -->
