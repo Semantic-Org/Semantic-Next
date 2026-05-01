@@ -78,6 +78,8 @@ Before you write anything, build a map of what the feature agent already tested 
 
 ### 3. Map Real-World Usage Patterns
 
+> **The methodology in steps 3–4 is `grounded-testing`** — derive expectations from docs/examples/skills via MCP, before reading source. Load that skill alongside this one. The framing here is post-PR gap analysis; the design discipline (intent before implementation, contrast cases, MCP-first) is the same.
+
 Now think about how the feature will actually be consumed. This is where you shift from "what does the code do" to "what will users do with it."
 
 **Where does this actually get used?**
@@ -282,6 +284,7 @@ This inventory alone — before writing a single boundary test — reveals that 
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
+| **Grounded Testing** | `grounded-testing` | The design discipline used in steps 3–4 — deriving expectations from user-facing intent (docs, examples, skills) before reading source |
 | **Writing Tests** | `testing` | You need test mechanics — environments, Vitest patterns, file placement |
 | **Test Infrastructure** | `testing-internals` | You need to understand config, CI pipeline, coverage setup |
 | **Code Review** | `code-review` | Reviewing code quality and standards compliance (runs after testing) |
