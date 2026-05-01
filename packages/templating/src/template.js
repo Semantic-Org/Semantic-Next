@@ -637,6 +637,9 @@ export const Template = class Template {
     if (this.eventController) {
       this.eventController.abort('Template destroyed');
     }
+    // Reset the keys-listener install gate so the next attach can wire fresh
+    // keydown/keyup listeners against the new eventController.
+    this._keysListenersInstalled = false;
   }
 
   removeObservers() {
@@ -652,6 +655,13 @@ export const Template = class Template {
     if (Object.keys(keys).length == 0) {
       return;
     }
+    // Idempotent: keydown/keyup are installed once per Template lifetime.
+    // Without this gate, bindKey()'s "previously empty" reinstall path
+    // stacks duplicate listeners after each unbind/rebind cycle.
+    if (this._keysListenersInstalled) {
+      return;
+    }
+    this._keysListenersInstalled = true;
     const sequenceTimeout = 500; // time in ms required between keypress
     const eventSettings = { abortController: this.eventController };
     this.currentSequence = '';

@@ -546,30 +546,22 @@ describe('Template — key bindings', () => {
       template.eventController.abort();
     });
 
-    // L4 pin — `unbindKey` does not tear down the document keydown listener.
-    // bindKey() at line 677-680 re-runs bindKeys() when the keys map was
-    // previously empty. So the sequence
-    //   bindKey('a', first) → unbindKey('a') → bindKey('b', second)
-    // INSTALLS A SECOND document keydown listener (the first one is still
-    // alive because unbindKey only deletes from `this.keys`, not the listener).
-    // Pressing 'b' now fires `second` TWICE — once per duplicate listener.
-    // Pin current behavior; document the leak.
-    it('L4: rebinding after all-unbind installs a duplicate listener (handler fires twice)', () => {
+    // B11: bindKey/unbindKey cycle no longer stacks document keydown listeners.
+    // Pre-fix: bindKey checked `Object.keys(this.keys).length == 0` and
+    // re-installed listeners every time the map was empty — but the
+    // previously-installed listeners were never torn down by unbindKey, so
+    // each cycle stacked an additional listener and the new handler fired
+    // once per stacked listener.
+    it('B11: rebinding after all-unbind does NOT stack listeners (handler fires once)', () => {
       const first = vi.fn();
       const second = vi.fn();
       const { template } = makeKeyTemplate({
         keys: { a: first },
       });
       template.unbindKey('a');
-      // keys is now empty; bindKey will re-run bindKeys() because needsInit
-      // checks Object.keys(this.keys).length == 0.
       template.bindKey('b', second);
       pressKey('b');
-      // BUG (L4): second listener stacks on top of the still-alive first
-      // listener, so `second` fires twice from one keypress. The OLD `first`
-      // handler is gone from the map (unbindKey deleted it) so it does not
-      // fire — but the LISTENER it set up is still installed.
-      expect(second).toHaveBeenCalledTimes(2);
+      expect(second).toHaveBeenCalledTimes(1);
       expect(first).not.toHaveBeenCalled();
       template.eventController.abort();
     });
