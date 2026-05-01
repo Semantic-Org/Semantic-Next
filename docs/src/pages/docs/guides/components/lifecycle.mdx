@@ -58,7 +58,7 @@ The `onThemeChanged` callback is a special callback that fires when a user swaps
 
 ### Hydration
 
-The default rendering engine for Semantic UI components is `lit` this means you can use [any existing Lit SSR package](https://lit.dev/docs/ssr/overview/#library-status) to render components on the server.
+Semantic UI components support server-side rendering out of the box. The default `native` rendering engine ships with a built-in SSR pipeline that emits Declarative Shadow DOM and hydrates without re-rendering on the client. Components using the optional `lit` engine can integrate with [Lit's SSR packages](https://lit.dev/docs/ssr/overview/#library-status) instead.
 
 > **UI Components** All [UI framework components](/ui) in Semantic UI are designed to work with server side hydration out of the box.
 
