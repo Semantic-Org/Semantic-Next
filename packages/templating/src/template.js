@@ -583,7 +583,7 @@ export const Template = class Template {
             }
             return value;
           });
-          const elValue = targetElement?.value || event.target?.value || event?.detail?.value;
+          const elValue = targetElement?.value ?? event.target?.value ?? event?.detail?.value;
           return template.call(boundEvent, {
             additionalData: {
               event: event,
