@@ -535,8 +535,10 @@ export const Template = class Template {
         }
 
         const eventHandler = function(event) {
-          // check if the event occurred in the current template if not global
-          if (eventType !== 'global' && !template.isNodeInTemplate(event.target)) {
+          // check if the event occurred in the current template (range-bounded
+          // for subtemplates via startNode/endNode markers). `deep` and
+          // `global` opt out so they can fire on slotted/nested content.
+          if (!inArray(eventType, ['deep', 'global']) && !template.isNodeInTemplate(event.target)) {
             return;
           }
 
