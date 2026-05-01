@@ -1,24 +1,8 @@
-// Surface 1 — Events DSL coverage tests.
-//
-// Tests written against the documented contract:
-//   - Selector grammar (single/multi event, single/multi selector, keyword prefix)
-//   - Bubble-map (non-bubbling -> bubbling rewrite)
-//   - Four dialects: default delegation, deep, global, bind
-//   - Handler-arg shape: event/target/data/value/isDeep
-//   - Return-value contract (false -> stopPropagation, 'cancel' -> preventDefault)
-//   - attachEvent dynamic helper + auto-cleanup
-//   - dispatchEvent custom-event emission
-//   - Lifecycle teardown via AbortController cascade
-//
-// Pins / contracts:
-//   B8 PIN (FAILING — locked contract): deep events from outside the
-//     template range are rejected by template.js:538 before line 544's
-//     deep-aware filter can let them through. Test in shadow-only mode
-//     where startNode/endNode markers matter.
-//   F-A: return-value contract honored by Query (cross-package coordination).
-//   C1: el === component element vs target === dispatching element.
-//   D4: bubble-map (load → DOMContentLoaded, unload → beforeunload).
-//   L5: bind-mode subsequent-render behavior (no rebind via wrapFunction no-op).
+// Browser tests for the events DSL: selector grammar, bubble-map rewrites, the
+// four dialects (default delegation, deep, global, bind), handler-arg shape,
+// return-value contract, attachEvent/dispatchEvent helpers, and lifecycle
+// teardown. Most behaviors are parameterized across light and shadow render
+// targets; shadow-only boundary tests live at the bottom.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -219,14 +203,13 @@ describe('events DSL — non-bubbling event mapping', () => {
     expect(parsed[0].eventName).toBe('mouseout');
   });
 
-  // D4 PIN — Source-pinned (the skill omits these but source includes them)
-  it('rewrites load as DOMContentLoaded (source-pinned)', () => {
+  it('rewrites load as DOMContentLoaded', () => {
     const template = new Template({});
     const parsed = template.parseEventString('load');
     expect(parsed[0].eventName).toBe('DOMContentLoaded');
   });
 
-  it('rewrites unload as beforeunload (source-pinned)', () => {
+  it('rewrites unload as beforeunload', () => {
     const template = new Template({});
     const parsed = template.parseEventString('unload');
     expect(parsed[0].eventName).toBe('beforeunload');
@@ -306,8 +289,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         try {
           const area = fixture.renderRoot.querySelector('.area');
           const inner = fixture.renderRoot.querySelector('.inner');
-          // Simulate a mouseover entering area from a sibling (relatedTarget unrelated)
-          // — should fire (boundary crossed).
+          // Crossing into .area from outside fires.
           area.dispatchEvent(
             new MouseEvent('mouseover', {
               bubbles: true,
@@ -317,8 +299,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
           );
           expect(handler).toHaveBeenCalledTimes(1);
 
-          // Now simulate motion *within* the area (relatedTarget contained by target)
-          // — should be filtered out.
+          // Movement entirely within .area is filtered out.
           area.dispatchEvent(
             new MouseEvent('mouseover', {
               bubbles: true,
@@ -339,7 +320,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
     *******************************/
 
     describe('events DSL — deep keyword (basic)', () => {
-      it('fires on a direct match inside the own template (isDeep=false)', async () => {
+      it('fires on a direct match inside the own template with isDeep false', async () => {
         let receivedIsDeep;
         const fixture = await mountTemplate({
           target,
@@ -360,9 +341,6 @@ RENDER_TARGETS.forEach(({ name, target }) => {
       });
 
       it('delivers isDeep as a boolean to the handler', async () => {
-        // isDeep is computed from `selector && $(event.target).closest(selector).length === 0`.
-        // Pin that the handler arg includes isDeep as a boolean (false in the common case
-        // where the delegated target itself matches the selector).
         let receivedIsDeep;
         const fixture = await mountTemplate({
           target,
@@ -426,12 +404,10 @@ RENDER_TARGETS.forEach(({ name, target }) => {
           target,
           events: { 'bind ping .target': handler },
         });
-        // Even though attachEvents has been called, bind defers until onRenderOnce.
         fixture.renderRoot.innerHTML = '<div class="target"></div>';
         try {
           const tgt = fixture.renderRoot.querySelector('.target');
           fireCustomEvent(tgt, 'ping');
-          // No render has fired (we don't invoke Template.render()).
           expect(handler).not.toHaveBeenCalled();
         }
         finally {
@@ -439,7 +415,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         }
       });
 
-      it('attaches listeners directly after onRendered fires (manual trigger)', async () => {
+      it('attaches listeners directly after onRendered fires', async () => {
         const handler = vi.fn();
         const fixture = await mountTemplate({
           target,
@@ -447,7 +423,6 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         });
         fixture.renderRoot.innerHTML = '<div class="target"></div>';
         try {
-          // Manually invoke onRenderOnce, simulating the post-first-render hook.
           if (typeof fixture.template.onRenderOnce === 'function') {
             fixture.template.onRenderOnce();
           }
@@ -472,7 +447,6 @@ RENDER_TARGETS.forEach(({ name, target }) => {
             fixture.template.onRenderOnce();
           }
           const tgt = fixture.renderRoot.querySelector('.target');
-          // dispatch with bubbles: false to confirm direct binding, not delegation
           tgt.dispatchEvent(new CustomEvent('nobubble', { bubbles: false }));
           expect(handler).toHaveBeenCalledTimes(1);
         }
@@ -481,9 +455,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         }
       });
 
-      it('L5 PIN — does not double-bind across multiple render cycles', async () => {
-        // Pin current behavior: wrapFunction(this.onRenderOnce) replaces onRenderOnce
-        // with a no-op after first call, so subsequent renders do not re-bind.
+      it('does not double-bind across multiple render cycles', async () => {
         const handler = vi.fn();
         const fixture = await mountTemplate({
           target,
@@ -491,13 +463,10 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         });
         fixture.renderRoot.innerHTML = '<div class="target"></div>';
         try {
-          // First "render"
           if (typeof fixture.template.onRenderOnce === 'function') {
             fixture.template.onRenderOnce();
           }
-          // Second "render": onRenderOnce is wrapped to noop after first call,
-          // so even if we tried to call it, it wouldn't rebind.
-          // (No-op call is safe; if someone calls it, it does nothing.)
+          // Second call is a no-op — onRenderOnce wraps to noop after the first run.
           const tgt = fixture.renderRoot.querySelector('.target');
           fireCustomEvent(tgt, 'ping');
           expect(handler).toHaveBeenCalledTimes(1);
@@ -546,7 +515,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         });
         fixture.renderRoot.innerHTML = '<button class="btn"><span class="label">Go</span></button>';
         try {
-          // Click on the inner span; matched element is .btn (the closest match)
+          // Clicking the inner span should resolve the matched element to .btn.
           clickOn(fixture.renderRoot.querySelector('.label'));
           expect(receivedTarget).toBe(fixture.renderRoot.querySelector('.btn'));
         }
@@ -656,7 +625,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
     *******************************/
 
     describe('events DSL — return-value contract', () => {
-      it('F-A: calls stopPropagation when the handler returns false', async () => {
+      it('calls stopPropagation when the handler returns false', async () => {
         const inner = vi.fn(() => false);
         const outer = vi.fn();
         const fixture = await mountTemplate({
@@ -664,14 +633,10 @@ RENDER_TARGETS.forEach(({ name, target }) => {
           events: { 'click .btn': inner },
         });
         fixture.renderRoot.innerHTML = '<button class="btn">Go</button>';
-        // Outer listener at document — should not see click if stopPropagation
-        // fires inside the inner delegated handler.
         document.addEventListener('click', outer);
         try {
           clickOn(fixture.renderRoot.querySelector('.btn'));
           expect(inner).toHaveBeenCalledTimes(1);
-          // Once stopPropagation fires inside the inner handler, the click
-          // does not continue to bubble up to document.
           expect(outer).not.toHaveBeenCalled();
         }
         finally {
@@ -680,7 +645,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         }
       });
 
-      it('F-A: calls preventDefault when the handler returns the string "cancel"', async () => {
+      it('calls preventDefault when the handler returns the string "cancel"', async () => {
         const handler = vi.fn(() => 'cancel');
         const fixture = await mountTemplate({
           target,
@@ -704,7 +669,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
       });
 
       it('does neither when the handler returns undefined', async () => {
-        const handler = vi.fn(); // implicitly returns undefined
+        const handler = vi.fn();
         const fixture = await mountTemplate({
           target,
           events: { 'click .btn': handler },
@@ -735,7 +700,6 @@ RENDER_TARGETS.forEach(({ name, target }) => {
       it('binds an event to an external selector from inside the component', async () => {
         const handler = vi.fn();
         const fixture = await mountTemplate({ target });
-        // Create a target outside the component's render tree.
         const externalTarget = document.createElement('div');
         externalTarget.id = 'external-target';
         document.body.appendChild(externalTarget);
@@ -777,7 +741,6 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         document.body.appendChild(externalTarget);
         fixture.template.attachEvent(externalTarget, 'click', handler);
         fixture.cleanup();
-        // After destroy, listener is gone.
         clickOn(externalTarget);
         expect(handler).not.toHaveBeenCalled();
         externalTarget.remove();
@@ -789,10 +752,9 @@ RENDER_TARGETS.forEach(({ name, target }) => {
     *******************************/
 
     describe('dispatchEvent — emitting custom events from a component', () => {
-      it('C1: fires a CustomEvent on the component element with detail equal to the supplied data', async () => {
+      it('fires a CustomEvent on the component element with detail equal to the supplied data', async () => {
         const fixture = await mountTemplate({ target });
         const handler = vi.fn();
-        // C1: el === component element (the host receives the event)
         fixture.host.addEventListener('itemactive', handler);
         try {
           fixture.template.dispatchEvent('itemactive', { id: 42 });
@@ -821,8 +783,6 @@ RENDER_TARGETS.forEach(({ name, target }) => {
       });
 
       it('invokes the matching on{Name} setting callback before dispatching the DOM event when triggerCallback is true', async () => {
-        // Stub host element with an onFoo callback (mimics what defineComponent
-        // sets up via settings reflection).
         const fixture = await mountTemplate({ target });
         const events = [];
         fixture.host.onFoo = function(data) {
@@ -901,7 +861,6 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         });
         fixture.renderRoot.innerHTML = '<button class="btn">Go</button>';
         try {
-          // Re-attach should remove existing first (template.js:489).
           fixture.template.attachEvents();
           const btn = fixture.renderRoot.querySelector('.btn');
           clickOn(btn);
@@ -931,9 +890,8 @@ describe('shadow only', () => {
         target: 'shadow',
         events: { 'click .item': handler },
       });
-      // Set up the shadow root with a <slot>; light DOM children flow into it.
-      // To activate the isNodeInTemplate range filter, we need startNode/endNode
-      // markers around the rendered content (in production, the renderer sets these).
+      // Range markers around the rendered content activate the
+      // isNodeInTemplate filter; the renderer sets these in production.
       const startMarker = document.createComment('start');
       const endMarker = document.createComment('end');
       fixture.renderRoot.innerHTML = '';
@@ -947,11 +905,8 @@ describe('shadow only', () => {
       fixture.template.endNode = endMarker;
       fixture.host.innerHTML = '<button class="item">Slotted</button>';
       try {
-        // The slotted button is in the host's light DOM, not inside the shadow.
-        // event.target on click is the light-DOM button. isNodeInTemplate walks
-        // up via parentNode chain — light DOM never finds a child of the shadow
-        // root, so getRootChild returns document, which is disconnected from
-        // startNode/endNode → isNodeInTemplate returns false → handler skipped.
+        // The slotted button lives in light DOM, outside the marker range, so
+        // isNodeInTemplate rejects it and the handler does not fire.
         const slotted = fixture.host.querySelector('.item');
         clickOn(slotted);
         expect(handler).not.toHaveBeenCalled();
@@ -967,8 +922,6 @@ describe('shadow only', () => {
         target: 'shadow',
         events: { 'click .item': handler },
       });
-      // Nested child host with its own shadow root inside our renderRoot.
-      // Range markers around the rendered content (production-like setup).
       const startMarker = document.createComment('start');
       const endMarker = document.createComment('end');
       fixture.renderRoot.innerHTML = '';
@@ -987,9 +940,8 @@ describe('shadow only', () => {
       try {
         const nested = childShadow.querySelector('.item');
         clickOn(nested);
-        // composed: true bubbles to parent shadow, but event.target retargets
-        // to the child-host (which doesn't match .item), so the isDeep check
-        // rejects the handler.
+        // composed: true bubbles to the parent shadow, but event.target retargets
+        // to child-host (which doesn't match .item), so the isDeep check rejects.
         expect(handler).not.toHaveBeenCalled();
       }
       finally {
@@ -999,7 +951,7 @@ describe('shadow only', () => {
   });
 
   /*******************************
-       Top-level encapsulation (no range markers)
+       Top-level encapsulation
   *******************************/
 
   describe('events DSL — top-level encapsulation', () => {
@@ -1038,22 +990,18 @@ describe('shadow only', () => {
   });
 
   /*******************************
-       Deep Keyword (boundary escape)
+       Deep Keyword (boundary)
   *******************************/
 
   describe('events DSL — deep keyword (boundary escape, shadow only)', () => {
-    // B8 PIN — deep keyword bug at template.js:538.
-    // Deep events from outside the template range are rejected before line
-    // 544's deep-aware filter can let them through. EXPECTED TO FAIL.
-    it('B8 PIN — fires on slotted content matching the selector (EXPECTED TO FAIL pre-fix)', async () => {
+    it('fires on slotted content matching the selector', async () => {
       const handler = vi.fn();
       const fixture = await mountTemplate({
         target: 'shadow',
         events: { 'deep click .item': handler },
       });
-      // Use the same range-marker setup as the default-mode encapsulation test,
-      // so this test exercises the boundary-escape contract symmetrically: the
-      // default test pins safety, this test pins escape under identical scaffolding.
+      // Mirrors the default-mode encapsulation setup so this test exercises
+      // the escape contract under identical scaffolding.
       const startMarker = document.createComment('start');
       const endMarker = document.createComment('end');
       fixture.renderRoot.innerHTML = '';

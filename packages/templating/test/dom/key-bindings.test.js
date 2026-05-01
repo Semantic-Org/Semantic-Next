@@ -1,15 +1,10 @@
-// Tests for Template's `keys` binding system. Covers single keys, comma-list
+// Tests for Template's `keys` binding system: single keys, comma-list
 // alternates, modifier combos, sequences with the 500ms timeout, the
 // inputFocused/repeatedKey/event callback extras, the return-value contract,
 // dynamic bindKey/unbindKey, the SSR guard, and AbortController cleanup.
 //
-// jsdom is enough — Template's keydown listener attaches to document
-// and there is no shadow DOM dependency for keys. Source: template.js:620-686.
-//
-// Surface 4 specific: bindKeys() does not require initialize()/attach(). We
-// construct a Template, install a fresh AbortController, then call bindKeys()
-// directly — the same wiring attachEvents() does internally — and abort the
-// controller for cleanup.
+// jsdom is enough — Template's keydown listener attaches to document and
+// there is no shadow DOM dependency for keys.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -24,8 +19,8 @@ afterEach(() => {
 /**
  * Construct a Template with the given keys and prime its eventController so
  * bindKeys() registers document listeners that can be aborted for cleanup.
- * Returns { template, element, root } with the template's listeners already
- * installed; aborts via `template.eventController.abort()`.
+ * Returns { template, element, root } with listeners already installed;
+ * abort via `template.eventController.abort()`.
  */
 function makeKeyTemplate(opts = {}) {
   const element = document.createElement('div');
@@ -39,8 +34,8 @@ function makeKeyTemplate(opts = {}) {
   });
   // Stub `instance` so buildCallParams (used by template.call inside the
   // keydown handler) can read `instance.content` without throwing. Real
-  // initialize() builds this for us; we skip initialize() to keep tests
-  // narrowly focused on the bindKeys surface.
+  // initialize() builds this for us; we skip initialize() here to keep the
+  // tests narrowly focused on bindKeys.
   template.instance = {};
   template.eventController = new AbortController();
   template.bindKeys();
@@ -58,7 +53,7 @@ function pressKey(key, init = {}) {
   );
 }
 
-/** Dispatch a sequence of keys (each is a full keydown+keyup). */
+/** Dispatch a sequence of keys (each a full keydown+keyup). */
 function pressKeys(keys) {
   for (const key of keys) {
     pressKey(key);
@@ -118,7 +113,7 @@ describe('Template — key bindings', () => {
       template.eventController.abort();
     });
 
-    it('normalizes uppercase key presses to lowercase via getKeyFromEvent', () => {
+    it('normalizes uppercase key presses to lowercase', () => {
       const handler = vi.fn();
       const { template } = makeKeyTemplate({ keys: { a: handler } });
       pressKey('A');
@@ -173,7 +168,7 @@ describe('Template — key bindings', () => {
   });
 
   /*******************************
-      Comma-separated descriptors (B4 pin)
+     Comma-separated descriptors
   *******************************/
 
   describe('comma-separated descriptors', () => {
@@ -187,14 +182,7 @@ describe('Template — key bindings', () => {
       template.eventController.abort();
     });
 
-    // B4 pin — EXPECTED TO FAIL today.
-    // Source line 640: `keySequence.split(',')` is not trimmed, so the
-    // alternate becomes ' down' (leading space). The buffer-space mechanic
-    // (line 660 appends ' ' AFTER the matching pass) only saves this when a
-    // prior keystroke left a trailing space — the FIRST press from a fresh
-    // buffer cannot match ' down'. Documented in the Stage 1 sketch (#7) and
-    // locked as B4 in Stage 1.5.
-    it('fires for the second listed key from a cold buffer (B4 PIN — leading-space alternate)', () => {
+    it('fires for the second listed key from a cold buffer', () => {
       const handler = vi.fn();
       const { template } = makeKeyTemplate({
         keys: { 'up, down': handler },
@@ -209,19 +197,14 @@ describe('Template — key bindings', () => {
       const { template } = makeKeyTemplate({
         keys: { 'up, down': handler },
       });
-      pressKey('ArrowUp'); // buffer becomes 'up '
+      pressKey('ArrowUp');
       handler.mockClear();
-      pressKey('ArrowDown'); // buffer becomes 'up down'; endsWith(' down') matches
+      pressKey('ArrowDown');
       expect(handler).toHaveBeenCalledTimes(1);
       template.eventController.abort();
     });
 
-    // B4 pin — `keys: { 'up , down ': handler }` (extra whitespace). After
-    // the B4 fix trims each split alternate, this should parse to
-    // ['up', 'down'] and ArrowUp from a cold buffer should fire. Today, the
-    // alternate is 'up ' (trailing space) which does not endsWith match the
-    // cold-buffer 'up'. EXPECTED TO FAIL today; passes after fix.
-    it("parses cleanly with extra whitespace ('up , down ') (B4 PIN — passes after fix)", () => {
+    it("parses cleanly with extra whitespace ('up , down ')", () => {
       const handler = vi.fn();
       const { template } = makeKeyTemplate({
         keys: { 'up , down ': handler },
@@ -279,7 +262,7 @@ describe('Template — key bindings', () => {
   });
 
   /*******************************
-        Key sequences
+            Key sequences
   *******************************/
 
   describe('key sequences (space-separated)', () => {
@@ -301,7 +284,6 @@ describe('Template — key bindings', () => {
       });
       try {
         pressKey('g');
-        // Advance timers past the 500ms reset window; buffer clears.
         vi.advanceTimersByTime(501);
         pressKey('i');
         expect(handler).not.toHaveBeenCalled();
@@ -312,7 +294,7 @@ describe('Template — key bindings', () => {
       }
     });
 
-    it('the timeout is sliding — each press extends the window', () => {
+    it('extends the timeout on each press (sliding window)', () => {
       vi.useFakeTimers();
       const handler = vi.fn();
       const { template } = makeKeyTemplate({
@@ -320,7 +302,7 @@ describe('Template — key bindings', () => {
       });
       try {
         pressKey('g');
-        vi.advanceTimersByTime(400); // < 500ms, buffer still alive
+        vi.advanceTimersByTime(400);
         pressKey('i');
         expect(handler).toHaveBeenCalledTimes(1);
       }
@@ -330,7 +312,7 @@ describe('Template — key bindings', () => {
       }
     });
 
-    it('continues to work for sequences after the comma-split fix (sequences are independent of comma-split)', () => {
+    it('matches a space-separated sequence regardless of comma-list parsing', () => {
       const handler = vi.fn();
       const { template } = makeKeyTemplate({
         keys: { 'g i': handler },
@@ -342,14 +324,13 @@ describe('Template — key bindings', () => {
   });
 
   /*******************************
-      Single + sequence co-fire (Stage 1 ambiguity)
+       Single + sequence co-fire
   *******************************/
 
   describe('single-key and matching-suffix sequence co-fire', () => {
-    // Stage 1 inference: registering both 'i' and 'g i' should cause BOTH
-    // to fire when the user presses 'g' then 'i' — because endsWith('g i')
-    // and endsWith('i') both match the buffer 'g i'. Pin current behavior.
     it("fires both 'i' and 'g i' handlers when a sequence completes", () => {
+      // The buffer 'g i' satisfies endsWith('g i') and endsWith('i'), so both
+      // descriptors match.
       const single = vi.fn();
       const sequence = vi.fn();
       const { template } = makeKeyTemplate({
@@ -408,11 +389,8 @@ describe('Template — key bindings', () => {
     });
 
     // jsdom does not implement isContentEditable / contentEditable on
-    // HTMLElement (verified: both return undefined). Source line 644 reads
-    // `document.activeElement.isContentEditable` directly, so this branch
-    // cannot be exercised under jsdom. The real-browser contract is verified
-    // by Surface 1's browser tests; this test would re-cover the same path.
-    it.skip('is true when a [contenteditable] element is focused (jsdom limitation — no isContentEditable)', () => {});
+    // HTMLElement; the contenteditable branch is exercised in browser tests.
+    it.skip('is true when a [contenteditable] element is focused', () => {});
 
     it('is falsy when a non-form element (e.g., <button>) is focused', () => {
       const handler = vi.fn();
@@ -423,11 +401,9 @@ describe('Template — key bindings', () => {
       element.appendChild(button);
       button.focus();
       pressKey('Escape');
-      // Source returns the result of `activeElement && (... || isContentEditable)`.
-      // Under jsdom, `isContentEditable` is undefined, so for a focused
-      // <button>, the expression evaluates to `truthy && (false || undefined)`
-      // which is `undefined`. Real browsers return `false`. Either way it's
-      // falsy — that is the user-facing contract.
+      // Real browsers return false; under jsdom isContentEditable is undefined,
+      // so the expression evaluates to undefined. Both are falsy — that is the
+      // user-facing contract.
       expect(handler.mock.calls[0][0].inputFocused).toBeFalsy();
       template.eventController.abort();
     });
@@ -454,7 +430,7 @@ describe('Template — key bindings', () => {
       const { template } = makeKeyTemplate({
         keys: { a: handler },
       });
-      // Two keydowns, no keyup between → simulates OS key repeat.
+      // Two keydowns with no keyup between simulate OS key repeat.
       pressKeyDown('a');
       pressKeyDown('a');
       expect(handler).toHaveBeenCalledTimes(2);
@@ -469,7 +445,7 @@ describe('Template — key bindings', () => {
         keys: { a: handler },
       });
       pressKeyDown('a');
-      pressKeyUp('a'); // clears currentKey
+      pressKeyUp('a');
       pressKeyDown('a');
       expect(handler).toHaveBeenCalledTimes(2);
       expect(handler.mock.calls[1][0].repeatedKey).toBe(false);
@@ -478,13 +454,10 @@ describe('Template — key bindings', () => {
   });
 
   /*******************************
-      Callback param: event (C2 — convergent with Surface 3)
+       Callback param: event
   *******************************/
 
-  describe('event callback param (C2 — undocumented in user doc)', () => {
-    // The user-facing keys doc lists only `inputFocused` and `repeatedKey` in
-    // the Callback Data table. Source line 648 also injects `event` (raw
-    // KeyboardEvent). Pin the contract; flag for doc-cleanup.
+  describe('event callback param', () => {
     it('passes the raw KeyboardEvent in handler args', () => {
       const handler = vi.fn();
       const { template } = makeKeyTemplate({
@@ -507,7 +480,7 @@ describe('Template — key bindings', () => {
     it('bindKey adds a handler that fires on the next matching press', () => {
       const handler = vi.fn();
       const { template } = makeKeyTemplate({
-        keys: { foo: () => {} }, // non-empty so bindKeys() ran
+        keys: { foo: () => {} },
       });
       template.bindKey('enter', handler);
       pressKey('Enter');
@@ -517,9 +490,7 @@ describe('Template — key bindings', () => {
 
     it('bindKey lazily wires up listeners when the keys map was previously empty', () => {
       const handler = vi.fn();
-      // Start with empty keys — bindKeys() early-returns.
       const { template } = makeKeyTemplate({ keys: {} });
-      // No listener was installed at construction. Now bindKey one.
       template.bindKey('enter', handler);
       pressKey('Enter');
       expect(handler).toHaveBeenCalledTimes(1);
@@ -528,9 +499,9 @@ describe('Template — key bindings', () => {
 
     it('bindKey is a no-op when called without a key or callback', () => {
       const { template } = makeKeyTemplate({ keys: {} });
-      template.bindKey(); // no args
-      template.bindKey('enter'); // no callback
-      template.bindKey(null, () => {}); // no key
+      template.bindKey();
+      template.bindKey('enter');
+      template.bindKey(null, () => {});
       expect(Object.keys(template.keys)).toHaveLength(0);
       template.eventController.abort();
     });
@@ -562,23 +533,17 @@ describe('Template — key bindings', () => {
   });
 
   /*******************************
-        SSR guard
+              SSR guard
   *******************************/
 
   describe('SSR / empty-map guards', () => {
-    // bindKeys at line 621 reads the IMPORTED `isServer` constant directly
-    // (`if (isServer) return;`), NOT `Template.isServer`. The imported
-    // `isServer` is computed once at module load (`typeof window === 'undefined'`)
-    // and cannot be toggled at runtime without invasive `vi.mock` setup.
-    // This is drift from the rest of template.js (lines 281, 503, 770, 837,
-    // 838, 899 all use Template.isServer). Flagged in report; covered
-    // structurally by the empty-keys guard below.
-    it.skip('bindKeys is a no-op when isServer is true (drift: bindKeys uses imported const, not Template.isServer)', () => {});
+    // The bindKeys server check reads the imported `isServer` constant, which
+    // is computed once at module load and cannot be toggled at runtime without
+    // invasive vi.mock setup. Covered structurally by the empty-keys guard.
+    it.skip('bindKeys is a no-op when isServer is true', () => {});
 
     it('bindKeys is a no-op when the keys map is empty', () => {
-      // With empty keys at construction time, the early-return at line 624
-      // means the listener is never installed and `currentSequence` (set on
-      // line 629 after the early return) is never initialized.
+      // No listener installed → currentSequence is never initialized.
       const { template } = makeKeyTemplate({ keys: {} });
       expect(() => pressKey('a')).not.toThrow();
       expect(template.currentSequence).toBeUndefined();
@@ -596,7 +561,6 @@ describe('Template — key bindings', () => {
       const { template } = makeKeyTemplate({
         keys: { esc: handler },
       });
-      // Verify the listener is alive before abort.
       pressKey('Escape');
       expect(handler).toHaveBeenCalledTimes(1);
       handler.mockClear();
@@ -604,7 +568,6 @@ describe('Template — key bindings', () => {
       template.eventController.abort();
       expect(template.eventController.signal.aborted).toBe(true);
 
-      // Subsequent dispatch should not invoke the handler.
       pressKey('Escape');
       expect(handler).not.toHaveBeenCalled();
     });
@@ -621,8 +584,7 @@ describe('Template — key bindings', () => {
 
       template.eventController.abort();
 
-      // Set a sentinel value; if the keyup listener is still alive, it would
-      // overwrite it back to ''. After abort it should remain.
+      // If the keyup listener were still alive it would overwrite the sentinel.
       template.currentKey = 'sentinel';
       pressKeyUp('a');
       expect(template.currentKey).toBe('sentinel');

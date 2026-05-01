@@ -1,23 +1,21 @@
-// Surface 5 — DOM scoping ($, $$, isNodeInTemplate)
-//
-// Tests Template's renderRoot-scoped query helpers and the containment
-// substrate they share with the events DSL. All tests run in the browser
-// project — shadow DOM, attachShadow, and compareDocumentPosition need a
-// real browser; jsdom support is partial and unreliable.
+// Template's renderRoot-scoped query helpers ($, $$, isNodeInTemplate)
+// and the containment substrate they share with the events DSL. All
+// tests run in the browser project — shadow DOM, attachShadow, and
+// compareDocumentPosition need a real browser; jsdom support is
+// partial and unreliable.
 //
 // Methodology:
 // - mountTemplate attaches a real Template + Renderer to a host element.
 //   When `target: 'shadow'` (default) the renderRoot is an open shadow
-//   root; when `target: 'light'` the renderRoot is the host itself. Tests
-//   are parameterized over both — DOM scoping is the one surface where
-//   shadow vs light boundary semantics are the whole point of testing.
+//   root; when `target: 'light'` the renderRoot is the host itself.
+//   Tests are parameterized over both — DOM scoping is the one surface
+//   where shadow vs light boundary semantics are the whole point.
 // - The template ('<div></div>') is intentionally minimal. We don't call
 //   render(), so the renderRoot stays empty and each test populates it
-//   manually with the elements it needs. This keeps $/$$ contract tests
-//   independent of the renderer's output.
-// - For isNodeInTemplate's startNode/endNode branch, sentinels are mutated
-//   on the Template instance directly (matches what the renderer's
-//   DynamicRegion does when wiring subtemplates).
+//   manually with the elements it needs.
+// - For isNodeInTemplate's startNode/endNode branch, sentinels are
+//   mutated on the Template instance directly (matches what the
+//   renderer's DynamicRegion does when wiring subtemplates).
 
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -69,7 +67,7 @@ afterEach(() => {
 });
 
 RENDER_TARGETS.forEach(({ name, target }) => {
-  describe(`Surface 5 — Template DOM scoping (${name})`, () => {
+  describe(`Template — DOM scoping (${name})`, () => {
     let fixture;
     let cleanups = [];
 
@@ -91,7 +89,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
     });
 
     /*******************************
-              $ — own renderRoot
+        $ — renderRoot-scoped query
     *******************************/
 
     describe('$ — renderRoot-scoped query', () => {
@@ -112,9 +110,8 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         expect(result.length).toBe(0);
       });
 
-      it("does NOT find elements in a nested child component's shadow root (no piercing)", async () => {
+      it("does not pierce a nested child component's shadow root", async () => {
         fixture = await mountTemplate({ target });
-        // Nested element with its own shadow root + a matching descendant inside it.
         const inner = document.createElement('div');
         const innerShadow = inner.attachShadow({ mode: 'open' });
         const buried = document.createElement('span');
@@ -127,9 +124,8 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         expect(result.length).toBe(0);
       });
 
-      it('does NOT match elements outside the renderRoot (siblings on document)', async () => {
+      it('does not match elements outside the renderRoot', async () => {
         fixture = await mountTemplate({ target });
-        // A sibling in document.body that matches — must not be visible.
         const sibling = document.createElement('div');
         sibling.className = 'match';
         document.body.appendChild(sibling);
@@ -141,11 +137,11 @@ RENDER_TARGETS.forEach(({ name, target }) => {
     });
 
     /*******************************
-         $$ — shadow-piercing query
+        $$ — shadow-piercing query
     *******************************/
 
     describe('$$ — shadow-piercing query', () => {
-      it('finds elements in own renderRoot (same as $ for that case)', async () => {
+      it('finds elements in the own renderRoot (matches $ for that case)', async () => {
         fixture = await mountTemplate({ target });
         const div = document.createElement('div');
         div.className = 'match';
@@ -156,7 +152,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         expect(result[0]).toBe(div);
       });
 
-      it("finds elements in a nested child component's shadow root (load-bearing difference)", async () => {
+      it("pierces into a nested child component's shadow root", async () => {
         fixture = await mountTemplate({ target });
         const inner = document.createElement('div');
         const innerShadow = inner.attachShadow({ mode: 'open' });
@@ -166,7 +162,6 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         fixture.renderRoot.appendChild(inner);
 
         const result = fixture.template.$$('.match');
-        // Pierces into innerShadow.
         const matched = Array.from(result);
         expect(matched).toContain(buried);
       });
@@ -185,7 +180,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         outerShadow.appendChild(innerHost);
         fixture.renderRoot.appendChild(outerHost);
 
-        // Also a sibling at the top level.
+        // Sibling at the top level too.
         const top = document.createElement('span');
         top.className = 'match';
         fixture.renderRoot.appendChild(top);
@@ -198,7 +193,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
     });
 
     /*******************************
-        Special selectors → document
+       Special selectors → document
     *******************************/
 
     describe('special selectors escape to document', () => {
@@ -216,57 +211,49 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         expect(result[0]).toBe(document.documentElement);
       });
 
-      // S5-O2 — Source observation: 'document' is in template.js's special-
-      // selector list (rebinds root → document) but Query has NO matching
-      // special-case for the literal selector 'document' (unlike 'window'/
-      // 'globalThis'). So the call ends up running
-      // `document.querySelectorAll('document')` — invalid as a CSS tag
-      // selector — and returns zero matches. The rebinding is observable
-      // (filter is skipped, see next test) but the selector never resolves
-      // to the document itself. Authors who want the document object should
-      // use `{ root: document }` or query for 'html'/'body' instead.
-      it('$("document") rebinds root to document but yields no matches (no CSS resolution for "document")', async () => {
+      // 'document' is in template.js's special-selector list (rebinds root
+      // to document) but Query has no matching special-case for the literal
+      // selector 'document' (unlike 'window'/'globalThis'). The call ends
+      // up running `document.querySelectorAll('document')` — invalid as a
+      // CSS tag selector — and returns zero matches. Authors who want the
+      // document object should use `{ root: document }` or query for
+      // 'html'/'body' instead.
+      it('$("document") rebinds root to document but yields no matches', async () => {
         fixture = await mountTemplate({ target });
         const result = fixture.template.$('document');
         expect(result.length).toBe(0);
       });
 
-      it('$("body") result is not filtered by isNodeInTemplate (root rebound to document, filter skipped)', async () => {
+      it('$("body") result is not filtered by isNodeInTemplate', async () => {
         // body is plainly outside the renderRoot. If filterTemplate were applied,
-        // the result would be filtered out (isNodeInTemplate(body) === false).
-        // The contract: rebinding the root to document also bypasses the filter.
+        // the result would be filtered out. Rebinding the root to document
+        // also bypasses the filter.
         fixture = await mountTemplate({ target });
         const result = fixture.template.$('body');
         expect(result.length).toBe(1);
         expect(result[0]).toBe(document.body);
       });
 
-      // L1 — cross-package: 'window' is handled by Query, NOT template.js's
-      // special-selector list. This test pins the cross-package coordination —
-      // Template's special-selector list is ['body', 'document', 'html'] only,
-      // but Query's own `inArray(selector, ['window', 'globalThis'])` branch
-      // (query.js line 159) catches 'window' downstream. If anyone refactors
-      // Query's special-case, in-component $('window') silently breaks.
-      it('$("window") returns the global proxy (delegated to underlying Query)', async () => {
+      // 'window' is handled by Query's own `inArray(selector, ['window',
+      // 'globalThis'])` branch, NOT template.js's special-selector list
+      // (which is ['body', 'document', 'html'] only). Cross-package
+      // coordination — if Query's special-case is refactored, in-component
+      // $('window') silently breaks.
+      it('$("window") returns the global proxy via underlying Query', async () => {
         fixture = await mountTemplate({ target });
         const result = fixture.template.$('window');
         expect(result.length).toBe(1);
-        // Query.globalThisProxy is the wrapped global. Verify the proxy
-        // behaves like window by checking a property that exists on globalThis.
         const { Query } = await import('@semantic-ui/query');
         expect(Query.isWindow(result[0])).toBe(true);
       });
     });
 
     /*******************************
-          filterTemplate: false
+        filterTemplate: false
     *******************************/
 
     describe('filterTemplate: false (internal opt-out)', () => {
       it('returns the raw query without applying isNodeInTemplate filter', async () => {
-        // Mount a template that pretends to be a subtemplate by setting
-        // startNode/endNode such that NOTHING is in range — then verify
-        // filterTemplate:false still returns matches (the filter is skipped).
         fixture = await mountTemplate({ target });
         const div = document.createElement('div');
         div.className = 'match';
@@ -277,16 +264,14 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         // can be strictly between them.
         const startNode = document.createTextNode('');
         const endNode = document.createTextNode('');
-        // Place both sentinels AFTER `div` in document order, with start
-        // immediately followed by end — no node can fall strictly between them.
         fixture.renderRoot.appendChild(startNode);
         fixture.renderRoot.appendChild(endNode);
         fixture.template.startNode = startNode;
         fixture.template.endNode = endNode;
 
-        // With default filterTemplate:true, range filter excludes div.
+        // Default filterTemplate:true excludes div via the range filter.
         expect(fixture.template.$('.match').length).toBe(0);
-        // With filterTemplate:false, raw query returns div.
+        // filterTemplate:false returns the raw query.
         const raw = fixture.template.$('.match', { filterTemplate: false });
         expect(raw.length).toBe(1);
         expect(raw[0]).toBe(div);
@@ -294,8 +279,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
     });
 
     /*******************************
-          isNodeInTemplate
-          (web component — no startNode/endNode)
+       isNodeInTemplate (no markers)
     *******************************/
 
     describe('isNodeInTemplate — web component (no range markers)', () => {
@@ -317,52 +301,39 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         expect(fixture.template.isNodeInTemplate(c)).toBe(true);
       });
 
-      // S5-O1 — Source observation: for top-level Templates (no startNode/
-      // endNode), `isNodeInRange` short-circuits to `true` BEFORE the
-      // `node === null` check (template.js line 707 → 710). So even when
-      // `getRootChild` walks off the top of the document and returns null,
-      // `isNodeInTemplate` returns true. The function's actual contract is
-      // narrower than "is this node a descendant of my renderRoot": it's
-      // "given a node that bubbled to my event listener, is it in my range"
-      // — and event targets that reach the listener are by construction
-      // inside the renderRoot. We pin the current behavior here.
-      it('returns true for a sibling element on the document outside the renderRoot (range short-circuit)', async () => {
+      // For top-level Templates without sentinels, isNodeInRange short-
+      // circuits to true before any node check. The function's actual
+      // contract is narrower than "is this node a descendant of my
+      // renderRoot": it's "given a node that bubbled to my event listener,
+      // is it in my range" — and event targets that reach the listener
+      // are by construction inside the renderRoot.
+      it('returns true for a sibling on the document outside the renderRoot', async () => {
         fixture = await mountTemplate({ target });
         const sibling = document.createElement('div');
         document.body.appendChild(sibling);
         cleanups.push(() => sibling.remove());
 
-        // getRootChild walks up to document, then null; isNodeInRange(null)
-        // returns true because !startNode || !endNode short-circuits first.
         expect(fixture.template.isNodeInTemplate(sibling)).toBe(true);
       });
 
-      it('returns true for a fully detached node when no sentinels are set (range short-circuit)', async () => {
+      it('returns true for a fully detached node when no sentinels are set', async () => {
         fixture = await mountTemplate({ target });
         const detached = document.createElement('div');
-        // never appended to anything — parentNode is null, host is undefined.
-        // Walk dies immediately. isNodeInRange(null) hits the
-        // `!startNode || !endNode` short-circuit and returns true.
+        // Never appended to anything — parentNode is null, host is undefined.
+        // Walk dies immediately; range short-circuit returns true.
         expect(fixture.template.isNodeInTemplate(detached)).toBe(true);
       });
     });
 
     /*******************************
-          isNodeInTemplate
-          (subtemplate — startNode/endNode set)
+      isNodeInTemplate (sentinels set)
     *******************************/
 
-    describe('isNodeInTemplate — subtemplate range (sentinels set)', () => {
-      // Helper: mount, set sentinels around a known position in the renderRoot.
+    describe('isNodeInTemplate — subtemplate range', () => {
+      // Mount and lay out: before, <start>, middle, <end>, after.
       async function mountWithSentinelRange() {
         const f = await mountTemplate({ target });
 
-        // Layout in renderRoot:
-        //   <div class="before">before</div>
-        //   <!-- start -->
-        //   <div class="middle">middle</div>
-        //   <!-- end -->
-        //   <div class="after">after</div>
         const before = document.createElement('div');
         before.className = 'before';
         const startNode = document.createTextNode('');
@@ -411,13 +382,11 @@ RENDER_TARGETS.forEach(({ name, target }) => {
     });
 
     /*******************************
-         $ + range filter integration
+        $ + range filter
     *******************************/
 
     describe('$ post-filters via isNodeInTemplate when root === renderRoot', () => {
       it('with sentinels set, $ returns only nodes strictly between them', async () => {
-        // The same fixture as the subtemplate range tests, but now we hit
-        // the $ surface — verify the post-filter is applied correctly.
         fixture = await mountTemplate({ target });
 
         const before = document.createElement('div');
@@ -450,7 +419,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
 });
 
 /*******************************
-    Shadow-only — boundary semantics
+    Shadow-only boundary semantics
 *******************************/
 
 // These behaviors only manifest when the renderRoot is a real ShadowRoot —
@@ -459,7 +428,7 @@ RENDER_TARGETS.forEach(({ name, target }) => {
 // document but not from $) or because the host-walking through .host
 // chains requires shadow boundaries.
 
-describe('Surface 5 — Template DOM scoping (shadow only)', () => {
+describe('Template — DOM scoping (shadow only)', () => {
   let fixture;
   let cleanups = [];
 
@@ -480,9 +449,9 @@ describe('Surface 5 — Template DOM scoping (shadow only)', () => {
     fixture = null;
   });
 
-  it('$ does NOT find elements that live in the light DOM of the host (slotted but not projected)', async () => {
+  it('$ does not find elements that live in the light DOM of the host', async () => {
     // A child in light DOM (host's children, not slotted into the shadow tree)
-    // is NOT visible from `querySelectorAll` rooted at the shadow root.
+    // is not visible from `querySelectorAll` rooted at the shadow root.
     fixture = await mountTemplate({ target: 'shadow' });
     const lightChild = document.createElement('div');
     lightChild.className = 'match';
@@ -493,10 +462,10 @@ describe('Surface 5 — Template DOM scoping (shadow only)', () => {
     expect(result.length).toBe(0);
   });
 
-  it('isNodeInTemplate returns true for an element inside a NESTED shadow root (host-walking via .host)', async () => {
-    // The getRootChild walk must cross shadow boundaries upward via
-    // `node.host` so events bubbling out of a nested child component can
-    // be attributed to the parent template.
+  it('isNodeInTemplate returns true for an element inside a nested shadow root', async () => {
+    // The getRootChild walk crosses shadow boundaries upward via `node.host`
+    // so events bubbling out of a nested child component can be attributed
+    // to the parent template.
     fixture = await mountTemplate({ target: 'shadow' });
     const innerHost = document.createElement('div');
     const innerShadow = innerHost.attachShadow({ mode: 'open' });
@@ -507,11 +476,9 @@ describe('Surface 5 — Template DOM scoping (shadow only)', () => {
     expect(fixture.template.isNodeInTemplate(deep)).toBe(true);
   });
 
-  // Sentinel exclusivity (strict-between semantics) — confirms the
-  // renderer's trailing-sentinel comment in dynamic-region.js is
-  // load-bearing: sentinels themselves are NOT in the range. This
-  // depends on compareDocumentPosition's strict bitwise comparison
-  // returning the FOLLOWING/PRECEDING bits unset for self-comparison.
+  // Sentinels themselves are not in the range. Depends on
+  // compareDocumentPosition's strict bitwise comparison returning the
+  // FOLLOWING/PRECEDING bits unset for self-comparison.
   describe('sentinel exclusivity', () => {
     async function mountWithSentinelRange() {
       const f = await mountTemplate({ target: 'shadow' });
@@ -534,13 +501,13 @@ describe('Surface 5 — Template DOM scoping (shadow only)', () => {
       return { fixture: f, before, startNode, middle, endNode, after };
     }
 
-    it('returns false when node === startNode (sentinels are exclusive)', async () => {
+    it('returns false when node === startNode', async () => {
       const ctx = await mountWithSentinelRange();
       fixture = ctx.fixture;
       expect(fixture.template.isNodeInTemplate(ctx.startNode)).toBe(false);
     });
 
-    it('returns false when node === endNode (sentinels are exclusive)', async () => {
+    it('returns false when node === endNode', async () => {
       const ctx = await mountWithSentinelRange();
       fixture = ctx.fixture;
       expect(fixture.template.isNodeInTemplate(ctx.endNode)).toBe(false);

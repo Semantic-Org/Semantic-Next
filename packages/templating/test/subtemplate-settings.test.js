@@ -1,20 +1,3 @@
-// Surface 7 — Subtemplate settings, parent/child wiring, clone semantics.
-//
-// Coverage targets:
-//   - isSubtemplate() truth conditions and B6 Option B contract (sole-authority setParent)
-//   - setParent idempotency + re-parenting + removeParent symmetry
-//   - Tier 1 (no defaultSettings — dominant path) vs Tier 2 (with defaultSettings)
-//   - Subtemplate settings Proxy: get/set, parent-element fallback, Signal creation
-//   - updateSubtemplateSettings keyed propagation (declared keys only)
-//   - clone() prototype-to-instance manifestation: copies, overrides, shared refs
-//   - Settings reactivity through Reaction + Proxy
-//   - C3 — falsy data preservation (`!== undefined`, not truthy check)
-//
-// B6 contract: tests pinned to Option B (sole-authority setParent). Tests
-// flagged "B6 PIN" CURRENTLY FAIL against unfixed source — they describe the
-// post-fix behavior the user has locked. See ai/workspace/template-coverage/
-// stage-1-5-batch.md §B6 for the full decision record.
-
 import { Reaction, Signal } from '@semantic-ui/reactivity';
 import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -28,9 +11,8 @@ afterEach(() => {
   Template.templateCount = 0;
 });
 
-// Local helper — stamps out a parent + child pair with the options needed to
-// drive initialize() through the real renderer. Mirrors the canonical
-// production wiring without depending on a shared `_helpers/` directory.
+// Stamps out a parent + child pair with the options needed to drive
+// initialize() through the real renderer.
 function makeSubtemplatePair({
   childDefaultSettings,
   childData,
@@ -50,19 +32,18 @@ function makeSubtemplatePair({
 }
 
 /*******************************
-        isSubtemplate()
+        isSubtemplate
 *******************************/
 
-describe('Template.isSubtemplate()', () => {
+describe('Template.isSubtemplate', () => {
   it('returns false for a freshly constructed Template with no parent', () => {
     const template = new Template();
     expect(template.isSubtemplate()).toBe(false);
     expect(template.parentTemplate).toBeUndefined();
   });
 
-  it('[B6 PIN — behavioral change] returns false for a Template constructed with parentTemplate but no setParent call', () => {
-    // Option B: setParent is the sole authority for parent wiring.
-    // Constructor stops setting this.parentTemplate. CURRENTLY FAILS.
+  it('returns false when constructed with parentTemplate but without setParent', () => {
+    // setParent is the sole authority for parent wiring.
     const parent = new Template();
     const child = new Template({
       template: '<span></span>',
@@ -73,7 +54,7 @@ describe('Template.isSubtemplate()', () => {
     expect(child.isSubtemplate()).toBe(false);
   });
 
-  it('returns true after setParent() is called', () => {
+  it('returns true after setParent', () => {
     const parent = new Template();
     const child = new Template();
     child.setParent(parent);
@@ -81,9 +62,7 @@ describe('Template.isSubtemplate()', () => {
     expect(child.parentTemplate).toBe(parent);
   });
 
-  it('[B6 PIN] returns false after removeParent() — parentTemplate is cleared', () => {
-    // Option B: removeParent must clear this.parentTemplate. CURRENTLY FAILS
-    // (today the assignment is missing; isSubtemplate() still returns true).
+  it('returns false after removeParent clears the parent reference', () => {
     const parent = new Template();
     const child = new Template();
     child.setParent(parent);
@@ -96,10 +75,10 @@ describe('Template.isSubtemplate()', () => {
 });
 
 /*******************************
-        setParent / removeParent (B6)
+      setParent / removeParent
 *******************************/
 
-describe('Template.setParent — wiring + idempotency (B6 contract)', () => {
+describe('Template.setParent', () => {
   it('adds the child to parent._childTemplates', () => {
     const parent = new Template();
     const child = new Template();
@@ -127,8 +106,7 @@ describe('Template.setParent — wiring + idempotency (B6 contract)', () => {
     expect(parent._childTemplates).toContain(childB);
   });
 
-  it('[B6 PIN] is idempotent when setParent(X) is called twice with the same parent', () => {
-    // Option B: O(1) idempotency check. CURRENTLY FAILS — child is pushed twice.
+  it('is idempotent on the same parent', () => {
     const parent = new Template();
     const child = new Template();
     child.setParent(parent);
@@ -137,9 +115,7 @@ describe('Template.setParent — wiring + idempotency (B6 contract)', () => {
     expect(occurrences).toBe(1);
   });
 
-  it('[B6 PIN] re-parents cleanly: setParent(X) then setParent(Y) leaves child only in Y', () => {
-    // Option B: setParent detaches from prior parent first. CURRENTLY FAILS —
-    // child is in BOTH X._childTemplates and Y._childTemplates today.
+  it('detaches from the prior parent when re-parented', () => {
     const parentX = new Template();
     const parentY = new Template();
     const child = new Template();
@@ -152,7 +128,7 @@ describe('Template.setParent — wiring + idempotency (B6 contract)', () => {
     expect(child.parentTemplate).toBe(parentY);
   });
 
-  it('restores wiring cleanly across setParent → removeParent → setParent(same)', () => {
+  it('restores wiring across setParent → removeParent → setParent on the same parent', () => {
     const parent = new Template();
     const child = new Template();
     child.setParent(parent);
@@ -165,7 +141,7 @@ describe('Template.setParent — wiring + idempotency (B6 contract)', () => {
   });
 });
 
-describe('Template.removeParent — destroy-time tear-down', () => {
+describe('Template.removeParent', () => {
   it('removes only the matching child by id, leaving siblings in place', () => {
     const parent = new Template();
     const childA = new Template();
@@ -182,29 +158,28 @@ describe('Template.removeParent — destroy-time tear-down', () => {
   it('is a no-op when parent has no _childTemplates yet', () => {
     const parent = new Template();
     const child = new Template();
-    // manually wire parentTemplate without going through setParent —
-    // simulates a partial-state code path. removeParent should not throw.
+    // Simulate a partial-state code path where parentTemplate was wired
+    // without going through setParent.
     child.parentTemplate = parent;
     expect(() => child.removeParent()).not.toThrow();
   });
 });
 
 /*******************************
-   Tier 1 — Naive subtemplate (no defaultSettings)
+   Subtemplate without defaultSettings
 *******************************/
 
-describe('Subtemplate Tier 1 — no defaultSettings (the dominant path)', () => {
-  it('does NOT create a settings Proxy when defaultSettings is undefined', () => {
+describe('Subtemplate without defaultSettings', () => {
+  it('does not create a settings Proxy when defaultSettings is undefined', () => {
     const { child } = makeSubtemplatePair({
       childData: { name: 'A' },
     });
     child.initialize();
-    // gate at line 188-190 short-circuits — settings is never assigned
     expect(child.settings).toBeUndefined();
     expect(child.settingsVars).toBeUndefined();
   });
 
-  it('does NOT create a settings Proxy when defaultSettings is an empty object', () => {
+  it('does not create a settings Proxy when defaultSettings is an empty object', () => {
     const { child } = makeSubtemplatePair({
       childDefaultSettings: {},
       childData: { foo: 'bar' },
@@ -213,7 +188,7 @@ describe('Subtemplate Tier 1 — no defaultSettings (the dominant path)', () => 
     expect(child.settings).toBeUndefined();
   });
 
-  it('does NOT create a settings Proxy on a non-subtemplate even with defaultSettings', () => {
+  it('does not create a settings Proxy on a non-subtemplate even with defaultSettings', () => {
     // Gate is conjunctive: isSubtemplate() AND defaultSettings AND length > 0.
     const template = new Template({
       template: '<div></div>',
@@ -238,17 +213,16 @@ describe('Subtemplate Tier 1 — no defaultSettings (the dominant path)', () => 
       childData: { foo: 1 },
     });
     child.initialize();
-    // exercises the !this.settings || !this.defaultSettings short-circuit
     expect(() => child.updateSubtemplateSettings({ foo: 2 })).not.toThrow();
     expect(child.settings).toBeUndefined();
   });
 });
 
 /*******************************
-  Tier 2 — Subtemplate with defaultSettings
+   Subtemplate with defaultSettings
 *******************************/
 
-describe('Subtemplate Tier 2 — defaultSettings creates a Proxy', () => {
+describe('Subtemplate with defaultSettings', () => {
   it('creates this.settings as a Proxy when subtemplate declares defaultSettings', () => {
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
@@ -268,7 +242,6 @@ describe('Subtemplate Tier 2 — defaultSettings creates a Proxy', () => {
   });
 
   it('overrides defaults with passed-in data for keys present in defaultSettings', () => {
-    // precedence: defaultSettings < clone-time data
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
       childData: { theme: 'dark' },
@@ -277,10 +250,7 @@ describe('Subtemplate Tier 2 — defaultSettings creates a Proxy', () => {
     expect(child.settings.theme).toBe('dark');
   });
 
-  it('[C3] preserves falsy data values (uses !== undefined, not truthy check)', () => {
-    // Subtemplate settings already uses !== undefined correctly. Surface 6's
-    // B1 fix targets createReactiveState (truthy bug). Pin that THIS path
-    // stays correct.
+  it('preserves falsy data values', () => {
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { count: 5 },
       childData: { count: 0 },
@@ -289,7 +259,7 @@ describe('Subtemplate Tier 2 — defaultSettings creates a Proxy', () => {
     expect(child.settings.count).toBe(0);
   });
 
-  it('[C3] preserves null and false in passed data', () => {
+  it('preserves null and false in passed data', () => {
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { active: true, label: 'default' },
       childData: { active: false, label: null },
@@ -299,7 +269,7 @@ describe('Subtemplate Tier 2 — defaultSettings creates a Proxy', () => {
     expect(child.settings.label).toBeNull();
   });
 
-  it('writes through the Proxy persist on the target object', () => {
+  it('persists writes through the Proxy on the target object', () => {
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
@@ -310,21 +280,19 @@ describe('Subtemplate Tier 2 — defaultSettings creates a Proxy', () => {
 
   it('creates a Signal in settingsVars on first read', () => {
     // Use createSubtemplateSettings directly to observe the lazy-create path.
-    // (initialize() walks all defaultSettings keys via overlaySettingsSignals
-    // before tests can observe the pre-read state.)
+    // initialize() walks all defaultSettings keys via overlaySettingsSignals
+    // before tests can observe the pre-read state.
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
     child.createSubtemplateSettings();
     expect(child.settingsVars.has('theme')).toBe(false);
-    child.settings.theme; // touch
+    child.settings.theme;
     expect(child.settingsVars.has('theme')).toBe(true);
     expect(child.settingsVars.get('theme')).toBeInstanceOf(Signal);
   });
 
-  it('after initialize(), all defaultSettings keys have backing Signals (overlaySettingsSignals primes them)', () => {
-    // initialize() invokes overlaySettingsSignals which iterates defaultSettings
-    // and reads each key through the Proxy to ensure each Signal exists.
+  it('primes a backing Signal for every defaultSettings key after initialize', () => {
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light', size: 'md' },
     });
@@ -345,8 +313,8 @@ describe('Subtemplate Tier 2 — defaultSettings creates a Proxy', () => {
   });
 
   it('creates a Signal on first write to a key never read before', () => {
-    // Use the Proxy directly without initialize() so the
-    // overlaySettingsSignals priming doesn't pre-create the signal.
+    // Use the Proxy directly without initialize() so overlaySettingsSignals
+    // priming doesn't pre-create the signal.
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
@@ -357,9 +325,7 @@ describe('Subtemplate Tier 2 — defaultSettings creates a Proxy', () => {
     expect(child.settingsVars.get('theme')).toBeInstanceOf(Signal);
   });
 
-  it('first write to an UNDECLARED key creates a Signal as well (set handler is unconditional)', () => {
-    // Pin the contract that writing arbitrary keys via the Proxy succeeds —
-    // not just keys in defaultSettings.
+  it('creates a Signal on first write to an undeclared key', () => {
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
@@ -373,7 +339,7 @@ describe('Subtemplate Tier 2 — defaultSettings creates a Proxy', () => {
       childDefaultSettings: { theme: 'light' },
     });
     child.initialize();
-    child.settings.theme; // create signal
+    child.settings.theme;
     const sig = child.settingsVars.get('theme');
     child.settings.theme = 'dark';
     expect(child.settingsVars.get('theme')).toBe(sig);
@@ -384,7 +350,6 @@ describe('Subtemplate Tier 2 — defaultSettings creates a Proxy', () => {
       childDefaultSettings: { theme: 'light' },
     });
     child.initialize();
-    // Symbol access goes straight to target[symbol]; no Signal map activity.
     const sym = Symbol.iterator;
     const before = child.settingsVars.size;
     child.settings[sym];
@@ -393,13 +358,13 @@ describe('Subtemplate Tier 2 — defaultSettings creates a Proxy', () => {
 });
 
 /*******************************
-   Parent fallback — element.settings
+     Parent element fallback
 *******************************/
 
-describe('Subtemplate settings — parent element.settings fallback', () => {
-  // Production wiring: renderer calls instance.setElement(parent.element)
-  // BEFORE initialize(). So this.element points at the parent's element,
-  // and the Proxy captures parentSettings from this.element?.settings.
+describe('Subtemplate settings — parent element fallback', () => {
+  // The renderer calls instance.setElement(parent.element) before initialize(),
+  // so this.element points at the parent's element and the Proxy captures
+  // parentSettings from this.element?.settings.
 
   function makeFallbackFixture({ childDefaultSettings, parentSettings, childData = {} }) {
     const fakeElement = { settings: { ...parentSettings } };
@@ -407,14 +372,14 @@ describe('Subtemplate settings — parent element.settings fallback', () => {
       ...makeSubtemplatePair({
         childDefaultSettings,
         childData,
-        childElement: fakeElement, // mirrors renderer's setElement(parent.element)
+        childElement: fakeElement,
         parentElement: fakeElement,
       }),
       fakeElement,
     };
   }
 
-  it('returns own setting when key IS in defaultSettings', () => {
+  it('returns own setting when key is in defaultSettings', () => {
     const f = makeFallbackFixture({
       childDefaultSettings: { ownProp: 'X' },
       parentSettings: { otherProp: 'Y' },
@@ -423,7 +388,7 @@ describe('Subtemplate settings — parent element.settings fallback', () => {
     expect(f.child.settings.ownProp).toBe('X');
   });
 
-  it('falls back to parent element.settings when key is NOT in own target', () => {
+  it('falls back to parent element.settings when key is not in own target', () => {
     const f = makeFallbackFixture({
       childDefaultSettings: { ownProp: 'X' },
       parentSettings: { otherProp: 'Y' },
@@ -441,24 +406,21 @@ describe('Subtemplate settings — parent element.settings fallback', () => {
     expect(f.child.settings.notInEither).toBeUndefined();
   });
 
-  it('shadows the parent fallback once an unrelated key is written via the Proxy', () => {
-    // Once `brand` is written through the Proxy, it lives in `target` and
-    // own-key precedence wins — the parent fallback is no longer consulted.
+  it('shadows the parent fallback once the key is written via the Proxy', () => {
+    // Once `brand` is written through the Proxy it lives in the local target
+    // and own-key precedence wins — the parent fallback is no longer consulted.
     const f = makeFallbackFixture({
       childDefaultSettings: { ownProp: 'X' },
       parentSettings: { brand: 'parent-brand' },
     });
     f.child.initialize();
-    expect(f.child.settings.brand).toBe('parent-brand'); // fallback
+    expect(f.child.settings.brand).toBe('parent-brand');
     f.child.settings.brand = 'shadowed';
-    expect(f.child.settings.brand).toBe('shadowed'); // own-target now wins
-    // Parent's settings object is untouched
+    expect(f.child.settings.brand).toBe('shadowed');
     expect(f.fakeElement.settings.brand).toBe('parent-brand');
   });
 
   it('returns undefined safely when child has no element at all', () => {
-    // No element → parentSettings captured as undefined → fallback path
-    // short-circuits. Pin: no throw on missing keys.
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { ownProp: 'X' },
     });
@@ -473,7 +435,7 @@ describe('Subtemplate settings — parent element.settings fallback', () => {
 *******************************/
 
 describe('Subtemplate settings reactivity', () => {
-  it('re-runs a Reaction that reads through the Proxy when the same key is written', () => {
+  it('re-runs a Reaction that reads through the Proxy when the key is written', () => {
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
@@ -523,13 +485,11 @@ describe('Subtemplate settings reactivity', () => {
     }
   });
 
-  it('does NOT trigger reactivity when the underlying object is mutated without a Proxy set', () => {
-    // Design pin — not a bug. Consumers must REPLACE values via Proxy set,
-    // not mutate the stored object in place. allowClone:false stores by
-    // reference; the Signal's deep-equality on set() also means a structurally
-    // identical replacement after a mutation is a no-op. The contract is:
-    // read through the Proxy, REPLACE the value with a structurally distinct
-    // object — not mutate-then-set-same-shape.
+  it('does not trigger reactivity when the underlying object is mutated in place', () => {
+    // Consumers must REPLACE values via Proxy set, not mutate the stored
+    // object in place. allowClone:false stores by reference, and the Signal's
+    // deep-equality on set() makes a structurally identical replacement after
+    // a mutation a no-op.
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { todo: { completed: false } },
     });
@@ -539,20 +499,16 @@ describe('Subtemplate settings reactivity', () => {
       child.initialize();
       reaction = Reaction.create(() => {
         runs++;
-        // Read through Proxy registers dependency on settingsVars.get('todo')
         const todo = child.settings.todo;
-        // Touch a property to make the read meaningful (no-op for tracking).
         void todo?.completed;
       });
       expect(runs).toBe(1);
 
-      // Direct mutation of the stored object — no Proxy `set` invoked.
       child.settings.todo.completed = true;
       Reaction.flush();
-      expect(runs).toBe(1); // NOT re-run
+      expect(runs).toBe(1);
 
-      // Replacement with a DIFFERENT shape triggers reactivity (Signal's
-      // equality check sees a structural change and notifies).
+      // A structurally distinct replacement does trigger.
       child.settings.todo = { completed: true, label: 'new' };
       Reaction.flush();
       expect(runs).toBe(2);
@@ -575,9 +531,6 @@ describe('Template.updateSubtemplateSettings', () => {
     child.initialize();
     child.updateSubtemplateSettings({ declared: 'updated', undeclared: 'ignored' });
     expect(child.settings.declared).toBe('updated');
-    // 'undeclared' is NOT pushed through the Proxy — it's not in
-    // defaultSettings, so the `each(this.defaultSettings)` loop skips it.
-    // settingsVars must not contain it either.
     expect(child.settingsVars.has('undeclared')).toBe(false);
   });
 
@@ -586,7 +539,7 @@ describe('Template.updateSubtemplateSettings', () => {
       childDefaultSettings: { theme: 'light' },
     });
     child.initialize();
-    child.settings.theme; // create signal
+    child.settings.theme;
     const sig = child.settingsVars.get('theme');
     const setSpy = vi.spyOn(sig, 'set');
 
@@ -594,13 +547,12 @@ describe('Template.updateSubtemplateSettings', () => {
     expect(setSpy).toHaveBeenCalledWith('dark');
   });
 
-  it('is a no-op when defaultSettings is undefined (Tier 1)', () => {
+  it('is a no-op when defaultSettings is undefined', () => {
     const { child } = makeSubtemplatePair({
       childData: { foo: 1 },
     });
     child.initialize();
     child.updateSubtemplateSettings({ foo: 2 });
-    // No Proxy was created and none should be created retroactively.
     expect(child.settings).toBeUndefined();
     expect(child.settingsVars).toBeUndefined();
   });
@@ -610,7 +562,6 @@ describe('Template.updateSubtemplateSettings', () => {
       childDefaultSettings: { theme: 'light', size: 'md' },
     });
     child.initialize();
-    // Only `theme` provided; `size` should be untouched.
     child.updateSubtemplateSettings({ theme: 'dark' });
     expect(child.settings.theme).toBe('dark');
     expect(child.settings.size).toBe('md');
@@ -618,10 +569,10 @@ describe('Template.updateSubtemplateSettings', () => {
 });
 
 /*******************************
-    clone() — prototype-to-instance
+              clone
 *******************************/
 
-describe('Template.clone — prototype-to-instance manifestation', () => {
+describe('Template.clone', () => {
   function makePrototype(opts = {}) {
     return new Template({
       template: '<p>{value}</p>',
@@ -683,7 +634,7 @@ describe('Template.clone — prototype-to-instance manifestation', () => {
     expect(clone.renderingEngine).toBe(proto.renderingEngine);
   });
 
-  it('forwards lifecycle callbacks (onCreatedCallback, onRenderedCallback, onDestroyedCallback, onThemeChangedCallback)', () => {
+  it('forwards lifecycle callbacks', () => {
     const proto = makePrototype();
     const clone = proto.clone({});
     expect(clone.onCreatedCallback).toBe(proto.onCreatedCallback);
@@ -692,12 +643,12 @@ describe('Template.clone — prototype-to-instance manifestation', () => {
     expect(clone.onThemeChangedCallback).toBe(proto.onThemeChangedCallback);
   });
 
-  it('does NOT forward parentTemplate via the constructor (Option B: setParent is sole authority)', () => {
+  it('does not forward parentTemplate via the constructor', () => {
+    // The renderer's cloneInstance calls setParent explicitly after
+    // constructing the clone — setParent is the sole authority.
     const ancestor = new Template();
     const proto = makePrototype({ parentTemplate: ancestor });
     const clone = proto.clone({});
-    // Constructor ignores parentTemplate; the renderer's cloneInstance
-    // calls setParent explicitly after constructing the clone.
     expect(clone.parentTemplate).toBeUndefined();
   });
 
@@ -707,7 +658,6 @@ describe('Template.clone — prototype-to-instance manifestation', () => {
     const clone = proto.clone({ events: customEvents });
     expect(clone.events).toBe(customEvents);
     expect(clone.events).not.toBe(proto.events);
-    // other fields still come from prototype
     expect(clone.keys).toBe(proto.keys);
   });
 
@@ -715,19 +665,18 @@ describe('Template.clone — prototype-to-instance manifestation', () => {
     const proto = makePrototype();
     const clone = proto.clone({ data: { value: 'X' } });
     expect(clone.data).toEqual({ value: 'X' });
-    expect(clone.data).not.toBe(proto.data); // proto.data is the {} default
+    expect(clone.data).not.toBe(proto.data);
   });
 
-  it('does NOT call initialize() on the cloned Template', () => {
+  it('does not call initialize on the cloned Template', () => {
     const proto = makePrototype();
     const clone = proto.clone({});
     expect(clone.initialized).toBeFalsy();
   });
 
-  it('[D6 PIN] events/ast/subTemplates/defaultState are SHARED references with prototype (not deep-cloned)', () => {
-    // The misnomer pin. Mutations to these on either side are visible to the
-    // other. Production code never mutates them — but the contract is that
-    // clone() is prototype-to-instance manifestation, NOT duplication.
+  it('shares events, ast, subTemplates, and defaultState with the prototype', () => {
+    // clone() is prototype-to-instance manifestation, not duplication.
+    // Production code never mutates these.
     const proto = makePrototype();
     const clone = proto.clone({});
     expect(clone.events).toBe(proto.events);
@@ -736,16 +685,14 @@ describe('Template.clone — prototype-to-instance manifestation', () => {
     expect(clone.defaultState).toBe(proto.defaultState);
     expect(clone.defaultSettings).toBe(proto.defaultSettings);
 
-    // Mutating proto.events IS visible on clone.events.
     proto.events['extra'] = () => 'late';
     expect(clone.events.extra).toBeDefined();
     expect(clone.events.extra).toBe(proto.events.extra);
   });
 
-  it('produces an independent reactive state (signals are FRESH per clone)', () => {
+  it('produces an independent reactive state with fresh Signal instances per clone', () => {
     const proto = makePrototype();
     const clone = proto.clone({});
-    // both have a state object, but the Signal instances are NOT shared.
     expect(clone.state).not.toBe(proto.state);
     expect(clone.state.count).toBeInstanceOf(Signal);
     expect(clone.state.count).not.toBe(proto.state.count);
@@ -761,14 +708,13 @@ describe('Template.clone — prototype-to-instance manifestation', () => {
 });
 
 /*******************************
-   Canonical clone + setParent flow
+   clone + setParent flow
 *******************************/
 
-describe('Canonical production wiring — clone → setElement → setParent → initialize', () => {
-  it('clone({ parentTemplate: X }) followed by setParent(X) wires the child correctly', () => {
-    // Renderer block at packages/renderer/src/engines/native/blocks/template.js:147–156
-    // is the production caller. clone() carries parentTemplate by spread; the
-    // explicit setParent(X) afterwards is what populates _childTemplates.
+describe('Template clone + setParent flow', () => {
+  it('wires the child correctly when clone({ parentTemplate }) is followed by setParent', () => {
+    // clone() carries parentTemplate by spread; the explicit setParent(X)
+    // afterwards is what populates _childTemplates.
     const proto = new Template({
       template: '<span>{name}</span>',
       defaultSettings: { name: 'init' },
@@ -783,12 +729,7 @@ describe('Canonical production wiring — clone → setElement → setParent →
     expect(parent._childTemplates.filter(t => t === child)).toHaveLength(1);
   });
 
-  it('full sequence: clone → setElement → setParent → initialize completes without error', () => {
-    // Production sequence per renderer block:
-    //   const instance = template.clone({ ..., parentTemplate, data, ... });
-    //   if (parent.element) { instance.setElement(parent.element); }
-    //   instance.setParent(parent);
-    //   instance.initialize();
+  it('completes the full clone → setElement → setParent → initialize sequence', () => {
     const proto = new Template({
       template: '<span>{theme}</span>',
       defaultSettings: { theme: 'light' },
@@ -804,11 +745,10 @@ describe('Canonical production wiring — clone → setElement → setParent →
     child.setParent(parent);
     expect(() => child.initialize()).not.toThrow();
 
-    // post-init invariants
     expect(child.isSubtemplate()).toBe(true);
     expect(child.settings).toBeDefined();
-    expect(child.settings.theme).toBe('dark'); // data wins over default
-    expect(child.settings.brand).toBe('X'); // parent fallback
+    expect(child.settings.theme).toBe('dark');
+    expect(child.settings.brand).toBe('X');
     expect(parent._childTemplates).toContain(child);
   });
 });

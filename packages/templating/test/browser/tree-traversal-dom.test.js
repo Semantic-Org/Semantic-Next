@@ -1,22 +1,12 @@
-// Surface 8 — Tree traversal: DOM cascade.
+// Tree traversal — DOM cascade.
 //
 // DOM-cascade tests need elements with `.component` set — the wiring real
 // web components do via WebComponentBase. We sidestep the component package
 // by manually assigning `.component` and `.dataContext` on host elements.
 // Light DOM (regular parent/child) is enough for findParent (walks up via
 // .parentNode || .host). findChild paths still require a shadowRoot on the
-// parent because that's what template.js:1115 conditions on; tests that
-// require it build a shadow root inline.
-//
-// Pinned bugs (do NOT fix here, just pin):
-//   - B3: DOM cascade returns { ...component, ...dataContext } — leaks state
-//     Signals (dataContext = data + state + instance). Locked decision: should
-//     return component (instance) only.
-//   - B5: findParent('uiPanels') (camel) works; findParent('ui-panels') (kebab)
-//     misses today. Locked decision: kebabToCamel input normalization at all
-//     instance binders.
-//   - B6 cross-effect: removeParent leaves child.parentTemplate non-undefined;
-//     covered in tree-traversal.test.js.
+// parent because that's what the source gates on; tests that require it
+// build a shadow root inline.
 
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -31,13 +21,8 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-/*******************************
-   Helper: build a parent → child
-   light-DOM hierarchy with the
-   .component / .dataContext refs
-   that findParent walks.
-*******************************/
-
+/* Helper: build a parent → child light-DOM hierarchy with the
+   .component / .dataContext refs that findParent walks. */
 function buildDomCascade({
   parentTemplateName = 'uiPanels',
   childTemplateName = 'uiPanel',
@@ -97,12 +82,11 @@ function buildDomCascade({
 }
 
 /*******************************
-       findParent — DOM cascade
+      findParent — DOM
 *******************************/
 
 describe('findParent — DOM cascade (light DOM, parent.component wired)', () => {
   it('child component finds parent by camelCase templateName', () => {
-    // The motivating panels-style use case: child reaches up to parent's API.
     const fixture = buildDomCascade({
       parentInstance: {
         panels: [{ id: 'a' }, { id: 'b' }],
@@ -113,17 +97,15 @@ describe('findParent — DOM cascade (light DOM, parent.component wired)', () =>
     });
     const found = fixture.childTpl.findParent('uiPanels');
     expect(found).toBeDefined();
-    // Method-call path
     expect(typeof found.isHidden).toBe('function');
     expect(found.isHidden(0)).toBe(false);
-    // Instance-property path
     expect(found.panels).toEqual([{ id: 'a' }, { id: 'b' }]);
   });
 
   it('walks across shadow boundaries via element.host', () => {
-    // Real panels-style nesting: outer host -> outer shadow -> middle host
-    // -> middle shadow -> inner host. The DOM cascade traverses each shadow
-    // boundary via `.host` so the inner template can find the outer.
+    // Real-world nesting: outer host -> outer shadow -> middle host ->
+    // middle shadow -> inner host. The DOM cascade traverses each shadow
+    // boundary via `.host` so the inner template can reach the outer.
     const outerHost = document.createElement('ui-outer');
     const outerShadow = outerHost.attachShadow({ mode: 'open' });
     document.body.appendChild(outerHost);
@@ -185,15 +167,8 @@ describe('findParent — DOM cascade (light DOM, parent.component wired)', () =>
     expect(found.templateName).toBe('uiPanels');
   });
 
-  /*******************************
-   B3 PIN — DOM cascade returns
-   instance-only after fix
-  *******************************/
-
-  describe('B3 PIN — DOM cascade returns instance-only after fix', () => {
-    it('PIN: state Signals leak through findParent today — should be undefined after fix', () => {
-      // Source: template.js:1078-1081 spreads { ...component, ...dataContext }.
-      // dataContext = extend({}, data, state, instance) so state Signals leak.
+  describe('returns instance only — no state or closure data leak', () => {
+    it('does not expose state Signals through findParent', () => {
       const fixture = buildDomCascade({
         parentState: { count: 5 },
         parentInstance: {
@@ -204,17 +179,13 @@ describe('findParent — DOM cascade (light DOM, parent.component wired)', () =>
       });
       const found = fixture.childTpl.findParent('uiPanels');
       expect(found).toBeDefined();
-      // Method still works
       expect(typeof found.publicApi).toBe('function');
-      // EXPECTED-FAIL today (state Signal leaks via dataContext spread).
-      // After the locked B3 fix, state must NOT be reachable via findParent.
       expect(found.count).toBeUndefined();
     });
 
-    it('PIN: data closure leaks through findParent today — should be undefined after fix', () => {
-      // dataContext also includes raw data (the closure data passed to the parent).
+    it('does not expose data closure through findParent', () => {
       const fixture = buildDomCascade({
-        parentData: { secret: 'closure-leak' },
+        parentData: { secret: 'closure-snapshot' },
         parentInstance: {
           publicApi() {
             return 'ok';
@@ -223,14 +194,12 @@ describe('findParent — DOM cascade (light DOM, parent.component wired)', () =>
       });
       const found = fixture.childTpl.findParent('uiPanels');
       expect(typeof found.publicApi).toBe('function');
-      // EXPECTED-FAIL today; passes after fix.
       expect(found.secret).toBeUndefined();
     });
 
-    it('PIN: cross-cascade convergence — DOM and subtemplate cascades return same shape', () => {
-      // Same parent component, accessed via both cascades. After the fix
-      // both must return objects with the same key set: instance methods
-      // and properties only — no state Signals, no closure data.
+    it('DOM and subtemplate cascades return the same shape', () => {
+      // Both lookup paths must agree: instance methods and properties only,
+      // never state Signals or closure data.
       const parentInstance = {
         hello() {
           return 'world';
@@ -243,26 +212,19 @@ describe('findParent — DOM cascade (light DOM, parent.component wired)', () =>
         childTemplateName: 'kid',
         parentInstance,
         parentState: { count: 0 },
-        parentData: { secret: 'leak' },
+        parentData: { secret: 'snapshot' },
       });
 
       const fromDom = dom.childTpl.findParent('sharedShape');
-      // EXPECTED-FAIL today (DOM cascade leaks state and data; subtemplate
-      // leaks only data). After fix both should match.
       expect(fromDom.count).toBeUndefined();
       expect(fromDom.secret).toBeUndefined();
-      // Both paths must continue to deliver the public API
       expect(typeof fromDom.hello).toBe('function');
       expect(fromDom.magic).toBe(1);
     });
   });
 
-  /*******************************
-   B5 PIN — kebab form forgiveness
-  *******************************/
-
-  describe('B5 PIN — findParent forgiving lookup (DOM cascade)', () => {
-    it('findParent("uiPanels") works (camel form, baseline)', () => {
+  describe('forgiving lookup — kebab and camel forms', () => {
+    it('findParent("uiPanels") works (camel form)', () => {
       const fixture = buildDomCascade({
         parentInstance: { ok: true },
       });
@@ -271,7 +233,7 @@ describe('findParent — DOM cascade (light DOM, parent.component wired)', () =>
       expect(found.ok).toBe(true);
     });
 
-    it('PIN: findParent("ui-panels") (kebab) ALSO succeeds — EXPECTED FAIL today', () => {
+    it('findParent("ui-panels") works (kebab form)', () => {
       const fixture = buildDomCascade({
         parentInstance: { ok: true },
       });
@@ -280,14 +242,13 @@ describe('findParent — DOM cascade (light DOM, parent.component wired)', () =>
       expect(found.ok).toBe(true);
     });
 
-    it('PIN: kebab and camel inputs converge on the same Template after fix', () => {
+    it('kebab and camel inputs converge on the same Template', () => {
       const fixture = buildDomCascade({
         parentInstance: { ok: true, sentinel: Math.random() },
       });
       const camel = fixture.childTpl.findParent('uiPanels');
       const kebab = fixture.childTpl.findParent('ui-panels');
       expect(camel).toBeDefined();
-      // EXPECTED-FAIL today; passes after fix.
       expect(kebab).toBeDefined();
       expect(camel.sentinel).toBe(kebab.sentinel);
     });
@@ -295,13 +256,12 @@ describe('findParent — DOM cascade (light DOM, parent.component wired)', () =>
 });
 
 /*******************************
-       findChild / findChildren —
-       DOM cascade
+   findChild / findChildren — DOM
 *******************************/
 
-// findChild's DOM-cascade branch is gated on `template.element?.shadowRoot`
-// (template.js:1115), so these tests build a shadow root on the parent host
-// and place children inside it. Light DOM is not enough.
+// findChild's DOM-cascade branch is gated on `template.element?.shadowRoot`,
+// so these tests build a shadow root on the parent host and place children
+// inside it. Light DOM is not enough.
 
 describe('findChild / findChildren — DOM cascade', () => {
   it('finds direct DOM child by templateName', () => {
@@ -337,7 +297,7 @@ describe('findChild / findChildren — DOM cascade', () => {
     expect(found.theId).toBe('kid');
   });
 
-  it('findChildren returns ALL matching DOM children', () => {
+  it('findChildren returns all matching DOM children', () => {
     const parentHost = document.createElement('ui-list');
     const shadow = parentHost.attachShadow({ mode: 'open' });
     document.body.appendChild(parentHost);
@@ -439,12 +399,8 @@ describe('findChild / findChildren — DOM cascade', () => {
     expect(found).toEqual([]);
   });
 
-  /*******************************
-   B3 PIN — findChild DOM cascade leaks
-  *******************************/
-
-  describe('B3 PIN — findChild DOM cascade returns instance-only after fix', () => {
-    it('PIN: state Signals leak through findChild today — should be undefined after fix', () => {
+  describe('returns instance only — no state leak', () => {
+    it('does not expose state Signals through findChild', () => {
       const parentHost = document.createElement('ui-list');
       const shadow = parentHost.attachShadow({ mode: 'open' });
       document.body.appendChild(parentHost);
@@ -480,17 +436,12 @@ describe('findChild / findChildren — DOM cascade', () => {
       const found = parentTpl.findChild('row');
       expect(found).toBeDefined();
       expect(typeof found.publicApi).toBe('function');
-      // EXPECTED-FAIL today; passes after fix.
       expect(found.count).toBeUndefined();
     });
   });
 
-  /*******************************
-   B5 PIN — findChild kebab form
-  *******************************/
-
-  describe('B5 PIN — findChild forgiving lookup (DOM cascade)', () => {
-    it('findChild("uiPanel") works (camel form, baseline)', () => {
+  describe('forgiving lookup — kebab and camel forms', () => {
+    it('findChild("uiPanel") works (camel form)', () => {
       const parentHost = document.createElement('ui-panels');
       const shadow = parentHost.attachShadow({ mode: 'open' });
       document.body.appendChild(parentHost);
@@ -520,7 +471,7 @@ describe('findChild / findChildren — DOM cascade', () => {
       expect(parentTpl.findChild('uiPanel')).toBeDefined();
     });
 
-    it('PIN: findChild("ui-panel") (kebab) ALSO succeeds — EXPECTED FAIL today', () => {
+    it('findChild("ui-panel") works (kebab form)', () => {
       const parentHost = document.createElement('ui-panels');
       const shadow = parentHost.attachShadow({ mode: 'open' });
       document.body.appendChild(parentHost);
@@ -555,22 +506,17 @@ describe('findChild / findChildren — DOM cascade', () => {
 });
 
 /*******************************
-   Cross-cascade precedence
-   (second-loop guard pin)
+       Cascade precedence
 *******************************/
 
 describe('findParent precedence — DOM cascade wins over subtemplate cascade', () => {
-  it('PIN: when both DOM ancestor and subtemplate parent share the templateName, DOM match wins', () => {
-    // Today: code structure (template.js:1086-1097) iterates the subtemplate
-    // chain unconditionally after the DOM walk, but the body is short-
-    // circuited by `match || ...` in isMatch. This works today and we pin
-    // the precedence so a future "cleanup" of isMatch can't silently flip it.
+  it('when both DOM ancestor and subtemplate parent share the templateName, DOM match wins', () => {
     const fixture = buildDomCascade({
       parentInstance: { source: 'dom' },
     });
 
-    // Wire the child to ALSO have a subtemplate parent with the same
-    // templateName but different identity (so we can tell which won).
+    // Wire the child to also have a subtemplate parent with the same
+    // templateName but different identity — so we can tell which won.
     const altParent = new Template({
       renderingEngine: realEngine,
       template: '<div></div>',
@@ -582,7 +528,6 @@ describe('findParent precedence — DOM cascade wins over subtemplate cascade', 
 
     const found = fixture.childTpl.findParent('uiPanels');
     expect(found).toBeDefined();
-    // DOM cascade wins
     expect(found.source).toBe('dom');
   });
 
@@ -608,11 +553,8 @@ describe('findParent precedence — DOM cascade wins over subtemplate cascade', 
 });
 
 /*******************************
-   Heap / GC — full DOM cycle
+       Heap / GC guards
 *******************************/
-
-// Inline registry assertions: the registry is just Template.renderedTemplates,
-// a Map<name, Template[]>. Total instances = sum of array lengths.
 
 function totalRegistered() {
   let total = 0;
@@ -636,8 +578,6 @@ describe('heap / GC — DOM mount/unmount returns registry to empty', () => {
   });
 
   it('100x DOM mount/unmount cycle does not leak registry entries', () => {
-    // Mirror the user's heap-leak concern: real DOM hosts, create + destroy
-    // in a tight loop. After the run, registry must be 0.
     for (let i = 0; i < 100; i++) {
       const fixture = buildDomCascade({
         parentTemplateName: 'cycleParent',
