@@ -210,6 +210,7 @@ export const Template = class Template {
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
+      this.resolveLifecyclePromise('created');
       if (!this.isHydrating) {
         this.dispatchEvent('created', { component: this.instance }, eventSettings, { triggerCallback: false });
       }
@@ -222,6 +223,7 @@ export const Template = class Template {
         this.onRenderOnce();
         delete this.onRenderOnce;
       }
+      this.resolveLifecyclePromise('rendered');
       if (!this.isHydrating) {
         this.dispatchEvent('rendered', { component: this.instance }, eventSettings, { triggerCallback: false });
       }
@@ -234,6 +236,7 @@ export const Template = class Template {
         if (this.element) {
           this.element.updateScheduled = false;
         }
+        this.resolveLifecyclePromise('updated');
         this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
       });
     };
@@ -254,6 +257,7 @@ export const Template = class Template {
       this.removeObservers();
       this.removeParent();
       this.call(this.onDestroyedCallback);
+      this.resolveLifecyclePromise('destroyed');
       this.dispatchEvent('destroyed', { component: this.instance }, eventSettings, { triggerCallback: false });
     };
 
@@ -909,10 +913,15 @@ export const Template = class Template {
     if (resolve) {
       resolve();
       delete this.lifecycleResolvers[eventName];
-      // recurring events get a fresh promise on next access
-      if (eventName === 'updated') {
-        delete this.lifecyclePromises[eventName];
-      }
+    }
+    if (eventName === 'updated') {
+      // recurring — clear cache so next access creates a fresh promise
+      delete this.lifecyclePromises[eventName];
+    }
+    else if (!this.lifecyclePromises[eventName]) {
+      // one-shot fired without prior awaiter — cache an immediately-resolved
+      // promise so late awaiters don't hang
+      this.lifecyclePromises[eventName] = Promise.resolve();
     }
   }
 
@@ -928,10 +937,6 @@ export const Template = class Template {
       wrapFunction(callback).call(this.element, eventData);
     }
 
-    // resolve lifecycle promise before DOM event dispatch
-    this.resolveLifecyclePromise(eventName);
-
-    // trigger DOM event
     return $(this.element).dispatchEvent(eventName, eventData, eventSettings);
   }
 

@@ -426,14 +426,15 @@ describe('Template — lifecycle', () => {
       expect(p1).not.toBe(p2);
     });
 
-    it('no-ops resolveLifecyclePromise when no resolver is registered', () => {
+    it('caches a resolved promise on first fire so late awaiters do not hang', () => {
       const template = new Template({
         template: '<div></div>',
         renderingEngine: realEngine,
       });
       template.initialize();
-      expect(() => template.resolveLifecyclePromise('rendered')).not.toThrow();
-      expect(template.lifecyclePromises.rendered).toBeUndefined();
+      template.resolveLifecyclePromise('rendered');
+      // No prior awaiter — but a resolved promise is now cached for late access
+      expect(template.lifecyclePromises.rendered).toBeInstanceOf(Promise);
     });
 
     it('resolves a late awaiter accessed AFTER resolveLifecyclePromise has fired', async () => {
@@ -473,10 +474,9 @@ describe('Template — lifecycle', () => {
     });
 
     it('runs synchronous DOM event listener before lifecyclePromise then-continuation', async () => {
-      // dispatchEvent calls resolveLifecyclePromise (resolver runs synchronously,
-      // which schedules .then continuations as microtasks) and THEN synchronously
-      // dispatches the DOM event (whose listener runs synchronously). Net order:
-      // DOM listener fires first, then-continuation drains in the next microtask.
+      // The lifecycle wrapper resolves the promise (then-callbacks queued as
+      // microtasks) and THEN dispatches the DOM event (listener runs sync).
+      // Net order: DOM listener first, then-continuation in the next microtask.
       const fixture = await mountTemplate({ template: '<span></span>' });
       try {
         const order = [];
@@ -486,6 +486,7 @@ describe('Template — lifecycle', () => {
         fixture.host.addEventListener('updated', () => {
           order.push('domEvent');
         });
+        fixture.template.resolveLifecyclePromise('updated');
         fixture.template.dispatchEvent(
           'updated',
           { component: fixture.template.instance },
