@@ -115,10 +115,10 @@ export const Template = class Template {
     // as a substitute for settings because settings only works with tag attributes
     let getInitialValue = (config, name) => {
       const dataValue = get(data, name);
-      if (dataValue) {
+      if (dataValue !== undefined) {
         return dataValue;
       }
-      return config?.value || config;
+      return config?.value ?? config;
     };
 
     each(defaultState, (config, name) => {
