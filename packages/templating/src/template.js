@@ -39,6 +39,7 @@ export const Template = class Template {
 
   static templateCount = 0;
 
+  // Mirror of @semantic-ui/utils' isServer; mutable so SSR-gated paths can be toggled in tests.
   static isServer = isServer;
 
   rendered = false;
