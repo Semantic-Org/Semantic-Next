@@ -16,16 +16,38 @@
 // stage-1-5-batch.md §B6 for the full decision record.
 
 import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { Template } from '../src/template.js';
-import { freshTemplate, subtemplateFixture } from './_helpers/fresh-template.js';
-import { clearTemplateRegistry } from './_helpers/registry-cleanup.js';
-import { stubEngine } from './_helpers/stub-engine.js';
+import { Template } from '@semantic-ui/templating';
+
+const realEngine = { renderer: Renderer, serverRenderer: ServerRenderer };
 
 afterEach(() => {
-  clearTemplateRegistry();
+  Template.renderedTemplates.clear();
+  Template.templateCount = 0;
 });
+
+// Local helper — stamps out a parent + child pair with the options needed to
+// drive initialize() through the real renderer. Mirrors the canonical
+// production wiring without depending on a shared `_helpers/` directory.
+function makeSubtemplatePair({
+  childDefaultSettings,
+  childData,
+  childElement,
+  parentElement,
+} = {}) {
+  const parent = new Template(parentElement ? { element: parentElement } : {});
+  const child = new Template({
+    template: '<span></span>',
+    renderingEngine: realEngine,
+    defaultSettings: childDefaultSettings,
+    data: childData,
+    element: childElement,
+  });
+  child.setParent(parent);
+  return { parent, child };
+}
 
 /*******************************
         isSubtemplate()
@@ -33,65 +55,43 @@ afterEach(() => {
 
 describe('Template.isSubtemplate()', () => {
   it('returns false for a freshly constructed Template with no parent', () => {
-    const { template, cleanup } = freshTemplate();
-    try {
-      expect(template.isSubtemplate()).toBe(false);
-      expect(template.parentTemplate).toBeUndefined();
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template();
+    expect(template.isSubtemplate()).toBe(false);
+    expect(template.parentTemplate).toBeUndefined();
   });
 
   it('[B6 PIN — behavioral change] returns false for a Template constructed with parentTemplate but no setParent call', () => {
     // Option B: setParent is the sole authority for parent wiring.
     // Constructor stops setting this.parentTemplate. CURRENTLY FAILS.
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    try {
-      const child = new Template({
-        template: '<span></span>',
-        renderingEngine: stubEngine,
-        parentTemplate: parent,
-      });
-      expect(child.parentTemplate).toBeUndefined();
-      expect(child.isSubtemplate()).toBe(false);
-    }
-    finally {
-      cleanupParent();
-    }
+    const parent = new Template();
+    const child = new Template({
+      template: '<span></span>',
+      renderingEngine: realEngine,
+      parentTemplate: parent,
+    });
+    expect(child.parentTemplate).toBeUndefined();
+    expect(child.isSubtemplate()).toBe(false);
   });
 
   it('returns true after setParent() is called', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate();
-    try {
-      child.setParent(parent);
-      expect(child.isSubtemplate()).toBe(true);
-      expect(child.parentTemplate).toBe(parent);
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    const parent = new Template();
+    const child = new Template();
+    child.setParent(parent);
+    expect(child.isSubtemplate()).toBe(true);
+    expect(child.parentTemplate).toBe(parent);
   });
 
   it('[B6 PIN] returns false after removeParent() — parentTemplate is cleared', () => {
     // Option B: removeParent must clear this.parentTemplate. CURRENTLY FAILS
     // (today the assignment is missing; isSubtemplate() still returns true).
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate();
-    try {
-      child.setParent(parent);
-      expect(child.isSubtemplate()).toBe(true);
+    const parent = new Template();
+    const child = new Template();
+    child.setParent(parent);
+    expect(child.isSubtemplate()).toBe(true);
 
-      child.removeParent();
-      expect(child.parentTemplate).toBeUndefined();
-      expect(child.isSubtemplate()).toBe(false);
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    child.removeParent();
+    expect(child.parentTemplate).toBeUndefined();
+    expect(child.isSubtemplate()).toBe(false);
   });
 });
 
@@ -101,142 +101,91 @@ describe('Template.isSubtemplate()', () => {
 
 describe('Template.setParent — wiring + idempotency (B6 contract)', () => {
   it('adds the child to parent._childTemplates', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate();
-    try {
-      child.setParent(parent);
-      expect(parent._childTemplates).toContain(child);
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    const parent = new Template();
+    const child = new Template();
+    child.setParent(parent);
+    expect(parent._childTemplates).toContain(child);
   });
 
   it('lazily initializes parent._childTemplates on first call', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate();
-    try {
-      expect(parent._childTemplates).toBeUndefined();
-      child.setParent(parent);
-      expect(Array.isArray(parent._childTemplates)).toBe(true);
-      expect(parent._childTemplates).toHaveLength(1);
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    const parent = new Template();
+    const child = new Template();
+    expect(parent._childTemplates).toBeUndefined();
+    child.setParent(parent);
+    expect(Array.isArray(parent._childTemplates)).toBe(true);
+    expect(parent._childTemplates).toHaveLength(1);
   });
 
   it('preserves existing siblings when adding a new child', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: childA, cleanup: cleanupA } = freshTemplate();
-    const { template: childB, cleanup: cleanupB } = freshTemplate();
-    try {
-      childA.setParent(parent);
-      childB.setParent(parent);
-      expect(parent._childTemplates).toHaveLength(2);
-      expect(parent._childTemplates).toContain(childA);
-      expect(parent._childTemplates).toContain(childB);
-    }
-    finally {
-      cleanupB();
-      cleanupA();
-      cleanupParent();
-    }
+    const parent = new Template();
+    const childA = new Template();
+    const childB = new Template();
+    childA.setParent(parent);
+    childB.setParent(parent);
+    expect(parent._childTemplates).toHaveLength(2);
+    expect(parent._childTemplates).toContain(childA);
+    expect(parent._childTemplates).toContain(childB);
   });
 
   it('[B6 PIN] is idempotent when setParent(X) is called twice with the same parent', () => {
     // Option B: O(1) idempotency check. CURRENTLY FAILS — child is pushed twice.
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate();
-    try {
-      child.setParent(parent);
-      child.setParent(parent);
-      const occurrences = parent._childTemplates.filter(t => t === child).length;
-      expect(occurrences).toBe(1);
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    const parent = new Template();
+    const child = new Template();
+    child.setParent(parent);
+    child.setParent(parent);
+    const occurrences = parent._childTemplates.filter(t => t === child).length;
+    expect(occurrences).toBe(1);
   });
 
   it('[B6 PIN] re-parents cleanly: setParent(X) then setParent(Y) leaves child only in Y', () => {
     // Option B: setParent detaches from prior parent first. CURRENTLY FAILS —
     // child is in BOTH X._childTemplates and Y._childTemplates today.
-    const { template: parentX, cleanup: cleanupX } = freshTemplate();
-    const { template: parentY, cleanup: cleanupY } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate();
-    try {
-      child.setParent(parentX);
-      child.setParent(parentY);
+    const parentX = new Template();
+    const parentY = new Template();
+    const child = new Template();
+    child.setParent(parentX);
+    child.setParent(parentY);
 
-      expect(parentX._childTemplates).not.toContain(child);
-      expect(parentY._childTemplates).toContain(child);
-      expect(parentY._childTemplates.filter(t => t === child)).toHaveLength(1);
-      expect(child.parentTemplate).toBe(parentY);
-    }
-    finally {
-      cleanupChild();
-      cleanupY();
-      cleanupX();
-    }
+    expect(parentX._childTemplates).not.toContain(child);
+    expect(parentY._childTemplates).toContain(child);
+    expect(parentY._childTemplates.filter(t => t === child)).toHaveLength(1);
+    expect(child.parentTemplate).toBe(parentY);
   });
 
   it('restores wiring cleanly across setParent → removeParent → setParent(same)', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate();
-    try {
-      child.setParent(parent);
-      child.removeParent();
-      child.setParent(parent);
+    const parent = new Template();
+    const child = new Template();
+    child.setParent(parent);
+    child.removeParent();
+    child.setParent(parent);
 
-      expect(child.parentTemplate).toBe(parent);
-      expect(parent._childTemplates).toContain(child);
-      expect(parent._childTemplates.filter(t => t === child)).toHaveLength(1);
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    expect(child.parentTemplate).toBe(parent);
+    expect(parent._childTemplates).toContain(child);
+    expect(parent._childTemplates.filter(t => t === child)).toHaveLength(1);
   });
 });
 
 describe('Template.removeParent — destroy-time tear-down', () => {
   it('removes only the matching child by id, leaving siblings in place', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: childA, cleanup: cleanupA } = freshTemplate();
-    const { template: childB, cleanup: cleanupB } = freshTemplate();
-    try {
-      childA.setParent(parent);
-      childB.setParent(parent);
-      childA.removeParent();
+    const parent = new Template();
+    const childA = new Template();
+    const childB = new Template();
+    childA.setParent(parent);
+    childB.setParent(parent);
+    childA.removeParent();
 
-      expect(parent._childTemplates).not.toContain(childA);
-      expect(parent._childTemplates).toContain(childB);
-      expect(parent._childTemplates).toHaveLength(1);
-    }
-    finally {
-      cleanupB();
-      cleanupA();
-      cleanupParent();
-    }
+    expect(parent._childTemplates).not.toContain(childA);
+    expect(parent._childTemplates).toContain(childB);
+    expect(parent._childTemplates).toHaveLength(1);
   });
 
   it('is a no-op when parent has no _childTemplates yet', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate();
-    try {
-      // manually wire parentTemplate without going through setParent —
-      // simulates a partial-state code path. removeParent should not throw.
-      child.parentTemplate = parent;
-      expect(() => child.removeParent()).not.toThrow();
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    const parent = new Template();
+    const child = new Template();
+    // manually wire parentTemplate without going through setParent —
+    // simulates a partial-state code path. removeParent should not throw.
+    child.parentTemplate = parent;
+    expect(() => child.removeParent()).not.toThrow();
   });
 });
 
@@ -246,75 +195,52 @@ describe('Template.removeParent — destroy-time tear-down', () => {
 
 describe('Subtemplate Tier 1 — no defaultSettings (the dominant path)', () => {
   it('does NOT create a settings Proxy when defaultSettings is undefined', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childData: { name: 'A' },
     });
-    try {
-      child.initialize();
-      // gate at line 188-190 short-circuits — settings is never assigned
-      expect(child.settings).toBeUndefined();
-      expect(child.settingsVars).toBeUndefined();
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    // gate at line 188-190 short-circuits — settings is never assigned
+    expect(child.settings).toBeUndefined();
+    expect(child.settingsVars).toBeUndefined();
   });
 
   it('does NOT create a settings Proxy when defaultSettings is an empty object', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: {},
       childData: { foo: 'bar' },
     });
-    try {
-      child.initialize();
-      expect(child.settings).toBeUndefined();
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    expect(child.settings).toBeUndefined();
   });
 
   it('does NOT create a settings Proxy on a non-subtemplate even with defaultSettings', () => {
     // Gate is conjunctive: isSubtemplate() AND defaultSettings AND length > 0.
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
       defaultSettings: { foo: 'bar' },
     });
-    try {
-      template.initialize();
-      expect(template.settings).toBeUndefined();
-    }
-    finally {
-      cleanup();
-    }
+    template.initialize();
+    expect(template.settings).toBeUndefined();
   });
 
   it('exposes data passed at construction in the renderer data context', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childData: { name: 'Alice' },
     });
-    try {
-      child.initialize();
-      const ctx = child.getDataContext();
-      expect(ctx.name).toBe('Alice');
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    const ctx = child.getDataContext();
+    expect(ctx.name).toBe('Alice');
   });
 
   it('makes updateSubtemplateSettings a no-op when the Proxy was never created', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childData: { foo: 1 },
     });
-    try {
-      child.initialize();
-      // exercises the !this.settings || !this.defaultSettings short-circuit
-      expect(() => child.updateSubtemplateSettings({ foo: 2 })).not.toThrow();
-      expect(child.settings).toBeUndefined();
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    // exercises the !this.settings || !this.defaultSettings short-circuit
+    expect(() => child.updateSubtemplateSettings({ foo: 2 })).not.toThrow();
+    expect(child.settings).toBeUndefined();
   });
 });
 
@@ -324,210 +250,145 @@ describe('Subtemplate Tier 1 — no defaultSettings (the dominant path)', () => 
 
 describe('Subtemplate Tier 2 — defaultSettings creates a Proxy', () => {
   it('creates this.settings as a Proxy when subtemplate declares defaultSettings', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
-    try {
-      child.initialize();
-      expect(child.settings).toBeDefined();
-      expect(child.settingsVars).toBeInstanceOf(Map);
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    expect(child.settings).toBeDefined();
+    expect(child.settingsVars).toBeInstanceOf(Map);
   });
 
   it('seeds the Proxy with values from defaultSettings', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light', size: 'md' },
     });
-    try {
-      child.initialize();
-      expect(child.settings.theme).toBe('light');
-      expect(child.settings.size).toBe('md');
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    expect(child.settings.theme).toBe('light');
+    expect(child.settings.size).toBe('md');
   });
 
   it('overrides defaults with passed-in data for keys present in defaultSettings', () => {
     // precedence: defaultSettings < clone-time data
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
       childData: { theme: 'dark' },
     });
-    try {
-      child.initialize();
-      expect(child.settings.theme).toBe('dark');
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    expect(child.settings.theme).toBe('dark');
   });
 
   it('[C3] preserves falsy data values (uses !== undefined, not truthy check)', () => {
     // Subtemplate settings already uses !== undefined correctly. Surface 6's
     // B1 fix targets createReactiveState (truthy bug). Pin that THIS path
     // stays correct.
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { count: 5 },
       childData: { count: 0 },
     });
-    try {
-      child.initialize();
-      expect(child.settings.count).toBe(0);
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    expect(child.settings.count).toBe(0);
   });
 
   it('[C3] preserves null and false in passed data', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { active: true, label: 'default' },
       childData: { active: false, label: null },
     });
-    try {
-      child.initialize();
-      expect(child.settings.active).toBe(false);
-      expect(child.settings.label).toBeNull();
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    expect(child.settings.active).toBe(false);
+    expect(child.settings.label).toBeNull();
   });
 
   it('writes through the Proxy persist on the target object', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
-    try {
-      child.initialize();
-      child.settings.theme = 'dark';
-      expect(child.settings.theme).toBe('dark');
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    child.settings.theme = 'dark';
+    expect(child.settings.theme).toBe('dark');
   });
 
   it('creates a Signal in settingsVars on first read', () => {
     // Use createSubtemplateSettings directly to observe the lazy-create path.
     // (initialize() walks all defaultSettings keys via overlaySettingsSignals
     // before tests can observe the pre-read state.)
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
-    try {
-      child.createSubtemplateSettings();
-      expect(child.settingsVars.has('theme')).toBe(false);
-      child.settings.theme; // touch
-      expect(child.settingsVars.has('theme')).toBe(true);
-      expect(child.settingsVars.get('theme')).toBeInstanceOf(Signal);
-    }
-    finally {
-      cleanup();
-    }
+    child.createSubtemplateSettings();
+    expect(child.settingsVars.has('theme')).toBe(false);
+    child.settings.theme; // touch
+    expect(child.settingsVars.has('theme')).toBe(true);
+    expect(child.settingsVars.get('theme')).toBeInstanceOf(Signal);
   });
 
   it('after initialize(), all defaultSettings keys have backing Signals (overlaySettingsSignals primes them)', () => {
     // initialize() invokes overlaySettingsSignals which iterates defaultSettings
     // and reads each key through the Proxy to ensure each Signal exists.
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light', size: 'md' },
     });
-    try {
-      child.initialize();
-      expect(child.settingsVars.has('theme')).toBe(true);
-      expect(child.settingsVars.has('size')).toBe(true);
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    expect(child.settingsVars.has('theme')).toBe(true);
+    expect(child.settingsVars.has('size')).toBe(true);
   });
 
   it('reuses the existing Signal on subsequent reads of the same key', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
-    try {
-      child.initialize();
-      child.settings.theme;
-      const firstSignal = child.settingsVars.get('theme');
-      child.settings.theme;
-      expect(child.settingsVars.get('theme')).toBe(firstSignal);
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    child.settings.theme;
+    const firstSignal = child.settingsVars.get('theme');
+    child.settings.theme;
+    expect(child.settingsVars.get('theme')).toBe(firstSignal);
   });
 
   it('creates a Signal on first write to a key never read before', () => {
     // Use the Proxy directly without initialize() so the
     // overlaySettingsSignals priming doesn't pre-create the signal.
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
-    try {
-      child.createSubtemplateSettings();
-      expect(child.settingsVars.has('theme')).toBe(false);
-      child.settings.theme = 'dark';
-      expect(child.settingsVars.has('theme')).toBe(true);
-      expect(child.settingsVars.get('theme')).toBeInstanceOf(Signal);
-    }
-    finally {
-      cleanup();
-    }
+    child.createSubtemplateSettings();
+    expect(child.settingsVars.has('theme')).toBe(false);
+    child.settings.theme = 'dark';
+    expect(child.settingsVars.has('theme')).toBe(true);
+    expect(child.settingsVars.get('theme')).toBeInstanceOf(Signal);
   });
 
   it('first write to an UNDECLARED key creates a Signal as well (set handler is unconditional)', () => {
     // Pin the contract that writing arbitrary keys via the Proxy succeeds —
     // not just keys in defaultSettings.
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
-    try {
-      child.createSubtemplateSettings();
-      child.settings.brandNew = 'value';
-      expect(child.settingsVars.has('brandNew')).toBe(true);
-    }
-    finally {
-      cleanup();
-    }
+    child.createSubtemplateSettings();
+    child.settings.brandNew = 'value';
+    expect(child.settingsVars.has('brandNew')).toBe(true);
   });
 
   it('updates the existing Signal on writes to a key already read', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
-    try {
-      child.initialize();
-      child.settings.theme; // create signal
-      const sig = child.settingsVars.get('theme');
-      child.settings.theme = 'dark';
-      expect(child.settingsVars.get('theme')).toBe(sig);
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    child.settings.theme; // create signal
+    const sig = child.settingsVars.get('theme');
+    child.settings.theme = 'dark';
+    expect(child.settingsVars.get('theme')).toBe(sig);
   });
 
   it('returns symbol-keyed properties without touching settingsVars', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
-    try {
-      child.initialize();
-      // Symbol access goes straight to target[symbol]; no Signal map activity.
-      const sym = Symbol.iterator;
-      const before = child.settingsVars.size;
-      child.settings[sym];
-      expect(child.settingsVars.size).toBe(before);
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    // Symbol access goes straight to target[symbol]; no Signal map activity.
+    const sym = Symbol.iterator;
+    const before = child.settingsVars.size;
+    child.settings[sym];
+    expect(child.settingsVars.size).toBe(before);
   });
 });
 
@@ -542,23 +403,14 @@ describe('Subtemplate settings — parent element.settings fallback', () => {
 
   function makeFallbackFixture({ childDefaultSettings, parentSettings, childData = {} }) {
     const fakeElement = { settings: { ...parentSettings } };
-    const { template: parent, cleanup: cleanupParent } = freshTemplate({
-      element: fakeElement,
-    });
-    const { template: child, cleanup: cleanupChild } = freshTemplate({
-      defaultSettings: childDefaultSettings,
-      data: childData,
-      element: fakeElement, // mirrors renderer's setElement(parent.element)
-    });
-    child.setParent(parent);
     return {
-      parent,
-      child,
+      ...makeSubtemplatePair({
+        childDefaultSettings,
+        childData,
+        childElement: fakeElement, // mirrors renderer's setElement(parent.element)
+        parentElement: fakeElement,
+      }),
       fakeElement,
-      cleanup: () => {
-        cleanupChild();
-        cleanupParent();
-      },
     };
   }
 
@@ -567,13 +419,8 @@ describe('Subtemplate settings — parent element.settings fallback', () => {
       childDefaultSettings: { ownProp: 'X' },
       parentSettings: { otherProp: 'Y' },
     });
-    try {
-      f.child.initialize();
-      expect(f.child.settings.ownProp).toBe('X');
-    }
-    finally {
-      f.cleanup();
-    }
+    f.child.initialize();
+    expect(f.child.settings.ownProp).toBe('X');
   });
 
   it('falls back to parent element.settings when key is NOT in own target', () => {
@@ -581,13 +428,8 @@ describe('Subtemplate settings — parent element.settings fallback', () => {
       childDefaultSettings: { ownProp: 'X' },
       parentSettings: { otherProp: 'Y' },
     });
-    try {
-      f.child.initialize();
-      expect(f.child.settings.otherProp).toBe('Y');
-    }
-    finally {
-      f.cleanup();
-    }
+    f.child.initialize();
+    expect(f.child.settings.otherProp).toBe('Y');
   });
 
   it('returns undefined when key is in neither own nor parent settings', () => {
@@ -595,13 +437,8 @@ describe('Subtemplate settings — parent element.settings fallback', () => {
       childDefaultSettings: { ownProp: 'X' },
       parentSettings: { otherProp: 'Y' },
     });
-    try {
-      f.child.initialize();
-      expect(f.child.settings.notInEither).toBeUndefined();
-    }
-    finally {
-      f.cleanup();
-    }
+    f.child.initialize();
+    expect(f.child.settings.notInEither).toBeUndefined();
   });
 
   it('shadows the parent fallback once an unrelated key is written via the Proxy', () => {
@@ -611,33 +448,23 @@ describe('Subtemplate settings — parent element.settings fallback', () => {
       childDefaultSettings: { ownProp: 'X' },
       parentSettings: { brand: 'parent-brand' },
     });
-    try {
-      f.child.initialize();
-      expect(f.child.settings.brand).toBe('parent-brand'); // fallback
-      f.child.settings.brand = 'shadowed';
-      expect(f.child.settings.brand).toBe('shadowed'); // own-target now wins
-      // Parent's settings object is untouched
-      expect(f.fakeElement.settings.brand).toBe('parent-brand');
-    }
-    finally {
-      f.cleanup();
-    }
+    f.child.initialize();
+    expect(f.child.settings.brand).toBe('parent-brand'); // fallback
+    f.child.settings.brand = 'shadowed';
+    expect(f.child.settings.brand).toBe('shadowed'); // own-target now wins
+    // Parent's settings object is untouched
+    expect(f.fakeElement.settings.brand).toBe('parent-brand');
   });
 
   it('returns undefined safely when child has no element at all', () => {
     // No element → parentSettings captured as undefined → fallback path
     // short-circuits. Pin: no throw on missing keys.
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { ownProp: 'X' },
     });
-    try {
-      child.initialize();
-      expect(child.settings.ownProp).toBe('X');
-      expect(child.settings.missingKey).toBeUndefined();
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    expect(child.settings.ownProp).toBe('X');
+    expect(child.settings.missingKey).toBeUndefined();
   });
 });
 
@@ -647,7 +474,7 @@ describe('Subtemplate settings — parent element.settings fallback', () => {
 
 describe('Subtemplate settings reactivity', () => {
   it('re-runs a Reaction that reads through the Proxy when the same key is written', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
     let runs = 0;
@@ -670,12 +497,11 @@ describe('Subtemplate settings reactivity', () => {
     }
     finally {
       reaction?.stop();
-      cleanup();
     }
   });
 
   it('re-runs the Reaction when updateSubtemplateSettings writes a declared key', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
     let runs = 0;
@@ -694,7 +520,6 @@ describe('Subtemplate settings reactivity', () => {
     }
     finally {
       reaction?.stop();
-      cleanup();
     }
   });
 
@@ -705,7 +530,7 @@ describe('Subtemplate settings reactivity', () => {
     // identical replacement after a mutation is a no-op. The contract is:
     // read through the Proxy, REPLACE the value with a structurally distinct
     // object — not mutate-then-set-same-shape.
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { todo: { completed: false } },
     });
     let runs = 0;
@@ -734,7 +559,6 @@ describe('Subtemplate settings reactivity', () => {
     }
     finally {
       reaction?.stop();
-      cleanup();
     }
   });
 });
@@ -745,71 +569,51 @@ describe('Subtemplate settings reactivity', () => {
 
 describe('Template.updateSubtemplateSettings', () => {
   it('writes only keys declared in defaultSettings, ignoring extras', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { declared: 'init' },
     });
-    try {
-      child.initialize();
-      child.updateSubtemplateSettings({ declared: 'updated', undeclared: 'ignored' });
-      expect(child.settings.declared).toBe('updated');
-      // 'undeclared' is NOT pushed through the Proxy — it's not in
-      // defaultSettings, so the `each(this.defaultSettings)` loop skips it.
-      // settingsVars must not contain it either.
-      expect(child.settingsVars.has('undeclared')).toBe(false);
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    child.updateSubtemplateSettings({ declared: 'updated', undeclared: 'ignored' });
+    expect(child.settings.declared).toBe('updated');
+    // 'undeclared' is NOT pushed through the Proxy — it's not in
+    // defaultSettings, so the `each(this.defaultSettings)` loop skips it.
+    // settingsVars must not contain it either.
+    expect(child.settingsVars.has('undeclared')).toBe(false);
   });
 
   it('writes the new value through the Proxy set, firing the underlying Signal', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
-    try {
-      child.initialize();
-      child.settings.theme; // create signal
-      const sig = child.settingsVars.get('theme');
-      const setSpy = vi.spyOn(sig, 'set');
+    child.initialize();
+    child.settings.theme; // create signal
+    const sig = child.settingsVars.get('theme');
+    const setSpy = vi.spyOn(sig, 'set');
 
-      child.updateSubtemplateSettings({ theme: 'dark' });
-      expect(setSpy).toHaveBeenCalledWith('dark');
-    }
-    finally {
-      cleanup();
-    }
+    child.updateSubtemplateSettings({ theme: 'dark' });
+    expect(setSpy).toHaveBeenCalledWith('dark');
   });
 
   it('is a no-op when defaultSettings is undefined (Tier 1)', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childData: { foo: 1 },
     });
-    try {
-      child.initialize();
-      child.updateSubtemplateSettings({ foo: 2 });
-      // No Proxy was created and none should be created retroactively.
-      expect(child.settings).toBeUndefined();
-      expect(child.settingsVars).toBeUndefined();
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    child.updateSubtemplateSettings({ foo: 2 });
+    // No Proxy was created and none should be created retroactively.
+    expect(child.settings).toBeUndefined();
+    expect(child.settingsVars).toBeUndefined();
   });
 
   it('skips keys that are present in defaultSettings but absent from dataContext', () => {
-    const { parent, child, cleanup } = subtemplateFixture({
+    const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light', size: 'md' },
     });
-    try {
-      child.initialize();
-      // Only `theme` provided; `size` should be untouched.
-      child.updateSubtemplateSettings({ theme: 'dark' });
-      expect(child.settings.theme).toBe('dark');
-      expect(child.settings.size).toBe('md');
-    }
-    finally {
-      cleanup();
-    }
+    child.initialize();
+    // Only `theme` provided; `size` should be untouched.
+    child.updateSubtemplateSettings({ theme: 'dark' });
+    expect(child.settings.theme).toBe('dark');
+    expect(child.settings.size).toBe('md');
   });
 });
 
@@ -832,7 +636,7 @@ describe('Template.clone — prototype-to-instance manifestation', () => {
       onRendered: () => {},
       onDestroyed: () => {},
       onThemeChanged: () => {},
-      renderingEngine: stubEngine,
+      renderingEngine: realEngine,
       ...opts,
     });
   }
@@ -889,15 +693,10 @@ describe('Template.clone — prototype-to-instance manifestation', () => {
   });
 
   it('forwards parentTemplate from the prototype unless overridden', () => {
-    const { template: ancestor, cleanup: cleanupAncestor } = freshTemplate();
-    try {
-      const proto = makePrototype({ parentTemplate: ancestor });
-      const clone = proto.clone({});
-      expect(clone.parentTemplate).toBe(ancestor);
-    }
-    finally {
-      cleanupAncestor();
-    }
+    const ancestor = new Template();
+    const proto = makePrototype({ parentTemplate: ancestor });
+    const clone = proto.clone({});
+    expect(clone.parentTemplate).toBe(ancestor);
   });
 
   it('lets settings overrides win over prototype defaults', () => {
@@ -971,20 +770,15 @@ describe('Canonical production wiring — clone → setElement → setParent →
     const proto = new Template({
       template: '<span>{name}</span>',
       defaultSettings: { name: 'init' },
-      renderingEngine: stubEngine,
+      renderingEngine: realEngine,
     });
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    try {
-      const child = proto.clone({ parentTemplate: parent, data: { name: 'A' } });
-      child.setParent(parent);
+    const parent = new Template();
+    const child = proto.clone({ parentTemplate: parent, data: { name: 'A' } });
+    child.setParent(parent);
 
-      expect(child.parentTemplate).toBe(parent);
-      expect(parent._childTemplates).toContain(child);
-      expect(parent._childTemplates.filter(t => t === child)).toHaveLength(1);
-    }
-    finally {
-      cleanupParent();
-    }
+    expect(child.parentTemplate).toBe(parent);
+    expect(parent._childTemplates).toContain(child);
+    expect(parent._childTemplates.filter(t => t === child)).toHaveLength(1);
   });
 
   it('full sequence: clone → setElement → setParent → initialize completes without error', () => {
@@ -996,28 +790,23 @@ describe('Canonical production wiring — clone → setElement → setParent →
     const proto = new Template({
       template: '<span>{theme}</span>',
       defaultSettings: { theme: 'light' },
-      renderingEngine: stubEngine,
+      renderingEngine: realEngine,
     });
     const fakeElement = { settings: { brand: 'X' } };
-    const { template: parent, cleanup: cleanupParent } = freshTemplate({ element: fakeElement });
-    try {
-      const child = proto.clone({
-        parentTemplate: parent,
-        data: { theme: 'dark' },
-      });
-      child.setElement(fakeElement);
-      child.setParent(parent);
-      expect(() => child.initialize()).not.toThrow();
+    const parent = new Template({ element: fakeElement });
+    const child = proto.clone({
+      parentTemplate: parent,
+      data: { theme: 'dark' },
+    });
+    child.setElement(fakeElement);
+    child.setParent(parent);
+    expect(() => child.initialize()).not.toThrow();
 
-      // post-init invariants
-      expect(child.isSubtemplate()).toBe(true);
-      expect(child.settings).toBeDefined();
-      expect(child.settings.theme).toBe('dark'); // data wins over default
-      expect(child.settings.brand).toBe('X'); // parent fallback
-      expect(parent._childTemplates).toContain(child);
-    }
-    finally {
-      cleanupParent();
-    }
+    // post-init invariants
+    expect(child.isSubtemplate()).toBe(true);
+    expect(child.settings).toBeDefined();
+    expect(child.settings.theme).toBe('dark'); // data wins over default
+    expect(child.settings.brand).toBe('X'); // parent fallback
+    expect(parent._childTemplates).toContain(child);
   });
 });

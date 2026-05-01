@@ -21,14 +21,15 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
+import { Template } from '@semantic-ui/templating';
 import { extend } from '@semantic-ui/utils';
 
-import { Template } from '../src/template.js';
-import { freshTemplate } from './_helpers/fresh-template.js';
-import { clearTemplateRegistry } from './_helpers/registry-cleanup.js';
+const realEngine = { renderer: Renderer, serverRenderer: ServerRenderer };
 
 afterEach(() => {
-  clearTemplateRegistry();
+  Template.renderedTemplates.clear();
+  Template.templateCount = 0;
 });
 
 /*******************************
@@ -37,28 +38,18 @@ afterEach(() => {
 
 describe('Template — createReactiveState', () => {
   it('wraps each defaultState entry in a Signal', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       defaultState: { count: 0, name: 'jack' },
     });
-    try {
-      expect(template.state.count).toBeInstanceOf(Signal);
-      expect(template.state.name).toBeInstanceOf(Signal);
-    }
-    finally {
-      cleanup();
-    }
+    expect(template.state.count).toBeInstanceOf(Signal);
+    expect(template.state.name).toBeInstanceOf(Signal);
   });
 
   it('initializes simple { count: 0 } config as Signal(0)', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       defaultState: { count: 0 },
     });
-    try {
-      expect(template.state.count.peek()).toBe(0);
-    }
-    finally {
-      cleanup();
-    }
+    expect(template.state.count.peek()).toBe(0);
   });
 
   it('forwards options for complex { value, options } config', () => {
@@ -66,7 +57,7 @@ describe('Template — createReactiveState', () => {
     // Default Signal equality treats deep-equal objects as equal; with
     // a strict-reference equality, two structurally-equal objects differ.
     const strictEquality = (a, b) => a === b;
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       defaultState: {
         config: {
           value: { x: 1 },
@@ -74,49 +65,34 @@ describe('Template — createReactiveState', () => {
         },
       },
     });
-    try {
-      const signal = template.state.config;
-      expect(signal).toBeInstanceOf(Signal);
-      expect(signal.peek()).toEqual({ x: 1 });
-      // Strict equality: same-shape but different-reference is "changed".
-      let observed = 0;
-      const r = Reaction.create(() => {
-        signal.get();
-        observed++;
-      });
-      Reaction.flush();
-      const before = observed;
-      signal.set({ x: 1 }); // structurally equal
-      Reaction.flush();
-      // With strict equality, even structurally-equal value triggers update.
-      expect(observed).toBeGreaterThan(before);
-      r.stop();
-    }
-    finally {
-      cleanup();
-    }
+    const signal = template.state.config;
+    expect(signal).toBeInstanceOf(Signal);
+    expect(signal.peek()).toEqual({ x: 1 });
+    // Strict equality: same-shape but different-reference is "changed".
+    let observed = 0;
+    const r = Reaction.create(() => {
+      signal.get();
+      observed++;
+    });
+    Reaction.flush();
+    const before = observed;
+    signal.set({ x: 1 }); // structurally equal
+    Reaction.flush();
+    // With strict equality, even structurally-equal value triggers update.
+    expect(observed).toBeGreaterThan(before);
+    r.stop();
   });
 
   it('returns {} when defaultState is undefined', () => {
-    const { template, cleanup } = freshTemplate();
-    try {
-      expect(template.state).toEqual({});
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template();
+    expect(template.state).toEqual({});
   });
 
   it('uses defaultState as-is when data is undefined', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       defaultState: { count: 5 },
     });
-    try {
-      expect(template.state.count.peek()).toBe(5);
-    }
-    finally {
-      cleanup();
-    }
+    expect(template.state.count.peek()).toBe(5);
   });
 
   /*******************************
@@ -124,29 +100,19 @@ describe('Template — createReactiveState', () => {
   *******************************/
 
   it('lets truthy data override defaultState', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       defaultState: { count: 5 },
       data: { count: 10 },
     });
-    try {
-      expect(template.state.count.peek()).toBe(10);
-    }
-    finally {
-      cleanup();
-    }
+    expect(template.state.count.peek()).toBe(10);
   });
 
   it('lets default work when data omits the key', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       defaultState: { count: 5 },
       data: {},
     });
-    try {
-      expect(template.state.count.peek()).toBe(5);
-    }
-    finally {
-      cleanup();
-    }
+    expect(template.state.count.peek()).toBe(5);
   });
 
   /*******************************
@@ -161,55 +127,35 @@ describe('Template — createReactiveState', () => {
 
   describe('B1 PIN — falsy data override (EXPECTED TO FAIL pre-fix)', () => {
     it('seeds Signal with 0 when data: { count: 0 }', () => {
-      const { template, cleanup } = freshTemplate({
+      const template = new Template({
         defaultState: { count: 5 },
         data: { count: 0 },
       });
-      try {
-        expect(template.state.count.peek()).toBe(0);
-      }
-      finally {
-        cleanup();
-      }
+      expect(template.state.count.peek()).toBe(0);
     });
 
     it('seeds Signal with false when data: { active: false }', () => {
-      const { template, cleanup } = freshTemplate({
+      const template = new Template({
         defaultState: { active: true },
         data: { active: false },
       });
-      try {
-        expect(template.state.active.peek()).toBe(false);
-      }
-      finally {
-        cleanup();
-      }
+      expect(template.state.active.peek()).toBe(false);
     });
 
     it('seeds Signal with empty string when data: { name: "" }', () => {
-      const { template, cleanup } = freshTemplate({
+      const template = new Template({
         defaultState: { name: 'default' },
         data: { name: '' },
       });
-      try {
-        expect(template.state.name.peek()).toBe('');
-      }
-      finally {
-        cleanup();
-      }
+      expect(template.state.name.peek()).toBe('');
     });
 
     it('seeds Signal with null when data: { value: null }', () => {
-      const { template, cleanup } = freshTemplate({
+      const template = new Template({
         defaultState: { value: 'default' },
         data: { value: null },
       });
-      try {
-        expect(template.state.value.peek()).toBe(null);
-      }
-      finally {
-        cleanup();
-      }
+      expect(template.state.value.peek()).toBe(null);
     });
   });
 });
@@ -227,124 +173,92 @@ describe('Template — createReactiveState', () => {
 
 describe('Template — getDataContext merge order', () => {
   it('returns data only when only data is set', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       data: { name: 'jack' },
     });
-    try {
-      const ctx = template.getDataContext();
-      expect(ctx).toEqual({ name: 'jack' });
-    }
-    finally {
-      cleanup();
-    }
+    const ctx = template.getDataContext();
+    expect(ctx).toEqual({ name: 'jack' });
   });
 
   it('returns state Signals only when only defaultState is set', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       defaultState: { count: 7 },
     });
-    try {
-      const ctx = template.getDataContext();
-      expect(ctx.count).toBeInstanceOf(Signal);
-      expect(ctx.count.peek()).toBe(7);
-    }
-    finally {
-      cleanup();
-    }
+    const ctx = template.getDataContext();
+    expect(ctx.count).toBeInstanceOf(Signal);
+    expect(ctx.count.peek()).toBe(7);
   });
 
   it('includes instance properties from createComponent', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
       createComponent: () => ({ greet: 'hi' }),
     });
-    try {
-      template.initialize();
-      const ctx = template.getDataContext();
-      expect(ctx.greet).toBe('hi');
-    }
-    finally {
-      cleanup();
-    }
+    template.initialize();
+    const ctx = template.getDataContext();
+    expect(ctx.greet).toBe('hi');
   });
 
   it('lets state Signal win over data on key collision', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       defaultState: { name: 'sally' },
       data: { name: 'jack' },
     });
-    try {
-      const ctx = template.getDataContext();
-      // state wraps the same key — state's Signal wins by spread order
-      expect(ctx.name).toBeInstanceOf(Signal);
-      // data override is truthy so the Signal seeds with 'jack' (per
-      // truthy-only override behavior); the assertion here is only that
-      // STATE wins the merge, not what the Signal happens to hold.
-      expect(ctx.name.peek()).toBe('jack');
-    }
-    finally {
-      cleanup();
-    }
+    const ctx = template.getDataContext();
+    // state wraps the same key — state's Signal wins by spread order
+    expect(ctx.name).toBeInstanceOf(Signal);
+    // data override is truthy so the Signal seeds with 'jack' (per
+    // truthy-only override behavior); the assertion here is only that
+    // STATE wins the merge, not what the Signal happens to hold.
+    expect(ctx.name.peek()).toBe('jack');
   });
 
   it('lets instance win over data on key collision', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
       data: { name: 'jack' },
       createComponent: () => ({ name: 'bob' }),
     });
-    try {
-      template.initialize();
-      const ctx = template.getDataContext();
-      expect(ctx.name).toBe('bob');
-    }
-    finally {
-      cleanup();
-    }
+    template.initialize();
+    const ctx = template.getDataContext();
+    expect(ctx.name).toBe('bob');
   });
 
   it('lets instance win over state on key collision', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
       defaultState: { name: 'sally' },
       createComponent: () => ({ name: 'bob' }),
     });
-    try {
-      template.initialize();
-      const ctx = template.getDataContext();
-      expect(ctx.name).toBe('bob');
-    }
-    finally {
-      cleanup();
-    }
+    template.initialize();
+    const ctx = template.getDataContext();
+    expect(ctx.name).toBe('bob');
   });
 
   it('lets instance win across all three layers (transitive)', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
       data: { value: 'data' },
       defaultState: { value: 'state' },
       createComponent: () => ({ value: 'instance' }),
     });
-    try {
-      template.initialize();
-      const ctx = template.getDataContext();
-      expect(ctx.value).toBe('instance');
-    }
-    finally {
-      cleanup();
-    }
+    template.initialize();
+    const ctx = template.getDataContext();
+    expect(ctx.value).toBe('instance');
   });
 
   it('returns a fresh object on every call', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       data: { name: 'jack' },
     });
-    try {
-      const a = template.getDataContext();
-      const b = template.getDataContext();
-      expect(a).not.toBe(b);
-      expect(a).toEqual(b);
-    }
-    finally {
-      cleanup();
-    }
+    const a = template.getDataContext();
+    const b = template.getDataContext();
+    expect(a).not.toBe(b);
+    expect(a).toEqual(b);
   });
 
   it('does NOT include settings (settings enter via overlay)', () => {
@@ -355,16 +269,11 @@ describe('Template — getDataContext merge order', () => {
       settingsVars: new Map([['color', new Signal('blue')]]),
       defaultSettings: { color: 'blue' },
     };
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       element: fakeElement,
     });
-    try {
-      const ctx = template.getDataContext();
-      expect(ctx.color).toBeUndefined();
-    }
-    finally {
-      cleanup();
-    }
+    const ctx = template.getDataContext();
+    expect(ctx.color).toBeUndefined();
   });
 });
 
@@ -374,72 +283,47 @@ describe('Template — getDataContext merge order', () => {
 
 describe('Template — setDataContext', () => {
   it('merges new keys into this.data', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       data: { a: 1 },
     });
-    try {
-      template.setDataContext({ a: 1, b: 2 });
-      expect(template.data).toEqual({ a: 1, b: 2 });
-    }
-    finally {
-      cleanup();
-    }
+    template.setDataContext({ a: 1, b: 2 });
+    expect(template.data).toEqual({ a: 1, b: 2 });
   });
 
   it('sets dataReplaced=true when something changes', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       data: { a: 1 },
     });
-    try {
-      template.dataReplaced = false;
-      template.setDataContext({ a: 1, b: 2 });
-      expect(template.dataReplaced).toBe(true);
-    }
-    finally {
-      cleanup();
-    }
+    template.dataReplaced = false;
+    template.setDataContext({ a: 1, b: 2 });
+    expect(template.dataReplaced).toBe(true);
   });
 
   it('does NOT set dataReplaced when nothing changes', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       data: { a: 1, b: 2 },
     });
-    try {
-      template.dataReplaced = false;
-      template.setDataContext({ a: 1, b: 2 });
-      expect(template.dataReplaced).toBe(false);
-    }
-    finally {
-      cleanup();
-    }
+    template.dataReplaced = false;
+    template.setDataContext({ a: 1, b: 2 });
+    expect(template.dataReplaced).toBe(false);
   });
 
   it('default { rerender: true } resets this.rendered to false', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       data: { a: 1 },
     });
-    try {
-      template.rendered = true;
-      template.setDataContext({ a: 2 });
-      expect(template.rendered).toBe(false);
-    }
-    finally {
-      cleanup();
-    }
+    template.rendered = true;
+    template.setDataContext({ a: 2 });
+    expect(template.rendered).toBe(false);
   });
 
   it('{ rerender: false } preserves this.rendered', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       data: { a: 1 },
     });
-    try {
-      template.rendered = true;
-      template.setDataContext({ a: 2 }, { rerender: false });
-      expect(template.rendered).toBe(true);
-    }
-    finally {
-      cleanup();
-    }
+    template.rendered = true;
+    template.setDataContext({ a: 2 }, { rerender: false });
+    expect(template.rendered).toBe(true);
   });
 
   /*******************************
@@ -450,17 +334,12 @@ describe('Template — setDataContext', () => {
     // assignInPlace deletes keys on target that aren't in source unless
     // preserveExistingKeys is true. setDataContext does NOT pass it, so
     // missing keys disappear.
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       data: { a: 1, b: 2 },
     });
-    try {
-      template.setDataContext({ a: 1 }); // no `b`
-      expect(template.data).toEqual({ a: 1 });
-      expect('b' in template.data).toBe(false);
-    }
-    finally {
-      cleanup();
-    }
+    template.setDataContext({ a: 1 }); // no `b`
+    expect(template.data).toEqual({ a: 1 });
+    expect('b' in template.data).toBe(false);
   });
 });
 
@@ -470,44 +349,32 @@ describe('Template — setDataContext', () => {
 
 describe('Template — overlaySettingsSignals (subtemplate path)', () => {
   it('is a no-op when settingsVars is not set', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate({
+    const parent = new Template();
+    const child = new Template({
       defaultSettings: { color: 'blue' },
     });
     child.setParent(parent);
-    try {
-      // No settingsVars → nothing overlaid; context returned unchanged.
-      const ctx = { existing: 'value' };
-      const result = child.overlaySettingsSignals(ctx);
-      expect(result).toBe(ctx);
-      expect(result.color).toBeUndefined();
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    // No settingsVars → nothing overlaid; context returned unchanged.
+    const ctx = { existing: 'value' };
+    const result = child.overlaySettingsSignals(ctx);
+    expect(result).toBe(ctx);
+    expect(result.color).toBeUndefined();
   });
 
   it('is a no-op when defaultSettings is missing', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate();
+    const parent = new Template();
+    const child = new Template();
     child.setParent(parent);
     // settingsVars set but defaultSettings absent → branch falls through
     child.settingsVars = new Map([['color', new Signal('red')]]);
-    try {
-      const ctx = {};
-      child.overlaySettingsSignals(ctx);
-      expect(ctx.color).toBeUndefined();
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    const ctx = {};
+    child.overlaySettingsSignals(ctx);
+    expect(ctx.color).toBeUndefined();
   });
 
   it('overlays Signals from settingsVars onto context', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate({
+    const parent = new Template();
+    const child = new Template({
       defaultSettings: { color: 'blue' },
     });
     child.setParent(parent);
@@ -517,54 +384,37 @@ describe('Template — overlaySettingsSignals (subtemplate path)', () => {
     const colorSignal = new Signal('red');
     child.settingsVars = new Map([['color', colorSignal]]);
     child.settings = { color: 'red' }; // proxy stand-in; just needs to read
-    try {
-      const ctx = {};
-      child.overlaySettingsSignals(ctx);
-      expect(ctx.color).toBe(colorSignal);
-      expect(ctx.color.peek()).toBe('red');
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    const ctx = {};
+    child.overlaySettingsSignals(ctx);
+    expect(ctx.color).toBe(colorSignal);
+    expect(ctx.color.peek()).toBe('red');
   });
 
   it('makes the Signal win over a plain duplicate from the spread', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate({
+    const parent = new Template();
+    const child = new Template({
       defaultSettings: { color: 'blue' },
     });
     child.setParent(parent);
     const colorSignal = new Signal('red');
     child.settingsVars = new Map([['color', colorSignal]]);
     child.settings = { color: 'red' };
-    try {
-      const ctx = { color: 'plain-string' };
-      child.overlaySettingsSignals(ctx);
-      // overlay wrote AFTER the spread → Signal wins
-      expect(ctx.color).toBe(colorSignal);
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    const ctx = { color: 'plain-string' };
+    child.overlaySettingsSignals(ctx);
+    // overlay wrote AFTER the spread → Signal wins
+    expect(ctx.color).toBe(colorSignal);
   });
 });
 
 describe('Template — overlaySettingsSignals (web component path)', () => {
   it('is a no-op when element has no settingsVars', () => {
     const fakeElement = { settings: {} };
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       element: fakeElement,
     });
-    try {
-      const ctx = {};
-      template.overlaySettingsSignals(ctx);
-      expect(ctx).toEqual({});
-    }
-    finally {
-      cleanup();
-    }
+    const ctx = {};
+    template.overlaySettingsSignals(ctx);
+    expect(ctx).toEqual({});
   });
 
   it('overlays each settingsVars entry as a Signal onto context', () => {
@@ -578,18 +428,13 @@ describe('Template — overlaySettingsSignals (web component path)', () => {
       ]),
       defaultSettings: { color: 'blue', size: 'small' },
     };
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       element: fakeElement,
     });
-    try {
-      const ctx = {};
-      template.overlaySettingsSignals(ctx);
-      expect(ctx.color).toBe(colorSignal);
-      expect(ctx.size).toBe(sizeSignal);
-    }
-    finally {
-      cleanup();
-    }
+    const ctx = {};
+    template.overlaySettingsSignals(ctx);
+    expect(ctx.color).toBe(colorSignal);
+    expect(ctx.size).toBe(sizeSignal);
   });
 
   it('touches each defaultSettings key (drives shadow Signal creation)', () => {
@@ -609,17 +454,12 @@ describe('Template — overlaySettingsSignals (web component path)', () => {
       settingsVars: new Map([['color', new Signal('blue')]]),
       defaultSettings: { color: 'blue', size: 'small' },
     };
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       element: fakeElement,
     });
-    try {
-      template.overlaySettingsSignals({});
-      expect(reads).toContain('color');
-      expect(reads).toContain('size');
-    }
-    finally {
-      cleanup();
-    }
+    template.overlaySettingsSignals({});
+    expect(reads).toContain('color');
+    expect(reads).toContain('size');
   });
 
   it('touches each componentSpec.attributes key (drives spec-attribute Signals)', () => {
@@ -642,17 +482,12 @@ describe('Template — overlaySettingsSignals (web component path)', () => {
         attributes: ['active', 'size'],
       },
     };
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       element: fakeElement,
     });
-    try {
-      template.overlaySettingsSignals({});
-      expect(reads).toContain('active');
-      expect(reads).toContain('size');
-    }
-    finally {
-      cleanup();
-    }
+    template.overlaySettingsSignals({});
+    expect(reads).toContain('active');
+    expect(reads).toContain('size');
   });
 
   it('returns the context object passed in', () => {
@@ -661,17 +496,12 @@ describe('Template — overlaySettingsSignals (web component path)', () => {
       settingsVars: new Map(),
       defaultSettings: {},
     };
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       element: fakeElement,
     });
-    try {
-      const ctx = { existing: 1 };
-      const result = template.overlaySettingsSignals(ctx);
-      expect(result).toBe(ctx);
-    }
-    finally {
-      cleanup();
-    }
+    const ctx = { existing: 1 };
+    const result = template.overlaySettingsSignals(ctx);
+    expect(result).toBe(ctx);
   });
 });
 
@@ -694,24 +524,19 @@ describe('Template — D8 PIN: settings overlay wins over state', () => {
       settingsVars: new Map([['color', settingsColorSignal]]),
       defaultSettings: { color: 'settings-blue' },
     };
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       element: fakeElement,
       defaultState: { color: 'state-red' },
     });
-    try {
-      // Mimic the render flow: spread, then overlay.
-      const ctx = template.getDataContext();
-      expect(ctx.color).toBeInstanceOf(Signal);
-      expect(ctx.color.peek()).toBe('state-red'); // state wins the spread
+    // Mimic the render flow: spread, then overlay.
+    const ctx = template.getDataContext();
+    expect(ctx.color).toBeInstanceOf(Signal);
+    expect(ctx.color.peek()).toBe('state-red'); // state wins the spread
 
-      template.overlaySettingsSignals(ctx);
-      // Settings overlay ran AFTER spread → settings Signal wins
-      expect(ctx.color).toBe(settingsColorSignal);
-      expect(ctx.color.peek()).toBe('settings-blue');
-    }
-    finally {
-      cleanup();
-    }
+    template.overlaySettingsSignals(ctx);
+    // Settings overlay ran AFTER spread → settings Signal wins
+    expect(ctx.color).toBe(settingsColorSignal);
+    expect(ctx.color.peek()).toBe('settings-blue');
   });
 });
 
@@ -755,43 +580,28 @@ describe('Template — extend (utils) shallow last-wins', () => {
 
 describe('Template — markRendered', () => {
   it('sets rendered=true and destroyed=false', () => {
-    const { template, cleanup } = freshTemplate();
-    try {
-      template.markRendered();
-      expect(template.rendered).toBe(true);
-      expect(template.destroyed).toBe(false);
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template();
+    template.markRendered();
+    expect(template.rendered).toBe(true);
+    expect(template.destroyed).toBe(false);
   });
 
   it('is idempotent', () => {
-    const { template, cleanup } = freshTemplate();
-    try {
-      template.markRendered();
-      template.markRendered();
-      template.markRendered();
-      expect(template.rendered).toBe(true);
-      expect(template.destroyed).toBe(false);
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template();
+    template.markRendered();
+    template.markRendered();
+    template.markRendered();
+    expect(template.rendered).toBe(true);
+    expect(template.destroyed).toBe(false);
   });
 
   it('revives a destroyed template (engine-facing contract)', () => {
-    const { template, cleanup } = freshTemplate();
-    try {
-      template.destroyed = true;
-      template.rendered = false;
-      template.markRendered();
-      expect(template.rendered).toBe(true);
-      expect(template.destroyed).toBe(false);
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template();
+    template.destroyed = true;
+    template.rendered = false;
+    template.markRendered();
+    expect(template.rendered).toBe(true);
+    expect(template.destroyed).toBe(false);
   });
 });
 
@@ -811,23 +621,18 @@ describe('Template — markRendered', () => {
 
 describe('Template — L3 PIN: dataReplaced flag is sticky', () => {
   it('first render leaves dataReplaced true after walk-through', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
       data: { a: 1 },
     });
-    try {
-      template.dataReplaced = false;
-      // simulate render's internal merge-and-update
-      template.setDataContext({ a: 1, b: 2 }, { rerender: false });
-      expect(template.dataReplaced).toBe(true);
-      // First-render branch (`if !rendered`) does not clear it.
-      // Only the else-if branch in render() does.
-      template.rendered = true; // simulate post-first-render markRendered
-      // Flag remains stuck-true — pin the bug for red-team Stage 3.
-      expect(template.dataReplaced).toBe(true);
-    }
-    finally {
-      cleanup();
-    }
+    template.dataReplaced = false;
+    // simulate render's internal merge-and-update
+    template.setDataContext({ a: 1, b: 2 }, { rerender: false });
+    expect(template.dataReplaced).toBe(true);
+    // First-render branch (`if !rendered`) does not clear it.
+    // Only the else-if branch in render() does.
+    template.rendered = true; // simulate post-first-render markRendered
+    // Flag remains stuck-true — pin the bug for red-team Stage 3.
+    expect(template.dataReplaced).toBe(true);
   });
 });
 
@@ -844,88 +649,67 @@ describe('Template — L3 PIN: dataReplaced flag is sticky', () => {
 
 describe('Template — C3 convergent: subtemplate settings respects falsy data', () => {
   it('subtemplate settings seeds from data: { count: 0 }', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate({
+    const parent = new Template();
+    const child = new Template({
+      template: '<span></span>',
+      renderingEngine: realEngine,
       defaultSettings: { count: 5 },
       data: { count: 0 },
     });
     child.setParent(parent);
-    try {
-      child.initialize();
-      // Settings proxy is set up by initialize via createSubtemplateSettings.
-      expect(child.settings.count).toBe(0);
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    child.initialize();
+    expect(child.settings.count).toBe(0);
   });
 
   it('subtemplate settings seeds from data: { active: false }', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate({
+    const parent = new Template();
+    const child = new Template({
+      template: '<span></span>',
+      renderingEngine: realEngine,
       defaultSettings: { active: true },
       data: { active: false },
     });
     child.setParent(parent);
-    try {
-      child.initialize();
-      expect(child.settings.active).toBe(false);
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    child.initialize();
+    expect(child.settings.active).toBe(false);
   });
 
   it('subtemplate settings seeds from data: { name: "" }', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate({
+    const parent = new Template();
+    const child = new Template({
+      template: '<span></span>',
+      renderingEngine: realEngine,
       defaultSettings: { name: 'default' },
       data: { name: '' },
     });
     child.setParent(parent);
-    try {
-      child.initialize();
-      expect(child.settings.name).toBe('');
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    child.initialize();
+    expect(child.settings.name).toBe('');
   });
 
   it('subtemplate settings seeds from data: { value: null }', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate({
+    const parent = new Template();
+    const child = new Template({
+      template: '<span></span>',
+      renderingEngine: realEngine,
       defaultSettings: { value: 'default' },
       data: { value: null },
     });
     child.setParent(parent);
-    try {
-      child.initialize();
-      expect(child.settings.value).toBe(null);
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    child.initialize();
+    expect(child.settings.value).toBe(null);
   });
 
   it('subtemplate settings falls through to default when data omits key', () => {
-    const { template: parent, cleanup: cleanupParent } = freshTemplate();
-    const { template: child, cleanup: cleanupChild } = freshTemplate({
+    const parent = new Template();
+    const child = new Template({
+      template: '<span></span>',
+      renderingEngine: realEngine,
       defaultSettings: { value: 'default' },
       data: {},
     });
     child.setParent(parent);
-    try {
-      child.initialize();
-      expect(child.settings.value).toBe('default');
-    }
-    finally {
-      cleanupChild();
-      cleanupParent();
-    }
+    child.initialize();
+    expect(child.settings.value).toBe('default');
   });
 });

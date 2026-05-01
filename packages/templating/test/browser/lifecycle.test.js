@@ -2,23 +2,73 @@
 //
 // These tests exercise Template's own contracts directly, without going through
 // WebComponentBase or defineComponent. The component-package browser tests cover
-// the full integration. See packages/templating/test/_helpers/README.md for the
-// cross-package boundary rationale.
+// the full integration.
+//
+// Lifecycle hook firing is renderRoot-agnostic: light DOM is sufficient for
+// every test in this file. mountTemplate uses a plain <div> as renderRoot.
 
 import { Reaction } from '@semantic-ui/reactivity';
+import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
+import { Template } from '@semantic-ui/templating';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Template } from '../../src/template.js';
-import { mountTemplateInShadow } from '../_helpers/browser-fixture.js';
-import { fireCustomEvent } from '../_helpers/dispatch.js';
-import { freshTemplate } from '../_helpers/fresh-template.js';
-import { assertRegistryEmpty, clearTemplateRegistry, snapshotRegistry } from '../_helpers/registry-cleanup.js';
-import { stubEngine } from '../_helpers/stub-engine.js';
-
 afterEach(() => {
-  clearTemplateRegistry();
+  Template.renderedTemplates.clear();
+  Template.templateCount = 0;
   document.body.innerHTML = '';
 });
+
+const realEngine = { renderer: Renderer, serverRenderer: ServerRenderer };
+
+// Light-DOM mount with a real Template + real Renderer. Lifecycle wrappers
+// fire identically whether the renderRoot is a shadowRoot or an element.
+async function mountTemplate({ template = '<div></div>', ...opts } = {}) {
+  const host = document.createElement('div');
+  document.body.appendChild(host);
+  const tpl = new Template({
+    template,
+    renderingEngine: realEngine,
+    element: host,
+    ...opts,
+  });
+  tpl.initialize();
+  await tpl.attach(host); // light DOM — host is the renderRoot
+  return {
+    host,
+    template: tpl,
+    cleanup: () => {
+      if (tpl.initialized && !tpl.destroyed) {
+        tpl.onDestroyed();
+      }
+      host.remove();
+    },
+  };
+}
+
+function fireCustomEvent(element, eventName, detail = {}) {
+  element.dispatchEvent(
+    new CustomEvent(eventName, {
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+      detail,
+    }),
+  );
+}
+
+function snapshotRegistry() {
+  const names = [...Template.renderedTemplates.keys()];
+  const counts = {};
+  for (const name of names) {
+    counts[name] = Template.renderedTemplates.get(name).length;
+  }
+  return {
+    size: names.length,
+    names,
+    counts,
+    totalInstances: Object.values(counts).reduce((s, n) => s + n, 0),
+  };
+}
 
 /*******************************
         Hook firing order
@@ -37,65 +87,62 @@ describe('Template lifecycle — hook firing order', () => {
     });
     const onCreated = vi.fn(() => calls.push('onCreated'));
 
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
       createComponent,
       onCreated,
     });
-    try {
-      template.initialize();
-      expect(calls).toEqual(['createComponent', 'instance.initialize', 'onCreated']);
-      expect(createComponent).toHaveBeenCalledTimes(1);
-      expect(onCreated).toHaveBeenCalledTimes(1);
-    }
-    finally {
-      cleanup();
-    }
+    template.initialize();
+    expect(calls).toEqual(['createComponent', 'instance.initialize', 'onCreated']);
+    expect(createComponent).toHaveBeenCalledTimes(1);
+    expect(onCreated).toHaveBeenCalledTimes(1);
   });
 
   it('does not fire onRendered during initialize() — only onCreated does', () => {
     const onCreated = vi.fn();
     const onRendered = vi.fn();
-    const { template, cleanup } = freshTemplate({ onCreated, onRendered });
-    try {
-      template.initialize();
-      expect(onCreated).toHaveBeenCalledTimes(1);
-      expect(onRendered).not.toHaveBeenCalled();
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      onCreated,
+      onRendered,
+    });
+    template.initialize();
+    expect(onCreated).toHaveBeenCalledTimes(1);
+    expect(onRendered).not.toHaveBeenCalled();
   });
 
   it('fires onRendered after a render() call', async () => {
     const onCreated = vi.fn();
     const onRendered = vi.fn();
-    const { template, cleanup } = freshTemplate({ onCreated, onRendered });
-    try {
-      template.initialize();
-      template.render();
-      // template.render() schedules onRendered via setTimeout(fn, 0)
-      await new Promise(r => setTimeout(r, 5));
-      expect(onCreated).toHaveBeenCalledTimes(1);
-      expect(onRendered).toHaveBeenCalledTimes(1);
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      onCreated,
+      onRendered,
+    });
+    template.initialize();
+    template.render();
+    // template.render() schedules onRendered via setTimeout(fn, 0)
+    await new Promise(r => setTimeout(r, 5));
+    expect(onCreated).toHaveBeenCalledTimes(1);
+    expect(onRendered).toHaveBeenCalledTimes(1);
   });
 
   it('fires onDestroyed when the wrapper is invoked', () => {
     const onCreated = vi.fn();
     const onDestroyed = vi.fn();
-    const { template, cleanup } = freshTemplate({ onCreated, onDestroyed });
-    try {
-      template.initialize();
-      template.onDestroyed();
-      expect(onDestroyed).toHaveBeenCalledTimes(1);
-      expect(template.destroyed).toBe(true);
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      onCreated,
+      onDestroyed,
+    });
+    template.initialize();
+    template.onDestroyed();
+    expect(onDestroyed).toHaveBeenCalledTimes(1);
+    expect(template.destroyed).toBe(true);
   });
 });
 
@@ -109,27 +156,26 @@ describe('Template lifecycle — callback params', () => {
     const onCreated = vi.fn((params) => {
       received = params;
     });
-    const { template, cleanup } = freshTemplate({ onCreated });
-    try {
-      template.initialize();
-      expect(received).toBeDefined();
-      // spot-check the documented destructurables
-      expect(received).toHaveProperty('self');
-      expect(received).toHaveProperty('tpl');
-      expect(received).toHaveProperty('component');
-      expect(received).toHaveProperty('state');
-      expect(received).toHaveProperty('data');
-      expect(received).toHaveProperty('isClient');
-      expect(received).toHaveProperty('isServer');
-      expect(received).toHaveProperty('isHydrating');
-      expect(received).toHaveProperty('reaction');
-      expect(received).toHaveProperty('signal');
-      expect(received).toHaveProperty('interval');
-      expect(received).toHaveProperty('timeout');
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      onCreated,
+    });
+    template.initialize();
+    expect(received).toBeDefined();
+    // spot-check the documented destructurables
+    expect(received).toHaveProperty('self');
+    expect(received).toHaveProperty('tpl');
+    expect(received).toHaveProperty('component');
+    expect(received).toHaveProperty('state');
+    expect(received).toHaveProperty('data');
+    expect(received).toHaveProperty('isClient');
+    expect(received).toHaveProperty('isServer');
+    expect(received).toHaveProperty('isHydrating');
+    expect(received).toHaveProperty('reaction');
+    expect(received).toHaveProperty('signal');
+    expect(received).toHaveProperty('interval');
+    expect(received).toHaveProperty('timeout');
   });
 
   it('passes the same callParams object to onDestroyed', () => {
@@ -141,15 +187,15 @@ describe('Template lifecycle — callback params', () => {
     const onDestroyed = vi.fn((p) => {
       destroyedParams = p;
     });
-    const { template, cleanup } = freshTemplate({ onCreated, onDestroyed });
-    try {
-      template.initialize();
-      template.onDestroyed();
-      expect(destroyedParams).toBe(createdParams);
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      onCreated,
+      onDestroyed,
+    });
+    template.initialize();
+    template.onDestroyed();
+    expect(destroyedParams).toBe(createdParams);
   });
 });
 
@@ -163,22 +209,21 @@ describe('Template lifecycle — callback params', () => {
 describe('Template.onUpdated wrapper (internal microtask debounce)', () => {
   it('does not invoke onUpdated wrapper directly during initialize()', () => {
     const onUpdated = vi.fn();
-    const { template, cleanup } = freshTemplate({ onUpdated });
-    try {
-      template.initialize();
-      // wrapper exists but the user callback is reached via this.call()
-      // and the onUpdated wrapper itself only fires the DOM event.
-      // For state-driven onUpdated, see the next test.
-      expect(typeof template.onUpdated).toBe('function');
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      onUpdated,
+    });
+    template.initialize();
+    // wrapper exists but the user callback is reached via this.call()
+    // and the onUpdated wrapper itself only fires the DOM event.
+    // For state-driven onUpdated, see the next test.
+    expect(typeof template.onUpdated).toBe('function');
   });
 
   it('schedules onUpdated via state Reaction afterFlush when state mutates after first render', async () => {
     const onUpdated = vi.fn();
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
       defaultState: { count: 0 },
       onUpdated,
@@ -212,7 +257,7 @@ describe('Template.onUpdated wrapper (internal microtask debounce)', () => {
   });
 
   it('emits a single updated DOM event when the state Reaction fires', async () => {
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
       defaultState: { count: 0 },
     });
@@ -233,7 +278,7 @@ describe('Template.onUpdated wrapper (internal microtask debounce)', () => {
   });
 
   it('coalesces multiple synchronous state mutations into one updated DOM event (microtask debounce)', async () => {
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
       defaultState: { a: 0, b: 0, c: 0 },
     });
@@ -255,7 +300,7 @@ describe('Template.onUpdated wrapper (internal microtask debounce)', () => {
   });
 
   it('does not dispatch updated when the wrapper runs before markRendered() (i.e., on first render)', async () => {
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
       defaultState: { count: 0 },
     });
@@ -276,7 +321,7 @@ describe('Template.onUpdated wrapper (internal microtask debounce)', () => {
   });
 
   it('flips updateScheduled true while pending and false after the microtask fires', async () => {
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
       defaultState: { count: 0 },
     });
@@ -304,14 +349,14 @@ describe('Template.onUpdated wrapper (internal microtask debounce)', () => {
 *******************************/
 
 describe('Template lifecycle — isHydrating gates DOM events (intentional, F-C)', () => {
-  it('runs the onCreated user callback during hydration', () => {
+  it('runs the onCreated user callback during hydration', async () => {
     const onCreated = vi.fn();
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
       onCreated,
     });
     try {
-      // mountTemplateInShadow already initialized once. The hydration gate
+      // mountTemplate already initialized once. The hydration gate
       // is observed on the dispatch path. Re-run: set isHydrating, then
       // manually invoke the onCreated wrapper to assert callback fires
       // and DOM event is suppressed.
@@ -328,9 +373,9 @@ describe('Template lifecycle — isHydrating gates DOM events (intentional, F-C)
     }
   });
 
-  it('suppresses the rendered DOM event during hydration but still runs the user callback', () => {
+  it('suppresses the rendered DOM event during hydration but still runs the user callback', async () => {
     const onRendered = vi.fn();
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
       onRendered,
     });
@@ -347,8 +392,8 @@ describe('Template lifecycle — isHydrating gates DOM events (intentional, F-C)
     }
   });
 
-  it('dispatches the created DOM event when not hydrating', () => {
-    const fixture = mountTemplateInShadow({
+  it('dispatches the created DOM event when not hydrating', async () => {
+    const fixture = await mountTemplate({
       template: '<span></span>',
     });
     const heard = vi.fn();
@@ -370,20 +415,18 @@ describe('Template lifecycle — isHydrating gates DOM events (intentional, F-C)
 
 describe('Template.lifecyclePromise (internal promise mechanics)', () => {
   it('returns the same Promise for repeated calls before resolution', () => {
-    const { template, cleanup } = freshTemplate();
-    try {
-      template.initialize();
-      const p1 = template.lifecyclePromise('rendered');
-      const p2 = template.lifecyclePromise('rendered');
-      expect(p1).toBe(p2);
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+    });
+    template.initialize();
+    const p1 = template.lifecyclePromise('rendered');
+    const p2 = template.lifecyclePromise('rendered');
+    expect(p1).toBe(p2);
   });
 
   it('caches the resolved promise for one-shot events (created)', async () => {
-    const fixture = mountTemplateInShadow({ template: '<span></span>' });
+    const fixture = await mountTemplate({ template: '<span></span>' });
     try {
       // mount already invoked onCreated which called resolveLifecyclePromise('created').
       // BUT mount didn't access lifecyclePromise('created') beforehand —
@@ -405,33 +448,29 @@ describe('Template.lifecyclePromise (internal promise mechanics)', () => {
   });
 
   it('returns a fresh Promise after resolution for the recurring event (updated)', () => {
-    const { template, cleanup } = freshTemplate();
-    try {
-      template.initialize();
-      const p1 = template.lifecyclePromise('updated');
-      template.resolveLifecyclePromise('updated');
-      const p2 = template.lifecyclePromise('updated');
-      // recurring: cached promise was deleted, p2 is a fresh promise
-      expect(p1).not.toBe(p2);
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+    });
+    template.initialize();
+    const p1 = template.lifecyclePromise('updated');
+    template.resolveLifecyclePromise('updated');
+    const p2 = template.lifecyclePromise('updated');
+    // recurring: cached promise was deleted, p2 is a fresh promise
+    expect(p1).not.toBe(p2);
   });
 
   it('no-ops resolveLifecyclePromise when no resolver is registered', () => {
-    const { template, cleanup } = freshTemplate();
-    try {
-      template.initialize();
-      // never accessed lifecyclePromise('rendered'), so no resolver is registered.
-      // This call should not throw.
-      expect(() => template.resolveLifecyclePromise('rendered')).not.toThrow();
-      // and the promise map is still empty
-      expect(template.lifecyclePromises.rendered).toBeUndefined();
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+    });
+    template.initialize();
+    // never accessed lifecyclePromise('rendered'), so no resolver is registered.
+    // This call should not throw.
+    expect(() => template.resolveLifecyclePromise('rendered')).not.toThrow();
+    // and the promise map is still empty
+    expect(template.lifecyclePromises.rendered).toBeUndefined();
   });
 
   /*
@@ -446,23 +485,21 @@ describe('Template.lifecyclePromise (internal promise mechanics)', () => {
    * EXPECTED-BUG-PIN: should fail with current source. Fold-fix at B2.
    */
   it('B2a: lifecyclePromise(created) accessed AFTER resolveLifecyclePromise hangs forever (expected bug)', async () => {
-    const { template, cleanup } = freshTemplate();
-    try {
-      template.initialize();
-      // simulate the lifecycle event firing without any prior promise access
-      template.resolveLifecyclePromise('created');
-      // now a consumer awaits el.created for the first time
-      const promise = template.lifecyclePromise('created');
-      const settled = await Promise.race([
-        promise.then(() => 'resolved'),
-        new Promise(resolve => setTimeout(() => resolve('hung'), 100)),
-      ]);
-      // After B2 fix: should be 'resolved'. Today: 'hung'.
-      expect(settled).toBe('resolved');
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+    });
+    template.initialize();
+    // simulate the lifecycle event firing without any prior promise access
+    template.resolveLifecyclePromise('created');
+    // now a consumer awaits el.created for the first time
+    const promise = template.lifecyclePromise('created');
+    const settled = await Promise.race([
+      promise.then(() => 'resolved'),
+      new Promise(resolve => setTimeout(() => resolve('hung'), 100)),
+    ]);
+    // After B2 fix: should be 'resolved'. Today: 'hung'.
+    expect(settled).toBe('resolved');
   });
 
   /*
@@ -476,7 +513,7 @@ describe('Template.lifecyclePromise (internal promise mechanics)', () => {
    * EXPECTED-BUG-PIN: should fail with current source. Fold-fix at B2.
    */
   it('B2b: lifecyclePromise(rendered) hangs when onRendered fires during isHydrating (expected bug)', async () => {
-    const fixture = mountTemplateInShadow({ template: '<span></span>' });
+    const fixture = await mountTemplate({ template: '<span></span>' });
     try {
       // pre-access (so B2a is not the cause of failure here)
       const promise = fixture.template.lifecyclePromise('rendered');
@@ -506,7 +543,7 @@ describe('Template.lifecyclePromise (internal promise mechanics)', () => {
     // invokes its listener synchronously). Net order: DOM listener fires
     // first, then-continuation drains in the next microtask. Pinning here
     // so any future change to this ordering is intentional.
-    const fixture = mountTemplateInShadow({ template: '<span></span>' });
+    const fixture = await mountTemplate({ template: '<span></span>' });
     try {
       const order = [];
       const promise = fixture.template.lifecyclePromise('updated').then(() => {
@@ -537,8 +574,8 @@ describe('Template.lifecyclePromise (internal promise mechanics)', () => {
 *******************************/
 
 describe('Template lifecycle — onThemeChanged observer', () => {
-  it('does not install a MutationObserver when no onThemeChanged callback is provided', () => {
-    const fixture = mountTemplateInShadow({ template: '<span></span>' });
+  it('does not install a MutationObserver when no onThemeChanged callback is provided', async () => {
+    const fixture = await mountTemplate({ template: '<span></span>' });
     try {
       // no observers registered for theme — observers array stays empty
       // (events DSL doesn't add observers; only the theme path does)
@@ -549,8 +586,8 @@ describe('Template lifecycle — onThemeChanged observer', () => {
     }
   });
 
-  it('installs a MutationObserver when onThemeChanged is provided', () => {
-    const fixture = mountTemplateInShadow({
+  it('installs a MutationObserver when onThemeChanged is provided', async () => {
+    const fixture = await mountTemplate({
       template: '<span></span>',
       onThemeChanged: () => {},
     });
@@ -564,7 +601,7 @@ describe('Template lifecycle — onThemeChanged observer', () => {
 
   it('fires onThemeChanged when the html class attribute changes', async () => {
     const onThemeChanged = vi.fn();
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
       onThemeChanged,
     });
@@ -586,7 +623,7 @@ describe('Template lifecycle — onThemeChanged observer', () => {
 
   it('fires onThemeChanged when a themechange event is dispatched on html', async () => {
     const onThemeChanged = vi.fn();
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
       onThemeChanged,
     });
@@ -602,7 +639,7 @@ describe('Template lifecycle — onThemeChanged observer', () => {
 
   it('coalesces a class mutation and a themechange event in the same window into one callback (10ms debounce)', async () => {
     const onThemeChanged = vi.fn();
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
       onThemeChanged,
     });
@@ -621,9 +658,9 @@ describe('Template lifecycle — onThemeChanged observer', () => {
     }
   });
 
-  it('disconnects the MutationObserver on destroy', () => {
+  it('disconnects the MutationObserver on destroy', async () => {
     const onThemeChanged = vi.fn();
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
       onThemeChanged,
     });
@@ -641,88 +678,86 @@ describe('Template lifecycle — onThemeChanged observer', () => {
 
 describe('Template.renderedTemplates registry', () => {
   it('adds a template on onCreated and removes it on onDestroyed', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
       templateName: 'registry-add-remove',
     });
-    try {
-      template.initialize();
-      const after = snapshotRegistry();
-      expect(after.counts['registry-add-remove']).toBe(1);
-      template.onDestroyed();
-      const afterDestroy = snapshotRegistry();
-      // remove() leaves an empty array on the key
-      expect(afterDestroy.counts['registry-add-remove'] || 0).toBe(0);
-    }
-    finally {
-      cleanup();
-    }
+    template.initialize();
+    const after = snapshotRegistry();
+    expect(after.counts['registry-add-remove']).toBe(1);
+    template.onDestroyed();
+    const afterDestroy = snapshotRegistry();
+    // remove() leaves an empty array on the key
+    expect(afterDestroy.counts['registry-add-remove'] || 0).toBe(0);
   });
 
   it('does not register isPrototype templates', () => {
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
       templateName: 'proto-template',
       isPrototype: true,
     });
-    try {
-      template.initialize();
-      const after = snapshotRegistry();
-      expect(after.counts['proto-template'] || 0).toBe(0);
-    }
-    finally {
-      cleanup();
-    }
+    template.initialize();
+    const after = snapshotRegistry();
+    expect(after.counts['proto-template'] || 0).toBe(0);
   });
 
   it('grows the array to N when N templates share a name', () => {
-    const a = freshTemplate({ templateName: 'shared-name' });
-    const b = freshTemplate({ templateName: 'shared-name' });
-    const c = freshTemplate({ templateName: 'shared-name' });
-    try {
-      a.template.initialize();
-      b.template.initialize();
-      c.template.initialize();
-      expect(snapshotRegistry().counts['shared-name']).toBe(3);
-      b.template.onDestroyed();
-      expect(snapshotRegistry().counts['shared-name']).toBe(2);
-    }
-    finally {
-      a.cleanup();
-      b.cleanup();
-      c.cleanup();
-    }
+    const a = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      templateName: 'shared-name',
+    });
+    const b = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      templateName: 'shared-name',
+    });
+    const c = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      templateName: 'shared-name',
+    });
+    a.initialize();
+    b.initialize();
+    c.initialize();
+    expect(snapshotRegistry().counts['shared-name']).toBe(3);
+    b.onDestroyed();
+    expect(snapshotRegistry().counts['shared-name']).toBe(2);
+    a.onDestroyed();
+    c.onDestroyed();
   });
 
   it('auto-names anonymous templates using Template.templateCount', () => {
     Template.templateCount = 0;
-    const a = freshTemplate(); // no templateName
-    const b = freshTemplate();
-    try {
-      expect(a.template.templateName).toBe('Anonymous #1');
-      expect(b.template.templateName).toBe('Anonymous #2');
-    }
-    finally {
-      a.cleanup();
-      b.cleanup();
-    }
+    const a = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+    }); // no templateName
+    const b = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+    });
+    expect(a.templateName).toBe('Anonymous #1');
+    expect(b.templateName).toBe('Anonymous #2');
   });
 
   it('removes the template from registry BEFORE invoking the user onDestroyed callback', () => {
     const observed = vi.fn();
-    const { template, cleanup } = freshTemplate({
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
       templateName: 'registry-order',
       onDestroyed() {
         observed(snapshotRegistry().counts['registry-order'] || 0);
       },
     });
-    try {
-      template.initialize();
-      template.onDestroyed();
-      // when the user callback ran, this template was already removed
-      expect(observed).toHaveBeenCalledWith(0);
-    }
-    finally {
-      cleanup();
-    }
+    template.initialize();
+    template.onDestroyed();
+    // when the user callback ran, this template was already removed
+    expect(observed).toHaveBeenCalledWith(0);
   });
 });
 
@@ -744,19 +779,20 @@ describe('Template lifecycle — SSR sequence (D3 pin)', () => {
   it('runs onCreated callback on the server', () => {
     Template.isServer = true;
     const onCreated = vi.fn();
-    const { template, cleanup } = freshTemplate({ onCreated });
-    try {
-      template.initialize();
-      expect(onCreated).toHaveBeenCalledTimes(1);
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      onCreated,
+    });
+    template.initialize();
+    expect(onCreated).toHaveBeenCalledTimes(1);
+    Template.isServer = originalIsServer;
+    template.onDestroyed();
   });
 
-  it('does not dispatch the created DOM event on the server (dispatchEvent early-returns)', () => {
+  it('does not dispatch the created DOM event on the server (dispatchEvent early-returns)', async () => {
     Template.isServer = true;
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
     });
     const heard = vi.fn();
@@ -768,6 +804,7 @@ describe('Template lifecycle — SSR sequence (D3 pin)', () => {
       expect(heard).not.toHaveBeenCalled();
     }
     finally {
+      Template.isServer = originalIsServer;
       fixture.cleanup();
     }
   });
@@ -781,21 +818,22 @@ describe('Template lifecycle — SSR sequence (D3 pin)', () => {
     // D3 doc-cleanup follow-up.
     Template.isServer = true;
     const onRendered = vi.fn();
-    const { template, cleanup } = freshTemplate({ onRendered });
-    try {
-      template.initialize();
-      template.render();
-      await new Promise(r => setTimeout(r, 5));
-      expect(onRendered).toHaveBeenCalledTimes(1);
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      onRendered,
+    });
+    template.initialize();
+    template.render();
+    await new Promise(r => setTimeout(r, 5));
+    expect(onRendered).toHaveBeenCalledTimes(1);
+    Template.isServer = originalIsServer;
+    template.onDestroyed();
   });
 
-  it('does not install the theme MutationObserver on the server', () => {
+  it('does not install the theme MutationObserver on the server', async () => {
     Template.isServer = true;
-    const fixture = mountTemplateInShadow({
+    const fixture = await mountTemplate({
       template: '<span></span>',
       onThemeChanged: () => {},
     });
@@ -803,6 +841,7 @@ describe('Template lifecycle — SSR sequence (D3 pin)', () => {
       expect(fixture.template.observers.length).toBe(0);
     }
     finally {
+      Template.isServer = originalIsServer;
       fixture.cleanup();
     }
   });
@@ -814,78 +853,72 @@ describe('Template lifecycle — SSR sequence (D3 pin)', () => {
 
 describe('Template lifecycle — destroy cleanup contract', () => {
   it('aborts the abortController signal', () => {
-    const { template, cleanup } = freshTemplate();
-    try {
-      template.initialize();
-      expect(template.abortSignal.aborted).toBe(false);
-      template.onDestroyed();
-      expect(template.abortSignal.aborted).toBe(true);
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+    });
+    template.initialize();
+    expect(template.abortSignal.aborted).toBe(false);
+    template.onDestroyed();
+    expect(template.abortSignal.aborted).toBe(true);
   });
 
   it('stops registered reactions and clears the array entries', () => {
-    const { template, cleanup } = freshTemplate();
-    try {
-      template.initialize();
-      // initialize() pushed at least the state-driven onUpdated reaction
-      // (only when this.element is truthy — freshTemplate has no element).
-      // Add one explicitly so we can observe it.
-      let runs = 0;
-      template.reaction(() => {
-        runs++;
-      });
-      Reaction.flush();
-      expect(runs).toBe(1);
-      const reactions = template.reactions;
-      template.onDestroyed();
-      // each reaction.stop() is called — Reaction.stop sets _stopped flag
-      reactions.forEach(r => {
-        expect(r._stopped !== undefined ? r._stopped : true).toBeTruthy();
-      });
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+    });
+    template.initialize();
+    // initialize() pushed at least the state-driven onUpdated reaction
+    // (only when this.element is truthy — bare new Template() above has no element).
+    // Add one explicitly so we can observe it.
+    let runs = 0;
+    template.reaction(() => {
+      runs++;
+    });
+    Reaction.flush();
+    expect(runs).toBe(1);
+    const reactions = template.reactions;
+    template.onDestroyed();
+    // each reaction.stop() is called — Reaction.stop sets _stopped flag
+    reactions.forEach(r => {
+      expect(r._stopped !== undefined ? r._stopped : true).toBeTruthy();
+    });
   });
 
   it('flips destroyed=true and rendered=false on destroy', () => {
-    const { template, cleanup } = freshTemplate();
-    try {
-      template.initialize();
-      template.markRendered();
-      expect(template.rendered).toBe(true);
-      template.onDestroyed();
-      expect(template.destroyed).toBe(true);
-      expect(template.rendered).toBe(false);
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+    });
+    template.initialize();
+    template.markRendered();
+    expect(template.rendered).toBe(true);
+    template.onDestroyed();
+    expect(template.destroyed).toBe(true);
+    expect(template.rendered).toBe(false);
   });
 
   it('detaches from parentTemplate._childTemplates on destroy', () => {
-    const parent = freshTemplate();
-    const child = freshTemplate();
-    try {
-      parent.template.initialize();
-      child.template.initialize();
-      child.template.setParent(parent.template);
-      expect(parent.template._childTemplates.length).toBe(1);
-      child.template.onDestroyed();
-      expect(parent.template._childTemplates.length).toBe(0);
-    }
-    finally {
-      parent.cleanup();
-      // child already destroyed; cleanup is a no-op in that branch
-      child.cleanup();
-    }
+    const parent = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+    });
+    const child = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+    });
+    parent.initialize();
+    child.initialize();
+    child.setParent(parent);
+    expect(parent._childTemplates.length).toBe(1);
+    child.onDestroyed();
+    expect(parent._childTemplates.length).toBe(0);
+    parent.onDestroyed();
   });
 
-  it('aborts the eventController on destroy (cascades from abortSignal)', () => {
-    const fixture = mountTemplateInShadow({
+  it('aborts the eventController on destroy (cascades from abortSignal)', async () => {
+    const fixture = await mountTemplate({
       template: '<span></span>',
       events: { 'click span'() {} },
     });
@@ -902,14 +935,14 @@ describe('Template lifecycle — destroy cleanup contract', () => {
   });
 
   it('leaves the registry empty after a clean lifecycle (leak check)', () => {
-    const { template, cleanup } = freshTemplate({ templateName: 'leak-check' });
-    try {
-      template.initialize();
-      template.onDestroyed();
-      assertRegistryEmpty();
-    }
-    finally {
-      cleanup();
-    }
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      templateName: 'leak-check',
+    });
+    template.initialize();
+    template.onDestroyed();
+    const snap = snapshotRegistry();
+    expect(snap.totalInstances).toBe(0);
   });
 });
