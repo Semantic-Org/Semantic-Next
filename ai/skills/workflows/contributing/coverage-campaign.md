@@ -115,14 +115,20 @@ signal, so be specific about what you flag.
 
 ---
 
-### Stage 1.5 — Intent Reconciliation [USER GATE]
+### Stage 1.5 — Intent Reconciliation [USER GATE — conditional]
 
-**Critical stage.** This is where the orchestrator earns its keep, and where determining intent often requires the user.
+**Where the orchestrator earns its keep.** Determining intent often — but not always — requires the user.
+
+**Off-ramp.** If Stage-1 reports surface no convergent ambiguities, no doc-vs-source disagreements that affect the contract, and no cross-surface tensions, proceed directly to Stage 2. The gate exists for decisions, not ceremony. Most campaigns will gate; not all need to.
+
+**Re-partition if Stage 1 revealed the partition was wrong.** A surface bleeding into another, or two surfaces that should have been one, surfaces here. Re-partition before spawning Stage 2 — the cost of one re-spawn is far less than the cost of two subagents writing overlapping or conflicting tests.
+
+When the gate IS warranted:
 
 1. **Read every Stage-1 report.** Don't skim; the labeled claims matter.
 2. **Build an aggregated findings table** — one row per surface-flagged contract ambiguity, doc-vs-source drift, or ambiguous spec. Tag rows where multiple surfaces independently flagged the same thing (convergent findings = high confidence).
 3. **Identify cross-surface tensions.** Surface A's claim may conflict with Surface B's. Resolve by reading source, or surface to user if unresolvable.
-4. **Identify shared scaffolding needs.** If three subagents all sketched a "fresh-component fixture" pattern, the orchestrator should write that helper once.
+4. **Identify shared scaffolding needs.** If three subagents all sketched a "fresh-component fixture" pattern, the orchestrator should write that helper once and broadcast it to Stage 2 spawns (see "Sharing between subagents" below).
 5. **Surface to user, in one batch:**
    - Convergent findings (highest confidence — "three subagents flagged X")
    - Doc-vs-source disagreements that affect the contract
@@ -264,6 +270,8 @@ Do not write tests — return findings.
 
 If high-priority gaps require a Stage-2-style spawn, treat that as a focused mini-iteration — same prompt template, narrower scope.
 
+**Cap at one mini-iteration.** A second round of red-team after the gap-fillers is the limit; remaining findings go to backlog with a brief note, not into a third loop. The campaign isn't trying for completeness — it's trying for honest first-pass coverage with documented residue. Diminishing returns on a third pass are real, and the user can re-spawn red-team later when the residue list earns its own attention.
+
 ---
 
 ### Stage 4 — Final Pass
@@ -297,7 +305,11 @@ Do NOT one-question-at-a-time. The orchestrator's job is to gather all decision-
 
 Inside a stage, individual subagents may flag findings. The orchestrator collects, dedupes, ranks by confidence (convergent = high), and presents in a structured table. The user makes one pass through the table; the orchestrator updates downstream artifacts.
 
-**Sharing feedback between subagents (within a stage):** generally don't. Each subagent works in isolation on its surface; sharing risks contamination of independent traces. The orchestrator gathers and reconciles after the stage. Exception: if Stage-1 reveals a critical shared concept (e.g., "the engine isn't registered in templating tests; here's the stub-engine pattern"), broadcast that to Stage-2 subagents at spawn time.
+**Sharing between subagents:** broadcast shared *scaffolding* freely between stages — fixtures, stub patterns, helpers, "every test needs an engine stub; here's the pattern." If Stage 1 surfaced it, every Stage 2 subagent should get it at spawn time rather than rediscover it. The orchestrator owns this distribution; that's the point of having an orchestrator.
+
+What to NOT share is *intent traces* mid-stage. Stage-1 subagents are independent witnesses; cross-pollinating their findings before reconciliation collapses the convergent-finding signal into orchestrator suggestion. Convergence is high-confidence only when it's independent.
+
+So: scaffolding crosses freely between stages; claims do not cross within a stage.
 
 ---
 

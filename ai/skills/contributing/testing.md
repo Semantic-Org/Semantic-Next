@@ -343,8 +343,6 @@ await expect.element(page.elementLocator(result)).toHaveTextContent('1');
 
 Available retriable matchers: `toHaveTextContent()`, `toBeVisible()`, `toBeDisabled()`, `toBeEnabled()`, `toBeInTheDocument()`.
 
-Reference file: `packages/component/test/browser/vitest4-example.js` (example only, not an active test).
-
 ---
 
 ## Quick Reference

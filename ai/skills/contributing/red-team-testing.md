@@ -161,13 +161,15 @@ Describe the concrete situation where a user hits this code path. Not "a user mi
 
 How often will real users hit this code path in practice?
 
-| Score | Meaning | Example |
-|---|---|---|
-| 80–100% | Nearly every user will hit this | Default settings, common attribute combinations, standard editor actions |
-| 50–79% | Common but not universal | Less popular attribute combinations, multi-component compositions, specific editor workflows |
-| 20–49% | Occasional but legitimate | Unusual but documented API usage, edge-case configurations, rapid state transitions |
-| 5–19% | Rare but real | Uncommon platform/browser combinations, very large datasets, unusual nesting depths |
-| 0–4% | Theoretically possible | Extreme edge cases that a real user could hit but almost certainly won't |
+| Score | Meaning |
+|---|---|
+| 80–100% | Nearly every user will hit this. The default-shaped use of the feature — what the canonical doc leads with, what the floor example demonstrates, what every component author writes on day one. |
+| 50–79% | Common but not universal. A major sub-feature of the topic, well-represented in the docs and examples — most authors of non-trivial components reach for it. |
+| 20–49% | Occasional but legitimate. A documented feature that authors use when the simpler shape doesn't fit — has dedicated examples, but not the dominant path. |
+| 5–19% | Rare but real. Specialized lifecycle hooks, escape hatches, edge configurations, advanced composition patterns. Documented but only relevant to a minority of components. |
+| 0–4% | Theoretically possible. Stress-shaped usage, internal-state edge cases, scenarios documented as constraints rather than features. |
+
+These are *shapes*, not inventories. To score a finding, you have to know what the canonical doc for the feature leads with, what its examples emphasize, and how downstream consumers actually use it. **That knowledge comes from MCP fetches, not from this table** — `list_user_docs` + `get_user_doc` for the canonical contract, `list_examples` + `get_example` for usage patterns. If you can't tell which band your finding sits in without guessing, you haven't fetched enough.
 
 Be honest with these scores. A frequency of 2% is still worth reporting if the failure mode is severe (data loss, crash, silent corruption). A frequency of 60% on a cosmetic glitch is worth reporting but differently than 60% on a logic error.
 

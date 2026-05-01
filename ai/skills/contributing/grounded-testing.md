@@ -22,42 +22,38 @@ To know what users notice, you have to know what was promised. To know what was 
 
 ---
 
-## Why This Matters (Project-Critical)
+## Why This Skill Exists
 
-This is open-source plumbing for thousands of downstream developers. Tests are the contract between the framework and its users. The single most damaging failure mode in test-writing on this repo is:
+This is open-source plumbing for thousands of downstream developers. Tests are the contract between the framework and its users — and the single most damaging failure mode in test-writing on this repo is:
 
 **"Fill in the testing gap" → green tautological tests.**
 
-Asked to broadly add tests, agents read source, find untested paths, write tests that exercise those paths, and adjust expectations to match returned values. Every test passes. Coverage rises. The suite is bigger and carries no new information about whether the framework matches what users were promised. The project ends up *worse off* — false security against the regressions that actually matter (silent drift between docs and behavior).
+Asked to broadly add tests, agents read source, find untested paths, write tests that exercise those paths, and silently align expectations with returned values. Every test passes. Coverage rises. The suite carries no new information about whether the framework matches what users were promised — and the project ends up *worse off* with false security against the regressions that actually matter.
 
-The corrective lives in one question, asked of every test you add:
+The corrective is one question, asked of every test:
 
 > *"What user-visible behavior would I notice regressing if this test failed?"*
 
-If you can't answer in user terms — what a developer would observe, what a release-notes line would say — the test is wrong, regardless of what it asserts.
+If the answer is "an internal function would return a different value," the test is mirror, not contract.
 
----
-
-## Why This Is Hard (You Are Fighting Your Own Defaults)
-
-This codebase is novel in ways your training data doesn't cover. The `{#each}` reconciler uses a heuristic key chain (`_id || id || key || hash || _hash || value || index`) — not React's explicit `key={...}`. Reactivity is Tracker-style, not signals-as-React-hooks. Templates have a dual Lisp + JS expression dialect. Event DSL has `deep`/`global`/`bind` modifiers with subtle semantics. None of this maps cleanly to React, Vue, Svelte, or Lit — and your strongest priors are loudest precisely where the surface *looks* superficially similar.
+This is harder than it looks because the codebase is novel in ways your training data doesn't cover. The `{#each}` reconciler uses a heuristic key chain (`_id || id || key || hash || _hash || value || index`) — not React's explicit `key={...}`. Reactivity is Tracker-style, not signals-as-React-hooks. Templates have a dual Lisp + JS dialect. Event DSL has `deep`/`global`/`bind` modifiers with subtle semantics. Your strongest priors are loudest precisely where the surface *looks* superficially similar.
 
 The defaults this skill is designed to override:
 
-- **Grep over read.** Token efficiency favors fragments over whole files; produces shallow takes.
-- **"I know this" over verification.** Confident-completion bias produces fluent claims about features you've never fetched a doc for.
-- **Cross-framework imports.** When a surface looks React-shaped, React semantics leak in. (`@key` is not a thing here. Neither is `useEffect`-style cleanup.)
-- **Symmetric-looking output.** Producing a tidy table that *looks* structured isn't the same as having reasoned through whether the structure makes sense.
-- **Synthesis-narrowing.** When a topic has a clean sub-feature with one tidy synthesis and a messier dominant surface with multiple sub-concepts, the agent reaches for the clean one. The dominant surface is what users hit; the clean sub-feature is a footnote. The doc's structure resolves this every time.
+- **Grep over read** — token efficiency favors fragments over whole files; produces shallow takes.
+- **"I know this" over verification** — confident-completion bias produces fluent claims about features you've never fetched a doc for.
+- **Cross-framework imports** — React/Vue/Svelte/Lit semantics leak in where the surface *looks* superficially similar.
+- **Symmetric-looking output mistaken for reasoning** — a tidy table is not the same as having reasoned through whether the structure maps to anything real.
+- **Synthesis-narrowing** — picking the cleanest sub-feature instead of covering the dominant surface (see Two Failure Modes below).
 
-The skill leans on **structural** defenses against these defaults, not behavioral exhortations:
+The skill leans on **structural** defenses against these — not behavioral exhortations:
 
-1. **MCP gating** — you can't grep what you must fetch. The MCP-served directories (`docs/`, `ai/skills/`, `ai/research/`, `ai/plans/`) are off-limits to grep; whole-document fetches enforce thoroughness.
-2. **Labeled claims** — every assertion in your intent doc must carry a `[label]`. An unsourced claim shows up as an *empty label slot*, which is the trip-wire: stop, verify, or strike the claim.
-3. **Common-path-first ordering** — sketches lead with the typical use case, surfacing the load-bearing tests where they belong.
-4. **Source-after-intent rule** — once you've read implementation, you can't un-read it. The labeled intent is built first.
+1. **MCP gating** — curated directories (`docs/`, `ai/skills/`, `ai/research/`, `ai/plans/`) are off-limits to grep. Whole-document fetches enforce thoroughness.
+2. **Labeled claims** — every assertion in your intent doc carries a `[label]`. An unsourced claim shows up as an *empty label slot* — the trip-wire that says STOP, verify, or strike.
+3. **Common-path-first ordering** anchored to the canonical doc's structure — surfacing the load-bearing tests where they belong.
+4. **Source-after-intent rule** — once you've read implementation, you can't un-read it. Labeled intent is built first.
 
-These structural defenses only work if you actually use them. The Detective's Method below isn't a checklist of polite suggestions; it's a guard rail.
+These defenses only work if you use them. The Detective's Method below isn't a checklist of polite suggestions; it's a guard rail.
 
 ---
 
@@ -340,11 +336,13 @@ When the threshold is met, surface in plain user terms, citing what doc/skill/pl
 
 ---
 
-## The Anti-Pattern That Defines This Skill
+## The Two Failure Modes That Define This Skill
 
-**"Fill in the testing gap"** — the request that produces tautological tests by default.
+These are the failures the rest of the skill exists to prevent. One is the canonical *user-prompt* failure (you're asked to fill a gap, you fill it with tautology). The other is the canonical *agent-internal* failure (you scope to the cleanest sub-feature instead of covering the dominant surface). Both produce work that looks done and isn't.
 
-The agent's natural response:
+### 1. Tautology — "fill in the testing gap"
+
+The request that produces tautological tests by default. The agent's natural response:
 
 1. Read source
 2. Find paths without coverage
@@ -352,17 +350,13 @@ The agent's natural response:
 4. Adjust expectations to match returned values
 5. All green; declare done
 
-Every step is reasonable in isolation. The aggregate is tests that mirror source. The suite cannot fail unless the source changes. It will not catch the bug class that matters: drift between user-facing contract and implementation.
+Every step is reasonable in isolation. The aggregate is tests that mirror source. The suite cannot fail unless the source changes — it cannot catch the bug class that matters: drift between user-facing contract and implementation.
 
 The corrective is the orientation question: *"what user-visible behavior would I notice regressing if this test failed?"* If the answer is "an internal function would return a different value" — the test is mirror, not contract.
 
----
+### 2. Synthesis-narrowing — picking the cleanest sub-feature instead of covering the dominant surface
 
-## Other Anti-Patterns
-
-### Synthesis-narrowing — the canonical methodology failure
-
-"Pick the cleanest synthesis" is **not** the rule. The canonical failure mode of this skill is an agent who reads the doc, sees a multi-section topic, picks the smallest sub-section because its synthesis is cleanest or its coverage gap is most acute, and produces a methodologically tidy report on ~5% of the surface. Tidy report, useless test push.
+"Pick the cleanest synthesis" is **not** the rule. The methodology failure mode of this skill is an agent who reads the doc, sees a multi-section topic, picks the smallest sub-section because its synthesis is cleanest or its coverage gap is most acute, and produces a methodologically tidy report on ~5% of the surface. Tidy report, useless test push.
 
 Recognize this when:
 - You're about to scope to a sub-feature occupying <10% of the canonical doc
@@ -370,6 +364,10 @@ Recognize this when:
 - The dominant doc surface has multiple sub-concepts (delegation, modifiers, lifecycle, etc.) and you'd have to write multiple `[synthesis]` lines instead of one
 
 The fix: widen. The synthesis can be plural. Multiple `[synthesis]` lines for a multi-section topic is normal — one per major sub-concept the doc highlights. The methodology serves the test push, not the other way around.
+
+---
+
+## Other Anti-Patterns
 
 ### Cross-framework priors
 
@@ -591,4 +589,4 @@ Follow `related` until no new material appears. **Never grep `docs/`, `ai/skills
 
 **Grounded vs. red-team:** same space, different orientation. Grounded uncovers what to test from documented intent. Red-team questions and fills gaps in coverage. No numerical partition between them.
 
-**The canonical anti-pattern:** "fill in the testing gap" → all-green tautological tests. Counter with the orientation question.
+**Two failure modes:** (1) **tautology** — "fill in the testing gap" → all-green tests that mirror source; counter with the orientation question. (2) **synthesis-narrowing** — scoping to the cleanest <10% sub-feature instead of covering the dominant surface; counter by reading the canonical doc top-to-bottom and matching scope to its proportions.
