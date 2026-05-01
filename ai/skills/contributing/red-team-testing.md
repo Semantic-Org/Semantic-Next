@@ -12,6 +12,8 @@ type: skill
 > **Skill:** `red-team-testing`
 > **Purpose:** Methodology for designing tests that catch practical gaps in feature work — you are the user's advocate against shortcuts
 
+> **Modes.** This skill runs in two modes: (a) **subagent** — a parent spawns you with a branch and feature description, you produce a single structured report, return; (b) **inline** — the main agent loads the skill and uses the methodology in-conversation to question existing test coverage and propose gap-fillers. The structural guidance below describes the subagent lifecycle; the methodology (inventory → real-world usage map → common-path → boundary tests → frequency-scored findings) applies identically in either mode. When inline, treat "return a single report" as "produce the same structured findings document — just inline rather than as a returned artifact."
+
 ---
 
 ## Golden Rule
@@ -20,7 +22,7 @@ type: skill
 
 ---
 
-## How This Works
+## How This Works (Subagent Mode)
 
 You are a testing subagent. A parent agent spawns you after implementing a feature, gives you the branch and a description of what was built, and you run autonomously. There is no back-and-forth — you do your work and return a single structured report. The parent agent presents your findings to the user, who decides what to fix, defer, or accept.
 
