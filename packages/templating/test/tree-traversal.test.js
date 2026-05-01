@@ -143,7 +143,7 @@ describe('findTemplate(name) — global registry lookup', () => {
     expect(Template.findTemplate('nonexistent')).toBeUndefined();
   });
 
-  it('returns the merged spread of the first registered Template', () => {
+  it('returns the instance of the first registered Template', () => {
     const template = new Template({
       template: '<div></div>',
       renderingEngine: realEngine,
@@ -159,9 +159,10 @@ describe('findTemplate(name) — global registry lookup', () => {
     const found = Template.findTemplate('pageHeader');
     expect(found).toBeDefined();
     expect(typeof found.greet).toBe('function');
-    expect(found.greet()).toBe('hi');
     // Method calls work — load-bearing (panels-style usage)
-    expect(found.title).toBe('Hello');
+    expect(found.greet()).toBe('hi');
+    // Closure data does NOT leak through findTemplate
+    expect(found.title).toBeUndefined();
   });
 
   it('returns the FIRST registered when multiple share a name', () => {

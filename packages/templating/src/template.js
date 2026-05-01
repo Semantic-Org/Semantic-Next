@@ -1068,10 +1068,7 @@ export const Template = class Template {
     if (!template) {
       return undefined;
     }
-    return {
-      ...template.instance,
-      ...template.data,
-    };
+    return template.instance;
   }
   static findParentTemplate(template, templateName) {
     templateName = templateName && kebabToCamel(templateName);
@@ -1094,10 +1091,7 @@ export const Template = class Template {
       let parentNode = getParent(template.element);
       while (parentNode) {
         if (isMatch(parentNode.component)) {
-          match = {
-            ...parentNode.component,
-            ...parentNode.dataContext,
-          };
+          match = parentNode.component;
           break;
         }
         parentNode = getParent(parentNode);
@@ -1107,10 +1101,7 @@ export const Template = class Template {
     while (template) {
       template = template.parentTemplate;
       if (isMatch(template)) {
-        match = {
-          ...template.instance,
-          ...template.data,
-        };
+        match = template.instance;
         break;
       }
     }
@@ -1137,10 +1128,7 @@ export const Template = class Template {
         if (node?.children) {
           for (const child of node.children) {
             if (child.component && isMatch(child.component)) {
-              result.push({
-                ...child.component,
-                ...child.dataContext,
-              });
+              result.push(child.component);
             }
             // Recursively check nested children including their shadow roots
             traverseChildren(child);
@@ -1158,10 +1146,7 @@ export const Template = class Template {
       if (childTemplates) {
         childTemplates.forEach((childTemplate) => {
           if (!templateName || (childTemplate.templateName === templateName)) {
-            result.push({
-              ...childTemplate.instance,
-              ...childTemplate.data,
-            });
+            result.push(childTemplate.instance);
           }
           search(childTemplate._childTemplates, templateName);
         });
