@@ -539,6 +539,20 @@ export const Template = class Template {
             return;
           }
 
+          // shadow encapsulation: reject events whose target lives outside our
+          // renderRoot for default/bind modes. Top-level web components rely on
+          // this to filter slotted content (Node.contains returns false for
+          // slotted nodes — they're in the host's light-DOM tree, not the
+          // shadow's). Subtemplates rely on the line-538 range filter via
+          // startNode/endNode markers. `deep` and `global` opt out by design.
+          if (
+            template.renderRoot
+            && !inArray(eventType, ['deep', 'global'])
+            && !template.renderRoot.contains(event.target)
+          ) {
+            return;
+          }
+
           // check if event occured on a deep event handler and the handler type isnt 'deep'
           const isDeep = selector && $(event.target).closest(selector).length == 0;
           if (!inArray(eventType, ['deep', 'global']) && isDeep) {
