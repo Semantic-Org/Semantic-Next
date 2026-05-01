@@ -999,40 +999,20 @@ describe('shadow only', () => {
   });
 
   /*******************************
-       Top-level encapsulation (no range markers — the realistic case)
+       Top-level encapsulation (no range markers)
   *******************************/
 
-  // The encapsulation tests above set startNode/endNode markers manually,
-  // which mirrors the SUBTEMPLATE path (the renderer sets markers around
-  // a subtemplate's render region). For TOP-LEVEL web components, the
-  // component-package's WebComponentBase.attach() calls template.attach(shadow)
-  // WITHOUT passing startNode/endNode. So template.startNode === undefined
-  // and isNodeInTemplate's range check short-circuits to true (line 707) —
-  // the line-538 filter is inert. The closest()-based filter at line 543
-  // doesn't reject events whose target ITSELF matches the selector (native
-  // closest walks light DOM up from the target including self). So default-
-  // mode handlers fire on slotted content matching the selector — contradicting
-  // the documented "encapsulation by default" contract.
-  //
-  // These tests are EXPECTED TO FAIL pre-fix. They pin the documented contract
-  // for the realistic top-level web-component setup.
-
-  describe('events DSL — top-level encapsulation (Q3 PIN, EXPECTED TO FAIL pre-fix)', () => {
-    it('Q3 PIN — does NOT fire on slotted content matching the selector (top-level, no markers)', async () => {
+  describe('events DSL — top-level encapsulation', () => {
+    it('does NOT fire default handlers on slotted content matching the selector', async () => {
       const handler = vi.fn();
       const fixture = await mountTemplate({
         target: 'shadow',
         events: { 'click .btn': handler },
       });
-      // Top-level setup: shadow with a slot, NO startNode/endNode markers.
-      // This is what WebComponentBase.attach() produces in production.
       fixture.renderRoot.innerHTML = '<div class="own"><slot></slot></div>';
       fixture.host.innerHTML = '<button class="btn">Slotted</button>';
       try {
-        const slotted = fixture.host.querySelector('.btn');
-        clickOn(slotted);
-        // Documented contract: default-mode handlers should NOT fire on
-        // slotted content. Today they do — handler fires once. Fails.
+        clickOn(fixture.host.querySelector('.btn'));
         expect(handler).not.toHaveBeenCalled();
       }
       finally {
@@ -1040,19 +1020,15 @@ describe('shadow only', () => {
       }
     });
 
-    it('Q3 sanity — DOES fire on shadow-internal elements matching the selector (counter-test)', async () => {
+    it('DOES fire default handlers on shadow-internal elements matching the selector', async () => {
       const handler = vi.fn();
       const fixture = await mountTemplate({
         target: 'shadow',
         events: { 'click .btn': handler },
       });
-      // Same shape as the failing test above, but click an element INSIDE the
-      // shadow root rather than slotted content. This pins that the fix
-      // doesn't accidentally reject shadow-internal events.
       fixture.renderRoot.innerHTML = '<button class="btn">Shadow-internal</button>';
       try {
-        const internal = fixture.renderRoot.querySelector('.btn');
-        clickOn(internal);
+        clickOn(fixture.renderRoot.querySelector('.btn'));
         expect(handler).toHaveBeenCalledTimes(1);
       }
       finally {

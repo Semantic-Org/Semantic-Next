@@ -546,13 +546,7 @@ describe('Template — key bindings', () => {
       template.eventController.abort();
     });
 
-    // B11: bindKey/unbindKey cycle no longer stacks document keydown listeners.
-    // Pre-fix: bindKey checked `Object.keys(this.keys).length == 0` and
-    // re-installed listeners every time the map was empty — but the
-    // previously-installed listeners were never torn down by unbindKey, so
-    // each cycle stacked an additional listener and the new handler fired
-    // once per stacked listener.
-    it('B11: rebinding after all-unbind does NOT stack listeners (handler fires once)', () => {
+    it('rebinding after all-unbind does not stack document listeners', () => {
       const first = vi.fn();
       const second = vi.fn();
       const { template } = makeKeyTemplate({

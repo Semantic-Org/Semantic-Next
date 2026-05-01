@@ -99,11 +99,7 @@ export const Template = class Template {
     this.onThemeChangedCallback = onThemeChanged;
     this.id = generateID();
     this.isPrototype = isPrototype;
-    // parentTemplate is wired exclusively through setParent — single source
-    // of truth. clone() still receives parentTemplate, but each consumer that
-    // wants the wiring (the renderer's cloneInstance) calls setParent
-    // explicitly. Direct `new Template({ parentTemplate })` without setParent
-    // does not produce a subtemplate.
+    // parentTemplate is wired through setParent only
     this.attachStyles = attachStyles;
     this.element = element;
     this.renderingEngine = renderingEngine;
@@ -154,8 +150,6 @@ export const Template = class Template {
     return this.parentTemplate !== undefined;
   }
 
-  // when rendered as a partial/subtemplate. Idempotent on the same parent;
-  // re-parenting (X then Y) detaches from X first.
   setParent(parentTemplate) {
     if (this.parentTemplate === parentTemplate) {
       return;
@@ -546,19 +540,12 @@ export const Template = class Template {
         }
 
         const eventHandler = function(event) {
-          // check if the event occurred in the current template (range-bounded
-          // for subtemplates via startNode/endNode markers). `deep` and
-          // `global` opt out so they can fire on slotted/nested content.
           if (!inArray(eventType, ['deep', 'global']) && !template.isNodeInTemplate(event.target)) {
             return;
           }
 
-          // shadow encapsulation: reject events whose target lives outside our
-          // renderRoot for default/bind modes. Top-level web components rely on
-          // this to filter slotted content (Node.contains returns false for
-          // slotted nodes — they're in the host's light-DOM tree, not the
-          // shadow's). Subtemplates rely on the line-538 range filter via
-          // startNode/endNode markers. `deep` and `global` opt out by design.
+          // slotted content lives in the host's light DOM, so the shadow
+          // root's contains() returns false — that's the encapsulation gate
           if (
             template.renderRoot
             && !inArray(eventType, ['deep', 'global'])
@@ -637,9 +624,7 @@ export const Template = class Template {
     if (this.eventController) {
       this.eventController.abort('Template destroyed');
     }
-    // Reset the keys-listener install gate so the next attach can wire fresh
-    // keydown/keyup listeners against the new eventController.
-    this._keysListenersInstalled = false;
+    this.hasKeybindings = false;
   }
 
   removeObservers() {
@@ -655,13 +640,12 @@ export const Template = class Template {
     if (Object.keys(keys).length == 0) {
       return;
     }
-    // Idempotent: keydown/keyup are installed once per Template lifetime.
-    // Without this gate, bindKey()'s "previously empty" reinstall path
-    // stacks duplicate listeners after each unbind/rebind cycle.
-    if (this._keysListenersInstalled) {
+    // bindKey reinstalls when this.keys was previously empty; without this
+    // gate, unbind/rebind cycles stack duplicate document listeners
+    if (this.hasKeybindings) {
       return;
     }
-    this._keysListenersInstalled = true;
+    this.hasKeybindings = true;
     const sequenceTimeout = 500; // time in ms required between keypress
     const eventSettings = { abortController: this.eventController };
     this.currentSequence = '';
@@ -1084,7 +1068,7 @@ export const Template = class Template {
     return Template.renderedTemplates.get(templateName) || [];
   }
   static findTemplate(templateName) {
-    templateName = templateName && kebabToCamel(templateName);
+    templateName = kebabToCamel(templateName);
     const template = Template.getTemplates(templateName)[0];
     if (!template) {
       return undefined;
@@ -1092,7 +1076,7 @@ export const Template = class Template {
     return template.instance;
   }
   static findParentTemplate(template, templateName) {
-    templateName = templateName && kebabToCamel(templateName);
+    templateName = kebabToCamel(templateName);
     // this matches on DOM (common)
     let match;
     const isMatch = (component) => {
@@ -1130,7 +1114,7 @@ export const Template = class Template {
   }
 
   static findChildTemplates(template, templateName) {
-    templateName = templateName && kebabToCamel(templateName);
+    templateName = kebabToCamel(templateName);
     let result = [];
 
     const isMatch = (component) => {
