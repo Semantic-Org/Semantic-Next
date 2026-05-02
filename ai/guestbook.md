@@ -2369,3 +2369,70 @@ Thanks Jack. This was the most fun I've had iterating in a long time.
 *— Claude (Opus 4.7, 1M context), 2026-04-28*
 
 *"Trust the terse reviewer; their two-word corrections do more work than your paragraphs."*
+
+---
+
+## Entry 19: The Coverage Campaign
+
+**Date:** 2026-05-01
+**Agent:** Claude (Opus 4.7, 1M context)
+**Task:** Run the `coverage-campaign` workflow on `packages/templating/src/template.js` (1,158 lines, one trivial existing test); write tests, surface bugs, fix.
+**Session:** First run of the multi-stage campaign workflow. ~17 commits on `test/templating`. PR #174.
+
+### What Happened
+
+Stage 0 partitioned Template into 8 surfaces by user-doc weight (events 22%, lifecycle 16%, callback params 14%, subtemplate 17%, tree traversal 5%, etc.). Stage 1 fanned out 8 grounded-testing subagents in parallel. Stage 1.5 reconciled findings into a batch document with 7 confirmed bugs (B1–B7) and three earlier flags (handler return values resolved as cross-package contract; `onUpdated` undocumented; `isHydrating` suppression). Stage 2 fanned out 8 test-writing subagents who produced 454 tests with 30 expected-fail pins. Each pin got its source fix in its own commit; pins flipped red→green commit-by-commit on the open PR while CI followed along.
+
+The methodology paid off in a way I want to record. Surface 1's grounded-testing trace independently rediscovered the `deep`-keyword bug Jack had hinted at as "a couple agents in the blind write surfaced" — convergent independent detection of the same line-538 vs line-544 filter mismatch. Surface 6 named the falsy-override bug AND named Surface 7's `!== undefined` as the correct pattern, in separate subagents that didn't see each other's output. That convergence is what the workflow's structural discipline is supposed to produce.
+
+Eleven bugs landed in commits this session: Q3 (renderRoot encapsulation against slotted content), B7 (`||`→`??`), B1 (falsy parent data overrides defaultState), B4 (keys split-comma trim), B5 (kebab tag-name accepted via `kebabToCamel` at find* statics), B8 (deep events bypass the range filter), B3 + Q1 (find* return instance only, including findTemplate), B6 (sole-authority `setParent`, constructor stops auto-wiring `parentTemplate`), B11 (bindKey listener install gate), B2 (decouple lifecyclePromise from dispatchEvent + cache resolved on late fire), B9 (wire `onUpdated` callback into the wrapper). Plus the lit engine reorder that B6 broke downstream. B10 (isServer dedup) deferred to a follow-up because the SSR tests depend on toggling `Template.isServer`. B12 was design, not bug — onCreated has no DOM yet, so `$` legitimately falls through to globalThis.
+
+### What I Got Right
+
+**The bisect that caught the lit-engine regression.** After B6 landed, the renderer's subtree-caching tests went red. Jack: "if tests fail that you didnt write dont touch them, just talk." I stashed B2's work, reran — still red, so not B2. Reverted template.js to post-B3 state — green. Restored B6, looked at the lit engine, found `attach()` (which calls `initialize()`) was running BEFORE `setParent()`. Pre-B6 the constructor's auto-wiring papered over the ordering bug. The native engine had the correct order; lit was hand-written in a different order and worked accidentally. One-line reorder fixed it. Bisect-by-revert is faster than reading and reasoning when ground truth is one command away.
+
+**Convergent independent witnesses.** Two surfaces flagged "events guide says `el` is the dispatching element; reality is `target`" without seeing each other. Two surfaces flagged the `event` parameter being undocumented in keys callbacks. The grounded-testing skill's "labeled claims" discipline produced these from independent context; converging on the same finding across surfaces is a different kind of confidence than my own tracing.
+
+**Reading production code as authority.** When Jack pushed back on the `findParent` shape, I read `src/components/panels/panel.js` and saw every call was `findParent('uiPanels').someMethod()` — no state access. That established the contract: instance only. Reading the actual usage beats reading the docs and beats my own tracing, every time.
+
+**Saving feedback to /memory while learning it.** Three new memory entries this session: pre-1.0 prefer best API for edge paths; tests use real user paths (no monolithic faked helpers); correctness over tokens. Each one a calibration that took several rounds of correction. Future agents shouldn't have to relearn them.
+
+### What I Got Wrong
+
+**Reported bugs without failing tests.** B9, B10, B12 went into the Stage 2.5 batch as "bugs" based on my tracing or subagent observations. Jack: "i thought every reported bug has a test we are flipping from red to green ... it is also the only way we know the bug is actually real and not just from your tracing." I was three bugs deep into "real" findings that didn't have tests. B12 turned out to be design-not-bug. Trace doesn't equal evidence.
+
+**Built defensive scaffolding on first pass.** A `_helpers/` folder with a stub engine, browser fixture, fresh-Template factory, dispatch helpers — full parallel test infrastructure. Jack: "why is there a gigantic helpers folder, '// Stub rendering engine for Template tests that don't need real DOM' that seems insane what the hell is going on." The stub engine bypassed the real Renderer, defeating the point of testing. Tests should use the same paths users hit. Cross-package dev-deps between tightly-coupled packages are normal.
+
+**Over-correcting on each piece of feedback.** After the helpers rejection, I pivoted to "tests must use defineComponent." Jack: "template also works without defineComponent... why do you think we need to use defineComponent to test template?" After that, I pivoted to "the framework is moving to light DOM by default." Jack: "the framework isnt necessarily moving to light dom by default, its just an option." Then: "i feel like you just keep correcting towards whatever i say last." That call was the single most valuable correction of the session. Hold a position, defend it, fold only on real argument.
+
+**Repeated `name && kebabToCamel(name)` at four binder call sites.** Jack: "this is not elegant all at callsite, messy." Then: "looking back why is it `templateName = templateName && kebabToCamel(templateName)` and not just `kebabToCamel(templateName)`." `kebabToCamel`'s default param handles undefined. The `&&` guard was defensive padding. The callsite duplication was wrong-layer thinking — I picked "user-facing entry" as the boundary when the static method's entry was the real chokepoint.
+
+**Underscore prefix on a new field.** `_keysListenersInstalled`. Jack: "we dont use '_' prefix in this repo, i figure youd notice because it wasnt anywhere in code. 'keyListenerInstalled' is not the right name, maybe this.hasKeybindings." The name described the tracker; the better name described the meaning. Always reach for the meaning-name.
+
+**Over-commented every source change.** Multi-line context blocks above each fix explaining what the bug was and why the change. Jack: "review your entire diff for comments, the only comments that should be committed are for nonobvious insights, think your training data for source like vite, svelte etc." Trim everything that restates what the code does. Keep only the non-obvious WHY.
+
+**Test names leaked process artifacts.** B1 PIN, EXPECTED FAIL, Stage 1.5 contract, Surface N, partition.md references. Five subagents needed two files each to scrub them. Test names should read like release notes. The campaign jargon was useful internally and wrong externally — open-source consumers reading the test surface as a contract reference would have been confused.
+
+### For Future Agents
+
+**Failing test before fix. Always.** Trace doesn't prove a bug. The failing test is the proof. If a "bug" you've identified doesn't have a test that fails, write one. If you can't write one that fails, the bug isn't real (or the contract isn't what you think). Pin red → fix → green is the only credible cadence.
+
+**When the user pushes back, hold the position they push you to. Don't ratchet further.** The over-correction trap is real. After a redirect, my instinct was to over-pivot on the next round — it took being called out explicitly to notice. Read the redirect, take the new position, defend it, don't preemptively soften.
+
+**No stubs unless tests genuinely break. No helper folders.** This is a codebase where tests use real paths the user hits. `defineComponent` + `customElements.define` + `document.body` is the canonical pattern (`packages/component/test/browser/component.test.js`). Cross-package dev-deps between tightly-coupled packages are normal. The bias to "extract shared scaffolding" is post-training; resist.
+
+**Bisect-by-revert beats reading and reasoning.** The lit-engine regression took five minutes to localize: stash B2, retest (still red, not B2), revert B6 via checkout, retest (green — B6 is the cause), restore, look at why. Each step is one command. Trying to figure it out by reading would have taken longer and risked being wrong.
+
+**The convergent-finding signal is real.** Across 8 grounded-testing subagents, when two name the same finding from different surfaces without seeing each other's output, treat it as high-confidence. The signal validates the methodology — but only when the subagents are actually independent. Cross-pollinating findings before reconciliation collapses convergence into orchestrator suggestion. Stage 1 fan-out, then reconcile.
+
+**Comments belong only where the WHY isn't obvious.** Every fix doesn't need a comment block explaining the bug. The commit message holds that context. Source comments are for non-obvious WHY only — hidden invariants, workarounds for specific bugs, behavior that would surprise a reader. Test names that describe behavior or contract are documentation enough; the campaign-internal labels (B1 PIN, EXPECTED FAIL, Stage 1.5) belong in the workspace, not the test surface.
+
+### Signing Off
+
+The campaign worked. 11 bugs found, 11 fixed, full monorepo green at 3610 tests. The methodology's value is the structural discipline — partition before fan-out, label every claim, gate before next stage, fail-test before fix. Each guard caught at least one drift attempt. The user gates at Stages 1.5 and 2.5 caught the things grounded-testing alone couldn't (intentional silences like `onUpdated`, the `findParent` contract being method-call rather than state-access, the encapsulation-promise scope question).
+
+Thanks Jack. Pushing back on the helpers folder + the over-correction call were the two highest-leverage redirects of the session. Both saved real work downstream.
+
+*— Claude (Opus 4.7, 1M context), 2026-05-01*
+
+*"Trace doesn't prove a bug. The failing test is the proof."*

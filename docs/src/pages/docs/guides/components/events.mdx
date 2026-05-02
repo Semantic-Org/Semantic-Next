@@ -31,6 +31,8 @@ defineComponent({
 });
 ```
 
+> **Slotted Content** Default selectors match content slotted into your component too. If your template has a `<slot>` and a user places a `<ui-button>` inside, `'click ui-button'` fires without ceremony — the slotted child is part of your component's logical template. To reach inside *another* web component's shadow tree, use the [`deep` keyword](#deep-events).
+
 ### Multiple Events + One Selector
 
 You can specify multiple events using a comma separated list with a single selector.
@@ -61,9 +63,8 @@ const events = {
 ```
 
 ### Component-Wide Events
-To attach events to your entire component you can pass in an event name without a selector.
 
-For example if you have a component called `ui-button` this would fire when the mouse hovered over any part of the component.
+Pass an event name without a selector to fire on any part of the component, including the host's own surface and host-dispatched events.
 
 ```javascript
 const events = {
@@ -95,14 +96,15 @@ You can add special keywords to that modify how events are attached permitting y
 
 ### Global Events
 
-You can use the `global` keyword to attach an event globally to any element outside of your component.
-
-For instance this can be used with global events like `scroll` or `hashchange`
+Use the `global` keyword to attach an event to an element outside your component.
 
 ```javascript
 const events = {
-  'global scroll window'() {
-    // page scrolled
+  'global scroll'() {
+    // no selector binds to window
+  },
+  'global click body'() {
+    // any click on the body
   }
 };
 ```
@@ -112,9 +114,9 @@ const events = {
 
 ### Deep Events
 
-You can use the `deep` keyword to attach events to nested web components or slotted content. This can let you target parts of the component's [shadow DOM](/docs/guides/query/shadow-dom) or [slotted content](/docs/guides/templates/slots) which a person using your component might include.
+You can use the `deep` keyword to attach events to elements inside *another* web component's [shadow DOM](/docs/guides/query/shadow-dom). Without `deep`, selectors only match content reachable from your component's template — including [slotted children](/docs/guides/templates/slots) — but not the internal DOM of nested components.
 
-> **Deep Usage** By default selectors will only match the DOM of your component's template. This will prevent the handler from firing if the user slots content which also matches your selectors.
+> **Projection vs. Piercing** Slotted content is *projected* through your `<slot>`s and matches default selectors automatically. `deep` is for *piercing* a shadow boundary — reaching into a child component's internals. The two are different boundaries; default mode handles projection, `deep` handles piercing.
 
 ```html
 <div class="component">
@@ -125,10 +127,12 @@ You can use the `deep` keyword to attach events to nested web components or slot
 ```javascript
 const events = {
   'deep ui-button .icon'() {
-    // the icon is part of `ui-button` shadow DOM
+    // .icon lives inside ui-button's shadow tree
   }
 };
 ```
+
+> **Composed events** `deep` only catches events dispatched with `composed: true`. Native events do; for custom events use the framework's [`dispatchEvent`](#dispatching-custom-events), which sets it by default.
 
 ### Bound events
 
@@ -154,10 +158,12 @@ In addition to the [standard arguments](/docs/guides/components/lifecycle) that 
 
 | parameter         | use                                                   |
 |-------------------|-------------------------------------------------------|
-| el                | the dom element that dispatched the event             |
+| el                | the component's host element                          |
+| target            | the dom element that dispatched the event             |
 | event             | the native event object                               |
-| data              | event.detail + data attributes on dom element         |
-| isDeep            | the event occurred on a nested web component or slot |
+| data              | event.detail + data attributes on the dispatching element |
+| value             | value of the dispatching element (form fields, custom event detail) |
+| isDeep            | the event came from inside another web component's shadow tree |
 
 
 In the following example events are attached to four separate buttons to control the size of the shape accessing methods using `self`.

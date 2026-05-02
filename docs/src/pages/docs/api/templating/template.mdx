@@ -48,7 +48,6 @@ new Template(options)
 | attachStyles   | boolean  | Whether to attach styles to the renderRoot |
 | onCreated      | Function | Callback when the template is created      |
 | onRendered     | Function | Callback when the template is rendered     |
-| onUpdated      | Function | Callback when the template is updated      |
 | onDestroyed    | Function | Callback when the template is destroyed    |
 | onThemeChanged | Function | Callback when the theme changes            |
 
@@ -202,7 +201,7 @@ template.setDataContext({ name: 'Jane' }, { rerender: true });
 
 ### clone
 
-Creates a copy of the template with optional new settings.
+Creates a new Template instance from a prototype. Each clone has its own data, element, and DOM bindings; AST, CSS, and callbacks are shared with the prototype by reference.
 
 #### Syntax
 ```javascript
@@ -210,24 +209,24 @@ template.clone(settings)
 ```
 
 #### Parameters
-| Name     | Type   | Description                          |
-|----------|--------|--------------------------------------|
-| settings | Object | New settings to apply to the clone   |
+| Name     | Type   | Description                                                    |
+|----------|--------|----------------------------------------------------------------|
+| settings | Object | Per-instance overrides like `data`, `element`, `parentTemplate` |
 
 #### Returns
-`Template` - A new Template instance.
+`Template` - A new Template instance derived from this prototype.
 
 #### Usage
 ```javascript
 import { Template } from '@semantic-ui/templating';
 
-const template = new Template({
+const prototype = new Template({
   templateName: 'greet-user',
   template: 'Welcome <b>{name}</b>',
-  data: { name: 'John' }
+  isPrototype: true,
 });
 
-const clonedTemplate = template.clone({ data: { name: 'Jane' } });
+const instance = prototype.clone({ data: { name: 'Jane' } });
 ```
 
 ### attachEvents

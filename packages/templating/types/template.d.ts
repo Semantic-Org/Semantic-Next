@@ -654,6 +654,8 @@ export class Template {
   initialized: boolean;
   /** Whether or not the component is rendered. */
   rendered: boolean;
+  /** Whether or not the component has been destroyed. */
+  destroyed: boolean;
 
   /** The parent node */
   parentNode: HTMLElement | ShadowRoot | undefined;
@@ -790,6 +792,12 @@ export class Template {
    * @returns The rendered lit-html TemplateResult.
    */
   render(additionalData?: DataContext): any;
+
+  /**
+   * Engine-facing flag setter: marks the template as rendered and clears the destroyed flag.
+   * Called by hydration paths and custom engines that take render() into their own hands.
+   */
+  markRendered(): void;
 
   /**
    * Queries for DOM elements within the template's renderRoot (similar to jQuery's $).

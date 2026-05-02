@@ -40,7 +40,9 @@ const getParentNode = (node, pierceShadow) => {
 const IS_QUERY = Symbol.for('semantic-ui/Query');
 
 export class Query {
-  get [IS_QUERY]() { return true; }
+  get [IS_QUERY]() {
+    return true;
+  }
   /*
     This avoids keeping a copy of window/globalThis in
     memory when an element references the global object
@@ -301,12 +303,22 @@ export class Query {
         findElements(node.shadowRoot, newSelector, !queriedRoot);
       }
 
-      // Process assigned nodes with direct for loop
+      // Process assigned nodes. Each slotted node is itself a candidate —
+      // querySelectorAll on the slotted node only finds descendants, so the
+      // node's own match against the selector has to be tested explicitly.
       if (node.assignedNodes) {
         const newSelector = getRemainingSelector(node, selector);
         const nodes = node.assignedNodes();
         for (let i = 0; i < nodes.length; i++) {
-          findElements(nodes[i], newSelector, queriedRoot);
+          const slotted = nodes[i];
+          if (
+            slotted.nodeType === Node.ELEMENT_NODE
+            && slotted.matches
+            && slotted.matches(newSelector)
+          ) {
+            elements.add(slotted);
+          }
+          findElements(slotted, newSelector, queriedRoot);
         }
       }
 
