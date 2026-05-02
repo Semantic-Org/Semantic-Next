@@ -1433,66 +1433,40 @@ describe('Component', () => {
         expect(allChildren[1].templateName).toBe('childSubtemplate');
       });
 
-      it('should find parent from subtemplate using findParent', async () => {
-        // Define parent subtemplate (no tagName)
-        const parentSubtemplate = defineComponent({
-          templateName: 'parentSubtemplate',
-          template: `
-            <div class="parent-sub">
-              <h3>Parent Subtemplate</h3>
-              {>nestedChild}
-            </div>
-          `,
-          subTemplates: {
-            nestedChild: defineComponent({
-              templateName: 'nestedChild',
-              template: '<span class="nested">Nested Child</span>',
-              createComponent: ({ findParent }) => ({
-                findContainerParent() {
-                  return findParent('containerComponent');
-                },
-                findSubtemplateParent() {
-                  return findParent('parentSubtemplate');
-                },
-              }),
-            }),
-          },
-          createComponent: () => ({
-            subtemplateData: 'subtemplate-parent-data',
-          }),
+      it('three-level composition: each level owns its own subTemplates', async () => {
+        // Real authoring shape: a.js -> {>b foo='bar'} ; b.js -> {>c foo='baz'} ;
+        // c.js -> {foo}. Each file declares only the subtemplate it directly
+        // references; the deepest receives its own data and renders it.
+        const c = defineComponent({
+          templateName: 'cTemplate',
+          template: '<span class="leaf">{foo}</span>',
         });
 
-        // Define container web component
-        const ContainerComponent = defineComponent({
-          tagName: 'test-subtemplate-container',
-          templateName: 'containerComponent',
-          template: `
-            <div class="container">
-              <h2>Container</h2>
-              {>parentSubtemplate}
-            </div>
-          `,
-          subTemplates: {
-            parentSubtemplate,
-          },
-          createComponent: () => ({
-            containerData: 'container-data-value',
-          }),
+        const b = defineComponent({
+          templateName: 'bTemplate',
+          template: `<div class="middle">{>c foo='baz'}</div>`,
+          subTemplates: { c },
         });
 
-        const containerElement = document.createElement('test-subtemplate-container');
+        defineComponent({
+          tagName: 'test-three-level-container',
+          templateName: 'aContainer',
+          template: `<div class="root">{>b foo='bar'}</div>`,
+          subTemplates: { b },
+        });
+
+        const containerElement = document.createElement('test-three-level-container');
         const rendered = $(containerElement).onNext('rendered');
         document.body.appendChild(containerElement);
         cleanupElements.push(containerElement);
 
         await rendered;
 
-        // Access the deeply nested child through template traversal
-        // This would be complex to test directly, but we can verify the structure exists
-        const containerComponent = containerElement.component;
-        expect(containerComponent).toBeDefined();
-        expect(containerComponent.templateName).toBe('containerComponent');
-        expect(containerComponent.containerData).toBe('container-data-value');
+        // The deepest leaf receives 'baz' (passed by b), not 'bar' (passed by a).
+        // Each level's `foo` shadows the outer one inside its own scope.
+        const leaf = containerElement.shadowRoot.querySelector('.leaf');
+        expect(leaf).not.toBeNull();
+        expect(leaf.textContent).toBe('baz');
       });
 
       it('should handle mixed web component and subtemplate navigation', async () => {

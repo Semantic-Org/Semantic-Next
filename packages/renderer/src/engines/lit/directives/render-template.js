@@ -119,7 +119,6 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.templateID = template.id;
     this.template = template.clone({
       templateName,
-      subTemplates: this.subTemplates,
       data: this.unpackData(this.data),
       parentTemplate: this.parentTemplate,
     });
