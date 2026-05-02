@@ -266,6 +266,7 @@ export const Template = class Template {
       this.removeEvents();
       this.removeObservers();
       this.removeParent();
+      this._childTemplates = [];
       this.call(this.onDestroyedCallback);
       this.resolveLifecyclePromise('destroyed');
       this.dispatchEvent('destroyed', { component: this.instance }, eventSettings, { triggerCallback: false });
@@ -1130,8 +1131,7 @@ export const Template = class Template {
         parentNode = getParent(parentNode);
       }
     }
-    // this matches on nested partials (less common). Track seen templates so
-    // a self-referential parentTemplate can't infinite-loop.
+    // this matches on nested partials (less common)
     const seen = new Set();
     while (template && !seen.has(template)) {
       seen.add(template);
@@ -1183,9 +1183,7 @@ export const Template = class Template {
       traverseChildren(template.element.shadowRoot);
     }
 
-    // Then check subtemplate children (recursive lookup for nested partials).
-    // Track visited templates so a self-referential _childTemplates can't
-    // blow the V8 stack with infinite recursion.
+    // Then check subtemplate children (recursive lookup for nested partials)
     const visited = new Set();
     function search(childTemplates, templateName) {
       if (childTemplates) {

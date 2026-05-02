@@ -361,6 +361,31 @@ describe('findParent — subtemplate cascade', () => {
     expect(found.panels).toEqual([{ id: 'gp' }]);
   });
 
+  it('findChild on a destroyed parent does not return the live children', () => {
+    // After onDestroyed, the parent should no longer surface children via
+    // its own traversal helpers. Children may still be alive via their own
+    // refs, but a destroyed parent isn't a valid query target.
+    const parent = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      templateName: 'parent',
+    });
+    const child = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      templateName: 'child',
+      createComponent: () => ({ tag: 'live' }),
+    });
+    parent.initialize();
+    child.initialize();
+    child.setParent(parent);
+
+    expect(parent.findChild('child')).toBeDefined();
+    parent.onDestroyed();
+    expect(parent.findChild('child')).toBeUndefined();
+    expect(parent.findChildren('child')).toEqual([]);
+  });
+
   describe('cycle safety — self-referential parent/child links', () => {
     it('findParent terminates when parentTemplate self-references', () => {
       // A template whose parentTemplate is itself would walk the parent
