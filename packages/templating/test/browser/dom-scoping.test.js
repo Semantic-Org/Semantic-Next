@@ -246,6 +246,34 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         const { Query } = await import('@semantic-ui/query');
         expect(Query.isWindow(result[0])).toBe(true);
       });
+
+      it('$ inside onCreated falls through to document so authors can query the rest of the page', () => {
+        // onCreated fires before attach() wires renderRoot, so this.renderRoot
+        // is undefined. The fallback used to be globalThis (Window), which has
+        // no querySelectorAll and threw a hard TypeError. document covers the
+        // user's actual intent: "query the surrounding page from onCreated."
+        const sentinel = document.createElement('div');
+        sentinel.id = 'oncreated-page-sentinel';
+        document.body.appendChild(sentinel);
+        let observed;
+        const template = new Template({
+          template: '<div></div>',
+          renderingEngine: { renderer: Renderer, serverRenderer: ServerRenderer },
+          onCreated: ({ $ }) => {
+            observed = $('#oncreated-page-sentinel');
+          },
+        });
+        try {
+          template.initialize();
+          expect(observed).toBeDefined();
+          expect(observed.length).toBe(1);
+          expect(observed[0]).toBe(sentinel);
+        }
+        finally {
+          sentinel.remove();
+          template.onDestroyed();
+        }
+      });
     });
 
     /*******************************

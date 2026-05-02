@@ -12,6 +12,7 @@ import {
   get,
   getKeyFromEvent,
   inArray,
+  isClient,
   isEqual,
   isFunction,
   isServer,
@@ -804,7 +805,7 @@ export const Template = class Template {
       root = document;
     }
     if (!root) {
-      root = globalThis;
+      root = isClient ? document : globalThis;
     }
     if (root == this.renderRoot) {
       const $results = $(selector, { root, ...otherArgs });
