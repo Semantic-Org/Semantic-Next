@@ -261,12 +261,13 @@ export const Template = class Template {
       Template.removeTemplate(this);
       this.rendered = false;
       this.destroyed = true;
+      this.hasKeybindings = false;
+      this._childTemplates = [];
       this.abortController.abort('Template destroyed');
       this.clearReactions();
       this.removeEvents();
       this.removeObservers();
       this.removeParent();
-      this._childTemplates = [];
       this.call(this.onDestroyedCallback);
       this.resolveLifecyclePromise('destroyed');
       this.dispatchEvent('destroyed', { component: this.instance }, eventSettings, { triggerCallback: false });
@@ -637,7 +638,6 @@ export const Template = class Template {
     if (this.eventController) {
       this.eventController.abort('Template destroyed');
     }
-    this.hasKeybindings = false;
   }
 
   removeObservers() {
