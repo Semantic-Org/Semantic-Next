@@ -1095,7 +1095,10 @@ export const Template = class Template {
     if (!template) {
       return undefined;
     }
-    return template.instance;
+    return {
+      ...template.instance,
+      ...template.data,
+    };
   }
   static findParentTemplate(template, templateName) {
     templateName = kebabToCamel(templateName);
@@ -1118,7 +1121,10 @@ export const Template = class Template {
       let parentNode = getParent(template.element);
       while (parentNode) {
         if (isMatch(parentNode.component)) {
-          match = parentNode.component;
+          match = {
+            ...parentNode.component,
+            ...parentNode.dataContext,
+          };
           break;
         }
         parentNode = getParent(parentNode);
@@ -1128,7 +1134,10 @@ export const Template = class Template {
     while (template) {
       template = template.parentTemplate;
       if (isMatch(template)) {
-        match = template.instance;
+        match = {
+          ...template.instance,
+          ...template.data,
+        };
         break;
       }
     }
@@ -1155,7 +1164,10 @@ export const Template = class Template {
         if (node?.children) {
           for (const child of node.children) {
             if (child.component && isMatch(child.component)) {
-              result.push(child.component);
+              result.push({
+                ...child.component,
+                ...child.dataContext,
+              });
             }
             // Recursively check nested children including their shadow roots
             traverseChildren(child);
@@ -1173,7 +1185,10 @@ export const Template = class Template {
       if (childTemplates) {
         childTemplates.forEach((childTemplate) => {
           if (!templateName || (childTemplate.templateName === templateName)) {
-            result.push(childTemplate.instance);
+            result.push({
+              ...childTemplate.instance,
+              ...childTemplate.data,
+            });
           }
           search(childTemplate._childTemplates, templateName);
         });

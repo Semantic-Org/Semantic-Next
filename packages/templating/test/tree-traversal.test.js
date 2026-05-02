@@ -173,8 +173,8 @@ describe('findTemplate — global registry lookup', () => {
     expect(found).toBeDefined();
     expect(typeof found.greet).toBe('function');
     expect(found.greet()).toBe('hi');
-    // Closure data does not leak through findTemplate
-    expect(found.title).toBeUndefined();
+    // findTemplate exposes the parent's full awareness — closure data included
+    expect(found.title).toBe('Hello');
   });
 
   it('returns the first registered when multiple share a name', () => {
@@ -361,8 +361,12 @@ describe('findParent — subtemplate cascade', () => {
     expect(found.panels).toEqual([{ id: 'gp' }]);
   });
 
-  describe('returns instance only — no closure data or state leak', () => {
-    it('does not expose data closure passed to the parent', () => {
+  describe('exposes everything the parent is aware of', () => {
+    // findParent's contract is "anything the parent has, in case the cascade
+    // would otherwise leave you blocked." Same shape the parent's template
+    // body sees — instance methods, runtime data (data accumulates state and
+    // additional context after the first render), closure data passed in.
+    it('exposes data closure passed to the parent', () => {
       const parent = new Template({
         template: '<div></div>',
         renderingEngine: realEngine,
@@ -385,18 +389,22 @@ describe('findParent — subtemplate cascade', () => {
 
       const found = child.findParent('parentWithData');
       expect(typeof found.publicApi).toBe('function');
-      expect(found.secret).toBeUndefined();
+      expect(found.secret).toBe('closure-snapshot');
     });
 
-    it('does not expose state Signals on the parent instance', () => {
+    it('exposes instance methods that close over state', () => {
+      // Subtemplate cascade returns instance + closure data; state Signals
+      // aren't directly spread (the DOM cascade is where state Signals come
+      // through via parentNode.dataContext). For subtemplate consumers, the
+      // canonical pattern is instance methods that close over state.
       const parent = new Template({
         template: '<div></div>',
         renderingEngine: realEngine,
         templateName: 'parentWithState',
-        defaultState: { count: 0 },
-        createComponent: () => ({
-          getCount(self) {
-            return self?.count?.get?.();
+        defaultState: { count: 7 },
+        createComponent: ({ state }) => ({
+          getCount() {
+            return state.count.get();
           },
         }),
       });
@@ -410,8 +418,8 @@ describe('findParent — subtemplate cascade', () => {
       child.setParent(parent);
 
       const found = child.findParent('parentWithState');
-      expect(found.count).toBeUndefined();
       expect(typeof found.getCount).toBe('function');
+      expect(found.getCount()).toBe(7);
     });
   });
 
@@ -637,8 +645,8 @@ describe('findChild / findChildren — subtemplate cascade', () => {
     expect(found.tag).toBe('a');
   });
 
-  describe('returns instance only — no closure data leak', () => {
-    it('findChild does not expose closure data on a child', () => {
+  describe('exposes everything the child is aware of', () => {
+    it('findChild exposes closure data on the child', () => {
       const parent = new Template({
         template: '<div></div>',
         renderingEngine: realEngine,
@@ -661,10 +669,10 @@ describe('findChild / findChildren — subtemplate cascade', () => {
 
       const found = parent.findChild('item');
       expect(typeof found.publicApi).toBe('function');
-      expect(found.secret).toBeUndefined();
+      expect(found.secret).toBe('closure-snapshot');
     });
 
-    it('findChildren returns instance-only entries', () => {
+    it("findChildren entries expose each child's full awareness", () => {
       const parent = new Template({
         template: '<div></div>',
         renderingEngine: realEngine,
@@ -692,8 +700,10 @@ describe('findChild / findChildren — subtemplate cascade', () => {
 
       const found = parent.findChildren('item');
       expect(found.length).toBe(2);
-      expect(found[0].secret).toBeUndefined();
-      expect(found[1].secret).toBeUndefined();
+      expect(found[0].tag).toBe('a');
+      expect(found[1].tag).toBe('b');
+      expect(found[0].secret).toBe('a-snapshot');
+      expect(found[1].secret).toBe('b-snapshot');
     });
   });
 

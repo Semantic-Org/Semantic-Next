@@ -167,8 +167,9 @@ describe('findParent — DOM cascade (light DOM, parent.component wired)', () =>
     expect(found.templateName).toBe('uiPanels');
   });
 
-  describe('returns instance only — no state or closure data leak', () => {
-    it('does not expose state Signals through findParent', () => {
+  describe('exposes everything the parent is aware of', () => {
+    it('exposes state Signals through findParent', () => {
+      // CodePlaygroundPreview's pattern: findParent(...).someStateSignal.get()
       const fixture = buildDomCascade({
         parentState: { count: 5 },
         parentInstance: {
@@ -180,10 +181,11 @@ describe('findParent — DOM cascade (light DOM, parent.component wired)', () =>
       const found = fixture.childTpl.findParent('uiPanels');
       expect(found).toBeDefined();
       expect(typeof found.publicApi).toBe('function');
-      expect(found.count).toBeUndefined();
+      expect(typeof found.count?.get).toBe('function');
+      expect(found.count.get()).toBe(5);
     });
 
-    it('does not expose data closure through findParent', () => {
+    it('exposes data closure through findParent', () => {
       const fixture = buildDomCascade({
         parentData: { secret: 'closure-snapshot' },
         parentInstance: {
@@ -194,12 +196,10 @@ describe('findParent — DOM cascade (light DOM, parent.component wired)', () =>
       });
       const found = fixture.childTpl.findParent('uiPanels');
       expect(typeof found.publicApi).toBe('function');
-      expect(found.secret).toBeUndefined();
+      expect(found.secret).toBe('closure-snapshot');
     });
 
-    it('DOM and subtemplate cascades return the same shape', () => {
-      // Both lookup paths must agree: instance methods and properties only,
-      // never state Signals or closure data.
+    it('DOM cascade exposes the parentNode.dataContext alongside instance methods', () => {
       const parentInstance = {
         hello() {
           return 'world';
@@ -216,8 +216,8 @@ describe('findParent — DOM cascade (light DOM, parent.component wired)', () =>
       });
 
       const fromDom = dom.childTpl.findParent('sharedShape');
-      expect(fromDom.count).toBeUndefined();
-      expect(fromDom.secret).toBeUndefined();
+      expect(typeof fromDom.count?.get).toBe('function');
+      expect(fromDom.secret).toBe('snapshot');
       expect(typeof fromDom.hello).toBe('function');
       expect(fromDom.magic).toBe(1);
     });
@@ -399,8 +399,8 @@ describe('findChild / findChildren — DOM cascade', () => {
     expect(found).toEqual([]);
   });
 
-  describe('returns instance only — no state leak', () => {
-    it('does not expose state Signals through findChild', () => {
+  describe('exposes everything the child is aware of', () => {
+    it('exposes state Signals through findChild', () => {
       const parentHost = document.createElement('ui-list');
       const shadow = parentHost.attachShadow({ mode: 'open' });
       document.body.appendChild(parentHost);
@@ -436,7 +436,8 @@ describe('findChild / findChildren — DOM cascade', () => {
       const found = parentTpl.findChild('row');
       expect(found).toBeDefined();
       expect(typeof found.publicApi).toBe('function');
-      expect(found.count).toBeUndefined();
+      expect(typeof found.count?.get).toBe('function');
+      expect(found.count.get()).toBe(7);
     });
   });
 
