@@ -259,10 +259,7 @@ export const Template = class Template {
 
     this.onDestroyed = () => {
       Template.removeTemplate(this);
-      this.rendered = false;
-      this.destroyed = true;
-      this.hasKeybindings = false;
-      this._childTemplates = [];
+      this.markDestroyed();
       this.abortController.abort('Template destroyed');
       this.clearReactions();
       this.removeEvents();
@@ -794,6 +791,13 @@ export const Template = class Template {
   markRendered() {
     this.rendered = true;
     this.destroyed = false;
+  }
+
+  markDestroyed() {
+    this.rendered = false;
+    this.destroyed = true;
+    this.hasKeybindings = false;
+    this._childTemplates = [];
   }
 
   /*******************************
