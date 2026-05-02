@@ -1,6 +1,7 @@
 import { Signal } from '@semantic-ui/reactivity';
 import { arrayFromObject, isArray, isEmpty, isPlainObject, isString } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
+import { isEachContentSelfContained } from './each-content-classifier.js';
 import { registerBlock } from './registry.js';
 
 /*
@@ -643,30 +644,46 @@ const eachBlock = defineBlock({
   },
 
   hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
-    // Resolve items now (this also registers the collection dep so future
-    // signal changes invalidate the block). If the server emitted per-item
-    // markers, adopt the existing DOM and wire per-item Reactions against
-    // it — without this, items that never change after hydrate would have
-    // unwired per-item attribute bindings forever.
-    const { items, collectionType } = resolveItems(node, lookupExpression);
-    if (items.length > 0) {
-      const adopted = adoptServerItems({
-        self,
-        items,
-        collectionType,
-        node,
-        data,
-        scope,
-        region,
-        renderAST,
-        hydrateInnerContent,
-        isSVG,
-      });
-      if (adopted) { return; }
-    }
-    // No per-item markers (legacy SSR output) or empty list — let `update`
-    // handle it on the first data change via the standard reconcile path.
+    // Always register a dep on the collection so future mutations
+    // invalidate the block.
+    lookupExpression(node.over);
     self.hasHydrated = true;
+
+    // Cheap path: per-item bindings only read iteration-local data
+    // (or pure framework helpers). Defer per-item Reaction wiring to
+    // the first items mutation — `adoptServerItems` runs there.
+    //
+    // Eager path: any per-item binding could read external state
+    // (a helper closing over `state.x`, a component method, a nested
+    // block whose condition reads outside the iteration scope, ...).
+    // Wire per-item Reactions now via `adoptServerItems`, otherwise
+    // the only chance to wire them is a future items-signal change
+    // that may never come — and external mutations would silently lose
+    // reactivity. The classifier bails conservative; cost is paid only
+    // when correctness demands it.
+    if (isEachContentSelfContained(node)) {
+      return;
+    }
+    const { items, collectionType } = resolveItems(node, lookupExpression);
+    if (items.length === 0) { return; }
+    const adopted = adoptServerItems({
+      self,
+      items,
+      collectionType,
+      node,
+      data,
+      scope,
+      region,
+      renderAST,
+      hydrateInnerContent,
+      isSVG,
+    });
+    if (adopted) {
+      // Adoption already wired per-item Reactions. Reset hasHydrated so
+      // `update` doesn't try to adopt again on the first signal change
+      // — it will reconcile against the items signal as normal.
+      self.hasHydrated = false;
+    }
   },
 
   update({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {

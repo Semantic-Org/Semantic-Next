@@ -1405,15 +1405,7 @@ describe('SSR hydration — snippet reactivity', () => {
     expect(span.textContent).toBe('[Updated]');
   });
 
-  // KNOWN BUG: same family as bug/hydrate-reactivity. The {#each} block's
-  // hydrate hook only registers a dep on the items collection — per-item
-  // bindings (including snippet args) are not wired until update() fires
-  // via items signal change. Snippet inner expressions (here {label})
-  // never get reactions registered against item-derived data on hydrate.
-  // Was masked when ssrAndHydrate used innerHTML (DSD not parsed →
-  // fullRender path → snippet rendered fresh client-side with normal
-  // binding wiring, no hydrate-deferral involved).
-  it.skip('snippet with named args inside each is reactive after hydration', async () => {
+  it('snippet with named args inside each is reactive after hydration', async () => {
     const el = await ssrAndHydrate({
       template: '{#snippet badge}<span class="b">[{label}]</span>{/snippet}'
         + '{#each item in items}<div>{>badge label=item.name}</div>{/each}',
