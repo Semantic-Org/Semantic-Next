@@ -2,11 +2,13 @@
 
 ## Status
 
-**Iceboxed.** PR A (CI parallelization) and PR C (in-house Node reporter) shipped. **PR B (suite rationalization + knob tuning) remains** — the only outstanding work.
+**Superseded for active planning by [`../bench-reporter-overhaul.md`](../bench-reporter-overhaul.md)** (ROADMAP P15).
 
-PR B's payoff: 27 → ~22 metrics organized as four story-driven suites (`rendering-throughput`, `reactivity`, `structural-changes`, `hydration`), `autoSampleConditions: ["2%"]` instead of `["0%", "10%"]`, 2-min per-config cap. The bench bot works without it; PR B improves what we measure and how interpretable the comment is.
+PR A (CI parallelization) and PR C (in-house Node reporter) shipped from the original design. PR B (suite rationalization + knob tuning) was partially absorbed (`autoSampleConditions: ["2%"]`, partial triplet collapses, `tachometer-ci-hydrate.json`) and partially carried forward into the active plan as **Track B** of the overhaul.
 
-Promote when noisy-row triplets or zero-convergence `unsure` verdicts cost real iteration time, or when a perf push needs the `wake-count-single-key` / `nested-mutation` / `hydrate-1000-card` benches PR B introduces.
+A separate methodology bug surfaced after PR C shipped — peak attribution operating on cross-session absolute ms produces phantom "regressions from peak" on PRs without perf changes (PR #174 surfaced 23 of these). The fix lives in the active plan as **Track A** (schema_v2 with within-session percent-delta + tip-of-tree SHA, `--scope pr` flag, tip-of-tree drift flag).
+
+This file remains as historical design context — the principles, status taxonomy rationale, JSON schema design, and PR A / PR C execution playbooks are referenced by the active plan rather than repeated. Read this for the *why* behind decisions in the active plan; read the active plan for what's getting built next.
 
 The full plan below was the original three-PR design; sections describing PR A and PR C are historical context for what shipped.
 
