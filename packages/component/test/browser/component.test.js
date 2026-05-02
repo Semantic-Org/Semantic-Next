@@ -1469,6 +1469,105 @@ describe('Component', () => {
         expect(leaf.textContent).toBe('baz');
       });
 
+      it('recursive subtemplate (self-reference with a base case) renders to depth', async () => {
+        // The realistic recursive composition pattern: a tree/menu node that
+        // references itself in its own subTemplates and uses an `{#if}` guard
+        // to terminate. Forward-ref the prototype into its own registry by
+        // mutating the same subTemplates object after the component is
+        // defined — captured by reference, so the late assignment is visible
+        // at render time.
+        const subTemplates = {};
+        defineComponent({
+          tagName: 'test-recursive-tree',
+          templateName: 'treeNode',
+          template: `
+            <li>
+              <span class="label">{label}</span>
+              {#if children.length}
+                <ul>
+                  {#each c in children}
+                    {>treeNode label=c.label children=c.children}
+                  {/each}
+                </ul>
+              {/if}
+            </li>
+          `,
+          subTemplates,
+          properties: {
+            label: { type: String },
+            children: { type: Array },
+          },
+        });
+        // Forward-ref now that the component class exists.
+        subTemplates.treeNode = customElements.get('test-recursive-tree').template;
+
+        const el = document.createElement('test-recursive-tree');
+        el.label = 'root';
+        el.children = [
+          { label: 'a', children: [{ label: 'a.1', children: [] }] },
+          { label: 'b', children: [] },
+        ];
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        cleanupElements.push(el);
+        await rendered;
+
+        const labels = Array.from(el.shadowRoot.querySelectorAll('.label'))
+          .map(n => n.textContent.trim());
+        expect(labels).toContain('root');
+        expect(labels).toContain('a');
+        expect(labels).toContain('a.1');
+        expect(labels).toContain('b');
+      });
+
+      it('cyclic composition without a base case fails fast instead of hanging', async () => {
+        // Two components reference each other in a cycle with no terminator.
+        // The renderer's recursion hits the V8 stack limit and throws
+        // RangeError before any render completes — bounded failure, not
+        // an infinite loop. Document the failure mode so authors who reach
+        // for recursion know to include a base case.
+        //
+        // The error fires inside a Reaction (async render), so we catch
+        // it via window.error rather than expecting appendChild to throw.
+        const aSubs = {};
+        const bSubs = {};
+        defineComponent({
+          tagName: 'test-cyclic-a',
+          templateName: 'cyclicA',
+          template: `<div class="a">{>cyclicB}</div>`,
+          subTemplates: aSubs,
+        });
+        defineComponent({
+          tagName: 'test-cyclic-b',
+          templateName: 'cyclicB',
+          template: `<div class="b">{>cyclicA}</div>`,
+          subTemplates: bSubs,
+        });
+        aSubs.cyclicB = customElements.get('test-cyclic-b').template;
+        bSubs.cyclicA = customElements.get('test-cyclic-a').template;
+
+        let caught;
+        const handler = (e) => {
+          caught = e.error || e.reason;
+          e.preventDefault();
+        };
+        window.addEventListener('error', handler);
+        window.addEventListener('unhandledrejection', handler);
+        try {
+          const el = document.createElement('test-cyclic-a');
+          document.body.appendChild(el);
+          cleanupElements.push(el);
+          // Give the reactive render a tick to fire and throw.
+          await new Promise(r => setTimeout(r, 100));
+          expect(caught).toBeDefined();
+          expect(caught).toBeInstanceOf(RangeError);
+        }
+        finally {
+          window.removeEventListener('error', handler);
+          window.removeEventListener('unhandledrejection', handler);
+        }
+      });
+
       it('should handle mixed web component and subtemplate navigation', async () => {
         // Define subtemplate child (no tagName)
         const subChildTemplate = defineComponent({
