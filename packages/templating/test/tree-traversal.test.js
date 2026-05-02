@@ -119,6 +119,23 @@ describe('Template.renderedTemplates registry', () => {
     const remaining = Template.getTemplates('sibling');
     expect(remaining[0].id).toBe(b.id);
   });
+
+  it('deletes the registry key when the last instance with that name destroys', () => {
+    // Without this, monotonically-increasing template names (Anonymous #N,
+    // route-driven distinct components) leave the Map growing forever as
+    // each unique name keeps an empty-array entry after destroy.
+    const before = Template.renderedTemplates.size;
+    for (let i = 0; i < 50; i++) {
+      const t = new Template({
+        template: '<div></div>',
+        renderingEngine: realEngine,
+        templateName: `transient_${i}`,
+      });
+      t.initialize();
+      t.onDestroyed();
+    }
+    expect(Template.renderedTemplates.size).toBe(before);
+  });
 });
 
 /*******************************
@@ -128,6 +145,15 @@ describe('Template.renderedTemplates registry', () => {
 describe('findTemplate — global registry lookup', () => {
   it('returns undefined when no Template is registered under that name', () => {
     expect(Template.findTemplate('nonexistent')).toBeUndefined();
+  });
+
+  it('returns undefined for null/undefined input without throwing', () => {
+    // kebabToCamel's default param handles undefined but explicit null
+    // bypasses defaults and would throw on null.split('-'). Defensive guard
+    // at the entry of findTemplate keeps the API friendly.
+    expect(() => Template.findTemplate(null)).not.toThrow();
+    expect(Template.findTemplate(null)).toBeUndefined();
+    expect(Template.findTemplate(undefined)).toBeUndefined();
   });
 
   it('returns the instance of the first registered Template', () => {

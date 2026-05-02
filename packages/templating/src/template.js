@@ -1078,12 +1078,18 @@ export const Template = class Template {
     }
     let templates = Template.renderedTemplates.get(template.templateName) || [];
     remove(templates, (thisTemplate) => thisTemplate.id == template.id);
-    Template.renderedTemplates.set(template.templateName, templates);
+    if (templates.length === 0) {
+      Template.renderedTemplates.delete(template.templateName);
+    }
+    else {
+      Template.renderedTemplates.set(template.templateName, templates);
+    }
   }
   static getTemplates(templateName) {
     return Template.renderedTemplates.get(templateName) || [];
   }
   static findTemplate(templateName) {
+    if (templateName == null) { return undefined; }
     templateName = kebabToCamel(templateName);
     const template = Template.getTemplates(templateName)[0];
     if (!template) {
