@@ -773,6 +773,44 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         expect(handler).not.toHaveBeenCalled();
         externalTarget.remove();
       });
+
+      it('forwards listener options (passive, capture, once) to addEventListener', async () => {
+        // Production at inpage-menu.js:269 passes `{ passive: true }` directly.
+        // The 4th arg should accept the natural addEventListener shape.
+        const fixture = await mountTemplate({ target });
+        const externalTarget = document.createElement('div');
+        document.body.appendChild(externalTarget);
+        const spy = vi.spyOn(externalTarget, 'addEventListener');
+        try {
+          fixture.template.attachEvent(externalTarget, 'touchmove', () => {}, { passive: true });
+          const call = spy.mock.calls.find(([name]) => name === 'touchmove');
+          expect(call).toBeDefined();
+          expect(call[2]).toMatchObject({ passive: true });
+        }
+        finally {
+          spy.mockRestore();
+          externalTarget.remove();
+          fixture.cleanup();
+        }
+      });
+
+      it('fires only once when called with { once: true }', async () => {
+        const handler = vi.fn();
+        const fixture = await mountTemplate({ target });
+        const externalTarget = document.createElement('div');
+        document.body.appendChild(externalTarget);
+        try {
+          fixture.template.attachEvent(externalTarget, 'click', handler, { once: true });
+          clickOn(externalTarget);
+          clickOn(externalTarget);
+          clickOn(externalTarget);
+          expect(handler).toHaveBeenCalledTimes(1);
+        }
+        finally {
+          externalTarget.remove();
+          fixture.cleanup();
+        }
+      });
     });
 
     /*******************************

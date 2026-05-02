@@ -894,12 +894,15 @@ export const Template = class Template {
     };
   }
 
-  // attaches an external event handler making sure to remove the event when the component is destroyed
-  attachEvent(selector, eventName, eventHandler, { eventSettings = {}, querySettings = { pierceShadow: true } } = {}) {
+  // Attaches an external event handler scoped to this template's lifetime.
+  // Listener options (passive, capture, once, signal, ...) are passed directly
+  // in the 4th arg, matching the native addEventListener shape. `querySettings`
+  // is the only namespaced key (it controls how `selector` is resolved).
+  attachEvent(selector, eventName, eventHandler, { querySettings = { pierceShadow: true }, ...eventSettings } = {}) {
     return $(selector, document, querySettings).on(eventName, eventHandler, {
       abortController: this.eventController,
       returnHandler: true,
-      ...eventSettings,
+      eventSettings,
     });
   }
 
