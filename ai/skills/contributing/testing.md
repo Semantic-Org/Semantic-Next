@@ -162,10 +162,11 @@ npx vitest --c tests/configs/vitest/vitest.config.js --run --project node equali
 
 ### Wall-clock budget and stuck-process cleanup
 
-The full repo suite finishes in ~1m 30s. Use a **2-minute timeout**; anything longer means
-something's stuck — almost always a leftover Vitest watcher (or its Playwright/Chromium
-spawns) holding ports from a previous session. A single suite (renderer browser, etc.)
-should finish in well under 30s; if it doesn't, the culprit is the same.
+The full repo suite (`npm test` from root, ~3600 tests across 82 files) finishes in **~28s**.
+A **60-second timeout is plenty**; anything longer means something's stuck — almost always
+a leftover Vitest watcher (or its Playwright/Chromium spawns) holding ports from a previous
+session. A single package's browser suite should finish in well under 15s; if it doesn't,
+the culprit is the same.
 
 When you hit a timeout, don't just retry — kill the stragglers first:
 
