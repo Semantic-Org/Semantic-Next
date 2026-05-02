@@ -213,6 +213,20 @@ describe('Template — key bindings', () => {
       expect(handler).toHaveBeenCalledTimes(1);
       template.eventController.abort();
     });
+
+    it('does not fire on every keystroke when the descriptor is a bare comma', () => {
+      // ','.split(',') yields ['',''] and endsWith('') is always true,
+      // so without empty-string filtering the handler fires on every key.
+      const handler = vi.fn();
+      const { template } = makeKeyTemplate({
+        keys: { ',': handler },
+      });
+      pressKey('a');
+      pressKey('b');
+      pressKey('c');
+      expect(handler).not.toHaveBeenCalled();
+      template.eventController.abort();
+    });
   });
 
   /*******************************
