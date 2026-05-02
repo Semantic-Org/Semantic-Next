@@ -442,8 +442,9 @@ export const Template = class Template {
     let eventType = 'delegate';
     let keywords = ['deep', 'global', 'bind'];
     each(keywords, (keyword) => {
-      if (eventString.startsWith(keyword)) {
-        eventString = eventString.replace(keyword, '');
+      // Require a word boundary so 'deepclick' isn't parsed as deep + 'click'.
+      if (eventString.startsWith(keyword + ' ')) {
+        eventString = eventString.slice(keyword.length);
         eventType = keyword;
       }
     });

@@ -172,6 +172,16 @@ describe('events DSL — selector grammar', () => {
       { eventName: 'customevent', eventType: 'bind', selector: 'some-component' },
     ]);
   });
+
+  it('does not strip a keyword embedded in a longer event name', () => {
+    // `'deepclick'` should be parsed as the literal eventName, not as
+    // `deep` + `click`. Keyword detection requires a word boundary.
+    const template = new Template({});
+    const parsed = template.parseEventString('deepclick .item');
+    expect(parsed).toEqual([
+      { eventName: 'deepclick', eventType: 'delegate', selector: '.item' },
+    ]);
+  });
 });
 
 /*******************************
