@@ -63,11 +63,8 @@ Semantic UI components support server-side rendering out of the box. The default
 > **UI Components** All [UI framework components](/ui) in Semantic UI are designed to work with server side hydration out of the box.
 
 ### Lifecycle Events on Server
-Lifecycle callbacks (`onCreated`, `onRendered`, `onDestroyed`) fire on the server in the same order as on the client.
 
-[DOM lifecycle events](#dom-lifecycle-events) are suppressed during hydration — `created` and `rendered` events do not dispatch on the client when reusing server-rendered markup, so listeners outside the component aren't fired twice for the same render.
-
-Use `isServer` or `isClient` inside callbacks when accessing globals that may not be defined on the server.
+Lifecycle callbacks (`onCreated`, `onRendered`, `onDestroyed`) fire on the server in the same order as on the client. [DOM lifecycle events](#dom-lifecycle-events) are suppressed during hydration so external listeners aren't fired twice for the same render. Use `isServer` or `isClient` inside callbacks when reaching for globals that may not be defined on the server.
 
 ```javascript 'isClient'
 const onRendered = function ({ isClient, self }) {

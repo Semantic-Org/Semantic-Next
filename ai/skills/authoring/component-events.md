@@ -64,8 +64,8 @@ const events = {
     state.hovered.set(true);
   },
 
-  // Deep — pierces a child web component's shadow tree.
-  // For slotted children of your own component, default mode already matches them.
+  // Deep: pierces a child web component's shadow tree.
+  // Default mode already matches slotted children of your own component.
   'deep click ui-button .icon'({ self }) {
     // .icon lives inside ui-button's shadow tree
   },

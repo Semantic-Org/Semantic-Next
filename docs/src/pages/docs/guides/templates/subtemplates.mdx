@@ -59,20 +59,7 @@ Verbose syntax uses the syntax `{> template name=templateName data=someData}` an
 
 ## Inherited Settings
 
-Inside a subtemplate's JS callbacks, `settings` reads from the subtemplate's own `defaultSettings` first and falls back to the parent web component's settings for keys the subtemplate didn't declare:
-
-```javascript
-const createComponent = ({ settings }) => ({
-  initialize() {
-    // declared on the subtemplate — uses subtemplate's value
-    settings.layout;
-    // not declared on the subtemplate — falls through to the host component
-    settings.theme;
-  },
-});
-```
-
-Inside template expressions, only the subtemplate's own declared settings are reactive. To use a host setting in a subtemplate's markup, pass it explicitly:
+Inside JS callbacks, `settings` falls back to the host component's settings for keys the subtemplate didn't declare. In template expressions only the subtemplate's own declared settings are reactive; pass host settings explicitly to use them in markup.
 
 ```sui
 {> userProfile theme=theme name=user.name}

@@ -63,9 +63,8 @@ const events = {
 ```
 
 ### Component-Wide Events
-To attach events to your entire component you can pass in an event name without a selector.
 
-No-selector handlers bind on the host element, so events on the host's own surface — padding, border, host-dispatched custom events — fire alongside events from inside the component.
+Pass an event name without a selector to fire on any part of the component, including the host's own surface and host-dispatched events.
 
 ```javascript
 const events = {
@@ -77,8 +76,6 @@ const events = {
   }
 };
 ```
-
-> See [Projection vs. Piercing](#deep-events) for how this interacts with slotted content and shadow boundaries.
 
 ## Inside Templates
 
@@ -99,22 +96,13 @@ You can add special keywords to that modify how events are attached permitting y
 
 ### Global Events
 
-You can use the `global` keyword to attach an event globally to any element outside of your component.
-
-When no selector is provided, the event attaches to `window` — handy for `scroll`, `hashchange`, and similar page-level events.
+Use the `global` keyword to attach an event to an element outside your component.
 
 ```javascript
 const events = {
   'global scroll'() {
-    // page scrolled
-  }
-};
-```
-
-Pass a selector to target a specific element instead:
-
-```javascript
-const events = {
+    // no selector binds to window
+  },
   'global click body'() {
     // any click on the body
   }
@@ -139,13 +127,12 @@ You can use the `deep` keyword to attach events to elements inside *another* web
 ```javascript
 const events = {
   'deep ui-button .icon'() {
-    // the icon lives inside ui-button's shadow tree —
-    // requires deep to pierce that boundary
+    // .icon lives inside ui-button's shadow tree
   }
 };
 ```
 
-> **Composed events required** `deep` only catches events that bubble out of a child component's shadow tree, which means the inner element must dispatch with `composed: true`. Native events (`click`, `mouseover`, etc.) already do this. For custom events, use the framework's [`dispatchEvent`](#dispatching-custom-events) helper — it sets `composed: true` by default.
+> **Composed events** `deep` only catches events dispatched with `composed: true`. Native events do; for custom events use the framework's [`dispatchEvent`](#dispatching-custom-events), which sets it by default.
 
 ### Bound events
 

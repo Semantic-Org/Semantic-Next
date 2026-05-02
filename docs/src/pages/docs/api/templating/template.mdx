@@ -201,9 +201,7 @@ template.setDataContext({ name: 'Jane' }, { rerender: true });
 
 ### clone
 
-Manifests a new Template instance from a prototype template. The renderer calls `clone` to produce per-mount instances from a registered prototype — each mount gets its own state, instance, and DOM bindings while sharing the prototype's compiled AST, CSS, and callbacks.
-
-This is not a deep copy. The returned Template shares structural definitions (AST, events, CSS, `createComponent`) with the source by reference; only per-instance fields (data, element, parent linkage) are fresh.
+Creates a new Template instance from a prototype. Each clone has its own data, element, and DOM bindings; AST, CSS, and callbacks are shared with the prototype by reference.
 
 #### Syntax
 ```javascript
@@ -213,7 +211,7 @@ template.clone(settings)
 #### Parameters
 | Name     | Type   | Description                                                    |
 |----------|--------|----------------------------------------------------------------|
-| settings | Object | Per-instance overrides — typically `data`, `element`, `parentTemplate` |
+| settings | Object | Per-instance overrides like `data`, `element`, `parentTemplate` |
 
 #### Returns
 `Template` - A new Template instance derived from this prototype.

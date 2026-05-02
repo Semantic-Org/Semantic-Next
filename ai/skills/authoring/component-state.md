@@ -37,7 +37,7 @@ The template data context is **flat**. Data, state, and the component instance a
 // Roughly: template data = settings overlaid on { ...data, ...state, ...instance }
 ```
 
-This means `{counter}` in a template could resolve from settings, state, or the component instance. **Settings win over state for same-named keys** because they overlay last as Signals — the renderer tracks the settings Signal, not the underlying state value. Avoid same-named collisions; if you must mirror, treat settings as the source and seed state from it explicitly.
+This means `{counter}` in a template could resolve from settings, state, or the component instance. **Settings win over state for same-named keys** because they overlay last as Signals. Avoid same-named collisions.
 
 ```html
 <!-- ✅ Direct name — template resolves from the flat context -->
