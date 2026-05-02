@@ -608,7 +608,7 @@ export const Template = class Template {
         // allow user to bind to global selectors if they opt in using the 'global' keyword
         // also allow events to be directly bound when opted in
         if (eventType == 'global') {
-          $(selector).on(eventName, eventHandler, eventSettings);
+          $(selector || window).on(eventName, eventHandler, eventSettings);
         }
         else if (eventType == 'bind') {
           this.onRenderOnce = () => {

@@ -401,6 +401,24 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         window.dispatchEvent(new HashChangeEvent('hashchange'));
         expect(handler).not.toHaveBeenCalled();
       });
+
+      it('defaults to window when no selector is given', async () => {
+        // `'global hashchange'` (no selector) should default to window so
+        // authors don't have to repeat the obvious `window` for the typical
+        // global event use cases (scroll/resize/hashchange).
+        const handler = vi.fn();
+        const fixture = await mountTemplate({
+          target,
+          events: { 'global hashchange': handler },
+        });
+        try {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+          expect(handler).toHaveBeenCalledTimes(1);
+        }
+        finally {
+          fixture.cleanup();
+        }
+      });
     });
 
     /*******************************
