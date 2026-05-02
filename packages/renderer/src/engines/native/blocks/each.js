@@ -642,12 +642,30 @@ const eachBlock = defineBlock({
     });
   },
 
-  hydrate({ node, lookupExpression, self }) {
-    // Trust server DOM. Register a dep on the collection so the first data
-    // change invalidates the block — `update` then clears the region and
-    // rebuilds via reconcile. Per-item reactivity (text/attr Reactions
-    // inside item content) is established at that rebuild, not on hydrate.
-    lookupExpression(node.over);
+  hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
+    // Resolve items now (this also registers the collection dep so future
+    // signal changes invalidate the block). If the server emitted per-item
+    // markers, adopt the existing DOM and wire per-item Reactions against
+    // it — without this, items that never change after hydrate would have
+    // unwired per-item attribute bindings forever.
+    const { items, collectionType } = resolveItems(node, lookupExpression);
+    if (items.length > 0) {
+      const adopted = adoptServerItems({
+        self,
+        items,
+        collectionType,
+        node,
+        data,
+        scope,
+        region,
+        renderAST,
+        hydrateInnerContent,
+        isSVG,
+      });
+      if (adopted) { return; }
+    }
+    // No per-item markers (legacy SSR output) or empty list — let `update`
+    // handle it on the first data change via the standard reconcile path.
     self.hasHydrated = true;
   },
 

@@ -1,6 +1,7 @@
 import { defineComponent, renderToString } from '@semantic-ui/component';
 import { $ } from '@semantic-ui/query';
 import { Reaction } from '@semantic-ui/reactivity';
+import { Template } from '@semantic-ui/templating';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 /*******************************
@@ -32,11 +33,22 @@ function shadowHTML(el) {
 async function ssrAndHydrate(opts, attrs = {}) {
   const tag = uniqueTag();
   const Component = defineComponent({ tagName: tag, renderingEngine: 'native', ...opts });
-  const html = renderToString(Component, attrs);
+  // Toggle Template.isServer so renderToString actually emits SSR HTML in
+  // the browser test env (it gates server vs client renderer selection).
+  const wasServer = Template.isServer;
+  Template.isServer = true;
+  let html;
+  try {
+    html = renderToString(Component, attrs);
+  }
+  finally {
+    Template.isServer = wasServer;
+  }
 
-  // Inject into page — browser parses DSD
+  // Use setHTMLUnsafe to actually parse Declarative Shadow DOM. innerHTML
+  // does NOT process <template shadowrootmode>; setHTMLUnsafe does.
   const wrapper = document.createElement('div');
-  wrapper.innerHTML = html;
+  wrapper.setHTMLUnsafe(html);
   const el = wrapper.firstElementChild;
 
   // Append triggers connectedCallback → hydration
@@ -281,6 +293,46 @@ describe('SSR hydration — each loops', () => {
     });
 
     expect(shadowHTML(el)).toBe('<span>r=red</span><span>g=green</span>');
+  });
+
+  // Regression: inpage-menu's per-item active class never updated on scroll.
+  // Production shape (verified from DevTools): the each block's items arrive
+  // via an HTML attribute on the custom element (`menu="[…JSON…]"`), so the
+  // items signal is set BEFORE connectedCallback runs hydrate. The each
+  // block's hydrate hook (each.js:645) only registers a dep on the items
+  // signal and defers per-item attribute reaction wiring to `update`. With
+  // items set before hydrate, the signal never fires after, `update` never
+  // runs, and per-item attribute reactions never get registered against the
+  // signals their helpers read. State mutations the helper depends on then
+  // have nothing to invalidate.
+  it('helper-call attribute inside each is reactive after hydration when items pre-populated', async () => {
+    let helperCalls = 0;
+    const el = await ssrAndHydrate({
+      template:
+        '{#each item in items}<a data-id="{item.id}" class="{classMap getItemClasses item}">{item.id}</a>{/each}',
+      defaultState: { activeID: null },
+      defaultSettings: { items: [{ id: 'a' }, { id: 'b' }] },
+      createComponent: ({ state }) => ({
+        getItemClasses(item) {
+          helperCalls++;
+          return { active: state.activeID.get() === item.id, item: true };
+        },
+      }),
+    });
+
+    // Sanity: SSR populated per-item DOM (proves DSD parsed and we're on the
+    // hydration path, not a fresh client render).
+    expect(el.shadowRoot.querySelectorAll('a')).toHaveLength(2);
+    const initial = helperCalls;
+
+    el.template.state.activeID.set('a');
+    await new Promise(r => setTimeout(r, 30));
+
+    // Pin: helper must be re-invoked when its read signal changes.
+    expect(helperCalls).toBeGreaterThan(initial);
+    const anchors = el.shadowRoot.querySelectorAll('a');
+    expect(anchors[0].getAttribute('class')).toContain('active');
+    expect(anchors[1].getAttribute('class')).not.toContain('active');
   });
 });
 
