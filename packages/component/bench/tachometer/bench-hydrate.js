@@ -96,7 +96,7 @@ const startMark = (name) => `${name}-start`;
 // data-sui-bind markers. The `each` block's hydrate hook stays O(1) on
 // main — it just registers a dep on the items signal. Per-item DOM is
 // already correct from SSR; no mutation triggered.
-const itemsForMount = makeItems(100);
+const itemsForMount = makeItems(1000);
 const dsdHTMLForMount = ssrList(itemsForMount);
 performance.mark(startMark('hydrate-each-100-mount'));
 container.setHTMLUnsafe(dsdHTMLForMount);
@@ -180,7 +180,7 @@ function ssrHelperList(items) {
 // cost difference between strategies that keep hydrate O(1) and
 // strategies that wire per-item Reactions on hydrate to register
 // external-signal deps eagerly.
-const helperItems = makeItems(100);
+const helperItems = makeItems(1000);
 const dsdHTMLForHelper = ssrHelperList(helperItems);
 performance.mark(startMark('hydrate-helper-100-mount'));
 container.setHTMLUnsafe(dsdHTMLForHelper);
