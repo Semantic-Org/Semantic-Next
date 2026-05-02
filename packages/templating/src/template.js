@@ -1130,8 +1130,11 @@ export const Template = class Template {
         parentNode = getParent(parentNode);
       }
     }
-    // this matches on nested partials (less common)
-    while (template) {
+    // this matches on nested partials (less common). Track seen templates so
+    // a self-referential parentTemplate can't infinite-loop.
+    const seen = new Set();
+    while (template && !seen.has(template)) {
+      seen.add(template);
       template = template.parentTemplate;
       if (isMatch(template)) {
         match = {
@@ -1180,10 +1183,15 @@ export const Template = class Template {
       traverseChildren(template.element.shadowRoot);
     }
 
-    // Then check subtemplate children (recursive lookup for nested partials)
+    // Then check subtemplate children (recursive lookup for nested partials).
+    // Track visited templates so a self-referential _childTemplates can't
+    // blow the V8 stack with infinite recursion.
+    const visited = new Set();
     function search(childTemplates, templateName) {
       if (childTemplates) {
         childTemplates.forEach((childTemplate) => {
+          if (visited.has(childTemplate)) { return; }
+          visited.add(childTemplate);
           if (!templateName || (childTemplate.templateName === templateName)) {
             result.push({
               ...childTemplate.instance,

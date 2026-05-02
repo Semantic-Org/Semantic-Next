@@ -361,6 +361,36 @@ describe('findParent — subtemplate cascade', () => {
     expect(found.panels).toEqual([{ id: 'gp' }]);
   });
 
+  describe('cycle safety — self-referential parent/child links', () => {
+    it('findParent terminates when parentTemplate self-references', () => {
+      // A template whose parentTemplate is itself would walk the parent
+      // chain forever without a cycle guard. Misuse-only, but the failure
+      // mode (hang) is bad enough to warrant a guard.
+      const a = new Template({
+        template: '<div></div>',
+        renderingEngine: realEngine,
+        templateName: 'a',
+      });
+      a.initialize();
+      a.parentTemplate = a;
+      expect(a.findParent('nonexistent')).toBeUndefined();
+    });
+
+    it('findChildren terminates when _childTemplates references itself', () => {
+      // A template whose _childTemplates contains itself recurses into
+      // its own subtree forever, blowing the V8 stack with RangeError.
+      // Cycle guard via a visited Set keeps the walk bounded.
+      const a = new Template({
+        template: '<div></div>',
+        renderingEngine: realEngine,
+        templateName: 'a',
+      });
+      a.initialize();
+      a._childTemplates = [a];
+      expect(() => a.findChildren('nonexistent')).not.toThrow();
+    });
+  });
+
   describe('exposes everything the parent is aware of', () => {
     // findParent's contract is "anything the parent has, in case the cascade
     // would otherwise leave you blocked." Same shape the parent's template
