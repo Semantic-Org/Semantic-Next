@@ -40,7 +40,6 @@ export const Template = class Template {
 
   static templateCount = 0;
 
-  // Mirror of @semantic-ui/utils' isServer; mutable so SSR-gated paths can be toggled in tests.
   static isServer = isServer;
 
   rendered = false;
@@ -102,7 +101,6 @@ export const Template = class Template {
     this.onThemeChangedCallback = onThemeChanged;
     this.id = generateID();
     this.isPrototype = isPrototype;
-    // parentTemplate is wired through setParent only
     this.attachStyles = attachStyles;
     this.element = element;
     this.renderingEngine = renderingEngine;
@@ -231,12 +229,6 @@ export const Template = class Template {
         this.dispatchEvent('rendered', { component: this.instance }, eventSettings, { triggerCallback: false });
       }
     };
-    // The state-Reaction below tracks `defaultState` Signals and fires this
-    // wrapper on change. It does NOT see fine-grained block-level reactivity
-    // (per-expression Reactions inside the renderer), so onUpdated is not a
-    // reliable "anything changed" hook — consumers that need universal
-    // coverage should observe the `updated` DOM event from outside or invoke
-    // this wrapper manually.
     this.onUpdated = () => {
       if (this.updateScheduled) { return; }
       this.updateScheduled = true;
@@ -618,12 +610,10 @@ export const Template = class Template {
         }
         else {
           if (selector) {
-            // event delegation at the component's shadow root
             $(this.renderRoot).on(eventName, selector, eventHandler, eventSettings);
           }
           else {
-            // naked event — bind on the host so events on the host's own
-            // surface (padding, border, host-dispatched) fire too
+            // naked: bind on host so events on the host's own surface fire
             $(this.element).on(eventName, eventHandler, eventSettings);
           }
         }
@@ -650,8 +640,7 @@ export const Template = class Template {
     if (Object.keys(keys).length == 0) {
       return;
     }
-    // bindKey reinstalls when this.keys was previously empty; without this
-    // gate, unbind/rebind cycles stack duplicate document listeners
+    // gate prevents unbind/rebind cycles from stacking document listeners
     if (this.hasKeybindings) {
       return;
     }
@@ -900,10 +889,8 @@ export const Template = class Template {
     };
   }
 
-  // Attaches an external event handler scoped to this template's lifetime.
-  // Listener options (passive, capture, once, signal, ...) are passed directly
-  // in the 4th arg, matching the native addEventListener shape. `querySettings`
-  // is the only namespaced key (it controls how `selector` is resolved).
+  // 4th arg matches the native addEventListener shape (passive/capture/once/...);
+  // querySettings is the only namespaced key.
   attachEvent(selector, eventName, eventHandler, { querySettings = { pierceShadow: true }, ...eventSettings } = {}) {
     return $(selector, document, querySettings).on(eventName, eventHandler, {
       abortController: this.eventController,
