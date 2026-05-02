@@ -31,14 +31,13 @@ Every component has three places to put data. Choosing correctly determines whet
 
 ### How templates see them
 
-The template data context is **flat**. Settings, state, and the component instance are spread into a single namespace:
+The template data context is **flat**. Data, state, and the component instance are spread into a single namespace, then settings are overlaid as reactive Signals on top:
 
 ```js
-// Inside packages/templating, getDataContext() does:
-{ ...this.data, ...this.state, ...this.instance }
+// Roughly: template data = settings overlaid on { ...data, ...state, ...instance }
 ```
 
-This means `{counter}` in a template could resolve from settings, state, or the component instance. **State wins over settings for same-named keys** because it spreads second.
+This means `{counter}` in a template could resolve from settings, state, or the component instance. **Settings win over state for same-named keys** because they overlay last as Signals — the renderer tracks the settings Signal, not the underlying state value. Avoid same-named collisions; if you must mirror, treat settings as the source and seed state from it explicitly.
 
 ```html
 <!-- ✅ Direct name — template resolves from the flat context -->

@@ -92,6 +92,8 @@ Because delegation requires bubbling, the framework automatically maps non-bubbl
 | `focus` | `focusin` |
 | `mouseenter` | `mouseover` |
 | `mouseleave` | `mouseout` |
+| `load` | `DOMContentLoaded` |
+| `unload` | `beforeunload` |
 
 ---
 

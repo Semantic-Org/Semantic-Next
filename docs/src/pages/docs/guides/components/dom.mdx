@@ -59,13 +59,13 @@ The `$` and `$$` arguments are available from [lifecycle callbacks](/docs/guides
 
 ### Example of $ vs $$
 
-In the following example you can see several elements with the class `matches` both in the document's DOM, the web component's DOM and the DOM slotted to a web component.
+The following example uses page-level Query (imported directly) to highlight what each operator can reach. Inside a component the same rules apply, scoped to the component's shadow root.
 
-You can see that `$` matches 2 elements
+`$` matches 2 elements:
 * Page DOM
 * Slotted DOM
 
-and `$$` matches 3 elements
+`$$` matches 3 elements:
 * Page DOM
 * Slotted DOM
 * Shadow DOM

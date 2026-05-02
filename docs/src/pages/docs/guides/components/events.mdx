@@ -65,7 +65,7 @@ const events = {
 ### Component-Wide Events
 To attach events to your entire component you can pass in an event name without a selector.
 
-For example if you have a component called `ui-button` this would fire when the mouse hovered over any part of the component.
+No-selector handlers bind on the host element, so events on the host's own surface — padding, border, host-dispatched custom events — fire alongside events from inside the component.
 
 ```javascript
 const events = {
@@ -77,6 +77,8 @@ const events = {
   }
 };
 ```
+
+> See [Projection vs. Piercing](#deep-events) for how this interacts with slotted content and shadow boundaries.
 
 ## Inside Templates
 
@@ -99,12 +101,22 @@ You can add special keywords to that modify how events are attached permitting y
 
 You can use the `global` keyword to attach an event globally to any element outside of your component.
 
-For instance this can be used with global events like `scroll` or `hashchange`
+When no selector is provided, the event attaches to `window` — handy for `scroll`, `hashchange`, and similar page-level events.
 
 ```javascript
 const events = {
-  'global scroll window'() {
+  'global scroll'() {
     // page scrolled
+  }
+};
+```
+
+Pass a selector to target a specific element instead:
+
+```javascript
+const events = {
+  'global click body'() {
+    // any click on the body
   }
 };
 ```
@@ -133,7 +145,7 @@ const events = {
 };
 ```
 
-> **Composed events required** `deep` works for events that bubble out of a child component's shadow tree, which means the inner element must dispatch with `composed: true` (native events like `click` already do this; CustomEvents need to opt in).
+> **Composed events required** `deep` only catches events that bubble out of a child component's shadow tree, which means the inner element must dispatch with `composed: true`. Native events (`click`, `mouseover`, etc.) already do this. For custom events, use the framework's [`dispatchEvent`](#dispatching-custom-events) helper — it sets `composed: true` by default.
 
 ### Bound events
 
@@ -159,9 +171,11 @@ In addition to the [standard arguments](/docs/guides/components/lifecycle) that 
 
 | parameter         | use                                                   |
 |-------------------|-------------------------------------------------------|
-| el                | the dom element that dispatched the event             |
+| el                | the component's host element                          |
+| target            | the dom element that dispatched the event             |
 | event             | the native event object                               |
-| data              | event.detail + data attributes on dom element         |
+| data              | event.detail + data attributes on the dispatching element |
+| value             | value of the dispatching element (form fields, custom event detail) |
 | isDeep            | the event came from inside another web component's shadow tree |
 
 
