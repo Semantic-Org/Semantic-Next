@@ -986,6 +986,25 @@ describe('shadow only', () => {
       }
     });
 
+    it('fires component-wide handlers (no selector) for events on the host itself', async () => {
+      // The host's own surface — its padding, border, or the host element
+      // dispatched event — is part of "the component" semantically. Binding
+      // a no-selector handler at the renderRoot misses these because the
+      // event never enters the shadow tree's bubble path.
+      const handler = vi.fn();
+      const fixture = await mountTemplate({
+        target: 'shadow',
+        events: { 'click': handler },
+      });
+      try {
+        clickOn(fixture.host);
+        expect(handler).toHaveBeenCalledTimes(1);
+      }
+      finally {
+        fixture.cleanup();
+      }
+    });
+
     it('DOES fire default handlers on shadow-internal elements matching the selector', async () => {
       const handler = vi.fn();
       const fixture = await mountTemplate({

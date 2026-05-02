@@ -617,8 +617,15 @@ export const Template = class Template {
           };
         }
         else {
-          // otherwise use event delegation at the components shadow root
-          $(this.renderRoot).on(eventName, selector, eventHandler, eventSettings);
+          if (selector) {
+            // event delegation at the component's shadow root
+            $(this.renderRoot).on(eventName, selector, eventHandler, eventSettings);
+          }
+          else {
+            // naked event — bind on the host so events on the host's own
+            // surface (padding, border, host-dispatched) fire too
+            $(this.element).on(eventName, eventHandler, eventSettings);
+          }
         }
       });
     });
