@@ -159,6 +159,26 @@ If a bullet's outcome is the obvious consequence of bullets above it, drop it.
 
 If the framing sentence has a "so that" / "plus the X that follows" / "in order to" tail, the tail is usually padding.
 
+### Subgroup long sections
+
+If a `## Changes` subsystem section grows past ~8 bullets, split with bold sub-labels rather than adding heading levels (the navigation generator reserves `####` and below for in-page menus):
+
+```markdown
+### Templates
+
+**Events**
+- ...
+- ...
+
+**Keys**
+- ...
+
+**Tree traversal & wiring**
+- ...
+```
+
+The labels match the natural axes a reviewer scans by — what surface area they care about. Pick labels that match the headings the package's docs use, not arbitrary categories.
+
 ### Bullet shape
 
 Bullets should be noun phrases or short verb phrases. Most under 10 words. Full sentences in bullets is an AI tell.
@@ -194,13 +214,16 @@ The list of specific files belongs in the diff. The bullet's job is to tell the 
 
 ## Intent over state, state over mechanism
 
-There are three layers a bullet can sit at. Reach for the highest one that's still accurate.
+There are four layers a bullet can sit at. Reach for the highest one that's still accurate.
 
-| Layer | Example (the bench reorg PR) | Why |
+| Layer | Example | Why |
 |---|---|---|
+| ❌❌ Internals | Let `deep` events bypass the line-538 range filter alongside `global` | Narrates the diff at the internal-mechanism level; means nothing to a reader who hasn't traced the call graph |
 | ❌ Mechanism | Update path references across 4 workflow YAMLs and 6 scripts | Restates the diff |
-| ✅ State | Move `bench-matrix` and `bench-reporter` under `tools/ci/bench/` | Describes what's now true |
-| ✅✅ Intent | Create `tools/ci/` for CI-only tooling; add bench tools under it | Captures the developer's purpose — what the change *was for* |
+| ✅ State | `deep` events fire on slotted content (was filtered out) | Describes what's now true at the user-facing layer |
+| ✅✅ Intent | Move `bench-matrix` and `bench-reporter` under `tools/ci/bench/` so CI-only tooling lives in one place | Captures the developer's purpose — what the change *was for* |
+
+The single most reliable test: **would this bullet mean anything to a reader who hasn't read the diff?** If the bullet references line numbers, internal field names that aren't public API, or "alongside X" cross-references that only resolve once you've traced the code path, you're in the Internals row. Rewrite at the State or Intent layer.
 
 When you can name the *why* in one short clause, lead with that. State bullets are fine when intent isn't crisp — but if the intent is clear (you're creating a category, simplifying a surface, separating concerns), the bullet should *say* it.
 
@@ -335,7 +358,31 @@ Listing every file or knob touched performs thoroughness the diff already shows.
    - Move `bench-history.json` next to the reporter
 ```
 
-### 6. Conversational offers
+### 6. Verb-first mechanism frames
+
+Bullets that lead with `Let X...`, `Stop Y from...`, `Wire A before B`, `Make Z behave...` describe what *the change does to the code*, not what's now true for the reader. They're a softer form of diff narration. Rewrite as state.
+
+| ❌ Verb-first mechanism | ✅ State / fix |
+|---|---|
+| Let `deep` events bypass the range filter alongside `global` | `deep` events fire on slotted content (was filtered out) |
+| Stop `bindKey` from stacking duplicate document keydown listeners | `bindKey`/`unbindKey` cycles no longer stack listeners |
+| Wire `setParent` before `attach` in the lit engine | Subtemplate settings init correctly in the lit engine |
+| Make `find*` accept kebab tag-names | `find*` helpers accept kebab tag-names |
+
+Words to look out for at the start of a bullet: *Let, Stop, Wire, Make, Force, Allow, Prevent, Cause, Drive*. Most rewrite cleanly to "X now does Y" or "Fixes Y."
+
+### 7. Internal symbols and line numbers
+
+Line numbers (`line-538`), internal field names (`_childTemplates`, `eventSettings.querySettings`), and cross-references like "alongside `global`" or "the spread that leaked closure values" all assume the reader has the diff open in another tab. They don't. The diff is the diff; bullets should describe what's true above it.
+
+| ❌ Internals jargon | ✅ Public-facing |
+|---|---|
+| Drop the spread that leaked closure values from `find*` returns | `find*` helpers expose parent state and data alongside the instance |
+| Bypass the line-538 range filter for `deep` and `global` | `deep` events fire on slotted content |
+
+Public API names (`attachEvent`, `dispatchEvent`, `setParent`, `findParent`, `useSignal`) are fine — they're the contract. Internal field names and call-graph trivia are not.
+
+### 8. Conversational offers
 
 PR descriptions state facts, not offers. Phrases like *happy to add as a follow-up*, *let me know if you want*, *would you like me to*, *feel free to* read as conversational AI. They have no place in a PR body. If a follow-up is worth mentioning, state it as a fact.
 
@@ -344,7 +391,7 @@ PR descriptions state facts, not offers. Phrases like *happy to add as a follow-
 ✅ "Determinism via a `seed` parameter is a possible follow-up."
 ```
 
-### 7. Word imprecision
+### 9. Word imprecision
 
 Pick the word that matches the *actual nature* of the change. AI writing reaches for stronger or more generic words; precision builds trust.
 
@@ -399,7 +446,8 @@ In order:
 8. **Trim framing sentence tails.** "so that…", "plus the X that follows", "in order to…" — usually padding.
 9. **Search for AI tells.** Look for: *verified, ensured, considered, note that, important to flag, in summary, this PR introduces, all tests pass, fully tested*.
 10. **Check tier appropriateness.** Did you reach for Medium/Large machinery on a Small PR? If yes, drop them.
-11. **Honest question:** if a colleague wrote this PR and pinged you, would the body sound like them, or like a corporate document? If the latter, you're still in AI-prose mode.
+11. **Voice check — read each bullet aloud.** Imagine you're texting it to the reviewer. Does it sound like a developer in a hurry, or like a press release? If the latter, rewrite. Specific tells: bullets that start with `Let X...`/`Stop Y...`/`Wire Z...` (verb-first mechanism), bullets that mention line numbers or internal field names, bullets longer than the corresponding commit message subject.
+12. **Honest question:** if a colleague wrote this PR and pinged you, would the body sound like them, or like a corporate document? If the latter, you're still in AI-prose mode.
 
 ---
 

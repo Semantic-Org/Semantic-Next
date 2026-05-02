@@ -119,7 +119,6 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.templateID = template.id;
     this.template = template.clone({
       templateName,
-      subTemplates: this.subTemplates,
       data: this.unpackData(this.data),
       parentTemplate: this.parentTemplate,
     });
@@ -130,15 +129,15 @@ export class RenderTemplateDirective extends AsyncDirective {
     const element = this.part?.options?.host;
     const renderRoot = element?.renderRoot;
     this.template.setElement(element);
+    if (this.parentTemplate) {
+      this.template.setParent(this.parentTemplate);
+    }
     this.template.attach(renderRoot, {
       element,
       parentNode,
       startNode,
       endNode,
     });
-    if (this.parentTemplate) {
-      this.template.setParent(this.parentTemplate);
-    }
   }
 
   unpackData(dataObj) {

@@ -146,7 +146,6 @@ function resolveSnippet(nameExpr, data, self) {
 function cloneInstance({ template, templateName, templateData, self }) {
   const instance = template.clone({
     templateName,
-    subTemplates: self.subTemplates,
     data: templateData,
     parentTemplate: self.parentTemplate,
     renderingEngine: 'native',

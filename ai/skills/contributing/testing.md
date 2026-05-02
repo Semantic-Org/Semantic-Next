@@ -160,6 +160,31 @@ npx vitest --c tests/configs/vitest/vitest.config.js --run equality
 npx vitest --c tests/configs/vitest/vitest.config.js --run --project node equality
 ```
 
+### Wall-clock budget and stuck-process cleanup
+
+The full repo suite (`npm test` from root, ~3600 tests across 82 files) finishes in **~28s**.
+A **60-second timeout is plenty**; anything longer means something's stuck — almost always
+a leftover Vitest watcher (or its Playwright/Chromium spawns) holding ports from a previous
+session. A single package's browser suite should finish in well under 15s; if it doesn't,
+the culprit is the same.
+
+When you hit a timeout, don't just retry — kill the stragglers first:
+
+```bash
+# Find them
+ps aux | grep -iE "vitest|chrome-headless" | grep -v grep
+
+# Kill the parent vitest node processes (the chromium children die with them)
+kill <pid> <pid> ...
+
+# Confirm clear
+ps aux | grep -iE "vitest|chrome-headless" | grep -v grep | wc -l   # should be 0
+```
+
+Common signs of a stuck watcher: tests hang past the 2-minute budget, "Failed to fetch
+dynamically imported module" errors at random files (port collisions), or vitest output
+just never appears.
+
 ### Watch mode
 
 Package configs set `watch: false`, so `npx vitest` runs and exits. Use `--watch` to override:
