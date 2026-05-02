@@ -33,10 +33,12 @@ The `events` object maps event strings to handler functions. The string format i
 
 | Keyword | Attached To | Use When |
 |---------|------------|----------|
-| *(none)* | Shadow root (delegated) | Default — elements in your template |
-| `deep` | Shadow root (delegated, pierces) | Target is inside a child web component's shadow DOM or slotted content |
+| *(none)* | Shadow root (delegated) | Default — elements in your template, including content slotted via `<slot>` |
+| `deep` | Shadow root (delegated, pierces) | Target is inside a child web component's shadow DOM (composed events only) |
 | `global` | The selector itself (document/window) | Window events: `scroll`, `resize`, `hashchange` |
 | `bind` | Each matching element directly | CustomEvents that don't bubble, or when delegation won't work |
+
+> **Projection vs. piercing.** Slotted children are *projected* through your `<slot>`s and match default selectors automatically — they belong to your template logically. `deep` is for *piercing* a different boundary: reaching into a child web component's shadow tree. Don't use `deep` for slot composition.
 
 ### Syntax Examples
 
@@ -62,9 +64,10 @@ const events = {
     state.hovered.set(true);
   },
 
-  // Deep — pierces child web component shadow DOM
-  'deep click menu-item'({ self, value }) {
-    self.setValue(value);
+  // Deep — pierces a child web component's shadow tree.
+  // For slotted children of your own component, default mode already matches them.
+  'deep click ui-button .icon'({ self }) {
+    // .icon lives inside ui-button's shadow tree
   },
 
   // Global — window/document events

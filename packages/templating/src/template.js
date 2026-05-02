@@ -558,16 +558,6 @@ export const Template = class Template {
             return;
           }
 
-          // slotted content lives in the host's light DOM, so the shadow
-          // root's contains() returns false — that's the encapsulation gate
-          if (
-            template.renderRoot
-            && !inArray(eventType, ['deep', 'global'])
-            && !template.renderRoot.contains(event.target)
-          ) {
-            return;
-          }
-
           // check if event occured on a deep event handler and the handler type isnt 'deep'
           const isDeep = selector && $(event.target).closest(selector).length == 0;
           if (!inArray(eventType, ['deep', 'global']) && isDeep) {

@@ -964,8 +964,12 @@ describe('shadow only', () => {
        Top-level encapsulation
   *******************************/
 
-  describe('events DSL — top-level encapsulation', () => {
-    it('does NOT fire default handlers on slotted content matching the selector', async () => {
+  describe('events DSL — projection vs piercing', () => {
+    // Slotted children are projected through the host's <slot> and belong to
+    // the host's logical template. Default-mode selectors match them without
+    // ceremony — that's projection, not piercing. The `deep` keyword is for
+    // a different boundary (another component's shadow tree).
+    it('DOES fire default handlers on slotted content matching the selector', async () => {
       const handler = vi.fn();
       const fixture = await mountTemplate({
         target: 'shadow',
@@ -975,7 +979,7 @@ describe('shadow only', () => {
       fixture.host.innerHTML = '<button class="btn">Slotted</button>';
       try {
         clickOn(fixture.host.querySelector('.btn'));
-        expect(handler).not.toHaveBeenCalled();
+        expect(handler).toHaveBeenCalledTimes(1);
       }
       finally {
         fixture.cleanup();
