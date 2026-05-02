@@ -1735,6 +1735,104 @@ describe('Component', () => {
 });
 
 /*******************************
+  Signal auto-unwrap + mutation
+*******************************/
+
+describe('Signal auto-unwrap and mutation helpers in rendered DOM', () => {
+  const cleanupElements = [];
+  afterEach(() => {
+    while (cleanupElements.length) {
+      const el = cleanupElements.pop();
+      if (el.parentNode) { el.parentNode.removeChild(el); }
+    }
+  });
+
+  it('renders the unwrapped state value, not the Signal object', async () => {
+    defineComponent({
+      tagName: 'test-signal-unwrap',
+      template: '<span class="count">{count}</span>',
+      defaultState: { count: 7 },
+    });
+    const el = document.createElement('test-signal-unwrap');
+    const rendered = $(el).onNext('rendered');
+    document.body.appendChild(el);
+    cleanupElements.push(el);
+    await rendered;
+    expect(el.shadowRoot.querySelector('.count').textContent).toBe('7');
+  });
+
+  it('state.signal.set updates the rendered value', async () => {
+    defineComponent({
+      tagName: 'test-signal-set',
+      template: '<span class="count">{count}</span>',
+      defaultState: { count: 0 },
+    });
+    const el = document.createElement('test-signal-set');
+    const rendered = $(el).onNext('rendered');
+    document.body.appendChild(el);
+    cleanupElements.push(el);
+    await rendered;
+    el.template.state.count.set(42);
+    await el.updateComplete;
+    expect(el.shadowRoot.querySelector('.count').textContent).toBe('42');
+  });
+
+  it('state.signal.increment propagates to the DOM', async () => {
+    defineComponent({
+      tagName: 'test-signal-increment',
+      template: '<span class="count">{count}</span>',
+      defaultState: { count: 0 },
+    });
+    const el = document.createElement('test-signal-increment');
+    const rendered = $(el).onNext('rendered');
+    document.body.appendChild(el);
+    cleanupElements.push(el);
+    await rendered;
+    el.template.state.count.increment();
+    el.template.state.count.increment();
+    el.template.state.count.increment();
+    await el.updateComplete;
+    expect(el.shadowRoot.querySelector('.count').textContent).toBe('3');
+  });
+
+  it('state.signal.toggle flips a boolean-driven class', async () => {
+    defineComponent({
+      tagName: 'test-signal-toggle',
+      template: "<div class=\"{active ? 'on' : 'off'}\"></div>",
+      defaultState: { active: false },
+    });
+    const el = document.createElement('test-signal-toggle');
+    const rendered = $(el).onNext('rendered');
+    document.body.appendChild(el);
+    cleanupElements.push(el);
+    await rendered;
+    expect(el.shadowRoot.querySelector('.off')).not.toBeNull();
+    el.template.state.active.toggle();
+    await el.updateComplete;
+    expect(el.shadowRoot.querySelector('.on')).not.toBeNull();
+  });
+
+  it('state.signal.push appends to the rendered each-block', async () => {
+    defineComponent({
+      tagName: 'test-signal-push',
+      template: '<ul>{#each item in items}<li class="row">{item}</li>{/each}</ul>',
+      defaultState: { items: ['a'] },
+    });
+    const el = document.createElement('test-signal-push');
+    const rendered = $(el).onNext('rendered');
+    document.body.appendChild(el);
+    cleanupElements.push(el);
+    await rendered;
+    expect(el.shadowRoot.querySelectorAll('.row').length).toBe(1);
+    el.template.state.items.push('b');
+    el.template.state.items.push('c');
+    await el.updateComplete;
+    const items = Array.from(el.shadowRoot.querySelectorAll('.row')).map(li => li.textContent);
+    expect(items).toEqual(['a', 'b', 'c']);
+  });
+});
+
+/*******************************
    Lifecycle: interval/timeout cleanup
 *******************************/
 
