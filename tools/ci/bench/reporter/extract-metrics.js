@@ -22,19 +22,14 @@ import path from 'node:path';
  * `differences[]` entry that pairs them. Caller projects into whatever
  * shape it needs.
  *
- * Malformed JSON files are skipped silently so a partial artifact upload
- * doesn't take down the whole reader.
+ * Lets `JSON.parse` errors propagate so a corrupt artifact fails CI
+ * loudly with a stack-traced path rather than silently shrinking the
+ * report.
  */
 export function* iterMetricPairs(dir) {
   for (const entry of walk(dir)) {
     if (!entry.endsWith('.json')) { continue; }
-    let data;
-    try {
-      data = JSON.parse(fs.readFileSync(entry, 'utf8'));
-    }
-    catch {
-      continue;
-    }
+    const data = JSON.parse(fs.readFileSync(entry, 'utf8'));
     if (!Array.isArray(data.benchmarks)) { continue; }
 
     const byName = new Map();
