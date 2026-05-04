@@ -125,10 +125,6 @@ const sample = defineBlock({
     discards the server's. The whole point of hydrate is to keep the
     server's bytes.
 
-    Pass `asChild: false` if your block's inner Reactions live on the
-    block's own scope rather than a child (snippet pattern). Default is
-    create-and-register a child scope (most blocks).
-
     serverMeta contains anything the ServerRenderer wrote into the
     closing block marker (see parseServerMeta in build-html-string.js
     for the prefix scheme). Use it for branch selection, key recovery,

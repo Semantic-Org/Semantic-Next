@@ -16,8 +16,8 @@ export const COMMENT_MARKER = `sui:${MARKER_VERSION}:`;
 export const BLOCK_MARKER = `sui-block:${MARKER_VERSION}:`;
 export const RAW_TEXT_MARKER = `sui-rawtext:${MARKER_VERSION}:`;
 
-// Closing block markers omit the version segment. Version match is enforced
-// at the open marker; the close just balances depth.
+// Prefix only — full close marker is `/sui-block:v1:N[:bX]`. Version match
+// is enforced at the open marker so `startsWith` callers compare without it.
 export const BLOCK_CLOSE_PREFIX = '/sui-block:';
 
 // Sentinel for {#if} main-body in branchIndex serialization — branches

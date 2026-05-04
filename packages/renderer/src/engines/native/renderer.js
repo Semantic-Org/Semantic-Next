@@ -502,19 +502,15 @@ export class Renderer {
     const { entries } = cachedBuildHTMLString(innerAST, { snippets: this.snippets });
     if (entries.length === 0) { return; }
 
-    // Wrap ownedNodes in a temporary container for TreeWalker traversal
+    // Move into a temporary fragment so TreeWalker has a connected root.
     const container = document.createDocumentFragment();
-    for (const n of [...ownedNodes]) {
-      container.appendChild(n);
-    }
+    container.append(...ownedNodes);
 
     this.hydrateMarkers({ root: container, entries, data, scope });
 
-    // Repopulate from container — hydrateMarkers may have removed comment nodes.
+    // hydrateMarkers strips comment markers — rebuild ownedNodes from live container.
     ownedNodes.length = 0;
-    for (const n of [...container.childNodes]) {
-      ownedNodes.push(n);
-    }
+    ownedNodes.push(...container.childNodes);
   }
 
   // asChild=false reuses the passed scope; default creates and registers
@@ -527,12 +523,9 @@ export class Renderer {
 
     if (region.ownedNodes.length > 0) {
       const frag = document.createDocumentFragment();
-      for (const n of region.ownedNodes) { frag.appendChild(n); }
+      frag.append(...region.ownedNodes);
       region.anchor.after(frag);
-      if (!region.endAnchor) {
-        region.endAnchor = document.createTextNode('');
-      }
-      region.ownedNodes[region.ownedNodes.length - 1].after(region.endAnchor);
+      region.placeEndAnchor();
     }
 
     return targetScope;

@@ -511,15 +511,11 @@ function adoptServerItems({
         serverGroup.startComment.replaceWith(startMarker);
       }
 
-      // Move [startMarker, ...mutableNodes, endMarker] into position
-      // after `insertAfter`. Server order generally matches client
-      // order so the contiguous range is already close to correct — we
-      // still reassemble via a fragment to guarantee endMarker lands
-      // right after the last item node regardless of intervening nodes.
+      // Reassemble [startMarker, ...mutableNodes, endMarker] via a fragment
+      // so endMarker lands directly after the last item node regardless of
+      // intervening server output.
       const frag = document.createDocumentFragment();
-      frag.appendChild(startMarker);
-      for (const n of mutableNodes) { frag.appendChild(n); }
-      frag.appendChild(endMarker);
+      frag.append(startMarker, ...mutableNodes, endMarker);
       insertAfter.after(frag);
       insertAfter = endMarker;
 
@@ -599,8 +595,6 @@ const eachBlock = defineBlock({
 
     if (items.length === 0) {
       if (node.elseContent) {
-        // isElse record is the signal `update` reads to detect the
-        // else→items transition.
         const elseScope = hydrateInto({ innerAST: node.elseContent });
         self.records.push({
           key: null,
