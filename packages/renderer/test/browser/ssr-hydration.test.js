@@ -316,6 +316,54 @@ describe('SSR hydration — each loops', () => {
     expect(shadowHTML(el)).toBe('<p>Still empty</p>');
   });
 
+  // Regression: the hydrate path for an empty {#each ... else} created an
+  // elseScope but did not register it on region.childScopes. When items
+  // transitioned empty → non-empty, region.clear() walked an empty scope
+  // list and the elseContent's bindings stayed subscribed to whatever
+  // signals they read. The leak is bounded — the renderer's isConnected
+  // guard self-stops the orphan on its next fire — but until then every
+  // elseContent binding is a ghost subscriber on its read signals.
+  //
+  // Test shape: a control component renders with items already populated
+  // (elseContent never runs, so emptyLabel carries only the framework's
+  // baseline subscribers). The second component renders empty, picks up
+  // one extra subscriber per elseContent binding, then transitions to
+  // non-empty. After the transition, the subscriber count must return
+  // to the control baseline. Three bindings in elseContent give a clean
+  // 1-vs-N delta that doesn't pin any specific framework-internal count.
+  it('hydrated each→else transition disposes elseContent subscribers', async () => {
+    const template = '{#each item in items}<li>{item}</li>{else}'
+      + '<p class="{emptyLabel}">{emptyLabel} ({emptyLabel})</p>'
+      + '{/each}';
+
+    const control = await ssrAndHydrate({
+      template,
+      defaultState: { items: ['x'], emptyLabel: 'None' },
+    });
+    const baseline = control.template.state.emptyLabel.dependency.subscribers.size;
+
+    const el = await ssrAndHydrate({
+      template,
+      defaultState: { items: [], emptyLabel: 'None' },
+    });
+
+    // Sanity: server emitted else branch and elseContent bindings did
+    // subscribe — without the elseScope reactions even existing, the
+    // delta below would be vacuous.
+    expect(shadowHTML(el)).toBe('<p class="None">None (None)</p>');
+    expect(el.template.state.emptyLabel.dependency.subscribers.size).toBeGreaterThan(baseline);
+
+    const updated = $(el).onNext('updated');
+    el.template.state.items.push('x');
+    await updated;
+
+    expect(shadowHTML(el)).toBe('<li>x</li>');
+    // Pin: the empty→non-empty transition must dispose the elseScope so
+    // its bindings unsubscribe synchronously. Equality with the control
+    // baseline proves no orphan reactions remain on emptyLabel.
+    expect(el.template.state.emptyLabel.dependency.subscribers.size).toBe(baseline);
+  });
+
   it('hydrates object iteration', async () => {
     const el = await ssrAndHydrate({
       template: '{#each val, key in colors}<span>{key}={val}</span>{/each}',
