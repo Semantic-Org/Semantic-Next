@@ -337,7 +337,7 @@ export class Renderer {
         Hydration
   *******************************/
 
-  hydrateMarkers(root, entries, data, scope) {
+  hydrateMarkers({ root, entries, data, scope }) {
     if (entries.length === 0) { return; }
 
     // Pass 1: walk elements with data-sui-bind, wire attribute Reactions.
@@ -490,8 +490,8 @@ export class Renderer {
     }
   }
 
-  hydrateInnerContent(ownedNodes, contentAST, data, scope) {
-    const { entries } = cachedBuildHTMLString(contentAST, { snippets: this.snippets });
+  hydrateInnerContent({ ownedNodes, innerAST, data, scope }) {
+    const { entries } = cachedBuildHTMLString(innerAST, { snippets: this.snippets });
     if (entries.length === 0) { return; }
 
     // Wrap ownedNodes in a temporary container for TreeWalker traversal
@@ -501,7 +501,7 @@ export class Renderer {
     }
 
     // Recursively hydrate inner markers with the sub-AST's entries.
-    this.hydrateMarkers(container, entries, data, scope);
+    this.hydrateMarkers({ root: container, entries, data, scope });
 
     // Update ownedNodes with the hydrated content (comments may have been removed)
     ownedNodes.length = 0;

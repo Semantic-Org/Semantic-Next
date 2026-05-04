@@ -65,7 +65,7 @@ export function defineBlock(config) {
       innerAST,
       data: innerData = data,
       scope: innerScope = scope,
-    } = {}) => renderer.hydrateInnerContent(ownedNodes, innerAST, innerData, innerScope);
+    } = {}) => renderer.hydrateInnerContent({ ownedNodes, innerAST, data: innerData, scope: innerScope });
 
     // Interned per-instance bag — same hidden-class shape across all hook
     // calls. hook/err keys are present from construction so the error-hook

@@ -252,12 +252,12 @@ const templateBlock = defineBlock({
       if (entries.length > 0) {
         const container = document.createDocumentFragment();
         for (const n of [...region.ownedNodes]) { container.appendChild(n); }
-        self.currentInstance.renderer.hydrateMarkers(
-          container,
+        self.currentInstance.renderer.hydrateMarkers({
+          root: container,
           entries,
-          self.currentInstance.renderer.data,
-          self.currentInstance.renderer.scope,
-        );
+          data: self.currentInstance.renderer.data,
+          scope: self.currentInstance.renderer.scope,
+        });
         const frag = document.createDocumentFragment();
         for (const n of [...container.childNodes]) { frag.appendChild(n); }
         region.anchor.after(frag);

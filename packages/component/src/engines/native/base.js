@@ -142,12 +142,12 @@ class WebComponentBase extends HTMLElementBase {
     const entries = prototypeTemplate._hydrationEntries;
 
     // Wire reactive bindings to existing server-rendered DOM
-    this.template.renderer.hydrateMarkers(
-      this.shadowRoot,
+    this.template.renderer.hydrateMarkers({
+      root: this.shadowRoot,
       entries,
-      this.template.renderer.data,
-      this.template.renderer.scope,
-    );
+      data: this.template.renderer.data,
+      scope: this.template.renderer.scope,
+    });
 
     this.template.isHydrating = false;
     this.template.markRendered();
