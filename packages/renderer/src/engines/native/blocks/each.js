@@ -1,7 +1,6 @@
 import { Signal } from '@semantic-ui/reactivity';
 import { arrayFromObject, isArray, isEmpty, isPlainObject, isString } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
-import { isEachContentSelfContained } from './each-content-classifier.js';
 import { registerBlock } from './registry.js';
 
 /*
@@ -16,14 +15,13 @@ import { registerBlock } from './registry.js';
   over *live* DOM, instead of dereferencing a stale childNodes snapshot
   taken at item-creation time.
 
-  Hydrate registers a dep on the collection. Per-item Reactions wire
-  lazily by default — on the first items mutation, `update` adopts the
-  server-rendered per-item DOM via `<!--sui-item:v1:KEY-->` markers
-  instead of rebuilding. When per-item content reads external state
-  (classified via each-content-classifier.js), hydrate adopts eagerly
-  so per-binding Reactions register their external deps now. Mismatched
-  keys fall through to a fresh render; subsequent mutations use the
-  normal reconcile path.
+  Hydrate adopts the server-rendered per-item DOM via
+  `<!--sui-item:v1:KEY-->` markers and wires per-item Reactions in place.
+  Same "register Reactions on hydrate" contract every other block honors:
+  per-item bindings that close over external state (a helper reading
+  `state.x`, a component method) need their Reactions live now, not
+  deferred to a future items mutation that may never come. Legacy SSR
+  output without markers falls back to nuke-and-rebuild on first update.
 
 */
 
@@ -646,38 +644,19 @@ const eachBlock = defineBlock({
   },
 
   hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
-    self.hasHydrated = true;
-
-    // Cheap path: per-item bindings only read iteration-local data
-    // (or pure framework helpers). Just register the items dep and
-    // defer per-item Reaction wiring to the first items mutation —
-    // `adoptServerItems` runs from `update` there.
-    //
-    // Eager path: any per-item binding (or elseContent binding) could
-    // read external state. Wire those Reactions now, otherwise the
-    // only chance is a future items-signal change that may never come
-    // — external mutations would silently lose reactivity.
-    if (isEachContentSelfContained(node)) {
-      lookupExpression(node.over);
-      return;
-    }
-
-    // resolveItems also registers the items dep via lookupExpression.
+    // resolveItems registers the items dep via lookupExpression.
     const { items, collectionType } = resolveItems(node, lookupExpression);
 
     if (items.length === 0) {
       if (node.elseContent) {
         // Server rendered the else branch into region.ownedNodes.
-        // Hydrate it in place so its bindings wire against external
-        // state. Push an isElse record so subsequent `update` calls
-        // recognize the else state and transition correctly.
+        // Hydrate it in place and push an isElse record so subsequent
+        // `update` calls recognize the else state and transition
+        // correctly. elseScope goes on region.childScopes so the next
+        // `region.clear()` disposes it (renderElse gets this via
+        // region.setContent; the hydrate path bypasses setContent
+        // because the DOM is already in place).
         const elseScope = scope.child();
-        // Register elseScope on the region so the next `region.clear()`
-        // (e.g. when items becomes non-empty) disposes it. renderElse
-        // gets this for free via `region.setContent`; the hydrate path
-        // never calls setContent (DOM is already in place) so we register
-        // explicitly. Without this, the scope leaks until the parent
-        // template scope disposes.
         region.childScopes.push(elseScope);
         hydrateInnerContent({
           ownedNodes: region.ownedNodes,
@@ -701,7 +680,6 @@ const eachBlock = defineBlock({
           isElse: true,
           propsSnapshot: null,
         });
-        self.hasHydrated = false;
       }
       return;
     }
@@ -718,11 +696,10 @@ const eachBlock = defineBlock({
       hydrateInnerContent,
       isSVG,
     });
-    if (adopted) {
-      // Adoption already wired per-item Reactions. Reset hasHydrated so
-      // `update` doesn't try to adopt again on the first signal change
-      // — it will reconcile against the items signal as normal.
-      self.hasHydrated = false;
+    if (!adopted) {
+      // Legacy SSR output without per-item markers — defer to `update`
+      // for the nuke-and-rebuild fallback on the first items mutation.
+      self.hasHydrated = true;
     }
   },
 

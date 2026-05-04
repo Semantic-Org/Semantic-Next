@@ -331,8 +331,8 @@ describe('SSR hydration — each loops', () => {
   // connectedCallback runs hydrate. Pre-fix, each.hydrate only registered a
   // dep on items and deferred per-item Reaction wiring to the first items
   // mutation — which never came when items arrived as a static prop. PR #175
-  // gates that lazy path on `isEachContentSelfContained`; this case (helper
-  // reads external state) takes the eager `adoptServerItems` branch instead.
+  // changes each.hydrate to call `adoptServerItems` immediately, wiring
+  // per-item Reactions in place against the server-rendered DOM.
   it('helper-call attribute inside each is reactive after hydration when items pre-populated', async () => {
     let helperCalls = 0;
     const el = await ssrAndHydrate({

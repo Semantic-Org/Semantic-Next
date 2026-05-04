@@ -108,9 +108,40 @@ The eager-wire cost on 1000 items is below the bench's noise floor at the mount 
 - **PR #177** (Test: Bump hydrate bench to 1000 items) — required to give tachometer enough resolution to read the perf delta. At 100 items the bench couldn't see ±25% changes.
 - **Prior `hydration-perf-pass`** — the lazy `each.hydrate` it introduced is what this PR threads the needle on. Reverting it without a classifier would have re-paid the ~425ms regression on PerfCards.
 
+## Reversal — classifier ripped out (2026-05-04)
+
+The classifier design described above shipped in the initial PR #175 review rounds and was ripped out one round later. The architectural objections (raised in PR review) made it un-mergeable:
+
+- **Abstraction-breaking.** The classifier lived in `blocks/` but wasn't itself a block. It re-derived per-block knowledge (how `each`/`if`/`svg` content is shaped) via hardcoded `case` statements, duplicating what the block registry already knows.
+- **Extensibility hole.** A user-registered custom block hits the `default:` branch → bail conservative → permanently can't use the lazy hydrate path. The framework's own block types were privileged.
+- **Shadow lexer.** Hardcoded `RESERVED_NAMES` (JS keywords) and `IMPLICIT_LOCALS` arrays, char-by-char expression scanning with brace-depth and ternary tracking — a quasi-JS parser re-implementing what the compiler already does.
+- **Predicting what runtime tells you for free.** `Dependency.depend()` is a no-op outside an active Reaction; the runtime per-binding Reaction IS the optimal analyzer. The classifier was a static-analysis artifact predicting what live evaluation would tell us O(1) at hydrate time.
+
+**Final architecture.** `each.hydrate` honors the same "register Reactions on hydrate" contract every other block hook honors. `adoptServerItems` is called immediately; per-item Reactions wire in place against the server-rendered DOM. No lazy/eager gate, no AST classifier, no special path. Empty-items + elseContent hydrates the else branch in place (what the perf pass had dropped).
+
+```js
+hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
+  const { items, collectionType } = resolveItems(node, lookupExpression);
+  if (items.length === 0) {
+    if (node.elseContent) { /* hydrate elseContent in place + push isElse record */ }
+    return;
+  }
+  const adopted = adoptServerItems({ ... });
+  if (!adopted) { self.hasHydrated = true; }   // legacy SSR fallback
+}
+```
+
+The empirical bench at 1000 items showed eager wiring is **flat vs main** — the lazy optimization the classifier was protecting wasn't paying for itself at any scale we measured. The `+19% / +1ms on state-change` regression is the work the framework should be doing on a state mutation; main's "fast" baseline was the silent-failure shape this PR repairs.
+
+**Files removed in the reversal:**
+- `packages/renderer/src/engines/native/blocks/each-content-classifier.js` (260 lines)
+- `packages/renderer/test/unit/each-content-classifier.test.js` (190 lines, 29 unit tests)
+
+**Lesson.** When a prior optimization forces you to invent a parallel system to preserve it, and the optimization doesn't measurably pay for itself, the right answer is to drop the optimization, not bolt on the parallel system. The classifier was a workaround for an over-optimization. The empirical bench should have been the load-bearing input from the start; "the perf pass said this matters" was a stale assumption that didn't survive the bench-resolution upgrade in PR #177.
+
 ## Status
 
-Completed 2026-05-02.
+Completed 2026-05-02. Reversed 2026-05-04 (classifier ripped out, canonical eager shape).
 
 ## Completion
 

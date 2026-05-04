@@ -366,7 +366,7 @@ For each marker:
 |-------------|-----------------|
 | Text expression | Wire a Reaction that sets `textNode.data` on change |
 | Conditional block | Collect owned DOM nodes between open/close markers, wire Reaction for future branch changes |
-| Each block | Register dep on collection (lazy default) OR adopt server items eagerly per the each-content classifier — see "Each block hydration" below |
+| Each block | Adopt server-rendered per-item DOM via `<!--sui-item:v1:KEY-->` markers and wire per-item Reactions in place — see "Each block hydration" below |
 | Template/snippet | Collect owned nodes, initialize subtemplate, recursively hydrate inner markers |
 | Async block | Wire the full async Reaction (loading → resolved → error), existing loading content gets replaced when promise resolves |
 | Rerender block | Collect owned nodes, wire the rerender/guard Reaction |
@@ -387,43 +387,29 @@ scope.reaction(element, (comp) => {
 
 The first run **evaluates the expression** (which is what registers signal dependencies as a side effect of accessing the data proxy) but **skips the DOM write** (the SSR'd value is trusted). This is the load-bearing piece for hydration correctness: the evaluation IS the witness for what signals the binding depends on. `Dependency.depend()` is a no-op when `Scheduler.current` is null, so the only way to register a dep is to read the signal *inside* a wired Reaction's compute callback. There is no "register without running" — the framework's per-expression reactivity guarantee comes from this arrangement.
 
-This is why, when a per-binding Reaction *isn't* wired (see each-block lazy hydrate below), the framework loses the ability to react to that expression's signals. Static analysis can't substitute — it can only decide whether to wire the Reaction at all.
+When a per-binding Reaction *isn't* wired, the framework loses the ability to react to that expression's signals. There is no static substitute for the runtime witness.
 
-### Each-block hydration: lazy by default, eager when content reads external state
+### Each-block hydration: wire on hydrate, like every other block
 
-`each.hydrate` is the only block hydrate hook that doesn't unconditionally wire per-item Reactions. The lazy path is a perf optimization: per-item Reactions are expensive (item count × bindings per item), so defer wiring until the items signal first fires, then wire in place via `adoptServerItems`. On a 1000-item list, eager wiring on hydrate added ~425ms in a previous experiment.
-
-The deferral assumes per-item bindings only depend on item-local data. When a binding closes over external state (a helper that reads `state.x`, a component method, a snippet arg evaluated against the parent scope), that assumption breaks. If items never mutates after hydrate, `update` never runs, `adoptServerItems` never fires, per-item Reactions never wire, and external mutations silently lose reactivity. The docs site `inpage-menu` was the canonical repro: items arrived as a prop and never changed; `getItemClasses(item)` reading `state.activeID` never updated the rendered class.
-
-The fix (PR #175) is `packages/renderer/src/engines/native/blocks/each-content-classifier.js` — a static analyzer that walks the each block's content AST and decides whether everything resolves to `iteration-vars ∪ pure-helper-registry ∪ reserved-names`. Cached per-AST identity on a `WeakMap`. `each.hydrate` consults it:
+`each.hydrate` honors the same "register Reactions on hydrate" contract every other block hook honors. It calls `adoptServerItems` immediately, which walks the server-rendered per-item DOM (`<!--sui-item:v1:KEY-->` markers), reuses each item's nodes, and wires per-item Reactions in place via `hydrateInnerContent` with `skipFirstWrite: true`. Same as conditional/svg/template — no opt-out, no special path.
 
 ```js
 hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
-  self.hasHydrated = true;
-  if (isEachContentSelfContained(node)) {
-    lookupExpression(node.over);                                // dep on items, lazy preserved
-    return;
-  }
-  // resolveItems also registers the items dep via lookupExpression.
   const { items, collectionType } = resolveItems(node, lookupExpression);
   if (items.length === 0) {
-    if (node.elseContent) { /* hydrate elseContent in place */ }
+    if (node.elseContent) { /* hydrate elseContent in place + push isElse record */ }
     return;
   }
-  adoptServerItems({ ... });                                    // wires per-item Reactions now
+  const adopted = adoptServerItems({ ... });
+  if (!adopted) { self.hasHydrated = true; }   // legacy SSR fallback (no per-item markers)
 }
 ```
 
-Self-contained → existing lazy hydrate (item-only `{item.name}`-style bindings + framework helpers like `classMap`/`activeIf`/`is`). Anything else → eager `adoptServerItems` so per-item Reactions register their external deps now.
+**Why this matters**: a prior perf pass made `each.hydrate` lazy — only register a dep on the items collection, defer per-item Reaction wiring to the first items mutation. The premise was that per-item bindings only depend on item-local data, so deferral was safe. That premise breaks the moment a per-item binding closes over external state (a helper reading `state.x`, a component method, a snippet arg). The docs site `inpage-menu` was the canonical repro: items arrived as a prop and never changed; `getItemClasses(item)` reading `state.activeID` never updated the rendered class because the per-item Reaction was never wired.
 
-Conservative bails (treat as not-self-contained, force eager wire):
-- `{#each}` without explicit `as` (item keys spread into local scope; statically indistinguishable from external names)
-- `{>snippet ...}`, `{>template ...}`, `{#rerender}`, `{#guard}`, `{#async}` — cross-AST or dynamic content the classifier doesn't trace into
-- Any expression where an identifier head doesn't resolve to iteration-vars or `TemplateHelpers`
+PR #175 first attempted to preserve the lazy path with a static-AST classifier that decided per-each whether content was "self-contained" enough to defer safely. That classifier was abstraction-breaking — a runtime shadow lexer with hardcoded JS-keyword tables and hardcoded block-name case statements, duplicating what the framework already knows at evaluation time. It was ripped out in favor of the canonical eager shape. The empirical bench at 1000 items showed eager wiring is **flat vs main** at the mount window; the lazy optimization wasn't paying for itself at any scale we measured.
 
-The same family of bug applies to **snippet-with-args inside each** (`{#each item in items}<div>{>badge label=item.name}</div>{/each}`): the snippet args evaluate inside the per-item content path; without per-item Reactions wired they never re-run when items mutate. The classifier's snippet-bail catches this case — that test is unskipped in PR #175.
-
-The classifier runs only inside `each.hydrate`, which only runs on the SSR-then-hydrate path. The 90% of users who runtime-compile in the browser without SSR pay zero analyzer cost. SSR users pay one walk per unique each-content AST shape (cached). The AST itself stays clean — no per-node hydration metadata.
+**Snippet-with-args inside each** (`{#each item in items}<div>{>badge label=item.name}</div>{/each}`) is the same shape: per-item snippet arg evaluation needs per-item Reactions wired now. The canonical eager hydrate handles this implicitly — there's nothing special about snippet args.
 
 ### Key Hydration Behaviors
 
@@ -560,11 +546,10 @@ HYDRATION WIRING
   6. Fire onRendered
 
 EACH BLOCK HYDRATION
-  each.hydrate consults isEachContentSelfContained(node):
-    self-contained -> lazy: just register dep on items collection
-    not self-contained -> eager adoptServerItems (wire per-item now)
-  Bails to "not self-contained" on:
-    no-`as` each, snippet/template/rerender/async/guard, unknown identifiers
+  each.hydrate calls adoptServerItems immediately (canonical eager).
+  Per-item Reactions wire in place against server DOM via item markers.
+  Empty items + elseContent -> hydrate elseContent in place.
+  Legacy SSR (no markers) -> set hasHydrated for nuke-rebuild fallback.
 
 TESTING / BENCHING TRAPS (silent failures)
   innerHTML doesn't process DSD          -> use setHTMLUnsafe
@@ -592,12 +577,10 @@ packages/renderer/src/
 ├── engines/native/renderer.js                        Renderer — hydrateMarkers(), hydrateAttributes()
 ├── engines/native/reactive-data.js                   bindAttribute / bindTextExpression with skipFirstWrite
 └── engines/native/blocks/
-    ├── each.js                                       each.hydrate gate, adoptServerItems, item proxy
-    └── each-content-classifier.js                    isEachContentSelfContained — lazy/eager gate
+    └── each.js                                       each.hydrate (eager adoptServerItems), item proxy
 
 packages/renderer/test/
-├── browser/ssr-hydration.test.js                     Canonical ssrAndHydrate helper (setHTMLUnsafe + Template.isServer)
-└── unit/each-content-classifier.test.js              Classifier behavior (item-local, external, conservative-bail)
+└── browser/ssr-hydration.test.js                     Canonical ssrAndHydrate helper (setHTMLUnsafe + Template.isServer)
 ```
 
 ---
