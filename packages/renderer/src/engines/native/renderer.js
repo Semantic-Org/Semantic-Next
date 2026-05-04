@@ -232,17 +232,23 @@ export class Renderer {
     while ((node = walker.nextNode())) {
       if (node.nodeType === Node.ELEMENT_NODE) {
         const element = node;
-        const attrsToProcess = [];
+        // Most elements have zero __sui attrs — defer the array allocation
+        // until we find one. Collect first, then iterate, because
+        // bindAttributeExpression calls element.removeAttribute for property
+        // and event bindings, which mutates the live NamedNodeMap.
+        let attrsToProcess;
         for (let i = 0; i < element.attributes.length; i++) {
           const attr = element.attributes[i];
           if (attr.value.includes(ATTR_MARKER_PREFIX)) {
-            attrsToProcess.push({ name: attr.name, value: attr.value });
+            (attrsToProcess ??= []).push({ name: attr.name, value: attr.value });
           }
         }
-        for (const { name: attrName, value: attrValue } of attrsToProcess) {
-          const { parts, markerIDs } = parseAttributePartsFn(attrValue);
-          for (const id of markerIDs) { processedAttrIDs.add(id); }
-          this.bindAttributeExpression(element, attrName, parts, markerIDs[0], entries, data, scope);
+        if (attrsToProcess) {
+          for (const { name: attrName, value: attrValue } of attrsToProcess) {
+            const { parts, markerIDs } = parseAttributePartsFn(attrValue);
+            for (const id of markerIDs) { processedAttrIDs.add(id); }
+            this.bindAttributeExpression(element, attrName, parts, markerIDs[0], entries, data, scope);
+          }
         }
       }
       else {
