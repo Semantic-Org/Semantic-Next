@@ -37,6 +37,8 @@ Each agent runs `gh pr diff {number}` and examines the changes through its lens.
 - **What's wrong** — one sentence
 - **Why it matters** — impact, what breaks, or which standard it violates
 
+**Group instances of the same pattern.** When you find N>1 occurrences of the same root issue (same root cause, same citation, same fix shape), return them as a *single grouped finding* listing every file/line, not N separate findings. Example: 22 comments across the diff that all narrate a migration → one grouped "migration-narration" finding listing all 22 sites. The scoring stage applies the rubric per-finding; grouping caps scorer count at unique-pattern-count rather than instance-count, while preserving fresh-cold-read tamper-safety on each pattern. Don't group across distinct citations or distinct fix shapes — those are different judgments.
+
 Lens agents **do not score their own findings.** Scoring is a separate stage with separate agents — see Handling Results.
 
 If an agent finds no issues, it returns "No issues found" with a brief summary of what it verified was clean.
@@ -93,9 +95,11 @@ Three lenses on the diff under a high-confidence bar. Comments are out of scope 
 ### Agent 6 — Performance Review
 Anchor: `ai/skills/workflows/contributing/improve-performance.md`. Tachometer is the committed source of truth for performance in this repo; CI posts a bench reporter comment on the PR with per-metric verdicts (faster / slower / no change / unsure) and an `Expected Noise` column.
 
+**Step 0 — Applicability check.** The benchmarks workflow runs only when a PR touches paths in its `paths:` filter (currently `packages/**` or `.github/workflows/benchmarks.yml`). Run `gh pr diff {number} --name-only` first. If none of the changed files match those paths, abort immediately with: *"PR scope doesn't trigger benchmarks (no `packages/**` or `benchmarks.yml` changes). Performance review N/A."* Don't fetch comments, don't speculate — the workflow won't have run.
+
 **Step 1 — Find the tachometer comment.** Use `gh pr view {number} --comments` or `gh api repos/{owner}/{repo}/issues/{number}/comments`. The bench reporter's comment is recognizable by the per-metric verdict table.
 
-**If absent — abort.** Return: *"Tachometer hasn't run yet on this PR. Rerun Agent 6 in a separate pass once CI catches up."* Don't speculate about performance without data.
+**If absent (despite applicable scope) — abort.** Return: *"Tachometer hasn't run yet on this PR. Rerun Agent 6 in a separate pass once CI catches up."* Don't speculate about performance without data.
 
 **If present — investigate each regression honestly.** For every metric flagged "slower," judge:
 
@@ -116,11 +120,13 @@ The 6 lens agents return findings *without* confidence scores. Scoring is a sepa
 
 Before spawning scoring agents, state in the conversation:
 
-> "Launching N parallel Opus scoring agents — one per finding."
+> "Launching N parallel Opus scoring agents — one per finding (grouped findings count as one)."
 
 **This is not optional, and not a checkbox to game.** Orchestrators on round 3+ of an iteration loop tend toward fatigue and skip the scoring stage — scoring findings themselves to save effort, hoping the user won't notice. The announcement is the artifact that makes skipping observable. If you're tempted to skip on round 3 (or 4, or 5), that's exactly the moment when the rigor matters most. Stop, announce, then launch.
 
 ### Scoring agents (Opus, one per finding, parallel)
+
+Lens agents already consolidate same-pattern instances into grouped findings (see Lens agent output format). Each grouped finding is one scorer. A lens that returns 22 same-pattern instances as one grouped finding gets one scorer; a lens that returns 5 distinct findings gets five.
 
 For each finding from any lens agent, launch a fresh **Opus** agent (always Opus — Haiku is too fast to verify standards citations) that receives:
 

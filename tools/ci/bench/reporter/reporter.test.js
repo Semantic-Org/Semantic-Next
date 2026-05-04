@@ -28,6 +28,8 @@ function runReporter({
   repo = '',
   wallClock = '',
   history = '',
+  prHistory = '',
+  scope = '',
   resultsDir = null,
 }) {
   const tmp = fs.mkdtempSync(path.join('/tmp', 'bench-report-test-'));
@@ -55,6 +57,8 @@ function runReporter({
   // resolves to <repo-root>/tools/ci/bench/reporter/bench-history.json;
   // tests opt in to a specific fixture.
   if (history) { argv.push('--history', history); }
+  if (prHistory) { argv.push('--pr-history', prHistory); }
+  if (scope) { argv.push('--scope', scope); }
   // Run from repo root so resolveMetricSource can find packages/.../bench/tachometer
   const cwd = path.resolve(__dirname, '..', '..', '..', '..');
   execFileSync('node', argv, { stdio: ['ignore', 'pipe', 'inherit'], cwd });
@@ -63,30 +67,55 @@ function runReporter({
   return { report, markdown };
 }
 
+function writeFixture(content) {
+  const tmp = fs.mkdtempSync('/tmp/bench-fixture-');
+  const filePath = path.join(tmp, 'history.json');
+  fs.writeFileSync(filePath, JSON.stringify(content));
+  return filePath;
+}
+
 /**
  * Build a tiny tachometer JSON fixture with one metric whose this-change
- * mean CI is the caller-specified range. Used to force specific cross-run
- * outcomes against fixtures/history-sample.json.
+ * mean CI and percent-delta CI are caller-specified. Used to force specific
+ * cross-run outcomes against fixtures/history-sample.json.
+ *
+ * `pctDeltaCi` is the within-session percent-delta vs tip-of-tree — the
+ * number cross-iteration peak attribution operates on. If `baselineSha`
+ * is provided, also writes the baseline-sha.txt sidecar (so the reporter
+ * picks up the current run's baseline for drift detection).
  */
-function writeHandcraftedResults(metricName, thisChangeCi, tipOfTreeCi = [10, 11]) {
+function writeHandcraftedResults(
+  metricName,
+  thisChangeCi,
+  tipOfTreeCi = [10, 11],
+  pctDeltaCi = [-5, 5],
+  baselineSha = '',
+) {
   const dir = fs.mkdtempSync('/tmp/bench-reporter-handcraft-');
+  const diff = {
+    absolute: { low: -1, high: 1 },
+    percentChange: { low: pctDeltaCi[0], high: pctDeltaCi[1] },
+  };
   const data = {
     benchmarks: [
       {
         name: `this-change [${metricName}]`,
         measurement: { name: metricName, mode: 'performance', entryName: metricName },
         mean: { low: thisChangeCi[0], high: thisChangeCi[1] },
-        differences: [null, { absolute: { low: -1, high: 1 }, percentChange: { low: -5, high: 5 } }],
+        differences: [null, diff],
       },
       {
         name: `tip-of-tree [${metricName}]`,
         measurement: { name: metricName, mode: 'performance', entryName: metricName },
         mean: { low: tipOfTreeCi[0], high: tipOfTreeCi[1] },
-        differences: [{ absolute: { low: -1, high: 1 }, percentChange: { low: -5, high: 5 } }, null],
+        differences: [diff, null],
       },
     ],
   };
   fs.writeFileSync(path.join(dir, 'handcrafted.json'), JSON.stringify(data));
+  if (baselineSha) {
+    fs.writeFileSync(path.join(dir, 'baseline-sha.txt'), baselineSha);
+  }
   return dir;
 }
 
@@ -193,8 +222,9 @@ test('real-delta fixture — rubric markdown structure', () => {
   // Rows auto-expanded (≤ 15) — no teaser pattern
   assert.ok(!markdown.includes('top 5 shown'));
 
-  // Metric source links present (paths resolved to bench.js / bench-todo.js at given SHA)
-  assert.ok(/\/blob\/abcdef012345678\/packages\/renderer\/bench\/tachometer\/bench[-\w]*\.js#L\d+/.test(markdown));
+  // Metric source links resolve to bench-*.js. Match any package — the
+  // suite layout isn't pinned and reorganizes over time.
+  assert.ok(/\/blob\/abcdef012345678\/packages\/\w+\/bench\/tachometer\/bench[-\w]*\.js#L\d+/.test(markdown));
 
   // Wall-clock footer
   assert.ok(markdown.includes('Wall-clock: 10m42s'));
@@ -307,10 +337,10 @@ test('severity emoji suffix placement', () => {
 
 const HISTORY_FIXTURE = path.join(__dirname, 'fixtures', 'history-sample.json');
 
-test('cross-run: WIN when current CI dominates historical peak', () => {
-  // history-sample.json has update-10th peak CI [6.0, 7.0] at bbbb...
-  // Current CI [4.5, 5.5] is entirely below → WIN
-  const dir = writeHandcraftedResults('update-10th', [4.5, 5.5]);
+test('cross-run: WIN when current pct-delta dominates historical peak', () => {
+  // history-sample.json's update-10th peak percent_delta_ci is [-40, -35] at bbbb.
+  // Current pct-delta [-50, -45] is more negative across the whole range → WIN.
+  const dir = writeHandcraftedResults('update-10th', [4.5, 5.5], [10, 11], [-50, -45]);
   const { report, markdown } = runReporter({
     resultsDir: dir,
     sha: 'feedbeef',
@@ -320,8 +350,8 @@ test('cross-run: WIN when current CI dominates historical peak', () => {
   });
   const m = report.metrics.find((x) => x.name === 'update-10th');
   assert.equal(m.history_status, 'WIN');
-  assert.equal(m.peak.sha, 'bbbb222222222222', 'peak commit is the best prior entry');
-  assert.ok(m.delta_from_peak_pct < 0, 'delta is negative when current is faster than peak');
+  assert.equal(m.peak.sha, 'bbbb222222222222', 'peak entry is the most-improved prior');
+  assert.ok(m.delta_from_peak_pct < 0, 'delta_from_peak_pct is negative when current dominates peak');
   assert.ok(!markdown.includes('Regressions from peak'), 'no reopened section when no REOPENED');
 });
 
@@ -329,6 +359,7 @@ test('cross-run: peak links to PR conversation when PR number is known', () => {
   // Peak has pr: 102 in the fixture → peak SHA in markdown should link
   // to /pull/102, not /commit/<sha>. Takes reviewers directly to the
   // bench comment from that PR (which is where the peak value came from).
+  // Default current pct-delta [-5, 5] vs peak [-40, -35] triggers REOPENED.
   const dir = writeHandcraftedResults('update-10th', [20.0, 21.0]);
   const { report, markdown } = runReporter({
     resultsDir: dir,
@@ -349,9 +380,9 @@ test('cross-run: peak links to PR conversation when PR number is known', () => {
   assert.ok(markdown.includes('](https://github.com/Semantic-Org/Semantic-Next/pull/104)'));
 });
 
-test('cross-run: REOPENED when a prior commit dominates current', () => {
-  // history-sample.json peak for update-10th = CI [6.0, 7.0]
-  // Current CI [20.0, 21.0] is entirely above → REOPENED
+test('cross-run: REOPENED when a prior iteration dominates current', () => {
+  // history-sample.json peak for update-10th = pct-delta [-40, -35] at bbbb.
+  // Default current pct-delta [-5, 5] is entirely above peak's range → REOPENED.
   const dir = writeHandcraftedResults('update-10th', [20.0, 21.0]);
   const { report, markdown } = runReporter({
     resultsDir: dir,
@@ -364,7 +395,11 @@ test('cross-run: REOPENED when a prior commit dominates current', () => {
   const m = report.metrics.find((x) => x.name === 'update-10th');
   assert.equal(m.history_status, 'REOPENED');
   assert.equal(m.peak.sha, 'bbbb222222222222');
-  assert.ok(m.delta_from_peak_pct > 50, `delta should be large positive when reopened (got ${m.delta_from_peak_pct})`);
+  // Current midpoint 0pp - peak midpoint -37.5pp = +37.5pp regressed from peak.
+  assert.ok(
+    m.delta_from_peak_pct > 30,
+    `delta_from_peak_pct should be large positive (got ${m.delta_from_peak_pct})`,
+  );
 
   // Bisect candidates = commits after peak (cccc, dddd)
   const bisectShas = m.bisect_candidates.map((c) => c.sha);
@@ -376,10 +411,10 @@ test('cross-run: REOPENED when a prior commit dominates current', () => {
   assert.ok(markdown.includes('📜 1 reopened'), 'headline count includes reopened');
 });
 
-test('cross-run: TIED-PEAK when CIs overlap', () => {
-  // history peak for update-10th = [6.0, 7.0]
-  // Current CI [6.5, 7.5] overlaps → TIED-PEAK
-  const dir = writeHandcraftedResults('update-10th', [6.5, 7.5]);
+test('cross-run: TIED-PEAK when pct-delta CIs overlap', () => {
+  // history peak for update-10th = pct-delta [-40, -35]
+  // Current pct-delta [-38, -33] overlaps → TIED-PEAK
+  const dir = writeHandcraftedResults('update-10th', [6.5, 7.5], [10, 11], [-38, -33]);
   const { report } = runReporter({
     resultsDir: dir,
     sha: 'aaaa',
@@ -389,6 +424,231 @@ test('cross-run: TIED-PEAK when CIs overlap', () => {
   });
   const m = report.metrics.find((x) => x.name === 'update-10th');
   assert.equal(m.history_status, 'TIED-PEAK');
+});
+
+test('--scope pr excludes main-history from peak attribution', () => {
+  // Default current pct-delta [-5, 5] would be REOPENED vs main-history's
+  // peak [-40, -35]. With --scope pr and an empty PR-iteration history,
+  // peak attribution sees no entries → no history_status, no REOPENED
+  // section in markdown.
+  const dir = writeHandcraftedResults('update-10th', [20, 21]);
+  const emptyPrHistory = writeFixture({ schema_version: 2, commits: [] });
+  const { report, markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'abc',
+    msg: 'x',
+    baseSha: 'def',
+    history: HISTORY_FIXTURE,
+    prHistory: emptyPrHistory,
+    scope: 'pr',
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.ok(!('history_status' in m), 'no peak attribution under --scope pr with empty PR history');
+  assert.ok(!markdown.includes('Regressions from peak'), 'no REOPENED section');
+  assert.equal(report.scope, 'pr', 'scope echoed to JSON adjunct');
+});
+
+test('--scope pr uses PR-iteration history when present', () => {
+  // PR-iteration history has its own "peak" at -30%; current at -5% → REOPENED.
+  // Main-history's [-40, -35] peak is excluded under --scope pr.
+  const dir = writeHandcraftedResults('update-10th', [10, 11]);
+  const prHistoryFile = writeFixture({
+    schema_version: 2,
+    commits: [{
+      sha: 'pr-iter-1234567',
+      msg: 'iteration 1',
+      parent_sha: '',
+      timestamp: '2026-04-20T00:00:00Z',
+      pr: null,
+      metrics: {
+        'update-10th': {
+          ci: [9, 10],
+          mean_ms: 9.5,
+          percent_delta_ci: [-32, -28],
+          baseline_sha: 'main-tip-12345',
+        },
+      },
+    }],
+  });
+  const { report } = runReporter({
+    resultsDir: dir,
+    sha: 'abc',
+    msg: 'x',
+    baseSha: 'def',
+    history: HISTORY_FIXTURE,
+    prHistory: prHistoryFile,
+    scope: 'pr',
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(m.history_status, 'REOPENED', 'REOPENED against PR-iteration peak only');
+  assert.equal(m.peak.sha, 'pr-iter-1234567', 'peak from PR history, not main-history');
+});
+
+test('drift flag fires with magnitude when chain is quantifiable', () => {
+  // Setup: current's baseline is mainB; PR-iteration peak's baseline is mainA.
+  // main-history has commits between mainA and mainB whose percent_delta_ci
+  // values combine to >5pp drift.
+  const driftHistory = writeFixture({
+    schema_version: 2,
+    commits: [
+      {
+        sha: 'mainA',
+        msg: 'main A',
+        parent_sha: '',
+        timestamp: '2026-04-15T00:00:00Z',
+        pr: null,
+        metrics: {
+          'update-10th': { ci: [10, 11], mean_ms: 10.5 },
+        },
+      },
+      {
+        sha: 'main-mid',
+        msg: 'main mid commit',
+        parent_sha: 'mainA',
+        timestamp: '2026-04-16T00:00:00Z',
+        pr: null,
+        metrics: {
+          'update-10th': {
+            ci: [10.5, 11.5],
+            mean_ms: 11,
+            percent_delta_ci: [4, 6],
+            baseline_sha: 'mainA',
+          },
+        },
+      },
+      {
+        sha: 'mainB',
+        msg: 'main B',
+        parent_sha: 'main-mid',
+        timestamp: '2026-04-17T00:00:00Z',
+        pr: null,
+        metrics: {
+          'update-10th': {
+            ci: [11, 12],
+            mean_ms: 11.5,
+            percent_delta_ci: [3, 5],
+            baseline_sha: 'main-mid',
+          },
+        },
+      },
+    ],
+  });
+  // PR-iteration peak: pct-delta [-30, -25] vs mainA. Best so far.
+  const prHistory = writeFixture({
+    schema_version: 2,
+    commits: [{
+      sha: 'pr-best-iter',
+      msg: 'best iteration',
+      parent_sha: '',
+      timestamp: '2026-04-15T01:00:00Z',
+      pr: null,
+      metrics: {
+        'update-10th': {
+          ci: [7, 8],
+          mean_ms: 7.5,
+          percent_delta_ci: [-30, -25],
+          baseline_sha: 'mainA',
+        },
+      },
+    }],
+  });
+  // Current: pct-delta [-5, 0] vs mainB. Worse than peak → REOPENED + drift.
+  const dir = writeHandcraftedResults('update-10th', [11, 12], [11.5, 12.5], [-5, 0], 'mainB');
+  const { report, markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'current',
+    msg: 'x',
+    baseSha: 'def',
+    history: driftHistory,
+    prHistory,
+    scope: 'pr',
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(m.history_status, 'REOPENED');
+  assert.ok(m.drift?.detected, 'drift detected');
+  assert.ok(m.drift.magnitude !== null, 'magnitude available');
+  // Chain: main-mid (+5pp midpoint) × mainB (+4pp midpoint). Combined ~9pp.
+  assert.ok(m.drift.magnitude > 5, `drift magnitude > 5pp (got ${m.drift.magnitude})`);
+  assert.equal(m.drift.chain_len, 2, 'two chain links');
+  assert.equal(m.drift.missing, 0);
+  // Markdown footnote rendered
+  assert.ok(/⚠️1 main moved \+\d+pp/.test(markdown), 'drift footnote with magnitude');
+  assert.ok(markdown.includes('chained across 2 main commits'));
+});
+
+test('drift flag binary-only when main-history is empty', () => {
+  // Current and peak baselines differ, but driftHist has nothing to walk →
+  // detected: true, magnitude: null. Footnote renders without a number.
+  const prHistory = writeFixture({
+    schema_version: 2,
+    commits: [{
+      sha: 'pr-best',
+      msg: 'best',
+      parent_sha: '',
+      timestamp: '2026-04-15T00:00:00Z',
+      pr: null,
+      metrics: {
+        'update-10th': {
+          ci: [7, 8],
+          mean_ms: 7.5,
+          percent_delta_ci: [-30, -25],
+          baseline_sha: 'mainA',
+        },
+      },
+    }],
+  });
+  const emptyMain = writeFixture({ schema_version: 2, commits: [] });
+  const dir = writeHandcraftedResults('update-10th', [11, 12], [11.5, 12.5], [-5, 0], 'mainB-different');
+  const { report, markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'current',
+    msg: 'x',
+    baseSha: 'def',
+    history: emptyMain,
+    prHistory,
+    scope: 'pr',
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(m.history_status, 'REOPENED');
+  assert.ok(m.drift?.detected, 'drift detected (binary)');
+  assert.equal(m.drift.magnitude, null, 'magnitude unavailable when chain is empty');
+  assert.ok(/drift magnitude unavailable/.test(markdown), 'gap footnote rendered');
+});
+
+test('no drift flag when baselines match', () => {
+  // Current and peak share a baseline → no drift, no flag, no footnote.
+  const sharedBaseline = 'shared-main-tip';
+  const prHistory = writeFixture({
+    schema_version: 2,
+    commits: [{
+      sha: 'pr-best',
+      msg: 'best',
+      parent_sha: '',
+      timestamp: '2026-04-15T00:00:00Z',
+      pr: null,
+      metrics: {
+        'update-10th': {
+          ci: [7, 8],
+          mean_ms: 7.5,
+          percent_delta_ci: [-30, -25],
+          baseline_sha: sharedBaseline,
+        },
+      },
+    }],
+  });
+  const dir = writeHandcraftedResults('update-10th', [11, 12], [11.5, 12.5], [-5, 0], sharedBaseline);
+  const { report, markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'current',
+    msg: 'x',
+    baseSha: 'def',
+    prHistory,
+    scope: 'pr',
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(m.history_status, 'REOPENED');
+  assert.ok(!m.drift || m.drift.detected === false, 'no drift when baselines match');
+  assert.ok(!markdown.includes('main moved'), 'no drift footnote');
 });
 
 test('cross-run: graceful degrade when history file is missing', () => {

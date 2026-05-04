@@ -17,16 +17,26 @@
       --repo-root <dir>       filesystem root for resolving bench sources (default: cwd)
       --wall-clock <seconds>  total bench run duration — footer metadata
       --history <path>        bench-history.json path (default: <repo-root>/tools/ci/bench/reporter/bench-history.json)
-      --pr-history <path>     PR-iteration history from fetch-pr-history.js (merged with --history)
+      --pr-history <path>     PR-iteration history from fetch-pr-history.js
+      --scope <all|pr>        peak attribution scope. 'pr' restricts comparison
+                              to PR-iteration history only (drops main-history
+                              overlay; eliminates phantom REOPENEDs on test-only
+                              PRs). 'all' merges main + PR (default).
       --out <dir>             output directory (default: ./bench-report)
 
-  Cross-run taxonomy (WIN / TIED-PEAK / REOPENED) engages automatically once
-  bench-history.json has entries. Empty or missing history file → reporter
-  falls back to current-vs-baseline only (no peak attribution rendered).
+  Cross-run taxonomy (WIN / TIED-PEAK / REOPENED) operates on within-session
+  percent-delta CIs — the only number tachometer warrants for cross-iteration
+  comparison. Drift detection walks main-history's chain of percent-deltas
+  between baselines and renders ⚠️ when main moved enough on the metric to
+  plausibly confound peak attribution within the PR.
+
+  Schema: bench-history.json is schema_version 2.
 */
 
 import fs from 'node:fs';
 import path from 'node:path';
+
+import { iterMetricPairs, readBaselineSha } from './extract-metrics.js';
 
 const args = parseArgs(process.argv.slice(2));
 const resultsDir = required(args, 'results');
@@ -45,6 +55,15 @@ const wallClockSec = args['wall-clock'] ? Number(args['wall-clock']) : null;
 const historyPath = args.history ?? path.join(repoRoot, 'tools/ci/bench/reporter/bench-history.json');
 const prHistoryPath = args['pr-history'] ?? '';
 const outDir = args.out ?? './bench-report';
+// 'pr' restricts peak attribution to PR-iteration history only — main-history
+// commits round-robin'd against their own tip-of-trees, so cross-session
+// comparison would mix iteration drift with environmental variance. 'all'
+// merges both for push-to-main runs that want the full timeline.
+const scope = args.scope ?? 'all';
+if (scope !== 'all' && scope !== 'pr') {
+  console.error(`Invalid --scope: ${scope}; expected 'all' or 'pr'`);
+  process.exit(1);
+}
 
 const NOISE_FLOOR = 2; // percent — matches autoSampleConditions
 
@@ -78,6 +97,12 @@ const TEASER_ROWS = 5;
 // present in the JSON adjunct for agent use.
 const BISECT_MARKDOWN_MAX = 3;
 
+// Cumulative main-side drift (in percentage points) above which a row
+// renders the baseline-drift flag. Below this, drift is in the runner
+// noise floor across the chain anyway; flagging would clutter every
+// long-running PR.
+const DRIFT_THRESHOLD_PP = 5;
+
 /**
  * Expected percent-change CI width for an unresolved CI given the bench's
  * absolute duration. Derived from the standard-error-of-the-difference of
@@ -92,7 +117,11 @@ function expectedNoisePp(meanMs) {
 const benchDirs = findBenchDirs(repoRoot);
 const mainHistory = loadHistory(historyPath);
 const prHistory = loadHistory(prHistoryPath);
-const history = mergeHistories(mainHistory, prHistory);
+const peakHistory = scope === 'pr' ? prHistory : mergeHistories(mainHistory, prHistory);
+// Drift always walks main-history regardless of peak scope — the chain of
+// per-commit percent-deltas is what quantifies how the baseline itself moved.
+const driftHistory = mainHistory;
+const currentBaselineSha = readBaselineSha(resultsDir);
 const metrics = loadAllMetrics(resultsDir);
 const report = buildReport(metrics);
 const markdown = renderMarkdown(report);
@@ -109,42 +138,23 @@ console.log(
 );
 
 /**
- * Walk `dir` for tachometer JSON files and extract per-metric this-change
- * vs tip-of-tree data. Each tachometer file can contain multiple metrics;
- * each metric has one "this-change [X]" and one "tip-of-tree [X]" entry.
+ * Project paired tachometer benchmarks into the shape buildReport consumes.
+ * Skips metrics without a tip-of-tree counterpart or differences[] entry —
+ * the comment renderer needs both sides plus the precomputed diff.
  */
 function loadAllMetrics(dir) {
   const out = [];
-  for (const entry of walk(dir)) {
-    if (!entry.endsWith('.json')) { continue; }
-    const data = JSON.parse(fs.readFileSync(entry, 'utf8'));
-    if (!Array.isArray(data.benchmarks)) { continue; }
-
-    // Group benchmarks by measurement name, index by source (this-change | tip-of-tree)
-    const byName = new Map();
-    data.benchmarks.forEach((bm, i) => {
-      const mName = bm.measurement?.name ?? bm.name;
-      const source = (bm.name ?? '').split(' [')[0];
-      if (!byName.has(mName)) { byName.set(mName, {}); }
-      byName.get(mName)[source] = { index: i, bm };
+  for (const { name, current, base, diff } of iterMetricPairs(dir)) {
+    if (!base || !diff) { continue; }
+    out.push({
+      name,
+      thisChangeMs: [current.bm.mean.low, current.bm.mean.high],
+      tipOfTreeMs: [base.bm.mean.low, base.bm.mean.high],
+      absoluteMsDelta: [diff.absolute.low, diff.absolute.high],
+      percentDelta: [diff.percentChange.low, diff.percentChange.high],
+      baselineSha: currentBaselineSha || null,
     });
-
-    for (const [name, pair] of byName) {
-      const cur = pair['this-change'];
-      const base = pair['tip-of-tree'];
-      if (!cur || !base) { continue; }
-      const diff = cur.bm.differences?.[base.index];
-      if (!diff) { continue; }
-      out.push({
-        name,
-        thisChangeMs: [cur.bm.mean.low, cur.bm.mean.high],
-        tipOfTreeMs: [base.bm.mean.low, base.bm.mean.high],
-        absoluteMsDelta: [diff.absolute.low, diff.absolute.high],
-        percentDelta: [diff.percentChange.low, diff.percentChange.high],
-      });
-    }
   }
-  // Deterministic order for snapshot stability
   out.sort((a, b) => a.name.localeCompare(b.name));
   return out;
 }
@@ -170,7 +180,7 @@ function buildReport(metrics) {
     const expectedPp = expectedNoisePp(meanMs);
     const ratio = expectedPp > 0 ? widthPp / expectedPp : Infinity;
     const source = resolveMetricSource(m.name, benchDirs, repoRoot);
-    const historyStatus = computeHistoryStatus(m, history);
+    const historyStatus = computeHistoryStatus(m, peakHistory, driftHistory);
     return {
       ...m,
       meanMs,
@@ -196,7 +206,8 @@ function buildReport(metrics) {
     noise_ratio_tolerance: NOISE_RATIO_TOLERANCE,
     summary,
     history_summary: historySummary,
-    history_available: history !== null && history.commits.length > 0,
+    history_available: peakHistory !== null && peakHistory.commits.length > 0,
+    scope,
     metrics: classified.map(toJsonMetric),
   };
 }
@@ -236,21 +247,22 @@ function toJsonMetric(m) {
     expected_noise_pp: Number(m.expectedPp.toFixed(2)),
     observed_noise_ratio: Number(m.ratio.toFixed(2)),
     source: m.source,
+    baseline_sha: m.baselineSha ?? null,
   };
-  // Cross-run fields only populated when history has data for this metric.
-  // Agents can detect absence vs "no peak" via missing key, not null.
   if (m.historyStatus) {
     out.history_status = m.historyStatus.status;
     out.peak = m.historyStatus.peak;
     out.delta_from_peak_pct = m.historyStatus.delta_from_peak_pct;
     out.bisect_candidates = m.historyStatus.bisect_candidates;
+    if (m.historyStatus.drift?.detected) {
+      out.drift = m.historyStatus.drift;
+    }
   }
   return out;
 }
 
 /**
- * Markdown renderer — implements the rubric at ai/workspace/tmp/bench-reporter-rubric.md.
- * Layout:
+ * Markdown renderer. Layout:
  *   1. Top header: h3 with state emoji + commit link + "on Benchmark Suite 📊"
  *   2. Metadata line: Base · Action · Raw (bench-report.json link)
  *   3. GitHub alert block with verdict copy
@@ -312,7 +324,6 @@ function renderMarkdown(report) {
     `🔍 ${unsureTotal} unsure`,
     `⚪ ${noChange.length} no change`,
   ];
-  // Surface REOPENED count in the headline when history has flagged any.
   const reopenedCount = report.history_summary?.REOPENED ?? 0;
   if (reopenedCount > 0) {
     resultsParts.push(`📜 ${reopenedCount} reopened`);
@@ -333,9 +344,6 @@ function renderMarkdown(report) {
   }
 
   // ─── Regressions from peak (cross-run; auto-expanded when present) ───
-  // Load-bearing signal — a metric better on a prior commit is always a
-  // cherry-pick candidate. Sits alongside Faster/Slower, not hidden in a
-  // collapsible, because a reviewer should never miss this.
   renderRegressionsFromPeak(lines, report);
 
   // ─── No Change (always collapsed) ────────────────────────────────────
@@ -422,33 +430,43 @@ function renderMarkdown(report) {
 
 /**
  * Append a "Regressions from peak" section when one or more metrics are
- * REOPENED (current CI dominated by a prior commit's CI). Actionable signal:
- * the metric was once better and this PR — or a commit before it — gave
- * that improvement back. Skipped entirely when history is empty or no
- * REOPENED metrics exist.
+ * REOPENED (current pct-delta dominated by a prior iteration's pct-delta).
+ * Actionable signal: the metric was once better and this PR — or a commit
+ * before it — gave that improvement back.
+ *
+ * Surface units are within-session percent-deltas (the pct-delta this run
+ * achieved vs its baseline; the pct-delta peak achieved vs ITS baseline).
+ * `delta_from_peak_pct` is the difference between those two midpoints in
+ * percentage points (pp). Drift footnotes fire when peak and current had
+ * different baselines and main moved enough on the metric to plausibly
+ * confound the comparison.
  */
 function renderRegressionsFromPeak(lines, report) {
   const reopened = report.metrics.filter((m) => m.history_status === 'REOPENED');
   if (reopened.length === 0) { return; }
 
-  // Sort by severity — largest delta-from-peak first.
-  const sorted = [...reopened].sort((a, b) => (b.delta_from_peak_pct ?? 0) - (a.delta_from_peak_pct ?? 0));
+  const sorted = [...reopened].sort(
+    (a, b) => (b.delta_from_peak_pct ?? 0) - (a.delta_from_peak_pct ?? 0),
+  );
 
   lines.push(`#### 📜 Regressions from peak (${reopened.length})`);
   lines.push('');
   lines.push(
-    `These metrics were better on a prior commit than they are now. The peak CI dominates current CI — not attributable to per-sample noise. Bisect candidates are the commits between the peak and HEAD; nearest-to-peak is usually the best bet.`,
+    `These metrics were better on a prior iteration than they are now. The peak's percent-delta vs its baseline dominates current's percent-delta vs its baseline — not attributable to per-sample noise. Bisect candidates are the commits between the peak iteration and HEAD; nearest-to-peak is usually the best bet.`,
   );
   lines.push('');
   lines.push('| metric | current | peak | vs peak | bisect candidates |');
   lines.push('|---|---|---|---|---|');
+
+  const flagged = [];
+
   for (const m of sorted) {
-    const currentMid = (m.mean_ms ?? ((m.this_change_ms_ci[0] + m.this_change_ms_ci[1]) / 2));
-    const peakMid = m.peak.mean_ms;
-    const deltaStr = m.delta_from_peak_pct > 0
-      ? `+${m.delta_from_peak_pct.toFixed(0)}%`
-      : `${m.delta_from_peak_pct.toFixed(0)}%`;
+    const currentStr = formatSignedPct(mid(m.percent_change_ci));
+    const peakStr = formatSignedPct(mid(m.peak.percent_delta_ci));
     const peakLink = commitOrPrLink(m.peak, report.repo);
+    const deltaStr = m.delta_from_peak_pct > 0
+      ? `regressed +${m.delta_from_peak_pct.toFixed(0)}pp`
+      : `${m.delta_from_peak_pct.toFixed(0)}pp`;
     const bisectMd = (m.bisect_candidates ?? [])
       .slice(0, BISECT_MARKDOWN_MAX)
       .map((c) => commitOrPrLink(c, report.repo))
@@ -456,13 +474,65 @@ function renderRegressionsFromPeak(lines, report) {
     const bisectCell = m.bisect_candidates && m.bisect_candidates.length > BISECT_MARKDOWN_MAX
       ? `${bisectMd} +${m.bisect_candidates.length - BISECT_MARKDOWN_MAX} more`
       : bisectMd || '—';
+
+    // Fires on threshold breach or chain-gap (magnitude unavailable).
+    let driftFlag = '';
+    if (m.drift?.detected) {
+      const mag = m.drift.magnitude;
+      const fires = mag === null || Math.abs(mag) >= DRIFT_THRESHOLD_PP;
+      if (fires) {
+        const idx = flagged.length + 1;
+        driftFlag = ` ⚠️${idx}`;
+        flagged.push({
+          idx,
+          metric: m.name,
+          drift: m.drift,
+          currentBaseline: m.baseline_sha,
+          peakBaseline: m.peak.baseline_sha,
+        });
+      }
+    }
+
     lines.push(
-      `| ${metricLink(m, report)} | ${currentMid.toFixed(1)}ms | ${
-        peakMid.toFixed(1)
-      }ms @ ${peakLink} | ${deltaStr} | ${bisectCell} |`,
+      `| ${
+        metricLink(m, report)
+      } | ${currentStr}${driftFlag} | ${peakStr} @ ${peakLink} | ${deltaStr} | ${bisectCell} |`,
     );
   }
   lines.push('');
+
+  if (flagged.length > 0) {
+    for (const f of flagged) {
+      lines.push(formatDriftFootnote(f));
+    }
+    lines.push('');
+  }
+}
+
+function formatSignedPct(pct) {
+  return pct > 0 ? `+${pct.toFixed(0)}%` : `${pct.toFixed(0)}%`;
+}
+
+function formatDriftFootnote({ idx, metric, drift, currentBaseline, peakBaseline }) {
+  const peakSha = peakBaseline ? peakBaseline.slice(0, 7) : '?';
+  const currentSha = currentBaseline ? currentBaseline.slice(0, 7) : '?';
+  if (drift.magnitude !== null) {
+    const sign = drift.magnitude > 0 ? '+' : '';
+    const links = drift.chain_len === 1 ? '1 main commit' : `${drift.chain_len} main commits`;
+    return (
+      `⚠️${idx} main moved ${sign}${drift.magnitude.toFixed(0)}pp on \`${metric}\` `
+      + `between baselines (\`${peakSha}\` → \`${currentSha}\`, chained across ${links}). `
+      + `Comparison may include main-side change.`
+    );
+  }
+  const total = drift.chain_len + drift.missing;
+  const detail = total === 0
+    ? '0 entries available in chain'
+    : `${drift.missing}/${total} entries missing percent_delta_ci`;
+  return (
+    `⚠️${idx} main moved between baselines on \`${metric}\` (\`${peakSha}\` → \`${currentSha}\`); `
+    + `drift magnitude unavailable (${detail}). Comparison may include main-side change.`
+  );
 }
 
 /**
@@ -686,27 +756,32 @@ function mergeHistories(mainHist, prHist) {
     ...(mainHist?.commits ?? []),
     ...(prHist?.commits ?? []),
   ];
-  // Deduplicate by SHA (same commit shouldn't appear twice)
   const seen = new Set();
   const deduped = commits.filter((c) => {
     if (seen.has(c.sha)) { return false; }
     seen.add(c.sha);
     return true;
   });
-  // Chronological order so bisect candidates are in causal sequence
+  // Chronological so bisect candidates land in causal order.
   deduped.sort((a, b) => (a.timestamp ?? '').localeCompare(b.timestamp ?? ''));
-  return { schema_version: 1, commits: deduped };
+  return { schema_version: 2, commits: deduped };
 }
 
 /**
- * Load bench-history.json. Returns null if missing/empty/invalid — the
- * reporter's D3b features all gracefully degrade on a null history.
+ * Load bench-history.json. Returns null on missing/empty/invalid — peak
+ * attribution gracefully degrades on null. Schema v2 only.
+ *
+ * Sort on read because `computeBaselineDrift` walks `commits` by index,
+ * and the rebase-retry path on push-to-main can land entries with
+ * non-monotonic timestamps.
  */
 function loadHistory(filePath) {
   if (!filePath || !fs.existsSync(filePath)) { return null; }
   try {
     const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    if (parsed.schema_version !== 1 || !Array.isArray(parsed.commits)) { return null; }
+    if (parsed.schema_version !== 2) { return null; }
+    if (!Array.isArray(parsed.commits)) { return null; }
+    parsed.commits.sort((a, b) => (a.timestamp ?? '').localeCompare(b.timestamp ?? ''));
     return parsed;
   }
   catch {
@@ -715,56 +790,67 @@ function loadHistory(filePath) {
 }
 
 /**
- * Compute per-metric cross-run status against the history file.
+ * Per-metric cross-run status against `peakHist`.
  *
- * Peak = the commit whose CI upper bound is lowest (smallest time = best
- * perf). On exact ties, prefer the most recent entry (history is ordered
- * chronologically by append order).
+ * Peak = the entry with the most-negative `percent_delta_ci` upper bound:
+ * the iteration that produced the largest improvement vs its own baseline.
+ * On exact ties, prefer the more recent entry (`commits` is chronological).
  *
- * Status taxonomy (current CI = this-change absolute ms):
- *   WIN        — current CI dominates peak (current high < peak low)
- *   REOPENED   — peak CI dominates current (peak high < current low)
- *   TIED-PEAK  — CIs overlap (no dominance either way)
+ * Status compares within-session percent-delta CIs at both ends. Cross-
+ * session absolute-ms compare would mix per-session environmental variance:
+ *   WIN        — current pct-delta CI dominates peak's (current high < peak low)
+ *   REOPENED   — peak pct-delta CI dominates current's (peak high < current low)
+ *   TIED-PEAK  — CIs overlap
  *
- * Returns null when history is null/empty OR this metric has no prior
- * entries (new bench). The reporter's caller distinguishes these cases
- * via the `history_available` summary flag and per-metric presence.
+ * Drift detection runs against `driftHist` (always main-history) regardless
+ * of the peak scope. See `computeBaselineDrift`.
+ *
+ * Returns null when this metric has no prior entries with `percent_delta_ci`
+ * — new bench, no comparable history yet.
  */
-function computeHistoryStatus(metric, hist) {
-  if (!hist || hist.commits.length === 0) { return null; }
-  const entries = hist.commits.filter((c) => c.metrics && metric.name in c.metrics);
+function computeHistoryStatus(metric, peakHist, driftHist) {
+  if (!peakHist || peakHist.commits.length === 0) { return null; }
+  const entries = peakHist.commits.filter(
+    (c) => c.metrics?.[metric.name]?.percent_delta_ci,
+  );
   if (entries.length === 0) { return null; }
 
-  // Pick peak. Tie-break: newer commit wins (commits array is chronological).
+  // Pick peak. Tie-break: newer commit wins.
   let peakIdx = 0;
   for (let i = 1; i < entries.length; i++) {
-    const candHigh = entries[i].metrics[metric.name].ci[1];
-    const peakHigh = entries[peakIdx].metrics[metric.name].ci[1];
-    if (candHigh < peakHigh) { peakIdx = i; }
-    else if (candHigh === peakHigh) { peakIdx = i; }
+    const candHigh = entries[i].metrics[metric.name].percent_delta_ci[1];
+    const peakHigh = entries[peakIdx].metrics[metric.name].percent_delta_ci[1];
+    if (candHigh <= peakHigh) { peakIdx = i; }
   }
   const peakEntry = entries[peakIdx];
   const peakMetric = peakEntry.metrics[metric.name];
-  const currentCi = metric.thisChangeMs;
-  const peakCi = peakMetric.ci;
+  const currentPctCi = metric.percentDelta;
+  const peakPctCi = peakMetric.percent_delta_ci;
 
   let status;
-  if (currentCi[1] < peakCi[0]) { status = 'WIN'; }
-  else if (peakCi[1] < currentCi[0]) { status = 'REOPENED'; }
+  if (currentPctCi[1] < peakPctCi[0]) { status = 'WIN'; }
+  else if (peakPctCi[1] < currentPctCi[0]) { status = 'REOPENED'; }
   else { status = 'TIED-PEAK'; }
 
-  // Bisect candidates: commits between peak and HEAD of history that
-  // contain this metric. Oldest-to-newest so the reviewer/agent sees
-  // the timeline in causal order.
-  const peakHistIdx = hist.commits.findIndex((c) => c.sha === peakEntry.sha);
-  const bisectCandidates = hist.commits
+  // Bisect candidates: commits after peak that also report this metric.
+  const peakHistIdx = peakHist.commits.findIndex((c) => c.sha === peakEntry.sha);
+  const bisectCandidates = peakHist.commits
     .slice(peakHistIdx + 1)
-    .filter((c) => c.metrics && metric.name in c.metrics)
+    .filter((c) => c.metrics?.[metric.name]?.percent_delta_ci)
     .map((c) => ({ sha: c.sha, msg: c.msg, pr: c.pr ?? null }));
 
-  const currentMid = (currentCi[0] + currentCi[1]) / 2;
-  const peakMid = (peakCi[0] + peakCi[1]) / 2;
-  const deltaFromPeakPct = peakMid > 0 ? ((currentMid - peakMid) / peakMid) * 100 : 0;
+  // Difference in percentage points (not %): current's pct-delta midpoint
+  // minus peak's. Positive reads as "regressed N pp of improvement."
+  const currentMid = (currentPctCi[0] + currentPctCi[1]) / 2;
+  const peakMid = (peakPctCi[0] + peakPctCi[1]) / 2;
+  const deltaFromPeakPct = currentMid - peakMid;
+
+  const drift = computeBaselineDrift(
+    metric.name,
+    metric.baselineSha,
+    peakMetric.baseline_sha,
+    driftHist,
+  );
 
   return {
     status,
@@ -772,11 +858,72 @@ function computeHistoryStatus(metric, hist) {
       sha: peakEntry.sha,
       msg: peakEntry.msg,
       pr: peakEntry.pr ?? null,
-      ci: peakCi,
+      ci: peakMetric.ci,
       mean_ms: peakMetric.mean_ms,
+      percent_delta_ci: peakPctCi,
+      baseline_sha: peakMetric.baseline_sha ?? null,
     },
     delta_from_peak_pct: Number(deltaFromPeakPct.toFixed(2)),
     bisect_candidates: bisectCandidates,
+    drift,
+  };
+}
+
+/**
+ * Quantify cumulative main-side drift between two baselines on a metric by
+ * walking the chain of main commits between them and combining their
+ * within-session percent-deltas. Subtracting absolute ms across sessions
+ * would mix per-session environmental variance into the result.
+ *
+ * Returns one of:
+ *   { detected: false }                                                   — baselines match (or one/both unknown)
+ *   { detected: true, magnitude: N, chain_len: K, missing: M }            — quantified; N in pp, positive = main got slower
+ *   { detected: true, magnitude: null, chain_len: K, missing: M }         — chain partially or wholly unwalkable
+ *
+ * Combines multiplicatively: ∏(1 + pct_i) − 1.
+ */
+function computeBaselineDrift(metricName, currentBaselineSha, peakBaselineSha, hist) {
+  if (!currentBaselineSha || !peakBaselineSha) {
+    return { detected: false };
+  }
+  if (currentBaselineSha === peakBaselineSha) {
+    return { detected: false };
+  }
+  if (!hist || hist.commits.length === 0) {
+    return { detected: true, magnitude: null, chain_len: 0, missing: 0 };
+  }
+  const idxCurrent = hist.commits.findIndex((c) => c.sha === currentBaselineSha);
+  const idxPeak = hist.commits.findIndex((c) => c.sha === peakBaselineSha);
+  if (idxCurrent < 0 || idxPeak < 0) {
+    return { detected: true, magnitude: null, chain_len: 0, missing: 0 };
+  }
+  const lo = Math.min(idxCurrent, idxPeak);
+  const hi = Math.max(idxCurrent, idxPeak);
+  // Commits AFTER the older baseline through the newer one — their deltas are
+  // what accumulated between the two baselines.
+  const chain = hist.commits.slice(lo + 1, hi + 1);
+  let chainLen = 0;
+  let missing = 0;
+  let cumulative = 1;
+  for (const c of chain) {
+    const m = c.metrics?.[metricName];
+    if (!m?.percent_delta_ci) {
+      missing++;
+      continue;
+    }
+    chainLen++;
+    const pctMid = (m.percent_delta_ci[0] + m.percent_delta_ci[1]) / 2;
+    cumulative *= 1 + pctMid / 100;
+  }
+  if (chainLen === 0) {
+    return { detected: true, magnitude: null, chain_len: 0, missing };
+  }
+  const magnitudePp = (cumulative - 1) * 100;
+  return {
+    detected: true,
+    magnitude: Number(magnitudePp.toFixed(2)),
+    chain_len: chainLen,
+    missing,
   };
 }
 
@@ -809,14 +956,6 @@ function round2([low, high]) {
 
 function round4([low, high]) {
   return [Number(low.toFixed(4)), Number(high.toFixed(4))];
-}
-
-function* walk(dir) {
-  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, ent.name);
-    if (ent.isDirectory()) { yield* walk(full); }
-    else { yield full; }
-  }
 }
 
 function parseArgs(argv) {

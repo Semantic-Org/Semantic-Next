@@ -20,9 +20,11 @@ type: skill
 
 ## Why this matters
 
-AI-written prose has a tell: it's trying to convince the reader the work was thorough and correct. Humans spot it instantly — and stop trusting the writer.
+PR descriptions on this repo are public. They're read by community users, downstream consumers, and contributors browsing GitHub. Write them as a public changelog entry for an open source project, in the tone of a colleague leaving a quick note.
 
-Good PR descriptions read like a colleague leaving a quick note. Matter-of-fact. State what's now true; don't argue for it. The diff is the evidence — your text gives orientation.
+Public changelog tone is matter-of-fact. State what changed and why a consumer should care. Don't argue. Don't perform thoroughness. Don't assume the reader has been following along.
+
+AI-written prose tells immediately because it's trying to convince the reader the work was thorough and correct. Humans spot it. The diff is the evidence. Your text gives orientation.
 
 If you catch yourself writing to demonstrate thoroughness or pre-empt skepticism, stop. Cut the offending text and go back to plain description.
 
@@ -30,11 +32,11 @@ If you catch yourself writing to demonstrate thoroughness or pre-empt skepticism
 
 ## What the reader actually wants
 
-The reviewer opens GitHub, glances at the title, skims the body, then reads the diff. Your text gives them just enough to:
+The reader opens GitHub, glances at the title, skims the body, then reads the diff if they're a reviewer. Your text gives them just enough to:
 
 1. Know what kind of change this is — **the title**
-2. Know why it exists as a unit — **one framing sentence**
-3. Know what's now true after merge — **3–5 outcome bullets**
+2. Know why it exists as a unit — **the framing**
+3. Know what's now true after merge — **outcome bullets**
 
 That's the entire job. Anything beyond is noise that erodes trust.
 
@@ -101,10 +103,11 @@ That's the whole body. No section headers beyond `## Changes`. No risk score. No
 ### Medium tier
 
 ```markdown
-[One sentence — why this PR exists.]
+[Framing. One or more sentences. Methodology fixes often need a paragraph
+or two to explain what was wrong before what's fixed. State the problem
+in plain language a downstream consumer can act on.]
 
 ## Changes
-- [Outcome bullet]
 - [Outcome bullet]
 - [Outcome bullet]
 
@@ -116,13 +119,17 @@ Failure modes: [bulleted list — only when score ≥ 5 or blast radius is non-o
 - [Deviations from standard only. Skip "rerun tests" / "CI passes" — those are assumed.]
 ```
 
-**Word target.** Medium-tier bodies usually land 80–150 words. Past 200 is a sign you're restating the diff. After drafting a body that feels complete, expect to cut roughly half — the AI default is about twice the length humans actually write.
+**Framing length.** As many sentences as the change genuinely needs to explain itself. Methodology bugs typically take 2–3 paragraphs (what was wrong, why it was wrong, what's fixed). Refactors take one. The test is whether removing a sentence loses information a downstream consumer needs. If not, cut.
+
+**Bullet count.** As many bullets as there are distinct outcomes. Two outcomes means two bullets. Don't pad to reach a target. Don't compress past clarity.
+
+**Word target.** Most bodies land 80–200 words. Past 300 is usually restating the diff. After drafting, expect to cut roughly a third. The AI default is twice the length humans actually write.
 
 ### Large tier
 
 Same as Medium, plus:
 
-- If plan-driven, lead the framing sentence with `Implements [plan name](permalink-at-PR-creation-SHA)`. Get the SHA via `git log -1 --format=%H ai/plans/foo.md` and form `https://github.com/Semantic-Org/Semantic-Next/blob/<sha>/ai/plans/foo.md`.
+- If plan-driven, open with `Implements [plan name](permalink-at-PR-creation-SHA).` on its own line, then a paragraph break, then the framing. Don't fold the plan link into the same sentence as the framing. Separation makes both surfaces easier to scan. Get the SHA via `git log -1 --format=%H ai/plans/foo.md` and form `https://github.com/Semantic-Org/Semantic-Next/blob/<sha>/ai/plans/foo.md`.
 - `## Risk` failure-modes list is mandatory.
 - Body may be longer, but bullets still describe outcomes, not mechanisms.
 
@@ -183,14 +190,24 @@ The labels match the natural axes a reviewer scans by — what surface area they
 
 ### Bullet shape
 
-Bullets should be noun phrases or short verb phrases. Most under 10 words. Full sentences in bullets is an AI tell.
+Bullets describe state in plain language. Either short noun phrases or full sentences in present tense work. The AI tell isn't full sentences per se. It's *corporate-prose* sentences ("This update enhances...", "This change provides...", "We have added..."). The smell test: would you text this to the reviewer?
 
 ```
+❌ "This change enables the system to remove the throwaway profiling artifacts."
 ❌ "Remove the throwaway profiling and screenshot artifacts from the repo root."
 ✅ "Remove root profiling/screenshot artifacts"
+✅ "Test runner now shows drift if main has changed significantly between iterations"
 ```
 
-**Pick one voice across all bullets.** Don't mix imperative ("Remove X"), declarative state ("X removed"), and active past with for-clause ("Dropped X for Y"). Mixed tenses read AI-shaped — no human drifts mid-list. Active past with "for X" is punchy and intent-bearing for bug fixes and refactors.
+**Pick one voice across all bullets.** Don't mix imperative ("Remove X"), declarative state ("X removed"), and active past with for-clause ("Dropped X for Y"). Mixed tenses read AI-shaped. No human drifts mid-list.
+
+### Italics for contrast pairs
+
+Use `*X* vs *Y*` when the body needs the reader's eye to land on a comparison. Sparing. Once or twice per body, not a stylistic mannerism.
+
+```
+✅ "Helps determine whether regressions represent *changes in the PR* versus *changes in main*"
+```
 
 ---
 
@@ -461,13 +478,13 @@ In order:
 7. **Cut scaffolding bullets.** If a bullet states the obvious consequence of bullets above it ("update path references to match"), drop it.
 8. **Trim framing sentence tails.** "so that…", "plus the X that follows", "in order to…" — usually padding.
 9. **Search for AI tells (words).** Look for: *verified, ensured, considered, note that, important to flag, in summary, this PR introduces, all tests pass, fully tested*.
-10. **Search for AI tells (punctuation).** Three patterns. Single instances are fine. Clusters or stylized uses are tells.
-    - **Paired em-dashes as parentheses** (`text — like this — text`). Single em-dashes are fine. Pairs used as brackets are AI-shaped — use real parens or split into two sentences.
+10. **Search for AI tells (punctuation).** Default to periods.
+    - **Semicolons.** Any semicolon in a body is an AI tell. Most rewrite cleanly to a period + new sentence.
+    - **Paired em-dashes as parentheses** (`text — like this — text`). AI-shaped. Use real parens or split into two sentences. Single em-dashes are fine but most rewrite to a period + new sentence.
     - **Explanatory colons** (`X was the canonical repro: helpers reading...`). Almost always splits cleanly into two sentences. The colon makes prose read like a writeup.
-    - **Semicolon clusters.** Three or more in one body is a tell. Most rewrite to periods.
 11. **Check tier appropriateness.** Did you reach for Medium/Large machinery on a Small PR? If yes, drop them.
 12. **Voice check — read each bullet aloud.** Imagine you're texting it to the reviewer. Does it sound like a developer in a hurry, or like a press release? If the latter, rewrite. Specific tells: bullets that start with `Let X...`/`Stop Y...`/`Wire Z...` (verb-first mechanism), bullets that mention line numbers or internal field names, bullets longer than the corresponding commit message subject.
-13. **Honest question.** If a colleague wrote this PR and pinged you, would the body sound like them, or like a corporate document? If the latter, you're still in AI-prose mode.
+13. **Public changelog gut-check.** This body lives on GitHub as a public record. Read it imagining a community user encountering it cold via the project's release notes. Does it stand alone? Or does it read as internal back-and-forth assuming the reader has been following along? If the latter, rewrite for the external audience.
 
 ---
 

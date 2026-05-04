@@ -127,19 +127,28 @@ jobs:
       # PR: baseline = base branch tip.
       # Push to main: baseline = this commit's parent (so the delta captures
       #   the merged commit's effect; bench-history indexes the current
-      #   commit's absolute CI).
+      #   commit's absolute CI alongside the within-session percent-delta).
+      #
+      # Resolve baseline SHA inline so it can be written to the artifact as
+      # a sidecar (baseline-sha.txt). The reporter pins each metric's
+      # percent_delta_ci to that SHA — required for cross-iteration drift
+      # detection (see tools/ci/bench/reporter/reporter.js:computeBaselineDrift).
       - name: Build baseline
         run: |
           if [ '${{ github.event_name }}' = 'push' ]; then
             # Fetch enough history to reach the parent commit locally.
             git fetch origin main --depth=2
+            BASELINE_SHA=$(git rev-parse HEAD~1)
             git checkout HEAD~1 -- packages/*/src/
           else
             git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+            BASELINE_SHA=$(git rev-parse FETCH_HEAD)
             git checkout FETCH_HEAD -- packages/*/src/
           fi
           node packages/${{ matrix.entry.package }}/bench/tachometer/build-ci.js baseline
           git checkout HEAD -- packages/*/src/
+          mkdir -p results
+          echo "$BASELINE_SHA" > results/baseline-sha.txt
 
       # Run just this matrix cell's single config.
       # Per-cell auto-sample tail is governed by the config's own `timeout`
@@ -156,4 +165,9 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.entry.name }}
-          path: results/*.json
+          # Include baseline-sha.txt sidecar — the reporter and history
+          # archiver read it to pin percent_delta_ci entries to their
+          # baseline SHA.
+          path: |
+            results/*.json
+            results/baseline-sha.txt
