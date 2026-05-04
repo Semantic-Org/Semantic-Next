@@ -45,7 +45,8 @@ const PURE_HELPERS = new Set(Object.keys(TemplateHelpers));
 const IMPLICIT_LOCALS = ['this', 'index', 'key'];
 
 // JS keywords and literal names that appear as bare identifiers but
-// don't read data context.
+// don't read data context. `this` is intentionally NOT here — it does
+// read data context and is added via IMPLICIT_LOCALS at the scope level.
 const RESERVED_NAMES = new Set([
   'true',
   'false',
@@ -61,7 +62,6 @@ const RESERVED_NAMES = new Set([
   'new',
   'delete',
   'void',
-  'this',
 ]);
 
 // Strips quoted string literals before identifier extraction so
@@ -247,9 +247,11 @@ export function isEachContentSelfContained(eachNode) {
   let cached = cache.get(eachNode);
   if (cached !== undefined) { return cached; }
 
-  // Top-level each: no enclosing iteration. elseContent runs in the
-  // outer scope (without `eachNode.as`) — `:else` is outside the
-  // iteration, so the iteration var must not classify as in-scope there.
+  // Top-level each: no enclosing iteration. elseContent runs outside
+  // the iteration, so it sees neither `eachNode.as` nor the iteration-
+  // context implicit locals (`this`/`index`/`key` get added only inside
+  // the per-item scope by buildLocalScope). Empty Set captures both
+  // omissions.
   const parentScope = new Set();
   const scope = buildLocalScope(eachNode, parentScope);
   cached = isContentSelfContained(eachNode.content, scope)

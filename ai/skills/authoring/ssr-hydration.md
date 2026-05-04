@@ -399,10 +399,18 @@ The fix (PR #175) is `packages/renderer/src/engines/native/blocks/each-content-c
 
 ```js
 hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
-  lookupExpression(node.over);                                  // dep on items
   self.hasHydrated = true;
-  if (isEachContentSelfContained(node)) { return; }             // lazy preserved
-  // ...resolve items, eagerly call adoptServerItems...
+  if (isEachContentSelfContained(node)) {
+    lookupExpression(node.over);                                // dep on items, lazy preserved
+    return;
+  }
+  // resolveItems also registers the items dep via lookupExpression.
+  const { items, collectionType } = resolveItems(node, lookupExpression);
+  if (items.length === 0) {
+    if (node.elseContent) { /* hydrate elseContent in place */ }
+    return;
+  }
+  adoptServerItems({ ... });                                    // wires per-item Reactions now
 }
 ```
 

@@ -325,16 +325,14 @@ describe('SSR hydration — each loops', () => {
     expect(shadowHTML(el)).toBe('<span>r=red</span><span>g=green</span>');
   });
 
-  // Regression: inpage-menu's per-item active class never updated on scroll.
-  // Production shape (verified from DevTools): the each block's items arrive
-  // via an HTML attribute on the custom element (`menu="[…JSON…]"`), so the
-  // items signal is set BEFORE connectedCallback runs hydrate. The each
-  // block's hydrate hook (each.js:645) only registers a dep on the items
-  // signal and defers per-item attribute reaction wiring to `update`. With
-  // items set before hydrate, the signal never fires after, `update` never
-  // runs, and per-item attribute reactions never get registered against the
-  // signals their helpers read. State mutations the helper depends on then
-  // have nothing to invalidate.
+  // Regression repro: inpage-menu's per-item active class never updated on
+  // scroll. Production shape (verified from DevTools): items arrive via an
+  // HTML attribute (`menu="[…JSON…]"`), so the items signal is set BEFORE
+  // connectedCallback runs hydrate. Pre-fix, each.hydrate only registered a
+  // dep on items and deferred per-item Reaction wiring to the first items
+  // mutation — which never came when items arrived as a static prop. PR #175
+  // gates that lazy path on `isEachContentSelfContained`; this case (helper
+  // reads external state) takes the eager `adoptServerItems` branch instead.
   it('helper-call attribute inside each is reactive after hydration when items pre-populated', async () => {
     let helperCalls = 0;
     const el = await ssrAndHydrate({

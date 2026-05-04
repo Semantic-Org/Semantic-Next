@@ -672,6 +672,13 @@ const eachBlock = defineBlock({
         // state. Push an isElse record so subsequent `update` calls
         // recognize the else state and transition correctly.
         const elseScope = scope.child();
+        // Register elseScope on the region so the next `region.clear()`
+        // (e.g. when items becomes non-empty) disposes it. renderElse
+        // gets this for free via `region.setContent`; the hydrate path
+        // never calls setContent (DOM is already in place) so we register
+        // explicitly. Without this, the scope leaks until the parent
+        // template scope disposes.
+        region.childScopes.push(elseScope);
         hydrateInnerContent({
           ownedNodes: region.ownedNodes,
           innerAST: node.elseContent,
