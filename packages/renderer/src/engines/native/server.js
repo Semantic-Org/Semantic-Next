@@ -22,7 +22,13 @@ import {
   isString,
 } from '@semantic-ui/utils';
 
-import { analyzePosition, BLOCK_MARKER, COMMENT_MARKER, DATA_SUI_BIND } from '../../build-html-string.js';
+import {
+  analyzePosition,
+  BLOCK_MARKER,
+  COMMENT_MARKER,
+  DATA_SUI_BIND,
+  MAIN_BRANCH_INDEX,
+} from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
 
 const REMOVE_ATTR = '__SUI_REMOVE__';
@@ -175,7 +181,7 @@ function scanHtmlChunk(chunk, scope) {
 
 export class ServerRenderer {
   constructor(
-    { ast, data, template, subTemplates, snippets, helpers, isSVG = false, inheritsData = true, protectedKeys } = {},
+    { ast, data, template, subTemplates, snippets, helpers, isSVG = false, protectedKeys } = {},
   ) {
     this.ast = ast || [];
     this.data = data;
@@ -184,7 +190,6 @@ export class ServerRenderer {
     this.snippets = snippets || {};
     this.helpers = helpers || {};
     this.isSVG = isSVG;
-    this.inheritsData = inheritsData;
     this.protectedKeys = protectedKeys;
 
     this.evaluator = new ExpressionEvaluator({
@@ -370,7 +375,7 @@ export class ServerRenderer {
 
     const condition = this.evaluator.lookupExpressionValue(node.condition, data);
     if (condition && node.content) {
-      branchIndex = 1000;
+      branchIndex = MAIN_BRANCH_INDEX;
       html += this.renderNodes(node.content, data);
     }
     else if (node.branches) {

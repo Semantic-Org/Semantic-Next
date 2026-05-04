@@ -33,6 +33,12 @@ export const RAW_TEXT_MARKER = `sui-rawtext:${MARKER_VERSION}:`;
 // metadata lives on the prototype-cached entries array.
 export const DATA_SUI_BIND = 'data-sui-bind';
 
+// Sentinel branchIndex for the main {#if} body. Branches array is indexed
+// from 0 ({:elseif}/{:else}); 1000 reserves a value above any plausible
+// branch count to mean "main body matched". Persisted on the closing block
+// marker as `:b1000` for hydration mismatch detection.
+export const MAIN_BRANCH_INDEX = 1000;
+
 // Compiled once — `lastIndex` is reset manually per use so the regex can
 // be reused across parse calls without cross-talk.
 const ATTR_MARKER_RE = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`, 'g');

@@ -1,4 +1,5 @@
 import { isDevelopment } from '@semantic-ui/utils';
+import { MAIN_BRANCH_INDEX } from '../../../build-html-string.js';
 import { defineBlock } from '../define-block.js';
 import { registerBlock } from './registry.js';
 
@@ -6,8 +7,8 @@ import { registerBlock } from './registry.js';
 
   {#if} / {:elseif} / {:else} — compiled as a single AST node with
   node.condition + node.branches[]. Branch matching is linear: the first
-  truthy branch wins; matchIndex of 1000 is reserved for the main {#if}
-  body and any numeric index i refers to node.branches[i].
+  truthy branch wins; matchIndex MAIN_BRANCH_INDEX is reserved for the
+  main {#if} body and any numeric index i refers to node.branches[i].
 
   Hydration: the server writes serverMeta.branchIndex on the closing block
   marker. On mount, the block compares server vs. client branch choice
@@ -19,9 +20,7 @@ import { registerBlock } from './registry.js';
 
 function selectBranch(node, lookupExpression) {
   if (lookupExpression(node.condition)) {
-    // matchIndex 1000 distinguishes the main {#if} body from any {:elseif}
-    // or {:else} branch whose index starts at 0. See update's equality check.
-    return { matchIndex: 1000, contentAST: node.content };
+    return { matchIndex: MAIN_BRANCH_INDEX, contentAST: node.content };
   }
   if (node.branches?.length) {
     for (let i = 0; i < node.branches.length; i++) {
@@ -40,7 +39,7 @@ function selectBranch(node, lookupExpression) {
 }
 
 function branchASTByIndex(node, matchIndex) {
-  if (matchIndex === 1000) { return node.content; }
+  if (matchIndex === MAIN_BRANCH_INDEX) { return node.content; }
   if (matchIndex >= 0 && node.branches?.[matchIndex]) {
     return node.branches[matchIndex].content;
   }

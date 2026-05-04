@@ -67,7 +67,6 @@ export class Renderer {
       snippets,
       helpers,
       isSVG = false,
-      inheritsData = true,
       receivesData = false,
       protectedKeys,
     } = {},
@@ -80,7 +79,6 @@ export class Renderer {
     this.collectSnippets(this.ast);
     this.helpers = helpers || {};
     this.isSVG = isSVG;
-    this.inheritsData = inheritsData;
     this.receivesData = receivesData;
     this.protectedKeys = protectedKeys;
     // Sequential debug ID. Subtree caching would key on hashCode(ast+data)

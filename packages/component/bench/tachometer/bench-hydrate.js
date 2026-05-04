@@ -113,9 +113,9 @@ const elForMutate = container.firstElementChild;
 *******************************/
 
 // Measured: setItems with a fresh array reference whose item keys
-// match the SSR'd markers — Reaction fires, update sees hasHydrated,
-// adoptServerItems reuses the server DOM and calls hydrateInnerContent
-// 100× (one cachedBuildHTMLString call per item).
+// match the SSR'd markers. Per-item DOM was already adopted at hydrate
+// time (see mount window above); this update tick walks the items
+// dependency, hits the equality gate per Signal, and stops.
 performance.mark(startMark('hydrate-each-100'));
 elForMutate.component.setItems(itemsForMount.slice());
 await flush();

@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-const MARKER_VERSION = 'v1';
+import { MARKER_VERSION } from '@semantic-ui/renderer';
 import { adoptStylesheet, isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
 
 import {
