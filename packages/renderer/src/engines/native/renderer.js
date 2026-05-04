@@ -38,8 +38,9 @@ function parseServerMeta(commentData, target) {
   }
 }
 
-// AST → { htmlString, entries } cache. Keyed on the AST array, which is
-// immutable after compile, so entries never stale and GC follows naturally.
+// AST → { html, svg } cache, where each slot holds the buildHTMLString
+// result for that namespace. Keyed on the AST array (immutable after
+// compile), so entries never stale and GC follows naturally.
 const buildStringCache = new WeakMap();
 
 function cachedBuildHTMLString(ast, options) {
@@ -353,7 +354,7 @@ export class Renderer {
 
     // Pass 1: walk elements with data-sui-bind, wire attribute Reactions.
     // hydrateAttributes is a no-op when no element carries the marker, so
-    // no pre-classification gate is needed.
+    // no pre-walk gate is needed.
     this.hydrateAttributes(root, entries, data, scope);
 
     // Pass 2: Walk comments for text and block markers — top level only.

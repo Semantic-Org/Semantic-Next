@@ -126,7 +126,6 @@ hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerCo
     if (node.elseContent) { /* hydrate elseContent in place + push isElse record */ }
     return;
   }
-  const adopted = adoptServerItems({ ... });
   adoptServerItems({ ... });
 }
 ```

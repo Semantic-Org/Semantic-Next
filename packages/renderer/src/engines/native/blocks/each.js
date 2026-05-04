@@ -16,11 +16,9 @@ import { registerBlock } from './registry.js';
   taken at item-creation time.
 
   Hydrate adopts the server-rendered per-item DOM via
-  `<!--sui-item:v1:KEY-->` markers and wires per-item Reactions in place.
-  Same "register Reactions on hydrate" contract every other block honors:
-  per-item bindings that close over external state (a helper reading
-  `state.x`, a component method) need their Reactions live now, not
-  deferred to a future items mutation that may never come.
+  `<!--sui-item:v1:KEY-->` markers and wires per-item Reactions in
+  place — the same "register Reactions on hydrate" contract every
+  other block honors.
 
 */
 
@@ -540,9 +538,8 @@ function adoptServerItems({
 
       // Wire per-item reactivity on the existing DOM. hydrateInnerContent
       // moves the nodes into a temporary fragment, walks with
-      // hydrateMarkers (which honors the data-sui-bind fast path against
-      // the block's inner entries), and leaves the hydrated nodes in
-      // `mutableNodes`.
+      // hydrateMarkers against the block's inner entries, and leaves the
+      // hydrated nodes in `mutableNodes`.
       const mutableNodes = [...serverGroup.nodes];
       hydrateInnerContent({
         ownedNodes: mutableNodes,
