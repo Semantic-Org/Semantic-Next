@@ -3,7 +3,6 @@ import { assignInPlace, createCache, filterObject, inArray } from '@semantic-ui/
 
 import {
   ATTR_MARKER_PREFIX,
-  ATTR_MARKER_SUFFIX,
   BLOCK_MARKER,
   buildHTMLString as buildHTMLStringPure,
   COMMENT_MARKER,
@@ -27,10 +26,6 @@ import './blocks/index.js';
 // PreparedTemplate cache — parse once, cloneNode per instance
 const templateCache = createCache({ maxSize: 1000, eviction: 'flush' });
 
-// Source pattern for attribute markers — fresh regex per use (`/g` regexes
-// carry mutable lastIndex; sharing one across calls is a footgun).
-const ATTR_MARKER_PATTERN = `${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`;
-
 // Parse trailing metadata from a closing block marker into serverMeta.
 // Reserved suffixes (after the version segment):
 //   bN  → branchIndex (which branch the {#if}/{:elseif}/{:else} server picked)
@@ -43,10 +38,8 @@ function parseServerMeta(commentData, target) {
   }
 }
 
-// AST → { htmlString, entries, refRoot } cache. Keyed on the AST array,
-// which is immutable after compile, so entries never stale and GC
-// follows naturally. Each entry also holds a lazy `refRoot` — the
-// parsed reference <template>.content for the legacy hydration walker.
+// AST → { htmlString, entries } cache. Keyed on the AST array, which is
+// immutable after compile, so entries never stale and GC follows naturally.
 const buildStringCache = new WeakMap();
 
 function cachedBuildHTMLString(ast, options) {
@@ -57,25 +50,7 @@ function cachedBuildHTMLString(ast, options) {
   }
   const slot = options.isSVG ? 'svg' : 'html';
   if (entry[slot] === null) {
-    const built = buildHTMLStringPure(ast, options);
-    // refRoot is a lazy getter — the data-sui-bind fast path in
-    // hydrateAttributes never reads it, so we avoid the per-instance
-    // `template.innerHTML = htmlString` parse. Only the legacy
-    // reference-DOM fallback (templates without data-sui-bind) touches it.
-    let refRoot = null;
-    entry[slot] = {
-      htmlString: built.htmlString,
-      entries: built.entries,
-      snippets: built.snippets,
-      get refRoot() {
-        if (refRoot === null) {
-          const refTemplate = document.createElement('template');
-          refTemplate.innerHTML = built.htmlString;
-          refRoot = refTemplate.content;
-        }
-        return refRoot;
-      },
-    };
+    entry[slot] = buildHTMLStringPure(ast, options);
   }
   return entry[slot];
 }
@@ -231,14 +206,6 @@ export class Renderer {
       Phase 3: Marker Binding
   *******************************/
 
-  // Parse an attribute value containing marker tokens into static/dynamic parts.
-  // Thin wrapper around the shared helper in build-html-string.js — preserved
-  // as an instance method so existing call sites (bindMarkers / ref-DOM
-  // fallback in hydrateAttributes) keep the same shape.
-  parseAttributeParts(attrValue) {
-    return parseAttributePartsFn(attrValue);
-  }
-
   // Attribute binding — delegates to reactive-data.js. See that module for
   // the dispatch on entry.classification.type (property / event / boolean
   // / ifDefined / interpolated / single-expression). `skipFirstWrite` is
@@ -272,7 +239,7 @@ export class Renderer {
           }
         }
         for (const { name: attrName, value: attrValue } of attrsToProcess) {
-          const { parts, markerIDs } = this.parseAttributeParts(attrValue);
+          const { parts, markerIDs } = parseAttributePartsFn(attrValue);
           for (const id of markerIDs) { processedAttrIDs.add(id); }
           this.bindAttributeExpression(element, attrName, parts, entries, data, scope);
         }
@@ -381,21 +348,13 @@ export class Renderer {
         Hydration
   *******************************/
 
-  hydrateMarkers(root, entries, data, scope, { ast } = {}) {
+  hydrateMarkers(root, entries, data, scope) {
     if (entries.length === 0) { return; }
 
-    // Classify entries
-    const attrEntries = [];
-    for (const entry of entries) {
-      if (entry.type === 'expression' && entry.classification?.insideTag) {
-        attrEntries.push(entry);
-      }
-    }
-
-    // Pass 1: Hydrate attribute bindings via reference DOM matching
-    if (attrEntries.length > 0) {
-      this.hydrateAttributes(root, entries, data, scope, ast);
-    }
+    // Pass 1: walk elements with data-sui-bind, wire attribute Reactions.
+    // hydrateAttributes is a no-op when no element carries the marker, so
+    // no pre-classification gate is needed.
+    this.hydrateAttributes(root, entries, data, scope);
 
     // Pass 2: Walk comments for text and block markers — top level only.
     // Inner markers (inside block pairs) are handled recursively by block handlers.
@@ -447,83 +406,13 @@ export class Renderer {
     }
   }
 
-  hydrateAttributes(root, entries, data, scope, ast) {
-    // Fast path — server stamps data-sui-bind on every element with
-    // dynamic bindings. Walk elements once, look up
-    // entries[id].attributeBinding for parts + classification, wire
-    // Reactions directly. No reference DOM, no parallel walker.
-    if (root.querySelector && root.querySelector(`[${DATA_SUI_BIND}]`)) {
-      this.hydrateAttributesViaDataBind(root, entries, data, scope);
-      return;
-    }
-
-    // Legacy fallback — reference DOM parallel walk for older SSR output
-    // without data-sui-bind. Reference DOM is cached alongside the
-    // htmlString; the parallel TreeWalker only reads attribute names off
-    // refEls, so sharing the cached fragment is safe.
-    const { refRoot } = cachedBuildHTMLString(ast || this.ast, { snippets: this.snippets });
-
-    // Build a set of real DOM elements owned by block regions so we can skip
-    // them during the parallel walk. Block directives (each, if, etc.) are
-    // single comments in the reference DOM but expand to N elements in the
-    // real DOM — skipping them keeps the walkers aligned.
-    const blockOwnedElements = new Set();
-    const blockWalker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
-    let blockComment;
-    while ((blockComment = blockWalker.nextNode())) {
-      if (!blockComment.data.startsWith(BLOCK_MARKER)) { continue; }
-      let next = blockComment.nextSibling;
-      let depth = 1;
-      while (next && depth > 0) {
-        if (next.nodeType === Node.COMMENT_NODE) {
-          if (next.data.startsWith(BLOCK_MARKER)) { depth++; }
-          else if (next.data.startsWith('/sui-block:')) { depth--; }
-        }
-        if (depth > 0 && next.nodeType === Node.ELEMENT_NODE) {
-          // Mark this element and all its descendants
-          const innerWalker = document.createTreeWalker(next, NodeFilter.SHOW_ELEMENT);
-          blockOwnedElements.add(next);
-          let inner;
-          while ((inner = innerWalker.nextNode())) { blockOwnedElements.add(inner); }
-        }
-        next = next.nextSibling;
-      }
-    }
-
-    // Walk both trees in parallel (element-only), skipping block-owned real elements
-    const refWalker = document.createTreeWalker(refRoot, NodeFilter.SHOW_ELEMENT);
-    const realWalker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
-      acceptNode: (node) =>
-        blockOwnedElements.has(node)
-          ? NodeFilter.FILTER_REJECT
-          : NodeFilter.FILTER_ACCEPT,
-    });
-
-    let refEl, realEl;
-    while ((refEl = refWalker.nextNode()) && (realEl = realWalker.nextNode())) {
-      const element = realEl;
-      const attrsToProcess = [];
-      for (let i = 0; i < refEl.attributes.length; i++) {
-        const attr = refEl.attributes[i];
-        if (attr.value.includes(ATTR_MARKER_PREFIX)) {
-          attrsToProcess.push({ name: attr.name, value: attr.value });
-        }
-      }
-
-      for (const { name: attrName, value: attrValue } of attrsToProcess) {
-        const { parts } = this.parseAttributeParts(attrValue);
-        this.bindAttributeExpression(element, attrName, parts, entries, data, scope, { skipFirstWrite: true });
-      }
-    }
-  }
-
   // Walk SHOW_ELEMENT | SHOW_COMMENT once, process `data-sui-bind` on
   // elements at block-depth 0, and let block hydrate hooks recurse into
   // their own contents via hydrateInnerContent. Depth is tracked inline
-  // from the block markers we encounter; no reference DOM, no separate
-  // owned-element set. The data-sui-bind attribute itself is stripped by
-  // the post-hydration cleanup pass (base.js removeMarkers).
-  hydrateAttributesViaDataBind(root, entries, data, scope) {
+  // from the block markers we encounter. The data-sui-bind attribute
+  // itself is stripped by the post-hydration cleanup pass (base.js
+  // removeMarkers).
+  hydrateAttributes(root, entries, data, scope) {
     const walker = document.createTreeWalker(
       root,
       NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT,
@@ -623,9 +512,7 @@ export class Renderer {
     }
 
     // Recursively hydrate inner markers with the sub-AST's entries.
-    // Pass contentAST so attribute hydration builds the reference DOM
-    // from the correct AST (not the top-level component AST).
-    this.hydrateMarkers(container, entries, data, scope, { ast: contentAST });
+    this.hydrateMarkers(container, entries, data, scope);
 
     // Update ownedNodes with the hydrated content (comments may have been removed)
     ownedNodes.length = 0;
