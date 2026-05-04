@@ -210,7 +210,7 @@ Work happens on a feature branch, committed incrementally, merged via PR.
      ```
 
    If the PR closes without merging, reverse all of the above. If the PR merges and the plan is complete, follow the archive flow below.
-8. **Self-review the PR** using the `contributing/code-review` skill. Run 5 parallel agents, fix findings, rerun until clean. See the skill for the full process — it covers agent lenses, scoring rubric, iterative loop, and what counts as a false positive.
+8. **Self-review the PR** using the `contributing/code-review` skill — it owns the full process (lens agents, scoring, iterative loop, false-positive rules). Fix findings, rerun until clean.
 9. **Post-merge verification** (when applicable). Only relevant for work that affects live infrastructure — CI pipelines, CDN endpoints, MCP deploys, etc. After the user merges and CI runs, verify the live endpoints behave correctly. Not needed for pure source changes.
 
 ### When to branch vs. commit to main
