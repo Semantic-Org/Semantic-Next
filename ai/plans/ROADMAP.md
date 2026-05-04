@@ -200,7 +200,7 @@ Slot in wherever there's a gap; not phase-gated.
 | P12 | [Template Spread Syntax](template-spread-syntax.md) | 4-8h | pair | scoped | `{>card ...friend}` — object spread in data passing. Ship when component templates demonstrate need. |
 | P13 | [Template Content Projection](template-wrapper-snippets.md) | 12-16h (1.5-2d) | pair | scoped | `{>content}` — content projection for snippets + subtemplates. Ship when component templates demonstrate need. |
 | P14 | [Template Let Bindings](template-let-bindings.md) | 10-14h (1-2d) | pair | scoped | `{#let}...{/let}` — snippet-for-vars. Ship when component templates demonstrate need. |
-| P15 | [Bench Reporter Overhaul](bench-reporter-overhaul.md) | 16-24h (2-3d) | pair | initial | Two coordinated tracks. **A — peak attribution correctness**: schema_v2 stores within-session percent-delta + tip-of-tree SHA; reporter peak compares same-session deltas; `--scope pr` drops main-history from PR comments. Fixes PR #174's 23 phantom regressions. **B — suite rationalization remainder** (from `icebox/tachometer-overhaul.md`): story-driven config reorg, triplet collapses, `wake-count-single-key` + `nested-mutation` micros, `timeout` final pass. Four PRs under `workflow_run` constraint. Supersedes the icebox plan. |
+| P15 | [Bench Peak Attribution](bench-peak-attribution.md) | 10-13h (1.5-2d) | pair | scoped | Fix the live peak-attribution bug. PR #174 (test-only, no perf changes) currently surfaces 25 phantom "Regressions from peak"; active perf PRs carry partial false-flagging too. Schema_v2 persists `percent_delta_ci` + `baseline_sha` per metric; reporter switches peak compare to same-session percent-delta; `--scope pr` drops main-history overlay on PR comments; drift flag when baselines differ. Bundles `toggle-{first,last}-10` collapse + conditional `timeout` 3→2. Three PRs under `workflow_run` constraint. |
 
 ---
 
@@ -214,6 +214,6 @@ Plans drafted but not on the active roadmap. See `ai/plans/icebox/` for files.
 - [Signals TC39 Integration](icebox/signals-tc39-integration.md) — adopt native `Signal.State`/`Signal.Computed` as backing primitives when TC39 ships. Blocked on TC39 Stage 3+.
 - [Add Icon Stroke Width](icebox/add-icon-stroke-width.md) — power-user feature, post-1.0.
 - [Audit Fix Continuation](icebox/audit-fix-continuation.md) — process work for follow-up audits.
-- [Tachometer Overhaul — PR B remainder](icebox/tachometer-overhaul.md) — suite rationalization + knob tuning + new benches. PR A (CI parallelization) and PR C (in-house Node reporter) shipped; PR B is the only outstanding piece.
+- [Bench Suite Expansion](icebox/bench-suite-expansion.md) — file-scoped hot-path micros (`micro-expression-evaluator`, `micro-signal`, etc.) + new end-to-end benches (`wake-count-single-key`, `nested-mutation`, `hydrate-1000-card`). Surgical adds; lands when underlying perf work needs them.
 - [Contributing Surface](icebox/contributing-surface.md) — pre-1.0 stance + 1.0 graduation pass + post-1.0 triage flow (size + scope, GH-shaped vs md-shaped). Most icebox graduates at 1.0; the rest stays internal.
 - [Registry](icebox/registry.md) — community registry for components and behaviors, runtime + compile-time consumption from one source, author-namespaced publishing under `@sui-hub` with editorial canonical aliases above. Post-Phase 4.
