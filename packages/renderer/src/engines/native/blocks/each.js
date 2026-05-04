@@ -594,32 +594,17 @@ const eachBlock = defineBlock({
     });
   },
 
-  hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
+  hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, hydrateInto, self, isSVG }) {
     // resolveItems registers the items dep via lookupExpression.
     const { items, collectionType } = resolveItems(node, lookupExpression);
 
     if (items.length === 0) {
       if (node.elseContent) {
-        // Server rendered the else branch into region.ownedNodes.
-        // Hydrate it in place and push an isElse record so subsequent
-        // `update` calls recognize the else state and transition
-        // correctly. elseScope goes on region.childScopes so the next
-        // `region.clear()` disposes it (renderElse gets this via
-        // region.setContent; the hydrate path bypasses setContent
-        // because the DOM is already in place).
-        const elseScope = scope.child();
-        region.childScopes.push(elseScope);
-        hydrateInnerContent({
-          ownedNodes: region.ownedNodes,
-          innerAST: node.elseContent,
-          data,
-          scope: elseScope,
-        });
-        // hydrateInnerContent moves nodes into a temp fragment; reinsert
-        // them after the region's anchor.
-        const frag = document.createDocumentFragment();
-        for (const n of region.ownedNodes) { frag.appendChild(n); }
-        region.anchor.after(frag);
+        // Server rendered the else branch. hydrateInto creates the
+        // child elseScope, registers it on region.childScopes, hydrates
+        // in place, and reattaches. We push an isElse record so update
+        // recognizes the else state and transitions correctly.
+        const elseScope = hydrateInto({ innerAST: node.elseContent });
         self.records.push({
           key: null,
           item: null,

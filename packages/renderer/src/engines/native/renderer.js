@@ -529,6 +529,38 @@ export class Renderer {
     }
   }
 
+  // Hydrate-and-attach. Walks markers in `region.ownedNodes` against
+  // `innerAST`, wires Reactions, and reinserts the (now-hydrated) nodes
+  // after `region.anchor`. Sets `region.endAnchor` so consumers that
+  // scan the region's last node (subtemplate attachToRenderRoot) get
+  // the same contract `setContent` provides.
+  //
+  // `asChild: true` (default) creates a child of `scope`, registers it
+  // on `region.childScopes` for cleanup, and uses it for inner Reactions.
+  // `asChild: false` uses `scope` as-is — the snippet path lives on the
+  // block's scope so its Reactions stop when the block does.
+  //
+  // Returns the scope the inner content was hydrated against — callers
+  // that track per-branch scope (each elseContent record) need it.
+  hydrateInto({ region, innerAST, data, scope, asChild = true }) {
+    const targetScope = asChild ? scope.child() : scope;
+    if (asChild) { region.childScopes.push(targetScope); }
+
+    this.hydrateInnerContent({ ownedNodes: region.ownedNodes, innerAST, data, scope: targetScope });
+
+    if (region.ownedNodes.length > 0) {
+      const frag = document.createDocumentFragment();
+      for (const n of region.ownedNodes) { frag.appendChild(n); }
+      region.anchor.after(frag);
+      if (!region.endAnchor) {
+        region.endAnchor = document.createTextNode('');
+      }
+      region.ownedNodes[region.ownedNodes.length - 1].after(region.endAnchor);
+    }
+
+    return targetScope;
+  }
+
   /*******************************
         Data Management
   *******************************/

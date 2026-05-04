@@ -64,7 +64,7 @@ const conditional = defineBlock({
     }
   },
 
-  hydrate({ node, data, scope, region, serverMeta, renderAST, lookupExpression, hydrateInnerContent, self }) {
+  hydrate({ node, scope, region, serverMeta, renderAST, lookupExpression, hydrateInto, self }) {
     const clientBranch = selectBranch(node, lookupExpression);
     const serverBranchIndex = serverMeta?.branchIndex;
     const hasMismatch = serverBranchIndex !== undefined
@@ -96,12 +96,7 @@ const conditional = defineBlock({
       // against the chosen branch's AST, then move nodes into the region.
       const innerAST = branchASTByIndex(node, clientBranch.matchIndex);
       if (innerAST) {
-        const innerScope = scope.child();
-        region.childScopes.push(innerScope);
-        hydrateInnerContent({ ownedNodes: region.ownedNodes, innerAST, data, scope: innerScope });
-        const frag = document.createDocumentFragment();
-        for (const n of region.ownedNodes) { frag.appendChild(n); }
-        region.anchor.after(frag);
+        hydrateInto({ innerAST });
       }
     }
 
