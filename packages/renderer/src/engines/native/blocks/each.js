@@ -16,12 +16,14 @@ import { registerBlock } from './registry.js';
   over *live* DOM, instead of dereferencing a stale childNodes snapshot
   taken at item-creation time.
 
-  Hydrate only registers a dep on the collection — no per-item Reactions
-  are wired at hydrate time. Per-item bindings establish on the first
-  data change, when `update` tries to adopt the server-rendered per-item
-  DOM via `<!--sui-item:v1:KEY-->` markers instead of rebuilding from
-  scratch. Mismatched keys fall through to a fresh render; subsequent
-  mutations use the normal reconcile path.
+  Hydrate registers a dep on the collection. Per-item Reactions wire
+  lazily by default — on the first items mutation, `update` adopts the
+  server-rendered per-item DOM via `<!--sui-item:v1:KEY-->` markers
+  instead of rebuilding. When per-item content reads external state
+  (classified via each-content-classifier.js), hydrate adopts eagerly
+  so per-binding Reactions register their external deps now. Mismatched
+  keys fall through to a fresh render; subsequent mutations use the
+  normal reconcile path.
 
 */
 

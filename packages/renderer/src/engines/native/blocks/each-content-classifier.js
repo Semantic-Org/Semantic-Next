@@ -215,7 +215,11 @@ export function isEachContentSelfContained(eachNode) {
   if (cached !== undefined) { return cached; }
 
   const scope = buildLocalScope(eachNode);
-  cached = isContentSelfContained(eachNode.content, scope);
+  // elseContent renders when items is empty — the inner each handler
+  // checks both branches; the public entry needs the same to avoid
+  // silent reactivity loss when SSR served only the {:else} branch.
+  cached = isContentSelfContained(eachNode.content, scope)
+    && (!eachNode.elseContent || isContentSelfContained(eachNode.elseContent, scope));
   cache.set(eachNode, cached);
   return cached;
 }

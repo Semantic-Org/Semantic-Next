@@ -141,6 +141,31 @@ describe('isEachContentSelfContained', () => {
   });
 
   /*******************************
+        elseContent shapes
+  *******************************/
+
+  it('self-contained elseContent stays lazy', () => {
+    const node = getEachNode(
+      '{#each item in items}<span>{item.name}</span>{:else}<p>none</p>{/each}',
+    );
+    expect(isEachContentSelfContained(node)).toBe(true);
+  });
+
+  it('elseContent reading external state forces eager wire', () => {
+    const node = getEachNode(
+      '{#each item in items}<span>{item.name}</span>{:else}<p>{emptyMessage}</p>{/each}',
+    );
+    expect(isEachContentSelfContained(node)).toBe(false);
+  });
+
+  it('elseContent calling helper that reads external state forces eager wire', () => {
+    const node = getEachNode(
+      '{#each item in items}<span>{item.name}</span>{:else}<p>{getEmptyText}</p>{/each}',
+    );
+    expect(isEachContentSelfContained(node)).toBe(false);
+  });
+
+  /*******************************
         Caching
   *******************************/
 
