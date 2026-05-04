@@ -696,7 +696,7 @@ const eachBlock = defineBlock({
     });
   },
 
-  update({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
+  update({ node, data, scope, region, renderAST, lookupExpression, self, isSVG }) {
     const { items, collectionType } = resolveItems(node, lookupExpression);
 
     const showingElse = self.records.length === 1 && self.records[0].isElse;
