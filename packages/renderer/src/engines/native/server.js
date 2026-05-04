@@ -409,20 +409,15 @@ export class ServerRenderer {
       // the client can adopt per-item DOM on first data change instead of
       // re-rendering the whole list. Key is computed via the shared
       // `getItemID` heuristic, so server and client agree on identity.
+      // Per-item data flows through `renderNodes(content, itemData)` and
+      // every evaluator lookup downstream takes data as an explicit
+      // argument — no need to allocate a per-item ExpressionEvaluator.
       for (let i = 0; i < items.length; i++) {
         const eachData = getEachData(items[i], i, collectionType, node);
         const itemData = { ...data, ...eachData };
-        const itemEvaluator = new ExpressionEvaluator({ data: itemData, helpers: this.helpers });
-        const savedEvaluator = this.evaluator;
-        this.evaluator = itemEvaluator;
         const key = getItemID(items[i], i, collectionType);
-        try {
-          html += `<!--${SUI_ITEM_MARKER}${encodeItemKey(key)}-->`;
-          html += this.renderNodes(node.content, itemData);
-        }
-        finally {
-          this.evaluator = savedEvaluator;
-        }
+        html += `<!--${SUI_ITEM_MARKER}${encodeItemKey(key)}-->`;
+        html += this.renderNodes(node.content, itemData);
       }
     }
 
@@ -468,14 +463,7 @@ export class ServerRenderer {
     if (this.snippets[templateName]) {
       const snippet = this.snippets[templateName];
       const snippetData = this.resolveNodeData(node, data);
-      const savedEvaluator = this.evaluator;
-      this.evaluator = new ExpressionEvaluator({ data: snippetData, helpers: this.helpers });
-      try {
-        html += this.renderNodes(snippet.content, snippetData);
-      }
-      finally {
-        this.evaluator = savedEvaluator;
-      }
+      html += this.renderNodes(snippet.content, snippetData);
     }
     else {
       let template;
@@ -510,13 +498,10 @@ export class ServerRenderer {
       return instance.render();
     }
 
-    // Plain AST object — render directly
+    // Plain AST object — render directly. Data flows through renderNodes
+    // and every evaluator lookup takes it as an explicit argument.
     if (template.ast) {
-      const savedEvaluator = this.evaluator;
-      this.evaluator = new ExpressionEvaluator({ data, helpers: this.helpers });
-      const html = this.renderNodes(template.ast, data);
-      this.evaluator = savedEvaluator;
-      return html;
+      return this.renderNodes(template.ast, data);
     }
 
     return '';
