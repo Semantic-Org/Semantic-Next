@@ -598,7 +598,6 @@ test('drift flag binary-only when main-history is empty', () => {
       },
     }],
   });
-  // Empty main-history (the day-zero post-wipe state).
   const emptyMain = writeFixture({ schema_version: 2, commits: [] });
   const dir = writeHandcraftedResults('update-10th', [11, 12], [11.5, 12.5], [-5, 0], 'mainB-different');
   const { report, markdown } = runReporter({

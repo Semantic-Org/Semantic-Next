@@ -111,7 +111,6 @@ test('extracts both absolute CI and percent-delta from differences[]', () => {
   // mean is the midpoint of the absolute CI
   const { ci, mean_ms } = metrics['update-10th'];
   assert.ok(Math.abs(mean_ms - (ci[0] + ci[1]) / 2) < 0.01, 'mean is CI midpoint');
-  // percent_delta_ci is the new v2 field — within-session percent-delta
   assert.ok(Array.isArray(metrics['update-10th'].percent_delta_ci), 'percent_delta_ci persisted');
   assert.equal(metrics['update-10th'].percent_delta_ci.length, 2);
 });
@@ -165,9 +164,6 @@ test('pr is null when commit message has no PR reference', () => {
 });
 
 test('rejects v1 schema with reset instruction', () => {
-  // v1 entries stored absolute ms and fed the buggy peak attribution; the
-  // writer rejects them rather than silently degrading. Operator must reset
-  // the file. This is intentional cleanup, not backward compat.
   const tmp = fs.mkdtempSync('/tmp/bench-hist-test-');
   const historyPath = path.join(tmp, 'bench-history.json');
   fs.writeFileSync(historyPath, JSON.stringify({ schema_version: 1, commits: [] }));

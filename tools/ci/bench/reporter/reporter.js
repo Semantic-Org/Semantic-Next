@@ -36,7 +36,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { readBaselineSha, walk } from './extract-metrics.js';
+import { iterMetricPairs, readBaselineSha } from './extract-metrics.js';
 
 const args = parseArgs(process.argv.slice(2));
 const resultsDir = required(args, 'results');
@@ -138,41 +138,22 @@ console.log(
 );
 
 /**
- * Walk `dir` for tachometer JSON files and extract per-metric this-change
- * vs tip-of-tree data. Each tachometer file can contain multiple metrics;
- * each metric has one "this-change [X]" and one "tip-of-tree [X]" entry.
+ * Project paired tachometer benchmarks into the shape buildReport consumes.
+ * Skips metrics without a tip-of-tree counterpart or differences[] entry —
+ * the comment renderer needs both sides plus the precomputed diff.
  */
 function loadAllMetrics(dir) {
   const out = [];
-  for (const entry of walk(dir)) {
-    if (!entry.endsWith('.json')) { continue; }
-    const data = JSON.parse(fs.readFileSync(entry, 'utf8'));
-    if (!Array.isArray(data.benchmarks)) { continue; }
-
-    // Group benchmarks by measurement name, index by source (this-change | tip-of-tree)
-    const byName = new Map();
-    data.benchmarks.forEach((bm, i) => {
-      const mName = bm.measurement?.name ?? bm.name;
-      const source = (bm.name ?? '').split(' [')[0];
-      if (!byName.has(mName)) { byName.set(mName, {}); }
-      byName.get(mName)[source] = { index: i, bm };
+  for (const { name, current, base, diff } of iterMetricPairs(dir)) {
+    if (!base || !diff) { continue; }
+    out.push({
+      name,
+      thisChangeMs: [current.bm.mean.low, current.bm.mean.high],
+      tipOfTreeMs: [base.bm.mean.low, base.bm.mean.high],
+      absoluteMsDelta: [diff.absolute.low, diff.absolute.high],
+      percentDelta: [diff.percentChange.low, diff.percentChange.high],
+      baselineSha: currentBaselineSha || null,
     });
-
-    for (const [name, pair] of byName) {
-      const cur = pair['this-change'];
-      const base = pair['tip-of-tree'];
-      if (!cur || !base) { continue; }
-      const diff = cur.bm.differences?.[base.index];
-      if (!diff) { continue; }
-      out.push({
-        name,
-        thisChangeMs: [cur.bm.mean.low, cur.bm.mean.high],
-        tipOfTreeMs: [base.bm.mean.low, base.bm.mean.high],
-        absoluteMsDelta: [diff.absolute.low, diff.absolute.high],
-        percentDelta: [diff.percentChange.low, diff.percentChange.high],
-        baselineSha: currentBaselineSha || null,
-      });
-    }
   }
   out.sort((a, b) => a.name.localeCompare(b.name));
   return out;
