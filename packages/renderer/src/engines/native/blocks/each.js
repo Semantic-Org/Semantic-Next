@@ -15,12 +15,10 @@ import { registerBlock } from './registry.js';
   over *live* DOM, instead of dereferencing a stale childNodes snapshot
   taken at item-creation time.
 
-  Hydrate only registers a dep on the collection — no per-item Reactions
-  are wired at hydrate time. Per-item bindings establish on the first
-  data change, when `update` tries to adopt the server-rendered per-item
-  DOM via `<!--sui-item:v1:KEY-->` markers instead of rebuilding from
-  scratch. Mismatched keys fall through to a fresh render; subsequent
-  mutations use the normal reconcile path.
+  Hydrate adopts the server-rendered per-item DOM via
+  `<!--sui-item:v1:KEY-->` markers and wires per-item Reactions in
+  place — the same "register Reactions on hydrate" contract every
+  other block honors.
 
 */
 
@@ -496,11 +494,12 @@ function extractServerItemGroups(ownedNodes) {
   return groups;
 }
 
-// First-data-change adoption path. Tries to reuse server-rendered per-
-// item DOM by matching item keys, wiring per-item reactivity against the
-// existing nodes via hydrateInnerContent. Returns true on success, false
-// if no server markers are present (legacy SSR output — caller should
-// fall through to a full rebuild).
+// Reuses server-rendered per-item DOM by matching item keys, wiring
+// per-item reactivity against the existing nodes via hydrateInnerContent.
+// Items with no matching server group render fresh; server groups whose
+// keys aren't claimed get disposed. The server unconditionally emits
+// `<!--sui-item:v1:KEY-->` markers for non-empty items (server.js); a
+// missing-markers shape here means a build/version mismatch.
 function adoptServerItems({
   self,
   items,
@@ -514,7 +513,9 @@ function adoptServerItems({
   isSVG,
 }) {
   const serverGroups = extractServerItemGroups(region.ownedNodes);
-  if (serverGroups.length === 0) { return false; }
+  if (serverGroups.length === 0) {
+    throw new Error('each.hydrate: server-rendered per-item markers missing — server/client renderer version mismatch');
+  }
 
   const serverByKey = new Map();
   for (const g of serverGroups) { serverByKey.set(g.key, g); }
@@ -537,9 +538,8 @@ function adoptServerItems({
 
       // Wire per-item reactivity on the existing DOM. hydrateInnerContent
       // moves the nodes into a temporary fragment, walks with
-      // hydrateMarkers (which honors the data-sui-bind fast path against
-      // the block's inner entries), and leaves the hydrated nodes in
-      // `mutableNodes`.
+      // hydrateMarkers against the block's inner entries, and leaves the
+      // hydrated nodes in `mutableNodes`.
       const mutableNodes = [...serverGroup.nodes];
       hydrateInnerContent({
         ownedNodes: mutableNodes,
@@ -611,14 +611,13 @@ function adoptServerItems({
   }
 
   self.records = newRecords;
-  return true;
 }
 
 const eachBlock = defineBlock({
   name: 'each',
 
   create() {
-    return { records: [], hasHydrated: false };
+    return { records: [] };
   },
 
   render({ node, data, scope, region, renderAST, lookupExpression, self, isSVG }) {
@@ -642,44 +641,63 @@ const eachBlock = defineBlock({
     });
   },
 
-  hydrate({ node, lookupExpression, self }) {
-    // Trust server DOM. Register a dep on the collection so the first data
-    // change invalidates the block — `update` then clears the region and
-    // rebuilds via reconcile. Per-item reactivity (text/attr Reactions
-    // inside item content) is established at that rebuild, not on hydrate.
-    lookupExpression(node.over);
-    self.hasHydrated = true;
-  },
-
-  update({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
+  hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
+    // resolveItems registers the items dep via lookupExpression.
     const { items, collectionType } = resolveItems(node, lookupExpression);
 
-    if (self.hasHydrated) {
-      self.hasHydrated = false;
-      if (items.length > 0) {
-        // Try to adopt server-rendered per-item DOM. If the server
-        // emitted sui-item:v1:KEY markers, items whose keys match reuse
-        // their DOM; others render fresh. Subsequent mutations flow
-        // through the standard reconcile path below.
-        const adopted = adoptServerItems({
-          self,
-          items,
-          collectionType,
-          node,
+    if (items.length === 0) {
+      if (node.elseContent) {
+        // Server rendered the else branch into region.ownedNodes.
+        // Hydrate it in place and push an isElse record so subsequent
+        // `update` calls recognize the else state and transition
+        // correctly. elseScope goes on region.childScopes so the next
+        // `region.clear()` disposes it (renderElse gets this via
+        // region.setContent; the hydrate path bypasses setContent
+        // because the DOM is already in place).
+        const elseScope = scope.child();
+        region.childScopes.push(elseScope);
+        hydrateInnerContent({
+          ownedNodes: region.ownedNodes,
+          innerAST: node.elseContent,
           data,
-          scope,
-          region,
-          renderAST,
-          hydrateInnerContent,
-          isSVG,
+          scope: elseScope,
         });
-        if (adopted) { return; }
+        // hydrateInnerContent moves nodes into a temp fragment; reinsert
+        // them after the region's anchor.
+        const frag = document.createDocumentFragment();
+        for (const n of region.ownedNodes) { frag.appendChild(n); }
+        region.anchor.after(frag);
+        self.records.push({
+          key: null,
+          item: null,
+          index: -1,
+          itemSignal: null,
+          startMarker: null,
+          endMarker: null,
+          scope: elseScope,
+          isElse: true,
+          propsSnapshot: null,
+        });
       }
-      // No per-item markers (legacy SSR output) or empty items — fall
-      // back to nuke-and-rebuild via the reconcile path below.
-      region.clear();
-      self.records.length = 0;
+      return;
     }
+
+    adoptServerItems({
+      self,
+      items,
+      collectionType,
+      node,
+      data,
+      scope,
+      region,
+      renderAST,
+      hydrateInnerContent,
+      isSVG,
+    });
+  },
+
+  update({ node, data, scope, region, renderAST, lookupExpression, self, isSVG }) {
+    const { items, collectionType } = resolveItems(node, lookupExpression);
 
     const showingElse = self.records.length === 1 && self.records[0].isElse;
 

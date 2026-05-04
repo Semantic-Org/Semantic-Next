@@ -116,6 +116,8 @@ Failure modes: [bulleted list — only when score ≥ 5 or blast radius is non-o
 - [Deviations from standard only. Skip "rerun tests" / "CI passes" — those are assumed.]
 ```
 
+**Word target.** Medium-tier bodies usually land 80–150 words. Past 200 is a sign you're restating the diff. After drafting a body that feels complete, expect to cut roughly half — the AI default is about twice the length humans actually write.
+
 ### Large tier
 
 Same as Medium, plus:
@@ -187,6 +189,8 @@ Bullets should be noun phrases or short verb phrases. Most under 10 words. Full 
 ❌ "Remove the throwaway profiling and screenshot artifacts from the repo root."
 ✅ "Remove root profiling/screenshot artifacts"
 ```
+
+**Pick one voice across all bullets.** Don't mix imperative ("Remove X"), declarative state ("X removed"), and active past with for-clause ("Dropped X for Y"). Mixed tenses read AI-shaped — no human drifts mid-list. Active past with "for X" is punchy and intent-bearing for bug fixes and refactors.
 
 ---
 
@@ -265,12 +269,16 @@ Authors who polish suspicious bullets into smooth prose ship subtle bugs. Review
 
 ## Risk score is routing metadata, not a confidence performance
 
-When you write a Risk score, you're telling the reviewer (or `/ultrareview`) **how much attention to spend**. Be honest:
+The Risk score is the chance of regression from this changeset, anchored to surface area — how many users sit on the affected code path. Don't catastrophize. Don't pad to look responsible. Don't deflate to look confident.
 
-- 2/10 Medium: "review this fast — I'm sure"
-- 7/10 Large: "slow down — look at the failure modes I named"
+| Score | When to use |
+|---|---|
+| **0/10** | Tests, harness, docs only. No public code modified. Always 0 in this case. |
+| **1–4** | Public code touched, but usage estimates suggest the path is rarely hit. |
+| **5–6** | Coin toss whether a given user is on this code path. |
+| **7–10** | Common code path. Effectively all users sit on it. |
 
-Don't pad the number to look responsible; don't deflate it to look confident. A correct low score is more useful than a high one. The score is a signal, not a posture.
+**Risk section is shorter than other sections.** It doesn't list each failure verbatim. It points to where to look for downstream effects. "This modifies the `Template` class which has downstream implications for the renderer" is enough — the reviewer chases the thread. A failure-modes list goes in only when the surface is genuinely non-obvious (see below).
 
 ## Failure modes are humility checks, not breaking-change rehash
 
@@ -430,6 +438,14 @@ Lead the framing sentence with `Implements [plan](permalink)`. Bullets describe 
 
 Title at concept level (the *destination concept*, not the literal new path). Bullets describe the move at the role level, not the file level.
 
+### Bug PRs
+
+Lead the framing with how the bug surfaced — what someone was doing when they hit it. The compact pattern is three beats. Discovered while [X], caused by [Y], so [Z]. Humans usually remember *where* they hit a bug. AI prose skips the discovery and starts at the technical formulation.
+
+| ❌ Abstract first | ✅ Discovery first |
+|---|---|
+| Per-item bindings inside each blocks lost reactivity to external state when items came from static props. | This bug was discovered while debugging hydration issues with `inpage-menu` in docs. Per-item bindings inside each blocks lost reactivity to external state when items came from static props. |
+
 ---
 
 ## After drafting, do this checklist
@@ -444,10 +460,14 @@ In order:
 6. **Cut justifications.** Search bullets for "now that", "since", "to satisfy", "because", "that doesn't" — usually defensive padding.
 7. **Cut scaffolding bullets.** If a bullet states the obvious consequence of bullets above it ("update path references to match"), drop it.
 8. **Trim framing sentence tails.** "so that…", "plus the X that follows", "in order to…" — usually padding.
-9. **Search for AI tells.** Look for: *verified, ensured, considered, note that, important to flag, in summary, this PR introduces, all tests pass, fully tested*.
-10. **Check tier appropriateness.** Did you reach for Medium/Large machinery on a Small PR? If yes, drop them.
-11. **Voice check — read each bullet aloud.** Imagine you're texting it to the reviewer. Does it sound like a developer in a hurry, or like a press release? If the latter, rewrite. Specific tells: bullets that start with `Let X...`/`Stop Y...`/`Wire Z...` (verb-first mechanism), bullets that mention line numbers or internal field names, bullets longer than the corresponding commit message subject.
-12. **Honest question:** if a colleague wrote this PR and pinged you, would the body sound like them, or like a corporate document? If the latter, you're still in AI-prose mode.
+9. **Search for AI tells (words).** Look for: *verified, ensured, considered, note that, important to flag, in summary, this PR introduces, all tests pass, fully tested*.
+10. **Search for AI tells (punctuation).** Three patterns. Single instances are fine. Clusters or stylized uses are tells.
+    - **Paired em-dashes as parentheses** (`text — like this — text`). Single em-dashes are fine. Pairs used as brackets are AI-shaped — use real parens or split into two sentences.
+    - **Explanatory colons** (`X was the canonical repro: helpers reading...`). Almost always splits cleanly into two sentences. The colon makes prose read like a writeup.
+    - **Semicolon clusters.** Three or more in one body is a tell. Most rewrite to periods.
+11. **Check tier appropriateness.** Did you reach for Medium/Large machinery on a Small PR? If yes, drop them.
+12. **Voice check — read each bullet aloud.** Imagine you're texting it to the reviewer. Does it sound like a developer in a hurry, or like a press release? If the latter, rewrite. Specific tells: bullets that start with `Let X...`/`Stop Y...`/`Wire Z...` (verb-first mechanism), bullets that mention line numbers or internal field names, bullets longer than the corresponding commit message subject.
+13. **Honest question.** If a colleague wrote this PR and pinged you, would the body sound like them, or like a corporate document? If the latter, you're still in AI-prose mode.
 
 ---
 

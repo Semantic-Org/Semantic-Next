@@ -293,6 +293,77 @@ describe('SSR hydration — each loops', () => {
     expect(shadowHTML(el)).toBe('<p>none</p>');
   });
 
+  // Regression: empty items + elseContent reading external state lost
+  // reactivity after hydrate. The empty-items branch in each.hydrate
+  // returned without hydrating elseContent's bindings.
+  it('elseContent bindings are reactive after hydration when items is empty', async () => {
+    const el = await ssrAndHydrate({
+      template: '{#each item in items}<li>{item}</li>{else}<p>{emptyMessage}</p>{/each}',
+      defaultState: { emptyMessage: 'No items yet' },
+      defaultSettings: { items: [] },
+      createComponent: ({ state }) => ({
+        get emptyMessage() {
+          return state.emptyMessage.get();
+        },
+      }),
+    });
+
+    expect(shadowHTML(el)).toBe('<p>No items yet</p>');
+
+    el.template.state.emptyMessage.set('Still empty');
+    await new Promise(r => setTimeout(r, 30));
+
+    expect(shadowHTML(el)).toBe('<p>Still empty</p>');
+  });
+
+  // Regression: the hydrate path for an empty {#each ... else} created an
+  // elseScope but did not register it on region.childScopes. When items
+  // transitioned empty → non-empty, region.clear() walked an empty scope
+  // list and the elseContent's bindings stayed subscribed to whatever
+  // signals they read. The leak is bounded — the renderer's isConnected
+  // guard self-stops the orphan on its next fire — but until then every
+  // elseContent binding is a ghost subscriber on its read signals.
+  //
+  // Test shape: a control component renders with items already populated
+  // (elseContent never runs, so emptyLabel carries only the framework's
+  // baseline subscribers). The second component renders empty, picks up
+  // one extra subscriber per elseContent binding, then transitions to
+  // non-empty. After the transition, the subscriber count must return
+  // to the control baseline. Three bindings in elseContent give a clean
+  // 1-vs-N delta that doesn't pin any specific framework-internal count.
+  it('hydrated each→else transition disposes elseContent subscribers', async () => {
+    const template = '{#each item in items}<li>{item}</li>{else}'
+      + '<p class="{emptyLabel}">{emptyLabel} ({emptyLabel})</p>'
+      + '{/each}';
+
+    const control = await ssrAndHydrate({
+      template,
+      defaultState: { items: ['x'], emptyLabel: 'None' },
+    });
+    const baseline = control.template.state.emptyLabel.dependency.subscribers.size;
+
+    const el = await ssrAndHydrate({
+      template,
+      defaultState: { items: [], emptyLabel: 'None' },
+    });
+
+    // Sanity: server emitted else branch and elseContent bindings did
+    // subscribe — without the elseScope reactions even existing, the
+    // delta below would be vacuous.
+    expect(shadowHTML(el)).toBe('<p class="None">None (None)</p>');
+    expect(el.template.state.emptyLabel.dependency.subscribers.size).toBeGreaterThan(baseline);
+
+    const updated = $(el).onNext('updated');
+    el.template.state.items.push('x');
+    await updated;
+
+    expect(shadowHTML(el)).toBe('<li>x</li>');
+    // Pin: the empty→non-empty transition must dispose the elseScope so
+    // its bindings unsubscribe synchronously. Equality with the control
+    // baseline proves no orphan reactions remain on emptyLabel.
+    expect(el.template.state.emptyLabel.dependency.subscribers.size).toBe(baseline);
+  });
+
   it('hydrates object iteration', async () => {
     const el = await ssrAndHydrate({
       template: '{#each val, key in colors}<span>{key}={val}</span>{/each}',
@@ -300,6 +371,44 @@ describe('SSR hydration — each loops', () => {
     });
 
     expect(shadowHTML(el)).toBe('<span>r=red</span><span>g=green</span>');
+  });
+
+  // Regression repro: inpage-menu's per-item active class never updated on
+  // scroll. Production shape (verified from DevTools): items arrive via an
+  // HTML attribute (`menu="[…JSON…]"`), so the items signal is set BEFORE
+  // connectedCallback runs hydrate. Pre-fix, each.hydrate only registered a
+  // dep on items and deferred per-item Reaction wiring to the first items
+  // mutation — which never came when items arrived as a static prop. PR #175
+  // changes each.hydrate to call `adoptServerItems` immediately, wiring
+  // per-item Reactions in place against the server-rendered DOM.
+  it('helper-call attribute inside each is reactive after hydration when items pre-populated', async () => {
+    let helperCalls = 0;
+    const el = await ssrAndHydrate({
+      template:
+        '{#each item in items}<a data-id="{item.id}" class="{classMap getItemClasses item}">{item.id}</a>{/each}',
+      defaultState: { activeID: null },
+      defaultSettings: { items: [{ id: 'a' }, { id: 'b' }] },
+      createComponent: ({ state }) => ({
+        getItemClasses(item) {
+          helperCalls++;
+          return { active: state.activeID.get() === item.id, item: true };
+        },
+      }),
+    });
+
+    // Sanity: SSR populated per-item DOM (proves DSD parsed and we're on the
+    // hydration path, not a fresh client render).
+    expect(el.shadowRoot.querySelectorAll('a')).toHaveLength(2);
+    const initial = helperCalls;
+
+    el.template.state.activeID.set('a');
+    await new Promise(r => setTimeout(r, 30));
+
+    // Pin: helper must be re-invoked when its read signal changes.
+    expect(helperCalls).toBeGreaterThan(initial);
+    const anchors = el.shadowRoot.querySelectorAll('a');
+    expect(anchors[0].getAttribute('class')).toContain('active');
+    expect(anchors[1].getAttribute('class')).not.toContain('active');
   });
 });
 
@@ -1365,15 +1474,7 @@ describe('SSR hydration — snippet reactivity', () => {
     expect(span.textContent).toBe('[Updated]');
   });
 
-  // KNOWN BUG: same family as bug/hydrate-reactivity. The {#each} block's
-  // hydrate hook only registers a dep on the items collection — per-item
-  // bindings (including snippet args) are not wired until update() fires
-  // via items signal change. Snippet inner expressions (here {label})
-  // never get reactions registered against item-derived data on hydrate.
-  // Was masked when ssrAndHydrate used innerHTML (DSD not parsed →
-  // fullRender path → snippet rendered fresh client-side with normal
-  // binding wiring, no hydrate-deferral involved).
-  it.skip('snippet with named args inside each is reactive after hydration', async () => {
+  it('snippet with named args inside each is reactive after hydration', async () => {
     const el = await ssrAndHydrate({
       template: '{#snippet badge}<span class="b">[{label}]</span>{/snippet}'
         + '{#each item in items}<div>{>badge label=item.name}</div>{/each}',
