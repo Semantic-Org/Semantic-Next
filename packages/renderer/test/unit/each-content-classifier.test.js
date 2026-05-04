@@ -146,21 +146,74 @@ describe('isEachContentSelfContained', () => {
 
   it('self-contained elseContent stays lazy', () => {
     const node = getEachNode(
-      '{#each item in items}<span>{item.name}</span>{:else}<p>none</p>{/each}',
+      '{#each item in items}<span>{item.name}</span>{else}<p>none</p>{/each}',
     );
     expect(isEachContentSelfContained(node)).toBe(true);
   });
 
   it('elseContent reading external state forces eager wire', () => {
     const node = getEachNode(
-      '{#each item in items}<span>{item.name}</span>{:else}<p>{emptyMessage}</p>{/each}',
+      '{#each item in items}<span>{item.name}</span>{else}<p>{emptyMessage}</p>{/each}',
     );
     expect(isEachContentSelfContained(node)).toBe(false);
   });
 
   it('elseContent calling helper that reads external state forces eager wire', () => {
     const node = getEachNode(
-      '{#each item in items}<span>{item.name}</span>{:else}<p>{getEmptyText}</p>{/each}',
+      '{#each item in items}<span>{item.name}</span>{else}<p>{getEmptyText}</p>{/each}',
+    );
+    expect(isEachContentSelfContained(node)).toBe(false);
+  });
+
+  it('elseContent referencing iteration var forces eager (var not in :else scope)', () => {
+    // `foo` is the iteration var; inside :else it's NOT in scope, so a
+    // bare `{foo}` there reads the parent — the classifier must not
+    // treat it as iteration-local.
+    const node = getEachNode(
+      '{#each foo in items}<span>{foo.x}</span>{else}<p>{foo}</p>{/each}',
+    );
+    expect(isEachContentSelfContained(node)).toBe(false);
+  });
+
+  /*******************************
+        Ternary disambiguation
+  *******************************/
+
+  it('ternary then-value reading external state forces eager wire', () => {
+    const node = getEachNode(
+      '{#each item in items}<span class="{classMap {active: item.size ? externalThen : item.bar}}">x</span>{/each}',
+    );
+    expect(isEachContentSelfContained(node)).toBe(false);
+  });
+
+  it('ternary else-value reading external state forces eager wire', () => {
+    const node = getEachNode(
+      '{#each item in items}<span>{item.size > 0 ? item.size : externalDefault}</span>{/each}',
+    );
+    expect(isEachContentSelfContained(node)).toBe(false);
+  });
+
+  it('object key followed by item-local ternary stays lazy', () => {
+    const node = getEachNode(
+      '{#each item in items}<span class="{classMap {active: item.flag ? item.a : item.b}}">x</span>{/each}',
+    );
+    expect(isEachContentSelfContained(node)).toBe(true);
+  });
+
+  it('optional chaining is not a ternary', () => {
+    const node = getEachNode(
+      '{#each item in items}<span>{item.nested?.value}</span>{/each}',
+    );
+    expect(isEachContentSelfContained(node)).toBe(true);
+  });
+
+  /*******************************
+        Template literal bail
+  *******************************/
+
+  it('template literal in expression bails to eager (interpolation may read external)', () => {
+    const node = getEachNode(
+      '{#each item in items}<span>{`prefix-${externalState}-suffix`}</span>{/each}',
     );
     expect(isEachContentSelfContained(node)).toBe(false);
   });

@@ -293,6 +293,29 @@ describe('SSR hydration — each loops', () => {
     expect(shadowHTML(el)).toBe('<p>none</p>');
   });
 
+  // Regression: empty items + elseContent reading external state lost
+  // reactivity after hydrate. each.hydrate's eager path early-returned on
+  // items.length === 0 without hydrating the elseContent's bindings.
+  it('elseContent bindings are reactive after hydration when items is empty', async () => {
+    const el = await ssrAndHydrate({
+      template: '{#each item in items}<li>{item}</li>{else}<p>{emptyMessage}</p>{/each}',
+      defaultState: { emptyMessage: 'No items yet' },
+      defaultSettings: { items: [] },
+      createComponent: ({ state }) => ({
+        get emptyMessage() {
+          return state.emptyMessage.get();
+        },
+      }),
+    });
+
+    expect(shadowHTML(el)).toBe('<p>No items yet</p>');
+
+    el.template.state.emptyMessage.set('Still empty');
+    await new Promise(r => setTimeout(r, 30));
+
+    expect(shadowHTML(el)).toBe('<p>Still empty</p>');
+  });
+
   it('hydrates object iteration', async () => {
     const el = await ssrAndHydrate({
       template: '{#each val, key in colors}<span>{key}={val}</span>{/each}',

@@ -646,28 +646,59 @@ const eachBlock = defineBlock({
   },
 
   hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
-    // Always register a dep on the collection so future mutations
-    // invalidate the block.
-    lookupExpression(node.over);
     self.hasHydrated = true;
 
     // Cheap path: per-item bindings only read iteration-local data
-    // (or pure framework helpers). Defer per-item Reaction wiring to
-    // the first items mutation — `adoptServerItems` runs there.
+    // (or pure framework helpers). Just register the items dep and
+    // defer per-item Reaction wiring to the first items mutation —
+    // `adoptServerItems` runs from `update` there.
     //
-    // Eager path: any per-item binding could read external state
-    // (a helper closing over `state.x`, a component method, a nested
-    // block whose condition reads outside the iteration scope, ...).
-    // Wire per-item Reactions now via `adoptServerItems`, otherwise
-    // the only chance to wire them is a future items-signal change
-    // that may never come — and external mutations would silently lose
-    // reactivity. The classifier bails conservative; cost is paid only
-    // when correctness demands it.
+    // Eager path: any per-item binding (or elseContent binding) could
+    // read external state. Wire those Reactions now, otherwise the
+    // only chance is a future items-signal change that may never come
+    // — external mutations would silently lose reactivity.
     if (isEachContentSelfContained(node)) {
+      lookupExpression(node.over);
       return;
     }
+
+    // resolveItems also registers the items dep via lookupExpression.
     const { items, collectionType } = resolveItems(node, lookupExpression);
-    if (items.length === 0) { return; }
+
+    if (items.length === 0) {
+      if (node.elseContent) {
+        // Server rendered the else branch into region.ownedNodes.
+        // Hydrate it in place so its bindings wire against external
+        // state. Push an isElse record so subsequent `update` calls
+        // recognize the else state and transition correctly.
+        const elseScope = scope.child();
+        hydrateInnerContent({
+          ownedNodes: region.ownedNodes,
+          innerAST: node.elseContent,
+          data,
+          scope: elseScope,
+        });
+        // hydrateInnerContent moves nodes into a temp fragment; reinsert
+        // them after the region's anchor.
+        const frag = document.createDocumentFragment();
+        for (const n of region.ownedNodes) { frag.appendChild(n); }
+        region.anchor.after(frag);
+        self.records.push({
+          key: null,
+          item: null,
+          index: -1,
+          itemSignal: null,
+          startMarker: null,
+          endMarker: null,
+          scope: elseScope,
+          isElse: true,
+          propsSnapshot: null,
+        });
+        self.hasHydrated = false;
+      }
+      return;
+    }
+
     const adopted = adoptServerItems({
       self,
       items,

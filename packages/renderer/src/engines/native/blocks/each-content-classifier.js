@@ -64,9 +64,11 @@ const RESERVED_NAMES = new Set([
   'this',
 ]);
 
-// Strips quoted/backtick string literals before identifier extraction
-// so identifiers inside string contents aren't treated as data refs.
-const STRING_LITERAL_RE = /'[^']*'|"[^"]*"|`[^`]*`/g;
+// Strips quoted string literals before identifier extraction so
+// identifiers inside string contents aren't treated as data refs.
+// Backticks are handled separately via early conservative bail —
+// a regex strip would silently swallow `${...}` interpolation contents.
+const STRING_LITERAL_RE = /'[^']*'|"[^"]*"/g;
 
 const IDENT_START_RE = /[a-zA-Z_$]/;
 const IDENT_BODY_RE = /[a-zA-Z0-9_$]/;
@@ -96,19 +98,47 @@ function buildLocalScope(eachNode, parentScope) {
 // unsafe reads would surface as a bare identifier name.
 function isExpressionSelfContained(expression, localScope) {
   if (typeof expression !== 'string' || !expression) { return true; }
+  // Template literals — `${expr}` interpolation contents would survive
+  // string stripping. Conservative bail keeps reactivity safe; template
+  // literals as expression bodies are unusual in this DSL.
+  if (expression.includes('`')) { return false; }
   const src = expression.replace(STRING_LITERAL_RE, '');
   const len = src.length;
   let braceDepth = 0;
+  // Pending ternary count per brace level. The next `:` at this brace
+  // level matches a `?` ternary when the count is positive; otherwise
+  // it's an object-literal key separator.
+  const ternaryStack = [0];
   let i = 0;
   while (i < len) {
     const c = src[i];
     if (c === '{') {
       braceDepth++;
+      ternaryStack.push(0);
       i++;
       continue;
     }
     if (c === '}') {
       braceDepth--;
+      ternaryStack.pop();
+      i++;
+      continue;
+    }
+    if (c === '?') {
+      // `?.` is optional chaining; `??` is nullish coalescing — neither
+      // opens a ternary.
+      if (src[i + 1] === '.' || src[i + 1] === '?') {
+        i += 2;
+        continue;
+      }
+      ternaryStack[ternaryStack.length - 1]++;
+      i++;
+      continue;
+    }
+    if (c === ':') {
+      if (ternaryStack[ternaryStack.length - 1] > 0) {
+        ternaryStack[ternaryStack.length - 1]--;
+      }
       i++;
       continue;
     }
@@ -126,11 +156,14 @@ function isExpressionSelfContained(expression, localScope) {
     // Property access — head was already classified at the dotted root.
     if (prev === '.') { continue; }
 
-    // Object literal key — `{key: value}` while inside braces.
+    // Object literal key — `{key: value}` — but only when the next `:`
+    // at this brace level isn't already claimed by a pending ternary.
     if (braceDepth > 0) {
       let k = j;
       while (k < len && (src[k] === ' ' || src[k] === '\t')) { k++; }
-      if (k < len && src[k] === ':') { continue; }
+      if (k < len && src[k] === ':' && ternaryStack[ternaryStack.length - 1] === 0) {
+        continue;
+      }
     }
 
     if (RESERVED_NAMES.has(head)) { continue; }
@@ -214,12 +247,13 @@ export function isEachContentSelfContained(eachNode) {
   let cached = cache.get(eachNode);
   if (cached !== undefined) { return cached; }
 
-  const scope = buildLocalScope(eachNode);
-  // elseContent renders when items is empty — the inner each handler
-  // checks both branches; the public entry needs the same to avoid
-  // silent reactivity loss when SSR served only the {:else} branch.
+  // Top-level each: no enclosing iteration. elseContent runs in the
+  // outer scope (without `eachNode.as`) — `:else` is outside the
+  // iteration, so the iteration var must not classify as in-scope there.
+  const parentScope = new Set();
+  const scope = buildLocalScope(eachNode, parentScope);
   cached = isContentSelfContained(eachNode.content, scope)
-    && (!eachNode.elseContent || isContentSelfContained(eachNode.elseContent, scope));
+    && (!eachNode.elseContent || isContentSelfContained(eachNode.elseContent, parentScope));
   cache.set(eachNode, cached);
   return cached;
 }
