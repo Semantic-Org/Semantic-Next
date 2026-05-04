@@ -1,5 +1,5 @@
 import { isArray, isFunction, isPlainObject } from '@semantic-ui/utils';
-import { BLOCK_CLOSE_PREFIX, BLOCK_MARKER, COMMENT_MARKER } from '../../build-html-string.js';
+import { isBlockClose, isBlockOpen, isExpressionMarker } from '../../build-html-string.js';
 
 /*
 
@@ -172,8 +172,7 @@ export function hydrateTextExpression({ comment, entry, data, scope, renderer })
     let next = comment.nextSibling;
     while (
       next && !(next.nodeType === Node.COMMENT_NODE
-        && (next.data.startsWith(COMMENT_MARKER) || next.data.startsWith(BLOCK_MARKER)
-          || next.data.startsWith(BLOCK_CLOSE_PREFIX)))
+        && (isExpressionMarker(next.data) || isBlockOpen(next.data) || isBlockClose(next.data)))
     ) {
       ownedNodes.push(next);
       next = next.nextSibling;

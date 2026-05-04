@@ -1,6 +1,6 @@
 import { Signal } from '@semantic-ui/reactivity';
 import { arrayFromObject, isArray, isEmpty } from '@semantic-ui/utils';
-import { BLOCK_CLOSE_PREFIX, BLOCK_MARKER } from '../../../build-html-string.js';
+import { isBlockClose, isBlockOpen } from '../../../build-html-string.js';
 import { defineBlock } from '../define-block.js';
 import { decodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from '../shared/each.js';
 import { registerBlock } from './registry.js';
@@ -424,12 +424,12 @@ function extractServerItemGroups(ownedNodes) {
   for (const n of ownedNodes) {
     if (n.nodeType === Node.COMMENT_NODE) {
       const data = n.data;
-      if (data.startsWith(BLOCK_MARKER)) {
+      if (isBlockOpen(data)) {
         blockDepth++;
         if (current) { current.nodes.push(n); }
         continue;
       }
-      if (data.startsWith(BLOCK_CLOSE_PREFIX)) {
+      if (isBlockClose(data)) {
         blockDepth--;
         if (current) { current.nodes.push(n); }
         continue;

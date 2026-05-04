@@ -48,6 +48,36 @@ export function parseServerMeta(commentData, target) {
   }
 }
 
+// Comment-marker classifiers — single-source-of-truth predicates over
+// the documented marker prefixes. Walkers in the renderer and each-block
+// use these to recognize block-open / block-close / expression / raw-text
+// boundaries without redeclaring the prefix strings.
+//
+// Each `parse*ID` returns the numeric ID minted in `populateAttributeBindings`
+// or `processNodes`; NaN is returned when the prefix matches but the suffix
+// isn't a number, which never happens for compiler-emitted comments.
+export function isBlockOpen(commentData) {
+  return commentData.startsWith(BLOCK_MARKER);
+}
+export function isBlockClose(commentData) {
+  return commentData.startsWith(BLOCK_CLOSE_PREFIX);
+}
+export function isExpressionMarker(commentData) {
+  return commentData.startsWith(COMMENT_MARKER);
+}
+export function isRawTextMarker(commentData) {
+  return commentData.startsWith(RAW_TEXT_MARKER);
+}
+export function parseBlockOpenID(commentData) {
+  return parseInt(commentData.slice(BLOCK_MARKER.length));
+}
+export function parseExpressionID(commentData) {
+  return parseInt(commentData.slice(COMMENT_MARKER.length));
+}
+export function parseRawTextID(commentData) {
+  return parseInt(commentData.slice(RAW_TEXT_MARKER.length));
+}
+
 // Marker for raw text element content (script, style, textarea, title)
 export const RAW_TEXT_MARKER = `sui-rawtext:${MARKER_VERSION}:`;
 

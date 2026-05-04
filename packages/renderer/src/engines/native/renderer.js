@@ -3,14 +3,17 @@ import { assignInPlace, createCache, filterObject, inArray } from '@semantic-ui/
 
 import {
   ATTR_MARKER_PREFIX,
-  BLOCK_CLOSE_PREFIX,
-  BLOCK_MARKER,
   buildHTMLString as buildHTMLStringPure,
-  COMMENT_MARKER,
   DATA_SUI_BIND,
+  isBlockClose,
+  isBlockOpen,
+  isExpressionMarker,
+  isRawTextMarker,
   parseAttributeParts as parseAttributePartsFn,
+  parseBlockOpenID,
+  parseExpressionID,
+  parseRawTextID,
   parseServerMeta,
-  RAW_TEXT_MARKER,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
 import { getBlock } from './blocks/registry.js';
@@ -244,8 +247,8 @@ export class Renderer {
       }
       else {
         const text = node.data;
-        if (text.startsWith(COMMENT_MARKER)) {
-          const markerID = parseInt(text.slice(COMMENT_MARKER.length));
+        if (isExpressionMarker(text)) {
+          const markerID = parseExpressionID(text);
           if (!isNaN(markerID)) {
             // Filter deferred until after the walk: elements visit before
             // sibling comments in document order, so an attr-marker's
@@ -254,14 +257,14 @@ export class Renderer {
             commentsToProcess.push({ comment: node, markerID, type: 'expression' });
           }
         }
-        else if (text.startsWith(RAW_TEXT_MARKER)) {
-          const markerID = parseInt(text.slice(RAW_TEXT_MARKER.length));
+        else if (isRawTextMarker(text)) {
+          const markerID = parseRawTextID(text);
           if (!isNaN(markerID)) {
             commentsToProcess.push({ comment: node, markerID, type: 'rawText' });
           }
         }
-        else if (text.startsWith(BLOCK_MARKER)) {
-          const markerID = parseInt(text.slice(BLOCK_MARKER.length));
+        else if (isBlockOpen(text)) {
+          const markerID = parseBlockOpenID(text);
           if (!isNaN(markerID)) {
             commentsToProcess.push({ comment: node, markerID, type: 'block' });
           }
@@ -364,26 +367,26 @@ export class Renderer {
       const text = comment.data;
 
       // Track block nesting — skip inner markers
-      if (text.startsWith(BLOCK_CLOSE_PREFIX)) {
+      if (isBlockClose(text)) {
         blockDepth--;
         continue;
       }
       if (blockDepth > 0) {
         // Track nested opening markers so closing markers stay balanced
-        if (text.startsWith(BLOCK_MARKER)) {
+        if (isBlockOpen(text)) {
           blockDepth++;
         }
         continue;
       }
 
-      if (text.startsWith(COMMENT_MARKER)) {
-        const markerID = parseInt(text.slice(COMMENT_MARKER.length));
+      if (isExpressionMarker(text)) {
+        const markerID = parseExpressionID(text);
         if (!isNaN(markerID)) {
           commentsToProcess.push({ comment, markerID, type: 'expression' });
         }
       }
-      else if (text.startsWith(BLOCK_MARKER)) {
-        const markerID = parseInt(text.slice(BLOCK_MARKER.length));
+      else if (isBlockOpen(text)) {
+        const markerID = parseBlockOpenID(text);
         if (!isNaN(markerID)) {
           commentsToProcess.push({ comment, markerID, type: 'block' });
           blockDepth++;
@@ -420,10 +423,10 @@ export class Renderer {
     while ((node = walker.nextNode())) {
       if (node.nodeType === Node.COMMENT_NODE) {
         const text = node.data;
-        if (text.startsWith(BLOCK_MARKER)) {
+        if (isBlockOpen(text)) {
           blockDepth++;
         }
-        else if (text.startsWith(BLOCK_CLOSE_PREFIX)) {
+        else if (isBlockClose(text)) {
           blockDepth--;
         }
         continue;
@@ -463,7 +466,6 @@ export class Renderer {
   hydrateBlock(comment, entry, data, scope) {
     const { node } = entry;
     const parentNode = comment.parentNode;
-    const markerID = entry.id;
 
     // Collect all nodes between opening and closing block markers.
     // Track depth because inner blocks (from nested snippets/conditionals)
@@ -474,10 +476,10 @@ export class Renderer {
     let blockDepth = 1;
     while (next) {
       if (next.nodeType === Node.COMMENT_NODE) {
-        if (next.data.startsWith(BLOCK_MARKER)) {
+        if (isBlockOpen(next.data)) {
           blockDepth++;
         }
-        else if (next.data.startsWith(BLOCK_CLOSE_PREFIX)) {
+        else if (isBlockClose(next.data)) {
           blockDepth--;
           if (blockDepth === 0) {
             parseServerMeta(next.data, serverMeta);
