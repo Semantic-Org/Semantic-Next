@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "A: Identifies that `innerHTML` does NOT process `<template shadowrootmode>` (the DSD spec)",
+      "passed": true,
+      "evidence": "Opening line states '`wrapper.innerHTML = html` does not process `<template shadowrootmode=\"open\">`. The DSD template stays as a literal `<template>` child of your custom element instead of being attached as a shadow root.' Reinforced later: 'The fragment parsers — `Element.innerHTML`, `Element.outerHTML`, and `Element.insertAdjacentHTML` — explicitly do NOT process `<template shadowrootmode>`.'"
+    },
+    {
+      "text": "B: Recommends `setHTMLUnsafe` (or `Document.parseHTMLUnsafe`) as the correct API",
+      "passed": true,
+      "evidence": "'Replace it with `wrapper.setHTMLUnsafe(html)` (or `Document.parseHTMLUnsafe(html)`).' Fix section shows full example using `wrapper.setHTMLUnsafe(html)` and explains '`Document.parseHTMLUnsafe(html)` is the alternative if you want to construct a whole document.'"
+    },
+    {
+      "text": "C: Explains the consequence chain: no shadowRoot at parse time → `hasServerContent === false` → `connectedCallback` runs `fullRender` instead of `hydrate`",
+      "passed": true,
+      "evidence": "Numbered steps explicitly trace: '1. The custom element parses with no shadow root.' → '3. ... `const hasServerContent = this.shadowRoot && this.shadowRoot.childNodes.length > 0;` ... Because `this.shadowRoot` is `null`, `hasServerContent` is `false`. The element ... runs `fullRender(prototypeTemplate)` — a fresh client render from scratch.'"
+    },
+    {
+      "text": "D: Notes that the failure is silent (no error) — the test \"succeeds\" but is testing a different code path than intended",
+      "passed": true,
+      "evidence": "'This is the silent-failure mode: there is no error, no warning, the test \"succeeds\" in the sense that the component eventually renders something, but you are testing `fullRender`, not `hydrate`.' Also: 'It hid a real hydration bug for hours because the tests \"passed\" against the wrong code path.'"
+    },
+    {
+      "text": "E: Mentions that the browser's main HTML parser DOES process DSD; the limitation is on fragment parsers (`innerHTML`, `outerHTML`, `insertAdjacentHTML`)",
+      "passed": true,
+      "evidence": "'when the **HTML parser** encounters `<template shadowrootmode=\"open\">` as a direct child of an element, it creates a shadow root on the parent ...' and 'Critically, the spec restricts this behavior to the **streaming HTML parser** the browser uses for the initial document load. The **fragment parsers** — `Element.innerHTML`, `Element.outerHTML`, and `Element.insertAdjacentHTML` — explicitly do NOT process `<template shadowrootmode>`.'"
+    }
+  ]
+}

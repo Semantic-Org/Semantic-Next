@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "A: Recognizes this is the same root cause as eval 2 (each-hydrate deferral) — not a snippet-specific bug",
+      "passed": false,
+      "evidence": "The answer correctly identifies that the bug is not snippet-specific ('this isn't snippet-specific — any expression inside the each body that reads item.<prop> would hit the same bug'), but it diagnoses a fundamentally different root cause: a propsSnapshot === null edge case in adoptServerItems, not the each-hydrate deferral of per-item Reaction wiring. The answer asserts the snippet wiring is correct and per-item Reactions are properly wired against itemSignal during adoption — directly contradicting the deferral-as-root-cause framing of eval 2. Misses the connection to the same root cause."
+    },
+    {
+      "text": "B: Explains that snippet args (label=item.name) are evaluated by the per-item content path; the snippet body sees those args via buildSnippetProxy",
+      "passed": true,
+      "evidence": "Answer explicitly explains: 'Snippet args (label=item.name) become lazy getters captured by buildSnippetProxy (packages/renderer/src/engines/native/blocks/template.js:67-114). The snippet body's {label} reactive text-node Reaction reads snippetData.label, which calls the captured getter () => evaluator.lookupExpressionValue(item.name, itemProxy)...'. Identifies buildSnippetProxy and the per-item arg evaluation path."
+    },
+    {
+      "text": "C: Notes that without per-item Reactions wired, the snippet arg evaluation never re-runs when items change in place",
+      "passed": false,
+      "evidence": "The answer takes the opposite position: 'So the text-node Reaction inside the snippet body does end up depending on the per-item itemSignal. The wiring is fine.' It claims the Reactions ARE wired and the bug is downstream (propsSnapshot/notify gating). Does not identify unwired per-item Reactions as the cause."
+    },
+    {
+      "text": "D: Identifies that the each-content-classifier conservatively bails on snippet/template/rerender/async invocations (treating them as cross-AST/dynamic) — forcing eager adoption — which is the fix",
+      "passed": false,
+      "evidence": "The answer references each-content-classifier ('confirms eager hydration is forced when an each contains a template (snippet) node, so adoptServerItems is what runs during hydrate (line 189-194)') but positions this as confirming the path that exposes the bug, not as the fix. The proposed fix is to populate propsSnapshot in adoptServerItems — a completely different remediation than 'force eager adoption via classifier bail-out.'"
+    },
+    {
+      "text": "E: Mentions the existing test 'snippet with named args inside each is reactive after hydration' (PR #175 unskipped it) OR equivalent: this scenario is a known regression test",
+      "passed": true,
+      "evidence": "Answer references 'the existing snippet with named args inside each test' at packages/renderer/test/browser/ssr-hydration.test.js:1408-1433, noting it 'uses a new object ref and therefore doesn't catch this.' Identifies the existing scenario test even if framing it as a near-miss rather than the regression test PR #175 unskipped."
+    }
+  ]
+}

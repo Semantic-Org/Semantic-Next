@@ -1,0 +1,34 @@
+{
+  "expectations": [
+    {
+      "text": "A: Identifies that bench noise floor scales inversely with bench duration",
+      "passed": true,
+      "evidence": "Stated explicitly: 'Relative noise is `absolute_jitter / bench_duration`, so it scales inversely with how long the bench takes' and 'The floor is a function of duration, not sample count.'"
+    },
+    {
+      "text": "B: Quotes or paraphrases the duration→noise table: ~2ms = ±10-20%, ~10ms = ±2-5%, ~50ms+ = ±1%",
+      "passed": true,
+      "evidence": "Reproduces the table verbatim under 'Why the floor is ±28%': '~2ms | ±10-20%', '~10ms | ±2-5%', '~50ms+ | ±1% or tighter' (with the ~6ms row added for context)."
+    },
+    {
+      "text": "C: Explains the physics: per-sample jitter (OS scheduling, GC, JIT) is roughly constant in absolute terms, typically sub-millisecond",
+      "passed": true,
+      "evidence": "States: 'Per-sample timing jitter on a CI runner — OS scheduling, GC pauses, JIT recompilations — is roughly constant in absolute terms, typically σ≈1-2ms.' Note: the rubric says 'typically sub-millisecond' while the answer says σ≈1-2ms; the qualitative claim (constant absolute jitter, named sources) matches."
+    },
+    {
+      "text": "D: Concludes that at ~6ms, ±28% is the floor; no amount of additional sampling lowers it",
+      "passed": true,
+      "evidence": "States: 'At 6ms, ~2ms of absolute jitter is ~33% relative — exactly where your ±28% lives' and explicitly: 'Even pushing `sampleSize` to 200+ would only narrow the CI within the noise floor — it would not push *below* it. The floor is a function of duration, not sample count.'"
+    },
+    {
+      "text": "E: Recommends increasing work per sample (e.g., bump to 1000 items) to push bench duration into the ±1% band",
+      "passed": true,
+      "evidence": "Section 'What to change about the bench' recommends amplifying per-sample work; option 1: 'Bump item count (most reliable) ... 1000 items ... pushes it into the 50-100ms range where ±1% becomes resolvable.' Concrete next step: 'Bump items to 1000.'"
+    },
+    {
+      "text": "F: Optionally references the perf-improvement skill or `improve-performance` workflow as the source for this methodology",
+      "passed": true,
+      "evidence": "References section explicitly cites 'ai/skills/workflows/contributing/improve-performance.md — duration/noise table, tuning-knob semantics' and also 'ai/skills/contributing/read-bench-report.md'."
+    }
+  ]
+}

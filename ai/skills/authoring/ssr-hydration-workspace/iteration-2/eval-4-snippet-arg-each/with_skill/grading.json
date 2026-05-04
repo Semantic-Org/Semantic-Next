@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "A: Recognizes this is the same root cause as eval 2 (each-hydrate deferral) — not a snippet-specific bug",
+      "passed": true,
+      "evidence": "Opens with 'This is the **lazy each-block hydration** trap' and frames it as a deferred per-item Reaction wiring problem rather than a snippet-specific bug. Step 5 explicitly distinguishes that pushing a new array fires the outer Reaction while mutating items[0] in place doesn't invalidate anything — directly mirroring the each.hydrate deferral framing."
+    },
+    {
+      "text": "B: Explains that snippet args (label=item.name) are evaluated by the per-item content path; the snippet body sees those args via buildSnippetProxy",
+      "passed": true,
+      "evidence": "Step 4: 'wraps the badge's snippet invocation hydrate hook... wrapped in Reactions whose compute function reads `label` through the snippet-arg proxy (`buildSnippetProxy` at `template.js:67`), which re-evaluates `item.name` against the item context's reactive data channel.' Names buildSnippetProxy and the snippet-arg threading explicitly."
+    },
+    {
+      "text": "C: Notes that without per-item Reactions wired, the snippet arg evaluation never re-runs when items change in place",
+      "passed": true,
+      "evidence": "Step 4: 'Without that adoption pass, **none of those Reactions exist.** The text node containing `[first]` is just static text on the page; nothing is observing `item.name` to write to it.' Step 5 reinforces: 'writing `items[0].name = \"second\"`... doesn't invalidate anything observing that text node.'"
+    },
+    {
+      "text": "D: Identifies that the each-content-classifier conservatively bails on snippet/template/rerender/async invocations (treating them as cross-AST/dynamic) — forcing eager adoption — which is the fix",
+      "passed": true,
+      "evidence": "'Why the snippet matters specifically' section: 'The classifier in `each-content-classifier.js` walks the per-item content AST and bails to \"external\" (forcing eager wiring) on cross-AST nodes — `template`, `snippet`, `rerender`, `guard`, `async` (lines 189-194 of that file).' Also notes 'snippet → bail to eager → adoption wires the snippet's interior bindings.'"
+    },
+    {
+      "text": "E: Mentions the existing test 'snippet with named args inside each is reactive after hydration' (PR #175 unskipped it) OR equivalent: this scenario is a known regression test",
+      "passed": true,
+      "evidence": "Multiple references to PR #175: 'Worth checking your branch is on PR #175 or later — the snippet-bail test was unskipped there.' And later: 'Branch predates PR #175 — `each.hydrate` doesn't consult the classifier at all and stays unconditionally lazy. The snippet-arg-in-each test was unskipped in that PR; before it, this exact case was a known silent-failure bug.'"
+    }
+  ]
+}

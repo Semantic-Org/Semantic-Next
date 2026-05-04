@@ -1,0 +1,40 @@
+{
+  "skill_name": "ssr-hydration",
+  "evals": [
+    {
+      "id": 0,
+      "name": "innerHTML-doesnt-process-DSD",
+      "prompt": "I'm writing a vitest browser test for a Semantic UI component's SSR hydration. I server-render the component to a string with renderToString, then inject it into a wrapper div via wrapper.innerHTML = html. I append the wrapper to document.body and await a 'rendered' event. The test asserts that el.shadowRoot has the per-item DOM the server emitted. The assertion fails — el.shadowRoot is null at the time I check. Walk me through what's happening and how to fix it. Be specific about which DOM API to use instead and why.",
+      "expected": "Identifies that innerHTML's fragment parser does not process <template shadowrootmode>. Recommends setHTMLUnsafe (or Document.parseHTMLUnsafe). Explains the consequence: hasServerContent is false in connectedCallback, so the component runs fullRender instead of hydrate.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "renderToString-empty-in-browser-env",
+      "prompt": "I'm writing a vitest browser test that calls renderToString(MyComponent, { items: [...] }) and inspects the resulting HTML string. The output is always `<my-component><template shadowrootmode=\"open\"></template></my-component>` — completely empty inside the template. The component's defaultSettings has the items I'm passing, the template has an each block, and on the actual SSR-from-Node path it renders the items fine. What's different about the browser test env, and how do I get renderToString to actually emit the items?",
+      "expected": "Identifies that Template.isServer gates the server vs client renderer selection. In a browser, Template.isServer is false by default, so template.render() picks the client Renderer (which writes to DOM, not strings). Solution: toggle Template.isServer = true around the renderToString call (with try/finally restore).",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "each-block-external-state-not-reactive-after-hydrate",
+      "prompt": "I have a Semantic UI component that hydrates from server-rendered DOM. Inside it there's a `{#each item in items}<a class=\"{classMap getItemClasses item}\">{item.title}</a>{/each}` block. The items array is set once from a prop and never mutates. The getItemClasses helper reads state.activeID and returns { active: state.activeID.get() === item.id, item: true }. On the client, mutating state.activeID does NOT update the rendered class — but I added a direct reaction(() => console.log(state.activeID.get())) and it fires correctly on every change. Why is the per-item class binding not reacting, and what's the fix?",
+      "expected": "Identifies that each.hydrate intentionally defers per-item Reaction wiring; per-item bindings only get wired when the items signal first fires (via adoptServerItems → hydrateInnerContent). When items never mutates, the bindings stay unwired forever, so external state changes have nothing to invalidate. The fix is the each-content-classifier introduced in PR #175 — should mention the classifier walks the each's content AST and forces eager adoption when bindings could read external state.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "tachometer-bench-noise-floor-too-high",
+      "prompt": "I added a tachometer bench measuring my component's hydration cost on a 100-item list. The bench reports the bench duration is ~6ms and tachometer says 'no meaningful change' compared to main, with an expected noise floor of ±28%. I'm pretty sure my fix shaved measurable time off hydrate, but the bench can't see it. Why is the noise floor so wide, and what should I change about the bench?",
+      "expected": "Explains that bench noise floor scales inversely with bench duration (per-sample jitter is roughly constant absolute, sub-millisecond). At ~6ms, ±28% is the physics of the measurement. The perf-improvement skill's table: ~2ms = ±10-20%, ~10ms = ±2-5%, ~50ms+ = ±1%. Fix: increase the work per sample — bump to 1000 items so the bench duration moves to ~60-160ms range where ±1-2% becomes resolvable.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "snippet-arg-inside-each-not-reactive",
+      "prompt": "I have an each block where each per-item content invokes a snippet: `{#each item in items}<div>{>badge label=item.name}</div>{/each}` and the badge snippet is `{#snippet badge}<span>[{label}]</span>{/snippet}`. After SSR + hydrate, mutating items[0].name (and pushing a new array) doesn't update the rendered label of the first badge. The outer each block's reaction definitely fires (I can see new DOM if I add new items). What's the framework doing?",
+      "expected": "Recognizes this as the same family as the each-hydrate-external-state bug. The snippet invocation is inside the each's per-item content; per-item reactions (including subtemplate/snippet arg evaluations) are deferred by each.hydrate and only wire when items signal first fires via adoptServerItems. Should explain that the each-content-classifier in PR #175 conservatively bails on snippet/template/rerender/async invocations (cross-AST flow it doesn't trace) — forcing eager adoption — which is what fixes this case.",
+      "files": []
+    }
+  ]
+}

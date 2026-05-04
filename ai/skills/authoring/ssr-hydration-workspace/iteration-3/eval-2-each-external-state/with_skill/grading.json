@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "A: Identifies each.hydrate deliberately defers per-item Reaction wiring (not a bug in the lazy design)",
+      "passed": true,
+      "evidence": "Line 9: 'On the SSR-then-hydrate path, each.hydrate does not unconditionally wire per-item Reactions. Per-item wiring is expensive (item count x bindings per item — ~425ms on a 1000-item list in prior benches), so the framework defers it'. Explicitly framed as deliberate deferral for performance, not a bug."
+    },
+    {
+      "text": "B: Explains the chain: each.hydrate only registers a dep on node.over; per-item Reactions wire later via adoptServerItems when items signal fires",
+      "passed": true,
+      "evidence": "Line 9: 'when hydrate runs, it only registers a dependency on the items collection signal and waits for update to fire. update then calls adoptServerItems, which finally wires per-item Reactions onto the existing server-rendered nodes.' Says 'items collection signal' rather than node.over by name, but the chain is correctly described."
+    },
+    {
+      "text": "C: Recognizes that if items never mutates, update never runs, and per-item bindings stay unwired forever",
+      "passed": true,
+      "evidence": "Line 13: 'Because items is set once from a prop and never mutates, the items signal never fires after hydrate. update never runs. adoptServerItems never fires. The per-item Reactions for class=\"{classMap getItemClasses item}\" are never wired.' Verbatim match to expectation."
+    },
+    {
+      "text": "D: Connects the bug to getItemClasses reading state.activeID — the external signal has no Reaction to invalidate, so mutations are silently lost",
+      "submitted": true,
+      "passed": true,
+      "evidence": "Line 15: 'With no Reaction wired around getItemClasses(item), state.activeID.depend() is never called inside a tracked compute. Mutations to state.activeID have no subscriber on those bindings to invalidate. The class string in the DOM stays at whatever the server emitted.' Direct connection made."
+    },
+    {
+      "text": "E: References the each-content-classifier (or equivalent fix shape: 'force eager adoption when bindings could read external state') as the resolution",
+      "passed": true,
+      "evidence": "Section 'Why the classifier didn't catch it' (lines 22-31) discusses each-content-classifier.js / isEachContentSelfContained extensively. Fix 2 (line 47): 'Force the each block onto the eager hydrate path. The classifier is the public contract for this.' Both classifier reference and the equivalent fix shape are explicit."
+    },
+    {
+      "text": "F: Notes the per-binding Reactions use skipFirstWrite: true — they evaluate to register deps but trust the SSR'd DOM; the evaluation IS what registers external deps",
+      "passed": true,
+      "evidence": "Line 17: 'The framework's per-expression reactivity guarantee depends on the per-binding Reaction running at least once with Scheduler.current set — that's the only way Dependency.depend() becomes a no-op-no-more. The lazy each path skips that step. There is no \"register without running\" — the evaluation IS the witness.' Captures the 'evaluation IS the registration' insight. skipFirstWrite is referenced explicitly in Key files section: 'reactive-data.js — skipFirstWrite contract; the load-bearing per-binding evaluation that registers signal deps'."
+    }
+  ]
+}

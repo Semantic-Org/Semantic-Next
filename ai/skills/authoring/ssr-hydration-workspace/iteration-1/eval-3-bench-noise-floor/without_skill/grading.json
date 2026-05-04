@@ -1,0 +1,34 @@
+{
+  "expectations": [
+    {
+      "text": "A: Identifies that bench noise floor scales inversely with bench duration",
+      "passed": true,
+      "evidence": "Opening lines state 'absolute per-sample jitter is roughly constant (~2 ms σ on the GHA runners this repo uses) and ±X% is just (constant ms) / (your duration)'. Summary repeats: 'duration-derived statistical floor for the σ ≈ 2 ms per-sample jitter'. Inverse scaling is explicitly named."
+    },
+    {
+      "text": "B: Quotes or paraphrases the duration→noise table: ~2ms = ±10-20%, ~10ms = ±2-5%, ~50ms+ = ±1%",
+      "passed": true,
+      "evidence": "Provides a concrete table of measured durations vs predicted ±% half-widths (7.4ms = ±10.6%, 13.7ms = ±5.7%, 12.6ms = ±6.2%, 16.2ms = ±4.8%) and states '≥ 30 ms (predicted ±2.6%) to comfortably clear the ±2% noise floor'. Also derives ±26% at 6ms. The bands map to the rubric's tiers (short = ±10-20%, ~10ms = ±2-5%, longer = ±1%)."
+    },
+    {
+      "text": "C: Explains the physics: per-sample jitter (OS scheduling, GC, JIT) is roughly constant in absolute terms, typically sub-millisecond",
+      "passed": true,
+      "evidence": "Explicitly explains 'absolute per-sample jitter is roughly constant' and lists 'system jitter (scheduling, GC, JIT)' as the cause. Notes σ ≈ 2 ms on GHA runners (slightly above sub-millisecond but the constant-absolute physics is clearly stated). The 'roughly constant in absolute terms' point is made repeatedly."
+    },
+    {
+      "text": "D: Concludes that at ~6ms, ±28% is the floor; no amount of additional sampling lowers it",
+      "passed": true,
+      "evidence": "Computes ±26% predicted at 6ms, explains observed ±28% is at the noise-floor-limited boundary, and explicitly states in option 4: 'Don't bump sampleSize — diminishing returns... 4× the wall-clock time gets you from ±28% to ±14%' and 'Width comes from duration, not from sample count beyond a point.'"
+    },
+    {
+      "text": "E: Recommends increasing work per sample (e.g., bump to 1000 items) to push bench duration into the ±1% band",
+      "passed": true,
+      "evidence": "Option 1 recommends 'Move from 100 items to whatever clears 30 ms in absolute time. For pure hydration, that's typically 500–1000 items in this repo.' Cites bench-hydrate.js using n=1000 items as the existing pattern to copy. Targets ≥30 ms / ±2.6%."
+    },
+    {
+      "text": "F: Optionally references the perf-improvement skill or improve-performance workflow as the source for this methodology",
+      "passed": false,
+      "evidence": "Answer references reporter.js, bench-history.json, bench-todo.js, and bench-hydrate.js as sources, but does not name the perf-improvement skill or improve-performance workflow. This is an optional expectation but per the rubric's literal wording it is not satisfied."
+    }
+  ]
+}

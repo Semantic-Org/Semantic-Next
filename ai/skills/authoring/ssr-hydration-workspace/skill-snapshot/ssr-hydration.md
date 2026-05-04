@@ -22,78 +22,6 @@ This is not server rendering for SEO or static generation. The goal is a fast vi
 
 ---
 
-## Critical gotchas (read first if you're testing or benching SSR)
-
-These are silent-failure modes — no error, your code just runs the wrong path. Each one cost real investigation time. Lead with them when triaging "my hydration test is broken" or "tachometer can't see my fix."
-
-### Gotcha 1: `innerHTML` does NOT process Declarative Shadow DOM
-
-The browser's main HTML parser processes `<template shadowrootmode="open">` natively — that's why a real page works. But the **fragment parsers** (`innerHTML`, `outerHTML`, `insertAdjacentHTML`) do not. The DSD spec opts those out because they're entry points for XSS escalation.
-
-```js
-// ❌ wrong — wrapper.firstElementChild has no shadowRoot
-wrapper.innerHTML = renderToString(MyComponent, attrs);
-
-// ✅ right — DSD is processed, shadow root attached
-wrapper.setHTMLUnsafe(renderToString(MyComponent, attrs));
-// Document-scoped alternative:
-const doc = Document.parseHTMLUnsafe(html);
-```
-
-**The silent-failure chain when you use `innerHTML`:**
-1. `<template shadowrootmode>` stays as a literal child of the custom element
-2. `el.shadowRoot` is `null` when `connectedCallback` fires
-3. `hasServerContent = el.shadowRoot && el.shadowRoot.childNodes.length > 0` → `false`
-4. `connectedCallback` falls through to `fullRender(prototypeTemplate)` instead of `hydrate(prototypeTemplate)`
-5. Your test or bench "works" — but it's measuring fresh client render, not hydration
-
-There is no error or warning. Tests pass for the wrong reason; benches measure the wrong code path. The canonical helper in `packages/renderer/test/browser/ssr-hydration.test.js` (`ssrAndHydrate`) uses `setHTMLUnsafe` for exactly this reason.
-
-### Gotcha 2: `renderToString` returns empty in browser test env unless `Template.isServer = true`
-
-`Template.isServer` is set once at module load from `typeof window === 'undefined'` in `@semantic-ui/utils`. In a browser test, `window` exists, so `Template.isServer === false`. Inside `Template.initialize()` the engine selection is:
-
-```js
-const RendererClass = (Template.isServer && engine.serverRenderer)
-  ? engine.serverRenderer
-  : engine.renderer;
-```
-
-The client `Renderer` returns a `DocumentFragment` from `render()`, not a string. `renderToString`'s wrapper template literal coerces that to `'[object DocumentFragment]'` (or empty after the string-only `expandCustomElements` no-ops on it). The DSD wrapper is emitted but the content inside is empty.
-
-```js
-// ✅ pattern from ssrAndHydrate
-const wasServer = Template.isServer;
-Template.isServer = true;
-try {
-  html = renderToString(Component, attrs);
-} finally {
-  Template.isServer = wasServer;
-}
-```
-
-The `try/finally` matters — leaving `Template.isServer = true` after the call breaks any subsequent client-side hydration or mount in the same test, because the renderer selection happens once per `template.initialize()`.
-
-### Gotcha 3: bench noise floor scales inversely with bench duration
-
-Per-sample timing jitter on CI runners (OS scheduling, GC, JIT) is roughly constant in absolute terms — typically σ≈1-2ms. Relative noise scales inversely with bench duration:
-
-| Bench duration | Expected noise floor |
-|---|---|
-| ~2ms | ±10-20% |
-| ~10ms | ±2-5% |
-| ~50ms+ | ±1% or tighter |
-
-A 6ms bench at ±28% noise is unresolvable — anything below ±28% reads as "no change" regardless of how many samples you collect. Tightening `autoSampleConditions` or bumping `sampleSize` does not lower the floor; only narrows the CI under it. Sampling more is √N-scaling: 4× samples for 2× CI tightening, capped by the per-config wall-clock budget.
-
-**The fix is to amplify work per sample.** Bump item count, loop the operation N times inside one `performance.measure`, or split into mount-vs-rebind windows. The canonical `bench-hydrate.js` uses 1000 items (not 100, despite the metric name's `-100` suffix) precisely to push duration into the ±1% band. See the `improve-performance` skill's bench-duration table for the methodology.
-
-### Gotcha 4: cross-session "regressions from peak" are phantoms
-
-The in-house bench reporter shows two columns: within-session `vs main` (the truthful signal) and cross-session "regressed from peak". The peak attribution operates on absolute ms across runs on different runner conditions and produces phantom regressions on PRs that didn't change perf. Read the `vs main` table; treat the "from peak" table as noisy until the `bench-reporter-overhaul` Track A schema_v2 lands.
-
----
-
 ## The Full Lifecycle
 
 A server-rendered component passes through five phases from definition to interactivity:
@@ -356,9 +284,16 @@ hydrate(prototypeTemplate) {
 
 Two passes over the server-rendered DOM:
 
-**Pass 1: Attribute bindings** — The server stamps `data-sui-bind="attr=N,..."` on every element with dynamic bindings (Plan 04 fast path). The client walks `[data-sui-bind]` elements at top level and wires Reactions directly via `entries[id].attributeBinding`. Block-owned elements (inside `{#if}`/`{#each}`/etc., tracked via `blockDepth` from comment markers) are skipped — block handlers recurse into their own contents via `hydrateInnerContent`. A legacy fallback (parallel ref-DOM walker) exists for older SSR output without `data-sui-bind`.
+**Pass 1: Attribute bindings** — The server didn't embed attribute markers (it evaluated them inline), so hydration can't find markers in the DOM. Instead, it builds a **reference DOM** from the AST's `buildHTMLString` output (which contains `__suiN__` markers), then walks the reference DOM and real DOM in parallel:
 
-**Pass 2: Comment markers** — A TreeWalker finds `<!--sui:v1:N-->` (text expressions) and `<!--sui-block:v1:N-->` (block directives) at top level. `blockDepth` tracking skips inner markers; block handlers process their own children.
+```
+Reference DOM: <div class="__sui0__ card" data-count="__sui1__">
+Real DOM:      <div class="dark card" data-count="3">
+```
+
+For each marker found in the reference element's attributes, the corresponding real element gets a Reaction wired. Block-owned elements (children inside `{#if}`, `{#each}`, etc.) are skipped because they're handled recursively by block hydration.
+
+**Pass 2: Comment markers** — A TreeWalker finds `<!--sui:v1:N-->` (text expressions) and `<!--sui-block:v1:N-->` (block directives) at the top level only. Block nesting is tracked via `blockDepth` — inner markers are skipped because block handlers process their own children recursively.
 
 For each marker:
 
@@ -366,56 +301,10 @@ For each marker:
 |-------------|-----------------|
 | Text expression | Wire a Reaction that sets `textNode.data` on change |
 | Conditional block | Collect owned DOM nodes between open/close markers, wire Reaction for future branch changes |
-| Each block | Register dep on collection (lazy default) OR adopt server items eagerly per the each-content classifier — see "Each block hydration" below |
+| Each block | Collect per-item DOM nodes, create item Signals and Proxies for each, wire Reaction for list changes |
 | Template/snippet | Collect owned nodes, initialize subtemplate, recursively hydrate inner markers |
 | Async block | Wire the full async Reaction (loading → resolved → error), existing loading content gets replaced when promise resolves |
 | Rerender block | Collect owned nodes, wire the rerender/guard Reaction |
-
-### The skipFirstWrite contract
-
-When debugging "my signal mutation doesn't update the DOM after hydration," name `skipFirstWrite: true` explicitly — it's the grep-able load-bearing mechanism in `packages/renderer/src/engines/native/reactive-data.js` and surfacing it lets the reader navigate the code path directly.
-
-Per-binding Reactions wired during hydration use `skipFirstWrite: true`:
-
-```js
-scope.reaction(element, (comp) => {
-  const value = renderer.lookupExpression(node.value, data);
-  if (skipFirstWrite && comp.firstRun) { return; }
-  // ... DOM write
-});
-```
-
-The first run **evaluates the expression** (which is what registers signal dependencies as a side effect of accessing the data proxy) but **skips the DOM write** (the SSR'd value is trusted). This is the load-bearing piece for hydration correctness: the evaluation IS the witness for what signals the binding depends on. `Dependency.depend()` is a no-op when `Scheduler.current` is null, so the only way to register a dep is to read the signal *inside* a wired Reaction's compute callback. There is no "register without running" — the framework's per-expression reactivity guarantee comes from this arrangement.
-
-This is why, when a per-binding Reaction *isn't* wired (see each-block lazy hydrate below), the framework loses the ability to react to that expression's signals. Static analysis can't substitute — it can only decide whether to wire the Reaction at all.
-
-### Each-block hydration: lazy by default, eager when content reads external state
-
-`each.hydrate` is the only block hydrate hook that doesn't unconditionally wire per-item Reactions. The lazy path is a perf optimization: per-item Reactions are expensive (item count × bindings per item), so defer wiring until the items signal first fires, then wire in place via `adoptServerItems`. On a 1000-item list, eager wiring on hydrate added ~425ms in a previous experiment.
-
-The deferral assumes per-item bindings only depend on item-local data. When a binding closes over external state (a helper that reads `state.x`, a component method, a snippet arg evaluated against the parent scope), that assumption breaks. If items never mutates after hydrate, `update` never runs, `adoptServerItems` never fires, per-item Reactions never wire, and external mutations silently lose reactivity. The docs site `inpage-menu` was the canonical repro: items arrived as a prop and never changed; `getItemClasses(item)` reading `state.activeID` never updated the rendered class.
-
-The fix (PR #175) is `packages/renderer/src/engines/native/blocks/each-content-classifier.js` — a static analyzer that walks the each block's content AST and decides whether everything resolves to `iteration-vars ∪ pure-helper-registry ∪ reserved-names`. Cached per-AST identity on a `WeakMap`. `each.hydrate` consults it:
-
-```js
-hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
-  lookupExpression(node.over);                                  // dep on items
-  self.hasHydrated = true;
-  if (isEachContentSelfContained(node)) { return; }             // lazy preserved
-  // ...resolve items, eagerly call adoptServerItems...
-}
-```
-
-Self-contained → existing lazy hydrate (item-only `{item.name}`-style bindings + framework helpers like `classMap`/`activeIf`/`is`). Anything else → eager `adoptServerItems` so per-item Reactions register their external deps now.
-
-Conservative bails (treat as not-self-contained, force eager wire):
-- `{#each}` without explicit `as` (item keys spread into local scope; statically indistinguishable from external names)
-- `{>snippet ...}`, `{>template ...}`, `{#rerender}`, `{#guard}`, `{#async}` — cross-AST or dynamic content the classifier doesn't trace into
-- Any expression where an identifier head doesn't resolve to iteration-vars or `TemplateHelpers`
-
-The same family of bug applies to **snippet-with-args inside each** (`{#each item in items}<div>{>badge label=item.name}</div>{/each}`): the snippet args evaluate inside the per-item content path; without per-item Reactions wired they never re-run when items mutate. The classifier's snippet-bail catches this case — that test is unskipped in PR #175.
-
-The classifier runs only inside `each.hydrate`, which only runs on the SSR-then-hydrate path. The 90% of users who runtime-compile in the browser without SSR pay zero analyzer cost. SSR users pay one walk per unique each-content AST shape (cached). The AST itself stays clean — no per-node hydration metadata.
 
 ### Key Hydration Behaviors
 
@@ -543,26 +432,9 @@ HYDRATION WIRING
   1. Remove server <style> (CSS -> adoptedStyleSheets)
   2. Clone template, initialize (createComponent runs client-side)
   3. Build entries from AST (cached on prototype)
-  4. hydrateMarkers:
-       Pass 1: data-sui-bind fast path for attribute bindings
-       Pass 2: TreeWalker over comment markers for text + blocks
-       Per-binding Reactions use skipFirstWrite: true
-       (evaluate to register deps, skip DOM write — server's value trusted)
-  5. Remove all comment markers + data-sui-bind attributes (rAF)
+  4. hydrateMarkers: parallel walk for attributes, comment walk for text + blocks
+  5. Remove all comment markers
   6. Fire onRendered
-
-EACH BLOCK HYDRATION
-  each.hydrate consults isEachContentSelfContained(node):
-    self-contained -> lazy: just register dep on items collection
-    not self-contained -> eager adoptServerItems (wire per-item now)
-  Bails to "not self-contained" on:
-    no-`as` each, snippet/template/rerender/async/guard, unknown identifiers
-
-TESTING / BENCHING TRAPS (silent failures)
-  innerHTML doesn't process DSD          -> use setHTMLUnsafe
-  renderToString empty in browser env    -> Template.isServer = true (try/finally)
-  bench under ~30ms can't resolve <±10%  -> bump items / loop op N times
-  cross-session "regressed from peak"    -> phantom; read `vs main` table instead
 ```
 
 ---
@@ -578,18 +450,10 @@ packages/component/src/
 └── engines/native/factory.js     Creates web component class with observedAttributes
 
 packages/renderer/src/
-├── build-html-string.js                              Shared HTML assembly + marker format constants
-├── expression-evaluator.js                           Shared expression evaluation
-├── engines/native/server.js                          ServerRenderer — AST -> HTML string
-├── engines/native/renderer.js                        Renderer — hydrateMarkers(), hydrateAttributes()
-├── engines/native/reactive-data.js                   bindAttribute / bindTextExpression with skipFirstWrite
-└── engines/native/blocks/
-    ├── each.js                                       each.hydrate gate, adoptServerItems, item proxy
-    └── each-content-classifier.js                    isEachContentSelfContained — lazy/eager gate
-
-packages/renderer/test/
-├── browser/ssr-hydration.test.js                     Canonical ssrAndHydrate helper (setHTMLUnsafe + Template.isServer)
-└── unit/each-content-classifier.test.js              Classifier behavior (item-local, external, conservative-bail)
+├── build-html-string.js          Shared HTML assembly + marker format constants
+├── expression-evaluator.js       Shared expression evaluation
+├── engines/native/server.js      ServerRenderer — AST -> HTML string
+└── engines/native/renderer.js    Renderer — hydrateMarkers(), hydrateAttributes()
 ```
 
 ---

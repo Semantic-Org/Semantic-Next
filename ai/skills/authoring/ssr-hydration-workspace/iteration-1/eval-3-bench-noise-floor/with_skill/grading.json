@@ -1,0 +1,34 @@
+{
+  "expectations": [
+    {
+      "text": "A: Identifies that bench noise floor scales inversely with bench duration",
+      "passed": true,
+      "evidence": "Opening states 'A 6ms tachometer bench... is below the resolution floor by physics' and explains 'CI width scales as ~σ/√N in absolute terms but as ~σ/(mean × √N) in relative terms', plus the entire duration-vs-noise table showing inverse relationship between mean duration and relative CI width."
+    },
+    {
+      "text": "B: Quotes or paraphrases the duration→noise table: ~2ms = ±10-20%, ~10ms = ±2-5%, ~50ms+ = ±1%",
+      "passed": true,
+      "evidence": "Provides a duration-vs-noise table: '2 ms ~±50%, 6 ms ~±28%, 20 ms ~±5–8%, 50 ms ~±2–4%, 100 ms ~±1–2%'. Numbers differ from the rubric's exact values (uses σ≈2ms calibration) but conveys equivalent inverse-scaling structure across the same regimes."
+    },
+    {
+      "text": "C: Explains the physics: per-sample jitter (OS scheduling, GC, JIT) is roughly constant in absolute terms, typically sub-millisecond",
+      "passed": true,
+      "evidence": "States 'GHA shared runners have a roughly constant absolute timing variance of σ≈2ms per sample' and lists sources as 'OS scheduling, GC, JIT recompiles, shared CPU'. Calls out that jitter is constant in absolute terms (though uses ~2ms rather than sub-millisecond — still captures the constant-absolute-jitter physics)."
+    },
+    {
+      "text": "D: Concludes that at ~6ms, ±28% is the floor; no amount of additional sampling lowers it",
+      "passed": true,
+      "evidence": "'Your ±28% matches the 6ms row, which is the noise floor giving its honest verdict' and explicitly addresses 'Why \"just bump sampleSize\" is the wrong instinct' showing that scaling N is impractical and that the floor is physics-limited. Also: 'Physics-limited; sampling longer won't help.'"
+    },
+    {
+      "text": "E: Recommends increasing work per sample (e.g., bump to 1000 items) to push bench duration into the ±1% band",
+      "passed": true,
+      "evidence": "Section 'Concrete fix for your bench — amplify the per-hydrate work' offers three scaling options including 'Scale the list itself' with explicit recommendation: 'Bump to 1000 items × ~60µs = ~60ms and you sit comfortably above the floor', plus the loop-N-times option pushing to ~300ms window for '<±1% territory'."
+    },
+    {
+      "text": "F: Optionally references the perf-improvement skill or improve-performance workflow as the source for this methodology",
+      "passed": true,
+      "evidence": "References 'ai/skills/contributing/extend-bench-suite.md' and 'ai/skills/contributing/read-bench-report.md' as the canonical sources for duration target table, naming conventions, knobs, and the Inconclusive vs Too Fast to Measure Precisely buckets. This is the expected skill family ('From the bench skill, the local verification flow:'). Marked optional in rubric; satisfied here."
+    }
+  ]
+}

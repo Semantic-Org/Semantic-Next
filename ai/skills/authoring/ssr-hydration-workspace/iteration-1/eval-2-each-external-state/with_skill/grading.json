@@ -1,0 +1,34 @@
+{
+  "expectations": [
+    {
+      "text": "A: Identifies `each.hydrate` deliberately defers per-item Reaction wiring (not a bug in the lazy design)",
+      "passed": true,
+      "evidence": "Answer describes the lazy/eager paths in each.hydrate explicitly (lines 12-14) and frames the lazy path as 'a deliberate optimization' (line 105): 'if every per-item binding reads only iteration-local data, the items signal firing is the *only* thing that can ever invalidate them, so deferring wiring until that fire is safe and saves work.'"
+    },
+    {
+      "text": "B: Explains the chain: `each.hydrate` only registers a dep on `node.over`; per-item Reactions wire later via `adoptServerItems` when items signal fires",
+      "passed": true,
+      "evidence": "Lines 12-14: 'Lazy — only register a dependency on the items collection itself. Per-item bindings get no Reactions until the items signal fires for the first time, at which point `adoptServerItems` walks `<!--sui-item:v1:KEY-->` markers, reuses each item's server DOM, and wires per-item Reactions inside.'"
+    },
+    {
+      "text": "C: Recognizes that if items never mutates, `update` never runs, and per-item bindings stay unwired forever",
+      "passed": true,
+      "evidence": "Line 5: 'Your `items` Signal never mutates, so the each-block's lazy hydration optimization is *staying* lazy'. Line 54: 'Your items don't mutate, so `adoptServerItems` never runs, and the binding never gets a Reaction watching `state.activeID`.'"
+    },
+    {
+      "text": "D: Connects the bug to `getItemClasses` reading `state.activeID` — the external signal has no Reaction to invalidate, so mutations are silently lost",
+      "passed": true,
+      "evidence": "Line 5: 'The class binding has nothing watching `state.activeID` to invalidate.' Line 54: 'the binding never gets a Reaction watching `state.activeID`. That matches your symptoms exactly.' The whole 'Where your case lands' section traces `getItemClasses` through the classifier."
+    },
+    {
+      "text": "E: References the each-content-classifier (or equivalent fix shape: \"force eager adoption when bindings could read external state\") as the resolution",
+      "passed": true,
+      "evidence": "Answer extensively discusses `each-content-classifier.js` and `isEachContentSelfContained` (lines 16-33). Fix #3 (line 91) is explicit: 'Force eager wiring by adding any binding the classifier flags as external.' Files section also points to the classifier source path."
+    },
+    {
+      "text": "F: Notes the per-binding Reactions use `skipFirstWrite: true` — they evaluate to register deps but trust the SSR'd DOM; the evaluation IS what registers external deps",
+      "passed": false,
+      "evidence": "No mention of `skipFirstWrite` anywhere in the answer (grep confirms zero occurrences). The answer discusses Reactions being 'wired' but never explains the skipFirstWrite mechanism — that the Reaction evaluates the binding once at hydrate time to register external deps without rewriting DOM. This mechanistic detail is missing."
+    }
+  ]
+}

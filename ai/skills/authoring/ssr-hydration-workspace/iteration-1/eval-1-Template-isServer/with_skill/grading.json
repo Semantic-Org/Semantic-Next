@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "A: Identifies `Template.isServer` as the controlling flag",
+      "passed": true,
+      "evidence": "The answer's title section is 'The root cause: Template.isServer is computed from typeof window' and explicitly states 'It picks based on the static flag Template.isServer'. Also enumerates Template.isServer = false as the cause."
+    },
+    {
+      "text": "B: Explains `template.render()` selects between `engine.serverRenderer` and `engine.renderer` based on `Template.isServer`",
+      "passed": true,
+      "evidence": "Quotes the exact selection code from template.js line 292: `const RendererClass = (Template.isServer && engine.serverRenderer) ? engine.serverRenderer : engine.renderer;` and explains the consequence."
+    },
+    {
+      "text": "C: Notes the client `Renderer` writes to DOM and does not produce HTML strings, leaving the wrapper template empty",
+      "passed": true,
+      "evidence": "Section 'Why the output looks empty' states 'When template.render() ran through the client Renderer.render() ... it returned a DocumentFragment - not a string' and explains the fragment coerces to '[object DocumentFragment]', leaving the items never appearing."
+    },
+    {
+      "text": "D: Recommends toggling `Template.isServer = true` for the duration of the `renderToString` call",
+      "passed": true,
+      "evidence": "The fix section explicitly shows `const wasServer = Template.isServer; Template.isServer = true;` around the renderToString call, both as canonical pattern from the framework's own tests and as a fix for the user."
+    },
+    {
+      "text": "E: Mentions wrapping in try/finally to restore the prior value (so other tests aren't affected)",
+      "passed": true,
+      "evidence": "Both code examples wrap renderToString in try/finally with `Template.isServer = wasServer` in finally, and adds 'Always restore in a finally - leaving Template.isServer = true for the rest of the test file will break any test that mounts a real component'."
+    }
+  ]
+}
