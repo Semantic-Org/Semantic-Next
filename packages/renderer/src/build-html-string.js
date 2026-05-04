@@ -6,7 +6,6 @@
   Pure function: all dependencies passed in, no instance state.
 */
 
-// Marker for expression placeholders in attribute values
 export const ATTR_MARKER_PREFIX = '__sui';
 export const ATTR_MARKER_SUFFIX = '__';
 
@@ -88,7 +87,7 @@ export function parseAttributeParts(attrValue) {
     if (match.index > lastIndex) {
       parts.push({ static: attrValue.slice(lastIndex, match.index) });
     }
-    const markerID = parseInt(match[1]);
+    const markerID = +match[1];
     parts.push({ markerID });
     markerIDs.push(markerID);
     lastIndex = ATTR_MARKER_RE.lastIndex;
@@ -279,36 +278,18 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
   return { htmlString, entries, snippets };
 }
 
-// After the AST walk completes, scan the emitted htmlString for every
-// attribute value that contains one or more `__sui{id}__` markers and
-// attach an `attributeBinding` record to the FIRST entry in that
-// attribute's marker set.
-//
-// attributeBinding = { rawAttrName, parts, markerIDs }
-//   rawAttrName: attribute as written in the template, with optional
-//                `.` / `@` prefix for property/event bindings. Boolean
-//                and regular attributes share the plain name — callers
-//                disambiguate via `entries[id].classification.type`.
-//   parts:       output of parseAttributeParts; alternating
-//                `{static}` and `{markerID}` entries covering the whole
-//                attribute value (including statics between/around
-//                multiple markers).
-//   markerIDs:   entry IDs for every expression inside this attribute,
-//                in document order. First ID is the "representative"
-//                that `data-sui-bind` on the server references.
-//
-// Subsequent entries in markerIDs (the non-first ones for a
-// multi-expression attribute) are reachable via the first entry's
-// attributeBinding. The hydration path processes each attribute once
-// via the first entry; bindAttribute handles the multi-expression
-// reaction internally using the full parts array.
-const ATTR_WITH_MARKER_RE = /\s([.@]?[\w:-]+)\s*=\s*(?:"([^"]*__sui\d+__[^"]*)"|([^\s"'>]*__sui\d+__[^\s"'>]*))/g;
+// Attach `attributeBinding` to the first entry of each attribute whose
+// value carries one or more markers. `parts` covers the full value
+// (alternating static/dynamic segments) so bindAttribute can reconstruct
+// the interpolation in one pass. The hydration path resolves the binding
+// via `data-sui-bind` → first entry → attributeBinding.parts.
+const ATTR_WITH_MARKER_RE = /\s(?:[.@]?[\w:-]+)\s*=\s*(?:"([^"]*__sui\d+__[^"]*)"|([^\s"'>]*__sui\d+__[^\s"'>]*))/g;
 
 function populateAttributeBindings(htmlString, entries) {
   ATTR_WITH_MARKER_RE.lastIndex = 0;
   let match;
   while ((match = ATTR_WITH_MARKER_RE.exec(htmlString)) !== null) {
-    const attrValue = match[2] !== undefined ? match[2] : match[3];
+    const attrValue = match[1] !== undefined ? match[1] : match[2];
     const { parts, markerIDs } = parseAttributeParts(attrValue);
     if (markerIDs.length === 0) { continue; }
     const entry = entries[markerIDs[0]];

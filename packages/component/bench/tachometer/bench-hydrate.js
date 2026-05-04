@@ -105,13 +105,11 @@ const elForMutate = container.firstElementChild;
 
 /*******************************
       Hydrate Each-100
-      (post-mount items mutation
-       — DOM already adopted)
+      (post-mount items mutation)
 *******************************/
 
-// setItems with a fresh array reference, same item keys as SSR markers.
-// Adoption ran at mount; this update tick exercises the items dependency
-// + per-Signal equality gate.
+// Fresh array reference, same keys as SSR markers — exercises the items
+// dependency wake + per-Signal equality gate without DOM work.
 performance.mark(startMark('hydrate-each-100'));
 elForMutate.component.setItems(itemsForMount.slice());
 await flush();

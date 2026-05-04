@@ -435,7 +435,7 @@ export class Renderer {
         const eqIdx = binding.lastIndexOf('=');
         if (eqIdx === -1) { continue; }
         const rawAttrName = binding.slice(0, eqIdx);
-        const entryId = parseInt(binding.slice(eqIdx + 1));
+        const entryId = +binding.slice(eqIdx + 1);
         if (isNaN(entryId)) { continue; }
         const entry = entries[entryId];
         if (!entry || !entry.attributeBinding) { continue; }
@@ -517,9 +517,8 @@ export class Renderer {
     }
   }
 
-  // `asChild: false` lands inner Reactions on the passed scope directly —
-  // snippet and subtemplate use this because their owning lifetime is
-  // already correct. Default registers a child boundary on region.childScopes.
+  // asChild=false reuses the passed scope; default creates and registers
+  // a child on region.childScopes.
   hydrateInto({ region, innerAST, data, scope, asChild = true }) {
     const targetScope = asChild ? scope.child() : scope;
     if (asChild) { region.childScopes.push(targetScope); }
