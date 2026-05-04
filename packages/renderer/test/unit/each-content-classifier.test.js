@@ -38,6 +38,14 @@ describe('isEachContentSelfContained', () => {
     expect(isEachContentSelfContained(node)).toBe(true);
   });
 
+  it('`this` inside an `as`-each forces eager (resolves to parent context)', () => {
+    // In `{#each item in items}`, `this` is NOT the item — the item is
+    // bound only to `item`. `this` reads parent data context, which is
+    // external state from the each's perspective.
+    const node = getEachNode('{#each item in items}<span>{this.x}</span>{/each}');
+    expect(isEachContentSelfContained(node)).toBe(false);
+  });
+
   it('pure helper with item-local arg stays lazy', () => {
     const node = getEachNode(
       '{#each item in items}<span>{formatDate item.created "h:mm a"}</span>{/each}',

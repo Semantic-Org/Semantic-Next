@@ -39,14 +39,17 @@ import { TemplateHelpers } from '@semantic-ui/templating';
 // call: a helper that reads state needs the per-binding Reaction to wire.
 const PURE_HELPERS = new Set(Object.keys(TemplateHelpers));
 
-// Reserved iteration-context names that show up implicitly. `this` is
-// the no-as item (also exposed when `as` is set). `index`/`key` are the
-// default `indexAs` names for arrays/objects when not explicitly named.
-const IMPLICIT_LOCALS = ['this', 'index', 'key'];
+// Iteration-context names exposed implicitly inside an `as`-each.
+// `index`/`key` are the default `indexAs` names for arrays/objects
+// when not explicitly named. `this` is NOT here: in `{#each items}`
+// (no-as) `this` is the item, but those bail at the public entry
+// before scope construction. Inside `{#each item in items}` (with as)
+// `this` resolves to the parent data context — i.e. external state
+// — and must NOT classify as iteration-local.
+const IMPLICIT_LOCALS = ['index', 'key'];
 
 // JS keywords and literal names that appear as bare identifiers but
-// don't read data context. `this` is intentionally NOT here — it does
-// read data context and is added via IMPLICIT_LOCALS at the scope level.
+// don't read data context. `this` is NOT here — see IMPLICIT_LOCALS.
 const RESERVED_NAMES = new Set([
   'true',
   'false',
