@@ -158,7 +158,7 @@ Completed 2026-05-02. Reversed 2026-05-04 (classifier ripped out, canonical eage
 - **PR #175** — bug fix on `bug/hydrate-reactivity`. Adds `each-content-classifier.js`, gates `each.hydrate`, 19 unit tests, unskips one previously-skipped integration test.
 - **PR #176** — test infra on `test/hydrate-bench-real-dsd`. `ssrAndHydrate` uses `setHTMLUnsafe`, `Template.isServer` toggle, `shadowHTML` strips `data-sui-bind`. Adds `hydrate-helper-100-mount` and `hydrate-helper-100-state-change` measurements.
 - **PR #177** — bench resolution on `test/hydrate-bench-1000-items`. One-line `makeItems(100)` → `makeItems(1000)` × 2.
-- Two `<task-notification>`-style fresh-take analyses in `ai/workspace/fresh-takes/` (neutral + challenge lenses) — preserved as historical context for the architectural debate.
+- Fresh-take subagent runs (neutral + challenge lenses) shaped the architectural debate that produced the eventual classifier rip-out.
 
 ### Methodology notes for future agents
 
