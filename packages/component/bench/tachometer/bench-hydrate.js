@@ -2,19 +2,17 @@ import { defineComponent } from '@semantic-ui/component';
 import { ServerRenderer } from '@semantic-ui/renderer';
 
 /*
-  Hydrate-each — gates hydration cost across two distinct windows:
+  Hydrate-each — two windows:
 
-  1. `hydrate-each-100-mount` — work paid by the hydrate microtask itself,
-     before any data mutation. Sensitive to designs that move per-item
-     wiring earlier (e.g. eager `adoptServerItems` in `each.hydrate`).
-  2. `hydrate-each-100` — first-data-change adoption: server-emitted
-     `<!--sui-item:v1:KEY-->` markers let `adoptServerItems` reuse DOM
-     and call `hydrateInnerContent` 100×. Sensitive to silent regressions
-     in the AST→string/entries cache (`renderer.js buildStringCache`),
-     which on a miss reverts to a full `buildHTMLStringPure` per item.
+  1. `hydrate-each-100-mount` — DSD parse + connectedCallback + the hydrate
+     microtask (eager `adoptServerItems`) + post-hydrate rAF. Per-item
+     wiring cost lives here.
+  2. `hydrate-each-100` — post-mount items mutation. Items dependency wakes,
+     `each.update` reconciles same keys, hits same-ref path. Mostly the
+     reconcile walk + Phase 3 snapshot diff.
 
-  Both windows require Declarative Shadow DOM to be parsed — `innerHTML`
-  does not process `<template shadowrootmode>`, only `setHTMLUnsafe` does.
+  Both windows require Declarative Shadow DOM — `setHTMLUnsafe` processes
+  `<template shadowrootmode>`, plain `innerHTML` does not.
 */
 
 defineComponent({

@@ -72,6 +72,7 @@ After the prefix:
 - **Concrete verbs.** Make / Move / Swap / Group / Add / Remove. Avoid Relocate / Re-anchor / Configure (formal/abstract). Avoid Drop (SQL connotations).
 - **Title is the primary change only.** Secondary work goes in body bullets — never `X and Y` titles.
 - **Don't lead with `BREAKING:` even for breaking changes.** The Risk score + changelog automation already signal the breaking nature. Use the prefix that describes the change *kind* — `Refactor:`, `Perf:`, `Feat:` — and let the Risk/changelog do the warning work.
+- **Don't leak iteration history into commit subjects** — no "Round 2 fixes," "post-review cleanup," "second pass," or similar. Even with squash-on-merge protecting `main`, branch commits are read by code-review subagents working on the PR, and round-numbering subtly biases them toward assuming earlier rounds caught the obvious issues. State what changed, not which review pass produced it. Same applies inside multi-commit branches that humans bisect.
 
 ### Worked examples (real PRs from this project)
 

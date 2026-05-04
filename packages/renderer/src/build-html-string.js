@@ -31,8 +31,7 @@ export const MAIN_BRANCH_INDEX = 1000;
 // where N is the first-entry ID. Name prefixes: `.prop`, `@event`, `?attr`.
 export const DATA_SUI_BIND = 'data-sui-bind';
 
-// Build a closing block marker comment data string. `meta.branchIndex` is
-// the only reserved suffix today; future suffixes added here.
+// Closing-marker payload. `branchIndex` is the only reserved suffix.
 export function formatBlockClose(id, meta) {
   let s = `${BLOCK_CLOSE_PREFIX}${MARKER_VERSION}:${id}`;
   if (meta && meta.branchIndex !== undefined) {
@@ -41,18 +40,15 @@ export function formatBlockClose(id, meta) {
   return s;
 }
 
-// Parse trailing metadata from a closing block marker into target.
 // `bN` → branchIndex; unknown segments ignored.
 export function parseServerMeta(commentData, target) {
   for (const part of commentData.split(':')) {
     if (part.startsWith('b')) {
-      target.branchIndex = parseInt(part.slice(1));
+      target.branchIndex = +part.slice(1);
     }
   }
 }
 
-// Walkers across renderer and each-block share these so prefix literals
-// stay in one place.
 export function isBlockOpen(commentData) {
   return commentData.startsWith(BLOCK_MARKER);
 }
@@ -66,13 +62,13 @@ export function isRawTextMarker(commentData) {
   return commentData.startsWith(RAW_TEXT_MARKER);
 }
 export function parseBlockOpenID(commentData) {
-  return parseInt(commentData.slice(BLOCK_MARKER.length));
+  return +commentData.slice(BLOCK_MARKER.length);
 }
 export function parseExpressionID(commentData) {
-  return parseInt(commentData.slice(COMMENT_MARKER.length));
+  return +commentData.slice(COMMENT_MARKER.length);
 }
 export function parseRawTextID(commentData) {
-  return parseInt(commentData.slice(RAW_TEXT_MARKER.length));
+  return +commentData.slice(RAW_TEXT_MARKER.length);
 }
 
 // Compiled once — `lastIndex` is reset manually per use so the regex can
@@ -312,12 +308,11 @@ function populateAttributeBindings(htmlString, entries) {
   ATTR_WITH_MARKER_RE.lastIndex = 0;
   let match;
   while ((match = ATTR_WITH_MARKER_RE.exec(htmlString)) !== null) {
-    const rawAttrName = match[1];
     const attrValue = match[2] !== undefined ? match[2] : match[3];
     const { parts, markerIDs } = parseAttributeParts(attrValue);
     if (markerIDs.length === 0) { continue; }
     const entry = entries[markerIDs[0]];
     if (!entry) { continue; }
-    entry.attributeBinding = { rawAttrName, parts, markerIDs };
+    entry.attributeBinding = { parts };
   }
 }

@@ -405,9 +405,7 @@ export class ServerRenderer {
       html += this.renderNodes(node.elseContent, data);
     }
     else {
-      // Per-item key marker — client adopts the matching node range at
-      // hydrate time. Key derivation lives in shared/each.js so server
-      // and client agree on identity.
+      // Per-item key marker — client adopts the matching node range at hydrate time.
       for (let i = 0; i < items.length; i++) {
         const eachData = getEachData(items[i], i, collectionType, node);
         const itemData = { ...data, ...eachData };
@@ -494,8 +492,7 @@ export class ServerRenderer {
       return instance.render();
     }
 
-    // Plain AST object — render directly. Data flows through renderNodes
-    // and every evaluator lookup takes it as an explicit argument.
+    // Plain AST object — render directly.
     if (template.ast) {
       return this.renderNodes(template.ast, data);
     }

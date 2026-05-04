@@ -517,10 +517,9 @@ export class Renderer {
     }
   }
 
-  // `asChild: false` skips child-scope creation so inner Reactions register
-  // on the passed `scope` directly — used by snippet/subtemplate, where the
-  // owning lifetime is already correct. Default true for blocks that want
-  // their own boundary on `region.childScopes`.
+  // `asChild: false` lands inner Reactions on the passed scope directly —
+  // snippet and subtemplate use this because their owning lifetime is
+  // already correct. Default registers a child boundary on region.childScopes.
   hydrateInto({ region, innerAST, data, scope, asChild = true }) {
     const targetScope = asChild ? scope.child() : scope;
     if (asChild) { region.childScopes.push(targetScope); }
