@@ -83,6 +83,7 @@ Plans with an open PR or live pair work. Updated as ceremony when a PR opens; en
 
 - [Release 0.18.0](active/release-0-18-0.md) — [PR #122](https://github.com/Semantic-Org/Semantic-Next/pull/122) `docs/shippable` (menu trimming + audit pass pending). Ships the next tagged release; last was 0.17.0 in November.
 - [Signal Performance](active/signal-performance.md) — [PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) freeze-by-default. Perf story unresolved (see plan's Bench Results); release inclusion is the open call.
+- [Bench Peak Attribution](active/bench-peak-attribution.md) — [PR #178](https://github.com/Semantic-Org/Semantic-Next/pull/178) methodology fix for cross-session absolute-ms comparisons. Eliminates phantom "Regressions from peak" on PRs.
 
 ---
 
@@ -200,7 +201,7 @@ Slot in wherever there's a gap; not phase-gated.
 | P12 | [Template Spread Syntax](template-spread-syntax.md) | 4-8h | pair | scoped | `{>card ...friend}` — object spread in data passing. Ship when component templates demonstrate need. |
 | P13 | [Template Content Projection](template-wrapper-snippets.md) | 12-16h (1.5-2d) | pair | scoped | `{>content}` — content projection for snippets + subtemplates. Ship when component templates demonstrate need. |
 | P14 | [Template Let Bindings](template-let-bindings.md) | 10-14h (1-2d) | pair | scoped | `{#let}...{/let}` — snippet-for-vars. Ship when component templates demonstrate need. |
-| P15 | [Bench Peak Attribution](bench-peak-attribution.md) | 9-11h (1.5d) | pair | scoped | Fix the live peak-attribution bug. PR #174 (test-only, no perf changes) currently surfaces 25 phantom "Regressions from peak"; active perf PRs carry partial false-flagging too. Schema_v2 persists `percent_delta_ci` + `baseline_sha` per metric; reporter switches peak compare to same-session percent-delta; `--scope pr` drops main-history overlay on PR comments; drift flag with chain-of-percent-deltas when baselines differ. `bench-history.json` wiped to empty v2 (v1 entries fed the bug). Two PRs: methodology fix + suite cleanup (`toggle-{first,last}-10` + conditional `timeout` 3→2). |
+| P15 | [Bench Peak Attribution](active/bench-peak-attribution.md) | 9-11h (1.5d) | pair | scoped | Fix the live peak-attribution bug. PR #174 (test-only, no perf changes) currently surfaces 25 phantom "Regressions from peak"; active perf PRs carry partial false-flagging too. Schema_v2 persists `percent_delta_ci` + `baseline_sha` per metric; reporter switches peak compare to same-session percent-delta; `--scope pr` drops main-history overlay on PR comments; drift flag with chain-of-percent-deltas when baselines differ. `bench-history.json` wiped to empty v2 (v1 entries fed the bug). Two PRs: methodology fix + suite cleanup (`toggle-{first,last}-10` + conditional `timeout` 3→2). |
 
 ---
 
