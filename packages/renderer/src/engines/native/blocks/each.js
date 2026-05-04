@@ -497,11 +497,12 @@ function extractServerItemGroups(ownedNodes) {
   return groups;
 }
 
-// First-data-change adoption path. Tries to reuse server-rendered per-
-// item DOM by matching item keys, wiring per-item reactivity against the
-// existing nodes via hydrateInnerContent. Returns true on success, false
-// if no server markers are present (legacy SSR output — caller should
-// fall through to a full rebuild).
+// Reuses server-rendered per-item DOM by matching item keys, wiring
+// per-item reactivity against the existing nodes via hydrateInnerContent.
+// Items with no matching server group render fresh; server groups whose
+// keys aren't claimed get disposed. Returns true on success, false if no
+// server markers are present (legacy SSR — caller falls back to a full
+// rebuild).
 function adoptServerItems({
   self,
   items,
@@ -707,28 +708,11 @@ const eachBlock = defineBlock({
     const { items, collectionType } = resolveItems(node, lookupExpression);
 
     if (self.hasHydrated) {
+      // hasHydrated is set in hydrate() only when adoptServerItems
+      // already tried and failed (legacy SSR without per-item markers).
+      // Markers don't appear retroactively, so retrying would just fail
+      // again — fall through to nuke-and-rebuild via the path below.
       self.hasHydrated = false;
-      if (items.length > 0) {
-        // Try to adopt server-rendered per-item DOM. If the server
-        // emitted sui-item:v1:KEY markers, items whose keys match reuse
-        // their DOM; others render fresh. Subsequent mutations flow
-        // through the standard reconcile path below.
-        const adopted = adoptServerItems({
-          self,
-          items,
-          collectionType,
-          node,
-          data,
-          scope,
-          region,
-          renderAST,
-          hydrateInnerContent,
-          isSVG,
-        });
-        if (adopted) { return; }
-      }
-      // No per-item markers (legacy SSR output) or empty items — fall
-      // back to nuke-and-rebuild via the reconcile path below.
       region.clear();
       self.records.length = 0;
     }

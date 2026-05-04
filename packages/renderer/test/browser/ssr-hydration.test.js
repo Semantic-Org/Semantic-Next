@@ -294,8 +294,8 @@ describe('SSR hydration — each loops', () => {
   });
 
   // Regression: empty items + elseContent reading external state lost
-  // reactivity after hydrate. each.hydrate's eager path early-returned on
-  // items.length === 0 without hydrating the elseContent's bindings.
+  // reactivity after hydrate. The empty-items branch in each.hydrate
+  // returned without hydrating elseContent's bindings.
   it('elseContent bindings are reactive after hydration when items is empty', async () => {
     const el = await ssrAndHydrate({
       template: '{#each item in items}<li>{item}</li>{else}<p>{emptyMessage}</p>{/each}',
