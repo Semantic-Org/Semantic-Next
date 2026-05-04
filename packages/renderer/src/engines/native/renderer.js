@@ -199,8 +199,17 @@ export class Renderer {
   // the dispatch on entry.classification.type (property / event / boolean
   // / ifDefined / interpolated / single-expression). `skipFirstWrite` is
   // passed through by hydrateAttributes.
-  bindAttributeExpression(element, attrName, parts, entries, data, scope, { skipFirstWrite = false } = {}) {
-    bindAttribute({ element, attrName, parts, entries, data, scope, renderer: this, skipFirstWrite });
+  bindAttributeExpression(
+    element,
+    attrName,
+    parts,
+    firstMarkerID,
+    entries,
+    data,
+    scope,
+    { skipFirstWrite = false } = {},
+  ) {
+    bindAttribute({ element, attrName, parts, firstMarkerID, entries, data, scope, renderer: this, skipFirstWrite });
   }
 
   bindMarkers(root, entries, data, scope, ast) {
@@ -230,7 +239,7 @@ export class Renderer {
         for (const { name: attrName, value: attrValue } of attrsToProcess) {
           const { parts, markerIDs } = parseAttributePartsFn(attrValue);
           for (const id of markerIDs) { processedAttrIDs.add(id); }
-          this.bindAttributeExpression(element, attrName, parts, entries, data, scope);
+          this.bindAttributeExpression(element, attrName, parts, markerIDs[0], entries, data, scope);
         }
       }
       else {
@@ -430,7 +439,7 @@ export class Renderer {
         if (isNaN(entryId)) { continue; }
         const entry = entries[entryId];
         if (!entry || !entry.attributeBinding) { continue; }
-        const { parts } = entry.attributeBinding;
+        const { parts, firstMarkerID } = entry.attributeBinding;
         // Strip `.` / `@` prefix for the DOM attribute name. bindAttribute
         // uses `classification.type` / `classification.attribute` for the
         // real dispatch; the name passed here is only used for the
@@ -439,7 +448,9 @@ export class Renderer {
         const domAttrName = (rawAttrName.charAt(0) === '.' || rawAttrName.charAt(0) === '@')
           ? rawAttrName.slice(1)
           : rawAttrName;
-        this.bindAttributeExpression(node, domAttrName, parts, entries, data, scope, { skipFirstWrite: true });
+        this.bindAttributeExpression(node, domAttrName, parts, firstMarkerID, entries, data, scope, {
+          skipFirstWrite: true,
+        });
       }
     }
   }

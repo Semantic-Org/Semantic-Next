@@ -310,6 +310,10 @@ function populateAttributeBindings(htmlString, entries) {
     if (markerIDs.length === 0) { continue; }
     const entry = entries[markerIDs[0]];
     if (!entry) { continue; }
-    entry.attributeBinding = { rawAttrName, parts, markerIDs };
+    // firstMarkerID is markerIDs[0] but can differ from parts[0].markerID
+    // when the attribute leads with static text (e.g. `class="card {x}"`).
+    // Stored once so reactive-data.js's bindAttribute doesn't `parts.find`
+    // on every binding setup.
+    entry.attributeBinding = { rawAttrName, parts, markerIDs, firstMarkerID: markerIDs[0] };
   }
 }
