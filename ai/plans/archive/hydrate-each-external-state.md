@@ -127,7 +127,7 @@ hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerCo
     return;
   }
   const adopted = adoptServerItems({ ... });
-  if (!adopted) { self.hasHydrated = true; }   // legacy SSR fallback
+  adoptServerItems({ ... });
 }
 ```
 

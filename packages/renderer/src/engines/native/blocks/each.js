@@ -20,8 +20,7 @@ import { registerBlock } from './registry.js';
   Same "register Reactions on hydrate" contract every other block honors:
   per-item bindings that close over external state (a helper reading
   `state.x`, a component method) need their Reactions live now, not
-  deferred to a future items mutation that may never come. Legacy SSR
-  output without markers falls back to nuke-and-rebuild on first update.
+  deferred to a future items mutation that may never come.
 
 */
 
@@ -500,9 +499,9 @@ function extractServerItemGroups(ownedNodes) {
 // Reuses server-rendered per-item DOM by matching item keys, wiring
 // per-item reactivity against the existing nodes via hydrateInnerContent.
 // Items with no matching server group render fresh; server groups whose
-// keys aren't claimed get disposed. Returns true on success, false if no
-// server markers are present (legacy SSR — caller falls back to a full
-// rebuild).
+// keys aren't claimed get disposed. The server unconditionally emits
+// `<!--sui-item:v1:KEY-->` markers for non-empty items (server.js); a
+// missing-markers shape here means a build/version mismatch.
 function adoptServerItems({
   self,
   items,
@@ -516,7 +515,9 @@ function adoptServerItems({
   isSVG,
 }) {
   const serverGroups = extractServerItemGroups(region.ownedNodes);
-  if (serverGroups.length === 0) { return false; }
+  if (serverGroups.length === 0) {
+    throw new Error('each.hydrate: server-rendered per-item markers missing — server/client renderer version mismatch');
+  }
 
   const serverByKey = new Map();
   for (const g of serverGroups) { serverByKey.set(g.key, g); }
@@ -613,14 +614,13 @@ function adoptServerItems({
   }
 
   self.records = newRecords;
-  return true;
 }
 
 const eachBlock = defineBlock({
   name: 'each',
 
   create() {
-    return { records: [], hasHydrated: false };
+    return { records: [] };
   },
 
   render({ node, data, scope, region, renderAST, lookupExpression, self, isSVG }) {
@@ -685,7 +685,7 @@ const eachBlock = defineBlock({
       return;
     }
 
-    const adopted = adoptServerItems({
+    adoptServerItems({
       self,
       items,
       collectionType,
@@ -697,25 +697,10 @@ const eachBlock = defineBlock({
       hydrateInnerContent,
       isSVG,
     });
-    if (!adopted) {
-      // Legacy SSR output without per-item markers — defer to `update`
-      // for the nuke-and-rebuild fallback on the first items mutation.
-      self.hasHydrated = true;
-    }
   },
 
   update({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
     const { items, collectionType } = resolveItems(node, lookupExpression);
-
-    if (self.hasHydrated) {
-      // hasHydrated is set in hydrate() only when adoptServerItems
-      // already tried and failed (legacy SSR without per-item markers).
-      // Markers don't appear retroactively, so retrying would just fail
-      // again — fall through to nuke-and-rebuild via the path below.
-      self.hasHydrated = false;
-      region.clear();
-      self.records.length = 0;
-    }
 
     const showingElse = self.records.length === 1 && self.records[0].isElse;
 

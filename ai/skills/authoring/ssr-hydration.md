@@ -400,8 +400,7 @@ hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerCo
     if (node.elseContent) { /* hydrate elseContent in place + push isElse record */ }
     return;
   }
-  const adopted = adoptServerItems({ ... });
-  if (!adopted) { self.hasHydrated = true; }   // legacy SSR fallback (no per-item markers)
+  adoptServerItems({ ... });
 }
 ```
 
@@ -549,7 +548,7 @@ EACH BLOCK HYDRATION
   each.hydrate calls adoptServerItems immediately (canonical eager).
   Per-item Reactions wire in place against server DOM via item markers.
   Empty items + elseContent -> hydrate elseContent in place.
-  Legacy SSR (no markers) -> set hasHydrated for nuke-rebuild fallback.
+  Server unconditionally emits per-item markers; missing-markers throws.
 
 TESTING / BENCHING TRAPS (silent failures)
   innerHTML doesn't process DSD          -> use setHTMLUnsafe
