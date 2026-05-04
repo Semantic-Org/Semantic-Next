@@ -202,17 +202,8 @@ export class Renderer {
   // the dispatch on entry.classification.type (property / event / boolean
   // / ifDefined / interpolated / single-expression). `skipFirstWrite` is
   // passed through by hydrateAttributes.
-  bindAttributeExpression(
-    element,
-    attrName,
-    parts,
-    firstMarkerID,
-    entries,
-    data,
-    scope,
-    { skipFirstWrite = false } = {},
-  ) {
-    bindAttribute({ element, attrName, parts, firstMarkerID, entries, data, scope, renderer: this, skipFirstWrite });
+  bindAttributeExpression(element, attrName, parts, entries, data, scope, { skipFirstWrite = false } = {}) {
+    bindAttribute({ element, attrName, parts, entries, data, scope, renderer: this, skipFirstWrite });
   }
 
   bindMarkers(root, entries, data, scope, ast) {
@@ -247,7 +238,7 @@ export class Renderer {
           for (const { name: attrName, value: attrValue } of attrsToProcess) {
             const { parts, markerIDs } = parseAttributePartsFn(attrValue);
             for (const id of markerIDs) { processedAttrIDs.add(id); }
-            this.bindAttributeExpression(element, attrName, parts, markerIDs[0], entries, data, scope);
+            this.bindAttributeExpression(element, attrName, parts, entries, data, scope);
           }
         }
       }
@@ -448,7 +439,7 @@ export class Renderer {
         if (isNaN(entryId)) { continue; }
         const entry = entries[entryId];
         if (!entry || !entry.attributeBinding) { continue; }
-        const { parts, firstMarkerID } = entry.attributeBinding;
+        const { parts } = entry.attributeBinding;
         // Strip `.` / `@` prefix for the DOM attribute name. bindAttribute
         // uses `classification.type` / `classification.attribute` for the
         // real dispatch; the name passed here is only used for the
@@ -457,9 +448,7 @@ export class Renderer {
         const domAttrName = (rawAttrName.charAt(0) === '.' || rawAttrName.charAt(0) === '@')
           ? rawAttrName.slice(1)
           : rawAttrName;
-        this.bindAttributeExpression(node, domAttrName, parts, firstMarkerID, entries, data, scope, {
-          skipFirstWrite: true,
-        });
+        this.bindAttributeExpression(node, domAttrName, parts, entries, data, scope, { skipFirstWrite: true });
       }
     }
   }
@@ -519,29 +508,19 @@ export class Renderer {
       container.appendChild(n);
     }
 
-    // Recursively hydrate inner markers with the sub-AST's entries.
     this.hydrateMarkers({ root: container, entries, data, scope });
 
-    // Update ownedNodes with the hydrated content (comments may have been removed)
+    // Repopulate from container — hydrateMarkers may have removed comment nodes.
     ownedNodes.length = 0;
     for (const n of [...container.childNodes]) {
       ownedNodes.push(n);
     }
   }
 
-  // Hydrate-and-attach. Walks markers in `region.ownedNodes` against
-  // `innerAST`, wires Reactions, and reinserts the (now-hydrated) nodes
-  // after `region.anchor`. Sets `region.endAnchor` so consumers that
-  // scan the region's last node (subtemplate attachToRenderRoot) get
-  // the same contract `setContent` provides.
-  //
-  // `asChild: true` (default) creates a child of `scope`, registers it
-  // on `region.childScopes` for cleanup, and uses it for inner Reactions.
-  // `asChild: false` uses `scope` as-is — the snippet path lives on the
-  // block's scope so its Reactions stop when the block does.
-  //
-  // Returns the scope the inner content was hydrated against — callers
-  // that track per-branch scope (each elseContent record) need it.
+  // `asChild: false` skips child-scope creation so inner Reactions register
+  // on the passed `scope` directly — used by snippet/subtemplate, where the
+  // owning lifetime is already correct. Default true for blocks that want
+  // their own boundary on `region.childScopes`.
   hydrateInto({ region, innerAST, data, scope, asChild = true }) {
     const targetScope = asChild ? scope.child() : scope;
     if (asChild) { region.childScopes.push(targetScope); }

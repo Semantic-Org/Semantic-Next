@@ -19,20 +19,18 @@ import { isBlockClose, isBlockOpen, isExpressionMarker } from '../../build-html-
 // ifDefined single-expression, single-expression string, and interpolated
 // string attributes. The `skipFirstWrite` flag is used during hydration to
 // establish Signal dependencies without re-writing server-authored values.
-// `firstMarkerID` is the first dynamic-part marker ID in `parts`; cached
-// during `populateAttributeBindings` so callers don't `parts.find` per setup.
 export function bindAttribute({
   element,
   attrName,
   parts,
-  firstMarkerID,
   entries,
   data,
   scope,
   renderer,
   skipFirstWrite = false,
 }) {
-  const { classification } = entries[firstMarkerID] || {};
+  const firstMarker = parts.find((p) => p.markerID !== undefined);
+  const { classification } = entries[firstMarker?.markerID] || {};
   const bindingType = classification?.type;
 
   if (bindingType === 'property') {

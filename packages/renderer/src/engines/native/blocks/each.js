@@ -595,15 +595,12 @@ const eachBlock = defineBlock({
   },
 
   hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, hydrateInto, self, isSVG }) {
-    // resolveItems registers the items dep via lookupExpression.
     const { items, collectionType } = resolveItems(node, lookupExpression);
 
     if (items.length === 0) {
       if (node.elseContent) {
-        // Server rendered the else branch. hydrateInto creates the
-        // child elseScope, registers it on region.childScopes, hydrates
-        // in place, and reattaches. We push an isElse record so update
-        // recognizes the else state and transitions correctly.
+        // isElse record is the signal `update` reads to detect the
+        // else→items transition.
         const elseScope = hydrateInto({ innerAST: node.elseContent });
         self.records.push({
           key: null,

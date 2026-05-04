@@ -405,13 +405,9 @@ export class ServerRenderer {
       html += this.renderNodes(node.elseContent, data);
     }
     else {
-      // Emit `<!--${SUI_ITEM_MARKER}KEY-->` before each item's content so
-      // the client can adopt per-item DOM on first data change instead of
-      // re-rendering the whole list. Key is computed via the shared
-      // `getItemID` heuristic, so server and client agree on identity.
-      // Per-item data flows through `renderNodes(content, itemData)` and
-      // every evaluator lookup downstream takes data as an explicit
-      // argument — no need to allocate a per-item ExpressionEvaluator.
+      // Per-item key marker — client adopts the matching node range at
+      // hydrate time. Key derivation lives in shared/each.js so server
+      // and client agree on identity.
       for (let i = 0; i < items.length; i++) {
         const eachData = getEachData(items[i], i, collectionType, node);
         const itemData = { ...data, ...eachData };

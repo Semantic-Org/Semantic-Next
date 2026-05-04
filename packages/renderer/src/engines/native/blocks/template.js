@@ -226,8 +226,7 @@ const templateBlock = defineBlock({
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
       const snippetData = buildSnippetProxy(node, data, self.evaluator);
       if (region.ownedNodes.length > 0) {
-        // Snippet inner Reactions live on the block's scope so they
-        // stop with the block — no separate child scope to manage.
+        // Snippet Reactions live on the block scope, not a child.
         hydrateInto({ innerAST: snippet.content, data: snippetData, asChild: false });
       }
       return;
@@ -242,9 +241,7 @@ const templateBlock = defineBlock({
     self.currentInstance = cloneInstance({ template, templateName, templateData, self });
 
     if (region.ownedNodes.length > 0) {
-      // Subtemplate hydrates against its own renderer's data + scope,
-      // not the parent block's. asChild: false because the subtemplate's
-      // scope is the root for its own Reactions, not a child of the parent.
+      // Subtemplate uses its own renderer's data/scope, not the parent block's.
       self.currentInstance.renderer.hydrateInto({
         region,
         innerAST: self.currentInstance.ast,

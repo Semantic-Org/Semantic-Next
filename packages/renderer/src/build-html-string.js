@@ -10,26 +10,31 @@
 export const ATTR_MARKER_PREFIX = '__sui';
 export const ATTR_MARKER_SUFFIX = '__';
 
-// Versioned markers — client checks version on hydration,
-// falls back to full render on mismatch
+// Versioned so client can detect server/client mismatches at hydrate time.
 export const MARKER_VERSION = 'v1';
 
-// Marker for text-position expressions (comment nodes)
 export const COMMENT_MARKER = `sui:${MARKER_VERSION}:`;
-
-// Marker for block-level directive positions
 export const BLOCK_MARKER = `sui-block:${MARKER_VERSION}:`;
+export const RAW_TEXT_MARKER = `sui-rawtext:${MARKER_VERSION}:`;
 
-// Prefix for closing block markers — version-stripped because version
-// match is enforced at the open marker; the close just balances depth.
-// Read sites use this for `startsWith` checks.
+// Closing block markers omit the version segment. Version match is enforced
+// at the open marker; the close just balances depth.
 export const BLOCK_CLOSE_PREFIX = '/sui-block:';
 
-// Build a closing block marker comment data string. `meta.branchIndex`
-// is the only reserved suffix today (conditional block); future suffixes
-// can be added here without touching write/parse sites.
+// Sentinel for {#if} main-body in branchIndex serialization — branches
+// array indexes from 0 for {:elseif}/{:else}, so 1000 reserves a value
+// above any plausible branch count.
+export const MAIN_BRANCH_INDEX = 1000;
+
+// Stamped on elements with dynamic bindings so the client can wire
+// Reactions without a reference-DOM walk. Encoding: `attr=N[,attr=N]*`
+// where N is the first-entry ID. Name prefixes: `.prop`, `@event`, `?attr`.
+export const DATA_SUI_BIND = 'data-sui-bind';
+
+// Build a closing block marker comment data string. `meta.branchIndex` is
+// the only reserved suffix today; future suffixes added here.
 export function formatBlockClose(id, meta) {
-  let s = `/sui-block:${MARKER_VERSION}:${id}`;
+  let s = `${BLOCK_CLOSE_PREFIX}${MARKER_VERSION}:${id}`;
   if (meta && meta.branchIndex !== undefined) {
     s += `:b${meta.branchIndex}`;
   }
@@ -37,9 +42,7 @@ export function formatBlockClose(id, meta) {
 }
 
 // Parse trailing metadata from a closing block marker into target.
-// Reserved suffixes (after the version segment):
-//   bN  → branchIndex (which branch the {#if}/{:elseif}/{:else} server picked)
-// Unknown segments are ignored. Mutates target in place.
+// `bN` → branchIndex; unknown segments ignored.
 export function parseServerMeta(commentData, target) {
   for (const part of commentData.split(':')) {
     if (part.startsWith('b')) {
@@ -48,14 +51,8 @@ export function parseServerMeta(commentData, target) {
   }
 }
 
-// Comment-marker classifiers — single-source-of-truth predicates over
-// the documented marker prefixes. Walkers in the renderer and each-block
-// use these to recognize block-open / block-close / expression / raw-text
-// boundaries without redeclaring the prefix strings.
-//
-// Each `parse*ID` returns the numeric ID minted in `populateAttributeBindings`
-// or `processNodes`; NaN is returned when the prefix matches but the suffix
-// isn't a number, which never happens for compiler-emitted comments.
+// Walkers across renderer and each-block share these so prefix literals
+// stay in one place.
 export function isBlockOpen(commentData) {
   return commentData.startsWith(BLOCK_MARKER);
 }
@@ -77,25 +74,6 @@ export function parseExpressionID(commentData) {
 export function parseRawTextID(commentData) {
   return parseInt(commentData.slice(RAW_TEXT_MARKER.length));
 }
-
-// Marker for raw text element content (script, style, textarea, title)
-export const RAW_TEXT_MARKER = `sui-rawtext:${MARKER_VERSION}:`;
-
-// Attribute stamped by the server on elements with dynamic bindings so the
-// client can wire Reactions without reconstructing a reference DOM from the
-// AST (eliminates the parallel-TreeWalker dance in hydrateAttributes).
-// Encoding: `attr=N[,attr=N]*` where N is the first-entry ID for that
-// attribute. Name prefixes: `.prop` property, `@event` event, `?attr`
-// boolean. Entries[N].attributeBinding carries full parts + classification,
-// so the data-sui-bind string stays minimal and all static/multi-expression
-// metadata lives on the prototype-cached entries array.
-export const DATA_SUI_BIND = 'data-sui-bind';
-
-// Sentinel branchIndex for the main {#if} body. Branches array is indexed
-// from 0 ({:elseif}/{:else}); 1000 reserves a value above any plausible
-// branch count to mean "main body matched". Persisted on the closing block
-// marker as `:b1000` for hydration mismatch detection.
-export const MAIN_BRANCH_INDEX = 1000;
 
 // Compiled once — `lastIndex` is reset manually per use so the regex can
 // be reused across parse calls without cross-talk.
@@ -340,10 +318,6 @@ function populateAttributeBindings(htmlString, entries) {
     if (markerIDs.length === 0) { continue; }
     const entry = entries[markerIDs[0]];
     if (!entry) { continue; }
-    // firstMarkerID is markerIDs[0] but can differ from parts[0].markerID
-    // when the attribute leads with static text (e.g. `class="card {x}"`).
-    // Stored once so reactive-data.js's bindAttribute doesn't `parts.find`
-    // on every binding setup.
-    entry.attributeBinding = { rawAttrName, parts, markerIDs, firstMarkerID: markerIDs[0] };
+    entry.attributeBinding = { rawAttrName, parts, markerIDs };
   }
 }
