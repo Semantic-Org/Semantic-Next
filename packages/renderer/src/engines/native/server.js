@@ -31,6 +31,7 @@ import {
   MAIN_BRANCH_INDEX,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
+import { encodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from './shared/each.js';
 
 const REMOVE_ATTR = '__SUI_REMOVE__';
 const REMOVE_ATTR_REGEX = /\s+[\w.@-]+\s*=\s*["']?__SUI_REMOVE__["']?/g;
@@ -70,15 +71,6 @@ function attrNameFromBuffer(buffer) {
   return match ? match[1] : null;
 }
 
-// HTML comment contents cannot contain `--` or `>` (WHATWG spec). User-
-// supplied keys may; encode them defensively. URL-encoding covers both
-// classes plus `%` itself. The client-side parser decodes with
-// `decodeURIComponent`. Keys are typically IDs (`x1`, `user-42`) that
-// don't need encoding, so the overhead is negligible in practice.
-function encodeItemKey(key) {
-  const str = String(key ?? '');
-  return encodeURIComponent(str);
-}
 function scanHtmlChunk(chunk, scope) {
   if (!scope.insideTag && chunk.indexOf('<') === -1) {
     scope.htmlBuffer += chunk;
@@ -413,19 +405,19 @@ export class ServerRenderer {
       html += this.renderNodes(node.elseContent, data);
     }
     else {
-      // Emit `<!--sui-item:v1:KEY-->` before each item's content so the
-      // client can adopt per-item DOM on first data change instead of
-      // re-rendering the whole list. Key is computed via the same
-      // `getItemID` heuristic the client uses, so the two agree on identity.
+      // Emit `<!--${SUI_ITEM_MARKER}KEY-->` before each item's content so
+      // the client can adopt per-item DOM on first data change instead of
+      // re-rendering the whole list. Key is computed via the shared
+      // `getItemID` heuristic, so server and client agree on identity.
       for (let i = 0; i < items.length; i++) {
-        const eachData = this.getEachData(items[i], i, collectionType, node);
+        const eachData = getEachData(items[i], i, collectionType, node);
         const itemData = { ...data, ...eachData };
         const itemEvaluator = new ExpressionEvaluator({ data: itemData, helpers: this.helpers });
         const savedEvaluator = this.evaluator;
         this.evaluator = itemEvaluator;
-        const key = this.getItemID(items[i], i, collectionType);
+        const key = getItemID(items[i], i, collectionType);
         try {
-          html += `<!--sui-item:v1:${encodeItemKey(key)}-->`;
+          html += `<!--${SUI_ITEM_MARKER}${encodeItemKey(key)}-->`;
           html += this.renderNodes(node.content, itemData);
         }
         finally {
@@ -533,40 +525,6 @@ export class ServerRenderer {
   /*******************************
       Data Helpers
   *******************************/
-
-  // Mirrors blocks/each.js getItemID — keep in sync. Server and client
-  // must agree on identity or first-data-change adoption misses keys.
-  // Key = first non-empty of: object.{_id, id, key, hash, _hash, value},
-  // object-collection key, or positional index. Stringified to match
-  // the string-keyed Map the client builds from `<!--sui-item:v1:KEY-->`.
-  getItemID(item, indexOrKey, collectionType) {
-    let raw;
-    if (isPlainObject(item)) {
-      const key = (collectionType === 'object') ? indexOrKey : undefined;
-      raw = key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
-    }
-    else if (isString(item)) {
-      raw = item + ':' + indexOrKey;
-    }
-    else {
-      raw = indexOrKey;
-    }
-    return String(raw);
-  }
-
-  getEachData(item, indexOrKey, collectionType, node) {
-    let { as, indexAs } = node;
-    if (!indexAs) {
-      indexAs = (collectionType === 'array') ? 'index' : 'key';
-    }
-    if (collectionType === 'object') {
-      indexOrKey = item.key;
-      item = item.value;
-    }
-    return as
-      ? { [as]: item, [indexAs]: indexOrKey }
-      : { ...item, this: item, [indexAs]: indexOrKey };
-  }
 
   resolveNodeData(node, data) {
     let resolved = { ...data };

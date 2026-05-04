@@ -1,7 +1,8 @@
 import { Signal } from '@semantic-ui/reactivity';
-import { arrayFromObject, isArray, isEmpty, isPlainObject, isString } from '@semantic-ui/utils';
+import { arrayFromObject, isArray, isEmpty } from '@semantic-ui/utils';
 import { BLOCK_CLOSE_PREFIX, BLOCK_MARKER } from '../../../build-html-string.js';
 import { defineBlock } from '../define-block.js';
+import { decodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from '../shared/each.js';
 import { registerBlock } from './registry.js';
 
 /*
@@ -23,8 +24,6 @@ import { registerBlock } from './registry.js';
 
 */
 
-const SUI_ITEM_MARKER = 'sui-item:v1:';
-
 // Proxies created by this module go into the WeakSet; template.js checks
 // membership to decide when expression reads should register deps directly
 // (item context) versus wrapping in Reaction.nonreactive (static data).
@@ -35,45 +34,6 @@ export function isItemContext(data) {
 
 function getCollectionType(items) {
   return isArray(items) ? 'array' : 'object';
-}
-
-function getItemID(item, indexOrKey, collectionType) {
-  // Always stringify — the server emits keys as text inside
-  // `<!--sui-item:v1:KEY-->` comments, and Map / === compare by value
-  // identity. Without stringification, numeric item IDs on the client
-  // miss string keys on the server at adoption time (and records keyed
-  // as numbers from a fresh render would miss string keys on the next
-  // reconcile after adoption).
-  let raw;
-  if (isPlainObject(item)) {
-    const key = (collectionType === 'object') ? indexOrKey : undefined;
-    raw = key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
-  }
-  else if (isString(item)) {
-    raw = item + ':' + indexOrKey;
-  }
-  else {
-    raw = indexOrKey;
-  }
-  return String(raw);
-}
-
-function getEachData(item, indexOrKey, collectionType, node) {
-  let { as, indexAs } = node;
-  if (!indexAs) {
-    indexAs = (collectionType === 'array') ? 'index' : 'key';
-  }
-  if (collectionType === 'object') {
-    indexOrKey = item.key;
-    item = item.value;
-  }
-  // The wrapper is always a fresh object so Signal.set() sees a new
-  // top-level reference and doesn't short-circuit on identity. Inner
-  // properties are shallow-copied from item (for the no-`as` case) so
-  // mutations to item's own properties ARE captured at the wrapper level.
-  return as
-    ? { [as]: item, [indexAs]: indexOrKey }
-    : { ...item, this: item, [indexAs]: indexOrKey };
 }
 
 // Allocate once per record at first reconcile (createSnapshot). On
@@ -476,14 +436,7 @@ function extractServerItemGroups(ownedNodes) {
       }
       if (blockDepth === 0 && data.startsWith(SUI_ITEM_MARKER)) {
         if (current) { groups.push(current); }
-        const rawKey = data.slice(SUI_ITEM_MARKER.length);
-        let key;
-        try {
-          key = decodeURIComponent(rawKey);
-        }
-        catch {
-          key = rawKey;
-        }
+        const key = decodeItemKey(data.slice(SUI_ITEM_MARKER.length));
         current = { key, startComment: n, nodes: [] };
         continue;
       }
