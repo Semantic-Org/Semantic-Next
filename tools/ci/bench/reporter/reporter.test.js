@@ -222,9 +222,8 @@ test('real-delta fixture — rubric markdown structure', () => {
   // Rows auto-expanded (≤ 15) — no teaser pattern
   assert.ok(!markdown.includes('top 5 shown'));
 
-  // Metric source links present (paths resolved to bench-*.js at given SHA).
-  // Don't pin to a specific package — bench files live wherever the suite
-  // organizes them (today component/ + reactivity/; previously renderer/).
+  // Metric source links resolve to bench-*.js. Match any package — the
+  // suite layout isn't pinned and reorganizes over time.
   assert.ok(/\/blob\/abcdef012345678\/packages\/\w+\/bench\/tachometer\/bench[-\w]*\.js#L\d+/.test(markdown));
 
   // Wall-clock footer

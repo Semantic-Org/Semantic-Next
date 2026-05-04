@@ -249,7 +249,6 @@ function toJsonMetric(m) {
     source: m.source,
     baseline_sha: m.baselineSha ?? null,
   };
-  // Missing key (not null) signals "no history for this metric" to consumers.
   if (m.historyStatus) {
     out.history_status = m.historyStatus.status;
     out.peak = m.historyStatus.peak;
@@ -772,11 +771,9 @@ function mergeHistories(mainHist, prHist) {
  * Load bench-history.json. Returns null on missing/empty/invalid — peak
  * attribution gracefully degrades on null. Schema v2 only.
  *
- * Sorts by timestamp on read. Consumers (`computeBaselineDrift`) walk
- * `commits` by index and assume chronological order. `append-history.js`
- * appends but never sorts, and the rebase-retry path on push-to-main
- * could plausibly land entries with non-monotonic timestamps; sorting
- * here keeps the assumption load-bearing without surprise.
+ * Sort on read because `computeBaselineDrift` walks `commits` by index,
+ * and the rebase-retry path on push-to-main can land entries with
+ * non-monotonic timestamps.
  */
 function loadHistory(filePath) {
   if (!filePath || !fs.existsSync(filePath)) { return null; }

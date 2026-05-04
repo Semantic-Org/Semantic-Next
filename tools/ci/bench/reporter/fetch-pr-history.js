@@ -59,19 +59,11 @@ for (const run of prRuns) {
     continue;
   }
 
-  const metrics = loadHistoryMetrics(dir);
+  const baselineSha = readBaselineSha(dir);
+  const metrics = loadHistoryMetrics(dir, baselineSha);
   if (Object.keys(metrics).length === 0) {
     console.log(`  Skip ${run.databaseId} (no metrics)`);
     continue;
-  }
-
-  const baselineSha = readBaselineSha(dir);
-  if (baselineSha) {
-    for (const m of Object.values(metrics)) {
-      if ('percent_delta_ci' in m) {
-        m.baseline_sha = baselineSha;
-      }
-    }
   }
 
   commits.push({

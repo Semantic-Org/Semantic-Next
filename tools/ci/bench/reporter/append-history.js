@@ -37,14 +37,7 @@ const baselineSha = args['baseline-sha'] ?? '';
 const timestamp = args.timestamp ?? new Date().toISOString();
 const historyPath = args.history ?? './bench-history.json';
 
-const metrics = loadHistoryMetrics(resultsDir);
-if (baselineSha) {
-  for (const m of Object.values(metrics)) {
-    if ('percent_delta_ci' in m) {
-      m.baseline_sha = baselineSha;
-    }
-  }
-}
+const metrics = loadHistoryMetrics(resultsDir, baselineSha);
 // Squash-merge commit titles end with ` (#N)` — capture so peak SHAs link
 // straight to the PR conversation page rather than the commit view.
 const prMatch = /\(#(\d+)\)\s*$/.exec(msg);

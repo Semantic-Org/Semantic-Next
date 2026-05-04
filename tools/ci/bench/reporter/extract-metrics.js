@@ -57,12 +57,13 @@ export function* iterMetricPairs(dir) {
 
 /**
  * Project results into the bench-history entry shape:
- *   { name → { ci, mean_ms, percent_delta_ci? } }
+ *   { name → { ci, mean_ms, percent_delta_ci?, baseline_sha? } }
  *
- * `percent_delta_ci` is the within-session-tight number; `ci`/`mean_ms`
- * are kept for context (parent-vs-commit views remain valid within a run).
+ * `baseline_sha` (when supplied) pins each `percent_delta_ci` to its
+ * comparison reference. Entries without a paired tip-of-tree skip both
+ * `percent_delta_ci` and `baseline_sha` — there's nothing to pin to.
  */
-export function loadHistoryMetrics(dir) {
+export function loadHistoryMetrics(dir, baselineSha = '') {
   const out = {};
   for (const { name, current, diff } of iterMetricPairs(dir)) {
     const m = current.bm.mean;
@@ -72,6 +73,9 @@ export function loadHistoryMetrics(dir) {
     };
     if (diff?.percentChange) {
       entry.percent_delta_ci = [round4(diff.percentChange.low), round4(diff.percentChange.high)];
+      if (baselineSha) {
+        entry.baseline_sha = baselineSha;
+      }
     }
     out[name] = entry;
   }
@@ -97,11 +101,11 @@ export function readBaselineSha(dir) {
   return '';
 }
 
-export function round4(n) {
+function round4(n) {
   return Number(n.toFixed(4));
 }
 
-export function* walk(dir) {
+function* walk(dir) {
   for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, ent.name);
     if (ent.isDirectory()) { yield* walk(full); }
