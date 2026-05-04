@@ -65,6 +65,19 @@ for (const run of prRuns) {
     continue;
   }
 
+  // Read the sidecar baseline SHA uploaded with the artifacts. Only present
+  // on runs from the v2-aware workflow; older runs return '' and entries
+  // skip the baseline_sha field entirely (no cross-iteration drift detection
+  // possible against pre-v2 iterations).
+  const baselineSha = readBaselineSha(dir);
+  if (baselineSha) {
+    for (const m of Object.values(metrics)) {
+      if ('percent_delta_ci' in m) {
+        m.baseline_sha = baselineSha;
+      }
+    }
+  }
+
   commits.push({
     sha: run.headSha,
     msg: run.displayTitle,
@@ -73,20 +86,24 @@ for (const run of prRuns) {
     pr: null,
     metrics,
   });
-  console.log(`  ${run.headSha.slice(0, 7)} — ${Object.keys(metrics).length} metrics`);
+  console.log(
+    `  ${run.headSha.slice(0, 7)} — ${Object.keys(metrics).length} metrics`
+      + (baselineSha ? ` @ baseline ${baselineSha.slice(0, 7)}` : ''),
+  );
 }
 
 // Chronological order (oldest first) so peak-index → bisect-candidates
 // after peak produces a causal timeline.
 commits.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
-fs.writeFileSync(outPath, JSON.stringify({ schema_version: 1, commits }, null, 2) + '\n');
+fs.writeFileSync(outPath, JSON.stringify({ schema_version: 2, commits }, null, 2) + '\n');
 console.log(`Wrote ${commits.length} entries to ${outPath}`);
 
 /**
- * Walk a results directory and extract one { ci, mean_ms } entry per
- * metric. Uses the `this-change` absolute CI — same extraction logic
- * as append-history.js.
+ * Walk a results directory and extract one entry per metric. Pairs each
+ * `this-change` benchmark with its `tip-of-tree` counterpart so the
+ * within-session percent-delta from `differences[]` is persisted alongside
+ * the absolute CI. Same extraction shape as append-history.js.
  */
 function loadMetrics(dir) {
   const out = {};
@@ -101,18 +118,50 @@ function loadMetrics(dir) {
     }
     if (!Array.isArray(data.benchmarks)) { continue; }
 
-    for (const bm of data.benchmarks) {
+    const byName = new Map();
+    data.benchmarks.forEach((bm, i) => {
+      const mName = bm.measurement?.name ?? bm.name;
       const source = (bm.name ?? '').split(' [')[0];
-      if (source !== 'this-change') { continue; }
-      const metricName = bm.measurement?.name ?? bm.name;
-      if (!bm.mean) { continue; }
-      out[metricName] = {
-        ci: [round4(bm.mean.low), round4(bm.mean.high)],
-        mean_ms: round4((bm.mean.low + bm.mean.high) / 2),
+      if (!byName.has(mName)) { byName.set(mName, {}); }
+      byName.get(mName)[source] = { index: i, bm };
+    });
+
+    for (const [name, pair] of byName) {
+      const cur = pair['this-change'];
+      const base = pair['tip-of-tree'];
+      if (!cur?.bm.mean) { continue; }
+      const metricEntry = {
+        ci: [round4(cur.bm.mean.low), round4(cur.bm.mean.high)],
+        mean_ms: round4((cur.bm.mean.low + cur.bm.mean.high) / 2),
       };
+      if (base) {
+        const diff = cur.bm.differences?.[base.index];
+        if (diff?.percentChange) {
+          metricEntry.percent_delta_ci = [
+            round4(diff.percentChange.low),
+            round4(diff.percentChange.high),
+          ];
+        }
+      }
+      out[name] = metricEntry;
     }
   }
   return out;
+}
+
+/**
+ * Read the sidecar baseline-sha.txt written by the v2-aware bench workflow
+ * alongside the tachometer JSONs. Returns '' if absent (pre-v2 run, or
+ * artifact missing the file). Caller decides whether to attach the SHA to
+ * extracted entries.
+ */
+function readBaselineSha(dir) {
+  for (const entry of walk(dir)) {
+    if (entry.endsWith('baseline-sha.txt')) {
+      return fs.readFileSync(entry, 'utf8').trim();
+    }
+  }
+  return '';
 }
 
 function round4(n) {

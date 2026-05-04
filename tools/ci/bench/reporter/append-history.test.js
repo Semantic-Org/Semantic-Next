@@ -14,7 +14,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SCRIPT = path.join(__dirname, 'append-history.js');
 const FIXTURE_DIR = path.join(__dirname, 'fixtures', 'real-delta');
 
-function runAppend({ sha, msg = 'test', parentSha = '', timestamp, historyPath, resultsDir = FIXTURE_DIR }) {
+function runAppend({
+  sha,
+  msg = 'test',
+  parentSha = '',
+  baselineSha = '',
+  timestamp,
+  historyPath,
+  resultsDir = FIXTURE_DIR,
+}) {
   const argv = [
     SCRIPT,
     '--results',
@@ -28,34 +36,39 @@ function runAppend({ sha, msg = 'test', parentSha = '', timestamp, historyPath, 
     '--history',
     historyPath,
   ];
+  if (baselineSha) { argv.push('--baseline-sha', baselineSha); }
   if (timestamp) { argv.push('--timestamp', timestamp); }
   // Capture stderr so throw-cases can assert on the inner error message.
   execFileSync('node', argv, { stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8' });
   return JSON.parse(fs.readFileSync(historyPath, 'utf8'));
 }
 
-test('seeds a new history file when one does not exist', () => {
+function seedV2(historyPath, commits = []) {
+  fs.writeFileSync(historyPath, JSON.stringify({ schema_version: 2, commits }));
+}
+
+test('seeds a new history file when one does not exist (schema_version 2)', () => {
   const tmp = fs.mkdtempSync('/tmp/bench-hist-test-');
   const historyPath = path.join(tmp, 'bench-history.json');
   const result = runAppend({ sha: 'abc123', historyPath, timestamp: '2026-04-15T00:00:00Z' });
 
-  assert.equal(result.schema_version, 1);
+  assert.equal(result.schema_version, 2, 'writes v2 schema');
   assert.equal(result.commits.length, 1);
   assert.equal(result.commits[0].sha, 'abc123');
   assert.equal(result.commits[0].timestamp, '2026-04-15T00:00:00Z');
   assert.ok(Object.keys(result.commits[0].metrics).length > 0, 'metrics extracted');
 });
 
-test('appends to an existing history', () => {
+test('appends to an existing v2 history', () => {
   const tmp = fs.mkdtempSync('/tmp/bench-hist-test-');
   const historyPath = path.join(tmp, 'bench-history.json');
-  fs.writeFileSync(
-    historyPath,
-    JSON.stringify({
-      schema_version: 1,
-      commits: [{ sha: 'existing-commit', msg: 'old', parent_sha: '', timestamp: '2026-01-01T00:00:00Z', metrics: {} }],
-    }),
-  );
+  seedV2(historyPath, [{
+    sha: 'existing-commit',
+    msg: 'old',
+    parent_sha: '',
+    timestamp: '2026-01-01T00:00:00Z',
+    metrics: {},
+  }]);
   const result = runAppend({ sha: 'new-commit', historyPath });
 
   assert.equal(result.commits.length, 2);
@@ -67,19 +80,13 @@ test('replaces an existing entry with matching SHA (idempotent re-run)', () => {
   const tmp = fs.mkdtempSync('/tmp/bench-hist-test-');
   const historyPath = path.join(tmp, 'bench-history.json');
   // Seed with an older entry for the same SHA we're about to write
-  fs.writeFileSync(
-    historyPath,
-    JSON.stringify({
-      schema_version: 1,
-      commits: [{
-        sha: 'target-sha',
-        msg: 'stale',
-        parent_sha: '',
-        timestamp: '2000-01-01T00:00:00Z',
-        metrics: { old: { ci: [1, 2], mean_ms: 1.5 } },
-      }],
-    }),
-  );
+  seedV2(historyPath, [{
+    sha: 'target-sha',
+    msg: 'stale',
+    parent_sha: '',
+    timestamp: '2000-01-01T00:00:00Z',
+    metrics: { old: { ci: [1, 2], mean_ms: 1.5 } },
+  }]);
   const result = runAppend({ sha: 'target-sha', msg: 'fresh', historyPath, timestamp: '2026-04-15T00:00:00Z' });
 
   assert.equal(result.commits.length, 1, 'no duplicate entries');
@@ -88,22 +95,43 @@ test('replaces an existing entry with matching SHA (idempotent re-run)', () => {
   assert.ok(!('old' in result.commits[0].metrics), 'stale metrics replaced');
 });
 
-test('extracts this-change absolute CIs only (not tip-of-tree)', () => {
+test('extracts both absolute CI and percent-delta from differences[]', () => {
   const tmp = fs.mkdtempSync('/tmp/bench-hist-test-');
   const historyPath = path.join(tmp, 'bench-history.json');
   const result = runAppend({ sha: 'abc', historyPath });
 
   const metrics = result.commits[0].metrics;
-  // The real-delta fixture has known this-change means for these metrics
-  // (update-10th, toggle-middle are the biggest movers in that run).
+  // The real-delta fixture pairs this-change + tip-of-tree benchmarks for
+  // each metric, so percent_delta_ci is extractable.
   assert.ok('update-10th' in metrics);
   assert.ok('toggle-middle' in metrics);
-  assert.ok(Array.isArray(metrics['update-10th'].ci));
+  assert.ok(Array.isArray(metrics['update-10th'].ci), 'absolute CI persisted');
   assert.equal(metrics['update-10th'].ci.length, 2);
   assert.equal(typeof metrics['update-10th'].mean_ms, 'number');
-  // Mean is the midpoint of the CI
+  // mean is the midpoint of the absolute CI
   const { ci, mean_ms } = metrics['update-10th'];
   assert.ok(Math.abs(mean_ms - (ci[0] + ci[1]) / 2) < 0.01, 'mean is CI midpoint');
+  // percent_delta_ci is the new v2 field — within-session percent-delta
+  assert.ok(Array.isArray(metrics['update-10th'].percent_delta_ci), 'percent_delta_ci persisted');
+  assert.equal(metrics['update-10th'].percent_delta_ci.length, 2);
+});
+
+test('applies --baseline-sha to entries with percent-delta', () => {
+  const tmp = fs.mkdtempSync('/tmp/bench-hist-test-');
+  const historyPath = path.join(tmp, 'bench-history.json');
+  const result = runAppend({ sha: 'abc', historyPath, baselineSha: 'parent-tip-1234567890' });
+
+  const updateTenth = result.commits[0].metrics['update-10th'];
+  assert.equal(updateTenth.baseline_sha, 'parent-tip-1234567890', 'baseline_sha attached');
+});
+
+test('omits baseline_sha when --baseline-sha not passed', () => {
+  const tmp = fs.mkdtempSync('/tmp/bench-hist-test-');
+  const historyPath = path.join(tmp, 'bench-history.json');
+  const result = runAppend({ sha: 'abc', historyPath });
+
+  const updateTenth = result.commits[0].metrics['update-10th'];
+  assert.ok(!('baseline_sha' in updateTenth), 'no baseline_sha when flag absent');
 });
 
 test('records parent_sha when provided', () => {
@@ -134,6 +162,24 @@ test('pr is null when commit message has no PR reference', () => {
     historyPath,
   });
   assert.equal(result.commits[0].pr, null);
+});
+
+test('rejects v1 schema with reset instruction', () => {
+  // v1 entries stored absolute ms and fed the buggy peak attribution; the
+  // writer rejects them rather than silently degrading. Operator must reset
+  // the file. This is intentional cleanup, not backward compat.
+  const tmp = fs.mkdtempSync('/tmp/bench-hist-test-');
+  const historyPath = path.join(tmp, 'bench-history.json');
+  fs.writeFileSync(historyPath, JSON.stringify({ schema_version: 1, commits: [] }));
+  try {
+    runAppend({ sha: 'x', historyPath });
+    assert.fail('expected script to exit non-zero');
+  }
+  catch (e) {
+    const combined = (e.stderr ?? '') + (e.message ?? '');
+    assert.match(combined, /Unsupported schema_version 1/);
+    assert.match(combined, /Reset the file/, 'error explains how to recover');
+  }
 });
 
 test('rejects an unsupported schema version', () => {
