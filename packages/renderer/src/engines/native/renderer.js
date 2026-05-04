@@ -3,11 +3,13 @@ import { assignInPlace, createCache, filterObject, inArray } from '@semantic-ui/
 
 import {
   ATTR_MARKER_PREFIX,
+  BLOCK_CLOSE_PREFIX,
   BLOCK_MARKER,
   buildHTMLString as buildHTMLStringPure,
   COMMENT_MARKER,
   DATA_SUI_BIND,
   parseAttributeParts as parseAttributePartsFn,
+  parseServerMeta,
   RAW_TEXT_MARKER,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
@@ -25,18 +27,6 @@ import './blocks/index.js';
 
 // PreparedTemplate cache — parse once, cloneNode per instance
 const templateCache = createCache({ maxSize: 1000, eviction: 'flush' });
-
-// Parse trailing metadata from a closing block marker into serverMeta.
-// Reserved suffixes (after the version segment):
-//   bN  → branchIndex (which branch the {#if}/{:elseif}/{:else} server picked)
-// Unknown segments are ignored. Mutates target in place.
-function parseServerMeta(commentData, target) {
-  for (const part of commentData.split(':')) {
-    if (part.startsWith('b')) {
-      target.branchIndex = parseInt(part.slice(1));
-    }
-  }
-}
 
 // AST → { html, svg } cache, where each slot holds the buildHTMLString
 // result for that namespace. Keyed on the AST array (immutable after
@@ -365,7 +355,7 @@ export class Renderer {
       const text = comment.data;
 
       // Track block nesting — skip inner markers
-      if (text.startsWith('/sui-block:')) {
+      if (text.startsWith(BLOCK_CLOSE_PREFIX)) {
         blockDepth--;
         continue;
       }
@@ -424,7 +414,7 @@ export class Renderer {
         if (text.startsWith(BLOCK_MARKER)) {
           blockDepth++;
         }
-        else if (text.startsWith('/sui-block:')) {
+        else if (text.startsWith(BLOCK_CLOSE_PREFIX)) {
           blockDepth--;
         }
         continue;
@@ -476,7 +466,7 @@ export class Renderer {
         if (next.data.startsWith(BLOCK_MARKER)) {
           blockDepth++;
         }
-        else if (next.data.startsWith('/sui-block:')) {
+        else if (next.data.startsWith(BLOCK_CLOSE_PREFIX)) {
           blockDepth--;
           if (blockDepth === 0) {
             parseServerMeta(next.data, serverMeta);

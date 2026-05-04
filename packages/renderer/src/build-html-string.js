@@ -20,6 +20,34 @@ export const COMMENT_MARKER = `sui:${MARKER_VERSION}:`;
 // Marker for block-level directive positions
 export const BLOCK_MARKER = `sui-block:${MARKER_VERSION}:`;
 
+// Prefix for closing block markers — version-stripped because version
+// match is enforced at the open marker; the close just balances depth.
+// Read sites use this for `startsWith` checks.
+export const BLOCK_CLOSE_PREFIX = '/sui-block:';
+
+// Build a closing block marker comment data string. `meta.branchIndex`
+// is the only reserved suffix today (conditional block); future suffixes
+// can be added here without touching write/parse sites.
+export function formatBlockClose(id, meta) {
+  let s = `/sui-block:${MARKER_VERSION}:${id}`;
+  if (meta && meta.branchIndex !== undefined) {
+    s += `:b${meta.branchIndex}`;
+  }
+  return s;
+}
+
+// Parse trailing metadata from a closing block marker into target.
+// Reserved suffixes (after the version segment):
+//   bN  → branchIndex (which branch the {#if}/{:elseif}/{:else} server picked)
+// Unknown segments are ignored. Mutates target in place.
+export function parseServerMeta(commentData, target) {
+  for (const part of commentData.split(':')) {
+    if (part.startsWith('b')) {
+      target.branchIndex = parseInt(part.slice(1));
+    }
+  }
+}
+
 // Marker for raw text element content (script, style, textarea, title)
 export const RAW_TEXT_MARKER = `sui-rawtext:${MARKER_VERSION}:`;
 

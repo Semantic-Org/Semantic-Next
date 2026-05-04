@@ -27,6 +27,7 @@ import {
   BLOCK_MARKER,
   COMMENT_MARKER,
   DATA_SUI_BIND,
+  formatBlockClose,
   MAIN_BRANCH_INDEX,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
@@ -396,7 +397,7 @@ export class ServerRenderer {
       }
     }
 
-    html += `<!--/sui-block:v1:${id}:b${branchIndex}-->`;
+    html += `<!--${formatBlockClose(id, { branchIndex })}-->`;
     return html;
   }
 
@@ -433,7 +434,7 @@ export class ServerRenderer {
       }
     }
 
-    html += `<!--/sui-block:v1:${id}-->`;
+    html += `<!--${formatBlockClose(id)}-->`;
     return html;
   }
 
@@ -446,7 +447,7 @@ export class ServerRenderer {
       html += this.renderNodes(node.loadingContent, data);
     }
 
-    html += `<!--/sui-block:v1:${id}-->`;
+    html += `<!--${formatBlockClose(id)}-->`;
     return html;
   }
 
@@ -458,7 +459,7 @@ export class ServerRenderer {
       html += this.renderNodes(node.content, data);
     }
 
-    html += `<!--/sui-block:v1:${id}-->`;
+    html += `<!--${formatBlockClose(id)}-->`;
     return html;
   }
 
@@ -499,7 +500,7 @@ export class ServerRenderer {
       }
     }
 
-    html += `<!--/sui-block:v1:${id}-->`;
+    html += `<!--${formatBlockClose(id)}-->`;
     return html;
   }
 

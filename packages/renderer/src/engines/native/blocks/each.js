@@ -1,5 +1,6 @@
 import { Signal } from '@semantic-ui/reactivity';
 import { arrayFromObject, isArray, isEmpty, isPlainObject, isString } from '@semantic-ui/utils';
+import { BLOCK_CLOSE_PREFIX, BLOCK_MARKER } from '../../../build-html-string.js';
 import { defineBlock } from '../define-block.js';
 import { registerBlock } from './registry.js';
 
@@ -463,12 +464,12 @@ function extractServerItemGroups(ownedNodes) {
   for (const n of ownedNodes) {
     if (n.nodeType === Node.COMMENT_NODE) {
       const data = n.data;
-      if (data.startsWith('sui-block:v1:')) {
+      if (data.startsWith(BLOCK_MARKER)) {
         blockDepth++;
         if (current) { current.nodes.push(n); }
         continue;
       }
-      if (data.startsWith('/sui-block:')) {
+      if (data.startsWith(BLOCK_CLOSE_PREFIX)) {
         blockDepth--;
         if (current) { current.nodes.push(n); }
         continue;
