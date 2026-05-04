@@ -32,6 +32,10 @@ Launch all 6 in parallel. Always use **Opus** — never Sonnet or Haiku for revi
 
 Each agent runs `gh pr diff {number}` and examines the changes through its lens.
 
+**Don't leak round number or iteration history to lens agents.** Each round's prompt should read as a first review against the current PR diff. Hints like "round 3", "round-2 fixes", "after iteration", or "previous reviewers already covered X" subtly bias the agent toward assuming earlier rounds caught the obvious issues — they read with less rigor and less skepticism. Frame every round as a cold first read of the current state. The agent has no way to verify what previous rounds covered, so the bias is unfalsifiable from its end.
+
+Same applies to scorers: don't tell a scoring agent "this finding came up in round 3" — strip iteration context before passing the finding.
+
 **Lens agent output format:** Each lens agent returns a structured list of findings. For each issue:
 - **File path and line number(s)**
 - **What's wrong** — one sentence
