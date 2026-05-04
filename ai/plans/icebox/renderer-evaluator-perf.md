@@ -6,19 +6,18 @@ Concrete perf optimizations across the native renderer and `ExpressionEvaluator`
 
 Iceboxed because the existing render path is fast enough at current scale (per the `signal-performance` lesson, microbenchmark gains often translate to single-digit percentages on real workloads). Promote when a benchmark or production workload demonstrates the win, or when adjacent work (`fine-grained-reactivity`, `signal-performance`) opens parts of the surface for clean folding.
 
+PR #175's eager-wire shape costs +5-12% on mount benches and +18% on `hydrate-helper-100-state-change` at 1000 items vs main. That cost is the contract for correct per-item reactivity, not a bug. No individual mechanism in this plan clears a >1ms-at-1000-items savings threshold without conflicting with `fine-grained-reactivity`'s direction (which replaces `createItemDataProxy` and `itemSignal` wholesale).
+
 ## Areas
 
 ### Renderer hot path
 
 Inner loop of list rendering — `each`-item proxy, dynamic regions, attribute binding.
 
-- **`createItemDataProxy` `get` trap clones per access.** Each property read calls `itemSignal.value`, which deep-clones the item object. An expression reading `item.name`, `item.price`, `item.id` clones the item object three times in the same Reaction tick. Replace with `itemSignal.depend()` + read `itemSignal.currentValue` directly — `depend()` is idempotent within a Reaction. Same fix on the `has` trap (currently uses `peek()` which clones).
+- **`createItemDataProxy` `get` trap clones per access.** Obsoleted by `fine-grained-reactivity.md`'s `ReactiveDataContext`, which drops `createItemDataProxy` entirely. Revisit only if that plan doesn't ship.
 - **`Signal.peek()` clones via `maybeClone`** — defeats peek's purpose. Return `currentValue` directly. Composes naturally with `signal-performance`'s freeze rewrite, which eliminates clone overhead by construction.
-- **`DynamicRegion` constructor creates an unused text-node anchor.** Every caller immediately replaces it with a marker or fresh anchor. Initialize `anchor = null`; let the caller assign.
-- **Reuse the source comment marker as the `DynamicRegion` anchor.** Currently `<!--sui-block:N-->` is replaced with an empty text node. Reusing the comment saves one DOM op per block directive and gives DevTools visibility into where block regions live in the tree.
 - **Inline attribute processing in `bindMarkers`.** Current pass collects into an `attrsToProcess` array per element before iterating. Inline the binding call to skip the intermediate array.
-- **For `{#each item as ...}` (named binding), use `Object.create(parentData)` + assignment** instead of a Proxy. The Proxy traps overhead is only justified when the data context overlay is structural; for named-as the keys are static and known.
-- **`evaluateRawTextNodes` uses object spreads in each loops** — replace with `Object.create(data)` + property assignment. Same pattern as above.
+- **`evaluateRawTextNodes` uses object spreads in each loops** — replace with `Object.create(data)` + property assignment.
 
 ### ExpressionEvaluator (V8-targeted)
 
@@ -54,14 +53,13 @@ Most expressions in real templates are simple identifiers or short Lisp-style he
 
 ## Open Questions
 
-- **Order vs `signal-performance` and `fine-grained-reactivity`.** Renderer items 1-2 (item-proxy clone elimination, `Signal.peek`) overlap with the freeze rewrite — freeze obsoletes the clone-elimination once it lands. Lean: land freeze first, then re-scope this plan against the post-freeze surface. Some items will fall away; others (path caching, function-arity specialization) are independent.
 - **WASM renderer relationship.** The server-side hot path moves to WASM (`wasm-renderer.md`) eventually. Client-side renderer + evaluator stays in JS — these items still pay off there.
 - **Benchmark scope.** Each item moves a small amount; cumulative gain shows on list-heavy workloads (filter-keystroke on 1000-row tables, hydrated-cards re-render). Need a representative benchmark before measuring — todo-list and krausest are starting points but neither hits the V8 escape-analysis edges this plan probes.
 
 ## Dependencies
 
-- Loose composition with `fine-grained-reactivity.md` (per-key signals + non-cloning peek = strict improvement together).
-- Adjacent to `signal-performance.md` — freeze rewrite obsoletes a subset of the clone-elimination items.
+- `signal-performance.md` lands first — freeze rewrite eliminates the `Signal.peek` clone item.
+- `fine-grained-reactivity.md` lands first — `ReactiveDataContext` removes `createItemDataProxy` and the per-item Proxy item entirely.
 
 ## Status
 

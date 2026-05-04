@@ -81,18 +81,18 @@ Three latent bugs surfaced once the test setup was corrected to actually hydrate
 
 The 100-item `hydrate-helper-100-mount` bench ran at ~6ms with ±28% noise floor. Anything below ±28% reads as no-change — completely unresolvable. Per the perf-improvement skill's bench-duration table: ~2ms = ±10-20%, ~10ms = ±2-5%, ~50ms+ = ±1%. Bumping to 1000 items pushed the helper-mount bench to ~40ms (±1% band) and the eager-adopt bench to ~80ms. One-line change at two `makeItems` call sites; metric names kept their `-100` suffix.
 
-## Empirical verdict (post-PR-#177 bench)
+## Empirical verdict (merge SHA `d77a555`)
 
-Within-session vs main, at 1000-item resolution:
+PR #175's `semantic-performance-bot[bot]` comment on the merged commit recorded confidently-slower verdicts vs main at 1000-item bench scale:
 
-| metric | Δ vs main | reading |
-|---|---|---|
-| `hydrate-each-100` (item-only, first-mutation adoption) | -0.7% to +0.7% | flat |
-| `hydrate-each-100-mount` (item-only mount) | -0.7% to +1.4% | flat |
-| `hydrate-helper-100-mount` (helper mount, eager-wired) | -0.9% to +0.6% | **flat** |
-| `hydrate-helper-100-state-change` | **+19% (1ms)** | confidently slower |
+| metric | Δ vs main |
+|---|---|
+| `hydrate-helper-100-state-change` | +18% (1ms) |
+| `hydrate-helper-100-mount` | +12% (5ms) |
+| `hydrate-each-100` | +10% (8ms) |
+| `hydrate-each-100-mount` | +5% (3ms) |
 
-The eager-wire cost on 1000 items is below the bench's noise floor at the mount window. The challenge fresh-take's premise (eager wiring would be a real ~425ms perf cost worth a static analyzer to avoid) doesn't survive the empirical test at this scale. The `+19%` / `+1ms` on `state-change` is the cost of the work the framework is supposed to do on a state mutation — main's "fast" number was the silent-failure baseline this fix repairs.
+The +18% on `state-change` is the cost of the work the framework is supposed to do on state mutation — main's "fast" baseline was the silent-failure shape this PR repairs. The mount regressions are the price the framework pays for correctness on per-item bindings that read external state. At realistic component scale (10-50 items) the absolute cost is sub-millisecond.
 
 ## Open Questions / Resolved
 
@@ -130,13 +130,13 @@ hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerCo
 }
 ```
 
-The empirical bench at 1000 items showed eager wiring is **flat vs main** — the lazy optimization the classifier was protecting wasn't paying for itself at any scale we measured. The `+19% / +1ms on state-change` regression is the work the framework should be doing on a state mutation; main's "fast" baseline was the silent-failure shape this PR repairs.
+The eager-wire cost vs main is real (+5-12% on mount benches at 1000 items, +18% on state-change). The architectural objections to the classifier — abstraction-breaking, hardcoded JS-keyword tables, extensibility hole, predicting at compile-time what runtime tells us O(1) at hydrate time — are what made it un-mergeable, not the empirics. The eager-wire cost is the contract for correct per-item reactivity.
 
 **Files removed in the reversal:**
 - `packages/renderer/src/engines/native/blocks/each-content-classifier.js` (260 lines)
 - `packages/renderer/test/unit/each-content-classifier.test.js` (190 lines, 29 unit tests)
 
-**Lesson.** When a prior optimization forces you to invent a parallel system to preserve it, and the optimization doesn't measurably pay for itself, the right answer is to drop the optimization, not bolt on the parallel system. The classifier was a workaround for an over-optimization. The empirical bench should have been the load-bearing input from the start; "the perf pass said this matters" was a stale assumption that didn't survive the bench-resolution upgrade in PR #177.
+**Lesson.** The classifier was a workaround invented to preserve a prior optimization. The architectural problems with it — abstraction-breaking, runtime shadow lexer, hardcoded JS-keyword tables, extensibility hole — made it un-mergeable on its own merits. The right answer was to drop the workaround and accept the eager-wire cost as the contract for correct per-item reactivity.
 
 ## Status
 
@@ -149,7 +149,7 @@ Completed 2026-05-02. Reversed 2026-05-04 (classifier ripped out, canonical eage
 - **Completed:** 2026-05-02
 - **Delta notes:** Two unplanned discoveries dominated the time:
   1. **`innerHTML` doesn't process DSD.** Spent two hours iterating on test setups that all "passed" because the test helper was running `fullRender`, not `hydrate`. The user pushed back on the strong claim ("are you saying hydration didn't work at all?") which forced me to verify with a probe test instead of asserting. The probe confirmed Chromium 147's `innerHTML` left the `<template>` as a literal child element; `setHTMLUnsafe` produced a real shadow root. Single fact, hours of indirection if it goes uncaught.
-  2. **Bench noise floor.** First post-fix tachometer report came back "No Meaningful Change" at 100 items. The user asked whether the hydrate benches were too short to resolve anything — they were. The 6ms-13ms bench durations sat in the ±10-28% noise band and "no change" was meaningless. Bumping to 1000 items moved them into the ±1% band where the truthful `+19% on state-change` and `flat on mount` signals became visible. The perf-improvement skill's bench-duration table (~2ms → ±10-20%, ~50ms → ±1%) was the load-bearing reference.
+  2. **Bench noise floor.** First post-fix tachometer report came back "No Meaningful Change" at 100 items. The user asked whether the hydrate benches were too short to resolve anything — they were. The 6ms-13ms bench durations sat in the ±10-28% noise band and "no change" was meaningless. Bumping to 1000 items moved them into the ±1% band where the eager-wire cost became measurable. The perf-improvement skill's bench-duration table (~2ms → ±10-20%, ~50ms → ±1%) was the load-bearing reference.
 
   These two non-obvious findings now live in the `ssr-hydration` skill so future agents don't relearn them.
 
