@@ -51,11 +51,6 @@ jobs:
           git fetch origin main --depth=1
           git checkout origin/main -- tools/ci/bench/reporter/ 2>/dev/null || true
 
-      # No main-history overlay on the PR comment path. Peak attribution
-      # uses --scope pr (PR-iteration history only) — main-history would
-      # surface phantom REOPENEDs against historical commits that
-      # round-robin'd against different tip-of-trees.
-
       - name: Download bench artifacts
         uses: dawidd6/action-download-artifact@v21
         with:
@@ -102,10 +97,9 @@ jobs:
           ENDED: ${{ github.event.workflow_run.updated_at }}
         run: |
           WALL_CLOCK=$(( $(date -d "$ENDED" +%s) - $(date -d "$STARTED" +%s) ))
-          # --scope pr: peak attribution uses PR-iteration history only;
-          # main-history (still loaded for drift quantification) is excluded
-          # from the comparison set so test-only PRs don't surface phantom
-          # REOPENEDs against historical main commits.
+          # --scope pr: peak attribution uses PR-iteration history only.
+          # main-history is still loaded for drift quantification but excluded
+          # from the comparison set.
           node tools/ci/bench/reporter/reporter.js \
             --results results \
             --sha '${{ github.event.workflow_run.head_sha }}' \
@@ -192,23 +186,15 @@ jobs:
 
       - name: Append history entry
         run: |
-          # The benched commit is the workflow_run's head_sha (the merge
-          # commit on main). Parent comes from the git history we just
-          # fetched. Timestamp is the bench run's completion time so the
-          # history is ordered by when the measurement was taken, not
-          # when the commit landed.
-          #
-          # baseline-sha.txt sidecar (uploaded next to tachometer JSONs)
-          # carries the SHA the bench's percent-delta is pinned to. Any
-          # matrix entry's sidecar suffices — they all benched against
-          # the same baseline within one workflow_run.
+          # Benched commit is the workflow_run's head_sha; parent comes from
+          # the depth-2 fetch above. Timestamp is the bench run's completion
+          # so history is ordered by measurement, not commit-land time.
+          # baseline-sha.txt is the sidecar uploaded next to each matrix
+          # cell's tachometer JSON. Any cell's value works — all cells in
+          # one workflow_run benched against the same baseline.
           BENCHED_SHA='${{ github.event.workflow_run.head_sha }}'
           PARENT_SHA=$(git rev-parse "$BENCHED_SHA^" 2>/dev/null || echo '')
-          BASELINE_SHA_FILE=$(find results -name baseline-sha.txt -type f | head -1)
-          BASELINE_SHA=''
-          if [ -n "$BASELINE_SHA_FILE" ]; then
-            BASELINE_SHA=$(cat "$BASELINE_SHA_FILE")
-          fi
+          BASELINE_SHA=$(find results -name baseline-sha.txt -type f -exec cat {} \; -quit)
           node tools/ci/bench/reporter/append-history.js \
             --results results \
             --sha "$BENCHED_SHA" \

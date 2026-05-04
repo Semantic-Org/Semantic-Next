@@ -25,17 +25,18 @@
       --out <dir>             output directory (default: ./bench-report)
 
   Cross-run taxonomy (WIN / TIED-PEAK / REOPENED) operates on within-session
-  percent-delta CIs (the only number tachometer warrants for cross-iteration
-  comparison). Drift detection walks main-history's chain of percent-deltas
-  between baselines; renders ⚠️ when main moved enough on the metric to
+  percent-delta CIs — the only number tachometer warrants for cross-iteration
+  comparison. Drift detection walks main-history's chain of percent-deltas
+  between baselines and renders ⚠️ when main moved enough on the metric to
   plausibly confound peak attribution within the PR.
 
-  Schema: bench-history.json schema_version 2 only. v1 entries (absolute ms)
-  cannot validly contribute to peak attribution and are ignored.
+  Schema: bench-history.json is schema_version 2.
 */
 
 import fs from 'node:fs';
 import path from 'node:path';
+
+import { readBaselineSha, walk } from './extract-metrics.js';
 
 const args = parseArgs(process.argv.slice(2));
 const resultsDir = required(args, 'results');
@@ -54,11 +55,10 @@ const wallClockSec = args['wall-clock'] ? Number(args['wall-clock']) : null;
 const historyPath = args.history ?? path.join(repoRoot, 'tools/ci/bench/reporter/bench-history.json');
 const prHistoryPath = args['pr-history'] ?? '';
 const outDir = args.out ?? './bench-report';
-// Scope of cross-iteration peak attribution. 'pr' restricts peak comparison
-// to PR-iteration history only — main-history overlay is excluded so
-// test-only PRs don't surface phantom REOPENEDs against historical main
-// commits that round-robin'd against different tip-of-trees. Default 'all'
-// preserves prior behavior for push-to-main runs (which want main-history).
+// 'pr' restricts peak attribution to PR-iteration history only — main-history
+// commits round-robin'd against their own tip-of-trees, so cross-session
+// comparison would mix iteration drift with environmental variance. 'all'
+// merges both for push-to-main runs that want the full timeline.
 const scope = args.scope ?? 'all';
 if (scope !== 'all' && scope !== 'pr') {
   console.error(`Invalid --scope: ${scope}; expected 'all' or 'pr'`);
@@ -117,12 +117,9 @@ function expectedNoisePp(meanMs) {
 const benchDirs = findBenchDirs(repoRoot);
 const mainHistory = loadHistory(historyPath);
 const prHistory = loadHistory(prHistoryPath);
-// Peak attribution operates on this scope. 'pr' excludes main-history
-// (test-only PRs don't surface phantoms against historical main commits).
 const peakHistory = scope === 'pr' ? prHistory : mergeHistories(mainHistory, prHistory);
-// Drift quantification always walks main-history regardless of peak scope —
-// the chain-of-percent-deltas across main commits is what tells us how much
-// the baseline itself moved between two iterations of this PR.
+// Drift always walks main-history regardless of peak scope — the chain of
+// per-commit percent-deltas is what quantifies how the baseline itself moved.
 const driftHistory = mainHistory;
 const currentBaselineSha = readBaselineSha(resultsDir);
 const metrics = loadAllMetrics(resultsDir);
@@ -173,34 +170,12 @@ function loadAllMetrics(dir) {
         tipOfTreeMs: [base.bm.mean.low, base.bm.mean.high],
         absoluteMsDelta: [diff.absolute.low, diff.absolute.high],
         percentDelta: [diff.percentChange.low, diff.percentChange.high],
-        // SHA the bench was compared against; pinned per-metric so peak
-        // attribution can detect baseline drift between iterations.
         baselineSha: currentBaselineSha || null,
       });
     }
   }
-  // Deterministic order for snapshot stability
   out.sort((a, b) => a.name.localeCompare(b.name));
   return out;
-}
-
-/**
- * Read the baseline-sha.txt sidecar uploaded by the bench workflow next to
- * the tachometer JSON. Returns '' if absent (pre-v2 artifact, or running
- * locally outside the workflow).
- */
-function readBaselineSha(dir) {
-  for (const entry of walk(dir)) {
-    if (entry.endsWith('baseline-sha.txt')) {
-      try {
-        return fs.readFileSync(entry, 'utf8').trim();
-      }
-      catch {
-        return '';
-      }
-    }
-  }
-  return '';
 }
 
 /**
@@ -293,8 +268,7 @@ function toJsonMetric(m) {
     source: m.source,
     baseline_sha: m.baselineSha ?? null,
   };
-  // Cross-run fields only populated when history has data for this metric.
-  // Agents can detect absence vs "no peak" via missing key, not null.
+  // Missing key (not null) signals "no history for this metric" to consumers.
   if (m.historyStatus) {
     out.history_status = m.historyStatus.status;
     out.peak = m.historyStatus.peak;
@@ -308,8 +282,7 @@ function toJsonMetric(m) {
 }
 
 /**
- * Markdown renderer — implements the rubric at ai/workspace/tmp/bench-reporter-rubric.md.
- * Layout:
+ * Markdown renderer. Layout:
  *   1. Top header: h3 with state emoji + commit link + "on Benchmark Suite 📊"
  *   2. Metadata line: Base · Action · Raw (bench-report.json link)
  *   3. GitHub alert block with verdict copy
@@ -371,7 +344,6 @@ function renderMarkdown(report) {
     `🔍 ${unsureTotal} unsure`,
     `⚪ ${noChange.length} no change`,
   ];
-  // Surface REOPENED count in the headline when history has flagged any.
   const reopenedCount = report.history_summary?.REOPENED ?? 0;
   if (reopenedCount > 0) {
     resultsParts.push(`📜 ${reopenedCount} reopened`);
@@ -392,9 +364,6 @@ function renderMarkdown(report) {
   }
 
   // ─── Regressions from peak (cross-run; auto-expanded when present) ───
-  // Load-bearing signal — a metric better on a prior commit is always a
-  // cherry-pick candidate. Sits alongside Faster/Slower, not hidden in a
-  // collapsible, because a reviewer should never miss this.
   renderRegressionsFromPeak(lines, report);
 
   // ─── No Change (always collapsed) ────────────────────────────────────
@@ -496,7 +465,6 @@ function renderRegressionsFromPeak(lines, report) {
   const reopened = report.metrics.filter((m) => m.history_status === 'REOPENED');
   if (reopened.length === 0) { return; }
 
-  // Sort by severity — largest pp regression first.
   const sorted = [...reopened].sort(
     (a, b) => (b.delta_from_peak_pct ?? 0) - (a.delta_from_peak_pct ?? 0),
   );
@@ -513,14 +481,9 @@ function renderRegressionsFromPeak(lines, report) {
   const flagged = [];
 
   for (const m of sorted) {
-    // Current's pct-delta midpoint vs its own baseline.
-    const currentPctMid = mid(m.percent_change_ci);
-    const currentStr = formatSignedPct(currentPctMid);
-    // Peak's pct-delta midpoint vs ITS baseline.
-    const peakPctMid = mid(m.peak.percent_delta_ci);
-    const peakStr = formatSignedPct(peakPctMid);
+    const currentStr = formatSignedPct(mid(m.percent_change_ci));
+    const peakStr = formatSignedPct(mid(m.peak.percent_delta_ci));
     const peakLink = commitOrPrLink(m.peak, report.repo);
-    // Difference in percentage points.
     const deltaStr = m.delta_from_peak_pct > 0
       ? `regressed +${m.delta_from_peak_pct.toFixed(0)}pp`
       : `${m.delta_from_peak_pct.toFixed(0)}pp`;
@@ -532,8 +495,7 @@ function renderRegressionsFromPeak(lines, report) {
       ? `${bisectMd} +${m.bisect_candidates.length - BISECT_MARKDOWN_MAX} more`
       : bisectMd || '—';
 
-    // Drift flag: fires when chain magnitude exceeds threshold OR when
-    // magnitude is unavailable but drift is detected (chain-gap case).
+    // Fires on threshold breach or chain-gap (magnitude unavailable).
     let driftFlag = '';
     if (m.drift?.detected) {
       const mag = m.drift.magnitude;
@@ -814,25 +776,26 @@ function mergeHistories(mainHist, prHist) {
     ...(mainHist?.commits ?? []),
     ...(prHist?.commits ?? []),
   ];
-  // Deduplicate by SHA (same commit shouldn't appear twice)
   const seen = new Set();
   const deduped = commits.filter((c) => {
     if (seen.has(c.sha)) { return false; }
     seen.add(c.sha);
     return true;
   });
-  // Chronological order so bisect candidates are in causal sequence
+  // Chronological so bisect candidates land in causal order.
   deduped.sort((a, b) => (a.timestamp ?? '').localeCompare(b.timestamp ?? ''));
   return { schema_version: 2, commits: deduped };
 }
 
 /**
- * Load bench-history.json. Returns null if missing/empty/invalid — peak
- * attribution gracefully degrades on a null history.
+ * Load bench-history.json. Returns null on missing/empty/invalid — peak
+ * attribution gracefully degrades on null. Schema v2 only.
  *
- * v2 only. v1 entries stored absolute ms and only fed the buggy
- * cross-session peak attribution being replaced; the file was reset to
- * empty v2 alongside the methodology fix.
+ * Sorts by timestamp on read. Consumers (`computeBaselineDrift`) walk
+ * `commits` by index and assume chronological order. `append-history.js`
+ * appends but never sorts, and the rebase-retry path on push-to-main
+ * could plausibly land entries with non-monotonic timestamps; sorting
+ * here keeps the assumption load-bearing without surprise.
  */
 function loadHistory(filePath) {
   if (!filePath || !fs.existsSync(filePath)) { return null; }
@@ -840,6 +803,7 @@ function loadHistory(filePath) {
     const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     if (parsed.schema_version !== 2) { return null; }
     if (!Array.isArray(parsed.commits)) { return null; }
+    parsed.commits.sort((a, b) => (a.timestamp ?? '').localeCompare(b.timestamp ?? ''));
     return parsed;
   }
   catch {
@@ -848,46 +812,37 @@ function loadHistory(filePath) {
 }
 
 /**
- * Compute per-metric cross-run status against the peak-attribution history.
+ * Per-metric cross-run status against `peakHist`.
  *
- * Peak = the entry with the most-negative `percent_delta_ci` upper bound —
+ * Peak = the entry with the most-negative `percent_delta_ci` upper bound:
  * the iteration that produced the largest improvement vs its own baseline.
- * On exact ties, prefer the most recent entry (commits array is chronological).
+ * On exact ties, prefer the more recent entry (`commits` is chronological).
  *
- * Status taxonomy operates on within-session percent-delta CIs (the only
- * methodologically valid number for cross-iteration comparison; absolute
- * ms across two sessions mixes per-session environmental variance):
+ * Status compares within-session percent-delta CIs at both ends. Cross-
+ * session absolute-ms compare would mix per-session environmental variance:
  *   WIN        — current pct-delta CI dominates peak's (current high < peak low)
  *   REOPENED   — peak pct-delta CI dominates current's (peak high < current low)
- *   TIED-PEAK  — CIs overlap (no dominance either way)
+ *   TIED-PEAK  — CIs overlap
  *
- * Drift detection runs against `driftHist` (main-history) regardless of the
- * peak-attribution scope — it walks the chain of main commits between the
- * two baselines to quantify how much main moved on this metric over the
- * PR's lifetime. See `computeBaselineDrift`.
+ * Drift detection runs against `driftHist` (always main-history) regardless
+ * of the peak scope. See `computeBaselineDrift`.
  *
- * Returns null when peakHist is null/empty OR this metric has no prior
- * entries with `percent_delta_ci` (new bench, or only v1 entries — the
- * file should have been wiped during the methodology fix; v1 entries
- * here are an unexpected state).
+ * Returns null when this metric has no prior entries with `percent_delta_ci`
+ * — new bench, no comparable history yet.
  */
 function computeHistoryStatus(metric, peakHist, driftHist) {
   if (!peakHist || peakHist.commits.length === 0) { return null; }
-  // Only entries with percent_delta_ci can contribute. v1 entries (absolute
-  // ms only) can't be validly compared across sessions.
   const entries = peakHist.commits.filter(
     (c) => c.metrics?.[metric.name]?.percent_delta_ci,
   );
   if (entries.length === 0) { return null; }
 
-  // Pick peak: most-negative percent_delta_ci upper bound. Tie-break: newer
-  // commit wins.
+  // Pick peak. Tie-break: newer commit wins.
   let peakIdx = 0;
   for (let i = 1; i < entries.length; i++) {
     const candHigh = entries[i].metrics[metric.name].percent_delta_ci[1];
     const peakHigh = entries[peakIdx].metrics[metric.name].percent_delta_ci[1];
-    if (candHigh < peakHigh) { peakIdx = i; }
-    else if (candHigh === peakHigh) { peakIdx = i; }
+    if (candHigh <= peakHigh) { peakIdx = i; }
   }
   const peakEntry = entries[peakIdx];
   const peakMetric = peakEntry.metrics[metric.name];
@@ -899,24 +854,19 @@ function computeHistoryStatus(metric, peakHist, driftHist) {
   else if (peakPctCi[1] < currentPctCi[0]) { status = 'REOPENED'; }
   else { status = 'TIED-PEAK'; }
 
-  // Bisect candidates: commits between peak and HEAD of peakHist that
-  // contain this metric (with percent_delta_ci). Oldest-to-newest so the
-  // reviewer/agent sees the timeline in causal order.
+  // Bisect candidates: commits after peak that also report this metric.
   const peakHistIdx = peakHist.commits.findIndex((c) => c.sha === peakEntry.sha);
   const bisectCandidates = peakHist.commits
     .slice(peakHistIdx + 1)
     .filter((c) => c.metrics?.[metric.name]?.percent_delta_ci)
     .map((c) => ({ sha: c.sha, msg: c.msg, pr: c.pr ?? null }));
 
-  // delta_from_peak_pct measured in percentage points (pp): difference
-  // between current's pct-delta midpoint and peak's pct-delta midpoint.
-  // Positive = regressed from peak. Reads as "you regressed N pp of
-  // improvement vs the best iteration on this metric."
+  // Difference in percentage points (not %): current's pct-delta midpoint
+  // minus peak's. Positive reads as "regressed N pp of improvement."
   const currentMid = (currentPctCi[0] + currentPctCi[1]) / 2;
   const peakMid = (peakPctCi[0] + peakPctCi[1]) / 2;
   const deltaFromPeakPct = currentMid - peakMid;
 
-  // Drift: how much did main move between current's baseline and peak's?
   const drift = computeBaselineDrift(
     metric.name,
     metric.baselineSha,
@@ -944,21 +894,15 @@ function computeHistoryStatus(metric, peakHist, driftHist) {
 /**
  * Quantify cumulative main-side drift between two baselines on a metric by
  * walking the chain of main commits between them and combining their
- * within-session percent-deltas.
+ * within-session percent-deltas. Subtracting absolute ms across sessions
+ * would mix per-session environmental variance into the result.
  *
  * Returns one of:
- *   { detected: false }
- *     — baselines match (or one/both unknown).
- *   { detected: true, magnitude: N, chain_len: K, missing: M }
- *     — quantified; N in pp, sign convention positive = main got slower.
- *   { detected: true, magnitude: null, chain_len: K, missing: M }
- *     — gap-handling: chain partially or wholly unwalkable; binary disclosure
- *     fires but magnitude is unavailable.
+ *   { detected: false }                                                   — baselines match (or one/both unknown)
+ *   { detected: true, magnitude: N, chain_len: K, missing: M }            — quantified; N in pp, positive = main got slower
+ *   { detected: true, magnitude: null, chain_len: K, missing: M }         — chain partially or wholly unwalkable
  *
- * Combines multiplicatively: ∏(1 + pct_i) − 1. Within-session deltas are
- * the only methodologically valid number for cross-session combine;
- * subtracting two main entries' absolute ms would re-introduce the
- * cross-session bug this file exists to fix.
+ * Combines multiplicatively: ∏(1 + pct_i) − 1.
  */
 function computeBaselineDrift(metricName, currentBaselineSha, peakBaselineSha, hist) {
   if (!currentBaselineSha || !peakBaselineSha) {
@@ -967,7 +911,6 @@ function computeBaselineDrift(metricName, currentBaselineSha, peakBaselineSha, h
   if (currentBaselineSha === peakBaselineSha) {
     return { detected: false };
   }
-  // No main-history at all → drift detected (binary), magnitude unavailable.
   if (!hist || hist.commits.length === 0) {
     return { detected: true, magnitude: null, chain_len: 0, missing: 0 };
   }
@@ -978,8 +921,8 @@ function computeBaselineDrift(metricName, currentBaselineSha, peakBaselineSha, h
   }
   const lo = Math.min(idxCurrent, idxPeak);
   const hi = Math.max(idxCurrent, idxPeak);
-  // Chain = commits AFTER the older baseline up through the newer one — those
-  // are the commits whose deltas accumulated between the two baselines.
+  // Commits AFTER the older baseline through the newer one — their deltas are
+  // what accumulated between the two baselines.
   const chain = hist.commits.slice(lo + 1, hi + 1);
   let chainLen = 0;
   let missing = 0;
@@ -1035,14 +978,6 @@ function round2([low, high]) {
 
 function round4([low, high]) {
   return [Number(low.toFixed(4)), Number(high.toFixed(4))];
-}
-
-function* walk(dir) {
-  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, ent.name);
-    if (ent.isDirectory()) { yield* walk(full); }
-    else { yield full; }
-  }
 }
 
 function parseArgs(argv) {

@@ -2,13 +2,13 @@
 /*
   Fetch prior bench results from this PR's branch to build a per-iteration
   history. Walks completed Benchmarks workflow runs, downloads their
-  results-* artifacts, extracts per-metric absolute CIs, and outputs a
+  results-* artifacts, extracts per-metric CIs, and outputs a
   pr-history.json in the same schema as bench-history.json.
 
   The reporter merges this PR-iteration history with bench-history.json
-  (main-commit history) to compute cross-run peak attribution. An agent
-  iterating on a perf branch sees: "iteration 3 was the best on
-  update-10th; your current iteration regressed from that."
+  (main-commit history) for cross-run peak attribution. An agent iterating
+  on a perf branch sees: "iteration 3 was the best on update-10th; your
+  current iteration regressed from that."
 
   Usage:
     node fetch-pr-history.js \
@@ -23,7 +23,7 @@
 
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
-import path from 'node:path';
+import { loadHistoryMetrics, readBaselineSha } from './extract-metrics.js';
 
 const args = parseArgs(process.argv.slice(2));
 const branch = required(args, 'branch');
@@ -59,16 +59,12 @@ for (const run of prRuns) {
     continue;
   }
 
-  const metrics = loadMetrics(dir);
+  const metrics = loadHistoryMetrics(dir);
   if (Object.keys(metrics).length === 0) {
     console.log(`  Skip ${run.databaseId} (no metrics)`);
     continue;
   }
 
-  // Read the sidecar baseline SHA uploaded with the artifacts. Only present
-  // on runs from the v2-aware workflow; older runs return '' and entries
-  // skip the baseline_sha field entirely (no cross-iteration drift detection
-  // possible against pre-v2 iterations).
   const baselineSha = readBaselineSha(dir);
   if (baselineSha) {
     for (const m of Object.values(metrics)) {
@@ -92,89 +88,12 @@ for (const run of prRuns) {
   );
 }
 
-// Chronological order (oldest first) so peak-index → bisect-candidates
-// after peak produces a causal timeline.
+// Sort by timestamp so peak → bisect-candidates after peak produces a
+// causal timeline.
 commits.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
 fs.writeFileSync(outPath, JSON.stringify({ schema_version: 2, commits }, null, 2) + '\n');
 console.log(`Wrote ${commits.length} entries to ${outPath}`);
-
-/**
- * Walk a results directory and extract one entry per metric. Pairs each
- * `this-change` benchmark with its `tip-of-tree` counterpart so the
- * within-session percent-delta from `differences[]` is persisted alongside
- * the absolute CI. Same extraction shape as append-history.js.
- */
-function loadMetrics(dir) {
-  const out = {};
-  for (const entry of walk(dir)) {
-    if (!entry.endsWith('.json')) { continue; }
-    let data;
-    try {
-      data = JSON.parse(fs.readFileSync(entry, 'utf8'));
-    }
-    catch {
-      continue;
-    }
-    if (!Array.isArray(data.benchmarks)) { continue; }
-
-    const byName = new Map();
-    data.benchmarks.forEach((bm, i) => {
-      const mName = bm.measurement?.name ?? bm.name;
-      const source = (bm.name ?? '').split(' [')[0];
-      if (!byName.has(mName)) { byName.set(mName, {}); }
-      byName.get(mName)[source] = { index: i, bm };
-    });
-
-    for (const [name, pair] of byName) {
-      const cur = pair['this-change'];
-      const base = pair['tip-of-tree'];
-      if (!cur?.bm.mean) { continue; }
-      const metricEntry = {
-        ci: [round4(cur.bm.mean.low), round4(cur.bm.mean.high)],
-        mean_ms: round4((cur.bm.mean.low + cur.bm.mean.high) / 2),
-      };
-      if (base) {
-        const diff = cur.bm.differences?.[base.index];
-        if (diff?.percentChange) {
-          metricEntry.percent_delta_ci = [
-            round4(diff.percentChange.low),
-            round4(diff.percentChange.high),
-          ];
-        }
-      }
-      out[name] = metricEntry;
-    }
-  }
-  return out;
-}
-
-/**
- * Read the sidecar baseline-sha.txt written by the v2-aware bench workflow
- * alongside the tachometer JSONs. Returns '' if absent (pre-v2 run, or
- * artifact missing the file). Caller decides whether to attach the SHA to
- * extracted entries.
- */
-function readBaselineSha(dir) {
-  for (const entry of walk(dir)) {
-    if (entry.endsWith('baseline-sha.txt')) {
-      return fs.readFileSync(entry, 'utf8').trim();
-    }
-  }
-  return '';
-}
-
-function round4(n) {
-  return Number(n.toFixed(4));
-}
-
-function* walk(dir) {
-  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, ent.name);
-    if (ent.isDirectory()) { yield* walk(full); }
-    else { yield full; }
-  }
-}
 
 function exec(cmd) {
   return execSync(cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
