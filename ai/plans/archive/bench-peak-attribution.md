@@ -185,3 +185,10 @@ None. The two PRs are independently revertable.
 ## Open Questions
 
 None.
+
+## Completion
+
+- **Estimated:** 9-11h pair (1.5d), per the in-scope split: PR 1 methodology fix (~7-9h) + PR 2 suite cleanup (~2h).
+- **Actual:** ~3h wall-clock on 2026-05-04 for the main methodology work (planned 11:54, merged 14:44 as PR #178), plus reporter polish commits that landed across the next day (`Build: Bench reporter — drop em-dashes…`, `…drop negative sign on WIN delta string`, `…collapse renderRegressionsFromPeak and renderNewPeaks`, `…extract formatCandidateCell, trim CR-flagged comments`, `Bench Reporter Surfaces Wins #180`).
+- **Completed:** 2026-05-05 (last reporter polish landed early morning).
+- **Delta notes:** Came in well under estimate. Methodology fix + bench-history wipe shipped together in PR #178 ahead of plan; reporter UX polish (peak/regression sections, glossary-adjacent rendering) followed over the next day in the smaller `Build: Bench reporter — …` commits and PR #180 as the surface stabilized.
