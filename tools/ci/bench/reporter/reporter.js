@@ -132,7 +132,7 @@ const PEAK_SECTIONS = {
     // Most-improved first. delta_from_peak_pct is negative for WIN, so
     // ascending sort surfaces the best.
     sortSign: 1,
-    formatDelta: (delta) => `improved ${delta.toFixed(0)}%`,
+    formatDelta: (delta) => `improved ${Math.abs(delta).toFixed(0)}%`,
   },
 };
 
