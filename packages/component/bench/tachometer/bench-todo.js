@@ -133,6 +133,9 @@ defineComponent({
         state.editingId.set(null);
         state.todos.setProperty(id, 'title', title);
       },
+      renameTodo(id, title) {
+        state.todos.setProperty(id, 'title', title);
+      },
     };
   },
 });
@@ -435,6 +438,27 @@ for (let i = 0; i < 5; i++) {
   await flush();
 }
 performance.measure('edit-cycle-5', startMark('edit-cycle-5'));
+destroy();
+
+/*******************************
+      Rename Flow
+      (single-field setProperty)
+*******************************/
+
+// Pure setProperty workload — `saveTodo` co-fires editingId, which
+// muddies the signal. `renameTodo` does only the per-id field write,
+// so the metric isolates the per-key broadcast cost. Distinct from
+// `toggle-*` (which uses replaceItem) and `edit-cycle-5` (which mixes
+// in an editingId flip per cycle).
+const el16 = await setup(100);
+// purpose: Renames 50 different items in a 100-item list via single-field setProperty without editingId co-fires.
+performance.mark(startMark('rename-50'));
+for (let i = 0; i < 50; i++) {
+  const todos = getTodos(el16);
+  el16.component.renameTodo(todos[i % todos.length].id, `Renamed ${i}`);
+  await flush();
+}
+performance.measure('rename-50', startMark('rename-50'));
 destroy();
 
 /*******************************

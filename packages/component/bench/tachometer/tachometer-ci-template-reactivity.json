@@ -15,7 +15,9 @@
         { "mode": "performance", "entryName": "snippet-args-per-key-100" },
         { "mode": "performance", "entryName": "active-indicator-200" },
         { "mode": "performance", "entryName": "stable-ref-mutate-500" },
-        { "mode": "performance", "entryName": "subtemplate-data-blob-100" }
+        { "mode": "performance", "entryName": "subtemplate-data-blob-100" },
+        { "mode": "performance", "entryName": "snippet-in-subtemplate-100" },
+        { "mode": "performance", "entryName": "active-indicator-nested-200" }
       ]
     },
     {
@@ -28,7 +30,9 @@
         { "mode": "performance", "entryName": "snippet-args-per-key-100" },
         { "mode": "performance", "entryName": "active-indicator-200" },
         { "mode": "performance", "entryName": "stable-ref-mutate-500" },
-        { "mode": "performance", "entryName": "subtemplate-data-blob-100" }
+        { "mode": "performance", "entryName": "subtemplate-data-blob-100" },
+        { "mode": "performance", "entryName": "snippet-in-subtemplate-100" },
+        { "mode": "performance", "entryName": "active-indicator-nested-200" }
       ]
     }
   ]

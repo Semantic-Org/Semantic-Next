@@ -120,6 +120,68 @@ defineComponent({
   }),
 });
 
+// Card subtemplate that defines a snippet internally and invokes it
+// four times. Distinct from `bench-snippet`'s top-level snippet — the
+// surrounding subtemplate has receivesData: true, which is the only
+// place dataDep gets attached to inner snippet Reactions today.
+const cardWithBadge = defineComponent({
+  renderingEngine: 'native',
+  template: [
+    '{#snippet badge}',
+    '<span class="badge">{text}</span>',
+    '{/snippet}',
+    '<span class="title">{title}</span>',
+    "{>badge text='Active'}",
+    "{>badge text='Verified'}",
+    "{>badge text='Premium'}",
+    "{>badge text='Featured'}",
+  ].join(''),
+});
+
+defineComponent({
+  tagName: 'bench-snippet-in-subtemplate',
+  renderingEngine: 'native',
+  template: `{#each i in idxs}{>card title=getTitle}{/each}`,
+  subTemplates: { card: cardWithBadge },
+  defaultState: { titleVal: 'init' },
+  createComponent: ({ state }) => ({
+    idxs: Array.from({ length: 25 }, (_, i) => i),
+    getTitle: () => state.titleVal.get(),
+  }),
+});
+
+// 3-deep nested #each anchored to nav-menu's actual structure
+// (section → page → subpage). External currentUrl signal feeds a
+// helper called on each leaf — the same shape nav-menu uses for its
+// active highlight. 5 × 10 × 4 = 200 leaf anchors.
+const buildNavSections = () => {
+  const sections = new Array(5);
+  for (let s = 0; s < 5; s++) {
+    const pages = new Array(10);
+    for (let p = 0; p < 10; p++) {
+      const subpages = new Array(4);
+      for (let sp = 0; sp < 4; sp++) {
+        subpages[sp] = { url: `/s${s}/p${p}/sp${sp}`, name: `sp${sp}` };
+      }
+      pages[p] = { name: `p${p}`, subpages };
+    }
+    sections[s] = { name: `s${s}`, pages };
+  }
+  return sections;
+};
+
+defineComponent({
+  tagName: 'bench-active-indicator-nested',
+  renderingEngine: 'native',
+  template:
+    `{#each section in sections}<section><h3>{section.name}</h3>{#each page in section.pages}<div><span>{page.name}</span>{#each subpage in page.subpages}<a class="{maybeActive subpage.url}">{subpage.name}</a>{/each}</div>{/each}</section>{/each}`,
+  defaultState: { currentUrl: '/' },
+  createComponent: ({ state }) => ({
+    sections: buildNavSections(),
+    maybeActive: (url) => state.currentUrl.get() === url ? 'active' : '',
+  }),
+});
+
 /*******************************
       Bench Runner
 *******************************/
@@ -214,6 +276,37 @@ for (let i = 0; i < 50; i++) {
   await flush();
 }
 performance.measure('subtemplate-data-blob-100', startMark('subtemplate-data-blob-100'));
+destroy();
+
+/*******************************
+      Snippet inside subtemplate
+*******************************/
+
+// purpose: Mutates one subtemplate prop's source across 25 cards each invoking 4 inner snippets. Snippet bodies should stay quiet.
+const el8 = await mount('bench-snippet-in-subtemplate');
+performance.mark(startMark('snippet-in-subtemplate-100'));
+for (let i = 0; i < 50; i++) {
+  el8.template.state.titleVal.set(`v${i}`);
+  await flush();
+}
+performance.measure('snippet-in-subtemplate-100', startMark('snippet-in-subtemplate-100'));
+destroy();
+
+/*******************************
+      Active indicator nested
+*******************************/
+
+// purpose: Cycles currentUrl through 50 leaf urls in a 5×10×4 nav. Only the previously and newly active leaves should update their class.
+const el9 = await mount('bench-active-indicator-nested');
+performance.mark(startMark('active-indicator-nested-200'));
+for (let i = 0; i < 50; i++) {
+  const s = i % 5;
+  const p = Math.floor(i / 5) % 10;
+  const sp = i % 4;
+  el9.template.state.currentUrl.set(`/s${s}/p${p}/sp${sp}`);
+  await flush();
+}
+performance.measure('active-indicator-nested-200', startMark('active-indicator-nested-200'));
 destroy();
 
 /*******************************
