@@ -1,5 +1,5 @@
 import { isArray, isFunction, isPlainObject } from '@semantic-ui/utils';
-import { BLOCK_MARKER, COMMENT_MARKER } from '../../build-html-string.js';
+import { isBlockClose, isBlockOpen, isExpressionMarker } from '../../build-html-string.js';
 
 /*
 
@@ -29,7 +29,8 @@ export function bindAttribute({
   renderer,
   skipFirstWrite = false,
 }) {
-  const { classification } = entries[parts.find((p) => p.markerID !== undefined)?.markerID] || {};
+  const firstMarker = parts.find((p) => p.markerID !== undefined);
+  const { classification } = entries[firstMarker?.markerID] || {};
   const bindingType = classification?.type;
 
   if (bindingType === 'property') {
@@ -169,8 +170,7 @@ export function hydrateTextExpression({ comment, entry, data, scope, renderer })
     let next = comment.nextSibling;
     while (
       next && !(next.nodeType === Node.COMMENT_NODE
-        && (next.data.startsWith(COMMENT_MARKER) || next.data.startsWith(BLOCK_MARKER)
-          || next.data.startsWith('/sui-block')))
+        && (isExpressionMarker(next.data) || isBlockOpen(next.data) || isBlockClose(next.data)))
     ) {
       ownedNodes.push(next);
       next = next.nextSibling;

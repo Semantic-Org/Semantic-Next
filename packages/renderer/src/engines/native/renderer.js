@@ -3,12 +3,17 @@ import { assignInPlace, createCache, filterObject, inArray } from '@semantic-ui/
 
 import {
   ATTR_MARKER_PREFIX,
-  BLOCK_MARKER,
   buildHTMLString as buildHTMLStringPure,
-  COMMENT_MARKER,
   DATA_SUI_BIND,
+  isBlockClose,
+  isBlockOpen,
+  isExpressionMarker,
+  isRawTextMarker,
   parseAttributeParts as parseAttributePartsFn,
-  RAW_TEXT_MARKER,
+  parseBlockOpenID,
+  parseExpressionID,
+  parseRawTextID,
+  parseServerMeta,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
 import { getBlock } from './blocks/registry.js';
@@ -25,18 +30,6 @@ import './blocks/index.js';
 
 // PreparedTemplate cache — parse once, cloneNode per instance
 const templateCache = createCache({ maxSize: 1000, eviction: 'flush' });
-
-// Parse trailing metadata from a closing block marker into serverMeta.
-// Reserved suffixes (after the version segment):
-//   bN  → branchIndex (which branch the {#if}/{:elseif}/{:else} server picked)
-// Unknown segments are ignored. Mutates target in place.
-function parseServerMeta(commentData, target) {
-  for (const part of commentData.split(':')) {
-    if (part.startsWith('b')) {
-      target.branchIndex = parseInt(part.slice(1));
-    }
-  }
-}
 
 // AST → { html, svg } cache, where each slot holds the buildHTMLString
 // result for that namespace. Keyed on the AST array (immutable after
@@ -67,7 +60,6 @@ export class Renderer {
       snippets,
       helpers,
       isSVG = false,
-      inheritsData = true,
       receivesData = false,
       protectedKeys,
     } = {},
@@ -80,7 +72,6 @@ export class Renderer {
     this.collectSnippets(this.ast);
     this.helpers = helpers || {};
     this.isSVG = isSVG;
-    this.inheritsData = inheritsData;
     this.receivesData = receivesData;
     this.protectedKeys = protectedKeys;
     // Sequential debug ID. Subtree caching would key on hashCode(ast+data)
@@ -232,23 +223,29 @@ export class Renderer {
     while ((node = walker.nextNode())) {
       if (node.nodeType === Node.ELEMENT_NODE) {
         const element = node;
-        const attrsToProcess = [];
+        // Most elements have zero __sui attrs — defer the array allocation
+        // until we find one. Collect first, then iterate, because
+        // bindAttributeExpression calls element.removeAttribute for property
+        // and event bindings, which mutates the live NamedNodeMap.
+        let attrsToProcess;
         for (let i = 0; i < element.attributes.length; i++) {
           const attr = element.attributes[i];
           if (attr.value.includes(ATTR_MARKER_PREFIX)) {
-            attrsToProcess.push({ name: attr.name, value: attr.value });
+            (attrsToProcess ??= []).push({ name: attr.name, value: attr.value });
           }
         }
-        for (const { name: attrName, value: attrValue } of attrsToProcess) {
-          const { parts, markerIDs } = parseAttributePartsFn(attrValue);
-          for (const id of markerIDs) { processedAttrIDs.add(id); }
-          this.bindAttributeExpression(element, attrName, parts, entries, data, scope);
+        if (attrsToProcess) {
+          for (const { name: attrName, value: attrValue } of attrsToProcess) {
+            const { parts, markerIDs } = parseAttributePartsFn(attrValue);
+            for (const id of markerIDs) { processedAttrIDs.add(id); }
+            this.bindAttributeExpression(element, attrName, parts, entries, data, scope);
+          }
         }
       }
       else {
         const text = node.data;
-        if (text.startsWith(COMMENT_MARKER)) {
-          const markerID = parseInt(text.slice(COMMENT_MARKER.length));
+        if (isExpressionMarker(text)) {
+          const markerID = parseExpressionID(text);
           if (!isNaN(markerID)) {
             // Filter deferred until after the walk: elements visit before
             // sibling comments in document order, so an attr-marker's
@@ -257,14 +254,14 @@ export class Renderer {
             commentsToProcess.push({ comment: node, markerID, type: 'expression' });
           }
         }
-        else if (text.startsWith(RAW_TEXT_MARKER)) {
-          const markerID = parseInt(text.slice(RAW_TEXT_MARKER.length));
+        else if (isRawTextMarker(text)) {
+          const markerID = parseRawTextID(text);
           if (!isNaN(markerID)) {
             commentsToProcess.push({ comment: node, markerID, type: 'rawText' });
           }
         }
-        else if (text.startsWith(BLOCK_MARKER)) {
-          const markerID = parseInt(text.slice(BLOCK_MARKER.length));
+        else if (isBlockOpen(text)) {
+          const markerID = parseBlockOpenID(text);
           if (!isNaN(markerID)) {
             commentsToProcess.push({ comment: node, markerID, type: 'block' });
           }
@@ -349,7 +346,7 @@ export class Renderer {
         Hydration
   *******************************/
 
-  hydrateMarkers(root, entries, data, scope) {
+  hydrateMarkers({ root, entries, data, scope }) {
     if (entries.length === 0) { return; }
 
     // Pass 1: walk elements with data-sui-bind, wire attribute Reactions.
@@ -366,27 +363,25 @@ export class Renderer {
     while ((comment = commentWalker.nextNode())) {
       const text = comment.data;
 
-      // Track block nesting — skip inner markers
-      if (text.startsWith('/sui-block:')) {
+      if (isBlockClose(text)) {
         blockDepth--;
         continue;
       }
       if (blockDepth > 0) {
-        // Track nested opening markers so closing markers stay balanced
-        if (text.startsWith(BLOCK_MARKER)) {
+        if (isBlockOpen(text)) {
           blockDepth++;
         }
         continue;
       }
 
-      if (text.startsWith(COMMENT_MARKER)) {
-        const markerID = parseInt(text.slice(COMMENT_MARKER.length));
+      if (isExpressionMarker(text)) {
+        const markerID = parseExpressionID(text);
         if (!isNaN(markerID)) {
           commentsToProcess.push({ comment, markerID, type: 'expression' });
         }
       }
-      else if (text.startsWith(BLOCK_MARKER)) {
-        const markerID = parseInt(text.slice(BLOCK_MARKER.length));
+      else if (isBlockOpen(text)) {
+        const markerID = parseBlockOpenID(text);
         if (!isNaN(markerID)) {
           commentsToProcess.push({ comment, markerID, type: 'block' });
           blockDepth++;
@@ -423,10 +418,10 @@ export class Renderer {
     while ((node = walker.nextNode())) {
       if (node.nodeType === Node.COMMENT_NODE) {
         const text = node.data;
-        if (text.startsWith(BLOCK_MARKER)) {
+        if (isBlockOpen(text)) {
           blockDepth++;
         }
-        else if (text.startsWith('/sui-block:')) {
+        else if (isBlockClose(text)) {
           blockDepth--;
         }
         continue;
@@ -438,11 +433,11 @@ export class Renderer {
         const eqIdx = binding.lastIndexOf('=');
         if (eqIdx === -1) { continue; }
         const rawAttrName = binding.slice(0, eqIdx);
-        const entryId = parseInt(binding.slice(eqIdx + 1));
+        const entryId = +binding.slice(eqIdx + 1);
         if (isNaN(entryId)) { continue; }
         const entry = entries[entryId];
-        if (!entry || !entry.attributeBinding) { continue; }
-        const { parts } = entry.attributeBinding;
+        if (!entry || !entry.attributeParts) { continue; }
+        const parts = entry.attributeParts;
         // Strip `.` / `@` prefix for the DOM attribute name. bindAttribute
         // uses `classification.type` / `classification.attribute` for the
         // real dispatch; the name passed here is only used for the
@@ -464,7 +459,6 @@ export class Renderer {
   hydrateBlock(comment, entry, data, scope) {
     const { node } = entry;
     const parentNode = comment.parentNode;
-    const markerID = entry.id;
 
     // Collect all nodes between opening and closing block markers.
     // Track depth because inner blocks (from nested snippets/conditionals)
@@ -475,10 +469,10 @@ export class Renderer {
     let blockDepth = 1;
     while (next) {
       if (next.nodeType === Node.COMMENT_NODE) {
-        if (next.data.startsWith(BLOCK_MARKER)) {
+        if (isBlockOpen(next.data)) {
           blockDepth++;
         }
-        else if (next.data.startsWith('/sui-block:')) {
+        else if (isBlockClose(next.data)) {
           blockDepth--;
           if (blockDepth === 0) {
             parseServerMeta(next.data, serverMeta);
@@ -502,24 +496,35 @@ export class Renderer {
     }
   }
 
-  hydrateInnerContent(ownedNodes, contentAST, data, scope) {
-    const { entries } = cachedBuildHTMLString(contentAST, { snippets: this.snippets });
+  hydrateInnerContent({ ownedNodes, innerAST, data, scope }) {
+    const { entries } = cachedBuildHTMLString(innerAST, { snippets: this.snippets });
     if (entries.length === 0) { return; }
 
-    // Wrap ownedNodes in a temporary container for TreeWalker traversal
+    // Move into a temporary fragment so TreeWalker has a connected root.
     const container = document.createDocumentFragment();
-    for (const n of [...ownedNodes]) {
-      container.appendChild(n);
-    }
+    container.append(...ownedNodes);
 
-    // Recursively hydrate inner markers with the sub-AST's entries.
-    this.hydrateMarkers(container, entries, data, scope);
+    this.hydrateMarkers({ root: container, entries, data, scope });
 
-    // Update ownedNodes with the hydrated content (comments may have been removed)
+    // hydrateMarkers strips comment markers — rebuild ownedNodes from live container.
     ownedNodes.length = 0;
-    for (const n of [...container.childNodes]) {
-      ownedNodes.push(n);
+    ownedNodes.push(...container.childNodes);
+  }
+
+  hydrateInto({ region, innerAST, data, scope, asChild = true }) {
+    const targetScope = asChild ? scope.child() : scope;
+    if (asChild) { region.childScopes.push(targetScope); }
+
+    this.hydrateInnerContent({ ownedNodes: region.ownedNodes, innerAST, data, scope: targetScope });
+
+    if (region.ownedNodes.length > 0) {
+      const frag = document.createDocumentFragment();
+      frag.append(...region.ownedNodes);
+      region.anchor.after(frag);
+      region.placeEndAnchor();
     }
+
+    return targetScope;
   }
 
   /*******************************

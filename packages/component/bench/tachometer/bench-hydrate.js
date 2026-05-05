@@ -2,19 +2,17 @@ import { defineComponent } from '@semantic-ui/component';
 import { ServerRenderer } from '@semantic-ui/renderer';
 
 /*
-  Hydrate-each — gates hydration cost across two distinct windows:
+  Hydrate-each — two windows:
 
-  1. `hydrate-each-100-mount` — work paid by the hydrate microtask itself,
-     before any data mutation. Sensitive to designs that move per-item
-     wiring earlier (e.g. eager `adoptServerItems` in `each.hydrate`).
-  2. `hydrate-each-100` — first-data-change adoption: server-emitted
-     `<!--sui-item:v1:KEY-->` markers let `adoptServerItems` reuse DOM
-     and call `hydrateInnerContent` 100×. Sensitive to silent regressions
-     in the AST→string/entries cache (`renderer.js buildStringCache`),
-     which on a miss reverts to a full `buildHTMLStringPure` per item.
+  1. `hydrate-each-100-mount` — DSD parse + connectedCallback + the hydrate
+     microtask (eager `adoptServerItems`) + post-hydrate rAF. Per-item
+     wiring cost lives here.
+  2. `hydrate-each-100` — post-mount items mutation. Items dependency wakes,
+     `each.update` reconciles same keys, hits same-ref path. Mostly the
+     reconcile walk + Phase 3 snapshot diff.
 
-  Both windows require Declarative Shadow DOM to be parsed — `innerHTML`
-  does not process `<template shadowrootmode>`, only `setHTMLUnsafe` does.
+  Both windows require Declarative Shadow DOM — `setHTMLUnsafe` processes
+  `<template shadowrootmode>`, plain `innerHTML` does not.
 */
 
 defineComponent({
@@ -90,12 +88,10 @@ const startMark = (name) => `${name}-start`;
        + the hydrate microtask)
 *******************************/
 
-// Measured: parsing the DSD via setHTMLUnsafe (which actually attaches
-// the shadow root, unlike innerHTML), connectedCallback, the hydrate
-// microtask scheduled inside it, and the post-hydrate rAF that strips
-// data-sui-bind markers. The `each` block's hydrate hook stays O(1) on
-// main — it just registers a dep on the items signal. Per-item DOM is
-// already correct from SSR; no mutation triggered.
+// Measured: DSD parse via setHTMLUnsafe (innerHTML doesn't attach the
+// shadow root), connectedCallback, the hydrate microtask, and the
+// post-hydrate rAF that strips data-sui-bind. Per-item Reactions wire
+// here; subsequent updates exercise the already-wired graph.
 const itemsForMount = makeItems(1000);
 const dsdHTMLForMount = ssrList(itemsForMount);
 performance.mark(startMark('hydrate-each-100-mount'));
@@ -107,15 +103,11 @@ const elForMutate = container.firstElementChild;
 
 /*******************************
       Hydrate Each-100
-      (first-data-change
-       adoption: 100× per-item
-       hydrateInnerContent)
+      (post-mount items mutation)
 *******************************/
 
-// Measured: setItems with a fresh array reference whose item keys
-// match the SSR'd markers — Reaction fires, update sees hasHydrated,
-// adoptServerItems reuses the server DOM and calls hydrateInnerContent
-// 100× (one cachedBuildHTMLString call per item).
+// Fresh array reference, same keys as SSR markers — exercises the items
+// dependency wake + per-Signal equality gate without DOM work.
 performance.mark(startMark('hydrate-each-100'));
 elForMutate.component.setItems(itemsForMount.slice());
 await flush();
@@ -175,11 +167,9 @@ function ssrHelperList(items) {
     + `</bench-hydrate-helper>`;
 }
 
-// Same mount window shape as above, but with a per-item attribute that
-// calls a helper closing over external `state.activeID`. Surfaces the
-// cost difference between strategies that keep hydrate O(1) and
-// strategies that wire per-item Reactions on hydrate to register
-// external-signal deps eagerly.
+// Same mount-window shape as above, but with a per-item attribute that
+// calls a helper closing over external `state.activeID`. Sensitive to
+// regressions in per-item Reaction wiring at hydrate time.
 const helperItems = makeItems(1000);
 const dsdHTMLForHelper = ssrHelperList(helperItems);
 performance.mark(startMark('hydrate-helper-100-mount'));
@@ -194,10 +184,10 @@ const elHelper = container.firstElementChild;
       (state change after mount)
 *******************************/
 
-// Measured: cost of mutating a state signal that per-item helpers read.
-// On a hydrate path that wires per-item Reactions, this fires 100
-// helper invocations + setAttribute calls. On a hydrate path that
-// defers wiring, this is silent — fast number, broken UX.
+// Mutating a state signal that per-item helpers close over fires 100
+// helper invocations + setAttribute calls. Confirms per-item Reactions
+// wired at hydrate are reactive to external state, not just to
+// itemSignal mutations.
 performance.mark(startMark('hydrate-helper-100-state-change'));
 elHelper.component.setActive('id-50');
 await flush();

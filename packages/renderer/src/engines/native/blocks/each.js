@@ -1,6 +1,8 @@
 import { Signal } from '@semantic-ui/reactivity';
-import { arrayFromObject, isArray, isEmpty, isPlainObject, isString } from '@semantic-ui/utils';
+import { arrayFromObject, isArray, isEmpty } from '@semantic-ui/utils';
+import { isBlockClose, isBlockOpen } from '../../../build-html-string.js';
 import { defineBlock } from '../define-block.js';
+import { decodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from '../shared/each.js';
 import { registerBlock } from './registry.js';
 
 /*
@@ -22,8 +24,6 @@ import { registerBlock } from './registry.js';
 
 */
 
-const SUI_ITEM_MARKER = 'sui-item:v1:';
-
 // Proxies created by this module go into the WeakSet; template.js checks
 // membership to decide when expression reads should register deps directly
 // (item context) versus wrapping in Reaction.nonreactive (static data).
@@ -34,45 +34,6 @@ export function isItemContext(data) {
 
 function getCollectionType(items) {
   return isArray(items) ? 'array' : 'object';
-}
-
-function getItemID(item, indexOrKey, collectionType) {
-  // Always stringify — the server emits keys as text inside
-  // `<!--sui-item:v1:KEY-->` comments, and Map / === compare by value
-  // identity. Without stringification, numeric item IDs on the client
-  // miss string keys on the server at adoption time (and records keyed
-  // as numbers from a fresh render would miss string keys on the next
-  // reconcile after adoption).
-  let raw;
-  if (isPlainObject(item)) {
-    const key = (collectionType === 'object') ? indexOrKey : undefined;
-    raw = key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
-  }
-  else if (isString(item)) {
-    raw = item + ':' + indexOrKey;
-  }
-  else {
-    raw = indexOrKey;
-  }
-  return String(raw);
-}
-
-function getEachData(item, indexOrKey, collectionType, node) {
-  let { as, indexAs } = node;
-  if (!indexAs) {
-    indexAs = (collectionType === 'array') ? 'index' : 'key';
-  }
-  if (collectionType === 'object') {
-    indexOrKey = item.key;
-    item = item.value;
-  }
-  // The wrapper is always a fresh object so Signal.set() sees a new
-  // top-level reference and doesn't short-circuit on identity. Inner
-  // properties are shallow-copied from item (for the no-`as` case) so
-  // mutations to item's own properties ARE captured at the wrapper level.
-  return as
-    ? { [as]: item, [indexAs]: indexOrKey }
-    : { ...item, this: item, [indexAs]: indexOrKey };
 }
 
 // Allocate once per record at first reconcile (createSnapshot). On
@@ -464,26 +425,19 @@ function extractServerItemGroups(ownedNodes) {
   for (const n of ownedNodes) {
     if (n.nodeType === Node.COMMENT_NODE) {
       const data = n.data;
-      if (data.startsWith('sui-block:v1:')) {
+      if (isBlockOpen(data)) {
         blockDepth++;
         if (current) { current.nodes.push(n); }
         continue;
       }
-      if (data.startsWith('/sui-block:')) {
+      if (isBlockClose(data)) {
         blockDepth--;
         if (current) { current.nodes.push(n); }
         continue;
       }
       if (blockDepth === 0 && data.startsWith(SUI_ITEM_MARKER)) {
         if (current) { groups.push(current); }
-        const rawKey = data.slice(SUI_ITEM_MARKER.length);
-        let key;
-        try {
-          key = decodeURIComponent(rawKey);
-        }
-        catch {
-          key = rawKey;
-        }
+        const key = decodeItemKey(data.slice(SUI_ITEM_MARKER.length));
         current = { key, startComment: n, nodes: [] };
         continue;
       }
@@ -558,15 +512,11 @@ function adoptServerItems({
         serverGroup.startComment.replaceWith(startMarker);
       }
 
-      // Move [startMarker, ...mutableNodes, endMarker] into position
-      // after `insertAfter`. Server order generally matches client
-      // order so the contiguous range is already close to correct — we
-      // still reassemble via a fragment to guarantee endMarker lands
-      // right after the last item node regardless of intervening nodes.
+      // Sibling block markers can land between item boundaries —
+      // reassemble via fragment so endMarker follows the last item node,
+      // not whichever node happens to be last.
       const frag = document.createDocumentFragment();
-      frag.appendChild(startMarker);
-      for (const n of mutableNodes) { frag.appendChild(n); }
-      frag.appendChild(endMarker);
+      frag.append(startMarker, ...mutableNodes, endMarker);
       insertAfter.after(frag);
       insertAfter = endMarker;
 
@@ -641,32 +591,12 @@ const eachBlock = defineBlock({
     });
   },
 
-  hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
-    // resolveItems registers the items dep via lookupExpression.
+  hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, hydrateInto, self, isSVG }) {
     const { items, collectionType } = resolveItems(node, lookupExpression);
 
     if (items.length === 0) {
       if (node.elseContent) {
-        // Server rendered the else branch into region.ownedNodes.
-        // Hydrate it in place and push an isElse record so subsequent
-        // `update` calls recognize the else state and transition
-        // correctly. elseScope goes on region.childScopes so the next
-        // `region.clear()` disposes it (renderElse gets this via
-        // region.setContent; the hydrate path bypasses setContent
-        // because the DOM is already in place).
-        const elseScope = scope.child();
-        region.childScopes.push(elseScope);
-        hydrateInnerContent({
-          ownedNodes: region.ownedNodes,
-          innerAST: node.elseContent,
-          data,
-          scope: elseScope,
-        });
-        // hydrateInnerContent moves nodes into a temp fragment; reinsert
-        // them after the region's anchor.
-        const frag = document.createDocumentFragment();
-        for (const n of region.ownedNodes) { frag.appendChild(n); }
-        region.anchor.after(frag);
+        const elseScope = hydrateInto({ innerAST: node.elseContent });
         self.records.push({
           key: null,
           item: null,

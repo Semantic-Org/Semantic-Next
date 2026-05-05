@@ -827,23 +827,33 @@ function computeHistoryStatus(metric, peakHist, driftHist) {
   const currentPctCi = metric.percentDelta;
   const peakPctCi = peakMetric.percent_delta_ci;
 
+  // Difference in midpoints. Positive = regressed from peak; negative = new
+  // best vs peak. Used both for the JND gate below and the rendered delta.
+  const currentMid = (currentPctCi[0] + currentPctCi[1]) / 2;
+  const peakMid = (peakPctCi[0] + peakPctCi[1]) / 2;
+  const deltaFromPeakPct = currentMid - peakMid;
+
   let status;
   if (currentPctCi[1] < peakPctCi[0]) { status = 'WIN'; }
   else if (peakPctCi[1] < currentPctCi[0]) { status = 'REOPENED'; }
   else { status = 'TIED-PEAK'; }
 
-  // Bisect candidates: commits after peak that also report this metric.
+  // Same JND as the same-session classifier. Sub-NOISE_FLOOR doesn't count
+  // as "moved" vs main, so it shouldn't count as "moved" vs peak either.
+  // Holds even when the within-session CIs are statistically non-overlapping.
+  if (Math.abs(deltaFromPeakPct) < NOISE_FLOOR) { status = 'TIED-PEAK'; }
+
+  // Candidates between peak and HEAD. Filter out commits that didn't touch
+  // packages/** — they couldn't have moved a runtime metric, so they
+  // shouldn't appear as bisect or credit candidates. `touches_packages`
+  // is set by `fetch-pr-history.js` per run; absent on legacy entries
+  // (default include for back-compat).
   const peakHistIdx = peakHist.commits.findIndex((c) => c.sha === peakEntry.sha);
   const bisectCandidates = peakHist.commits
     .slice(peakHistIdx + 1)
     .filter((c) => c.metrics?.[metric.name]?.percent_delta_ci)
+    .filter((c) => c.touches_packages !== false)
     .map((c) => ({ sha: c.sha, msg: c.msg, pr: c.pr ?? null }));
-
-  // Difference in percentage points (not %): current's pct-delta midpoint
-  // minus peak's. Positive reads as "regressed N pp of improvement."
-  const currentMid = (currentPctCi[0] + currentPctCi[1]) / 2;
-  const peakMid = (peakPctCi[0] + peakPctCi[1]) / 2;
-  const deltaFromPeakPct = currentMid - peakMid;
 
   const drift = computeBaselineDrift(
     metric.name,
