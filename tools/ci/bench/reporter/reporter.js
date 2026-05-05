@@ -103,6 +103,39 @@ const BISECT_MARKDOWN_MAX = 3;
 // long-running PR.
 const DRIFT_THRESHOLD_PP = 5;
 
+// Cross-iteration peak-attribution sections. Both REOPENED ("regression")
+// and WIN ("win") render the same shape — heading, description, table of
+// metric / current / peak / vs peak / candidates, with drift footnotes when
+// peak and current had different baselines and main moved enough to confound
+// the comparison. Only the framing (status filter, sort direction, copy,
+// delta wording) differs.
+const PEAK_SECTIONS = {
+  regression: {
+    status: 'REOPENED',
+    headingPrefix: '📜 Regressions from peak',
+    description:
+      `These metrics were better on a prior iteration than they are now. The peak's percent-delta vs its baseline dominates current's percent-delta vs its baseline — not attributable to per-sample noise. Bisect candidates are the commits between the peak iteration and HEAD; nearest-to-peak is usually the best bet.`,
+    columnHeader: '| metric | current | peak | vs peak | bisect candidates |',
+    // Largest pp regression first (descending on signed delta).
+    sortSign: -1,
+    formatDelta: (delta) =>
+      delta > 0
+        ? `regressed +${delta.toFixed(0)}%`
+        : `${delta.toFixed(0)}%`,
+  },
+  win: {
+    status: 'WIN',
+    headingPrefix: '🏆 New peaks',
+    description:
+      `These metrics reached a new best in this iteration — current's percent-delta vs its baseline dominates the prior peak's percent-delta vs its baseline. Credit candidates are the commits between the prior peak and HEAD; nearest-to-current is usually the cause.`,
+    columnHeader: '| metric | current | prior peak | vs prior peak | credit candidates |',
+    // Most-improved first. delta_from_peak_pct is negative for WIN, so
+    // ascending sort surfaces the best.
+    sortSign: 1,
+    formatDelta: (delta) => `improved ${delta.toFixed(0)}%`,
+  },
+};
+
 /**
  * Expected percent-change CI width for an unresolved CI given the bench's
  * absolute duration. Derived from the standard-error-of-the-difference of
@@ -347,11 +380,11 @@ function renderMarkdown(report) {
     renderFasterSlowerSection(lines, slower, 'slower', report);
   }
 
-  // ─── New peaks (cross-run; auto-expanded when present) ──────────────
-  renderNewPeaks(lines, report);
+  // ─── New peaks (cross-run; auto-expanded when present) ───────────────
+  renderPeakSection(lines, report, 'win');
 
   // ─── Regressions from peak (cross-run; auto-expanded when present) ───
-  renderRegressionsFromPeak(lines, report);
+  renderPeakSection(lines, report, 'regression');
 
   // ─── No Change (always collapsed) ────────────────────────────────────
   if (noChange.length > 0) {
@@ -436,33 +469,31 @@ function renderMarkdown(report) {
 }
 
 /**
- * Append a "Regressions from peak" section when one or more metrics are
- * REOPENED (current pct-delta dominated by a prior iteration's pct-delta).
- * Actionable signal: the metric was once better and this PR — or a commit
- * before it — gave that improvement back.
+ * Append a cross-iteration peak-attribution section. `kind === 'regression'`
+ * surfaces REOPENED metrics (peak dominates current); `kind === 'win'`
+ * surfaces WIN metrics (current dominates peak). Drift footnotes fire when
+ * peak and current had different baselines and main moved enough to confound
+ * the comparison — symmetric across both kinds because false-blame and
+ * false-credit are the same kind of attribution failure in opposite directions.
  *
- * Surface units are within-session percent-deltas (the pct-delta this run
- * achieved vs its baseline; the pct-delta peak achieved vs ITS baseline).
- * `delta_from_peak_pct` is the difference between those two midpoints in
- * percentage points (pp). Drift footnotes fire when peak and current had
- * different baselines and main moved enough on the metric to plausibly
- * confound the comparison.
+ * Surface units: within-session percent-deltas vs each iteration's baseline.
+ * `delta_from_peak_pct` is the difference between those midpoints, rendered
+ * in the same `%` unit as the table cells.
  */
-function renderRegressionsFromPeak(lines, report) {
-  const reopened = report.metrics.filter((m) => m.history_status === 'REOPENED');
-  if (reopened.length === 0) { return; }
+function renderPeakSection(lines, report, kind) {
+  const config = PEAK_SECTIONS[kind];
+  const rows = report.metrics.filter((m) => m.history_status === config.status);
+  if (rows.length === 0) { return; }
 
-  const sorted = [...reopened].sort(
-    (a, b) => (b.delta_from_peak_pct ?? 0) - (a.delta_from_peak_pct ?? 0),
+  const sorted = [...rows].sort(
+    (a, b) => config.sortSign * ((a.delta_from_peak_pct ?? 0) - (b.delta_from_peak_pct ?? 0)),
   );
 
-  lines.push(`#### 📜 Regressions from peak (${reopened.length})`);
+  lines.push(`#### ${config.headingPrefix} (${rows.length})`);
   lines.push('');
-  lines.push(
-    `These metrics were better on a prior iteration than they are now. The peak's percent-delta vs its baseline dominates current's percent-delta vs its baseline — not attributable to per-sample noise. Bisect candidates are the commits between the peak iteration and HEAD; nearest-to-peak is usually the best bet.`,
-  );
+  lines.push(config.description);
   lines.push('');
-  lines.push('| metric | current | peak | vs peak | bisect candidates |');
+  lines.push(config.columnHeader);
   lines.push('|---|---|---|---|---|');
 
   const flagged = [];
@@ -471,104 +502,10 @@ function renderRegressionsFromPeak(lines, report) {
     const currentStr = formatSignedPct(mid(m.percent_change_ci));
     const peakStr = formatSignedPct(mid(m.peak.percent_delta_ci));
     const peakLink = commitOrPrLink(m.peak, report.repo);
-    const deltaStr = m.delta_from_peak_pct > 0
-      ? `regressed +${m.delta_from_peak_pct.toFixed(0)}%`
-      : `${m.delta_from_peak_pct.toFixed(0)}%`;
-    const bisectCell = formatCandidateCell(m.bisect_candidates, report.repo);
-
-    // Fires on threshold breach or chain-gap (magnitude unavailable).
-    let driftFlag = '';
-    if (m.drift?.detected) {
-      const mag = m.drift.magnitude;
-      const fires = mag === null || Math.abs(mag) >= DRIFT_THRESHOLD_PP;
-      if (fires) {
-        const idx = flagged.length + 1;
-        driftFlag = ` ⚠️${idx}`;
-        flagged.push({
-          idx,
-          metric: m.name,
-          drift: m.drift,
-          currentBaseline: m.baseline_sha,
-          peakBaseline: m.peak.baseline_sha,
-        });
-      }
-    }
-
-    lines.push(
-      `| ${
-        metricLink(m, report)
-      } | ${currentStr}${driftFlag} | ${peakStr} @ ${peakLink} | ${deltaStr} | ${bisectCell} |`,
-    );
-  }
-  lines.push('');
-
-  if (flagged.length > 0) {
-    for (const f of flagged) {
-      lines.push(formatDriftFootnote(f));
-    }
-    lines.push('');
-  }
-}
-
-function formatSignedPct(pct) {
-  return pct > 0 ? `+${pct.toFixed(0)}%` : `${pct.toFixed(0)}%`;
-}
-
-/**
- * Render the comma-joined candidate cell for the regressions/wins tables,
- * with an overflow suffix when the list exceeds BISECT_MARKDOWN_MAX. Same
- * shape for both the bisect (regression) and credit (win) sides — only
- * the column heading differs at the call site.
- */
-function formatCandidateCell(candidates, repo) {
-  if (!candidates || candidates.length === 0) { return '—'; }
-  const md = candidates
-    .slice(0, BISECT_MARKDOWN_MAX)
-    .map((c) => commitOrPrLink(c, repo))
-    .join(', ');
-  return candidates.length > BISECT_MARKDOWN_MAX
-    ? `${md} +${candidates.length - BISECT_MARKDOWN_MAX} more`
-    : md;
-}
-
-/**
- * Append a "New peaks" section when one or more metrics are WIN — current
- * pct-delta CI dominates the prior best iteration's CI. Affirmative signal:
- * "this iteration is the new best on metric X." Mirrors
- * `renderRegressionsFromPeak` with the framing flipped — credit candidates
- * are the commits that may have caused the improvement.
- */
-function renderNewPeaks(lines, report) {
-  const wins = report.metrics.filter((m) => m.history_status === 'WIN');
-  if (wins.length === 0) { return; }
-
-  // delta_from_peak_pct is negative for WIN — ascending sort surfaces the
-  // most-improved first.
-  const sorted = [...wins].sort(
-    (a, b) => (a.delta_from_peak_pct ?? 0) - (b.delta_from_peak_pct ?? 0),
-  );
-
-  lines.push(`#### 🏆 New peaks (${wins.length})`);
-  lines.push('');
-  lines.push(
-    `These metrics reached a new best in this iteration — current's percent-delta vs its baseline dominates the prior peak's percent-delta vs its baseline. Credit candidates are the commits between the prior peak and HEAD; nearest-to-current is usually the cause.`,
-  );
-  lines.push('');
-  lines.push('| metric | current | prior peak | vs prior peak | credit candidates |');
-  lines.push('|---|---|---|---|---|');
-
-  const flagged = [];
-
-  for (const m of sorted) {
-    const currentStr = formatSignedPct(mid(m.percent_change_ci));
-    const peakStr = formatSignedPct(mid(m.peak.percent_delta_ci));
-    const peakLink = commitOrPrLink(m.peak, report.repo);
-    const deltaStr = `improved ${m.delta_from_peak_pct.toFixed(0)}%`;
+    const deltaStr = config.formatDelta(m.delta_from_peak_pct);
     const candCell = formatCandidateCell(m.bisect_candidates, report.repo);
 
-    // Drift treatment is symmetric with regressions: a WIN where main moved
-    // between baselines may credit the iteration for movement that's
-    // actually main-side, mirroring the false-blame case for REOPENED.
+    // Drift fires on threshold breach or chain-gap (magnitude unavailable).
     let driftFlag = '';
     if (m.drift?.detected) {
       const mag = m.drift.magnitude;
@@ -598,6 +535,27 @@ function renderNewPeaks(lines, report) {
     }
     lines.push('');
   }
+}
+
+function formatSignedPct(pct) {
+  return pct > 0 ? `+${pct.toFixed(0)}%` : `${pct.toFixed(0)}%`;
+}
+
+/**
+ * Render the comma-joined candidate cell for peak-attribution tables, with
+ * an overflow suffix when the list exceeds BISECT_MARKDOWN_MAX. Same shape
+ * for bisect (regression) and credit (win) sides — only the column heading
+ * differs at the call site.
+ */
+function formatCandidateCell(candidates, repo) {
+  if (!candidates || candidates.length === 0) { return '—'; }
+  const md = candidates
+    .slice(0, BISECT_MARKDOWN_MAX)
+    .map((c) => commitOrPrLink(c, repo))
+    .join(', ');
+  return candidates.length > BISECT_MARKDOWN_MAX
+    ? `${md} +${candidates.length - BISECT_MARKDOWN_MAX} more`
+    : md;
 }
 
 function formatDriftFootnote({ idx, metric, drift, currentBaseline, peakBaseline }) {
