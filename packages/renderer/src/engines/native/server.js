@@ -492,7 +492,6 @@ export class ServerRenderer {
       return instance.render();
     }
 
-    // Plain AST object — render directly.
     if (template.ast) {
       return this.renderNodes(template.ast, data);
     }

@@ -79,8 +79,8 @@ export function parseRawTextID(commentData) {
 const ATTR_MARKER_RE = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`, 'g');
 
 // Split an attribute value like `card __sui0__` or `foo __sui1__ bar __sui2__`
-// into static/dynamic parts. Used by both render-path binding and hydrate
-// lookup via entries[id].attributeBinding.
+// into static/dynamic parts. Used by render-path binding and the hydrate
+// lookup via entries[id].attributeParts.
 export function parseAttributeParts(attrValue) {
   const parts = [];
   const markerIDs = [];

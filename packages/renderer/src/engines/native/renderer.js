@@ -363,13 +363,11 @@ export class Renderer {
     while ((comment = commentWalker.nextNode())) {
       const text = comment.data;
 
-      // Track block nesting — skip inner markers
       if (isBlockClose(text)) {
         blockDepth--;
         continue;
       }
       if (blockDepth > 0) {
-        // Track nested opening markers so closing markers stay balanced
         if (isBlockOpen(text)) {
           blockDepth++;
         }
