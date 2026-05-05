@@ -16,86 +16,147 @@ import { TemplateCompiler } from '@semantic-ui/compiler';
 const startMark = (name) => `${name}-start`;
 
 /*******************************
-      Parse cold
+      Fixtures
 *******************************/
 
-// Realistic component shape — card with header/body/footer, attribute
-// interpolation, a conditional block, a list block, and event/property
-// bindings. Fresh TemplateCompiler instance per iter so each compile()
-// hits the full parse path. The compiler has no AST cache: every parse
-// runs the StringScanner + tag-recognition loop end to end, so the
-// "cold" framing is just clarifying that this measures fresh-parse work.
-{
-  const parseColdTemplate = `<article class="card card-{variant}" data-id="{id}">
-    <header class="card-header">
-      <h2 class="title">{title}</h2>
-      <span class="badge {classIf isNew 'is-new'}">{count}</span>
-    </header>
-    <section class="card-body">
-      <p class="lead">{lead}</p>
-      {#if hasDescription}
-        <p class="description">{description}</p>
-      {/if}
-    </section>
-    <footer class="card-footer">
-      <button class="btn btn-{variant}" disabled={busy} @click={onSubmit}>{label}</button>
-      {#each action in actions}
-        <a class="action" href="{action.href}">{action.label}</a>
+// Normal component shape — a TodoMVC-style list with header/main/footer,
+// nested if + each blocks, helper calls, attribute interpolation, and
+// data attributes. This is what a real-world component looks like in
+// production. Compile time on this shape is the headline signal — many
+// users compile at runtime in the browser (CDN-loaded, agentic VMs),
+// so faster parse here translates directly to faster page-time-to-
+// interactive. Class names follow the repo's semantic / role-based
+// convention (header, list, footer, item, action) — purpose, not
+// implementation.
+const normalTemplate = `<div class="todo-app">
+  <header class="header">
+    <h1 class="title">Todos</h1>
+    <input class="input" placeholder="What needs doing?" />
+  </header>
+  {#if hasTodos}
+    <ul class="list">
+      {#each todo in filteredTodos}
+        <li class="todo {classMap {completed: todo.completed}}">
+          <input class="toggle" type="checkbox" checked={todo.completed} data-id="{todo.id}" />
+          <label data-id="{todo.id}">{todo.title}</label>
+          <button class="destroy" data-id="{todo.id}"></button>
+        </li>
       {/each}
+    </ul>
+    <footer class="footer">
+      <span class="count">{activeCount} {maybePlural activeCount 'item'} left</span>
+      {#if hasCompleted}
+        <button class="clear">Clear completed</button>
+      {/if}
     </footer>
-  </article>`;
+  {/if}
+</div>`;
 
-  // purpose: Compiles a realistic card template 500 times to measure full fresh-parse throughput end to end.
-  performance.mark(startMark('micro-compiler-parse-cold-500'));
+// Kitchen-sink card. Exercises every block type the parser handles
+// (#if/else if/else, #each/else with custom index, #snippet + invoke,
+// #async/loading/error, slot) plus mixed expression styles, helper
+// calls, and event/property bindings. Used as the edge-case stress
+// test for parse + walk on a complex tree — catches regressions that
+// only surface under feature-dense templates.
+const kitchenSinkTemplate = `<article class="card">
+  <header class="header">
+    <h2 class="title">{title}</h2>
+    {#if hasBadge}
+      <span class="badge">{count} {maybePlural count 'item'}</span>
+    {/if}
+  </header>
+
+  <section class="body">
+    {#if isLoading}
+      <p class="loading">Loading…</p>
+    {else if hasError}
+      <p class="error">{errorMessage}</p>
+    {else}
+      <p class="description">{lead}</p>
+      {#snippet itemRow}
+        <div class="item {activeIf is index selectedIndex}" data-index="{index}">
+          <span class="label">{label}</span>
+          <span class="meta">{formatDate date 'MMM YYYY'}</span>
+        </div>
+      {/snippet}
+      {#each item, i in items}
+        {>itemRow label=item.label date=item.date index=i}
+      {else}
+        <div class="empty">No items yet</div>
+      {/each}
+    {/if}
+  </section>
+
+  <footer class="footer">
+    <div class="actions">
+      <button class="save" disabled={isBusy} @click={onSave}>Save</button>
+      <button class="cancel" @click={onCancel}>Cancel</button>
+    </div>
+    {#async getStatus as status}
+      <span class="status">{status}</span>
+    {loading}
+      <span class="loading">…</span>
+    {error as e}
+      <span class="error">{e.message}</span>
+    {/async}
+    {>slot extras}
+  </footer>
+</article>`;
+
+/*******************************
+      Parse cold — normal
+*******************************/
+
+// Headline signal for compile cost. Many users compile at runtime in the
+// browser (CDN, agentic VMs), so parse throughput on a realistic
+// component shape is the number that translates to page interactivity.
+// Fresh TemplateCompiler instance per iter so each compile() hits the
+// full parse path.
+{
+  // purpose: Compiles a TodoMVC-style component template 500 times to measure full compile throughput on a normal-component shape.
+  performance.mark(startMark('micro-compiler-parse-cold-normal-500'));
   for (let i = 0; i < 500; i++) {
-    new TemplateCompiler(parseColdTemplate).compile();
+    new TemplateCompiler(normalTemplate).compile();
   }
-  performance.measure('micro-compiler-parse-cold-500', startMark('micro-compiler-parse-cold-500'));
+  performance.measure('micro-compiler-parse-cold-normal-500', startMark('micro-compiler-parse-cold-normal-500'));
+}
+
+/*******************************
+      Parse cold — complex
+*******************************/
+
+// Edge-case stress test on a feature-dense template. Catches parser
+// regressions on uncommon block paths (#async, deep nesting, snippet
+// hoisting, slot) that don't show up in the normal-shape headline.
+{
+  // purpose: Compiles a feature-dense kitchen-sink template 200 times to surface parser regressions on uncommon block paths.
+  performance.mark(startMark('micro-compiler-parse-cold-complex-200'));
+  for (let i = 0; i < 200; i++) {
+    new TemplateCompiler(kitchenSinkTemplate).compile();
+  }
+  performance.measure('micro-compiler-parse-cold-complex-200', startMark('micro-compiler-parse-cold-complex-200'));
 }
 
 /*******************************
       AST walk (optimizeAST)
 *******************************/
 
-// Realistic 20-card grid — yields a ~480-node top-level AST with html
-// siblings to merge, snippet hoisting, and nested if/each blocks that
-// recurse. optimizeAST is the only public AST-traversal pass: it merges
-// adjacent html nodes, hoists snippets, recurses into block content,
-// and disambiguates duplicate template calls. Pre-built AST so the
-// timed loop isolates the walk; calling on already-optimized input is
-// idempotent for the merge pass but still walks every node and rebuilds
-// nested content arrays — representative of one full traversal.
+// Pre-built kitchen-sink AST so the timed loop isolates the walk.
+// optimizeAST is the only public AST-traversal pass: it merges adjacent
+// html nodes, hoists snippets, recurses into block content (#if/#each/
+// #async/#snippet), and disambiguates duplicate template calls. Calling
+// on already-optimized input is idempotent for the merge pass but still
+// walks every node and rebuilds nested content arrays — representative
+// of one full traversal of a complex tree.
 {
-  const astWalkCard = `<article class="card card-{variant}" data-id="{id}">
-    <header class="card-header">
-      <h2 class="title">{title}</h2>
-      <span class="badge {classIf isNew 'is-new'}">{count}</span>
-    </header>
-    <section class="card-body">
-      <p class="lead">{lead}</p>
-      {#if hasDescription}
-        <p class="description">{description}</p>
-      {/if}
-    </section>
-    <footer class="card-footer">
-      <button class="btn btn-{variant}" disabled={busy} @click={onSubmit}>{label}</button>
-      {#each action in actions}
-        <a class="action" href="{action.href}">{action.label}</a>
-      {/each}
-    </footer>
-  </article>`;
-  let astWalkSource = '';
-  for (let i = 0; i < 20; i++) {
-    astWalkSource += astWalkCard;
-  }
-  const astWalkAST = new TemplateCompiler(astWalkSource).compile();
+  const astWalkAST = new TemplateCompiler(kitchenSinkTemplate).compile();
 
-  // purpose: Walks a 20-card AST through optimizeAST 2000 times to isolate the merge, hoist, and recurse pass cost.
-  performance.mark(startMark('micro-compiler-ast-walk-2k'));
-  for (let i = 0; i < 2_000; i++) {
+  // purpose: Walks a kitchen-sink AST through optimizeAST 5000 times to isolate the merge, hoist, and recurse pass cost.
+  performance.mark(startMark('micro-compiler-ast-walk-5k'));
+  for (let i = 0; i < 5_000; i++) {
     TemplateCompiler.optimizeAST(astWalkAST);
   }
-  performance.measure('micro-compiler-ast-walk-2k', startMark('micro-compiler-ast-walk-2k'));
+  performance.measure('micro-compiler-ast-walk-5k', startMark('micro-compiler-ast-walk-5k'));
 }
 
 /*******************************

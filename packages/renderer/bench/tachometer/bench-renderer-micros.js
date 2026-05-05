@@ -131,14 +131,16 @@ const data = {
       buildHTMLString throughput
 *******************************/
 
-// Realistic component shape — multi-element wrapper with attributes, mixed
-// static + dynamic text, an interpolated class, and a boolean attr binding.
-// Same AST every iter so the measurement isolates HTML assembly cost.
+// Realistic leaf-component shape — header/body/footer with attributes,
+// mixed static + dynamic text, an interpolated class, and a boolean attr
+// binding. Class names follow the repo's semantic / role-based
+// convention. Same AST every iter so the measurement isolates HTML
+// assembly cost.
 {
-  const buildHTMLStringTemplate = `<div class="card {classIf active 'is-active'}" data-id="{id}">
-    <header class="card-header"><h2>{title}</h2><span class="badge">{count}</span></header>
-    <section class="card-body"><p>{description}</p></section>
-    <footer class="card-footer"><button class="btn btn-{variant}" disabled={busy}>{label}</button></footer>
+  const buildHTMLStringTemplate = `<div class="card {activeIf isActive}" data-id="{id}">
+    <header class="header"><h2 class="title">{title}</h2><span class="badge">{count}</span></header>
+    <section class="body"><p class="description">{description}</p></section>
+    <footer class="footer"><button class="action" disabled={busy}>{label}</button></footer>
   </div>`;
   const buildHTMLStringAST = new TemplateCompiler(buildHTMLStringTemplate).compile();
 
@@ -168,16 +170,16 @@ const data = {
   for (let i = 0; i < 100; i++) {
     cardRows += `
       <article class="card" data-id="{id}" .index={i}>
-        <header class="card-header">
+        <header class="header">
           <h3 class="title">{title}</h3>
           <span class="subtitle">{subtitle}</span>
         </header>
-        <div class="card-body">
-          <p class="lead">{lead}</p>
-          <span class="meta-a">{metaA}</span>
-          <span class="meta-b">{metaB}</span>
+        <div class="body">
+          <p class="description">{lead}</p>
+          <span class="tag">{metaA}</span>
+          <span class="status">{metaB}</span>
         </div>
-        <footer class="card-footer">
+        <footer class="footer">
           <button class="action" .disabled={disabled} @click={onClick}>{label}</button>
         </footer>
       </article>

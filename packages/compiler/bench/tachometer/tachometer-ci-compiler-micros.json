@@ -10,8 +10,9 @@
       "url": "ci-current-compiler-micros.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
-        { "mode": "performance", "entryName": "micro-compiler-parse-cold-500" },
-        { "mode": "performance", "entryName": "micro-compiler-ast-walk-2k" },
+        { "mode": "performance", "entryName": "micro-compiler-parse-cold-normal-500" },
+        { "mode": "performance", "entryName": "micro-compiler-parse-cold-complex-200" },
+        { "mode": "performance", "entryName": "micro-compiler-ast-walk-5k" },
         { "mode": "performance", "entryName": "micro-compiler-snippet-args-5k" }
       ]
     },
@@ -20,8 +21,9 @@
       "url": "ci-baseline-compiler-micros.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
-        { "mode": "performance", "entryName": "micro-compiler-parse-cold-500" },
-        { "mode": "performance", "entryName": "micro-compiler-ast-walk-2k" },
+        { "mode": "performance", "entryName": "micro-compiler-parse-cold-normal-500" },
+        { "mode": "performance", "entryName": "micro-compiler-parse-cold-complex-200" },
+        { "mode": "performance", "entryName": "micro-compiler-ast-walk-5k" },
         { "mode": "performance", "entryName": "micro-compiler-snippet-args-5k" }
       ]
     }
