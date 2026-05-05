@@ -103,6 +103,12 @@ const BISECT_MARKDOWN_MAX = 3;
 // long-running PR.
 const DRIFT_THRESHOLD_PP = 5;
 
+// Max length of the rendered purpose text (the comment body after
+// `// purpose:`). Longer purposes truncate with a single ellipsis char.
+// Bench files enforce the same cap at authoring time; this is the
+// reporter-side defense in depth.
+const PURPOSE_MAX_CHARS = 120;
+
 // Cross-iteration peak-attribution sections. Both REOPENED ("regression")
 // and WIN ("win") render the same shape: heading, description, table of
 // metric / current / peak / vs peak / candidates, with drift footnotes when
@@ -213,6 +219,7 @@ function buildReport(metrics) {
     const expectedPp = expectedNoisePp(meanMs);
     const ratio = expectedPp > 0 ? widthPp / expectedPp : Infinity;
     const source = resolveMetricSource(m.name, benchDirs, repoRoot);
+    const purpose = resolveMetricPurpose(m.name, benchDirs, repoRoot);
     const historyStatus = computeHistoryStatus(m, peakHistory, driftHistory);
     return {
       ...m,
@@ -221,6 +228,7 @@ function buildReport(metrics) {
       expectedPp,
       ratio,
       source,
+      purpose,
       historyStatus,
       status: classify(m.percentDelta, ratio),
     };
@@ -280,6 +288,7 @@ function toJsonMetric(m) {
     expected_noise_pp: Number(m.expectedPp.toFixed(2)),
     observed_noise_ratio: Number(m.ratio.toFixed(2)),
     source: m.source,
+    purpose: m.purpose ?? null,
     baseline_sha: m.baselineSha ?? null,
   };
   if (m.historyStatus) {
@@ -453,6 +462,9 @@ function renderMarkdown(report) {
     lines.push('');
   }
 
+  // ─── Glossary (only when at least one metric has a purpose) ──────────
+  renderGlossarySection(lines, report);
+
   // ─── Footer ──────────────────────────────────────────────────────────
   lines.push('---');
   const footerParts = [
@@ -466,6 +478,30 @@ function renderMarkdown(report) {
   lines.push(`<sub>${footerParts.join(' · ')}</sub>`);
 
   return lines.join('\n');
+}
+
+/**
+ * Append a collapsible glossary mapping each annotated metric to its
+ * purpose comment. Only metrics with a non-null `purpose` appear; a run
+ * with zero annotated metrics emits nothing. Sorted alphabetically by
+ * metric name. The metric column links to the same source location as
+ * the headline tables.
+ */
+function renderGlossarySection(lines, report) {
+  const rows = report.metrics.filter((m) => m.purpose);
+  if (rows.length === 0) { return; }
+  const sorted = [...rows].sort((a, b) => a.name.localeCompare(b.name));
+  lines.push('<details>');
+  lines.push(`<summary>📖 Bench glossary (${sorted.length} metric${sorted.length === 1 ? '' : 's'})</summary>`);
+  lines.push('');
+  lines.push('| metric | what it tests |');
+  lines.push('|---|---|');
+  for (const m of sorted) {
+    lines.push(`| ${metricLink(m, report)} | ${m.purpose} |`);
+  }
+  lines.push('');
+  lines.push('</details>');
+  lines.push('');
 }
 
 /**
@@ -777,6 +813,50 @@ function resolveMetricSource(metricName, dirs, root) {
       const lines = content.split('\n');
       const idx = lines.findIndex((line) => needle.test(line));
       if (idx >= 0) { return { path: relPath, line: idx + 1 }; }
+    }
+  }
+  return null;
+}
+
+/**
+ * Resolve the one-line purpose comment for a metric. Convention: a
+ * `// purpose: <text>` comment on the line immediately above the metric's
+ * `performance.mark(startMark('<name>'))` call. Only the directly-preceding
+ * line counts. A blank line or unrelated comment between purpose and mark
+ * decouples them.
+ *
+ * Returns the trimmed comment text (without the `// purpose:` prefix), or
+ * null if no purpose is associated with the metric. Truncates at
+ * PURPOSE_MAX_CHARS with a single ellipsis (…) to keep glossary rows compact.
+ */
+function resolveMetricPurpose(metricName, dirs, root) {
+  const escaped = metricName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const markNeedle = new RegExp(
+    `performance\\.mark\\(\\s*startMark\\(\\s*['"\`]${escaped}['"\`]\\s*\\)\\s*\\)`,
+  );
+  const purposeNeedle = /^\s*\/\/\s*purpose:\s*(.*?)\s*$/;
+  for (const dir of dirs) {
+    const full = path.join(root, dir);
+    let entries;
+    try {
+      entries = fs.readdirSync(full);
+    }
+    catch {
+      continue;
+    }
+    for (const file of entries) {
+      if (!file.endsWith('.js')) { continue; }
+      const relPath = path.join(dir, file);
+      const content = fs.readFileSync(path.join(root, relPath), 'utf8');
+      const lines = content.split('\n');
+      const idx = lines.findIndex((line) => markNeedle.test(line));
+      if (idx <= 0) { continue; }
+      const prev = lines[idx - 1];
+      const match = purposeNeedle.exec(prev);
+      if (!match) { continue; }
+      const text = match[1];
+      if (text.length <= PURPOSE_MAX_CHARS) { return text; }
+      return `${text.slice(0, PURPOSE_MAX_CHARS - 1)}…`;
     }
   }
   return null;
