@@ -76,7 +76,7 @@ Two extra-scope changes in `tools/ci/bench/reporter/`:
 1. **Purpose-extraction system.** Each metric carries a `// purpose: <text>` single-line comment immediately above its `performance.mark(startMark(...))` call. The reporter walks bench files once, indexes per-metric source location and purpose, and renders a collapsed `📖 Bench glossary` `<details>` block at the bottom of the PR comment.
 2. **Single-pass file index.** The two prior resolvers (source-location + purpose) collapsed into one walk indexed by metric name. Drops the per-metric N×2 file scan.
 
-Companion workspace spec at `ai/workspace/bench-metric-purposes.md` (gitignored — captures voice rules: no colons/semicolons/em-dashes, no AI tells, capitalize first word, ≤25 words, hard cap 120 chars per line, lead with active verb, strip `measures`/`tests whether`/`validates` prefixes).
+Voice rules for purpose comments: no colons/semicolons/em-dashes, no AI tells, capitalize first word, ≤25 words, hard cap 120 chars per line, lead with active verb, strip `measures`/`tests whether`/`validates` prefixes.
 
 ## Renderer correctness tests
 
@@ -91,7 +91,7 @@ Two previously-skipped tests unburied:
 
 | Session | Estimated | Done |
 |---|---|---|
-| 1. Track A calibration | ~3h | ✓ Calibration log artifact in workspace. Findings: 5 metrics had real coarseness gaps, 2 metrics already at ideal. Both kept (regression-protection role). |
+| 1. Track A calibration | ~3h | ✓ Findings: 5 metrics had real coarseness gaps, 2 metrics already at ideal. Both kept (regression-protection role). |
 | 2. Track A bench file + config | ~3h | ✓ |
 | 3. Hydration metric amplification | ~30m | ✓ |
 | 4. Track B signal cheap extensions | ~2h | ✓ |
