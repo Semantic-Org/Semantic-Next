@@ -347,8 +347,7 @@ function renderMarkdown(report) {
     renderFasterSlowerSection(lines, slower, 'slower', report);
   }
 
-  // ─── New peaks (cross-run; affirmative — same iterations a perf agent ──
-  // wants to credit when something landed and stuck) ─────────────────────
+  // ─── New peaks (cross-run; auto-expanded when present) ──────────────
   renderNewPeaks(lines, report);
 
   // ─── Regressions from peak (cross-run; auto-expanded when present) ───
@@ -475,13 +474,7 @@ function renderRegressionsFromPeak(lines, report) {
     const deltaStr = m.delta_from_peak_pct > 0
       ? `regressed +${m.delta_from_peak_pct.toFixed(0)}%`
       : `${m.delta_from_peak_pct.toFixed(0)}%`;
-    const bisectMd = (m.bisect_candidates ?? [])
-      .slice(0, BISECT_MARKDOWN_MAX)
-      .map((c) => commitOrPrLink(c, report.repo))
-      .join(', ');
-    const bisectCell = m.bisect_candidates && m.bisect_candidates.length > BISECT_MARKDOWN_MAX
-      ? `${bisectMd} +${m.bisect_candidates.length - BISECT_MARKDOWN_MAX} more`
-      : bisectMd || '—';
+    const bisectCell = formatCandidateCell(m.bisect_candidates, report.repo);
 
     // Fires on threshold breach or chain-gap (magnitude unavailable).
     let driftFlag = '';
@@ -522,6 +515,23 @@ function formatSignedPct(pct) {
 }
 
 /**
+ * Render the comma-joined candidate cell for the regressions/wins tables,
+ * with an overflow suffix when the list exceeds BISECT_MARKDOWN_MAX. Same
+ * shape for both the bisect (regression) and credit (win) sides — only
+ * the column heading differs at the call site.
+ */
+function formatCandidateCell(candidates, repo) {
+  if (!candidates || candidates.length === 0) { return '—'; }
+  const md = candidates
+    .slice(0, BISECT_MARKDOWN_MAX)
+    .map((c) => commitOrPrLink(c, repo))
+    .join(', ');
+  return candidates.length > BISECT_MARKDOWN_MAX
+    ? `${md} +${candidates.length - BISECT_MARKDOWN_MAX} more`
+    : md;
+}
+
+/**
  * Append a "New peaks" section when one or more metrics are WIN — current
  * pct-delta CI dominates the prior best iteration's CI. Affirmative signal:
  * "this iteration is the new best on metric X." Mirrors
@@ -532,8 +542,8 @@ function renderNewPeaks(lines, report) {
   const wins = report.metrics.filter((m) => m.history_status === 'WIN');
   if (wins.length === 0) { return; }
 
-  // Sort by improvement magnitude — biggest gains first. delta_from_peak_pct
-  // is negative for WIN, so ascending order surfaces the most-improved.
+  // delta_from_peak_pct is negative for WIN — ascending sort surfaces the
+  // most-improved first.
   const sorted = [...wins].sort(
     (a, b) => (a.delta_from_peak_pct ?? 0) - (b.delta_from_peak_pct ?? 0),
   );
@@ -552,13 +562,7 @@ function renderNewPeaks(lines, report) {
     const peakStr = formatSignedPct(mid(m.peak.percent_delta_ci));
     const peakLink = commitOrPrLink(m.peak, report.repo);
     const deltaStr = `improved ${m.delta_from_peak_pct.toFixed(0)}%`;
-    const candMd = (m.bisect_candidates ?? [])
-      .slice(0, BISECT_MARKDOWN_MAX)
-      .map((c) => commitOrPrLink(c, report.repo))
-      .join(', ');
-    const candCell = m.bisect_candidates && m.bisect_candidates.length > BISECT_MARKDOWN_MAX
-      ? `${candMd} +${m.bisect_candidates.length - BISECT_MARKDOWN_MAX} more`
-      : candMd || '—';
+    const candCell = formatCandidateCell(m.bisect_candidates, report.repo);
 
     lines.push(
       `| ${metricLink(m, report)} | ${currentStr} | ${peakStr} @ ${peakLink} | ${deltaStr} | ${candCell} |`,
