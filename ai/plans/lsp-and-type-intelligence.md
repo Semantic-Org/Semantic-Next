@@ -26,7 +26,7 @@ Only first-party primitives (~14 today, ~80 target) use `componentSpec`. The maj
 
 Rework `defineComponent` generics. `M` inferred from `createComponent` return. `S` from `defaultSettings`. `St` from `defaultState`. Uses `ThisType<M>` on the return and `FactoryParams` (self omitted from M, added back as `Record<string, any>`) to break circularity.
 
-Results (all validated with `tsc --strict`, prototype at `ai/workspace/tmp/exp-thistype-both.ts`):
+Results (all validated with `tsc --strict`):
 
 - `settings.*` -- fully typed everywhere
 - `state.*` -- fully typed everywhere (wrapped in `Signal<T>`)
@@ -45,7 +45,6 @@ Results (all validated with `tsc --strict`, prototype at `ai/workspace/tmp/exp-t
 
 For users who want fully typed `self` in createComponent without using `this`. Intercepts `getScriptSnapshot` to inject JSDoc annotations. Same pattern as `typescript-plugin-css-modules` and Angular TCBs.
 
-Research at `ai/workspace/reference/typescript-plugin-research.md`.
 
 ### Architecture — Transport-Agnostic Core
 

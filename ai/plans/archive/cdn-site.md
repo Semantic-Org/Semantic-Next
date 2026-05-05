@@ -320,7 +320,7 @@ tools/cdn/
 
 ## Status
 
-Not started. Partial scaffolding exists in `scripts/cdn/`. Fresh-take evaluation at `ai/workspace/tmp/cdn-url-design-evaluation.md`.
+Not started. Partial scaffolding exists in `scripts/cdn/`.
 
 ## Completion
 

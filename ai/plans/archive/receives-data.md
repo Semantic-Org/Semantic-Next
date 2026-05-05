@@ -74,4 +74,4 @@ The renderer-side gate stays. Combined with #1 and #2, the full picture:
   1. `data.uiClasses = () => this.getUIClasses(...)` in `packages/component/src/engines/native/base.js:47` — function form, settings-Signal-tracked.
   2. Dirty flag in `packages/templating/src/template.js:139` — `assignInPlace(this.data, data, { returnChanged: true })`, `dataReplaced` gates `bumpDataVersion()`.
   3. `receivesData` flag in `packages/renderer/src/engines/native/renderer.js:151` — gates `dataDep.depend()` in `lookupExpression()`.
-- Archived 2026-04-29 from workspace draft. Plan was executed without a canonical roadmap entry; this archive entry is the catalog record.
+- Archived 2026-04-29. Plan was executed without a canonical roadmap entry; this archive entry is the catalog record.

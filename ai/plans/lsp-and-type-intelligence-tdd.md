@@ -33,7 +33,7 @@ None of this can be represented in TypeScript. Templates need their own language
 
 ## Validated Type Results
 
-Prototype files at `ai/workspace/tmp/exp-thistype-both.ts` (10 tests, `tsc --strict` clean). Solver experiments at `ai/workspace/tmp/lsp-self-type-findings.md`.
+Prototype validated with 10 tests, `tsc --strict` clean.
 
 | Target | Mechanism | tsc | IDE | Status |
 |--------|-----------|-----|-----|--------|

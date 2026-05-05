@@ -199,7 +199,7 @@ No manifest generation needed. The file structure IS the API.
 
 **Priority:** High - critical for AI-assisted theming workflows
 
-**See also:** `ai/workspace/plans/css-token-extraction.md` for full implementation details
+**See also:** css-token-extraction plan for full implementation details
 
 ---
 

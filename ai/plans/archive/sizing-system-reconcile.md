@@ -8,9 +8,7 @@ Reorganize and consolidate the sizing/spacing/padding/margin token system with c
 
 ## Phase 1: Inventory Existing System
 
-**Create scratch file:** `ai/workspace/memory/sizing-inventory.md`
-
-Document all existing groupings from:
+Inventory all existing groupings from:
 - `src/css/tokens/global/sizing.css`
 - `src/css/tokens/global/spacing.css`
 - `src/css/tokens/computed/em-sizing.css`
@@ -27,7 +25,7 @@ For each grouping, record:
 
 ## Phase 2: Extract to Scratch Files
 
-Move each logical grouping to: `ai/workspace/memory/sizing/[groupname].css`
+Extract each logical grouping into a scratch file per group:
 
 Proposed groupings:
 1. `base-values.css` - unitless base numbers (--size-3xs-base, --em-size, etc.)
@@ -49,7 +47,7 @@ Proposed groupings:
 
 ## Phase 3: Design New System
 
-**Create:** `ai/workspace/memory/sizing-new-system.css`
+Draft the new system in a scratch file.
 
 Requirements:
 1. **Base values** (unitless) - foundation for calculations
@@ -98,7 +96,7 @@ Move sections from `sizing-new-system.css` to src/css files:
 
 ## Phase 5: Verify Completeness
 
-Compare new system against extracted files in `ai/workspace/memory/sizing/`:
+Compare new system against extracted groupings:
 
 For each old grouping, verify:
 - [ ] Functionality preserved or intentionally removed
@@ -120,10 +118,10 @@ Discuss findings with user before finalizing.
 - `src/css/tokens/computed/em-sizing.css`
 - `src/css/tokens/computed/layout.css`
 
-**Create:**
-- `ai/workspace/memory/sizing-inventory.md`
-- `ai/workspace/memory/sizing/*.css` (extracted groupings)
-- `ai/workspace/memory/sizing-new-system.css`
+**Create (scratch):**
+- Sizing inventory document
+- Per-grouping extracted CSS scratch files
+- New system draft CSS
 
 **Modify:**
 - Source files above (remove old, add new)

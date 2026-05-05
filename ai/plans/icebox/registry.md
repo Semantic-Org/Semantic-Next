@@ -1,6 +1,6 @@
 # Registry
 
-> **Status:** Draft (workspace) — workshop pending, not yet on the roadmap.
+> **Status:** Draft — workshop pending, not yet on the roadmap.
 > **Goal:** SUI registry for components and behaviors with runtime + compile-time consumption, an open author namespace, and an editorial canonical layer above it.
 > **Roadmap home:** Post-Phase 4. Almost certainly post-Phase 5.
 

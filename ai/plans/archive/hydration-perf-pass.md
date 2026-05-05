@@ -2,22 +2,11 @@
 
 ## Goal
 
-Close the ~425 ms hydration regression the `perf/native` block-decomposition branch had vs `main` on the canonical `/perf/hydrated` benchmark (1000-card `PerfCards` component, SSR + client hydration). Work through the perf corpus in `ai/workspace/reference/perf/` in sequence, measuring before and after each change, landing only what the benchmark justified.
+Close the ~425 ms hydration regression the `perf/native` block-decomposition branch had vs `main` on the canonical `/perf/hydrated` benchmark (1000-card `PerfCards` component, SSR + client hydration). Work through the perf corpus in sequence, measuring before and after each change, landing only what the benchmark justified.
 
-The perf corpus had been produced over multiple prior investigation sessions and organized into seven staged directories:
+The perf corpus had been produced over multiple prior investigation sessions and organized into seven staged directories covering: hypotheses and hot-spots, per-topic open questions, neutral-evaluation reports, solution sketches, industry-survey art, concrete scoped plans, and already-landed plans.
 
-```
-ai/workspace/reference/perf/
-  01-investigation/   — hypotheses, hot-spots, initial profiling
-  02-briefs/          — per-topic open questions
-  03-analysis/        — neutral-evaluation reports from sub-agents
-  04-solutions/       — per-topic solution sketches
-  05-art/             — industry-survey "how other frameworks solve this"
-  06-plans/           — concrete scoped plans (the load-bearing ones)
-  07-complete/        — plans already landed in prior sessions
-```
-
-Going into this pass, `06-plans/` had items 02, 04, 05, 08, 09, 12 open. `07-complete/` already had 01 (unsafe-html anchor), 03 (attach splitting), 06 (expression-eval firstRun), 07 (signal stack-trace), 10 (signal-clone hotpath), 11 (hashCode removal).
+Going into this pass, the open plans were 02, 04, 05, 08, 09, 12. Already complete: 01 (unsafe-html anchor), 03 (attach splitting), 06 (expression-eval firstRun), 07 (signal stack-trace), 10 (signal-clone hotpath), 11 (hashCode removal).
 
 ## Design / Implementation
 
@@ -62,7 +51,7 @@ Effect on hydration: TTI dropped to ~half of main's.
 
 ## Supporting changes
 
-- **Comparison document** (`ai/workspace/perf-log.md`) — continuous record of before/after measurements per plan, with commit hashes linking back to the changes. Includes the Vercel vs dev vs staging calibration.
+- **Comparison document** — continuous record of before/after measurements per plan, with commit hashes linking back to the changes. Includes the Vercel vs dev vs staging calibration.
 - **Vercel preview build strategy** — touch a docs file on each perf commit so Vercel's docs-based cache invalidates (packages/ changes alone don't trigger a rebuild).
 - **PR tachometer integration** — each commit triggers a tachometer run, authoritative prod-like measurement. Updated the pinned PR comment.
 - **Test suite discipline** — every commit ran `npm test` green (920 renderer tests, 79 component tests). The one pre-existing failure (`.claude missing dist/cdn/` in `internal-packages/esbuild-resolve-bare-imports/test/cdn-urls.test.js`) is unrelated.
@@ -111,6 +100,6 @@ Driving the decomposition branch's client-render regression from ~−60% on `sel
 ### Artifacts landed
 
 - 11 commits on `perf/native` (PR #137), `5bb6ae3af` through `deb712cc7`
-- `ai/workspace/perf-log.md` — full measurement trail
+- Perf log — full measurement trail (per-plan before/after with commit hashes)
 - 2 test cases added as `it.skip` in `subtree-spurious.test.js` documenting the fine-grained reactivity gaps (will flip to `it` when the follow-up plan lands)
 - Plan 12 (hydration yielding) moved to `ai/plans/deferred/` with rationale

@@ -46,7 +46,7 @@
 - [ ] ai-rewrite-context.md: skill name → ai-author-context
 - [ ] ai-create-context.md: skill name → ai-author-context, list_docs/get_doc → list_user_docs/get_user_doc
 - [ ] research-component-patterns.md: ai/research/[component]/ → ai/research/components/[component]/, fix ui-list path, fix self-reference path
-- [ ] verify-pattern-research.md: Fix research paths, ai/artifacts/ → ai/workspace/artifacts/
+- [ ] verify-pattern-research.md: Fix research paths, ai/artifacts/ → ai/research/
 - [ ] docs-add-links.md: All URL paths need /docs/guides/ or /docs/ prefix
 - [ ] docs-evaluate-text.md: Remove nonexistent file refs, fix all page paths with /docs/guides/ prefix
 - [ ] primitive-scaffold.md: Spec separator -component.js → .component.js, spec barrel .spec segment, CSS tree levels, plural template braces, Astro registry pattern
