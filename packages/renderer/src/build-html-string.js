@@ -39,11 +39,15 @@ export function formatBlockClose(id, meta) {
   return s;
 }
 
-// `bN` → branchIndex; unknown segments ignored.
+// `bN` (signed integer) → branchIndex. Strict digit suffix so future
+// reserved prefixes like `block`/`bypass` don't accidentally clobber.
+// Allows the `-1` sentinel emitted when no conditional branch matched.
+const META_BRANCH_RE = /^b(-?\d+)$/;
 export function parseServerMeta(commentData, target) {
   for (const part of commentData.split(':')) {
-    if (part.startsWith('b')) {
-      target.branchIndex = +part.slice(1);
+    const m = META_BRANCH_RE.exec(part);
+    if (m) {
+      target.branchIndex = +m[1];
     }
   }
 }
@@ -278,11 +282,11 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
   return { htmlString, entries, snippets };
 }
 
-// Attach `attributeBinding` to the first entry of each attribute whose
-// value carries one or more markers. `parts` covers the full value
-// (alternating static/dynamic segments) so bindAttribute can reconstruct
-// the interpolation in one pass. The hydration path resolves the binding
-// via `data-sui-bind` → first entry → attributeBinding.parts.
+// Attach `attributeParts` to the first entry of each attribute whose value
+// carries one or more markers. `parts` covers the full value (alternating
+// static/dynamic segments) so bindAttribute can reconstruct the
+// interpolation in one pass. The hydration path resolves the binding via
+// `data-sui-bind` → first entry → entry.attributeParts.
 const ATTR_WITH_MARKER_RE = /\s(?:[.@]?[\w:-]+)\s*=\s*(?:"([^"]*__sui\d+__[^"]*)"|([^\s"'>]*__sui\d+__[^\s"'>]*))/g;
 
 function populateAttributeBindings(htmlString, entries) {
@@ -294,6 +298,6 @@ function populateAttributeBindings(htmlString, entries) {
     if (markerIDs.length === 0) { continue; }
     const entry = entries[markerIDs[0]];
     if (!entry) { continue; }
-    entry.attributeBinding = { parts };
+    entry.attributeParts = parts;
   }
 }

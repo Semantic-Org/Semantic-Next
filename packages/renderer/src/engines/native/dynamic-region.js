@@ -14,10 +14,8 @@ export class DynamicRegion {
     this.childScopes = [];
     for (const node of this.ownedNodes) { node.remove(); }
     this.ownedNodes = [];
-    if (this.endAnchor) {
-      this.endAnchor.remove();
-      this.endAnchor = null;
-    }
+    // endAnchor stays allocated — placeEndAnchor reattaches it on next fill.
+    if (this.endAnchor) { this.endAnchor.remove(); }
   }
 
   setContent(fragment, scope) {

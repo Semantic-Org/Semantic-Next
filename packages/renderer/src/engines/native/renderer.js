@@ -438,8 +438,8 @@ export class Renderer {
         const entryId = +binding.slice(eqIdx + 1);
         if (isNaN(entryId)) { continue; }
         const entry = entries[entryId];
-        if (!entry || !entry.attributeBinding) { continue; }
-        const { parts } = entry.attributeBinding;
+        if (!entry || !entry.attributeParts) { continue; }
+        const parts = entry.attributeParts;
         // Strip `.` / `@` prefix for the DOM attribute name. bindAttribute
         // uses `classification.type` / `classification.attribute` for the
         // real dispatch; the name passed here is only used for the
