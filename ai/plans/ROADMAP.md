@@ -84,6 +84,7 @@ Plans with an open PR or live pair work. Updated as ceremony when a PR opens; en
 - [Release 0.18.0](active/release-0-18-0.md) — [PR #122](https://github.com/Semantic-Org/Semantic-Next/pull/122) `docs/shippable` (menu trimming + audit pass pending). Ships the next tagged release; last was 0.17.0 in November.
 - [Signal Performance](active/signal-performance.md) — [PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) freeze-by-default. Perf story unresolved (see plan's Bench Results); release inclusion is the open call.
 - [Bench Peak Attribution](active/bench-peak-attribution.md) — [PR #178](https://github.com/Semantic-Org/Semantic-Next/pull/178) methodology fix for cross-session absolute-ms comparisons. Eliminates phantom "Regressions from peak" on PRs.
+- [Bench Coverage Expansion](active/bench-coverage-expansion.md) — fine-grained reactivity workloads + per-file hot-path micros. Pure client-mount, no SSR. Supersedes the icebox `bench-suite-expansion` plan.
 
 ---
 
@@ -215,6 +216,5 @@ Plans drafted but not on the active roadmap. See `ai/plans/icebox/` for files.
 - [Signals TC39 Integration](icebox/signals-tc39-integration.md) — adopt native `Signal.State`/`Signal.Computed` as backing primitives when TC39 ships. Blocked on TC39 Stage 3+.
 - [Add Icon Stroke Width](icebox/add-icon-stroke-width.md) — power-user feature, post-1.0.
 - [Audit Fix Continuation](icebox/audit-fix-continuation.md) — process work for follow-up audits.
-- [Bench Suite Expansion](icebox/bench-suite-expansion.md) — file-scoped hot-path micros (`micro-expression-evaluator`, `micro-signal`, etc.) + new end-to-end benches (`wake-count-single-key`, `nested-mutation`, `hydrate-1000-card`). Surgical adds; lands when underlying perf work needs them.
 - [Contributing Surface](icebox/contributing-surface.md) — pre-1.0 stance + 1.0 graduation pass + post-1.0 triage flow (size + scope, GH-shaped vs md-shaped). Most icebox graduates at 1.0; the rest stays internal.
 - [Registry](icebox/registry.md) — community registry for components and behaviors, runtime + compile-time consumption from one source, author-namespaced publishing under `@sui-hub` with editorial canonical aliases above. Post-Phase 4.
