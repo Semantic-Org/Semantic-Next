@@ -2,7 +2,7 @@ import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
 import { each, fatal, isPlainObject, isString, keys } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
-import { isItemContext } from './each.js';
+import { isItemContext } from '../reactive-context.js';
 import { registerBlock } from './registry.js';
 
 /*
