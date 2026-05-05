@@ -34,6 +34,7 @@ let sink = null;
       sink = sig.get();
     });
   }
+  // purpose: tests how a single signal's value change fans out to 500 subscribers across 1200 successive updates.
   performance.mark(startMark('signal-reactive-fanout-500x1200'));
   for (let i = 0; i < 1200; i++) {
     sig.set(i + 1);
@@ -56,6 +57,7 @@ let sink = null;
   const observer = Reaction.create(() => {
     sink = end.get();
   });
+  // purpose: tests how a 10-deep chain of derived signals propagates a value change from root to leaf 60k times.
   performance.mark(startMark('signal-computed-chain-10x60k'));
   for (let i = 0; i < 60_000; i++) {
     root.set(i + 1);
@@ -73,6 +75,7 @@ let sink = null;
   const r = Reaction.create(() => {
     sink = sigs[0].get() + sigs[1].get() + sigs[2].get() + sigs[3].get() + sigs[4].get();
   });
+  // purpose: tests how one subscriber reading five separate signals reacts when each signal changes in turn.
   performance.mark(startMark('signal-reactive-multi-read-5x160k'));
   for (let i = 0; i < 32_000; i++) {
     for (let j = 0; j < 5; j++) {
@@ -101,6 +104,7 @@ let sink = null;
     }
     sink = active;
   });
+  // purpose: tests replacing a 1000-item list signal with a fresh 1000-item array and rescanning it 1000 times.
   performance.mark(startMark('signal-reactive-list-replace-1000x1000'));
   for (let i = 0; i < 1000; i++) {
     items.set(makeRecords(1000));
@@ -123,6 +127,7 @@ let sink = null;
     }
     sink = count;
   });
+  // purpose: tests how a search-term signal change triggers a re-scan over a 1000-item list across 300 updates.
   performance.mark(startMark('signal-reactive-list-filter-1000x300'));
   for (let i = 0; i < 300; i++) {
     search.set(`q-${i}`);
@@ -149,6 +154,7 @@ let sink = null;
     }
     sink = count;
   });
+  // purpose: tests appending 20 items onto an empty list signal with a subscriber, across 2000 reset cycles.
   performance.mark(startMark('signal-reactive-push-2000x20'));
   for (let c = 0; c < 2000; c++) {
     sig.set([]);
@@ -173,6 +179,7 @@ let sink = null;
     }
     sink = active;
   });
+  // purpose: tests replacing one item by index in a 1000-item list signal across 300 updates, with a subscriber.
   performance.mark(startMark('signal-reactive-set-index-300'));
   for (let i = 0; i < 300; i++) {
     sig.setIndex(i % 1000, {
@@ -206,6 +213,7 @@ let sink = null;
     const idx = (i % 2 === 0) ? (i / 2) % 1000 : 999 - (((i - 1) / 2) % 1000);
     ids[i] = `rec-${idx}`;
   }
+  // purpose: tests finding an item by id and updating one field in a 1000-item list signal, 200 alternating updates.
   performance.mark(startMark('signal-reactive-set-property-by-id-200'));
   for (let i = 0; i < 200; i++) {
     sig.setProperty(ids[i], 'active', i % 2 === 0);
