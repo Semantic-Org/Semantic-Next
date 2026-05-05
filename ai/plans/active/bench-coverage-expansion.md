@@ -4,7 +4,7 @@
 
 Two tracks of bench coverage in one PR.
 
-**Track A — Fine-grained reactivity workloads.** Six workload-shaped metrics in a new `bench-reactivity` cell, anchored to production component patterns (tabs selection, password-strength derived state, card-search filtering) and to the doc-promised-but-unrealized invariants the renderer doesn't yet deliver. Pure client-mount path — no SSR, no hydration. Models the naive case of CDN-loaded or agentic-VM-loaded SUI components.
+**Track A — Fine-grained reactivity workloads.** Seven workload-shaped metrics in a new `bench-reactivity` cell, anchored to production component patterns (tabs selection, password-strength derived state, card-search filtering) and to the doc-promised-but-unrealized invariants the renderer doesn't yet deliver. Pure client-mount path — no SSR, no hydration. Models the naive case of CDN-loaded or agentic-VM-loaded SUI components. A separate amplification of an existing `bench-hydrate.js` metric covers the SSR-hydration variant of the same invariants.
 
 **Track B — Per-file hot-path micros.** Per-package isolation benches that catch sub-noise-floor regressions on PRs touching a single hot-path file. The macro suite shifts by 2-3% on a 20% regression in `expression-evaluator.js` — below the resolution floor. Per-file micros surface those.
 
@@ -12,7 +12,7 @@ Together they fill two distinct measurement gaps that the existing krausest / to
 
 ## Status
 
-`initial` — Track A bench candidates need calibration to confirm wall-clock spreads exist in today's renderer at the proposed N. Track B candidates need duration estimation per micro before the bench shells land. Open questions on negative-control inclusion and Track B scope (cheap extensions vs full new package infra).
+`initial` — Track A bench candidates need calibration to confirm wall-clock spreads exist in today's renderer at the proposed N. Track B candidates need duration estimation per micro before the bench shells land. Calibration is a hard gate on the metric set: any metric whose today-spread sits at the σ-floor doesn't ship.
 
 ## Supersedes
 
@@ -23,27 +23,47 @@ Together they fill two distinct measurement gaps that the existing krausest / to
 
 ## Track A — Fine-grained reactivity workloads
 
-Six metrics in a new file `packages/component/bench/tachometer/bench-reactivity.js`, served via `tachometer-ci-reactivity.json`. Pure client-mount — `document.createElement → appendChild → flush → mutate`. Each anchored to a real example pattern with a clear "what wins under an ideal renderer" target.
+Seven metrics in a new file `packages/component/bench/tachometer/bench-reactivity.js`, served via `tachometer-ci-reactivity.json`. Pure client-mount — `document.createElement → appendChild → flush → mutate`. Each anchored to a real example pattern.
+
+Metric descriptions deliberately avoid prescribing per-eval counts ("ideal: 100, today: 200"). The bench commits to wall-clock only; baking eval-count predictions into bench design primes readers toward one solution shape (per-key Signal subscription) and would obscure wins from any other approach (compile-time dependency analysis, render-graph memoization, etc.).
+
+Eval counts are valuable as calibration *artifacts*, not bench commitments. Calibration session 1 records today's eval count alongside the wall-clock spread for each metric; the artifact lives in a calibration log (`ai/workspace/artifacts/bench-reactivity-calibration.md` or similar), not in the bench code. Future debugging can answer "did this fix close the count gap or only the wall-clock gap?" without the bench itself prescribing a target.
 
 ### Subtemplate / snippet axis
 
-Direct exercise of the per-key isolation gap in subtemplate args. The doc at `docs/src/pages/docs/guides/templates/subtemplates.mdx` promises that shorthand individual props and `reactiveData={...}` are surgical-per-key. The skipped tests in `packages/renderer/test/browser/subtree-spurious.test.js` say today's renderer flattens both through `unpackNodeData` and re-evals every child expression on any key change.
+Direct exercise of the per-key isolation gap in subtemplate and snippet args. The doc at `docs/src/pages/docs/guides/templates/subtemplates.mdx` promises that shorthand individual props and `reactiveData={...}` are surgical-per-key. The skipped tests in `packages/renderer/test/browser/subtree-spurious.test.js` document that today's renderer flattens both through `unpackNodeData` and re-evals every child expression on any key change.
 
-| Metric | Workload | Wins close gap |
+| Metric | Workload | Coverage |
 |---|---|---|
-| `subtemplate-reactiveData-100` | 100 child subtemplates with `{>card reactiveData={label: getLabel, status: getStatus}}`. Mutate `labelVal` 50×. | Skipped test in `subtree-spurious.test.js:527`. Today: 200 expressions re-eval. Ideal: 100. |
-| `subtemplate-shorthand-props-100` | 100 child subtemplates with `{>card label=getLabel status=getStatus}`. Mutate `labelVal` 50×. | Skipped test in `subtree-spurious.test.js:465`. Same gap, different syntactic form. A renderer fix that lands one likely lands both — bench validates. |
-| `subtemplate-data-blob-100` | 100 child subtemplates with `{>card data=getCardData}`. Mutate label inside cardData 50×. | Negative control. Coarse-by-design — every child expression re-evals on any input change. Should NOT improve when fine-grained reactivity lands. Catches accidental tightening of the documented coarse-blob semantic. |
+| `subtemplate-reactiveData-100` | 100 child subtemplates with `{>card reactiveData={label: getLabel, status: getStatus}}`. Mutate `labelVal` 50×. | Documented invariant: skipped test `subtree-spurious.test.js:527`. |
+| `subtemplate-shorthand-props-100` | 100 child subtemplates with `{>card label=getLabel status=getStatus}`. Mutate `labelVal` 50×. | Documented invariant: skipped test `subtree-spurious.test.js:465`. Shares the `unpackNodeData` flatten path with reactiveData; cut if calibration shows 1:1 wall-clock tracking with `subtemplate-reactiveData-100`. |
+| `snippet-args-per-key-100` | 100 invocations of a `{#snippet card label=labelArg status=statusArg}` expansion via `{>card label=getLabel status=getStatus}` calls. Mutate `labelVal` 50×. | Snippets are the third FGR adoption site (after each-items and subtemplate reactiveData) with a more subtle failure mode — zero-reactivity inside subtemplate-nested snippets per the FGR plan's open question 1. Without this metric, snippet-site regressions land bench-blind. |
 
 ### Broader reactivity axis
 
 Each anchored to a production example's mutation pattern. Tests fine-grained reactivity invariants outside the subtemplate boundary.
 
-| Metric | Anchor | Workload | Wins close gap |
+| Metric | Anchor | Workload | Coverage |
 |---|---|---|---|
-| `active-indicator-200` | tabs, dropdown, async-search `selectedIndex`, card-search filter highlight | 200 items each reading `is item.id selectedId` from one external signal. Cycle selectedId 100×. | Ideal: 2 items re-eval per cycle (prev-active + new-active). Today: likely all 200. |
-| `stable-ref-mutate-500` | card-search results, async-search results | 500-item list, replace `items[i]` with fresh ref. 100 cycles, each picking different `i`. | Ideal: 1 item's expressions re-eval per cycle. Tests per-key isolation in `#each` outside of subtemplates. |
-| `derived-cascade-100` | password-strength | One root signal feeding 8 derived expressions (length check, uppercase, digit, special, label, two class maps, percentage). 100 character mutations. | Ideal: derived chains short-circuit when intermediates don't move. Today: 800 evaluations. |
+| `active-indicator-200` | tabs, dropdown, async-search `selectedIndex`, card-search filter highlight | 200 items each reading `is item.id selectedId` from one external signal. Cycle selectedId 100×. | External-signal-into-each fan-out. Tests whether per-item bindings reading external state isolate to the items whose computed value changes. |
+| `stable-ref-mutate-500` | card-search results, async-search results | 500-item list, replace `items[i]` with fresh ref. 100 cycles, each picking different `i`. | Per-key isolation in `#each` outside subtemplates. Same-array-ref + per-item ref change. |
+| `derived-cascade-100` | password-strength | One root signal feeding 8 derived expressions (length check, uppercase, digit, special, label, two class maps, percentage). 100 character mutations. | Derived-chain short-circuit when intermediate values don't move. |
+
+### Negative control
+
+Documented coarse semantic that should NOT improve under fine-grained reactivity work. Wall-clock should stay flat. Catches accidental tightening that would constitute a behavioral break.
+
+| Metric | Workload | Documented coarse path |
+|---|---|---|
+| `subtemplate-data-blob-100` | 100 child subtemplates with `{>card data=getCardData}`. Mutate label inside cardData 50×. | `data={expression}` evaluates the whole blob on every change; every child re-evaluates by design. |
+
+A second negative control on the `setDataContext` + `bumpDataVersion` coarse path was considered and dropped — symmetry alone doesn't justify a CI cell, and a metric named `coarse-bumpDataVersion-50` reads as cryptic internal-API rather than workload-pattern. Add only if accidental tightening of `setDataContext` becomes a concrete concern.
+
+### Hydration coverage
+
+Track A is pure client-mount. The hydration variant of the same invariants — does the SSR adoption path correctly wire per-item subscriptions to external signals — is FGR's open-question-4 and the failure mode that surfaced in PR #175. The existing `hydrate-helper-100-state-change` metric in `bench-hydrate.js` exercises this shape (hydrate from SSR → mutate `state.activeID` → measure per-item helper re-eval cost) but currently sits at ~6ms with ±26-29% noise — perpetually "Too Fast to Measure Precisely."
+
+Amplify the existing metric (raise iteration count or per-iteration work) to clear the σ-floor. No new file or config — extend `bench-hydrate.js` in place.
 
 ## Track B — Per-file hot-path micros
 
@@ -84,9 +104,9 @@ Same constraints as the rest of the bench harness, no carve-outs:
 ## Open questions
 
 1. **`subtemplate-data-blob-100` — keep or drop.** Negative control catches accidental semantic regression but adds CI time and noise to the headline. Lean: keep initially; drop if the cell's wall-clock exceeds 6 minutes.
-2. **Track A — one config or split.** Six metrics in `tachometer-ci-reactivity.json` keeps the suite cohesive. Splitting `derived-cascade-100` off (it stresses computation, not rendering) would isolate the signal but adds a second matrix cell. Lean: one config.
-3. **Track B scope.** Cheap extensions only (`micro-signal` + `micro-reaction-scheduler` extending `bench-signal.js` — net ~2h) vs full set including renderer + templating new package infra (~6-8h additional). Lean: ship cheap extensions in this PR; defer renderer + templating new infra to a follow-up unless calibration shows the gap is urgent and not catchable any other way.
-4. **Track A calibration confidence.** Today's "200 re-eval / 0 re-eval" claims are inferred from the skipped tests, not measured. Calibration step (Session 1) is a precondition — if today's gap is only 2× rather than larger, bench duration math changes and some metrics may drop.
+2. **Track A — one config or split.** Seven metrics in `tachometer-ci-reactivity.json` keeps the suite cohesive. Splitting `derived-cascade-100` off (it stresses computation, not rendering) would isolate the signal but adds a second matrix cell. Lean: one config.
+3. **Track B scope.** Cheap extensions only (`micro-signal` + `micro-reaction-scheduler` extending `bench-signal.js` — net ~2h) vs full set including renderer + templating new package infra (~6-8h additional). Lean: ship cheap extensions + renderer infra in this PR. The macro suite shifts only 2-3% on a 20% regression in `expression-evaluator.js` (per the plan's own framing), so renderer per-file micros earn their slot independently of any specific upcoming PR — they catch sub-resolution-floor regressions on whichever future PR introduces them. Defer templating infra to a follow-up unless calibration shows urgent gap.
+4. **Track A calibration confidence.** Today's per-key invalidation claims are inferred from the skipped tests, not measured. Calibration session 1 is a hard gate — metric names don't get committed until measured. If a metric's wall-clock spread is below the σ-floor today, it has no resolvable signal and shouldn't ship; better to find that out in calibration than after CI. Specifically: amplify N (item count, mutation count) until the metric clears ~10-15ms, or drop the metric.
 
 ## Dependencies
 
@@ -94,17 +114,21 @@ None. Bench harness, reporter, matrix discovery, history archival are all in pla
 
 ## Sessions (estimated)
 
-1. **Track A calibration.** Instrument the four reactivity-axis candidates locally. Add throwaway counters to confirm today's wake count and measure the wall-clock spread. Adjust N upward where the spread is tight, downward where it's so dramatic the bench is unstable. ~3h.
-2. **Track A bench file + config.** Write `bench-reactivity.js`, two HTML fixtures, `tachometer-ci-reactivity.json`. Add to `build-ci.js`. Local zero-delta dry run via `node build-ci.js current`, `node build-ci.js baseline` (same source both sides), `npx tachometer --config tachometer-ci-reactivity.json`. ~3h.
-3. **Track B cheap extensions.** Add `micro-signal` and `micro-reaction-scheduler` entries to existing `bench-signal.js`. Calibrate iteration counts to clear the noise floor. ~2h.
-4. **Track B new infra (conditional on open-question ruling).** Stand up `bench-renderer-micros.js` + `tachometer-ci-renderer-micros.json` in renderer. Stand up `bench/tachometer/` infra in templating. ~4-6h.
-5. **PR open + first CI bench run.** Validate that metrics resolve in CI, that the reporter renders all metrics correctly, and that `bench-history.json` gets its first entries after merge.
+1. **Track A calibration.** Instrument all seven Track A candidates locally. Throwaway counters record today's eval-count per metric (saved to a calibration log artifact); wall-clock measurement establishes the spread. Adjust N until each metric clears ~10-15ms; drop any metric whose spread sits at the σ-floor today. Hard gate on metric-name commit. ~3h.
+2. **Track A bench file + config.** Write `bench-reactivity.js`, HTML fixtures, `tachometer-ci-reactivity.json`. Add to `build-ci.js`. Local zero-delta dry run (same source on both sides) verifies the reporter resolves the metrics within ±2% of zero. ~3h.
+3. **Hydration metric amplification.** Raise iteration count or per-iteration work in `hydrate-helper-100-state-change` until it clears ~10ms test time. Single-file edit in `bench-hydrate.js`. ~30m.
+4. **Track B cheap extensions.** Add `micro-signal` and `micro-reaction-scheduler` entries to existing `bench-signal.js`. Calibrate iteration counts to clear the noise floor. ~2h.
+5. **Track B renderer infra.** Stand up `bench-renderer-micros.js` + `tachometer-ci-renderer-micros.json` + ci-current/baseline html + `build-ci.js` for the renderer package. Add `micro-expression-evaluator`, `micro-build-html-string`, `micro-dom-walker`. ~4h.
+6. **Track B templating infra (deferred unless urgent).** Stand up `bench/tachometer/` infra in templating. ~2h follow-up.
+7. **PR open + first CI bench run.** Validate that metrics resolve in CI, that the reporter renders all metrics correctly, and that `bench-history.json` gets its first entries after merge.
 
-Total: 8-14h pair depending on Track B scope.
+Total: 12-15h pair (sessions 1-5+7); add 2h if templating infra ships in this PR rather than as follow-up.
 
 ## Completion criteria
 
 - Track A metrics resolve cleanly on a zero-delta run (CI within ±2% of zero) and produce spreads consistent with the calibration step under a synthetic renderer perturbation.
 - Track B metrics chosen for inclusion clear ~10ms mean after amplification — no perpetual residency in "Too Fast to Measure Precisely."
+- Amplified `hydrate-helper-100-state-change` clears the σ-floor (no longer flagged "Too Fast to Measure Precisely" with ±26-29% expected noise).
+- Calibration log artifact captures today's eval-count per Track A metric — referenceable by future debugging without prescribing targets in the bench code.
 - The icebox plan is removed and `ROADMAP.md` reflects the supersession.
 - Bench design rationale lives in the bench file's header comment (per the existing convention in `bench-todo.js`, `bench-krausest.js`, `bench-hydrate.js`), not a standalone doc.
