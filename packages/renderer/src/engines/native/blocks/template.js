@@ -241,7 +241,6 @@ const templateBlock = defineBlock({
     self.currentInstance = cloneInstance({ template, templateName, templateData, self });
 
     if (region.ownedNodes.length > 0) {
-      // Subtemplate uses its own renderer's data/scope, not the parent block's.
       self.currentInstance.renderer.hydrateInto({
         region,
         innerAST: self.currentInstance.ast,

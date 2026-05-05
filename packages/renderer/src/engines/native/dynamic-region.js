@@ -14,7 +14,7 @@ export class DynamicRegion {
     this.childScopes = [];
     for (const node of this.ownedNodes) { node.remove(); }
     this.ownedNodes = [];
-    // endAnchor is reusable across fills — placeEndAnchor reattaches it.
+    // endAnchor is reusable across fills.
     if (this.endAnchor) { this.endAnchor.remove(); }
   }
 

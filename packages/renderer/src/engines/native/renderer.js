@@ -511,8 +511,6 @@ export class Renderer {
     ownedNodes.push(...container.childNodes);
   }
 
-  // asChild=false reuses the passed scope; default creates and registers
-  // a child on region.childScopes.
   hydrateInto({ region, innerAST, data, scope, asChild = true }) {
     const targetScope = asChild ? scope.child() : scope;
     if (asChild) { region.childScopes.push(targetScope); }
