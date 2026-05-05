@@ -66,17 +66,26 @@ for (const run of prRuns) {
     continue;
   }
 
+  // Did this iteration's commit actually touch packages source? GitHub's
+  // `paths:` filter triggers benches on any commit in a PR whose overall
+  // diff includes packages/**, so harness-only commits ride along when
+  // earlier commits in the PR moved packages. Filtering here keeps those
+  // commits out of bisect/credit candidate suggestions downstream.
+  const touchesPackages = commitTouchesPackages(repo, run.headSha);
+
   commits.push({
     sha: run.headSha,
     msg: run.displayTitle,
     parent_sha: '',
     timestamp: run.createdAt,
     pr: null,
+    touches_packages: touchesPackages,
     metrics,
   });
   console.log(
     `  ${run.headSha.slice(0, 7)} — ${Object.keys(metrics).length} metrics`
-      + (baselineSha ? ` @ baseline ${baselineSha.slice(0, 7)}` : ''),
+      + (baselineSha ? ` @ baseline ${baselineSha.slice(0, 7)}` : '')
+      + (touchesPackages ? '' : ' (harness-only)'),
   );
 }
 
@@ -89,6 +98,24 @@ console.log(`Wrote ${commits.length} entries to ${outPath}`);
 
 function exec(cmd) {
   return execSync(cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+}
+
+/**
+ * Query the GitHub API for the commit's changed-file list and return true
+ * when any path is under `packages/`. Defaults to true on API failure so
+ * an unreachable commit doesn't silently disappear from candidate lists.
+ */
+function commitTouchesPackages(repoSlug, sha) {
+  try {
+    const filesRaw = exec(
+      `gh api repos/${repoSlug}/commits/${sha} --jq '.files[].filename'`,
+    );
+    const files = filesRaw.split('\n').filter(Boolean);
+    return files.some((f) => f.startsWith('packages/'));
+  }
+  catch {
+    return true;
+  }
 }
 
 function parseArgs(argv) {

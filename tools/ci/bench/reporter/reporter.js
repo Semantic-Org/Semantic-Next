@@ -103,6 +103,39 @@ const BISECT_MARKDOWN_MAX = 3;
 // long-running PR.
 const DRIFT_THRESHOLD_PP = 5;
 
+// Cross-iteration peak-attribution sections. Both REOPENED ("regression")
+// and WIN ("win") render the same shape: heading, description, table of
+// metric / current / peak / vs peak / candidates, with drift footnotes when
+// peak and current had different baselines and main moved enough to confound
+// the comparison. Only the framing (status filter, sort direction, copy,
+// delta wording) differs.
+const PEAK_SECTIONS = {
+  regression: {
+    status: 'REOPENED',
+    headingPrefix: '📜 Regressions from peak',
+    description:
+      `These metrics were better on a prior iteration than they are now. The peak's percent-delta vs its baseline dominates current's percent-delta vs its baseline — not attributable to per-sample noise. Bisect candidates are the commits between the peak iteration and HEAD; nearest-to-peak is usually the best bet.`,
+    columnHeader: '| metric | current | peak | vs peak | bisect candidates |',
+    // Largest % regression first (descending on signed delta).
+    sortSign: -1,
+    formatDelta: (delta) =>
+      delta > 0
+        ? `regressed +${delta.toFixed(0)}%`
+        : `${delta.toFixed(0)}%`,
+  },
+  win: {
+    status: 'WIN',
+    headingPrefix: '🏆 New peaks',
+    description:
+      `These metrics reached a new best in this iteration — current's percent-delta vs its baseline dominates the prior peak's percent-delta vs its baseline. Credit candidates are the commits between the prior peak and HEAD; nearest-to-current is usually the cause.`,
+    columnHeader: '| metric | current | prior peak | vs prior peak | credit candidates |',
+    // Most-improved first. delta_from_peak_pct is negative for WIN, so
+    // ascending sort surfaces the best.
+    sortSign: 1,
+    formatDelta: (delta) => `improved ${Math.abs(delta).toFixed(0)}%`,
+  },
+};
+
 /**
  * Expected percent-change CI width for an unresolved CI given the bench's
  * absolute duration. Derived from the standard-error-of-the-difference of
@@ -324,6 +357,10 @@ function renderMarkdown(report) {
     `🔍 ${unsureTotal} unsure`,
     `⚪ ${noChange.length} no change`,
   ];
+  const winCount = report.history_summary?.WIN ?? 0;
+  if (winCount > 0) {
+    resultsParts.push(`🏆 ${winCount} new peak${winCount === 1 ? '' : 's'}`);
+  }
   const reopenedCount = report.history_summary?.REOPENED ?? 0;
   if (reopenedCount > 0) {
     resultsParts.push(`📜 ${reopenedCount} reopened`);
@@ -343,8 +380,11 @@ function renderMarkdown(report) {
     renderFasterSlowerSection(lines, slower, 'slower', report);
   }
 
+  // ─── New peaks (cross-run; auto-expanded when present) ───────────────
+  renderPeakSection(lines, report, 'win');
+
   // ─── Regressions from peak (cross-run; auto-expanded when present) ───
-  renderRegressionsFromPeak(lines, report);
+  renderPeakSection(lines, report, 'regression');
 
   // ─── No Change (always collapsed) ────────────────────────────────────
   if (noChange.length > 0) {
@@ -429,33 +469,31 @@ function renderMarkdown(report) {
 }
 
 /**
- * Append a "Regressions from peak" section when one or more metrics are
- * REOPENED (current pct-delta dominated by a prior iteration's pct-delta).
- * Actionable signal: the metric was once better and this PR — or a commit
- * before it — gave that improvement back.
+ * Append a cross-iteration peak-attribution section. `kind === 'regression'`
+ * surfaces REOPENED metrics (peak dominates current); `kind === 'win'`
+ * surfaces WIN metrics (current dominates peak). Drift footnotes fire when
+ * peak and current had different baselines and main moved enough to confound
+ * the comparison. Symmetric across both kinds because false-blame and
+ * false-credit are the same kind of attribution failure in opposite directions.
  *
- * Surface units are within-session percent-deltas (the pct-delta this run
- * achieved vs its baseline; the pct-delta peak achieved vs ITS baseline).
- * `delta_from_peak_pct` is the difference between those two midpoints in
- * percentage points (pp). Drift footnotes fire when peak and current had
- * different baselines and main moved enough on the metric to plausibly
- * confound the comparison.
+ * Surface units: within-session percent-deltas vs each iteration's baseline.
+ * `delta_from_peak_pct` is the difference between those midpoints, rendered
+ * in the same `%` unit as the table cells.
  */
-function renderRegressionsFromPeak(lines, report) {
-  const reopened = report.metrics.filter((m) => m.history_status === 'REOPENED');
-  if (reopened.length === 0) { return; }
+function renderPeakSection(lines, report, kind) {
+  const config = PEAK_SECTIONS[kind];
+  const rows = report.metrics.filter((m) => m.history_status === config.status);
+  if (rows.length === 0) { return; }
 
-  const sorted = [...reopened].sort(
-    (a, b) => (b.delta_from_peak_pct ?? 0) - (a.delta_from_peak_pct ?? 0),
+  const sorted = [...rows].sort(
+    (a, b) => config.sortSign * ((a.delta_from_peak_pct ?? 0) - (b.delta_from_peak_pct ?? 0)),
   );
 
-  lines.push(`#### 📜 Regressions from peak (${reopened.length})`);
+  lines.push(`#### ${config.headingPrefix} (${rows.length})`);
   lines.push('');
-  lines.push(
-    `These metrics were better on a prior iteration than they are now. The peak's percent-delta vs its baseline dominates current's percent-delta vs its baseline — not attributable to per-sample noise. Bisect candidates are the commits between the peak iteration and HEAD; nearest-to-peak is usually the best bet.`,
-  );
+  lines.push(config.description);
   lines.push('');
-  lines.push('| metric | current | peak | vs peak | bisect candidates |');
+  lines.push(config.columnHeader);
   lines.push('|---|---|---|---|---|');
 
   const flagged = [];
@@ -464,18 +502,10 @@ function renderRegressionsFromPeak(lines, report) {
     const currentStr = formatSignedPct(mid(m.percent_change_ci));
     const peakStr = formatSignedPct(mid(m.peak.percent_delta_ci));
     const peakLink = commitOrPrLink(m.peak, report.repo);
-    const deltaStr = m.delta_from_peak_pct > 0
-      ? `regressed +${m.delta_from_peak_pct.toFixed(0)}pp`
-      : `${m.delta_from_peak_pct.toFixed(0)}pp`;
-    const bisectMd = (m.bisect_candidates ?? [])
-      .slice(0, BISECT_MARKDOWN_MAX)
-      .map((c) => commitOrPrLink(c, report.repo))
-      .join(', ');
-    const bisectCell = m.bisect_candidates && m.bisect_candidates.length > BISECT_MARKDOWN_MAX
-      ? `${bisectMd} +${m.bisect_candidates.length - BISECT_MARKDOWN_MAX} more`
-      : bisectMd || '—';
+    const deltaStr = config.formatDelta(m.delta_from_peak_pct);
+    const candCell = formatCandidateCell(m.bisect_candidates, report.repo);
 
-    // Fires on threshold breach or chain-gap (magnitude unavailable).
+    // Drift fires on threshold breach or chain-gap (magnitude unavailable).
     let driftFlag = '';
     if (m.drift?.detected) {
       const mag = m.drift.magnitude;
@@ -494,9 +524,7 @@ function renderRegressionsFromPeak(lines, report) {
     }
 
     lines.push(
-      `| ${
-        metricLink(m, report)
-      } | ${currentStr}${driftFlag} | ${peakStr} @ ${peakLink} | ${deltaStr} | ${bisectCell} |`,
+      `| ${metricLink(m, report)} | ${currentStr}${driftFlag} | ${peakStr} @ ${peakLink} | ${deltaStr} | ${candCell} |`,
     );
   }
   lines.push('');
@@ -511,6 +539,23 @@ function renderRegressionsFromPeak(lines, report) {
 
 function formatSignedPct(pct) {
   return pct > 0 ? `+${pct.toFixed(0)}%` : `${pct.toFixed(0)}%`;
+}
+
+/**
+ * Render the comma-joined candidate cell for peak-attribution tables, with
+ * an overflow suffix when the list exceeds BISECT_MARKDOWN_MAX. Same shape
+ * for bisect (regression) and credit (win) sides. Only the column heading
+ * differs at the call site.
+ */
+function formatCandidateCell(candidates, repo) {
+  if (!candidates || candidates.length === 0) { return '—'; }
+  const md = candidates
+    .slice(0, BISECT_MARKDOWN_MAX)
+    .map((c) => commitOrPrLink(c, repo))
+    .join(', ');
+  return candidates.length > BISECT_MARKDOWN_MAX
+    ? `${md} +${candidates.length - BISECT_MARKDOWN_MAX} more`
+    : md;
 }
 
 function formatDriftFootnote({ idx, metric, drift, currentBaseline, peakBaseline }) {
@@ -887,7 +932,7 @@ function computeHistoryStatus(metric, peakHist, driftHist) {
  *
  * Returns one of:
  *   { detected: false }                                                   — baselines match (or one/both unknown)
- *   { detected: true, magnitude: N, chain_len: K, missing: M }            — quantified; N in pp, positive = main got slower
+ *   { detected: true, magnitude: N, chain_len: K, missing: M }            — quantified. N in %, positive = main got slower
  *   { detected: true, magnitude: null, chain_len: K, missing: M }         — chain partially or wholly unwalkable
  *
  * Combines multiplicatively: ∏(1 + pct_i) − 1.
