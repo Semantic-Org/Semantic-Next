@@ -187,14 +187,17 @@ const elHelper = container.firstElementChild;
       (state change after mount)
 *******************************/
 
-// Mutating a state signal that per-item helpers close over fires 100
+// Mutating a state signal that per-item helpers close over fires
 // helper invocations + setAttribute calls. Confirms per-item Reactions
 // wired at hydrate are reactive to external state, not just to
-// itemSignal mutations.
-// purpose: Changes shared state after hydration so only the previously active and newly active items update.
+// itemSignal mutations. 10 cycles amplifies the work above the σ-floor —
+// single-shot landed at ~6ms with ±26-29% noise on GHA.
+// purpose: Cycles the shared activeID through 10 different items in a hydrated 1000-item list so two items repaint per cycle.
 performance.mark(startMark('hydrate-helper-100-state-change'));
-elHelper.component.setActive('id-50');
-await flush();
+for (let i = 0; i < 10; i++) {
+  elHelper.component.setActive(`id-${i * 100}`);
+  await flush();
+}
 performance.measure('hydrate-helper-100-state-change', startMark('hydrate-helper-100-state-change'));
 container.innerHTML = '';
 
