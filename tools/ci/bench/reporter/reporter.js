@@ -557,6 +557,8 @@ function renderNewPeaks(lines, report) {
   lines.push('| metric | current | prior peak | vs prior peak | credit candidates |');
   lines.push('|---|---|---|---|---|');
 
+  const flagged = [];
+
   for (const m of sorted) {
     const currentStr = formatSignedPct(mid(m.percent_change_ci));
     const peakStr = formatSignedPct(mid(m.peak.percent_delta_ci));
@@ -564,11 +566,38 @@ function renderNewPeaks(lines, report) {
     const deltaStr = `improved ${m.delta_from_peak_pct.toFixed(0)}%`;
     const candCell = formatCandidateCell(m.bisect_candidates, report.repo);
 
+    // Drift treatment is symmetric with regressions: a WIN where main moved
+    // between baselines may credit the iteration for movement that's
+    // actually main-side, mirroring the false-blame case for REOPENED.
+    let driftFlag = '';
+    if (m.drift?.detected) {
+      const mag = m.drift.magnitude;
+      const fires = mag === null || Math.abs(mag) >= DRIFT_THRESHOLD_PP;
+      if (fires) {
+        const idx = flagged.length + 1;
+        driftFlag = ` ⚠️${idx}`;
+        flagged.push({
+          idx,
+          metric: m.name,
+          drift: m.drift,
+          currentBaseline: m.baseline_sha,
+          peakBaseline: m.peak.baseline_sha,
+        });
+      }
+    }
+
     lines.push(
-      `| ${metricLink(m, report)} | ${currentStr} | ${peakStr} @ ${peakLink} | ${deltaStr} | ${candCell} |`,
+      `| ${metricLink(m, report)} | ${currentStr}${driftFlag} | ${peakStr} @ ${peakLink} | ${deltaStr} | ${candCell} |`,
     );
   }
   lines.push('');
+
+  if (flagged.length > 0) {
+    for (const f of flagged) {
+      lines.push(formatDriftFootnote(f));
+    }
+    lines.push('');
+  }
 }
 
 function formatDriftFootnote({ idx, metric, drift, currentBaseline, peakBaseline }) {
