@@ -5,9 +5,7 @@
   measurement. Some metrics measure a win available when an FGR fix
   closes a coarseness gap; others lock in current correct behavior so a
   future regression on per-expression isolation surfaces as a slower
-  verdict. Calibration log at
-  ai/workspace/artifacts/bench-reactivity-calibration.md captures
-  per-metric eval counts as a debugging artifact.
+  verdict.
 */
 
 import { defineComponent } from '@semantic-ui/component';
@@ -164,27 +162,23 @@ async function mount(tagName) {
 
 /*******************************
       Subtemplate reactiveData
-      Per-key isolation gap on
-      verbose-form reactive data.
 *******************************/
 
-// purpose: Mutates a single field on a verbose `reactiveData` object passed to 100 child subtemplates so only the changed field's expression should re-evaluate.
+// purpose: Mutates one verbose reactiveData field across 100 child subtemplates. Only the changed field re-evaluates.
 const el1 = await mount('bench-reactivedata');
-performance.mark(startMark('subtemplate-reactiveData-100'));
+performance.mark(startMark('subtemplate-reactive-data-100'));
 for (let i = 0; i < 50; i++) {
   el1.template.state.labelVal.set(`v${i}`);
   await flush();
 }
-performance.measure('subtemplate-reactiveData-100', startMark('subtemplate-reactiveData-100'));
+performance.measure('subtemplate-reactive-data-100', startMark('subtemplate-reactive-data-100'));
 destroy();
 
 /*******************************
       Subtemplate shorthand props
-      Per-key isolation gap on
-      shorthand individual props.
 *******************************/
 
-// purpose: Mutates one source signal driving one shorthand prop on 100 child subtemplates so only that prop's expression should re-evaluate.
+// purpose: Mutates one shorthand prop's source across 100 child subtemplates. Only that prop re-evaluates.
 const el2 = await mount('bench-shorthand');
 performance.mark(startMark('subtemplate-shorthand-props-100'));
 for (let i = 0; i < 50; i++) {
@@ -196,12 +190,9 @@ destroy();
 
 /*******************************
       Snippet args
-      Locks in current correct
-      per-expression isolation in
-      snippet bodies.
 *******************************/
 
-// purpose: Mutates one source signal driving one snippet arg across 100 invocations so adjacent expressions in the snippet body that read no signals stay quiet.
+// purpose: Mutates one snippet arg's source across 100 invocations. Adjacent no-signal expressions stay quiet.
 const el3 = await mount('bench-snippet');
 performance.mark(startMark('snippet-args-per-key-100'));
 for (let i = 0; i < 50; i++) {
@@ -213,11 +204,9 @@ destroy();
 
 /*******************************
       Active indicator
-      External-signal-into-each
-      fan-out.
 *******************************/
 
-// purpose: Cycles a selection signal across 200 list items so only the previously highlighted and newly highlighted items update their class.
+// purpose: Cycles selectedId across 200 list items. Only the previously and newly active items update their class.
 const el4 = await mount('bench-active-indicator');
 performance.mark(startMark('active-indicator-200'));
 for (let i = 0; i < 100; i++) {
@@ -229,11 +218,9 @@ destroy();
 
 /*******************************
       Stable-ref item mutate
-      Locks in current per-key
-      isolation in `#each`.
 *******************************/
 
-// purpose: Replaces one item by index in a 500-item list across 100 cycles so only the changed item's expressions re-render.
+// purpose: Replaces one item by index in a 500-item list across 100 cycles. Only that item's expressions re-render.
 const el5 = await mount('bench-stable-ref');
 performance.mark(startMark('stable-ref-mutate-500'));
 for (let i = 0; i < 100; i++) {
@@ -246,12 +233,9 @@ destroy();
 
 /*******************************
       Derived cascade
-      Throughput of 7 derived
-      expressions reading one
-      root signal.
 *******************************/
 
-// purpose: Types 100 characters into a single password signal that drives 7 derived expressions matching the password-strength component pattern.
+// purpose: Types 100 characters into a password signal that drives 7 derived expressions like password-strength.
 const el6 = await mount('bench-derived-cascade');
 performance.mark(startMark('derived-cascade-100'));
 for (let i = 0; i < 100; i++) {
@@ -263,12 +247,9 @@ destroy();
 
 /*******************************
       Subtemplate data blob
-      Negative control on the
-      documented coarse-blob
-      semantic.
 *******************************/
 
-// purpose: Mutates one field inside a `data=expression` blob passed to 100 child subtemplates so every expression in every child re-renders by design.
+// purpose: Mutates one field inside data=expression on 100 children. Every child re-renders by design.
 const el7 = await mount('bench-data-blob');
 performance.mark(startMark('subtemplate-data-blob-100'));
 for (let i = 0; i < 50; i++) {

@@ -90,7 +90,7 @@ const data = {
 // both shapes with the same instance + cache state.
 {
   const evaluator = new ExpressionEvaluator({ data, helpers });
-  // purpose: Evaluates one simple identifier and one dotted path 100000 times each to measure the property-lookup hot path.
+  // purpose: Evaluates one simple identifier and one dotted path 100000 times each. Property-lookup hot path.
   performance.mark(startMark('micro-expr-simple-100k'));
   for (let i = 0; i < 100_000; i++) {
     evaluator.evaluate('count', data);
@@ -104,7 +104,7 @@ const data = {
 // parse-cache lookup + helper dispatch.
 {
   const evaluator = new ExpressionEvaluator({ data, helpers });
-  // purpose: Evaluates one Lisp-style helper call 50000 times to measure parse-cache lookup and helper dispatch.
+  // purpose: Evaluates one Lisp-style helper call 50000 times. Parse-cache lookup and helper dispatch.
   performance.mark(startMark('micro-expr-lisp-50k'));
   for (let i = 0; i < 50_000; i++) {
     evaluator.evaluate("classIf isActive 'active'", data);
@@ -118,7 +118,7 @@ const data = {
 // rebuilds the function per call would be invisible in macro suites.
 {
   const evaluator = new ExpressionEvaluator({ data, helpers });
-  // purpose: Evaluates one arithmetic expression and one ternary 10000 times each to measure the JS-eval hot path.
+  // purpose: Evaluates one arithmetic expression and one ternary 10000 times each. JS-eval hot path.
   performance.mark(startMark('micro-expr-js-10k'));
   for (let i = 0; i < 10_000; i++) {
     evaluator.evaluate('count + 1', data);
@@ -144,7 +144,7 @@ const data = {
   </div>`;
   const buildHTMLStringAST = new TemplateCompiler(buildHTMLStringTemplate).compile();
 
-  // purpose: Builds the HTML string for a realistic card AST 10000 times to measure raw assembly throughput.
+  // purpose: Builds the HTML string for a realistic card AST 10000 times. Raw assembly throughput.
   performance.mark(startMark('micro-build-html-string-10k'));
   for (let i = 0; i < 10_000; i++) {
     buildHTMLString(buildHTMLStringAST);
@@ -216,7 +216,7 @@ const data = {
   // returns the same { entries } reference for the same AST.
   const { entries: domWalkerEntries } = domWalkerRenderers[0].buildHTMLString(domWalkerAST, false);
 
-  // purpose: Runs bindMarkers across a 1000-node card fragment 15 times to isolate the TreeWalker pass and binding dispatch.
+  // purpose: Runs bindMarkers across a 1000-node card fragment 15 times. TreeWalker pass and binding dispatch.
   performance.mark(startMark('micro-dom-walker-1000x15'));
   for (let r = 0; r < REPS; r++) {
     const renderer = domWalkerRenderers[r];

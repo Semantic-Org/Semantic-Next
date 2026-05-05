@@ -113,7 +113,7 @@ const kitchenSinkTemplate = `<article class="card">
 // Fresh TemplateCompiler instance per iter so each compile() hits the
 // full parse path.
 {
-  // purpose: Compiles a TodoMVC-style component template 500 times to measure full compile throughput on a normal-component shape.
+  // purpose: Compiles a TodoMVC-style component template 500 times. Headline metric for normal-component compile throughput.
   performance.mark(startMark('micro-compiler-parse-cold-normal-500'));
   for (let i = 0; i < 500; i++) {
     new TemplateCompiler(normalTemplate).compile();
@@ -129,7 +129,7 @@ const kitchenSinkTemplate = `<article class="card">
 // regressions on uncommon block paths (#async, deep nesting, snippet
 // hoisting, slot) that don't show up in the normal-shape headline.
 {
-  // purpose: Compiles a feature-dense kitchen-sink template 200 times to surface parser regressions on uncommon block paths.
+  // purpose: Compiles a feature-dense kitchen-sink template 200 times. Catches parser regressions on uncommon block paths.
   performance.mark(startMark('micro-compiler-parse-cold-complex-200'));
   for (let i = 0; i < 200; i++) {
     new TemplateCompiler(kitchenSinkTemplate).compile();
@@ -151,7 +151,7 @@ const kitchenSinkTemplate = `<article class="card">
 {
   const astWalkAST = new TemplateCompiler(kitchenSinkTemplate).compile();
 
-  // purpose: Walks a kitchen-sink AST through optimizeAST 5000 times to isolate the merge, hoist, and recurse pass cost.
+  // purpose: Walks a kitchen-sink AST through optimizeAST 5000 times. Merge, hoist, and recurse pass.
   performance.mark(startMark('micro-compiler-ast-walk-5k'));
   for (let i = 0; i < 5_000; i++) {
     TemplateCompiler.optimizeAST(astWalkAST);
@@ -179,7 +179,7 @@ const kitchenSinkTemplate = `<article class="card">
     "template name=fancyCard reactiveData={a: 'one', b: two, c: 'three'}",
   ];
 
-  // purpose: Parses four representative subtemplate-call shapes 5000 times each to measure snippet args extraction throughput.
+  // purpose: Parses four representative subtemplate-call shapes 5000 times each. Snippet args extraction.
   performance.mark(startMark('micro-compiler-snippet-args-5k'));
   for (let i = 0; i < 5_000; i++) {
     snippetArgsCompiler.parseTemplateString(snippetArgsExprs[0]);

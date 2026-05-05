@@ -235,7 +235,7 @@ let sink = null;
 // cost an order of magnitude and lights up immediately.
 {
   const sig = new Signal(42);
-  // purpose: Sets a signal to its current value 10000000 times to measure the no-op fast path when nothing changes.
+  // purpose: Sets a signal to its current value 10000000 times. Exercises the no-op fast path when nothing changes.
   performance.mark(startMark('signal-set-same-10m'));
   for (let i = 0; i < 10_000_000; i++) {
     sig.set(42);
@@ -249,7 +249,7 @@ let sink = null;
 // continuously. 100k cycles to clear the σ-floor at ~340ns/cycle.
 {
   const sig = new Signal(0);
-  // purpose: Creates and tears down a subscriber on one signal across 100000 cycles to measure subscription churn cost.
+  // purpose: Creates and tears down a subscriber on one signal across 100000 cycles. Subscription churn cost.
   performance.mark(startMark('signal-sub-unsub-100k'));
   for (let i = 0; i < 100_000; i++) {
     const r = Reaction.create(() => {
@@ -270,7 +270,7 @@ let sink = null;
 // activity. 5M iterations to comfortably clear σ-floor after V8 inlines
 // the empty path.
 {
-  // purpose: Calls Reaction.flush() 5000000 times with no pending work to measure scheduler dispatch overhead.
+  // purpose: Calls Reaction.flush() 5000000 times with no pending work. Scheduler dispatch overhead.
   performance.mark(startMark('reaction-flush-noop-5m'));
   for (let i = 0; i < 5_000_000; i++) {
     Reaction.flush();
@@ -315,7 +315,7 @@ let sink = null;
   const r = Reaction.create(() => {
     sink = toggle.get() ? sigA.get() : sigB.get();
   });
-  // purpose: Toggles which of two signals a subscriber reads across 30000 cycles to measure dependency-set diffing.
+  // purpose: Toggles which of two signals a subscriber reads across 30000 cycles. Per-run dep-set diffing.
   performance.mark(startMark('reaction-dep-diff-30k'));
   for (let i = 0; i < 30_000; i++) {
     toggle.set(i % 2 === 0);

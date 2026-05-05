@@ -520,11 +520,7 @@ RENDERING_ENGINES.forEach(engine => {
       // bumps the whole subtemplate's dataDep on any field change, so
       // every child expression re-evaluates. Fine-grained per-key deps
       // would require a Proxy similar to each's itemProxy with per-
-      // property Dependency tracking. Marked it.fails — vitest expects
-      // this to fail today and will error if it ever passes (signaling
-      // the gap is closed and the marker can be removed). Calibration
-      // for this gap lives at ai/workspace/artifacts/bench-reactivity-
-      // calibration.md.
+      // property Dependency tracking.
       it.fails('changing one reactiveData field should not re-evaluate subtemplate expressions that read a different field', async () => {
         let labelEvalCount = 0;
         let statusEvalCount = 0;

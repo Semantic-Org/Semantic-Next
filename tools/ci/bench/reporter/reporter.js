@@ -105,8 +105,8 @@ const DRIFT_THRESHOLD_PP = 5;
 
 // Max length of the rendered purpose text (the comment body after
 // `// purpose:`). Longer purposes truncate with a single ellipsis char.
-// Bench files enforce the same cap at authoring time; this is the
-// reporter-side defense in depth.
+// Bench files SHOULD honor the same cap at authoring time, but the
+// reporter is the defense in depth.
 const PURPOSE_MAX_CHARS = 120;
 
 // Cross-iteration peak-attribution sections. Both REOPENED ("regression")
@@ -154,6 +154,7 @@ function expectedNoisePp(meanMs) {
 }
 
 const benchDirs = findBenchDirs(repoRoot);
+const benchIndex = indexBenchFiles(benchDirs, repoRoot);
 const mainHistory = loadHistory(historyPath);
 const prHistory = loadHistory(prHistoryPath);
 const peakHistory = scope === 'pr' ? prHistory : mergeHistories(mainHistory, prHistory);
@@ -218,8 +219,9 @@ function buildReport(metrics) {
     const widthPp = m.percentDelta[1] - m.percentDelta[0];
     const expectedPp = expectedNoisePp(meanMs);
     const ratio = expectedPp > 0 ? widthPp / expectedPp : Infinity;
-    const source = resolveMetricSource(m.name, benchDirs, repoRoot);
-    const purpose = resolveMetricPurpose(m.name, benchDirs, repoRoot);
+    const indexed = benchIndex.get(m.name);
+    const source = indexed?.source ?? null;
+    const purpose = indexed?.purpose ?? null;
     const historyStatus = computeHistoryStatus(m, peakHistory, driftHistory);
     return {
       ...m,
@@ -789,51 +791,25 @@ function findBenchDirs(root) {
 }
 
 /**
- * Find the source location where `metricName` is defined. Looks for the
- * first line containing the metric name as a quoted string in any .js
- * file under the given dirs. Returns { path, line } relative to repoRoot,
- * or null if not found.
- */
-function resolveMetricSource(metricName, dirs, root) {
-  const escaped = metricName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const needle = new RegExp(`['"\`]${escaped}['"\`]`);
-  for (const dir of dirs) {
-    const full = path.join(root, dir);
-    let entries;
-    try {
-      entries = fs.readdirSync(full);
-    }
-    catch {
-      continue;
-    }
-    for (const file of entries) {
-      if (!file.endsWith('.js')) { continue; }
-      const relPath = path.join(dir, file);
-      const content = fs.readFileSync(path.join(root, relPath), 'utf8');
-      const lines = content.split('\n');
-      const idx = lines.findIndex((line) => needle.test(line));
-      if (idx >= 0) { return { path: relPath, line: idx + 1 }; }
-    }
-  }
-  return null;
-}
-
-/**
- * Resolve the one-line purpose comment for a metric. Convention: a
- * `// purpose: <text>` comment on the line immediately above the metric's
- * `performance.mark(startMark('<name>'))` call. Only the directly-preceding
- * line counts. A blank line or unrelated comment between purpose and mark
- * decouples them.
+ * Single-pass index of all bench `.js` files under `dirs`. Walks each
+ * file once and records, for every `performance.mark(startMark('<name>'))`
+ * site, the source location and the optional `// purpose: <text>` comment
+ * on the immediately preceding line.
  *
- * Returns the trimmed comment text (without the `// purpose:` prefix), or
- * null if no purpose is associated with the metric. Truncates at
- * PURPOSE_MAX_CHARS with a single ellipsis (…) to keep glossary rows compact.
+ * The map keys on metric name; values are `{ source: { path, line },
+ * purpose: string | null }`. Empty purpose text (`// purpose:` with no
+ * body) yields `purpose: null` so the glossary skips those rows
+ * consistent with `null` from no-comment cases.
+ *
+ * Purpose text is truncated at PURPOSE_MAX_CHARS with a single ellipsis
+ * (…) to keep glossary rows compact.
+ *
+ * Lets `JSON.parse`/`fs.readFileSync` errors propagate so a corrupt file
+ * fails CI loudly rather than silently dropping a metric.
  */
-function resolveMetricPurpose(metricName, dirs, root) {
-  const escaped = metricName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const markNeedle = new RegExp(
-    `performance\\.mark\\(\\s*startMark\\(\\s*['"\`]${escaped}['"\`]\\s*\\)\\s*\\)`,
-  );
+function indexBenchFiles(dirs, root) {
+  const index = new Map();
+  const markNeedle = /performance\.mark\(\s*startMark\(\s*['"`]([^'"`]+)['"`]\s*\)\s*\)/;
   const purposeNeedle = /^\s*\/\/\s*purpose:\s*(.*?)\s*$/;
   for (const dir of dirs) {
     const full = path.join(root, dir);
@@ -847,19 +823,27 @@ function resolveMetricPurpose(metricName, dirs, root) {
     for (const file of entries) {
       if (!file.endsWith('.js')) { continue; }
       const relPath = path.join(dir, file);
-      const content = fs.readFileSync(path.join(root, relPath), 'utf8');
-      const lines = content.split('\n');
-      const idx = lines.findIndex((line) => markNeedle.test(line));
-      if (idx <= 0) { continue; }
-      const prev = lines[idx - 1];
-      const match = purposeNeedle.exec(prev);
-      if (!match) { continue; }
-      const text = match[1];
-      if (text.length <= PURPOSE_MAX_CHARS) { return text; }
-      return `${text.slice(0, PURPOSE_MAX_CHARS - 1)}…`;
+      const lines = fs.readFileSync(path.join(root, relPath), 'utf8').split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        const m = markNeedle.exec(lines[i]);
+        if (!m) { continue; }
+        const name = m[1];
+        if (index.has(name)) { continue; }
+        const source = { path: relPath, line: i + 1 };
+        let purpose = null;
+        if (i > 0) {
+          const prev = purposeNeedle.exec(lines[i - 1]);
+          if (prev && prev[1].length > 0) {
+            purpose = prev[1].length <= PURPOSE_MAX_CHARS
+              ? prev[1]
+              : `${prev[1].slice(0, PURPOSE_MAX_CHARS - 1)}…`;
+          }
+        }
+        index.set(name, { source, purpose });
+      }
     }
   }
-  return null;
+  return index;
 }
 
 /** Format seconds → `10m42s` / `42s`. */

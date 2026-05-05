@@ -37,8 +37,8 @@ History today has 8 v1 entries spanning 2026-04-18 to 2026-05-02 (`packages/**`-
 | Item | Reason |
 |---|---|
 | Story-driven config rename (`tachometer-ci-rendering-throughput`, etc.) | Cosmetic. `discover.js` globs `tachometer-ci*.json` so renames are zero-code-change, but the reporter already groups metrics by source file path. Defer until the rename has a concrete consumer. |
-| New end-to-end micros: `wake-count-single-key`, `nested-mutation`, `hydrate-1000-card` | Sketched in [`../icebox/bench-suite-expansion.md`](../icebox/bench-suite-expansion.md). Lands when underlying reactivity / hydration work creates a gating need. |
-| Internal hot-path micros (`micro-expression-evaluator`, `micro-signal`, etc.) | Sketched in [`../icebox/bench-suite-expansion.md`](../icebox/bench-suite-expansion.md). Lands when an audit flags a hot-path regression the macro suite missed. |
+| New end-to-end micros: `wake-count-single-key`, `nested-mutation`, `hydrate-1000-card` | Sketched in [`bench-coverage-expansion.md`](bench-coverage-expansion.md). Lands when underlying reactivity / hydration work creates a gating need. |
+| Internal hot-path micros (`micro-expression-evaluator`, `micro-signal`, etc.) | Sketched in [`bench-coverage-expansion.md`](bench-coverage-expansion.md). Lands when an audit flags a hot-path regression the macro suite missed. |
 | `remove-{first,middle,last}-10` triplet collapse | Rejected, not deferred. Position-aware (head/middle/tail take different splice paths in flat-list reconcile). Keep all three. |
 | `branch_start_sha` schema field | No consumer asking. Cheap to add later. |
 | Main-drift dashboard | Separate concern from peak attribution. Build if/when long-running perf branches make it useful. |

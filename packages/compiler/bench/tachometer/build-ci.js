@@ -1,6 +1,6 @@
 /*
   Builds compiler bench files into self-contained bundles for CI
-  comparison. Mirrors packages/renderer/bench/tachometer/build-ci.js.
+  comparison.
 
   Usage: node build-ci.js <outdir>
     outdir: 'current' or 'baseline' — writes to dist/<outdir>/
