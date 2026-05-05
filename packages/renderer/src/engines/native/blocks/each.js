@@ -215,6 +215,7 @@ function disposeRecord(record) {
 // Phase 3: itemSignal updates for records whose item/index changed.
 function reconcile({ records, items, collectionType, node, data, scope, region, renderAST, isSVG }) {
   const oldRecords = records.slice();
+  const oldKeys = oldRecords.map((r) => r.key);
   const newKeys = items.map((item, i) => getItemID(item, i, collectionType));
   const newRecords = new Array(items.length);
 
@@ -234,30 +235,30 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       oldTail--;
       continue;
     }
-    if (oldRecords[oldHead].key === newKeys[newHead]) {
+    if (oldKeys[oldHead] === newKeys[newHead]) {
       newRecords[newHead++] = oldRecords[oldHead++];
     }
-    else if (oldRecords[oldTail].key === newKeys[newTail]) {
+    else if (oldKeys[oldTail] === newKeys[newTail]) {
       newRecords[newTail--] = oldRecords[oldTail--];
     }
-    else if (oldRecords[oldHead].key === newKeys[newTail]) {
+    else if (oldKeys[oldHead] === newKeys[newTail]) {
       newRecords[newTail--] = oldRecords[oldHead++];
     }
-    else if (oldRecords[oldTail].key === newKeys[newHead]) {
+    else if (oldKeys[oldTail] === newKeys[newHead]) {
       newRecords[newHead++] = oldRecords[oldTail--];
     }
     else {
       if (!oldKeyToIdx) {
         oldKeyToIdx = new Map();
-        for (let i = oldHead; i <= oldTail; i++) { oldKeyToIdx.set(oldRecords[i].key, i); }
+        for (let i = oldHead; i <= oldTail; i++) { oldKeyToIdx.set(oldKeys[i], i); }
         newKeySet = new Set();
         for (let i = newHead; i <= newTail; i++) { newKeySet.add(newKeys[i]); }
       }
-      if (!newKeySet.has(oldRecords[oldHead].key)) {
+      if (!newKeySet.has(oldKeys[oldHead])) {
         disposeRecord(oldRecords[oldHead]);
         oldHead++;
       }
-      else if (!newKeySet.has(oldRecords[oldTail].key)) {
+      else if (!newKeySet.has(oldKeys[oldTail])) {
         disposeRecord(oldRecords[oldTail]);
         oldTail--;
       }
