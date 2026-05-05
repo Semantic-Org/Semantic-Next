@@ -84,7 +84,7 @@ Plans with an open PR or live pair work. Updated as ceremony when a PR opens; en
 - [Release 0.18.0](active/release-0-18-0.md) — [PR #122](https://github.com/Semantic-Org/Semantic-Next/pull/122) `docs/shippable` (menu trimming + audit pass pending). Ships the next tagged release; last was 0.17.0 in November.
 - [Signal Performance](active/signal-performance.md) — [PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) freeze-by-default. Perf story unresolved (see plan's Bench Results); release inclusion is the open call.
 - [Bench Peak Attribution](active/bench-peak-attribution.md) — [PR #178](https://github.com/Semantic-Org/Semantic-Next/pull/178) methodology fix for cross-session absolute-ms comparisons. Eliminates phantom "Regressions from peak" on PRs.
-- [Bench Coverage Expansion](active/bench-coverage-expansion.md) — fine-grained reactivity workloads + per-file hot-path micros. Pure client-mount, no SSR. Supersedes the icebox `bench-suite-expansion` plan.
+- [Bench Coverage Expansion](active/bench-coverage-expansion.md) — [PR #181](https://github.com/Semantic-Org/Semantic-Next/pull/181) fine-grained reactivity workloads + per-file hot-path micros + metric purpose system. Pure client-mount, no SSR. Supersedes the icebox `bench-suite-expansion` plan.
 
 ---
 
