@@ -81,6 +81,12 @@ const data = {
       Expression evaluator
 *******************************/
 
+// The expression-evaluator metrics call `evaluator.evaluate(...)` and
+// discard the return value. V8 cannot DCE the call because `evaluate`
+// has observable side effects (cache writes, dependency tracking via
+// the bound Reaction). The discard is safe and intentional — what we're
+// timing is dispatch + cache + parse, not what we'd do with the result.
+
 // micro-expr-simple-100k — property-lookup hot path. Production
 // distribution puts ~79% of expression evaluations here (60% simple
 // identifier, ~21% dotted path). Two evaluations per iteration covers
@@ -162,6 +168,11 @@ const data = {
 // each iter consumes a virgin fragment so bindMarkers' DOM mutations
 // (replace comment markers, strip property/event attrs) don't poison
 // the next pass.
+//
+// This block reaches into renderer internals on purpose (`bindMarkers`,
+// `parseHTML`, `buildHTMLString`). That coupling is the bench. If those
+// methods get renamed or their signatures change, this bench needs to
+// follow — there is no public API that exposes the same isolation.
 {
   let cardRows = '';
   for (let i = 0; i < 100; i++) {
@@ -200,6 +211,10 @@ const data = {
   // own ReactionScope — bindMarkers wires Reactions into scope, and a
   // shared scope would accumulate ~15 generations of stale Reactions
   // across the timed loop, distorting later iterations.
+  //
+  // REPS=15 looks small but lands at ~90ms in chromium smoke
+  // (1000-node tree × 15 walks) — comfortably above the σ-floor.
+  // Don't lower without re-checking; don't raise without reason.
   const REPS = 15;
   const domWalkerFragments = new Array(REPS);
   const domWalkerRenderers = new Array(REPS);
