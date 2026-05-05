@@ -226,7 +226,8 @@ const templateBlock = defineBlock({
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
       const snippetData = buildSnippetProxy(node, data, self.evaluator);
       if (region.ownedNodes.length > 0) {
-        // Snippet Reactions live on the block scope, not a child.
+        // Snippet args reactivity is anchored on the block scope; a child
+        // would dispose with the next region.clear() and break arg reactivity.
         hydrateInto({ innerAST: snippet.content, data: snippetData, asChild: false });
       }
       return;

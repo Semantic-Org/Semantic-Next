@@ -512,9 +512,9 @@ function adoptServerItems({
         serverGroup.startComment.replaceWith(startMarker);
       }
 
-      // Server output may include sibling block markers between item
-      // boundaries — reassemble explicitly so endMarker lands after the
-      // last item node regardless.
+      // Sibling block markers can land between item boundaries —
+      // reassemble via fragment so endMarker follows the last item node,
+      // not whichever node happens to be last.
       const frag = document.createDocumentFragment();
       frag.append(startMarker, ...mutableNodes, endMarker);
       insertAfter.after(frag);

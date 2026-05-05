@@ -6,7 +6,9 @@
 
 import { isPlainObject, isString } from '@semantic-ui/utils';
 
-export const SUI_ITEM_MARKER = 'sui-item:v1:';
+import { MARKER_VERSION } from '../../../build-html-string.js';
+
+export const SUI_ITEM_MARKER = `sui-item:${MARKER_VERSION}:`;
 
 // Stringified — Map / === compare by value identity, and the server's
 // KEY is always serialized as text inside the comment marker.

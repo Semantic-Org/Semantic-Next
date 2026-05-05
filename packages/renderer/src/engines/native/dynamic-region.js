@@ -26,9 +26,9 @@ export class DynamicRegion {
     this.placeEndAnchor();
   }
 
-  // Boundary sentinel after the last owned node. isNodeInTemplate uses
-  // strict "between" compareDocumentPosition so the trailing anchor ensures
-  // the last content node is included in the range.
+  // isNodeInTemplate uses strict "between" compareDocumentPosition, so a
+  // trailing anchor is required for the last content node to fall inside
+  // the range.
   placeEndAnchor() {
     const lastNode = this.ownedNodes[this.ownedNodes.length - 1];
     if (!lastNode) { return; }

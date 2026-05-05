@@ -273,7 +273,7 @@ Without recovery, hook throws propagate so failures are loud — the browser log
 
 | Block | AST type | Notes |
 |---|---|---|
-| `conditional.js` | `if` | Linear branch match. `matchIndex 1000` = main body, ≥0 = branches. Server stamps `serverMeta.branchIndex` on the closing marker; mismatch triggers a re-render with a dev warning (env guards `isClient`/`isServer` exempted). |
+| `conditional.js` | `if` | Linear branch match. `matchIndex` = `MAIN_BRANCH_INDEX` (1000) for main body, ≥0 for branches. Server stamps `serverMeta.branchIndex` on the closing marker; mismatch triggers a re-render with a dev warning (env guards `isClient`/`isServer` exempted). |
 | `each.js` | `each` | Keyed reconciliation with per-item `Signal` + Proxy + per-item start/end text-node markers. `WeakSet itemContextProxies` replaces the old `__isItemProxy` flag; `template.js` checks via `isItemContext()` import. Snapshot-based dirty detection avoids full deep-equality on the steady-state path. |
 | `async.js` | `async` | Three states (loading / success / error). Generation counter discards stale promise resolutions. Recovery wraps sync throws and dispatches into `errorContent` via the `error` hook. |
 | `rerender.js` | `rerender` | Both `{#rerender expr}` and `{#guard key}` compile to the same node type. Guard wraps tracking in `Reaction.guard` (deep-equality gate); rerender uses plain `lookupExpression`. |
@@ -310,7 +310,7 @@ Collects all DOM nodes between the opening `sui-block:v1:N` and matching `/sui-b
 
 ### Why `data-sui-bind` matters
 
-Profiling identified a ~648 ms `template.innerHTML = htmlString` reparse per 100-card page in the legacy hydration path. The fast path skips that entirely — entries already carry `attributeBinding: { parts, classification }` from `buildHTMLString`. The reference DOM is now a lazy getter on the cache entry, only built when the legacy path runs (rolling-upgrade tolerance).
+Profiling identified a ~648 ms `template.innerHTML = htmlString` reparse per 100-card page in the legacy hydration path. The fast path skips that entirely — entries already carry `attributeParts` (the parsed alternating static/marker segments) from `buildHTMLString`, and the classification is on the entry itself.
 
 ---
 

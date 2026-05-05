@@ -88,12 +88,10 @@ const startMark = (name) => `${name}-start`;
        + the hydrate microtask)
 *******************************/
 
-// Measured: parsing the DSD via setHTMLUnsafe (which actually attaches
-// the shadow root, unlike innerHTML), connectedCallback, the hydrate
-// microtask scheduled inside it, and the post-hydrate rAF that strips
-// data-sui-bind markers. The `each` block's hydrate hook stays O(1) on
-// main — it just registers a dep on the items signal. Per-item DOM is
-// already correct from SSR; no mutation triggered.
+// Measured: DSD parse via setHTMLUnsafe (innerHTML doesn't attach the
+// shadow root), connectedCallback, the hydrate microtask, and the
+// post-hydrate rAF that strips data-sui-bind. Per-item Reactions wire
+// here; subsequent updates exercise the already-wired graph.
 const itemsForMount = makeItems(1000);
 const dsdHTMLForMount = ssrList(itemsForMount);
 performance.mark(startMark('hydrate-each-100-mount'));
@@ -169,11 +167,9 @@ function ssrHelperList(items) {
     + `</bench-hydrate-helper>`;
 }
 
-// Same mount window shape as above, but with a per-item attribute that
-// calls a helper closing over external `state.activeID`. Surfaces the
-// cost difference between strategies that keep hydrate O(1) and
-// strategies that wire per-item Reactions on hydrate to register
-// external-signal deps eagerly.
+// Same mount-window shape as above, but with a per-item attribute that
+// calls a helper closing over external `state.activeID`. Sensitive to
+// regressions in per-item Reaction wiring at hydrate time.
 const helperItems = makeItems(1000);
 const dsdHTMLForHelper = ssrHelperList(helperItems);
 performance.mark(startMark('hydrate-helper-100-mount'));
@@ -188,10 +184,10 @@ const elHelper = container.firstElementChild;
       (state change after mount)
 *******************************/
 
-// Measured: cost of mutating a state signal that per-item helpers read.
-// On a hydrate path that wires per-item Reactions, this fires 100
-// helper invocations + setAttribute calls. On a hydrate path that
-// defers wiring, this is silent — fast number, broken UX.
+// Mutating a state signal that per-item helpers close over fires 100
+// helper invocations + setAttribute calls. Confirms per-item Reactions
+// wired at hydrate are reactive to external state, not just to
+// itemSignal mutations.
 performance.mark(startMark('hydrate-helper-100-state-change'));
 elHelper.component.setActive('id-50');
 await flush();

@@ -356,7 +356,7 @@ hydrate(prototypeTemplate) {
 
 Two passes over the server-rendered DOM:
 
-**Pass 1: Attribute bindings** — The server stamps `data-sui-bind="attr=N,..."` on every element with dynamic bindings (Plan 04 fast path). The client walks `[data-sui-bind]` elements at top level and wires Reactions directly via `entries[id].attributeBinding`. Block-owned elements (inside `{#if}`/`{#each}`/etc., tracked via `blockDepth` from comment markers) are skipped — block handlers recurse into their own contents via `hydrateInnerContent`. A legacy fallback (parallel ref-DOM walker) exists for older SSR output without `data-sui-bind`.
+**Pass 1: Attribute bindings** — The server stamps `data-sui-bind="attr=N,..."` on every element with dynamic bindings (Plan 04 fast path). The client walks `[data-sui-bind]` elements at top level and wires Reactions directly via `entries[id].attributeParts`. Block-owned elements (inside `{#if}`/`{#each}`/etc., tracked via `blockDepth` from comment markers) are skipped — block handlers recurse into their own contents via `hydrateInnerContent`.
 
 **Pass 2: Comment markers** — A TreeWalker finds `<!--sui:v1:N-->` (text expressions) and `<!--sui-block:v1:N-->` (block directives) at top level. `blockDepth` tracking skips inner markers; block handlers process their own children.
 
