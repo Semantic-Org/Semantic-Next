@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/nicolo-ribaudo.github.io/HEAD/nicolo-ribaudo.github.io/src/assets/tachometer.schema.json",
+  "root": "../../../..",
+  "sampleSize": 50,
+  "timeout": 3,
+  "autoSampleConditions": ["2%"],
+  "benchmarks": [
+    {
+      "name": "this-change",
+      "url": "ci-current-template-reactivity.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "subtemplate-reactive-data-100" },
+        { "mode": "performance", "entryName": "subtemplate-shorthand-props-100" },
+        { "mode": "performance", "entryName": "snippet-args-per-key-100" },
+        { "mode": "performance", "entryName": "active-indicator-200" },
+        { "mode": "performance", "entryName": "stable-ref-mutate-500" },
+        { "mode": "performance", "entryName": "subtemplate-data-blob-100" },
+        { "mode": "performance", "entryName": "snippet-in-subtemplate-100" },
+        { "mode": "performance", "entryName": "active-indicator-nested-200" }
+      ]
+    },
+    {
+      "name": "tip-of-tree",
+      "url": "ci-baseline-template-reactivity.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "subtemplate-reactive-data-100" },
+        { "mode": "performance", "entryName": "subtemplate-shorthand-props-100" },
+        { "mode": "performance", "entryName": "snippet-args-per-key-100" },
+        { "mode": "performance", "entryName": "active-indicator-200" },
+        { "mode": "performance", "entryName": "stable-ref-mutate-500" },
+        { "mode": "performance", "entryName": "subtemplate-data-blob-100" },
+        { "mode": "performance", "entryName": "snippet-in-subtemplate-100" },
+        { "mode": "performance", "entryName": "active-indicator-nested-200" }
+      ]
+    }
+  ]
+}

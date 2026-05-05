@@ -17,7 +17,12 @@
         { "mode": "performance", "entryName": "signal-reactive-list-filter-1000x300" },
         { "mode": "performance", "entryName": "signal-reactive-push-2000x20" },
         { "mode": "performance", "entryName": "signal-reactive-set-index-300" },
-        { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-200" }
+        { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-200" },
+        { "mode": "performance", "entryName": "signal-set-same-10m" },
+        { "mode": "performance", "entryName": "signal-sub-unsub-100k" },
+        { "mode": "performance", "entryName": "reaction-flush-noop-5m" },
+        { "mode": "performance", "entryName": "reaction-coalesce-200x100" },
+        { "mode": "performance", "entryName": "reaction-dep-diff-30k" }
       ]
     },
     {
@@ -32,7 +37,12 @@
         { "mode": "performance", "entryName": "signal-reactive-list-filter-1000x300" },
         { "mode": "performance", "entryName": "signal-reactive-push-2000x20" },
         { "mode": "performance", "entryName": "signal-reactive-set-index-300" },
-        { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-200" }
+        { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-200" },
+        { "mode": "performance", "entryName": "signal-set-same-10m" },
+        { "mode": "performance", "entryName": "signal-sub-unsub-100k" },
+        { "mode": "performance", "entryName": "reaction-flush-noop-5m" },
+        { "mode": "performance", "entryName": "reaction-coalesce-200x100" },
+        { "mode": "performance", "entryName": "reaction-dep-diff-30k" }
       ]
     }
   ]

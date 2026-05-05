@@ -1,7 +1,6 @@
 /*
-  Builds bench files into self-contained bundles for CI comparison.
-  Used by the benchmarks workflow to create current/baseline bundles
-  from different git refs.
+  Builds compiler bench files into self-contained bundles for CI
+  comparison.
 
   Usage: node build-ci.js <outdir>
     outdir: 'current' or 'baseline' — writes to dist/<outdir>/
@@ -14,9 +13,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const outdir = process.argv[2] || 'current';
 const outBase = join(__dirname, 'dist', outdir);
 
-const benchFiles = ['bench-krausest.js', 'bench-todo.js', 'bench-hydrate.js', 'bench-template-reactivity.js'];
+const benchFiles = ['bench-compiler-micros.js'];
 
-await Promise.all(benchFiles.map(file =>
+await Promise.all(benchFiles.map((file) =>
   esbuild.build({
     entryPoints: [join(__dirname, file)],
     bundle: true,

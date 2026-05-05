@@ -94,6 +94,7 @@ const startMark = (name) => `${name}-start`;
 // here; subsequent updates exercise the already-wired graph.
 const itemsForMount = makeItems(1000);
 const dsdHTMLForMount = ssrList(itemsForMount);
+// purpose: Hydrates a server-rendered 1000-item list and waits for it to become interactive without re-rendering.
 performance.mark(startMark('hydrate-each-100-mount'));
 container.setHTMLUnsafe(dsdHTMLForMount);
 await drainMicrotasks();
@@ -108,6 +109,7 @@ const elForMutate = container.firstElementChild;
 
 // Fresh array reference, same keys as SSR markers — exercises the items
 // dependency wake + per-Signal equality gate without DOM work.
+// purpose: Reassigns the items of a hydrated 1000-item list to a fresh array with the same keys and data.
 performance.mark(startMark('hydrate-each-100'));
 elForMutate.component.setItems(itemsForMount.slice());
 await flush();
@@ -172,6 +174,7 @@ function ssrHelperList(items) {
 // regressions in per-item Reaction wiring at hydrate time.
 const helperItems = makeItems(1000);
 const dsdHTMLForHelper = ssrHelperList(helperItems);
+// purpose: Hydrates a 1000-item list where each item calls a helper that reads state shared across the list.
 performance.mark(startMark('hydrate-helper-100-mount'));
 container.setHTMLUnsafe(dsdHTMLForHelper);
 await drainMicrotasks();
@@ -184,13 +187,16 @@ const elHelper = container.firstElementChild;
       (state change after mount)
 *******************************/
 
-// Mutating a state signal that per-item helpers close over fires 100
+// Mutating a state signal that per-item helpers close over fires
 // helper invocations + setAttribute calls. Confirms per-item Reactions
 // wired at hydrate are reactive to external state, not just to
-// itemSignal mutations.
+// itemSignal mutations. 10 cycles amplifies the work above the σ-floor.
+// purpose: Cycles the shared activeID through 10 different items in a hydrated 1000-item list so two items repaint per cycle.
 performance.mark(startMark('hydrate-helper-100-state-change'));
-elHelper.component.setActive('id-50');
-await flush();
+for (let i = 0; i < 10; i++) {
+  elHelper.component.setActive(`id-${i * 100}`);
+  await flush();
+}
 performance.measure('hydrate-helper-100-state-change', startMark('hydrate-helper-100-state-change'));
 container.innerHTML = '';
 

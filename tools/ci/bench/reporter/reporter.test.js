@@ -31,6 +31,7 @@ function runReporter({
   prHistory = '',
   scope = '',
   resultsDir = null,
+  repoRoot = null,
 }) {
   const tmp = fs.mkdtempSync(path.join('/tmp', 'bench-report-test-'));
   const argv = [
@@ -59,12 +60,30 @@ function runReporter({
   if (history) { argv.push('--history', history); }
   if (prHistory) { argv.push('--pr-history', prHistory); }
   if (scope) { argv.push('--scope', scope); }
-  // Run from repo root so resolveMetricSource can find packages/.../bench/tachometer
+  // Tests that need to control bench-source discovery (purpose comments,
+  // metric-source link paths) pass --repo-root pointing at a synthetic tree.
+  if (repoRoot) { argv.push('--repo-root', repoRoot); }
+  // Run from repo root so the bench-file index can find packages/.../bench/tachometer
   const cwd = path.resolve(__dirname, '..', '..', '..', '..');
   execFileSync('node', argv, { stdio: ['ignore', 'pipe', 'inherit'], cwd });
   const report = JSON.parse(fs.readFileSync(path.join(tmp, 'bench-report.json'), 'utf8'));
   const markdown = fs.readFileSync(path.join(tmp, 'comment.md'), 'utf8');
   return { report, markdown };
+}
+
+/**
+ * Build a synthetic repoRoot containing `packages/<pkg>/bench/tachometer/<file>`
+ * with the given JS contents. Exercises bench-source discovery against
+ * deterministic fixtures rather than the real tree. Returns the temp root.
+ */
+function writeSyntheticRepoRoot(files) {
+  const root = fs.mkdtempSync('/tmp/bench-purpose-root-');
+  for (const { pkg = 'component', file = 'bench-test.js', contents } of files) {
+    const dir = path.join(root, 'packages', pkg, 'bench', 'tachometer');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, file), contents);
+  }
+  return root;
 }
 
 function writeFixture(content) {
@@ -991,3 +1010,216 @@ function makeBenchEntry(metricName, source, meanLow, meanHigh, diffs) {
     differences: diffs,
   };
 }
+
+// ─── purpose extraction + glossary rendering ───────────────────────────────
+
+const PURPOSE_TEXT = 'tests whether items in a list update independently when one external selection signal changes.';
+
+test('purpose: resolved from comment immediately above the metric mark', () => {
+  const root = writeSyntheticRepoRoot([{
+    contents: [
+      `const startMark = (name) => \`\${name}-start\`;`,
+      `// purpose: ${PURPOSE_TEXT}`,
+      `performance.mark(startMark('alpha'));`,
+    ].join('\n'),
+  }]);
+  const dir = writeHandcraftedResults('alpha', [10, 11]);
+  const { report } = runReporter({
+    resultsDir: dir,
+    sha: 'abc',
+    msg: 'x',
+    baseSha: 'def',
+    repoRoot: root,
+  });
+  const m = report.metrics.find((x) => x.name === 'alpha');
+  assert.equal(m.purpose, PURPOSE_TEXT);
+});
+
+test('purpose: null when no comment precedes the metric mark', () => {
+  const root = writeSyntheticRepoRoot([{
+    contents: [
+      `const startMark = (name) => \`\${name}-start\`;`,
+      `performance.mark(startMark('alpha'));`,
+    ].join('\n'),
+  }]);
+  const dir = writeHandcraftedResults('alpha', [10, 11]);
+  const { report } = runReporter({
+    resultsDir: dir,
+    sha: 'abc',
+    msg: 'x',
+    baseSha: 'def',
+    repoRoot: root,
+  });
+  const m = report.metrics.find((x) => x.name === 'alpha');
+  assert.equal(m.purpose, null, 'purpose field present and null when no comment');
+});
+
+test('purpose: null when comment is more than one line above the mark', () => {
+  // Blank line between purpose comment and mark decouples them. Only the
+  // immediately-preceding line counts so a stray comment elsewhere can't
+  // accidentally claim a metric.
+  const root = writeSyntheticRepoRoot([{
+    contents: [
+      `const startMark = (name) => \`\${name}-start\`;`,
+      `// purpose: ${PURPOSE_TEXT}`,
+      ``,
+      `performance.mark(startMark('alpha'));`,
+    ].join('\n'),
+  }]);
+  const dir = writeHandcraftedResults('alpha', [10, 11]);
+  const { report } = runReporter({
+    resultsDir: dir,
+    sha: 'abc',
+    msg: 'x',
+    baseSha: 'def',
+    repoRoot: root,
+  });
+  const m = report.metrics.find((x) => x.name === 'alpha');
+  assert.equal(m.purpose, null);
+});
+
+test('purpose: truncates at 120 chars with single-char ellipsis', () => {
+  // 130-char description is over the cap; reporter truncates to 119 chars
+  // + `…` → 120-char rendered length total.
+  const longText = 'x'.repeat(130);
+  const root = writeSyntheticRepoRoot([{
+    contents: [
+      `const startMark = (name) => \`\${name}-start\`;`,
+      `// purpose: ${longText}`,
+      `performance.mark(startMark('alpha'));`,
+    ].join('\n'),
+  }]);
+  const dir = writeHandcraftedResults('alpha', [10, 11]);
+  const { report } = runReporter({
+    resultsDir: dir,
+    sha: 'abc',
+    msg: 'x',
+    baseSha: 'def',
+    repoRoot: root,
+  });
+  const m = report.metrics.find((x) => x.name === 'alpha');
+  assert.equal(m.purpose.length, 120, 'truncated length includes the ellipsis char');
+  assert.ok(m.purpose.endsWith('…'), 'single ellipsis char, not three dots');
+  assert.equal(m.purpose, `${'x'.repeat(119)}…`);
+});
+
+test('glossary: section renders when at least one metric has a purpose', () => {
+  const root = writeSyntheticRepoRoot([{
+    contents: [
+      `const startMark = (name) => \`\${name}-start\`;`,
+      `// purpose: ${PURPOSE_TEXT}`,
+      `performance.mark(startMark('alpha'));`,
+    ].join('\n'),
+  }]);
+  const dir = writeHandcraftedResults('alpha', [10, 11]);
+  const { markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'abc',
+    msg: 'x',
+    baseSha: 'def',
+    repoRoot: root,
+  });
+  assert.ok(markdown.includes('<summary>📖 Bench glossary (1 metric)</summary>'), 'glossary summary present');
+  assert.ok(markdown.includes('| metric | what it tests |'), 'glossary table header');
+  assert.ok(markdown.includes(`| \`alpha\` | ${PURPOSE_TEXT} |`), 'metric row with purpose text');
+  // Glossary lives just above the footer
+  const glossaryIdx = markdown.indexOf('📖 Bench glossary');
+  const footerIdx = markdown.indexOf('<sub>Sample size: 50');
+  assert.ok(glossaryIdx >= 0 && footerIdx >= 0 && glossaryIdx < footerIdx, 'glossary above footer');
+});
+
+test('glossary: omitted entirely when no metric has a purpose', () => {
+  const root = writeSyntheticRepoRoot([{
+    contents: [
+      `const startMark = (name) => \`\${name}-start\`;`,
+      `performance.mark(startMark('alpha'));`,
+    ].join('\n'),
+  }]);
+  const dir = writeHandcraftedResults('alpha', [10, 11]);
+  const { markdown, report } = runReporter({
+    resultsDir: dir,
+    sha: 'abc',
+    msg: 'x',
+    baseSha: 'def',
+    repoRoot: root,
+  });
+  assert.ok(!markdown.includes('Bench glossary'), 'no glossary section');
+  // JSON adjunct still carries the field per metric — null when absent.
+  const m = report.metrics.find((x) => x.name === 'alpha');
+  assert.equal(m.purpose, null);
+});
+
+test('glossary: rows sort alphabetically and skip metrics without a purpose', () => {
+  // Three metrics in source order zebra/alpha/beta. Beta has no purpose;
+  // alpha and zebra do. Glossary should list alpha then zebra, no beta.
+  const root = writeSyntheticRepoRoot([{
+    contents: [
+      `const startMark = (name) => \`\${name}-start\`;`,
+      `// purpose: zebra description`,
+      `performance.mark(startMark('zebra'));`,
+      `performance.mark(startMark('beta'));`,
+      `// purpose: alpha description`,
+      `performance.mark(startMark('alpha'));`,
+    ].join('\n'),
+  }]);
+  // Build a results dir with all three metrics so the reporter has rows
+  // for each, then assert glossary content.
+  const baseDir = fs.mkdtempSync('/tmp/bench-purpose-results-');
+  const data = {
+    benchmarks: [],
+  };
+  const names = ['zebra', 'beta', 'alpha'];
+  for (const name of names) {
+    const diff = { absolute: { low: -1, high: 1 }, percentChange: { low: -5, high: 5 } };
+    data.benchmarks.push({
+      name: `this-change [${name}]`,
+      measurement: { name, mode: 'performance', entryName: name },
+      mean: { low: 10, high: 11 },
+      differences: [],
+    });
+    data.benchmarks.push({
+      name: `tip-of-tree [${name}]`,
+      measurement: { name, mode: 'performance', entryName: name },
+      mean: { low: 10, high: 11 },
+      differences: [],
+    });
+    // Wire differences cross-references by index.
+    const thisIdx = data.benchmarks.length - 2;
+    const tipIdx = data.benchmarks.length - 1;
+    data.benchmarks[thisIdx].differences = Array(data.benchmarks.length).fill(null);
+    data.benchmarks[thisIdx].differences[tipIdx] = diff;
+    data.benchmarks[tipIdx].differences = Array(data.benchmarks.length).fill(null);
+    data.benchmarks[tipIdx].differences[thisIdx] = diff;
+  }
+  // Pad earlier differences arrays so all entries reference indices that
+  // exist in the final benchmarks array.
+  for (const b of data.benchmarks) {
+    while (b.differences.length < data.benchmarks.length) { b.differences.push(null); }
+  }
+  fs.writeFileSync(path.join(baseDir, 'multi.json'), JSON.stringify(data));
+
+  const { markdown } = runReporter({
+    resultsDir: baseDir,
+    sha: 'abc',
+    msg: 'x',
+    baseSha: 'def',
+    repoRoot: root,
+  });
+
+  // Two annotated metrics → "(2 metrics)" in summary.
+  assert.ok(markdown.includes('<summary>📖 Bench glossary (2 metrics)</summary>'));
+
+  // Alphabetic order: alpha row precedes zebra row.
+  const alphaIdx = markdown.indexOf('| `alpha` | alpha description |');
+  const zebraIdx = markdown.indexOf('| `zebra` | zebra description |');
+  assert.ok(alphaIdx > 0, 'alpha row present');
+  assert.ok(zebraIdx > 0, 'zebra row present');
+  assert.ok(alphaIdx < zebraIdx, 'alpha sorts before zebra');
+
+  // beta is absent from the glossary slice — no purpose comment for it.
+  // (beta still appears in the headline "Too Fast" table since it has data.)
+  const glossaryStart = markdown.indexOf('📖 Bench glossary');
+  const glossaryEnd = markdown.indexOf('</details>', glossaryStart);
+  const glossarySlice = markdown.slice(glossaryStart, glossaryEnd);
+  assert.ok(!glossarySlice.includes('beta'), 'beta excluded from glossary');
+});

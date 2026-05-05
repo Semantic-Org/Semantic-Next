@@ -1891,5 +1891,120 @@ RENDERING_ENGINES.forEach(engine => {
       expect(shadowText(el)).toContain('from-snippet');
       expect(shadowText(el)).not.toContain('<b>v1</b>');
     });
+
+    /*******************************
+   28. Snippet/subtemplate arg-source propagation
+
+   Mutating the source signal a snippet or subtemplate arg reads from
+   (`{>card label=getLabel}` with `getLabel` reading a signal) must
+   update the inner expression's rendered text.
+*******************************/
+
+    describe('28. Snippet/subtemplate arg-source propagation', () => {
+      it('snippet body updates when arg source signal changes', async () => {
+        const tag = uniqueTag(engine, 'snippet-arg-prop');
+        let getLabelCalls = 0;
+
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#snippet card}<span class="content">{label}</span>{/snippet}{>card label=getLabel}',
+          defaultState: { labelVal: 'first' },
+          createComponent: ({ state }) => ({
+            getLabel: () => {
+              getLabelCalls++;
+              return state.labelVal.get();
+            },
+          }),
+        });
+
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+        expect(shadowText(el)).toContain('first');
+        const initialCalls = getLabelCalls;
+
+        el.template.state.labelVal.set('second');
+        await flush(el);
+
+        expect(shadowText(el)).toContain('second');
+        expect(shadowText(el)).not.toContain('first');
+        expect(getLabelCalls).toBeGreaterThan(initialCalls);
+      });
+
+      it('reactiveData subtemplate updates when source signal changes', async () => {
+        const tag = uniqueTag(engine, 'reactive-arg-prop');
+        let getLabelCalls = 0;
+
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<span class="content">{label}</span>',
+        });
+
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: "{> template name='child' reactiveData={label: getLabel}}",
+          subTemplates: { child },
+          defaultState: { labelVal: 'first' },
+          createComponent: ({ state }) => ({
+            getLabel: () => {
+              getLabelCalls++;
+              return state.labelVal.get();
+            },
+          }),
+        });
+
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+        expect(shadowText(el)).toContain('first');
+        const initialCalls = getLabelCalls;
+
+        el.template.state.labelVal.set('second');
+        await flush(el);
+
+        expect(shadowText(el)).toContain('second');
+        expect(shadowText(el)).not.toContain('first');
+        expect(getLabelCalls).toBeGreaterThan(initialCalls);
+      });
+
+      it('shorthand-props subtemplate updates when source signal changes', async () => {
+        const tag = uniqueTag(engine, 'shorthand-arg-prop');
+        let getLabelCalls = 0;
+
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<span class="content">{label}</span>',
+        });
+
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{>child label=getLabel}',
+          subTemplates: { child },
+          defaultState: { labelVal: 'first' },
+          createComponent: ({ state }) => ({
+            getLabel: () => {
+              getLabelCalls++;
+              return state.labelVal.get();
+            },
+          }),
+        });
+
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+        expect(shadowText(el)).toContain('first');
+        const initialCalls = getLabelCalls;
+
+        el.template.state.labelVal.set('second');
+        await flush(el);
+
+        expect(shadowText(el)).toContain('second');
+        expect(shadowText(el)).not.toContain('first');
+        expect(getLabelCalls).toBeGreaterThan(initialCalls);
+      });
+    });
   }); // describe(engine)
 }); // RENDERING_ENGINES.forEach

@@ -103,6 +103,12 @@ const BISECT_MARKDOWN_MAX = 3;
 // long-running PR.
 const DRIFT_THRESHOLD_PP = 5;
 
+// Max length of the rendered purpose text (the comment body after
+// `// purpose:`). Longer purposes truncate with a single ellipsis char.
+// Bench files SHOULD honor the same cap at authoring time, but the
+// reporter is the defense in depth.
+const PURPOSE_MAX_CHARS = 120;
+
 // Cross-iteration peak-attribution sections. Both REOPENED ("regression")
 // and WIN ("win") render the same shape: heading, description, table of
 // metric / current / peak / vs peak / candidates, with drift footnotes when
@@ -148,6 +154,7 @@ function expectedNoisePp(meanMs) {
 }
 
 const benchDirs = findBenchDirs(repoRoot);
+const benchIndex = indexBenchFiles(benchDirs, repoRoot);
 const mainHistory = loadHistory(historyPath);
 const prHistory = loadHistory(prHistoryPath);
 const peakHistory = scope === 'pr' ? prHistory : mergeHistories(mainHistory, prHistory);
@@ -212,7 +219,9 @@ function buildReport(metrics) {
     const widthPp = m.percentDelta[1] - m.percentDelta[0];
     const expectedPp = expectedNoisePp(meanMs);
     const ratio = expectedPp > 0 ? widthPp / expectedPp : Infinity;
-    const source = resolveMetricSource(m.name, benchDirs, repoRoot);
+    const indexed = benchIndex.get(m.name);
+    const source = indexed?.source ?? null;
+    const purpose = indexed?.purpose ?? null;
     const historyStatus = computeHistoryStatus(m, peakHistory, driftHistory);
     return {
       ...m,
@@ -221,6 +230,7 @@ function buildReport(metrics) {
       expectedPp,
       ratio,
       source,
+      purpose,
       historyStatus,
       status: classify(m.percentDelta, ratio),
     };
@@ -280,6 +290,7 @@ function toJsonMetric(m) {
     expected_noise_pp: Number(m.expectedPp.toFixed(2)),
     observed_noise_ratio: Number(m.ratio.toFixed(2)),
     source: m.source,
+    purpose: m.purpose ?? null,
     baseline_sha: m.baselineSha ?? null,
   };
   if (m.historyStatus) {
@@ -453,6 +464,9 @@ function renderMarkdown(report) {
     lines.push('');
   }
 
+  // ─── Glossary (only when at least one metric has a purpose) ──────────
+  renderGlossarySection(lines, report);
+
   // ─── Footer ──────────────────────────────────────────────────────────
   lines.push('---');
   const footerParts = [
@@ -466,6 +480,30 @@ function renderMarkdown(report) {
   lines.push(`<sub>${footerParts.join(' · ')}</sub>`);
 
   return lines.join('\n');
+}
+
+/**
+ * Append a collapsible glossary mapping each annotated metric to its
+ * purpose comment. Only metrics with a non-null `purpose` appear; a run
+ * with zero annotated metrics emits nothing. Sorted alphabetically by
+ * metric name. The metric column links to the same source location as
+ * the headline tables.
+ */
+function renderGlossarySection(lines, report) {
+  const rows = report.metrics.filter((m) => m.purpose);
+  if (rows.length === 0) { return; }
+  const sorted = [...rows].sort((a, b) => a.name.localeCompare(b.name));
+  lines.push('<details>');
+  lines.push(`<summary>📖 Bench glossary (${sorted.length} metric${sorted.length === 1 ? '' : 's'})</summary>`);
+  lines.push('');
+  lines.push('| metric | what it tests |');
+  lines.push('|---|---|');
+  for (const m of sorted) {
+    lines.push(`| ${metricLink(m, report)} | ${m.purpose} |`);
+  }
+  lines.push('');
+  lines.push('</details>');
+  lines.push('');
 }
 
 /**
@@ -753,14 +791,31 @@ function findBenchDirs(root) {
 }
 
 /**
- * Find the source location where `metricName` is defined. Looks for the
- * first line containing the metric name as a quoted string in any .js
- * file under the given dirs. Returns { path, line } relative to repoRoot,
- * or null if not found.
+ * Single-pass index of all bench `.js` files under `dirs`. Walks each
+ * file once and records, for every `performance.mark` site, the source
+ * location and the optional `// purpose: <text>` comment on the
+ * immediately preceding line.
+ *
+ * Matches both the canonical `performance.mark(startMark('<name>'))` form
+ * (used across the workload bench files) and the bare
+ * `performance.mark('<name>')` form (used in older one-off benches like
+ * `signature.js`). First match per metric name wins.
+ *
+ * The map keys on metric name; values are `{ source: { path, line },
+ * purpose: string | null }`. Empty purpose text (`// purpose:` with no
+ * body) yields `purpose: null` so the glossary skips those rows
+ * consistent with `null` from no-comment cases.
+ *
+ * Purpose text is truncated at PURPOSE_MAX_CHARS with a single ellipsis
+ * (…) to keep glossary rows compact.
+ *
+ * Lets `fs.readFileSync` errors propagate so a missing/unreadable bench
+ * file fails CI loudly rather than silently dropping a metric.
  */
-function resolveMetricSource(metricName, dirs, root) {
-  const escaped = metricName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const needle = new RegExp(`['"\`]${escaped}['"\`]`);
+function indexBenchFiles(dirs, root) {
+  const index = new Map();
+  const markNeedle = /performance\.mark\(\s*(?:startMark\(\s*)?['"`]([^'"`]+)['"`]/;
+  const purposeNeedle = /^\s*\/\/\s*purpose:\s*(.*?)\s*$/;
   for (const dir of dirs) {
     const full = path.join(root, dir);
     let entries;
@@ -773,13 +828,27 @@ function resolveMetricSource(metricName, dirs, root) {
     for (const file of entries) {
       if (!file.endsWith('.js')) { continue; }
       const relPath = path.join(dir, file);
-      const content = fs.readFileSync(path.join(root, relPath), 'utf8');
-      const lines = content.split('\n');
-      const idx = lines.findIndex((line) => needle.test(line));
-      if (idx >= 0) { return { path: relPath, line: idx + 1 }; }
+      const lines = fs.readFileSync(path.join(root, relPath), 'utf8').split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        const m = markNeedle.exec(lines[i]);
+        if (!m) { continue; }
+        const name = m[1];
+        if (index.has(name)) { continue; }
+        const source = { path: relPath, line: i + 1 };
+        let purpose = null;
+        if (i > 0) {
+          const prev = purposeNeedle.exec(lines[i - 1]);
+          if (prev && prev[1].length > 0) {
+            purpose = prev[1].length <= PURPOSE_MAX_CHARS
+              ? prev[1]
+              : `${prev[1].slice(0, PURPOSE_MAX_CHARS - 1)}…`;
+          }
+        }
+        index.set(name, { source, purpose });
+      }
     }
   }
-  return null;
+  return index;
 }
 
 /** Format seconds → `10m42s` / `42s`. */

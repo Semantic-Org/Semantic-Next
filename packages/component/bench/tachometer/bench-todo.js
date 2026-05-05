@@ -133,6 +133,9 @@ defineComponent({
         state.editingId.set(null);
         state.todos.setProperty(id, 'title', title);
       },
+      renameTodo(id, title) {
+        state.todos.setProperty(id, 'title', title);
+      },
     };
   },
 });
@@ -188,6 +191,7 @@ async function markEveryNth(el, n) {
 *******************************/
 
 const el1 = await mount();
+// purpose: Renders 500 todo items added at once from a single data load.
 performance.mark(startMark('bulk-add-500'));
 el1.component.addBulk(500);
 await flush();
@@ -195,6 +199,7 @@ performance.measure('bulk-add-500', startMark('bulk-add-500'));
 destroy();
 
 const el2 = await mount();
+// purpose: Renders 200 todo items added at once from a single data load.
 performance.mark(startMark('bulk-add-200'));
 el2.component.addBulk(200);
 await flush();
@@ -207,6 +212,7 @@ destroy();
 *******************************/
 
 const el3 = await mount();
+// purpose: Appends 20 todo items one at a time, like a user typing entries in a row.
 performance.mark(startMark('add-20'));
 for (let i = 0; i < 20; i++) {
   el3.component.addOne(`New todo ${i + 1}`);
@@ -226,6 +232,7 @@ destroy();
 // workloads. Both legs run every iter so regression detection is sound,
 // but this is not a pure "single toggle" measurement.
 const el4 = await setup(100);
+// purpose: Toggles the first item in a 100-item list ten times, alternating completed on and off.
 performance.mark(startMark('toggle-first-10'));
 for (let i = 0; i < 10; i++) {
   el4.component.toggleTodo(getTodos(el4)[0].id);
@@ -235,6 +242,7 @@ performance.measure('toggle-first-10', startMark('toggle-first-10'));
 destroy();
 
 const el5 = await setup(100);
+// purpose: Toggles the last item in a 100-item list ten times, alternating completed on and off.
 performance.mark(startMark('toggle-last-10'));
 for (let i = 0; i < 10; i++) {
   el5.component.toggleTodo(getTodos(el5)[99].id);
@@ -244,6 +252,7 @@ performance.measure('toggle-last-10', startMark('toggle-last-10'));
 destroy();
 
 const el6 = await setup(100);
+// purpose: Toggles a middle item in a 100-item list ten times, alternating completed on and off.
 performance.mark(startMark('toggle-middle-10'));
 for (let i = 0; i < 10; i++) {
   el6.component.toggleTodo(getTodos(el6)[49].id);
@@ -258,6 +267,7 @@ destroy();
 *******************************/
 
 const el7 = await setup(100);
+// purpose: Checks off the first 10 items one by one, like a user working down a list.
 performance.mark(startMark('toggle-10'));
 for (let i = 0; i < 10; i++) {
   el7.component.toggleTodo(getTodos(el7)[i].id);
@@ -274,6 +284,7 @@ destroy();
 // 20 alternating toggle-all invocations on a 100-item list — amplified
 // so the measurement clears the σ≈2ms per-sample noise floor on CI.
 const el8 = await setup(100);
+// purpose: Toggles all 100 items completed and back across 20 cycles via the master checkbox.
 performance.mark(startMark('toggle-all-20'));
 for (let i = 0; i < 20; i++) {
   el8.component.toggleAll();
@@ -289,6 +300,7 @@ destroy();
 // 10× loop per position; re-fetch each iter since the list shrinks.
 // Each position's ~10ms per-delete workload clears the σ≈2ms floor.
 const el9 = await setup(100);
+// purpose: Deletes the first item 10 times from a 100-item list, with remaining items moving up each time.
 performance.mark(startMark('remove-first-10'));
 for (let i = 0; i < 10; i++) {
   el9.component.deleteTodo(getTodos(el9)[0].id);
@@ -298,6 +310,7 @@ performance.measure('remove-first-10', startMark('remove-first-10'));
 destroy();
 
 const el10 = await setup(100);
+// purpose: Deletes the middle item 10 times from a 100-item list, walking halfway through to find each target.
 performance.mark(startMark('remove-middle-10'));
 for (let i = 0; i < 10; i++) {
   const todos = getTodos(el10);
@@ -308,6 +321,7 @@ performance.measure('remove-middle-10', startMark('remove-middle-10'));
 destroy();
 
 const el10b = await setup(100);
+// purpose: Deletes the last item 10 times from a 100-item list, with no other items needing to move.
 performance.mark(startMark('remove-last-10'));
 for (let i = 0; i < 10; i++) {
   const todos = getTodos(el10b);
@@ -322,6 +336,7 @@ destroy();
 *******************************/
 
 const el11 = await setup(100);
+// purpose: Deletes 5 items from the front of a 100-item list, one click at a time.
 performance.mark(startMark('remove-5-front'));
 for (let i = 0; i < 5; i++) {
   el11.component.deleteTodo(getTodos(el11)[0].id);
@@ -334,6 +349,7 @@ destroy();
 // O(N/2) scan has wider per-sample variance, so 5× landed at ~74ms
 // with observed CI straddling ±2%. 10× brings it to ~148ms / ±1%.
 const el11b = await setup(100);
+// purpose: Deletes 10 items from the middle of a 100-item list, one click at a time.
 performance.mark(startMark('remove-10-middle'));
 for (let i = 0; i < 10; i++) {
   const todos = getTodos(el11b);
@@ -344,6 +360,7 @@ performance.measure('remove-10-middle', startMark('remove-10-middle'));
 destroy();
 
 const el11c = await setup(100);
+// purpose: Deletes 5 items from the end of a 100-item list, one click at a time.
 performance.mark(startMark('remove-5-back'));
 for (let i = 0; i < 5; i++) {
   const todos = getTodos(el11c);
@@ -361,6 +378,7 @@ destroy();
 // operation is large enough to clear the σ≈2ms per-sample noise floor.
 const el12 = await setup(500);
 await markEveryNth(el12, 2);
+// purpose: Clears 250 completed items from a 500-item list in one action, like clicking clear completed.
 performance.mark(startMark('clear-completed-250'));
 el12.component.clearCompleted();
 await flush();
@@ -380,6 +398,7 @@ const el13 = await setup(100);
 await markEveryNth(el13, 3);
 
 const filters = ['active', 'completed', 'all'];
+// purpose: Cycles through active, completed, and all filters 20 times on a 100-item list.
 performance.mark(startMark('filter-cycle-20'));
 for (let i = 0; i < 20; i++) {
   el13.component.setFilter(filters[i % 3]);
@@ -395,6 +414,7 @@ destroy();
 // edit-start-10: 10 consecutive edit transitions cycling different ids
 // (editingId must change each iter or the signal equality short-circuits).
 const el14 = await setup(100);
+// purpose: Enters edit mode on 10 different items in a row, like double-clicking each one.
 performance.mark(startMark('edit-start-10'));
 for (let i = 0; i < 10; i++) {
   el14.component.editTodo(getTodos(el14)[40 + i].id);
@@ -408,6 +428,7 @@ destroy();
 // edit-start-10's last iter — otherwise that first transition is an
 // edit→edit hop, which is a different workload than the others.
 const el15 = await setup(100);
+// purpose: Runs 5 full edit-then-save cycles on different items, like editing a row and saving it.
 performance.mark(startMark('edit-cycle-5'));
 for (let i = 0; i < 5; i++) {
   const id = getTodos(el15)[40 + i].id;
@@ -417,6 +438,27 @@ for (let i = 0; i < 5; i++) {
   await flush();
 }
 performance.measure('edit-cycle-5', startMark('edit-cycle-5'));
+destroy();
+
+/*******************************
+      Rename Flow
+      (single-field setProperty)
+*******************************/
+
+// Pure setProperty workload — `saveTodo` co-fires editingId, which
+// muddies the signal. `renameTodo` does only the per-id field write,
+// so the metric isolates the per-key broadcast cost. Distinct from
+// `toggle-*` (which uses replaceItem) and `edit-cycle-5` (which mixes
+// in an editingId flip per cycle).
+const el16 = await setup(100);
+// purpose: Renames 50 different items in a 100-item list via single-field setProperty without editingId co-fires.
+performance.mark(startMark('rename-50'));
+for (let i = 0; i < 50; i++) {
+  const todos = getTodos(el16);
+  el16.component.renameTodo(todos[i % todos.length].id, `Renamed ${i}`);
+  await flush();
+}
+performance.measure('rename-50', startMark('rename-50'));
 destroy();
 
 /*******************************
