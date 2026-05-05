@@ -103,35 +103,6 @@ defineComponent({
   },
 });
 
-defineComponent({
-  tagName: 'bench-derived-cascade',
-  renderingEngine: 'native',
-  template:
-    `{#if hasLength}LEN {/if}{#if hasUpper}UP {/if}{#if hasNumber}NUM {/if}{#if hasSpecial}SPEC {/if}<span>{getStrengthLabel}</span><span class="{classMap getStrengthClasses}"></span><span>{getDisplayPercent}</span>`,
-  defaultState: { password: '' },
-  createComponent: ({ self, state }) => ({
-    hasLength: () => state.password.get().length >= 8,
-    hasUpper: () => /[A-Z]/.test(state.password.get()),
-    hasNumber: () => /[0-9]/.test(state.password.get()),
-    hasSpecial: () => /[^A-Za-z0-9]/.test(state.password.get()),
-    getStrength: () => {
-      const p = state.password.get();
-      let s = 0;
-      if (p.length >= 8) { s++; }
-      if (/[A-Z]/.test(p)) { s++; }
-      if (/[0-9]/.test(p)) { s++; }
-      if (/[^A-Za-z0-9]/.test(p)) { s++; }
-      return s;
-    },
-    getStrengthLabel: () => ['', 'Weak', 'Fair', 'Good', 'Strong'][self.getStrength()],
-    getStrengthClasses: () => {
-      const s = self.getStrength();
-      return { weak: s === 1, fair: s === 2, good: s === 3, strong: s === 4 };
-    },
-    getDisplayPercent: () => `${self.getStrength() * 25}%`,
-  }),
-});
-
 const dataBlobChild = defineComponent({
   renderingEngine: 'native',
   template: '<span>{label}</span><span>{status}</span>',
@@ -229,20 +200,6 @@ for (let i = 0; i < 100; i++) {
   await flush();
 }
 performance.measure('stable-ref-mutate-500', startMark('stable-ref-mutate-500'));
-destroy();
-
-/*******************************
-      Derived cascade
-*******************************/
-
-// purpose: Types 100 characters into a password signal that drives 7 derived expressions like password-strength.
-const el6 = await mount('bench-derived-cascade');
-performance.mark(startMark('derived-cascade-100'));
-for (let i = 0; i < 100; i++) {
-  el6.template.state.password.set('a'.repeat(i + 1));
-  await flush();
-}
-performance.measure('derived-cascade-100', startMark('derived-cascade-100'));
 destroy();
 
 /*******************************

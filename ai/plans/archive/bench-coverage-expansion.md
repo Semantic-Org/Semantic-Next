@@ -4,7 +4,7 @@
 
 Two tracks of bench coverage shipped in one PR.
 
-**Track A — Fine-grained reactivity workloads.** Seven workload-shaped metrics in a new `bench-template-reactivity` cell, anchored to production component patterns (tabs selection, password-strength derived state, card-search filtering, dropdown selected-item, async-search results) and to the doc-promised-but-unrealized invariants the renderer doesn't yet deliver. Pure client-mount path — no SSR, no hydration. Models the naive case of CDN-loaded or agentic-VM-loaded SUI components. A separate amplification of an existing `bench-hydrate.js` metric covers the SSR-hydration variant of the same invariants.
+**Track A — Fine-grained reactivity workloads.** Six workload-shaped metrics in a new `bench-template-reactivity` cell, anchored to production component patterns (tabs selection, card-search filtering, dropdown selected-item, async-search results) and to the doc-promised-but-unrealized invariants the renderer doesn't yet deliver. Pure client-mount path — no SSR, no hydration. Models the naive case of CDN-loaded or agentic-VM-loaded SUI components. A separate amplification of an existing `bench-hydrate.js` metric covers the SSR-hydration variant of the same invariants.
 
 **Track B — Per-file hot-path micros.** Per-package isolation benches that catch sub-noise-floor regressions on PRs touching a single hot-path file. The macro suite shifts by 2-3% on a 20% regression in `expression-evaluator.js` — below the resolution floor. Per-file micros surface those.
 
@@ -12,18 +12,18 @@ Together they fill measurement gaps that the existing krausest / todo / hydrate 
 
 ## Status
 
-`complete` — all seven Track A metrics shipped, hydration metric amplified, Track B signal extensions + renderer micros + compiler micros all shipped, bench reporter gained a purpose-extraction + glossary system (extra-scope), per-suite purpose comments authored across all five bench files (extra-scope), snippet/subtemplate arg-source-propagation correctness tests landed in renderer (extra-scope), two previously-skipped granularity tests promoted (one to passing, one to `it.fails`). Plan + roadmap entries updated. PR #181 open and ready. Post-merge tail: bench-history.json populates after merge, the `--edit-last` workflow fix for duplicate-bot-comments takes effect post-merge.
+`complete` — six Track A metrics shipped (a seventh, `derived-cascade-100`, was dropped pre-merge after review found its workload measured regex throughput more than reactive dispatch and the FGR plan it was speculatively designed for doesn't ship expression-evaluator memoization), hydration metric amplified, Track B signal extensions + renderer micros + compiler micros all shipped, bench reporter gained a purpose-extraction + glossary system (extra-scope), per-suite purpose comments authored across all five bench files (extra-scope), snippet/subtemplate arg-source-propagation correctness tests landed in renderer (extra-scope), two previously-skipped granularity tests promoted (one to passing, one to `it.fails`). Plan + roadmap entries updated. PR #181 open and ready. Post-merge tail: bench-history.json populates after merge, the `--edit-last` workflow fix for duplicate-bot-comments takes effect post-merge.
 
 ## Supersedes
 
 [`../icebox/bench-suite-expansion.md`](../icebox/bench-suite-expansion.md). Removed in this PR.
 
-- Icebox Track 2 (wake-count, nested-mutation, hydrate-1000) — fully absorbed. Wake-count drops in favor of wall-clock benches (real Reactions doing real small work makes wake count visible as wall-clock — no instrumentation primitive needed). `nested-mutation` is partly covered by Track A's `derived-cascade-100` and `stable-ref-mutate-500`. `hydrate-1000-card` already exists in `bench-hydrate.js` (the `100` in metric names is residual from when items were 100; today they are 1000).
+- Icebox Track 2 (wake-count, nested-mutation, hydrate-1000) — fully absorbed. Wake-count drops in favor of wall-clock benches (real Reactions doing real small work makes wake count visible as wall-clock — no instrumentation primitive needed). `nested-mutation` is partly covered by Track A's `stable-ref-mutate-500`. `hydrate-1000-card` already exists in `bench-hydrate.js` (the `100` in metric names is residual from when items were 100; today they are 1000).
 - Icebox Track 1 (per-file micros) — absorbed as Track B below. The plan named this "templating" but `TemplateCompiler` lives in `@semantic-ui/compiler`, so the package-level infra was stood up there.
 
 ## Track A — Fine-grained reactivity workloads
 
-Seven metrics in `packages/component/bench/tachometer/bench-template-reactivity.js`, served via `tachometer-ci-template-reactivity.json`. Pure client-mount — `document.createElement → appendChild → flush → mutate`.
+Six metrics in `packages/component/bench/tachometer/bench-template-reactivity.js`, served via `tachometer-ci-template-reactivity.json`. Pure client-mount — `document.createElement → appendChild → flush → mutate`.
 
 ### Subtemplate / snippet axis
 
@@ -43,7 +43,6 @@ Each anchored to a production example's mutation pattern.
 |---|---|---|---|
 | `active-indicator-200` | tabs, dropdown, async-search `selectedIndex`, card-search filter highlight | 200 items each reading `is item.id selectedId` from one external signal. Cycle selectedId 100×. | External-signal-into-each fan-out. Calibration showed today's behavior re-evals 198 of 200 items per cycle (99× gap to the ideal of 2). |
 | `stable-ref-mutate-500` | card-search results, async-search results | 500-item list, replace `items[i]` with fresh ref. 100 cycles, each picking different `i`. | Per-key isolation in `#each` outside subtemplates. Calibration showed today is already at the ideal (1 per cycle). Bench locks in correct behavior — regression to coarse list re-eval is caught. |
-| `derived-cascade-100` | password-strength | One root signal feeding 7 derived expressions (length check, uppercase, digit, special, label, class map, percentage). 100 character mutations. | Eval count is 7/cycle today and ideal — wall-clock spread is contingent on FGR shipping DOM-update short-circuit on stable derived outputs. |
 
 ### Negative control
 
@@ -91,7 +90,7 @@ Two previously-skipped tests unburied:
 
 | Session | Estimated | Done |
 |---|---|---|
-| 1. Track A calibration | ~3h | ✓ Findings: 5 metrics had real coarseness gaps, 2 metrics already at ideal. Both kept (regression-protection role). |
+| 1. Track A calibration | ~3h | ✓ Findings: 5 metrics had real coarseness gaps, 1 metric already at ideal (kept as regression-protection). A seventh metric calibrated as a derived-cascade workload was dropped pre-merge — it measured regex throughput more than reactive dispatch and was speculatively designed for an FGR plan that doesn't ship expression-evaluator memoization. |
 | 2. Track A bench file + config | ~3h | ✓ |
 | 3. Hydration metric amplification | ~30m | ✓ |
 | 4. Track B signal cheap extensions | ~2h | ✓ |
