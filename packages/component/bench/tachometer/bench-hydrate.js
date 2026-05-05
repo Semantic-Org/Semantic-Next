@@ -94,6 +94,7 @@ const startMark = (name) => `${name}-start`;
 // here; subsequent updates exercise the already-wired graph.
 const itemsForMount = makeItems(1000);
 const dsdHTMLForMount = ssrList(itemsForMount);
+// purpose: tests how long a server-rendered list takes to become interactive after hydration without re-rendering.
 performance.mark(startMark('hydrate-each-100-mount'));
 container.setHTMLUnsafe(dsdHTMLForMount);
 await drainMicrotasks();
@@ -108,6 +109,7 @@ const elForMutate = container.firstElementChild;
 
 // Fresh array reference, same keys as SSR markers — exercises the items
 // dependency wake + per-Signal equality gate without DOM work.
+// purpose: tests how a hydrated list reacts when items are reassigned to a new array with the same data.
 performance.mark(startMark('hydrate-each-100'));
 elForMutate.component.setItems(itemsForMount.slice());
 await flush();
@@ -172,6 +174,7 @@ function ssrHelperList(items) {
 // regressions in per-item Reaction wiring at hydrate time.
 const helperItems = makeItems(1000);
 const dsdHTMLForHelper = ssrHelperList(helperItems);
+// purpose: tests hydration cost when each list item uses a helper that reads state shared across the list.
 performance.mark(startMark('hydrate-helper-100-mount'));
 container.setHTMLUnsafe(dsdHTMLForHelper);
 await drainMicrotasks();
@@ -188,6 +191,7 @@ const elHelper = container.firstElementChild;
 // helper invocations + setAttribute calls. Confirms per-item Reactions
 // wired at hydrate are reactive to external state, not just to
 // itemSignal mutations.
+// purpose: tests whether changing shared state after hydration re-runs helpers and updates only affected items.
 performance.mark(startMark('hydrate-helper-100-state-change'));
 elHelper.component.setActive('id-50');
 await flush();
