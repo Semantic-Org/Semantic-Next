@@ -294,7 +294,7 @@ let sink = null;
   performance.mark(startMark('reaction-coalesce-200x100'));
   for (let burst = 0; burst < 200; burst++) {
     for (let setN = 0; setN < 100; setN++) {
-      sig.set(burst * 100 + setN);
+      sig.set(burst * 100 + setN + 1);
     }
     Reaction.flush();
   }
@@ -311,7 +311,7 @@ let sink = null;
 {
   const sigA = new Signal('a');
   const sigB = new Signal('b');
-  const toggle = new Signal(true);
+  const toggle = new Signal(false);
   const r = Reaction.create(() => {
     sink = toggle.get() ? sigA.get() : sigB.get();
   });

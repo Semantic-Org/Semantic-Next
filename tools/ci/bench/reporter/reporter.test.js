@@ -63,7 +63,7 @@ function runReporter({
   // Tests that need to control bench-source discovery (purpose comments,
   // metric-source link paths) pass --repo-root pointing at a synthetic tree.
   if (repoRoot) { argv.push('--repo-root', repoRoot); }
-  // Run from repo root so resolveMetricSource can find packages/.../bench/tachometer
+  // Run from repo root so the bench-file index can find packages/.../bench/tachometer
   const cwd = path.resolve(__dirname, '..', '..', '..', '..');
   execFileSync('node', argv, { stdio: ['ignore', 'pipe', 'inherit'], cwd });
   const report = JSON.parse(fs.readFileSync(path.join(tmp, 'bench-report.json'), 'utf8'));
@@ -73,9 +73,8 @@ function runReporter({
 
 /**
  * Build a synthetic repoRoot containing `packages/<pkg>/bench/tachometer/<file>`
- * with the given JS contents. Exercises `resolveMetricPurpose` and
- * `resolveMetricSource` against deterministic fixtures rather than the real
- * tree. Returns the temp root.
+ * with the given JS contents. Exercises bench-source discovery against
+ * deterministic fixtures rather than the real tree. Returns the temp root.
  */
 function writeSyntheticRepoRoot(files) {
   const root = fs.mkdtempSync('/tmp/bench-purpose-root-');

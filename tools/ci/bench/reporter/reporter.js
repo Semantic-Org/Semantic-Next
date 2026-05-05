@@ -792,9 +792,14 @@ function findBenchDirs(root) {
 
 /**
  * Single-pass index of all bench `.js` files under `dirs`. Walks each
- * file once and records, for every `performance.mark(startMark('<name>'))`
- * site, the source location and the optional `// purpose: <text>` comment
- * on the immediately preceding line.
+ * file once and records, for every `performance.mark` site, the source
+ * location and the optional `// purpose: <text>` comment on the
+ * immediately preceding line.
+ *
+ * Matches both the canonical `performance.mark(startMark('<name>'))` form
+ * (used across the workload bench files) and the bare
+ * `performance.mark('<name>')` form (used in older one-off benches like
+ * `signature.js`). First match per metric name wins.
  *
  * The map keys on metric name; values are `{ source: { path, line },
  * purpose: string | null }`. Empty purpose text (`// purpose:` with no
@@ -804,12 +809,12 @@ function findBenchDirs(root) {
  * Purpose text is truncated at PURPOSE_MAX_CHARS with a single ellipsis
  * (…) to keep glossary rows compact.
  *
- * Lets `JSON.parse`/`fs.readFileSync` errors propagate so a corrupt file
- * fails CI loudly rather than silently dropping a metric.
+ * Lets `fs.readFileSync` errors propagate so a missing/unreadable bench
+ * file fails CI loudly rather than silently dropping a metric.
  */
 function indexBenchFiles(dirs, root) {
   const index = new Map();
-  const markNeedle = /performance\.mark\(\s*startMark\(\s*['"`]([^'"`]+)['"`]\s*\)\s*\)/;
+  const markNeedle = /performance\.mark\(\s*(?:startMark\(\s*)?['"`]([^'"`]+)['"`]/;
   const purposeNeedle = /^\s*\/\/\s*purpose:\s*(.*?)\s*$/;
   for (const dir of dirs) {
     const full = path.join(root, dir);

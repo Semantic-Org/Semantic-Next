@@ -190,8 +190,7 @@ const elHelper = container.firstElementChild;
 // Mutating a state signal that per-item helpers close over fires
 // helper invocations + setAttribute calls. Confirms per-item Reactions
 // wired at hydrate are reactive to external state, not just to
-// itemSignal mutations. 10 cycles amplifies the work above the σ-floor —
-// single-shot landed at ~6ms with ±26-29% noise on GHA.
+// itemSignal mutations. 10 cycles amplifies the work above the σ-floor.
 // purpose: Cycles the shared activeID through 10 different items in a hydrated 1000-item list so two items repaint per cycle.
 performance.mark(startMark('hydrate-helper-100-state-change'));
 for (let i = 0; i < 10; i++) {

@@ -60,24 +60,21 @@ const helpers = {
 // Data context shape with Signals for state — production reality. Settings
 // are plain values, state is Signal-wrapped, computed are functions.
 const data = {
-  // Settings (plain)
   type: 'button',
   variant: 'primary',
   size: 'medium',
   disabled: false,
   icon: 'check',
   label: 'Submit',
-  // State (Signals)
+  classes: 'ui primary button',
   count: new Signal(42),
   value: new Signal(1),
   isOpen: new Signal(false),
   isTrue: new Signal(true),
+  isActive: new Signal(true),
   fruit: new Signal('cherry'),
   items: new Signal(['one', 'two', 'three']),
   user: { name: new Signal('Jack'), role: 'admin', settings: { theme: 'dark' } },
-  // Computed
-  isActive: new Signal(true),
-  classes: 'ui primary button',
 };
 
 /*******************************

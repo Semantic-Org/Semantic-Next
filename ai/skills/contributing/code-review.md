@@ -48,7 +48,7 @@ Lens agents **do not score their own findings.** Scoring is a separate stage wit
 If an agent finds no issues, it returns "No issues found" with a brief summary of what it verified was clean.
 
 ### Agent 1 — Standards Compliance
-Audit changes against project standards in CLAUDE.md and `ai/skills/`. Check code formatting, commit format conventions, non-obvious patterns, and documented conventions.
+Audit changes against project standards in CLAUDE.md and `ai/skills/`. Check code formatting, non-obvious patterns, and documented conventions. Note: PRs are squashed on merge.
 
 ### Agent 2 — Shallow Bug Scan
 Read the implementation file changes and scan for obvious bugs. Focus on logic errors, regex edge cases, incorrect key construction, missing error handling, content-type or cache header bugs. Ignore documentation, skill files, and plan files. Focus on large bugs, avoid nitpicks and likely false positives.

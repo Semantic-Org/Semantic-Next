@@ -210,7 +210,7 @@ destroy();
 const el4 = await mount('bench-active-indicator');
 performance.mark(startMark('active-indicator-200'));
 for (let i = 0; i < 100; i++) {
-  el4.template.state.selectedId.set(i);
+  el4.template.state.selectedId.set(i + 1);
   await flush();
 }
 performance.measure('active-indicator-200', startMark('active-indicator-200'));

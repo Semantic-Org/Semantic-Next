@@ -460,9 +460,7 @@ RENDERING_ENGINES.forEach(engine => {
       // (which read no signals) never re-fire after initial render —
       // their Reactions track no dependencies. The expression that
       // reads the snippet arg's source signal does fire, propagates
-      // the new value, and updates the DOM. See the companion DOM-
-      // update test in subtree-caching.test.js (#28) which asserts
-      // the visible-value invariant.
+      // the new value, and updates the DOM.
       it('changing one snippet arg does not fire markers in adjacent expressions', async () => {
         let labelEvalCount = 0;
         let statusEvalCount = 0;

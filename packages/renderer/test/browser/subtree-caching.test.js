@@ -1895,13 +1895,9 @@ RENDERING_ENGINES.forEach(engine => {
     /*******************************
    28. Snippet/subtemplate arg-source propagation
 
-   Basic correctness: when a snippet or subtemplate arg is wired to a
-   reactive source via a function reference (`{>card label=getLabel}` where
-   `getLabel` reads a signal), mutating the source signal must update the
-   inner expression's rendered text. Surfaced from a calibration session
-   where the snippet path was observed firing zero per-cycle markers under
-   labelVal mutation, suggesting the snippet boundary loses the source
-   signal's reactivity.
+   Mutating the source signal a snippet or subtemplate arg reads from
+   (`{>card label=getLabel}` with `getLabel` reading a signal) must
+   update the inner expression's rendered text.
 *******************************/
 
     describe('28. Snippet/subtemplate arg-source propagation', () => {
