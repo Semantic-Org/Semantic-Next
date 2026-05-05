@@ -2,7 +2,7 @@ import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
 import { each, fatal, isPlainObject, isString, keys } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
-import { isItemContext } from '../reactive-context.js';
+import { isItemContext, ReactiveDataContext } from '../reactive-context.js';
 import { registerBlock } from './registry.js';
 
 /*
@@ -21,43 +21,49 @@ import { registerBlock } from './registry.js';
                   their own deps via the snippet-arg proxy. update is
                   a no-op (snippets are one-shot at mount).
   • subtemplate — full Template lifecycle: clone, initialize, render,
-                  attach. Updates re-evaluate name, swap instance if it
-                  changed, otherwise push new data via setDataContext.
+                  attach. Updates re-evaluate name + blob, swap instance
+                  if name changed. ReactiveData propagation does NOT go
+                  through update — see setupReactiveSubtemplate.
+
+  Subtemplate reactiveData uses a per-key path independent of update's
+  outer Reaction. setupReactiveSubtemplate wraps the subtemplate's
+  renderer.data in a ReactiveDataContext and registers one Reaction per
+  reactiveData entry on a child scope (self.reactiveDataScope). Each
+  Reaction tracks one source expression and pushes via ctx.setKey when
+  it fires. Subscribers reading proxy.fooKey only re-evaluate when
+  fooKey's per-key Signal notifies — bumpDataVersion fanout is bypassed
+  for reactiveData. Blob `data={...}` keeps the bumpDataVersion path:
+  blob writes are wholesale-replacement by contract, so the coarse
+  fanout there is intentional.
 
   Two-level context use: create() receives dispatch-level bag and stashes
   renderer.evaluator / renderer.subTemplates / renderer.snippets /
-  renderer.template / renderer.dataDep onto self. The 9-key author bag
-  stays honest; subsequent hooks read from self.* rather than reaching
-  through scope.
+  renderer.template / renderer.dataDep onto self. The author bag stays
+  honest; subsequent hooks read from self.* rather than reaching through
+  scope.
 
 */
 
-function unpackNodeData(node, data, evaluator) {
-  let templateData = {};
-  if (node.data) {
-    if (isString(node.data)) {
-      const evaluated = evaluator.lookupExpressionValue(node.data, data);
-      if (isPlainObject(evaluated)) {
-        templateData = { ...templateData, ...evaluated };
-      }
-    }
-    else if (isPlainObject(node.data)) {
-      // Inside {#each}, read reactively so item-signal mutations propagate
-      // into subtemplate data. Outside each, static data={} stays non-reactive.
-      const inItemContext = isItemContext(data);
-      each(node.data, (expr, key) => {
-        templateData[key] = inItemContext
-          ? evaluator.lookupExpressionValue(expr, data)
-          : Reaction.nonreactive(() => evaluator.lookupExpressionValue(expr, data));
-      });
+function unpackBlobData(node, data, evaluator) {
+  let blobData = {};
+  if (!node.data) { return blobData; }
+  if (isString(node.data)) {
+    const evaluated = evaluator.lookupExpressionValue(node.data, data);
+    if (isPlainObject(evaluated)) {
+      blobData = { ...blobData, ...evaluated };
     }
   }
-  if (node.reactiveData) {
-    each(node.reactiveData, (expr, key) => {
-      templateData[key] = evaluator.lookupExpressionValue(expr, data);
+  else if (isPlainObject(node.data)) {
+    // Inside {#each}, read reactively so item-signal mutations propagate
+    // into subtemplate data. Outside each, static data={} stays non-reactive.
+    const inItemContext = isItemContext(data);
+    each(node.data, (expr, key) => {
+      blobData[key] = inItemContext
+        ? evaluator.lookupExpressionValue(expr, data)
+        : Reaction.nonreactive(() => evaluator.lookupExpressionValue(expr, data));
     });
   }
-  return templateData;
+  return blobData;
 }
 
 // Snippet-arg overlay proxy. Args become lazy getters that re-evaluate
@@ -166,11 +172,72 @@ function attachToRenderRoot(instance, region, self, { startNode } = {}) {
   });
 }
 
+// Wrap the freshly-cloned subtemplate instance's renderer.data in a
+// ReactiveDataContext and register one Reaction per reactiveData entry.
+// Each Reaction evaluates its source expression in the parent's data
+// context and pushes via ctx.setKey. The Reaction's firstRun seeds the
+// per-key Signal (Reaction-context contained — source signals register
+// as deps of THIS Reaction, not the block's outer Reaction); subsequent
+// fires push new values that subscribers reading proxy.key see via
+// per-key notify.
+//
+// The Reactions live on a child scope (self.reactiveDataScope) so a
+// template swap can dispose them with one call without disturbing the
+// block's own scope or its outer Reaction.
+function setupReactiveSubtemplate({ node, data, scope, region, self }) {
+  // writeToParent: true syncs reactiveData values back into currentInstance.data
+  // so closures that captured `data` at createComponent time (e.g. methods
+  // doing `data.todo.completed`) see current values. The parent here is the
+  // subtemplate's own data ref, not shared, so the write is safe.
+  self.reactiveContext = new ReactiveDataContext(self.currentInstance.data, { writeToParent: true });
+  self.currentInstance.renderer.data = self.reactiveContext.proxy;
+  self.currentInstance.renderer.evaluator.setData(self.reactiveContext.proxy);
+
+  if (!node.reactiveData) { return; }
+
+  // When a reactiveData key matches one of the subtemplate's declared
+  // defaultSettings entries, route the value through the existing settings
+  // Proxy too. The settings Proxy maintains its own per-key Signals
+  // (createSubtemplateSettings in template.js); writing settings[key] = value
+  // fires that signal, so closures capturing `{ settings }` and reading
+  // settings[key] track the correct Signal and re-fire when it notifies.
+  // Without this, per-key updates would land in reactiveContext but never
+  // reach the settings Signal, leaving settings-bound closures stale.
+  const defaultSettings = self.currentInstance.defaultSettings;
+  const settingsProxy = self.currentInstance.settings;
+  const mirrorToSettings = (key, value) => {
+    if (settingsProxy && defaultSettings && key in defaultSettings) {
+      settingsProxy[key] = value;
+    }
+  };
+
+  self.reactiveDataScope = scope.child();
+  each(node.reactiveData, (expr, key) => {
+    self.reactiveDataScope.reaction(region.anchor, () => {
+      const value = self.evaluator.lookupExpressionValue(expr, data);
+      self.reactiveContext.setKey(key, value);
+      mirrorToSettings(key, value);
+    }, { message: `subtemplate-arg:${key}` });
+  });
+}
+
+function teardownReactiveSubtemplate(self) {
+  if (self.reactiveDataScope) {
+    self.reactiveDataScope.dispose();
+    self.reactiveDataScope = null;
+  }
+  if (self.reactiveContext) {
+    self.reactiveContext.dispose();
+    self.reactiveContext = null;
+  }
+}
+
 function clearInstance(self, region) {
   if (self.currentInstance) {
     self.currentInstance.onDestroyed();
     self.currentInstance = null;
     self.currentTemplateID = null;
+    teardownReactiveSubtemplate(self);
     region.clear();
   }
 }
@@ -189,6 +256,8 @@ const templateBlock = defineBlock({
       kind: null,
       currentTemplateID: null,
       currentInstance: null,
+      reactiveContext: null,
+      reactiveDataScope: null,
     };
   },
 
@@ -207,17 +276,18 @@ const templateBlock = defineBlock({
 
     self.dataDep.depend();
     const { template, templateName } = resolveSubtemplate(node.name, data, self);
-    const templateData = unpackNodeData(node, data, self.evaluator);
+    const blobData = unpackBlobData(node, data, self.evaluator);
     if (!template) { return; }
 
     self.currentTemplateID = template.id;
-    self.currentInstance = cloneInstance({ template, templateName, templateData, self });
+    self.currentInstance = cloneInstance({ template, templateName, templateData: blobData, self });
+    setupReactiveSubtemplate({ node, data, scope, region, self });
     const fragment = self.currentInstance.render();
     region.setContent(fragment);
     attachToRenderRoot(self.currentInstance, region, self);
   },
 
-  hydrate({ node, data, region, hydrateInto, self }) {
+  hydrate({ node, data, region, scope, hydrateInto, self }) {
     const kind = detectKind({ node, data, self });
     if (kind === null) { return; }
 
@@ -235,11 +305,12 @@ const templateBlock = defineBlock({
 
     self.dataDep.depend();
     const { template, templateName } = resolveSubtemplate(node.name, data, self);
-    const templateData = unpackNodeData(node, data, self.evaluator);
+    const blobData = unpackBlobData(node, data, self.evaluator);
     if (!template) { return; }
 
     self.currentTemplateID = template.id;
-    self.currentInstance = cloneInstance({ template, templateName, templateData, self });
+    self.currentInstance = cloneInstance({ template, templateName, templateData: blobData, self });
+    setupReactiveSubtemplate({ node, data, scope, region, self });
 
     if (region.ownedNodes.length > 0) {
       self.currentInstance.renderer.hydrateInto({
@@ -257,7 +328,7 @@ const templateBlock = defineBlock({
     }
   },
 
-  update({ node, data, region, self }) {
+  update({ node, data, region, scope, self }) {
     // Snippets are one-shot at mount — name reactivity at the outer level
     // is documented as undefined (kind shouldn't change), and inner
     // expression reactivity is handled by the snippet-arg proxy's lazy
@@ -266,7 +337,7 @@ const templateBlock = defineBlock({
 
     self.dataDep.depend();
     const { template, templateName } = resolveSubtemplate(node.name, data, self);
-    const templateData = unpackNodeData(node, data, self.evaluator);
+    const blobData = unpackBlobData(node, data, self.evaluator);
 
     if (!template) {
       clearInstance(self, region);
@@ -275,25 +346,37 @@ const templateBlock = defineBlock({
 
     if (template.id !== self.currentTemplateID) {
       if (self.currentInstance) { self.currentInstance.onDestroyed(); }
+      teardownReactiveSubtemplate(self);
       self.currentTemplateID = template.id;
-      self.currentInstance = cloneInstance({ template, templateName, templateData, self });
+      self.currentInstance = cloneInstance({ template, templateName, templateData: blobData, self });
+      setupReactiveSubtemplate({ node, data, scope, region, self });
       const fragment = self.currentInstance.render();
       region.setContent(fragment);
       attachToRenderRoot(self.currentInstance, region, self);
     }
     else {
-      self.currentInstance.setDataContext(templateData, { rerender: false });
-      self.currentInstance.render(templateData);
+      // Same template — push only blob data. ReactiveData propagation
+      // happens through the per-key Reactions in self.reactiveDataScope,
+      // not through this update path.
+      self.currentInstance.setDataContext(blobData, { rerender: false });
+      self.currentInstance.render(blobData);
     }
   },
 
   destroy({ self }) {
     // Snippets have no instance to destroy — region.clear() handles DOM,
     // inner reactions registered against parent scope auto-dispose.
+    // reactiveDataScope is a child of the block's scope; its Reactions
+    // dispose when the block scope's onDispose runs after this hook.
     if (self.currentInstance) {
       self.currentInstance.onDestroyed();
       self.currentInstance = null;
     }
+    if (self.reactiveContext) {
+      self.reactiveContext.dispose();
+      self.reactiveContext = null;
+    }
+    self.reactiveDataScope = null;
   },
 
   evaluateText({ node, data, renderer }) {

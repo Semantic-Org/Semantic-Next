@@ -30,6 +30,16 @@ import { Dependency, Signal } from '@semantic-ui/reactivity';
   feature; surface them as findings, do not reintroduce a sibling
   Dependency to keep them passing.
 
+  `writeToParent` mirrors per-key Signal values back into the underlying
+  parent object on every setKey. The subtemplate adoption site needs this
+  because user code captures the parent object by reference at
+  createComponent time (e.g. `{ data }` destructured into a closure that
+  reads `data.todo.completed` later) — those reads bypass the proxy and
+  must see the current value. The each-block adoption site leaves it off:
+  the parent there is the each-block's outer data context, shared across
+  all sibling records, so writing per-record wrapper keys back into it
+  would cross-contaminate siblings.
+
 */
 
 const itemContextProxies = new WeakSet();
@@ -39,8 +49,9 @@ export function isItemContext(data) {
 }
 
 export class ReactiveDataContext {
-  constructor(parent, { registerItemContext = false } = {}) {
+  constructor(parent, { registerItemContext = false, writeToParent = false } = {}) {
     this.parent = parent;
+    this.writeToParent = writeToParent;
     this.signals = new Map();
     this.keySetVersion = new Dependency();
 
@@ -54,6 +65,20 @@ export class ReactiveDataContext {
         if (signal !== undefined) { return signal.value; }
         keySetVersion.depend();
         return target[prop];
+      },
+      set(target, prop, value) {
+        // Route writes through the per-key Signal when one exists so blob
+        // assignment paths (renderer.setData → assignInPlace → proxy[key] = v)
+        // notify subscribers instead of silently bypassing the per-key layer.
+        // Unknown keys default to writing the target — preserves the proxy
+        // as a transparent overlay.
+        const signal = signals.get(prop);
+        if (signal !== undefined) {
+          signal.set(value);
+          return true;
+        }
+        target[prop] = value;
+        return true;
       },
       has(target, prop) {
         return signals.has(prop) || (prop in target);
@@ -92,6 +117,9 @@ export class ReactiveDataContext {
     }
     else {
       signal.set(value);
+    }
+    if (this.writeToParent) {
+      this.parent[key] = value;
     }
   }
 
