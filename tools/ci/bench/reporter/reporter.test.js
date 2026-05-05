@@ -353,6 +353,9 @@ test('cross-run: WIN when current pct-delta dominates historical peak', () => {
   assert.equal(m.peak.sha, 'bbbb222222222222', 'peak entry is the most-improved prior');
   assert.ok(m.delta_from_peak_pct < 0, 'delta_from_peak_pct is negative when current dominates peak');
   assert.ok(!markdown.includes('Regressions from peak'), 'no reopened section when no REOPENED');
+  assert.ok(markdown.includes('🏆 New peaks (1)'), 'New peaks section renders');
+  assert.ok(markdown.includes('🏆 1 new peak'), 'headline includes new peak count');
+  assert.ok(/improved -\d+%/.test(markdown), 'delta uses % unit');
 });
 
 test('cross-run: peak links to PR conversation when PR number is known', () => {
@@ -409,6 +412,8 @@ test('cross-run: REOPENED when a prior iteration dominates current', () => {
   assert.ok(markdown.includes('📜 Regressions from peak (1)'), 'reopened section with count');
   assert.ok(markdown.includes('`bbbb222`'), 'peak SHA linked');
   assert.ok(markdown.includes('📜 1 reopened'), 'headline count includes reopened');
+  assert.ok(/regressed \+\d+%/.test(markdown), 'delta uses % unit (not pp)');
+  assert.ok(!markdown.includes('🏆'), 'no new peaks count when WIN is zero');
 });
 
 test('cross-run: TIED-PEAK when pct-delta CIs overlap', () => {
@@ -424,6 +429,104 @@ test('cross-run: TIED-PEAK when pct-delta CIs overlap', () => {
   });
   const m = report.metrics.find((x) => x.name === 'update-10th');
   assert.equal(m.history_status, 'TIED-PEAK');
+});
+
+test('cross-run: sub-NOISE_FLOOR delta downgrades to TIED-PEAK even with non-overlapping CIs', () => {
+  // Non-overlapping CIs that would naively be REOPENED, but the midpoint
+  // gap is below NOISE_FLOOR (2). The JND gate downgrades to TIED-PEAK so
+  // sub-noise-floor differences don't fire false alarms.
+  const prHistory = writeFixture({
+    schema_version: 2,
+    commits: [{
+      sha: 'pr-iter-1',
+      msg: 'iteration 1',
+      parent_sha: '',
+      timestamp: '2026-04-20T00:00:00Z',
+      pr: null,
+      metrics: {
+        'update-10th': {
+          ci: [10, 11],
+          mean_ms: 10.5,
+          percent_delta_ci: [-2.5, -2.0],
+          baseline_sha: 'mainA',
+        },
+      },
+    }],
+  });
+  // Current pct-delta [-1.5, -1.0] vs peak [-2.5, -2.0]. peak.high (-2) <
+  // current.low (-1.5) → CIs don't overlap. Midpoints: current -1.25,
+  // peak -2.25. delta = +1pp, below NOISE_FLOOR. JND downgrades to TIED.
+  const dir = writeHandcraftedResults('update-10th', [10, 11], [10.5, 11.5], [-1.5, -1.0], 'mainA');
+  const { report, markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'current',
+    msg: 'x',
+    baseSha: 'def',
+    prHistory,
+    scope: 'pr',
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(m.history_status, 'TIED-PEAK', 'JND gate downgrades sub-floor delta');
+  assert.ok(!markdown.includes('Regressions from peak'), 'no reopened section');
+  assert.ok(!markdown.includes('New peaks'), 'no new peaks section');
+});
+
+test('cross-run: bisect candidates exclude touches_packages: false entries', () => {
+  // History: peak (touches packages), then a harness-only commit, then
+  // current. The harness-only commit should not appear as a bisect candidate
+  // even though it has percent_delta_ci data.
+  const prHistory = writeFixture({
+    schema_version: 2,
+    commits: [
+      {
+        sha: 'pr-peak-1234567',
+        msg: 'peak iteration',
+        parent_sha: '',
+        timestamp: '2026-04-20T00:00:00Z',
+        pr: null,
+        touches_packages: true,
+        metrics: {
+          'update-10th': {
+            ci: [7, 8],
+            mean_ms: 7.5,
+            percent_delta_ci: [-30, -25],
+            baseline_sha: 'mainA',
+          },
+        },
+      },
+      {
+        sha: 'pr-harness-7654321',
+        msg: 'Harness: tweak some skill',
+        parent_sha: '',
+        timestamp: '2026-04-20T01:00:00Z',
+        pr: null,
+        touches_packages: false,
+        metrics: {
+          'update-10th': {
+            ci: [8, 9],
+            mean_ms: 8.5,
+            percent_delta_ci: [-20, -15],
+            baseline_sha: 'mainA',
+          },
+        },
+      },
+    ],
+  });
+  // Current pct-delta [-5, 0] regresses from peak [-30, -25]. delta ~+25pp.
+  const dir = writeHandcraftedResults('update-10th', [11, 12], [11.5, 12.5], [-5, 0], 'mainA');
+  const { report } = runReporter({
+    resultsDir: dir,
+    sha: 'current',
+    msg: 'x',
+    baseSha: 'def',
+    prHistory,
+    scope: 'pr',
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(m.history_status, 'REOPENED');
+  // Only the harness commit sits between peak and current, but it shouldn't
+  // appear because touches_packages is false.
+  assert.equal(m.bisect_candidates.length, 0, 'harness-only commit excluded');
 });
 
 test('--scope pr excludes main-history from peak attribution', () => {

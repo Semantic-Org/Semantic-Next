@@ -324,6 +324,10 @@ function renderMarkdown(report) {
     `🔍 ${unsureTotal} unsure`,
     `⚪ ${noChange.length} no change`,
   ];
+  const winCount = report.history_summary?.WIN ?? 0;
+  if (winCount > 0) {
+    resultsParts.push(`🏆 ${winCount} new peak${winCount === 1 ? '' : 's'}`);
+  }
   const reopenedCount = report.history_summary?.REOPENED ?? 0;
   if (reopenedCount > 0) {
     resultsParts.push(`📜 ${reopenedCount} reopened`);
@@ -342,6 +346,10 @@ function renderMarkdown(report) {
   if (slower.length > 0) {
     renderFasterSlowerSection(lines, slower, 'slower', report);
   }
+
+  // ─── New peaks (cross-run; affirmative — same iterations a perf agent ──
+  // wants to credit when something landed and stuck) ─────────────────────
+  renderNewPeaks(lines, report);
 
   // ─── Regressions from peak (cross-run; auto-expanded when present) ───
   renderRegressionsFromPeak(lines, report);
@@ -465,8 +473,8 @@ function renderRegressionsFromPeak(lines, report) {
     const peakStr = formatSignedPct(mid(m.peak.percent_delta_ci));
     const peakLink = commitOrPrLink(m.peak, report.repo);
     const deltaStr = m.delta_from_peak_pct > 0
-      ? `regressed +${m.delta_from_peak_pct.toFixed(0)}pp`
-      : `${m.delta_from_peak_pct.toFixed(0)}pp`;
+      ? `regressed +${m.delta_from_peak_pct.toFixed(0)}%`
+      : `${m.delta_from_peak_pct.toFixed(0)}%`;
     const bisectMd = (m.bisect_candidates ?? [])
       .slice(0, BISECT_MARKDOWN_MAX)
       .map((c) => commitOrPrLink(c, report.repo))
@@ -511,6 +519,52 @@ function renderRegressionsFromPeak(lines, report) {
 
 function formatSignedPct(pct) {
   return pct > 0 ? `+${pct.toFixed(0)}%` : `${pct.toFixed(0)}%`;
+}
+
+/**
+ * Append a "New peaks" section when one or more metrics are WIN — current
+ * pct-delta CI dominates the prior best iteration's CI. Affirmative signal:
+ * "this iteration is the new best on metric X." Mirrors
+ * `renderRegressionsFromPeak` with the framing flipped — credit candidates
+ * are the commits that may have caused the improvement.
+ */
+function renderNewPeaks(lines, report) {
+  const wins = report.metrics.filter((m) => m.history_status === 'WIN');
+  if (wins.length === 0) { return; }
+
+  // Sort by improvement magnitude — biggest gains first. delta_from_peak_pct
+  // is negative for WIN, so ascending order surfaces the most-improved.
+  const sorted = [...wins].sort(
+    (a, b) => (a.delta_from_peak_pct ?? 0) - (b.delta_from_peak_pct ?? 0),
+  );
+
+  lines.push(`#### 🏆 New peaks (${wins.length})`);
+  lines.push('');
+  lines.push(
+    `These metrics reached a new best in this iteration — current's percent-delta vs its baseline dominates the prior peak's percent-delta vs its baseline. Credit candidates are the commits between the prior peak and HEAD; nearest-to-current is usually the cause.`,
+  );
+  lines.push('');
+  lines.push('| metric | current | prior peak | vs prior peak | credit candidates |');
+  lines.push('|---|---|---|---|---|');
+
+  for (const m of sorted) {
+    const currentStr = formatSignedPct(mid(m.percent_change_ci));
+    const peakStr = formatSignedPct(mid(m.peak.percent_delta_ci));
+    const peakLink = commitOrPrLink(m.peak, report.repo);
+    const deltaStr = `improved ${m.delta_from_peak_pct.toFixed(0)}%`;
+    const candMd = (m.bisect_candidates ?? [])
+      .slice(0, BISECT_MARKDOWN_MAX)
+      .map((c) => commitOrPrLink(c, report.repo))
+      .join(', ');
+    const candCell = m.bisect_candidates && m.bisect_candidates.length > BISECT_MARKDOWN_MAX
+      ? `${candMd} +${m.bisect_candidates.length - BISECT_MARKDOWN_MAX} more`
+      : candMd || '—';
+
+    lines.push(
+      `| ${metricLink(m, report)} | ${currentStr} | ${peakStr} @ ${peakLink} | ${deltaStr} | ${candCell} |`,
+    );
+  }
+  lines.push('');
 }
 
 function formatDriftFootnote({ idx, metric, drift, currentBaseline, peakBaseline }) {
