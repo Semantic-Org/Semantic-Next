@@ -83,7 +83,7 @@ new Signal(data, { safety: 'none', equalityFunction: isEqual })        // no pro
 
 None upstream — all items are independent of the broader roadmap.
 
-**Downstream:** [Fine-Grained Reactivity](../fine-grained-reactivity.md) consumes the `safety: 'none'` preset for framework-internal per-key Signals. Land this first; Fine-Grained Reactivity slots in once the preset API is stable.
+**Downstream:** [Fine-Grained Reactivity](fine-grained-reactivity.md) consumes the `safety: 'none'` preset for framework-internal per-key Signals. Land this first; Fine-Grained Reactivity slots in once the preset API is stable.
 
 ## Known callsites requiring `safety: 'none'`
 
