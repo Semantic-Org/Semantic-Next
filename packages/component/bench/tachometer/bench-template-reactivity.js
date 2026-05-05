@@ -182,6 +182,28 @@ defineComponent({
   }),
 });
 
+// 1000-item flat each with five fields per item. Mount-only, no
+// mutations. Items signal stays at framework defaults so the
+// workload represents the path a typical author takes when
+// declaring a list without hand-tuning Signal options. Measures
+// per-record creation and Signal allocation cost on mount.
+defineComponent({
+  tagName: 'bench-each-mount',
+  renderingEngine: 'native',
+  template:
+    `{#each item in items}<div><span>{item.a}</span><span>{item.b}</span><span>{item.c}</span><span>{item.d}</span><span>{item.e}</span></div>{/each}`,
+  defaultState: {
+    items: Array.from({ length: 1000 }, (_, i) => ({
+      id: `id-${i}`,
+      a: `a${i}`,
+      b: `b${i}`,
+      c: `c${i}`,
+      d: `d${i}`,
+      e: `e${i}`,
+    })),
+  },
+});
+
 /*******************************
       Bench Runner
 *******************************/
@@ -307,6 +329,22 @@ for (let i = 0; i < 50; i++) {
   await flush();
 }
 performance.measure('active-indicator-nested-200', startMark('active-indicator-nested-200'));
+destroy();
+
+/*******************************
+      Each mount
+*******************************/
+
+// Mark before createElement so the timer captures the entire mount
+// path: connectedCallback, fullRender, Renderer construction,
+// parseHTML, bindMarkers, and the each block's per-record creation.
+// No mutation cycle follows. Only mount cost is measured.
+// purpose: Mounts a fresh 1000-item each block with five-field items so per-record allocation cost dominates the wall clock.
+performance.mark(startMark('each-mount-1000'));
+const el10 = document.createElement('bench-each-mount');
+container.appendChild(el10);
+await flush();
+performance.measure('each-mount-1000', startMark('each-mount-1000'));
 destroy();
 
 /*******************************
