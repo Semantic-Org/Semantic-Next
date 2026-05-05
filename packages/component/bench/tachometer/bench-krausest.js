@@ -199,7 +199,7 @@ function getRows(el) {
 *******************************/
 
 const el1 = await mount();
-// purpose: measures rendering a fresh 1000-row table into an empty parent.
+// purpose: Renders a fresh 1000-row table into an empty parent.
 performance.mark(startMark('create-1k'));
 el1.component.run(1000);
 await flush();
@@ -207,7 +207,7 @@ performance.measure('create-1k', startMark('create-1k'));
 destroy();
 
 const el2 = await mount();
-// purpose: measures rendering a fresh 10000-row table into an empty parent at ten times the create-1k scale.
+// purpose: Renders a fresh 10000-row table into an empty parent at ten times the create-1k scale.
 performance.mark(startMark('create-10k'));
 el2.component.run(10000);
 await flush();
@@ -224,7 +224,7 @@ destroy();
 const el3 = await mount();
 el3.component.run(1000);
 await flush();
-// purpose: measures replacing 1000 rows with a fresh 1000-row set, exercising the keyed-list diff on a populated table.
+// purpose: Replaces 1000 rows with a fresh 1000-row set, diffing the keyed list against a populated table.
 performance.mark(startMark('replace-1k'));
 el3.component.run(1000);
 await flush();
@@ -239,7 +239,7 @@ destroy();
 const el4 = await mount();
 el4.component.run(1000);
 await flush();
-// purpose: measures appending 1000 new rows onto an existing 1000-row table.
+// purpose: Appends 1000 new rows onto an existing 1000-row table.
 performance.mark(startMark('append-1k'));
 el4.component.add(1000);
 await flush();
@@ -257,7 +257,7 @@ destroy();
 const el5 = await mount();
 el5.component.run(1000);
 await flush();
-// purpose: measures updating the label on every tenth row of a 1000-row table, repeated ten times for signal strength.
+// purpose: Updates the label on every tenth row of a 1000-row table, looped ten times to lift the work above noise.
 performance.mark(startMark('update-10th-10'));
 for (let i = 0; i < 10; i++) {
   el5.component.update();
@@ -278,7 +278,7 @@ destroy();
 const el6 = await mount();
 el6.component.run(1000);
 await flush();
-// purpose: measures highlighting one row at a time across 40 rows, testing how selection isolates to the affected row.
+// purpose: Highlights one row at a time across 40 rows so only the previous and newly highlighted rows update.
 performance.mark(startMark('select-40'));
 for (let i = 0; i < 40; i++) {
   el6.component.select(i * 25);
@@ -296,7 +296,7 @@ destroy();
 const el7 = await mount();
 el7.component.run(1000);
 await flush();
-// purpose: measures swapping the second and second-to-last rows in a 1000-row table, repeated 20 times.
+// purpose: Swaps the second and second-to-last rows in a 1000-row table, repeated 20 times.
 performance.mark(startMark('swap-rows-20'));
 for (let i = 0; i < 20; i++) {
   el7.component.swapRows();
@@ -319,7 +319,7 @@ destroy();
 const el8 = await mount();
 el8.component.run(1000);
 await flush();
-// purpose: measures removing the first row 20 times from a 1000-row table, exercising shift work at the head.
+// purpose: Removes the first row 20 times from a 1000-row table, with all remaining rows sliding up each time.
 performance.mark(startMark('remove-row-front-20'));
 for (let i = 0; i < 20; i++) {
   el8.component.removeRow(getRows(el8)[0].id);
@@ -331,7 +331,7 @@ destroy();
 const el9 = await mount();
 el9.component.run(1000);
 await flush();
-// purpose: measures removing the middle row 20 times from a 1000-row table, exercising splice work mid-list.
+// purpose: Removes the middle row 20 times from a 1000-row table, with the rows below it sliding up each time.
 performance.mark(startMark('remove-row-middle-20'));
 for (let i = 0; i < 20; i++) {
   const rows = getRows(el9);
@@ -344,7 +344,7 @@ destroy();
 const el10 = await mount();
 el10.component.run(1000);
 await flush();
-// purpose: measures removing the last row 10 times from a 1000-row table, the cheapest splice position.
+// purpose: Removes the last row 10 times from a 1000-row table, with no other rows needing to move.
 performance.mark(startMark('remove-row-back-10'));
 for (let i = 0; i < 10; i++) {
   const rows = getRows(el10);
@@ -365,7 +365,7 @@ destroy();
 const el11 = await mount();
 el11.component.run(10000);
 await flush();
-// purpose: measures clearing a 10000-row table back to empty in a single operation.
+// purpose: Clears a 10000-row table back to empty in a single operation.
 performance.mark(startMark('clear-10k'));
 el11.component.clear();
 await flush();
