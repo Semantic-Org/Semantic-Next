@@ -104,7 +104,7 @@ const BISECT_MARKDOWN_MAX = 3;
 const DRIFT_THRESHOLD_PP = 5;
 
 // Cross-iteration peak-attribution sections. Both REOPENED ("regression")
-// and WIN ("win") render the same shape — heading, description, table of
+// and WIN ("win") render the same shape: heading, description, table of
 // metric / current / peak / vs peak / candidates, with drift footnotes when
 // peak and current had different baselines and main moved enough to confound
 // the comparison. Only the framing (status filter, sort direction, copy,
@@ -116,7 +116,7 @@ const PEAK_SECTIONS = {
     description:
       `These metrics were better on a prior iteration than they are now. The peak's percent-delta vs its baseline dominates current's percent-delta vs its baseline — not attributable to per-sample noise. Bisect candidates are the commits between the peak iteration and HEAD; nearest-to-peak is usually the best bet.`,
     columnHeader: '| metric | current | peak | vs peak | bisect candidates |',
-    // Largest pp regression first (descending on signed delta).
+    // Largest % regression first (descending on signed delta).
     sortSign: -1,
     formatDelta: (delta) =>
       delta > 0
@@ -473,7 +473,7 @@ function renderMarkdown(report) {
  * surfaces REOPENED metrics (peak dominates current); `kind === 'win'`
  * surfaces WIN metrics (current dominates peak). Drift footnotes fire when
  * peak and current had different baselines and main moved enough to confound
- * the comparison — symmetric across both kinds because false-blame and
+ * the comparison. Symmetric across both kinds because false-blame and
  * false-credit are the same kind of attribution failure in opposite directions.
  *
  * Surface units: within-session percent-deltas vs each iteration's baseline.
@@ -544,7 +544,7 @@ function formatSignedPct(pct) {
 /**
  * Render the comma-joined candidate cell for peak-attribution tables, with
  * an overflow suffix when the list exceeds BISECT_MARKDOWN_MAX. Same shape
- * for bisect (regression) and credit (win) sides — only the column heading
+ * for bisect (regression) and credit (win) sides. Only the column heading
  * differs at the call site.
  */
 function formatCandidateCell(candidates, repo) {
@@ -932,7 +932,7 @@ function computeHistoryStatus(metric, peakHist, driftHist) {
  *
  * Returns one of:
  *   { detected: false }                                                   — baselines match (or one/both unknown)
- *   { detected: true, magnitude: N, chain_len: K, missing: M }            — quantified; N in pp, positive = main got slower
+ *   { detected: true, magnitude: N, chain_len: K, missing: M }            — quantified. N in %, positive = main got slower
  *   { detected: true, magnitude: null, chain_len: K, missing: M }         — chain partially or wholly unwalkable
  *
  * Combines multiplicatively: ∏(1 + pct_i) − 1.

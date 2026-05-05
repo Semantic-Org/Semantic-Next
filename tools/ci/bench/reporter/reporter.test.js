@@ -356,7 +356,7 @@ test('cross-run: WIN when current pct-delta dominates historical peak', () => {
   assert.ok(markdown.includes('🏆 New peaks (1)'), 'New peaks section renders');
   assert.ok(markdown.includes('🏆 1 new peak'), 'headline includes new peak count');
   assert.ok(/improved \d+%/.test(markdown), 'delta uses % unit');
-  assert.ok(!/improved -\d+%/.test(markdown), 'delta drops negative sign for WIN — verb already encodes direction');
+  assert.ok(!/improved -\d+%/.test(markdown), 'delta drops negative sign for WIN: verb already encodes direction');
 });
 
 test('cross-run: peak links to PR conversation when PR number is known', () => {
