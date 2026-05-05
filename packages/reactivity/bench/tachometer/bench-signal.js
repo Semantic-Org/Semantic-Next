@@ -224,6 +224,108 @@ let sink = null;
 }
 
 /*******************************
+      Signal hot paths
+*******************************/
+
+// signal-set-same-10m — exercises the equality short-circuit. With no
+// subscribers attached, set(same) collapses to an equality check + early
+// return. V8 JIT inlines aggressively here (each set is ~8ns), so 10M
+// iterations are needed to land above the σ-floor. A regression that
+// bypasses the short-circuit (e.g., always-notify) inflates the per-set
+// cost an order of magnitude and lights up immediately.
+{
+  const sig = new Signal(42);
+  // purpose: Sets a signal to its current value 10000000 times to measure the no-op fast path when nothing changes.
+  performance.mark(startMark('signal-set-same-10m'));
+  for (let i = 0; i < 10_000_000; i++) {
+    sig.set(42);
+  }
+  performance.measure('signal-set-same-10m', startMark('signal-set-same-10m'));
+}
+
+// signal-sub-unsub-100k — measures the per-create/per-destroy cost of a
+// subscriber that reads one signal. Components with frequent mount/unmount
+// (modal dialogs, list virtualization, route transitions) hit this path
+// continuously. 100k cycles to clear the σ-floor at ~340ns/cycle.
+{
+  const sig = new Signal(0);
+  // purpose: Creates and tears down a subscriber on one signal across 100000 cycles to measure subscription churn cost.
+  performance.mark(startMark('signal-sub-unsub-100k'));
+  for (let i = 0; i < 100_000; i++) {
+    const r = Reaction.create(() => {
+      sink = sig.get();
+    });
+    r.stop();
+  }
+  performance.measure('signal-sub-unsub-100k', startMark('signal-sub-unsub-100k'));
+}
+
+/*******************************
+      Reaction scheduler
+*******************************/
+
+// reaction-flush-noop-5m — pure scheduler dispatch with no pending work.
+// Every microtask boundary that the framework reaches calls into the
+// scheduler; if dispatch has overhead, it accumulates across all reactive
+// activity. 5M iterations to comfortably clear σ-floor after V8 inlines
+// the empty path.
+{
+  // purpose: Calls Reaction.flush() 5000000 times with no pending work to measure scheduler dispatch overhead.
+  performance.mark(startMark('reaction-flush-noop-5m'));
+  for (let i = 0; i < 5_000_000; i++) {
+    Reaction.flush();
+  }
+  performance.measure('reaction-flush-noop-5m', startMark('reaction-flush-noop-5m'));
+}
+
+// reaction-coalesce-200x100 — 200 bursts, each setting the signal 100
+// times before one flush. With coalescing, all 100 subscribers wake once
+// per burst regardless of set count. Without coalescing, each subscriber
+// wakes 100 times per burst — wall-clock balloons proportionally.
+{
+  const sig = new Signal(0);
+  const subs = new Array(100);
+  for (let i = 0; i < 100; i++) {
+    subs[i] = Reaction.create(() => {
+      sink = sig.get();
+    });
+  }
+  // purpose: Sets one signal 100 times then flushes once across 200 bursts so 100 subscribers wake one time per burst.
+  performance.mark(startMark('reaction-coalesce-200x100'));
+  for (let burst = 0; burst < 200; burst++) {
+    for (let setN = 0; setN < 100; setN++) {
+      sig.set(burst * 100 + setN);
+    }
+    Reaction.flush();
+  }
+  performance.measure('reaction-coalesce-200x100', startMark('reaction-coalesce-200x100'));
+  for (let i = 0; i < 100; i++) { subs[i].stop(); }
+}
+
+// reaction-dep-diff-30k — a subscriber that reads a different signal
+// depending on a toggle. Each cycle flips the toggle, so the reaction's
+// dependency set changes (drops one signal, picks up another). Exercises
+// the per-run dep-set diffing path that fires on every reactive
+// expression's re-run in real components. 30k cycles to comfortably clear
+// the σ-floor at ~1µs/cycle.
+{
+  const sigA = new Signal('a');
+  const sigB = new Signal('b');
+  const toggle = new Signal(true);
+  const r = Reaction.create(() => {
+    sink = toggle.get() ? sigA.get() : sigB.get();
+  });
+  // purpose: Toggles which of two signals a subscriber reads across 30000 cycles to measure dependency-set diffing.
+  performance.mark(startMark('reaction-dep-diff-30k'));
+  for (let i = 0; i < 30_000; i++) {
+    toggle.set(i % 2 === 0);
+    Reaction.flush();
+  }
+  performance.measure('reaction-dep-diff-30k', startMark('reaction-dep-diff-30k'));
+  r.stop();
+}
+
+/*******************************
       Results
 *******************************/
 
