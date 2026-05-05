@@ -27,7 +27,9 @@ export const MAIN_BRANCH_INDEX = 1000;
 
 // Stamped on elements with dynamic bindings so the client can wire
 // Reactions without a reference-DOM walk. Encoding: `attr=N[,attr=N]*`
-// where N is the first-entry ID. Name prefixes: `.prop`, `@event`, `?attr`.
+// where N is the first-entry ID. Name prefixes: `.prop` for property
+// bindings, `@event` for event listeners; boolean attrs use the bare
+// name (classification.type === 'boolean' on the entry).
 export const DATA_SUI_BIND = 'data-sui-bind';
 
 // Closing-marker payload. `branchIndex` is the only reserved suffix.

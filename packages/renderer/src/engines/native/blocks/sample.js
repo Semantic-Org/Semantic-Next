@@ -80,10 +80,10 @@ const sample = defineBlock({
 
   /*
     render(bag) — first mount on the client (no server-rendered DOM to
-    adopt). The bag has the documented 9 keys (node, data, scope, region,
-    isSVG, serverMeta, self, plus the closures lookupExpression /
-    renderAST / hydrateInnerContent). Use them; don't pull from anywhere
-    else.
+    adopt). The bag has node, data, scope, region, isSVG, serverMeta,
+    self, plus the closures lookupExpression / renderAST /
+    hydrateInnerContent / hydrateInto. Use them; don't pull from
+    anywhere else.
 
     Pattern: build a fragment via renderAST(), put it in the region via
     region.setContent(fragment, optionalChildScope). The region owns DOM
