@@ -46,21 +46,36 @@ import { registerBlock } from './registry.js';
 
 function unpackBlobData(node, data, evaluator) {
   let blobData = {};
-  if (!node.data) { return blobData; }
-  if (isString(node.data)) {
-    const evaluated = evaluator.lookupExpressionValue(node.data, data);
-    if (isPlainObject(evaluated)) {
-      blobData = { ...blobData, ...evaluated };
+  if (node.data) {
+    if (isString(node.data)) {
+      const evaluated = evaluator.lookupExpressionValue(node.data, data);
+      if (isPlainObject(evaluated)) {
+        blobData = { ...blobData, ...evaluated };
+      }
+    }
+    else if (isPlainObject(node.data)) {
+      // Inside {#each}, read reactively so item-signal mutations propagate
+      // into subtemplate data. Outside each, static data={} stays non-reactive.
+      const inItemContext = isItemContext(data);
+      each(node.data, (expr, key) => {
+        blobData[key] = inItemContext
+          ? evaluator.lookupExpressionValue(expr, data)
+          : Reaction.nonreactive(() => evaluator.lookupExpressionValue(expr, data));
+      });
     }
   }
-  else if (isPlainObject(node.data)) {
-    // Inside {#each}, read reactively so item-signal mutations propagate
-    // into subtemplate data. Outside each, static data={} stays non-reactive.
-    const inItemContext = isItemContext(data);
-    each(node.data, (expr, key) => {
-      blobData[key] = inItemContext
-        ? evaluator.lookupExpressionValue(expr, data)
-        : Reaction.nonreactive(() => evaluator.lookupExpressionValue(expr, data));
+  // Seed reactiveData into the cloned template's `data` synchronously so
+  // closures captured by createComponent (e.g. methods reading
+  // `data.lineNumbers`) see the initial values at the moment the closure
+  // is built. setupReactiveSubtemplate's Reaction takes over for ongoing
+  // updates — its setKey calls mirror back into this same object via
+  // writeToParent. Reads happen in nonreactive scope so the source-signal
+  // deps register on the subtemplate's per-key Reaction (set up by
+  // setupReactiveSubtemplate) rather than on whatever Reaction is
+  // currently mounting the parent.
+  if (node.reactiveData) {
+    each(node.reactiveData, (expr, key) => {
+      blobData[key] = Reaction.nonreactive(() => evaluator.lookupExpressionValue(expr, data));
     });
   }
   return blobData;
