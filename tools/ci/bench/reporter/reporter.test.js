@@ -491,6 +491,139 @@ test('cross-run: sub-NOISE_FLOOR delta downgrades to TIED-PEAK even with non-ove
   assert.ok(!markdown.includes('New peaks'), 'no new peaks section');
 });
 
+test('cross-run: peak selection excludes touches_packages: false entries', () => {
+  // History: a harness-only commit with the most-improved percent_delta_ci,
+  // followed by a smaller measurement-touching peak. Peak selection must
+  // pick the smaller-but-eligible commit, not the harness-only outlier.
+  const prHistory = writeFixture({
+    schema_version: 2,
+    commits: [
+      {
+        sha: 'harness-9999999',
+        msg: 'Harness: tweak some skill',
+        parent_sha: '',
+        timestamp: '2026-04-20T00:00:00Z',
+        pr: null,
+        touches_packages: false,
+        metrics: {
+          'update-10th': {
+            ci: [5, 6],
+            mean_ms: 5.5,
+            percent_delta_ci: [-50, -45],
+            baseline_sha: 'mainA',
+          },
+        },
+      },
+      {
+        sha: 'real-pkg-1234',
+        msg: 'Refactor: real package change',
+        parent_sha: '',
+        timestamp: '2026-04-20T01:00:00Z',
+        pr: null,
+        touches_packages: true,
+        metrics: {
+          'update-10th': {
+            ci: [9, 10],
+            mean_ms: 9.5,
+            percent_delta_ci: [-20, -15],
+            baseline_sha: 'mainA',
+          },
+        },
+      },
+    ],
+  });
+  // Current pct-delta [-5, 0] regresses from the eligible peak [-20, -15],
+  // delta ~+15pp.
+  const dir = writeHandcraftedResults('update-10th', [11, 12], [11.5, 12.5], [-5, 0], 'mainA');
+  const { report } = runReporter({
+    resultsDir: dir,
+    sha: 'current',
+    msg: 'x',
+    baseSha: 'def',
+    prHistory,
+    scope: 'pr',
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(m.peak.sha, 'real-pkg-1234', 'peak is the bench-touching commit, not the harness one');
+  assert.equal(m.history_status, 'REOPENED');
+});
+
+test('cross-run: peak selection excludes outlier-noisy iterations (ratio gate)', () => {
+  // History: a wildly-noisy iteration with the most-improved midpoint
+  // (CI width way above expected for its duration), followed by a tighter
+  // iteration. The noisy peak's own resolution floor exceeds NOISE_FLOOR
+  // — anchoring the regression table to it would report deltas inside
+  // its own noise band. Peak selection must skip it.
+  const prHistory = writeFixture({
+    schema_version: 2,
+    commits: [
+      {
+        sha: 'noisy-7777777',
+        msg: 'Refactor: a noisy iteration',
+        parent_sha: '',
+        timestamp: '2026-04-20T00:00:00Z',
+        pr: null,
+        touches_packages: true,
+        metrics: {
+          'update-10th': {
+            ci: [9, 10],
+            mean_ms: 9.5,
+            // Width is 25pp; expected ≈ 0.784 * 2 / 9.5 * 100 ≈ 16.5pp.
+            // Ratio ≈ 1.5 — within tolerance.
+            percent_delta_ci: [-50, -25],
+            baseline_sha: 'mainA',
+          },
+        },
+      },
+      {
+        sha: 'tight-3333333',
+        msg: 'Refactor: a tighter iteration',
+        parent_sha: '',
+        timestamp: '2026-04-20T01:00:00Z',
+        pr: null,
+        touches_packages: true,
+        metrics: {
+          'update-10th': {
+            ci: [9, 10],
+            mean_ms: 9.5,
+            // Width 5pp; ratio ≈ 0.3 — well within tolerance.
+            percent_delta_ci: [-20, -15],
+            baseline_sha: 'mainA',
+          },
+        },
+      },
+      {
+        sha: 'huge-noise-1',
+        msg: 'Refactor: huge noise',
+        parent_sha: '',
+        timestamp: '2026-04-20T02:00:00Z',
+        pr: null,
+        touches_packages: true,
+        metrics: {
+          'update-10th': {
+            ci: [9, 10],
+            mean_ms: 9.5,
+            // Width 60pp; ratio ≈ 3.6 — over tolerance, skipped.
+            percent_delta_ci: [-90, -30],
+            baseline_sha: 'mainA',
+          },
+        },
+      },
+    ],
+  });
+  const dir = writeHandcraftedResults('update-10th', [11, 12], [11.5, 12.5], [-5, 0], 'mainA');
+  const { report } = runReporter({
+    resultsDir: dir,
+    sha: 'current',
+    msg: 'x',
+    baseSha: 'def',
+    prHistory,
+    scope: 'pr',
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.notEqual(m.peak.sha, 'huge-noise-1', 'too-noisy iteration is not picked as peak');
+});
+
 test('cross-run: bisect candidates exclude touches_packages: false entries', () => {
   // History: peak (touches packages), then a harness-only commit, then
   // current. The harness-only commit should not appear as a bisect candidate

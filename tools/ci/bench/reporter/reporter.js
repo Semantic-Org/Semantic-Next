@@ -924,9 +924,24 @@ function loadHistory(filePath) {
  */
 function computeHistoryStatus(metric, peakHist, driftHist) {
   if (!peakHist || peakHist.commits.length === 0) { return null; }
-  const entries = peakHist.commits.filter(
-    (c) => c.metrics?.[metric.name]?.percent_delta_ci,
-  );
+  // Eligible peaks must (a) have measured this metric, (b) have touched
+  // bench-relevant packages so the iteration could plausibly have moved
+  // the metric, and (c) have a within-session CI tight enough to anchor
+  // the comparison. The same-session classifier already uses ratio ≤
+  // NOISE_RATIO_TOLERANCE × expected to separate signal from boundary
+  // noise; an outlier-noisy iteration anchoring the peak would let the
+  // 'Regressions from peak' table report differences that are within the
+  // peak iteration's own resolution floor. `touches_packages` is set by
+  // fetch-pr-history per run; absent on legacy entries (default include).
+  const entries = peakHist.commits.filter((c) => {
+    const m = c.metrics?.[metric.name];
+    if (!m?.percent_delta_ci) { return false; }
+    if (c.touches_packages === false) { return false; }
+    const widthPp = m.percent_delta_ci[1] - m.percent_delta_ci[0];
+    const expectedPp = m.mean_ms > 0 ? expectedNoisePp(m.mean_ms) : 0;
+    if (expectedPp <= 0) { return true; }
+    return widthPp / expectedPp <= NOISE_RATIO_TOLERANCE;
+  });
   if (entries.length === 0) { return null; }
 
   // Pick peak. Tie-break: newer commit wins.
