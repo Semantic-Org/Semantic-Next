@@ -40,6 +40,15 @@ import { Dependency, Signal } from '@semantic-ui/reactivity';
   all sibling records, so writing per-record wrapper keys back into it
   would cross-contaminate siblings.
 
+  Proxy handler is module-scoped and stable across all instances. The
+  Proxy's target IS the ReactiveDataContext (`this`); handler functions
+  read instance state via `target.signals` / `target.parent` /
+  `target.keySetVersion`. This keeps V8's hidden-class shape stable
+  across the 1000+ records that mount benches construct, so the get-trap
+  path can establish a monomorphic inline cache. With per-instance
+  closure-captured handlers, V8 sees a fresh shape per record and falls
+  back to polymorphic dispatch.
+
 */
 
 const itemContextProxies = new WeakSet();
@@ -48,70 +57,70 @@ export function isItemContext(data) {
   return data != null && itemContextProxies.has(data);
 }
 
+function trapGet(target, prop) {
+  if (typeof prop === 'symbol') { return target.parent[prop]; }
+  const signal = target.signals.get(prop);
+  if (signal !== undefined) { return signal.value; }
+  target.keySetVersion.depend();
+  return target.parent[prop];
+}
+
+function trapHas(target, prop) {
+  return target.signals.has(prop) || (prop in target.parent);
+}
+
+function trapOwnKeys(target) {
+  const ownKeys = Reflect.ownKeys(target.parent);
+  const merged = [...target.signals.keys()];
+  for (const key of ownKeys) {
+    if (!target.signals.has(key)) { merged.push(key); }
+  }
+  return merged;
+}
+
+function trapGetOwnPropertyDescriptor(target, prop) {
+  if (target.signals.has(prop)) {
+    return {
+      configurable: true,
+      enumerable: true,
+      value: target.signals.get(prop).peek(),
+    };
+  }
+  return Object.getOwnPropertyDescriptor(target.parent, prop);
+}
+
+function trapSet(target, prop, value) {
+  const signal = target.signals.get(prop);
+  if (signal !== undefined) {
+    signal.set(value);
+    return true;
+  }
+  target.parent[prop] = value;
+  return true;
+}
+
+const HANDLER_RO = {
+  get: trapGet,
+  has: trapHas,
+  ownKeys: trapOwnKeys,
+  getOwnPropertyDescriptor: trapGetOwnPropertyDescriptor,
+};
+
+const HANDLER_RW = {
+  get: trapGet,
+  has: trapHas,
+  ownKeys: trapOwnKeys,
+  getOwnPropertyDescriptor: trapGetOwnPropertyDescriptor,
+  set: trapSet,
+};
+
 export class ReactiveDataContext {
   constructor(parent, { registerItemContext = false, writeToParent = false } = {}) {
     this.parent = parent;
     this.writeToParent = writeToParent;
     this.signals = new Map();
     this.keySetVersion = new Dependency();
-
-    const signals = this.signals;
-    const keySetVersion = this.keySetVersion;
-
-    // Set trap is only attached when writeToParent is true (subtemplate
-    // adoption). Without writeToParent, no caller writes through the
-    // proxy — each-block records use ctx.replace/setKey/notifyKey
-    // directly. Defining a set trap unconditionally pollutes V8's
-    // inline cache for the read path, costing ~3-5% on each-block
-    // mount benches with no observable benefit.
-    const proxyHandler = {
-      get(target, prop) {
-        if (typeof prop === 'symbol') { return target[prop]; }
-        const signal = signals.get(prop);
-        if (signal !== undefined) { return signal.value; }
-        keySetVersion.depend();
-        return target[prop];
-      },
-      has(target, prop) {
-        return signals.has(prop) || (prop in target);
-      },
-      ownKeys(target) {
-        const ownKeys = Reflect.ownKeys(target);
-        const merged = [...signals.keys()];
-        for (const key of ownKeys) {
-          if (!signals.has(key)) { merged.push(key); }
-        }
-        return merged;
-      },
-      getOwnPropertyDescriptor(target, prop) {
-        if (signals.has(prop)) {
-          return {
-            configurable: true,
-            enumerable: true,
-            value: signals.get(prop).peek(),
-          };
-        }
-        return Object.getOwnPropertyDescriptor(target, prop);
-      },
-    };
-
-    if (writeToParent) {
-      // Route writes through the per-key Signal when one exists so blob
-      // assignment paths (renderer.setData → assignInPlace → proxy[key] = v)
-      // notify subscribers instead of silently bypassing the per-key layer.
-      // Unknown keys default to writing the target.
-      proxyHandler.set = (target, prop, value) => {
-        const signal = signals.get(prop);
-        if (signal !== undefined) {
-          signal.set(value);
-          return true;
-        }
-        target[prop] = value;
-        return true;
-      };
-    }
-
-    this.proxy = new Proxy(parent, proxyHandler);
+    this.proxy = new Proxy(this, writeToParent ? HANDLER_RW : HANDLER_RO);
 
     if (registerItemContext) {
       itemContextProxies.add(this.proxy);
