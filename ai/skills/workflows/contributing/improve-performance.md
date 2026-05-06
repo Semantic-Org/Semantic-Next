@@ -352,15 +352,46 @@ Use vitest bench for fast iteration feedback. Do not treat vitest bench numbers 
 
 ### Step 6: Validate with Tachometer
 
-Once the optimization is stable and tests pass, validate with tachometer:
+Once the optimization is stable and tests pass, validate with tachometer. This is the authoritative measurement with statistical confidence intervals — every committed performance claim must be backed by tachometer results.
 
-```bash
-npm run bench:component
+**Check first — can this host run tachometer?**
+
+```sh
+grep -qi microsoft /proc/version && echo "WSL2 — push to CI" || echo "Native Linux/Mac — local works"
 ```
 
-This produces the authoritative measurement with statistical confidence intervals. Only commit performance claims backed by tachometer results.
+WSL2 is a known dead end (selenium-spawned chromedriver crashes with `ECONNREFUSED` before binding its HTTP port). On WSL2, push to a draft PR and use the bench-bot comment as your validation. On native Linux or macOS, run locally.
 
-For before/after comparison, run tachometer with two benchmark URLs in the same session — it round-robins to eliminate run-order bias.
+**Local before/after comparison.** Tachometer's `build-ci.js` produces two bundles — `dist/current/` from your working tree and `dist/baseline/` from main. The config compares them in one round-robin session, eliminating thermal/GC/JIT bias:
+
+```sh
+cd packages/<pkg>/bench/tachometer
+node build-ci.js current               # your working tree
+node build-ci.js baseline              # checks out main, builds, restores tree
+npx tachometer --config tachometer-ci-<suite>.json
+```
+
+**Run a single suite, not the whole battery.** Each `tachometer-ci-*.json` covers one suite (krausest, todo, template-reactivity, signal, hydrate). Pass the one you actually changed:
+
+```sh
+npx tachometer --config tachometer-ci-template-reactivity.json
+```
+
+CLI overrides for iteration speed (don't ship tuned numbers — these are for shaping, not committing):
+
+| CLI flag | Use for |
+|---|---|
+| `--sample-size=30` / `-n 30` | Faster passes during iteration. Below 30 → don't trust the CI |
+| `--timeout=2` | Cap wall-clock per config (default 3 min auto-sample) |
+| `--auto-sample-conditions=0%` | Zero-delta dry runs converge fastest with `0%` |
+| `--json-file=out.json` | Save raw output to inspect offline |
+
+**Reading the output.** Tachometer prints a per-metric verdict: `faster`, `slower`, `unsure`, or `no change`, with the 95% CI for percent-delta. Verdict definitions match the bench-bot's PR comment — see the `read-bench-report` skill. Two things specifically to check:
+
+- Confidence interval **width** as a percent of the mean. That's your local noise floor for each metric.
+- Whether the verdict matches your hypothesis. A `faster` verdict at the magnitude you expected is the signal. `unsure` with a CI tight to the noise floor means the bench is too short to resolve the change at this scale — amplify the workload (more iterations) or measure something else.
+
+**Don't substitute other tools.** Playwright, vitest bench, and direct Chrome runs all skip tachometer's round-robin sampling and convergence checks. Numbers from those tools are iteration-grade signal and never authoritative.
 
 ### Step 7: Clean Up
 
@@ -398,11 +429,18 @@ rm isolate-*.log
 
 ### tachometer (committed measurement)
 
-```bash
-cd packages/renderer
+WSL2 is a dead end — push to CI. On native Linux/macOS:
 
-npm run bench:component    # Run all component operations via tachometer config
+```bash
+cd packages/<pkg>/bench/tachometer
+node build-ci.js current
+node build-ci.js baseline
+npx tachometer --config tachometer-ci-<suite>.json
+# Iteration overrides: -n 30 / --timeout=2 / --auto-sample-conditions=0%
+# (don't ship tuned numbers; the JSON config is the committed config)
 ```
+
+`npm run bench:component` from the bench dir runs the full battery. Prefer the per-suite invocation above when iterating on one area.
 
 ## Packages with Bench Infrastructure
 

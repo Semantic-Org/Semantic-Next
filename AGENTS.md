@@ -109,12 +109,14 @@
   `Harness: Tighten framing for agents on PR merges`
   `Test: Add subtemplate settings tests`
   `Perf: Rewrite weightedObjectSearch`
+  `Bench: Add realistic-helper subtemplate metrics`
   `Refactor: Update todo-list to use canonical subtemplate patterns`
   `BREAKING: Rename formatDateTimeSeconds to formatTime`
   `Feat/Bug: Add protectedKeys to prevent clobbering of each/async vars`
 
   Settle on: `Bug` not `Fix`/`Bugs`, `Test` not `Tests`/`Testing`, `Build` not `Tools`/`Tooling`.
   `Harness:` covers the AI harness — agent skills, workflows, AGENTS.md, hooks, settings.json, MCP config. Anything shaping how agents operate in this repo (not the published framework itself).
+  `Bench:` covers tachometer benchmark additions, edits, and reporter changes. Distinct from `Perf:` (which changes runtime cost) and `Test:` (which gates correctness).
   Compound prefixes like `Feat/Bug:` or `Bug/Test:` are fine for cross-cutting changes.
   Optional monorepo scope: `Bug(reactivity): Fix race condition`. Scope is lowercase.
 
