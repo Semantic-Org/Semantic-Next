@@ -204,6 +204,128 @@ defineComponent({
   },
 });
 
+// Realistic-helper subtemplates. The four bench-template-reactivity
+// metrics above use trivial helpers (signal read + return) so per-key
+// isolation savings are at the µs-per-cycle scale and don't surface
+// against the rAF-bound wall clock. The two metrics below use helpers
+// shaped like the ones that show up in real apps — formatting via Intl
+// APIs, classIf chains, capitalize for display, plus the higher-cost
+// shapes (Array.find lookups, taxRules iteration, percent/ratio math
+// over a metrics object) that look innocent at the call site but
+// dominate per-binding cost when fanned out across many subtemplate
+// instances. Light and heavy variants let the report distinguish the
+// "formatting tier" cost from the "data-iterating tier" cost.
+
+const realisticLightChild = defineComponent({
+  renderingEngine: 'native',
+  template: [
+    '<div class="card {classIf isPriority \'priority\'}">',
+    '<div class="title">{capitalize title}</div>',
+    '<div class="time">{formatDate updatedAt \'h:mm a\'}</div>',
+    "<div class=\"status {classIf isOnline 'online' 'offline'}\">{capitalize status}</div>",
+    '<div class="role">{capitalize role}</div>',
+    '</div>',
+  ].join(''),
+});
+
+defineComponent({
+  tagName: 'bench-realistic-light',
+  renderingEngine: 'native',
+  template:
+    `{#each i in idxs}{>child title=getTitle updatedAt=getUpdatedAt status=getStatus role=getRole isPriority=getIsPriority isOnline=getIsOnline}{/each}`,
+  subTemplates: { child: realisticLightChild },
+  defaultState: {
+    titleVal: 'card title',
+    updatedAtVal: new Date('2024-07-24T09:15:30Z'),
+    statusVal: 'active',
+    roleVal: 'admin',
+    isPriorityVal: false,
+    isOnlineVal: true,
+  },
+  createComponent: ({ state }) => ({
+    idxs: Array.from({ length: 100 }, (_, i) => i),
+    getTitle: () => state.titleVal.get(),
+    getUpdatedAt: () => state.updatedAtVal.get(),
+    getStatus: () => state.statusVal.get(),
+    getRole: () => state.roleVal.get(),
+    getIsPriority: () => state.isPriorityVal.get(),
+    getIsOnline: () => state.isOnlineVal.get(),
+  }),
+});
+
+const realisticHeavyChild = defineComponent({
+  renderingEngine: 'native',
+  template: [
+    '<div class="card">',
+    '<div class="title">{title}</div>',
+    '<div class="price">{displayPrice}</div>',
+    '<div class="status">{statusLabel}</div>',
+    '<div class="owner">{ownerBadge}</div>',
+    '</div>',
+  ].join(''),
+});
+
+// Synthetic data shaped like real CRM/dashboard payloads — taxRules
+// iteration (think "regional VAT lookup per row"), allUsers Array.find
+// (the React-codebase classic), Intl.NumberFormat / toLocaleString
+// inside formatting helpers, snake_case → "Title Case" string
+// transforms. Each helper reads one source signal plus auxiliary data
+// it pulls non-reactively. With per-key isolation, mutating titleVal
+// should re-fire only the title binding's evaluator. Without it, all
+// four helpers run per child on every mutation.
+const heavyTaxRules = Array.from({ length: 12 }, (_, i) => ({
+  region: `r${i}`,
+  rate: 0.05 + (i % 4) * 0.0125,
+  applicableTo: i % 2 === 0 ? 'USD' : 'EUR',
+}));
+const heavyUsers = Array.from({ length: 50 }, (_, i) => ({
+  id: `u${i}`,
+  role: ['admin', 'editor', 'viewer', 'guest'][i % 4],
+  badge: `Tier ${i % 5}`,
+}));
+
+defineComponent({
+  tagName: 'bench-realistic-heavy',
+  renderingEngine: 'native',
+  template:
+    `{#each i in idxs}{>child title=getTitle displayPrice=getDisplayPrice statusLabel=getStatusLabel ownerBadge=getOwnerBadge}{/each}`,
+  subTemplates: { child: realisticHeavyChild },
+  defaultState: {
+    titleVal: 'card title',
+    amountVal: 1234.56,
+    statusVal: 'pending_admin_review',
+    ownerIdVal: 'u17',
+  },
+  createComponent: ({ state }) => ({
+    idxs: Array.from({ length: 100 }, (_, i) => i),
+    getTitle: () => state.titleVal.get(),
+    getDisplayPrice: () => {
+      const amount = state.amountVal.get();
+      let total = amount;
+      for (const t of heavyTaxRules) {
+        if (t.applicableTo === 'USD') { total += amount * t.rate; }
+      }
+      return total.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    },
+    getStatusLabel: () => {
+      const status = state.statusVal.get();
+      const parts = status.split('_');
+      const labels = new Array(parts.length);
+      for (let i = 0; i < parts.length; i++) {
+        const p = parts[i];
+        labels[i] = p[0].toUpperCase() + p.slice(1).toLowerCase();
+      }
+      return labels.join(' ');
+    },
+    getOwnerBadge: () => {
+      const id = state.ownerIdVal.get();
+      const user = heavyUsers.find((u) => u.id === id);
+      if (!user) { return ''; }
+      return `${user.role[0].toUpperCase()}${user.role.slice(1)} · ${user.badge}`;
+    },
+  }),
+});
+
 /*******************************
       Bench Runner
 *******************************/
@@ -329,6 +451,34 @@ for (let i = 0; i < 50; i++) {
   await flush();
 }
 performance.measure('active-indicator-nested-200', startMark('active-indicator-nested-200'));
+destroy();
+
+/*******************************
+      Realistic helpers — light
+*******************************/
+
+// purpose: 100 subtemplates, 4 inner bindings each calling formatDate / classIf / capitalize. Mutates one source signal — under per-key isolation, only the title binding's evaluator runs; without it, all four helpers re-fire per child on every cycle.
+const el11 = await mount('bench-realistic-light');
+performance.mark(startMark('subtemplate-helpers-light-100'));
+for (let i = 0; i < 50; i++) {
+  el11.template.state.titleVal.set(`title-${i}`);
+  await flush();
+}
+performance.measure('subtemplate-helpers-light-100', startMark('subtemplate-helpers-light-100'));
+destroy();
+
+/*******************************
+      Realistic helpers — heavy
+*******************************/
+
+// purpose: 100 subtemplates, 4 inner bindings where three call helpers shaped like userland reality — Intl.NumberFormat, Array.find against a 50-item lookup table, snake_case → Title Case string transform, taxRules iteration. Mutates titleVal only; per-key isolation should keep the three heavy helpers asleep.
+const el12 = await mount('bench-realistic-heavy');
+performance.mark(startMark('subtemplate-helpers-heavy-100'));
+for (let i = 0; i < 50; i++) {
+  el12.template.state.titleVal.set(`title-${i}`);
+  await flush();
+}
+performance.measure('subtemplate-helpers-heavy-100', startMark('subtemplate-helpers-heavy-100'));
 destroy();
 
 /*******************************
