@@ -95,24 +95,38 @@ Config must set `"resolveBareModules": false` so tachometer doesn't interfere wi
 
 ### Tachometer bench pattern
 
-Follow the pattern from [lit's benchmarks](https://github.com/nicolo-ribaudo/nicolo-ribaudo.github.io/tree/HEAD/nicolo-ribaudo.github.io/src/assets):
+Lit's bench harness ([lit/lit `packages/benchmarks`](https://github.com/lit/lit/tree/main/packages/benchmarks)) is the reference for the cycle-loop methodology used here. Same shape on this suite:
 
 1. **One HTML file** — import map + `<script type="module" src="./bench.js">`
 2. **One JS file** — imports, setup, all benchmark operations in sequence
 3. **`performance.mark()` / `performance.measure()`** — each operation emits a named measure
-4. **`requestAnimationFrame`** — wait for render completion between operations
-5. **Config** — `"mode": "performance"` with `"entryName"` for each measure
+4. **`Reaction.flush()`** inside cycle loops — sync drain of pending Reactions, **never `await rAF`**. rAF inside a measured loop gates each iteration on the 16.66ms vsync clock, so 50 cycles wall-clock at ~833ms regardless of work and sub-frame deltas vanish. lit-html benches are fully synchronous in the measured region for the same reason. See `extend-bench-suite` for the full anti-pattern call-out.
+5. **`await rAF` only outside measurement** (between metrics, in the `mount()` helper) or as a one-shot tail after a single huge bulk op where the work itself dominates.
+6. **Config** — `"mode": "performance"` with `"entryName"` for each measure
 
 ```js
 // bench.js
 import { defineComponent } from '@semantic-ui/component';
+import { Reaction } from '@semantic-ui/reactivity';
+
+const flush = () => new Promise(r => requestAnimationFrame(r));    // mount/cleanup
+const flushWork = () => Reaction.flush();                          // inside loops
 
 // ... setup ...
 
+// One-shot bulk op: work dominates, single rAF tail is fine.
 performance.mark('create-1k-start');
 el.component.create(1000);
-await new Promise(r => requestAnimationFrame(r));
+await flush();
 performance.measure('create-1k', 'create-1k-start');
+
+// Cycle loop: sync drain per iteration, no rAF.
+performance.mark('toggle-10-start');
+for (let i = 0; i < 10; i++) {
+  el.component.toggle(i);
+  flushWork();
+}
+performance.measure('toggle-10', 'toggle-10-start');
 ```
 
 ```json
@@ -371,10 +385,10 @@ node build-ci.js baseline              # checks out main, builds, restores tree
 npx tachometer --config tachometer-ci-<suite>.json
 ```
 
-**Run a single suite, not the whole battery.** Each `tachometer-ci-*.json` covers one suite (krausest, todo, template-reactivity, signal, hydrate). Pass the one you actually changed:
+**Run a single suite, not the whole battery.** Each `tachometer-ci-*.json` covers one suite (krausest, todo, template, signal, hydrate). Pass the one you actually changed:
 
 ```sh
-npx tachometer --config tachometer-ci-template-reactivity.json
+npx tachometer --config tachometer-ci-template.json
 ```
 
 CLI overrides for iteration speed (don't ship tuned numbers — these are for shaping, not committing):

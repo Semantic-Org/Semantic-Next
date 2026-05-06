@@ -114,11 +114,11 @@ const kitchenSinkTemplate = `<article class="card">
 // full parse path.
 {
   // purpose: Compiles a TodoMVC-style component template 500 times. Headline metric for normal-component compile throughput.
-  performance.mark(startMark('micro-compiler-parse-cold-normal-500'));
+  performance.mark(startMark('parse-cold-normal-500'));
   for (let i = 0; i < 500; i++) {
     new TemplateCompiler(normalTemplate).compile();
   }
-  performance.measure('micro-compiler-parse-cold-normal-500', startMark('micro-compiler-parse-cold-normal-500'));
+  performance.measure('parse-cold-normal-500', startMark('parse-cold-normal-500'));
 }
 
 /*******************************
@@ -130,11 +130,11 @@ const kitchenSinkTemplate = `<article class="card">
 // hoisting, slot) that don't show up in the normal-shape headline.
 {
   // purpose: Compiles a feature-dense kitchen-sink template 200 times. Catches parser regressions on uncommon block paths.
-  performance.mark(startMark('micro-compiler-parse-cold-complex-200'));
+  performance.mark(startMark('parse-cold-complex-200'));
   for (let i = 0; i < 200; i++) {
     new TemplateCompiler(kitchenSinkTemplate).compile();
   }
-  performance.measure('micro-compiler-parse-cold-complex-200', startMark('micro-compiler-parse-cold-complex-200'));
+  performance.measure('parse-cold-complex-200', startMark('parse-cold-complex-200'));
 }
 
 /*******************************
@@ -152,11 +152,11 @@ const kitchenSinkTemplate = `<article class="card">
   const astWalkAST = new TemplateCompiler(kitchenSinkTemplate).compile();
 
   // purpose: Walks a kitchen-sink AST through optimizeAST 5000 times. Merge, hoist, and recurse pass.
-  performance.mark(startMark('micro-compiler-ast-walk-5k'));
+  performance.mark(startMark('ast-walk-5k'));
   for (let i = 0; i < 5_000; i++) {
     TemplateCompiler.optimizeAST(astWalkAST);
   }
-  performance.measure('micro-compiler-ast-walk-5k', startMark('micro-compiler-ast-walk-5k'));
+  performance.measure('ast-walk-5k', startMark('ast-walk-5k'));
 }
 
 /*******************************
@@ -180,14 +180,14 @@ const kitchenSinkTemplate = `<article class="card">
   ];
 
   // purpose: Parses four representative subtemplate-call shapes 5000 times each. Snippet args extraction.
-  performance.mark(startMark('micro-compiler-snippet-args-5k'));
+  performance.mark(startMark('snippet-args-5k'));
   for (let i = 0; i < 5_000; i++) {
     snippetArgsCompiler.parseTemplateString(snippetArgsExprs[0]);
     snippetArgsCompiler.parseTemplateString(snippetArgsExprs[1]);
     snippetArgsCompiler.parseTemplateString(snippetArgsExprs[2]);
     snippetArgsCompiler.parseTemplateString(snippetArgsExprs[3]);
   }
-  performance.measure('micro-compiler-snippet-args-5k', startMark('micro-compiler-snippet-args-5k'));
+  performance.measure('snippet-args-5k', startMark('snippet-args-5k'));
 }
 
 /*******************************

@@ -130,25 +130,23 @@ const PEAK_SECTIONS = {
     status: 'REOPENED',
     headingPrefix: '📜 Regressions from peak',
     description:
-      `These metrics were faster on an earlier push to this PR than they are now, and the gap is bigger than measurement noise. The candidates list is the commits between the best run and this one that touched \`packages/\` and got benched — the most recent one is usually where to look. Cancelled or superseded runs aren't included.`,
-    columnHeader: '| metric | current | peak | vs peak | bisect candidates |',
+      `These metrics were faster on an earlier push to this PR. The most recent candidate is usually where to look.`,
+    columnHeader: '| metric | regression | prior peak | likely candidates |',
     // Largest % regression first (descending on signed delta).
     sortSign: -1,
-    formatDelta: (delta) =>
-      delta > 0
-        ? `regressed +${delta.toFixed(0)}%`
-        : `${delta.toFixed(0)}%`,
+    // delta_from_peak_pct is positive for REOPENED (current is worse). Show
+    // bare magnitude — the column header already encodes direction.
+    formatDelta: (delta) => `${Math.abs(delta).toFixed(0)}%`,
   },
   win: {
     status: 'WIN',
     headingPrefix: '🏆 New peaks',
-    description:
-      `These metrics are faster than they've ever been on this PR, beyond measurement noise. The candidates list is the commits between the previous best and this one that touched \`packages/\` and got benched — the most recent one is usually the cause. Cancelled or superseded runs aren't included.`,
-    columnHeader: '| metric | current | prior peak | vs prior peak | credit candidates |',
+    description: `These metrics hit a new best on this PR. The most recent candidate is usually the cause.`,
+    columnHeader: '| metric | improvement | prior peak | likely candidates |',
     // Most-improved first. delta_from_peak_pct is negative for WIN, so
     // ascending sort surfaces the best.
     sortSign: 1,
-    formatDelta: (delta) => `improved ${Math.abs(delta).toFixed(0)}%`,
+    formatDelta: (delta) => `${Math.abs(delta).toFixed(0)}%`,
   },
 };
 
@@ -464,7 +462,7 @@ function renderMarkdown(report) {
       lines.push(`#### Inconclusive (${inconclusive.length})`);
       lines.push('');
       lines.push(
-        `The measurement crossed the ±${NOISE_FLOOR}% line and is wider than this bench's duration usually produces. More samples might land it on one side. Benches that keep showing up here are inherently noisy — make them do more work per run, or accept that this is their floor.`,
+        `The CI crossed ±${NOISE_FLOOR}% and is wider than this bench's duration usually produces. More samples may settle these.`,
       );
       lines.push('');
       lines.push('| metric | Change | Expected Noise |');
@@ -542,7 +540,15 @@ function renderMarkdown(report) {
 function renderGlossarySection(lines, report) {
   const rows = report.metrics.filter((m) => m.purpose);
   if (rows.length === 0) { return; }
-  const sorted = [...rows].sort((a, b) => a.name.localeCompare(b.name));
+  // Composite sort: groupid (bench-file prefix) first, testid (metric name)
+  // within group. Bare-metric-alpha mixed suites visually random — grouping
+  // by suite reads as "all todo:* together, then all template:*".
+  const sorted = [...rows].sort((a, b) => {
+    const pa = benchPrefix(a.source?.path) ?? '';
+    const pb = benchPrefix(b.source?.path) ?? '';
+    if (pa !== pb) { return pa.localeCompare(pb); }
+    return a.name.localeCompare(b.name);
+  });
   lines.push('<details>');
   lines.push(`<summary>📖 Bench glossary (${sorted.length} metric${sorted.length === 1 ? '' : 's'})</summary>`);
   lines.push('');
@@ -592,22 +598,28 @@ function renderPeakSection(lines, report, kind) {
   lines.push(config.description);
   lines.push('');
   lines.push(config.columnHeader);
-  lines.push('|---|---|---|---|---|');
+  lines.push('|---|---|---|---|');
 
   const flagged = [];
 
   for (const m of sorted) {
-    const currentStr = formatSignedPct(mid(m.percent_change_ci));
-    const peakStr = formatSignedPct(mid(m.peak.percent_delta_ci));
     const peakLink = commitOrPrLink(m.peak, report.repo);
     const deltaStr = config.formatDelta(m.delta_from_peak_pct);
-    const candCell = formatCandidateCell(m.bisect_candidates, report.repo);
+    const candCell = formatCandidateCell(
+      m.bisect_candidates,
+      report.repo,
+      m.peak.sha,
+      report.head.sha,
+    );
 
-    // Drift fires on threshold breach or chain-gap (magnitude unavailable).
+    // Drift fires only when the chain quantifies a meaningful main-side move.
+    // Chain-gap cases (magnitude unavailable) don't render — the warning was
+    // unactionable noise, especially on long-lived PRs whose peak baselines
+    // age out of bench-history.
     let driftFlag = '';
     if (m.drift?.detected) {
       const mag = m.drift.magnitude;
-      const fires = mag === null || Math.abs(mag) >= DRIFT_THRESHOLD_PP;
+      const fires = mag !== null && Math.abs(mag) >= DRIFT_THRESHOLD_PP;
       if (fires) {
         const idx = flagged.length + 1;
         driftFlag = ` ⚠️${idx}`;
@@ -622,7 +634,7 @@ function renderPeakSection(lines, report, kind) {
     }
 
     lines.push(
-      `| ${metricLink(m, report)} | ${currentStr}${driftFlag} | ${peakStr} @ ${peakLink} | ${deltaStr} | ${candCell} |`,
+      `| ${metricLink(m, report)} | ${deltaStr}${driftFlag} | ${peakLink} | ${candCell} |`,
     );
   }
   lines.push('');
@@ -635,46 +647,48 @@ function renderPeakSection(lines, report, kind) {
   }
 }
 
-function formatSignedPct(pct) {
-  return pct > 0 ? `+${pct.toFixed(0)}%` : `${pct.toFixed(0)}%`;
-}
-
 /**
- * Render the comma-joined candidate cell for peak-attribution tables, with
- * an overflow suffix when the list exceeds BISECT_MARKDOWN_MAX. Same shape
- * for bisect (regression) and credit (win) sides. Only the column heading
- * differs at the call site.
+ * Render the comma-joined candidate cell for peak-attribution tables. Same
+ * shape for bisect (regression) and credit (win) sides — only the column
+ * heading differs at the call site.
+ *
+ * Display order is reverse-chronological (newest first) so the eye lands
+ * on the most-likely culprit per the section description's recent-bias
+ * heuristic. JSON `bisect_candidates` stays chronological for agent
+ * stability.
+ *
+ * On overflow, the `+N more` tail becomes a link to GitHub's compare view
+ * for `peakSha...currentSha`. Compare view shows commits + cumulative diff
+ * across the range — a single click takes a reviewer to the full bisect
+ * surface. Note: compare includes commits we filtered out of `candidates`
+ * (harness-only, cancelled runs); the explicit list narrows, the compare
+ * link broadens for context.
  */
-function formatCandidateCell(candidates, repo) {
+function formatCandidateCell(candidates, repo, peakSha, currentSha) {
   if (!candidates || candidates.length === 0) { return '—'; }
-  const md = candidates
+  const ordered = [...candidates].reverse();
+  const md = ordered
     .slice(0, BISECT_MARKDOWN_MAX)
     .map((c) => commitOrPrLink(c, repo))
     .join(', ');
-  return candidates.length > BISECT_MARKDOWN_MAX
-    ? `${md} +${candidates.length - BISECT_MARKDOWN_MAX} more`
-    : md;
+  if (ordered.length <= BISECT_MARKDOWN_MAX) { return md; }
+  const remaining = ordered.length - BISECT_MARKDOWN_MAX;
+  if (!repo || !peakSha || !currentSha) {
+    return `${md} +${remaining} more`;
+  }
+  const compareUrl = `https://github.com/${repo}/compare/${peakSha}...${currentSha}`;
+  return `${md} ([+${remaining} more](${compareUrl}))`;
 }
 
 function formatDriftFootnote({ idx, metric, drift, currentBaseline, peakBaseline }) {
   const peakSha = peakBaseline ? peakBaseline.slice(0, 7) : '?';
   const currentSha = currentBaseline ? currentBaseline.slice(0, 7) : '?';
-  if (drift.magnitude !== null) {
-    const sign = drift.magnitude > 0 ? '+' : '';
-    const links = drift.chain_len === 1 ? '1 main commit' : `${drift.chain_len} main commits`;
-    return (
-      `⚠️${idx} main moved ${sign}${drift.magnitude.toFixed(0)}pp on \`${metric}\` `
-      + `between baselines (\`${peakSha}\` → \`${currentSha}\`, chained across ${links}). `
-      + `Comparison may include main-side change.`
-    );
-  }
-  const total = drift.chain_len + drift.missing;
-  const detail = total === 0
-    ? '0 entries available in chain'
-    : `${drift.missing}/${total} entries missing percent_delta_ci`;
+  const sign = drift.magnitude > 0 ? '+' : '';
+  const links = drift.chain_len === 1 ? '1 main commit' : `${drift.chain_len} main commits`;
   return (
-    `⚠️${idx} main moved between baselines on \`${metric}\` (\`${peakSha}\` → \`${currentSha}\`); `
-    + `drift magnitude unavailable (${detail}). Comparison may include main-side change.`
+    `⚠️${idx} main moved ${sign}${drift.magnitude.toFixed(0)}pp on \`${metric}\` `
+    + `between baselines (\`${peakSha}\` → \`${currentSha}\`, chained across ${links}). `
+    + `Comparison may include main-side change.`
   );
 }
 
@@ -791,9 +805,29 @@ function fmtSinglePoint(m, direction) {
   return `${pctSign}${Math.round(midPct)}% (${Math.round(midMs)}ms)${severitySuffix(midPct, direction)}`;
 }
 
-/** Metric name → markdown link to bench source at run's SHA, or plain code if unresolved. */
+/**
+ * `bench-todo.js` → `todo`. Strips the `bench-` prefix and `.js` suffix from
+ * the source filename to use as a suite hint in metric labels. Returns null
+ * when the source isn't resolved (metric falls back to bare name).
+ */
+function benchPrefix(sourcePath) {
+  if (!sourcePath) { return null; }
+  const file = sourcePath.split('/').pop();
+  const stripped = file.replace(/^bench-/, '').replace(/\.js$/, '');
+  return stripped || null;
+}
+
+/**
+ * Metric name → markdown link to bench source at run's SHA, or plain code
+ * if unresolved. Label is prefixed with the bench-file basename
+ * (`todo:bulk-add-500`) so reviewers can group rows by suite at a glance —
+ * disambiguates `remove-*` / `clear-*` operations that exist in both
+ * `bench-todo` and `bench-krausest`.
+ */
 function metricLink(m, report) {
-  const label = `\`${m.name}\``;
+  const prefix = benchPrefix(m.source?.path);
+  const display = prefix ? `${prefix}:${m.name}` : m.name;
+  const label = `\`${display}\``;
   if (!report.repo || !m.source) { return label; }
   const hashPart = m.source.line ? `#L${m.source.line}` : '';
   return `[${label}](https://github.com/${report.repo}/blob/${report.head.sha}/${m.source.path}${hashPart})`;

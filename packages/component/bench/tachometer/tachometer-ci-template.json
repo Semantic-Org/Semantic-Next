@@ -7,7 +7,7 @@
   "benchmarks": [
     {
       "name": "this-change",
-      "url": "ci-current-template-reactivity.html",
+      "url": "ci-current-template.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
         { "mode": "performance", "entryName": "subtemplate-reactive-data-100" },
@@ -25,7 +25,7 @@
     },
     {
       "name": "tip-of-tree",
-      "url": "ci-baseline-template-reactivity.html",
+      "url": "ci-baseline-template.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
         { "mode": "performance", "entryName": "subtemplate-reactive-data-100" },

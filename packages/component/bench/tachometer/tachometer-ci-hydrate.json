@@ -10,10 +10,10 @@
       "url": "ci-current-hydrate.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
-        { "mode": "performance", "entryName": "hydrate-each-100-mount" },
-        { "mode": "performance", "entryName": "hydrate-each-100" },
-        { "mode": "performance", "entryName": "hydrate-helper-100-mount" },
-        { "mode": "performance", "entryName": "hydrate-helper-100-state-change" }
+        { "mode": "performance", "entryName": "each-100-mount" },
+        { "mode": "performance", "entryName": "each-100" },
+        { "mode": "performance", "entryName": "helper-100-mount" },
+        { "mode": "performance", "entryName": "helper-100-state-change" }
       ]
     },
     {
@@ -21,10 +21,10 @@
       "url": "ci-baseline-hydrate.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
-        { "mode": "performance", "entryName": "hydrate-each-100-mount" },
-        { "mode": "performance", "entryName": "hydrate-each-100" },
-        { "mode": "performance", "entryName": "hydrate-helper-100-mount" },
-        { "mode": "performance", "entryName": "hydrate-helper-100-state-change" }
+        { "mode": "performance", "entryName": "each-100-mount" },
+        { "mode": "performance", "entryName": "each-100" },
+        { "mode": "performance", "entryName": "helper-100-mount" },
+        { "mode": "performance", "entryName": "helper-100-state-change" }
       ]
     }
   ]

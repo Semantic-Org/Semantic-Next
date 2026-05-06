@@ -1,13 +1,14 @@
 import { defineComponent } from '@semantic-ui/component';
+import { Reaction } from '@semantic-ui/reactivity';
 import { ServerRenderer } from '@semantic-ui/renderer';
 
 /*
   Hydrate-each — two windows:
 
-  1. `hydrate-each-100-mount` — DSD parse + connectedCallback + the hydrate
+  1. `each-100-mount` — DSD parse + connectedCallback + the hydrate
      microtask (eager `adoptServerItems`) + post-hydrate rAF. Per-item
      wiring cost lives here.
-  2. `hydrate-each-100` — post-mount items mutation. Items dependency wakes,
+  2. `each-100` — post-mount items mutation. Items dependency wakes,
      `each.update` reconciles same keys, hits same-ref path. Mostly the
      reconcile walk + Phase 3 snapshot diff.
 
@@ -78,8 +79,18 @@ function ssrList(items) {
 const container = document.createElement('div');
 document.body.appendChild(container);
 
+// Pre-measurement / between-metric idle wait. rAF gates `mount()` so any
+// connectedCallback-deferred microtasks settle before the next metric
+// starts.
 const flush = () => new Promise(r => requestAnimationFrame(r));
 const drainMicrotasks = () => new Promise(r => setTimeout(r, 0));
+// Sync drain of pending Reactions. Used inside `performance.mark` ...
+// `performance.measure` regions where a per-iteration `await rAF` would
+// dominate wall-clock with 16ms idle gaps and bury sub-frame JS-work
+// deltas. The reactivity Scheduler flushes on a microtask, so calling
+// `Reaction.flush()` immediately after a `signal.set` runs every queued
+// Reaction synchronously — exactly what we want to measure.
+const flushWork = () => Reaction.flush();
 const startMark = (name) => `${name}-start`;
 
 /*******************************
@@ -95,11 +106,11 @@ const startMark = (name) => `${name}-start`;
 const itemsForMount = makeItems(1000);
 const dsdHTMLForMount = ssrList(itemsForMount);
 // purpose: Hydrates a server-rendered 1000-item list and waits for it to become interactive without re-rendering.
-performance.mark(startMark('hydrate-each-100-mount'));
+performance.mark(startMark('each-100-mount'));
 container.setHTMLUnsafe(dsdHTMLForMount);
 await drainMicrotasks();
 await flush();
-performance.measure('hydrate-each-100-mount', startMark('hydrate-each-100-mount'));
+performance.measure('each-100-mount', startMark('each-100-mount'));
 const elForMutate = container.firstElementChild;
 
 /*******************************
@@ -110,10 +121,10 @@ const elForMutate = container.firstElementChild;
 // Fresh array reference, same keys as SSR markers — exercises the items
 // dependency wake + per-Signal equality gate without DOM work.
 // purpose: Reassigns the items of a hydrated 1000-item list to a fresh array with the same keys and data.
-performance.mark(startMark('hydrate-each-100'));
+performance.mark(startMark('each-100'));
 elForMutate.component.setItems(itemsForMount.slice());
 await flush();
-performance.measure('hydrate-each-100', startMark('hydrate-each-100'));
+performance.measure('each-100', startMark('each-100'));
 container.innerHTML = '';
 
 /*******************************
@@ -175,11 +186,11 @@ function ssrHelperList(items) {
 const helperItems = makeItems(1000);
 const dsdHTMLForHelper = ssrHelperList(helperItems);
 // purpose: Hydrates a 1000-item list where each item calls a helper that reads state shared across the list.
-performance.mark(startMark('hydrate-helper-100-mount'));
+performance.mark(startMark('helper-100-mount'));
 container.setHTMLUnsafe(dsdHTMLForHelper);
 await drainMicrotasks();
 await flush();
-performance.measure('hydrate-helper-100-mount', startMark('hydrate-helper-100-mount'));
+performance.measure('helper-100-mount', startMark('helper-100-mount'));
 const elHelper = container.firstElementChild;
 
 /*******************************
@@ -192,12 +203,12 @@ const elHelper = container.firstElementChild;
 // wired at hydrate are reactive to external state, not just to
 // itemSignal mutations. 10 cycles amplifies the work above the σ-floor.
 // purpose: Cycles the shared activeID through 10 different items in a hydrated 1000-item list so two items repaint per cycle.
-performance.mark(startMark('hydrate-helper-100-state-change'));
+performance.mark(startMark('helper-100-state-change'));
 for (let i = 0; i < 10; i++) {
   elHelper.component.setActive(`id-${i * 100}`);
-  await flush();
+  flushWork();
 }
-performance.measure('hydrate-helper-100-state-change', startMark('hydrate-helper-100-state-change'));
+performance.measure('helper-100-state-change', startMark('helper-100-state-change'));
 container.innerHTML = '';
 
 /*******************************

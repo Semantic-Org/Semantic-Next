@@ -87,47 +87,47 @@ const data = {
 // the bound Reaction). The discard is safe and intentional — what we're
 // timing is dispatch + cache + parse, not what we'd do with the result.
 
-// micro-expr-simple-100k — property-lookup hot path. Production
+// expr-simple-100k — property-lookup hot path. Production
 // distribution puts ~79% of expression evaluations here (60% simple
 // identifier, ~21% dotted path). Two evaluations per iteration covers
 // both shapes with the same instance + cache state.
 {
   const evaluator = new ExpressionEvaluator({ data, helpers });
   // purpose: Evaluates one simple identifier and one dotted path 100000 times each. Property-lookup hot path.
-  performance.mark(startMark('micro-expr-simple-100k'));
+  performance.mark(startMark('expr-simple-100k'));
   for (let i = 0; i < 100_000; i++) {
     evaluator.evaluate('count', data);
     evaluator.evaluate('user.name', data);
   }
-  performance.measure('micro-expr-simple-100k', startMark('micro-expr-simple-100k'));
+  performance.measure('expr-simple-100k', startMark('expr-simple-100k'));
 }
 
-// micro-expr-lisp-50k — Lisp-style helper invocation. Production
+// expr-lisp-50k — Lisp-style helper invocation. Production
 // distribution puts ~19% of evaluations here. Each call goes through
 // parse-cache lookup + helper dispatch.
 {
   const evaluator = new ExpressionEvaluator({ data, helpers });
   // purpose: Evaluates one Lisp-style helper call 50000 times. Parse-cache lookup and helper dispatch.
-  performance.mark(startMark('micro-expr-lisp-50k'));
+  performance.mark(startMark('expr-lisp-50k'));
   for (let i = 0; i < 50_000; i++) {
     evaluator.evaluate("classIf isActive 'active'", data);
   }
-  performance.measure('micro-expr-lisp-50k', startMark('micro-expr-lisp-50k'));
+  performance.measure('expr-lisp-50k', startMark('expr-lisp-50k'));
 }
 
-// micro-expr-js-10k — JS expression eval via new Function + Proxy.
+// expr-js-10k — JS expression eval via new Function + Proxy.
 // Production distribution puts ~2% of evaluations here, but the per-call
 // cost is high enough that it's worth isolating — a regression that
 // rebuilds the function per call would be invisible in macro suites.
 {
   const evaluator = new ExpressionEvaluator({ data, helpers });
   // purpose: Evaluates one arithmetic expression and one ternary 10000 times each. JS-eval hot path.
-  performance.mark(startMark('micro-expr-js-10k'));
+  performance.mark(startMark('expr-js-10k'));
   for (let i = 0; i < 10_000; i++) {
     evaluator.evaluate('count + 1', data);
     evaluator.evaluate("isOpen ? 'open' : 'closed'", data);
   }
-  performance.measure('micro-expr-js-10k', startMark('micro-expr-js-10k'));
+  performance.measure('expr-js-10k', startMark('expr-js-10k'));
 }
 
 /*******************************
@@ -148,11 +148,11 @@ const data = {
   const buildHTMLStringAST = new TemplateCompiler(buildHTMLStringTemplate).compile();
 
   // purpose: Builds the HTML string for a realistic card AST 10000 times. Raw assembly throughput.
-  performance.mark(startMark('micro-build-html-string-10k'));
+  performance.mark(startMark('build-html-string-10k'));
   for (let i = 0; i < 10_000; i++) {
     buildHTMLString(buildHTMLStringAST);
   }
-  performance.measure('micro-build-html-string-10k', startMark('micro-build-html-string-10k'));
+  performance.measure('build-html-string-10k', startMark('build-html-string-10k'));
 }
 
 /*******************************
@@ -229,12 +229,12 @@ const data = {
   const { entries: domWalkerEntries } = domWalkerRenderers[0].buildHTMLString(domWalkerAST, false);
 
   // purpose: Runs bindMarkers across a 1000-node card fragment 15 times. TreeWalker pass and binding dispatch.
-  performance.mark(startMark('micro-dom-walker-1000x15'));
+  performance.mark(startMark('dom-walker-1000x15'));
   for (let r = 0; r < REPS; r++) {
     const renderer = domWalkerRenderers[r];
     renderer.bindMarkers(domWalkerFragments[r], domWalkerEntries, domWalkerData, renderer.scope, domWalkerAST);
   }
-  performance.measure('micro-dom-walker-1000x15', startMark('micro-dom-walker-1000x15'));
+  performance.measure('dom-walker-1000x15', startMark('dom-walker-1000x15'));
 }
 
 /*******************************
