@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
-import { each, fatal, isPlainObject, isString, keys } from '@semantic-ui/utils';
+import { each, fatal, isPlainObject, isString } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
 import { isItemContext } from '../reactive-context.js';
 import { registerBlock } from './registry.js';
@@ -81,75 +81,102 @@ function unpackBlobData(node, data, evaluator) {
 // binding's Reaction subscribes directly to its inputs — per-key
 // isolation is structural, not mediated by an intermediate Dep layer.
 //
-// `target` is the underlying object the proxy fronts. For snippets this
-// is the parent data context (snippets share the parent scope). For
-// subtemplates this is the cloned Template's `this.data` — state and
-// instance overlay live on `target` so non-arg lookups resolve there.
+// The Proxy target is a small holder object (target / allGetters /
+// getterKeys); the trap handler is module-scoped (ARGS_HANDLER) so V8
+// sees the same handler shape across every subtemplate / snippet
+// mount and can establish monomorphic inline caches at the trap
+// dispatch sites. With per-call closure-captured handlers V8 falls
+// back to polymorphic dispatch, which is what made bulk-add-500 /
+// filter-cycle-20 regress when the lazy proxy moved onto the
+// subtemplate path.
 //
 // has / ownKeys / getOwnPropertyDescriptor make declared keys visible
 // to `prop in proxy`, Object.keys, and descriptor-aware spreads (extend
 // uses Object.getOwnPropertyDescriptor and re-defines as a getter — so
 // descriptor-style copies preserve laziness).
+//
+// defineProperty / deleteProperty / getPrototypeOf forward to
+// holder.target so callers that mutate the proxy via descriptor APIs
+// (e.g. Template.overlaySettingsSignals) hit the underlying data
+// object, not the holder.
+
+// No-op setter included in the getter descriptor so `extend`-style
+// copies (Object.defineProperty against this descriptor) accept
+// assignment when overlays write the same key. Writes are absorbed;
+// subsequent reads still resolve through the lazy getter.
+const ABSORB_SET = () => {};
+
+const ARGS_HANDLER = {
+  get(holder, prop) {
+    if (typeof prop === 'symbol') { return holder.target[prop]; }
+    const getter = holder.allGetters[prop];
+    if (getter !== undefined) { return getter(); }
+    return holder.target[prop];
+  },
+  set(holder, prop, value) {
+    if (prop in holder.allGetters) { return true; }
+    holder.target[prop] = value;
+    return true;
+  },
+  has(holder, prop) {
+    return (prop in holder.allGetters) || (prop in holder.target);
+  },
+  ownKeys(holder) {
+    const ownKeys = Reflect.ownKeys(holder.target);
+    const merged = [...holder.getterKeys];
+    for (const key of ownKeys) {
+      if (!(key in holder.allGetters)) { merged.push(key); }
+    }
+    return merged;
+  },
+  getOwnPropertyDescriptor(holder, prop) {
+    const getter = holder.allGetters[prop];
+    if (getter !== undefined) {
+      return { configurable: true, enumerable: true, get: getter, set: ABSORB_SET };
+    }
+    return Object.getOwnPropertyDescriptor(holder.target, prop);
+  },
+  defineProperty(holder, prop, descriptor) {
+    return Reflect.defineProperty(holder.target, prop, descriptor);
+  },
+  deleteProperty(holder, prop) {
+    return delete holder.target[prop];
+  },
+  getPrototypeOf(holder) {
+    return Reflect.getPrototypeOf(holder.target);
+  },
+};
+
 function buildArgsProxy({ node, parentData, evaluator, target }) {
-  const staticGetters = {};
-  const reactiveGetters = {};
+  const allGetters = Object.create(null);
 
   if (node.data) {
     if (isString(node.data)) {
       const evaluated = evaluator.lookupExpressionValue(node.data, parentData);
       if (isPlainObject(evaluated)) {
         each(evaluated, (val, key) => {
-          staticGetters[key] = () => val;
+          allGetters[key] = () => val;
         });
       }
     }
     else if (isPlainObject(node.data)) {
       each(node.data, (expr, key) => {
-        staticGetters[key] = () => evaluator.lookupExpressionValue(expr, parentData);
+        allGetters[key] = () => evaluator.lookupExpressionValue(expr, parentData);
       });
     }
   }
   if (node.reactiveData) {
     each(node.reactiveData, (expr, key) => {
-      reactiveGetters[key] = () => evaluator.lookupExpressionValue(expr, parentData);
+      allGetters[key] = () => evaluator.lookupExpressionValue(expr, parentData);
     });
   }
 
-  const allGetters = { ...staticGetters, ...reactiveGetters };
-  const getterKeys = keys(allGetters);
+  const getterKeys = Object.keys(allGetters);
+  // Empty-args fast path — no-arg snippet invocations (`{>name}`) skip
+  // the Proxy entirely and use the parent data context directly.
+  if (getterKeys.length === 0) { return target; }
 
-  // Descriptor includes a no-op setter so that `extend`-style copies
-  // (Object.defineProperty against this descriptor) accept assignment
-  // when overlays write the same key — e.g. Template.overlaySettingsSignals
-  // overwriting a settings-keyed property with its Signal. Writes are
-  // absorbed; subsequent reads still resolve through the lazy getter,
-  // keeping the source expression as the source of truth.
-  const absorbSet = () => {};
-
-  return new Proxy(target, {
-    get(target, prop) {
-      if (typeof prop === 'symbol') { return target[prop]; }
-      if (prop in allGetters) { return allGetters[prop](); }
-      return target[prop];
-    },
-    set(target, prop, value) {
-      if (prop in allGetters) { return true; }
-      target[prop] = value;
-      return true;
-    },
-    has(target, prop) {
-      return (prop in allGetters) || (prop in target);
-    },
-    ownKeys(target) {
-      return [...new Set([...getterKeys, ...Reflect.ownKeys(target)])];
-    },
-    getOwnPropertyDescriptor(target, prop) {
-      if (prop in allGetters) {
-        return { configurable: true, enumerable: true, get: allGetters[prop], set: absorbSet };
-      }
-      return Object.getOwnPropertyDescriptor(target, prop);
-    },
-  });
+  return new Proxy({ target, allGetters, getterKeys }, ARGS_HANDLER);
 }
 
 // Read name nonreactively for kind detection so name changes (which
