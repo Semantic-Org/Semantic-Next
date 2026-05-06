@@ -83,6 +83,7 @@ Plans with an open PR or live pair work. Updated as ceremony when a PR opens; en
 
 - [Release 0.18.0](active/release-0-18-0.md) — [PR #122](https://github.com/Semantic-Org/Semantic-Next/pull/122) `docs/shippable` (menu trimming + audit pass pending). Ships the next tagged release; last was 0.17.0 in November.
 - [Signal Performance](active/signal-performance.md) — [PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) freeze-by-default. Perf story unresolved (see plan's Bench Results); release inclusion is the open call.
+- [Bench Comment Truthfulness](active/bench-comment-truthfulness.md) — [PR #186](https://github.com/Semantic-Org/Semantic-Next/pull/186) Tier 1 reporter fixes (peak filter, per-cell σ, suppression, copy rewrite, base-SHA fallback). Tier 2 amplification split out as a follow-up icebox plan.
 ---
 
 ## Phase 0 — Renderer Architecture
@@ -214,4 +215,4 @@ Plans drafted but not on the active roadmap. See `ai/plans/icebox/` for files.
 - [Audit Fix Continuation](icebox/audit-fix-continuation.md) — process work for follow-up audits.
 - [Contributing Surface](icebox/contributing-surface.md) — pre-1.0 stance + 1.0 graduation pass + post-1.0 triage flow (size + scope, GH-shaped vs md-shaped). Most icebox graduates at 1.0; the rest stays internal.
 - [Registry](icebox/registry.md) — community registry for components and behaviors, runtime + compile-time consumption from one source, author-namespaced publishing under `@sui-hub` with editorial canonical aliases above. Post-Phase 4.
-- [Bench Comment Truthfulness](icebox/bench-comment-truthfulness.md) — reporter-side asymmetry fixes (peak `touches_packages`, peak-quality gate, candidate-cell honesty, glossary indexer, σ-from-samples) plus bench-authoring amplification audit on saturated and high-cross-session-variance metrics. Surfaced by PR #183 audit.
+- [Bench Amplification Audit](icebox/bench-amplification-audit.md) — Tier 2 follow-up to bench-comment-truthfulness. Amplify metrics that fail the duration-OR-variance bar: rAF-saturated, cross-session-variance dominant, and short-duration metrics. Waits on FGR's path forward (renaming metrics breaks in-flight comparability).
