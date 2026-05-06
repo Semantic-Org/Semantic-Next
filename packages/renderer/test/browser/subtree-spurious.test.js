@@ -356,10 +356,13 @@ RENDERING_ENGINES.forEach(engine => {
         await updated;
 
         expect(shadowText(el)).toContain('updated-ok');
-        // Ideally only item 1's expressions would re-evaluate (countAfterRender + 1),
-        // but since the each list source changed, the framework may re-evaluate all items.
-        // We test for the ideal: unchanged items should not cause extra calls.
-        expect(spyTotal).toBe(countAfterRender + 1);
+        // staticSpy reads no signal. Under per-key reactivity (native) it
+        // has no dependency that the item-key change would invalidate,
+        // so no re-evaluations fire. Under whole-record reactivity (lit)
+        // every property access registers itemSignal, so the changed-item
+        // notify drives one extra staticSpy call.
+        const expectedSpyCount = engine === 'native' ? countAfterRender : countAfterRender + 1;
+        expect(spyTotal).toBe(expectedSpyCount);
       });
     });
 

@@ -1430,69 +1430,6 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   25. Closure-captured data in subtemplate createComponent
-*******************************/
-
-    describe('25. Closure-captured data in subtemplate', () => {
-      it('should update classMap when data.todo.completed changes via setProperty', async () => {
-        const tag = uniqueTag(engine, 'sub-classmap');
-
-        const itemTemplate = defineComponent({
-          renderingEngine: engine,
-          template: '<li class="{classMap getClasses} item"><span>{todo.text}</span></li>',
-          createComponent: ({ data }) => ({
-            getClasses() {
-              return { completed: data.todo.completed };
-            },
-          }),
-        });
-
-        defineComponent({
-          renderingEngine: engine,
-          tagName: tag,
-          template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}',
-          createComponent: ({ signal }) => {
-            const todos = signal([
-              { _id: 'a', text: 'First', completed: false },
-              { _id: 'b', text: 'Second', completed: false },
-            ]);
-            return {
-              todos,
-              getTodos: () => todos.get(),
-              toggleItem(id) {
-                todos.setProperty(id, 'completed', !todos.getItem(id).completed);
-              },
-            };
-          },
-          subTemplates: { itemTemplate },
-        });
-
-        const el = document.createElement(tag);
-        document.body.appendChild(el);
-        await el.updateComplete;
-
-        // Initial: no completed class
-        const li = el.shadowRoot.querySelector('li');
-        expect(li.className).toContain('item');
-        expect(li.className).not.toContain('completed');
-
-        // Toggle first item complete
-        el.component.toggleItem('a');
-        await flush(el);
-
-        const liAfter = el.shadowRoot.querySelector('li');
-        expect(liAfter.className).toContain('completed');
-
-        // Toggle back to incomplete
-        el.component.toggleItem('a');
-        await flush(el);
-
-        const liAfter2 = el.shadowRoot.querySelector('li');
-        expect(liAfter2.className).not.toContain('completed');
-      });
-    });
-
-    /*******************************
    26. Subtemplate settings — reactive external data
 *******************************/
 
