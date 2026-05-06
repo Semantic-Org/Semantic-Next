@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
-import { each, fatal, isPlainObject, isString, keys } from '@semantic-ui/utils';
+import { each, fatal, isPlainObject, isString } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
 import { isItemContext, ReactiveDataContext } from '../reactive-context.js';
 import { registerBlock } from './registry.js';
@@ -66,57 +66,55 @@ function unpackBlobData(node, data, evaluator) {
   return blobData;
 }
 
-// Snippet-arg overlay proxy. Args become lazy getters that re-evaluate
-// against the parent data context at access time, tracking the same
-// Signal deps a fresh-render snippet would. The has/ownKeys/descriptor
-// traps make `prop in snippetData` and Object.keys() see the args.
-function buildSnippetProxy(node, data, evaluator) {
-  const staticGetters = {};
-  const reactiveGetters = {};
+// Snippet-arg context. Wraps the parent data in a ReactiveDataContext and
+// registers one Reaction per arg. Each Reaction evaluates its source
+// expression in the parent's data context and pushes via setKey, so the
+// snippet body's per-arg reads track only that arg's per-key Signal.
+//
+// writeToParent stays off — snippet's parent is the surrounding data
+// context, which is shared across sibling snippet invocations. Writing
+// would cross-contaminate.
+//
+// The Reactions live on the block's scope directly (no child scope) —
+// snippets are one-shot at mount, no instance swap, so the block's own
+// scope dispose is sufficient teardown.
+function buildSnippetContext(node, data, evaluator, scope, region) {
+  const context = new ReactiveDataContext(data);
 
   if (node.data) {
     if (isString(node.data)) {
-      const evaluated = evaluator.lookupExpressionValue(node.data, data);
-      if (isPlainObject(evaluated)) {
-        each(evaluated, (val, key) => {
-          staticGetters[key] = () => val;
-        });
-      }
+      // String form: `data="expression"` — the whole evaluated object is
+      // spread into the snippet's keys. Re-evaluates on source change so
+      // a parent recomputing the blob propagates to the snippet body.
+      scope.reaction(region.anchor, () => {
+        const evaluated = evaluator.lookupExpressionValue(node.data, data);
+        if (isPlainObject(evaluated)) {
+          each(evaluated, (val, key) => {
+            context.setKey(key, val);
+          });
+        }
+      }, { message: `snippet-data-spread` });
     }
     else if (isPlainObject(node.data)) {
       each(node.data, (expr, key) => {
-        staticGetters[key] = () => evaluator.lookupExpressionValue(expr, data);
+        scope.reaction(region.anchor, () => {
+          const value = evaluator.lookupExpressionValue(expr, data);
+          context.setKey(key, value);
+        }, { message: `snippet-arg:${key}` });
       });
     }
   }
+
   if (node.reactiveData) {
     each(node.reactiveData, (expr, key) => {
-      reactiveGetters[key] = () => evaluator.lookupExpressionValue(expr, data);
+      scope.reaction(region.anchor, () => {
+        const value = evaluator.lookupExpressionValue(expr, data);
+        context.setKey(key, value);
+      }, { message: `snippet-arg:${key}` });
     });
   }
 
-  const allGetters = { ...staticGetters, ...reactiveGetters };
-  const getterKeys = keys(allGetters);
-
-  return new Proxy(data, {
-    get(target, prop) {
-      if (typeof prop === 'symbol') { return target[prop]; }
-      if (prop in allGetters) { return allGetters[prop](); }
-      return target[prop];
-    },
-    has(target, prop) {
-      return (prop in allGetters) || (prop in target);
-    },
-    ownKeys(target) {
-      return [...new Set([...getterKeys, ...Reflect.ownKeys(target)])];
-    },
-    getOwnPropertyDescriptor(target, prop) {
-      if (prop in allGetters) {
-        return { configurable: true, enumerable: true, get: allGetters[prop] };
-      }
-      return Object.getOwnPropertyDescriptor(target, prop);
-    },
-  });
+  return context;
 }
 
 // Read name nonreactively for kind detection so name changes (which
@@ -268,8 +266,8 @@ const templateBlock = defineBlock({
     if (kind === 'snippet') {
       const snippet = resolveSnippet(node.name, data, self);
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
-      const snippetData = buildSnippetProxy(node, data, self.evaluator);
-      const fragment = renderAST({ ast: snippet.content, data: snippetData, scope, isSVG });
+      const snippetContext = buildSnippetContext(node, data, self.evaluator, scope, region);
+      const fragment = renderAST({ ast: snippet.content, data: snippetContext.proxy, scope, isSVG });
       region.setContent(fragment);
       return;
     }
@@ -294,11 +292,11 @@ const templateBlock = defineBlock({
     if (kind === 'snippet') {
       const snippet = resolveSnippet(node.name, data, self);
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
-      const snippetData = buildSnippetProxy(node, data, self.evaluator);
+      const snippetContext = buildSnippetContext(node, data, self.evaluator, scope, region);
       if (region.ownedNodes.length > 0) {
         // Snippet args reactivity is anchored on the block scope; a child
         // would dispose with the next region.clear() and break arg reactivity.
-        hydrateInto({ innerAST: snippet.content, data: snippetData, asChild: false });
+        hydrateInto({ innerAST: snippet.content, data: snippetContext.proxy, asChild: false });
       }
       return;
     }
