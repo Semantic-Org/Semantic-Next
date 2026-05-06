@@ -122,7 +122,12 @@ const dataBlobChild = defineComponent({
 defineComponent({
   tagName: 'bench-data-blob',
   renderingEngine: 'native',
-  template: `{#each i in idxs}{>child data=getCardData}{/each}`,
+  // Explicit-form invocation `{> template name='child' data=expr}` —
+  // shorthand `{>child data=expr}` parses `data=expr` as a reactiveData
+  // entry (key='data') rather than as the blob argument, which makes
+  // this metric stop measuring the blob path it was named for. Explicit
+  // form keeps the compiler emitting `node.data = "getCardData"`.
+  template: `{#each i in idxs}{> template name='child' data=getCardData}{/each}`,
   subTemplates: { child: dataBlobChild },
   defaultState: { labelVal: 'init' },
   createComponent: ({ state }) => ({
