@@ -69,11 +69,18 @@ const NOISE_FLOOR = 2; // percent — matches autoSampleConditions
 
 // Per-sample timing jitter on shared GHA runners. OS scheduling, GC, and
 // JIT contribute an ~absolute-constant noise floor that becomes wide in
-// relative terms for short benches. Calibrated empirically: zero-delta
-// observed CI widths fit a σ≈2ms model well for most benches; the handful
-// that exceed it (create-1k, append-1k) show 2.5-3× expected, which is
-// the diagnostic signal — unusually noisy for duration, worth a second look.
+// relative terms for short benches. Used as the fallback when a bench
+// cell hasn't accumulated enough samples to estimate σ from its own
+// data (see SIGMA_SAMPLE_FLOOR). Calibrated empirically: zero-delta
+// observed CI widths fit a σ≈2ms model well for most benches.
 const SIGMA_ABS_MS = 2;
+
+// Minimum sample count for trusting a per-cell σ estimate. Below this,
+// the estimate is itself too noisy to drive the Expected Noise column;
+// fall back to the global SIGMA_ABS_MS. The sampleSize=50 floor in our
+// configs means most cells clear this comfortably; cells that hit the
+// timeout before reaching it get the safer fallback.
+const SIGMA_SAMPLE_FLOOR = 20;
 
 // Classification tolerance. Observed / expected ratio below this counts as
 // "explained by duration-based noise floor" → noise-floor-limited bucket.
@@ -145,12 +152,33 @@ const PEAK_SECTIONS = {
 /**
  * Expected percent-change CI width for an unresolved CI given the bench's
  * absolute duration. Derived from the standard-error-of-the-difference of
- * two means at sampleSize=50, σ=SIGMA_ABS_MS per sample, z=1.96:
+ * two means at sampleSize=50, σ per sample, z=1.96:
  *   abs_CI_width ≈ 2 * 1.96 * sqrt(2) * σ / sqrt(50) ≈ 0.784 * σ
  *   pct_width = abs_CI_width / mean * 100
+ *
+ * `sigma` defaults to the global SIGMA_ABS_MS calibration. When samples
+ * exist for the bench cell, callers pass a per-cell σ estimated from
+ * those samples — heavy-allocation benches like clear-10k empirically
+ * run σ≈17ms vs the global 2ms, so the Expected Noise column was
+ * under-predicting their resolution floor by 4-9×.
  */
-function expectedNoisePp(meanMs) {
-  return (0.784 * SIGMA_ABS_MS) / meanMs * 100;
+function expectedNoisePp(meanMs, sigma = SIGMA_ABS_MS) {
+  return (0.784 * sigma) / meanMs * 100;
+}
+
+/**
+ * Sample standard deviation. Returns null when the array is too small
+ * to trust (< SIGMA_SAMPLE_FLOOR). Uses Bessel-corrected variance.
+ */
+function sampleSigma(samples) {
+  if (!Array.isArray(samples) || samples.length < SIGMA_SAMPLE_FLOOR) { return null; }
+  const n = samples.length;
+  let sum = 0;
+  for (const v of samples) { sum += v; }
+  const mean = sum / n;
+  let sq = 0;
+  for (const v of samples) { sq += (v - mean) ** 2; }
+  return Math.sqrt(sq / (n - 1));
 }
 
 const benchDirs = findBenchDirs(repoRoot);
@@ -193,6 +221,8 @@ function loadAllMetrics(dir) {
       absoluteMsDelta: [diff.absolute.low, diff.absolute.high],
       percentDelta: [diff.percentChange.low, diff.percentChange.high],
       baselineSha: currentBaselineSha || null,
+      sampleCount: current.bm.samples?.length ?? 0,
+      sigmaMs: sampleSigma(current.bm.samples),
     });
   }
   out.sort((a, b) => a.name.localeCompare(b.name));
@@ -217,7 +247,9 @@ function buildReport(metrics) {
   const classified = metrics.map((m) => {
     const meanMs = (m.thisChangeMs[0] + m.thisChangeMs[1]) / 2;
     const widthPp = m.percentDelta[1] - m.percentDelta[0];
-    const expectedPp = expectedNoisePp(meanMs);
+    // Per-cell σ when the cell has enough samples; SIGMA_ABS_MS otherwise.
+    const sigma = m.sigmaMs ?? SIGMA_ABS_MS;
+    const expectedPp = expectedNoisePp(meanMs, sigma);
     const ratio = expectedPp > 0 ? widthPp / expectedPp : Infinity;
     const indexed = benchIndex.get(m.name);
     const source = indexed?.source ?? null;
@@ -289,6 +321,8 @@ function toJsonMetric(m) {
     mean_ms: Number(m.meanMs.toFixed(2)),
     expected_noise_pp: Number(m.expectedPp.toFixed(2)),
     observed_noise_ratio: Number(m.ratio.toFixed(2)),
+    sigma_ms: m.sigmaMs != null ? Number(m.sigmaMs.toFixed(2)) : null,
+    sample_count: m.sampleCount ?? 0,
     source: m.source,
     purpose: m.purpose ?? null,
     baseline_sha: m.baselineSha ?? null,

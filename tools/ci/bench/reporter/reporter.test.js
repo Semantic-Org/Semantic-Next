@@ -175,6 +175,8 @@ test('real-delta fixture — summary counts and key verdicts', () => {
   // JSON adjunct exposes the diagnostic fields
   assert.ok('expected_noise_pp' in bulkAdd);
   assert.ok('observed_noise_ratio' in bulkAdd);
+  assert.ok('sigma_ms' in bulkAdd, 'per-cell σ surfaced in JSON');
+  assert.ok('sample_count' in bulkAdd, 'per-cell sample_count surfaced in JSON');
   assert.equal(report.sigma_abs_ms, 2);
   assert.equal(report.noise_ratio_tolerance, 2);
 });
@@ -266,16 +268,14 @@ test('zero-delta fixture — 0 faster, 0 slower, correct categorisation', () => 
     + report.summary['noise-floor-limited'];
   assert.equal(total, 21, 'all 21 metrics classified');
 
-  // Most short benches land in noise-floor-limited; long benches with
-  // unexpectedly wide CI (create-1k, append-1k at ~2.7× expected) are
-  // the genuine 'unsure' entries.
-  assert.equal(report.summary['noise-floor-limited'], 12);
-  assert.equal(report.summary.unsure, 2);
-
-  // create-1k and append-1k are long benches (>100ms) whose CI widths
-  // exceed the duration-derived floor by more than 2× — surface them.
-  const unsureNames = report.metrics.filter((m) => m.status === 'unsure').map((m) => m.name);
-  assert.deepEqual(unsureNames.sort(), ['append-1k', 'create-1k']);
+  // With per-cell σ (computed from each bench's own samples), expected
+  // noise tracks each bench's empirical variance. In zero-delta runs
+  // σ_current ≈ σ_base, so predicted CI ≈ observed CI and the ratio
+  // hovers at ~1× for every bench — all unresolved metrics land in
+  // noise-floor-limited. The "unsure" bucket fires when σ_current and
+  // σ_base diverge (asymmetric-variance change), not in zero-delta.
+  assert.equal(report.summary['noise-floor-limited'], 14);
+  assert.equal(report.summary.unsure, 0);
 
   // No-change state → ⚪ heading + [!NOTE] alert
   assert.ok(markdown.startsWith('### ⚪ No Meaningful Change for'), 'no-change state heading');
@@ -285,9 +285,11 @@ test('zero-delta fixture — 0 faster, 0 slower, correct categorisation', () => 
   // Headline count line combines inconclusive + too-fast into one 🔍 unsure total
   assert.ok(markdown.includes('✅ 0 faster · ❌ 0 slower · 🔍 14 unsure · ⚪ 7 no change'));
 
-  // Unsure block has BOTH subsections
-  assert.ok(markdown.includes('#### Inconclusive (2)'), 'Inconclusive subsection with 2');
-  assert.ok(markdown.includes('#### Too Fast to Measure Precisely (12)'), 'Too Fast subsection with 12');
+  // Per-cell σ degenerates the Inconclusive bucket in zero-delta — every
+  // metric's CI matches what its own samples predict. All 14 unresolved
+  // metrics land in Too Fast to Measure Precisely.
+  assert.ok(!markdown.includes('#### Inconclusive'), 'no Inconclusive subsection in zero-delta');
+  assert.ok(markdown.includes('#### Too Fast to Measure Precisely (14)'), 'Too Fast subsection with 14');
 
   // Everything is collapsed (no auto-expand on zero-delta)
   assert.ok(!markdown.includes('<details open>'), 'no auto-expanded details on zero-delta');
