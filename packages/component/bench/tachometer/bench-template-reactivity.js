@@ -9,9 +9,20 @@
 */
 
 import { defineComponent } from '@semantic-ui/component';
+import { Reaction } from '@semantic-ui/reactivity';
 
 const startMark = (name) => `${name}-start`;
+// Pre-measurement / between-metric idle wait. rAF gates `mount()` so any
+// connectedCallback-deferred microtasks settle before the next metric
+// starts.
 const flush = () => new Promise((r) => requestAnimationFrame(r));
+// Sync drain of pending Reactions. Used inside `performance.mark` ...
+// `performance.measure` regions where a per-iteration `await rAF` would
+// dominate wall-clock with 16ms idle gaps and bury sub-frame JS-work
+// deltas. The reactivity Scheduler flushes on a microtask, so calling
+// `Reaction.flush()` immediately after a `signal.set` runs every queued
+// Reaction synchronously — exactly what we want to measure.
+const flushWork = () => Reaction.flush();
 
 const container = document.createElement('div');
 document.body.appendChild(container);
@@ -333,7 +344,7 @@ defineComponent({
 async function mount(tagName) {
   const el = document.createElement(tagName);
   container.appendChild(el);
-  await flush();
+  flushWork();
   return el;
 }
 
@@ -346,7 +357,7 @@ const el1 = await mount('bench-reactivedata');
 performance.mark(startMark('subtemplate-reactive-data-100'));
 for (let i = 0; i < 50; i++) {
   el1.template.state.labelVal.set(`v${i}`);
-  await flush();
+  flushWork();
 }
 performance.measure('subtemplate-reactive-data-100', startMark('subtemplate-reactive-data-100'));
 destroy();
@@ -360,7 +371,7 @@ const el2 = await mount('bench-shorthand');
 performance.mark(startMark('subtemplate-shorthand-props-100'));
 for (let i = 0; i < 50; i++) {
   el2.template.state.labelVal.set(`v${i}`);
-  await flush();
+  flushWork();
 }
 performance.measure('subtemplate-shorthand-props-100', startMark('subtemplate-shorthand-props-100'));
 destroy();
@@ -374,7 +385,7 @@ const el3 = await mount('bench-snippet');
 performance.mark(startMark('snippet-args-per-key-100'));
 for (let i = 0; i < 50; i++) {
   el3.template.state.labelVal.set(`v${i}`);
-  await flush();
+  flushWork();
 }
 performance.measure('snippet-args-per-key-100', startMark('snippet-args-per-key-100'));
 destroy();
@@ -388,7 +399,7 @@ const el4 = await mount('bench-active-indicator');
 performance.mark(startMark('active-indicator-200'));
 for (let i = 0; i < 100; i++) {
   el4.template.state.selectedId.set(i + 1);
-  await flush();
+  flushWork();
 }
 performance.measure('active-indicator-200', startMark('active-indicator-200'));
 destroy();
@@ -403,7 +414,7 @@ performance.mark(startMark('stable-ref-mutate-500'));
 for (let i = 0; i < 100; i++) {
   const idx = i % 500;
   el5.template.state.items.setIndex(idx, { id: idx, label: `updated-${i}` });
-  await flush();
+  flushWork();
 }
 performance.measure('stable-ref-mutate-500', startMark('stable-ref-mutate-500'));
 destroy();
@@ -417,7 +428,7 @@ const el7 = await mount('bench-data-blob');
 performance.mark(startMark('subtemplate-data-blob-100'));
 for (let i = 0; i < 50; i++) {
   el7.template.state.labelVal.set(`v${i}`);
-  await flush();
+  flushWork();
 }
 performance.measure('subtemplate-data-blob-100', startMark('subtemplate-data-blob-100'));
 destroy();
@@ -431,7 +442,7 @@ const el8 = await mount('bench-snippet-in-subtemplate');
 performance.mark(startMark('snippet-in-subtemplate-100'));
 for (let i = 0; i < 50; i++) {
   el8.template.state.titleVal.set(`v${i}`);
-  await flush();
+  flushWork();
 }
 performance.measure('snippet-in-subtemplate-100', startMark('snippet-in-subtemplate-100'));
 destroy();
@@ -448,7 +459,7 @@ for (let i = 0; i < 50; i++) {
   const p = Math.floor(i / 5) % 10;
   const sp = i % 4;
   el9.template.state.currentUrl.set(`/s${s}/p${p}/sp${sp}`);
-  await flush();
+  flushWork();
 }
 performance.measure('active-indicator-nested-200', startMark('active-indicator-nested-200'));
 destroy();
@@ -462,7 +473,7 @@ const el11 = await mount('bench-realistic-light');
 performance.mark(startMark('subtemplate-helpers-light-100'));
 for (let i = 0; i < 50; i++) {
   el11.template.state.titleVal.set(`title-${i}`);
-  await flush();
+  flushWork();
 }
 performance.measure('subtemplate-helpers-light-100', startMark('subtemplate-helpers-light-100'));
 destroy();
@@ -476,7 +487,7 @@ const el12 = await mount('bench-realistic-heavy');
 performance.mark(startMark('subtemplate-helpers-heavy-100'));
 for (let i = 0; i < 50; i++) {
   el12.template.state.titleVal.set(`title-${i}`);
-  await flush();
+  flushWork();
 }
 performance.measure('subtemplate-helpers-heavy-100', startMark('subtemplate-helpers-heavy-100'));
 destroy();

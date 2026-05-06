@@ -1,4 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
+import { Reaction } from '@semantic-ui/reactivity';
 import { ServerRenderer } from '@semantic-ui/renderer';
 
 /*
@@ -78,8 +79,18 @@ function ssrList(items) {
 const container = document.createElement('div');
 document.body.appendChild(container);
 
+// Pre-measurement / between-metric idle wait. rAF gates `mount()` so any
+// connectedCallback-deferred microtasks settle before the next metric
+// starts.
 const flush = () => new Promise(r => requestAnimationFrame(r));
 const drainMicrotasks = () => new Promise(r => setTimeout(r, 0));
+// Sync drain of pending Reactions. Used inside `performance.mark` ...
+// `performance.measure` regions where a per-iteration `await rAF` would
+// dominate wall-clock with 16ms idle gaps and bury sub-frame JS-work
+// deltas. The reactivity Scheduler flushes on a microtask, so calling
+// `Reaction.flush()` immediately after a `signal.set` runs every queued
+// Reaction synchronously — exactly what we want to measure.
+const flushWork = () => Reaction.flush();
 const startMark = (name) => `${name}-start`;
 
 /*******************************
@@ -195,7 +206,7 @@ const elHelper = container.firstElementChild;
 performance.mark(startMark('hydrate-helper-100-state-change'));
 for (let i = 0; i < 10; i++) {
   elHelper.component.setActive(`id-${i * 100}`);
-  await flush();
+  flushWork();
 }
 performance.measure('hydrate-helper-100-state-change', startMark('hydrate-helper-100-state-change'));
 container.innerHTML = '';
