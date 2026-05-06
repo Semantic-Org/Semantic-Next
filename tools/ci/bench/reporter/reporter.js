@@ -127,7 +127,7 @@ const PEAK_SECTIONS = {
     status: 'REOPENED',
     headingPrefix: '📜 Regressions from peak',
     description:
-      `These metrics were better on a prior iteration than they are now. The peak's percent-delta vs its baseline dominates current's percent-delta vs its baseline — not attributable to per-sample noise. Bisect candidates are the commits between the peak iteration and HEAD; nearest-to-peak is usually the best bet.`,
+      `These metrics were better on a prior iteration than they are now. The peak's percent-delta vs its baseline dominates current's percent-delta vs its baseline — not attributable to per-sample noise. Bisect candidates are the bench-measured, packages-touching commits between the peak iteration and HEAD; nearest-to-peak is usually the best bet. Cancelled CI runs and push-collapsed iterations don't appear here.`,
     columnHeader: '| metric | current | peak | vs peak | bisect candidates |',
     // Largest % regression first (descending on signed delta).
     sortSign: -1,
@@ -140,7 +140,7 @@ const PEAK_SECTIONS = {
     status: 'WIN',
     headingPrefix: '🏆 New peaks',
     description:
-      `These metrics reached a new best in this iteration — current's percent-delta vs its baseline dominates the prior peak's percent-delta vs its baseline. Credit candidates are the commits between the prior peak and HEAD; nearest-to-current is usually the cause.`,
+      `These metrics reached a new best in this iteration — current's percent-delta vs its baseline dominates the prior peak's percent-delta vs its baseline. Credit candidates are the bench-measured, packages-touching commits between the prior peak and HEAD; nearest-to-current is usually the cause. Cancelled CI runs and push-collapsed iterations don't appear here.`,
     columnHeader: '| metric | current | prior peak | vs prior peak | credit candidates |',
     // Most-improved first. delta_from_peak_pct is negative for WIN, so
     // ascending sort surfaces the best.
@@ -460,7 +460,7 @@ function renderMarkdown(report) {
       lines.push(`#### Inconclusive (${inconclusive.length})`);
       lines.push('');
       lines.push(
-        `The measured difference is small, and our sampling couldn't confidently place it above or below zero. Running more samples in a future run might settle these metrics.`,
+        `These metrics' CIs straddle ±${NOISE_FLOOR}% AND exceed what each cell's per-sample variance predicts for its duration. More samples may settle sampling-unlucky cases. Metrics that stay here across iterations are intrinsically variable — amplify the workload or accept the floor.`,
       );
       lines.push('');
       lines.push('| metric | Change | Expected Noise |');
@@ -503,8 +503,20 @@ function renderMarkdown(report) {
 
   // ─── Footer ──────────────────────────────────────────────────────────
   lines.push('---');
+  // Sample size: report the floor + max actually reached. Cells auto-sample
+  // up to the timeout when their CI hasn't converged at the 2% threshold,
+  // so PR-iteration runs can range 50→several hundred. Bare "Sample size:
+  // 50" obscured the auto-sample tail, so a hot bench whose cell ran 280
+  // samples looked the same in the footer as a cold one that never moved
+  // off the floor.
+  const sampleCounts = report.metrics.map((m) => m.sample_count).filter((n) => n > 0);
+  const sampleFloor = sampleCounts.length ? Math.min(...sampleCounts) : 50;
+  const sampleMax = sampleCounts.length ? Math.max(...sampleCounts) : 50;
+  const sampleSizeStr = sampleFloor === sampleMax
+    ? `Sample size: ${sampleFloor}`
+    : `Sample size: ${sampleFloor} floor / ${sampleMax} max`;
   const footerParts = [
-    'Sample size: 50',
+    sampleSizeStr,
     `Resolution floor: ±${NOISE_FLOOR}%`,
     'Timeout: 3min',
   ];
