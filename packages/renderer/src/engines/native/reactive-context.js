@@ -17,18 +17,27 @@ import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
   its next run. Without this, a key authored later in an item's lifetime
   would silently never propagate to its readers.
 
-  Per-key state is inlined as `values` (Map<key, value>) plus a lazily
-  allocated `deps` (Map<key, Dependency>). Each per-key Dependency is
-  what readers actually subscribe to. We deliberately do not allocate a
-  full Signal per key: Signal wraps a Dependency with allowClone /
-  equalityFunction / clone / currentValue field assignments per
-  instance. At 1000+ records × 5 keys the wrapper allocation dominates.
-  Equality dedup is preserved: `Signal.equalityFunction` is snapshotted
-  at construction, matching Signal's per-instance snapshot semantics so
-  the inlined dedup behaves identically to a Signal.set call on the same
-  static. Late overrides of `Signal.equalityFunction` after the RDC is
-  constructed will not retroactively retarget — same blind spot Signal
-  itself has.
+  Per-key state is inlined as `values` (a null-prototype object) plus a
+  lazily allocated `deps` (Map<key, Dependency>). Each per-key
+  Dependency is what readers actually subscribe to. We deliberately do
+  not allocate a full Signal per key: Signal wraps a Dependency with
+  allowClone / equalityFunction / clone / currentValue field
+  assignments per instance. At 1000+ records × 5 keys the wrapper
+  allocation dominates. Equality dedup is preserved:
+  `Signal.equalityFunction` is snapshotted at construction, matching
+  Signal's per-instance snapshot semantics so the inlined dedup behaves
+  identically to a Signal.set call on the same static. Late overrides
+  of `Signal.equalityFunction` after the RDC is constructed will not
+  retroactively retarget — same blind spot Signal itself has.
+
+  `values` uses Object.create(null) (not Map) because every record in a
+  bench-todo / bench-krausest mount adds the same keys in the same
+  order, letting V8 establish a stable hidden-class chain across all
+  records. Plain-object property access (target.values[prop]) inline-
+  caches at the call site once the shape is stable; Map.get always
+  pays a virtual call into the Map's get method. The existence check
+  uses (prop in target.values) — fast on null-prototype objects since
+  no prototype-chain walk is needed.
 
   Closure-only readers (functions reading no per-key data) intentionally
   do not register any record-level "anything changed" Dependency. Today's
@@ -67,7 +76,8 @@ export function isItemContext(data) {
 
 function trapGet(target, prop) {
   if (typeof prop === 'symbol') { return target.parent[prop]; }
-  if (target.values.has(prop)) {
+  const values = target.values;
+  if (prop in values) {
     if (Scheduler.current) {
       let deps = target.deps;
       if (deps === null) {
@@ -81,38 +91,39 @@ function trapGet(target, prop) {
       }
       dep.depend();
     }
-    return target.values.get(prop);
+    return values[prop];
   }
   target.keySetVersion.depend();
   return target.parent[prop];
 }
 
 function trapHas(target, prop) {
-  return target.values.has(prop) || (prop in target.parent);
+  return (prop in target.values) || (prop in target.parent);
 }
 
 function trapOwnKeys(target) {
   const ownKeys = Reflect.ownKeys(target.parent);
-  const merged = [...target.values.keys()];
+  const merged = Object.keys(target.values);
+  const values = target.values;
   for (const key of ownKeys) {
-    if (!target.values.has(key)) { merged.push(key); }
+    if (!(key in values)) { merged.push(key); }
   }
   return merged;
 }
 
 function trapGetOwnPropertyDescriptor(target, prop) {
-  if (target.values.has(prop)) {
+  if (prop in target.values) {
     return {
       configurable: true,
       enumerable: true,
-      value: target.values.get(prop),
+      value: target.values[prop],
     };
   }
   return Object.getOwnPropertyDescriptor(target.parent, prop);
 }
 
 function trapSet(target, prop, value) {
-  if (target.values.has(prop)) {
+  if (prop in target.values) {
     target.setKey(prop, value);
     return true;
   }
@@ -139,7 +150,7 @@ export class ReactiveDataContext {
   constructor(parent, { registerItemContext = false, writeToParent = false } = {}) {
     this.parent = parent;
     this.writeToParent = writeToParent;
-    this.values = new Map();
+    this.values = Object.create(null);
     this.deps = null;
     // Snapshot Signal.equalityFunction at construction. Mirrors Signal's
     // own per-instance snapshot semantics — late overrides of the static
@@ -156,16 +167,16 @@ export class ReactiveDataContext {
   }
 
   setKey(key, value) {
-    if (!this.values.has(key)) {
-      this.values.set(key, value);
+    if (!(key in this.values)) {
+      this.values[key] = value;
       if (this.writeToParent) { this.parent[key] = value; }
       this.keySetVersion.changed();
       return;
     }
     if (this.writeToParent) { this.parent[key] = value; }
-    const old = this.values.get(key);
+    const old = this.values[key];
     if (this.equalityFunction(old, value)) { return; }
-    this.values.set(key, value);
+    this.values[key] = value;
     if (this.deps !== null) {
       const dep = this.deps.get(key);
       if (dep !== undefined) { dep.changed(); }
@@ -183,22 +194,22 @@ export class ReactiveDataContext {
       this.setKey(key, nextValues[key]);
     }
     if (clearMissing) {
-      for (const key of this.values.keys()) {
+      for (const key in this.values) {
         if (!(key in nextValues)) { this.setKey(key, undefined); }
       }
     }
   }
 
   has(key) {
-    return this.values.has(key);
+    return key in this.values;
   }
 
   keys() {
-    return [...this.values.keys()];
+    return Object.keys(this.values);
   }
 
   dispose() {
-    this.values.clear();
+    this.values = Object.create(null);
     if (this.deps !== null) { this.deps.clear(); }
   }
 }
