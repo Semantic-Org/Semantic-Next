@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
-import { each, fatal, isPlainObject, isString } from '@semantic-ui/utils';
+import { each, fatal, isPlainObject, isString, keys } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
 import { isItemContext, ReactiveDataContext } from '../reactive-context.js';
 import { registerBlock } from './registry.js';
@@ -66,62 +66,64 @@ function unpackBlobData(node, data, evaluator) {
   return blobData;
 }
 
-// Snippet-arg context. Wraps the parent data in a ReactiveDataContext and
-// registers one Reaction per arg. Each Reaction evaluates its source
-// expression in the parent's data context and pushes via setKey, so the
-// snippet body's per-arg reads track only that arg's per-key Signal.
+// Snippet-arg overlay proxy. Args become lazy getters that re-evaluate
+// against the parent data context at access time, tracking the same
+// Signal deps a fresh-render snippet would. The has/ownKeys/descriptor
+// traps make `prop in snippetData` and Object.keys() see the args.
 //
-// writeToParent stays off — snippet's parent is the surrounding data
-// context, which is shared across sibling snippet invocations. Writing
-// would cross-contaminate.
-//
-// The Reactions live on the block's scope directly (no child scope) —
-// snippets are one-shot at mount, no instance swap, so the block's own
-// scope dispose is sufficient teardown.
-function buildSnippetContext(node, data, evaluator, scope, region) {
-  // No-arg snippets skip the per-key infrastructure entirely. Inline
-  // expansion against parent data is cheaper than allocating a Map +
-  // Dependency + Proxy per invocation when there are no args to track.
-  // Caller falls through to using parent data directly when this returns
-  // null.
-  if (!node.data && !node.reactiveData) {
-    return null;
-  }
+// Per-key isolation is intrinsic to the lazy-getter approach: each
+// binding's Reaction reads `proxy.argname` exactly once per evaluation,
+// and the lazy getter calls evaluator.lookupExpressionValue which
+// registers source-signal deps on the binding's Reaction directly. A
+// per-key Reaction layer between source and binding would only add an
+// extra wake hop without changing the wake count or registration shape.
+function buildSnippetProxy(node, data, evaluator) {
+  const staticGetters = {};
+  const reactiveGetters = {};
 
-  const context = new ReactiveDataContext(data);
-
-  // Single Reaction handles every arg — both `data={...}` and
-  // `key=expr` forms. setKey's per-key isEqual gate keeps per-key
-  // isolation at the binding layer. One Reaction allocation per snippet
-  // invocation regardless of arg count.
-  if (node.data || node.reactiveData) {
-    scope.reaction(region.anchor, () => {
-      if (node.data) {
-        if (isString(node.data)) {
-          const evaluated = evaluator.lookupExpressionValue(node.data, data);
-          if (isPlainObject(evaluated)) {
-            each(evaluated, (val, key) => {
-              context.setKey(key, val);
-            });
-          }
-        }
-        else if (isPlainObject(node.data)) {
-          each(node.data, (expr, key) => {
-            const value = evaluator.lookupExpressionValue(expr, data);
-            context.setKey(key, value);
-          });
-        }
-      }
-      if (node.reactiveData) {
-        each(node.reactiveData, (expr, key) => {
-          const value = evaluator.lookupExpressionValue(expr, data);
-          context.setKey(key, value);
+  if (node.data) {
+    if (isString(node.data)) {
+      const evaluated = evaluator.lookupExpressionValue(node.data, data);
+      if (isPlainObject(evaluated)) {
+        each(evaluated, (val, key) => {
+          staticGetters[key] = () => val;
         });
       }
-    }, { message: 'snippet-args' });
+    }
+    else if (isPlainObject(node.data)) {
+      each(node.data, (expr, key) => {
+        staticGetters[key] = () => evaluator.lookupExpressionValue(expr, data);
+      });
+    }
+  }
+  if (node.reactiveData) {
+    each(node.reactiveData, (expr, key) => {
+      reactiveGetters[key] = () => evaluator.lookupExpressionValue(expr, data);
+    });
   }
 
-  return context;
+  const allGetters = { ...staticGetters, ...reactiveGetters };
+  const getterKeys = keys(allGetters);
+
+  return new Proxy(data, {
+    get(target, prop) {
+      if (typeof prop === 'symbol') { return target[prop]; }
+      if (prop in allGetters) { return allGetters[prop](); }
+      return target[prop];
+    },
+    has(target, prop) {
+      return (prop in allGetters) || (prop in target);
+    },
+    ownKeys(target) {
+      return [...new Set([...getterKeys, ...Reflect.ownKeys(target)])];
+    },
+    getOwnPropertyDescriptor(target, prop) {
+      if (prop in allGetters) {
+        return { configurable: true, enumerable: true, get: allGetters[prop] };
+      }
+      return Object.getOwnPropertyDescriptor(target, prop);
+    },
+  });
 }
 
 // Read name nonreactively for kind detection so name changes (which
@@ -214,13 +216,12 @@ function setupReactiveSubtemplate({ node, data, scope, region, self }) {
   // settings[key] track the correct Signal and re-fire when it notifies.
   // Without this, per-key updates would land in reactiveContext but never
   // reach the settings Signal, leaving settings-bound closures stale.
+  // Hoist defaults / settings access out of the hot path; subtemplates
+  // without defaultSettings (the common case) skip the settings mirror
+  // entirely via the inline check below.
   const defaultSettings = self.currentInstance.defaultSettings;
   const settingsProxy = self.currentInstance.settings;
-  const mirrorToSettings = (key, value) => {
-    if (settingsProxy && defaultSettings && key in defaultSettings) {
-      settingsProxy[key] = value;
-    }
-  };
+  const hasSettingsMirror = !!(settingsProxy && defaultSettings);
 
   // Single Reaction for all reactiveData entries. The Reaction tracks every
   // source signal across all entries and re-evaluates them on any change.
@@ -235,7 +236,9 @@ function setupReactiveSubtemplate({ node, data, scope, region, self }) {
     each(node.reactiveData, (expr, key) => {
       const value = self.evaluator.lookupExpressionValue(expr, data);
       self.reactiveContext.setKey(key, value);
-      mirrorToSettings(key, value);
+      if (hasSettingsMirror && key in defaultSettings) {
+        settingsProxy[key] = value;
+      }
     });
   }, { message: 'subtemplate-args' });
 }
@@ -287,8 +290,7 @@ const templateBlock = defineBlock({
     if (kind === 'snippet') {
       const snippet = resolveSnippet(node.name, data, self);
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
-      const snippetContext = buildSnippetContext(node, data, self.evaluator, scope, region);
-      const snippetData = snippetContext ? snippetContext.proxy : data;
+      const snippetData = buildSnippetProxy(node, data, self.evaluator);
       const fragment = renderAST({ ast: snippet.content, data: snippetData, scope, isSVG });
       region.setContent(fragment);
       return;
@@ -314,8 +316,7 @@ const templateBlock = defineBlock({
     if (kind === 'snippet') {
       const snippet = resolveSnippet(node.name, data, self);
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
-      const snippetContext = buildSnippetContext(node, data, self.evaluator, scope, region);
-      const snippetData = snippetContext ? snippetContext.proxy : data;
+      const snippetData = buildSnippetProxy(node, data, self.evaluator);
       if (region.ownedNodes.length > 0) {
         // Snippet args reactivity is anchored on the block scope; a child
         // would dispose with the next region.clear() and break arg reactivity.
