@@ -123,9 +123,9 @@ No `TemplateCompiler` changes. AST untouched.
 
 Silent `undefined`, matching today's `try/catch` in `evaluateJavascript`. No compile-time validation, no AST walk, no separate lint. The AST stays untouched. Proper error surfacing is a separate framework-wide plan.
 
-### Relationship to SSR / `ai/plans/native-ssr.md`
+### Relationship to SSR / `ai/plans/archive/native-ssr.md`
 
-`native-ssr.md:125-132` already flags this exact constraint: `ExpressionEvaluator` + `new Function` is the reason SSR in Workers needs `unsafe-eval`. This plan is the concrete answer to that footnote — once shipped, `renderToString` in Workers runs under default CSP.
+`archive/native-ssr.md` already flags this exact constraint: `ExpressionEvaluator` + `new Function` is the reason SSR in Workers needs `unsafe-eval`. This plan is the concrete answer to that footnote — once shipped, `renderToString` in Workers runs under default CSP.
 
 ## Open Questions
 
@@ -140,8 +140,8 @@ Silent `undefined`, matching today's `try/catch` in `evaluateJavascript`. No com
 ## Dependencies
 
 - None blocking. Unblocked today.
-- Informs [Native SSR](native-ssr.md) — resolves the `unsafe-eval` asterisk called out there.
-- Shares API-shape thinking with [Signal Performance](signal-performance.md) `safety` preset (may or may not want to share the vocabulary).
+- Informs [Native SSR](archive/native-ssr.md) — resolves the `unsafe-eval` asterisk called out there.
+- Shares API-shape thinking with [Signal Performance](active/signal-performance.md) `safety` preset (may or may not want to share the vocabulary).
 
 ## Sessions (estimated)
 

@@ -5615,7 +5615,7 @@ export const iconMappings = {
     visual:
       "GitHub's Octocat logo — a cat silhouette with a rounded head, pointed ears, and a forked tail at the base.",
     usage: 'GitHub repository link, source code button, open source attribution, version control integration',
-    lucide: 'github',
+    lucide: null,
     phosphor: 'github-logo',
     tabler: 'brand-github',
     materialSymbols: null,

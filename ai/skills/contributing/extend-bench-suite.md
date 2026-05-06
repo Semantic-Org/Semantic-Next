@@ -116,6 +116,89 @@ performance.measure('toggle-middle', startMark('toggle-middle'));
 
 ---
 
+## Cycle-loop flushing: `Reaction.flush()`, never `await rAF`
+
+The single most expensive methodology mistake on this suite was waiting for `requestAnimationFrame` between mutations inside a measured region. Don't do it. Fix it on sight if you find it.
+
+> The pattern below is informed by reading lit-html's tachometer harness end-to-end — `kitchen-sink`, `repeat`, `template-heavy`, and the `lit-element/list` component-level benches in [lit/lit `packages/benchmarks`](https://github.com/lit/lit/tree/main/packages/benchmarks). lit-html measured regions are fully synchronous (no `await rAF`). `lit-element` benches use `await updateComplete()` between mutations — LitElement's commit is microtask-scheduled, so they wait on the framework's own settle promise rather than racing it. The handful of rAF appearances in their bench tree amortize across whole loops, not per iteration.
+
+### Why it's wrong
+
+The reactivity Scheduler queues Reactions on a microtask. Microtasks drain before the next animation frame fires. So after `signal.set(...)`:
+
+1. `Dependency.changed()` schedules pending Reactions
+2. The microtask queue drains — every queued Reaction runs, every DOM update commits — synchronously, *before* rAF
+3. rAF eventually fires ~16ms later, sitting idle waiting
+
+`await new Promise(r => requestAnimationFrame(r))` after a mutation adds **~16ms of idle wait after the work is already done**. It's not "wait for paint" (tachometer measures wall-clock between marks; paint is irrelevant). It's not "wait for the framework to settle" (microtask drain already did that). It's pure idle.
+
+When you put that `await rAF` inside a cycle loop, every iteration gates on the 16.66ms vsync clock:
+
+```js
+// ❌ Anti-pattern — measures frame cadence, not work
+performance.mark('start');
+for (let i = 0; i < 50; i++) {
+  state.x.set(i);
+  await new Promise(r => requestAnimationFrame(r));
+}
+performance.measure('metric', 'start');
+```
+
+The wall clock is `50 × 16.66ms ≈ 833ms` regardless of how much CPU the framework spent. A bench where every cycle does 0.1ms of work and one where every cycle does 15ms of work both wall-clock at ~833ms — both fit under one frame, both wait the same idle 16ms after, both measure the same. **Sub-frame JS-work deltas are invisible.**
+
+This pattern hid an entire reactivity investigation's per-key isolation work — trivial-helper and realistic-helper benches alike read at zero delta because they were watching the frame clock, not the framework.
+
+### The pattern that measures work
+
+```js
+// ✅ Sync drain — wall-clock is the actual work
+import { Reaction } from '@semantic-ui/reactivity';
+const flushWork = () => Reaction.flush();
+
+performance.mark('start');
+for (let i = 0; i < 50; i++) {
+  state.x.set(i);
+  flushWork();
+}
+performance.measure('metric', 'start');
+```
+
+`Reaction.flush()` is a re-export of `Scheduler.flush()`. It walks the queue and runs every pending Reaction inline — same work the microtask would have done, just synchronously, without waiting for vsync. Wall-clock between the marks is now the sum of actual reactive work the loop drove. A 50% per-cycle JS-time win shows up as a 50% wall-clock win, not as no change.
+
+### When `await rAF` is still right
+
+rAF inside a measured region is appropriate **only** when:
+
+- **One-shot mount metrics where the framework's lifecycle is genuinely async.** `each-mount-1000`-style benches that mark, append a custom element, await rAF once, then measure — the rAF gives `connectedCallback` and any rAF-deferred lifecycle hooks time to complete. One rAF, not 50.
+- **One-shot bulk operations after a signal mutation when the work itself is huge.** `bulk-add-500`, `clear-completed-250`, `create-1k`, `replace-1k`, `clear-10k` — the work dominates wall-clock (hundreds of ms); the rAF is a constant ~16ms tail and reads as an honest paint-settle gate. `flushWork()` would also work; `await flush()` is acceptable here for symmetry with the mount helpers above.
+
+rAF **between** metrics (after `destroy()`, before the next `mount()`) is fine — that's outside any measured region and just gives the previous metric's tear-down time to fully settle. The `mount()` helper at the top of every bench file uses `flush` (rAF) for exactly this reason.
+
+### Diagnostic: am I rAF-bound?
+
+If your bench's 50-cycle mean is suspiciously close to `50 × 16.66ms = 833ms` regardless of what you change in the workload, it's rAF-bound. Same heuristic for 100 cycles (~1666ms) or 25 cycles (~417ms). Look for `await flush()` (or `await new Promise(r => rAF(r))`) inside the `for` loop and replace with `flushWork()`.
+
+### Two flushes, one file
+
+The convention every bench in `packages/component/bench/tachometer/` uses:
+
+```js
+import { Reaction } from '@semantic-ui/reactivity';
+
+// Pre-measurement / between-metric idle wait. rAF gates `mount()` so any
+// connectedCallback-deferred microtasks settle before the next metric starts.
+const flush = () => new Promise(r => requestAnimationFrame(r));
+
+// Sync drain of pending Reactions. Used inside `performance.mark` ...
+// `performance.measure` regions where a per-iteration `await rAF` would
+// dominate wall-clock with 16ms idle gaps and bury sub-frame JS-work deltas.
+const flushWork = () => Reaction.flush();
+```
+
+`flush` for setup and one-shot mount tails. `flushWork` for everything inside a cycle loop in a measured region. If you're writing a new bench file, copy this pair and use them with intent.
+
+---
+
 ## Decision: Extend an Existing Bench File or Create a New One?
 
 **Extend existing if the workload fits an existing bench's fixture.** Most new metrics add to `bench-todo.js` (TodoMVC-style list operations) or `bench-krausest.js` (krausest js-framework-benchmark parity workload). Add the `mark`/`measure` pair to the JS file, add the `entryName` to the appropriate `tachometer-ci*.json`. Done in 5 minutes.
@@ -190,23 +273,72 @@ Naming convention for amplified workloads: suffix with the iteration count (`sig
 
 ## Before You Push
 
-Run the bench locally to confirm it works:
+You should run tachometer locally before pushing a new or changed bench. The point is two-fold: confirm the bench wires up correctly, and read its noise floor on the host you're working from. CI's noise floor is GHA's (σ≈2ms); your laptop's may differ — but a bench that's too short or too noisy on your machine will be too short or too noisy on CI in the same direction.
+
+### Check first — does local tachometer work on this host?
+
+```sh
+grep -qi microsoft /proc/version && echo "WSL2 — push to CI for tachometer" || echo "Native Linux/Mac — local tachometer works"
+```
+
+**WSL2 is a known dead end for tachometer.** Selenium-spawned chromedriver crashes before binding its HTTP port (selenium reports `ECONNREFUSED 127.0.0.1:<port>`). Manually-launched chromedriver works fine on the same host, but tachometer doesn't expose a "use this existing chromedriver" knob, and patching its selenium config is more friction than it's worth. Skip the local loop, push to a draft PR, and use the bench-bot comment as your noise-floor source.
+
+If you're on native Linux or macOS, continue to the local loop below.
+
+### The local loop
 
 ```sh
 cd packages/<pkg>/bench/tachometer   # e.g. packages/component or packages/reactivity
 node build-ci.js current
-node build-ci.js baseline  # same source both sides for a dry-run; zero-delta
+node build-ci.js baseline             # same source both sides → zero delta
 npx tachometer --config tachometer-ci-<suite>.json
 ```
 
-**Check for:**
+`tachometer --config <file>` honors every knob in the JSON. Override at the CLI when iterating:
 
-- Tachometer reports the expected number of measurements (`N for this-change, N for tip-of-tree`).
+| CLI flag | Config key | Use locally for |
+|---|---|---|
+| `--sample-size=N` / `-n N` | `sampleSize` | Quicker passes during iteration. Drop below 30 only for a smoke test, never for committed numbers |
+| `--timeout=M` | `timeout` (minutes) | Cap wall-clock per config |
+| `--auto-sample-conditions=0%` | `autoSampleConditions` | Zero-delta dry runs converge fastest with `0%` |
+| `--json-file=out.json` | — | Save raw output for offline inspection |
+| `--csv-file=stats.csv` | — | Per-metric summary table |
+
+### Reading the zero-delta output
+
+Same source on both sides means the **true** delta is zero. What tachometer reports tells you the noise floor:
+
+- `unsure` with a tight CI (e.g. `±1.5%`) on a long-running metric → resolvable noise floor; real perf changes ≥2% will be visible on this machine
+- `unsure` with wide CI on a short bench (e.g. `-15% to +15%`) → bench is duration-limited; scale the workload up or it'll come back unresolved on every PR
+- `slower` or `faster` on zero delta → clock skew between samples, thermal throttling, or background load. Re-run after closing other apps; if it persists, the host is too unstable to trust
+
+The headline number to record is **CI half-width as a percentage of the mean**. That's your local floor. If it's wider than ±5% on a metric meant to gate ≥2% deltas, the bench can't do its job here.
+
+### Iteration shortcut
+
+For a fast read on whether a single new metric is shaped right (without sampling the whole suite):
+
+```sh
+# temporary tachometer-noise-floor.json that lists ONLY the new metrics
+# in both this-change and tip-of-tree arrays; don't commit it
+npx tachometer --config tachometer-noise-floor.json --auto-sample-conditions=0% --timeout=2
+```
+
+This converges in under two minutes on a typical metric and reads the floor without re-running everything in the suite. Delete the temporary config before pushing.
+
+### Environment gotchas
+
+- **Stale chromedriver/Chrome processes** between runs. Kill them: `pkill -9 chrome; pkill -9 -f chromedriver`.
+- **`XDG_RUNTIME_DIR` missing** on stripped-down Linux environments — Chrome logs `dbus/bus.cc` errors and may fail to start. Fix: `mkdir -p /tmp/runtime-$UID && chmod 700 /tmp/runtime-$UID && export XDG_RUNTIME_DIR=/tmp/runtime-$UID`.
+
+### Sanity checks on the result
+
+- Tachometer reports the expected number of measurements (`N for this-change, N for tip-of-tree`). A mismatch means an `entryName` is in one array but not the other.
 - Each measurement name matches what you defined.
-- Mean duration is in the range you estimated — if it's 10× shorter than expected, something's wrong with the workload (early return? optimiser elision?).
+- Mean duration is in the range you estimated — if it's 10× shorter than expected, something's wrong with the workload (early return? optimiser elision? `await flush()` skipped?).
 - No `ReferenceError` or `undefined is not a function` in the Chrome console. Open `ci-current-<suite>.html` in a browser to debug interactively.
 
-If the local run works, push. CI will run the same config in matrix form and the in-house reporter will render the comment per the rubric in `ai/workspace/tmp/bench-reporter-rubric.md`.
+If the local run works and the noise floor is acceptable, push. CI will run the same config in matrix form and the in-house reporter will render the PR comment — see `read-bench-report` for what each section means. Local floor and GHA floor will not match exactly — record both in the PR body so reviewers know what to expect.
 
 ---
 

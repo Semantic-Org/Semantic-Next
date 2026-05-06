@@ -1,0 +1,1154 @@
+{
+  "close": {
+    "value": "x",
+    "reason": "Tabler uses 'x' for close/dismiss"
+  },
+  "back": {
+    "value": "arrow-left",
+    "reason": ""
+  },
+  "next": {
+    "value": "arrow-right",
+    "reason": ""
+  },
+  "up": {
+    "value": "arrow-up",
+    "reason": ""
+  },
+  "down": {
+    "value": "arrow-down",
+    "reason": ""
+  },
+  "external-link": {
+    "value": "external-link",
+    "reason": ""
+  },
+  "chevron-right": {
+    "value": "chevron-right",
+    "reason": ""
+  },
+  "chevron-down": {
+    "value": "chevron-down",
+    "reason": ""
+  },
+  "chevron-up": {
+    "value": "chevron-up",
+    "reason": ""
+  },
+  "chevron-left": {
+    "value": "chevron-left",
+    "reason": ""
+  },
+  "more": {
+    "value": "dots",
+    "reason": "Horizontal ellipsis for more options"
+  },
+  "more-options": {
+    "value": "dots-vertical",
+    "reason": "Vertical ellipsis for kebab menu"
+  },
+  "sidebar": {
+    "value": "layout-sidebar",
+    "reason": ""
+  },
+  "columns": {
+    "value": "layout-columns",
+    "reason": "Tabler prefixes layout icons with 'layout-'"
+  },
+  "anchor": {
+    "value": "anchor",
+    "reason": "Nautical anchor icon; maps to anchor link concept"
+  },
+  "add": {
+    "value": "plus",
+    "reason": ""
+  },
+  "edit": {
+    "value": "pencil",
+    "reason": ""
+  },
+  "delete": {
+    "value": "trash",
+    "reason": ""
+  },
+  "save": {
+    "value": "device-floppy",
+    "reason": "Tabler prefixes device icons with 'device-'"
+  },
+  "check": {
+    "value": "check",
+    "reason": ""
+  },
+  "refresh": {
+    "value": "refresh",
+    "reason": ""
+  },
+  "undo": {
+    "value": "arrow-back-up",
+    "reason": "Curved arrow pointing back and up"
+  },
+  "redo": {
+    "value": "arrow-forward-up",
+    "reason": "Curved arrow pointing forward and up"
+  },
+  "copy": {
+    "value": "copy",
+    "reason": ""
+  },
+  "clipboard": {
+    "value": "clipboard",
+    "reason": ""
+  },
+  "copied": {
+    "value": "clipboard-check",
+    "reason": "Clipboard with checkmark indicating successful copy"
+  },
+  "paste": {
+    "value": "clipboard-text",
+    "reason": "No direct paste icon in Tabler; clipboard-text is the closest match"
+  },
+  "cut": {
+    "value": "scissors",
+    "reason": ""
+  },
+  "move": {
+    "value": "arrows-move",
+    "reason": "Four-directional arrow icon"
+  },
+  "drag-handle": {
+    "value": "grip-vertical",
+    "reason": "Six dots arranged in two columns"
+  },
+  "upload": {
+    "value": "upload",
+    "reason": ""
+  },
+  "download": {
+    "value": "download",
+    "reason": ""
+  },
+  "import": {
+    "value": "file-import",
+    "reason": ""
+  },
+  "export": {
+    "value": "file-export",
+    "reason": ""
+  },
+  "print": {
+    "value": "printer",
+    "reason": ""
+  },
+  "share": {
+    "value": "share",
+    "reason": ""
+  },
+  "send": {
+    "value": "send",
+    "reason": "Paper airplane style icon"
+  },
+  "zap": {
+    "value": "bolt",
+    "reason": "Lightning bolt icon"
+  },
+  "user": {
+    "value": "user",
+    "reason": ""
+  },
+  "avatar": {
+    "value": "user-circle",
+    "reason": "User icon inside a circle"
+  },
+  "users": {
+    "value": "users",
+    "reason": ""
+  },
+  "add-user": {
+    "value": "user-plus",
+    "reason": ""
+  },
+  "remove-user": {
+    "value": "user-minus",
+    "reason": ""
+  },
+  "assigned": {
+    "value": "user-check",
+    "reason": "User with checkmark"
+  },
+  "admin": {
+    "value": "user-shield",
+    "reason": "User with shield indicating admin/protected role"
+  },
+  "user-settings": {
+    "value": "user-cog",
+    "reason": "User with gear/cog icon"
+  },
+  "anonymous": {
+    "value": "user-question",
+    "reason": "User with question mark; represents unknown/guest user"
+  },
+  "roles": {
+    "value": null,
+    "reason": "No satisfactory Tabler icon for roles/permissions concept. shield-half is too abstract, users-group doesn't convey permissions."
+  },
+  "login": {
+    "value": "login",
+    "reason": "Arrow pointing into a bracket/door"
+  },
+  "logout": {
+    "value": "logout",
+    "reason": "Arrow pointing out of a bracket/door"
+  },
+  "fingerprint": {
+    "value": "fingerprint",
+    "reason": ""
+  },
+  "checkbox": {
+    "value": "square-check",
+    "reason": "Square with checkmark inside"
+  },
+  "checkbox-empty": {
+    "value": "square",
+    "reason": "Empty square representing unchecked state"
+  },
+  "toggle": {
+    "value": "toggle-right",
+    "reason": "Toggle switch in the on/right position"
+  },
+  "toggle-off": {
+    "value": "toggle-left",
+    "reason": "Toggle switch in the off/left position"
+  },
+  "file": {
+    "value": "file",
+    "reason": "Direct match; Tabler 'file' icon represents a generic file document"
+  },
+  "document": {
+    "value": "file-text",
+    "reason": "File with text lines; Tabler 'file-text' represents a text document"
+  },
+  "pdf": {
+    "value": "file-type-pdf",
+    "reason": "Tabler has a dedicated 'file-type-pdf' icon with PDF label, unlike Lucide"
+  },
+  "folder": {
+    "value": "folder",
+    "reason": "Direct match for folder/directory icon"
+  },
+  "new-folder": {
+    "value": "folder-plus",
+    "reason": "Folder with plus sign for creating a new folder"
+  },
+  "open-folder": {
+    "value": "folder-open",
+    "reason": "Direct match for open folder icon"
+  },
+  "archive": {
+    "value": "archive",
+    "reason": "Direct match for archive/box icon in the Document category"
+  },
+  "zip": {
+    "value": "file-zip",
+    "reason": "Tabler has a dedicated 'file-zip' icon for compressed files"
+  },
+  "attachment": {
+    "value": "paperclip",
+    "reason": "Standard paperclip attachment icon"
+  },
+  "link": {
+    "value": "link",
+    "reason": "Direct match for link/chain icon"
+  },
+  "unlink": {
+    "value": "unlink",
+    "reason": "Direct match for broken chain/unlink icon"
+  },
+  "image": {
+    "value": "photo",
+    "reason": "Tabler uses 'photo' (not 'image') for the image/picture icon in the Media category"
+  },
+  "gallery": {
+    "value": null,
+    "reason": "No generic gallery/multiple-photos icon in Tabler. Only singular 'photo' exists; brand-google-photos is brand-specific and inappropriate"
+  },
+  "video": {
+    "value": "video",
+    "reason": "Direct match for video camera icon"
+  },
+  "camera": {
+    "value": "camera",
+    "reason": "Direct match for camera/photo capture icon"
+  },
+  "camera-off": {
+    "value": "camera-off",
+    "reason": "Direct match for disabled camera icon with slash"
+  },
+  "volume": {
+    "value": "volume",
+    "reason": "Tabler 'volume' is the standard speaker icon representing audio on"
+  },
+  "volume-low": {
+    "value": "volume-2",
+    "reason": "Tabler 'volume-2' shows speaker with single sound wave arc, representing low/medium volume"
+  },
+  "mute": {
+    "value": "volume-off",
+    "reason": "Direct match for muted speaker icon"
+  },
+  "music": {
+    "value": "music",
+    "reason": "Direct match for music note icon in the Media category"
+  },
+  "microphone": {
+    "value": "microphone",
+    "reason": "Direct match for microphone icon"
+  },
+  "microphone-off": {
+    "value": "microphone-off",
+    "reason": "Direct match for muted microphone with slash"
+  },
+  "headphones": {
+    "value": "headphones",
+    "reason": "Direct match for headphones icon"
+  },
+  "podcast": {
+    "value": null,
+    "reason": "No generic podcast icon in Tabler. Only brand-specific icons exist (brand-apple-podcast, brand-google-podcasts) which are inappropriate for a generic concept"
+  },
+  "broadcast": {
+    "value": "live-photo",
+    "reason": "Center dot with radiating signal elements; closest match for broadcast/live concept. No dedicated broadcast or radio-tower icon exists in Tabler"
+  },
+  "crop": {
+    "value": "crop",
+    "reason": "Direct match for crop/trim tool icon"
+  },
+  "rotate": {
+    "value": "rotate",
+    "reason": "Direct match for rotation icon; Tabler also has rotate-clockwise and rotate-2 variants"
+  },
+  "play": {
+    "value": "player-play",
+    "reason": "Tabler prefixes media controls with 'player-'; standard play triangle"
+  },
+  "pause": {
+    "value": "player-pause",
+    "reason": "Tabler prefixes media controls with 'player-'; two vertical bars"
+  },
+  "stop": {
+    "value": "player-stop",
+    "reason": "Tabler has a dedicated 'player-stop' icon unlike Lucide which uses 'square'"
+  },
+  "skip-next": {
+    "value": "player-skip-forward",
+    "reason": "Triangle with vertical bar pointing right for next track; Tabler uses 'forward' not 'next'"
+  },
+  "skip-previous": {
+    "value": "player-skip-back",
+    "reason": "Triangle with vertical bar pointing left for previous track"
+  },
+  "fast-forward": {
+    "value": "player-track-next",
+    "reason": "Double triangle pointing right; Tabler's 'player-track-next' is the fast-forward double-chevron style. No generic 'fast-forward' icon exists"
+  },
+  "rewind": {
+    "value": "player-track-prev",
+    "reason": "Double triangle pointing left; Tabler's 'player-track-prev' is the rewind double-chevron style. No generic 'rewind' icon exists"
+  },
+  "shuffle": {
+    "value": "arrows-shuffle",
+    "reason": "Crossed arrows for shuffle/random; Tabler uses 'arrows-shuffle' naming"
+  },
+  "repeat": {
+    "value": "repeat",
+    "reason": "Direct match for repeat/loop arrows icon in the Media category"
+  },
+  "record": {
+    "value": "player-record",
+    "reason": "Dedicated record circle icon in Tabler's player icon set"
+  },
+  "brush": {
+    "value": "brush",
+    "reason": "Direct match for brush/paint tool in the Design category"
+  },
+  "pen": {
+    "value": "pencil",
+    "reason": "Tabler's 'pencil' is the standard writing/drawing tool icon in Design category. Also considered 'ballpen' but pencil is more universally recognized for this concept"
+  },
+  "color": {
+    "value": "color-picker",
+    "reason": "Eyedropper tool for picking colors; direct match for color picker concept"
+  },
+  "eraser": {
+    "value": "eraser",
+    "reason": "Direct match for eraser/clear tool in the Text category"
+  },
+  "filter": {
+    "value": "filter",
+    "reason": "Direct match; Tabler has a filter/funnel icon (v1.0)"
+  },
+  "sort": {
+    "value": "sort-ascending",
+    "reason": "Tabler has sort-ascending (v1.0) for ascending sort indicator; no plain 'sort' icon"
+  },
+  "list": {
+    "value": "list",
+    "reason": "Direct match; Tabler list icon shows horizontal lines representing a list view"
+  },
+  "table": {
+    "value": "table",
+    "reason": "Direct match; Tabler table icon shows a grid/spreadsheet layout"
+  },
+  "grid": {
+    "value": "grid-dots",
+    "reason": "Tabler grid-dots shows a 3x3 dot grid representing grid/card view; no plain 'grid' icon"
+  },
+  "chart-bar": {
+    "value": "chart-bar",
+    "reason": "Direct match; Tabler chart-bar icon (v1.0) shows vertical bar chart"
+  },
+  "chart-line": {
+    "value": "chart-line",
+    "reason": "Direct match; Tabler chart-line icon (v1.0) shows a line graph for analytics/trends"
+  },
+  "chart-pie": {
+    "value": "chart-pie",
+    "reason": "Direct match; Tabler chart-pie icon (v1.0) shows a pie/donut chart for statistics"
+  },
+  "view": {
+    "value": "eye",
+    "reason": "Direct match; Tabler eye icon (v1.0) is the standard show/visible indicator"
+  },
+  "hide": {
+    "value": "eye-off",
+    "reason": "Direct match; Tabler eye-off icon (v1.22) shows a crossed-out eye for hidden/invisible state"
+  },
+  "search": {
+    "value": "search",
+    "reason": "Direct match; Tabler search icon (v1.0) is a magnifying glass"
+  },
+  "zoom-in": {
+    "value": "zoom-in",
+    "reason": "Direct match; Tabler zoom-in icon shows a magnifying glass with plus symbol"
+  },
+  "zoom-out": {
+    "value": "zoom-out",
+    "reason": "Direct match; Tabler zoom-out icon shows a magnifying glass with minus symbol"
+  },
+  "fullscreen": {
+    "value": "arrows-maximize",
+    "reason": "Tabler arrows-maximize (v1.0) shows outward-pointing arrows for fullscreen/maximize"
+  },
+  "exit-fullscreen": {
+    "value": "arrows-minimize",
+    "reason": "Tabler arrows-minimize (v1.0) shows inward-pointing arrows for exit fullscreen/minimize"
+  },
+  "board": {
+    "value": "layout-kanban",
+    "reason": "Tabler layout-kanban (v1.11) shows column-based kanban board layout"
+  },
+  "activity": {
+    "value": "activity-heartbeat",
+    "reason": "Tabler activity-heartbeat (v1.64) shows a pulse/lifeline waveform for activity monitoring"
+  },
+  "success": {
+    "value": "circle-check",
+    "reason": "Direct match; Tabler circle-check shows a checkmark inside a circle for success state"
+  },
+  "error": {
+    "value": "circle-x",
+    "reason": "Direct match; Tabler circle-x shows an X inside a circle for error/failure state"
+  },
+  "warning": {
+    "value": "alert-triangle",
+    "reason": "Direct match; Tabler alert-triangle shows the standard warning triangle with exclamation mark"
+  },
+  "info": {
+    "value": "info-circle",
+    "reason": "Direct match; Tabler info-circle shows an 'i' inside a circle for informational messages"
+  },
+  "help": {
+    "value": "help-circle",
+    "reason": "Direct match; Tabler help-circle (v2.10) shows a question mark inside a circle"
+  },
+  "loading": {
+    "value": "loader-2",
+    "reason": "Tabler loader-2 is a spinner/loading indicator; preferred over loader for its cleaner animation-ready design"
+  },
+  "filled-circle": {
+    "value": "circle-dot",
+    "reason": "Tabler circle-dot shows a filled dot inside a circle, matching radio-selected/active state"
+  },
+  "empty-circle": {
+    "value": "circle",
+    "reason": "Direct match; Tabler circle is a plain empty circle for inactive/unselected radio state"
+  },
+  "verified": {
+    "value": "rosette-discount-check",
+    "reason": "Tabler rosette-discount-check shows a checkmark inside a rosette badge; the standard verified/badge-check icon"
+  },
+  "smile": {
+    "value": "mood-happy",
+    "reason": "Tabler mood-happy shows a happy smiley face; matches satisfied/happy emoji concept"
+  },
+  "frown": {
+    "value": "mood-sad",
+    "reason": "Tabler mood-sad shows a sad face with downturned mouth; matches dissatisfied/frown concept"
+  },
+  "tip": {
+    "value": "bulb",
+    "reason": "Tabler bulb shows a lightbulb icon; the universal symbol for tip/idea/hint"
+  },
+  "fire": {
+    "value": "flame",
+    "reason": "Tabler flame (v1.35) shows a fire icon; tagged with fire, burn, bonfire, hot"
+  },
+  "support": {
+    "value": "lifebuoy",
+    "reason": "Tabler lifebuoy (v1.0) shows a life ring; tagged with help and support"
+  },
+  "like": {
+    "value": "heart",
+    "reason": "Direct match; Tabler heart icon is the standard like/favorite symbol"
+  },
+  "unlike": {
+    "value": "heart-broken",
+    "reason": "Tabler heart-broken (v1.18) shows a cracked heart; represents unlike/unfavorite"
+  },
+  "star": {
+    "value": "star",
+    "reason": "Direct match; Tabler star icon is the standard favorite/rating symbol"
+  },
+  "bookmark": {
+    "value": "bookmark",
+    "reason": "Direct match; Tabler bookmark icon represents save-for-later"
+  },
+  "thumbs-up": {
+    "value": "thumb-up",
+    "reason": "Tabler thumb-up (v1.0) shows a thumbs up gesture; tagged with like, emotion, good"
+  },
+  "thumbs-down": {
+    "value": "thumb-down",
+    "reason": "Tabler thumb-down (v1.0) shows a thumbs down gesture; tagged with dislike, bad"
+  },
+  "reply": {
+    "value": "arrow-back-up",
+    "reason": "Tabler arrow-back-up shows a curved backwards arrow; the standard reply action icon"
+  },
+  "comment": {
+    "value": "message",
+    "reason": "Tabler message shows a single speech bubble; represents comment/message"
+  },
+  "comments": {
+    "value": "messages",
+    "reason": "Tabler messages (v1.2) shows overlapping speech bubbles; tagged with chat, reply, conversation"
+  },
+  "typing": {
+    "value": "message-dots",
+    "reason": "Tabler message-dots shows a speech bubble with three dots; the standard typing/composing indicator"
+  },
+  "mention": {
+    "value": "at",
+    "reason": "Direct match; Tabler at icon shows the @ symbol for mentions"
+  },
+  "block": {
+    "value": "ban",
+    "reason": "Direct match; Tabler ban icon shows a circle with slash; tagged with no, reject, restriction, prohibited"
+  },
+  "flag": {
+    "value": "flag",
+    "reason": "Direct match; Tabler flag icon represents report/flag action"
+  },
+  "pin": {
+    "value": "pinned",
+    "reason": "Tabler pinned (v1.31) shows a thumbtack/pushpin; represents pinning an item"
+  },
+  "award": {
+    "value": "award",
+    "reason": "Direct match; Tabler award icon shows a medal/ribbon badge for achievements"
+  },
+  "trophy": {
+    "value": "trophy",
+    "reason": "Direct match; Tabler trophy icon shows a trophy cup for winner/achievement"
+  },
+  "gift": {
+    "value": "gift",
+    "reason": "Direct match; Tabler gift icon (v1.2) shows a wrapped present; tagged with birthday, celebration, reward"
+  },
+  "target": {
+    "value": "target",
+    "reason": "Direct match; Tabler target icon (v1.0) shows a bullseye; tagged with focus, aim, goal"
+  },
+  "bold": {
+    "value": "bold",
+    "reason": "Direct match; Tabler bold icon shows a bold 'B' character for text formatting"
+  },
+  "italic": {
+    "value": "italic",
+    "reason": "Direct match; Tabler italic icon shows an italic 'I' character for text formatting"
+  },
+  "underline": {
+    "value": "underline",
+    "reason": "Direct match; Tabler underline icon shows an underlined 'U' character for text formatting"
+  },
+  "strikethrough": {
+    "value": "strikethrough",
+    "reason": "Direct match; Tabler strikethrough icon shows struck-through text for text formatting"
+  },
+  "code": {
+    "value": "code",
+    "reason": "Direct match; Tabler code icon shows angle brackets for code/markup"
+  },
+  "quote": {
+    "value": "blockquote",
+    "reason": "Tabler blockquote (v1.39) shows quotation marks with lines; matches blockquote/quote concept"
+  },
+  "heading": {
+    "value": "heading",
+    "reason": "Direct match; Tabler heading (v1.39) shows an 'H' character representing heading/title"
+  },
+  "paragraph": {
+    "value": "pilcrow",
+    "reason": "Tabler pilcrow (v1.113) shows the paragraph symbol; tagged with paragraph, letter, text"
+  },
+  "bullet-list": {
+    "value": "list",
+    "reason": "Tabler list icon shows horizontal lines with bullets; represents unordered/bullet list"
+  },
+  "numbered-list": {
+    "value": "list-numbers",
+    "reason": "Tabler list-numbers (v1.40) shows numbered lines; represents ordered/numbered list"
+  },
+  "checklist": {
+    "value": "list-check",
+    "reason": "Tabler list-check (v1.2) shows lines with checkmarks; tagged with todo, tasks, reminders"
+  },
+  "indent": {
+    "value": "indent-increase",
+    "reason": "Tabler indent-increase shows lines with rightward arrow; represents increasing indent level"
+  },
+  "outdent": {
+    "value": "indent-decrease",
+    "reason": "Tabler indent-decrease (v1.3) shows lines with leftward arrow; represents decreasing indent level"
+  },
+  "align-left": {
+    "value": "align-left",
+    "reason": "Direct match; Tabler align-left shows left-aligned text lines"
+  },
+  "align-center": {
+    "value": "align-center",
+    "reason": "Direct match; Tabler align-center shows center-aligned text lines"
+  },
+  "align-right": {
+    "value": "align-right",
+    "reason": "Direct match; Tabler align-right shows right-aligned text lines"
+  },
+  "justify": {
+    "value": "align-justified",
+    "reason": "Tabler align-justified shows fully justified text lines; matches justify/align-justify concept"
+  },
+  "emoji": {
+    "value": "mood-smile",
+    "reason": "Tabler mood-smile (v1.0) shows a smiley face; represents emoji picker trigger"
+  },
+  "cart": {
+    "value": "shopping-cart",
+    "reason": "Exact match. Tabler uses `shopping-cart` for the standard cart icon."
+  },
+  "add-to-cart": {
+    "value": "shopping-cart-plus",
+    "reason": "Exact match. `shopping-cart-plus` shows a cart with a plus symbol."
+  },
+  "remove-from-cart": {
+    "value": "shopping-cart-x",
+    "reason": "Tabler has `shopping-cart-x` (cart with an X). No `shopping-cart-minus` was found."
+  },
+  "payment": {
+    "value": "credit-card",
+    "reason": "Exact match. Standard credit card icon."
+  },
+  "wallet": {
+    "value": "wallet",
+    "reason": "Exact match."
+  },
+  "money": {
+    "value": "coins",
+    "reason": "Tabler has `coins` (multiple coins) and `currency-dollar`. `coins` is the best general money/currency icon."
+  },
+  "tag": {
+    "value": "tag",
+    "reason": "Exact match."
+  },
+  "tags": {
+    "value": "tags",
+    "reason": "Exact match."
+  },
+  "discount": {
+    "value": "percentage",
+    "reason": "Exact match. `percentage` shows a percent symbol."
+  },
+  "coupon": {
+    "value": "ticket",
+    "reason": "Exact match. `ticket` represents a coupon/ticket."
+  },
+  "package": {
+    "value": "package",
+    "reason": "Exact match."
+  },
+  "shipping": {
+    "value": "truck",
+    "reason": "Exact match. Standard truck icon for shipping."
+  },
+  "delivery": {
+    "value": "truck-delivery",
+    "reason": "Exact match. `truck-delivery` is a truck with a delivery/speed indicator."
+  },
+  "return": {
+    "value": "receipt-refund",
+    "reason": "Tabler has `receipt-refund` (receipt with return arrow). Best match for return/refund concept."
+  },
+  "receipt": {
+    "value": "receipt",
+    "reason": "Exact match."
+  },
+  "invoice": {
+    "value": "file-invoice",
+    "reason": "Exact match. `file-invoice` is a document styled as an invoice."
+  },
+  "store": {
+    "value": "building-store",
+    "reason": "Exact match. `building-store` shows a storefront building."
+  },
+  "shopping-bag": {
+    "value": "shopping-bag",
+    "reason": "Exact match."
+  },
+  "calendar": {
+    "value": "calendar",
+    "reason": "Exact match."
+  },
+  "schedule": {
+    "value": "calendar-event",
+    "reason": "Exact match. `calendar-event` shows a calendar with an event marker."
+  },
+  "scheduled": {
+    "value": "calendar-check",
+    "reason": "Exact match. `calendar-check` shows a calendar with a checkmark."
+  },
+  "overdue": {
+    "value": "calendar-off",
+    "reason": "Tabler has `calendar-off` and `calendar-cancel`. No `calendar-x` was confirmed. `calendar-off` conveys an expired/overdue calendar state."
+  },
+  "time": {
+    "value": "clock",
+    "reason": "Exact match."
+  },
+  "timer": {
+    "value": "hourglass",
+    "reason": "Tabler has both `hourglass` and `stopwatch`. `hourglass` is a better fit for timer/countdown."
+  },
+  "watch": {
+    "value": "device-watch",
+    "reason": "Tabler uses `device-watch` for smartwatch. Confirmed to exist."
+  },
+  "layers": {
+    "value": "stack-2",
+    "reason": "Tabler has `stack` and `stack-2`. `stack-2` shows three layered shapes, which better represents the layers/stack concept."
+  },
+  "subtask": {
+    "value": "subtask",
+    "reason": "Exact match."
+  },
+  "tree": {
+    "value": "hierarchy",
+    "reason": "Exact match. `hierarchy` shows a tree/org-chart structure."
+  },
+  "progress": {
+    "value": "progress",
+    "reason": "Exact match."
+  },
+  "milestone": {
+    "value": "diamond",
+    "reason": "Exact match. Diamond shape is the standard milestone symbol in project management."
+  },
+  "tasks": {
+    "value": "list-check",
+    "reason": "Exact match. `list-check` shows a checklist with checkmarks."
+  },
+  "location": {
+    "value": "map-pin",
+    "reason": "Exact match. Standard map pin/marker icon."
+  },
+  "map": {
+    "value": "map",
+    "reason": "Exact match."
+  },
+  "directions": {
+    "value": "route",
+    "reason": "Exact match. `route` shows a path/directions line."
+  },
+  "compass": {
+    "value": "compass",
+    "reason": "Exact match."
+  },
+  "current-location": {
+    "value": "current-location",
+    "reason": "Exact match. Crosshairs/GPS-style current location icon."
+  },
+  "measure": {
+    "value": "ruler",
+    "reason": "Exact match."
+  },
+  "trending-up": {
+    "value": "trending-up",
+    "reason": "Exact match."
+  },
+  "trending-down": {
+    "value": "trending-down",
+    "reason": "Exact match."
+  },
+  "balance": {
+    "value": "scale",
+    "reason": "Exact match. `scale` shows a balance/weighing scale."
+  },
+  "swap": {
+    "value": "arrows-exchange",
+    "reason": "Tabler has `arrows-exchange`, `arrows-exchange-2`, and `exchange`. `arrows-exchange` shows bidirectional arrows for transfer/swap."
+  },
+  "savings": {
+    "value": "pig-money",
+    "reason": "Tabler uses `pig-money` (not `piggy-bank`). Shows a pig with a coin, representing savings."
+  },
+  "vault": {
+    "value": null,
+    "reason": "No safe/vault icon found in Tabler. Searched for `safe`, `vault`, `safe-box`, and `lock-dollar` -- none exist."
+  },
+  "briefcase": {
+    "value": "briefcase",
+    "reason": "Exact match."
+  },
+  "company": {
+    "value": "building",
+    "reason": "Exact match. Single building/office icon."
+  },
+  "organization": {
+    "value": "buildings",
+    "reason": "Exact match. `buildings` shows multiple buildings, representing a larger organization/corporate entity."
+  },
+  "news": {
+    "value": "news",
+    "reason": "Exact match."
+  },
+  "rss": {
+    "value": "rss",
+    "reason": "Exact match."
+  },
+  "docs": {
+    "value": "book",
+    "reason": "Exact match. Closed book icon for documentation."
+  },
+  "book-open": {
+    "value": "book-2",
+    "reason": "Tabler uses `book-2` for an open/alternative book style. Best match for an open book."
+  },
+  "graduation": {
+    "value": "school",
+    "reason": "Tabler uses `school` (building with academic context). No graduation-cap icon was found; `school` is the closest education/academic icon."
+  },
+  "settings": {
+    "tabler": "settings",
+    "notes": "Tabler has `settings` (gear icon). Direct match."
+  },
+  "sliders": {
+    "tabler": "adjustments",
+    "notes": "Tabler `adjustments` shows vertical sliders/equalizer controls. Matches the sliders/adjustments concept well."
+  },
+  "theme": {
+    "tabler": "palette",
+    "notes": "Tabler `palette` represents colors/appearance. Good match for theme/colors."
+  },
+  "light-mode": {
+    "tabler": "sun",
+    "notes": "Tabler `sun` is the standard light mode icon."
+  },
+  "dark-mode": {
+    "tabler": "moon",
+    "notes": "Tabler `moon` is the standard dark mode icon."
+  },
+  "accessibility": {
+    "tabler": "accessible",
+    "notes": "Tabler uses `accessible` (not `accessibility`). Wheelchair/universal access symbol."
+  },
+  "plugin": {
+    "tabler": "puzzle",
+    "notes": "Tabler `puzzle` represents extensions/add-ons. Tagged with extension, add-on."
+  },
+  "webhook": {
+    "tabler": "webhook",
+    "notes": "Tabler has `webhook`. Direct match."
+  },
+  "globe": {
+    "tabler": "world",
+    "notes": "Tabler has both `globe` and `world`. `world` is more commonly used and shows a full globe with latitude/longitude lines."
+  },
+  "desktop": {
+    "tabler": "device-desktop",
+    "notes": "Tabler `device-desktop` is the monitor/computer icon."
+  },
+  "laptop": {
+    "tabler": "device-laptop",
+    "notes": "Tabler `device-laptop` is the laptop icon."
+  },
+  "mobile": {
+    "tabler": "device-mobile",
+    "notes": "Tabler `device-mobile` is the smartphone icon."
+  },
+  "tablet": {
+    "tabler": "device-tablet",
+    "notes": "Tabler `device-tablet` is the tablet icon."
+  },
+  "keyboard": {
+    "tabler": "keyboard",
+    "notes": "Tabler has `keyboard`. Direct match."
+  },
+  "cpu": {
+    "tabler": "cpu",
+    "notes": "Tabler has `cpu` in the Devices category. Direct match."
+  },
+  "storage": {
+    "tabler": "server",
+    "notes": "Tabler has no dedicated hard-drive icon. `server` is the closest match for storage/disk concept. Considered `database` but that is more data-specific."
+  },
+  "usb": {
+    "tabler": "usb",
+    "notes": "Tabler has `usb`. Direct match. Also has `device-usb` but `usb` is simpler."
+  },
+  "cast": {
+    "tabler": "cast",
+    "notes": "Tabler has `cast`. Direct match for Chromecast/Airplay streaming."
+  },
+  "terminal": {
+    "tabler": "terminal",
+    "notes": "Tabler has `terminal`. Direct match. Tagged with console, command, git, command line."
+  },
+  "database": {
+    "tabler": "database",
+    "notes": "Tabler has `database`. Direct match."
+  },
+  "server": {
+    "tabler": "server-2",
+    "notes": "Tabler has `server` and `server-2`. Using `server-2` to differentiate from `storage` mapping above which uses `server`."
+  },
+  "cloud": {
+    "tabler": "cloud",
+    "notes": "Tabler has `cloud`. Direct match."
+  },
+  "cloud-upload": {
+    "tabler": "cloud-upload",
+    "notes": "Tabler has `cloud-upload`. Direct match."
+  },
+  "cloud-download": {
+    "tabler": "cloud-download",
+    "notes": "Tabler has `cloud-download`. Direct match."
+  },
+  "bug": {
+    "tabler": "bug",
+    "notes": "Tabler has `bug`. Direct match."
+  },
+  "git": {
+    "tabler": "git-branch",
+    "notes": "Tabler has `git-branch` for version control branching. Good match for git/branch concept."
+  },
+  "network": {
+    "tabler": "network",
+    "notes": "Tabler has `network` in the Computers category. Direct match."
+  },
+  "wifi": {
+    "tabler": "wifi",
+    "notes": "Tabler has `wifi`. Direct match."
+  },
+  "bluetooth": {
+    "tabler": "bluetooth",
+    "notes": "Tabler has `bluetooth`. Direct match."
+  },
+  "power": {
+    "tabler": "power",
+    "notes": "Tabler has `power`. Direct match."
+  },
+  "battery": {
+    "tabler": "battery",
+    "notes": "Tabler has `battery`. Direct match."
+  },
+  "tool": {
+    "tabler": "tool",
+    "notes": "Tabler has `tool` (wrench icon). Direct match."
+  },
+  "tools": {
+    "tabler": "tools",
+    "notes": "Tabler has `tools`. Direct match."
+  },
+  "qr-code": {
+    "tabler": "qrcode",
+    "notes": "Tabler uses `qrcode` (no hyphen). Note the naming difference from Semantic UI `qr-code`."
+  },
+  "barcode": {
+    "tabler": "barcode",
+    "notes": "Tabler has `barcode` in the System category. Direct match."
+  },
+  "calculator": {
+    "tabler": "calculator",
+    "notes": "Tabler has `calculator`. Direct match."
+  },
+  "random": {
+    "tabler": "dice",
+    "notes": "Tabler has `dice`. Good match for random/chance concept."
+  },
+  "history": {
+    "tabler": "history",
+    "notes": "Tabler has `history`. Direct match."
+  },
+  "rain": {
+    "tabler": "cloud-rain",
+    "notes": "Tabler has `cloud-rain` in the Weather category. Good match."
+  },
+  "storm": {
+    "tabler": "storm",
+    "notes": "Tabler has `storm` (code f24c) in the Weather category. Tagged with weather, cloud, lightning, rain, wind, tornado."
+  },
+  "snow": {
+    "tabler": "snowflake",
+    "notes": "Tabler has `snowflake`. Standard snow/cold icon."
+  },
+  "wind": {
+    "tabler": "wind",
+    "notes": "Tabler has `wind` in the Weather category. Direct match."
+  },
+  "temperature": {
+    "tabler": "temperature",
+    "notes": "Tabler has `temperature` in the Weather category. Direct match."
+  },
+  "water": {
+    "tabler": "droplet",
+    "notes": "Tabler has `droplet` in the Design category. Good match for water/humidity."
+  },
+  "coffee": {
+    "tabler": "coffee",
+    "notes": "Tabler has `coffee` in the Food category. Direct match."
+  },
+  "infinity": {
+    "tabler": "infinity",
+    "notes": "Tabler has `infinity`. Direct match."
+  },
+  "eco": {
+    "tabler": "leaf",
+    "notes": "Tabler has `leaf`. Good match for eco/nature concept."
+  },
+  "hexagon": {
+    "tabler": "hexagon",
+    "notes": "Tabler has `hexagon` in the Shapes category. Direct match."
+  },
+  "triangle": {
+    "tabler": "triangle",
+    "notes": "Tabler has `triangle` in the Shapes category. Direct match."
+  },
+  "google": {
+    "tabler": "brand-google",
+    "notes": "Tabler has `brand-google`. Brand icons use the `brand-` prefix."
+  },
+  "github": {
+    "tabler": "brand-github",
+    "notes": "Tabler has `brand-github`. Direct match."
+  },
+  "apple": {
+    "tabler": "brand-apple",
+    "notes": "Tabler has `brand-apple`. Direct match."
+  },
+  "facebook": {
+    "tabler": "brand-facebook",
+    "notes": "Tabler has `brand-facebook`. Direct match."
+  },
+  "twitter": {
+    "tabler": "brand-x",
+    "notes": "Tabler has both `brand-twitter` (old bird logo) and `brand-x` (current X logo, added v2.29). Using `brand-x` as it reflects the current branding."
+  },
+  "linkedin": {
+    "tabler": "brand-linkedin",
+    "notes": "Tabler has `brand-linkedin`. Direct match."
+  },
+  "microsoft": {
+    "tabler": "brand-windows",
+    "notes": "Tabler has `brand-windows`. Best match for Microsoft/Windows."
+  },
+  "slack": {
+    "tabler": "brand-slack",
+    "notes": "Tabler has `brand-slack`. Direct match."
+  },
+  "discord": {
+    "tabler": "brand-discord",
+    "notes": "Tabler has `brand-discord`. Direct match."
+  },
+  "instagram": {
+    "tabler": "brand-instagram",
+    "notes": "Tabler has `brand-instagram`. Direct match."
+  },
+  "youtube": {
+    "tabler": "brand-youtube",
+    "notes": "Tabler has `brand-youtube`. Direct match."
+  },
+  "android": {
+    "tabler": "brand-android",
+    "notes": "Tabler has `brand-android`. Direct match."
+  },
+  "sparkles": {
+    "tabler": "sparkles",
+    "notes": "Tabler has `sparkles`. Direct match for AI/magic concept."
+  },
+  "wand": {
+    "tabler": "wand",
+    "notes": "Tabler has `wand` (added v1.5). Direct match for magic wand/auto-fix."
+  },
+  "bot": {
+    "tabler": "robot",
+    "notes": "Tabler uses `robot` (not `bot`). Same concept for robot/automation."
+  },
+  "notifications": {
+    "tabler": "bell",
+    "notes": "Tabler has `bell`. Standard notifications icon."
+  },
+  "email": {
+    "tabler": "mail",
+    "notes": "Tabler uses `mail` (not `email`). Direct match for envelope/email."
+  },
+  "inbox": {
+    "tabler": "inbox",
+    "notes": "Tabler has `inbox`. Direct match."
+  },
+  "phone": {
+    "tabler": "phone",
+    "notes": "Tabler has `phone`. Direct match."
+  },
+  "contacts": {
+    "tabler": "address-book",
+    "notes": "Tabler has `address-book` (added v1.55). Good match for contacts/address book."
+  },
+  "lock": {
+    "tabler": "lock",
+    "notes": "Tabler has `lock`. Direct match."
+  },
+  "unlock": {
+    "tabler": "lock-open",
+    "notes": "Tabler uses `lock-open` (not `unlock`). Shows an open padlock."
+  },
+  "security": {
+    "tabler": "shield",
+    "notes": "Tabler has `shield` in the System category. Tagged with safety, protect, protection."
+  },
+  "secure": {
+    "tabler": "shield-check",
+    "notes": "Tabler has `shield-check`. Shield with checkmark for verified/secure."
+  },
+  "key": {
+    "tabler": "key",
+    "notes": "Tabler has `key`. Direct match."
+  }
+}

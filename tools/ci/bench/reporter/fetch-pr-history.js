@@ -2,13 +2,13 @@
 /*
   Fetch prior bench results from this PR's branch to build a per-iteration
   history. Walks completed Benchmarks workflow runs, downloads their
-  results-* artifacts, extracts per-metric absolute CIs, and outputs a
+  results-* artifacts, extracts per-metric CIs, and outputs a
   pr-history.json in the same schema as bench-history.json.
 
   The reporter merges this PR-iteration history with bench-history.json
-  (main-commit history) to compute cross-run peak attribution. An agent
-  iterating on a perf branch sees: "iteration 3 was the best on
-  update-10th; your current iteration regressed from that."
+  (main-commit history) for cross-run peak attribution. An agent iterating
+  on a perf branch sees: "iteration 3 was the best on update-10th; your
+  current iteration regressed from that."
 
   Usage:
     node fetch-pr-history.js \
@@ -23,7 +23,7 @@
 
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
-import path from 'node:path';
+import { loadHistoryMetrics, readBaselineSha } from './extract-metrics.js';
 
 const args = parseArgs(process.argv.slice(2));
 const branch = required(args, 'branch');
@@ -59,11 +59,19 @@ for (const run of prRuns) {
     continue;
   }
 
-  const metrics = loadMetrics(dir);
+  const baselineSha = readBaselineSha(dir);
+  const metrics = loadHistoryMetrics(dir, baselineSha);
   if (Object.keys(metrics).length === 0) {
     console.log(`  Skip ${run.databaseId} (no metrics)`);
     continue;
   }
+
+  // Did this iteration's commit actually touch packages source? GitHub's
+  // `paths:` filter triggers benches on any commit in a PR whose overall
+  // diff includes packages/**, so harness-only commits ride along when
+  // earlier commits in the PR moved packages. Filtering here keeps those
+  // commits out of bisect/credit candidate suggestions downstream.
+  const touchesPackages = commitTouchesPackages(repo, run.headSha);
 
   commits.push({
     sha: run.headSha,
@@ -71,64 +79,43 @@ for (const run of prRuns) {
     parent_sha: '',
     timestamp: run.createdAt,
     pr: null,
+    touches_packages: touchesPackages,
     metrics,
   });
-  console.log(`  ${run.headSha.slice(0, 7)} — ${Object.keys(metrics).length} metrics`);
+  console.log(
+    `  ${run.headSha.slice(0, 7)} — ${Object.keys(metrics).length} metrics`
+      + (baselineSha ? ` @ baseline ${baselineSha.slice(0, 7)}` : '')
+      + (touchesPackages ? '' : ' (harness-only)'),
+  );
 }
 
-// Chronological order (oldest first) so peak-index → bisect-candidates
-// after peak produces a causal timeline.
+// Sort by timestamp so peak → bisect-candidates after peak produces a
+// causal timeline.
 commits.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
-fs.writeFileSync(outPath, JSON.stringify({ schema_version: 1, commits }, null, 2) + '\n');
+fs.writeFileSync(outPath, JSON.stringify({ schema_version: 2, commits }, null, 2) + '\n');
 console.log(`Wrote ${commits.length} entries to ${outPath}`);
-
-/**
- * Walk a results directory and extract one { ci, mean_ms } entry per
- * metric. Uses the `this-change` absolute CI — same extraction logic
- * as append-history.js.
- */
-function loadMetrics(dir) {
-  const out = {};
-  for (const entry of walk(dir)) {
-    if (!entry.endsWith('.json')) { continue; }
-    let data;
-    try {
-      data = JSON.parse(fs.readFileSync(entry, 'utf8'));
-    }
-    catch {
-      continue;
-    }
-    if (!Array.isArray(data.benchmarks)) { continue; }
-
-    for (const bm of data.benchmarks) {
-      const source = (bm.name ?? '').split(' [')[0];
-      if (source !== 'this-change') { continue; }
-      const metricName = bm.measurement?.name ?? bm.name;
-      if (!bm.mean) { continue; }
-      out[metricName] = {
-        ci: [round4(bm.mean.low), round4(bm.mean.high)],
-        mean_ms: round4((bm.mean.low + bm.mean.high) / 2),
-      };
-    }
-  }
-  return out;
-}
-
-function round4(n) {
-  return Number(n.toFixed(4));
-}
-
-function* walk(dir) {
-  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, ent.name);
-    if (ent.isDirectory()) { yield* walk(full); }
-    else { yield full; }
-  }
-}
 
 function exec(cmd) {
   return execSync(cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+}
+
+/**
+ * Query the GitHub API for the commit's changed-file list and return true
+ * when any path is under `packages/`. Defaults to true on API failure so
+ * an unreachable commit doesn't silently disappear from candidate lists.
+ */
+function commitTouchesPackages(repoSlug, sha) {
+  try {
+    const filesRaw = exec(
+      `gh api repos/${repoSlug}/commits/${sha} --jq '.files[].filename'`,
+    );
+    const files = filesRaw.split('\n').filter(Boolean);
+    return files.some((f) => f.startsWith('packages/'));
+  }
+  catch {
+    return true;
+  }
 }
 
 function parseArgs(argv) {

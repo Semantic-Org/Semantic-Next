@@ -12,9 +12,11 @@ import {
   get,
   getKeyFromEvent,
   inArray,
+  isClient,
   isEqual,
   isFunction,
   isServer,
+  kebabToCamel,
   mapObject,
   noop,
   remove,
@@ -95,10 +97,10 @@ export const Template = class Template {
     this.onRenderedCallback = onRendered;
     this.onDestroyedCallback = onDestroyed;
     this.onCreatedCallback = onCreated;
+    this.onUpdatedCallback = onUpdated;
     this.onThemeChangedCallback = onThemeChanged;
     this.id = generateID();
     this.isPrototype = isPrototype;
-    this.parentTemplate = parentTemplate;
     this.attachStyles = attachStyles;
     this.element = element;
     this.renderingEngine = renderingEngine;
@@ -115,10 +117,10 @@ export const Template = class Template {
     // as a substitute for settings because settings only works with tag attributes
     let getInitialValue = (config, name) => {
       const dataValue = get(data, name);
-      if (dataValue) {
+      if (dataValue !== undefined) {
         return dataValue;
       }
-      return config?.value || config;
+      return config?.value ?? config;
     };
 
     each(defaultState, (config, name) => {
@@ -149,25 +151,30 @@ export const Template = class Template {
     return this.parentTemplate !== undefined;
   }
 
-  // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
-    // add child templates to parent for searching with getChild
+    if (this.parentTemplate === parentTemplate) {
+      return;
+    }
+    if (this.parentTemplate) {
+      this.removeParent();
+    }
     if (!parentTemplate._childTemplates) {
       parentTemplate._childTemplates = [];
     }
     parentTemplate._childTemplates.push(this);
-
-    // add parent template to this element for searching with getParent
     this.parentTemplate = parentTemplate;
   }
 
   removeParent() {
-    if (!this.parentTemplate?._childTemplates) {
+    if (!this.parentTemplate) {
       return;
     }
-    this.parentTemplate._childTemplates = this.parentTemplate._childTemplates.filter(template => {
-      return template.id !== this.id;
-    });
+    if (this.parentTemplate._childTemplates) {
+      this.parentTemplate._childTemplates = this.parentTemplate._childTemplates.filter(template => {
+        return template.id !== this.id;
+      });
+    }
+    this.parentTemplate = undefined;
   }
 
   setElement(element) {
@@ -204,6 +211,7 @@ export const Template = class Template {
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
+      this.resolveLifecyclePromise('created');
       if (!this.isHydrating) {
         this.dispatchEvent('created', { component: this.instance }, eventSettings, { triggerCallback: false });
       }
@@ -216,6 +224,7 @@ export const Template = class Template {
         this.onRenderOnce();
         delete this.onRenderOnce;
       }
+      this.resolveLifecyclePromise('rendered');
       if (!this.isHydrating) {
         this.dispatchEvent('rendered', { component: this.instance }, eventSettings, { triggerCallback: false });
       }
@@ -228,6 +237,8 @@ export const Template = class Template {
         if (this.element) {
           this.element.updateScheduled = false;
         }
+        this.call(this.onUpdatedCallback);
+        this.resolveLifecyclePromise('updated');
         this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
       });
     };
@@ -240,14 +251,14 @@ export const Template = class Template {
 
     this.onDestroyed = () => {
       Template.removeTemplate(this);
-      this.rendered = false;
-      this.destroyed = true;
+      this.markDestroyed();
       this.abortController.abort('Template destroyed');
       this.clearReactions();
       this.removeEvents();
       this.removeObservers();
       this.removeParent();
       this.call(this.onDestroyedCallback);
+      this.resolveLifecyclePromise('destroyed');
       this.dispatchEvent('destroyed', { component: this.instance }, eventSettings, { triggerCallback: false });
     };
 
@@ -423,8 +434,9 @@ export const Template = class Template {
     let eventType = 'delegate';
     let keywords = ['deep', 'global', 'bind'];
     each(keywords, (keyword) => {
-      if (eventString.startsWith(keyword)) {
-        eventString = eventString.replace(keyword, '');
+      // Require a word boundary so 'deepclick' isn't parsed as deep + 'click'.
+      if (eventString.startsWith(keyword + ' ')) {
+        eventString = eventString.slice(keyword.length);
         eventType = keyword;
       }
     });
@@ -534,8 +546,7 @@ export const Template = class Template {
         }
 
         const eventHandler = function(event) {
-          // check if the event occurred in the current template if not global
-          if (eventType !== 'global' && !template.isNodeInTemplate(event.target)) {
+          if (!inArray(eventType, ['deep', 'global']) && !template.isNodeInTemplate(event.target)) {
             return;
           }
 
@@ -569,7 +580,7 @@ export const Template = class Template {
             }
             return value;
           });
-          const elValue = targetElement?.value || event.target?.value || event?.detail?.value;
+          const elValue = targetElement?.value ?? event.target?.value ?? event?.detail?.value;
           return template.call(boundEvent, {
             additionalData: {
               event: event,
@@ -589,7 +600,7 @@ export const Template = class Template {
         // allow user to bind to global selectors if they opt in using the 'global' keyword
         // also allow events to be directly bound when opted in
         if (eventType == 'global') {
-          $(selector).on(eventName, eventHandler, eventSettings);
+          $(selector || window).on(eventName, eventHandler, eventSettings);
         }
         else if (eventType == 'bind') {
           this.onRenderOnce = () => {
@@ -598,8 +609,13 @@ export const Template = class Template {
           };
         }
         else {
-          // otherwise use event delegation at the components shadow root
-          $(this.renderRoot).on(eventName, selector, eventHandler, eventSettings);
+          if (selector) {
+            $(this.renderRoot).on(eventName, selector, eventHandler, eventSettings);
+          }
+          else {
+            // naked: bind on host so events on the host's own surface fire
+            $(this.element).on(eventName, eventHandler, eventSettings);
+          }
         }
       });
     });
@@ -624,6 +640,11 @@ export const Template = class Template {
     if (Object.keys(keys).length == 0) {
       return;
     }
+    // gate prevents unbind/rebind cycles from stacking document listeners
+    if (this.hasKeybindings) {
+      return;
+    }
+    this.hasKeybindings = true;
     const sequenceTimeout = 500; // time in ms required between keypress
     const eventSettings = { abortController: this.eventController };
     this.currentSequence = '';
@@ -637,7 +658,7 @@ export const Template = class Template {
         // check for key event
         each(this.keys, (handler, keySequence) => {
           keySequence = keySequence.replace(/\s*\+\s*/g, '+'); // remove space around +
-          const keySequences = keySequence.split(',');
+          const keySequences = keySequence.split(',').map(s => s.trim()).filter(s => s.length > 0);
           if (any(keySequences, sequence => this.currentSequence.endsWith(sequence))) {
             const inputFocused = document.activeElement
               && (['input', 'select', 'textarea'].includes(document.activeElement.tagName.toLowerCase())
@@ -761,6 +782,13 @@ export const Template = class Template {
     this.destroyed = false;
   }
 
+  markDestroyed() {
+    this.rendered = false;
+    this.destroyed = true;
+    this.hasKeybindings = false;
+    this._childTemplates = [];
+  }
+
   /*******************************
              DOM Helpers
   *******************************/
@@ -771,7 +799,7 @@ export const Template = class Template {
       root = document;
     }
     if (!root) {
-      root = globalThis;
+      root = isClient ? document : globalThis;
     }
     if (root == this.renderRoot) {
       const $results = $(selector, { root, ...otherArgs });
@@ -861,12 +889,13 @@ export const Template = class Template {
     };
   }
 
-  // attaches an external event handler making sure to remove the event when the component is destroyed
-  attachEvent(selector, eventName, eventHandler, { eventSettings = {}, querySettings = { pierceShadow: true } } = {}) {
+  // 4th arg matches the native addEventListener shape (passive/capture/once/...);
+  // querySettings is the only namespaced key.
+  attachEvent(selector, eventName, eventHandler, { querySettings = { pierceShadow: true }, ...eventSettings } = {}) {
     return $(selector, document, querySettings).on(eventName, eventHandler, {
       abortController: this.eventController,
       returnHandler: true,
-      ...eventSettings,
+      eventSettings,
     });
   }
 
@@ -887,10 +916,15 @@ export const Template = class Template {
     if (resolve) {
       resolve();
       delete this.lifecycleResolvers[eventName];
-      // recurring events get a fresh promise on next access
-      if (eventName === 'updated') {
-        delete this.lifecyclePromises[eventName];
-      }
+    }
+    if (eventName === 'updated') {
+      // recurring — clear cache so next access creates a fresh promise
+      delete this.lifecyclePromises[eventName];
+    }
+    else if (!this.lifecyclePromises[eventName]) {
+      // one-shot fired without prior awaiter — cache an immediately-resolved
+      // promise so late awaiters don't hang
+      this.lifecyclePromises[eventName] = Promise.resolve();
     }
   }
 
@@ -906,10 +940,6 @@ export const Template = class Template {
       wrapFunction(callback).call(this.element, eventData);
     }
 
-    // resolve lifecycle promise before DOM event dispatch
-    this.resolveLifecyclePromise(eventName);
-
-    // trigger DOM event
     return $(this.element).dispatchEvent(eventName, eventData, eventSettings);
   }
 
@@ -1020,10 +1050,10 @@ export const Template = class Template {
           Template Helpers
   *******************************/
 
-  findTemplate = (templateName) => Template.findTemplate(templateName);
-  findParent = (templateName) => Template.findParentTemplate(this, templateName);
-  findChild = (templateName) => Template.findChildTemplate(this, templateName);
-  findChildren = (templateName) => Template.findChildTemplates(this, templateName);
+  findTemplate = (name) => Template.findTemplate(name);
+  findParent = (name) => Template.findParentTemplate(this, name);
+  findChild = (name) => Template.findChildTemplate(this, name);
+  findChildren = (name) => Template.findChildTemplates(this, name);
 
   static renderedTemplates = new Map();
 
@@ -1041,12 +1071,19 @@ export const Template = class Template {
     }
     let templates = Template.renderedTemplates.get(template.templateName) || [];
     remove(templates, (thisTemplate) => thisTemplate.id == template.id);
-    Template.renderedTemplates.set(template.templateName, templates);
+    if (templates.length === 0) {
+      Template.renderedTemplates.delete(template.templateName);
+    }
+    else {
+      Template.renderedTemplates.set(template.templateName, templates);
+    }
   }
   static getTemplates(templateName) {
     return Template.renderedTemplates.get(templateName) || [];
   }
   static findTemplate(templateName) {
+    if (templateName == null) { return undefined; }
+    templateName = kebabToCamel(templateName);
     const template = Template.getTemplates(templateName)[0];
     if (!template) {
       return undefined;
@@ -1057,6 +1094,7 @@ export const Template = class Template {
     };
   }
   static findParentTemplate(template, templateName) {
+    templateName = kebabToCamel(templateName);
     // this matches on DOM (common)
     let match;
     const isMatch = (component) => {
@@ -1086,7 +1124,9 @@ export const Template = class Template {
       }
     }
     // this matches on nested partials (less common)
-    while (template) {
+    const seen = new Set();
+    while (template && !seen.has(template)) {
+      seen.add(template);
       template = template.parentTemplate;
       if (isMatch(template)) {
         match = {
@@ -1100,6 +1140,7 @@ export const Template = class Template {
   }
 
   static findChildTemplates(template, templateName) {
+    templateName = kebabToCamel(templateName);
     let result = [];
 
     const isMatch = (component) => {
@@ -1135,9 +1176,12 @@ export const Template = class Template {
     }
 
     // Then check subtemplate children (recursive lookup for nested partials)
+    const visited = new Set();
     function search(childTemplates, templateName) {
       if (childTemplates) {
         childTemplates.forEach((childTemplate) => {
+          if (visited.has(childTemplate)) { return; }
+          visited.add(childTemplate);
           if (!templateName || (childTemplate.templateName === templateName)) {
             result.push({
               ...childTemplate.instance,

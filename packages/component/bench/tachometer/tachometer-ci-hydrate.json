@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/nicolo-ribaudo.github.io/HEAD/nicolo-ribaudo.github.io/src/assets/tachometer.schema.json",
+  "root": "../../../..",
+  "sampleSize": 50,
+  "timeout": 3,
+  "autoSampleConditions": ["2%"],
+  "benchmarks": [
+    {
+      "name": "this-change",
+      "url": "ci-current-hydrate.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "each-100-mount" },
+        { "mode": "performance", "entryName": "each-100" },
+        { "mode": "performance", "entryName": "helper-100-mount" },
+        { "mode": "performance", "entryName": "helper-100-state-change" }
+      ]
+    },
+    {
+      "name": "tip-of-tree",
+      "url": "ci-baseline-hydrate.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "each-100-mount" },
+        { "mode": "performance", "entryName": "each-100" },
+        { "mode": "performance", "entryName": "helper-100-mount" },
+        { "mode": "performance", "entryName": "helper-100-state-change" }
+      ]
+    }
+  ]
+}

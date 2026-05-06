@@ -80,10 +80,10 @@ const sample = defineBlock({
 
   /*
     render(bag) — first mount on the client (no server-rendered DOM to
-    adopt). The bag has the documented 9 keys (node, data, scope, region,
-    isSVG, serverMeta, self, plus the closures lookupExpression /
-    renderAST / hydrateInnerContent). Use them; don't pull from anywhere
-    else.
+    adopt). The bag has node, data, scope, region, isSVG, serverMeta,
+    self, plus the closures lookupExpression / renderAST /
+    hydrateInnerContent / hydrateInto. Use them; don't pull from
+    anywhere else.
 
     Pattern: build a fragment via renderAST(), put it in the region via
     region.setContent(fragment, optionalChildScope). The region owns DOM
@@ -117,35 +117,26 @@ const sample = defineBlock({
       1. Register the same Signal deps render() would (so update() fires
          later) — usually a single lookupExpression() call on the same
          expression render() reads.
-      2. Recursively hydrate inner content via hydrateInnerContent() —
-         this walks the inner markers and adopts their DOM.
-      3. Move ownedNodes into the live position via region.anchor.after().
+      2. Hand the inner content to hydrateInto() — it creates the child
+         scope, walks inner markers, reattaches into the region, and
+         sets region.endAnchor.
 
     DO NOT call renderAST() from hydrate — that builds fresh DOM and
     discards the server's. The whole point of hydrate is to keep the
     server's bytes.
 
-    serverMeta contains anything the ServerRenderer wrote into the closing
-    block marker (see parseServerMeta in renderer.js for the prefix scheme).
-    Use it for branch selection, key recovery, etc.
+    serverMeta contains anything the ServerRenderer wrote into the
+    closing block marker (see parseServerMeta in build-html-string.js
+    for the prefix scheme). Use it for branch selection, key recovery,
+    etc.
   */
-  hydrate({ node, data, scope, region, lookupExpression, hydrateInnerContent, self }) {
+  hydrate({ node, data, region, lookupExpression, hydrateInto, self }) {
     const value = lookupExpression(node.expression);
     self.lastValue = value;
     self.generation++;
 
     if (region.ownedNodes.length > 0 && node.content) {
-      const innerScope = scope.child();
-      region.childScopes.push(innerScope);
-      hydrateInnerContent({
-        ownedNodes: region.ownedNodes,
-        innerAST: node.content,
-        data: { ...data, sampleValue: value },
-        scope: innerScope,
-      });
-      const frag = document.createDocumentFragment();
-      for (const n of region.ownedNodes) { frag.appendChild(n); }
-      region.anchor.after(frag);
+      hydrateInto({ innerAST: node.content, data: { ...data, sampleValue: value } });
     }
   },
 

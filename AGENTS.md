@@ -109,118 +109,45 @@
   `Harness: Tighten framing for agents on PR merges`
   `Test: Add subtemplate settings tests`
   `Perf: Rewrite weightedObjectSearch`
+  `Bench: Add realistic-helper subtemplate metrics`
   `Refactor: Update todo-list to use canonical subtemplate patterns`
   `BREAKING: Rename formatDateTimeSeconds to formatTime`
   `Feat/Bug: Add protectedKeys to prevent clobbering of each/async vars`
 
   Settle on: `Bug` not `Fix`/`Bugs`, `Test` not `Tests`/`Testing`, `Build` not `Tools`/`Tooling`.
   `Harness:` covers the AI harness — agent skills, workflows, AGENTS.md, hooks, settings.json, MCP config. Anything shaping how agents operate in this repo (not the published framework itself).
+  `Bench:` covers tachometer benchmark additions, edits, and reporter changes. Distinct from `Perf:` (which changes runtime cost) and `Test:` (which gates correctness).
   Compound prefixes like `Feat/Bug:` or `Bug/Test:` are fine for cross-cutting changes.
   Optional monorepo scope: `Bug(reactivity): Fix race condition`. Scope is lowercase.
 
-  PR titles follow this same format — they become the squash commit subject in `main` (with `(#NNN)` appended). Squash body is empty by repo setting; rich context belongs in the PR description (lives on github.com), not in commit bodies.
+  PR titles follow this same format — they become the squash commit subject in `main` (with `(#NNN)` appended). Squash body is empty by repo setting; rich context belongs in the PR description (lives on github.com), not in commit bodies. For PR title and body conventions, tier triage, and anti-patterns, use the `author-pull-requests` skill.
 </commit_format>
 
-<pr_format>
-  PR descriptions are read by a stranger who didn't watch you build it. They want to know what is now true in the codebase — not what changed in the repo, not how you got here, not whether you verified it. The diff defends itself; process narration belongs in the conversation log.
+<ai_folder_layout>
+  The `/ai/` directory holds AI-collaboration infrastructure for this project. Four homes:
 
-  ## Tiers
+  - `/ai/skills/` — MCP-served skills, context, and workflows. Organized by audience subdirectory (e.g. `contributing/`, `authoring/`). See the `ai-author-context` skill for authoring conventions.
+  - `/ai/research/` — Independent research corpus (cross-framework UI primitive analysis, etc.). Not served via MCP. See the `research-component-patterns` workflow for adding new component research.
+  - `/ai/plans/` — Canonical implementation plans tracked by `ROADMAP.md`. Completed plans archive to `/ai/plans/archive/`; drafted-but-not-on-the-roadmap plans live in `/ai/plans/icebox/`. See the `manage-roadmap` skill for the planning workflow.
+  - `/ai/workspace/` — Per-user scratch (gitignored). See `<agent_workspace>` below.
 
-  Tier by what the reviewer has to do, not by line count. A 500-line docs PR is Small; a 30-line change to the renderer's hot path is Large.
-
-  - **Small** — no code behavior change. Reviewer can rubber-stamp. Chores, docs, harness, comments, dead-code removal, dep bumps with no API change, content additions.
-  - **Medium** — code change with user-visible effect bounded to one feature or module. Reviewer reads the diff carefully but doesn't need to think about systemic failure modes.
-  - **Large** — implements a plan, crosses package boundaries, touches load-bearing internals (renderer, reactivity, templating, compiler), or changes a public API. Reviewer should slow down and consider named failure modes.
-
-  Self-test, in order:
-
-  - If you can't name a failure mode worth listing, it's not Large.
-  - If you can't name a user-facing behavior change, it's not Medium.
-
-  ## Titles
-
-  Title format follows `<commit_format>`. Additional rules:
-
-  - 3–5 words after the prefix. After drafting, cut every word that doesn't carry meaning.
-  - Concept names, not literal paths: `Make Integrations Folder`, not `Move integrations/astro/src/`.
-  - Concrete verbs: Make, Move, Swap, Group, Add. Prefer Remove over Drop. Avoid Relocate, Re-anchor, Configure.
-  - Title is the primary change only. Secondary work goes in body bullets, not in `X and Y` titles.
-
-  | Before | After |
-  |---|---|
-  | Refactor: Relocate astro integration to integrations/ and prep for publish | Chore: Make Integrations Folder and Move Astro |
-  | Build: Move bench tooling under tools/ci/bench/ and relocate bench-history.json | Chore: Group CI Bench Tools |
-  | Chore: Remove broken package.json refs | Chore: Remove Vestigial package.json Entries |
-
-  ## Body by tier
-
-  ### Small
-
-  One or two sentences of intent. `## Changes` is optional; omit when the title says it all.
-
-  ### Medium
-
-  ```
-  [One sentence — why this PR exists.]
-
-  ## Changes
-  - [Outcome bullet]
-  - [Outcome bullet]
-
-  ## Risk
-  N/10 — [one-line reason].
-  Failure modes: [bulleted list — only when score ≥5 or blast radius is non-obvious]
-
-  ## How to Test
-  - [Deviations from standard only. Skip "rerun tests" / "CI passes" — those are assumed.]
-  ```
-
-  ### Large
-
-  Same as Medium, plus:
-
-  - If plan-driven, lead the framing sentence with `Implements [plan name](permalink-at-PR-creation-SHA)`. Get the SHA via `git log -1 --format=%H ai/plans/foo.md` and form `https://github.com/Semantic-Org/Semantic-Next/blob/<sha>/ai/plans/foo.md`.
-  - `## Risk` failure-modes list is mandatory.
-  - Body may be longer, but bullets still describe outcomes, not mechanisms.
-
-  ## Risk score is routing metadata
-
-  The score tells the reviewer (or a code-review subagent / `/ultrareview`) how much attention to spend. A 2/10 Medium says "review this fast." A 7/10 Large says "slow down — look at the failure modes." It is not a confidence performance; keep it honest.
-
-  ## Hotlinking
-
-  Default: don't. Mentioned files do not need links — reviewers can find them.
-
-  Exceptions:
-  - Plan-driven Large PRs always link the plan at the PR-creation SHA.
-  - Large PRs may link a specific line (`...#L123`) when a reviewer should look at one place specifically — e.g. a breaking-change site.
-
-  Package names (`@semantic-ui/astro`) and shell commands (`npm test`) stay backticked, never linked.
-
-  ## Anti-patterns — do not write these
-
-  - Process narration: "verified", "ensured", "tested", "I considered X but went with Y", "to accomplish this"
-  - Parenthetical proofs: "(verified — zero diff on main)", "(per discussion)"
-  - Pre-filled test-plan checkboxes
-  - `## Out of scope` sections — they pre-empt a question that may not be asked
-  - Hedging: "note that", "important to call out", "worth flagging"
-  - Listing every file or knob touched. A bullet at the right concept level often covers many file changes.
-  - Word imprecision: "broken" when the right word is "vestigial" or "stale"
-</pr_format>
+  **Do not create new top-level directories** in `/ai/`. New work fits into one of the above.
+</ai_folder_layout>
 
 <agent_workspace>
-  You have access to an agent workspace in `/ai/workspace/`. Use it for scratch files, drafts, and intermediate outputs as needed. Loose files in the workspace root are fine for active work.
+  `/ai/workspace/` is per-user scratch — not tracked by git, no shared structure imposed. Two audiences use it:
 
-  **Do not create new top-level directories** in `ai/workspace/` or `ai/`. Use the existing structure:
+  - **Agents** create files as work proceeds: drafts, intermediate outputs, perf traces, evaluation reports.
+  - **Humans** drop reference files for agents to consume: screenshots, external snapshots, PDFs, ad-hoc notes.
 
-  - `/ai/skills/` — All MCP-served content (skills, context, workflows). Organized by audience subdirectory.
-  - `/ai/research/` — Independent research corpus. Not served via MCP.
-  - `/ai/workspace/plans/` — Implementation plans. Always put plans here so they can be tracked with this repository.
-  - `/ai/workspace/artifacts/` — Agent work product: drafts, intermediate outputs, generated content.
-  - `/ai/workspace/reference/` — User-provided input: screenshots, external docs, snapshots.
-  - `/ai/workspace/tmp/` — Truly ephemeral files (intermediate outputs, scratch calculations, pipeline artifacts). Can be cleaned up at any time without review.
+  Suggested organization (tidiness hints, not rules):
 
-  **Housekeeping** — When a task or project is finished, move its workspace artifacts to the appropriate subdirectory in `/ai/trash/`. Completed plans go to `/ai/trash/plans/`, investigations to `/ai/trash/investigations/`, etc. This keeps the workspace focused on active work.
+  - `plans/` — Drafts in development. Promote to `/ai/plans/{plan}.md` via the `manage-roadmap` skill once a plan is adopted on the roadmap.
+  - `artifacts/` — Reports, evaluations, intermediate outputs.
+  - `reference/` — Screenshots, external snapshots, research input.
+  - `tmp/` — Truly ephemeral; cleanup-anytime safe.
+
+  Promotion to a canonical home (`/ai/skills/`, `/ai/research/`, `/ai/plans/`) is user-initiated. When asked to promote a draft, follow the relevant skill workflow (e.g. `manage-roadmap` for plans). Otherwise, files in `/ai/workspace/` stay local — the workspace is gitignored.
 </agent_workspace>
 
 <tool_gotchas>

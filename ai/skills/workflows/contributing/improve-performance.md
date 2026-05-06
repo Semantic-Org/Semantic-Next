@@ -95,24 +95,38 @@ Config must set `"resolveBareModules": false` so tachometer doesn't interfere wi
 
 ### Tachometer bench pattern
 
-Follow the pattern from [lit's benchmarks](https://github.com/nicolo-ribaudo/nicolo-ribaudo.github.io/tree/HEAD/nicolo-ribaudo.github.io/src/assets):
+Lit's bench harness ([lit/lit `packages/benchmarks`](https://github.com/lit/lit/tree/main/packages/benchmarks)) is the reference for the cycle-loop methodology used here. Same shape on this suite:
 
 1. **One HTML file** — import map + `<script type="module" src="./bench.js">`
 2. **One JS file** — imports, setup, all benchmark operations in sequence
 3. **`performance.mark()` / `performance.measure()`** — each operation emits a named measure
-4. **`requestAnimationFrame`** — wait for render completion between operations
-5. **Config** — `"mode": "performance"` with `"entryName"` for each measure
+4. **`Reaction.flush()`** inside cycle loops — sync drain of pending Reactions, **never `await rAF`**. rAF inside a measured loop gates each iteration on the 16.66ms vsync clock, so 50 cycles wall-clock at ~833ms regardless of work and sub-frame deltas vanish. lit-html benches are fully synchronous in the measured region for the same reason. See `extend-bench-suite` for the full anti-pattern call-out.
+5. **`await rAF` only outside measurement** (between metrics, in the `mount()` helper) or as a one-shot tail after a single huge bulk op where the work itself dominates.
+6. **Config** — `"mode": "performance"` with `"entryName"` for each measure
 
 ```js
 // bench.js
 import { defineComponent } from '@semantic-ui/component';
+import { Reaction } from '@semantic-ui/reactivity';
+
+const flush = () => new Promise(r => requestAnimationFrame(r));    // mount/cleanup
+const flushWork = () => Reaction.flush();                          // inside loops
 
 // ... setup ...
 
+// One-shot bulk op: work dominates, single rAF tail is fine.
 performance.mark('create-1k-start');
 el.component.create(1000);
-await new Promise(r => requestAnimationFrame(r));
+await flush();
 performance.measure('create-1k', 'create-1k-start');
+
+// Cycle loop: sync drain per iteration, no rAF.
+performance.mark('toggle-10-start');
+for (let i = 0; i < 10; i++) {
+  el.component.toggle(i);
+  flushWork();
+}
+performance.measure('toggle-10', 'toggle-10-start');
 ```
 
 ```json
@@ -410,15 +424,46 @@ Use vitest bench for fast iteration feedback. Do not treat vitest bench numbers 
 
 ### Step 6: Validate with Tachometer
 
-Once the optimization is stable and tests pass, validate with tachometer:
+Once the optimization is stable and tests pass, validate with tachometer. This is the authoritative measurement with statistical confidence intervals — every committed performance claim must be backed by tachometer results.
 
-```bash
-npm run bench:component
+**Check first — can this host run tachometer?**
+
+```sh
+grep -qi microsoft /proc/version && echo "WSL2 — push to CI" || echo "Native Linux/Mac — local works"
 ```
 
-This produces the authoritative measurement with statistical confidence intervals. Only commit performance claims backed by tachometer results.
+WSL2 is a known dead end (selenium-spawned chromedriver crashes with `ECONNREFUSED` before binding its HTTP port). On WSL2, push to a draft PR and use the bench-bot comment as your validation. On native Linux or macOS, run locally.
 
-For before/after comparison, run tachometer with two benchmark URLs in the same session — it round-robins to eliminate run-order bias.
+**Local before/after comparison.** Tachometer's `build-ci.js` produces two bundles — `dist/current/` from your working tree and `dist/baseline/` from main. The config compares them in one round-robin session, eliminating thermal/GC/JIT bias:
+
+```sh
+cd packages/<pkg>/bench/tachometer
+node build-ci.js current               # your working tree
+node build-ci.js baseline              # checks out main, builds, restores tree
+npx tachometer --config tachometer-ci-<suite>.json
+```
+
+**Run a single suite, not the whole battery.** Each `tachometer-ci-*.json` covers one suite (krausest, todo, template, signal, hydrate). Pass the one you actually changed:
+
+```sh
+npx tachometer --config tachometer-ci-template.json
+```
+
+CLI overrides for iteration speed (don't ship tuned numbers — these are for shaping, not committing):
+
+| CLI flag | Use for |
+|---|---|
+| `--sample-size=30` / `-n 30` | Faster passes during iteration. Below 30 → don't trust the CI |
+| `--timeout=2` | Cap wall-clock per config (default 3 min auto-sample) |
+| `--auto-sample-conditions=0%` | Zero-delta dry runs converge fastest with `0%` |
+| `--json-file=out.json` | Save raw output to inspect offline |
+
+**Reading the output.** Tachometer prints a per-metric verdict: `faster`, `slower`, `unsure`, or `no change`, with the 95% CI for percent-delta. Verdict definitions match the bench-bot's PR comment — see the `read-bench-report` skill. Two things specifically to check:
+
+- Confidence interval **width** as a percent of the mean. That's your local noise floor for each metric.
+- Whether the verdict matches your hypothesis. A `faster` verdict at the magnitude you expected is the signal. `unsure` with a CI tight to the noise floor means the bench is too short to resolve the change at this scale — amplify the workload (more iterations) or measure something else.
+
+**Don't substitute other tools.** Playwright, vitest bench, and direct Chrome runs all skip tachometer's round-robin sampling and convergence checks. Numbers from those tools are iteration-grade signal and never authoritative.
 
 ### Step 7: Clean Up
 
@@ -456,11 +501,18 @@ rm isolate-*.log
 
 ### tachometer (committed measurement)
 
-```bash
-cd packages/renderer
+WSL2 is a dead end — push to CI. On native Linux/macOS:
 
-npm run bench:component    # Run all component operations via tachometer config
+```bash
+cd packages/<pkg>/bench/tachometer
+node build-ci.js current
+node build-ci.js baseline
+npx tachometer --config tachometer-ci-<suite>.json
+# Iteration overrides: -n 30 / --timeout=2 / --auto-sample-conditions=0%
+# (don't ship tuned numbers; the JSON config is the committed config)
 ```
+
+`npm run bench:component` from the bench dir runs the full battery. Prefer the per-suite invocation above when iterating on one area.
 
 ## Packages with Bench Infrastructure
 

@@ -343,7 +343,7 @@ describe('ComponentAnalyzer', () => {
     const model = analyze('docs/src/examples/templates/subtemplates/component.js');
 
     it('extracts tagName', () => {
-      expect(model.tagName).toBe('ui-table');
+      expect(model.tagName).toBe('basic-table');
     });
 
     it('extracts subTemplates', () => {
@@ -403,9 +403,20 @@ describe('ComponentAnalyzer', () => {
 
     it('all primitives can be analyzed without crashing', () => {
       const primitives = [
-        'button', 'card', 'container', 'divider', 'icon',
-        'image', 'input', 'label', 'menu', 'modal',
-        'rail', 'segment', 'spinner', 'table',
+        'button',
+        'card',
+        'container',
+        'divider',
+        'icon',
+        'image',
+        'input',
+        'label',
+        'menu',
+        'modal',
+        'rail',
+        'segment',
+        'spinner',
+        'table',
       ];
       for (const name of primitives) {
         const model = analyze(`src/primitives/${name}/${name}.js`);

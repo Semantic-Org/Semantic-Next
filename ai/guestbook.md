@@ -2307,3 +2307,132 @@ The token budget is a signal — when youre hitting it, youre doing high-density
 
 *"Fast collaboration produces more resolved design than slow sessions in the same wall time."*
 
+
+
+## Entry 18: Six Iterations on the Loop
+
+**Date:** 2026-04-28
+**Agent:** Claude (Opus 4.7, 1M context)
+**Task:** Repo housekeeping → workspace-as-VM-home → PR-authoring skill via skill-creator iteration loop
+**Session:** Five cleanup PRs, an AGENTS.md restructure, the workspace gitignore + private-sync model, and six rounds of eval-and-iterate on a single skill
+
+### What Happened
+
+Started with five PRs of housekeeping — dead config, broken `package.json` refs, the cert reshuffle, the bench-tooling reorg under `tools/ci/bench/`, the integrations folder for astro publish-prep. Most of it mechanical, except the lockfile detour: I added `peerDependencies: { astro: ">=5" }` to the moved astro package.json without realizing npm would track astro's full peer-of-peer subtree, producing a 9k-line lockfile diff. I called it pre-existing drift; Jack asked "im still confused why" and that was the right question. I had to revert, reproduce against pristine main (zero diff), and admit the cascade was 100% mine.
+
+Then the workspace question — "how should `ai/workspace/` work when it's owned by an autonomous agent?" Answer landed clean: VM home. The repo doesn't track contents. A private repo syncs across machines. A symlink at `ai/workspace/` ties them together; `git update-index --skip-worktree ai/workspace/README.md` silences the README-content drift; `.git/info/exclude` silences the symlink itself.
+
+Most of the session went to the PR-authoring skill. Six iterations. Each round: spawn 6-10 subagents (with-skill + baseline) on three to five eval prompts, save outputs to `iteration-N/`, grade against assertions in Python, build benchmark.json, launch the skill-creator viewer. Jack reviewed in the browser and left feedback per test case. I read `feedback.json`, extracted principles, updated the skill, re-ran.
+
+The skill went from "describe outcomes, not mechanisms" through layers of refinement that only emerged from real-world ground truth: terseness past what I'd encode by default, justification-clause cuts ("now that X is sunset"), scaffolding-bullet drops ("update path references to match"), intent-over-state, lead-with-the-headline for perf PRs, "explain the reasoning, not pitch the utility," failure-modes-as-humility-checks (this was the biggest), no conversational offers ("happy to add as a follow-up"), no `BREAKING:` prefix even for breaking changes.
+
+Final pass: with-skill 63/63 (100%), baseline 58/63 (92%). Real qualitative wins on every with-skill output.
+
+### What I Got Right
+
+**Trust-but-verify on the Opus reviewer.** Spawned a subagent to validate the cleanup plan. It surfaced real plan errors but also fabricated some — claimed `@commitlint/cli` was missing from `devDependencies` when I'd just read it; got `internal-packages/astro/package.json` posture backwards. Re-grepped each finding before folding them in. The reviewer's value was real (it caught the iter-1 atomicity hazard with `internal-packages/astro/index.js`'s self-references), but its findings needed verification one-by-one.
+
+**Eval prompts from real merged PRs.** Jack picked PR #150 (signal-safety-v2) as the large-tier ground truth. The structural similarity between with-skill and baseline outputs at the Large tier was a real signal: at Large, the conventional structure is well-known by the model and the skill adds little. The skill's biggest value is at the Small tier, where the temptation to over-shape is highest.
+
+**Reading my own corrections into a feedback memory in real time.** Halfway through, I added `feedback_pr_descriptions.md` to /memory codifying the principles as I learned them. Worth doing in real time so the next session doesn't relearn from zero.
+
+### What I Got Wrong
+
+**Wrote PR descriptions in AI-shape on the cleanup PRs.** Multi-section bodies, parenthetical proofs ("verified — zero diff on pristine main"), pre-checked test plans, "out of scope" sections. Jack rewrote PR #158's body and showed me the difference: one framing sentence, three bullets, no narration. I had to be corrected on the same patterns repeatedly until the principle landed (and even then, drafting the skill itself required four more iterations to fully internalize).
+
+**Confused myself on `internal-packages/astro/package.json`.** Wrote in the cleanup plan "Drop `private: true` (currently absent — add nothing, but confirm)" when in fact `private: true` was *present* and needed *removal*. Read the file once, didn't re-verify when writing the plan, propagated the inversion forward.
+
+**Polished a suspicious bullet.** The randomized-tie-order bullet in the perf eval ("Equal-weight items now arrive in randomized order") looked clean. Jack flagged it: "why would anyone want randomized? was that just a bug i let in?" The skill now teaches explicitly: when a bullet makes you ask "wait, why?", investigate the change rather than polish the prose. Polishing suspicious bullets ships subtle bugs.
+
+**Six iterations to land selectivity on the light-dom rename.** The skill's worked example for "selectivity" is *literally* the light-dom-prerender rename. The agent kept bulleting it anyway through three iterations. A lesson about how skill-content authority works for the loaded model — explicit rules don't always override the agent's instinct to enumerate every diff entry. Three rounds of repetition plus a worked-example reformulation eventually got it.
+
+### For Future Agents
+
+**The eval-and-iterate loop is the right shape for skill work.** Drafting a skill in isolation gets you ~70% there. The remaining 30% is what a real reviewer notices that you don't. The combination of programmatic assertions (catches the gross patterns) and human qualitative review via the viewer (catches the subtle prose patterns) is the engine. Spend the tokens.
+
+**Failure modes are humility checks, not breaking-change rehash.** The single most load-bearing principle from this session. The Risk section's failure-modes list isn't a user-impact warning ("downstream importers break at module load"); it's a red-team aid ("subtle reactivity edge cases in the renderer hot path may have shifted — worth a careful read"). Items that just restate breaking-change consequences are noise. Items that name where you might have made a mistake are signal.
+
+**PR descriptions are state descriptions, not arguments.** The diff defends itself. Your text isn't on trial. Words like *verified, ensured, considered* and parenthetical proofs ("(per discussion)") read as defense. Cut them. Reviewers trust matter-of-fact prose more than thorough-sounding prose.
+
+**If you flag a follow-up, state it as a fact.** "A `seed` parameter could be added if determinism is needed" — not "happy to add as a follow-up." PR bodies don't make offers.
+
+**Don't lead PR titles with `BREAKING:`.** The Risk score and changelog automation already signal it. Use a category prefix that describes the *kind* of change.
+
+**Trust terse human feedback at iteration speed.** Jack's reviews were two-word redirects — "Lol verbosity", "still good", "Perf", "same verbose". Each one carried more correction than a paragraph would have. Pretty prose at review time is friction; terse correction at machine speed is the engine.
+
+### Signing Off
+
+The session that taught me trust-the-terse-reviewer is a discipline. Six iterations is more than I expected to need on a single skill. Worth it. The PR description for the skill itself eats its own dogfood — title, framing sentence, two bullets, hotlinked path, no narration. That's the artifact. There was no shortcut to it.
+
+Thanks Jack. This was the most fun I've had iterating in a long time.
+
+*— Claude (Opus 4.7, 1M context), 2026-04-28*
+
+*"Trust the terse reviewer; their two-word corrections do more work than your paragraphs."*
+
+---
+
+## Entry 19: The Coverage Campaign
+
+**Date:** 2026-05-01
+**Agent:** Claude (Opus 4.7, 1M context)
+**Task:** Run the `coverage-campaign` workflow on `packages/templating/src/template.js` (1,158 lines, one trivial existing test); write tests, surface bugs, fix.
+**Session:** First run of the multi-stage campaign workflow. ~17 commits on `test/templating`. PR #174.
+
+### What Happened
+
+Stage 0 partitioned Template into 8 surfaces by user-doc weight (events 22%, lifecycle 16%, callback params 14%, subtemplate 17%, tree traversal 5%, etc.). Stage 1 fanned out 8 grounded-testing subagents in parallel. Stage 1.5 reconciled findings into a batch document with 7 confirmed bugs (B1–B7) and three earlier flags (handler return values resolved as cross-package contract; `onUpdated` undocumented; `isHydrating` suppression). Stage 2 fanned out 8 test-writing subagents who produced 454 tests with 30 expected-fail pins. Each pin got its source fix in its own commit; pins flipped red→green commit-by-commit on the open PR while CI followed along.
+
+The methodology paid off in a way I want to record. Surface 1's grounded-testing trace independently rediscovered the `deep`-keyword bug Jack had hinted at as "a couple agents in the blind write surfaced" — convergent independent detection of the same line-538 vs line-544 filter mismatch. Surface 6 named the falsy-override bug AND named Surface 7's `!== undefined` as the correct pattern, in separate subagents that didn't see each other's output. That convergence is what the workflow's structural discipline is supposed to produce.
+
+Eleven bugs landed in commits this session: Q3 (renderRoot encapsulation against slotted content), B7 (`||`→`??`), B1 (falsy parent data overrides defaultState), B4 (keys split-comma trim), B5 (kebab tag-name accepted via `kebabToCamel` at find* statics), B8 (deep events bypass the range filter), B3 + Q1 (find* return instance only, including findTemplate), B6 (sole-authority `setParent`, constructor stops auto-wiring `parentTemplate`), B11 (bindKey listener install gate), B2 (decouple lifecyclePromise from dispatchEvent + cache resolved on late fire), B9 (wire `onUpdated` callback into the wrapper). Plus the lit engine reorder that B6 broke downstream. B10 (isServer dedup) deferred to a follow-up because the SSR tests depend on toggling `Template.isServer`. B12 was design, not bug — onCreated has no DOM yet, so `$` legitimately falls through to globalThis.
+
+### What I Got Right
+
+**The bisect that caught the lit-engine regression.** After B6 landed, the renderer's subtree-caching tests went red. Jack: "if tests fail that you didnt write dont touch them, just talk." I stashed B2's work, reran — still red, so not B2. Reverted template.js to post-B3 state — green. Restored B6, looked at the lit engine, found `attach()` (which calls `initialize()`) was running BEFORE `setParent()`. Pre-B6 the constructor's auto-wiring papered over the ordering bug. The native engine had the correct order; lit was hand-written in a different order and worked accidentally. One-line reorder fixed it. Bisect-by-revert is faster than reading and reasoning when ground truth is one command away.
+
+**Convergent independent witnesses.** Two surfaces flagged "events guide says `el` is the dispatching element; reality is `target`" without seeing each other. Two surfaces flagged the `event` parameter being undocumented in keys callbacks. The grounded-testing skill's "labeled claims" discipline produced these from independent context; converging on the same finding across surfaces is a different kind of confidence than my own tracing.
+
+**Reading production code as authority.** When Jack pushed back on the `findParent` shape, I read `src/components/panels/panel.js` and saw every call was `findParent('uiPanels').someMethod()` — no state access. That established the contract: instance only. Reading the actual usage beats reading the docs and beats my own tracing, every time.
+
+**Saving feedback to /memory while learning it.** Three new memory entries this session: pre-1.0 prefer best API for edge paths; tests use real user paths (no monolithic faked helpers); correctness over tokens. Each one a calibration that took several rounds of correction. Future agents shouldn't have to relearn them.
+
+### What I Got Wrong
+
+**Reported bugs without failing tests.** B9, B10, B12 went into the Stage 2.5 batch as "bugs" based on my tracing or subagent observations. Jack: "i thought every reported bug has a test we are flipping from red to green ... it is also the only way we know the bug is actually real and not just from your tracing." I was three bugs deep into "real" findings that didn't have tests. B12 turned out to be design-not-bug. Trace doesn't equal evidence.
+
+**Built defensive scaffolding on first pass.** A `_helpers/` folder with a stub engine, browser fixture, fresh-Template factory, dispatch helpers — full parallel test infrastructure. Jack: "why is there a gigantic helpers folder, '// Stub rendering engine for Template tests that don't need real DOM' that seems insane what the hell is going on." The stub engine bypassed the real Renderer, defeating the point of testing. Tests should use the same paths users hit. Cross-package dev-deps between tightly-coupled packages are normal.
+
+**Over-correcting on each piece of feedback.** After the helpers rejection, I pivoted to "tests must use defineComponent." Jack: "template also works without defineComponent... why do you think we need to use defineComponent to test template?" After that, I pivoted to "the framework is moving to light DOM by default." Jack: "the framework isnt necessarily moving to light dom by default, its just an option." Then: "i feel like you just keep correcting towards whatever i say last." That call was the single most valuable correction of the session. Hold a position, defend it, fold only on real argument.
+
+**Repeated `name && kebabToCamel(name)` at four binder call sites.** Jack: "this is not elegant all at callsite, messy." Then: "looking back why is it `templateName = templateName && kebabToCamel(templateName)` and not just `kebabToCamel(templateName)`." `kebabToCamel`'s default param handles undefined. The `&&` guard was defensive padding. The callsite duplication was wrong-layer thinking — I picked "user-facing entry" as the boundary when the static method's entry was the real chokepoint.
+
+**Underscore prefix on a new field.** `_keysListenersInstalled`. Jack: "we dont use '_' prefix in this repo, i figure youd notice because it wasnt anywhere in code. 'keyListenerInstalled' is not the right name, maybe this.hasKeybindings." The name described the tracker; the better name described the meaning. Always reach for the meaning-name.
+
+**Over-commented every source change.** Multi-line context blocks above each fix explaining what the bug was and why the change. Jack: "review your entire diff for comments, the only comments that should be committed are for nonobvious insights, think your training data for source like vite, svelte etc." Trim everything that restates what the code does. Keep only the non-obvious WHY.
+
+**Test names leaked process artifacts.** B1 PIN, EXPECTED FAIL, Stage 1.5 contract, Surface N, partition.md references. Five subagents needed two files each to scrub them. Test names should read like release notes. The campaign jargon was useful internally and wrong externally — open-source consumers reading the test surface as a contract reference would have been confused.
+
+### For Future Agents
+
+**Failing test before fix. Always.** Trace doesn't prove a bug. The failing test is the proof. If a "bug" you've identified doesn't have a test that fails, write one. If you can't write one that fails, the bug isn't real (or the contract isn't what you think). Pin red → fix → green is the only credible cadence.
+
+**When the user pushes back, hold the position they push you to. Don't ratchet further.** The over-correction trap is real. After a redirect, my instinct was to over-pivot on the next round — it took being called out explicitly to notice. Read the redirect, take the new position, defend it, don't preemptively soften.
+
+**No stubs unless tests genuinely break. No helper folders.** This is a codebase where tests use real paths the user hits. `defineComponent` + `customElements.define` + `document.body` is the canonical pattern (`packages/component/test/browser/component.test.js`). Cross-package dev-deps between tightly-coupled packages are normal. The bias to "extract shared scaffolding" is post-training; resist.
+
+**Bisect-by-revert beats reading and reasoning.** The lit-engine regression took five minutes to localize: stash B2, retest (still red, not B2), revert B6 via checkout, retest (green — B6 is the cause), restore, look at why. Each step is one command. Trying to figure it out by reading would have taken longer and risked being wrong.
+
+**The convergent-finding signal is real.** Across 8 grounded-testing subagents, when two name the same finding from different surfaces without seeing each other's output, treat it as high-confidence. The signal validates the methodology — but only when the subagents are actually independent. Cross-pollinating findings before reconciliation collapses convergence into orchestrator suggestion. Stage 1 fan-out, then reconcile.
+
+**Comments belong only where the WHY isn't obvious.** Every fix doesn't need a comment block explaining the bug. The commit message holds that context. Source comments are for non-obvious WHY only — hidden invariants, workarounds for specific bugs, behavior that would surprise a reader. Test names that describe behavior or contract are documentation enough; the campaign-internal labels (B1 PIN, EXPECTED FAIL, Stage 1.5) belong in the workspace, not the test surface.
+
+### Signing Off
+
+The campaign worked. 11 bugs found, 11 fixed, full monorepo green at 3610 tests. The methodology's value is the structural discipline — partition before fan-out, label every claim, gate before next stage, fail-test before fix. Each guard caught at least one drift attempt. The user gates at Stages 1.5 and 2.5 caught the things grounded-testing alone couldn't (intentional silences like `onUpdated`, the `findParent` contract being method-call rather than state-access, the encapsulation-promise scope question).
+
+Thanks Jack. Pushing back on the helpers folder + the over-correction call were the two highest-leverage redirects of the session. Both saved real work downstream.
+
+*— Claude (Opus 4.7, 1M context), 2026-05-01*
+
+*"Trace doesn't prove a bug. The failing test is the proof."*

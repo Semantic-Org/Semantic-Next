@@ -1,7 +1,7 @@
 ---
 title: Managing the Project Roadmap
-description: How the project roadmap and plan system works at ai/plans/ — creating, updating, completing, deferring, and organizing plans. Load when scoping new work, closing out completed work, or reorganizing priorities.
-keywords: [roadmap, plans, scoping, project management, priorities, dependencies, planning]
+description: How the project roadmap and plan system works at ai/plans/ — creating, updating, completing, iceboxing, and organizing plans. Load when scoping new work, closing out completed work, or reorganizing priorities.
+keywords: [roadmap, plans, scoping, project management, priorities, dependencies, planning, icebox]
 audience: contributing
 skill: manage-roadmap
 type: skill
@@ -23,8 +23,8 @@ ai/plans/
   value-schema.md
   wrapper-architecture.md
   ...
-  archive/                # Completed or rejected plans
-  deferred/               # Explicitly deferred plans
+  archive/                # Completed plans
+  icebox/                 # Drafted but not on the active roadmap
 ```
 
 `ROADMAP.md` is always loaded by agents working on this project. It answers "what's next" and "what's blocked on what."
@@ -37,15 +37,15 @@ Every plan declares who does the work:
 
 | Level | Meaning |
 |---|---|
-| `agent` | Agent executes autonomously with a clear brief |
-| `pair` | Socratic — Jack and Claude think through it together. The conversation *is* the work. |
-| `jack` | Jack's hands and instincts. Claude may research or review. |
+| `agent` | Agent executes autonomously with a clear brief. |
+| `pair` | Collaborative — user and agent work through it together. The conversation *is* the work. |
+| `user` | User-driven. Agent may research or review. |
 
 Most plans in this project are `pair` — the framework authors have deep expertise and most important work emerges from dialogue, not delegation.
 
 ### Effort Estimates
 
-Use hours as the primary unit. Days require a conversion step (1d = 8h) that introduces errors. For estimates over 8 hours, show both: `16-24h (2-3d)`. Under 8 hours, just hours: `4h`. Reference point: subtree caching took ~40h (5d) pair. Be honest about estimates — a plan that's "open-ended design" should say so rather than pretending it's 16 hours.
+Use hours as the primary unit. For estimates over 8 hours, show both: `16-24h (2-3d)`. Under 8 hours, just hours: `4h`. Be honest about estimates — a plan that's "open-ended design" should declare itself rather than assigning false precision.
 
 ### ROADMAP.md Sections
 
@@ -53,18 +53,22 @@ Plans live in one of these sections based on their current state:
 
 | Section | What goes here |
 |---|---|
-| **Do Next** | Unblocked and highest priority. Max ~5 items. This is the active work queue. |
-| **Up Next** | Unblocked but lower priority than "Do Next." |
+| **Currently Open** | Plans with an open PR or live pair work. Mirrored by `ai/plans/active/`. Updated as ceremony when a PR opens; entries clear when the PR merges or closes without merge. Typically 1-2 entries. |
+| **Phase tables** | The phase the plan belongs to, in priority order within the phase. |
 | **Blocked on [X]** | Waiting on a specific dependency. Group by blocker. |
-| **Last** | Homepage final pass — always the last thing. |
-| **Hidden Content Inventory** | Maps commented-out docs content to their parent plan numbers. |
-| **Deferred** | Explicitly set aside with rationale. Links to `ai/plans/deferred/`. |
-| **Archive** | Completed or rejected. Links to `ai/plans/archive/`. |
+| **Parallel** | Slot in wherever there's a gap; not phase-gated. |
+| **Icebox** | Drafted but not on the active roadmap. Listed by name only — full plan files in `ai/plans/icebox/`. |
 
-Each entry in a section follows this table format:
+Each entry in a phase or parallel section follows this table format:
 
 ```markdown
-| # | Plan | Days | Mode | Status | Blocker | Notes |
+| # | Plan | Hours | Mode | Scope | Notes |
+```
+
+Icebox entries are simpler — bullet list with a one-line description:
+
+```markdown
+- [Plan Name](icebox/plan-name.md) — one-line description
 ```
 
 ---
@@ -73,7 +77,7 @@ Each entry in a section follows this table format:
 
 ### Write the plan file
 
-Create `ai/plans/{plan-name}.md`. Use kebab-case for filenames.
+Create `ai/plans/{plan-name}.md`. Use kebab-case for filenames. Avoid version suffixes (`v2`, `v3`) — name plans by functionality.
 
 Every plan file needs:
 
@@ -124,7 +128,7 @@ The exception is purely mechanical work with no design surface (e.g., "migrate t
 
 An initial scope captures *what needs to be decided* and *why it matters*, but doesn't prescribe the solution. It must be upgraded to `scoped` through a pair session before the work can be completed.
 
-**Session planning for scoped plans.** When upgrading a plan to `scoped`, add a `## Sessions (estimated)` section that breaks the work into session-sized chunks. Each chunk should be completable in one sitting (1-3 hours for pair, variable for agent/jack). These are rough — they'll be finalized at runtime by the `plan-session` skill, which checks what's still relevant before presenting them.
+**Session planning for scoped plans.** When upgrading a plan to `scoped`, add a `## Sessions (estimated)` section that breaks the work into session-sized chunks. Each chunk should be completable in one sitting (1-3 hours for pair, variable for agent/user). These are rough — they'll be finalized at runtime by the `plan-session` skill, which checks what's still relevant before presenting them.
 
 ```markdown
 ## Sessions (estimated)
@@ -142,19 +146,21 @@ The ROADMAP.md table includes a `Scope` column. When a plan is upgraded from `in
 
 Ask these questions:
 
-1. **Is it blocked?** If yes, which section matches the blocker? Add it there.
-2. **Is it unblocked and urgent?** Add to "Do Next" — but only if there's room (max ~5). If "Do Next" is full, either bump something down or add to "Up Next."
-3. **Is it unblocked but not urgent?** Add to "Up Next."
+1. **Is it on a phase's critical path?** Add to the phase table, in the position that reflects priority within the phase.
+2. **Is it parallel to phase work?** Add to `Parallel` — slots in wherever there's a gap.
+3. **Is it blocked on something specific?** Add to a `Blocked on [X]` section, or note the blocker in the Notes column.
+4. **Is it captured but not yet ready for the active roadmap?** File it in the icebox — see Step 5.
+
+When a plan starts execution (a PR opens, or pair work goes live), additionally surface it in `## Currently Open` and move the file into `ai/plans/active/`. See "When a PR opens" under Step 2.5.
 
 ### Add the entry
 
 Insert a new row in the appropriate table. Assign the next available `#` in that section. Include:
 
-- **Plan**: Name linked to the file, e.g. `[Token Finalization](token-finalization.md)`
-- **Days**: Concrete estimate. Use ranges for uncertainty (e.g., `2-3d`). If design is open-ended, say so: `2d impl, open design`
-- **Mode**: `agent`, `pair`, or `jack`
-- **Status**: `Not started`, `Active`, `3/10`, etc.
-- **Blocker**: What it's waiting on, or `—` if unblocked
+- **Plan**: Name linked to the file, e.g. `[Token Finalization](token-finalization.md)`.
+- **Hours**: Concrete estimate. Use ranges for uncertainty (e.g., `2-3d`). If design is open-ended, say so: `2d impl, open design`.
+- **Mode**: `agent`, `pair`, or `user`.
+- **Scope**: `initial` or `scoped`.
 - **Notes**: One line of context. What makes this plan notable.
 
 ---
@@ -190,14 +196,27 @@ Work happens on a feature branch, committed incrementally, merged via PR.
 
 5. **Run the full test suite** before opening the PR: `npm test` from the repo root. All tests must pass. If any fail, fix before proceeding.
 6. **Ask the user to push** — `git push` requires user permissions. Prompt: "Ready for PR — please push with `! git push -u origin feat/{branch}`". Wait for confirmation before proceeding.
-7. **Open a PR** using `gh pr create`. Write the description like a human would — short, plain outline of what changed and why. No verbose AI-style summaries, no exhaustive file lists, no "this PR introduces" preamble. Match the tone and length of a typical human-authored PR.
-8. **Self-review the PR** using the `contributing/code-review` skill. Run 5 parallel Opus agents, fix findings, rerun until clean. See the skill for the full process — it covers agent lenses, scoring rubric, iterative loop, and what counts as a false positive.
+7. **Open a PR** using `gh pr create`, following the [`author-pull-requests`](author-pull-requests.md) skill for title format, description conventions, and tier triage. The skill is the canonical procedure for PR shape; this step lands the PR for the plan you're executing. (Short, plain summary; no AI-style preamble; match human-authored tone.)
+
+   **Once the PR is open, do the active ceremony:**
+
+   - `git mv ai/plans/{plan}.md ai/plans/active/{plan}.md` — moves the plan into the in-flight folder so GitHub directory browsing shows it as active.
+   - Update internal links in the moved file: sibling-plan refs (`other.md`) → `../other.md`; skill refs (`../skills/...`) → `../../skills/...`.
+   - Update other plans linking *to* the moved file: `{plan}.md` → `active/{plan}.md`.
+   - Add a one-line entry to ROADMAP's `## Currently Open`:
+
+     ```
+     - [Plan Name](active/plan-name.md) — [PR #N](https://github.com/Semantic-Org/Semantic-Next/pull/N) brief context.
+     ```
+
+   If the PR closes without merging, reverse all of the above. If the PR merges and the plan is complete, follow the archive flow below.
+8. **Self-review the PR** using the `contributing/code-review` skill — it owns the full process (lens agents, scoring, iterative loop, false-positive rules). Fix findings, rerun until clean.
 9. **Post-merge verification** (when applicable). Only relevant for work that affects live infrastructure — CI pipelines, CDN endpoints, MCP deploys, etc. After the user merges and CI runs, verify the live endpoints behave correctly. Not needed for pure source changes.
 
 ### When to branch vs. commit to main
 
-- **Branch** (`feat/`): multi-commit work, new features, anything that touches routing/build/deploy
-- **Direct to main**: single-commit fixes, doc typos, plan file updates
+- **Branch** (`feat/`): multi-commit work, new features, anything that touches routing/build/deploy.
+- **Direct to main**: single-commit fixes, doc typos, plan file updates.
 
 ---
 
@@ -206,8 +225,7 @@ Work happens on a feature branch, committed incrementally, merged via PR.
 When progress is made on a plan:
 
 1. **Update the plan file** — revise the Status section and any design/implementation details that have changed.
-2. **Update ROADMAP.md** — change the Status column (e.g., `0/10` → `4/10` or `Not started` → `Active`).
-3. **Check if blockers have cleared** — if a plan was blocked and the blocker is now resolved, move it to the appropriate unblocked section (Do Next or Up Next).
+2. **Check if blockers have cleared** — if a plan was blocked and the blocker is now resolved, move it to the appropriate unblocked section (Do Next or Up Next).
 
 ---
 
@@ -233,47 +251,38 @@ git log --oneline --format="%ai %s" {first-commit-sha}^..HEAD --reverse
 ```
 
 Then:
-1. Note the first and last commit timestamps for total wall-clock span
-2. Look for gaps > 30 minutes between consecutive commits — these indicate breaks, CI waits, or context switches
-3. Calculate active time by summing the "burst" ranges (consecutive commits < 30min apart)
-4. Report both wall-clock span and estimated active time
+
+1. Note the first and last commit timestamps for total wall-clock span.
+2. Look for gaps > 30 minutes between consecutive commits — these indicate breaks, CI waits, or context switches.
+3. Calculate active time by summing the "burst" ranges (consecutive commits < 30min apart).
+4. Report both wall-clock span and estimated active time.
 
 Example output: "~6.5h wall clock (14:09–20:32 ET), ~4h active across 3 bursts. Gaps: 45min CI wait, 30min design discussion."
 
 Present the analysis to the user and ask if it sounds right before recording. They may know about breaks or context that commits don't capture.
 
-2. **Move the file**: `mv ai/plans/{plan}.md ai/plans/archive/`
+2. **Move the file**: `mv ai/plans/{plan}.md ai/plans/archive/`.
 3. **Remove from active sections** in ROADMAP.md.
-4. **Add a line to the Archive section** at the bottom of ROADMAP.md.
-5. **Check downstream** — did completing this plan unblock other plans? If so, move those from their blocked section to Do Next or Up Next.
-6. **Promote from Up Next** — if Do Next has room, pull the highest priority item from Up Next.
+4. **Check downstream** — did completing this plan unblock other plans? If so, move those from their blocked section to Do Next or Up Next.
+5. **Promote from Up Next** — if Do Next has room, pull the highest priority item from Up Next.
+
+The archive directory is the catalog of completed work; each plan's `## Completion` section is its self-record. ROADMAP.md does not maintain a separate Archive section — the directory listing and individual plan files are sufficient.
 
 ---
 
-## Step 5: Deferring a Plan
+## Step 5: Iceboxing a Plan
 
-When a plan is deliberately set aside:
+When a plan is captured but not on the active roadmap — either deliberately deferred or just not yet prioritized:
 
-1. **Move the file**: `mv ai/plans/{plan}.md ai/plans/deferred/`
-2. **Remove from active sections** in ROADMAP.md.
-3. **Add to the Deferred section** with a rationale — why it's deferred and under what conditions it would be revisited.
+1. **Move or create the file**: `mv ai/plans/{plan}.md ai/plans/icebox/`, or create directly in `ai/plans/icebox/`.
+2. **Remove from active sections** in ROADMAP.md (if it was there).
+3. **Add a line to the Icebox section** in ROADMAP.md:
 
-Example:
 ```markdown
-- **Vanilla Renderer** — 30-50d pair. Ship 1.0 on Lit. Revisit for 2.0 if dependency becomes a real problem.
+- [Plan Name](icebox/plan-name.md) — one-line description
 ```
 
----
-
-## Step 6: Maintaining the Hidden Content Inventory
-
-The Hidden Content Inventory tracks docs pages that were commented out (not deleted) and maps each to the plan that will produce the content. When adding or completing plans that involve documentation:
-
-1. **Check if any inventory items reference the plan** by number.
-2. **When content is written**, note that the corresponding menu entry / footer link / page stub can be uncommented.
-3. **Cross-reference** uses the `#` numbers from the active plan tables: e.g., "~~CSS/Styling tab~~ → blocked on CSS token docs (#14)"
-
-When plan numbers shift (due to completions or reordering), update the inventory references.
+If there's a "not now because X" rationale, capture it inside the plan file under `## Status` rather than in the ROADMAP entry. The ROADMAP entry is just a pointer.
 
 ---
 
@@ -281,7 +290,7 @@ When plan numbers shift (due to completions or reordering), update the inventory
 
 ### "This is too big for one plan"
 
-If a plan would take more than ~2 weeks, it's probably a track, not a plan. Tracks are described in the Tracks section at the top of ROADMAP.md. Individual plans within the track are created as work begins — not all upfront.
+If a plan would take more than ~2 weeks, it's probably a track, not a plan. Tracks are described in the phase narratives at the top of ROADMAP.md. Individual plans within the track are created as work begins — not all upfront.
 
 ### "This plan is done but I'm not sure"
 

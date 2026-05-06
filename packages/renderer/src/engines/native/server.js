@@ -22,8 +22,16 @@ import {
   isString,
 } from '@semantic-ui/utils';
 
-import { analyzePosition, BLOCK_MARKER, COMMENT_MARKER, DATA_SUI_BIND } from '../../build-html-string.js';
+import {
+  analyzePosition,
+  BLOCK_MARKER,
+  COMMENT_MARKER,
+  DATA_SUI_BIND,
+  formatBlockClose,
+  MAIN_BRANCH_INDEX,
+} from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
+import { encodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from './shared/each.js';
 
 const REMOVE_ATTR = '__SUI_REMOVE__';
 const REMOVE_ATTR_REGEX = /\s+[\w.@-]+\s*=\s*["']?__SUI_REMOVE__["']?/g;
@@ -63,15 +71,6 @@ function attrNameFromBuffer(buffer) {
   return match ? match[1] : null;
 }
 
-// HTML comment contents cannot contain `--` or `>` (WHATWG spec). User-
-// supplied keys may; encode them defensively. URL-encoding covers both
-// classes plus `%` itself. The client-side parser decodes with
-// `decodeURIComponent`. Keys are typically IDs (`x1`, `user-42`) that
-// don't need encoding, so the overhead is negligible in practice.
-function encodeItemKey(key) {
-  const str = String(key ?? '');
-  return encodeURIComponent(str);
-}
 function scanHtmlChunk(chunk, scope) {
   if (!scope.insideTag && chunk.indexOf('<') === -1) {
     scope.htmlBuffer += chunk;
@@ -175,7 +174,7 @@ function scanHtmlChunk(chunk, scope) {
 
 export class ServerRenderer {
   constructor(
-    { ast, data, template, subTemplates, snippets, helpers, isSVG = false, inheritsData = true, protectedKeys } = {},
+    { ast, data, template, subTemplates, snippets, helpers, isSVG = false, protectedKeys } = {},
   ) {
     this.ast = ast || [];
     this.data = data;
@@ -184,7 +183,6 @@ export class ServerRenderer {
     this.snippets = snippets || {};
     this.helpers = helpers || {};
     this.isSVG = isSVG;
-    this.inheritsData = inheritsData;
     this.protectedKeys = protectedKeys;
 
     this.evaluator = new ExpressionEvaluator({
@@ -370,7 +368,7 @@ export class ServerRenderer {
 
     const condition = this.evaluator.lookupExpressionValue(node.condition, data);
     if (condition && node.content) {
-      branchIndex = 1000;
+      branchIndex = MAIN_BRANCH_INDEX;
       html += this.renderNodes(node.content, data);
     }
     else if (node.branches) {
@@ -391,7 +389,7 @@ export class ServerRenderer {
       }
     }
 
-    html += `<!--/sui-block:v1:${id}:b${branchIndex}-->`;
+    html += `<!--${formatBlockClose(id, { branchIndex })}-->`;
     return html;
   }
 
@@ -407,30 +405,17 @@ export class ServerRenderer {
       html += this.renderNodes(node.elseContent, data);
     }
     else {
-      // Plan 09 — emit `<!--sui-item:v1:KEY-->` before each item's content
-      // so the client can adopt per-item DOM on first data change instead
-      // of nuking the whole list and re-rendering. The key is computed
-      // from the item via the same `getItemID` heuristic the client uses
-      // (`_id`/`id`/`key`/`hash`/`_hash`/`value`/index fallback), so
-      // server and client agree on identity.
+      // Per-item key marker — client adopts the matching node range at hydrate time.
       for (let i = 0; i < items.length; i++) {
-        const eachData = this.getEachData(items[i], i, collectionType, node);
+        const eachData = getEachData(items[i], i, collectionType, node);
         const itemData = { ...data, ...eachData };
-        const itemEvaluator = new ExpressionEvaluator({ data: itemData, helpers: this.helpers });
-        const savedEvaluator = this.evaluator;
-        this.evaluator = itemEvaluator;
-        const key = this.getItemID(items[i], i, collectionType);
-        try {
-          html += `<!--sui-item:v1:${encodeItemKey(key)}-->`;
-          html += this.renderNodes(node.content, itemData);
-        }
-        finally {
-          this.evaluator = savedEvaluator;
-        }
+        const key = getItemID(items[i], i, collectionType);
+        html += `<!--${SUI_ITEM_MARKER}${encodeItemKey(key)}-->`;
+        html += this.renderNodes(node.content, itemData);
       }
     }
 
-    html += `<!--/sui-block:v1:${id}-->`;
+    html += `<!--${formatBlockClose(id)}-->`;
     return html;
   }
 
@@ -443,7 +428,7 @@ export class ServerRenderer {
       html += this.renderNodes(node.loadingContent, data);
     }
 
-    html += `<!--/sui-block:v1:${id}-->`;
+    html += `<!--${formatBlockClose(id)}-->`;
     return html;
   }
 
@@ -455,7 +440,7 @@ export class ServerRenderer {
       html += this.renderNodes(node.content, data);
     }
 
-    html += `<!--/sui-block:v1:${id}-->`;
+    html += `<!--${formatBlockClose(id)}-->`;
     return html;
   }
 
@@ -472,14 +457,7 @@ export class ServerRenderer {
     if (this.snippets[templateName]) {
       const snippet = this.snippets[templateName];
       const snippetData = this.resolveNodeData(node, data);
-      const savedEvaluator = this.evaluator;
-      this.evaluator = new ExpressionEvaluator({ data: snippetData, helpers: this.helpers });
-      try {
-        html += this.renderNodes(snippet.content, snippetData);
-      }
-      finally {
-        this.evaluator = savedEvaluator;
-      }
+      html += this.renderNodes(snippet.content, snippetData);
     }
     else {
       let template;
@@ -496,7 +474,7 @@ export class ServerRenderer {
       }
     }
 
-    html += `<!--/sui-block:v1:${id}-->`;
+    html += `<!--${formatBlockClose(id)}-->`;
     return html;
   }
 
@@ -514,13 +492,8 @@ export class ServerRenderer {
       return instance.render();
     }
 
-    // Plain AST object — render directly
     if (template.ast) {
-      const savedEvaluator = this.evaluator;
-      this.evaluator = new ExpressionEvaluator({ data, helpers: this.helpers });
-      const html = this.renderNodes(template.ast, data);
-      this.evaluator = savedEvaluator;
-      return html;
+      return this.renderNodes(template.ast, data);
     }
 
     return '';
@@ -529,41 +502,6 @@ export class ServerRenderer {
   /*******************************
       Data Helpers
   *******************************/
-
-  // Mirrors the client-side heuristic in blocks/each.js — prefer
-  // user-supplied identity fields, fall back to the positional index.
-  // Always stringified so server-emitted keys match the string-keyed
-  // Map the client builds from the `<!--sui-item:v1:KEY-->` extraction.
-  // Kept in sync manually; see ai/workspace/reference/perf/06-plans/
-  // 09-each-hydration-dom-reuse.md §Server.
-  getItemID(item, indexOrKey, collectionType) {
-    let raw;
-    if (isPlainObject(item)) {
-      const key = (collectionType === 'object') ? indexOrKey : undefined;
-      raw = key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
-    }
-    else if (isString(item)) {
-      raw = item + ':' + indexOrKey;
-    }
-    else {
-      raw = indexOrKey;
-    }
-    return String(raw);
-  }
-
-  getEachData(item, indexOrKey, collectionType, node) {
-    let { as, indexAs } = node;
-    if (!indexAs) {
-      indexAs = (collectionType === 'array') ? 'index' : 'key';
-    }
-    if (collectionType === 'object') {
-      indexOrKey = item.key;
-      item = item.value;
-    }
-    return as
-      ? { [as]: item, [indexAs]: indexOrKey }
-      : { ...item, this: item, [indexAs]: indexOrKey };
-  }
 
   resolveNodeData(node, data) {
     let resolved = { ...data };

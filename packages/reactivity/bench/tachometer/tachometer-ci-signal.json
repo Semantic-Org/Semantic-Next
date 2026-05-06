@@ -10,14 +10,19 @@
       "url": "ci-current-signal.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
-        { "mode": "performance", "entryName": "signal-reactive-fanout-500x1200" },
-        { "mode": "performance", "entryName": "signal-computed-chain-10x60k" },
-        { "mode": "performance", "entryName": "signal-reactive-multi-read-5x160k" },
-        { "mode": "performance", "entryName": "signal-reactive-list-replace-1000x1000" },
-        { "mode": "performance", "entryName": "signal-reactive-list-filter-1000x300" },
-        { "mode": "performance", "entryName": "signal-reactive-push-2000x20" },
-        { "mode": "performance", "entryName": "signal-reactive-set-index-300" },
-        { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-200" }
+        { "mode": "performance", "entryName": "reactive-fanout-500x1200" },
+        { "mode": "performance", "entryName": "computed-chain-10x60k" },
+        { "mode": "performance", "entryName": "reactive-multi-read-5x160k" },
+        { "mode": "performance", "entryName": "reactive-list-replace-1000x1000" },
+        { "mode": "performance", "entryName": "reactive-list-filter-1000x300" },
+        { "mode": "performance", "entryName": "reactive-push-2000x20" },
+        { "mode": "performance", "entryName": "reactive-set-index-300" },
+        { "mode": "performance", "entryName": "reactive-set-property-by-id-200" },
+        { "mode": "performance", "entryName": "set-same-10m" },
+        { "mode": "performance", "entryName": "sub-unsub-100k" },
+        { "mode": "performance", "entryName": "reaction-flush-noop-5m" },
+        { "mode": "performance", "entryName": "reaction-coalesce-200x100" },
+        { "mode": "performance", "entryName": "reaction-dep-diff-30k" }
       ]
     },
     {
@@ -25,14 +30,19 @@
       "url": "ci-baseline-signal.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
-        { "mode": "performance", "entryName": "signal-reactive-fanout-500x1200" },
-        { "mode": "performance", "entryName": "signal-computed-chain-10x60k" },
-        { "mode": "performance", "entryName": "signal-reactive-multi-read-5x160k" },
-        { "mode": "performance", "entryName": "signal-reactive-list-replace-1000x1000" },
-        { "mode": "performance", "entryName": "signal-reactive-list-filter-1000x300" },
-        { "mode": "performance", "entryName": "signal-reactive-push-2000x20" },
-        { "mode": "performance", "entryName": "signal-reactive-set-index-300" },
-        { "mode": "performance", "entryName": "signal-reactive-set-property-by-id-200" }
+        { "mode": "performance", "entryName": "reactive-fanout-500x1200" },
+        { "mode": "performance", "entryName": "computed-chain-10x60k" },
+        { "mode": "performance", "entryName": "reactive-multi-read-5x160k" },
+        { "mode": "performance", "entryName": "reactive-list-replace-1000x1000" },
+        { "mode": "performance", "entryName": "reactive-list-filter-1000x300" },
+        { "mode": "performance", "entryName": "reactive-push-2000x20" },
+        { "mode": "performance", "entryName": "reactive-set-index-300" },
+        { "mode": "performance", "entryName": "reactive-set-property-by-id-200" },
+        { "mode": "performance", "entryName": "set-same-10m" },
+        { "mode": "performance", "entryName": "sub-unsub-100k" },
+        { "mode": "performance", "entryName": "reaction-flush-noop-5m" },
+        { "mode": "performance", "entryName": "reaction-coalesce-200x100" },
+        { "mode": "performance", "entryName": "reaction-dep-diff-30k" }
       ]
     }
   ]

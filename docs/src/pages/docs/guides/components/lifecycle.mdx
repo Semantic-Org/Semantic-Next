@@ -58,14 +58,13 @@ The `onThemeChanged` callback is a special callback that fires when a user swaps
 
 ### Hydration
 
-The default rendering engine for Semantic UI components is `lit` this means you can use [any existing Lit SSR package](https://lit.dev/docs/ssr/overview/#library-status) to render components on the server.
+Semantic UI components support server-side rendering out of the box. The default `native` rendering engine ships with a built-in SSR pipeline that emits Declarative Shadow DOM and hydrates without re-rendering on the client. Components using the optional `lit` engine can integrate with [Lit's SSR packages](https://lit.dev/docs/ssr/overview/#library-status) instead.
 
 > **UI Components** All [UI framework components](/ui) in Semantic UI are designed to work with server side hydration out of the box.
 
 ### Lifecycle Events on Server
-All lifecycle events will fire on the server in the same order as on the client.
 
-This means you should use `isServer` or `isClient` during server side rendering to handle checking for globals that may not be defined.
+Lifecycle callbacks (`onCreated`, `onRendered`, `onDestroyed`) fire on the server in the same order as on the client. [DOM lifecycle events](#dom-lifecycle-events) are suppressed during hydration so external listeners aren't fired twice for the same render. Use `isServer` or `isClient` inside callbacks when reaching for globals that may not be defined on the server.
 
 ```javascript 'isClient'
 const onRendered = function ({ isClient, self }) {
@@ -142,16 +141,18 @@ The following parameters are destructurable from all callbacks.
 Event handlers also have access to a few additional arguments
 | parameter         | use                                              |
 |-------------------|--------------------------------------------------|
-| el                | the dom element that fired the event             |
-| event             | the event object                                 |
-| value             | event.target.value from target element           |
-| data              | event.detail + data attributes on dom element    |
+| target            | the dom element that dispatched the event        |
+| event             | the native event object                          |
+| value             | value of the dispatching element (form fields, custom event detail) |
+| data              | event.detail + data attributes on the dispatching element |
+| isDeep            | the event came from inside another web component's shadow tree |
 
 ### Key Bindings
 
 [Key bindings](/docs/guides/components/keys) also have access to a few additional arguments
 | parameter         | use                                              |
 |-------------------|--------------------------------------------------|
+| event             | the native `KeyboardEvent`                       |
 | inputFocused      | whether any input/contenteditable is focused     |
 | repeatedKey       | whether the key is held down                     |
 
