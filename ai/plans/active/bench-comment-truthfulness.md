@@ -60,21 +60,27 @@ The reframe-lens audit and Jack's architectural pushback both confirmed the righ
 
 Highest leverage items: #1 (peak filter), #2 (peak quality gate), and the Tier 2 amplification work. Lowest cost / cleanest wins: #4 (suppression), #6 (footer), #7-8 (copy/comments).
 
-## Open questions
+## Decisions
 
-- For Tier 1 #1, when no eligible peak remains (all prior iterations were harness-only), should the row be omitted or rendered with an explicit "no eligible peak" framing? Default proposal: omit, matching how `null` historyStatus already behaves for new metrics.
-- For Tier 1 #5, the σ=2ms documented baseline survives as a fallback when a bench has fewer than ~20 samples (initial-budget cells). Per-bench σ takes over above that threshold. Or always use it when samples exist?
-- For Tier 2 amplification, some krausest metrics mirror the published js-framework-benchmark suite and have a special parity contract (`bench-krausest.js` notes in the skill). Amplification that diverges from the canonical workload may break that parity. Triage per metric — internal-only metrics amplify freely, parity-bound metrics need a different fix (separate report cell, or accept higher noise floor).
+Resolved during scope upgrade.
+
+- **No-eligible-peak fallout (Tier 1 #1).** Omit the row. Matches the `null` historyStatus path for new metrics. Rendering a "no eligible peak" placeholder is just noise.
+- **Per-cell σ fallback (Tier 1 #5).** Use per-cell σ when samples ≥ 20; fall back to global SIGMA_ABS_MS=2ms below that. The 50-sample floor in CI configs makes the fallback rare — covers cells that hit the timeout before reaching the floor.
+- **Tier 2 amplification scope.** Krausest is signal-only here, not a parity contract — its job is to predict our trend on the published js-framework-benchmark suite. A bench permanently in "Too Fast" produces zero signal, so resolution wins over workload-shape preservation. Amplification stays within the operation (more iterations or larger scale, never a different operation).
+- **Tier 2 split-out.** Tier 2 lands in a follow-up plan. Reason: amplification renames or silently shifts metric definitions (`-20` → `-100`), which breaks comparability of the FGR branch's existing bench-bot history. Tier 1 is pure improvement for FGR debug; Tier 2 is the disruption. Decoupling them lets FGR keep using its existing data while we land the reporter fixes. Filed as [Bench Amplification Audit](../icebox/bench-amplification-audit.md).
+
+## Sessions (estimated)
+
+1. Reporter Tier 1 edits — peak filter + quality gate, per-cell σ, suppression, copy/footer, base-SHA fallback. Bench-side: align purpose comments with the extractor's expectation. ~3-4h.
+2. Subagent copy review pass on the rendered comment, rewrite for first-time readers. ~30m.
 
 ## Dependencies
 
-None. All edits are local to `tools/ci/bench/reporter/`, `.github/workflows/benchmarks*.yml`, and `packages/*/bench/tachometer/`. No coordination with other plans needed.
+None for Tier 1. Tier 2 (separate plan) lands after FGR's path forward is resolved.
 
 ## Status
 
-`initial` — captured from PR #183 audit. Several decisions (open-questions list) need a pair session before Tier 1 is `scoped`. Tier 2 is mechanical once Tier 1 lands, but each bench file's amplification target needs a quick judgment call on workload realism.
-
-The work is not gating any release. Filed in icebox until either (a) the cross-iteration overlay's noise content becomes a recurring distraction in PR review, or (b) a future perf PR needs the saturated `bench-template-reactivity.js` metrics to actually resolve.
+`scoped` — Tier 1 in flight on `feat/bench-comment-truthfulness`. Decisions on open questions captured above. Tier 2 split out as [Bench Amplification Audit](../icebox/bench-amplification-audit.md) and waits on FGR.
 
 ## References
 

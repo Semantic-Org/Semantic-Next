@@ -45,7 +45,10 @@ const msg = args.msg ?? '';
 const runUrl = args['run-url'] ?? '';
 const runId = args['run-id'] ?? '';
 const baseRef = args['base-ref'] ?? 'main';
-const baseSha = args['base-sha'] ?? '';
+// CLI override; falls back to the baseline-sha.txt sidecar each per-config
+// artifact carries (see readBaselineSha, evaluated below). Without either,
+// the Base header link falls back to the moving branch tip.
+const baseShaArg = args['base-sha'] ?? '';
 // Fall back to GITHUB_REPOSITORY so commit links work without an explicit
 // --repo when running under Actions. Still honors --repo override when
 // someone needs to pin a different repo (e.g. cross-fork comparison).
@@ -69,11 +72,18 @@ const NOISE_FLOOR = 2; // percent — matches autoSampleConditions
 
 // Per-sample timing jitter on shared GHA runners. OS scheduling, GC, and
 // JIT contribute an ~absolute-constant noise floor that becomes wide in
-// relative terms for short benches. Calibrated empirically: zero-delta
-// observed CI widths fit a σ≈2ms model well for most benches; the handful
-// that exceed it (create-1k, append-1k) show 2.5-3× expected, which is
-// the diagnostic signal — unusually noisy for duration, worth a second look.
+// relative terms for short benches. Used as the fallback when a bench
+// cell hasn't accumulated enough samples to estimate σ from its own
+// data (see SIGMA_SAMPLE_FLOOR). Calibrated empirically: zero-delta
+// observed CI widths fit a σ≈2ms model well for most benches.
 const SIGMA_ABS_MS = 2;
+
+// Minimum sample count for trusting a per-cell σ estimate. Below this,
+// the estimate is itself too noisy to drive the Expected Noise column;
+// fall back to the global SIGMA_ABS_MS. The sampleSize=50 floor in our
+// configs means most cells clear this comfortably; cells that hit the
+// timeout before reaching it get the safer fallback.
+const SIGMA_SAMPLE_FLOOR = 20;
 
 // Classification tolerance. Observed / expected ratio below this counts as
 // "explained by duration-based noise floor" → noise-floor-limited bucket.
@@ -120,7 +130,7 @@ const PEAK_SECTIONS = {
     status: 'REOPENED',
     headingPrefix: '📜 Regressions from peak',
     description:
-      `These metrics were better on a prior iteration than they are now. The peak's percent-delta vs its baseline dominates current's percent-delta vs its baseline — not attributable to per-sample noise. Bisect candidates are the commits between the peak iteration and HEAD; nearest-to-peak is usually the best bet.`,
+      `These metrics were faster on an earlier push to this PR than they are now, and the gap is bigger than measurement noise. The candidates list is the commits between the best run and this one that touched \`packages/\` and got benched — the most recent one is usually where to look. Cancelled or superseded runs aren't included.`,
     columnHeader: '| metric | current | peak | vs peak | bisect candidates |',
     // Largest % regression first (descending on signed delta).
     sortSign: -1,
@@ -133,7 +143,7 @@ const PEAK_SECTIONS = {
     status: 'WIN',
     headingPrefix: '🏆 New peaks',
     description:
-      `These metrics reached a new best in this iteration — current's percent-delta vs its baseline dominates the prior peak's percent-delta vs its baseline. Credit candidates are the commits between the prior peak and HEAD; nearest-to-current is usually the cause.`,
+      `These metrics are faster than they've ever been on this PR, beyond measurement noise. The candidates list is the commits between the previous best and this one that touched \`packages/\` and got benched — the most recent one is usually the cause. Cancelled or superseded runs aren't included.`,
     columnHeader: '| metric | current | prior peak | vs prior peak | credit candidates |',
     // Most-improved first. delta_from_peak_pct is negative for WIN, so
     // ascending sort surfaces the best.
@@ -145,12 +155,33 @@ const PEAK_SECTIONS = {
 /**
  * Expected percent-change CI width for an unresolved CI given the bench's
  * absolute duration. Derived from the standard-error-of-the-difference of
- * two means at sampleSize=50, σ=SIGMA_ABS_MS per sample, z=1.96:
+ * two means at sampleSize=50, σ per sample, z=1.96:
  *   abs_CI_width ≈ 2 * 1.96 * sqrt(2) * σ / sqrt(50) ≈ 0.784 * σ
  *   pct_width = abs_CI_width / mean * 100
+ *
+ * `sigma` defaults to the global SIGMA_ABS_MS calibration. When samples
+ * exist for the bench cell, callers pass a per-cell σ estimated from
+ * those samples — heavy-allocation benches like clear-10k empirically
+ * run σ≈17ms vs the global 2ms, so the Expected Noise column was
+ * under-predicting their resolution floor by 4-9×.
  */
-function expectedNoisePp(meanMs) {
-  return (0.784 * SIGMA_ABS_MS) / meanMs * 100;
+function expectedNoisePp(meanMs, sigma = SIGMA_ABS_MS) {
+  return (0.784 * sigma) / meanMs * 100;
+}
+
+/**
+ * Sample standard deviation. Returns null when the array is too small
+ * to trust (< SIGMA_SAMPLE_FLOOR). Uses Bessel-corrected variance.
+ */
+function sampleSigma(samples) {
+  if (!Array.isArray(samples) || samples.length < SIGMA_SAMPLE_FLOOR) { return null; }
+  const n = samples.length;
+  let sum = 0;
+  for (const v of samples) { sum += v; }
+  const mean = sum / n;
+  let sq = 0;
+  for (const v of samples) { sq += (v - mean) ** 2; }
+  return Math.sqrt(sq / (n - 1));
 }
 
 const benchDirs = findBenchDirs(repoRoot);
@@ -162,6 +193,7 @@ const peakHistory = scope === 'pr' ? prHistory : mergeHistories(mainHistory, prH
 // per-commit percent-deltas is what quantifies how the baseline itself moved.
 const driftHistory = mainHistory;
 const currentBaselineSha = readBaselineSha(resultsDir);
+const baseSha = baseShaArg || currentBaselineSha || '';
 const metrics = loadAllMetrics(resultsDir);
 const report = buildReport(metrics);
 const markdown = renderMarkdown(report);
@@ -193,6 +225,8 @@ function loadAllMetrics(dir) {
       absoluteMsDelta: [diff.absolute.low, diff.absolute.high],
       percentDelta: [diff.percentChange.low, diff.percentChange.high],
       baselineSha: currentBaselineSha || null,
+      sampleCount: current.bm.samples?.length ?? 0,
+      sigmaMs: sampleSigma(current.bm.samples),
     });
   }
   out.sort((a, b) => a.name.localeCompare(b.name));
@@ -217,7 +251,9 @@ function buildReport(metrics) {
   const classified = metrics.map((m) => {
     const meanMs = (m.thisChangeMs[0] + m.thisChangeMs[1]) / 2;
     const widthPp = m.percentDelta[1] - m.percentDelta[0];
-    const expectedPp = expectedNoisePp(meanMs);
+    // Per-cell σ when the cell has enough samples; SIGMA_ABS_MS otherwise.
+    const sigma = m.sigmaMs ?? SIGMA_ABS_MS;
+    const expectedPp = expectedNoisePp(meanMs, sigma);
     const ratio = expectedPp > 0 ? widthPp / expectedPp : Infinity;
     const indexed = benchIndex.get(m.name);
     const source = indexed?.source ?? null;
@@ -289,6 +325,8 @@ function toJsonMetric(m) {
     mean_ms: Number(m.meanMs.toFixed(2)),
     expected_noise_pp: Number(m.expectedPp.toFixed(2)),
     observed_noise_ratio: Number(m.ratio.toFixed(2)),
+    sigma_ms: m.sigmaMs != null ? Number(m.sigmaMs.toFixed(2)) : null,
+    sample_count: m.sampleCount ?? 0,
     source: m.source,
     purpose: m.purpose ?? null,
     baseline_sha: m.baselineSha ?? null,
@@ -426,7 +464,7 @@ function renderMarkdown(report) {
       lines.push(`#### Inconclusive (${inconclusive.length})`);
       lines.push('');
       lines.push(
-        `The measured difference is small, and our sampling couldn't confidently place it above or below zero. Running more samples in a future run might settle these metrics.`,
+        `The measurement crossed the ±${NOISE_FLOOR}% line and is wider than this bench's duration usually produces. More samples might land it on one side. Benches that keep showing up here are inherently noisy — make them do more work per run, or accept that this is their floor.`,
       );
       lines.push('');
       lines.push('| metric | Change | Expected Noise |');
@@ -443,9 +481,9 @@ function renderMarkdown(report) {
       lines.push(`#### Too Fast to Measure Precisely (${tooFast.length})`);
       lines.push('');
       lines.push(
-        `On benches this short, system jitter (scheduling, GC, JIT) masks sub-${
+        `On benches this short, OS jitter, GC, and JIT pauses drown out anything under ${
           SIGMA_ABS_MS * 2
-        }% changes; larger deltas still resolve cleanly.`,
+        }%. Bigger changes than that still show up.`,
       );
       lines.push('');
       lines.push('| metric | Change | Test Time | Expected Noise |');
@@ -469,9 +507,21 @@ function renderMarkdown(report) {
 
   // ─── Footer ──────────────────────────────────────────────────────────
   lines.push('---');
+  // Sample size: report the floor + max actually reached. Cells auto-sample
+  // up to the timeout when their CI hasn't converged at the 2% threshold,
+  // so PR-iteration runs can range 50→several hundred. Bare "Sample size:
+  // 50" obscured the auto-sample tail, so a hot bench whose cell ran 280
+  // samples looked the same in the footer as a cold one that never moved
+  // off the floor.
+  const sampleCounts = report.metrics.map((m) => m.sample_count).filter((n) => n > 0);
+  const sampleFloor = sampleCounts.length ? Math.min(...sampleCounts) : 50;
+  const sampleMax = sampleCounts.length ? Math.max(...sampleCounts) : 50;
+  const sampleSizeStr = sampleFloor === sampleMax
+    ? `Sample size: ${sampleFloor}`
+    : `Sample size: ${sampleFloor} floor / ${sampleMax} max`;
   const footerParts = [
-    'Sample size: 50',
-    `Resolution floor: ±${NOISE_FLOOR}%`,
+    sampleSizeStr,
+    `Noise floor: ±${NOISE_FLOOR}%`,
     'Timeout: 3min',
   ];
   if (report.wall_clock_seconds != null) {
@@ -520,7 +570,17 @@ function renderGlossarySection(lines, report) {
  */
 function renderPeakSection(lines, report, kind) {
   const config = PEAK_SECTIONS[kind];
-  const rows = report.metrics.filter((m) => m.history_status === config.status);
+  // Same-session classification wins on dedup for the unsure bucket.
+  // A metric in Inconclusive (CI straddles ±2% AND wider than the
+  // duration-derived floor predicts) shouldn't ALSO appear in a
+  // "regressed from peak" table — the two framings read as contradictory
+  // (filter-cycle-20 audited as the canonical case). Noise-floor-limited
+  // metrics stay eligible: the cross-iteration framing operates on
+  // delta_from_peak_pct, which can resolve cleanly even when same-session
+  // is at its resolution floor.
+  const rows = report.metrics.filter((m) => (
+    m.history_status === config.status && m.status !== 'unsure'
+  ));
   if (rows.length === 0) { return; }
 
   const sorted = [...rows].sort(
@@ -687,11 +747,11 @@ function determineState(summary) {
     };
   }
   if (f > 0 && s > 0) {
-    const modifier = f > s ? 'Net Positive' : s > f ? 'Net Negative' : 'Balanced';
-    const conjunction = modifier === 'Balanced' ? 'and regresses on' : 'while regressing on';
+    const modifier = f > s ? 'mostly faster' : s > f ? 'mostly slower' : 'balanced';
+    const conjunction = modifier === 'balanced' ? 'and regresses on' : 'while regressing on';
     return {
       emoji: '🟡',
-      heading: `Mixed Performance (${modifier})`,
+      heading: `Mixed (${modifier})`,
       alertType: 'WARNING',
       body: `This PR improves ✅ ${f} test${f === 1 ? '' : 's'} ${conjunction} ❌ ${s} test${s === 1 ? '' : 's'}.`,
     };
@@ -924,9 +984,24 @@ function loadHistory(filePath) {
  */
 function computeHistoryStatus(metric, peakHist, driftHist) {
   if (!peakHist || peakHist.commits.length === 0) { return null; }
-  const entries = peakHist.commits.filter(
-    (c) => c.metrics?.[metric.name]?.percent_delta_ci,
-  );
+  // Eligible peaks must (a) have measured this metric, (b) have touched
+  // bench-relevant packages so the iteration could plausibly have moved
+  // the metric, and (c) have a within-session CI tight enough to anchor
+  // the comparison. The same-session classifier already uses ratio ≤
+  // NOISE_RATIO_TOLERANCE × expected to separate signal from boundary
+  // noise; an outlier-noisy iteration anchoring the peak would let the
+  // 'Regressions from peak' table report differences that are within the
+  // peak iteration's own resolution floor. `touches_packages` is set by
+  // fetch-pr-history per run; absent on legacy entries (default include).
+  const entries = peakHist.commits.filter((c) => {
+    const m = c.metrics?.[metric.name];
+    if (!m?.percent_delta_ci) { return false; }
+    if (c.touches_packages === false) { return false; }
+    const widthPp = m.percent_delta_ci[1] - m.percent_delta_ci[0];
+    const expectedPp = m.mean_ms > 0 ? expectedNoisePp(m.mean_ms) : 0;
+    if (expectedPp <= 0) { return true; }
+    return widthPp / expectedPp <= NOISE_RATIO_TOLERANCE;
+  });
   if (entries.length === 0) { return null; }
 
   // Pick peak. Tie-break: newer commit wins.
