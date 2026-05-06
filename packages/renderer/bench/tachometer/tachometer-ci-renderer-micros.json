@@ -10,11 +10,11 @@
       "url": "ci-current-renderer-micros.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
-        { "mode": "performance", "entryName": "micro-expr-simple-100k" },
-        { "mode": "performance", "entryName": "micro-expr-lisp-50k" },
-        { "mode": "performance", "entryName": "micro-expr-js-10k" },
-        { "mode": "performance", "entryName": "micro-build-html-string-10k" },
-        { "mode": "performance", "entryName": "micro-dom-walker-1000x15" }
+        { "mode": "performance", "entryName": "expr-simple-100k" },
+        { "mode": "performance", "entryName": "expr-lisp-50k" },
+        { "mode": "performance", "entryName": "expr-js-10k" },
+        { "mode": "performance", "entryName": "build-html-string-10k" },
+        { "mode": "performance", "entryName": "dom-walker-1000x15" }
       ]
     },
     {
@@ -22,11 +22,11 @@
       "url": "ci-baseline-renderer-micros.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
-        { "mode": "performance", "entryName": "micro-expr-simple-100k" },
-        { "mode": "performance", "entryName": "micro-expr-lisp-50k" },
-        { "mode": "performance", "entryName": "micro-expr-js-10k" },
-        { "mode": "performance", "entryName": "micro-build-html-string-10k" },
-        { "mode": "performance", "entryName": "micro-dom-walker-1000x15" }
+        { "mode": "performance", "entryName": "expr-simple-100k" },
+        { "mode": "performance", "entryName": "expr-lisp-50k" },
+        { "mode": "performance", "entryName": "expr-js-10k" },
+        { "mode": "performance", "entryName": "build-html-string-10k" },
+        { "mode": "performance", "entryName": "dom-walker-1000x15" }
       ]
     }
   ]

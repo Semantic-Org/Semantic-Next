@@ -1,4 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
+import { Reaction } from '@semantic-ui/reactivity';
 import { generateID } from '@semantic-ui/utils';
 
 /*******************************
@@ -147,13 +148,23 @@ defineComponent({
 const container = document.createElement('div');
 document.body.appendChild(container);
 
+// Pre-measurement / between-metric idle wait. rAF gates `mount()` so any
+// connectedCallback-deferred microtasks settle before the next metric
+// starts.
 const flush = () => new Promise(r => requestAnimationFrame(r));
+// Sync drain of pending Reactions. Used inside `performance.mark` ...
+// `performance.measure` regions where a per-iteration `await rAF` would
+// dominate wall-clock with 16ms idle gaps and bury sub-frame JS-work
+// deltas. The reactivity Scheduler flushes on a microtask, so calling
+// `Reaction.flush()` immediately after a `signal.set` runs every queued
+// Reaction synchronously — exactly what we want to measure.
+const flushWork = () => Reaction.flush();
 const startMark = (name) => `${name}-start`;
 
 async function mount() {
   const el = document.createElement('bench-todo');
   container.appendChild(el);
-  await flush();
+  flushWork();
   return el;
 }
 
@@ -169,7 +180,7 @@ function getTodos(el) {
 async function setup(n) {
   const el = await mount();
   el.component.addBulk(n);
-  await flush();
+  flushWork();
   return el;
 }
 
@@ -182,7 +193,7 @@ async function markEveryNth(el, n) {
   for (let i = 0; i < todos.length; i += n) {
     el.component.toggleTodo(todos[i].id);
   }
-  await flush();
+  flushWork();
 }
 
 /*******************************
@@ -216,7 +227,7 @@ const el3 = await mount();
 performance.mark(startMark('add-20'));
 for (let i = 0; i < 20; i++) {
   el3.component.addOne(`New todo ${i + 1}`);
-  await flush();
+  flushWork();
 }
 performance.measure('add-20', startMark('add-20'));
 destroy();
@@ -236,7 +247,7 @@ const el4 = await setup(100);
 performance.mark(startMark('toggle-first-10'));
 for (let i = 0; i < 10; i++) {
   el4.component.toggleTodo(getTodos(el4)[0].id);
-  await flush();
+  flushWork();
 }
 performance.measure('toggle-first-10', startMark('toggle-first-10'));
 destroy();
@@ -246,7 +257,7 @@ const el5 = await setup(100);
 performance.mark(startMark('toggle-last-10'));
 for (let i = 0; i < 10; i++) {
   el5.component.toggleTodo(getTodos(el5)[99].id);
-  await flush();
+  flushWork();
 }
 performance.measure('toggle-last-10', startMark('toggle-last-10'));
 destroy();
@@ -256,7 +267,7 @@ const el6 = await setup(100);
 performance.mark(startMark('toggle-middle-10'));
 for (let i = 0; i < 10; i++) {
   el6.component.toggleTodo(getTodos(el6)[49].id);
-  await flush();
+  flushWork();
 }
 performance.measure('toggle-middle-10', startMark('toggle-middle-10'));
 destroy();
@@ -271,7 +282,7 @@ const el7 = await setup(100);
 performance.mark(startMark('toggle-10'));
 for (let i = 0; i < 10; i++) {
   el7.component.toggleTodo(getTodos(el7)[i].id);
-  await flush();
+  flushWork();
 }
 performance.measure('toggle-10', startMark('toggle-10'));
 destroy();
@@ -288,7 +299,7 @@ const el8 = await setup(100);
 performance.mark(startMark('toggle-all-20'));
 for (let i = 0; i < 20; i++) {
   el8.component.toggleAll();
-  await flush();
+  flushWork();
 }
 performance.measure('toggle-all-20', startMark('toggle-all-20'));
 destroy();
@@ -304,7 +315,7 @@ const el9 = await setup(100);
 performance.mark(startMark('remove-first-10'));
 for (let i = 0; i < 10; i++) {
   el9.component.deleteTodo(getTodos(el9)[0].id);
-  await flush();
+  flushWork();
 }
 performance.measure('remove-first-10', startMark('remove-first-10'));
 destroy();
@@ -315,7 +326,7 @@ performance.mark(startMark('remove-middle-10'));
 for (let i = 0; i < 10; i++) {
   const todos = getTodos(el10);
   el10.component.deleteTodo(todos[Math.floor(todos.length / 2)].id);
-  await flush();
+  flushWork();
 }
 performance.measure('remove-middle-10', startMark('remove-middle-10'));
 destroy();
@@ -326,7 +337,7 @@ performance.mark(startMark('remove-last-10'));
 for (let i = 0; i < 10; i++) {
   const todos = getTodos(el10b);
   el10b.component.deleteTodo(todos[todos.length - 1].id);
-  await flush();
+  flushWork();
 }
 performance.measure('remove-last-10', startMark('remove-last-10'));
 destroy();
@@ -340,7 +351,7 @@ const el11 = await setup(100);
 performance.mark(startMark('remove-5-front'));
 for (let i = 0; i < 5; i++) {
   el11.component.deleteTodo(getTodos(el11)[0].id);
-  await flush();
+  flushWork();
 }
 performance.measure('remove-5-front', startMark('remove-5-front'));
 destroy();
@@ -354,7 +365,7 @@ performance.mark(startMark('remove-10-middle'));
 for (let i = 0; i < 10; i++) {
   const todos = getTodos(el11b);
   el11b.component.deleteTodo(todos[Math.floor(todos.length / 2)].id);
-  await flush();
+  flushWork();
 }
 performance.measure('remove-10-middle', startMark('remove-10-middle'));
 destroy();
@@ -365,7 +376,7 @@ performance.mark(startMark('remove-5-back'));
 for (let i = 0; i < 5; i++) {
   const todos = getTodos(el11c);
   el11c.component.deleteTodo(todos[todos.length - 1].id);
-  await flush();
+  flushWork();
 }
 performance.measure('remove-5-back', startMark('remove-5-back'));
 destroy();
@@ -402,7 +413,7 @@ const filters = ['active', 'completed', 'all'];
 performance.mark(startMark('filter-cycle-20'));
 for (let i = 0; i < 20; i++) {
   el13.component.setFilter(filters[i % 3]);
-  await flush();
+  flushWork();
 }
 performance.measure('filter-cycle-20', startMark('filter-cycle-20'));
 destroy();
@@ -418,7 +429,7 @@ const el14 = await setup(100);
 performance.mark(startMark('edit-start-10'));
 for (let i = 0; i < 10; i++) {
   el14.component.editTodo(getTodos(el14)[40 + i].id);
-  await flush();
+  flushWork();
 }
 performance.measure('edit-start-10', startMark('edit-start-10'));
 destroy();
@@ -433,9 +444,9 @@ performance.mark(startMark('edit-cycle-5'));
 for (let i = 0; i < 5; i++) {
   const id = getTodos(el15)[40 + i].id;
   el15.component.editTodo(id);
-  await flush();
+  flushWork();
   el15.component.saveTodo(id, `Updated item ${i}`);
-  await flush();
+  flushWork();
 }
 performance.measure('edit-cycle-5', startMark('edit-cycle-5'));
 destroy();
@@ -456,7 +467,7 @@ performance.mark(startMark('rename-50'));
 for (let i = 0; i < 50; i++) {
   const todos = getTodos(el16);
   el16.component.renameTodo(todos[i % todos.length].id, `Renamed ${i}`);
-  await flush();
+  flushWork();
 }
 performance.measure('rename-50', startMark('rename-50'));
 destroy();

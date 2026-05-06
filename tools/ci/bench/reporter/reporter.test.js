@@ -393,8 +393,10 @@ test('cross-run: WIN when current pct-delta dominates historical peak', () => {
   assert.ok(!markdown.includes('Regressions from peak'), 'no reopened section when no REOPENED');
   assert.ok(markdown.includes('🏆 New peaks (1)'), 'New peaks section renders');
   assert.ok(markdown.includes('🏆 1 new peak'), 'headline includes new peak count');
-  assert.ok(/improved \d+%/.test(markdown), 'delta uses % unit');
-  assert.ok(!/improved -\d+%/.test(markdown), 'delta drops negative sign for WIN: verb already encodes direction');
+  assert.ok(markdown.includes('| improvement |'), 'improvement column header on WIN table');
+  // WIN section's table: row is `| metric | <improvement>% | <peakLink> | <candidates> |`
+  // Bare magnitude (no leading sign) — header encodes direction.
+  assert.ok(/\| \d+% \|/.test(markdown), 'delta is bare magnitude — header encodes direction');
 });
 
 test('cross-run: peak links to PR conversation when PR number is known', () => {
@@ -451,7 +453,8 @@ test('cross-run: REOPENED when a prior iteration dominates current', () => {
   assert.ok(markdown.includes('📜 Regressions from peak (1)'), 'reopened section with count');
   assert.ok(markdown.includes('`bbbb222`'), 'peak SHA linked');
   assert.ok(markdown.includes('📜 1 reopened'), 'headline count includes reopened');
-  assert.ok(/regressed \+\d+%/.test(markdown), 'delta uses % unit (not pp)');
+  assert.ok(markdown.includes('| regression |'), 'regression column header on REOPENED table');
+  assert.ok(/\| \d+% \|/.test(markdown), 'delta is bare magnitude — header encodes direction');
   assert.ok(!markdown.includes('🏆'), 'no new peaks count when WIN is zero');
 });
 
@@ -896,9 +899,12 @@ test('drift flag fires with magnitude when chain is quantifiable', () => {
   assert.ok(markdown.includes('chained across 2 main commits'));
 });
 
-test('drift flag binary-only when main-history is empty', () => {
+test('drift detected but unquantifiable: no markdown footnote, JSON keeps signal', () => {
   // Current and peak baselines differ, but driftHist has nothing to walk →
-  // detected: true, magnitude: null. Footnote renders without a number.
+  // detected: true, magnitude: null. The reporter records the binary-only
+  // drift in JSON for agent consumption but suppresses the footnote in
+  // markdown — the warning was content-free FUD on long-lived PRs whose
+  // peak baselines age out of bench-history.
   const prHistory = writeFixture({
     schema_version: 2,
     commits: [{
@@ -930,9 +936,10 @@ test('drift flag binary-only when main-history is empty', () => {
   });
   const m = report.metrics.find((x) => x.name === 'update-10th');
   assert.equal(m.history_status, 'REOPENED');
-  assert.ok(m.drift?.detected, 'drift detected (binary)');
+  assert.ok(m.drift?.detected, 'drift detected (binary) — JSON preserves the signal');
   assert.equal(m.drift.magnitude, null, 'magnitude unavailable when chain is empty');
-  assert.ok(/drift magnitude unavailable/.test(markdown), 'gap footnote rendered');
+  assert.ok(!markdown.includes('main moved'), 'no drift footnote when magnitude is unquantifiable');
+  assert.ok(!markdown.includes('⚠️'), 'no inline drift marker when magnitude is unquantifiable');
 });
 
 test('no drift flag when baselines match', () => {
@@ -1318,7 +1325,10 @@ test('glossary: section renders when at least one metric has a purpose', () => {
   });
   assert.ok(markdown.includes('<summary>📖 Bench glossary (1 metric)</summary>'), 'glossary summary present');
   assert.ok(markdown.includes('| metric | what it tests |'), 'glossary table header');
-  assert.ok(markdown.includes(`| \`alpha\` | ${PURPOSE_TEXT} |`), 'metric row with purpose text');
+  // Default synthetic file is `bench-test.js` → label prefix `test:` so
+  // reviewers can see suite membership at a glance.
+  assert.ok(markdown.includes(`\`test:alpha\``), 'metric label carries bench-file prefix');
+  assert.ok(markdown.includes(`| ${PURPOSE_TEXT} |`), 'purpose text in row');
   // Glossary lives just above the footer
   const glossaryIdx = markdown.indexOf('📖 Bench glossary');
   const footerIdx = markdown.indexOf('<sub>Sample size: 50');
@@ -1406,9 +1416,10 @@ test('glossary: rows sort alphabetically and skip metrics without a purpose', ()
   // Two annotated metrics → "(2 metrics)" in summary.
   assert.ok(markdown.includes('<summary>📖 Bench glossary (2 metrics)</summary>'));
 
-  // Alphabetic order: alpha row precedes zebra row.
-  const alphaIdx = markdown.indexOf('| `alpha` | alpha description |');
-  const zebraIdx = markdown.indexOf('| `zebra` | zebra description |');
+  // Alphabetic order: alpha row precedes zebra row. Labels carry the
+  // bench-file prefix (`test:alpha`, `test:zebra`).
+  const alphaIdx = markdown.indexOf('test:alpha');
+  const zebraIdx = markdown.indexOf('test:zebra');
   assert.ok(alphaIdx > 0, 'alpha row present');
   assert.ok(zebraIdx > 0, 'zebra row present');
   assert.ok(alphaIdx < zebraIdx, 'alpha sorts before zebra');

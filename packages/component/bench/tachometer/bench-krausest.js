@@ -26,6 +26,7 @@
   once per op — no spurious renderer fan-out.
 */
 import { defineComponent } from '@semantic-ui/component';
+import { Reaction } from '@semantic-ui/reactivity';
 
 /*******************************
       Data Generation
@@ -175,13 +176,23 @@ defineComponent({
 const container = document.createElement('div');
 document.body.appendChild(container);
 
+// Pre-measurement / between-metric idle wait. rAF gates `mount()` so any
+// connectedCallback-deferred microtasks settle before the next metric
+// starts.
 const flush = () => new Promise(r => requestAnimationFrame(r));
+// Sync drain of pending Reactions. Used inside `performance.mark` ...
+// `performance.measure` regions where a per-iteration `await rAF` would
+// dominate wall-clock with 16ms idle gaps and bury sub-frame JS-work
+// deltas. The reactivity Scheduler flushes on a microtask, so calling
+// `Reaction.flush()` immediately after a `signal.set` runs every queued
+// Reaction synchronously — exactly what we want to measure.
+const flushWork = () => Reaction.flush();
 const startMark = (name) => `${name}-start`;
 
 async function mount() {
   const el = document.createElement('bench-app');
   container.appendChild(el);
-  await flush();
+  flushWork();
   return el;
 }
 
@@ -261,7 +272,7 @@ await flush();
 performance.mark(startMark('update-10th-10'));
 for (let i = 0; i < 10; i++) {
   el5.component.update();
-  await flush();
+  flushWork();
 }
 performance.measure('update-10th-10', startMark('update-10th-10'));
 destroy();
@@ -282,7 +293,7 @@ await flush();
 performance.mark(startMark('select-40'));
 for (let i = 0; i < 40; i++) {
   el6.component.select(i * 25);
-  await flush();
+  flushWork();
 }
 performance.measure('select-40', startMark('select-40'));
 destroy();
@@ -300,7 +311,7 @@ await flush();
 performance.mark(startMark('swap-rows-20'));
 for (let i = 0; i < 20; i++) {
   el7.component.swapRows();
-  await flush();
+  flushWork();
 }
 performance.measure('swap-rows-20', startMark('swap-rows-20'));
 destroy();
@@ -323,7 +334,7 @@ await flush();
 performance.mark(startMark('remove-row-front-20'));
 for (let i = 0; i < 20; i++) {
   el8.component.removeRow(getRows(el8)[0].id);
-  await flush();
+  flushWork();
 }
 performance.measure('remove-row-front-20', startMark('remove-row-front-20'));
 destroy();
@@ -336,7 +347,7 @@ performance.mark(startMark('remove-row-middle-20'));
 for (let i = 0; i < 20; i++) {
   const rows = getRows(el9);
   el9.component.removeRow(rows[Math.floor(rows.length / 2)].id);
-  await flush();
+  flushWork();
 }
 performance.measure('remove-row-middle-20', startMark('remove-row-middle-20'));
 destroy();
@@ -349,7 +360,7 @@ performance.mark(startMark('remove-row-back-10'));
 for (let i = 0; i < 10; i++) {
   const rows = getRows(el10);
   el10.component.removeRow(rows[rows.length - 1].id);
-  await flush();
+  flushWork();
 }
 performance.measure('remove-row-back-10', startMark('remove-row-back-10'));
 destroy();

@@ -228,6 +228,22 @@ The `bench-report.json` artifact (linked from the **Raw:** line in the metadata 
 
 ---
 
+## Methodology shifts — uniform suite-wide swings
+
+If many unrelated metrics suddenly show enormous magnitude changes — 50%+ improvements or regressions across benches that share no functional code path — suspect a measurement methodology shift, not a real perf change. The signature: shifts are **uniform** across metrics whose only commonality is the bench harness, often coincident with a bench-infra commit on main.
+
+Past examples of methodology shifts on this suite:
+
+- **`await rAF` → `Reaction.flush()` in cycle loops.** Wall-clock for previously rAF-bound metrics drops from ~833ms (`50 × 16.66ms` frame floor) to whatever the actual work is — often tens of ms. Looks like a 90%+ improvement on every metric that had a 50-cycle loop with `await flush()` inside.
+- **`sampleSize` or `timeout` knob changes.** Tighter convergence shifts CIs uniformly; coarser sampling widens them. Distinct from a real change because the shape (CI width vs midpoint) moves, not the midpoint specifically.
+- **Bench-bot reporter rendering changes.** No actual measurement shift, but the comment looks dramatically different — peak attribution, drift footnotes, column headers.
+
+Real perf changes have **selective** shape: faster where the PR touched, flat where it didn't. A PR that touches `each.js` shouldn't cause `signal-set-same-10m` to swing 70%. If it appears to, you're reading methodology, not code.
+
+Methodology-shift symptoms also fire the bench-bot's per-PR peak history. The first run after a methodology shift on main will show every metric as either `New Peak` or `Regression from peak` — the prior PR push was on the old methodology, the new one isn't comparable. After a few main commits land on the new methodology, peaks rebuild from those entries and the noise resolves. **Trust the second-run report more than the first.**
+
+---
+
 ## Reading Decision Tree
 
 ```
