@@ -190,23 +190,72 @@ Naming convention for amplified workloads: suffix with the iteration count (`sig
 
 ## Before You Push
 
-Run the bench locally to confirm it works:
+You should run tachometer locally before pushing a new or changed bench. The point is two-fold: confirm the bench wires up correctly, and read its noise floor on the host you're working from. CI's noise floor is GHA's (σ≈2ms); your laptop's may differ — but a bench that's too short or too noisy on your machine will be too short or too noisy on CI in the same direction.
+
+### Check first — does local tachometer work on this host?
+
+```sh
+grep -qi microsoft /proc/version && echo "WSL2 — push to CI for tachometer" || echo "Native Linux/Mac — local tachometer works"
+```
+
+**WSL2 is a known dead end for tachometer.** Selenium-spawned chromedriver crashes before binding its HTTP port (selenium reports `ECONNREFUSED 127.0.0.1:<port>`). Manually-launched chromedriver works fine on the same host, but tachometer doesn't expose a "use this existing chromedriver" knob, and patching its selenium config is more friction than it's worth. Skip the local loop, push to a draft PR, and use the bench-bot comment as your noise-floor source.
+
+If you're on native Linux or macOS, continue to the local loop below.
+
+### The local loop
 
 ```sh
 cd packages/<pkg>/bench/tachometer   # e.g. packages/component or packages/reactivity
 node build-ci.js current
-node build-ci.js baseline  # same source both sides for a dry-run; zero-delta
+node build-ci.js baseline             # same source both sides → zero delta
 npx tachometer --config tachometer-ci-<suite>.json
 ```
 
-**Check for:**
+`tachometer --config <file>` honors every knob in the JSON. Override at the CLI when iterating:
 
-- Tachometer reports the expected number of measurements (`N for this-change, N for tip-of-tree`).
+| CLI flag | Config key | Use locally for |
+|---|---|---|
+| `--sample-size=N` / `-n N` | `sampleSize` | Quicker passes during iteration. Drop below 30 only for a smoke test, never for committed numbers |
+| `--timeout=M` | `timeout` (minutes) | Cap wall-clock per config |
+| `--auto-sample-conditions=0%` | `autoSampleConditions` | Zero-delta dry runs converge fastest with `0%` |
+| `--json-file=out.json` | — | Save raw output for offline inspection |
+| `--csv-file=stats.csv` | — | Per-metric summary table |
+
+### Reading the zero-delta output
+
+Same source on both sides means the **true** delta is zero. What tachometer reports tells you the noise floor:
+
+- `unsure` with a tight CI (e.g. `±1.5%`) on a long-running metric → resolvable noise floor; real perf changes ≥2% will be visible on this machine
+- `unsure` with wide CI on a short bench (e.g. `-15% to +15%`) → bench is duration-limited; scale the workload up or it'll come back unresolved on every PR
+- `slower` or `faster` on zero delta → clock skew between samples, thermal throttling, or background load. Re-run after closing other apps; if it persists, the host is too unstable to trust
+
+The headline number to record is **CI half-width as a percentage of the mean**. That's your local floor. If it's wider than ±5% on a metric meant to gate ≥2% deltas, the bench can't do its job here.
+
+### Iteration shortcut
+
+For a fast read on whether a single new metric is shaped right (without sampling the whole suite):
+
+```sh
+# temporary tachometer-noise-floor.json that lists ONLY the new metrics
+# in both this-change and tip-of-tree arrays; don't commit it
+npx tachometer --config tachometer-noise-floor.json --auto-sample-conditions=0% --timeout=2
+```
+
+This converges in under two minutes on a typical metric and reads the floor without re-running everything in the suite. Delete the temporary config before pushing.
+
+### Environment gotchas
+
+- **Stale chromedriver/Chrome processes** between runs. Kill them: `pkill -9 chrome; pkill -9 -f chromedriver`.
+- **`XDG_RUNTIME_DIR` missing** on stripped-down Linux environments — Chrome logs `dbus/bus.cc` errors and may fail to start. Fix: `mkdir -p /tmp/runtime-$UID && chmod 700 /tmp/runtime-$UID && export XDG_RUNTIME_DIR=/tmp/runtime-$UID`.
+
+### Sanity checks on the result
+
+- Tachometer reports the expected number of measurements (`N for this-change, N for tip-of-tree`). A mismatch means an `entryName` is in one array but not the other.
 - Each measurement name matches what you defined.
-- Mean duration is in the range you estimated — if it's 10× shorter than expected, something's wrong with the workload (early return? optimiser elision?).
+- Mean duration is in the range you estimated — if it's 10× shorter than expected, something's wrong with the workload (early return? optimiser elision? `await flush()` skipped?).
 - No `ReferenceError` or `undefined is not a function` in the Chrome console. Open `ci-current-<suite>.html` in a browser to debug interactively.
 
-If the local run works, push. CI will run the same config in matrix form and the in-house reporter will render the comment per the rubric in `ai/workspace/tmp/bench-reporter-rubric.md`.
+If the local run works and the noise floor is acceptable, push. CI will run the same config in matrix form and the in-house reporter will render the comment per the rubric in `ai/workspace/tmp/bench-reporter-rubric.md`. Local floor and GHA floor will not match exactly — record both in the PR body so reviewers know what to expect.
 
 ---
 
