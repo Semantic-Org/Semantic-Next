@@ -58,27 +58,19 @@ export class ReactiveDataContext {
     const signals = this.signals;
     const keySetVersion = this.keySetVersion;
 
-    this.proxy = new Proxy(parent, {
+    // Set trap is only attached when writeToParent is true (subtemplate
+    // adoption). Without writeToParent, no caller writes through the
+    // proxy — each-block records use ctx.replace/setKey/notifyKey
+    // directly. Defining a set trap unconditionally pollutes V8's
+    // inline cache for the read path, costing ~3-5% on each-block
+    // mount benches with no observable benefit.
+    const proxyHandler = {
       get(target, prop) {
         if (typeof prop === 'symbol') { return target[prop]; }
         const signal = signals.get(prop);
         if (signal !== undefined) { return signal.value; }
         keySetVersion.depend();
         return target[prop];
-      },
-      set(target, prop, value) {
-        // Route writes through the per-key Signal when one exists so blob
-        // assignment paths (renderer.setData → assignInPlace → proxy[key] = v)
-        // notify subscribers instead of silently bypassing the per-key layer.
-        // Unknown keys default to writing the target — preserves the proxy
-        // as a transparent overlay.
-        const signal = signals.get(prop);
-        if (signal !== undefined) {
-          signal.set(value);
-          return true;
-        }
-        target[prop] = value;
-        return true;
       },
       has(target, prop) {
         return signals.has(prop) || (prop in target);
@@ -101,7 +93,25 @@ export class ReactiveDataContext {
         }
         return Object.getOwnPropertyDescriptor(target, prop);
       },
-    });
+    };
+
+    if (writeToParent) {
+      // Route writes through the per-key Signal when one exists so blob
+      // assignment paths (renderer.setData → assignInPlace → proxy[key] = v)
+      // notify subscribers instead of silently bypassing the per-key layer.
+      // Unknown keys default to writing the target.
+      proxyHandler.set = (target, prop, value) => {
+        const signal = signals.get(prop);
+        if (signal !== undefined) {
+          signal.set(value);
+          return true;
+        }
+        target[prop] = value;
+        return true;
+      };
+    }
+
+    this.proxy = new Proxy(parent, proxyHandler);
 
     if (registerItemContext) {
       itemContextProxies.add(this.proxy);

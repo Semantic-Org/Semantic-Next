@@ -79,39 +79,46 @@ function unpackBlobData(node, data, evaluator) {
 // snippets are one-shot at mount, no instance swap, so the block's own
 // scope dispose is sufficient teardown.
 function buildSnippetContext(node, data, evaluator, scope, region) {
-  const context = new ReactiveDataContext(data);
-
-  if (node.data) {
-    if (isString(node.data)) {
-      // String form: `data="expression"` — the whole evaluated object is
-      // spread into the snippet's keys. Re-evaluates on source change so
-      // a parent recomputing the blob propagates to the snippet body.
-      scope.reaction(region.anchor, () => {
-        const evaluated = evaluator.lookupExpressionValue(node.data, data);
-        if (isPlainObject(evaluated)) {
-          each(evaluated, (val, key) => {
-            context.setKey(key, val);
-          });
-        }
-      }, { message: `snippet-data-spread` });
-    }
-    else if (isPlainObject(node.data)) {
-      each(node.data, (expr, key) => {
-        scope.reaction(region.anchor, () => {
-          const value = evaluator.lookupExpressionValue(expr, data);
-          context.setKey(key, value);
-        }, { message: `snippet-arg:${key}` });
-      });
-    }
+  // No-arg snippets skip the per-key infrastructure entirely. Inline
+  // expansion against parent data is cheaper than allocating a Map +
+  // Dependency + Proxy per invocation when there are no args to track.
+  // Caller falls through to using parent data directly when this returns
+  // null.
+  if (!node.data && !node.reactiveData) {
+    return null;
   }
 
-  if (node.reactiveData) {
-    each(node.reactiveData, (expr, key) => {
-      scope.reaction(region.anchor, () => {
-        const value = evaluator.lookupExpressionValue(expr, data);
-        context.setKey(key, value);
-      }, { message: `snippet-arg:${key}` });
-    });
+  const context = new ReactiveDataContext(data);
+
+  // Single Reaction handles every arg — both `data={...}` and
+  // `key=expr` forms. setKey's per-key isEqual gate keeps per-key
+  // isolation at the binding layer. One Reaction allocation per snippet
+  // invocation regardless of arg count.
+  if (node.data || node.reactiveData) {
+    scope.reaction(region.anchor, () => {
+      if (node.data) {
+        if (isString(node.data)) {
+          const evaluated = evaluator.lookupExpressionValue(node.data, data);
+          if (isPlainObject(evaluated)) {
+            each(evaluated, (val, key) => {
+              context.setKey(key, val);
+            });
+          }
+        }
+        else if (isPlainObject(node.data)) {
+          each(node.data, (expr, key) => {
+            const value = evaluator.lookupExpressionValue(expr, data);
+            context.setKey(key, value);
+          });
+        }
+      }
+      if (node.reactiveData) {
+        each(node.reactiveData, (expr, key) => {
+          const value = evaluator.lookupExpressionValue(expr, data);
+          context.setKey(key, value);
+        });
+      }
+    }, { message: 'snippet-args' });
   }
 
   return context;
@@ -183,6 +190,14 @@ function attachToRenderRoot(instance, region, self, { startNode } = {}) {
 // template swap can dispose them with one call without disturbing the
 // block's own scope or its outer Reaction.
 function setupReactiveSubtemplate({ node, data, scope, region, self }) {
+  // No reactiveData — naive subtemplate path. Skip the per-key
+  // infrastructure entirely; renderer.data stays the original ref and
+  // expressions inside the subtemplate flow through dataDep/render
+  // unchanged. Critical for mount-cost-sensitive cases like
+  // bench-todo's bulk-add-500 when subtemplates without reactive args
+  // are common.
+  if (!node.reactiveData) { return; }
+
   // writeToParent: true syncs reactiveData values back into currentInstance.data
   // so closures that captured `data` at createComponent time (e.g. methods
   // doing `data.todo.completed`) see current values. The parent here is the
@@ -190,8 +205,6 @@ function setupReactiveSubtemplate({ node, data, scope, region, self }) {
   self.reactiveContext = new ReactiveDataContext(self.currentInstance.data, { writeToParent: true });
   self.currentInstance.renderer.data = self.reactiveContext.proxy;
   self.currentInstance.renderer.evaluator.setData(self.reactiveContext.proxy);
-
-  if (!node.reactiveData) { return; }
 
   // When a reactiveData key matches one of the subtemplate's declared
   // defaultSettings entries, route the value through the existing settings
@@ -209,14 +222,22 @@ function setupReactiveSubtemplate({ node, data, scope, region, self }) {
     }
   };
 
+  // Single Reaction for all reactiveData entries. The Reaction tracks every
+  // source signal across all entries and re-evaluates them on any change.
+  // setKey's per-key isEqual gate notifies only the keys whose values
+  // actually changed, so per-key isolation at the binding layer is
+  // preserved. The trade is one Reaction allocation per subtemplate
+  // (down from N), at the cost of re-evaluating unchanged sibling
+  // expressions when one source fires — cheap when sources are simple
+  // identifier/dotted-path lookups.
   self.reactiveDataScope = scope.child();
-  each(node.reactiveData, (expr, key) => {
-    self.reactiveDataScope.reaction(region.anchor, () => {
+  self.reactiveDataScope.reaction(region.anchor, () => {
+    each(node.reactiveData, (expr, key) => {
       const value = self.evaluator.lookupExpressionValue(expr, data);
       self.reactiveContext.setKey(key, value);
       mirrorToSettings(key, value);
-    }, { message: `subtemplate-arg:${key}` });
-  });
+    });
+  }, { message: 'subtemplate-args' });
 }
 
 function teardownReactiveSubtemplate(self) {
@@ -267,7 +288,8 @@ const templateBlock = defineBlock({
       const snippet = resolveSnippet(node.name, data, self);
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
       const snippetContext = buildSnippetContext(node, data, self.evaluator, scope, region);
-      const fragment = renderAST({ ast: snippet.content, data: snippetContext.proxy, scope, isSVG });
+      const snippetData = snippetContext ? snippetContext.proxy : data;
+      const fragment = renderAST({ ast: snippet.content, data: snippetData, scope, isSVG });
       region.setContent(fragment);
       return;
     }
@@ -293,10 +315,11 @@ const templateBlock = defineBlock({
       const snippet = resolveSnippet(node.name, data, self);
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
       const snippetContext = buildSnippetContext(node, data, self.evaluator, scope, region);
+      const snippetData = snippetContext ? snippetContext.proxy : data;
       if (region.ownedNodes.length > 0) {
         // Snippet args reactivity is anchored on the block scope; a child
         // would dispose with the next region.clear() and break arg reactivity.
-        hydrateInto({ innerAST: snippet.content, data: snippetContext.proxy, asChild: false });
+        hydrateInto({ innerAST: snippet.content, data: snippetData, asChild: false });
       }
       return;
     }
