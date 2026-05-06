@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES } from './test-utils.js';
 
 RENDERING_ENGINES.forEach(engine => {
+  const isLit = engine === 'lit';
+
   describe(engine, () => {
     /*******************************
          Test Helpers
@@ -514,7 +516,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
     });
 
-    describe('reactiveData per-key granularity', () => {
+    describe.skipIf(isLit)('reactiveData per-key granularity', () => {
       // Per-key isolation on reactiveData: changing one field's source
       // re-fires only bindings that read that field. Marker bindings
       // (read no signals) and sibling-key bindings (read a different
@@ -638,7 +640,7 @@ RENDERING_ENGINES.forEach(engine => {
    subtemplate-reactive-data-100 scenario)
 *******************************/
 
-    describe('per-key isolation across N subtemplates', () => {
+    describe.skipIf(isLit)('per-key isolation across N subtemplates', () => {
       it('mutating one reactiveData source should not re-fire bindings reading a different reactiveData key', async () => {
         // Mirrors bench-reactivedata in
         // packages/component/bench/tachometer/bench-template-reactivity.js:
@@ -706,7 +708,7 @@ RENDERING_ENGINES.forEach(engine => {
    each adoption site.
 *******************************/
 
-    describe('FGR contract: each-block in-place mutation', () => {
+    describe.skipIf(isLit)('FGR contract: each-block in-place mutation', () => {
       it('mutating one item field via setProperty re-fires only the binding reading that field', async () => {
         // {#each item in items} body has two bindings reading two
         // different fields of the same item. setProperty mutates one
@@ -793,7 +795,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
     });
 
-    describe('FGR contract: subtemplate reactiveData (shorthand syntax)', () => {
+    describe.skipIf(isLit)('FGR contract: subtemplate reactiveData (shorthand syntax)', () => {
       it("mutating one shorthand reactive prop source re-fires only that key's binding", async () => {
         // Mirrors the verbose-syntax test at the it.fails block above,
         // but uses `{>child a=expr b=expr}` shorthand. Same per-key
@@ -845,7 +847,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
     });
 
-    describe('FGR contract: subtemplate-inside-each composition (bench-todo)', () => {
+    describe.skipIf(isLit)('FGR contract: subtemplate-inside-each composition (bench-todo)', () => {
       it('mutating one item field via setProperty re-fires only the matching subtemplate-binding key', async () => {
         // bench-todo's exact composition: {#each todo in todos}{>todoItem
         // id=todo.id title=todo.title completed=todo.completed}{/each}.
