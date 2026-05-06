@@ -46,11 +46,10 @@ function runReporter({
     runUrl,
     '--base-ref',
     baseRef,
-    '--base-sha',
-    baseSha,
     '--out',
     tmp,
   ];
+  if (baseSha) { argv.push('--base-sha', baseSha); }
   if (repo) { argv.push('--repo', repo); }
   if (wallClock) { argv.push('--wall-clock', wallClock); }
   // Point history at a known fixture path OR a deliberate non-existent
@@ -296,6 +295,24 @@ test('zero-delta fixture — 0 faster, 0 slower, correct categorisation', () => 
   // No faster/slower sections to render
   assert.ok(!markdown.includes('#### ✅ Faster'));
   assert.ok(!markdown.includes('#### ❌ Slower'));
+});
+
+test('base header — falls back to baseline-sha.txt sidecar when --base-sha unset', () => {
+  // The matrix workflow may not pass --base-sha. Each per-config artifact
+  // already carries baseline-sha.txt — the reporter should use that as the
+  // fallback so the Base link pins to the actual measurement baseline,
+  // not a moving branch tip.
+  const dir = writeHandcraftedResults('m', [10, 11], [10, 11], [-1, 1], 'sidecarSha123');
+  const { report, markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'abc',
+    msg: 'x',
+    // No baseSha CLI arg
+    repo: 'owner/repo',
+  });
+  assert.equal(report.base.sha, 'sidecarSha123', 'sidecar SHA threaded into report.base');
+  assert.ok(markdown.includes('/commit/sidecarSha123'), 'Base link uses commit URL with sidecar SHA');
+  assert.ok(!markdown.includes('/tree/main'), 'no fallback to moving branch tip');
 });
 
 test('base header — plain ref when no base-sha passed', () => {

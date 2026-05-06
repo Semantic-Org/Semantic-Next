@@ -45,7 +45,10 @@ const msg = args.msg ?? '';
 const runUrl = args['run-url'] ?? '';
 const runId = args['run-id'] ?? '';
 const baseRef = args['base-ref'] ?? 'main';
-const baseSha = args['base-sha'] ?? '';
+// CLI override; falls back to the baseline-sha.txt sidecar each per-config
+// artifact carries (see readBaselineSha, evaluated below). Without either,
+// the Base header link falls back to the moving branch tip.
+const baseShaArg = args['base-sha'] ?? '';
 // Fall back to GITHUB_REPOSITORY so commit links work without an explicit
 // --repo when running under Actions. Still honors --repo override when
 // someone needs to pin a different repo (e.g. cross-fork comparison).
@@ -190,6 +193,7 @@ const peakHistory = scope === 'pr' ? prHistory : mergeHistories(mainHistory, prH
 // per-commit percent-deltas is what quantifies how the baseline itself moved.
 const driftHistory = mainHistory;
 const currentBaselineSha = readBaselineSha(resultsDir);
+const baseSha = baseShaArg || currentBaselineSha || '';
 const metrics = loadAllMetrics(resultsDir);
 const report = buildReport(metrics);
 const markdown = renderMarkdown(report);
