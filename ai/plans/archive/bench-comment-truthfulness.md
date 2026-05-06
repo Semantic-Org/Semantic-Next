@@ -80,7 +80,14 @@ None for Tier 1. Tier 2 (separate plan) lands after FGR's path forward is resolv
 
 ## Status
 
-`scoped` — Tier 1 in flight on `feat/bench-comment-truthfulness`. Decisions on open questions captured above. Tier 2 split out as [Bench Amplification Audit](../icebox/bench-amplification-audit.md) and waits on FGR.
+Complete. Tier 1 shipped in [PR #186](https://github.com/Semantic-Org/Semantic-Next/pull/186). Tier 2 lives as [Bench Amplification Audit](../icebox/bench-amplification-audit.md) and waits on FGR's path forward.
+
+## Completion
+
+- **Estimated:** ~3.5-4.5h pair (Tier 1 + subagent copy review)
+- **Actual:** ~20m wall-clock, ~20m active across one continuous burst
+- **Completed:** 2026-05-06
+- **Delta notes:** Massively under estimate. The estimate assumed reporter-internals discovery cost; in practice the reporter was well-tested and the changes were small, surgical edits. The subagent copy-review pass paid for itself — caught five strings that read like internals-leak even after the engineering changes were tight, and produced a focused rewrite list in one shot.
 
 ## References
 

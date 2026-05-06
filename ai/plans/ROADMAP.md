@@ -83,7 +83,6 @@ Plans with an open PR or live pair work. Updated as ceremony when a PR opens; en
 
 - [Release 0.18.0](active/release-0-18-0.md) — [PR #122](https://github.com/Semantic-Org/Semantic-Next/pull/122) `docs/shippable` (menu trimming + audit pass pending). Ships the next tagged release; last was 0.17.0 in November.
 - [Signal Performance](active/signal-performance.md) — [PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) freeze-by-default. Perf story unresolved (see plan's Bench Results); release inclusion is the open call.
-- [Bench Comment Truthfulness](active/bench-comment-truthfulness.md) — [PR #186](https://github.com/Semantic-Org/Semantic-Next/pull/186) Tier 1 reporter fixes (peak filter, per-cell σ, suppression, copy rewrite, base-SHA fallback). Tier 2 amplification split out as a follow-up icebox plan.
 ---
 
 ## Phase 0 — Renderer Architecture
