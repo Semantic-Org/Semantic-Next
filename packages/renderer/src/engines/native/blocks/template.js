@@ -2,7 +2,7 @@ import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
 import { each, fatal, isPlainObject, isString, keys } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
-import { isItemContext, ReactiveDataContext } from '../reactive-context.js';
+import { isItemContext } from '../reactive-context.js';
 import { registerBlock } from './registry.js';
 
 /*
@@ -22,83 +22,81 @@ import { registerBlock } from './registry.js';
                   a no-op (snippets are one-shot at mount).
   • subtemplate — full Template lifecycle: clone, initialize, render,
                   attach. Updates re-evaluate name + blob, swap instance
-                  if name changed. ReactiveData propagation does NOT go
-                  through update — see setupReactiveSubtemplate.
+                  if name changed.
 
-  Subtemplate reactiveData uses a per-key path independent of update's
-  outer Reaction. setupReactiveSubtemplate wraps the subtemplate's
-  renderer.data in a ReactiveDataContext and registers one Reaction per
-  reactiveData entry on a child scope (self.reactiveDataScope). Each
-  Reaction tracks one source expression and pushes via ctx.setKey when
-  it fires. Subscribers reading proxy.fooKey only re-evaluate when
-  fooKey's per-key Signal notifies — bumpDataVersion fanout is bypassed
-  for reactiveData. Blob `data={...}` keeps the bumpDataVersion path:
-  blob writes are wholesale-replacement by contract, so the coarse
-  fanout there is intentional.
+  Snippets and subtemplates share the same data-propagation primitive:
+  a lazy-getter Proxy fronting the parent context (buildArgsProxy).
+  Each reactiveData entry becomes a getter that calls
+  evaluator.lookupExpressionValue at access time, so source-signal deps
+  register on whichever Reaction is current at that read — the binding's
+  own Reaction. Per-key isolation is structural: a binding that reads
+  proxy.label registers labelVal; a sibling binding reading proxy.status
+  registers statusVal; mutating labelVal wakes only the label binding.
+
+  Subtemplates carry the lifecycle layer (clone, createComponent, settings,
+  onCreated/etc.) on top of this same propagation. The proxy is installed
+  as the subtemplate's `data` BEFORE initialize() runs so that closures
+  captured by createComponent see the proxy and route through it on
+  later reads. createComponent is invoked nonreactively so setup-time
+  reads of data.foo don't pollute the parent's outer Reaction with
+  source-signal deps.
+
+  Blob `data={...}` (string or object literal) keeps the eager,
+  bumpDataVersion-fanout path documented as coarse-by-design.
 
   Two-level context use: create() receives dispatch-level bag and stashes
   renderer.evaluator / renderer.subTemplates / renderer.snippets /
-  renderer.template / renderer.dataDep onto self. The author bag stays
-  honest; subsequent hooks read from self.* rather than reaching through
-  scope.
+  renderer.template / renderer.dataDep onto self.
 
 */
 
 function unpackBlobData(node, data, evaluator) {
   let blobData = {};
-  if (node.data) {
-    if (isString(node.data)) {
-      const evaluated = evaluator.lookupExpressionValue(node.data, data);
-      if (isPlainObject(evaluated)) {
-        blobData = { ...blobData, ...evaluated };
-      }
+  if (!node.data) { return blobData; }
+  if (isString(node.data)) {
+    const evaluated = evaluator.lookupExpressionValue(node.data, data);
+    if (isPlainObject(evaluated)) {
+      blobData = { ...blobData, ...evaluated };
     }
-    else if (isPlainObject(node.data)) {
-      // Inside {#each}, read reactively so item-signal mutations propagate
-      // into subtemplate data. Outside each, static data={} stays non-reactive.
-      const inItemContext = isItemContext(data);
-      each(node.data, (expr, key) => {
-        blobData[key] = inItemContext
-          ? evaluator.lookupExpressionValue(expr, data)
-          : Reaction.nonreactive(() => evaluator.lookupExpressionValue(expr, data));
-      });
-    }
+    return blobData;
   }
-  // Seed reactiveData into the cloned template's `data` synchronously so
-  // closures captured by createComponent (e.g. methods reading
-  // `data.lineNumbers`) see the initial values at the moment the closure
-  // is built. setupReactiveSubtemplate's Reaction takes over for ongoing
-  // updates — its setKey calls mirror back into this same object via
-  // writeToParent. Reads happen in nonreactive scope so the source-signal
-  // deps register on the subtemplate's per-key Reaction (set up by
-  // setupReactiveSubtemplate) rather than on whatever Reaction is
-  // currently mounting the parent.
-  if (node.reactiveData) {
-    each(node.reactiveData, (expr, key) => {
-      blobData[key] = Reaction.nonreactive(() => evaluator.lookupExpressionValue(expr, data));
+  if (isPlainObject(node.data)) {
+    // Inside {#each}, read reactively so item-signal mutations propagate
+    // into subtemplate data. Outside each, static data={} stays non-reactive.
+    const inItemContext = isItemContext(data);
+    each(node.data, (expr, key) => {
+      blobData[key] = inItemContext
+        ? evaluator.lookupExpressionValue(expr, data)
+        : Reaction.nonreactive(() => evaluator.lookupExpressionValue(expr, data));
     });
   }
   return blobData;
 }
 
-// Snippet-arg overlay proxy. Args become lazy getters that re-evaluate
-// against the parent data context at access time, tracking the same
-// Signal deps a fresh-render snippet would. The has/ownKeys/descriptor
-// traps make `prop in snippetData` and Object.keys() see the args.
+// Lazy-getter Proxy used by both snippets and subtemplates. Each
+// reactiveData entry (and each entry of a literal node.data object for
+// snippets) becomes a getter that calls
+// evaluator.lookupExpressionValue at access time. Source-signal deps
+// register on whichever Reaction is current at that read, so a
+// binding's Reaction subscribes directly to its inputs — per-key
+// isolation is structural, not mediated by an intermediate Dep layer.
 //
-// Per-key isolation is intrinsic to the lazy-getter approach: each
-// binding's Reaction reads `proxy.argname` exactly once per evaluation,
-// and the lazy getter calls evaluator.lookupExpressionValue which
-// registers source-signal deps on the binding's Reaction directly. A
-// per-key Reaction layer between source and binding would only add an
-// extra wake hop without changing the wake count or registration shape.
-function buildSnippetProxy(node, data, evaluator) {
+// `target` is the underlying object the proxy fronts. For snippets this
+// is the parent data context (snippets share the parent scope). For
+// subtemplates this is the cloned Template's `this.data` — state and
+// instance overlay live on `target` so non-arg lookups resolve there.
+//
+// has / ownKeys / getOwnPropertyDescriptor make declared keys visible
+// to `prop in proxy`, Object.keys, and descriptor-aware spreads (extend
+// uses Object.getOwnPropertyDescriptor and re-defines as a getter — so
+// descriptor-style copies preserve laziness).
+function buildArgsProxy({ node, parentData, evaluator, target }) {
   const staticGetters = {};
   const reactiveGetters = {};
 
   if (node.data) {
     if (isString(node.data)) {
-      const evaluated = evaluator.lookupExpressionValue(node.data, data);
+      const evaluated = evaluator.lookupExpressionValue(node.data, parentData);
       if (isPlainObject(evaluated)) {
         each(evaluated, (val, key) => {
           staticGetters[key] = () => val;
@@ -107,24 +105,37 @@ function buildSnippetProxy(node, data, evaluator) {
     }
     else if (isPlainObject(node.data)) {
       each(node.data, (expr, key) => {
-        staticGetters[key] = () => evaluator.lookupExpressionValue(expr, data);
+        staticGetters[key] = () => evaluator.lookupExpressionValue(expr, parentData);
       });
     }
   }
   if (node.reactiveData) {
     each(node.reactiveData, (expr, key) => {
-      reactiveGetters[key] = () => evaluator.lookupExpressionValue(expr, data);
+      reactiveGetters[key] = () => evaluator.lookupExpressionValue(expr, parentData);
     });
   }
 
   const allGetters = { ...staticGetters, ...reactiveGetters };
   const getterKeys = keys(allGetters);
 
-  return new Proxy(data, {
+  // Descriptor includes a no-op setter so that `extend`-style copies
+  // (Object.defineProperty against this descriptor) accept assignment
+  // when overlays write the same key — e.g. Template.overlaySettingsSignals
+  // overwriting a settings-keyed property with its Signal. Writes are
+  // absorbed; subsequent reads still resolve through the lazy getter,
+  // keeping the source expression as the source of truth.
+  const absorbSet = () => {};
+
+  return new Proxy(target, {
     get(target, prop) {
       if (typeof prop === 'symbol') { return target[prop]; }
       if (prop in allGetters) { return allGetters[prop](); }
       return target[prop];
+    },
+    set(target, prop, value) {
+      if (prop in allGetters) { return true; }
+      target[prop] = value;
+      return true;
     },
     has(target, prop) {
       return (prop in allGetters) || (prop in target);
@@ -134,7 +145,7 @@ function buildSnippetProxy(node, data, evaluator) {
     },
     getOwnPropertyDescriptor(target, prop) {
       if (prop in allGetters) {
-        return { configurable: true, enumerable: true, get: allGetters[prop] };
+        return { configurable: true, enumerable: true, get: allGetters[prop], set: absorbSet };
       }
       return Object.getOwnPropertyDescriptor(target, prop);
     },
@@ -171,7 +182,19 @@ function resolveSnippet(nameExpr, data, self) {
   return self.snippets[name] || null;
 }
 
-function cloneInstance({ template, templateName, templateData, self }) {
+// Build the subtemplate's lazy-getter proxy and clone the Template
+// against it. The proxy is installed BEFORE initialize() runs so that
+// closures captured by createComponent (e.g. methods that read
+// `data.foo` later) capture the proxy itself — subsequent reads route
+// through the lazy getter and register source-signal deps on the
+// caller's Reaction.
+//
+// Initialize is wrapped in Reaction.nonreactive so synchronous reads
+// of data.foo from inside createComponent or onCreated do not register
+// source-signal deps on the parent's outer Reaction. Reads from later
+// binding-Reaction context still register normally — the wrap only
+// silences the setup path.
+function cloneInstance({ template, templateName, templateData, self, parentData, node }) {
   const instance = template.clone({
     templateName,
     data: templateData,
@@ -180,7 +203,17 @@ function cloneInstance({ template, templateName, templateData, self }) {
   });
   if (self.parentTemplate?.element) { instance.setElement(self.parentTemplate.element); }
   if (self.parentTemplate) { instance.setParent(self.parentTemplate); }
-  instance.initialize();
+
+  // For reactiveData subtemplates, install the lazy proxy as the
+  // instance's data ref. The proxy's target is the seeded blob already
+  // on instance.data, so non-arg keys (state, instance overlay added
+  // during initialize, blob keys) resolve via fall-through.
+  if (node?.reactiveData) {
+    const proxy = buildArgsProxy({ node, parentData, evaluator: self.evaluator, target: instance.data });
+    instance.data = proxy;
+  }
+
+  Reaction.nonreactive(() => instance.initialize());
   return instance;
 }
 
@@ -194,78 +227,42 @@ function attachToRenderRoot(instance, region, self, { startNode } = {}) {
   });
 }
 
-// Wrap the freshly-cloned subtemplate instance's renderer.data in a
-// ReactiveDataContext and register one Reaction per reactiveData entry.
-// Each Reaction evaluates its source expression in the parent's data
-// context and pushes via ctx.setKey. The Reaction's firstRun seeds the
-// per-key Signal (Reaction-context contained — source signals register
-// as deps of THIS Reaction, not the block's outer Reaction); subsequent
-// fires push new values that subscribers reading proxy.key see via
-// per-key notify.
+// Settings mirror — when a reactiveData key matches one of the
+// subtemplate's declared defaultSettings entries, route per-key
+// updates into the settings Proxy too. The settings Proxy holds its
+// own per-key Signals (createSubtemplateSettings in templating); a
+// write fires the Signal, so closures reading `settings.foo` track
+// that Signal and wake when it notifies. Without this, settings-keyed
+// closures stay stale because the data-side proxy doesn't touch them.
 //
-// The Reactions live on a child scope (self.reactiveDataScope) so a
-// template swap can dispose them with one call without disturbing the
-// block's own scope or its outer Reaction.
-function setupReactiveSubtemplate({ node, data, scope, region, self }) {
-  // No reactiveData — naive subtemplate path. Skip the per-key
-  // infrastructure entirely; renderer.data stays the original ref and
-  // expressions inside the subtemplate flow through dataDep/render
-  // unchanged. Critical for mount-cost-sensitive cases like
-  // bench-todo's bulk-add-500 when subtemplates without reactive args
-  // are common.
+// Allocates a child scope + one Reaction only when the subtemplate
+// actually has overlap between reactiveData and defaultSettings;
+// pure-data subtemplates pay nothing.
+function setupSettingsMirror({ node, data, scope, region, self }) {
   if (!node.reactiveData) { return; }
-
-  // writeToParent: true syncs reactiveData values back into currentInstance.data
-  // so closures that captured `data` at createComponent time (e.g. methods
-  // doing `data.todo.completed`) see current values. The parent here is the
-  // subtemplate's own data ref, not shared, so the write is safe.
-  self.reactiveContext = new ReactiveDataContext(self.currentInstance.data, { writeToParent: true });
-  self.currentInstance.renderer.data = self.reactiveContext.proxy;
-  self.currentInstance.renderer.evaluator.setData(self.reactiveContext.proxy);
-
-  // When a reactiveData key matches one of the subtemplate's declared
-  // defaultSettings entries, route the value through the existing settings
-  // Proxy too. The settings Proxy maintains its own per-key Signals
-  // (createSubtemplateSettings in template.js); writing settings[key] = value
-  // fires that signal, so closures capturing `{ settings }` and reading
-  // settings[key] track the correct Signal and re-fire when it notifies.
-  // Without this, per-key updates would land in reactiveContext but never
-  // reach the settings Signal, leaving settings-bound closures stale.
-  // Hoist defaults / settings access out of the hot path; subtemplates
-  // without defaultSettings (the common case) skip the settings mirror
-  // entirely via the inline check below.
   const defaultSettings = self.currentInstance.defaultSettings;
   const settingsProxy = self.currentInstance.settings;
-  const hasSettingsMirror = !!(settingsProxy && defaultSettings);
+  if (!settingsProxy || !defaultSettings) { return; }
 
-  // Single Reaction for all reactiveData entries. The Reaction tracks every
-  // source signal across all entries and re-evaluates them on any change.
-  // setKey's per-key isEqual gate notifies only the keys whose values
-  // actually changed, so per-key isolation at the binding layer is
-  // preserved. The trade is one Reaction allocation per subtemplate
-  // (down from N), at the cost of re-evaluating unchanged sibling
-  // expressions when one source fires — cheap when sources are simple
-  // identifier/dotted-path lookups.
-  self.reactiveDataScope = scope.child();
-  self.reactiveDataScope.reaction(region.anchor, () => {
-    each(node.reactiveData, (expr, key) => {
-      const value = self.evaluator.lookupExpressionValue(expr, data);
-      self.reactiveContext.setKey(key, value);
-      if (hasSettingsMirror && key in defaultSettings) {
-        settingsProxy[key] = value;
-      }
-    });
-  }, { message: 'subtemplate-args' });
+  const settingsKeys = [];
+  each(node.reactiveData, (_, key) => {
+    if (key in defaultSettings) { settingsKeys.push(key); }
+  });
+  if (settingsKeys.length === 0) { return; }
+
+  self.settingsScope = scope.child();
+  self.settingsScope.reaction(region.anchor, () => {
+    for (const key of settingsKeys) {
+      const expr = node.reactiveData[key];
+      settingsProxy[key] = self.evaluator.lookupExpressionValue(expr, data);
+    }
+  }, { message: 'subtemplate-settings' });
 }
 
-function teardownReactiveSubtemplate(self) {
-  if (self.reactiveDataScope) {
-    self.reactiveDataScope.dispose();
-    self.reactiveDataScope = null;
-  }
-  if (self.reactiveContext) {
-    self.reactiveContext.dispose();
-    self.reactiveContext = null;
+function teardownSettingsMirror(self) {
+  if (self.settingsScope) {
+    self.settingsScope.dispose();
+    self.settingsScope = null;
   }
 }
 
@@ -274,9 +271,22 @@ function clearInstance(self, region) {
     self.currentInstance.onDestroyed();
     self.currentInstance = null;
     self.currentTemplateID = null;
-    teardownReactiveSubtemplate(self);
+    teardownSettingsMirror(self);
     region.clear();
   }
+}
+
+// Template.render walks the subtemplate's data via assignInPlace during
+// setDataContext / renderer.setData. For reactiveData paths the data is
+// a lazy-getter proxy whose reads register source-signal deps on the
+// active Reaction. Wrap the call so those reads don't register on the
+// block's outer Reaction — bindings inside the subtemplate register
+// their own deps via the proxy at evaluation time.
+function renderInstance(instance, node, blobData) {
+  if (node.reactiveData) {
+    return Reaction.nonreactive(() => instance.render(blobData));
+  }
+  return instance.render(blobData);
 }
 
 const templateBlock = defineBlock({
@@ -293,8 +303,7 @@ const templateBlock = defineBlock({
       kind: null,
       currentTemplateID: null,
       currentInstance: null,
-      reactiveContext: null,
-      reactiveDataScope: null,
+      settingsScope: null,
     };
   },
 
@@ -305,7 +314,7 @@ const templateBlock = defineBlock({
     if (kind === 'snippet') {
       const snippet = resolveSnippet(node.name, data, self);
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
-      const snippetData = buildSnippetProxy(node, data, self.evaluator);
+      const snippetData = buildArgsProxy({ node, parentData: data, evaluator: self.evaluator, target: data });
       const fragment = renderAST({ ast: snippet.content, data: snippetData, scope, isSVG });
       region.setContent(fragment);
       return;
@@ -317,9 +326,20 @@ const templateBlock = defineBlock({
     if (!template) { return; }
 
     self.currentTemplateID = template.id;
-    self.currentInstance = cloneInstance({ template, templateName, templateData: blobData, self });
-    setupReactiveSubtemplate({ node, data, scope, region, self });
-    const fragment = self.currentInstance.render();
+    self.currentInstance = cloneInstance({
+      template,
+      templateName,
+      templateData: blobData,
+      self,
+      parentData: data,
+      node,
+    });
+    setupSettingsMirror({ node, data, scope, region, self });
+    // Template.render's setData chain reads through the data proxy; for
+    // the per-key path those reads must not register source-signal deps
+    // on this block's outer Reaction. Bindings inside the subtemplate
+    // register on source signals through their own Reactions.
+    const fragment = renderInstance(self.currentInstance, node);
     region.setContent(fragment);
     attachToRenderRoot(self.currentInstance, region, self);
   },
@@ -331,7 +351,7 @@ const templateBlock = defineBlock({
     if (kind === 'snippet') {
       const snippet = resolveSnippet(node.name, data, self);
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
-      const snippetData = buildSnippetProxy(node, data, self.evaluator);
+      const snippetData = buildArgsProxy({ node, parentData: data, evaluator: self.evaluator, target: data });
       if (region.ownedNodes.length > 0) {
         // Snippet args reactivity is anchored on the block scope; a child
         // would dispose with the next region.clear() and break arg reactivity.
@@ -346,8 +366,15 @@ const templateBlock = defineBlock({
     if (!template) { return; }
 
     self.currentTemplateID = template.id;
-    self.currentInstance = cloneInstance({ template, templateName, templateData: blobData, self });
-    setupReactiveSubtemplate({ node, data, scope, region, self });
+    self.currentInstance = cloneInstance({
+      template,
+      templateName,
+      templateData: blobData,
+      self,
+      parentData: data,
+      node,
+    });
+    setupSettingsMirror({ node, data, scope, region, self });
 
     if (region.ownedNodes.length > 0) {
       self.currentInstance.renderer.hydrateInto({
@@ -383,37 +410,40 @@ const templateBlock = defineBlock({
 
     if (template.id !== self.currentTemplateID) {
       if (self.currentInstance) { self.currentInstance.onDestroyed(); }
-      teardownReactiveSubtemplate(self);
+      teardownSettingsMirror(self);
       self.currentTemplateID = template.id;
-      self.currentInstance = cloneInstance({ template, templateName, templateData: blobData, self });
-      setupReactiveSubtemplate({ node, data, scope, region, self });
-      const fragment = self.currentInstance.render();
+      self.currentInstance = cloneInstance({
+        template,
+        templateName,
+        templateData: blobData,
+        self,
+        parentData: data,
+        node,
+      });
+      setupSettingsMirror({ node, data, scope, region, self });
+      const fragment = renderInstance(self.currentInstance, node);
       region.setContent(fragment);
       attachToRenderRoot(self.currentInstance, region, self);
     }
     else {
-      // Same template — push only blob data. ReactiveData propagation
-      // happens through the per-key Reactions in self.reactiveDataScope,
-      // not through this update path.
+      // Same template — push blob data only. reactiveData propagation
+      // happens through the lazy proxy reads inside the subtemplate's
+      // bindings, not through this update path.
       self.currentInstance.setDataContext(blobData, { rerender: false });
-      self.currentInstance.render(blobData);
+      renderInstance(self.currentInstance, node, blobData);
     }
   },
 
   destroy({ self }) {
     // Snippets have no instance to destroy — region.clear() handles DOM,
     // inner reactions registered against parent scope auto-dispose.
-    // reactiveDataScope is a child of the block's scope; its Reactions
+    // settingsScope is a child of the block's scope; its Reactions
     // dispose when the block scope's onDispose runs after this hook.
     if (self.currentInstance) {
       self.currentInstance.onDestroyed();
       self.currentInstance = null;
     }
-    if (self.reactiveContext) {
-      self.reactiveContext.dispose();
-      self.reactiveContext = null;
-    }
-    self.reactiveDataScope = null;
+    self.settingsScope = null;
   },
 
   evaluateText({ node, data, renderer }) {

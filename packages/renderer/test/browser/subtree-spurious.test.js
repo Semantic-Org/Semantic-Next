@@ -516,8 +516,9 @@ RENDERING_ENGINES.forEach(engine => {
 
     describe('reactiveData per-key granularity', () => {
       // Per-key isolation on reactiveData: changing one field's source
-      // should re-evaluate only the binding reading that field. Bindings
-      // reading a different field should not re-evaluate.
+      // re-fires only bindings that read that field. Marker bindings
+      // (read no signals) and sibling-key bindings (read a different
+      // field) never re-fire — same contract as the snippet path.
       it('changing one reactiveData field should not re-evaluate subtemplate expressions that read a different field', async () => {
         let labelEvalCount = 0;
         let statusEvalCount = 0;
@@ -559,16 +560,18 @@ RENDERING_ENGINES.forEach(engine => {
         const labelCountAfterRender = labelEvalCount;
         const statusCountAfterRender = statusEvalCount;
 
-        // Only labelVal changes. The expectation under fine-grained
-        // reactiveData would be: label re-evaluates, status does NOT.
+        // Only labelVal changes — the {label} binding wakes (text
+        // updates), but markLabel/markStatus register no source signals
+        // and stay quiet. Same per-expression isolation the snippet
+        // path delivers above.
         const updated = $(el).onNext('updated');
         el.template.state.labelVal.set('changed');
         await updated;
 
         expect(shadowText(el)).toContain('changed');
         expect(shadowText(el)).toContain('active');
-        expect(labelEvalCount).toBeGreaterThan(labelCountAfterRender);
-        expect(statusEvalCount).toBe(statusCountAfterRender); // the claim under test
+        expect(labelEvalCount).toBe(labelCountAfterRender);
+        expect(statusEvalCount).toBe(statusCountAfterRender);
       });
     });
 
