@@ -341,8 +341,8 @@ async function mount(tagName) {
       Subtemplate reactiveData
 *******************************/
 
-// purpose: Mutates one verbose reactiveData field across 100 child subtemplates. Only the changed field re-evaluates.
 const el1 = await mount('bench-reactivedata');
+// purpose: Mutates one verbose reactiveData field across 100 child subtemplates. Only the changed field re-evaluates.
 performance.mark(startMark('subtemplate-reactive-data-100'));
 for (let i = 0; i < 50; i++) {
   el1.template.state.labelVal.set(`v${i}`);
@@ -355,8 +355,8 @@ destroy();
       Subtemplate shorthand props
 *******************************/
 
-// purpose: Mutates one shorthand prop's source across 100 child subtemplates. Only that prop re-evaluates.
 const el2 = await mount('bench-shorthand');
+// purpose: Mutates one shorthand prop's source across 100 child subtemplates. Only that prop re-evaluates.
 performance.mark(startMark('subtemplate-shorthand-props-100'));
 for (let i = 0; i < 50; i++) {
   el2.template.state.labelVal.set(`v${i}`);
@@ -369,8 +369,8 @@ destroy();
       Snippet args
 *******************************/
 
-// purpose: Mutates one snippet arg's source across 100 invocations. Adjacent no-signal expressions stay quiet.
 const el3 = await mount('bench-snippet');
+// purpose: Mutates one snippet arg's source across 100 invocations. Adjacent no-signal expressions stay quiet.
 performance.mark(startMark('snippet-args-per-key-100'));
 for (let i = 0; i < 50; i++) {
   el3.template.state.labelVal.set(`v${i}`);
@@ -383,8 +383,8 @@ destroy();
       Active indicator
 *******************************/
 
-// purpose: Cycles selectedId across 200 list items. Only the previously and newly active items update their class.
 const el4 = await mount('bench-active-indicator');
+// purpose: Cycles selectedId across 200 list items. Only the previously and newly active items update their class.
 performance.mark(startMark('active-indicator-200'));
 for (let i = 0; i < 100; i++) {
   el4.template.state.selectedId.set(i + 1);
@@ -397,8 +397,8 @@ destroy();
       Stable-ref item mutate
 *******************************/
 
-// purpose: Replaces one item by index in a 500-item list across 100 cycles. Only that item's expressions re-render.
 const el5 = await mount('bench-stable-ref');
+// purpose: Replaces one item by index in a 500-item list across 100 cycles. Only that item's expressions re-render.
 performance.mark(startMark('stable-ref-mutate-500'));
 for (let i = 0; i < 100; i++) {
   const idx = i % 500;
@@ -412,8 +412,8 @@ destroy();
       Subtemplate data blob
 *******************************/
 
-// purpose: Mutates one field inside data=expression on 100 children. Every child re-renders by design.
 const el7 = await mount('bench-data-blob');
+// purpose: Mutates one field inside data=expression on 100 children. Every child re-renders by design.
 performance.mark(startMark('subtemplate-data-blob-100'));
 for (let i = 0; i < 50; i++) {
   el7.template.state.labelVal.set(`v${i}`);
@@ -426,8 +426,8 @@ destroy();
       Snippet inside subtemplate
 *******************************/
 
-// purpose: Mutates one subtemplate prop's source across 25 cards each invoking 4 inner snippets. Snippet bodies should stay quiet.
 const el8 = await mount('bench-snippet-in-subtemplate');
+// purpose: Mutates one subtemplate prop's source across 25 cards each invoking 4 inner snippets. Snippet bodies should stay quiet.
 performance.mark(startMark('snippet-in-subtemplate-100'));
 for (let i = 0; i < 50; i++) {
   el8.template.state.titleVal.set(`v${i}`);
@@ -440,8 +440,8 @@ destroy();
       Active indicator nested
 *******************************/
 
-// purpose: Cycles currentUrl through 50 leaf urls in a 5×10×4 nav. Only the previously and newly active leaves should update their class.
 const el9 = await mount('bench-active-indicator-nested');
+// purpose: Cycles currentUrl through 50 leaf urls in a 5×10×4 nav. Only the previously and newly active leaves should update their class.
 performance.mark(startMark('active-indicator-nested-200'));
 for (let i = 0; i < 50; i++) {
   const s = i % 5;
@@ -457,8 +457,8 @@ destroy();
       Realistic helpers — light
 *******************************/
 
-// purpose: 100 subtemplates, 4 inner bindings each calling formatDate / classIf / capitalize. Mutates one source signal — under per-key isolation, only the title binding's evaluator runs; without it, all four helpers re-fire per child on every cycle.
 const el11 = await mount('bench-realistic-light');
+// purpose: 100 subtemplates, 4 inner bindings each calling formatDate / classIf / capitalize. Mutates one source signal — under per-key isolation, only the title binding's evaluator runs; without it, all four helpers re-fire per child on every cycle.
 performance.mark(startMark('subtemplate-helpers-light-100'));
 for (let i = 0; i < 50; i++) {
   el11.template.state.titleVal.set(`title-${i}`);
@@ -471,8 +471,8 @@ destroy();
       Realistic helpers — heavy
 *******************************/
 
-// purpose: 100 subtemplates, 4 inner bindings where three call helpers shaped like userland reality — Intl.NumberFormat, Array.find against a 50-item lookup table, snake_case → Title Case string transform, taxRules iteration. Mutates titleVal only; per-key isolation should keep the three heavy helpers asleep.
 const el12 = await mount('bench-realistic-heavy');
+// purpose: 100 subtemplates, 4 inner bindings where three call helpers shaped like userland reality — Intl.NumberFormat, Array.find against a 50-item lookup table, snake_case → Title Case string transform, taxRules iteration. Mutates titleVal only; per-key isolation should keep the three heavy helpers asleep.
 performance.mark(startMark('subtemplate-helpers-heavy-100'));
 for (let i = 0; i < 50; i++) {
   el12.template.state.titleVal.set(`title-${i}`);
