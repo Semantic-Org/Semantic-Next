@@ -89,9 +89,11 @@ jobs:
     runs-on: ubuntu-latest
     # With amplified metrics (Bench: Amplify… commits), a typical run lands
     # at 12-14 min — initial sampling dominates, ~9 min at N=50 × 2 benches ×
-    # N metrics, then auto-sample usually converges in 2-3 min. 20-min cap
-    # gives a few minutes of margin over the observed ceiling.
-    timeout-minutes: 20
+    # N metrics, then auto-sample usually converges in 2-3 min. 25-min cap
+    # gives margin over the observed ceiling; the 9-metric template-reactivity
+    # cell with each-mount-1000 added sits closest to the limit and was
+    # cancelling at 20 min on the FGR PR.
+    timeout-minutes: 25
 
     steps:
       - uses: actions/checkout@v6
