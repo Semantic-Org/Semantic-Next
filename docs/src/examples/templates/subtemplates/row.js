@@ -5,7 +5,7 @@ const template = await getText('./row.html');
 
 const createComponent = ({ findParent }) => ({
   getTitle() {
-    return findParent('uiTable').getTitle();
+    return findParent('basicTable').getTitle();
   },
 });
 
