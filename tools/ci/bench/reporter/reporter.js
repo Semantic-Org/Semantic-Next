@@ -130,7 +130,7 @@ const PEAK_SECTIONS = {
     status: 'REOPENED',
     headingPrefix: '📜 Regressions from peak',
     description:
-      `These metrics were better on a prior iteration than they are now. The peak's percent-delta vs its baseline dominates current's percent-delta vs its baseline — not attributable to per-sample noise. Bisect candidates are the bench-measured, packages-touching commits between the peak iteration and HEAD; nearest-to-peak is usually the best bet. Cancelled CI runs and push-collapsed iterations don't appear here.`,
+      `These metrics were faster on an earlier push to this PR than they are now, and the gap is bigger than measurement noise. The candidates list is the commits between the best run and this one that touched \`packages/\` and got benched — the most recent one is usually where to look. Cancelled or superseded runs aren't included.`,
     columnHeader: '| metric | current | peak | vs peak | bisect candidates |',
     // Largest % regression first (descending on signed delta).
     sortSign: -1,
@@ -143,7 +143,7 @@ const PEAK_SECTIONS = {
     status: 'WIN',
     headingPrefix: '🏆 New peaks',
     description:
-      `These metrics reached a new best in this iteration — current's percent-delta vs its baseline dominates the prior peak's percent-delta vs its baseline. Credit candidates are the bench-measured, packages-touching commits between the prior peak and HEAD; nearest-to-current is usually the cause. Cancelled CI runs and push-collapsed iterations don't appear here.`,
+      `These metrics are faster than they've ever been on this PR, beyond measurement noise. The candidates list is the commits between the previous best and this one that touched \`packages/\` and got benched — the most recent one is usually the cause. Cancelled or superseded runs aren't included.`,
     columnHeader: '| metric | current | prior peak | vs prior peak | credit candidates |',
     // Most-improved first. delta_from_peak_pct is negative for WIN, so
     // ascending sort surfaces the best.
@@ -464,7 +464,7 @@ function renderMarkdown(report) {
       lines.push(`#### Inconclusive (${inconclusive.length})`);
       lines.push('');
       lines.push(
-        `These metrics' CIs straddle ±${NOISE_FLOOR}% AND exceed what each cell's per-sample variance predicts for its duration. More samples may settle sampling-unlucky cases. Metrics that stay here across iterations are intrinsically variable — amplify the workload or accept the floor.`,
+        `The measurement crossed the ±${NOISE_FLOOR}% line and is wider than this bench's duration usually produces. More samples might land it on one side. Benches that keep showing up here are inherently noisy — make them do more work per run, or accept that this is their floor.`,
       );
       lines.push('');
       lines.push('| metric | Change | Expected Noise |');
@@ -481,9 +481,9 @@ function renderMarkdown(report) {
       lines.push(`#### Too Fast to Measure Precisely (${tooFast.length})`);
       lines.push('');
       lines.push(
-        `On benches this short, system jitter (scheduling, GC, JIT) masks sub-${
+        `On benches this short, OS jitter, GC, and JIT pauses drown out anything under ${
           SIGMA_ABS_MS * 2
-        }% changes; larger deltas still resolve cleanly.`,
+        }%. Bigger changes than that still show up.`,
       );
       lines.push('');
       lines.push('| metric | Change | Test Time | Expected Noise |');
@@ -521,7 +521,7 @@ function renderMarkdown(report) {
     : `Sample size: ${sampleFloor} floor / ${sampleMax} max`;
   const footerParts = [
     sampleSizeStr,
-    `Resolution floor: ±${NOISE_FLOOR}%`,
+    `Noise floor: ±${NOISE_FLOOR}%`,
     'Timeout: 3min',
   ];
   if (report.wall_clock_seconds != null) {
@@ -747,11 +747,11 @@ function determineState(summary) {
     };
   }
   if (f > 0 && s > 0) {
-    const modifier = f > s ? 'Net Positive' : s > f ? 'Net Negative' : 'Balanced';
-    const conjunction = modifier === 'Balanced' ? 'and regresses on' : 'while regressing on';
+    const modifier = f > s ? 'mostly faster' : s > f ? 'mostly slower' : 'balanced';
+    const conjunction = modifier === 'balanced' ? 'and regresses on' : 'while regressing on';
     return {
       emoji: '🟡',
-      heading: `Mixed Performance (${modifier})`,
+      heading: `Mixed (${modifier})`,
       alertType: 'WARNING',
       body: `This PR improves ✅ ${f} test${f === 1 ? '' : 's'} ${conjunction} ❌ ${s} test${s === 1 ? '' : 's'}.`,
     };

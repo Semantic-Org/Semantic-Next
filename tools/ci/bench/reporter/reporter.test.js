@@ -193,8 +193,8 @@ test('real-delta fixture — rubric markdown structure', () => {
 
   // h3 top header with state emoji, commit link, and Benchmark Suite anchor
   assert.ok(
-    markdown.startsWith('### 🟡 Mixed Performance (Net Positive) for'),
-    'h3 with mixed-net-positive state emoji',
+    markdown.startsWith('### 🟡 Mixed (mostly faster) for'),
+    'h3 with mixed-mostly-faster state emoji',
   );
   assert.ok(markdown.includes('on Benchmark Suite 📊'), 'Benchmark Suite anchor suffix');
   assert.ok(
