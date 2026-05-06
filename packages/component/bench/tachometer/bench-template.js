@@ -215,8 +215,8 @@ defineComponent({
   },
 });
 
-// Realistic-helper subtemplates. The four bench-template-reactivity
-// metrics above use trivial helpers (signal read + return) so per-key
+// Realistic-helper subtemplates. The four bench-template metrics above
+// use trivial helpers (signal read + return) so per-key
 // isolation savings are at the µs-per-cycle scale and don't surface
 // against the rAF-bound wall clock. The two metrics below use helpers
 // shaped like the ones that show up in real apps — formatting via Intl

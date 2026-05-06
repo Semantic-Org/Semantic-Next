@@ -8,7 +8,7 @@
       "timestamp": "2026-05-05T04:12:21Z",
       "pr": 179,
       "metrics": {
-        "hydrate-each-100-mount": {
+        "each-100-mount": {
           "ci": [
             74.5144,
             75.1349
@@ -20,7 +20,7 @@
           ],
           "baseline_sha": "51e699f74e4acefd503e3444913805f4b0058893"
         },
-        "hydrate-each-100": {
+        "each-100": {
           "ci": [
             93.1477,
             94.3616
@@ -32,7 +32,7 @@
           ],
           "baseline_sha": "51e699f74e4acefd503e3444913805f4b0058893"
         },
-        "hydrate-helper-100-mount": {
+        "helper-100-mount": {
           "ci": [
             45.2065,
             45.6214
@@ -44,7 +44,7 @@
           ],
           "baseline_sha": "51e699f74e4acefd503e3444913805f4b0058893"
         },
-        "hydrate-helper-100-state-change": {
+        "helper-100-state-change": {
           "ci": [
             5.2788,
             6.0604
@@ -188,7 +188,7 @@
           ],
           "baseline_sha": "51e699f74e4acefd503e3444913805f4b0058893"
         },
-        "signal-reactive-fanout-500x1200": {
+        "reactive-fanout-500x1200": {
           "ci": [
             87.158,
             88.0729
@@ -200,7 +200,7 @@
           ],
           "baseline_sha": "51e699f74e4acefd503e3444913805f4b0058893"
         },
-        "signal-computed-chain-10x60k": {
+        "computed-chain-10x60k": {
           "ci": [
             217.5559,
             219.3968
@@ -212,7 +212,7 @@
           ],
           "baseline_sha": "51e699f74e4acefd503e3444913805f4b0058893"
         },
-        "signal-reactive-multi-read-5x160k": {
+        "reactive-multi-read-5x160k": {
           "ci": [
             198.766,
             199.8904
@@ -224,7 +224,7 @@
           ],
           "baseline_sha": "51e699f74e4acefd503e3444913805f4b0058893"
         },
-        "signal-reactive-list-replace-1000x1000": {
+        "reactive-list-replace-1000x1000": {
           "ci": [
             315.4369,
             318.5249
@@ -236,7 +236,7 @@
           ],
           "baseline_sha": "51e699f74e4acefd503e3444913805f4b0058893"
         },
-        "signal-reactive-list-filter-1000x300": {
+        "reactive-list-filter-1000x300": {
           "ci": [
             117.1794,
             119.3224
@@ -248,7 +248,7 @@
           ],
           "baseline_sha": "51e699f74e4acefd503e3444913805f4b0058893"
         },
-        "signal-reactive-push-2000x20": {
+        "reactive-push-2000x20": {
           "ci": [
             217.7028,
             221.199
@@ -260,7 +260,7 @@
           ],
           "baseline_sha": "51e699f74e4acefd503e3444913805f4b0058893"
         },
-        "signal-reactive-set-index-300": {
+        "reactive-set-index-300": {
           "ci": [
             109.3755,
             111.079
@@ -272,7 +272,7 @@
           ],
           "baseline_sha": "51e699f74e4acefd503e3444913805f4b0058893"
         },
-        "signal-reactive-set-property-by-id-200": {
+        "reactive-set-property-by-id-200": {
           "ci": [
             211.3102,
             215.6025
@@ -497,7 +497,7 @@
       "timestamp": "2026-05-06T21:37:51Z",
       "pr": 186,
       "metrics": {
-        "micro-compiler-parse-cold-normal-500": {
+        "parse-cold-normal-500": {
           "ci": [
             52.3544,
             53.3317
@@ -509,7 +509,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "micro-compiler-parse-cold-complex-200": {
+        "parse-cold-complex-200": {
           "ci": [
             37.2862,
             37.7459
@@ -521,7 +521,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "micro-compiler-ast-walk-5k": {
+        "ast-walk-5k": {
           "ci": [
             15.021,
             15.4347
@@ -533,7 +533,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "micro-compiler-snippet-args-5k": {
+        "snippet-args-5k": {
           "ci": [
             49.212,
             49.7595
@@ -545,7 +545,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "hydrate-each-100-mount": {
+        "each-100-mount": {
           "ci": [
             74.5419,
             75.7158
@@ -557,7 +557,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "hydrate-each-100": {
+        "each-100": {
           "ci": [
             88.4021,
             89.3757
@@ -569,7 +569,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "hydrate-helper-100-mount": {
+        "helper-100-mount": {
           "ci": [
             44.9046,
             45.9198
@@ -581,7 +581,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "hydrate-helper-100-state-change": {
+        "helper-100-state-change": {
           "ci": [
             153.1751,
             155.1027
@@ -725,7 +725,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "micro-expr-simple-100k": {
+        "expr-simple-100k": {
           "ci": [
             35.1409,
             35.6919
@@ -737,7 +737,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "micro-expr-lisp-50k": {
+        "expr-lisp-50k": {
           "ci": [
             39.2557,
             39.8195
@@ -749,7 +749,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "micro-expr-js-10k": {
+        "expr-js-10k": {
           "ci": [
             19.4907,
             19.8733
@@ -761,7 +761,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "micro-build-html-string-10k": {
+        "build-html-string-10k": {
           "ci": [
             49.8245,
             50.5435
@@ -773,7 +773,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "micro-dom-walker-1000x15": {
+        "dom-walker-1000x15": {
           "ci": [
             47.406,
             48.1988
@@ -785,7 +785,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "signal-reactive-fanout-500x1200": {
+        "reactive-fanout-500x1200": {
           "ci": [
             90.4795,
             92.2865
@@ -797,7 +797,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "signal-computed-chain-10x60k": {
+        "computed-chain-10x60k": {
           "ci": [
             220.8447,
             224.0913
@@ -809,7 +809,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "signal-reactive-multi-read-5x160k": {
+        "reactive-multi-read-5x160k": {
           "ci": [
             204.979,
             208.293
@@ -821,7 +821,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "signal-reactive-list-replace-1000x1000": {
+        "reactive-list-replace-1000x1000": {
           "ci": [
             318.5756,
             321.6824
@@ -833,7 +833,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "signal-reactive-list-filter-1000x300": {
+        "reactive-list-filter-1000x300": {
           "ci": [
             119.3536,
             122.2604
@@ -845,7 +845,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "signal-reactive-push-2000x20": {
+        "reactive-push-2000x20": {
           "ci": [
             226.9348,
             231.5092
@@ -857,7 +857,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "signal-reactive-set-index-300": {
+        "reactive-set-index-300": {
           "ci": [
             111.0192,
             112.8368
@@ -869,7 +869,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "signal-reactive-set-property-by-id-200": {
+        "reactive-set-property-by-id-200": {
           "ci": [
             215.1668,
             218.7332
@@ -881,7 +881,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "signal-set-same-10m": {
+        "set-same-10m": {
           "ci": [
             42.6861,
             47.1339
@@ -893,7 +893,7 @@
           ],
           "baseline_sha": "37d81c1139b8db13fd6314cbe503a540ccb7dc75"
         },
-        "signal-sub-unsub-100k": {
+        "sub-unsub-100k": {
           "ci": [
             22.0987,
             22.7473
