@@ -493,6 +493,51 @@ test('cross-run: sub-NOISE_FLOOR delta downgrades to TIED-PEAK even with non-ove
   assert.ok(!markdown.includes('New peaks'), 'no new peaks section');
 });
 
+test('cross-run: unsure-classified metrics are suppressed from cross-iteration tables', () => {
+  // History: peak iteration with a clear improvement, current run lands
+  // unsure (CI wider than expected for its duration). Same-session
+  // classification wins — the metric should not appear in Regressions
+  // from peak even though delta_from_peak_pct exceeds NOISE_FLOOR.
+  const prHistory = writeFixture({
+    schema_version: 2,
+    commits: [{
+      sha: 'pr-peak-1234',
+      msg: 'iter 1',
+      parent_sha: '',
+      timestamp: '2026-04-20T00:00:00Z',
+      pr: null,
+      touches_packages: true,
+      metrics: {
+        'edge-metric': {
+          ci: [9, 10],
+          mean_ms: 9.5,
+          // Width 5pp; narrow CI so the peak-quality gate accepts it.
+          percent_delta_ci: [-30, -25],
+          baseline_sha: 'mainA',
+        },
+      },
+    }],
+  });
+  // Current pct-delta [-20, +15] — straddles ±2% AND width 35pp at
+  // meanMs≈10 produces ratio = 35 / (0.784*2/10*100) ≈ 2.23, exceeding
+  // NOISE_RATIO_TOLERANCE → unsure. Midpoint -2.5, peak midpoint -27.5,
+  // delta +25pp → would be REOPENED by raw classification, but unsure
+  // same-session means dedup fires.
+  const dir = writeHandcraftedResults('edge-metric', [9.8, 10.2], [9.8, 10.2], [-20, 15], 'mainA');
+  const { report, markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'current',
+    msg: 'x',
+    baseSha: 'def',
+    prHistory,
+    scope: 'pr',
+  });
+  const m = report.metrics.find((x) => x.name === 'edge-metric');
+  assert.equal(m.status, 'unsure', 'sanity: same-session classification is unsure');
+  assert.equal(m.history_status, 'REOPENED', 'cross-iteration analysis still computes the status');
+  assert.ok(!markdown.includes('Regressions from peak'), 'unsure metric is suppressed from cross-iteration table');
+});
+
 test('cross-run: peak selection excludes touches_packages: false entries', () => {
   // History: a harness-only commit with the most-improved percent_delta_ci,
   // followed by a smaller measurement-touching peak. Peak selection must

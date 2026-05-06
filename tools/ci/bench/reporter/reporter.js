@@ -554,7 +554,17 @@ function renderGlossarySection(lines, report) {
  */
 function renderPeakSection(lines, report, kind) {
   const config = PEAK_SECTIONS[kind];
-  const rows = report.metrics.filter((m) => m.history_status === config.status);
+  // Same-session classification wins on dedup for the unsure bucket.
+  // A metric in Inconclusive (CI straddles ±2% AND wider than the
+  // duration-derived floor predicts) shouldn't ALSO appear in a
+  // "regressed from peak" table — the two framings read as contradictory
+  // (filter-cycle-20 audited as the canonical case). Noise-floor-limited
+  // metrics stay eligible: the cross-iteration framing operates on
+  // delta_from_peak_pct, which can resolve cleanly even when same-session
+  // is at its resolution floor.
+  const rows = report.metrics.filter((m) => (
+    m.history_status === config.status && m.status !== 'unsure'
+  ));
   if (rows.length === 0) { return; }
 
   const sorted = [...rows].sort(
