@@ -17,12 +17,18 @@ import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
   its next run. Without this, a key authored later in an item's lifetime
   would silently never propagate to its readers.
 
-  Per-key state is inlined as `values` (a null-prototype object) plus a
-  lazily allocated `deps` (Map<key, Dependency>). Each per-key
-  Dependency is what readers actually subscribe to. We deliberately do
-  not allocate a full Signal per key: Signal wraps a Dependency with
-  allowClone / equalityFunction / clone / currentValue field
-  assignments per instance. At 1000+ records × 5 keys the wrapper
+  Per-key state is inlined as `values` (a null-prototype object) plus
+  `deps` (Map<key, Dependency>). Both are eager — the per-key Dependency
+  is allocated at setKey time, not lazily on first reactive read. Eager
+  allocation keeps the RDC's hidden class stable from construction
+  (deps is always Map, never null), so V8's IC at the trap dispatch
+  site sees one shape across all records. The lazy variant pessimized
+  the trap during firstRun by triggering a per-record shape transition
+  exactly when the IC was warming up.
+
+  We deliberately do not allocate a full Signal per key: Signal wraps
+  a Dependency with allowClone / equalityFunction / clone / currentValue
+  field assignments per instance. At 1000+ records × 5 keys the wrapper
   allocation dominates. Equality dedup is preserved:
   `Signal.equalityFunction` is snapshotted at construction, matching
   Signal's per-instance snapshot semantics so the inlined dedup behaves
@@ -38,6 +44,17 @@ import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
   pays a virtual call into the Map's get method. The existence check
   uses (prop in target.values) — fast on null-prototype objects since
   no prototype-chain walk is needed.
+
+  `sealKeysAfterReplace` declares that the value-key set is fixed
+  after the seed replace() call. as-mode {#each todo in items} uses it
+  because getEachData returns a fixed shape ({[as], [indexAs]}) — no
+  key is ever added mid-life. When sealed, both keySetVersion.depend()
+  (in trapGet's fallthrough branch) and keySetVersion.changed() (in
+  setKey's new-key branch) are skipped. Avoids a per-fallthrough-read
+  subscribe/cleanup on a Dep that can never fire — measurable wins on
+  workloads where bindings read parent-context identifiers (helpers,
+  parent state) through the each-record proxy. Spread-mode keeps the
+  unsealed default because spread item shapes can gain keys.
 
   Closure-only readers (functions reading no per-key data) intentionally
   do not register any record-level "anything changed" Dependency. Today's
@@ -79,21 +96,11 @@ function trapGet(target, prop) {
   const values = target.values;
   if (prop in values) {
     if (Scheduler.current) {
-      let deps = target.deps;
-      if (deps === null) {
-        deps = new Map();
-        target.deps = deps;
-      }
-      let dep = deps.get(prop);
-      if (dep === undefined) {
-        dep = new Dependency();
-        deps.set(prop, dep);
-      }
-      dep.depend();
+      target.deps.get(prop).depend();
     }
     return values[prop];
   }
-  target.keySetVersion.depend();
+  if (!target.keysSealed) { target.keySetVersion.depend(); }
   return target.parent[prop];
 }
 
@@ -147,11 +154,17 @@ const HANDLER_RW = {
 };
 
 export class ReactiveDataContext {
-  constructor(parent, { registerItemContext = false, writeToParent = false } = {}) {
+  constructor(parent, {
+    registerItemContext = false,
+    writeToParent = false,
+    sealKeysAfterReplace = false,
+  } = {}) {
     this.parent = parent;
     this.writeToParent = writeToParent;
+    this.sealKeysAfterReplace = sealKeysAfterReplace;
+    this.keysSealed = false;
     this.values = Object.create(null);
-    this.deps = null;
+    this.deps = new Map();
     // Snapshot Signal.equalityFunction at construction. Mirrors Signal's
     // own per-instance snapshot semantics — late overrides of the static
     // do not retroactively retarget already-constructed instances. If
@@ -169,22 +182,20 @@ export class ReactiveDataContext {
   setKey(key, value) {
     if (!(key in this.values)) {
       this.values[key] = value;
+      this.deps.set(key, new Dependency());
       if (this.writeToParent) { this.parent[key] = value; }
-      this.keySetVersion.changed();
+      if (!this.keysSealed) { this.keySetVersion.changed(); }
       return;
     }
     if (this.writeToParent) { this.parent[key] = value; }
     const old = this.values[key];
     if (this.equalityFunction(old, value)) { return; }
     this.values[key] = value;
-    if (this.deps !== null) {
-      const dep = this.deps.get(key);
-      if (dep !== undefined) { dep.changed(); }
-    }
+    const dep = this.deps.get(key);
+    if (dep !== undefined) { dep.changed(); }
   }
 
   notifyKey(key) {
-    if (this.deps === null) { return; }
     const dep = this.deps.get(key);
     if (dep !== undefined) { dep.changed(); }
   }
@@ -198,6 +209,7 @@ export class ReactiveDataContext {
         if (!(key in nextValues)) { this.setKey(key, undefined); }
       }
     }
+    if (this.sealKeysAfterReplace) { this.keysSealed = true; }
   }
 
   has(key) {
@@ -210,6 +222,7 @@ export class ReactiveDataContext {
 
   dispose() {
     this.values = Object.create(null);
-    if (this.deps !== null) { this.deps.clear(); }
+    this.deps.clear();
+    this.keysSealed = false;
   }
 }
