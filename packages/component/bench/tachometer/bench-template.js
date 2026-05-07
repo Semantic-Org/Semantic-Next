@@ -443,13 +443,13 @@ destroy();
 *******************************/
 
 const el8 = await mount('bench-snippet-in-subtemplate');
-// purpose: Mutates one subtemplate prop's source across 25 cards each invoking 4 inner snippets. Snippet bodies should stay quiet.
-performance.mark(startMark('snippet-in-subtemplate-100'));
-for (let i = 0; i < 50; i++) {
+// purpose: Mutates one subtemplate prop's source across 25 cards each invoking 4 inner snippets, 1000 cycles. Snippet bodies should stay quiet.
+performance.mark(startMark('snippet-in-subtemplate-100x1k'));
+for (let i = 0; i < 1000; i++) {
   el8.template.state.titleVal.set(`v${i}`);
   flushWork();
 }
-performance.measure('snippet-in-subtemplate-100', startMark('snippet-in-subtemplate-100'));
+performance.measure('snippet-in-subtemplate-100x1k', startMark('snippet-in-subtemplate-100x1k'));
 destroy();
 
 /*******************************
