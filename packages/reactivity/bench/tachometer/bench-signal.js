@@ -278,7 +278,7 @@ let sink = null;
   performance.measure('reaction-flush-noop-5m', startMark('reaction-flush-noop-5m'));
 }
 
-// reaction-coalesce-200x100 — 200 bursts, each setting the signal 100
+// reaction-coalesce-400x100 — 400 bursts, each setting the signal 100
 // times before one flush. With coalescing, all 100 subscribers wake once
 // per burst regardless of set count. Without coalescing, each subscriber
 // wakes 100 times per burst — wall-clock balloons proportionally.
@@ -290,23 +290,23 @@ let sink = null;
       sink = sig.get();
     });
   }
-  // purpose: Sets one signal 100 times then flushes once across 200 bursts so 100 subscribers wake one time per burst.
-  performance.mark(startMark('reaction-coalesce-200x100'));
-  for (let burst = 0; burst < 200; burst++) {
+  // purpose: Sets one signal 100 times then flushes once across 400 bursts so 100 subscribers wake one time per burst.
+  performance.mark(startMark('reaction-coalesce-400x100'));
+  for (let burst = 0; burst < 400; burst++) {
     for (let setN = 0; setN < 100; setN++) {
       sig.set(burst * 100 + setN + 1);
     }
     Reaction.flush();
   }
-  performance.measure('reaction-coalesce-200x100', startMark('reaction-coalesce-200x100'));
+  performance.measure('reaction-coalesce-400x100', startMark('reaction-coalesce-400x100'));
   for (let i = 0; i < 100; i++) { subs[i].stop(); }
 }
 
-// reaction-dep-diff-30k — a subscriber that reads a different signal
+// reaction-dep-diff-45k — a subscriber that reads a different signal
 // depending on a toggle. Each cycle flips the toggle, so the reaction's
 // dependency set changes (drops one signal, picks up another). Exercises
 // the per-run dep-set diffing path that fires on every reactive
-// expression's re-run in real components. 30k cycles to comfortably clear
+// expression's re-run in real components. 45k cycles to comfortably clear
 // the σ-floor at ~1µs/cycle.
 {
   const sigA = new Signal('a');
@@ -315,13 +315,13 @@ let sink = null;
   const r = Reaction.create(() => {
     sink = toggle.get() ? sigA.get() : sigB.get();
   });
-  // purpose: Toggles which of two signals a subscriber reads across 30000 cycles. Per-run dep-set diffing.
-  performance.mark(startMark('reaction-dep-diff-30k'));
-  for (let i = 0; i < 30_000; i++) {
+  // purpose: Toggles which of two signals a subscriber reads across 45000 cycles. Per-run dep-set diffing.
+  performance.mark(startMark('reaction-dep-diff-45k'));
+  for (let i = 0; i < 45_000; i++) {
     toggle.set(i % 2 === 0);
     Reaction.flush();
   }
-  performance.measure('reaction-dep-diff-30k', startMark('reaction-dep-diff-30k'));
+  performance.measure('reaction-dep-diff-45k', startMark('reaction-dep-diff-45k'));
   r.stop();
 }
 

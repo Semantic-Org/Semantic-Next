@@ -21,8 +21,8 @@
         { "mode": "performance", "entryName": "set-same-10m" },
         { "mode": "performance", "entryName": "sub-unsub-100k" },
         { "mode": "performance", "entryName": "reaction-flush-noop-5m" },
-        { "mode": "performance", "entryName": "reaction-coalesce-200x100" },
-        { "mode": "performance", "entryName": "reaction-dep-diff-30k" }
+        { "mode": "performance", "entryName": "reaction-coalesce-400x100" },
+        { "mode": "performance", "entryName": "reaction-dep-diff-45k" }
       ]
     },
     {
@@ -41,8 +41,8 @@
         { "mode": "performance", "entryName": "set-same-10m" },
         { "mode": "performance", "entryName": "sub-unsub-100k" },
         { "mode": "performance", "entryName": "reaction-flush-noop-5m" },
-        { "mode": "performance", "entryName": "reaction-coalesce-200x100" },
-        { "mode": "performance", "entryName": "reaction-dep-diff-30k" }
+        { "mode": "performance", "entryName": "reaction-coalesce-400x100" },
+        { "mode": "performance", "entryName": "reaction-dep-diff-45k" }
       ]
     }
   ]
