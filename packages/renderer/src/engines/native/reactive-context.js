@@ -17,28 +17,27 @@ import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
   its next run. Without this, a key authored later in an item's lifetime
   would silently never propagate to its readers.
 
-  Per-key state is inlined as `values` and `deps` — both null-prototype
-  objects, eagerly allocated. Each per-key Dependency is what readers
-  actually subscribe to; the Dependency itself is allocated on first
-  reactive read of the key (closure-only records pay zero per-key dep
-  cost). We deliberately do not allocate a full Signal per key: Signal
-  wraps a Dependency with allowClone / equalityFunction / clone /
-  currentValue field assignments per instance. At 1000+ records × 5
-  keys the wrapper allocation dominates. Equality dedup is preserved:
+  Per-key state is inlined as `values` (a null-prototype object) plus a
+  lazily allocated `deps` (Map<key, Dependency>). Each per-key
+  Dependency is what readers actually subscribe to. We deliberately do
+  not allocate a full Signal per key: Signal wraps a Dependency with
+  allowClone / equalityFunction / clone / currentValue field
+  assignments per instance. At 1000+ records × 5 keys the wrapper
+  allocation dominates. Equality dedup is preserved:
   `Signal.equalityFunction` is snapshotted at construction, matching
   Signal's per-instance snapshot semantics so the inlined dedup behaves
   identically to a Signal.set call on the same static. Late overrides
   of `Signal.equalityFunction` after the RDC is constructed will not
   retroactively retarget — same blind spot Signal itself has.
 
-  Both maps use `Object.create(null)` (not `Map`) because every record
-  in a bench-todo / bench-krausest mount adds the same keys in the
-  same order, letting V8 establish a stable hidden-class chain across
-  all records. Plain-object property access (target.values[prop])
-  inline-caches at the call site once the shape is stable; Map.get
-  always pays a virtual call into the Map's get method. The existence
-  check uses (prop in target.values) — fast on null-prototype objects
-  since no prototype-chain walk is needed.
+  `values` uses Object.create(null) (not Map) because every record in a
+  bench-todo / bench-krausest mount adds the same keys in the same
+  order, letting V8 establish a stable hidden-class chain across all
+  records. Plain-object property access (target.values[prop]) inline-
+  caches at the call site once the shape is stable; Map.get always
+  pays a virtual call into the Map's get method. The existence check
+  uses (prop in target.values) — fast on null-prototype objects since
+  no prototype-chain walk is needed.
 
   Closure-only readers (functions reading no per-key data) intentionally
   do not register any record-level "anything changed" Dependency. Today's
@@ -80,11 +79,15 @@ function trapGet(target, prop) {
   const values = target.values;
   if (prop in values) {
     if (Scheduler.current) {
-      const deps = target.deps;
-      let dep = deps[prop];
+      let deps = target.deps;
+      if (deps === null) {
+        deps = new Map();
+        target.deps = deps;
+      }
+      let dep = deps.get(prop);
       if (dep === undefined) {
         dep = new Dependency();
-        deps[prop] = dep;
+        deps.set(prop, dep);
       }
       dep.depend();
     }
@@ -148,7 +151,7 @@ export class ReactiveDataContext {
     this.parent = parent;
     this.writeToParent = writeToParent;
     this.values = Object.create(null);
-    this.deps = Object.create(null);
+    this.deps = null;
     // Snapshot Signal.equalityFunction at construction. Mirrors Signal's
     // own per-instance snapshot semantics — late overrides of the static
     // do not retroactively retarget already-constructed instances. If
@@ -174,12 +177,15 @@ export class ReactiveDataContext {
     const old = this.values[key];
     if (this.equalityFunction(old, value)) { return; }
     this.values[key] = value;
-    const dep = this.deps[key];
-    if (dep !== undefined) { dep.changed(); }
+    if (this.deps !== null) {
+      const dep = this.deps.get(key);
+      if (dep !== undefined) { dep.changed(); }
+    }
   }
 
   notifyKey(key) {
-    const dep = this.deps[key];
+    if (this.deps === null) { return; }
+    const dep = this.deps.get(key);
     if (dep !== undefined) { dep.changed(); }
   }
 
@@ -204,6 +210,6 @@ export class ReactiveDataContext {
 
   dispose() {
     this.values = Object.create(null);
-    this.deps = Object.create(null);
+    if (this.deps !== null) { this.deps.clear(); }
   }
 }
