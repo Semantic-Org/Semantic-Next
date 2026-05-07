@@ -222,7 +222,7 @@ export class ReactiveDataContext {
 
   dispose() {
     this.values = Object.create(null);
-    this.deps.clear();
+    if (this.deps !== null) { this.deps.clear(); }
     this.keysSealed = false;
   }
 }
