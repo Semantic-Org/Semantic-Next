@@ -1,5 +1,27 @@
 import { isRecovery, isTracing } from '../../helpers.js';
 
+// Block-author helper: create a child data context that inherits from
+// `parent` via the prototype chain, with `extras` layered on as own
+// properties. Use when a block renders inner content with the parent
+// context plus a few additional keys (sample/async/each).
+//
+// Why prototype-chain inheritance (not spread): block data contexts
+// can themselves be lazy-getter records (subtemplate / snippet args
+// via buildArgsRecord). A spread `{ ...data, extras }` invokes any
+// getters and snapshots their values, losing reactivity for parent
+// reads inside the inner content. Object.create preserves those
+// getters: child reads inherited keys live, source-signal deps
+// register on whichever Reaction is running.
+//
+// Exported for server.js (SSR has no bag) and provided through the
+// block bag (`bag.childContext`) so registered blocks don't need to
+// import it.
+export function childContext(parent, extras) {
+  const child = Object.create(parent);
+  if (extras) { Object.assign(child, extras); }
+  return child;
+}
+
 // Structured error log — opt-in via setTracing(true). Tree-shakes when off.
 // `syntax` is the block's own template-syntax representation (each block
 // owns its formatting via the `syntax` config hook).
@@ -88,6 +110,7 @@ export function defineBlock(config) {
       renderAST,
       hydrateInnerContent,
       hydrateInto,
+      childContext,
       hook: null,
       err: null,
     };

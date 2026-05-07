@@ -31,6 +31,7 @@ import {
   MAIN_BRANCH_INDEX,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
+import { childContext } from './define-block.js';
 import { encodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from './shared/each.js';
 
 const REMOVE_ATTR = '__SUI_REMOVE__';
@@ -205,7 +206,7 @@ export class ServerRenderer {
     if (respectProtectedKeys && this.protectedKeys) {
       newData = filterObject(newData, (value, key) => !inArray(key, this.protectedKeys));
     }
-    assignInPlace(this.data, newData, { preserveExistingKeys: preserveExistingData });
+    assignInPlace(this.data, newData, { preserveExistingKeys: preserveExistingData, preserveGetters: true });
   }
 
   bumpDataVersion() {
@@ -408,7 +409,7 @@ export class ServerRenderer {
       // Per-item key marker — client adopts the matching node range at hydrate time.
       for (let i = 0; i < items.length; i++) {
         const eachData = getEachData(items[i], i, collectionType, node);
-        const itemData = { ...data, ...eachData };
+        const itemData = childContext(data, eachData);
         const key = getItemID(items[i], i, collectionType);
         html += `<!--${SUI_ITEM_MARKER}${encodeItemKey(key)}-->`;
         html += this.renderNodes(node.content, itemData);
@@ -504,7 +505,7 @@ export class ServerRenderer {
   *******************************/
 
   resolveNodeData(node, data) {
-    let resolved = { ...data };
+    let resolved = childContext(data);
 
     if (node.data) {
       if (isString(node.data)) {

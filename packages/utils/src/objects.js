@@ -119,20 +119,60 @@ const deepMerge = (target, source, options) => {
   }
 };
 
-export const assignInPlace = (target, source, { preserveExistingKeys = false, returnChanged = false } = {}) => {
+export const assignInPlace = (target, source, {
+  preserveExistingKeys = false,
+  preserveGetters = false,
+  returnChanged = false,
+} = {}) => {
   let changed = false;
   if (!preserveExistingKeys) {
-    for (const key in target) {
-      if (!(key in source)) {
-        delete target[key];
+    if (preserveGetters) {
+      // Own keys only — a `for...in` walk on a prototype-chained target
+      // would attempt `delete` on inherited keys (no-op), and that delete
+      // attempt deopts V8's hidden class for the target. The own-only
+      // path also matches the descriptor check's contract: getter
+      // descriptors are an own-property concept.
+      const ownKeys = Object.keys(target);
+      for (let i = 0; i < ownKeys.length; i++) {
+        const key = ownKeys[i];
+        if (!(key in source)) {
+          const desc = Object.getOwnPropertyDescriptor(target, key);
+          if (desc && desc.get) { continue; }
+          delete target[key];
+          changed = true;
+        }
+      }
+    }
+    else {
+      for (const key in target) {
+        if (!(key in source)) {
+          delete target[key];
+          changed = true;
+        }
+      }
+    }
+  }
+  if (preserveGetters) {
+    for (const key in source) {
+      // Skip declared getter keys: their `set` is absorb-only by contract
+      // (any write would be a no-op), so the inequality compare burns two
+      // getter invocations to decide nothing. On hot reactive paths the
+      // target-side and source-side getters often run the expression
+      // evaluator, so skipping pays back per key.
+      const desc = Object.getOwnPropertyDescriptor(target, key);
+      if (desc && desc.get) { continue; }
+      if (target[key] !== source[key]) {
+        target[key] = source[key];
         changed = true;
       }
     }
   }
-  for (const key in source) {
-    if (target[key] !== source[key]) {
-      target[key] = source[key];
-      changed = true;
+  else {
+    for (const key in source) {
+      if (target[key] !== source[key]) {
+        target[key] = source[key];
+        changed = true;
+      }
     }
   }
   return returnChanged ? changed : target;

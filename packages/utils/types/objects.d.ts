@@ -129,6 +129,8 @@ export function deepExtend<T extends object, S extends object[]>(
 export interface AssignInPlaceOptions {
   /** Keep keys in target that are not in source (default false) */
   preserveExistingKeys?: boolean;
+  /** Skip own getter descriptors when deleting keys not present in source (default false). Useful when target carries computed properties that shouldn't be torn down by syncs. */
+  preserveGetters?: boolean;
   /** Return whether any properties changed instead of the target object (default false) */
   returnChanged?: boolean;
 }

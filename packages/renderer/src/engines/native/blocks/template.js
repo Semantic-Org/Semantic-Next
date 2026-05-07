@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
-import { each, fatal, isPlainObject, isString } from '@semantic-ui/utils';
+import { each, extend, fatal, isPlainObject, isString } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
 import { isItemContext } from '../reactive-context.js';
 import { registerBlock } from './registry.js';
@@ -25,18 +25,19 @@ import { registerBlock } from './registry.js';
                   if name changed.
 
   Snippets and subtemplates share the same data-propagation primitive:
-  a lazy-getter Proxy fronting the parent context (buildArgsProxy).
-  Each reactiveData entry becomes a getter that calls
+  a lazy-getter record (buildArgsRecord) — a plain object inheriting
+  from the parent context, with declared keys defined as native ES
+  getter descriptors. Each reactiveData entry's getter calls
   evaluator.lookupExpressionValue at access time, so source-signal deps
   register on whichever Reaction is current at that read — the binding's
   own Reaction. Per-key isolation is structural: a binding that reads
-  proxy.label registers labelVal; a sibling binding reading proxy.status
+  record.label registers labelVal; a sibling binding reading record.status
   registers statusVal; mutating labelVal wakes only the label binding.
 
   Subtemplates carry the lifecycle layer (clone, createComponent, settings,
-  onCreated/etc.) on top of this same propagation. The proxy is installed
+  onCreated/etc.) on top of this same propagation. The record is installed
   as the subtemplate's `data` BEFORE initialize() runs so that closures
-  captured by createComponent see the proxy and route through it on
+  captured by createComponent see it and route through the getters on
   later reads. createComponent is invoked nonreactively so setup-time
   reads of data.foo don't pollute the parent's outer Reaction with
   source-signal deps.
@@ -73,110 +74,107 @@ function unpackBlobData(node, data, evaluator) {
   return blobData;
 }
 
-// Lazy-getter Proxy used by both snippets and subtemplates. Each
+// Lazy-getter record used by both snippets and subtemplates. Each
 // reactiveData entry (and each entry of a literal node.data object for
-// snippets) becomes a getter that calls
-// evaluator.lookupExpressionValue at access time. Source-signal deps
-// register on whichever Reaction is current at that read, so a
-// binding's Reaction subscribes directly to its inputs — per-key
-// isolation is structural, not mediated by an intermediate Dep layer.
+// snippets) becomes a native ES getter descriptor on a flat plain
+// object. Source-signal deps register on whichever Reaction is current
+// at the read, so a binding's Reaction subscribes directly to its
+// inputs — per-key isolation is structural, not mediated by an
+// intermediate Dep layer.
 //
-// The Proxy target is a small holder object (target / allGetters /
-// getterKeys); the trap handler is module-scoped (ARGS_HANDLER) so V8
-// sees the same handler shape across every subtemplate / snippet
-// mount and can establish monomorphic inline caches at the trap
-// dispatch sites. With per-call closure-captured handlers V8 falls
-// back to polymorphic dispatch, which is what made bulk-add-500 /
-// filter-cycle-20 regress when the lazy proxy moved onto the
-// subtemplate path.
+// Shape: a fresh `{}` (proto = Object.prototype) with target's own
+// descriptors copied in via `extend`, then declared getters defined
+// on top. Every record built for the same template node ends up with
+// the same own-property progression in the same order, so V8
+// consolidates them into one hidden class. The IC at every binding's
+// `data[token]` read site stays monomorphic — even when 1000 records
+// exist for an each-block iteration. `Object.create(target)` produced
+// a per-record prototype chain off `target`'s identity that V8 split
+// into distinct shapes, regressing read-heavy reconciles by ~3.5x.
 //
-// has / ownKeys / getOwnPropertyDescriptor make declared keys visible
-// to `prop in proxy`, Object.keys, and descriptor-aware spreads (extend
-// uses Object.getOwnPropertyDescriptor and re-defines as a getter — so
-// descriptor-style copies preserve laziness).
+// Why descriptors instead of a Proxy: a Proxy's get trap is a function
+// call into module code on every property read. Native getter
+// descriptors compile to the same hidden-class IC as a plain property
+// access — V8 inlines them. The trap surface that a Proxy would carry
+// (has / ownKeys / getOwnPropertyDescriptor / set / defineProperty /
+// deleteProperty / getPrototypeOf) collapses into the language
+// semantics: `in` checks own properties, `Object.keys` returns own
+// enumerables, `extend` (utils/objects.js) is descriptor-aware and
+// copies the get/set pair intact.
 //
-// defineProperty / deleteProperty / getPrototypeOf forward to
-// holder.target so callers that mutate the proxy via descriptor APIs
-// (e.g. Template.overlaySettingsSignals) hit the underlying data
-// object, not the holder.
+// Why `extend(record, target)` over `Object.assign(record, target)`:
+// extend is descriptor-aware. If target itself carries a getter (e.g.
+// nested subtemplate, or component-level `darkMode`), Object.assign
+// would invoke and snapshot the value. extend copies the descriptor,
+// preserving laziness. For non-getter target keys both produce the
+// same result.
+//
+// Absorb-set semantics: declared keys carry `set: () => {}` so that
+// `record.foo = x` is silently absorbed (matching the prior Proxy's
+// set trap on declared keys). The settingsScope-mirror path writes
+// Signal references onto the subtemplate's `settings` proxy directly,
+// not through this record, so absorb-set does not interfere with
+// overlay propagation.
 
-// No-op setter included in the getter descriptor so `extend`-style
-// copies (Object.defineProperty against this descriptor) accept
-// assignment when overlays write the same key. Writes are absorbed;
-// subsequent reads still resolve through the lazy getter.
 const ABSORB_SET = () => {};
 
-const ARGS_HANDLER = {
-  get(holder, prop) {
-    if (typeof prop === 'symbol') { return holder.target[prop]; }
-    const getter = holder.allGetters[prop];
-    if (getter !== undefined) { return getter(); }
-    return holder.target[prop];
-  },
-  set(holder, prop, value) {
-    if (prop in holder.allGetters) { return true; }
-    holder.target[prop] = value;
-    return true;
-  },
-  has(holder, prop) {
-    return (prop in holder.allGetters) || (prop in holder.target);
-  },
-  ownKeys(holder) {
-    const ownKeys = Reflect.ownKeys(holder.target);
-    const merged = [...holder.getterKeys];
-    for (const key of ownKeys) {
-      if (!(key in holder.allGetters)) { merged.push(key); }
-    }
-    return merged;
-  },
-  getOwnPropertyDescriptor(holder, prop) {
-    const getter = holder.allGetters[prop];
-    if (getter !== undefined) {
-      return { configurable: true, enumerable: true, get: getter, set: ABSORB_SET };
-    }
-    return Object.getOwnPropertyDescriptor(holder.target, prop);
-  },
-  defineProperty(holder, prop, descriptor) {
-    return Reflect.defineProperty(holder.target, prop, descriptor);
-  },
-  deleteProperty(holder, prop) {
-    return delete holder.target[prop];
-  },
-  getPrototypeOf(holder) {
-    return Reflect.getPrototypeOf(holder.target);
-  },
-};
+function buildArgsRecord({ node, parentData, evaluator, target }) {
+  // Declared-key collection. Two flavors: static (eager value) and
+  // expression (lazy lookup). Parallel arrays avoid an object allocation
+  // per declared key.
+  let keys = null;
+  let kinds = null; // 's' = static, 'e' = expression
+  let values = null; // static value or expression token
 
-function buildArgsProxy({ node, parentData, evaluator, target }) {
-  const allGetters = Object.create(null);
+  const declare = (key, kind, val) => {
+    if (keys === null) {
+      keys = [];
+      kinds = [];
+      values = [];
+    }
+    keys.push(key);
+    kinds.push(kind);
+    values.push(val);
+  };
 
   if (node.data) {
     if (isString(node.data)) {
       const evaluated = evaluator.lookupExpressionValue(node.data, parentData);
       if (isPlainObject(evaluated)) {
-        each(evaluated, (val, key) => {
-          allGetters[key] = () => val;
-        });
+        each(evaluated, (val, key) => declare(key, 's', val));
       }
     }
     else if (isPlainObject(node.data)) {
-      each(node.data, (expr, key) => {
-        allGetters[key] = () => evaluator.lookupExpressionValue(expr, parentData);
-      });
+      each(node.data, (expr, key) => declare(key, 'e', expr));
     }
   }
   if (node.reactiveData) {
-    each(node.reactiveData, (expr, key) => {
-      allGetters[key] = () => evaluator.lookupExpressionValue(expr, parentData);
-    });
+    each(node.reactiveData, (expr, key) => declare(key, 'e', expr));
   }
 
-  const getterKeys = Object.keys(allGetters);
   // Empty-args fast path — no-arg snippet invocations (`{>name}`) skip
-  // the Proxy entirely and use the parent data context directly.
-  if (getterKeys.length === 0) { return target; }
+  // the wrapper entirely and use the parent data context directly.
+  if (keys === null) { return target; }
 
-  return new Proxy({ target, allGetters, getterKeys }, ARGS_HANDLER);
+  // Flat record with shared Object.prototype proto. extend copies
+  // target's own descriptors (preserving any getters) before declared
+  // getters land on top, so every record built for the same node ends
+  // up with the same own-property shape.
+  const record = {};
+  extend(record, target);
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const val = values[i];
+    Object.defineProperty(record, key, {
+      configurable: true,
+      enumerable: true,
+      get: kinds[i] === 's'
+        ? () => val
+        : () => evaluator.lookupExpressionValue(val, parentData),
+      set: ABSORB_SET,
+    });
+  }
+  return record;
 }
 
 // Read name nonreactively for kind detection so name changes (which
@@ -231,13 +229,14 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
   if (self.parentTemplate?.element) { instance.setElement(self.parentTemplate.element); }
   if (self.parentTemplate) { instance.setParent(self.parentTemplate); }
 
-  // For reactiveData subtemplates, install the lazy proxy as the
-  // instance's data ref. The proxy's target is the seeded blob already
-  // on instance.data, so non-arg keys (state, instance overlay added
-  // during initialize, blob keys) resolve via fall-through.
+  // For reactiveData subtemplates, install the lazy-getter record as
+  // the instance's data ref. The record's prototype is the seeded blob
+  // already on instance.data, so non-arg keys (state, instance overlay
+  // added during initialize, blob keys) resolve via prototype-chain
+  // fall-through.
   if (node?.reactiveData) {
-    const proxy = buildArgsProxy({ node, parentData, evaluator: self.evaluator, target: instance.data });
-    instance.data = proxy;
+    const record = buildArgsRecord({ node, parentData, evaluator: self.evaluator, target: instance.data });
+    instance.data = record;
   }
 
   Reaction.nonreactive(() => instance.initialize());
@@ -341,7 +340,7 @@ const templateBlock = defineBlock({
     if (kind === 'snippet') {
       const snippet = resolveSnippet(node.name, data, self);
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
-      const snippetData = buildArgsProxy({ node, parentData: data, evaluator: self.evaluator, target: data });
+      const snippetData = buildArgsRecord({ node, parentData: data, evaluator: self.evaluator, target: data });
       const fragment = renderAST({ ast: snippet.content, data: snippetData, scope, isSVG });
       region.setContent(fragment);
       return;
@@ -378,7 +377,7 @@ const templateBlock = defineBlock({
     if (kind === 'snippet') {
       const snippet = resolveSnippet(node.name, data, self);
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
-      const snippetData = buildArgsProxy({ node, parentData: data, evaluator: self.evaluator, target: data });
+      const snippetData = buildArgsRecord({ node, parentData: data, evaluator: self.evaluator, target: data });
       if (region.ownedNodes.length > 0) {
         // Snippet args reactivity is anchored on the block scope; a child
         // would dispose with the next region.clear() and break arg reactivity.
@@ -453,10 +452,13 @@ const templateBlock = defineBlock({
       attachToRenderRoot(self.currentInstance, region, self);
     }
     else {
-      // Same template — push blob data only. reactiveData propagation
-      // happens through the lazy proxy reads inside the subtemplate's
-      // bindings, not through this update path.
-      self.currentInstance.setDataContext(blobData, { rerender: false });
+      // Same template — `instance.render(blobData)` merges blobData into
+      // the instance's dataContext via additionalData, then setDataContext
+      // assigns the full result onto this.data. A separate setDataContext
+      // call here would be a destructive partial sync (small source vs full
+      // target → assignInPlace deletes everything not in blobData), only
+      // for render() to immediately re-assign the full set. That cycle was
+      // shape-thrashing V8 hidden classes on hot toggle paths.
       renderInstance(self.currentInstance, node, blobData);
     }
   },
