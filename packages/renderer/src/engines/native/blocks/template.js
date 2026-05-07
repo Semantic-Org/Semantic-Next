@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
-import { each, extend, fatal, isPlainObject, isString } from '@semantic-ui/utils';
+import { each, fatal, isPlainObject, isString } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
 import { isItemContext } from '../reactive-context.js';
 import { registerBlock } from './registry.js';
@@ -76,41 +76,36 @@ function unpackBlobData(node, data, evaluator) {
 
 // Lazy-getter record used by both snippets and subtemplates. Each
 // reactiveData entry (and each entry of a literal node.data object for
-// snippets) becomes a native ES getter descriptor on a flat plain
-// object. Source-signal deps register on whichever Reaction is current
-// at the read, so a binding's Reaction subscribes directly to its
-// inputs — per-key isolation is structural, not mediated by an
-// intermediate Dep layer.
+// snippets) becomes a native ES getter descriptor on a record that
+// inherits from `target` via the prototype chain. Source-signal deps
+// register on whichever Reaction is current at the read, so a binding's
+// Reaction subscribes directly to its inputs — per-key isolation is
+// structural, not mediated by an intermediate Dep layer.
 //
-// Shape: a fresh `{}` (proto = Object.prototype) with target's own
-// descriptors copied in via `extend`, then the declared getters defined
-// on top. Every record built for the same template node has the same
-// own-property progression in the same order, so V8 consolidates them
-// into one hidden class. That keeps the IC at every binding's read site
-// monomorphic — even when 1000 records exist for an each-block iteration.
+// Shape: `record = Object.create(target)` puts non-declared keys on the
+// prototype chain (state, instance overlay, parent context). Declared
+// keys live as own getter descriptors on the record. Reads of declared
+// keys invoke the getter (and register source-signal deps on the
+// current Reaction). Reads of non-declared keys fall through to target.
 //
-// Why NOT `Object.create(target)`: each subtemplate clone has its own
-// `instance.data` object, so a prototype-chain off `target` produced a
-// distinct hidden class chain per record. The IC at the binding's
-// `data[token]` read site went megamorphic across N records, regressing
-// real workloads (krausest remove-middle-10 +244%) by up to ~3.5x.
+// Why prototype-chain inheritance (not eager-merge): Template.render
+// triggers `assignInPlace(record, ...)` on every block update. With
+// preserveGetters=true the assignInPlace deletes any non-getter own
+// keys not present in the new source. If target's keys had been
+// merged onto the record as own properties, every block update would
+// delete them and Template.render would re-add them, thrashing V8's
+// hidden class. Keeping target keys on the prototype makes the
+// `delete record[k]` a no-op for inherited keys — shape stays stable.
 //
 // Why descriptors instead of a Proxy: a Proxy's get trap is a function
 // call into module code on every property read. Native getter
-// descriptors compile to the same hidden-class IC as a plain property
-// access — V8 inlines them. The trap surface that a Proxy would carry
-// (has / ownKeys / getOwnPropertyDescriptor / set / defineProperty /
-// deleteProperty / getPrototypeOf) collapses into the language
-// semantics: `in` checks own properties, `Object.keys` returns own
-// enumerables, `extend` (utils/objects.js) is descriptor-aware and
-// copies the get/set pair intact.
-//
-// Why `extend(record, target)` over `Object.assign(record, target)`:
-// extend is descriptor-aware. If target itself carries a getter (e.g.
-// nested subtemplate, or component-level `darkMode`), Object.assign
-// would invoke and snapshot the value. extend copies the descriptor,
-// preserving laziness. For non-getter target keys both produce the
-// same result.
+// descriptors compile down to the same hidden-class IC as a plain
+// property access — V8 inlines them. The trap surface that a Proxy
+// would carry (has / ownKeys / getOwnPropertyDescriptor / set /
+// defineProperty / deleteProperty / getPrototypeOf) collapses into the
+// language semantics: `in` walks the prototype chain, `Object.keys`
+// returns own enumerables, `extend` (utils/objects.js) is descriptor-
+// aware and copies the get/set pair intact.
 //
 // Absorb-set semantics: declared keys carry `set: () => {}` so that
 // `record.foo = x` is silently absorbed (matching the prior Proxy's
@@ -159,12 +154,9 @@ function buildArgsRecord({ node, parentData, evaluator, target }) {
   // the wrapper entirely and use the parent data context directly.
   if (keys === null) { return target; }
 
-  // Flat record with shared Object.prototype proto. extend copies
-  // target's own descriptors (preserving any getters) before declared
-  // getters land on top, so every record built for the same node ends
-  // up with the same own-property shape.
-  const record = {};
-  extend(record, target);
+  // target keys stay on the prototype chain so block-update's
+  // assignInPlace cycles don't thrash the record's own-property shape.
+  const record = Object.create(target);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
     const val = values[i];
