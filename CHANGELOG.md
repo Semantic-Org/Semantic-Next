@@ -30,6 +30,7 @@ xx.xx.xxxx
 
 ### Templates
 * **Bug** - Fixed `instanceof` brand check on `Template` to use prototype getter instead of class field — same fix as Signal and Query.
+* **Bug** - Fixed shorthand subtemplate `{>name data=expr}` routing the helper return through `reactiveData` instead of the data context — now matches the verbose `{> template name='child' data=expr}` form and the documented contract.
 
 ### Query
 * **Bug** - Fixed `instanceof` checks failing for `Query.wrap()` instances — brand property was a class field (set only in constructor) but `wrap()` uses `Object.create()`. Moved to prototype getter so all prototype-chain objects pass the check regardless of construction path.

@@ -336,8 +336,8 @@ RENDERING_ENGINES.forEach(engine => {
           tagName: tag,
           template: [
             '{#snippet leaf}<span>{value}</span>{/snippet}',
-            '{#snippet branch}{>leaf value=data}{/snippet}',
-            '{>branch data=(getLabel)}',
+            '{#snippet branch}{>leaf value=label}{/snippet}',
+            '{>branch label=(getLabel)}',
           ].join(''),
           defaultState: { count: 0 },
           createComponent: ({ state }) => ({
