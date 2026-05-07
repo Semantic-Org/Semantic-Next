@@ -517,6 +517,38 @@ describe('query', () => {
         const elements = $$('test-slot-component .parent .child');
         expect(elements.length).toBe(1);
       });
+
+      it('should find slotted root nodes that themselves match the selector', () => {
+        // Querying from a shadow root for a class that the slotted node itself
+        // carries (not a descendant) — the deep walk recurses into assignedNodes
+        // and must test each slotted node against the selector before recursing.
+        class TestSlotRoot extends HTMLElement {
+          constructor() {
+            super();
+            const shadow = this.attachShadow({ mode: 'open' });
+            const wrapper = document.createElement('div');
+            wrapper.appendChild(document.createElement('slot'));
+            shadow.appendChild(wrapper);
+          }
+        }
+        customElements.define('test-slot-root', TestSlotRoot);
+
+        const host = document.createElement('test-slot-root');
+        const slotted = document.createElement('div');
+        slotted.className = 'match';
+        slotted.textContent = 'slotted root matches selector';
+        host.appendChild(slotted);
+        document.body.appendChild(host);
+
+        try {
+          const results = $('.match', { root: host.shadowRoot, pierceShadow: true });
+          expect(results.length).toBe(1);
+          expect(results[0]).toBe(slotted);
+        }
+        finally {
+          host.remove();
+        }
+      });
     });
 
     // Complex boundary crossing tests

@@ -20,7 +20,7 @@ const createComponent = ({ settings }) => ({
 });
 
 defineComponent({
-  tagName: 'ui-table',
+  tagName: 'basic-table',
   template,
   css,
   defaultSettings,

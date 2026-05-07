@@ -29,39 +29,30 @@ jobs:
       # surface as GITHUB_TOKEN; branded, not widened.
       - name: Generate bot token
         id: bot-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.SEMANTIC_PERF_BOT_APP_ID }}
+          client-id: ${{ secrets.SEMANTIC_PERF_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_PERF_BOT_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: '.node-version'
 
       # Pin reporter to main. The PR cannot author the tool that renders
       # its own bench comment — classification thresholds, output format,
       # and peak attribution must be author-neutral. Overlaid before any
-      # downstream step that reads tools/bench-reporter/.
+      # downstream step that reads tools/ci/bench/reporter/.
       - name: Overlay reporter from main
         run: |
           git fetch origin main --depth=1
-          git checkout origin/main -- tools/bench-reporter/ 2>/dev/null || true
-
-      # Overlay main's bench-history.json onto the PR checkout so the
-      # reporter's peak-attribution runs against the freshest history,
-      # not whatever version was on the PR's branch point. `|| true` keeps
-      # the step non-fatal if main has no file yet (first run after D3a).
-      - name: Fetch latest bench-history.json from main
-        run: |
-          git fetch origin main --depth=1
-          git show origin/main:bench-history.json > bench-history.json 2>/dev/null || true
+          git checkout origin/main -- tools/ci/bench/reporter/ 2>/dev/null || true
 
       - name: Download bench artifacts
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v21
         with:
           github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
@@ -69,6 +60,7 @@ jobs:
           name_is_regexp: true
           name: results-.*
           path: results
+          allow_forks: true
 
       - name: Resolve PR number
         id: pr
@@ -93,7 +85,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
         run: |
-          node tools/bench-reporter/fetch-pr-history.js \
+          node tools/ci/bench/reporter/fetch-pr-history.js \
             --branch '${{ github.event.workflow_run.head_branch }}' \
             --repo '${{ github.repository }}' \
             --current-run-id '${{ github.event.workflow_run.id }}' \
@@ -105,7 +97,10 @@ jobs:
           ENDED: ${{ github.event.workflow_run.updated_at }}
         run: |
           WALL_CLOCK=$(( $(date -d "$ENDED" +%s) - $(date -d "$STARTED" +%s) ))
-          node tools/bench-reporter/reporter.js \
+          # --scope pr: peak attribution uses PR-iteration history only.
+          # main-history is still loaded for drift quantification but excluded
+          # from the comparison set.
+          node tools/ci/bench/reporter/reporter.js \
             --results results \
             --sha '${{ github.event.workflow_run.head_sha }}' \
             --msg '${{ github.event.workflow_run.display_title }}' \
@@ -114,11 +109,12 @@ jobs:
             --base-ref 'main' \
             --repo '${{ github.repository }}' \
             --pr-history pr-history.json \
+            --scope pr \
             --wall-clock "$WALL_CLOCK" \
             --out bench-report
 
       - name: Upload bench-report.json adjunct
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bench-report
           path: bench-report/bench-report.json
@@ -129,14 +125,20 @@ jobs:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
           PR: ${{ steps.pr.outputs.number }}
           REPO: ${{ github.repository }}
+          BOT_LOGIN: semantic-performance-bot[bot]
         run: |
-          # --edit-last finds the most recent comment from the authenticated
-          # user; with the bot token, that targets the bot's previous bench
-          # comment (not github-actions[bot]'s earlier artifacts).
-          if ! gh pr comment "$PR" --repo "$REPO" --edit-last \
-                --body-file bench-report/comment.md 2>/dev/null; then
-            gh pr comment "$PR" --repo "$REPO" \
-              --body-file bench-report/comment.md
+          # Explicit author-login lookup (not `gh pr comment --edit-last`):
+          # --edit-last queries comments by viewer identity, which can drift
+          # across short-lived installation-token rotations and silently
+          # create a duplicate comment instead of editing the prior one.
+          # Filtering REST results by `user.login` is stable across tokens.
+          EXISTING_ID=$(gh api "repos/$REPO/issues/$PR/comments" \
+            --jq "[.[] | select(.user.login == \"$BOT_LOGIN\")] | last | .id // empty")
+          if [ -n "$EXISTING_ID" ]; then
+            jq -nR --rawfile body bench-report/comment.md '{body: $body}' \
+              | gh api "repos/$REPO/issues/comments/$EXISTING_ID" -X PATCH --input -
+          else
+            gh pr comment "$PR" --repo "$REPO" --body-file bench-report/comment.md
           fi
 
   # History path: append this commit's absolute CIs to bench-history.json
@@ -159,26 +161,26 @@ jobs:
       # by Semantic Performance Bot rather than github-actions[bot].
       - name: Generate bot token
         id: bot-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.SEMANTIC_PERF_BOT_APP_ID }}
+          client-id: ${{ secrets.SEMANTIC_PERF_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_PERF_BOT_PRIVATE_KEY }}
 
       # Check out main's tip for the commit target. We push back to main,
       # so we need the most recent state — not the bench's head_sha (which
       # may have been superseded by a later merge during the ~10-min bench).
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: main
           fetch-depth: 2  # need HEAD~1 for parent_sha lookup
           token: ${{ steps.bot-token.outputs.token }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: '.node-version'
 
       - name: Download bench artifacts
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v21
         with:
           github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
@@ -186,23 +188,27 @@ jobs:
           name_is_regexp: true
           name: results-.*
           path: results
+          allow_forks: true
 
       - name: Append history entry
         run: |
-          # The benched commit is the workflow_run's head_sha (the merge
-          # commit on main). Parent comes from the git history we just
-          # fetched. Timestamp is the bench run's completion time so the
-          # history is ordered by when the measurement was taken, not
-          # when the commit landed.
+          # Benched commit is the workflow_run's head_sha; parent comes from
+          # the depth-2 fetch above. Timestamp is the bench run's completion
+          # so history is ordered by measurement, not commit-land time.
+          # baseline-sha.txt is the sidecar uploaded next to each matrix
+          # cell's tachometer JSON. Any cell's value works — all cells in
+          # one workflow_run benched against the same baseline.
           BENCHED_SHA='${{ github.event.workflow_run.head_sha }}'
           PARENT_SHA=$(git rev-parse "$BENCHED_SHA^" 2>/dev/null || echo '')
-          node tools/bench-reporter/append-history.js \
+          BASELINE_SHA=$(find results -name baseline-sha.txt -type f -exec cat {} \; -quit)
+          node tools/ci/bench/reporter/append-history.js \
             --results results \
             --sha "$BENCHED_SHA" \
             --msg '${{ github.event.workflow_run.display_title }}' \
             --parent-sha "$PARENT_SHA" \
+            --baseline-sha "$BASELINE_SHA" \
             --timestamp '${{ github.event.workflow_run.updated_at }}' \
-            --history bench-history.json
+            --history tools/ci/bench/reporter/bench-history.json
 
       - name: Commit + push
         env:
@@ -217,13 +223,13 @@ jobs:
           git config user.email '${{ secrets.SEMANTIC_PERF_BOT_APP_ID }}+semantic-performance-bot[bot]@users.noreply.github.com'
           # If nothing changed (e.g. a re-run for a SHA already archived with
           # identical numbers), skip rather than making an empty commit.
-          if git diff --quiet bench-history.json; then
+          if git diff --quiet tools/ci/bench/reporter/bench-history.json; then
             echo 'No change to bench-history.json; skipping commit.'
             exit 0
           fi
           BENCHED_SHA='${{ github.event.workflow_run.head_sha }}'
           SHORT_SHA=${BENCHED_SHA:0:7}
-          git add bench-history.json
+          git add tools/ci/bench/reporter/bench-history.json
           git commit -m "Chore: Archive bench history for $SHORT_SHA [skip ci]"
           # Narrow race: another merge may have landed on main while we were
           # running benches. Try push; if it's rejected as non-fast-forward,

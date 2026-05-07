@@ -12,6 +12,8 @@ type: skill
 > **Skill:** `testing`
 > **Purpose:** Repo-specific test conventions, environment selection, and patterns for writing tests in the Semantic UI monorepo
 
+> **Before designing tests:** This skill is mechanics — environments, runners, file placement. For _what_ to assert and how to derive expectations from user-facing intent, load `grounded-testing` first. The two skills are designed to be loaded together.
+
 ---
 
 ## Golden Rule
@@ -157,6 +159,31 @@ npx vitest --c tests/configs/vitest/vitest.config.js --run equality
 # Only node tests matching "equality"
 npx vitest --c tests/configs/vitest/vitest.config.js --run --project node equality
 ```
+
+### Wall-clock budget and stuck-process cleanup
+
+The full repo suite (`npm test` from root, ~3600 tests across 82 files) finishes in **~28s**.
+A **60-second timeout is plenty**; anything longer means something's stuck — almost always
+a leftover Vitest watcher (or its Playwright/Chromium spawns) holding ports from a previous
+session. A single package's browser suite should finish in well under 15s; if it doesn't,
+the culprit is the same.
+
+When you hit a timeout, don't just retry — kill the stragglers first:
+
+```bash
+# Find them
+ps aux | grep -iE "vitest|chrome-headless" | grep -v grep
+
+# Kill the parent vitest node processes (the chromium children die with them)
+kill <pid> <pid> ...
+
+# Confirm clear
+ps aux | grep -iE "vitest|chrome-headless" | grep -v grep | wc -l   # should be 0
+```
+
+Common signs of a stuck watcher: tests hang past the 2-minute budget, "Failed to fetch
+dynamically imported module" errors at random files (port collisions), or vitest output
+just never appears.
 
 ### Watch mode
 
@@ -341,8 +368,6 @@ await expect.element(page.elementLocator(result)).toHaveTextContent('1');
 
 Available retriable matchers: `toHaveTextContent()`, `toBeVisible()`, `toBeDisabled()`, `toBeEnabled()`, `toBeInTheDocument()`.
 
-Reference file: `packages/component/test/browser/vitest4-example.js` (example only, not an active test).
-
 ---
 
 ## Quick Reference
@@ -385,6 +410,9 @@ import { page, userEvent } from 'vitest/browser';  // browser tests only
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
+| **Grounded Testing** | `grounded-testing` | Deriving test expectations from user-facing intent before reading source — load alongside this skill when designing tests |
+| **Red-Team Testing** | `red-team-testing` | Subagent methodology for post-PR gap analysis |
+| **Test Infrastructure** | `testing-internals` | Modifying test runner config, adding test utilities, or changing the CI test pipeline |
 | **Repo Guide** | `repo-guide` | Navigating the monorepo structure |
 | **Component Authoring** | `component-authoring` | Understanding component architecture before testing |
 | **Internals** | `internals` | Deep understanding of framework internals |

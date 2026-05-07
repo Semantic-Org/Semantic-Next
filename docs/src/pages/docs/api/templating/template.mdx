@@ -10,7 +10,7 @@ methods: ['initialize', 'render', 'setDataContext', 'clone', 'attachEvents']
 
 The `Template` class represents a compiled template and provides methods for manipulating and rendering it. It integrates with the Semantic UI component system and supports various rendering engines.
 
-SUI is designed to be flexible in terms of how components are rendered, currently Semantic ships with the [`Lit`](https://lit.dev/) rendering engine which will compile templates to `lit html` for use with web components.
+Semantic UI ships with a `native` rendering engine by default, which renders templates directly to DOM. An optional [`Lit`](https://lit.dev/) engine compiles templates to `lit html` and is available when imported and registered explicitly.
 
 > **Advanced Use Only** When using Semantic UI components, a template will automatically be created from `defineComponent`. It **is not recommended to use `Template` class on its own** except for advanced use-cases.
 
@@ -43,12 +43,11 @@ new Template(options)
 | subTemplates   | Object   | Sub-templates used within this template    |
 | createComponent| Function | Function to create the component instance  |
 | parentTemplate | Template | The parent template when nested            |
-| renderingEngine| string   | The rendering engine to use (default: 'lit') |
+| renderingEngine| string   | The rendering engine to use (default: 'native') |
 | isPrototype    | boolean  | Whether this is a prototype template       |
 | attachStyles   | boolean  | Whether to attach styles to the renderRoot |
 | onCreated      | Function | Callback when the template is created      |
 | onRendered     | Function | Callback when the template is rendered     |
-| onUpdated      | Function | Callback when the template is updated      |
 | onDestroyed    | Function | Callback when the template is destroyed    |
 | onThemeChanged | Function | Callback when the theme changes            |
 
@@ -156,7 +155,7 @@ template.render(additionalData)
 | additionalData | Object | Additional data to merge for rendering |
 
 #### Returns
-`TemplateResult` - The rendered template content (typically a Lit TemplateResult).
+The rendered template content. The shape depends on the rendering engine — DOM nodes for `native`, a `TemplateResult` for `lit`.
 
 #### Usage
 ```javascript
@@ -202,7 +201,7 @@ template.setDataContext({ name: 'Jane' }, { rerender: true });
 
 ### clone
 
-Creates a copy of the template with optional new settings.
+Creates a new Template instance from a prototype. Each clone has its own data, element, and DOM bindings; AST, CSS, and callbacks are shared with the prototype by reference.
 
 #### Syntax
 ```javascript
@@ -210,24 +209,24 @@ template.clone(settings)
 ```
 
 #### Parameters
-| Name     | Type   | Description                          |
-|----------|--------|--------------------------------------|
-| settings | Object | New settings to apply to the clone   |
+| Name     | Type   | Description                                                    |
+|----------|--------|----------------------------------------------------------------|
+| settings | Object | Per-instance overrides like `data`, `element`, `parentTemplate` |
 
 #### Returns
-`Template` - A new Template instance.
+`Template` - A new Template instance derived from this prototype.
 
 #### Usage
 ```javascript
 import { Template } from '@semantic-ui/templating';
 
-const template = new Template({
+const prototype = new Template({
   templateName: 'greet-user',
   template: 'Welcome <b>{name}</b>',
-  data: { name: 'John' }
+  isPrototype: true,
 });
 
-const clonedTemplate = template.clone({ data: { name: 'Jane' } });
+const instance = prototype.clone({ data: { name: 'Jane' } });
 ```
 
 ### attachEvents

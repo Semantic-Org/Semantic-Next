@@ -1,6 +1,8 @@
 import { Signal } from '@semantic-ui/reactivity';
-import { arrayFromObject, isArray, isEmpty, isPlainObject, isString } from '@semantic-ui/utils';
+import { arrayFromObject, isArray, isEmpty } from '@semantic-ui/utils';
+import { isBlockClose, isBlockOpen } from '../../../build-html-string.js';
 import { defineBlock } from '../define-block.js';
+import { decodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from '../shared/each.js';
 import { registerBlock } from './registry.js';
 
 /*
@@ -15,33 +17,12 @@ import { registerBlock } from './registry.js';
   over *live* DOM, instead of dereferencing a stale childNodes snapshot
   taken at item-creation time.
 
-  Six plan fixes (ai/plans/native-renderer-blocks.md §EachBlock):
-    (1) dual update path — one set(), always a fresh wrapper object so
-        deep-equality sees distinct content at the outer level. Inner
-        refs are still shared; same-ref mutations still rely on notify()
-        for that one specific case (documented below)
-    (2) parallel collections — a single ordered ItemRecord[] replaces
-        itemMap + currentKeys; key lookup builds a transient Map per run
-    (3) __isItemProxy leakage — replaced with a WeakSet tracked inside
-        this module; template dispatch checks via isItemContext() import
-    (5) showingElse flag — else-content is a single ItemRecord entry with
-        isElse: true, rendered once when items is empty
-    (6) Proxy preservation — unchanged; the parent-data-fallthrough +
-        item-signal-reactivity pattern is load-bearing
-  Hydrate trusts server DOM and registers a dep on the collection — O(1)
-  per-item cost. On the first data change, `update` tries to adopt the
-  server-rendered per-item DOM (guided by `<!--sui-item:v1:KEY-->` markers
-  the ServerRenderer emitted) instead of nuking the region and rebuilding
-  from scratch. Keys that match receive a fresh itemSignal + Proxy and
-  their inner bindings are wired against the existing DOM via
-  hydrateInnerContent; keys that don't match fall through to a fresh
-  createRecord render. Subsequent mutations use the normal keyed reconcile
-  path. See ai/workspace/reference/perf/06-plans/09-each-hydration-dom-
-  reuse.md (Strategy D+E).
+  Hydrate adopts the server-rendered per-item DOM via
+  `<!--sui-item:v1:KEY-->` markers and wires per-item Reactions in
+  place — the same "register Reactions on hydrate" contract every
+  other block honors.
 
 */
-
-const SUI_ITEM_MARKER = 'sui-item:v1:';
 
 // Proxies created by this module go into the WeakSet; template.js checks
 // membership to decide when expression reads should register deps directly
@@ -53,45 +34,6 @@ export function isItemContext(data) {
 
 function getCollectionType(items) {
   return isArray(items) ? 'array' : 'object';
-}
-
-function getItemID(item, indexOrKey, collectionType) {
-  // Always stringify — the server emits keys as text inside
-  // `<!--sui-item:v1:KEY-->` comments, and Map / === compare by value
-  // identity. Without stringification, numeric item IDs on the client
-  // miss string keys on the server at adoption time (and records keyed
-  // as numbers from a fresh render would miss string keys on the next
-  // reconcile after adoption).
-  let raw;
-  if (isPlainObject(item)) {
-    const key = (collectionType === 'object') ? indexOrKey : undefined;
-    raw = key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
-  }
-  else if (isString(item)) {
-    raw = item + ':' + indexOrKey;
-  }
-  else {
-    raw = indexOrKey;
-  }
-  return String(raw);
-}
-
-function getEachData(item, indexOrKey, collectionType, node) {
-  let { as, indexAs } = node;
-  if (!indexAs) {
-    indexAs = (collectionType === 'array') ? 'index' : 'key';
-  }
-  if (collectionType === 'object') {
-    indexOrKey = item.key;
-    item = item.value;
-  }
-  // The wrapper is always a fresh object so Signal.set() sees a new
-  // top-level reference and doesn't short-circuit on identity. Inner
-  // properties are shallow-copied from item (for the no-`as` case) so
-  // mutations to item's own properties ARE captured at the wrapper level.
-  return as
-    ? { [as]: item, [indexAs]: indexOrKey }
-    : { ...item, this: item, [indexAs]: indexOrKey };
 }
 
 // Allocate once per record at first reconcile (createSnapshot). On
@@ -137,6 +79,11 @@ function refreshSnapshotAndDetect(snap, item) {
   return changed;
 }
 
+// Load-bearing: the parent-data fallthrough + item-signal reactivity
+// pattern is what lets `{name}` resolve to either an item field or a
+// parent-context binding without the caller knowing which. Flattening
+// this to a merged object would break per-item Signal subscriptions —
+// expressions wouldn't re-evaluate when the item mutates.
 function createItemDataProxy(parentData, itemSignal) {
   const proxy = new Proxy(parentData, {
     get(target, prop) {
@@ -392,26 +339,18 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   }
 
   // Phase 3: update item signals where item ref or index changed, OR
-  // where a retained same-ref item has mutated in place.
+  // where a retained same-ref item mutated in place.
   //
-  // Same-ref same-index objects bypass Signal.set's equality gate because
-  // the wrapper's `[as]: item` binding is reference-equal across calls
-  // and `isEqual` stops at ===. That's what forces the else-if notify()
-  // branch — but notify() unconditionally wakes every per-item binding,
-  // which for update-10th means the 900 untouched records pay the cost
-  // of the 100 genuinely-mutated ones. Instead, snapshot each item's
-  // top-level prop values at reconcile end; on the next reconcile,
-  // shallow-compare. Only notify when a prop actually changed.
-  //
-  // Preserves the subtree-caching §8 contract ("should update conditional
-  // branches when item data changes") — that test mutates
-  // `items[i].active` which is a top-level prop, so shallow-compare sees
-  // the change and we still notify. Nested-object mutations (items[i].nested.x)
-  // would slip past the shallow check, but no tests or documented contracts
-  // rely on that — same observable behavior as before for mutations that
-  // touch enumerable own props. The fresh-record skip is still gated by
-  // rec.propsSnapshot === null (created by createRecord with no snapshot;
-  // first phase-3 pass records one, subsequent passes compare).
+  // Same-ref same-index objects bypass Signal.set's equality gate (the
+  // wrapper's `[as]: item` is reference-equal across calls and isEqual
+  // stops at ===). The naive fix — calling notify() unconditionally —
+  // wakes every per-item binding on every reconcile, so unchanged
+  // records pay the cost of mutated ones. Instead, snapshot each item's
+  // top-level props at reconcile end and shallow-compare on the next
+  // pass, only firing notify() when a prop actually changed. Top-level
+  // prop mutations (items[i].active = ...) re-render dependent
+  // expressions; nested-object mutations (items[i].nested.x) slip past
+  // the shallow check, and no documented contract relies on them.
   for (let i = 0; i < newRecords.length; i++) {
     const rec = newRecords[i];
     const item = items[i];
@@ -486,26 +425,19 @@ function extractServerItemGroups(ownedNodes) {
   for (const n of ownedNodes) {
     if (n.nodeType === Node.COMMENT_NODE) {
       const data = n.data;
-      if (data.startsWith('sui-block:v1:')) {
+      if (isBlockOpen(data)) {
         blockDepth++;
         if (current) { current.nodes.push(n); }
         continue;
       }
-      if (data.startsWith('/sui-block:')) {
+      if (isBlockClose(data)) {
         blockDepth--;
         if (current) { current.nodes.push(n); }
         continue;
       }
       if (blockDepth === 0 && data.startsWith(SUI_ITEM_MARKER)) {
         if (current) { groups.push(current); }
-        const rawKey = data.slice(SUI_ITEM_MARKER.length);
-        let key;
-        try {
-          key = decodeURIComponent(rawKey);
-        }
-        catch {
-          key = rawKey;
-        }
+        const key = decodeItemKey(data.slice(SUI_ITEM_MARKER.length));
         current = { key, startComment: n, nodes: [] };
         continue;
       }
@@ -516,11 +448,12 @@ function extractServerItemGroups(ownedNodes) {
   return groups;
 }
 
-// First-data-change adoption path (Plan 09 Strategy D). Tries to reuse
-// server-rendered per-item DOM by matching item keys, wiring per-item
-// reactivity against the existing nodes via hydrateInnerContent. Returns
-// true on success, false if no server markers are present (legacy SSR
-// output — caller should fall through to nuke-and-rebuild).
+// Reuses server-rendered per-item DOM by matching item keys, wiring
+// per-item reactivity against the existing nodes via hydrateInnerContent.
+// Items with no matching server group render fresh; server groups whose
+// keys aren't claimed get disposed. The server unconditionally emits
+// `<!--sui-item:v1:KEY-->` markers for non-empty items (server.js); a
+// missing-markers shape here means a build/version mismatch.
 function adoptServerItems({
   self,
   items,
@@ -534,7 +467,9 @@ function adoptServerItems({
   isSVG,
 }) {
   const serverGroups = extractServerItemGroups(region.ownedNodes);
-  if (serverGroups.length === 0) { return false; }
+  if (serverGroups.length === 0) {
+    throw new Error('each.hydrate: server-rendered per-item markers missing — server/client renderer version mismatch');
+  }
 
   const serverByKey = new Map();
   for (const g of serverGroups) { serverByKey.set(g.key, g); }
@@ -557,9 +492,8 @@ function adoptServerItems({
 
       // Wire per-item reactivity on the existing DOM. hydrateInnerContent
       // moves the nodes into a temporary fragment, walks with
-      // hydrateMarkers (which honors Plan 04's data-sui-bind fast path
-      // against the block's inner entries), and leaves the hydrated
-      // nodes in `mutableNodes`.
+      // hydrateMarkers against the block's inner entries, and leaves the
+      // hydrated nodes in `mutableNodes`.
       const mutableNodes = [...serverGroup.nodes];
       hydrateInnerContent({
         ownedNodes: mutableNodes,
@@ -578,15 +512,11 @@ function adoptServerItems({
         serverGroup.startComment.replaceWith(startMarker);
       }
 
-      // Move [startMarker, ...mutableNodes, endMarker] into position
-      // after `insertAfter`. Server order generally matches client
-      // order so the contiguous range is already close to correct — we
-      // still reassemble via a fragment to guarantee endMarker lands
-      // right after the last item node regardless of intervening nodes.
+      // Sibling block markers can land between item boundaries —
+      // reassemble via fragment so endMarker follows the last item node,
+      // not whichever node happens to be last.
       const frag = document.createDocumentFragment();
-      frag.appendChild(startMarker);
-      for (const n of mutableNodes) { frag.appendChild(n); }
-      frag.appendChild(endMarker);
+      frag.append(startMarker, ...mutableNodes, endMarker);
       insertAfter.after(frag);
       insertAfter = endMarker;
 
@@ -631,14 +561,13 @@ function adoptServerItems({
   }
 
   self.records = newRecords;
-  return true;
 }
 
 const eachBlock = defineBlock({
   name: 'each',
 
   create() {
-    return { records: [], hasHydrated: false };
+    return { records: [] };
   },
 
   render({ node, data, scope, region, renderAST, lookupExpression, self, isSVG }) {
@@ -662,45 +591,43 @@ const eachBlock = defineBlock({
     });
   },
 
-  hydrate({ node, lookupExpression, self }) {
-    // Trust server DOM. Register a dep on the collection so the first data
-    // change invalidates the block — `update` then clears the region and
-    // rebuilds via reconcile. Per-item reactivity (text/attr Reactions
-    // inside item content) is established at that rebuild, not on hydrate.
-    lookupExpression(node.over);
-    self.hasHydrated = true;
-  },
-
-  update({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
+  hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, hydrateInto, self, isSVG }) {
     const { items, collectionType } = resolveItems(node, lookupExpression);
 
-    if (self.hasHydrated) {
-      self.hasHydrated = false;
-      if (items.length > 0) {
-        // Plan 09 — try to adopt server-rendered per-item DOM. If the
-        // server emitted sui-item:v1:KEY markers (Plan 09 SSR output),
-        // items whose keys match reuse their DOM; others render fresh.
-        // Subsequent mutations flow through the standard reconcile path
-        // below with a populated records array.
-        const adopted = adoptServerItems({
-          self,
-          items,
-          collectionType,
-          node,
-          data,
-          scope,
-          region,
-          renderAST,
-          hydrateInnerContent,
-          isSVG,
+    if (items.length === 0) {
+      if (node.elseContent) {
+        const elseScope = hydrateInto({ innerAST: node.elseContent });
+        self.records.push({
+          key: null,
+          item: null,
+          index: -1,
+          itemSignal: null,
+          startMarker: null,
+          endMarker: null,
+          scope: elseScope,
+          isElse: true,
+          propsSnapshot: null,
         });
-        if (adopted) { return; }
       }
-      // No per-item markers (legacy SSR output) or empty items — fall
-      // back to nuke-and-rebuild via the reconcile path below.
-      region.clear();
-      self.records.length = 0;
+      return;
     }
+
+    adoptServerItems({
+      self,
+      items,
+      collectionType,
+      node,
+      data,
+      scope,
+      region,
+      renderAST,
+      hydrateInnerContent,
+      isSVG,
+    });
+  },
+
+  update({ node, data, scope, region, renderAST, lookupExpression, self, isSVG }) {
+    const { items, collectionType } = resolveItems(node, lookupExpression);
 
     const showingElse = self.records.length === 1 && self.records[0].isElse;
 

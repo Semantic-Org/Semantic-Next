@@ -36,9 +36,8 @@ const rerender = defineBlock({
       : '{#rerender}',
 
   create({ renderer }) {
-    // Capture evaluator so hooks can call lookupTokenValue for the single-
-    // token node.key path. The 9-key hook bag doesn't expose it; this is
-    // the create() seam the plan names.
+    // Capture evaluator so hooks can call lookupTokenValue for the
+    // single-token node.key path — the hook bag doesn't expose it.
     return { evaluator: renderer.evaluator };
   },
 
@@ -49,14 +48,9 @@ const rerender = defineBlock({
 
   hydrate(ctx) {
     trackDeps(ctx);
-    const { node, data, scope, region, hydrateInnerContent } = ctx;
+    const { node, region, hydrateInto } = ctx;
     if (region.ownedNodes.length > 0 && node.content) {
-      const innerScope = scope.child();
-      region.childScopes.push(innerScope);
-      hydrateInnerContent({ ownedNodes: region.ownedNodes, innerAST: node.content, data, scope: innerScope });
-      const frag = document.createDocumentFragment();
-      for (const n of region.ownedNodes) { frag.appendChild(n); }
-      region.anchor.after(frag);
+      hydrateInto({ innerAST: node.content });
     }
   },
 

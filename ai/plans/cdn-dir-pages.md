@@ -56,11 +56,11 @@ Two top-level tabs: **Usage** and **Directory**.
 
 Entry point URL, import snippet, link to docs, list of available components. Component list sourced from specs at build time. Heaviest sub-page — depends on spec format.
 
-### Icons listing (`/icons/`) — not started
+### Icons listing (`/icons/`) — live
 
 Available libraries (lucide, phosphor, tabler, material-symbols, heroicons, brands), usage snippet showing `<ui-icon>` and `/load` with `icons` attribute. One code sample + one table.
 
-### Fonts listing (`/fonts/`) — not started
+### Fonts listing (`/fonts/`) — live
 
 Available fonts (lato), usage snippet showing `/load` with `fonts` attribute. Simplest page — one code sample, one table row.
 
@@ -107,4 +107,8 @@ None — `/load` endpoint and CDN Asset Sets both complete.
 
 ## Status
 
-Core implementation complete (2026-04-03). All 4 pages live (index, core, icons, fonts) + custom 404. Trailing-slash routing, CSS serving, upload pipeline all working. Remaining: build-time version injection, package file browser (future scope).
+Major dir pages live (root, icons, fonts) + custom 404, trailing-slash routing, CSS serving, upload pipeline. Remaining:
+
+- Per-package dir pages (`/core@0.18.0/` and other packages)
+- Package file browsers (deeper navigation into each package)
+- Build-time version injection across pages

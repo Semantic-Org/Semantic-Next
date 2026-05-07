@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+MSG_FILE="$1"
+
+if grep -qi 'Co-Authored-By:' "$MSG_FILE"; then
+  echo 'Error: Commit messages must not contain Co-Authored-By lines.'
+  exit 1
+fi
+
+if [ -n "$CLAUDECODE" ]; then
+  subject=$(head -1 "$MSG_FILE")
+  vocab='Feat|Bug|Docs|Chore|Harness|Test|Perf|Refactor|Build|Bench|BREAKING'
+  pattern="^(${vocab})(/(${vocab}))?(\\([a-z][a-z0-9-]*\\))?: [A-Z].*[^.]\$"
+  if ! echo "$subject" | grep -qE "$pattern"; then
+    cat <<EOF
+Error: Subject must match 'Category: Description' format.
+Got:      $subject
+Expected: Feat: Add cache for subtemplate renders
+          Feat(reactivity): Add foo                  (with monorepo scope)
+          Feat/Bug: Add protectedKeys to prevent X   (compound, rare)
+Vocabulary: Feat, Bug, Docs, Chore, Harness, Test, Perf, Refactor, Build, Bench, BREAKING
+Both category and description capitalized. No trailing period.
+EOF
+    exit 1
+  fi
+fi

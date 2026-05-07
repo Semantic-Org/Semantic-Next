@@ -14,7 +14,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const outdir = process.argv[2] || 'current';
 const outBase = join(__dirname, 'dist', outdir);
 
-const benchFiles = ['bench-krausest.js', 'bench-todo.js'];
+const benchFiles = ['bench-krausest.js', 'bench-todo.js', 'bench-hydrate.js', 'bench-template.js'];
 
 await Promise.all(benchFiles.map(file =>
   esbuild.build({

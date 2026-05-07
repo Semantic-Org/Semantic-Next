@@ -1,0 +1,1154 @@
+{
+  "close": {
+    "value": "x-mark",
+    "reason": "Heroicons uses 'x-mark' for the close/dismiss X symbol. Direct semantic match."
+  },
+  "back": {
+    "value": "arrow-left",
+    "reason": "Direct match. Standard left-pointing arrow for back navigation."
+  },
+  "next": {
+    "value": "arrow-right",
+    "reason": "Direct match. Standard right-pointing arrow for forward navigation."
+  },
+  "up": {
+    "value": "arrow-up",
+    "reason": "Direct match. Standard upward arrow."
+  },
+  "down": {
+    "value": "arrow-down",
+    "reason": "Direct match. Standard downward arrow."
+  },
+  "external-link": {
+    "value": "arrow-top-right-on-square",
+    "reason": "Heroicons uses 'arrow-top-right-on-square' for the open-in-new/external link concept. Arrow exiting a square."
+  },
+  "chevron-right": {
+    "value": "chevron-right",
+    "reason": "Direct match."
+  },
+  "chevron-down": {
+    "value": "chevron-down",
+    "reason": "Direct match."
+  },
+  "chevron-up": {
+    "value": "chevron-up",
+    "reason": "Direct match."
+  },
+  "chevron-left": {
+    "value": "chevron-left",
+    "reason": "Direct match."
+  },
+  "more": {
+    "value": "ellipsis-horizontal",
+    "reason": "Heroicons uses 'ellipsis-horizontal' for three horizontal dots. Direct semantic match for more options."
+  },
+  "more-options": {
+    "value": "ellipsis-vertical",
+    "reason": "Heroicons uses 'ellipsis-vertical' for three vertical dots (kebab menu). Direct semantic match."
+  },
+  "sidebar": {
+    "value": "bars-3-bottom-left",
+    "reason": "Three horizontal bars with bottom one shorter on the left side. Visually suggests sidebar/panel layout. Best available match in Heroicons."
+  },
+  "columns": {
+    "value": "view-columns",
+    "reason": "Heroicons 'view-columns' represents a multi-column layout. Direct semantic match."
+  },
+  "anchor": {
+    "value": null,
+    "reason": "No anchor or jump-to-section icon in Heroicons. 'link' exists but would conflict with the separate 'link' mapping and doesn't convey anchor semantics."
+  },
+  "user": {
+    "value": "user",
+    "reason": "Direct match. Standard single-person silhouette."
+  },
+  "avatar": {
+    "value": "user-circle",
+    "reason": "Heroicons 'user-circle' shows a user inside a circle. Exact match for avatar/profile picture."
+  },
+  "users": {
+    "value": "user-group",
+    "reason": "Heroicons 'user-group' shows multiple people. Direct semantic match for team/group."
+  },
+  "add-user": {
+    "value": "user-plus",
+    "reason": "Direct match. Person with a plus sign."
+  },
+  "remove-user": {
+    "value": "user-minus",
+    "reason": "Direct match. Person with a minus sign."
+  },
+  "assigned": {
+    "value": null,
+    "reason": "No user-check icon in Heroicons. Using generic 'user' would lose the 'verified/assigned' distinction."
+  },
+  "admin": {
+    "value": "shield-check",
+    "reason": "Heroicons 'shield-check' combines a shield with a checkmark. Conveys authority and verification, reasonable for admin."
+  },
+  "user-settings": {
+    "value": null,
+    "reason": "No user-cog or user-gear icon in Heroicons. Using generic 'user' would lose the 'settings' distinction."
+  },
+  "anonymous": {
+    "value": null,
+    "reason": "No incognito, mask, or anonymous user icon in Heroicons."
+  },
+  "roles": {
+    "value": null,
+    "reason": "No roles or permissions-specific icon in Heroicons. 'user-group' is already used for 'users'."
+  },
+  "login": {
+    "value": "arrow-right-end-on-rectangle",
+    "reason": "Heroicons 'arrow-right-end-on-rectangle' shows an arrow entering a rectangle. Standard login/sign-in metaphor."
+  },
+  "logout": {
+    "value": "arrow-left-start-on-rectangle",
+    "reason": "Heroicons 'arrow-left-start-on-rectangle' shows an arrow leaving a rectangle. Standard logout/sign-out metaphor."
+  },
+  "fingerprint": {
+    "value": "finger-print",
+    "reason": "Direct match (hyphenated as 'finger-print' in Heroicons). Standard biometric icon."
+  },
+  "add": {
+    "value": "plus",
+    "reason": "Direct match. Universal plus sign for add/create."
+  },
+  "edit": {
+    "value": "pencil-square",
+    "reason": "Heroicons has both 'pencil' and 'pencil-square'. 'pencil-square' (pencil on a square) is the standard edit icon in UI contexts, matching the edit-in-place concept."
+  },
+  "delete": {
+    "value": "trash",
+    "reason": "Direct match. Standard trash can icon."
+  },
+  "save": {
+    "value": null,
+    "reason": "Heroicons has no floppy disk or save icon. This is a well-known gap. 'document-arrow-down' is a download icon, not a save icon."
+  },
+  "check": {
+    "value": "check",
+    "reason": "Direct match. Simple checkmark for confirm/done/approve."
+  },
+  "refresh": {
+    "value": "arrow-path",
+    "reason": "Heroicons 'arrow-path' shows circular arrows forming a loop. Standard refresh/reload icon."
+  },
+  "undo": {
+    "value": "arrow-uturn-left",
+    "reason": "Heroicons 'arrow-uturn-left' is a U-turn arrow pointing left. Standard undo metaphor."
+  },
+  "redo": {
+    "value": "arrow-uturn-right",
+    "reason": "Heroicons 'arrow-uturn-right' is a U-turn arrow pointing right. Standard redo metaphor."
+  },
+  "copy": {
+    "value": "document-duplicate",
+    "reason": "Heroicons 'document-duplicate' shows two overlapping documents. Standard copy/duplicate icon."
+  },
+  "clipboard": {
+    "value": "clipboard",
+    "reason": "Direct match. Standard clipboard icon."
+  },
+  "copied": {
+    "value": "clipboard-document-check",
+    "reason": "Heroicons 'clipboard-document-check' shows a clipboard with a checkmark. Exact match for copied/confirmed clipboard action."
+  },
+  "paste": {
+    "value": "clipboard-document",
+    "reason": "Heroicons 'clipboard-document' shows a clipboard with a document. Reasonable match for paste (content on clipboard ready to place)."
+  },
+  "cut": {
+    "value": "scissors",
+    "reason": "Direct match. Universal scissors icon for cut."
+  },
+  "move": {
+    "value": null,
+    "reason": "No move/four-directional arrow icon in Heroicons. 'arrows-pointing-out' is expand/fullscreen, not move."
+  },
+  "drag-handle": {
+    "value": "bars-2",
+    "reason": "Heroicons 'bars-2' shows two horizontal bars. Commonly used as a drag handle indicator. No grip-dots icon available."
+  },
+  "upload": {
+    "value": "arrow-up-tray",
+    "reason": "Heroicons 'arrow-up-tray' shows an upward arrow with a tray. Standard upload icon."
+  },
+  "download": {
+    "value": "arrow-down-tray",
+    "reason": "Heroicons 'arrow-down-tray' shows a downward arrow with a tray. Standard download icon."
+  },
+  "import": {
+    "value": "arrow-down-on-square",
+    "reason": "Heroicons 'arrow-down-on-square' shows a downward arrow onto a square. Reasonable match for importing data."
+  },
+  "export": {
+    "value": "arrow-up-on-square",
+    "reason": "Heroicons 'arrow-up-on-square' shows an upward arrow from a square. Reasonable match for exporting data."
+  },
+  "print": {
+    "value": "printer",
+    "reason": "Direct match. Standard printer icon."
+  },
+  "share": {
+    "value": "share",
+    "reason": "Direct match. Standard share icon."
+  },
+  "send": {
+    "value": "paper-airplane",
+    "reason": "Heroicons 'paper-airplane' is the standard send/submit icon. Direct semantic match."
+  },
+  "zap": {
+    "value": "bolt",
+    "reason": "Heroicons 'bolt' is a lightning bolt. Direct semantic match for fast/instant action."
+  },
+  "checkbox": {
+    "value": null,
+    "reason": "No checkbox icon in Heroicons. 'check' is a standalone checkmark without a bounding square."
+  },
+  "checkbox-empty": {
+    "value": null,
+    "reason": "No empty checkbox (square outline) icon in Heroicons."
+  },
+  "toggle": {
+    "value": null,
+    "reason": "No toggle switch icon in Heroicons."
+  },
+  "toggle-off": {
+    "value": null,
+    "reason": "No toggle switch icon in Heroicons."
+  },
+  "file": {
+    "value": "document",
+    "reason": "Heroicons uses 'document' for a generic file icon (blank page). Exact match."
+  },
+  "document": {
+    "value": "document-text",
+    "reason": "Heroicons 'document-text' shows a page with text lines, matching 'text document'."
+  },
+  "pdf": {
+    "value": null,
+    "reason": "No PDF-specific icon in Heroicons. 'document' is too generic to be a good match."
+  },
+  "folder": {
+    "value": "folder",
+    "reason": "Direct match."
+  },
+  "new-folder": {
+    "value": "folder-plus",
+    "reason": "Heroicons 'folder-plus' is a folder with a plus sign. Exact semantic match."
+  },
+  "open-folder": {
+    "value": "folder-open",
+    "reason": "Direct match."
+  },
+  "archive": {
+    "value": "archive-box",
+    "reason": "Heroicons 'archive-box' represents an archive/box. Good match."
+  },
+  "zip": {
+    "value": null,
+    "reason": "No compressed file or zip icon in Heroicons."
+  },
+  "attachment": {
+    "value": "paper-clip",
+    "reason": "Heroicons 'paper-clip' is the standard attachment/paperclip icon. Exact match."
+  },
+  "link": {
+    "value": "link",
+    "reason": "Direct match."
+  },
+  "unlink": {
+    "value": "link-slash",
+    "reason": "Heroicons added 'link-slash' to represent a broken/removed link. Added in v2.1."
+  },
+  "image": {
+    "value": "photo",
+    "reason": "Heroicons uses 'photo' for an image/picture icon. Exact semantic match."
+  },
+  "gallery": {
+    "value": null,
+    "reason": "No multi-image or gallery icon in Heroicons. 'photo' is singular only."
+  },
+  "video": {
+    "value": "video-camera",
+    "reason": "Heroicons uses 'video-camera' for video. Also has 'film' but video-camera is more standard."
+  },
+  "camera": {
+    "value": "camera",
+    "reason": "Direct match."
+  },
+  "camera-off": {
+    "value": null,
+    "reason": "Heroicons has 'video-camera-slash' but no 'camera-slash' or camera-off equivalent for still cameras."
+  },
+  "volume": {
+    "value": "speaker-wave",
+    "reason": "Heroicons 'speaker-wave' shows a speaker with sound waves. Good match for volume on."
+  },
+  "volume-low": {
+    "value": null,
+    "reason": "No low-volume speaker variant in Heroicons. Only 'speaker-wave' (full) and 'speaker-x-mark' (muted)."
+  },
+  "mute": {
+    "value": "speaker-x-mark",
+    "reason": "Heroicons 'speaker-x-mark' shows a speaker with an X. Exact match for muted."
+  },
+  "music": {
+    "value": "musical-note",
+    "reason": "Heroicons 'musical-note' represents music/audio. Exact semantic match."
+  },
+  "microphone": {
+    "value": "microphone",
+    "reason": "Direct match."
+  },
+  "microphone-off": {
+    "value": null,
+    "reason": "No microphone-off or microphone-slash icon confirmed in Heroicons v2."
+  },
+  "headphones": {
+    "value": null,
+    "reason": "No headphones icon in Heroicons."
+  },
+  "podcast": {
+    "value": null,
+    "reason": "No podcast-specific icon in Heroicons."
+  },
+  "broadcast": {
+    "value": "signal",
+    "reason": "Heroicons 'signal' represents wireless/broadcast signal. Reasonable match for broadcast/live."
+  },
+  "crop": {
+    "value": null,
+    "reason": "No crop/trim icon in Heroicons."
+  },
+  "rotate": {
+    "value": null,
+    "reason": "No rotate icon in Heroicons. 'arrow-path' is a loop, not a rotation."
+  },
+  "play": {
+    "value": "play",
+    "reason": "Direct match. Standalone play triangle icon."
+  },
+  "pause": {
+    "value": "pause",
+    "reason": "Direct match. Standalone pause icon."
+  },
+  "stop": {
+    "value": "stop-circle",
+    "reason": "No standalone 'stop' icon exists. 'stop-circle' (stop inside a circle) is the closest available."
+  },
+  "skip-next": {
+    "value": "forward",
+    "reason": "Heroicons 'forward' represents skip to next track. Good match."
+  },
+  "skip-previous": {
+    "value": "backward",
+    "reason": "Heroicons 'backward' represents skip to previous track. Good match."
+  },
+  "fast-forward": {
+    "value": null,
+    "reason": "No fast-forward icon in Heroicons. 'forward' is skip-next, not fast-forward."
+  },
+  "rewind": {
+    "value": null,
+    "reason": "No rewind icon in Heroicons. 'backward' is skip-previous, not rewind."
+  },
+  "shuffle": {
+    "value": null,
+    "reason": "No shuffle/random icon in Heroicons."
+  },
+  "repeat": {
+    "value": "arrow-path",
+    "reason": "Heroicons 'arrow-path' shows circular arrows forming a loop. Reasonable match for repeat/loop."
+  },
+  "record": {
+    "value": null,
+    "reason": "No record icon (filled circle) in Heroicons."
+  },
+  "brush": {
+    "value": "paint-brush",
+    "reason": "Heroicons 'paint-brush' is a brush/paint icon. Exact semantic match."
+  },
+  "pen": {
+    "value": "pencil",
+    "reason": "Heroicons has 'pencil' (simple pencil) and 'pencil-square' (pencil with square). 'pencil' is the better match for a drawing/pen tool."
+  },
+  "color": {
+    "value": "eye-dropper",
+    "reason": "Heroicons 'eye-dropper' is a color picker/eyedropper tool. Exact semantic match."
+  },
+  "eraser": {
+    "value": null,
+    "reason": "No eraser icon in Heroicons."
+  },
+  "filter": {
+    "value": "funnel",
+    "reason": "Heroicons' 'funnel' is the standard filter icon, a funnel/cone shape for filtering results"
+  },
+  "sort": {
+    "value": "bars-arrow-down",
+    "reason": "Heroicons' 'bars-arrow-down' shows horizontal bars with a downward arrow, representing sort order"
+  },
+  "list": {
+    "value": "list-bullet",
+    "reason": "Heroicons' 'list-bullet' shows a bulleted list layout, direct match for list view"
+  },
+  "table": {
+    "value": "table-cells",
+    "reason": "Heroicons' 'table-cells' shows a grid of table cells, direct match for table/spreadsheet view"
+  },
+  "grid": {
+    "value": "squares-2x2",
+    "reason": "Heroicons' 'squares-2x2' shows a 2x2 grid of squares, standard grid/card view icon"
+  },
+  "chart-bar": {
+    "value": "chart-bar",
+    "reason": "Heroicons' 'chart-bar' is a direct name match for bar chart visualization"
+  },
+  "chart-line": {
+    "value": null,
+    "reason": "Heroicons has no line chart icon. Only chart-bar and chart-pie are available; no line/trend chart exists"
+  },
+  "chart-pie": {
+    "value": "chart-pie",
+    "reason": "Heroicons' 'chart-pie' is a direct name match for pie chart visualization"
+  },
+  "view": {
+    "value": "eye",
+    "reason": "Heroicons' 'eye' is the standard visibility/show icon, direct semantic match"
+  },
+  "hide": {
+    "value": "eye-slash",
+    "reason": "Heroicons' 'eye-slash' is the standard hide/invisible icon, an eye with a diagonal slash"
+  },
+  "search": {
+    "value": "magnifying-glass",
+    "reason": "Heroicons renamed 'search' to 'magnifying-glass' in v2, the standard search icon"
+  },
+  "zoom-in": {
+    "value": "magnifying-glass-plus",
+    "reason": "Heroicons' 'magnifying-glass-plus' shows a magnifying glass with a plus sign for zoom in"
+  },
+  "zoom-out": {
+    "value": "magnifying-glass-minus",
+    "reason": "Heroicons' 'magnifying-glass-minus' shows a magnifying glass with a minus sign for zoom out"
+  },
+  "fullscreen": {
+    "value": "arrows-pointing-out",
+    "reason": "Heroicons' 'arrows-pointing-out' shows four arrows pointing outward, the standard maximize/fullscreen icon"
+  },
+  "exit-fullscreen": {
+    "value": "arrows-pointing-in",
+    "reason": "Heroicons' 'arrows-pointing-in' shows four arrows pointing inward, the standard minimize/exit fullscreen icon"
+  },
+  "board": {
+    "value": "view-columns",
+    "reason": "Heroicons' 'view-columns' shows a columnar layout, the closest match to a kanban/board view"
+  },
+  "activity": {
+    "value": null,
+    "reason": "Heroicons has no activity/pulse icon. There is no heartbeat, waveform, or activity monitor equivalent in the set"
+  },
+  "success": {
+    "value": "check-circle",
+    "reason": "Heroicons' 'check-circle' is a checkmark inside a circle, the universal success/complete indicator"
+  },
+  "error": {
+    "value": "x-circle",
+    "reason": "Heroicons' 'x-circle' is an X inside a circle, the standard error/failed indicator"
+  },
+  "warning": {
+    "value": "exclamation-triangle",
+    "reason": "Heroicons' 'exclamation-triangle' is an exclamation mark in a triangle, the universal warning/caution symbol"
+  },
+  "info": {
+    "value": "information-circle",
+    "reason": "Heroicons' 'information-circle' is an 'i' inside a circle, the standard information indicator"
+  },
+  "help": {
+    "value": "question-mark-circle",
+    "reason": "Heroicons' 'question-mark-circle' is a question mark inside a circle, the standard help/FAQ icon"
+  },
+  "loading": {
+    "value": "arrow-path",
+    "reason": "Heroicons' 'arrow-path' shows circular arrows suggesting refresh/loading. Heroicons has no dedicated spinner icon, and this is the closest match"
+  },
+  "filled-circle": {
+    "value": null,
+    "reason": "Heroicons has no filled circle/dot icon. There is no solid disc, radio-selected, or dot indicator in the set"
+  },
+  "empty-circle": {
+    "value": null,
+    "reason": "Heroicons has no empty circle outline icon suitable for an inactive/unselected radio state"
+  },
+  "verified": {
+    "value": "check-badge",
+    "reason": "Heroicons' 'check-badge' is a badge with a checkmark, the standard verified/trusted indicator"
+  },
+  "smile": {
+    "value": "face-smile",
+    "reason": "Heroicons' 'face-smile' is a smiling face emoji, direct semantic match for happy/satisfied mood"
+  },
+  "frown": {
+    "value": "face-frown",
+    "reason": "Heroicons' 'face-frown' is a frowning face emoji, direct semantic match for sad/dissatisfied mood"
+  },
+  "fire": {
+    "value": "fire",
+    "reason": "Heroicons' 'fire' is a direct name match, a flame icon for hot/trending content"
+  },
+  "tip": {
+    "value": "light-bulb",
+    "reason": "Heroicons' 'light-bulb' is the standard tip/idea/hint icon, a lightbulb shape"
+  },
+  "support": {
+    "value": "lifebuoy",
+    "reason": "Heroicons' 'lifebuoy' is a life preserver ring, the standard support/help icon"
+  },
+  "like": {
+    "value": "heart",
+    "reason": "Heroicons' 'heart' is the standard like/favorite icon, a heart shape"
+  },
+  "unlike": {
+    "value": null,
+    "reason": "Heroicons has no broken heart or heart-crack icon. No suitable unlike/unfavorite equivalent exists"
+  },
+  "star": {
+    "value": "star",
+    "reason": "Heroicons' 'star' is a direct name match, the standard star/favorite/rating icon"
+  },
+  "bookmark": {
+    "value": "bookmark",
+    "reason": "Heroicons' 'bookmark' is a direct name match, the standard save-for-later icon"
+  },
+  "thumbs-up": {
+    "value": "hand-thumb-up",
+    "reason": "Heroicons' 'hand-thumb-up' is a thumbs-up gesture, the standard upvote/approval icon"
+  },
+  "thumbs-down": {
+    "value": "hand-thumb-down",
+    "reason": "Heroicons' 'hand-thumb-down' is a thumbs-down gesture, the standard downvote/disapproval icon"
+  },
+  "reply": {
+    "value": "arrow-uturn-left",
+    "reason": "Heroicons' 'arrow-uturn-left' is a curved arrow pointing back, the standard reply icon pattern"
+  },
+  "comment": {
+    "value": "chat-bubble-left",
+    "reason": "Heroicons' 'chat-bubble-left' is a single speech bubble, direct match for comment/message"
+  },
+  "comments": {
+    "value": "chat-bubble-left-right",
+    "reason": "Heroicons' 'chat-bubble-left-right' shows two overlapping speech bubbles, representing multiple comments/discussion"
+  },
+  "typing": {
+    "value": "chat-bubble-left-ellipsis",
+    "reason": "Heroicons' 'chat-bubble-left-ellipsis' is a speech bubble with three dots, the standard typing/composing indicator"
+  },
+  "mention": {
+    "value": "at-symbol",
+    "reason": "Heroicons' 'at-symbol' is the @ sign, the universal mention/at symbol"
+  },
+  "block": {
+    "value": "no-symbol",
+    "reason": "Heroicons' 'no-symbol' is a circle with a diagonal line through it, the standard block/ban/prohibited icon"
+  },
+  "flag": {
+    "value": "flag",
+    "reason": "Heroicons' 'flag' is a direct name match, the standard flag/report icon"
+  },
+  "pin": {
+    "value": null,
+    "reason": "Heroicons has no thumbtack/pin icon. There is a map-pin but it represents geographic location, not a pinned/bookmarked item"
+  },
+  "award": {
+    "value": null,
+    "reason": "Heroicons has no award ribbon or badge/achievement icon. 'check-badge' is for verification, not awards. No suitable match"
+  },
+  "trophy": {
+    "value": "trophy",
+    "reason": "Heroicons' 'trophy' is a direct name match, the standard achievement/winner icon"
+  },
+  "gift": {
+    "value": "gift",
+    "reason": "Heroicons' 'gift' is a direct name match, the standard gift/reward/present icon"
+  },
+  "target": {
+    "value": null,
+    "reason": "Heroicons has no target/bullseye/crosshair icon suitable for goal/target. The 'viewfinder-circle' is a camera viewfinder, not a target"
+  },
+  "bold": {
+    "value": "bold",
+    "reason": "Heroicons' 'bold' is a direct name match for bold text formatting (letter B)"
+  },
+  "italic": {
+    "value": "italic",
+    "reason": "Heroicons' 'italic' is a direct name match for italic text formatting (letter I)"
+  },
+  "underline": {
+    "value": "underline",
+    "reason": "Heroicons' 'underline' is a direct name match for underline text formatting (letter U with underline)"
+  },
+  "strikethrough": {
+    "value": "strikethrough",
+    "reason": "Heroicons' 'strikethrough' is a direct name match for strikethrough text formatting"
+  },
+  "code": {
+    "value": "code-bracket",
+    "reason": "Heroicons' 'code-bracket' shows angle brackets <>, the standard code/markup icon"
+  },
+  "quote": {
+    "value": null,
+    "reason": "Heroicons has no blockquote or quotation mark icon. No suitable match for blockquote formatting"
+  },
+  "heading": {
+    "value": "h1",
+    "reason": "Heroicons' 'h1' was added in v2.1.5 as a text formatting icon, representing a primary heading"
+  },
+  "paragraph": {
+    "value": null,
+    "reason": "Heroicons has no paragraph pilcrow icon. No paragraph formatting equivalent exists"
+  },
+  "bullet-list": {
+    "value": "list-bullet",
+    "reason": "Heroicons' 'list-bullet' is a bulleted list icon, direct semantic match for unordered lists"
+  },
+  "numbered-list": {
+    "value": "numbered-list",
+    "reason": "Heroicons' 'numbered-list' was added in v2.1.5 as a text formatting icon, direct name match for ordered lists"
+  },
+  "checklist": {
+    "value": null,
+    "reason": "Heroicons has no checklist or todo-list icon. The 'clipboard-document-check' is for document verification, not a checklist editor tool"
+  },
+  "indent": {
+    "value": null,
+    "reason": "Heroicons has no indent icon. No text indentation formatting equivalent exists in the set"
+  },
+  "outdent": {
+    "value": null,
+    "reason": "Heroicons has no outdent/dedent icon. No text outdentation formatting equivalent exists in the set"
+  },
+  "align-left": {
+    "value": null,
+    "reason": "Heroicons has no text alignment icons. Bars-3/bars-3-bottom-left are navigation menus, not text alignment"
+  },
+  "align-center": {
+    "value": null,
+    "reason": "Heroicons has no text alignment icons. No center-align formatting equivalent exists"
+  },
+  "align-right": {
+    "value": null,
+    "reason": "Heroicons has no text alignment icons. No right-align formatting equivalent exists"
+  },
+  "justify": {
+    "value": null,
+    "reason": "Heroicons has no text alignment icons. No justify formatting equivalent exists"
+  },
+  "emoji": {
+    "value": "face-smile",
+    "reason": "Heroicons' 'face-smile' is a smiley face, the standard emoji picker trigger icon"
+  },
+  "cart": {
+    "value": "shopping-cart",
+    "reason": "Direct match; Heroicons has 'shopping-cart' icon for e-commerce cart"
+  },
+  "add-to-cart": {
+    "value": null,
+    "reason": "Heroicons does not have a cart-plus or add-to-cart variant; only 'shopping-cart' exists without add/remove modifiers"
+  },
+  "remove-from-cart": {
+    "value": null,
+    "reason": "Heroicons does not have a cart-minus or remove-from-cart variant"
+  },
+  "payment": {
+    "value": "credit-card",
+    "reason": "Direct match; Heroicons has 'credit-card' icon for payment/billing"
+  },
+  "wallet": {
+    "value": "wallet",
+    "reason": "Direct match; Heroicons has 'wallet' icon"
+  },
+  "money": {
+    "value": "banknotes",
+    "reason": "Heroicons 'banknotes' represents paper money/currency; best match for money/dollar. Also available: 'currency-dollar', 'currency-euro', etc."
+  },
+  "tag": {
+    "value": "tag",
+    "reason": "Direct match; Heroicons has 'tag' icon for price tag/label"
+  },
+  "tags": {
+    "value": null,
+    "reason": "Heroicons does not have a multi-tag icon; only singular 'tag' exists"
+  },
+  "discount": {
+    "value": "percent-badge",
+    "reason": "Heroicons 'percent-badge' shows a percent symbol in a badge; closest match for discount/percentage"
+  },
+  "coupon": {
+    "value": "ticket",
+    "reason": "Heroicons 'ticket' represents a coupon/ticket; best available match since Heroicons has no dedicated coupon icon"
+  },
+  "package": {
+    "value": "cube",
+    "reason": "Heroicons 'cube' is a 3D box shape commonly used for packages/modules; no dedicated shipping-box icon exists"
+  },
+  "shipping": {
+    "value": "truck",
+    "reason": "Direct match; Heroicons has 'truck' icon for shipping/delivery"
+  },
+  "delivery": {
+    "value": "truck",
+    "reason": "Heroicons 'truck' is the only delivery-related icon; no express/fast delivery variant exists"
+  },
+  "return": {
+    "value": "receipt-refund",
+    "reason": "Heroicons 'receipt-refund' shows a receipt with a return arrow; best match for return/refund"
+  },
+  "receipt": {
+    "value": "receipt-percent",
+    "reason": "Heroicons 'receipt-percent' is a receipt icon; closest dedicated receipt icon in the set"
+  },
+  "invoice": {
+    "value": "document-text",
+    "reason": "Heroicons 'document-text' is the closest match for invoice; a text document representing a formal document. No dedicated invoice icon exists"
+  },
+  "store": {
+    "value": "building-storefront",
+    "reason": "Direct match; Heroicons 'building-storefront' represents a store/shop with an awning"
+  },
+  "shopping-bag": {
+    "value": "shopping-bag",
+    "reason": "Direct match; Heroicons has 'shopping-bag' icon"
+  },
+  "calendar": {
+    "value": "calendar",
+    "reason": "Direct match; Heroicons has 'calendar' icon for date selection"
+  },
+  "schedule": {
+    "value": "calendar-days",
+    "reason": "Heroicons 'calendar-days' shows a calendar with visible day numbers; best match for schedule/events view"
+  },
+  "scheduled": {
+    "value": "calendar-date-range",
+    "reason": "Heroicons 'calendar-date-range' represents a date range selection; closest match for scheduled/due date since no calendar-check exists"
+  },
+  "overdue": {
+    "value": null,
+    "reason": "Heroicons does not have a calendar-x or calendar with warning icon; no satisfactory match for overdue/deadline"
+  },
+  "time": {
+    "value": "clock",
+    "reason": "Direct match; Heroicons has 'clock' icon for time"
+  },
+  "timer": {
+    "value": null,
+    "reason": "Heroicons does not have a stopwatch, timer, or countdown icon"
+  },
+  "watch": {
+    "value": null,
+    "reason": "Heroicons does not have a smartwatch or wristwatch icon"
+  },
+  "layers": {
+    "value": "rectangle-stack",
+    "reason": "Heroicons 'rectangle-stack' shows stacked rectangles; best match for layers/stack concept"
+  },
+  "subtask": {
+    "value": null,
+    "reason": "Heroicons does not have a subtask or child-task icon; no hierarchy-branch icon exists"
+  },
+  "tree": {
+    "value": null,
+    "reason": "Heroicons does not have a tree/hierarchy/sitemap/org-chart icon"
+  },
+  "progress": {
+    "value": null,
+    "reason": "Heroicons does not have a progress bar or progress indicator icon"
+  },
+  "milestone": {
+    "value": null,
+    "reason": "Heroicons does not have a milestone or diamond/gem icon suitable for project milestones"
+  },
+  "tasks": {
+    "value": "clipboard-document-list",
+    "reason": "Heroicons 'clipboard-document-list' shows a clipboard with a list; best match for task list/todo management"
+  },
+  "location": {
+    "value": "map-pin",
+    "reason": "Direct match; Heroicons has 'map-pin' icon for location markers"
+  },
+  "map": {
+    "value": "map",
+    "reason": "Direct match; Heroicons has 'map' icon for map view"
+  },
+  "directions": {
+    "value": null,
+    "reason": "Heroicons does not have a directions/route/navigation-arrow icon"
+  },
+  "compass": {
+    "value": null,
+    "reason": "Heroicons does not have a compass icon"
+  },
+  "current-location": {
+    "value": null,
+    "reason": "Heroicons does not have a crosshairs or current-location/near-me icon"
+  },
+  "measure": {
+    "value": null,
+    "reason": "Heroicons does not have a ruler or measurement/distance icon"
+  },
+  "trending-up": {
+    "value": "arrow-trending-up",
+    "reason": "Direct match; Heroicons has 'arrow-trending-up' for upward trends/growth"
+  },
+  "trending-down": {
+    "value": "arrow-trending-down",
+    "reason": "Direct match; Heroicons has 'arrow-trending-down' for downward trends/decline"
+  },
+  "balance": {
+    "value": "scale",
+    "reason": "Direct match; Heroicons has 'scale' icon for balance/justice/weighing"
+  },
+  "swap": {
+    "value": "arrows-right-left",
+    "reason": "Heroicons 'arrows-right-left' shows bidirectional arrows; best match for transfer/swap/exchange"
+  },
+  "savings": {
+    "value": null,
+    "reason": "Heroicons does not have a piggy bank or savings icon"
+  },
+  "vault": {
+    "value": null,
+    "reason": "Heroicons does not have a vault or safe icon"
+  },
+  "briefcase": {
+    "value": "briefcase",
+    "reason": "Direct match; Heroicons has 'briefcase' icon for work/business"
+  },
+  "company": {
+    "value": "building-office",
+    "reason": "Direct match; Heroicons 'building-office' represents a company/office building. Also available: 'building-office-2' for a taller variant"
+  },
+  "organization": {
+    "value": "building-office-2",
+    "reason": "Heroicons 'building-office-2' is a larger office building; used for organization/corporate/enterprise to distinguish from single company 'building-office'"
+  },
+  "news": {
+    "value": "newspaper",
+    "reason": "Direct match; Heroicons has 'newspaper' icon for news/blog/articles"
+  },
+  "rss": {
+    "value": "rss",
+    "reason": "Direct match; Heroicons has 'rss' icon for RSS feed"
+  },
+  "docs": {
+    "value": "book-open",
+    "reason": "Heroicons 'book-open' represents an open book; best match for documentation/book reference"
+  },
+  "book-open": {
+    "value": "book-open",
+    "reason": "Direct match; Heroicons has 'book-open' icon for reading/docs"
+  },
+  "graduation": {
+    "value": "academic-cap",
+    "reason": "Direct match; Heroicons has 'academic-cap' (graduation cap) for education/academic/degree"
+  },
+  "settings": {
+    "value": "cog-6-tooth",
+    "reason": "Heroicons 'cog-6-tooth' is the standard settings/gear icon; preferred over 'cog' and 'cog-8-tooth' for its cleaner design"
+  },
+  "sliders": {
+    "value": "adjustments-horizontal",
+    "reason": "Heroicons 'adjustments-horizontal' represents horizontal sliders/adjustments; direct match for settings sliders"
+  },
+  "theme": {
+    "value": "swatch",
+    "reason": "Heroicons 'swatch' represents color/theme selection; best available match for theme/palette since Heroicons has no 'palette' icon"
+  },
+  "light-mode": {
+    "value": "sun",
+    "reason": "Direct match; Heroicons has 'sun' icon for light mode"
+  },
+  "dark-mode": {
+    "value": "moon",
+    "reason": "Direct match; Heroicons has 'moon' icon for dark mode"
+  },
+  "accessibility": {
+    "value": null,
+    "reason": "Heroicons does not have an accessibility/wheelchair icon; confirmed via GitHub discussion #473 that this was requested but not added"
+  },
+  "plugin": {
+    "value": "puzzle-piece",
+    "reason": "Heroicons 'puzzle-piece' represents plugin/extension; standard metaphor for extensions"
+  },
+  "webhook": {
+    "value": null,
+    "reason": "Heroicons does not have a webhook or API endpoint icon; no satisfactory match in the ~316 icon set"
+  },
+  "globe": {
+    "value": "globe-alt",
+    "reason": "Heroicons 'globe-alt' is a wireframe globe icon; best match for world/public/language. Also available: 'globe-americas', 'globe-europe-africa', 'globe-asia-australia'"
+  },
+  "desktop": {
+    "value": "computer-desktop",
+    "reason": "Direct match; Heroicons uses 'computer-desktop' for desktop monitor"
+  },
+  "laptop": {
+    "value": null,
+    "reason": "Heroicons does not have a dedicated laptop icon; 'computer-desktop' is for monitors only and would be misleading for laptop"
+  },
+  "mobile": {
+    "value": "device-phone-mobile",
+    "reason": "Direct match; Heroicons uses 'device-phone-mobile' for smartphone/mobile device"
+  },
+  "tablet": {
+    "value": "device-tablet",
+    "reason": "Direct match; Heroicons uses 'device-tablet' for tablet device"
+  },
+  "keyboard": {
+    "value": null,
+    "reason": "Heroicons does not have a keyboard icon"
+  },
+  "cpu": {
+    "value": "cpu-chip",
+    "reason": "Direct match; Heroicons uses 'cpu-chip' for processor/chip"
+  },
+  "storage": {
+    "value": "circle-stack",
+    "reason": "Heroicons 'circle-stack' (stacked discs) is commonly used to represent storage/database; closest match for hard drive/disk storage"
+  },
+  "usb": {
+    "value": null,
+    "reason": "Heroicons does not have a USB icon"
+  },
+  "cast": {
+    "value": null,
+    "reason": "Heroicons does not have a cast/chromecast/airplay icon"
+  },
+  "terminal": {
+    "value": "command-line",
+    "reason": "Direct match; Heroicons uses 'command-line' for terminal/console"
+  },
+  "database": {
+    "value": "circle-stack",
+    "reason": "Heroicons 'circle-stack' (stacked discs) is the standard database icon representation"
+  },
+  "server": {
+    "value": "server",
+    "reason": "Direct match; Heroicons has 'server' icon. Also available: 'server-stack' for multiple servers"
+  },
+  "cloud": {
+    "value": "cloud",
+    "reason": "Direct match; Heroicons has 'cloud' icon"
+  },
+  "cloud-upload": {
+    "value": "cloud-arrow-up",
+    "reason": "Heroicons uses 'cloud-arrow-up' for cloud upload; renamed from v1's 'cloud-upload'"
+  },
+  "cloud-download": {
+    "value": "cloud-arrow-down",
+    "reason": "Heroicons uses 'cloud-arrow-down' for cloud download; renamed from v1's 'cloud-download'"
+  },
+  "bug": {
+    "value": "bug-ant",
+    "reason": "Heroicons uses 'bug-ant' for bug/issue; the icon depicts an ant/bug shape"
+  },
+  "git": {
+    "value": null,
+    "reason": "Heroicons does not have any git/branch/version-control icons; no brand or developer-tool-specific icons"
+  },
+  "network": {
+    "value": null,
+    "reason": "Heroicons does not have a dedicated network topology icon"
+  },
+  "wifi": {
+    "value": "wifi",
+    "reason": "Direct match; Heroicons has 'wifi' icon for WiFi signal"
+  },
+  "bluetooth": {
+    "value": null,
+    "reason": "Heroicons does not have a Bluetooth icon"
+  },
+  "power": {
+    "value": "power",
+    "reason": "Direct match; Heroicons has 'power' icon for power on/off"
+  },
+  "battery": {
+    "value": "battery-100",
+    "reason": "Heroicons has battery icons (battery-0, battery-50, battery-100); using 'battery-100' as the default full battery representation"
+  },
+  "tool": {
+    "value": "wrench",
+    "reason": "Direct match; Heroicons has 'wrench' icon for single tool/fix"
+  },
+  "tools": {
+    "value": "wrench-screwdriver",
+    "reason": "Heroicons 'wrench-screwdriver' shows crossed wrench and screwdriver; perfect match for tools/toolbox"
+  },
+  "qr-code": {
+    "value": "qr-code",
+    "reason": "Direct match; Heroicons has 'qr-code' icon"
+  },
+  "barcode": {
+    "value": null,
+    "reason": "Heroicons does not have a barcode icon"
+  },
+  "calculator": {
+    "value": "calculator",
+    "reason": "Direct match; Heroicons has 'calculator' icon"
+  },
+  "random": {
+    "value": null,
+    "reason": "Heroicons does not have a dice or random icon"
+  },
+  "history": {
+    "value": "clock",
+    "reason": "Heroicons has 'clock' but no dedicated history/restore icon; 'clock' is a loose semantic match but commonly used for history. Considered 'arrow-path' (circular arrows) as an alternative for restore/refresh semantics"
+  },
+  "rain": {
+    "value": null,
+    "reason": "Heroicons does not have rain or weather-specific icons beyond sun, moon, and cloud"
+  },
+  "storm": {
+    "value": "bolt",
+    "reason": "Heroicons 'bolt' (lightning bolt) is the closest match for storm/lightning; no cloud-lightning combo exists"
+  },
+  "snow": {
+    "value": null,
+    "reason": "Heroicons does not have a snowflake or snow icon"
+  },
+  "wind": {
+    "value": null,
+    "reason": "Heroicons does not have a wind icon"
+  },
+  "temperature": {
+    "value": null,
+    "reason": "Heroicons does not have a thermometer or temperature icon"
+  },
+  "water": {
+    "value": null,
+    "reason": "Heroicons does not have a droplet or water/humidity icon"
+  },
+  "coffee": {
+    "value": null,
+    "reason": "Heroicons does not have a coffee cup or mug icon"
+  },
+  "infinity": {
+    "value": null,
+    "reason": "Heroicons does not have an infinity symbol icon"
+  },
+  "eco": {
+    "value": null,
+    "reason": "Heroicons does not have a leaf or eco/nature icon"
+  },
+  "hexagon": {
+    "value": null,
+    "reason": "Heroicons does not have a hexagon shape icon"
+  },
+  "triangle": {
+    "value": null,
+    "reason": "Heroicons does not have a triangle shape icon; 'exclamation-triangle' exists but is a warning symbol, not a geometric shape"
+  },
+  "google": {
+    "value": null,
+    "reason": "Heroicons does not include any brand icons"
+  },
+  "github": {
+    "value": null,
+    "reason": "Heroicons does not include any brand icons"
+  },
+  "apple": {
+    "value": null,
+    "reason": "Heroicons does not include any brand icons"
+  },
+  "facebook": {
+    "value": null,
+    "reason": "Heroicons does not include any brand icons"
+  },
+  "twitter": {
+    "value": null,
+    "reason": "Heroicons does not include any brand icons"
+  },
+  "linkedin": {
+    "value": null,
+    "reason": "Heroicons does not include any brand icons"
+  },
+  "microsoft": {
+    "value": null,
+    "reason": "Heroicons does not include any brand icons"
+  },
+  "slack": {
+    "value": null,
+    "reason": "Heroicons does not include any brand icons"
+  },
+  "discord": {
+    "value": null,
+    "reason": "Heroicons does not include any brand icons"
+  },
+  "instagram": {
+    "value": null,
+    "reason": "Heroicons does not include any brand icons"
+  },
+  "youtube": {
+    "value": null,
+    "reason": "Heroicons does not include any brand icons"
+  },
+  "android": {
+    "value": null,
+    "reason": "Heroicons does not include any brand icons"
+  },
+  "sparkles": {
+    "value": "sparkles",
+    "reason": "Direct match; Heroicons has 'sparkles' icon, commonly used for AI/magic features"
+  },
+  "wand": {
+    "value": null,
+    "reason": "Heroicons does not have a magic wand icon"
+  },
+  "bot": {
+    "value": null,
+    "reason": "Heroicons does not have a robot or bot icon"
+  },
+  "notifications": {
+    "value": "bell",
+    "reason": "Direct match; Heroicons 'bell' is the standard notifications/alerts icon. Also available: 'bell-alert', 'bell-slash', 'bell-snooze'"
+  },
+  "email": {
+    "value": "envelope",
+    "reason": "Heroicons uses 'envelope' for email; renamed from v1's 'mail'. Also available: 'envelope-open'"
+  },
+  "inbox": {
+    "value": "inbox",
+    "reason": "Direct match; Heroicons has 'inbox' icon. Also available: 'inbox-arrow-down', 'inbox-stack'"
+  },
+  "phone": {
+    "value": "phone",
+    "reason": "Direct match; Heroicons has 'phone' icon for phone calls. Also available: 'phone-arrow-down-left', 'phone-arrow-up-right', 'phone-x-mark'"
+  },
+  "contacts": {
+    "value": "identification",
+    "reason": "Heroicons 'identification' (ID card icon) is the closest match for contacts/address book; no dedicated address book icon exists"
+  },
+  "lock": {
+    "value": "lock-closed",
+    "reason": "Heroicons uses 'lock-closed' for locked/secure state; v2 renamed 'lock' to 'lock-closed'"
+  },
+  "unlock": {
+    "value": "lock-open",
+    "reason": "Direct match; Heroicons has 'lock-open' for unlocked state"
+  },
+  "security": {
+    "value": "shield-exclamation",
+    "reason": "Heroicons 'shield-exclamation' represents security/protection with alert; chosen over plain 'shield-check' to distinguish from 'secure'"
+  },
+  "secure": {
+    "value": "shield-check",
+    "reason": "Direct match; Heroicons 'shield-check' represents verified/secure with checkmark"
+  },
+  "key": {
+    "value": "key",
+    "reason": "Direct match; Heroicons has 'key' icon for key/password/access"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/nicolo-ribaudo.github.io/HEAD/nicolo-ribaudo.github.io/src/assets/tachometer.schema.json",
+  "root": "../../../..",
+  "sampleSize": 50,
+  "timeout": 3,
+  "autoSampleConditions": ["2%"],
+  "benchmarks": [
+    {
+      "name": "this-change",
+      "url": "ci-current-compiler-micros.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "parse-cold-normal-500" },
+        { "mode": "performance", "entryName": "parse-cold-complex-200" },
+        { "mode": "performance", "entryName": "ast-walk-15k" },
+        { "mode": "performance", "entryName": "snippet-args-5k" }
+      ]
+    },
+    {
+      "name": "tip-of-tree",
+      "url": "ci-baseline-compiler-micros.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "parse-cold-normal-500" },
+        { "mode": "performance", "entryName": "parse-cold-complex-200" },
+        { "mode": "performance", "entryName": "ast-walk-15k" },
+        { "mode": "performance", "entryName": "snippet-args-5k" }
+      ]
+    }
+  ]
+}

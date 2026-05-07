@@ -106,30 +106,48 @@
   `Bug: Fix race condition in async when stale promises fire late`
   `Docs: Rewrite specs guide`
   `Chore: Rebuild bundle`
-  `AI: Update context loading instructions`
+  `Harness: Tighten framing for agents on PR merges`
   `Test: Add subtemplate settings tests`
   `Perf: Rewrite weightedObjectSearch`
+  `Bench: Add realistic-helper subtemplate metrics`
   `Refactor: Update todo-list to use canonical subtemplate patterns`
   `BREAKING: Rename formatDateTimeSeconds to formatTime`
   `Feat/Bug: Add protectedKeys to prevent clobbering of each/async vars`
 
   Settle on: `Bug` not `Fix`/`Bugs`, `Test` not `Tests`/`Testing`, `Build` not `Tools`/`Tooling`.
-  Compound prefixes like `Feat/Bug:` or `AI/Docs:` are fine for cross-cutting changes.
+  `Harness:` covers the AI harness — agent skills, workflows, AGENTS.md, hooks, settings.json, MCP config. Anything shaping how agents operate in this repo (not the published framework itself).
+  `Bench:` covers tachometer benchmark additions, edits, and reporter changes. Distinct from `Perf:` (which changes runtime cost) and `Test:` (which gates correctness).
+  Compound prefixes like `Feat/Bug:` or `Bug/Test:` are fine for cross-cutting changes.
+  Optional monorepo scope: `Bug(reactivity): Fix race condition`. Scope is lowercase.
+
+  PR titles follow this same format — they become the squash commit subject in `main` (with `(#NNN)` appended). Squash body is empty by repo setting; rich context belongs in the PR description (lives on github.com), not in commit bodies. For PR title and body conventions, tier triage, and anti-patterns, use the `author-pull-requests` skill.
 </commit_format>
 
+<ai_folder_layout>
+  The `/ai/` directory holds AI-collaboration infrastructure for this project. Four homes:
+
+  - `/ai/skills/` — MCP-served skills, context, and workflows. Organized by audience subdirectory (e.g. `contributing/`, `authoring/`). See the `ai-author-context` skill for authoring conventions.
+  - `/ai/research/` — Independent research corpus (cross-framework UI primitive analysis, etc.). Not served via MCP. See the `research-component-patterns` workflow for adding new component research.
+  - `/ai/plans/` — Canonical implementation plans tracked by `ROADMAP.md`. Completed plans archive to `/ai/plans/archive/`; drafted-but-not-on-the-roadmap plans live in `/ai/plans/icebox/`. See the `manage-roadmap` skill for the planning workflow.
+  - `/ai/workspace/` — Per-user scratch (gitignored). See `<agent_workspace>` below.
+
+  **Do not create new top-level directories** in `/ai/`. New work fits into one of the above.
+</ai_folder_layout>
+
 <agent_workspace>
-  You have access to an agent workspace in `/ai/workspace/`. Use it for scratch files, drafts, and intermediate outputs as needed. Loose files in the workspace root are fine for active work.
+  `/ai/workspace/` is per-user scratch — not tracked by git, no shared structure imposed. Two audiences use it:
 
-  **Do not create new top-level directories** in `ai/workspace/` or `ai/`. Use the existing structure:
+  - **Agents** create files as work proceeds: drafts, intermediate outputs, perf traces, evaluation reports.
+  - **Humans** drop reference files for agents to consume: screenshots, external snapshots, PDFs, ad-hoc notes.
 
-  - `/ai/skills/` — All MCP-served content (skills, context, workflows). Organized by audience subdirectory.
-  - `/ai/research/` — Independent research corpus. Not served via MCP.
-  - `/ai/workspace/plans/` — Implementation plans. Always put plans here so they can be tracked with this repository.
-  - `/ai/workspace/artifacts/` — Agent work product: drafts, intermediate outputs, generated content.
-  - `/ai/workspace/reference/` — User-provided input: screenshots, external docs, snapshots.
-  - `/ai/workspace/tmp/` — Truly ephemeral files (intermediate outputs, scratch calculations, pipeline artifacts). Can be cleaned up at any time without review.
+  Suggested organization (tidiness hints, not rules):
 
-  **Housekeeping** — When a task or project is finished, move its workspace artifacts to the appropriate subdirectory in `/ai/trash/`. Completed plans go to `/ai/trash/plans/`, investigations to `/ai/trash/investigations/`, etc. This keeps the workspace focused on active work.
+  - `plans/` — Drafts in development. Promote to `/ai/plans/{plan}.md` via the `manage-roadmap` skill once a plan is adopted on the roadmap.
+  - `artifacts/` — Reports, evaluations, intermediate outputs.
+  - `reference/` — Screenshots, external snapshots, research input.
+  - `tmp/` — Truly ephemeral; cleanup-anytime safe.
+
+  Promotion to a canonical home (`/ai/skills/`, `/ai/research/`, `/ai/plans/`) is user-initiated. When asked to promote a draft, follow the relevant skill workflow (e.g. `manage-roadmap` for plans). Otherwise, files in `/ai/workspace/` stay local — the workspace is gitignored.
 </agent_workspace>
 
 <tool_gotchas>

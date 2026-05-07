@@ -14,10 +14,8 @@ export class DynamicRegion {
     this.childScopes = [];
     for (const node of this.ownedNodes) { node.remove(); }
     this.ownedNodes = [];
-    if (this.endAnchor) {
-      this.endAnchor.remove();
-      this.endAnchor = null;
-    }
+    // endAnchor is reusable across fills.
+    if (this.endAnchor) { this.endAnchor.remove(); }
   }
 
   setContent(fragment, scope) {
@@ -25,16 +23,19 @@ export class DynamicRegion {
     this.ownedNodes = [...fragment.childNodes];
     if (scope) { this.childScopes.push(scope); }
     this.anchor.after(fragment);
-    // Place end sentinel after content for template boundary detection.
-    // isNodeInTemplate uses strict "between" comparisons, so a trailing
-    // sentinel ensures the last content node is included in the range.
+    this.placeEndAnchor();
+  }
+
+  // isNodeInTemplate uses strict "between" compareDocumentPosition, so a
+  // trailing anchor is required for the last content node to fall inside
+  // the range.
+  placeEndAnchor() {
+    const lastNode = this.ownedNodes[this.ownedNodes.length - 1];
+    if (!lastNode) { return; }
     if (!this.endAnchor) {
       this.endAnchor = document.createTextNode('');
     }
-    const lastNode = this.ownedNodes[this.ownedNodes.length - 1];
-    if (lastNode) {
-      lastNode.after(this.endAnchor);
-    }
+    lastNode.after(this.endAnchor);
   }
 
   getLastNode() {

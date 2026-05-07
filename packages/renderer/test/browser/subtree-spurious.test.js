@@ -455,14 +455,13 @@ RENDERING_ENGINES.forEach(engine => {
 *******************************/
 
     describe('snippet args per-key granularity', () => {
-      // Documents a pre-existing gap: changing one snippet arg should
-      // re-evaluate only inner expressions that read that arg. The
-      // lazy-getter proxy in buildSnippetProxy (blocks/template.js) looks
-      // fine-grained in principle but fails to propagate the source
-      // signal through to the inner reaction on re-evaluation. Related to
-      // the reactiveData coarseness and the planned `ReactiveDataContext`
-      // primitive — enable when that lands.
-      it.skip('changing one snippet arg should not re-evaluate inner expressions that read a different arg', async () => {
+      // Confirms the snippet path does per-expression isolation. Each
+      // expression in a snippet body gets its own Reaction. Markers
+      // (which read no signals) never re-fire after initial render —
+      // their Reactions track no dependencies. The expression that
+      // reads the snippet arg's source signal does fire, propagates
+      // the new value, and updates the DOM.
+      it('changing one snippet arg does not fire markers in adjacent expressions', async () => {
         let labelEvalCount = 0;
         let statusEvalCount = 0;
         const tag = uniqueTag();
@@ -507,24 +506,20 @@ RENDERING_ENGINES.forEach(engine => {
 
         expect(shadowText(el)).toContain('changed');
         expect(shadowText(el)).toContain('active');
-        expect(labelEvalCount).toBeGreaterThan(labelCountAfterRender);
+        expect(labelEvalCount).toBe(labelCountAfterRender);
         expect(statusEvalCount).toBe(statusCountAfterRender);
       });
     });
 
     describe('reactiveData per-key granularity', () => {
-      // Documents an intended-but-unimplemented guarantee: changing one
-      // reactiveData field should not invalidate child subtemplate
-      // expressions that read a different field. Current implementation
-      // of `unpackNodeData` (packages/renderer/src/engines/native/blocks/
-      // template.js) flattens all reactiveData into a plain object and
-      // pushes it into the subtemplate via setDataContext, which bumps
-      // the whole subtemplate's dataDep — every child expression
-      // re-evaluates. Fine-grained per-key deps would require a Proxy
-      // similar to each's itemProxy, with per-property Dependency
-      // tracking. Enable when that lands. (See also the each-item
-      // flat-reactivity discussion in ai/workspace/perf-log.md.)
-      it.skip('changing one reactiveData field should not re-evaluate subtemplate expressions that read a different field', async () => {
+      // Documents the per-key isolation gap on reactiveData. Today's
+      // renderer flattens reactiveData through unpackNodeData
+      // (packages/renderer/src/engines/native/blocks/template.js) and
+      // bumps the whole subtemplate's dataDep on any field change, so
+      // every child expression re-evaluates. Fine-grained per-key deps
+      // would require a Proxy similar to each's itemProxy with per-
+      // property Dependency tracking.
+      it.fails('changing one reactiveData field should not re-evaluate subtemplate expressions that read a different field', async () => {
         let labelEvalCount = 0;
         let statusEvalCount = 0;
         const tag = uniqueTag();

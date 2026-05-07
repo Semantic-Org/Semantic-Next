@@ -458,154 +458,403 @@ describe('Component', () => {
       expect(TestComponent.template.createComponent).toBe(createComponentWithSignal);
     });
   });
-  /*
-    Unclear expected functionality here so removing tests for now
-
-  // Test lifecycle events behavior
+  // Test lifecycle events behavior — Surface 2 (Stage 2 of coverage campaign).
   describe('Lifecycle Events', () => {
-    it('should ensure each lifecycle event only fires once and does not bubble from nested components', async () => {
-      // Track all lifecycle events for parent and child
-      const parentCreated = vi.fn();
-      const parentRendered = vi.fn();
-      const parentUpdated = vi.fn();
-      const childCreated = vi.fn();
-      const childRendered = vi.fn();
-      const childUpdated = vi.fn();
+    let lifecycleElements = [];
 
-      // Track if parent receives any child lifecycle events (should be 0)
-      const parentCreatedHandler = vi.fn();
-      const parentRenderedHandler = vi.fn();
-      const parentUpdatedHandler = vi.fn();
-      const parentDestroyedHandler = vi.fn();
-
-      // Define child component
-      defineComponent({
-        tagName: 'test-lifecycle-child-bubble',
-        template: '<div class="child">Child Content</div>',
-        onCreated: childCreated,
-        onRendered: childRendered,
-        onUpdated: childUpdated
+    afterEach(() => {
+      lifecycleElements.forEach(el => {
+        if (el.parentNode) {
+          el.parentNode.removeChild(el);
+        }
       });
-
-      // Define parent component with nested child
-      defineComponent({
-        tagName: 'test-lifecycle-parent-bubble',
-        template: `
-          <div class="parent">
-            Parent Content
-            <test-lifecycle-child-bubble></test-lifecycle-child-bubble>
-          </div>
-        `,
-        onCreated: parentCreated,
-        onRendered: parentRendered,
-        onUpdated: parentUpdated
-      });
-
-      // Create parent element and add lifecycle event listeners
-      const parentElement = document.createElement('test-lifecycle-parent-bubble');
-      parentElement.addEventListener('created', parentCreatedHandler);
-      parentElement.addEventListener('rendered', parentRenderedHandler);
-      parentElement.addEventListener('updated', parentUpdatedHandler);
-      parentElement.addEventListener('destroyed', parentDestroyedHandler);
-
-      // Add to DOM to trigger creation and rendering
-      document.body.appendChild(parentElement);
-
-      // Wait for lifecycle events to fire
-      await $(parentElement).onNext('rendered');
-
-      // Verify each component's lifecycle callbacks fired exactly once
-      expect(parentCreated).toHaveBeenCalledTimes(1);
-      expect(parentRendered).toHaveBeenCalledTimes(1);
-      expect(childCreated).toHaveBeenCalledTimes(1);
-      expect(childRendered).toHaveBeenCalledTimes(1);
-
-      // CRITICAL: Verify parent event listeners only received parent's own events
-      expect(parentCreatedHandler).toHaveBeenCalledTimes(1);
-      expect(parentRenderedHandler).toHaveBeenCalledTimes(1);
-      expect(parentUpdatedHandler).toHaveBeenCalledTimes(0); // No updates yet
-      expect(parentDestroyedHandler).toHaveBeenCalledTimes(0); // Not destroyed yet
-
-      // Clean up
-      document.body.removeChild(parentElement);
+      lifecycleElements = [];
     });
 
-    it('should ensure lifecycle events do not bubble when using Query library event binding', async () => {
-      // Import Query library for testing
-      const { $ } = await import('@semantic-ui/query');
+    /*******************************
+              Hook order
+    *******************************/
 
-      // Track lifecycle events
-      const parentCreated = vi.fn();
-      const parentRendered = vi.fn();
-      const childCreated = vi.fn();
-      const childRendered = vi.fn();
-
-      // Track Query library event handlers
-      const queryCreatedHandler = vi.fn();
-      const queryRenderedHandler = vi.fn();
-      const queryUpdatedHandler = vi.fn();
-      const queryDestroyedHandler = vi.fn();
-
-      // Define child component
+    it('runs onCreated then onRendered in that order on first mount', async () => {
+      const order = [];
+      const tag = 'test-lc-create-render-order';
       defineComponent({
-        tagName: 'test-query-child-component',
-        template: '<div class="child">Query Child Content</div>',
-        onCreated: childCreated,
-        onRendered: childRendered
+        tagName: tag,
+        template: '<div></div>',
+        onCreated: () => order.push('created'),
+        onRendered: () => order.push('rendered'),
+      });
+      const el = document.createElement(tag);
+      const rendered = $(el).onNext('rendered');
+      document.body.appendChild(el);
+      lifecycleElements.push(el);
+      await rendered;
+      expect(order).toEqual(['created', 'rendered']);
+    });
+
+    it('does not bubble created/rendered events from a child component into a parent listener (composed:false)', async () => {
+      const parentTag = 'test-lc-parent-no-bubble';
+      const childTag = 'test-lc-child-no-bubble';
+      defineComponent({
+        tagName: childTag,
+        template: '<span class="child"></span>',
+      });
+      defineComponent({
+        tagName: parentTag,
+        template: `<div class="parent"><${childTag}></${childTag}></div>`,
       });
 
-      // Define parent component with nested child
+      const parentEl = document.createElement(parentTag);
+      const heard = vi.fn();
+      parentEl.addEventListener('created', heard);
+      parentEl.addEventListener('rendered', heard);
+      const rendered = $(parentEl).onNext('rendered');
+      document.body.appendChild(parentEl);
+      lifecycleElements.push(parentEl);
+      await rendered;
+      // The parent itself dispatches one created + one rendered to itself.
+      // The child's events are confined to the child element (composed:false +
+      // shadow boundary). A listener on parentEl should receive only the
+      // parent's two events.
+      expect(heard).toHaveBeenCalledTimes(2);
+    });
+
+    it('exposes event.detail.component on the created and rendered DOM events', async () => {
+      const tag = 'test-lc-event-detail-component';
+      const seen = { created: null, rendered: null };
       defineComponent({
-        tagName: 'test-query-parent-component',
-        template: `
-          <div class="parent">
-            Query Parent Content
-            <test-query-child-component></test-query-child-component>
-          </div>
-        `,
-        onCreated: parentCreated,
-        onRendered: parentRendered
+        tagName: tag,
+        template: '<div></div>',
+        createComponent: () => ({ marker: 'specific-component' }),
       });
+      const el = document.createElement(tag);
+      el.addEventListener('created', (e) => {
+        seen.created = e.detail.component;
+      });
+      el.addEventListener('rendered', (e) => {
+        seen.rendered = e.detail.component;
+      });
+      const rendered = $(el).onNext('rendered');
+      document.body.appendChild(el);
+      lifecycleElements.push(el);
+      await rendered;
+      expect(seen.created).toBeDefined();
+      expect(seen.created.marker).toBe('specific-component');
+      expect(seen.rendered).toBeDefined();
+      expect(seen.rendered.marker).toBe('specific-component');
+      // same instance object across both events
+      expect(seen.created).toBe(seen.rendered);
+    });
 
-      // Create parent element and add to DOM
-      const parentElement = document.createElement('test-query-parent-component');
-      document.body.appendChild(parentElement);
+    it('fires onDestroyed and dispatches destroyed DOM event when removed from DOM', async () => {
+      const tag = 'test-lc-on-destroyed';
+      const onDestroyed = vi.fn();
+      defineComponent({
+        tagName: tag,
+        template: '<div></div>',
+        onDestroyed,
+      });
+      const el = document.createElement(tag);
+      const heard = vi.fn();
+      el.addEventListener('destroyed', heard);
+      const rendered = $(el).onNext('rendered');
+      document.body.appendChild(el);
+      await rendered;
+      document.body.removeChild(el);
+      // synchronous in disconnectedCallback
+      expect(onDestroyed).toHaveBeenCalledTimes(1);
+      expect(heard).toHaveBeenCalledTimes(1);
+    });
 
-      // Use Query library to bind lifecycle event listeners to parent
-      $('test-query-parent-component').on('created', queryCreatedHandler);
-      $('test-query-parent-component').on('rendered', queryRenderedHandler);
-      $('test-query-parent-component').on('updated', queryUpdatedHandler);
-      $('test-query-parent-component').on('destroyed', queryDestroyedHandler);
+    /*******************************
+        onUpdated (intentional silence,
+        F-B implementation vocab)
+    *******************************/
 
-      // Wait for lifecycle events to fire
-      await new Promise(resolve => setTimeout(resolve, 100));
+    it('does not invoke the user-supplied onUpdated callback when the updated DOM event fires', async () => {
+      // F-B note: the onUpdated user callback is reached only via this.call()
+      // from the wrapper; the wrapper itself dispatches the 'updated' DOM
+      // event with triggerCallback:false. So registering onUpdated does NOT
+      // make it fire on every state mutation. State mutations fire the
+      // 'updated' DOM event but not the user callback. Pinning current
+      // behavior; this is part of the F-B intentional-silence surface.
+      const tag = 'test-lc-onupdated-not-invoked';
+      const onUpdated = vi.fn();
+      defineComponent({
+        tagName: tag,
+        template: '<span>{count}</span>',
+        defaultState: { count: 0 },
+        onUpdated,
+        createComponent: ({ state }) => ({
+          bump() {
+            state.count.increment();
+          },
+        }),
+      });
+      const el = document.createElement(tag);
+      const rendered = $(el).onNext('rendered');
+      document.body.appendChild(el);
+      lifecycleElements.push(el);
+      await rendered;
+      el.component.bump();
+      await el.updateComplete;
+      // user callback path is not wired by the wrapper
+      expect(onUpdated).not.toHaveBeenCalled();
+    });
 
-      // Verify each component's lifecycle callbacks fired exactly once
-      expect(parentCreated).toHaveBeenCalledTimes(1);
-      expect(parentRendered).toHaveBeenCalledTimes(1);
-      expect(childCreated).toHaveBeenCalledTimes(1);
-      expect(childRendered).toHaveBeenCalledTimes(1);
+    it('emits the updated DOM event after a state mutation that follows first render', async () => {
+      const tag = 'test-lc-updated-event-after-render';
+      defineComponent({
+        tagName: tag,
+        template: '<span>{count}</span>',
+        defaultState: { count: 0 },
+        createComponent: ({ state }) => ({
+          bump() {
+            state.count.increment();
+          },
+        }),
+      });
+      const el = document.createElement(tag);
+      const heard = vi.fn();
+      el.addEventListener('updated', heard);
+      const rendered = $(el).onNext('rendered');
+      document.body.appendChild(el);
+      lifecycleElements.push(el);
+      await rendered;
+      // first render done. mutate. Listen for the next 'updated' event;
+      // updateComplete cannot be polled synchronously after the mutation
+      // because updateScheduled is set inside the state Reaction's afterFlush
+      // (one microtask later), not synchronously by the mutation.
+      const updatedFired = $(el).onNext('updated');
+      el.component.bump();
+      await updatedFired;
+      expect(heard).toHaveBeenCalledTimes(1);
+    });
 
-      // CRITICAL: Verify Query library event handlers only received parent's own events
-      // This confirms that $('component').on('rendered', handler) only fires once
-      expect(queryCreatedHandler).toHaveBeenCalledTimes(1);
-      expect(queryRenderedHandler).toHaveBeenCalledTimes(1);
-      expect(queryUpdatedHandler).toHaveBeenCalledTimes(0);
-      expect(queryDestroyedHandler).toHaveBeenCalledTimes(0);
+    it('does not emit the updated DOM event on first render (per commit 5cbf23921)', async () => {
+      const tag = 'test-lc-no-updated-on-first-render';
+      defineComponent({
+        tagName: tag,
+        template: '<span>{count}</span>',
+        defaultState: { count: 0 },
+      });
+      const el = document.createElement(tag);
+      const heard = vi.fn();
+      el.addEventListener('updated', heard);
+      const rendered = $(el).onNext('rendered');
+      document.body.appendChild(el);
+      lifecycleElements.push(el);
+      await rendered;
+      // settle additional microtasks just in case
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(heard).not.toHaveBeenCalled();
+    });
 
-      // Verify event data structure from Query library
-      const renderedEventCall = queryRenderedHandler.mock.calls[0];
-      const renderedEvent = renderedEventCall[0];
-      expect(renderedEvent.type).toBe('rendered');
-      expect(renderedEvent.detail).toBeDefined();
-      expect(renderedEvent.detail.component).toBeDefined();
+    it('coalesces multiple state mutations in one tick into a single updated DOM event (microtask debounce, per commit 9c8e0aee7)', async () => {
+      const tag = 'test-lc-updated-debounced';
+      defineComponent({
+        tagName: tag,
+        template: '<span>{a}-{b}-{c}</span>',
+        defaultState: { a: 0, b: 0, c: 0 },
+        createComponent: ({ state }) => ({
+          bumpAll() {
+            state.a.increment();
+            state.b.increment();
+            state.c.increment();
+          },
+        }),
+      });
+      const el = document.createElement(tag);
+      const heard = vi.fn();
+      el.addEventListener('updated', heard);
+      const rendered = $(el).onNext('rendered');
+      document.body.appendChild(el);
+      lifecycleElements.push(el);
+      await rendered;
+      el.component.bumpAll();
+      await el.updateComplete;
+      // two more microtasks for the debounce settle
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(heard).toHaveBeenCalledTimes(1);
+    });
 
-      // Clean up
-      document.body.removeChild(parentElement);
+    /*******************************
+       Lifecycle promises on element
+    *******************************/
+
+    it('returns undefined for el.created and el.rendered before connectedCallback runs (no template yet)', () => {
+      // Before connectedCallback (i.e., before append), el.template is
+      // undefined. The lifecycle promise getters do `this.template?.lifecyclePromise(...)`
+      // so they return undefined. Pinning this behavior — it's the pre-mount
+      // shape callers can rely on.
+      const tag = 'test-lc-promise-pre-mount';
+      defineComponent({
+        tagName: tag,
+        template: '<div></div>',
+      });
+      const el = document.createElement(tag);
+      lifecycleElements.push(el); // afterEach removes from DOM if attached, otherwise no-op
+      expect(el.created).toBeUndefined();
+      expect(el.rendered).toBeUndefined();
+      expect(el.destroyed).toBeUndefined();
+      // updated is special: returns Promise.resolve() when no update pending.
+      // Without a template, updateScheduled is undefined (falsy), so the
+      // getter takes the resolve-immediate branch and returns Promise.resolve().
+      expect(el.updated).toBeInstanceOf(Promise);
+    });
+
+    it('resolves el.updated immediately when no update is pending (Promise.resolve fast path)', async () => {
+      const tag = 'test-lc-updated-fastpath';
+      defineComponent({
+        tagName: tag,
+        template: '<span>{count}</span>',
+        defaultState: { count: 0 },
+      });
+      const el = document.createElement(tag);
+      const rendered = $(el).onNext('rendered');
+      document.body.appendChild(el);
+      lifecycleElements.push(el);
+      await rendered;
+      // no update queued
+      expect(el.updateScheduled).toBeFalsy();
+      const result = await Promise.race([
+        el.updated.then(() => 'resolved'),
+        new Promise(resolve => setTimeout(() => resolve('hung'), 50)),
+      ]);
+      expect(result).toBe('resolved');
+    });
+
+    it('resolves el.updated when an update is pending (recurring promise)', async () => {
+      const tag = 'test-lc-updated-pending';
+      defineComponent({
+        tagName: tag,
+        template: '<span>{count}</span>',
+        defaultState: { count: 0 },
+        createComponent: ({ state }) => ({
+          bump() {
+            state.count.increment();
+          },
+        }),
+      });
+      const el = document.createElement(tag);
+      const rendered = $(el).onNext('rendered');
+      document.body.appendChild(el);
+      lifecycleElements.push(el);
+      await rendered;
+      // Use the DOM event as the synchronization point so we know an update
+      // was queued and processed; el.updated resolves alongside.
+      const updated = $(el).onNext('updated');
+      el.component.bump();
+      const result = await Promise.race([
+        Promise.all([el.updated, updated]).then(() => 'resolved'),
+        new Promise(resolve => setTimeout(() => resolve('hung'), 200)),
+      ]);
+      expect(result).toBe('resolved');
+    });
+
+    /*******************************
+       B2a / B2b — expected-bug pins
+    *******************************/
+
+    /*
+     * B2a: el.created accessed AFTER the created event already fired, with
+     * no prior access to el.created, hangs forever. resolveLifecyclePromise
+     * no-oped (no resolver registered) and the late access lazy-creates a
+     * fresh resolver that nothing will call.
+     *
+     * EXPECTED-BUG-PIN — fails today, passes after the B2 fix.
+     */
+    it('B2: el.created accessed AFTER created event already fired without prior access (expected bug pin)', async () => {
+      const tag = 'test-lc-b2a-late-created';
+      defineComponent({
+        tagName: tag,
+        template: '<div></div>',
+      });
+      const el = document.createElement(tag);
+      // Append AND wait for rendered using a promise other than el.created/el.rendered
+      // so we don't accidentally pre-access the lifecycle promise.
+      const heardRendered = new Promise(resolve => {
+        el.addEventListener('rendered', resolve, { once: true });
+      });
+      document.body.appendChild(el);
+      lifecycleElements.push(el);
+      await heardRendered;
+      // 'created' event has already fired by now. Now late-access:
+      const result = await Promise.race([
+        el.created.then(() => 'resolved'),
+        new Promise(resolve => setTimeout(() => resolve('hung'), 100)),
+      ]);
+      expect(result).toBe('resolved');
+    });
+
+    /*
+     * B2b: el.rendered hangs during hydration because the wrapper gates the
+     * dispatchEvent call on !isHydrating, and dispatchEvent is what calls
+     * resolveLifecyclePromise. So during hydration, neither the DOM event
+     * nor the promise resolution fires.
+     *
+     * Driving real hydration through DSD is heavy; we exercise the path
+     * directly by toggling template.isHydrating and re-firing the wrapper.
+     *
+     * EXPECTED-BUG-PIN — fails today, passes after the B2 fix.
+     */
+    it('B2: el.rendered hangs when onRendered fires during isHydrating (expected bug pin)', async () => {
+      const tag = 'test-lc-b2b-hydrating-rendered';
+      defineComponent({
+        tagName: tag,
+        template: '<div></div>',
+      });
+      const el = document.createElement(tag);
+      const renderedEvent = $(el).onNext('rendered');
+      document.body.appendChild(el);
+      lifecycleElements.push(el);
+      await renderedEvent;
+
+      // simulate a hydration-suppressed second cycle: re-arm the recurring
+      // fresh-promise behavior is only for 'updated', so we instead exercise
+      // a freshly-created element + immediate hydration toggle. The cleanest
+      // way to pin B2b at this layer is to observe that during hydration the
+      // template.dispatchEvent path early-returns and so resolveLifecyclePromise
+      // is not called.
+      el.template.isHydrating = true;
+      // NOTE: el.rendered already resolved on the real first render — the
+      // cached promise is already resolved. Reset the cache to simulate the
+      // hydration-first-mount scenario where the promise was awaited but
+      // never resolved.
+      delete el.template.lifecyclePromises.rendered;
+      delete el.template.lifecycleResolvers.rendered;
+      const promise = el.rendered;
+      // re-fire the wrapper (would normally happen from setTimeout/render)
+      el.template.onRendered();
+      const result = await Promise.race([
+        promise.then(() => 'resolved'),
+        new Promise(resolve => setTimeout(() => resolve('hung'), 100)),
+      ]);
+      expect(result).toBe('resolved');
+    });
+
+    /*******************************
+        Cleanup contract end-to-end
+    *******************************/
+
+    it('aborts the abortSignal when removed from DOM', async () => {
+      const tag = 'test-lc-abort-on-disconnect';
+      defineComponent({
+        tagName: tag,
+        template: '<div></div>',
+      });
+      const el = document.createElement(tag);
+      const rendered = $(el).onNext('rendered');
+      document.body.appendChild(el);
+      await rendered;
+      const signal = el.template.abortSignal;
+      expect(signal.aborted).toBe(false);
+      document.body.removeChild(el);
+      expect(signal.aborted).toBe(true);
     });
   });
-
-  */
 
   // Test component hierarchy navigation helpers
   describe('Component Navigation Helpers', () => {
@@ -1184,66 +1433,139 @@ describe('Component', () => {
         expect(allChildren[1].templateName).toBe('childSubtemplate');
       });
 
-      it('should find parent from subtemplate using findParent', async () => {
-        // Define parent subtemplate (no tagName)
-        const parentSubtemplate = defineComponent({
-          templateName: 'parentSubtemplate',
-          template: `
-            <div class="parent-sub">
-              <h3>Parent Subtemplate</h3>
-              {>nestedChild}
-            </div>
-          `,
-          subTemplates: {
-            nestedChild: defineComponent({
-              templateName: 'nestedChild',
-              template: '<span class="nested">Nested Child</span>',
-              createComponent: ({ findParent }) => ({
-                findContainerParent() {
-                  return findParent('containerComponent');
-                },
-                findSubtemplateParent() {
-                  return findParent('parentSubtemplate');
-                },
-              }),
-            }),
-          },
-          createComponent: () => ({
-            subtemplateData: 'subtemplate-parent-data',
-          }),
+      it('three-level composition: each level owns its own subTemplates', async () => {
+        // Real authoring shape: a.js -> {>b foo='bar'} ; b.js -> {>c foo='baz'} ;
+        // c.js -> {foo}. Each file declares only the subtemplate it directly
+        // references; the deepest receives its own data and renders it.
+        const c = defineComponent({
+          templateName: 'cTemplate',
+          template: '<span class="leaf">{foo}</span>',
         });
 
-        // Define container web component
-        const ContainerComponent = defineComponent({
-          tagName: 'test-subtemplate-container',
-          templateName: 'containerComponent',
-          template: `
-            <div class="container">
-              <h2>Container</h2>
-              {>parentSubtemplate}
-            </div>
-          `,
-          subTemplates: {
-            parentSubtemplate,
-          },
-          createComponent: () => ({
-            containerData: 'container-data-value',
-          }),
+        const b = defineComponent({
+          templateName: 'bTemplate',
+          template: `<div class="middle">{>c foo='baz'}</div>`,
+          subTemplates: { c },
         });
 
-        const containerElement = document.createElement('test-subtemplate-container');
+        defineComponent({
+          tagName: 'test-three-level-container',
+          templateName: 'aContainer',
+          template: `<div class="root">{>b foo='bar'}</div>`,
+          subTemplates: { b },
+        });
+
+        const containerElement = document.createElement('test-three-level-container');
         const rendered = $(containerElement).onNext('rendered');
         document.body.appendChild(containerElement);
         cleanupElements.push(containerElement);
 
         await rendered;
 
-        // Access the deeply nested child through template traversal
-        // This would be complex to test directly, but we can verify the structure exists
-        const containerComponent = containerElement.component;
-        expect(containerComponent).toBeDefined();
-        expect(containerComponent.templateName).toBe('containerComponent');
-        expect(containerComponent.containerData).toBe('container-data-value');
+        // The deepest leaf receives 'baz' (passed by b), not 'bar' (passed by a).
+        // Each level's `foo` shadows the outer one inside its own scope.
+        const leaf = containerElement.shadowRoot.querySelector('.leaf');
+        expect(leaf).not.toBeNull();
+        expect(leaf.textContent).toBe('baz');
+      });
+
+      it('recursive subtemplate (self-reference with a base case) renders to depth', async () => {
+        // The realistic recursive composition pattern: a tree/menu node that
+        // references itself in its own subTemplates and uses an `{#if}` guard
+        // to terminate. Forward-ref the prototype into its own registry by
+        // mutating the same subTemplates object after the component is
+        // defined — captured by reference, so the late assignment is visible
+        // at render time.
+        const subTemplates = {};
+        defineComponent({
+          tagName: 'test-recursive-tree',
+          templateName: 'treeNode',
+          template: `
+            <li>
+              <span class="label">{label}</span>
+              {#if children.length}
+                <ul>
+                  {#each c in children}
+                    {>treeNode label=c.label children=c.children}
+                  {/each}
+                </ul>
+              {/if}
+            </li>
+          `,
+          subTemplates,
+          properties: {
+            label: { type: String },
+            children: { type: Array },
+          },
+        });
+        // Forward-ref now that the component class exists.
+        subTemplates.treeNode = customElements.get('test-recursive-tree').template;
+
+        const el = document.createElement('test-recursive-tree');
+        el.label = 'root';
+        el.children = [
+          { label: 'a', children: [{ label: 'a.1', children: [] }] },
+          { label: 'b', children: [] },
+        ];
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        cleanupElements.push(el);
+        await rendered;
+
+        const labels = Array.from(el.shadowRoot.querySelectorAll('.label'))
+          .map(n => n.textContent.trim());
+        expect(labels).toContain('root');
+        expect(labels).toContain('a');
+        expect(labels).toContain('a.1');
+        expect(labels).toContain('b');
+      });
+
+      it('cyclic composition without a base case fails fast instead of hanging', async () => {
+        // Two components reference each other in a cycle with no terminator.
+        // The renderer's recursion hits the V8 stack limit and throws
+        // RangeError before any render completes — bounded failure, not
+        // an infinite loop. Document the failure mode so authors who reach
+        // for recursion know to include a base case.
+        //
+        // The error fires inside a Reaction (async render), so we catch
+        // it via window.error rather than expecting appendChild to throw.
+        const aSubs = {};
+        const bSubs = {};
+        defineComponent({
+          tagName: 'test-cyclic-a',
+          templateName: 'cyclicA',
+          template: `<div class="a">{>cyclicB}</div>`,
+          subTemplates: aSubs,
+        });
+        defineComponent({
+          tagName: 'test-cyclic-b',
+          templateName: 'cyclicB',
+          template: `<div class="b">{>cyclicA}</div>`,
+          subTemplates: bSubs,
+        });
+        aSubs.cyclicB = customElements.get('test-cyclic-b').template;
+        bSubs.cyclicA = customElements.get('test-cyclic-a').template;
+
+        let caught;
+        const handler = (e) => {
+          caught = e.error || e.reason;
+          e.preventDefault();
+        };
+        window.addEventListener('error', handler);
+        window.addEventListener('unhandledrejection', handler);
+        try {
+          const el = document.createElement('test-cyclic-a');
+          document.body.appendChild(el);
+          cleanupElements.push(el);
+          // Give the reactive render a tick to fire and throw.
+          await new Promise(r => setTimeout(r, 100));
+          expect(caught).toBeDefined();
+          expect(caught).toBeInstanceOf(RangeError);
+        }
+        finally {
+          window.removeEventListener('error', handler);
+          window.removeEventListener('unhandledrejection', handler);
+        }
       });
 
       it('should handle mixed web component and subtemplate navigation', async () => {
@@ -1409,6 +1731,104 @@ describe('Component', () => {
         }
       });
     });
+  });
+});
+
+/*******************************
+  Signal auto-unwrap + mutation
+*******************************/
+
+describe('Signal auto-unwrap and mutation helpers in rendered DOM', () => {
+  const cleanupElements = [];
+  afterEach(() => {
+    while (cleanupElements.length) {
+      const el = cleanupElements.pop();
+      if (el.parentNode) { el.parentNode.removeChild(el); }
+    }
+  });
+
+  it('renders the unwrapped state value, not the Signal object', async () => {
+    defineComponent({
+      tagName: 'test-signal-unwrap',
+      template: '<span class="count">{count}</span>',
+      defaultState: { count: 7 },
+    });
+    const el = document.createElement('test-signal-unwrap');
+    const rendered = $(el).onNext('rendered');
+    document.body.appendChild(el);
+    cleanupElements.push(el);
+    await rendered;
+    expect(el.shadowRoot.querySelector('.count').textContent).toBe('7');
+  });
+
+  it('state.signal.set updates the rendered value', async () => {
+    defineComponent({
+      tagName: 'test-signal-set',
+      template: '<span class="count">{count}</span>',
+      defaultState: { count: 0 },
+    });
+    const el = document.createElement('test-signal-set');
+    const rendered = $(el).onNext('rendered');
+    document.body.appendChild(el);
+    cleanupElements.push(el);
+    await rendered;
+    el.template.state.count.set(42);
+    await el.updateComplete;
+    expect(el.shadowRoot.querySelector('.count').textContent).toBe('42');
+  });
+
+  it('state.signal.increment propagates to the DOM', async () => {
+    defineComponent({
+      tagName: 'test-signal-increment',
+      template: '<span class="count">{count}</span>',
+      defaultState: { count: 0 },
+    });
+    const el = document.createElement('test-signal-increment');
+    const rendered = $(el).onNext('rendered');
+    document.body.appendChild(el);
+    cleanupElements.push(el);
+    await rendered;
+    el.template.state.count.increment();
+    el.template.state.count.increment();
+    el.template.state.count.increment();
+    await el.updateComplete;
+    expect(el.shadowRoot.querySelector('.count').textContent).toBe('3');
+  });
+
+  it('state.signal.toggle flips a boolean-driven class', async () => {
+    defineComponent({
+      tagName: 'test-signal-toggle',
+      template: "<div class=\"{active ? 'on' : 'off'}\"></div>",
+      defaultState: { active: false },
+    });
+    const el = document.createElement('test-signal-toggle');
+    const rendered = $(el).onNext('rendered');
+    document.body.appendChild(el);
+    cleanupElements.push(el);
+    await rendered;
+    expect(el.shadowRoot.querySelector('.off')).not.toBeNull();
+    el.template.state.active.toggle();
+    await el.updateComplete;
+    expect(el.shadowRoot.querySelector('.on')).not.toBeNull();
+  });
+
+  it('state.signal.push appends to the rendered each-block', async () => {
+    defineComponent({
+      tagName: 'test-signal-push',
+      template: '<ul>{#each item in items}<li class="row">{item}</li>{/each}</ul>',
+      defaultState: { items: ['a'] },
+    });
+    const el = document.createElement('test-signal-push');
+    const rendered = $(el).onNext('rendered');
+    document.body.appendChild(el);
+    cleanupElements.push(el);
+    await rendered;
+    expect(el.shadowRoot.querySelectorAll('.row').length).toBe(1);
+    el.template.state.items.push('b');
+    el.template.state.items.push('c');
+    await el.updateComplete;
+    const items = Array.from(el.shadowRoot.querySelectorAll('.row')).map(li => li.textContent);
+    expect(items).toEqual(['a', 'b', 'c']);
   });
 });
 

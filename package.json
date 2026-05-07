@@ -187,8 +187,6 @@
     "build:specs": "wireit",
     "build:icons": "wireit",
     "dev": "wireit",
-    "dev:workspace": "node ./internal-packages/scripts/src/build-ai-workspace.js --serve",
-    "mcp": "wireit",
     "deploy:mcp": "wireit",
     "build:docs": "wireit",
     "build:docs-packages": "wireit",
@@ -201,7 +199,6 @@
     "update-version": "wireit",
     "test:case": "wireit",
     "prepublishOnly": "wireit",
-    "prettify": "prettierx ./ --write --ignore-unknown",
     "format": "npx dprint fmt",
     "test": "vitest --c tests/configs/vitest/vitest.config.js",
     "test:watch": "vitest --c tests/configs/vitest/vitest-watch.config.js",
@@ -210,7 +207,8 @@
     "ci:test": "vitest --c tests/configs/vitest/ci-test-all.config.js",
     "ci:test:unit": "vitest --c tests/configs/vitest/ci-test-unit.config.js",
     "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js",
-    "test:cdn": "cd tools/cdn && npx vitest run --config vitest.config.js"
+    "test:cdn": "cd tools/cdn && npx vitest run --config vitest.config.js",
+    "setup": "npx simple-git-hooks"
   },
   "wireit": {
     "dev": {
@@ -319,10 +317,6 @@
     "update-version": {
       "command": "node ./scripts/update-versions.js"
     },
-    "mcp": {
-      "command": "cd ai/mcp && node agents-server.js",
-      "service": true
-    },
     "deploy:mcp": {
       "dependencies": [
         "./tools/mcp:deploy"
@@ -346,26 +340,24 @@
     "@pagefind/modular-ui": "^1.3.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.5.0",
-    "@commitlint/config-conventional": "^20.5.0",
     "@types/node": "^25.6.0",
-    "@typescript-eslint/eslint-plugin": "^8.58.1",
-    "@typescript-eslint/parser": "^8.58.1",
-    "@vitest/browser": "^4.1.4",
-    "@vitest/browser-playwright": "^4.1.4",
-    "@vitest/coverage-istanbul": "^4.1.4",
-    "@vitest/ui": "^4.1.4",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
+    "@vitest/browser": "^4.1.5",
+    "@vitest/browser-playwright": "^4.1.5",
+    "@vitest/coverage-istanbul": "^4.1.5",
+    "@vitest/ui": "^4.1.5",
     "chalk": "^5.6.2",
     "dprint": "^0.54.0",
     "esbuild": "^0.28.0",
     "glob": "^13.0.6",
-    "inquirer": "^13.4.1",
-    "jsdom": "^29.0.2",
+    "inquirer": "^13.4.2",
+    "jsdom": "^29.1.0",
     "playwright": "^1.59.1",
     "semver": "^7.7.4",
     "simple-git-hooks": "^2.13.1",
     "underscore": "^1.13.8",
-    "vitest": "^4.1.4",
+    "vitest": "^4.1.5",
     "wireit": "^0.14.12",
     "ws": "^8.20.0"
   },
@@ -376,18 +368,18 @@
   },
   "workspaces": [
     "internal-packages/*",
+    "integrations/*",
     "packages/*",
     "docs/*",
     "examples/*",
     "tools/mcp",
-    "tools/devtools",
     "tools/lsp",
     "tools/benchmark",
     "tools/cdn"
   ],
   "simple-git-hooks": {
-    "pre-commit": "STAGED=$(git diff --cached --name-only --diff-filter=ACM); npx dprint fmt --staged && echo \"$STAGED\" | xargs -r git add",
-    "commit-msg": "if grep -qi 'Co-Authored-By:' \"$1\"; then echo 'Error: Commit messages must not contain Co-Authored-By lines.'; exit 1; fi"
+    "pre-commit": "bash tools/hooks/pre-commit",
+    "commit-msg": "bash tools/hooks/commit-msg \"$1\""
   },
   "overrides": {
     "vite": "^7",

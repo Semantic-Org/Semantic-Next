@@ -12,23 +12,24 @@
     "LICENSE",
     "README.md"
   ],
+  "exports": {
+    ".": "./src/log.js"
+  },
   "sideEffects": false,
   "scripts": {
     "test": "vitest run"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/semantic-org/esbuild-resolve-bare-imports.git"
+    "url": "git+https://github.com/Semantic-Org/Semantic-Next.git",
+    "directory": "internal-packages/esbuild-log"
   },
   "keywords": [
     "esbuild",
     "plugin",
-    "cdn",
-    "jsdelivr",
-    "unpkg",
-    "imports",
-    "resolve",
-    "modules",
+    "log",
+    "logging",
+    "chalk",
     "semantic-ui"
   ],
   "peerDependencies": {

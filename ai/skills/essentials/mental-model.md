@@ -191,6 +191,23 @@ Behaviors store their instance on the element (`el.transition`). Calling `$el.tr
 
 Specs are the formal schema for design system primitives. Understanding how they flow through the system helps you work with (or build) spec-driven components.
 
+### The Spec as Single Source of Truth
+
+A spec like `button.spec.js` is **not documentation** — it's a **contract** that drives every other representation of the component. The spec manifests in multiple forms, all derived from the same definition:
+
+| Manifestation | Where it appears | What it gives you |
+|---|---|---|
+| Runtime config | `.component.js` (generated) | Properties, validation, attribute aliases |
+| Machine-readable JSON | `.spec.json` (generated) | Full API surface for LLMs and tooling |
+| CSS file structure | `css/theme/{category}/{attribute}-variables.css` | Spec attribute name = filename |
+| CSS layer names | `layer({component}.theme.{category}.{attribute})` | Queryable in CSSOM at runtime |
+| HTML examples | `SpecReader.getDefinition()` | Documentation pages, MCP `get_component` |
+| TypeScript types | `.d.ts` (hand-authored, mirrors spec) | Editor autocomplete, type checking |
+
+Learn the spec structure once, navigate every layer. Given any rendered element you can trace back to the CSS that controls it: read the tag name, look up the spec, find the active attribute, follow the 1:1 mapping to either a source file (`css/theme/states/disabled-variables.css`) or a CSS layer in the live CSSOM (`layer(button.theme.states.disabled)`).
+
+The spec vocabulary itself is **descriptivist** — derived from convergent patterns observed across Material UI, Chakra, Radix, Mantine, Ant Design, and others. Usage levels reflect observed frequency in real-world implementations, not opinion.
+
 ### From Spec to `{uiClasses}` Classes
 
 The `{uiClasses}` computed class string is built by `WebComponentBase.getUIClasses()`:

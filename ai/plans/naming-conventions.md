@@ -22,6 +22,8 @@ Options:
 - `<ui-tooltip>` + `<ui-popover>` — split by interaction type
 - `<ui-popup>` with `type="tooltip"` / `type="popover"` — one component, explicit modes
 
+Behavior side partially resolved: see [Rename Tooltip → Popover](rename-tooltip-to-popover.md). Component name remains open.
+
 ### General Philosophy
 
 - Use common names people search for vs SUI-specific names?

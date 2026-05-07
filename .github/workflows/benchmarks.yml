@@ -9,7 +9,7 @@ on:
       # run (pull_request uses PR-head YAML), so self-test
       - '.github/workflows/benchmarks.yml'
       # Bench source (bench-*.js, tachometer-ci*.json, build-ci.js) and
-      # reporter (tools/bench-reporter/**) are deliberately NOT listed here.
+      # reporter (tools/ci/bench/reporter/**) are deliberately NOT listed here.
       # The discover and benchmarks jobs overlay main's copy of both before
       # every run, so PR-side edits have no effect on the PR's own comment.
       # Harness changes land on main in a separate PR; test-taker cannot
@@ -40,22 +40,22 @@ jobs:
       matrix: ${{ steps.matrix.outputs.result }}
       has-benchmarks: ${{ steps.matrix.outputs.has-benchmarks }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: '.node-version'
 
-      # Pin bench harness to main. Matrix composition (tools/bench-matrix,
+      # Pin bench harness to main. Matrix composition (tools/ci/bench/matrix,
       # bench source, tachometer configs, reporter) is author-neutral —
       # test-taker can't widen or narrow its own scope, rewrite discover.js,
       # or add a rigged config. Harness changes land on main first.
       - name: Overlay bench harness from main
         run: |
           git fetch origin main --depth=1
-          git checkout origin/main -- packages/*/bench/ tools/bench-reporter/ tools/bench-matrix/ 2>/dev/null || true
+          git checkout origin/main -- packages/*/bench/ tools/ci/bench/reporter/ tools/ci/bench/matrix/ 2>/dev/null || true
 
       # Collect the PR's changed-file set vs base; discover.js filters the
       # matrix to configs whose owning package's @semantic-ui/* dep closure
@@ -76,7 +76,7 @@ jobs:
         id: matrix
         env:
           CHANGED_FILES_PATH: /tmp/changed-files.txt
-        run: node tools/bench-matrix/discover.js
+        run: node tools/ci/bench/matrix/discover.js
 
   benchmarks:
     needs: discover
@@ -89,16 +89,18 @@ jobs:
     runs-on: ubuntu-latest
     # With amplified metrics (Bench: Amplify… commits), a typical run lands
     # at 12-14 min — initial sampling dominates, ~9 min at N=50 × 2 benches ×
-    # N metrics, then auto-sample usually converges in 2-3 min. 20-min cap
-    # gives a few minutes of margin over the observed ceiling.
-    timeout-minutes: 20
+    # N metrics, then auto-sample usually converges in 2-3 min. 25-min cap
+    # gives margin over the observed ceiling; the 9-metric template cell with
+    # each-mount-1000 added sits closest to the limit and was cancelling at
+    # 20 min on the FGR PR.
+    timeout-minutes: 25
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: '.node-version'
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
@@ -117,7 +119,7 @@ jobs:
       - name: Overlay bench harness from main
         run: |
           git fetch origin main --depth=1
-          git checkout origin/main -- packages/*/bench/ tools/bench-reporter/ 2>/dev/null || true
+          git checkout origin/main -- packages/*/bench/ tools/ci/bench/reporter/ 2>/dev/null || true
 
       # Build current branch benchmark bundles
       - name: Build current
@@ -127,19 +129,28 @@ jobs:
       # PR: baseline = base branch tip.
       # Push to main: baseline = this commit's parent (so the delta captures
       #   the merged commit's effect; bench-history indexes the current
-      #   commit's absolute CI).
+      #   commit's absolute CI alongside the within-session percent-delta).
+      #
+      # Resolve baseline SHA inline so it can be written to the artifact as
+      # a sidecar (baseline-sha.txt). The reporter pins each metric's
+      # percent_delta_ci to that SHA — required for cross-iteration drift
+      # detection (see tools/ci/bench/reporter/reporter.js:computeBaselineDrift).
       - name: Build baseline
         run: |
           if [ '${{ github.event_name }}' = 'push' ]; then
             # Fetch enough history to reach the parent commit locally.
             git fetch origin main --depth=2
+            BASELINE_SHA=$(git rev-parse HEAD~1)
             git checkout HEAD~1 -- packages/*/src/
           else
             git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+            BASELINE_SHA=$(git rev-parse FETCH_HEAD)
             git checkout FETCH_HEAD -- packages/*/src/
           fi
           node packages/${{ matrix.entry.package }}/bench/tachometer/build-ci.js baseline
           git checkout HEAD -- packages/*/src/
+          mkdir -p results
+          echo "$BASELINE_SHA" > results/baseline-sha.txt
 
       # Run just this matrix cell's single config.
       # Per-cell auto-sample tail is governed by the config's own `timeout`
@@ -153,7 +164,12 @@ jobs:
             --json-file "results/${{ matrix.entry.package }}-${{ matrix.entry.name }}.json"
 
       - name: Upload results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.entry.name }}
-          path: results/*.json
+          # Include baseline-sha.txt sidecar — the reporter and history
+          # archiver read it to pin percent_delta_ci entries to their
+          # baseline SHA.
+          path: |
+            results/*.json
+            results/baseline-sha.txt

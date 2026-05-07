@@ -1,0 +1,1154 @@
+{
+  "close": {
+    "value": "close",
+    "reason": "Direct name match in Material Symbols, the standard X/close icon"
+  },
+  "back": {
+    "value": "arrow_back",
+    "reason": "Material Symbols' 'arrow_back' is the standard left-pointing arrow for back navigation"
+  },
+  "next": {
+    "value": "arrow_forward",
+    "reason": "Material Symbols' 'arrow_forward' is the standard right-pointing arrow for forward navigation"
+  },
+  "up": {
+    "value": "arrow_upward",
+    "reason": "Material Symbols' 'arrow_upward' is the standard upward arrow for go-up navigation"
+  },
+  "down": {
+    "value": "arrow_downward",
+    "reason": "Material Symbols' 'arrow_downward' is the standard downward arrow for go-down navigation"
+  },
+  "external-link": {
+    "value": "open_in_new",
+    "reason": "Material Symbols' 'open_in_new' shows a box with an arrow pointing out, the standard external link icon"
+  },
+  "chevron-right": {
+    "value": "chevron_right",
+    "reason": "Direct name match in Material Symbols, standard right-pointing chevron"
+  },
+  "chevron-down": {
+    "value": "expand_more",
+    "reason": "Material Symbols uses 'expand_more' for the downward chevron, the standard dropdown/expand indicator"
+  },
+  "chevron-up": {
+    "value": "expand_less",
+    "reason": "Material Symbols uses 'expand_less' for the upward chevron, the standard collapse indicator"
+  },
+  "chevron-left": {
+    "value": "chevron_left",
+    "reason": "Direct name match in Material Symbols, standard left-pointing chevron"
+  },
+  "more": {
+    "value": "more_horiz",
+    "reason": "Material Symbols' 'more_horiz' is three horizontal dots, the standard horizontal more-options indicator"
+  },
+  "more-options": {
+    "value": "more_vert",
+    "reason": "Material Symbols' 'more_vert' is three vertical dots (kebab menu), the standard vertical more-options icon"
+  },
+  "sidebar": {
+    "value": "view_sidebar",
+    "reason": "Material Symbols' 'view_sidebar' represents a sidebar panel layout, direct match for toggle sidebar"
+  },
+  "columns": {
+    "value": "view_column",
+    "reason": "Material Symbols' 'view_column' shows a multi-column layout, direct match for column layout concept"
+  },
+  "anchor": {
+    "value": "tag",
+    "reason": "Material Symbols' 'tag' (a hash/pound symbol) represents anchor links (#); 'anchor' in Material Symbols is a nautical anchor which is the wrong metaphor"
+  },
+  "user": {
+    "value": "person",
+    "reason": "Material Symbols' 'person' is the standard single-person silhouette icon"
+  },
+  "avatar": {
+    "value": "account_circle",
+    "reason": "Material Symbols' 'account_circle' shows a person inside a circle, the standard avatar/profile picture placeholder"
+  },
+  "users": {
+    "value": "group",
+    "reason": "Material Symbols' 'group' shows multiple people, the standard team/group icon"
+  },
+  "add-user": {
+    "value": "person_add",
+    "reason": "Material Symbols' 'person_add' is a person with a plus sign, the standard add/invite user icon"
+  },
+  "remove-user": {
+    "value": "person_remove",
+    "reason": "Material Symbols' 'person_remove' is a person with a minus sign, the standard remove user icon"
+  },
+  "assigned": {
+    "value": "how_to_reg",
+    "reason": "Material Symbols' 'how_to_reg' is a person with a checkmark, used for verified/assigned user status"
+  },
+  "admin": {
+    "value": "admin_panel_settings",
+    "reason": "Material Symbols' 'admin_panel_settings' shows a shield with a gear, conveying administrative authority"
+  },
+  "user-settings": {
+    "value": "manage_accounts",
+    "reason": "Material Symbols' 'manage_accounts' shows a person with a gear, the standard icon for user configuration"
+  },
+  "anonymous": {
+    "value": null,
+    "reason": "Material Symbols has no incognito/anonymous user icon; 'visibility_off' and 'person_off' convey different meanings (hiding, not anonymity)"
+  },
+  "roles": {
+    "value": null,
+    "reason": "Material Symbols has no icon that clearly represents user roles or permissions as an abstract concept; 'badge' and 'assignment_ind' are about identity, not roles"
+  },
+  "login": {
+    "value": "login",
+    "reason": "Direct name match in Material Symbols, an arrow entering a bracket for sign-in"
+  },
+  "logout": {
+    "value": "logout",
+    "reason": "Direct name match in Material Symbols, an arrow leaving a bracket for sign-out"
+  },
+  "fingerprint": {
+    "value": "fingerprint",
+    "reason": "Direct name match in Material Symbols, the standard fingerprint biometric icon"
+  },
+  "add": {
+    "value": "add",
+    "reason": "Direct name match in Material Symbols, the universal plus-sign add/create icon"
+  },
+  "edit": {
+    "value": "edit",
+    "reason": "Direct name match in Material Symbols, a pencil icon for edit/modify"
+  },
+  "delete": {
+    "value": "delete",
+    "reason": "Direct name match in Material Symbols, the standard trash can icon for delete/remove"
+  },
+  "save": {
+    "value": "save",
+    "reason": "Direct name match in Material Symbols, the classic floppy disk save icon"
+  },
+  "check": {
+    "value": "check",
+    "reason": "Direct name match in Material Symbols, a simple checkmark for confirm/done/approve"
+  },
+  "refresh": {
+    "value": "sync",
+    "reason": "Material Symbols' 'sync' shows circular arrows, the standard refresh/reload/sync icon; 'refresh' also exists but 'sync' is more universally used in Material"
+  },
+  "undo": {
+    "value": "undo",
+    "reason": "Direct name match in Material Symbols, the standard curved-arrow undo icon"
+  },
+  "redo": {
+    "value": "redo",
+    "reason": "Direct name match in Material Symbols, the standard curved-arrow redo icon"
+  },
+  "copy": {
+    "value": "content_copy",
+    "reason": "Material Symbols' 'content_copy' shows two overlapping documents, the standard copy/duplicate icon"
+  },
+  "clipboard": {
+    "value": "assignment",
+    "reason": "Material Symbols' 'assignment' is a clipboard icon; Material Symbols has no icon literally named 'clipboard'"
+  },
+  "copied": {
+    "value": "assignment_turned_in",
+    "reason": "Material Symbols' 'assignment_turned_in' is a clipboard with a checkmark, representing copied/completed clipboard action"
+  },
+  "paste": {
+    "value": "content_paste",
+    "reason": "Material Symbols' 'content_paste' is the standard paste-from-clipboard icon"
+  },
+  "cut": {
+    "value": "content_cut",
+    "reason": "Material Symbols' 'content_cut' shows scissors, the universal cut symbol"
+  },
+  "move": {
+    "value": "open_with",
+    "reason": "Material Symbols' 'open_with' shows a four-directional arrow cross, the standard move/drag icon"
+  },
+  "drag-handle": {
+    "value": "drag_indicator",
+    "reason": "Material Symbols' 'drag_indicator' shows a six-dot vertical grip pattern, the standard drag handle for reorderable items"
+  },
+  "upload": {
+    "value": "upload",
+    "reason": "Direct name match in Material Symbols, standard upward-arrow upload icon"
+  },
+  "download": {
+    "value": "download",
+    "reason": "Direct name match in Material Symbols, standard downward-arrow download icon"
+  },
+  "import": {
+    "value": null,
+    "reason": "Material Symbols has no dedicated import-data icon; 'input' shows a generic input arrow and 'publish' is for uploading, neither clearly conveys data import"
+  },
+  "export": {
+    "value": null,
+    "reason": "Material Symbols has no dedicated export-data icon; 'ios_share' is platform-specific and 'output' is not a standard Material Symbols icon"
+  },
+  "print": {
+    "value": "print",
+    "reason": "Direct name match in Material Symbols, the standard printer icon"
+  },
+  "share": {
+    "value": "share",
+    "reason": "Direct name match in Material Symbols, the standard share icon with branching nodes"
+  },
+  "send": {
+    "value": "send",
+    "reason": "Direct name match in Material Symbols, a paper airplane icon for sending messages"
+  },
+  "zap": {
+    "value": "bolt",
+    "reason": "Material Symbols' 'bolt' is a lightning bolt icon, the standard fast/instant action symbol"
+  },
+  "checkbox": {
+    "value": "check_box",
+    "reason": "Material Symbols' 'check_box' is a square with a checkmark inside, the standard checked checkbox"
+  },
+  "checkbox-empty": {
+    "value": "check_box_outline_blank",
+    "reason": "Material Symbols' 'check_box_outline_blank' is an empty square outline, the standard unchecked checkbox"
+  },
+  "toggle": {
+    "value": "toggle_on",
+    "reason": "Material Symbols' 'toggle_on' shows a toggle switch in the on position"
+  },
+  "toggle-off": {
+    "value": "toggle_off",
+    "reason": "Material Symbols' 'toggle_off' shows a toggle switch in the off position"
+  },
+  "file": {
+    "value": "insert_drive_file",
+    "reason": "insert_drive_file is the standard generic file icon in Material Symbols (a page with a corner fold)."
+  },
+  "document": {
+    "value": "description",
+    "reason": "description shows a document with text lines, matching the 'text document' concept."
+  },
+  "pdf": {
+    "value": "picture_as_pdf",
+    "reason": "picture_as_pdf is the dedicated PDF icon in Material Symbols."
+  },
+  "folder": {
+    "value": "folder",
+    "reason": "Direct match."
+  },
+  "new-folder": {
+    "value": "create_new_folder",
+    "reason": "create_new_folder shows a folder with a plus sign."
+  },
+  "open-folder": {
+    "value": "folder_open",
+    "reason": "Direct match for an open folder."
+  },
+  "archive": {
+    "value": "archive",
+    "reason": "Direct match. Shows a box/archive container."
+  },
+  "zip": {
+    "value": "folder_zip",
+    "reason": "folder_zip shows a folder with a zipper, representing compressed files."
+  },
+  "attachment": {
+    "value": "attach_file",
+    "reason": "attach_file shows a paperclip for file attachment."
+  },
+  "link": {
+    "value": "link",
+    "reason": "Direct match. Shows chain links for URL/hyperlink."
+  },
+  "unlink": {
+    "value": "link_off",
+    "reason": "link_off shows broken chain links, representing unlinking."
+  },
+  "image": {
+    "value": "image",
+    "reason": "Direct match. Shows a landscape photo icon."
+  },
+  "gallery": {
+    "value": "collections",
+    "reason": "collections shows stacked images, representing a photo gallery."
+  },
+  "video": {
+    "value": "videocam",
+    "reason": "videocam shows a video camera, the standard video icon in Material Symbols."
+  },
+  "camera": {
+    "value": "photo_camera",
+    "reason": "photo_camera is the standard camera icon for photo capture."
+  },
+  "camera-off": {
+    "value": "no_photography",
+    "reason": "no_photography shows a crossed-out camera."
+  },
+  "volume": {
+    "value": "volume_up",
+    "reason": "volume_up shows a speaker with sound waves, representing volume on/high."
+  },
+  "volume-low": {
+    "value": "volume_down",
+    "reason": "volume_down shows a speaker with reduced sound waves."
+  },
+  "mute": {
+    "value": "volume_off",
+    "reason": "volume_off shows a speaker with an X, representing muted audio."
+  },
+  "music": {
+    "value": "music_note",
+    "reason": "music_note shows a single musical note."
+  },
+  "microphone": {
+    "value": "mic",
+    "reason": "mic is the standard microphone icon in Material Symbols."
+  },
+  "microphone-off": {
+    "value": "mic_off",
+    "reason": "mic_off shows a crossed-out microphone."
+  },
+  "headphones": {
+    "value": "headphones",
+    "reason": "Direct match."
+  },
+  "podcast": {
+    "value": "podcasts",
+    "reason": "podcasts shows concentric arcs representing a podcast signal."
+  },
+  "broadcast": {
+    "value": "cell_tower",
+    "reason": "cell_tower shows a broadcasting tower with signal waves, fitting the broadcast/live concept."
+  },
+  "crop": {
+    "value": "crop",
+    "reason": "Direct match. Shows crop marks for image cropping."
+  },
+  "rotate": {
+    "value": "rotate_right",
+    "reason": "rotate_right shows a circular arrow indicating rotation. Chose right over left as the default rotation direction."
+  },
+  "play": {
+    "value": "play_arrow",
+    "reason": "play_arrow is the standard play triangle in Material Symbols."
+  },
+  "pause": {
+    "value": "pause",
+    "reason": "Direct match. Shows two vertical bars."
+  },
+  "stop": {
+    "value": "stop",
+    "reason": "Direct match. Shows a filled square."
+  },
+  "skip-next": {
+    "value": "skip_next",
+    "reason": "Direct match. Shows a triangle with a vertical bar (next track)."
+  },
+  "skip-previous": {
+    "value": "skip_previous",
+    "reason": "Direct match. Shows a vertical bar with a triangle (previous track)."
+  },
+  "fast-forward": {
+    "value": "fast_forward",
+    "reason": "Direct match. Shows double right-pointing triangles."
+  },
+  "rewind": {
+    "value": "fast_rewind",
+    "reason": "fast_rewind shows double left-pointing triangles for rewind."
+  },
+  "shuffle": {
+    "value": "shuffle",
+    "reason": "Direct match. Shows crossing arrows."
+  },
+  "repeat": {
+    "value": "repeat",
+    "reason": "Direct match. Shows looping arrows."
+  },
+  "record": {
+    "value": "fiber_manual_record",
+    "reason": "fiber_manual_record is a filled circle, the universal record symbol. Material Symbols does not have a dedicated 'record' icon with a better name."
+  },
+  "brush": {
+    "value": "brush",
+    "reason": "Direct match. Shows a paint brush."
+  },
+  "pen": {
+    "value": "edit",
+    "reason": "edit shows a pencil/pen icon, which is the standard drawing/writing tool in Material Symbols. The 'draw' icon also exists but 'edit' is more recognizable as a pen."
+  },
+  "color": {
+    "value": "colorize",
+    "reason": "colorize shows an eyedropper tool for color picking."
+  },
+  "eraser": {
+    "value": null,
+    "reason": "Material Symbols does not have a dedicated eraser icon. The closest alternatives (backspace, clear, delete) represent different concepts entirely and would be misleading as an eraser tool."
+  },
+  "filter": {
+    "value": "filter_list",
+    "reason": "Material Symbols' 'filter_list' is the standard funnel/filter icon used for filtering results"
+  },
+  "sort": {
+    "value": "sort",
+    "reason": "Direct name match in Material Symbols, shows stacked horizontal lines of varying length for sorting"
+  },
+  "list": {
+    "value": "list",
+    "reason": "Direct name match in Material Symbols, shows a list layout with horizontal lines and bullet points"
+  },
+  "table": {
+    "value": "table",
+    "reason": "Direct name match in Material Symbols, shows a grid/spreadsheet table layout"
+  },
+  "grid": {
+    "value": "grid_view",
+    "reason": "Material Symbols' 'grid_view' shows a 2x2 grid of squares, the standard card/grid view icon"
+  },
+  "chart-bar": {
+    "value": "bar_chart",
+    "reason": "Material Symbols' 'bar_chart' shows vertical bars of varying heights, the standard bar chart icon"
+  },
+  "chart-line": {
+    "value": "show_chart",
+    "reason": "Material Symbols' 'show_chart' shows a line graph trending upward, the standard line chart/analytics icon"
+  },
+  "chart-pie": {
+    "value": "pie_chart",
+    "reason": "Direct semantic match in Material Symbols, shows a circle divided into segments for pie chart/statistics"
+  },
+  "view": {
+    "value": "visibility",
+    "reason": "Material Symbols' 'visibility' is the standard open-eye icon for show/visible state"
+  },
+  "hide": {
+    "value": "visibility_off",
+    "reason": "Material Symbols' 'visibility_off' is the standard eye-with-slash icon for hide/invisible state"
+  },
+  "search": {
+    "value": "search",
+    "reason": "Direct name match in Material Symbols, the standard magnifying glass search icon"
+  },
+  "zoom-in": {
+    "value": "zoom_in",
+    "reason": "Direct name match in Material Symbols, magnifying glass with a plus sign"
+  },
+  "zoom-out": {
+    "value": "zoom_out",
+    "reason": "Direct name match in Material Symbols, magnifying glass with a minus sign"
+  },
+  "fullscreen": {
+    "value": "fullscreen",
+    "reason": "Direct name match in Material Symbols, shows four outward-pointing corner arrows for maximize/fullscreen"
+  },
+  "exit-fullscreen": {
+    "value": "fullscreen_exit",
+    "reason": "Material Symbols' 'fullscreen_exit' shows four inward-pointing corner arrows for minimize/exit fullscreen"
+  },
+  "board": {
+    "value": "view_kanban",
+    "reason": "Material Symbols' 'view_kanban' shows a kanban board layout with vertical columns, direct match for board/kanban view"
+  },
+  "activity": {
+    "value": "monitoring",
+    "reason": "Material Symbols' 'monitoring' shows a chart with a pulse-like line, representing activity monitoring and analytics"
+  },
+  "success": {
+    "value": "check_circle",
+    "reason": "Material Symbols' 'check_circle' is a checkmark inside a circle, the universal success/complete indicator"
+  },
+  "error": {
+    "value": "error",
+    "reason": "Direct name match in Material Symbols, shows an exclamation mark inside a circle for error alerts"
+  },
+  "warning": {
+    "value": "warning",
+    "reason": "Direct name match in Material Symbols, shows an exclamation mark inside a triangle for warning alerts"
+  },
+  "info": {
+    "value": "info",
+    "reason": "Direct name match in Material Symbols, shows the letter 'i' inside a circle for information"
+  },
+  "help": {
+    "value": "help",
+    "reason": "Direct name match in Material Symbols, shows a question mark inside a circle for help/FAQ"
+  },
+  "loading": {
+    "value": "progress_activity",
+    "reason": "Material Symbols' 'progress_activity' is the circular loading/spinner indicator, the standard loading state icon"
+  },
+  "filled-circle": {
+    "value": "radio_button_checked",
+    "reason": "Material Symbols' 'radio_button_checked' shows a filled circle inside a ring, the standard active/selected radio state"
+  },
+  "empty-circle": {
+    "value": "radio_button_unchecked",
+    "reason": "Material Symbols' 'radio_button_unchecked' shows an empty circle outline, the standard inactive/unselected radio state"
+  },
+  "verified": {
+    "value": "verified",
+    "reason": "Direct name match in Material Symbols, shows a checkmark inside a shield/badge shape for verified status"
+  },
+  "smile": {
+    "value": "sentiment_satisfied",
+    "reason": "Material Symbols' 'sentiment_satisfied' shows a smiling face, the standard happy/satisfied emoji icon"
+  },
+  "frown": {
+    "value": "sentiment_dissatisfied",
+    "reason": "Material Symbols' 'sentiment_dissatisfied' shows a frowning face, the standard sad/dissatisfied emoji icon"
+  },
+  "tip": {
+    "value": "lightbulb",
+    "reason": "Material Symbols' 'lightbulb' is the universal symbol for ideas, tips, and hints"
+  },
+  "fire": {
+    "value": "local_fire_department",
+    "reason": "Material Symbols' 'local_fire_department' shows a flame icon, the best match for hot/trending/fire concept"
+  },
+  "support": {
+    "value": "support",
+    "reason": "Direct name match in Material Symbols, shows a lifebuoy/life ring icon for support and assistance"
+  },
+  "like": {
+    "value": "favorite",
+    "reason": "Material Symbols' 'favorite' is a filled heart icon, the standard like/heart symbol"
+  },
+  "unlike": {
+    "value": "heart_broken",
+    "reason": "Material Symbols' 'heart_broken' shows a broken heart, the standard unlike/heartbreak icon"
+  },
+  "star": {
+    "value": "star",
+    "reason": "Direct name match in Material Symbols, a five-pointed star for favorite/rating"
+  },
+  "bookmark": {
+    "value": "bookmark",
+    "reason": "Direct name match in Material Symbols, a bookmark/ribbon icon for save-for-later"
+  },
+  "thumbs-up": {
+    "value": "thumb_up",
+    "reason": "Material Symbols' 'thumb_up' is the standard thumbs-up icon for upvote/approval"
+  },
+  "thumbs-down": {
+    "value": "thumb_down",
+    "reason": "Material Symbols' 'thumb_down' is the standard thumbs-down icon for downvote/disapproval"
+  },
+  "reply": {
+    "value": "reply",
+    "reason": "Direct name match in Material Symbols, shows a curved left-pointing arrow for replying"
+  },
+  "comment": {
+    "value": "comment",
+    "reason": "Direct name match in Material Symbols, shows a speech bubble for comments/messages"
+  },
+  "comments": {
+    "value": "forum",
+    "reason": "Material Symbols' 'forum' shows overlapping speech bubbles, representing multiple comments/discussion"
+  },
+  "typing": {
+    "value": "more_horiz",
+    "reason": "Material Symbols' 'more_horiz' shows three horizontal dots, commonly used as a typing indicator in chat UIs"
+  },
+  "mention": {
+    "value": "alternate_email",
+    "reason": "Material Symbols' 'alternate_email' shows the @ symbol, the standard mention/at-sign icon"
+  },
+  "block": {
+    "value": "block",
+    "reason": "Direct name match in Material Symbols, shows a circle with a diagonal line through it for block/ban"
+  },
+  "flag": {
+    "value": "flag",
+    "reason": "Direct name match in Material Symbols, a flag icon for reporting/flagging content"
+  },
+  "pin": {
+    "value": "push_pin",
+    "reason": "Material Symbols' 'push_pin' shows a thumbtack/pushpin, the standard icon for pinning items"
+  },
+  "award": {
+    "value": "military_tech",
+    "reason": "Material Symbols' 'military_tech' shows a medal with a ribbon, representing badges and awards"
+  },
+  "trophy": {
+    "value": "emoji_events",
+    "reason": "Material Symbols' 'emoji_events' shows a trophy cup, the standard achievement/winner icon"
+  },
+  "gift": {
+    "value": "card_giftcard",
+    "reason": "Material Symbols' 'card_giftcard' shows a gift card with a ribbon, the closest match for gift/reward/present"
+  },
+  "target": {
+    "value": "target",
+    "reason": "Direct name match in Material Symbols, shows a target/bullseye icon for goal/target concept"
+  },
+  "bold": {
+    "value": "format_bold",
+    "reason": "Material Symbols' 'format_bold' shows a bold letter 'B', the standard bold text formatting icon"
+  },
+  "italic": {
+    "value": "format_italic",
+    "reason": "Material Symbols' 'format_italic' shows an italic letter 'I', the standard italic text formatting icon"
+  },
+  "underline": {
+    "value": "format_underlined",
+    "reason": "Material Symbols' 'format_underlined' shows an underlined letter 'U', the standard underline text formatting icon"
+  },
+  "strikethrough": {
+    "value": "format_strikethrough",
+    "reason": "Material Symbols' 'format_strikethrough' shows a struck-through letter 'S', the standard strikethrough icon"
+  },
+  "code": {
+    "value": "code",
+    "reason": "Direct name match in Material Symbols, shows angle brackets <> for code/programming snippets"
+  },
+  "quote": {
+    "value": "format_quote",
+    "reason": "Material Symbols' 'format_quote' shows quotation marks, the standard blockquote icon"
+  },
+  "heading": {
+    "value": "title",
+    "reason": "Material Symbols' 'title' shows a 'T' with formatting lines, the standard heading/title icon for text editors"
+  },
+  "paragraph": {
+    "value": "notes",
+    "reason": "Material Symbols' 'notes' shows horizontal lines representing paragraph text, the closest match for paragraph body text"
+  },
+  "bullet-list": {
+    "value": "format_list_bulleted",
+    "reason": "Material Symbols' 'format_list_bulleted' shows bulleted list lines, the standard unordered list icon"
+  },
+  "numbered-list": {
+    "value": "format_list_numbered",
+    "reason": "Material Symbols' 'format_list_numbered' shows numbered list lines, the standard ordered list icon"
+  },
+  "checklist": {
+    "value": "checklist",
+    "reason": "Direct name match in Material Symbols, shows a list with checkboxes for todo/checklist"
+  },
+  "indent": {
+    "value": "format_indent_increase",
+    "reason": "Material Symbols' 'format_indent_increase' shows lines shifting right, the standard indent text icon"
+  },
+  "outdent": {
+    "value": "format_indent_decrease",
+    "reason": "Material Symbols' 'format_indent_decrease' shows lines shifting left, the standard outdent/decrease indent icon"
+  },
+  "align-left": {
+    "value": "format_align_left",
+    "reason": "Material Symbols' 'format_align_left' shows left-aligned lines, the standard left alignment icon"
+  },
+  "align-center": {
+    "value": "format_align_center",
+    "reason": "Material Symbols' 'format_align_center' shows center-aligned lines, the standard center alignment icon"
+  },
+  "align-right": {
+    "value": "format_align_right",
+    "reason": "Material Symbols' 'format_align_right' shows right-aligned lines, the standard right alignment icon"
+  },
+  "justify": {
+    "value": "format_align_justify",
+    "reason": "Material Symbols' 'format_align_justify' shows fully justified lines, the standard justify alignment icon"
+  },
+  "emoji": {
+    "value": "emoji_emotions",
+    "reason": "Material Symbols' 'emoji_emotions' shows a smiley face, the standard emoji picker icon"
+  },
+  "cart": {
+    "value": "shopping_cart",
+    "reason": "Direct match; Material Symbols' standard e-commerce shopping cart icon"
+  },
+  "add-to-cart": {
+    "value": "add_shopping_cart",
+    "reason": "Direct match; Material Symbols has a dedicated add_shopping_cart icon (cart with plus sign)"
+  },
+  "remove-from-cart": {
+    "value": "remove_shopping_cart",
+    "reason": "Direct match; Material Symbols has a dedicated remove_shopping_cart icon (cart with X/minus)"
+  },
+  "payment": {
+    "value": "credit_card",
+    "reason": "Standard credit card icon for payment/billing; direct semantic match in Material Symbols"
+  },
+  "wallet": {
+    "value": "account_balance_wallet",
+    "reason": "Material Symbols' wallet icon; the name is account_balance_wallet rather than just 'wallet'"
+  },
+  "money": {
+    "value": "payments",
+    "reason": "Material Symbols' 'payments' shows stacked bills/currency; better generic money icon than 'attach_money' which is just a dollar sign"
+  },
+  "tag": {
+    "value": "sell",
+    "reason": "Material Symbols' 'sell' is a price tag icon; best match for price tag/label concept"
+  },
+  "tags": {
+    "value": "sell",
+    "reason": "Material Symbols has no multi-tag icon; 'sell' (price tag) is the closest single-tag match"
+  },
+  "discount": {
+    "value": "percent",
+    "reason": "Material Symbols' 'percent' icon shows a percentage symbol; directly conveys discount"
+  },
+  "coupon": {
+    "value": "confirmation_number",
+    "reason": "Material Symbols' 'confirmation_number' shows a ticket-like shape with perforated edges; best match for coupon/ticket concept"
+  },
+  "package": {
+    "value": "package",
+    "reason": "Direct name match in Material Symbols; a box/package icon for orders and shipments"
+  },
+  "shipping": {
+    "value": "local_shipping",
+    "reason": "Direct match; Material Symbols' standard shipping/delivery truck icon"
+  },
+  "delivery": {
+    "value": "local_shipping",
+    "reason": "Material Symbols has no distinct express/fast delivery icon; reuses 'local_shipping' (truck) as it is the closest match for delivery"
+  },
+  "return": {
+    "value": "assignment_return",
+    "reason": "Material Symbols' 'assignment_return' shows a document with return arrow; represents product return/refund"
+  },
+  "receipt": {
+    "value": "receipt",
+    "reason": "Direct name match in Material Symbols; standard receipt icon"
+  },
+  "invoice": {
+    "value": "receipt_long",
+    "reason": "Material Symbols' 'receipt_long' shows an extended receipt with line items; differentiates from plain receipt for detailed invoices"
+  },
+  "store": {
+    "value": "storefront",
+    "reason": "Material Symbols' 'storefront' shows a shop facade with awning; the standard store/shop icon"
+  },
+  "shopping-bag": {
+    "value": "shopping_bag",
+    "reason": "Direct match; Material Symbols' standard shopping bag icon"
+  },
+  "calendar": {
+    "value": "calendar_today",
+    "reason": "Material Symbols' 'calendar_today' is a single-day calendar; the standard date picker icon"
+  },
+  "schedule": {
+    "value": "calendar_month",
+    "reason": "Material Symbols' 'calendar_month' shows a calendar with a full month grid; represents a schedule with multiple events"
+  },
+  "scheduled": {
+    "value": "event_available",
+    "reason": "Material Symbols' 'event_available' shows a calendar with a checkmark; indicates a confirmed/scheduled date"
+  },
+  "overdue": {
+    "value": "event_busy",
+    "reason": "Material Symbols' 'event_busy' shows a calendar with an X; represents a missed deadline or overdue date"
+  },
+  "time": {
+    "value": "schedule",
+    "reason": "Material Symbols' 'schedule' is a clock face icon; the standard time/clock icon (confusingly named 'schedule' in Material)"
+  },
+  "timer": {
+    "value": "timer",
+    "reason": "Direct name match in Material Symbols; a stopwatch/countdown timer icon"
+  },
+  "watch": {
+    "value": "watch",
+    "reason": "Direct name match in Material Symbols; a wristwatch/smartwatch icon"
+  },
+  "layers": {
+    "value": "layers",
+    "reason": "Direct name match in Material Symbols; stacked layers icon"
+  },
+  "subtask": {
+    "value": "subdirectory_arrow_right",
+    "reason": "Material Symbols' 'subdirectory_arrow_right' shows a right-angle arrow branching down; visually represents a subtask branching from a parent"
+  },
+  "tree": {
+    "value": "account_tree",
+    "reason": "Direct match; Material Symbols' 'account_tree' shows a hierarchy/tree diagram, perfect for org charts and sitemaps"
+  },
+  "progress": {
+    "value": "progress_activity",
+    "reason": "Material Symbols' 'progress_activity' shows a circular progress indicator; directly represents ongoing progress"
+  },
+  "milestone": {
+    "value": "diamond",
+    "reason": "Material Symbols' 'diamond' is a diamond shape; the standard milestone marker used in project management (Gantt charts)"
+  },
+  "tasks": {
+    "value": "task_alt",
+    "reason": "Material Symbols' 'task_alt' shows a checkmark in a circle; represents completed tasks/todos"
+  },
+  "location": {
+    "value": "location_on",
+    "reason": "Direct match; Material Symbols' standard map pin/location marker icon"
+  },
+  "map": {
+    "value": "map",
+    "reason": "Direct name match in Material Symbols; a folded map icon"
+  },
+  "directions": {
+    "value": "directions",
+    "reason": "Direct name match in Material Symbols; a directional sign/route icon"
+  },
+  "compass": {
+    "value": "explore",
+    "reason": "Material Symbols' 'explore' is a compass icon; the standard compass/navigation icon in the library"
+  },
+  "current-location": {
+    "value": "my_location",
+    "reason": "Direct match; Material Symbols' 'my_location' is a crosshair icon indicating current GPS position"
+  },
+  "measure": {
+    "value": "straighten",
+    "reason": "Material Symbols' 'straighten' shows a ruler; the standard measurement/distance icon"
+  },
+  "trending-up": {
+    "value": "trending_up",
+    "reason": "Direct name match in Material Symbols; upward trend line for growth/increase"
+  },
+  "trending-down": {
+    "value": "trending_down",
+    "reason": "Direct name match in Material Symbols; downward trend line for decline/decrease"
+  },
+  "balance": {
+    "value": "balance",
+    "reason": "Direct name match in Material Symbols; a balance scale icon"
+  },
+  "swap": {
+    "value": "swap_horiz",
+    "reason": "Material Symbols' 'swap_horiz' shows bidirectional horizontal arrows; represents transfer/exchange"
+  },
+  "savings": {
+    "value": "savings",
+    "reason": "Direct name match in Material Symbols; a piggy bank icon"
+  },
+  "vault": {
+    "value": null,
+    "reason": "Material Symbols has no vault or safe icon; 'lock' is a padlock (generic security), not a vault/safe box"
+  },
+  "docs": {
+    "value": "menu_book",
+    "reason": "Material Symbols' 'menu_book' shows an open book with pages; represents documentation/reference material"
+  },
+  "book-open": {
+    "value": "auto_stories",
+    "reason": "Material Symbols' 'auto_stories' shows an open book with flipping pages; conveys active reading/open book"
+  },
+  "graduation": {
+    "value": "school",
+    "reason": "Material Symbols' 'school' shows a graduation cap; the standard education/academic icon"
+  },
+  "briefcase": {
+    "value": "work",
+    "reason": "Material Symbols' 'work' is a briefcase icon; the standard work/job icon (named 'work' rather than 'briefcase')"
+  },
+  "company": {
+    "value": "apartment",
+    "reason": "Material Symbols' 'apartment' shows a multi-story building; represents a company office/building"
+  },
+  "organization": {
+    "value": "corporate_fare",
+    "reason": "Material Symbols' 'corporate_fare' shows a building with organizational structure; ideal for corporate/enterprise concept"
+  },
+  "news": {
+    "value": "newspaper",
+    "reason": "Direct match; Material Symbols' 'newspaper' icon represents news/article content"
+  },
+  "rss": {
+    "value": "rss_feed",
+    "reason": "Direct match; Material Symbols' 'rss_feed' is the standard RSS broadcast icon"
+  },
+  "settings": {
+    "value": "settings",
+    "reason": "Direct match; Material Symbols has 'settings' as a gear/cog icon"
+  },
+  "sliders": {
+    "value": "tune",
+    "reason": "Material Symbols 'tune' shows horizontal sliders for adjustments; best match for sliders/adjustments concept"
+  },
+  "theme": {
+    "value": "palette",
+    "reason": "Material Symbols 'palette' represents color/theme selection; matches theme/appearance meaning"
+  },
+  "light-mode": {
+    "value": "light_mode",
+    "reason": "Direct match; Material Symbols has 'light_mode' sun icon"
+  },
+  "dark-mode": {
+    "value": "dark_mode",
+    "reason": "Direct match; Material Symbols has 'dark_mode' crescent moon icon"
+  },
+  "accessibility": {
+    "value": "accessibility_new",
+    "reason": "Material Symbols 'accessibility_new' shows a person with arms raised; the updated accessibility icon, preferred over older 'accessibility'"
+  },
+  "plugin": {
+    "value": "extension",
+    "reason": "Material Symbols 'extension' shows a puzzle piece; standard metaphor for plugins/extensions"
+  },
+  "webhook": {
+    "value": "webhook",
+    "reason": "Direct match; Material Symbols has 'webhook' icon for API/endpoint"
+  },
+  "globe": {
+    "value": "language",
+    "reason": "Material Symbols 'language' shows a globe with a grid; represents world/public/language. Chosen over 'public' which is also a globe but 'language' is the more common choice for globe/world"
+  },
+  "desktop": {
+    "value": "desktop_windows",
+    "reason": "Material Symbols 'desktop_windows' shows a desktop monitor; the standard desktop computer icon"
+  },
+  "laptop": {
+    "value": "laptop_mac",
+    "reason": "Material Symbols 'laptop_mac' is the clean laptop icon; preferred over 'laptop_windows' for a generic laptop representation"
+  },
+  "mobile": {
+    "value": "smartphone",
+    "reason": "Material Symbols 'smartphone' is the standard mobile phone icon"
+  },
+  "tablet": {
+    "value": "tablet",
+    "reason": "Direct match; Material Symbols has 'tablet' icon for tablet device"
+  },
+  "keyboard": {
+    "value": "keyboard",
+    "reason": "Direct match; Material Symbols has 'keyboard' icon"
+  },
+  "cpu": {
+    "value": "memory",
+    "reason": "Material Symbols 'memory' shows a chip/processor; best match for CPU/processor concept"
+  },
+  "storage": {
+    "value": "storage",
+    "reason": "Direct match; Material Symbols has 'storage' icon representing a storage drive/disk"
+  },
+  "usb": {
+    "value": "usb",
+    "reason": "Direct match; Material Symbols has 'usb' icon for USB connection"
+  },
+  "cast": {
+    "value": "cast",
+    "reason": "Direct match; Material Symbols has 'cast' icon for casting/streaming to devices"
+  },
+  "terminal": {
+    "value": "terminal",
+    "reason": "Direct match; Material Symbols has 'terminal' icon for command line interface"
+  },
+  "database": {
+    "value": "database",
+    "reason": "Direct match; Material Symbols has 'database' icon"
+  },
+  "server": {
+    "value": "dns",
+    "reason": "Material Symbols 'dns' shows stacked server nodes; best match for server concept since there is no dedicated 'server' icon"
+  },
+  "cloud": {
+    "value": "cloud",
+    "reason": "Direct match; Material Symbols has 'cloud' icon"
+  },
+  "cloud-upload": {
+    "value": "cloud_upload",
+    "reason": "Direct match; Material Symbols has 'cloud_upload' icon for cloud upload/backup"
+  },
+  "cloud-download": {
+    "value": "cloud_download",
+    "reason": "Direct match; Material Symbols has 'cloud_download' icon"
+  },
+  "bug": {
+    "value": "bug_report",
+    "reason": "Material Symbols uses 'bug_report' for the bug icon; shows a bug/insect representing issues"
+  },
+  "git": {
+    "value": "account_tree",
+    "reason": "Material Symbols 'account_tree' shows a branching tree structure; closest match for git branch/version control since there is no dedicated git icon"
+  },
+  "network": {
+    "value": "hub",
+    "reason": "Material Symbols 'hub' shows a network hub with radiating connections; best match for generic network concept"
+  },
+  "wifi": {
+    "value": "wifi",
+    "reason": "Direct match; Material Symbols has 'wifi' icon for WiFi signal"
+  },
+  "bluetooth": {
+    "value": "bluetooth",
+    "reason": "Direct match; Material Symbols has 'bluetooth' icon"
+  },
+  "power": {
+    "value": "power_settings_new",
+    "reason": "Material Symbols 'power_settings_new' shows the standard power on/off symbol (circle with line)"
+  },
+  "battery": {
+    "value": "battery_full",
+    "reason": "Material Symbols 'battery_full' is the standard full battery icon; best default representation for battery status"
+  },
+  "tool": {
+    "value": "build",
+    "reason": "Material Symbols 'build' shows a wrench; the standard single-tool icon for fix/repair"
+  },
+  "tools": {
+    "value": "construction",
+    "reason": "Material Symbols 'construction' shows wrench and hammer crossed; represents multiple tools/toolbox"
+  },
+  "qr-code": {
+    "value": "qr_code_2",
+    "reason": "Material Symbols 'qr_code_2' is the updated QR code icon with better visual clarity; preferred over 'qr_code'"
+  },
+  "barcode": {
+    "value": null,
+    "reason": "Material Symbols does not have a dedicated barcode icon. The closest would be 'qr_code' but that represents a different concept (2D vs 1D barcode)"
+  },
+  "calculator": {
+    "value": "calculate",
+    "reason": "Material Symbols 'calculate' shows a calculator; direct semantic match"
+  },
+  "random": {
+    "value": "casino",
+    "reason": "Material Symbols 'casino' shows a die; best match for random/dice concept"
+  },
+  "history": {
+    "value": "history",
+    "reason": "Direct match; Material Symbols has 'history' icon showing a clock with a counter-clockwise arrow"
+  },
+  "rain": {
+    "value": "rainy",
+    "reason": "Material Symbols 'rainy' shows cloud with rain drops; the standard rain weather icon"
+  },
+  "storm": {
+    "value": "thunderstorm",
+    "reason": "Material Symbols 'thunderstorm' shows cloud with lightning; the standard storm icon"
+  },
+  "snow": {
+    "value": "ac_unit",
+    "reason": "Material Symbols 'ac_unit' shows a snowflake; the standard icon for snow/cold. Considered 'severe_cold' but 'ac_unit' is the cleaner snowflake representation"
+  },
+  "wind": {
+    "value": "air",
+    "reason": "Material Symbols 'air' shows flowing air/wind lines; the standard icon for wind"
+  },
+  "temperature": {
+    "value": "thermostat",
+    "reason": "Material Symbols 'thermostat' shows a thermometer; best match for temperature. Also available as 'device_thermostat' but 'thermostat' is more common"
+  },
+  "water": {
+    "value": "water_drop",
+    "reason": "Material Symbols 'water_drop' shows a water droplet; direct match for water/humidity"
+  },
+  "coffee": {
+    "value": "local_cafe",
+    "reason": "Material Symbols 'local_cafe' shows a coffee cup; the standard coffee/cafe icon in Material Symbols (uses 'local_' prefix convention)"
+  },
+  "infinity": {
+    "value": "all_inclusive",
+    "reason": "Material Symbols 'all_inclusive' shows an infinity symbol; direct semantic match for infinite/unlimited"
+  },
+  "eco": {
+    "value": "eco",
+    "reason": "Direct match; Material Symbols has 'eco' icon showing a leaf for nature/environment"
+  },
+  "hexagon": {
+    "value": "hexagon",
+    "reason": "Direct match; Material Symbols has 'hexagon' shape icon"
+  },
+  "triangle": {
+    "value": "change_history",
+    "reason": "Material Symbols 'change_history' renders as a triangle shape; the standard triangle icon in Material Symbols"
+  },
+  "google": {
+    "value": null,
+    "reason": "Material Symbols does NOT have brand logos. There is no Google logo icon available"
+  },
+  "github": {
+    "value": null,
+    "reason": "Material Symbols does NOT have brand logos. There is no GitHub logo icon available"
+  },
+  "apple": {
+    "value": null,
+    "reason": "Material Symbols does NOT have brand logos. There is no Apple logo icon available"
+  },
+  "facebook": {
+    "value": null,
+    "reason": "Material Symbols does NOT have brand logos. There is no Facebook logo icon available"
+  },
+  "twitter": {
+    "value": null,
+    "reason": "Material Symbols does NOT have brand logos. There is no Twitter/X logo icon available"
+  },
+  "linkedin": {
+    "value": null,
+    "reason": "Material Symbols does NOT have brand logos. There is no LinkedIn logo icon available"
+  },
+  "microsoft": {
+    "value": null,
+    "reason": "Material Symbols does NOT have brand logos. There is no Microsoft/Windows logo icon available"
+  },
+  "slack": {
+    "value": null,
+    "reason": "Material Symbols does NOT have brand logos. There is no Slack logo icon available"
+  },
+  "discord": {
+    "value": null,
+    "reason": "Material Symbols does NOT have brand logos. There is no Discord logo icon available"
+  },
+  "instagram": {
+    "value": null,
+    "reason": "Material Symbols does NOT have brand logos. There is no Instagram logo icon available"
+  },
+  "youtube": {
+    "value": null,
+    "reason": "Material Symbols does NOT have brand logos. There is no YouTube logo icon available"
+  },
+  "android": {
+    "value": null,
+    "reason": "Material Symbols does NOT have the Android robot brand logo as a standard icon"
+  },
+  "sparkles": {
+    "value": "auto_awesome",
+    "reason": "Material Symbols 'auto_awesome' shows sparkle stars; widely used for AI/magic features across Google products"
+  },
+  "wand": {
+    "value": "auto_fix_high",
+    "reason": "Material Symbols 'auto_fix_high' shows a magic wand with sparkles; the standard auto-fix/wizard icon"
+  },
+  "bot": {
+    "value": "smart_toy",
+    "reason": "Material Symbols 'smart_toy' shows a robot face; the standard robot/bot icon"
+  },
+  "notifications": {
+    "value": "notifications",
+    "reason": "Direct match; Material Symbols has 'notifications' bell icon"
+  },
+  "email": {
+    "value": "mail",
+    "reason": "Material Symbols 'mail' shows an envelope; direct semantic match for email. Also available as 'email' but 'mail' is the primary icon"
+  },
+  "inbox": {
+    "value": "inbox",
+    "reason": "Direct match; Material Symbols has 'inbox' icon"
+  },
+  "phone": {
+    "value": "call",
+    "reason": "Material Symbols 'call' shows a phone handset; the standard phone call icon. Preferred over 'phone' which also exists but 'call' is more commonly used"
+  },
+  "contacts": {
+    "value": "contacts",
+    "reason": "Direct match; Material Symbols has 'contacts' icon for address book"
+  },
+  "lock": {
+    "value": "lock",
+    "reason": "Direct match; Material Symbols has 'lock' icon for locked/secure state"
+  },
+  "unlock": {
+    "value": "lock_open",
+    "reason": "Material Symbols 'lock_open' represents unlocked state; direct semantic match"
+  },
+  "security": {
+    "value": "shield",
+    "reason": "Direct match; Material Symbols 'shield' represents security/protection"
+  },
+  "secure": {
+    "value": "verified_user",
+    "reason": "Material Symbols 'verified_user' shows a shield with a checkmark; represents verified/secure status"
+  },
+  "key": {
+    "value": "vpn_key",
+    "reason": "Material Symbols 'vpn_key' shows a key icon; the standard key/access icon in Material Symbols. Named for VPN but universally used for key/password concepts"
+  }
+}

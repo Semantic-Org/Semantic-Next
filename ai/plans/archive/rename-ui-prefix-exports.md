@@ -76,3 +76,9 @@ Update references in ai/skills/ markdown files that show import examples.
 
 ### Phase 6: Type definitions (cosmetic)
 - `packages/specs/types/index.d.ts` — update comment example `"UIButton"` → `"Button"`
+
+## Completion
+
+- **Shipped.** Verified directly in source: `src/primitives/index.js` exports `Button`, `Card`, `Icon`, `MenuItem` (no `UI` prefix). `src/primitives/button/button.js` exports `Button`. `src/primitives/menu/specs/menu-item.spec.js` has `exportName: 'MenuItem'` (the corner case the plan called out).
+- Web component tags (`<ui-button>`) unchanged as planned — required by HTML spec.
+- Archived 2026-04-29 from workspace draft. Plan was executed without a canonical roadmap entry; this archive entry is the catalog record.

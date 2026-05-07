@@ -1,5 +1,5 @@
 // shared
-export { analyzePosition, buildHTMLString, MARKER_VERSION } from './build-html-string.js';
+export { analyzePosition, buildHTMLString, MAIN_BRANCH_INDEX, MARKER_VERSION } from './build-html-string.js';
 export { ExpressionEvaluator } from './expression-evaluator.js';
 export { isRecovery, isTracing, setRecovery, setTracing } from './helpers.js';
 

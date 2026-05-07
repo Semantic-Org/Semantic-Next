@@ -146,7 +146,6 @@ function resolveSnippet(nameExpr, data, self) {
 function cloneInstance({ template, templateName, templateData, self }) {
   const instance = template.clone({
     templateName,
-    subTemplates: self.subTemplates,
     data: templateData,
     parentTemplate: self.parentTemplate,
     renderingEngine: 'native',
@@ -218,7 +217,7 @@ const templateBlock = defineBlock({
     attachToRenderRoot(self.currentInstance, region, self);
   },
 
-  hydrate({ node, data, region, scope, hydrateInnerContent, self }) {
+  hydrate({ node, data, region, hydrateInto, self }) {
     const kind = detectKind({ node, data, self });
     if (kind === null) { return; }
 
@@ -227,15 +226,9 @@ const templateBlock = defineBlock({
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
       const snippetData = buildSnippetProxy(node, data, self.evaluator);
       if (region.ownedNodes.length > 0) {
-        hydrateInnerContent({
-          ownedNodes: region.ownedNodes,
-          innerAST: snippet.content,
-          data: snippetData,
-          scope,
-        });
-        const frag = document.createDocumentFragment();
-        for (const n of region.ownedNodes) { frag.appendChild(n); }
-        region.anchor.after(frag);
+        // Snippet args reactivity is anchored on the block scope; a child
+        // would dispose with the next region.clear() and break arg reactivity.
+        hydrateInto({ innerAST: snippet.content, data: snippetData, asChild: false });
       }
       return;
     }
@@ -249,27 +242,13 @@ const templateBlock = defineBlock({
     self.currentInstance = cloneInstance({ template, templateName, templateData, self });
 
     if (region.ownedNodes.length > 0) {
-      const { entries } = self.currentInstance.renderer.buildHTMLString(self.currentInstance.ast);
-      if (entries.length > 0) {
-        const container = document.createDocumentFragment();
-        for (const n of [...region.ownedNodes]) { container.appendChild(n); }
-        self.currentInstance.renderer.hydrateMarkers(
-          container,
-          entries,
-          self.currentInstance.renderer.data,
-          self.currentInstance.renderer.scope,
-        );
-        const frag = document.createDocumentFragment();
-        for (const n of [...container.childNodes]) { frag.appendChild(n); }
-        region.anchor.after(frag);
-        const collected = [];
-        let sibling = region.anchor.nextSibling;
-        while (sibling) {
-          collected.push(sibling);
-          sibling = sibling.nextSibling;
-        }
-        region.ownedNodes = collected;
-      }
+      self.currentInstance.renderer.hydrateInto({
+        region,
+        innerAST: self.currentInstance.ast,
+        data: self.currentInstance.renderer.data,
+        scope: self.currentInstance.renderer.scope,
+        asChild: false,
+      });
     }
 
     self.currentInstance.markRendered();

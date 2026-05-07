@@ -1,10 +1,6 @@
 # State from Settings
 
-**Priority:** 4 (above sizing/token work, below subtree caching — this is a DX primitive that unblocks clean component patterns)
-**Status:** Not started
-**Branch:** —
-
-## Problem
+## Goal
 
 Components often need to accept an initial value from an HTML attribute but then own that value internally via state signals. Today this requires manual shadowing — declaring the same key in both `defaultSettings` and `defaultState`, then seeding state from settings in `initialize()`. The access patterns for settings (proxy: `settings.x` / `settings.x = y`) and state (signal: `state.x.get()` / `state.x.set(y)`) are intentionally different, so promoting state to a setting currently requires rewriting every callsite.
 
@@ -103,10 +99,18 @@ const defaultState = {
 // <todo-app filter="active"> seeds the signal at init.
 ```
 
-## Open questions
+## Open Questions
 
 1. **Should `sync` mode exist at v1?** It adds complexity (reaction setup, cleanup, edge cases with bidirectional updates). Could ship `snapshot` only and add `sync` if real demand appears.
 
 2. **Attribute reflection for debugging?** In snapshot mode, the attribute becomes stale after init. Should the framework remove the attribute after consuming it, leave it stale, or add a debug-mode reflection option?
 
 3. **Interaction with componentSpec?** Spec-driven primitives have their own attribute system. Should `from: 'setting'` work with spec attributes, or is this strictly for ad-hoc components?
+
+## Dependencies
+
+None blocking. The 25-line implementation surface threads through `define-component.js`, `web-component.js`, and `template.js` independently of other in-flight work.
+
+## Status
+
+`scoped` — design decisions locked, implementation surface concrete (~25 lines across three files), open questions are post-MVP refinements rather than scoping gates.

@@ -1,0 +1,113 @@
+{
+  "schema_version": 2,
+  "commits": [
+    {
+      "sha": "aaaa111111111111",
+      "msg": "Perf: initial optimization (#101)",
+      "parent_sha": "",
+      "timestamp": "2026-04-10T00:00:00Z",
+      "pr": 101,
+      "metrics": {
+        "update-10th": {
+          "ci": [10.0, 11.0],
+          "mean_ms": 10.5,
+          "percent_delta_ci": [-5.0, -3.0],
+          "baseline_sha": "0000000000000000"
+        },
+        "select": {
+          "ci": [20.0, 21.0],
+          "mean_ms": 20.5,
+          "percent_delta_ci": [-2.0, -1.0],
+          "baseline_sha": "0000000000000000"
+        },
+        "toggle-middle": {
+          "ci": [8.0, 9.0],
+          "mean_ms": 8.5,
+          "percent_delta_ci": [-3.0, -1.0],
+          "baseline_sha": "0000000000000000"
+        }
+      }
+    },
+    {
+      "sha": "bbbb222222222222",
+      "msg": "Perf: deeper optimization (best) (#102)",
+      "parent_sha": "aaaa111111111111",
+      "timestamp": "2026-04-11T00:00:00Z",
+      "pr": 102,
+      "metrics": {
+        "update-10th": {
+          "ci": [6.0, 7.0],
+          "mean_ms": 6.5,
+          "percent_delta_ci": [-40.0, -35.0],
+          "baseline_sha": "aaaa111111111111"
+        },
+        "select": {
+          "ci": [18.0, 19.0],
+          "mean_ms": 18.5,
+          "percent_delta_ci": [-12.0, -8.0],
+          "baseline_sha": "aaaa111111111111"
+        },
+        "toggle-middle": {
+          "ci": [7.0, 8.0],
+          "mean_ms": 7.5,
+          "percent_delta_ci": [-15.0, -10.0],
+          "baseline_sha": "aaaa111111111111"
+        }
+      }
+    },
+    {
+      "sha": "cccc333333333333",
+      "msg": "Refactor: structural cleanup (#103)",
+      "parent_sha": "bbbb222222222222",
+      "timestamp": "2026-04-12T00:00:00Z",
+      "pr": 103,
+      "metrics": {
+        "update-10th": {
+          "ci": [7.0, 8.0],
+          "mean_ms": 7.5,
+          "percent_delta_ci": [12.0, 18.0],
+          "baseline_sha": "bbbb222222222222"
+        },
+        "select": {
+          "ci": [18.2, 19.1],
+          "mean_ms": 18.65,
+          "percent_delta_ci": [-1.0, 2.0],
+          "baseline_sha": "bbbb222222222222"
+        },
+        "toggle-middle": {
+          "ci": [7.1, 8.1],
+          "mean_ms": 7.6,
+          "percent_delta_ci": [-1.0, 3.0],
+          "baseline_sha": "bbbb222222222222"
+        }
+      }
+    },
+    {
+      "sha": "dddd444444444444",
+      "msg": "Bug: fix correctness issue (#104)",
+      "parent_sha": "cccc333333333333",
+      "timestamp": "2026-04-13T00:00:00Z",
+      "pr": 104,
+      "metrics": {
+        "update-10th": {
+          "ci": [9.0, 10.0],
+          "mean_ms": 9.5,
+          "percent_delta_ci": [22.0, 28.0],
+          "baseline_sha": "cccc333333333333"
+        },
+        "select": {
+          "ci": [18.1, 19.0],
+          "mean_ms": 18.55,
+          "percent_delta_ci": [-0.8, 0.2],
+          "baseline_sha": "cccc333333333333"
+        },
+        "toggle-middle": {
+          "ci": [7.2, 8.2],
+          "mean_ms": 7.7,
+          "percent_delta_ci": [0.5, 2.5],
+          "baseline_sha": "cccc333333333333"
+        }
+      }
+    }
+  ]
+}
