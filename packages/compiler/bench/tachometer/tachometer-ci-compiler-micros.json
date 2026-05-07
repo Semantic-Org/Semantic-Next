@@ -12,7 +12,7 @@
       "measurement": [
         { "mode": "performance", "entryName": "parse-cold-normal-500" },
         { "mode": "performance", "entryName": "parse-cold-complex-200" },
-        { "mode": "performance", "entryName": "ast-walk-5k" },
+        { "mode": "performance", "entryName": "ast-walk-15k" },
         { "mode": "performance", "entryName": "snippet-args-5k" }
       ]
     },
@@ -23,7 +23,7 @@
       "measurement": [
         { "mode": "performance", "entryName": "parse-cold-normal-500" },
         { "mode": "performance", "entryName": "parse-cold-complex-200" },
-        { "mode": "performance", "entryName": "ast-walk-5k" },
+        { "mode": "performance", "entryName": "ast-walk-15k" },
         { "mode": "performance", "entryName": "snippet-args-5k" }
       ]
     }

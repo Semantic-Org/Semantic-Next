@@ -13,7 +13,7 @@
         { "mode": "performance", "entryName": "each-100-mount" },
         { "mode": "performance", "entryName": "each-100" },
         { "mode": "performance", "entryName": "helper-100-mount" },
-        { "mode": "performance", "entryName": "helper-100-state-change" }
+        { "mode": "performance", "entryName": "helper-100-state-change-1k" }
       ]
     },
     {
@@ -24,7 +24,7 @@
         { "mode": "performance", "entryName": "each-100-mount" },
         { "mode": "performance", "entryName": "each-100" },
         { "mode": "performance", "entryName": "helper-100-mount" },
-        { "mode": "performance", "entryName": "helper-100-state-change" }
+        { "mode": "performance", "entryName": "helper-100-state-change-1k" }
       ]
     }
   ]
