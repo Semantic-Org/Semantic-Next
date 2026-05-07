@@ -126,14 +126,29 @@ export const assignInPlace = (target, source, {
 } = {}) => {
   let changed = false;
   if (!preserveExistingKeys) {
-    for (const key in target) {
-      if (!(key in source)) {
-        if (preserveGetters) {
+    if (preserveGetters) {
+      // Own keys only — a `for...in` walk on a prototype-chained target
+      // would attempt `delete` on inherited keys (no-op), and that delete
+      // attempt deopts V8's hidden class for the target. The own-only
+      // path also matches the descriptor check's contract: getter
+      // descriptors are an own-property concept.
+      const ownKeys = Object.keys(target);
+      for (let i = 0; i < ownKeys.length; i++) {
+        const key = ownKeys[i];
+        if (!(key in source)) {
           const desc = Object.getOwnPropertyDescriptor(target, key);
           if (desc && desc.get) { continue; }
+          delete target[key];
+          changed = true;
         }
-        delete target[key];
-        changed = true;
+      }
+    }
+    else {
+      for (const key in target) {
+        if (!(key in source)) {
+          delete target[key];
+          changed = true;
+        }
       }
     }
   }
