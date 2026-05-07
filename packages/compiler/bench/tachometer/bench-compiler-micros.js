@@ -151,12 +151,12 @@ const kitchenSinkTemplate = `<article class="card">
 {
   const astWalkAST = new TemplateCompiler(kitchenSinkTemplate).compile();
 
-  // purpose: Walks a kitchen-sink AST through optimizeAST 5000 times. Merge, hoist, and recurse pass.
-  performance.mark(startMark('ast-walk-5k'));
-  for (let i = 0; i < 5_000; i++) {
+  // purpose: Walks a kitchen-sink AST through optimizeAST 15000 times. Merge, hoist, and recurse pass.
+  performance.mark(startMark('ast-walk-15k'));
+  for (let i = 0; i < 15_000; i++) {
     TemplateCompiler.optimizeAST(astWalkAST);
   }
-  performance.measure('ast-walk-5k', startMark('ast-walk-5k'));
+  performance.measure('ast-walk-15k', startMark('ast-walk-15k'));
 }
 
 /*******************************
