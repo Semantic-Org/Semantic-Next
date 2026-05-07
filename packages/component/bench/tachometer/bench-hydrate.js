@@ -31,7 +31,7 @@ defineComponent({
     </ul>
   `,
   defaultState: {
-    items: { value: [], options: { allowClone: false, safety: 'reference' } },
+    items: [],
   },
   createComponent({ state }) {
     return {
@@ -146,8 +146,8 @@ defineComponent({
     </ul>
   `,
   defaultState: {
-    activeID: { value: null, options: { allowClone: false, safety: 'reference' } },
-    items: { value: [], options: { allowClone: false, safety: 'reference' } },
+    activeID: null,
+    items: [],
   },
   createComponent({ self, state }) {
     return {
@@ -201,14 +201,15 @@ const elHelper = container.firstElementChild;
 // Mutating a state signal that per-item helpers close over fires
 // helper invocations + setAttribute calls. Confirms per-item Reactions
 // wired at hydrate are reactive to external state, not just to
-// itemSignal mutations. 10 cycles amplifies the work above the σ-floor.
-// purpose: Cycles the shared activeID through 10 different items in a hydrated 1000-item list so two items repaint per cycle.
-performance.mark(startMark('helper-100-state-change'));
-for (let i = 0; i < 10; i++) {
-  elHelper.component.setActive(`id-${i * 100}`);
+// itemSignal mutations. 1000 cycles walking every item once so the
+// per-cycle two-item repaint pattern accumulates measurable work.
+// purpose: Walks the shared activeID across every item in a hydrated 1000-item list so two items repaint per cycle.
+performance.mark(startMark('helper-100-state-change-1k'));
+for (let i = 0; i < 1000; i++) {
+  elHelper.component.setActive(`id-${i}`);
   flushWork();
 }
-performance.measure('helper-100-state-change', startMark('helper-100-state-change'));
+performance.measure('helper-100-state-change-1k', startMark('helper-100-state-change-1k'));
 container.innerHTML = '';
 
 /*******************************

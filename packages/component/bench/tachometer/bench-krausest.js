@@ -268,13 +268,13 @@ destroy();
 const el5 = await mount();
 el5.component.run(1000);
 await flush();
-// purpose: Updates the label on every tenth row of a 1000-row table, looped ten times to lift the work above noise.
-performance.mark(startMark('update-10th-10'));
-for (let i = 0; i < 10; i++) {
+// purpose: Updates the label on every tenth row of a 1000-row table, looped 50 times to lift the work above noise.
+performance.mark(startMark('update-10th-50'));
+for (let i = 0; i < 50; i++) {
   el5.component.update();
   flushWork();
 }
-performance.measure('update-10th-10', startMark('update-10th-10'));
+performance.measure('update-10th-50', startMark('update-10th-50'));
 destroy();
 
 /*******************************
@@ -355,14 +355,14 @@ destroy();
 const el10 = await mount();
 el10.component.run(1000);
 await flush();
-// purpose: Removes the last row 10 times from a 1000-row table, with no other rows needing to move.
-performance.mark(startMark('remove-row-back-10'));
-for (let i = 0; i < 10; i++) {
+// purpose: Removes the last row 100 times from a 1000-row table, with no other rows needing to move.
+performance.mark(startMark('remove-row-back-100'));
+for (let i = 0; i < 100; i++) {
   const rows = getRows(el10);
   el10.component.removeRow(rows[rows.length - 1].id);
   flushWork();
 }
-performance.measure('remove-row-back-10', startMark('remove-row-back-10'));
+performance.measure('remove-row-back-100', startMark('remove-row-back-100'));
 destroy();
 
 /*******************************

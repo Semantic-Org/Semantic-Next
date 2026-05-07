@@ -63,14 +63,7 @@ defineComponent({
   `,
   subTemplates: { todoItem },
   defaultState: {
-    // Pinned to safety: 'reference' so the bench tracks the reference fast
-    // path regardless of Signal.defaultSafety. Dual-key shape (allowClone +
-    // safety) keeps the in-flight signal-API refactor compatible without
-    // touching the bench. Mutations use the SUI-canonical helpers below
-    // (push/replaceItem/removeItem/setProperty/filter/setArrayProperty),
-    // which bypass equality or produce new refs — no equalityFunction
-    // override needed.
-    todos: { value: [], options: { allowClone: false, safety: 'reference' } },
+    todos: [],
     filter: 'all',
     editingId: null,
   },
@@ -237,39 +230,39 @@ destroy();
       (one user click)
 *******************************/
 
-// 10× loop per index; same id every iter so signal alternates true/false.
-// Metric averages toggle-on + toggle-off cost — if those diverge (class
-// adds vs removes may do different DOM work), the number mixes two
-// workloads. Both legs run every iter so regression detection is sound,
-// but this is not a pure "single toggle" measurement.
+// Same id every iter so the signal alternates true/false; metric averages
+// toggle-on + toggle-off cost — if those diverge (class adds vs removes
+// may do different DOM work), the number mixes two workloads. Both legs
+// run every iter so regression detection is sound, but this is not a
+// pure "single toggle" measurement.
 const el4 = await setup(100);
-// purpose: Toggles the first item in a 100-item list ten times, alternating completed on and off.
-performance.mark(startMark('toggle-first-10'));
-for (let i = 0; i < 10; i++) {
+// purpose: Toggles the first item in a 100-item list 100 times, alternating completed on and off.
+performance.mark(startMark('toggle-first-100'));
+for (let i = 0; i < 100; i++) {
   el4.component.toggleTodo(getTodos(el4)[0].id);
   flushWork();
 }
-performance.measure('toggle-first-10', startMark('toggle-first-10'));
+performance.measure('toggle-first-100', startMark('toggle-first-100'));
 destroy();
 
 const el5 = await setup(100);
-// purpose: Toggles the last item in a 100-item list ten times, alternating completed on and off.
-performance.mark(startMark('toggle-last-10'));
-for (let i = 0; i < 10; i++) {
+// purpose: Toggles the last item in a 100-item list 100 times, alternating completed on and off.
+performance.mark(startMark('toggle-last-100'));
+for (let i = 0; i < 100; i++) {
   el5.component.toggleTodo(getTodos(el5)[99].id);
   flushWork();
 }
-performance.measure('toggle-last-10', startMark('toggle-last-10'));
+performance.measure('toggle-last-100', startMark('toggle-last-100'));
 destroy();
 
 const el6 = await setup(100);
-// purpose: Toggles a middle item in a 100-item list ten times, alternating completed on and off.
-performance.mark(startMark('toggle-middle-10'));
-for (let i = 0; i < 10; i++) {
+// purpose: Toggles a middle item in a 100-item list 100 times, alternating completed on and off.
+performance.mark(startMark('toggle-middle-100'));
+for (let i = 0; i < 100; i++) {
   el6.component.toggleTodo(getTodos(el6)[49].id);
   flushWork();
 }
-performance.measure('toggle-middle-10', startMark('toggle-middle-10'));
+performance.measure('toggle-middle-100', startMark('toggle-middle-100'));
 destroy();
 
 /*******************************
@@ -278,13 +271,13 @@ destroy();
 *******************************/
 
 const el7 = await setup(100);
-// purpose: Checks off the first 10 items one by one, like a user working down a list.
-performance.mark(startMark('toggle-10'));
-for (let i = 0; i < 10; i++) {
-  el7.component.toggleTodo(getTodos(el7)[i].id);
+// purpose: Cycles through the first 10 items 10 times each, like a user toggling items repeatedly down a list.
+performance.mark(startMark('toggle-100'));
+for (let i = 0; i < 100; i++) {
+  el7.component.toggleTodo(getTodos(el7)[i % 10].id);
   flushWork();
 }
-performance.measure('toggle-10', startMark('toggle-10'));
+performance.measure('toggle-100', startMark('toggle-100'));
 destroy();
 
 /*******************************
@@ -292,54 +285,56 @@ destroy();
       (one user action, all items)
 *******************************/
 
-// 20 alternating toggle-all invocations on a 100-item list — amplified
-// so the measurement clears the σ≈2ms per-sample noise floor on CI.
+// 200 alternating toggle-all invocations on a 100-item list. Each call
+// touches every item, so the 200× sustains a measurable workload above
+// the σ≈2ms per-sample noise floor on CI.
 const el8 = await setup(100);
-// purpose: Toggles all 100 items completed and back across 20 cycles via the master checkbox.
-performance.mark(startMark('toggle-all-20'));
-for (let i = 0; i < 20; i++) {
+// purpose: Toggles all 100 items completed and back across 200 cycles via the master checkbox.
+performance.mark(startMark('toggle-all-200'));
+for (let i = 0; i < 200; i++) {
   el8.component.toggleAll();
   flushWork();
 }
-performance.measure('toggle-all-20', startMark('toggle-all-20'));
+performance.measure('toggle-all-200', startMark('toggle-all-200'));
 destroy();
 
 /*******************************
       Single Removal
 *******************************/
 
-// 10× loop per position; re-fetch each iter since the list shrinks.
-// Each position's ~10ms per-delete workload clears the σ≈2ms floor.
-const el9 = await setup(100);
-// purpose: Deletes the first item 10 times from a 100-item list, with remaining items moving up each time.
-performance.mark(startMark('remove-first-10'));
-for (let i = 0; i < 10; i++) {
+// 100× loop per position on a 200-item list — re-fetch each iter since
+// the list shrinks. Setup of 200 leaves comfortable headroom past the
+// 100-iter loop (list ends at 100 items, never empty).
+const el9 = await setup(200);
+// purpose: Deletes the first item 100 times from a 200-item list, with remaining items moving up each time.
+performance.mark(startMark('remove-first-100'));
+for (let i = 0; i < 100; i++) {
   el9.component.deleteTodo(getTodos(el9)[0].id);
   flushWork();
 }
-performance.measure('remove-first-10', startMark('remove-first-10'));
+performance.measure('remove-first-100', startMark('remove-first-100'));
 destroy();
 
-const el10 = await setup(100);
-// purpose: Deletes the middle item 10 times from a 100-item list, walking halfway through to find each target.
-performance.mark(startMark('remove-middle-10'));
-for (let i = 0; i < 10; i++) {
+const el10 = await setup(200);
+// purpose: Deletes the middle item 100 times from a 200-item list, walking halfway through to find each target.
+performance.mark(startMark('remove-middle-100'));
+for (let i = 0; i < 100; i++) {
   const todos = getTodos(el10);
   el10.component.deleteTodo(todos[Math.floor(todos.length / 2)].id);
   flushWork();
 }
-performance.measure('remove-middle-10', startMark('remove-middle-10'));
+performance.measure('remove-middle-100', startMark('remove-middle-100'));
 destroy();
 
-const el10b = await setup(100);
-// purpose: Deletes the last item 10 times from a 100-item list, with no other items needing to move.
-performance.mark(startMark('remove-last-10'));
-for (let i = 0; i < 10; i++) {
+const el10b = await setup(200);
+// purpose: Deletes the last item 100 times from a 200-item list, with no other items needing to move.
+performance.mark(startMark('remove-last-100'));
+for (let i = 0; i < 100; i++) {
   const todos = getTodos(el10b);
   el10b.component.deleteTodo(todos[todos.length - 1].id);
   flushWork();
 }
-performance.measure('remove-last-10', startMark('remove-last-10'));
+performance.measure('remove-last-100', startMark('remove-last-100'));
 destroy();
 
 /*******************************
@@ -347,38 +342,35 @@ destroy();
 *******************************/
 
 const el11 = await setup(100);
-// purpose: Deletes 5 items from the front of a 100-item list, one click at a time.
-performance.mark(startMark('remove-5-front'));
-for (let i = 0; i < 5; i++) {
+// purpose: Deletes 50 items from the front of a 100-item list, one click at a time.
+performance.mark(startMark('remove-50-front'));
+for (let i = 0; i < 50; i++) {
   el11.component.deleteTodo(getTodos(el11)[0].id);
   flushWork();
 }
-performance.measure('remove-5-front', startMark('remove-5-front'));
+performance.measure('remove-50-front', startMark('remove-50-front'));
 destroy();
 
-// 10× loop (vs 5× for the front/back variants) — middle removal's
-// O(N/2) scan has wider per-sample variance, so 5× landed at ~74ms
-// with observed CI straddling ±2%. 10× brings it to ~148ms / ±1%.
 const el11b = await setup(100);
-// purpose: Deletes 10 items from the middle of a 100-item list, one click at a time.
-performance.mark(startMark('remove-10-middle'));
-for (let i = 0; i < 10; i++) {
+// purpose: Deletes 50 items from the middle of a 100-item list, one click at a time.
+performance.mark(startMark('remove-50-middle'));
+for (let i = 0; i < 50; i++) {
   const todos = getTodos(el11b);
   el11b.component.deleteTodo(todos[Math.floor(todos.length / 2)].id);
   flushWork();
 }
-performance.measure('remove-10-middle', startMark('remove-10-middle'));
+performance.measure('remove-50-middle', startMark('remove-50-middle'));
 destroy();
 
 const el11c = await setup(100);
-// purpose: Deletes 5 items from the end of a 100-item list, one click at a time.
-performance.mark(startMark('remove-5-back'));
-for (let i = 0; i < 5; i++) {
+// purpose: Deletes 50 items from the end of a 100-item list, one click at a time.
+performance.mark(startMark('remove-50-back'));
+for (let i = 0; i < 50; i++) {
   const todos = getTodos(el11c);
   el11c.component.deleteTodo(todos[todos.length - 1].id);
   flushWork();
 }
-performance.measure('remove-5-back', startMark('remove-5-back'));
+performance.measure('remove-50-back', startMark('remove-50-back'));
 destroy();
 
 /*******************************
@@ -462,14 +454,14 @@ destroy();
 // `toggle-*` (which uses replaceItem) and `edit-cycle-5` (which mixes
 // in an editingId flip per cycle).
 const el16 = await setup(100);
-// purpose: Renames 50 different items in a 100-item list via single-field setProperty without editingId co-fires.
-performance.mark(startMark('rename-50'));
-for (let i = 0; i < 50; i++) {
+// purpose: Renames items in a 100-item list 500 times via single-field setProperty without editingId co-fires.
+performance.mark(startMark('rename-500'));
+for (let i = 0; i < 500; i++) {
   const todos = getTodos(el16);
   el16.component.renameTodo(todos[i % todos.length].id, `Renamed ${i}`);
   flushWork();
 }
-performance.measure('rename-50', startMark('rename-50'));
+performance.measure('rename-500', startMark('rename-500'));
 destroy();
 
 /*******************************
