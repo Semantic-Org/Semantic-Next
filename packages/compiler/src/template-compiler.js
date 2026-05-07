@@ -652,6 +652,11 @@ class TemplateCompiler {
       each(dataMatches, (match, index) => {
         let name = match[1].trim();
         let value = match[2].trim();
+        // `data` is the reserved blob arg, not a reactive key
+        if (name === 'data') {
+          templateInfo.data = value;
+          return;
+        }
         data[name] = value;
       });
       // standard notation defaults to reactive data

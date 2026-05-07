@@ -1306,6 +1306,30 @@ describe('TemplateCompiler', () => {
       expect(ast).toEqual(expectedAST);
     });
 
+    it('should route shorthand data= to node.data, not reactiveData', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{>child data=getCardData}`);
+      expect(ast).toEqual([
+        { type: 'template', name: "'child'", data: 'getCardData', reactiveData: {} },
+      ]);
+    });
+
+    it('should split mixed shorthand args into data and reactiveData', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{>child data=getRow extra=foo}`);
+      expect(ast).toEqual([
+        { type: 'template', name: "'child'", data: 'getRow', reactiveData: { extra: 'foo' } },
+      ]);
+    });
+
+    it('should produce equivalent data binding for shorthand vs verbose', () => {
+      const compiler = new TemplateCompiler();
+      const shorthand = compiler.compile(`{>child data=getRow}`);
+      const verbose = compiler.compile(`{> template name='child' data=getRow}`);
+      expect(shorthand[0].data).toBe(verbose[0].data);
+      expect(shorthand[0].reactiveData ?? {}).toEqual(verbose[0].reactiveData ?? {});
+    });
+
     it('should compile a template with a partial and reactive data', () => {
       const compiler = new TemplateCompiler();
       const template = `
