@@ -4,6 +4,18 @@ import { LitWebComponentBase } from '../../src/engines/lit/base.js';
 import '../../src/engines/lit/register.js';
 import { defineComponent } from '../../src/index.js';
 
+// vi.mock is hoisted to module top by vitest — keeping it explicit here
+// matches that hoist, scopes isServer:true to this entire file, and
+// avoids the "vi.mock must be at the top level" deprecation that
+// causes intermittent CI failures when the inline form races test setup.
+vi.mock('@semantic-ui/utils', async () => {
+  const actual = await vi.importActual('@semantic-ui/utils');
+  return {
+    ...actual,
+    isServer: true,
+  };
+});
+
 /*
   Lit-specific component tests — these test LitElement internals
   (static styles, willUpdate, shadowRootOptions) that don't exist
@@ -80,14 +92,6 @@ describe('Component (Lit-specific)', () => {
 
   describe('Server-Side Rendering', () => {
     it('should handle SSR scenario in willUpdate', () => {
-      vi.mock('@semantic-ui/utils', async () => {
-        const actual = await vi.importActual('@semantic-ui/utils');
-        return {
-          ...actual,
-          isServer: true,
-        };
-      });
-
       const TestComponent = defineComponent({
         tagName: 'test-lit-ssr-component',
         renderingEngine: 'lit',
