@@ -152,10 +152,27 @@ export const assignInPlace = (target, source, {
       }
     }
   }
-  for (const key in source) {
-    if (target[key] !== source[key]) {
-      target[key] = source[key];
-      changed = true;
+  if (preserveGetters) {
+    for (const key in source) {
+      // Skip declared getter keys: their `set` is absorb-only by contract
+      // (any write would be a no-op), so the inequality compare burns two
+      // getter invocations to decide nothing. On hot reactive paths the
+      // target-side and source-side getters often run the expression
+      // evaluator, so skipping pays back per key.
+      const desc = Object.getOwnPropertyDescriptor(target, key);
+      if (desc && desc.get) { continue; }
+      if (target[key] !== source[key]) {
+        target[key] = source[key];
+        changed = true;
+      }
+    }
+  }
+  else {
+    for (const key in source) {
+      if (target[key] !== source[key]) {
+        target[key] = source[key];
+        changed = true;
+      }
     }
   }
   return returnChanged ? changed : target;
