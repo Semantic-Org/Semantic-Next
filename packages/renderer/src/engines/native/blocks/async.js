@@ -45,7 +45,7 @@ function createSuccessDataContext(node, value) {
 // server already rendered the current state, so we skip the synchronous
 // loadingContent re-render (see hydrate hook).
 function evaluateAndRender(ctx, { skipLoadingRender = false } = {}) {
-  const { node, data, scope, region, renderAST, lookupExpression, self, isSVG } = ctx;
+  const { node, data, scope, region, renderAST, lookupExpression, childContext, self, isSVG } = ctx;
   const result = lookupExpression(node.expression);
   const currentGen = ++self.generation;
 
@@ -53,7 +53,7 @@ function evaluateAndRender(ctx, { skipLoadingRender = false } = {}) {
     const stateScope = scope.child();
     const fragment = renderAST({
       ast,
-      data: { ...data, ...extraData },
+      data: childContext(data, extraData),
       scope: stateScope,
       isSVG,
     });
@@ -93,13 +93,13 @@ function evaluateAndRender(ctx, { skipLoadingRender = false } = {}) {
 }
 
 function renderErrorState(ctx, err) {
-  const { node, data, scope, region, renderAST, isSVG } = ctx;
+  const { node, data, scope, region, renderAST, childContext, isSVG } = ctx;
   if (!node.errorContent?.length) { return; }
   const stateScope = scope.child();
   const errorData = node.errorAs ? { [node.errorAs]: err } : { this: err };
   const fragment = renderAST({
     ast: node.errorContent,
-    data: { ...data, ...errorData },
+    data: childContext(data, errorData),
     scope: stateScope,
     isSVG,
   });

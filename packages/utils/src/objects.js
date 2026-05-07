@@ -119,11 +119,19 @@ const deepMerge = (target, source, options) => {
   }
 };
 
-export const assignInPlace = (target, source, { preserveExistingKeys = false, returnChanged = false } = {}) => {
+export const assignInPlace = (target, source, {
+  preserveExistingKeys = false,
+  preserveGetters = false,
+  returnChanged = false,
+} = {}) => {
   let changed = false;
   if (!preserveExistingKeys) {
     for (const key in target) {
       if (!(key in source)) {
+        if (preserveGetters) {
+          const desc = Object.getOwnPropertyDescriptor(target, key);
+          if (desc && desc.get) { continue; }
+        }
         delete target[key];
         changed = true;
       }
