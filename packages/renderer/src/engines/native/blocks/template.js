@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
-import { each, fatal, isPlainObject, isString } from '@semantic-ui/utils';
+import { each, extend, fatal, isPlainObject, isString } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
 import { isItemContext } from '../reactive-context.js';
 import { registerBlock } from './registry.js';
@@ -76,36 +76,38 @@ function unpackBlobData(node, data, evaluator) {
 
 // Lazy-getter record used by both snippets and subtemplates. Each
 // reactiveData entry (and each entry of a literal node.data object for
-// snippets) becomes a native ES getter descriptor on a record that
-// inherits from `target` via the prototype chain. Source-signal deps
-// register on whichever Reaction is current at the read, so a binding's
-// Reaction subscribes directly to its inputs — per-key isolation is
-// structural, not mediated by an intermediate Dep layer.
+// snippets) becomes a native ES getter descriptor on a flat plain
+// object. Source-signal deps register on whichever Reaction is current
+// at the read, so a binding's Reaction subscribes directly to its
+// inputs — per-key isolation is structural, not mediated by an
+// intermediate Dep layer.
 //
-// Shape: `record = Object.create(target)` puts non-declared keys on the
-// prototype chain (state, instance overlay, parent context). Declared
-// keys live as own getter descriptors on the record. Reads of declared
-// keys invoke the getter (and register source-signal deps on the
-// current Reaction). Reads of non-declared keys fall through to target.
-//
-// Why prototype-chain inheritance (not eager-merge): Template.render
-// triggers `assignInPlace(record, ...)` on every block update. With
-// preserveGetters=true the assignInPlace deletes any non-getter own
-// keys not present in the new source. If target's keys had been
-// merged onto the record as own properties, every block update would
-// delete them and Template.render would re-add them, thrashing V8's
-// hidden class. Keeping target keys on the prototype makes the
-// `delete record[k]` a no-op for inherited keys — shape stays stable.
+// Shape: a fresh `{}` (proto = Object.prototype) with target's own
+// descriptors copied in via `extend`, then declared getters defined
+// on top. Every record built for the same template node ends up with
+// the same own-property progression in the same order, so V8
+// consolidates them into one hidden class. The IC at every binding's
+// `data[token]` read site stays monomorphic — even when 1000 records
+// exist for an each-block iteration. `Object.create(target)` produced
+// a per-record prototype chain off `target`'s identity that V8 split
+// into distinct shapes, regressing read-heavy reconciles by ~3.5x.
 //
 // Why descriptors instead of a Proxy: a Proxy's get trap is a function
 // call into module code on every property read. Native getter
-// descriptors compile down to the same hidden-class IC as a plain
-// property access — V8 inlines them. The trap surface that a Proxy
-// would carry (has / ownKeys / getOwnPropertyDescriptor / set /
-// defineProperty / deleteProperty / getPrototypeOf) collapses into the
-// language semantics: `in` walks the prototype chain, `Object.keys`
-// returns own enumerables, `extend` (utils/objects.js) is descriptor-
-// aware and copies the get/set pair intact.
+// descriptors compile to the same hidden-class IC as a plain property
+// access — V8 inlines them. The trap surface that a Proxy would carry
+// (has / ownKeys / getOwnPropertyDescriptor / set / defineProperty /
+// deleteProperty / getPrototypeOf) collapses into the language
+// semantics: `in` checks own properties, `Object.keys` returns own
+// enumerables, `extend` (utils/objects.js) is descriptor-aware and
+// copies the get/set pair intact.
+//
+// Why `extend(record, target)` over `Object.assign(record, target)`:
+// extend is descriptor-aware. If target itself carries a getter (e.g.
+// nested subtemplate, or component-level `darkMode`), Object.assign
+// would invoke and snapshot the value. extend copies the descriptor,
+// preserving laziness. For non-getter target keys both produce the
+// same result.
 //
 // Absorb-set semantics: declared keys carry `set: () => {}` so that
 // `record.foo = x` is silently absorbed (matching the prior Proxy's
@@ -154,9 +156,12 @@ function buildArgsRecord({ node, parentData, evaluator, target }) {
   // the wrapper entirely and use the parent data context directly.
   if (keys === null) { return target; }
 
-  // target keys stay on the prototype chain so block-update's
-  // assignInPlace cycles don't thrash the record's own-property shape.
-  const record = Object.create(target);
+  // Flat record with shared Object.prototype proto. extend copies
+  // target's own descriptors (preserving any getters) before declared
+  // getters land on top, so every record built for the same node ends
+  // up with the same own-property shape.
+  const record = {};
+  extend(record, target);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
     const val = values[i];
@@ -447,10 +452,13 @@ const templateBlock = defineBlock({
       attachToRenderRoot(self.currentInstance, region, self);
     }
     else {
-      // Same template — push blob data only. reactiveData propagation
-      // happens through the lazy proxy reads inside the subtemplate's
-      // bindings, not through this update path.
-      self.currentInstance.setDataContext(blobData, { rerender: false });
+      // Same template — `instance.render(blobData)` merges blobData into
+      // the instance's dataContext via additionalData, then setDataContext
+      // assigns the full result onto this.data. A separate setDataContext
+      // call here would be a destructive partial sync (small source vs full
+      // target → assignInPlace deletes everything not in blobData), only
+      // for render() to immediately re-assign the full set. That cycle was
+      // shape-thrashing V8 hidden classes on hot toggle paths.
       renderInstance(self.currentInstance, node, blobData);
     }
   },
