@@ -61,16 +61,6 @@ import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
   property access — that is the coarseness this primitive exists to
   remove.
 
-  `writeToParent` mirrors per-key values back into the underlying parent
-  object on every setKey. The subtemplate adoption site needs this
-  because user code captures the parent object by reference at
-  createComponent time (e.g. `{ data }` destructured into a closure that
-  reads `data.todo.completed` later) — those reads bypass the proxy and
-  must see the current value. The each-block adoption site leaves it off:
-  the parent there is the each-block's outer data context, shared across
-  all sibling records, so writing per-record wrapper keys back into it
-  would cross-contaminate siblings.
-
   Proxy handler is module-scoped and stable across all instances. The
   Proxy's target IS the ReactiveDataContext (`this`); handler functions
   read instance state via `target.values` / `target.parent` /
@@ -125,38 +115,19 @@ function trapGetOwnPropertyDescriptor(target, prop) {
   return Object.getOwnPropertyDescriptor(target.parent, prop);
 }
 
-function trapSet(target, prop, value) {
-  if (prop in target.values) {
-    target.setKey(prop, value);
-    return true;
-  }
-  target.parent[prop] = value;
-  return true;
-}
-
-const HANDLER_RO = {
+const HANDLER = {
   get: trapGet,
   has: trapHas,
   ownKeys: trapOwnKeys,
   getOwnPropertyDescriptor: trapGetOwnPropertyDescriptor,
-};
-
-const HANDLER_RW = {
-  get: trapGet,
-  has: trapHas,
-  ownKeys: trapOwnKeys,
-  getOwnPropertyDescriptor: trapGetOwnPropertyDescriptor,
-  set: trapSet,
 };
 
 export class ReactiveDataContext {
   constructor(parent, {
     registerItemContext = false,
-    writeToParent = false,
     sealKeysAfterReplace = false,
   } = {}) {
     this.parent = parent;
-    this.writeToParent = writeToParent;
     this.sealKeysAfterReplace = sealKeysAfterReplace;
     this.keysSealed = false;
     this.values = Object.create(null);
@@ -168,7 +139,7 @@ export class ReactiveDataContext {
     // both Signal and RDC fail the same way; no divergence.
     this.equalityFunction = Signal.equalityFunction;
     this.keySetVersion = new Dependency();
-    this.proxy = new Proxy(this, writeToParent ? HANDLER_RW : HANDLER_RO);
+    this.proxy = new Proxy(this, HANDLER);
 
     if (registerItemContext) {
       itemContextProxies.add(this.proxy);
@@ -179,11 +150,9 @@ export class ReactiveDataContext {
     if (!(key in this.values)) {
       this.values[key] = value;
       this.deps.set(key, new Dependency());
-      if (this.writeToParent) { this.parent[key] = value; }
       if (!this.keysSealed) { this.keySetVersion.changed(); }
       return;
     }
-    if (this.writeToParent) { this.parent[key] = value; }
     const old = this.values[key];
     if (this.equalityFunction(old, value)) { return; }
     this.values[key] = value;
@@ -196,29 +165,16 @@ export class ReactiveDataContext {
     if (dep !== undefined) { dep.changed(); }
   }
 
-  replace(nextValues, { clearMissing = false } = {}) {
+  replace(nextValues) {
     for (const key in nextValues) {
       this.setKey(key, nextValues[key]);
-    }
-    if (clearMissing) {
-      for (const key in this.values) {
-        if (!(key in nextValues)) { this.setKey(key, undefined); }
-      }
     }
     if (this.sealKeysAfterReplace) { this.keysSealed = true; }
   }
 
-  has(key) {
-    return key in this.values;
-  }
-
-  keys() {
-    return Object.keys(this.values);
-  }
-
   dispose() {
     this.values = Object.create(null);
-    if (this.deps !== null) { this.deps.clear(); }
+    this.deps.clear();
     this.keysSealed = false;
   }
 }
