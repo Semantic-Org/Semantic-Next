@@ -348,9 +348,14 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   // contract; the only divergence is whether values[asKey] needs an
   // explicit update (yes for refChanged, no for same-ref).
   //
-  // Spread-mode and primitive items take the legacy refChanged / setKey
-  // path. Spread mode emits setKey per changed field plus notifyKey('this')
-  // for whole-item readers of {this}.
+  // Spread-mode, primitive items, and object iteration take the legacy
+  // refChanged / setKey path. Spread mode emits setKey per changed field
+  // plus notifyKey('this') for whole-item readers of {this}. Object
+  // iteration's per-record value is the {key, value} wrapper from
+  // arrayFromObject, not a directly-readable item; getEachData unwraps
+  // it into top-level dataContext keys, so the per-FIELD optimization
+  // doesn't apply (the "fields" are already at the top level and bindings
+  // read them as primitives without .X dispatch).
   //
   // Fresh records (just created in this pass) skip the diff because
   // their bindings were wired synchronously against the current values
@@ -360,8 +365,9 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
     const item = items[i];
     const refChanged = record.item !== item || record.index !== i;
     const isObjectItem = typeof item === 'object' && item !== null;
+    const isArrayAsMode = collectionType === 'array' && !!node.as;
 
-    if (refChanged && node.as && isObjectItem && !record.fresh) {
+    if (refChanged && isArrayAsMode && isObjectItem && !record.fresh) {
       const changedKeys = refreshSnapshotAndDetect(record.snapshot, item);
       record.dataContext.values[node.as] = item;
       record.item = item;
@@ -389,7 +395,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       else {
         const changedKeys = refreshSnapshotAndDetect(record.snapshot, item);
         if (changedKeys) {
-          if (node.as) {
+          if (isArrayAsMode) {
             for (const key of changedKeys) {
               record.dataContext.notifyField(node.as, key);
             }
