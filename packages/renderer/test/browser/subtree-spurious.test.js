@@ -709,14 +709,10 @@ RENDERING_ENGINES.forEach(engine => {
 *******************************/
 
     describe.skipIf(isLit)('FGR contract: each-block in-place mutation', () => {
-      // Marked it.fails — per-FIELD isolation under `as`-mode requires
-      // splitting the as-key into its constituent properties so a binding
-      // reading `todo.completed` subscribes to a per-field dep rather than
-      // the whole-item key. That's a separate architectural change beyond
-      // FGR's three-site scope (each items / subtemplate reactiveData /
-      // snippet args). The test stays as a forward-looking contract so a
-      // future fix lights it up green; for now we lock in the documented
-      // gap so CI is honest about what FGR shipped vs what it didn't.
+      // Per-FIELD isolation under `as`-mode requires splitting the as-key
+      // into its constituent properties so a binding reading `todo.completed`
+      // subscribes to a per-field dep rather than the whole-item key. The
+      // test pins that contract for a future architectural pass.
       it.fails('mutating one item field via setProperty re-fires only the binding reading that field', async () => {
         // {#each item in items} body has two bindings reading two
         // different fields of the same item. setProperty mutates one
@@ -856,12 +852,11 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     describe.skipIf(isLit)('FGR contract: subtemplate-inside-each composition (bench-todo)', () => {
-      // Marked it.fails — same as-mode per-FIELD gap as the each-block
-      // test above. Inside `{#each todo in todos}`, mutating one field of
-      // an item fires the as-key dep which in turn wakes every subtemplate
-      // binding reading `todo.X`, not just the field that changed. Splitting
-      // the as-key is out of scope for this PR; the test pins the contract
-      // for a future architectural pass.
+      // Same as-mode per-FIELD gap surfaced through a subtemplate boundary.
+      // Inside `{#each todo in todos}`, mutating one field of an item fires
+      // the as-key dep which wakes every subtemplate binding reading
+      // `todo.X`, not just the field that changed. The test pins the
+      // contract for the per-field-isolation pass that closes the gap.
       it.fails('mutating one item field via setProperty re-fires only the matching subtemplate-binding key', async () => {
         // bench-todo's exact composition: {#each todo in todos}{>todoItem
         // id=todo.id title=todo.title completed=todo.completed}{/each}.
