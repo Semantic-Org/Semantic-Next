@@ -127,17 +127,19 @@ function trapGet(target, prop) {
 
 // Item-tracking proxy. Returned from trapGet when the as-key is read.
 // Target is the RDC itself (same monomorphic-dispatch reasoning the
-// outer HANDLER uses). Each .X access registers a per-FIELD Dependency
-// keyed by fieldName in target.fieldDeps, lazy-allocated on first read.
-// The trap reads target.values[target.asKey] at access time, so the
-// proxy follows item-ref changes through dataContext.replace() without
-// needing to be invalidated.
+// outer HANDLER uses). Per-FIELD dep registration is gated on
+// target.fieldMutated — a flag that stays false until the first
+// notifyField call on this record. Records whose items are never
+// mutated in-place (active-indicator, navigation lists) pay only the
+// proxy trap overhead with no dep allocation or dep.depend() calls.
+// Once the flag is set, trapItemGet registers per-FIELD deps normally
+// so subsequent in-place mutations fire only the matching binding.
 function trapItemGet(target, prop) {
   const item = target.values[target.asKey];
   if (typeof prop === 'symbol') {
     return item == null ? undefined : item[prop];
   }
-  if (Scheduler.current) {
+  if (Scheduler.current && target.fieldMutated) {
     let dep = target.fieldDeps[prop];
     if (dep === undefined) {
       dep = target.fieldDeps[prop] = new Dependency();
@@ -200,6 +202,10 @@ export class ReactiveDataContext {
     // field read, so RDCs without an asKey or whose as-key value is
     // never read pay only the empty-object allocation cost.
     this.fieldDeps = Object.create(null);
+    // False until the first notifyField call. trapItemGet skips per-FIELD
+    // dep registration while this is false, so records that are never
+    // mutated in-place pay no dep.depend() overhead on item field reads.
+    this.fieldMutated = false;
     // Lazy item proxy — only allocated on first access of the as-key.
     // Same proxy instance for the lifetime of the RDC; trapItemGet
     // re-reads target.values[target.asKey] on each access so item ref
@@ -242,7 +248,19 @@ export class ReactiveDataContext {
   // Reconcile calls this once per changed key after snapshot diff. The
   // asKey arg is API-symmetric with the user's mental model — storage
   // is flat (one as-key per RDC, fixed at construction).
+  //
+  // First call: no bindings have registered per-FIELD deps yet (trapItemGet
+  // skips dep work until fieldMutated is true). Set the flag and fall back
+  // to the per-key dep so all bindings on this record re-run. They'll
+  // register per-FIELD deps during that re-run, making subsequent calls
+  // field-precise.
   notifyField(_asKey, fieldName) {
+    if (!this.fieldMutated) {
+      this.fieldMutated = true;
+      const keyDep = this.deps[this.asKey];
+      if (keyDep !== undefined) { keyDep.changed(); }
+      return;
+    }
     const dep = this.fieldDeps[fieldName];
     if (dep !== undefined) { dep.changed(); }
   }
@@ -258,6 +276,7 @@ export class ReactiveDataContext {
     this.values = Object.create(null);
     this.deps = Object.create(null);
     this.fieldDeps = Object.create(null);
+    this.fieldMutated = false;
     this.keysSealed = false;
   }
 }
