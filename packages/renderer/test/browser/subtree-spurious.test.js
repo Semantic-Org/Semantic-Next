@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES } from './test-utils.js';
 
 RENDERING_ENGINES.forEach(engine => {
+  const isLit = engine === 'lit';
+
   describe(engine, () => {
     /*******************************
          Test Helpers
@@ -356,10 +358,13 @@ RENDERING_ENGINES.forEach(engine => {
         await updated;
 
         expect(shadowText(el)).toContain('updated-ok');
-        // Ideally only item 1's expressions would re-evaluate (countAfterRender + 1),
-        // but since the each list source changed, the framework may re-evaluate all items.
-        // We test for the ideal: unchanged items should not cause extra calls.
-        expect(spyTotal).toBe(countAfterRender + 1);
+        // staticSpy reads no signal. Under per-key reactivity (native) it
+        // has no dependency that the item-key change would invalidate,
+        // so no re-evaluations fire. Under whole-record reactivity (lit)
+        // every property access registers itemSignal, so the changed-item
+        // notify drives one extra staticSpy call.
+        const expectedSpyCount = engine === 'native' ? countAfterRender : countAfterRender + 1;
+        expect(spyTotal).toBe(expectedSpyCount);
       });
     });
 
@@ -511,15 +516,12 @@ RENDERING_ENGINES.forEach(engine => {
       });
     });
 
-    describe('reactiveData per-key granularity', () => {
-      // Documents the per-key isolation gap on reactiveData. Today's
-      // renderer flattens reactiveData through unpackNodeData
-      // (packages/renderer/src/engines/native/blocks/template.js) and
-      // bumps the whole subtemplate's dataDep on any field change, so
-      // every child expression re-evaluates. Fine-grained per-key deps
-      // would require a Proxy similar to each's itemProxy with per-
-      // property Dependency tracking.
-      it.fails('changing one reactiveData field should not re-evaluate subtemplate expressions that read a different field', async () => {
+    describe.skipIf(isLit)('reactiveData per-key granularity', () => {
+      // Per-key isolation on reactiveData: changing one field's source
+      // re-fires only bindings that read that field. Marker bindings
+      // (read no signals) and sibling-key bindings (read a different
+      // field) never re-fire — same contract as the snippet path.
+      it('changing one reactiveData field should not re-evaluate subtemplate expressions that read a different field', async () => {
         let labelEvalCount = 0;
         let statusEvalCount = 0;
         const tag = uniqueTag();
@@ -560,16 +562,18 @@ RENDERING_ENGINES.forEach(engine => {
         const labelCountAfterRender = labelEvalCount;
         const statusCountAfterRender = statusEvalCount;
 
-        // Only labelVal changes. The expectation under fine-grained
-        // reactiveData would be: label re-evaluates, status does NOT.
+        // Only labelVal changes — the {label} binding wakes (text
+        // updates), but markLabel/markStatus register no source signals
+        // and stay quiet. Same per-expression isolation the snippet
+        // path delivers above.
         const updated = $(el).onNext('updated');
         el.template.state.labelVal.set('changed');
         await updated;
 
         expect(shadowText(el)).toContain('changed');
         expect(shadowText(el)).toContain('active');
-        expect(labelEvalCount).toBeGreaterThan(labelCountAfterRender);
-        expect(statusEvalCount).toBe(statusCountAfterRender); // the claim under test
+        expect(labelEvalCount).toBe(labelCountAfterRender);
+        expect(statusEvalCount).toBe(statusCountAfterRender);
       });
     });
 
@@ -627,6 +631,286 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('active');
         expect(labelEvalCount).toBeGreaterThan(labelCountAfterRender);
         expect(statusEvalCount).toBeGreaterThan(statusCountAfterRender);
+      });
+    });
+
+    /*******************************
+   Per-key isolation across N subtemplates
+   (mirrors bench-template-reactivity's
+   subtemplate-reactive-data-100 scenario)
+*******************************/
+
+    describe.skipIf(isLit)('per-key isolation across N subtemplates', () => {
+      it('mutating one reactiveData source should not re-fire bindings reading a different reactiveData key', async () => {
+        // Mirrors bench-reactivedata in
+        // packages/component/bench/tachometer/bench-template-reactivity.js:
+        // 100 child subtemplates, each receiving label + status via
+        // reactiveData. Mutating labelVal 50 times should re-fire the
+        // label-reading binding in each child but NOT the status-reading
+        // binding. Per-key isolation is the design promise; the bench is
+        // saturated by rAF so wall-clock can't see the win, but the
+        // binding-fire counter can.
+        let statusBindingFires = 0;
+        let labelBindingFires = 0;
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<span>{readLabel}</span><span>{readStatus}</span>',
+          createComponent: ({ data }) => ({
+            readLabel() {
+              labelBindingFires++;
+              return data.label;
+            },
+            readStatus() {
+              statusBindingFires++;
+              return data.status;
+            },
+          }),
+        });
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: `{#each i in idxs}{>child label=getLabel status=getStatus}{/each}`,
+          subTemplates: { child },
+          defaultState: { labelVal: 'init' },
+          createComponent: ({ state }) => ({
+            idxs: Array.from({ length: 100 }, (_, i) => i),
+            getLabel: () => state.labelVal.get(),
+            getStatus: () => 'static',
+          }),
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(labelBindingFires).toBe(100);
+        expect(statusBindingFires).toBe(100);
+
+        for (let i = 0; i < 50; i++) {
+          const updated = $(el).onNext('updated');
+          el.template.state.labelVal.set(`v${i}`);
+          await updated;
+        }
+
+        // Per-key isolation: every labelVal mutation re-fires the 100
+        // label bindings. Status bindings should not re-fire — status
+        // never changed.
+        expect(labelBindingFires).toBe(100 + 50 * 100);
+        expect(statusBindingFires).toBe(100);
+      });
+    });
+
+    /*******************************
+   FGR per-key isolation contract
+   — full enumeration of the
+   per-key isolation contract across
+   each adoption site.
+*******************************/
+
+    describe.skipIf(isLit)('FGR contract: each-block in-place mutation', () => {
+      // Per-FIELD isolation under `as`-mode requires splitting the as-key
+      // into its constituent properties so a binding reading `todo.completed`
+      // subscribes to a per-field dep rather than the whole-item key. The
+      // test pins that contract for a future architectural pass.
+      it.fails('mutating one item field via setProperty re-fires only the binding reading that field', async () => {
+        // {#each item in items} body has two bindings reading two
+        // different fields of the same item. setProperty mutates one
+        // field. Per-key isolation: only that field's binding fires.
+        let textFires = 0;
+        let completedFires = 0;
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each todo in getTodos}<span>{readText todo}</span><span>{readCompleted todo}</span>{/each}',
+          createComponent: ({ signal }) => {
+            const todos = signal([{ _id: 'a', text: 'first', completed: false }]);
+            return {
+              todos,
+              getTodos: () => todos.get(),
+              readText: (todo) => {
+                textFires++;
+                return todo.text;
+              },
+              readCompleted: (todo) => {
+                completedFires++;
+                return String(todo.completed);
+              },
+              toggle: () => todos.setProperty('a', 'completed', !todos.getItem('a').completed),
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(textFires).toBe(1);
+        expect(completedFires).toBe(1);
+
+        const updated = $(el).onNext('updated');
+        el.component.toggle();
+        await updated;
+
+        expect(completedFires).toBe(2);
+        expect(textFires).toBe(1);
+      });
+
+      it('mutating one item field does NOT re-fire bindings of unaffected sibling items', async () => {
+        // Each block has 3 items. setProperty on item 'a'.completed
+        // should re-fire only item a's completed-binding. Items b and c
+        // should not re-fire any bindings (their data is unchanged).
+        const fires = { a: 0, b: 0, c: 0 };
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each todo in getTodos}<span>{readCompleted todo}</span>{/each}',
+          createComponent: ({ signal }) => {
+            const todos = signal([
+              { _id: 'a', completed: false },
+              { _id: 'b', completed: false },
+              { _id: 'c', completed: false },
+            ]);
+            return {
+              todos,
+              getTodos: () => todos.get(),
+              readCompleted: (todo) => {
+                fires[todo._id]++;
+                return String(todo.completed);
+              },
+              toggleA: () => todos.setProperty('a', 'completed', !todos.getItem('a').completed),
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(fires).toEqual({ a: 1, b: 1, c: 1 });
+
+        const updated = $(el).onNext('updated');
+        el.component.toggleA();
+        await updated;
+
+        expect(fires).toEqual({ a: 2, b: 1, c: 1 });
+      });
+    });
+
+    describe.skipIf(isLit)('FGR contract: subtemplate reactiveData (shorthand syntax)', () => {
+      it("mutating one shorthand reactive prop source re-fires only that key's binding", async () => {
+        // Mirrors the verbose-syntax test at the it.fails block above,
+        // but uses `{>child a=expr b=expr}` shorthand. Same per-key
+        // contract — the parser produces the same node.reactiveData
+        // shape regardless of syntax, but a separate test pins the
+        // shorthand path to the contract.
+        let labelFires = 0;
+        let statusFires = 0;
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<span>{readLabel}</span><span>{readStatus}</span>',
+          createComponent: ({ data }) => ({
+            readLabel() {
+              labelFires++;
+              return data.label;
+            },
+            readStatus() {
+              statusFires++;
+              return data.status;
+            },
+          }),
+        });
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{>child label=getLabel status=getStatus}',
+          subTemplates: { child },
+          defaultState: { labelVal: 'hello', statusVal: 'active' },
+          createComponent: ({ state }) => ({
+            getLabel: () => state.labelVal.get(),
+            getStatus: () => state.statusVal.get(),
+          }),
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(labelFires).toBe(1);
+        expect(statusFires).toBe(1);
+
+        const updated = $(el).onNext('updated');
+        el.template.state.labelVal.set('changed');
+        await updated;
+
+        expect(labelFires).toBe(2);
+        expect(statusFires).toBe(1);
+      });
+    });
+
+    describe.skipIf(isLit)('FGR contract: subtemplate-inside-each composition (bench-todo)', () => {
+      // Same as-mode per-FIELD gap surfaced through a subtemplate boundary.
+      // Inside `{#each todo in todos}`, mutating one field of an item fires
+      // the as-key dep which wakes every subtemplate binding reading
+      // `todo.X`, not just the field that changed. The test pins the
+      // contract for the per-field-isolation pass that closes the gap.
+      it.fails('mutating one item field via setProperty re-fires only the matching subtemplate-binding key', async () => {
+        // bench-todo's exact composition: {#each todo in todos}{>todoItem
+        // id=todo.id title=todo.title completed=todo.completed}{/each}.
+        // setProperty('a', 'completed', true) should re-fire only the
+        // completed-reading binding inside item a's todoItem subtemplate.
+        // Title and id bindings should not re-fire.
+        const fires = { id: 0, title: 0, completed: 0 };
+        const todoItem = defineComponent({
+          renderingEngine: engine,
+          template: '<span>{readId}</span><span>{readTitle}</span><span>{readCompleted}</span>',
+          createComponent: ({ data }) => ({
+            readId() {
+              fires.id++;
+              return data.id;
+            },
+            readTitle() {
+              fires.title++;
+              return data.title;
+            },
+            readCompleted() {
+              fires.completed++;
+              return String(data.completed);
+            },
+          }),
+        });
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each todo in getTodos}{>todoItem id=todo._id title=todo.title completed=todo.completed}{/each}',
+          subTemplates: { todoItem },
+          createComponent: ({ signal }) => {
+            const todos = signal([{ _id: 'a', title: 'first', completed: false }]);
+            return {
+              todos,
+              getTodos: () => todos.get(),
+              toggle: () => todos.setProperty('a', 'completed', !todos.getItem('a').completed),
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(fires).toEqual({ id: 1, title: 1, completed: 1 });
+
+        const updated = $(el).onNext('updated');
+        el.component.toggle();
+        await updated;
+
+        expect(fires.completed).toBe(2);
+        expect(fires.id).toBe(1);
+        expect(fires.title).toBe(1);
       });
     });
   }); // describe(engine)

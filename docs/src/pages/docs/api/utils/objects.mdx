@@ -158,7 +158,7 @@ console.log(result); // { a: 1, b: 2, c: 3, d: 4 }
 ### assignInPlace
 
 ```javascript
-function assignInPlace(target, source, { preserveExistingKeys = false, returnChanged = false } = {})
+function assignInPlace(target, source, { preserveExistingKeys = false, preserveGetters = false, returnChanged = false } = {})
 ```
 
 Mutates the target object in place so its contents match the source, without replacing the object reference. Deletes keys not present in source (unless `preserveExistingKeys` is true), then assigns all source properties.
@@ -176,6 +176,7 @@ Mutates the target object in place so its contents match the source, without rep
 | Name                | Type    | Default | Description |
 |---------------------|---------|---------|-------------|
 | preserveExistingKeys | boolean | false   | Keep keys in target that are not in source |
+| preserveGetters      | boolean | false   | Skip own getter descriptors when deleting keys not in source. Useful when target carries computed properties that shouldn't be torn down by syncs |
 | returnChanged        | boolean | false   | Return whether any properties changed instead of the target |
 
 #### Returns
@@ -195,6 +196,12 @@ console.log(config); // { host: 'production.app', port: 443 } — debug removed
 const settings = { theme: 'light', lang: 'en' };
 assignInPlace(settings, { theme: 'dark', fontSize: 14 }, { preserveExistingKeys: true });
 console.log(settings); // { theme: 'dark', lang: 'en', fontSize: 14 }
+
+// Preserve computed properties
+const view = { name: 'Alice' };
+Object.defineProperty(view, 'greeting', { get() { return `Hi, ${this.name}`; }, enumerable: true });
+assignInPlace(view, { name: 'Bob' }, { preserveGetters: true });
+console.log(view.greeting); // 'Hi, Bob' — getter intact
 
 // Detect changes
 const state = { count: 5 };

@@ -26,6 +26,8 @@ export class Dependency {
   }
 
   changed(context) {
+    // Skip tracing-context bookkeeping when no subscribers are listening.
+    if (this.subscribers.size === 0) { return; }
     if (isTracing()) {
       if (context) {
         this.context = context;
