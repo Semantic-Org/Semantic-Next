@@ -17,12 +17,14 @@ import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
   its next run. Without this, a key authored later in an item's lifetime
   would silently never propagate to its readers.
 
-  Per-key state is inlined as `values` (a null-prototype object) plus
-  `deps` (Map<key, Dependency>). Both are eager — the per-key Dependency
-  is allocated at setKey time, not lazily on first reactive read. Eager
-  allocation keeps the RDC's hidden class stable from construction
-  (deps is always Map, never null), so V8's IC at the trap dispatch
-  site sees one shape across all records.
+  Per-key state is inlined as `values` and `deps`, both null-prototype
+  objects. The per-key Dependency is allocated at setKey time, not
+  lazily on first reactive read. Eager allocation keeps the RDC's hidden
+  class stable from construction so V8's IC at the trap dispatch site
+  sees one shape across all records. Null-prototype-object storage for
+  `deps` (over Map) lets `target.deps[prop]` inline-cache like a plain
+  property access; Map.get always pays a virtual call into the Map's
+  get method.
 
   We deliberately do not allocate a full Signal per key: Signal wraps
   a Dependency with allowClone / equalityFunction / clone / currentValue
@@ -82,7 +84,7 @@ function trapGet(target, prop) {
   const values = target.values;
   if (prop in values) {
     if (Scheduler.current) {
-      target.deps.get(prop).depend();
+      target.deps[prop].depend();
     }
     return values[prop];
   }
@@ -131,7 +133,7 @@ export class ReactiveDataContext {
     this.sealKeysAfterReplace = sealKeysAfterReplace;
     this.keysSealed = false;
     this.values = Object.create(null);
-    this.deps = new Map();
+    this.deps = Object.create(null);
     // Snapshot Signal.equalityFunction at construction. Mirrors Signal's
     // own per-instance snapshot semantics — late overrides of the static
     // do not retroactively retarget already-constructed instances. If
@@ -149,19 +151,19 @@ export class ReactiveDataContext {
   setKey(key, value) {
     if (!(key in this.values)) {
       this.values[key] = value;
-      this.deps.set(key, new Dependency());
+      this.deps[key] = new Dependency();
       if (!this.keysSealed) { this.keySetVersion.changed(); }
       return;
     }
     const old = this.values[key];
     if (this.equalityFunction(old, value)) { return; }
     this.values[key] = value;
-    const dep = this.deps.get(key);
+    const dep = this.deps[key];
     if (dep !== undefined) { dep.changed(); }
   }
 
   notifyKey(key) {
-    const dep = this.deps.get(key);
+    const dep = this.deps[key];
     if (dep !== undefined) { dep.changed(); }
   }
 
@@ -174,7 +176,7 @@ export class ReactiveDataContext {
 
   dispose() {
     this.values = Object.create(null);
-    this.deps.clear();
+    this.deps = Object.create(null);
     this.keysSealed = false;
   }
 }
