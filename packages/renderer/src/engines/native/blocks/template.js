@@ -206,11 +206,11 @@ function resolveSnippet(nameExpr, data, self) {
   return self.snippets[name] || null;
 }
 
-// Build the subtemplate's lazy-getter proxy and clone the Template
-// against it. The proxy is installed BEFORE initialize() runs so that
+// Build the subtemplate's lazy-getter record and clone the Template
+// against it. The record is installed BEFORE initialize() runs so that
 // closures captured by createComponent (e.g. methods that read
-// `data.foo` later) capture the proxy itself — subsequent reads route
-// through the lazy getter and register source-signal deps on the
+// `data.foo` later) capture the record itself — subsequent reads route
+// through the lazy getters and register source-signal deps on the
 // caller's Reaction.
 //
 // Initialize is wrapped in Reaction.nonreactive so synchronous reads
@@ -302,10 +302,10 @@ function clearInstance(self, region) {
 
 // Template.render walks the subtemplate's data via assignInPlace during
 // setDataContext / renderer.setData. For reactiveData paths the data is
-// a lazy-getter proxy whose reads register source-signal deps on the
+// a lazy-getter record whose reads register source-signal deps on the
 // active Reaction. Wrap the call so those reads don't register on the
 // block's outer Reaction — bindings inside the subtemplate register
-// their own deps via the proxy at evaluation time.
+// their own deps via the record at evaluation time.
 function renderInstance(instance, node, blobData) {
   if (node.reactiveData) {
     return Reaction.nonreactive(() => instance.render(blobData));
