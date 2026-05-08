@@ -22,19 +22,18 @@ import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
   is allocated at setKey time, not lazily on first reactive read. Eager
   allocation keeps the RDC's hidden class stable from construction
   (deps is always Map, never null), so V8's IC at the trap dispatch
-  site sees one shape across all records. The lazy variant pessimized
-  the trap during firstRun by triggering a per-record shape transition
-  exactly when the IC was warming up.
+  site sees one shape across all records.
 
   We deliberately do not allocate a full Signal per key: Signal wraps
   a Dependency with allowClone / equalityFunction / clone / currentValue
-  field assignments per instance. At 1000+ records × 5 keys the wrapper
-  allocation dominates. Equality dedup is preserved:
-  `Signal.equalityFunction` is snapshotted at construction, matching
-  Signal's per-instance snapshot semantics so the inlined dedup behaves
-  identically to a Signal.set call on the same static. Late overrides
-  of `Signal.equalityFunction` after the RDC is constructed will not
-  retroactively retarget — same blind spot Signal itself has.
+  field assignments per instance. The wrapper allocation dominates at
+  scale where many records each carry several keys. Equality dedup is
+  preserved: `Signal.equalityFunction` is snapshotted at construction,
+  matching Signal's per-instance snapshot semantics so the inlined
+  dedup behaves identically to a Signal.set call on the same static.
+  Late overrides of `Signal.equalityFunction` after the RDC is
+  constructed will not retroactively retarget — same blind spot Signal
+  itself has.
 
   `values` uses Object.create(null) (not Map) because every record in a
   bench-todo / bench-krausest mount adds the same keys in the same
@@ -78,10 +77,9 @@ import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
   Proxy's target IS the ReactiveDataContext (`this`); handler functions
   read instance state via `target.values` / `target.parent` /
   `target.keySetVersion` / `target.deps`. This keeps V8's hidden-class
-  shape stable across the 1000+ records that mount benches construct, so
-  the get-trap path can establish a monomorphic inline cache. With
-  per-instance closure-captured handlers, V8 sees a fresh shape per
-  record and falls back to polymorphic dispatch.
+  shape stable across all records, so the get-trap path can establish
+  a monomorphic inline cache. Per-instance closure-captured handlers
+  would split the shape per record and force polymorphic dispatch.
 
 */
 

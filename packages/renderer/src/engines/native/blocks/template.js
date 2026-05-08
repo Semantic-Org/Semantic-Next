@@ -87,10 +87,10 @@ function unpackBlobData(node, data, evaluator) {
 // on top. Every record built for the same template node ends up with
 // the same own-property progression in the same order, so V8
 // consolidates them into one hidden class. The IC at every binding's
-// `data[token]` read site stays monomorphic — even when 1000 records
-// exist for an each-block iteration. `Object.create(target)` produced
-// a per-record prototype chain off `target`'s identity that V8 split
-// into distinct shapes, regressing read-heavy reconciles by ~3.5x.
+// `data[token]` read site stays monomorphic across all records in an
+// each-block iteration. A prototype-chain shape off the target's
+// identity splits records into per-target hidden classes, so we copy
+// descriptors onto a flat record instead.
 //
 // Why descriptors instead of a Proxy: a Proxy's get trap is a function
 // call into module code on every property read. Native getter
@@ -110,11 +110,10 @@ function unpackBlobData(node, data, evaluator) {
 // same result.
 //
 // Absorb-set semantics: declared keys carry `set: () => {}` so that
-// `record.foo = x` is silently absorbed (matching the prior Proxy's
-// set trap on declared keys). The settingsScope-mirror path writes
-// Signal references onto the subtemplate's `settings` proxy directly,
-// not through this record, so absorb-set does not interfere with
-// overlay propagation.
+// `record.foo = x` is silently absorbed. The settingsScope-mirror path
+// writes Signal references onto the subtemplate's `settings` proxy
+// directly, not through this record, so absorb-set does not interfere
+// with overlay propagation.
 
 const ABSORB_SET = () => {};
 
@@ -457,8 +456,7 @@ const templateBlock = defineBlock({
       // assigns the full result onto this.data. A separate setDataContext
       // call here would be a destructive partial sync (small source vs full
       // target → assignInPlace deletes everything not in blobData), only
-      // for render() to immediately re-assign the full set. That cycle was
-      // shape-thrashing V8 hidden classes on hot toggle paths.
+      // for render() to immediately re-assign the full set.
       renderInstance(self.currentInstance, node, blobData);
     }
   },
