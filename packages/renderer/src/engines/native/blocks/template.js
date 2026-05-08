@@ -229,10 +229,9 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
   if (self.parentTemplate) { instance.setParent(self.parentTemplate); }
 
   // For reactiveData subtemplates, install the lazy-getter record as
-  // the instance's data ref. The record's prototype is the seeded blob
-  // already on instance.data, so non-arg keys (state, instance overlay
-  // added during initialize, blob keys) resolve via prototype-chain
-  // fall-through.
+  // the instance's data ref. `target: instance.data` seeds the record
+  // with the blob's own descriptors via `extend`, so blob keys read
+  // through the same record alongside the declared reactiveData getters.
   if (node?.reactiveData) {
     const record = buildArgsRecord({ node, parentData, evaluator: self.evaluator, target: instance.data });
     instance.data = record;
