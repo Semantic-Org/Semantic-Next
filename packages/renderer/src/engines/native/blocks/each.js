@@ -166,7 +166,7 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
     // Captured on creation so the first reconcile pass can detect
     // in-place mutations against a real reference. Refreshed in place
     // by refreshSnapshotAndDetect on each subsequent reconcile.
-    snapshot: (typeof item === 'object' && item !== null) ? createSnapshot(item) : null,
+    snapshot: createSnapshot(item),
     // True until the record's first reconcile pass. Distinguishes
     // freshly-created records (whose bindings were wired against the
     // current data and have no stale subscribers to wake) from steady-
@@ -348,7 +348,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       record.dataContext.replace(getEachData(item, i, collectionType, node));
       record.item = item;
       record.index = i;
-      record.snapshot = (typeof item === 'object' && item !== null) ? createSnapshot(item) : null;
+      record.snapshot = createSnapshot(item);
     }
     else if (typeof item === 'object' && item !== null && !record.fresh) {
       if (record.snapshot === null) {
@@ -526,7 +526,7 @@ function adoptServerItems({
         endMarker,
         scope: itemScope,
         isElse: false,
-        snapshot: (typeof item === 'object' && item !== null) ? createSnapshot(item) : null,
+        snapshot: createSnapshot(item),
         fresh: true,
       });
     }
