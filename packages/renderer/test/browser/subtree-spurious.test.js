@@ -713,7 +713,7 @@ RENDERING_ENGINES.forEach(engine => {
       // into its constituent properties so a binding reading `todo.completed`
       // subscribes to a per-field dep rather than the whole-item key. The
       // test pins that contract for a future architectural pass.
-      it.fails('mutating one item field via setProperty re-fires only the binding reading that field', async () => {
+      it('mutating one item field via setProperty re-fires only the binding reading that field', async () => {
         // {#each item in items} body has two bindings reading two
         // different fields of the same item. setProperty mutates one
         // field. Per-key isolation: only that field's binding fires.
@@ -797,6 +797,149 @@ RENDERING_ENGINES.forEach(engine => {
 
         expect(fires).toEqual({ a: 2, b: 1, c: 1 });
       });
+
+      it("replacing one item ref via setIndex re-fires that item's bindings but not siblings", async () => {
+        // emoji-reactions shape: {#each reaction in reactions} reads
+        // reaction.emoji and reaction.count. setIndex replaces the whole
+        // item ref at one index. Bindings reading reaction.X must wake
+        // (item ref changed → reconcile's ref-change branch fires the
+        // per-key dep on the as-key). Sibling items are unchanged so
+        // their bindings stay quiet. Pins ref-change correctness for
+        // the upcoming per-FIELD pass — the per-key dep on the as-key
+        // is what carries ref-change wakeups.
+        const fires = { aEmoji: 0, aCount: 0, bEmoji: 0, bCount: 0 };
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template:
+            '{#each reaction in getReactions}<span>{readEmoji reaction}</span><span>{readCount reaction}</span>{/each}',
+          createComponent: ({ signal }) => {
+            const reactions = signal([
+              { _id: 'a', emoji: '👍', count: 1 },
+              { _id: 'b', emoji: '❤️', count: 2 },
+            ]);
+            return {
+              reactions,
+              getReactions: () => reactions.get(),
+              readEmoji: (r) => {
+                if (r._id === 'a') { fires.aEmoji++; }
+                else { fires.bEmoji++; }
+                return r.emoji;
+              },
+              readCount: (r) => {
+                if (r._id === 'a') { fires.aCount++; }
+                else { fires.bCount++; }
+                return String(r.count);
+              },
+              replaceA: () => reactions.setIndex(0, { _id: 'a', emoji: '🎉', count: 99 }),
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(fires).toEqual({ aEmoji: 1, aCount: 1, bEmoji: 1, bCount: 1 });
+
+        const updated = $(el).onNext('updated');
+        el.component.replaceA();
+        await updated;
+
+        expect(fires).toEqual({ aEmoji: 2, aCount: 2, bEmoji: 1, bCount: 1 });
+      });
+
+      it('setArrayProperty re-fires only the matching field across every item', async () => {
+        // todo-list toggleAll shape: state.todos.setArrayProperty(
+        // 'completed', true) mutates the completed field on every item
+        // in place. Per-FIELD isolation: every item's completed binding
+        // re-fires, but no item's title binding re-fires. Pins the
+        // multi-record same-field path the per-FIELD pass turns on.
+        let titleFires = 0;
+        let completedFires = 0;
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each todo in getTodos}<span>{readTitle todo}</span><span>{readCompleted todo}</span>{/each}',
+          createComponent: ({ signal }) => {
+            const todos = signal([
+              { _id: 'a', title: 'first', completed: false },
+              { _id: 'b', title: 'second', completed: false },
+              { _id: 'c', title: 'third', completed: false },
+            ]);
+            return {
+              todos,
+              getTodos: () => todos.get(),
+              readTitle: (todo) => {
+                titleFires++;
+                return todo.title;
+              },
+              readCompleted: (todo) => {
+                completedFires++;
+                return String(todo.completed);
+              },
+              completeAll: () => todos.setArrayProperty('completed', true),
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(titleFires).toBe(3);
+        expect(completedFires).toBe(3);
+
+        const updated = $(el).onNext('updated');
+        el.component.completeAll();
+        await updated;
+
+        expect(completedFires).toBe(6);
+        expect(titleFires).toBe(3);
+      });
+
+      it('per-field dep registered for an absent field re-fires when the field is added', async () => {
+        // Open question 2 from the FGR plan: a binding reading a key
+        // that does not yet exist on the item registers a per-FIELD dep
+        // on first render (resolves to undefined). Later setProperty
+        // adds the key — snapshot diff sees the new key, notifyField
+        // fires the dep, the binding re-fires and reads the new value.
+        // Confirms lazy field-dep allocation does not depend on the
+        // field existing at registration time.
+        let flagFires = 0;
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each todo in getTodos}<span>{readFlag todo}</span>{/each}',
+          createComponent: ({ signal }) => {
+            const todos = signal([{ _id: 'a', text: 'first' }]);
+            return {
+              todos,
+              getTodos: () => todos.get(),
+              readFlag: (todo) => {
+                flagFires++;
+                return String(todo.flag);
+              },
+              addFlag: () => todos.setProperty('a', 'flag', true),
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(flagFires).toBe(1);
+
+        const updated = $(el).onNext('updated');
+        el.component.addFlag();
+        await updated;
+
+        expect(flagFires).toBe(2);
+      });
     });
 
     describe.skipIf(isLit)('FGR contract: subtemplate reactiveData (shorthand syntax)', () => {
@@ -857,7 +1000,7 @@ RENDERING_ENGINES.forEach(engine => {
       // the as-key dep which wakes every subtemplate binding reading
       // `todo.X`, not just the field that changed. The test pins the
       // contract for the per-field-isolation pass that closes the gap.
-      it.fails('mutating one item field via setProperty re-fires only the matching subtemplate-binding key', async () => {
+      it('mutating one item field via setProperty re-fires only the matching subtemplate-binding key', async () => {
         // bench-todo's exact composition: {#each todo in todos}{>todoItem
         // id=todo.id title=todo.title completed=todo.completed}{/each}.
         // setProperty('a', 'completed', true) should re-fire only the

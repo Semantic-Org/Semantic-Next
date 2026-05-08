@@ -71,6 +71,32 @@ import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
   a monomorphic inline cache. Per-instance closure-captured handlers
   would split the shape per record and force polymorphic dispatch.
 
+  As-mode per-FIELD isolation. {#each todo in todos} puts the whole item
+  under one as-key. A binding reading proxy.todo.completed returns the
+  item ref and then does plain object access on .completed, so the only
+  reactive subscription is the per-key dep on 'todo' — every binding
+  reading any field of the item subscribes to the same dep. In-place
+  mutation of one field (setProperty / setArrayProperty) re-fires every
+  field reader on the record. Per-FIELD isolation closes that gap by
+  routing the as-key read through an item-tracking proxy whose .X access
+  registers a per-FIELD dep. The structural rhyme with createSettingsProxy
+  in component-helpers.js is the "lazy-allocate a per-property reactive
+  primitive in a Map-shaped container, register on each read" pattern.
+  Differences from the settings shape: null-proto storage instead of Map
+  (V8 inline-cache the per-FIELD lookup; same Entry-20 reasoning that
+  led to deps being null-proto), module-scoped item handler with the
+  RDC as target instead of per-instance closure (RDCs are many per
+  mount where settings are one per element).
+
+  trapGet for the as-key still registers the per-key dep on 'todo' — it
+  is what carries ref-change wakeups when reconcile calls setKey(asKey,
+  newItem) via dataContext.replace(). Per-FIELD deps cover only in-place
+  mutations. Bindings registered via the item proxy subscribe to BOTH
+  the per-key dep and one per-FIELD dep per accessed field. Ref-change
+  re-fires every binding (via per-key dep), each one re-evaluates against
+  the new item and re-registers fresh field deps. In-place mutation
+  re-fires only the matching per-FIELD dep.
+
 */
 
 const itemContextProxies = new WeakSet();
@@ -86,11 +112,42 @@ function trapGet(target, prop) {
     if (Scheduler.current) {
       target.deps[prop].depend();
     }
+    if (prop === target.asKey) {
+      const item = values[prop];
+      // Primitive / null items can't be proxied. The per-FIELD path is
+      // a no-op for them (no fields to dispatch on); return raw.
+      if (item === null || typeof item !== 'object') { return item; }
+      return target.itemProxy ?? (target.itemProxy = new Proxy(target, ITEM_HANDLER));
+    }
     return values[prop];
   }
   if (!target.keysSealed) { target.keySetVersion.depend(); }
   return target.parent[prop];
 }
+
+// Item-tracking proxy. Returned from trapGet when the as-key is read.
+// Target is the RDC itself (same monomorphic-dispatch reasoning the
+// outer HANDLER uses). Each .X access registers a per-FIELD Dependency
+// keyed by fieldName in target.fieldDeps, lazy-allocated on first read.
+// The trap reads target.values[target.asKey] at access time, so the
+// proxy follows item-ref changes through dataContext.replace() without
+// needing to be invalidated.
+function trapItemGet(target, prop) {
+  const item = target.values[target.asKey];
+  if (typeof prop === 'symbol') {
+    return item == null ? undefined : item[prop];
+  }
+  if (Scheduler.current) {
+    let dep = target.fieldDeps[prop];
+    if (dep === undefined) {
+      dep = target.fieldDeps[prop] = new Dependency();
+    }
+    dep.depend();
+  }
+  return item == null ? undefined : item[prop];
+}
+
+const ITEM_HANDLER = { get: trapItemGet };
 
 function trapHas(target, prop) {
   return (prop in target.values) || (prop in target.parent);
@@ -128,12 +185,26 @@ export class ReactiveDataContext {
   constructor(parent, {
     registerItemContext = false,
     sealKeysAfterReplace = false,
+    asKey = null,
   } = {}) {
     this.parent = parent;
     this.sealKeysAfterReplace = sealKeysAfterReplace;
     this.keysSealed = false;
+    this.asKey = asKey;
     this.values = Object.create(null);
     this.deps = Object.create(null);
+    // Eager null-proto allocation matches values / deps. Same Entry-20
+    // reasoning: stable hidden-class shape across all records lets V8
+    // monomorphic-IC the per-FIELD lookup at the call site. Inner
+    // Dependency instances are lazy — only allocated on first reactive
+    // field read, so RDCs without an asKey or whose as-key value is
+    // never read pay only the empty-object allocation cost.
+    this.fieldDeps = Object.create(null);
+    // Lazy item proxy — only allocated on first access of the as-key.
+    // Same proxy instance for the lifetime of the RDC; trapItemGet
+    // re-reads target.values[target.asKey] on each access so item ref
+    // changes flow through transparently.
+    this.itemProxy = null;
     // Snapshot Signal.equalityFunction at construction. Mirrors Signal's
     // own per-instance snapshot semantics — late overrides of the static
     // do not retroactively retarget already-constructed instances. If
@@ -167,6 +238,15 @@ export class ReactiveDataContext {
     if (dep !== undefined) { dep.changed(); }
   }
 
+  // Per-FIELD wakeup for in-place mutations under as-mode {#each}.
+  // Reconcile calls this once per changed key after snapshot diff. The
+  // asKey arg is API-symmetric with the user's mental model — storage
+  // is flat (one as-key per RDC, fixed at construction).
+  notifyField(_asKey, fieldName) {
+    const dep = this.fieldDeps[fieldName];
+    if (dep !== undefined) { dep.changed(); }
+  }
+
   replace(nextValues) {
     for (const key in nextValues) {
       this.setKey(key, nextValues[key]);
@@ -177,6 +257,7 @@ export class ReactiveDataContext {
   dispose() {
     this.values = Object.create(null);
     this.deps = Object.create(null);
+    this.fieldDeps = Object.create(null);
     this.keysSealed = false;
   }
 }

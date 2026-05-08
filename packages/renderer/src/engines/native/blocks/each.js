@@ -142,6 +142,7 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
   const dataContext = new ReactiveDataContext(data, {
     registerItemContext: true,
     sealKeysAfterReplace: !!node.as,
+    asKey: node.as,
   });
   dataContext.replace(eachData);
   const fragment = renderAST({ ast: node.content, data: dataContext.proxy, scope: itemScope, isSVG });
@@ -323,18 +324,33 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
 
   // Phase 3: per-key data updates.
   //
-  // Ref-change path: rebuild the wrapper and push every key. Per-key
-  // Signals dedup via default isEqual, so primitives that happen to
-  // share values across the swap don't notify.
+  // As-mode object items take the per-FIELD path: diff fields against
+  // the record's snapshot, fire only the changed-field deps via
+  // notifyField. The diff runs in two branches:
   //
-  // Same-ref path: snapshot-diff the raw item to find which fields
-  // mutated. Spread-mode templates push each changed primitive into
-  // its per-key Signal; readers of `proxy.this` get an explicit
-  // notifyKey because the wrapper's `this` key holds the item by
-  // reference and the ref equality gate would otherwise short-circuit.
-  // `as`-mode templates notify the as-key — the wrapper holds the
-  // item by reference and the per-key Signal can't see the inner
-  // mutation any other way.
+  //   - refChanged + same-key match: today's hot path. Default Signal
+  //     options clone on read, so Signal.get() returns fresh refs every
+  //     reconcile pass. Phase 1 preserved this record by key match, so
+  //     the item is the same logical entity even when the ref changed.
+  //     We update values[asKey] directly to skip setKey's per-key dep
+  //     fire and notifyField only for fields that actually mutated.
+  //
+  //   - same-ref + snapshot-diff: today's reference-mode path. When
+  //     Signal options skip cloning (krausest-style reference safety,
+  //     or future defaults that drop clone-on-read in favor of freeze
+  //     or a ref-style primitive), in-place mutations preserve the
+  //     item ref. The two branches collapse: most as-mode object
+  //     items will land here instead of refChanged, and the refChanged
+  //     branch becomes the path for intentional whole-item replacements
+  //     only (replaceItem / setIndex with a new object).
+  //
+  // Both branches funnel through notifyField with the same per-FIELD
+  // contract; the only divergence is whether values[asKey] needs an
+  // explicit update (yes for refChanged, no for same-ref).
+  //
+  // Spread-mode and primitive items take the legacy refChanged / setKey
+  // path. Spread mode emits setKey per changed field plus notifyKey('this')
+  // for whole-item readers of {this}.
   //
   // Fresh records (just created in this pass) skip the diff because
   // their bindings were wired synchronously against the current values
@@ -343,14 +359,30 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
     const record = newRecords[i];
     const item = items[i];
     const refChanged = record.item !== item || record.index !== i;
+    const isObjectItem = typeof item === 'object' && item !== null;
 
-    if (refChanged) {
+    if (refChanged && node.as && isObjectItem && !record.fresh) {
+      const changedKeys = refreshSnapshotAndDetect(record.snapshot, item);
+      record.dataContext.values[node.as] = item;
+      record.item = item;
+      if (record.index !== i) {
+        const indexAs = node.indexAs || (collectionType === 'array' ? 'index' : 'key');
+        record.dataContext.setKey(indexAs, i);
+        record.index = i;
+      }
+      if (changedKeys) {
+        for (const key of changedKeys) {
+          record.dataContext.notifyField(node.as, key);
+        }
+      }
+    }
+    else if (refChanged) {
       record.dataContext.replace(getEachData(item, i, collectionType, node));
       record.item = item;
       record.index = i;
       record.snapshot = createSnapshot(item);
     }
-    else if (typeof item === 'object' && item !== null && !record.fresh) {
+    else if (isObjectItem && !record.fresh) {
       if (record.snapshot === null) {
         record.snapshot = createSnapshot(item);
       }
@@ -358,7 +390,9 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
         const changedKeys = refreshSnapshotAndDetect(record.snapshot, item);
         if (changedKeys) {
           if (node.as) {
-            record.dataContext.notifyKey(node.as);
+            for (const key of changedKeys) {
+              record.dataContext.notifyField(node.as, key);
+            }
           }
           else {
             for (const key of changedKeys) {
@@ -484,6 +518,7 @@ function adoptServerItems({
       const dataContext = new ReactiveDataContext(data, {
         registerItemContext: true,
         sealKeysAfterReplace: !!node.as,
+        asKey: node.as,
       });
       dataContext.replace(eachData);
 
