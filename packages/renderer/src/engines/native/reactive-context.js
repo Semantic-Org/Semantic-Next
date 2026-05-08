@@ -18,11 +18,11 @@ import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
   would silently never propagate to its readers.
 
   Per-key state is inlined as `values` (a null-prototype object) plus
-  `deps` (Map<key, Dependency>). Both are eager — the per-key Dependency
-  is allocated at setKey time, not lazily on first reactive read. Eager
-  allocation keeps the RDC's hidden class stable from construction
-  (deps is always Map, never null), so V8's IC at the trap dispatch
-  site sees one shape across all records.
+  `deps` (Map<key, Dependency>). The Map is allocated eagerly at
+  construction so the RDC's hidden class stays stable from the start
+  (deps is always Map, never null). Per-key Dependencies inside the
+  Map are allocated lazily on first reactive read in `trapGet` —
+  declared keys that are never reactively read pay nothing.
 
   We deliberately do not allocate a full Signal per key: Signal wraps
   a Dependency with allowClone / equalityFunction / clone / currentValue
@@ -82,7 +82,13 @@ function trapGet(target, prop) {
   const values = target.values;
   if (prop in values) {
     if (Scheduler.current) {
-      target.deps.get(prop).depend();
+      const deps = target.deps;
+      let dep = deps.get(prop);
+      if (dep === undefined) {
+        dep = new Dependency();
+        deps.set(prop, dep);
+      }
+      dep.depend();
     }
     return values[prop];
   }
@@ -149,7 +155,6 @@ export class ReactiveDataContext {
   setKey(key, value) {
     if (!(key in this.values)) {
       this.values[key] = value;
-      this.deps.set(key, new Dependency());
       if (!this.keysSealed) { this.keySetVersion.changed(); }
       return;
     }
