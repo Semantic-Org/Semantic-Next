@@ -17,7 +17,7 @@ export class Dependency {
   }
 
   changed(context) {
-    if (config.mode !== 'off') {
+    if (config.mode !== 'off' && this.subscribers.size > 0) {
       if (context) {
         this.context = context;
       }

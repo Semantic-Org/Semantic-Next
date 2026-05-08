@@ -138,7 +138,10 @@ export const Template = class Template {
   }
 
   setDataContext(data, { rerender = true } = {}) {
-    const changed = assignInPlace(this.data, data, { returnChanged: true });
+    // preserveGetters keeps computed properties on this.data intact —
+    // both component-level getters (e.g. darkMode) and the lazy-getter
+    // record installed by buildArgsRecord for reactiveData subtemplates.
+    const changed = assignInPlace(this.data, data, { preserveGetters: true, returnChanged: true });
     if (changed) {
       this.dataReplaced = true;
     }

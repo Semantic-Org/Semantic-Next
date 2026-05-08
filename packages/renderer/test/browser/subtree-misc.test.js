@@ -392,6 +392,43 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).not.toContain('msg:hi');
       });
 
+      it("exposes reactiveData on createComponent's closure-captured data param", async () => {
+        // Regression: subtemplates whose parent passes values via
+        // reactiveData (e.g. `{>child key=expr}`) must seed those
+        // values into the cloned template's `data` synchronously,
+        // BEFORE createComponent runs. Closures captured in
+        // createComponent (for example, methods that read
+        // data.lineNumbers later in lifecycle hooks) need the initial
+        // value at the moment they are built. If reactiveData is only
+        // pushed via the post-init Reaction, the closure-captured
+        // `data` ref appears empty at createComponent time.
+        const tag = uniqueTag();
+        let observedAtCreate;
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<span>{lineNumbers}</span>',
+          defaultSettings: { lineNumbers: false },
+          createComponent: ({ data }) => ({
+            captureAtCreate() {
+              observedAtCreate = data.lineNumbers;
+            },
+          }),
+          onCreated: ({ self }) => self.captureAtCreate(),
+        });
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{>child lineNumbers=lineNumbers}',
+          defaultState: { lineNumbers: true },
+          subTemplates: { child },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        expect(observedAtCreate).toBe(true);
+      });
+
       it('should update subtemplate with shorthand reactive props', async () => {
         const tag = uniqueTag();
         const child = defineComponent({

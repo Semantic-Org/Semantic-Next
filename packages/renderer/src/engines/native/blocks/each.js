@@ -1,7 +1,7 @@
-import { Signal } from '@semantic-ui/reactivity';
 import { arrayFromObject, isArray, isEmpty } from '@semantic-ui/utils';
 import { isBlockClose, isBlockOpen } from '../../../build-html-string.js';
 import { defineBlock } from '../define-block.js';
+import { ReactiveDataContext } from '../reactive-context.js';
 import { decodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from '../shared/each.js';
 import { registerBlock } from './registry.js';
 
@@ -17,6 +17,16 @@ import { registerBlock } from './registry.js';
   over *live* DOM, instead of dereferencing a stale childNodes snapshot
   taken at item-creation time.
 
+  Each record holds a ReactiveDataContext that exposes per-key Signals
+  via a Proxy. The proxy is the data context the item's content renders
+  against; reading `proxy.foo` registers a per-key dependency, falling
+  through to the parent context on miss. Replacing item data (ref change)
+  routes through `dataContext.replace()`; in-place mutations are detected
+  via a per-record snapshot diff and routed through per-key `setKey` for
+  the spread case (primitive value pushes) or `notifyKey` for the `as`
+  case (the wrapper key holds the item by reference, so the ref-equality
+  short-circuit needs an explicit nudge).
+
   Hydrate adopts the server-rendered per-item DOM via
   `<!--sui-item:v1:KEY-->` markers and wires per-item Reactions in
   place — the same "register Reactions on hydrate" contract every
@@ -24,81 +34,44 @@ import { registerBlock } from './registry.js';
 
 */
 
-// Proxies created by this module go into the WeakSet; template.js checks
-// membership to decide when expression reads should register deps directly
-// (item context) versus wrapping in Reaction.nonreactive (static data).
-const itemContextProxies = new WeakSet();
-export function isItemContext(data) {
-  return data != null && itemContextProxies.has(data);
-}
-
 function getCollectionType(items) {
   return isArray(items) ? 'array' : 'object';
 }
 
 // Allocate once per record at first reconcile (createSnapshot). On
 // subsequent reconciles, refreshSnapshotAndDetect both diffs the item
-// against the cached snap AND updates snap in place — one pass, zero
-// allocation. The common case on update-10th (900 unchanged items) pays
-// only a cache-friendly `snap.k === item.k` check per prop per item.
+// against the cached snapshot AND updates the snapshot in place — one
+// pass, zero allocation. The common case on update-10th (900 unchanged
+// items) pays only a cache-friendly `snapshot.k === item.k` check per
+// prop per item.
 function createSnapshot(item) {
   if (item === null || typeof item !== 'object') { return item; }
-  const snap = {};
-  for (const k in item) {
-    if (Object.prototype.hasOwnProperty.call(item, k)) {
-      snap[k] = item[k];
+  const snapshot = {};
+  for (const key in item) {
+    if (Object.prototype.hasOwnProperty.call(item, key)) {
+      snapshot[key] = item[key];
     }
   }
-  return snap;
+  return snapshot;
 }
 
-// Returns true if any top-level prop of `item` differs from `snap`, and
-// updates `snap` to match `item`. Added keys register as a change on the
-// iteration that introduces them; removed keys slip past (we don't scan
-// snap's keys — the common case has a stable prop set, and the alternative
-// would pessimize the hot path for a never-observed contract). If the
-// prop set is unstable, the user can always call itemSignal.notify()
-// manually.
-function refreshSnapshotAndDetect(snap, item) {
-  if (snap === null || typeof snap !== 'object') { return snap !== item; }
-  if (item === null || typeof item !== 'object') { return true; }
-  let changed = false;
-  for (const k in item) {
-    if (!Object.prototype.hasOwnProperty.call(item, k)) { continue; }
-    if (snap[k] !== item[k]) {
-      changed = true;
-      snap[k] = item[k];
-    }
-    else if (!(k in snap)) {
-      // New key arrived with same value (e.g. undefined). Rare — record
-      // it and flag changed so the binding re-evaluates `k in item`.
-      changed = true;
-      snap[k] = item[k];
+// Returns the list of changed keys (or null if nothing changed) and
+// updates `snapshot` to match `item` in place. Added keys register on
+// the iteration that introduces them; removed keys slip past — the
+// common case has a stable prop set, and the alternative would
+// pessimize the hot path for a never-observed contract.
+function refreshSnapshotAndDetect(snapshot, item) {
+  if (snapshot === null || typeof snapshot !== 'object') { return null; }
+  if (item === null || typeof item !== 'object') { return null; }
+  let changedKeys = null;
+  for (const key in item) {
+    if (!Object.prototype.hasOwnProperty.call(item, key)) { continue; }
+    if (snapshot[key] !== item[key]) {
+      (changedKeys ??= []).push(key);
+      snapshot[key] = item[key];
     }
   }
-  return changed;
-}
-
-// Load-bearing: the parent-data fallthrough + item-signal reactivity
-// pattern is what lets `{name}` resolve to either an item field or a
-// parent-context binding without the caller knowing which. Flattening
-// this to a merged object would break per-item Signal subscriptions —
-// expressions wouldn't re-evaluate when the item mutates.
-function createItemDataProxy(parentData, itemSignal) {
-  const proxy = new Proxy(parentData, {
-    get(target, prop) {
-      if (typeof prop === 'symbol') { return target[prop]; }
-      const itemData = itemSignal.value;
-      if (prop in itemData) { return itemData[prop]; }
-      return target[prop];
-    },
-    has(target, prop) {
-      const itemData = itemSignal.peek();
-      return (prop in itemData) || (prop in target);
-    },
-  });
-  itemContextProxies.add(proxy);
-  return proxy;
+  return changedKeys;
 }
 
 // Remove every node in the half-open range (start, end] — i.e. from
@@ -109,11 +82,11 @@ function createItemDataProxy(parentData, itemSignal) {
 // markers right now IS the item's current DOM, regardless of what was
 // there at createRecord time.
 function removeRangeContent(startMarker, endMarker) {
-  let n = startMarker.nextSibling;
-  while (n && n !== endMarker) {
-    const next = n.nextSibling;
-    n.remove();
-    n = next;
+  let node = startMarker.nextSibling;
+  while (node && node !== endMarker) {
+    const next = node.nextSibling;
+    node.remove();
+    node = next;
   }
 }
 
@@ -124,12 +97,12 @@ function removeRangeContent(startMarker, endMarker) {
 // would point into the fragment, not the source. After this call, both
 // markers and all inner content are in the fragment in original order.
 function extractRangeToFragment(startMarker, endMarker, fragment) {
-  let n = startMarker.nextSibling;
+  let node = startMarker.nextSibling;
   fragment.appendChild(startMarker);
-  while (n && n !== endMarker) {
-    const next = n.nextSibling;
-    fragment.appendChild(n);
-    n = next;
+  while (node && node !== endMarker) {
+    const next = node.nextSibling;
+    fragment.appendChild(node);
+    node = next;
   }
   fragment.appendChild(endMarker);
 }
@@ -137,6 +110,7 @@ function extractRangeToFragment(startMarker, endMarker, fragment) {
 function clearRecords(records) {
   for (const record of records) {
     record.scope.dispose();
+    if (record.dataContext) { record.dataContext.dispose(); }
     disposeRecordDOM(record);
   }
   records.length = 0;
@@ -165,10 +139,12 @@ function disposeRecordDOM(record) {
 function createRecord({ key, item, index, collectionType, node, data, scope, renderAST, isSVG }) {
   const eachData = getEachData(item, index, collectionType, node);
   const itemScope = scope.child();
-  // Framework-internal signal over user-owned iteration data — don't freeze
-  const itemSignal = new Signal(eachData, { safety: 'reference' });
-  const itemProxy = createItemDataProxy(data, itemSignal);
-  const fragment = renderAST({ ast: node.content, data: itemProxy, scope: itemScope, isSVG });
+  const dataContext = new ReactiveDataContext(data, {
+    registerItemContext: true,
+    sealKeysAfterReplace: !!node.as,
+  });
+  dataContext.replace(eachData);
+  const fragment = renderAST({ ast: node.content, data: dataContext.proxy, scope: itemScope, isSVG });
   // Marker-bounded item range: startMarker ... [item content] ... endMarker.
   // These two empty text nodes are the record's only positional identity.
   // Inner blocks never touch them — each nested DynamicRegion owns its own
@@ -181,24 +157,27 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
     key,
     item,
     index,
-    itemSignal,
+    dataContext,
     startMarker,
     endMarker,
     fragment,
     scope: itemScope,
     isElse: false,
-    // Populated on the first reconcile pass (phase 3). Null marker means
-    // "no prior snapshot → record is fresh, no subscribers to wake up,
-    // skip notify". Cleared to a shallow-clone of the item's top-level
-    // props once the record has seen one reconcile; subsequent passes
-    // compare against this snapshot to detect in-place mutations without
-    // firing notify() on untouched items.
-    propsSnapshot: null,
+    // Captured on creation so the first reconcile pass can detect
+    // in-place mutations against a real reference. Refreshed in place
+    // by refreshSnapshotAndDetect on each subsequent reconcile.
+    snapshot: createSnapshot(item),
+    // True until the record's first reconcile pass. Distinguishes
+    // freshly-created records (whose bindings were wired against the
+    // current data and have no stale subscribers to wake) from steady-
+    // state records (which need notifyKey broadcasts on in-place mutation).
+    fresh: true,
   };
 }
 
 function disposeRecord(record) {
   record.scope.dispose();
+  if (record.dataContext) { record.dataContext.dispose(); }
   disposeRecordDOM(record);
 }
 
@@ -213,10 +192,13 @@ function disposeRecord(record) {
 //          extracts the [startMarker..endMarker] range into a fragment,
 //          then reinserts it — correct regardless of what inner blocks
 //          have done to content between the markers.
-// Phase 3: itemSignal updates for records whose item/index changed.
+// Phase 3: per-key data updates. Ref-changed records refresh their
+//          whole context via dataContext.replace(); same-ref records
+//          run a snapshot diff and only touch keys that actually
+//          mutated.
 function reconcile({ records, items, collectionType, node, data, scope, region, renderAST, isSVG }) {
   const oldRecords = records.slice();
-  const oldKeys = oldRecords.map((r) => r.key);
+  const oldKeys = oldRecords.map((record) => record.key);
   const newKeys = items.map((item, i) => getItemID(item, i, collectionType));
   const newRecords = new Array(items.length);
 
@@ -265,8 +247,8 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       }
       else {
         const oldIdx = oldKeyToIdx.get(newKeys[newHead]);
-        const oldRec = oldIdx !== undefined ? oldRecords[oldIdx] : null;
-        if (oldRec === null) {
+        const oldRecord = oldIdx !== undefined ? oldRecords[oldIdx] : null;
+        if (oldRecord === null) {
           newRecords[newHead] = createRecord({
             key: newKeys[newHead],
             item: items[newHead],
@@ -280,7 +262,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
           });
         }
         else {
-          newRecords[newHead] = oldRec;
+          newRecords[newHead] = oldRecord;
           oldRecords[oldIdx] = null;
         }
         newHead++;
@@ -304,8 +286,8 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   }
 
   while (oldHead <= oldTail) {
-    const r = oldRecords[oldHead++];
-    if (r !== null) { disposeRecord(r); }
+    const record = oldRecords[oldHead++];
+    if (record !== null) { disposeRecord(record); }
   }
 
   // Phase 2: linearize DOM order using markers.
@@ -323,65 +305,75 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   //     Fresh records start with their content already in the fragment
   //     we built in createRecord — insert it directly.
   let cursor = region.anchor;
-  for (const rec of newRecords) {
-    if (!rec) { continue; }
-    if (rec.fragment) {
+  for (const record of newRecords) {
+    if (!record) { continue; }
+    if (record.fragment) {
       // Freshly created record — content and markers are in the fragment.
-      cursor.after(rec.fragment);
-      rec.fragment = null;
+      cursor.after(record.fragment);
+      record.fragment = null;
     }
-    else if (rec.startMarker.previousSibling !== cursor) {
+    else if (record.startMarker.previousSibling !== cursor) {
       // Existing record in the wrong position — extract and reinsert.
-      const frag = document.createDocumentFragment();
-      extractRangeToFragment(rec.startMarker, rec.endMarker, frag);
-      cursor.after(frag);
+      const fragment = document.createDocumentFragment();
+      extractRangeToFragment(record.startMarker, record.endMarker, fragment);
+      cursor.after(fragment);
     }
-    cursor = rec.endMarker;
+    cursor = record.endMarker;
   }
 
-  // Phase 3: update item signals where item ref or index changed, OR
-  // where a retained same-ref item mutated in place.
+  // Phase 3: per-key data updates.
   //
-  // Same-ref same-index objects bypass Signal.set's equality gate (the
-  // wrapper's `[as]: item` is reference-equal across calls and isEqual
-  // stops at ===). The naive fix — calling notify() unconditionally —
-  // wakes every per-item binding on every reconcile, so unchanged
-  // records pay the cost of mutated ones. Instead, snapshot each item's
-  // top-level props at reconcile end and shallow-compare on the next
-  // pass, only firing notify() when a prop actually changed. Top-level
-  // prop mutations (items[i].active = ...) re-render dependent
-  // expressions; nested-object mutations (items[i].nested.x) slip past
-  // the shallow check, and no documented contract relies on them.
+  // Ref-change path: rebuild the wrapper and push every key. Per-key
+  // Signals dedup via default isEqual, so primitives that happen to
+  // share values across the swap don't notify.
+  //
+  // Same-ref path: snapshot-diff the raw item to find which fields
+  // mutated. Spread-mode templates push each changed primitive into
+  // its per-key Signal; readers of `proxy.this` get an explicit
+  // notifyKey because the wrapper's `this` key holds the item by
+  // reference and the ref equality gate would otherwise short-circuit.
+  // `as`-mode templates notify the as-key — the wrapper holds the
+  // item by reference and the per-key Signal can't see the inner
+  // mutation any other way.
+  //
+  // Fresh records (just created in this pass) skip the diff because
+  // their bindings were wired synchronously against the current values
+  // and have no stale subscribers to wake.
   for (let i = 0; i < newRecords.length; i++) {
-    const rec = newRecords[i];
+    const record = newRecords[i];
     const item = items[i];
-    if (rec.item !== item || rec.index !== i) {
-      rec.itemSignal.set(getEachData(item, i, collectionType, node));
-      rec.item = item;
-      rec.index = i;
-      // Capture the new item's shape so a future in-place mutation is
-      // detectable. Only allocation-site for the snapshot object.
-      rec.propsSnapshot = createSnapshot(item);
+    const refChanged = record.item !== item || record.index !== i;
+
+    if (refChanged) {
+      record.dataContext.replace(getEachData(item, i, collectionType, node));
+      record.item = item;
+      record.index = i;
+      record.snapshot = createSnapshot(item);
     }
-    else if (typeof item === 'object' && item !== null) {
-      if (rec.propsSnapshot === null) {
-        // Fresh record (first reconcile after createRecord). Bindings
-        // were wired synchronously against the signal's value; there's
-        // no stale subscriber to wake. Record the snapshot for the next
-        // reconcile's comparison.
-        rec.propsSnapshot = createSnapshot(item);
+    else if (typeof item === 'object' && item !== null && !record.fresh) {
+      if (record.snapshot === null) {
+        record.snapshot = createSnapshot(item);
       }
-      else if (refreshSnapshotAndDetect(rec.propsSnapshot, item)) {
-        // Mutation observed — propagate to per-item bindings. The
-        // snapshot was updated in place by refreshSnapshotAndDetect,
-        // no new allocation.
-        rec.itemSignal.notify();
+      else {
+        const changedKeys = refreshSnapshotAndDetect(record.snapshot, item);
+        if (changedKeys) {
+          if (node.as) {
+            record.dataContext.notifyKey(node.as);
+          }
+          else {
+            for (const key of changedKeys) {
+              record.dataContext.setKey(key, item[key]);
+            }
+            record.dataContext.notifyKey('this');
+          }
+        }
       }
     }
+    record.fresh = false;
   }
 
   records.length = 0;
-  for (const r of newRecords) { records.push(r); }
+  for (const record of newRecords) { records.push(record); }
 }
 
 function renderElse({ records, node, data, scope, region, renderAST, isSVG }) {
@@ -393,12 +385,13 @@ function renderElse({ records, node, data, scope, region, renderAST, isSVG }) {
     key: null,
     item: null,
     index: -1,
-    itemSignal: null,
+    dataContext: null,
     startMarker: null,
     endMarker: null,
     scope: elseScope,
     isElse: true,
-    propsSnapshot: null,
+    snapshot: null,
+    fresh: false,
   });
 }
 
@@ -423,27 +416,27 @@ function extractServerItemGroups(ownedNodes) {
   let current = null;
   let blockDepth = 0;
 
-  for (const n of ownedNodes) {
-    if (n.nodeType === Node.COMMENT_NODE) {
-      const data = n.data;
+  for (const node of ownedNodes) {
+    if (node.nodeType === Node.COMMENT_NODE) {
+      const data = node.data;
       if (isBlockOpen(data)) {
         blockDepth++;
-        if (current) { current.nodes.push(n); }
+        if (current) { current.nodes.push(node); }
         continue;
       }
       if (isBlockClose(data)) {
         blockDepth--;
-        if (current) { current.nodes.push(n); }
+        if (current) { current.nodes.push(node); }
         continue;
       }
       if (blockDepth === 0 && data.startsWith(SUI_ITEM_MARKER)) {
         if (current) { groups.push(current); }
         const key = decodeItemKey(data.slice(SUI_ITEM_MARKER.length));
-        current = { key, startComment: n, nodes: [] };
+        current = { key, startComment: node, nodes: [] };
         continue;
       }
     }
-    if (current) { current.nodes.push(n); }
+    if (current) { current.nodes.push(node); }
   }
   if (current) { groups.push(current); }
   return groups;
@@ -473,7 +466,7 @@ function adoptServerItems({
   }
 
   const serverByKey = new Map();
-  for (const g of serverGroups) { serverByKey.set(g.key, g); }
+  for (const group of serverGroups) { serverByKey.set(group.key, group); }
 
   const newRecords = [];
   const usedKeys = new Set();
@@ -488,9 +481,12 @@ function adoptServerItems({
       usedKeys.add(key);
       const eachData = getEachData(item, i, collectionType, node);
       const itemScope = scope.child();
-      // Framework-internal signal over user-owned iteration data — don't freeze
-      const itemSignal = new Signal(eachData, { safety: 'reference' });
-      const itemProxy = createItemDataProxy(data, itemSignal);
+
+      const dataContext = new ReactiveDataContext(data, {
+        registerItemContext: true,
+        sealKeysAfterReplace: !!node.as,
+      });
+      dataContext.replace(eachData);
 
       // Wire per-item reactivity on the existing DOM. hydrateInnerContent
       // moves the nodes into a temporary fragment, walks with
@@ -500,7 +496,7 @@ function adoptServerItems({
       hydrateInnerContent({
         ownedNodes: mutableNodes,
         innerAST: node.content,
-        data: itemProxy,
+        data: dataContext.proxy,
         scope: itemScope,
       });
 
@@ -517,21 +513,22 @@ function adoptServerItems({
       // Sibling block markers can land between item boundaries —
       // reassemble via fragment so endMarker follows the last item node,
       // not whichever node happens to be last.
-      const frag = document.createDocumentFragment();
-      frag.append(startMarker, ...mutableNodes, endMarker);
-      insertAfter.after(frag);
+      const fragment = document.createDocumentFragment();
+      fragment.append(startMarker, ...mutableNodes, endMarker);
+      insertAfter.after(fragment);
       insertAfter = endMarker;
 
       newRecords.push({
         key,
         item,
         index: i,
-        itemSignal,
+        dataContext,
         startMarker,
         endMarker,
         scope: itemScope,
         isElse: false,
-        propsSnapshot: null,
+        snapshot: createSnapshot(item),
+        fresh: true,
       });
     }
     else {
@@ -554,11 +551,11 @@ function adoptServerItems({
   }
 
   // Dispose unused server items — their DOM is no longer in the list.
-  for (const g of serverGroups) {
-    if (usedKeys.has(g.key)) { continue; }
-    if (g.startComment.parentNode) { g.startComment.remove(); }
-    for (const n of g.nodes) {
-      if (n.parentNode) { n.remove(); }
+  for (const group of serverGroups) {
+    if (usedKeys.has(group.key)) { continue; }
+    if (group.startComment.parentNode) { group.startComment.remove(); }
+    for (const orphan of group.nodes) {
+      if (orphan.parentNode) { orphan.remove(); }
     }
   }
 
@@ -603,12 +600,13 @@ const eachBlock = defineBlock({
           key: null,
           item: null,
           index: -1,
-          itemSignal: null,
+          dataContext: null,
           startMarker: null,
           endMarker: null,
           scope: elseScope,
           isElse: true,
-          propsSnapshot: null,
+          snapshot: null,
+          fresh: false,
         });
       }
       return;
@@ -648,6 +646,7 @@ const eachBlock = defineBlock({
       for (const record of self.records) {
         if (record.isElse) { continue; }
         record.scope.dispose();
+        if (record.dataContext) { record.dataContext.dispose(); }
         disposeRecordDOM(record);
       }
       self.records.length = 0;

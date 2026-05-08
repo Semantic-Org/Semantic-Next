@@ -540,7 +540,7 @@ export class Renderer {
     if (respectProtectedKeys && this.protectedKeys) {
       newData = filterObject(newData, (value, key) => !inArray(key, this.protectedKeys));
     }
-    assignInPlace(this.data, newData, { preserveExistingKeys: preserveExistingData });
+    assignInPlace(this.data, newData, { preserveExistingKeys: preserveExistingData, preserveGetters: true });
   }
 
   bumpDataVersion() {

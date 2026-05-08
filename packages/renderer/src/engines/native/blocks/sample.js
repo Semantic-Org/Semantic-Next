@@ -94,7 +94,7 @@ const sample = defineBlock({
     hooks). When tracked signals change, update() fires — never render()
     again on the same instance.
   */
-  render({ node, data, scope, region, renderAST, lookupExpression, self }) {
+  render({ node, data, scope, region, renderAST, lookupExpression, childContext, self }) {
     const value = lookupExpression(node.expression);
     self.lastValue = value;
     self.generation++;
@@ -102,7 +102,7 @@ const sample = defineBlock({
     const childScope = scope.child();
     const fragment = renderAST({
       ast: node.content,
-      data: { ...data, sampleValue: value },
+      data: childContext(data, { sampleValue: value }),
       scope: childScope,
     });
     region.setContent(fragment, childScope);
@@ -130,13 +130,13 @@ const sample = defineBlock({
     for the prefix scheme). Use it for branch selection, key recovery,
     etc.
   */
-  hydrate({ node, data, region, lookupExpression, hydrateInto, self }) {
+  hydrate({ node, data, region, lookupExpression, hydrateInto, childContext, self }) {
     const value = lookupExpression(node.expression);
     self.lastValue = value;
     self.generation++;
 
     if (region.ownedNodes.length > 0 && node.content) {
-      hydrateInto({ innerAST: node.content, data: { ...data, sampleValue: value } });
+      hydrateInto({ innerAST: node.content, data: childContext(data, { sampleValue: value }) });
     }
   },
 
@@ -152,7 +152,7 @@ const sample = defineBlock({
 
     Don't dispose self; defineBlock owns its lifetime via destroy().
   */
-  update({ node, data, scope, region, renderAST, lookupExpression, self }) {
+  update({ node, data, scope, region, renderAST, lookupExpression, childContext, self }) {
     const value = lookupExpression(node.expression);
     if (value === self.lastValue) { return; } // common bail-out
     self.lastValue = value;
@@ -161,7 +161,7 @@ const sample = defineBlock({
     const childScope = scope.child();
     const fragment = renderAST({
       ast: node.content,
-      data: { ...data, sampleValue: value },
+      data: childContext(data, { sampleValue: value }),
       scope: childScope,
     });
     region.setContent(fragment, childScope);

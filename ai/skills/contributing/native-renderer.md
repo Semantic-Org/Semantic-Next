@@ -385,5 +385,5 @@ Single-file: `npm test -- attribute-bindings`. Note: `-t` filters report non-mat
 | **Native SSR** (`ai/plans/archive/native-ssr.md`) | Server-side rendering and hydration changes |
 | **Renderer Refinement** (`ai/plans/archive/native-renderer-refinement.md`) | Performance, code quality, architectural purity |
 | **Native Renderer Blocks** (`ai/plans/archive/native-renderer-blocks.md`) | Block-level concerns (drove the `defineBlock` decomposition) |
-| **Fine-Grained Reactivity** (`ai/plans/fine-grained-reactivity.md`) | Selective `dataDep` tracking, cutting subscription overhead |
+| **Fine-Grained Reactivity** (`ai/plans/active/fine-grained-reactivity.md`) | Selective `dataDep` tracking, cutting subscription overhead |
 | **Lit Removal** (archived) | Historical context — `ComponentBase` extends `HTMLElement` is shipped |
