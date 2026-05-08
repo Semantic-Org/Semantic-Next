@@ -240,19 +240,6 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
   }
 
   Reaction.nonreactive(() => instance.initialize());
-
-  // Stateless reactiveData subtemplates: drop the renderer.data clone
-  // that initialize() built — its accessor descriptors are copies of
-  // the record's, so one descriptor object per instance is enough.
-  if (
-    node?.reactiveData
-    && Object.keys(instance.state).length === 0
-    && !instance.settingsVars
-    && Object.keys(instance.instance).length === 1
-  ) {
-    instance.renderer.data = instance.data;
-    instance.renderer.evaluator.setData(instance.data);
-  }
   return instance;
 }
 
