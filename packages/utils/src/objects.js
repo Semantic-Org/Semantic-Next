@@ -119,12 +119,37 @@ const deepMerge = (target, source, options) => {
   }
 };
 
+// Cached set of own-getter keys per target. The hot-path consumers
+// (lazy-getter records built once at subtemplate / each-record clone
+// time) carry a stable getter set for their lifetime, so repeated
+// preserveGetters walks can reuse the answer instead of allocating a
+// fresh descriptor object per source key per call.
+const getterKeysCache = new WeakMap();
+
+function getOwnGetterKeys(target) {
+  let keys = getterKeysCache.get(target);
+  if (keys !== undefined) { return keys; }
+  keys = null;
+  const ownKeys = Object.keys(target);
+  for (let i = 0; i < ownKeys.length; i++) {
+    const key = ownKeys[i];
+    const desc = Object.getOwnPropertyDescriptor(target, key);
+    if (desc && desc.get) {
+      if (keys === null) { keys = new Set(); }
+      keys.add(key);
+    }
+  }
+  getterKeysCache.set(target, keys);
+  return keys;
+}
+
 export const assignInPlace = (target, source, {
   preserveExistingKeys = false,
   preserveGetters = false,
   returnChanged = false,
 } = {}) => {
   let changed = false;
+  const ownGetters = preserveGetters ? getOwnGetterKeys(target) : null;
   if (!preserveExistingKeys) {
     if (preserveGetters) {
       // Own keys only — a `for...in` walk on a prototype-chained target
@@ -136,8 +161,7 @@ export const assignInPlace = (target, source, {
       for (let i = 0; i < ownKeys.length; i++) {
         const key = ownKeys[i];
         if (!(key in source)) {
-          const desc = Object.getOwnPropertyDescriptor(target, key);
-          if (desc && desc.get) { continue; }
+          if (ownGetters !== null && ownGetters.has(key)) { continue; }
           delete target[key];
           changed = true;
         }
@@ -159,8 +183,7 @@ export const assignInPlace = (target, source, {
       // getter invocations to decide nothing. On hot reactive paths the
       // target-side and source-side getters often run the expression
       // evaluator, so skipping pays back per key.
-      const desc = Object.getOwnPropertyDescriptor(target, key);
-      if (desc && desc.get) { continue; }
+      if (ownGetters !== null && ownGetters.has(key)) { continue; }
       if (target[key] !== source[key]) {
         target[key] = source[key];
         changed = true;
