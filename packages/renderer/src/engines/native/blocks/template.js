@@ -355,10 +355,6 @@ const templateBlock = defineBlock({
       node,
     });
     setupSettingsMirror({ node, data, scope, region, self });
-    // Template.render's setData chain reads through the data proxy; for
-    // the per-key path those reads must not register source-signal deps
-    // on this block's outer Reaction. Bindings inside the subtemplate
-    // register on source signals through their own Reactions.
     const fragment = renderInstance(self.currentInstance, node);
     region.setContent(fragment);
     attachToRenderRoot(self.currentInstance, region, self);
