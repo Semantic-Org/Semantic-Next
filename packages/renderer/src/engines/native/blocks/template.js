@@ -45,10 +45,6 @@ import { registerBlock } from './registry.js';
   Blob `data={...}` (string or object literal) keeps the eager,
   bumpDataVersion-fanout path documented as coarse-by-design.
 
-  Two-level context use: create() receives dispatch-level bag and stashes
-  renderer.evaluator / renderer.subTemplates / renderer.snippets /
-  renderer.template / renderer.dataDep onto self.
-
 */
 
 function unpackBlobData(node, data, evaluator) {
