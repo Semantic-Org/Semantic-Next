@@ -56,12 +56,10 @@ import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
   unsealed default because spread item shapes can gain keys.
 
   Closure-only readers (functions reading no per-key data) intentionally
-  do not register any record-level "anything changed" Dependency. Today's
-  whole-record proxy registers itemSignal on every property access — that
-  is the coarseness this primitive exists to remove. Tests that assert
-  closure bindings re-fire on item changes encode that coarseness as
-  feature; surface them as findings, do not reintroduce a sibling
-  Dependency to keep them passing.
+  do not register any record-level "anything changed" Dependency. The
+  whole-record-proxy alternative registers an item-level signal on every
+  property access — that is the coarseness this primitive exists to
+  remove.
 
   `writeToParent` mirrors per-key values back into the underlying parent
   object on every setKey. The subtemplate adoption site needs this
