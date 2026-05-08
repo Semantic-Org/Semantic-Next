@@ -119,11 +119,8 @@ const deepMerge = (target, source, options) => {
   }
 };
 
-// Cached set of own-getter keys per target. The hot-path consumers
-// (lazy-getter records built once at subtemplate / each-record clone
-// time) carry a stable getter set for their lifetime, so repeated
-// preserveGetters walks can reuse the answer instead of allocating a
-// fresh descriptor object per source key per call.
+// Cached own-getter keys per target — `getOwnPropertyDescriptor`
+// allocates a descriptor object per key just to read `.get`.
 const getterKeysCache = new WeakMap();
 
 function getOwnGetterKeys(target) {
