@@ -1,6 +1,6 @@
 import { Signal } from '@semantic-ui/reactivity';
 import { createCache } from '@semantic-ui/utils';
-import { unwrap } from './helpers.js';
+import { UNWRAP } from './helpers.js';
 
 // Fallback handler for the rare includeHelpers: false path
 const jsNoHelpersHandler = {
@@ -12,7 +12,11 @@ const jsNoHelpersHandler = {
     if (value instanceof Signal) {
       return value.get();
     }
-    return unwrap(value);
+    if (value !== null && typeof value === 'object') {
+      const unwrapped = value[UNWRAP];
+      if (unwrapped !== undefined) { return unwrapped; }
+    }
+    return value;
   },
 };
 
@@ -64,7 +68,11 @@ export class ExpressionEvaluator {
           if (value instanceof Signal) {
             return value.get();
           }
-          return unwrap(value);
+          if (value !== null && typeof value === 'object') {
+            const unwrapped = value[UNWRAP];
+            if (unwrapped !== undefined) { return unwrapped; }
+          }
+          return value;
         },
       },
     );
@@ -247,7 +255,12 @@ export class ExpressionEvaluator {
           if (argCount > 0) {
             const args = new Array(argCount);
             for (let a = 0; a < argCount; a++) {
-              args[a] = unwrap(results[index + 1 + a]);
+              let v = results[index + 1 + a];
+              if (v !== null && typeof v === 'object') {
+                const u = v[UNWRAP];
+                if (u !== undefined) { v = u; }
+              }
+              args[a] = v;
             }
             result = tokenValue(...args);
           }
