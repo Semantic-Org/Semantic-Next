@@ -936,6 +936,101 @@ RENDERING_ENGINES.forEach(engine => {
         expect(flagFires).toBe(2);
       });
 
+      it('helper receives the raw item identity, not a framework wrapper', async () => {
+        // The framework uses an item-tracking proxy internally for
+        // per-FIELD dep registration on dotted reads. The proxy must
+        // not leak into userland — when a helper receives the item as
+        // a bare argument, it should get the original object reference,
+        // so identity checks (===, WeakMap, instanceof) and naive
+        // debugging (console.log, JSON.stringify) work as users expect.
+        const ref = { _id: 'apple', name: 'Apple' };
+        let captured = null;
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each fruit in fruits}<span>{capture fruit}</span>{/each}',
+          createComponent: ({ signal }) => {
+            const fruits = signal([ref], { allowClone: false });
+            return {
+              fruits,
+              capture: (fruit) => {
+                captured = fruit;
+                return '';
+              },
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(captured).toBe(ref);
+      });
+
+      it('helper can call internal-slot methods on a bare item argument', async () => {
+        // Class methods that depend on internal slots — Date.getTime,
+        // Map.set, RegExp.exec — throw TypeError when this is a Proxy
+        // because the slot lookup misses. Helpers receiving items must
+        // get the actual instance so these methods work.
+        let timestamp = null;
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each d in dates}<span>{readTime d}</span>{/each}',
+          createComponent: ({ signal }) => {
+            const dates = signal([new Date('2024-01-01T00:00:00Z')], { allowClone: false });
+            return {
+              dates,
+              readTime: (d) => {
+                timestamp = d.getTime();
+                return String(timestamp);
+              },
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(timestamp).toBe(new Date('2024-01-01T00:00:00Z').getTime());
+      });
+
+      it('helper can use bare item as a WeakMap key matching its source identity', async () => {
+        // Common pattern: cache derived data keyed by item identity.
+        // weakMap.get(itemFromHelper) only returns the cached value if
+        // the helper received the same object reference the user stored.
+        const cache = new WeakMap();
+        const ref = { _id: 'apple', name: 'Apple' };
+        cache.set(ref, 'cached-derived-value');
+        let lookupResult = null;
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each fruit in fruits}<span>{readCache fruit}</span>{/each}',
+          createComponent: ({ signal }) => {
+            const fruits = signal([ref], { allowClone: false });
+            return {
+              fruits,
+              readCache: (fruit) => {
+                lookupResult = cache.get(fruit);
+                return String(lookupResult);
+              },
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(lookupResult).toBe('cached-derived-value');
+      });
+
       it('item passed to a helper exposes the item shape, not RDC internals', async () => {
         // Naive debug pattern: helpers receive the item proxy. console.log
         // (in devtools) and Object.keys / JSON.stringify operations must
