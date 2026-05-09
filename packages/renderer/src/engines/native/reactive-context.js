@@ -224,20 +224,19 @@ export class ReactiveDataContext {
     this.asKey = asKey;
     this.values = Object.create(null);
     this.deps = Object.create(null);
-    // Eager null-proto allocation matches values / deps so the RDC's
-    // hidden-class shape stays stable across all records, letting V8
-    // monomorphic-IC the per-FIELD lookup at the call site. Inner
-    // Dependency instances are lazy — only allocated on first reactive
-    // field read, so RDCs without an asKey or whose as-key value is
-    // never read pay only the empty-object allocation cost.
-    this.fieldDeps = Object.create(null);
-    // Item proxy with the user's item as target (so devtools and
-    // JSON.stringify see the item, not the RDC). Re-allocated when the
-    // as-key value's ref changes; itemProxyTarget tracks which item
-    // the cached proxy currently wraps.
+    // The per-FIELD machinery is only consumed when the as-key path
+    // returns the item proxy. Spread mode and non-as-mode each blocks
+    // never reach trapItemGet, so the fieldDeps map and item handler
+    // closure are dead weight there. Inner Dependency instances on
+    // fieldDeps are lazy — allocated on first reactive field read.
+    this.fieldDeps = null;
     this.itemProxy = null;
     this.itemProxyTarget = null;
-    this.itemHandler = createItemHandler(this);
+    this.itemHandler = null;
+    if (asKey !== null) {
+      this.fieldDeps = Object.create(null);
+      this.itemHandler = createItemHandler(this);
+    }
     // Snapshot Signal.equalityFunction at construction. Mirrors Signal's
     // own per-instance snapshot semantics — late overrides of the static
     // do not retroactively retarget already-constructed instances. If
@@ -293,7 +292,7 @@ export class ReactiveDataContext {
   dispose() {
     this.values = Object.create(null);
     this.deps = Object.create(null);
-    this.fieldDeps = Object.create(null);
+    if (this.fieldDeps !== null) { this.fieldDeps = Object.create(null); }
     this.itemProxy = null;
     this.itemProxyTarget = null;
     this.keysSealed = false;
