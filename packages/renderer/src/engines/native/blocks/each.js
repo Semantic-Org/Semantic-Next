@@ -357,12 +357,12 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   // Fresh records (just created in this pass) skip the diff because
   // their bindings were wired synchronously against the current values
   // and have no stale subscribers to wake.
+  const isArrayAsMode = collectionType === 'array' && !!node.as;
   for (let i = 0; i < newRecords.length; i++) {
     const record = newRecords[i];
     const item = items[i];
     const refChanged = record.item !== item || record.index !== i;
     const isObjectItem = typeof item === 'object' && item !== null;
-    const isArrayAsMode = collectionType === 'array' && !!node.as;
 
     if (refChanged && isArrayAsMode && isObjectItem) {
       // Hydrated records arrive at first reconcile with fresh=true and
