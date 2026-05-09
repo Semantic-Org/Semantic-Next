@@ -201,6 +201,9 @@ Slot in wherever there's a gap; not phase-gated.
 | P12 | [Template Spread Syntax](template-spread-syntax.md) | 4-8h | pair | scoped | `{>card ...friend}` — object spread in data passing. Ship when component templates demonstrate need. |
 | P13 | [Template Content Projection](template-wrapper-snippets.md) | 12-16h (1.5-2d) | pair | scoped | `{>content}` — content projection for snippets + subtemplates. Ship when component templates demonstrate need. |
 | P14 | [Template Let Bindings](template-let-bindings.md) | 10-14h (1-2d) | pair | scoped | `{#let}...{/let}` — snippet-for-vars. Ship when component templates demonstrate need. |
+| P15 | [Native Renderer — Perf Wins](native-renderer-perf-wins.md) | 4-6h | pair | scoped | Three small renderer cleanups: cache collapse (Option A — keep string cache for unsafeHTML), module-scoped TreeWalker, unsafeHTML dirty-check (~10000× savings ratio at unchanged values). Item 3 ships standalone for clean bench attribution. |
+| P16 | [Expression Block Unification](expression-block-unification.md) | 12-20h (1.5-2.5d) | pair | scoped | Refactor expression handling into the block model via framework-supplied compute/commit hooks. Eliminates `reactive-data.js`'s 3-export asymmetry; AST-to-handler becomes 1:1 across all node types. Aligns native dispatch shape with the Lit engine's. |
+| P17 | [defineBlock — Mount-Cost Reduction](defineblock-mount-cost.md) | 4-6h | pair | scoped | Eliminate per-dispatch closure construction in `defineBlock`. Krausest `create-1000`/`create-10000` wins. **Blocked on `2a.2` (FGR — As-Mode Per-Field Isolation) merge** to avoid `each.js` conflicts. |
 
 ---
 
