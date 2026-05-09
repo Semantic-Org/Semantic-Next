@@ -802,11 +802,8 @@ RENDERING_ENGINES.forEach(engine => {
         // emoji-reactions shape: {#each reaction in reactions} reads
         // reaction.emoji and reaction.count. setIndex replaces the whole
         // item ref at one index. Bindings reading reaction.X must wake
-        // (item ref changed → reconcile's ref-change branch fires the
-        // per-key dep on the as-key). Sibling items are unchanged so
-        // their bindings stay quiet. Pins ref-change correctness for
-        // the upcoming per-FIELD pass — the per-key dep on the as-key
-        // is what carries ref-change wakeups.
+        // because the snapshot diff fires notifyField for each changed
+        // field. Sibling items are unchanged so their bindings stay quiet.
         const fires = { aEmoji: 0, aCount: 0, bEmoji: 0, bCount: 0 };
         const tag = uniqueTag();
         defineComponent({
@@ -854,8 +851,7 @@ RENDERING_ENGINES.forEach(engine => {
         // todo-list toggleAll shape: state.todos.setArrayProperty(
         // 'completed', true) mutates the completed field on every item
         // in place. Per-FIELD isolation: every item's completed binding
-        // re-fires, but no item's title binding re-fires. Pins the
-        // multi-record same-field path the per-FIELD pass turns on.
+        // re-fires, but no item's title binding re-fires.
         let titleFires = 0;
         let completedFires = 0;
         const tag = uniqueTag();
@@ -901,13 +897,12 @@ RENDERING_ENGINES.forEach(engine => {
       });
 
       it('per-field dep registered for an absent field re-fires when the field is added', async () => {
-        // Open question 2 from the FGR plan: a binding reading a key
-        // that does not yet exist on the item registers a per-FIELD dep
-        // on first render (resolves to undefined). Later setProperty
-        // adds the key — snapshot diff sees the new key, notifyField
-        // fires the dep, the binding re-fires and reads the new value.
-        // Confirms lazy field-dep allocation does not depend on the
-        // field existing at registration time.
+        // A binding reading a key that does not yet exist on the item
+        // registers a per-FIELD dep on first render (resolves to
+        // undefined). Later setProperty adds the key; snapshot diff sees
+        // the new key, notifyField fires the dep, the binding re-fires
+        // and reads the new value. Lazy field-dep allocation does not
+        // depend on the field existing at registration time.
         let flagFires = 0;
         const tag = uniqueTag();
         defineComponent({

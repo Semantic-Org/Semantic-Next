@@ -3,8 +3,6 @@
 > Eliminate per-dispatch closure construction in `defineBlock`. Originally framed as a per-fire perf change (incorrectly); the reviewer corrected the framing — the closures are built once per block dispatch (mount or render-cycle), not on every Reaction fire. Still worth doing, just under the right banner.
 >
 > Source review path: `~/lit/packages/lit-html/src/directives/repeat.ts` for the parts-stable-across-update pattern; `~/lit/packages/lit-html/src/lit-html.ts` for ChildPart instance-field capture.
->
-> **Source-of-truth audit trail:** the verdict, corrected framing, and code citations were established by `ai/workspace/artifacts/native-renderer-per-fire-perf-review.md` (Item B section). The original plan that this extracts from is archived at `ai/workspace/plans/archive/native-renderer-per-fire-perf.md`.
 
 ---
 
@@ -208,8 +206,6 @@ Recommended: Option 1. The block author API has zero external consumers today; a
 **Blocked on:** [FGR — As-Mode Per-Field Isolation](active/fgr-as-mode-per-field-isolation.md) merging.
 
 This plan touches `each.js` along with the other 4 block files (renderAST/lookupExpression call-site updates). The fgr-each-as branch is also editing `each.js`. Shipping in parallel would create merge conflicts on `each.js` and tangle bench attribution. Land after fgr-each-as merges; rebase against main; then file as its own PR.
-
-Review trail: `ai/workspace/artifacts/native-renderer-per-fire-perf-review.md` (Item B section — verdict `ACCEPT WITH MODIFICATIONS`, key correction was reframing from per-fire to mount-cost). Originating comparative review: reframe agent's recommendation B in `ai/workspace/artifacts/lit-review-reframe.md`.
 
 ## Status
 

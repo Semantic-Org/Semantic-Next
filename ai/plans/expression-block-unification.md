@@ -432,8 +432,6 @@ A future user-facing directive layer (not currently planned) would extend `regis
 
 None — independent of FGR work, of `expression-block-unification`'s own predecessors, and of the perf-wins / mount-cost bundles.
 
-The fresh-take review at `ai/workspace/artifacts/expression-block-unification-review.md` flagged structural concerns with an earlier framing of this plan. Subsequent design iteration (commit/compute hook split, `defineBlock` untouched, classification stays internal to framework) addressed those concerns. The current plan reflects the post-iteration design.
-
 ## Status
 
 Scoped — design decisions made, implementation steps concrete, audit trail preserved. Ready to execute.

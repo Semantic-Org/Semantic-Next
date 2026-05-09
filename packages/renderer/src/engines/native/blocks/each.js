@@ -20,12 +20,11 @@ import { registerBlock } from './registry.js';
   Each record holds a ReactiveDataContext that exposes per-key Signals
   via a Proxy. The proxy is the data context the item's content renders
   against; reading `proxy.foo` registers a per-key dependency, falling
-  through to the parent context on miss. Replacing item data (ref change)
-  routes through `dataContext.replace()`; in-place mutations are detected
-  via a per-record snapshot diff and routed through per-key `setKey` for
-  the spread case (primitive value pushes) or `notifyKey` for the `as`
-  case (the wrapper key holds the item by reference, so the ref-equality
-  short-circuit needs an explicit nudge).
+  through to the parent context on miss. Mutations are detected via a
+  per-record snapshot diff. Spread-mode pushes each changed primitive
+  through `setKey`; as-mode object items route every wakeup through
+  `notifyField` per changed key, fanning out to per-FIELD deps registered
+  by the item proxy in ReactiveDataContext.
 
   Hydrate adopts the server-rendered per-item DOM via
   `<!--sui-item:v1:KEY-->` markers and wires per-item Reactions in
@@ -326,36 +325,27 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   //
   // As-mode object items take the per-FIELD path: diff fields against
   // the record's snapshot, fire only the changed-field deps via
-  // notifyField. The diff runs in two branches:
+  // notifyField. Two branches funnel through the same notifyField
+  // contract — they differ only in whether values[asKey] needs an
+  // explicit update:
   //
-  //   - refChanged + same-key match: today's hot path. Default Signal
-  //     options clone on read, so Signal.get() returns fresh refs every
-  //     reconcile pass. Phase 1 preserved this record by key match, so
-  //     the item is the same logical entity even when the ref changed.
-  //     We update values[asKey] directly to skip setKey's per-key dep
-  //     fire and notifyField only for fields that actually mutated.
+  //   - refChanged + same-key match: cloning Signals return fresh refs
+  //     every reconcile pass, so refs differ even when the item is the
+  //     same logical entity. Phase 1 preserved the record by key match;
+  //     update values[asKey] directly (skipping setKey's per-key dep
+  //     fire) and notifyField only for fields that actually mutated.
   //
-  //   - same-ref + snapshot-diff: today's reference-mode path. When
-  //     Signal options skip cloning (krausest-style reference safety,
-  //     or future defaults that drop clone-on-read in favor of freeze
-  //     or a ref-style primitive), in-place mutations preserve the
-  //     item ref. The two branches collapse: most as-mode object
-  //     items will land here instead of refChanged, and the refChanged
-  //     branch becomes the path for intentional whole-item replacements
-  //     only (replaceItem / setIndex with a new object).
-  //
-  // Both branches funnel through notifyField with the same per-FIELD
-  // contract; the only divergence is whether values[asKey] needs an
-  // explicit update (yes for refChanged, no for same-ref).
+  //   - same-ref + snapshot-diff: reference-mode Signals preserve the
+  //     item ref across in-place mutations. values[asKey] is already
+  //     correct; the diff fires per-FIELD deps for changed fields.
   //
   // Spread-mode, primitive items, and object iteration take the legacy
   // refChanged / setKey path. Spread mode emits setKey per changed field
   // plus notifyKey('this') for whole-item readers of {this}. Object
   // iteration's per-record value is the {key, value} wrapper from
-  // arrayFromObject, not a directly-readable item; getEachData unwraps
-  // it into top-level dataContext keys, so the per-FIELD optimization
-  // doesn't apply (the "fields" are already at the top level and bindings
-  // read them as primitives without .X dispatch).
+  // arrayFromObject; getEachData unwraps it into top-level dataContext
+  // keys, so the per-FIELD optimization doesn't apply (the "fields" are
+  // already at the top level and bindings read them as primitives).
   //
   // Fresh records (just created in this pass) skip the diff because
   // their bindings were wired synchronously against the current values
@@ -368,17 +358,12 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
     const isArrayAsMode = collectionType === 'array' && !!node.as;
 
     if (refChanged && isArrayAsMode && isObjectItem) {
-      // No `!record.fresh` guard. In-reconcile-fresh records have
-      // refChanged=false by construction (createRecord runs with
-      // items[newHead] and the record is placed at newRecords[newHead]),
-      // so the guard never affected them. Hydrated records (built by
-      // adoptServerItems with fresh=true) DO arrive at Phase 3 with
-      // refChanged=true on the first mutation after hydration; they need
-      // this branch's snapshot diff + notifyField fan-out to wake the
-      // bindings wired during hydration. The previous catch-all path
-      // relied on dataContext.replace's setKey-fires-per-key-dep wakeup,
-      // which is dead weight for as-mode object items (per-key dep on
-      // the as-key is no longer subscribed by trapGet).
+      // Hydrated records arrive at first reconcile with fresh=true and
+      // refChanged=true; they need the snapshot diff + notifyField
+      // fan-out to wake bindings wired during hydration. In-reconcile-
+      // fresh records have refChanged=false by construction (createRecord
+      // runs with items[newHead] and the record is placed at
+      // newRecords[newHead]), so fresh-status doesn't gate this branch.
       const changedKeys = refreshSnapshotAndDetect(record.snapshot, item);
       record.dataContext.values[node.as] = item;
       record.item = item;

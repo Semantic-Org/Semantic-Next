@@ -3,8 +3,6 @@
 > Three small, low-risk changes that survived the comparative review's rater pass *and* the fresh-take re-verification. Each lands independently. Together they form one shippable bundle.
 >
 > Source review path: `~/lit/packages/lit-html/src/lit-html.ts` for cache layer and walker pattern; `~/lit/packages/lit-html/src/directives/unsafe-html.ts` for the dirty-check pattern. SUI source paths inline.
->
-> **Source-of-truth audit trail:** the verdicts and code citations in this plan were established by `ai/workspace/artifacts/native-renderer-quick-wins-review.md`. The original (less-grounded) plan that this consolidates from is archived at `ai/workspace/plans/archive/native-renderer-quick-wins.md`.
 
 ---
 
@@ -383,8 +381,6 @@ Independent; ship in any order. Recommended:
 ## Dependencies
 
 None — independent of FGR work, of expression-block-unification, and of defineblock-mount-cost.
-
-Review trail: `ai/workspace/artifacts/native-renderer-quick-wins-review.md` (per-item verdicts grounded in source citations). Originating comparative review: `ai/workspace/artifacts/lit-comparative-renderer-review.md` (Items #3, #4, and the unsafeHTML sub-case of #5).
 
 ## Status
 
