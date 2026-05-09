@@ -109,28 +109,15 @@ function trapGet(target, prop) {
   if (typeof prop === 'symbol') { return target.parent[prop]; }
   const values = target.values;
   if (prop in values) {
+    if (Scheduler.current) {
+      target.deps[prop].depend();
+    }
     if (prop === target.asKey) {
       const item = values[prop];
       // Primitive / null items can't be proxied. The per-FIELD path is
-      // a no-op for them (no fields to dispatch on); return raw and
-      // register the per-key dep — it is the only wakeup channel for
-      // primitive items (reconcile's `else if (refChanged)` branch
-      // fires it via setKey when the value differs).
-      if (item === null || typeof item !== 'object') {
-        if (Scheduler.current) { target.deps[prop].depend(); }
-        return item;
-      }
-      // Object items go through the itemProxy. Per-FIELD deps registered
-      // by trapItemGet carry every wakeup — reconcile's as-mode object
-      // path fires notifyField per changed key (each.js:381, :400) and
-      // never fires the per-key dep on the as-key. Subscribing here would
-      // add a Reaction-side dep that gets cleaned up and re-attached on
-      // every cycle but never invalidates: pure overhead on workloads
-      // that re-evaluate per item (active-indicator, selection cycles).
+      // a no-op for them (no fields to dispatch on); return raw.
+      if (item === null || typeof item !== 'object') { return item; }
       return target.itemProxy ?? (target.itemProxy = new Proxy(target, ITEM_HANDLER));
-    }
-    if (Scheduler.current) {
-      target.deps[prop].depend();
     }
     return values[prop];
   }
