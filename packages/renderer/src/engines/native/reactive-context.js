@@ -148,10 +148,6 @@ function trapGet(target, prop) {
       // as-key never fires for object items in this path, so subscribing
       // here would attach a Reaction-side dep that cleans up and
       // re-attaches per cycle without ever invalidating.
-      if (target.itemProxyTarget !== item) {
-        target.itemProxy = new Proxy(item, target.itemHandler);
-        target.itemProxyTarget = item;
-      }
       return target.itemProxy;
     }
     if (Scheduler.current) {
@@ -163,14 +159,18 @@ function trapGet(target, prop) {
   return target.parent[prop];
 }
 
-// Per-RDC handler for the item proxy. Target is the user's item itself
-// — devtools display, JSON.stringify, Object.keys, and `in` operate on
-// the item's shape rather than the RDC's internals. The handler is a
-// closure over the RDC so trap functions reach fieldDeps without
-// needing a getter on the proxy target.
+// Per-RDC handler for the item proxy. Target is a per-RDC placeholder
+// `{}` (so devtools display reads "Proxy(Object) {…}" — clean for
+// stack-trace debugging — without binding the proxy's identity to a
+// specific item ref). Every trap delegates to rdc.values[rdc.asKey],
+// the RDC's current item, so the proxy is stable across item-ref
+// changes (cloning Signals issue fresh refs every reconcile pass; we
+// don't want to invalidate per-cache-holder).
 function createItemHandler(rdc) {
+  const currentItem = () => rdc.values[rdc.asKey];
   return {
-    get(item, prop) {
+    get(_, prop) {
+      const item = currentItem();
       if (prop === ITEM_TARGET) {
         if (Scheduler.current) {
           let dep = rdc.fieldDeps[BARE_ITEM_DEP];
@@ -181,7 +181,9 @@ function createItemHandler(rdc) {
         }
         return item;
       }
-      if (typeof prop === 'symbol') { return item[prop]; }
+      if (typeof prop === 'symbol') {
+        return item == null ? undefined : item[prop];
+      }
       if (Scheduler.current) {
         let dep = rdc.fieldDeps[prop];
         if (dep === undefined) {
@@ -189,23 +191,26 @@ function createItemHandler(rdc) {
         }
         dep.depend();
       }
-      return item[prop];
+      return item == null ? undefined : item[prop];
     },
-    has(item, prop) {
-      return prop in item;
+    has(_, prop) {
+      const item = currentItem();
+      return item != null && (prop in item);
     },
-    ownKeys(item) {
-      return Reflect.ownKeys(item);
+    ownKeys() {
+      const item = currentItem();
+      return item == null ? [] : Reflect.ownKeys(item);
     },
-    getOwnPropertyDescriptor(item, prop) {
+    getOwnPropertyDescriptor(_, prop) {
+      const item = currentItem();
+      if (item == null) { return undefined; }
       const desc = Object.getOwnPropertyDescriptor(item, prop);
-      // Proxy invariant: if the target is non-extensible (frozen),
-      // descriptors must mirror exactly. Frozen items already return
-      // configurable: false, which is correct.
-      if (desc !== undefined && Object.isExtensible(item)) {
-        desc.configurable = true;
-      }
+      if (desc !== undefined) { desc.configurable = true; }
       return desc;
+    },
+    getPrototypeOf() {
+      const item = currentItem();
+      return item == null ? null : Object.getPrototypeOf(item);
     },
   };
 }
@@ -256,16 +261,16 @@ export class ReactiveDataContext {
     this.deps = Object.create(null);
     // The per-FIELD machinery is only consumed when the as-key path
     // returns the item proxy. Spread mode and non-as-mode each blocks
-    // never reach trapItemGet, so the fieldDeps map and item handler
-    // closure are dead weight there. Inner Dependency instances on
-    // fieldDeps are lazy — allocated on first reactive field read.
+    // never reach trapItemGet, so the fieldDeps map and item proxy are
+    // dead weight there. Inner Dependency instances on fieldDeps are
+    // lazy — allocated on first reactive field read. The item proxy
+    // wraps a per-RDC `{}` placeholder; traps delegate to the current
+    // values[asKey] so the proxy ref is stable across item-ref changes.
     this.fieldDeps = null;
     this.itemProxy = null;
-    this.itemProxyTarget = null;
-    this.itemHandler = null;
     if (asKey !== null) {
       this.fieldDeps = Object.create(null);
-      this.itemHandler = createItemHandler(this);
+      this.itemProxy = new Proxy({}, createItemHandler(this));
     }
     // Snapshot Signal.equalityFunction at construction. Mirrors Signal's
     // own per-instance snapshot semantics — late overrides of the static
@@ -327,7 +332,6 @@ export class ReactiveDataContext {
     this.deps = Object.create(null);
     if (this.fieldDeps !== null) { this.fieldDeps = Object.create(null); }
     this.itemProxy = null;
-    this.itemProxyTarget = null;
     this.keysSealed = false;
   }
 }
