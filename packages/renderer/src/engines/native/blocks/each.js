@@ -148,7 +148,7 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
   const dataContext = new ReactiveDataContext(data, {
     registerItemContext: true,
     sealKeysAfterReplace: !!node.as,
-    ...(node.as ? { asKey: node.as } : null),
+    asKey: node.as,
   });
   dataContext.replace(eachData);
   const fragment = renderAST({ ast: node.content, data: dataContext.proxy, scope: itemScope, isSVG });
@@ -559,7 +559,7 @@ function adoptServerItems({
       const dataContext = new ReactiveDataContext(data, {
         registerItemContext: true,
         sealKeysAfterReplace: !!node.as,
-        ...(node.as ? { asKey: node.as } : null),
+        asKey: node.as,
       });
       dataContext.replace(eachData);
 
