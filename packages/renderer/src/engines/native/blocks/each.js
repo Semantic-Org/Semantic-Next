@@ -135,6 +135,13 @@ function disposeRecordDOM(record) {
   }
 }
 
+// For object iteration, items[i] is the {key, value} wrapper from
+// arrayFromObject — the snapshot must track the unpacked inner value so
+// reconcile's per-FIELD diff sees the same shape bindings observe.
+function snapshotForRecord(item, collectionType) {
+  return collectionType === 'object' && item != null ? createSnapshot(item.value) : createSnapshot(item);
+}
+
 function createRecord({ key, item, index, collectionType, node, data, scope, renderAST, isSVG }) {
   const eachData = getEachData(item, index, collectionType, node);
   const itemScope = scope.child();
@@ -166,7 +173,7 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
     // Captured on creation so the first reconcile pass can detect
     // in-place mutations against a real reference. Refreshed in place
     // by refreshSnapshotAndDetect on each subsequent reconcile.
-    snapshot: createSnapshot(item),
+    snapshot: snapshotForRecord(item, collectionType),
     // True until the record's first reconcile pass. Distinguishes
     // freshly-created records (whose bindings were wired against the
     // current data and have no stale subscribers to wake) from steady-
@@ -382,7 +389,27 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       record.dataContext.replace(getEachData(item, i, collectionType, node));
       record.item = item;
       record.index = i;
-      record.snapshot = createSnapshot(item);
+      // Object iteration in as-mode unpacks {key,value} wrappers into the
+      // as-key. When the unpacked value is itself an object, bindings
+      // reading entry.X subscribed via the itemProxy and won't wake from
+      // setKey's per-key fire. Diff the prior snapshot vs the unpacked
+      // value and fire per-FIELD wakeups for changed fields.
+      const asValue = node.as ? record.dataContext.values[node.as] : null;
+      if (asValue !== null && typeof asValue === 'object') {
+        let changedKeys = null;
+        if (record.snapshot !== null && typeof record.snapshot === 'object') {
+          changedKeys = refreshSnapshotAndDetect(record.snapshot, asValue);
+        }
+        record.snapshot = createSnapshot(asValue);
+        if (changedKeys) {
+          for (const key of changedKeys) {
+            record.dataContext.notifyField(key);
+          }
+        }
+      }
+      else {
+        record.snapshot = snapshotForRecord(item, collectionType);
+      }
     }
     else if (isObjectItem && !record.fresh) {
       if (record.snapshot === null) {
