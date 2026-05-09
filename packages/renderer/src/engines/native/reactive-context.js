@@ -1,4 +1,5 @@
 import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
+import { UNWRAP } from '../../helpers.js';
 
 /*
 
@@ -71,6 +72,26 @@ import { Dependency, Scheduler, Signal } from '@semantic-ui/reactivity';
   a monomorphic inline cache. Per-instance closure-captured handlers
   would split the shape per record and force polymorphic dispatch.
 
+  As-mode per-FIELD isolation. {#each todo in todos} puts the whole item
+  under one as-key. Without isolation, a binding reading proxy.todo.X
+  would subscribe only to the per-key dep on 'todo' (because trapGet
+  returns the raw item and the .X access is a plain property read), so
+  in-place mutation of any field would re-fire every binding on the
+  record. The fix routes the as-key read through an item-tracking proxy
+  (ITEM_HANDLER + trapItemGet) whose .X access registers a per-FIELD
+  Dependency keyed by field name in target.fieldDeps. Reconcile's
+  as-mode object-item path fires notifyField per changed key after a
+  snapshot diff, so only bindings that read the mutated field re-fire.
+
+  For object items, trapGet skips the per-key dep registration on the
+  as-key entirely. Reconcile never fires that dep on the as-mode object-
+  item path (the refChanged branch writes values[asKey] directly and
+  the same-ref branch routes through notifyField), so subscribing would
+  attach a Reaction-side dep that cleans up and re-attaches per cycle
+  without ever invalidating. Primitive items keep the per-key path
+  because reconcile's catch-all `else if (refChanged)` branch fires
+  setKey(asKey, primitive) when the value differs.
+
 */
 
 const itemContextProxies = new WeakSet();
@@ -79,10 +100,47 @@ export function isItemContext(data) {
   return data != null && itemContextProxies.has(data);
 }
 
+// Bare-access subscribers register against this key in fieldDeps. Per
+// access through the UNWRAP symbol — the consumer is taking the item
+// out of the framework's tracking surface, so we have no per-FIELD
+// information to subscribe to. notifyField also fires this dep so the
+// binding wakes on any field mutation.
+const BARE_ITEM_DEP = Symbol('sui:bare-item-dep');
+
 function trapGet(target, prop) {
   if (typeof prop === 'symbol') { return target.parent[prop]; }
   const values = target.values;
   if (prop in values) {
+    if (prop === target.asKey) {
+      const item = values[prop];
+      // Primitive / null items can't be proxied. The per-FIELD path is
+      // a no-op for them (no fields to dispatch on); return raw and
+      // register the per-key dep — it is the only wakeup channel for
+      // primitive items (reconcile's `else if (refChanged)` branch
+      // fires it via setKey when the value differs). The dep is lazy
+      // here because setKey skips allocating it when the as-key value
+      // is an object; a later object → primitive transition would
+      // otherwise read through an undefined dep.
+      if (item === null || typeof item !== 'object') {
+        if (Scheduler.current) {
+          let dep = target.deps[prop];
+          if (dep === undefined) {
+            dep = target.deps[prop] = new Dependency();
+          }
+          dep.depend();
+        }
+        return item;
+      }
+      // Object items go through the itemProxy. Per-FIELD deps registered
+      // by the item-handler carry every wakeup; the per-key dep on the
+      // as-key never fires for object items in this path, so subscribing
+      // here would attach a Reaction-side dep that cleans up and
+      // re-attaches per cycle without ever invalidating.
+      if (target.itemProxy === null) {
+        target.itemProxy = new Proxy({}, target.itemHandler);
+      }
+      return target.itemProxy;
+    }
     if (Scheduler.current) {
       target.deps[prop].depend();
     }
@@ -90,6 +148,61 @@ function trapGet(target, prop) {
   }
   if (!target.keysSealed) { target.keySetVersion.depend(); }
   return target.parent[prop];
+}
+
+// Per-RDC handler for the item proxy. Target is a per-RDC placeholder
+// `{}` (so devtools display reads "Proxy(Object) {…}" — clean for
+// stack-trace debugging — without binding the proxy's identity to a
+// specific item ref). Every trap delegates to rdc.values[rdc.asKey],
+// the RDC's current item, so the proxy is stable across item-ref
+// changes (cloning Signals issue fresh refs every reconcile pass; we
+// don't want to invalidate per-cache-holder).
+function createItemHandler(rdc) {
+  return {
+    get(_, prop) {
+      const item = rdc.values[rdc.asKey];
+      if (prop === UNWRAP) {
+        if (Scheduler.current) {
+          let dep = rdc.fieldDeps[BARE_ITEM_DEP];
+          if (dep === undefined) {
+            dep = rdc.fieldDeps[BARE_ITEM_DEP] = new Dependency();
+          }
+          dep.depend();
+        }
+        return item;
+      }
+      if (typeof prop === 'symbol') {
+        return item == null ? undefined : item[prop];
+      }
+      if (Scheduler.current) {
+        let dep = rdc.fieldDeps[prop];
+        if (dep === undefined) {
+          dep = rdc.fieldDeps[prop] = new Dependency();
+        }
+        dep.depend();
+      }
+      return item == null ? undefined : item[prop];
+    },
+    has(_, prop) {
+      const item = rdc.values[rdc.asKey];
+      return item != null && (prop in item);
+    },
+    ownKeys() {
+      const item = rdc.values[rdc.asKey];
+      return item == null ? [] : Reflect.ownKeys(item);
+    },
+    getOwnPropertyDescriptor(_, prop) {
+      const item = rdc.values[rdc.asKey];
+      if (item == null) { return undefined; }
+      const desc = Object.getOwnPropertyDescriptor(item, prop);
+      if (desc !== undefined) { desc.configurable = true; }
+      return desc;
+    },
+    getPrototypeOf() {
+      const item = rdc.values[rdc.asKey];
+      return item == null ? null : Object.getPrototypeOf(item);
+    },
+  };
 }
 
 function trapHas(target, prop) {
@@ -128,12 +241,30 @@ export class ReactiveDataContext {
   constructor(parent, {
     registerItemContext = false,
     sealKeysAfterReplace = false,
+    asKey = null,
   } = {}) {
     this.parent = parent;
     this.sealKeysAfterReplace = sealKeysAfterReplace;
     this.keysSealed = false;
+    this.asKey = asKey;
     this.values = Object.create(null);
     this.deps = Object.create(null);
+    // The per-FIELD machinery is only consumed when the as-key path
+    // returns the item proxy. Spread mode and non-as-mode each blocks
+    // never reach trapItemGet, so the fieldDeps map and item handler
+    // are dead weight there. Inner Dependency instances on fieldDeps
+    // are lazy — allocated on first reactive field read. The item
+    // proxy wraps a per-RDC `{}` placeholder; traps delegate to the
+    // current values[asKey] so the proxy ref is stable across item-
+    // ref changes. The proxy itself is lazy — allocated on first
+    // access of the as-key.
+    this.fieldDeps = null;
+    this.itemProxy = null;
+    this.itemHandler = null;
+    if (asKey !== null) {
+      this.fieldDeps = Object.create(null);
+      this.itemHandler = createItemHandler(this);
+    }
     // Snapshot Signal.equalityFunction at construction. Mirrors Signal's
     // own per-instance snapshot semantics — late overrides of the static
     // do not retroactively retarget already-constructed instances. If
@@ -151,7 +282,14 @@ export class ReactiveDataContext {
   setKey(key, value) {
     if (!(key in this.values)) {
       this.values[key] = value;
-      this.deps[key] = new Dependency();
+      // For object items under the as-key, trapGet returns the itemProxy
+      // without subscribing to the per-key dep, so the Dependency would
+      // never fire. Skip the allocation. Primitive as-key values and all
+      // other keys keep the eager allocation — they're read through trapGet
+      // directly and depend on this dep being present at first read.
+      if (key !== this.asKey || value === null || typeof value !== 'object') {
+        this.deps[key] = new Dependency();
+      }
       if (!this.keysSealed) { this.keySetVersion.changed(); }
       return;
     }
@@ -167,6 +305,14 @@ export class ReactiveDataContext {
     if (dep !== undefined) { dep.changed(); }
   }
 
+  notifyField(fieldName) {
+    if (this.fieldDeps === null) { return; }
+    const dep = this.fieldDeps[fieldName];
+    if (dep !== undefined) { dep.changed(); }
+    const bareDep = this.fieldDeps[BARE_ITEM_DEP];
+    if (bareDep !== undefined) { bareDep.changed(); }
+  }
+
   replace(nextValues) {
     for (const key in nextValues) {
       this.setKey(key, nextValues[key]);
@@ -177,6 +323,8 @@ export class ReactiveDataContext {
   dispose() {
     this.values = Object.create(null);
     this.deps = Object.create(null);
+    if (this.fieldDeps !== null) { this.fieldDeps = Object.create(null); }
+    this.itemProxy = null;
     this.keysSealed = false;
   }
 }

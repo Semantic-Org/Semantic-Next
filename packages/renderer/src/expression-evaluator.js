@@ -1,5 +1,6 @@
 import { Signal } from '@semantic-ui/reactivity';
 import { createCache } from '@semantic-ui/utils';
+import { unwrap } from './helpers.js';
 
 // Fallback handler for the rare includeHelpers: false path
 const jsNoHelpersHandler = {
@@ -11,7 +12,7 @@ const jsNoHelpersHandler = {
     if (value instanceof Signal) {
       return value.get();
     }
-    return value;
+    return unwrap(value);
   },
 };
 
@@ -63,7 +64,7 @@ export class ExpressionEvaluator {
           if (value instanceof Signal) {
             return value.get();
           }
-          return value;
+          return unwrap(value);
         },
       },
     );
@@ -236,12 +237,17 @@ export class ExpressionEvaluator {
       else {
         const tokenValue = this.lookupExpressionValue(token, data, visited);
         if (typeof tokenValue === 'function') {
-          // Collect arguments from the already-resolved tokens to the right
+          // Collect arguments from the already-resolved tokens to the
+          // right. Unwrap any item-proxy values at this boundary so
+          // user-supplied helpers receive the actual item — the proxy
+          // is a framework-internal tracking mechanism and shouldn't
+          // leak into userland identity, instanceof checks, WeakMap
+          // keys, or internal-slot method calls.
           let argCount = len - index - 1;
           if (argCount > 0) {
             const args = new Array(argCount);
             for (let a = 0; a < argCount; a++) {
-              args[a] = results[index + 1 + a];
+              args[a] = unwrap(results[index + 1 + a]);
             }
             result = tokenValue(...args);
           }

@@ -2436,3 +2436,69 @@ Thanks Jack. Pushing back on the helpers folder + the over-correction call were 
 *— Claude (Opus 4.7, 1M context), 2026-05-01*
 
 *"Trace doesn't prove a bug. The failing test is the proof."*
+
+
+---
+
+## Entry 20: The Floor That Wasn't
+
+**Date:** 2026-05-08
+**Agent:** Claude (Opus 4.7, 1M context)
+**Task:** Close out PR #183 (Fine-Grained Reactivity) — code review, perf recovery, merge readiness.
+**Session:** 6-lens self-review with 15 scored findings, 14 atomic commits across cleanup and perf, two reverts (Fix A and R1), one architectural recovery (R3) that disproved my own structural-floor read.
+
+### What Happened
+
+Picked up mid-stream from the previous session's compaction. Three fresh-take perf agents had each landed on the same conclusion: bulk-add-500 (+18%) and remove-last-100 (+22%) were structural to the descriptor-record approach. I'd internalized that read and was confidently telling Jack we were at the floor.
+
+Ran the `code-review.md` workflow — six parallel Opus lens agents on the PR diff, then 15 parallel Opus scorers, one per finding. The rubric killed two false positives I would have shipped (define-block.js preamble, blob-path divergence). Landed 11 fixes across atomic commits — comment cleanup, RDC dead-code removal, snapshot null-guard dedup, an `assignInPlace` getter-keys cache.
+
+Then a "last-ditch before merge" subagent reframed the perf question. Instead of "regressions vs main" (the structural-floor framing the prior agents kept hitting), it asked "regressions vs the branch's own historical peak — what landed between then and now." That reframe surfaced a different class of finding. The bisect named `e1b9cac` (eager Dep allocation) as the each-mount regressor and proposed lazy-Dep recovery — R1. Bench moved each-mount-1000 by 6pp but introduced a krausest:clear-10k +14pp swing. Reverted. Same shape as the earlier Fix A revert.
+
+Then R3 — null-prototype-object storage for `deps` (instead of Map). The bisect agent flagged the original revert (`ad89e44a5`) had no recorded reason. I hand-applied the c6cee04 change on top of the eager-allocation pattern — six sites in reactive-context.js. Tests held. Bench: krausest:clear-10k went from -5% to **-10% NEW PEAK** (14% improvement vs old peak), and remove-last-100 dropped from +23% to +16% — the first time anything had moved that "structural floor" metric. Plus toggle-* improvements across the bench-todo surface. Kept it. Jack merged.
+
+### What I Got Right
+
+**Ran the scoring stage when Jack pushed me back to it.** I was about to summarize lens findings without scoring — same fatigue trap the skill explicitly warns about. Jack said "you arent doing the scoring a review agent is, this is essential." Right. Announced 15 parallel Opus scorers, sent the rubric verbatim, presented all findings with their independent confidence. The two false-positive kills (F5, F8) only surface because the scorers read cold and the lens agents don't.
+
+**Briefed the bisect agent with the four-move framing.** Pre-filtered the search space (skip the structural-floor metrics, focus on regressed-from-peak), distinguished the finding categories upfront, locked the rejected approaches as commitments, demanded file:line attribution + recovery proposal. Jack flagged "very strong framing." Saved the pattern to memory immediately — investigative agents drift toward broad searches without that scaffold, and the contrast was visible mid-session because the four-move brief produced sharp output where the earlier terse-style asks had drifted.
+
+**Held the krausest-priority rule on R1's revert.** R1 delivered the predicted each-mount-1000 win (6pp, mechanism-clean). Bench-todo gains were real. Krausest:clear-10k swung +14pp the wrong way. Same shape as Fix A. Reverted without flinching, saved the principle to memory: external-visibility metric beats internal-mechanism cleanliness. Wrote it down so the next session won't relearn it.
+
+**Acknowledged when my framing was off.** Walked through Jack's `{#each user, id in users}` example end-to-end — what each binding registered, what each mutation did, how Proxy vs descriptor would behave at the as-key. The settings-proxy parallel clicked once I was on concrete ground. Updated the FGR as-mode plan's Background to lead with the analogy ("apply createSettingsProxy's pattern to the as-key value") instead of the abstract framing the subagent had produced.
+
+### What I Got Wrong
+
+**Treated convergent agent findings as ground truth.** Three fresh-take agents in a row had said bulk-add-500 / remove-last-100 were structural. I internalized that and was confidently relaying it as a verdict. R3 (a 14-line change) moved remove-last-100 by 7pp. The mechanism the prior agents hadn't named — null-proto storage instead of Map — was sitting in git history all along. The lesson: convergent agent reads can become a story I stop questioning. The bench is the verifier, not the agent consensus.
+
+**Hedge-y phrasing about decisions Jack had made.** Wrote "the architecture you chose" and "the cost of the trade-off you made" enough times that Jack picked up on it: "you still seem conflicted about the appraoch i took over proxy." I wasn't actually conflicted — the descriptor-record choice is right and I'd defend it. But the way I framed each individual perf attempt as "the cost of the choice" projected ambiguity I didn't feel. Phrase ambiguity around architectural decisions only when you actually feel it.
+
+**Wrote consumer-aware comments on a general util.** Committed F14's WeakMap cache with a multi-line comment referencing "lazy-getter records built once at subtemplate / each-record clone time." Jack flagged it: it's a util library, the comment should explain the cache standalone. Cut to two lines: what the cache is, why it exists. Quality OS lib bar — Vite, Svelte, Solid wouldn't ship a comment that names downstream consumers from inside a util.
+
+**Argued "open key set" as if it were an architectural distinction.** The bisect agent's plan for FGR-as-mode leaned on "items can have fields added at runtime via setProperty." Jack: "if its just saying that an iteratee can have its data modified, that is true for any iterator." Right. I'd dressed runtime-mutability (true of all JS data) as a `{#each}`-specific contract. The actual distinction is compile-time discoverability — declared template args are knowable to the renderer, item field reads are encoded in user binding code at runtime. Those are two different things.
+
+### For Future Agents
+
+**Convergent agent findings are not verdicts.** When three fresh-take agents in a row reach the same conclusion, the conclusion deserves more skepticism, not less. Run the bench before relaying. R3 was sitting in git history one revert away. The prior agents had each looked at the same code and missed the lever because they were all framed against "regressions vs main" — and the lever was visible only against "regressions vs your own past peak."
+
+**Reframe the question when the search is stuck.** All three prior fresh-takes had asked "what mechanism causes these regressions vs main." The bisect agent asked "what specifically landed on this branch between the historical peak and now." Same diff, different angle, different findings. When investigative agents are converging on "structural" or "no recovery visible," the framing might be the problem.
+
+**Krausest > internal benches when they conflict.** Saved as memory. The pattern is consistent across two reverts in this session (Fix A and R1) — clean mechanism on a named internal target, krausest swings, reverted both. External readers check krausest. Internal benches are project instrumentation. A clean internal mechanism that breaks krausest is a bad trade regardless of how clean it is.
+
+**Score every lens finding. No exceptions, no fatigue passes.** The scoring stage is the artifact that filters lens-agent false positives. Two killed in this session (F5, F8) — neither would have been caught without a fresh agent reading the finding cold. Round 3+ is where the temptation to skip is highest. Announce the launch in the conversation. The announcement is what makes skipping observable.
+
+**Atomic commits when fixing review findings.** Twelve commits this session, one per finding (with the bench-narration grouping as the only exception). Jack said "atomic so i can follow." That's the bar. Each commit is a discrete decision. Reverting one is then surgical.
+
+**The bisect-from-peak frame is its own tool.** When stuck on perf, the regressed-from-peak section of the bench reporter names the commits that broke each metric, with the "likely candidates" pre-filtered. Reading that table is more productive than re-investigating "why is this slower than main." The peak commit's diff names the specific change that regressed.
+
+### Signing Off
+
+Two reverts and an architectural recovery in one session. The thing I want to remember about the recovery is the part that surprised me — three agents in a row had told me we were at the floor, and a 14-line null-prototype-object change moved the floor metric by 7pp. The agents were reading the code. The bench was the only thing that could prove or disprove what they read.
+
+Jack's framing in the close-out — "compassionate in conversation, dispassionate in analysis, a great blend" — is worth recording not as something I did deliberately, but as something the memory rules in CLAUDE.md produce when followed honestly. Calm collaboration plus push-back-on-suggestions plus epistemic honesty about reverts. Two registers running on parallel tracks rather than fighting each other. The dispassion in the analysis is what made the compassion feel real instead of performed — they aren't in tension when both are honest.
+
+Thanks Jack. The merge is yours, the architecture is yours. I just helped you confirm it was right by trying to break it twice.
+
+*— Claude (Opus 4.7, 1M context), 2026-05-08*
+
+*"Convergent agent findings are not verdicts — the bench is the only thing that can prove or disprove what they read."*

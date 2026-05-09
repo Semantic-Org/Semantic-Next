@@ -112,6 +112,7 @@ Behavioral changes and API contracts that downstream agents and consumers will t
 |---|------|-------|------|-------|-------|
 | 2a | [Signal Performance](active/signal-performance.md) | 4-5h + audit | pair | scoped | `safety` preset system (`freeze` / `reference` / `none`) replacing `allowClone`. Audit of `.get()` call sites for get-mutate-set patterns gates the default flip. |
 | 2a.1 | [Fine-Grained Reactivity](active/fine-grained-reactivity.md) | 6-8h | pair | initial | `ReactiveDataContext` — per-key Signal bag — at `{#each}` items, subtemplate `reactiveData`, snippet args. Eliminates the N×M coarse invalidation pattern. Lands after 2a. |
+| 2a.2 | [FGR — As-Mode Per-Field Isolation](active/fgr-as-mode-per-field-isolation.md) | 3-4h | pair | initial | Closes the per-FIELD gap in `{#each todo in todos}` where one field's mutation wakes every binding reading the item. Two `it.fails` contracts in `subtree-spurious` come off. Fast-follow to 2a.1. |
 | 2b | [Value Schema](value-schema.md) | 16-24h (2-3d) | pair | initial | Contract for ~20-30 form components. `value` setting + schema + `change` event. Gates form/form-field and the wrapper architecture. |
 | 2c | [State from Settings](state-from-settings.md) | 8h | pair | scoped | `{ default: 'all', from: 'setting' }` in `defaultState`. Eliminates manual shadowing for components that accept initial values from attributes but own them as state. |
 | 2d | [Subtemplate Settings](subtemplate-settings.md) | 8-12h | pair | initial | Reactive `defaultSettings` on subtemplates with merged proxy over parent web component settings. Same upgrade path: add `tagName` and the subtemplate becomes a web component with no API change. |
@@ -200,6 +201,9 @@ Slot in wherever there's a gap; not phase-gated.
 | P12 | [Template Spread Syntax](template-spread-syntax.md) | 4-8h | pair | scoped | `{>card ...friend}` — object spread in data passing. Ship when component templates demonstrate need. |
 | P13 | [Template Content Projection](template-wrapper-snippets.md) | 12-16h (1.5-2d) | pair | scoped | `{>content}` — content projection for snippets + subtemplates. Ship when component templates demonstrate need. |
 | P14 | [Template Let Bindings](template-let-bindings.md) | 10-14h (1-2d) | pair | scoped | `{#let}...{/let}` — snippet-for-vars. Ship when component templates demonstrate need. |
+| P15 | [Native Renderer — Perf Wins](native-renderer-perf-wins.md) | 4-6h | pair | scoped | Three small renderer cleanups: cache collapse (Option A — keep string cache for unsafeHTML), module-scoped TreeWalker, unsafeHTML dirty-check (~10000× savings ratio at unchanged values). Item 3 ships standalone for clean bench attribution. |
+| P16 | [Expression Block Unification](expression-block-unification.md) | 12-20h (1.5-2.5d) | pair | scoped | Refactor expression handling into the block model via framework-supplied compute/commit hooks. Eliminates `reactive-data.js`'s 3-export asymmetry; AST-to-handler becomes 1:1 across all node types. Aligns native dispatch shape with the Lit engine's. |
+| P17 | [defineBlock — Mount-Cost Reduction](defineblock-mount-cost.md) | 4-6h | pair | scoped | Eliminate per-dispatch closure construction in `defineBlock`. Krausest `create-1000`/`create-10000` wins. **Blocked on `2a.2` (FGR — As-Mode Per-Field Isolation) merge** to avoid `each.js` conflicts. |
 
 ---
 
