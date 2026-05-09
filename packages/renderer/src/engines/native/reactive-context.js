@@ -148,6 +148,9 @@ function trapGet(target, prop) {
       // as-key never fires for object items in this path, so subscribing
       // here would attach a Reaction-side dep that cleans up and
       // re-attaches per cycle without ever invalidating.
+      if (target.itemProxy === null) {
+        target.itemProxy = new Proxy({}, target.itemHandler);
+      }
       return target.itemProxy;
     }
     if (Scheduler.current) {
@@ -167,10 +170,9 @@ function trapGet(target, prop) {
 // changes (cloning Signals issue fresh refs every reconcile pass; we
 // don't want to invalidate per-cache-holder).
 function createItemHandler(rdc) {
-  const currentItem = () => rdc.values[rdc.asKey];
   return {
     get(_, prop) {
-      const item = currentItem();
+      const item = rdc.values[rdc.asKey];
       if (prop === ITEM_TARGET) {
         if (Scheduler.current) {
           let dep = rdc.fieldDeps[BARE_ITEM_DEP];
@@ -194,22 +196,22 @@ function createItemHandler(rdc) {
       return item == null ? undefined : item[prop];
     },
     has(_, prop) {
-      const item = currentItem();
+      const item = rdc.values[rdc.asKey];
       return item != null && (prop in item);
     },
     ownKeys() {
-      const item = currentItem();
+      const item = rdc.values[rdc.asKey];
       return item == null ? [] : Reflect.ownKeys(item);
     },
     getOwnPropertyDescriptor(_, prop) {
-      const item = currentItem();
+      const item = rdc.values[rdc.asKey];
       if (item == null) { return undefined; }
       const desc = Object.getOwnPropertyDescriptor(item, prop);
       if (desc !== undefined) { desc.configurable = true; }
       return desc;
     },
     getPrototypeOf() {
-      const item = currentItem();
+      const item = rdc.values[rdc.asKey];
       return item == null ? null : Object.getPrototypeOf(item);
     },
   };
@@ -261,16 +263,19 @@ export class ReactiveDataContext {
     this.deps = Object.create(null);
     // The per-FIELD machinery is only consumed when the as-key path
     // returns the item proxy. Spread mode and non-as-mode each blocks
-    // never reach trapItemGet, so the fieldDeps map and item proxy are
-    // dead weight there. Inner Dependency instances on fieldDeps are
-    // lazy — allocated on first reactive field read. The item proxy
-    // wraps a per-RDC `{}` placeholder; traps delegate to the current
-    // values[asKey] so the proxy ref is stable across item-ref changes.
+    // never reach trapItemGet, so the fieldDeps map and item handler
+    // are dead weight there. Inner Dependency instances on fieldDeps
+    // are lazy — allocated on first reactive field read. The item
+    // proxy wraps a per-RDC `{}` placeholder; traps delegate to the
+    // current values[asKey] so the proxy ref is stable across item-
+    // ref changes. The proxy itself is lazy — allocated on first
+    // access of the as-key.
     this.fieldDeps = null;
     this.itemProxy = null;
+    this.itemHandler = null;
     if (asKey !== null) {
       this.fieldDeps = Object.create(null);
-      this.itemProxy = new Proxy({}, createItemHandler(this));
+      this.itemHandler = createItemHandler(this);
     }
     // Snapshot Signal.equalityFunction at construction. Mirrors Signal's
     // own per-instance snapshot semantics — late overrides of the static
