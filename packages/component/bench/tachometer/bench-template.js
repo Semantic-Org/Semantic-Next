@@ -357,13 +357,13 @@ async function mount(tagName) {
 *******************************/
 
 const el1 = await mount('bench-reactivedata');
-// purpose: Mutates one verbose reactiveData field across 100 child subtemplates. Only the changed field re-evaluates.
-performance.mark(startMark('subtemplate-reactive-data-100'));
-for (let i = 0; i < 50; i++) {
+// purpose: Mutates one verbose reactiveData field across 100 child subtemplates, 500 cycles. Only the changed field re-evaluates.
+performance.mark(startMark('subtemplate-reactive-data-100x500'));
+for (let i = 0; i < 500; i++) {
   el1.template.state.labelVal.set(`v${i}`);
   flushWork();
 }
-performance.measure('subtemplate-reactive-data-100', startMark('subtemplate-reactive-data-100'));
+performance.measure('subtemplate-reactive-data-100x500', startMark('subtemplate-reactive-data-100x500'));
 destroy();
 
 /*******************************
@@ -371,13 +371,13 @@ destroy();
 *******************************/
 
 const el2 = await mount('bench-shorthand');
-// purpose: Mutates one shorthand prop's source across 100 child subtemplates. Only that prop re-evaluates.
-performance.mark(startMark('subtemplate-shorthand-props-100'));
-for (let i = 0; i < 50; i++) {
+// purpose: Mutates one shorthand prop's source across 100 child subtemplates, 500 cycles. Only that prop re-evaluates.
+performance.mark(startMark('subtemplate-shorthand-props-100x500'));
+for (let i = 0; i < 500; i++) {
   el2.template.state.labelVal.set(`v${i}`);
   flushWork();
 }
-performance.measure('subtemplate-shorthand-props-100', startMark('subtemplate-shorthand-props-100'));
+performance.measure('subtemplate-shorthand-props-100x500', startMark('subtemplate-shorthand-props-100x500'));
 destroy();
 
 /*******************************
@@ -385,13 +385,13 @@ destroy();
 *******************************/
 
 const el3 = await mount('bench-snippet');
-// purpose: Mutates one snippet arg's source across 100 invocations. Adjacent no-signal expressions stay quiet.
-performance.mark(startMark('snippet-args-per-key-100'));
-for (let i = 0; i < 50; i++) {
+// purpose: Mutates one snippet arg's source across 100 invocations, 500 cycles. Adjacent no-signal expressions stay quiet.
+performance.mark(startMark('snippet-args-per-key-100x500'));
+for (let i = 0; i < 500; i++) {
   el3.template.state.labelVal.set(`v${i}`);
   flushWork();
 }
-performance.measure('snippet-args-per-key-100', startMark('snippet-args-per-key-100'));
+performance.measure('snippet-args-per-key-100x500', startMark('snippet-args-per-key-100x500'));
 destroy();
 
 /*******************************
@@ -473,13 +473,13 @@ destroy();
 *******************************/
 
 const el11 = await mount('bench-realistic-light');
-// purpose: 100 subtemplates, 4 inner bindings each calling formatDate / classIf / capitalize. Mutates one source signal — under per-key isolation, only the title binding's evaluator runs; without it, all four helpers re-fire per child on every cycle.
-performance.mark(startMark('subtemplate-helpers-light-100'));
-for (let i = 0; i < 50; i++) {
+// purpose: 100 subtemplates, 4 inner bindings each calling formatDate / classIf / capitalize, 500 cycles. Mutates one source signal — under per-key isolation, only the title binding's evaluator runs; without it, all four helpers re-fire per child on every cycle.
+performance.mark(startMark('subtemplate-helpers-light-100x500'));
+for (let i = 0; i < 500; i++) {
   el11.template.state.titleVal.set(`title-${i}`);
   flushWork();
 }
-performance.measure('subtemplate-helpers-light-100', startMark('subtemplate-helpers-light-100'));
+performance.measure('subtemplate-helpers-light-100x500', startMark('subtemplate-helpers-light-100x500'));
 destroy();
 
 /*******************************
@@ -487,13 +487,13 @@ destroy();
 *******************************/
 
 const el12 = await mount('bench-realistic-heavy');
-// purpose: 100 subtemplates, 4 inner bindings where three call helpers shaped like userland reality — Intl.NumberFormat, Array.find against a 50-item lookup table, snake_case → Title Case string transform, taxRules iteration. Mutates titleVal only; per-key isolation should keep the three heavy helpers asleep.
-performance.mark(startMark('subtemplate-helpers-heavy-100'));
-for (let i = 0; i < 50; i++) {
+// purpose: 100 subtemplates, 4 inner bindings where three call helpers shaped like userland reality — Intl.NumberFormat, Array.find against a 50-item lookup table, snake_case → Title Case string transform, taxRules iteration, 500 cycles. Mutates titleVal only; per-key isolation should keep the three heavy helpers asleep.
+performance.mark(startMark('subtemplate-helpers-heavy-100x500'));
+for (let i = 0; i < 500; i++) {
   el12.template.state.titleVal.set(`title-${i}`);
   flushWork();
 }
-performance.measure('subtemplate-helpers-heavy-100', startMark('subtemplate-helpers-heavy-100'));
+performance.measure('subtemplate-helpers-heavy-100x500', startMark('subtemplate-helpers-heavy-100x500'));
 destroy();
 
 /*******************************
