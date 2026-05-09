@@ -12,7 +12,7 @@ const jsNoHelpersHandler = {
     if (value instanceof Signal) {
       return value.get();
     }
-    return value;
+    return unwrap(value);
   },
 };
 
@@ -64,7 +64,7 @@ export class ExpressionEvaluator {
           if (value instanceof Signal) {
             return value.get();
           }
-          return value;
+          return unwrap(value);
         },
       },
     );

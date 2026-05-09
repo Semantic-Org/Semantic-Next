@@ -1018,6 +1018,37 @@ RENDERING_ENGINES.forEach(engine => {
         expect(captured).toBe(ref);
       });
 
+      it('JS-style expression hands raw item identity to a function call', async () => {
+        // {capture(fruit)} routes through the JS evaluator's with(ctx)
+        // proxy rather than the Lisp helper-call site. The bare item
+        // crossing into the user function via JS still has to be
+        // unwrapped for identity / instanceof / WeakMap to work.
+        const ref = { _id: 'apple', name: 'Apple' };
+        let captured = null;
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each fruit in fruits}<span>{capture(fruit)}</span>{/each}',
+          createComponent: ({ signal }) => {
+            const fruits = signal([ref], { allowClone: false });
+            return {
+              fruits,
+              capture: (fruit) => {
+                captured = fruit;
+                return '';
+              },
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(captured).toBe(ref);
+      });
+
       it('helper can call internal-slot methods on a bare item argument', async () => {
         // Class methods that depend on internal slots — Date.getTime,
         // Map.set, RegExp.exec — throw TypeError when this is a Proxy
