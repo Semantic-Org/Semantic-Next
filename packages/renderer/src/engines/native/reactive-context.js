@@ -242,7 +242,7 @@ export class ReactiveDataContext {
     if (dep !== undefined) { dep.changed(); }
   }
 
-  notifyField(_asKey, fieldName) {
+  notifyField(fieldName) {
     const dep = this.fieldDeps[fieldName];
     if (dep !== undefined) { dep.changed(); }
   }

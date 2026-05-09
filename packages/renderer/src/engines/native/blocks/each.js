@@ -374,7 +374,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       }
       if (changedKeys) {
         for (const key of changedKeys) {
-          record.dataContext.notifyField(node.as, key);
+          record.dataContext.notifyField(key);
         }
       }
     }
@@ -393,7 +393,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
         if (changedKeys) {
           if (isArrayAsMode) {
             for (const key of changedKeys) {
-              record.dataContext.notifyField(node.as, key);
+              record.dataContext.notifyField(key);
             }
           }
           else {
