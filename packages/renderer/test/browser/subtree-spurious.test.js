@@ -935,6 +935,47 @@ RENDERING_ENGINES.forEach(engine => {
 
         expect(flagFires).toBe(2);
       });
+
+      it('mutating an object-iteration entry re-fires per-FIELD bindings on that record', async () => {
+        // {#each entry in obj} where obj's values are objects. Bindings
+        // reading entry.X register per-FIELD deps via the item proxy.
+        // setProperty replaces obj.a with a new {x:100}, fires the obj
+        // signal. Reconcile takes the catch-all refChanged branch (object
+        // iteration → isArrayAsMode=false → falls past the per-FIELD
+        // path), so the per-FIELD dep on 'x' must still fire to wake the
+        // binding for the 'a' record.
+        let xFires = 0;
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each entry in getObj}<span>{readX entry}</span>{/each}',
+          createComponent: ({ signal }) => {
+            const obj = signal({ a: { x: 1 }, b: { x: 2 } });
+            return {
+              obj,
+              getObj: () => obj.get(),
+              readX: (entry) => {
+                xFires++;
+                return String(entry.x);
+              },
+              bumpA: () => obj.setProperty('a', { x: 100 }),
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(xFires).toBe(2);
+
+        const updated = $(el).onNext('updated');
+        el.component.bumpA();
+        await updated;
+
+        expect(xFires).toBe(3);
+      });
     });
 
     describe.skipIf(isLit)('FGR contract: subtemplate reactiveData (shorthand syntax)', () => {
