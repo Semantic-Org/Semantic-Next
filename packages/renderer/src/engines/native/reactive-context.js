@@ -109,9 +109,18 @@ function trapGet(target, prop) {
       // a no-op for them (no fields to dispatch on); return raw and
       // register the per-key dep — it is the only wakeup channel for
       // primitive items (reconcile's `else if (refChanged)` branch
-      // fires it via setKey when the value differs).
+      // fires it via setKey when the value differs). The dep is lazy
+      // here because setKey skips allocating it when the as-key value
+      // is an object; a later object → primitive transition would
+      // otherwise read through an undefined dep.
       if (item === null || typeof item !== 'object') {
-        if (Scheduler.current) { target.deps[prop].depend(); }
+        if (Scheduler.current) {
+          let dep = target.deps[prop];
+          if (dep === undefined) {
+            dep = target.deps[prop] = new Dependency();
+          }
+          dep.depend();
+        }
         return item;
       }
       // Object items go through the itemProxy. Per-FIELD deps registered
@@ -226,7 +235,14 @@ export class ReactiveDataContext {
   setKey(key, value) {
     if (!(key in this.values)) {
       this.values[key] = value;
-      this.deps[key] = new Dependency();
+      // For object items under the as-key, trapGet returns the itemProxy
+      // without subscribing to the per-key dep, so the Dependency would
+      // never fire. Skip the allocation. Primitive as-key values and all
+      // other keys keep the eager allocation — they're read through trapGet
+      // directly and depend on this dep being present at first read.
+      if (key !== this.asKey || value === null || typeof value !== 'object') {
+        this.deps[key] = new Dependency();
+      }
       if (!this.keysSealed) { this.keySetVersion.changed(); }
       return;
     }
