@@ -137,8 +137,10 @@ The model tier depends on what the verification actually requires. Bug-class ver
 | Tier | Lens agents | Model | Why |
 |---|---|---|---|
 | Comment hygiene | Agent 4 | Haiku | String-vs-code or quote-vs-rule matching, no framework reasoning |
-| History / pattern drift | Agent 3 | Sonnet | Read prior commits, judge whether change breaks an existing pattern |
-| Bug / perf / standards / simplification | Agents 1, 2, 5, 6 | Opus | Subtle bugs, framework correctness, perf claims — exactly the cases where weaker models silently miss |
+| Standards / history / simplification | Agents 1, 3, 5 | Sonnet | Quote-verification, local reading, util-substitution checks — verification is bounded |
+| Bug / performance | Agents 2, 6 | Opus | Subtle regressions, framework correctness, hot-path claims — exactly the cases where weaker models silently miss |
+
+Opus tier is deliberately narrow. The 6+-round iterative loop means total scoring cost compounds, and only Agents 2 and 6 produce findings whose verification genuinely demands Opus. Standards violations are mostly quote-matching once cited, and simplification findings are mostly local. Demoting Agents 1, 3, 5 to Sonnet keeps Opus volume bounded by actual bug/perf surface (typically 0–5 per round) rather than total review volume.
 
 For each finding from any lens agent, launch a fresh scorer at the right tier that receives:
 

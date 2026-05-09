@@ -1002,6 +1002,46 @@ RENDERING_ENGINES.forEach(engine => {
         expect(after.taste).toBe('Amazing');
       });
 
+      it('replacing a primitive item with an object on the same key wakes the binding', async () => {
+        // Edge: array as-mode where items[i] morphs primitive → object
+        // at the same key. getItemID for both falls back to indexOrKey
+        // when the object has no _id/id/key/hash, so the record is
+        // reused. Path A's snapshot is the prior primitive; the diff
+        // must recover (re-snapshot from the object and fire wakeups)
+        // so bindings registered during the primitive period re-fire.
+        let lastRendered = '';
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each item in items}<span class="row">{render item}</span>{/each}',
+          defaultState: { items: [42, 100] },
+          createComponent: ({ state }) => ({
+            render: (item) => {
+              const rendered = (item !== null && typeof item === 'object')
+                ? `obj:${item.x}`
+                : `prim:${item}`;
+              lastRendered = rendered;
+              return rendered;
+            },
+            morphFirst: () => state.items.setIndex(0, { x: 1 }),
+          }),
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        const span = el.shadowRoot.querySelector('.row');
+        expect(span.textContent).toBe('prim:42');
+
+        const updated = $(el).onNext('updated');
+        el.component.morphFirst();
+        await updated;
+
+        expect(span.textContent).toBe('obj:1');
+      });
+
       it('mutating an object-iteration entry re-fires per-FIELD bindings on that record', async () => {
         // {#each entry in obj} where obj's values are objects. Bindings
         // reading entry.X register per-FIELD deps via the item proxy.
