@@ -99,6 +99,26 @@ export function isItemContext(data) {
   return data != null && itemContextProxies.has(data);
 }
 
+// Sentinel that the item-handler's get trap recognizes to return its
+// underlying target. Used by unwrapItem at userland boundaries so user
+// code receives the actual item, not the framework's tracking proxy.
+const ITEM_TARGET = Symbol.for('@semantic-ui/item-proxy-target');
+
+// Bare-access subscribers register against this key in fieldDeps. Per
+// access through the ITEM_TARGET symbol — the user is taking the item
+// out of the framework's tracking surface, so we have no per-FIELD
+// information to subscribe to. notifyField also fires this dep so the
+// binding wakes on any field mutation.
+const BARE_ITEM_DEP = Symbol('sui:bare-item-dep');
+
+export function unwrapItem(value) {
+  if (value !== null && typeof value === 'object') {
+    const target = value[ITEM_TARGET];
+    if (target !== undefined) { return target; }
+  }
+  return value;
+}
+
 function trapGet(target, prop) {
   if (typeof prop === 'symbol') { return target.parent[prop]; }
   const values = target.values;
@@ -128,9 +148,8 @@ function trapGet(target, prop) {
       // as-key never fires for object items in this path, so subscribing
       // here would attach a Reaction-side dep that cleans up and
       // re-attaches per cycle without ever invalidating.
-      if (target.itemProxyTarget !== item) {
-        target.itemProxy = new Proxy(item, target.itemHandler);
-        target.itemProxyTarget = item;
+      if (target.itemProxy === null) {
+        target.itemProxy = new Proxy({}, target.itemHandler);
       }
       return target.itemProxy;
     }
@@ -143,15 +162,30 @@ function trapGet(target, prop) {
   return target.parent[prop];
 }
 
-// Per-RDC handler for the item proxy. Target is the user's item itself
-// — devtools display, JSON.stringify, Object.keys, and `in` operate on
-// the item's shape rather than the RDC's internals. The handler is a
-// closure over the RDC so trap functions reach fieldDeps without
-// needing a getter on the proxy target.
+// Per-RDC handler for the item proxy. Target is a per-RDC placeholder
+// `{}` (so devtools display reads "Proxy(Object) {…}" — clean for
+// stack-trace debugging — without binding the proxy's identity to a
+// specific item ref). Every trap delegates to rdc.values[rdc.asKey],
+// the RDC's current item, so the proxy is stable across item-ref
+// changes (cloning Signals issue fresh refs every reconcile pass; we
+// don't want to invalidate per-cache-holder).
 function createItemHandler(rdc) {
   return {
-    get(item, prop) {
-      if (typeof prop === 'symbol') { return item[prop]; }
+    get(_, prop) {
+      const item = rdc.values[rdc.asKey];
+      if (prop === ITEM_TARGET) {
+        if (Scheduler.current) {
+          let dep = rdc.fieldDeps[BARE_ITEM_DEP];
+          if (dep === undefined) {
+            dep = rdc.fieldDeps[BARE_ITEM_DEP] = new Dependency();
+          }
+          dep.depend();
+        }
+        return item;
+      }
+      if (typeof prop === 'symbol') {
+        return item == null ? undefined : item[prop];
+      }
       if (Scheduler.current) {
         let dep = rdc.fieldDeps[prop];
         if (dep === undefined) {
@@ -159,23 +193,26 @@ function createItemHandler(rdc) {
         }
         dep.depend();
       }
-      return item[prop];
+      return item == null ? undefined : item[prop];
     },
-    has(item, prop) {
-      return prop in item;
+    has(_, prop) {
+      const item = rdc.values[rdc.asKey];
+      return item != null && (prop in item);
     },
-    ownKeys(item) {
-      return Reflect.ownKeys(item);
+    ownKeys() {
+      const item = rdc.values[rdc.asKey];
+      return item == null ? [] : Reflect.ownKeys(item);
     },
-    getOwnPropertyDescriptor(item, prop) {
+    getOwnPropertyDescriptor(_, prop) {
+      const item = rdc.values[rdc.asKey];
+      if (item == null) { return undefined; }
       const desc = Object.getOwnPropertyDescriptor(item, prop);
-      // Proxy invariant: if the target is non-extensible (frozen),
-      // descriptors must mirror exactly. Frozen items already return
-      // configurable: false, which is correct.
-      if (desc !== undefined && Object.isExtensible(item)) {
-        desc.configurable = true;
-      }
+      if (desc !== undefined) { desc.configurable = true; }
       return desc;
+    },
+    getPrototypeOf() {
+      const item = rdc.values[rdc.asKey];
+      return item == null ? null : Object.getPrototypeOf(item);
     },
   };
 }
@@ -227,11 +264,14 @@ export class ReactiveDataContext {
     // The per-FIELD machinery is only consumed when the as-key path
     // returns the item proxy. Spread mode and non-as-mode each blocks
     // never reach trapItemGet, so the fieldDeps map and item handler
-    // closure are dead weight there. Inner Dependency instances on
-    // fieldDeps are lazy — allocated on first reactive field read.
+    // are dead weight there. Inner Dependency instances on fieldDeps
+    // are lazy — allocated on first reactive field read. The item
+    // proxy wraps a per-RDC `{}` placeholder; traps delegate to the
+    // current values[asKey] so the proxy ref is stable across item-
+    // ref changes. The proxy itself is lazy — allocated on first
+    // access of the as-key.
     this.fieldDeps = null;
     this.itemProxy = null;
-    this.itemProxyTarget = null;
     this.itemHandler = null;
     if (asKey !== null) {
       this.fieldDeps = Object.create(null);
@@ -278,8 +318,11 @@ export class ReactiveDataContext {
   }
 
   notifyField(fieldName) {
+    if (this.fieldDeps === null) { return; }
     const dep = this.fieldDeps[fieldName];
     if (dep !== undefined) { dep.changed(); }
+    const bareDep = this.fieldDeps[BARE_ITEM_DEP];
+    if (bareDep !== undefined) { bareDep.changed(); }
   }
 
   replace(nextValues) {
@@ -294,7 +337,6 @@ export class ReactiveDataContext {
     this.deps = Object.create(null);
     if (this.fieldDeps !== null) { this.fieldDeps = Object.create(null); }
     this.itemProxy = null;
-    this.itemProxyTarget = null;
     this.keysSealed = false;
   }
 }
