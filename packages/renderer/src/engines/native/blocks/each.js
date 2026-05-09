@@ -371,7 +371,19 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       // fresh records have refChanged=false by construction (createRecord
       // runs with items[newHead] and the record is placed at
       // newRecords[newHead]), so fresh-status doesn't gate this branch.
-      const changedKeys = refreshSnapshotAndDetect(record.snapshot, item);
+      let changedKeys = null;
+      if (record.snapshot !== null && typeof record.snapshot === 'object') {
+        changedKeys = refreshSnapshotAndDetect(record.snapshot, item);
+      }
+      else {
+        // Prior snapshot was a primitive (item morphed from primitive
+        // to object on the same key). Re-snapshot from the new object
+        // and fire the per-key dep on the as-key — bindings registered
+        // during the primitive period subscribed via trapGet's primitive
+        // branch and have no per-FIELD subscriptions yet.
+        record.snapshot = createSnapshot(item);
+        record.dataContext.notifyKey(node.as);
+      }
       record.dataContext.values[node.as] = item;
       record.item = item;
       if (record.index !== i) {
