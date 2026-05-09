@@ -99,6 +99,26 @@ export function isItemContext(data) {
   return data != null && itemContextProxies.has(data);
 }
 
+// Sentinel that the item-handler's get trap recognizes to return its
+// underlying target. Used by unwrapItem at userland boundaries so user
+// code receives the actual item, not the framework's tracking proxy.
+const ITEM_TARGET = Symbol.for('@semantic-ui/item-proxy-target');
+
+// Bare-access subscribers register against this key in fieldDeps. Per
+// access through the ITEM_TARGET symbol — the user is taking the item
+// out of the framework's tracking surface, so we have no per-FIELD
+// information to subscribe to. notifyField also fires this dep so the
+// binding wakes on any field mutation.
+const BARE_ITEM_DEP = Symbol('sui:bare-item-dep');
+
+export function unwrapItem(value) {
+  if (value !== null && typeof value === 'object') {
+    const target = value[ITEM_TARGET];
+    if (target !== undefined) { return target; }
+  }
+  return value;
+}
+
 function trapGet(target, prop) {
   if (typeof prop === 'symbol') { return target.parent[prop]; }
   const values = target.values;
@@ -151,6 +171,16 @@ function trapGet(target, prop) {
 function createItemHandler(rdc) {
   return {
     get(item, prop) {
+      if (prop === ITEM_TARGET) {
+        if (Scheduler.current) {
+          let dep = rdc.fieldDeps[BARE_ITEM_DEP];
+          if (dep === undefined) {
+            dep = rdc.fieldDeps[BARE_ITEM_DEP] = new Dependency();
+          }
+          dep.depend();
+        }
+        return item;
+      }
       if (typeof prop === 'symbol') { return item[prop]; }
       if (Scheduler.current) {
         let dep = rdc.fieldDeps[prop];
@@ -278,8 +308,11 @@ export class ReactiveDataContext {
   }
 
   notifyField(fieldName) {
+    if (this.fieldDeps === null) { return; }
     const dep = this.fieldDeps[fieldName];
     if (dep !== undefined) { dep.changed(); }
+    const bareDep = this.fieldDeps[BARE_ITEM_DEP];
+    if (bareDep !== undefined) { bareDep.changed(); }
   }
 
   replace(nextValues) {
