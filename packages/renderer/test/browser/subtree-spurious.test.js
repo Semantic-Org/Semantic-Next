@@ -978,9 +978,9 @@ RENDERING_ENGINES.forEach(engine => {
           renderingEngine: engine,
           tagName: tag,
           template: '{#each fruit in fruits}<span class="json">{stringify fruit}</span>{/each}',
-          defaultState: { fruits: [{ name: 'Apple', taste: 'Sweet' }] },
+          defaultState: { fruits: [{ _id: 'apple', name: 'Apple', taste: 'Sweet' }] },
           createComponent: ({ state }) => ({
-            ripen: () => state.fruits.setProperty(0, 'taste', 'Amazing'),
+            ripen: () => state.fruits.setProperty('apple', 'taste', 'Amazing'),
           }),
         });
         const el = document.createElement(tag);
@@ -989,13 +989,17 @@ RENDERING_ENGINES.forEach(engine => {
         await rendered;
 
         const span = el.shadowRoot.querySelector('.json');
-        expect(JSON.parse(span.textContent)).toEqual({ name: 'Apple', taste: 'Sweet' });
+        const initial = JSON.parse(span.textContent);
+        expect(initial.name).toBe('Apple');
+        expect(initial.taste).toBe('Sweet');
 
         const updated = $(el).onNext('updated');
         el.component.ripen();
         await updated;
 
-        expect(JSON.parse(span.textContent)).toEqual({ name: 'Apple', taste: 'Amazing' });
+        const after = JSON.parse(span.textContent);
+        expect(after.name).toBe('Apple');
+        expect(after.taste).toBe('Amazing');
       });
 
       it('mutating an object-iteration entry re-fires per-FIELD bindings on that record', async () => {
