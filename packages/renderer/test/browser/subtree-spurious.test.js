@@ -936,6 +936,68 @@ RENDERING_ENGINES.forEach(engine => {
         expect(flagFires).toBe(2);
       });
 
+      it('item passed to a helper exposes the item shape, not RDC internals', async () => {
+        // Naive debug pattern: helpers receive the item proxy. console.log
+        // (in devtools) and Object.keys / JSON.stringify operations must
+        // see the user's item shape, not the ReactiveDataContext's
+        // internal slots (parent, sealKeysAfterReplace, asKey, values…).
+        let captured = null;
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each fruit in fruits}<span>{capture fruit}</span>{/each}',
+          defaultState: { fruits: [{ name: 'Apple', taste: 'Sweet' }] },
+          createComponent: () => ({
+            capture: (fruit) => {
+              captured = fruit;
+              return '';
+            },
+          }),
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(captured).not.toBeNull();
+        expect(Object.keys(captured).sort()).toEqual(['name', 'taste']);
+        expect('name' in captured).toBe(true);
+        expect('parent' in captured).toBe(false);
+        expect('asKey' in captured).toBe(false);
+        expect(captured.name).toBe('Apple');
+      });
+
+      it('stringify of an as-key item produces correct JSON and updates on mutation', async () => {
+        // {stringify fruit} renders JSON of the item. Iteration goes
+        // through the item proxy's ownKeys / get traps, registering
+        // fieldDeps as JSON.stringify reads each field. Field mutations
+        // fire notifyField → bindings re-stringify with the new value.
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each fruit in fruits}<span class="json">{stringify fruit}</span>{/each}',
+          defaultState: { fruits: [{ name: 'Apple', taste: 'Sweet' }] },
+          createComponent: ({ state }) => ({
+            ripen: () => state.fruits.setProperty(0, 'taste', 'Amazing'),
+          }),
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        const span = el.shadowRoot.querySelector('.json');
+        expect(JSON.parse(span.textContent)).toEqual({ name: 'Apple', taste: 'Sweet' });
+
+        const updated = $(el).onNext('updated');
+        el.component.ripen();
+        await updated;
+
+        expect(JSON.parse(span.textContent)).toEqual({ name: 'Apple', taste: 'Amazing' });
+      });
+
       it('mutating an object-iteration entry re-fires per-FIELD bindings on that record', async () => {
         // {#each entry in obj} where obj's values are objects. Bindings
         // reading entry.X register per-FIELD deps via the item proxy.
