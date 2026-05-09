@@ -949,19 +949,15 @@ RENDERING_ENGINES.forEach(engine => {
         defineComponent({
           renderingEngine: engine,
           tagName: tag,
-          template: '{#each entry in getObj}<span>{readX entry}</span>{/each}',
-          createComponent: ({ signal }) => {
-            const obj = signal({ a: { x: 1 }, b: { x: 2 } });
-            return {
-              obj,
-              getObj: () => obj.get(),
-              readX: (entry) => {
-                xFires++;
-                return String(entry.x);
-              },
-              bumpA: () => obj.setProperty('a', { x: 100 }),
-            };
-          },
+          template: '{#each entry in obj}<span>{readX entry}</span>{/each}',
+          defaultState: { obj: { a: { x: 1 }, b: { x: 2 } } },
+          createComponent: ({ state }) => ({
+            readX: (entry) => {
+              xFires++;
+              return String(entry.x);
+            },
+            bumpA: () => state.obj.setProperty('a', { x: 100 }),
+          }),
         });
         const el = document.createElement(tag);
         const rendered = $(el).onNext('rendered');
