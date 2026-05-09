@@ -367,7 +367,18 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
     const isObjectItem = typeof item === 'object' && item !== null;
     const isArrayAsMode = collectionType === 'array' && !!node.as;
 
-    if (refChanged && isArrayAsMode && isObjectItem && !record.fresh) {
+    if (refChanged && isArrayAsMode && isObjectItem) {
+      // No `!record.fresh` guard. In-reconcile-fresh records have
+      // refChanged=false by construction (createRecord runs with
+      // items[newHead] and the record is placed at newRecords[newHead]),
+      // so the guard never affected them. Hydrated records (built by
+      // adoptServerItems with fresh=true) DO arrive at Phase 3 with
+      // refChanged=true on the first mutation after hydration; they need
+      // this branch's snapshot diff + notifyField fan-out to wake the
+      // bindings wired during hydration. The previous catch-all path
+      // relied on dataContext.replace's setKey-fires-per-key-dep wakeup,
+      // which is dead weight for as-mode object items (per-key dep on
+      // the as-key is no longer subscribed by trapGet).
       const changedKeys = refreshSnapshotAndDetect(record.snapshot, item);
       record.dataContext.values[node.as] = item;
       record.item = item;
