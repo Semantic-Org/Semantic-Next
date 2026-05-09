@@ -1,6 +1,6 @@
 import { Signal } from '@semantic-ui/reactivity';
 import { createCache } from '@semantic-ui/utils';
-import { unwrapItem } from './engines/native/reactive-context.js';
+import { unwrap } from './helpers.js';
 
 // Fallback handler for the rare includeHelpers: false path
 const jsNoHelpersHandler = {
@@ -247,7 +247,7 @@ export class ExpressionEvaluator {
           if (argCount > 0) {
             const args = new Array(argCount);
             for (let a = 0; a < argCount; a++) {
-              args[a] = unwrapItem(results[index + 1 + a]);
+              args[a] = unwrap(results[index + 1 + a]);
             }
             result = tokenValue(...args);
           }
