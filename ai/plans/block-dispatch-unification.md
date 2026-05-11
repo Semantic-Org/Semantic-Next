@@ -372,6 +372,25 @@ packages/renderer/src/engines/native/
 
 Each step is independently shippable, each leaves the codebase green, and each has its own verification gate. **Step 1 is the regression bugfix — it ships first and closes the SpecimenExplorer issue independently of the rest.**
 
+### Progress (PR #196 / `feat/block-unify`)
+
+| Step | Status | Notes |
+|---|---|---|
+| 0 — Bench baseline | partial | Tooling smoke-tested on host; full baseline captured by CI tachometer benches (in flight) rather than locally. 0b factory-shape isolation bench skipped — actual landed implementation uses a lighter approach (see Step 1 note). |
+| 1 — Regression bugfix | ✓ shipped | Approach landed simpler than originally specified: blocks-in-attribute reach the attribute binding via `bindAttribute` recognizing block-type entries (`evaluateMarkerToString` → `renderASTToString`), not via a `place`/`commit` dispatch on the block bag. Block markers in attribute position emit `__suiN__` (not `<!--sui-block-->`). Server emits inline. `each`/`async` throw on attribute position via `renderASTToString`. Lit directives also fixed (re-fire bypassed `formatForPart`; `serializeContent` dropped values). |
+| 2 — `compute` shorthand | ✓ partial | `compute` shorthand + `bag.place(content)` landed in `defineBlock`. `conditional` migrated. `rerender` and `template` did **not** migrate — `rerender`'s "always rebuild" semantics clash with `place`'s reference-equality dedup; `template` manages a subtemplate instance lifecycle that doesn't reduce to "place content". They keep explicit `render`/`update`. |
+| 3 — `blocks/raw-text.js` | ✓ shipped | Raw-text dispatch routes through the registry. Uses a plain dispatch function (not `defineBlock` — no region, no lifecycle separation). Legacy `bindRawTextContent` method retained on Renderer until Step 6 (still bound but unused). |
+| 4 — `blocks/expression.js` | deferred | Highest-frequency dispatch; structural change carries perf risk. Hold until Step 1-3 bench results validate the foundation, then revisit. The `bag.place`/`compute` infra is in place when the time comes. |
+| 5 — Unify `hydrateMarkers` dispatch | deferred | Blocked on Step 4. |
+| 6 — Delete `reactive-data.js` | deferred | Blocked on Steps 4-5. |
+| 7 — Refresh `blocks/sample.js` | deferred | Best updated after Steps 4-6 land so sample reflects steady-state patterns. |
+| 8 — Final verification | in flight | CI tachometer benches running. |
+
+**Deferred to follow-up PR(s):** Steps 4-7. Steps 1-3 deliver the user-visible regression fix plus structural foundation (compute shorthand + bag.place + registry-routed raw-text). The remaining structural folding is internal cleanup that should land behind its own perf gate.
+
+---
+
+
 ### Step 0 — Bench baseline
 
 Two purposes: capture a clean baseline of all committed suites at the current branch tip, AND validate the factory-shape closure cost in isolation before any structural commit.
