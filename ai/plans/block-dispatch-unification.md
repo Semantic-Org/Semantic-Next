@@ -374,9 +374,27 @@ Each step is independently shippable, each leaves the codebase green, and each h
 
 ### Step 0 — Bench baseline
 
-Port `makeAttributeStringCommit` factory in isolation, bench against today's `bindAttribute` string path on `bench-data-blob`. Decision gate before steps 1-6. If closure-allocation cost per binding is non-trivial, redesign the contract before structural commits.
+Two purposes: capture a clean baseline of all committed suites at the current branch tip, AND validate the factory-shape closure cost in isolation before any structural commit.
 
-**Verification gate:** factory-shape per-binding overhead within tolerance (≤5% vs class-method dispatch on `bench-data-blob`). If not, redesign before proceeding.
+**0a — Full-suite baseline.** Run every committed suite at `main` and save the JSON artifacts. These become the comparison target for steps 1, 6, and 8.
+
+```bash
+# All five suites, captured to bench-report.json per suite
+cd packages/component/bench/tachometer
+node build-ci.js current && node build-ci.js baseline
+npx tachometer --config tachometer-ci-krausest.json   --json-file krausest-baseline.json
+npx tachometer --config tachometer-ci-template.json   --json-file template-baseline.json
+npx tachometer --config tachometer-ci-hydrate.json    --json-file hydrate-baseline.json
+npx tachometer --config tachometer-ci-todo.json       --json-file todo-baseline.json
+cd ../../../renderer/bench/tachometer
+npx tachometer --config tachometer-ci-renderer-micros.json --json-file renderer-baseline.json
+```
+
+(WSL2 hosts: skip local run; baseline is the bench-bot artifact from a PR comment at branch tip.)
+
+**0b — Factory-shape isolation bench.** Port `makeAttributeStringCommit` in isolation, bench against today's `bindAttribute` string path on `bench-data-blob` and `each-mount-1000`. Decision gate before steps 1-6.
+
+**Verification gate:** factory-shape per-binding overhead within tolerance (`no change` reporter verdict on `bench-data-blob` and `each-mount-1000`). If `slower` ≥ 5%, redesign the contract (consolidate closures, share state via per-binding objects) before proceeding. Reviewer's concern is load-bearing here; abandoning the factory shape and falling back to today's class-method dispatch is the documented escape hatch.
 
 ### Step 1 — Regression bugfix: block position classification
 
@@ -468,6 +486,42 @@ After all callers migrated, delete the file. Drop dead methods on Renderer (`bin
 | 8 | Cross-package full suite + perf gate vs main and vs step 0 |
 
 Each step ships independently behind its gate. If a step's gate fails, prior steps stay shipped — no cross-step rollback needed. **Step 1's gate is the user-visible regression close — the milestone that justifies the plan landing at all.**
+
+---
+
+## Perf budget
+
+The committed perf suite (`packages/{component,renderer,reactivity,compiler}/bench/tachometer/`) is the gate. Tachometer reporter verdict per metric must be `no change` or `faster`; `slower` only acceptable when it's the tax of correctness (e.g., the attribute-position dispatch path costs more than zero because it now does work; today it produces broken output for free). Headline regressions on the steady-state hot paths are not acceptable.
+
+**Metrics that must not regress more than ±5% (reporter verdict `no change`):**
+
+| Suite | Metrics | Why |
+|---|---|---|
+| `krausest` | `create-1k`, `create-10k`, `update-10th-50`, `swap-rows-20`, `clear-10k` | Mount + per-row update + DOM swap. Most exposed to per-binding closure allocation and place dispatch. |
+| `template` | `subtemplate-reactive-data-100x500`, `subtemplate-shorthand-props-100x500`, `snippet-args-per-key-100x500`, `subtemplate-data-blob-100`, `each-mount-1000`, `active-indicator-200`, `stable-ref-mutate-500` | Each-block per-item binding overhead; subtemplate dispatch; signal-driven update. Refactor touches all these paths. |
+| `hydrate` | All current metrics | Data-sui-bind fast path must stay fast; hydration is the most timing-sensitive path. |
+| `renderer-micros` | All | `buildHTMLString`, dispatch micros. Directly touched by the refactor. |
+| `signal` | All | Untouched by this refactor; baseline check that nothing leaked across packages. |
+
+**Mitigations baked into the design:**
+
+- **`makePlace` hoists classification once at mount, not per-content-call.** The factory inspects `entry.classification` and returns one of N specialized closures (text-AST, text-primitive, attribute-AST, attribute-primitive, etc.). The runtime path is a direct function call, not a switch-per-call. Same shape `lit-html`'s Part subclasses use.
+- **Text-position `place(astContent)` is a thin wrapper over today's `region.setContent(renderAST(content, childScope), childScope)`.** Net overhead target: zero. The refactor's text path must trace identically to today's. Step 2's verification gate explicitly compares.
+- **Bag construction allocates one closure per primitive (`reaction`, `track`, `computed`, `onDispose`, `place`).** Acceptable absolute cost (~5 closures × ~50 bytes ≈ 250 bytes per dispatch); the question is V8 hidden-class stability. Interning the bag shape (same property order, same call site for `Object.assign` or struct-of-fields) keeps the bag monomorphic. If profile shows polymorphic access on the bag fields after Step 1, intern the construction.
+- **`bag.computed` / `bag.reaction` are pay-only-when-used.** Construction allocates the closures but a block that doesn't call them costs nothing beyond the allocation. For blocks like `each` that wire many internal Reactions, `scope.reaction` is still the canonical path; `bag.reaction` is a proxy that doesn't change the call shape inside the block.
+- **`renderASTToString` for attribute-position blocks allocates per evaluation.** Acceptable — attribute-position blocks are rare in real templates (the SpecimenExplorer case is one site; production usage is sparse). If a hot path emerges, intern via WeakMap keyed by AST array.
+
+**Mitigations NOT baked in (deliberate trade):**
+
+- Per-binding closure allocation in `makeCompute`/`makeCommit` (R2). The reviewer flagged this; Step 0 benches before committing. If it's material on `bench-data-blob` (~100 bindings × 1000 records), redesign the factory shape (e.g., a single dispatch function reading from a small per-binding state object). The factory shape might not survive.
+- Event-handler stable-listener semantics (R3). Today's `lookup-per-fire` costs more on each event fire; new path is faster per-fire but changes semantics for reactively-updated handlers. Step 4 decides which to preserve; default is lookup-per-fire (no perf regression on bench, semantics preserved).
+
+**Verification cadence:**
+
+- Step 0 establishes the baseline. Run all five suites; record `bench-report.json` artifacts.
+- After Step 1 (regression bugfix): re-run all five suites. Compare per-metric against Step 0 baseline. Any metric showing `slower` ≥ 5% must have a documented justification.
+- After Step 6 (reactive-data.js delete): full re-run. The cumulative delta is the refactor's perf cost.
+- Step 8 is the final aggregate gate.
 
 ---
 
