@@ -261,7 +261,9 @@ function languageFor(filename) {
 */
 async function collectSourceFiles(dest) {
   const entries = await readdir(dest);
-  const excluded = new Set(['page.html', 'page.css']);
+  // Skip the synced page.html (it's the generated wrapper); the upstream
+  // usage fragment is injected separately by renderSourceViewer.
+  const excluded = new Set(['page.html']);
   const allowed = entries
     .filter((name) => !excluded.has(name) && languageFor(name) !== null);
 
@@ -269,15 +271,26 @@ async function collectSourceFiles(dest) {
     if (name === 'component.js') { return 0; }
     if (name === 'component.html') { return 1; }
     if (name === 'component.css') { return 2; }
+    if (name === 'page.css') { return 95; }
     if (name === 'page.js') { return 100; }
     return 50;
   };
   return allowed.sort((a, b) => order(a) - order(b) || a.localeCompare(b));
 }
 
-/* Render the collapsible "View code" viewer with tabbed source files. */
-async function renderSourceViewer(dest, id) {
-  const files = await collectSourceFiles(dest);
+/*
+  Render the collapsible "View code" viewer with tabbed source files. Files
+  on disk are read from `dest`; the upstream page.html usage fragment is
+  passed in as `pageFragment` and injected as a virtual entry before any
+  page.css / page.js files.
+*/
+async function renderSourceViewer(dest, id, pageFragment) {
+  const diskFiles = await collectSourceFiles(dest);
+  const files = [...diskFiles];
+  if (pageFragment) {
+    const pageIdx = files.findIndex((f) => f === 'page.css' || f === 'page.js');
+    files.splice(pageIdx === -1 ? files.length : pageIdx, 0, 'page.html');
+  }
   if (files.length === 0) { return ''; }
 
   const fileButtons = files.map((file, i) =>
@@ -289,7 +302,9 @@ async function renderSourceViewer(dest, id) {
   const panels = [];
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    const content = await readFile(join(dest, file), 'utf8');
+    const content = file === 'page.html' && pageFragment
+      ? pageFragment
+      : await readFile(join(dest, file), 'utf8');
     const lang = languageFor(file);
     const html = lang ? hljs.highlight(content, { language: lang }).value : escapeHTML(content);
     panels.push(
@@ -388,11 +403,11 @@ ${PAGE_STYLES}
       <header class="header">
         <nav class="crumbs">
           <a class="back" href="/">← Examples</a>
+          <span class="position">${position} / ${total}</span>
           ${prev ? `<a href="../${prev.id}/page.html">prev</a>` : '<span></span>'}
           ${next ? `<a href="../${next.id}/page.html">next</a>` : '<span></span>'}
-          <span class="position">${position} / ${total}</span>
         </nav>
-        <h1 class="title">${escapeHTML(headline)}<small>${escapeHTML(title)}</small></h1>
+        <h1 class="title">${escapeHTML(headline)}</h1>
         <p class="description">${renderInline(intro)}</p>
       </header>
       <div class="container">
@@ -462,7 +477,7 @@ async function syncOne(id, curriculumIndex) {
     const next = curriculumIndex >= 0 && curriculumIndex < CURRICULUM.length - 1
       ? CURRICULUM[curriculumIndex + 1]
       : null;
-    const sourceViewer = await renderSourceViewer(dest, id);
+    const sourceViewer = await renderSourceViewer(dest, id, fragment);
     const wrapped = wrapPageHTML({
       id,
       title,
@@ -542,6 +557,11 @@ ${core}
       <ul class="entries">
 ${rest}
       </ul>
+      <footer class="footer">
+        <a href="https://next.semantic-ui.com/">Docs</a>
+        <span class="sep">·</span>
+        <a href="https://github.com/Semantic-Org/Semantic-Next">GitHub</a>
+      </footer>
     </div>
   </body>
 </html>

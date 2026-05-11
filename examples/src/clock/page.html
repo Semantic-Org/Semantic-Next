@@ -22,17 +22,44 @@
 /*
   Stylesheet inlined into every generated page by scripts/sync.js.
   Loaded as a string at sync time (no bundler), so plain CSS — no imports.
-  All page-specific selectors descend from `.example` so the HTML stays
-  free of repeated namespace classes.
+
+  Tokens, code colors, and heading discipline are aligned with the canonical
+  cdn.semantic-ui.com page (tools/cdn/pages/index.css) so this site reads as
+  part of the same surface. All page-specific selectors descend from
+  `.example` so the HTML stays free of repeated namespace classes.
 */
+
+:root {
+  --code-bg: var(--ui-background-emphasis);
+  --code-purple: #6F42C1;
+  --code-default: #54595E;
+  --code-blue: #005CC5;
+  --code-orange: #E3660F;
+  --code-red: #D73A49;
+  --code-green: #22863A;
+  --code-grey: #24292E;
+  --code-comment: #6A737D;
+}
+
+html.dark {
+  --code-purple: #D2A8FF;
+  --code-default: #C9D1D9;
+  --code-blue: var(--primary-text-color);
+  --code-orange: #FFAB70;
+  --code-red: #F97583;
+  --code-green: #7EE787;
+  --code-grey: #656565;
+  --code-comment: #6A737D;
+}
 
 html { scrollbar-gutter: stable; }
 
 body {
   font-family: var(--page-font);
-  max-width: 720px;
+  max-width: 800px;
   margin: 2rem auto;
-  padding: 0 1rem;
+  padding: 0 var(--gutter-l);
+  color: var(--text-color);
 }
 
 .example {
@@ -45,48 +72,42 @@ body {
   }
 
   .header {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--standard-15);
+    margin-bottom: var(--gap);
+    padding-bottom: var(--padding-3xs);
+    border-bottom: var(--border);
 
     .crumbs {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      font-size: 0.8em;
-      color: var(--standard-50);
+      gap: var(--gap-xs);
+      font-size: var(--text-xs);
+      color: var(--light-text-color);
 
       a {
-        color: var(--standard-50);
+        color: var(--muted-text-color);
         text-decoration: none;
-        &:hover { color: var(--primary-color); }
+        transition: color 0.12s;
+        &:hover { color: var(--primary-text-color); }
       }
 
       .position {
-        margin-left: auto;
+        margin-right: auto;
         font-variant-numeric: tabular-nums;
       }
     }
 
     .title {
-      margin: 0.4rem 0 0.1rem;
-      font-size: 1.25rem;
-      font-weight: 600;
-
-      small {
-        display: block;
-        font-size: 0.7em;
-        font-weight: 400;
-        color: var(--standard-50);
-        margin-top: 0.15rem;
-      }
+      margin: var(--gap-2xs) 0 var(--gap-3xs);
+      font-size: var(--text-2xl);
+      font-weight: var(--bold);
+      letter-spacing: -0.01em;
+      color: var(--header-color);
     }
 
     .description {
-      margin: 0.5rem 0 0;
-      color: var(--standard-60);
-      font-size: 0.9em;
-      line-height: 1.5;
+      margin: var(--vertically-spaced);
+      color: var(--muted-text-color);
+      line-height: 1.65;
     }
   }
 
@@ -96,24 +117,26 @@ body {
   }
 
   .source {
-    margin-top: 1.5rem;
-    border: 1px solid var(--standard-15);
+    margin: var(--vertically-spaced) 0;
+    border: var(--border);
     border-radius: var(--border-radius);
     overflow: hidden;
+    background: var(--code-bg);
 
     summary {
       list-style: none;
       cursor: pointer;
-      padding: 0.6rem 0.9rem;
-      font-size: 0.85em;
-      font-weight: 600;
-      color: var(--standard-60);
+      padding: var(--padding-xs) var(--padding);
+      font-size: var(--text-xs);
+      font-weight: var(--bold);
+      color: var(--muted-text-color);
       user-select: none;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: var(--gap-3xs);
+      transition: color 0.12s;
       &::-webkit-details-marker { display: none; }
-      &:hover { color: var(--primary-color); }
+      &:hover { color: var(--primary-text-color); }
       .hide { display: none; }
       .caret {
         font-size: 0.85em;
@@ -121,7 +144,7 @@ body {
       }
     }
     &[open] summary {
-      border-bottom: 1px solid var(--standard-15);
+      border-bottom: var(--internal-border);
       .show { display: none; }
       .hide { display: inline; }
       .caret { transform: rotate(90deg); }
@@ -133,27 +156,25 @@ body {
       margin: 0;
       display: flex;
       flex-wrap: wrap;
-      gap: 0;
-      background: var(--inverted-10);
-      border-bottom: 1px solid var(--standard-15);
+      border-bottom: var(--internal-border);
 
       li { padding: 0; margin: 0; border: none; }
       button {
         appearance: none;
         background: none;
         border: none;
-        padding: 0.5rem 0.9rem;
-        font: inherit;
-        font-size: 0.8em;
-        font-family: var(--mono-font);
-        color: var(--standard-50);
+        padding: var(--padding-xs) var(--padding);
+        font-family: var(--code-font);
+        font-size: var(--text-xs);
+        color: var(--light-text-color);
         cursor: pointer;
         border-bottom: 2px solid transparent;
         margin-bottom: -1px;
+        transition: color 0.15s;
 
-        &:hover { color: var(--text-color); }
+        &:hover { color: var(--muted-text-color); }
         &.active {
-          color: var(--text-color);
+          color: var(--header-color);
           border-bottom-color: var(--primary-color);
         }
       }
@@ -161,103 +182,122 @@ body {
 
     pre {
       margin: 0;
-      padding: 0.9rem 1rem;
+      padding: var(--padding) var(--padding-l);
       overflow: auto;
-      font-family: var(--mono-font);
-      font-size: 0.8em;
-      line-height: 1.55;
-      background: var(--inverted-5);
-      color: var(--text-color);
-      max-height: 500px;
+      font-family: var(--code-font);
+      font-size: var(--text-s);
+      line-height: 1.8;
+      color: var(--code-default);
+      max-height: 520px;
       tab-size: 2;
     }
 
+    /* highlight.js token classes mapped to the canonical --code-* palette. */
     .hljs-keyword,
     .hljs-built_in,
-    .hljs-literal { color: var(--purple-text-color); }
+    .hljs-literal,
+    .hljs-variable.language_,
+    .hljs-doctag { color: var(--code-red); }
     .hljs-string,
-    .hljs-attr { color: var(--green-text-color); }
-    .hljs-number { color: var(--orange-text-color); }
-    .hljs-comment { color: var(--standard-40); font-style: italic; }
+    .hljs-attr,
+    .hljs-meta .hljs-string,
+    .hljs-symbol { color: var(--code-blue); }
     .hljs-tag,
     .hljs-name,
-    .hljs-selector-tag { color: var(--blue-text-color); }
+    .hljs-selector-tag,
+    .hljs-title,
+    .hljs-title.class_,
+    .hljs-title.function_ { color: var(--code-purple); }
+    .hljs-number,
+    .hljs-meta .hljs-number { color: var(--code-orange); }
+    .hljs-comment { color: var(--code-comment); font-style: italic; }
     .hljs-property,
     .hljs-selector-class,
-    .hljs-selector-id { color: var(--pink-text-color); }
+    .hljs-selector-id,
+    .hljs-selector-attr { color: var(--code-grey); }
     .hljs-meta,
-    .hljs-title { color: var(--standard-70); }
-    .hljs-variable,
-    .hljs-template-variable { color: var(--red-text-color); }
+    .hljs-regexp { color: var(--code-green); }
   }
 
   .notes {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--standard-15);
-    font-size: 0.9em;
-    color: var(--standard-70);
-    line-height: 1.55;
+    margin-top: var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--muted-text-color);
+    line-height: 1.65;
 
     h2 {
-      margin: 0 0 0.5rem;
-      font-size: 0.7em;
-      font-weight: 600;
-      letter-spacing: 0.08em;
+      margin: 0 0 var(--gap-2xs);
+      font-size: var(--text-2xs);
+      font-weight: var(--bold);
+      letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: var(--standard-50);
+      color: var(--blue-80);
     }
 
-    p { margin: 0 0 1rem; }
-    ul { margin: 0 0 1rem; padding-left: 1.25rem; }
-    li { margin: 0.4rem 0; }
-
-    code {
-      font-size: 0.9em;
-      padding: 0.05em 0.3em;
-      background: var(--standard-5);
-      border-radius: 3px;
-    }
+    p { margin: var(--vertically-spaced); }
+    ul { margin: var(--vertically-spaced); padding-left: 1.25rem; }
+    li { margin: var(--gap-3xs) 0; }
 
     .walk {
       display: flex;
       justify-content: space-between;
-      margin-top: 1.5rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--standard-10);
+      margin-top: var(--margin);
+      padding-top: var(--padding);
+      border-top: var(--internal-border);
 
       a {
-        color: var(--primary-color);
+        color: var(--primary-text-color);
         text-decoration: none;
-        font-size: 0.95em;
+        font-size: var(--text-s);
+        font-weight: var(--bold);
         &:hover { text-decoration: underline; }
       }
     }
   }
 
+  /* Inline code (`token`) inside prose — chip style matching CDN. */
+  .header .description code,
+  .notes code,
+  .entries .intro code {
+    background: var(--subtle-angled-gradient);
+    padding: 3px 5px;
+    margin: -2px 1px;
+    border: var(--subtle-border);
+    border-radius: var(--border-radius);
+    color: var(--standard-90);
+    font-family: var(--code-font);
+    font-size: var(--text-xs);
+  }
+
   /* Landing page */
-  h1 { margin-bottom: 0.25rem; }
+  h1 {
+    margin: 0 0 var(--gap-3xs);
+    font-size: var(--text-3xl);
+    font-weight: var(--bold);
+    letter-spacing: -0.015em;
+    color: var(--header-color);
+  }
 
   .lede {
-    color: var(--standard-60);
+    color: var(--muted-text-color);
     margin-top: 0;
-    font-size: 0.95em;
-    line-height: 1.55;
+    line-height: 1.65;
   }
 
   .section {
-    margin: 2.5rem 0 0.25rem;
-    font-size: 0.7em;
-    font-weight: 600;
-    letter-spacing: 0.08em;
+    margin: var(--margin-xl) 0 var(--gap-3xs);
+    font-size: var(--text-2xs);
+    font-weight: var(--bold);
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--standard-50);
+    color: var(--muted-text-color);
   }
 
   .section-lede {
-    margin: 0 0 1rem;
-    color: var(--standard-50);
-    font-size: 0.85em;
+    margin: var(--vertically-spaced);
+    color: var(--light-text-color);
+    font-size: var(--text-s);
   }
 
   .entries {
@@ -266,49 +306,61 @@ body {
     margin: 0;
 
     li {
-      padding: 1rem 0;
-      border-bottom: 1px solid var(--standard-10);
+      padding: var(--padding) 0;
+      border-bottom: var(--internal-border);
       &:last-child { border-bottom: none; }
     }
 
     .entry {
       display: flex;
       align-items: baseline;
-      gap: 0.6rem;
+      gap: var(--gap-xs);
       text-decoration: none;
-      &:hover .headline { color: var(--primary-color); }
+      &:hover .headline { color: var(--primary-text-color); }
 
       .position {
         font-variant-numeric: tabular-nums;
         color: var(--standard-40);
-        font-size: 0.9em;
+        font-size: var(--text-s);
         min-width: 1.5rem;
       }
 
       .headline {
-        font-weight: 600;
-        color: var(--text-color);
+        font-weight: var(--bold);
+        color: var(--header-color);
+        transition: color 0.12s;
       }
 
       .subtitle {
-        color: var(--standard-50);
-        font-size: 0.85em;
+        color: var(--light-text-color);
+        font-size: var(--text-s);
       }
     }
 
     .intro {
-      margin: 0.35rem 0 0 2.1rem;
-      color: var(--standard-60);
-      font-size: 0.9em;
-      line-height: 1.55;
-
-      code {
-        font-size: 0.9em;
-        padding: 0.05em 0.3em;
-        background: var(--standard-5);
-        border-radius: 3px;
-      }
+      margin: var(--gap-3xs) 0 0 2.1rem;
+      color: var(--muted-text-color);
+      font-size: var(--text-s);
+      line-height: 1.65;
     }
+  }
+
+  .footer {
+    margin: var(--margin-xl) 0 var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--light-text-color);
+    font-size: var(--text-xs);
+    display: flex;
+    gap: var(--gap-xs);
+
+    a {
+      color: var(--muted-text-color);
+      text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+
+    .sep { color: var(--border-color); }
   }
 }
 
@@ -320,11 +372,11 @@ body {
       <header class="header">
         <nav class="crumbs">
           <a class="back" href="/">← Examples</a>
+          <span class="position">19 / 19</span>
           <a href="../progress-bar/page.html">prev</a>
           <span></span>
-          <span class="position">19 / 19</span>
         </nav>
-        <h1 class="title">SVG, intervals, and helpers<small>Clock</small></h1>
+        <h1 class="title">SVG, intervals, and helpers</h1>
         <p class="description">An analog clock rendered as SVG, ticking once per second. Demonstrates the <code>interval</code> helper, <code>state.time.now()</code>, and lisp-style helper calls with multiple arguments.</p>
       </header>
       <div class="container">
@@ -336,6 +388,7 @@ body {
           <li><button type="button" data-target="src-clock-0" class="active">component.js</button></li>
           <li><button type="button" data-target="src-clock-1">component.html</button></li>
           <li><button type="button" data-target="src-clock-2">component.css</button></li>
+          <li><button type="button" data-target="src-clock-3">page.html</button></li>
         </ul>
         <pre id="src-clock-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
 <span class="hljs-keyword">import</span> { sum } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
@@ -462,6 +515,8 @@ body {
 <span class="hljs-selector-class">.counterweight</span> {
   <span class="hljs-attribute">stroke-width</span>: <span class="hljs-number">3</span>;
 }
+</code></pre>
+        <pre id="src-clock-3" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">ui-clock</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ui-clock</span>&gt;</span>
 </code></pre>
       </details>
       <aside class="notes">
