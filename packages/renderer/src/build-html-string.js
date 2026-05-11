@@ -268,12 +268,19 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
             break;
           }
           // Block-level directives: if, each, async, rerender, template.
-          // Classification mirrors what expression entries store, so dispatch
-          // can route attribute-position blocks through the attribute path
-          // (text-position blocks continue to emit a comment marker today).
+          // Text-position blocks emit a comment marker (today's behavior).
+          // Attribute-position blocks emit an __suiN__ marker — the same
+          // shape attribute-position expressions use — so they participate
+          // in the attribute-binding code path. Comment markers inside an
+          // attribute value would become literal text, not a Comment node.
           const id = entries.length;
           const classification = analyzePosition(htmlBuffer);
-          htmlString += `<!--${BLOCK_MARKER}${id}-->`;
+          if (classification.insideTag) {
+            htmlString += `${ATTR_MARKER_PREFIX}${id}${ATTR_MARKER_SUFFIX}`;
+          }
+          else {
+            htmlString += `<!--${BLOCK_MARKER}${id}-->`;
+          }
           const entry = { id, type: node.type, node, classification };
           if (insideSVG) { entry.isSVG = true; }
           entries.push(entry);

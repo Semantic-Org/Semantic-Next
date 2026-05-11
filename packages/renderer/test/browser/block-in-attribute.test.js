@@ -119,7 +119,7 @@ RENDERING_ENGINES.forEach(engine => {
         renderingEngine: engine,
         tagName: tag,
         template:
-          "<div data-status=\"{#if is status 'loading'}wait{:elseif is status 'error'}fail{else}ready{/if}\"></div>",
+          "<div data-status=\"{#if is status 'loading'}wait{else if is status 'error'}fail{else}ready{/if}\"></div>",
         defaultState: { status: 'loading' },
       });
       const el = document.createElement(tag);

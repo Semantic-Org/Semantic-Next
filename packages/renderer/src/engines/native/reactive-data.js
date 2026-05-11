@@ -1,5 +1,17 @@
 import { isArray, isFunction, isPlainObject } from '@semantic-ui/utils';
 import { isBlockClose, isBlockOpen, isExpressionMarker } from '../../build-html-string.js';
+import { renderASTToString } from './commit-hooks.js';
+
+// Evaluate a marker entry to its attribute-value string. Expression entries
+// take today's lookupExpression path; block entries (if/rerender) walk the
+// matched-branch content via renderASTToString. each/async/template/etc.
+// throw via renderASTToString — see commit-hooks.js for the supported set.
+function evaluateMarkerToString(entry, data, renderer) {
+  if (entry.type === 'expression') {
+    return renderer.lookupExpression(entry.node.value, data);
+  }
+  return renderASTToString([entry.node], data, renderer);
+}
 
 /*
 
@@ -30,10 +42,15 @@ export function bindAttribute({
   skipFirstWrite = false,
 }) {
   const firstMarker = parts.find((p) => p.markerID !== undefined);
-  const { classification } = entries[firstMarker?.markerID] || {};
+  const firstEntry = entries[firstMarker?.markerID];
+  const { classification } = firstEntry || {};
   const bindingType = classification?.type;
+  const firstIsBlock = firstEntry && firstEntry.type !== 'expression';
 
   if (bindingType === 'property') {
+    if (firstIsBlock) {
+      throw new Error(`{#${firstEntry.type}} cannot be used in property position (.${classification.attribute}=).`);
+    }
     const realAttrName = classification.attribute;
     const expr = entries[parts[0].markerID];
     scope.reaction(element, (comp) => {
@@ -46,6 +63,9 @@ export function bindAttribute({
   }
 
   if (bindingType === 'event') {
+    if (firstIsBlock) {
+      throw new Error(`{#${firstEntry.type}} cannot be used in event position (@${classification.attribute}=).`);
+    }
     const realAttrName = classification.attribute;
     const expr = entries[parts[0].markerID];
     const handler = (...args) => {
@@ -60,11 +80,14 @@ export function bindAttribute({
 
   const isSingleExpr = parts.length === 1 && parts[0].markerID !== undefined;
   const singleEntry = isSingleExpr ? entries[parts[0].markerID] : null;
+  const singleIsBlock = isSingleExpr && singleEntry.type !== 'expression';
   const isIfDefined = singleEntry?.node.ifDefined || singleEntry?.classification.type === 'boolean';
 
   if (isSingleExpr) {
     scope.reaction(element, (comp) => {
-      const value = renderer.lookupExpression(singleEntry.node.value, data);
+      const value = singleIsBlock
+        ? renderASTToString([singleEntry.node], data, renderer)
+        : renderer.lookupExpression(singleEntry.node.value, data);
       if (skipFirstWrite && comp.firstRun) { return; }
 
       if (isIfDefined && !value) {
@@ -95,11 +118,12 @@ export function bindAttribute({
   else {
     scope.reaction(element, (comp) => {
       if (skipFirstWrite && comp.firstRun) {
-        // Evaluate all expressions to register Signal dependencies,
-        // but skip the DOM write — server content is trusted.
+        // Evaluate all markers to register Signal dependencies, skip DOM
+        // write — server content is trusted. Block markers register the
+        // same deps via the branch evaluation inside renderASTToString.
         for (const part of parts) {
           if (part.markerID !== undefined) {
-            renderer.lookupExpression(entries[part.markerID].node.value, data);
+            evaluateMarkerToString(entries[part.markerID], data, renderer);
           }
         }
         return;
@@ -110,7 +134,7 @@ export function bindAttribute({
           value += part.static;
         }
         else {
-          value += renderer.lookupExpression(entries[part.markerID].node.value, data) ?? '';
+          value += evaluateMarkerToString(entries[part.markerID], data, renderer) ?? '';
         }
       }
       element.setAttribute(attrName, value);
