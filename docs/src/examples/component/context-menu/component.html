@@ -1,26 +1,26 @@
 <div class="trigger">
   {>slot}
 </div>
-<div class="{classMap getMenuStates} menu" style="{getMenuStyle}" role="menu" part="menu">
+<div class="{classIf visible 'visible'} menu" style="width: {width}px;" role="menu" part="menu">
   <div class="items">
-    {#each item in items}
-      {#if isDivider item}
-        <div class="divider" data-divider="true"></div>
+    {#each item, index in items}
+      {#if item.divider}
+        <div class="divider"></div>
       {else}
-        <div 
-          class="item {classMap getItemStates index}"
+        <div
+          class="item {activeIf (activeIndex == index)}"
           data-index="{index}"
           role="menuitem"
           part="menu-item"
-          tabindex="{(isItemActive(index) ? '0' : '-1')}"
+          tabindex="{activeIndex == index ? '0' : '-1'}"
         >
-          {#if hasIcon item}
+          {#if item.icon}
             <span class="icon" part="icon">
               <ui-icon icon="{item.icon}"></ui-icon>
             </span>
           {/if}
           <span class="label" part="label">{item.label}</span>
-          {#if hasShortcut item}
+          {#if item.shortcut}
             <span class="shortcut" part="shortcut">{item.shortcut}</span>
           {/if}
         </div>
