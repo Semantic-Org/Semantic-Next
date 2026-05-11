@@ -31,6 +31,7 @@ import {
   MAIN_BRANCH_INDEX,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
+import { renderASTToString } from './commit-hooks.js';
 import { childContext } from './define-block.js';
 import { encodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from './shared/each.js';
 
@@ -362,15 +363,64 @@ export class ServerRenderer {
       Block Directives
   *******************************/
 
+  // Adapter so renderASTToString (shared with client) can call into the
+  // server's ExpressionEvaluator. The walker only uses lookupExpression.
+  stringRenderer() {
+    return {
+      lookupExpression: (expr, d) => this.evaluator.lookupExpressionValue(expr, d),
+    };
+  }
+
+  // Emit a block's evaluated string value inline as an attribute value.
+  // Mirrors renderExpression's insideTag branch: registers the entry in
+  // scope.tagBindings so data-sui-bind gets stamped on the element, then
+  // escapes and emits the value with the quote-aware wrapping.
+  emitAttributeBlock(id, value, scope) {
+    const classification = analyzePosition(scope.htmlBuffer);
+    if (classification.type === 'property' || classification.type === 'event') {
+      // Blocks produce strings; property/event positions need raw
+      // values / function references. Refuse with the same REMOVE_ATTR
+      // sentinel renderExpression uses for these positions so the
+      // attribute disappears from the output rather than emitting a
+      // string into a slot that expects something else.
+      scope.htmlBuffer += REMOVE_ATTR;
+      return REMOVE_ATTR;
+    }
+    const resolvedAttr = classification.attribute || scope.currentAttrName || '';
+    if (resolvedAttr && scope.tagBindings && !(resolvedAttr in scope.tagBindings)) {
+      scope.tagBindings[resolvedAttr] = id;
+    }
+
+    const strValue = String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;');
+
+    const tagStart = scope.htmlBuffer.lastIndexOf('<');
+    const tagFragment = scope.htmlBuffer.slice(tagStart);
+    const doubleQuotes = (tagFragment.match(/"/g) || []).length;
+    const insideQuotes = doubleQuotes % 2 === 1;
+
+    if (!insideQuotes) {
+      scope.htmlBuffer += `"${strValue}"`;
+      return `"${strValue}"`;
+    }
+    scope.htmlBuffer += strValue;
+    return strValue;
+  }
+
   renderConditional(node, data, scope) {
     const id = scope.entryId++;
-    let html = `<!--${BLOCK_MARKER}${id}-->`;
-    let branchIndex = -1;
+    const classification = analyzePosition(scope.htmlBuffer);
 
+    // Pick the matched branch's content AST. matchIndex tracking is only
+    // useful in text position (server stamps it on the close marker for
+    // client hydration); attribute position emits inline, no markers.
+    let matchedAST = null;
+    let branchIndex = -1;
     const condition = this.evaluator.lookupExpressionValue(node.condition, data);
     if (condition && node.content) {
       branchIndex = MAIN_BRANCH_INDEX;
-      html += this.renderNodes(node.content, data);
+      matchedAST = node.content;
     }
     else if (node.branches) {
       for (let i = 0; i < node.branches.length; i++) {
@@ -378,24 +428,42 @@ export class ServerRenderer {
         if (branch.type === 'elseif') {
           if (this.evaluator.lookupExpressionValue(branch.condition, data)) {
             branchIndex = i;
-            html += this.renderNodes(branch.content, data);
+            matchedAST = branch.content;
             break;
           }
         }
         else if (branch.type === 'else') {
           branchIndex = i;
-          html += this.renderNodes(branch.content, data);
+          matchedAST = branch.content;
           break;
         }
       }
     }
 
+    if (classification.insideTag) {
+      const inner = matchedAST
+        ? renderASTToString(matchedAST, data, this.stringRenderer())
+        : '';
+      return this.emitAttributeBlock(id, inner, scope);
+    }
+
+    // Text position — today's marker-wrapped behavior.
+    let html = `<!--${BLOCK_MARKER}${id}-->`;
+    if (matchedAST) {
+      html += this.renderNodes(matchedAST, data);
+    }
     html += `<!--${formatBlockClose(id, { branchIndex })}-->`;
     return html;
   }
 
   renderEach(node, data, scope) {
     const id = scope.entryId++;
+    if (analyzePosition(scope.htmlBuffer).insideTag) {
+      throw new Error(
+        '{#each} cannot be rendered inside an attribute value. '
+          + 'Use a method or computed signal that returns a string.',
+      );
+    }
     let html = `<!--${BLOCK_MARKER}${id}-->`;
 
     const rawItems = this.evaluator.lookupExpressionValue(node.over, data) || [];
@@ -422,6 +490,12 @@ export class ServerRenderer {
 
   renderAsync(node, data, scope) {
     const id = scope.entryId++;
+    if (analyzePosition(scope.htmlBuffer).insideTag) {
+      throw new Error(
+        '{#async} cannot be rendered inside an attribute value. '
+          + 'Use a method or computed signal that returns a string.',
+      );
+    }
     let html = `<!--${BLOCK_MARKER}${id}-->`;
 
     // SSR: render loading content only, never await
@@ -435,12 +509,19 @@ export class ServerRenderer {
 
   renderRerender(node, data, scope) {
     const id = scope.entryId++;
-    let html = `<!--${BLOCK_MARKER}${id}-->`;
+    const classification = analyzePosition(scope.htmlBuffer);
 
+    if (classification.insideTag) {
+      const inner = node.content
+        ? renderASTToString(node.content, data, this.stringRenderer())
+        : '';
+      return this.emitAttributeBlock(id, inner, scope);
+    }
+
+    let html = `<!--${BLOCK_MARKER}${id}-->`;
     if (node.content) {
       html += this.renderNodes(node.content, data);
     }
-
     html += `<!--${formatBlockClose(id)}-->`;
     return html;
   }
