@@ -29,7 +29,7 @@
 html { scrollbar-gutter: stable; }
 
 body {
-  font-family: var(--page-font, system-ui, sans-serif);
+  font-family: var(--page-font);
   max-width: 720px;
   margin: 2rem auto;
   padding: 0 1rem;
@@ -47,19 +47,19 @@ body {
   .header {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--standard-15, #e5e5e5);
+    border-bottom: 1px solid var(--standard-15);
 
     .crumbs {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       font-size: 0.8em;
-      color: var(--standard-50, #888);
+      color: var(--standard-50);
 
       a {
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         text-decoration: none;
-        &:hover { color: var(--primary-color, #2185d0); }
+        &:hover { color: var(--primary-color); }
       }
 
       .position {
@@ -77,14 +77,14 @@ body {
         display: block;
         font-size: 0.7em;
         font-weight: 400;
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         margin-top: 0.15rem;
       }
     }
 
     .description {
       margin: 0.5rem 0 0;
-      color: var(--standard-60, #666);
+      color: var(--standard-60);
       font-size: 0.9em;
       line-height: 1.5;
     }
@@ -95,12 +95,108 @@ body {
     transform: translateZ(0);
   }
 
+  .source {
+    margin-top: 1.5rem;
+    border: 1px solid var(--standard-15);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.85em;
+      font-weight: 600;
+      color: var(--standard-60);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: 1px solid var(--standard-15);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      background: var(--inverted-10);
+      border-bottom: 1px solid var(--standard-15);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: 0.5rem 0.9rem;
+        font: inherit;
+        font-size: 0.8em;
+        font-family: var(--mono-font);
+        color: var(--standard-50);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+
+        &:hover { color: var(--text-color); }
+        &.active {
+          color: var(--text-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: 0.9rem 1rem;
+      overflow: auto;
+      font-family: var(--mono-font);
+      font-size: 0.8em;
+      line-height: 1.55;
+      background: var(--inverted-5);
+      color: var(--text-color);
+      max-height: 500px;
+      tab-size: 2;
+    }
+
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal { color: var(--purple-text-color); }
+    .hljs-string,
+    .hljs-attr { color: var(--green-text-color); }
+    .hljs-number { color: var(--orange-text-color); }
+    .hljs-comment { color: var(--standard-40); font-style: italic; }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag { color: var(--blue-text-color); }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id { color: var(--pink-text-color); }
+    .hljs-meta,
+    .hljs-title { color: var(--standard-70); }
+    .hljs-variable,
+    .hljs-template-variable { color: var(--red-text-color); }
+  }
+
   .notes {
     margin-top: 2rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--standard-15, #e5e5e5);
+    border-top: 1px solid var(--standard-15);
     font-size: 0.9em;
-    color: var(--standard-70, #555);
+    color: var(--standard-70);
     line-height: 1.55;
 
     h2 {
@@ -109,7 +205,7 @@ body {
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--standard-50, #888);
+      color: var(--standard-50);
     }
 
     p { margin: 0 0 1rem; }
@@ -119,7 +215,7 @@ body {
     code {
       font-size: 0.9em;
       padding: 0.05em 0.3em;
-      background: var(--standard-5, #f5f5f5);
+      background: var(--standard-5);
       border-radius: 3px;
     }
 
@@ -128,10 +224,10 @@ body {
       justify-content: space-between;
       margin-top: 1.5rem;
       padding-top: 1rem;
-      border-top: 1px solid var(--standard-10, #eee);
+      border-top: 1px solid var(--standard-10);
 
       a {
-        color: var(--primary-color, #2185d0);
+        color: var(--primary-color);
         text-decoration: none;
         font-size: 0.95em;
         &:hover { text-decoration: underline; }
@@ -143,7 +239,7 @@ body {
   h1 { margin-bottom: 0.25rem; }
 
   .lede {
-    color: var(--standard-60, #666);
+    color: var(--standard-60);
     margin-top: 0;
     font-size: 0.95em;
     line-height: 1.55;
@@ -155,12 +251,12 @@ body {
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--standard-50, #888);
+    color: var(--standard-50);
   }
 
   .section-lede {
     margin: 0 0 1rem;
-    color: var(--standard-50, #888);
+    color: var(--standard-50);
     font-size: 0.85em;
   }
 
@@ -171,7 +267,7 @@ body {
 
     li {
       padding: 1rem 0;
-      border-bottom: 1px solid var(--standard-10, #eee);
+      border-bottom: 1px solid var(--standard-10);
       &:last-child { border-bottom: none; }
     }
 
@@ -180,36 +276,36 @@ body {
       align-items: baseline;
       gap: 0.6rem;
       text-decoration: none;
-      &:hover .headline { color: var(--primary-color, #2185d0); }
+      &:hover .headline { color: var(--primary-color); }
 
       .position {
         font-variant-numeric: tabular-nums;
-        color: var(--standard-40, #aaa);
+        color: var(--standard-40);
         font-size: 0.9em;
         min-width: 1.5rem;
       }
 
       .headline {
         font-weight: 600;
-        color: var(--text-color, #222);
+        color: var(--text-color);
       }
 
       .subtitle {
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         font-size: 0.85em;
       }
     }
 
     .intro {
       margin: 0.35rem 0 0 2.1rem;
-      color: var(--standard-60, #666);
+      color: var(--standard-60);
       font-size: 0.9em;
       line-height: 1.55;
 
       code {
         font-size: 0.9em;
         padding: 0.05em 0.3em;
-        background: var(--standard-5, #f5f5f5);
+        background: var(--standard-5);
         border-radius: 3px;
       }
     }
@@ -234,6 +330,530 @@ body {
       <div class="container">
         <friend-directory></friend-directory>
       </div>
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+          <li><button type="button" data-target="src-card-search-0" class="active">component.js</button></li>
+          <li><button type="button" data-target="src-card-search-1">component.html</button></li>
+          <li><button type="button" data-target="src-card-search-2">component.css</button></li>
+          <li><button type="button" data-target="src-card-search-3">card.css</button></li>
+          <li><button type="button" data-target="src-card-search-4">card.html</button></li>
+          <li><button type="button" data-target="src-card-search-5">card.js</button></li>
+          <li><button type="button" data-target="src-card-search-6">data.js</button></li>
+        </ul>
+        <pre id="src-card-search-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+<span class="hljs-keyword">import</span> { each, escapeRegExp, get, weightedObjectSearch } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
+
+<span class="hljs-comment">// sub templates</span>
+<span class="hljs-keyword">import</span> { card } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./card.js&#x27;</span>;
+
+<span class="hljs-comment">// data source for friends</span>
+<span class="hljs-keyword">import</span> { friends } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./data.js&#x27;</span>;
+
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
+<span class="hljs-comment">// component resources</span>
+<span class="hljs-keyword">const</span> defaultState = {
+  <span class="hljs-attr">filter</span>: <span class="hljs-string">&#x27;all&#x27;</span>,
+  <span class="hljs-attr">searchTerm</span>: <span class="hljs-string">&#x27;&#x27;</span>,
+  friends,
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ state }</span>) =&gt; ({
+  <span class="hljs-attr">filters</span>: [
+    { <span class="hljs-attr">label</span>: <span class="hljs-string">&#x27;All&#x27;</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">&#x27;all&#x27;</span> },
+    { <span class="hljs-attr">label</span>: <span class="hljs-string">&#x27;Female&#x27;</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">&#x27;female&#x27;</span> },
+    { <span class="hljs-attr">label</span>: <span class="hljs-string">&#x27;Male&#x27;</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">&#x27;male&#x27;</span> },
+  ],
+
+  <span class="hljs-title function_">getVisibleFriends</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">let</span> friends = state.<span class="hljs-property">friends</span>.<span class="hljs-title function_">get</span>();
+
+    <span class="hljs-comment">// filter by gender</span>
+    <span class="hljs-keyword">const</span> filter = state.<span class="hljs-property">filter</span>.<span class="hljs-title function_">get</span>();
+    <span class="hljs-keyword">if</span> (filter !== <span class="hljs-string">&#x27;all&#x27;</span>) {
+      friends = friends.<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">friend</span> =&gt;</span> friend.<span class="hljs-property">gender</span> === filter);
+    }
+
+    <span class="hljs-comment">// filter by search term</span>
+    <span class="hljs-keyword">const</span> searchTerm = state.<span class="hljs-property">searchTerm</span>.<span class="hljs-title function_">get</span>();
+    <span class="hljs-keyword">if</span> (searchTerm) {
+      friends = <span class="hljs-title function_">weightedObjectSearch</span>(searchTerm, friends, {
+        <span class="hljs-attr">propertiesToMatch</span>: [<span class="hljs-string">&#x27;name&#x27;</span>, <span class="hljs-string">&#x27;joined&#x27;</span>, <span class="hljs-string">&#x27;location&#x27;</span>, <span class="hljs-string">&#x27;role&#x27;</span>],
+      });
+    }
+    <span class="hljs-keyword">return</span> friends;
+  },
+});
+
+<span class="hljs-keyword">const</span> events = {
+  <span class="hljs-string">&#x27;change ui-menu&#x27;</span>({ state, data }) {
+    state.<span class="hljs-property">filter</span>.<span class="hljs-title function_">set</span>(data.<span class="hljs-property">value</span>);
+  },
+  <span class="hljs-string">&#x27;input ui-input&#x27;</span>({ state, value, target }) {
+    state.<span class="hljs-property">searchTerm</span>.<span class="hljs-title function_">set</span>(value);
+  },
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">FriendDirectory</span> = <span class="hljs-title function_">defineComponent</span>({
+  <span class="hljs-attr">tagName</span>: <span class="hljs-string">&#x27;friend-directory&#x27;</span>,
+  template,
+  <span class="hljs-attr">renderingEngine</span>: <span class="hljs-string">&#x27;native&#x27;</span>,
+  css,
+  defaultState,
+  events,
+  createComponent,
+  <span class="hljs-attr">subTemplates</span>: {
+    card,
+  },
+});
+</code></pre>
+        <pre id="src-card-search-1" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;component&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;actions&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">ui-menu</span> <span class="hljs-attr">inset</span> <span class="hljs-attr">selection</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;{filter}&quot;</span> <span class="hljs-attr">items</span>=<span class="hljs-string">&quot;{filters}&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;menu&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ui-menu</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">ui-input</span> <span class="hljs-attr">search</span> <span class="hljs-attr">tiny</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;Search friends...&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{searchTerm}</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;search&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ui-input</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;cards&quot;</span>&gt;</span>
+    {#each friend in getVisibleFriends}
+      {&gt; card
+        name=friend.name
+        location=friend.location
+        role=friend.role
+        joined=friend.joined
+        image=friend.image
+        contacts=friend.contacts
+      }
+    {else}
+      No {filter != &#x27;all&#x27; ? filter : &#x27;&#x27;} results for &quot;{searchTerm}&quot;
+    {/each}
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-card-search-2" hidden><code class="hljs language-css">
+<span class="hljs-selector-pseudo">:host</span> {
+  <span class="hljs-attr">--card-min</span>: <span class="hljs-number">250px</span>;
+  <span class="hljs-attr">--card-gap</span>: <span class="hljs-built_in">var</span>(--gap);
+  <span class="hljs-attr">--card-image-max-height</span>: <span class="hljs-number">150px</span>;
+}
+
+<span class="hljs-selector-class">.component</span> {
+  <span class="hljs-attribute">container</span>: component / inline-size;
+}
+
+<span class="hljs-selector-class">.actions</span> {
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">align-items</span>: center;
+  <span class="hljs-attribute">margin-bottom</span>: <span class="hljs-built_in">var</span>(--margin);
+
+  <span class="hljs-selector-class">.search</span> {
+    <span class="hljs-attribute">margin-left</span>: auto;
+  }
+}
+<span class="hljs-selector-class">.cards</span> {
+  <span class="hljs-attribute">display</span>: grid;
+  <span class="hljs-attribute">grid-template-columns</span>: <span class="hljs-number">1</span>fr;
+  <span class="hljs-attribute">flex-wrap</span>: wrap;
+  <span class="hljs-attribute">gap</span>: <span class="hljs-built_in">var</span>(--card-gap);
+}
+
+<span class="hljs-keyword">@container</span> component (<span class="hljs-attribute">max-width</span>: <span class="hljs-number">300px</span>) {
+  <span class="hljs-selector-class">.card</span> {
+    <span class="hljs-attribute">flex-direction</span>: column <span class="hljs-meta">!important</span>;
+    <span class="hljs-selector-class">.image</span> {
+      <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+      <span class="hljs-attribute">height</span>: <span class="hljs-number">100px</span>;
+    }
+  }
+}
+
+<span class="hljs-keyword">@container</span> component (<span class="hljs-attribute">min-width</span>: <span class="hljs-number">500px</span>) {
+  <span class="hljs-selector-class">.cards</span> {
+    <span class="hljs-attribute">grid-template-columns</span>: <span class="hljs-number">1</span>fr <span class="hljs-number">1</span>fr;
+  }
+}
+
+<span class="hljs-keyword">@container</span> component (<span class="hljs-attribute">min-width</span>: <span class="hljs-number">900px</span>) {
+  <span class="hljs-selector-class">.cards</span> {
+    <span class="hljs-attribute">grid-template-columns</span>: <span class="hljs-number">1</span>fr <span class="hljs-number">1</span>fr <span class="hljs-number">1</span>fr;
+  }
+}
+
+<span class="hljs-keyword">@container</span> component (<span class="hljs-attribute">min-width</span>: <span class="hljs-number">1200px</span>) {
+  <span class="hljs-selector-class">.cards</span> {
+    <span class="hljs-attribute">grid-template-columns</span>: <span class="hljs-number">1</span>fr <span class="hljs-number">1</span>fr <span class="hljs-number">1</span>fr <span class="hljs-number">1</span>fr;
+  }
+}
+
+</code></pre>
+        <pre id="src-card-search-3" hidden><code class="hljs language-css">
+<span class="hljs-selector-class">.card</span> {
+  <span class="hljs-attribute">cursor</span>: pointer;
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--angled-gradient);
+  <span class="hljs-attribute">box-shadow</span>: <span class="hljs-built_in">var</span>(--raised-shadow);
+  <span class="hljs-attribute">border</span>: <span class="hljs-built_in">var</span>(--border);
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius);
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">flex-direction</span>: row;
+  <span class="hljs-attribute">transition</span>: transform <span class="hljs-number">0.2s</span> ease;
+
+  &amp;<span class="hljs-selector-pseudo">:hover</span> {
+    <span class="hljs-attribute">background-color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">10</span>);
+    <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(-<span class="hljs-number">3%</span>);
+  }
+
+  <span class="hljs-selector-class">.image</span> {
+    <span class="hljs-attribute">display</span>: block;
+    <span class="hljs-attribute">width</span>: <span class="hljs-number">30%</span>;
+    <span class="hljs-attribute">height</span>: auto;
+    <span class="hljs-attribute">max-height</span>: <span class="hljs-built_in">var</span>(--card-image-max-height);
+    <span class="hljs-attribute">object-fit</span>: cover;
+    <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--right-attached-border-radius);
+  }
+
+  <span class="hljs-selector-class">.content</span> {
+
+    <span class="hljs-attribute">display</span>: flex;
+    <span class="hljs-attribute">flex-direction</span>: column;
+    <span class="hljs-attribute">flex-grow</span>: <span class="hljs-number">1</span>;
+    <span class="hljs-attribute">padding</span>: <span class="hljs-built_in">var</span>(--padding-xs);
+
+    <span class="hljs-selector-class">.main</span> {
+      <span class="hljs-attribute">flex-grow</span>: <span class="hljs-number">1</span>;
+    }
+
+    <span class="hljs-selector-class">.title</span> {
+      <span class="hljs-attribute">font-size</span>: <span class="hljs-number">16px</span>;
+      <span class="hljs-attribute">font-weight</span>: bold;
+      <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">100</span>);
+    }
+
+    <span class="hljs-selector-class">.detail</span> {
+      <span class="hljs-attribute">display</span>: flex;
+      <span class="hljs-attribute">flex-direction</span>: row;
+      <span class="hljs-attribute">font-size</span>: <span class="hljs-number">11px</span>;
+      <span class="hljs-attribute">flex-wrap</span>: wrap;
+      <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">40</span>);
+      <span class="hljs-attribute">margin-bottom</span>: <span class="hljs-built_in">var</span>(--margin-xs);
+    }
+  }
+
+  <span class="hljs-selector-class">.meta</span> {
+    <span class="hljs-attribute">margin-top</span>: <span class="hljs-built_in">var</span>(--margin-xs);
+    <span class="hljs-attribute">padding-top</span>: <span class="hljs-built_in">var</span>(--padding-xs);
+    <span class="hljs-attribute">border-top</span>: <span class="hljs-built_in">var</span>(--border);
+    <span class="hljs-attribute">display</span>: flex;
+    <span class="hljs-attribute">gap</span>: <span class="hljs-built_in">var</span>(--gap-xs);
+
+    &amp; &gt; * {
+      <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">90</span>);
+      <span class="hljs-attribute">font-weight</span>: bold;
+    }
+  }
+
+  <span class="hljs-selector-class">.emphasis</span> {
+    <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--primary-text-color);
+  }
+
+  <span class="hljs-selector-class">.small</span> {
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">var</span>(--small);
+  }
+  <span class="hljs-selector-class">.right</span> {
+    <span class="hljs-attribute">margin-left</span>: auto;
+  }
+
+}
+</code></pre>
+        <pre id="src-card-search-4" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;card&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;image&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;{image}&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;content&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;main&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;title&quot;</span>&gt;</span>{name}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;detail&quot;</span>&gt;</span>
+        Joined {joined}
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;right&quot;</span>&gt;</span>{role}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;meta&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;location&quot;</span>&gt;</span>{location}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-card-search-5" hidden><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./card.css?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./card.html?raw&#x27;</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> card = <span class="hljs-title function_">defineComponent</span>({
+  <span class="hljs-attr">renderingEngine</span>: <span class="hljs-string">&#x27;native&#x27;</span>,
+  template,
+  css,
+});
+</code></pre>
+        <pre id="src-card-search-6" hidden><code class="hljs language-javascript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> friends = [
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Jenny Kim&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Seattle&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Product Designer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2020&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/jenny.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">234</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Steve Wilson&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;San Francisco&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Software Engineer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2021&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/steve.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">189</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Matt Thompson&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;London&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Product Manager&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2019&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/matt.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">342</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Molly Chen&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Berlin&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;UX Researcher&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2022&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/molly.png&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">156</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Christian Lee&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Seoul&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Frontend Developer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2020&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/christian.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">278</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Helen Park&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Toronto&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Product Designer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2021&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/helen.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">198</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Daniel Cohen&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Tel Aviv&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Backend Developer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2019&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/daniel.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">245</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Lindsay Silva&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;São Paulo&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Product Manager&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2022&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/lindsay.png&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">167</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Tom Mueller&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Berlin&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Software Engineer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2020&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/tom.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">289</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Ade Johnson&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Lagos&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Data Analyst&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2019&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/ade.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">315</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Cassie Brown&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;New York&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Marketing Specialist&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2020&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/cassie.png&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">193</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Chris Nguyen&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Ho Chi Minh City&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Full Stack Developer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2021&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/chris.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">212</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Elliot Foster&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Sydney&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Cloud Architect&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2019&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/elliot.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">278</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Elyse Thompson&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Edinburgh&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Content Writer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2020&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/elyse.png&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">150</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Eve Smith&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Los Angeles&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Graphic Designer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2021&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/eve.png&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">204</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Joe Garcia&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Madrid&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;DevOps Engineer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2022&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/joe.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">186</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Justen Peters&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Austin&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Mobile Developer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2020&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/justen.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">238</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Kristy Lee&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;San Diego&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Community Manager&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2021&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/kristy.png&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">194</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Laura Davis&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Dublin&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Business Analyst&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2019&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/laura.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">263</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Lena Ivanova&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Moscow&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Data Scientist&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2020&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/lena.png&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">176</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Mark Zhao&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Shanghai&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Machine Learning Engineer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2021&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/mark.png&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">251</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Matthew Allen&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Boston&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Cybersecurity Specialist&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2022&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/matthew.png&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">169</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Nan Zhu&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Beijing&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Database Administrator&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2019&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/nan.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">220</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Nom Phan&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Bangkok&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;SEO Specialist&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2020&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/nom.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">147</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Patrick Stewart&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Chicago&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;IT Consultant&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2021&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/patrick.png&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">187</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Rachel Green&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Miami&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;UI Designer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2022&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/rachel.png&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">179</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Stevie Mack&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Melbourne&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;System Administrator&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2020&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/stevie.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;male&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">210</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Veronika Koval&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Kyiv&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;QA Engineer&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2021&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/veronika.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">160</span>,
+  },
+  {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Zoe Martinez&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;Buenos Aires&#x27;</span>,
+    <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;Project Manager&#x27;</span>,
+    <span class="hljs-attr">joined</span>: <span class="hljs-string">&#x27;2019&#x27;</span>,
+    <span class="hljs-attr">image</span>: <span class="hljs-string">&#x27;https://next.semantic-ui.com/images/avatar/zoe.jpg&#x27;</span>,
+    <span class="hljs-attr">gender</span>: <span class="hljs-string">&#x27;female&#x27;</span>,
+    <span class="hljs-attr">contacts</span>: <span class="hljs-number">202</span>,
+  },
+];
+</code></pre>
+      </details>
       <aside class="notes">
         <h2>New patterns</h2>
         <p>Subtemplate imports, <code>weightedObjectSearch</code>, <code>@container</code> queries, first-party UI components (<code>ui-menu</code>, <code>ui-input</code>), <code>{#each ... else}</code> with JS expressions.</p>
@@ -245,10 +865,20 @@ body {
           <li>Because each component renders inside its own shadow root, container queries (<code>@container</code>) work without further setup.</li>
         </ul>
         <nav class="walk">
-          <a href="../context-menu/page.html">← Global and deep events</a>
+          <a href="../context-menu/page.html">← Slots, deep events, and cross-instance coordination</a>
           <a href="../tailwind/page.html">Tailwind inside shadow DOM →</a>
         </nav>
       </aside>
     </div>
+    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>
   </body>
 </html>

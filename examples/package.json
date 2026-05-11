@@ -10,18 +10,19 @@
   "module": "./index.js",
   "main": "./index.js",
   "scripts": {
-    "sync": "node scripts/sync.js",
-    "sync:watch": "node scripts/sync.js --watch",
+    "build": "node scripts/sync.js",
+    "watch": "node scripts/sync.js --watch",
     "dev": "node scripts/dev.js"
   },
   "dependencies": {
-    "@semantic-ui/core": "*",
     "@semantic-ui/component": "*",
+    "@semantic-ui/core": "*",
     "@semantic-ui/query": "*",
     "@semantic-ui/specs": "*",
     "@semantic-ui/tailwind": "*",
     "@semantic-ui/templating": "*",
-    "@semantic-ui/utils": "*"
+    "@semantic-ui/utils": "*",
+    "highlight.js": "^11.11.1"
   },
   "devDependencies": {
     "esbuild": "^0.28.0"

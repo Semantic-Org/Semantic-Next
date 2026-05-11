@@ -31,7 +31,7 @@
 html { scrollbar-gutter: stable; }
 
 body {
-  font-family: var(--page-font, system-ui, sans-serif);
+  font-family: var(--page-font);
   max-width: 720px;
   margin: 2rem auto;
   padding: 0 1rem;
@@ -49,19 +49,19 @@ body {
   .header {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--standard-15, #e5e5e5);
+    border-bottom: 1px solid var(--standard-15);
 
     .crumbs {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       font-size: 0.8em;
-      color: var(--standard-50, #888);
+      color: var(--standard-50);
 
       a {
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         text-decoration: none;
-        &:hover { color: var(--primary-color, #2185d0); }
+        &:hover { color: var(--primary-color); }
       }
 
       .position {
@@ -79,14 +79,14 @@ body {
         display: block;
         font-size: 0.7em;
         font-weight: 400;
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         margin-top: 0.15rem;
       }
     }
 
     .description {
       margin: 0.5rem 0 0;
-      color: var(--standard-60, #666);
+      color: var(--standard-60);
       font-size: 0.9em;
       line-height: 1.5;
     }
@@ -97,12 +97,108 @@ body {
     transform: translateZ(0);
   }
 
+  .source {
+    margin-top: 1.5rem;
+    border: 1px solid var(--standard-15);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.85em;
+      font-weight: 600;
+      color: var(--standard-60);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: 1px solid var(--standard-15);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      background: var(--inverted-10);
+      border-bottom: 1px solid var(--standard-15);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: 0.5rem 0.9rem;
+        font: inherit;
+        font-size: 0.8em;
+        font-family: var(--mono-font);
+        color: var(--standard-50);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+
+        &:hover { color: var(--text-color); }
+        &.active {
+          color: var(--text-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: 0.9rem 1rem;
+      overflow: auto;
+      font-family: var(--mono-font);
+      font-size: 0.8em;
+      line-height: 1.55;
+      background: var(--inverted-5);
+      color: var(--text-color);
+      max-height: 500px;
+      tab-size: 2;
+    }
+
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal { color: var(--purple-text-color); }
+    .hljs-string,
+    .hljs-attr { color: var(--green-text-color); }
+    .hljs-number { color: var(--orange-text-color); }
+    .hljs-comment { color: var(--standard-40); font-style: italic; }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag { color: var(--blue-text-color); }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id { color: var(--pink-text-color); }
+    .hljs-meta,
+    .hljs-title { color: var(--standard-70); }
+    .hljs-variable,
+    .hljs-template-variable { color: var(--red-text-color); }
+  }
+
   .notes {
     margin-top: 2rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--standard-15, #e5e5e5);
+    border-top: 1px solid var(--standard-15);
     font-size: 0.9em;
-    color: var(--standard-70, #555);
+    color: var(--standard-70);
     line-height: 1.55;
 
     h2 {
@@ -111,7 +207,7 @@ body {
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--standard-50, #888);
+      color: var(--standard-50);
     }
 
     p { margin: 0 0 1rem; }
@@ -121,7 +217,7 @@ body {
     code {
       font-size: 0.9em;
       padding: 0.05em 0.3em;
-      background: var(--standard-5, #f5f5f5);
+      background: var(--standard-5);
       border-radius: 3px;
     }
 
@@ -130,10 +226,10 @@ body {
       justify-content: space-between;
       margin-top: 1.5rem;
       padding-top: 1rem;
-      border-top: 1px solid var(--standard-10, #eee);
+      border-top: 1px solid var(--standard-10);
 
       a {
-        color: var(--primary-color, #2185d0);
+        color: var(--primary-color);
         text-decoration: none;
         font-size: 0.95em;
         &:hover { text-decoration: underline; }
@@ -145,7 +241,7 @@ body {
   h1 { margin-bottom: 0.25rem; }
 
   .lede {
-    color: var(--standard-60, #666);
+    color: var(--standard-60);
     margin-top: 0;
     font-size: 0.95em;
     line-height: 1.55;
@@ -157,12 +253,12 @@ body {
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--standard-50, #888);
+    color: var(--standard-50);
   }
 
   .section-lede {
     margin: 0 0 1rem;
-    color: var(--standard-50, #888);
+    color: var(--standard-50);
     font-size: 0.85em;
   }
 
@@ -173,7 +269,7 @@ body {
 
     li {
       padding: 1rem 0;
-      border-bottom: 1px solid var(--standard-10, #eee);
+      border-bottom: 1px solid var(--standard-10);
       &:last-child { border-bottom: none; }
     }
 
@@ -182,36 +278,36 @@ body {
       align-items: baseline;
       gap: 0.6rem;
       text-decoration: none;
-      &:hover .headline { color: var(--primary-color, #2185d0); }
+      &:hover .headline { color: var(--primary-color); }
 
       .position {
         font-variant-numeric: tabular-nums;
-        color: var(--standard-40, #aaa);
+        color: var(--standard-40);
         font-size: 0.9em;
         min-width: 1.5rem;
       }
 
       .headline {
         font-weight: 600;
-        color: var(--text-color, #222);
+        color: var(--text-color);
       }
 
       .subtitle {
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         font-size: 0.85em;
       }
     }
 
     .intro {
       margin: 0.35rem 0 0 2.1rem;
-      color: var(--standard-60, #666);
+      color: var(--standard-60);
       font-size: 0.9em;
       line-height: 1.55;
 
       code {
         font-size: 0.9em;
         padding: 0.05em 0.3em;
-        background: var(--standard-5, #f5f5f5);
+        background: var(--standard-5);
         border-radius: 3px;
       }
     }
@@ -238,6 +334,296 @@ body {
         <rating-slider min="1" max="5" initial-value="3"></rating-slider>
         <div class="message"></div>
       </div>
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+          <li><button type="button" data-target="src-rating-slider-0" class="active">component.js</button></li>
+          <li><button type="button" data-target="src-rating-slider-1">component.html</button></li>
+          <li><button type="button" data-target="src-rating-slider-2">component.css</button></li>
+          <li><button type="button" data-target="src-rating-slider-3">page.js</button></li>
+        </ul>
+        <pre id="src-rating-slider-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
+<span class="hljs-keyword">const</span> defaultSettings = {
+  <span class="hljs-attr">min</span>: <span class="hljs-number">1</span>,
+  <span class="hljs-attr">max</span>: <span class="hljs-number">10</span>,
+  <span class="hljs-attr">initialValue</span>: <span class="hljs-number">5</span>,
+  <span class="hljs-attr">showLabels</span>: <span class="hljs-literal">true</span>,
+};
+
+<span class="hljs-keyword">const</span> defaultState = {
+  <span class="hljs-attr">rating</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">dragging</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">currentPercentage</span>: <span class="hljs-number">0</span>,
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ $, self, state, settings, dispatchEvent }</span>) =&gt; ({
+  <span class="hljs-title function_">initialize</span>(<span class="hljs-params"></span>) {
+    state.<span class="hljs-property">rating</span>.<span class="hljs-title function_">set</span>(settings.<span class="hljs-property">initialValue</span>);
+  },
+
+  <span class="hljs-title function_">getSliderStyles</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">dragging</span>: state.<span class="hljs-property">dragging</span>.<span class="hljs-title function_">get</span>(),
+    };
+  },
+
+  <span class="hljs-title function_">getLabelStyles</span>(<span class="hljs-params">number</span>) {
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">current</span>: state.<span class="hljs-property">rating</span>.<span class="hljs-title function_">get</span>() === number,
+    };
+  },
+
+  <span class="hljs-title function_">getRatingPercentage</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> { min, max } = settings;
+    <span class="hljs-keyword">const</span> rating = state.<span class="hljs-property">rating</span>.<span class="hljs-title function_">get</span>();
+    <span class="hljs-keyword">return</span> ((rating - min) / (max - min)) * <span class="hljs-number">100</span>;
+  },
+
+  <span class="hljs-title function_">getPercentage</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (state.<span class="hljs-property">currentPercentage</span>.<span class="hljs-title function_">get</span>()) {
+      <span class="hljs-keyword">return</span> state.<span class="hljs-property">currentPercentage</span>.<span class="hljs-title function_">get</span>();
+    }
+    <span class="hljs-keyword">return</span> self.<span class="hljs-title function_">getRatingPercentage</span>();
+  },
+
+  <span class="hljs-title function_">getGuidePercentage</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (!state.<span class="hljs-property">currentPercentage</span>.<span class="hljs-title function_">get</span>()) {
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">return</span> self.<span class="hljs-title function_">getRatingPercentage</span>();
+  },
+
+  <span class="hljs-title function_">setRating</span>(<span class="hljs-params">value</span>) {
+    <span class="hljs-keyword">const</span> { min, max } = settings;
+    <span class="hljs-keyword">const</span> newValue = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(min, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(max, value));
+
+    <span class="hljs-keyword">if</span> (newValue !== state.<span class="hljs-property">rating</span>.<span class="hljs-title function_">get</span>()) {
+      state.<span class="hljs-property">rating</span>.<span class="hljs-title function_">set</span>(newValue);
+
+      <span class="hljs-comment">// Dispatch custom event that parent components can listen to</span>
+      <span class="hljs-title function_">dispatchEvent</span>(<span class="hljs-string">&#x27;change&#x27;</span>, {
+        <span class="hljs-attr">rating</span>: newValue,
+        <span class="hljs-attr">min</span>: settings.<span class="hljs-property">min</span>,
+        <span class="hljs-attr">max</span>: settings.<span class="hljs-property">max</span>,
+      });
+    }
+  },
+
+  <span class="hljs-title function_">resetRating</span>(<span class="hljs-params"></span>) {
+    self.<span class="hljs-title function_">setRating</span>(settings.<span class="hljs-property">initialValue</span>);
+  },
+
+  <span class="hljs-title function_">updateRatingFromEvent</span>(<span class="hljs-params">event</span>) {
+    <span class="hljs-keyword">const</span> slider = $(<span class="hljs-string">&#x27;.slider&#x27;</span>).<span class="hljs-title function_">el</span>();
+    <span class="hljs-keyword">const</span> rect = slider.<span class="hljs-title function_">getBoundingClientRect</span>();
+    <span class="hljs-keyword">const</span> position = (event.<span class="hljs-property">clientX</span> - rect.<span class="hljs-property">left</span>) / rect.<span class="hljs-property">width</span>;
+    <span class="hljs-keyword">const</span> percentage = position * <span class="hljs-number">100</span>;
+    <span class="hljs-keyword">const</span> { min, max } = settings;
+    <span class="hljs-keyword">const</span> value = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">round</span>(min + position * (max - min));
+    state.<span class="hljs-property">currentPercentage</span>.<span class="hljs-title function_">set</span>(percentage);
+    self.<span class="hljs-title function_">setRating</span>(value);
+  },
+});
+
+<span class="hljs-keyword">const</span> events = {
+  <span class="hljs-string">&#x27;pointerdown .slider&#x27;</span>({ self, state, event }) {
+    state.<span class="hljs-property">dragging</span>.<span class="hljs-title function_">set</span>(<span class="hljs-literal">true</span>);
+    self.<span class="hljs-title function_">updateRatingFromEvent</span>(event);
+    event.<span class="hljs-title function_">preventDefault</span>();
+  },
+
+  <span class="hljs-string">&#x27;global pointermove html&#x27;</span>({ self, state, event }) {
+    <span class="hljs-keyword">if</span> (!state.<span class="hljs-property">dragging</span>.<span class="hljs-title function_">get</span>()) {
+      <span class="hljs-keyword">return</span>;
+    }
+    self.<span class="hljs-title function_">updateRatingFromEvent</span>(event);
+  },
+
+  <span class="hljs-string">&#x27;global pointerup html&#x27;</span>({ state, dispatchEvent }) {
+    <span class="hljs-keyword">if</span> (!state.<span class="hljs-property">dragging</span>.<span class="hljs-title function_">get</span>()) {
+      <span class="hljs-keyword">return</span>;
+    }
+    state.<span class="hljs-property">currentPercentage</span>.<span class="hljs-title function_">set</span>(<span class="hljs-number">0</span>);
+    state.<span class="hljs-property">dragging</span>.<span class="hljs-title function_">set</span>(<span class="hljs-literal">false</span>);
+    <span class="hljs-title function_">dispatchEvent</span>(<span class="hljs-string">&#x27;finalized&#x27;</span>, {
+      <span class="hljs-attr">rating</span>: state.<span class="hljs-property">rating</span>.<span class="hljs-title function_">get</span>(),
+    });
+  },
+
+  <span class="hljs-string">&#x27;click .reset&#x27;</span>({ self }) {
+    self.<span class="hljs-title function_">resetRating</span>();
+  },
+};
+
+<span class="hljs-comment">// Define and export the component</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">RatingSlider</span> = <span class="hljs-title function_">defineComponent</span>({
+  <span class="hljs-attr">tagName</span>: <span class="hljs-string">&#x27;rating-slider&#x27;</span>,
+  template,
+  css,
+  defaultSettings,
+  defaultState,
+  createComponent,
+  events,
+});
+</code></pre>
+        <pre id="src-rating-slider-1" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;slider {classMap getSliderStyles}&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;fill&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;width: {getPercentage}%&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;guide&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;width: {getGuidePercentage}%&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;track&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;area&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;handle&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;left: {getPercentage}%&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+{#if showLabels}
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;labels&quot;</span>&gt;</span>
+    {#each value in range(min, max + 1) }
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{classMap getLabelStyles value} label&quot;</span>&gt;</span>
+        {value}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    {/each}
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+{/if}
+
+<span class="hljs-tag">&lt;<span class="hljs-name">ui-button</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;reset&quot;</span> <span class="hljs-attr">blue</span>&gt;</span>Reset<span class="hljs-tag">&lt;/<span class="hljs-name">ui-button</span>&gt;</span>
+</code></pre>
+        <pre id="src-rating-slider-2" hidden><code class="hljs language-css"><span class="hljs-comment">/* component.css */</span>
+<span class="hljs-selector-pseudo">:host</span> {
+  <span class="hljs-attr">--slider-height</span>: <span class="hljs-number">10px</span>;
+  <span class="hljs-attr">--slider-border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius);
+  <span class="hljs-attr">--handle-size</span>: <span class="hljs-number">24px</span>;
+  <span class="hljs-attr">--track-color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">10</span>);
+  <span class="hljs-attr">--fill-color</span>: <span class="hljs-built_in">var</span>(--yellow);
+  <span class="hljs-attr">--guide-color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">50</span>);
+  <span class="hljs-attr">--handle-color</span>: <span class="hljs-built_in">var</span>(--yellow);
+}
+
+
+<span class="hljs-selector-class">.slider</span> {
+  <span class="hljs-attribute">position</span>: relative;
+  <span class="hljs-attribute">height</span>: <span class="hljs-built_in">var</span>(--slider-height);
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--track-color);
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--slider-border-radius);
+  <span class="hljs-attribute">cursor</span>: pointer;
+  <span class="hljs-attribute">margin</span>: <span class="hljs-built_in">var</span>(--margin) <span class="hljs-number">0</span>;
+
+  <span class="hljs-selector-class">.area</span> {
+    <span class="hljs-attribute">margin</span>: <span class="hljs-number">0rem</span> <span class="hljs-built_in">var</span>(--margin);
+    <span class="hljs-attribute">position</span>: relative;
+    <span class="hljs-attribute">height</span>: <span class="hljs-built_in">var</span>(--slider-height);
+    <span class="hljs-attribute">width</span>: <span class="hljs-built_in">calc</span>(<span class="hljs-number">100%</span> - <span class="hljs-number">2em</span>);
+  }
+
+
+  <span class="hljs-selector-class">.track</span> {
+    <span class="hljs-attribute">position</span>: absolute;
+    <span class="hljs-attribute">top</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">left</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">right</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">bottom</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--slider-border-radius);
+  }
+
+  <span class="hljs-selector-class">.guide</span>,
+  <span class="hljs-selector-class">.fill</span> {
+    <span class="hljs-attribute">position</span>: absolute;
+    <span class="hljs-attribute">top</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">left</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;
+    <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--fill-color);
+    <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--slider-border-radius);
+    <span class="hljs-attribute">transition</span>: width <span class="hljs-number">0.1s</span> ease;
+  }
+
+  <span class="hljs-selector-class">.guide</span> {
+    <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--guide-color);
+  }
+
+  <span class="hljs-selector-class">.handle</span> {
+    <span class="hljs-attribute">position</span>: absolute;
+    <span class="hljs-attribute">top</span>: <span class="hljs-number">50%</span>;
+    <span class="hljs-attribute">width</span>: <span class="hljs-built_in">var</span>(--handle-size);
+    <span class="hljs-attribute">height</span>: <span class="hljs-built_in">var</span>(--handle-size);
+    <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--handle-color);
+    <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">50%</span>;
+    <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translate</span>(-<span class="hljs-number">50%</span>, -<span class="hljs-number">50%</span>);
+    <span class="hljs-attribute">box-shadow</span>: <span class="hljs-built_in">var</span>(--raised-shadow);
+    <span class="hljs-attribute">transition</span>: left <span class="hljs-number">0.1s</span> ease;
+  }
+
+  &amp;<span class="hljs-selector-class">.dragging</span> {
+    <span class="hljs-attribute">cursor</span>: grabbing;
+
+    <span class="hljs-selector-class">.fill</span>,
+    <span class="hljs-selector-class">.guide</span>,
+    <span class="hljs-selector-class">.handle</span> {
+      <span class="hljs-attribute">transition</span>: none;
+    }
+  }
+}
+
+
+
+<span class="hljs-selector-class">.labels</span> {
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">justify-content</span>: space-between;
+  <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">var</span>(--small);
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">60</span>);
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span> <span class="hljs-built_in">calc</span>(<span class="hljs-built_in">var</span>(--handle-size) / <span class="hljs-number">2</span>);
+
+  <span class="hljs-selector-class">.label</span> {
+
+    &amp;<span class="hljs-selector-class">.current</span> {
+      <span class="hljs-attribute">font-weight</span>: bold;
+      <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--yellow);
+    }
+  }
+}
+
+<span class="hljs-selector-class">.reset</span> {
+  <span class="hljs-attribute">display</span>: inline-block;
+  <span class="hljs-attribute">margin-top</span>: <span class="hljs-built_in">var</span>(--margin);
+}
+
+
+</code></pre>
+        <pre id="src-rating-slider-3" hidden><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { $ } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/query&#x27;</span>;
+
+$(<span class="hljs-string">&#x27;rating-slider&#x27;</span>)
+  .<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;change&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> rating = event.<span class="hljs-property">detail</span>.<span class="hljs-property">rating</span>;
+  })
+  .<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;finalized&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> rating = event.<span class="hljs-property">detail</span>.<span class="hljs-property">rating</span>;
+    <span class="hljs-title function_">updateFeedbackMessage</span>(rating);
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Final rating:&#x27;</span>, rating);
+  });
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">updateFeedbackMessage</span>(<span class="hljs-params">value</span>) {
+  <span class="hljs-keyword">const</span> $message = $(<span class="hljs-string">&#x27;.message&#x27;</span>);
+
+  <span class="hljs-comment">// You could also use Query to add classes</span>
+  $message.<span class="hljs-title function_">removeClass</span>(<span class="hljs-string">&#x27;negative neutral positive&#x27;</span>);
+  <span class="hljs-keyword">let</span> ratingClass;
+  <span class="hljs-keyword">if</span> (value &lt;= <span class="hljs-number">2</span>) {
+    $message.<span class="hljs-title function_">text</span>(<span class="hljs-string">`We&#x27;re sorry to hear that. How can we improve?`</span>);
+    ratingClass = <span class="hljs-string">&#x27;negative&#x27;</span>;
+  }
+  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (value &lt;= <span class="hljs-number">4</span>) {
+    ratingClass = <span class="hljs-string">&#x27;neutral&#x27;</span>;
+    $message.<span class="hljs-title function_">text</span>(<span class="hljs-string">&#x27;Thanks for your feedback!&#x27;</span>);
+  }
+  <span class="hljs-keyword">else</span> {
+    $message.<span class="hljs-title function_">text</span>(<span class="hljs-string">`Excellent! We&#x27;re glad you&#x27;re enjoying it!`</span>);
+    ratingClass = <span class="hljs-string">&#x27;positive&#x27;</span>;
+  }
+  $message.<span class="hljs-title function_">addClass</span>(<span class="hljs-string">`visible <span class="hljs-subst">${ratingClass}</span>`</span>);
+}
+</code></pre>
+      </details>
       <aside class="notes">
         <h2>New patterns</h2>
         <p><code>&#39;global pointermove body&#39;</code>, <code>dispatchEvent</code> for both <code>change</code> and <code>finalized</code>, <code>range()</code>.</p>
@@ -253,5 +639,15 @@ body {
         </nav>
       </aside>
     </div>
+    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>
   </body>
 </html>

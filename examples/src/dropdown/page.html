@@ -31,7 +31,7 @@
 html { scrollbar-gutter: stable; }
 
 body {
-  font-family: var(--page-font, system-ui, sans-serif);
+  font-family: var(--page-font);
   max-width: 720px;
   margin: 2rem auto;
   padding: 0 1rem;
@@ -49,19 +49,19 @@ body {
   .header {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--standard-15, #e5e5e5);
+    border-bottom: 1px solid var(--standard-15);
 
     .crumbs {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       font-size: 0.8em;
-      color: var(--standard-50, #888);
+      color: var(--standard-50);
 
       a {
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         text-decoration: none;
-        &:hover { color: var(--primary-color, #2185d0); }
+        &:hover { color: var(--primary-color); }
       }
 
       .position {
@@ -79,14 +79,14 @@ body {
         display: block;
         font-size: 0.7em;
         font-weight: 400;
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         margin-top: 0.15rem;
       }
     }
 
     .description {
       margin: 0.5rem 0 0;
-      color: var(--standard-60, #666);
+      color: var(--standard-60);
       font-size: 0.9em;
       line-height: 1.5;
     }
@@ -97,12 +97,108 @@ body {
     transform: translateZ(0);
   }
 
+  .source {
+    margin-top: 1.5rem;
+    border: 1px solid var(--standard-15);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.85em;
+      font-weight: 600;
+      color: var(--standard-60);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: 1px solid var(--standard-15);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      background: var(--inverted-10);
+      border-bottom: 1px solid var(--standard-15);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: 0.5rem 0.9rem;
+        font: inherit;
+        font-size: 0.8em;
+        font-family: var(--mono-font);
+        color: var(--standard-50);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+
+        &:hover { color: var(--text-color); }
+        &.active {
+          color: var(--text-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: 0.9rem 1rem;
+      overflow: auto;
+      font-family: var(--mono-font);
+      font-size: 0.8em;
+      line-height: 1.55;
+      background: var(--inverted-5);
+      color: var(--text-color);
+      max-height: 500px;
+      tab-size: 2;
+    }
+
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal { color: var(--purple-text-color); }
+    .hljs-string,
+    .hljs-attr { color: var(--green-text-color); }
+    .hljs-number { color: var(--orange-text-color); }
+    .hljs-comment { color: var(--standard-40); font-style: italic; }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag { color: var(--blue-text-color); }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id { color: var(--pink-text-color); }
+    .hljs-meta,
+    .hljs-title { color: var(--standard-70); }
+    .hljs-variable,
+    .hljs-template-variable { color: var(--red-text-color); }
+  }
+
   .notes {
     margin-top: 2rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--standard-15, #e5e5e5);
+    border-top: 1px solid var(--standard-15);
     font-size: 0.9em;
-    color: var(--standard-70, #555);
+    color: var(--standard-70);
     line-height: 1.55;
 
     h2 {
@@ -111,7 +207,7 @@ body {
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--standard-50, #888);
+      color: var(--standard-50);
     }
 
     p { margin: 0 0 1rem; }
@@ -121,7 +217,7 @@ body {
     code {
       font-size: 0.9em;
       padding: 0.05em 0.3em;
-      background: var(--standard-5, #f5f5f5);
+      background: var(--standard-5);
       border-radius: 3px;
     }
 
@@ -130,10 +226,10 @@ body {
       justify-content: space-between;
       margin-top: 1.5rem;
       padding-top: 1rem;
-      border-top: 1px solid var(--standard-10, #eee);
+      border-top: 1px solid var(--standard-10);
 
       a {
-        color: var(--primary-color, #2185d0);
+        color: var(--primary-color);
         text-decoration: none;
         font-size: 0.95em;
         &:hover { text-decoration: underline; }
@@ -145,7 +241,7 @@ body {
   h1 { margin-bottom: 0.25rem; }
 
   .lede {
-    color: var(--standard-60, #666);
+    color: var(--standard-60);
     margin-top: 0;
     font-size: 0.95em;
     line-height: 1.55;
@@ -157,12 +253,12 @@ body {
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--standard-50, #888);
+    color: var(--standard-50);
   }
 
   .section-lede {
     margin: 0 0 1rem;
-    color: var(--standard-50, #888);
+    color: var(--standard-50);
     font-size: 0.85em;
   }
 
@@ -173,7 +269,7 @@ body {
 
     li {
       padding: 1rem 0;
-      border-bottom: 1px solid var(--standard-10, #eee);
+      border-bottom: 1px solid var(--standard-10);
       &:last-child { border-bottom: none; }
     }
 
@@ -182,36 +278,36 @@ body {
       align-items: baseline;
       gap: 0.6rem;
       text-decoration: none;
-      &:hover .headline { color: var(--primary-color, #2185d0); }
+      &:hover .headline { color: var(--primary-color); }
 
       .position {
         font-variant-numeric: tabular-nums;
-        color: var(--standard-40, #aaa);
+        color: var(--standard-40);
         font-size: 0.9em;
         min-width: 1.5rem;
       }
 
       .headline {
         font-weight: 600;
-        color: var(--text-color, #222);
+        color: var(--text-color);
       }
 
       .subtitle {
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         font-size: 0.85em;
       }
     }
 
     .intro {
       margin: 0.35rem 0 0 2.1rem;
-      color: var(--standard-60, #666);
+      color: var(--standard-60);
       font-size: 0.9em;
       line-height: 1.55;
 
       code {
         font-size: 0.9em;
         padding: 0.05em 0.3em;
-        background: var(--standard-5, #f5f5f5);
+        background: var(--standard-5);
         border-radius: 3px;
       }
     }
@@ -362,6 +458,346 @@ body {
           </div>
         </div>
       </div>
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+          <li><button type="button" data-target="src-dropdown-0" class="active">component.js</button></li>
+          <li><button type="button" data-target="src-dropdown-1">component.html</button></li>
+          <li><button type="button" data-target="src-dropdown-2">component.css</button></li>
+          <li><button type="button" data-target="src-dropdown-3">page.js</button></li>
+        </ul>
+        <pre id="src-dropdown-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+<span class="hljs-keyword">import</span> { isEmpty, isFunction, isString } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
+
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
+<span class="hljs-keyword">const</span> defaultSettings = {
+  <span class="hljs-attr">options</span>: [], <span class="hljs-comment">// Array of {value, text, icon} objects</span>
+  <span class="hljs-attr">selected</span>: <span class="hljs-string">&#x27;&#x27;</span>, <span class="hljs-comment">// Currently selected value</span>
+  <span class="hljs-attr">placeholder</span>: <span class="hljs-string">&#x27;Select an option&#x27;</span>, <span class="hljs-comment">// Placeholder text when nothing selected</span>
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;&#x27;</span>, <span class="hljs-comment">// Form name attribute</span>
+  <span class="hljs-attr">allowEmpty</span>: <span class="hljs-literal">false</span>, <span class="hljs-comment">// Allow selecting &quot;none&quot;</span>
+  <span class="hljs-attr">emptyText</span>: <span class="hljs-string">&#x27;&#x27;</span>, <span class="hljs-comment">// Text for empty option</span>
+  <span class="hljs-attr">fluid</span>: <span class="hljs-literal">false</span>, <span class="hljs-comment">// Takes full width of parent</span>
+  <span class="hljs-attr">small</span>: <span class="hljs-literal">false</span>, <span class="hljs-comment">// Small size</span>
+  <span class="hljs-attr">large</span>: <span class="hljs-literal">false</span>, <span class="hljs-comment">// Large size</span>
+  <span class="hljs-attr">error</span>: <span class="hljs-literal">false</span>, <span class="hljs-comment">// Error state</span>
+  <span class="hljs-attr">disabled</span>: <span class="hljs-literal">false</span>, <span class="hljs-comment">// Disabled state</span>
+  <span class="hljs-attr">onChange</span>: <span class="hljs-literal">null</span>, <span class="hljs-comment">// Callback when selection changes</span>
+};
+
+<span class="hljs-keyword">const</span> defaultState = {
+  <span class="hljs-attr">isOpen</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">selectedText</span>: <span class="hljs-string">&#x27;&#x27;</span>,
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ settings, state, self, dispatchEvent }</span>) =&gt; ({
+  <span class="hljs-title function_">initialize</span>(<span class="hljs-params"></span>) {
+    self.<span class="hljs-title function_">updateSelectedText</span>();
+  },
+
+  <span class="hljs-title function_">updateSelectedText</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> selected = settings.<span class="hljs-property">selected</span>;
+    <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isEmpty</span>(selected) &amp;&amp; !settings.<span class="hljs-property">allowEmpty</span>) {
+      state.<span class="hljs-property">selectedText</span>.<span class="hljs-title function_">set</span>(settings.<span class="hljs-property">placeholder</span>);
+      <span class="hljs-keyword">return</span>;
+    }
+
+    <span class="hljs-keyword">const</span> option = settings.<span class="hljs-property">options</span>.<span class="hljs-title function_">find</span>(<span class="hljs-function"><span class="hljs-params">opt</span> =&gt;</span> opt.<span class="hljs-property">value</span> === selected);
+    <span class="hljs-keyword">if</span> (option) {
+      state.<span class="hljs-property">selectedText</span>.<span class="hljs-title function_">set</span>(option.<span class="hljs-property">text</span>);
+    }
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (settings.<span class="hljs-property">allowEmpty</span>) {
+      state.<span class="hljs-property">selectedText</span>.<span class="hljs-title function_">set</span>(self.<span class="hljs-title function_">getEmptyText</span>());
+    }
+    <span class="hljs-keyword">else</span> {
+      state.<span class="hljs-property">selectedText</span>.<span class="hljs-title function_">set</span>(settings.<span class="hljs-property">placeholder</span>);
+    }
+  },
+
+  <span class="hljs-title function_">toggleDropdown</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (settings.<span class="hljs-property">disabled</span>) { <span class="hljs-keyword">return</span>; }
+
+    <span class="hljs-keyword">const</span> newState = !state.<span class="hljs-property">isOpen</span>.<span class="hljs-title function_">get</span>();
+    state.<span class="hljs-property">isOpen</span>.<span class="hljs-title function_">set</span>(newState);
+  },
+
+  <span class="hljs-title function_">getDropdownClasses</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">fluid</span>: settings.<span class="hljs-property">fluid</span>,
+      <span class="hljs-attr">small</span>: settings.<span class="hljs-property">small</span>,
+      <span class="hljs-attr">large</span>: settings.<span class="hljs-property">large</span>,
+      <span class="hljs-attr">error</span>: settings.<span class="hljs-property">error</span>,
+      <span class="hljs-attr">disabled</span>: settings.<span class="hljs-property">disabled</span>,
+      <span class="hljs-attr">active</span>: state.<span class="hljs-property">isOpen</span>.<span class="hljs-title function_">get</span>(),
+    };
+  },
+
+  <span class="hljs-title function_">selectOption</span>(<span class="hljs-params">value</span>) {
+    <span class="hljs-keyword">if</span> (settings.<span class="hljs-property">disabled</span>) { <span class="hljs-keyword">return</span>; }
+
+    <span class="hljs-comment">// Update the selected value</span>
+    settings.<span class="hljs-property">selected</span> = value;
+    self.<span class="hljs-title function_">updateSelectedText</span>();
+    state.<span class="hljs-property">isOpen</span>.<span class="hljs-title function_">set</span>(<span class="hljs-literal">false</span>);
+
+    <span class="hljs-comment">// Dispatch event with selected value</span>
+    <span class="hljs-title function_">dispatchEvent</span>(<span class="hljs-string">&#x27;change&#x27;</span>, { value });
+
+    <span class="hljs-comment">// Call onChange callback if provided</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isFunction</span>(settings.<span class="hljs-property">onChange</span>)) {
+      settings.<span class="hljs-title function_">onChange</span>(value);
+    }
+  },
+
+  <span class="hljs-title function_">getSelectedText</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> text = state.<span class="hljs-property">selectedText</span>.<span class="hljs-title function_">get</span>();
+    <span class="hljs-keyword">return</span> !<span class="hljs-title function_">isEmpty</span>(text) ? text : settings.<span class="hljs-property">placeholder</span>;
+  },
+
+  <span class="hljs-title function_">getItemClasses</span>(<span class="hljs-params">value</span>) {
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">active</span>: value === settings.<span class="hljs-property">selected</span>,
+    };
+  },
+
+  <span class="hljs-comment">// Get the currently selected value</span>
+  <span class="hljs-title function_">getSelectedValue</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> settings.<span class="hljs-property">selected</span>;
+  },
+
+  <span class="hljs-comment">// Get the empty text with a fallback</span>
+  <span class="hljs-title function_">getEmptyText</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title function_">isString</span>(settings.<span class="hljs-property">emptyText</span>) &amp;&amp; !<span class="hljs-title function_">isEmpty</span>(settings.<span class="hljs-property">emptyText</span>)
+      ? settings.<span class="hljs-property">emptyText</span>
+      : <span class="hljs-string">&#x27;None&#x27;</span>;
+  },
+});
+
+<span class="hljs-keyword">const</span> events = {
+  <span class="hljs-string">&#x27;click .dropdown&#x27;</span>({ self, event }) {
+    <span class="hljs-comment">// Prevent clicks within the menu from closing the dropdown</span>
+    <span class="hljs-keyword">if</span> (!event.<span class="hljs-property">target</span>.<span class="hljs-title function_">closest</span>(<span class="hljs-string">&#x27;.menu&#x27;</span>)) {
+      self.<span class="hljs-title function_">toggleDropdown</span>();
+    }
+  },
+
+  <span class="hljs-string">&#x27;click .item&#x27;</span>({ self, data }) {
+    self.<span class="hljs-title function_">selectOption</span>(data.<span class="hljs-property">value</span>);
+  },
+
+  <span class="hljs-string">&#x27;global click body&#x27;</span>({ state, el, event }) {
+    <span class="hljs-comment">// Close dropdown when clicking outside</span>
+    <span class="hljs-keyword">if</span> (state.<span class="hljs-property">isOpen</span>.<span class="hljs-title function_">get</span>() &amp;&amp; !el.<span class="hljs-title function_">contains</span>(event.<span class="hljs-property">target</span>)) {
+      state.<span class="hljs-property">isOpen</span>.<span class="hljs-title function_">set</span>(<span class="hljs-literal">false</span>);
+    }
+  },
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">UIDropdown</span> = <span class="hljs-title function_">defineComponent</span>({
+  <span class="hljs-attr">tagName</span>: <span class="hljs-string">&#x27;ui-dropdown&#x27;</span>,
+  template,
+  css,
+  defaultSettings,
+  defaultState,
+  createComponent,
+  events,
+});
+</code></pre>
+        <pre id="src-dropdown-1" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{classMap getDropdownClasses} dropdown&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;hidden&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">{name}</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{getSelectedValue()}</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;text&quot;</span>&gt;</span>{getSelectedText}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">ui-icon</span> <span class="hljs-attr">icon</span>=<span class="hljs-string">&quot;chevron-down&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;dropdown-icon&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ui-icon</span>&gt;</span>
+  
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;menu {classIf isOpen &#x27;visible&#x27;}&quot;</span>&gt;</span>
+    {#if allowEmpty}
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;item&quot;</span> <span class="hljs-attr">data-value</span>=<span class="hljs-string">&quot;&quot;</span>&gt;</span>
+        {getEmptyText()}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    {/if}
+    {#each options}
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{classMap getItemClasses value} item&quot;</span> <span class="hljs-attr">data-value</span>=<span class="hljs-string">{value}</span>&gt;</span>
+        {#if icon}
+          <span class="hljs-tag">&lt;<span class="hljs-name">ui-icon</span> <span class="hljs-attr">icon</span>=<span class="hljs-string">{icon}</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;option-icon&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ui-icon</span>&gt;</span>
+        {/if}
+        {text}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    {/each}
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-dropdown-2" hidden><code class="hljs language-css"><span class="hljs-selector-pseudo">:host</span> {
+  <span class="hljs-attr">--dropdown-border-color</span>: <span class="hljs-built_in">var</span>(--border-color);
+  <span class="hljs-attr">--dropdown-border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius);
+  <span class="hljs-attr">--dropdown-padding</span>: <span class="hljs-built_in">var</span>(--<span class="hljs-number">10px</span>) <span class="hljs-built_in">var</span>(--<span class="hljs-number">16px</span>); <span class="hljs-comment">/* px expressed in em */</span>
+  <span class="hljs-attr">--dropdown-background</span>: <span class="hljs-built_in">var</span>(--inverted-<span class="hljs-number">100</span>);
+  <span class="hljs-attr">--dropdown-text-color</span>: <span class="hljs-built_in">var</span>(--text-color);
+  <span class="hljs-attr">--dropdown-placeholder-color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">40</span>);
+  <span class="hljs-attr">--dropdown-hover-border-color</span>: <span class="hljs-built_in">var</span>(--selected-border-color);
+  <span class="hljs-attr">--dropdown-focus-border-color</span>: <span class="hljs-built_in">var</span>(--primary-color);
+  <span class="hljs-attr">--dropdown-min-width</span>: <span class="hljs-number">200px</span>;
+  <span class="hljs-attr">--dropdown-min-height</span>: <span class="hljs-number">2.85em</span>;
+  <span class="hljs-attr">--dropdown-icon-color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">40</span>);
+
+  <span class="hljs-attr">--dropdown-menu-shadow</span>: <span class="hljs-built_in">var</span>(--floating-shadow);
+  <span class="hljs-attr">--dropdown-item-padding</span>: <span class="hljs-built_in">var</span>(--<span class="hljs-number">8px</span>) <span class="hljs-built_in">var</span>(--<span class="hljs-number">16px</span>); <span class="hljs-comment">/* px expressed in em */</span>
+  <span class="hljs-attr">--dropdown-item-hover-bg</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">5</span>);
+  <span class="hljs-attr">--dropdown-item-active-bg</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">5</span>) <span class="hljs-built_in">var</span>(--angled-gradient);
+  <span class="hljs-attr">--dropdown-item-active-color</span>: <span class="hljs-built_in">var</span>(--primary-text-color);
+
+  <span class="hljs-attr">--dropdown-error-color</span>: <span class="hljs-built_in">var</span>(--error-color);
+
+  <span class="hljs-attribute">display</span>: block;
+}
+
+<span class="hljs-selector-class">.dropdown</span> {
+  <span class="hljs-attribute">position</span>: relative;
+  <span class="hljs-attribute">display</span>: inline-block;
+  <span class="hljs-attribute">min-width</span>: <span class="hljs-built_in">var</span>(--dropdown-min-width);
+  <span class="hljs-attribute">border</span>: <span class="hljs-built_in">var</span>(--border);
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--dropdown-border-radius);
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--dropdown-background);
+  <span class="hljs-attribute">cursor</span>: pointer;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-built_in">var</span>(--dropdown-padding);
+  <span class="hljs-attribute">transition</span>: <span class="hljs-built_in">var</span>(--transition);
+  <span class="hljs-attribute">min-height</span>: <span class="hljs-built_in">var</span>(--dropdown-min-height);
+  <span class="hljs-attribute">box-sizing</span>: border-box;
+
+  &amp;<span class="hljs-selector-pseudo">:hover</span> {
+    <span class="hljs-attribute">border-color</span>: <span class="hljs-built_in">var</span>(--dropdown-hover-border-color);
+  }
+
+  &amp;<span class="hljs-selector-class">.active</span> {
+    <span class="hljs-attribute">border-color</span>: <span class="hljs-built_in">var</span>(--dropdown-focus-border-color);
+
+    &amp; <span class="hljs-selector-class">.dropdown-icon</span> {
+      <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(-<span class="hljs-number">50%</span>) <span class="hljs-built_in">rotate</span>(<span class="hljs-number">180deg</span>);
+    }
+  }
+
+  &amp;<span class="hljs-selector-class">.fluid</span> {
+    <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+  }
+
+  &amp;<span class="hljs-selector-class">.small</span> {
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">var</span>(--small);
+  }
+
+  &amp;<span class="hljs-selector-class">.large</span> {
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">var</span>(--large);
+  }
+
+  &amp;<span class="hljs-selector-class">.error</span> {
+    <span class="hljs-attribute">border-color</span>: <span class="hljs-built_in">var</span>(--dropdown-error-color);
+
+    &amp;<span class="hljs-selector-pseudo">:hover</span>, &amp;<span class="hljs-selector-class">.active</span> {
+      <span class="hljs-attribute">border-color</span>: <span class="hljs-built_in">var</span>(--dropdown-error-color);
+    }
+
+    &amp; <span class="hljs-selector-class">.text</span> {
+      <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--dropdown-error-color);
+    }
+  }
+
+  &amp;<span class="hljs-selector-class">.disabled</span> {
+    <span class="hljs-attribute">opacity</span>: <span class="hljs-built_in">var</span>(--disabled-opacity);
+    <span class="hljs-attribute">cursor</span>: not-allowed;
+    <span class="hljs-attribute">pointer-events</span>: none;
+  }
+
+  &amp; <span class="hljs-selector-class">.text</span> {
+    <span class="hljs-attribute">display</span>: block;
+    <span class="hljs-attribute">overflow</span>: hidden;
+    <span class="hljs-attribute">white-space</span>: nowrap;
+    <span class="hljs-attribute">text-overflow</span>: ellipsis;
+    <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--dropdown-text-color);
+  }
+
+  &amp; <span class="hljs-selector-class">.dropdown-icon</span> {
+    <span class="hljs-attribute">position</span>: absolute;
+    <span class="hljs-attribute">right</span>: <span class="hljs-number">16px</span>;
+    <span class="hljs-attribute">top</span>: <span class="hljs-number">50%</span>;
+    <span class="hljs-attribute">transform</span>: <span class="hljs-built_in">translateY</span>(-<span class="hljs-number">50%</span>);
+    <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--dropdown-icon-color);
+    <span class="hljs-attribute">transition</span>: transform <span class="hljs-built_in">var</span>(--duration) <span class="hljs-built_in">var</span>(--easing);
+  }
+
+  &amp; <span class="hljs-selector-class">.menu</span> {
+    <span class="hljs-attribute">position</span>: absolute;
+    <span class="hljs-attribute">z-index</span>: <span class="hljs-built_in">var</span>(--float-layer);
+    <span class="hljs-attribute">top</span>: <span class="hljs-built_in">calc</span>(<span class="hljs-number">100%</span> + <span class="hljs-number">5px</span>);
+    <span class="hljs-attribute">left</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">right</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--dropdown-background);
+    <span class="hljs-attribute">border</span>: <span class="hljs-built_in">var</span>(--border);
+    <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--dropdown-border-radius);
+    <span class="hljs-attribute">box-shadow</span>: <span class="hljs-built_in">var</span>(--dropdown-menu-shadow);
+    <span class="hljs-attribute">max-height</span>: <span class="hljs-number">300px</span>;
+    <span class="hljs-attribute">overflow-y</span>: auto;
+    <span class="hljs-attribute">display</span>: none;
+
+    &amp;<span class="hljs-selector-class">.visible</span> {
+      <span class="hljs-attribute">display</span>: block <span class="hljs-meta">!important</span>;
+    }
+
+    &amp; <span class="hljs-selector-class">.item</span> {
+      <span class="hljs-attribute">padding</span>: <span class="hljs-built_in">var</span>(--dropdown-item-padding);
+      <span class="hljs-attribute">cursor</span>: pointer;
+      <span class="hljs-attribute">transition</span>: background <span class="hljs-built_in">var</span>(--duration) <span class="hljs-built_in">var</span>(--easing);
+
+      &amp;<span class="hljs-selector-pseudo">:hover</span> {
+        <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--dropdown-item-hover-bg);
+      }
+
+      &amp;<span class="hljs-selector-class">.active</span> {
+        <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--dropdown-item-active-bg);
+        <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--dropdown-item-active-color);
+        <span class="hljs-attribute">font-weight</span>: <span class="hljs-built_in">var</span>(--bold);
+      }
+
+      &amp; <span class="hljs-selector-class">.option-icon</span> {
+        <span class="hljs-attribute">margin-right</span>: <span class="hljs-number">8px</span>;
+        <span class="hljs-attribute">vertical-align</span>: middle;
+      }
+    }
+  }
+}
+
+<span class="hljs-comment">/* Hidden input */</span>
+<span class="hljs-selector-tag">input</span><span class="hljs-selector-attr">[type=<span class="hljs-string">&quot;hidden&quot;</span>]</span> {
+  <span class="hljs-attribute">display</span>: none;
+}
+</code></pre>
+        <pre id="src-dropdown-3" hidden><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { $ } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/query&#x27;</span>;
+<span class="hljs-keyword">import</span> { isEmpty } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
+
+<span class="hljs-comment">// Display selection in the result areas</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">showSelection</span> = (<span class="hljs-params">elementId, value</span>) =&gt; {
+  <span class="hljs-keyword">const</span> displayValue = !<span class="hljs-title function_">isEmpty</span>(value) ? value : <span class="hljs-string">&#x27;Nothing&#x27;</span>;
+  $(<span class="hljs-string">`#<span class="hljs-subst">${elementId}</span>`</span>).<span class="hljs-title function_">html</span>(<span class="hljs-string">`Selected: <span class="hljs-subst">${displayValue}</span>`</span>);
+};
+
+<span class="hljs-comment">// Basic dropdown</span>
+$(<span class="hljs-string">&#x27;#basic-dropdown&#x27;</span>).<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;change&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+  <span class="hljs-title function_">showSelection</span>(<span class="hljs-string">&#x27;basic-result&#x27;</span>, event.<span class="hljs-property">detail</span>.<span class="hljs-property">value</span>);
+});
+
+<span class="hljs-comment">// Icon dropdown</span>
+$(<span class="hljs-string">&#x27;#icon-dropdown&#x27;</span>).<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;change&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+  <span class="hljs-title function_">showSelection</span>(<span class="hljs-string">&#x27;icon-result&#x27;</span>, event.<span class="hljs-property">detail</span>.<span class="hljs-property">value</span>);
+});
+
+<span class="hljs-comment">// Variant dropdown</span>
+$(<span class="hljs-string">&#x27;#variant-dropdown&#x27;</span>).<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;change&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+  <span class="hljs-title function_">showSelection</span>(<span class="hljs-string">&#x27;variant-result&#x27;</span>, event.<span class="hljs-property">detail</span>.<span class="hljs-property">value</span>);
+});
+
+<span class="hljs-comment">// Log all dropdown changes</span>
+$(<span class="hljs-string">&#x27;ui-dropdown&#x27;</span>).<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;change&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Dropdown changed:&#x27;</span>, event.<span class="hljs-property">detail</span>);
+});
+</code></pre>
+      </details>
       <aside class="notes">
         <h2>New patterns</h2>
         <p>Hidden <code>&lt;input&gt;</code> for form submission, <code>onChange</code> callback alongside <code>dispatchEvent</code>, <code>el.contains(event.target)</code>, JSON in HTML attributes, <code>{classIf}</code>.</p>
@@ -378,5 +814,15 @@ body {
         </nav>
       </aside>
     </div>
+    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>
   </body>
 </html>

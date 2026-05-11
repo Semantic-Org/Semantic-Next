@@ -29,7 +29,7 @@
 html { scrollbar-gutter: stable; }
 
 body {
-  font-family: var(--page-font, system-ui, sans-serif);
+  font-family: var(--page-font);
   max-width: 720px;
   margin: 2rem auto;
   padding: 0 1rem;
@@ -47,19 +47,19 @@ body {
   .header {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--standard-15, #e5e5e5);
+    border-bottom: 1px solid var(--standard-15);
 
     .crumbs {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       font-size: 0.8em;
-      color: var(--standard-50, #888);
+      color: var(--standard-50);
 
       a {
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         text-decoration: none;
-        &:hover { color: var(--primary-color, #2185d0); }
+        &:hover { color: var(--primary-color); }
       }
 
       .position {
@@ -77,14 +77,14 @@ body {
         display: block;
         font-size: 0.7em;
         font-weight: 400;
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         margin-top: 0.15rem;
       }
     }
 
     .description {
       margin: 0.5rem 0 0;
-      color: var(--standard-60, #666);
+      color: var(--standard-60);
       font-size: 0.9em;
       line-height: 1.5;
     }
@@ -95,12 +95,108 @@ body {
     transform: translateZ(0);
   }
 
+  .source {
+    margin-top: 1.5rem;
+    border: 1px solid var(--standard-15);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.85em;
+      font-weight: 600;
+      color: var(--standard-60);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: 1px solid var(--standard-15);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      background: var(--inverted-10);
+      border-bottom: 1px solid var(--standard-15);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: 0.5rem 0.9rem;
+        font: inherit;
+        font-size: 0.8em;
+        font-family: var(--mono-font);
+        color: var(--standard-50);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+
+        &:hover { color: var(--text-color); }
+        &.active {
+          color: var(--text-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: 0.9rem 1rem;
+      overflow: auto;
+      font-family: var(--mono-font);
+      font-size: 0.8em;
+      line-height: 1.55;
+      background: var(--inverted-5);
+      color: var(--text-color);
+      max-height: 500px;
+      tab-size: 2;
+    }
+
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal { color: var(--purple-text-color); }
+    .hljs-string,
+    .hljs-attr { color: var(--green-text-color); }
+    .hljs-number { color: var(--orange-text-color); }
+    .hljs-comment { color: var(--standard-40); font-style: italic; }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag { color: var(--blue-text-color); }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id { color: var(--pink-text-color); }
+    .hljs-meta,
+    .hljs-title { color: var(--standard-70); }
+    .hljs-variable,
+    .hljs-template-variable { color: var(--red-text-color); }
+  }
+
   .notes {
     margin-top: 2rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--standard-15, #e5e5e5);
+    border-top: 1px solid var(--standard-15);
     font-size: 0.9em;
-    color: var(--standard-70, #555);
+    color: var(--standard-70);
     line-height: 1.55;
 
     h2 {
@@ -109,7 +205,7 @@ body {
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--standard-50, #888);
+      color: var(--standard-50);
     }
 
     p { margin: 0 0 1rem; }
@@ -119,7 +215,7 @@ body {
     code {
       font-size: 0.9em;
       padding: 0.05em 0.3em;
-      background: var(--standard-5, #f5f5f5);
+      background: var(--standard-5);
       border-radius: 3px;
     }
 
@@ -128,10 +224,10 @@ body {
       justify-content: space-between;
       margin-top: 1.5rem;
       padding-top: 1rem;
-      border-top: 1px solid var(--standard-10, #eee);
+      border-top: 1px solid var(--standard-10);
 
       a {
-        color: var(--primary-color, #2185d0);
+        color: var(--primary-color);
         text-decoration: none;
         font-size: 0.95em;
         &:hover { text-decoration: underline; }
@@ -143,7 +239,7 @@ body {
   h1 { margin-bottom: 0.25rem; }
 
   .lede {
-    color: var(--standard-60, #666);
+    color: var(--standard-60);
     margin-top: 0;
     font-size: 0.95em;
     line-height: 1.55;
@@ -155,12 +251,12 @@ body {
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--standard-50, #888);
+    color: var(--standard-50);
   }
 
   .section-lede {
     margin: 0 0 1rem;
-    color: var(--standard-50, #888);
+    color: var(--standard-50);
     font-size: 0.85em;
   }
 
@@ -171,7 +267,7 @@ body {
 
     li {
       padding: 1rem 0;
-      border-bottom: 1px solid var(--standard-10, #eee);
+      border-bottom: 1px solid var(--standard-10);
       &:last-child { border-bottom: none; }
     }
 
@@ -180,36 +276,36 @@ body {
       align-items: baseline;
       gap: 0.6rem;
       text-decoration: none;
-      &:hover .headline { color: var(--primary-color, #2185d0); }
+      &:hover .headline { color: var(--primary-color); }
 
       .position {
         font-variant-numeric: tabular-nums;
-        color: var(--standard-40, #aaa);
+        color: var(--standard-40);
         font-size: 0.9em;
         min-width: 1.5rem;
       }
 
       .headline {
         font-weight: 600;
-        color: var(--text-color, #222);
+        color: var(--text-color);
       }
 
       .subtitle {
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         font-size: 0.85em;
       }
     }
 
     .intro {
       margin: 0.35rem 0 0 2.1rem;
-      color: var(--standard-60, #666);
+      color: var(--standard-60);
       font-size: 0.9em;
       line-height: 1.55;
 
       code {
         font-size: 0.9em;
         padding: 0.05em 0.3em;
-        background: var(--standard-5, #f5f5f5);
+        background: var(--standard-5);
         border-radius: 3px;
       }
     }
@@ -234,6 +330,97 @@ body {
       <div class="container">
         <circle-expand></circle-expand>
       </div>
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+          <li><button type="button" data-target="src-event-data-0" class="active">component.js</button></li>
+          <li><button type="button" data-target="src-event-data-1">component.html</button></li>
+          <li><button type="button" data-target="src-event-data-2">component.css</button></li>
+        </ul>
+        <pre id="src-event-data-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
+<span class="hljs-keyword">const</span> defaultSettings = {
+  <span class="hljs-attr">delta</span>: <span class="hljs-number">50</span>,
+};
+
+<span class="hljs-keyword">const</span> defaultState = {
+  <span class="hljs-attr">width</span>: <span class="hljs-number">250</span>,
+  <span class="hljs-attr">height</span>: <span class="hljs-number">250</span>,
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ state, settings }</span>) =&gt; ({
+
+  <span class="hljs-comment">// this destructures the button data</span>
+  <span class="hljs-comment">// data-dimension and data-helper and uses it to adjust state</span>
+  <span class="hljs-title function_">adjustSize</span>(<span class="hljs-params">{ dimension, helper }</span>) {
+    state[dimension][helper](settings.<span class="hljs-property">delta</span>);
+  },
+
+});
+
+<span class="hljs-keyword">const</span> events = {
+
+  <span class="hljs-comment">// data-dimension and data-helper are passed from html metadata</span>
+  <span class="hljs-comment">// i.e. &lt;ui-button data-dimension=&quot;width&quot; data-helper=&quot;increment&quot;&gt;</span>
+  <span class="hljs-string">&#x27;click ui-button&#x27;</span>({ self, data }) {
+    self.<span class="hljs-title function_">adjustSize</span>(data);
+  },
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">CircleExpand</span> = <span class="hljs-title function_">defineComponent</span>({
+  <span class="hljs-attr">tagName</span>: <span class="hljs-string">&#x27;circle-expand&#x27;</span>,
+  template,
+  css,
+  defaultState,
+  defaultSettings,
+  events,
+  createComponent,
+});
+</code></pre>
+        <pre id="src-event-data-1" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Width<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">ui-button</span> <span class="hljs-attr">data-helper</span>=<span class="hljs-string">&quot;decrement&quot;</span> <span class="hljs-attr">data-dimension</span>=<span class="hljs-string">&quot;width&quot;</span>&gt;</span>
+  Decrease
+<span class="hljs-tag">&lt;/<span class="hljs-name">ui-button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">ui-button</span> <span class="hljs-attr">data-helper</span>=<span class="hljs-string">&quot;increment&quot;</span> <span class="hljs-attr">data-dimension</span>=<span class="hljs-string">&quot;width&quot;</span>&gt;</span>
+  Increase
+<span class="hljs-tag">&lt;/<span class="hljs-name">ui-button</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Height<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">ui-button</span> <span class="hljs-attr">data-helper</span>=<span class="hljs-string">&quot;decrement&quot;</span> <span class="hljs-attr">data-dimension</span>=<span class="hljs-string">&quot;height&quot;</span>&gt;</span>
+  Decrease
+<span class="hljs-tag">&lt;/<span class="hljs-name">ui-button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">ui-button</span> <span class="hljs-attr">data-helper</span>=<span class="hljs-string">&quot;increment&quot;</span> <span class="hljs-attr">data-dimension</span>=<span class="hljs-string">&quot;height&quot;</span>&gt;</span>
+  Increase
+<span class="hljs-tag">&lt;/<span class="hljs-name">ui-button</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">hr</span>/&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;rectangle&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;
+  width: { width &gt; 0 ? width : 0 }px;
+  height: { height &gt; 0 ? height : 0 }px;
+&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-event-data-2" hidden><code class="hljs language-css"><span class="hljs-selector-class">.rectangle</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--pink) <span class="hljs-built_in">var</span>(--strong-angled-gradient);
+  <span class="hljs-attribute">box-shadow</span>: <span class="hljs-built_in">var</span>(--subtle-shadow);
+  <span class="hljs-attribute">border</span>: <span class="hljs-built_in">var</span>(--border);
+  <span class="hljs-attribute">transition</span>: all <span class="hljs-number">500ms</span> ease-in-out;
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius)
+}
+<span class="hljs-selector-tag">p</span> {
+  <span class="hljs-attribute">margin-top</span>: <span class="hljs-built_in">var</span>(--margin);
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">50</span>);
+}
+hr {
+  <span class="hljs-attribute">margin</span>: <span class="hljs-built_in">var</span>(--vertically-spaced);
+  <span class="hljs-attribute">border-bottom</span>: <span class="hljs-built_in">var</span>(--border);
+  <span class="hljs-attribute">outline</span>: none;
+  <span class="hljs-attribute">background</span>: none;
+}
+</code></pre>
+      </details>
       <aside class="notes">
         <h2>New patterns</h2>
         <p><code>state[dimension][helper](settings.delta)</code> bracket-notation access, single-handler dispatch via data attributes.</p>
@@ -248,5 +435,15 @@ body {
         </nav>
       </aside>
     </div>
+    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>
   </body>
 </html>

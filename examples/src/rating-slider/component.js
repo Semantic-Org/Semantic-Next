@@ -91,14 +91,14 @@ const events = {
     event.preventDefault();
   },
 
-  'global pointermove body'({ self, state, event }) {
+  'global pointermove html'({ self, state, event }) {
     if (!state.dragging.get()) {
       return;
     }
     self.updateRatingFromEvent(event);
   },
 
-  'global pointerup body'({ state, dispatchEvent }) {
+  'global pointerup html'({ state, dispatchEvent }) {
     if (!state.dragging.get()) {
       return;
     }

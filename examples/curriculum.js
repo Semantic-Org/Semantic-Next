@@ -69,16 +69,17 @@ export const CURRICULUM = [
   },
   {
     id: 'context-menu',
-    headline: 'Global and deep events',
+    headline: 'Slots, deep events, and cross-instance coordination',
     intro:
-      'A right-click context menu. The component listens for events both inside shadow DOM (`deep`) and on the document (`global`), positions itself within the viewport, and uses a custom event so opening one menu closes any others.',
+      'A right-click context menu. The trigger wraps a `<slot>`, so the actual right-click happens on light-DOM content that the host element exposes through the shadow root. The component listens on the document with `global`, positions itself within the viewport, and uses a custom event so opening one menu closes any others.',
     newPatterns:
-      "`{>slot}`, `'global click body'`, `'deep contextmenu .trigger'`, `part`, `peek()`, key handler return values, `role` / `tabindex`, `el`.",
+      "`{>slot}`, `'deep contextmenu .trigger'`, `'global click body'`, `'global show context-menu'`, `part`, key handler return values, `role` / `tabindex`, `dispatchEvent`.",
     whatToNotice: [
-      "`'deep contextmenu .trigger'` listens for `contextmenu` on the `.trigger` element even when it sits inside another shadow root. Standard event listeners stop at the boundary.",
+      "`'deep contextmenu .trigger'` — the trigger contains `{>slot}` and the actual right-click target is light-DOM content the consumer passed in. Without `deep`, the framework's handler bails out because `event.target` lives in a different tree than `.trigger`. The `deep` keyword opts in to handling events whose target sits outside the component's own subtree.",
       "`'global click body'` and `'global contextmenu body'` listen on the document from within the shadow DOM, and unbind automatically when the component is destroyed.",
       "`'global show context-menu'` listens for a custom event dispatched by *other* `context-menu` instances. Each menu dismisses itself when a sibling opens.",
       'Key handlers can return `true` or `false` to indicate whether they handled the event — useful when the same key should fall through to the page when the menu is closed.',
+      '`part="menu"`, `part="menu-item"`, etc. let the consumer style internals from outside the shadow root with `::part()`.',
     ],
   },
   {

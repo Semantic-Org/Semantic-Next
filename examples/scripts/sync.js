@@ -19,7 +19,19 @@ import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import hljs from 'highlight.js/lib/core';
+import hljsCSS from 'highlight.js/lib/languages/css';
+import hljsJS from 'highlight.js/lib/languages/javascript';
+import hljsJSON from 'highlight.js/lib/languages/json';
+import hljsXML from 'highlight.js/lib/languages/xml';
+
 import { CORE_COUNT, CURRICULUM } from '../curriculum.js';
+
+hljs.registerLanguage('javascript', hljsJS);
+hljs.registerLanguage('xml', hljsXML);
+hljs.registerLanguage('html', hljsXML);
+hljs.registerLanguage('css', hljsCSS);
+hljs.registerLanguage('json', hljsJSON);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const EXAMPLES_DIR = resolve(__dirname, '..');
@@ -232,6 +244,71 @@ function renderInline(text) {
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 }
 
+/* Map a filename to a highlight.js language identifier. */
+function languageFor(filename) {
+  if (filename.endsWith('.js')) { return 'javascript'; }
+  if (filename.endsWith('.html')) { return 'html'; }
+  if (filename.endsWith('.css')) { return 'css'; }
+  if (filename.endsWith('.json')) { return 'json'; }
+  return null;
+}
+
+/*
+  Pick the source files to expose in the per-example code viewer.
+  Excludes the generated wrapper page.html and the page-only page.css.
+  Order: component.js → component.html → component.css → other subfiles
+  alphabetically → page.js last (since it's usage, not the component itself).
+*/
+async function collectSourceFiles(dest) {
+  const entries = await readdir(dest);
+  const excluded = new Set(['page.html', 'page.css']);
+  const allowed = entries
+    .filter((name) => !excluded.has(name) && languageFor(name) !== null);
+
+  const order = (name) => {
+    if (name === 'component.js') { return 0; }
+    if (name === 'component.html') { return 1; }
+    if (name === 'component.css') { return 2; }
+    if (name === 'page.js') { return 100; }
+    return 50;
+  };
+  return allowed.sort((a, b) => order(a) - order(b) || a.localeCompare(b));
+}
+
+/* Render the collapsible "View code" viewer with tabbed source files. */
+async function renderSourceViewer(dest, id) {
+  const files = await collectSourceFiles(dest);
+  if (files.length === 0) { return ''; }
+
+  const fileButtons = files.map((file, i) =>
+    `          <li><button type="button" data-target="src-${id}-${i}"${i === 0 ? ' class="active"' : ''}>${
+      escapeHTML(file)
+    }</button></li>`
+  ).join('\n');
+
+  const panels = [];
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const content = await readFile(join(dest, file), 'utf8');
+    const lang = languageFor(file);
+    const html = lang ? hljs.highlight(content, { language: lang }).value : escapeHTML(content);
+    panels.push(
+      `        <pre id="src-${id}-${i}"${
+        i === 0 ? '' : ' hidden'
+      }><code class="hljs language-${lang}">${html}</code></pre>`,
+    );
+  }
+
+  return `
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+${fileButtons}
+        </ul>
+${panels.join('\n')}
+      </details>`;
+}
+
 /* Render the curriculum's lesson notes panel + prev/next walk for one example. */
 function renderLessonNotes(entry, prev, next) {
   if (!entry) { return ''; }
@@ -253,8 +330,25 @@ ${bullets}
       </aside>`;
 }
 
+/*
+  Tiny client script that hooks up <details class="source"> tab switching.
+  Embedded once per page (cheap, ~300 bytes minified inline).
+*/
+const SOURCE_SCRIPT = `    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>`;
+
 /* Wrap a docs-style page.html fragment in a complete HTML document. */
-function wrapPageHTML({ id, title, description, fragment, hasPageCSS, hasPageJS, entry, position, prev, next }) {
+function wrapPageHTML(
+  { id, title, description, fragment, hasPageCSS, hasPageJS, entry, position, prev, next, sourceViewer },
+) {
   // blocking="render" defers paint until each module is parsed + executed,
   // so custom elements are upgraded before the first frame (no FOUC flash).
   const scripts = [
@@ -303,8 +397,9 @@ ${PAGE_STYLES}
       </header>
       <div class="container">
 ${fragment.trimEnd().replace(/^/gm, '        ')}
-      </div>${renderLessonNotes(entry, prev, next)}
+      </div>${sourceViewer}${renderLessonNotes(entry, prev, next)}
     </div>
+${SOURCE_SCRIPT}
   </body>
 </html>
 `;
@@ -367,6 +462,7 @@ async function syncOne(id, curriculumIndex) {
     const next = curriculumIndex >= 0 && curriculumIndex < CURRICULUM.length - 1
       ? CURRICULUM[curriculumIndex + 1]
       : null;
+    const sourceViewer = await renderSourceViewer(dest, id);
     const wrapped = wrapPageHTML({
       id,
       title,
@@ -378,6 +474,7 @@ async function syncOne(id, curriculumIndex) {
       position: curriculumIndex >= 0 ? curriculumIndex + 1 : 0,
       prev,
       next,
+      sourceViewer,
     });
     await writeFile(pageHTML, wrapped);
   }

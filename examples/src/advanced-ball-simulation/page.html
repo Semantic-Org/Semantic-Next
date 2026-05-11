@@ -29,7 +29,7 @@
 html { scrollbar-gutter: stable; }
 
 body {
-  font-family: var(--page-font, system-ui, sans-serif);
+  font-family: var(--page-font);
   max-width: 720px;
   margin: 2rem auto;
   padding: 0 1rem;
@@ -47,19 +47,19 @@ body {
   .header {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--standard-15, #e5e5e5);
+    border-bottom: 1px solid var(--standard-15);
 
     .crumbs {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       font-size: 0.8em;
-      color: var(--standard-50, #888);
+      color: var(--standard-50);
 
       a {
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         text-decoration: none;
-        &:hover { color: var(--primary-color, #2185d0); }
+        &:hover { color: var(--primary-color); }
       }
 
       .position {
@@ -77,14 +77,14 @@ body {
         display: block;
         font-size: 0.7em;
         font-weight: 400;
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         margin-top: 0.15rem;
       }
     }
 
     .description {
       margin: 0.5rem 0 0;
-      color: var(--standard-60, #666);
+      color: var(--standard-60);
       font-size: 0.9em;
       line-height: 1.5;
     }
@@ -95,12 +95,108 @@ body {
     transform: translateZ(0);
   }
 
+  .source {
+    margin-top: 1.5rem;
+    border: 1px solid var(--standard-15);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.85em;
+      font-weight: 600;
+      color: var(--standard-60);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: 1px solid var(--standard-15);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      background: var(--inverted-10);
+      border-bottom: 1px solid var(--standard-15);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: 0.5rem 0.9rem;
+        font: inherit;
+        font-size: 0.8em;
+        font-family: var(--mono-font);
+        color: var(--standard-50);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+
+        &:hover { color: var(--text-color); }
+        &.active {
+          color: var(--text-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: 0.9rem 1rem;
+      overflow: auto;
+      font-family: var(--mono-font);
+      font-size: 0.8em;
+      line-height: 1.55;
+      background: var(--inverted-5);
+      color: var(--text-color);
+      max-height: 500px;
+      tab-size: 2;
+    }
+
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal { color: var(--purple-text-color); }
+    .hljs-string,
+    .hljs-attr { color: var(--green-text-color); }
+    .hljs-number { color: var(--orange-text-color); }
+    .hljs-comment { color: var(--standard-40); font-style: italic; }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag { color: var(--blue-text-color); }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id { color: var(--pink-text-color); }
+    .hljs-meta,
+    .hljs-title { color: var(--standard-70); }
+    .hljs-variable,
+    .hljs-template-variable { color: var(--red-text-color); }
+  }
+
   .notes {
     margin-top: 2rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--standard-15, #e5e5e5);
+    border-top: 1px solid var(--standard-15);
     font-size: 0.9em;
-    color: var(--standard-70, #555);
+    color: var(--standard-70);
     line-height: 1.55;
 
     h2 {
@@ -109,7 +205,7 @@ body {
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--standard-50, #888);
+      color: var(--standard-50);
     }
 
     p { margin: 0 0 1rem; }
@@ -119,7 +215,7 @@ body {
     code {
       font-size: 0.9em;
       padding: 0.05em 0.3em;
-      background: var(--standard-5, #f5f5f5);
+      background: var(--standard-5);
       border-radius: 3px;
     }
 
@@ -128,10 +224,10 @@ body {
       justify-content: space-between;
       margin-top: 1.5rem;
       padding-top: 1rem;
-      border-top: 1px solid var(--standard-10, #eee);
+      border-top: 1px solid var(--standard-10);
 
       a {
-        color: var(--primary-color, #2185d0);
+        color: var(--primary-color);
         text-decoration: none;
         font-size: 0.95em;
         &:hover { text-decoration: underline; }
@@ -143,7 +239,7 @@ body {
   h1 { margin-bottom: 0.25rem; }
 
   .lede {
-    color: var(--standard-60, #666);
+    color: var(--standard-60);
     margin-top: 0;
     font-size: 0.95em;
     line-height: 1.55;
@@ -155,12 +251,12 @@ body {
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--standard-50, #888);
+    color: var(--standard-50);
   }
 
   .section-lede {
     margin: 0 0 1rem;
-    color: var(--standard-50, #888);
+    color: var(--standard-50);
     font-size: 0.85em;
   }
 
@@ -171,7 +267,7 @@ body {
 
     li {
       padding: 1rem 0;
-      border-bottom: 1px solid var(--standard-10, #eee);
+      border-bottom: 1px solid var(--standard-10);
       &:last-child { border-bottom: none; }
     }
 
@@ -180,36 +276,36 @@ body {
       align-items: baseline;
       gap: 0.6rem;
       text-decoration: none;
-      &:hover .headline { color: var(--primary-color, #2185d0); }
+      &:hover .headline { color: var(--primary-color); }
 
       .position {
         font-variant-numeric: tabular-nums;
-        color: var(--standard-40, #aaa);
+        color: var(--standard-40);
         font-size: 0.9em;
         min-width: 1.5rem;
       }
 
       .headline {
         font-weight: 600;
-        color: var(--text-color, #222);
+        color: var(--text-color);
       }
 
       .subtitle {
-        color: var(--standard-50, #888);
+        color: var(--standard-50);
         font-size: 0.85em;
       }
     }
 
     .intro {
       margin: 0.35rem 0 0 2.1rem;
-      color: var(--standard-60, #666);
+      color: var(--standard-60);
       font-size: 0.9em;
       line-height: 1.55;
 
       code {
         font-size: 0.9em;
         padding: 0.05em 0.3em;
-        background: var(--standard-5, #f5f5f5);
+        background: var(--standard-5);
         border-radius: 3px;
       }
     }
@@ -240,6 +336,357 @@ body {
           saturation-decay="400">
         </ball-simulation>
       </div>
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+          <li><button type="button" data-target="src-advanced-ball-simulation-0" class="active">component.js</button></li>
+          <li><button type="button" data-target="src-advanced-ball-simulation-1">component.html</button></li>
+          <li><button type="button" data-target="src-advanced-ball-simulation-2">component.css</button></li>
+        </ul>
+        <pre id="src-advanced-ball-simulation-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+<span class="hljs-keyword">import</span> { each, generateID } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
+
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
+<span class="hljs-comment">/*
+  This animation loop uses the ball position as the main source of reactivity
+  updating the positions using requestAnimationFrame as the browser will permit
+  the animation loop to update the view
+
+  The reactivity occurs in updateBalls()
+  and the reaction is in startAnimation()
+*/</span>
+
+<span class="hljs-keyword">const</span> defaultState = {
+  <span class="hljs-attr">balls</span>: [],
+};
+
+<span class="hljs-keyword">const</span> defaultSettings = {
+  <span class="hljs-attr">count</span>: <span class="hljs-number">0</span>, <span class="hljs-comment">// initial ball count</span>
+  <span class="hljs-attr">radius</span>: <span class="hljs-number">3</span>, <span class="hljs-comment">// average ball radius</span>
+  <span class="hljs-attr">velocity</span>: <span class="hljs-number">100</span>, <span class="hljs-comment">// average ball velocity</span>
+  <span class="hljs-attr">emitRate</span>: <span class="hljs-number">2</span>, <span class="hljs-comment">// rate which balls are emitted from pointer</span>
+  <span class="hljs-attr">saturationDecay</span>: <span class="hljs-number">500</span>, <span class="hljs-comment">// how quickly ball saturation decays after collision</span>
+  <span class="hljs-attr">lightnessDecay</span>: <span class="hljs-number">20</span>, <span class="hljs-comment">// how quickly ball lightness decays after collission</span>
+  <span class="hljs-attr">minSaturation</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// min saturation of ball</span>
+  <span class="hljs-attr">minLightness</span>: <span class="hljs-number">10</span>, <span class="hljs-comment">// min lightness of ball</span>
+  <span class="hljs-attr">radiusVariance</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// variance in ball radius</span>
+  <span class="hljs-attr">velocityVariance</span>: <span class="hljs-number">100</span>, <span class="hljs-comment">// variance in ball velocity</span>
+  <span class="hljs-attr">speed</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// relative speed of entire animation</span>
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ self, $, reaction, settings, state }</span>) =&gt; ({
+  <span class="hljs-attr">emitter</span>: { <span class="hljs-attr">active</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span> },
+  <span class="hljs-attr">render</span>: { <span class="hljs-attr">lastTime</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">fps</span>: <span class="hljs-number">0</span> },
+
+  <span class="hljs-title function_">startAnimation</span>(<span class="hljs-params"></span>) {
+    self.<span class="hljs-property">render</span>.<span class="hljs-property">lastTime</span> = performance.<span class="hljs-title function_">now</span>() * <span class="hljs-number">0.001</span>;
+
+    <span class="hljs-comment">// this is the main render loop, it does not need to call itself</span>
+    <span class="hljs-comment">// as the reactivity handles rerendering</span>
+    <span class="hljs-title function_">reaction</span>(<span class="hljs-function">() =&gt;</span> {
+      state.<span class="hljs-property">balls</span>.<span class="hljs-title function_">get</span>(); <span class="hljs-comment">// reactive source</span>
+      <span class="hljs-title function_">requestAnimationFrame</span>(self.<span class="hljs-property">animate</span>);
+    });
+  },
+
+  <span class="hljs-title function_">getCanvas</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> $(<span class="hljs-string">&#x27;canvas&#x27;</span>).<span class="hljs-title function_">get</span>(<span class="hljs-number">0</span>);
+  },
+
+  <span class="hljs-title function_">animate</span>(<span class="hljs-params">currentTime</span>) {
+    currentTime *= <span class="hljs-number">0.001</span>;
+    <span class="hljs-keyword">const</span> deltaTime = currentTime - self.<span class="hljs-property">render</span>.<span class="hljs-property">lastTime</span>;
+    self.<span class="hljs-property">render</span>.<span class="hljs-property">lastTime</span> = currentTime;
+
+    <span class="hljs-keyword">let</span> fps = <span class="hljs-number">1</span> / deltaTime;
+    <span class="hljs-keyword">if</span> (fps !== <span class="hljs-title class_">Infinity</span>) {
+      self.<span class="hljs-property">render</span>.<span class="hljs-property">fps</span> = <span class="hljs-number">1</span> / deltaTime;
+    }
+
+    <span class="hljs-keyword">if</span> (self.<span class="hljs-property">emitter</span>.<span class="hljs-property">active</span>) {
+      self.<span class="hljs-title function_">emitBalls</span>();
+    }
+
+    self.<span class="hljs-title function_">updateBalls</span>(deltaTime);
+    self.<span class="hljs-title function_">draw</span>();
+  },
+
+  <span class="hljs-title function_">emitBalls</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> newBalls = [];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; settings.<span class="hljs-property">emitRate</span>; i++) {
+      newBalls.<span class="hljs-title function_">push</span>(self.<span class="hljs-title function_">createBall</span>({
+        <span class="hljs-attr">x</span>: self.<span class="hljs-property">emitter</span>.<span class="hljs-property">x</span>,
+        <span class="hljs-attr">y</span>: self.<span class="hljs-property">emitter</span>.<span class="hljs-property">y</span>,
+      }));
+    }
+    <span class="hljs-keyword">const</span> currentBalls = state.<span class="hljs-property">balls</span>.<span class="hljs-title function_">peek</span>();
+    state.<span class="hljs-property">balls</span>.<span class="hljs-title function_">set</span>([...currentBalls, ...newBalls]);
+  },
+
+  <span class="hljs-title function_">createBall</span>(<span class="hljs-params">{ x, y }</span>) {
+    <span class="hljs-keyword">const</span> <span class="hljs-title function_">randomInRange</span> = (<span class="hljs-params">average, variance</span>) =&gt; {
+      <span class="hljs-keyword">const</span> value = average + (<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() - <span class="hljs-number">0.5</span>) * <span class="hljs-number">2</span> * variance;
+      <span class="hljs-keyword">return</span> (value &lt; <span class="hljs-number">1</span>) ? <span class="hljs-number">1</span> : value;
+    };
+    <span class="hljs-keyword">const</span> angle = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">2</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>;
+    <span class="hljs-keyword">const</span> speed = <span class="hljs-title function_">randomInRange</span>(settings.<span class="hljs-property">velocity</span>, settings.<span class="hljs-property">velocityVariance</span>);
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">_id</span>: <span class="hljs-title function_">generateID</span>(),
+      x,
+      y,
+      <span class="hljs-attr">radius</span>: <span class="hljs-title function_">randomInRange</span>(settings.<span class="hljs-property">radius</span>, settings.<span class="hljs-property">radiusVariance</span>),
+      <span class="hljs-attr">color</span>: self.<span class="hljs-title function_">getRandomColor</span>(),
+      <span class="hljs-attr">saturation</span>: <span class="hljs-number">100</span>, <span class="hljs-comment">// Start at full saturation</span>
+      <span class="hljs-attr">vx</span>: <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">cos</span>(angle) * speed,
+      <span class="hljs-attr">vy</span>: <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sin</span>(angle) * speed,
+    };
+  },
+
+  <span class="hljs-title function_">getRandomColor</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> hue = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">360</span>;
+    <span class="hljs-keyword">const</span> lightness = <span class="hljs-number">40</span> + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">20</span>; <span class="hljs-comment">// 40-60%</span>
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">h</span>: hue, <span class="hljs-attr">s</span>: <span class="hljs-number">100</span>, <span class="hljs-attr">l</span>: lightness }; <span class="hljs-comment">// Start with full saturation</span>
+  },
+
+  <span class="hljs-title function_">updateBalls</span>(<span class="hljs-params">deltaTime</span>) {
+    deltaTime = deltaTime * settings.<span class="hljs-property">speed</span>;
+
+    <span class="hljs-keyword">const</span> canvas = self.<span class="hljs-title function_">getCanvas</span>();
+    <span class="hljs-keyword">const</span> currentBalls = state.<span class="hljs-property">balls</span>.<span class="hljs-title function_">peek</span>();
+    <span class="hljs-keyword">const</span> updatedBalls = currentBalls.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">ball</span> =&gt;</span>
+      self.<span class="hljs-title function_">pipe</span>(
+        ball,
+        <span class="hljs-function"><span class="hljs-params">b</span> =&gt;</span> self.<span class="hljs-title function_">decayColor</span>(b, deltaTime),
+        <span class="hljs-function"><span class="hljs-params">b</span> =&gt;</span> self.<span class="hljs-title function_">updatePosition</span>(b, deltaTime),
+        <span class="hljs-function"><span class="hljs-params">b</span> =&gt;</span> self.<span class="hljs-title function_">checkWalls</span>(b, canvas),
+      )
+    );
+
+    self.<span class="hljs-title function_">checkCollisions</span>(updatedBalls);
+    state.<span class="hljs-property">balls</span>.<span class="hljs-title function_">set</span>(updatedBalls);
+  },
+
+  <span class="hljs-title function_">pipe</span>(<span class="hljs-params">initialValue, ...fns</span>) {
+    <span class="hljs-keyword">return</span> fns.<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">value, fn</span>) =&gt;</span> <span class="hljs-title function_">fn</span>(value), initialValue);
+  },
+
+  <span class="hljs-title function_">decayColor</span>(<span class="hljs-params">ball, deltaTime</span>) {
+    <span class="hljs-keyword">return</span> {
+      ...ball,
+      <span class="hljs-attr">saturation</span>: <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(
+        settings.<span class="hljs-property">minSaturation</span>,
+        ball.<span class="hljs-property">saturation</span> - settings.<span class="hljs-property">saturationDecay</span> * deltaTime,
+      ),
+      <span class="hljs-attr">color</span>: {
+        ...ball.<span class="hljs-property">color</span>,
+        <span class="hljs-attr">l</span>: <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(
+          settings.<span class="hljs-property">minLightness</span>,
+          ball.<span class="hljs-property">color</span>.<span class="hljs-property">l</span> - settings.<span class="hljs-property">lightnessDecay</span> * deltaTime,
+        ),
+      },
+    };
+  },
+
+  <span class="hljs-title function_">updatePosition</span>(<span class="hljs-params">ball, deltaTime</span>) {
+    <span class="hljs-keyword">return</span> {
+      ...ball,
+      <span class="hljs-attr">x</span>: ball.<span class="hljs-property">x</span> + ball.<span class="hljs-property">vx</span> * deltaTime,
+      <span class="hljs-attr">y</span>: ball.<span class="hljs-property">y</span> + ball.<span class="hljs-property">vy</span> * deltaTime,
+    };
+  },
+
+  <span class="hljs-title function_">checkWalls</span>(<span class="hljs-params">ball, canvas</span>) {
+    <span class="hljs-keyword">let</span> { x, y, vx, vy, radius } = ball;
+
+    <span class="hljs-comment">// left/right</span>
+    <span class="hljs-keyword">if</span> (x + radius &gt; canvas.<span class="hljs-property">width</span> || x - radius &lt; <span class="hljs-number">0</span>) {
+      vx = -vx;
+      x = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(radius, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(canvas.<span class="hljs-property">width</span> - radius, x));
+    }
+    <span class="hljs-comment">// top/bottom wall</span>
+    <span class="hljs-keyword">if</span> (y + radius &gt; canvas.<span class="hljs-property">height</span> || y - radius &lt; <span class="hljs-number">0</span>) {
+      vy = -vy;
+      y = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(radius, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(canvas.<span class="hljs-property">height</span> - radius, y));
+    }
+
+    <span class="hljs-keyword">return</span> { ...ball, x, y, vx, vy };
+  },
+
+  <span class="hljs-title function_">checkCollisions</span>(<span class="hljs-params">balls</span>) {
+    <span class="hljs-title function_">each</span>(balls, <span class="hljs-function">(<span class="hljs-params">ball1, i</span>) =&gt;</span> {
+      <span class="hljs-title function_">each</span>(balls.<span class="hljs-title function_">slice</span>(i + <span class="hljs-number">1</span>), <span class="hljs-function"><span class="hljs-params">ball2</span> =&gt;</span> {
+        <span class="hljs-keyword">const</span> dx = ball2.<span class="hljs-property">x</span> - ball1.<span class="hljs-property">x</span>;
+        <span class="hljs-keyword">const</span> dy = ball2.<span class="hljs-property">y</span> - ball1.<span class="hljs-property">y</span>;
+        <span class="hljs-keyword">const</span> distance = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(dx * dx + dy * dy);
+        <span class="hljs-keyword">if</span> (distance &lt; ball1.<span class="hljs-property">radius</span> + ball2.<span class="hljs-property">radius</span>) {
+          self.<span class="hljs-title function_">handleCollision</span>(ball1, ball2, dx, dy, distance);
+        }
+      });
+    });
+  },
+
+  <span class="hljs-title function_">handleCollision</span>(<span class="hljs-params">ball1, ball2, dx, dy, distance</span>) {
+    <span class="hljs-comment">// Revive colors</span>
+    ball1.<span class="hljs-property">color</span> = self.<span class="hljs-title function_">getRandomColor</span>();
+    ball2.<span class="hljs-property">color</span> = self.<span class="hljs-title function_">getRandomColor</span>();
+    ball1.<span class="hljs-property">saturation</span> = <span class="hljs-number">100</span>;
+    ball2.<span class="hljs-property">saturation</span> = <span class="hljs-number">100</span>;
+
+    <span class="hljs-comment">// Collision physics</span>
+    <span class="hljs-keyword">const</span> angle = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">atan2</span>(dy, dx);
+    <span class="hljs-keyword">const</span> sin = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sin</span>(angle);
+    <span class="hljs-keyword">const</span> cos = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">cos</span>(angle);
+
+    <span class="hljs-comment">// Rotate velocities</span>
+    <span class="hljs-keyword">const</span> vx1 = ball1.<span class="hljs-property">vx</span> * cos + ball1.<span class="hljs-property">vy</span> * sin;
+    <span class="hljs-keyword">const</span> vy1 = ball1.<span class="hljs-property">vy</span> * cos - ball1.<span class="hljs-property">vx</span> * sin;
+    <span class="hljs-keyword">const</span> vx2 = ball2.<span class="hljs-property">vx</span> * cos + ball2.<span class="hljs-property">vy</span> * sin;
+    <span class="hljs-keyword">const</span> vy2 = ball2.<span class="hljs-property">vy</span> * cos - ball2.<span class="hljs-property">vx</span> * sin;
+
+    <span class="hljs-comment">// Swap velocities</span>
+    ball1.<span class="hljs-property">vx</span> = vx2 * cos - vy1 * sin;
+    ball1.<span class="hljs-property">vy</span> = vy1 * cos + vx2 * sin;
+    ball2.<span class="hljs-property">vx</span> = vx1 * cos - vy2 * sin;
+    ball2.<span class="hljs-property">vy</span> = vy2 * cos + vx1 * sin;
+
+    <span class="hljs-comment">// Move balls apart</span>
+    <span class="hljs-keyword">const</span> overlap = (ball1.<span class="hljs-property">radius</span> + ball2.<span class="hljs-property">radius</span> - distance) / <span class="hljs-number">2</span>;
+    ball1.<span class="hljs-property">x</span> -= overlap * cos;
+    ball1.<span class="hljs-property">y</span> -= overlap * sin;
+    ball2.<span class="hljs-property">x</span> += overlap * cos;
+    ball2.<span class="hljs-property">y</span> += overlap * sin;
+  },
+
+  <span class="hljs-title function_">draw</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> canvas = self.<span class="hljs-title function_">getCanvas</span>();
+    <span class="hljs-keyword">const</span> ctx = canvas.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">&#x27;2d&#x27;</span>);
+    ctx.<span class="hljs-title function_">clearRect</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, canvas.<span class="hljs-property">width</span>, canvas.<span class="hljs-property">height</span>);
+
+    <span class="hljs-title function_">each</span>(state.<span class="hljs-property">balls</span>.<span class="hljs-title function_">peek</span>(), <span class="hljs-function">(<span class="hljs-params">ball</span>) =&gt;</span> {
+      self.<span class="hljs-title function_">drawBall</span>(ball);
+    });
+
+    self.<span class="hljs-title function_">drawFPS</span>(ctx);
+  },
+
+  <span class="hljs-title function_">drawInitialBalls</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> canvas = self.<span class="hljs-title function_">getCanvas</span>();
+    <span class="hljs-keyword">const</span> initialBalls = [];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; settings.<span class="hljs-property">count</span>; i++) {
+      initialBalls.<span class="hljs-title function_">push</span>(self.<span class="hljs-title function_">createBall</span>({
+        <span class="hljs-attr">x</span>: <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * canvas.<span class="hljs-property">width</span>,
+        <span class="hljs-attr">y</span>: <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * canvas.<span class="hljs-property">height</span>,
+      }));
+    }
+    state.<span class="hljs-property">balls</span>.<span class="hljs-title function_">set</span>(initialBalls);
+    self.<span class="hljs-title function_">draw</span>();
+  },
+
+  <span class="hljs-title function_">drawBall</span>(<span class="hljs-params">ball</span>) {
+    <span class="hljs-keyword">const</span> canvas = self.<span class="hljs-title function_">getCanvas</span>();
+    <span class="hljs-keyword">const</span> ctx = canvas.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">&#x27;2d&#x27;</span>);
+    ctx.<span class="hljs-title function_">beginPath</span>();
+    ctx.<span class="hljs-title function_">arc</span>(ball.<span class="hljs-property">x</span>, ball.<span class="hljs-property">y</span>, ball.<span class="hljs-property">radius</span>, <span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span> * <span class="hljs-number">2</span>);
+    ctx.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">`hsl(<span class="hljs-subst">${ball.color.h}</span>, <span class="hljs-subst">${ball.saturation}</span>%, <span class="hljs-subst">${ball.color.l}</span>%)`</span>;
+    ctx.<span class="hljs-title function_">fill</span>();
+    ctx.<span class="hljs-title function_">closePath</span>();
+  },
+
+  <span class="hljs-title function_">drawFPS</span>(<span class="hljs-params">ctx</span>) {
+    <span class="hljs-keyword">const</span> canvas = self.<span class="hljs-title function_">getCanvas</span>();
+    ctx.<span class="hljs-property">fillStyle</span> = <span class="hljs-string">&#x27;white&#x27;</span>;
+    ctx.<span class="hljs-property">font</span> = <span class="hljs-string">&#x27;12px Arial&#x27;</span>;
+    ctx.<span class="hljs-property">textAlign</span> = <span class="hljs-string">&#x27;right&#x27;</span>;
+    <span class="hljs-keyword">let</span> fps = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">round</span>(self.<span class="hljs-property">render</span>.<span class="hljs-property">fps</span>);
+    <span class="hljs-keyword">if</span> (fps &lt; <span class="hljs-number">100</span>) {
+      fps = <span class="hljs-string">`0<span class="hljs-subst">${fps}</span>`</span>;
+    }
+    ctx.<span class="hljs-title function_">fillText</span>(<span class="hljs-string">`FPS: <span class="hljs-subst">${fps}</span>`</span>, canvas.<span class="hljs-property">width</span> - <span class="hljs-number">10</span>, canvas.<span class="hljs-property">height</span> - <span class="hljs-number">10</span>);
+  },
+  <span class="hljs-title function_">getPointerPosition</span>(<span class="hljs-params">event</span>) {
+    <span class="hljs-keyword">const</span> canvas = self.<span class="hljs-title function_">getCanvas</span>();
+    <span class="hljs-keyword">const</span> rect = canvas.<span class="hljs-title function_">getBoundingClientRect</span>();
+    <span class="hljs-keyword">const</span> scaleX = canvas.<span class="hljs-property">width</span> / rect.<span class="hljs-property">width</span>;
+    <span class="hljs-keyword">const</span> scaleY = canvas.<span class="hljs-property">height</span> / rect.<span class="hljs-property">height</span>;
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">x</span>: (event.<span class="hljs-property">clientX</span> - rect.<span class="hljs-property">left</span>) * scaleX,
+      <span class="hljs-attr">y</span>: (event.<span class="hljs-property">clientY</span> - rect.<span class="hljs-property">top</span>) * scaleY,
+    };
+  },
+});
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">onRendered</span> = (<span class="hljs-params">{ state, data, settings, self }</span>) =&gt; {
+  self.<span class="hljs-title function_">drawInitialBalls</span>();
+  self.<span class="hljs-title function_">startAnimation</span>();
+};
+
+<span class="hljs-keyword">const</span> events = {
+  <span class="hljs-string">&#x27;pointerdown canvas&#x27;</span>({ self, event }) {
+    <span class="hljs-keyword">const</span> pos = self.<span class="hljs-title function_">getPointerPosition</span>(event);
+    self.<span class="hljs-property">emitter</span>.<span class="hljs-property">x</span> = pos.<span class="hljs-property">x</span>;
+    self.<span class="hljs-property">emitter</span>.<span class="hljs-property">y</span> = pos.<span class="hljs-property">y</span>;
+    self.<span class="hljs-property">emitter</span>.<span class="hljs-property">active</span> = <span class="hljs-literal">true</span>;
+  },
+
+  <span class="hljs-string">&#x27;pointermove canvas&#x27;</span>({ self, event }) {
+    <span class="hljs-keyword">if</span> (self.<span class="hljs-property">emitter</span>.<span class="hljs-property">active</span>) {
+      <span class="hljs-keyword">const</span> pos = self.<span class="hljs-title function_">getPointerPosition</span>(event);
+      self.<span class="hljs-property">emitter</span>.<span class="hljs-property">x</span> = pos.<span class="hljs-property">x</span>;
+      self.<span class="hljs-property">emitter</span>.<span class="hljs-property">y</span> = pos.<span class="hljs-property">y</span>;
+    }
+  },
+  <span class="hljs-string">&#x27;pointerup, pointerleave canvas&#x27;</span>({ self }) {
+    self.<span class="hljs-property">emitter</span>.<span class="hljs-property">active</span> = <span class="hljs-literal">false</span>;
+  },
+  <span class="hljs-string">&#x27;change input.speed&#x27;</span>({ value, settings }) {
+    settings.<span class="hljs-property">speed</span> = value / <span class="hljs-number">100</span>;
+  },
+  <span class="hljs-string">&#x27;touchstart, touchmove canvas&#x27;</span>({ event }) {
+    <span class="hljs-comment">// prevent highlight/scroll on mobile</span>
+    event.<span class="hljs-title function_">preventDefault</span>();
+  },
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">BallSimulation</span> = <span class="hljs-title function_">defineComponent</span>({
+  <span class="hljs-attr">tagName</span>: <span class="hljs-string">&#x27;ball-simulation&#x27;</span>,
+  template,
+  css,
+  createComponent,
+  onRendered,
+  events,
+  defaultState,
+  defaultSettings,
+});
+</code></pre>
+        <pre id="src-advanced-ball-simulation-1" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;simulation&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">canvas</span> <span class="hljs-attr">width</span>=<span class="hljs-string">&quot;500&quot;</span> <span class="hljs-attr">height</span>=<span class="hljs-string">&quot;500&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">canvas</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Press and hold to emit balls. Balls will light up when they collide with other balls.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Adjust Speed<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>{speed}x speed<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;range&quot;</span> <span class="hljs-attr">min</span>=<span class="hljs-string">&quot;1&quot;</span> <span class="hljs-attr">max</span>=<span class="hljs-string">&quot;300&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;{speed * 100}&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;speed&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-advanced-ball-simulation-2" hidden><code class="hljs language-css"><span class="hljs-selector-class">.simulation</span> {
+  <span class="hljs-attribute">text-align</span>: center;
+  <span class="hljs-attribute">user-select</span>: none;
+  <span class="hljs-selector-tag">canvas</span> {
+    <span class="hljs-attribute">border</span>: <span class="hljs-built_in">var</span>(--border);
+    <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius);
+    <span class="hljs-attribute">max-width</span>: <span class="hljs-number">100%</span>;
+  }
+  <span class="hljs-selector-tag">p</span> {
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">var</span>(--small);
+    <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">30</span>);
+  }
+  <span class="hljs-selector-tag">input</span> {
+   <span class="hljs-attribute">vertical-align</span>: middle;
+    <span class="hljs-attribute">margin-left</span>: <span class="hljs-built_in">var</span>(--margin-xs);
+  }
+}
+
+</code></pre>
+      </details>
       <aside class="notes">
         <h2>New patterns</h2>
         <p><code>reaction()</code> as the animation driver, <code>peek()</code> for non-tracking reads, <code>onRendered</code>, runtime settings mutation, <code>&lt;canvas&gt;</code> integration.</p>
@@ -255,5 +702,15 @@ body {
         </nav>
       </aside>
     </div>
+    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>
   </body>
 </html>
