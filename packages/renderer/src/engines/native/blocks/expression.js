@@ -35,9 +35,16 @@ const expression = defineBlock({
   name: 'expression',
   syntax: (node) => `{${node.value}}`,
 
-  compute({ node, data, renderer, lookupExpression }) {
+  // Stash evaluator for the literalValue path (lookupTokenValue doesn't
+  // auto-invoke functions — needed for `{#fn handler}` and event-binding
+  // shapes where the value is a function reference, not its call result).
+  create({ renderer }) {
+    return { evaluator: renderer.evaluator };
+  },
+
+  compute({ node, data, self, lookupExpression }) {
     if (node.literalValue) {
-      return renderer.evaluator.lookupTokenValue(node.value, data);
+      return self.evaluator.lookupTokenValue(node.value, data);
     }
     const value = lookupExpression(node.value);
     if (node.unsafeHTML) {
@@ -54,11 +61,11 @@ const expression = defineBlock({
   // siblings; we adopt them via region.ownedNodes. The matched content
   // is returned so defineBlock primes place via match() — first
   // compute-driven update tick then dedups instead of re-rendering.
-  hydrate({ node, data, region, renderer, lookupExpression }) {
+  hydrate({ node, data, region, self, lookupExpression }) {
     if (node.literalValue) {
       // One-shot; nothing reactive to set up. Adopt the server text node
       // (or create one if missing) so place finds it on later writes.
-      const value = renderer.evaluator.lookupTokenValue(node.value, data);
+      const value = self.evaluator.lookupTokenValue(node.value, data);
       this.adoptValueTextNode(region, String(value ?? ''));
       return value;
     }
