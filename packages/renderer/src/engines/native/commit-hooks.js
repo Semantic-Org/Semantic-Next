@@ -24,24 +24,52 @@ import { isArray, isPlainObject } from '@semantic-ui/utils';
 // reference and from null/undefined so the first call always commits.
 const PLACE_INIT = Symbol('place:init');
 
+// Wrapper marker for "this value should be parsed as HTML and inserted
+// as a sibling sequence" — distinguished from AST arrays (rendered via
+// renderAST) and primitives (written to a text node). Compute returns
+// `unsafeHTML(value)` from a block when it wants place to parse-and-insert.
+const UNSAFE_HTML = Symbol('place:unsafeHTML');
+export function unsafeHTML(value) {
+  return { [UNSAFE_HTML]: value };
+}
+
+function isUnsafeHTML(content) {
+  return content != null && typeof content === 'object' && UNSAFE_HTML in content;
+}
+
 // Construct a {place, match} pair for a text-position block.
 //
-// place(content) — public, exposed on the bag. content is an AST array
-// (the matched branch / template content); null clears the region.
-// Reference equality dedups — selectBranch returns the same node.content
-// reference for the same matched branch, so unchanged-branch re-fires
-// no-op.
+// place(content) — public, exposed on the bag. Polymorphic on content
+// shape:
+//   • AST array (Array.isArray) — render via renderAST + region.setContent
+//     with a fresh child scope. Region-managing blocks (conditional,
+//     rerender, template) use this path.
+//   • unsafeHTML wrapper ({ [UNSAFE_HTML]: 'html string' }) — parse value
+//     as HTML, replace region.ownedNodes with the parsed nodes. Mirror of
+//     the existing unsafeHTML expression path.
+//   • null / undefined — clear the region.
+//   • Any other value (primitive) — coerce to string, write into a
+//     reactive text node that lives inside the region as its single owned
+//     node. The text node is created lazily on first primitive place().
+// Reference equality dedups across all shapes — unchanged content
+// no-ops. region.setContent (when place eventually swaps shape) clears
+// region.childScopes, disposing any hydrate scope hydrateInto pushed.
 //
 // match(content) — internal, called by defineBlock from hydrate's return
-// value. Records "the DOM already matches this content" without performing
-// a DOM op, so the first compute-driven update after hydration dedups
-// against the server DOM instead of triggering a wasteful re-render.
-// region.setContent (when place eventually swaps) clears region.childScopes
-// — disposing the hydrate scope hydrateInto pushed — so no leak from the
-// orphaned child-scope at swap time.
+// value. Records "the DOM already matches this content" without
+// performing a DOM op, so the first compute-driven update after
+// hydration dedups against the server DOM instead of triggering a
+// wasteful re-render.
 export function makePlace({ region, scope, renderer, data, isSVG }) {
   let lastContent = PLACE_INIT;
   let lastChildScope = null;
+  let valueTextNode = null;
+
+  function clearOwnedSiblings() {
+    for (const n of region.ownedNodes) { n.remove(); }
+    region.ownedNodes = [];
+    if (region.endAnchor) { region.endAnchor.remove(); }
+  }
 
   function place(content) {
     if (content === lastContent) { return; }
@@ -53,14 +81,50 @@ export function makePlace({ region, scope, renderer, data, isSVG }) {
     }
 
     if (content == null) {
+      // Reset the value text node so a later primitive place() starts fresh.
+      valueTextNode = null;
       region.clear();
       return;
     }
 
-    const childScope = scope.child();
-    lastChildScope = childScope;
-    const fragment = renderer.readAST({ ast: content, scope: childScope, data, isSVG });
-    region.setContent(fragment, childScope);
+    if (isUnsafeHTML(content)) {
+      // HTML payload — parse and insert after the anchor.
+      valueTextNode = null;
+      clearOwnedSiblings();
+      const html = content[UNSAFE_HTML];
+      const str = html == null ? '' : String(html);
+      if (str) {
+        const parsed = renderer.parseHTML(str);
+        const nodes = [...parsed.childNodes];
+        region.anchor.after(parsed);
+        region.ownedNodes = nodes;
+        region.placeEndAnchor();
+      }
+      return;
+    }
+
+    if (Array.isArray(content)) {
+      valueTextNode = null;
+      const childScope = scope.child();
+      lastChildScope = childScope;
+      const fragment = renderer.readAST({ ast: content, scope: childScope, data, isSVG });
+      region.setContent(fragment, childScope);
+      return;
+    }
+
+    // Primitive value (string / number / boolean). Write to a reactive
+    // text node owned by the region. Create lazily.
+    const str = String(content);
+    if (!valueTextNode || valueTextNode.parentNode == null) {
+      clearOwnedSiblings();
+      valueTextNode = document.createTextNode(str);
+      region.anchor.after(valueTextNode);
+      region.ownedNodes = [valueTextNode];
+      region.placeEndAnchor();
+    }
+    else if (valueTextNode.data !== str) {
+      valueTextNode.data = str;
+    }
   }
 
   function match(content) {
