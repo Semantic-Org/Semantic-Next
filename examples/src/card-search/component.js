@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { weightedObjectSearch } from '@semantic-ui/utils';
+import { each, escapeRegExp, get, weightedObjectSearch } from '@semantic-ui/utils';
 
 // sub templates
 import { card } from './card.js';
@@ -47,7 +47,7 @@ const events = {
   'change ui-menu'({ state, data }) {
     state.filter.set(data.value);
   },
-  'input ui-input'({ state, value }) {
+  'input ui-input'({ state, value, target }) {
     state.searchTerm.set(value);
   },
 };
@@ -55,7 +55,6 @@ const events = {
 export const FriendDirectory = defineComponent({
   tagName: 'friend-directory',
   template,
-  renderingEngine: 'native',
   css,
   defaultState,
   events,

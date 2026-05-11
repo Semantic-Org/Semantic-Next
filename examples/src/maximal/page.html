@@ -414,6 +414,7 @@ body {
   onAttributeChanged,
   onCreated,
   onDestroyed,
+  onRendered,
   onThemeChanged
 } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./lifecycle.js&#x27;</span>;
 
@@ -427,6 +428,7 @@ body {
   <span class="hljs-attr">subTemplates</span>: { buttons },
   createComponent,
   onCreated,
+  onRendered,
   onDestroyed,
   onThemeChanged,
   onAttributeChanged,
@@ -506,11 +508,11 @@ number-adjust ~ number-adjust<span class="hljs-selector-pseudo">::part</span>(co
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">onDestroyed</span> = (<span class="hljs-params"></span>) =&gt; {
   <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Destroyed&#x27;</span>);
 };
-<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">onThemeChanged</span> = (<span class="hljs-params">darkMode</span>) =&gt; {
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">onThemeChanged</span> = (<span class="hljs-params">{ darkMode }</span>) =&gt; {
   <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Theme changed&#x27;</span>, darkMode);
 };
-<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">onAttributeChanged</span> = (<span class="hljs-params">name, value</span>) =&gt; {
-  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Attribute changed&#x27;</span>, name, value);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">onAttributeChanged</span> = (<span class="hljs-params">name, oldValue, newValue</span>) =&gt; {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Attribute changed&#x27;</span>, name, oldValue, <span class="hljs-string">&#x27;→&#x27;</span>, newValue);
 };
 </code></pre>
         <pre id="src-maximal-8" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>First component<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>

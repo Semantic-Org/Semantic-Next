@@ -1,67 +1,69 @@
 # @semantic-ui/examples
 
-A standalone, runnable copy of every framework example, served as plain HTML pages with bundled component code. Each example is a self-contained folder that builds from source against the monorepo packages.
+A walkthrough of [Semantic UI](https://next.semantic-ui.com) through working components. Each example is a complete, runnable web component — template, styles, behavior, and a host page that mounts it — built directly against the framework you'd install from npm.
 
-This directory is mirrored from `docs/src/examples/` by `scripts/sync.js` — the canonical source for each example lives there, not here.
+The examples are sequenced from the smallest possible component to dense real-world patterns. Read them in order if you're learning the framework; jump to a specific one if you're looking for how to do a particular thing.
 
-## Running locally
+## Try it
 
 ```bash
+npm install
 npm run dev
 ```
 
-Starts an esbuild dev server at `http://localhost:3000`. The landing page lists every example; each card links to a standalone page that loads its own bundle. Edits to source files trigger automatic rebuilds.
+Opens at `http://localhost:3000`. The landing page lists every example with a one-line description; each card links to a standalone page that mounts the component and shows the source.
 
-## Layout
+You can also browse the examples on the [hosted docs site](https://next.semantic-ui.com).
+
+## Reading an example
+
+Each `src/<example-id>/` folder contains a self-contained component. The smallest, `minimal/`, looks like this:
 
 ```
-examples/
-├── curriculum.js          pedagogy metadata (order, headlines, intros, notes)
-├── index.html             generated landing page
-├── index.js               generated barrel re-exporting every example component
-├── scripts/
-│   ├── sync.js            pulls source from docs/src/examples/, generates pages
-│   └── dev.js             esbuild bundler + static server
-└── src/
-    └── <example-id>/
-        ├── component.js   the component definition
-        ├── component.html template (when not inlined)
-        ├── component.css  shadow-scoped styles (when not inlined)
-        ├── page.html      generated wrapper that mounts the component
-        ├── page.js        optional page-level orchestration
-        └── page.css       optional page-level styles
+minimal/
+├── component.js       defineComponent({ tagName, template, css, ... })
+└── page.html          a page that uses the component
 ```
 
-Each `<example-id>` folder is a single example. Files inside `src/` are copies — edits should be made in `docs/src/examples/<example-id>/` and re-synced.
+Most examples split the template and styles into their own files and add a host page:
 
-## Adding or editing an example
+```
+emoji-reactions/
+├── component.js       defineComponent({ tagName, template, events, ... })
+├── component.html     the template
+├── component.css      shadow-scoped styles
+└── page.html          a page that uses the component
+```
 
-1. Author the source in `docs/src/examples/<category>/<example-id>/`.
-2. Add an entry to `curriculum.js` if the example should appear in the walkthrough. The entry's `id` must match the source folder name.
-3. Run `npm run build` to sync, or `npm run watch` to track changes continuously.
+Some add a `page.js` for page-level orchestration (e.g. configuring the component via `$(tag).settings({...})`) or a `page.css` for page-only styles. The `component.*` files are the example — the page files just put it on screen.
 
-`scripts/sync.js` discovers each curriculum ID's source folder, rewrites `getText(...)` calls into Vite-style `?raw` imports, wraps `page.html` in a complete document, and regenerates `index.html` from `curriculum.js` order.
+To copy an example into your own project, the `src/<example-id>/component.*` files are all you need; adjust the framework imports and drop the component into any HTML page.
 
 ## Curriculum
 
-`curriculum.js` is the source of truth for example ordering and pedagogy metadata. Each entry declares:
+Each example carries pedagogy metadata in [`curriculum.js`](./curriculum.js):
 
-- `id` — folder name under `src/` (matches the source folder in `docs/src/examples/`)
-- `headline` — short descriptive title rendered on the landing page and per-example header
-- `intro` — one paragraph describing what the example does and demonstrates
-- `newPatterns` — comma-separated list of framework features introduced in this example
-- `whatToNotice` — bullet list of specific observations, each making a claim about a framework capability
+- **headline** — short descriptive title
+- **intro** — one paragraph on what the example does and demonstrates
+- **newPatterns** — the framework features the example introduces
+- **whatToNotice** — specific observations to call out while reading the code
 
-`CORE_COUNT` divides the curriculum into an ordered walkthrough (first N examples) and standalone pattern examples (the rest). Inline markdown is supported in prose fields: backticks render as `<code>`, `**double asterisks**` as `<strong>`.
+The notes panel on each example page is rendered from these fields.
 
 ## Scripts
 
 | Command | Effect |
 |---|---|
-| `npm run dev` | Bundle + serve at `localhost:3000`, watch for source changes |
-| `npm run build` | One-shot sync from `docs/src/examples/` and regenerate landing page |
-| `npm run watch` | Same as `build`, then keep syncing on source changes |
+| `npm run dev` | Start the bundler + dev server at `localhost:3000` |
+| `npm run build` | Regenerate landing page and example pages from `curriculum.js` |
+| `npm run watch` | Same as `build`, then keep syncing on changes |
 
-## Source
+See [`scripts/README.md`](./scripts/README.md) for what each script does internally.
 
-The examples are part of the Semantic UI Next monorepo. The framework packages they depend on (`@semantic-ui/component`, `@semantic-ui/query`, `@semantic-ui/templating`, …) are resolved through the workspace, so edits to those packages are picked up immediately by `npm run dev`.
+## Contributing
+
+The example sources are authored in the main repo under `docs/src/examples/` and mirrored here. To edit an example, change the file in `docs/src/examples/<example-id>/` and run `npm run build`. To add a new example, create the folder under `docs/src/examples/` and add an entry to `curriculum.js`.
+
+## License
+
+MIT — see the repo root for full text.

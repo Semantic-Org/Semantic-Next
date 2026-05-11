@@ -14,6 +14,7 @@ import {
   onAttributeChanged,
   onCreated,
   onDestroyed,
+  onRendered,
   onThemeChanged
 } from './lifecycle.js';
 
@@ -27,6 +28,7 @@ export const NumberAdjust = defineComponent({
   subTemplates: { buttons },
   createComponent,
   onCreated,
+  onRendered,
   onDestroyed,
   onThemeChanged,
   onAttributeChanged,

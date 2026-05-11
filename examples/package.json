@@ -12,7 +12,8 @@
   "scripts": {
     "build": "node scripts/sync.js",
     "watch": "node scripts/sync.js --watch",
-    "dev": "node scripts/dev.js"
+    "dev": "node scripts/dev.js",
+    "prepublishOnly": "node scripts/sync.js"
   },
   "dependencies": {
     "@semantic-ui/component": "*",
