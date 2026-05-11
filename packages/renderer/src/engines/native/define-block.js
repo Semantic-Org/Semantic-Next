@@ -1,4 +1,5 @@
 import { isRecovery, isTracing } from '../../helpers.js';
+import { makePlace } from './commit-hooks.js';
 
 // Block-author helper: create a child data context that inherits from
 // `parent` via the prototype chain, with `extras` layered on as own
@@ -43,8 +44,29 @@ export function reportBlockError({ name, syntax, hook, err }) {
 }
 
 export function defineBlock(config) {
-  const { name, create, render, hydrate, update, destroy, error: errorHook, shouldRecover, evaluateText, syntax } =
-    config;
+  const {
+    name,
+    create,
+    hydrate,
+    destroy,
+    error: errorHook,
+    shouldRecover,
+    evaluateText,
+    syntax,
+    compute,
+  } = config;
+
+  // When `compute` is provided, synthesize render and update as
+  // `bag.place(compute(bag))`. Block authors who need direct lifecycle
+  // control (each, async) provide explicit render/update instead and omit
+  // compute. hydrate stays as the author wrote it — server-DOM adoption
+  // has a distinct contract (no rebuild) that compute can't synthesize.
+  const render = compute
+    ? (bag) => bag.place(compute(bag))
+    : config.render;
+  const update = compute
+    ? (bag) => bag.place(compute(bag))
+    : config.update;
 
   const dispatch = function(ctx) {
     const { node, data, scope, region, isSVG, serverMeta, hydrating, renderer } = ctx;
@@ -95,6 +117,13 @@ export function defineBlock(config) {
       asChild,
     } = {}) => renderer.hydrateInto({ region, innerAST, data: innerData, scope: innerScope, asChild });
 
+    // place is the text-position placement primitive: takes an AST array
+    // (or null to clear) and handles child-scope allocation + renderAST +
+    // region.setContent with reference-equality dedup. Blocks using
+    // `compute` reach bag.place implicitly; blocks with explicit
+    // render/update can use it to collapse the rebuild boilerplate.
+    const place = makePlace({ region, scope, renderer, data, isSVG });
+
     // Interned per-instance bag — same hidden-class shape across all hook
     // calls. hook/err keys are present from construction so the error-hook
     // extension is just two field writes, not an Object.assign.
@@ -111,6 +140,7 @@ export function defineBlock(config) {
       hydrateInnerContent,
       hydrateInto,
       childContext,
+      place,
       hook: null,
       err: null,
     };

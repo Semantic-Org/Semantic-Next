@@ -11,7 +11,61 @@ import { isArray, isPlainObject } from '@semantic-ui/utils';
   data-sui-bind tag tracking (no element scanning inside an attribute
   value).
 
+  makePlace constructs the `bag.place(content)` closure that text-position
+  block dispatch uses to swap region content. It owns the child-scope +
+  renderAST + region.setContent sequence every block writes by hand today,
+  plus reference-equality dedup so the same matched branch doesn't re-fire
+  a DOM swap. Block authors using the `compute` shorthand never call this
+  directly; defineBlock invokes it from render and update.
+
 */
+
+// Sentinel for "no content placed yet" — distinct from any AST array
+// reference and from null/undefined so the first call always commits.
+const PLACE_INIT = Symbol('place:init');
+
+// Construct a place(content) closure for a text-position block. content is
+// an AST array (the matched branch / template content); null clears the
+// region. Reference equality dedups — selectBranch returns the same
+// node.content reference for the same matched branch, so unchanged-branch
+// re-fires no-op.
+//
+// `place.prime(content)` sets lastContent without performing the DOM op.
+// Used by hydrate hooks after adopting server-rendered DOM so the first
+// compute-driven update doesn't trigger an unnecessary re-render.
+// region.setContent (when place eventually swaps) clears region.childScopes
+// — disposing the hydrate scope hydrateInto pushed — so no leak from the
+// orphaned child-scope at swap time.
+export function makePlace({ region, scope, renderer, data, isSVG }) {
+  let lastContent = PLACE_INIT;
+  let lastChildScope = null;
+
+  function place(content) {
+    if (content === lastContent) { return; }
+    lastContent = content;
+
+    if (lastChildScope) {
+      lastChildScope.dispose();
+      lastChildScope = null;
+    }
+
+    if (content == null) {
+      region.clear();
+      return;
+    }
+
+    const childScope = scope.child();
+    lastChildScope = childScope;
+    const fragment = renderer.readAST({ ast: content, scope: childScope, data, isSVG });
+    region.setContent(fragment, childScope);
+  }
+
+  place.prime = function prime(content) {
+    lastContent = content;
+  };
+
+  return place;
+}
 
 // Coerce an evaluated expression value to its attribute-value string form.
 // Objects/arrays are JSON-stringified; null/undefined become empty string;

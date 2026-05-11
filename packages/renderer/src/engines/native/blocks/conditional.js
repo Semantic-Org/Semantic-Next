@@ -50,21 +50,16 @@ const conditional = defineBlock({
   name: 'conditional',
   syntax: (node) => `{#if ${node.condition}}`,
 
-  create() {
-    return { currentBranchIndex: -1 };
+  // compute synthesizes render and update — bag.place owns the
+  // child-scope + renderAST + region.setContent sequence and dedups via
+  // reference equality on selectBranch's contentAST (stable across calls
+  // for the same matched branch). hydrate stays explicit because adopting
+  // server DOM via hydrateInto has a distinct contract.
+  compute({ node, lookupExpression }) {
+    return selectBranch(node, lookupExpression).contentAST;
   },
 
-  render({ scope, region, node, renderAST, lookupExpression, self }) {
-    const result = selectBranch(node, lookupExpression);
-    self.currentBranchIndex = result.matchIndex;
-    if (result.contentAST) {
-      const branchScope = scope.child();
-      const fragment = renderAST({ ast: result.contentAST, scope: branchScope });
-      region.setContent(fragment, branchScope);
-    }
-  },
-
-  hydrate({ node, scope, region, serverMeta, renderAST, lookupExpression, hydrateInto, self }) {
+  hydrate({ node, place, region, serverMeta, lookupExpression, hydrateInto }) {
     const clientBranch = selectBranch(node, lookupExpression);
     const serverBranchIndex = serverMeta?.branchIndex;
     const hasMismatch = serverBranchIndex !== undefined
@@ -82,16 +77,11 @@ const conditional = defineBlock({
           );
         }
       }
-      if (clientBranch.contentAST) {
-        const branchScope = scope.child();
-        const fragment = renderAST({ ast: clientBranch.contentAST, scope: branchScope });
-        region.setContent(fragment, branchScope);
-      }
-      else {
-        region.clear();
-      }
+      place(clientBranch.contentAST);
+      return;
     }
-    else if (region.ownedNodes.length > 0) {
+
+    if (region.ownedNodes.length > 0) {
       // Server DOM matches the client branch — hydrate inner markers
       // against the chosen branch's AST, then move nodes into the region.
       const innerAST = branchASTByIndex(node, clientBranch.matchIndex);
@@ -100,21 +90,10 @@ const conditional = defineBlock({
       }
     }
 
-    self.currentBranchIndex = clientBranch.matchIndex;
-  },
-
-  update({ node, scope, region, renderAST, lookupExpression, self }) {
-    const result = selectBranch(node, lookupExpression);
-    if (result.matchIndex === self.currentBranchIndex) { return; }
-    self.currentBranchIndex = result.matchIndex;
-    if (result.contentAST) {
-      const branchScope = scope.child();
-      const fragment = renderAST({ ast: result.contentAST, scope: branchScope });
-      region.setContent(fragment, branchScope);
-    }
-    else {
-      region.clear();
-    }
+    // Prime place's lastContent with the matched branch so the first
+    // compute-driven update post-hydrate dedups (no unnecessary swap of
+    // server DOM when the branch hasn't changed).
+    place.prime(clientBranch.contentAST);
   },
 
   evaluateText({ node, data, renderer }) {
