@@ -181,6 +181,7 @@
   },
   "scripts": {
     "build": "wireit",
+    "build:clean": "wireit",
     "build:ui": "wireit",
     "build:ui-deps": "wireit",
     "build:ui-components": "wireit",
@@ -223,7 +224,8 @@
         "build:packages",
         "build:ui-deps",
         "build:ui-components",
-        "build:specs"
+        "build:specs",
+        "build:cdn-assets"
       ]
     },
     "build:ui": {
@@ -232,7 +234,7 @@
         "build:ui-deps",
         "build:ui-components",
         "build:specs",
-        "./packages/specs:build:icons"
+        "build:icons"
       ]
     },
     "build:packages": {
@@ -273,7 +275,7 @@
         "build:icons"
       ]
     },
-    "build:clean-directory": {
+    "build:clean": {
       "command": "node ./internal-packages/scripts/src/clean-directory.js"
     },
     "build:ui-deps": {
