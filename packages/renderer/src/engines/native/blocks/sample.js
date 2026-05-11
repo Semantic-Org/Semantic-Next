@@ -28,6 +28,21 @@
 import { defineBlock } from '../define-block.js';
 // import { registerBlock } from './registry.js';   // intentionally not imported
 
+/*
+
+  RECOGNIZED CONFIG FIELDS (the framework knows about these by name):
+    name, syntax, shouldRecover, create, render, hydrate, update, destroy,
+    error, evaluateText, compute.
+
+  Any other top-level field is an AUTHOR HELPER — a method or value the
+  block uses internally. The framework invokes hooks as `config.hook(bag)`
+  so `this === config` inside each hook; helpers reach each other via
+  `this.helperName(...)`. See blocks/conditional.js (`selectBranch`) for a
+  worked example. When reading an unfamiliar block, fields outside the list
+  above are author code, not framework contract.
+
+*/
+
 const sample = defineBlock({
   // The name appears in the structured error log header. Match the AST
   // node.type the compiler produces for this construct.

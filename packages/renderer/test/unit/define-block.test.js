@@ -65,7 +65,10 @@ describe('defineBlock', () => {
       render() {},
       evaluateText: evalText,
     });
-    expect(block.evaluateText).toBe(evalText);
+    // dispatch.evaluateText wraps so `this === config` inside the hook,
+    // letting authors call sibling helpers via `this.helperName(...)`.
+    // The wrapper forwards the bag verbatim and returns the result.
+    expect(typeof block.evaluateText).toBe('function');
     expect(block.evaluateText({ node: { type: 'if' }, data: {} })).toBe('static:if');
   });
 

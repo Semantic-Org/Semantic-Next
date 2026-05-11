@@ -16,43 +16,50 @@ import { registerBlock } from './registry.js';
   (isClient / isServer) is exempted from the mismatch warning because it
   is the documented way to diverge intentionally.
 
-*/
+  Helper methods (selectBranch) live on the block config object — defineBlock
+  invokes hooks as config.hook(bag), so `this === config` inside each hook
+  and helpers are reachable as `this.selectBranch(...)`.
 
-function selectBranch(node, lookupExpression) {
-  if (lookupExpression(node.condition)) {
-    return { matchIndex: MAIN_BRANCH_INDEX, contentAST: node.content };
-  }
-  if (node.branches?.length) {
-    for (let i = 0; i < node.branches.length; i++) {
-      const branch = node.branches[i];
-      if (branch.type === 'elseif') {
-        if (lookupExpression(branch.condition)) {
-          return { matchIndex: i, contentAST: branch.content };
-        }
-      }
-      else if (branch.type === 'else') {
-        return { matchIndex: i, contentAST: branch.content };
-      }
-    }
-  }
-  return { matchIndex: -1, contentAST: null };
-}
+*/
 
 const conditional = defineBlock({
   name: 'conditional',
   syntax: (node) => `{#if ${node.condition}}`,
 
+  // Pick the matched branch. Returns the branch's content AST array as a
+  // stable reference (same array every call when the same branch wins),
+  // which is what bag.place's reference-equality dedup relies on.
+  selectBranch(node, lookupExpression) {
+    if (lookupExpression(node.condition)) {
+      return { matchIndex: MAIN_BRANCH_INDEX, contentAST: node.content };
+    }
+    if (node.branches?.length) {
+      for (let i = 0; i < node.branches.length; i++) {
+        const branch = node.branches[i];
+        if (branch.type === 'elseif') {
+          if (lookupExpression(branch.condition)) {
+            return { matchIndex: i, contentAST: branch.content };
+          }
+        }
+        else if (branch.type === 'else') {
+          return { matchIndex: i, contentAST: branch.content };
+        }
+      }
+    }
+    return { matchIndex: -1, contentAST: null };
+  },
+
   // compute synthesizes render and update — bag.place owns the
   // child-scope + renderAST + region.setContent sequence and dedups via
-  // reference equality on selectBranch's contentAST (stable across calls
-  // for the same matched branch). hydrate stays explicit because adopting
-  // server DOM via hydrateInto has a distinct contract.
+  // reference equality on selectBranch's contentAST. hydrate stays
+  // explicit because adopting server DOM via hydrateInto has a distinct
+  // contract.
   compute({ node, lookupExpression }) {
-    return selectBranch(node, lookupExpression).contentAST;
+    return this.selectBranch(node, lookupExpression).contentAST;
   },
 
   hydrate({ node, place, region, serverMeta, lookupExpression, hydrateInto }) {
-    const clientBranch = selectBranch(node, lookupExpression);
+    const clientBranch = this.selectBranch(node, lookupExpression);
     const serverBranchIndex = serverMeta?.branchIndex;
     const hasMismatch = serverBranchIndex !== undefined
       && serverBranchIndex !== clientBranch.matchIndex;
@@ -80,7 +87,7 @@ const conditional = defineBlock({
     }
 
     // Return the matched-branch AST so defineBlock records it on `place`:
-    // the first compute-driven update tick will dedup against this rather
+    // the first compute-driven update tick dedups against this rather
     // than re-rendering over the server bytes.
     return clientBranch.contentAST;
   },

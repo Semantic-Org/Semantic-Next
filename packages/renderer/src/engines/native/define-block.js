@@ -44,29 +44,31 @@ export function reportBlockError({ name, syntax, hook, err }) {
 }
 
 export function defineBlock(config) {
-  const {
-    name,
-    create,
-    hydrate,
-    destroy,
-    error: errorHook,
-    shouldRecover,
-    evaluateText,
-    syntax,
-    compute,
-  } = config;
+  // Read identity/diagnostic fields directly — they don't need `this`.
+  // Hook fields (compute/render/update/hydrate/create/destroy/error) are
+  // invoked as `config.X(bag)` below so `this === config` inside the hook,
+  // letting authors stash helper methods on the same config object and
+  // call them as `this.helperName(...)`. V8 inlines this via the monomorphic
+  // inline cache on config's stable shape (config is constructed once at
+  // module load and never mutated).
+  const { name, shouldRecover, evaluateText, syntax } = config;
+  const errorHook = config.error;
+  const hasCompute = typeof config.compute === 'function';
 
   // When `compute` is provided, synthesize render and update as
   // `bag.place(compute(bag))`. Block authors who need direct lifecycle
   // control (each, async) provide explicit render/update instead and omit
   // compute. hydrate stays as the author wrote it — server-DOM adoption
   // has a distinct contract (no rebuild) that compute can't synthesize.
-  const render = compute
-    ? (bag) => bag.place(compute(bag))
-    : config.render;
-  const update = compute
-    ? (bag) => bag.place(compute(bag))
-    : config.update;
+  const render = hasCompute
+    ? (bag) => bag.place(config.compute(bag))
+    : config.render && ((bag) => config.render(bag));
+  const update = hasCompute
+    ? (bag) => bag.place(config.compute(bag))
+    : config.update && ((bag) => config.update(bag));
+  const hydrate = config.hydrate && ((bag) => config.hydrate(bag));
+  const create = config.create && ((ctx) => config.create(ctx));
+  const destroy = config.destroy && ((bag) => config.destroy(bag));
 
   const dispatch = function(ctx) {
     const { node, data, scope, region, isSVG, serverMeta, hydrating, renderer } = ctx;
@@ -171,7 +173,7 @@ export function defineBlock(config) {
             bag.hook = hookName;
             bag.err = err;
             try {
-              errorHook(bag);
+              config.error(bag);
             }
             catch (errorErr) {
               reportBlockError({ name, syntax: syntax?.(node), hook: 'error', err: errorErr });
@@ -230,7 +232,10 @@ export function defineBlock(config) {
   };
 
   if (evaluateText) {
-    dispatch.evaluateText = evaluateText;
+    // Wrap so `this === config` inside evaluateText, matching the other
+    // hooks. Block authors can call `this.helperName(...)` to reach
+    // helpers defined on the same config object.
+    dispatch.evaluateText = (bag) => config.evaluateText(bag);
   }
 
   dispatch.definition = config;
