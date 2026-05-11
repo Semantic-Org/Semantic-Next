@@ -268,21 +268,18 @@ export class Renderer {
       if (type === 'expression' && processedAttrIDs.has(markerID)) { continue; }
       const entry = entries[markerID];
 
-      if (type === 'expression') {
-        // Dispatch via registry — text-position expression routes through
-        // blocks/expression.js, which delegates to bindTextExpression for
-        // now. Future cleanup may inline the binding logic into the block
-        // file and retire the legacy method.
-        getBlock('expression')?.({ comment, entry, data, scope, renderer: this });
+      if (type === 'expression' || type === 'block') {
+        // Both go through the same defineBlock-style dispatch via
+        // bindBlock. For 'expression', bindBlock looks up the
+        // 'expression' block in the registry; entry.node.type IS
+        // 'expression', so the lookup resolves the same way.
+        this.bindBlock(comment, entry, data, scope);
       }
       else if (type === 'rawText') {
-        // Dispatch via registry — the raw-text block self-registers from
-        // blocks/raw-text.js. Equivalent to the legacy bindRawTextContent
-        // raw-text walker; no legacy code path remains.
+        // Raw-text dispatch — plain function (no region, no lifecycle
+        // separation). Stays separate from defineBlock since it modifies
+        // a sibling element's textContent rather than managing a region.
         getBlock('rawText')?.({ comment, entry, data, scope, renderer: this });
-      }
-      else if (type === 'block') {
-        this.bindBlock(comment, entry, data, scope);
       }
     }
   }
@@ -380,9 +377,25 @@ export class Renderer {
       if (!entry) { continue; }
 
       if (type === 'expression') {
-        // Registry dispatch with hydrating: true routes to the same
-        // expression block; the block delegates to hydrateTextExpression.
-        getBlock('expression')?.({ comment, entry, data, scope, renderer: this, hydrating: true });
+        // Expression entries are dispatched via defineBlock just like
+        // block entries — the marker is single, so the region is
+        // constructed here (no close marker / serverMeta to parse). The
+        // expression block's hydrate hook adopts the server-emitted
+        // value text node (or unsafeHTML siblings) into region.ownedNodes
+        // before returning the matched content to prime place.
+        const block = getBlock(entry.node.type);
+        if (block) {
+          const region = new DynamicRegion(comment.parentNode, comment);
+          block({
+            node: entry.node,
+            data,
+            scope,
+            region,
+            renderer: this,
+            isSVG: entry.isSVG,
+            hydrating: true,
+          });
+        }
       }
       else if (type === 'block') {
         this.hydrateBlock(comment, entry, data, scope);
