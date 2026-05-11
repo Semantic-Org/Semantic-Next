@@ -18,8 +18,9 @@ const createComponent = ({ self, state, reaction }) => ({
   initialize() {
     self.loadTodos();
     self.setFilterFromHash();
-    reaction(() => {
+    reaction((reaction) => {
       const todos = state.todos.get();
+      if (reaction.firstRun) return;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
     });
   },

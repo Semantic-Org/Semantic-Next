@@ -19,9 +19,9 @@ export const onRendered = () => {
 export const onDestroyed = () => {
   console.log('Destroyed');
 };
-export const onThemeChanged = (darkMode) => {
+export const onThemeChanged = ({ darkMode }) => {
   console.log('Theme changed', darkMode);
 };
-export const onAttributeChanged = (name, value) => {
-  console.log('Attribute changed', name, value);
+export const onAttributeChanged = (name, oldValue, newValue) => {
+  console.log('Attribute changed', name, oldValue, '→', newValue);
 };

@@ -73,7 +73,6 @@ const createComponent = ({ $, state, settings, self, timeout }) => ({
   selectCurrent() {
     const index = state.selectedIndex.get();
     const result = self.results[index];
-    console.log(index, result);
     if (result) {
       self.clearSearch();
       self.setValue(result);

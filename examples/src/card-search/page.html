@@ -395,7 +395,7 @@ body {
           <li><button type="button" data-target="src-card-search-7">page.html</button></li>
         </ul>
         <pre id="src-card-search-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
-<span class="hljs-keyword">import</span> { each, escapeRegExp, get, weightedObjectSearch } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
+<span class="hljs-keyword">import</span> { weightedObjectSearch } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
 
 <span class="hljs-comment">// sub templates</span>
 <span class="hljs-keyword">import</span> { card } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./card.js&#x27;</span>;
@@ -443,7 +443,7 @@ body {
   <span class="hljs-string">&#x27;change ui-menu&#x27;</span>({ state, data }) {
     state.<span class="hljs-property">filter</span>.<span class="hljs-title function_">set</span>(data.<span class="hljs-property">value</span>);
   },
-  <span class="hljs-string">&#x27;input ui-input&#x27;</span>({ state, value, target }) {
+  <span class="hljs-string">&#x27;input ui-input&#x27;</span>({ state, value }) {
     state.<span class="hljs-property">searchTerm</span>.<span class="hljs-title function_">set</span>(value);
   },
 };
@@ -473,7 +473,6 @@ body {
         role=friend.role
         joined=friend.joined
         image=friend.image
-        contacts=friend.contacts
       }
     {else}
       No {filter != &#x27;all&#x27; ? filter : &#x27;&#x27;} results for &quot;{searchTerm}&quot;

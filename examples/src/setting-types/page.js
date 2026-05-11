@@ -10,14 +10,14 @@ $('user-profile').settings({
 });
 
 // configure the change link to modify the data of the component
-$('.change').on('click', (event) => {
+$('.change').on('click', () => {
   $('user-profile').settings({
     birthday: {
       month: 'May',
       day: 3,
     },
   });
-  event.preventDefault();
+  return 'cancel';
 });
 
 /* vanilla js

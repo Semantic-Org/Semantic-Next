@@ -141,7 +141,7 @@ const createComponent = ({ self, $, settings, state, reaction }) => ({
   resize() {
     const gl = self.gl;
     const canvas = gl.canvas;
-    const rect = canvas.parentElement.getBoundingClientRect();
+    const rect = $('canvas').parent().bounds();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.ceil(rect.width * dpr);
     canvas.height = Math.ceil(rect.height * dpr);

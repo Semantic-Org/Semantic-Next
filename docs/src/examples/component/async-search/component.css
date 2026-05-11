@@ -5,7 +5,12 @@
   display: block;
 
   .results {
-    margin-top: 5px;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: var(--float-layer);
+    margin-top: var(--margin-3xs);
     box-shadow: var(--floating-shadow);
     border: var(--strong-border);
     background-color: var(--inverted-100);

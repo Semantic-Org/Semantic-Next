@@ -1,6 +1,18 @@
 # examples/scripts
 
-Build and dev tooling for the examples package. Two scripts: `sync.js` regenerates the static pages; `dev.js` serves them with live rebuild. Both are pure Node + esbuild — no framework-specific tooling.
+Build and dev tooling for the examples package. `sync.js` regenerates the static pages from a curriculum manifest; `dev.js` serves them with live rebuild. Both are pure Node + esbuild — no framework-specific tooling.
+
+## curriculum.js
+
+`../curriculum.js` is the source of truth for example ordering and pedagogy metadata. Each entry declares:
+
+- **`id`** — folder name under `src/` and `docs/src/examples/`
+- **`headline`** — short descriptive title rendered on the landing page and per-example header
+- **`intro`** — one paragraph on what the example does and demonstrates
+- **`newPatterns`** — comma-separated list of framework features introduced
+- **`whatToNotice`** — bullet list of specific observations to call out while reading the code
+
+`CORE_COUNT` divides the curriculum into an ordered walkthrough (first N examples) and standalone pattern examples (the rest). Inline markdown is supported in prose fields: backticks render as `<code>`, `**double asterisks**` as `<strong>`.
 
 ## sync.js
 
@@ -22,15 +34,11 @@ For each example it:
 
 After all examples sync, it regenerates `examples/index.html` (the landing page) and `examples/index.js` (a barrel that re-exports every component class).
 
-The mirror is one-way: `docs/src/examples/` is the canonical source. Edits to `examples/src/` are overwritten on the next sync.
+The mirror is one-way: `docs/src/examples/` is canonical. Edits to `examples/src/` are overwritten on the next sync.
 
 ## dev.js
 
 esbuild-based bundler and static server. Discovers every folder under `examples/src/`, bundles its `component.js` (and `page.js`, if present) into `examples/dist/<id>/`, and serves the entire `examples/` directory at `http://localhost:3000`.
-
-```bash
-node scripts/dev.js
-```
 
 The generated `page.html` files reference `/dist/<id>/component.js` for the bundle; the bundler watches source files and rebuilds on change. Framework packages are resolved through the workspace, so edits to `packages/*` are picked up on the next request.
 

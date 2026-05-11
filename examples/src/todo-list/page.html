@@ -418,8 +418,9 @@ body {
   <span class="hljs-title function_">initialize</span>(<span class="hljs-params"></span>) {
     self.<span class="hljs-title function_">loadTodos</span>();
     self.<span class="hljs-title function_">setFilterFromHash</span>();
-    <span class="hljs-title function_">reaction</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">reaction</span>(<span class="hljs-function">(<span class="hljs-params">reaction</span>) =&gt;</span> {
       <span class="hljs-keyword">const</span> todos = state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">get</span>();
+      <span class="hljs-keyword">if</span> (reaction.<span class="hljs-property">firstRun</span>) <span class="hljs-keyword">return</span>;
       <span class="hljs-variable language_">localStorage</span>.<span class="hljs-title function_">setItem</span>(<span class="hljs-variable constant_">STORAGE_KEY</span>, <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(todos));
     });
   },

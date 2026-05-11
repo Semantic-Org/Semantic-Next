@@ -464,7 +464,6 @@ body {
   <span class="hljs-title function_">selectCurrent</span>(<span class="hljs-params"></span>) {
     <span class="hljs-keyword">const</span> index = state.<span class="hljs-property">selectedIndex</span>.<span class="hljs-title function_">get</span>();
     <span class="hljs-keyword">const</span> result = self.<span class="hljs-property">results</span>[index];
-    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(index, result);
     <span class="hljs-keyword">if</span> (result) {
       self.<span class="hljs-title function_">clearSearch</span>();
       self.<span class="hljs-title function_">setValue</span>(result);
@@ -574,7 +573,12 @@ body {
   <span class="hljs-attribute">display</span>: block;
 
   <span class="hljs-selector-class">.results</span> {
-    <span class="hljs-attribute">margin-top</span>: <span class="hljs-number">5px</span>;
+    <span class="hljs-attribute">position</span>: absolute;
+    <span class="hljs-attribute">top</span>: <span class="hljs-number">100%</span>;
+    <span class="hljs-attribute">left</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">right</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">z-index</span>: <span class="hljs-built_in">var</span>(--float-layer);
+    <span class="hljs-attribute">margin-top</span>: <span class="hljs-built_in">var</span>(--margin-<span class="hljs-number">3</span>xs);
     <span class="hljs-attribute">box-shadow</span>: <span class="hljs-built_in">var</span>(--floating-shadow);
     <span class="hljs-attribute">border</span>: <span class="hljs-built_in">var</span>(--strong-border);
     <span class="hljs-attribute">background-color</span>: <span class="hljs-built_in">var</span>(--inverted-<span class="hljs-number">100</span>);

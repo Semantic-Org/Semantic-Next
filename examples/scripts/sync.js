@@ -642,13 +642,14 @@ function idFromWatchPath(relPath) {
 }
 
 /*
-  Watch docs/src/examples recursively. Coalesce bursts of file events
-  per-ID with a short debounce, then re-sync each affected ID and
-  regenerate the landing/barrel once at the end of the burst.
+  Watch docs/src/examples recursively. Reactive only — does not prime the
+  on-disk state on startup; run `node scripts/sync.js` (or `npm run build`)
+  for a one-shot full sync. Coalesces bursts of file events per-ID with a
+  short debounce, then re-syncs each affected ID and regenerates the
+  landing / barrel once at the end of the burst.
 */
 async function watchMode() {
-  await syncIds(CURRICULUM_IDS, { regenerateIndex: true });
-  console.log(`\nWatching ${relative(REPO_ROOT, DOCS_EXAMPLES)} …  (Ctrl+C to stop)`);
+  console.log(`Watching ${relative(REPO_ROOT, DOCS_EXAMPLES)} …  (Ctrl+C to stop)`);
 
   const pending = new Set();
   let timer = null;

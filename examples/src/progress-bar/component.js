@@ -1,5 +1,4 @@
 import { defineComponent } from '@semantic-ui/component';
-import { inArray } from '@semantic-ui/utils';
 
 import css from './component.css?raw';
 import template from './component.html?raw';
@@ -16,7 +15,7 @@ const defaultSettings = {
 };
 
 
-const createComponent = ({ self, state, settings, reaction }) => ({
+const createComponent = ({ self, settings }) => ({
   getPercentage() {
     const { value, min, max } = settings;
     const range = max - min;
@@ -25,11 +24,11 @@ const createComponent = ({ self, state, settings, reaction }) => ({
   },
 
   isComplete() {
-    return settings.value >= 100;
+    return settings.value >= settings.max;
   },
 
   isLabelInline() {
-    if(inArray(settings.size, ['mini'])) {
+    if (settings.size === 'mini') {
       return false;
     }
     return settings.inlineLabel;
@@ -40,15 +39,11 @@ const createComponent = ({ self, state, settings, reaction }) => ({
     return `${percentage}%`;
   },
 
-  getSizeClass() {
-    return `size-${settings.size}`;
-  },
-
   getBarClasses() {
     return {
       [settings.size]: true,
       [settings.theme]: true,
-      'active': settings.animated && settings.value < 100,
+      'active': settings.animated && settings.value < settings.max,
       'complete': self.isComplete()
     };
   }

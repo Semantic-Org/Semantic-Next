@@ -549,7 +549,7 @@ body {
   <span class="hljs-title function_">resize</span>(<span class="hljs-params"></span>) {
     <span class="hljs-keyword">const</span> gl = self.<span class="hljs-property">gl</span>;
     <span class="hljs-keyword">const</span> canvas = gl.<span class="hljs-property">canvas</span>;
-    <span class="hljs-keyword">const</span> rect = canvas.<span class="hljs-property">parentElement</span>.<span class="hljs-title function_">getBoundingClientRect</span>();
+    <span class="hljs-keyword">const</span> rect = $(<span class="hljs-string">&#x27;canvas&#x27;</span>).<span class="hljs-title function_">parent</span>().<span class="hljs-title function_">bounds</span>();
     <span class="hljs-keyword">const</span> dpr = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(<span class="hljs-variable language_">window</span>.<span class="hljs-property">devicePixelRatio</span> || <span class="hljs-number">1</span>, <span class="hljs-number">2</span>);
     canvas.<span class="hljs-property">width</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(rect.<span class="hljs-property">width</span> * dpr);
     canvas.<span class="hljs-property">height</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(rect.<span class="hljs-property">height</span> * dpr);

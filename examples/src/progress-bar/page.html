@@ -446,7 +446,6 @@ body {
           <li><button type="button" data-target="src-progress-bar-5">page.js</button></li>
         </ul>
         <pre id="src-progress-bar-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
-<span class="hljs-keyword">import</span> { inArray } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
 
 <span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
 <span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
@@ -463,7 +462,7 @@ body {
 };
 
 
-<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ self, state, settings, reaction }</span>) =&gt; ({
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ self, settings }</span>) =&gt; ({
   <span class="hljs-title function_">getPercentage</span>(<span class="hljs-params"></span>) {
     <span class="hljs-keyword">const</span> { value, min, max } = settings;
     <span class="hljs-keyword">const</span> range = max - min;
@@ -472,11 +471,11 @@ body {
   },
 
   <span class="hljs-title function_">isComplete</span>(<span class="hljs-params"></span>) {
-    <span class="hljs-keyword">return</span> settings.<span class="hljs-property">value</span> &gt;= <span class="hljs-number">100</span>;
+    <span class="hljs-keyword">return</span> settings.<span class="hljs-property">value</span> &gt;= settings.<span class="hljs-property">max</span>;
   },
 
   <span class="hljs-title function_">isLabelInline</span>(<span class="hljs-params"></span>) {
-    <span class="hljs-keyword">if</span>(<span class="hljs-title function_">inArray</span>(settings.<span class="hljs-property">size</span>, [<span class="hljs-string">&#x27;mini&#x27;</span>])) {
+    <span class="hljs-keyword">if</span> (settings.<span class="hljs-property">size</span> === <span class="hljs-string">&#x27;mini&#x27;</span>) {
       <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
     }
     <span class="hljs-keyword">return</span> settings.<span class="hljs-property">inlineLabel</span>;
@@ -487,15 +486,11 @@ body {
     <span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${percentage}</span>%`</span>;
   },
 
-  <span class="hljs-title function_">getSizeClass</span>(<span class="hljs-params"></span>) {
-    <span class="hljs-keyword">return</span> <span class="hljs-string">`size-<span class="hljs-subst">${settings.size}</span>`</span>;
-  },
-
   <span class="hljs-title function_">getBarClasses</span>(<span class="hljs-params"></span>) {
     <span class="hljs-keyword">return</span> {
       [settings.<span class="hljs-property">size</span>]: <span class="hljs-literal">true</span>,
       [settings.<span class="hljs-property">theme</span>]: <span class="hljs-literal">true</span>,
-      <span class="hljs-string">&#x27;active&#x27;</span>: settings.<span class="hljs-property">animated</span> &amp;&amp; settings.<span class="hljs-property">value</span> &lt; <span class="hljs-number">100</span>,
+      <span class="hljs-string">&#x27;active&#x27;</span>: settings.<span class="hljs-property">animated</span> &amp;&amp; settings.<span class="hljs-property">value</span> &lt; settings.<span class="hljs-property">max</span>,
       <span class="hljs-string">&#x27;complete&#x27;</span>: self.<span class="hljs-title function_">isComplete</span>()
     };
   }

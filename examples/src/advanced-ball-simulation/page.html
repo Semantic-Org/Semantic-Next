@@ -659,7 +659,7 @@ body {
   },
   <span class="hljs-title function_">getPointerPosition</span>(<span class="hljs-params">event</span>) {
     <span class="hljs-keyword">const</span> canvas = self.<span class="hljs-title function_">getCanvas</span>();
-    <span class="hljs-keyword">const</span> rect = canvas.<span class="hljs-title function_">getBoundingClientRect</span>();
+    <span class="hljs-keyword">const</span> rect = $(<span class="hljs-string">&#x27;canvas&#x27;</span>).<span class="hljs-title function_">bounds</span>();
     <span class="hljs-keyword">const</span> scaleX = canvas.<span class="hljs-property">width</span> / rect.<span class="hljs-property">width</span>;
     <span class="hljs-keyword">const</span> scaleY = canvas.<span class="hljs-property">height</span> / rect.<span class="hljs-property">height</span>;
     <span class="hljs-keyword">return</span> {
@@ -669,7 +669,7 @@ body {
   },
 });
 
-<span class="hljs-keyword">const</span> <span class="hljs-title function_">onRendered</span> = (<span class="hljs-params">{ state, data, settings, self }</span>) =&gt; {
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">onRendered</span> = (<span class="hljs-params">{ self }</span>) =&gt; {
   self.<span class="hljs-title function_">drawInitialBalls</span>();
   self.<span class="hljs-title function_">startAnimation</span>();
 };

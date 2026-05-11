@@ -527,14 +527,14 @@ $(<span class="hljs-string">&#x27;user-profile&#x27;</span>).<span class="hljs-t
 });
 
 <span class="hljs-comment">// configure the change link to modify the data of the component</span>
-$(<span class="hljs-string">&#x27;.change&#x27;</span>).<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;click&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+$(<span class="hljs-string">&#x27;.change&#x27;</span>).<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;click&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
   $(<span class="hljs-string">&#x27;user-profile&#x27;</span>).<span class="hljs-title function_">settings</span>({
     <span class="hljs-attr">birthday</span>: {
       <span class="hljs-attr">month</span>: <span class="hljs-string">&#x27;May&#x27;</span>,
       <span class="hljs-attr">day</span>: <span class="hljs-number">3</span>,
     },
   });
-  event.<span class="hljs-title function_">preventDefault</span>();
+  <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;cancel&#x27;</span>;
 });
 
 <span class="hljs-comment">/* vanilla js

@@ -39,30 +39,9 @@ Some add a `page.js` for page-level orchestration (e.g. configuring the componen
 
 To copy an example into your own project, the `src/<example-id>/component.*` files are all you need; adjust the framework imports and drop the component into any HTML page.
 
-## Curriculum
-
-Each example carries pedagogy metadata in [`curriculum.js`](./curriculum.js):
-
-- **headline** — short descriptive title
-- **intro** — one paragraph on what the example does and demonstrates
-- **newPatterns** — the framework features the example introduces
-- **whatToNotice** — specific observations to call out while reading the code
-
-The notes panel on each example page is rendered from these fields.
-
-## Scripts
-
-| Command | Effect |
-|---|---|
-| `npm run dev` | Start the bundler + dev server at `localhost:3000` |
-| `npm run build` | Regenerate landing page and example pages from `curriculum.js` |
-| `npm run watch` | Same as `build`, then keep syncing on changes |
-
-See [`scripts/README.md`](./scripts/README.md) for what each script does internally.
-
 ## Contributing
 
-The example sources are authored in the main repo under `docs/src/examples/` and mirrored here. To edit an example, change the file in `docs/src/examples/<example-id>/` and run `npm run build`. To add a new example, create the folder under `docs/src/examples/` and add an entry to `curriculum.js`.
+The example sources are authored in the main repo under `docs/src/examples/` and mirrored here. To edit an example, change the file in `docs/src/examples/<example-id>/`. See [`scripts/README.md`](./scripts/README.md) for the build pipeline and curriculum authoring.
 
 ## License
 
