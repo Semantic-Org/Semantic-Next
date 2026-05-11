@@ -150,7 +150,11 @@ export function defineBlock(config) {
       err: null,
     };
 
-    const onSuccess = () => {
+    // notifyUpdate signals "post-mount reactive DOM change" to the host —
+    // initial render uses the `rendered` lifecycle and shouldn't fire it.
+    // Pass suppressNotify on the firstRun call sites to skip.
+    const onSuccess = (suppressNotify) => {
+      if (suppressNotify) { return; }
       if (typeof renderer.notifyUpdate === 'function') {
         renderer.notifyUpdate();
       }
@@ -162,10 +166,10 @@ export function defineBlock(config) {
     // hook decides what to render. With recovery alone (global flag, no
     // hook): default-isolate via region.clear() + reaction stop.
     const safeRun = wantsRecovery
-      ? (hookName, fn, comp) => {
+      ? (hookName, fn, comp, suppressNotify) => {
         try {
           fn();
-          onSuccess();
+          onSuccess(suppressNotify);
         }
         catch (err) {
           reportBlockError({ name, syntax: syntax?.(node), hook: hookName, err });
@@ -190,9 +194,9 @@ export function defineBlock(config) {
           }
         }
       }
-      : (_hookName, fn) => {
+      : (_hookName, fn, _comp, suppressNotify) => {
         fn();
-        onSuccess();
+        onSuccess(suppressNotify);
       };
 
     const reactionAnchor = region.anchor;
@@ -200,22 +204,27 @@ export function defineBlock(config) {
     scope.reaction(reactionAnchor, (comp) => {
       if (comp.firstRun) {
         const isHydrating = hydrating && hydrate;
-        safeRun(isHydrating ? 'hydrate' : 'render', () => {
-          if (isHydrating) {
-            // hydrate returns the AST that matches the server-rendered
-            // DOM (when applicable). Records the match on `place` so the
-            // first compute-driven update tick dedups instead of
-            // re-rendering over server bytes. Returning undefined is the
-            // backward-compatible no-op for blocks (each, async, etc.)
-            // that don't use compute / don't need the match hook.
-            const matched = hydrate(bag);
-            if (matched !== undefined) { matchPlace(matched); }
-          }
-          else { render(bag); }
-        }, comp);
+        safeRun(
+          isHydrating ? 'hydrate' : 'render',
+          () => {
+            if (isHydrating) {
+              // hydrate returns the AST that matches the server-rendered
+              // DOM (when applicable). Records the match on `place` so the
+              // first compute-driven update tick dedups instead of
+              // re-rendering over server bytes. Returning undefined is the
+              // backward-compatible no-op for blocks (each, async, etc.)
+              // that don't use compute / don't need the match hook.
+              const matched = hydrate(bag);
+              if (matched !== undefined) { matchPlace(matched); }
+            }
+            else { render(bag); }
+          },
+          comp,
+          /* suppressNotify */ true,
+        );
       }
       else if (update) {
-        safeRun('update', () => update(bag), comp);
+        safeRun('update', () => update(bag), comp, /* suppressNotify */ false);
       }
     }, {
       message: `${name}:${node.type}`,
