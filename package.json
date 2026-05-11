@@ -260,8 +260,7 @@
       "command": "cd docs && npm install && npx link ../ && npm run build",
       "dependencies": [
         "build",
-        "build:docs-packages",
-        "examples:sync"
+        "build:docs-packages"
       ]
     },
     "build:docs-packages": {
