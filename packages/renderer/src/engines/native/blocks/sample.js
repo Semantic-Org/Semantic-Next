@@ -79,15 +79,55 @@ const sample = defineBlock({
   },
 
   /*
+    SHORTHAND: compute(bag) → content
+    ---------------------------------
+    When render and update have the same body — select content based on
+    data, return the AST to render — `compute` collapses both into one
+    function. Framework synthesizes `render(bag) → bag.place(compute(bag))`
+    and `update(bag) → bag.place(compute(bag))`. bag.place handles the
+    child-scope allocation + renderAST + region.setContent sequence and
+    dedups via reference equality on the returned content (same AST
+    reference → no DOM op).
+
+    Use compute when the block always rebuilds-on-change (conditional,
+    match-style branching). Don't use compute when:
+      • render-vs-update semantics genuinely differ (each: build vs
+        reconcile; async: initial state vs promise-resolution)
+      • the block needs to mutate-in-place rather than rebuild
+      • dedup is wrong (rerender: forces re-render on every dep change)
+
+    `bag.place(null)` clears the region. `bag.place.prime(content)` sets
+    lastContent without performing the DOM op — used in hydrate after
+    adopting server DOM so the first compute-driven update post-hydrate
+    dedups correctly.
+
+    Example (the simplest possible compute block):
+
+      compute({ node, lookupExpression }) {
+        return lookupExpression(node.condition) ? node.content : null;
+      }
+
+    Authors who want compute's brevity but a different dedup strategy
+    can return a wrapper object — reference equality compares the
+    wrapper, not the inner AST.
+
+    The sample below uses explicit render/hydrate/update to show the
+    full surface. For a single-body block, replace render+update with a
+    compute hook.
+  */
+
+  /*
     render(bag) — first mount on the client (no server-rendered DOM to
     adopt). The bag has node, data, scope, region, isSVG, serverMeta,
-    self, plus the closures lookupExpression / renderAST /
+    self, plus the closures lookupExpression / renderAST / place /
     hydrateInnerContent / hydrateInto. Use them; don't pull from
     anywhere else.
 
     Pattern: build a fragment via renderAST(), put it in the region via
     region.setContent(fragment, optionalChildScope). The region owns DOM
-    cleanup; the child scope owns reaction cleanup.
+    cleanup; the child scope owns reaction cleanup. Or use bag.place to
+    delegate both — it's region.setContent(renderAST(content, childScope),
+    childScope) packaged with dedup.
 
     Reactivity: any lookupExpression() call inside this hook registers
     deps on the current Reaction (the one defineBlock created around all
@@ -120,10 +160,16 @@ const sample = defineBlock({
       2. Hand the inner content to hydrateInto() — it creates the child
          scope, walks inner markers, reattaches into the region, and
          sets region.endAnchor.
+      3. If the block also uses `compute`, prime bag.place with the
+         matched content via `bag.place.prime(content)` so the first
+         compute-driven update post-hydrate dedups (avoids an
+         unnecessary server-DOM swap when nothing changed).
 
     DO NOT call renderAST() from hydrate — that builds fresh DOM and
     discards the server's. The whole point of hydrate is to keep the
-    server's bytes.
+    server's bytes. hydrate stays as an explicit hook even when render
+    and update are synthesized from `compute` — its contract is
+    structurally different and can't be unified.
 
     serverMeta contains anything the ServerRenderer wrote into the
     closing block marker (see parseServerMeta in build-html-string.js
