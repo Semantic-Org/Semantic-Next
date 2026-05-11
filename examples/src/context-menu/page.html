@@ -116,6 +116,10 @@ body {
   .container {
     position: relative;
     transform: translateZ(0);
+    /* Lift above the later-sibling .source so position:absolute overflow from
+       inside the example (e.g. async-search results) doesn't get covered by
+       the code viewer below. */
+    z-index: 1;
   }
 
   .source {
