@@ -1,13 +1,14 @@
-import { noChange } from 'lit';
+import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
-import { directive } from 'lit/directive.js';
+import { directive, PartType } from 'lit/directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { isClient, wrapFunction } from '@semantic-ui/utils';
+import { isArray, isClient, isObject, wrapFunction } from '@semantic-ui/utils';
 
 export class ReactiveRerenderDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
+    this.partInfo = partInfo;
     this.reaction = null;
   }
 
@@ -24,7 +25,7 @@ export class ReactiveRerenderDirective extends AsyncDirective {
       this.watchChanges();
     }
 
-    return this.condition.content();
+    return this.formatForPart(this.condition.content());
   }
 
   watchChanges() {
@@ -54,9 +55,73 @@ export class ReactiveRerenderDirective extends AsyncDirective {
       }
 
       if (!computation.firstRun) {
-        this.setValue(this.condition.content());
+        this.setValue(this.formatForPart(this.condition.content()));
       }
     }, { context });
+  }
+
+  // PartInfo-aware serialization: attribute parts get a string; CHILD/PROPERTY/
+  // EVENT/ELEMENT parts pass content through unchanged so lit places it.
+  // Mirrors ReactiveConditionalDirective.formatForPart so rerender behaves
+  // identically when it lands in an attribute value.
+  formatForPart(content) {
+    switch (this.partInfo.type) {
+      case PartType.ATTRIBUTE:
+      case PartType.BOOLEAN_ATTRIBUTE:
+        return this.serializeContent(content);
+      default:
+        return content;
+    }
+  }
+
+  serializeContent(content) {
+    if (content == null || content === nothing) { return ''; }
+    if (content?.strings) {
+      const { strings, values } = content;
+      let result = '';
+      for (let i = 0; i < strings.length; i++) {
+        result += strings[i];
+        if (i < values.length) {
+          result += this.resolveValue(values[i]);
+        }
+      }
+      return result;
+    }
+    if (isArray(content) || isObject(content)) {
+      try {
+        return JSON.stringify(content);
+      }
+      catch (e) {
+        return String(content);
+      }
+    }
+    return String(content);
+  }
+
+  // Inner expressions inside a {#rerender}/{#if} branch land in the
+  // TemplateResult's `values` array as lit *directive markers* (the
+  // reactiveData directive result), not evaluated primitives — lit
+  // normally resolves these when it places the result into a part.
+  // For attribute-position serialization we resolve them manually by
+  // reaching into the directive's first arg's `.value()` callback,
+  // which the LitRenderer attaches in `evaluateExpression`. Nested
+  // TemplateResults recurse via serializeContent.
+  resolveValue(v) {
+    if (v?.values?.[0]?.value && typeof v.values[0].value === 'function') {
+      return String(v.values[0].value() ?? '');
+    }
+    if (v?.strings) {
+      return this.serializeContent(v);
+    }
+    if (isArray(v) || isObject(v)) {
+      try {
+        return JSON.stringify(v);
+      }
+      catch (e) {
+        return String(v);
+      }
+    }
+    return String(v ?? '');
   }
 
   // to make sure signal triggers reactivity

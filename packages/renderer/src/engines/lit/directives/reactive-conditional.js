@@ -25,7 +25,12 @@ export class ReactiveConditionalDirective extends AsyncDirective {
       conditional: conditional,
     };
 
-    // Create a new reaction that watches for reactive changes on client
+    // Create a new reaction that watches for reactive changes on client.
+    // Every non-firstRun re-fire pushes the new content through setValue,
+    // routed through formatForPart so attribute parts get a serialized
+    // string rather than a raw TemplateResult lit can't render.
+    // matchIndex gating is intentionally absent — content can change
+    // within the same branch when inner expressions update.
     if (isClient) {
       this.reaction = Reaction.create((comp) => {
         if (!this.isConnected) {
@@ -34,11 +39,10 @@ export class ReactiveConditionalDirective extends AsyncDirective {
         }
 
         const result = this.getBranch(this.conditional);
-        const matchIndex = result.matchIndex;
+        this.matchIndex = result.matchIndex;
         content = result.content;
-        if (!comp.firstRun && this.matchIndex !== matchIndex) {
-          this.matchIndex = matchIndex;
-          this.setValue(content);
+        if (!comp.firstRun) {
+          this.setValue(this.formatForPart(content));
         }
         return content;
       }, { context });
@@ -105,10 +109,21 @@ export class ReactiveConditionalDirective extends AsyncDirective {
       return '';
     }
 
+    // TemplateResult: interleave static strings with evaluated values so
+    // branch content like `active-{count}` produces `active-5`, not
+    // `active-` (the old strings.join('') bug). Values may be lit
+    // directive markers (from inner expressions) — resolveValue extracts
+    // the actual value via the directive's first arg's .value() callback.
     if (content?.strings) {
-      // For simple conditionals in attributes, just join the static strings
-      // This works for basic cases like {#if condition}text{/if}
-      return content.strings.join('');
+      const { strings, values } = content;
+      let result = '';
+      for (let i = 0; i < strings.length; i++) {
+        result += strings[i];
+        if (i < values.length) {
+          result += this.resolveValue(values[i]);
+        }
+      }
+      return result;
     }
 
     // Handle arrays and objects like reactive-data does
@@ -122,6 +137,30 @@ export class ReactiveConditionalDirective extends AsyncDirective {
     }
 
     return String(content);
+  }
+
+  // Inner expressions inside a branch land in the TemplateResult's `values`
+  // array as lit directive markers (reactiveData results), not evaluated
+  // primitives — lit normally resolves these when placing into a part. For
+  // attribute-position serialization we resolve manually by calling the
+  // directive's first arg's .value() callback (attached by LitRenderer's
+  // evaluateExpression). Same pattern as ReactiveRerenderDirective.
+  resolveValue(v) {
+    if (v?.values?.[0]?.value && typeof v.values[0].value === 'function') {
+      return String(v.values[0].value() ?? '');
+    }
+    if (v?.strings) {
+      return this.serializeContent(v);
+    }
+    if (isArray(v) || isObject(v)) {
+      try {
+        return JSON.stringify(v);
+      }
+      catch (e) {
+        return String(v);
+      }
+    }
+    return String(v ?? '');
   }
 
   disconnected() {
