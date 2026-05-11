@@ -1,15 +1,28 @@
 {
   "name": "@semantic-ui/examples",
-  "version": "0.10.5",
+  "version": "0.18.0",
   "title": "Semantic UI Next Examples",
-  "description": "Sample components written using SUI",
+  "description": "Canonical curriculum examples mirroring docs/src/examples/",
   "homepage": "http://www.semantic-ui.com",
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "license": "MIT",
   "type": "module",
   "module": "./index.js",
+  "main": "./index.js",
+  "scripts": {
+    "sync": "node scripts/sync.js",
+    "dev": "node scripts/dev.js"
+  },
   "dependencies": {
-    "@semantic-ui/core": "^0.10.5",
-    "@semantic-ui/components": "^0.10.5"
+    "@semantic-ui/core": "*",
+    "@semantic-ui/component": "*",
+    "@semantic-ui/query": "*",
+    "@semantic-ui/specs": "*",
+    "@semantic-ui/tailwind": "*",
+    "@semantic-ui/templating": "*",
+    "@semantic-ui/utils": "*"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
   }
 }

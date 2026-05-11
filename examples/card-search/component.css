@@ -1,0 +1,55 @@
+
+:host {
+  --card-min: 250px;
+  --card-gap: var(--gap);
+  --card-image-max-height: 150px;
+}
+
+.component {
+  container: component / inline-size;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--margin);
+
+  .search {
+    margin-left: auto;
+  }
+}
+.cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  flex-wrap: wrap;
+  gap: var(--card-gap);
+}
+
+@container component (max-width: 300px) {
+  .card {
+    flex-direction: column !important;
+    .image {
+      width: 100%;
+      height: 100px;
+    }
+  }
+}
+
+@container component (min-width: 500px) {
+  .cards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@container component (min-width: 900px) {
+  .cards {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+@container component (min-width: 1200px) {
+  .cards {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+}
+

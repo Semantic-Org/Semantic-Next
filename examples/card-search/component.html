@@ -1,0 +1,20 @@
+<div class="component">
+  <div class="actions">
+    <ui-menu inset selection value="{filter}" items="{filters}" class="menu"></ui-menu>
+    <ui-input search tiny placeholder="Search friends..." value={searchTerm} class="search"></ui-input>
+  </div>
+  <div class="cards">
+    {#each friend in getVisibleFriends}
+      {> card
+        name=friend.name
+        location=friend.location
+        role=friend.role
+        joined=friend.joined
+        image=friend.image
+        contacts=friend.contacts
+      }
+    {else}
+      No {filter != 'all' ? filter : ''} results for "{searchTerm}"
+    {/each}
+  </div>
+</div>

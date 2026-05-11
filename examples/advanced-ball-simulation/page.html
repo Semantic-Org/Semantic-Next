@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Advanced Ball Simulation — advanced-ball-simulation</title>
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <script type="module" blocking="render" src="/dist/advanced-ball-simulation/component.js"></script>
+    <style>
+      html { scrollbar-gutter: stable; }
+      body { font-family: var(--page-font, system-ui, sans-serif); max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+      .example.container { position: relative; transform: translateZ(0); }
+      .example.theme { position: fixed; top: 1rem; right: 1rem; z-index: 1000; }
+      .example.header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--standard-15, #e5e5e5); }
+      .example.header .back { display: inline-block; font-size: 0.8em; color: var(--standard-50, #888); text-decoration: none; letter-spacing: 0.02em; }
+      .example.header .back:hover { color: var(--primary-color, #2185d0); }
+      .example.header .title { margin: 0.4rem 0 0.2rem; font-size: 1.25rem; font-weight: 600; }
+      .example.header .description { margin: 0; color: var(--standard-60, #666); font-size: 0.9em; line-height: 1.5; }
+    </style>
+  </head>
+  <body>
+    <theme-switcher class="example theme"></theme-switcher>
+    <header class="example header">
+      <a class="back" href="/">← Examples</a>
+      <h1 class="title">Advanced Ball Simulation</h1>
+      <p class="description">An advanced example of using reactivity to create a particle simulation</p>
+    </header>
+    <div class="example container">
+      <ball-simulation
+        count="180"
+        radius="1"
+        speed="1"
+        radius-variance="2"
+        saturation-decay="400">
+      </ball-simulation>
+    </div>
+  </body>
+</html>

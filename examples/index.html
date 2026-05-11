@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Semantic UI Examples</title>
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <style>
+      html { scrollbar-gutter: stable; }
+      body { font-family: var(--page-font, system-ui, sans-serif); max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+      .example.container { position: relative; transform: translateZ(0); }
+      .example.theme { position: fixed; top: 1rem; right: 1rem; z-index: 1000; }
+      .example.header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--standard-15, #e5e5e5); }
+      .example.header .back { display: inline-block; font-size: 0.8em; color: var(--standard-50, #888); text-decoration: none; letter-spacing: 0.02em; }
+      .example.header .back:hover { color: var(--primary-color, #2185d0); }
+      .example.header .title { margin: 0.4rem 0 0.2rem; font-size: 1.25rem; font-weight: 600; }
+      .example.header .description { margin: 0; color: var(--standard-60, #666); font-size: 0.9em; line-height: 1.5; }
+      h1 { margin-bottom: 0.25rem; }
+      p.lede { color: var(--standard-60, #666); margin-top: 0; }
+      ul { list-style: none; padding: 0; }
+      li { padding: 0.5rem 0; border-bottom: 1px solid var(--standard-10, #eee); }
+      li a { font-weight: 600; text-decoration: none; color: var(--primary-color, #2185d0); }
+      li a:hover { text-decoration: underline; }
+      code { color: var(--standard-50, #888); font-size: 0.85em; margin-left: 0.5rem; }
+    </style>
+  </head>
+  <body>
+    <theme-switcher class="example theme"></theme-switcher>
+    <h1>Semantic UI Examples</h1>
+    <p class="lede">Canonical curriculum examples mirroring <code>docs/src/examples/</code>. Run <code>npm run dev</code> in <code>examples/</code> to start the esbuild server.</p>
+    <ul>
+      <li><a href="./minimal/page.html">Current Time</a> <code>minimal</code></li>
+      <li><a href="./emoji-reactions/page.html">Emoji Reactions</a> <code>emoji-reactions</code></li>
+      <li><a href="./todo-list/page.html">TodoMVC</a> <code>todo-list</code></li>
+      <li><a href="./async-search/page.html">Search Autocomplete</a> <code>async-search</code></li>
+      <li><a href="./context-menu/page.html">Context Menu</a> <code>context-menu</code></li>
+      <li><a href="./card-search/page.html">Card Search</a> <code>card-search</code></li>
+      <li><a href="./tailwind/page.html">Tailwind</a> <code>tailwind</code></li>
+      <li><a href="./dynamic-table/page.html">Dynamic Table</a> <code>dynamic-table</code></li>
+      <li><a href="./external-calls/page.html">External Calls</a> <code>external-calls</code></li>
+      <li><a href="./maximal/page.html">Kitchen Sink</a> <code>maximal</code></li>
+      <li><a href="./component-specs/page.html">Using Specs</a> <code>component-specs</code></li>
+      <li><a href="./advanced-keybinding/page.html">Advanced Keybinding</a> <code>advanced-keybinding</code></li>
+      <li><a href="./rating-slider/page.html">Rating Slider</a> <code>rating-slider</code></li>
+      <li><a href="./advanced-ball-simulation/page.html">Advanced Ball Simulation</a> <code>advanced-ball-simulation</code></li>
+      <li><a href="./event-data/page.html">Event Data</a> <code>event-data</code></li>
+      <li><a href="./dropdown/page.html">Dropdown</a> <code>dropdown</code></li>
+      <li><a href="./setting-types/page.html">Setting Types</a> <code>setting-types</code></li>
+      <li><a href="./progress-bar/page.html">Progress Bar</a> <code>progress-bar</code></li>
+      <li><a href="./clock/page.html">Clock</a> <code>clock</code></li>
+    </ul>
+  </body>
+</html>

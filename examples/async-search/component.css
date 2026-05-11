@@ -1,0 +1,41 @@
+:host {
+  font-family: var(--page-font);
+  width: 300px;
+  position: relative;
+  display: block;
+
+  .results {
+    margin-top: 5px;
+    box-shadow: var(--floating-shadow);
+    border: var(--strong-border);
+    background-color: var(--inverted-100);
+    border-radius: var(--border-radius);
+    max-height: 200px;
+    overflow: auto;
+    scrollbar-width: thin;
+
+    .result {
+      padding: var(--padding);
+      cursor: pointer;
+      border-top: var(--border);
+      padding: var(--padding-xs) var(--padding);
+
+      &:hover,
+      &.active {
+        background-color: var(--standard-5);
+      }
+      &:first-child {
+        border-top: none;
+      }
+    }
+
+    .message {
+      padding: var(--padding-xs);
+      color: var(--standard-40);
+      b {
+        color: var(--primary-text-color);
+      }
+    }
+  }
+
+}

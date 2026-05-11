@@ -70,7 +70,7 @@ const onCreated = function({ self, reaction, signal, state, isClient }) {
 };
 
 const events = {
-  'click'({ self, state }) {
+  'click'({ state, $ }) {
     const currentTheme = state.theme.get();
     const newTheme = (currentTheme == 'light')
       ? 'dark'
