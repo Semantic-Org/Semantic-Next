@@ -267,10 +267,14 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
             rawTextNodes.push(node);
             break;
           }
-          // Block-level directives: if, each, async, rerender, template
+          // Block-level directives: if, each, async, rerender, template.
+          // Classification mirrors what expression entries store, so dispatch
+          // can route attribute-position blocks through the attribute path
+          // (text-position blocks continue to emit a comment marker today).
           const id = entries.length;
+          const classification = analyzePosition(htmlBuffer);
           htmlString += `<!--${BLOCK_MARKER}${id}-->`;
-          const entry = { id, type: node.type, node };
+          const entry = { id, type: node.type, node, classification };
           if (insideSVG) { entry.isSVG = true; }
           entries.push(entry);
           break;
