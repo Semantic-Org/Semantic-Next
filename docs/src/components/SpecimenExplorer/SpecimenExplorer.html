@@ -30,7 +30,7 @@
     <ui-panel size="280px" min-size="200px" max-size="400px">
       <ui-panels direction="vertical" class="control-panels">
         {#each group in getControlGroups}
-          <ui-panel size="{#if true}grow{/if}" label="{group.label}">
+          <ui-panel size="{#if group.last}grow{else}natural{/if}" label="{group.label}">
             <div class="section-controls">
               {#each control in group.controls}
                 {#if is control.type 'radio'}
