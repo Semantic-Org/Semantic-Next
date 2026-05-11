@@ -277,7 +277,11 @@ export class Renderer {
         this.bindTextExpression(comment, entry, data, scope);
       }
       else if (type === 'rawText') {
-        this.bindRawTextContent(comment, entry, data, scope);
+        // Dispatch via registry — the raw-text block self-registers from
+        // blocks/raw-text.js. Equivalent to the legacy bindRawTextContent
+        // method below (kept for now until expression also routes through
+        // the registry and reactive-data.js can retire).
+        getBlock('rawText')?.({ comment, entry, data, scope, renderer: this });
       }
       else if (type === 'block') {
         this.bindBlock(comment, entry, data, scope);
