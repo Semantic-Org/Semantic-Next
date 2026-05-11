@@ -44,7 +44,9 @@ Blocks split into shapes after the refactor:
 
 `each` and `async` keep direct `region` access because their lifecycles aren't reducible to "place new content reactively" — each owns keyed children with per-item identity; async owns three-state transitions over a promise. They don't fit `compute`.
 
-`{#let}` introduces the one-shot case: mount-time it injects a `computed(() => expr)` into the data context; inner expression bindings subscribe to that computed via their own per-binding Reactions. The let block itself never needs to re-fire — `reactive: false` skips wrapping its body in the framework's outer Reaction. Without this flag, the let block would wastefully re-evaluate its setup on every signal change its inner content reads.
+`{#let}` introduces the one-shot case: mount-time it injects a `Signal.computed(() => evalExpr(data))` into the data context; inner expression bindings subscribe to that computed via their own per-binding Reactions. The let block itself never needs to re-fire — `reactive: false` skips wrapping its body in the framework's outer Reaction. Without this flag, the let block would wastefully re-evaluate its setup on every signal change its inner content reads.
+
+**Cleanup obligation for `reactive: false` + computed.** `Signal.computed(fn)` returns a Signal driven by an internal Reaction with no auto-cleanup. The bag's `computed(fn)` helper (see "Why framework-managed reactivity primitives" above) wraps `Signal.computed` and registers the internal Reaction via `bag.scope.track` so it stops when the block disposes. `{#let}` uses `bag.computed(() => evalExpr(data))` — no manual cleanup needed.
 
 After the refactor:
 - The post-rewrite regression where `<ui-panel size="{#if x}A{else}B{/if}">` rendered literal `&lt;!--sui-block...&gt;` text in the attribute is fixed.
@@ -101,7 +103,7 @@ After the refactor:
 
 Before: one bag shape with `region` always present.
 
-After: one bag shape with optional fields based on position:
+After: one bag shape with optional fields based on position, plus framework-managed reactivity primitives:
 
 ```js
 {
@@ -112,6 +114,12 @@ After: one bag shape with optional fields based on position:
   renderAST,                          // ({ ast, scope?, data?, isSVG? }) => fragment — for text-position rebuilds
   hydrateInnerContent, hydrateInto,   // hydration helpers
   childContext,                       // (parent, overrides) => data
+
+  // Reactivity primitives — framework-managed lifecycle
+  reaction(callback, options?),       // create+track a Reaction; auto-stops on scope dispose (and on anchor disconnect)
+  track(reaction),                    // register an externally-created Reaction for stop-on-dispose
+  computed(fn, options?),             // Signal.computed wrapper; auto-stops the internal Reaction on dispose
+  onDispose(fn),                      // shorthand for scope.onDispose
 
   // Text-position only (classification.type === 'text' / 'rawText')
   region,                             // DynamicRegion — present iff content lives in DOM
@@ -126,6 +134,24 @@ After: one bag shape with optional fields based on position:
 ```
 
 Block authors using `compute` only ever touch `bag.place`. Block authors writing manual lifecycle hooks (each, async) reach for `bag.region` directly in text position; in attribute position the framework refuses to construct their bag.
+
+### Why framework-managed reactivity primitives
+
+`Signal.computed(fn)` returns a Signal driven by an internal `Reaction.create`-d Reaction (`signal._computedReaction`). The framework provides no scope to that Reaction — if the block scope disposes without explicit `reaction.stop()`, the computed lives forever, holding signal subscriptions and keeping closures alive. Today no block creates ad-hoc computeds, so this isn't yet a leak. `{#let}` introduces the case.
+
+Rather than asking block authors to remember `scope.onDispose(() => signal._computedReaction.stop())`, the bag exposes `bag.computed(fn)` which constructs the signal AND registers its internal Reaction via `bag.scope.track` so it disposes with the block. Same pattern for ad-hoc `bag.reaction(fn)` calls (which already exist as `scope.reaction`; the bag just surfaces them).
+
+```js
+// {#let total = price * qty} compiles to a let block whose render does:
+render({ node, data, region, scope, computed, renderAST, lookupExpression, childContext }) {
+  const value = computed(() => lookupExpression(node.expr));    // computed Reaction tracked
+  const augmentedData = childContext(data, { [node.name]: value });
+  const childScope = scope.child();
+  region.setContent(renderAST({ ast: node.content, data: augmentedData, scope: childScope }), childScope);
+}
+```
+
+No manual `.stop()`. No leak vector. Same pattern is available to any future block that needs ad-hoc reactivity — `bag.reaction` and `bag.track` cover the general case; `bag.computed` is the targeted convenience.
 
 ### `place(content)` — the framework's placement primitive
 
@@ -359,7 +385,7 @@ Smallest patch that restores blocks-in-attribute-position support. Lands ahead o
 - `build-html-string.js`: default-case block-emit classifies via `analyzePosition(htmlBuffer)`; attribute-position blocks emit `__suiN__`, store `classification` on the entry.
 - `commit-hooks.js` (new): implement `makePlace` and `renderASTToString`. `makePlace` constructs a `place(content)` closure aware of `entry.classification`. For text position, internally allocates child scope + calls `renderAST` + `region.setContent` (today's pattern, packaged). For attribute position, calls `renderASTToString` + `commit`. Hydration mode: first call register-deps-only, no DOM write.
 - `engines/native/renderer.js bindMarkers`: when an attribute marker resolves to a block-type entry, dispatch with a bag containing `place` (no `region`).
-- `engines/native/define-block.js`: bag construction routes through `makePlace`; existing blocks gain `bag.place` alongside `bag.region`.
+- `engines/native/define-block.js`: bag construction routes through `makePlace`; existing blocks gain `bag.place` alongside `bag.region`. Bag also gains framework-managed reactivity primitives: `bag.reaction(fn)` (proxies `scope.reaction`), `bag.track(reaction)`, `bag.computed(fn)` (`Signal.computed` wrapped to auto-stop on dispose), `bag.onDispose(fn)`.
 - `engines/native/blocks/conditional.js`: replace inline `region.setContent(renderAST(...))` in render/update with `bag.place(contentAST)`. Hydrate unchanged. Block now works in both positions.
 - `engines/native/blocks/{each,async}.js`: no body changes; framework refuses attribute-position bag construction for these block types with `BlockNotSupportedInAttributePosition`.
 - `engines/native/blocks/{rerender,template}.js`: same `bag.place` migration as conditional.
