@@ -1,5 +1,5 @@
 import { Reaction } from '@semantic-ui/reactivity';
-import { each, isArray, isClient, isObject } from '@semantic-ui/utils';
+import { each, isArray, isClient, isFunction, isObject } from '@semantic-ui/utils';
 import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive, PartType } from 'lit/directive.js';
@@ -146,7 +146,7 @@ export class ReactiveConditionalDirective extends AsyncDirective {
   // directive's first arg's .value() callback (attached by LitRenderer's
   // evaluateExpression). Same pattern as ReactiveRerenderDirective.
   resolveValue(v) {
-    if (v?.values?.[0]?.value && typeof v.values[0].value === 'function') {
+    if (isFunction(v?.values?.[0]?.value)) {
       return String(v.values[0].value() ?? '');
     }
     if (v?.strings) {

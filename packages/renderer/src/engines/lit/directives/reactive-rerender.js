@@ -3,7 +3,7 @@ import { AsyncDirective } from 'lit/async-directive.js';
 import { directive, PartType } from 'lit/directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { isArray, isClient, isObject, wrapFunction } from '@semantic-ui/utils';
+import { isArray, isClient, isFunction, isObject, wrapFunction } from '@semantic-ui/utils';
 
 export class ReactiveRerenderDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -107,7 +107,7 @@ export class ReactiveRerenderDirective extends AsyncDirective {
   // which the LitRenderer attaches in `evaluateExpression`. Nested
   // TemplateResults recurse via serializeContent.
   resolveValue(v) {
-    if (v?.values?.[0]?.value && typeof v.values[0].value === 'function') {
+    if (isFunction(v?.values?.[0]?.value)) {
       return String(v.values[0].value() ?? '');
     }
     if (v?.strings) {
