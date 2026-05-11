@@ -19,11 +19,7 @@ import { ExpressionEvaluator } from '../../expression-evaluator.js';
 import { getBlock } from './blocks/registry.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
-import {
-  bindAttribute,
-  bindTextExpression as bindTextExpressionFn,
-  hydrateTextExpression as hydrateTextExpressionFn,
-} from './reactive-data.js';
+import { bindAttribute } from './reactive-data.js';
 // Side-effect import: every block module self-registers into the block registry.
 import './blocks/index.js';
 
@@ -321,14 +317,6 @@ export class Renderer {
   }
 
   /*******************************
-        Text Bindings
-  *******************************/
-
-  bindTextExpression(comment, entry, data, scope) {
-    bindTextExpressionFn({ comment, entry, data, scope, renderer: this });
-  }
-
-  /*******************************
         Block Directive Binding
   *******************************/
 
@@ -449,11 +437,6 @@ export class Renderer {
         this.bindAttributeExpression(node, domAttrName, parts, entries, data, scope, { skipFirstWrite: true });
       }
     }
-  }
-
-  // Hydrating text-expression binding — delegates to reactive-data.js.
-  hydrateTextExpression(comment, entry, data, scope) {
-    hydrateTextExpressionFn({ comment, entry, data, scope, renderer: this });
   }
 
   hydrateBlock(comment, entry, data, scope) {
