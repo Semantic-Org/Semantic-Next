@@ -96,10 +96,11 @@ const sample = defineBlock({
       • the block needs to mutate-in-place rather than rebuild
       • dedup is wrong (rerender: forces re-render on every dep change)
 
-    `bag.place(null)` clears the region. `bag.place.prime(content)` sets
-    lastContent without performing the DOM op — used in hydrate after
-    adopting server DOM so the first compute-driven update post-hydrate
-    dedups correctly.
+    `bag.place(null)` clears the region. To tell place the server DOM
+    already matches a given content (avoiding a wasteful re-render on
+    the first compute-driven update post-hydrate), return that content
+    from your hydrate hook — defineBlock records it on place for you.
+    Hydrate hooks that don't use this just don't return anything.
 
     Example (the simplest possible compute block):
 
@@ -160,10 +161,11 @@ const sample = defineBlock({
       2. Hand the inner content to hydrateInto() — it creates the child
          scope, walks inner markers, reattaches into the region, and
          sets region.endAnchor.
-      3. If the block also uses `compute`, prime bag.place with the
-         matched content via `bag.place.prime(content)` so the first
-         compute-driven update post-hydrate dedups (avoids an
-         unnecessary server-DOM swap when nothing changed).
+      3. If the block also uses `compute`, RETURN the matched content
+         AST from hydrate so the framework records it on `place` — the
+         first compute-driven update post-hydrate dedups against this
+         (avoids an unnecessary server-DOM swap when nothing changed).
+         Returning undefined is fine for blocks that don't need it.
 
     DO NOT call renderAST() from hydrate — that builds fresh DOM and
     discards the server's. The whole point of hydrate is to keep the

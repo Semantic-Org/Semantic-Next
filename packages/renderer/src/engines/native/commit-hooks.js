@@ -24,15 +24,18 @@ import { isArray, isPlainObject } from '@semantic-ui/utils';
 // reference and from null/undefined so the first call always commits.
 const PLACE_INIT = Symbol('place:init');
 
-// Construct a place(content) closure for a text-position block. content is
-// an AST array (the matched branch / template content); null clears the
-// region. Reference equality dedups — selectBranch returns the same
-// node.content reference for the same matched branch, so unchanged-branch
-// re-fires no-op.
+// Construct a {place, match} pair for a text-position block.
 //
-// `place.prime(content)` sets lastContent without performing the DOM op.
-// Used by hydrate hooks after adopting server-rendered DOM so the first
-// compute-driven update doesn't trigger an unnecessary re-render.
+// place(content) — public, exposed on the bag. content is an AST array
+// (the matched branch / template content); null clears the region.
+// Reference equality dedups — selectBranch returns the same node.content
+// reference for the same matched branch, so unchanged-branch re-fires
+// no-op.
+//
+// match(content) — internal, called by defineBlock from hydrate's return
+// value. Records "the DOM already matches this content" without performing
+// a DOM op, so the first compute-driven update after hydration dedups
+// against the server DOM instead of triggering a wasteful re-render.
 // region.setContent (when place eventually swaps) clears region.childScopes
 // — disposing the hydrate scope hydrateInto pushed — so no leak from the
 // orphaned child-scope at swap time.
@@ -60,11 +63,11 @@ export function makePlace({ region, scope, renderer, data, isSVG }) {
     region.setContent(fragment, childScope);
   }
 
-  place.prime = function prime(content) {
+  function match(content) {
     lastContent = content;
-  };
+  }
 
-  return place;
+  return { place, match };
 }
 
 // Coerce an evaluated expression value to its attribute-value string form.

@@ -121,8 +121,11 @@ export function defineBlock(config) {
     // (or null to clear) and handles child-scope allocation + renderAST +
     // region.setContent with reference-equality dedup. Blocks using
     // `compute` reach bag.place implicitly; blocks with explicit
-    // render/update can use it to collapse the rebuild boilerplate.
-    const place = makePlace({ region, scope, renderer, data, isSVG });
+    // render/update can use it to collapse the rebuild boilerplate. match
+    // is the internal counterpart — defineBlock calls it with hydrate's
+    // return value (when non-undefined) so the first post-hydrate update
+    // dedups instead of overwriting server DOM.
+    const { place, match: matchPlace } = makePlace({ region, scope, renderer, data, isSVG });
 
     // Interned per-instance bag — same hidden-class shape across all hook
     // calls. hook/err keys are present from construction so the error-hook
@@ -196,7 +199,16 @@ export function defineBlock(config) {
       if (comp.firstRun) {
         const isHydrating = hydrating && hydrate;
         safeRun(isHydrating ? 'hydrate' : 'render', () => {
-          if (isHydrating) { hydrate(bag); }
+          if (isHydrating) {
+            // hydrate returns the AST that matches the server-rendered
+            // DOM (when applicable). Records the match on `place` so the
+            // first compute-driven update tick dedups instead of
+            // re-rendering over server bytes. Returning undefined is the
+            // backward-compatible no-op for blocks (each, async, etc.)
+            // that don't use compute / don't need the match hook.
+            const matched = hydrate(bag);
+            if (matched !== undefined) { matchPlace(matched); }
+          }
           else { render(bag); }
         }, comp);
       }

@@ -38,14 +38,6 @@ function selectBranch(node, lookupExpression) {
   return { matchIndex: -1, contentAST: null };
 }
 
-function branchASTByIndex(node, matchIndex) {
-  if (matchIndex === MAIN_BRANCH_INDEX) { return node.content; }
-  if (matchIndex >= 0 && node.branches?.[matchIndex]) {
-    return node.branches[matchIndex].content;
-  }
-  return null;
-}
-
 const conditional = defineBlock({
   name: 'conditional',
   syntax: (node) => `{#if ${node.condition}}`,
@@ -81,19 +73,16 @@ const conditional = defineBlock({
       return;
     }
 
-    if (region.ownedNodes.length > 0) {
+    if (region.ownedNodes.length > 0 && clientBranch.contentAST) {
       // Server DOM matches the client branch — hydrate inner markers
       // against the chosen branch's AST, then move nodes into the region.
-      const innerAST = branchASTByIndex(node, clientBranch.matchIndex);
-      if (innerAST) {
-        hydrateInto({ innerAST });
-      }
+      hydrateInto({ innerAST: clientBranch.contentAST });
     }
 
-    // Prime place's lastContent with the matched branch so the first
-    // compute-driven update post-hydrate dedups (no unnecessary swap of
-    // server DOM when the branch hasn't changed).
-    place.prime(clientBranch.contentAST);
+    // Return the matched-branch AST so defineBlock records it on `place`:
+    // the first compute-driven update tick will dedup against this rather
+    // than re-rendering over the server bytes.
+    return clientBranch.contentAST;
   },
 
   evaluateText({ node, data, renderer }) {
