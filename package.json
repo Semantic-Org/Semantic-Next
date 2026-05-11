@@ -107,8 +107,12 @@
       "default": "./src/primitives/icon/sets/heroicons/heroicons.css"
     },
     "./icon/sets/brands.css": {
-      "import": "./src/primitives/icon/sets/brands/index.css",
-      "default": "./src/primitives/icon/sets/brands/index.css"
+      "import": "./src/primitives/icon/sets/brands/brands.css",
+      "default": "./src/primitives/icon/sets/brands/brands.css"
+    },
+    "./fonts/lato.css": {
+      "import": "./src/fonts/lato/lato.css",
+      "default": "./src/fonts/lato/lato.css"
     },
     "./input": {
       "import": "./src/primitives/input/index.js",

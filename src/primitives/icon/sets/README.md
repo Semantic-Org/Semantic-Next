@@ -1,39 +1,58 @@
 # Icon Sets
 
-Each folder contains a CSS file that maps CSS custom properties to SVG icons for a specific icon library. These files power the `<ui-icon>` component — when you write `<ui-icon home>`, the component resolves `--icon-home` from whichever icon set CSS is loaded on the page.
+Each folder is a self-contained CSS file plus its SVGs, exposed through `@semantic-ui/core` as a public CSS export. Importing one of these files makes the `<ui-icon>` primitive resolve canonical names (`<ui-icon home>`, `<ui-icon search>`) to the icons that library provides.
 
-## How it works
+## Consuming downstream
 
-The CSS files are generated from a central mappings file at `packages/specs/src/icons/mappings.js`. That file defines ~291 canonical icon names (like `home`, `save`, `warning`) and maps each one to the corresponding icon name in each library.
+The stable surface is `package.json` `exports` — not the files in this directory. Always import via the public path:
 
-Each generated CSS file has three sections:
-
-1. **Native definitions** — `--icon-{library-name}: url('./{library-name}.svg')` for each SVG
-2. **Canonical names** — `--icon-{canonical}: var(--icon-{native})` so that markup like `<ui-icon home>` resolves to the library-specific icon (e.g., Lucide's `house`)
-3. **Aliases** — `--icon-{alias}: var(--icon-{native})` for alternative names (e.g., `cancel` and `dismiss` both point to the close icon)
-
-This means you can swap icon libraries by changing a single CSS import — all your markup stays the same.
-
-## Regenerating
-
-After editing `mappings.js`, regenerate the CSS files:
-
-```
-cd packages/specs
-npm run icons:build-css
+```js
+import '@semantic-ui/core/icon/sets/lucide.css';
+// or phosphor, tabler, material-symbols, heroicons, brands
 ```
 
-This runs `scripts/generate-icon-css.js`, which reads the mappings and writes out `index.css` for each library.
+Swapping libraries is a one-line change. Markup stays the same.
 
-## Libraries
+Bundlers (Vite, Webpack, Parcel, Next, Astro, Remix, Nuxt) follow the `url('./svg/...')` references inside the CSS, copy the SVGs through to the output, and rewrite the URLs automatically. For build-step-free consumption use the CDN (`https://cdn.semantic-ui.com/icons/{set}`), not the npm files directly.
+
+## How a set is structured
+
+Each generated set is two pieces:
+
+```
+{library}/
+  {library}.css     — :root custom properties pointing at svg/ files
+  svg/              — SVG sources copied from the upstream npm package
+```
+
+The CSS has two sections:
+
+1. **Native definitions** — `--icon-{library-native-name}: url('./svg/{file}.svg')` for every SVG present
+2. **Canonical aliases** — `--icon-{canonical}: var(--icon-{library-native})` only when the canonical name differs from the library's native name
+
+User-facing aliases (e.g. `cancel` → `close`) are **not** in CSS — they're resolved in JavaScript by the `<ui-icon>` component via `iconAliases` from `@semantic-ui/specs/icons/meta`. That keeps every set's CSS small and the alias table single-sourced.
+
+## Rendering technique
+
+The five generated sets (Lucide, Phosphor, Tabler, Material Symbols, Heroicons) are monochrome — they use CSS `mask-image` so icons inherit `currentColor`. The `brands` set is hand-maintained colored framework logos and uses `background-image` instead to preserve native SVG colors.
 
 | Folder | Library | Technique |
 |--------|---------|-----------|
-| `lucide/` | [Lucide](https://lucide.dev) | SVG mask |
-| `phosphor/` | [Phosphor](https://phosphoricons.com) | SVG mask |
-| `tabler/` | [Tabler Icons](https://tabler.io/icons) | SVG mask |
-| `material-symbols/` | [Material Symbols](https://fonts.google.com/icons) | SVG mask |
-| `heroicons/` | [Heroicons](https://heroicons.com) | SVG mask |
-| `brands/` | Framework logos | SVG image (multicolor) |
+| `lucide/` | [Lucide](https://lucide.dev) | mask |
+| `phosphor/` | [Phosphor](https://phosphoricons.com) | mask |
+| `tabler/` | [Tabler Icons](https://tabler.io/icons) | mask |
+| `material-symbols/` | [Material Symbols](https://fonts.google.com/icons) | mask |
+| `heroicons/` | [Heroicons](https://heroicons.com) | mask |
+| `brands/` | Framework logos (hand-maintained) | background-image |
 
-All five icon libraries use the mask technique (monochrome SVGs that inherit `currentColor`). The `brands` set is a separate hand-maintained set of colored framework logos using the image technique.
+## Regenerating
+
+The five monochrome sets are generated from `packages/specs/src/icons/mappings.js`. After editing that file:
+
+```bash
+cd packages/specs && npm run build:icons
+```
+
+This rebuilds `icons.meta.js`, the per-library CSS, and copies the SVGs from the installed upstream npm packages. The `brands/` set is not generated — its SVGs and CSS are edited by hand.
+
+For the full architecture and maintenance workflows see the `icon-system` skill and `maintain-icon-vocabulary` workflow.
