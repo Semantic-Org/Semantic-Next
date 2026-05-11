@@ -1,4 +1,4 @@
-<!-- @license lucide-static v0.563.0 - ISC -->
+<!-- @license lucide-static v1.12.0 - ISC -->
 <svg
   class="lucide lucide-ban"
   xmlns="http://www.w3.org/2000/svg"
@@ -11,6 +11,6 @@
   stroke-linecap="round"
   stroke-linejoin="round"
 >
-  <path d="M4.929 4.929 19.07 19.071" />
   <circle cx="12" cy="12" r="10" />
+  <path d="M4.929 4.929 19.07 19.071" />
 </svg>
