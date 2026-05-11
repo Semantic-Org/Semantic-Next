@@ -44,8 +44,7 @@ const rawTextPlugin = {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const EXAMPLES_DIR = resolve(__dirname, '..');
-
-const SKIP = new Set(['dist', 'node_modules', 'scripts', 'test-case', 'test-element']);
+const SRC_DIR = resolve(EXAMPLES_DIR, 'src');
 
 async function exists(path) {
   try {
@@ -58,12 +57,12 @@ async function exists(path) {
 }
 
 async function findEntryPoints() {
-  const entries = await readdir(EXAMPLES_DIR, { withFileTypes: true });
   const points = [resolve(EXAMPLES_DIR, 'sui.js')];
+  const entries = await readdir(SRC_DIR, { withFileTypes: true });
   for (const entry of entries) {
-    if (!entry.isDirectory() || SKIP.has(entry.name) || entry.name.startsWith('.')) { continue; }
-    const component = resolve(EXAMPLES_DIR, entry.name, 'component.js');
-    const page = resolve(EXAMPLES_DIR, entry.name, 'page.js');
+    if (!entry.isDirectory() || entry.name.startsWith('.')) { continue; }
+    const component = resolve(SRC_DIR, entry.name, 'component.js');
+    const page = resolve(SRC_DIR, entry.name, 'page.js');
     if (await exists(component)) { points.push(component); }
     if (await exists(page)) { points.push(page); }
   }

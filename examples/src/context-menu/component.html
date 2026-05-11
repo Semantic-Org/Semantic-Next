@@ -1,0 +1,30 @@
+<div class="trigger">
+  {>slot}
+</div>
+<div class="{classIf visible 'visible'} menu" style="width: {width}px;" role="menu" part="menu">
+  <div class="items">
+    {#each item, index in items}
+      {#if item.divider}
+        <div class="divider"></div>
+      {else}
+        <div
+          class="item {activeIf (activeIndex == index)}"
+          data-index="{index}"
+          role="menuitem"
+          part="menu-item"
+          tabindex="{activeIndex == index ? '0' : '-1'}"
+        >
+          {#if item.icon}
+            <span class="icon" part="icon">
+              <ui-icon icon="{item.icon}"></ui-icon>
+            </span>
+          {/if}
+          <span class="label" part="label">{item.label}</span>
+          {#if item.shortcut}
+            <span class="shortcut" part="shortcut">{item.shortcut}</span>
+          {/if}
+        </div>
+      {/if}
+    {/each}
+  </div>
+</div>

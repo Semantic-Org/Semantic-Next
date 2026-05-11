@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Semantic UI Examples</title>
+    <link rel="icon" href="/favicon.ico" />
     <script>
       (function () {
         var t = null;
@@ -17,48 +18,370 @@
     <link rel="stylesheet" href="/dist/sui.css" />
     <script type="module" blocking="render" src="/dist/sui.js"></script>
     <style>
-      html { scrollbar-gutter: stable; }
-      body { font-family: var(--page-font, system-ui, sans-serif); max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
-      .example.container { position: relative; transform: translateZ(0); }
-      .example.theme { position: fixed; top: 1rem; right: 1rem; z-index: 1000; }
-      .example.header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--standard-15, #e5e5e5); }
-      .example.header .back { display: inline-block; font-size: 0.8em; color: var(--standard-50, #888); text-decoration: none; letter-spacing: 0.02em; }
-      .example.header .back:hover { color: var(--primary-color, #2185d0); }
-      .example.header .title { margin: 0.4rem 0 0.2rem; font-size: 1.25rem; font-weight: 600; }
-      .example.header .description { margin: 0; color: var(--standard-60, #666); font-size: 0.9em; line-height: 1.5; }
-      h1 { margin-bottom: 0.25rem; }
-      p.lede { color: var(--standard-60, #666); margin-top: 0; }
-      ul { list-style: none; padding: 0; }
-      li { padding: 0.5rem 0; border-bottom: 1px solid var(--standard-10, #eee); }
-      li a { font-weight: 600; text-decoration: none; color: var(--primary-color, #2185d0); }
-      li a:hover { text-decoration: underline; }
-      code { color: var(--standard-50, #888); font-size: 0.85em; margin-left: 0.5rem; }
+/*
+  Stylesheet inlined into every generated page by scripts/sync.js.
+  Loaded as a string at sync time (no bundler), so plain CSS — no imports.
+  All page-specific selectors descend from `.example` so the HTML stays
+  free of repeated namespace classes.
+*/
+
+html { scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--page-font, system-ui, sans-serif);
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.example {
+
+  .theme {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--standard-15, #e5e5e5);
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.8em;
+      color: var(--standard-50, #888);
+
+      a {
+        color: var(--standard-50, #888);
+        text-decoration: none;
+        &:hover { color: var(--primary-color, #2185d0); }
+      }
+
+      .position {
+        margin-left: auto;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    .title {
+      margin: 0.4rem 0 0.1rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+
+      small {
+        display: block;
+        font-size: 0.7em;
+        font-weight: 400;
+        color: var(--standard-50, #888);
+        margin-top: 0.15rem;
+      }
+    }
+
+    .description {
+      margin: 0.5rem 0 0;
+      color: var(--standard-60, #666);
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+  }
+
+  .container {
+    position: relative;
+    transform: translateZ(0);
+  }
+
+  .notes {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--standard-15, #e5e5e5);
+    font-size: 0.9em;
+    color: var(--standard-70, #555);
+    line-height: 1.55;
+
+    h2 {
+      margin: 0 0 0.5rem;
+      font-size: 0.7em;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--standard-50, #888);
+    }
+
+    p { margin: 0 0 1rem; }
+    ul { margin: 0 0 1rem; padding-left: 1.25rem; }
+    li { margin: 0.4rem 0; }
+
+    code {
+      font-size: 0.9em;
+      padding: 0.05em 0.3em;
+      background: var(--standard-5, #f5f5f5);
+      border-radius: 3px;
+    }
+
+    .walk {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--standard-10, #eee);
+
+      a {
+        color: var(--primary-color, #2185d0);
+        text-decoration: none;
+        font-size: 0.95em;
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+
+  /* Landing page */
+  h1 { margin-bottom: 0.25rem; }
+
+  .lede {
+    color: var(--standard-60, #666);
+    margin-top: 0;
+    font-size: 0.95em;
+    line-height: 1.55;
+  }
+
+  .section {
+    margin: 2.5rem 0 0.25rem;
+    font-size: 0.7em;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--standard-50, #888);
+  }
+
+  .section-lede {
+    margin: 0 0 1rem;
+    color: var(--standard-50, #888);
+    font-size: 0.85em;
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--standard-10, #eee);
+      &:last-child { border-bottom: none; }
+    }
+
+    .entry {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      text-decoration: none;
+      &:hover .headline { color: var(--primary-color, #2185d0); }
+
+      .position {
+        font-variant-numeric: tabular-nums;
+        color: var(--standard-40, #aaa);
+        font-size: 0.9em;
+        min-width: 1.5rem;
+      }
+
+      .headline {
+        font-weight: 600;
+        color: var(--text-color, #222);
+      }
+
+      .subtitle {
+        color: var(--standard-50, #888);
+        font-size: 0.85em;
+      }
+    }
+
+    .intro {
+      margin: 0.35rem 0 0 2.1rem;
+      color: var(--standard-60, #666);
+      font-size: 0.9em;
+      line-height: 1.55;
+
+      code {
+        font-size: 0.9em;
+        padding: 0.05em 0.3em;
+        background: var(--standard-5, #f5f5f5);
+        border-radius: 3px;
+      }
+    }
+  }
+}
+
     </style>
   </head>
   <body>
-    <theme-switcher class="example theme"></theme-switcher>
-    <h1>Semantic UI Examples</h1>
-    <p class="lede">Canonical curriculum examples mirroring <code>docs/src/examples/</code>. Run <code>npm run dev</code> in <code>examples/</code> to start the esbuild server.</p>
-    <ul>
-      <li><a href="./minimal/page.html">Current Time</a> <code>minimal</code></li>
-      <li><a href="./emoji-reactions/page.html">Emoji Reactions</a> <code>emoji-reactions</code></li>
-      <li><a href="./todo-list/page.html">TodoMVC</a> <code>todo-list</code></li>
-      <li><a href="./async-search/page.html">Search Autocomplete</a> <code>async-search</code></li>
-      <li><a href="./context-menu/page.html">Context Menu</a> <code>context-menu</code></li>
-      <li><a href="./card-search/page.html">Card Search</a> <code>card-search</code></li>
-      <li><a href="./tailwind/page.html">Tailwind</a> <code>tailwind</code></li>
-      <li><a href="./dynamic-table/page.html">Dynamic Table</a> <code>dynamic-table</code></li>
-      <li><a href="./external-calls/page.html">External Calls</a> <code>external-calls</code></li>
-      <li><a href="./maximal/page.html">Kitchen Sink</a> <code>maximal</code></li>
-      <li><a href="./component-specs/page.html">Using Specs</a> <code>component-specs</code></li>
-      <li><a href="./advanced-keybinding/page.html">Advanced Keybinding</a> <code>advanced-keybinding</code></li>
-      <li><a href="./rating-slider/page.html">Rating Slider</a> <code>rating-slider</code></li>
-      <li><a href="./advanced-ball-simulation/page.html">Advanced Ball Simulation</a> <code>advanced-ball-simulation</code></li>
-      <li><a href="./event-data/page.html">Event Data</a> <code>event-data</code></li>
-      <li><a href="./dropdown/page.html">Dropdown</a> <code>dropdown</code></li>
-      <li><a href="./setting-types/page.html">Setting Types</a> <code>setting-types</code></li>
-      <li><a href="./progress-bar/page.html">Progress Bar</a> <code>progress-bar</code></li>
-      <li><a href="./clock/page.html">Clock</a> <code>clock</code></li>
-    </ul>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <h1>Semantic UI Examples</h1>
+      <p class="lede">A tour of the framework, from the smallest possible component to deeper patterns. The first 7 introduce the core concepts in order; the rest cover specific features and can be read standalone.</p>
+      <h2 class="section">Start here</h2>
+      <p class="section-lede">Each example builds on the previous one. Read in order.</p>
+      <ul class="entries">
+        <li>
+          <a class="entry" href="./src/minimal/page.html">
+            <span class="position">1</span>
+            <span class="headline">Hello world</span>
+            <span class="subtitle">Current Time</span>
+          </a>
+          <p class="intro">A complete component in a single <code>defineComponent</code> call. Inline template, inline CSS, one piece of state, and the <code>interval</code> lifecycle helper to advance the clock once per second.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/emoji-reactions/page.html">
+            <span class="position">2</span>
+            <span class="headline">State and events</span>
+            <span class="subtitle">Emoji Reactions</span>
+          </a>
+          <p class="intro">A row of emoji reactions you can toggle. Initial reactions come from an HTML attribute that the component parses on <code>initialize()</code>; clicking a reaction flips its <code>active</code> flag and adjusts the count.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/todo-list/page.html">
+            <span class="position">3</span>
+            <span class="headline">TodoMVC</span>
+            <span class="subtitle">TodoMVC</span>
+          </a>
+          <p class="intro">TodoMVC implemented with the framework&#39;s canonical patterns: signal mutation helpers for the list, a <code>reaction()</code> that mirrors state to localStorage, subtemplates for items, and <code>hashchange</code> for routing between filters.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/async-search/page.html">
+            <span class="position">4</span>
+            <span class="headline">Async blocks</span>
+            <span class="subtitle">Search Autocomplete</span>
+          </a>
+          <p class="intro">A typeahead built with <code>{#async}</code>. The template calls an async function inline and renders the resolved value, with <code>{loading}</code> and <code>{error}</code> branches alongside it. When the input changes, the block re-runs automatically.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/context-menu/page.html">
+            <span class="position">5</span>
+            <span class="headline">Global and deep events</span>
+            <span class="subtitle">Context Menu</span>
+          </a>
+          <p class="intro">A right-click context menu. The component listens for events both inside shadow DOM (<code>deep</code>) and on the document (<code>global</code>), positions itself within the viewport, and uses a custom event so opening one menu closes any others.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/card-search/page.html">
+            <span class="position">6</span>
+            <span class="headline">Composition with subtemplates</span>
+            <span class="subtitle">Card Search</span>
+          </a>
+          <p class="intro">A friend directory filtered by gender and search term. The card markup lives in its own file and is registered as a subtemplate; the page is assembled from first-party <code>ui-menu</code> and <code>ui-input</code> components.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/tailwind/page.html">
+            <span class="position">7</span>
+            <span class="headline">Tailwind inside shadow DOM</span>
+            <span class="subtitle">Tailwind</span>
+          </a>
+          <p class="intro">Tailwind 4 compiled at runtime by the <code>TailwindPlugin</code> and injected into the component&#39;s shadow root. Existing Tailwind classes, <code>@theme</code>, and <code>@custom-variant</code> work without modification.</p>
+        </li>
+      </ul>
+      <h2 class="section">More patterns</h2>
+      <p class="section-lede">Standalone examples covering specific features.</p>
+      <ul class="entries">
+        <li>
+          <a class="entry" href="./src/dynamic-table/page.html">
+            <span class="position">8</span>
+            <span class="headline">Templates as settings</span>
+            <span class="subtitle">Dynamic Table</span>
+          </a>
+          <p class="intro">A generic table where the consumer supplies the row template via <code>settings</code>. The table owns the structural markup (<code>thead</code>, <code>tbody</code>, the iteration); the caller decides what each row looks like.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/external-calls/page.html">
+            <span class="position">9</span>
+            <span class="headline">Calling component methods from the page</span>
+            <span class="subtitle">External Calls</span>
+          </a>
+          <p class="intro">A counter ticks once per second; the page focuses an input to pause it and blurs to resume. <code>$(&#39;ui-counter&#39;).component()</code> returns the same <code>self</code> the component uses internally, so external code can call its methods directly.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/maximal/page.html">
+            <span class="position">10</span>
+            <span class="headline">The full defineComponent surface</span>
+            <span class="subtitle">Kitchen Sink</span>
+          </a>
+          <p class="intro">A number adjuster that uses most of <code>defineComponent</code>. The implementation is split across multiple files to show that lifecycle hooks, settings, subtemplates, and CSS can all be authored separately and composed at the call site.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/component-specs/page.html">
+            <span class="position">11</span>
+            <span class="headline">Spec-driven primitives</span>
+            <span class="subtitle">Using Specs</span>
+          </a>
+          <p class="intro">How the first-party design-system primitives are defined. A spec object lists a component&#39;s variations and states; <code>SpecReader</code> turns it into a <code>componentSpec</code> that enables three equivalent attribute syntaxes.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/advanced-keybinding/page.html">
+            <span class="position">12</span>
+            <span class="headline">Static and runtime keybindings</span>
+            <span class="subtitle">Advanced Keybinding</span>
+          </a>
+          <p class="intro">A search component with a fixed <code>ctrl + f</code> shortcut, <code>up</code>/<code>down</code>/<code>esc</code> navigation, and an <code>enter</code> binding that is added or removed at runtime depending on whether a result is selected.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/rating-slider/page.html">
+            <span class="position">13</span>
+            <span class="headline">Drag tracking with global events</span>
+            <span class="subtitle">Rating Slider</span>
+          </a>
+          <p class="intro">A slider you can drag past the bounds of the component. <code>pointerdown</code> on the track starts the drag; <code>global pointermove body</code> and <code>global pointerup body</code> follow the pointer anywhere on the page until it is released.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/advanced-ball-simulation/page.html">
+            <span class="position">14</span>
+            <span class="headline">Reactivity as an animation loop</span>
+            <span class="subtitle">Advanced Ball Simulation</span>
+          </a>
+          <p class="intro">A bouncing-ball simulation where the reactive system drives the render loop: a <code>reaction()</code> reads the balls array and schedules the next animation frame whenever it changes. Demonstrates that the same primitives that drive a template can drive 60 fps animation.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/event-data/page.html">
+            <span class="position">15</span>
+            <span class="headline">Data-driven event dispatch</span>
+            <span class="subtitle">Event Data</span>
+          </a>
+          <p class="intro">One event handler, many actions. Each button carries <code>data-dimension</code> and <code>data-helper</code> attributes; the handler reads them and indexes into the signal with bracket notation to pick which mutation to perform.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/dropdown/page.html">
+            <span class="position">16</span>
+            <span class="headline">A form-friendly dropdown</span>
+            <span class="subtitle">Dropdown</span>
+          </a>
+          <p class="intro">A select-style dropdown with click-outside dismissal and a hidden <code>&lt;input&gt;</code> so the component participates in form submission. Demonstrates JSON in HTML attributes, dual <code>onChange</code> / <code>change</code> event notification, and <code>{classIf}</code>.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/setting-types/page.html">
+            <span class="position">17</span>
+            <span class="headline">Setting types and coercion</span>
+            <span class="subtitle">Setting Types</span>
+          </a>
+          <p class="intro">A reference for what each setting type looks like at each boundary: HTML attribute, JS property, and <code>.settings()</code> call. Strings, numbers, booleans, arrays, objects, and functions are all valid setting types.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/progress-bar/page.html">
+            <span class="position">18</span>
+            <span class="headline">Parameterized snippets</span>
+            <span class="subtitle">Progress Bar</span>
+          </a>
+          <p class="intro">A progress bar whose label changes once it reaches 100%. The same <code>{#snippet label}</code> is rendered with and without a <code>canComplete</code> parameter to produce two variants of the same fragment.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/clock/page.html">
+            <span class="position">19</span>
+            <span class="headline">SVG, intervals, and helpers</span>
+            <span class="subtitle">Clock</span>
+          </a>
+          <p class="intro">An analog clock rendered as SVG, ticking once per second. Demonstrates the <code>interval</code> helper, <code>state.time.now()</code>, and lisp-style helper calls with multiple arguments.</p>
+        </li>
+      </ul>
+    </div>
   </body>
 </html>

@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Advanced Ball Simulation — advanced-ball-simulation</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <script type="module" blocking="render" src="/dist/src/advanced-ball-simulation/component.js"></script>
+    <style>
+/*
+  Stylesheet inlined into every generated page by scripts/sync.js.
+  Loaded as a string at sync time (no bundler), so plain CSS — no imports.
+  All page-specific selectors descend from `.example` so the HTML stays
+  free of repeated namespace classes.
+*/
+
+html { scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--page-font, system-ui, sans-serif);
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.example {
+
+  .theme {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--standard-15, #e5e5e5);
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.8em;
+      color: var(--standard-50, #888);
+
+      a {
+        color: var(--standard-50, #888);
+        text-decoration: none;
+        &:hover { color: var(--primary-color, #2185d0); }
+      }
+
+      .position {
+        margin-left: auto;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    .title {
+      margin: 0.4rem 0 0.1rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+
+      small {
+        display: block;
+        font-size: 0.7em;
+        font-weight: 400;
+        color: var(--standard-50, #888);
+        margin-top: 0.15rem;
+      }
+    }
+
+    .description {
+      margin: 0.5rem 0 0;
+      color: var(--standard-60, #666);
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+  }
+
+  .container {
+    position: relative;
+    transform: translateZ(0);
+  }
+
+  .notes {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--standard-15, #e5e5e5);
+    font-size: 0.9em;
+    color: var(--standard-70, #555);
+    line-height: 1.55;
+
+    h2 {
+      margin: 0 0 0.5rem;
+      font-size: 0.7em;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--standard-50, #888);
+    }
+
+    p { margin: 0 0 1rem; }
+    ul { margin: 0 0 1rem; padding-left: 1.25rem; }
+    li { margin: 0.4rem 0; }
+
+    code {
+      font-size: 0.9em;
+      padding: 0.05em 0.3em;
+      background: var(--standard-5, #f5f5f5);
+      border-radius: 3px;
+    }
+
+    .walk {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--standard-10, #eee);
+
+      a {
+        color: var(--primary-color, #2185d0);
+        text-decoration: none;
+        font-size: 0.95em;
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+
+  /* Landing page */
+  h1 { margin-bottom: 0.25rem; }
+
+  .lede {
+    color: var(--standard-60, #666);
+    margin-top: 0;
+    font-size: 0.95em;
+    line-height: 1.55;
+  }
+
+  .section {
+    margin: 2.5rem 0 0.25rem;
+    font-size: 0.7em;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--standard-50, #888);
+  }
+
+  .section-lede {
+    margin: 0 0 1rem;
+    color: var(--standard-50, #888);
+    font-size: 0.85em;
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--standard-10, #eee);
+      &:last-child { border-bottom: none; }
+    }
+
+    .entry {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      text-decoration: none;
+      &:hover .headline { color: var(--primary-color, #2185d0); }
+
+      .position {
+        font-variant-numeric: tabular-nums;
+        color: var(--standard-40, #aaa);
+        font-size: 0.9em;
+        min-width: 1.5rem;
+      }
+
+      .headline {
+        font-weight: 600;
+        color: var(--text-color, #222);
+      }
+
+      .subtitle {
+        color: var(--standard-50, #888);
+        font-size: 0.85em;
+      }
+    }
+
+    .intro {
+      margin: 0.35rem 0 0 2.1rem;
+      color: var(--standard-60, #666);
+      font-size: 0.9em;
+      line-height: 1.55;
+
+      code {
+        font-size: 0.9em;
+        padding: 0.05em 0.3em;
+        background: var(--standard-5, #f5f5f5);
+        border-radius: 3px;
+      }
+    }
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <header class="header">
+        <nav class="crumbs">
+          <a class="back" href="/">← Examples</a>
+          <a href="../rating-slider/page.html">prev</a>
+          <a href="../event-data/page.html">next</a>
+          <span class="position">14 / 19</span>
+        </nav>
+        <h1 class="title">Reactivity as an animation loop<small>Advanced Ball Simulation</small></h1>
+        <p class="description">A bouncing-ball simulation where the reactive system drives the render loop: a <code>reaction()</code> reads the balls array and schedules the next animation frame whenever it changes. Demonstrates that the same primitives that drive a template can drive 60 fps animation.</p>
+      </header>
+      <div class="container">
+        <ball-simulation
+          count="180"
+          radius="1"
+          speed="1"
+          radius-variance="2"
+          saturation-decay="400">
+        </ball-simulation>
+      </div>
+      <aside class="notes">
+        <h2>New patterns</h2>
+        <p><code>reaction()</code> as the animation driver, <code>peek()</code> for non-tracking reads, <code>onRendered</code>, runtime settings mutation, <code>&lt;canvas&gt;</code> integration.</p>
+        <h2>What to notice</h2>
+        <ul>
+          <li><code>reaction(() =&gt; { state.balls.get(); requestAnimationFrame(self.animate); })</code> reads the balls signal to register a dependency, then schedules a frame. <code>animate</code> mutates the balls, which re-fires the reaction, which schedules the next frame.</li>
+          <li><code>state.balls.peek()</code> reads the current value without registering a reactive dependency — used inside <code>animate</code> so writing back to <code>state.balls</code> doesn&#39;t create an infinite loop.</li>
+          <li><code>self.emitter</code> and <code>self.render</code> are stored on <code>self</code>, not <code>state</code>, because they are bookkeeping (pointer position, last frame time, FPS counter) that should not trigger renders. Rule of thumb: <code>state</code> for things the template reads, <code>self</code> for everything else.</li>
+        </ul>
+        <nav class="walk">
+          <a href="../rating-slider/page.html">← Drag tracking with global events</a>
+          <a href="../event-data/page.html">Data-driven event dispatch →</a>
+        </nav>
+      </aside>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Context Menu — context-menu</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <link rel="stylesheet" href="./page.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <script type="module" blocking="render" src="/dist/src/context-menu/component.js"></script>
+    <script type="module" blocking="render" src="/dist/src/context-menu/page.js"></script>
+    <style>
+/*
+  Stylesheet inlined into every generated page by scripts/sync.js.
+  Loaded as a string at sync time (no bundler), so plain CSS — no imports.
+  All page-specific selectors descend from `.example` so the HTML stays
+  free of repeated namespace classes.
+*/
+
+html { scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--page-font, system-ui, sans-serif);
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.example {
+
+  .theme {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--standard-15, #e5e5e5);
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.8em;
+      color: var(--standard-50, #888);
+
+      a {
+        color: var(--standard-50, #888);
+        text-decoration: none;
+        &:hover { color: var(--primary-color, #2185d0); }
+      }
+
+      .position {
+        margin-left: auto;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    .title {
+      margin: 0.4rem 0 0.1rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+
+      small {
+        display: block;
+        font-size: 0.7em;
+        font-weight: 400;
+        color: var(--standard-50, #888);
+        margin-top: 0.15rem;
+      }
+    }
+
+    .description {
+      margin: 0.5rem 0 0;
+      color: var(--standard-60, #666);
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+  }
+
+  .container {
+    position: relative;
+    transform: translateZ(0);
+  }
+
+  .notes {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--standard-15, #e5e5e5);
+    font-size: 0.9em;
+    color: var(--standard-70, #555);
+    line-height: 1.55;
+
+    h2 {
+      margin: 0 0 0.5rem;
+      font-size: 0.7em;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--standard-50, #888);
+    }
+
+    p { margin: 0 0 1rem; }
+    ul { margin: 0 0 1rem; padding-left: 1.25rem; }
+    li { margin: 0.4rem 0; }
+
+    code {
+      font-size: 0.9em;
+      padding: 0.05em 0.3em;
+      background: var(--standard-5, #f5f5f5);
+      border-radius: 3px;
+    }
+
+    .walk {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--standard-10, #eee);
+
+      a {
+        color: var(--primary-color, #2185d0);
+        text-decoration: none;
+        font-size: 0.95em;
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+
+  /* Landing page */
+  h1 { margin-bottom: 0.25rem; }
+
+  .lede {
+    color: var(--standard-60, #666);
+    margin-top: 0;
+    font-size: 0.95em;
+    line-height: 1.55;
+  }
+
+  .section {
+    margin: 2.5rem 0 0.25rem;
+    font-size: 0.7em;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--standard-50, #888);
+  }
+
+  .section-lede {
+    margin: 0 0 1rem;
+    color: var(--standard-50, #888);
+    font-size: 0.85em;
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--standard-10, #eee);
+      &:last-child { border-bottom: none; }
+    }
+
+    .entry {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      text-decoration: none;
+      &:hover .headline { color: var(--primary-color, #2185d0); }
+
+      .position {
+        font-variant-numeric: tabular-nums;
+        color: var(--standard-40, #aaa);
+        font-size: 0.9em;
+        min-width: 1.5rem;
+      }
+
+      .headline {
+        font-weight: 600;
+        color: var(--text-color, #222);
+      }
+
+      .subtitle {
+        color: var(--standard-50, #888);
+        font-size: 0.85em;
+      }
+    }
+
+    .intro {
+      margin: 0.35rem 0 0 2.1rem;
+      color: var(--standard-60, #666);
+      font-size: 0.9em;
+      line-height: 1.55;
+
+      code {
+        font-size: 0.9em;
+        padding: 0.05em 0.3em;
+        background: var(--standard-5, #f5f5f5);
+        border-radius: 3px;
+      }
+    }
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <header class="header">
+        <nav class="crumbs">
+          <a class="back" href="/">← Examples</a>
+          <a href="../async-search/page.html">prev</a>
+          <a href="../card-search/page.html">next</a>
+          <span class="position">5 / 19</span>
+        </nav>
+        <h1 class="title">Global and deep events<small>Context Menu</small></h1>
+        <p class="description">A right-click context menu. The component listens for events both inside shadow DOM (<code>deep</code>) and on the document (<code>global</code>), positions itself within the viewport, and uses a custom event so opening one menu closes any others.</p>
+      </header>
+      <div class="container">
+        <context-menu class="box">
+          <div class="box">
+            Right-click on this box for a context menu
+          </div>
+        </context-menu>
+        
+        
+        <context-menu class="image">
+          <div class="image">
+            <img src="https://next.semantic-ui.com/images/avatar/jenny.jpg">
+            <p>Try right-clicking on the image for an image-specific menu</p>
+          </div>
+        </context-menu>
+        
+        <div class="output">No action yet</div>
+      </div>
+      <aside class="notes">
+        <h2>New patterns</h2>
+        <p><code>{&gt;slot}</code>, <code>&#39;global click body&#39;</code>, <code>&#39;deep contextmenu .trigger&#39;</code>, <code>part</code>, <code>peek()</code>, key handler return values, <code>role</code> / <code>tabindex</code>, <code>el</code>.</p>
+        <h2>What to notice</h2>
+        <ul>
+          <li><code>&#39;deep contextmenu .trigger&#39;</code> listens for <code>contextmenu</code> on the <code>.trigger</code> element even when it sits inside another shadow root. Standard event listeners stop at the boundary.</li>
+          <li><code>&#39;global click body&#39;</code> and <code>&#39;global contextmenu body&#39;</code> listen on the document from within the shadow DOM, and unbind automatically when the component is destroyed.</li>
+          <li><code>&#39;global show context-menu&#39;</code> listens for a custom event dispatched by *other* <code>context-menu</code> instances. Each menu dismisses itself when a sibling opens.</li>
+          <li>Key handlers can return <code>true</code> or <code>false</code> to indicate whether they handled the event — useful when the same key should fall through to the page when the menu is closed.</li>
+        </ul>
+        <nav class="walk">
+          <a href="../async-search/page.html">← Async blocks</a>
+          <a href="../card-search/page.html">Composition with subtemplates →</a>
+        </nav>
+      </aside>
+    </div>
+  </body>
+</html>

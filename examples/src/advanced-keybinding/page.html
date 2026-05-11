@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Advanced Keybinding — advanced-keybinding</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <script type="module" blocking="render" src="/dist/src/advanced-keybinding/component.js"></script>
+    <script type="module" blocking="render" src="/dist/src/advanced-keybinding/page.js"></script>
+    <style>
+/*
+  Stylesheet inlined into every generated page by scripts/sync.js.
+  Loaded as a string at sync time (no bundler), so plain CSS — no imports.
+  All page-specific selectors descend from `.example` so the HTML stays
+  free of repeated namespace classes.
+*/
+
+html { scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--page-font, system-ui, sans-serif);
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.example {
+
+  .theme {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--standard-15, #e5e5e5);
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.8em;
+      color: var(--standard-50, #888);
+
+      a {
+        color: var(--standard-50, #888);
+        text-decoration: none;
+        &:hover { color: var(--primary-color, #2185d0); }
+      }
+
+      .position {
+        margin-left: auto;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    .title {
+      margin: 0.4rem 0 0.1rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+
+      small {
+        display: block;
+        font-size: 0.7em;
+        font-weight: 400;
+        color: var(--standard-50, #888);
+        margin-top: 0.15rem;
+      }
+    }
+
+    .description {
+      margin: 0.5rem 0 0;
+      color: var(--standard-60, #666);
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+  }
+
+  .container {
+    position: relative;
+    transform: translateZ(0);
+  }
+
+  .notes {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--standard-15, #e5e5e5);
+    font-size: 0.9em;
+    color: var(--standard-70, #555);
+    line-height: 1.55;
+
+    h2 {
+      margin: 0 0 0.5rem;
+      font-size: 0.7em;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--standard-50, #888);
+    }
+
+    p { margin: 0 0 1rem; }
+    ul { margin: 0 0 1rem; padding-left: 1.25rem; }
+    li { margin: 0.4rem 0; }
+
+    code {
+      font-size: 0.9em;
+      padding: 0.05em 0.3em;
+      background: var(--standard-5, #f5f5f5);
+      border-radius: 3px;
+    }
+
+    .walk {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--standard-10, #eee);
+
+      a {
+        color: var(--primary-color, #2185d0);
+        text-decoration: none;
+        font-size: 0.95em;
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+
+  /* Landing page */
+  h1 { margin-bottom: 0.25rem; }
+
+  .lede {
+    color: var(--standard-60, #666);
+    margin-top: 0;
+    font-size: 0.95em;
+    line-height: 1.55;
+  }
+
+  .section {
+    margin: 2.5rem 0 0.25rem;
+    font-size: 0.7em;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--standard-50, #888);
+  }
+
+  .section-lede {
+    margin: 0 0 1rem;
+    color: var(--standard-50, #888);
+    font-size: 0.85em;
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--standard-10, #eee);
+      &:last-child { border-bottom: none; }
+    }
+
+    .entry {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      text-decoration: none;
+      &:hover .headline { color: var(--primary-color, #2185d0); }
+
+      .position {
+        font-variant-numeric: tabular-nums;
+        color: var(--standard-40, #aaa);
+        font-size: 0.9em;
+        min-width: 1.5rem;
+      }
+
+      .headline {
+        font-weight: 600;
+        color: var(--text-color, #222);
+      }
+
+      .subtitle {
+        color: var(--standard-50, #888);
+        font-size: 0.85em;
+      }
+    }
+
+    .intro {
+      margin: 0.35rem 0 0 2.1rem;
+      color: var(--standard-60, #666);
+      font-size: 0.9em;
+      line-height: 1.55;
+
+      code {
+        font-size: 0.9em;
+        padding: 0.05em 0.3em;
+        background: var(--standard-5, #f5f5f5);
+        border-radius: 3px;
+      }
+    }
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <header class="header">
+        <nav class="crumbs">
+          <a class="back" href="/">← Examples</a>
+          <a href="../component-specs/page.html">prev</a>
+          <a href="../rating-slider/page.html">next</a>
+          <span class="position">12 / 19</span>
+        </nav>
+        <h1 class="title">Static and runtime keybindings<small>Advanced Keybinding</small></h1>
+        <p class="description">A search component with a fixed <code>ctrl + f</code> shortcut, <code>up</code>/<code>down</code>/<code>esc</code> navigation, and an <code>enter</code> binding that is added or removed at runtime depending on whether a result is selected.</p>
+      </header>
+      <div class="container">
+        <search-component></search-component>
+      </div>
+      <aside class="notes">
+        <h2>New patterns</h2>
+        <p><code>bindKey</code>, <code>unbindKey</code>, the <code>&#39;ctrl + f&#39;</code> modifier syntax, dynamic keybinding inside a <code>reaction()</code>.</p>
+        <h2>What to notice</h2>
+        <ul>
+          <li><code>bindKey(&#39;enter&#39;, handler)</code> and <code>unbindKey(&#39;enter&#39;)</code> add and remove keybindings at runtime. Wrapping them in a <code>reaction()</code> makes the binding follow whatever state the reaction reads — here, <code>selectedIndex &gt; -1</code>.</li>
+          <li>Modifier keys use a plain string: <code>&#39;ctrl + f&#39;</code>. <code>shift</code>, <code>alt</code>, and <code>meta</code> work the same way.</li>
+          <li>Static keys declared in the <code>keys</code> option coexist with dynamic ones. The <code>enter</code> binding lives on top of the static <code>up</code> / <code>down</code> / <code>esc</code> bindings.</li>
+        </ul>
+        <nav class="walk">
+          <a href="../component-specs/page.html">← Spec-driven primitives</a>
+          <a href="../rating-slider/page.html">Drag tracking with global events →</a>
+        </nav>
+      </aside>
+    </div>
+  </body>
+</html>

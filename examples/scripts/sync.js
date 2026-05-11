@@ -9,22 +9,26 @@
   - Regenerates examples/index.html with links to every synced example.
 
   Usage:
-    node scripts/sync.js                    # sync all CURRICULUM_IDS
+    node scripts/sync.js                    # sync all CURRICULUM_IDS once
     node scripts/sync.js todo-list clock    # sync just the named IDs
+    node scripts/sync.js --watch            # initial sync + watch docs/src/examples for changes
 */
 
-import { existsSync } from 'node:fs';
+import { existsSync, watch as fsWatch } from 'node:fs';
 import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { CORE_COUNT, CURRICULUM } from '../curriculum.js';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const EXAMPLES_DIR = resolve(__dirname, '..');
+const SRC_DIR = resolve(EXAMPLES_DIR, 'src');
 const REPO_ROOT = resolve(EXAMPLES_DIR, '..');
 const DOCS_EXAMPLES = resolve(REPO_ROOT, 'docs/src/examples');
 const DOCS_METADATA = resolve(REPO_ROOT, 'docs/src/content/examples');
+const DOCS_FAVICON = resolve(REPO_ROOT, 'docs/public/favicon.ico');
 
-// The example-curriculum.md ranking, in order.
 /*
   Docs assets (avatars under /images/, etc.) aren't served by the examples
   dev server. Rewrite root-relative paths to absolute URLs that point at the
@@ -32,27 +36,8 @@ const DOCS_METADATA = resolve(REPO_ROOT, 'docs/src/content/examples');
 */
 const DOCS_ORIGIN = 'https://next.semantic-ui.com';
 
-const CURRICULUM_IDS = [
-  'minimal',
-  'emoji-reactions',
-  'todo-list',
-  'async-search',
-  'context-menu',
-  'card-search',
-  'tailwind',
-  'dynamic-table',
-  'external-calls',
-  'maximal',
-  'component-specs',
-  'advanced-keybinding',
-  'rating-slider',
-  'advanced-ball-simulation',
-  'event-data',
-  'dropdown',
-  'setting-types',
-  'progress-bar',
-  'clock',
-];
+/* Curriculum order drives sync iteration, prev/next nav, and landing-page sectioning. */
+const CURRICULUM_IDS = CURRICULUM.map((e) => e.id);
 
 /*
   Inline pre-paint script that reads the stored theme and applies `dark` or
@@ -71,21 +56,13 @@ const THEME_BOOTSTRAP = `    <script>
     </script>`;
 
 /*
-  Shared layout for every generated page. The example fragment is wrapped in
-  `.example container` so position:absolute children resolve to the container
-  (via position: relative) and position:fixed children resolve to it too (the
-  `transform` declaration creates a new containing block). The theme-switcher
-  lives outside the container so it stays anchored to the viewport.
+  Shared stylesheet for every generated page. Loaded from scripts/page.css
+  at sync time and inlined into each output. The HTML wraps each page's
+  body in `<div class="example">`, so all selectors descend from `.example`
+  and individual elements keep plain class names (`.header`, `.container`,
+  `.notes`, `.theme`, `.lede`, …).
 */
-const PAGE_LAYOUT = `      html { scrollbar-gutter: stable; }
-      body { font-family: var(--page-font, system-ui, sans-serif); max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
-      .example.container { position: relative; transform: translateZ(0); }
-      .example.theme { position: fixed; top: 1rem; right: 1rem; z-index: 1000; }
-      .example.header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--standard-15, #e5e5e5); }
-      .example.header .back { display: inline-block; font-size: 0.8em; color: var(--standard-50, #888); text-decoration: none; letter-spacing: 0.02em; }
-      .example.header .back:hover { color: var(--primary-color, #2185d0); }
-      .example.header .title { margin: 0.4rem 0 0.2rem; font-size: 1.25rem; font-weight: 600; }
-      .example.header .description { margin: 0; color: var(--standard-60, #666); font-size: 0.9em; line-height: 1.5; }`;
+const PAGE_STYLES = await readFile(resolve(__dirname, 'page.css'), 'utf8');
 
 /* Convert kebab-case tag → PascalCase, preserving `ui` as `UI`. */
 function kebabToPascal(kebab) {
@@ -248,54 +225,94 @@ function escapeHTML(s) {
   }[c]));
 }
 
+/* Inline-markdown rendering for curriculum prose: `code` and **bold**. Escape first so spans render safely. */
+function renderInline(text) {
+  return escapeHTML(text)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+}
+
+/* Render the curriculum's lesson notes panel + prev/next walk for one example. */
+function renderLessonNotes(entry, prev, next) {
+  if (!entry) { return ''; }
+  const bullets = entry.whatToNotice.map((b) => `          <li>${renderInline(b)}</li>`).join('\n');
+  const prevLink = prev ? `<a href="../${prev.id}/page.html">← ${escapeHTML(prev.headline)}</a>` : '<span></span>';
+  const nextLink = next ? `<a href="../${next.id}/page.html">${escapeHTML(next.headline)} →</a>` : '<span></span>';
+  return `
+      <aside class="notes">
+        <h2>New patterns</h2>
+        <p>${renderInline(entry.newPatterns)}</p>
+        <h2>What to notice</h2>
+        <ul>
+${bullets}
+        </ul>
+        <nav class="walk">
+          ${prevLink}
+          ${nextLink}
+        </nav>
+      </aside>`;
+}
+
 /* Wrap a docs-style page.html fragment in a complete HTML document. */
-function wrapPageHTML({ id, title, description, fragment, hasPageCSS, hasPageJS }) {
+function wrapPageHTML({ id, title, description, fragment, hasPageCSS, hasPageJS, entry, position, prev, next }) {
   // blocking="render" defers paint until each module is parsed + executed,
   // so custom elements are upgraded before the first frame (no FOUC flash).
   const scripts = [
     `    <script type="module" blocking="render" src="/dist/sui.js"></script>`,
-    `    <script type="module" blocking="render" src="/dist/${id}/component.js"></script>`,
+    `    <script type="module" blocking="render" src="/dist/src/${id}/component.js"></script>`,
   ];
-  if (hasPageJS) { scripts.push(`    <script type="module" blocking="render" src="/dist/${id}/page.js"></script>`); }
+  if (hasPageJS) {
+    scripts.push(
+      `    <script type="module" blocking="render" src="/dist/src/${id}/page.js"></script>`,
+    );
+  }
 
   const links = [`    <link rel="stylesheet" href="/dist/sui.css" />`];
   if (hasPageCSS) { links.push(`    <link rel="stylesheet" href="./page.css" />`); }
+
+  const headline = entry ? entry.headline : title;
+  const intro = entry ? entry.intro : description;
+  const total = CURRICULUM.length;
 
   return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${title} — ${id}</title>
+    <title>${escapeHTML(title)} — ${id}</title>
+    <link rel="icon" href="/favicon.ico" />
 ${THEME_BOOTSTRAP}
 ${links.join('\n')}
 ${scripts.join('\n')}
     <style>
-${PAGE_LAYOUT}
+${PAGE_STYLES}
     </style>
   </head>
   <body>
-    <theme-switcher class="example theme"></theme-switcher>
-    <header class="example header">
-      <a class="back" href="/">← Examples</a>
-      <h1 class="title">${escapeHTML(title)}</h1>${
-    description
-      ? `
-      <p class="description">${escapeHTML(description)}</p>`
-      : ''
-  }
-    </header>
-    <div class="example container">
-${fragment.trimEnd().replace(/^/gm, '      ')}
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <header class="header">
+        <nav class="crumbs">
+          <a class="back" href="/">← Examples</a>
+          ${prev ? `<a href="../${prev.id}/page.html">prev</a>` : '<span></span>'}
+          ${next ? `<a href="../${next.id}/page.html">next</a>` : '<span></span>'}
+          <span class="position">${position} / ${total}</span>
+        </nav>
+        <h1 class="title">${escapeHTML(headline)}<small>${escapeHTML(title)}</small></h1>
+        <p class="description">${renderInline(intro)}</p>
+      </header>
+      <div class="container">
+${fragment.trimEnd().replace(/^/gm, '        ')}
+      </div>${renderLessonNotes(entry, prev, next)}
     </div>
   </body>
 </html>
 `;
 }
 
-async function syncOne(id) {
+async function syncOne(id, curriculumIndex) {
   const source = await findSourceFolder(id);
-  const dest = join(EXAMPLES_DIR, id);
+  const dest = join(SRC_DIR, id);
   const meta = await readMetadata(id);
   const title = meta.title || id;
   const description = meta.description || '';
@@ -345,6 +362,11 @@ async function syncOne(id) {
     ? `<${tagName}></${tagName}>\n`
     : null;
   if (fragment !== null) {
+    const entry = CURRICULUM[curriculumIndex] ?? null;
+    const prev = curriculumIndex > 0 ? CURRICULUM[curriculumIndex - 1] : null;
+    const next = curriculumIndex >= 0 && curriculumIndex < CURRICULUM.length - 1
+      ? CURRICULUM[curriculumIndex + 1]
+      : null;
     const wrapped = wrapPageHTML({
       id,
       title,
@@ -352,6 +374,10 @@ async function syncOne(id) {
       fragment,
       hasPageCSS: existsSync(join(dest, 'page.css')),
       hasPageJS: existsSync(join(dest, 'page.js')),
+      entry,
+      position: curriculumIndex >= 0 ? curriculumIndex + 1 : 0,
+      prev,
+      next,
     });
     await writeFile(pageHTML, wrapped);
   }
@@ -363,55 +389,76 @@ async function syncOne(id) {
 async function writeBarrel(synced) {
   const lines = synced
     .filter((s) => s.exportName)
-    .map((s) => `export { ${s.exportName} } from './${s.id}/component.js';`);
+    .map((s) => `export { ${s.exportName} } from './src/${s.id}/component.js';`);
   const content = `/* Generated by scripts/sync.js. Do not edit by hand. */\n${lines.join('\n')}\n`;
   await writeFile(join(EXAMPLES_DIR, 'index.js'), content);
 }
 
 async function writeIndex(synced) {
-  const items = synced
-    .map(({ id, title }) => `      <li><a href="./${id}/page.html">${title}</a> <code>${id}</code></li>`)
-    .join('\n');
+  // synced is in CURRICULUM_IDS (curriculum) order. Pair each with its entry,
+  // then group into the introductory walkthrough (1..CORE_COUNT) and the
+  // standalone pattern examples (rest).
+  const byId = new Map(synced.map((s) => [s.id, s]));
+  const enriched = CURRICULUM
+    .map((entry, i) => ({ entry, position: i + 1, sync: byId.get(entry.id) }))
+    .filter((row) => row.sync);
+
+  const renderItem = ({ entry, position, sync }) =>
+    `        <li>
+          <a class="entry" href="./src/${entry.id}/page.html">
+            <span class="position">${position}</span>
+            <span class="headline">${escapeHTML(entry.headline)}</span>
+            <span class="subtitle">${escapeHTML(sync.title)}</span>
+          </a>
+          <p class="intro">${renderInline(entry.intro)}</p>
+        </li>`;
+
+  const core = enriched.filter((r) => r.position <= CORE_COUNT).map(renderItem).join('\n');
+  const rest = enriched.filter((r) => r.position > CORE_COUNT).map(renderItem).join('\n');
+
   const html = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Semantic UI Examples</title>
+    <link rel="icon" href="/favicon.ico" />
 ${THEME_BOOTSTRAP}
     <link rel="stylesheet" href="/dist/sui.css" />
     <script type="module" blocking="render" src="/dist/sui.js"></script>
     <style>
-${PAGE_LAYOUT}
-      h1 { margin-bottom: 0.25rem; }
-      p.lede { color: var(--standard-60, #666); margin-top: 0; }
-      ul { list-style: none; padding: 0; }
-      li { padding: 0.5rem 0; border-bottom: 1px solid var(--standard-10, #eee); }
-      li a { font-weight: 600; text-decoration: none; color: var(--primary-color, #2185d0); }
-      li a:hover { text-decoration: underline; }
-      code { color: var(--standard-50, #888); font-size: 0.85em; margin-left: 0.5rem; }
+${PAGE_STYLES}
     </style>
   </head>
   <body>
-    <theme-switcher class="example theme"></theme-switcher>
-    <h1>Semantic UI Examples</h1>
-    <p class="lede">Canonical curriculum examples mirroring <code>docs/src/examples/</code>. Run <code>npm run dev</code> in <code>examples/</code> to start the esbuild server.</p>
-    <ul>
-${items}
-    </ul>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <h1>Semantic UI Examples</h1>
+      <p class="lede">A tour of the framework, from the smallest possible component to deeper patterns. The first ${CORE_COUNT} introduce the core concepts in order; the rest cover specific features and can be read standalone.</p>
+      <h2 class="section">Start here</h2>
+      <p class="section-lede">Each example builds on the previous one. Read in order.</p>
+      <ul class="entries">
+${core}
+      </ul>
+      <h2 class="section">More patterns</h2>
+      <p class="section-lede">Standalone examples covering specific features.</p>
+      <ul class="entries">
+${rest}
+      </ul>
+    </div>
   </body>
 </html>
 `;
   await writeFile(join(EXAMPLES_DIR, 'index.html'), html);
 }
 
-async function main() {
-  const ids = process.argv.slice(2);
-  const targets = ids.length > 0 ? ids : CURRICULUM_IDS;
+/* Sync a list of IDs once. When `regenerateIndex` is true, refresh favicon + landing + barrel. */
+async function syncIds(ids, { regenerateIndex }) {
   const synced = [];
-  for (const id of targets) {
+  for (const id of ids) {
     try {
-      const result = await syncOne(id);
+      const curriculumIndex = CURRICULUM_IDS.indexOf(id);
+      const result = await syncOne(id, curriculumIndex);
       synced.push(result);
       console.log(`✓ ${id.padEnd(28)}  ← ${result.source}`);
     }
@@ -420,10 +467,85 @@ async function main() {
       process.exitCode = 1;
     }
   }
-  if (ids.length === 0) {
-    await writeIndex(synced);
-    await writeBarrel(synced);
+  if (regenerateIndex) {
+    // The landing + barrel describe every synced example, not just the ones
+    // refreshed in this run. Reconstruct the full list from disk so partial
+    // syncs (watch mode, single-id invocations) don't truncate them.
+    const fullList = await fullSyncedList();
+    await copyFile(DOCS_FAVICON, join(EXAMPLES_DIR, 'favicon.ico'));
+    await writeIndex(fullList);
+    await writeBarrel(fullList);
   }
+}
+
+/* When a watch event fires on a partial sync, we still need the full list to rebuild the landing. */
+async function fullSyncedList() {
+  // Reconstruct the synced descriptor list from disk + metadata so the landing
+  // page can be regenerated after a partial re-sync.
+  const out = [];
+  for (const id of CURRICULUM_IDS) {
+    const dest = join(SRC_DIR, id);
+    if (!existsSync(dest)) { continue; }
+    const meta = await readMetadata(id);
+    const componentJS = join(dest, 'component.js');
+    let exportName = null;
+    if (existsSync(componentJS)) {
+      const src = await readFile(componentJS, 'utf8');
+      const m = src.match(/export\s+const\s+(\w+)\s*=\s*defineComponent\(/);
+      if (m) { exportName = m[1]; }
+    }
+    out.push({ id, title: meta.title || id, exportName, source: '' });
+  }
+  return out;
+}
+
+/* Map a relative path under docs/src/examples (e.g. "component/context-menu/component.html") to a curriculum ID. */
+function idFromWatchPath(relPath) {
+  if (!relPath) { return null; }
+  const parts = relPath.split(/[\\/]/);
+  for (let i = parts.length - 1; i >= 0; i--) {
+    if (CURRICULUM_IDS.includes(parts[i])) { return parts[i]; }
+  }
+  return null;
+}
+
+/*
+  Watch docs/src/examples recursively. Coalesce bursts of file events
+  per-ID with a short debounce, then re-sync each affected ID and
+  regenerate the landing/barrel once at the end of the burst.
+*/
+async function watchMode() {
+  await syncIds(CURRICULUM_IDS, { regenerateIndex: true });
+  console.log(`\nWatching ${relative(REPO_ROOT, DOCS_EXAMPLES)} …  (Ctrl+C to stop)`);
+
+  const pending = new Set();
+  let timer = null;
+
+  const flush = async () => {
+    const ids = [...pending];
+    pending.clear();
+    timer = null;
+    await syncIds(ids, { regenerateIndex: true });
+  };
+
+  fsWatch(DOCS_EXAMPLES, { recursive: true }, (_event, filename) => {
+    const id = idFromWatchPath(filename);
+    if (!id) { return; }
+    pending.add(id);
+    if (timer) { clearTimeout(timer); }
+    timer = setTimeout(flush, 200);
+  });
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  if (args.includes('--watch')) {
+    await watchMode();
+    return;
+  }
+  const ids = args.filter((a) => !a.startsWith('-'));
+  const targets = ids.length > 0 ? ids : CURRICULUM_IDS;
+  await syncIds(targets, { regenerateIndex: ids.length === 0 });
 }
 
 main();
