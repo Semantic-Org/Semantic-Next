@@ -21,36 +21,9 @@ const createComponent = ({ $, self, state, settings, dispatchEvent }) => ({
     state.rating.set(settings.initialValue);
   },
 
-  getSliderStyles() {
-    return {
-      dragging: state.dragging.get(),
-    };
-  },
-
-  getLabelStyles(number) {
-    return {
-      current: state.rating.get() === number,
-    };
-  },
-
-  getRatingPercentage() {
+  ratingPercentage() {
     const { min, max } = settings;
-    const rating = state.rating.get();
-    return ((rating - min) / (max - min)) * 100;
-  },
-
-  getPercentage() {
-    if (state.currentPercentage.get()) {
-      return state.currentPercentage.get();
-    }
-    return self.getRatingPercentage();
-  },
-
-  getGuidePercentage() {
-    if (!state.currentPercentage.get()) {
-      return;
-    }
-    return self.getRatingPercentage();
+    return ((state.rating.get() - min) / (max - min)) * 100;
   },
 
   setRating(value) {
@@ -59,8 +32,6 @@ const createComponent = ({ $, self, state, settings, dispatchEvent }) => ({
 
     if (newValue !== state.rating.get()) {
       state.rating.set(newValue);
-
-      // Dispatch custom event that parent components can listen to
       dispatchEvent('change', {
         rating: newValue,
         min: settings.min,
@@ -74,14 +45,12 @@ const createComponent = ({ $, self, state, settings, dispatchEvent }) => ({
   },
 
   updateRatingFromEvent(event) {
-    const slider = $('.slider').el();
-    const rect = slider.getBoundingClientRect();
-    const position = (event.clientX - rect.left) / rect.width;
-    const percentage = position * 100;
+    const rect = $('.slider').bounds();
+    const rawPosition = (event.clientX - rect.left) / rect.width;
+    const position = Math.max(0, Math.min(1, rawPosition));
     const { min, max } = settings;
-    const value = Math.round(min + position * (max - min));
-    state.currentPercentage.set(percentage);
-    self.setRating(value);
+    state.currentPercentage.set(position * 100);
+    self.setRating(Math.round(min + position * (max - min)));
   },
 });
 
@@ -89,17 +58,17 @@ const events = {
   'pointerdown .slider'({ self, state, event }) {
     state.dragging.set(true);
     self.updateRatingFromEvent(event);
-    event.preventDefault();
+    return 'cancel';
   },
 
-  'global pointermove body'({ self, state, event }) {
+  'global pointermove html'({ self, state, event }) {
     if (!state.dragging.get()) {
       return;
     }
     self.updateRatingFromEvent(event);
   },
 
-  'global pointerup body'({ state, dispatchEvent }) {
+  'global pointerup html'({ state, dispatchEvent }) {
     if (!state.dragging.get()) {
       return;
     }

@@ -1,0 +1,17 @@
+table {
+  border-collapse: collapse;
+  width: 100%;
+  border: var(--border);
+}
+
+th {
+  padding: var(--padding-3xs) var(--padding-xs);
+  text-align: left;
+  font-weight: var(--bold);
+  background-color: var(--standard-5);
+}
+
+td {
+  border: var(--solid-border);
+  padding: var(--padding-xs);
+}

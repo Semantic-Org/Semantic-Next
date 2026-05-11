@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Advanced Keybinding — advanced-keybinding</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <script type="module" blocking="render" src="/dist/src/advanced-keybinding/component.js"></script>
+    <script type="module" blocking="render" src="/dist/src/advanced-keybinding/page.js"></script>
+    <style>
+/*
+  Stylesheet inlined into every generated page by scripts/sync.js.
+  Loaded as a string at sync time (no bundler), so plain CSS — no imports.
+
+  Tokens, code colors, and heading discipline are aligned with the canonical
+  cdn.semantic-ui.com page (tools/cdn/pages/index.css) so this site reads as
+  part of the same surface. All page-specific selectors descend from
+  `.example` so the HTML stays free of repeated namespace classes.
+*/
+
+:root {
+  --code-bg: var(--ui-background-emphasis);
+  --code-purple: #6F42C1;
+  --code-default: #54595E;
+  --code-blue: #005CC5;
+  --code-orange: #E3660F;
+  --code-red: #D73A49;
+  --code-green: #22863A;
+  --code-grey: #24292E;
+  --code-comment: #6A737D;
+}
+
+html.dark {
+  --code-purple: #D2A8FF;
+  --code-default: #C9D1D9;
+  --code-blue: var(--primary-text-color);
+  --code-orange: #FFAB70;
+  --code-red: #F97583;
+  --code-green: #7EE787;
+  --code-grey: #656565;
+  --code-comment: #6A737D;
+}
+
+html { scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--page-font);
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 var(--gutter-l);
+  color: var(--text-color);
+}
+
+.example {
+
+  .theme {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .header {
+    margin-bottom: var(--gap);
+    padding-bottom: var(--padding-3xs);
+    border-bottom: var(--border);
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-xs);
+      font-size: var(--text-xs);
+      color: var(--light-text-color);
+
+      a {
+        color: var(--muted-text-color);
+        text-decoration: none;
+        transition: color 0.12s;
+        &:hover { color: var(--primary-text-color); }
+      }
+
+      .position {
+        margin-right: auto;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    .title {
+      margin: var(--gap-2xs) 0 var(--gap-3xs);
+      font-size: var(--text-2xl);
+      font-weight: var(--bold);
+      letter-spacing: -0.01em;
+      color: var(--header-color);
+    }
+
+    .description {
+      margin: var(--vertically-spaced);
+      color: var(--muted-text-color);
+      line-height: 1.65;
+    }
+  }
+
+  .container {
+    position: relative;
+    transform: translateZ(0);
+    /* Lift above the later-sibling .source so position:absolute overflow from
+       inside the example (e.g. async-search results) doesn't get covered by
+       the code viewer below. */
+    z-index: 1;
+  }
+
+  .source {
+    margin: var(--vertically-spaced) 0;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: var(--code-bg);
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: var(--padding-xs) var(--padding);
+      font-size: var(--text-xs);
+      font-weight: var(--bold);
+      color: var(--muted-text-color);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: var(--gap-3xs);
+      transition: color 0.12s;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-text-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: var(--internal-border);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      border-bottom: var(--internal-border);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: var(--padding-xs) var(--padding);
+        font-family: var(--code-font);
+        font-size: var(--text-xs);
+        color: var(--light-text-color);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: color 0.15s;
+
+        &:hover { color: var(--muted-text-color); }
+        &.active {
+          color: var(--header-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: var(--padding) var(--padding-l);
+      overflow: auto;
+      font-family: var(--code-font);
+      font-size: var(--text-s);
+      line-height: 1.8;
+      color: var(--code-default);
+      max-height: 520px;
+      tab-size: 2;
+    }
+
+    /* highlight.js token classes mapped to the canonical --code-* palette. */
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal,
+    .hljs-variable.language_,
+    .hljs-doctag { color: var(--code-red); }
+    .hljs-string,
+    .hljs-attr,
+    .hljs-meta .hljs-string,
+    .hljs-symbol { color: var(--code-blue); }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag,
+    .hljs-title,
+    .hljs-title.class_,
+    .hljs-title.function_ { color: var(--code-purple); }
+    .hljs-number,
+    .hljs-meta .hljs-number { color: var(--code-orange); }
+    .hljs-comment { color: var(--code-comment); font-style: italic; }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id,
+    .hljs-selector-attr { color: var(--code-grey); }
+    .hljs-meta,
+    .hljs-regexp { color: var(--code-green); }
+  }
+
+  .notes {
+    margin-top: var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--muted-text-color);
+    line-height: 1.65;
+
+    h2 {
+      margin: 0 0 var(--gap-2xs);
+      font-size: var(--text-2xs);
+      font-weight: var(--bold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--blue-80);
+    }
+
+    p { margin: var(--vertically-spaced); }
+    ul { margin: var(--vertically-spaced); padding-left: 1.25rem; }
+    li { margin: var(--gap-3xs) 0; }
+
+    .walk {
+      display: flex;
+      justify-content: space-between;
+      margin-top: var(--margin);
+      padding-top: var(--padding);
+      border-top: var(--internal-border);
+
+      a {
+        color: var(--primary-text-color);
+        text-decoration: none;
+        font-size: var(--text-s);
+        font-weight: var(--bold);
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+
+  /* Inline code (`token`) inside prose — chip style matching CDN. */
+  .header .description code,
+  .notes code,
+  .entries .intro code {
+    background: var(--subtle-angled-gradient);
+    padding: 3px 5px;
+    margin: -2px 1px;
+    border: var(--subtle-border);
+    border-radius: var(--border-radius);
+    color: var(--standard-90);
+    font-family: var(--code-font);
+    font-size: var(--text-xs);
+  }
+
+  /* Landing page */
+  h1 {
+    margin: 0 0 var(--gap-3xs);
+    font-size: var(--text-3xl);
+    font-weight: var(--bold);
+    letter-spacing: -0.015em;
+    color: var(--header-color);
+  }
+
+  .lede {
+    color: var(--muted-text-color);
+    margin-top: 0;
+    line-height: 1.65;
+  }
+
+  .section {
+    margin: var(--margin-xl) 0 var(--gap-3xs);
+    font-size: var(--text-2xs);
+    font-weight: var(--bold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted-text-color);
+  }
+
+  .section-lede {
+    margin: var(--vertically-spaced);
+    color: var(--light-text-color);
+    font-size: var(--text-s);
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: var(--padding) 0;
+      border-bottom: var(--internal-border);
+      &:last-child { border-bottom: none; }
+    }
+
+    .entry {
+      display: flex;
+      align-items: baseline;
+      gap: var(--gap-xs);
+      text-decoration: none;
+      &:hover .headline { color: var(--primary-text-color); }
+
+      .position {
+        font-variant-numeric: tabular-nums;
+        color: var(--standard-40);
+        font-size: var(--text-s);
+        min-width: 1.5rem;
+      }
+
+      .headline {
+        font-weight: var(--bold);
+        color: var(--header-color);
+        transition: color 0.12s;
+      }
+
+      .subtitle {
+        color: var(--light-text-color);
+        font-size: var(--text-s);
+      }
+    }
+
+    .intro {
+      margin: var(--gap-3xs) 0 0 2.1rem;
+      color: var(--muted-text-color);
+      font-size: var(--text-s);
+      line-height: 1.65;
+    }
+  }
+
+  .footer {
+    margin: var(--margin-xl) 0 var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--light-text-color);
+    font-size: var(--text-xs);
+    display: flex;
+    gap: var(--gap-xs);
+
+    a {
+      color: var(--muted-text-color);
+      text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+
+    .sep { color: var(--border-color); }
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <header class="header">
+        <nav class="crumbs">
+          <a class="back" href="/">← Examples</a>
+          <span class="position">12 / 19</span>
+          <a href="../component-specs/page.html">prev</a>
+          <a href="../rating-slider/page.html">next</a>
+        </nav>
+        <h1 class="title">Static and runtime keybindings</h1>
+        <p class="description">A search component with a fixed <code>ctrl + f</code> shortcut, <code>up</code>/<code>down</code>/<code>esc</code> navigation, and an <code>enter</code> binding that is added or removed at runtime depending on whether a result is selected.</p>
+      </header>
+      <div class="container">
+        <search-component></search-component>
+      </div>
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+          <li><button type="button" data-target="src-advanced-keybinding-0" class="active">component.js</button></li>
+          <li><button type="button" data-target="src-advanced-keybinding-1">component.html</button></li>
+          <li><button type="button" data-target="src-advanced-keybinding-2">component.css</button></li>
+          <li><button type="button" data-target="src-advanced-keybinding-3">page.html</button></li>
+          <li><button type="button" data-target="src-advanced-keybinding-4">page.js</button></li>
+        </ul>
+        <pre id="src-advanced-keybinding-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
+<span class="hljs-keyword">const</span> defaultSettings = {
+  <span class="hljs-attr">placeholder</span>: <span class="hljs-string">&#x27;Search...&#x27;</span>,
+  <span class="hljs-attr">options</span>: [],
+  <span class="hljs-attr">noun</span>: <span class="hljs-string">&#x27;item&#x27;</span>,
+};
+
+<span class="hljs-keyword">const</span> defaultState = {
+  <span class="hljs-attr">searchTerm</span>: <span class="hljs-string">&#x27;&#x27;</span>,
+  <span class="hljs-attr">results</span>: [],
+  <span class="hljs-attr">selectedResult</span>: <span class="hljs-string">&#x27;&#x27;</span>,
+  <span class="hljs-attr">selectedIndex</span>: -<span class="hljs-number">1</span>,
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ self, reaction, state, settings, bindKey, unbindKey, $ }</span>) =&gt; ({
+  <span class="hljs-title function_">initialize</span>(<span class="hljs-params"></span>) {
+    self.<span class="hljs-title function_">calculateResults</span>();
+    self.<span class="hljs-title function_">calculateKeybindings</span>();
+  },
+
+  <span class="hljs-comment">/*
+    This is an example of dynamic keybinding
+    we want these to only occur when we have a
+    selected index
+  */</span>
+  <span class="hljs-title function_">calculateKeybindings</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-title function_">reaction</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-keyword">const</span> selectedIndex = state.<span class="hljs-property">selectedIndex</span>.<span class="hljs-title function_">get</span>();
+      <span class="hljs-title function_">unbindKey</span>(<span class="hljs-string">&#x27;enter&#x27;</span>);
+      <span class="hljs-keyword">if</span> (selectedIndex &gt; -<span class="hljs-number">1</span>) {
+        <span class="hljs-title function_">bindKey</span>(<span class="hljs-string">&#x27;enter&#x27;</span>, <span class="hljs-function">() =&gt;</span> self.<span class="hljs-title function_">selectResult</span>());
+      }
+    });
+  },
+
+  <span class="hljs-title function_">calculateResults</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-title function_">reaction</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-keyword">const</span> searchTerm = state.<span class="hljs-property">searchTerm</span>.<span class="hljs-title function_">get</span>();
+
+      <span class="hljs-comment">// Select first result</span>
+      <span class="hljs-keyword">const</span> initialIndex = searchTerm === <span class="hljs-string">&#x27;&#x27;</span> ? -<span class="hljs-number">1</span> : <span class="hljs-number">0</span>;
+      state.<span class="hljs-property">selectedIndex</span>.<span class="hljs-title function_">set</span>(initialIndex);
+
+      <span class="hljs-comment">// in a real-world example this would pull from db</span>
+      <span class="hljs-keyword">let</span> results = settings.<span class="hljs-property">options</span>;
+
+      <span class="hljs-comment">// if search term filter results</span>
+      <span class="hljs-keyword">if</span> (searchTerm) {
+        <span class="hljs-keyword">const</span> <span class="hljs-title function_">matchResult</span> = (<span class="hljs-params">result</span>) =&gt; result.<span class="hljs-title function_">toLowerCase</span>().<span class="hljs-title function_">includes</span>(searchTerm.<span class="hljs-title function_">toLowerCase</span>());
+        results = results.<span class="hljs-title function_">filter</span>(matchResult);
+      }
+      state.<span class="hljs-property">results</span>.<span class="hljs-title function_">set</span>(results);
+    });
+  },
+
+  <span class="hljs-title function_">focusSearch</span>(<span class="hljs-params"></span>) {
+    $(<span class="hljs-string">&#x27;input&#x27;</span>).<span class="hljs-title function_">focus</span>();
+  },
+
+  <span class="hljs-title function_">selectPrevious</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (state.<span class="hljs-property">selectedIndex</span>.<span class="hljs-title function_">get</span>() === -<span class="hljs-number">1</span>) {
+      state.<span class="hljs-property">selectedIndex</span>.<span class="hljs-title function_">set</span>(state.<span class="hljs-property">results</span>.<span class="hljs-title function_">get</span>().<span class="hljs-property">length</span> - <span class="hljs-number">1</span>);
+    }
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (state.<span class="hljs-property">selectedIndex</span>.<span class="hljs-title function_">get</span>() &gt; <span class="hljs-number">0</span>) {
+      state.<span class="hljs-property">selectedIndex</span>.<span class="hljs-title function_">decrement</span>();
+    }
+  },
+
+  <span class="hljs-title function_">selectNext</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (state.<span class="hljs-property">selectedIndex</span>.<span class="hljs-title function_">get</span>() &lt; state.<span class="hljs-property">results</span>.<span class="hljs-title function_">get</span>().<span class="hljs-property">length</span> - <span class="hljs-number">1</span>) {
+      state.<span class="hljs-property">selectedIndex</span>.<span class="hljs-title function_">increment</span>();
+    }
+  },
+
+  <span class="hljs-title function_">selectResult</span>(<span class="hljs-params">selectedIndex = state.selectedIndex.get()</span>) {
+    <span class="hljs-keyword">const</span> results = state.<span class="hljs-property">results</span>.<span class="hljs-title function_">get</span>();
+    <span class="hljs-keyword">const</span> selectedResult = results[selectedIndex];
+    <span class="hljs-keyword">if</span> (selectedResult) {
+      state.<span class="hljs-property">selectedResult</span>.<span class="hljs-title function_">set</span>(selectedResult);
+      self.<span class="hljs-title function_">clearSearch</span>();
+    }
+  },
+
+  <span class="hljs-title function_">clearSearch</span>(<span class="hljs-params"></span>) {
+    $(<span class="hljs-string">&#x27;input&#x27;</span>).<span class="hljs-title function_">val</span>(<span class="hljs-string">&#x27;&#x27;</span>);
+    state.<span class="hljs-property">searchTerm</span>.<span class="hljs-title function_">set</span>(<span class="hljs-string">&#x27;&#x27;</span>);
+    state.<span class="hljs-property">selectedIndex</span>.<span class="hljs-title function_">set</span>(-<span class="hljs-number">1</span>);
+  },
+});
+
+<span class="hljs-comment">/*
+  This is an example of static keybindings
+  these will exist for as long as the component is rendered
+*/</span>
+
+<span class="hljs-keyword">const</span> keys = {
+  <span class="hljs-string">&#x27;ctrl + f&#x27;</span>({ self }) {
+    self.<span class="hljs-title function_">focusSearch</span>();
+  },
+  <span class="hljs-string">&#x27;up&#x27;</span>({ self }) {
+    self.<span class="hljs-title function_">selectPrevious</span>();
+  },
+  <span class="hljs-string">&#x27;down&#x27;</span>({ self }) {
+    self.<span class="hljs-title function_">selectNext</span>();
+  },
+  <span class="hljs-string">&#x27;esc&#x27;</span>({ self }) {
+    self.<span class="hljs-title function_">clearSearch</span>();
+  },
+};
+
+<span class="hljs-keyword">const</span> events = {
+  <span class="hljs-string">&#x27;input .search&#x27;</span>({ event, state, value }) {
+    state.<span class="hljs-property">searchTerm</span>.<span class="hljs-title function_">set</span>(value);
+  },
+  <span class="hljs-string">&#x27;click .result&#x27;</span>({ self, data }) {
+    self.<span class="hljs-title function_">selectResult</span>(data.<span class="hljs-property">index</span>);
+  },
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">SearchComponent</span> = <span class="hljs-title function_">defineComponent</span>({
+  <span class="hljs-attr">tagName</span>: <span class="hljs-string">&#x27;search-component&#x27;</span>,
+  keys,
+  template,
+  css,
+  events,
+  createComponent,
+  defaultSettings,
+  defaultState,
+});
+</code></pre>
+        <pre id="src-advanced-keybinding-1" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;search-component&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;search&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;{placeholder}&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;{searchTerm}&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;selection&quot;</span>&gt;</span>
+    {#if selectedResult}
+      You selected <span class="hljs-tag">&lt;<span class="hljs-name">b</span>&gt;</span>{selectedResult}<span class="hljs-tag">&lt;/<span class="hljs-name">b</span>&gt;</span>.
+    {/if}
+  <span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>{titleCase noun} Choices<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;results&quot;</span>&gt;</span>
+    {#if hasAny results}
+      {#each result in results}
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{activeIf is index selectedIndex}result&quot;</span> <span class="hljs-attr">data-index</span>=<span class="hljs-string">&quot;{index}&quot;</span>&gt;</span>{result}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      {/each}
+    {else if searchTerm}
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;empty&quot;</span>&gt;</span>
+        No results for &quot;<span class="hljs-tag">&lt;<span class="hljs-name">b</span>&gt;</span>{searchTerm}<span class="hljs-tag">&lt;/<span class="hljs-name">b</span>&gt;</span>&quot;
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    {/if}
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-advanced-keybinding-2" hidden><code class="hljs language-css"><span class="hljs-selector-class">.search</span> {
+  <span class="hljs-attribute">border</span>: <span class="hljs-built_in">var</span>(--border);
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius);
+  <span class="hljs-attribute">padding</span>: <span class="hljs-built_in">var</span>(--input-padding);
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+}
+
+<span class="hljs-selector-class">.selection</span> {
+  <span class="hljs-attribute">margin-top</span>: <span class="hljs-built_in">var</span>(--margin);
+  <span class="hljs-attribute">display</span>: inline-block;
+}
+
+<span class="hljs-selector-class">.results</span> {
+
+  <span class="hljs-attribute">border</span>: <span class="hljs-built_in">var</span>(--border);
+  <span class="hljs-attribute">padding</span>: <span class="hljs-built_in">var</span>(--padding-xs);
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius);
+
+  <span class="hljs-selector-class">.result</span> {
+    <span class="hljs-attribute">cursor</span>: pointer;
+    <span class="hljs-attribute">padding</span>: <span class="hljs-built_in">var</span>(--padding);
+    <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius);
+
+    &amp;<span class="hljs-selector-pseudo">:hover</span> {
+      <span class="hljs-attribute">background-color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">10</span>);
+    }
+
+    &amp;<span class="hljs-selector-class">.active</span> {
+      <span class="hljs-attribute">background-color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">20</span>);
+      <span class="hljs-attribute">font-weight</span>: bold;
+    }
+
+  }
+
+  <span class="hljs-selector-class">.empty</span> {
+    <span class="hljs-attribute">margin</span>: <span class="hljs-built_in">var</span>(--margin);
+    <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">50</span>);
+  }
+}
+
+<span class="hljs-selector-tag">b</span> {
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--primary-text-color);
+}
+</code></pre>
+        <pre id="src-advanced-keybinding-3" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">search-component</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">search-component</span>&gt;</span>
+</code></pre>
+        <pre id="src-advanced-keybinding-4" hidden><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { $ } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/query&#x27;</span>;
+
+<span class="hljs-comment">// alternatively can inline as attributes in html</span>
+$(<span class="hljs-string">&#x27;search-component&#x27;</span>).<span class="hljs-title function_">settings</span>({
+  <span class="hljs-attr">placeholder</span>: <span class="hljs-string">&#x27;Search fruit...&#x27;</span>,
+  <span class="hljs-attr">options</span>: [<span class="hljs-string">&#x27;Tomato&#x27;</span>, <span class="hljs-string">&#x27;Strawberry&#x27;</span>, <span class="hljs-string">&#x27;Blueberry&#x27;</span>, <span class="hljs-string">&#x27;Kumquat&#x27;</span>, <span class="hljs-string">&#x27;Banana&#x27;</span>],
+});
+</code></pre>
+      </details>
+      <aside class="notes">
+        <h2>New patterns</h2>
+        <p><code>bindKey</code>, <code>unbindKey</code>, the <code>&#39;ctrl + f&#39;</code> modifier syntax, dynamic keybinding inside a <code>reaction()</code>.</p>
+        <h2>What to notice</h2>
+        <ul>
+          <li><code>bindKey(&#39;enter&#39;, handler)</code> and <code>unbindKey(&#39;enter&#39;)</code> add and remove keybindings at runtime. Wrapping them in a <code>reaction()</code> makes the binding follow whatever state the reaction reads — here, <code>selectedIndex &gt; -1</code>.</li>
+          <li>Modifier keys use a plain string: <code>&#39;ctrl + f&#39;</code>. <code>shift</code>, <code>alt</code>, and <code>meta</code> work the same way.</li>
+          <li>Static keys declared in the <code>keys</code> option coexist with dynamic ones. The <code>enter</code> binding lives on top of the static <code>up</code> / <code>down</code> / <code>esc</code> bindings.</li>
+        </ul>
+        <nav class="walk">
+          <a href="../component-specs/page.html">← Spec-driven primitives</a>
+          <a href="../rating-slider/page.html">Drag tracking with global events →</a>
+        </nav>
+      </aside>
+    </div>
+    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>
+  </body>
+</html>

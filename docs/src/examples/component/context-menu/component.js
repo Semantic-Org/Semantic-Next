@@ -12,25 +12,17 @@ const defaultSettings = {
 
 const defaultState = {
   visible: false,
-  position: { x: 0, y: 0 },
   activeIndex: -1,
 };
 
 const createComponent = ({ self, state, settings, $, dispatchEvent }) => ({
   showMenu(event) {
-    // Position menu at cursor
-    const x = event.clientX;
-    const y = event.clientY;
-
-    state.position.set({ x, y });
     state.visible.set(true);
     state.activeIndex.set(-1);
-
-    // Prevent default context menu
     event.preventDefault();
 
-    // Adjust position if menu would go off-screen
-    requestAnimationFrame(() => self.adjustMenuPosition());
+    // Wait for the menu to render, then position it at the cursor and keep it on-screen
+    requestAnimationFrame(() => self.positionMenu(event.clientX, event.clientY));
     dispatchEvent('show');
   },
 
@@ -40,30 +32,20 @@ const createComponent = ({ self, state, settings, $, dispatchEvent }) => ({
     dispatchEvent('hide');
   },
 
-  adjustMenuPosition() {
-    const menu = $('.menu').el();
-    if (!menu) { return; }
+  positionMenu(x, y) {
+    const $menu = $('.menu');
+    if (!$menu.exists()) { return; }
 
-    const position = state.position.peek();
-    const rect = menu.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    // 'global' anchors the fixed-position menu to viewport coordinates (matches event.clientX/Y)
+    $menu.position({ type: 'global', top: y, left: x });
 
-    let { x, y } = position;
+    const menu = $menu.bounds();
+    const viewport = $(window).dimensions();
 
-    // Adjust horizontal position if needed
-    if (x + rect.width > viewportWidth) {
-      x = viewportWidth - rect.width - 5;
-    }
-
-    // Adjust vertical position if needed
-    if (y + rect.height > viewportHeight) {
-      y = viewportHeight - rect.height - 5;
-    }
-
-    // Update position if adjusted
-    if (x !== position.x || y !== position.y) {
-      state.position.set({ x, y });
+    const overflowX = Math.max(menu.right - viewport.right + 5, 0);
+    const overflowY = Math.max(menu.bottom - viewport.bottom + 5, 0);
+    if (overflowX || overflowY) {
+      $menu.position({ type: 'global', top: y - overflowY, left: x - overflowX });
     }
   },
 
@@ -97,45 +79,6 @@ const createComponent = ({ self, state, settings, $, dispatchEvent }) => ({
     if (index >= 0 && index < items.length && !items[index].divider) {
       self.selectItem(items[index], index);
     }
-  },
-
-  getMenuStates() {
-    return {
-      visible: state.visible.get(),
-    };
-  },
-
-  getMenuStyle() {
-    const position = state.position.get();
-    const visible = state.visible.get();
-
-    return `
-      left: ${position.x}px;
-      top: ${position.y}px;
-      width: ${settings.width}px;
-    `;
-  },
-
-  getItemStates(index) {
-    return {
-      active: self.isItemActive(index),
-    };
-  },
-
-  isItemActive(index) {
-    return state.activeIndex.get() === index;
-  },
-
-  isDivider(item) {
-    return item.divider === true;
-  },
-
-  hasIcon(item) {
-    return item.icon && item.icon.length > 0;
-  },
-
-  hasShortcut(item) {
-    return item.shortcut && item.shortcut.length > 0;
   },
 });
 
@@ -196,19 +139,13 @@ const events = {
     event.stopPropagation();
   },
 
-  'click .item'({ self, settings, event, data }) {
-    const index = parseInt(data.index, 10);
-    const item = settings.items[index];
-
-    self.selectItem(item, index);
-    event.stopPropagation();
+  'click .item'({ self, settings, data }) {
+    self.selectItem(settings.items[data.index], data.index);
+    return false;
   },
 
   'mouseenter .item'({ state, data }) {
-    if (data.divider === 'true') {
-      return;
-    }
-    state.activeIndex.set(parseInt(data.index, 10));
+    state.activeIndex.set(data.index);
   },
 };
 

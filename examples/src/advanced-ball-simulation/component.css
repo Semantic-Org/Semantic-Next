@@ -1,0 +1,18 @@
+.simulation {
+  text-align: center;
+  user-select: none;
+  canvas {
+    border: var(--border);
+    border-radius: var(--border-radius);
+    max-width: 100%;
+  }
+  p {
+    font-size: var(--small);
+    color: var(--standard-30);
+  }
+  input {
+   vertical-align: middle;
+    margin-left: var(--margin-xs);
+  }
+}
+

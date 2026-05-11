@@ -262,7 +262,7 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
   },
   getPointerPosition(event) {
     const canvas = self.getCanvas();
-    const rect = canvas.getBoundingClientRect();
+    const rect = $('canvas').bounds();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     return {
@@ -272,7 +272,7 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
   },
 });
 
-const onRendered = ({ state, data, settings, self }) => {
+const onRendered = ({ self }) => {
   self.drawInitialBalls();
   self.startAnimation();
 };

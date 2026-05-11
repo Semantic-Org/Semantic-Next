@@ -107,8 +107,12 @@
       "default": "./src/primitives/icon/sets/heroicons/heroicons.css"
     },
     "./icon/sets/brands.css": {
-      "import": "./src/primitives/icon/sets/brands/index.css",
-      "default": "./src/primitives/icon/sets/brands/index.css"
+      "import": "./src/primitives/icon/sets/brands/brands.css",
+      "default": "./src/primitives/icon/sets/brands/brands.css"
+    },
+    "./fonts/lato.css": {
+      "import": "./src/fonts/lato/lato.css",
+      "default": "./src/fonts/lato/lato.css"
     },
     "./input": {
       "import": "./src/primitives/input/index.js",
@@ -199,6 +203,8 @@
     "publish": "wireit",
     "update-version": "wireit",
     "test:case": "wireit",
+    "examples:sync": "wireit",
+    "watch:examples": "wireit",
     "prepublishOnly": "wireit",
     "format": "npx dprint fmt",
     "test": "vitest --c tests/configs/vitest/vitest.config.js",
@@ -254,7 +260,8 @@
       "command": "cd docs && npm install && npx link ../ && npm run build",
       "dependencies": [
         "build",
-        "build:docs-packages"
+        "build:docs-packages",
+        "examples:sync"
       ]
     },
     "build:docs-packages": {
@@ -296,7 +303,8 @@
     "watch": {
       "dependencies": [
         "watch:ui",
-        "watch:icons"
+        "watch:icons",
+        "watch:examples"
       ]
     },
     "watch:ui": {
@@ -330,6 +338,13 @@
       "dependencies": [
         "build:packages"
       ]
+    },
+    "examples:sync": {
+      "command": "cd examples && node scripts/sync.js"
+    },
+    "watch:examples": {
+      "command": "cd examples && node scripts/sync.js --watch",
+      "service": true
     }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",

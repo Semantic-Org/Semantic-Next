@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TodoMVC — todo-list</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <link rel="stylesheet" href="./page.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <script type="module" blocking="render" src="/dist/src/todo-list/component.js"></script>
+    <style>
+/*
+  Stylesheet inlined into every generated page by scripts/sync.js.
+  Loaded as a string at sync time (no bundler), so plain CSS — no imports.
+
+  Tokens, code colors, and heading discipline are aligned with the canonical
+  cdn.semantic-ui.com page (tools/cdn/pages/index.css) so this site reads as
+  part of the same surface. All page-specific selectors descend from
+  `.example` so the HTML stays free of repeated namespace classes.
+*/
+
+:root {
+  --code-bg: var(--ui-background-emphasis);
+  --code-purple: #6F42C1;
+  --code-default: #54595E;
+  --code-blue: #005CC5;
+  --code-orange: #E3660F;
+  --code-red: #D73A49;
+  --code-green: #22863A;
+  --code-grey: #24292E;
+  --code-comment: #6A737D;
+}
+
+html.dark {
+  --code-purple: #D2A8FF;
+  --code-default: #C9D1D9;
+  --code-blue: var(--primary-text-color);
+  --code-orange: #FFAB70;
+  --code-red: #F97583;
+  --code-green: #7EE787;
+  --code-grey: #656565;
+  --code-comment: #6A737D;
+}
+
+html { scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--page-font);
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 var(--gutter-l);
+  color: var(--text-color);
+}
+
+.example {
+
+  .theme {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .header {
+    margin-bottom: var(--gap);
+    padding-bottom: var(--padding-3xs);
+    border-bottom: var(--border);
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-xs);
+      font-size: var(--text-xs);
+      color: var(--light-text-color);
+
+      a {
+        color: var(--muted-text-color);
+        text-decoration: none;
+        transition: color 0.12s;
+        &:hover { color: var(--primary-text-color); }
+      }
+
+      .position {
+        margin-right: auto;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    .title {
+      margin: var(--gap-2xs) 0 var(--gap-3xs);
+      font-size: var(--text-2xl);
+      font-weight: var(--bold);
+      letter-spacing: -0.01em;
+      color: var(--header-color);
+    }
+
+    .description {
+      margin: var(--vertically-spaced);
+      color: var(--muted-text-color);
+      line-height: 1.65;
+    }
+  }
+
+  .container {
+    position: relative;
+    transform: translateZ(0);
+    /* Lift above the later-sibling .source so position:absolute overflow from
+       inside the example (e.g. async-search results) doesn't get covered by
+       the code viewer below. */
+    z-index: 1;
+  }
+
+  .source {
+    margin: var(--vertically-spaced) 0;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: var(--code-bg);
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: var(--padding-xs) var(--padding);
+      font-size: var(--text-xs);
+      font-weight: var(--bold);
+      color: var(--muted-text-color);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: var(--gap-3xs);
+      transition: color 0.12s;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-text-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: var(--internal-border);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      border-bottom: var(--internal-border);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: var(--padding-xs) var(--padding);
+        font-family: var(--code-font);
+        font-size: var(--text-xs);
+        color: var(--light-text-color);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: color 0.15s;
+
+        &:hover { color: var(--muted-text-color); }
+        &.active {
+          color: var(--header-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: var(--padding) var(--padding-l);
+      overflow: auto;
+      font-family: var(--code-font);
+      font-size: var(--text-s);
+      line-height: 1.8;
+      color: var(--code-default);
+      max-height: 520px;
+      tab-size: 2;
+    }
+
+    /* highlight.js token classes mapped to the canonical --code-* palette. */
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal,
+    .hljs-variable.language_,
+    .hljs-doctag { color: var(--code-red); }
+    .hljs-string,
+    .hljs-attr,
+    .hljs-meta .hljs-string,
+    .hljs-symbol { color: var(--code-blue); }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag,
+    .hljs-title,
+    .hljs-title.class_,
+    .hljs-title.function_ { color: var(--code-purple); }
+    .hljs-number,
+    .hljs-meta .hljs-number { color: var(--code-orange); }
+    .hljs-comment { color: var(--code-comment); font-style: italic; }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id,
+    .hljs-selector-attr { color: var(--code-grey); }
+    .hljs-meta,
+    .hljs-regexp { color: var(--code-green); }
+  }
+
+  .notes {
+    margin-top: var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--muted-text-color);
+    line-height: 1.65;
+
+    h2 {
+      margin: 0 0 var(--gap-2xs);
+      font-size: var(--text-2xs);
+      font-weight: var(--bold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--blue-80);
+    }
+
+    p { margin: var(--vertically-spaced); }
+    ul { margin: var(--vertically-spaced); padding-left: 1.25rem; }
+    li { margin: var(--gap-3xs) 0; }
+
+    .walk {
+      display: flex;
+      justify-content: space-between;
+      margin-top: var(--margin);
+      padding-top: var(--padding);
+      border-top: var(--internal-border);
+
+      a {
+        color: var(--primary-text-color);
+        text-decoration: none;
+        font-size: var(--text-s);
+        font-weight: var(--bold);
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+
+  /* Inline code (`token`) inside prose — chip style matching CDN. */
+  .header .description code,
+  .notes code,
+  .entries .intro code {
+    background: var(--subtle-angled-gradient);
+    padding: 3px 5px;
+    margin: -2px 1px;
+    border: var(--subtle-border);
+    border-radius: var(--border-radius);
+    color: var(--standard-90);
+    font-family: var(--code-font);
+    font-size: var(--text-xs);
+  }
+
+  /* Landing page */
+  h1 {
+    margin: 0 0 var(--gap-3xs);
+    font-size: var(--text-3xl);
+    font-weight: var(--bold);
+    letter-spacing: -0.015em;
+    color: var(--header-color);
+  }
+
+  .lede {
+    color: var(--muted-text-color);
+    margin-top: 0;
+    line-height: 1.65;
+  }
+
+  .section {
+    margin: var(--margin-xl) 0 var(--gap-3xs);
+    font-size: var(--text-2xs);
+    font-weight: var(--bold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted-text-color);
+  }
+
+  .section-lede {
+    margin: var(--vertically-spaced);
+    color: var(--light-text-color);
+    font-size: var(--text-s);
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: var(--padding) 0;
+      border-bottom: var(--internal-border);
+      &:last-child { border-bottom: none; }
+    }
+
+    .entry {
+      display: flex;
+      align-items: baseline;
+      gap: var(--gap-xs);
+      text-decoration: none;
+      &:hover .headline { color: var(--primary-text-color); }
+
+      .position {
+        font-variant-numeric: tabular-nums;
+        color: var(--standard-40);
+        font-size: var(--text-s);
+        min-width: 1.5rem;
+      }
+
+      .headline {
+        font-weight: var(--bold);
+        color: var(--header-color);
+        transition: color 0.12s;
+      }
+
+      .subtitle {
+        color: var(--light-text-color);
+        font-size: var(--text-s);
+      }
+    }
+
+    .intro {
+      margin: var(--gap-3xs) 0 0 2.1rem;
+      color: var(--muted-text-color);
+      font-size: var(--text-s);
+      line-height: 1.65;
+    }
+  }
+
+  .footer {
+    margin: var(--margin-xl) 0 var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--light-text-color);
+    font-size: var(--text-xs);
+    display: flex;
+    gap: var(--gap-xs);
+
+    a {
+      color: var(--muted-text-color);
+      text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+
+    .sep { color: var(--border-color); }
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <header class="header">
+        <nav class="crumbs">
+          <a class="back" href="/">← Examples</a>
+          <span class="position">3 / 19</span>
+          <a href="../emoji-reactions/page.html">prev</a>
+          <a href="../async-search/page.html">next</a>
+        </nav>
+        <h1 class="title">TodoMVC</h1>
+        <p class="description">TodoMVC implemented with the framework&#39;s canonical patterns: signal mutation helpers for the list, a <code>reaction()</code> that mirrors state to localStorage, subtemplates for items, and <code>hashchange</code> for routing between filters.</p>
+      </header>
+      <div class="container">
+        <todo-app></todo-app>
+        <footer class="info">
+          <p>Double-click to edit a todo</p>
+          <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+        </footer>
+      </div>
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+          <li><button type="button" data-target="src-todo-list-0" class="active">component.js</button></li>
+          <li><button type="button" data-target="src-todo-list-1">component.html</button></li>
+          <li><button type="button" data-target="src-todo-list-2">component.css</button></li>
+          <li><button type="button" data-target="src-todo-list-3">todo-item.html</button></li>
+          <li><button type="button" data-target="src-todo-list-4">todo-item.js</button></li>
+          <li><button type="button" data-target="src-todo-list-5">page.html</button></li>
+          <li><button type="button" data-target="src-todo-list-6">page.css</button></li>
+        </ul>
+        <pre id="src-todo-list-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+<span class="hljs-keyword">import</span> { generateID } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
+
+<span class="hljs-keyword">import</span> { todoItem } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./todo-item.js&#x27;</span>;
+
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">STORAGE_KEY</span> = <span class="hljs-string">&#x27;todos-semantic-ui&#x27;</span>;
+
+<span class="hljs-keyword">const</span> defaultState = {
+  <span class="hljs-attr">todos</span>: [],
+  <span class="hljs-attr">filter</span>: <span class="hljs-string">&#x27;all&#x27;</span>,
+  <span class="hljs-attr">editingId</span>: <span class="hljs-literal">null</span>,
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ self, state, reaction }</span>) =&gt; ({
+
+  <span class="hljs-title function_">initialize</span>(<span class="hljs-params"></span>) {
+    self.<span class="hljs-title function_">loadTodos</span>();
+    self.<span class="hljs-title function_">setFilterFromHash</span>();
+    <span class="hljs-title function_">reaction</span>(<span class="hljs-function">(<span class="hljs-params">reaction</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> todos = state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">get</span>();
+      <span class="hljs-keyword">if</span> (reaction.<span class="hljs-property">firstRun</span>) <span class="hljs-keyword">return</span>;
+      <span class="hljs-variable language_">localStorage</span>.<span class="hljs-title function_">setItem</span>(<span class="hljs-variable constant_">STORAGE_KEY</span>, <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(todos));
+    });
+  },
+
+  <span class="hljs-title function_">loadTodos</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">const</span> stored = <span class="hljs-variable language_">localStorage</span>.<span class="hljs-title function_">getItem</span>(<span class="hljs-variable constant_">STORAGE_KEY</span>);
+      <span class="hljs-keyword">if</span> (stored) state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">set</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(stored));
+    } <span class="hljs-keyword">catch</span> (e) {
+      <span class="hljs-comment">// ignore corrupt data</span>
+    }
+  },
+
+  <span class="hljs-title function_">setFilterFromHash</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> hash = <span class="hljs-variable language_">window</span>.<span class="hljs-property">location</span>.<span class="hljs-property">hash</span>;
+    <span class="hljs-keyword">if</span> (hash === <span class="hljs-string">&#x27;#/active&#x27;</span>) state.<span class="hljs-property">filter</span>.<span class="hljs-title function_">set</span>(<span class="hljs-string">&#x27;active&#x27;</span>);
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (hash === <span class="hljs-string">&#x27;#/completed&#x27;</span>) state.<span class="hljs-property">filter</span>.<span class="hljs-title function_">set</span>(<span class="hljs-string">&#x27;completed&#x27;</span>);
+    <span class="hljs-keyword">else</span> state.<span class="hljs-property">filter</span>.<span class="hljs-title function_">set</span>(<span class="hljs-string">&#x27;all&#x27;</span>);
+  },
+
+  <span class="hljs-comment">// computed</span>
+  <span class="hljs-title function_">hasTodos</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">get</span>().<span class="hljs-property">length</span> &gt; <span class="hljs-number">0</span>;
+  },
+
+  <span class="hljs-title function_">filteredTodos</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> todos = state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">get</span>();
+    <span class="hljs-keyword">const</span> filter = state.<span class="hljs-property">filter</span>.<span class="hljs-title function_">get</span>();
+    <span class="hljs-keyword">if</span> (filter === <span class="hljs-string">&#x27;active&#x27;</span>) <span class="hljs-keyword">return</span> todos.<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">t</span> =&gt;</span> !t.<span class="hljs-property">completed</span>);
+    <span class="hljs-keyword">if</span> (filter === <span class="hljs-string">&#x27;completed&#x27;</span>) <span class="hljs-keyword">return</span> todos.<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">t</span> =&gt;</span> t.<span class="hljs-property">completed</span>);
+    <span class="hljs-keyword">return</span> todos;
+  },
+
+  <span class="hljs-title function_">activeCount</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">get</span>().<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">t</span> =&gt;</span> !t.<span class="hljs-property">completed</span>).<span class="hljs-property">length</span>;
+  },
+
+  <span class="hljs-title function_">hasCompleted</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">get</span>().<span class="hljs-title function_">some</span>(<span class="hljs-function"><span class="hljs-params">t</span> =&gt;</span> t.<span class="hljs-property">completed</span>);
+  },
+
+  <span class="hljs-title function_">allCompleted</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> todos = state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">get</span>();
+    <span class="hljs-keyword">return</span> todos.<span class="hljs-property">length</span> &gt; <span class="hljs-number">0</span> &amp;&amp; todos.<span class="hljs-title function_">every</span>(<span class="hljs-function"><span class="hljs-params">t</span> =&gt;</span> t.<span class="hljs-property">completed</span>);
+  },
+
+  <span class="hljs-title function_">isEditing</span>(<span class="hljs-params">id</span>) {
+    <span class="hljs-keyword">return</span> state.<span class="hljs-property">editingId</span>.<span class="hljs-title function_">get</span>() === id;
+  },
+
+  <span class="hljs-comment">// actions</span>
+  <span class="hljs-title function_">addTodo</span>(<span class="hljs-params">title</span>) {
+    <span class="hljs-keyword">const</span> trimmed = title.<span class="hljs-title function_">trim</span>();
+    <span class="hljs-keyword">if</span> (!trimmed) <span class="hljs-keyword">return</span>;
+    state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">push</span>({
+      <span class="hljs-attr">id</span>: <span class="hljs-title function_">generateID</span>(),
+      <span class="hljs-attr">title</span>: trimmed,
+      <span class="hljs-attr">completed</span>: <span class="hljs-literal">false</span>,
+    });
+  },
+
+  <span class="hljs-title function_">toggleTodo</span>(<span class="hljs-params">id</span>) {
+    <span class="hljs-keyword">const</span> todo = state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">getItem</span>(id);
+    <span class="hljs-keyword">if</span> (todo) {
+      state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">replaceItem</span>(id, { ...todo, <span class="hljs-attr">completed</span>: !todo.<span class="hljs-property">completed</span> });
+    }
+  },
+
+  <span class="hljs-title function_">toggleAll</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> allCompleted = state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">get</span>().<span class="hljs-title function_">every</span>(<span class="hljs-function"><span class="hljs-params">t</span> =&gt;</span> t.<span class="hljs-property">completed</span>);
+    state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">setArrayProperty</span>(<span class="hljs-string">&#x27;completed&#x27;</span>, !allCompleted);
+  },
+
+  <span class="hljs-title function_">deleteTodo</span>(<span class="hljs-params">id</span>) {
+    state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">removeItem</span>(id);
+  },
+
+  <span class="hljs-title function_">saveTodo</span>(<span class="hljs-params">id, title</span>) {
+    state.<span class="hljs-property">editingId</span>.<span class="hljs-title function_">set</span>(<span class="hljs-literal">null</span>);
+    <span class="hljs-keyword">const</span> trimmed = title.<span class="hljs-title function_">trim</span>();
+    <span class="hljs-keyword">if</span> (!trimmed) {
+      self.<span class="hljs-title function_">deleteTodo</span>(id);
+      <span class="hljs-keyword">return</span>;
+    }
+    state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">setProperty</span>(id, <span class="hljs-string">&#x27;title&#x27;</span>, trimmed);
+  },
+
+  <span class="hljs-title function_">clearCompleted</span>(<span class="hljs-params"></span>) {
+    state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">t</span> =&gt;</span> !t.<span class="hljs-property">completed</span>);
+  },
+});
+
+<span class="hljs-keyword">const</span> events = {
+
+  <span class="hljs-string">&#x27;keydown .new-todo&#x27;</span>({ self, value, target, event }) {
+    <span class="hljs-keyword">if</span> (event.<span class="hljs-property">key</span> === <span class="hljs-string">&#x27;Enter&#x27;</span>) {
+      self.<span class="hljs-title function_">addTodo</span>(value);
+      target.<span class="hljs-property">value</span> = <span class="hljs-string">&#x27;&#x27;</span>;
+    }
+  },
+
+  <span class="hljs-string">&#x27;change .toggle-all&#x27;</span>({ self }) {
+    self.<span class="hljs-title function_">toggleAll</span>();
+  },
+
+  <span class="hljs-string">&#x27;change .toggle&#x27;</span>({ self, data }) {
+    self.<span class="hljs-title function_">toggleTodo</span>(data.<span class="hljs-property">id</span>);
+  },
+
+  <span class="hljs-string">&#x27;dblclick .todo-list label&#x27;</span>({ state, data, $, afterFlush }) {
+    state.<span class="hljs-property">editingId</span>.<span class="hljs-title function_">set</span>(data.<span class="hljs-property">id</span>);
+    <span class="hljs-title function_">afterFlush</span>(<span class="hljs-function">() =&gt;</span> {
+      $(<span class="hljs-string">&#x27;.editing .edit&#x27;</span>).<span class="hljs-title function_">focus</span>();
+    });
+  },
+
+  <span class="hljs-string">&#x27;click .destroy&#x27;</span>({ self, data }) {
+    self.<span class="hljs-title function_">deleteTodo</span>(data.<span class="hljs-property">id</span>);
+  },
+
+  <span class="hljs-string">&#x27;keydown .edit&#x27;</span>({ target, event }) {
+    <span class="hljs-keyword">if</span> (event.<span class="hljs-property">key</span> === <span class="hljs-string">&#x27;Enter&#x27;</span>) {
+      target.<span class="hljs-title function_">blur</span>();
+    }
+  },
+
+  <span class="hljs-string">&#x27;focusout .edit&#x27;</span>({ self, state, data, value }) {
+    <span class="hljs-keyword">if</span> (state.<span class="hljs-property">editingId</span>.<span class="hljs-title function_">get</span>() !== <span class="hljs-literal">null</span>) {
+      self.<span class="hljs-title function_">saveTodo</span>(data.<span class="hljs-property">id</span>, value);
+    }
+  },
+
+  <span class="hljs-string">&#x27;click .clear-completed&#x27;</span>({ self }) {
+    self.<span class="hljs-title function_">clearCompleted</span>();
+  },
+
+  <span class="hljs-string">&#x27;global hashchange window&#x27;</span>({ self }) {
+    self.<span class="hljs-title function_">setFilterFromHash</span>();
+  },
+};
+
+<span class="hljs-keyword">const</span> keys = {
+  <span class="hljs-string">&#x27;esc&#x27;</span>({ state }) {
+    <span class="hljs-keyword">if</span> (state.<span class="hljs-property">editingId</span>.<span class="hljs-title function_">get</span>() === <span class="hljs-literal">null</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    state.<span class="hljs-property">editingId</span>.<span class="hljs-title function_">set</span>(<span class="hljs-literal">null</span>);
+  },
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">TodoApp</span> = <span class="hljs-title function_">defineComponent</span>({
+  <span class="hljs-attr">tagName</span>: <span class="hljs-string">&#x27;todo-app&#x27;</span>,
+  template,
+  css,
+  defaultState,
+  createComponent,
+  events,
+  keys,
+  <span class="hljs-attr">subTemplates</span>: { todoItem },
+});
+</code></pre>
+        <pre id="src-todo-list-1" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">section</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;todoapp&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">header</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;header&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>todos<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;new-todo&quot;</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;What needs to be done?&quot;</span> <span class="hljs-attr">autofocus</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">header</span>&gt;</span>
+  {#if hasTodos}
+    <span class="hljs-tag">&lt;<span class="hljs-name">section</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;main&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;toggle-all&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;toggle-all&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">checked</span>=<span class="hljs-string">{allCompleted}</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">&quot;toggle-all&quot;</span>&gt;</span>Mark all as complete<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;todo-list&quot;</span>&gt;</span>
+        {#each todo in filteredTodos}
+          {&gt;todoItem
+            id=todo.id
+            title=todo.title
+            completed=todo.completed
+            editing=(isEditing todo.id)
+          }
+        {/each}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">section</span>&gt;</span>
+    {&gt;footer}
+  {/if}
+<span class="hljs-tag">&lt;/<span class="hljs-name">section</span>&gt;</span>
+
+{#snippet footer}
+  <span class="hljs-tag">&lt;<span class="hljs-name">footer</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;footer&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;todo-count&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span>{activeCount}<span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span> item{maybePlural activeCount} left
+    <span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;filters&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{selectedIf is filter &#x27;all&#x27;}&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;#/&quot;</span>&gt;</span>All<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{selectedIf is filter &#x27;active&#x27;}&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;#/active&quot;</span>&gt;</span>Active<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{selectedIf is filter &#x27;completed&#x27;}&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;#/completed&quot;</span>&gt;</span>Completed<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+    {#if hasCompleted}
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;clear-completed&quot;</span>&gt;</span>Clear completed<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    {/if}
+  <span class="hljs-tag">&lt;/<span class="hljs-name">footer</span>&gt;</span>
+{/snippet}
+</code></pre>
+        <pre id="src-todo-list-2" hidden><code class="hljs language-css"><span class="hljs-selector-pseudo">:host</span> {
+	<span class="hljs-attribute">display</span>: block;
+	<span class="hljs-attribute">font</span>: <span class="hljs-number">14px</span> <span class="hljs-string">&#x27;Helvetica Neue&#x27;</span>, Helvetica, Arial, sans-serif;
+	<span class="hljs-attribute">line-height</span>: <span class="hljs-number">1.4em</span>;
+	<span class="hljs-attribute">color</span>: <span class="hljs-number">#4d4d4d</span>;
+	<span class="hljs-attribute">font-weight</span>: <span class="hljs-number">300</span>;
+	-webkit-<span class="hljs-attribute">font-smoothing</span>: antialiased;
+	-moz-osx-<span class="hljs-attribute">font-smoothing</span>: grayscale;
+}
+
+<span class="hljs-selector-tag">button</span> {
+	<span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">border</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">background</span>: none;
+	<span class="hljs-attribute">font-size</span>: <span class="hljs-number">100%</span>;
+	<span class="hljs-attribute">vertical-align</span>: baseline;
+	<span class="hljs-attribute">font-family</span>: inherit;
+	<span class="hljs-attribute">font-weight</span>: inherit;
+	<span class="hljs-attribute">color</span>: inherit;
+	-webkit-<span class="hljs-attribute">appearance</span>: none;
+	<span class="hljs-attribute">appearance</span>: none;
+	-webkit-<span class="hljs-attribute">font-smoothing</span>: antialiased;
+	-moz-osx-<span class="hljs-attribute">font-smoothing</span>: grayscale;
+}
+
+<span class="hljs-selector-pseudo">:focus</span>,
+<span class="hljs-selector-class">.toggle</span><span class="hljs-selector-pseudo">:focus</span> + <span class="hljs-selector-tag">label</span>,
+<span class="hljs-selector-class">.toggle-all</span><span class="hljs-selector-pseudo">:focus</span> + <span class="hljs-selector-tag">label</span> {
+	<span class="hljs-attribute">box-shadow</span>: <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">2px</span> <span class="hljs-number">2px</span> <span class="hljs-number">#cf7d7d</span>;
+	<span class="hljs-attribute">outline</span>: <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-selector-class">.todoapp</span> {
+	<span class="hljs-attribute">background</span>: <span class="hljs-number">#fff</span>;
+	<span class="hljs-attribute">margin</span>: <span class="hljs-number">130px</span> <span class="hljs-number">0</span> <span class="hljs-number">40px</span> <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">position</span>: relative;
+	<span class="hljs-attribute">box-shadow</span>: <span class="hljs-number">0</span> <span class="hljs-number">2px</span> <span class="hljs-number">4px</span> <span class="hljs-number">0</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.2</span>),
+	            <span class="hljs-number">0</span> <span class="hljs-number">25px</span> <span class="hljs-number">50px</span> <span class="hljs-number">0</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.1</span>);
+}
+
+<span class="hljs-selector-class">.todoapp</span> <span class="hljs-selector-tag">input</span>::-webkit-input-placeholder {
+	<span class="hljs-attribute">font-style</span>: italic;
+	<span class="hljs-attribute">font-weight</span>: <span class="hljs-number">300</span>;
+	<span class="hljs-attribute">color</span>: <span class="hljs-number">#e6e6e6</span>;
+}
+
+<span class="hljs-selector-class">.todoapp</span> <span class="hljs-selector-tag">input</span><span class="hljs-selector-pseudo">::placeholder</span> {
+	<span class="hljs-attribute">font-style</span>: italic;
+	<span class="hljs-attribute">font-weight</span>: <span class="hljs-number">300</span>;
+	<span class="hljs-attribute">color</span>: <span class="hljs-number">#e6e6e6</span>;
+}
+
+<span class="hljs-selector-class">.todoapp</span> <span class="hljs-selector-tag">h1</span> {
+	<span class="hljs-attribute">position</span>: absolute;
+	<span class="hljs-attribute">top</span>: -<span class="hljs-number">155px</span>;
+	<span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+	<span class="hljs-attribute">font-size</span>: <span class="hljs-number">100px</span>;
+	<span class="hljs-attribute">font-weight</span>: <span class="hljs-number">100</span>;
+	<span class="hljs-attribute">text-align</span>: center;
+	<span class="hljs-attribute">color</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">175</span>, <span class="hljs-number">47</span>, <span class="hljs-number">47</span>, <span class="hljs-number">0.25</span>);
+	-webkit-<span class="hljs-attribute">text-rendering</span>: optimizeLegibility;
+	-moz-<span class="hljs-attribute">text-rendering</span>: optimizeLegibility;
+	<span class="hljs-attribute">text-rendering</span>: optimizeLegibility;
+}
+
+<span class="hljs-selector-class">.new-todo</span>,
+<span class="hljs-selector-class">.edit</span> {
+	<span class="hljs-attribute">position</span>: relative;
+	<span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+	<span class="hljs-attribute">font-size</span>: <span class="hljs-number">24px</span>;
+	<span class="hljs-attribute">font-family</span>: inherit;
+	<span class="hljs-attribute">font-weight</span>: inherit;
+	<span class="hljs-attribute">line-height</span>: <span class="hljs-number">1.4em</span>;
+	<span class="hljs-attribute">border</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">color</span>: inherit;
+	<span class="hljs-attribute">padding</span>: <span class="hljs-number">6px</span>;
+	<span class="hljs-attribute">border</span>: <span class="hljs-number">1px</span> solid <span class="hljs-number">#999</span>;
+	<span class="hljs-attribute">box-shadow</span>: inset <span class="hljs-number">0</span> -<span class="hljs-number">1px</span> <span class="hljs-number">5px</span> <span class="hljs-number">0</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.2</span>);
+	<span class="hljs-attribute">box-sizing</span>: border-box;
+	-webkit-<span class="hljs-attribute">font-smoothing</span>: antialiased;
+	-moz-osx-<span class="hljs-attribute">font-smoothing</span>: grayscale;
+}
+
+<span class="hljs-selector-class">.new-todo</span> {
+	<span class="hljs-attribute">padding</span>: <span class="hljs-number">16px</span> <span class="hljs-number">16px</span> <span class="hljs-number">16px</span> <span class="hljs-number">60px</span>;
+	<span class="hljs-attribute">border</span>: none;
+	<span class="hljs-attribute">background</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.003</span>);
+	<span class="hljs-attribute">box-shadow</span>: inset <span class="hljs-number">0</span> -<span class="hljs-number">2px</span> <span class="hljs-number">1px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.03</span>);
+}
+
+<span class="hljs-selector-class">.main</span> {
+	<span class="hljs-attribute">position</span>: relative;
+	<span class="hljs-attribute">z-index</span>: <span class="hljs-number">2</span>;
+	<span class="hljs-attribute">border-top</span>: <span class="hljs-number">1px</span> solid <span class="hljs-number">#e6e6e6</span>;
+}
+
+<span class="hljs-selector-class">.toggle-all</span> {
+	<span class="hljs-attribute">text-align</span>: center;
+	<span class="hljs-attribute">border</span>: none;
+	<span class="hljs-attribute">opacity</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">position</span>: absolute;
+}
+
+<span class="hljs-selector-class">.toggle-all</span> + <span class="hljs-selector-tag">label</span> {
+	<span class="hljs-attribute">width</span>: <span class="hljs-number">60px</span>;
+	<span class="hljs-attribute">height</span>: <span class="hljs-number">34px</span>;
+	<span class="hljs-attribute">font-size</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">position</span>: absolute;
+	<span class="hljs-attribute">top</span>: -<span class="hljs-number">52px</span>;
+	<span class="hljs-attribute">left</span>: -<span class="hljs-number">13px</span>;
+	-webkit-<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotate</span>(<span class="hljs-number">90deg</span>);
+	<span class="hljs-attribute">transform</span>: <span class="hljs-built_in">rotate</span>(<span class="hljs-number">90deg</span>);
+}
+
+<span class="hljs-selector-class">.toggle-all</span> + <span class="hljs-selector-tag">label</span><span class="hljs-selector-pseudo">:before</span> {
+	<span class="hljs-attribute">content</span>: <span class="hljs-string">&#x27;❯&#x27;</span>;
+	<span class="hljs-attribute">font-size</span>: <span class="hljs-number">22px</span>;
+	<span class="hljs-attribute">color</span>: <span class="hljs-number">#e6e6e6</span>;
+	<span class="hljs-attribute">padding</span>: <span class="hljs-number">10px</span> <span class="hljs-number">27px</span> <span class="hljs-number">10px</span> <span class="hljs-number">27px</span>;
+}
+
+<span class="hljs-selector-class">.toggle-all</span><span class="hljs-selector-pseudo">:checked</span> + <span class="hljs-selector-tag">label</span><span class="hljs-selector-pseudo">:before</span> {
+	<span class="hljs-attribute">color</span>: <span class="hljs-number">#737373</span>;
+}
+
+<span class="hljs-selector-class">.todo-list</span> {
+	<span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">list-style</span>: none;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> {
+	<span class="hljs-attribute">position</span>: relative;
+	<span class="hljs-attribute">font-size</span>: <span class="hljs-number">24px</span>;
+	<span class="hljs-attribute">border-bottom</span>: <span class="hljs-number">1px</span> solid <span class="hljs-number">#ededed</span>;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span><span class="hljs-selector-pseudo">:last-child</span> {
+	<span class="hljs-attribute">border-bottom</span>: none;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span><span class="hljs-selector-class">.editing</span> {
+	<span class="hljs-attribute">border-bottom</span>: none;
+	<span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span><span class="hljs-selector-class">.editing</span> <span class="hljs-selector-class">.edit</span> {
+	<span class="hljs-attribute">display</span>: block;
+	<span class="hljs-attribute">width</span>: <span class="hljs-number">506px</span>;
+	<span class="hljs-attribute">padding</span>: <span class="hljs-number">12px</span> <span class="hljs-number">16px</span>;
+	<span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">43px</span>;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span><span class="hljs-selector-class">.editing</span> <span class="hljs-selector-class">.view</span> {
+	<span class="hljs-attribute">display</span>: none;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-class">.toggle</span> {
+	<span class="hljs-attribute">text-align</span>: center;
+	<span class="hljs-attribute">width</span>: <span class="hljs-number">40px</span>;
+	<span class="hljs-attribute">height</span>: auto;
+	<span class="hljs-attribute">position</span>: absolute;
+	<span class="hljs-attribute">top</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">bottom</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">margin</span>: auto <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">border</span>: none;
+	-webkit-<span class="hljs-attribute">appearance</span>: none;
+	<span class="hljs-attribute">appearance</span>: none;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-class">.toggle</span> {
+	<span class="hljs-attribute">opacity</span>: <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-class">.toggle</span> + <span class="hljs-selector-tag">label</span> {
+	<span class="hljs-attribute">background-image</span>: <span class="hljs-built_in">url</span>(<span class="hljs-string">&#x27;data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23ededed%22%20stroke-width%3D%223%22/%3E%3C/svg%3E&#x27;</span>);
+	<span class="hljs-attribute">background-repeat</span>: no-repeat;
+	<span class="hljs-attribute">background-position</span>: center left;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-class">.toggle</span><span class="hljs-selector-pseudo">:checked</span> + <span class="hljs-selector-tag">label</span> {
+	<span class="hljs-attribute">background-image</span>: <span class="hljs-built_in">url</span>(<span class="hljs-string">&#x27;data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23bddad5%22%20stroke-width%3D%223%22/%3E%3Cpath%20fill%3D%22%235dc2af%22%20d%3D%22M72%2025L42%2071%2027%2056l-4%204%2020%2020%2034-52z%22/%3E%3C/svg%3E&#x27;</span>);
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-tag">label</span> {
+	<span class="hljs-attribute">word-break</span>: break-all;
+	<span class="hljs-attribute">padding</span>: <span class="hljs-number">15px</span> <span class="hljs-number">15px</span> <span class="hljs-number">15px</span> <span class="hljs-number">60px</span>;
+	<span class="hljs-attribute">display</span>: block;
+	<span class="hljs-attribute">line-height</span>: <span class="hljs-number">1.2</span>;
+	<span class="hljs-attribute">transition</span>: color <span class="hljs-number">0.4s</span>;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span><span class="hljs-selector-class">.completed</span> <span class="hljs-selector-tag">label</span> {
+	<span class="hljs-attribute">color</span>: <span class="hljs-number">#d9d9d9</span>;
+	<span class="hljs-attribute">text-decoration</span>: line-through;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-class">.destroy</span> {
+	<span class="hljs-attribute">display</span>: none;
+	<span class="hljs-attribute">position</span>: absolute;
+	<span class="hljs-attribute">top</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">right</span>: <span class="hljs-number">10px</span>;
+	<span class="hljs-attribute">bottom</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">width</span>: <span class="hljs-number">40px</span>;
+	<span class="hljs-attribute">height</span>: <span class="hljs-number">40px</span>;
+	<span class="hljs-attribute">margin</span>: auto <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">font-size</span>: <span class="hljs-number">30px</span>;
+	<span class="hljs-attribute">color</span>: <span class="hljs-number">#cc9a9a</span>;
+	<span class="hljs-attribute">margin-bottom</span>: <span class="hljs-number">11px</span>;
+	<span class="hljs-attribute">transition</span>: color <span class="hljs-number">0.2s</span> ease-out;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-class">.destroy</span><span class="hljs-selector-pseudo">:hover</span> {
+	<span class="hljs-attribute">color</span>: <span class="hljs-number">#af5b5e</span>;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-class">.destroy</span><span class="hljs-selector-pseudo">:after</span> {
+	<span class="hljs-attribute">content</span>: <span class="hljs-string">&#x27;×&#x27;</span>;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span><span class="hljs-selector-pseudo">:hover</span> <span class="hljs-selector-class">.destroy</span> {
+	<span class="hljs-attribute">display</span>: block;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-class">.edit</span> {
+	<span class="hljs-attribute">display</span>: none;
+}
+
+<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span><span class="hljs-selector-class">.editing</span><span class="hljs-selector-pseudo">:last-child</span> {
+	<span class="hljs-attribute">margin-bottom</span>: -<span class="hljs-number">1px</span>;
+}
+
+<span class="hljs-selector-class">.footer</span> {
+	<span class="hljs-attribute">color</span>: <span class="hljs-number">#777</span>;
+	<span class="hljs-attribute">padding</span>: <span class="hljs-number">10px</span> <span class="hljs-number">15px</span>;
+	<span class="hljs-attribute">height</span>: <span class="hljs-number">20px</span>;
+	<span class="hljs-attribute">text-align</span>: center;
+	<span class="hljs-attribute">border-top</span>: <span class="hljs-number">1px</span> solid <span class="hljs-number">#e6e6e6</span>;
+}
+
+<span class="hljs-selector-class">.footer</span><span class="hljs-selector-pseudo">:before</span> {
+	<span class="hljs-attribute">content</span>: <span class="hljs-string">&#x27;&#x27;</span>;
+	<span class="hljs-attribute">position</span>: absolute;
+	<span class="hljs-attribute">right</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">bottom</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">left</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">height</span>: <span class="hljs-number">50px</span>;
+	<span class="hljs-attribute">overflow</span>: hidden;
+	<span class="hljs-attribute">box-shadow</span>: <span class="hljs-number">0</span> <span class="hljs-number">1px</span> <span class="hljs-number">1px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.2</span>),
+	            <span class="hljs-number">0</span> <span class="hljs-number">8px</span> <span class="hljs-number">0</span> -<span class="hljs-number">3px</span> <span class="hljs-number">#f6f6f6</span>,
+	            <span class="hljs-number">0</span> <span class="hljs-number">9px</span> <span class="hljs-number">1px</span> -<span class="hljs-number">3px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.2</span>),
+	            <span class="hljs-number">0</span> <span class="hljs-number">16px</span> <span class="hljs-number">0</span> -<span class="hljs-number">6px</span> <span class="hljs-number">#f6f6f6</span>,
+	            <span class="hljs-number">0</span> <span class="hljs-number">17px</span> <span class="hljs-number">2px</span> -<span class="hljs-number">6px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.2</span>);
+}
+
+<span class="hljs-selector-class">.todo-count</span> {
+	<span class="hljs-attribute">float</span>: left;
+	<span class="hljs-attribute">text-align</span>: left;
+}
+
+<span class="hljs-selector-class">.todo-count</span> <span class="hljs-selector-tag">strong</span> {
+	<span class="hljs-attribute">font-weight</span>: <span class="hljs-number">300</span>;
+}
+
+<span class="hljs-selector-class">.filters</span> {
+	<span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">list-style</span>: none;
+	<span class="hljs-attribute">position</span>: absolute;
+	<span class="hljs-attribute">right</span>: <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">left</span>: <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-selector-class">.filters</span> <span class="hljs-selector-tag">li</span> {
+	<span class="hljs-attribute">display</span>: inline;
+}
+
+<span class="hljs-selector-class">.filters</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-tag">a</span> {
+	<span class="hljs-attribute">color</span>: inherit;
+	<span class="hljs-attribute">margin</span>: <span class="hljs-number">3px</span>;
+	<span class="hljs-attribute">padding</span>: <span class="hljs-number">3px</span> <span class="hljs-number">7px</span>;
+	<span class="hljs-attribute">text-decoration</span>: none;
+	<span class="hljs-attribute">border</span>: <span class="hljs-number">1px</span> solid transparent;
+	<span class="hljs-attribute">border-radius</span>: <span class="hljs-number">3px</span>;
+}
+
+<span class="hljs-selector-class">.filters</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-tag">a</span><span class="hljs-selector-pseudo">:hover</span> {
+	<span class="hljs-attribute">border-color</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">175</span>, <span class="hljs-number">47</span>, <span class="hljs-number">47</span>, <span class="hljs-number">0.1</span>);
+}
+
+<span class="hljs-selector-class">.filters</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-tag">a</span><span class="hljs-selector-class">.selected</span> {
+	<span class="hljs-attribute">border-color</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">175</span>, <span class="hljs-number">47</span>, <span class="hljs-number">47</span>, <span class="hljs-number">0.2</span>);
+}
+
+<span class="hljs-selector-class">.clear-completed</span>,
+<span class="hljs-selector-class">.clear-completed</span><span class="hljs-selector-pseudo">:active</span> {
+	<span class="hljs-attribute">float</span>: right;
+	<span class="hljs-attribute">position</span>: relative;
+	<span class="hljs-attribute">line-height</span>: <span class="hljs-number">20px</span>;
+	<span class="hljs-attribute">text-decoration</span>: none;
+	<span class="hljs-attribute">cursor</span>: pointer;
+}
+
+<span class="hljs-selector-class">.clear-completed</span><span class="hljs-selector-pseudo">:hover</span> {
+	<span class="hljs-attribute">text-decoration</span>: underline;
+}
+
+<span class="hljs-keyword">@media</span> screen <span class="hljs-keyword">and</span> (<span class="hljs-attribute">-webkit-min-device-pixel-ratio</span>:<span class="hljs-number">0</span>) {
+	<span class="hljs-selector-class">.toggle-all</span>,
+	<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-class">.toggle</span> {
+		<span class="hljs-attribute">background</span>: none;
+	}
+
+	<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-class">.toggle</span> {
+		<span class="hljs-attribute">height</span>: <span class="hljs-number">40px</span>;
+	}
+}
+
+<span class="hljs-keyword">@media</span> (<span class="hljs-attribute">max-width</span>: <span class="hljs-number">430px</span>) {
+	<span class="hljs-selector-class">.footer</span> {
+		<span class="hljs-attribute">height</span>: <span class="hljs-number">50px</span>;
+	}
+
+	<span class="hljs-selector-class">.filters</span> {
+		<span class="hljs-attribute">bottom</span>: <span class="hljs-number">10px</span>;
+	}
+}
+
+<span class="hljs-comment">/* Dark mode — override hardcoded TodoMVC colors with design tokens */</span>
+<span class="hljs-keyword">@container</span> style(<span class="hljs-attribute">--dark-mode</span>: true) {
+	<span class="hljs-selector-pseudo">:host</span> {
+		<span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">80</span>);
+	}
+
+	<span class="hljs-selector-class">.todoapp</span> {
+		<span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">5</span>);
+		<span class="hljs-attribute">box-shadow</span>: <span class="hljs-number">0</span> <span class="hljs-number">2px</span> <span class="hljs-number">4px</span> <span class="hljs-number">0</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.5</span>),
+		            <span class="hljs-number">0</span> <span class="hljs-number">25px</span> <span class="hljs-number">50px</span> <span class="hljs-number">0</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.4</span>);
+
+		<span class="hljs-selector-tag">h1</span> {
+			<span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--red-text-color);
+		}
+
+		<span class="hljs-selector-tag">input</span><span class="hljs-selector-pseudo">::placeholder</span> {
+			<span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">30</span>);
+		}
+	}
+
+	<span class="hljs-selector-class">.main</span> {
+		<span class="hljs-attribute">border-top-color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">15</span>);
+	}
+
+	<span class="hljs-selector-class">.toggle-all</span> + <span class="hljs-selector-tag">label</span><span class="hljs-selector-pseudo">:before</span> {
+		<span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">30</span>);
+	}
+
+	<span class="hljs-selector-class">.toggle-all</span><span class="hljs-selector-pseudo">:checked</span> + <span class="hljs-selector-tag">label</span><span class="hljs-selector-pseudo">:before</span> {
+		<span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">60</span>);
+	}
+
+	<span class="hljs-selector-class">.todo-list</span> <span class="hljs-selector-tag">li</span> {
+		<span class="hljs-attribute">border-bottom-color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">15</span>);
+
+		<span class="hljs-selector-class">.toggle</span> + <span class="hljs-selector-tag">label</span> {
+			<span class="hljs-attribute">background-image</span>: <span class="hljs-built_in">url</span>(<span class="hljs-string">&#x27;data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23444444%22%20stroke-width%3D%223%22/%3E%3C/svg%3E&#x27;</span>);
+		}
+
+		<span class="hljs-selector-class">.toggle</span><span class="hljs-selector-pseudo">:checked</span> + <span class="hljs-selector-tag">label</span> {
+			<span class="hljs-attribute">background-image</span>: <span class="hljs-built_in">url</span>(<span class="hljs-string">&#x27;data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23305b50%22%20stroke-width%3D%223%22/%3E%3Cpath%20fill%3D%22%235dc2af%22%20d%3D%22M72%2025L42%2071%2027%2056l-4%204%2020%2020%2034-52z%22/%3E%3C/svg%3E&#x27;</span>);
+		}
+
+		&amp;<span class="hljs-selector-class">.completed</span> <span class="hljs-selector-tag">label</span> {
+			<span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">30</span>);
+		}
+	}
+
+	<span class="hljs-selector-class">.new-todo</span>,
+	<span class="hljs-selector-class">.edit</span> {
+		<span class="hljs-attribute">color</span>: inherit;
+		<span class="hljs-attribute">border-color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">15</span>);
+		<span class="hljs-attribute">box-shadow</span>: inset <span class="hljs-number">0</span> -<span class="hljs-number">1px</span> <span class="hljs-number">5px</span> <span class="hljs-number">0</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.3</span>);
+	}
+
+	<span class="hljs-selector-class">.new-todo</span> {
+		<span class="hljs-attribute">box-shadow</span>: inset <span class="hljs-number">0</span> -<span class="hljs-number">2px</span> <span class="hljs-number">1px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.1</span>);
+	}
+
+	<span class="hljs-selector-class">.footer</span> {
+		<span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">60</span>);
+		<span class="hljs-attribute">border-top-color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">15</span>);
+
+		&amp;<span class="hljs-selector-pseudo">:before</span> {
+			<span class="hljs-attribute">box-shadow</span>: <span class="hljs-number">0</span> <span class="hljs-number">1px</span> <span class="hljs-number">1px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.3</span>),
+			            <span class="hljs-number">0</span> <span class="hljs-number">8px</span> <span class="hljs-number">0</span> -<span class="hljs-number">3px</span> <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">5</span>),
+			            <span class="hljs-number">0</span> <span class="hljs-number">9px</span> <span class="hljs-number">1px</span> -<span class="hljs-number">3px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.3</span>),
+			            <span class="hljs-number">0</span> <span class="hljs-number">16px</span> <span class="hljs-number">0</span> -<span class="hljs-number">6px</span> <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">5</span>),
+			            <span class="hljs-number">0</span> <span class="hljs-number">17px</span> <span class="hljs-number">2px</span> -<span class="hljs-number">6px</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.3</span>);
+		}
+	}
+
+	<span class="hljs-selector-class">.filters</span> <span class="hljs-selector-tag">li</span> <span class="hljs-selector-tag">a</span> {
+		&amp;<span class="hljs-selector-pseudo">:hover</span> {
+			<span class="hljs-attribute">border-color</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">175</span>, <span class="hljs-number">47</span>, <span class="hljs-number">47</span>, <span class="hljs-number">0.25</span>);
+		}
+
+		&amp;<span class="hljs-selector-class">.selected</span> {
+			<span class="hljs-attribute">border-color</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">175</span>, <span class="hljs-number">47</span>, <span class="hljs-number">47</span>, <span class="hljs-number">0.4</span>);
+		}
+	}
+}
+</code></pre>
+        <pre id="src-todo-list-3" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{classMap {completed: completed, editing: editing}}&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;view&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;toggle&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">checked</span>=<span class="hljs-string">{completed}</span> <span class="hljs-attr">data-id</span>=<span class="hljs-string">&quot;{id}&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">data-id</span>=<span class="hljs-string">&quot;{id}&quot;</span>&gt;</span>{title}<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;destroy&quot;</span> <span class="hljs-attr">data-id</span>=<span class="hljs-string">&quot;{id}&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  {#if editing}
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;edit&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;{title}&quot;</span> <span class="hljs-attr">data-id</span>=<span class="hljs-string">&quot;{id}&quot;</span> /&gt;</span>
+  {/if}
+<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+</code></pre>
+        <pre id="src-todo-list-4" hidden><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./todo-item.html?raw&#x27;</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> todoItem = <span class="hljs-title function_">defineComponent</span>({
+  template,
+});
+</code></pre>
+        <pre id="src-todo-list-5" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">todo-app</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">todo-app</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">footer</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;info&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Double-click to edit a todo<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Part of <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;http://todomvc.com&quot;</span>&gt;</span>TodoMVC<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">footer</span>&gt;</span>
+</code></pre>
+        <pre id="src-todo-list-6" hidden><code class="hljs language-css"><span class="hljs-selector-class">.info</span> {
+	<span class="hljs-attribute">margin</span>: <span class="hljs-number">65px</span> auto <span class="hljs-number">0</span>;
+	<span class="hljs-attribute">color</span>: <span class="hljs-number">#bfbfbf</span>;
+	<span class="hljs-attribute">font-size</span>: <span class="hljs-number">10px</span>;
+	<span class="hljs-attribute">text-shadow</span>: <span class="hljs-number">0</span> <span class="hljs-number">1px</span> <span class="hljs-number">0</span> <span class="hljs-built_in">rgba</span>(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0.5</span>);
+	<span class="hljs-attribute">text-align</span>: center;
+}
+
+<span class="hljs-selector-class">.info</span> <span class="hljs-selector-tag">p</span> {
+	<span class="hljs-attribute">line-height</span>: <span class="hljs-number">1</span>;
+}
+
+<span class="hljs-selector-class">.info</span> <span class="hljs-selector-tag">a</span> {
+	<span class="hljs-attribute">color</span>: inherit;
+	<span class="hljs-attribute">text-decoration</span>: none;
+	<span class="hljs-attribute">font-weight</span>: <span class="hljs-number">400</span>;
+}
+
+<span class="hljs-selector-class">.info</span> <span class="hljs-selector-tag">a</span><span class="hljs-selector-pseudo">:hover</span> {
+	<span class="hljs-attribute">text-decoration</span>: underline;
+}
+</code></pre>
+      </details>
+      <aside class="notes">
+        <h2>New patterns</h2>
+        <p><code>push</code>, <code>removeItem</code>, <code>replaceItem</code>, <code>setProperty</code>, <code>setArrayProperty</code>, <code>filter</code>, <code>getItem</code>, <code>reaction()</code>, <code>{#snippet}</code>, <code>subTemplates</code>, <code>keys</code>, <code>afterFlush</code>, <code>{classMap}</code>, <code>{selectedIf}</code>, <code>{maybePlural}</code>, <code>&#39;global hashchange window&#39;</code>.</p>
+        <h2>What to notice</h2>
+        <ul>
+          <li>Each mutation has a named helper: <code>state.todos.push(todo)</code>, <code>removeItem(id)</code>, <code>replaceItem(id, next)</code>, <code>setProperty(id, key, value)</code>, <code>setArrayProperty(&#39;completed&#39;, true)</code>. Helpers describe intent instead of reproducing immutable-update boilerplate.</li>
+          <li><code>reaction(() =&gt; { state.todos.get(); localStorage.setItem(...) })</code> syncs the list to storage. Re-runs when the read signal changes; no dependency array.</li>
+          <li>Subtemplates compose with named parameters: <code>{&gt;todoItem id=todo.id title=todo.title ...}</code>. The <code>todoItem</code> template lives in its own file and is registered via <code>subTemplates</code>.</li>
+          <li><code>afterFlush(() =&gt; $(&#39;.editing .edit&#39;).focus())</code> runs after the next render commits, which is how you reach into the DOM that the new state just produced.</li>
+        </ul>
+        <nav class="walk">
+          <a href="../emoji-reactions/page.html">← State and events</a>
+          <a href="../async-search/page.html">Async blocks →</a>
+        </nav>
+      </aside>
+    </div>
+    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>
+  </body>
+</html>

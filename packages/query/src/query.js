@@ -2460,7 +2460,8 @@ export class Query {
     const results = this.map(el => {
       const $el = this.chain(el);
       const elRect = $el.dimensions();
-      const $positioningParent = $el.positioningParent();
+      // containing block might be outside shadow dom
+      const $positioningParent = $el.positioningParent({ pierceShadow: true });
       const parentRect = $positioningParent.dimensions();
       const round = val => (precision === 'pixel' ? Math.round(val) : val);
 
@@ -2552,8 +2553,8 @@ export class Query {
       $viewport = this.chain(viewport);
     }
     else {
-      // Use clipping parent as default viewport
-      $viewport = this.clippingParent();
+      // clipping ancestor might be outside shadow dom
+      $viewport = this.clippingParent({ pierceShadow: true });
     }
 
     // If no viewport found, use document element

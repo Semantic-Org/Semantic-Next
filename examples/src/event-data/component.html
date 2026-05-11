@@ -1,0 +1,22 @@
+<p>Width</p>
+<ui-button data-helper="decrement" data-dimension="width">
+  Decrease
+</ui-button>
+<ui-button data-helper="increment" data-dimension="width">
+  Increase
+</ui-button>
+
+<p>Height</p>
+<ui-button data-helper="decrement" data-dimension="height">
+  Decrease
+</ui-button>
+<ui-button data-helper="increment" data-dimension="height">
+  Increase
+</ui-button>
+
+<hr/>
+
+<div class="rectangle" style="
+  width: { width > 0 ? width : 0 }px;
+  height: { height > 0 ? height : 0 }px;
+"></div>

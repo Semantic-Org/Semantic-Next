@@ -34,6 +34,7 @@ xx.xx.xxxx
 
 ### Query
 * **Bug** - Fixed `instanceof` checks failing for `Query.wrap()` instances — brand property was a class field (set only in constructor) but `wrap()` uses `Object.create()`. Moved to prototype getter so all prototype-chain objects pass the check regardless of construction path.
+* **Bug** - Fixed `.position({ type: 'global' })` placing elements with the wrong offset when a CSS containing block (transform/filter/perspective/etc.) lived outside the element's shadow DOM — `positioningParent` now pierces shadow boundaries so the math matches what the browser actually uses. `isInView` now does the same for its default clipping viewport.
 * **Feature** - Added `includeMargin`, `includePadding`, and `includeBorder` options to `naturalWidth()` and `naturalHeight()` — allows measuring unconstrained intrinsic dimensions while preserving the element's box model.
 
 ### Utils
