@@ -304,3 +304,102 @@ describe('block-in-attribute — hydration', () => {
     expect(shadowAttrValue(el, 'div', 'class')).toBe('base inactive suffix');
   });
 });
+
+/*******************************
+       Inner expressions inside branch content
+*******************************/
+
+RENDERING_ENGINES.forEach(engine => {
+  describe(`{#if} branch with inner expression [${engine}]`, () => {
+    it('renders inner expression value in branch content', async () => {
+      const tag = uniqueTag(engine);
+      defineComponent({
+        renderingEngine: engine,
+        tagName: tag,
+        template: '<div data-label="{#if showCount}count-{count}{else}none{/if}"></div>',
+        defaultState: { showCount: true, count: 7 },
+      });
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      await el.rendered;
+
+      expect(el.shadowRoot.querySelector('div').getAttribute('data-label')).toBe('count-7');
+    });
+
+    it('updates when inner expression signal changes (same branch)', async () => {
+      const tag = uniqueTag(engine);
+      defineComponent({
+        renderingEngine: engine,
+        tagName: tag,
+        template: '<div data-label="{#if showCount}count-{count}{else}none{/if}"></div>',
+        defaultState: { showCount: true, count: 7 },
+      });
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      await el.rendered;
+
+      const div = el.shadowRoot.querySelector('div');
+      expect(div.getAttribute('data-label')).toBe('count-7');
+
+      el.template.state.count.set(9);
+      await waitForUpdate(el);
+      expect(div.getAttribute('data-label')).toBe('count-9');
+    });
+  });
+});
+
+/*******************************
+       Block-position safety nets
+*******************************/
+
+describe('block-in-attribute — unsupported positions [native]', () => {
+  // These tests target the native engine where renderASTToString in
+  // commit-hooks.js refuses each/async, and reactive-data.js throws on
+  // block markers in property/event position. Lit has different
+  // failure modes and isn't covered by these guards yet.
+
+  function expectThrowOnMount(template, defaultState = {}) {
+    const tag = uniqueTag('native');
+    defineComponent({
+      renderingEngine: 'native',
+      tagName: tag,
+      template,
+      defaultState,
+    });
+    const el = document.createElement(tag);
+    let caught;
+    const handler = (e) => {
+      caught = e.error || e.reason || e;
+      e.preventDefault();
+    };
+    window.addEventListener('error', handler, { once: true });
+    try {
+      document.body.appendChild(el);
+    }
+    catch (e) {
+      caught = e;
+    }
+    finally {
+      window.removeEventListener('error', handler);
+    }
+    return caught;
+  }
+
+  it('{#each} inside an attribute value throws on mount', () => {
+    const err = expectThrowOnMount(
+      '<div data-list="items: {#each item in items}{item.label} {/each}"></div>',
+      { items: [{ label: 'a' }, { label: 'b' }] },
+    );
+    expect(err).toBeDefined();
+    expect(String(err)).toMatch(/each.*attribute/i);
+  });
+
+  it('{#async} inside an attribute value throws on mount', () => {
+    const err = expectThrowOnMount(
+      '<div data-status="{#async fetcher}loading{success}done{/async}"></div>',
+      { fetcher: () => Promise.resolve() },
+    );
+    expect(err).toBeDefined();
+    expect(String(err)).toMatch(/async.*attribute/i);
+  });
+});

@@ -20,15 +20,18 @@ export class ReactiveConditionalDirective extends AsyncDirective {
     }
 
     let content = nothing;
+    let initialFormatted = nothing;
     let context = {
       message: `if/else statement: {#if ${conditional.expression}}`,
       conditional: conditional,
     };
 
     // Create a new reaction that watches for reactive changes on client.
-    // Every non-firstRun re-fire pushes the new content through setValue,
-    // routed through formatForPart so attribute parts get a serialized
-    // string rather than a raw TemplateResult lit can't render.
+    // formatForPart is invoked INSIDE the reaction (even on firstRun) so
+    // its serialization reads — which call .value() on inner directive
+    // markers — register signal deps on this reaction. Without that,
+    // inner expressions in a branch never propagate signal changes
+    // through this directive's setValue.
     // matchIndex gating is intentionally absent — content can change
     // within the same branch when inner expressions update.
     if (isClient) {
@@ -41,8 +44,12 @@ export class ReactiveConditionalDirective extends AsyncDirective {
         const result = this.getBranch(this.conditional);
         this.matchIndex = result.matchIndex;
         content = result.content;
-        if (!comp.firstRun) {
-          this.setValue(this.formatForPart(content));
+        const formatted = this.formatForPart(content);
+        if (comp.firstRun) {
+          initialFormatted = formatted;
+        }
+        else {
+          this.setValue(formatted);
         }
         return content;
       }, { context });
@@ -50,9 +57,10 @@ export class ReactiveConditionalDirective extends AsyncDirective {
     else {
       const result = this.getBranch(this.conditional);
       content = result.content;
+      initialFormatted = this.formatForPart(content);
     }
 
-    return this.formatForPart(content);
+    return initialFormatted;
   }
 
   getBranch(conditional) {
