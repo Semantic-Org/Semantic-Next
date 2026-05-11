@@ -376,17 +376,15 @@ Each step is independently shippable, each leaves the codebase green, and each h
 
 | Step | Status | Notes |
 |---|---|---|
-| 0 — Bench baseline | partial | Tooling smoke-tested on host; full baseline captured by CI tachometer benches (in flight) rather than locally. 0b factory-shape isolation bench skipped — actual landed implementation uses a lighter approach (see Step 1 note). |
-| 1 — Regression bugfix | ✓ shipped | Approach landed simpler than originally specified: blocks-in-attribute reach the attribute binding via `bindAttribute` recognizing block-type entries (`evaluateMarkerToString` → `renderASTToString`), not via a `place`/`commit` dispatch on the block bag. Block markers in attribute position emit `__suiN__` (not `<!--sui-block-->`). Server emits inline. `each`/`async` throw on attribute position via `renderASTToString`. Lit directives also fixed (re-fire bypassed `formatForPart`; `serializeContent` dropped values). |
+| 0 — Bench baseline | partial | Tooling smoke-tested on host; full baseline captured by CI tachometer benches (per-push) rather than locally. 0b factory-shape isolation bench skipped — actual landed implementation uses a lighter approach (see Step 1 note). |
+| 1 — Regression bugfix | ✓ shipped | Approach landed simpler than originally specified: blocks-in-attribute reach the attribute binding via `bindAttribute` recognizing block-type entries (`evaluateMarkerToString` → `renderASTToString`), not via a `place`/`commit` dispatch on the block bag. Block markers in attribute position emit `__suiN__` (not `<!--sui-block-->`). Server emits inline. `each`/`async` throw on attribute position via `renderASTToString`. Lit directives also fixed (re-fire bypassed `formatForPart`; `serializeContent` dropped values; inner-expression reactivity threaded through outer Reaction). |
 | 2 — `compute` shorthand | ✓ partial | `compute` shorthand + `bag.place(content)` landed in `defineBlock`. `conditional` migrated. `rerender` and `template` did **not** migrate — `rerender`'s "always rebuild" semantics clash with `place`'s reference-equality dedup; `template` manages a subtemplate instance lifecycle that doesn't reduce to "place content". They keep explicit `render`/`update`. |
-| 3 — `blocks/raw-text.js` | ✓ shipped | Raw-text dispatch routes through the registry. Uses a plain dispatch function (not `defineBlock` — no region, no lifecycle separation). Legacy `bindRawTextContent` method retained on Renderer until Step 6 (still bound but unused). |
-| 4 — `blocks/expression.js` | deferred | Highest-frequency dispatch; structural change carries perf risk. Hold until Step 1-3 bench results validate the foundation, then revisit. The `bag.place`/`compute` infra is in place when the time comes. |
-| 5 — Unify `hydrateMarkers` dispatch | deferred | Blocked on Step 4. |
-| 6 — Delete `reactive-data.js` | deferred | Blocked on Steps 4-5. |
-| 7 — Refresh `blocks/sample.js` | deferred | Best updated after Steps 4-6 land so sample reflects steady-state patterns. |
-| 8 — Final verification | in flight | CI tachometer benches running. |
-
-**Deferred to follow-up PR(s):** Steps 4-7. Steps 1-3 deliver the user-visible regression fix plus structural foundation (compute shorthand + bag.place + registry-routed raw-text). The remaining structural folding is internal cleanup that should land behind its own perf gate.
+| 3 — `blocks/raw-text.js` | ✓ shipped | Raw-text dispatch routes through the registry. Uses a plain dispatch function (not `defineBlock` — no region, no lifecycle separation). |
+| 4 — `blocks/expression.js` | ✓ shipped | Text-position expression dispatch routes through `getBlock('expression')` for both bind and hydrate paths. Block file owns the text-binding logic (moved from the former `reactive-data.js`). Attribute-position expressions stay in `bindAttribute` — one Reaction owns the full attribute string regardless of marker count, and per-marker dispatch would duplicate that orchestration. |
+| 5 — Unify `hydrateMarkers` dispatch | ✓ shipped | Hydrate's expression dispatch routes through `getBlock('expression')({ hydrating: true })`. Block hydrate stays in `hydrateBlock` (region construction + serverMeta parse) and dispatches via `getBlock(node.type)`. |
+| 6 — Delete `reactive-data.js` | ✓ shipped via rename | File renamed to `attribute-binding.js` (only attribute-binding logic remained after expression/rawText moved out). Dead `bindRawTextContent`/`bindTextExpression`/`hydrateTextExpression` wrappers removed from `Renderer`. |
+| 7 — Refresh `blocks/sample.js` | ✓ partial | `compute` shorthand + `bag.place` + `place.prime` documented inline. Existing detailed pattern preserved for blocks that need explicit `render`/`update`. |
+| 8 — Final verification | in flight | CI tachometer benches running per-push for clean bisect targets. Step 1 (ff690d1) bench: ✅ 1 faster, ❌ 0 slower. Step 2-3 (c16a06e9) bench: ✅ 3 faster, ❌ 1 slower (`krausest:clear-10k +15%`, within historical ±24% noise for that metric — watching). |
 
 ---
 
