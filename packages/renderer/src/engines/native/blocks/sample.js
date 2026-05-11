@@ -20,7 +20,7 @@
   When the construct needs a DOM region of its own — a slice of nodes whose
   lifecycle is independent of the surrounding template (mount/unmount,
   reactive boundaries, hydration claim). If the construct is a pure
-  expression with no region, it's a text-binding in reactive-data.js, not a
+  expression with no region, dispatch via the registry as `'expression'`, not a
   block.
 
 */

@@ -16,10 +16,10 @@ import {
   parseServerMeta,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
+import { bindAttribute } from './attribute-binding.js';
 import { getBlock } from './blocks/registry.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
-import { bindAttribute } from './reactive-data.js';
 // Side-effect import: every block module self-registers into the block registry.
 import './blocks/index.js';
 
@@ -193,10 +193,10 @@ export class Renderer {
       Phase 3: Marker Binding
   *******************************/
 
-  // Attribute binding — delegates to reactive-data.js. See that module for
-  // the dispatch on entry.classification.type (property / event / boolean
-  // / ifDefined / interpolated / single-expression). `skipFirstWrite` is
-  // passed through by hydrateAttributes.
+  // Attribute binding — delegates to attribute-binding.js. See that module
+  // for the dispatch on entry.classification.type (property / event /
+  // boolean / ifDefined / interpolated / single-expression).
+  // `skipFirstWrite` is passed through by hydrateAttributes.
   bindAttributeExpression(element, attrName, parts, entries, data, scope, { skipFirstWrite = false } = {}) {
     bindAttribute({ element, attrName, parts, entries, data, scope, renderer: this, skipFirstWrite });
   }
@@ -278,7 +278,7 @@ export class Renderer {
       else if (type === 'rawText') {
         // Dispatch via registry — the raw-text block self-registers from
         // blocks/raw-text.js. Equivalent to the legacy bindRawTextContent
-        // method below (kept for now until reactive-data.js retires).
+        // raw-text walker; no legacy code path remains.
         getBlock('rawText')?.({ comment, entry, data, scope, renderer: this });
       }
       else if (type === 'block') {

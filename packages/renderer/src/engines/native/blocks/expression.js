@@ -8,7 +8,7 @@ import { registerBlock } from './registry.js';
   template) reaches the renderer through one primitive: getBlock(type).
 
   Attribute-position expressions are NOT dispatched here — they're walked
-  by bindAttribute in reactive-data.js as part of an attribute's combined
+  by bindAttribute in attribute-binding.js as part of an attribute's combined
   parts evaluation (one Reaction owns the full attribute string regardless
   of how many markers it contains). bindAttribute handles both expression
   and block-type markers in that position via evaluateMarkerToString.
