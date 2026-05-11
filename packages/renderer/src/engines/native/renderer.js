@@ -21,7 +21,6 @@ import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
 import {
   bindAttribute,
-  bindRawTextContent as bindRawTextContentFn,
   bindTextExpression as bindTextExpressionFn,
   hydrateTextExpression as hydrateTextExpressionFn,
 } from './reactive-data.js';
@@ -290,14 +289,6 @@ export class Renderer {
         this.bindBlock(comment, entry, data, scope);
       }
     }
-  }
-
-  /*******************************
-      Raw Text Element Bindings
-  *******************************/
-
-  bindRawTextContent(comment, entry, data, scope) {
-    bindRawTextContentFn({ comment, entry, data, scope, renderer: this });
   }
 
   // Raw-text walker — used for <script>, <style>, <textarea>, <title>

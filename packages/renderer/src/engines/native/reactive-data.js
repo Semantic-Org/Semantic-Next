@@ -250,23 +250,5 @@ export function hydrateTextExpression({ comment, entry, data, scope, renderer })
   });
 }
 
-// Raw-text element binding (script, style, textarea, title). These
-// elements parse their content as text, not markup — so we can't use
-// comment markers inside them. Instead the entire content is evaluated
-// from the collected AST nodes into a string, set via textContent.
-export function bindRawTextContent({ comment, entry, data, scope, renderer }) {
-  let element = comment.previousSibling;
-  while (element && element.nodeType === Node.TEXT_NODE) {
-    element = element.previousSibling;
-  }
-  if (!element || element.nodeType !== Node.ELEMENT_NODE) {
-    comment.remove();
-    return;
-  }
-
-  comment.remove();
-
-  scope.reaction(element, () => {
-    element.textContent = renderer.evaluateRawTextNodes(entry.nodes, data);
-  });
-}
+// Raw-text element binding (script, style, textarea, title) moved to
+// blocks/raw-text.js. Dispatched via the block registry as `'rawText'`.
