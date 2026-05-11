@@ -274,13 +274,16 @@ export class Renderer {
       const entry = entries[markerID];
 
       if (type === 'expression') {
-        this.bindTextExpression(comment, entry, data, scope);
+        // Dispatch via registry — text-position expression routes through
+        // blocks/expression.js, which delegates to bindTextExpression for
+        // now. Future cleanup may inline the binding logic into the block
+        // file and retire the legacy method.
+        getBlock('expression')?.({ comment, entry, data, scope, renderer: this });
       }
       else if (type === 'rawText') {
         // Dispatch via registry — the raw-text block self-registers from
         // blocks/raw-text.js. Equivalent to the legacy bindRawTextContent
-        // method below (kept for now until expression also routes through
-        // the registry and reactive-data.js can retire).
+        // method below (kept for now until reactive-data.js retires).
         getBlock('rawText')?.({ comment, entry, data, scope, renderer: this });
       }
       else if (type === 'block') {
@@ -398,7 +401,9 @@ export class Renderer {
       if (!entry) { continue; }
 
       if (type === 'expression') {
-        this.hydrateTextExpression(comment, entry, data, scope);
+        // Registry dispatch with hydrating: true routes to the same
+        // expression block; the block delegates to hydrateTextExpression.
+        getBlock('expression')?.({ comment, entry, data, scope, renderer: this, hydrating: true });
       }
       else if (type === 'block') {
         this.hydrateBlock(comment, entry, data, scope);
