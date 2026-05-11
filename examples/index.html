@@ -490,20 +490,20 @@ body {
           <p class="intro">A bouncing-ball simulation where the reactive system drives the render loop: a <code>reaction()</code> reads the balls array and schedules the next animation frame whenever it changes. Demonstrates that the same primitives that drive a template can drive 60 fps animation.</p>
         </li>
         <li>
-          <a class="entry" href="./src/event-data/page.html">
+          <a class="entry" href="./src/solar-system-3d/page.html">
             <span class="position">15</span>
+            <span class="headline">Driving a render loop with a tick signal</span>
+            <span class="subtitle">Solar System 3D</span>
+          </a>
+          <p class="intro">A solar system rendered by a single WebGL fragment shader on a full-screen quad. The component owns the canvas, drag-to-orbit, the keys (<code>o</code> orbits, <code>s</code> cool sun, <code>space</code> pause, <code>=</code>/<code>-</code> speed, <code>r</code> reset), and the per-frame uniform uploads. Settings flow into the shader as uniforms each frame.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/event-data/page.html">
+            <span class="position">16</span>
             <span class="headline">Data-driven event dispatch</span>
             <span class="subtitle">Event Data</span>
           </a>
           <p class="intro">One event handler, many actions. Each button carries <code>data-dimension</code> and <code>data-helper</code> attributes; the handler reads them and indexes into the signal with bracket notation to pick which mutation to perform.</p>
-        </li>
-        <li>
-          <a class="entry" href="./src/dropdown/page.html">
-            <span class="position">16</span>
-            <span class="headline">A form-friendly dropdown</span>
-            <span class="subtitle">Dropdown</span>
-          </a>
-          <p class="intro">A select-style dropdown with click-outside dismissal and a hidden <code>&lt;input&gt;</code> so the component participates in form submission. Demonstrates JSON in HTML attributes, dual <code>onChange</code> / <code>change</code> event notification, and <code>{classIf}</code>.</p>
         </li>
         <li>
           <a class="entry" href="./src/setting-types/page.html">

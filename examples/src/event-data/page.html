@@ -372,9 +372,9 @@ body {
       <header class="header">
         <nav class="crumbs">
           <a class="back" href="/">← Examples</a>
-          <span class="position">15 / 19</span>
-          <a href="../advanced-ball-simulation/page.html">prev</a>
-          <a href="../dropdown/page.html">next</a>
+          <span class="position">16 / 19</span>
+          <a href="../solar-system-3d/page.html">prev</a>
+          <a href="../setting-types/page.html">next</a>
         </nav>
         <h1 class="title">Data-driven event dispatch</h1>
         <p class="description">One event handler, many actions. Each button carries <code>data-dimension</code> and <code>data-helper</code> attributes; the handler reads them and indexes into the signal with bracket notation to pick which mutation to perform.</p>
@@ -482,11 +482,11 @@ hr {
         <h2>What to notice</h2>
         <ul>
           <li><code>state[dimension][helper](settings.delta)</code> resolves to e.g. <code>state.width.increment(50)</code> when the button is <code>&lt;ui-button data-dimension=&quot;width&quot; data-helper=&quot;increment&quot;&gt;</code>. The handler stays generic; the buttons encode their intent in HTML.</li>
-          <li>This pattern keeps the JS short when several controls do the same thing to different signals. The alternative is one handler per button.</li>
+          <li>The pattern only works because signal mutation helpers (<code>.increment</code>, <code>.decrement</code>, …) are named methods on the signal itself. <code>state[dim][helper](delta)</code> reads a string from <code>data-helper</code> and dispatches to a real method — there is no get-mutate-set round-trip to abstract away.</li>
         </ul>
         <nav class="walk">
-          <a href="../advanced-ball-simulation/page.html">← Reactivity as an animation loop</a>
-          <a href="../dropdown/page.html">A form-friendly dropdown →</a>
+          <a href="../solar-system-3d/page.html">← Driving a render loop with a tick signal</a>
+          <a href="../setting-types/page.html">Setting types and coercion →</a>
         </nav>
       </aside>
     </div>

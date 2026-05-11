@@ -585,6 +585,9 @@ async function syncIds(ids, { regenerateIndex }) {
     }
   }
   if (regenerateIndex) {
+    // Prune any src/ folders that no longer correspond to a curriculum entry
+    // (e.g. an example was removed from CURRICULUM in curriculum.js).
+    await removeOrphans();
     // The landing + barrel describe every synced example, not just the ones
     // refreshed in this run. Reconstruct the full list from disk so partial
     // syncs (watch mode, single-id invocations) don't truncate them.
@@ -592,6 +595,18 @@ async function syncIds(ids, { regenerateIndex }) {
     await copyFile(DOCS_FAVICON, join(EXAMPLES_DIR, 'favicon.ico'));
     await writeIndex(fullList);
     await writeBarrel(fullList);
+  }
+}
+
+async function removeOrphans() {
+  if (!existsSync(SRC_DIR)) { return; }
+  const keep = new Set(CURRICULUM_IDS);
+  const entries = await readdir(SRC_DIR, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory() || keep.has(entry.name)) { continue; }
+    const orphan = join(SRC_DIR, entry.name);
+    await rm(orphan, { recursive: true, force: true });
+    console.log(`⌫ ${entry.name.padEnd(28)}  (orphaned, removed)`);
   }
 }
 

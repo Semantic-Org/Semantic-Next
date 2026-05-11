@@ -211,7 +211,21 @@ Proves SUI's reactivity works at animation speed — a `reaction()` drives `requ
 
 ---
 
-### 15. `event-data` — Dynamic Signal Access
+### 15. `solar-system-3d` — Wrapping a Graphics Pipeline
+
+A WebGL fragment shader rendering the solar system, with the component owning the canvas, the drag-to-orbit input, keyboard controls, and per-frame uniform uploads. Same reactivity-driven animation loop as the ball simulation, but extended into a full Processing.js-style imperative pipeline — keybindings, settings, and reactivity sit alongside the shader without fighting it. Sells SUI as a comfortable wrapper for graphics code.
+
+**New patterns:** Static `keys` with multi-character bindings (`'=, +'`), pointer-capture drag, sub-module imports (`fragment.js` / `vertex.js` / `webgl.js`), `state.frame.increment()` to tick the animation reaction, external preset orchestration via `$().settings({ visible: [...] })`.
+
+**What to notice:**
+- Same `reaction()` + `requestAnimationFrame` shape as the ball simulation, but the tick is explicit: `state.frame.increment()` at the end of `render` advances the signal the reaction depends on.
+- Keybindings as first-class framework concerns. `'=, +'` and `'-, _'` bind both characters at once; `space` pauses; `o`/`s` toggle settings. Each handler mutates a setting that the next render reads as a shader uniform.
+- Shader source is a plain string exported from `fragment.js`. Sub-modules import into `component.js` the same way subtemplates do — the framework doesn't care that the strings happen to be GLSL.
+- `page.js` ships preset visibility arrays through a `ui-menu` and pipes the selection into the component: `$('solar-system-3d').settings({ visible: presets[value] })`. Settings are reactive, so the shader picks up the change on the next frame.
+
+---
+
+### 16. `event-data` — Dynamic Signal Access
 
 Uses `data-*` attributes to dynamically select which signal and which mutation method to call. A single event handler handles all cases via bracket notation.
 
@@ -220,19 +234,6 @@ Uses `data-*` attributes to dynamically select which signal and which mutation m
 **What to notice:**
 - `state[dimension][helper](settings.delta)` — `dimension` and `helper` come from `data-dimension` and `data-helper` attributes on the button. One handler, many behaviors.
 - This pattern eliminates repetitive event handlers. Instead of separate handlers for each action, one handler reads data attributes to determine what to do.
-
----
-
-### 16. `dropdown` — Real-World Form Component
-
-Form integration with hidden inputs, click-away dismissal, JSON arrays as HTML attributes.
-
-**New patterns:** Hidden `<input>` for forms, `onChange` callback alongside `dispatchEvent`, `el.contains(event.target)`, JSON in attributes, `{classIf}`.
-
-**What to notice:**
-- `options='[{"value": "apple", "text": "Apple"}]'` — JSON in HTML attributes, auto-parsed for array/object settings.
-- `settings.onChange` alongside `dispatchEvent` — supports both callbacks and DOM events.
-- `{classIf isOpen 'visible'}` — simpler than `classMap` for a single conditional class.
 
 ---
 
@@ -296,7 +297,7 @@ SVG rendering and the `interval` helper with automatic lifecycle cleanup.
 | `'global event target'` | `context-menu` |
 | `'deep event selector'` | `context-menu` |
 | `{>slot}` content projection | `context-menu` |
-| `classMap` / `activeIf` / `selectedIf` / `classIf` | `emoji-reactions` / `todo-list` / `dropdown` |
+| `classMap` / `activeIf` / `selectedIf` / `classIf` | `emoji-reactions` / `todo-list` |
 | `reaction()` for side effects | `todo-list` |
 | `peek()` for non-reactive reads | `context-menu` |
 | `dispatchEvent` (→ `event.detail`) | `context-menu` |
@@ -320,8 +321,8 @@ SVG rendering and the `interval` helper with automatic lifecycle cleanup.
 | Lisp-style expressions | `async-search` |
 | JS-style expressions | `card-search` |
 | `afterFlush` | `todo-list` |
-| JSON in HTML attributes | `dropdown` |
-| Form integration (hidden input) | `dropdown` |
+| Sub-module imports (shader / data files) | `solar-system-3d` |
+| WebGL inside shadow DOM | `solar-system-3d` |
 | `{#each ... else}` | `card-search` |
 | `range()` helper | `rating-slider` |
 | `{both x y}` compound conditional | `progress-bar` |

@@ -690,7 +690,7 @@ $(<span class="hljs-string">&#x27;rating-slider&#x27;</span>)
         <h2>What to notice</h2>
         <ul>
           <li><code>&#39;global pointermove body&#39;</code> and <code>&#39;global pointerup body&#39;</code> listen on <code>document.body</code> from inside the component. The listeners are bound when the component mounts and removed when it is destroyed.</li>
-          <li>Two custom events are emitted: <code>change</code> fires continuously while dragging, <code>finalized</code> fires once on release. Consumers pick whichever cadence they want.</li>
+          <li><code>dispatchEvent(&#39;change&#39;, { rating, min, max })</code> from inside <code>createComponent</code> fires a real DOM CustomEvent on the host element. Two distinct event names (<code>change</code> continuously, <code>finalized</code> on release) cost nothing to emit, and because they are standard DOM events any consumer — vanilla <code>addEventListener</code>, an inline <code>onchange=</code>, React via <code>onChange</code> — receives them the same way.</li>
           <li><code>{#each value in range(min, max + 1)}</code> uses the <code>range</code> helper to generate the label numbers directly in the template — no need to precompute the array.</li>
         </ul>
         <nav class="walk">

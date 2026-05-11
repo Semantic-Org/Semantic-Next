@@ -481,7 +481,7 @@ $(<span class="hljs-string">&#x27;dynamic-table&#x27;</span>).<span class="hljs-
         <ul>
           <li><code>rowTemplate: new Template()</code> is an empty default. The page replaces it via <code>$(&#39;dynamic-table&#39;).settings({ rowTemplate: RowTemplate })</code>.</li>
           <li>A <code>Template</code> is a first-class value — the same kind of thing that gets compiled from <code>?raw</code> HTML imports. It can travel through <code>settings</code> just like a string or a number.</li>
-          <li>Different pages can mount the same <code>&lt;dynamic-table&gt;</code> with completely different row layouts without changing the table component.</li>
+          <li><code>RowTemplate</code> is itself a <code>defineComponent({ template, ... })</code> call — without <code>tagName</code>. The same API produces a custom element (with <code>tagName</code>) or a subtemplate (without). Both are <code>Template</code> values that travel through <code>settings</code> like a string or number, so consumer-authored templates compose without a separate slot or render-prop API.</li>
         </ul>
         <nav class="walk">
           <a href="../tailwind/page.html">← Tailwind inside shadow DOM</a>

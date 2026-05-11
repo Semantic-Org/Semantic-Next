@@ -1,0 +1,992 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Solar System 3D — solar-system-3d</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <link rel="stylesheet" href="./page.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <script type="module" blocking="render" src="/dist/src/solar-system-3d/component.js"></script>
+    <script type="module" blocking="render" src="/dist/src/solar-system-3d/page.js"></script>
+    <style>
+/*
+  Stylesheet inlined into every generated page by scripts/sync.js.
+  Loaded as a string at sync time (no bundler), so plain CSS — no imports.
+
+  Tokens, code colors, and heading discipline are aligned with the canonical
+  cdn.semantic-ui.com page (tools/cdn/pages/index.css) so this site reads as
+  part of the same surface. All page-specific selectors descend from
+  `.example` so the HTML stays free of repeated namespace classes.
+*/
+
+:root {
+  --code-bg: var(--ui-background-emphasis);
+  --code-purple: #6F42C1;
+  --code-default: #54595E;
+  --code-blue: #005CC5;
+  --code-orange: #E3660F;
+  --code-red: #D73A49;
+  --code-green: #22863A;
+  --code-grey: #24292E;
+  --code-comment: #6A737D;
+}
+
+html.dark {
+  --code-purple: #D2A8FF;
+  --code-default: #C9D1D9;
+  --code-blue: var(--primary-text-color);
+  --code-orange: #FFAB70;
+  --code-red: #F97583;
+  --code-green: #7EE787;
+  --code-grey: #656565;
+  --code-comment: #6A737D;
+}
+
+html { scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--page-font);
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 var(--gutter-l);
+  color: var(--text-color);
+}
+
+.example {
+
+  .theme {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .header {
+    margin-bottom: var(--gap);
+    padding-bottom: var(--padding-3xs);
+    border-bottom: var(--border);
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-xs);
+      font-size: var(--text-xs);
+      color: var(--light-text-color);
+
+      a {
+        color: var(--muted-text-color);
+        text-decoration: none;
+        transition: color 0.12s;
+        &:hover { color: var(--primary-text-color); }
+      }
+
+      .position {
+        margin-right: auto;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    .title {
+      margin: var(--gap-2xs) 0 var(--gap-3xs);
+      font-size: var(--text-2xl);
+      font-weight: var(--bold);
+      letter-spacing: -0.01em;
+      color: var(--header-color);
+    }
+
+    .description {
+      margin: var(--vertically-spaced);
+      color: var(--muted-text-color);
+      line-height: 1.65;
+    }
+  }
+
+  .container {
+    position: relative;
+    transform: translateZ(0);
+  }
+
+  .source {
+    margin: var(--vertically-spaced) 0;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: var(--code-bg);
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: var(--padding-xs) var(--padding);
+      font-size: var(--text-xs);
+      font-weight: var(--bold);
+      color: var(--muted-text-color);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: var(--gap-3xs);
+      transition: color 0.12s;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-text-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: var(--internal-border);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      border-bottom: var(--internal-border);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: var(--padding-xs) var(--padding);
+        font-family: var(--code-font);
+        font-size: var(--text-xs);
+        color: var(--light-text-color);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: color 0.15s;
+
+        &:hover { color: var(--muted-text-color); }
+        &.active {
+          color: var(--header-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: var(--padding) var(--padding-l);
+      overflow: auto;
+      font-family: var(--code-font);
+      font-size: var(--text-s);
+      line-height: 1.8;
+      color: var(--code-default);
+      max-height: 520px;
+      tab-size: 2;
+    }
+
+    /* highlight.js token classes mapped to the canonical --code-* palette. */
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal,
+    .hljs-variable.language_,
+    .hljs-doctag { color: var(--code-red); }
+    .hljs-string,
+    .hljs-attr,
+    .hljs-meta .hljs-string,
+    .hljs-symbol { color: var(--code-blue); }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag,
+    .hljs-title,
+    .hljs-title.class_,
+    .hljs-title.function_ { color: var(--code-purple); }
+    .hljs-number,
+    .hljs-meta .hljs-number { color: var(--code-orange); }
+    .hljs-comment { color: var(--code-comment); font-style: italic; }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id,
+    .hljs-selector-attr { color: var(--code-grey); }
+    .hljs-meta,
+    .hljs-regexp { color: var(--code-green); }
+  }
+
+  .notes {
+    margin-top: var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--muted-text-color);
+    line-height: 1.65;
+
+    h2 {
+      margin: 0 0 var(--gap-2xs);
+      font-size: var(--text-2xs);
+      font-weight: var(--bold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--blue-80);
+    }
+
+    p { margin: var(--vertically-spaced); }
+    ul { margin: var(--vertically-spaced); padding-left: 1.25rem; }
+    li { margin: var(--gap-3xs) 0; }
+
+    .walk {
+      display: flex;
+      justify-content: space-between;
+      margin-top: var(--margin);
+      padding-top: var(--padding);
+      border-top: var(--internal-border);
+
+      a {
+        color: var(--primary-text-color);
+        text-decoration: none;
+        font-size: var(--text-s);
+        font-weight: var(--bold);
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+
+  /* Inline code (`token`) inside prose — chip style matching CDN. */
+  .header .description code,
+  .notes code,
+  .entries .intro code {
+    background: var(--subtle-angled-gradient);
+    padding: 3px 5px;
+    margin: -2px 1px;
+    border: var(--subtle-border);
+    border-radius: var(--border-radius);
+    color: var(--standard-90);
+    font-family: var(--code-font);
+    font-size: var(--text-xs);
+  }
+
+  /* Landing page */
+  h1 {
+    margin: 0 0 var(--gap-3xs);
+    font-size: var(--text-3xl);
+    font-weight: var(--bold);
+    letter-spacing: -0.015em;
+    color: var(--header-color);
+  }
+
+  .lede {
+    color: var(--muted-text-color);
+    margin-top: 0;
+    line-height: 1.65;
+  }
+
+  .section {
+    margin: var(--margin-xl) 0 var(--gap-3xs);
+    font-size: var(--text-2xs);
+    font-weight: var(--bold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted-text-color);
+  }
+
+  .section-lede {
+    margin: var(--vertically-spaced);
+    color: var(--light-text-color);
+    font-size: var(--text-s);
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: var(--padding) 0;
+      border-bottom: var(--internal-border);
+      &:last-child { border-bottom: none; }
+    }
+
+    .entry {
+      display: flex;
+      align-items: baseline;
+      gap: var(--gap-xs);
+      text-decoration: none;
+      &:hover .headline { color: var(--primary-text-color); }
+
+      .position {
+        font-variant-numeric: tabular-nums;
+        color: var(--standard-40);
+        font-size: var(--text-s);
+        min-width: 1.5rem;
+      }
+
+      .headline {
+        font-weight: var(--bold);
+        color: var(--header-color);
+        transition: color 0.12s;
+      }
+
+      .subtitle {
+        color: var(--light-text-color);
+        font-size: var(--text-s);
+      }
+    }
+
+    .intro {
+      margin: var(--gap-3xs) 0 0 2.1rem;
+      color: var(--muted-text-color);
+      font-size: var(--text-s);
+      line-height: 1.65;
+    }
+  }
+
+  .footer {
+    margin: var(--margin-xl) 0 var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--light-text-color);
+    font-size: var(--text-xs);
+    display: flex;
+    gap: var(--gap-xs);
+
+    a {
+      color: var(--muted-text-color);
+      text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+
+    .sep { color: var(--border-color); }
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <header class="header">
+        <nav class="crumbs">
+          <a class="back" href="/">← Examples</a>
+          <span class="position">15 / 19</span>
+          <a href="../advanced-ball-simulation/page.html">prev</a>
+          <a href="../event-data/page.html">next</a>
+        </nav>
+        <h1 class="title">Driving a render loop with a tick signal</h1>
+        <p class="description">A solar system rendered by a single WebGL fragment shader on a full-screen quad. The component owns the canvas, drag-to-orbit, the keys (<code>o</code> orbits, <code>s</code> cool sun, <code>space</code> pause, <code>=</code>/<code>-</code> speed, <code>r</code> reset), and the per-frame uniform uploads. Settings flow into the shader as uniforms each frame.</p>
+      </header>
+      <div class="container">
+        <solar-system-3d cool-sun="false"></solar-system-3d>
+        <ui-menu selection value="all"></ui-menu>
+        <div class="hints">
+          <span>Drag to orbit</span>
+          <span><kbd>O</kbd> Orbits</span>
+          <span><kbd>S</kbd> Sunglasses</span>
+          <span><kbd>Space</kbd> Pause</span>
+          <span><kbd>R</kbd> Reset</span>
+          <span><kbd>+</kbd><kbd>-</kbd> Speed</span>
+        </div>
+      </div>
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+          <li><button type="button" data-target="src-solar-system-3d-0" class="active">component.js</button></li>
+          <li><button type="button" data-target="src-solar-system-3d-1">component.html</button></li>
+          <li><button type="button" data-target="src-solar-system-3d-2">component.css</button></li>
+          <li><button type="button" data-target="src-solar-system-3d-3">fragment.js</button></li>
+          <li><button type="button" data-target="src-solar-system-3d-4">vertex.js</button></li>
+          <li><button type="button" data-target="src-solar-system-3d-5">webgl.js</button></li>
+          <li><button type="button" data-target="src-solar-system-3d-6">page.html</button></li>
+          <li><button type="button" data-target="src-solar-system-3d-7">page.css</button></li>
+          <li><button type="button" data-target="src-solar-system-3d-8">page.js</button></li>
+        </ul>
+        <pre id="src-solar-system-3d-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+<span class="hljs-keyword">import</span> { vertSrc, fragSrc, compile } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./webgl.js&#x27;</span>;
+
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
+<span class="hljs-comment">// Days elapsed from J2000 epoch (Jan 1 2000 12:00 UTC) to a given date</span>
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">J2000</span> = <span class="hljs-title class_">Date</span>.<span class="hljs-title function_">UTC</span>(<span class="hljs-number">2000</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">12</span>);
+<span class="hljs-keyword">const</span> msPerDay = <span class="hljs-number">86400000</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">daysFromJ2000</span> = (<span class="hljs-params">date</span>) =&gt; (date.<span class="hljs-title function_">getTime</span>() - <span class="hljs-variable constant_">J2000</span>) / msPerDay;
+
+<span class="hljs-keyword">const</span> defaultSettings = {
+  <span class="hljs-attr">speed</span>: <span class="hljs-number">0.5</span>,
+  <span class="hljs-attr">daysPerSecond</span>: <span class="hljs-number">36.5</span>,
+  <span class="hljs-attr">showOrbits</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">coolSun</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">date</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-attr">visible</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+};
+
+<span class="hljs-keyword">const</span> defaultState = {
+  <span class="hljs-attr">frame</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">simDate</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(),
+};
+
+<span class="hljs-keyword">const</span> keys = {
+  <span class="hljs-string">&#x27;o&#x27;</span>({ settings }) {
+    settings.<span class="hljs-property">showOrbits</span> = !settings.<span class="hljs-property">showOrbits</span>;
+  },
+  <span class="hljs-string">&#x27;s&#x27;</span>({ settings }) {
+    settings.<span class="hljs-property">coolSun</span> = !settings.<span class="hljs-property">coolSun</span>;
+  },
+  <span class="hljs-string">&#x27;space&#x27;</span>({ settings }) {
+    settings.<span class="hljs-property">speed</span> = settings.<span class="hljs-property">speed</span> ? <span class="hljs-number">0</span> : <span class="hljs-number">0.5</span>;
+  },
+  <span class="hljs-string">&#x27;r&#x27;</span>({ self }) {
+    self.<span class="hljs-property">pointer</span> = { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span> };
+    self.<span class="hljs-property">velocity</span> = { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span> };
+  },
+  <span class="hljs-string">&#x27;=, +&#x27;</span>({ settings }) {
+    settings.<span class="hljs-property">speed</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(settings.<span class="hljs-property">speed</span> * <span class="hljs-number">1.2</span>, <span class="hljs-number">5</span>);
+  },
+  <span class="hljs-string">&#x27;-, _&#x27;</span>({ settings }) {
+    settings.<span class="hljs-property">speed</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(settings.<span class="hljs-property">speed</span> / <span class="hljs-number">1.2</span>, <span class="hljs-number">0.05</span>);
+  },
+};
+
+<span class="hljs-keyword">const</span> events = {
+  <span class="hljs-string">&#x27;global resize window&#x27;</span>({ self }) {
+    self.<span class="hljs-title function_">resize</span>();
+  },
+  <span class="hljs-string">&#x27;pointerdown canvas&#x27;</span>({ self, event, target }) {
+    self.<span class="hljs-property">dragging</span> = <span class="hljs-literal">true</span>;
+    self.<span class="hljs-property">lastPointer</span> = { <span class="hljs-attr">x</span>: event.<span class="hljs-property">clientX</span>, <span class="hljs-attr">y</span>: event.<span class="hljs-property">clientY</span> };
+    target.<span class="hljs-title function_">setPointerCapture</span>(event.<span class="hljs-property">pointerId</span>);
+  },
+  <span class="hljs-string">&#x27;pointermove canvas&#x27;</span>({ self, event }) {
+    <span class="hljs-keyword">if</span> (!self.<span class="hljs-property">dragging</span>) <span class="hljs-keyword">return</span>;
+    <span class="hljs-keyword">const</span> dx = event.<span class="hljs-property">clientX</span> - self.<span class="hljs-property">lastPointer</span>.<span class="hljs-property">x</span>;
+    <span class="hljs-keyword">const</span> dy = event.<span class="hljs-property">clientY</span> - self.<span class="hljs-property">lastPointer</span>.<span class="hljs-property">y</span>;
+    self.<span class="hljs-property">velocity</span>.<span class="hljs-property">x</span> = dx * -<span class="hljs-number">0.005</span>;
+    self.<span class="hljs-property">velocity</span>.<span class="hljs-property">y</span> = dy * -<span class="hljs-number">0.003</span>;
+    self.<span class="hljs-property">pointer</span>.<span class="hljs-property">x</span> += self.<span class="hljs-property">velocity</span>.<span class="hljs-property">x</span>;
+    self.<span class="hljs-property">pointer</span>.<span class="hljs-property">y</span> += self.<span class="hljs-property">velocity</span>.<span class="hljs-property">y</span>;
+    self.<span class="hljs-property">pointer</span>.<span class="hljs-property">y</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(-<span class="hljs-number">0.5</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(<span class="hljs-number">0.5</span>, self.<span class="hljs-property">pointer</span>.<span class="hljs-property">y</span>));
+    self.<span class="hljs-property">lastPointer</span> = { <span class="hljs-attr">x</span>: event.<span class="hljs-property">clientX</span>, <span class="hljs-attr">y</span>: event.<span class="hljs-property">clientY</span> };
+  },
+  <span class="hljs-string">&#x27;pointerup canvas&#x27;</span>({ self }) {
+    self.<span class="hljs-property">dragging</span> = <span class="hljs-literal">false</span>;
+    self.<span class="hljs-property">lastPointer</span> = <span class="hljs-literal">null</span>;
+  },
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ self, $, settings, state, reaction }</span>) =&gt; ({
+  <span class="hljs-attr">gl</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-attr">prog</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-attr">loc</span>: {},
+  <span class="hljs-attr">simDays</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">lastFrame</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">startTime</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">pointer</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span> },
+  <span class="hljs-attr">velocity</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span> },
+  <span class="hljs-attr">dragging</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">lastPointer</span>: <span class="hljs-literal">null</span>,
+
+  <span class="hljs-title function_">initWebGL</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> canvas = $(<span class="hljs-string">&#x27;canvas&#x27;</span>).<span class="hljs-title function_">el</span>();
+    <span class="hljs-keyword">const</span> gl = canvas.<span class="hljs-title function_">getContext</span>(<span class="hljs-string">&#x27;webgl&#x27;</span>, {
+      <span class="hljs-attr">alpha</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">antialias</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">depth</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">preserveDrawingBuffer</span>: <span class="hljs-literal">false</span>,
+    });
+    <span class="hljs-keyword">if</span> (!gl) <span class="hljs-keyword">return</span>;
+    self.<span class="hljs-property">gl</span> = gl;
+
+    <span class="hljs-keyword">const</span> vs = <span class="hljs-title function_">compile</span>(gl, gl.<span class="hljs-property">VERTEX_SHADER</span>, vertSrc);
+    <span class="hljs-keyword">const</span> fs = <span class="hljs-title function_">compile</span>(gl, gl.<span class="hljs-property">FRAGMENT_SHADER</span>, fragSrc);
+    <span class="hljs-keyword">if</span> (!vs || !fs) <span class="hljs-keyword">return</span>;
+
+    <span class="hljs-keyword">const</span> prog = gl.<span class="hljs-title function_">createProgram</span>();
+    gl.<span class="hljs-title function_">attachShader</span>(prog, vs);
+    gl.<span class="hljs-title function_">attachShader</span>(prog, fs);
+    gl.<span class="hljs-title function_">linkProgram</span>(prog);
+    gl.<span class="hljs-title function_">useProgram</span>(prog);
+    self.<span class="hljs-property">prog</span> = prog;
+
+    <span class="hljs-keyword">const</span> buf = gl.<span class="hljs-title function_">createBuffer</span>();
+    gl.<span class="hljs-title function_">bindBuffer</span>(gl.<span class="hljs-property">ARRAY_BUFFER</span>, buf);
+    gl.<span class="hljs-title function_">bufferData</span>(gl.<span class="hljs-property">ARRAY_BUFFER</span>, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Float32Array</span>([-<span class="hljs-number">1</span>,-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>,-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>,<span class="hljs-number">1</span>, <span class="hljs-number">1</span>,<span class="hljs-number">1</span>]), gl.<span class="hljs-property">STATIC_DRAW</span>);
+    <span class="hljs-keyword">const</span> aPos = gl.<span class="hljs-title function_">getAttribLocation</span>(prog, <span class="hljs-string">&#x27;a_pos&#x27;</span>);
+    gl.<span class="hljs-title function_">enableVertexAttribArray</span>(aPos);
+    gl.<span class="hljs-title function_">vertexAttribPointer</span>(aPos, <span class="hljs-number">2</span>, gl.<span class="hljs-property">FLOAT</span>, <span class="hljs-literal">false</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+
+    self.<span class="hljs-property">loc</span> = {
+      <span class="hljs-attr">time</span>: gl.<span class="hljs-title function_">getUniformLocation</span>(prog, <span class="hljs-string">&#x27;u_time&#x27;</span>),
+      <span class="hljs-attr">resolution</span>: gl.<span class="hljs-title function_">getUniformLocation</span>(prog, <span class="hljs-string">&#x27;u_resolution&#x27;</span>),
+      <span class="hljs-attr">showOrbits</span>: gl.<span class="hljs-title function_">getUniformLocation</span>(prog, <span class="hljs-string">&#x27;u_showOrbits&#x27;</span>),
+      <span class="hljs-attr">coolSun</span>: gl.<span class="hljs-title function_">getUniformLocation</span>(prog, <span class="hljs-string">&#x27;u_coolSun&#x27;</span>),
+      <span class="hljs-attr">wallTime</span>: gl.<span class="hljs-title function_">getUniformLocation</span>(prog, <span class="hljs-string">&#x27;u_wallTime&#x27;</span>),
+      <span class="hljs-attr">pointer</span>: gl.<span class="hljs-title function_">getUniformLocation</span>(prog, <span class="hljs-string">&#x27;u_pointer&#x27;</span>),
+      <span class="hljs-attr">visible</span>: <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>({ <span class="hljs-attr">length</span>: <span class="hljs-number">8</span> }, <span class="hljs-function">(<span class="hljs-params">_, i</span>) =&gt;</span>
+        gl.<span class="hljs-title function_">getUniformLocation</span>(prog, <span class="hljs-string">`u_visible[<span class="hljs-subst">${i}</span>]`</span>)
+      ),
+    };
+
+    self.<span class="hljs-title function_">resize</span>();
+    self.<span class="hljs-property">startTime</span> = performance.<span class="hljs-title function_">now</span>();
+    self.<span class="hljs-property">lastFrame</span> = self.<span class="hljs-property">startTime</span>;
+    <span class="hljs-comment">// Start from the configured date or today, measured in days from J2000</span>
+    <span class="hljs-keyword">const</span> startDate = settings.<span class="hljs-property">date</span> || <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>();
+    self.<span class="hljs-property">simDays</span> = <span class="hljs-title function_">daysFromJ2000</span>(startDate);
+  },
+
+  <span class="hljs-title function_">startAnimation</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-title function_">reaction</span>(<span class="hljs-function">() =&gt;</span> {
+      state.<span class="hljs-property">frame</span>.<span class="hljs-title function_">get</span>();
+      <span class="hljs-title function_">requestAnimationFrame</span>(self.<span class="hljs-property">render</span>);
+    });
+  },
+
+  <span class="hljs-title function_">resize</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> gl = self.<span class="hljs-property">gl</span>;
+    <span class="hljs-keyword">const</span> canvas = gl.<span class="hljs-property">canvas</span>;
+    <span class="hljs-keyword">const</span> rect = canvas.<span class="hljs-property">parentElement</span>.<span class="hljs-title function_">getBoundingClientRect</span>();
+    <span class="hljs-keyword">const</span> dpr = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(<span class="hljs-variable language_">window</span>.<span class="hljs-property">devicePixelRatio</span> || <span class="hljs-number">1</span>, <span class="hljs-number">2</span>);
+    canvas.<span class="hljs-property">width</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(rect.<span class="hljs-property">width</span> * dpr);
+    canvas.<span class="hljs-property">height</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(rect.<span class="hljs-property">height</span> * dpr);
+    gl.<span class="hljs-title function_">viewport</span>(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, canvas.<span class="hljs-property">width</span>, canvas.<span class="hljs-property">height</span>);
+  },
+
+  <span class="hljs-title function_">render</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> gl = self.<span class="hljs-property">gl</span>;
+    <span class="hljs-keyword">if</span> (!gl) <span class="hljs-keyword">return</span>;
+
+    <span class="hljs-keyword">const</span> now = performance.<span class="hljs-title function_">now</span>();
+    <span class="hljs-keyword">const</span> dt = (now - self.<span class="hljs-property">lastFrame</span>) / <span class="hljs-number">1000</span>;
+    self.<span class="hljs-property">lastFrame</span> = now;
+    self.<span class="hljs-property">simDays</span> += dt * settings.<span class="hljs-property">daysPerSecond</span> * settings.<span class="hljs-property">speed</span>;
+
+    <span class="hljs-keyword">const</span> loc = self.<span class="hljs-property">loc</span>;
+
+    gl.<span class="hljs-title function_">uniform1f</span>(loc.<span class="hljs-property">time</span>, self.<span class="hljs-property">simDays</span>);
+    gl.<span class="hljs-title function_">uniform1f</span>(loc.<span class="hljs-property">wallTime</span>, (now - self.<span class="hljs-property">startTime</span>) / <span class="hljs-number">1000</span>);
+    state.<span class="hljs-property">simDate</span>.<span class="hljs-title function_">set</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-variable constant_">J2000</span> + self.<span class="hljs-property">simDays</span> * msPerDay));
+    gl.<span class="hljs-title function_">uniform2f</span>(loc.<span class="hljs-property">resolution</span>, gl.<span class="hljs-property">canvas</span>.<span class="hljs-property">width</span>, gl.<span class="hljs-property">canvas</span>.<span class="hljs-property">height</span>);
+    gl.<span class="hljs-title function_">uniform1f</span>(loc.<span class="hljs-property">showOrbits</span>, settings.<span class="hljs-property">showOrbits</span> ? <span class="hljs-number">1.0</span> : <span class="hljs-number">0.0</span>);
+    gl.<span class="hljs-title function_">uniform1f</span>(loc.<span class="hljs-property">coolSun</span>, settings.<span class="hljs-property">coolSun</span> ? <span class="hljs-number">1.0</span> : <span class="hljs-number">0.0</span>);
+
+    <span class="hljs-keyword">const</span> vis = settings.<span class="hljs-property">visible</span> || [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">8</span>; i++) {
+      gl.<span class="hljs-title function_">uniform1f</span>(loc.<span class="hljs-property">visible</span>[i], vis[i] ?? <span class="hljs-number">1.0</span>);
+    }
+
+    <span class="hljs-comment">// Apply momentum decay when not dragging</span>
+    <span class="hljs-keyword">if</span> (!self.<span class="hljs-property">dragging</span>) {
+      self.<span class="hljs-property">pointer</span>.<span class="hljs-property">x</span> += self.<span class="hljs-property">velocity</span>.<span class="hljs-property">x</span>;
+      self.<span class="hljs-property">pointer</span>.<span class="hljs-property">y</span> += self.<span class="hljs-property">velocity</span>.<span class="hljs-property">y</span>;
+      self.<span class="hljs-property">velocity</span>.<span class="hljs-property">x</span> *= <span class="hljs-number">0.95</span>;
+      self.<span class="hljs-property">velocity</span>.<span class="hljs-property">y</span> *= <span class="hljs-number">0.95</span>;
+      <span class="hljs-comment">// Clamp elevation</span>
+      self.<span class="hljs-property">pointer</span>.<span class="hljs-property">y</span> = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(-<span class="hljs-number">0.5</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(<span class="hljs-number">0.5</span>, self.<span class="hljs-property">pointer</span>.<span class="hljs-property">y</span>));
+    }
+    gl.<span class="hljs-title function_">uniform2f</span>(loc.<span class="hljs-property">pointer</span>, self.<span class="hljs-property">pointer</span>.<span class="hljs-property">x</span>, self.<span class="hljs-property">pointer</span>.<span class="hljs-property">y</span>);
+
+    gl.<span class="hljs-title function_">drawArrays</span>(gl.<span class="hljs-property">TRIANGLE_STRIP</span>, <span class="hljs-number">0</span>, <span class="hljs-number">4</span>);
+    state.<span class="hljs-property">frame</span>.<span class="hljs-title function_">increment</span>();
+  },
+});
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">onRendered</span> = (<span class="hljs-params">{ self, isClient }</span>) =&gt; {
+  <span class="hljs-keyword">if</span> (!isClient) <span class="hljs-keyword">return</span>;
+  self.<span class="hljs-title function_">initWebGL</span>();
+  self.<span class="hljs-title function_">startAnimation</span>();
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">SolarSystem3D</span> = <span class="hljs-title function_">defineComponent</span>({
+  <span class="hljs-attr">tagName</span>: <span class="hljs-string">&#x27;solar-system-3d&#x27;</span>,
+  template,
+  css,
+  createComponent,
+  keys,
+  events,
+  defaultSettings,
+  defaultState,
+  onRendered,
+});
+</code></pre>
+        <pre id="src-solar-system-3d-1" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;scene&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">canvas</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">canvas</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;date&quot;</span>&gt;</span>{formatDate simDate &#x27;ll&#x27; { timezone: &#x27;UTC&#x27; }}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-solar-system-3d-2" hidden><code class="hljs language-css"><span class="hljs-selector-pseudo">:host</span> {
+  <span class="hljs-attribute">display</span>: block;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;
+}
+
+<span class="hljs-selector-class">.scene</span> {
+  <span class="hljs-attribute">position</span>: relative;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius);
+  <span class="hljs-attribute">overflow</span>: hidden;
+}
+
+<span class="hljs-selector-tag">canvas</span> {
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">display</span>: block;
+  <span class="hljs-attribute">cursor</span>: grab;
+}
+<span class="hljs-selector-tag">canvas</span><span class="hljs-selector-pseudo">:active</span> {
+  <span class="hljs-attribute">cursor</span>: grabbing;
+}
+
+<span class="hljs-selector-class">.date</span> {
+  <span class="hljs-attribute">position</span>: absolute;
+  <span class="hljs-attribute">bottom</span>: <span class="hljs-built_in">var</span>(--margin);
+  <span class="hljs-attribute">left</span>: <span class="hljs-built_in">var</span>(--margin);
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--white-<span class="hljs-number">60</span>);
+  <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">var</span>(--text-s);
+  <span class="hljs-attribute">font-family</span>: <span class="hljs-built_in">var</span>(--page-font);
+  <span class="hljs-attribute">pointer-events</span>: none;
+}
+</code></pre>
+        <pre id="src-solar-system-3d-3" hidden><code class="hljs language-javascript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-string">`
+precision highp float;
+
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform float u_visible[8];
+uniform float u_showOrbits;
+uniform float u_coolSun;
+uniform float u_wallTime;
+uniform vec2 u_pointer;
+
+// ── Sun tuning ──
+const float SUN_RADIUS = 1.8;
+const vec3  SUN_EDGE_COLOR = vec3(0.9, 0.55, 0.0);
+const vec3  SUN_CENTER_COLOR = vec3(1.0, 0.92, 0.25);
+
+// ── Cool sun face tuning ──
+const float LENS_SPACING = 0.32;     // horizontal offset from center
+const float LENS_HEIGHT = 0.06;      // vertical offset (positive = up)
+const float LENS_RADIUS = 0.22;      // lens circle radius
+const vec3  LENS_COLOR = vec3(0.02, 0.02, 0.06);
+const float LENS_HIGHLIGHT = 0.2;    // sheen strength on upper lens
+
+const float BRIDGE_WIDTH = 0.1;      // half-width of bridge
+const float BRIDGE_THICK = 0.05;     // half-thickness
+
+const float ARM_INNER = 0.54;        // starts at lens edge
+const float ARM_OUTER = 0.85;        // extends toward sun edge
+const float ARM_THICK = 0.045;       // half-thickness
+
+const float SMILE_Y = 0.28;          // vertical offset below center
+const float SMILE_RADIUS = 0.32;     // arc radius
+const float SMILE_THICK = 0.06;      // arc line thickness
+const float SMILE_SQUASH = 0.9;      // horizontal squash (&lt;1 = wider)
+
+const vec3  FRAME_COLOR = vec3(0.1, 0.05, 0.0);
+const float EDGE_SOFT = 0.025;       // smoothstep anti-aliasing width
+
+float raySphere(vec3 ro, vec3 rd, vec3 c, float r) {
+  vec3 oc = ro - c;
+  float b = dot(oc, rd);
+  float h = b * b - (dot(oc, oc) - r * r);
+  if (h &lt; 0.0) return -1.0;
+  return -b - sqrt(h);
+}
+
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+void main() {
+  vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution) / u_resolution.y;
+
+  // Camera orbit with pointer interaction
+  // One full camera orbit per Earth year
+  float camAngle = 6.28318 * u_time / 365.25 + u_pointer.x;
+  float camHeight = 18.0 + u_pointer.y * 8.0;
+  vec3 ro = vec3(sin(camAngle) * 20.0, camHeight, cos(camAngle) * 20.0);
+  vec3 ta = vec3(0.0, -3.8, 0.0);
+  vec3 fwd = normalize(ta - ro);
+  vec3 right = normalize(cross(fwd, vec3(0.0, 1.0, 0.0)));
+  vec3 up = cross(right, fwd);
+  vec3 rd = normalize(fwd * 1.1 + uv.x * right + uv.y * up);
+
+  vec3 col = vec3(0.0);
+  float closest = 1000.0;
+
+  // Stars
+  vec2 starCell = floor(uv * 250.0);
+  float starVal = hash(starCell);
+  if (starVal &gt; 0.993) {
+    float phase = hash(starCell + 100.0) * 6.28318;
+    float rate = 1.0 + hash(starCell + 200.0) * 3.0;
+    float twinkle = 0.7 + 0.3 * sin(u_wallTime * rate + phase);
+    col = vec3((starVal - 0.993) / 0.007 * twinkle * 0.3);
+  }
+
+  // Sun sphere
+  float sunT = raySphere(ro, rd, vec3(0.0), SUN_RADIUS);
+  if (sunT &gt; 0.0) {
+    closest = sunT;
+    vec3 p = normalize(ro + rd * sunT);
+
+    // 3D shading: darken edges for spherical feel
+    float facing = dot(p, normalize(ro));
+    col = mix(SUN_EDGE_COLOR, SUN_CENTER_COLOR, smoothstep(0.0, 1.0, facing));
+
+    // Cool sun face
+    if (u_coolSun &gt; 0.5) {
+      float fu = dot(p, right);
+      float fv = dot(p, up);
+
+      // Sunglasses lenses
+      float leftLens = length(vec2(fu + LENS_SPACING, fv - LENS_HEIGHT)) - LENS_RADIUS;
+      float rightLens = length(vec2(fu - LENS_SPACING, fv - LENS_HEIGHT)) - LENS_RADIUS;
+      float lens = min(leftLens, rightLens);
+
+      // Bridge
+      float bridge = max(abs(fu) - BRIDGE_WIDTH, abs(fv - LENS_HEIGHT) - BRIDGE_THICK);
+
+      // Arms (temples)
+      float leftArm = max(max(-(fu + ARM_OUTER), fu + ARM_INNER), abs(fv - LENS_HEIGHT) - ARM_THICK);
+      float rightArm = max(max(fu - ARM_OUTER, -(fu - ARM_INNER)), abs(fv - LENS_HEIGHT) - ARM_THICK);
+      float arms = min(leftArm, rightArm);
+
+      // Smile
+      float smileDist = length(vec2(fu * SMILE_SQUASH, fv + SMILE_Y));
+      float smile = max(abs(smileDist - SMILE_RADIUS) - SMILE_THICK, fv + SMILE_Y);
+
+      // Dark lenses with highlight
+      if (lens &lt; 0.0) {
+        float edge = smoothstep(-EDGE_SOFT, 0.0, lens);
+        float highlight = smoothstep(0.0, 0.25, fv) * LENS_HIGHLIGHT;
+        col = mix(LENS_COLOR + highlight, col, edge);
+      }
+
+      // Frames and smile
+      float frame = min(min(bridge, arms), smile);
+      if (frame &lt; 0.0) {
+        float edge = smoothstep(-EDGE_SOFT, 0.0, frame);
+        col = mix(FRAME_COLOR, col, edge);
+      }
+    }
+  }
+
+  vec3 toSun = normalize(-ro);
+
+  // Orbit rings on y=0 plane
+  if (u_showOrbits &gt; 0.5 &amp;&amp; abs(rd.y) &gt; 0.001) {
+    float planeT = -ro.y / rd.y;
+    if (planeT &gt; 0.0 &amp;&amp; planeT &lt; closest) {
+      vec3 hitP = ro + rd * planeT;
+      float dist = length(vec2(hitP.x, hitP.z));
+
+      for (int i = 0; i &lt; 8; i++) {
+        if (u_visible[i] &gt; 0.5) {
+          float oR;
+          if (i == 0) oR = 2.5;
+          else if (i == 1) oR = 3.5;
+          else if (i == 2) oR = 4.5;
+          else if (i == 3) oR = 5.8;
+          else if (i == 4) oR = 7.8;
+          else if (i == 5) oR = 10.0;
+          else if (i == 6) oR = 12.0;
+          else oR = 13.8;
+
+          float band = abs(dist - oR);
+          if (band &lt; 0.05) {
+            col += vec3(1.0) * (1.0 - band / 0.05) * 0.18;
+          }
+        }
+      }
+    }
+  }
+
+  // Planets
+  for (int i = 0; i &lt; 8; i++) {
+    if (u_visible[i] &gt; 0.5) {
+      float orbitR, planetR, period, meanLon;
+      vec3 pColor;
+      bool rings = false;
+
+      // orbitR: visual spacing, period: real orbital period in days, meanLon: J2000 mean longitude (radians)
+      if (i == 0) { orbitR=2.5; planetR=0.15; period=87.97;   meanLon=4.40; pColor=vec3(0.71,0.71,0.71); }
+      else if (i == 1) { orbitR=3.5; planetR=0.18; period=224.7;   meanLon=3.18; pColor=vec3(0.91,0.80,0.64); }
+      else if (i == 2) { orbitR=4.5; planetR=0.19; period=365.25;  meanLon=1.75; pColor=vec3(0.30,0.62,0.88); }
+      else if (i == 3) { orbitR=5.8; planetR=0.16; period=687.0;   meanLon=6.20; pColor=vec3(0.88,0.36,0.23); }
+      else if (i == 4) { orbitR=7.8; planetR=0.40; period=4332.6;  meanLon=0.60; pColor=vec3(0.83,0.65,0.45); }
+      else if (i == 5) { orbitR=10.0; planetR=0.34; period=10759.0; meanLon=0.87; pColor=vec3(0.91,0.84,0.64); rings=true; }
+      else if (i == 6) { orbitR=12.0; planetR=0.24; period=30687.0; meanLon=5.47; pColor=vec3(0.50,0.78,0.89); }
+      else { orbitR=13.8; planetR=0.22; period=60190.0; meanLon=5.32; pColor=vec3(0.25,0.37,0.81); }
+
+      float angle = 6.28318 * u_time / period + meanLon;
+      vec3 center = vec3(cos(angle) * orbitR, 0.0, sin(angle) * orbitR);
+
+      // Saturn rings
+      if (rings &amp;&amp; abs(rd.y) &gt; 0.001) {
+        float ringT = -ro.y / rd.y;
+        if (ringT &gt; 0.0 &amp;&amp; ringT &lt; closest) {
+          vec3 hitP = ro + rd * ringT;
+          float d = length(vec2(hitP.x - center.x, hitP.z - center.z));
+          float innerR = planetR * 1.5;
+          float outerR = planetR * 2.8;
+          if (d &gt; innerR &amp;&amp; d &lt; outerR) {
+            float ringBand = 0.5 + 0.5 * sin(d * 50.0);
+            float fade = smoothstep(innerR, innerR + 0.02, d) * smoothstep(outerR, outerR - 0.02, d);
+            float light = 0.3 + 0.7 * max(normalize(-center).y + 0.5, 0.0);
+            col = pColor * 0.6 * ringBand * fade * light;
+            closest = ringT;
+          }
+        }
+      }
+
+      // Planet sphere
+      float t = raySphere(ro, rd, center, planetR);
+      if (t &gt; 0.0 &amp;&amp; t &lt; closest) {
+        closest = t;
+        vec3 n = normalize(ro + rd * t - center);
+        float diff = max(dot(n, normalize(-center)), 0.0);
+        col = pColor * (0.06 + 0.94 * diff);
+      }
+    }
+  }
+
+  // Sun glow — only apply to rays that missed the sun sphere
+  float glow = max(dot(rd, toSun), 0.0);
+  vec3 glowCol = vec3(1.0, 0.7, 0.3) * pow(glow, 80.0) * 0.15
+               + vec3(1.0, 0.4, 0.1) * pow(glow, 20.0) * 0.008;
+  if (sunT &lt;= 0.0) {
+    float occlude = pow(glow, 30.0);
+    col = col * (1.0 - occlude) + glowCol;
+  }
+
+  gl_FragColor = vec4(col, 1.0);
+}
+`</span>;
+</code></pre>
+        <pre id="src-solar-system-3d-4" hidden><code class="hljs language-javascript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-string">`
+attribute vec2 a_pos;
+void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
+`</span>;
+</code></pre>
+        <pre id="src-solar-system-3d-5" hidden><code class="hljs language-javascript"><span class="hljs-keyword">export</span> { <span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> fragSrc } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./fragment.js&#x27;</span>;
+<span class="hljs-keyword">export</span> { <span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> vertSrc } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./vertex.js&#x27;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">compile</span>(<span class="hljs-params">gl, type, src</span>) {
+  <span class="hljs-keyword">const</span> s = gl.<span class="hljs-title function_">createShader</span>(type);
+  gl.<span class="hljs-title function_">shaderSource</span>(s, src);
+  gl.<span class="hljs-title function_">compileShader</span>(s);
+  <span class="hljs-keyword">if</span> (!gl.<span class="hljs-title function_">getShaderParameter</span>(s, gl.<span class="hljs-property">COMPILE_STATUS</span>)) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(<span class="hljs-string">&#x27;shader:&#x27;</span>, gl.<span class="hljs-title function_">getShaderInfoLog</span>(s));
+    gl.<span class="hljs-title function_">deleteShader</span>(s);
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+  }
+  <span class="hljs-keyword">return</span> s;
+}
+</code></pre>
+        <pre id="src-solar-system-3d-6" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">solar-system-3d</span> <span class="hljs-attr">cool-sun</span>=<span class="hljs-string">&quot;false&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">solar-system-3d</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">ui-menu</span> <span class="hljs-attr">selection</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;all&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ui-menu</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;hints&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span>Drag to orbit<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">kbd</span>&gt;</span>O<span class="hljs-tag">&lt;/<span class="hljs-name">kbd</span>&gt;</span> Orbits<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">kbd</span>&gt;</span>S<span class="hljs-tag">&lt;/<span class="hljs-name">kbd</span>&gt;</span> Sunglasses<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">kbd</span>&gt;</span>Space<span class="hljs-tag">&lt;/<span class="hljs-name">kbd</span>&gt;</span> Pause<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">kbd</span>&gt;</span>R<span class="hljs-tag">&lt;/<span class="hljs-name">kbd</span>&gt;</span> Reset<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">kbd</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">kbd</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">kbd</span>&gt;</span>-<span class="hljs-tag">&lt;/<span class="hljs-name">kbd</span>&gt;</span> Speed<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-solar-system-3d-7" hidden><code class="hljs language-css"><span class="hljs-selector-tag">html</span>, <span class="hljs-selector-tag">body</span> {
+  <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">overflow</span>: hidden;
+}
+
+solar-system-<span class="hljs-number">3</span>d {
+  <span class="hljs-attribute">display</span>: block;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;
+}
+
+ui-<span class="hljs-selector-tag">menu</span> {
+  <span class="hljs-attribute">position</span>: fixed;
+  <span class="hljs-attribute">top</span>: <span class="hljs-built_in">var</span>(--margin);
+  <span class="hljs-attribute">left</span>: <span class="hljs-built_in">var</span>(--margin);
+  <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+}
+
+<span class="hljs-selector-class">.hints</span> {
+  <span class="hljs-attribute">position</span>: fixed;
+  <span class="hljs-attribute">bottom</span>: <span class="hljs-built_in">var</span>(--margin);
+  <span class="hljs-attribute">right</span>: <span class="hljs-built_in">var</span>(--margin);
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">gap</span>: <span class="hljs-built_in">var</span>(--gap-s);
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--white-<span class="hljs-number">50</span>);
+  <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">var</span>(--text-xs);
+  <span class="hljs-attribute">font-family</span>: <span class="hljs-built_in">var</span>(--page-font);
+}
+<span class="hljs-selector-class">.hints</span> <span class="hljs-selector-tag">kbd</span> {
+  <span class="hljs-attribute">display</span>: inline-block;
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">1px</span> <span class="hljs-number">5px</span>;
+  <span class="hljs-attribute">border</span>: <span class="hljs-number">1px</span> solid <span class="hljs-built_in">var</span>(--white-<span class="hljs-number">20</span>);
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius-xs);
+  <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">var</span>(--text-<span class="hljs-number">3</span>xs);
+  <span class="hljs-attribute">font-family</span>: inherit;
+  <span class="hljs-attribute">vertical-align</span>: <span class="hljs-number">1px</span>;
+}
+</code></pre>
+        <pre id="src-solar-system-3d-8" hidden><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { $ } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/query&#x27;</span>;
+
+<span class="hljs-keyword">const</span> presets = {
+  <span class="hljs-attr">all</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+  <span class="hljs-attr">inner</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+  <span class="hljs-attr">outer</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+  <span class="hljs-attr">habitable</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>],
+};
+
+$(<span class="hljs-string">&#x27;ui-menu&#x27;</span>).<span class="hljs-title function_">settings</span>({
+  <span class="hljs-attr">items</span>: [
+    { <span class="hljs-attr">label</span>: <span class="hljs-string">&#x27;All Planets&#x27;</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">&#x27;all&#x27;</span> },
+    { <span class="hljs-attr">label</span>: <span class="hljs-string">&#x27;Inner Planets&#x27;</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">&#x27;inner&#x27;</span> },
+    { <span class="hljs-attr">label</span>: <span class="hljs-string">&#x27;Outer Planets&#x27;</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">&#x27;outer&#x27;</span> },
+    { <span class="hljs-attr">label</span>: <span class="hljs-string">&#x27;Habitable Zone&#x27;</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">&#x27;habitable&#x27;</span> },
+  ],
+});
+
+$(<span class="hljs-string">&#x27;ui-menu&#x27;</span>).<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;change&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+  $(<span class="hljs-string">&#x27;solar-system-3d&#x27;</span>).<span class="hljs-title function_">settings</span>({ <span class="hljs-attr">visible</span>: presets[event.<span class="hljs-property">detail</span>.<span class="hljs-property">value</span>] });
+});
+</code></pre>
+      </details>
+      <aside class="notes">
+        <h2>New patterns</h2>
+        <p>Synthetic tick via <code>state.frame.increment()</code> + <code>reaction()</code>, comma-separated key bindings (<code>&#39;=, +&#39;</code>), settings as the shared mutation channel between key handlers, render loop, and <code>page.js</code>, external orchestration via <code>$(&#39;...&#39;).settings({...})</code>, <code>&#39;global resize window&#39;</code>, <code>formatDate</code> with an options object (<code>&#39;ll&#39; { timezone: &#39;UTC&#39; }</code>), <code>onRendered({ isClient })</code> for client-only init.</p>
+        <h2>What to notice</h2>
+        <ul>
+          <li>The render loop runs on a synthetic tick. <code>render()</code> ends with <code>state.frame.increment()</code>, the <code>reaction()</code> reads <code>state.frame.get()</code>, and that read–write pair schedules the next <code>requestAnimationFrame</code>. SUI&#39;s reactivity is acting as the loop scheduler — the counter exists only to drive the loop, no piece of *data* needs to be reactive.</li>
+          <li>Comma-separated key strings declare multiple bindings to the same handler in one line: <code>&#39;=, +&#39;</code> and <code>&#39;-, _&#39;</code> mean both characters run the speed adjustment. They sit alongside single bindings like <code>&#39;space&#39;</code> and <code>&#39;o&#39;</code> with no special casing.</li>
+          <li>Settings are the shared mutation channel. Key handlers do <code>settings.speed = …</code>, <code>render()</code> reads <code>settings.speed</code> and uploads it as a <code>gl.uniform1f</code>, and <code>page.js</code> writes <code>settings.visible</code> from outside via <code>$(&#39;solar-system-3d&#39;).settings({ visible: presets[value] })</code>. Plain property writes from any of the three sources, plain reads in the loop — one channel reaches inside and outside the component without wiring.</li>
+          <li><code>onRendered({ isClient })</code> gates WebGL initialization to the client. The same component definition can be server-rendered: the canvas markup ships in the SSR string and <code>initWebGL</code> only runs after hydration. SUI&#39;s SSR-aware lifecycle keeps a <code>&lt;canvas&gt;</code> component server-renderable.</li>
+        </ul>
+        <nav class="walk">
+          <a href="../advanced-ball-simulation/page.html">← Reactivity as an animation loop</a>
+          <a href="../event-data/page.html">Data-driven event dispatch →</a>
+        </nav>
+      </aside>
+    </div>
+    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>
+  </body>
+</html>

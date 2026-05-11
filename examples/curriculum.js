@@ -118,7 +118,7 @@ export const CURRICULUM = [
     whatToNotice: [
       "`rowTemplate: new Template()` is an empty default. The page replaces it via `$('dynamic-table').settings({ rowTemplate: RowTemplate })`.",
       'A `Template` is a first-class value — the same kind of thing that gets compiled from `?raw` HTML imports. It can travel through `settings` just like a string or a number.',
-      'Different pages can mount the same `<dynamic-table>` with completely different row layouts without changing the table component.',
+      '`RowTemplate` is itself a `defineComponent({ template, ... })` call — without `tagName`. The same API produces a custom element (with `tagName`) or a subtemplate (without). Both are `Template` values that travel through `settings` like a string or number, so consumer-authored templates compose without a separate slot or render-prop API.',
     ],
   },
   {
@@ -181,7 +181,7 @@ export const CURRICULUM = [
     newPatterns: "`'global pointermove body'`, `dispatchEvent` for both `change` and `finalized`, `range()`.",
     whatToNotice: [
       "`'global pointermove body'` and `'global pointerup body'` listen on `document.body` from inside the component. The listeners are bound when the component mounts and removed when it is destroyed.",
-      'Two custom events are emitted: `change` fires continuously while dragging, `finalized` fires once on release. Consumers pick whichever cadence they want.',
+      "`dispatchEvent('change', { rating, min, max })` from inside `createComponent` fires a real DOM CustomEvent on the host element. Two distinct event names (`change` continuously, `finalized` on release) cost nothing to emit, and because they are standard DOM events any consumer — vanilla `addEventListener`, an inline `onchange=`, React via `onChange` — receives them the same way.",
       '`{#each value in range(min, max + 1)}` uses the `range` helper to generate the label numbers directly in the template — no need to precompute the array.',
     ],
   },
@@ -199,6 +199,20 @@ export const CURRICULUM = [
     ],
   },
   {
+    id: 'solar-system-3d',
+    headline: 'Driving a render loop with a tick signal',
+    intro:
+      'A solar system rendered by a single WebGL fragment shader on a full-screen quad. The component owns the canvas, drag-to-orbit, the keys (`o` orbits, `s` cool sun, `space` pause, `=`/`-` speed, `r` reset), and the per-frame uniform uploads. Settings flow into the shader as uniforms each frame.',
+    newPatterns:
+      "Synthetic tick via `state.frame.increment()` + `reaction()`, comma-separated key bindings (`'=, +'`), settings as the shared mutation channel between key handlers, render loop, and `page.js`, external orchestration via `$('...').settings({...})`, `'global resize window'`, `formatDate` with an options object (`'ll' { timezone: 'UTC' }`), `onRendered({ isClient })` for client-only init.",
+    whatToNotice: [
+      "The render loop runs on a synthetic tick. `render()` ends with `state.frame.increment()`, the `reaction()` reads `state.frame.get()`, and that read–write pair schedules the next `requestAnimationFrame`. SUI's reactivity is acting as the loop scheduler — the counter exists only to drive the loop, no piece of *data* needs to be reactive.",
+      "Comma-separated key strings declare multiple bindings to the same handler in one line: `'=, +'` and `'-, _'` mean both characters run the speed adjustment. They sit alongside single bindings like `'space'` and `'o'` with no special casing.",
+      "Settings are the shared mutation channel. Key handlers do `settings.speed = …`, `render()` reads `settings.speed` and uploads it as a `gl.uniform1f`, and `page.js` writes `settings.visible` from outside via `$('solar-system-3d').settings({ visible: presets[value] })`. Plain property writes from any of the three sources, plain reads in the loop — one channel reaches inside and outside the component without wiring.",
+      "`onRendered({ isClient })` gates WebGL initialization to the client. The same component definition can be server-rendered: the canvas markup ships in the SSR string and `initWebGL` only runs after hydration. SUI's SSR-aware lifecycle keeps a `<canvas>` component server-renderable.",
+    ],
+  },
+  {
     id: 'event-data',
     headline: 'Data-driven event dispatch',
     intro:
@@ -207,21 +221,7 @@ export const CURRICULUM = [
       '`state[dimension][helper](settings.delta)` bracket-notation access, single-handler dispatch via data attributes.',
     whatToNotice: [
       '`state[dimension][helper](settings.delta)` resolves to e.g. `state.width.increment(50)` when the button is `<ui-button data-dimension="width" data-helper="increment">`. The handler stays generic; the buttons encode their intent in HTML.',
-      'This pattern keeps the JS short when several controls do the same thing to different signals. The alternative is one handler per button.',
-    ],
-  },
-  {
-    id: 'dropdown',
-    headline: 'A form-friendly dropdown',
-    intro:
-      'A select-style dropdown with click-outside dismissal and a hidden `<input>` so the component participates in form submission. Demonstrates JSON in HTML attributes, dual `onChange` / `change` event notification, and `{classIf}`.',
-    newPatterns:
-      'Hidden `<input>` for form submission, `onChange` callback alongside `dispatchEvent`, `el.contains(event.target)`, JSON in HTML attributes, `{classIf}`.',
-    whatToNotice: [
-      'The dropdown emits both a `change` DOM event and an `onChange` callback. Consumers can listen with whichever style fits — `addEventListener` from HTML or a function passed through `.settings()`.',
-      '`options=\'[{"value": "apple", "text": "Apple"}]\'` — when a setting\'s default is an array or object, the framework parses JSON out of the corresponding HTML attribute automatically.',
-      "`{classIf isOpen 'visible'}` is the shorthand for a single conditional class. `{classMap}` is for combining several.",
-      'The click-outside handler uses `el.contains(event.target)` against the host element — the same check works for shadow-root contents because the host is the root of `el`.',
+      'The pattern only works because signal mutation helpers (`.increment`, `.decrement`, …) are named methods on the signal itself. `state[dim][helper](delta)` reads a string from `data-helper` and dispatches to a real method — there is no get-mutate-set round-trip to abstract away.',
     ],
   },
   {
