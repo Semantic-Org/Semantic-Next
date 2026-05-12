@@ -25,8 +25,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  1. Sibling Expressions
-     in Flat Template
+   Sibling expressions in flat template
 *******************************/
 
     describe('sibling expressions in flat template', () => {
@@ -99,8 +98,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  2. Expression Outside vs
-     Inside {#each}
+   Expression outside vs inside each
 *******************************/
 
     describe('expression outside vs inside each', () => {
@@ -145,8 +143,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  3. Expression Outside vs
-     Inside {#if}
+   Expression outside vs inside if
 *******************************/
 
     describe('expression outside vs inside if', () => {
@@ -185,8 +182,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  4. Expression Outside vs
-     Inside {#rerender}
+   Expression outside vs inside rerender
 *******************************/
 
     describe('expression outside vs inside rerender', () => {
@@ -225,7 +221,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  5. Sibling {#each} Blocks
+   Sibling each blocks
 *******************************/
 
     describe('sibling each blocks', () => {
@@ -277,8 +273,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  6. Per-item Granularity
-     Inside a Single Each
+   Per-item granularity inside a single each
 *******************************/
 
     describe('per-item granularity inside a single each', () => {
@@ -369,9 +364,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  7. {#rerender} Should NOT
-     Re-evaluate Expressions
-     Outside Its Block
+   Rerender isolation from sibling content
 *******************************/
 
     describe('rerender isolation from sibling content', () => {
@@ -454,9 +447,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
     });
     /*******************************
-  8. Verbose data=expression
-     Should Re-evaluate ALL
-     Subtemplate Expressions
+   Snippet args and reactiveData granularity
 *******************************/
 
     describe('snippet args per-key granularity', () => {
@@ -636,8 +627,6 @@ RENDERING_ENGINES.forEach(engine => {
 
     /*******************************
    Per-key isolation across N subtemplates
-   (mirrors bench-template-reactivity's
-   subtemplate-reactive-data-100 scenario)
 *******************************/
 
     describe.skipIf(isLit)('per-key isolation across N subtemplates', () => {
@@ -703,9 +692,6 @@ RENDERING_ENGINES.forEach(engine => {
 
     /*******************************
    FGR per-key isolation contract
-   — full enumeration of the
-   per-key isolation contract across
-   each adoption site.
 *******************************/
 
     describe.skipIf(isLit)('FGR contract: each-block in-place mutation', () => {
