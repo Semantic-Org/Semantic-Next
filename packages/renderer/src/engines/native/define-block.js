@@ -306,9 +306,15 @@ function makeValueDispatch(config) {
     const { comment, node, data, scope, renderer, hydrating } = ctx;
 
     // self stays null when there's no `create` hook — skips the empty-obj
-    // allocation. Authors who do declare `create` get its return value
-    // passed to compute/hydrate as the 4th positional argument.
+    // allocation. Authors who do declare `create` get its return value as
+    // `bag.self` per the standard contract.
     const self = create ? (create.call(config, ctx) || null) : null;
+
+    // Reusable bag — same hidden-class shape across firstRun and every
+    // subsequent re-fire. comment is filled for the hydrate-call use case
+    // and stays as a dead field on the update path (V8 hidden class is
+    // shared either way).
+    const bag = { node, data, self, renderer, comment };
 
     let anchor;
     let ownedNodes = null;
@@ -320,9 +326,7 @@ function makeValueDispatch(config) {
       // the hook (e.g. lookupExpression for serverValue splitting) don't
       // register on a parent block's outer Reaction — the per-expression
       // Reaction below registers fresh deps via firstRun.
-      const adopted = Reaction.nonreactive(
-        () => hydrate.call(config, node, data, renderer, comment, self),
-      );
+      const adopted = Reaction.nonreactive(() => hydrate.call(config, bag));
       anchor = adopted.anchor;
       ownedNodes = adopted.ownedNodes || null;
     }
@@ -337,18 +341,13 @@ function makeValueDispatch(config) {
     // unsafeHTML branch per fire, and unsafeHTML expressions don't pay a
     // primitive-path branch. The primitive body matches the pre-unification
     // bindTextExpression shape: compute + nullish coalesce + write.
-    //
-    // Positional args to compute/hydrate (instead of a destructured bag
-    // object) skip the bag allocation per dispatch — ~50 bytes per
-    // expression saved, which adds up under mount/clear pressure (e.g.
-    // krausest:clear-10k).
     if (node.unsafeHTML) {
       scope.reaction(anchor, (comp) => {
         if (comp.firstRun && hydrating) {
-          compute.call(config, node, data, renderer, self);
+          compute.call(config, bag);
           return;
         }
-        const value = compute.call(config, node, data, renderer, self);
+        const value = compute.call(config, bag);
         if (ownedNodes !== null) {
           for (let i = 0; i < ownedNodes.length; i++) { ownedNodes[i].remove(); }
         }
@@ -378,10 +377,10 @@ function makeValueDispatch(config) {
       // Three ops per fire: compute + nullish coalesce + write.
       scope.reaction(anchor, (comp) => {
         if (comp.firstRun && hydrating) {
-          compute.call(config, node, data, renderer, self);
+          compute.call(config, bag);
           return;
         }
-        anchor.data = compute.call(config, node, data, renderer, self) ?? '';
+        anchor.data = compute.call(config, bag) ?? '';
       });
     }
   }

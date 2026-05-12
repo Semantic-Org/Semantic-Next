@@ -36,12 +36,11 @@ const expression = defineBlock({
   kind: 'value',
   syntax: (node) => `{${node.value}}`,
 
-  // Positional args (node, data, renderer, [comment,] self) — kind:'value'
-  // dispatches skip the bag allocation per dispatch. The literalValue path
-  // uses `lookupTokenValue` because it doesn't auto-invoke functions
-  // (needed for `{#fn handler}` and event-binding shapes where the value
-  // is a function reference, not its call result).
-  compute(node, data, renderer) {
+  // No `create` hook — renderer.evaluator is reached directly via the bag.
+  // The literalValue path uses `lookupTokenValue` because it doesn't
+  // auto-invoke functions (needed for `{#fn handler}` and event-binding
+  // shapes where the value is a function reference, not its call result).
+  compute({ node, data, renderer }) {
     if (node.literalValue) {
       return renderer.evaluator.lookupTokenValue(node.value, data);
     }
@@ -53,8 +52,8 @@ const expression = defineBlock({
   },
 
   // Hydrate adopts the server-rendered DOM rather than rebuilding. Returns
-  // { anchor, ownedNodes } so the lean dispatch wires its Reaction on the
-  // right node.
+  // { anchor, ownedNodes, matched } so the lean dispatch wires its Reaction
+  // on the right node and primes lastContent against `matched` for dedup.
   //
   // For default text expressions the server emits `<!--sui:v1:N-->VALUE`
   // where VALUE may merge with following static text into one text node —
@@ -62,23 +61,23 @@ const expression = defineBlock({
   // unsafeHTML the server emitted the parsed HTML payload as siblings; we
   // collect them as ownedNodes and replace the comment with an empty
   // positional anchor.
-  hydrate(node, data, renderer, comment) {
+  hydrate({ node, data, renderer, comment }) {
     if (node.literalValue) {
       const value = renderer.evaluator.lookupTokenValue(node.value, data);
       const anchor = this.adoptValueTextNode(comment, String(value ?? ''));
-      return { anchor, ownedNodes: null };
+      return { anchor, ownedNodes: null, matched: value };
     }
 
     if (node.unsafeHTML) {
       const ownedNodes = this.collectServerSiblings(comment);
       const anchor = document.createTextNode('');
       comment.parentNode.replaceChild(anchor, comment);
-      return { anchor, ownedNodes };
+      return { anchor, ownedNodes, matched: unsafeHTML(renderer.lookupExpression(node.value, data)) };
     }
 
     const serverValue = String(renderer.lookupExpression(node.value, data) ?? '');
     const anchor = this.adoptValueTextNode(comment, serverValue);
-    return { anchor, ownedNodes: null };
+    return { anchor, ownedNodes: null, matched: serverValue };
   },
 
   // ---- helpers ----
