@@ -8,11 +8,12 @@ import { registerBlock } from './registry.js';
 /*
 
   {>name} template invocation. Handles BOTH snippets and subtemplates —
-  the kind is determined at first render by checking renderer.snippets[name]
-  and locked on self.kind for the lifetime of the block instance. Per
-  the documented constraint (plan §dynamic template names), name must
-  resolve consistently to one kind; kind-swapping mid-life is undefined
-  behavior and we honor the first-resolved kind.
+  the templateType is determined at first render by checking
+  renderer.snippets[name] and locked on self.templateType for the
+  lifetime of the block instance. Per the documented constraint (plan
+  §dynamic template names), name must resolve consistently to one
+  templateType; templateType-swapping mid-life is undefined behavior
+  and we honor the first-resolved value.
 
   Two branches:
   • snippet     — inline expansion. No own scope (uses parent), no
@@ -172,17 +173,17 @@ function buildArgsRecord({ node, parentData, evaluator, target }) {
   return record;
 }
 
-// Read name nonreactively for kind detection so name changes (which
-// shouldn't change kind per the documented constraint) don't fire the
-// outer reaction unnecessarily for snippet-kind blocks. Subtemplate
+// Read name nonreactively for templateType detection so name changes
+// (which shouldn't change the type per the documented constraint)
+// don't fire the outer reaction unnecessarily for snippets. Subtemplate
 // name reactivity is handled separately inside the subtemplate branch
 // where it's needed for instance swap.
-function detectKind({ node, data, self }) {
-  if (self.kind !== null) { return self.kind; }
+function detectTemplateType({ node, data, self }) {
+  if (self.templateType !== null) { return self.templateType; }
   const name = Reaction.nonreactive(() => self.evaluator.lookupExpressionValue(node.name, data));
   if (name == null || name === '') { return null; }
-  self.kind = self.snippets[name] ? 'snippet' : 'subtemplate';
-  return self.kind;
+  self.templateType = self.snippets[name] ? 'snippet' : 'subtemplate';
+  return self.templateType;
 }
 
 function resolveSubtemplate(nameExpr, data, self) {
@@ -320,7 +321,7 @@ const templateBlock = defineBlock({
       snippets: renderer.snippets,
       parentTemplate: renderer.template,
       dataDep: renderer.dataDep,
-      kind: null,
+      templateType: null,
       currentTemplateID: null,
       currentInstance: null,
       settingsScope: null,
@@ -328,10 +329,10 @@ const templateBlock = defineBlock({
   },
 
   render({ node, data, region, scope, renderAST, self, isSVG }) {
-    const kind = detectKind({ node, data, self });
-    if (kind === null) { return; }
+    const templateType = detectTemplateType({ node, data, self });
+    if (templateType === null) { return; }
 
-    if (kind === 'snippet') {
+    if (templateType === 'snippet') {
       const snippet = resolveSnippet(node.name, data, self);
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
       const snippetData = buildArgsRecord({ node, parentData: data, evaluator: self.evaluator, target: data });
@@ -361,10 +362,10 @@ const templateBlock = defineBlock({
   },
 
   hydrate({ node, data, region, scope, hydrateInto, self }) {
-    const kind = detectKind({ node, data, self });
-    if (kind === null) { return; }
+    const templateType = detectTemplateType({ node, data, self });
+    if (templateType === null) { return; }
 
-    if (kind === 'snippet') {
+    if (templateType === 'snippet') {
       const snippet = resolveSnippet(node.name, data, self);
       if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
       const snippetData = buildArgsRecord({ node, parentData: data, evaluator: self.evaluator, target: data });
@@ -410,10 +411,10 @@ const templateBlock = defineBlock({
 
   update({ node, data, region, scope, self }) {
     // Snippets are one-shot at mount — name reactivity at the outer level
-    // is documented as undefined (kind shouldn't change), and inner
-    // expression reactivity is handled by the snippet-arg proxy's lazy
-    // getters via per-marker Reactions wired during render/hydrate.
-    if (self.kind === 'snippet') { return; }
+    // is documented as undefined (templateType shouldn't change), and
+    // inner expression reactivity is handled by the snippet-arg proxy's
+    // lazy getters via per-marker Reactions wired during render/hydrate.
+    if (self.templateType === 'snippet') { return; }
 
     self.dataDep.depend();
     const { template, templateName } = resolveSubtemplate(node.name, data, self);

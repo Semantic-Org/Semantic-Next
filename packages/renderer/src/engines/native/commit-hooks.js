@@ -2,21 +2,23 @@ import { isArray, isPlainObject } from '@semantic-ui/utils';
 
 /*
 
-  Helpers for the position-aware block dispatch refactor.
+  Helpers for position-aware block dispatch.
 
-  renderASTToString walks an AST + data context and returns a string. It is
-  the attribute-position counterpart to renderAST — used when a block lands
-  inside an attribute value and its content needs to be serialized rather
-  than rendered as DOM. Mirrors ServerRenderer.renderNodes minus the
-  data-sui-bind tag tracking (no element scanning inside an attribute
-  value).
+  renderASTToString walks an AST + data context and returns a string —
+  the attribute-position counterpart to renderAST. Used when a block
+  lands inside an attribute value and its content needs serializing
+  rather than rendering as DOM. Mirrors ServerRenderer.renderNodes
+  minus the data-sui-bind tag tracking.
 
-  makePlace constructs the `bag.place(content)` closure that text-position
-  block dispatch uses to swap region content. It owns the child-scope +
-  renderAST + region.setContent sequence every block writes by hand today,
-  plus reference-equality dedup so the same matched branch doesn't re-fire
-  a DOM swap. Block authors using the `compute` shorthand never call this
-  directly; defineBlock invokes it from render and update.
+  makePlace constructs the `bag.place(content)` closure used by region
+  blocks (conditional / rerender / template). It owns the
+  child-scope + renderAST + region.setContent sequence, plus
+  reference-equality dedup so the same matched branch doesn't re-fire
+  a DOM swap. defineBlock invokes it from render and update.
+
+  unsafeHTML / UNSAFE_HTML are the marker pair returned by value-block
+  compute when the emitted value is an HTML string; the unsafeHTML
+  variant of the lean dispatch (define-block.js) consumes them.
 
 */
 
@@ -24,21 +26,24 @@ import { isArray, isPlainObject } from '@semantic-ui/utils';
 // reference and from null/undefined so the first call always commits.
 const PLACE_INIT = Symbol('place:init');
 
-// Construct a {place, match} pair for a text-position block.
+export const UNSAFE_HTML = Symbol('place:unsafeHTML');
+export function unsafeHTML(value) {
+  return { [UNSAFE_HTML]: value };
+}
+
+// Construct a {place, match} pair for a text-position region block.
 //
 // place(content) — public, exposed on the bag. content is an AST array
-// (the matched branch / template content); null clears the region.
-// Reference equality dedups — selectBranch returns the same node.content
-// reference for the same matched branch, so unchanged-branch re-fires
-// no-op.
+// (rendered via renderAST + region.setContent against a fresh child
+// scope) or null (region.clear). Reference equality dedups —
+// unchanged content no-ops. region.setContent clears region.childScopes,
+// disposing any hydrate scope hydrateInto pushed.
 //
-// match(content) — internal, called by defineBlock from hydrate's return
-// value. Records "the DOM already matches this content" without performing
-// a DOM op, so the first compute-driven update after hydration dedups
-// against the server DOM instead of triggering a wasteful re-render.
-// region.setContent (when place eventually swaps) clears region.childScopes
-// — disposing the hydrate scope hydrateInto pushed — so no leak from the
-// orphaned child-scope at swap time.
+// match(content) — internal, called by defineBlock from hydrate's
+// return value. Records "the DOM already matches this content" without
+// performing a DOM op, so the first compute-driven update after
+// hydration dedups against the server DOM instead of triggering a
+// wasteful re-render.
 export function makePlace({ region, scope, renderer, data, isSVG }) {
   let lastContent = PLACE_INIT;
   let lastChildScope = null;
