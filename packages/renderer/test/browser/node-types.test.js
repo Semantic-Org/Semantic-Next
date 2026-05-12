@@ -83,9 +83,8 @@ RENDERING_ENGINES.forEach(engine => {
         renderingEngine: engine,
         template: '<div>{#html doctype}</div>',
         createComponent: () => ({
-          // Doctype declarations are document-level — a <template> strips
-          // them, leaving template.content with zero child nodes. The
-          // unsafeHTML payload writer must tolerate this without crashing.
+          // <template> strips doctype declarations — content has zero
+          // child nodes after parse.
           doctype: '<!DOCTYPE html>',
         }),
       });

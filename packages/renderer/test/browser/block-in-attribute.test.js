@@ -211,11 +211,6 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     it('reactively updates inner-expression signal when rerender key is unchanged', async () => {
-      // The existing single-signal test reads the same signal for the
-      // rerender key AND the inner expression, so the outer Reaction
-      // picks up the dep through condition.expression() and re-fires
-      // regardless. Separate signals expose whether inner-expression
-      // deps actually register on the directive's Reaction.
       const tag = uniqueTag(engine);
       defineComponent({
         renderingEngine: engine,
@@ -429,10 +424,6 @@ describe('block-in-attribute — unsupported positions [native]', () => {
   });
 
   it('SSR: {>name} inside an attribute value throws (matches client behavior)', () => {
-    // Client renderASTToString already throws for template AST nodes in
-    // attribute position; server must match so SSR + {>name} inside an
-    // attribute fails loud rather than silently emitting comment markers
-    // that break hydration.
     const tag = uniqueTag('ssr');
     const Component = defineComponent({
       tagName: tag,

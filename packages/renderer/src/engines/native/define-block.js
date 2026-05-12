@@ -365,10 +365,8 @@ function makeValueDispatch(config) {
       endAnchor: null,
     };
 
-    // Static dispatches skip Reaction wiring — the value is fixed for
-    // the lifetime of the dispatch, so there's no reactive surface to
-    // track. Hydration is a no-op because the adopted text node already
-    // carries the server-rendered value.
+    // Static dispatches skip Reaction wiring. Hydration is a no-op —
+    // the adopted text node already carries the server-rendered value.
     if (staticValue) {
       if (!hydrating) {
         anchor.data = String(compute(state) ?? '');

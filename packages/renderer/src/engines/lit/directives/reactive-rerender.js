@@ -29,11 +29,6 @@ export class ReactiveRerenderDirective extends AsyncDirective {
       rerender: this.condition,
     };
 
-    // Mirrors ReactiveConditionalDirective: formatForPart runs INSIDE the
-    // reaction (even on firstRun) so inner directive markers' .value()
-    // calls register signal deps on this reaction. Without that, inner
-    // expressions in the body don't propagate signal changes through
-    // setValue.
     if (isClient) {
       this.reaction = Reaction.create((computation) => {
         if (!this.isConnected) {

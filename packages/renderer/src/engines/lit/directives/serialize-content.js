@@ -4,7 +4,7 @@ import { nothing } from 'lit';
 // Serialize lit content (TemplateResult, primitive, array, object) for
 // attribute-position placement. Inner directive markers are resolved via
 // their first arg's `.value()` callback, which LitRenderer attaches in
-// evaluateExpression. Shared by reactive-conditional and reactive-rerender.
+// evaluateExpression.
 
 export function serializeContent(content) {
   if (content == null || content === nothing) { return ''; }
