@@ -309,7 +309,10 @@ function makeValueDispatch(config) {
   function valueDispatch(ctx) {
     const { comment, node, data, scope, renderer, hydrating } = ctx;
 
-    const self = create ? (create.call(config, ctx) || {}) : {};
+    // self stays null when there's no `create` hook — skips the empty-obj
+    // allocation. Authors who do declare `create` get its return value as
+    // `bag.self` per the standard contract.
+    const self = create ? (create.call(config, ctx) || null) : null;
 
     // Reusable bag — same hidden-class shape across firstRun and every
     // subsequent re-fire. comment is filled for the hydrate-call use case
@@ -400,7 +403,7 @@ function makeValueDispatch(config) {
       }
       const str = String(value);
       if (anchor.data !== str) { anchor.data = str; }
-    }, { message: `${config.name}:${node.type}`, block: config.name, node });
+    });
   }
 
   if (config.evaluateText) {
