@@ -5,7 +5,7 @@ import { Template } from '@semantic-ui/templating';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 /*******************************
-   SSR Hydration Tests
+      SSR Hydration Tests
 *******************************/
 
 // Each test server-renders a component via renderToString,
@@ -74,7 +74,7 @@ beforeEach(() => {
 });
 
 /*******************************
-   Static HTML
+          Static HTML
 *******************************/
 
 describe('SSR hydration — static HTML', () => {
@@ -98,7 +98,7 @@ describe('SSR hydration — static HTML', () => {
 });
 
 /*******************************
-   Text expressions
+       Text expressions
 *******************************/
 
 describe('SSR hydration — text expressions', () => {
@@ -151,7 +151,7 @@ describe('SSR hydration — text expressions', () => {
 });
 
 /*******************************
-   Attribute expressions
+     Attribute expressions
 *******************************/
 
 describe('SSR hydration — attribute expressions', () => {
@@ -197,7 +197,7 @@ describe('SSR hydration — attribute expressions', () => {
 });
 
 /*******************************
-   Conditionals
+         Conditionals
 *******************************/
 
 describe('SSR hydration — conditionals', () => {
@@ -250,7 +250,7 @@ describe('SSR hydration — conditionals', () => {
 });
 
 /*******************************
-   Each loops
+          Each loops
 *******************************/
 
 describe('SSR hydration — each loops', () => {
@@ -412,7 +412,7 @@ describe('SSR hydration — each loops', () => {
 });
 
 /*******************************
-   Snippets
+           Snippets
 *******************************/
 
 describe('SSR hydration — snippets', () => {
@@ -439,7 +439,7 @@ describe('SSR hydration — snippets', () => {
 });
 
 /*******************************
-   Subtemplates
+         Subtemplates
 *******************************/
 
 describe('SSR hydration — subtemplates', () => {
@@ -473,7 +473,7 @@ describe('SSR hydration — subtemplates', () => {
 });
 
 /*******************************
-   Nested blocks
+         Nested blocks
 *******************************/
 
 describe('SSR hydration — nested blocks', () => {
@@ -500,7 +500,7 @@ describe('SSR hydration — nested blocks', () => {
 });
 
 /*******************************
-   Async (loading state)
+     Async (loading state)
 *******************************/
 
 describe('SSR hydration — async blocks', () => {
@@ -523,7 +523,7 @@ describe('SSR hydration — async blocks', () => {
 });
 
 /*******************************
-   Rerender block
+        Rerender block
 *******************************/
 
 describe('SSR hydration — rerender', () => {
@@ -538,7 +538,7 @@ describe('SSR hydration — rerender', () => {
 });
 
 /*******************************
-   Guard block
+          Guard block
 *******************************/
 
 describe('SSR hydration — guard', () => {
@@ -556,7 +556,7 @@ describe('SSR hydration — guard', () => {
 });
 
 /*******************************
-   Slots
+             Slots
 *******************************/
 
 describe('SSR hydration — slots', () => {
@@ -578,7 +578,7 @@ describe('SSR hydration — slots', () => {
 });
 
 /*******************************
-   Unsafe HTML
+          Unsafe HTML
 *******************************/
 
 describe('SSR hydration — unsafe HTML', () => {
@@ -615,7 +615,7 @@ describe('SSR hydration — unsafe HTML', () => {
 });
 
 /*******************************
-   isServer / isClient
+      isServer / isClient
 *******************************/
 
 describe('SSR hydration — environment guards', () => {
@@ -632,7 +632,7 @@ describe('SSR hydration — environment guards', () => {
 });
 
 /*******************************
-   Each with conditional per item
+   Conditional per each item
 *******************************/
 
 describe('SSR hydration — each with per-item conditional', () => {
@@ -658,7 +658,7 @@ describe('SSR hydration — each with per-item conditional', () => {
 });
 
 /*******************************
-   Snippet inside each
+      Snippet inside each
 *******************************/
 
 describe('SSR hydration — snippet inside each', () => {
@@ -706,7 +706,7 @@ describe('SSR hydration — multi-branch conditional', () => {
 });
 
 /*******************************
-   Object iteration
+       Object iteration
 *******************************/
 
 describe('SSR hydration — object iteration', () => {
@@ -726,7 +726,7 @@ describe('SSR hydration — object iteration', () => {
 });
 
 /*******************************
-     Hydration contract
+      Hydration contract
 *******************************/
 
 describe('SSR hydration — contract', () => {
@@ -821,7 +821,7 @@ describe('SSR hydration — contract', () => {
 });
 
 /*******************************
-     Post-hydration reactivity
+   Post-hydration reactivity
 *******************************/
 
 describe('SSR hydration — post-hydration state updates', () => {
@@ -1072,7 +1072,7 @@ describe('SSR hydration — post-hydration list mutations', () => {
 });
 
 /*******************************
-   Spec-driven components
+    Spec-driven components
 *******************************/
 
 describe('SSR hydration — spec-driven components', () => {
@@ -1164,7 +1164,7 @@ describe('SSR hydration — spec-driven components', () => {
 });
 
 /*******************************
-     Event delegation after hydration
+       Event delegation
 *******************************/
 
 describe('SSR hydration — events after hydration', () => {
@@ -1216,7 +1216,7 @@ describe('SSR hydration — events after hydration', () => {
 });
 
 /*******************************
-     createComponent lifecycle
+   createComponent lifecycle
 *******************************/
 
 describe('SSR hydration — createComponent lifecycle', () => {
@@ -1297,7 +1297,7 @@ describe('SSR hydration — createComponent lifecycle', () => {
 });
 
 /*******************************
-     CSS scoping
+          CSS scoping
 *******************************/
 
 describe('SSR hydration — CSS', () => {
@@ -1325,7 +1325,7 @@ describe('SSR hydration — CSS', () => {
 });
 
 /*******************************
-     Server/client data divergence
+ Server/client data divergence
 *******************************/
 
 describe('SSR hydration — data divergence', () => {
@@ -1370,7 +1370,7 @@ describe('SSR hydration — data divergence', () => {
 });
 
 /*******************************
-     Snippet reactivity
+      Snippet reactivity
 *******************************/
 
 describe('SSR hydration — snippet reactivity', () => {
@@ -1622,8 +1622,7 @@ describe('SSR hydration — snippet reactivity', () => {
 });
 
 /*******************************
-     Attribute alignment
-     across block directives
+   Block attribute alignment
 *******************************/
 
 describe('SSR hydration — attribute alignment across blocks', () => {
