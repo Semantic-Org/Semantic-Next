@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Emoji Reactions — emoji-reactions</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <script type="module" blocking="render" src="/dist/src/emoji-reactions/component.js"></script>
+    <style>
+/*
+  Stylesheet inlined into every generated page by scripts/sync.js.
+  Loaded as a string at sync time (no bundler), so plain CSS — no imports.
+
+  Tokens, code colors, and heading discipline are aligned with the canonical
+  cdn.semantic-ui.com page (tools/cdn/pages/index.css) so this site reads as
+  part of the same surface. All page-specific selectors descend from
+  `.example` so the HTML stays free of repeated namespace classes.
+*/
+
+:root {
+  --code-bg: var(--ui-background-emphasis);
+  --code-purple: #6F42C1;
+  --code-default: #54595E;
+  --code-blue: #005CC5;
+  --code-orange: #E3660F;
+  --code-red: #D73A49;
+  --code-green: #22863A;
+  --code-grey: #24292E;
+  --code-comment: #6A737D;
+}
+
+html.dark {
+  --code-purple: #D2A8FF;
+  --code-default: #C9D1D9;
+  --code-blue: var(--primary-text-color);
+  --code-orange: #FFAB70;
+  --code-red: #F97583;
+  --code-green: #7EE787;
+  --code-grey: #656565;
+  --code-comment: #6A737D;
+}
+
+html { scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--page-font);
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 var(--gutter-l);
+  color: var(--text-color);
+}
+
+.example {
+
+  .theme {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .header {
+    margin-bottom: var(--gap);
+    padding-bottom: var(--padding-3xs);
+    border-bottom: var(--border);
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-xs);
+      font-size: var(--text-xs);
+      color: var(--light-text-color);
+
+      a {
+        color: var(--muted-text-color);
+        text-decoration: none;
+        transition: color 0.12s;
+        &:hover { color: var(--primary-text-color); }
+      }
+
+      .position {
+        margin-right: auto;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    .title {
+      margin: var(--gap-2xs) 0 var(--gap-3xs);
+      font-size: var(--text-2xl);
+      font-weight: var(--bold);
+      letter-spacing: -0.01em;
+      color: var(--header-color);
+    }
+
+    .description {
+      margin: var(--vertically-spaced);
+      color: var(--muted-text-color);
+      line-height: 1.65;
+    }
+  }
+
+  .container {
+    position: relative;
+    transform: translateZ(0);
+    /* Lift above the later-sibling .source so position:absolute overflow from
+       inside the example (e.g. async-search results) doesn't get covered by
+       the code viewer below. */
+    z-index: 1;
+  }
+
+  .source {
+    margin: var(--vertically-spaced) 0;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: var(--code-bg);
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: var(--padding-xs) var(--padding);
+      font-size: var(--text-xs);
+      font-weight: var(--bold);
+      color: var(--muted-text-color);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: var(--gap-3xs);
+      transition: color 0.12s;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-text-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: var(--internal-border);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      border-bottom: var(--internal-border);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: var(--padding-xs) var(--padding);
+        font-family: var(--code-font);
+        font-size: var(--text-xs);
+        color: var(--light-text-color);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: color 0.15s;
+
+        &:hover { color: var(--muted-text-color); }
+        &.active {
+          color: var(--header-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: var(--padding) var(--padding-l);
+      overflow: auto;
+      font-family: var(--code-font);
+      font-size: var(--text-s);
+      line-height: 1.8;
+      color: var(--code-default);
+      max-height: 520px;
+      tab-size: 2;
+    }
+
+    /* highlight.js token classes mapped to the canonical --code-* palette. */
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal,
+    .hljs-variable.language_,
+    .hljs-doctag { color: var(--code-red); }
+    .hljs-string,
+    .hljs-attr,
+    .hljs-meta .hljs-string,
+    .hljs-symbol { color: var(--code-blue); }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag,
+    .hljs-title,
+    .hljs-title.class_,
+    .hljs-title.function_ { color: var(--code-purple); }
+    .hljs-number,
+    .hljs-meta .hljs-number { color: var(--code-orange); }
+    .hljs-comment { color: var(--code-comment); font-style: italic; }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id,
+    .hljs-selector-attr { color: var(--code-grey); }
+    .hljs-meta,
+    .hljs-regexp { color: var(--code-green); }
+  }
+
+  .notes {
+    margin-top: var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--muted-text-color);
+    line-height: 1.65;
+
+    h2 {
+      margin: 0 0 var(--gap-2xs);
+      font-size: var(--text-2xs);
+      font-weight: var(--bold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--blue-80);
+    }
+
+    p { margin: var(--vertically-spaced); }
+    ul { margin: var(--vertically-spaced); padding-left: 1.25rem; }
+    li { margin: var(--gap-3xs) 0; }
+
+    .walk {
+      display: flex;
+      justify-content: space-between;
+      margin-top: var(--margin);
+      padding-top: var(--padding);
+      border-top: var(--internal-border);
+
+      a {
+        color: var(--primary-text-color);
+        text-decoration: none;
+        font-size: var(--text-s);
+        font-weight: var(--bold);
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+
+  /* Inline code (`token`) inside prose — chip style matching CDN. */
+  .header .description code,
+  .notes code,
+  .entries .intro code {
+    background: var(--subtle-angled-gradient);
+    padding: 3px 5px;
+    margin: -2px 1px;
+    border: var(--subtle-border);
+    border-radius: var(--border-radius);
+    color: var(--standard-90);
+    font-family: var(--code-font);
+    font-size: var(--text-xs);
+  }
+
+  /* Landing page */
+  h1 {
+    margin: 0 0 var(--gap-3xs);
+    font-size: var(--text-3xl);
+    font-weight: var(--bold);
+    letter-spacing: -0.015em;
+    color: var(--header-color);
+  }
+
+  .lede {
+    color: var(--muted-text-color);
+    margin-top: 0;
+    line-height: 1.65;
+  }
+
+  .section {
+    margin: var(--margin-xl) 0 var(--gap-3xs);
+    font-size: var(--text-2xs);
+    font-weight: var(--bold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted-text-color);
+  }
+
+  .section-lede {
+    margin: var(--vertically-spaced);
+    color: var(--light-text-color);
+    font-size: var(--text-s);
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: var(--padding) 0;
+      border-bottom: var(--internal-border);
+      &:last-child { border-bottom: none; }
+    }
+
+    .entry {
+      display: flex;
+      align-items: baseline;
+      gap: var(--gap-xs);
+      text-decoration: none;
+      &:hover .headline { color: var(--primary-text-color); }
+
+      .position {
+        font-variant-numeric: tabular-nums;
+        color: var(--standard-40);
+        font-size: var(--text-s);
+        min-width: 1.5rem;
+      }
+
+      .headline {
+        font-weight: var(--bold);
+        color: var(--header-color);
+        transition: color 0.12s;
+      }
+
+      .subtitle {
+        color: var(--light-text-color);
+        font-size: var(--text-s);
+      }
+    }
+
+    .intro {
+      margin: var(--gap-3xs) 0 0 2.1rem;
+      color: var(--muted-text-color);
+      font-size: var(--text-s);
+      line-height: 1.65;
+    }
+  }
+
+  .footer {
+    margin: var(--margin-xl) 0 var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--light-text-color);
+    font-size: var(--text-xs);
+    display: flex;
+    gap: var(--gap-xs);
+
+    a {
+      color: var(--muted-text-color);
+      text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+
+    .sep { color: var(--border-color); }
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <header class="header">
+        <nav class="crumbs">
+          <a class="back" href="/">← Examples</a>
+          <span class="position">2 / 19</span>
+          <a href="../minimal/page.html">prev</a>
+          <a href="../todo-list/page.html">next</a>
+        </nav>
+        <h1 class="title">State and events</h1>
+        <p class="description">A row of emoji reactions you can toggle. Initial reactions come from an HTML attribute that the component parses on <code>initialize()</code>; clicking a reaction flips its <code>active</code> flag and adjusts the count.</p>
+      </header>
+      <div class="container">
+        <emoji-reactions reactions="👍 12, ❤️ 5, 😂 3, 🎉 8, 🚀 1"></emoji-reactions>
+      </div>
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+          <li><button type="button" data-target="src-emoji-reactions-0" class="active">component.js</button></li>
+          <li><button type="button" data-target="src-emoji-reactions-1">component.html</button></li>
+          <li><button type="button" data-target="src-emoji-reactions-2">component.css</button></li>
+          <li><button type="button" data-target="src-emoji-reactions-3">page.html</button></li>
+        </ul>
+        <pre id="src-emoji-reactions-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
+<span class="hljs-keyword">const</span> defaultSettings = {
+  <span class="hljs-attr">reactions</span>: <span class="hljs-string">&#x27;👍 12, ❤️ 5, 😂 3, 🎉 8&#x27;</span>,
+};
+
+<span class="hljs-keyword">const</span> defaultState = {
+  <span class="hljs-attr">reactionState</span>: [],
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ state, settings }</span>) =&gt; ({
+  <span class="hljs-title function_">initialize</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> reactions = settings.<span class="hljs-property">reactions</span>.<span class="hljs-title function_">split</span>(<span class="hljs-string">&#x27;,&#x27;</span>).<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">entry</span> =&gt;</span> {
+      <span class="hljs-keyword">const</span> [emoji, count] = entry.<span class="hljs-title function_">trim</span>().<span class="hljs-title function_">split</span>(<span class="hljs-regexp">/\s+/</span>);
+      <span class="hljs-keyword">return</span> { emoji, <span class="hljs-attr">count</span>: <span class="hljs-built_in">parseInt</span>(count) || <span class="hljs-number">0</span>, <span class="hljs-attr">active</span>: <span class="hljs-literal">false</span> };
+    });
+    state.<span class="hljs-property">reactionState</span>.<span class="hljs-title function_">set</span>(reactions);
+  },
+
+  <span class="hljs-title function_">toggle</span>(<span class="hljs-params">index</span>) {
+    <span class="hljs-keyword">const</span> reaction = state.<span class="hljs-property">reactionState</span>.<span class="hljs-title function_">getIndex</span>(index);
+    <span class="hljs-keyword">const</span> active = !reaction.<span class="hljs-property">active</span>;
+    <span class="hljs-keyword">const</span> count = reaction.<span class="hljs-property">count</span> + (active ? <span class="hljs-number">1</span> : -<span class="hljs-number">1</span>);
+    state.<span class="hljs-property">reactionState</span>.<span class="hljs-title function_">setIndex</span>(index, { ...reaction, active, count });
+  },
+});
+
+<span class="hljs-keyword">const</span> events = {
+  <span class="hljs-string">&#x27;click .reaction&#x27;</span>({ self, data }) {
+    self.<span class="hljs-title function_">toggle</span>(data.<span class="hljs-property">index</span>);
+  },
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">EmojiReactions</span> = <span class="hljs-title function_">defineComponent</span>({
+  <span class="hljs-attr">tagName</span>: <span class="hljs-string">&#x27;emoji-reactions&#x27;</span>,
+  template,
+  css,
+  defaultSettings,
+  defaultState,
+  createComponent,
+  events,
+});
+</code></pre>
+        <pre id="src-emoji-reactions-1" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;reactions&quot;</span>&gt;</span>
+  {#each reaction, i in reactionState}
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;reaction {activeIf reaction.active}&quot;</span> <span class="hljs-attr">data-index</span>=<span class="hljs-string">&quot;{i}&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;emoji&quot;</span>&gt;</span>{reaction.emoji}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+      {#if reaction.count}
+        <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;count&quot;</span>&gt;</span>{reaction.count}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+      {/if}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+  {/each}
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-emoji-reactions-2" hidden><code class="hljs language-css"><span class="hljs-selector-pseudo">:host</span> {
+  <span class="hljs-attribute">display</span>: block;
+  <span class="hljs-attribute">font-family</span>: <span class="hljs-built_in">var</span>(--page-font);
+}
+
+<span class="hljs-selector-class">.reactions</span> {
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">gap</span>: <span class="hljs-built_in">var</span>(--gap-<span class="hljs-number">3</span>xs);
+}
+
+<span class="hljs-selector-class">.reaction</span> {
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">align-items</span>: center;
+  <span class="hljs-attribute">gap</span>: <span class="hljs-built_in">var</span>(--gap-<span class="hljs-number">3</span>xs);
+  <span class="hljs-attribute">padding</span>: <span class="hljs-built_in">var</span>(--padding-<span class="hljs-number">3</span>xs) <span class="hljs-built_in">var</span>(--padding-xs);
+  <span class="hljs-attribute">border</span>: <span class="hljs-built_in">var</span>(--subtle-border);
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius);
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">5</span>);
+  <span class="hljs-attribute">cursor</span>: pointer;
+  <span class="hljs-attribute">transition</span>: <span class="hljs-built_in">var</span>(--transition);
+  <span class="hljs-attribute">user-select</span>: none;
+
+  &amp;<span class="hljs-selector-pseudo">:hover</span> {
+    <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">10</span>);
+  }
+
+  &amp;<span class="hljs-selector-class">.active</span> {
+    <span class="hljs-attribute">border-color</span>: <span class="hljs-built_in">var</span>(--primary-border-color);
+    <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--primary-<span class="hljs-number">5</span>);
+  }
+}
+
+<span class="hljs-selector-class">.emoji</span> {
+  <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">var</span>(--base);
+  <span class="hljs-attribute">line-height</span>: <span class="hljs-number">1</span>;
+}
+
+<span class="hljs-selector-class">.count</span> {
+  <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">var</span>(--small);
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">60</span>);
+  <span class="hljs-attribute">min-width</span>: <span class="hljs-number">1ch</span>;
+
+  <span class="hljs-selector-class">.active</span> &amp; {
+    <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--primary-color);
+    <span class="hljs-attribute">font-weight</span>: <span class="hljs-built_in">var</span>(--bold);
+  }
+}
+</code></pre>
+        <pre id="src-emoji-reactions-3" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">emoji-reactions</span> <span class="hljs-attr">reactions</span>=<span class="hljs-string">&quot;👍 12, ❤️ 5, 😂 3, 🎉 8, 🚀 1&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">emoji-reactions</span>&gt;</span>
+</code></pre>
+      </details>
+      <aside class="notes">
+        <h2>New patterns</h2>
+        <p><code>defaultSettings</code>, <code>defaultState</code>, <code>createComponent</code>, <code>events</code>, <code>{#each}</code>, <code>getIndex</code> / <code>setIndex</code>, <code>initialize()</code>, <code>data-*</code> parsing, <code>{activeIf}</code>.</p>
+        <h2>What to notice</h2>
+        <ul>
+          <li><code>state.reactionState.getIndex(index)</code> and <code>setIndex(index, value)</code> read and replace a single array item by index — no manual <code>map</code> or spread.</li>
+          <li>Event handlers receive a <code>data</code> object containing parsed <code>data-*</code> attributes from the event target. <code>data-index=&quot;{i}&quot;</code> in the template becomes <code>data.index</code> in the handler.</li>
+          <li>The component works from a single HTML tag: <code>&lt;emoji-reactions reactions=&quot;👍 12, ❤️ 5&quot;&gt;</code>. Settings are parsed from the attribute string in <code>initialize()</code>.</li>
+        </ul>
+        <nav class="walk">
+          <a href="../minimal/page.html">← Hello world</a>
+          <a href="../todo-list/page.html">TodoMVC →</a>
+        </nav>
+      </aside>
+    </div>
+    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>
+  </body>
+</html>

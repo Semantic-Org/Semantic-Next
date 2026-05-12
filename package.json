@@ -107,8 +107,12 @@
       "default": "./src/primitives/icon/sets/heroicons/heroicons.css"
     },
     "./icon/sets/brands.css": {
-      "import": "./src/primitives/icon/sets/brands/index.css",
-      "default": "./src/primitives/icon/sets/brands/index.css"
+      "import": "./src/primitives/icon/sets/brands/brands.css",
+      "default": "./src/primitives/icon/sets/brands/brands.css"
+    },
+    "./fonts/lato.css": {
+      "import": "./src/fonts/lato/lato.css",
+      "default": "./src/fonts/lato/lato.css"
     },
     "./input": {
       "import": "./src/primitives/input/index.js",
@@ -181,6 +185,7 @@
   },
   "scripts": {
     "build": "wireit",
+    "build:clean": "wireit",
     "build:ui": "wireit",
     "build:ui-deps": "wireit",
     "build:ui-components": "wireit",
@@ -198,6 +203,8 @@
     "publish": "wireit",
     "update-version": "wireit",
     "test:case": "wireit",
+    "examples:sync": "wireit",
+    "watch:examples": "wireit",
     "prepublishOnly": "wireit",
     "format": "npx dprint fmt",
     "test": "vitest --c tests/configs/vitest/vitest.config.js",
@@ -223,7 +230,8 @@
         "build:packages",
         "build:ui-deps",
         "build:ui-components",
-        "build:specs"
+        "build:specs",
+        "build:cdn-assets"
       ]
     },
     "build:ui": {
@@ -232,7 +240,7 @@
         "build:ui-deps",
         "build:ui-components",
         "build:specs",
-        "./packages/specs:build:icons"
+        "build:icons"
       ]
     },
     "build:packages": {
@@ -273,7 +281,7 @@
         "build:icons"
       ]
     },
-    "build:clean-directory": {
+    "build:clean": {
       "command": "node ./internal-packages/scripts/src/clean-directory.js"
     },
     "build:ui-deps": {
@@ -294,7 +302,8 @@
     "watch": {
       "dependencies": [
         "watch:ui",
-        "watch:icons"
+        "watch:icons",
+        "watch:examples"
       ]
     },
     "watch:ui": {
@@ -328,6 +337,13 @@
       "dependencies": [
         "build:packages"
       ]
+    },
+    "examples:sync": {
+      "command": "cd examples && node scripts/sync.js"
+    },
+    "watch:examples": {
+      "command": "cd examples && node scripts/sync.js --watch",
+      "service": true
     }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",

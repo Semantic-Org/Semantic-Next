@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Progress Bar — progress-bar</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <link rel="stylesheet" href="./page.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <script type="module" blocking="render" src="/dist/src/progress-bar/component.js"></script>
+    <script type="module" blocking="render" src="/dist/src/progress-bar/page.js"></script>
+    <style>
+/*
+  Stylesheet inlined into every generated page by scripts/sync.js.
+  Loaded as a string at sync time (no bundler), so plain CSS — no imports.
+
+  Tokens, code colors, and heading discipline are aligned with the canonical
+  cdn.semantic-ui.com page (tools/cdn/pages/index.css) so this site reads as
+  part of the same surface. All page-specific selectors descend from
+  `.example` so the HTML stays free of repeated namespace classes.
+*/
+
+:root {
+  --code-bg: var(--ui-background-emphasis);
+  --code-purple: #6F42C1;
+  --code-default: #54595E;
+  --code-blue: #005CC5;
+  --code-orange: #E3660F;
+  --code-red: #D73A49;
+  --code-green: #22863A;
+  --code-grey: #24292E;
+  --code-comment: #6A737D;
+}
+
+html.dark {
+  --code-purple: #D2A8FF;
+  --code-default: #C9D1D9;
+  --code-blue: var(--primary-text-color);
+  --code-orange: #FFAB70;
+  --code-red: #F97583;
+  --code-green: #7EE787;
+  --code-grey: #656565;
+  --code-comment: #6A737D;
+}
+
+html { scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--page-font);
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 var(--gutter-l);
+  color: var(--text-color);
+}
+
+.example {
+
+  .theme {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .header {
+    margin-bottom: var(--gap);
+    padding-bottom: var(--padding-3xs);
+    border-bottom: var(--border);
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-xs);
+      font-size: var(--text-xs);
+      color: var(--light-text-color);
+
+      a {
+        color: var(--muted-text-color);
+        text-decoration: none;
+        transition: color 0.12s;
+        &:hover { color: var(--primary-text-color); }
+      }
+
+      .position {
+        margin-right: auto;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    .title {
+      margin: var(--gap-2xs) 0 var(--gap-3xs);
+      font-size: var(--text-2xl);
+      font-weight: var(--bold);
+      letter-spacing: -0.01em;
+      color: var(--header-color);
+    }
+
+    .description {
+      margin: var(--vertically-spaced);
+      color: var(--muted-text-color);
+      line-height: 1.65;
+    }
+  }
+
+  .container {
+    position: relative;
+    transform: translateZ(0);
+    /* Lift above the later-sibling .source so position:absolute overflow from
+       inside the example (e.g. async-search results) doesn't get covered by
+       the code viewer below. */
+    z-index: 1;
+  }
+
+  .source {
+    margin: var(--vertically-spaced) 0;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: var(--code-bg);
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: var(--padding-xs) var(--padding);
+      font-size: var(--text-xs);
+      font-weight: var(--bold);
+      color: var(--muted-text-color);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: var(--gap-3xs);
+      transition: color 0.12s;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-text-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: var(--internal-border);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      border-bottom: var(--internal-border);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: var(--padding-xs) var(--padding);
+        font-family: var(--code-font);
+        font-size: var(--text-xs);
+        color: var(--light-text-color);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: color 0.15s;
+
+        &:hover { color: var(--muted-text-color); }
+        &.active {
+          color: var(--header-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: var(--padding) var(--padding-l);
+      overflow: auto;
+      font-family: var(--code-font);
+      font-size: var(--text-s);
+      line-height: 1.8;
+      color: var(--code-default);
+      max-height: 520px;
+      tab-size: 2;
+    }
+
+    /* highlight.js token classes mapped to the canonical --code-* palette. */
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal,
+    .hljs-variable.language_,
+    .hljs-doctag { color: var(--code-red); }
+    .hljs-string,
+    .hljs-attr,
+    .hljs-meta .hljs-string,
+    .hljs-symbol { color: var(--code-blue); }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag,
+    .hljs-title,
+    .hljs-title.class_,
+    .hljs-title.function_ { color: var(--code-purple); }
+    .hljs-number,
+    .hljs-meta .hljs-number { color: var(--code-orange); }
+    .hljs-comment { color: var(--code-comment); font-style: italic; }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id,
+    .hljs-selector-attr { color: var(--code-grey); }
+    .hljs-meta,
+    .hljs-regexp { color: var(--code-green); }
+  }
+
+  .notes {
+    margin-top: var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--muted-text-color);
+    line-height: 1.65;
+
+    h2 {
+      margin: 0 0 var(--gap-2xs);
+      font-size: var(--text-2xs);
+      font-weight: var(--bold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--blue-80);
+    }
+
+    p { margin: var(--vertically-spaced); }
+    ul { margin: var(--vertically-spaced); padding-left: 1.25rem; }
+    li { margin: var(--gap-3xs) 0; }
+
+    .walk {
+      display: flex;
+      justify-content: space-between;
+      margin-top: var(--margin);
+      padding-top: var(--padding);
+      border-top: var(--internal-border);
+
+      a {
+        color: var(--primary-text-color);
+        text-decoration: none;
+        font-size: var(--text-s);
+        font-weight: var(--bold);
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+
+  /* Inline code (`token`) inside prose — chip style matching CDN. */
+  .header .description code,
+  .notes code,
+  .entries .intro code {
+    background: var(--subtle-angled-gradient);
+    padding: 3px 5px;
+    margin: -2px 1px;
+    border: var(--subtle-border);
+    border-radius: var(--border-radius);
+    color: var(--standard-90);
+    font-family: var(--code-font);
+    font-size: var(--text-xs);
+  }
+
+  /* Landing page */
+  h1 {
+    margin: 0 0 var(--gap-3xs);
+    font-size: var(--text-3xl);
+    font-weight: var(--bold);
+    letter-spacing: -0.015em;
+    color: var(--header-color);
+  }
+
+  .lede {
+    color: var(--muted-text-color);
+    margin-top: 0;
+    line-height: 1.65;
+  }
+
+  .section {
+    margin: var(--margin-xl) 0 var(--gap-3xs);
+    font-size: var(--text-2xs);
+    font-weight: var(--bold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted-text-color);
+  }
+
+  .section-lede {
+    margin: var(--vertically-spaced);
+    color: var(--light-text-color);
+    font-size: var(--text-s);
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: var(--padding) 0;
+      border-bottom: var(--internal-border);
+      &:last-child { border-bottom: none; }
+    }
+
+    .entry {
+      display: flex;
+      align-items: baseline;
+      gap: var(--gap-xs);
+      text-decoration: none;
+      &:hover .headline { color: var(--primary-text-color); }
+
+      .position {
+        font-variant-numeric: tabular-nums;
+        color: var(--standard-40);
+        font-size: var(--text-s);
+        min-width: 1.5rem;
+      }
+
+      .headline {
+        font-weight: var(--bold);
+        color: var(--header-color);
+        transition: color 0.12s;
+      }
+
+      .subtitle {
+        color: var(--light-text-color);
+        font-size: var(--text-s);
+      }
+    }
+
+    .intro {
+      margin: var(--gap-3xs) 0 0 2.1rem;
+      color: var(--muted-text-color);
+      font-size: var(--text-s);
+      line-height: 1.65;
+    }
+  }
+
+  .footer {
+    margin: var(--margin-xl) 0 var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--light-text-color);
+    font-size: var(--text-xs);
+    display: flex;
+    gap: var(--gap-xs);
+
+    a {
+      color: var(--muted-text-color);
+      text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+
+    .sep { color: var(--border-color); }
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <header class="header">
+        <nav class="crumbs">
+          <a class="back" href="/">← Examples</a>
+          <span class="position">18 / 19</span>
+          <a href="../setting-types/page.html">prev</a>
+          <a href="../clock/page.html">next</a>
+        </nav>
+        <h1 class="title">Parameterized snippets</h1>
+        <p class="description">A progress bar whose label changes once it reaches 100%. The same <code>{#snippet label}</code> is rendered with and without a <code>canComplete</code> parameter to produce two variants of the same fragment.</p>
+      </header>
+      <div class="container">
+        <h3>Controls</h3>
+        <ui-button class="set">Change Progress</ui-button>
+        <ui-button green class="complete">Complete</ui-button>
+        
+        <h3>Standard</h3>
+        <progress-bar value="75"></progress-bar>
+        
+        <h3>Sizes</h3>
+        <div class="example">
+          <h4>Mini</h4>
+          <progress-bar value="20" size="mini"></progress-bar>
+        </div>
+        <div class="example">
+          <h4>Small</h4>
+          <progress-bar value="50" size="small"></progress-bar>
+        </div>
+        <div class="example">
+          <h4>Medium</h4>
+          <progress-bar value="65" size="medium"></progress-bar>
+        </div>
+        <div class="example">
+        <h4>Large</h4>
+          <progress-bar value="80" size="large"></progress-bar>
+        </div>
+        
+        <h3>Styles</h3>
+        <div class="example">
+          <h4>Success</h4>
+          <progress-bar value="90" theme="success"></progress-bar>
+        </div>
+        <div class="example">
+          <h4>Warning</h4>
+          <progress-bar value="60" theme="warning"></progress-bar>
+        </div>
+        <div class="example">
+          <h4>Danger</h4>
+          <progress-bar value="30" theme="danger"></progress-bar>
+        </div>
+        
+        <h3>Settings</h3>
+        <div class="example">
+          <h4>Without Animation</h4>
+          <progress-bar value="45" animated="false"></progress-bar>
+        </div>
+        <div class="example">
+          <h4>Without Inline Label</h4>
+          <progress-bar value="85" inlinelabel="false"></progress-bar>
+        </div>
+        <div class="example">
+          <h4>Without Label</h4>
+          <progress-bar value="85" showlabel="false"></progress-bar>
+        </div>
+      </div>
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+          <li><button type="button" data-target="src-progress-bar-0" class="active">component.js</button></li>
+          <li><button type="button" data-target="src-progress-bar-1">component.html</button></li>
+          <li><button type="button" data-target="src-progress-bar-2">component.css</button></li>
+          <li><button type="button" data-target="src-progress-bar-3">page.html</button></li>
+          <li><button type="button" data-target="src-progress-bar-4">page.css</button></li>
+          <li><button type="button" data-target="src-progress-bar-5">page.js</button></li>
+        </ul>
+        <pre id="src-progress-bar-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
+<span class="hljs-keyword">const</span> defaultSettings = {
+  <span class="hljs-attr">value</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">max</span>: <span class="hljs-number">100</span>,
+  <span class="hljs-attr">min</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">showLabel</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">animated</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">size</span>: <span class="hljs-string">&#x27;medium&#x27;</span>,
+  <span class="hljs-attr">theme</span>: <span class="hljs-string">&#x27;primary&#x27;</span>,
+  <span class="hljs-attr">inlineLabel</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">completeText</span>: <span class="hljs-string">&#x27;Complete&#x27;</span>,
+};
+
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ self, settings }</span>) =&gt; ({
+  <span class="hljs-title function_">getPercentage</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> { value, min, max } = settings;
+    <span class="hljs-keyword">const</span> range = max - min;
+    <span class="hljs-keyword">const</span> adjustedValue = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(min, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(max, value));
+    <span class="hljs-keyword">return</span> ((adjustedValue - min) / range) * <span class="hljs-number">100</span>;
+  },
+
+  <span class="hljs-title function_">isComplete</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> settings.<span class="hljs-property">value</span> &gt;= settings.<span class="hljs-property">max</span>;
+  },
+
+  <span class="hljs-title function_">isLabelInline</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (settings.<span class="hljs-property">size</span> === <span class="hljs-string">&#x27;mini&#x27;</span>) {
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+    <span class="hljs-keyword">return</span> settings.<span class="hljs-property">inlineLabel</span>;
+  },
+
+  <span class="hljs-title function_">getDisplayPercentage</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> percentage = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">round</span>(self.<span class="hljs-title function_">getPercentage</span>());
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${percentage}</span>%`</span>;
+  },
+
+  <span class="hljs-title function_">getBarClasses</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> {
+      [settings.<span class="hljs-property">size</span>]: <span class="hljs-literal">true</span>,
+      [settings.<span class="hljs-property">theme</span>]: <span class="hljs-literal">true</span>,
+      <span class="hljs-string">&#x27;active&#x27;</span>: settings.<span class="hljs-property">animated</span> &amp;&amp; settings.<span class="hljs-property">value</span> &lt; settings.<span class="hljs-property">max</span>,
+      <span class="hljs-string">&#x27;complete&#x27;</span>: self.<span class="hljs-title function_">isComplete</span>()
+    };
+  }
+});
+
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">ProgressBar</span> = <span class="hljs-title function_">defineComponent</span>({
+  <span class="hljs-attr">tagName</span>: <span class="hljs-string">&#x27;progress-bar&#x27;</span>,
+  template,
+  css,
+  defaultSettings,
+  createComponent,
+});
+</code></pre>
+        <pre id="src-progress-bar-1" hidden><code class="hljs language-html">{#snippet label}
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;label&quot;</span>&gt;</span>
+    {#if showLabel}
+      {getDisplayPercentage}
+      {#if both canComplete isComplete}
+        {completeText}
+      {/if}
+    {/if}
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+{/snippet}
+
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{classMap getBarClasses} bar&quot;</span> <span class="hljs-attr">part</span>=<span class="hljs-string">&quot;bar&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;track&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> 
+      <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;fill&quot;</span> 
+      <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;width: {getPercentage}%&quot;</span>
+    &gt;</span>
+      {#if isLabelInline}
+        {&gt;label}
+      {/if}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  {#if not isLabelInline}
+    {&gt;label canComplete=true}
+  {/if}
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-progress-bar-2" hidden><code class="hljs language-css"><span class="hljs-selector-pseudo">:host</span> {
+  <span class="hljs-attr">--progress-height</span>: <span class="hljs-number">1rem</span>;
+  <span class="hljs-attr">--progress-bg</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">10</span>);
+  <span class="hljs-attr">--progress-color</span>: <span class="hljs-built_in">var</span>(--primary-color);
+  <span class="hljs-attr">--progress-transition</span>: width <span class="hljs-number">0.3s</span> ease, background <span class="hljs-number">1s</span> ease;
+  <span class="hljs-attr">--progress-min-width</span>: <span class="hljs-number">2.5rem</span>;
+  <span class="hljs-attr">--label-spacing</span>: <span class="hljs-built_in">var</span>(--<span class="hljs-number">5px</span>);
+  
+  <span class="hljs-attribute">display</span>: block;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+}
+
+<span class="hljs-selector-class">.progress-bar</span> {
+  <span class="hljs-attribute">position</span>: relative;
+  <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">overflow</span>: hidden;
+}
+
+<span class="hljs-selector-class">.track</span> {
+  <span class="hljs-attribute">background-color</span>: <span class="hljs-built_in">var</span>(--progress-bg);
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius);
+  <span class="hljs-attribute">height</span>: <span class="hljs-built_in">var</span>(--progress-height);
+  <span class="hljs-attribute">box-shadow</span>: <span class="hljs-built_in">var</span>(--inset-shadow);
+  <span class="hljs-attribute">overflow</span>: hidden;
+  <span class="hljs-attribute">position</span>: relative;
+}
+
+<span class="hljs-selector-class">.label</span> {
+  <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">var</span>(--small);
+  <span class="hljs-attribute">font-weight</span>: <span class="hljs-built_in">var</span>(--bold);
+  <span class="hljs-attribute">text-align</span>: center;
+  <span class="hljs-attribute">margin-top</span>: <span class="hljs-built_in">var</span>(--label-spacing);
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--text-color);
+}
+
+<span class="hljs-selector-class">.fill</span> {
+  <span class="hljs-attribute">position</span>: relative;
+  <span class="hljs-attribute">display</span>: flex;
+  <span class="hljs-attribute">flex-direction</span>: row;
+  <span class="hljs-attribute">align-items</span>: center;
+  <span class="hljs-attribute">justify-content</span>: flex-end;
+  <span class="hljs-attribute">height</span>: <span class="hljs-number">100%</span>;
+  <span class="hljs-attribute">min-width</span>: <span class="hljs-built_in">var</span>(--progress-min-width);
+  <span class="hljs-attribute">background-color</span>: <span class="hljs-built_in">var</span>(--progress-color);
+  <span class="hljs-attribute">background-image</span>: <span class="hljs-built_in">var</span>(--gradient);
+  <span class="hljs-attribute">transition</span>: <span class="hljs-built_in">var</span>(--progress-transition);
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius);
+  <span class="hljs-attribute">box-shadow</span>: <span class="hljs-built_in">var</span>(--shadow);
+
+  <span class="hljs-selector-class">.label</span> {
+    <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span> <span class="hljs-built_in">var</span>(--label-spacing) <span class="hljs-number">0px</span> <span class="hljs-number">0px</span>;
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-built_in">var</span>(--<span class="hljs-number">8px</span>);
+    <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--white-<span class="hljs-number">80</span>);
+    <span class="hljs-attribute">text-shadow</span>: <span class="hljs-built_in">var</span>(--text-shadow);
+  }
+
+  &amp;<span class="hljs-selector-pseudo">::after</span> {
+    <span class="hljs-attribute">content</span>: <span class="hljs-string">&#x27;&#x27;</span>;
+    <span class="hljs-attribute">opacity</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">position</span>: absolute;
+    <span class="hljs-attribute">top</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">left</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">right</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">bottom</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--white);
+    <span class="hljs-attribute">border-radius</span>: inherit;
+  }
+}
+
+<span class="hljs-keyword">@keyframes</span> active {
+  <span class="hljs-number">0%</span> {
+    <span class="hljs-attribute">opacity</span>: .<span class="hljs-number">3</span>;
+    <span class="hljs-attribute">width</span>: <span class="hljs-number">0</span>
+  }
+
+  <span class="hljs-number">100%</span> {
+    <span class="hljs-attribute">opacity</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>
+  }
+}
+
+<span class="hljs-comment">/* States */</span>
+<span class="hljs-selector-class">.active</span> <span class="hljs-selector-class">.fill</span><span class="hljs-selector-pseudo">::after</span> {
+  <span class="hljs-attribute">animation</span>: active <span class="hljs-number">2s</span> ease infinite
+}
+
+<span class="hljs-selector-class">.complete</span> {
+  <span class="hljs-selector-class">.fill</span> {
+    <span class="hljs-attribute">background-color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">5</span>);
+    <span class="hljs-attribute">background-image</span>: <span class="hljs-built_in">var</span>(--subtle-gradient);
+
+    &amp;<span class="hljs-selector-pseudo">:after</span> {
+      <span class="hljs-attribute">animation</span>: none;
+    }
+  }
+}
+
+
+<span class="hljs-comment">/* Size variants */</span>
+<span class="hljs-selector-class">.mini</span> {
+  <span class="hljs-attr">--progress-height</span>: <span class="hljs-number">4px</span>;
+  <span class="hljs-selector-class">.label</span> {
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-number">10px</span>;
+  }
+}
+<span class="hljs-selector-class">.small</span> {
+  <span class="hljs-attr">--progress-height</span>: <span class="hljs-number">8px</span>;
+  <span class="hljs-selector-class">.label</span> {
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-number">10px</span>;
+  }
+}
+<span class="hljs-selector-class">.medium</span> {
+  <span class="hljs-attr">--progress-height</span>: <span class="hljs-number">16px</span>;
+  <span class="hljs-selector-class">.label</span> {
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-number">12px</span>;
+  }
+}
+
+<span class="hljs-selector-class">.large</span> {
+  <span class="hljs-attr">--progress-height</span>: <span class="hljs-number">2rem</span>;
+  <span class="hljs-selector-class">.label</span> {
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-number">13px</span>;
+  }
+}
+
+
+<span class="hljs-comment">/* Theme variants */</span>
+<span class="hljs-selector-class">.primary</span> {
+  <span class="hljs-attr">--progress-color</span>: <span class="hljs-built_in">var</span>(--primary-color);
+}
+<span class="hljs-selector-class">.secondary</span> {
+  <span class="hljs-attr">--progress-color</span>: <span class="hljs-built_in">var</span>(--secondary-color);
+}
+
+<span class="hljs-selector-class">.success</span> {
+  <span class="hljs-attr">--progress-color</span>: <span class="hljs-built_in">var</span>(--positive-color);
+}
+<span class="hljs-selector-class">.danger</span> {
+  <span class="hljs-attr">--progress-color</span>: <span class="hljs-built_in">var</span>(--negative-color);
+}
+<span class="hljs-selector-class">.warning</span> {
+  <span class="hljs-attr">--progress-color</span>: <span class="hljs-built_in">var</span>(--warning-color);
+}
+<span class="hljs-selector-class">.info</span> {
+  <span class="hljs-attr">--progress-color</span>: <span class="hljs-built_in">var</span>(--info-color);
+}
+</code></pre>
+        <pre id="src-progress-bar-3" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Controls<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">ui-button</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;set&quot;</span>&gt;</span>Change Progress<span class="hljs-tag">&lt;/<span class="hljs-name">ui-button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">ui-button</span> <span class="hljs-attr">green</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;complete&quot;</span>&gt;</span>Complete<span class="hljs-tag">&lt;/<span class="hljs-name">ui-button</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Standard<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">progress-bar</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;75&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">progress-bar</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Sizes<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;example&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>Mini<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">progress-bar</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;20&quot;</span> <span class="hljs-attr">size</span>=<span class="hljs-string">&quot;mini&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">progress-bar</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;example&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>Small<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">progress-bar</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;50&quot;</span> <span class="hljs-attr">size</span>=<span class="hljs-string">&quot;small&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">progress-bar</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;example&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>Medium<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">progress-bar</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;65&quot;</span> <span class="hljs-attr">size</span>=<span class="hljs-string">&quot;medium&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">progress-bar</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;example&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>Large<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">progress-bar</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;80&quot;</span> <span class="hljs-attr">size</span>=<span class="hljs-string">&quot;large&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">progress-bar</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Styles<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;example&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>Success<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">progress-bar</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;90&quot;</span> <span class="hljs-attr">theme</span>=<span class="hljs-string">&quot;success&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">progress-bar</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;example&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>Warning<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">progress-bar</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;60&quot;</span> <span class="hljs-attr">theme</span>=<span class="hljs-string">&quot;warning&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">progress-bar</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;example&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>Danger<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">progress-bar</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;30&quot;</span> <span class="hljs-attr">theme</span>=<span class="hljs-string">&quot;danger&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">progress-bar</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Settings<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;example&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>Without Animation<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">progress-bar</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;45&quot;</span> <span class="hljs-attr">animated</span>=<span class="hljs-string">&quot;false&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">progress-bar</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;example&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>Without Inline Label<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">progress-bar</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;85&quot;</span> <span class="hljs-attr">inlinelabel</span>=<span class="hljs-string">&quot;false&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">progress-bar</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;example&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>Without Label<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">progress-bar</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;85&quot;</span> <span class="hljs-attr">showlabel</span>=<span class="hljs-string">&quot;false&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">progress-bar</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-progress-bar-4" hidden><code class="hljs language-css"><span class="hljs-selector-tag">h3</span>, <span class="hljs-selector-tag">h4</span> {
+  <span class="hljs-attribute">margin</span>: <span class="hljs-built_in">var</span>(--margin) <span class="hljs-number">0rem</span>;
+}
+</code></pre>
+        <pre id="src-progress-bar-5" hidden><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { $ } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/query&#x27;</span>;
+
+$(<span class="hljs-string">&#x27;.set&#x27;</span>).<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;click&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> randomProgress = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">100</span>;
+  $(<span class="hljs-string">&#x27;progress-bar&#x27;</span>).<span class="hljs-title function_">attr</span>(<span class="hljs-string">&#x27;value&#x27;</span>, randomProgress);
+});
+
+$(<span class="hljs-string">&#x27;.complete&#x27;</span>).<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;click&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  $(<span class="hljs-string">&#x27;progress-bar&#x27;</span>).<span class="hljs-title function_">attr</span>(<span class="hljs-string">&#x27;value&#x27;</span>, <span class="hljs-number">100</span>);
+});
+</code></pre>
+      </details>
+      <aside class="notes">
+        <h2>New patterns</h2>
+        <p>Snippet parameters (<code>{&gt;label canComplete=true}</code>), <code>{#if both x y}</code>, the <code>part</code> attribute, dynamic class names.</p>
+        <h2>What to notice</h2>
+        <ul>
+          <li>A snippet is called like a template: <code>{&gt;label}</code> renders without arguments, <code>{&gt;label canComplete=true}</code> passes <code>canComplete</code> into the snippet body where <code>{#if canComplete}</code> can check it.</li>
+          <li><code>{#if both canComplete isComplete}</code> is the built-in AND helper. Reads as a sentence; pairs with <code>either</code>, <code>neither</code>, <code>nor</code>.</li>
+        </ul>
+        <nav class="walk">
+          <a href="../setting-types/page.html">← Setting types and coercion</a>
+          <a href="../clock/page.html">SVG, intervals, and helpers →</a>
+        </nav>
+      </aside>
+    </div>
+    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>
+  </body>
+</html>

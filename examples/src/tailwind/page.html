@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tailwind — tailwind</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <link rel="stylesheet" href="./page.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <script type="module" blocking="render" src="/dist/src/tailwind/component.js"></script>
+    <script type="module" blocking="render" src="/dist/src/tailwind/page.js"></script>
+    <style>
+/*
+  Stylesheet inlined into every generated page by scripts/sync.js.
+  Loaded as a string at sync time (no bundler), so plain CSS — no imports.
+
+  Tokens, code colors, and heading discipline are aligned with the canonical
+  cdn.semantic-ui.com page (tools/cdn/pages/index.css) so this site reads as
+  part of the same surface. All page-specific selectors descend from
+  `.example` so the HTML stays free of repeated namespace classes.
+*/
+
+:root {
+  --code-bg: var(--ui-background-emphasis);
+  --code-purple: #6F42C1;
+  --code-default: #54595E;
+  --code-blue: #005CC5;
+  --code-orange: #E3660F;
+  --code-red: #D73A49;
+  --code-green: #22863A;
+  --code-grey: #24292E;
+  --code-comment: #6A737D;
+}
+
+html.dark {
+  --code-purple: #D2A8FF;
+  --code-default: #C9D1D9;
+  --code-blue: var(--primary-text-color);
+  --code-orange: #FFAB70;
+  --code-red: #F97583;
+  --code-green: #7EE787;
+  --code-grey: #656565;
+  --code-comment: #6A737D;
+}
+
+html { scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--page-font);
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 var(--gutter-l);
+  color: var(--text-color);
+}
+
+.example {
+
+  .theme {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .header {
+    margin-bottom: var(--gap);
+    padding-bottom: var(--padding-3xs);
+    border-bottom: var(--border);
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-xs);
+      font-size: var(--text-xs);
+      color: var(--light-text-color);
+
+      a {
+        color: var(--muted-text-color);
+        text-decoration: none;
+        transition: color 0.12s;
+        &:hover { color: var(--primary-text-color); }
+      }
+
+      .position {
+        margin-right: auto;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    .title {
+      margin: var(--gap-2xs) 0 var(--gap-3xs);
+      font-size: var(--text-2xl);
+      font-weight: var(--bold);
+      letter-spacing: -0.01em;
+      color: var(--header-color);
+    }
+
+    .description {
+      margin: var(--vertically-spaced);
+      color: var(--muted-text-color);
+      line-height: 1.65;
+    }
+  }
+
+  .container {
+    position: relative;
+    transform: translateZ(0);
+    /* Lift above the later-sibling .source so position:absolute overflow from
+       inside the example (e.g. async-search results) doesn't get covered by
+       the code viewer below. */
+    z-index: 1;
+  }
+
+  .source {
+    margin: var(--vertically-spaced) 0;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: var(--code-bg);
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: var(--padding-xs) var(--padding);
+      font-size: var(--text-xs);
+      font-weight: var(--bold);
+      color: var(--muted-text-color);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: var(--gap-3xs);
+      transition: color 0.12s;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-text-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: var(--internal-border);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      border-bottom: var(--internal-border);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: var(--padding-xs) var(--padding);
+        font-family: var(--code-font);
+        font-size: var(--text-xs);
+        color: var(--light-text-color);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: color 0.15s;
+
+        &:hover { color: var(--muted-text-color); }
+        &.active {
+          color: var(--header-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: var(--padding) var(--padding-l);
+      overflow: auto;
+      font-family: var(--code-font);
+      font-size: var(--text-s);
+      line-height: 1.8;
+      color: var(--code-default);
+      max-height: 520px;
+      tab-size: 2;
+    }
+
+    /* highlight.js token classes mapped to the canonical --code-* palette. */
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal,
+    .hljs-variable.language_,
+    .hljs-doctag { color: var(--code-red); }
+    .hljs-string,
+    .hljs-attr,
+    .hljs-meta .hljs-string,
+    .hljs-symbol { color: var(--code-blue); }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag,
+    .hljs-title,
+    .hljs-title.class_,
+    .hljs-title.function_ { color: var(--code-purple); }
+    .hljs-number,
+    .hljs-meta .hljs-number { color: var(--code-orange); }
+    .hljs-comment { color: var(--code-comment); font-style: italic; }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id,
+    .hljs-selector-attr { color: var(--code-grey); }
+    .hljs-meta,
+    .hljs-regexp { color: var(--code-green); }
+  }
+
+  .notes {
+    margin-top: var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--muted-text-color);
+    line-height: 1.65;
+
+    h2 {
+      margin: 0 0 var(--gap-2xs);
+      font-size: var(--text-2xs);
+      font-weight: var(--bold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--blue-80);
+    }
+
+    p { margin: var(--vertically-spaced); }
+    ul { margin: var(--vertically-spaced); padding-left: 1.25rem; }
+    li { margin: var(--gap-3xs) 0; }
+
+    .walk {
+      display: flex;
+      justify-content: space-between;
+      margin-top: var(--margin);
+      padding-top: var(--padding);
+      border-top: var(--internal-border);
+
+      a {
+        color: var(--primary-text-color);
+        text-decoration: none;
+        font-size: var(--text-s);
+        font-weight: var(--bold);
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+
+  /* Inline code (`token`) inside prose — chip style matching CDN. */
+  .header .description code,
+  .notes code,
+  .entries .intro code {
+    background: var(--subtle-angled-gradient);
+    padding: 3px 5px;
+    margin: -2px 1px;
+    border: var(--subtle-border);
+    border-radius: var(--border-radius);
+    color: var(--standard-90);
+    font-family: var(--code-font);
+    font-size: var(--text-xs);
+  }
+
+  /* Landing page */
+  h1 {
+    margin: 0 0 var(--gap-3xs);
+    font-size: var(--text-3xl);
+    font-weight: var(--bold);
+    letter-spacing: -0.015em;
+    color: var(--header-color);
+  }
+
+  .lede {
+    color: var(--muted-text-color);
+    margin-top: 0;
+    line-height: 1.65;
+  }
+
+  .section {
+    margin: var(--margin-xl) 0 var(--gap-3xs);
+    font-size: var(--text-2xs);
+    font-weight: var(--bold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted-text-color);
+  }
+
+  .section-lede {
+    margin: var(--vertically-spaced);
+    color: var(--light-text-color);
+    font-size: var(--text-s);
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: var(--padding) 0;
+      border-bottom: var(--internal-border);
+      &:last-child { border-bottom: none; }
+    }
+
+    .entry {
+      display: flex;
+      align-items: baseline;
+      gap: var(--gap-xs);
+      text-decoration: none;
+      &:hover .headline { color: var(--primary-text-color); }
+
+      .position {
+        font-variant-numeric: tabular-nums;
+        color: var(--standard-40);
+        font-size: var(--text-s);
+        min-width: 1.5rem;
+      }
+
+      .headline {
+        font-weight: var(--bold);
+        color: var(--header-color);
+        transition: color 0.12s;
+      }
+
+      .subtitle {
+        color: var(--light-text-color);
+        font-size: var(--text-s);
+      }
+    }
+
+    .intro {
+      margin: var(--gap-3xs) 0 0 2.1rem;
+      color: var(--muted-text-color);
+      font-size: var(--text-s);
+      line-height: 1.65;
+    }
+  }
+
+  .footer {
+    margin: var(--margin-xl) 0 var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--light-text-color);
+    font-size: var(--text-xs);
+    display: flex;
+    gap: var(--gap-xs);
+
+    a {
+      color: var(--muted-text-color);
+      text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+
+    .sep { color: var(--border-color); }
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <header class="header">
+        <nav class="crumbs">
+          <a class="back" href="/">← Examples</a>
+          <span class="position">7 / 19</span>
+          <a href="../card-search/page.html">prev</a>
+          <a href="../dynamic-table/page.html">next</a>
+        </nav>
+        <h1 class="title">Tailwind inside shadow DOM</h1>
+        <p class="description">Tailwind 4 compiled at runtime by the <code>TailwindPlugin</code> and injected into the component&#39;s shadow root. Existing Tailwind classes, <code>@theme</code>, and <code>@custom-variant</code> work without modification.</p>
+      </header>
+      <div class="container">
+        <tailwind-demo></tailwind-demo>
+      </div>
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+          <li><button type="button" data-target="src-tailwind-0" class="active">component.js</button></li>
+          <li><button type="button" data-target="src-tailwind-1">component.html</button></li>
+          <li><button type="button" data-target="src-tailwind-2">component.css</button></li>
+          <li><button type="button" data-target="src-tailwind-3">page.html</button></li>
+          <li><button type="button" data-target="src-tailwind-4">page.css</button></li>
+          <li><button type="button" data-target="src-tailwind-5">page.js</button></li>
+        </ul>
+        <pre id="src-tailwind-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">TailwindPlugin</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/tailwind&#x27;</span>;
+
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
+<span class="hljs-keyword">const</span> defaultSettings = {
+  <span class="hljs-attr">proofPoints</span>: [],
+};
+
+<span class="hljs-keyword">let</span> definition = {
+  <span class="hljs-attr">tagName</span>: <span class="hljs-string">&#x27;tailwind-demo&#x27;</span>,
+  template,
+  css,
+  defaultSettings,
+};
+
+<span class="hljs-comment">// Transform with Tailwind plugin</span>
+definition = <span class="hljs-keyword">await</span> <span class="hljs-title class_">TailwindPlugin</span>(definition);
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">TailwindDemo</span> = <span class="hljs-title function_">defineComponent</span>(definition);
+</code></pre>
+        <pre id="src-tailwind-1" hidden><code class="hljs language-html">{#snippet bullet}
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;flex&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">svg</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;h-6 w-6 flex-shrink-0&quot;</span> <span class="hljs-attr">viewBox</span>=<span class="hljs-string">&quot;0 0 22 22&quot;</span> <span class="hljs-attr">fill</span>=<span class="hljs-string">&quot;none&quot;</span> <span class="hljs-attr">stroke-linecap</span>=<span class="hljs-string">&quot;square&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">circle</span> <span class="hljs-attr">cx</span>=<span class="hljs-string">&quot;11&quot;</span> <span class="hljs-attr">cy</span>=<span class="hljs-string">&quot;11&quot;</span> <span class="hljs-attr">r</span>=<span class="hljs-string">&quot;11&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;fill-sky-400 opacity-25&quot;</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">circle</span> <span class="hljs-attr">cx</span>=<span class="hljs-string">&quot;11&quot;</span> <span class="hljs-attr">cy</span>=<span class="hljs-string">&quot;11&quot;</span> <span class="hljs-attr">r</span>=<span class="hljs-string">&quot;10.5&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;stroke-sky-400 opacity-25&quot;</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">path</span> <span class="hljs-attr">d</span>=<span class="hljs-string">&quot;M8 11.5L10.5 14L14 8&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;stroke-sky-800 dark:stroke-sky-300&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;ml-3&quot;</span>&gt;</span>
+      {#html content}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+{/snippet}
+
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;component {darkMode ? &#x27;dark&#x27; : &#x27;&#x27;}&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;relative grid min-h-screen grid-cols-[1fr_2.5rem_auto_2.5rem_1fr] grid-rows-[1fr_1px_auto_1px_1fr] bg-white [--pattern-fg:var(--color-gray-950)]/5 dark:bg-gray-950 dark:[--pattern-fg:var(--color-white)]/10&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;col-start-3 row-start-3 flex max-w-lg flex-col bg-gray-100 p-2 dark:bg-white/10&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;rounded-xl bg-white p-10 text-sm/7 text-gray-700 dark:bg-gray-950 dark:text-gray-300&quot;</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;https://play.tailwindcss.com/img/logo.svg&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;mb-12 h-6 dark:hidden&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;Tailwind Play&quot;</span> /&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;https://play.tailwindcss.com/img/logo-dark.svg&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;mb-12 h-6 hidden dark:block&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;Tailwind Play&quot;</span> /&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;space-y-6&quot;</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>An advanced online playground for Tailwind CSS, including support for things like:<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;space-y-3&quot;</span>&gt;</span>
+            {#each item in proofPoints}
+              {&gt;bullet content=item}
+            {/each}
+          <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Perfect for learning how the framework works, prototyping a new idea, or creating a demo to share online.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">hr</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;my-6 w-full border-gray-200 dark:border-gray-700&quot;</span> /&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;mb-3&quot;</span>&gt;</span>Want to dig deeper into Tailwind?<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">ui-button</span> <span class="hljs-attr">primary</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://tailwindcss.com/docs&quot;</span> <span class="hljs-attr">icon</span>=<span class="hljs-string">&quot;open book&quot;</span>&gt;</span>Read the docs<span class="hljs-tag">&lt;/<span class="hljs-name">ui-button</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;relative -right-px col-start-2 row-span-full row-start-1 border-x border-x-(--pattern-fg) bg-[image:repeating-linear-gradient(315deg,_var(--pattern-fg)_0,_var(--pattern-fg)_1px,_transparent_0,_transparent_50%)] bg-[size:10px_10px] bg-fixed&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;relative -left-px col-start-4 row-span-full row-start-1 border-x border-x-(--pattern-fg) bg-[image:repeating-linear-gradient(315deg,_var(--pattern-fg)_0,_var(--pattern-fg)_1px,_transparent_0,_transparent_50%)] bg-[size:10px_10px] bg-fixed&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;relative -bottom-px col-span-full col-start-1 row-start-2 h-px bg-(--pattern-fg)&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;relative -top-px col-span-full col-start-1 row-start-4 h-px bg-(--pattern-fg)&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-tailwind-2" hidden><code class="hljs language-css"><span class="hljs-comment">/*
+  Example using @theme inside a component
+
+*/</span>
+
+<span class="hljs-keyword">@theme</span> {
+  <span class="hljs-comment">/* This changes the bluish grays to a monochrome color */</span>
+  <span class="hljs-attr">--color-gray-100</span>: <span class="hljs-built_in">theme</span>(colors.zinc.<span class="hljs-number">100</span>);
+  <span class="hljs-attr">--color-gray-300</span>: <span class="hljs-built_in">theme</span>(colors.zinc.<span class="hljs-number">300</span>);
+  <span class="hljs-attr">--color-gray-700</span>: <span class="hljs-built_in">theme</span>(colors.zinc.<span class="hljs-number">700</span>);
+  <span class="hljs-attr">--color-gray-950</span>: <span class="hljs-built_in">theme</span>(colors.zinc.<span class="hljs-number">950</span>);
+}
+
+<span class="hljs-comment">/* this allows us to add &quot;dark&quot; class to component to trigger dark mode */</span>
+<span class="hljs-keyword">@custom-variant</span> dark (&amp;:where(.dark, .dark *));
+</code></pre>
+        <pre id="src-tailwind-3" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">tailwind-demo</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">tailwind-demo</span>&gt;</span>
+</code></pre>
+        <pre id="src-tailwind-4" hidden><code class="hljs language-css"><span class="hljs-selector-tag">html</span> {
+  <span class="hljs-comment">/*
+    note tailwind base em size is 16px instead of semantic ui&#x27;s 14px
+    this means to have everything sized the same as other tailwind projects
+    when using sui + tailwinds you will want to resize semantic components
+  */</span>
+  <span class="hljs-attr">--font-size</span>: <span class="hljs-number">16px</span>;
+}
+</code></pre>
+        <pre id="src-tailwind-5" hidden><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { $ } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/query&#x27;</span>;
+
+$(<span class="hljs-string">&#x27;tailwind-demo&#x27;</span>).<span class="hljs-title function_">settings</span>({
+  <span class="hljs-attr">proofPoints</span>: [
+    <span class="hljs-string">`Customizing your theme with &lt;code&gt;@theme&lt;/code&gt;`</span>,
+    <span class="hljs-string">`Adding custom utilities with &lt;code&gt;@utility&lt;/code&gt;`</span>,
+    <span class="hljs-string">`Adding custom variants with &lt;code&gt;@variant&lt;/code&gt;`</span>,
+    <span class="hljs-string">`Code completion with instant preview`</span>,
+  ],
+});
+</code></pre>
+      </details>
+      <aside class="notes">
+        <h2>New patterns</h2>
+        <p><code>TailwindPlugin</code>, the plugin pattern for <code>defineComponent</code>, <code>@theme</code>, <code>@custom-variant</code>, <code>{#html content}</code> for raw HTML.</p>
+        <h2>What to notice</h2>
+        <ul>
+          <li><code>definition = await TailwindPlugin(definition)</code> is the plugin pattern: a function that takes a component definition, transforms it, and returns a new one. Here it compiles the Tailwind classes used in the template and injects the resulting CSS into the shadow root.</li>
+          <li>Standard utility classes (<code>flex</code>, <code>space-y-6</code>, <code>rounded-xl</code>, <code>bg-white</code>, <code>dark:bg-gray-950</code>) work directly. Shadow DOM normally blocks page stylesheets, so this only works because the plugin scopes the generated CSS inside the component.</li>
+          <li><code>@theme</code> and <code>@custom-variant</code> — the Tailwind 4 directives — work inside the component&#39;s own CSS file.</li>
+        </ul>
+        <nav class="walk">
+          <a href="../card-search/page.html">← Composition with subtemplates</a>
+          <a href="../dynamic-table/page.html">Templates as settings →</a>
+        </nav>
+      </aside>
+    </div>
+    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>
+  </body>
+</html>

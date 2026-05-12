@@ -1,0 +1,39 @@
+<section class="todoapp">
+  <header class="header">
+    <h1>todos</h1>
+    <input class="new-todo" placeholder="What needs to be done?" autofocus />
+  </header>
+  {#if hasTodos}
+    <section class="main">
+      <input id="toggle-all" class="toggle-all" type="checkbox" checked={allCompleted} />
+      <label for="toggle-all">Mark all as complete</label>
+      <ul class="todo-list">
+        {#each todo in filteredTodos}
+          {>todoItem
+            id=todo.id
+            title=todo.title
+            completed=todo.completed
+            editing=(isEditing todo.id)
+          }
+        {/each}
+      </ul>
+    </section>
+    {>footer}
+  {/if}
+</section>
+
+{#snippet footer}
+  <footer class="footer">
+    <span class="todo-count">
+      <strong>{activeCount}</strong> item{maybePlural activeCount} left
+    </span>
+    <ul class="filters">
+      <li><a class="{selectedIf is filter 'all'}" href="#/">All</a></li>
+      <li><a class="{selectedIf is filter 'active'}" href="#/active">Active</a></li>
+      <li><a class="{selectedIf is filter 'completed'}" href="#/completed">Completed</a></li>
+    </ul>
+    {#if hasCompleted}
+      <button class="clear-completed">Clear completed</button>
+    {/if}
+  </footer>
+{/snippet}

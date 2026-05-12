@@ -1,0 +1,15 @@
+.counter {
+  border: var(--border);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+
+  .status {
+    float: right;
+    &.green {
+      color: var(--green);
+    }
+    &.red {
+      color: var(--red);
+    }
+  }
+}
