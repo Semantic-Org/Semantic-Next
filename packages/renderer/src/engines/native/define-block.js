@@ -297,52 +297,6 @@ export function defineBlock(config) {
 //   • `create(ctx)` returns `self` — same contract.
 //   • `evaluateText` is forwarded for raw-text contexts (each / async fall
 //     through to expression's evaluator when nested in a raw-text element).
-// Module-level Reaction body for primitive value blocks. `this` is the
-// per-dispatch state object — bound at dispatch time via Function.bind so
-// every dispatch's Reaction shares this same backing function. V8's
-// BoundFunction handling lets the call site at Reaction.create unify ICs
-// across 20K+ dispatches instead of seeing 20K distinct closure shapes.
-function primitiveValueBody(comp) {
-  const state = this;
-  if (comp.firstRun && state.hydrating) {
-    state.compute.call(state.config, state.bag);
-    return;
-  }
-  state.anchor.data = state.compute.call(state.config, state.bag) ?? '';
-}
-
-// Module-level Reaction body for unsafeHTML value blocks. Mutates
-// `state.ownedNodes` / `state.endAnchor` as it manages the parsed-HTML
-// payload across re-fires.
-function unsafeHTMLValueBody(comp) {
-  const state = this;
-  if (comp.firstRun && state.hydrating) {
-    state.compute.call(state.config, state.bag);
-    return;
-  }
-  const value = state.compute.call(state.config, state.bag);
-  if (state.ownedNodes !== null) {
-    for (let i = 0; i < state.ownedNodes.length; i++) { state.ownedNodes[i].remove(); }
-  }
-  state.ownedNodes = null;
-  if (state.anchor.data !== '') { state.anchor.data = ''; }
-  const html = value == null || value[UNSAFE_HTML] == null
-    ? ''
-    : String(value[UNSAFE_HTML]);
-  if (html) {
-    const parsed = state.renderer.parseHTML(html);
-    const nodes = [...parsed.childNodes];
-    state.anchor.after(parsed);
-    state.ownedNodes = nodes;
-    if (!state.endAnchor) { state.endAnchor = document.createTextNode(''); }
-    nodes[nodes.length - 1].after(state.endAnchor);
-  }
-  else if (state.endAnchor) {
-    state.endAnchor.remove();
-    state.endAnchor = null;
-  }
-}
-
 function makeValueDispatch(config) {
   const create = config.create;
   const compute = config.compute;
@@ -364,6 +318,7 @@ function makeValueDispatch(config) {
 
     let anchor;
     let ownedNodes = null;
+    let endAnchor = null;
 
     if (hydrating && hydrate) {
       // Hydrate hook adopts server DOM and reports back the reactive node
@@ -380,24 +335,54 @@ function makeValueDispatch(config) {
       comment.parentNode.replaceChild(anchor, comment);
     }
 
-    // Per-dispatch state bound as `this` on the shared Reaction body.
-    // Mutable fields (ownedNodes / endAnchor for unsafeHTML) live on the
-    // state object so the body can update them across re-fires.
-    const state = node.unsafeHTML
-      ? { compute, config, bag, anchor, hydrating, renderer, ownedNodes, endAnchor: null }
-      : { compute, config, bag, anchor, hydrating };
-
-    // Specialize the Reaction body by AST flag. The shared backing
-    // functions (primitiveValueBody / unsafeHTMLValueBody) live at module
-    // scope; `.bind(state)` produces a BoundFunction whose backing is
-    // stable across every dispatch. V8 generates one optimized code path
-    // for each backing function, regardless of dispatch count.
-    scope.reaction(
-      anchor,
-      node.unsafeHTML
-        ? unsafeHTMLValueBody.bind(state)
-        : primitiveValueBody.bind(state),
-    );
+    // Specialize the Reaction body by AST flag. `node.unsafeHTML` is set
+    // at compile time, so each dispatch picks one of two bodies and V8
+    // optimizes them independently — primitive expressions don't pay an
+    // unsafeHTML branch per fire, and unsafeHTML expressions don't pay a
+    // primitive-path branch. The primitive body matches the pre-unification
+    // bindTextExpression shape: compute + nullish coalesce + write.
+    if (node.unsafeHTML) {
+      scope.reaction(anchor, (comp) => {
+        if (comp.firstRun && hydrating) {
+          compute.call(config, bag);
+          return;
+        }
+        const value = compute.call(config, bag);
+        if (ownedNodes !== null) {
+          for (let i = 0; i < ownedNodes.length; i++) { ownedNodes[i].remove(); }
+        }
+        ownedNodes = null;
+        if (anchor.data !== '') { anchor.data = ''; }
+        const html = value == null || value[UNSAFE_HTML] == null
+          ? ''
+          : String(value[UNSAFE_HTML]);
+        if (html) {
+          const parsed = renderer.parseHTML(html);
+          const nodes = [...parsed.childNodes];
+          anchor.after(parsed);
+          ownedNodes = nodes;
+          if (!endAnchor) { endAnchor = document.createTextNode(''); }
+          nodes[nodes.length - 1].after(endAnchor);
+        }
+        else if (endAnchor) {
+          endAnchor.remove();
+          endAnchor = null;
+        }
+      });
+    }
+    else {
+      // Primitive-only body — equivalent to pre-unification wireTextReaction.
+      // No dedup; signal.set's own equality check suppresses redundant
+      // fires upstream, and the browser no-ops identical text-node writes.
+      // Three ops per fire: compute + nullish coalesce + write.
+      scope.reaction(anchor, (comp) => {
+        if (comp.firstRun && hydrating) {
+          compute.call(config, bag);
+          return;
+        }
+        anchor.data = compute.call(config, bag) ?? '';
+      });
+    }
   }
 
   if (config.evaluateText) {
