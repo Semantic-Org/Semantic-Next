@@ -387,7 +387,7 @@
     "integrations/*",
     "packages/*",
     "docs/*",
-    "examples/*",
+    "examples",
     "tools/mcp",
     "tools/lsp",
     "tools/benchmark",
