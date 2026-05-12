@@ -8,7 +8,7 @@ RENDERING_ENGINES.forEach(engine => {
 
   describe(engine, () => {
     /*******************************
-       Test Helpers
+             Test Helpers
     *******************************/
 
     let tagCounter = 0;
@@ -25,7 +25,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-       Sibling expressions in flat template
+          Sibling expressions
     *******************************/
 
     describe('sibling expressions in flat template', () => {
@@ -98,7 +98,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-       Expression outside vs inside each
+        Outside vs inside each
     *******************************/
 
     describe('expression outside vs inside each', () => {
@@ -143,7 +143,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-       Expression outside vs inside if
+         Outside vs inside if
     *******************************/
 
     describe('expression outside vs inside if', () => {
@@ -182,7 +182,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-       Expression outside vs inside rerender
+      Outside vs inside rerender
     *******************************/
 
     describe('expression outside vs inside rerender', () => {
@@ -221,7 +221,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-       Sibling each blocks
+          Sibling each blocks
     *******************************/
 
     describe('sibling each blocks', () => {
@@ -273,7 +273,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-       Per-item granularity inside a single each
+        Per-item in single each
     *******************************/
 
     describe('per-item granularity inside a single each', () => {
@@ -364,7 +364,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-       Rerender isolation from sibling content
+          Rerender isolation
     *******************************/
 
     describe('rerender isolation from sibling content', () => {
@@ -447,7 +447,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
     });
     /*******************************
-       Snippet args and reactiveData granularity
+      Snippet & reactiveData keys
     *******************************/
 
     describe('snippet args per-key granularity', () => {
@@ -626,7 +626,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-       Per-key isolation across N subtemplates
+         Per-key across N subs
     *******************************/
 
     describe.skipIf(isLit)('per-key isolation across N subtemplates', () => {
@@ -691,7 +691,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-       FGR per-key isolation contract
+         FGR per-key contract
     *******************************/
 
     describe.skipIf(isLit)('FGR contract: each-block in-place mutation', () => {
