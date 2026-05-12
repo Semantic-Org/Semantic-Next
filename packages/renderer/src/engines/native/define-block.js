@@ -1,10 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { isRecovery, isTracing } from '../../helpers.js';
-import { isUnsafeHTML, makePlace, UNSAFE_HTML } from './commit-hooks.js';
-
-// Sentinel for "no content placed yet" — distinct from any real value
-// so the first compute write always commits.
-const PLACE_INIT = Symbol('valueDispatch:init');
+import { makePlace, UNSAFE_HTML } from './commit-hooks.js';
 
 // Block-author helper: create a child data context that inherits from
 // `parent` via the prototype chain, with `extras` layered on as own
@@ -323,7 +319,6 @@ function makeValueDispatch(config) {
     let anchor;
     let ownedNodes = null;
     let endAnchor = null;
-    let lastContent = PLACE_INIT;
 
     if (hydrating && hydrate) {
       // Hydrate hook adopts server DOM and reports back the reactive node
@@ -334,50 +329,35 @@ function makeValueDispatch(config) {
       const adopted = Reaction.nonreactive(() => hydrate.call(config, bag));
       anchor = adopted.anchor;
       ownedNodes = adopted.ownedNodes || null;
-      if (adopted.matched !== undefined) { lastContent = adopted.matched; }
     }
     else {
       anchor = document.createTextNode('');
       comment.parentNode.replaceChild(anchor, comment);
     }
 
-    scope.reaction(anchor, (comp) => {
-      // firstRun + hydrating: register Signal deps without overwriting the
-      // server-trusted DOM. lastContent was primed from hydrate.matched.
-      if (comp.firstRun && hydrating) {
-        compute.call(config, bag);
-        return;
-      }
-      const value = compute.call(config, bag);
-      if (value === lastContent && !comp.firstRun) { return; }
-      lastContent = value;
-
-      // Inline polymorphic write — replaces the makePlace closure path.
-      if (value == null) {
-        if (ownedNodes !== null) {
-          for (let i = 0; i < ownedNodes.length; i++) { ownedNodes[i].remove(); }
-          ownedNodes = null;
-          if (endAnchor) {
-            endAnchor.remove();
-            endAnchor = null;
-          }
+    // Specialize the Reaction body by AST flag. `node.unsafeHTML` is set
+    // at compile time, so each dispatch picks one of two bodies and V8
+    // optimizes them independently — primitive expressions don't pay an
+    // unsafeHTML branch per fire, and unsafeHTML expressions don't pay a
+    // primitive-path branch. The primitive body matches the pre-unification
+    // bindTextExpression shape: compute + nullish coalesce + write.
+    if (node.unsafeHTML) {
+      scope.reaction(anchor, (comp) => {
+        if (comp.firstRun && hydrating) {
+          compute.call(config, bag);
+          return;
         }
-        if (anchor.data !== '') { anchor.data = ''; }
-        return;
-      }
-
-      if (isUnsafeHTML(value)) {
-        // unsafeHTML — anchor stays empty, ownedNodes carry the parsed
-        // siblings, endAnchor bounds the region for Template.isNodeInRange.
+        const value = compute.call(config, bag);
         if (ownedNodes !== null) {
           for (let i = 0; i < ownedNodes.length; i++) { ownedNodes[i].remove(); }
         }
         ownedNodes = null;
         if (anchor.data !== '') { anchor.data = ''; }
-        const html = value[UNSAFE_HTML];
-        const str = html == null ? '' : String(html);
-        if (str) {
-          const parsed = renderer.parseHTML(str);
+        const html = value == null || value[UNSAFE_HTML] == null
+          ? ''
+          : String(value[UNSAFE_HTML]);
+        if (html) {
+          const parsed = renderer.parseHTML(html);
           const nodes = [...parsed.childNodes];
           anchor.after(parsed);
           ownedNodes = nodes;
@@ -388,22 +368,21 @@ function makeValueDispatch(config) {
           endAnchor.remove();
           endAnchor = null;
         }
-        return;
-      }
-
-      // Primitive — write directly into the anchor text node. If we were
-      // in unsafeHTML mode, clear owned siblings first.
-      if (ownedNodes !== null) {
-        for (let i = 0; i < ownedNodes.length; i++) { ownedNodes[i].remove(); }
-        ownedNodes = null;
-        if (endAnchor) {
-          endAnchor.remove();
-          endAnchor = null;
+      });
+    }
+    else {
+      // Primitive-only body — equivalent to pre-unification wireTextReaction.
+      // No dedup; signal.set's own equality check suppresses redundant
+      // fires upstream, and the browser no-ops identical text-node writes.
+      // Three ops per fire: compute + nullish coalesce + write.
+      scope.reaction(anchor, (comp) => {
+        if (comp.firstRun && hydrating) {
+          compute.call(config, bag);
+          return;
         }
-      }
-      const str = String(value);
-      if (anchor.data !== str) { anchor.data = str; }
-    });
+        anchor.data = compute.call(config, bag) ?? '';
+      });
+    }
   }
 
   if (config.evaluateText) {
