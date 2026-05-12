@@ -297,6 +297,52 @@ export function defineBlock(config) {
 //   • `create(ctx)` returns `self` — same contract.
 //   • `evaluateText` is forwarded for raw-text contexts (each / async fall
 //     through to expression's evaluator when nested in a raw-text element).
+// Module-level Reaction body for primitive value blocks. Shared across
+// every dispatch — V8 sees one function instance at the Reaction call
+// site for all primitive-shape value expressions, making the IC
+// monomorphic on the call shape rather than allocating one closure per
+// dispatch as the closure-capturing pattern would. `state` carries the
+// per-dispatch fields (compute, node, data, renderer, anchor, hydrating).
+function primitiveValueBody(state, comp) {
+  if (comp.firstRun && state.hydrating) {
+    state.compute(state);
+    return;
+  }
+  state.anchor.data = state.compute(state) ?? '';
+}
+
+// Module-level Reaction body for unsafeHTML value blocks. Same shared-
+// function pattern as primitiveValueBody. Mutable per-dispatch fields
+// (ownedNodes, endAnchor) live on the state object so the body can update
+// them across re-fires.
+function unsafeHTMLValueBody(state, comp) {
+  if (comp.firstRun && state.hydrating) {
+    state.compute(state);
+    return;
+  }
+  const value = state.compute(state);
+  if (state.ownedNodes !== null) {
+    for (let i = 0; i < state.ownedNodes.length; i++) { state.ownedNodes[i].remove(); }
+  }
+  state.ownedNodes = null;
+  if (state.anchor.data !== '') { state.anchor.data = ''; }
+  const html = value == null || value[UNSAFE_HTML] == null
+    ? ''
+    : String(value[UNSAFE_HTML]);
+  if (html) {
+    const parsed = state.renderer.parseHTML(html);
+    const nodes = [...parsed.childNodes];
+    state.anchor.after(parsed);
+    state.ownedNodes = nodes;
+    if (!state.endAnchor) { state.endAnchor = document.createTextNode(''); }
+    nodes[nodes.length - 1].after(state.endAnchor);
+  }
+  else if (state.endAnchor) {
+    state.endAnchor.remove();
+    state.endAnchor = null;
+  }
+}
+
 function makeValueDispatch(config) {
   const create = config.create;
   const compute = config.compute;
@@ -306,27 +352,30 @@ function makeValueDispatch(config) {
     const { comment, node, data, scope, renderer, hydrating } = ctx;
 
     // self stays null when there's no `create` hook — skips the empty-obj
-    // allocation. Authors who do declare `create` get its return value as
-    // `bag.self` per the standard contract.
+    // allocation. Authors who do declare `create` get its return value
+    // through `state.self` (compute reads state directly).
     const self = create ? (create.call(config, ctx) || null) : null;
-
-    // Reusable bag — same hidden-class shape across firstRun and every
-    // subsequent re-fire. comment is filled for the hydrate-call use case
-    // and stays as a dead field on the update path (V8 hidden class is
-    // shared either way).
-    const bag = { node, data, self, renderer, comment };
 
     let anchor;
     let ownedNodes = null;
-    let endAnchor = null;
 
     if (hydrating && hydrate) {
-      // Hydrate hook adopts server DOM and reports back the reactive node
-      // identity. Wrap in Reaction.nonreactive so any signal reads inside
-      // the hook (e.g. lookupExpression for serverValue splitting) don't
-      // register on a parent block's outer Reaction — the per-expression
-      // Reaction below registers fresh deps via firstRun.
-      const adopted = Reaction.nonreactive(() => hydrate.call(config, bag));
+      // Hydrate uses the same state shape compute will see at fire time,
+      // plus a `comment` field for the adoption logic. `this === config`
+      // inside the hook so authors can call helpers via `this.X(...)`.
+      const hydrateState = {
+        compute,
+        node,
+        data,
+        renderer,
+        anchor: null,
+        hydrating: true,
+        self,
+        ownedNodes: null,
+        endAnchor: null,
+        comment,
+      };
+      const adopted = Reaction.nonreactive(() => hydrate.call(config, hydrateState));
       anchor = adopted.anchor;
       ownedNodes = adopted.ownedNodes || null;
     }
@@ -335,54 +384,37 @@ function makeValueDispatch(config) {
       comment.parentNode.replaceChild(anchor, comment);
     }
 
-    // Specialize the Reaction body by AST flag. `node.unsafeHTML` is set
-    // at compile time, so each dispatch picks one of two bodies and V8
-    // optimizes them independently — primitive expressions don't pay an
-    // unsafeHTML branch per fire, and unsafeHTML expressions don't pay a
-    // primitive-path branch. The primitive body matches the pre-unification
-    // bindTextExpression shape: compute + nullish coalesce + write.
-    if (node.unsafeHTML) {
-      scope.reaction(anchor, (comp) => {
-        if (comp.firstRun && hydrating) {
-          compute.call(config, bag);
-          return;
-        }
-        const value = compute.call(config, bag);
-        if (ownedNodes !== null) {
-          for (let i = 0; i < ownedNodes.length; i++) { ownedNodes[i].remove(); }
-        }
-        ownedNodes = null;
-        if (anchor.data !== '') { anchor.data = ''; }
-        const html = value == null || value[UNSAFE_HTML] == null
-          ? ''
-          : String(value[UNSAFE_HTML]);
-        if (html) {
-          const parsed = renderer.parseHTML(html);
-          const nodes = [...parsed.childNodes];
-          anchor.after(parsed);
-          ownedNodes = nodes;
-          if (!endAnchor) { endAnchor = document.createTextNode(''); }
-          nodes[nodes.length - 1].after(endAnchor);
-        }
-        else if (endAnchor) {
-          endAnchor.remove();
-          endAnchor = null;
-        }
-      });
-    }
-    else {
-      // Primitive-only body — equivalent to pre-unification wireTextReaction.
-      // No dedup; signal.set's own equality check suppresses redundant
-      // fires upstream, and the browser no-ops identical text-node writes.
-      // Three ops per fire: compute + nullish coalesce + write.
-      scope.reaction(anchor, (comp) => {
-        if (comp.firstRun && hydrating) {
-          compute.call(config, bag);
-          return;
-        }
-        anchor.data = compute.call(config, bag) ?? '';
-      });
-    }
+    // Per-dispatch state — replaces both the per-dispatch bag object AND
+    // the per-dispatch Reaction-body closure that the bag pattern would
+    // need. Same hidden-class shape across primitive and unsafeHTML
+    // variants (V8 keeps a single hidden class for all kind:'value'
+    // dispatches; the body functions destructure / access only the fields
+    // they need).
+    const state = {
+      compute,
+      node,
+      data,
+      renderer,
+      anchor,
+      hydrating,
+      self,
+      ownedNodes,
+      endAnchor: null,
+    };
+
+    // Inline the isConnected guard rather than going through
+    // scope.reaction — that route would allocate an additional wrapper
+    // closure around the user body. The body itself (primitiveValueBody /
+    // unsafeHTMLValueBody) is module-level, so we save one closure
+    // allocation per dispatch compared to the closure-capture pattern.
+    const body = node.unsafeHTML ? unsafeHTMLValueBody : primitiveValueBody;
+    scope.track(Reaction.create((comp) => {
+      if (!comp.firstRun && !anchor.isConnected) {
+        comp.stop();
+        return;
+      }
+      body(state, comp);
+    }));
   }
 
   if (config.evaluateText) {
