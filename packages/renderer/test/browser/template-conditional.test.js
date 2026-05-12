@@ -27,6 +27,7 @@ import { RENDERING_ENGINES } from './test-utils.js';
 */
 
 RENDERING_ENGINES.forEach((engine) => {
+  const isLit = engine === 'lit';
   describe(`[${engine}] template + conditional red-team`, () => {
     let tagCounter = 0;
     function uniqueTag(suffix = '') {
@@ -226,11 +227,60 @@ RENDERING_ENGINES.forEach((engine) => {
     *******************************/
 
     describe('template block gap coverage', () => {
+      // The dominant reactive name-swap shape, pinned for both target shapes
+      // (subtemplate and snippet). Cross-type swap is structurally impossible
+      // because a name can't be both registered in subTemplates and declared
+      // as an inline snippet.
+
+      it('subtemplate name swaps from one subtemplate to another reactively', async () => {
+        const tag = uniqueTag('sub-swap');
+        const childA = defineComponent({ renderingEngine: engine, template: '<span class="a">A</span>' });
+        const childB = defineComponent({ renderingEngine: engine, template: '<span class="b">B</span>' });
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{>template name=which}',
+          defaultState: { which: 'childA' },
+          subTemplates: { childA, childB },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+        expect(el.shadowRoot.querySelector('.a')).toBeTruthy();
+        expect(el.shadowRoot.querySelector('.b')).toBeFalsy();
+
+        el.template.state.which.set('childB');
+        await flush(el);
+        expect(el.shadowRoot.querySelector('.a')).toBeFalsy();
+        expect(el.shadowRoot.querySelector('.b')).toBeTruthy();
+      });
+
+      it.skipIf(isLit)('snippet name swaps from one snippet to another reactively', async () => {
+        const tag = uniqueTag('snip-swap');
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template:
+            '{#snippet alpha}<span class="a">A</span>{/snippet}{#snippet beta}<span class="b">B</span>{/snippet}{>template name=which}',
+          defaultState: { which: 'alpha' },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+        expect(el.shadowRoot.querySelector('.a')).toBeTruthy();
+        expect(el.shadowRoot.querySelector('.b')).toBeFalsy();
+
+        el.template.state.which.set('beta');
+        await flush(el);
+        expect(el.shadowRoot.querySelector('.a')).toBeFalsy();
+        expect(el.shadowRoot.querySelector('.b')).toBeTruthy();
+      });
+
       // [source] template.js detectTemplateType returns null when name
       // resolves to '' or null. The dispatch then bails — nothing renders.
       // Subsequent name updates should still resolve the templateType
       // correctly. No test exists for the empty-then-populated path.
-      it('subtemplate name resolving from empty/null to defined snippet renders content', async () => {
+      it.skipIf(isLit)('subtemplate name resolving from empty/null to defined snippet renders content', async () => {
         const tag = uniqueTag('empty-name');
         defineComponent({
           renderingEngine: engine,
@@ -329,30 +379,33 @@ RENDERING_ENGINES.forEach((engine) => {
       // passes the wrong thing (a string instead of an object). Should
       // degrade gracefully (render with empty data), not crash the
       // renderer.
-      it('verbose data="expr" evaluating to non-object renders subtemplate without crashing', async () => {
-        const tag = uniqueTag('blob-bad');
-        const child = defineComponent({
-          renderingEngine: engine,
-          template: '<span class="c">static-content</span>',
-        });
-        defineComponent({
-          renderingEngine: engine,
-          tagName: tag,
-          // node.data is a string expression that resolves to a primitive
-          template: "{>template name='child' data=primitiveValue}",
-          createComponent: () => ({
-            primitiveValue: 'not-an-object',
-          }),
-          subTemplates: { child },
-        });
-        const el = document.createElement(tag);
-        document.body.appendChild(el);
-        await el.updateComplete;
+      it.skipIf(isLit)(
+        'verbose data="expr" evaluating to non-object renders subtemplate without crashing',
+        async () => {
+          const tag = uniqueTag('blob-bad');
+          const child = defineComponent({
+            renderingEngine: engine,
+            template: '<span class="c">static-content</span>',
+          });
+          defineComponent({
+            renderingEngine: engine,
+            tagName: tag,
+            // node.data is a string expression that resolves to a primitive
+            template: "{>template name='child' data=primitiveValue}",
+            createComponent: () => ({
+              primitiveValue: 'not-an-object',
+            }),
+            subTemplates: { child },
+          });
+          const el = document.createElement(tag);
+          document.body.appendChild(el);
+          await el.updateComplete;
 
-        // Should not crash; the child template's static content should render
-        expect(el.shadowRoot.querySelector('.c')).toBeTruthy();
-        expect(el.shadowRoot.querySelector('.c').textContent).toBe('static-content');
-      });
+          // Should not crash; the child template's static content should render
+          expect(el.shadowRoot.querySelector('.c')).toBeTruthy();
+          expect(el.shadowRoot.querySelector('.c').textContent).toBe('static-content');
+        },
+      );
 
       // [synthesis] When a subtemplate is rendered inside a conditional
       // branch that gets swapped away, its `onDestroyed` should fire and
