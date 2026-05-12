@@ -325,10 +325,7 @@ function makeValueDispatch(config) {
       // identity. Wrap in Reaction.nonreactive so any signal reads inside
       // the hook (e.g. lookupExpression for serverValue splitting) don't
       // register on a parent block's outer Reaction — the per-expression
-      // Reaction below registers fresh deps via firstRun. Hydrate keeps
-      // `this === config` so authors can reach helpers (e.g.
-      // `this.adoptValueTextNode`) — comment-position adoption is the cold
-      // path; helpers are useful there.
+      // Reaction below registers fresh deps via firstRun.
       const adopted = Reaction.nonreactive(() => hydrate.call(config, bag));
       anchor = adopted.anchor;
       ownedNodes = adopted.ownedNodes || null;
@@ -337,15 +334,6 @@ function makeValueDispatch(config) {
       anchor = document.createTextNode('');
       comment.parentNode.replaceChild(anchor, comment);
     }
-    // Drop the comment reference from the captured bag — it's now detached
-    // from the DOM (either because hydrate adopted the surrounding nodes
-    // and removed/replaced the marker, or because we just did the
-    // replaceChild above). Letting bag.comment continue to point at a
-    // detached node would keep ~N detached Comment nodes alive across the
-    // lifetime of every Reaction in this block — measurable on bulk-mount
-    // benches like krausest:append-1k. Same hidden class either way; just
-    // a null pointer in place of the dead reference.
-    bag.comment = null;
 
     // Specialize the Reaction body by AST flag. `node.unsafeHTML` is set
     // at compile time, so each dispatch picks one of two bodies and V8
@@ -353,19 +341,13 @@ function makeValueDispatch(config) {
     // unsafeHTML branch per fire, and unsafeHTML expressions don't pay a
     // primitive-path branch. The primitive body matches the pre-unification
     // bindTextExpression shape: compute + nullish coalesce + write.
-    //
-    // `compute(bag)` is called as a plain function — the kind:'value'
-    // contract requires compute to be `this`-free (helpers are reachable
-    // via this binding inside hydrate, not compute). The direct call skips
-    // the Function.prototype.call indirection at every Reaction fire,
-    // ~1-2μs each at steady state.
     if (node.unsafeHTML) {
       scope.reaction(anchor, (comp) => {
         if (comp.firstRun && hydrating) {
-          compute(bag);
+          compute.call(config, bag);
           return;
         }
-        const value = compute(bag);
+        const value = compute.call(config, bag);
         if (ownedNodes !== null) {
           for (let i = 0; i < ownedNodes.length; i++) { ownedNodes[i].remove(); }
         }
@@ -395,10 +377,10 @@ function makeValueDispatch(config) {
       // Three ops per fire: compute + nullish coalesce + write.
       scope.reaction(anchor, (comp) => {
         if (comp.firstRun && hydrating) {
-          compute(bag);
+          compute.call(config, bag);
           return;
         }
-        anchor.data = compute(bag) ?? '';
+        anchor.data = compute.call(config, bag) ?? '';
       });
     }
   }
