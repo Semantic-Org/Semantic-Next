@@ -1,33 +1,27 @@
-import { noChange } from 'lit';
+import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
-import { directive } from 'lit/directive.js';
+import { directive, PartType } from 'lit/directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
 import { isClient, wrapFunction } from '@semantic-ui/utils';
 
+import { serializeContent } from './serialize-content.js';
+
 export class ReactiveRerenderDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
+    this.partInfo = partInfo;
     this.reaction = null;
   }
 
   render(condition) {
     this.condition = condition;
 
-    // Reuse existing reaction — signals handle updates
     if (this.reaction) {
       return noChange;
     }
 
-    // Create new reaction on client
-    if (isClient) {
-      this.watchChanges();
-    }
-
-    return this.condition.content();
-  }
-
-  watchChanges() {
+    let initialFormatted = nothing;
     const context = {
       message: `rerender block: {#${this.condition.key ? 'guard' : 'rerender'} ${
         this.condition.keyString || this.condition.expressionString
@@ -35,32 +29,49 @@ export class ReactiveRerenderDirective extends AsyncDirective {
       rerender: this.condition,
     };
 
-    this.reaction = Reaction.create((computation) => {
-      if (!this.isConnected) {
-        computation.stop();
-        return;
-      }
+    if (isClient) {
+      this.reaction = Reaction.create((computation) => {
+        if (!this.isConnected) {
+          computation.stop();
+          return;
+        }
 
-      // this guards against the return value of a reactive expression the "key"
-      // {#guard expression} -> key=expression
-      // {#rerender key=expression} -> key=expressin`
-      if (this.condition.keyString) {
-        Reaction.guard(() => this.getValue(this.condition.key()));
-      }
+        // Outer guard/key reactivity.
+        // {#guard expression} -> key=expression
+        // {#rerender key=expression} -> key=expression
+        if (this.condition.keyString) {
+          Reaction.guard(() => this.getValue(this.condition.key()));
+        }
+        if (this.condition.expressionString) {
+          this.getValue(this.condition.expression());
+        }
 
-      // {#rerender expression} - naively add a reactive context to this reaction
-      if (this.condition.expressionString) {
-        this.getValue(this.condition.expression());
-      }
+        const formatted = this.formatForPart(this.condition.content());
+        if (computation.firstRun) {
+          initialFormatted = formatted;
+        }
+        else {
+          this.setValue(formatted);
+        }
+      }, { context });
+    }
+    else {
+      initialFormatted = this.formatForPart(this.condition.content());
+    }
 
-      if (!computation.firstRun) {
-        this.setValue(this.condition.content());
-      }
-    }, { context });
+    return initialFormatted;
   }
 
-  // to make sure signal triggers reactivity
-  // we want to call accessor from our reaction
+  formatForPart(content) {
+    switch (this.partInfo.type) {
+      case PartType.ATTRIBUTE:
+      case PartType.BOOLEAN_ATTRIBUTE:
+        return serializeContent(content);
+      default:
+        return content;
+    }
+  }
+
   getValue(expression) {
     return wrapFunction(expression)();
   }

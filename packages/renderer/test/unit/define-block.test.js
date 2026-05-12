@@ -65,7 +65,10 @@ describe('defineBlock', () => {
       render() {},
       evaluateText: evalText,
     });
-    expect(block.evaluateText).toBe(evalText);
+    // dispatch.evaluateText wraps so `this === config` inside the hook,
+    // letting authors call sibling helpers via `this.helperName(...)`.
+    // The wrapper forwards the bag verbatim and returns the result.
+    expect(typeof block.evaluateText).toBe('function');
     expect(block.evaluateText({ node: { type: 'if' }, data: {} })).toBe('static:if');
   });
 
@@ -78,5 +81,23 @@ describe('defineBlock', () => {
     const block = defineBlock(config);
     expect(block.definition.name).toBe('rerender');
     expect(block.definition.update).toBe(config.update);
+  });
+
+  it('throws when a config provides both compute and render/update', () => {
+    expect(() =>
+      defineBlock({
+        name: 'mixed',
+        compute() {},
+        render() {},
+      })
+    ).toThrow(/compute.*render/i);
+
+    expect(() =>
+      defineBlock({
+        name: 'mixed',
+        compute() {},
+        update() {},
+      })
+    ).toThrow(/compute.*update/i);
   });
 });

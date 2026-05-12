@@ -1,8 +1,10 @@
 import { Reaction } from '@semantic-ui/reactivity';
-import { each, isArray, isClient, isObject } from '@semantic-ui/utils';
+import { each, isClient } from '@semantic-ui/utils';
 import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive, PartType } from 'lit/directive.js';
+
+import { serializeContent } from './serialize-content.js';
 
 export class ReactiveConditionalDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -20,12 +22,20 @@ export class ReactiveConditionalDirective extends AsyncDirective {
     }
 
     let content = nothing;
+    let initialFormatted = nothing;
     let context = {
       message: `if/else statement: {#if ${conditional.expression}}`,
       conditional: conditional,
     };
 
-    // Create a new reaction that watches for reactive changes on client
+    // Create a new reaction that watches for reactive changes on client.
+    // formatForPart is invoked INSIDE the reaction (even on firstRun) so
+    // its serialization reads — which call .value() on inner directive
+    // markers — register signal deps on this reaction. Without that,
+    // inner expressions in a branch never propagate signal changes
+    // through this directive's setValue.
+    // matchIndex gating is intentionally absent — content can change
+    // within the same branch when inner expressions update.
     if (isClient) {
       this.reaction = Reaction.create((comp) => {
         if (!this.isConnected) {
@@ -34,11 +44,14 @@ export class ReactiveConditionalDirective extends AsyncDirective {
         }
 
         const result = this.getBranch(this.conditional);
-        const matchIndex = result.matchIndex;
+        this.matchIndex = result.matchIndex;
         content = result.content;
-        if (!comp.firstRun && this.matchIndex !== matchIndex) {
-          this.matchIndex = matchIndex;
-          this.setValue(content);
+        const formatted = this.formatForPart(content);
+        if (comp.firstRun) {
+          initialFormatted = formatted;
+        }
+        else {
+          this.setValue(formatted);
         }
         return content;
       }, { context });
@@ -46,9 +59,10 @@ export class ReactiveConditionalDirective extends AsyncDirective {
     else {
       const result = this.getBranch(this.conditional);
       content = result.content;
+      initialFormatted = this.formatForPart(content);
     }
 
-    return this.formatForPart(content);
+    return initialFormatted;
   }
 
   getBranch(conditional) {
@@ -87,41 +101,10 @@ export class ReactiveConditionalDirective extends AsyncDirective {
     switch (this.partInfo.type) {
       case PartType.ATTRIBUTE:
       case PartType.BOOLEAN_ATTRIBUTE:
-        return this.serializeContent(content);
-
-      case PartType.CHILD:
-      case PartType.PROPERTY:
-      case PartType.EVENT:
-      case PartType.ELEMENT:
+        return serializeContent(content);
       default:
-        // For element content, return as-is (TemplateResult objects are fine here)
         return content;
     }
-  }
-
-  serializeContent(content) {
-    // Handle lit's nothing value
-    if (content === nothing) {
-      return '';
-    }
-
-    if (content?.strings) {
-      // For simple conditionals in attributes, just join the static strings
-      // This works for basic cases like {#if condition}text{/if}
-      return content.strings.join('');
-    }
-
-    // Handle arrays and objects like reactive-data does
-    if (isArray(content) || isObject(content)) {
-      try {
-        return JSON.stringify(content);
-      }
-      catch (e) {
-        return String(content);
-      }
-    }
-
-    return String(content);
   }
 
   disconnected() {

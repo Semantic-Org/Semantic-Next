@@ -41,7 +41,7 @@ RENDERING_ENGINES.forEach(engine => {
   *******************************/
 
     describe(`[${engine}] component contract — lifecycle events`, () => {
-      it('fires created, rendered, and updated on first render', async () => {
+      it('fires created and rendered on first render, but not updated', async () => {
         const order = [];
         const tag = uniqueTag();
         defineComponent({
@@ -57,10 +57,15 @@ RENDERING_ENGINES.forEach(engine => {
         const rendered = $(el).onNext('rendered');
         document.body.appendChild(el);
         await rendered;
+        // Wait long enough for any stray microtask / setTimeout to fire.
+        await new Promise(r => setTimeout(r, 100));
 
         expect(order).toContain('created');
         expect(order).toContain('rendered');
         expect(order.indexOf('created')).toBeLessThan(order.indexOf('rendered'));
+        // updated is reserved for post-mount reactive changes; first render
+        // uses the `rendered` lifecycle.
+        expect(order).not.toContain('updated');
       });
 
       it('fires destroyed on disconnect', async () => {

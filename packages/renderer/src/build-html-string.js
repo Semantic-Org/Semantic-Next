@@ -267,10 +267,19 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
             rawTextNodes.push(node);
             break;
           }
-          // Block-level directives: if, each, async, rerender, template
+          // Attribute-position blocks emit the same __suiN__ shape as
+          // attribute-position expressions so they share the attribute-
+          // binding path — comment markers in an attribute value become
+          // literal text, not Comment nodes.
           const id = entries.length;
-          htmlString += `<!--${BLOCK_MARKER}${id}-->`;
-          const entry = { id, type: node.type, node };
+          const classification = analyzePosition(htmlBuffer);
+          if (classification.insideTag) {
+            htmlString += `${ATTR_MARKER_PREFIX}${id}${ATTR_MARKER_SUFFIX}`;
+          }
+          else {
+            htmlString += `<!--${BLOCK_MARKER}${id}-->`;
+          }
+          const entry = { id, type: node.type, node, classification };
           if (insideSVG) { entry.isSVG = true; }
           entries.push(entry);
           break;
