@@ -28,12 +28,12 @@ const PLACE_INIT = Symbol('place:init');
 // as a sibling sequence" — distinguished from AST arrays (rendered via
 // renderAST) and primitives (written to a text node). Compute returns
 // `unsafeHTML(value)` from a block when it wants place to parse-and-insert.
-const UNSAFE_HTML = Symbol('place:unsafeHTML');
+export const UNSAFE_HTML = Symbol('place:unsafeHTML');
 export function unsafeHTML(value) {
   return { [UNSAFE_HTML]: value };
 }
 
-function isUnsafeHTML(content) {
+export function isUnsafeHTML(content) {
   return content != null && typeof content === 'object' && UNSAFE_HTML in content;
 }
 

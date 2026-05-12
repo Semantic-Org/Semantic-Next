@@ -7,22 +7,22 @@ import { registerBlock } from './registry.js';
 
   Expression block — text-position dispatch.
 
-  Every text-position `{expression}` reaches the renderer through this
-  block via the standard defineBlock contract: framework constructs a
-  DynamicRegion, wires the outer Reaction, calls compute → place. No
-  separate "value-emitting" dispatch shape — the bag.place primitive is
-  polymorphic on content type (primitive → text-node write; unsafeHTML
-  wrapper → parse-and-insert; AST array → renderAST + setContent).
+  Opts into defineBlock's lean value-emitter path via `kind: 'value'`. The
+  renderer skips DynamicRegion allocation for this shape; the lean dispatch
+  manages a single anchor text node (which IS the value text node in the
+  primitive case) and an ownedNodes list for unsafeHTML payloads. Authoring
+  shape is identical to a region-block — compute returns the value, hydrate
+  adopts server DOM, helpers live on the config and are reached via `this`.
 
   Three node flags compute branches on:
-    • unsafeHTML  — wrap evaluated value as `unsafeHTML(value)`; place
-                    parses the string as HTML and inserts the parsed
-                    nodes as region.ownedNodes.
+    • unsafeHTML  — wrap evaluated value as `unsafeHTML(value)`; the lean
+                    dispatch parses the string as HTML and inserts the
+                    parsed nodes as ownedNodes after the anchor.
     • literalValue — read via lookupTokenValue (no auto-invoke for
                     functions). Used by `{#fn handler}` so the function
                     reference isn't called for its return value.
-    • default     — read via lookupExpression; return as a primitive;
-                    place writes a single owned text node.
+    • default     — read via renderer.lookupExpression; return as a
+                    primitive; the lean dispatch writes anchor.data.
 
   Attribute-position expressions are NOT dispatched here — they're walked
   by bindAttribute in attribute-binding.js as part of an attribute's
@@ -33,6 +33,7 @@ import { registerBlock } from './registry.js';
 
 const expression = defineBlock({
   name: 'expression',
+  kind: 'value',
   syntax: (node) => `{${node.value}}`,
 
   // Stash evaluator for the literalValue path (lookupTokenValue doesn't
@@ -42,56 +43,54 @@ const expression = defineBlock({
     return { evaluator: renderer.evaluator };
   },
 
-  compute({ node, data, self, lookupExpression }) {
+  compute({ node, data, self, renderer }) {
     if (node.literalValue) {
       return self.evaluator.lookupTokenValue(node.value, data);
     }
-    const value = lookupExpression(node.value);
+    const value = renderer.lookupExpression(node.value, data);
     if (node.unsafeHTML) {
       return unsafeHTML(value);
     }
     return value;
   },
 
-  // Hydrate adopts the server-rendered DOM rather than rebuilding. For
-  // default text expressions the server emits `<!--sui:v1:N-->VALUE` and
-  // the text node may concatenate VALUE with following static text — we
-  // split at the server-value boundary so the reactive node covers only
-  // VALUE. For unsafeHTML the server emitted the parsed HTML payload as
-  // siblings; we adopt them via region.ownedNodes. The matched content
-  // is returned so defineBlock primes place via match() — first
-  // compute-driven update tick then dedups instead of re-rendering.
-  hydrate({ node, data, region, self, lookupExpression }) {
+  // Hydrate adopts the server-rendered DOM rather than rebuilding. Returns
+  // { anchor, ownedNodes, matched } so the lean dispatch wires its Reaction
+  // on the right node and primes lastContent against `matched` for dedup.
+  //
+  // For default text expressions the server emits `<!--sui:v1:N-->VALUE`
+  // where VALUE may merge with following static text into one text node —
+  // we split at the boundary so the reactive node covers only VALUE. For
+  // unsafeHTML the server emitted the parsed HTML payload as siblings; we
+  // collect them as ownedNodes and replace the comment with an empty
+  // positional anchor.
+  hydrate({ node, data, self, renderer, comment }) {
     if (node.literalValue) {
-      // One-shot; nothing reactive to set up. Adopt the server text node
-      // (or create one if missing) so place finds it on later writes.
       const value = self.evaluator.lookupTokenValue(node.value, data);
-      this.adoptValueTextNode(region, String(value ?? ''));
-      return value;
+      const anchor = this.adoptValueTextNode(comment, String(value ?? ''));
+      return { anchor, ownedNodes: null, matched: value };
     }
 
     if (node.unsafeHTML) {
-      // Collect server-emitted siblings up to the next sui marker as
-      // ownedNodes. place's unsafeHTML branch clears/replaces ownedNodes
-      // on subsequent writes; pre-populating here is the adopt step.
-      region.ownedNodes = this.collectServerSiblings(region.anchor);
-      if (region.ownedNodes.length > 0) { region.placeEndAnchor(); }
-      return unsafeHTML(lookupExpression(node.value));
+      const ownedNodes = this.collectServerSiblings(comment);
+      const anchor = document.createTextNode('');
+      comment.parentNode.replaceChild(anchor, comment);
+      return { anchor, ownedNodes, matched: unsafeHTML(renderer.lookupExpression(node.value, data)) };
     }
 
-    const serverValue = String(lookupExpression(node.value) ?? '');
-    this.adoptValueTextNode(region, serverValue);
-    return serverValue;
+    const serverValue = String(renderer.lookupExpression(node.value, data) ?? '');
+    const anchor = this.adoptValueTextNode(comment, serverValue);
+    return { anchor, ownedNodes: null, matched: serverValue };
   },
 
   // ---- helpers ----
 
-  // Walk forward from `anchor` collecting siblings until the next sui
-  // marker (open block, close block, or expression). These are the
-  // server-emitted payload nodes belonging to the current region.
-  collectServerSiblings(anchor) {
+  // Walk forward from `from` collecting siblings until the next sui marker
+  // (open block, close block, or expression). These are the server-emitted
+  // payload nodes belonging to the current expression.
+  collectServerSiblings(from) {
     const collected = [];
-    let next = anchor.nextSibling;
+    let next = from.nextSibling;
     while (
       next && !(next.nodeType === Node.COMMENT_NODE
         && (isExpressionMarker(next.data) || isBlockOpen(next.data) || isBlockClose(next.data)))
@@ -102,25 +101,26 @@ const expression = defineBlock({
     return collected;
   },
 
-  // Find or create the single text node that holds this expression's
-  // value. For server-hydrated cases, the server's text node sits right
-  // after the anchor and may include trailing static text — split at the
-  // serverValue boundary so the reactive node covers only the value.
-  adoptValueTextNode(region, serverValue) {
-    const nextNode = region.anchor.nextSibling;
+  // Adopt (or create) the text node that holds this expression's value,
+  // replacing the comment marker. For server-hydrated cases, the text
+  // node sits right after the comment and may include trailing static
+  // text — split at the serverValue boundary so the reactive node covers
+  // only the value.
+  adoptValueTextNode(comment, serverValue) {
+    const nextNode = comment.nextSibling;
     let textNode;
     if (nextNode && nextNode.nodeType === Node.TEXT_NODE) {
       if (nextNode.data.length > serverValue.length && nextNode.data.startsWith(serverValue)) {
         nextNode.splitText(serverValue.length);
       }
       textNode = nextNode;
+      comment.remove();
     }
     else {
       textNode = document.createTextNode(serverValue);
-      region.anchor.after(textNode);
+      comment.replaceWith(textNode);
     }
-    region.ownedNodes = [textNode];
-    region.placeEndAnchor();
+    return textNode;
   },
 });
 

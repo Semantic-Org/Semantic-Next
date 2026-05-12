@@ -321,6 +321,12 @@ export class Renderer {
     const { node, isSVG } = entry;
     const block = getBlock(node.type);
     if (!block) { return; }
+    if (block.shape === 'value') {
+      // Value-shape blocks (e.g. expression) manage their own anchor and
+      // ownedNodes — DR allocation would be discarded by the lean path.
+      block({ comment, node, data, scope, renderer: this, isSVG, hydrating: false });
+      return;
+    }
     const region = new DynamicRegion(comment.parentNode, comment);
     block({ node, data, scope, region, renderer: this, isSVG, hydrating: false });
   }
@@ -377,14 +383,23 @@ export class Renderer {
       if (!entry) { continue; }
 
       if (type === 'expression') {
-        // Expression entries are dispatched via defineBlock just like
-        // block entries — the marker is single, so the region is
-        // constructed here (no close marker / serverMeta to parse). The
-        // expression block's hydrate hook adopts the server-emitted
-        // value text node (or unsafeHTML siblings) into region.ownedNodes
-        // before returning the matched content to prime place.
+        // Expression entries are dispatched via the registry. Value-shape
+        // blocks adopt server DOM directly from the comment marker — no
+        // DR pre-allocation. The lean dispatch reports back the reactive
+        // anchor identity from its hydrate hook.
         const block = getBlock(entry.node.type);
-        if (block) {
+        if (block?.shape === 'value') {
+          block({
+            comment,
+            node: entry.node,
+            data,
+            scope,
+            renderer: this,
+            isSVG: entry.isSVG,
+            hydrating: true,
+          });
+        }
+        else if (block) {
           const region = new DynamicRegion(comment.parentNode, comment);
           block({
             node: entry.node,
