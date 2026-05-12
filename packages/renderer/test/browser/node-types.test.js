@@ -75,6 +75,28 @@ RENDERING_ENGINES.forEach(engine => {
       expect(el.shadowRoot.querySelector('b')).not.toBeNull();
       expect(el.shadowRoot.querySelector('em')).toBeNull();
     });
+
+    it('should not crash when unsafeHTML content parses to zero child nodes', async () => {
+      const tag = uniqueTag();
+      defineComponent({
+        tagName: tag,
+        renderingEngine: engine,
+        template: '<div>{#html doctype}</div>',
+        createComponent: () => ({
+          // Doctype declarations are document-level — a <template> strips
+          // them, leaving template.content with zero child nodes. The
+          // unsafeHTML payload writer must tolerate this without crashing.
+          doctype: '<!DOCTYPE html>',
+        }),
+      });
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      await el.rendered;
+
+      const div = el.shadowRoot.querySelector('div');
+      expect(div).not.toBeNull();
+      expect(div.textContent).toBe('');
+    });
   });
 
   /*******************************

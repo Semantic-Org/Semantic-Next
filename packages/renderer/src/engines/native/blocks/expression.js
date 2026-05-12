@@ -7,22 +7,20 @@ import { registerBlock } from './registry.js';
 
   Expression block — text-position dispatch.
 
-  Opts into defineBlock's lean value-emitter path via `kind: 'value'`. The
-  renderer skips DynamicRegion allocation for this shape; the lean dispatch
+  Opts into defineBlock's lean value-emitter path via `type: 'value'`. The
+  renderer skips DynamicRegion allocation for this shape; the dispatch
   manages a single anchor text node (which IS the value text node in the
-  primitive case) and an ownedNodes list for unsafeHTML payloads. Authoring
-  shape is identical to a region-block — compute returns the value, hydrate
-  adopts server DOM, helpers live on the config and are reached via `this`.
+  primitive case) and an ownedNodes list for unsafeHTML payloads.
 
-  Three node flags compute branches on:
-    • unsafeHTML  — wrap evaluated value as `unsafeHTML(value)`; the lean
-                    dispatch parses the string as HTML and inserts the
-                    parsed nodes as ownedNodes after the anchor.
+  Compute has two node-flag branches plus a default path:
+    • unsafeHTML   — wrap evaluated value as `unsafeHTML(value)`; the
+                     dispatch parses the string as HTML and inserts the
+                     parsed nodes as ownedNodes after the anchor.
     • literalValue — read via lookupTokenValue (no auto-invoke for
-                    functions). Used by `{#fn handler}` so the function
-                    reference isn't called for its return value.
-    • default     — read via renderer.lookupExpression; return as a
-                    primitive; the lean dispatch writes anchor.data.
+                     functions). Used by `{#fn handler}` so the function
+                     reference isn't called for its return value.
+    • default      — read via renderer.lookupExpression; return as a
+                     primitive; the dispatch writes anchor.data.
 
   Attribute-position expressions are NOT dispatched here — they're walked
   by bindAttribute in attribute-binding.js as part of an attribute's
@@ -33,8 +31,13 @@ import { registerBlock } from './registry.js';
 
 const expression = defineBlock({
   name: 'expression',
-  kind: 'value',
+  type: 'value',
   syntax: (node) => `{${node.value}}`,
+
+  // {#fn marker} returns a function reference as-is. There's no path that
+  // reads a Signal during compute, so the dispatch skips Reaction wiring
+  // entirely for these markers.
+  static: (node) => Boolean(node.literalValue),
 
   // No `create` hook — renderer.evaluator is reached directly via the bag.
   // The literalValue path uses `lookupTokenValue` because it doesn't
@@ -52,8 +55,9 @@ const expression = defineBlock({
   },
 
   // Hydrate adopts the server-rendered DOM rather than rebuilding. Returns
-  // { anchor, ownedNodes, matched } so the lean dispatch wires its Reaction
-  // on the right node and primes lastContent against `matched` for dedup.
+  // { anchor, ownedNodes } — anchor becomes the dispatch's reactive text
+  // node; ownedNodes (unsafeHTML only) tracks the parsed payload for
+  // replacement on update.
   //
   // For default text expressions the server emits `<!--sui:v1:N-->VALUE`
   // where VALUE may merge with following static text into one text node —
@@ -65,22 +69,20 @@ const expression = defineBlock({
     if (node.literalValue) {
       const value = renderer.evaluator.lookupTokenValue(node.value, data);
       const anchor = this.adoptValueTextNode(comment, String(value ?? ''));
-      return { anchor, ownedNodes: null, matched: value };
+      return { anchor, ownedNodes: null };
     }
 
     if (node.unsafeHTML) {
       const ownedNodes = this.collectServerSiblings(comment);
       const anchor = document.createTextNode('');
       comment.parentNode.replaceChild(anchor, comment);
-      return { anchor, ownedNodes, matched: unsafeHTML(renderer.lookupExpression(node.value, data)) };
+      return { anchor, ownedNodes };
     }
 
     const serverValue = String(renderer.lookupExpression(node.value, data) ?? '');
     const anchor = this.adoptValueTextNode(comment, serverValue);
-    return { anchor, ownedNodes: null, matched: serverValue };
+    return { anchor, ownedNodes: null };
   },
-
-  // ---- helpers ----
 
   // Walk forward from `from` collecting siblings until the next sui marker
   // (open block, close block, or expression). These are the server-emitted

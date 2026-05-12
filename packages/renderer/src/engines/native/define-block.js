@@ -45,13 +45,10 @@ export function reportBlockError({ name, syntax, hook, err }) {
 }
 
 export function defineBlock(config) {
-  // `kind: 'value'` opts into the lean dispatch in valueDispatch.js — for
-  // blocks whose `compute` returns a primitive (or unsafeHTML wrapper, or
-  // null) rather than an AST array. The renderer sees `dispatch.shape ===
-  // 'value'` and skips the DynamicRegion allocation; the lean dispatch
-  // manages its own anchor / ownedNodes pair without DR's full machinery.
-  // Authoring shape is identical (defineBlock + compute + helpers via this).
-  if (config.kind === 'value') {
+  // `type: 'value'` selects the lean dispatch (see makeValueDispatch
+  // below). The renderer reads `dispatch.type === 'value'` and skips
+  // DynamicRegion allocation.
+  if (config.type === 'value') {
     return makeValueDispatch(config);
   }
 
@@ -262,41 +259,6 @@ export function defineBlock(config) {
   return dispatch;
 }
 
-// Lean dispatch path for `kind: 'value'` blocks (currently: expression).
-//
-// What it elides vs. the regular dispatch (per-instance, hot):
-//   • No DynamicRegion — the renderer skips the DR allocation entirely
-//     (shape flag below). The anchor IS the single value text node in
-//     the primitive case (no separate "positional" anchor), matching the
-//     pre-unification bindTextExpression shape.
-//   • No helper closures on the bag (lookupExpression / renderAST /
-//     hydrateInnerContent / hydrateInto). Authors reach renderer methods
-//     directly via the `renderer` bag field.
-//   • No makePlace (no place/match/clearOwnedSiblings closures). The
-//     Reaction body inlines the polymorphic write — primitive, unsafeHTML
-//     wrapper, or null — against the dispatch-local anchor/ownedNodes.
-//   • No safeRun wrapper. Tracing/recovery are not supported on value
-//     blocks; authors who need them should use the region path.
-//   • No notifyUpdate. Text-position expression writes never bubbled to
-//     the host's `updated` lifecycle in the pre-unification path; preserve
-//     that semantics here so coarsely-reactive subtemplates don't pay a
-//     microtask per inner-expression update.
-//   • No onDispose registration when there's no destroy hook. The Reaction
-//     stops via scope.dispose; the text node either dies with its parent
-//     (each-item removal, branch swap) or with the shadow root (unmount).
-//
-// What it preserves (so expression.js still reads like a defineBlock):
-//   • `compute({ node, data, self, renderer })` returns a primitive,
-//     `unsafeHTML(value)` wrapper, or null. Hook is called as
-//     `compute.call(config, bag)` so `this === config` and helpers on the
-//     config object are reachable as `this.helperName(...)`.
-//   • `hydrate(bag)` adopts server DOM and returns `{ anchor, ownedNodes,
-//     matched }`. `anchor` becomes the dispatch's reactive text node;
-//     `ownedNodes` populates the unsafeHTML payload tracking; `matched`
-//     primes lastContent so the first reactive re-fire dedups against it.
-//   • `create(ctx)` returns `self` — same contract.
-//   • `evaluateText` is forwarded for raw-text contexts (each / async fall
-//     through to expression's evaluator when nested in a raw-text element).
 // Module-level Reaction body for primitive value blocks. Shared across
 // every dispatch — V8 sees one function instance at the Reaction call
 // site for all primitive-shape value expressions, making the IC
@@ -311,10 +273,9 @@ function primitiveValueBody(state, comp) {
   state.anchor.data = state.compute(state) ?? '';
 }
 
-// Module-level Reaction body for unsafeHTML value blocks. Same shared-
-// function pattern as primitiveValueBody. Mutable per-dispatch fields
-// (ownedNodes, endAnchor) live on the state object so the body can update
-// them across re-fires.
+// Companion to primitiveValueBody for unsafeHTML payloads. Mutable
+// fields (ownedNodes, endAnchor) live on state so re-fires can update
+// them.
 function unsafeHTMLValueBody(state, comp) {
   if (comp.firstRun && state.hydrating) {
     state.compute(state);
@@ -325,28 +286,70 @@ function unsafeHTMLValueBody(state, comp) {
     for (let i = 0; i < state.ownedNodes.length; i++) { state.ownedNodes[i].remove(); }
   }
   state.ownedNodes = null;
-  if (state.anchor.data !== '') { state.anchor.data = ''; }
   const html = value == null || value[UNSAFE_HTML] == null
     ? ''
     : String(value[UNSAFE_HTML]);
   if (html) {
     const parsed = state.renderer.parseHTML(html);
     const nodes = [...parsed.childNodes];
-    state.anchor.after(parsed);
-    state.ownedNodes = nodes;
-    if (!state.endAnchor) { state.endAnchor = document.createTextNode(''); }
-    nodes[nodes.length - 1].after(state.endAnchor);
+    // Doctype/comment-only inputs strip to an empty fragment when parsed
+    // into a <template>. Skip the insert + endAnchor wiring rather than
+    // dereferencing nodes[-1].
+    if (nodes.length) {
+      state.anchor.after(parsed);
+      state.ownedNodes = nodes;
+      if (!state.endAnchor) { state.endAnchor = document.createTextNode(''); }
+      nodes[nodes.length - 1].after(state.endAnchor);
+      return;
+    }
   }
-  else if (state.endAnchor) {
+  if (state.endAnchor) {
     state.endAnchor.remove();
     state.endAnchor = null;
   }
 }
 
+// Lean dispatch for `type: 'value'` blocks (currently: expression). A
+// value-block's compute returns a primitive, an `unsafeHTML(value)`
+// wrapper, or null; the dispatch owns a single anchor text node plus
+// (for unsafeHTML) an ownedNodes list. The renderer reads
+// `dispatch.type === 'value'` and skips DynamicRegion allocation.
+//
+// What this path elides vs. the region dispatch:
+//   • No DynamicRegion — anchor IS the value text node in the
+//     primitive case.
+//   • No helper closures on a bag — blocks reach renderer methods
+//     directly via state.renderer.
+//   • No makePlace. The Reaction body inlines the write against
+//     dispatch-local anchor / ownedNodes.
+//   • No safeRun. Tracing/recovery aren't supported on value blocks.
+//   • No notifyUpdate on update — text-position writes don't bubble
+//     to `updated`, so coarsely reactive subtemplates don't pay a
+//     microtask per inner write.
+//   • No onDispose when the block has no destroy hook. The Reaction
+//     stops via scope.dispose; the text node dies with its parent.
+//
+// What value-blocks declare:
+//   • compute(state) — Called as state.compute(state) on every fire
+//     (no `this` binding). state = { compute, node, data, renderer,
+//     anchor, hydrating, self, ownedNodes, endAnchor }. Return a
+//     primitive, an `unsafeHTML(value)` wrapper, or null.
+//   • hydrate(state) — Called as hydrate.call(config, state) once at
+//     mount. `this === config`, so authors reach config helpers via
+//     `this.X(...)`. state adds a `comment` field for the adoption
+//     logic. Return { anchor, ownedNodes }.
+//   • create(ctx) — Returns `self`, reachable as state.self.
+//   • evaluateText — Forwarded for raw-text contexts (each/async
+//     nested in a raw-text element fall through to expression's
+//     evaluator).
+//   • static(node) — Optional predicate. Return true when a node-level
+//     flag guarantees no reactive dependencies; the dispatch skips
+//     Reaction wiring entirely and writes anchor.data once at mount.
 function makeValueDispatch(config) {
   const create = config.create;
   const compute = config.compute;
   const hydrate = config.hydrate;
+  const isStatic = config.static;
 
   function valueDispatch(ctx) {
     const { comment, node, data, scope, renderer, hydrating } = ctx;
@@ -355,14 +358,15 @@ function makeValueDispatch(config) {
     // allocation. Authors who do declare `create` get its return value
     // through `state.self` (compute reads state directly).
     const self = create ? (create.call(config, ctx) || null) : null;
+    const staticValue = isStatic ? isStatic(node) : false;
 
     let anchor;
     let ownedNodes = null;
 
     if (hydrating && hydrate) {
-      // Hydrate uses the same state shape compute will see at fire time,
-      // plus a `comment` field for the adoption logic. `this === config`
-      // inside the hook so authors can call helpers via `this.X(...)`.
+      // Hydrate gets its own state with a `comment` field for the
+      // adoption logic. `this === config` inside the hook so authors
+      // reach config helpers via `this.X(...)`.
       const hydrateState = {
         compute,
         node,
@@ -384,12 +388,9 @@ function makeValueDispatch(config) {
       comment.parentNode.replaceChild(anchor, comment);
     }
 
-    // Per-dispatch state — replaces both the per-dispatch bag object AND
-    // the per-dispatch Reaction-body closure that the bag pattern would
-    // need. Same hidden-class shape across primitive and unsafeHTML
-    // variants (V8 keeps a single hidden class for all kind:'value'
-    // dispatches; the body functions destructure / access only the fields
-    // they need).
+    // Per-dispatch state. Same hidden-class shape across primitive and
+    // unsafeHTML variants — the body functions destructure / access
+    // only the fields they need.
     const state = {
       compute,
       node,
@@ -402,11 +403,21 @@ function makeValueDispatch(config) {
       endAnchor: null,
     };
 
+    // Static dispatches skip Reaction wiring — the value is fixed for
+    // the lifetime of the dispatch, so there's no reactive surface to
+    // track. Hydration is a no-op because the adopted text node already
+    // carries the server-rendered value.
+    if (staticValue) {
+      if (!hydrating) {
+        anchor.data = String(compute(state) ?? '');
+      }
+      return;
+    }
+
     // Inline the isConnected guard rather than going through
-    // scope.reaction — that route would allocate an additional wrapper
-    // closure around the user body. The body itself (primitiveValueBody /
-    // unsafeHTMLValueBody) is module-level, so we save one closure
-    // allocation per dispatch compared to the closure-capture pattern.
+    // scope.reaction (which would wrap the body in another closure per
+    // dispatch). The body itself is module-level — see
+    // primitiveValueBody / unsafeHTMLValueBody above.
     const body = node.unsafeHTML ? unsafeHTMLValueBody : primitiveValueBody;
     scope.track(Reaction.create((comp) => {
       if (!comp.firstRun && !anchor.isConnected) {
@@ -421,6 +432,6 @@ function makeValueDispatch(config) {
     valueDispatch.evaluateText = (bag) => config.evaluateText(bag);
   }
   valueDispatch.definition = config;
-  valueDispatch.shape = 'value';
+  valueDispatch.type = 'value';
   return valueDispatch;
 }
