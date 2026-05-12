@@ -269,16 +269,9 @@ export class Renderer {
       const entry = entries[markerID];
 
       if (type === 'expression' || type === 'block') {
-        // Both go through the same defineBlock-style dispatch via
-        // bindBlock. For 'expression', bindBlock looks up the
-        // 'expression' block in the registry; entry.node.type IS
-        // 'expression', so the lookup resolves the same way.
         this.bindBlock(comment, entry, data, scope);
       }
       else if (type === 'rawText') {
-        // Raw-text dispatch — plain function (no region, no lifecycle
-        // separation). Stays separate from defineBlock since it modifies
-        // a sibling element's textContent rather than managing a region.
         getBlock('rawText')?.({ comment, entry, data, scope, renderer: this });
       }
     }
@@ -322,8 +315,7 @@ export class Renderer {
     const block = getBlock(node.type);
     if (!block) { return; }
     if (block.type === 'value') {
-      // type:'value' blocks (e.g. expression) manage their own anchor and
-      // ownedNodes — DR allocation would be discarded by the lean path.
+      // Value-blocks own their anchor; skip DynamicRegion.
       block({ comment, node, data, scope, renderer: this, isSVG, hydrating: false });
       return;
     }
@@ -383,9 +375,6 @@ export class Renderer {
       if (!entry) { continue; }
 
       if (type === 'expression') {
-        // Expression dispatch adopts server DOM directly from the comment
-        // marker (no DR pre-allocation). The hydrate hook reports back
-        // the reactive anchor identity.
         const block = getBlock(entry.node.type);
         if (block) {
           block({

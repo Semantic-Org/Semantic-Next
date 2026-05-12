@@ -1,10 +1,17 @@
-import { isArray, isFunction, isPlainObject } from '@semantic-ui/utils';
-import { renderASTToString } from './commit-hooks.js';
+import { isFunction } from '@semantic-ui/utils';
+import { renderASTToString, stringifyAttrValue } from './commit-hooks.js';
 
-// Evaluate a marker entry to its attribute-value string. Expression entries
-// take today's lookupExpression path; block entries (if/rerender) walk the
-// matched-branch content via renderASTToString. each/async/template/etc.
-// throw via renderASTToString — see commit-hooks.js for the supported set.
+/*
+
+  Attribute-position bindings — single Reaction per marker, DOM updated in
+  place. Dispatched from bindMarkers / hydrateMarkers via entry.classification.
+  skipFirstWrite is the hydration flag: register deps, skip the write.
+
+*/
+
+// Expression entries use lookupExpression; block entries (if/rerender) walk
+// matched-branch content via renderASTToString, which throws for each/async/
+// template/svg/slot.
 function evaluateMarkerToString(entry, data, renderer) {
   if (entry.type === 'expression') {
     return renderer.lookupExpression(entry.node.value, data);
@@ -12,24 +19,8 @@ function evaluateMarkerToString(entry, data, renderer) {
   return renderASTToString([entry.node], data, renderer);
 }
 
-/*
-
-  Expression-position bindings (attribute + text + raw-text). These are
-  NOT blocks — no DynamicRegion, no opening/closing markers, no owned
-  region. They are inline bindings: a single Reaction per marker that
-  updates the DOM in place when its tracked Signals change.
-
-  Dispatches happen at the call-site level (bindMarkers / hydrateMarkers
-  in renderer.js) via entry.classification.type computed during
-  buildHTMLString. `skipFirstWrite` is the hydration flag — register deps
-  on firstRun, skip the DOM write because server content is trusted.
-
-*/
-
-// Attribute binding — handles property (.foo=), event (@foo=), boolean/
-// ifDefined single-expression, single-expression string, and interpolated
-// string attributes. The `skipFirstWrite` flag is used during hydration to
-// establish Signal dependencies without re-writing server-authored values.
+// Handles property (.foo=), event (@foo=), boolean / ifDefined single-
+// expression, single-expression string, and interpolated string attrs.
 export function bindAttribute({
   element,
   attrName,
@@ -93,9 +84,7 @@ export function bindAttribute({
         element.removeAttribute(attrName);
       }
       else {
-        const strValue = (isArray(value) || isPlainObject(value))
-          ? JSON.stringify(value)
-          : String(value ?? '');
+        const strValue = stringifyAttrValue(value);
         if (element.getAttribute(attrName) !== strValue) {
           element.setAttribute(attrName, strValue);
         }
@@ -140,7 +129,3 @@ export function bindAttribute({
     });
   }
 }
-
-// Text-position expression bindings (fresh + hydrating) moved to
-// blocks/expression.js. Raw-text bindings moved to blocks/raw-text.js.
-// Both dispatched via the block registry as `'expression'` / `'rawText'`.

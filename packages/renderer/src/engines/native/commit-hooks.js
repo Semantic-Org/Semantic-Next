@@ -2,23 +2,13 @@ import { isArray, isPlainObject } from '@semantic-ui/utils';
 
 /*
 
-  Helpers for position-aware block dispatch.
-
-  renderASTToString walks an AST + data context and returns a string —
-  the attribute-position counterpart to renderAST. Used when a block
-  lands inside an attribute value and its content needs serializing
-  rather than rendering as DOM. Mirrors ServerRenderer.renderNodes
-  minus the data-sui-bind tag tracking.
-
-  makePlace constructs the `bag.place(content)` closure used by region
-  blocks (conditional / rerender / template). It owns the
-  child-scope + renderAST + region.setContent sequence, plus
-  reference-equality dedup so the same matched branch doesn't re-fire
-  a DOM swap. defineBlock invokes it from render and update.
-
-  unsafeHTML / UNSAFE_HTML are the marker pair returned by value-block
-  compute when the emitted value is an HTML string; the unsafeHTML
-  variant of the lean dispatch (define-block.js) consumes them.
+  Position-aware block dispatch helpers:
+    • makePlace — region-block place/match pair with reference-equality
+      dedup (consumed by defineBlock's compute synthesis).
+    • renderASTToString — serializer for blocks that land inside an
+      attribute value (no DOM, must be a string).
+    • unsafeHTML / UNSAFE_HTML — marker pair for value-block compute that
+      emits an HTML string (consumed by define-block's unsafeHTML body).
 
 */
 
@@ -78,7 +68,7 @@ export function makePlace({ region, scope, renderer, data, isSVG }) {
 // Coerce an evaluated expression value to its attribute-value string form.
 // Objects/arrays are JSON-stringified; null/undefined become empty string;
 // everything else is String()'d.
-function stringifyAttrValue(value) {
+export function stringifyAttrValue(value) {
   if (value == null) { return ''; }
   if (isArray(value) || isPlainObject(value)) {
     try {

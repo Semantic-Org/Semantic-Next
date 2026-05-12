@@ -2,141 +2,56 @@
 
   Sample block — the canonical reference for authoring a new block.
 
-  Not registered. Not imported from index.js. Not exercised by tests. This
-  file exists solely to memorialize what a block looks like end-to-end.
-  Copy it, rename, fill in real semantics, and add the registerBlock call
-  + side-effect import in blocks/index.js.
+  Not registered, not imported, not exercised by tests. Copy it, rename,
+  fill in semantics, then add `registerBlock(name, ...)` + a side-effect
+  import in blocks/index.js.
 
-  ================================================================
-  WHAT A BLOCK IS
-  ================================================================
+  A block is the dispatch for one AST node type. The compiler emits
+  `{ type: 'thing', ... }` for `{#thing}` constructs; the renderer looks
+  it up via `getBlock(node.type)(ctx)`. defineBlock wraps a config object
+  into that dispatch — full lifecycle (create, render-or-hydrate, update,
+  destroy), error recovery, and a DynamicRegion for the DOM slice.
 
-  Every {#thing} construct compiles to an AST node with type === 'thing'
-  and arrives at the renderer's dispatch via the block registry:
+  Config shape (framework-known fields):
 
-      getBlock(node.type)(ctx)
+    name              required. Header in error logs.
+    syntax(node)      optional. Template-source one-liner for logs.
+    shouldRecover(node)  optional. Per-node gate for try/catch wrapping.
+    create(ctx)       optional. Per-instance setup; returns `self`.
+    compute(bag)      shorthand for render+update — returns content AST,
+                      framework calls bag.place(compute(bag)) on each
+                      tick. Use when both reduce to "pick content, place".
+    render(bag)       first mount when compute doesn't fit.
+    update(bag)       signal-driven re-tick when compute doesn't fit.
+    hydrate(bag)      first mount when server DOM exists. Adopt via
+                      bag.hydrateInto({ innerAST }); return matched
+                      content so the first update dedups against it.
+    destroy(bag)      teardown. Only for resources outside region/scope.
+    error(bag)        replacement when a hook throws; bag adds hook + err.
+    evaluateText(bag) raw-text fallback (<script>, <style>, <textarea>,
+                      <title>); returns a string concatenated into
+                      textContent.
 
-  A block's job is to produce DOM (or update existing DOM) for its slice
-  of the AST and keep that DOM reactive against the live signal graph.
-  defineBlock() wraps a config object into a dispatch function that owns
-  the full lifecycle — create, render-or-hydrate at mount, update on
-  signal changes, destroy at teardown — plus error machinery and a
-  region for the block's DOM.
+  Hooks are invoked as `config.hook(bag)` so `this === config` — author
+  helpers on the same object are reachable as `this.helperName(...)`.
 
-  ================================================================
-  WHEN TO ADD ONE
-  ================================================================
-
-  Add a block when a construct needs a DOM slice with its own lifecycle:
-  mount/unmount, reactive boundary, hydration claim. Pure inline values
-  with no region are handled by the expression block (already registered
-  as `'expression'`) — most {expression} usage doesn't need a new block.
-
-  ================================================================
-  THE CONFIG SHAPE
-  ================================================================
-
-  Recognized fields — the framework knows these by name:
-
-    Identity / diagnostics
-      name              required. Appears in the structured error log header.
-      syntax(node)      optional. One-liner that renders the template-source
-                        form for the log header.
-      shouldRecover(node)  optional. Per-node gate for try/catch wrapping.
-
-    State
-      create(ctx)       optional. Per-instance setup. Receives the full
-                        dispatch ctx (including renderer); other hooks get
-                        the smaller bag. Stash anything hot hooks need into
-                        the returned `self` object.
-
-    Body (pick one shape)
-      compute(bag)      shorthand. Returns the AST array to place. Framework
-                        synthesizes render and update as `bag.place(compute(bag))`.
-                        Use when render and update both reduce to "pick
-                        content, place it" and content is stable per matched
-                        branch (dedup via reference equality).
-      render(bag)       first mount. Build DOM, call `bag.place(content)` or
-                        wire it directly via `bag.region`.
-      update(bag)       fires on each signal-driven re-tick after first mount.
-
-    Hydration
-      hydrate(bag)      first mount when server-rendered DOM exists. Adopt
-                        the DOM via `bag.hydrateInto({ innerAST })`, return
-                        the matched content AST so the framework records it
-                        on `bag.place` (so the first compute-driven update
-                        dedups instead of re-rendering over server bytes).
-
-    Lifecycle
-      destroy(bag)      optional. Fires when the parent scope disposes. Only
-                        needed for resources outside the region/scope —
-                        external listeners, timers, manually-attached DOM.
-
-    Error machinery
-      error(bag)        optional. Replacement rendering when a hook throws.
-                        bag is extended with { hook, err }.
-
-    Raw-text contexts
-      evaluateText(bag) optional. Defines behavior inside <script>, <style>,
-                        <textarea>, <title>. The walker calls it synchronously
-                        and concatenates the returned string into textContent.
-
-  Helper methods / fields outside the recognized list are author code. The
-  framework invokes hooks as `config.hook(bag)` so `this === config` inside
-  each hook; helpers are reachable as `this.helperName(...)`. See
-  blocks/conditional.js (`selectBranch`) for a worked example.
-
-  ================================================================
-  THE BAG
-  ================================================================
-
-  Hooks receive a bag with these closures (read; don't reach elsewhere):
-
-    node                the AST node for this block instance
-    data                current data context
-    scope               ReactionScope for this block's reactivity + cleanup
-    region              DynamicRegion the block owns (text-position only)
-    isSVG               SVG namespace flag
-    serverMeta          payload from the closing block marker (e.g. branchIndex)
-    self                per-instance state returned by create()
-    place(content)      framework-owned text-position placement; dedups via
-                        reference equality; null clears the region
-    lookupExpression    (expr) => evaluated value, registers Signal deps on
-                        the surrounding Reaction
-    renderAST           ({ ast, scope?, data?, isSVG? }) => DocumentFragment
-    hydrateInto         ({ innerAST, data?, scope?, asChild? }) — adopt
-                        server DOM in the region; wires per-marker Reactions
-                        against the existing bytes
-    hydrateInnerContent ({ ownedNodes, innerAST, data?, scope? }) — adopt
-                        without re-anchoring (less common)
-    childContext        (parent, extras) => child data context
-
-  Inside render/update/hydrate/destroy/error: `this === config`. Helpers on
-  the config (this file's `selectMatchingThing` below) are reachable via
-  `this.helperName(...)`.
-
-  ================================================================
-  V8 NOTES
-  ================================================================
-
-  defineBlock builds the config once at module load. All dispatches share
-  that same object, so `this`'s shape is stable across every hook call —
-  inline caches resolve `this.helperName` to the underlying function on the
-  first call and stay monomorphic. Same goes for hot bag fields. Keep the
-  config flat; don't mutate it after construction.
+  Bag fields:
+    node, data, scope, region, isSVG, serverMeta, self,
+    place(content)          — dedup-ed AST placement (null clears)
+    lookupExpression(expr)  — evaluate + register signal deps
+    renderAST({...})        — produce a DocumentFragment
+    hydrateInto({...})      — adopt server DOM in the region
+    hydrateInnerContent({...}) — adopt without re-anchoring
+    childContext(parent, extras) — child data context
 
 */
 
 import { defineBlock } from '../define-block.js';
 // import { registerBlock } from './registry.js';   // intentionally not imported
 
-// ============================================================
-// EXAMPLE: the compute-shorthand shape (most blocks)
-// ============================================================
-//
-// Hypothetical block: {#thing expr}content{/thing} — picks one of two
-// content variants based on `expr`. Demonstrates compute + a helper +
-// explicit hydrate.
+// Example 1 — compute-shorthand shape (most blocks).
+// {#thing expr}content{/thing} picks one of two content variants based
+// on `expr`. Demonstrates compute + helper + explicit hydrate.
 
 const sample = defineBlock({
   name: 'thing',
@@ -187,13 +102,10 @@ const sample = defineBlock({
   },
 });
 
-// ============================================================
-// EXAMPLE 2: explicit render/update when compute doesn't fit
-// ============================================================
-//
+// Example 2 — explicit render/update when compute doesn't fit.
 // Blocks like each (keyed reconciliation), async (promise state machine),
-// or rerender (always-rebuild semantics) can't synthesize update from
-// compute. Their render and update bodies genuinely differ. Sketch:
+// or rerender (always-rebuild) can't synthesize update from compute —
+// their render and update bodies genuinely differ. Sketch:
 //
 //   defineBlock({
 //     name: 'manualLifecycle',

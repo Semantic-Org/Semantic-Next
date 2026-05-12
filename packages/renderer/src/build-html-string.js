@@ -267,12 +267,10 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
             rawTextNodes.push(node);
             break;
           }
-          // Block-level directives: if, each, async, rerender, template.
-          // Text-position blocks emit a comment marker (today's behavior).
-          // Attribute-position blocks emit an __suiN__ marker — the same
-          // shape attribute-position expressions use — so they participate
-          // in the attribute-binding code path. Comment markers inside an
-          // attribute value would become literal text, not a Comment node.
+          // Attribute-position blocks emit the same __suiN__ shape as
+          // attribute-position expressions so they share the attribute-
+          // binding path — comment markers in an attribute value become
+          // literal text, not Comment nodes.
           const id = entries.length;
           const classification = analyzePosition(htmlBuffer);
           if (classification.insideTag) {

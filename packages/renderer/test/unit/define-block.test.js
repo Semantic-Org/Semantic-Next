@@ -82,4 +82,22 @@ describe('defineBlock', () => {
     expect(block.definition.name).toBe('rerender');
     expect(block.definition.update).toBe(config.update);
   });
+
+  it('throws when a config provides both compute and render/update', () => {
+    expect(() =>
+      defineBlock({
+        name: 'mixed',
+        compute() {},
+        render() {},
+      })
+    ).toThrow(/compute.*render/i);
+
+    expect(() =>
+      defineBlock({
+        name: 'mixed',
+        compute() {},
+        update() {},
+      })
+    ).toThrow(/compute.*update/i);
+  });
 });

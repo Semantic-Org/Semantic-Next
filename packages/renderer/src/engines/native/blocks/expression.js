@@ -5,27 +5,11 @@ import { registerBlock } from './registry.js';
 
 /*
 
-  Expression block — text-position dispatch.
-
-  Opts into defineBlock's lean value-emitter path via `type: 'value'`. The
-  renderer skips DynamicRegion allocation for this shape; the dispatch
-  manages a single anchor text node (which IS the value text node in the
-  primitive case) and an ownedNodes list for unsafeHTML payloads.
-
-  Compute has two node-flag branches plus a default path:
-    • unsafeHTML   — wrap evaluated value as `unsafeHTML(value)`; the
-                     dispatch parses the string as HTML and inserts the
-                     parsed nodes as ownedNodes after the anchor.
-    • literalValue — read via lookupTokenValue (no auto-invoke for
-                     functions). Used by `{#fn handler}` so the function
-                     reference isn't called for its return value.
-    • default      — read via renderer.lookupExpression; return as a
-                     primitive; the dispatch writes anchor.data.
-
-  Attribute-position expressions are NOT dispatched here — they're walked
-  by bindAttribute in attribute-binding.js as part of an attribute's
-  combined parts evaluation. One Reaction owns the full attribute string
-  regardless of how many markers it contains.
+  Text-position expression dispatch (type:'value'). Compute returns a
+  primitive (writes anchor.data), an unsafeHTML(html) wrapper (parses +
+  inserts nodes), or — for {#fn handler} — a function reference via
+  lookupTokenValue. Attribute-position expressions go through
+  bindAttribute, not here.
 
 */
 

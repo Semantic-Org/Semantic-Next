@@ -1,8 +1,10 @@
 import { Reaction } from '@semantic-ui/reactivity';
-import { each, isArray, isClient, isFunction, isObject } from '@semantic-ui/utils';
+import { each, isClient } from '@semantic-ui/utils';
 import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive, PartType } from 'lit/directive.js';
+
+import { serializeContent } from './serialize-content.js';
 
 export class ReactiveConditionalDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -99,76 +101,10 @@ export class ReactiveConditionalDirective extends AsyncDirective {
     switch (this.partInfo.type) {
       case PartType.ATTRIBUTE:
       case PartType.BOOLEAN_ATTRIBUTE:
-        return this.serializeContent(content);
-
-      case PartType.CHILD:
-      case PartType.PROPERTY:
-      case PartType.EVENT:
-      case PartType.ELEMENT:
+        return serializeContent(content);
       default:
-        // For element content, return as-is (TemplateResult objects are fine here)
         return content;
     }
-  }
-
-  serializeContent(content) {
-    // Handle lit's nothing value
-    if (content === nothing) {
-      return '';
-    }
-
-    // TemplateResult: interleave static strings with evaluated values so
-    // branch content like `active-{count}` produces `active-5`, not
-    // `active-` (the old strings.join('') bug). Values may be lit
-    // directive markers (from inner expressions) — resolveValue extracts
-    // the actual value via the directive's first arg's .value() callback.
-    if (content?.strings) {
-      const { strings, values } = content;
-      let result = '';
-      for (let i = 0; i < strings.length; i++) {
-        result += strings[i];
-        if (i < values.length) {
-          result += this.resolveValue(values[i]);
-        }
-      }
-      return result;
-    }
-
-    // Handle arrays and objects like reactive-data does
-    if (isArray(content) || isObject(content)) {
-      try {
-        return JSON.stringify(content);
-      }
-      catch (e) {
-        return String(content);
-      }
-    }
-
-    return String(content);
-  }
-
-  // Inner expressions inside a branch land in the TemplateResult's `values`
-  // array as lit directive markers (reactiveData results), not evaluated
-  // primitives — lit normally resolves these when placing into a part. For
-  // attribute-position serialization we resolve manually by calling the
-  // directive's first arg's .value() callback (attached by LitRenderer's
-  // evaluateExpression). Same pattern as ReactiveRerenderDirective.
-  resolveValue(v) {
-    if (isFunction(v?.values?.[0]?.value)) {
-      return String(v.values[0].value() ?? '');
-    }
-    if (v?.strings) {
-      return this.serializeContent(v);
-    }
-    if (isArray(v) || isObject(v)) {
-      try {
-        return JSON.stringify(v);
-      }
-      catch (e) {
-        return String(v);
-      }
-    }
-    return String(v ?? '');
   }
 
   disconnected() {

@@ -45,6 +45,12 @@ export function reportBlockError({ name, syntax, hook, err }) {
 }
 
 export function defineBlock(config) {
+  if (typeof config.compute === 'function' && (config.render || config.update)) {
+    throw new Error(
+      `Block "${config.name}" defines both 'compute' and 'render'/'update' — pick one shape.`,
+    );
+  }
+
   // `type: 'value'` selects the lean dispatch (see makeValueDispatch
   // below). The renderer reads `dispatch.type === 'value'` and skips
   // DynamicRegion allocation.
@@ -52,22 +58,16 @@ export function defineBlock(config) {
     return makeValueDispatch(config);
   }
 
-  // Read identity/diagnostic fields directly — they don't need `this`.
-  // Hook fields (compute/render/update/hydrate/create/destroy/error) are
-  // invoked as `config.X(bag)` below so `this === config` inside the hook,
-  // letting authors stash helper methods on the same config object and
-  // call them as `this.helperName(...)`. V8 inlines this via the monomorphic
-  // inline cache on config's stable shape (config is constructed once at
-  // module load and never mutated).
+  // Hooks (compute/render/update/hydrate/create/destroy/error) are invoked
+  // as `config.X(bag)` so `this === config` — authors stash helper methods
+  // on the same config object and reach them as `this.helperName(...)`.
   const { name, shouldRecover, evaluateText, syntax } = config;
   const errorHook = config.error;
   const hasCompute = typeof config.compute === 'function';
 
-  // When `compute` is provided, synthesize render and update as
-  // `bag.place(compute(bag))`. Block authors who need direct lifecycle
-  // control (each, async) provide explicit render/update instead and omit
-  // compute. hydrate stays as the author wrote it — server-DOM adoption
-  // has a distinct contract (no rebuild) that compute can't synthesize.
+  // compute is sugar for `bag.place(compute(bag))` on both render and
+  // update. Authors needing explicit lifecycle (each, async) supply
+  // render/update instead and omit compute.
   const render = hasCompute
     ? (bag) => bag.place(config.compute(bag))
     : config.render && ((bag) => config.render(bag));
@@ -127,19 +127,13 @@ export function defineBlock(config) {
       asChild,
     } = {}) => renderer.hydrateInto({ region, innerAST, data: innerData, scope: innerScope, asChild });
 
-    // place is the text-position placement primitive: takes an AST array
-    // (or null to clear) and handles child-scope allocation + renderAST +
-    // region.setContent with reference-equality dedup. Blocks using
-    // `compute` reach bag.place implicitly; blocks with explicit
-    // render/update can use it to collapse the rebuild boilerplate. match
-    // is the internal counterpart — defineBlock calls it with hydrate's
-    // return value (when non-undefined) so the first post-hydrate update
-    // dedups instead of overwriting server DOM.
+    // place(astOrNull) commits to the region with reference-equality dedup.
+    // matchPlace records hydrate's return so the first post-hydrate tick
+    // dedups against server DOM instead of re-rendering over it.
     const { place, match: matchPlace } = makePlace({ region, scope, renderer, data, isSVG });
 
-    // Interned per-instance bag — same hidden-class shape across all hook
-    // calls. hook/err keys are present from construction so the error-hook
-    // extension is just two field writes, not an Object.assign.
+    // hook/err pre-allocated so the error path is field writes, not an
+    // Object.assign extension.
     const bag = {
       node,
       data,
@@ -259,12 +253,7 @@ export function defineBlock(config) {
   return dispatch;
 }
 
-// Module-level Reaction body for primitive value blocks. Shared across
-// every dispatch — V8 sees one function instance at the Reaction call
-// site for all primitive-shape value expressions, making the IC
-// monomorphic on the call shape rather than allocating one closure per
-// dispatch as the closure-capturing pattern would. `state` carries the
-// per-dispatch fields (compute, node, data, renderer, anchor, hydrating).
+// Module-level body — shared across every primitive value dispatch.
 function primitiveValueBody(state, comp) {
   if (comp.firstRun && state.hydrating) {
     state.compute(state);
@@ -309,42 +298,18 @@ function unsafeHTMLValueBody(state, comp) {
   }
 }
 
-// Lean dispatch for `type: 'value'` blocks (currently: expression). A
-// value-block's compute returns a primitive, an `unsafeHTML(value)`
-// wrapper, or null; the dispatch owns a single anchor text node plus
-// (for unsafeHTML) an ownedNodes list. The renderer reads
-// `dispatch.type === 'value'` and skips DynamicRegion allocation.
-//
-// What this path elides vs. the region dispatch:
-//   • No DynamicRegion — anchor IS the value text node in the
-//     primitive case.
-//   • No helper closures on a bag — blocks reach renderer methods
-//     directly via state.renderer.
-//   • No makePlace. The Reaction body inlines the write against
-//     dispatch-local anchor / ownedNodes.
-//   • No safeRun. Tracing/recovery aren't supported on value blocks.
-//   • No notifyUpdate on update — text-position writes don't bubble
-//     to `updated`, so coarsely reactive subtemplates don't pay a
-//     microtask per inner write.
-//   • No onDispose when the block has no destroy hook. The Reaction
-//     stops via scope.dispose; the text node dies with its parent.
-//
-// What value-blocks declare:
-//   • compute(state) — Called as state.compute(state) on every fire
-//     (no `this` binding). state = { compute, node, data, renderer,
-//     anchor, hydrating, self, ownedNodes, endAnchor }. Return a
-//     primitive, an `unsafeHTML(value)` wrapper, or null.
-//   • hydrate(state) — Called as hydrate.call(config, state) once at
-//     mount. `this === config`, so authors reach config helpers via
-//     `this.X(...)`. state adds a `comment` field for the adoption
-//     logic. Return { anchor, ownedNodes }.
-//   • create(ctx) — Returns `self`, reachable as state.self.
-//   • evaluateText — Forwarded for raw-text contexts (each/async
-//     nested in a raw-text element fall through to expression's
-//     evaluator).
-//   • static(node) — Optional predicate. Return true when a node-level
-//     flag guarantees no reactive dependencies; the dispatch skips
-//     Reaction wiring entirely and writes anchor.data once at mount.
+// Lean dispatch for `type: 'value'` blocks (currently: expression).
+// Compute returns a primitive, an `unsafeHTML(value)` wrapper, or null.
+// The dispatch owns a single anchor text node and skips DynamicRegion +
+// safeRun + notifyUpdate. Config hooks:
+//   • compute(state) — called as state.compute(state); no `this` binding.
+//     state = { compute, node, data, renderer, anchor, hydrating, self,
+//     ownedNodes, endAnchor }. Returns the value to commit.
+//   • hydrate(state) — called as hydrate.call(config, state); `this ===
+//     config`. state adds `comment`. Returns { anchor, ownedNodes }.
+//   • create(ctx) — returns `self`, reached as state.self.
+//   • evaluateText — forwarded for raw-text contexts.
+//   • static(node) — when truthy, skip Reaction wiring; write once.
 function makeValueDispatch(config) {
   const create = config.create;
   const compute = config.compute;
@@ -388,9 +353,6 @@ function makeValueDispatch(config) {
       comment.parentNode.replaceChild(anchor, comment);
     }
 
-    // Per-dispatch state. Same hidden-class shape across primitive and
-    // unsafeHTML variants — the body functions destructure / access
-    // only the fields they need.
     const state = {
       compute,
       node,
@@ -414,10 +376,6 @@ function makeValueDispatch(config) {
       return;
     }
 
-    // Inline the isConnected guard rather than going through
-    // scope.reaction (which would wrap the body in another closure per
-    // dispatch). The body itself is module-level — see
-    // primitiveValueBody / unsafeHTMLValueBody above.
     const body = node.unsafeHTML ? unsafeHTMLValueBody : primitiveValueBody;
     scope.track(Reaction.create((comp) => {
       if (!comp.firstRun && !anchor.isConnected) {

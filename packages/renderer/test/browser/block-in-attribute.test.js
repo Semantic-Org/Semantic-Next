@@ -209,6 +209,31 @@ RENDERING_ENGINES.forEach(engine => {
       await waitForUpdate(el);
       expect(div.getAttribute('data-label')).toBe('item-2');
     });
+
+    it('reactively updates inner-expression signal when rerender key is unchanged', async () => {
+      // The existing single-signal test reads the same signal for the
+      // rerender key AND the inner expression, so the outer Reaction
+      // picks up the dep through condition.expression() and re-fires
+      // regardless. Separate signals expose whether inner-expression
+      // deps actually register on the directive's Reaction.
+      const tag = uniqueTag(engine);
+      defineComponent({
+        renderingEngine: engine,
+        tagName: tag,
+        template: '<div data-label="{#rerender bucket}name-{name}{/rerender}"></div>',
+        defaultState: { bucket: 'A', name: 'foo' },
+      });
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      await el.rendered;
+
+      const div = el.shadowRoot.querySelector('div');
+      expect(div.getAttribute('data-label')).toBe('name-foo');
+
+      el.template.state.name.set('bar');
+      await waitForUpdate(el);
+      expect(div.getAttribute('data-label')).toBe('name-bar');
+    });
   });
 });
 
@@ -401,5 +426,33 @@ describe('block-in-attribute — unsupported positions [native]', () => {
     );
     expect(err).toBeDefined();
     expect(String(err)).toMatch(/async.*attribute/i);
+  });
+
+  it('SSR: {>name} inside an attribute value throws (matches client behavior)', () => {
+    // Client renderASTToString already throws for template AST nodes in
+    // attribute position; server must match so SSR + {>name} inside an
+    // attribute fails loud rather than silently emitting comment markers
+    // that break hydration.
+    const tag = uniqueTag('ssr');
+    const Component = defineComponent({
+      tagName: tag,
+      renderingEngine: 'native',
+      template: '<div data-fragment="prefix-{>frag}"></div>',
+      snippets: { frag: { content: [{ type: 'html', html: 'inline' }] } },
+    });
+    const wasServer = Template.isServer;
+    Template.isServer = true;
+    let caught;
+    try {
+      renderToString(Component);
+    }
+    catch (e) {
+      caught = e;
+    }
+    finally {
+      Template.isServer = wasServer;
+    }
+    expect(caught).toBeDefined();
+    expect(String(caught)).toMatch(/template.*attribute/i);
   });
 });

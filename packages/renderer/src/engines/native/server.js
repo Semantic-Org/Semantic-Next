@@ -31,7 +31,7 @@ import {
   MAIN_BRANCH_INDEX,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
-import { renderASTToString } from './commit-hooks.js';
+import { renderASTToString, stringifyAttrValue } from './commit-hooks.js';
 import { childContext } from './define-block.js';
 import { encodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from './shared/each.js';
 
@@ -325,10 +325,7 @@ export class ServerRenderer {
         return REMOVE_ATTR;
       }
 
-      let strValue = (isArray(value) || isPlainObject(value))
-        ? JSON.stringify(value)
-        : String(value ?? '');
-      strValue = strValue.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+      let strValue = stringifyAttrValue(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
       // Check if we're inside a quoted attribute value by counting quotes
       // in the current tag fragment. Odd count = inside quotes, even = unquoted.
@@ -447,7 +444,6 @@ export class ServerRenderer {
       return this.emitAttributeBlock(id, inner, scope);
     }
 
-    // Text position — today's marker-wrapped behavior.
     let html = `<!--${BLOCK_MARKER}${id}-->`;
     if (matchedAST) {
       html += this.renderNodes(matchedAST, data);
@@ -531,6 +527,12 @@ export class ServerRenderer {
   *******************************/
 
   renderTemplate(node, data, scope) {
+    if (analyzePosition(scope.htmlBuffer).insideTag) {
+      throw new Error(
+        '{>template} cannot be rendered inside an attribute value. '
+          + 'Use a method or computed signal that returns a string.',
+      );
+    }
     const id = scope.entryId++;
     let html = `<!--${BLOCK_MARKER}${id}-->`;
 
