@@ -33,7 +33,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   1. Async inside Rerender
+   Async inside Rerender
 *******************************/
 
     describe('1. Async inside Rerender', () => {
@@ -72,7 +72,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   2. Async Stale Promise
+   Async Stale Promise
 *******************************/
 
     describe('2. Async stale promise', () => {
@@ -112,7 +112,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   5. Each with Filter Toggle
+   Each with Filter Toggle
 *******************************/
 
     describe('5. Each with filter toggle', () => {
@@ -157,7 +157,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   7. Each Empty/Populated
+   Each Empty/Populated
 *******************************/
 
     describe('7. Each empty/populated transition', () => {
@@ -196,7 +196,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   8. Conditional inside Each
+   Conditional inside Each
 *******************************/
 
     describe('8. Conditional inside each', () => {
@@ -237,7 +237,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   9. External Signal in Each
+   External Signal in Each
 *******************************/
 
     describe('9. External signal controls conditionals in each', () => {
@@ -278,7 +278,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   10. Nested Each with Filter
+   Nested Each with Filter
 *******************************/
 
     describe('10. Nested each with filter', () => {
@@ -328,7 +328,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   12. Snippet Called Per Item
+   Snippet Called Per Item
 *******************************/
 
     describe('12. Snippet called per item', () => {
@@ -386,7 +386,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   13. Attribute-driven Re-render
+   Attribute-driven Re-render
 *******************************/
 
     describe('13. Attribute-driven re-render with async', () => {
@@ -428,7 +428,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   14. Each Item Reorder
+   Each Item Reorder
 *******************************/
 
     describe('14. Each item reorder', () => {
@@ -478,7 +478,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   15. Non-reactive data in cached subtree
+   Non-reactive data in cached subtree
 *******************************/
 
     describe('15a. Non-reactive expressions in each', () => {
@@ -692,7 +692,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   16. Subtemplate inside each — focus preservation
+   Subtemplate inside each — focus preservation
 *******************************/
 
     describe('16. Subtemplate inside each', () => {
@@ -864,7 +864,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   17. Settings-driven conditional and ternary updates
+   Settings-driven conditional and ternary updates
 *******************************/
 
     describe('17. Settings-driven conditional and ternary', () => {
@@ -953,7 +953,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   18. Subtemplate data context wins over parent settings
+   Subtemplate data context wins over parent settings
 *******************************/
 
     describe('18. Subtemplate data overrides parent setting', () => {
@@ -994,34 +994,33 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   19. Subtemplate spurious re-evaluation inside each
-
-   Pattern: detecting spurious re-evaluation in subtemplates
-   ─────────────────────────────────────────────────────────
-   To test whether a subtemplate's expressions re-fire, define a marker
-   function in the subtemplate's own createComponent and call it from the
-   template. This works because createComponent return values live on the
-   template instance — they bypass the parent→child data packing layer
-   (which resolves functions to their return values via wrapFunction).
-
-     const child = defineComponent({
-       template: '<span>{marker}{value}</span>',
-       createComponent: ({ data }) => ({
-         marker: () => { callLog.push(data.item._id); return ''; },
-       }),
-     });
-
-   The marker expression becomes a reactiveData directive inside the
-   subtemplate's own LitRenderer. It re-fires only when that renderer's
-   dataVersion changes — making it a direct probe of whether the
-   subtemplate actually re-evaluated, not just whether the parent
-   considered re-rendering it.
-
-   Do NOT pass spy functions through subtemplate data props (e.g.
-   {>child spy=spy}). The packing mechanism calls wrapFunction(fn)()
-   during unpacking, which invokes the function with no arguments and
-   passes the return value instead of the function itself.
+   Subtemplate spurious re-evaluation inside each
 *******************************/
+
+    // Pattern: detecting spurious re-evaluation in subtemplates.
+    // To test whether a subtemplate's expressions re-fire, define a marker
+    // function in the subtemplate's own createComponent and call it from the
+    // template. This works because createComponent return values live on the
+    // template instance — they bypass the parent→child data packing layer
+    // (which resolves functions to their return values via wrapFunction).
+    //
+    //   const child = defineComponent({
+    //     template: '<span>{marker}{value}</span>',
+    //     createComponent: ({ data }) => ({
+    //       marker: () => { callLog.push(data.item._id); return ''; },
+    //     }),
+    //   });
+    //
+    // The marker expression becomes a reactiveData directive inside the
+    // subtemplate's own LitRenderer. It re-fires only when that renderer's
+    // dataVersion changes — making it a direct probe of whether the
+    // subtemplate actually re-evaluated, not just whether the parent
+    // considered re-rendering it.
+    //
+    // Do NOT pass spy functions through subtemplate data props (e.g.
+    // {>child spy=spy}). The packing mechanism calls wrapFunction(fn)()
+    // during unpacking, which invokes the function with no arguments and
+    // passes the return value instead of the function itself.
 
     describe('19. Subtemplate isolation inside each', () => {
       it('should not re-evaluate unchanged item subtemplates when sibling item changes', async () => {
@@ -1081,7 +1080,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   20. DOM node identity for unchanged items
+   DOM node identity for unchanged items
 *******************************/
 
     describe('20. DOM node identity preservation', () => {
@@ -1138,7 +1137,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   21. Subtemplate internal state preservation
+   Subtemplate internal state preservation
 *******************************/
 
     describe('21. Subtemplate internal state preservation', () => {
@@ -1205,7 +1204,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   22. Rapid successive mutations
+   Rapid successive mutations
 *******************************/
 
     describe('22. Rapid successive mutations', () => {
@@ -1258,7 +1257,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   23. Subtemplate lifecycle callbacks
+   Subtemplate lifecycle callbacks
 *******************************/
 
     describe('23. Subtemplate lifecycle callbacks', () => {
@@ -1362,7 +1361,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   24. Subtemplate using findParent for reactive data
+   Subtemplate using findParent for reactive data
 *******************************/
 
     describe('24. Subtemplate with findParent reactivity', () => {
@@ -1430,7 +1429,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   25. Closure-captured data in subtemplate createComponent
+   Closure-captured data in subtemplate createComponent
 *******************************/
 
     describe('25. Closure-captured data in subtemplate', () => {
@@ -1493,7 +1492,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   26. Subtemplate settings — reactive external data
+   Subtemplate settings — reactive external data
 *******************************/
 
     describe('26. Subtemplate settings', () => {
@@ -1716,7 +1715,7 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   27. Protected scope variables
+   Protected scope variables
 *******************************/
 
     describe('27. Protected scope variables', () => {
@@ -1893,12 +1892,12 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   28. Snippet/subtemplate arg-source propagation
-
-   Mutating the source signal a snippet or subtemplate arg reads from
-   (`{>card label=getLabel}` with `getLabel` reading a signal) must
-   update the inner expression's rendered text.
+   Snippet/subtemplate arg-source propagation
 *******************************/
+
+    // Mutating the source signal a snippet or subtemplate arg reads from
+    // (`{>card label=getLabel}` with `getLabel` reading a signal) must
+    // update the inner expression's rendered text.
 
     describe('28. Snippet/subtemplate arg-source propagation', () => {
       it('snippet body updates when arg source signal changes', async () => {
