@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES, waitForUpdate } from './test-utils.js';
 
 /*******************************
-         Test Helpers
+   Test Helpers
 *******************************/
 
 let tagCounter = 0;
