@@ -269,16 +269,19 @@ RENDERING_ENGINES.forEach((engine) => {
         });
 
         // shouldRecover gate returns false when errorContent is empty —
-        // the throw propagates. el.rendered may never resolve, so we
-        // capture on the global error event instead.
+        // the throw propagates. Native surfaces synchronously via window.error;
+        // Lit's microtask-scheduled render surfaces via unhandledrejection.
+        // Listen for both since the user contract is "the error reaches the
+        // host," not "via a specific browser event."
         let caught = null;
         const errorHandler = (event) => {
           if (!caught) {
-            caught = event.error || new Error(event.message);
+            caught = event.error || event.reason || new Error(event.message);
           }
           event.preventDefault();
         };
         window.addEventListener('error', errorHandler);
+        window.addEventListener('unhandledrejection', errorHandler);
 
         try {
           const el = document.createElement(tag);
@@ -292,6 +295,7 @@ RENDERING_ENGINES.forEach((engine) => {
         }
         finally {
           window.removeEventListener('error', errorHandler);
+          window.removeEventListener('unhandledrejection', errorHandler);
         }
 
         expect(caught).not.toBeNull();
@@ -828,7 +832,10 @@ RENDERING_ENGINES.forEach((engine) => {
     // evaluateText (line 753).
 
     describe('raw-text: blocks that cannot operate inside raw-text contexts', () => {
-      it('should surface an error when {#async} appears inside <script>', async () => {
+      // Lit doesn't dispatch blocks through a raw-text walker — its template
+      // builds via tagged-template-literal interpolation, so the "async can't
+      // operate in raw-text" rejection is structurally a native concern.
+      it.skipIf(engine === 'lit')('should surface an error when {#async} appears inside <script>', async () => {
         const tag = uniqueTag();
         defineComponent({
           tagName: tag,
@@ -841,16 +848,18 @@ RENDERING_ENGINES.forEach((engine) => {
           }),
         });
 
-        // The throw happens inside a Reaction callback during render. It
-        // propagates to the unhandled error path. Capture via window.error.
+        // The throw happens inside a Reaction callback during render. Native
+        // surfaces synchronously via window.error; Lit's microtask-scheduled
+        // render surfaces via unhandledrejection. Listen for both.
         let caught = null;
         const errorHandler = (event) => {
           if (!caught) {
-            caught = event.error || new Error(event.message);
+            caught = event.error || event.reason || new Error(event.message);
           }
           event.preventDefault();
         };
         window.addEventListener('error', errorHandler);
+        window.addEventListener('unhandledrejection', errorHandler);
 
         try {
           const el = document.createElement(tag);
@@ -867,6 +876,7 @@ RENDERING_ENGINES.forEach((engine) => {
         }
         finally {
           window.removeEventListener('error', errorHandler);
+          window.removeEventListener('unhandledrejection', errorHandler);
         }
 
         // Source: renderer.js evaluateRawTextNodes — throws when a block
