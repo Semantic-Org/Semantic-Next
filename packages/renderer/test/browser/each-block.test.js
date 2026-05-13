@@ -44,8 +44,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Key chain — duplicate ids
-*******************************/
+       Key chain — duplicate ids
+    *******************************/
 
     describe('each reconcile — key chain edge cases', () => {
       it('renders both items when two objects share the same id', async () => {
@@ -245,8 +245,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Move-not-recreate
-*******************************/
+           Move-not-recreate
+    *******************************/
 
     describe('each reconcile — DOM identity preservation on move', () => {
       it('preserves LI identity when reversing a 5-item keyed list', async () => {
@@ -362,8 +362,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Mixed item shapes
-*******************************/
+           Mixed item shapes
+    *******************************/
 
     describe('each reconcile — mixed item shapes', () => {
       it('renders a mixed array of primitives and objects', async () => {
@@ -435,8 +435,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   In-place mutation
-*******************************/
+           In-place mutation
+    *******************************/
 
     describe('each reconcile — in-place item mutation', () => {
       it('reactively updates one item field without touching siblings (as-mode)', async () => {
@@ -514,8 +514,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Object iteration
-*******************************/
+           Object iteration
+    *******************************/
 
     describe('each reconcile — object iteration shape', () => {
       it('iterates object with custom key alias', async () => {
@@ -577,8 +577,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Else-content transitions
-*******************************/
+       Else-content transitions
+    *******************************/
 
     describe('each reconcile — else-content transitions', () => {
       it('round-trips between populated and empty multiple times', async () => {
@@ -648,8 +648,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Source expression edge cases
-*******************************/
+     Source expression edge cases
+    *******************************/
 
     describe('each reconcile — null/undefined source expressions', () => {
       it('renders empty when items signal holds null', async () => {
@@ -718,8 +718,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Large list growth/shrink
-*******************************/
+       Large list growth/shrink
+    *******************************/
 
     describe('each reconcile — list size transitions', () => {
       it('grows a 0-item list to 100 items and back to 0', async () => {
@@ -813,8 +813,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Index variable behavior
-*******************************/
+        Index variable behavior
+    *******************************/
 
     describe('each reconcile — index variable', () => {
       it('updates index when items are reordered (custom indexAs)', async () => {
@@ -871,8 +871,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Nested each + reorder
-*******************************/
+         Nested each + reorder
+    *******************************/
 
     describe('each reconcile — nested reordering', () => {
       it('preserves nested DOM identity when parent rows reorder', async () => {
@@ -916,8 +916,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Multiple eaches in one parent
-*******************************/
+     Multiple eaches in one parent
+    *******************************/
 
     describe('each reconcile — multiple sibling each blocks', () => {
       it('renders two each blocks back-to-back without marker collision', async () => {
@@ -967,8 +967,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Spread mode {this}
-*******************************/
+          Spread mode {this}
+    *******************************/
 
     describe('each reconcile — spread mode (no `as`)', () => {
       it('exposes {this} for primitive items', async () => {
@@ -1024,8 +1024,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Each over expression
-*******************************/
+         Each over expression
+    *******************************/
 
     describe('each reconcile — `over` expression resolution', () => {
       it('iterates an inline literal array', async () => {

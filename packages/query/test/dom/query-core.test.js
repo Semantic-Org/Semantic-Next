@@ -14,7 +14,7 @@
 import { $, $$, Query } from '@semantic-ui/query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-describe('query — grounded against documented contract', () => {
+describe('query — documented contract', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });

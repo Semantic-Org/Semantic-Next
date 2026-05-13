@@ -28,7 +28,7 @@ import { RENDERING_ENGINES } from './test-utils.js';
 
 RENDERING_ENGINES.forEach((engine) => {
   const isLit = engine === 'lit';
-  describe(`[${engine}] template + conditional red-team`, () => {
+  describe(`[${engine}] template + conditional`, () => {
     let tagCounter = 0;
     function uniqueTag(suffix = '') {
       return `rt-tc-${engine}-${suffix}-${++tagCounter}`;

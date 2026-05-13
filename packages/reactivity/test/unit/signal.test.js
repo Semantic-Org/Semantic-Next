@@ -1000,7 +1000,7 @@ describe.concurrent('Signal', () => {
   });
 });
 
-describe('Signal API — grounded coverage', () => {
+describe('Signal API', () => {
   /***********************************************
    * Constructor and options
    * Source: api(Signal, Constructor), example(reactive-equality, reactive-clone)

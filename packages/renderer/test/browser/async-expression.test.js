@@ -38,8 +38,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Async — destructuring `as {a, b, ...rest}`
-*******************************/
+    Async — destructuring `as {a, b, ...rest}`
+    *******************************/
 
     describe('async destructuring (`as {a, b, ...rest}`)', () => {
       it('should bind destructured fields from the resolved object', async () => {
@@ -94,8 +94,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Async — `{this}` without `as` alias
-*******************************/
+    Async — `{this}` without `as` alias
+    *******************************/
 
     describe('async with implicit `{this}` (no `as` alias)', () => {
       it('should expose resolved value as `{this}` when `as` is omitted', async () => {
@@ -148,9 +148,10 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Async — re-show resolved value while a new promise is in flight
-   (lines 68-72 in async.js: hasResolved && !loadingContent path)
-*******************************/
+      Async — re-show in flight
+    *******************************/
+
+    // hasResolved && !loadingContent path (async.js lines 68-72).
 
     describe('async re-fire while in flight, no loadingContent', () => {
       it('should keep last resolved value visible while next promise is pending', async () => {
@@ -204,8 +205,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Async — stale promise discarded after rejection
-*******************************/
+    Async — stale promise discarded after rejection
+    *******************************/
 
     describe('async stale promise rejection', () => {
       it('should discard a late rejection from a superseded promise', async () => {
@@ -250,8 +251,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Async — sync throw with no errorContent
-*******************************/
+    Async — sync throw with no errorContent
+    *******************************/
 
     describe('async sync throw with no error branch', () => {
       it('should propagate the throw when no errorContent is declared', async () => {
@@ -299,8 +300,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Async — promise rejection with no errorContent
-*******************************/
+    Async — promise rejection with no errorContent
+    *******************************/
 
     describe('async rejected promise with no error branch', () => {
       it('should swallow rejection silently when errorContent is empty', async () => {
@@ -338,8 +339,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Async — sync (non-promise) return value
-*******************************/
+    Async — sync (non-promise) return value
+    *******************************/
 
     describe('async sync return (non-promise)', () => {
       it('should render content immediately when expression returns a non-promise', async () => {
@@ -368,8 +369,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Async — stale resolution after component removal
-*******************************/
+    Async — stale resolution after component removal
+    *******************************/
 
     describe('async resolution after component disconnect', () => {
       it('should not throw when a pending promise resolves after the component is removed', async () => {
@@ -409,8 +410,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Async — destructuring on non-object
-*******************************/
+    Async — destructuring on non-object
+    *******************************/
 
     describe('async destructuring with non-object resolution', () => {
       it('should bind destructured fields to undefined when value is a primitive', async () => {
@@ -443,8 +444,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Expression — `{#html}` with null/undefined and boundary cases
-*******************************/
+    Expression — `{#html}` with null/undefined and boundary cases
+    *******************************/
 
     describe('expression: unsafeHTML clearing', () => {
       it('should clear previous DOM nodes when unsafe HTML expression becomes null', async () => {
@@ -512,8 +513,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Expression — text expression with undefined
-*******************************/
+    Expression — text expression with undefined
+    *******************************/
 
     describe('expression: text-position with undefined', () => {
       it('should render empty string when text expression resolves to undefined', async () => {
@@ -564,9 +565,10 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Expression — `{#fn}` literal reference for text-position
-   Source: expression.js compute branch — literalValue uses lookupTokenValue
-*******************************/
+      `{#fn}` literal in text
+    *******************************/
+
+    // expression.js compute branch — literalValue uses lookupTokenValue.
 
     describe('expression: {#fn} literal in text position', () => {
       it('should render a literal function reference as its stringified form (no auto-invoke)', async () => {
@@ -596,8 +598,8 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Expression — mixed Lisp + JS syntax (documented in skill)
-*******************************/
+    Expression — mixed Lisp + JS syntax (documented in skill)
+    *******************************/
 
     describe('expression: mixed lisp/JS in one expression', () => {
       it('should evaluate a lisp call whose arg is a parenthesized ternary', async () => {
@@ -640,10 +642,11 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Raw-text — <style>, <textarea>, <title>
-   Only <script> is currently tested. Source comment in raw-text.js:
-   "<script>, <style>, <textarea>, <title>".
-*******************************/
+       Raw-text — non-script
+    *******************************/
+
+    // <script>, <style>, <textarea>, <title> are the raw-text elements.
+    // Only <script> was previously tested.
 
     describe('raw-text: non-script raw-text elements', () => {
       it('should bind expressions inside <style> with a brace-free body', async () => {
@@ -817,11 +820,12 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Raw-text — block dispatch behaviors inside raw-text
-   Source: renderer.js evaluateRawTextNodes — throws when block has no
-   evaluateText. async.js explicitly opts out (line 144-147).
-   each.js does define evaluateText (line 753).
-*******************************/
+      Raw-text — block dispatch
+    *******************************/
+
+    // renderer.js evaluateRawTextNodes throws when a block has no
+    // evaluateText. async.js opts out (line 144-147); each.js defines
+    // evaluateText (line 753).
 
     describe('raw-text: blocks that cannot operate inside raw-text contexts', () => {
       it('should surface an error when {#async} appears inside <script>', async () => {
@@ -892,10 +896,11 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Raw-text — empty / no-element case
-   Source: raw-text.js — "if (!element) { comment.remove(); return; }"
-   This branch handles malformed raw-text marker placement.
-*******************************/
+        Raw-text — empty case
+    *******************************/
+
+    // raw-text.js: `if (!element) { comment.remove(); return; }` —
+    // handles malformed raw-text marker placement.
 
     describe('raw-text: degenerate cases', () => {
       it('FINDING: fully static <style> content with `{` braces does not round-trip', async () => {
@@ -945,9 +950,10 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Async — loading branch alias `{before}`
-   Documented in component-templating skill.
-*******************************/
+      Async — `{before}` alias
+    *******************************/
+
+    // Documented in component-templating skill.
 
     describe('async: alternative section aliases', () => {
       it('should accept `{before}` as alias for `{loading}`', async () => {
@@ -1003,10 +1009,11 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
-   Async — reactive re-execution from data context signal
-   Documented: "When a signal used in the async expression changes, the
-   block re-executes the promise automatically."
-*******************************/
+     Async — reactive re-execution
+    *******************************/
+
+    // Documented: "When a signal used in the async expression changes,
+    // the block re-executes the promise automatically."
 
     describe('async reactive re-execution', () => {
       it('should re-fire promise when an argument signal in the expression changes', async () => {

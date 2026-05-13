@@ -5,8 +5,8 @@ import { RENDERING_ENGINES } from './test-utils.js';
 RENDERING_ENGINES.forEach(engine => {
   describe(engine, () => {
     /*******************************
-         Test Helpers
-*******************************/
+             Test Helpers
+    *******************************/
 
     let tagCounter = 0;
     function uniqueTag() {
@@ -26,8 +26,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   each → expression
-*******************************/
+          each → expression
+    *******************************/
 
     describe('each → expression', () => {
       it('reactive: inner expression updates when signal changes', async () => {
@@ -89,8 +89,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   each → if → expression
-*******************************/
+      each → if → expression
+    *******************************/
 
     describe('each → if → expression', () => {
       it('reactive: conditional branch switches when signal changes', async () => {
@@ -154,8 +154,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   each → snippet → expression
-*******************************/
+    each → snippet → expression
+    *******************************/
 
     describe('each → snippet → expression', () => {
       it('reactive: snippet expression updates when signal changes', async () => {
@@ -220,8 +220,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   each → async → expression
-*******************************/
+     each → async → expression
+    *******************************/
 
     describe('each → async → expression', () => {
       it('reactive: async block re-executes when signal changes', async () => {
@@ -304,8 +304,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   each → each → expression
-*******************************/
+     each → each → expression
+    *******************************/
 
     describe('each → each → expression', () => {
       it('reactive: inner each expression updates when signal changes', async () => {
@@ -383,8 +383,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   each → rerender → expression
-*******************************/
+    each → rerender → expression
+    *******************************/
 
     describe('each → rerender → expression', () => {
       it('reactive: rerender block re-evaluates when key signal changes', async () => {
