@@ -278,16 +278,9 @@ export const Template = class Template {
     }, 10);
 
     this.onDestroyed = () => {
-      if (this.destroyed) { return; }
       Template.removeTemplate(this);
-      // Snapshot child Templates before markDestroyed — that method clears
-      // the list to free references. Each child runs its own cleanup chain
-      // (abort, clearReactions, removeEvents, user onDestroyed).
-      const children = this._childTemplates?.slice();
       this.markDestroyed();
-      if (children) {
-        for (const child of children) { child.onDestroyed(); }
-      }
+      this.renderer?.destroy?.();
       this.abortController.abort('Template destroyed');
       this.clearReactions();
       this.removeEvents();
