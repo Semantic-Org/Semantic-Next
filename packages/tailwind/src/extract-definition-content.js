@@ -59,15 +59,15 @@ export function extractDefinitionContent(definition) {
     });
   }
 
-  // 6. SubTemplates — recurse so nested subtemplates and their JS surfaces
-  // (createComponent, lifecycle hooks, events, keys) are all scanned the same
-  // way as the top-level definition.
+  // 6. SubTemplates - scan their HTML and CSS
   if (isObject(definition.subTemplates)) {
     each(definition.subTemplates, (subTemplate) => {
-      const nested = extractDefinitionContent(subTemplate);
-      if (nested.html) { htmlContent.push(nested.html); }
-      if (nested.js) { jsContent.push(nested.js); }
-      if (nested.css) { cssContent.push(nested.css); }
+      if (subTemplate.template) {
+        htmlContent.push(subTemplate.template);
+      }
+      if (subTemplate.css) {
+        cssContent.push(subTemplate.css);
+      }
     });
   }
 

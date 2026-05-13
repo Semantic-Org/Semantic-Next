@@ -268,7 +268,7 @@ describe('TailwindPlugin — definition transform', () => {
           template: '<span class="text-sm"></span>',
           subTemplates: {
             inner: {
-              template: '<em class="text-lg"></em>',
+              template: '<em class="text-md"></em>',
             },
           },
         },
@@ -276,7 +276,7 @@ describe('TailwindPlugin — definition transform', () => {
     });
     expect(result.css).toContain('.text-xs');
     expect(result.css).toContain('.text-sm');
-    expect(result.css).toContain('.text-lg');
+    expect(result.css).toContain('.text-md');
   });
 
   it('resolves @apply directives in component CSS even when no template classes are present', async () => {
