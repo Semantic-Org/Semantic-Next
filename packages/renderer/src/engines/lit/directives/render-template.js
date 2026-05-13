@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
-import { isClient, isFunction, isString, mapObject } from '@semantic-ui/utils';
+import { isClient, isFunction, isPlainObject, isString, mapObject } from '@semantic-ui/utils';
 import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
@@ -143,6 +143,9 @@ export class RenderTemplateDirective extends AsyncDirective {
   unpackData(dataObj) {
     if (isFunction(dataObj)) {
       return dataObj();
+    }
+    if (!isPlainObject(dataObj)) {
+      return {};
     }
     return mapObject(dataObj, (val) => val());
   }
