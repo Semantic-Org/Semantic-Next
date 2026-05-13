@@ -418,7 +418,7 @@ export class SpecReader {
   }
 
   canUseAttribute(type) {
-    if (type == Function) {
+    if (type === Function || type === 'function') {
       return false;
     }
     return true;
