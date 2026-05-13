@@ -11,6 +11,7 @@ import {
   generateID,
   get,
   getKeyFromEvent,
+  idleCallback,
   inArray,
   isClient,
   isEqual,
@@ -280,7 +281,7 @@ export const Template = class Template {
     this.onDestroyed = () => {
       Template.removeTemplate(this);
       this.markDestroyed();
-      queueMicrotask(() => this.renderer?.destroy?.());
+      idleCallback(() => this.renderer?.destroy?.());
       this.abortController.abort('Template destroyed');
       this.clearReactions();
       this.removeEvents();
