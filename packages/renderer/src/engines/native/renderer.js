@@ -124,10 +124,6 @@ export class Renderer {
     });
   }
 
-  destroy() {
-    this.scope.dispose();
-  }
-
   /*******************************
         AST → DOM
   *******************************/

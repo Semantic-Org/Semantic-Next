@@ -202,8 +202,6 @@ export class ServerRenderer {
     return html.replace(REMOVE_ATTR_REGEX, '');
   }
 
-  destroy() {}
-
   setData(newData) {
     this.updateData(newData, { preserveExistingData: false });
     this.evaluator.setData(this.data);

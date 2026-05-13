@@ -86,8 +86,6 @@ export class LitRenderer {
     return this.litTemplate;
   }
 
-  destroy() {}
-
   cachedRender(data) {
     if (data) {
       this.updateData(data);
