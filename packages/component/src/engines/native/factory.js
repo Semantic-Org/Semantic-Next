@@ -32,18 +32,16 @@ export function createComponent({
   component.properties = resolvedProperties;
 
   // observedAttributes — must be set before customElements.define()
-  // HTML lowercases attribute names but doesn't transform hyphens. The
-  // canonical (camelCase) property's observed name is its lowercase form —
-  // that's what `<comp useAccordion>` or `<comp useaccordion>` deliver. The
-  // kebab form is observed via its dedicated alias entry.
+  // The alias key IS the attribute name (multiword aliases register both
+  // kebab and lowercase forms in component-helpers); the canonical falls
+  // back to its kebab form for the single-word case where no alias exists.
   const observedAttrs = new Set();
   each(resolvedProperties, (config, propName) => {
     if (config.alias) {
-      // The alias key IS the attribute name (kebab: `use-accordion`).
       observedAttrs.add(propName);
     }
     else if (config.attribute !== false) {
-      observedAttrs.add(propName.toLowerCase());
+      observedAttrs.add(camelToKebab(propName));
     }
   });
   Object.defineProperty(component, 'observedAttributes', {

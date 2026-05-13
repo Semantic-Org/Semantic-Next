@@ -223,18 +223,8 @@ class WebComponentBase extends HTMLElementBase {
       return;
     }
 
-    // HTML lowercases attribute names without touching hyphens. A property
-    // declared as `useAccordion` is observed as `useaccordion`; kebabToCamel
-    // alone can't recover the camelCase, so fall back to a lowercase match
-    // against the canonical (non-alias) property names.
-    let propName = kebabToCamel(attribute);
-    let config = resolvedProperties[propName];
-    if (!config) {
-      propName = Object.keys(resolvedProperties).find(
-        (k) => !resolvedProperties[k].alias && k.toLowerCase() === attribute,
-      );
-      config = propName ? resolvedProperties[propName] : undefined;
-    }
+    const propName = kebabToCamel(attribute);
+    const config = resolvedProperties[propName];
     const convertedValue = config?.converter?.fromAttribute
       ? config.converter.fromAttribute(newValue, config.type)
       : newValue;
