@@ -774,6 +774,31 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         externalTarget.remove();
       });
 
+      it('binds a listener attached from inside onCreated and cleans up on destroy', async () => {
+        // onCreated fires before attachEvents() sets up eventController. The auto-cleanup
+        // contract still has to hold — attachEvent ties to the template's lifetime
+        // controller, not the per-attachment-cycle one.
+        const handler = vi.fn();
+        const externalTarget = document.createElement('div');
+        document.body.appendChild(externalTarget);
+        try {
+          const fixture = await mountTemplate({
+            target,
+            onCreated: ({ attachEvent }) => {
+              attachEvent(externalTarget, 'click', handler);
+            },
+          });
+          clickOn(externalTarget);
+          expect(handler).toHaveBeenCalledTimes(1);
+          fixture.cleanup();
+          clickOn(externalTarget);
+          expect(handler).toHaveBeenCalledTimes(1);
+        }
+        finally {
+          externalTarget.remove();
+        }
+      });
+
       it('forwards listener options (passive, capture, once) to addEventListener', async () => {
         // Production at inpage-menu.js:269 passes `{ passive: true }` directly.
         // The 4th arg should accept the natural addEventListener shape.

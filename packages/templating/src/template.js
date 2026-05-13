@@ -922,7 +922,7 @@ export const Template = class Template {
   // querySettings is the only namespaced key.
   attachEvent(selector, eventName, eventHandler, { querySettings = { pierceShadow: true }, ...eventSettings } = {}) {
     return $(selector, document, querySettings).on(eventName, eventHandler, {
-      abortController: this.eventController,
+      abortController: this.abortController,
       returnHandler: true,
       eventSettings,
     });
