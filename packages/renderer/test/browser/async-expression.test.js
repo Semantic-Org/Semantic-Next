@@ -691,6 +691,52 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(style.textContent.trim()).not.toBe('.theme { color: red; }');
       });
 
+      it('renders <style>{#html getStyles}</style> content into the style element, not into the next sibling', async () => {
+        // Reproduces docs/src/examples/templates/expressions-raw-html style-injection
+        // pattern. The rawtext marker must land immediately after </style>, not
+        // after subsequent siblings — otherwise raw-text.js walks back from the
+        // marker and finds the wrong element to set textContent on.
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<style>{#html getStyles}</style>\n<button class="themed-button">Themed Button</button>',
+          createComponent: () => ({
+            getStyles: () => '.themed-button { color: red; }',
+          }),
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        const style = el.shadowRoot.querySelector('style');
+        const button = el.shadowRoot.querySelector('button.themed-button');
+        expect(style.textContent).toContain('.themed-button { color: red; }');
+        expect(button.textContent).toBe('Themed Button');
+      });
+
+      it('updates <style> textContent reactively when the {#html} source changes', async () => {
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<style>{#html getStyles}</style>\n<button class="themed-button">x</button>',
+          defaultState: { theme: 'red' },
+          createComponent: ({ state }) => ({
+            getStyles: () => `.themed-button { color: ${state.theme.get()}; }`,
+          }),
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+        const style = el.shadowRoot.querySelector('style');
+        expect(style.textContent).toContain('color: red');
+
+        el.template.state.theme.set('blue');
+        await waitForUpdate(el);
+        expect(style.textContent).toContain('color: blue');
+      });
+
       it('should bind expression inside <textarea>', async () => {
         const tag = uniqueTag();
         defineComponent({

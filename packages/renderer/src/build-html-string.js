@@ -170,29 +170,51 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
   let insideRawText = false;
   let rawTextNodes = null; // collected AST nodes for the raw text content
 
-  // Check if buffer has entered/exited a raw text element after html node
-  const updateRawTextState = (html) => {
-    if (!insideRawText) {
-      // Check if we just entered a raw text element (the > that closes its opening tag)
-      const openMatch = html.match(RAW_TEXT_OPEN);
-      if (openMatch) {
-        // Confirm the tag has been closed with >
-        const tagStart = html.lastIndexOf('<' + openMatch[1]);
-        if (tagStart !== -1 && html.indexOf('>', tagStart) !== -1) {
-          insideRawText = true;
-          rawTextNodes = [];
-        }
-      }
-    }
-    else {
-      // Check if we just exited
-      if (RAW_TEXT_CLOSE.test(html)) {
-        // Emit the raw text marker AFTER the closing tag
+  // Append an html chunk to the output, tracking raw-text entry/exit.
+  // When inside raw-text and the chunk contains the closing tag, the
+  // marker must be inserted immediately after the close — not at the end
+  // of the chunk — because the AST often combines `</style>` with the
+  // following siblings into one html node.
+  const appendHtml = (html) => {
+    if (insideRawText) {
+      const closeMatch = html.match(RAW_TEXT_CLOSE);
+      if (closeMatch) {
+        const splitAt = closeMatch.index + closeMatch[0].length;
+        const beforeClose = html.slice(0, splitAt);
+        htmlString += beforeClose;
+        htmlBuffer += beforeClose;
         const id = entries.length;
         htmlString += `<!--${RAW_TEXT_MARKER}${id}-->`;
         entries.push({ id, type: 'rawText', nodes: rawTextNodes });
         insideRawText = false;
         rawTextNodes = null;
+        // The remainder (after </style>) may itself open another raw-text element.
+        appendHtml(html.slice(splitAt));
+        return;
+      }
+      htmlString += html;
+      htmlBuffer += html;
+      return;
+    }
+    htmlString += html;
+    htmlBuffer += html;
+    // The raw-text open tag may span multiple chunks — e.g.
+    // `<textarea placeholder="{ph}">` arrives as three html chunks
+    // separated by an expression — so detection runs on the cumulative
+    // buffer. Guard against re-matching a previously-closed raw-text
+    // element (the buffer still contains the old `<style>` after we
+    // closed it) by checking that no matching close tag follows the open.
+    const openMatch = htmlBuffer.match(RAW_TEXT_OPEN);
+    if (openMatch) {
+      const tagName = openMatch[1];
+      const tagStart = htmlBuffer.lastIndexOf('<' + tagName);
+      const tagEnd = tagStart === -1 ? -1 : htmlBuffer.indexOf('>', tagStart);
+      if (tagEnd !== -1) {
+        const closeRegex = new RegExp(`</${tagName}\\s*>`, 'i');
+        if (!closeRegex.test(htmlBuffer.slice(tagEnd))) {
+          insideRawText = true;
+          rawTextNodes = [];
+        }
       }
     }
   };
@@ -201,9 +223,7 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
     for (const node of nodes) {
       switch (node.type) {
         case 'html':
-          htmlString += node.html;
-          htmlBuffer += node.html;
-          updateRawTextState(htmlBuffer);
+          appendHtml(node.html);
           break;
 
         case 'expression': {
