@@ -746,10 +746,9 @@ export class Query {
           };
         }
 
-        // wrap listener to support return false / return 'cancel'
-        // only wrap if handler has a return statement to preserve native reference
+        // wrap when handler can return false/'cancel' (explicit return or arrow expression body)
         const rawListener = delegateHandler || handler;
-        const needsWrapping = delegateHandler || /\breturn\b/.test(handler.toString());
+        const needsWrapping = delegateHandler || /\breturn\b|=>\s*[^\s{]/.test(handler.toString());
         const eventListener = needsWrapping
           ? function(e) {
             const result = rawListener.call(this, e);
