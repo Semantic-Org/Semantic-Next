@@ -358,6 +358,45 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
+   Subtemplate cleanup on parent disconnect
+*******************************/
+
+    describe('subtemplate cleanup on parent disconnect', () => {
+      it.skipIf(engine === 'lit')('fires subtemplate onDestroyed when parent is removed from the DOM', async () => {
+        const order = [];
+        const tag = uniqueTag();
+
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<span>{label}</span>',
+          onDestroyed: () => {
+            order.push('child-destroyed');
+          },
+        });
+
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '{>child label="hi"}',
+          onDestroyed: () => {
+            order.push('parent-destroyed');
+          },
+          subTemplates: { child },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+
+        el.remove();
+        await new Promise(r => setTimeout(r, 50));
+
+        // Renderer.destroy() cascades scope dispose through block destroy hooks,
+        // firing subtemplate onDestroyed before the parent's user callback.
+        expect(order).toEqual(['child-destroyed', 'parent-destroyed']);
+      });
+    });
+
+    /*******************************
    Unbounded Growth Prevention
 *******************************/
 

@@ -54,15 +54,12 @@ export const defineComponent = ({
     ast = compiler.compile();
   }
 
-  // Subtemplates may be passed as Template instances (the canonical shape) or as
-  // plain-object literals — sugar for an inline `defineComponent` without a
-  // `tagName`. Replace plain entries in place so the original map reference is
-  // preserved for forward-ref patterns (e.g. recursive subtemplates that wire
-  // themselves in after `defineComponent` returns).
   each(subTemplates, (subTemplate, name) => {
+    // support syntactic sugar obj literal subtemplates
     if (!(subTemplate instanceof Template)) {
       subTemplates[name] = defineComponent(subTemplate);
     }
+    // use subtemplate css which includes its own subtemplates
     if (subTemplates[name].css) {
       css += subTemplates[name].css;
     }
