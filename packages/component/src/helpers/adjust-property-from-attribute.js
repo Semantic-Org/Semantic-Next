@@ -53,20 +53,12 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
 
   // settings have signals that mirror the prop and need to be triggered
   const setSetting = (property, value) => {
-    let newValue = value;
     if (el.settings[property] !== undefined) {
-      const converter = properties?.[property]?.converter?.fromproperty;
+      const converter = properties?.[property]?.converter?.fromAttribute;
       if (isFunction(converter)) {
-        newValue = converter(newValue);
+        value = converter(value);
       }
-      else {
-        // check if json
-        try {
-          newValue = JSON.parse(newValue);
-        }
-        catch (e) {}
-      }
-      el.settings[property] = newValue;
+      el.settings[property] = value;
     }
   };
 
@@ -181,19 +173,19 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
     setSetting(attribute, attributeValue);
   }
 
-  if (properties && attributeValue !== undefined && attribute.includes('-')) {
-    /* This handles the case of multiword properties like `useAccordion`
-       maps to <ui-menu use-accordion> or <ui-menu useaccordion>
-       the kebab case is just an alias which will update the base setting
+  if (properties && attributeValue !== undefined) {
+    /* This handles alias forms of multiword properties — both kebab
+       (<ui-menu use-accordion>) and all-lowercase (<ui-menu useaccordion>)
+       bridge to the canonical property via aliasFor (set in getProperties).
     */
-    const propertyName = kebabToCamel(attribute);
     const attributeSettings = properties[attribute];
-    if (propertyName !== attribute && attributeSettings?.alias) {
+    if (attributeSettings?.alias) {
+      const propertyName = attributeSettings.aliasFor;
       const convertFunc = attributeSettings?.converter?.fromAttribute;
       const propertyValue = (convertFunc)
         ? convertFunc(attributeValue)
         : attributeValue;
-      if (propertyValue) {
+      if (propertyValue !== undefined) {
         setProperty(propertyName, propertyValue);
       }
       return;

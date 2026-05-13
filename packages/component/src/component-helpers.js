@@ -81,8 +81,10 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
   }
 
   /* This handles the case of multiword settings like `useAccordion`
-     we support 2 syntax <ui-menu use-accordion> or <ui-menu useaccordion>'
-     the kebab attr serves as an alias with no accessor
+     we support 2 syntax <ui-menu use-accordion> or <ui-menu useaccordion>
+     the kebab attr serves as an alias with no accessor. The concatenated
+     lowercase form (useaccordion) is reached via canonical-name observation
+     in factory.js — no separate properties entry needed.
   */
   each(properties, (propertySettings, propertyName) => {
     const attributeName = camelToKebab(propertyName);
@@ -91,6 +93,7 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
         ...properties[propertyName],
         noAccessor: true,
         alias: true,
+        aliasFor: propertyName,
       };
     }
   });
