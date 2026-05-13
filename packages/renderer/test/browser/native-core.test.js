@@ -133,13 +133,16 @@ describe('value/selected/checked property mirror on single-expression', () => {
 
   it('mirrors selected property on <option> for single-expression', async () => {
     // attribute-binding.js mirrors `selected` to the boolean property.
-    // Two options so the browser doesn't auto-select the only one;
-    // toggling isChosen flips the .selected property on option A.
+    // Use <select multiple> — single-select reconciliation auto-selects the
+    // first option when none have selectedness, which would mask the property
+    // mirror with browser behavior. Multi-select lets us assert the framework
+    // contract cleanly.
     const tag = uniqueTag();
     defineComponent({
       renderingEngine: ENGINE,
       tagName: tag,
-      template: '<select><option selected="{isChosen}" value="a">A</option><option value="b">B</option></select>',
+      template:
+        '<select multiple><option selected="{isChosen}" value="a">A</option><option value="b">B</option></select>',
       defaultState: { isChosen: true },
     });
     const el = document.createElement(tag);
