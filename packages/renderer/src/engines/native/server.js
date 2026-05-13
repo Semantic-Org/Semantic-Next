@@ -34,9 +34,10 @@ import {
   RAW_TEXT_MARKER,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
+import { encodeItemKey, getEachData, getItemID } from '../../shared/each.js';
+import { SUI_ITEM_MARKER } from './blocks/each.js';
 import { renderASTToString, stringifyAttrValue } from './commit-hooks.js';
 import { childContext } from './define-block.js';
-import { encodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from './shared/each.js';
 
 const REMOVE_ATTR = '__SUI_REMOVE__';
 const REMOVE_ATTR_REGEX = /\s+[\w.@-]+\s*=\s*["']?__SUI_REMOVE__["']?/g;

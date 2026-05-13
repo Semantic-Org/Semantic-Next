@@ -1,14 +1,11 @@
 /*
-  Each-block coordination shared between server and client. Both sides
-  must agree on item key, item-data shape, and marker encoding or hydration
-  silently mismatches.
+  Each-block coordination shared across engines. Pure logic — keying,
+  per-item data shape, and key encode/decode. No DOM, no engine-specific
+  primitives. Native and Lit both use these so the user-facing contract
+  for {#each} stays uniform.
 */
 
 import { isPlainObject, isString } from '@semantic-ui/utils';
-
-import { MARKER_VERSION } from '../../../build-html-string.js';
-
-export const SUI_ITEM_MARKER = `sui-item:${MARKER_VERSION}:`;
 
 // Stringified — Map / === compare by value identity, and the server's
 // KEY is always serialized as text inside the comment marker.
