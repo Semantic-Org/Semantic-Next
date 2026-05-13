@@ -29,7 +29,15 @@ import {
   DATA_SUI_BIND,
   formatBlockClose,
   MAIN_BRANCH_INDEX,
+  RAW_TEXT_MARKER,
 } from '../../build-html-string.js';
+
+// Mirror build-html-string.js's raw-text bounds so server output and
+// client hydration agree. HTML parses content inside these elements as
+// raw text — comment markers placed inside become literal text and
+// break the content (CSS/JS corruption, visible marker text in textareas).
+const RAW_TEXT_OPEN = /\<(script|style|textarea|title)[\s>]/i;
+const RAW_TEXT_CLOSE = /\<\/(script|style|textarea|title)\s*\>/i;
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
 import { renderASTToString, stringifyAttrValue } from './commit-hooks.js';
 import { childContext } from './define-block.js';
@@ -71,6 +79,31 @@ const ATTR_NAME_AT_OPEN = /\s([.@]?[\w:-]+)\s*=\s*$/;
 function attrNameFromBuffer(buffer) {
   const match = ATTR_NAME_AT_OPEN.exec(buffer);
   return match ? match[1] : null;
+}
+
+// Flip scope.insideRawText when the cumulative htmlBuffer ends inside an
+// unclosed raw-text element. Skips when a matching close tag already
+// follows the open in the buffer (a previously-closed raw-text element
+// stays in the buffer and would otherwise re-trigger on the next chunk).
+function maybeEnterRawText(scope) {
+  const openMatch = scope.htmlBuffer.match(RAW_TEXT_OPEN);
+  if (!openMatch) { return; }
+  const tagName = openMatch[1];
+  const tagStart = scope.htmlBuffer.lastIndexOf('<' + tagName);
+  const tagEnd = tagStart === -1 ? -1 : scope.htmlBuffer.indexOf('>', tagStart);
+  if (tagEnd === -1) { return; }
+  const closeRegex = new RegExp(`</${tagName}\\s*>`, 'i');
+  if (closeRegex.test(scope.htmlBuffer.slice(tagEnd))) { return; }
+  scope.insideRawText = true;
+}
+
+// After emitting a rawtext marker, the remainder of the html chunk may
+// itself open another raw-text element (rare but possible). Defer to
+// maybeEnterRawText against the updated buffer.
+function appendHtmlPostClose(remainder, scope) {
+  if (!remainder) { return ''; }
+  maybeEnterRawText(scope);
+  return remainder;
 }
 
 function scanHtmlChunk(chunk, scope) {
@@ -227,17 +260,39 @@ export class ServerRenderer {
         inQuote: null,
         currentAttrName: null,
         tagBindings: {},
+        insideRawText: false,
       };
     }
 
     let html = '';
 
+    // Wraps scanHtmlChunk to detect raw-text bounds. When inside raw-text
+    // and the chunk contains the close tag, splits at the close boundary
+    // and inserts `<!--sui-rawtext:v1:N-->` immediately after — not at the
+    // end of the chunk — because subsequent siblings often share the same
+    // html node and the marker must sit between the close and them.
+    const appendHtml = (chunk) => {
+      const stamped = scanHtmlChunk(chunk, scope);
+      if (scope.insideRawText) {
+        const closeMatch = stamped.match(RAW_TEXT_CLOSE);
+        if (closeMatch) {
+          const splitAt = closeMatch.index + closeMatch[0].length;
+          const id = scope.entryId++;
+          scope.insideRawText = false;
+          return stamped.slice(0, splitAt)
+            + `<!--${RAW_TEXT_MARKER}${id}-->`
+            + appendHtmlPostClose(stamped.slice(splitAt), scope);
+        }
+        return stamped;
+      }
+      maybeEnterRawText(scope);
+      return stamped;
+    };
+
     for (const node of ast) {
       switch (node.type) {
         case 'html':
-          // scanHtmlChunk tracks tag boundaries so dynamic attribute bindings
-          // get flushed into `data-sui-bind` just before the closing `>`.
-          html += scanHtmlChunk(node.html, scope);
+          html += appendHtml(node.html);
           break;
 
         case 'expression':
@@ -287,9 +342,21 @@ export class ServerRenderer {
   *******************************/
 
   renderExpression(node, data, scope) {
-    const id = scope.entryId++;
     const classification = analyzePosition(scope.htmlBuffer);
     const value = this.evaluator.lookupExpressionValue(node.value, data);
+
+    // Content-position expressions inside <style>/<script>/<textarea>/<title>
+    // emit literal text — no comment marker (those become literal characters
+    // in raw-text contexts, corrupting CSS/JS or showing as visible text).
+    // Attribute-position expressions on the raw-text element itself fall
+    // through to the normal path below.
+    if (scope.insideRawText && !classification.insideTag) {
+      return node.unsafeHTML
+        ? String(value ?? '')
+        : escapeHTML(String(value ?? ''));
+    }
+
+    const id = scope.entryId++;
 
     if (classification.insideTag) {
       // Record this entry as the first binding for its attribute, so the

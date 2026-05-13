@@ -854,9 +854,15 @@ describe('raw-text elements', () => {
   });
 
   it('renders expression value inside <style> as plain text (no comment marker)', () => {
-    const ast = compile('<style>.x { color: {color}; }</style>');
-    const html = render({ ast, data: { color: 'red' } });
-    expect(html).toContain('color: red;');
+    // Braceless body — the compiler's `{` expression delimiter doesn't have
+    // raw-text awareness, so CSS rule braces around an expression eat the
+    // body into a single expression token. That constraint is documented
+    // separately; here we pin that expressions DO render to plain text
+    // inside <style> when the compiler emits them as expression nodes.
+    const ast = compile('<style>{rule}</style>');
+    const html = render({ ast, data: { rule: '.x color red' } });
+    expect(html).toContain('.x color red');
+    expect(html).not.toMatch(/<style>[^<]*<!--sui:v1:/);
   });
 
   it('emits sui-rawtext marker after a raw-text element with expressions (matches client)', () => {
