@@ -191,14 +191,6 @@ export const Template = class Template {
     }
     parentTemplate._childTemplates.push(this);
     this.parentTemplate = parentTemplate;
-    // Cascade parent destruction to this subtemplate via the platform's
-    // abort dispatch — avoids walking the renderer scope tree at teardown.
-    // The `signal: this.abortSignal` option auto-removes the listener if
-    // THIS template is destroyed first (e.g. conditional swap), so we
-    // don't accumulate listeners on long-lived parents.
-    parentTemplate.abortSignal.addEventListener('abort', () => {
-      if (!this.destroyed) { this.onDestroyed(); }
-    }, { signal: this.abortSignal, once: true });
   }
 
   removeParent() {
@@ -288,7 +280,14 @@ export const Template = class Template {
     this.onDestroyed = () => {
       if (this.destroyed) { return; }
       Template.removeTemplate(this);
+      // Snapshot child Templates before markDestroyed — that method clears
+      // the list to free references. Each child runs its own cleanup chain
+      // (abort, clearReactions, removeEvents, user onDestroyed).
+      const children = this._childTemplates?.slice();
       this.markDestroyed();
+      if (children) {
+        for (const child of children) { child.onDestroyed(); }
+      }
       this.abortController.abort('Template destroyed');
       this.clearReactions();
       this.removeEvents();
