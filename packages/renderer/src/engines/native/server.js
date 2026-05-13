@@ -28,16 +28,11 @@ import {
   COMMENT_MARKER,
   DATA_SUI_BIND,
   formatBlockClose,
+  isInsideRawText,
   MAIN_BRANCH_INDEX,
+  RAW_TEXT_CLOSE,
   RAW_TEXT_MARKER,
 } from '../../build-html-string.js';
-
-// Mirror build-html-string.js's raw-text bounds so server output and
-// client hydration agree. HTML parses content inside these elements as
-// raw text — comment markers placed inside become literal text and
-// break the content (CSS/JS corruption, visible marker text in textareas).
-const RAW_TEXT_OPEN = /\<(script|style|textarea|title)[\s>]/i;
-const RAW_TEXT_CLOSE = /\<\/(script|style|textarea|title)\s*\>/i;
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
 import { renderASTToString, stringifyAttrValue } from './commit-hooks.js';
 import { childContext } from './define-block.js';
@@ -79,31 +74,6 @@ const ATTR_NAME_AT_OPEN = /\s([.@]?[\w:-]+)\s*=\s*$/;
 function attrNameFromBuffer(buffer) {
   const match = ATTR_NAME_AT_OPEN.exec(buffer);
   return match ? match[1] : null;
-}
-
-// Flip scope.insideRawText when the cumulative htmlBuffer ends inside an
-// unclosed raw-text element. Skips when a matching close tag already
-// follows the open in the buffer (a previously-closed raw-text element
-// stays in the buffer and would otherwise re-trigger on the next chunk).
-function maybeEnterRawText(scope) {
-  const openMatch = scope.htmlBuffer.match(RAW_TEXT_OPEN);
-  if (!openMatch) { return; }
-  const tagName = openMatch[1];
-  const tagStart = scope.htmlBuffer.lastIndexOf('<' + tagName);
-  const tagEnd = tagStart === -1 ? -1 : scope.htmlBuffer.indexOf('>', tagStart);
-  if (tagEnd === -1) { return; }
-  const closeRegex = new RegExp(`</${tagName}\\s*>`, 'i');
-  if (closeRegex.test(scope.htmlBuffer.slice(tagEnd))) { return; }
-  scope.insideRawText = true;
-}
-
-// After emitting a rawtext marker, the remainder of the html chunk may
-// itself open another raw-text element (rare but possible). Defer to
-// maybeEnterRawText against the updated buffer.
-function appendHtmlPostClose(remainder, scope) {
-  if (!remainder) { return ''; }
-  maybeEnterRawText(scope);
-  return remainder;
 }
 
 function scanHtmlChunk(chunk, scope) {
@@ -279,13 +249,18 @@ export class ServerRenderer {
           const splitAt = closeMatch.index + closeMatch[0].length;
           const id = scope.entryId++;
           scope.insideRawText = false;
-          return stamped.slice(0, splitAt)
-            + `<!--${RAW_TEXT_MARKER}${id}-->`
-            + appendHtmlPostClose(stamped.slice(splitAt), scope);
+          const after = stamped.slice(splitAt);
+          // The remainder may itself open another raw-text element.
+          if (after && isInsideRawText(scope.htmlBuffer)) {
+            scope.insideRawText = true;
+          }
+          return stamped.slice(0, splitAt) + `<!--${RAW_TEXT_MARKER}${id}-->` + after;
         }
         return stamped;
       }
-      maybeEnterRawText(scope);
+      if (isInsideRawText(scope.htmlBuffer)) {
+        scope.insideRawText = true;
+      }
       return stamped;
     };
 

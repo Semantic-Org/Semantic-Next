@@ -105,8 +105,31 @@ export function parseAttributeParts(attrValue) {
 }
 
 // HTML raw text elements — browser treats content as text, not markup
-const RAW_TEXT_OPEN = /\<(script|style|textarea|title)[\s>]/i;
-const RAW_TEXT_CLOSE = /\<\/(script|style|textarea|title)\s*\>/i;
+export const RAW_TEXT_OPEN = /\<(script|style|textarea|title)[\s>]/i;
+export const RAW_TEXT_CLOSE = /\<\/(script|style|textarea|title)\s*\>/i;
+
+// Per-tag close-tag regexes precomputed once. Cheaper than `new RegExp()`
+// per call when scanning every html chunk for raw-text bounds.
+const RAW_TEXT_CLOSE_BY_TAG = {
+  script: /<\/script\s*>/i,
+  style: /<\/style\s*>/i,
+  textarea: /<\/textarea\s*>/i,
+  title: /<\/title\s*>/i,
+};
+
+// True when `buffer` ends inside an unclosed raw-text element. Both the
+// client (buildHTMLString) and the server renderer flip into raw-text mode
+// from this check — keeping the logic in one place so server/client output
+// agree on where the `<!--sui-rawtext:v1:N-->` marker lands.
+export function isInsideRawText(buffer) {
+  const openMatch = buffer.match(RAW_TEXT_OPEN);
+  if (!openMatch) { return false; }
+  const tagName = openMatch[1].toLowerCase();
+  const tagStart = buffer.lastIndexOf('<' + openMatch[1]);
+  const tagEnd = tagStart === -1 ? -1 : buffer.indexOf('>', tagStart);
+  if (tagEnd === -1) { return false; }
+  return !RAW_TEXT_CLOSE_BY_TAG[tagName].test(buffer.slice(tagEnd));
+}
 
 /*******************************
     Binding Classification
@@ -198,24 +221,9 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
     }
     htmlString += html;
     htmlBuffer += html;
-    // The raw-text open tag may span multiple chunks — e.g.
-    // `<textarea placeholder="{ph}">` arrives as three html chunks
-    // separated by an expression — so detection runs on the cumulative
-    // buffer. Guard against re-matching a previously-closed raw-text
-    // element (the buffer still contains the old `<style>` after we
-    // closed it) by checking that no matching close tag follows the open.
-    const openMatch = htmlBuffer.match(RAW_TEXT_OPEN);
-    if (openMatch) {
-      const tagName = openMatch[1];
-      const tagStart = htmlBuffer.lastIndexOf('<' + tagName);
-      const tagEnd = tagStart === -1 ? -1 : htmlBuffer.indexOf('>', tagStart);
-      if (tagEnd !== -1) {
-        const closeRegex = new RegExp(`</${tagName}\\s*>`, 'i');
-        if (!closeRegex.test(htmlBuffer.slice(tagEnd))) {
-          insideRawText = true;
-          rawTextNodes = [];
-        }
-      }
+    if (isInsideRawText(htmlBuffer)) {
+      insideRawText = true;
+      rawTextNodes = [];
     }
   };
 
