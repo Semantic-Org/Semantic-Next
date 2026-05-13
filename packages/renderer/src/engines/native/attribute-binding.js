@@ -9,12 +9,12 @@ import { renderASTToString, stringifyAttrValue } from './commit-hooks.js';
 
 */
 
-// Expression entries use lookupExpression; block entries (if/rerender) walk
+// Expression entries are stringified; block entries (if/rerender) walk
 // matched-branch content via renderASTToString, which throws for each/async/
 // template/svg/slot.
 function evaluateMarkerToString(entry, data, renderer) {
   if (entry.type === 'expression') {
-    return renderer.lookupExpression(entry.node.value, data);
+    return stringifyAttrValue(renderer.lookupExpression(entry.node.value, data));
   }
   return renderASTToString([entry.node], data, renderer);
 }
@@ -122,7 +122,7 @@ export function bindAttribute({
           value += part.static;
         }
         else {
-          value += evaluateMarkerToString(entries[part.markerID], data, renderer) ?? '';
+          value += evaluateMarkerToString(entries[part.markerID], data, renderer);
         }
       }
       element.setAttribute(attrName, value);
