@@ -397,11 +397,12 @@ describe('TailwindPlugin — definition transform', () => {
   it('applies the component css as a source stylesheet so @theme tokens flow through', async () => {
     // [skill] @theme blocks let consumers override design tokens within a component.
     const result = await TailwindPlugin({
-      template: '<div class="text-base"></div>',
-      css: '@theme { --color-brand-purple-999: #ff00ff; }',
+      template: '<div class="bg-gray-100"></div>',
+      css: '@theme { --color-gray-100: #ff00ff; }',
     });
-    // The custom theme variable should appear in the compiled output.
-    expect(result.css).toContain('--color-brand-purple-999');
+    // The override appears in the cascade and the utility resolves through it.
+    expect(result.css).toMatch(/--color-gray-100:\s*#ff00ff/);
+    expect(result.css).toContain('background-color: var(--color-gray-100)');
   });
 
   it('respects an @utility definition in component css', async () => {
