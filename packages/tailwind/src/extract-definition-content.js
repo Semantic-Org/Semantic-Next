@@ -4,6 +4,9 @@
 
 import { each, isFunction, isObject } from '@semantic-ui/utils';
 
+const IS_TEMPLATE = Symbol.for('semantic-ui/Template');
+const isTemplate = (v) => v?.[IS_TEMPLATE] === true;
+
 export function extractDefinitionContent(definition) {
   const htmlContent = [];
   const jsContent = [];
@@ -59,15 +62,19 @@ export function extractDefinitionContent(definition) {
     });
   }
 
-  // 6. SubTemplates - scan their HTML and CSS
+  // 6. SubTemplates — recurse so nested subtemplates and their JS surfaces
+  // (createComponent, lifecycle hooks, events, keys) all get scanned the same
+  // way as the top-level definition. Template instances are normalized back to
+  // their definition-arg shape via toDefinition() so the recursive call sees a
+  // consistent surface regardless of how the subtemplate was authored.
   if (isObject(definition.subTemplates)) {
     each(definition.subTemplates, (subTemplate) => {
-      if (subTemplate.template) {
-        htmlContent.push(subTemplate.template);
-      }
-      if (subTemplate.css) {
-        cssContent.push(subTemplate.css);
-      }
+      const nested = extractDefinitionContent(
+        isTemplate(subTemplate) ? subTemplate.toDefinition() : subTemplate,
+      );
+      if (nested.html) { htmlContent.push(nested.html); }
+      if (nested.js) { jsContent.push(nested.js); }
+      if (nested.css) { cssContent.push(nested.css); }
     });
   }
 

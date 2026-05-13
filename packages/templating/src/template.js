@@ -101,12 +101,37 @@ export const Template = class Template {
     this.onThemeChangedCallback = onThemeChanged;
     this.id = generateID();
     this.isPrototype = isPrototype;
+    if (isPrototype) {
+      // Source template only retained on prototypes — runtime clones go without
+      // to keep memory tight. Lets prototypes round-trip via toDefinition().
+      this.template = template;
+    }
     this.attachStyles = attachStyles;
     this.element = element;
     this.renderingEngine = renderingEngine;
     if (renderRoot) {
       this.attach(renderRoot);
     }
+  }
+
+  toDefinition() {
+    return {
+      template: this.template,
+      css: this.css,
+      createComponent: this.createComponent,
+      onCreated: this.onCreatedCallback,
+      onRendered: this.onRenderedCallback,
+      onDestroyed: this.onDestroyedCallback,
+      onThemeChanged: this.onThemeChangedCallback,
+      onUpdated: this.onUpdatedCallback,
+      events: this.events,
+      keys: this.keys,
+      subTemplates: this.subTemplates,
+      defaultState: this.defaultState,
+      defaultSettings: this.defaultSettings,
+      renderingEngine: this.renderingEngine,
+      templateName: this.templateName,
+    };
   }
 
   createReactiveState(defaultState, data) {

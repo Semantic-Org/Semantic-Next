@@ -23,8 +23,10 @@ export async function TailwindPlugin(definition, { autoprefix = true } = {}) {
   // Collect all content and CSS from the component definition
   const { content, css } = extractDefinitionContent(definition);
 
-  // Quick check - if no content, return unchanged
-  if (!content.trim()) {
+  // Quick check — skip when neither scannable content nor css is present.
+  // CSS-only definitions still need to run so @apply / @utility / @theme
+  // resolve before adoption.
+  if (!content.trim() && !css.trim()) {
     return definition;
   }
 

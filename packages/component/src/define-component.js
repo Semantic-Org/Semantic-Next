@@ -68,6 +68,7 @@ export const defineComponent = ({
     templateName,
     isPrototype: true,
     renderingEngine,
+    template,
     ast,
     css,
     events,

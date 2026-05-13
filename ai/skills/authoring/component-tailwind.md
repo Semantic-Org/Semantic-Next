@@ -234,23 +234,27 @@ const createComponent = ({ $ }) => ({
 
 ### Subtemplates
 
-Sub-template content is scanned recursively. No extra setup needed:
+Sub-template content is scanned recursively. Subtemplates are built with `defineComponent` (no `tagName`) and passed in by reference — the resulting Template instances let the parent compose them without registering each as a custom element:
 
 ```js
+import { defineComponent } from '@semantic-ui/component';
+import { TailwindPlugin } from '@semantic-ui/tailwind';
+
+const header = defineComponent({
+  template: '<header class="p-4 border-b"><slot name="header"></slot></header>',
+});
+const body = defineComponent({
+  template: '<div class="p-4"><slot></slot></div>',
+});
+
 let definition = {
   tagName: 'ui-card',
   template: '<div class="bg-white shadow-lg">{>header}{>body}</div>',
-  subTemplates: {
-    header: {
-      template: '<header class="p-4 border-b"><slot name="header"></slot></header>',
-    },
-    body: {
-      template: '<div class="p-4"><slot></slot></div>',
-    },
-  },
+  subTemplates: { header, body },
 };
 
 definition = await TailwindPlugin(definition);
+export const UICard = defineComponent(definition);
 ```
 
 ### Dark Mode via Class Toggle

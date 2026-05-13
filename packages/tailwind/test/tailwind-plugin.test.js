@@ -12,6 +12,7 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { defineComponent } from '@semantic-ui/component';
 import { extractDefinitionContent, TailwindPlugin } from '../src/server.js';
 
 /*******************************
@@ -96,17 +97,18 @@ describe('extractDefinitionContent — content scanner', () => {
   });
 
   it('scans one level of subTemplates for both template HTML and CSS', () => {
+    // [example] Canonical usage — subtemplates are built via defineComponent (no tagName)
+    // and the resulting Template instances are passed in the parent's subTemplates map.
+    const header = defineComponent({
+      template: '<header class="sub-header"></header>',
+      css: '@theme { --color-header: red; }',
+    });
+    const body = defineComponent({
+      template: '<section class="sub-body"></section>',
+    });
     const { html, css } = extractDefinitionContent({
       template: '<div class="parent-class"></div>',
-      subTemplates: {
-        header: {
-          template: '<header class="sub-header"></header>',
-          css: '@theme { --color-header: red; }',
-        },
-        body: {
-          template: '<section class="sub-body"></section>',
-        },
-      },
+      subTemplates: { header, body },
     });
     expect(html).toContain('parent-class');
     expect(html).toContain('sub-header');
@@ -114,22 +116,19 @@ describe('extractDefinitionContent — content scanner', () => {
     expect(css).toContain('--color-header');
   });
 
-  it('scans nested subTemplates recursively (the skill says recursive)', () => {
-    // [skill] component-tailwind: "Sub-template content is scanned recursively. No extra setup needed."
-    // A subtemplate may itself declare subTemplates (since subtemplates are full Template definitions).
-    // The contract is that classes appearing anywhere in that tree get detected.
+  it('scans nested subTemplates recursively', () => {
+    // A subtemplate may itself declare subTemplates. Classes appearing anywhere in
+    // that tree must be detected.
+    const inner = defineComponent({
+      template: '<em class="deep-class"></em>',
+    });
+    const outer = defineComponent({
+      template: '<span class="mid-class"></span>',
+      subTemplates: { inner },
+    });
     const { html } = extractDefinitionContent({
       template: '<div class="top-class"></div>',
-      subTemplates: {
-        outer: {
-          template: '<span class="mid-class"></span>',
-          subTemplates: {
-            inner: {
-              template: '<em class="deep-class"></em>',
-            },
-          },
-        },
-      },
+      subTemplates: { outer },
     });
     expect(html).toContain('top-class');
     expect(html).toContain('mid-class');
@@ -137,19 +136,17 @@ describe('extractDefinitionContent — content scanner', () => {
   });
 
   it('scans createComponent and lifecycle hooks inside subTemplates', () => {
-    // [skill] The plugin "scans every location where Tailwind classes might appear" —
-    // a subtemplate's createComponent is just as much a location as the parent's.
-    // [example] examples/tailwind shows subtemplates with full createComponent definitions.
+    // A subtemplate's createComponent and lifecycle hooks are equally valid locations
+    // for class string literals — they should reach the scanner the same way the parent's do.
+    const child = defineComponent({
+      template: '<span></span>',
+      createComponent: () => ({ run: () => 'bg-sub-cc' }),
+      onCreated: () => 'bg-sub-lifecycle',
+      events: { 'click .x': () => 'bg-sub-event' },
+    });
     const { js } = extractDefinitionContent({
       template: '<div></div>',
-      subTemplates: {
-        child: {
-          template: '<span></span>',
-          createComponent: () => ({ run: () => 'bg-sub-cc' }),
-          onCreated: () => 'bg-sub-lifecycle',
-          events: { 'click .x': () => 'bg-sub-event' },
-        },
-      },
+      subTemplates: { child },
     });
     expect(js).toContain('bg-sub-cc');
     expect(js).toContain('bg-sub-lifecycle');
@@ -248,35 +245,32 @@ describe('TailwindPlugin — definition transform', () => {
   });
 
   it('emits CSS containing utilities for classes used in subTemplates', async () => {
+    const header = defineComponent({
+      template: '<header class="bg-amber-500"></header>',
+    });
     const result = await TailwindPlugin({
       template: '<div class="text-xl"></div>',
-      subTemplates: {
-        header: { template: '<header class="bg-amber-500"></header>' },
-      },
+      subTemplates: { header },
     });
     expect(result.css).toContain('.text-xl');
     expect(result.css).toContain('.bg-amber-500');
   });
 
   it('emits CSS containing utilities for classes used in deeply-nested subTemplates', async () => {
-    // [skill] "Sub-template content is scanned recursively"
-    // [example] tailwind example uses subTemplates with full template trees
+    const inner = defineComponent({
+      template: '<em class="text-lg"></em>',
+    });
+    const outer = defineComponent({
+      template: '<span class="text-sm"></span>',
+      subTemplates: { inner },
+    });
     const result = await TailwindPlugin({
       template: '<div class="text-xs"></div>',
-      subTemplates: {
-        outer: {
-          template: '<span class="text-sm"></span>',
-          subTemplates: {
-            inner: {
-              template: '<em class="text-md"></em>',
-            },
-          },
-        },
-      },
+      subTemplates: { outer },
     });
     expect(result.css).toContain('.text-xs');
     expect(result.css).toContain('.text-sm');
-    expect(result.css).toContain('.text-md');
+    expect(result.css).toContain('.text-lg');
   });
 
   it('resolves @apply directives in component CSS even when no template classes are present', async () => {
@@ -444,16 +438,15 @@ describe('TailwindPlugin — definition transform', () => {
 
 describe('TailwindPlugin — cross-cutting contract', () => {
   it('emits utilities for classes that only appear inside lifecycle hooks of a subtemplate', async () => {
-    // [synthesis] If the plugin is "comprehensive", every code path that holds a class string
-    //  must yield a compiled utility. The subtemplate lifecycle hook is one such path.
+    // Every code path that holds a class string must yield a compiled utility.
+    // A subtemplate lifecycle hook is one such path.
+    const child = defineComponent({
+      template: '<span></span>',
+      onRendered: () => 'bg-fuchsia-500',
+    });
     const result = await TailwindPlugin({
       template: '<div></div>',
-      subTemplates: {
-        child: {
-          template: '<span></span>',
-          onRendered: () => 'bg-fuchsia-500',
-        },
-      },
+      subTemplates: { child },
     });
     expect(result.css).toContain('.bg-fuchsia-500');
   });
