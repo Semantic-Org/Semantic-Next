@@ -67,6 +67,7 @@ export class SpecReader {
       tagName: this.getTagName(),
       content: [],
       contentAttributes: [],
+      slots: [],
 
       types: [],
       variations: [],
@@ -219,6 +220,7 @@ export class SpecReader {
       tagName: spec.tagName,
       content: [],
       contentAttributes: [],
+      slots: [],
 
       types: [],
       variations: [],
