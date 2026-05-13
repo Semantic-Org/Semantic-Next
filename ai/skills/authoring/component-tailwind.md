@@ -234,28 +234,46 @@ const createComponent = ({ $ }) => ({
 
 ### Subtemplates
 
-Sub-template content is scanned recursively. Subtemplates are built with `defineComponent` (no `tagName`) and passed in by reference — the resulting Template instances let the parent compose them without registering each as a custom element:
+Sub-template content is scanned recursively. Two shapes work:
+
+**Inline object literal — sugar for a one-off subtemplate scoped to this parent:**
 
 ```js
-import { defineComponent } from '@semantic-ui/component';
-import { TailwindPlugin } from '@semantic-ui/tailwind';
-
-const header = defineComponent({
-  template: '<header class="p-4 border-b"><slot name="header"></slot></header>',
-});
-const body = defineComponent({
-  template: '<div class="p-4"><slot></slot></div>',
-});
-
 let definition = {
   tagName: 'ui-card',
   template: '<div class="bg-white shadow-lg">{>header}{>body}</div>',
-  subTemplates: { header, body },
+  subTemplates: {
+    header: { template: '<header class="p-4 border-b"><slot name="header"></slot></header>' },
+    body: { template: '<div class="p-4"><slot></slot></div>' },
+  },
 };
 
 definition = await TailwindPlugin(definition);
 export const UICard = defineComponent(definition);
 ```
+
+**`defineComponent` (no `tagName`) — when a subtemplate is shared across components or has enough surface (createComponent, lifecycle, events) that it warrants its own file:**
+
+```js
+// header.js
+export const header = defineComponent({
+  template: '<header class="p-4 border-b"><slot name="header"></slot></header>',
+});
+
+// component.js
+import { header } from './header.js';
+
+let definition = {
+  tagName: 'ui-card',
+  template: '<div class="bg-white shadow-lg">{>header}</div>',
+  subTemplates: { header },
+};
+
+definition = await TailwindPlugin(definition);
+export const UICard = defineComponent(definition);
+```
+
+Either form scans the same way. `defineComponent` normalizes plain-object entries into Template instances internally, so downstream code only sees one shape.
 
 ### Dark Mode via Class Toggle
 

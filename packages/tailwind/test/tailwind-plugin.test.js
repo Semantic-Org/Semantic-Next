@@ -256,6 +256,19 @@ describe('TailwindPlugin — definition transform', () => {
     expect(result.css).toContain('.bg-amber-500');
   });
 
+  it('accepts plain-object subtemplate sugar for one-off inline definitions', async () => {
+    // defineComponent normalizes plain-object entries to Template instances, so authors
+    // who want to write a small subtemplate inline can skip the wrapper call.
+    const result = await TailwindPlugin({
+      template: '<div class="text-xl"></div>',
+      subTemplates: {
+        header: { template: '<header class="bg-cyan-500"></header>' },
+      },
+    });
+    expect(result.css).toContain('.text-xl');
+    expect(result.css).toContain('.bg-cyan-500');
+  });
+
   it('emits CSS containing utilities for classes used in deeply-nested subTemplates', async () => {
     const inner = defineComponent({
       template: '<em class="text-lg"></em>',
