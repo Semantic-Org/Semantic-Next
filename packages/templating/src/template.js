@@ -280,7 +280,7 @@ export const Template = class Template {
     this.onDestroyed = () => {
       Template.removeTemplate(this);
       this.markDestroyed();
-      requestAnimationFrame(() => this.renderer?.destroy?.());
+      this.renderer?.destroy?.();
       this.abortController.abort('Template destroyed');
       this.clearReactions();
       this.removeEvents();
