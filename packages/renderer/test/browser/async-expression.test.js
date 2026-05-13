@@ -757,6 +757,44 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(ta.textContent).toBe('second draft');
       });
 
+      it('renders <script> inside {#each} with dynamic attrs and reactive body, with sibling after (codeplayground shape)', async () => {
+        // Mirrors docs/src/components/CodePlayground/CodePlayground.html —
+        // {#each file in files}<script type="{file.type}">{file.content}</script>{/each}
+        // followed by sibling content. If the raw-text marker lands after the
+        // sibling instead of immediately after </script>, the rawText block
+        // walks back to the wrong element and the script content ends up
+        // elsewhere in the DOM.
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template:
+            '<div class="wrap">{#each f in files}<script type="{f.type}">{f.content}</script>{/each}<p class="after">after</p></div>',
+          defaultState: {
+            files: [
+              { type: 'text/css', content: '.a { color: red; }' },
+              { type: 'application/json', content: '{"x":1}' },
+            ],
+          },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        const scripts = el.shadowRoot.querySelectorAll('script');
+        expect(scripts.length).toBe(2);
+        expect(scripts[0].getAttribute('type')).toBe('text/css');
+        expect(scripts[0].textContent).toBe('.a { color: red; }');
+        expect(scripts[1].getAttribute('type')).toBe('application/json');
+        expect(scripts[1].textContent).toBe('{"x":1}');
+
+        const after = el.shadowRoot.querySelector('p.after');
+        expect(after.textContent).toBe('after');
+        // The script bodies must not leak into the sibling.
+        expect(after.textContent).not.toContain('color');
+        expect(after.textContent).not.toContain('"x":1');
+      });
+
       it('should bind expression inside <title>', async () => {
         const tag = uniqueTag();
         defineComponent({
