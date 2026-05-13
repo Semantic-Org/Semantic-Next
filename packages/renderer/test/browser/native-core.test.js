@@ -796,10 +796,13 @@ describe('ReactionScope hierarchical cleanup', () => {
     expect(evaluated).toBe(baseline);
   });
 
-  it('disposes children before parent so children see live parent state', async () => {
-    // dispose() iterates children first, then own reactions, then disposers.
-    // A child's destroy hook should be able to read state set up by the
-    // parent (e.g. cleanup that depends on parent-owned resources).
+  it('nested custom elements fire onDestroyed parent-first per browser spec', async () => {
+    // Nested custom elements are independent registered tags with separate
+    // Template instances. When the parent is removed the browser walks
+    // disconnectedCallback top-down. Subtemplate child-first ordering is a
+    // separate contract verified in cleanup-reactions.test.js — that one is
+    // renderer-controlled and runs depth-first through ReactionScope. This
+    // test pins the cross-tag side so the two contracts don't drift.
     const order = [];
     const tag = uniqueTag();
     const childTag = uniqueTag();
@@ -827,8 +830,7 @@ describe('ReactionScope hierarchical cleanup', () => {
     el.remove();
     await new Promise(r => setTimeout(r, 50));
 
-    // Child's destroy must fire before parent's destroy.
-    expect(order).toEqual(['child-destroyed', 'parent-destroyed']);
+    expect(order).toEqual(['parent-destroyed', 'child-destroyed']);
   });
 
   it('does not accumulate disposed child scopes in parent.children across branch swaps', async () => {
