@@ -1047,25 +1047,21 @@ describe('Reaction — public API contract', () => {
       expect(outerCallback).not.toHaveBeenCalled();
     });
 
-    it('drops outer-reaction tracking for signals read AFTER an inner Reaction.create call', () => {
-      // [source] reaction.run() finally-block sets Scheduler.current = null instead of
-      // restoring the previous slot. Inner reactions clobber the outer's tracking
-      // context permanently for the remainder of the outer callback.
-      //
-      // Real-world scenario: an author creates a transient sub-reaction inside a
-      // component's main reaction, then reads more signals afterward — those reads
-      // silently fail to track, and the reaction never re-fires when they change.
+    it('preserves outer-reaction tracking for signals read AFTER an inner Reaction.create call', () => {
+      // Witness: reaction.run save/restores Scheduler.current. Inner reactions
+      // (Reaction.create, guard, computed, derive) must not clobber the outer's
+      // tracking context for the remainder of the outer callback.
       const beforeInner = new Signal('B');
       const afterInner = new Signal('A');
       const innerOnly = new Signal('I');
       const callback = vi.fn();
 
       Reaction.create(() => {
-        const b = beforeInner.get(); // dependency established
+        const b = beforeInner.get();
         Reaction.create(() => {
           innerOnly.get();
-        }); // clobbers Scheduler.current
-        const a = afterInner.get(); // expected: dependency. Actual: NOT tracked
+        });
+        const a = afterInner.get();
         callback(b, a);
       });
 
@@ -1073,8 +1069,6 @@ describe('Reaction — public API contract', () => {
       afterInner.set('A2');
       Reaction.flush();
 
-      // What the user would expect: outer re-fires because afterInner changed.
-      // If this assertion fails, it documents the context-loss footgun.
       expect(callback).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenCalledWith('B', 'A2');
     });

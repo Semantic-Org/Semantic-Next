@@ -162,6 +162,11 @@ export class Signal {
       derivedSignal.set(result);
     });
 
+    // scope to parent reaction when called from inside one
+    if (Reaction.current) {
+      Reaction.current.onCleanup(() => reaction.stop());
+    }
+
     // Store reaction reference for potential cleanup
     derivedSignal._derivedReaction = reaction;
 
@@ -178,6 +183,11 @@ export class Signal {
       const result = computeFn();
       computedSignal.set(result);
     });
+
+    // scope to parent reaction when called from inside one
+    if (Reaction.current) {
+      Reaction.current.onCleanup(() => reaction.stop());
+    }
 
     // Store reaction reference for potential cleanup
     computedSignal._computedReaction = reaction;

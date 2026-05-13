@@ -530,6 +530,96 @@ describe('Reaction.guard', () => {
     Reaction.flush();
     expect(callback).toHaveBeenCalledTimes(2);
   });
+
+  it('does not accumulate inner reactions on the source across outer re-runs', () => {
+    // Witness: outer.onCleanup(() => comp.stop()) in guard [source]. Each
+    // outer re-run stops the prior inner comp before creating a new one,
+    // so the source signal's subscriber set stays bounded.
+    const counter = new Signal(0);
+    Reaction.create(() => {
+      Reaction.guard(() => counter.get());
+    });
+
+    for (let i = 1; i <= 5; i++) {
+      counter.set(i);
+      Reaction.flush();
+    }
+
+    expect(counter.dependency.subscribers.size).toBe(1);
+  });
+
+  it('stops the inner reaction when the outer reaction stops', () => {
+    const counter = new Signal(0);
+    const outer = Reaction.create(() => {
+      Reaction.guard(() => counter.get());
+    });
+    expect(counter.dependency.subscribers.size).toBe(1);
+
+    outer.stop();
+    expect(counter.dependency.subscribers.size).toBe(0);
+  });
+});
+
+/*******************************
+        Reaction.onCleanup
+*******************************/
+
+describe('Reaction.onCleanup', () => {
+  it('fires registered callbacks at the start of the next run()', () => {
+    const s = new Signal(0);
+    const cleanup = vi.fn();
+
+    Reaction.create((self) => {
+      s.get();
+      self.onCleanup(cleanup);
+    });
+    expect(cleanup).not.toHaveBeenCalled();
+
+    s.set(1);
+    Reaction.flush();
+    expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it('fires registered callbacks on stop()', () => {
+    const cleanup = vi.fn();
+    const r = Reaction.create((self) => {
+      self.onCleanup(cleanup);
+    });
+    expect(cleanup).not.toHaveBeenCalled();
+
+    r.stop();
+    expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears the queue after firing — re-runs only fire freshly registered callbacks', () => {
+    const s = new Signal(0);
+    const cleanup = vi.fn();
+    const r = Reaction.create((self) => {
+      s.get();
+      if (self.firstRun) {
+        self.onCleanup(cleanup);
+      }
+    });
+
+    s.set(1);
+    Reaction.flush();
+    expect(cleanup).toHaveBeenCalledTimes(1);
+
+    s.set(2);
+    Reaction.flush();
+    expect(cleanup).toHaveBeenCalledTimes(1); // no double-fire
+  });
+
+  it('fires callbacks in registration order', () => {
+    const order = [];
+    const r = Reaction.create((self) => {
+      self.onCleanup(() => order.push('a'));
+      self.onCleanup(() => order.push('b'));
+      self.onCleanup(() => order.push('c'));
+    });
+    r.stop();
+    expect(order).toEqual(['a', 'b', 'c']);
+  });
 });
 
 /*******************************

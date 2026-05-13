@@ -944,6 +944,39 @@ describe.concurrent('Signal', () => {
       // This is hard to test directly, but we can verify the structure is correct
       expect(derived._derivedReaction).toBeDefined();
     });
+
+    it('derive inside a parent reaction does not accumulate subscribers across re-runs', () => {
+      const source = new Signal(1);
+      Reaction.create(() => {
+        source.derive(v => v * 2);
+      });
+
+      for (let i = 1; i <= 5; i++) {
+        source.set(i);
+        Reaction.flush();
+      }
+
+      // 1 subscriber: the parent reaction. Each derive() inside spawns an
+      // internal reaction scoped to the parent's lifetime, not a long-lived
+      // independent observer.
+      expect(source.dependency.subscribers.size).toBe(1);
+    });
+
+    it('Signal.computed inside a parent reaction does not accumulate subscribers across re-runs', () => {
+      const a = new Signal(1);
+      const b = new Signal(10);
+      Reaction.create(() => {
+        Signal.computed(() => a.get() + b.get());
+      });
+
+      for (let i = 1; i <= 5; i++) {
+        a.set(i);
+        Reaction.flush();
+      }
+
+      expect(a.dependency.subscribers.size).toBe(1);
+      expect(b.dependency.subscribers.size).toBe(1);
+    });
   });
 
   /*******************************

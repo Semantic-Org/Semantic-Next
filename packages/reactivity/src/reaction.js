@@ -15,12 +15,29 @@ export class Reaction {
   constructor(callback, { context } = {}) {
     this.callback = callback;
     this.dependencies = new Set();
+    this.cleanups = [];
     this.firstRun = true;
     this.active = true;
     if (context && isTracing()) {
       this.setContext(context);
     }
     this.boundRun = this.run.bind(this);
+  }
+
+  // Fires before next run() and on stop(); scope inner reactions to parent here.
+  onCleanup(callback) {
+    this.cleanups.push(callback);
+  }
+
+  fireCleanups() {
+    if (this.cleanups.length === 0) {
+      return;
+    }
+    const callbacks = this.cleanups;
+    this.cleanups = [];
+    for (let i = 0; i < callbacks.length; i++) {
+      callbacks[i]();
+    }
   }
 
   setContext(additionalContext = {}) {
@@ -62,6 +79,9 @@ export class Reaction {
         firstRun: this.firstRun,
       });
     }
+    this.fireCleanups();
+    // save/restore so nested run() (guard, computed, derive) doesn't strand the parent
+    const previousReaction = Scheduler.current;
     Scheduler.current = this;
     try {
       for (const dep of this.dependencies) {
@@ -72,7 +92,7 @@ export class Reaction {
       this.firstRun = false;
     }
     finally {
-      Scheduler.current = null;
+      Scheduler.current = previousReaction;
     }
   }
 
@@ -95,6 +115,7 @@ export class Reaction {
     }
     this.active = false;
     this.dependencies.forEach(dep => dep.unsubscribe(this));
+    this.fireCleanups();
   }
 
   // Static proxies for developer experience
@@ -137,6 +158,7 @@ export class Reaction {
       }
       value = newValue;
     });
+    Scheduler.current.onCleanup(() => comp.stop());
     comp.run();
     return newValue;
   }
