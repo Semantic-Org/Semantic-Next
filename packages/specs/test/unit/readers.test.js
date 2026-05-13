@@ -486,18 +486,11 @@ describe('SpecReader.getWebComponentSpec — option attribute collisions', () =>
     expect(componentSpec.optionAttributes['subtle-styled']).toBe('styled');
   });
 
-  it('removes the bare form when a value collides across three or more attributes', () => {
-    /*
-      The button spec has 'subtle' shared across styled, positive, warning,
-      negative, info. The generated button.component.js shows the bare
-      'subtle' entry IS removed — only compound forms remain. The internal
-      code comment claims "first owner retains bare entry" but the
-      [contradiction] is: subsequent iterations always delete the bare
-      entry regardless of first-owner. Documented canonical output (the
-      generated button.component.js) wins.
-    */
+  it('first-owner attribute keeps the bare entry when a value collides across three or more attributes', () => {
+    // 'subtle' appears in styled (type), positive (variation), negative (variation).
+    // Types iterate first, so styled is the first owner — bare entry points to it.
     const reader = new SpecReader(buttonShapeSpec());
-    expect(reader.getWebComponentSpec().optionAttributes.subtle).toBeUndefined();
+    expect(reader.getWebComponentSpec().optionAttributes.subtle).toBe('styled');
   });
 
   it('does not produce compound forms for non-colliding sibling values when their attribute has no collision', () => {

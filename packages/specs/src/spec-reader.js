@@ -471,7 +471,8 @@ export class SpecReader {
     // when any value in an attribute collides, ALL sibling values get compound forms
     // e.g. "left" and "right" collide between floated/attached
     // → attached also generates "top-attached", "bottom-attached" for consistency
-    // colliding values lose their bare entry, non-colliding siblings keep theirs
+    // colliding bare entries point to the first-owner attribute; non-colliding
+    // siblings keep their bare form pointing to their own attribute.
     each(componentSpec.allowedValues, (allowedValues, attr) => {
       if (!collidingAttributes.has(attr)) {
         return;
@@ -482,9 +483,10 @@ export class SpecReader {
         }
         // generate compound form for all values in a colliding attribute
         componentSpec.optionAttributes[`${value}-${attr}`] = attr;
-        // only remove bare entry for actually colliding values
-        if (collidingValues.has(value) && attr !== firstOwner[value]) {
-          delete componentSpec.optionAttributes[value];
+        // pin colliding bare to first-owner (overwrites whatever reverseKeys
+        // resolved to; idempotent across non-first-owner iterations)
+        if (collidingValues.has(value)) {
+          componentSpec.optionAttributes[value] = firstOwner[value];
         }
       });
     });
