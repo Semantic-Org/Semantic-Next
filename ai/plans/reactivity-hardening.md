@@ -2,106 +2,73 @@
 
 ## Goal
 
-Close the Reaction / Scheduler / Dependency hygiene gaps surfaced by the council fresh-take review of the reactivity package. Most items are local correctness or allocation fixes converged on by all five frontier models. A few are deferred architectural decisions (lazy refcounted computed, dep-tracking rewrite) that need their own measurement or design pass.
+Close the Reaction / Scheduler / Dependency hygiene gaps surfaced by the council fresh-take review of the reactivity package. Items 1-4 have shipped on this branch. Item 1 expanded beyond its original scope when the interleave-to-stable contract emerged during the work and was corrected toward in real time. Items 5, 6, 8 remain. Item 7 benchmarks ship as a precursor PR. Item 9 is gated on Item 7 data.
 
-Complementary to [Signal Performance](signal-performance.md) — that plan owns the Signal-side preset and freeze work. This plan owns everything else in the reactivity package.
+Complementary to [Signal Performance](active/signal-performance.md) which owns the `safety` preset and freeze work in PR #150. The API rename — lowercase free-function surface, dropping Reaction static forwards, DX verb decisions — is a separate initiative scoped post-hardening as a multi-PR sweep across packages, src, docs, and examples.
+
+## Status
+
+| # | Item | Status |
+|---|---|---|
+| 1 | afterFlush stranding + interleave-to-stable contract + per-pass snapshot | **shipped** (c58d4706d, d29cca246, 1b78ed56e) |
+| 2 | `stop()` terminal + `invalidate()` guard on stopped | **shipped** (69c84361e) |
+| 3 | `firstRun` in finally on throw (covers `run` and `guard`) | **shipped** (f06001dab) |
+| 4 | `Dependency.cleanUp` + `unsubscribe` → `remove` | **shipped** (fa165d94f) |
+| 5 | Scheduler set-swap | remaining |
+| 6 | `boundRun` removal + shared `mergeContext` helper | remaining |
+| 7 | Benchmark additions | precursor PR before Items 5/6/8 |
+| 8 | Lazy refcounted computed (unify `derive`/`computed`) | remaining |
+| 9 | Mark-and-sweep dep tracking | gated on Item 7 data |
 
 ## Design / Implementation
 
-### Item 1: `Scheduler.afterFlush` stranding
+Tests are the durable contract for each item. Code blocks are illustrative — one valid implementation. The implementation may deviate from the sketch during the work, as it did for Items 1 and 3.
 
-**Problem:** `Scheduler.afterFlush(cb)` pushes onto `afterFlushCallbacks` without scheduling a flush. If the callback registers outside an active flush window — and no reactive invalidation follows — the callback strands indefinitely. The conventional contract is "after the current or next flush," not "only if some unrelated future invalidation happens."
+### Item 1: `afterFlush` contract — shipped
 
-**Solution:** Schedule a flush in `afterFlush` itself, gated on whether one is already pending:
+**Contract.** `afterFlush(cb)` observes the post-cascade settled world. The flush loop interleaves reaction drains and one-batch-at-a-time afterFlush drains until both queues are empty in the same iteration. Callbacks registered during a batch run in the next batch — with any reactions they queued flushed first. The plan originally specified only the stranding fix; the interleave-to-stable contract emerged from implementation work and is now load-bearing for any downstream code that depends on "after flush" meaning "after the world has settled."
 
-```js
-static afterFlush(callback) {
-  Scheduler.afterFlushCallbacks.push(callback);
-  if (!Scheduler.isFlushScheduled) {
-    Scheduler.scheduleFlush();
-  }
-}
-```
+**Tests (durable):**
+- `internals.test.js:245` — drains reactions queued by an afterFlush callback before the next callback runs (**the contract test**)
+- `internals.test.js:213` — drains afterFlush callbacks registered during afterFlush in the same flush
+- `internals.test.js:227` — schedules a flush when afterFlush registers with no pending work
+- `internals.test.js:197` — handles afterFlush registered from inside a reaction body
 
-Tests:
-- `afterFlush` registered with no pending work fires on the next microtask
-- `afterFlush` registered inside another `afterFlush` runs in the same drain
-- `afterFlush` registered inside a reaction callback runs after that flush
-- Existing afterFlush behavior under active flush unchanged
+**Follow-up.** The cycle cap (`maxFlushIterations = 100`) now spans both queues with a unified iteration counter. Add a test for reaction↔afterFlush ping-pong hitting the cap. One-test addition; lands with Item 5 or 6.
 
-### Item 2: `stop()` / `invalidate()` resurrection
+### Item 2: `stop()` terminal — shipped
 
-**Problem:** `stop()` sets `active = false` but `invalidate()` unconditionally sets `active = true`. If a signal fires after stop and the reaction is still in any `dep.subscribers` set, `changed()` calls `invalidate()` which silently re-arms the reaction. A test pins this revival behavior, but no real consumer relies on it — the test was speculative source-archaeology, not user-grounded.
+**Contract.** `stop()` is terminal. A stopped reaction is removed from `pendingReactions`, has its dependency edges severed, fires cleanups, and cannot be resurrected by `invalidate()` or by a signal change racing in.
 
-**Solution:** Introduce an explicit `stopped` flag separate from `active`. Stop becomes terminal:
+**Tests (durable):**
+- `reaction.test.js:600` — `invalidate` on a stopped reaction is a no-op
+- `reaction.test.js:616` — `stop` removes from `pendingReactions` mid-cycle
+- `reaction.test.js:504` + `internals.test.js:404` — `stop` is idempotent
+- `internals.test.js:415` — stopped reaction never re-runs on dependency change
 
-```js
-constructor(...) {
-  this.stopped = false;
-  this.active = true;
-  // ...
-}
+### Item 3: throw-safety in `run` and `guard` — shipped
 
-stop() {
-  if (this.stopped) return;
-  this.stopped = true;
-  this.active = false;
-  Scheduler.pendingReactions.delete(this);
-  for (const dep of this.dependencies) dep.remove(this);
-  this.dependencies.clear();
-  this.fireCleanups();
-}
+**Contract.** A reaction that throws is left invalidated; `firstRun` advances to false in `finally`; re-invalidation tracks fresh deps from a known baseline. `Reaction.guard` whose `f()` throws on first run propagates value changes on later successful runs.
 
-invalidate(context) {
-  if (this.stopped) return;
-  this.active = true;
-  if (context) this.addContext(context);
-  Scheduler.scheduleReaction(this);
-}
-```
+**Tests (durable):**
+- `internals.test.js:299` — `firstRun` advances on throw, fresh deps on re-invalidation
+- `internals.test.js:531` — guard propagates value changes after first-run throw
 
-Tests:
-- Stopped reaction is removed from `pendingReactions`
-- `invalidate()` on a stopped reaction is a no-op (no resurrection)
-- Calling `stop()` twice is harmless
-- Replace the existing revival test with one asserting `invalidate` on stopped does nothing
+**Unification realized during work.** The plan originally listed two separate fixes for Problems A (`run`) and B (`guard`). The implementation found one change covers both because `Reaction.guard`'s inner `comp.run()` flows through the same try/finally. Single source of truth, two test surfaces, one fix.
 
-### Item 3: Throw-safety in `run()` and `guard`
+### Item 4: `Dependency.remove` — shipped
 
-**Problem A:** If a reaction's callback throws, `firstRun` is never set to false and `dependencies` is already cleared. On next invalidation the reaction re-runs with `firstRun: true` and an empty dep set, but `fireCleanups()` already ran against state the callback didn't establish.
+**Behavior.** No external change. `Dependency.cleanUp` and `Dependency.unsubscribe` merged into `Dependency.remove(reaction)`. All call sites updated. Pure cleanup.
 
-**Problem B:** `Reaction.guard`'s inner `comp.firstRun` only flips false after the callback completes successfully. If `f()` throws on the first run, `firstRun` stays true, and the next successful run skips the equality check — meaning guard's downstream invalidation never fires for the first recovered value.
+### Item 5: Scheduler set-swap — remaining
 
-**Solution:** Move `firstRun = false` into `finally` in both places. Document the contract: "A reaction that throws is left invalidated; it re-tracks from scratch on next schedule."
+**Problem.** `const reactions = [...Scheduler.pendingReactions]` allocates a fresh array on every flush iteration. With per-expression granularity, a single app-signal change can invalidate hundreds of reactions, so the allocation scales with fan-out.
 
-```js
-run() {
-  if (!this.active) return;
-  // ... existing tracing/cleanup ...
-  try {
-    // ... existing body ...
-  } finally {
-    this.firstRun = false;
-    Scheduler.current = previousReaction;
-  }
-}
-```
+**Direction.** Set-swap. Preserves coalescing semantics — new invalidations land in the next pass.
 
-Tests:
-- A reaction that throws on first run, then succeeds on next invalidation, tracks fresh dependencies
-- `Reaction.guard` whose `f()` throws on first run propagates value changes on later successful runs
+**Contract.** All existing reaction-flush tests continue passing. `flush-fanout-allocation-200x500` bench (added in Item 7 precursor) shows measurable allocation drop and wall-clock improvement.
 
-### Item 4: `Dependency.cleanUp` / `unsubscribe` merge
-
-**Problem:** Two methods with identical bodies (`this.subscribers.delete(reaction)`) called from different sites in `Reaction.run` and `Reaction.stop`. The faux-distinction adds a term to the lifecycle without behavioral difference. Pure cleanup.
-
-**Solution:** Collapse to `Dependency.remove(reaction)`. Update call sites in `reaction.js`.
-
-### Item 5: Scheduler set-swap
-
-**Problem:** `const reactions = [...Scheduler.pendingReactions]` materializes a fresh array on every flush iteration. With per-expression granularity a single signal change can invalidate hundreds of expression-reactions, so the allocation scales with fan-out.
-
-**Solution:** Set-swap. Preserves coalescing semantics — new invalidations land in the next pass.
+Illustrative implementation:
 
 ```js
 const toRun = Scheduler.pendingReactions;
@@ -112,23 +79,25 @@ for (const r of toRun) {
 }
 ```
 
-Benchmark (lands alongside in PR A): `flush-fanout-allocation-200x500` — 200 flush cycles, 500 invalidations each. Captures the fan-out shape. Expected: measurable improvement, allocation count drops sharply.
+The cycle counter accounting that spans both queues must be preserved — the swap doesn't get to skip the iteration increment.
 
-### Item 6: `boundRun` removal + shared `setContext` helper
+### Item 6: `boundRun` removal + shared `mergeContext` helper — remaining
 
-**Problem A:** `this.boundRun = this.run.bind(this)` in the Reaction constructor allocates one bound function per Reaction. The only caller is `Reaction.create` for the first run; the scheduler stores reaction objects and calls `.run()` directly. Pure churn in a per-expression model.
+**Problem A.** `this.boundRun = this.run.bind(this)` allocates one bound function per Reaction. Only consumer is `Reaction.create` for the initial run. Scheduler stores reaction objects and calls `.run()` directly. Pure churn in a per-expression model.
 
-**Problem B:** Three near-identical `setContext` / `addContext` blocks across `Signal`, `Reaction`, and `Dependency`. All gated on `isTracing()`, all do object spreads. A small shared helper in `helpers.js` collapses these.
+**Problem B.** Three near-identical `setContext` / `addContext` blocks across `Signal`, `Reaction`, and `Dependency`. All gate on `config.mode !== 'off'`, all do object spreads.
 
-**Solution:**
-- Drop `boundRun`. `Reaction.create` calls `reaction.run()` directly.
-- Extract shared `mergeContext(target, additional, defaults)` helper. Each class passes its own seed values (`{ value }` for Signal, `{ firstRun }` for Reaction, raw bag for Dependency).
+**Direction.** Drop `boundRun`; `Reaction.create` calls `reaction.run()` directly. Extract `mergeContext(target, additional, defaults)` helper to `helpers.js`; each class passes its own seed values (`{ value }` for Signal, `{ firstRun }` for Reaction, raw bag for Dependency).
 
-Benchmark addition: `reaction-create-stop-200kx10` — page-render shape with many short-lived reactions. Expected: small but measurable improvement in `sub-unsub-100k`.
+**Contract.** No behavioral change. All existing tracing-mode tests continue passing. `reaction-create-stop-200kx10` bench shows measurable improvement; `sub-unsub-100k` improves as a side effect.
 
-### Item 7: Benchmark additions
+**Coordination note.** Item 6 conflicts with PR #150's `helpers.js` changes (`config` object centralization, `signalTag`). Rebase order is determined by which branch ships first. Surface is small enough to make the rebase mechanical either way.
 
-These workloads aren't gating Items 1-6 (those land on correctness merits), but they baseline the perf claims and gate the larger Item 9 rewrite. Each follows the existing pattern in `bench-signal.js` — `performance.mark` + `performance.measure`, sink-anchored, iteration counts sized to clear the σ-floor.
+### Item 7: Benchmark additions — precursor PR
+
+**Lands as a separate PR to main before Items 5/6/8.** Reason: tachometer-CI builds the baseline by checking out main, so any new metric only on the feature branch silently misses on the `tip-of-tree` side. Benches must exist on main first.
+
+Adds to `packages/reactivity/bench/tachometer/bench-signal.js` and both measurement arrays in `tachometer-ci-signal.json`.
 
 Stable-dependency churn (gates Item 9):
 - `reactive-stable-fanout-5000x500` — 5000 reactions each reading the same single signal, 500 invalidations
@@ -140,51 +109,51 @@ Computed lifecycle (informs Item 8):
 - `computed-subscribe-unsubscribe-50k` — create computed, attach subscriber, detach, repeat
 
 Scheduler allocation (verifies Item 5):
-- `flush-fanout-allocation-200x500` — already specified under Item 5
+- `flush-fanout-allocation-200x500` — 200 flush cycles, 500 invalidations each
 
 Reaction lifecycle (verifies Item 6):
-- `reaction-create-stop-200kx10` — already specified under Item 6
+- `reaction-create-stop-200kx10` — page-render shape with many short-lived reactions
 
-### Item 8: Unify `derive` / `computed` with lazy reference counting
+Signal-read benches (`signal-read-object-tracked-1m`, `signal-read-array-tracked-500x10k`, `signal-write-large-array-1000x10k`) belong to [signal-performance](active/signal-performance.md), not here.
 
-**Problem:** The WeakRef in `Signal.derive` guards the wrong side of the retention chain. The strong path is `source → dep.subscribers → reaction → closure → derivedSignal`. A WeakRef on the source protects against a leak that can't happen (source GC implies no subscribers fire) while doing nothing about the leak that does happen (derived discarded while source lives).
+### Item 8: Unify `derive`/`computed` with lazy reference counting — remaining
 
-`Signal.computed` has the same pattern without the WeakRef. Neither `_derivedReaction` nor `_computedReaction` is consumed anywhere outside the constructor that sets it.
+**Problem.** The WeakRef in `Signal.derive` guards the wrong side of the retention chain. Strong path is `source → dep.subscribers → reaction → closure → derivedSignal`. WeakRef on the source protects a leak that can't happen (source GC implies no subscribers fire) while doing nothing about the leak that does happen (derived discarded while source lives). `Signal.computed` has the same pattern without the WeakRef. Neither `_derivedReaction` nor `_computedReaction` is consumed outside the constructor that sets it.
 
-**Solution:** Collapse both primitives into a single `Signal.computed(fn, { parent = Reaction.current } = {})`. Computed signals subscribe to upstream only when they have ≥1 downstream subscriber. When the last subscriber detaches, the internal reaction stops, severing the strong root from the source. Matches Vue 3, MobX, Solid. Eliminates the leak entirely without WeakRef gymnastics. `derive` becomes a thin compatibility wrapper.
+**Direction.** Collapse both primitives into a single `Signal.computed(fn, { parent = Reaction.current } = {})`. Computed signals subscribe to upstream only when they have ≥1 downstream subscriber. When the last subscriber detaches, the internal reaction stops, severing the strong root from the source. Matches Vue 3, MobX, Solid. Eliminates the leak entirely without WeakRef gymnastics. `derive` becomes a thin compatibility wrapper. Remove `_derivedReaction` / `_computedReaction` private fields and the `sourceRef.deref()` check in the reaction body. Parent-reaction scoping via `onCleanup` is retained for renderer-tree usage.
 
-Remove `_derivedReaction` / `_computedReaction` private fields, the `new WeakRef(this)` machinery, and the `sourceRef.deref()` check in the reaction body. Parent-reaction scoping via `onCleanup` is retained for renderer-tree usage.
+**Semantic note (audit-cleared 2026-05-13).** Top-level `Signal.computed(fn)` historically re-ran on every source change regardless of observers. Post-change, unobserved computeds are dormant — the first observer triggers subscription and the first read, additional observers share the cached value, last-observer detach severs upstream and stops the internal reaction. Call-site audit across `packages/`, `src/`, and `docs/src` found zero framework-internal consumers and three example consumers, all wrapped in `Reaction.create`. Every existing consumer observes; the behavior change is invisible to current code.
 
-**Semantic note (audit-cleared):** Top-level `Signal.computed(fn)` historically re-ran on every source change regardless of whether anyone observed the result. Post-change, an unobserved computed is dormant — the first observer triggers subscription and the first read, additional observers share the cached value, last-observer detach severs upstream and stops the internal reaction. A call-site audit of `Signal.computed` and `.derive` across `packages/`, `src/`, and `docs/src` found zero framework-internal consumers and three example consumers, all wrapped in `Reaction.create`. Every existing consumer observes, so the behavior change is invisible to current code. Future bare-`Signal.computed` use outside a reaction sees the new lazy behavior, which matches the conventions established by every other modern signals library.
+**Contract.**
 
-Tests:
+Tests (durable, to be written with the implementation):
 - Computed with no subscriber does not eagerly compute when source changes
 - Computed gains/loses subscribers correctly across mount/unmount cycles
 - Bare `Signal.computed(fn)` followed by abandonment leaves `source.dependency.subscribers.size === 0`
 - Parent-scoped computed still cleans up on parent stop
-- Existing `computed-chain-10x60k` benchmark stays flat or improves (subscribers exist throughout the run)
 
-Acceptance criteria (vs Item 7's baselines):
+Benches:
 - `computed-unobserved-1000x1000` improves dramatically — near-zero work for the unobserved case
 - `computed-subscribe-unsubscribe-50k` shows acceptable reference-counting overhead
+- Existing `computed-chain-10x60k` stays flat or improves (subscribers exist throughout the run)
 
-### Item 9: Dependency-tracking rewrite (gated)
+### Item 9: Dependency-tracking rewrite — gated
 
-**Problem (hypothesized):** Every `Reaction.run()` tears down all prior dependencies (`dep.cleanUp(this)` on each, `dependencies.clear()`) and re-acquires them from scratch as the callback executes. In the per-expression model where most expressions read the same 1–3 signals every run, the stable-dependency case dominates and the churn is pure waste.
+**Hypothesis.** Every `Reaction.run()` tears down all prior dependencies (`dep.remove(this)` on each, `dependencies.clear()`) and re-acquires them as the callback executes. In the per-expression model where most expressions read the same 1-3 signals every run, the stable-dependency case dominates and the churn is pure waste.
 
-**Counter:** `Set.delete` + `Set.add` on small sets is fast and allocation-free on modern V8. The existing `reaction-dep-diff-45k` benchmark measures the changing-dependency case; nothing measures stable-deps churn today. The hypothesis may not survive measurement.
+**Counter.** `Set.delete` + `Set.add` on small sets is fast and allocation-free on modern V8. The existing `reaction-dep-diff-45k` benchmark measures the changing-dependency case; nothing measures stable-deps churn today. The hypothesis may not survive measurement.
 
-**Gating:** Item 7's stable-dep benchmarks must show meaningful headroom before this PR lands. Specific thresholds:
+**Gating thresholds (vs Item 7 baselines).**
 - `reactive-stable-fanout-5000x500` shows ≥2× headroom attributable to Set churn
 - `reactive-stable-deps-3reads-50kx200` confirms in the median shape
 
-**If proceeding — versioned mark-and-sweep edges:**
+**Direction if proceeding — versioned mark-and-sweep edges:**
 - Each reaction has an iteration counter, incremented per run
 - Each dependency edge stores `lastSeen` (the iteration where it was touched)
 - During tracking, signal reads update `lastSeen` to the current iteration
 - After the callback, sweep edges where `lastSeen !== current` and remove them
 
-Side benefit: this gives natural transactional error recovery. If the callback throws, the partial sweep is skipped and dependencies remain intact for the next run.
+Side benefit: natural transactional error recovery. If the callback throws, the partial sweep is skipped and dependencies remain intact for the next run.
 
 **Acceptance criteria:**
 - `reactive-stable-fanout-5000x500` improves ≥2×
@@ -196,26 +165,30 @@ If improvements don't materialize, abandon and document the measurement so this 
 
 ## Open Questions
 
-- **TrackingContext extraction.** Council's strong synthesis proposed extracting a small module that owns `Scheduler.current` and the save/restore dance, so neither `Reaction` nor `Scheduler` owns the tracking slot. Conceptually clean but deferred work — schedule after Items 1-8 settle, decide whether to include in this plan or split.
-- **Dep-tracking rewrite (Item 9) viability.** Gated on Item 7 benchmark data. Honest possibility of abandonment.
+- **Item 9 viability.** Gated on Item 7 benchmark data. Honest possibility of abandonment.
+
+## Deferred to other plans
+
+- **API rename / lowercase free-function surface** (`signal`, `reaction`, `computed`, `nonreactive`, `guard`, `afterFlush`). Massive scope (~week of practical work) covering the reactivity package, renderer, components, src, docs, and examples. Separate initiative; lands post-hardening as a multi-PR sweep.
+- **`flushed()` Promise companion** to `afterFlush`. DX wrapper for the 10% genuinely-async caller case. Belongs to the rename initiative — adding new top-level surface is the rename's domain, not hardening's.
+- **Drop Reaction's static forwards** (`flush`, `scheduleFlush`, `afterFlush`, `getSource`). Tied to the rename's free-function surface.
+- **TrackingContext extraction** — separating `Scheduler.current` and the save/restore dance from both Reaction and Scheduler. Conceptually clean, deferred to surface settling.
+- **Read-side cloning rework and `safety` preset system** — owned by [Signal Performance](active/signal-performance.md) and PR #150.
 
 ## Dependencies
 
-- [Signal Performance](signal-performance.md) — file overlap (mainly `signal.js`, which Items 1-6 don't touch). Coordinate rebase order. Items 1-6 stabilize `reaction.js` and `scheduler.js` and reduce the conflict surface for Signal Performance's eventual rebase.
+- [Signal Performance](active/signal-performance.md) — file overlap is small. Item 8 touches `signal.js` (computed/derive paths) which #150 also rewrites. Item 6 touches `helpers.js` which #150 reorganizes around `config`. Items 5 conflicts only with PR #150 if #150 reshaped the scheduler (it didn't). Rebase friction is manageable; ordering determined by which branch ships first.
 
-**Downstream:** None hard. Items 1-6 are pure hygiene improvements that don't gate other roadmap work.
+**Downstream:** None hard. Items 5-9 are independent of other roadmap work.
 
 ## Sessions (estimated)
 
-1. **Items 1-8 bundled PR** (~6-8h pair) — nine commits, regression tests per fix, benchmarks for Items 5/6/8 alongside the fixes, single PR mirroring the recent PR #201 reactivity-fix arc. Risk 3/10 (lazy refcounting in Item 8 is a semantic change, but the call-site audit cleared all current consumers). The PR description names the audit result explicitly.
-2. **Item 9 evaluation + possible rewrite** (4-8h pair, conditional) — read benchmarks from Item 7's bench additions once the bundled PR has been live long enough to baseline. Either rewrite or document abandonment.
+1. **Item 7 precursor PR** (~2h pair) — seven new benches added to `bench-signal.js` and both measurement arrays in `tachometer-ci-signal.json`. Land on main. Captures baseline numbers.
+2. **Items 5, 6, 8 bundled PR** (~4-5h pair) — set-swap, boundRun + mergeContext, lazy refcounted computed. Includes the four Item 8 tests and the cycle-cap test follow-up from Item 1. Bench data cited against Item 7's baselines.
+3. **Item 9 evaluation** (~4-8h pair, conditional) — read Item 7's stable-dep numbers from main once the bundled PR has been live long enough to baseline. Either rewrite via versioned mark-and-sweep or document abandonment with the measurement attached.
 
-Total time: 6-8h baseline; up to 16h if Item 9 proceeds.
+Total: ~6-7h baseline; up to ~15h if Item 9 proceeds.
 
-## Status
+## Origin
 
-Scoped for Items 1-8. Initial for Item 9 — gated on Item 7 benchmark data with an explicit abandonment path.
-
-Item 8's call-site audit ran on 2026-05-13 and surfaced zero framework-internal consumers plus three example consumers, all wrapped in `Reaction.create`. The semantic change to lazy refcounting is invisible to every existing consumer, so Item 8 promotes from deferred decision to in-bundle.
-
-Originated from a five-frontier-model council fresh-take review of the reactivity package. Source artifact at `ai/workspace/fresh-takes/reactivity-fresh-take.md` and synthesis at `ai/workspace/fresh-takes/pr-sequence.md`.
+Originated from a five-frontier-model council fresh-take review of the reactivity package (gpt-5.5, deepseek-v4-pro, gemini-3.1-pro, claude-opus-4.7, grok-4.3). Source artifact at `ai/workspace/fresh-takes/reactivity-fresh-take.md`; synthesis at `ai/workspace/fresh-takes/pr-sequence.md`. Items 1 and 3 expanded beyond their original specs during implementation through real-time correction — the plan now documents the realized contracts rather than the anticipated ones.
