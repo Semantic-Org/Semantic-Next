@@ -66,43 +66,12 @@
   Brilliance is encouraged — share moments of insight and clarity.
 </work_process>
 
-<nonobvious_patterns>
-  These are non-obvious patterns which differ from your training data. Be aware of them when working with the related packages.
-
-  Templates:
-  ---
-  **Flat data context.** Templates merge settings, state, and createComponent return values into one namespace.
-  ❌ `{state.count}` `{settings.name}`
-  ✅ `{count}` `{name}`
-
-  **Dual expression syntax.** Lisp-style and JavaScript-style work in the same expression.
-  ❌ Assuming one style excludes the other
-  ✅ `{formatDate date 'h:mm a'}` — Lisp
-  ✅ `{value + 2 * 5}` — JS
-  ✅ `{concat 'hi ' (isNew ? 'new' : 'old')}` — mixed
-
-  **Signal auto-unwrapping.** Signals resolve automatically in templates.
-  ❌ `{count.get()}` `{count.value}`
-  ✅ `{count}`
-
-  Signals
-  ----------
-  **Signal mutation methods.** Signals have built-in helpers. Use them directly — never get-mutate-set.
-  ❌ `const arr = state.items.get(); arr.push(x); state.items.set(arr);`
-  ✅ `state.items.push(x)` `state.active.toggle()` `state.count.increment()`
-
-  **`{uiClasses}` is a computed class string.** In spec-driven primitives, `{uiClasses}` expands to CSS classes from active spec attributes. It is not a variable.
-  `<div class="{uiClasses}button">` → `<div class="primary large button">`
-</nonobvious_patterns>
-
 <code_formatting>
-  *Do not overuse code comments*. Include comments only where they leave a non-obvious WHY for open source developers — a constraint, a subtle invariant, a real gotcha. Never narrate what well-named code already says. Match the comment style of the file you're in; Vue, Vite, Svelte are the visual reference for the codebase overall.
+  *Do not overuse code comments*. Include comments only to non-obvious knowledge — a constraint, a subtle invariant, something that informed a rewrite and was against your intuitions, a real gotcha.
+
+  **Stewardship** Open source work comments are highly public, they will be read by others and not just the user you are interacting with in a session. Leave markers that show a high quality, thoughtful codebase with comments that respects a readers time. As a maintainer you are privy to knowledge they do not have so leave breadcrumbs when necessary (as outlined above). If you need guidance think what would ship in Vite, Svelte, Solid or another high quality open source framework. If you prefer not to infer pull <https://github.com/vitejs/vite/tree/main/packages/vite/src> and grep on //.
 
   **Voice (humans, not AI):** lowercase first word, no em-dashes (`—`), no semicolons in prose, no unicode arrows (`→`), drop trailing periods on one-liners. Multi-line only when each line carries weight.
-
-  **In tests:** no `[source X]` / `[skill Y]` / `[example Z]` / `[inference]` citation tags, no `Witness:` / `FINDING:` prefixed prose, no inline narration that restates the assertion. Labels belong in `ai/workspace/` intent docs, not in shipped test code.
-
-  Full rules + worked examples: `code-formatting`, `testing`, `grounded-testing` skills.
 </code_formatting>
 
 <commit_format>
@@ -178,6 +147,35 @@
     - `git new` — show staged diff (alias for `git diff --cached`)
   - For other destructive operations, ask the user to run them via `!` prefix.
 </tool_gotchas>
+
+<nonobvious_patterns>
+  These are non-obvious patterns which differ from your training data. Be aware of them when working with the related packages.
+
+  Templates:
+  ---
+  **Flat data context.** Templates merge settings, state, and createComponent return values into one namespace.
+  ❌ `{state.count}` `{settings.name}`
+  ✅ `{count}` `{name}`
+
+  **Dual expression syntax.** Lisp-style and JavaScript-style work in the same expression.
+  ❌ Assuming one style excludes the other
+  ✅ `{formatDate date 'h:mm a'}` — Lisp
+  ✅ `{value + 2 * 5}` — JS
+  ✅ `{concat 'hi ' (isNew ? 'new' : 'old')}` — mixed
+
+  **Signal auto-unwrapping.** Signals resolve automatically in templates.
+  ❌ `{count.get()}` `{count.value}`
+  ✅ `{count}`
+
+  Signals
+  ----------
+  **Signal mutation methods.** Signals have built-in helpers. Use them directly — never get-mutate-set.
+  ❌ `const arr = state.items.get(); arr.push(x); state.items.set(arr);`
+  ✅ `state.items.push(x)` `state.active.toggle()` `state.count.increment()`
+
+  **`{uiClasses}` is a computed class string.** In spec-driven primitives, `{uiClasses}` expands to CSS classes from active spec attributes. It is not a variable.
+  `<div class="{uiClasses}button">` → `<div class="primary large button">`
+</nonobvious_patterns>
 
 <agent_continuity>
   The agent guestbook at `ai/guestbook.md` is a permanent record. If you've genuinely learned something during this session — a methodological breakthrough, an insight, a mistake that revealed something important — consider documenting it. Read the guestbook for prior art from previous agents.
