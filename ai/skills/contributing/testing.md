@@ -338,6 +338,72 @@ The reactivity tests use decorative comment blocks to separate logical groups:
 
 Match this style when adding tests to files that use it.
 
+### Comments that earn their keep
+
+A test comment earns its keep when it answers "what would a future reader miss if I removed this?" The shape: short, conversational, focused on the non-obvious WHY that the test body doesn't show. Real examples from the codebase:
+
+**Test isolation rationale** — `packages/query/test/browser/behavior.test.js`:
+
+```javascript
+// Each test registers under a unique name so behaviors don't leak across
+// tests (Query.behaviors is global static state and registerBehavior() is a
+// silent no-op for duplicate names).
+let counter = 0;
+const uniqueName = (base) => `${base}_${++counter}`;
+```
+
+Without this, a reader wonders why every test invents a name. The "silent no-op" detail is a real gotcha — re-registration doesn't throw, it returns the prior behavior.
+
+**Real consumer reference** — `packages/query/test/browser/behavior.test.js`:
+
+```javascript
+// pattern used by Tooltip's onHidden: $(this).tooltip('set text', 'Copy Code')
+it('supports natural-language two-word setter invocation', () => { ... });
+```
+
+Anchors the test to actual production usage. The test name says *what*; the comment says *where*.
+
+**User-facing contract pin** — `packages/query/test/browser/behavior.test.js`:
+
+```javascript
+// data-* with falsy values (0, false, '') must override settings
+// common pattern: data-enabled="false" should disable a default of true
+it('lets data-* attributes override settings with false values', () => { ... });
+```
+
+Names the user expectation in concrete terms, not the implementation detail.
+
+**Structural invariant** — `packages/renderer/test/browser/template-conditional.test.js`:
+
+```javascript
+// cross-type swap is structurally impossible: a name can't be both registered and declared inline
+it('subtemplate name expression resolving to a Template instance swaps correctly', async () => { ... });
+```
+
+Explains why the test scenario is bounded — answers "why doesn't this cover swap-from-X-to-Y?"
+
+**Cross-engine setup rationale** — `packages/renderer/test/browser/async-expression.test.js`:
+
+```javascript
+// throw propagates when errorContent is empty
+// native surfaces it synchronously via window.error, lit's microtask render surfaces via unhandledrejection
+// listen for both since the contract is "error reaches the host" not via a specific event
+```
+
+Justifies a non-obvious test setup (listening to two different browser events) by naming the engine difference.
+
+**Failure mode the test catches** — `packages/tailwind/test/tailwind-plugin.test.js`:
+
+```javascript
+// if two adjacent strings concatenated without a separator, "bg-red-500" + "p-4"
+// would scan as "bg-red-500p-4", not a valid Tailwind class. newlines preserve boundaries
+it('joins extracted sources with newlines so adjacent strings cannot merge into invalid candidates', () => { ... });
+```
+
+Names the regression the test guards against — the specific bad concatenation that would slip past if the separator regressed.
+
+The common pattern: each comment either documents a user-facing expectation, names a real consumer, explains a non-obvious constraint, or names the failure mode the test catches. None of them narrate what the next line of code does — that's what the `it()` name and the assertions are for.
+
 ### Comments to avoid in tests
 
 Test source is terse. The `it()` name and the assertions do the work. Add a comment only when explaining genuinely non-obvious WHY — a browser quirk, a perf constraint, a subtle invariant that's not visible from reading the test body.
