@@ -276,6 +276,32 @@ describe('Scheduler — current reaction context', () => {
     expect(s.hasDependents()).toBe(false);
   });
 
+  it('advances firstRun even when the callback throws, so re-invalidation tracks fresh deps', () => {
+    const trigger = new Signal(0);
+    let throwOnce = true;
+    const callback = vi.fn();
+    let reaction;
+
+    // Reaction.create throws because the first run does, so capture the instance via the callback arg
+    expect(() => {
+      Reaction.create((r) => {
+        reaction = r;
+        trigger.get();
+        callback(r.firstRun);
+        if (throwOnce) {
+          throwOnce = false;
+          throw new Error('first run throws');
+        }
+      });
+    }).toThrow('first run throws');
+
+    expect(reaction.firstRun).toBe(false);
+
+    trigger.set(1);
+    Reaction.flush();
+    expect(callback).toHaveBeenLastCalledWith(false);
+  });
+
   it('nonreactive nests correctly — restores outer reaction when inner returns', () => {
     const outer = new Signal('outer');
     const inner = new Signal('inner');
@@ -480,6 +506,33 @@ describe('Reaction.guard', () => {
 
     outer.stop();
     expect(counter.dependency.subscribers.size).toBe(0);
+  });
+
+  it('propagates value changes after the first f() throws', () => {
+    const source = new Signal('first');
+    let throwOnce = true;
+    const downstream = vi.fn();
+
+    expect(() => {
+      Reaction.create(() => {
+        const v = Reaction.guard(() => {
+          const x = source.get();
+          if (throwOnce) {
+            throwOnce = false;
+            throw new Error('first run throws');
+          }
+          return x;
+        });
+        downstream(v);
+      });
+    }).toThrow('first run throws');
+
+    expect(downstream).not.toHaveBeenCalled();
+
+    // a signal change re-fires the inner guard, which now succeeds and propagates upward
+    source.set('second');
+    Reaction.flush();
+    expect(downstream).toHaveBeenCalledWith('second');
   });
 });
 
