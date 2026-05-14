@@ -250,16 +250,15 @@ export class ServerRenderer {
           const id = scope.entryId++;
           scope.insideRawText = false;
           const after = stamped.slice(splitAt);
-          // chunk-only — we just cleared insideRawText, so any new open must be in `after`
-          if (after && isInsideRawText(after)) {
+          // the remainder may itself open another raw-text element
+          if (after && isInsideRawText(scope.htmlBuffer)) {
             scope.insideRawText = true;
           }
           return stamped.slice(0, splitAt) + `<!--${RAW_TEXT_MARKER}${id}-->` + after;
         }
         return stamped;
       }
-      // chunk-only — prior buffer state was !insideRawText, any unclosed open must be in this chunk
-      if (isInsideRawText(stamped)) {
+      if (isInsideRawText(scope.htmlBuffer)) {
         scope.insideRawText = true;
       }
       return stamped;

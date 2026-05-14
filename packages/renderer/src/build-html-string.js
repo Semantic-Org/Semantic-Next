@@ -221,8 +221,8 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
     }
     htmlString += html;
     htmlBuffer += html;
-    // chunk-only scan — prior buffer state was !insideRawText, so any unclosed open must be in this chunk
-    if (isInsideRawText(html)) {
+    // buffer-wide scan — raw-text opening tags can be split across html chunks by attribute expressions like `<textarea placeholder="{x}">`, so the `<tag` and its `>` may live in different chunks
+    if (isInsideRawText(htmlBuffer)) {
       insideRawText = true;
       rawTextNodes = [];
     }
