@@ -173,13 +173,8 @@ function buildArgsRecord({ node, parentData, evaluator, target }) {
   return record;
 }
 
-// Read name reactively only while templateType is still null so the outer
-// Reaction wakes when a data-driven name finally resolves. Once locked,
-// the early return short-circuits before any read — so post-lock name
-// changes don't fire the outer reaction (templateType is documented as
-// stable per name, swapping it mid-life is undefined). Subtemplate name
-// reactivity for instance swap is handled separately in the subtemplate
-// branch.
+// First read is reactive so a data-driven name resolving from null re-runs the outer Reaction.
+// Lock on first resolution — templateType is documented stable per name.
 function detectTemplateType({ node, data, self }) {
   if (self.templateType !== null) { return self.templateType; }
   const name = self.evaluator.lookupExpressionValue(node.name, data);
@@ -205,8 +200,6 @@ function resolveSnippet(nameExpr, data, self) {
   return self.snippets[name] || null;
 }
 
-// Shared prep for render + hydrate snippet branches. Tracks the snippet on
-// self.currentSnippet so subsequent updates can compare identity.
 function prepareSnippet({ node, data, self }) {
   const snippet = resolveSnippet(node.name, data, self);
   if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
@@ -422,23 +415,22 @@ const templateBlock = defineBlock({
   },
 
   update({ node, data, region, scope, renderAST, self, isSVG }) {
-    // First render/hydrate may have seen a null name (e.g. data-driven
-    // {>template name=which} with which=null until state settles). Re-detect
-    // now so the snippet branch isn't silently skipped on later resolution.
+    // First render may have seen a null name (data-driven name=null until state settles). Re-detect once it resolves.
     if (self.templateType === null) {
       const detected = detectTemplateType({ node, data, self });
       if (detected === null) { return; }
-      // detected is now locked on self.templateType — fall through.
     }
 
-    // Snippet path: same-type swap (snippet→snippet) is supported by
-    // comparing snippet identity. Cross-type swap is structurally impossible
-    // (a name can't be both a snippet and a subtemplate). Inner expression
-    // reactivity is handled by the snippet-arg proxy's lazy getters via
-    // per-marker Reactions wired during render/hydrate.
+    // Identity-compare is enough: a name can't be both snippet and subtemplate, so cross-type swap is impossible.
+    // Inner expression reactivity lives in the snippet-arg proxy's per-marker Reactions wired during render/hydrate.
     if (self.templateType === 'snippet') {
       const snippet = resolveSnippet(node.name, data, self);
       if (snippet === self.currentSnippet) { return; }
+      if (!snippet) {
+        region.clear();
+        self.currentSnippet = null;
+        return;
+      }
       mountSnippet({ node, data, region, scope, renderAST, isSVG, self });
       return;
     }
