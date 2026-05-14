@@ -105,7 +105,7 @@ export function parseAttributeParts(attrValue) {
 }
 
 // HTML raw text elements — browser treats content as text, not markup
-export const RAW_TEXT_OPEN = /\<(script|style|textarea|title)[\s>]/i;
+export const RAW_TEXT_OPEN = /\<(script|style|textarea|title)[\s>]/gi;
 export const RAW_TEXT_CLOSE = /\<\/(script|style|textarea|title)\s*\>/i;
 
 // Per-tag close-tag regexes precomputed once. Cheaper than `new RegExp()`
@@ -122,11 +122,14 @@ const RAW_TEXT_CLOSE_BY_TAG = {
 // from this check — keeping the logic in one place so server/client output
 // agree on where the `<!--sui-rawtext:v1:N-->` marker lands.
 export function isInsideRawText(buffer) {
-  const openMatch = buffer.match(RAW_TEXT_OPEN);
-  if (!openMatch) { return false; }
-  const tagName = openMatch[1].toLowerCase();
-  const tagStart = buffer.lastIndexOf('<' + openMatch[1]);
-  const tagEnd = tagStart === -1 ? -1 : buffer.indexOf('>', tagStart);
+  // last open (not first) — multi-raw-text buffers must test the latest tag
+  let lastMatch = null;
+  for (const m of buffer.matchAll(RAW_TEXT_OPEN)) {
+    lastMatch = m;
+  }
+  if (!lastMatch) { return false; }
+  const tagName = lastMatch[1].toLowerCase();
+  const tagEnd = buffer.indexOf('>', lastMatch.index);
   if (tagEnd === -1) { return false; }
   return !RAW_TEXT_CLOSE_BY_TAG[tagName].test(buffer.slice(tagEnd));
 }

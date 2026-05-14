@@ -6,6 +6,7 @@ import {
   BLOCK_MARKER,
   COMMENT_MARKER,
   DATA_SUI_BIND,
+  isInsideRawText,
   MARKER_VERSION,
   RAW_TEXT_MARKER,
 } from '../../src/build-html-string.js';
@@ -891,6 +892,39 @@ describe('raw-text elements', () => {
     const ast = compile('<textarea>{value}</textarea>');
     const html = render({ ast, data: { value: 'hello' } });
     expect(html).not.toMatch(/<textarea>[^<]*<!--sui:v1:/);
+  });
+
+  it('does NOT emit comment markers inside <script> when a closed <style> precedes it', () => {
+    // <style>...</style><script>{x}</script> in a single html node — the
+    // first raw-text element is closed, but the buffer ends inside the
+    // unclosed <script>. isInsideRawText must recognize the latest open.
+    const ast = compile('<style>.x{color:red}</style><script>{value}</script>');
+    const html = render({ ast, data: { value: 42 } });
+    expect(html).not.toMatch(/<script>[^<]*<!--sui:v1:/);
+  });
+});
+
+describe('isInsideRawText', () => {
+  it('returns true when buffer ends inside an unclosed raw-text element', () => {
+    expect(isInsideRawText('<div><script>const x = ')).toBe(true);
+    expect(isInsideRawText('<style>.a{')).toBe(true);
+  });
+
+  it('returns false when the only raw-text element is closed', () => {
+    expect(isInsideRawText('<style>.a{}</style><div>')).toBe(false);
+  });
+
+  it('returns true when a later raw-text element is unclosed after an earlier one closed', () => {
+    expect(isInsideRawText('<style>.a{}</style><script>const x = ')).toBe(true);
+    expect(isInsideRawText('<script>const x;</script><style>.b{')).toBe(true);
+  });
+
+  it('returns false when all raw-text elements in the buffer are closed', () => {
+    expect(isInsideRawText('<style>.a{}</style><script>x;</script>')).toBe(false);
+  });
+
+  it('returns false for buffers with no raw-text element', () => {
+    expect(isInsideRawText('<div><p>hello</p></div>')).toBe(false);
   });
 });
 
