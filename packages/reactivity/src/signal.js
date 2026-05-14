@@ -11,9 +11,10 @@ import {
   wrapFunction,
 } from '@semantic-ui/utils';
 
-import { Dependency } from './dependency.js';
+import { ComputedDependency, Dependency } from './dependency.js';
 import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
 import { Reaction } from './reaction.js';
+import { Scheduler } from './scheduler.js';
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
 
@@ -132,54 +133,82 @@ export class Signal {
     });
   }
 
-  // derive a new signal from this signal's value
+  // derive a new signal from this signal's value. thin wrapper over computed:
+  // this.get() inside the closure tracks the source via the internal reaction's
+  // own subscription, so source retention follows the natural chain. when the
+  // derived signal has no subscribers, the internal reaction stops and the
+  // source's subscriber set releases — no WeakRef needed.
   derive(computeFn, options = {}) {
-    const derivedSignal = new Signal(undefined, options);
-
-    // check if signal has been garbage collected
-    // if it has we need to clean up reaction
-    const sourceRef = new WeakRef(this);
-
-    // Create reaction that updates the derived signal
-    const reaction = Reaction.create(() => {
-      const source = sourceRef.deref();
-      if (!source) {
-        reaction.stop(); // Auto-cleanup if source is gone
-        return;
-      }
-      const result = computeFn(source.get());
-      derivedSignal.set(result);
-    });
-
-    // scope to parent reaction when called from inside one
-    if (Reaction.current) {
-      Reaction.current.onCleanup(() => reaction.stop());
-    }
-
-    // Store reaction reference for potential cleanup
-    derivedSignal._derivedReaction = reaction;
-
-    return derivedSignal;
+    return Signal.computed(() => computeFn(this.get()), options);
   }
 
-  // static method for computing from multiple signals
+  // Lazy reference-counted computed. Subscribes to upstream dependencies only
+  // when at least one downstream subscriber observes; stops the internal
+  // reaction (severing the strong root from upstream) when the last subscriber
+  // detaches. Matches the Vue 3 / MobX / Solid pattern.
+  //
+  // Decision crib (per council fresh-take ref-fresh-take-strong.md):
+  //  - first-subscribe trigger: ComputedDependency.depend() at 0→1, fires BEFORE
+  //    adding the new subscriber so the internal reaction's initial set()
+  //    doesn't invalidate the just-attaching reader.
+  //  - last-detach: deferred to next afterFlush boundary, cancelled if any
+  //    subscriber re-attaches first. Required for correctness given that every
+  //    Reaction.run() transiently empties subscribers during dep-clear.
+  //  - restart on re-subscribe: fresh reaction. Terminal-stop invariant stands.
+  //  - parent-stop wins: forces synchronous teardown, cancels any pending defer.
+  //  - bare reads in dormant state return cached currentValue (initial value
+  //    populated at construction via Reaction.nonreactive — no upstream
+  //    subscription happens during the initial run). After a subscription
+  //    window has run and detached, bare reads may return a stale cached value;
+  //    caller should re-observe to refresh.
   static computed(computeFn, options = {}) {
-    const computedSignal = new Signal(undefined, options);
+    const { parent = Reaction.current, ...signalOptions } = options;
+    let internalReaction = null;
+    let stopPending = false;
+    const computedSignal = new Signal(undefined, signalOptions);
 
-    // Create reaction that updates the computed signal
-    // No WeakRef needed - computed signal and reaction have same lifecycle
-    const reaction = Reaction.create(() => {
-      const result = computeFn();
-      computedSignal.set(result);
-    });
+    const startTracking = () => {
+      stopPending = false;
+      if (internalReaction) { return; }
+      internalReaction = Reaction.create(() => {
+        computedSignal.set(computeFn());
+      });
+    };
 
-    // scope to parent reaction when called from inside one
-    if (Reaction.current) {
-      Reaction.current.onCleanup(() => reaction.stop());
+    const stopTrackingNow = () => {
+      if (!internalReaction) { return; }
+      internalReaction.stop();
+      internalReaction = null;
+    };
+
+    const queueStop = () => {
+      if (stopPending) { return; }
+      stopPending = true;
+      Scheduler.afterFlush(() => {
+        if (stopPending && computedSignal.dependency.subscribers.size === 0) {
+          stopTrackingNow();
+        }
+        stopPending = false;
+      });
+    };
+
+    computedSignal.dependency = new ComputedDependency(
+      { firstRun: true, value: undefined },
+      { onObserved: startTracking, onUnobserved: queueStop },
+    );
+
+    // Eager initial run via nonreactive scope. Populates currentValue so bare
+    // reads return a sensible initial value, without subscribing to upstream
+    // (no internal reaction exists yet; nonreactive ensures the caller's
+    // tracking context, if any, doesn't pick up incidental source reads).
+    computedSignal.set(Reaction.nonreactive(computeFn));
+
+    if (parent) {
+      parent.onCleanup(() => {
+        stopPending = false;
+        stopTrackingNow();
+      });
     }
-
-    // Store reaction reference for potential cleanup
-    computedSignal._computedReaction = reaction;
 
     return computedSignal;
   }

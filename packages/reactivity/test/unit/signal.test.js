@@ -594,6 +594,7 @@ describe.concurrent('Signal', () => {
     it('should create a derived signal from a single source', () => {
       const source = new Signal(10);
       const doubled = source.derive(val => val * 2);
+      Reaction.create(() => doubled.get()); // observe → internal reaction subscribes (lazy refcount)
 
       expect(doubled.get()).toBe(20);
 
@@ -606,6 +607,7 @@ describe.concurrent('Signal', () => {
       const a = new Signal(1);
       const b = new Signal(2);
       const sum = Signal.computed(() => a.get() + b.get());
+      Reaction.create(() => sum.get());
 
       expect(sum.get()).toBe(3);
 
@@ -622,6 +624,7 @@ describe.concurrent('Signal', () => {
     it('should update derived when source changes', () => {
       const items = new Signal([1, 2, 3]);
       const count = items.derive(arr => arr.length);
+      Reaction.create(() => count.get());
 
       expect(count.get()).toBe(3);
 
@@ -639,6 +642,7 @@ describe.concurrent('Signal', () => {
       const b = new Signal(2);
       const c = new Signal(3);
       const sum = Signal.computed(() => a.get() + b.get() + c.get());
+      Reaction.create(() => sum.get());
 
       expect(sum.get()).toBe(6);
 
@@ -699,9 +703,21 @@ describe.concurrent('Signal', () => {
       // Base signal remains unchanged
       expect(base.get()).toBe(10);
 
-      // Next base change will recalculate derived
+      // Observe the derived so the internal reaction subscribes to base.
+      // Without an observer, derived is dormant and base changes do not
+      // propagate — the lazy refcount design (post-Item-8).
+      let observed;
+      Reaction.create(() => {
+        observed = derived.get();
+      });
+
+      // Internal reaction's run overwrites the user-set value with the
+      // current computation (5 * 2 not yet — base is still 10 here).
+      expect(observed).toBe(20);
+
       base.set(5);
       Reaction.flush();
+      expect(observed).toBe(10);
       expect(derived.get()).toBe(10);
     });
 
@@ -736,6 +752,10 @@ describe.concurrent('Signal', () => {
       const doubled = base.derive(val => val * 2);
       const quadrupled = doubled.derive(val => val * 2);
       const final = Signal.computed(() => quadrupled.get() + 1);
+      // Observe the chain leaf — the chain's internal reactions stay alive
+      // via the natural retention path (leaf subscribes to quadrupled.dep,
+      // quadrupled to doubled.dep, doubled to base.dep).
+      Reaction.create(() => final.get());
 
       expect(final.get()).toBe(9); // 2 * 2 * 2 + 1
 
@@ -761,6 +781,8 @@ describe.concurrent('Signal', () => {
       );
 
       const inStockCount = items.derive(arr => arr.filter(item => item.inStock).length);
+      Reaction.create(() => totalValue.get());
+      Reaction.create(() => inStockCount.get());
 
       expect(totalValue.get()).toBe(40);
       expect(inStockCount.get()).toBe(2);
@@ -807,6 +829,7 @@ describe.concurrent('Signal', () => {
       const result = Signal.computed(() => {
         return useA.get() ? a.get() : b.get();
       });
+      Reaction.create(() => result.get());
 
       expect(result.get()).toBe(10);
 
@@ -830,6 +853,7 @@ describe.concurrent('Signal', () => {
     it('should handle object transformations in derive', () => {
       const user = new Signal({ name: 'Alice', age: 30 });
       const displayName = user.derive(u => `${u.name} (${u.age})`);
+      Reaction.create(() => displayName.get());
 
       expect(displayName.get()).toBe('Alice (30)');
 
@@ -854,6 +878,7 @@ describe.concurrent('Signal', () => {
         const tax = subtotal * taxRate.get();
         return subtotal + tax + shipping.get();
       });
+      Reaction.create(() => total.get());
 
       expect(total.get()).toBeCloseTo(64.346, 2);
 
@@ -921,33 +946,11 @@ describe.concurrent('Signal', () => {
       warnSpy.mockRestore();
     });
 
-    // Test WeakRef cleanup behavior
-    it('should handle WeakRef cleanup gracefully', () => {
-      let source = new Signal(10);
-      const derived = source.derive(val => val * 2);
-
-      expect(derived.get()).toBe(20);
-
-      // Reaction should be active
-      expect(derived._derivedReaction.active).toBe(true);
-
-      // Simulate source being garbage collected
-      source = null;
-
-      // Force garbage collection if available (Node.js only)
-      if (global.gc) {
-        global.gc();
-      }
-
-      // The reaction should still be active but will auto-cleanup on next run
-      // This is hard to test directly, but we can verify the structure is correct
-      expect(derived._derivedReaction).toBeDefined();
-    });
-
     it('derive inside a parent reaction does not accumulate subscribers across re-runs', () => {
       const source = new Signal(1);
       Reaction.create(() => {
-        source.derive(v => v * 2);
+        const d = source.derive(v => v * 2);
+        d.get(); // observe so the internal reaction subscribes
       });
 
       for (let i = 1; i <= 5; i++) {
@@ -955,9 +958,9 @@ describe.concurrent('Signal', () => {
         Reaction.flush();
       }
 
-      // 1 subscriber: the parent reaction. Each derive() inside spawns an
-      // internal reaction scoped to the parent's lifetime, not a long-lived
-      // independent observer.
+      // One subscriber: the current parent-run's internal reaction. Each
+      // parent re-run spawns a fresh derived; the prior internal reaction
+      // is stopped via parent.onCleanup. Steady-state is 1.
       expect(source.dependency.subscribers.size).toBe(1);
     });
 
@@ -965,7 +968,8 @@ describe.concurrent('Signal', () => {
       const a = new Signal(1);
       const b = new Signal(10);
       Reaction.create(() => {
-        Signal.computed(() => a.get() + b.get());
+        const c = Signal.computed(() => a.get() + b.get());
+        c.get(); // observe so the internal reaction subscribes
       });
 
       for (let i = 1; i <= 5; i++) {
@@ -1759,6 +1763,7 @@ describe('Signal API', () => {
     it('updates the derived signal automatically when the source changes', () => {
       const numbers = new Signal([1, 2, 3]);
       const count = numbers.derive(arr => arr.length);
+      Reaction.create(() => count.get());
       numbers.push(4);
       Reaction.flush();
       expect(count.get()).toBe(4);
@@ -1768,6 +1773,7 @@ describe('Signal API', () => {
       const base = new Signal(2);
       const doubled = base.derive(v => v * 2);
       const quadrupled = doubled.derive(v => v * 2);
+      Reaction.create(() => quadrupled.get());
       base.set(3);
       Reaction.flush();
       expect(doubled.get()).toBe(6);
@@ -1792,6 +1798,7 @@ describe('Signal API', () => {
       const a = new Signal(1);
       const b = new Signal(2);
       const sum = Signal.computed(() => a.get() + b.get());
+      Reaction.create(() => sum.get());
       expect(sum.get()).toBe(3);
 
       a.set(10);
@@ -1815,6 +1822,172 @@ describe('Signal API', () => {
       Reaction.flush();
       expect(observed).toHaveBeenCalledTimes(2);
       expect(observed).toHaveBeenLastCalledWith(12);
+    });
+  });
+
+  /***********************************************
+   * Signal.computed — lazy reference counting
+   * Computed signals subscribe upstream only when they have ≥1 downstream
+   * subscriber. Last subscriber detach triggers a deferred stop that fires
+   * on the next afterFlush; first re-subscribe in the same flush cancels it.
+   ***********************************************/
+
+  describe('Signal.computed — lazy refcount', () => {
+    it('does not eagerly compute when no subscriber observes and source changes', () => {
+      const source = new Signal(0);
+      let computeCount = 0;
+      // eslint-disable-next-line no-unused-vars
+      const c = Signal.computed(() => {
+        computeCount++;
+        return source.get() * 2;
+      });
+      const initialCount = computeCount;
+      source.set(1);
+      Reaction.flush();
+      source.set(2);
+      Reaction.flush();
+      source.set(3);
+      Reaction.flush();
+      // no subscriber, no eager recomputation
+      expect(computeCount).toBe(initialCount);
+    });
+
+    it('gains and loses upstream subscription correctly across mount/unmount cycles', () => {
+      const source = new Signal(0);
+      const c = Signal.computed(() => source.get() * 2);
+      expect(source.dependency.subscribers.size).toBe(0);
+
+      const r1 = Reaction.create(() => c.get());
+      expect(source.dependency.subscribers.size).toBe(1);
+
+      r1.stop();
+      Reaction.flush();
+      // deferred stop fires on flush — upstream should release
+      expect(source.dependency.subscribers.size).toBe(0);
+
+      const r2 = Reaction.create(() => c.get());
+      expect(source.dependency.subscribers.size).toBe(1);
+
+      r2.stop();
+      Reaction.flush();
+      expect(source.dependency.subscribers.size).toBe(0);
+    });
+
+    it('bare Signal.computed(fn) followed by abandonment leaves source subscribers empty', () => {
+      const source = new Signal(0);
+      // eslint-disable-next-line no-unused-vars
+      let c = Signal.computed(() => source.get() * 2);
+      c = null;
+      Reaction.flush();
+      expect(source.dependency.subscribers.size).toBe(0);
+    });
+
+    it('parent-scoped computed cleans up on parent stop', () => {
+      const source = new Signal(0);
+      let c;
+      const parent = Reaction.create(() => {
+        c = Signal.computed(() => source.get() * 2);
+        c.get();
+      });
+      expect(source.dependency.subscribers.size).toBe(1);
+
+      parent.stop();
+      Reaction.flush();
+      // parent stop forces synchronous teardown — upstream releases
+      expect(source.dependency.subscribers.size).toBe(0);
+    });
+
+    // Pins the load-bearing council finding: Reaction.run()'s dep-clear creates
+    // a transient subscribers.size === 0 state on every rerun of the subscriber.
+    // Deferred-cancellable stop must NOT destroy the internal reaction in that
+    // window, or every routine rerun re-allocates it.
+    it('a subscriber rerunning many times allocates exactly one internal reaction', () => {
+      const source = new Signal(0);
+      const trigger = new Signal(0);
+      let computeCount = 0;
+      const c = Signal.computed(() => {
+        computeCount++;
+        return source.get() * 2;
+      });
+
+      Reaction.create(() => {
+        trigger.get();
+        c.get();
+      });
+      // initial baseline — eager init + first observe.
+      // load-bearing invariant: count must not grow with stable source.
+      const initialCount = computeCount;
+
+      // source is stable; subscriber reruns many times via trigger.
+      // If immediate-stop were the contract, each rerun would re-create
+      // the internal reaction and re-call computeFn (initialCount + 20).
+      for (let i = 1; i <= 20; i++) {
+        trigger.set(i);
+        Reaction.flush();
+      }
+      expect(computeCount).toBe(initialCount);
+    });
+
+    it('re-subscribing during the deferred-stop window does not allocate a second internal reaction', () => {
+      const source = new Signal(0);
+      let computeCount = 0;
+      const c = Signal.computed(() => {
+        computeCount++;
+        return source.get() * 2;
+      });
+
+      const r1 = Reaction.create(() => c.get());
+      const initialCount = computeCount;
+
+      r1.stop();
+      // deferred stop queued via afterFlush, hasn't fired yet
+      const r2 = Reaction.create(() => c.get());
+      Reaction.flush();
+      // re-subscribe cancels the pending stop; no new internal reaction
+      expect(computeCount).toBe(initialCount);
+
+      r2.stop();
+    });
+
+    it('bare get() in dormant state returns last cached value (re-observe to refresh)', () => {
+      const source = new Signal(0);
+      const c = Signal.computed(() => source.get() * 10);
+
+      // Eager initial run populates the cache without subscribing
+      expect(c.get()).toBe(0);
+
+      // Subscribe + detach so the internal reaction's lifecycle exercises
+      const r = Reaction.create(() => c.get());
+      r.stop();
+      Reaction.flush();
+
+      source.set(5);
+      // Dormant: source change doesn't propagate. Cache holds prior value.
+      // Bare reads accept this — re-observe to refresh.
+      expect(c.get()).toBe(0);
+
+      // Re-observation triggers the internal reaction; cache refreshes.
+      let observed;
+      Reaction.create(() => {
+        observed = c.get();
+      });
+      expect(observed).toBe(50);
+    });
+
+    it('parent-stop with live subscribers fires teardown synchronously', () => {
+      const source = new Signal(0);
+      let c;
+      const parent = Reaction.create(() => {
+        c = Signal.computed(() => source.get() * 2);
+      });
+      const childSubscriber = Reaction.create(() => c.get());
+      expect(source.dependency.subscribers.size).toBe(1);
+
+      // parent stops — should force teardown even though childSubscriber still observes
+      parent.stop();
+      expect(source.dependency.subscribers.size).toBe(0);
+
+      childSubscriber.stop();
     });
   });
 
