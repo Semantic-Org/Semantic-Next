@@ -22,7 +22,12 @@
         { "mode": "performance", "entryName": "sub-unsub-100k" },
         { "mode": "performance", "entryName": "reaction-flush-noop-5m" },
         { "mode": "performance", "entryName": "reaction-coalesce-400x100" },
-        { "mode": "performance", "entryName": "reaction-dep-diff-45k" }
+        { "mode": "performance", "entryName": "reaction-dep-diff-45k" },
+        { "mode": "performance", "entryName": "reactive-stable-fanout-5000x100" },
+        { "mode": "performance", "entryName": "reactive-stable-deps-3reads-5000x100" },
+        { "mode": "performance", "entryName": "computed-unobserved-200x500" },
+        { "mode": "performance", "entryName": "computed-subscribe-unsubscribe-10k" },
+        { "mode": "performance", "entryName": "flush-fanout-allocation-1000x500" }
       ]
     },
     {
@@ -42,7 +47,12 @@
         { "mode": "performance", "entryName": "sub-unsub-100k" },
         { "mode": "performance", "entryName": "reaction-flush-noop-5m" },
         { "mode": "performance", "entryName": "reaction-coalesce-400x100" },
-        { "mode": "performance", "entryName": "reaction-dep-diff-45k" }
+        { "mode": "performance", "entryName": "reaction-dep-diff-45k" },
+        { "mode": "performance", "entryName": "reactive-stable-fanout-5000x100" },
+        { "mode": "performance", "entryName": "reactive-stable-deps-3reads-5000x100" },
+        { "mode": "performance", "entryName": "computed-unobserved-200x500" },
+        { "mode": "performance", "entryName": "computed-subscribe-unsubscribe-10k" },
+        { "mode": "performance", "entryName": "flush-fanout-allocation-1000x500" }
       ]
     }
   ]
