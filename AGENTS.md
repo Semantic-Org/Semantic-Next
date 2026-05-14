@@ -96,7 +96,13 @@
 </nonobvious_patterns>
 
 <code_formatting>
-  *Do not overuse code comments*. Include comments in places where it makes sense to leave a breadcrumb for open source developers. Consider source code for projects like Vue, Vite, Svelte, etc when thinking about if a code comment is necessary. Comments should match the formatting of other comments in the library in general, and in the file in specific.
+  *Do not overuse code comments*. Include comments only where they leave a non-obvious WHY for open source developers — a constraint, a subtle invariant, a real gotcha. Never narrate what well-named code already says. Match the comment style of the file you're in; Vue, Vite, Svelte are the visual reference for the codebase overall.
+
+  **Voice (humans, not AI):** lowercase first word, no em-dashes (`—`), no semicolons in prose, no unicode arrows (`→`), drop trailing periods on one-liners. Multi-line only when each line carries weight.
+
+  **In tests:** no `[source X]` / `[skill Y]` / `[example Z]` / `[inference]` citation tags, no `Witness:` / `FINDING:` prefixed prose, no inline narration that restates the assertion. Labels belong in `ai/workspace/` intent docs, not in shipped test code.
+
+  Full rules + worked examples: `code-formatting`, `testing`, `grounded-testing` skills.
 </code_formatting>
 
 <commit_format>
