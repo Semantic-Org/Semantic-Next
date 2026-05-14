@@ -243,6 +243,21 @@ RENDERING_ENGINES.forEach((engine) => {
         await el.updateComplete;
         expect(el.settings.config).toEqual({ mode: 'b', count: 3 });
       });
+
+      it('parses JSON object via kebab-cased alias on a multiword default', async () => {
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<i></i>',
+          defaultSettings: { userConfig: { mode: 'a' } },
+        });
+        const el = document.createElement(tag);
+        el.setAttribute('user-config', '{"mode":"b","count":3}');
+        document.body.appendChild(el);
+        await el.updateComplete;
+        expect(el.settings.userConfig).toEqual({ mode: 'b', count: 3 });
+      });
     });
 
     describe('Array defaults', () => {
@@ -259,6 +274,21 @@ RENDERING_ENGINES.forEach((engine) => {
         document.body.appendChild(el);
         await el.updateComplete;
         expect(el.settings.items).toEqual([1, 2, 3]);
+      });
+
+      it('parses JSON array via kebab-cased alias on a multiword default', async () => {
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<i></i>',
+          defaultSettings: { selectedItems: [] },
+        });
+        const el = document.createElement(tag);
+        el.setAttribute('selected-items', '[1,2,3]');
+        document.body.appendChild(el);
+        await el.updateComplete;
+        expect(el.settings.selectedItems).toEqual([1, 2, 3]);
       });
     });
 

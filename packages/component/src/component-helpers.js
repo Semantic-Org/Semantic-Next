@@ -177,6 +177,7 @@ export function getPropertySettings({ name, type = String, propertyOnly = false 
   else if (type == Object || type == Array) {
     property.converter = {
       fromAttribute: (value) => {
+        if (typeof value !== 'string') { return value; }
         try {
           return JSON.parse(value);
         }
