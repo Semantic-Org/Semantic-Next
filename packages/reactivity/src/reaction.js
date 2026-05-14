@@ -90,9 +90,10 @@ export class Reaction {
       }
       this.dependencies.clear();
       this.callback(this);
-      this.firstRun = false;
     }
     finally {
+      // firstRun advances even on throw so a re-invalidation re-tracks from a known baseline
+      this.firstRun = false;
       Scheduler.current = previousReaction;
     }
   }
