@@ -2,7 +2,7 @@
 
 ## Goal
 
-Close the Reaction / Scheduler / Dependency hygiene gaps surfaced by the council fresh-take review of the reactivity package. Items 1-4 have shipped on this branch. Item 1 expanded beyond its original scope when the interleave-to-stable contract emerged during the work and was corrected toward in real time. Items 5, 6, 8 remain. Item 7 benchmarks ship as a precursor PR. Item 9 is gated on Item 7 data.
+Close the Reaction / Scheduler / Dependency hygiene gaps surfaced by the council fresh-take review of the reactivity package. Items 1-4 and Item 7 have shipped. Item 1 expanded beyond its original scope when the interleave-to-stable contract emerged during the work and was corrected toward in real time. Items 5, 6, 8 ship in this PR. Item 9 is gated on Item 7 bench data.
 
 Complementary to [Signal Performance](active/signal-performance.md) which owns the `safety` preset and freeze work in PR #150. The API rename — lowercase free-function surface, dropping Reaction static forwards, DX verb decisions — is a separate initiative scoped post-hardening as a multi-PR sweep across packages, src, docs, and examples.
 
@@ -16,7 +16,7 @@ Complementary to [Signal Performance](active/signal-performance.md) which owns t
 | 4 | `Dependency.cleanUp` + `unsubscribe` → `remove` | **shipped** (fa165d94f) |
 | 5 | Scheduler set-swap | remaining |
 | 6 | `boundRun` removal + shared `mergeContext` helper | remaining |
-| 7 | Benchmark additions | precursor PR before Items 5/6/8 |
+| 7 | Benchmark additions (5 new benches) | **shipped** via [PR #203](https://github.com/Semantic-Org/Semantic-Next/pull/203) |
 | 8 | Lazy refcounted computed (unify `derive`/`computed`) | remaining |
 | 9 | Mark-and-sweep dep tracking | gated on Item 7 data |
 
@@ -66,7 +66,7 @@ Tests are the durable contract for each item. Code blocks are illustrative — o
 
 **Direction.** Set-swap. Preserves coalescing semantics — new invalidations land in the next pass.
 
-**Contract.** All existing reaction-flush tests continue passing. `flush-fanout-allocation-200x500` bench (added in Item 7 precursor) shows measurable allocation drop and wall-clock improvement.
+**Contract.** All existing reaction-flush tests continue passing. `flush-fanout-allocation-1000x500` bench shows measurable allocation drop and wall-clock improvement. Existing `reactive-fanout-500x1200` should also improve as a side effect.
 
 Illustrative implementation:
 
@@ -89,30 +89,26 @@ The cycle counter accounting that spans both queues must be preserved — the sw
 
 **Direction.** Drop `boundRun`; `Reaction.create` calls `reaction.run()` directly. Extract `mergeContext(target, additional, defaults)` helper to `helpers.js`; each class passes its own seed values (`{ value }` for Signal, `{ firstRun }` for Reaction, raw bag for Dependency).
 
-**Contract.** No behavioral change. All existing tracing-mode tests continue passing. `reaction-create-stop-200kx10` bench shows measurable improvement; `sub-unsub-100k` improves as a side effect.
+**Contract.** No behavioral change. All existing tracing-mode tests continue passing. `sub-unsub-100k` measures this directly — expected: small but measurable improvement. (Currently runs at 22ms on CI — near the noise floor; if the win is small the bench may need amplification to clear σ.)
 
 **Coordination note.** Item 6 conflicts with PR #150's `helpers.js` changes (`config` object centralization, `signalTag`). Rebase order is determined by which branch ships first. Surface is small enough to make the rebase mechanical either way.
 
-### Item 7: Benchmark additions — precursor PR
+### Item 7: Benchmark additions — shipped via PR #203
 
-**Lands as a separate PR to main before Items 5/6/8.** Reason: tachometer-CI builds the baseline by checking out main, so any new metric only on the feature branch silently misses on the `tip-of-tree` side. Benches must exist on main first.
-
-Adds to `packages/reactivity/bench/tachometer/bench-signal.js` and both measurement arrays in `tachometer-ci-signal.json`.
+Five new tachometer measurements added to `bench-signal.js` and both measurement arrays in `tachometer-ci-signal.json`. Iteration counts grounded in actual CI durations of existing benches; target window 60-150ms.
 
 Stable-dependency churn (gates Item 9):
-- `reactive-stable-fanout-5000x500` — 5000 reactions each reading the same single signal, 500 invalidations
-- `reactive-stable-deps-3reads-50kx200` — 50k reactions × 3 signals × 200 cycles (median templating shape)
-- `reaction-stable-deps-10kx1k` — 10k reactions × 1 signal × 1000 invalidations
+- `reactive-stable-fanout-5000x100` — 5000 reactions × 1 signal × 100 invalidations
+- `reactive-stable-deps-3reads-5000x100` — 5000 reactions × 3 signals × 100 cycles (median templating shape)
 
 Computed lifecycle (informs Item 8):
-- `computed-unobserved-1000x1000` — 1000 computed signals derived from a root, no external subscriber, root updated 1000 times
-- `computed-subscribe-unsubscribe-50k` — create computed, attach subscriber, detach, repeat
+- `computed-unobserved-200x500` — 200 computed signals derived from a root, no observer, root updated 500 times
+- `computed-subscribe-unsubscribe-10k` — create + attach + detach × 10k cycles
 
 Scheduler allocation (verifies Item 5):
-- `flush-fanout-allocation-200x500` — 200 flush cycles, 500 invalidations each
+- `flush-fanout-allocation-1000x500` — 1000 flush cycles × 500-subscriber fanout
 
-Reaction lifecycle (verifies Item 6):
-- `reaction-create-stop-200kx10` — page-render shape with many short-lived reactions
+**Dropped from original list:** `reaction-stable-deps-10kx1k` (companion redundant with the wide-fan + median-shape pair) and `reaction-create-stop-200kx10` (overlaps existing `sub-unsub-100k`).
 
 Signal-read benches (`signal-read-object-tracked-1m`, `signal-read-array-tracked-500x10k`, `signal-write-large-array-1000x10k`) belong to [signal-performance](active/signal-performance.md), not here.
 
@@ -132,9 +128,9 @@ Tests (durable, to be written with the implementation):
 - Bare `Signal.computed(fn)` followed by abandonment leaves `source.dependency.subscribers.size === 0`
 - Parent-scoped computed still cleans up on parent stop
 
-Benches:
-- `computed-unobserved-1000x1000` improves dramatically — near-zero work for the unobserved case
-- `computed-subscribe-unsubscribe-50k` shows acceptable reference-counting overhead
+Acceptance criteria (vs Item 7's baselines on main):
+- `computed-unobserved-200x500` improves dramatically — near-zero work for the unobserved case
+- `computed-subscribe-unsubscribe-10k` shows acceptable reference-counting overhead
 - Existing `computed-chain-10x60k` stays flat or improves (subscribers exist throughout the run)
 
 ### Item 9: Dependency-tracking rewrite — gated
@@ -143,9 +139,9 @@ Benches:
 
 **Counter.** `Set.delete` + `Set.add` on small sets is fast and allocation-free on modern V8. The existing `reaction-dep-diff-45k` benchmark measures the changing-dependency case; nothing measures stable-deps churn today. The hypothesis may not survive measurement.
 
-**Gating thresholds (vs Item 7 baselines).**
-- `reactive-stable-fanout-5000x500` shows ≥2× headroom attributable to Set churn
-- `reactive-stable-deps-3reads-50kx200` confirms in the median shape
+**Gating:** Item 7's stable-dep benchmarks must show meaningful headroom before this PR lands. Specific thresholds:
+- `reactive-stable-fanout-5000x100` shows ≥2× headroom attributable to Set churn
+- `reactive-stable-deps-3reads-5000x100` confirms in the median shape
 
 **Direction if proceeding — versioned mark-and-sweep edges:**
 - Each reaction has an iteration counter, incremented per run
@@ -156,8 +152,8 @@ Benches:
 Side benefit: natural transactional error recovery. If the callback throws, the partial sweep is skipped and dependencies remain intact for the next run.
 
 **Acceptance criteria:**
-- `reactive-stable-fanout-5000x500` improves ≥2×
-- `reactive-stable-deps-3reads-50kx200` improves ≥1.5×
+- `reactive-stable-fanout-5000x100` improves ≥2×
+- `reactive-stable-deps-3reads-5000x100` improves ≥1.5×
 - `reaction-dep-diff-45k` flat or better (changing-set case must not regress)
 - `sub-unsub-100k` flat (creation/teardown path unchanged)
 
@@ -177,17 +173,16 @@ If improvements don't materialize, abandon and document the measurement so this 
 
 ## Dependencies
 
-- [Signal Performance](active/signal-performance.md) — file overlap is small. Item 8 touches `signal.js` (computed/derive paths) which #150 also rewrites. Item 6 touches `helpers.js` which #150 reorganizes around `config`. Items 5 conflicts only with PR #150 if #150 reshaped the scheduler (it didn't). Rebase friction is manageable; ordering determined by which branch ships first.
+- [Signal Performance](active/signal-performance.md) — file overlap is small. Item 8 touches `signal.js` (computed/derive paths) which #150 also rewrites. Item 6 touches `helpers.js` which #150 reorganizes around `config`. Item 5 touches `scheduler.js` which #150 doesn't reshape. Rebase friction is manageable; ordering determined by which branch ships first.
 
 **Downstream:** None hard. Items 5-9 are independent of other roadmap work.
 
 ## Sessions (estimated)
 
-1. **Item 7 precursor PR** (~2h pair) — seven new benches added to `bench-signal.js` and both measurement arrays in `tachometer-ci-signal.json`. Land on main. Captures baseline numbers.
-2. **Items 5, 6, 8 bundled PR** (~4-5h pair) — set-swap, boundRun + mergeContext, lazy refcounted computed. Includes the four Item 8 tests and the cycle-cap test follow-up from Item 1. Bench data cited against Item 7's baselines.
-3. **Item 9 evaluation** (~4-8h pair, conditional) — read Item 7's stable-dep numbers from main once the bundled PR has been live long enough to baseline. Either rewrite via versioned mark-and-sweep or document abandonment with the measurement attached.
+1. **Items 5, 6, 8 bundled PR** (~4-5h pair) — set-swap, boundRun + mergeContext, lazy refcounted computed. Includes the four Item 8 tests and the cycle-cap test follow-up from Item 1. Bench data cited against Item 7's baselines (now on main via PR #203).
+2. **Item 9 evaluation** (~4-8h pair, conditional) — read this PR's stable-dep numbers against main's Item-7 baselines. Either rewrite via versioned mark-and-sweep or document abandonment with the measurement attached.
 
-Total: ~6-7h baseline; up to ~15h if Item 9 proceeds.
+Total: ~4-5h baseline; up to ~13h if Item 9 proceeds.
 
 ## Origin
 
