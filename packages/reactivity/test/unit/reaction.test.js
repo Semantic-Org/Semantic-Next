@@ -597,18 +597,37 @@ describe('Reaction — public API contract', () => {
       expect(callback).toHaveBeenCalledTimes(2); // initial + invalidated re-run
     });
 
-    it('revives a stopped reaction by flipping active back to true', () => {
+    it('does nothing when invalidate is called on a stopped reaction', () => {
       const callback = vi.fn();
       const reaction = Reaction.create(callback);
 
       reaction.stop();
+      expect(reaction.stopped).toBe(true);
       expect(reaction.active).toBe(false);
 
       reaction.invalidate();
-      expect(reaction.active).toBe(true);
+      expect(reaction.active).toBe(false);
+      expect(Scheduler.pendingReactions.has(reaction)).toBe(false);
 
       Reaction.flush();
-      expect(callback).toHaveBeenCalledTimes(2);
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('removes the reaction from pendingReactions when stop is called mid-cycle', () => {
+      const s = new Signal(0);
+      const callback = vi.fn();
+      const reaction = Reaction.create(() => {
+        callback(s.get());
+      });
+
+      s.set(1);
+      expect(Scheduler.pendingReactions.has(reaction)).toBe(true);
+
+      reaction.stop();
+      expect(Scheduler.pendingReactions.has(reaction)).toBe(false);
+
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
     });
   });
 
