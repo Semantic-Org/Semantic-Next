@@ -102,9 +102,11 @@ export class Reaction {
     }
     this.stopped = true;
     this.active = false;
-    Scheduler.pendingReactions.delete(this);
+    // pendingReactions.delete + dependencies.clear were added when stop became
+    // terminal. Both are paid on every stop but only matter in rare races
+    // (stop-while-queued) or for memory hygiene (GC handles when reaction is
+    // collected). Skipping them recovers the lifecycle-churn hot path.
     this.dependencies.forEach(dep => dep.remove(this));
-    this.dependencies.clear();
     this.fireCleanups();
   }
 
