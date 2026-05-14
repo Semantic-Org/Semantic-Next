@@ -85,7 +85,7 @@ export class Reaction {
     Scheduler.current = this;
     try {
       for (const dep of this.dependencies) {
-        dep.cleanUp(this);
+        dep.remove(this);
       }
       this.dependencies.clear();
       this.callback(this);
@@ -114,7 +114,7 @@ export class Reaction {
       return;
     }
     this.active = false;
-    this.dependencies.forEach(dep => dep.unsubscribe(this));
+    this.dependencies.forEach(dep => dep.remove(this));
     this.fireCleanups();
   }
 
