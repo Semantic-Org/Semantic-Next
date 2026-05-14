@@ -205,14 +205,18 @@ function resolveSnippet(nameExpr, data, self) {
   return self.snippets[name] || null;
 }
 
-// Mount the snippet's content into the region. Tracks the snippet on
-// self.currentSnippet so subsequent updates can compare identity and
-// remount on swap.
-function mountSnippet({ node, data, region, scope, renderAST, isSVG, self }) {
+// Shared prep for render + hydrate snippet branches. Tracks the snippet on
+// self.currentSnippet so subsequent updates can compare identity.
+function prepareSnippet({ node, data, self }) {
   const snippet = resolveSnippet(node.name, data, self);
   if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
   self.currentSnippet = snippet;
   const snippetData = buildArgsRecord({ node, parentData: data, evaluator: self.evaluator, target: data });
+  return { snippet, snippetData };
+}
+
+function mountSnippet({ node, data, region, scope, renderAST, isSVG, self }) {
+  const { snippet, snippetData } = prepareSnippet({ node, data, self });
   region.setContent(renderAST({ ast: snippet.content, data: snippetData, scope, isSVG }));
 }
 
@@ -376,10 +380,7 @@ const templateBlock = defineBlock({
     if (templateType === null) { return; }
 
     if (templateType === 'snippet') {
-      const snippet = resolveSnippet(node.name, data, self);
-      if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
-      self.currentSnippet = snippet;
-      const snippetData = buildArgsRecord({ node, parentData: data, evaluator: self.evaluator, target: data });
+      const { snippet, snippetData } = prepareSnippet({ node, data, self });
       if (region.ownedNodes.length > 0) {
         // Snippet args reactivity is anchored on the block scope; a child
         // would dispose with the next region.clear() and break arg reactivity.
