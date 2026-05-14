@@ -185,6 +185,23 @@ Common signs of a stuck watcher: tests hang past the 2-minute budget, "Failed to
 dynamically imported module" errors at random files (port collisions), or vitest output
 just never appears.
 
+### Flaky setup vs real test failures
+
+Browser tests on WSL2 hosts sometimes fail at setup with `Failed to fetch dynamically imported module` or `Cannot connect to the iframe ... CORS`. These are infrastructure races during vitest's browser bootstrap, not test-body failures, and they appear non-deterministically — different files fail on each run.
+
+**The dismissive trap:** when failing test names match the scope of what you just committed, that is a real bug, not the host flaking. The give-away: a setup flake fails at *import* before any test runs and the failed files shift each run; a real bug fails inside an `expect(...)` and the same named tests fail every time. Persistent failures whose names map to your diff are ground truth — CI is the gate, do not retry expecting silence.
+
+Quick disambiguation:
+
+| | flake | real failure |
+|---|---|---|
+| Which files fail | different files each run | same tests every run |
+| Failure surface | module-fetch / iframe-CORS at setup | assertion failure inside test body |
+| Scope match | unrelated to recent edits | tests cover what you just touched |
+| Resolves on isolation re-run | usually yes | no |
+
+When in doubt, re-run the suspect files in isolation. A setup flake clears, a real failure persists. If a CI run reports failures on tests whose names track the area of your change, trust CI even when local runs look noisy.
+
 ### Watch mode
 
 Package configs set `watch: false`, so `npx vitest` runs and exits. Use `--watch` to override:
