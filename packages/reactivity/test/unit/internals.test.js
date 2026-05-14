@@ -241,6 +241,26 @@ describe('Scheduler — flush', () => {
     expect(() => Reaction.flush()).toThrow('boom');
     expect(survivor).toHaveBeenCalledTimes(1);
   });
+
+  it('drains reactions queued by an afterFlush callback before the next callback runs', () => {
+    const source = new Signal('initial');
+    const derived = new Signal('initial');
+
+    Reaction.create(() => {
+      derived.set(`reaction-saw-${source.get()}`);
+    });
+
+    let observedInCb2;
+    Reaction.afterFlush(() => {
+      source.set('updated-by-cb1');
+      Reaction.afterFlush(() => {
+        observedInCb2 = derived.peek();
+      });
+    });
+
+    Reaction.flush();
+    expect(observedInCb2).toBe('reaction-saw-updated-by-cb1');
+  });
 });
 
 /*******************************

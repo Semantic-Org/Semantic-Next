@@ -30,36 +30,32 @@ export class Scheduler {
     let firstError;
     let iterations = 0;
     try {
-      while (Scheduler.pendingReactions.size > 0) {
+      // interleaved drain — each afterFlush callback runs against fully-settled reactions,
+      // and reactions queued by an afterFlush callback drain before the next callback fires
+      while (Scheduler.pendingReactions.size > 0 || Scheduler.afterFlushCallbacks.length > 0) {
         if (++iterations > Scheduler.maxFlushIterations) {
           console.error('Reactive cycle detected: flush exceeded maximum iterations');
           Scheduler.pendingReactions.clear();
+          Scheduler.afterFlushCallbacks.length = 0;
           break;
         }
-        const reactions = [...Scheduler.pendingReactions];
-        Scheduler.pendingReactions.clear();
-        for (let i = 0; i < reactions.length; i++) {
-          try {
-            reactions[i].run();
-          }
-          catch (e) {
-            if (!firstError) { firstError = e; }
+        if (Scheduler.pendingReactions.size > 0) {
+          const reactions = [...Scheduler.pendingReactions];
+          Scheduler.pendingReactions.clear();
+          for (let i = 0; i < reactions.length; i++) {
+            try {
+              reactions[i].run();
+            }
+            catch (e) {
+              if (!firstError) { firstError = e; }
+            }
           }
         }
-      }
-
-      // re-entrant drain so callbacks registered during the drain land in the same cycle
-      while (Scheduler.afterFlushCallbacks.length > 0) {
-        if (++iterations > Scheduler.maxFlushIterations) {
-          console.error('Reactive cycle detected: afterFlush exceeded maximum iterations');
-          Scheduler.afterFlushCallbacks = [];
-          break;
-        }
-        const callbacks = Scheduler.afterFlushCallbacks;
-        Scheduler.afterFlushCallbacks = [];
-        for (let i = 0; i < callbacks.length; i++) {
+        else {
+          // shift one afterFlush at a time so reactions it queues settle before the next callback
+          const callback = Scheduler.afterFlushCallbacks.shift();
           try {
-            callbacks[i]();
+            callback();
           }
           catch (e) {
             if (!firstError) { firstError = e; }
