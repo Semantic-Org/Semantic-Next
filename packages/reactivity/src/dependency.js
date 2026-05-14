@@ -1,19 +1,33 @@
 import { captureStack, isTracing } from './helpers.js';
 import { Scheduler } from './scheduler.js';
 
+const NOOP = () => {};
+
 export class Dependency {
   constructor(...metadata) {
     this.subscribers = new Set();
+    this.context = undefined;
+    // Refcount transition hooks. NOOP by default so every Dependency has the
+    // same hidden class — IC sites that touch dep.depend / dep.changed /
+    // dep.remove stay monomorphic regardless of which Signals are computed.
+    // Signal.computed reassigns these on its own dep; reassignment doesn't
+    // transition the shape since the slot is already initialized.
+    this.onBecameObserved = NOOP;
+    this.onBecameUnobserved = NOOP;
     if (isTracing()) {
       this.setContext(metadata);
     }
   }
 
   depend() {
-    if (Scheduler.current) {
-      this.subscribers.add(Scheduler.current);
-      Scheduler.current.dependencies.add(this);
+    if (!Scheduler.current) { return; }
+    // fire BEFORE adding the new subscriber so a refcount-driven initial set()
+    // doesn't notify the just-attaching reader.
+    if (this.subscribers.size === 0) {
+      this.onBecameObserved();
     }
+    this.subscribers.add(Scheduler.current);
+    Scheduler.current.dependencies.add(this);
   }
 
   // Cheap context naming on tracing; stack capture only on stack mode.
@@ -44,35 +58,7 @@ export class Dependency {
 
   remove(reaction) {
     this.subscribers.delete(reaction);
-  }
-}
-
-// Dependency variant for computed signals. Fires transition hooks on the
-// 0→1 and 1→0 subscriber edges so the computed primitive can start its
-// internal reaction lazily and stop it when no observer remains.
-//
-// onBecameObserved fires BEFORE adding the new subscriber so the initial
-// set() from the just-started internal reaction doesn't notify the reader
-// that's mid-attachment.
-export class ComputedDependency extends Dependency {
-  constructor(metadata, { onObserved, onUnobserved } = {}) {
-    super(metadata);
-    this.onBecameObserved = onObserved;
-    this.onBecameUnobserved = onUnobserved;
-  }
-
-  depend() {
-    if (!Scheduler.current) { return; }
-    if (this.subscribers.size === 0 && this.onBecameObserved) {
-      this.onBecameObserved();
-    }
-    this.subscribers.add(Scheduler.current);
-    Scheduler.current.dependencies.add(this);
-  }
-
-  remove(reaction) {
-    this.subscribers.delete(reaction);
-    if (this.subscribers.size === 0 && this.onBecameUnobserved) {
+    if (this.subscribers.size === 0) {
       this.onBecameUnobserved();
     }
   }

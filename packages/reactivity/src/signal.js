@@ -11,7 +11,7 @@ import {
   wrapFunction,
 } from '@semantic-ui/utils';
 
-import { ComputedDependency, Dependency } from './dependency.js';
+import { Dependency } from './dependency.js';
 import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
 import { Reaction } from './reaction.js';
 import { Scheduler } from './scheduler.js';
@@ -148,8 +148,8 @@ export class Signal {
   // detaches. Matches the Vue 3 / MobX / Solid pattern.
   //
   // Decision crib (per council fresh-take ref-fresh-take-strong.md):
-  //  - first-subscribe trigger: ComputedDependency.depend() at 0→1, fires BEFORE
-  //    adding the new subscriber so the internal reaction's initial set()
+  //  - first-subscribe trigger: Dependency.depend() at 0→1 fires onBecameObserved
+  //    BEFORE adding the new subscriber so the internal reaction's initial set()
   //    doesn't invalidate the just-attaching reader.
   //  - last-detach: deferred to next afterFlush boundary, cancelled if any
   //    subscriber re-attaches first. Required for correctness given that every
@@ -192,10 +192,13 @@ export class Signal {
       });
     };
 
-    computedSignal.dependency = new ComputedDependency(
-      { firstRun: true, value: undefined },
-      { onObserved: startTracking, onUnobserved: queueStop },
-    );
+    // attach hooks directly to the existing Dependency. base Dependency
+    // already initialized them to NOOP at construction so this is a slot-value
+    // update on an existing field — no hidden-class transition. all Dependency
+    // instances (regular + computed) share the same shape, keeping global IC
+    // sites at dep.depend / dep.changed / dep.remove monomorphic.
+    computedSignal.dependency.onBecameObserved = startTracking;
+    computedSignal.dependency.onBecameUnobserved = queueStop;
 
     // Eager initial run via nonreactive scope. Populates currentValue so bare
     // reads return a sensible initial value, without subscribing to upstream
