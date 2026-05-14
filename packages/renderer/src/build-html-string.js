@@ -117,11 +117,15 @@ const RAW_TEXT_CLOSE_BY_TAG = {
 };
 
 // shared by buildHTMLString and the server renderer so both flip into raw-text mode at the same boundary
+// callers can pass a full buffer or just the new chunk — the function only needs the substring covering the last open tag to decide
 export function isInsideRawText(buffer) {
-  // take the last open since multi-raw-text buffers must test the latest tag
+  // last open wins — earlier raw-text elements may already be closed
+  // exec loop (not matchAll) to avoid per-call iterator allocation in the hot path
+  RAW_TEXT_OPEN.lastIndex = 0;
   let lastMatch = null;
-  for (const m of buffer.matchAll(RAW_TEXT_OPEN)) {
-    lastMatch = m;
+  let match;
+  while ((match = RAW_TEXT_OPEN.exec(buffer)) !== null) {
+    lastMatch = match;
   }
   if (!lastMatch) { return false; }
   const tagName = lastMatch[1].toLowerCase();
@@ -217,7 +221,8 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
     }
     htmlString += html;
     htmlBuffer += html;
-    if (isInsideRawText(htmlBuffer)) {
+    // chunk-only scan — prior buffer state was !insideRawText, so any unclosed open must be in this chunk
+    if (isInsideRawText(html)) {
       insideRawText = true;
       rawTextNodes = [];
     }
