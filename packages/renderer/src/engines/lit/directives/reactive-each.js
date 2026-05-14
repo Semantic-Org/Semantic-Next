@@ -1,12 +1,11 @@
-import { noChange, nothing } from 'lit';
+import { noChange } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { clone, isEmpty, isEqual } from '@semantic-ui/utils';
+import { arrayFromObject, clone, isClient, isEmpty, isEqual, isPlainObject } from '@semantic-ui/utils';
 
-import { arrayFromObject, isClient, isPlainObject, isString } from '@semantic-ui/utils';
 import { getCollectionType, getEachData, getItemID } from '../../../shared/each.js';
 
 export class ReactiveEachDirective extends AsyncDirective {
