@@ -30,16 +30,17 @@ export class Scheduler {
     let firstError;
     let iterations = 0;
     try {
-      // interleaved drain — each afterFlush callback runs against fully-settled reactions,
-      // and reactions queued by an afterFlush callback drain before the next callback fires
+      // alternate: drain all pending reactions, then run one snapshot of afterFlush callbacks.
+      // afterFlushes registered during the batch land in the next alternation, which drains
+      // any reactions they queued before the next batch runs.
       while (Scheduler.pendingReactions.size > 0 || Scheduler.afterFlushCallbacks.length > 0) {
-        if (++iterations > Scheduler.maxFlushIterations) {
-          console.error('Reactive cycle detected: flush exceeded maximum iterations');
-          Scheduler.pendingReactions.clear();
-          Scheduler.afterFlushCallbacks.length = 0;
-          break;
-        }
-        if (Scheduler.pendingReactions.size > 0) {
+        while (Scheduler.pendingReactions.size > 0) {
+          if (++iterations > Scheduler.maxFlushIterations) {
+            console.error('Reactive cycle detected: flush exceeded maximum iterations');
+            Scheduler.pendingReactions.clear();
+            Scheduler.afterFlushCallbacks.length = 0;
+            break;
+          }
           const reactions = [...Scheduler.pendingReactions];
           Scheduler.pendingReactions.clear();
           for (let i = 0; i < reactions.length; i++) {
@@ -51,14 +52,21 @@ export class Scheduler {
             }
           }
         }
-        else {
-          // shift one afterFlush at a time so reactions it queues settle before the next callback
-          const callback = Scheduler.afterFlushCallbacks.shift();
-          try {
-            callback();
+        if (Scheduler.afterFlushCallbacks.length > 0) {
+          if (++iterations > Scheduler.maxFlushIterations) {
+            console.error('Reactive cycle detected: flush exceeded maximum iterations');
+            Scheduler.afterFlushCallbacks.length = 0;
+            break;
           }
-          catch (e) {
-            if (!firstError) { firstError = e; }
+          const callbacks = Scheduler.afterFlushCallbacks;
+          Scheduler.afterFlushCallbacks = [];
+          for (let i = 0; i < callbacks.length; i++) {
+            try {
+              callbacks[i]();
+            }
+            catch (e) {
+              if (!firstError) { firstError = e; }
+            }
           }
         }
       }
