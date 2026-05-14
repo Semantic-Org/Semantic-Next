@@ -221,7 +221,7 @@ export class ServerRenderer {
   }
 
   /*******************************
-      AST → HTML String
+         AST → HTML String
   *******************************/
 
   renderNodes(ast, data, scope) {
@@ -313,7 +313,7 @@ export class ServerRenderer {
   }
 
   /*******************************
-      Expression Rendering
+        Expression Rendering
   *******************************/
 
   renderExpression(node, data, scope) {
@@ -395,7 +395,7 @@ export class ServerRenderer {
   }
 
   /*******************************
-      Block Directives
+         Block Directives
   *******************************/
 
   // Adapter so renderASTToString (shared with client) can call into the
@@ -561,7 +561,7 @@ export class ServerRenderer {
   }
 
   /*******************************
-      Template / Snippet
+        Template / Snippet
   *******************************/
 
   renderTemplate(node, data, scope) {

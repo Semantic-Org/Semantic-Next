@@ -20,7 +20,8 @@ import { bindAttribute } from './attribute-binding.js';
 import { getBlock } from './blocks/registry.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
-// Side-effect import: every block module self-registers into the block registry.
+
+// import block registry
 import './blocks/index.js';
 
 // PreparedTemplate cache — parse once, cloneNode per instance
@@ -129,17 +130,13 @@ export class Renderer {
   }
 
   /*******************************
-        AST → DOM
+             AST → DOM
   *******************************/
   /*
-
-  The key insight: the entire AST (HTML + expressions + block directives)
-  is assembled into a single HTML string with markers for ALL dynamic
-  positions. This string is parsed ONCE via template.innerHTML, producing
-  a correct DOM tree where block markers are positioned inside their
-  containing elements. Then a TreeWalker pass wires reactive bindings
-  and replaces block markers with live DynamicRegions.
-
+    Build Flow:
+    1) AST is assembled into an HTML string with markers for dynamic regions.
+    2) String is parsed once via template.innerHTML to make DOM
+    3) Tree walker wires reactive bindings and replaces markers with DynamicRegions
   */
 
   readAST({ ast, data, scope, isSVG = this.isSVG }) {
@@ -160,7 +157,7 @@ export class Renderer {
   }
 
   /*******************************
-      Phase 1: HTML String Assembly
+       Phase 1: HTML String
   *******************************/
 
   buildHTMLString(ast, isSVG) {
@@ -168,7 +165,7 @@ export class Renderer {
   }
 
   /*******************************
-      Phase 2: HTML Parsing
+       Phase 2: HTML Parsing
   *******************************/
 
   parseHTML(htmlString, isSVG = false) {
@@ -311,7 +308,7 @@ export class Renderer {
   }
 
   /*******************************
-        Block Directive Binding
+       Block Directive Binding
   *******************************/
 
   bindBlock(comment, entry, data, scope) {
@@ -328,7 +325,7 @@ export class Renderer {
   }
 
   /*******************************
-        Hydration
+              Hydration
   *******************************/
 
   hydrateMarkers({ root, entries, data, scope }) {
@@ -519,7 +516,7 @@ export class Renderer {
   }
 
   /*******************************
-        Data Management
+          Data Management
   *******************************/
 
   setData(newData) {
@@ -534,6 +531,7 @@ export class Renderer {
     assignInPlace(this.data, newData, { preserveExistingKeys: preserveExistingData, preserveGetters: true });
   }
 
+  /* This is used only in coarse data invalidation of subtrees where parent cannot track dependencies */
   bumpDataVersion() {
     this.dataDep.changed();
     this.notifyUpdate();
