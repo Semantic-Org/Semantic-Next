@@ -210,8 +210,7 @@ describe('Scheduler — flush', () => {
     expect(settled).toHaveBeenCalledTimes(1);
   });
 
-  // late-registered afterFlush queues for the next flush, otherwise self-registering callbacks would infinite-loop
-  it('does not run afterFlush callbacks registered DURING afterFlush in the same pass', () => {
+  it('drains afterFlush callbacks registered during afterFlush in the same flush', () => {
     let runCount = 0;
     const recursive = () => {
       runCount++;
@@ -222,10 +221,25 @@ describe('Scheduler — flush', () => {
     Reaction.afterFlush(recursive);
 
     Reaction.flush();
-    expect(runCount).toBe(1);
+    expect(runCount).toBe(5);
+  });
 
-    Reaction.flush();
-    expect(runCount).toBe(2);
+  it('schedules a flush when afterFlush registers with no pending work', async () => {
+    const cb = vi.fn();
+    Reaction.afterFlush(cb);
+    await Promise.resolve();
+    expect(cb).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps draining when an afterFlush callback throws', () => {
+    const survivor = vi.fn();
+    Reaction.afterFlush(() => {
+      throw new Error('boom');
+    });
+    Reaction.afterFlush(survivor);
+
+    expect(() => Reaction.flush()).toThrow('boom');
+    expect(survivor).toHaveBeenCalledTimes(1);
   });
 });
 

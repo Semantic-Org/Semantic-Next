@@ -7,6 +7,7 @@ export class Scheduler {
   static pendingReactions = new Set();
   static afterFlushCallbacks = [];
   static isFlushScheduled = false;
+  static isFlushing = false;
 
   static scheduleReaction(reaction) {
     Scheduler.pendingReactions.add(reaction);
@@ -24,36 +25,50 @@ export class Scheduler {
 
   static flush() {
     Scheduler.isFlushScheduled = false;
+    Scheduler.isFlushing = true;
     // capture first error but finish draining so one faulty reaction or afterFlush callback can't jam the queue
     let firstError;
     let iterations = 0;
-    while (Scheduler.pendingReactions.size > 0) {
-      if (++iterations > Scheduler.maxFlushIterations) {
-        console.error('Reactive cycle detected: flush exceeded maximum iterations');
-        Scheduler.pendingReactions.clear();
-        break;
-      }
-      const reactions = [...Scheduler.pendingReactions];
-      Scheduler.pendingReactions.clear();
-      for (let i = 0; i < reactions.length; i++) {
-        try {
-          reactions[i].run();
+    try {
+      while (Scheduler.pendingReactions.size > 0) {
+        if (++iterations > Scheduler.maxFlushIterations) {
+          console.error('Reactive cycle detected: flush exceeded maximum iterations');
+          Scheduler.pendingReactions.clear();
+          break;
         }
-        catch (e) {
-          if (!firstError) { firstError = e; }
+        const reactions = [...Scheduler.pendingReactions];
+        Scheduler.pendingReactions.clear();
+        for (let i = 0; i < reactions.length; i++) {
+          try {
+            reactions[i].run();
+          }
+          catch (e) {
+            if (!firstError) { firstError = e; }
+          }
+        }
+      }
+
+      // re-entrant drain so callbacks registered during the drain land in the same cycle
+      while (Scheduler.afterFlushCallbacks.length > 0) {
+        if (++iterations > Scheduler.maxFlushIterations) {
+          console.error('Reactive cycle detected: afterFlush exceeded maximum iterations');
+          Scheduler.afterFlushCallbacks = [];
+          break;
+        }
+        const callbacks = Scheduler.afterFlushCallbacks;
+        Scheduler.afterFlushCallbacks = [];
+        for (let i = 0; i < callbacks.length; i++) {
+          try {
+            callbacks[i]();
+          }
+          catch (e) {
+            if (!firstError) { firstError = e; }
+          }
         }
       }
     }
-
-    const callbacks = Scheduler.afterFlushCallbacks;
-    Scheduler.afterFlushCallbacks = [];
-    for (let i = 0; i < callbacks.length; i++) {
-      try {
-        callbacks[i]();
-      }
-      catch (e) {
-        if (!firstError) { firstError = e; }
-      }
+    finally {
+      Scheduler.isFlushing = false;
     }
 
     if (firstError) { throw firstError; }
@@ -61,6 +76,9 @@ export class Scheduler {
 
   static afterFlush(callback) {
     Scheduler.afterFlushCallbacks.push(callback);
+    if (!Scheduler.isFlushing) {
+      Scheduler.scheduleFlush();
+    }
   }
 
   static getSource() {
