@@ -24,7 +24,7 @@ export class Reaction {
     this.boundRun = this.run.bind(this);
   }
 
-  // Fires before next run() and on stop(); scope inner reactions to parent here.
+  // callbacks fire before next run() and on stop. use to scope inner reactions to parent
   onCleanup(callback) {
     this.cleanups.push(callback);
   }

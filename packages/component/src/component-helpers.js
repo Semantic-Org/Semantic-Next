@@ -80,13 +80,7 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
     });
   }
 
-  /* Multiword settings like `useAccordion` accept either attribute form
-     <ui-menu use-accordion> or <ui-menu useaccordion>. HTML normalizes
-     attribute names by lowercasing but never adds/removes hyphens, so
-     the two forms land at distinct DOM strings; each gets a noAccessor
-     alias entry that bridges to the canonical property via aliasFor.
-     Single-word settings skip both branches.
-  */
+  // HTML lowercases attribute names but doesn't add/remove hyphens, register both kebab and lowercase forms
   each(properties, (propertySettings, propertyName) => {
     const addAlias = (aliasKey) => {
       if (aliasKey !== propertyName && !properties[aliasKey] && properties[propertyName]) {

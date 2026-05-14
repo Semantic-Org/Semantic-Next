@@ -1,16 +1,3 @@
-/*
-  Grounded tests for the $ / $$ query surface.
-
-  These tests are derived from the documented contract (the `query` skill,
-  the ~100 canonical query-* examples, and the API reference), not from
-  reading source. The intent is to verify what a downstream developer is
-  promised, not what the function happens to return today.
-
-  Failing tests in this file are first-class deliverables — they mean
-  the documented contract drifted from the implementation. Do NOT silently
-  align expectations with source.
-*/
-
 import { $, $$, Query } from '@semantic-ui/query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 

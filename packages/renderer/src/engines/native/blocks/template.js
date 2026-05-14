@@ -173,8 +173,8 @@ function buildArgsRecord({ node, parentData, evaluator, target }) {
   return record;
 }
 
-// First read is reactive so a data-driven name resolving from null re-runs the outer Reaction.
-// Lock on first resolution — templateType is documented stable per name.
+// read name expression reactively so the outer Reaction re-runs once it resolves
+// lock on first resolve, name maps to a stable type per docs
 function detectTemplateType({ node, data, self }) {
   if (self.templateType !== null) { return self.templateType; }
   const name = self.evaluator.lookupExpressionValue(node.name, data);
@@ -415,14 +415,14 @@ const templateBlock = defineBlock({
   },
 
   update({ node, data, region, scope, renderAST, self, isSVG }) {
-    // First render may have seen a null name (data-driven name=null until state settles). Re-detect once it resolves.
+    // name expression may have been unresolved on first render, re-detect once it resolves
     if (self.templateType === null) {
       const detected = detectTemplateType({ node, data, self });
       if (detected === null) { return; }
     }
 
-    // Identity-compare is enough: a name can't be both snippet and subtemplate, so cross-type swap is impossible.
-    // Inner expression reactivity lives in the snippet-arg proxy's per-marker Reactions wired during render/hydrate.
+    // identity-compare is enough since a name can't be both snippet and subtemplate
+    // inner expression reactivity lives in the snippet-arg proxy's per-marker Reactions wired during render/hydrate
     if (self.templateType === 'snippet') {
       const snippet = resolveSnippet(node.name, data, self);
       if (snippet === self.currentSnippet) { return; }

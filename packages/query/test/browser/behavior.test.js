@@ -1,14 +1,3 @@
-/*
-  Grounded tests for the Behavior base class — packages/query/src/behavior.js
-  and its registration entrypoint — packages/query/src/register-behavior.js.
-
-  Each test verifies a user-visible contract from the query-behaviors and
-  component-behaviors skills + canonical examples (query-tooltip, mask-input,
-  automarkdown). Source is used as verification only. Where source disagrees
-  with the documented contract the test stays aligned with the documented
-  contract — the test itself is the arbiter.
-*/
-
 import { $, Query, registerBehavior } from '@semantic-ui/query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Behavior } from '../../src/behavior.js';

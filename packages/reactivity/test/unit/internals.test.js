@@ -1,15 +1,3 @@
-// Red-team coverage for scheduler.js, dependency.js, helpers.js.
-//
-// Hunts branches that the Signal/Reaction suites cover only via the happy
-// path: re-entrancy, mid-flush mutation, afterFlush ordering, error
-// propagation, cleanUp/unsubscribe symmetry, tracing-mode transitions.
-//
-// Expectations are derived from the public reactivity contract documented
-// in MCP examples (`batch-updates`, `schedule-flush`, `reactive-flush`,
-// `after-flush`, `performance-patterns`) and the `reactive-state` /
-// `internals` skills. When source disagrees with that contract, the test
-// is the witness — do not silently re-align.
-
 import {
   Dependency,
   isStackCapture,
@@ -30,7 +18,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  // Defend against tracing mode leaking across tests
   setStackCapture(false);
   setTracing(false);
 });

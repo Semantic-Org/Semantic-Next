@@ -108,8 +108,7 @@ export function parseAttributeParts(attrValue) {
 export const RAW_TEXT_OPEN = /\<(script|style|textarea|title)[\s>]/gi;
 export const RAW_TEXT_CLOSE = /\<\/(script|style|textarea|title)\s*\>/i;
 
-// Per-tag close-tag regexes precomputed once. Cheaper than `new RegExp()`
-// per call when scanning every html chunk for raw-text bounds.
+// precompute per-tag close regexes so we don't allocate one per html chunk scan
 const RAW_TEXT_CLOSE_BY_TAG = {
   script: /<\/script\s*>/i,
   style: /<\/style\s*>/i,
@@ -117,12 +116,9 @@ const RAW_TEXT_CLOSE_BY_TAG = {
   title: /<\/title\s*>/i,
 };
 
-// True when `buffer` ends inside an unclosed raw-text element. Both the
-// client (buildHTMLString) and the server renderer flip into raw-text mode
-// from this check — keeping the logic in one place so server/client output
-// agree on where the `<!--sui-rawtext:v1:N-->` marker lands.
+// shared by buildHTMLString and the server renderer so both flip into raw-text mode at the same boundary
 export function isInsideRawText(buffer) {
-  // last open (not first) — multi-raw-text buffers must test the latest tag
+  // take the last open since multi-raw-text buffers must test the latest tag
   let lastMatch = null;
   for (const m of buffer.matchAll(RAW_TEXT_OPEN)) {
     lastMatch = m;
@@ -196,11 +192,8 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
   let insideRawText = false;
   let rawTextNodes = null; // collected AST nodes for the raw text content
 
-  // Append an html chunk to the output, tracking raw-text entry/exit.
-  // When inside raw-text and the chunk contains the closing tag, the
-  // marker must be inserted immediately after the close — not at the end
-  // of the chunk — because the AST often combines `</style>` with the
-  // following siblings into one html node.
+  // when inside raw-text, marker must land right after the close tag (not at chunk end)
+  // since the AST often combines `</style>` with following siblings into one html node
   const appendHtml = (html) => {
     if (insideRawText) {
       const closeMatch = html.match(RAW_TEXT_CLOSE);
@@ -214,7 +207,7 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
         entries.push({ id, type: 'rawText', nodes: rawTextNodes });
         insideRawText = false;
         rawTextNodes = null;
-        // The remainder (after </style>) may itself open another raw-text element.
+        // the remainder (after </style>) may itself open another raw-text element
         appendHtml(html.slice(splitAt));
         return;
       }

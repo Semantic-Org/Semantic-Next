@@ -471,8 +471,8 @@ export class SpecReader {
     // when any value in an attribute collides, ALL sibling values get compound forms
     // e.g. "left" and "right" collide between floated/attached
     // → attached also generates "top-attached", "bottom-attached" for consistency
-    // colliding bare entries point to the first-owner attribute; non-colliding
-    // siblings keep their bare form pointing to their own attribute.
+    // colliding bare entries point to the first-owner attribute
+    // non-colliding siblings keep their bare form pointing to their own attribute
     each(componentSpec.allowedValues, (allowedValues, attr) => {
       if (!collidingAttributes.has(attr)) {
         return;

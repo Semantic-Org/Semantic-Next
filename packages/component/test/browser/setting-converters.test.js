@@ -2,24 +2,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES } from '../../../renderer/test/browser/test-utils.js';
 import { defineComponent } from '../../src/index.js';
 
-/*
-  Setting attribute → value conversion across engines.
-
-  getPropertySettings in packages/component/src/component-helpers.js
-  installs Lit-style converters for each defaultSettings type:
-    Boolean: 'false' / '0' / 'null' / 'undefined' → false; '' / 'true' / true → true
-    Number:  null → null; otherwise Number(value)
-    Object:  JSON.parse(value); invalid → null
-    Array:   JSON.parse(value); invalid → null
-    String:  passes through (Lit default)
-
-  The native renderer was added after the canonical progress-bar example
-  was authored. The example uses `<progress-bar animated="false">` etc.
-  with `defaultSettings: { animated: true, inlineLabel: true, showLabel: true }`.
-  All three should arrive as `false` but on the native engine the multiword
-  ones come through as `true`. These tests pin the contract across engines.
-*/
-
 RENDERING_ENGINES.forEach((engine) => {
   describe(engine, () => {
     let tagCounter = 0;

@@ -3,29 +3,6 @@ import { Reaction } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES } from './test-utils.js';
 
-/*
-  Red-team coverage for template.js (subtemplate / snippet dispatch) and
-  conditional.js (if / elseif / else branch matching) in the native
-  rendering engine. Inventory tracking elsewhere in the file shows we
-  already exercise:
-    - basic snippet/subtemplate rendering
-    - reactive name swap
-    - reactiveData arg propagation
-    - if/each interplay, branch cleanup, settings mirror
-
-  These tests target gaps the existing suite does not:
-    - branch swap → snippet/subtemplate rendered through both branches
-    - snippet/subtemplate with missing/null name expression
-    - conditional with no branches (only `{#if}` + content, no else)
-    - blob `data="expr"` resolving to null/non-object
-    - reactiveData with key that shadows a snippet/subtemplate-arg name
-    - nested conditional + each + reactiveData arg
-    - guard inside conditional branch
-    - rerender block inside conditional
-    - subtemplate Template-instance passed directly as name expr
-    - resolveSubtemplate fallback paths (unknown name string, instance)
-*/
-
 RENDERING_ENGINES.forEach((engine) => {
   const isLit = engine === 'lit';
   describe(`[${engine}] template + conditional`, () => {

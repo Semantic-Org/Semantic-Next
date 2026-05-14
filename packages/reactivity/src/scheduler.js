@@ -24,8 +24,7 @@ export class Scheduler {
 
   static flush() {
     Scheduler.isFlushScheduled = false;
-    // capture the first error but finish draining — one faulty reaction or
-    // afterFlush callback should not jam the rest of the queue
+    // capture first error but finish draining so one faulty reaction or afterFlush callback can't jam the queue
     let firstError;
     let iterations = 0;
     while (Scheduler.pendingReactions.size > 0) {

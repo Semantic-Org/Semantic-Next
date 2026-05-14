@@ -1,14 +1,3 @@
-// Helpers and shape tests for @semantic-ui/specs
-// Verifies the public surface advertised in the component-specs skill:
-//   - Shared term shape (states / variations / types objects)
-//   - Helper functions (getStates, getVariations, addOptionExamples,
-//     filterVariationOptions, modifyVariation, withUsageLevel)
-//   - Entry points (browser / server)
-//   - SpecReader contract (getWebComponentSpec output shape)
-//
-// Tests use Node project so they import from src/server.js (the package's
-// "node" export). Browser entry re-exports the same surface via src/browser.js.
-
 import { describe, expect, it } from 'vitest';
 
 import {

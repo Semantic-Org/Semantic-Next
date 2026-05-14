@@ -1,15 +1,3 @@
-/*
-  Coverage tests for @semantic-ui/tailwind
-
-  Scope: extract-definition-content.js, browser.js, server.js
-  Approach: grounded-testing — tests express what consumers EXPECT, not what source returns
-  Witnesses cited inline with [label] tags. See report for full intent doc.
-
-  Browser/server are byte-identical files (sole import differs). The plugin is exercised
-  via the node-environment server entry — browser would require Chromium + WASM and we
-  treat the two as semantically equivalent for the surfaces this file covers.
-*/
-
 import { describe, expect, it } from 'vitest';
 
 import { defineComponent } from '@semantic-ui/component';

@@ -1,15 +1,3 @@
-/*
-  Red-team coverage for native async, expression, and raw-text blocks.
-
-  Scope:
-    packages/renderer/src/engines/native/blocks/async.js
-    packages/renderer/src/engines/native/blocks/expression.js
-    packages/renderer/src/engines/native/blocks/raw-text.js
-
-  These hunt for real user-facing contract gaps. Tests assert documented
-  behavior from the MCP skill set (component-templating, native-renderer,
-  render-pipeline) and the canonical examples.
-*/
 import { defineComponent } from '@semantic-ui/component';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES } from './test-utils.js';

@@ -9,9 +9,7 @@ import { renderASTToString, stringifyAttrValue } from './commit-hooks.js';
 
 */
 
-// Expression entries are stringified; block entries (if/rerender) walk
-// matched-branch content via renderASTToString, which throws for each/async/
-// template/svg/slot.
+// renderASTToString throws for each/async/template/svg/slot since those can't appear in attribute position
 function evaluateMarkerToString(entry, data, renderer) {
   if (entry.type === 'expression') {
     return stringifyAttrValue(renderer.lookupExpression(entry.node.value, data));

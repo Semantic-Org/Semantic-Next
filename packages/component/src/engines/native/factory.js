@@ -31,10 +31,7 @@ export function createComponent({
   };
   component.properties = resolvedProperties;
 
-  // observedAttributes — must be set before customElements.define()
-  // The alias key IS the attribute name (multiword aliases register both
-  // kebab and lowercase forms in component-helpers); the canonical falls
-  // back to its kebab form for the single-word case where no alias exists.
+  // observedAttributes must be set before customElements.define()
   const observedAttrs = new Set();
   each(resolvedProperties, (config, propName) => {
     if (config.alias) {

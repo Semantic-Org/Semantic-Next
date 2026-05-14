@@ -1,23 +1,3 @@
-/*
-  Red-team coverage for the {#each} block reconciler.
-
-  Existing tests demonstrate the happy path (simple lists, named iterators,
-  index, else-content, object iteration, basic reactivity). This file targets
-  the heuristic key chain in getItemID(), reorder/move semantics, and shapes
-  the canonical examples don't cover but real-world data routinely produces:
-  - duplicate ids, primitive collisions, mixed-shape items
-  - reorder + move (preserve item identity, not just re-render)
-  - Date / class instance items (isPlainObject === false branch)
-  - in-place id mutation, mixed primitive↔object morphs
-  - else-block reactivity round trips
-  - {#each} over null / undefined / falsy expressions
-
-  Wrapped per-engine so any parity divergence between native and lit
-  surfaces in the report. Per-FIELD reactivity tests are FGR-native
-  contract; sibling tests that depend on the proxy machinery are gated
-  with describe.skipIf(isLit, ...) per the subtree-spurious.test.js pattern.
-*/
-
 import { defineComponent } from '@semantic-ui/component';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES, waitForUpdate } from './test-utils.js';

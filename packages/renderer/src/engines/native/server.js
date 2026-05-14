@@ -239,11 +239,8 @@ export class ServerRenderer {
 
     let html = '';
 
-    // Wraps scanHtmlChunk to detect raw-text bounds. When inside raw-text
-    // and the chunk contains the close tag, splits at the close boundary
-    // and inserts `<!--sui-rawtext:v1:N-->` immediately after — not at the
-    // end of the chunk — because subsequent siblings often share the same
-    // html node and the marker must sit between the close and them.
+    // when inside raw-text, marker must land right after the close tag (not at chunk end)
+    // since subsequent siblings often share the same html node
     const appendHtml = (chunk) => {
       const stamped = scanHtmlChunk(chunk, scope);
       if (scope.insideRawText) {
@@ -253,7 +250,7 @@ export class ServerRenderer {
           const id = scope.entryId++;
           scope.insideRawText = false;
           const after = stamped.slice(splitAt);
-          // The remainder may itself open another raw-text element.
+          // the remainder may itself open another raw-text element
           if (after && isInsideRawText(scope.htmlBuffer)) {
             scope.insideRawText = true;
           }
@@ -323,11 +320,7 @@ export class ServerRenderer {
     const classification = analyzePosition(scope.htmlBuffer);
     const value = this.evaluator.lookupExpressionValue(node.value, data);
 
-    // Content-position expressions inside <style>/<script>/<textarea>/<title>
-    // emit literal text — no comment marker (those become literal characters
-    // in raw-text contexts, corrupting CSS/JS or showing as visible text).
-    // Attribute-position expressions on the raw-text element itself fall
-    // through to the normal path below.
+    // inside raw-text, expressions emit literal text since comment markers would corrupt CSS/JS or be visible
     if (scope.insideRawText && !classification.insideTag) {
       return node.unsafeHTML
         ? String(value ?? '')

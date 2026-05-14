@@ -174,10 +174,6 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
   }
 
   if (properties && attributeValue !== undefined) {
-    /* This handles alias forms of multiword properties — both kebab
-       (<ui-menu use-accordion>) and all-lowercase (<ui-menu useaccordion>)
-       bridge to the canonical property via aliasFor (set in getProperties).
-    */
     const attributeSettings = properties[attribute];
     if (attributeSettings?.alias) {
       const propertyName = attributeSettings.aliasFor;

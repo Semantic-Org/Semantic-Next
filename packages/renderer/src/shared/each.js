@@ -1,8 +1,6 @@
 /*
-  Each-block coordination shared across engines. Pure logic — keying,
-  per-item data shape, and key encode/decode. No DOM, no engine-specific
-  primitives. Native and Lit both use these so the user-facing contract
-  for {#each} stays uniform.
+  shared each-block helpers used by native + lit so the {#each} contract stays uniform across engines
+  pure logic, no DOM or engine primitives
 */
 
 import { isArray, isPlainObject, isString } from '@semantic-ui/utils';

@@ -253,7 +253,7 @@ export function defineBlock(config) {
   return dispatch;
 }
 
-// Commit fn — shared across every text-value dispatch.
+// shared commit fn for text-value dispatches
 function commitText(state, comp) {
   if (comp.firstRun && state.hydrating) {
     state.compute(state);
@@ -262,9 +262,7 @@ function commitText(state, comp) {
   state.anchor.data = unwrap(state.compute(state)) ?? '';
 }
 
-// Companion to commitText for unsafeHTML payloads. Mutable
-// fields (ownedNodes, endAnchor) live on state so re-fires can update
-// them.
+// mutable fields (ownedNodes, endAnchor) live on state so re-fires can update them
 function commitUnsafeHTML(state, comp) {
   if (comp.firstRun && state.hydrating) {
     state.compute(state);

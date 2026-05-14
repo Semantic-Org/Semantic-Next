@@ -100,8 +100,8 @@ export class ReactiveEachDirective extends AsyncDirective {
   getTemplate(item, indexOrKey, collectionType) {
     const key = getItemID(item, indexOrKey, collectionType);
 
-    // skip unchanged items to avoid redundant re-renders; index is part of
-    // the snapshot so reorders re-evaluate template expressions that bind it
+    // skip unchanged items to avoid redundant re-renders
+    // index is part of the snapshot so reorders re-evaluate template expressions that bind it
     const snapshot = this._itemSnapshots.get(key);
     if (snapshot !== undefined && snapshot.index === indexOrKey && isEqual(snapshot.item, item)) {
       return noChange;

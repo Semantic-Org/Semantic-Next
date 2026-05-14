@@ -62,11 +62,8 @@ export function extractDefinitionContent(definition) {
     });
   }
 
-  // 6. SubTemplates — recurse so nested subtemplates and their JS surfaces
-  // (createComponent, lifecycle hooks, events, keys) all get scanned the same
-  // way as the top-level definition. Template instances are normalized back to
-  // their definition-arg shape via toDefinition() so the recursive call sees a
-  // consistent surface regardless of how the subtemplate was authored.
+  // 6. SubTemplates - recurse so nested subtemplates get scanned the same as top-level
+  // Template instances normalize back to their definition shape via toDefinition()
   if (isObject(definition.subTemplates)) {
     each(definition.subTemplates, (subTemplate) => {
       const nested = extractDefinitionContent(
