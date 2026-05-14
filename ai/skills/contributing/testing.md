@@ -338,6 +338,21 @@ The reactivity tests use decorative comment blocks to separate logical groups:
 
 Match this style when adding tests to files that use it.
 
+### Comments to avoid in tests
+
+Test source is terse. The `it()` name and the assertions do the work. Add a comment only when explaining genuinely non-obvious WHY — a browser quirk, a perf constraint, a subtle invariant that's not visible from reading the test body.
+
+Patterns that should not appear in shipped test code:
+
+- Citation markers — `[source X]`, `[skill X]`, `[example X]`, `[doc:X]`, `[inference]`, `[synthesis]`. These belong in your `ai/workspace/` intent doc, not the test file.
+- `Witness:` / `FINDING:` / `Documented user workaround:` prefixed prose. Same — design-doc scaffolding, not artifact.
+- Inline narration that restates the assertion (`// initial only` next to `expect(callback).toHaveBeenCalledTimes(1)`). The assertion already does that.
+- Generic section labels mid-test that aren't `describe()` blocks (`// Test conditional dependencies`).
+- File-level header docblocks describing what the file tests. The filename + `describe()` names cover it.
+- File-level `// Red-team coverage for X` framing. Red-team is the design discipline, not a test-file label.
+
+When the comment doesn't have a clear answer to "what would a future reader miss if I removed this?", remove it. See [grounded-testing § Labels and intent prose leaking into test source](./grounded-testing.md#labels-and-intent-prose-leaking-into-test-source) for the rationale.
+
 ---
 
 ## Vitest Browser API Patterns (Shadow DOM)
