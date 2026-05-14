@@ -112,7 +112,7 @@ for (const r of toRun) {
 }
 ```
 
-Benchmark (lands alongside in PR A): `flush-fanout-allocation-200x500` — 200 flush cycles, 500 invalidations each. Captures the fan-out shape. Expected: measurable improvement, allocation count drops sharply.
+Benchmark precursor: `flush-fanout-allocation-1000x500` — 1000 flush cycles, 500 invalidations each. Captures the fan-out shape. Expected: measurable improvement, allocation count drops sharply.
 
 ### Item 6: `boundRun` removal + shared `setContext` helper
 
@@ -124,26 +124,26 @@ Benchmark (lands alongside in PR A): `flush-fanout-allocation-200x500` — 200 f
 - Drop `boundRun`. `Reaction.create` calls `reaction.run()` directly.
 - Extract shared `mergeContext(target, additional, defaults)` helper. Each class passes its own seed values (`{ value }` for Signal, `{ firstRun }` for Reaction, raw bag for Dependency).
 
-Benchmark addition: `reaction-create-stop-200kx10` — page-render shape with many short-lived reactions. Expected: small but measurable improvement in `sub-unsub-100k`.
+Benchmark: existing `sub-unsub-100k` measures this directly. Expected: small but measurable improvement. (Currently runs at 22ms on CI — near the noise floor; if the win is small the bench may need amplification to clear σ.)
 
 ### Item 7: Benchmark additions
 
-These workloads aren't gating Items 1-6 (those land on correctness merits), but they baseline the perf claims and gate the larger Item 9 rewrite. Each follows the existing pattern in `bench-signal.js` — `performance.mark` + `performance.measure`, sink-anchored, iteration counts sized to clear the σ-floor.
+These workloads aren't gating Items 1-6 (those land on correctness merits), but they baseline the perf claims and gate the larger Item 9 rewrite. Each follows the existing pattern in `bench-signal.js` — `performance.mark` + `performance.measure`, sink-anchored, iteration counts grounded in actual CI durations of existing benches to clear the σ-floor with headroom.
+
+Ships as a precursor PR to main so the `tip-of-tree` side of tachometer-CI emits the same measurements as `this-change` when the hardening PR runs.
 
 Stable-dependency churn (gates Item 9):
-- `reactive-stable-fanout-5000x500` — 5000 reactions each reading the same single signal, 500 invalidations
-- `reactive-stable-deps-3reads-50kx200` — 50k reactions × 3 signals × 200 cycles (median templating shape)
-- `reaction-stable-deps-10kx1k` — 10k reactions × 1 signal × 1000 invalidations
+- `reactive-stable-fanout-5000x100` — 5000 reactions each reading the same single signal, 100 invalidations
+- `reactive-stable-deps-3reads-5000x100` — 5000 reactions × 3 signals × 100 cycles (median templating shape)
 
 Computed lifecycle (informs Item 8):
-- `computed-unobserved-1000x1000` — 1000 computed signals derived from a root, no external subscriber, root updated 1000 times
-- `computed-subscribe-unsubscribe-50k` — create computed, attach subscriber, detach, repeat
+- `computed-unobserved-200x500` — 200 computed signals derived from a root, no external subscriber, root updated 500 times
+- `computed-subscribe-unsubscribe-10k` — create computed, attach subscriber, detach, repeat 10k times
 
 Scheduler allocation (verifies Item 5):
-- `flush-fanout-allocation-200x500` — already specified under Item 5
+- `flush-fanout-allocation-1000x500` — 1000 flush cycles, 500-subscriber fanout each
 
-Reaction lifecycle (verifies Item 6):
-- `reaction-create-stop-200kx10` — already specified under Item 6
+**Dropped from original list:** `reaction-stable-deps-10kx1k` (companion measurement redundant with the wide-fan + median-shape pair) and `reaction-create-stop-200kx10` (overlaps existing `sub-unsub-100k`). Five new benches; Item 6 cites existing `sub-unsub-100k` directly.
 
 ### Item 8: Unify `derive` / `computed` with lazy reference counting
 
@@ -165,8 +165,8 @@ Tests:
 - Existing `computed-chain-10x60k` benchmark stays flat or improves (subscribers exist throughout the run)
 
 Acceptance criteria (vs Item 7's baselines):
-- `computed-unobserved-1000x1000` improves dramatically — near-zero work for the unobserved case
-- `computed-subscribe-unsubscribe-50k` shows acceptable reference-counting overhead
+- `computed-unobserved-200x500` improves dramatically — near-zero work for the unobserved case
+- `computed-subscribe-unsubscribe-10k` shows acceptable reference-counting overhead
 
 ### Item 9: Dependency-tracking rewrite (gated)
 
@@ -175,8 +175,8 @@ Acceptance criteria (vs Item 7's baselines):
 **Counter:** `Set.delete` + `Set.add` on small sets is fast and allocation-free on modern V8. The existing `reaction-dep-diff-45k` benchmark measures the changing-dependency case; nothing measures stable-deps churn today. The hypothesis may not survive measurement.
 
 **Gating:** Item 7's stable-dep benchmarks must show meaningful headroom before this PR lands. Specific thresholds:
-- `reactive-stable-fanout-5000x500` shows ≥2× headroom attributable to Set churn
-- `reactive-stable-deps-3reads-50kx200` confirms in the median shape
+- `reactive-stable-fanout-5000x100` shows ≥2× headroom attributable to Set churn
+- `reactive-stable-deps-3reads-5000x100` confirms in the median shape
 
 **If proceeding — versioned mark-and-sweep edges:**
 - Each reaction has an iteration counter, incremented per run
@@ -187,8 +187,8 @@ Acceptance criteria (vs Item 7's baselines):
 Side benefit: this gives natural transactional error recovery. If the callback throws, the partial sweep is skipped and dependencies remain intact for the next run.
 
 **Acceptance criteria:**
-- `reactive-stable-fanout-5000x500` improves ≥2×
-- `reactive-stable-deps-3reads-50kx200` improves ≥1.5×
+- `reactive-stable-fanout-5000x100` improves ≥2×
+- `reactive-stable-deps-3reads-5000x100` improves ≥1.5×
 - `reaction-dep-diff-45k` flat or better (changing-set case must not regress)
 - `sub-unsub-100k` flat (creation/teardown path unchanged)
 
