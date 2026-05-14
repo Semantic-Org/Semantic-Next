@@ -88,24 +88,18 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
      Single-word settings skip both branches.
   */
   each(properties, (propertySettings, propertyName) => {
-    const kebabName = camelToKebab(propertyName);
-    if (kebabName !== propertyName && !properties[kebabName] && properties[propertyName]) {
-      properties[kebabName] = {
-        ...properties[propertyName],
-        noAccessor: true,
-        alias: true,
-        aliasFor: propertyName,
-      };
-    }
-    const lowerName = propertyName.toLowerCase();
-    if (lowerName !== propertyName && !properties[lowerName] && properties[propertyName]) {
-      properties[lowerName] = {
-        ...properties[propertyName],
-        noAccessor: true,
-        alias: true,
-        aliasFor: propertyName,
-      };
-    }
+    const addAlias = (aliasKey) => {
+      if (aliasKey !== propertyName && !properties[aliasKey] && properties[propertyName]) {
+        properties[aliasKey] = {
+          ...properties[propertyName],
+          noAccessor: true,
+          alias: true,
+          aliasFor: propertyName,
+        };
+      }
+    };
+    addAlias(camelToKebab(propertyName));
+    addAlias(propertyName.toLowerCase());
   });
 
   // accessors can break certain special dom attrs
