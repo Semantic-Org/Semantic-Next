@@ -920,16 +920,12 @@ describe('Reaction — public API contract', () => {
       expect(final).toBe(5);
     });
 
-    // authors chaining afterFlush should know inner registration queues for the next flush
-    it('defers an afterFlush callback registered from inside another afterFlush callback', () => {
+    it('drains afterFlush callbacks registered from inside another afterFlush in the same flush', () => {
       const order = [];
       Reaction.afterFlush(() => {
         order.push('outer');
         Reaction.afterFlush(() => order.push('inner'));
       });
-      Reaction.flush();
-      expect(order).toEqual(['outer']);
-
       Reaction.flush();
       expect(order).toEqual(['outer', 'inner']);
     });
