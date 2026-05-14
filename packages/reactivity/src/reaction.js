@@ -1,14 +1,6 @@
 import { clone, isEqual } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
-import {
-  captureStack,
-  extendContext,
-  isStackCapture,
-  isTracing,
-  setMergedContext,
-  setStackCapture,
-  setTracing,
-} from './helpers.js';
+import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
 import { Scheduler } from './scheduler.js';
 
 export class Reaction {
@@ -49,7 +41,8 @@ export class Reaction {
   }
 
   setContext(additionalContext = {}) {
-    setMergedContext(this, { firstRun: this.firstRun }, additionalContext);
+    if (!isTracing()) { return; }
+    this.context = { firstRun: this.firstRun, ...additionalContext };
   }
 
   setTrace() {
@@ -57,7 +50,11 @@ export class Reaction {
   }
 
   addContext(additionalContext = {}) {
-    extendContext(this, additionalContext);
+    if (!isTracing()) { return; }
+    if (!this.context) { this.context = {}; }
+    for (const key in additionalContext) {
+      this.context[key] = additionalContext[key];
+    }
   }
 
   run() {

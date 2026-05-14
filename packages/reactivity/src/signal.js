@@ -12,15 +12,7 @@ import {
 } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
-import {
-  captureStack,
-  extendContext,
-  isStackCapture,
-  isTracing,
-  setMergedContext,
-  setStackCapture,
-  setTracing,
-} from './helpers.js';
+import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
 import { Reaction } from './reaction.js';
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
@@ -61,12 +53,18 @@ export class Signal {
 
   // set debugging context for signal removing any present context
   setContext(additionalContext = {}) {
-    setMergedContext(this, { value: this.currentValue }, additionalContext);
+    // guard before allocating the defaults object — notify() hits this every signal write
+    if (!isTracing()) { return; }
+    this.context = { value: this.currentValue, ...additionalContext };
   }
 
   // add context to signal
   addContext(additionalContext = {}) {
-    extendContext(this, additionalContext);
+    if (!isTracing()) { return; }
+    if (!this.context) { this.context = {}; }
+    for (const key in additionalContext) {
+      this.context[key] = additionalContext[key];
+    }
   }
 
   // Stack trace capture is gated separately because Error.captureStackTrace
