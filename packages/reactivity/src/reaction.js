@@ -18,6 +18,7 @@ export class Reaction {
     this.cleanups = [];
     this.firstRun = true;
     this.active = true;
+    this.stopped = false;
     if (context && isTracing()) {
       this.setContext(context);
     }
@@ -97,24 +98,25 @@ export class Reaction {
   }
 
   invalidate(context) {
-    // Set this reaction as active and about to be run
+    if (this.stopped) {
+      return;
+    }
     this.active = true;
-
-    // Pass through trace for debugging
     if (context) {
       this.addContext(context);
     }
-
-    // Schedule this reaction to occur in the next flush
     Scheduler.scheduleReaction(this);
   }
 
   stop() {
-    if (!this.active) {
+    if (this.stopped) {
       return;
     }
+    this.stopped = true;
     this.active = false;
+    Scheduler.pendingReactions.delete(this);
     this.dependencies.forEach(dep => dep.remove(this));
+    this.dependencies.clear();
     this.fireCleanups();
   }
 
