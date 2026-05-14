@@ -63,7 +63,6 @@ describe('Scheduler — flush', () => {
     trigger.set(1);
     Reaction.flush();
 
-    // Both reactions should have re-run inside the single flush.
     expect(log).toContain('upstream:1');
     expect(log).toContain('downstream:derived-1');
   });
@@ -79,8 +78,7 @@ describe('Scheduler — flush', () => {
 
     [1, 2, 3, 4, 5].forEach(v => n.set(v));
     Reaction.afterFlush(() => {
-      // At this point the reaction's last value should already be the final
-      // one (5) — afterFlush is *post* reaction drain.
+      // afterFlush runs post reaction-drain, so the reaction has already seen the final value (5)
       afterFlushLog.push(n.peek());
     });
 
@@ -117,11 +115,12 @@ describe('Scheduler — flush', () => {
 
     expect(errorSpy).toHaveBeenCalled();
     expect(errorSpy.mock.calls[0][0]).toMatch(/cycle detected/i);
-    // pending set should be cleared so the next flush is a clean slate.
     expect(Scheduler.pendingReactions.size).toBe(0);
     errorSpy.mockRestore();
   });
 
+  // exception in one reaction must not silently swallow others in the same batch
+  // either it propagates or framework isolates each, this test pins which
   it('continues processing remaining reactions when one throws', () => {
     const a = new Signal(0);
     const b = new Signal(0);
@@ -139,8 +138,6 @@ describe('Scheduler — flush', () => {
     a.set(1);
     b.set(42);
 
-    // Wrap in try/catch — the contract here is "subsequent reactions still
-    // run", not "throw is swallowed".
     let caught;
     try {
       Reaction.flush();
@@ -150,7 +147,6 @@ describe('Scheduler — flush', () => {
     }
 
     expect(bSeen).toBe(42);
-    // Re-flushing after a throw should not be jammed.
     expect(Scheduler.pendingReactions.size).toBe(0);
   });
 
@@ -168,9 +164,8 @@ describe('Scheduler — flush', () => {
     try {
       Reaction.flush();
     }
-    catch (_) { /* swallow for next phase */ }
+    catch (_) {}
 
-    // After throw — does the next set still schedule a flush?
     n.set(2);
     Reaction.flush();
 
@@ -184,8 +179,6 @@ describe('Scheduler — flush', () => {
     Reaction.create(() => callback(n.get()));
     expect(callback).toHaveBeenCalledTimes(1);
 
-    // Six writes — each calls scheduleFlush — should still produce only
-    // one additional reaction run after flush.
     for (let i = 1; i <= 6; i++) { n.set(i); }
     Reaction.flush();
 
@@ -217,6 +210,7 @@ describe('Scheduler — flush', () => {
     expect(settled).toHaveBeenCalledTimes(1);
   });
 
+  // late-registered afterFlush queues for the next flush, otherwise self-registering callbacks would infinite-loop
   it('does not run afterFlush callbacks registered DURING afterFlush in the same pass', () => {
     let runCount = 0;
     const recursive = () => {
@@ -230,7 +224,6 @@ describe('Scheduler — flush', () => {
     Reaction.flush();
     expect(runCount).toBe(1);
 
-    // The late-registered one is parked. Flush again to pick it up.
     Reaction.flush();
     expect(runCount).toBe(2);
   });
@@ -263,8 +256,7 @@ describe('Scheduler — current reaction context', () => {
 
     expect(Scheduler.current).toBe(null);
 
-    // Verify the practical consequence: reading a signal outside a
-    // reaction must not attach a dependency.
+    // reading a signal outside a reaction must not attach a dependency
     const s = new Signal('x');
     s.get();
     expect(s.hasDependents()).toBe(false);
@@ -282,11 +274,11 @@ describe('Scheduler — current reaction context', () => {
 
     inner.set('inner-changed');
     Reaction.flush();
-    expect(seen).toHaveBeenCalledTimes(1); // not retriggered by inner
+    expect(seen).toHaveBeenCalledTimes(1);
 
     outer.set('outer-changed');
     Reaction.flush();
-    expect(seen).toHaveBeenCalledTimes(2); // retriggered by outer
+    expect(seen).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -324,11 +316,11 @@ describe('Dependency', () => {
     expect(s.hasDependents()).toBe(true);
 
     rA.stop();
-    expect(s.hasDependents()).toBe(true); // b is still subscribed
+    expect(s.hasDependents()).toBe(true);
 
     s.set(1);
     Reaction.flush();
-    expect(a).toHaveBeenCalledTimes(1); // only the initial run
+    expect(a).toHaveBeenCalledTimes(1);
     expect(b).toHaveBeenCalledTimes(2);
   });
 
@@ -370,11 +362,11 @@ describe('Dependency', () => {
     });
     expect(cb).toHaveBeenCalledTimes(1);
 
-    s.set(1); // schedules r
+    s.set(1);
     r.stop();
     Reaction.flush();
 
-    expect(cb).toHaveBeenCalledTimes(1); // never re-ran after stop
+    expect(cb).toHaveBeenCalledTimes(1);
   });
 
   it('dependency tracking re-establishes after each reaction run (no stale subscriptions)', () => {
@@ -394,7 +386,6 @@ describe('Dependency', () => {
     Reaction.flush();
     expect(lastSeen).toBe('b');
 
-    // a should be unsubscribed; setting it must NOT retrigger.
     expect(a.hasDependents()).toBe(false);
     expect(b.hasDependents()).toBe(true);
 
@@ -403,9 +394,9 @@ describe('Dependency', () => {
       lastSeen = flag.get() ? a.get() : b.get();
       cb();
     });
-    a.set('a2'); // would only retrigger if a still had subscribers
+    a.set('a2');
     Reaction.flush();
-    expect(cb).toHaveBeenCalledTimes(1); // initial only
+    expect(cb).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -436,21 +427,22 @@ describe('Reaction.guard', () => {
     Reaction.create(() => {
       Reaction.guard(
         () => obj.get(),
-        (oldV, newV) => oldV?.a === newV?.a, // gate on `a` only
+        (oldV, newV) => oldV?.a === newV?.a,
       );
       callback();
     });
     expect(callback).toHaveBeenCalledTimes(1);
 
-    obj.set({ a: 1, b: 2 }); // b changes but a stays the same
+    obj.set({ a: 1, b: 2 });
     Reaction.flush();
-    expect(callback).toHaveBeenCalledTimes(1); // no retrigger
+    expect(callback).toHaveBeenCalledTimes(1);
 
-    obj.set({ a: 2, b: 2 }); // a changes
+    obj.set({ a: 2, b: 2 });
     Reaction.flush();
     expect(callback).toHaveBeenCalledTimes(2);
   });
 
+  // each outer re-run must stop the prior inner comp so the source's subscriber set stays bounded
   it('does not accumulate inner reactions on the source across outer re-runs', () => {
     const counter = new Signal(0);
     Reaction.create(() => {
@@ -524,7 +516,7 @@ describe('Reaction.onCleanup', () => {
 
     s.set(2);
     Reaction.flush();
-    expect(cleanup).toHaveBeenCalledTimes(1); // no double-fire
+    expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
   it('fires callbacks in registration order', () => {
@@ -545,7 +537,6 @@ describe('Reaction.onCleanup', () => {
 
 describe('helpers — tracing modes', () => {
   it('starts in tracing="off" — isTracing and isStackCapture both false', () => {
-    // (afterEach above resets state. Verify the initial contract.)
     expect(isTracing()).toBe(false);
     expect(isStackCapture()).toBe(false);
   });
@@ -577,7 +568,7 @@ describe('helpers — tracing modes', () => {
     setStackCapture(false);
 
     expect(isStackCapture()).toBe(false);
-    expect(isTracing()).toBe(true); // demote, do not turn off
+    expect(isTracing()).toBe(true);
   });
 
   it('setStackCapture(false) is a no-op when stack capture was never on', () => {
@@ -633,13 +624,11 @@ describe('mid-reaction signal updates', () => {
     Reaction.create(() => {
       runs++;
       const v = n.get();
-      if (v < 3) { n.set(v + 1); // converges
-       }
+      if (v < 3) { n.set(v + 1); }
     });
 
     Reaction.flush();
     expect(n.peek()).toBe(3);
-    // Should converge in a handful of passes, not exhaust the safety limit.
     expect(runs).toBeLessThan(20);
   });
 
@@ -676,7 +665,7 @@ describe('Signal — read paths via internals', () => {
       lastSeen = s.get({ clone: false });
     });
 
-    expect(lastSeen).toBe(s.currentValue); // identity, no clone
+    expect(lastSeen).toBe(s.currentValue);
 
     s.set({ a: 2 });
     Reaction.flush();

@@ -165,11 +165,8 @@ RENDERING_ENGINES.forEach((engine) => {
         const initialCount = guardEvalCount;
         expect(initialCount).toBeGreaterThan(0);
 
-        // Bump unrelated ticker — guard key unchanged, so guard should NOT
-        // re-fire. The inner expression still tracks ticker itself, so this
-        // tests guard's gating semantics on the outer rerender wrap.
-        // (Note: inner per-expression reactivity is independent. The guard
-        // controls whether the BLOCK re-evaluates, not its child reactions.)
+        // guard key unchanged so the block must not re-evaluate
+        // inner per-expression reactivity is independent: the guard gates block re-evaluation, not child reactions
         el.template.state.ticker.set(1);
         await flush(el);
 
@@ -184,10 +181,8 @@ RENDERING_ENGINES.forEach((engine) => {
     *******************************/
 
     describe('template block gap coverage', () => {
-      // The dominant reactive name-swap shape, pinned for both target shapes
-      // (subtemplate and snippet). Cross-type swap is structurally impossible
-      // because a name can't be both registered in subTemplates and declared
-      // as an inline snippet.
+      // pins reactive name-swap for both subtemplate and snippet
+      // cross-type swap is structurally impossible: a name can't be both registered and declared inline
 
       it('subtemplate name swaps from one subtemplate to another reactively', async () => {
         const tag = uniqueTag('sub-swap');

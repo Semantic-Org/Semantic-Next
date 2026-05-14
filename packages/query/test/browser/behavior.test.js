@@ -45,7 +45,6 @@ describe('registerBehavior — registration and prototype exposure', () => {
     registerBehavior({ name, createBehavior: secondHandler });
     const el = document.createElement('div');
     document.body.appendChild(el);
-    // The first registration's createBehavior should be the one wired up.
     const result = $(el)[name]('ping');
     expect(result).toBe('first');
   });
@@ -90,7 +89,7 @@ describe('String-API invocation lazy-creates the instance', () => {
     const result = $(el)[name]('ping', 'one');
     expect(result).toBe('pong');
     expect(calls).toEqual(['one']);
-    expect(el[name]).toBeTruthy(); // instance now stored on element
+    expect(el[name]).toBeTruthy();
   });
 
   it('reuses the existing instance on subsequent string-API calls', () => {
@@ -193,7 +192,6 @@ describe('callMethod — resolution path', () => {
     });
     const el = document.createElement('div');
     document.body.appendChild(el);
-    // No 'unknownMethod', no customInvocation. Should return undefined (not crash).
     expect(() => $(el)[name]('unknownMethod')).not.toThrow();
   });
 
@@ -426,7 +424,6 @@ describe('Reinitialization — calling with new settings on existing instance', 
     expect(onCreatedSpy).toHaveBeenCalledTimes(1);
     expect(onDestroyedSpy).toHaveBeenCalledTimes(0);
 
-    // Re-initialize with new settings
     $(el)[name]({ value: 'second' });
     expect(onDestroyedSpy).toHaveBeenCalledTimes(1);
     expect(onCreatedSpy).toHaveBeenCalledTimes(2);
@@ -456,7 +453,6 @@ describe('setup() — one-time shared resource creation', () => {
     $(el1)[name]();
     $(el2)[name]();
     expect(setupSpy).toHaveBeenCalledTimes(1);
-    // Both instances share the same cache
     expect($(el1)[name]('getCache')).toBe($(el2)[name]('getCache'));
   });
 
@@ -506,7 +502,7 @@ describe('Return value collection across multiple elements', () => {
     document.body.appendChild(el1);
     document.body.appendChild(el2);
     const result = $(`.${name}-target`)[name]('get type');
-    expect(result).toBe('info'); // not ['info', 'info']
+    expect(result).toBe('info');
   });
 
   it('collects different return values into an array', () => {
@@ -543,7 +539,6 @@ describe('Return value collection across multiple elements', () => {
     document.body.appendChild(el);
     const $el = $(el);
     const chained = $el[name]('show');
-    // Methods returning undefined should produce a chainable Query
     expect(chained).toBe($el);
   });
 });
@@ -581,8 +576,8 @@ describe('CSS adoption — adoptedStyleSheets in document and shadow DOM', () =>
     inner.textContent = 'styled in shadow';
     shadow.appendChild(inner);
 
-    // Use $() with explicit shadow root so the behavior is initialized against
-    // the shadow-DOM element — CSS should be adopted to the element's root.
+    // use $() with explicit shadow root so the behavior initializes against the shadow element
+    // CSS must adopt to the element's root, not document
     $(inner, { root: shadow })[name]();
     const color = getComputedStyle(inner).color;
     expect(color).toBe('rgb(11, 22, 33)');
@@ -636,7 +631,7 @@ describe('Declarative events — delegation', () => {
     expect(handlerSpy).toHaveBeenCalledTimes(1);
     $(root)[name]('destroy');
     child.click();
-    expect(handlerSpy).toHaveBeenCalledTimes(1); // no second call after destroy
+    expect(handlerSpy).toHaveBeenCalledTimes(1);
   });
 
   it('interpolates {key} templating from selectors / classNames / settings', () => {
@@ -683,7 +678,7 @@ describe('Declarative mutations — childList observers', () => {
     const item = document.createElement('span');
     item.className = itemClass;
     root.appendChild(item);
-    // MutationObserver is async — wait one microtask + a microtask cycle.
+    // MutationObserver is async, wait one microtask cycle
     await new Promise((r) => setTimeout(r, 0));
     expect(handlerSpy).toHaveBeenCalledTimes(1);
   });
@@ -771,7 +766,6 @@ describe('setting() — get and set individual settings', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
     $(el)[name]();
-    // Direct instance access; setting('name') returns the value.
     expect(el[name].setting('delay')).toBe(100);
   });
 
@@ -805,8 +799,7 @@ describe('Edge cases probing the contract', () => {
     });
     const el = document.createElement('div');
     document.body.appendChild(el);
-    // false is a legitimate return value (e.g. for queries like 'is visible').
-    // The framework's `?? undefined` does not collapse false.
+    // false is a legitimate return value (e.g. queries like 'is visible'), the `?? undefined` must not collapse it
     const result = $(el)[name]('isVisible');
     expect(result).toBe(false);
   });
@@ -825,8 +818,7 @@ describe('Edge cases probing the contract', () => {
   });
 
   it('collapses a null customInvocation return to undefined and chains the Query', () => {
-    // Documents the `found ?? undefined` collapse — null is treated as
-    // "no value" and the call returns the Query for chaining instead.
+    // `?? undefined` collapse treats null as no-value so the call returns the Query for chaining
     const name = uniqueName('nullRet');
     registerBehavior({
       name,
@@ -936,11 +928,7 @@ describe('Suspected drift between documented intent and source', () => {
     document.body.appendChild(el);
     $(el)[name]();
     expect(onCreatedSpy).toHaveBeenCalledTimes(1);
-    // Call again with no arguments. The skill speaks of "new settings"
-    // triggering reinit; this case is ambiguous — let the test arbitrate.
     $(el)[name]();
-    // If this fails, it means a no-op was expected; if it passes, the
-    // contract is "any non-method invocation reinitializes."
     expect(onDestroyedSpy).toHaveBeenCalledTimes(1);
     expect(onCreatedSpy).toHaveBeenCalledTimes(2);
   });
@@ -949,14 +937,11 @@ describe('Suspected drift between documented intent and source', () => {
   // the class method declared at behavior.js:618. Either rename one to fix.
   it.todo('exposes settings(newSettings) as a callable bulk-update method');
 
-  // Real probe: a selector containing the substring 'global' should not
-  // be mangled by the global-keyword path.
   it('does not strip the substring "global" from selectors when the global keyword is used', () => {
     const name = uniqueName('globalSel');
     const handlerSpy = vi.fn();
     registerBehavior({
       name,
-      // The user wants delegation on a selector that contains 'global'.
       events: {
         'click .global-target': handlerSpy,
       },
@@ -975,7 +960,6 @@ describe('Suspected drift between documented intent and source', () => {
   it('does not strip a substring "global" from a selector that follows the global keyword', () => {
     const name = uniqueName('globalKw');
     const handlerSpy = vi.fn();
-    // Add a globally-scoped click handler on an element with 'global' in its class.
     const target = document.createElement('div');
     target.className = 'globalwrapper';
     document.body.appendChild(target);
@@ -990,10 +974,10 @@ describe('Suspected drift between documented intent and source', () => {
     document.body.appendChild(host);
     $(host)[name]();
     target.click();
-    // If the keyword strip mangled the selector, this would fail.
     expect(handlerSpy).toHaveBeenCalledTimes(1);
   });
 
+  // pattern used by Tooltip's onHidden: $(this).tooltip('set text', 'Copy Code')
   it('supports natural-language two-word setter invocation', () => {
     const name = uniqueName('natSet');
     let stored;
@@ -1013,6 +997,7 @@ describe('Suspected drift between documented intent and source', () => {
     expect(stored).toBe('Copy Code');
   });
 
+  // passing undefined is a getter call, you can't clear a setting that way
   it('treats setting(key, undefined) as a getter, not a setter', () => {
     const name = uniqueName('undefSet');
     registerBehavior({
@@ -1023,12 +1008,13 @@ describe('Suspected drift between documented intent and source', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
     $(el)[name]();
-    // Explicit undefined: getter contract.
     const result = el[name].setting('mode', undefined);
     expect(result).toBe('on');
     expect(el[name].setting('mode')).toBe('on');
   });
 
+  // data-* with falsy values (0, false, '') must override settings
+  // common pattern: data-enabled="false" should disable a default of true
   it('lets data-* attributes override settings with false values', () => {
     const name = uniqueName('falseData');
     registerBehavior({

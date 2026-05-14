@@ -215,11 +215,11 @@ describe.concurrent('Signal', () => {
       });
       Reaction.create(callback);
 
-      signal.set(42); // no change, equality blocks
+      signal.set(42);
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
-      signal.notify(); // force trigger
+      signal.notify();
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(2);
     });
@@ -702,7 +702,7 @@ describe.concurrent('Signal', () => {
       // Next base change will recalculate derived
       base.set(5);
       Reaction.flush();
-      expect(derived.get()).toBe(10); // Back to calculated value
+      expect(derived.get()).toBe(10);
     });
 
     // Test no over-reactivity
@@ -794,9 +794,8 @@ describe.concurrent('Signal', () => {
       const firstResult = derived.get();
       expect(firstResult.doubled).toBe(0);
 
-      // Verify no cloning
       const secondResult = derived.get();
-      expect(firstResult).toBe(secondResult); // Same reference
+      expect(firstResult).toBe(secondResult);
     });
 
     // Test conditional dependencies

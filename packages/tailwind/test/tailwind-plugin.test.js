@@ -121,8 +121,8 @@ describe('extractDefinitionContent — content scanner', () => {
   });
 
   it('scans createComponent and lifecycle hooks inside subTemplates', () => {
-    // A subtemplate's createComponent and lifecycle hooks are equally valid locations
-    // for class string literals — they should reach the scanner the same way the parent's do.
+    // subtemplate createComponent and lifecycle hooks are equally valid locations for class literals
+    // they should reach the scanner the same way the parent's do
     const child = defineComponent({
       template: '<span></span>',
       createComponent: () => ({ run: () => 'bg-sub-cc' }),
@@ -139,8 +139,8 @@ describe('extractDefinitionContent — content scanner', () => {
   });
 
   it('joins extracted sources with newlines so adjacent strings cannot merge into invalid candidates', () => {
-    // If two adjacent strings concatenated without a separator, "bg-red-500" + "p-4"
-    // would scan as "bg-red-500p-4" — neither a valid Tailwind class. Newlines preserve boundaries.
+    // if two adjacent strings concatenated without a separator, "bg-red-500" + "p-4"
+    // would scan as "bg-red-500p-4", not a valid Tailwind class. newlines preserve boundaries
     const { content } = extractDefinitionContent({
       template: '<div class="bg-red-500"></div>',
       createComponent: () => 'p-4',
@@ -151,7 +151,7 @@ describe('extractDefinitionContent — content scanner', () => {
   });
 
   it('skips non-function values inside the events object', () => {
-    // A handler may be misconfigured as a string in user code. Should not crash; should not stringify.
+    // a handler may be misconfigured as a string in user code, must not crash or stringify
     const { js } = extractDefinitionContent({
       template: '<div></div>',
       events: {
@@ -168,8 +168,8 @@ describe('extractDefinitionContent — content scanner', () => {
     expect(html).toBe('');
     expect(js).toBe('');
     expect(css).toBe('');
-    // content is `html + '\n' + js` which is "\n" when both empty — TailwindPlugin shortcircuits on
-    // !content.trim() so an entirely-empty definition is detected.
+    // content is `html + '\n' + js` which is "\n" when both empty
+    // TailwindPlugin shortcircuits on !content.trim() so an entirely-empty definition is detected
     expect(content.trim()).toBe('');
   });
 

@@ -417,7 +417,6 @@ describe('query — documented contract', () => {
       const $reversed = $original.reverse();
       expect($reversed[0].dataset.i).toBe('2');
       expect($reversed[2].dataset.i).toBe('0');
-      // Original should still be in original order
       expect($original[0].dataset.i).toBe('0');
     });
   });
@@ -524,10 +523,8 @@ describe('query — documented contract', () => {
     });
 
     it('.text(value) sets textContent and escapes HTML', () => {
-      // text() never injects HTML — the test name highlights that distinction.
       document.body.innerHTML = '<p class="p"></p>';
       $('.p').text('<b>raw</b>');
-      // Setting text should NOT create a <b> element
       expect(document.querySelector('.p b')).toBeNull();
       expect(document.querySelector('.p').textContent).toBe('<b>raw</b>');
     });
@@ -657,7 +654,6 @@ describe('query — documented contract', () => {
 
     it('.hasClass(name) returns true when any element has the class', () => {
       document.body.innerHTML = '<div class="d active"></div><div class="d"></div>';
-      // Source uses .some() — true when ANY element has the class.
       expect($('.d').hasClass('active')).toBe(true);
     });
 
@@ -765,18 +761,16 @@ describe('query — documented contract', () => {
       document.querySelector('.b').click();
       expect(stopCalled).toBe(true);
       expect(preventCalled).toBe(false);
-      // Propagation should be stopped, so form handler should not fire.
       expect(formHandler).not.toHaveBeenCalled();
     });
 
+    // arrow-implicit-return is the common idiom for inline event handlers
     it('arrow-implicit-return false on .on() stops propagation', () => {
       document.body.innerHTML = '<div class="outer"><div class="inner"></div></div>';
       const outerHandler = vi.fn();
       $('.outer').on('click', outerHandler);
-      // Note: arrow with implicit return `false` — no `return` keyword in source.
       $('.inner').on('click', () => false);
       document.querySelector('.inner').click();
-      // Outer handler should NOT fire because propagation was stopped
       expect(outerHandler).not.toHaveBeenCalled();
     });
 
@@ -911,7 +905,7 @@ describe('query — documented contract', () => {
     });
 
     it('resolves only once even if event fires multiple times', async () => {
-      // The "next" semantic — promise resolves to ONE event, not many.
+      // onNext resolves to ONE event not many — extra clicks should not re-fire the handler
       document.body.innerHTML = '<button class="b"></button>';
       const handler = vi.fn();
       $('.b').onNext('click').then(handler);
@@ -919,7 +913,6 @@ describe('query — documented contract', () => {
       el.click();
       el.click();
       el.click();
-      // Microtask flush
       await Promise.resolve();
       await Promise.resolve();
       expect(handler).toHaveBeenCalledTimes(1);
@@ -1003,7 +996,6 @@ describe('query — documented contract', () => {
       const $detached = $('.child').detach();
       expect(document.querySelectorAll('.child').length).toBe(0);
       expect($detached.length).toBe(1);
-      // Reinsert
       $('.parent').append($detached);
       expect(document.querySelectorAll('.parent .child').length).toBe(1);
     });
@@ -1011,9 +1003,7 @@ describe('query — documented contract', () => {
     it('.clone() returns a deep copy of the elements', () => {
       document.body.innerHTML = '<div class="orig"><b>nested</b></div>';
       const $clone = $('.orig').clone();
-      // Cloned content should include the nested element
       expect($clone.find('b').length).toBe(1);
-      // Original still in place
       expect(document.querySelector('.orig')).not.toBeNull();
     });
   });
@@ -1029,6 +1019,7 @@ describe('query — documented contract', () => {
       expect(document.querySelector('.d').style.display).toBe('none');
     });
 
+    // show() restores natural display, not always 'block'
     it('.show() restores display after .hide()', () => {
       document.body.innerHTML = '<div class="d"></div>';
       const $d = $('.d');
@@ -1063,7 +1054,7 @@ describe('query — documented contract', () => {
 
     it('.data(key) returns the dataset value for a single element', () => {
       document.body.innerHTML = '<div class="d" data-user-id="42"></div>';
-      // dataset auto-camelCases data-user-id → userId
+      // dataset auto-camelCases data-user-id to userId
       expect($('.d').data('userId')).toBe('42');
     });
 
@@ -1117,7 +1108,6 @@ describe('query — documented contract', () => {
     it('.cssVar(name, value) sets a CSS custom property with -- prefix', () => {
       document.body.innerHTML = '<div class="d"></div>';
       $('.d').cssVar('my-var', '12px');
-      // The property is set with -- prefix
       expect(document.querySelector('.d').style.getPropertyValue('--my-var')).toBe('12px');
     });
   });
@@ -1188,7 +1178,6 @@ describe('query — documented contract', () => {
     });
 
     it('.text() on empty collection returns undefined', () => {
-      // map(...).length is 0 → values[0] === undefined.
       expect($('.nope').text()).toBeUndefined();
     });
 
@@ -1201,8 +1190,7 @@ describe('query — documented contract', () => {
     });
 
     it('mutating methods on empty collection return the Query (chain preserved)', () => {
-      // Setters should not throw on empty selection — many user flows
-      // rely on $('.nothing').addClass(...) being a safe no-op.
+      // setters must not throw on empty selection, $('.nothing').addClass(...) is a common safe no-op pattern
       const $empty = $('.nope');
       expect($empty.addClass('x')).toBe($empty);
       expect($empty.removeClass('x')).toBe($empty);
@@ -1225,7 +1213,6 @@ describe('query — documented contract', () => {
 
       const $$body = $$('body');
       expect($$body.options.pierceShadow).toBe(true);
-      // .find() on a $$ selection should ALSO pierce
       expect($$body.find('.inner').length).toBe(1);
     });
   });

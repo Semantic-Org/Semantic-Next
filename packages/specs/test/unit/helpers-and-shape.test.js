@@ -175,7 +175,7 @@ describe('shared variations have the shape the docs promise', () => {
   });
 
   it('attached variation enumerates the five attachment positions', () => {
-    // The skill doc names them with "-attached" suffix; source uses bare values.
+    // skill doc names them with "-attached" suffix but source uses bare values
     expect(ATTACHED_OPTIONS.map(o => o.value)).toEqual([
       'top',
       'attached',
@@ -213,7 +213,7 @@ describe('shared variations have the shape the docs promise', () => {
   });
 
   it('size variation has no compoundAliases, fluid has no options', () => {
-    // FLUID_VARIATION is boolean-style — no options array
+    // FLUID_VARIATION is boolean-style, no options array
     expect(FLUID_VARIATION.options).toBeUndefined();
     expect(CIRCULAR_VARIATION.options).toBeUndefined();
   });
@@ -242,7 +242,7 @@ describe('getStates returns the requested shared state constants', () => {
   });
 
   it('silently drops names that are not registered states', () => {
-    // filter(Boolean) — unknown names map to undefined and are dropped
+    // filter(Boolean), unknown names map to undefined and are dropped
     const result = getStates(['hover', 'nonexistent', 'disabled']);
     expect(result).toEqual([HOVER_STATE, DISABLED_STATE]);
   });
@@ -282,7 +282,7 @@ describe('getVariations returns the requested shared variation constants', () =>
   });
 
   it('does not include spacing variation in the named map', () => {
-    // SPACING_VARIATION is exported but absent from getVariations map — must be imported by constant if needed.
+    // SPACING_VARIATION is exported but absent from getVariations map, must be imported by constant if needed
     const result = getVariations(['spacing']);
     expect(result).toEqual([]);
   });

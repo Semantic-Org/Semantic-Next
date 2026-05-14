@@ -458,7 +458,6 @@ describe('Reaction — public API contract', () => {
     });
 
     it('does not register dependencies when a signal is read after an early-return on firstRun', () => {
-      // Documented pitfall from guides/reactivity/controls
       const value = new Signal('initial');
       const callback = vi.fn();
 
@@ -499,7 +498,7 @@ describe('Reaction — public API contract', () => {
       value.set(1);
       Reaction.flush();
 
-      expect(callback).toHaveBeenCalledTimes(1); // only the initial run
+      expect(callback).toHaveBeenCalledTimes(1);
     });
 
     it('treats stop() as idempotent — calling twice does not throw', () => {
@@ -527,7 +526,7 @@ describe('Reaction — public API contract', () => {
       reaction.stop();
 
       reaction.run();
-      expect(callback).toHaveBeenCalledTimes(1); // only the initial create-run
+      expect(callback).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -921,6 +920,7 @@ describe('Reaction — public API contract', () => {
       expect(final).toBe(5);
     });
 
+    // authors chaining afterFlush should know inner registration queues for the next flush
     it('defers an afterFlush callback registered from inside another afterFlush callback', () => {
       const order = [];
       Reaction.afterFlush(() => {
@@ -988,6 +988,8 @@ describe('Reaction — public API contract', () => {
       expect(innerCallback).toHaveBeenCalledTimes(2);
     });
 
+    // nested reactions leak unless the author stops them explicitly
+    // outer.run() clears its own deps but doesn't touch inner reactions
     it('does not automatically clean up inner reactions when the outer re-runs', () => {
       const outer = new Signal(1);
       const inner = new Signal('a');
@@ -1033,10 +1035,10 @@ describe('Reaction — public API contract', () => {
       outerCallback.mockClear();
       innerOnly.set('i2');
       Reaction.flush();
-      // If outer accidentally tracked innerOnly, the outer would fire again.
       expect(outerCallback).not.toHaveBeenCalled();
     });
 
+    // inner reactions (Reaction.create, guard, computed, derive) must not clobber outer tracking
     it('preserves outer-reaction tracking for signals read AFTER an inner Reaction.create call', () => {
       const beforeInner = new Signal('B');
       const afterInner = new Signal('A');
@@ -1086,6 +1088,7 @@ describe('Reaction — public API contract', () => {
       expect(Reaction.current).toBeNull();
     });
 
+    // one bad afterFlush callback must not silently swallow the rest
     it('continues running later afterFlush callbacks when an earlier one throws', () => {
       const callback2 = vi.fn();
       Reaction.afterFlush(() => {
@@ -1097,6 +1100,7 @@ describe('Reaction — public API contract', () => {
       expect(callback2).toHaveBeenCalled();
     });
 
+    // a faulty reaction must not disable the rest of the reactive system
     it("continues running later reactions when an earlier reaction's callback throws", () => {
       const trigger = new Signal(0);
       const survivor = vi.fn();

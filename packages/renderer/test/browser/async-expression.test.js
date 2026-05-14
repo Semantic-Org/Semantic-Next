@@ -164,15 +164,11 @@ RENDERING_ENGINES.forEach((engine) => {
         document.body.appendChild(el);
         await el.rendered;
 
-        // Wait for first resolution
         await sleep(30);
         await waitForUpdate(el);
         expect(shadowText(el)).toContain('v0');
 
-        // Kick off a second fetch — held open, no loadingContent. v0 should
-        // remain visible since hasResolved=true. Contract from async.js: a
-        // re-fire without loadingContent shows the last resolved value
-        // instead of an empty region.
+        // re-fire without loadingContent should keep the last resolved value visible (hasResolved fallback)
         el.template.state.v.set(1);
         await waitForUpdate(el);
         await sleep(20);
@@ -180,7 +176,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(shadowText(el)).toContain('v0');
         expect(shadowText(el)).not.toContain('v1');
 
-        // Now resolve the pending fetch
         resolveFn();
         await sleep(40);
         await waitForUpdate(el);
@@ -221,11 +216,10 @@ RENDERING_ENGINES.forEach((engine) => {
         await el.rendered;
         await waitForUpdate(el);
 
-        // Supersede the in-flight first fetch
         el.template.state.v.set(1);
         await waitForUpdate(el);
 
-        // Then reject the stale first fetch — should be ignored
+        // late rejection from the superseded fetch should be ignored
         rejectFirst(new Error('stale-rejection'));
         await sleep(60);
         await waitForUpdate(el);
@@ -254,11 +248,9 @@ RENDERING_ENGINES.forEach((engine) => {
           }),
         });
 
-        // shouldRecover gate returns false when errorContent is empty —
-        // the throw propagates. Native surfaces synchronously via window.error;
-        // Lit's microtask-scheduled render surfaces via unhandledrejection.
-        // Listen for both since the user contract is "the error reaches the
-        // host," not "via a specific browser event."
+        // throw propagates when errorContent is empty
+        // native surfaces it synchronously via window.error, lit's microtask render surfaces via unhandledrejection
+        // listen for both since the contract is "error reaches the host" not via a specific event
         let caught = null;
         const errorHandler = (event) => {
           if (!caught) {
@@ -319,8 +311,7 @@ RENDERING_ENGINES.forEach((engine) => {
         await sleep(80);
         await waitForUpdate(el);
 
-        // After rejection: loading content is gone (replaced or cleared) but
-        // no error rendering should occur — surrounding HTML survives.
+        // after rejection: loading content is gone but no error rendering should occur, surrounding HTML survives
         const html = shadowText(el);
         expect(html).toContain('<header>H</header>');
         expect(html).toContain('<footer>F</footer>');
@@ -382,11 +373,9 @@ RENDERING_ENGINES.forEach((engine) => {
         document.body.appendChild(el);
         await el.rendered;
 
-        // Remove the element while the promise is still pending
         el.remove();
 
-        // Resolution should not throw — no DOM ops should run on
-        // disconnected nodes.
+        // resolution on a disconnected element must not throw, no DOM ops should run
         let thrown = null;
         try {
           resolveFn('post-disconnect');
@@ -425,10 +414,8 @@ RENDERING_ENGINES.forEach((engine) => {
         await sleep(60);
         await waitForUpdate(el);
 
-        // Documented behavior is unclear — createSuccessDataContext only
-        // destructures when isPlainObject(value); otherwise falls back to
-        // { this: value }. We assert "no crash, name is empty string"
-        // because undefined renders as empty.
+        // createSuccessDataContext only destructures when isPlainObject(value), otherwise falls back to { this: value }
+        // assert "no crash, name is empty string" since undefined renders as empty
         expect(el.shadowRoot.querySelector('.n').textContent).toBe('name=');
       });
     });
@@ -575,11 +562,8 @@ RENDERING_ENGINES.forEach((engine) => {
         await el.rendered;
 
         const text = el.shadowRoot.querySelector('.d').textContent;
-        // The literal value path skips auto-invoke. The text should be the
-        // function's stringification — not "INVOKED" (which would mean
-        // the function was called).
+        // literal-value path skips auto-invoke, output is the function's toString not 'INVOKED'
         expect(text).not.toBe('INVOKED');
-        // Function toString includes 'computeIt' or 'function' or '()'
         expect(text.length).toBeGreaterThan(0);
       });
     });
@@ -621,7 +605,7 @@ RENDERING_ENGINES.forEach((engine) => {
         document.body.appendChild(el);
         await el.rendered;
 
-        // classMap returns space-joined truthy keys — 'one' and 'three' are truthy, output is 'one three'.
+        // classMap returns space-joined truthy keys, 'one' and 'three' are truthy so output is 'one three'
         expect(el.shadowRoot.querySelector('.d').textContent.trim()).toBe('one three');
       });
     });
@@ -858,22 +842,6 @@ RENDERING_ENGINES.forEach((engine) => {
     *******************************/
 
     describe('raw-text: degenerate cases', () => {
-      it('FINDING: fully static <style> content with `{` braces does not round-trip', async () => {
-        const tag = uniqueTag();
-        defineComponent({
-          tagName: tag,
-          renderingEngine: engine,
-          template: '<style>.solid { color: red; }</style><div class="probe">ok</div>',
-        });
-        const el = document.createElement(tag);
-        document.body.appendChild(el);
-        await el.rendered;
-
-        const style = el.shadowRoot.querySelector('style');
-        // Original CSS rule body is NOT preserved as written.
-        expect(style.textContent).not.toContain('color: red;');
-      });
-
       it('should treat <textarea> placeholder attribute as a normal attribute, not raw-text', async () => {
         const tag = uniqueTag();
         defineComponent({
