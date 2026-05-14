@@ -105,6 +105,7 @@ export const defineComponent = ({
 
     // Store tagName on the class for SSR renderToString
     webComponent.componentTagName = tagName;
+    webComponent.toDefinition = () => prototypeTemplate.toDefinition();
     registerComponent(tagName, webComponent);
 
     if (isClient && customElements.get(tagName)) {

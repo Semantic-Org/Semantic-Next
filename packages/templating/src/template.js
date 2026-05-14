@@ -102,8 +102,6 @@ export const Template = class Template {
     this.id = generateID();
     this.isPrototype = isPrototype;
     if (isPrototype) {
-      // Source template only retained on prototypes — runtime clones go without
-      // to keep memory tight. Lets prototypes round-trip via toDefinition().
       this.template = template;
     }
     this.attachStyles = attachStyles;
