@@ -5,7 +5,11 @@
   for {#each} stays uniform.
 */
 
-import { isPlainObject, isString } from '@semantic-ui/utils';
+import { isArray, isPlainObject, isString } from '@semantic-ui/utils';
+
+export function getCollectionType(items) {
+  return isArray(items) ? 'array' : 'object';
+}
 
 // Stringified — Map / === compare by value identity, and the server's
 // KEY is always serialized as text inside the comment marker.

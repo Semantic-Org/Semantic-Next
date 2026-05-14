@@ -6,8 +6,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { Reaction } from '@semantic-ui/reactivity';
 import { clone, isEmpty, isEqual } from '@semantic-ui/utils';
 
-import { arrayFromObject, isArray, isClient, isPlainObject, isString } from '@semantic-ui/utils';
-import { getItemID } from '../../../shared/each.js';
+import { arrayFromObject, isClient, isPlainObject, isString } from '@semantic-ui/utils';
+import { getCollectionType, getEachData, getItemID } from '../../../shared/each.js';
 
 export class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -71,7 +71,7 @@ export class ReactiveEachDirective extends AsyncDirective {
     }
     // this turns { a: 'b'} to [{key: 'a', value: 'b'}]
     // for use with repeat
-    const collectionType = this.getCollectionType(items);
+    const collectionType = getCollectionType(items);
     if (collectionType == 'object') {
       items = arrayFromObject(items);
     }
@@ -94,13 +94,6 @@ export class ReactiveEachDirective extends AsyncDirective {
     );
   }
 
-  getCollectionType(items) {
-    if (isArray(items)) {
-      return 'array';
-    }
-    return 'object';
-  }
-
   getItems() {
     return this.eachCondition.over() || [];
   }
@@ -119,30 +112,8 @@ export class ReactiveEachDirective extends AsyncDirective {
       index: indexOrKey,
     });
 
-    const templateData = this.getEachData(item, indexOrKey, collectionType, this.eachCondition);
+    const templateData = getEachData(item, indexOrKey, collectionType, this.eachCondition);
     return this.eachCondition.content(templateData, key);
-  }
-
-  getEachData(item, indexOrKey, collectionType, eachCondition) {
-    let { as, indexAs } = eachCondition;
-
-    // add default index/key values
-    if (!indexAs) {
-      indexAs = (collectionType == 'array')
-        ? 'index'
-        : 'key';
-    }
-    // handle conversion of object to array
-    if (collectionType == 'object') {
-      indexOrKey = item.key;
-      item = item.value;
-    }
-
-    // if 'as' is specified we pass the whole value as an item
-    // otherwise we spread the value to data context
-    return as
-      ? { [as]: item, [indexAs]: indexOrKey }
-      : { ...item, this: item, [indexAs]: indexOrKey };
   }
 
   disconnected() {
