@@ -155,7 +155,7 @@ export class Behavior {
   addDataOverrides(element = this.element) {
     const elementData = this.getElementData();
     each(this.settings, (value, name) => {
-      if (elementData[name]) {
+      if (elementData[name] !== undefined) {
         this.settings[name] = elementData[name];
       }
     });

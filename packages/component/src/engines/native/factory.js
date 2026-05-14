@@ -31,11 +31,11 @@ export function createComponent({
   };
   component.properties = resolvedProperties;
 
-  // observedAttributes — must be set before customElements.define()
+  // observedAttributes must be set before customElements.define()
   const observedAttrs = new Set();
   each(resolvedProperties, (config, propName) => {
     if (config.alias) {
-      observedAttrs.add(config.attribute || camelToKebab(propName));
+      observedAttrs.add(propName);
     }
     else if (config.attribute !== false) {
       observedAttrs.add(camelToKebab(propName));

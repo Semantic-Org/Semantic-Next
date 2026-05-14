@@ -1,14 +1,13 @@
 /*
-  Each-block coordination shared between server and client. Both sides
-  must agree on item key, item-data shape, and marker encoding or hydration
-  silently mismatches.
+  shared each-block helpers used by native + lit so the {#each} contract stays uniform across engines
+  pure logic, no DOM or engine primitives
 */
 
-import { isPlainObject, isString } from '@semantic-ui/utils';
+import { isArray, isPlainObject, isString } from '@semantic-ui/utils';
 
-import { MARKER_VERSION } from '../../../build-html-string.js';
-
-export const SUI_ITEM_MARKER = `sui-item:${MARKER_VERSION}:`;
+export function getCollectionType(items) {
+  return isArray(items) ? 'array' : 'object';
+}
 
 // Stringified — Map / === compare by value identity, and the server's
 // KEY is always serialized as text inside the comment marker.

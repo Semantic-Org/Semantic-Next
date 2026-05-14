@@ -86,6 +86,8 @@ export class LitRenderer {
     return this.litTemplate;
   }
 
+  destroy() {}
+
   cachedRender(data) {
     if (data) {
       this.updateData(data);
@@ -428,6 +430,7 @@ export class LitRenderer {
     // we want to concat all html added consecutively
     if (this.lastHTML) {
       const lastHTML = this.html.pop();
+      this.html.raw.pop();
       html = `${lastHTML}${html}`;
     }
     this.html.push(html);

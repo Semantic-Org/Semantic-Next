@@ -173,14 +173,11 @@ function buildArgsRecord({ node, parentData, evaluator, target }) {
   return record;
 }
 
-// Read name nonreactively for templateType detection so name changes
-// (which shouldn't change the type per the documented constraint)
-// don't fire the outer reaction unnecessarily for snippets. Subtemplate
-// name reactivity is handled separately inside the subtemplate branch
-// where it's needed for instance swap.
+// read name expression reactively so the outer Reaction re-runs once it resolves
+// lock on first resolve, name maps to a stable type per docs
 function detectTemplateType({ node, data, self }) {
   if (self.templateType !== null) { return self.templateType; }
-  const name = Reaction.nonreactive(() => self.evaluator.lookupExpressionValue(node.name, data));
+  const name = self.evaluator.lookupExpressionValue(node.name, data);
   if (name == null || name === '') { return null; }
   self.templateType = self.snippets[name] ? 'snippet' : 'subtemplate';
   return self.templateType;
@@ -201,6 +198,19 @@ function resolveSnippet(nameExpr, data, self) {
   const name = self.evaluator.lookupExpressionValue(nameExpr, data);
   if (!isString(name)) { return null; }
   return self.snippets[name] || null;
+}
+
+function prepareSnippet({ node, data, self }) {
+  const snippet = resolveSnippet(node.name, data, self);
+  if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
+  self.currentSnippet = snippet;
+  const snippetData = buildArgsRecord({ node, parentData: data, evaluator: self.evaluator, target: data });
+  return { snippet, snippetData };
+}
+
+function mountSnippet({ node, data, region, scope, renderAST, isSVG, self }) {
+  const { snippet, snippetData } = prepareSnippet({ node, data, self });
+  region.setContent(renderAST({ ast: snippet.content, data: snippetData, scope, isSVG }));
 }
 
 // Build the subtemplate's lazy-getter record and clone the Template
@@ -323,6 +333,7 @@ const templateBlock = defineBlock({
       dataDep: renderer.dataDep,
       templateType: null,
       currentTemplateID: null,
+      currentSnippet: null,
       currentInstance: null,
       settingsScope: null,
     };
@@ -333,11 +344,7 @@ const templateBlock = defineBlock({
     if (templateType === null) { return; }
 
     if (templateType === 'snippet') {
-      const snippet = resolveSnippet(node.name, data, self);
-      if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
-      const snippetData = buildArgsRecord({ node, parentData: data, evaluator: self.evaluator, target: data });
-      const fragment = renderAST({ ast: snippet.content, data: snippetData, scope, isSVG });
-      region.setContent(fragment);
+      mountSnippet({ node, data, region, scope, renderAST, isSVG, self });
       return;
     }
 
@@ -366,9 +373,7 @@ const templateBlock = defineBlock({
     if (templateType === null) { return; }
 
     if (templateType === 'snippet') {
-      const snippet = resolveSnippet(node.name, data, self);
-      if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
-      const snippetData = buildArgsRecord({ node, parentData: data, evaluator: self.evaluator, target: data });
+      const { snippet, snippetData } = prepareSnippet({ node, data, self });
       if (region.ownedNodes.length > 0) {
         // Snippet args reactivity is anchored on the block scope; a child
         // would dispose with the next region.clear() and break arg reactivity.
@@ -409,12 +414,26 @@ const templateBlock = defineBlock({
     }
   },
 
-  update({ node, data, region, scope, self }) {
-    // Snippets are one-shot at mount — name reactivity at the outer level
-    // is documented as undefined (templateType shouldn't change), and
-    // inner expression reactivity is handled by the snippet-arg proxy's
-    // lazy getters via per-marker Reactions wired during render/hydrate.
-    if (self.templateType === 'snippet') { return; }
+  update({ node, data, region, scope, renderAST, self, isSVG }) {
+    // name expression may have been unresolved on first render, re-detect once it resolves
+    if (self.templateType === null) {
+      const detected = detectTemplateType({ node, data, self });
+      if (detected === null) { return; }
+    }
+
+    // identity-compare is enough since a name can't be both snippet and subtemplate
+    // inner expression reactivity lives in the snippet-arg proxy's per-marker Reactions wired during render/hydrate
+    if (self.templateType === 'snippet') {
+      const snippet = resolveSnippet(node.name, data, self);
+      if (snippet === self.currentSnippet) { return; }
+      if (!snippet) {
+        region.clear();
+        self.currentSnippet = null;
+        return;
+      }
+      mountSnippet({ node, data, region, scope, renderAST, isSVG, self });
+      return;
+    }
 
     self.dataDep.depend();
     const { template, templateName } = resolveSubtemplate(node.name, data, self);

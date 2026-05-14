@@ -28,12 +28,16 @@ import {
   COMMENT_MARKER,
   DATA_SUI_BIND,
   formatBlockClose,
+  isInsideRawText,
   MAIN_BRANCH_INDEX,
+  RAW_TEXT_CLOSE,
+  RAW_TEXT_MARKER,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
+import { encodeItemKey, getEachData, getItemID } from '../../shared/each.js';
+import { SUI_ITEM_MARKER } from './blocks/each.js';
 import { renderASTToString, stringifyAttrValue } from './commit-hooks.js';
 import { childContext } from './define-block.js';
-import { encodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from './shared/each.js';
 
 const REMOVE_ATTR = '__SUI_REMOVE__';
 const REMOVE_ATTR_REGEX = /\s+[\w.@-]+\s*=\s*["']?__SUI_REMOVE__["']?/g;
@@ -198,6 +202,8 @@ export class ServerRenderer {
     return html.replace(REMOVE_ATTR_REGEX, '');
   }
 
+  destroy() {}
+
   setData(newData) {
     this.updateData(newData, { preserveExistingData: false });
     this.evaluator.setData(this.data);
@@ -215,7 +221,7 @@ export class ServerRenderer {
   }
 
   /*******************************
-      AST → HTML String
+         AST → HTML String
   *******************************/
 
   renderNodes(ast, data, scope) {
@@ -227,17 +233,41 @@ export class ServerRenderer {
         inQuote: null,
         currentAttrName: null,
         tagBindings: {},
+        insideRawText: false,
       };
     }
 
     let html = '';
 
+    // when inside raw-text, marker must land right after the close tag (not at chunk end)
+    // since subsequent siblings often share the same html node
+    const appendHtml = (chunk) => {
+      const stamped = scanHtmlChunk(chunk, scope);
+      if (scope.insideRawText) {
+        const closeMatch = stamped.match(RAW_TEXT_CLOSE);
+        if (closeMatch) {
+          const splitAt = closeMatch.index + closeMatch[0].length;
+          const id = scope.entryId++;
+          scope.insideRawText = false;
+          const after = stamped.slice(splitAt);
+          // the remainder may itself open another raw-text element
+          if (after && isInsideRawText(scope.htmlBuffer)) {
+            scope.insideRawText = true;
+          }
+          return stamped.slice(0, splitAt) + `<!--${RAW_TEXT_MARKER}${id}-->` + after;
+        }
+        return stamped;
+      }
+      if (isInsideRawText(scope.htmlBuffer)) {
+        scope.insideRawText = true;
+      }
+      return stamped;
+    };
+
     for (const node of ast) {
       switch (node.type) {
         case 'html':
-          // scanHtmlChunk tracks tag boundaries so dynamic attribute bindings
-          // get flushed into `data-sui-bind` just before the closing `>`.
-          html += scanHtmlChunk(node.html, scope);
+          html += appendHtml(node.html);
           break;
 
         case 'expression':
@@ -283,13 +313,21 @@ export class ServerRenderer {
   }
 
   /*******************************
-      Expression Rendering
+        Expression Rendering
   *******************************/
 
   renderExpression(node, data, scope) {
-    const id = scope.entryId++;
     const classification = analyzePosition(scope.htmlBuffer);
     const value = this.evaluator.lookupExpressionValue(node.value, data);
+
+    // inside raw-text, expressions emit literal text since comment markers would corrupt CSS/JS or be visible
+    if (scope.insideRawText && !classification.insideTag) {
+      return node.unsafeHTML
+        ? String(value ?? '')
+        : escapeHTML(String(value ?? ''));
+    }
+
+    const id = scope.entryId++;
 
     if (classification.insideTag) {
       // Record this entry as the first binding for its attribute, so the
@@ -357,7 +395,7 @@ export class ServerRenderer {
   }
 
   /*******************************
-      Block Directives
+         Block Directives
   *******************************/
 
   // Adapter so renderASTToString (shared with client) can call into the
@@ -523,7 +561,7 @@ export class ServerRenderer {
   }
 
   /*******************************
-      Template / Snippet
+        Template / Snippet
   *******************************/
 
   renderTemplate(node, data, scope) {

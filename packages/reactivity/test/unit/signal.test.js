@@ -1,5 +1,5 @@
 import { Reaction, Signal } from '@semantic-ui/reactivity';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe.concurrent('Signal', () => {
   /*******************************
@@ -215,11 +215,11 @@ describe.concurrent('Signal', () => {
       });
       Reaction.create(callback);
 
-      signal.set(42); // no change, equality blocks
+      signal.set(42);
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
-      signal.notify(); // force trigger
+      signal.notify();
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(2);
     });
@@ -702,7 +702,7 @@ describe.concurrent('Signal', () => {
       // Next base change will recalculate derived
       base.set(5);
       Reaction.flush();
-      expect(derived.get()).toBe(10); // Back to calculated value
+      expect(derived.get()).toBe(10);
     });
 
     // Test no over-reactivity
@@ -794,9 +794,8 @@ describe.concurrent('Signal', () => {
       const firstResult = derived.get();
       expect(firstResult.doubled).toBe(0);
 
-      // Verify no cloning
       const secondResult = derived.get();
-      expect(firstResult).toBe(secondResult); // Same reference
+      expect(firstResult).toBe(secondResult);
     });
 
     // Test conditional dependencies
@@ -944,6 +943,39 @@ describe.concurrent('Signal', () => {
       // This is hard to test directly, but we can verify the structure is correct
       expect(derived._derivedReaction).toBeDefined();
     });
+
+    it('derive inside a parent reaction does not accumulate subscribers across re-runs', () => {
+      const source = new Signal(1);
+      Reaction.create(() => {
+        source.derive(v => v * 2);
+      });
+
+      for (let i = 1; i <= 5; i++) {
+        source.set(i);
+        Reaction.flush();
+      }
+
+      // 1 subscriber: the parent reaction. Each derive() inside spawns an
+      // internal reaction scoped to the parent's lifetime, not a long-lived
+      // independent observer.
+      expect(source.dependency.subscribers.size).toBe(1);
+    });
+
+    it('Signal.computed inside a parent reaction does not accumulate subscribers across re-runs', () => {
+      const a = new Signal(1);
+      const b = new Signal(10);
+      Reaction.create(() => {
+        Signal.computed(() => a.get() + b.get());
+      });
+
+      for (let i = 1; i <= 5; i++) {
+        a.set(i);
+        Reaction.flush();
+      }
+
+      expect(a.dependency.subscribers.size).toBe(1);
+      expect(b.dependency.subscribers.size).toBe(1);
+    });
   });
 
   /*******************************
@@ -963,6 +995,888 @@ describe.concurrent('Signal', () => {
     it('should return true for objects created via Object.create(Signal.prototype)', () => {
       const fake = Object.create(Signal.prototype);
       expect(fake instanceof Signal).toBe(true);
+    });
+  });
+});
+
+describe('Signal API', () => {
+  /***********************************************
+   * Constructor and options
+   ***********************************************/
+
+  describe('Constructor', () => {
+    it('exposes the initial value via get(), value, and peek() on first access', () => {
+      const counter = new Signal(7);
+      expect(counter.get()).toBe(7);
+      expect(counter.value).toBe(7);
+      expect(counter.peek()).toBe(7);
+    });
+
+    it('accepts undefined as an initial value', () => {
+      const blank = new Signal(undefined);
+      expect(blank.get()).toBe(undefined);
+      expect(blank.peek()).toBe(undefined);
+    });
+
+    it('accepts null as an initial value without crashing or cloning', () => {
+      const empty = new Signal(null);
+      expect(empty.get()).toBe(null);
+    });
+
+    it('clones object initial values by default so external mutations do not leak in', () => {
+      const original = { count: 0 };
+      const signal = new Signal(original);
+      original.count = 99;
+      // Internal state should be insulated from later mutation of the source
+      expect(signal.peek().count).toBe(0);
+    });
+
+    it('does NOT clone when allowClone is false — external mutation reflects through peek()', () => {
+      const original = { count: 0 };
+      const signal = new Signal(original, { allowClone: false });
+      original.count = 99;
+      expect(signal.peek().count).toBe(99);
+    });
+
+    it('uses a custom equality function to decide whether set() re-fires subscribers', () => {
+      // only the id field counts as a change
+      const callback = vi.fn();
+      const user = new Signal(
+        { id: 1, name: 'Alice', lastLogin: '2023-01-01' },
+        { equalityFunction: (oldUser, newUser) => oldUser.id === newUser.id },
+      );
+      user.subscribe(callback);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      // Different id — change
+      user.set({ id: 2, name: 'Bob', lastLogin: '2023-01-02' });
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(2);
+
+      // Same id — no fire even though name changed
+      user.set({ id: 2, name: 'Robert', lastLogin: '2023-01-03' });
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('uses a custom clone function when provided', () => {
+      const cloneSpy = vi.fn(value => ({ ...value, cloned: true }));
+      const signal = new Signal({ name: 'Alice' }, { cloneFunction: cloneSpy });
+      expect(cloneSpy).toHaveBeenCalled();
+      expect(signal.peek().cloned).toBe(true);
+    });
+  });
+
+  /***********************************************
+   * get() / value getter — reactive read with cloning
+   ***********************************************/
+
+  describe('get() and value', () => {
+    it('reading inside a Reaction creates a dependency so changes re-run the reaction', () => {
+      const counter = new Signal(0);
+      const cb = vi.fn(() => counter.get());
+      Reaction.create(cb);
+      expect(cb).toHaveBeenCalledTimes(1);
+
+      counter.set(1);
+      Reaction.flush();
+      expect(cb).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns a cloned object each call so callers cannot poison internal state by mutating the result', () => {
+      const signal = new Signal({ inner: 'untouched' });
+      const a = signal.get();
+      a.inner = 'mutated';
+      // Second get returns a fresh clone — first mutation did not stick
+      expect(signal.get().inner).toBe('untouched');
+    });
+
+    it('value getter is an alias for get() — both produce the same value', () => {
+      const counter = new Signal(42);
+      expect(counter.value).toBe(counter.get());
+    });
+
+    it('value setter is an alias for set() — both apply equality-checked updates', () => {
+      const counter = new Signal(0);
+      counter.value = 5;
+      expect(counter.get()).toBe(5);
+    });
+  });
+
+  /***********************************************
+   * set() — equality-checked write
+   ***********************************************/
+
+  describe('set()', () => {
+    it('writes a new primitive value and triggers subscribers', () => {
+      const callback = vi.fn();
+      const counter = new Signal(0);
+      counter.subscribe(callback);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      counter.set(1);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('skips re-firing subscribers when the new value is equal under default deep equality', () => {
+      const callback = vi.fn();
+      const signal = new Signal({ a: 1, b: 2 });
+      signal.subscribe(callback);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      signal.set({ a: 1, b: 2 });
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('treats NaN as equal to NaN (Object.is-style) under default deep equality', () => {
+      const callback = vi.fn();
+      const signal = new Signal(NaN);
+      signal.subscribe(callback);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      signal.set(NaN);
+      Reaction.flush();
+      // Documented contract: set with equal value does not re-fire.
+      // For NaN, the framework's deep equality must recognise NaN === NaN
+      // or the signal will spuriously re-fire whenever NaN is re-written.
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  /***********************************************
+   * peek() — non-reactive read
+   ***********************************************/
+
+  describe('peek()', () => {
+    it('reading inside a Reaction does NOT create a dependency', () => {
+      const counter = new Signal(0);
+      const multiplier = new Signal(2);
+      const cb = vi.fn(() => {
+        counter.get();
+        multiplier.peek();
+      });
+      Reaction.create(cb);
+      expect(cb).toHaveBeenCalledTimes(1);
+
+      // Changing the peeked signal must NOT re-fire the reaction
+      multiplier.set(10);
+      Reaction.flush();
+      expect(cb).toHaveBeenCalledTimes(1);
+
+      // But changing the dep'd signal still does
+      counter.set(5);
+      Reaction.flush();
+      expect(cb).toHaveBeenCalledTimes(2);
+    });
+
+    it('clones object values just like get(), insulating callers from mutation', () => {
+      const signal = new Signal({ level: 1 });
+      const snapshot = signal.peek();
+      snapshot.level = 99;
+      expect(signal.peek().level).toBe(1);
+    });
+  });
+
+  /***********************************************
+   * subscribe() — callback observer that fires once synchronously + on changes
+   ***********************************************/
+
+  describe('subscribe()', () => {
+    it('runs the callback immediately on first subscribe so observers see the current value', () => {
+      const callback = vi.fn();
+      const signal = new Signal('hi');
+      signal.subscribe(callback);
+      // First-run happens synchronously inside Reaction.create
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback.mock.calls[0][0]).toBe('hi');
+    });
+
+    it('passes the new value and a reaction handle to the callback on every fire', () => {
+      const callback = vi.fn();
+      const signal = new Signal('first');
+      signal.subscribe(callback);
+      Reaction.flush();
+
+      signal.set('second');
+      Reaction.flush();
+
+      const lastCall = callback.mock.calls.at(-1);
+      expect(lastCall[0]).toBe('second');
+      expect(lastCall[1]).toHaveProperty('stop');
+      expect(typeof lastCall[1].stop).toBe('function');
+    });
+
+    it('returns a handle whose stop() prevents further fires', () => {
+      const callback = vi.fn();
+      const signal = new Signal(0);
+      const handle = signal.subscribe(callback);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      handle.stop();
+      signal.set(1);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  /***********************************************
+   * clear() — set to undefined
+   ***********************************************/
+
+  describe('clear()', () => {
+    it('sets the value to undefined', () => {
+      const signal = new Signal('something');
+      signal.clear();
+      expect(signal.get()).toBeUndefined();
+    });
+
+    it('triggers subscribers when clearing a non-undefined value', () => {
+      const callback = vi.fn();
+      const signal = new Signal({ name: 'Alice' });
+      signal.subscribe(callback);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      signal.clear();
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(callback.mock.calls.at(-1)[0]).toBeUndefined();
+    });
+
+    it('does NOT re-fire subscribers when clearing an already-undefined signal', () => {
+      const callback = vi.fn();
+      const signal = new Signal(undefined);
+      signal.subscribe(callback);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      signal.clear();
+      Reaction.flush();
+      // Equality blocks the no-op
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  /***********************************************
+   * notify() — force-fire bypassing equality
+   ***********************************************/
+
+  describe('notify()', () => {
+    it('force-triggers subscribers even when the value reference is identical', () => {
+      // mutate the underlying object via peek(), then notify() so subscribers re-run.
+      const callback = vi.fn();
+      const data = new Signal({ count: 0 }, { allowClone: false });
+      Reaction.create(() => callback(data.get().count));
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenLastCalledWith(0);
+
+      data.peek().count = 5;
+      data.notify();
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(callback).toHaveBeenLastCalledWith(5);
+    });
+
+    it('does not change the stored value', () => {
+      const signal = new Signal('stable');
+      signal.notify();
+      expect(signal.peek()).toBe('stable');
+    });
+  });
+
+  /***********************************************
+   * depend() — register dependency without reading
+   ***********************************************/
+
+  describe('depend()', () => {
+    it('registers a dependency in the current reaction so changes re-fire it', () => {
+      const theme = new Signal({ mode: 'dark' });
+      const callback = vi.fn();
+      Reaction.create(() => {
+        theme.depend();
+        callback();
+      });
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      theme.set({ mode: 'light' });
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('outside a reactive context, calling depend() is a no-op (does not throw, no subscribers)', () => {
+      const signal = new Signal('any');
+      expect(() => signal.depend()).not.toThrow();
+      expect(signal.hasDependents()).toBe(false);
+    });
+  });
+
+  /***********************************************
+   * hasDependents() — boolean introspection
+   ***********************************************/
+
+  describe('hasDependents()', () => {
+    it('returns false before any reaction subscribes', () => {
+      const signal = new Signal(0);
+      expect(signal.hasDependents()).toBe(false);
+    });
+
+    it('returns true while a reaction depends on the signal, false after it stops', () => {
+      const signal = new Signal(0);
+      const reaction = Reaction.create(() => signal.get());
+      expect(signal.hasDependents()).toBe(true);
+      reaction.stop();
+      expect(signal.hasDependents()).toBe(false);
+    });
+
+    it('returns false after the only subscribing reaction is stopped, even after notify()', () => {
+      const signal = new Signal(0);
+      const reaction = Reaction.create(() => signal.get());
+      reaction.stop();
+      signal.notify();
+      Reaction.flush();
+      expect(signal.hasDependents()).toBe(false);
+    });
+  });
+
+  /***********************************************
+   * mutate() — safe in-place mutation
+   ***********************************************/
+
+  describe('mutate()', () => {
+    let warnSpy;
+    beforeEach(() => {
+      warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    });
+    afterEach(() => {
+      warnSpy.mockRestore();
+    });
+
+    it('in-place mutation without returning fires subscribers when the value changed', () => {
+      const callback = vi.fn();
+      const items = new Signal(['apple', 'banana']);
+      items.subscribe(callback);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      items.mutate(arr => {
+        arr.push('orange');
+      });
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(items.get()).toEqual(['apple', 'banana', 'orange']);
+    });
+
+    it('returning a brand-new value from the mutation function sets it as the new value', () => {
+      const count = new Signal(5);
+      count.mutate(val => val * 2);
+      expect(count.get()).toBe(10);
+    });
+
+    it('in-place mutation that does not actually change the value does NOT re-fire subscribers', () => {
+      const callback = vi.fn();
+      const items = new Signal(['a', 'b']);
+      items.subscribe(callback);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      // mutate that touches nothing — equality says no-change
+      items.mutate(() => {});
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('returning the same reference that was mutated in place warns in dev', () => {
+      const signal = new Signal([1, 2, 3]);
+      signal.mutate(arr => {
+        arr.push(4);
+        return arr;
+      });
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      expect(warnSpy.mock.calls[0][0]).toMatch(/same reference/);
+    });
+  });
+
+  /***********************************************
+   * Array push / unshift / splice — mutating helpers that bypass equality
+   ***********************************************/
+
+  describe('push() / unshift() / splice() — array helpers', () => {
+    it('push() appends a single item and triggers subscribers', () => {
+      const callback = vi.fn();
+      const notifications = new Signal([{ text: 'Welcome!', read: false }]);
+      notifications.subscribe(callback);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      notifications.push({ text: 'New message', read: false });
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(notifications.get()).toHaveLength(2);
+      expect(notifications.get()[1].text).toBe('New message');
+    });
+
+    it('push() accepts multiple arguments and appends them in order', () => {
+      const items = new Signal([1]);
+      items.push(2, 3, 4);
+      expect(items.get()).toEqual([1, 2, 3, 4]);
+    });
+
+    it('unshift() prepends items so the new value lands at the front', () => {
+      const callback = vi.fn();
+      const messages = new Signal([{ user: 'system', text: 'started' }]);
+      messages.subscribe(callback);
+      Reaction.flush();
+
+      messages.unshift({ user: 'Alice', text: 'Hello!' });
+      Reaction.flush();
+      expect(messages.get()[0].user).toBe('Alice');
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('splice() can insert without removing any items', () => {
+      const playlist = new Signal(['t1', 'New', 't3', 't4']);
+      playlist.splice(2, 0, 'Bonus 1', 'Bonus 2');
+      expect(playlist.get()).toEqual(['t1', 'New', 'Bonus 1', 'Bonus 2', 't3', 't4']);
+    });
+
+    it('splice() removing the entire array yields an empty array', () => {
+      const items = new Signal(['a', 'b', 'c']);
+      items.splice(0, 3);
+      expect(items.get()).toEqual([]);
+    });
+  });
+
+  /***********************************************
+   * map() / filter() — in-place transformation helpers
+   ***********************************************/
+
+  describe('map() / filter() — transformation helpers', () => {
+    it('map() replaces the array in place with the transformed values', () => {
+      const prices = new Signal([10, 20, 30, 40]);
+      prices.map(price => price * 0.9);
+      expect(prices.get()).toEqual([9, 18, 27, 36]);
+    });
+
+    it('filter() keeps only items that match the predicate', () => {
+      const numbers = new Signal([1, 2, 3, 4, 5, 6]);
+      numbers.filter(n => n % 2 === 0);
+      expect(numbers.get()).toEqual([2, 4, 6]);
+    });
+
+    it('filter() to an empty result yields an empty array (not undefined)', () => {
+      const items = new Signal([1, 2, 3]);
+      items.filter(() => false);
+      expect(items.get()).toEqual([]);
+    });
+
+    it('map() and filter() both trigger subscribers on transformation', () => {
+      const callback = vi.fn();
+      const items = new Signal([1, 2, 3]);
+      items.subscribe(callback);
+      Reaction.flush();
+
+      items.map(x => x + 1);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(2);
+
+      items.filter(x => x > 2);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(3);
+      expect(items.get()).toEqual([3, 4]);
+    });
+  });
+
+  /***********************************************
+   * Index helpers — getIndex / setIndex / removeIndex
+   ***********************************************/
+
+  describe('getIndex() / setIndex() / removeIndex()', () => {
+    it('getIndex() reads the item at a given position', () => {
+      const colors = new Signal(['red', 'green', 'blue']);
+      expect(colors.getIndex(0)).toBe('red');
+      expect(colors.getIndex(2)).toBe('blue');
+    });
+
+    it('getIndex() creates a dependency, so writes via setIndex() re-fire reactions', () => {
+      const colors = new Signal(['red', 'green', 'blue', 'yellow']);
+      const fn = vi.fn();
+      Reaction.create(() => fn(colors.getIndex(0)));
+      expect(fn).toHaveBeenCalledTimes(1);
+      expect(fn).toHaveBeenLastCalledWith('red');
+
+      colors.setIndex(0, 'purple');
+      Reaction.flush();
+      expect(fn).toHaveBeenCalledTimes(2);
+      expect(fn).toHaveBeenLastCalledWith('purple');
+    });
+
+    it('setIndex() replaces the item at the given index', () => {
+      const letters = new Signal(['a', 'b', 'c']);
+      letters.setIndex(1, 'x');
+      expect(letters.get()).toEqual(['a', 'x', 'c']);
+    });
+
+    it('removeIndex() drops the item at the given index and shortens the array', () => {
+      const tasks = new Signal([
+        { text: 'Learn', completed: true },
+        { text: 'Write', completed: false },
+      ]);
+      tasks.removeIndex(0);
+      expect(tasks.get()).toEqual([{ text: 'Write', completed: false }]);
+    });
+  });
+
+  /***********************************************
+   * setArrayProperty — single-index or all-items property set
+   ***********************************************/
+
+  describe('setArrayProperty()', () => {
+    it('with three arguments, sets the property on the object at the given index only', () => {
+      const tasks = new Signal([
+        { id: 1, title: 'Buy groceries', completed: false },
+        { id: 2, title: 'Walk the dog', completed: false },
+      ]);
+      tasks.setArrayProperty(0, 'completed', true);
+      expect(tasks.get()).toEqual([
+        { id: 1, title: 'Buy groceries', completed: true },
+        { id: 2, title: 'Walk the dog', completed: false },
+      ]);
+    });
+
+    it('with two arguments, sets the property on every object in the array', () => {
+      const tasks = new Signal([
+        { id: 1, completed: false },
+        { id: 2, completed: false },
+        { id: 3, completed: false },
+      ]);
+      tasks.setArrayProperty('completed', true);
+      expect(tasks.get().every(t => t.completed === true)).toBe(true);
+    });
+  });
+
+  /***********************************************
+   * ID-based collection helpers
+   ***********************************************/
+
+  describe('ID-based helpers', () => {
+    const users = () => [
+      { id: 'user1', name: 'Alice', status: 'online' },
+      { id: 'user2', name: 'Bob', status: 'offline' },
+      { id: 'user3', name: 'Carol', status: 'online' },
+    ];
+
+    it('getItem() locates an object by its id field', () => {
+      const signal = new Signal(users());
+      expect(signal.getItem('user2')).toEqual({ id: 'user2', name: 'Bob', status: 'offline' });
+    });
+
+    it('getItem() returns undefined when no item matches the id', () => {
+      const signal = new Signal(users());
+      expect(signal.getItem('missing')).toBeUndefined();
+    });
+
+    it('getItemIndex() returns the index of the matching item, or -1 when not found', () => {
+      const signal = new Signal(users());
+      expect(signal.getItemIndex('user2')).toBe(1);
+      expect(signal.getItemIndex('unknown')).toBe(-1);
+    });
+
+    it('replaceItem() swaps the entire object matching the id while leaving others untouched', () => {
+      const contacts = new Signal([
+        { id: 'alice123', name: 'Alice', email: 'alice@email.com' },
+        { id: 'bob456', name: 'Bob', email: 'bob@email.com' },
+      ]);
+      const updated = { id: 'alice123', name: 'Alice Smith', email: 'asmith@email.com' };
+      contacts.replaceItem('alice123', updated);
+      expect(contacts.get()[0]).toEqual(updated);
+      expect(contacts.get()[1].name).toBe('Bob');
+    });
+
+    it('removeItem() removes the matching object and leaves the rest in order', () => {
+      const signal = new Signal(users());
+      signal.removeItem('user2');
+      expect(signal.get().map(u => u.id)).toEqual(['user1', 'user3']);
+    });
+
+    it('setProperty(id, field, value) on an array signal updates the named field on the matching item', () => {
+      const signal = new Signal(users());
+      signal.setProperty('user2', 'status', 'online');
+      expect(signal.getItem('user2').status).toBe('online');
+      expect(signal.getItem('user1').status).toBe('online'); // others untouched
+    });
+
+    it('setProperty(field, value) on an object signal updates one field of that object', () => {
+      const user = new Signal({ name: 'Alice', age: 30 });
+      user.setProperty('name', 'Bob');
+      expect(user.get()).toEqual({ name: 'Bob', age: 30 });
+    });
+
+    it('recognises id from any of: id, _id, hash, key fields', () => {
+      const signal = new Signal();
+      expect(signal.getID({ id: 'a' })).toBe('a');
+      expect(signal.getID({ _id: 'b' })).toBe('b');
+      expect(signal.getID({ hash: 'c' })).toBe('c');
+      expect(signal.getID({ key: 'd' })).toBe('d');
+    });
+
+    it('hasID() returns true when the item carries that id under any recognised field', () => {
+      const signal = new Signal();
+      expect(signal.hasID({ id: 'x' }, 'x')).toBe(true);
+      expect(signal.hasID({ _id: 'x' }, 'x')).toBe(true);
+      expect(signal.hasID({ key: 'x' }, 'x')).toBe(true);
+      expect(signal.hasID({ id: 'x' }, 'y')).toBe(false);
+    });
+  });
+
+  /***********************************************
+   * toggle() — boolean flip
+   ***********************************************/
+
+  describe('toggle()', () => {
+    it('flips false to true', () => {
+      const flag = new Signal(false);
+      flag.toggle();
+      expect(flag.get()).toBe(true);
+    });
+
+    it('flips true to false', () => {
+      const flag = new Signal(true);
+      flag.toggle();
+      expect(flag.get()).toBe(false);
+    });
+
+    it('a pair of toggle() calls leaves the value where it started', () => {
+      const flag = new Signal(false);
+      flag.toggle();
+      flag.toggle();
+      expect(flag.get()).toBe(false);
+    });
+
+    it('triggers subscribers on each flip', () => {
+      const callback = vi.fn();
+      const flag = new Signal(false);
+      flag.subscribe(callback);
+      Reaction.flush();
+      flag.toggle();
+      Reaction.flush();
+      flag.toggle();
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  /***********************************************
+   * increment() / decrement()
+   ***********************************************/
+
+  describe('increment() / decrement()', () => {
+    it('increment() with no argument adds 1', () => {
+      const counter = new Signal(0);
+      counter.increment();
+      expect(counter.get()).toBe(1);
+    });
+
+    it('increment(amount) adds the given amount', () => {
+      const counter = new Signal(0);
+      counter.increment(10);
+      expect(counter.get()).toBe(10);
+    });
+
+    it('increment(amount, max) caps the result at max', () => {
+      const counter = new Signal(95);
+      counter.increment(10, 100);
+      expect(counter.get()).toBe(100);
+    });
+
+    it('decrement() with no argument subtracts 1', () => {
+      const score = new Signal(100);
+      score.decrement();
+      expect(score.get()).toBe(99);
+    });
+
+    it('decrement(amount) subtracts the given amount', () => {
+      const score = new Signal(100);
+      score.decrement(10);
+      expect(score.get()).toBe(90);
+    });
+
+    it('decrement(amount, min) floors the result at min', () => {
+      const score = new Signal(5);
+      score.decrement(10, 0);
+      expect(score.get()).toBe(0);
+    });
+  });
+
+  /***********************************************
+   * now() — set to current Date
+   ***********************************************/
+
+  describe('now()', () => {
+    it('replaces the value with a fresh Date instance', () => {
+      const lastUpdated = new Signal(new Date(0));
+      lastUpdated.now();
+      const stored = lastUpdated.get();
+      expect(stored).toBeInstanceOf(Date);
+      // The new timestamp should be strictly later than the epoch we seeded
+      expect(stored.getTime()).toBeGreaterThan(0);
+    });
+
+    it('triggers subscribers when called', async () => {
+      const callback = vi.fn();
+      const lastUpdated = new Signal(new Date(0));
+      lastUpdated.subscribe(callback);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      // Spacing to guarantee a different millisecond timestamp
+      await new Promise(r => setTimeout(r, 2));
+      lastUpdated.now();
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  /***********************************************
+   * derive() — single-source transformation
+   ***********************************************/
+
+  describe('derive()', () => {
+    it('returns a Signal whose value is the transformed source value', () => {
+      const numbers = new Signal([1, 2, 3, 4, 5]);
+      const count = numbers.derive(arr => arr.length);
+      expect(count).toBeInstanceOf(Signal);
+      expect(count.get()).toBe(5);
+    });
+
+    it('updates the derived signal automatically when the source changes', () => {
+      const numbers = new Signal([1, 2, 3]);
+      const count = numbers.derive(arr => arr.length);
+      numbers.push(4);
+      Reaction.flush();
+      expect(count.get()).toBe(4);
+    });
+
+    it('chained derive() pipelines refresh through every link when the source moves', () => {
+      const base = new Signal(2);
+      const doubled = base.derive(v => v * 2);
+      const quadrupled = doubled.derive(v => v * 2);
+      base.set(3);
+      Reaction.flush();
+      expect(doubled.get()).toBe(6);
+      expect(quadrupled.get()).toBe(12);
+    });
+  });
+
+  /***********************************************
+   * Signal.computed — multi-source computation
+   ***********************************************/
+
+  describe('Signal.computed', () => {
+    it('returns a Signal whose value is the result of the compute function', () => {
+      const firstName = new Signal('John');
+      const lastName = new Signal('Doe');
+      const fullName = Signal.computed(() => `${firstName.get()} ${lastName.get()}`);
+      expect(fullName).toBeInstanceOf(Signal);
+      expect(fullName.get()).toBe('John Doe');
+    });
+
+    it('updates when ANY tracked dependency changes', () => {
+      const a = new Signal(1);
+      const b = new Signal(2);
+      const sum = Signal.computed(() => a.get() + b.get());
+      expect(sum.get()).toBe(3);
+
+      a.set(10);
+      Reaction.flush();
+      expect(sum.get()).toBe(12);
+
+      b.set(20);
+      Reaction.flush();
+      expect(sum.get()).toBe(30);
+    });
+
+    it('a reaction observing the computed re-runs when an upstream dependency changes', () => {
+      const a = new Signal(1);
+      const b = new Signal(2);
+      const sum = Signal.computed(() => a.get() + b.get());
+      const observed = vi.fn();
+      Reaction.create(() => observed(sum.get()));
+      expect(observed).toHaveBeenCalledTimes(1);
+
+      a.set(10);
+      Reaction.flush();
+      expect(observed).toHaveBeenCalledTimes(2);
+      expect(observed).toHaveBeenLastCalledWith(12);
+    });
+  });
+
+  /***********************************************
+   * instanceof and identity
+   ***********************************************/
+
+  describe('instanceof Signal', () => {
+    it('matches signals created with new Signal()', () => {
+      expect(new Signal(0) instanceof Signal).toBe(true);
+    });
+
+    it('matches derived signals returned by derive()', () => {
+      const source = new Signal(1);
+      expect(source.derive(v => v + 1) instanceof Signal).toBe(true);
+    });
+
+    it('matches computed signals returned by Signal.computed', () => {
+      expect(Signal.computed(() => 1) instanceof Signal).toBe(true);
+    });
+
+    it('does not match plain objects or primitives', () => {
+      expect({} instanceof Signal).toBe(false);
+      expect(null instanceof Signal).toBe(false);
+      expect(undefined instanceof Signal).toBe(false);
+      expect(42 instanceof Signal).toBe(false);
+    });
+  });
+
+  /***********************************************
+   * Negative path coverage — type misuse on helpers
+   * The framework documents helpers per data type (push for arrays,
+   * toggle for booleans, etc.). When a user calls a helper that
+   * doesn't apply to the signal's value, what happens?
+   * These tests document the actual behaviour as the user-visible contract.
+   ***********************************************/
+
+  describe('Type-mismatched helper calls', () => {
+    it('toggle() on a non-boolean coerces via NOT — numbers become false', () => {
+      // !1 = false
+      const signal = new Signal(1);
+      signal.toggle();
+      expect(signal.get()).toBe(false);
+    });
+
+    it('toggle() on undefined becomes true', () => {
+      const signal = new Signal(undefined);
+      signal.toggle();
+      expect(signal.get()).toBe(true);
+    });
+
+    it('increment() on a string concatenates — numeric helpers are not type-guarded', () => {
+      // uses + operator without coercion
+      const signal = new Signal('count');
+      signal.increment(1);
+      expect(signal.get()).toBe('count1');
+    });
+
+    it('push() on a non-array signal throws because the underlying value has no push method', () => {
+      // calls this.currentValue.push directly
+      const signal = new Signal(42);
+      expect(() => signal.push('x')).toThrow();
     });
   });
 });

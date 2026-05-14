@@ -24,6 +24,8 @@ export class Scheduler {
 
   static flush() {
     Scheduler.isFlushScheduled = false;
+    // capture first error but finish draining so one faulty reaction or afterFlush callback can't jam the queue
+    let firstError;
     let iterations = 0;
     while (Scheduler.pendingReactions.size > 0) {
       if (++iterations > Scheduler.maxFlushIterations) {
@@ -34,15 +36,27 @@ export class Scheduler {
       const reactions = [...Scheduler.pendingReactions];
       Scheduler.pendingReactions.clear();
       for (let i = 0; i < reactions.length; i++) {
-        reactions[i].run();
+        try {
+          reactions[i].run();
+        }
+        catch (e) {
+          if (!firstError) { firstError = e; }
+        }
       }
     }
 
     const callbacks = Scheduler.afterFlushCallbacks;
     Scheduler.afterFlushCallbacks = [];
     for (let i = 0; i < callbacks.length; i++) {
-      callbacks[i]();
+      try {
+        callbacks[i]();
+      }
+      catch (e) {
+        if (!firstError) { firstError = e; }
+      }
     }
+
+    if (firstError) { throw firstError; }
   }
 
   static afterFlush(callback) {

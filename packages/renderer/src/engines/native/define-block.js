@@ -1,5 +1,5 @@
 import { Reaction } from '@semantic-ui/reactivity';
-import { isRecovery, isTracing } from '../../helpers.js';
+import { isRecovery, isTracing, unwrap } from '../../helpers.js';
 import { makePlace, UNSAFE_HTML } from './commit-hooks.js';
 
 // Block-author helper: create a child data context that inherits from
@@ -51,11 +51,11 @@ export function defineBlock(config) {
     );
   }
 
-  // `type: 'value'` selects the lean dispatch (see makeValueDispatch
+  // `type: 'value'` selects the lean dispatch (see defineValueBlock
   // below). The renderer reads `dispatch.type === 'value'` and skips
   // DynamicRegion allocation.
   if (config.type === 'value') {
-    return makeValueDispatch(config);
+    return defineValueBlock(config);
   }
 
   // Hooks (compute/render/update/hydrate/create/destroy/error) are invoked
@@ -253,19 +253,17 @@ export function defineBlock(config) {
   return dispatch;
 }
 
-// Module-level body — shared across every primitive value dispatch.
-function primitiveValueBody(state, comp) {
+// shared commit fn for text-value dispatches
+function commitText(state, comp) {
   if (comp.firstRun && state.hydrating) {
     state.compute(state);
     return;
   }
-  state.anchor.data = state.compute(state) ?? '';
+  state.anchor.data = unwrap(state.compute(state)) ?? '';
 }
 
-// Companion to primitiveValueBody for unsafeHTML payloads. Mutable
-// fields (ownedNodes, endAnchor) live on state so re-fires can update
-// them.
-function unsafeHTMLValueBody(state, comp) {
+// mutable fields (ownedNodes, endAnchor) live on state so re-fires can update them
+function commitUnsafeHTML(state, comp) {
   if (comp.firstRun && state.hydrating) {
     state.compute(state);
     return;
@@ -310,13 +308,13 @@ function unsafeHTMLValueBody(state, comp) {
 //   • create(ctx) — returns `self`, reached as state.self.
 //   • evaluateText — forwarded for raw-text contexts.
 //   • static(node) — when truthy, skip Reaction wiring; write once.
-function makeValueDispatch(config) {
+function defineValueBlock(config) {
   const create = config.create;
   const compute = config.compute;
   const hydrate = config.hydrate;
   const isStatic = config.static;
 
-  function valueDispatch(ctx) {
+  const dispatch = function(ctx) {
     const { comment, node, data, scope, renderer, hydrating } = ctx;
 
     // self stays null when there's no `create` hook — skips the empty-obj
@@ -374,20 +372,20 @@ function makeValueDispatch(config) {
       return;
     }
 
-    const body = node.unsafeHTML ? unsafeHTMLValueBody : primitiveValueBody;
+    const commit = node.unsafeHTML ? commitUnsafeHTML : commitText;
     scope.track(Reaction.create((comp) => {
       if (!comp.firstRun && !anchor.isConnected) {
         comp.stop();
         return;
       }
-      body(state, comp);
+      commit(state, comp);
     }));
-  }
+  };
 
   if (config.evaluateText) {
-    valueDispatch.evaluateText = (bag) => config.evaluateText(bag);
+    dispatch.evaluateText = (bag) => config.evaluateText(bag);
   }
-  valueDispatch.definition = config;
-  valueDispatch.type = 'value';
-  return valueDispatch;
+  dispatch.definition = config;
+  dispatch.type = 'value';
+  return dispatch;
 }

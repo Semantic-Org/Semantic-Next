@@ -205,6 +205,17 @@ Don't invent artificial failures to justify your existence. The user spawned you
 
 **Don't over-index on coverage numbers.** A test that artificially covers 10 lines of code but exercises no real usage pattern is worse than no test at all — it creates a false sense of security.
 
+**Don't leak report framing into test source.** The "FINDING," frequency score, severity, and recommendation classifications are for the report you return — not for the test file. A test that surfaces a real gap gets a descriptive `it()` name that reads like a release note, not a prefix:
+
+```js
+❌ it('FINDING: fully static <style> with { braces does not round-trip')
+✅ it('preserves <style> rule braces when no template expressions are present')
+```
+
+If the test reveals a known bug, convert it to `it.todo(...)` with the intended-behavior name and a one-line `//` above it explaining the bug. Never ship a test that asserts the buggy behavior as a passing assertion — it locks in the bug and breaks for the wrong reason when someone fixes it.
+
+The same rule for citation markers: `[source X]`, `[skill X]`, `[example X]`, `[inference]`, `[synthesis]`, `Witness:` — all live in your workspace doc, not the test source. See [grounded-testing § Labels and intent prose leaking into test source](./grounded-testing.md#labels-and-intent-prose-leaking-into-test-source).
+
 ---
 
 ## Worked Example: CDN Combo Endpoint

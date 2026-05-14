@@ -1,9 +1,11 @@
 import { arrayFromObject, isArray, isEmpty } from '@semantic-ui/utils';
-import { isBlockClose, isBlockOpen } from '../../../build-html-string.js';
+import { isBlockClose, isBlockOpen, MARKER_VERSION } from '../../../build-html-string.js';
+import { decodeItemKey, getCollectionType, getEachData, getItemID } from '../../../shared/each.js';
 import { defineBlock } from '../define-block.js';
 import { ReactiveDataContext } from '../reactive-context.js';
-import { decodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from '../shared/each.js';
 import { registerBlock } from './registry.js';
+
+export const SUI_ITEM_MARKER = `sui-item:${MARKER_VERSION}:`;
 
 /*
 
@@ -32,10 +34,6 @@ import { registerBlock } from './registry.js';
   other block honors.
 
 */
-
-function getCollectionType(items) {
-  return isArray(items) ? 'array' : 'object';
-}
 
 // Allocate once per record at first reconcile (createSnapshot). On
 // subsequent reconciles, refreshSnapshotAndDetect both diffs the item

@@ -105,8 +105,34 @@ export function parseAttributeParts(attrValue) {
 }
 
 // HTML raw text elements — browser treats content as text, not markup
-const RAW_TEXT_OPEN = /\<(script|style|textarea|title)[\s>]/i;
-const RAW_TEXT_CLOSE = /\<\/(script|style|textarea|title)\s*\>/i;
+export const RAW_TEXT_OPEN = /\<(script|style|textarea|title)[\s>]/gi;
+export const RAW_TEXT_CLOSE = /\<\/(script|style|textarea|title)\s*\>/i;
+
+// precompute per-tag close regexes so we don't allocate one per html chunk scan
+const RAW_TEXT_CLOSE_BY_TAG = {
+  script: /<\/script\s*>/i,
+  style: /<\/style\s*>/i,
+  textarea: /<\/textarea\s*>/i,
+  title: /<\/title\s*>/i,
+};
+
+// shared by buildHTMLString and the server renderer so both flip into raw-text mode at the same boundary
+// callers can pass a full buffer or just the new chunk — the function only needs the substring covering the last open tag to decide
+export function isInsideRawText(buffer) {
+  // last open wins — earlier raw-text elements may already be closed
+  // exec loop (not matchAll) to avoid per-call iterator allocation in the hot path
+  RAW_TEXT_OPEN.lastIndex = 0;
+  let lastMatch = null;
+  let match;
+  while ((match = RAW_TEXT_OPEN.exec(buffer)) !== null) {
+    lastMatch = match;
+  }
+  if (!lastMatch) { return false; }
+  const tagName = lastMatch[1].toLowerCase();
+  const tagEnd = buffer.indexOf('>', lastMatch.index);
+  if (tagEnd === -1) { return false; }
+  return !RAW_TEXT_CLOSE_BY_TAG[tagName].test(buffer.slice(tagEnd));
+}
 
 /*******************************
     Binding Classification
@@ -170,30 +196,35 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
   let insideRawText = false;
   let rawTextNodes = null; // collected AST nodes for the raw text content
 
-  // Check if buffer has entered/exited a raw text element after html node
-  const updateRawTextState = (html) => {
-    if (!insideRawText) {
-      // Check if we just entered a raw text element (the > that closes its opening tag)
-      const openMatch = html.match(RAW_TEXT_OPEN);
-      if (openMatch) {
-        // Confirm the tag has been closed with >
-        const tagStart = html.lastIndexOf('<' + openMatch[1]);
-        if (tagStart !== -1 && html.indexOf('>', tagStart) !== -1) {
-          insideRawText = true;
-          rawTextNodes = [];
-        }
-      }
-    }
-    else {
-      // Check if we just exited
-      if (RAW_TEXT_CLOSE.test(html)) {
-        // Emit the raw text marker AFTER the closing tag
+  // when inside raw-text, marker must land right after the close tag (not at chunk end)
+  // since the AST often combines `</style>` with following siblings into one html node
+  const appendHtml = (html) => {
+    if (insideRawText) {
+      const closeMatch = html.match(RAW_TEXT_CLOSE);
+      if (closeMatch) {
+        const splitAt = closeMatch.index + closeMatch[0].length;
+        const beforeClose = html.slice(0, splitAt);
+        htmlString += beforeClose;
+        htmlBuffer += beforeClose;
         const id = entries.length;
         htmlString += `<!--${RAW_TEXT_MARKER}${id}-->`;
         entries.push({ id, type: 'rawText', nodes: rawTextNodes });
         insideRawText = false;
         rawTextNodes = null;
+        // the remainder (after </style>) may itself open another raw-text element
+        appendHtml(html.slice(splitAt));
+        return;
       }
+      htmlString += html;
+      htmlBuffer += html;
+      return;
+    }
+    htmlString += html;
+    htmlBuffer += html;
+    // buffer-wide scan — raw-text opening tags can be split across html chunks by attribute expressions like `<textarea placeholder="{x}">`, so the `<tag` and its `>` may live in different chunks
+    if (isInsideRawText(htmlBuffer)) {
+      insideRawText = true;
+      rawTextNodes = [];
     }
   };
 
@@ -201,9 +232,7 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
     for (const node of nodes) {
       switch (node.type) {
         case 'html':
-          htmlString += node.html;
-          htmlBuffer += node.html;
-          updateRawTextState(htmlBuffer);
+          appendHtml(node.html);
           break;
 
         case 'expression': {

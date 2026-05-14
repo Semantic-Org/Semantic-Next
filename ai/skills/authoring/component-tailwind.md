@@ -234,24 +234,46 @@ const createComponent = ({ $ }) => ({
 
 ### Subtemplates
 
-Sub-template content is scanned recursively. No extra setup needed:
+Sub-template content is scanned recursively. Two shapes work:
+
+**Inline object literal — sugar for a one-off subtemplate scoped to this parent:**
 
 ```js
 let definition = {
   tagName: 'ui-card',
   template: '<div class="bg-white shadow-lg">{>header}{>body}</div>',
   subTemplates: {
-    header: {
-      template: '<header class="p-4 border-b"><slot name="header"></slot></header>',
-    },
-    body: {
-      template: '<div class="p-4"><slot></slot></div>',
-    },
+    header: { template: '<header class="p-4 border-b"><slot name="header"></slot></header>' },
+    body: { template: '<div class="p-4"><slot></slot></div>' },
   },
 };
 
 definition = await TailwindPlugin(definition);
+export const UICard = defineComponent(definition);
 ```
+
+**`defineComponent` (no `tagName`) — when a subtemplate is shared across components or has enough surface (createComponent, lifecycle, events) that it warrants its own file:**
+
+```js
+// header.js
+export const header = defineComponent({
+  template: '<header class="p-4 border-b"><slot name="header"></slot></header>',
+});
+
+// component.js
+import { header } from './header.js';
+
+let definition = {
+  tagName: 'ui-card',
+  template: '<div class="bg-white shadow-lg">{>header}</div>',
+  subTemplates: { header },
+};
+
+definition = await TailwindPlugin(definition);
+export const UICard = defineComponent(definition);
+```
+
+Either form scans the same way. `defineComponent` normalizes plain-object entries into Template instances internally, so downstream code only sees one shape.
 
 ### Dark Mode via Class Toggle
 

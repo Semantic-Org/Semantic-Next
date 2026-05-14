@@ -48,6 +48,7 @@ export default {
     "mini": "spacing",
     "tiny": "spacing",
     "small": "spacing",
+    "medium": "spacing",
     "large": "spacing",
     "big": "spacing",
     "huge": "spacing",

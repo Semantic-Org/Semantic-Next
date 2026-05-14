@@ -30,6 +30,8 @@ export default {
     "flat": "styled",
     "outline": "styled",
     "ghost": "styled",
+    "left": "floated",
+    "right": "floated",
     "compact": "compact",
     "mini": "size",
     "tiny": "size",

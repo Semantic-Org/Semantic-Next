@@ -44,7 +44,7 @@
   "dependencies": {
     "@semantic-ui/component": "^0.18.0",
     "@semantic-ui/utils": "^0.18.0",
-    "tailwindcss-iso": "^1.0.6"
+    "tailwindcss-iso": "^1.0.7"
   },
   "devDependencies": {
     "@semantic-ui/internal-scripts": "^0.18.0"

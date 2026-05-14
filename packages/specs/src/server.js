@@ -28,16 +28,4 @@ export class SpecReader extends BaseSpecReader {
 
     writeFileSync(path, content);
   }
-
-  writeTestFromSpec(path, options = {}) {
-    const spec = this.spec;
-    const componentSpec = this.getTestFromSpec(spec);
-
-    mkdirSync(dirname(path), { recursive: true });
-
-    let content = `// Auto-generated test spec\n`;
-    content += `export default ${JSON.stringify(componentSpec, null, 2)};\n`;
-
-    writeFileSync(path, content);
-  }
 }

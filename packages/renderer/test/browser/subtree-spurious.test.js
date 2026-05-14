@@ -8,8 +8,8 @@ RENDERING_ENGINES.forEach(engine => {
 
   describe(engine, () => {
     /*******************************
-         Test Helpers
-*******************************/
+             Test Helpers
+    *******************************/
 
     let tagCounter = 0;
     function uniqueTag() {
@@ -25,9 +25,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  1. Sibling Expressions
-     in Flat Template
-*******************************/
+          Sibling expressions
+    *******************************/
 
     describe('sibling expressions in flat template', () => {
       it('changing one signal should not re-evaluate an expression reading a different signal', async () => {
@@ -99,9 +98,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  2. Expression Outside vs
-     Inside {#each}
-*******************************/
+        Outside vs inside each
+    *******************************/
 
     describe('expression outside vs inside each', () => {
       it('changing each data should not re-evaluate an expression outside the loop', async () => {
@@ -145,9 +143,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  3. Expression Outside vs
-     Inside {#if}
-*******************************/
+         Outside vs inside if
+    *******************************/
 
     describe('expression outside vs inside if', () => {
       it('toggling a condition should not re-evaluate an expression outside the conditional', async () => {
@@ -185,9 +182,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  4. Expression Outside vs
-     Inside {#rerender}
-*******************************/
+      Outside vs inside rerender
+    *******************************/
 
     describe('expression outside vs inside rerender', () => {
       it('bumping the rerender key should not re-evaluate an expression outside the rerender block', async () => {
@@ -225,8 +221,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  5. Sibling {#each} Blocks
-*******************************/
+          Sibling each blocks
+    *******************************/
 
     describe('sibling each blocks', () => {
       it('changing one each source should not re-evaluate expressions in a sibling each', async () => {
@@ -277,9 +273,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  6. Per-item Granularity
-     Inside a Single Each
-*******************************/
+        Per-item in single each
+    *******************************/
 
     describe('per-item granularity inside a single each', () => {
       it('changing an external signal should not cause per-item expressions to re-evaluate when they do not read it', async () => {
@@ -369,10 +364,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  7. {#rerender} Should NOT
-     Re-evaluate Expressions
-     Outside Its Block
-*******************************/
+          Rerender isolation
+    *******************************/
 
     describe('rerender isolation from sibling content', () => {
       it('bumping rerender key should not re-evaluate sibling expressions or sibling each items', async () => {
@@ -454,10 +447,8 @@ RENDERING_ENGINES.forEach(engine => {
       });
     });
     /*******************************
-  8. Verbose data=expression
-     Should Re-evaluate ALL
-     Subtemplate Expressions
-*******************************/
+      Snippet & reactiveData keys
+    *******************************/
 
     describe('snippet args per-key granularity', () => {
       // Confirms the snippet path does per-expression isolation. Each
@@ -635,10 +626,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Per-key isolation across N subtemplates
-   (mirrors bench-template-reactivity's
-   subtemplate-reactive-data-100 scenario)
-*******************************/
+         Per-key across N subs
+    *******************************/
 
     describe.skipIf(isLit)('per-key isolation across N subtemplates', () => {
       it('mutating one reactiveData source should not re-fire bindings reading a different reactiveData key', async () => {
@@ -702,11 +691,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   FGR per-key isolation contract
-   — full enumeration of the
-   per-key isolation contract across
-   each adoption site.
-*******************************/
+         FGR per-key contract
+    *******************************/
 
     describe.skipIf(isLit)('FGR contract: each-block in-place mutation', () => {
       // Per-FIELD isolation under `as`-mode requires splitting the as-key
