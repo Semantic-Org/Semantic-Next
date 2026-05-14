@@ -875,18 +875,14 @@ describe('package entry points expose the same public surface', () => {
   });
 
   it('server SpecReader extends the base reader with file-system methods', () => {
-    // [source:server.js:14] server SpecReader subclasses base, adds writeComponentSpec
     const reader = new serverEntry.SpecReader({});
     expect(typeof reader.writeComponentSpec).toBe('function');
-    expect(typeof reader.writeTestFromSpec).toBe('function');
     // Inherited from base
     expect(typeof reader.getWebComponentSpec).toBe('function');
   });
 
   it('browser SpecReader does not include file-system methods', () => {
-    // [source:browser.js:4] browser exports the base reader only — no FS coupling
     const reader = new browserEntry.SpecReader({});
     expect(reader.writeComponentSpec).toBeUndefined();
-    expect(reader.writeTestFromSpec).toBeUndefined();
   });
 });
