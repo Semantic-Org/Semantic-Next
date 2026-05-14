@@ -119,6 +119,27 @@ describe('Scheduler — flush', () => {
     errorSpy.mockRestore();
   });
 
+  // the cycle cap spans both queues with a unified iteration counter — a reaction
+  // that schedules an afterFlush that re-invalidates the reaction must also hit it
+  it('breaks a reaction↔afterFlush cycle and logs an error', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const trigger = new Signal(0);
+
+    Reaction.create(() => {
+      trigger.get();
+      Reaction.afterFlush(() => trigger.set(trigger.peek() + 1));
+    });
+
+    trigger.set(1);
+    Reaction.flush();
+
+    expect(errorSpy).toHaveBeenCalled();
+    expect(errorSpy.mock.calls.some(c => /cycle detected/i.test(c[0]))).toBe(true);
+    expect(Scheduler.pendingReactions.size).toBe(0);
+    expect(Scheduler.afterFlushCallbacks.length).toBe(0);
+    errorSpy.mockRestore();
+  });
+
   // exception in one reaction must not silently swallow others in the same batch
   // either it propagates or framework isolates each, this test pins which
   it('continues processing remaining reactions when one throws', () => {
