@@ -582,8 +582,7 @@ describe('CSS adoption — adoptedStyleSheets in document and shadow DOM', () =>
     shadow.appendChild(inner);
 
     // Use $() with explicit shadow root so the behavior is initialized against
-    // the shadow-DOM element. Per skill: behavior CSS should be adopted to the
-    // element's root (the shadow root in this case).
+    // the shadow-DOM element — CSS should be adopted to the element's root.
     $(inner, { root: shadow })[name]();
     const color = getComputedStyle(inner).color;
     expect(color).toBe('rgb(11, 22, 33)');
@@ -923,10 +922,6 @@ describe('Edge cases probing the contract', () => {
 ----------------------------------------------------------------------- */
 
 describe('Suspected drift between documented intent and source', () => {
-  // [skill query-behaviors] documents that "Calling a behavior with new
-  // settings on an element that already has an instance triggers reinitialize".
-  // The 'with new settings' is the keystone phrase. Does calling with NO
-  // settings also reinitialize, or is it a no-op?
   it('calling the behavior with no arguments on an existing instance still reinitializes (destroys + recreates)', () => {
     const name = uniqueName('reinitNoArgs');
     const onDestroyedSpy = vi.fn();
@@ -950,38 +945,10 @@ describe('Suspected drift between documented intent and source', () => {
     expect(onCreatedSpy).toHaveBeenCalledTimes(2);
   });
 
-  // [source behavior.js:619-624] declares `settings(newSettings)` as a
-  // class method, but [source behavior.js:86] sets `this.settings =
-  // settings` (an object) on every instance. The instance property
-  // shadows the method — so calling `el[name].settings({...})` should
-  // throw. This is a contract trap: the skill suggests two distinct
-  // helpers (`setting` and `settings`), but only `setting` is reachable.
-  it('reveals collision between settings-as-property and settings-as-method', () => {
-    const name = uniqueName('settingsClash');
-    registerBehavior({
-      name,
-      defaultSettings: { a: 1 },
-      createBehavior: () => ({}),
-    });
-    const el = document.createElement('div');
-    document.body.appendChild(el);
-    $(el)[name]();
-    // settings is the OBJECT (from constructor), not the method (prototype).
-    expect(typeof el[name].settings).toBe('object');
-    expect(el[name].settings.a).toBe(1);
-    // Calling it as a method should throw because it is not callable.
-    expect(() => el[name].settings({ a: 2 })).toThrow(TypeError);
-  });
+  // behavior.js:86 sets this.settings = settings (object) which shadows
+  // the class method declared at behavior.js:618. Either rename one to fix.
+  it.todo('exposes settings(newSettings) as a callable bulk-update method');
 
-  // [source behavior.js:192-198] parseEventString uses startsWith without a
-  // word boundary. A selector that begins with "global" or "bind" without
-  // an actual keyword prefix would be mis-parsed. Example: an event
-  // declared as 'click .global-button' starts with 'c', so the keyword
-  // logic is safe. But consider 'global click .button' — actually that
-  // IS the documented usage. The risk is a selector LIKE '.globalBox' if
-  // it appeared earlier in the string. The current grammar reserves the
-  // keyword to the start of the string only, so this guards selectors
-  // already.
   // Real probe: a selector containing the substring 'global' should not
   // be mangled by the global-keyword path.
   it('does not strip the substring "global" from selectors when the global keyword is used', () => {
@@ -1005,11 +972,6 @@ describe('Suspected drift between documented intent and source', () => {
     expect(handlerSpy).toHaveBeenCalledTimes(1);
   });
 
-  // [source behavior.js:191-198] When the event string itself starts
-  // with the keyword (e.g. "global"), the FIRST occurrence of "global"
-  // is stripped. If the selector also contains "global", this could
-  // strip from the selector instead. Confirms that only the leading
-  // keyword is removed, not a later occurrence.
   it('does not strip a substring "global" from a selector that follows the global keyword', () => {
     const name = uniqueName('globalKw');
     const handlerSpy = vi.fn();
@@ -1032,10 +994,6 @@ describe('Suspected drift between documented intent and source', () => {
     expect(handlerSpy).toHaveBeenCalledTimes(1);
   });
 
-  // [skill component-behaviors] Tooltip's onHidden callback uses
-  // `$(this).tooltip('set text', 'Copy Code')`. This pattern relies on
-  // the natural-language method lookup ('set text' -> setText).
-  // Verifies the canonical pattern from CodeSample.js.
   it('supports natural-language two-word setter invocation', () => {
     const name = uniqueName('natSet');
     let stored;
@@ -1055,9 +1013,6 @@ describe('Suspected drift between documented intent and source', () => {
     expect(stored).toBe('Copy Code');
   });
 
-  // [source behavior.js:608] `if (value === undefined)` means
-  // setting('key', undefined) acts as a getter — you cannot explicitly
-  // clear a setting by setting it to undefined.
   it('treats setting(key, undefined) as a getter, not a setter', () => {
     const name = uniqueName('undefSet');
     registerBehavior({
@@ -1074,13 +1029,6 @@ describe('Suspected drift between documented intent and source', () => {
     expect(el[name].setting('mode')).toBe('on');
   });
 
-  // [source behavior.js:157-161] addDataOverrides uses
-  // `if (elementData[name]) { ... }` — a truthy check. This means
-  // data-* attributes with falsy parsed values (0, false, '')
-  // silently fail to override the default. Documented user intent:
-  // 'data-active="false"' should disable a default of true.
-  // A frontend developer writing `<div data-enabled="false">` will
-  // expect enabled === false, not the default true.
   it('lets data-* attributes override settings with false values', () => {
     const name = uniqueName('falseData');
     registerBehavior({
@@ -1091,11 +1039,9 @@ describe('Suspected drift between documented intent and source', () => {
       }),
     });
     const el = document.createElement('div');
-    el.dataset.enabled = 'false'; // user wants to disable via attribute
+    el.dataset.enabled = 'false';
     document.body.appendChild(el);
     $(el)[name]();
-    // Expected per skill: data-* attributes override settings.
-    // Source uses truthy check → false is silently ignored.
     expect($(el)[name]('read')).toBe(false);
   });
 
@@ -1109,11 +1055,9 @@ describe('Suspected drift between documented intent and source', () => {
       }),
     });
     const el = document.createElement('div');
-    el.dataset.delay = '0'; // user wants instant: 0 ms delay
+    el.dataset.delay = '0';
     document.body.appendChild(el);
     $(el)[name]();
-    // Expected per skill: data-* attributes override settings.
-    // Source uses truthy check → 0 is silently ignored.
     expect($(el)[name]('read')).toBe(0);
   });
 
@@ -1127,11 +1071,9 @@ describe('Suspected drift between documented intent and source', () => {
       }),
     });
     const el = document.createElement('div');
-    el.dataset.label = ''; // user wants to clear the label
+    el.dataset.label = '';
     document.body.appendChild(el);
     $(el)[name]();
-    // Expected per skill: data-* attributes override settings.
-    // Source uses truthy check → '' is silently ignored.
     expect($(el)[name]('read')).toBe('');
   });
 });

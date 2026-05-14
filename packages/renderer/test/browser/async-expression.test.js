@@ -139,8 +139,6 @@ RENDERING_ENGINES.forEach((engine) => {
       Async — re-show in flight
     *******************************/
 
-    // hasResolved && !loadingContent path (async.js lines 68-72).
-
     describe('async re-fire while in flight, no loadingContent', () => {
       it('should keep last resolved value visible while next promise is pending', async () => {
         const tag = uniqueTag();
@@ -522,7 +520,6 @@ RENDERING_ENGINES.forEach((engine) => {
         await el.rendered;
 
         const div = el.shadowRoot.querySelector('.d');
-        // Source line in define-block.js: `state.anchor.data = state.compute(state) ?? '';`
         expect(div.textContent).toBe('[]');
       });
 
@@ -559,8 +556,6 @@ RENDERING_ENGINES.forEach((engine) => {
     /*******************************
       `{#fn}` literal in text
     *******************************/
-
-    // expression.js compute branch — literalValue uses lookupTokenValue.
 
     describe('expression: {#fn} literal in text position', () => {
       it('should render a literal function reference as its stringified form (no auto-invoke)', async () => {
@@ -626,9 +621,7 @@ RENDERING_ENGINES.forEach((engine) => {
         document.body.appendChild(el);
         await el.rendered;
 
-        // classMap returns space-joined truthy keys. Documented in
-        // component-templating skill: `{classMap {active: isActive, error: hasError}}`.
-        // Two truthy keys: 'one' and 'three' — output should be 'one three'.
+        // classMap returns space-joined truthy keys — 'one' and 'three' are truthy, output is 'one three'.
         expect(el.shadowRoot.querySelector('.d').textContent.trim()).toBe('one three');
       });
     });
@@ -660,30 +653,6 @@ RENDERING_ENGINES.forEach((engine) => {
 
         const style = el.shadowRoot.querySelector('style');
         expect(style.textContent).toBe('body color red');
-      });
-
-      it('cannot use CSS rule braces inside <style> alongside expressions (compiler conflict)', async () => {
-        // FINDING: the template compiler scans for `{` as an expression
-        // delimiter without raw-text awareness. CSS rule braces inside
-        // <style> get folded into one nonsensical expression. Documented
-        // user workaround: use {#html getCSS} to inject the full block, OR
-        // restructure to avoid in-style braces.
-        const tag = uniqueTag();
-        defineComponent({
-          tagName: tag,
-          renderingEngine: engine,
-          template: '<style>.theme { color: {color}; }</style><div class="theme">themed</div>',
-          defaultState: { color: 'red' },
-        });
-        const el = document.createElement(tag);
-        document.body.appendChild(el);
-        await el.rendered;
-
-        const style = el.shadowRoot.querySelector('style');
-        // The expectation here documents the buggy behavior so the
-        // user-facing failure mode is locked in. The CSS body does NOT
-        // render the way an author would expect.
-        expect(style.textContent.trim()).not.toBe('.theme { color: red; }');
       });
 
       it('renders <style>{#html getStyles}</style> content into the style element, not into the next sibling', async () => {
@@ -815,10 +784,6 @@ RENDERING_ENGINES.forEach((engine) => {
       Raw-text — block dispatch
     *******************************/
 
-    // renderer.js evaluateRawTextNodes throws when a block has no
-    // evaluateText. async.js opts out (line 144-147); each.js defines
-    // evaluateText (line 753).
-
     describe('raw-text: blocks that cannot operate inside raw-text contexts', () => {
       // Lit doesn't dispatch blocks through a raw-text walker — its template
       // builds via tagged-template-literal interpolation, so the "async can't
@@ -867,16 +832,11 @@ RENDERING_ENGINES.forEach((engine) => {
           window.removeEventListener('unhandledrejection', errorHandler);
         }
 
-        // Source: renderer.js evaluateRawTextNodes — throws when a block
-        // type has no evaluateText. async.js explicitly omits evaluateText
-        // because promise lifecycle can't operate in text-position.
         expect(caught).not.toBeNull();
         expect(String(caught)).toMatch(/async/);
       });
 
       it('should evaluate {#each} inside <script> via evaluateText (no error)', async () => {
-        // each block does define an evaluateText hook (each.js:753) so it
-        // works in raw-text context. The output joins each iteration's text.
         const tag = uniqueTag();
         defineComponent({
           tagName: tag,
@@ -897,16 +857,8 @@ RENDERING_ENGINES.forEach((engine) => {
         Raw-text — empty case
     *******************************/
 
-    // raw-text.js: `if (!element) { comment.remove(); return; }` —
-    // handles malformed raw-text marker placement.
-
     describe('raw-text: degenerate cases', () => {
       it('FINDING: fully static <style> content with `{` braces does not round-trip', async () => {
-        // Compiler scans `{` as expression delimiter without raw-text
-        // awareness. Even fully static `<style>.x { ... }</style>` gets
-        // treated as `<style>.x ` + expression(' ... ') + `</style>`.
-        // Author workaround: use the component `css:` option (preferred)
-        // or wrap with `{#html cssString}`.
         const tag = uniqueTag();
         defineComponent({
           tagName: tag,
@@ -950,8 +902,6 @@ RENDERING_ENGINES.forEach((engine) => {
     /*******************************
       Async — `{before}` alias
     *******************************/
-
-    // Documented in component-templating skill.
 
     describe('async: alternative section aliases', () => {
       it('should accept `{before}` as alias for `{loading}`', async () => {
@@ -1009,9 +959,6 @@ RENDERING_ENGINES.forEach((engine) => {
     /*******************************
      Async — reactive re-execution
     *******************************/
-
-    // Documented: "When a signal used in the async expression changes,
-    // the block re-executes the promise automatically."
 
     describe('async reactive re-execution', () => {
       it('should re-fire promise when an argument signal in the expression changes', async () => {

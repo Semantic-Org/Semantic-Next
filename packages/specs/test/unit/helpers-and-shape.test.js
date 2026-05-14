@@ -53,7 +53,6 @@ import * as serverEntry from '../../src/server.js';
 *******************************/
 
 describe('shared states have the shape the docs promise', () => {
-  // [doc:component-specs/Spec Section Types] State entries have name + attribute + description
   it('exposes a name string on every shared state constant', () => {
     for (const state of [HOVER_STATE, FOCUS_STATE, ACTIVE_STATE, LOADING_STATE, PRESSED_STATE, DISABLED_STATE]) {
       expect(typeof state.name).toBe('string');
@@ -76,7 +75,6 @@ describe('shared states have the shape the docs promise', () => {
   });
 
   it('disabled state advertises compound aliases for clickable-disabled', () => {
-    // [source:states/disabled.js] DISABLED_STATE has compoundAliases:true and value 'clickable'
     expect(DISABLED_STATE.compoundAliases).toBe(true);
     expect(DISABLED_STATE.includeAttributeClass).toBe(true);
     expect(DISABLED_STATE.options.map(o => o.value)).toEqual(['disabled', 'clickable']);
@@ -97,7 +95,6 @@ describe('shared types have the shape the docs promise', () => {
   });
 
   it('emphasis options enumerate primary secondary tertiary', () => {
-    // [skill:component-specs] EMPHASIS_OPTIONS: primary, secondary, tertiary
     expect(EMPHASIS_OPTIONS.map(o => o.value)).toEqual(['primary', 'secondary', 'tertiary']);
   });
 
@@ -143,7 +140,6 @@ describe('shared variations have the shape the docs promise', () => {
   });
 
   it('size variation enumerates the canonical size scale', () => {
-    // [skill:component-specs] mini, tiny, small, medium, large, big, huge, massive
     expect(SIZE_OPTIONS.map(o => o.value)).toEqual([
       'mini',
       'tiny',
@@ -157,7 +153,6 @@ describe('shared variations have the shape the docs promise', () => {
   });
 
   it('color variation enumerates the canonical color palette', () => {
-    // [skill:component-specs] red orange yellow olive green teal blue violet purple pink brown grey slate
     expect(COLOR_OPTIONS.map(o => o.value)).toEqual([
       'red',
       'orange',
@@ -176,13 +171,10 @@ describe('shared variations have the shape the docs promise', () => {
   });
 
   it('floated variation enumerates left and right', () => {
-    // [skill:component-specs] FLOATED_OPTIONS = left-floated, right-floated
-    // The skill doc says "left-floated, right-floated" but source uses bare "left", "right".
     expect(FLOATED_OPTIONS.map(o => o.value)).toEqual(['left', 'right']);
   });
 
   it('attached variation enumerates the five attachment positions', () => {
-    // [skill:component-specs] ATTACHED_OPTIONS top-attached, attached, bottom-attached, left-attached, right-attached
     // The skill doc names them with "-attached" suffix; source uses bare values.
     expect(ATTACHED_OPTIONS.map(o => o.value)).toEqual([
       'top',
@@ -194,18 +186,15 @@ describe('shared variations have the shape the docs promise', () => {
   });
 
   it('compact variation enumerates compact and very', () => {
-    // [source:variations/compact.js] options are 'compact' and 'very'
     expect(COMPACT_OPTIONS.map(o => o.value)).toEqual(['compact', 'very']);
     expect(COMPACT_VARIATION.compoundAliases).toBe(true);
   });
 
   it('padded variation enumerates padded and very', () => {
-    // [source:variations/padded.js] options are 'padded' and 'very'
     expect(PADDED_OPTIONS.map(o => o.value)).toEqual(['padded', 'very']);
   });
 
   it('horizontal aligned variation uses text-align attribute', () => {
-    // [source] HORIZONTAL_ALIGNED_VARIATION name 'Text Alignment', attribute 'text-align'
     expect(HORIZONTAL_ALIGNED_VARIATION.attribute).toBe('text-align');
     expect(HORIZONTAL_ALIGNED_OPTIONS.map(o => o.value)).toEqual([
       'left-aligned',
@@ -224,7 +213,7 @@ describe('shared variations have the shape the docs promise', () => {
   });
 
   it('size variation has no compoundAliases, fluid has no options', () => {
-    // [source] FLUID_VARIATION is boolean-style — no options array
+    // FLUID_VARIATION is boolean-style — no options array
     expect(FLUID_VARIATION.options).toBeUndefined();
     expect(CIRCULAR_VARIATION.options).toBeUndefined();
   });
@@ -235,8 +224,6 @@ describe('shared variations have the shape the docs promise', () => {
 *******************************/
 
 describe('getStates returns the requested shared state constants', () => {
-  // [doc:component-specs/getStates] Get multiple state constants by name
-
   it('returns the matching state objects in the order requested', () => {
     const result = getStates(['hover', 'disabled']);
     expect(result).toEqual([HOVER_STATE, DISABLED_STATE]);
@@ -255,7 +242,7 @@ describe('getStates returns the requested shared state constants', () => {
   });
 
   it('silently drops names that are not registered states', () => {
-    // [source:helpers.js:58] filter(Boolean) — unknown names map to undefined and are dropped
+    // filter(Boolean) — unknown names map to undefined and are dropped
     const result = getStates(['hover', 'nonexistent', 'disabled']);
     expect(result).toEqual([HOVER_STATE, DISABLED_STATE]);
   });
@@ -280,7 +267,7 @@ describe('getVariations returns the requested shared variation constants', () =>
   });
 
   it('accepts horizontal-aligned and vertical-aligned by their hyphenated key', () => {
-    // [source:helpers.js:71-72] keys are 'horizontal-aligned' and 'vertical-aligned'
+    // keys are 'horizontal-aligned' and 'vertical-aligned'
     const result = getVariations(['horizontal-aligned', 'vertical-aligned']);
     expect(result).toEqual([HORIZONTAL_ALIGNED_VARIATION, VERTICAL_ALIGNED_VARIATION]);
   });
@@ -295,8 +282,7 @@ describe('getVariations returns the requested shared variation constants', () =>
   });
 
   it('does not include spacing variation in the named map', () => {
-    // [source:helpers.js:63-74] SPACING_VARIATION is exported but absent from getVariations map.
-    // Documents the gap — SPACING_VARIATION must be imported by constant if needed.
+    // SPACING_VARIATION is exported but absent from getVariations map — must be imported by constant if needed.
     const result = getVariations(['spacing']);
     expect(result).toEqual([]);
   });
@@ -307,8 +293,6 @@ describe('getVariations returns the requested shared variation constants', () =>
 *******************************/
 
 describe('addOptionExamples decorates options with per-value example code', () => {
-  // [skill:component-specs] add custom exampleCode keyed by option.value
-
   const baseOptions = [
     { name: 'Small', value: 'small' },
     { name: 'Large', value: 'large' },
@@ -346,7 +330,7 @@ describe('addOptionExamples decorates options with per-value example code', () =
   });
 
   it('accepts an omitted customExamples argument', () => {
-    // [source:helpers.js:28] customExamples = {} default
+    // customExamples = {} default
     const optionsWithDefault = [
       { name: 'Small', value: 'small', exampleCode: 'kept' },
     ];
@@ -360,8 +344,6 @@ describe('addOptionExamples decorates options with per-value example code', () =
 *******************************/
 
 describe('filterVariationOptions narrows a variation to a subset', () => {
-  // [skill:component-specs] Array of values OR predicate function
-
   it('filters by array of values', () => {
     const result = filterVariationOptions(SIZE_VARIATION, ['small', 'medium', 'large']);
     expect(result.options.map(o => o.value)).toEqual(['small', 'medium', 'large']);
@@ -398,8 +380,6 @@ describe('filterVariationOptions narrows a variation to a subset', () => {
 *******************************/
 
 describe('modifyVariation shallow-merges overrides', () => {
-  // [doc:component-specs/modifyVariation]
-
   it('overrides a single property', () => {
     const result = modifyVariation(ATTACHED_VARIATION, { usageLevel: 3 });
     expect(result.usageLevel).toBe(3);
@@ -414,7 +394,7 @@ describe('modifyVariation shallow-merges overrides', () => {
   });
 
   it('replaces options when given', () => {
-    // [source:helpers.js:88-93] shallow merge — overrides take precedence
+    // shallow merge — overrides take precedence
     const newOptions = [{ name: 'A', value: 'a' }];
     const result = modifyVariation(SIZE_VARIATION, { options: newOptions });
     expect(result.options).toBe(newOptions);
@@ -433,8 +413,6 @@ describe('modifyVariation shallow-merges overrides', () => {
 *******************************/
 
 describe('withUsageLevel overrides only the usageLevel field', () => {
-  // [source:helpers.js:80-85] withUsageLevel(item, level) — no API doc page
-
   it('returns a new object with the new usageLevel', () => {
     const result = withUsageLevel(FLUID_VARIATION, 2);
     expect(result.usageLevel).toBe(2);
@@ -465,8 +443,6 @@ describe('withUsageLevel overrides only the usageLevel field', () => {
 *******************************/
 
 describe('SpecReader constructor', () => {
-  // [doc:SpecReader/Constructor] new SpecReader(spec, options)
-
   it('accepts a spec object and stores it', () => {
     const spec = { name: 'Foo', tagName: 'ui-foo' };
     const reader = new SpecReader(spec);
@@ -494,7 +470,7 @@ describe('SpecReader constructor', () => {
   });
 
   it('defaults spec to empty object when not provided', () => {
-    // [source:spec-reader.js:29] this.spec = spec || {}
+    // this.spec = spec || {}
     const reader = new SpecReader();
     expect(reader.spec).toEqual({});
   });
@@ -531,8 +507,6 @@ describe('SpecReader.getTagName and getComponentName', () => {
 });
 
 describe('SpecReader.getWebComponentSpec output shape', () => {
-  // [doc:SpecReader/getWebComponentSpec] Returns runtime metadata for defineComponent
-
   const widgetSpec = {
     name: 'Widget',
     tagName: 'ui-widget',
@@ -551,14 +525,12 @@ describe('SpecReader.getWebComponentSpec output shape', () => {
   });
 
   it('lists every attribute name', () => {
-    // [example:component-specs] attributes: ['emphasis', 'size']
     const reader = new SpecReader(widgetSpec);
     const out = reader.getWebComponentSpec();
     expect(out.attributes).toEqual(expect.arrayContaining(['emphasis', 'size', 'disabled', 'icon-only']));
   });
 
   it('maps every option value back to its attribute via optionAttributes', () => {
-    // [example:component-specs] optionAttributes: { primary: 'emphasis', large: 'size' }
     const reader = new SpecReader(widgetSpec);
     const out = reader.getWebComponentSpec();
     expect(out.optionAttributes.primary).toBe('emphasis');
@@ -585,7 +557,7 @@ describe('SpecReader.getWebComponentSpec output shape', () => {
   });
 
   it('records the propertyType for each attribute', () => {
-    // [source:spec-reader.js:362] enum attrs derive string from options, settings honor declared type
+    // enum attrs derive string from options, settings honor declared type
     const reader = new SpecReader(widgetSpec);
     const out = reader.getWebComponentSpec();
     expect(out.propertyTypes.emphasis).toBe('string');
@@ -594,7 +566,6 @@ describe('SpecReader.getWebComponentSpec output shape', () => {
   });
 
   it('lists attributes with includeAttributeClass under attributeClasses', () => {
-    // [skill:component-specs] includeAttributeClass true → adds attribute as CSS class
     const reader = new SpecReader(widgetSpec);
     const out = reader.getWebComponentSpec();
     expect(out.attributeClasses).toContain('emphasis');
@@ -608,7 +579,7 @@ describe('SpecReader.getWebComponentSpec output shape', () => {
   });
 
   it('caches the result between calls (returns the same reference)', () => {
-    // [source:spec-reader.js:62] cached on this.componentSpec
+    // cached on this.componentSpec
     const reader = new SpecReader(widgetSpec);
     const first = reader.getWebComponentSpec();
     const second = reader.getWebComponentSpec();
@@ -625,7 +596,7 @@ describe('SpecReader.getWebComponentSpec output shape', () => {
   });
 
   it('strips empty arrays from the output to reduce payload', () => {
-    // [source:spec-reader.js:202] filterObject removes isEmpty entries
+    // filterObject removes isEmpty entries
     const minimal = { tagName: 'ui-bare' };
     const reader = new SpecReader(minimal);
     const out = reader.getWebComponentSpec();
@@ -639,8 +610,6 @@ describe('SpecReader.getWebComponentSpec output shape', () => {
 });
 
 describe('SpecReader optionAttributes compound forms', () => {
-  // [skill:component-specs] When values collide across attributes, compound forms are generated.
-
   it('generates compound forms when two attributes share an option value', () => {
     // 'left' and 'right' both appear in floated and attached
     const spec = {
@@ -649,7 +618,7 @@ describe('SpecReader optionAttributes compound forms', () => {
     };
     const reader = new SpecReader(spec);
     const out = reader.getWebComponentSpec();
-    // [source:spec-reader.js:482] compound form `${value}-${attr}` is generated
+    // compound form `${value}-${attr}` is generated
     expect(out.optionAttributes['left-floated']).toBe('floated');
     expect(out.optionAttributes['right-floated']).toBe('floated');
     expect(out.optionAttributes['left-attached']).toBe('attached');
@@ -657,7 +626,7 @@ describe('SpecReader optionAttributes compound forms', () => {
   });
 
   it('first-owner attribute keeps the bare entry for colliding values', () => {
-    // [source:spec-reader.js:484] only first owner of value keeps bare key in optionAttributes
+    // only first owner of value keeps bare key in optionAttributes
     const spec = {
       tagName: 'ui-collide',
       variations: [FLOATED_VARIATION, ATTACHED_VARIATION],
@@ -670,7 +639,7 @@ describe('SpecReader optionAttributes compound forms', () => {
   });
 
   it('non-colliding values in colliding attributes still get compound forms', () => {
-    // [source:spec-reader.js:481-483] all values of a colliding attribute get compounds
+    // all values of a colliding attribute get compounds
     const spec = {
       tagName: 'ui-collide',
       variations: [FLOATED_VARIATION, ATTACHED_VARIATION],
@@ -686,7 +655,7 @@ describe('SpecReader optionAttributes compound forms', () => {
   });
 
   it('compoundAliases on a state generates compound aliases for its values', () => {
-    // [source:spec-reader.js:493] states with compoundAliases:true contribute compound forms
+    // states with compoundAliases:true contribute compound forms
     const spec = {
       tagName: 'ui-alias',
       states: [DISABLED_STATE],
@@ -700,8 +669,7 @@ describe('SpecReader optionAttributes compound forms', () => {
   });
 
   it('compoundAliases produces only one ordering per value (value-attribute)', () => {
-    // [contradiction:skill says both orderings work — source generates only one]
-    // [source:spec-reader.js:511] `${value}-${attr}` is generated; reverse only if prefixCompound
+    // `${value}-${attr}` is generated; reverse only if prefixCompound
     const spec = {
       tagName: 'ui-alias',
       states: [DISABLED_STATE],
@@ -715,7 +683,7 @@ describe('SpecReader optionAttributes compound forms', () => {
   });
 
   it('does not compound an identity option whose value matches the attribute', () => {
-    // [source:spec-reader.js:478,504] skips value === attr — identity options stay bare
+    // skips value === attr — identity options stay bare
     const spec = {
       tagName: 'ui-self',
       states: [{ name: 'Compact', attribute: 'compact', options: [{ value: 'compact' }] }],
@@ -728,8 +696,6 @@ describe('SpecReader optionAttributes compound forms', () => {
 });
 
 describe('SpecReader plural mode filters sections by pluralShared* lists', () => {
-  // [skill:component-specs/Plural Component Inheritance]
-
   const buttonSpec = {
     name: 'Button',
     tagName: 'ui-button',
@@ -756,7 +722,7 @@ describe('SpecReader plural mode filters sections by pluralShared* lists', () =>
   it('plural reader filters types using pluralSharedTypes', () => {
     const reader = new SpecReader(buttonSpec, { plural: true });
     const out = reader.getWebComponentSpec();
-    // [source:spec-reader.js:100] pluralSharedTypes is empty → no types pass through
+    // pluralSharedTypes is empty → no types pass through
     expect(out.types).toBeUndefined();
   });
 
@@ -773,8 +739,6 @@ describe('SpecReader plural mode filters sections by pluralShared* lists', () =>
 });
 
 describe('SpecReader settings honor declared types', () => {
-  // [skill:component-specs/Settings]
-
   it('boolean settings default to false', () => {
     const spec = {
       tagName: 'ui-x',
@@ -808,7 +772,7 @@ describe('SpecReader settings honor declared types', () => {
   });
 
   it('function settings are excluded from observed attributes', () => {
-    // [source:spec-reader.js:421] canUseAttribute returns false for Function
+    // canUseAttribute returns false for Function
     const spec = {
       tagName: 'ui-x',
       events: [{ name: 'Change', attribute: 'change' }],
@@ -825,8 +789,6 @@ describe('SpecReader settings honor declared types', () => {
 *******************************/
 
 describe('package entry points expose the same public surface', () => {
-  // [source:browser.js, server.js] both files re-export the shared terms and helpers
-
   it('browser entry exposes SpecReader', () => {
     expect(typeof browserEntry.SpecReader).toBe('function');
   });

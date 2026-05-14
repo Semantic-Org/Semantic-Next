@@ -28,13 +28,6 @@ RENDERING_ENGINES.forEach((engine) => {
     *******************************/
 
     describe('conditional gap coverage', () => {
-      // [api] component-templating.md says "Conditionals" support
-      // {#if}/{else if}/{else}. The /{if-no-else} shape is documented under
-      // "if with no else — false produces empty" in html-output but we lack
-      // a reactive test verifying the branch cleans up when condition flips
-      // back. The conditional.js selectBranch returns
-      // { matchIndex: -1, contentAST: null } in that case — null AST goes
-      // through bag.place(null) which calls region.clear().
       it('if with no else branch removes content when condition flips false', async () => {
         const tag = uniqueTag('if-no-else');
         defineComponent({
@@ -62,9 +55,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelectorAll('.inner').length).toBe(1);
       });
 
-      // [source] conditional.js selectBranch walks node.branches[] in order.
-      // First truthy elseif wins. If two elseifs match, first should win.
-      // No test verifies ordering precedence.
       it('if/elseif chain — first truthy elseif wins, later branches ignored', async () => {
         const tag = uniqueTag('elseif-precedence');
         defineComponent({
@@ -83,9 +73,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelectorAll('.b2').length).toBe(0);
       });
 
-      // [synthesis] Reactive swap through three branches in rapid succession
-      // should not strand DOM from intermediate branches. Tests place()
-      // dedup and region.clear() cascading properly across each transition.
       it('rapid sequential branch swap leaves no stranded DOM', async () => {
         const tag = uniqueTag('rapid-swap');
         defineComponent({
@@ -117,8 +104,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelectorAll('.mz').length).toBe(1);
       });
 
-      // [synthesis] Nested conditional inside conditional: outer toggles
-      // should clean up inner DOM and inner reactions.
       it('outer if removal disposes inner if branch reactions', async () => {
         let innerEvalCount = 0;
         const tag = uniqueTag('nested-if-dispose');
@@ -156,11 +141,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(afterRemoval).toBeGreaterThanOrEqual(baseline);
       });
 
-      // [example] conditionals-rerender example shows {#guard} clauses.
-      // Guard should re-render only when the keyed expression's value
-      // actually changes (deep-equality). Inside a conditional branch,
-      // a guard with an unchanging key should not re-evaluate when an
-      // unrelated signal fires.
       it('guard block inside conditional re-evaluates only on key change', async () => {
         let guardEvalCount = 0;
         const tag = uniqueTag('guard-in-if');
@@ -253,10 +233,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelector('.b')).toBeTruthy();
       });
 
-      // [source] template.js detectTemplateType returns null when name
-      // resolves to '' or null. The dispatch then bails — nothing renders.
-      // Subsequent name updates should still resolve the templateType
-      // correctly. No test exists for the empty-then-populated path.
       it.skipIf(isLit)('subtemplate name resolving from empty/null to defined snippet renders content', async () => {
         const tag = uniqueTag('empty-name');
         defineComponent({
@@ -278,12 +254,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelectorAll('.ok').length).toBe(1);
       });
 
-      // [source] template.js resolveSubtemplate returns
-      // `{ template: undefined, ... }` when the name string doesn't match
-      // any registered subtemplate. update() then calls clearInstance.
-      // No test verifies that an initial render starting with an unknown
-      // name renders nothing and later resolves cleanly when the name
-      // becomes valid.
       it('subtemplate starting with unknown name renders nothing until name resolves', async () => {
         const tag = uniqueTag('unknown-name');
         const child = defineComponent({
@@ -310,10 +280,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelectorAll('.cc').length).toBe(1);
       });
 
-      // [source] template.js resolveSubtemplate accepts Template instances
-      // directly — the dynamic-table pattern (subtemplates as settings)
-      // relies on this. Existing tests verify a name STRING swap; no test
-      // passes an actual Template instance through state.
       it('subtemplate name expression resolving to a Template instance swaps correctly', async () => {
         const tag = uniqueTag('inst-as-name');
         const viewA = defineComponent({
@@ -347,15 +313,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelectorAll('.b').length).toBe(1);
       });
 
-      // [source] unpackBlobData with string node.data: when expression
-      // doesn't evaluate to a plain object, blobData stays empty. No
-      // tests cover this path — what happens when data="someStr" and
-      // someStr is a string, not an object.
-      //
-      // Real-world scenario: a templating mistake where the developer
-      // passes the wrong thing (a string instead of an object). Should
-      // degrade gracefully (render with empty data), not crash the
-      // renderer.
       it.skipIf(isLit)(
         'verbose data="expr" evaluating to non-object renders subtemplate without crashing',
         async () => {
@@ -384,10 +341,6 @@ RENDERING_ENGINES.forEach((engine) => {
         },
       );
 
-      // [synthesis] When a subtemplate is rendered inside a conditional
-      // branch that gets swapped away, its `onDestroyed` should fire and
-      // it should not leak DOM. Existing test covers single subtemplate
-      // removal via if-false; this verifies repeated cycling.
       it('subtemplate inside cycling conditional does not leak instances', async () => {
         let createCount = 0;
         let destroyCount = 0;
@@ -438,12 +391,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(createCount - initialCreate).toBe(3);
       });
 
-      // [source] template.js setupSettingsMirror writes Signal references
-      // onto settingsProxy[key]. If reactiveData passes a value matching
-      // a declared defaultSettings entry, the settings proxy should reflect
-      // the latest value through state changes. The 'sub-settings' tests
-      // cover the case via setProperty; we test the path where the value
-      // comes through getter, not signal mutation.
       it('subtemplate settings mirror reflects reactiveData updates fed by computed getter', async () => {
         const tag = uniqueTag('mirror-get');
 
@@ -479,11 +426,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(shadowText(el)).not.toContain('m-0');
       });
 
-      // [source] template.js cloneInstance buildArgsRecord installs lazy
-      // getters that re-evaluate. If a snippet is invoked from BOTH a
-      // conditional's main branch and its else branch with different args,
-      // the arg evaluator should re-bind to the parent context when the
-      // branch swaps (each branch is rendered fresh from its own AST).
       it('snippet invoked from each branch of conditional binds correct args per branch', async () => {
         const tag = uniqueTag('snip-branches');
         defineComponent({
@@ -522,14 +464,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(shadowText(el)).toContain('[YEPP]');
       });
 
-      // [synthesis] template.js holds self.templateType across renders
-      // (locked on first detection). If a snippet is removed via a
-      // conditional and the parent restores it, the same block-instance
-      // must re-resolve correctly. Existing tests don't cover the case
-      // where the entire conditional branch (containing the {>name}) is
-      // recreated, but defineBlock destroys the block instance with the
-      // branch. We verify the new block instance also picks up the
-      // snippet correctly.
       it('snippet inside conditional branch is recreated cleanly on branch return', async () => {
         const tag = uniqueTag('snip-recreate');
         defineComponent({
@@ -565,12 +499,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelector('.c')?.textContent).toBe('card-two');
       });
 
-      // [source] template.js update() with same template id calls
-      // renderInstance(currentInstance, node, blobData). The
-      // additionalData path through Template.render merges blobData
-      // into dataContext. We verify that blob data updates DO propagate
-      // when the parent passes a new object via data={...} object form
-      // (eager blob path, not lazy reactiveData).
       it('verbose data object updates propagate when expression yields new object identities', async () => {
         const tag = uniqueTag('blob-update');
         const child = defineComponent({
@@ -597,14 +525,10 @@ RENDERING_ENGINES.forEach((engine) => {
 
         expect(shadowText(el)).toContain('v0');
 
-        // [contradiction] Documented contract: object-literal `data={...}`
-        // OUTSIDE of #each is non-reactive. The same data value should
-        // NOT update when the source signal changes.
+        // Object-literal `data={...}` outside #each is non-reactive.
         el.template.state.version.set(1);
         await flush(el);
 
-        // This asserts the documented constraint; if it fails, the
-        // contract drift the test surfaces should be filed.
         expect(shadowText(el)).toContain('v0');
         expect(shadowText(el)).not.toContain('v1');
       });
@@ -615,11 +539,6 @@ RENDERING_ENGINES.forEach((engine) => {
     *******************************/
 
     describe('conditional × template cross-cutting', () => {
-      // [synthesis] Pattern in the wild: a card list where each card has
-      // an optional href that swaps a wrapper element via conditional.
-      // Existing tests verify the wrapper via static settings; we verify
-      // it under each loop with per-item href, which is where the
-      // pattern hits production scale.
       it('per-item conditional wrapper inside each toggles cleanly with item state', async () => {
         const tag = uniqueTag('per-item-wrap');
         defineComponent({
@@ -643,10 +562,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelectorAll('span.text').length).toBe(1);
       });
 
-      // [synthesis] A snippet defined once, invoked from two branches with
-      // different argument shapes. Reactive arg sources differ. When the
-      // condition flips, the new branch's snippet args must register the
-      // right signal deps on the new scope, AND old deps must be torn down.
       it('snippet shared across branches re-binds arg deps on swap (old deps stop firing)', async () => {
         const tag = uniqueTag('shared-snip-deps');
         let labelEvalCount = 0;
@@ -694,9 +609,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(shadowText(el)).toContain('[bbb]');
       });
 
-      // [synthesis] Rerender block sitting INSIDE a conditional. When the
-      // outer condition flips, the rerender block's content + child scope
-      // must dispose. No existing test covers this composition.
       it('rerender block inside conditional disposes on branch removal', async () => {
         let rerenderEvalCount = 0;
         const tag = uniqueTag('rer-in-if');
@@ -743,12 +655,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelector('.r')?.textContent).toBe('changed');
       });
 
-      // [synthesis] Subtemplate's INTERNAL conditional (rendered by the
-      // child template, not the parent) should respond to settings flowing
-      // in via reactiveData. The child owns the {#if}, the parent flips
-      // the controlling signal. Existing tests focus on conditional in
-      // parent template; this one verifies the propagation path through
-      // the subtemplate's own renderer + dataDep.
       it("subtemplate's own internal {#if} switches when parent reactiveData arg flips", async () => {
         const tag = uniqueTag('child-internal-if');
 
@@ -784,13 +690,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelector('.hl')).toBeNull();
       });
 
-      // [source] template.js: snippet args use buildArgsRecord which
-      // copies target's descriptors via `extend`. ABSORB_SET on declared
-      // keys means writes are silently dropped. A snippet that tries to
-      // assign data.label = X from inside its body should not crash —
-      // but also should not propagate to the parent. We document the
-      // behavior so callers don't expect mutation semantics from snippet
-      // args.
       it('snippet absorb-set semantics: writes to passed args are dropped silently', async () => {
         const tag = uniqueTag('snip-absorb');
         let observedAfterMutate = null;
@@ -827,13 +726,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelector('.w').textContent).toBe('updated');
       });
 
-      // [source] template.js detectTemplateType resolves once and locks.
-      // If a name expression resolves to a snippet, then later resolves
-      // to a subtemplate name with the same string, the lock should hold.
-      // We can't test the conflicting-resolution path safely here, but
-      // we CAN verify: snippet defined with the same name as a registered
-      // subtemplate — which wins? Source says
-      // `self.snippets[name] ? 'snippet' : 'subtemplate'` — snippet wins.
       it('name colliding between snippet and subTemplates resolves to snippet (first lookup)', async () => {
         const tag = uniqueTag('collide-name');
         const child = defineComponent({
@@ -857,10 +749,6 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelector('.from-sub')).toBeNull();
       });
 
-      // [synthesis] Conditional with ONLY else-if (no main truthy body,
-      // no else, no else-if matches) — selectBranch returns
-      // matchIndex -1, contentAST null. Should render nothing AND clean
-      // up if a prior branch was rendered.
       it('all elseifs falsy and no else renders empty, then recovers when condition becomes truthy', async () => {
         const tag = uniqueTag('all-false');
         defineComponent({

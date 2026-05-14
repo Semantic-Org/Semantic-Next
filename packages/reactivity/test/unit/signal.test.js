@@ -1003,7 +1003,6 @@ describe.concurrent('Signal', () => {
 describe('Signal API', () => {
   /***********************************************
    * Constructor and options
-   * Source: api(Signal, Constructor), example(reactive-equality, reactive-clone)
    ***********************************************/
 
   describe('Constructor', () => {
@@ -1041,7 +1040,7 @@ describe('Signal API', () => {
     });
 
     it('uses a custom equality function to decide whether set() re-fires subscribers', () => {
-      // From example(reactive-equality): only the id field counts as a change
+      // only the id field counts as a change
       const callback = vi.fn();
       const user = new Signal(
         { id: 1, name: 'Alice', lastLogin: '2023-01-01' },
@@ -1072,7 +1071,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * get() / value getter — reactive read with cloning
-   * Source: api(Get), source(signal.js#get)
    ***********************************************/
 
   describe('get() and value', () => {
@@ -1109,7 +1107,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * set() — equality-checked write
-   * Source: api(Set), source(signal.js#set)
    ***********************************************/
 
   describe('set()', () => {
@@ -1155,7 +1152,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * peek() — non-reactive read
-   * Source: api(Peek), example(reactive-peek)
    ***********************************************/
 
   describe('peek()', () => {
@@ -1190,7 +1186,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * subscribe() — callback observer that fires once synchronously + on changes
-   * Source: api(Subscribe), example(reactive-subscribe)
    ***********************************************/
 
   describe('subscribe()', () => {
@@ -1234,7 +1229,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * clear() — set to undefined
-   * Source: api(Clear), example(reactive-clear)
    ***********************************************/
 
   describe('clear()', () => {
@@ -1273,13 +1267,11 @@ describe('Signal API', () => {
 
   /***********************************************
    * notify() — force-fire bypassing equality
-   * Source: api(Notify), example(reactive-notify)
    ***********************************************/
 
   describe('notify()', () => {
     it('force-triggers subscribers even when the value reference is identical', () => {
-      // From example(reactive-notify): mutate the underlying object via peek(),
-      // then notify() so subscribers re-run.
+      // mutate the underlying object via peek(), then notify() so subscribers re-run.
       const callback = vi.fn();
       const data = new Signal({ count: 0 }, { allowClone: false });
       Reaction.create(() => callback(data.get().count));
@@ -1303,7 +1295,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * depend() — register dependency without reading
-   * Source: api(Depend)
    ***********************************************/
 
   describe('depend()', () => {
@@ -1330,7 +1321,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * hasDependents() — boolean introspection
-   * Source: api(hasDependents)
    ***********************************************/
 
   describe('hasDependents()', () => {
@@ -1359,7 +1349,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * mutate() — safe in-place mutation
-   * Source: api(Mutate), source(signal.js#mutate)
    ***********************************************/
 
   describe('mutate()', () => {
@@ -1418,7 +1407,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * Array push / unshift / splice — mutating helpers that bypass equality
-   * Source: example(reactive-push, reactive-unshift, reactive-splice)
    ***********************************************/
 
   describe('push() / unshift() / splice() — array helpers', () => {
@@ -1469,7 +1457,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * map() / filter() — in-place transformation helpers
-   * Source: example(reactive-map, reactive-filter)
    ***********************************************/
 
   describe('map() / filter() — transformation helpers', () => {
@@ -1510,7 +1497,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * Index helpers — getIndex / setIndex / removeIndex
-   * Source: example(reactive-get-index, reactive-set-index, reactive-remove-index)
    ***********************************************/
 
   describe('getIndex() / setIndex() / removeIndex()', () => {
@@ -1521,7 +1507,6 @@ describe('Signal API', () => {
     });
 
     it('getIndex() creates a dependency, so writes via setIndex() re-fire reactions', () => {
-      // Source: example(reactive-get-index) — same data shape
       const colors = new Signal(['red', 'green', 'blue', 'yellow']);
       const fn = vi.fn();
       Reaction.create(() => fn(colors.getIndex(0)));
@@ -1552,7 +1537,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * setArrayProperty — single-index or all-items property set
-   * Source: example(reactive-set-array-property)
    ***********************************************/
 
   describe('setArrayProperty()', () => {
@@ -1581,7 +1565,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * ID-based collection helpers
-   * Source: example(reactive-get-item, reactive-replace-item, reactive-remove-item, reactive-set-property)
    ***********************************************/
 
   describe('ID-based helpers', () => {
@@ -1656,7 +1639,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * toggle() — boolean flip
-   * Source: example(reactive-toggle)
    ***********************************************/
 
   describe('toggle()', () => {
@@ -1694,7 +1676,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * increment() / decrement()
-   * Source: example(reactive-increment, reactive-decrement)
    ***********************************************/
 
   describe('increment() / decrement()', () => {
@@ -1737,7 +1718,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * now() — set to current Date
-   * Source: example(reactive-now)
    ***********************************************/
 
   describe('now()', () => {
@@ -1767,7 +1747,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * derive() — single-source transformation
-   * Source: api(Derive), example(reactive-derived)
    ***********************************************/
 
   describe('derive()', () => {
@@ -1799,7 +1778,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * Signal.computed — multi-source computation
-   * Source: api(Signal.computed), example(reactive-computed)
    ***********************************************/
 
   describe('Signal.computed', () => {
@@ -1843,7 +1821,6 @@ describe('Signal API', () => {
 
   /***********************************************
    * instanceof and identity
-   * Source: source(signal.js — Symbol.hasInstance)
    ***********************************************/
 
   describe('instanceof Signal', () => {
@@ -1878,7 +1855,7 @@ describe('Signal API', () => {
 
   describe('Type-mismatched helper calls', () => {
     it('toggle() on a non-boolean coerces via NOT — numbers become false', () => {
-      // Documents source(signal.js#toggle = mutate(val => !val)) — !1 = false
+      // !1 = false
       const signal = new Signal(1);
       signal.toggle();
       expect(signal.get()).toBe(false);
@@ -1891,14 +1868,14 @@ describe('Signal API', () => {
     });
 
     it('increment() on a string concatenates — numeric helpers are not type-guarded', () => {
-      // Documents source(signal.js#increment) — uses + operator without coercion
+      // uses + operator without coercion
       const signal = new Signal('count');
       signal.increment(1);
       expect(signal.get()).toBe('count1');
     });
 
     it('push() on a non-array signal throws because the underlying value has no push method', () => {
-      // Documents source(signal.js#push) — calls this.currentValue.push directly
+      // calls this.currentValue.push directly
       const signal = new Signal(42);
       expect(() => signal.push('x')).toThrow();
     });

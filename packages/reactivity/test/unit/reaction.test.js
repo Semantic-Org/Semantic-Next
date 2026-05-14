@@ -599,7 +599,6 @@ describe('Reaction — public API contract', () => {
     });
 
     it('revives a stopped reaction by flipping active back to true', () => {
-      // [source] documented in source code; the API page does not call this out
       const callback = vi.fn();
       const reaction = Reaction.create(callback);
 
@@ -732,7 +731,6 @@ describe('Reaction — public API contract', () => {
     });
 
     it('returns f() directly when called outside of any reaction', () => {
-      // [source] short-circuit path when no Scheduler.current
       const result = Reaction.guard(() => 7);
       expect(result).toBe(7);
     });
@@ -924,9 +922,6 @@ describe('Reaction — public API contract', () => {
     });
 
     it('defers an afterFlush callback registered from inside another afterFlush callback', () => {
-      // [source] Scheduler.flush snapshots afterFlushCallbacks before iterating,
-      // so anything registered DURING flush is queued for the next flush, not the
-      // current one. Authors who chain afterFlush calls should know this.
       const order = [];
       Reaction.afterFlush(() => {
         order.push('outer');
@@ -994,9 +989,6 @@ describe('Reaction — public API contract', () => {
     });
 
     it('does not automatically clean up inner reactions when the outer re-runs', () => {
-      // [source] reaction.run() clears its own dependencies but does not touch inner
-      // reactions created by the callback. A nested reaction is leaked unless the
-      // author stops it explicitly.
       const outer = new Signal(1);
       const inner = new Signal('a');
       const innerCallback = vi.fn();
@@ -1025,8 +1017,6 @@ describe('Reaction — public API contract', () => {
     });
 
     it('does not restore the parent reactive context when an inner reaction runs', () => {
-      // [source] reaction.run() sets Scheduler.current = this, then finally sets it = null.
-      // Within an inner reaction, the outer's tracking context is lost.
       const outer = new Signal('o');
       const innerOnly = new Signal('i');
       const outerCallback = vi.fn();
@@ -1048,9 +1038,6 @@ describe('Reaction — public API contract', () => {
     });
 
     it('preserves outer-reaction tracking for signals read AFTER an inner Reaction.create call', () => {
-      // Witness: reaction.run save/restores Scheduler.current. Inner reactions
-      // (Reaction.create, guard, computed, derive) must not clobber the outer's
-      // tracking context for the remainder of the outer callback.
       const beforeInner = new Signal('B');
       const afterInner = new Signal('A');
       const innerOnly = new Signal('I');
@@ -1100,8 +1087,6 @@ describe('Reaction — public API contract', () => {
     });
 
     it('continues running later afterFlush callbacks when an earlier one throws', () => {
-      // [inference] Authors expect cleanup-style callbacks to be independent;
-      // one bad callback should not silently swallow the rest.
       const callback2 = vi.fn();
       Reaction.afterFlush(() => {
         throw new Error('first afterFlush failure');
@@ -1113,8 +1098,6 @@ describe('Reaction — public API contract', () => {
     });
 
     it("continues running later reactions when an earlier reaction's callback throws", () => {
-      // [inference] Authors expect a faulty reaction not to disable the rest of
-      // the reactive system.
       const trigger = new Signal(0);
       const survivor = vi.fn();
 

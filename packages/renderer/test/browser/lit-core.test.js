@@ -618,9 +618,7 @@ describe('Lit directive disconnect cleanup', () => {
 });
 
 /*******************************
-   Lit engine — additional red-team probes
-   These target less-obvious code paths in renderer.js and the
-   directives that may not be exercised elsewhere.
+   Lit engine internals coverage
 *******************************/
 
 describe('LitRenderer — addHTML concat logic', () => {

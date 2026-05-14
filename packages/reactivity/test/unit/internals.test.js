@@ -28,8 +28,6 @@ afterEach(() => {
 
 describe('Scheduler — flush', () => {
   it('batches multiple synchronous signal writes into a single reaction run', () => {
-    // Witness: batch-updates [example] — "Multiple synchronous signal updates
-    // result in a single batched reaction execution"
     const a = new Signal('John');
     const b = new Signal('Doe');
     const callback = vi.fn();
@@ -48,9 +46,6 @@ describe('Scheduler — flush', () => {
   });
 
   it('runs reactions scheduled during a flush in the same flush pass', () => {
-    // Witness: scheduler.flush() while-loop drains pendingReactions until
-    // empty [source]. Signal.set() inside a reaction body must observe
-    // its downstream subscribers run before flush() returns control.
     const trigger = new Signal(0);
     const downstream = new Signal('idle');
     const log = [];
@@ -74,8 +69,6 @@ describe('Scheduler — flush', () => {
   });
 
   it('processes afterFlush callbacks only once per flush after all reactions settle', () => {
-    // Witness: after-flush [example] — "afterFlush occurs after final value
-    // is set" — implies callbacks fire AFTER the pendingReactions drain.
     const n = new Signal(0);
     const reactionLog = [];
     const afterFlushLog = [];
@@ -98,9 +91,6 @@ describe('Scheduler — flush', () => {
   });
 
   it('runs afterFlush callbacks in registration order', () => {
-    // Witness: Scheduler.afterFlushCallbacks is a list iterated forward
-    // [source]. Two afterFlush(...) calls should produce two records in the
-    // order they were registered.
     const order = [];
     Reaction.afterFlush(() => order.push('first'));
     Reaction.afterFlush(() => order.push('second'));
@@ -112,9 +102,6 @@ describe('Scheduler — flush', () => {
   });
 
   it('breaks an unconditional A↔B reactive cycle and logs an error', () => {
-    // Witness: scheduler.maxFlushIterations + the existing
-    // 'cycle detected' test in reaction.test.js [source]. We assert the
-    // public contract: flush() returns rather than hangs.
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const a = new Signal(0);
     const b = new Signal(0);
@@ -136,13 +123,6 @@ describe('Scheduler — flush', () => {
   });
 
   it('continues processing remaining reactions when one throws', () => {
-    // Witness: schedule-flush [example] documents flush() as a normal
-    // public method. A user-thrown exception in one reaction must not
-    // silently swallow other reactions in the same batch — either it
-    // propagates (and the user sees it) OR the framework isolates each.
-    // Either behaviour is acceptable so long as `b` still observes its
-    // update once the smoke clears. This test exists to nail down which
-    // contract is in effect.
     const a = new Signal(0);
     const b = new Signal(0);
     let bSeen = 0;
@@ -175,9 +155,6 @@ describe('Scheduler — flush', () => {
   });
 
   it('flushes again cleanly after a previous flush threw', () => {
-    // Witness: Scheduler.isFlushScheduled is a single boolean [source].
-    // If a throw leaves it true, subsequent set()s would silently fail to
-    // schedule. Verifies the post-throw recoverability contract.
     const n = new Signal(0);
     const seen = [];
 
@@ -201,8 +178,6 @@ describe('Scheduler — flush', () => {
   });
 
   it('does not double-schedule a microtask when a flush is already pending', () => {
-    // Witness: isFlushScheduled guard [source]. Multiple scheduleFlush()
-    // calls between microtask boundaries should result in a single flush.
     const callback = vi.fn();
     const n = new Signal(0);
 
@@ -219,9 +194,6 @@ describe('Scheduler — flush', () => {
   });
 
   it('runs afterFlush via microtask without an explicit flush call', async () => {
-    // Witness: reaction.test.js 'afterFlush should call registered callbacks
-    // after flushing' uses scheduleFlush() + await microtask boundary
-    // [source]. Reproducing that here verifies the auto-flush path.
     const cb = vi.fn();
     Reaction.afterFlush(cb);
     Reaction.scheduleFlush();
@@ -230,9 +202,6 @@ describe('Scheduler — flush', () => {
   });
 
   it('handles afterFlush registered from inside a reaction body', () => {
-    // Witness: performance-patterns [example] registers afterFlush from
-    // inside Reaction.create. The afterFlush callback should still fire
-    // after the reaction settles within the same flush.
     const trigger = new Signal(false);
     const settled = vi.fn();
 
@@ -249,11 +218,6 @@ describe('Scheduler — flush', () => {
   });
 
   it('does not run afterFlush callbacks registered DURING afterFlush in the same pass', () => {
-    // Witness: scheduler.flush snapshots afterFlushCallbacks into a local
-    // `callbacks` and resets the static list before iterating [source].
-    // A late registration goes into the fresh list — it will only run on
-    // the next flush. This is observable: a self-registering afterFlush
-    // would otherwise infinite-loop.
     let runCount = 0;
     const recursive = () => {
       runCount++;
@@ -278,8 +242,6 @@ describe('Scheduler — flush', () => {
 
 describe('Scheduler — current reaction context', () => {
   it('exposes the currently-running reaction via Reaction.current', () => {
-    // Witness: Reaction.current proxies Scheduler.current [source].
-    // Public surface for the tracing helpers (Reaction.getSource).
     let seen = null;
     const r = Reaction.create(function inside() {
       seen = Reaction.current;
@@ -293,10 +255,6 @@ describe('Scheduler — current reaction context', () => {
   });
 
   it('restores Scheduler.current after a reaction throws', () => {
-    // Witness: try/finally in Reaction.run [source]. A user-thrown error
-    // inside the body must not leave Scheduler.current dangling — that
-    // would cause subsequent signal reads outside any reaction to attach
-    // dependencies.
     expect(() => {
       Reaction.create(() => {
         throw new Error('mid-run');
@@ -313,8 +271,6 @@ describe('Scheduler — current reaction context', () => {
   });
 
   it('nonreactive nests correctly — restores outer reaction when inner returns', () => {
-    // Witness: reaction.js nonreactive [source]: previousReaction save +
-    // restore. A nested reaction must observe its dependency tracking.
     const outer = new Signal('outer');
     const inner = new Signal('inner');
     const seen = vi.fn();
@@ -340,26 +296,18 @@ describe('Scheduler — current reaction context', () => {
 
 describe('Dependency', () => {
   it('depend() outside a reaction is a no-op', () => {
-    // Witness: dependency.depend early-returns if Scheduler.current is
-    // null [source]. Caller can call depend() defensively without guards.
     const dep = new Dependency();
     expect(() => dep.depend()).not.toThrow();
     expect(dep.subscribers.size).toBe(0);
   });
 
   it('changed() with no subscribers does not throw or allocate', () => {
-    // Witness: dependency.changed early-returns when subscribers.size is
-    // zero [source]. The fast path for "signal no one is watching" must
-    // remain side-effect-free.
     const dep = new Dependency();
     expect(() => dep.changed()).not.toThrow();
     expect(() => dep.changed({ value: 'whatever' })).not.toThrow();
   });
 
   it('cleanUp removes the reaction without affecting other subscribers', () => {
-    // Witness: Reaction.run calls dep.cleanUp(this) on every prior
-    // dependency before re-tracking [source]. Multiple reactions on the
-    // same signal must remain independent.
     const s = new Signal(0);
     const a = vi.fn();
     const b = vi.fn();
@@ -385,9 +333,6 @@ describe('Dependency', () => {
   });
 
   it('stop() cleanly unsubscribes all of a reaction’s dependencies', () => {
-    // Witness: reaction.stop iterates dependencies and unsubscribes each
-    // [source]. After stop, none of the upstream signals should retain
-    // the reaction in their subscriber set.
     const s1 = new Signal(0);
     const s2 = new Signal(0);
     const r = Reaction.create(() => {
@@ -405,8 +350,6 @@ describe('Dependency', () => {
   });
 
   it('stop() is idempotent — calling twice does not throw or double-process', () => {
-    // Witness: reaction.stop early-returns if !active [source]. Idempotency
-    // is the documented behaviour.
     const s = new Signal(0);
     const r = Reaction.create(() => s.get());
 
@@ -418,9 +361,6 @@ describe('Dependency', () => {
   });
 
   it('a stopped reaction never re-runs even if a dependency change races in', () => {
-    // Witness: reaction.run early-returns if !active [source]. A pending
-    // invalidation that landed before stop() still respects the active
-    // flag at execution time.
     const s = new Signal(0);
     const cb = vi.fn();
 
@@ -438,9 +378,6 @@ describe('Dependency', () => {
   });
 
   it('dependency tracking re-establishes after each reaction run (no stale subscriptions)', () => {
-    // Witness: reaction.run clears this.dependencies + calls dep.cleanUp
-    // before re-running [source]. After a conditional-branch swap the old
-    // dependency should NOT retain the reaction.
     const flag = new Signal(true);
     const a = new Signal('a');
     const b = new Signal('b');
@@ -478,9 +415,6 @@ describe('Dependency', () => {
 
 describe('Reaction.guard', () => {
   it('returns the value when called outside a reactive context', () => {
-    // Witness: reaction.guard early-returns f() when Scheduler.current is
-    // null [source]. Used by callers that do not know whether they are
-    // inside a Reaction.
     const result = Reaction.guard(() => 42);
     expect(result).toBe(42);
     expect(Scheduler.current).toBe(null);
@@ -496,7 +430,6 @@ describe('Reaction.guard', () => {
   });
 
   it('uses a custom equality check to gate downstream invalidation', () => {
-    // Witness: reaction.guard accepts a second `equalCheck` arg [source].
     const callback = vi.fn();
     const obj = new Signal({ a: 1, b: 1 });
 
@@ -519,9 +452,6 @@ describe('Reaction.guard', () => {
   });
 
   it('does not accumulate inner reactions on the source across outer re-runs', () => {
-    // Witness: outer.onCleanup(() => comp.stop()) in guard [source]. Each
-    // outer re-run stops the prior inner comp before creating a new one,
-    // so the source signal's subscriber set stays bounded.
     const counter = new Signal(0);
     Reaction.create(() => {
       Reaction.guard(() => counter.get());
@@ -637,15 +567,12 @@ describe('helpers — tracing modes', () => {
   });
 
   it('setStackCapture(true) implies tracing', () => {
-    // Witness: helpers.js — setStackCapture(true) sets mode = 'stack'
-    // directly [source]. Skill text: "stack implies context".
     setStackCapture(true);
     expect(isTracing()).toBe(true);
     expect(isStackCapture()).toBe(true);
   });
 
   it('setStackCapture(false) demotes stack → context, leaving tracing on', () => {
-    // Witness: helpers.js — if (mode === 'stack') mode = 'context' [source].
     setStackCapture(true);
     setStackCapture(false);
 
@@ -661,8 +588,6 @@ describe('helpers — tracing modes', () => {
   });
 
   it('setTracing(true) is idempotent — does not promote context → stack', () => {
-    // Witness: helpers.js — setTracing(true) only transitions when
-    // mode === 'off' [source]. Repeated calls must not escalate.
     setTracing(true);
     setTracing(true);
     setTracing(true);
@@ -671,8 +596,6 @@ describe('helpers — tracing modes', () => {
   });
 
   it('Signal.setContext is a no-op when tracing is off', () => {
-    // Witness: signal.setContext early-returns when !isTracing() [source].
-    // Verifies the zero-allocation guarantee on the hot path.
     const s = new Signal('val');
     s.setContext({ foo: 'bar' });
     expect(s.context).toBeUndefined();
@@ -704,8 +627,6 @@ describe('helpers — tracing modes', () => {
 
 describe('mid-reaction signal updates', () => {
   it('a reaction that sets its own dependency does not infinite-loop in one flush', () => {
-    // Witness: Scheduler.maxFlushIterations = 100 [source]. Self-mutating
-    // reactions that converge must complete; ones that don't must be cut.
     const n = new Signal(0);
     let runs = 0;
 
@@ -748,9 +669,6 @@ describe('mid-reaction signal updates', () => {
 
 describe('Signal — read paths via internals', () => {
   it('get({ clone: false }) creates a dependency but returns the live reference', () => {
-    // Witness: signal.get [source] — when clone:false, depend() is called
-    // and currentValue is returned as-is. Lets callers opt out of the
-    // clone cost while keeping reactivity.
     const obj = { a: 1 };
     const s = new Signal(obj);
     let lastSeen;
@@ -766,8 +684,6 @@ describe('Signal — read paths via internals', () => {
   });
 
   it('peek returns a clone (defensive read) but no dependency', () => {
-    // Witness: signal.peek calls maybeClone [source]. Mutating the peeked
-    // copy must not affect the internal value.
     const s = new Signal([1, 2, 3]);
     const peeked = s.peek();
     peeked.push(99);

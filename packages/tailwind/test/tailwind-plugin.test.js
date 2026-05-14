@@ -18,7 +18,7 @@ describe('extractDefinitionContent — content scanner', () => {
   });
 
   it('puts the component css into the css bucket, not the scan content', () => {
-    // [skill] css is fed to the compiler as `css`, content is for class extraction.
+    // css is fed to the compiler as `css`, content is for class extraction.
     // If css were merged into content, @theme/@utility blocks would be misinterpreted as classes.
     const { content, css } = extractDefinitionContent({
       template: '<div></div>',
@@ -42,7 +42,6 @@ describe('extractDefinitionContent — content scanner', () => {
   });
 
   it('scans every lifecycle hook for class literals', () => {
-    // [skill] lists all five lifecycle hooks
     const { js } = extractDefinitionContent({
       template: '<div></div>',
       onCreated: () => 'class-from-onCreated',
@@ -85,8 +84,6 @@ describe('extractDefinitionContent — content scanner', () => {
   });
 
   it('scans one level of subTemplates for both template HTML and CSS', () => {
-    // [example] Canonical usage — subtemplates are built via defineComponent (no tagName)
-    // and the resulting Template instances are passed in the parent's subTemplates map.
     const header = defineComponent({
       template: '<header class="sub-header"></header>',
       css: '@theme { --color-header: red; }',
@@ -142,7 +139,7 @@ describe('extractDefinitionContent — content scanner', () => {
   });
 
   it('joins extracted sources with newlines so adjacent strings cannot merge into invalid candidates', () => {
-    // [inference] If two adjacent strings concatenated without a separator, "bg-red-500" + "p-4"
+    // If two adjacent strings concatenated without a separator, "bg-red-500" + "p-4"
     // would scan as "bg-red-500p-4" — neither a valid Tailwind class. Newlines preserve boundaries.
     const { content } = extractDefinitionContent({
       template: '<div class="bg-red-500"></div>',
@@ -177,7 +174,6 @@ describe('extractDefinitionContent — content scanner', () => {
   });
 
   it('does not mutate the input definition', () => {
-    // [synthesis] Plugin contract: pre-process pattern, immutable inputs.
     const def = {
       template: '<div class="p-4"></div>',
       events: { 'click .a': () => 'bg-test' },
@@ -209,8 +205,6 @@ describe('TailwindPlugin — definition transform', () => {
   });
 
   it('emits CSS containing utilities for classes referenced in createComponent bodies', async () => {
-    // [skill] "Tailwind classes referenced in JavaScript ... are detected as long as the class
-    //  string literal appears in the function body."
     const result = await TailwindPlugin({
       template: '<div></div>',
       createComponent: () => ({
@@ -275,10 +269,6 @@ describe('TailwindPlugin — definition transform', () => {
   });
 
   it('resolves @apply directives in component CSS even when no template classes are present', async () => {
-    // [skill] @apply is a standard Tailwind 4 directive consumers will reach for to compose
-    // utilities into semantic class names. The plugin scans css for @theme/@utility blocks,
-    // so @apply should also work. A component author with `css: '.btn { @apply bg-blue-500 p-2; }'`
-    // and no other content expects the compiled CSS to contain the resolved utilities.
     const result = await TailwindPlugin({
       css: '.my-btn { @apply bg-blue-500 p-2; }',
     });
@@ -316,15 +306,12 @@ describe('TailwindPlugin — definition transform', () => {
   });
 
   it('returns the definition unchanged when there is no scannable content', async () => {
-    // [source] guard at `if (!content.trim()) return definition`.
     const def = {};
     const result = await TailwindPlugin(def);
     expect(result).toBe(def);
   });
 
   it('moves @property rules out of component css into pageCSS for document-level adoption', async () => {
-    // [source] @property rules are stripped from component css and placed in pageCSS so that
-    //  defineComponent adopts them on the document (Shadow DOM ignores @property otherwise).
     // shadow-lg generates several @property declarations in Tailwind 4.
     const result = await TailwindPlugin({
       template: '<div class="shadow-lg"></div>',
@@ -335,7 +322,6 @@ describe('TailwindPlugin — definition transform', () => {
   });
 
   it('appends generated @property pageCSS after any pre-existing pageCSS', async () => {
-    // [source] `definition.pageCSS ? `${definition.pageCSS}\n${pageCSS}` : pageCSS`
     const result = await TailwindPlugin({
       template: '<div class="shadow-lg"></div>',
       pageCSS: '/* existing-page-css */',
@@ -348,8 +334,7 @@ describe('TailwindPlugin — definition transform', () => {
   });
 
   it('preserves a pre-existing pageCSS when there are no @property rules to extract', async () => {
-    // [inference] If no @property rules in tailwind output, the conditional
-    //  ...(pageCSS && {...}) should NOT clobber the user's existing pageCSS.
+    // If no @property rules in tailwind output, the conditional should NOT clobber existing pageCSS.
     const result = await TailwindPlugin({
       template: '<div class="p-1"></div>',
       pageCSS: '/* user-page-css */',
@@ -358,7 +343,6 @@ describe('TailwindPlugin — definition transform', () => {
   });
 
   it('omits pageCSS entirely when none is generated and none was supplied', async () => {
-    // [inference] Simple template, no shadow / @property utilities → no pageCSS at all.
     const result = await TailwindPlugin({
       template: '<div class="p-1"></div>',
     });
@@ -366,7 +350,7 @@ describe('TailwindPlugin — definition transform', () => {
   });
 
   it('applies vendor prefixes by default when classes need them', async () => {
-    // [source] autoprefix defaults to true; prefixCSS handles user-select among others.
+    // autoprefix defaults to true; prefixCSS handles user-select among others.
     const result = await TailwindPlugin({
       template: '<div class="select-none"></div>',
     });
@@ -390,7 +374,6 @@ describe('TailwindPlugin — definition transform', () => {
   });
 
   it('applies the component css as a source stylesheet so @theme tokens flow through', async () => {
-    // [skill] @theme blocks let consumers override design tokens within a component.
     const result = await TailwindPlugin({
       template: '<div class="bg-gray-100"></div>',
       css: '@theme { --color-gray-100: #ff00ff; }',
@@ -401,7 +384,6 @@ describe('TailwindPlugin — definition transform', () => {
   });
 
   it('respects an @utility definition in component css', async () => {
-    // [skill] @utility lets consumers define custom utility classes.
     const result = await TailwindPlugin({
       template: '<div class="my-custom-shadow"></div>',
       css: '@utility my-custom-shadow { box-shadow: 0 0 1px red; }',
@@ -411,7 +393,6 @@ describe('TailwindPlugin — definition transform', () => {
   });
 
   it('respects an @custom-variant definition in component css', async () => {
-    // [skill] @custom-variant lets consumers define class-based dark mode and similar.
     const result = await TailwindPlugin({
       template: '<div class="dark:text-white"></div>',
       css: '@custom-variant dark (&:where(.dark, .dark *));',
@@ -422,7 +403,6 @@ describe('TailwindPlugin — definition transform', () => {
   });
 
   it('returns the original definition when only undocumented class strings appear (no Tailwind output)', async () => {
-    // [source] `if (!tailwindCSS.trim()) return definition` — if compilation yielded nothing useful.
     // Real Tailwind 4 outputs at least the preflight comment header even for unknown classes,
     // so this branch is essentially defensive. We assert it preserves the definition.
     const def = { template: '<div class="totally-not-tailwind-foo-123"></div>' };
@@ -453,7 +433,6 @@ describe('TailwindPlugin — cross-cutting contract', () => {
   });
 
   it('preserves field types — defaultState and defaultSettings retain object identity', async () => {
-    // [synthesis] Plugin transforms strings, not data. Object-typed fields pass through by reference.
     const settings = { foo: 1 };
     const state = { bar: 2 };
     const result = await TailwindPlugin({

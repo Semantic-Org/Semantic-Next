@@ -12,7 +12,6 @@ describe('query — documented contract', () => {
 
   describe('selection', () => {
     it('$$() pierces shadow DOM where $() does not', () => {
-      // The query skill: "$ respects Shadow DOM boundaries. $$ crosses them."
       const host = document.createElement('div');
       document.body.appendChild(host);
       const shadow = host.attachShadow({ mode: 'open' });
@@ -23,8 +22,6 @@ describe('query — documented contract', () => {
     });
 
     it('creates elements from leading-whitespace HTML strings', () => {
-      // The skill shows $('<div>Content</div>') — leading whitespace is common
-      // in template literals: $(`\n  <div>x</div>\n`).
       const $el = $('   <div class="created">hi</div>');
       expect($el.length).toBe(1);
       expect($el[0].tagName).toBe('DIV');
@@ -55,7 +52,6 @@ describe('query — documented contract', () => {
 
   describe('.end()', () => {
     it('returns the previous selection after a traversal', () => {
-      // From query-end example + chaining contract.
       document.body.innerHTML = `
         <ul class="items">
           <li><button class="button">a</button></li>
@@ -68,7 +64,6 @@ describe('query — documented contract', () => {
     });
 
     it('threads through multiple .end() calls', () => {
-      // chaining example: $('.items').addClass(...).find('.button').on(...).end().css(...)
       document.body.innerHTML = `
         <div class="root">
           <div class="mid"><span class="leaf"></span></div>
@@ -81,9 +76,6 @@ describe('query — documented contract', () => {
     });
 
     it('returns the same Query when there is no previous selection', () => {
-      // The query skill describes .end() as "undo for method chaining" — calling
-      // it with no chain history is harmless, not an error. Source confirms
-      // `return this.prevObject || this`.
       const $div = $('div');
       expect($div.end()).toBe($div);
     });
@@ -95,7 +87,6 @@ describe('query — documented contract', () => {
 
   describe('.find() / .children()', () => {
     it('.find() returns ALL descendants (not just direct children)', () => {
-      // query-find example: "Searches all descendants (unlike children())".
       document.body.innerHTML = `
         <div class="container">
           <div class="row">
@@ -109,7 +100,6 @@ describe('query — documented contract', () => {
     });
 
     it('.children() returns only direct children', () => {
-      // query-children example: "children() only returns direct children".
       document.body.innerHTML = `
         <div class="parent">
           <div class="child">direct</div>
@@ -160,7 +150,6 @@ describe('query — documented contract', () => {
     });
 
     it('.next(selector) walks past siblings until one matches', () => {
-      // [source] confirms a walk, not a one-shot match. This is a real
       // jQuery-vs-SUI divergence: in jQuery, .next(selector) only matches
       // the IMMEDIATE next sibling against the selector (returns empty
       // otherwise). SUI walks until match. Documenting the SUI contract.
@@ -201,8 +190,6 @@ describe('query — documented contract', () => {
     });
 
     it('.closestAll() returns ALL matching ancestors', () => {
-      // query-closestall example: "Unlike closest() which stops at first
-      // match, closestAll() continues up the entire tree".
       document.body.innerHTML = `
         <div class="box">
           <div class="box">
@@ -242,7 +229,6 @@ describe('query — documented contract', () => {
     });
 
     it('.not(selector) excludes matching elements', () => {
-      // query-not example: "Inverse of filter() - excludes matching elements".
       document.body.innerHTML = `
         <div class="item">a</div>
         <div class="item special">b</div>
@@ -253,7 +239,6 @@ describe('query — documented contract', () => {
     });
 
     it('.is(selector) returns true when every element matches', () => {
-      // [source] confirms: filteredElements.length === this.length —
       // ALL must match, not ANY. This is a SUI departure from jQuery.
       document.body.innerHTML = `
         <div class="a active"></div>
@@ -263,9 +248,6 @@ describe('query — documented contract', () => {
     });
 
     it('.is(selector) returns false when ANY element does not match', () => {
-      // The "every must match" contract — flagging because the user-facing
-      // skill describes .is() as "Test if any element matches selector",
-      // which suggests jQuery semantics. Source disagrees; test arbitrates.
       document.body.innerHTML = `
         <div class="a active"></div>
         <div class="a"></div>
@@ -299,7 +281,6 @@ describe('query — documented contract', () => {
     });
 
     it('returns true when passed a DOM element that is a descendant', () => {
-      // query-contains example: container.contains(target) where target is a Query.
       document.body.innerHTML = `
         <div class="container"><div class="target"></div></div>
       `;
@@ -319,7 +300,6 @@ describe('query — documented contract', () => {
 
   describe('.index() / .indexOf()', () => {
     it('.index() returns position among siblings', () => {
-      // query-index example.
       document.body.innerHTML = `
         <div class="list">
           <div class="item"></div>
@@ -331,8 +311,6 @@ describe('query — documented contract', () => {
     });
 
     it('.indexOf(filter) returns index within the current collection', () => {
-      // query-indexof example: $('.item').indexOf('.target') → index of
-      // the target within the .item collection.
       document.body.innerHTML = `
         <div class="item">a</div>
         <div class="item target">b</div>
@@ -353,7 +331,6 @@ describe('query — documented contract', () => {
 
   describe('.add()', () => {
     it('combines selections from different selectors', () => {
-      // query-add example: $('.red').add('.blue').addClass('highlighted').
       document.body.innerHTML = `
         <div class="red"></div>
         <div class="red"></div>
@@ -431,8 +408,6 @@ describe('query — documented contract', () => {
     });
 
     it('.reverse() returns a new collection in reverse order without mutating the original', () => {
-      // query-reverse example tip: "Creates new Query object - original
-      // collection remains unchanged".
       document.body.innerHTML = `
         <div class="i" data-i="0"></div>
         <div class="i" data-i="1"></div>
@@ -462,8 +437,6 @@ describe('query — documented contract', () => {
     });
 
     it('.each() inside, `this` is the Query-wrapped element', () => {
-      // query-on-callback example shows function-style callbacks where
-      // `this` is a usable element reference.
       document.body.innerHTML = '<span class="s">hi</span>';
       let received;
       $('.s').each(function() {
@@ -474,8 +447,6 @@ describe('query — documented contract', () => {
     });
 
     it('.map(fn) returns a plain JavaScript array', () => {
-      // query-map example shows `$('.number').map(el => $(el).text())` →
-      // values used with `.join(', ')` — so .map must return a real Array.
       document.body.innerHTML = `
         <span class="n">5</span><span class="n">10</span><span class="n">15</span>
       `;
@@ -497,7 +468,6 @@ describe('query — documented contract', () => {
     });
 
     it('.get() with no argument returns an array of all elements', () => {
-      // query-get tip and skill table.
       document.body.innerHTML = '<input><input><input>';
       const all = $('input').get();
       expect(Array.isArray(all)).toBe(true);
@@ -532,7 +502,6 @@ describe('query — documented contract', () => {
     });
 
     it('.count() returns the number of matched elements', () => {
-      // query-count example.
       document.body.innerHTML = '<div class="i"></div><div class="i"></div>';
       expect($('.i').count()).toBe(2);
     });
@@ -575,7 +544,6 @@ describe('query — documented contract', () => {
     });
 
     it('.val() and .value() are aliases', () => {
-      // skill: ".val() is an alias for .value() — both are identical."
       document.body.innerHTML = '<input class="i" value="hello">';
       expect($('.i').val()).toBe('hello');
       expect($('.i').value()).toBe('hello');
@@ -641,7 +609,6 @@ describe('query — documented contract', () => {
     });
 
     it('.addAttr(name) sets a boolean attribute to empty string', () => {
-      // skill: "$('ui-button').addAttr('disabled')" — boolean attribute pattern.
       document.body.innerHTML = '<button class="b"></button>';
       $('.b').addAttr('disabled');
       expect(document.querySelector('.b').getAttribute('disabled')).toBe('');
@@ -649,7 +616,6 @@ describe('query — documented contract', () => {
     });
 
     it('.addAttr([a, b]) sets multiple boolean attributes', () => {
-      // skill: "$('ui-input').addAttr(['required', 'readonly'])"
       document.body.innerHTML = '<input class="i">';
       $('.i').addAttr(['required', 'readonly']);
       const el = document.querySelector('.i');
@@ -715,7 +681,6 @@ describe('query — documented contract', () => {
     });
 
     it('.on() supports space-separated event names', () => {
-      // query-on example shows: $('.multiple').on('pointerdown pointerup', handler).
       document.body.innerHTML = '<div class="d"></div>';
       const handler = vi.fn();
       $('.d').on('mousedown mouseup', handler);
@@ -726,7 +691,6 @@ describe('query — documented contract', () => {
     });
 
     it('.on(event, selector, handler) supports event delegation', () => {
-      // query-on-delegate example: bind to parent, match descendants by selector.
       document.body.innerHTML = `
         <div class="list">
           <div class="item">a</div>
@@ -740,8 +704,6 @@ describe('query — documented contract', () => {
     });
 
     it('delegated handler fires on dynamically-added children too', () => {
-      // The headline value of delegation. query-on-delegate example
-      // explicitly demonstrates this.
       document.body.innerHTML = '<div class="list"></div>';
       const handler = vi.fn();
       $('.list').on('click', '.item', handler);
@@ -751,7 +713,6 @@ describe('query — documented contract', () => {
     });
 
     it('.one() fires only once and is removed afterwards', () => {
-      // query-one example: "Event that fires only once".
       document.body.innerHTML = '<button class="b"></button>';
       const handler = vi.fn();
       $('.b').one('click', handler);
@@ -772,7 +733,6 @@ describe('query — documented contract', () => {
     });
 
     it('.on(event, handler, { abortController }) removes via abort()', () => {
-      // query-on-abort example.
       document.body.innerHTML = '<button class="b"></button>';
       const handler = vi.fn();
       const controller = new AbortController();
@@ -783,8 +743,7 @@ describe('query — documented contract', () => {
     });
 
     it('handler returning false calls stopPropagation but NOT preventDefault', () => {
-      // From the query skill: this is a SUI departure from jQuery
-      // (which does both on `return false`).
+      // SUI departure from jQuery (which does both on `return false`).
       document.body.innerHTML = '<form class="f"><button class="b" type="submit"></button></form>';
       let stopCalled = false;
       let preventCalled = false;
@@ -811,10 +770,6 @@ describe('query — documented contract', () => {
     });
 
     it('arrow-implicit-return false on .on() stops propagation', () => {
-      // The query skill explicitly documents this idiom:
-      //   $('.link').on('click', () => false);   // stopPropagation() only
-      // The implicit-return arrow form is the COMMON one used in inline
-      // event handlers — this is the shape developers will reach for first.
       document.body.innerHTML = '<div class="outer"><div class="inner"></div></div>';
       const outerHandler = vi.fn();
       $('.outer').on('click', outerHandler);
@@ -826,7 +781,6 @@ describe('query — documented contract', () => {
     });
 
     it("handler returning 'cancel' calls preventDefault but not stopPropagation", () => {
-      // Same skill section — 'cancel' is the SUI keyword for preventDefault.
       document.body.innerHTML = '<form class="f"></form>';
       const $form = $('.f');
       let preventCalled = false;
@@ -850,9 +804,6 @@ describe('query — documented contract', () => {
 
   describe('events — .trigger() and .dispatchEvent()', () => {
     it('.trigger(eventName) invokes native handler when available', () => {
-      // query-trigger tip: "Creates Event objects that trigger native
-      // browser behaviors". For 'click' on a button, el.click() exists
-      // and is invoked.
       document.body.innerHTML = '<button class="b"></button>';
       const handler = vi.fn();
       $('.b').on('click', handler);
@@ -869,7 +820,6 @@ describe('query — documented contract', () => {
     });
 
     it('.dispatchEvent(name, data) sets event.detail to the data payload', () => {
-      // query-dispatchevent example: $('.dispatcher').dispatchEvent('ping', { date }).
       document.body.innerHTML = '<div class="d"></div>';
       let received;
       $('.d').on('ping', (e) => {
@@ -880,8 +830,6 @@ describe('query — documented contract', () => {
     });
 
     it('.dispatchEvent() bubbles by default', () => {
-      // skill: "All events default to composed: true (cross shadow DOM)"
-      // and dispatchEvent uses bubbles: true by default.
       document.body.innerHTML = '<div class="parent"><div class="child"></div></div>';
       const parentHandler = vi.fn();
       $('.parent').on('ping', parentHandler);
@@ -904,7 +852,6 @@ describe('query — documented contract', () => {
 
   describe('.intercept() — capture-phase event delegation', () => {
     it('fires BEFORE child .on() handlers (capture order)', () => {
-      // query-intercept example: "intercept fires top-down (capture phase)".
       document.body.innerHTML = `
         <div class="outer">
           <div class="middle">
@@ -923,7 +870,6 @@ describe('query — documented contract', () => {
     });
 
     it('returning false from an intercept handler stops propagation to descendants', () => {
-      // query-intercept example documents this exact behavior.
       document.body.innerHTML = `
         <div class="parent">
           <div class="child"></div>
@@ -937,8 +883,6 @@ describe('query — documented contract', () => {
     });
 
     it('supports delegation: intercept("click", ".selector", handler)', () => {
-      // From the skill quick-reference: intercept supports delegation
-      // identically to .on().
       document.body.innerHTML = `
         <div class="root">
           <div class="match"></div>
@@ -959,7 +903,6 @@ describe('query — documented contract', () => {
 
   describe('.onNext() — promise-based event waiting', () => {
     it('resolves with the event when it fires', async () => {
-      // query-onnext example: `await $('.next').onNext('click')`.
       document.body.innerHTML = '<button class="b"></button>';
       const promise = $('.b').onNext('click');
       document.querySelector('.b').click();
@@ -983,7 +926,6 @@ describe('query — documented contract', () => {
     });
 
     it('rejects after the timeout when the event does not fire', async () => {
-      // From the skill: "await $('ui-modal').onNext('hide', { timeout: 5000 })".
       document.body.innerHTML = '<div class="d"></div>';
       let error;
       try {
@@ -1057,7 +999,6 @@ describe('query — documented contract', () => {
     });
 
     it('.detach() removes elements but keeps them in the Query for reinsertion', () => {
-      // query-detach example.
       document.body.innerHTML = '<div class="parent"><div class="child"></div></div>';
       const $detached = $('.child').detach();
       expect(document.querySelectorAll('.child').length).toBe(0);
@@ -1068,7 +1009,6 @@ describe('query — documented contract', () => {
     });
 
     it('.clone() returns a deep copy of the elements', () => {
-      // query-clone example.
       document.body.innerHTML = '<div class="orig"><b>nested</b></div>';
       const $clone = $('.orig').clone();
       // Cloned content should include the nested element
@@ -1090,8 +1030,6 @@ describe('query — documented contract', () => {
     });
 
     it('.show() restores display after .hide()', () => {
-      // The skill emphasizes .show() restores NATURAL display, not always
-      // "block". Validating the round-trip here.
       document.body.innerHTML = '<div class="d"></div>';
       const $d = $('.d');
       $d.hide();
@@ -1177,7 +1115,6 @@ describe('query — documented contract', () => {
     });
 
     it('.cssVar(name, value) sets a CSS custom property with -- prefix', () => {
-      // The skill: ".cssVar('foo', 'bar')" sets --foo.
       document.body.innerHTML = '<div class="d"></div>';
       $('.d').cssVar('my-var', '12px');
       // The property is set with -- prefix
@@ -1191,7 +1128,6 @@ describe('query — documented contract', () => {
 
   describe('chaining', () => {
     it('mutating methods return the Query for chaining', () => {
-      // query-chaining example: three mutations chained on one selection.
       document.body.innerHTML = '<div class="d"></div>';
       const $d = $('.d');
       const result = $d.addClass('a').addClass('b').text('hi');
@@ -1282,8 +1218,6 @@ describe('query — documented contract', () => {
 
   describe('$$ shadow piercing', () => {
     it('$$ propagates pierceShadow to traversal results', () => {
-      // The skill: "$$ does everything $ does but pierces through Shadow
-      // DOM boundaries." That should apply to .find()/.closest() etc.
       const host = document.createElement('div');
       document.body.appendChild(host);
       const shadow = host.attachShadow({ mode: 'open' });
