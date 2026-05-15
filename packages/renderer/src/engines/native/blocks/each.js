@@ -205,9 +205,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   const oldRecords = records.slice();
   const oldKeys = oldRecords.map((record) => record.key);
   const newKeys = items.map((item, i) => getItemID(item, i, collectionType));
-  // .fill(null) promotes HOLEY_SMI → PACKED; matches the null sentinel
-  // the reconcile uses for reused slots.
-  const newRecords = new Array(items.length).fill(null);
+  const newRecords = new Array(items.length);
 
   let oldHead = 0;
   let oldTail = oldRecords.length - 1;
