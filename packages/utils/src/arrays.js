@@ -62,6 +62,13 @@ export const firstMatch = (array = [], callbackOrValue) => {
     ? callbackOrValue
     : (val) => isEqual(val, callbackOrValue);
 
+  if (Array.isArray(array)) {
+    for (let i = 0; i < array.length; i++) {
+      if (callback(array[i], i, array)) { return array[i]; }
+    }
+    return;
+  }
+
   let result;
   each(array, (value, index) => {
     if (callback(value, index, array)) {
@@ -79,6 +86,13 @@ export const findIndex = (array = [], callbackOrValue) => {
   const callback = isFunction(callbackOrValue)
     ? callbackOrValue
     : (val) => isEqual(val, callbackOrValue);
+
+  if (Array.isArray(array)) {
+    for (let i = 0; i < array.length; i++) {
+      if (callback(array[i], i, array)) { return i; }
+    }
+    return -1;
+  }
 
   let matchedIndex = -1;
   each(array, (value, index) => {

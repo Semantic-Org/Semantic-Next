@@ -203,7 +203,6 @@ function disposeRecord(record) {
 //          mutated.
 function reconcile({ records, items, collectionType, node, data, scope, region, renderAST, isSVG }) {
   const oldRecords = records.slice();
-  const oldKeys = oldRecords.map((record) => record.key);
   const newKeys = items.map((item, i) => getItemID(item, i, collectionType));
   const newRecords = new Array(items.length);
 
@@ -215,39 +214,48 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   let newKeySet;
 
   while (oldHead <= oldTail && newHead <= newTail) {
-    if (oldRecords[oldHead] === null) {
+    const oldHeadRec = oldRecords[oldHead];
+    if (oldHeadRec === null) {
       oldHead++;
       continue;
     }
-    if (oldRecords[oldTail] === null) {
+    const oldTailRec = oldRecords[oldTail];
+    if (oldTailRec === null) {
       oldTail--;
       continue;
     }
-    if (oldKeys[oldHead] === newKeys[newHead]) {
-      newRecords[newHead++] = oldRecords[oldHead++];
+    if (oldHeadRec.key === newKeys[newHead]) {
+      newRecords[newHead++] = oldHeadRec;
+      oldHead++;
     }
-    else if (oldKeys[oldTail] === newKeys[newTail]) {
-      newRecords[newTail--] = oldRecords[oldTail--];
+    else if (oldTailRec.key === newKeys[newTail]) {
+      newRecords[newTail--] = oldTailRec;
+      oldTail--;
     }
-    else if (oldKeys[oldHead] === newKeys[newTail]) {
-      newRecords[newTail--] = oldRecords[oldHead++];
+    else if (oldHeadRec.key === newKeys[newTail]) {
+      newRecords[newTail--] = oldHeadRec;
+      oldHead++;
     }
-    else if (oldKeys[oldTail] === newKeys[newHead]) {
-      newRecords[newHead++] = oldRecords[oldTail--];
+    else if (oldTailRec.key === newKeys[newHead]) {
+      newRecords[newHead++] = oldTailRec;
+      oldTail--;
     }
     else {
       if (!oldKeyToIdx) {
         oldKeyToIdx = new Map();
-        for (let i = oldHead; i <= oldTail; i++) { oldKeyToIdx.set(oldKeys[i], i); }
+        for (let i = oldHead; i <= oldTail; i++) {
+          const rec = oldRecords[i];
+          if (rec !== null) { oldKeyToIdx.set(rec.key, i); }
+        }
         newKeySet = new Set();
         for (let i = newHead; i <= newTail; i++) { newKeySet.add(newKeys[i]); }
       }
-      if (!newKeySet.has(oldKeys[oldHead])) {
-        disposeRecord(oldRecords[oldHead]);
+      if (!newKeySet.has(oldHeadRec.key)) {
+        disposeRecord(oldHeadRec);
         oldHead++;
       }
-      else if (!newKeySet.has(oldKeys[oldTail])) {
-        disposeRecord(oldRecords[oldTail]);
+      else if (!newKeySet.has(oldTailRec.key)) {
+        disposeRecord(oldTailRec);
         oldTail--;
       }
       else {
