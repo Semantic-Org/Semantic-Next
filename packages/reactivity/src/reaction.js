@@ -113,9 +113,11 @@ export class Reaction {
       return;
     }
     this.active = false;
-    // pendingReactions.delete + dependencies.clear are skipped — run() early-returns
-    // on !active so a queued stopped reaction is harmless, and the dependencies Set
-    // is GC'd with the reaction itself. Recovers the lifecycle-churn hot path.
+    // Cheap O(1) — keeps stopped reactions out of the next flush iteration.
+    // Leaving them queued visibly softened krausest swap-rows-20 / remove-row-back wins.
+    Scheduler.pendingReactions.delete(this);
+    // dependencies.clear() is still skipped — dep.remove(this) below already
+    // touches each dep, and this reaction's own Set GCs with the reaction.
     this.dependencies.forEach(dep => dep.remove(this));
     this.fireCleanups();
   }
