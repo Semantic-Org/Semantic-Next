@@ -921,29 +921,6 @@ describe.concurrent('Signal', () => {
       warnSpy.mockRestore();
     });
 
-    // Test WeakRef cleanup behavior
-    it('should handle WeakRef cleanup gracefully', () => {
-      let source = new Signal(10);
-      const derived = source.derive(val => val * 2);
-
-      expect(derived.get()).toBe(20);
-
-      // Reaction should be active
-      expect(derived._derivedReaction.active).toBe(true);
-
-      // Simulate source being garbage collected
-      source = null;
-
-      // Force garbage collection if available (Node.js only)
-      if (global.gc) {
-        global.gc();
-      }
-
-      // The reaction should still be active but will auto-cleanup on next run
-      // This is hard to test directly, but we can verify the structure is correct
-      expect(derived._derivedReaction).toBeDefined();
-    });
-
     it('derive inside a parent reaction does not accumulate subscribers across re-runs', () => {
       const source = new Signal(1);
       Reaction.create(() => {

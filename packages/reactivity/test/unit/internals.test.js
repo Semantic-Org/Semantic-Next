@@ -119,6 +119,27 @@ describe('Scheduler — flush', () => {
     errorSpy.mockRestore();
   });
 
+  // the cycle cap spans both queues with a unified iteration counter — a reaction
+  // that schedules an afterFlush that re-invalidates the reaction must also hit it
+  it('breaks a reaction↔afterFlush cycle and logs an error', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const trigger = new Signal(0);
+
+    Reaction.create(() => {
+      trigger.get();
+      Reaction.afterFlush(() => trigger.set(trigger.peek() + 1));
+    });
+
+    trigger.set(1);
+    Reaction.flush();
+
+    expect(errorSpy).toHaveBeenCalled();
+    expect(errorSpy.mock.calls.some(c => /cycle detected/i.test(c[0]))).toBe(true);
+    expect(Scheduler.pendingReactions.size).toBe(0);
+    expect(Scheduler.afterFlushCallbacks.length).toBe(0);
+    errorSpy.mockRestore();
+  });
+
   // exception in one reaction must not silently swallow others in the same batch
   // either it propagates or framework isolates each, this test pins which
   it('continues processing remaining reactions when one throws', () => {
@@ -210,8 +231,7 @@ describe('Scheduler — flush', () => {
     expect(settled).toHaveBeenCalledTimes(1);
   });
 
-  // late-registered afterFlush queues for the next flush, otherwise self-registering callbacks would infinite-loop
-  it('does not run afterFlush callbacks registered DURING afterFlush in the same pass', () => {
+  it('drains afterFlush callbacks registered during afterFlush in the same flush', () => {
     let runCount = 0;
     const recursive = () => {
       runCount++;
@@ -222,10 +242,45 @@ describe('Scheduler — flush', () => {
     Reaction.afterFlush(recursive);
 
     Reaction.flush();
-    expect(runCount).toBe(1);
+    expect(runCount).toBe(5);
+  });
+
+  it('schedules a flush when afterFlush registers with no pending work', async () => {
+    const cb = vi.fn();
+    Reaction.afterFlush(cb);
+    await Promise.resolve();
+    expect(cb).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps draining when an afterFlush callback throws', () => {
+    const survivor = vi.fn();
+    Reaction.afterFlush(() => {
+      throw new Error('boom');
+    });
+    Reaction.afterFlush(survivor);
+
+    expect(() => Reaction.flush()).toThrow('boom');
+    expect(survivor).toHaveBeenCalledTimes(1);
+  });
+
+  it('drains reactions queued by an afterFlush callback before the next callback runs', () => {
+    const source = new Signal('initial');
+    const derived = new Signal('initial');
+
+    Reaction.create(() => {
+      derived.set(`reaction-saw-${source.get()}`);
+    });
+
+    let observedInCb2;
+    Reaction.afterFlush(() => {
+      source.set('updated-by-cb1');
+      Reaction.afterFlush(() => {
+        observedInCb2 = derived.peek();
+      });
+    });
 
     Reaction.flush();
-    expect(runCount).toBe(2);
+    expect(observedInCb2).toBe('reaction-saw-updated-by-cb1');
   });
 });
 
@@ -260,6 +315,32 @@ describe('Scheduler — current reaction context', () => {
     const s = new Signal('x');
     s.get();
     expect(s.hasDependents()).toBe(false);
+  });
+
+  it('advances firstRun even when the callback throws, so re-invalidation tracks fresh deps', () => {
+    const trigger = new Signal(0);
+    let throwOnce = true;
+    const callback = vi.fn();
+    let reaction;
+
+    // Reaction.create throws because the first run does, so capture the instance via the callback arg
+    expect(() => {
+      Reaction.create((r) => {
+        reaction = r;
+        trigger.get();
+        callback(r.firstRun);
+        if (throwOnce) {
+          throwOnce = false;
+          throw new Error('first run throws');
+        }
+      });
+    }).toThrow('first run throws');
+
+    expect(reaction.firstRun).toBe(false);
+
+    trigger.set(1);
+    Reaction.flush();
+    expect(callback).toHaveBeenLastCalledWith(false);
   });
 
   it('nonreactive nests correctly — restores outer reaction when inner returns', () => {
@@ -466,6 +547,33 @@ describe('Reaction.guard', () => {
 
     outer.stop();
     expect(counter.dependency.subscribers.size).toBe(0);
+  });
+
+  it('propagates value changes after the first f() throws', () => {
+    const source = new Signal('first');
+    let throwOnce = true;
+    const downstream = vi.fn();
+
+    expect(() => {
+      Reaction.create(() => {
+        const v = Reaction.guard(() => {
+          const x = source.get();
+          if (throwOnce) {
+            throwOnce = false;
+            throw new Error('first run throws');
+          }
+          return x;
+        });
+        downstream(v);
+      });
+    }).toThrow('first run throws');
+
+    expect(downstream).not.toHaveBeenCalled();
+
+    // a signal change re-fires the inner guard, which now succeeds and propagates upward
+    source.set('second');
+    Reaction.flush();
+    expect(downstream).toHaveBeenCalledWith('second');
   });
 });
 

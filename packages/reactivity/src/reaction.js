@@ -85,27 +85,25 @@ export class Reaction {
     Scheduler.current = this;
     try {
       for (const dep of this.dependencies) {
-        dep.cleanUp(this);
+        dep.remove(this);
       }
       this.dependencies.clear();
       this.callback(this);
-      this.firstRun = false;
     }
     finally {
+      // firstRun advances even on throw so a re-invalidation re-tracks from a known baseline
+      this.firstRun = false;
       Scheduler.current = previousReaction;
     }
   }
 
   invalidate(context) {
-    // Set this reaction as active and about to be run
-    this.active = true;
-
-    // Pass through trace for debugging
+    if (!this.active) {
+      return;
+    }
     if (context) {
       this.addContext(context);
     }
-
-    // Schedule this reaction to occur in the next flush
     Scheduler.scheduleReaction(this);
   }
 
@@ -114,7 +112,9 @@ export class Reaction {
       return;
     }
     this.active = false;
-    this.dependencies.forEach(dep => dep.unsubscribe(this));
+    Scheduler.pendingReactions.delete(this);
+    this.dependencies.forEach(dep => dep.remove(this));
+    this.dependencies.clear();
     this.fireCleanups();
   }
 

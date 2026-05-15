@@ -597,7 +597,7 @@ describe('Reaction — public API contract', () => {
       expect(callback).toHaveBeenCalledTimes(2); // initial + invalidated re-run
     });
 
-    it('revives a stopped reaction by flipping active back to true', () => {
+    it('does nothing when invalidate is called on a stopped reaction', () => {
       const callback = vi.fn();
       const reaction = Reaction.create(callback);
 
@@ -605,10 +605,28 @@ describe('Reaction — public API contract', () => {
       expect(reaction.active).toBe(false);
 
       reaction.invalidate();
-      expect(reaction.active).toBe(true);
+      expect(reaction.active).toBe(false);
+      expect(Scheduler.pendingReactions.has(reaction)).toBe(false);
 
       Reaction.flush();
-      expect(callback).toHaveBeenCalledTimes(2);
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('removes the reaction from pendingReactions when stop is called mid-cycle', () => {
+      const s = new Signal(0);
+      const callback = vi.fn();
+      const reaction = Reaction.create(() => {
+        callback(s.get());
+      });
+
+      s.set(1);
+      expect(Scheduler.pendingReactions.has(reaction)).toBe(true);
+
+      reaction.stop();
+      expect(Scheduler.pendingReactions.has(reaction)).toBe(false);
+
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -920,16 +938,12 @@ describe('Reaction — public API contract', () => {
       expect(final).toBe(5);
     });
 
-    // authors chaining afterFlush should know inner registration queues for the next flush
-    it('defers an afterFlush callback registered from inside another afterFlush callback', () => {
+    it('drains afterFlush callbacks registered from inside another afterFlush in the same flush', () => {
       const order = [];
       Reaction.afterFlush(() => {
         order.push('outer');
         Reaction.afterFlush(() => order.push('inner'));
       });
-      Reaction.flush();
-      expect(order).toEqual(['outer']);
-
       Reaction.flush();
       expect(order).toEqual(['outer', 'inner']);
     });

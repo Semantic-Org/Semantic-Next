@@ -42,13 +42,7 @@ export class Dependency {
     }
   }
 
-  // called after flush
-  cleanUp(reaction) {
-    this.subscribers.delete(reaction);
-  }
-
-  // identical for now but called from stop()
-  unsubscribe(reaction) {
+  remove(reaction) {
     this.subscribers.delete(reaction);
   }
 }

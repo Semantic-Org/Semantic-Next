@@ -145,29 +145,22 @@ export class Signal {
   // derive a new signal from this signal's value
   derive(computeFn, options = {}) {
     const derivedSignal = new Signal(undefined, options);
+    // weak so the reaction's closure doesn't pin derived through source.dep.subscribers
+    const derivedRef = new WeakRef(derivedSignal);
+    const source = this;
 
-    // check if signal has been garbage collected
-    // if it has we need to clean up reaction
-    const sourceRef = new WeakRef(this);
-
-    // Create reaction that updates the derived signal
     const reaction = Reaction.create(() => {
-      const source = sourceRef.deref();
-      if (!source) {
-        reaction.stop(); // Auto-cleanup if source is gone
+      const d = derivedRef.deref();
+      if (!d) {
+        reaction.stop();
         return;
       }
-      const result = computeFn(source.get());
-      derivedSignal.set(result);
+      d.set(computeFn(source.get()));
     });
 
-    // scope to parent reaction when called from inside one
     if (Reaction.current) {
       Reaction.current.onCleanup(() => reaction.stop());
     }
-
-    // Store reaction reference for potential cleanup
-    derivedSignal._derivedReaction = reaction;
 
     return derivedSignal;
   }
@@ -175,21 +168,20 @@ export class Signal {
   // static method for computing from multiple signals
   static computed(computeFn, options = {}) {
     const computedSignal = new Signal(undefined, options);
+    const computedRef = new WeakRef(computedSignal);
 
-    // Create reaction that updates the computed signal
-    // No WeakRef needed - computed signal and reaction have same lifecycle
     const reaction = Reaction.create(() => {
-      const result = computeFn();
-      computedSignal.set(result);
+      const c = computedRef.deref();
+      if (!c) {
+        reaction.stop();
+        return;
+      }
+      c.set(computeFn());
     });
 
-    // scope to parent reaction when called from inside one
     if (Reaction.current) {
       Reaction.current.onCleanup(() => reaction.stop());
     }
-
-    // Store reaction reference for potential cleanup
-    computedSignal._computedReaction = reaction;
 
     return computedSignal;
   }
