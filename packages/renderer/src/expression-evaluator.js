@@ -41,6 +41,10 @@ export class ExpressionEvaluator {
   // getExpressionArray is deterministic for a given expression string
   static parseCache = createCache({ maxSize: 5000, eviction: 'flush' });
 
+  // Pre-split segments for dotted paths. getDeepDataValue is called per
+  // expression read; caching avoids the per-call substring + intern cost.
+  static pathSegmentsCache = createCache({ maxSize: 5000, eviction: 'flush' });
+
   constructor({ data, helpers, dataVersion } = {}) {
     this.data = data;
     this.helpers = helpers || {};
@@ -310,11 +314,19 @@ export class ExpressionEvaluator {
     }
   }
 
-  getDeepDataValue(obj, path) {
-    let dot = path.indexOf('.');
+  getPathSegments(path) {
+    let segments = ExpressionEvaluator.pathSegmentsCache.get(path);
+    if (segments !== undefined) {
+      return segments;
+    }
+    segments = path.split('.');
+    ExpressionEvaluator.pathSegmentsCache.set(path, segments);
+    return segments;
+  }
 
+  getDeepDataValue(obj, path) {
     // Fast path: simple identifier (no dots)
-    if (dot === -1) {
+    if (path.indexOf('.') === -1) {
       const value = obj[path];
       if (value instanceof Signal) {
         return value.get();
@@ -322,11 +334,9 @@ export class ExpressionEvaluator {
       return value;
     }
 
-    // Walk segments via indexOf to avoid split() array allocation on hot path
+    const segments = this.getPathSegments(path);
     let current = obj;
-    let start = 0;
-    let end = dot;
-    while (start < path.length) {
+    for (let i = 0; i < segments.length; i++) {
       if (current instanceof Signal) {
         current = current.get();
       }
@@ -336,12 +346,7 @@ export class ExpressionEvaluator {
       if (current == null) {
         return undefined;
       }
-      current = current[path.substring(start, end)];
-      start = end + 1;
-      end = path.indexOf('.', start);
-      if (end === -1) {
-        end = path.length;
-      }
+      current = current[segments[i]];
     }
     return current;
   }
