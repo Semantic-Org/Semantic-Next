@@ -42,11 +42,10 @@ export class Scheduler {
             break;
           }
           // set-swap: avoid the per-pass array spread. new invalidations land in the next pass.
-          // no stopped guard — Reaction.stop() already removes from pendingReactions, and
-          // Reaction.run() early-returns on !active anyway.
           const toRun = Scheduler.pendingReactions;
           Scheduler.pendingReactions = new Set();
           for (const r of toRun) {
+            if (r.stopped) { continue; }
             try {
               r.run();
             }
