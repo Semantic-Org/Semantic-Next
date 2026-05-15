@@ -137,7 +137,7 @@ function trapGet(target, prop) {
       // here would attach a Reaction-side dep that cleans up and
       // re-attaches per cycle without ever invalidating.
       if (target.itemProxy === null) {
-        target.itemProxy = new Proxy({}, target.itemHandler);
+        target.itemProxy = new Proxy({ rdc: target }, ITEM_HANDLER);
       }
       return target.itemProxy;
     }
@@ -150,60 +150,61 @@ function trapGet(target, prop) {
   return target.parent[prop];
 }
 
-// Per-RDC handler for the item proxy. Target is a per-RDC placeholder
-// `{}` (so devtools display reads "Proxy(Object) {…}" — clean for
-// stack-trace debugging — without binding the proxy's identity to a
-// specific item ref). Every trap delegates to rdc.values[rdc.asKey],
-// the RDC's current item, so the proxy is stable across item-ref
-// changes (cloning Signals issue fresh refs every reconcile pass; we
-// don't want to invalidate per-cache-holder).
-function createItemHandler(rdc) {
-  return {
-    get(_, prop) {
-      const item = rdc.values[rdc.asKey];
-      if (prop === UNWRAP) {
-        if (Scheduler.current) {
-          let dep = rdc.fieldDeps[BARE_ITEM_DEP];
-          if (dep === undefined) {
-            dep = rdc.fieldDeps[BARE_ITEM_DEP] = new Dependency();
-          }
-          dep.depend();
-        }
-        return item;
-      }
-      if (typeof prop === 'symbol') {
-        return item == null ? undefined : item[prop];
-      }
+// Module-level handler shared across every RDC's item proxy. The proxy's
+// target carries the RDC reference (`{ rdc }`) so traps reach the current
+// values[asKey] without per-instance closures. Per-RDC factories allocated
+// five closures (one per trap) at every record creation — measurable on
+// large each-block mounts.
+const ITEM_HANDLER = {
+  get(target, prop) {
+    const rdc = target.rdc;
+    const item = rdc.values[rdc.asKey];
+    if (prop === UNWRAP) {
       if (Scheduler.current) {
-        let dep = rdc.fieldDeps[prop];
+        let dep = rdc.fieldDeps[BARE_ITEM_DEP];
         if (dep === undefined) {
-          dep = rdc.fieldDeps[prop] = new Dependency();
+          dep = rdc.fieldDeps[BARE_ITEM_DEP] = new Dependency();
         }
         dep.depend();
       }
+      return item;
+    }
+    if (typeof prop === 'symbol') {
       return item == null ? undefined : item[prop];
-    },
-    has(_, prop) {
-      const item = rdc.values[rdc.asKey];
-      return item != null && (prop in item);
-    },
-    ownKeys() {
-      const item = rdc.values[rdc.asKey];
-      return item == null ? [] : Reflect.ownKeys(item);
-    },
-    getOwnPropertyDescriptor(_, prop) {
-      const item = rdc.values[rdc.asKey];
-      if (item == null) { return undefined; }
-      const desc = Object.getOwnPropertyDescriptor(item, prop);
-      if (desc !== undefined) { desc.configurable = true; }
-      return desc;
-    },
-    getPrototypeOf() {
-      const item = rdc.values[rdc.asKey];
-      return item == null ? null : Object.getPrototypeOf(item);
-    },
-  };
-}
+    }
+    if (Scheduler.current) {
+      let dep = rdc.fieldDeps[prop];
+      if (dep === undefined) {
+        dep = rdc.fieldDeps[prop] = new Dependency();
+      }
+      dep.depend();
+    }
+    return item == null ? undefined : item[prop];
+  },
+  has(target, prop) {
+    const rdc = target.rdc;
+    const item = rdc.values[rdc.asKey];
+    return item != null && (prop in item);
+  },
+  ownKeys(target) {
+    const rdc = target.rdc;
+    const item = rdc.values[rdc.asKey];
+    return item == null ? [] : Reflect.ownKeys(item);
+  },
+  getOwnPropertyDescriptor(target, prop) {
+    const rdc = target.rdc;
+    const item = rdc.values[rdc.asKey];
+    if (item == null) { return undefined; }
+    const desc = Object.getOwnPropertyDescriptor(item, prop);
+    if (desc !== undefined) { desc.configurable = true; }
+    return desc;
+  },
+  getPrototypeOf(target) {
+    const rdc = target.rdc;
+    const item = rdc.values[rdc.asKey];
+    return item == null ? null : Object.getPrototypeOf(item);
+  },
+};
 
 function trapHas(target, prop) {
   return (prop in target.values) || (prop in target.parent);
@@ -260,10 +261,8 @@ export class ReactiveDataContext {
     // access of the as-key.
     this.fieldDeps = null;
     this.itemProxy = null;
-    this.itemHandler = null;
     if (asKey !== null) {
       this.fieldDeps = Object.create(null);
-      this.itemHandler = createItemHandler(this);
     }
     // Snapshot Signal.equalityFunction at construction. Mirrors Signal's
     // own per-instance snapshot semantics — late overrides of the static
