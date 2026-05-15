@@ -41,13 +41,11 @@ export class Scheduler {
             Scheduler.afterFlushCallbacks.length = 0;
             break;
           }
-          // set-swap: avoid the per-pass array spread. new invalidations land in the next pass.
-          const toRun = Scheduler.pendingReactions;
-          Scheduler.pendingReactions = new Set();
-          for (const r of toRun) {
-            if (r.stopped) { continue; }
+          const reactions = [...Scheduler.pendingReactions];
+          Scheduler.pendingReactions.clear();
+          for (let i = 0; i < reactions.length; i++) {
             try {
-              r.run();
+              reactions[i].run();
             }
             catch (e) {
               if (!firstError) { firstError = e; }
