@@ -145,11 +145,7 @@ export class Signal {
   // derive a new signal from this signal's value
   derive(computeFn, options = {}) {
     const derivedSignal = new Signal(undefined, options);
-    // WeakRef on the derived side of the chain. Without this,
-    // source.dependency.subscribers holds reaction strongly, reaction's closure
-    // holds derivedSignal strongly, so derivedSignal can never be GC'd while
-    // source lives. Weakening the closure→derived link lets GC collect a
-    // discarded derived; the reaction then self-stops on next source change.
+    // weak so the reaction's closure doesn't pin derived through source.dep.subscribers
     const derivedRef = new WeakRef(derivedSignal);
     const source = this;
 
@@ -172,7 +168,6 @@ export class Signal {
   // static method for computing from multiple signals
   static computed(computeFn, options = {}) {
     const computedSignal = new Signal(undefined, options);
-    // see derive() above — same retention chain, same fix.
     const computedRef = new WeakRef(computedSignal);
 
     const reaction = Reaction.create(() => {

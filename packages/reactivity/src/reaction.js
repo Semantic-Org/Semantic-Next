@@ -17,7 +17,6 @@ export class Reaction {
     this.dependencies = new Set();
     this.cleanups = [];
     this.firstRun = true;
-    // active=false is terminal — stop() sets it, invalidate() refuses to resurrect
     this.active = true;
     if (context && isTracing()) {
       this.setContext(context);
