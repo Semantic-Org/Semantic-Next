@@ -43,3 +43,18 @@ export const captureStack = (target, caller) => {
     target.context.stack = new Error().stack;
   }
 };
+
+// Replace target.context with `{ ...defaults, ...additional }`. No-op when tracing is off.
+export const setMergedContext = (target, defaults, additional) => {
+  if (mode === 'off') { return; }
+  target.context = { ...defaults, ...additional };
+};
+
+// Shallow-merge `additional` into `target.context`, creating it if needed. No-op when tracing is off.
+export const extendContext = (target, additional) => {
+  if (mode === 'off') { return; }
+  if (!target.context) { target.context = {}; }
+  for (const key in additional) {
+    target.context[key] = additional[key];
+  }
+};
