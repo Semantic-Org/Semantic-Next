@@ -1,6 +1,5 @@
 import {
   clone,
-  findIndex,
   isArray,
   isClassInstance,
   isDevelopment,
@@ -328,13 +327,16 @@ export class Signal {
   }
 
   getIDs(item) {
-    if (isObject(item)) {
-      return unique([item?._id, item?.id, item?.hash, item?.key].filter(Boolean));
+    if (!isObject(item)) {
+      return [item];
     }
-    return [item];
+    return unique([item.id, item._id, item.hash, item.key].filter(Boolean));
   }
   getID(item) {
-    return this.getIDs(item).filter(Boolean)[0];
+    if (!isObject(item)) {
+      return item;
+    }
+    return item.id || item._id || item.hash || item.key;
   }
   hasID(item, id) {
     return this.getID(item) === id;
@@ -346,7 +348,11 @@ export class Signal {
     }
   }
   getItemIndex(id) {
-    return findIndex(this.currentValue, item => this.hasID(item, id));
+    const arr = this.currentValue;
+    for (let i = 0; i < arr.length; i++) {
+      if (this.hasID(arr[i], id)) { return i; }
+    }
+    return -1;
   }
   setProperty(idOrProperty, property, value) {
     if (isArray(this.currentValue)) {
