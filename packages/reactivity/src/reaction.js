@@ -17,8 +17,8 @@ export class Reaction {
     this.dependencies = new Set();
     this.cleanups = [];
     this.firstRun = true;
+    // active=false is terminal — stop() sets it, invalidate() refuses to resurrect
     this.active = true;
-    this.stopped = false;
     if (context && isTracing()) {
       this.setContext(context);
     }
@@ -99,10 +99,9 @@ export class Reaction {
   }
 
   invalidate(context) {
-    if (this.stopped) {
+    if (!this.active) {
       return;
     }
-    this.active = true;
     if (context) {
       this.addContext(context);
     }
@@ -110,10 +109,9 @@ export class Reaction {
   }
 
   stop() {
-    if (this.stopped) {
+    if (!this.active) {
       return;
     }
-    this.stopped = true;
     this.active = false;
     Scheduler.pendingReactions.delete(this);
     this.dependencies.forEach(dep => dep.remove(this));

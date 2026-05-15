@@ -602,7 +602,6 @@ describe('Reaction — public API contract', () => {
       const reaction = Reaction.create(callback);
 
       reaction.stop();
-      expect(reaction.stopped).toBe(true);
       expect(reaction.active).toBe(false);
 
       reaction.invalidate();
