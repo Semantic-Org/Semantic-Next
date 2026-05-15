@@ -228,8 +228,9 @@ export class ExpressionEvaluator {
     }
 
     const len = expressionArray.length;
-    // Pre-allocate results array at the right size instead of per-iteration unshift
-    const results = new Array(len);
+    // .fill promotes the HOLEY_SMI allocation to PACKED so reverse-fill
+    // assignments don't pin the array on the holey codegen path.
+    const results = new Array(len).fill(undefined);
 
     let index = len;
     while (index--) {
@@ -249,9 +250,9 @@ export class ExpressionEvaluator {
           // keys, or internal-slot method calls.
           let argCount = len - index - 1;
           if (argCount > 0) {
-            const args = new Array(argCount);
+            const args = [];
             for (let a = 0; a < argCount; a++) {
-              args[a] = unwrap(results[index + 1 + a]);
+              args.push(unwrap(results[index + 1 + a]));
             }
             result = tokenValue(...args);
           }
