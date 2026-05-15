@@ -612,7 +612,7 @@ describe('Reaction — public API contract', () => {
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
-    it('does not invoke the callback when a reaction stopped mid-cycle is later flushed', () => {
+    it('removes the reaction from pendingReactions when stop is called mid-cycle', () => {
       const s = new Signal(0);
       const callback = vi.fn();
       const reaction = Reaction.create(() => {
@@ -620,11 +620,12 @@ describe('Reaction — public API contract', () => {
       });
 
       s.set(1);
-      reaction.stop();
-      Reaction.flush();
+      expect(Scheduler.pendingReactions.has(reaction)).toBe(true);
 
-      // user-visible contract: stopped reaction never re-runs.
-      // run() early-returns on !active so the queued instance is harmless.
+      reaction.stop();
+      expect(Scheduler.pendingReactions.has(reaction)).toBe(false);
+
+      Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
     });
   });

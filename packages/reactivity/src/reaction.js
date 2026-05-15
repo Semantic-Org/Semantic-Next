@@ -113,10 +113,9 @@ export class Reaction {
       return;
     }
     this.active = false;
-    // pendingReactions.delete + dependencies.clear are skipped — run() early-returns
-    // on !active so a queued stopped reaction is harmless, and the dependencies Set
-    // is GC'd with the reaction itself. Recovers the lifecycle-churn hot path.
+    Scheduler.pendingReactions.delete(this);
     this.dependencies.forEach(dep => dep.remove(this));
+    this.dependencies.clear();
     this.fireCleanups();
   }
 
