@@ -22,8 +22,10 @@ export class Dependency {
   depend() {
     if (!Scheduler.current) { return; }
     // fire BEFORE adding the new subscriber so a refcount-driven initial set()
-    // doesn't notify the just-attaching reader.
-    if (this.subscribers.size === 0) {
+    // doesn't notify the just-attaching reader. NOOP-skip avoids an indirect
+    // call on the 99% case where the dep is a regular signal — the call site
+    // stays monomorphic on closures only when a computed is actually attached.
+    if (this.subscribers.size === 0 && this.onBecameObserved !== NOOP) {
       this.onBecameObserved();
     }
     this.subscribers.add(Scheduler.current);
@@ -58,7 +60,7 @@ export class Dependency {
 
   remove(reaction) {
     this.subscribers.delete(reaction);
-    if (this.subscribers.size === 0) {
+    if (this.subscribers.size === 0 && this.onBecameUnobserved !== NOOP) {
       this.onBecameUnobserved();
     }
   }

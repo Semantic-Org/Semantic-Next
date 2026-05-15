@@ -19,10 +19,6 @@ export class Reaction {
     this.firstRun = true;
     this.active = true;
     this.stopped = false;
-    // restored as shape probe — main had this.boundRun in constructor; dropping
-    // it (Item 6) shifted Reaction's hidden class. testing whether matching
-    // main's slot count for consumers' ICs recovers list-mutation regressions.
-    this.boundRun = this.run.bind(this);
     if (context && isTracing()) {
       this.setContext(context);
     }
