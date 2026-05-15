@@ -1,7 +1,5 @@
 import {
   clone,
-  findIndex,
-  firstMatch,
   isArray,
   isClassInstance,
   isDevelopment,
@@ -88,7 +86,6 @@ export class Signal {
 
   static equalityFunction = isEqual;
   static cloneFunction = clone;
-  static idFields = ['id', '_id', 'hash', 'key'];
   static setTracing = setTracing;
   static isTracing = isTracing;
   static setStackCapture = setStackCapture;
@@ -333,14 +330,13 @@ export class Signal {
     if (!isObject(item)) {
       return [item];
     }
-    return unique(Signal.idFields.map(f => item[f]).filter(Boolean));
+    return unique([item.id, item._id, item.hash, item.key].filter(Boolean));
   }
   getID(item) {
     if (!isObject(item)) {
       return item;
     }
-    const field = firstMatch(Signal.idFields, f => item[f]);
-    return field === undefined ? undefined : item[field];
+    return item.id || item._id || item.hash || item.key;
   }
   hasID(item, id) {
     return this.getID(item) === id;
@@ -352,7 +348,11 @@ export class Signal {
     }
   }
   getItemIndex(id) {
-    return findIndex(this.currentValue, item => this.hasID(item, id));
+    const arr = this.currentValue;
+    for (let i = 0; i < arr.length; i++) {
+      if (this.hasID(arr[i], id)) { return i; }
+    }
+    return -1;
   }
   setProperty(idOrProperty, property, value) {
     if (isArray(this.currentValue)) {
