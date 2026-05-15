@@ -148,7 +148,7 @@ export class Signal {
   // detaches. Matches the Vue 3 / MobX / Solid pattern.
   //
   // Decision crib (per council fresh-take ref-fresh-take-strong.md):
-  //  - first-subscribe trigger: Dependency.depend() at 0→1 fires onBecameObserved
+  //  - first-subscribe trigger: Dependency.depend() at 0→1 fires onObserved
   //    BEFORE adding the new subscriber so the internal reaction's initial set()
   //    doesn't invalidate the just-attaching reader.
   //  - last-detach: deferred to next afterFlush boundary, cancelled if any
@@ -197,8 +197,8 @@ export class Signal {
     // update on an existing field — no hidden-class transition. all Dependency
     // instances (regular + computed) share the same shape, keeping global IC
     // sites at dep.depend / dep.changed / dep.remove monomorphic.
-    computedSignal.dependency.onBecameObserved = startTracking;
-    computedSignal.dependency.onBecameUnobserved = queueStop;
+    computedSignal.dependency.onObserved = startTracking;
+    computedSignal.dependency.onUnobserved = queueStop;
 
     // Eager initial run via nonreactive scope. Populates currentValue so bare
     // reads return a sensible initial value, without subscribing to upstream

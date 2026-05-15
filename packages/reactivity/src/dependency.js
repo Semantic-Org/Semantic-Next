@@ -12,8 +12,8 @@ export class Dependency {
     // dep.remove stay monomorphic regardless of which Signals are computed.
     // Signal.computed reassigns these on its own dep; reassignment doesn't
     // transition the shape since the slot is already initialized.
-    this.onBecameObserved = NOOP;
-    this.onBecameUnobserved = NOOP;
+    this.onObserved = NOOP;
+    this.onUnobserved = NOOP;
     if (isTracing()) {
       this.setContext(metadata);
     }
@@ -25,8 +25,8 @@ export class Dependency {
     // doesn't notify the just-attaching reader. NOOP-skip avoids an indirect
     // call on the 99% case where the dep is a regular signal — the call site
     // stays monomorphic on closures only when a computed is actually attached.
-    if (this.subscribers.size === 0 && this.onBecameObserved !== NOOP) {
-      this.onBecameObserved();
+    if (this.subscribers.size === 0 && this.onObserved !== NOOP) {
+      this.onObserved();
     }
     this.subscribers.add(Scheduler.current);
     Scheduler.current.dependencies.add(this);
@@ -60,8 +60,8 @@ export class Dependency {
 
   remove(reaction) {
     this.subscribers.delete(reaction);
-    if (this.subscribers.size === 0 && this.onBecameUnobserved !== NOOP) {
-      this.onBecameUnobserved();
+    if (this.subscribers.size === 0 && this.onUnobserved !== NOOP) {
+      this.onUnobserved();
     }
   }
 }
