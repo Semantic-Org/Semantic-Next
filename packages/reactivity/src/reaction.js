@@ -106,7 +106,9 @@ export class Reaction {
     // terminal. Both are paid on every stop but only matter in rare races
     // (stop-while-queued) or for memory hygiene (GC handles when reaction is
     // collected). Skipping them recovers the lifecycle-churn hot path.
-    this.dependencies.forEach(dep => dep.remove(this));
+    // for...of matches Reaction.run() — avoids per-stop arrow closure allocation
+    // that Sparkplug can't elide.
+    for (const dep of this.dependencies) { dep.remove(this); }
     this.fireCleanups();
   }
 
