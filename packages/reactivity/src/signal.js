@@ -1,6 +1,7 @@
 import {
   clone,
   findIndex,
+  firstMatch,
   isArray,
   isClassInstance,
   isDevelopment,
@@ -87,6 +88,7 @@ export class Signal {
 
   static equalityFunction = isEqual;
   static cloneFunction = clone;
+  static idFields = ['id', '_id', 'hash', 'key'];
   static setTracing = setTracing;
   static isTracing = isTracing;
   static setStackCapture = setStackCapture;
@@ -328,13 +330,17 @@ export class Signal {
   }
 
   getIDs(item) {
-    if (isObject(item)) {
-      return unique([item?._id, item?.id, item?.hash, item?.key].filter(Boolean));
+    if (!isObject(item)) {
+      return [item];
     }
-    return [item];
+    return unique(Signal.idFields.map(f => item[f]).filter(Boolean));
   }
   getID(item) {
-    return this.getIDs(item).filter(Boolean)[0];
+    if (!isObject(item)) {
+      return item;
+    }
+    const field = firstMatch(Signal.idFields, f => item[f]);
+    return field === undefined ? undefined : item[field];
   }
   hasID(item, id) {
     return this.getID(item) === id;
