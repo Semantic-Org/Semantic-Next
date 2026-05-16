@@ -746,10 +746,9 @@ export class Query {
           };
         }
 
-        // wrap listener to support return false / return 'cancel'
-        // only wrap if handler has a return statement to preserve native reference
+        // wrap when handler can return false/'cancel' (explicit return or arrow expression body)
         const rawListener = delegateHandler || handler;
-        const needsWrapping = delegateHandler || /\breturn\b/.test(handler.toString());
+        const needsWrapping = delegateHandler || /\breturn\b|=>\s*[^\s{]/.test(handler.toString());
         const eventListener = needsWrapping
           ? function(e) {
             const result = rawListener.call(this, e);
@@ -2460,7 +2459,8 @@ export class Query {
     const results = this.map(el => {
       const $el = this.chain(el);
       const elRect = $el.dimensions();
-      const $positioningParent = $el.positioningParent();
+      // containing block might be outside shadow dom
+      const $positioningParent = $el.positioningParent({ pierceShadow: true });
       const parentRect = $positioningParent.dimensions();
       const round = val => (precision === 'pixel' ? Math.round(val) : val);
 
@@ -2552,8 +2552,8 @@ export class Query {
       $viewport = this.chain(viewport);
     }
     else {
-      // Use clipping parent as default viewport
-      $viewport = this.clippingParent();
+      // clipping ancestor might be outside shadow dom
+      $viewport = this.clippingParent({ pierceShadow: true });
     }
 
     // If no viewport found, use document element

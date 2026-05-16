@@ -5,29 +5,77 @@ export class Scheduler {
   static pendingReactions = new Set();
   static afterFlushCallbacks = [];
   static isFlushScheduled = false;
+  static isFlushing = false;
+
+  static scheduleReaction(reaction) {
+    Scheduler.pendingReactions.add(reaction);
+    Scheduler.scheduleFlush();
+  }
+
+  static scheduleFlush() {
+    if (!Scheduler.isFlushScheduled) {
+      Scheduler.isFlushScheduled = true;
+      microtask(flushTask);
+    }
+  }
+
   static maxFlushIterations = 100;
 
   static flush() {
     Scheduler.isFlushScheduled = false;
+    Scheduler.isFlushing = true;
+    // capture first error but finish draining so one faulty reaction or afterFlush callback can't jam the queue
+    let firstError;
     let iterations = 0;
-    while (Scheduler.pendingReactions.size > 0) {
-      if (++iterations > Scheduler.maxFlushIterations) {
-        console.error('Reactive cycle detected: flush exceeded maximum iterations');
-        Scheduler.pendingReactions.clear();
-        break;
+    try {
+      // alternate: drain all pending reactions, then run one snapshot of afterFlush callbacks.
+      // afterFlushes registered during the batch land in the next alternation, which drains
+      // any reactions they queued before the next batch runs.
+      while (Scheduler.pendingReactions.size > 0 || Scheduler.afterFlushCallbacks.length > 0) {
+        while (Scheduler.pendingReactions.size > 0) {
+          if (++iterations > Scheduler.maxFlushIterations) {
+            console.error('Reactive cycle detected: flush exceeded maximum iterations');
+            Scheduler.pendingReactions.clear();
+            Scheduler.afterFlushCallbacks.length = 0;
+            break;
+          }
+          // set-swap: avoid the per-pass array spread. new invalidations land in the next pass.
+          const toRun = Scheduler.pendingReactions;
+          Scheduler.pendingReactions = new Set();
+          for (const r of toRun) {
+            if (r.stopped) { continue; }
+            try {
+              r.run();
+            }
+            catch (e) {
+              if (!firstError) { firstError = e; }
+            }
+          }
+        }
+        if (Scheduler.afterFlushCallbacks.length > 0) {
+          if (++iterations > Scheduler.maxFlushIterations) {
+            console.error('Reactive cycle detected: flush exceeded maximum iterations');
+            Scheduler.afterFlushCallbacks.length = 0;
+            break;
+          }
+          const callbacks = Scheduler.afterFlushCallbacks;
+          Scheduler.afterFlushCallbacks = [];
+          for (let i = 0; i < callbacks.length; i++) {
+            try {
+              callbacks[i]();
+            }
+            catch (e) {
+              if (!firstError) { firstError = e; }
+            }
+          }
+        }
       }
-      const reactions = [...Scheduler.pendingReactions];
-      Scheduler.pendingReactions.clear();
-      for (let i = 0; i < reactions.length; i++) {
-        reactions[i].run();
-      }
+    }
+    finally {
+      Scheduler.isFlushing = false;
     }
 
-    const callbacks = Scheduler.afterFlushCallbacks;
-    Scheduler.afterFlushCallbacks = [];
-    for (let i = 0; i < callbacks.length; i++) {
-      callbacks[i]();
-    }
+    if (firstError) { throw firstError; }
   }
 
   /*-------------------
@@ -36,6 +84,9 @@ export class Scheduler {
 
   static afterFlush(callback) {
     Scheduler.afterFlushCallbacks.push(callback);
+    if (!Scheduler.isFlushing) {
+      Scheduler.scheduleFlush();
+    }
   }
 
   static scheduleReaction(reaction) {

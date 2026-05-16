@@ -270,7 +270,9 @@ No single witness is authoritative. Drift between any pair is the norm.
 
 ### 3. Articulate intent with labeled moves
 
-Don't write a paragraph saying "the feature does X." Build the intent claim by claim, **labeling the source of each claim**. The labels make your reasoning auditable, and force discipline — you can't smuggle a guess in as a doc claim, because there's no label for it.
+Don't write a paragraph saying "the feature does X." Build the intent claim by claim **in a workspace doc** (`ai/workspace/artifacts/intent-<topic>.md` or similar), labeling the source of each claim. The labels make your reasoning auditable and force discipline — you can't smuggle a guess in as a doc claim, because there's no label for it.
+
+**The intent doc is scaffolding, not artifact.** It lives in `ai/workspace/` (gitignored, per-user). Labels stay there. They do not propagate into test source — see [Labels and intent prose leaking into test source](#labels-and-intent-prose-leaking-into-test-source) below.
 
 | Label | Meaning |
 |---|---|
@@ -410,6 +412,31 @@ Once you've read source, you can't un-read it. Your "expected" values silently b
 ### Symmetric-looking structure substituting for reasoning
 
 Producing a tidy table or numbered list isn't the same as having reasoned through whether the structure maps to anything real. (The frequency-band table that previously sat in this file imported red-team's internal scoring and pretended it partitioned skills — it didn't, and the symmetry made the error harder to see.) When you're tempted to produce a clean partition, ask whether the partition reflects a real division or just looks like one.
+
+### Labels and intent prose leaking into test source
+
+Labels (`[doc]`, `[source]`, `[skill]`, `[example]`, `[synthesis]`, `[inference]`, `[contradiction]`) and any "Witness: ..." narrative live in the intent doc you build in `ai/workspace/`. They are scaffolding for your reasoning. They do not propagate into the test file.
+
+The common failure (every line below is rot in a shipped test):
+
+```js
+// Witness: scheduler.flush() while-loop drains pendingReactions until
+// empty [source]. Signal.set() inside a reaction body must observe
+// its downstream subscribers run before flush() returns control.
+it('runs reactions scheduled during a flush in the same flush pass', () => {
+  // ...
+});
+```
+
+The prose above is a copy of intent-doc rationale. It belongs in the design doc, not the test source. A shipped test is:
+
+- A descriptive `it()` name that reads like a release note
+- The assertions themselves
+- Comments only when explaining genuinely non-obvious WHY — never to narrate what the next assertion checks, never to cite where the contract came from
+
+Citation markers — `[source X:line]`, `[skill X]`, `[example X]`, `[doc:X]`, `[inference]`, `[label]` — and `FINDING:` / `Documented user workaround:` / `Witness:` prefixed blocks belong in your workspace, not in shipped test code. They are AI-tells that signal "this came from an agent translating a design doc," exactly the opposite of how a human writes a test.
+
+**Test names are the artifact. Intent docs are scaffolding. Keep them separate.**
 
 ### Ignoring the changelog
 

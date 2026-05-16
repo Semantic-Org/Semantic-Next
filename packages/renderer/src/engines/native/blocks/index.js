@@ -11,3 +11,5 @@ import './conditional.js';
 import './async.js';
 import './each.js';
 import './template.js';
+import './raw-text.js';
+import './expression.js';

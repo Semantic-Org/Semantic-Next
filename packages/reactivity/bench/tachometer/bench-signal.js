@@ -326,6 +326,121 @@ let sink = null;
 }
 
 /*******************************
+      Reactivity Hardening — Items 5 / 8 / 9
+*******************************/
+
+// Stable-dependency churn — gates Item 9 dep-tracking rewrite.
+// N reactions × stable deps × M invalidations. Existing reaction-dep-diff-45k
+// measures the changing-dependency case; these isolate the stable-set churn
+// hypothesized to dominate per-expression workloads.
+
+// reactive-stable-fanout-5000x100 — wide-fan case, single stable dep per reaction
+{
+  const sig = new Signal(0);
+  const reactions = new Array(5000);
+  for (let i = 0; i < 5000; i++) {
+    reactions[i] = Reaction.create(() => {
+      sink = sig.get();
+    });
+  }
+  // purpose: 5000 reactions × 1 signal × 100 invalidations. Per-run Set.delete + add on a stable dep edge.
+  performance.mark(startMark('reactive-stable-fanout-5000x100'));
+  for (let i = 0; i < 100; i++) {
+    sig.set(i + 1);
+    Reaction.flush();
+  }
+  performance.measure('reactive-stable-fanout-5000x100', startMark('reactive-stable-fanout-5000x100'));
+  for (let i = 0; i < 5000; i++) { reactions[i].stop(); }
+}
+
+// reactive-stable-deps-3reads-5000x100 — median templating shape, 3 stable deps per reaction
+{
+  const sigA = new Signal(0);
+  const sigB = new Signal(0);
+  const sigC = new Signal(0);
+  const reactions = new Array(5000);
+  for (let i = 0; i < 5000; i++) {
+    reactions[i] = Reaction.create(() => {
+      sink = sigA.get() + sigB.get() + sigC.get();
+    });
+  }
+  // purpose: 5000 reactions × 3 signals × 100 cycles. Each run clears + re-adds 3 stable dep edges.
+  performance.mark(startMark('reactive-stable-deps-3reads-5000x100'));
+  for (let i = 0; i < 100; i++) {
+    sigA.set(i + 1);
+    Reaction.flush();
+  }
+  performance.measure('reactive-stable-deps-3reads-5000x100', startMark('reactive-stable-deps-3reads-5000x100'));
+  for (let i = 0; i < 5000; i++) { reactions[i].stop(); }
+}
+
+// Computed lifecycle — informs Item 8 lazy refcounted computed.
+
+// computed-unobserved-200x500 — eager-recompute baseline.
+// Under the current code, computeds re-run on every source change regardless
+// of whether anyone observes them. Post-Item-8 this drops to near-zero — the
+// computed stays dormant without subscribers.
+{
+  const root = new Signal(0);
+  const computeds = new Array(200);
+  for (let i = 0; i < 200; i++) {
+    computeds[i] = Signal.computed(() => root.get() + i);
+  }
+  // anchor to keep the array live for DCE; values read outside any reaction so no subscriber attaches
+  let preamble = 0;
+  for (let i = 0; i < 200; i++) { preamble += computeds[i].get(); }
+  sink = preamble;
+  // purpose: 200 unobserved computed signals, root updated 500 times. Measures the eager-recompute cost the refcount removes.
+  performance.mark(startMark('computed-unobserved-200x500'));
+  for (let i = 0; i < 500; i++) {
+    root.set(i + 1);
+    Reaction.flush();
+  }
+  performance.measure('computed-unobserved-200x500', startMark('computed-unobserved-200x500'));
+}
+
+// computed-subscribe-unsubscribe-10k — refcount machinery overhead on the subscribe/unsubscribe path.
+// Function-scoped fixture so each cycle's computed + observer are GC-eligible.
+{
+  const root = new Signal(0);
+  const cycle = () => {
+    const c = Signal.computed(() => root.get() + 1);
+    const r = Reaction.create(() => {
+      sink = c.get();
+    });
+    r.stop();
+  };
+  // purpose: 10000 create-computed + attach-observer + detach cycles. Lifecycle cost the refcount path must keep acceptable.
+  performance.mark(startMark('computed-subscribe-unsubscribe-10k'));
+  for (let i = 0; i < 10_000; i++) { cycle(); }
+  performance.measure('computed-subscribe-unsubscribe-10k', startMark('computed-subscribe-unsubscribe-10k'));
+}
+
+// Scheduler allocation — verifies Item 5 set-swap.
+
+// flush-fanout-allocation-1000x500 — amplified per-flush spread cost.
+// Existing reactive-fanout-500x1200 measures the same shape at 90ms; this
+// runs more flushes (1000) so per-flush array allocation is proportionally
+// more of the total. Set-swap eliminates the spread.
+{
+  const sig = new Signal(0);
+  const reactions = new Array(500);
+  for (let i = 0; i < 500; i++) {
+    reactions[i] = Reaction.create(() => {
+      sink = sig.get();
+    });
+  }
+  // purpose: 500 subscribers fanout across 1000 flush cycles. Each flush spreads pendingReactions; tests per-flush allocation churn.
+  performance.mark(startMark('flush-fanout-allocation-1000x500'));
+  for (let i = 0; i < 1000; i++) {
+    sig.set(i + 1);
+    Reaction.flush();
+  }
+  performance.measure('flush-fanout-allocation-1000x500', startMark('flush-fanout-allocation-1000x500'));
+  for (let i = 0; i < 500; i++) { reactions[i].stop(); }
+}
+
+/*******************************
       Results
 *******************************/
 

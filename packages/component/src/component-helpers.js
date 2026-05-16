@@ -80,19 +80,20 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
     });
   }
 
-  /* This handles the case of multiword settings like `useAccordion`
-     we support 2 syntax <ui-menu use-accordion> or <ui-menu useaccordion>'
-     the kebab attr serves as an alias with no accessor
-  */
+  // HTML lowercases attribute names but doesn't add/remove hyphens, register both kebab and lowercase forms
   each(properties, (propertySettings, propertyName) => {
-    const attributeName = camelToKebab(propertyName);
-    if (attributeName !== propertyName && !properties[attributeName] && properties[propertyName]) {
-      properties[attributeName] = {
-        ...properties[propertyName],
-        noAccessor: true,
-        alias: true,
-      };
-    }
+    const addAlias = (aliasKey) => {
+      if (aliasKey !== propertyName && !properties[aliasKey] && properties[propertyName]) {
+        properties[aliasKey] = {
+          ...properties[propertyName],
+          noAccessor: true,
+          alias: true,
+          aliasFor: propertyName,
+        };
+      }
+    };
+    addAlias(camelToKebab(propertyName));
+    addAlias(propertyName.toLowerCase());
   });
 
   // accessors can break certain special dom attrs
@@ -164,6 +165,7 @@ export function getPropertySettings({ name, type = String, propertyOnly = false 
   else if (type == Object || type == Array) {
     property.converter = {
       fromAttribute: (value) => {
+        if (typeof value !== 'string') { return value; }
         try {
           return JSON.parse(value);
         }

@@ -1,0 +1,26 @@
+{#snippet label}
+  <div class="label">
+    {#if showLabel}
+      {getDisplayPercentage}
+      {#if both canComplete isComplete}
+        {completeText}
+      {/if}
+    {/if}
+  </div>
+{/snippet}
+
+<div class="{classMap getBarClasses} bar" part="bar">
+  <div class="track">
+    <div 
+      class="fill" 
+      style="width: {getPercentage}%"
+    >
+      {#if isLabelInline}
+        {>label}
+      {/if}
+    </div>
+  </div>
+  {#if not isLabelInline}
+    {>label canComplete=true}
+  {/if}
+</div>

@@ -5,8 +5,8 @@ import { RENDERING_ENGINES } from './test-utils.js';
 RENDERING_ENGINES.forEach(engine => {
   describe(engine, () => {
     /*******************************
-         Test Helpers
-*******************************/
+             Test Helpers
+    *******************************/
 
     let tagCounter = 0;
     function uniqueTag() {
@@ -24,8 +24,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  rerender → expression
-*******************************/
+        rerender → expression
+    *******************************/
 
     describe('rerender → expression', () => {
       it('reactive: inner expression updates when signal changes', async () => {
@@ -83,8 +83,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  rerender → async → expression
-*******************************/
+    rerender → async → expression
+    *******************************/
 
     describe('rerender → async → expression', () => {
       it('reactive: async content updates when signal changes inside rerender', async () => {
@@ -160,8 +160,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  rerender → if → expression
-*******************************/
+    rerender → if → expression
+    *******************************/
 
     describe('rerender → if → expression', () => {
       it('reactive: conditional branch switches when signal changes inside rerender', async () => {
@@ -219,8 +219,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-  rerender → each → expression
-*******************************/
+    rerender → each → expression
+    *******************************/
 
     describe('rerender → each → expression', () => {
       it('reactive: each items update when signal changes inside rerender', async () => {

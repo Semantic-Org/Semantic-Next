@@ -1,9 +1,11 @@
 import { arrayFromObject, isArray, isEmpty } from '@semantic-ui/utils';
-import { isBlockClose, isBlockOpen } from '../../../build-html-string.js';
+import { isBlockClose, isBlockOpen, MARKER_VERSION } from '../../../build-html-string.js';
+import { decodeItemKey, getCollectionType, getEachData, getItemID } from '../../../shared/each.js';
 import { defineBlock } from '../define-block.js';
 import { ReactiveDataContext } from '../reactive-context.js';
-import { decodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from '../shared/each.js';
 import { registerBlock } from './registry.js';
+
+export const SUI_ITEM_MARKER = `sui-item:${MARKER_VERSION}:`;
 
 /*
 
@@ -20,12 +22,11 @@ import { registerBlock } from './registry.js';
   Each record holds a ReactiveDataContext that exposes per-key Signals
   via a Proxy. The proxy is the data context the item's content renders
   against; reading `proxy.foo` registers a per-key dependency, falling
-  through to the parent context on miss. Replacing item data (ref change)
-  routes through `dataContext.replace()`; in-place mutations are detected
-  via a per-record snapshot diff and routed through per-key `setKey` for
-  the spread case (primitive value pushes) or `notifyKey` for the `as`
-  case (the wrapper key holds the item by reference, so the ref-equality
-  short-circuit needs an explicit nudge).
+  through to the parent context on miss. Mutations are detected via a
+  per-record snapshot diff. Spread-mode pushes each changed primitive
+  through `setKey`; as-mode object items route every wakeup through
+  `notifyField` per changed key, fanning out to per-FIELD deps registered
+  by the item proxy in ReactiveDataContext.
 
   Hydrate adopts the server-rendered per-item DOM via
   `<!--sui-item:v1:KEY-->` markers and wires per-item Reactions in
@@ -33,10 +34,6 @@ import { registerBlock } from './registry.js';
   other block honors.
 
 */
-
-function getCollectionType(items) {
-  return isArray(items) ? 'array' : 'object';
-}
 
 // Allocate once per record at first reconcile (createSnapshot). On
 // subsequent reconciles, refreshSnapshotAndDetect both diffs the item
@@ -136,12 +133,20 @@ function disposeRecordDOM(record) {
   }
 }
 
+// For object iteration, items[i] is the {key, value} wrapper from
+// arrayFromObject — the snapshot must track the unpacked inner value so
+// reconcile's per-FIELD diff sees the same shape bindings observe.
+function snapshotForRecord(item, collectionType) {
+  return collectionType === 'object' && item != null ? createSnapshot(item.value) : createSnapshot(item);
+}
+
 function createRecord({ key, item, index, collectionType, node, data, scope, renderAST, isSVG }) {
   const eachData = getEachData(item, index, collectionType, node);
   const itemScope = scope.child();
   const dataContext = new ReactiveDataContext(data, {
     registerItemContext: true,
     sealKeysAfterReplace: !!node.as,
+    asKey: node.as,
   });
   dataContext.replace(eachData);
   const fragment = renderAST({ ast: node.content, data: dataContext.proxy, scope: itemScope, isSVG });
@@ -166,7 +171,7 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
     // Captured on creation so the first reconcile pass can detect
     // in-place mutations against a real reference. Refreshed in place
     // by refreshSnapshotAndDetect on each subsequent reconcile.
-    snapshot: createSnapshot(item),
+    snapshot: snapshotForRecord(item, collectionType),
     // True until the record's first reconcile pass. Distinguishes
     // freshly-created records (whose bindings were wired against the
     // current data and have no stale subscribers to wake) from steady-
@@ -198,7 +203,6 @@ function disposeRecord(record) {
 //          mutated.
 function reconcile({ records, items, collectionType, node, data, scope, region, renderAST, isSVG }) {
   const oldRecords = records.slice();
-  const oldKeys = oldRecords.map((record) => record.key);
   const newKeys = items.map((item, i) => getItemID(item, i, collectionType));
   const newRecords = new Array(items.length);
 
@@ -210,39 +214,48 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   let newKeySet;
 
   while (oldHead <= oldTail && newHead <= newTail) {
-    if (oldRecords[oldHead] === null) {
+    const oldHeadRec = oldRecords[oldHead];
+    if (oldHeadRec === null) {
       oldHead++;
       continue;
     }
-    if (oldRecords[oldTail] === null) {
+    const oldTailRec = oldRecords[oldTail];
+    if (oldTailRec === null) {
       oldTail--;
       continue;
     }
-    if (oldKeys[oldHead] === newKeys[newHead]) {
-      newRecords[newHead++] = oldRecords[oldHead++];
+    if (oldHeadRec.key === newKeys[newHead]) {
+      newRecords[newHead++] = oldHeadRec;
+      oldHead++;
     }
-    else if (oldKeys[oldTail] === newKeys[newTail]) {
-      newRecords[newTail--] = oldRecords[oldTail--];
+    else if (oldTailRec.key === newKeys[newTail]) {
+      newRecords[newTail--] = oldTailRec;
+      oldTail--;
     }
-    else if (oldKeys[oldHead] === newKeys[newTail]) {
-      newRecords[newTail--] = oldRecords[oldHead++];
+    else if (oldHeadRec.key === newKeys[newTail]) {
+      newRecords[newTail--] = oldHeadRec;
+      oldHead++;
     }
-    else if (oldKeys[oldTail] === newKeys[newHead]) {
-      newRecords[newHead++] = oldRecords[oldTail--];
+    else if (oldTailRec.key === newKeys[newHead]) {
+      newRecords[newHead++] = oldTailRec;
+      oldTail--;
     }
     else {
       if (!oldKeyToIdx) {
         oldKeyToIdx = new Map();
-        for (let i = oldHead; i <= oldTail; i++) { oldKeyToIdx.set(oldKeys[i], i); }
+        for (let i = oldHead; i <= oldTail; i++) {
+          const rec = oldRecords[i];
+          if (rec !== null) { oldKeyToIdx.set(rec.key, i); }
+        }
         newKeySet = new Set();
         for (let i = newHead; i <= newTail; i++) { newKeySet.add(newKeys[i]); }
       }
-      if (!newKeySet.has(oldKeys[oldHead])) {
-        disposeRecord(oldRecords[oldHead]);
+      if (!newKeySet.has(oldHeadRec.key)) {
+        disposeRecord(oldHeadRec);
         oldHead++;
       }
-      else if (!newKeySet.has(oldKeys[oldTail])) {
-        disposeRecord(oldRecords[oldTail]);
+      else if (!newKeySet.has(oldTailRec.key)) {
+        disposeRecord(oldTailRec);
         oldTail--;
       }
       else {
@@ -323,42 +336,110 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
 
   // Phase 3: per-key data updates.
   //
-  // Ref-change path: rebuild the wrapper and push every key. Per-key
-  // Signals dedup via default isEqual, so primitives that happen to
-  // share values across the swap don't notify.
+  // As-mode object items take the per-FIELD path: diff fields against
+  // the record's snapshot, fire only the changed-field deps via
+  // notifyField. Two branches funnel through the same notifyField
+  // contract — they differ only in whether values[asKey] needs an
+  // explicit update:
   //
-  // Same-ref path: snapshot-diff the raw item to find which fields
-  // mutated. Spread-mode templates push each changed primitive into
-  // its per-key Signal; readers of `proxy.this` get an explicit
-  // notifyKey because the wrapper's `this` key holds the item by
-  // reference and the ref equality gate would otherwise short-circuit.
-  // `as`-mode templates notify the as-key — the wrapper holds the
-  // item by reference and the per-key Signal can't see the inner
-  // mutation any other way.
+  //   - refChanged + same-key match: cloning Signals return fresh refs
+  //     every reconcile pass, so refs differ even when the item is the
+  //     same logical entity. Phase 1 preserved the record by key match;
+  //     update values[asKey] directly (skipping setKey's per-key dep
+  //     fire) and notifyField only for fields that actually mutated.
+  //
+  //   - same-ref + snapshot-diff: reference-mode Signals preserve the
+  //     item ref across in-place mutations. values[asKey] is already
+  //     correct; the diff fires per-FIELD deps for changed fields.
+  //
+  // Spread-mode, primitive items, and object iteration take the legacy
+  // refChanged / setKey path. Spread mode emits setKey per changed field
+  // plus notifyKey('this') for whole-item readers of {this}. Object
+  // iteration's per-record value is the {key, value} wrapper from
+  // arrayFromObject; getEachData unwraps it into top-level dataContext
+  // keys, so the per-FIELD optimization doesn't apply (the "fields" are
+  // already at the top level and bindings read them as primitives).
   //
   // Fresh records (just created in this pass) skip the diff because
   // their bindings were wired synchronously against the current values
   // and have no stale subscribers to wake.
+  const isArrayAsMode = collectionType === 'array' && !!node.as;
   for (let i = 0; i < newRecords.length; i++) {
     const record = newRecords[i];
     const item = items[i];
     const refChanged = record.item !== item || record.index !== i;
+    const isObjectItem = typeof item === 'object' && item !== null;
 
-    if (refChanged) {
+    if (refChanged && isArrayAsMode && isObjectItem) {
+      // Hydrated records arrive at first reconcile with fresh=true and
+      // refChanged=true; they need the snapshot diff + notifyField
+      // fan-out to wake bindings wired during hydration. In-reconcile-
+      // fresh records have refChanged=false by construction (createRecord
+      // runs with items[newHead] and the record is placed at
+      // newRecords[newHead]), so fresh-status doesn't gate this branch.
+      let changedKeys = null;
+      if (record.snapshot !== null && typeof record.snapshot === 'object') {
+        changedKeys = refreshSnapshotAndDetect(record.snapshot, item);
+      }
+      else {
+        // Prior snapshot was a primitive (item morphed from primitive
+        // to object on the same key). Re-snapshot from the new object
+        // and fire the per-key dep on the as-key — bindings registered
+        // during the primitive period subscribed via trapGet's primitive
+        // branch and have no per-FIELD subscriptions yet.
+        record.snapshot = createSnapshot(item);
+        record.dataContext.notifyKey(node.as);
+      }
+      record.dataContext.values[node.as] = item;
+      record.item = item;
+      if (record.index !== i) {
+        const indexAs = node.indexAs || (collectionType === 'array' ? 'index' : 'key');
+        record.dataContext.setKey(indexAs, i);
+        record.index = i;
+      }
+      if (changedKeys) {
+        for (const key of changedKeys) {
+          record.dataContext.notifyField(key);
+        }
+      }
+    }
+    else if (refChanged) {
       record.dataContext.replace(getEachData(item, i, collectionType, node));
       record.item = item;
       record.index = i;
-      record.snapshot = createSnapshot(item);
+      // Object iteration in as-mode unpacks {key,value} wrappers into the
+      // as-key. When the unpacked value is itself an object, bindings
+      // reading entry.X subscribed via the itemProxy and won't wake from
+      // setKey's per-key fire. Diff the prior snapshot vs the unpacked
+      // value and fire per-FIELD wakeups for changed fields.
+      const asValue = node.as ? record.dataContext.values[node.as] : null;
+      if (asValue !== null && typeof asValue === 'object') {
+        let changedKeys = null;
+        if (record.snapshot !== null && typeof record.snapshot === 'object') {
+          changedKeys = refreshSnapshotAndDetect(record.snapshot, asValue);
+        }
+        record.snapshot = createSnapshot(asValue);
+        if (changedKeys) {
+          for (const key of changedKeys) {
+            record.dataContext.notifyField(key);
+          }
+        }
+      }
+      else {
+        record.snapshot = snapshotForRecord(item, collectionType);
+      }
     }
-    else if (typeof item === 'object' && item !== null && !record.fresh) {
+    else if (isObjectItem && !record.fresh) {
       if (record.snapshot === null) {
         record.snapshot = createSnapshot(item);
       }
       else {
         const changedKeys = refreshSnapshotAndDetect(record.snapshot, item);
         if (changedKeys) {
-          if (node.as) {
-            record.dataContext.notifyKey(node.as);
+          if (isArrayAsMode) {
+            for (const key of changedKeys) {
+              record.dataContext.notifyField(key);
+            }
           }
           else {
             for (const key of changedKeys) {
@@ -485,6 +566,7 @@ function adoptServerItems({
       const dataContext = new ReactiveDataContext(data, {
         registerItemContext: true,
         sealKeysAfterReplace: !!node.as,
+        asKey: node.as,
       });
       dataContext.replace(eachData);
 

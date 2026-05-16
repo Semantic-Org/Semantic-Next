@@ -16,16 +16,12 @@ import {
   parseServerMeta,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
+import { bindAttribute } from './attribute-binding.js';
 import { getBlock } from './blocks/registry.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
-import {
-  bindAttribute,
-  bindRawTextContent as bindRawTextContentFn,
-  bindTextExpression as bindTextExpressionFn,
-  hydrateTextExpression as hydrateTextExpressionFn,
-} from './reactive-data.js';
-// Side-effect import: every block module self-registers into the block registry.
+
+// import block registry
 import './blocks/index.js';
 
 // PreparedTemplate cache — parse once, cloneNode per instance
@@ -129,18 +125,18 @@ export class Renderer {
     });
   }
 
+  destroy() {
+    this.scope.dispose();
+  }
+
   /*******************************
-        AST → DOM
+             AST → DOM
   *******************************/
   /*
-
-  The key insight: the entire AST (HTML + expressions + block directives)
-  is assembled into a single HTML string with markers for ALL dynamic
-  positions. This string is parsed ONCE via template.innerHTML, producing
-  a correct DOM tree where block markers are positioned inside their
-  containing elements. Then a TreeWalker pass wires reactive bindings
-  and replaces block markers with live DynamicRegions.
-
+    Build Flow:
+    1) AST is assembled into an HTML string with markers for dynamic regions.
+    2) String is parsed once via template.innerHTML to make DOM
+    3) Tree walker wires reactive bindings and replaces markers with DynamicRegions
   */
 
   readAST({ ast, data, scope, isSVG = this.isSVG }) {
@@ -161,7 +157,7 @@ export class Renderer {
   }
 
   /*******************************
-      Phase 1: HTML String Assembly
+       Phase 1: HTML String
   *******************************/
 
   buildHTMLString(ast, isSVG) {
@@ -169,7 +165,7 @@ export class Renderer {
   }
 
   /*******************************
-      Phase 2: HTML Parsing
+       Phase 2: HTML Parsing
   *******************************/
 
   parseHTML(htmlString, isSVG = false) {
@@ -198,10 +194,10 @@ export class Renderer {
       Phase 3: Marker Binding
   *******************************/
 
-  // Attribute binding — delegates to reactive-data.js. See that module for
-  // the dispatch on entry.classification.type (property / event / boolean
-  // / ifDefined / interpolated / single-expression). `skipFirstWrite` is
-  // passed through by hydrateAttributes.
+  // Attribute binding — delegates to attribute-binding.js. See that module
+  // for the dispatch on entry.classification.type (property / event /
+  // boolean / ifDefined / interpolated / single-expression).
+  // `skipFirstWrite` is passed through by hydrateAttributes.
   bindAttributeExpression(element, attrName, parts, entries, data, scope, { skipFirstWrite = false } = {}) {
     bindAttribute({ element, attrName, parts, entries, data, scope, renderer: this, skipFirstWrite });
   }
@@ -273,24 +269,13 @@ export class Renderer {
       if (type === 'expression' && processedAttrIDs.has(markerID)) { continue; }
       const entry = entries[markerID];
 
-      if (type === 'expression') {
-        this.bindTextExpression(comment, entry, data, scope);
-      }
-      else if (type === 'rawText') {
-        this.bindRawTextContent(comment, entry, data, scope);
-      }
-      else if (type === 'block') {
+      if (type === 'expression' || type === 'block') {
         this.bindBlock(comment, entry, data, scope);
       }
+      else if (type === 'rawText') {
+        getBlock('rawText')?.({ comment, entry, data, scope, renderer: this });
+      }
     }
-  }
-
-  /*******************************
-      Raw Text Element Bindings
-  *******************************/
-
-  bindRawTextContent(comment, entry, data, scope) {
-    bindRawTextContentFn({ comment, entry, data, scope, renderer: this });
   }
 
   // Raw-text walker — used for <script>, <style>, <textarea>, <title>
@@ -323,27 +308,24 @@ export class Renderer {
   }
 
   /*******************************
-        Text Bindings
-  *******************************/
-
-  bindTextExpression(comment, entry, data, scope) {
-    bindTextExpressionFn({ comment, entry, data, scope, renderer: this });
-  }
-
-  /*******************************
-        Block Directive Binding
+       Block Directive Binding
   *******************************/
 
   bindBlock(comment, entry, data, scope) {
     const { node, isSVG } = entry;
     const block = getBlock(node.type);
     if (!block) { return; }
+    if (block.type === 'value') {
+      // Value-blocks own their anchor; skip DynamicRegion.
+      block({ comment, node, data, scope, renderer: this, isSVG, hydrating: false });
+      return;
+    }
     const region = new DynamicRegion(comment.parentNode, comment);
     block({ node, data, scope, region, renderer: this, isSVG, hydrating: false });
   }
 
   /*******************************
-        Hydration
+              Hydration
   *******************************/
 
   hydrateMarkers({ root, entries, data, scope }) {
@@ -394,7 +376,18 @@ export class Renderer {
       if (!entry) { continue; }
 
       if (type === 'expression') {
-        this.hydrateTextExpression(comment, entry, data, scope);
+        const block = getBlock(entry.node.type);
+        if (block) {
+          block({
+            comment,
+            node: entry.node,
+            data,
+            scope,
+            renderer: this,
+            isSVG: entry.isSVG,
+            hydrating: true,
+          });
+        }
       }
       else if (type === 'block') {
         this.hydrateBlock(comment, entry, data, scope);
@@ -449,11 +442,6 @@ export class Renderer {
         this.bindAttributeExpression(node, domAttrName, parts, entries, data, scope, { skipFirstWrite: true });
       }
     }
-  }
-
-  // Hydrating text-expression binding — delegates to reactive-data.js.
-  hydrateTextExpression(comment, entry, data, scope) {
-    hydrateTextExpressionFn({ comment, entry, data, scope, renderer: this });
   }
 
   hydrateBlock(comment, entry, data, scope) {
@@ -528,7 +516,7 @@ export class Renderer {
   }
 
   /*******************************
-        Data Management
+          Data Management
   *******************************/
 
   setData(newData) {
@@ -543,6 +531,7 @@ export class Renderer {
     assignInPlace(this.data, newData, { preserveExistingKeys: preserveExistingData, preserveGetters: true });
   }
 
+  /* This is used only in coarse data invalidation of subtrees where parent cannot track dependencies */
   bumpDataVersion() {
     this.dataDep.changed();
     this.notifyUpdate();

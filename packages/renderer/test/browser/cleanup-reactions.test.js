@@ -6,8 +6,8 @@ import { RENDERING_ENGINES } from './test-utils.js';
 RENDERING_ENGINES.forEach(engine => {
   describe(engine, () => {
     /*******************************
-         Test Helpers
-*******************************/
+             Test Helpers
+    *******************************/
 
     let tagCounter = 0;
     function uniqueTag() {
@@ -25,8 +25,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Conditional Branch Cleanup
-*******************************/
+      Conditional Branch Cleanup
+    *******************************/
 
     describe('conditional branch cleanup', () => {
       it('should stop reactions in removed if branch', async () => {
@@ -141,8 +141,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-     Each Item Cleanup
-*******************************/
+           Each Item Cleanup
+    *******************************/
 
     describe('each item cleanup', () => {
       it('should stop reactions for removed list items', async () => {
@@ -239,8 +239,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Rerender Block Cleanup
-*******************************/
+        Rerender Block Cleanup
+    *******************************/
 
     describe('rerender block cleanup', () => {
       it('should stop old content reactions when rerender key changes', async () => {
@@ -278,8 +278,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Subtemplate Cleanup
-*******************************/
+          Subtemplate Cleanup
+    *******************************/
 
     describe('subtemplate cleanup on conditional removal', () => {
       it('should call onDestroyed when subtemplate is conditionally removed', async () => {
@@ -358,8 +358,46 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Unbounded Growth Prevention
-*******************************/
+    Subtemplate cleanup on parent disconnect
+    *******************************/
+
+    describe('subtemplate cleanup on parent disconnect', () => {
+      it.skipIf(engine === 'lit')('fires subtemplate onDestroyed when parent is removed from the DOM', async () => {
+        const order = [];
+        const tag = uniqueTag();
+
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<span>{label}</span>',
+          onDestroyed: () => {
+            order.push('child-destroyed');
+          },
+        });
+
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '{>child label="hi"}',
+          onDestroyed: () => {
+            order.push('parent-destroyed');
+          },
+          subTemplates: { child },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+
+        el.remove();
+        await new Promise(r => setTimeout(r, 50));
+
+        expect(order).toContain('parent-destroyed');
+        expect(order).toContain('child-destroyed');
+      });
+    });
+
+    /*******************************
+      Unbounded Growth Prevention
+    *******************************/
 
     describe('unbounded reaction growth prevention', () => {
       it('should not accumulate reactions across repeated branch swaps', async () => {
@@ -444,8 +482,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-     DOM Node Cleanup
-*******************************/
+           DOM Node Cleanup
+    *******************************/
 
     describe('DOM node cleanup', () => {
       it('should remove each items added after initial render when condition flips', async () => {

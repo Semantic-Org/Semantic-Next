@@ -26,8 +26,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Conditional → Each → Expression
-*******************************/
+    Conditional → Each → Expression
+    *******************************/
 
     describe('if → each → expression', () => {
       it('should update each items inside a conditional when reactive data changes', async () => {
@@ -95,8 +95,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Conditional → Async → Expression
-*******************************/
+    Conditional → Async → Expression
+    *******************************/
 
     describe('if → async → expression', () => {
       it('should render async content inside a conditional with reactive re-execution', async () => {
@@ -168,8 +168,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Snippet → If → Expression
-*******************************/
+     Snippet → If → Expression
+    *******************************/
 
     describe('snippet → if → expression', () => {
       it('should update conditional inside snippet when reactive data changes', async () => {
@@ -227,8 +227,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Snippet → Each → Expression
-*******************************/
+    Snippet → Each → Expression
+    *******************************/
 
     describe('snippet → each → expression', () => {
       it('should render each items inside a snippet with reactive list changes', async () => {
@@ -300,8 +300,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Snippet → Snippet (nested)
-*******************************/
+     Snippet → Snippet (nested)
+    *******************************/
 
     describe('snippet → snippet (nested invocation)', () => {
       it('should render nested snippet invocations with reactive data', async () => {
@@ -359,8 +359,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Subtemplate with reactiveData
-*******************************/
+     Subtemplate with reactiveData
+    *******************************/
 
     describe('subtemplate with reactiveData (verbose syntax)', () => {
       it('should update subtemplate when reactiveData signal changes', async () => {
@@ -463,8 +463,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Subtemplate with static data
-*******************************/
+     Subtemplate with static data
+    *******************************/
 
     describe('subtemplate with static data (verbose syntax)', () => {
       it('should render subtemplate with static data object', async () => {
@@ -519,8 +519,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Subtemplate with dynamic name
-*******************************/
+     Subtemplate with dynamic name
+    *******************************/
 
     describe('subtemplate with dynamic name=expression', () => {
       it('should swap subtemplate when name expression changes', async () => {
@@ -653,9 +653,10 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Shorthand static prop=expr
-   (no parens, standalone)
-*******************************/
+      Shorthand static prop=expr
+    *******************************/
+
+    // No parens, standalone form.
 
     describe('subtemplate shorthand without parens', () => {
       it('should reactively update — compiler routes all shorthand to reactiveData', async () => {
@@ -719,8 +720,8 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
-   Subtemplate data inside #each
-*******************************/
+     Subtemplate data inside #each
+    *******************************/
 
     describe('subtemplate data contract inside each', () => {
       it('shorthand prop=expr should update when each item changes', async () => {

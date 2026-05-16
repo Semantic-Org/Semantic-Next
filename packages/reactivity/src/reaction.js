@@ -15,12 +15,47 @@ export class Reaction {
   constructor(callback, { context } = {}) {
     this.callback = callback;
     this.dependencies = new Set();
+    this.cleanups = [];
     this.firstRun = true;
     this.active = true;
     if (context && config.mode !== 'off') {
       this.setContext(context);
     }
     this.boundRun = this.run.bind(this);
+  }
+
+
+  // callbacks fire before next run() and on stop. use to scope inner reactions to parent
+  onCleanup(callback) {
+    this.cleanups.push(callback);
+  }
+
+  fireCleanups() {
+    if (this.cleanups.length === 0) {
+      return;
+    }
+    const callbacks = this.cleanups;
+    this.cleanups = [];
+    for (let i = 0; i < callbacks.length; i++) {
+      callbacks[i]();
+    }
+  }
+
+  setContext(additionalContext = {}) {
+    if (!isTracing()) {
+      return;
+    }
+    const defaultContext = {
+      firstRun: this.firstRun,
+    };
+    this.context = {
+      ...defaultContext,
+      ...additionalContext,
+    };
+  }
+
+  setTrace() {
+    captureStack(this, this.setTrace);
   }
 
   addContext(additionalContext = {}) {
@@ -44,27 +79,31 @@ export class Reaction {
         firstRun: this.firstRun,
       });
     }
+    this.fireCleanups();
+    // save/restore so nested run() (guard, computed, derive) doesn't strand the parent
+    const previousReaction = Scheduler.current;
     Scheduler.current = this;
     try {
       for (const dep of this.dependencies) {
-        dep.cleanUp(this);
+        dep.remove(this);
       }
       this.dependencies.clear();
       this.callback(this);
-      this.firstRun = false;
     }
     finally {
-      Scheduler.current = null;
+      // firstRun advances even on throw so a re-invalidation re-tracks from a known baseline
+      this.firstRun = false;
+      Scheduler.current = previousReaction;
     }
   }
 
   invalidate(context) {
-    this.active = true;
-
+    if (!this.active) {
+      return;
+    }
     if (context && config.mode !== 'off') {
       this.addContext(context);
     }
-
     Scheduler.scheduleReaction(this);
   }
 
@@ -73,7 +112,10 @@ export class Reaction {
       return;
     }
     this.active = false;
-    this.dependencies.forEach(dep => dep.unsubscribe(this));
+    Scheduler.pendingReactions.delete(this);
+    this.dependencies.forEach(dep => dep.remove(this));
+    this.dependencies.clear();
+    this.fireCleanups();
   }
 
   static get current() {
@@ -114,6 +156,7 @@ export class Reaction {
       }
       value = newValue;
     });
+    Scheduler.current.onCleanup(() => comp.stop());
     comp.run();
     return newValue;
   }

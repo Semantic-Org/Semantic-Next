@@ -2464,6 +2464,7 @@ export default {
     "nature": "icon",
     "plant": "icon",
     "organic": "icon",
+    "green": "icon",
     "environment": "icon",
     "idea": "icon",
     "tip": "icon",

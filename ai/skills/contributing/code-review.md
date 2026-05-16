@@ -128,22 +128,42 @@ Before spawning scoring agents, state in the conversation:
 
 **This is not optional, and not a checkbox to game.** Orchestrators on round 3+ of an iteration loop tend toward fatigue and skip the scoring stage — scoring findings themselves to save effort, hoping the user won't notice. The announcement is the artifact that makes skipping observable. If you're tempted to skip on round 3 (or 4, or 5), that's exactly the moment when the rigor matters most. Stop, announce, then launch.
 
-### Scoring agents (Opus, one per finding, parallel)
+### Scoring agents (parallel, model-tiered by lens)
 
-Lens agents already consolidate same-pattern instances into grouped findings (see Lens agent output format). Each grouped finding is one scorer. A lens that returns 22 same-pattern instances as one grouped finding gets one scorer; a lens that returns 5 distinct findings gets five.
+Lens agents already consolidate same-pattern instances into grouped findings (see Lens agent output format). Each grouped finding is one scorer. A lens that returns 22 same-pattern instances as one grouped finding gets one scorer.
 
-For each finding from any lens agent, launch a fresh **Opus** agent (always Opus — Haiku is too fast to verify standards citations) that receives:
+The model tier depends on what the verification actually requires. Bug-class verification needs framework reasoning (trace through code, confirm path is broken). Comment-class verification is matching (compare comment text to code, or compare comment to a quoted rule) — Haiku is sufficient and the cold-reader skepticism still holds.
+
+| Tier | Lens agents | Model | Why |
+|---|---|---|---|
+| Comment hygiene | Agent 4 | Haiku | String-vs-code or quote-vs-rule matching, no framework reasoning |
+| Standards / history / simplification | Agents 1, 3, 5 | Sonnet | Quote-verification, local reading, util-substitution checks — verification is bounded |
+| Bug / performance | Agents 2, 6 | Opus | Subtle regressions, framework correctness, hot-path claims — exactly the cases where weaker models silently miss |
+
+Opus tier is deliberately narrow. The 6+-round iterative loop means total scoring cost compounds, and only Agents 2 and 6 produce findings whose verification genuinely demands Opus. Standards violations are mostly quote-matching once cited, and simplification findings are mostly local. Demoting Agents 1, 3, 5 to Sonnet keeps Opus volume bounded by actual bug/perf surface (typically 0–5 per round) rather than total review volume.
+
+For each finding from any lens agent, launch a fresh scorer at the right tier that receives:
 
 - The full PR diff
 - The single finding (file/line, what's wrong, why)
 - The relevant standards docs the finding cites — `CLAUDE.md`, the cited `ai/skills/` doc, the formatting guide, the perf workflow, etc.
-- The rubric below, passed verbatim
+- The rubric for its tier (below), passed verbatim
 
-The scoring agent reads the finding cold, applies the rubric, and returns a single number with a one-sentence justification. For findings that cite a standard, the agent must **verify the cited doc actually calls out the issue specifically** — misattributed citations score 0.
+The scoring agent reads the finding cold, applies the rubric, and returns a single number with a one-sentence justification. For findings that cite a standard, the agent must **verify the cited doc actually calls out the issue specifically** — misattributed citations score 0. This applies at every tier.
 
-### Scoring rubric (pass to each scoring agent verbatim)
+**Haiku-tier safeguard.** The one real failure mode for Haiku scoring is rubber-stamping a misattributed citation. Force structured verification, not narrative judgment:
 
-For each issue, assess confidence on a 0-100 scale:
+1. Quote the rule from the cited standards doc verbatim. If you can't find it, score 0.
+2. Quote the offending lines from the diff verbatim.
+3. Judge: does (2) violate (1)? Score per the comment-hygiene rubric.
+
+Forcing the quotes makes misattribution mechanical rather than judgmental. Haiku is reliable at "find this string" even when it's unreliable at "judge whether this rule applies."
+
+### Scoring rubrics (pass to each scoring agent verbatim, by tier)
+
+Two rubrics, because the cost asymmetry differs by category. Use the one matching the scorer's tier.
+
+**Bug / perf / standards / history rubric** — for findings that affect functionality, performance, or codebase-level standards. A real issue missed is expensive (the bug ships, the perf regression lands). A false positive surfaced is cheap (the user reads the score and ignores it).
 
 | Score | Meaning |
 |---|---|
@@ -153,14 +173,32 @@ For each issue, assess confidence on a 0-100 scale:
 | 75 | Verified, very likely to be hit in practice. The existing approach is insufficient. Directly impacts functionality or explicitly mentioned in project standards. |
 | 100 | Confirmed real, will happen frequently. Evidence directly confirms this. |
 
-### Present all scored findings to the user
+**Comment-hygiene rubric** — for Agent 4 findings. This codebase is open source — comments are read by external contributors, future maintainers, and downstream forks. The bar is "would this comment ship in Vite, Svelte, or Solid?" Cost asymmetry runs the other direction here: a bad comment shipped is expensive (it confuses readers, narrates context they don't have, rots over time), a wrongly-deleted comment is one revert away from restored.
 
-Do not silently triage. Present every finding with:
+| Score | Meaning |
+|---|---|
+| 0 | Misattributed citation — the cited rule doesn't exist in the standards doc, or the comment is load-bearing why-context that earns its keep |
+| 25 | Probably real comment hygiene issue. Deletion or reword is safe even if not certain. |
+| 50 | Verified real. Comment is rot-prone, narrative, or what-not-why. Should be removed or reworded. |
+| 75 | Directly violates an explicit rule in CLAUDE.md or the formatting guide. |
+| 100 | Comment factually contradicts the code it sits next to. |
+
+### Handling scored findings
+
+Asymmetric stakes warrant asymmetric handling. A wrong bug-fix burns time investigating. A wrong comment-delete is recoverable in seconds.
+
+**Bug / perf / standards / history tier** — present every finding to the user with:
 - The file and line reference
 - Why it was flagged (and by which lens agent)
 - The independent confidence score with its one-sentence justification
 
-The user decides what to fix, what to defer, and what to accept.
+Do not silently triage. The user decides what to fix, what to defer, and what to accept.
+
+**Comment hygiene tier** — auto-apply any finding scoring 25+. The 25-bar is correct because (a) misattributed citations are already filtered to 0 by the structured-verification safeguard, (b) Vite-grade comment hygiene is the lens agent's bar, so anything surviving cold-read scoring at 25+ is below that bar by definition, and (c) deletion is recoverable.
+
+After applying, report each change in the conversation: file:line and what was deleted (or reworded to). This is the actual review artifact — commit shape doesn't matter since the repo squashes on merge.
+
+Do not auto-apply if the scorer returned 0 (misattributed citation) or if the finding scope crosses into code changes — those are no longer comment-hygiene findings and belong in the present-to-user tier.
 
 ### What counts as a false positive
 

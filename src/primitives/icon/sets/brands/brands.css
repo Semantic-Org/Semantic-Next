@@ -1,0 +1,22 @@
+/* Brand Icons (Colored background-image) */
+:root {
+  /* Set-level defaults for background-image technique */
+  --icon-brands: none;
+  --icon-brands-bg: transparent;
+  --icon-brands-img: none;
+
+  /* Icon definitions */
+  --icon-js-img: url('./svg/js.svg');
+  --icon-astro-img: url('./svg/astro.svg');
+  --icon-vue-img: url('./svg/vue.svg');
+  --icon-react-img: url('./svg/react.svg');
+  --icon-svelte-img: url('./svg/svelte.svg');
+  --icon-angular-img: url('./svg/angular.svg');
+  --icon-nextjs-img: url('./svg/nextjs.svg');
+  --icon-astro-mark-img: url('./svg/astro-mark.svg');
+  --icon-vue-mark-img: url('./svg/vue-mark.svg');
+  --icon-react-mark-img: url('./svg/react-mark.svg');
+  --icon-svelte-mark-img: url('./svg/svelte-mark.svg');
+  --icon-angular-mark-img: url('./svg/angular-mark.svg');
+  --icon-nextjs-mark-img: url('./svg/nextjs-mark.svg');
+}

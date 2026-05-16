@@ -31,11 +31,8 @@ export class Dependency {
     }
   }
 
-  cleanUp(reaction) {
-    this.subscribers.delete(reaction);
-  }
 
-  unsubscribe(reaction) {
+  remove(reaction) {
     this.subscribers.delete(reaction);
   }
 

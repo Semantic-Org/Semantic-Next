@@ -1,260 +1,140 @@
 /*
 
-  Sample block — reference shape for agents writing a new block.
+  Sample block — the canonical reference for authoring a new block.
 
-  Not registered. Not imported from index.js. Not exercised by tests. This
-  file exists solely to memorialize the patterns a real block needs and the
-  decisions behind them. Read this end-to-end before touching the others.
+  Not registered, not imported, not exercised by tests. Copy it, rename,
+  fill in semantics, then add `registerBlock(name, ...)` + a side-effect
+  import in blocks/index.js.
 
-  WHY A NEW BLOCK NEEDS DEFINEBLOCK INSTEAD OF AN INLINE SWITCH IN RENDERER
+  A block is the dispatch for one AST node type. The compiler emits
+  `{ type: 'thing', ... }` for `{#thing}` constructs; the renderer looks
+  it up via `getBlock(node.type)(ctx)`. defineBlock wraps a config object
+  into that dispatch — full lifecycle (create, render-or-hydrate, update,
+  destroy), error recovery, and a DynamicRegion for the DOM slice.
 
-  Every {#thing} construct compiles to an AST node with type === 'thing'
-  and lands here at dispatch time. defineBlock() returns a dispatch function
-  that owns the full lifecycle (create → render | hydrate → update* →
-  destroy) including error machinery and the breadcrumb path. Inline
-  switches in renderer.js predate this and are the thing the refactor was
-  retiring; don't add new cases to that switch.
+  Config shape (framework-known fields):
 
-  WHEN TO ADD A NEW BLOCK
+    name              required. Header in error logs.
+    syntax(node)      optional. Template-source one-liner for logs.
+    shouldRecover(node)  optional. Per-node gate for try/catch wrapping.
+    create(ctx)       optional. Per-instance setup; returns `self`.
+    compute(bag)      shorthand for render+update — returns content AST,
+                      framework calls bag.place(compute(bag)) on each
+                      tick. Use when both reduce to "pick content, place".
+    render(bag)       first mount when compute doesn't fit.
+    update(bag)       signal-driven re-tick when compute doesn't fit.
+    hydrate(bag)      first mount when server DOM exists. Adopt via
+                      bag.hydrateInto({ innerAST }); return matched
+                      content so the first update dedups against it.
+    destroy(bag)      teardown. Only for resources outside region/scope.
+    error(bag)        replacement when a hook throws; bag adds hook + err.
+    evaluateText(bag) raw-text fallback (<script>, <style>, <textarea>,
+                      <title>); returns a string concatenated into
+                      textContent.
 
-  When the construct needs a DOM region of its own — a slice of nodes whose
-  lifecycle is independent of the surrounding template (mount/unmount,
-  reactive boundaries, hydration claim). If the construct is a pure
-  expression with no region, it's a text-binding in reactive-data.js, not a
-  block.
+  Hooks are invoked as `config.hook(bag)` so `this === config` — author
+  helpers on the same object are reachable as `this.helperName(...)`.
+
+  Bag fields:
+    node, data, scope, region, isSVG, serverMeta, self,
+    place(content)          — dedup-ed AST placement (null clears)
+    lookupExpression(expr)  — evaluate + register signal deps
+    renderAST({...})        — produce a DocumentFragment
+    hydrateInto({...})      — adopt server DOM in the region
+    hydrateInnerContent({...}) — adopt without re-anchoring
+    childContext(parent, extras) — child data context
 
 */
 
 import { defineBlock } from '../define-block.js';
 // import { registerBlock } from './registry.js';   // intentionally not imported
 
+// Example 1 — compute-shorthand shape (most blocks).
+// {#thing expr}content{/thing} picks one of two content variants based
+// on `expr`. Demonstrates compute + helper + explicit hydrate.
+
 const sample = defineBlock({
-  // The name appears in the structured error log header. Match the AST
-  // node.type the compiler produces for this construct.
-  name: 'sample',
+  name: 'thing',
+  syntax: (node) => `{#thing ${node.expression}}`,
 
-  /*
-    syntax(node) — optional. Returns the template-source representation of
-    this block instance for the error log. One-liner per block; the
-    log header becomes `[sui] {name} {syntax(node)}`. Skip if you don't
-    need the per-instance attribution — the header falls back to just the
-    block name.
-  */
-  syntax: (node) => `{#sample ${node.expression}}`,
-
-  /*
-    shouldRecover(node) — optional. Gates whether the dispatch wraps each
-    hook in try/catch. Return false for AST shapes that can't usefully
-    recover (e.g., async with no errorContent — there's nothing to render
-    on a throw, so let it propagate loudly). Default: recover when the
-    block has an error hook.
-  */
-  shouldRecover: (node) => Boolean(node.errorContent?.length),
-
-  /*
-    create(ctx) — called once per block instance. Returns the per-instance
-    state object that subsequent hooks see as `self`. The full dispatch
-    context (renderer included) is only passed to create(); other hooks get
-    the smaller "bag" (see below). This is the seam for stashing renderer
-    internals onto self so hot hooks don't reach through scope.
-
-    Two-level context: dispatch-level bag → hook-level bag.
-    Stash here:                       Read in render/update:
-      self.evaluator = renderer.evaluator     self.evaluator
-      self.snippets  = renderer.snippets      self.snippets
-      ...
-
-    DO NOT mutate the input context. DO NOT rely on properties that aren't
-    documented in the dispatch ctx — they can change without notice.
-  */
+  // Per-instance state. Stashed on `self` for hot hooks; create receives
+  // the full ctx (including renderer) so renderer internals you need
+  // repeatedly land here once.
   create({ renderer }) {
     return {
       evaluator: renderer.evaluator,
-      // Initialize any state used across hooks. Keep this small — anything
-      // you stash here lives until destroy(). Closures captured here are
-      // GC-eligible only when self goes out of scope.
-      generation: 0,
-      lastValue: null,
     };
   },
 
-  /*
-    render(bag) — first mount on the client (no server-rendered DOM to
-    adopt). The bag has node, data, scope, region, isSVG, serverMeta,
-    self, plus the closures lookupExpression / renderAST /
-    hydrateInnerContent / hydrateInto. Use them; don't pull from
-    anywhere else.
-
-    Pattern: build a fragment via renderAST(), put it in the region via
-    region.setContent(fragment, optionalChildScope). The region owns DOM
-    cleanup; the child scope owns reaction cleanup.
-
-    Reactivity: any lookupExpression() call inside this hook registers
-    deps on the current Reaction (the one defineBlock created around all
-    hooks). When tracked signals change, update() fires — never render()
-    again on the same instance.
-  */
-  render({ node, data, scope, region, renderAST, lookupExpression, childContext, self }) {
-    const value = lookupExpression(node.expression);
-    self.lastValue = value;
-    self.generation++;
-
-    const childScope = scope.child();
-    const fragment = renderAST({
-      ast: node.content,
-      data: childContext(data, { sampleValue: value }),
-      scope: childScope,
-    });
-    region.setContent(fragment, childScope);
+  // Author helper. Reached from hooks as `this.selectVariant(...)`.
+  // Returns a stable AST array reference so bag.place's reference-equality
+  // dedup works (same input → same array → no DOM op on update).
+  selectVariant(node, lookupExpression) {
+    const truthy = lookupExpression(node.expression);
+    return truthy ? node.content : node.elseContent;
   },
 
-  /*
-    hydrate(bag) — adopt server-rendered DOM instead of building from
-    scratch. The region.ownedNodes array is pre-populated with the slice
-    of DOM the server emitted between this block's opening and closing
-    markers. Your job:
+  // compute synthesizes render + update. Framework calls bag.place(compute(bag))
+  // on first mount and on every subsequent signal-driven tick. lookupExpression
+  // reads inside compute register the relevant Signal deps on the outer Reaction.
+  compute({ node, lookupExpression }) {
+    return this.selectVariant(node, lookupExpression);
+  },
 
-      1. Register the same Signal deps render() would (so update() fires
-         later) — usually a single lookupExpression() call on the same
-         expression render() reads.
-      2. Hand the inner content to hydrateInto() — it creates the child
-         scope, walks inner markers, reattaches into the region, and
-         sets region.endAnchor.
-
-    DO NOT call renderAST() from hydrate — that builds fresh DOM and
-    discards the server's. The whole point of hydrate is to keep the
-    server's bytes.
-
-    serverMeta contains anything the ServerRenderer wrote into the
-    closing block marker (see parseServerMeta in build-html-string.js
-    for the prefix scheme). Use it for branch selection, key recovery,
-    etc.
-  */
-  hydrate({ node, data, region, lookupExpression, hydrateInto, childContext, self }) {
-    const value = lookupExpression(node.expression);
-    self.lastValue = value;
-    self.generation++;
-
-    if (region.ownedNodes.length > 0 && node.content) {
-      hydrateInto({ innerAST: node.content, data: childContext(data, { sampleValue: value }) });
+  // Hydrate has a distinct contract: adopt server DOM, don't rebuild. Returning
+  // the matched content lets the framework dedup the first compute-driven update
+  // tick against it (so we don't re-render over server bytes when nothing changed).
+  hydrate({ node, region, lookupExpression, hydrateInto }) {
+    const matched = this.selectVariant(node, lookupExpression);
+    if (region.ownedNodes.length > 0 && matched) {
+      hydrateInto({ innerAST: matched });
     }
+    return matched;
   },
 
-  /*
-    update(bag) — fires on every reaction tick after first render/hydrate.
-    Same bag shape as render, plus self carries forward across ticks.
-
-    Decide here whether to:
-      • mutate in place (cheap — preferred for value swaps)
-      • rebuild via region.setContent() with a fresh child scope
-        (correct when the AST shape inside might change, e.g., {#if}
-        switching branches)
-
-    Don't dispose self; defineBlock owns its lifetime via destroy().
-  */
-  update({ node, data, scope, region, renderAST, lookupExpression, childContext, self }) {
-    const value = lookupExpression(node.expression);
-    if (value === self.lastValue) { return; } // common bail-out
-    self.lastValue = value;
-    self.generation++;
-
-    const childScope = scope.child();
-    const fragment = renderAST({
-      ast: node.content,
-      data: childContext(data, { sampleValue: value }),
-      scope: childScope,
-    });
-    region.setContent(fragment, childScope);
-  },
-
-  /*
-    destroy(bag) — fires when the parent scope disposes (template
-    unmounted, parent block re-rendered, etc.). The reaction is already
-    being torn down; region.clear() runs after this returns. You only need
-    to release things defineBlock can't reach: external listeners,
-    timers, manually-attached DOM outside the region, etc.
-
-    Throws here propagate. Stranding sibling cleanup is the deliberate
-    trade — silent recovery hides destroy bugs harder than DOM leaks do.
-  */
-  destroy({ self }) {
-    // Release anything attached outside the region or scope here.
-    // self.timer && clearInterval(self.timer);
-    void self;
-  },
-
-  /*
-    error({ err, hook, ...bag }) — optional. When defined AND wantsRecovery
-    is true, takes over after a hook throws. The bag is extended with
-    { hook, err } telling you which hook threw and why. Decide what to
-    render — typically an error template or a fallback fragment.
-
-    If you don't define error(), the default-isolate path runs:
-    region.clear() + comp.stop() so the failed instance stops re-firing.
-
-    Throws inside error() are not recovered — they propagate and the
-    breadcrumb fires for the error hook. Don't throw from here.
-  */
-  error({ err, hook, region, scope, renderAST, node }) {
-    if (!node.errorContent?.length) {
-      region.clear();
-      return;
-    }
-    const errorScope = scope.child();
-    const fragment = renderAST({
-      ast: node.errorContent,
-      data: { error: err, errorHook: hook },
-      scope: errorScope,
-    });
-    region.setContent(fragment, errorScope);
-  },
-
-  /*
-    evaluateText({ node, data, renderer }) — optional. Defines how this
-    block behaves inside raw-text contexts: <script>, <style>, <textarea>,
-    <title>. These elements parse content as text, not markup; there's
-    no live DOM, no comment markers, no reactive regions. The walker
-    calls evaluateText synchronously and concatenates the returned string
-    into textContent.
-
-    DECISION TREE — do you implement evaluateText for your block?
-
-      Implement when the block's semantics reduce cleanly to "recompute
-      textContent each tick":
-        • {#if}        — pick a branch, recurse via evaluateRawTextNodes
-        • {#each}      — loop, recurse per item
-        • {>name}      — expand snippet/template, recurse
-        • {#rerender}  — re-evaluate deps, recurse on content
-
-      Don't implement when the block needs an asynchronous lifecycle, a
-      live DOM region, or per-invocation state the text walker can't
-      provide:
-        • {#async}     — promise lifecycle can't survive textContent.
-
-      The walker throws when it encounters a block without evaluateText
-      ("{#name} cannot be rendered inside raw-text contexts ..."), so
-      misuse surfaces as a hard error at render time. No silent no-ops,
-      no per-block warning machinery.
-
-    The renderer argument exposes evaluateRawTextNodes(nodes, data) for
-    recursing into child AST. Use it instead of reimplementing the walker.
-  */
+  // Raw-text fallback for <script>/<style>/<textarea>/<title>. Throw or
+  // return a string. Omit for blocks that don't make sense in raw text
+  // (async, each); the walker will throw on encounter.
   evaluateText({ node, data, renderer }) {
-    const value = renderer.lookupExpression(node.expression, data);
-    void value;
-    return renderer.evaluateRawTextNodes(node.content, data);
+    const truthy = renderer.lookupExpression(node.expression, data);
+    const content = truthy ? node.content : node.elseContent;
+    return content ? renderer.evaluateRawTextNodes(content, data) : '';
   },
 });
+
+// Example 2 — explicit render/update when compute doesn't fit.
+// Blocks like each (keyed reconciliation), async (promise state machine),
+// or rerender (always-rebuild) can't synthesize update from compute —
+// their render and update bodies genuinely differ. Sketch:
+//
+//   defineBlock({
+//     name: 'manualLifecycle',
+//     create({ renderer }) { return { items: [] }; },
+//     render({ node, data, scope, region, renderAST, self }) {
+//       // build from scratch, allocate per-item state, etc.
+//       const childScope = scope.child();
+//       const fragment = renderAST({ ast: node.content, scope: childScope });
+//       region.setContent(fragment, childScope);
+//     },
+//     update({ node, data, region, self }) {
+//       // reconcile against self.items rather than rebuilding from scratch
+//     },
+//     hydrate({ region, hydrateInto }) {
+//       hydrateInto({ innerAST: node.content });
+//       // no return — this block doesn't use compute, so no need to record on place
+//     },
+//     destroy({ self }) {
+//       // release external resources only — region/scope cleanup is automatic
+//     },
+//   });
 
 /*
   NOT REGISTERED. A real block ends with:
 
-    registerBlock('sample', sample);
+    registerBlock('thing', sample);
 
-  and is added to blocks/index.js so the side-effect import wires it into
-  the registry at startup. This file omits both so it stays purely
-  documentary. Copy this file, rename it, fill in real semantics, add the
-  registerBlock call, and add the import to index.js.
+  and an import in blocks/index.js so the registration runs at startup.
+  This file omits both so it stays purely documentary.
 */
 
 export default sample;

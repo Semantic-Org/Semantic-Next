@@ -161,21 +161,22 @@ export class Signal {
 
   derive(computeFn, options = {}) {
     const derivedSignal = new Signal(undefined, options);
-    // WeakRef lets the derived reaction self-stop when the source is GC'd
-    const sourceRef = new WeakRef(this);
+
+    // weak so the reaction's closure doesn't pin derived through source.dep.subscribers
+    const derivedRef = new WeakRef(derivedSignal);
+    const source = this;
 
     const reaction = Reaction.create(() => {
-      const source = sourceRef.deref();
-      if (!source) {
+      const derived = derivedRef.deref();
+      if (!derived) {
         reaction.stop();
         return;
       }
-      const result = computeFn(source.get());
-      derivedSignal.set(result);
+      derived.set(computeFn(source.get()));
     });
-
-    derivedSignal._derivedReaction = reaction;
-
+    if (Reaction.current) {
+      Reaction.current.onCleanup(() => reaction.stop());
+    }
     return derivedSignal;
   }
 
@@ -333,14 +334,17 @@ export class Signal {
   }
 
   getIDs(item) {
-    if (isObject(item)) {
-      return unique([item?._id, item?.id, item?.hash, item?.key].filter(Boolean));
+    if (!isObject(item)) {
+      return [item];
     }
-    return [item];
+    return unique([item.id, item._id, item.hash, item.key].filter(Boolean));
   }
 
   getID(item) {
-    return this.getIDs(item).filter(Boolean)[0];
+    if (!isObject(item)) {
+      return item;
+    }
+    return item.id || item._id || item.hash || item.key;
   }
 
   hasID(item, id) {
@@ -355,7 +359,11 @@ export class Signal {
   }
 
   getItemIndex(id) {
-    return findIndex(this.currentValue, item => this.hasID(item, id));
+    const arr = this.currentValue;
+    for (let i = 0; i < arr.length; i++) {
+      if (this.hasID(arr[i], id)) { return i; }
+    }
+    return -1;
   }
 
   setProperty(idOrProperty, property, value) {

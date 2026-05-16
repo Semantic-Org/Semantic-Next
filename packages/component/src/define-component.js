@@ -54,9 +54,14 @@ export const defineComponent = ({
     ast = compiler.compile();
   }
 
-  each(subTemplates, (template) => {
-    if (template.css) {
-      css += template.css;
+  each(subTemplates, (subTemplate, name) => {
+    // support syntactic sugar obj literal subtemplates
+    if (!(subTemplate instanceof Template)) {
+      subTemplates[name] = defineComponent(subTemplate);
+    }
+    // use subtemplate css which includes its own subtemplates
+    if (subTemplates[name].css) {
+      css += subTemplates[name].css;
     }
   });
 
@@ -68,6 +73,7 @@ export const defineComponent = ({
     templateName,
     isPrototype: true,
     renderingEngine,
+    template,
     ast,
     css,
     events,
@@ -99,6 +105,7 @@ export const defineComponent = ({
 
     // Store tagName on the class for SSR renderToString
     webComponent.componentTagName = tagName;
+    webComponent.toDefinition = () => prototypeTemplate.toDefinition();
     registerComponent(tagName, webComponent);
 
     if (isClient && customElements.get(tagName)) {

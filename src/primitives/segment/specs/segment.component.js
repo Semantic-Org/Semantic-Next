@@ -51,6 +51,7 @@ export default {
     "attached": "attached",
     "bottom-attached": "attached",
     "padded": "padded",
+    "very": "padded",
     "compact": "compact",
     "red": "color",
     "orange": "color",

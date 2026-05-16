@@ -185,6 +185,23 @@ Common signs of a stuck watcher: tests hang past the 2-minute budget, "Failed to
 dynamically imported module" errors at random files (port collisions), or vitest output
 just never appears.
 
+### Flaky setup vs real test failures
+
+Browser tests on WSL2 hosts sometimes fail at setup with `Failed to fetch dynamically imported module` or `Cannot connect to the iframe ... CORS`. These are infrastructure races during vitest's browser bootstrap, not test-body failures, and they appear non-deterministically — different files fail on each run.
+
+**The dismissive trap:** when failing test names match the scope of what you just committed, that is a real bug, not the host flaking. The give-away: a setup flake fails at *import* before any test runs and the failed files shift each run; a real bug fails inside an `expect(...)` and the same named tests fail every time. Persistent failures whose names map to your diff are ground truth — CI is the gate, do not retry expecting silence.
+
+Quick disambiguation:
+
+| | flake | real failure |
+|---|---|---|
+| Which files fail | different files each run | same tests every run |
+| Failure surface | module-fetch / iframe-CORS at setup | assertion failure inside test body |
+| Scope match | unrelated to recent edits | tests cover what you just touched |
+| Resolves on isolation re-run | usually yes | no |
+
+When in doubt, re-run the suspect files in isolation. A setup flake clears, a real failure persists. If a CI run reports failures on tests whose names track the area of your change, trust CI even when local runs look noisy.
+
 ### Watch mode
 
 Package configs set `watch: false`, so `npx vitest` runs and exits. Use `--watch` to override:
@@ -337,6 +354,87 @@ The reactivity tests use decorative comment blocks to separate logical groups:
 ```
 
 Match this style when adding tests to files that use it.
+
+### Comments that earn their keep
+
+A test comment earns its keep when it answers "what would a future reader miss if I removed this?" The shape: short, conversational, focused on the non-obvious WHY that the test body doesn't show. Real examples from the codebase:
+
+**Test isolation rationale** — `packages/query/test/browser/behavior.test.js`:
+
+```javascript
+// Each test registers under a unique name so behaviors don't leak across
+// tests (Query.behaviors is global static state and registerBehavior() is a
+// silent no-op for duplicate names).
+let counter = 0;
+const uniqueName = (base) => `${base}_${++counter}`;
+```
+
+Without this, a reader wonders why every test invents a name. The "silent no-op" detail is a real gotcha — re-registration doesn't throw, it returns the prior behavior.
+
+**Real consumer reference** — `packages/query/test/browser/behavior.test.js`:
+
+```javascript
+// pattern used by Tooltip's onHidden: $(this).tooltip('set text', 'Copy Code')
+it('supports natural-language two-word setter invocation', () => { ... });
+```
+
+Anchors the test to actual production usage. The test name says *what*; the comment says *where*.
+
+**User-facing contract pin** — `packages/query/test/browser/behavior.test.js`:
+
+```javascript
+// data-* with falsy values (0, false, '') must override settings
+// common pattern: data-enabled="false" should disable a default of true
+it('lets data-* attributes override settings with false values', () => { ... });
+```
+
+Names the user expectation in concrete terms, not the implementation detail.
+
+**Structural invariant** — `packages/renderer/test/browser/template-conditional.test.js`:
+
+```javascript
+// cross-type swap is structurally impossible: a name can't be both registered and declared inline
+it('subtemplate name expression resolving to a Template instance swaps correctly', async () => { ... });
+```
+
+Explains why the test scenario is bounded — answers "why doesn't this cover swap-from-X-to-Y?"
+
+**Cross-engine setup rationale** — `packages/renderer/test/browser/async-expression.test.js`:
+
+```javascript
+// throw propagates when errorContent is empty
+// native surfaces it synchronously via window.error, lit's microtask render surfaces via unhandledrejection
+// listen for both since the contract is "error reaches the host" not via a specific event
+```
+
+Justifies a non-obvious test setup (listening to two different browser events) by naming the engine difference.
+
+**Failure mode the test catches** — `packages/tailwind/test/tailwind-plugin.test.js`:
+
+```javascript
+// if two adjacent strings concatenated without a separator, "bg-red-500" + "p-4"
+// would scan as "bg-red-500p-4", not a valid Tailwind class. newlines preserve boundaries
+it('joins extracted sources with newlines so adjacent strings cannot merge into invalid candidates', () => { ... });
+```
+
+Names the regression the test guards against — the specific bad concatenation that would slip past if the separator regressed.
+
+The common pattern: each comment either documents a user-facing expectation, names a real consumer, explains a non-obvious constraint, or names the failure mode the test catches. None of them narrate what the next line of code does — that's what the `it()` name and the assertions are for.
+
+### Comments to avoid in tests
+
+Test source is terse. The `it()` name and the assertions do the work. Add a comment only when explaining genuinely non-obvious WHY — a browser quirk, a perf constraint, a subtle invariant that's not visible from reading the test body.
+
+Patterns that should not appear in shipped test code:
+
+- Citation markers — `[source X]`, `[skill X]`, `[example X]`, `[doc:X]`, `[inference]`, `[synthesis]`. These belong in your `ai/workspace/` intent doc, not the test file.
+- `Witness:` / `FINDING:` / `Documented user workaround:` prefixed prose. Same — design-doc scaffolding, not artifact.
+- Inline narration that restates the assertion (`// initial only` next to `expect(callback).toHaveBeenCalledTimes(1)`). The assertion already does that.
+- Generic section labels mid-test that aren't `describe()` blocks (`// Test conditional dependencies`).
+- File-level header docblocks describing what the file tests. The filename + `describe()` names cover it.
+- File-level `// Red-team coverage for X` framing. Red-team is the design discipline, not a test-file label.
+
+When the comment doesn't have a clear answer to "what would a future reader miss if I removed this?", remove it. See [grounded-testing § Labels and intent prose leaking into test source](./grounded-testing.md#labels-and-intent-prose-leaking-into-test-source) for the rationale.
 
 ---
 

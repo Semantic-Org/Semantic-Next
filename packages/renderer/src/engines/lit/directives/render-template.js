@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
-import { isClient, isFunction, isString, mapObject } from '@semantic-ui/utils';
+import { isClient, isFunction, isPlainObject, isString, mapObject } from '@semantic-ui/utils';
 import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
@@ -141,13 +141,13 @@ export class RenderTemplateDirective extends AsyncDirective {
   }
 
   unpackData(dataObj) {
-    const raw = isFunction(dataObj) ? dataObj() : mapObject(dataObj, (val) => val());
-    // Subtemplate uses the result as a mutable container for setDataContext
-    // merges. Signal values under safety: 'freeze' come in frozen, so
-    // shallow-copy plain objects and arrays on the way through.
-    if (raw === null || typeof raw !== 'object') { return raw; }
-    if (Array.isArray(raw)) { return [...raw]; }
-    return { ...raw };
+    if (isFunction(dataObj)) {
+      return dataObj();
+    }
+    if (!isPlainObject(dataObj)) {
+      return {};
+    }
+    return mapObject(dataObj, (val) => val());
   }
 
   update(part, settings) {

@@ -101,12 +101,35 @@ export const Template = class Template {
     this.onThemeChangedCallback = onThemeChanged;
     this.id = generateID();
     this.isPrototype = isPrototype;
+    if (isPrototype) {
+      this.template = template;
+    }
     this.attachStyles = attachStyles;
     this.element = element;
     this.renderingEngine = renderingEngine;
     if (renderRoot) {
       this.attach(renderRoot);
     }
+  }
+
+  toDefinition() {
+    return {
+      template: this.template,
+      css: this.css,
+      createComponent: this.createComponent,
+      onCreated: this.onCreatedCallback,
+      onRendered: this.onRenderedCallback,
+      onDestroyed: this.onDestroyedCallback,
+      onThemeChanged: this.onThemeChangedCallback,
+      onUpdated: this.onUpdatedCallback,
+      events: this.events,
+      keys: this.keys,
+      subTemplates: this.subTemplates,
+      defaultState: this.defaultState,
+      defaultSettings: this.defaultSettings,
+      renderingEngine: this.renderingEngine,
+      templateName: this.templateName,
+    };
   }
 
   createReactiveState(defaultState, data) {
@@ -255,6 +278,7 @@ export const Template = class Template {
     this.onDestroyed = () => {
       Template.removeTemplate(this);
       this.markDestroyed();
+      this.renderer?.destroy?.();
       this.abortController.abort('Template destroyed');
       this.clearReactions();
       this.removeEvents();
@@ -896,7 +920,7 @@ export const Template = class Template {
   // querySettings is the only namespaced key.
   attachEvent(selector, eventName, eventHandler, { querySettings = { pierceShadow: true }, ...eventSettings } = {}) {
     return $(selector, document, querySettings).on(eventName, eventHandler, {
-      abortController: this.eventController,
+      abortController: this.abortController,
       returnHandler: true,
       eventSettings,
     });

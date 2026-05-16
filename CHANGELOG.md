@@ -43,9 +43,12 @@ xx.xx.xxxx
 
 ### Query
 * **Bug** - Fixed `instanceof` checks failing for `Query.wrap()` instances — brand property was a class field (set only in constructor) but `wrap()` uses `Object.create()`. Moved to prototype getter so all prototype-chain objects pass the check regardless of construction path.
+* **Bug** - Fixed `.position({ type: 'global' })` placing elements with the wrong offset when a CSS containing block (transform/filter/perspective/etc.) lived outside the element's shadow DOM — `positioningParent` now pierces shadow boundaries so the math matches what the browser actually uses. `isInView` now does the same for its default clipping viewport.
 * **Feature** - Added `includeMargin`, `includePadding`, and `includeBorder` options to `naturalWidth()` and `naturalHeight()` — allows measuring unconstrained intrinsic dimensions while preserving the element's box model.
 
 ### Utils
+* **BREAKING** - `noop` now returns `undefined` (truly no-op). Previously it returned its first argument (identity). Use the new `identity` export if you need the old behavior.
+* **Feature** - Added `identity` export — returns its first argument unchanged.
 * **Feature** - Added [`deepFreeze`](https://next.semantic-ui.com/docs/api/utils/cloning#deepfreeze) — recursively freezes a value in place and returns the same reference. Walks arrays and plain objects only, leaving `Date`, `Map`, `Set`, `RegExp`, DOM nodes, and custom class instances untouched so their internal slots keep working. Cycle-safe via an internal `WeakSet`; already-frozen inputs take a fast-path no-op.
 * **Feature** - Added [`createCache`](https://next.semantic-ui.com/docs/api/utils/cache) — a bounded, Map-like cache factory with pluggable eviction (`lru` default, `fifo`, `flush`) and an `onEvict` hook. Collapses ad-hoc `new Map()` + size-check patterns behind one named primitive.
 * **Feature** - Added `assignInPlace()` for syncing an object's contents to match a source without replacing the reference — supports `preserveExistingKeys` to skip deletion, `preserveGetters` to keep computed properties (own getter descriptors) intact across syncs, and `returnChanged` to detect modifications

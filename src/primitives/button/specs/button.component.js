@@ -83,10 +83,13 @@ export default {
   "optionAttributes": {
     "primary": "emphasis",
     "secondary": "emphasis",
+    "subtle": "styled",
     "flat": "styled",
     "outline": "styled",
     "ghost": "styled",
     "disabled": "disabled",
+    "left": "floated",
+    "right": "floated",
     "compact": "compact",
     "mini": "size",
     "tiny": "size",

@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Event Data — event-data</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <script type="module" blocking="render" src="/dist/src/event-data/component.js"></script>
+    <style>
+/*
+  Stylesheet inlined into every generated page by scripts/sync.js.
+  Loaded as a string at sync time (no bundler), so plain CSS — no imports.
+
+  Tokens, code colors, and heading discipline are aligned with the canonical
+  cdn.semantic-ui.com page (tools/cdn/pages/index.css) so this site reads as
+  part of the same surface. All page-specific selectors descend from
+  `.example` so the HTML stays free of repeated namespace classes.
+*/
+
+:root {
+  --code-bg: var(--ui-background-emphasis);
+  --code-purple: #6F42C1;
+  --code-default: #54595E;
+  --code-blue: #005CC5;
+  --code-orange: #E3660F;
+  --code-red: #D73A49;
+  --code-green: #22863A;
+  --code-grey: #24292E;
+  --code-comment: #6A737D;
+}
+
+html.dark {
+  --code-purple: #D2A8FF;
+  --code-default: #C9D1D9;
+  --code-blue: var(--primary-text-color);
+  --code-orange: #FFAB70;
+  --code-red: #F97583;
+  --code-green: #7EE787;
+  --code-grey: #656565;
+  --code-comment: #6A737D;
+}
+
+html { scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--page-font);
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 var(--gutter-l);
+  color: var(--text-color);
+}
+
+.example {
+
+  .theme {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .header {
+    margin-bottom: var(--gap);
+    padding-bottom: var(--padding-3xs);
+    border-bottom: var(--border);
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-xs);
+      font-size: var(--text-xs);
+      color: var(--light-text-color);
+
+      a {
+        color: var(--muted-text-color);
+        text-decoration: none;
+        transition: color 0.12s;
+        &:hover { color: var(--primary-text-color); }
+      }
+
+      .position {
+        margin-right: auto;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    .title {
+      margin: var(--gap-2xs) 0 var(--gap-3xs);
+      font-size: var(--text-2xl);
+      font-weight: var(--bold);
+      letter-spacing: -0.01em;
+      color: var(--header-color);
+    }
+
+    .description {
+      margin: var(--vertically-spaced);
+      color: var(--muted-text-color);
+      line-height: 1.65;
+    }
+  }
+
+  .container {
+    position: relative;
+    transform: translateZ(0);
+    /* Lift above the later-sibling .source so position:absolute overflow from
+       inside the example (e.g. async-search results) doesn't get covered by
+       the code viewer below. */
+    z-index: 1;
+  }
+
+  .source {
+    margin: var(--vertically-spaced) 0;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: var(--code-bg);
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: var(--padding-xs) var(--padding);
+      font-size: var(--text-xs);
+      font-weight: var(--bold);
+      color: var(--muted-text-color);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: var(--gap-3xs);
+      transition: color 0.12s;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-text-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: var(--internal-border);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      border-bottom: var(--internal-border);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: var(--padding-xs) var(--padding);
+        font-family: var(--code-font);
+        font-size: var(--text-xs);
+        color: var(--light-text-color);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: color 0.15s;
+
+        &:hover { color: var(--muted-text-color); }
+        &.active {
+          color: var(--header-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: var(--padding) var(--padding-l);
+      overflow: auto;
+      font-family: var(--code-font);
+      font-size: var(--text-s);
+      line-height: 1.8;
+      color: var(--code-default);
+      max-height: 520px;
+      tab-size: 2;
+    }
+
+    /* highlight.js token classes mapped to the canonical --code-* palette. */
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal,
+    .hljs-variable.language_,
+    .hljs-doctag { color: var(--code-red); }
+    .hljs-string,
+    .hljs-attr,
+    .hljs-meta .hljs-string,
+    .hljs-symbol { color: var(--code-blue); }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag,
+    .hljs-title,
+    .hljs-title.class_,
+    .hljs-title.function_ { color: var(--code-purple); }
+    .hljs-number,
+    .hljs-meta .hljs-number { color: var(--code-orange); }
+    .hljs-comment { color: var(--code-comment); font-style: italic; }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id,
+    .hljs-selector-attr { color: var(--code-grey); }
+    .hljs-meta,
+    .hljs-regexp { color: var(--code-green); }
+  }
+
+  .notes {
+    margin-top: var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--muted-text-color);
+    line-height: 1.65;
+
+    h2 {
+      margin: 0 0 var(--gap-2xs);
+      font-size: var(--text-2xs);
+      font-weight: var(--bold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--blue-80);
+    }
+
+    p { margin: var(--vertically-spaced); }
+    ul { margin: var(--vertically-spaced); padding-left: 1.25rem; }
+    li { margin: var(--gap-3xs) 0; }
+
+    .walk {
+      display: flex;
+      justify-content: space-between;
+      margin-top: var(--margin);
+      padding-top: var(--padding);
+      border-top: var(--internal-border);
+
+      a {
+        color: var(--primary-text-color);
+        text-decoration: none;
+        font-size: var(--text-s);
+        font-weight: var(--bold);
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+
+  /* Inline code (`token`) inside prose — chip style matching CDN. */
+  .header .description code,
+  .notes code,
+  .entries .intro code {
+    background: var(--subtle-angled-gradient);
+    padding: 3px 5px;
+    margin: -2px 1px;
+    border: var(--subtle-border);
+    border-radius: var(--border-radius);
+    color: var(--standard-90);
+    font-family: var(--code-font);
+    font-size: var(--text-xs);
+  }
+
+  /* Landing page */
+  h1 {
+    margin: 0 0 var(--gap-3xs);
+    font-size: var(--text-3xl);
+    font-weight: var(--bold);
+    letter-spacing: -0.015em;
+    color: var(--header-color);
+  }
+
+  .lede {
+    color: var(--muted-text-color);
+    margin-top: 0;
+    line-height: 1.65;
+  }
+
+  .section {
+    margin: var(--margin-xl) 0 var(--gap-3xs);
+    font-size: var(--text-2xs);
+    font-weight: var(--bold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted-text-color);
+  }
+
+  .section-lede {
+    margin: var(--vertically-spaced);
+    color: var(--light-text-color);
+    font-size: var(--text-s);
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: var(--padding) 0;
+      border-bottom: var(--internal-border);
+      &:last-child { border-bottom: none; }
+    }
+
+    .entry {
+      display: flex;
+      align-items: baseline;
+      gap: var(--gap-xs);
+      text-decoration: none;
+      &:hover .headline { color: var(--primary-text-color); }
+
+      .position {
+        font-variant-numeric: tabular-nums;
+        color: var(--standard-40);
+        font-size: var(--text-s);
+        min-width: 1.5rem;
+      }
+
+      .headline {
+        font-weight: var(--bold);
+        color: var(--header-color);
+        transition: color 0.12s;
+      }
+
+      .subtitle {
+        color: var(--light-text-color);
+        font-size: var(--text-s);
+      }
+    }
+
+    .intro {
+      margin: var(--gap-3xs) 0 0 2.1rem;
+      color: var(--muted-text-color);
+      font-size: var(--text-s);
+      line-height: 1.65;
+    }
+  }
+
+  .footer {
+    margin: var(--margin-xl) 0 var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--light-text-color);
+    font-size: var(--text-xs);
+    display: flex;
+    gap: var(--gap-xs);
+
+    a {
+      color: var(--muted-text-color);
+      text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+
+    .sep { color: var(--border-color); }
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <header class="header">
+        <nav class="crumbs">
+          <a class="back" href="/">← Examples</a>
+          <span class="position">16 / 19</span>
+          <a href="../solar-system-3d/page.html">prev</a>
+          <a href="../setting-types/page.html">next</a>
+        </nav>
+        <h1 class="title">Data-driven event dispatch</h1>
+        <p class="description">One event handler, many actions. Each button carries <code>data-dimension</code> and <code>data-helper</code> attributes; the handler reads them and indexes into the signal with bracket notation to pick which mutation to perform.</p>
+      </header>
+      <div class="container">
+        <circle-expand></circle-expand>
+      </div>
+      <details class="source" open>
+        <summary><ui-icon icon="chevron-right" class="caret"></ui-icon><span class="show">View code</span><span class="hide">Hide code</span></summary>
+        <ul class="files">
+          <li><button type="button" data-target="src-event-data-0" class="active">component.js</button></li>
+          <li><button type="button" data-target="src-event-data-1">component.html</button></li>
+          <li><button type="button" data-target="src-event-data-2">component.css</button></li>
+          <li><button type="button" data-target="src-event-data-3">page.html</button></li>
+        </ul>
+        <pre id="src-event-data-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
+
+<span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
+<span class="hljs-keyword">const</span> defaultSettings = {
+  <span class="hljs-attr">delta</span>: <span class="hljs-number">50</span>,
+};
+
+<span class="hljs-keyword">const</span> defaultState = {
+  <span class="hljs-attr">width</span>: <span class="hljs-number">250</span>,
+  <span class="hljs-attr">height</span>: <span class="hljs-number">250</span>,
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">createComponent</span> = (<span class="hljs-params">{ state, settings }</span>) =&gt; ({
+
+  <span class="hljs-comment">// this destructures the button data</span>
+  <span class="hljs-comment">// data-dimension and data-helper and uses it to adjust state</span>
+  <span class="hljs-title function_">adjustSize</span>(<span class="hljs-params">{ dimension, helper }</span>) {
+    state[dimension][helper](settings.<span class="hljs-property">delta</span>);
+  },
+
+});
+
+<span class="hljs-keyword">const</span> events = {
+
+  <span class="hljs-comment">// data-dimension and data-helper are passed from html metadata</span>
+  <span class="hljs-comment">// i.e. &lt;ui-button data-dimension=&quot;width&quot; data-helper=&quot;increment&quot;&gt;</span>
+  <span class="hljs-string">&#x27;click ui-button&#x27;</span>({ self, data }) {
+    self.<span class="hljs-title function_">adjustSize</span>(data);
+  },
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">CircleExpand</span> = <span class="hljs-title function_">defineComponent</span>({
+  <span class="hljs-attr">tagName</span>: <span class="hljs-string">&#x27;circle-expand&#x27;</span>,
+  template,
+  css,
+  defaultState,
+  defaultSettings,
+  events,
+  createComponent,
+});
+</code></pre>
+        <pre id="src-event-data-1" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Width<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">ui-button</span> <span class="hljs-attr">data-helper</span>=<span class="hljs-string">&quot;decrement&quot;</span> <span class="hljs-attr">data-dimension</span>=<span class="hljs-string">&quot;width&quot;</span>&gt;</span>
+  Decrease
+<span class="hljs-tag">&lt;/<span class="hljs-name">ui-button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">ui-button</span> <span class="hljs-attr">data-helper</span>=<span class="hljs-string">&quot;increment&quot;</span> <span class="hljs-attr">data-dimension</span>=<span class="hljs-string">&quot;width&quot;</span>&gt;</span>
+  Increase
+<span class="hljs-tag">&lt;/<span class="hljs-name">ui-button</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Height<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">ui-button</span> <span class="hljs-attr">data-helper</span>=<span class="hljs-string">&quot;decrement&quot;</span> <span class="hljs-attr">data-dimension</span>=<span class="hljs-string">&quot;height&quot;</span>&gt;</span>
+  Decrease
+<span class="hljs-tag">&lt;/<span class="hljs-name">ui-button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">ui-button</span> <span class="hljs-attr">data-helper</span>=<span class="hljs-string">&quot;increment&quot;</span> <span class="hljs-attr">data-dimension</span>=<span class="hljs-string">&quot;height&quot;</span>&gt;</span>
+  Increase
+<span class="hljs-tag">&lt;/<span class="hljs-name">ui-button</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">hr</span>/&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;rectangle&quot;</span> <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;
+  width: { width &gt; 0 ? width : 0 }px;
+  height: { height &gt; 0 ? height : 0 }px;
+&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+        <pre id="src-event-data-2" hidden><code class="hljs language-css"><span class="hljs-selector-class">.rectangle</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-built_in">var</span>(--pink) <span class="hljs-built_in">var</span>(--strong-angled-gradient);
+  <span class="hljs-attribute">box-shadow</span>: <span class="hljs-built_in">var</span>(--subtle-shadow);
+  <span class="hljs-attribute">border</span>: <span class="hljs-built_in">var</span>(--border);
+  <span class="hljs-attribute">transition</span>: all <span class="hljs-number">500ms</span> ease-in-out;
+  <span class="hljs-attribute">border-radius</span>: <span class="hljs-built_in">var</span>(--border-radius)
+}
+<span class="hljs-selector-tag">p</span> {
+  <span class="hljs-attribute">margin-top</span>: <span class="hljs-built_in">var</span>(--margin);
+  <span class="hljs-attribute">color</span>: <span class="hljs-built_in">var</span>(--standard-<span class="hljs-number">50</span>);
+}
+hr {
+  <span class="hljs-attribute">margin</span>: <span class="hljs-built_in">var</span>(--vertically-spaced);
+  <span class="hljs-attribute">border-bottom</span>: <span class="hljs-built_in">var</span>(--border);
+  <span class="hljs-attribute">outline</span>: none;
+  <span class="hljs-attribute">background</span>: none;
+}
+</code></pre>
+        <pre id="src-event-data-3" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">circle-expand</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">circle-expand</span>&gt;</span>
+</code></pre>
+      </details>
+      <aside class="notes">
+        <h2>New patterns</h2>
+        <p><code>state[dimension][helper](settings.delta)</code> bracket-notation access, single-handler dispatch via data attributes.</p>
+        <h2>What to notice</h2>
+        <ul>
+          <li><code>state[dimension][helper](settings.delta)</code> resolves to e.g. <code>state.width.increment(50)</code> when the button is <code>&lt;ui-button data-dimension=&quot;width&quot; data-helper=&quot;increment&quot;&gt;</code>. The handler stays generic; the buttons encode their intent in HTML.</li>
+          <li>The pattern only works because signal mutation helpers (<code>.increment</code>, <code>.decrement</code>, …) are named methods on the signal itself. <code>state[dim][helper](delta)</code> reads a string from <code>data-helper</code> and dispatches to a real method — there is no get-mutate-set round-trip to abstract away.</li>
+        </ul>
+        <nav class="walk">
+          <a href="../solar-system-3d/page.html">← Driving a render loop with a tick signal</a>
+          <a href="../setting-types/page.html">Setting types and coercion →</a>
+        </nav>
+      </aside>
+    </div>
+    <script>
+      document.querySelectorAll('details.source').forEach(function (root) {
+        root.addEventListener('click', function (e) {
+          var btn = e.target.closest('button[data-target]');
+          if (!btn) return;
+          root.querySelectorAll('button[data-target]').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          root.querySelectorAll('pre[id^="src-"]').forEach(function (p) { p.toggleAttribute('hidden', p.id !== btn.dataset.target); });
+        });
+      });
+    </script>
+  </body>
+</html>

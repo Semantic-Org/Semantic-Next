@@ -28,11 +28,16 @@ import {
   COMMENT_MARKER,
   DATA_SUI_BIND,
   formatBlockClose,
+  isInsideRawText,
   MAIN_BRANCH_INDEX,
+  RAW_TEXT_CLOSE,
+  RAW_TEXT_MARKER,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
+import { encodeItemKey, getEachData, getItemID } from '../../shared/each.js';
+import { SUI_ITEM_MARKER } from './blocks/each.js';
+import { renderASTToString, stringifyAttrValue } from './commit-hooks.js';
 import { childContext } from './define-block.js';
-import { encodeItemKey, getEachData, getItemID, SUI_ITEM_MARKER } from './shared/each.js';
 
 const REMOVE_ATTR = '__SUI_REMOVE__';
 const REMOVE_ATTR_REGEX = /\s+[\w.@-]+\s*=\s*["']?__SUI_REMOVE__["']?/g;
@@ -197,6 +202,8 @@ export class ServerRenderer {
     return html.replace(REMOVE_ATTR_REGEX, '');
   }
 
+  destroy() {}
+
   setData(newData) {
     this.updateData(newData, { preserveExistingData: false });
     this.evaluator.setData(this.data);
@@ -214,7 +221,7 @@ export class ServerRenderer {
   }
 
   /*******************************
-      AST → HTML String
+         AST → HTML String
   *******************************/
 
   renderNodes(ast, data, scope) {
@@ -226,17 +233,41 @@ export class ServerRenderer {
         inQuote: null,
         currentAttrName: null,
         tagBindings: {},
+        insideRawText: false,
       };
     }
 
     let html = '';
 
+    // when inside raw-text, marker must land right after the close tag (not at chunk end)
+    // since subsequent siblings often share the same html node
+    const appendHtml = (chunk) => {
+      const stamped = scanHtmlChunk(chunk, scope);
+      if (scope.insideRawText) {
+        const closeMatch = stamped.match(RAW_TEXT_CLOSE);
+        if (closeMatch) {
+          const splitAt = closeMatch.index + closeMatch[0].length;
+          const id = scope.entryId++;
+          scope.insideRawText = false;
+          const after = stamped.slice(splitAt);
+          // the remainder may itself open another raw-text element
+          if (after && isInsideRawText(scope.htmlBuffer)) {
+            scope.insideRawText = true;
+          }
+          return stamped.slice(0, splitAt) + `<!--${RAW_TEXT_MARKER}${id}-->` + after;
+        }
+        return stamped;
+      }
+      if (isInsideRawText(scope.htmlBuffer)) {
+        scope.insideRawText = true;
+      }
+      return stamped;
+    };
+
     for (const node of ast) {
       switch (node.type) {
         case 'html':
-          // scanHtmlChunk tracks tag boundaries so dynamic attribute bindings
-          // get flushed into `data-sui-bind` just before the closing `>`.
-          html += scanHtmlChunk(node.html, scope);
+          html += appendHtml(node.html);
           break;
 
         case 'expression':
@@ -282,13 +313,21 @@ export class ServerRenderer {
   }
 
   /*******************************
-      Expression Rendering
+        Expression Rendering
   *******************************/
 
   renderExpression(node, data, scope) {
-    const id = scope.entryId++;
     const classification = analyzePosition(scope.htmlBuffer);
     const value = this.evaluator.lookupExpressionValue(node.value, data);
+
+    // inside raw-text, expressions emit literal text since comment markers would corrupt CSS/JS or be visible
+    if (scope.insideRawText && !classification.insideTag) {
+      return node.unsafeHTML
+        ? String(value ?? '')
+        : escapeHTML(String(value ?? ''));
+    }
+
+    const id = scope.entryId++;
 
     if (classification.insideTag) {
       // Record this entry as the first binding for its attribute, so the
@@ -324,10 +363,7 @@ export class ServerRenderer {
         return REMOVE_ATTR;
       }
 
-      let strValue = (isArray(value) || isPlainObject(value))
-        ? JSON.stringify(value)
-        : String(value ?? '');
-      strValue = strValue.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+      let strValue = stringifyAttrValue(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
       // Check if we're inside a quoted attribute value by counting quotes
       // in the current tag fragment. Odd count = inside quotes, even = unquoted.
@@ -359,18 +395,67 @@ export class ServerRenderer {
   }
 
   /*******************************
-      Block Directives
+         Block Directives
   *******************************/
+
+  // Adapter so renderASTToString (shared with client) can call into the
+  // server's ExpressionEvaluator. The walker only uses lookupExpression.
+  stringRenderer() {
+    return {
+      lookupExpression: (expr, d) => this.evaluator.lookupExpressionValue(expr, d),
+    };
+  }
+
+  // Emit a block's evaluated string value inline as an attribute value.
+  // Mirrors renderExpression's insideTag branch: registers the entry in
+  // scope.tagBindings so data-sui-bind gets stamped on the element, then
+  // escapes and emits the value with the quote-aware wrapping.
+  emitAttributeBlock(id, value, scope) {
+    const classification = analyzePosition(scope.htmlBuffer);
+    if (classification.type === 'property' || classification.type === 'event') {
+      // Blocks produce strings; property/event positions need raw
+      // values / function references. Refuse with the same REMOVE_ATTR
+      // sentinel renderExpression uses for these positions so the
+      // attribute disappears from the output rather than emitting a
+      // string into a slot that expects something else.
+      scope.htmlBuffer += REMOVE_ATTR;
+      return REMOVE_ATTR;
+    }
+    const resolvedAttr = classification.attribute || scope.currentAttrName || '';
+    if (resolvedAttr && scope.tagBindings && !(resolvedAttr in scope.tagBindings)) {
+      scope.tagBindings[resolvedAttr] = id;
+    }
+
+    const strValue = String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;');
+
+    const tagStart = scope.htmlBuffer.lastIndexOf('<');
+    const tagFragment = scope.htmlBuffer.slice(tagStart);
+    const doubleQuotes = (tagFragment.match(/"/g) || []).length;
+    const insideQuotes = doubleQuotes % 2 === 1;
+
+    if (!insideQuotes) {
+      scope.htmlBuffer += `"${strValue}"`;
+      return `"${strValue}"`;
+    }
+    scope.htmlBuffer += strValue;
+    return strValue;
+  }
 
   renderConditional(node, data, scope) {
     const id = scope.entryId++;
-    let html = `<!--${BLOCK_MARKER}${id}-->`;
-    let branchIndex = -1;
+    const classification = analyzePosition(scope.htmlBuffer);
 
+    // Pick the matched branch's content AST. matchIndex tracking is only
+    // useful in text position (server stamps it on the close marker for
+    // client hydration); attribute position emits inline, no markers.
+    let matchedAST = null;
+    let branchIndex = -1;
     const condition = this.evaluator.lookupExpressionValue(node.condition, data);
     if (condition && node.content) {
       branchIndex = MAIN_BRANCH_INDEX;
-      html += this.renderNodes(node.content, data);
+      matchedAST = node.content;
     }
     else if (node.branches) {
       for (let i = 0; i < node.branches.length; i++) {
@@ -378,24 +463,41 @@ export class ServerRenderer {
         if (branch.type === 'elseif') {
           if (this.evaluator.lookupExpressionValue(branch.condition, data)) {
             branchIndex = i;
-            html += this.renderNodes(branch.content, data);
+            matchedAST = branch.content;
             break;
           }
         }
         else if (branch.type === 'else') {
           branchIndex = i;
-          html += this.renderNodes(branch.content, data);
+          matchedAST = branch.content;
           break;
         }
       }
     }
 
+    if (classification.insideTag) {
+      const inner = matchedAST
+        ? renderASTToString(matchedAST, data, this.stringRenderer())
+        : '';
+      return this.emitAttributeBlock(id, inner, scope);
+    }
+
+    let html = `<!--${BLOCK_MARKER}${id}-->`;
+    if (matchedAST) {
+      html += this.renderNodes(matchedAST, data);
+    }
     html += `<!--${formatBlockClose(id, { branchIndex })}-->`;
     return html;
   }
 
   renderEach(node, data, scope) {
     const id = scope.entryId++;
+    if (analyzePosition(scope.htmlBuffer).insideTag) {
+      throw new Error(
+        '{#each} cannot be rendered inside an attribute value. '
+          + 'Use a method or computed signal that returns a string.',
+      );
+    }
     let html = `<!--${BLOCK_MARKER}${id}-->`;
 
     const rawItems = this.evaluator.lookupExpressionValue(node.over, data) || [];
@@ -422,6 +524,12 @@ export class ServerRenderer {
 
   renderAsync(node, data, scope) {
     const id = scope.entryId++;
+    if (analyzePosition(scope.htmlBuffer).insideTag) {
+      throw new Error(
+        '{#async} cannot be rendered inside an attribute value. '
+          + 'Use a method or computed signal that returns a string.',
+      );
+    }
     let html = `<!--${BLOCK_MARKER}${id}-->`;
 
     // SSR: render loading content only, never await
@@ -435,21 +543,34 @@ export class ServerRenderer {
 
   renderRerender(node, data, scope) {
     const id = scope.entryId++;
-    let html = `<!--${BLOCK_MARKER}${id}-->`;
+    const classification = analyzePosition(scope.htmlBuffer);
 
+    if (classification.insideTag) {
+      const inner = node.content
+        ? renderASTToString(node.content, data, this.stringRenderer())
+        : '';
+      return this.emitAttributeBlock(id, inner, scope);
+    }
+
+    let html = `<!--${BLOCK_MARKER}${id}-->`;
     if (node.content) {
       html += this.renderNodes(node.content, data);
     }
-
     html += `<!--${formatBlockClose(id)}-->`;
     return html;
   }
 
   /*******************************
-      Template / Snippet
+        Template / Snippet
   *******************************/
 
   renderTemplate(node, data, scope) {
+    if (analyzePosition(scope.htmlBuffer).insideTag) {
+      throw new Error(
+        '{>template} cannot be rendered inside an attribute value. '
+          + 'Use a method or computed signal that returns a string.',
+      );
+    }
     const id = scope.entryId++;
     let html = `<!--${BLOCK_MARKER}${id}-->`;
 

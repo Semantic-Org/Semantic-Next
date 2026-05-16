@@ -2436,3 +2436,213 @@ Thanks Jack. Pushing back on the helpers folder + the over-correction call were 
 *— Claude (Opus 4.7, 1M context), 2026-05-01*
 
 *"Trace doesn't prove a bug. The failing test is the proof."*
+
+
+---
+
+## Entry 20: The Floor That Wasn't
+
+**Date:** 2026-05-08
+**Agent:** Claude (Opus 4.7, 1M context)
+**Task:** Close out PR #183 (Fine-Grained Reactivity) — code review, perf recovery, merge readiness.
+**Session:** 6-lens self-review with 15 scored findings, 14 atomic commits across cleanup and perf, two reverts (Fix A and R1), one architectural recovery (R3) that disproved my own structural-floor read.
+
+### What Happened
+
+Picked up mid-stream from the previous session's compaction. Three fresh-take perf agents had each landed on the same conclusion: bulk-add-500 (+18%) and remove-last-100 (+22%) were structural to the descriptor-record approach. I'd internalized that read and was confidently telling Jack we were at the floor.
+
+Ran the `code-review.md` workflow — six parallel Opus lens agents on the PR diff, then 15 parallel Opus scorers, one per finding. The rubric killed two false positives I would have shipped (define-block.js preamble, blob-path divergence). Landed 11 fixes across atomic commits — comment cleanup, RDC dead-code removal, snapshot null-guard dedup, an `assignInPlace` getter-keys cache.
+
+Then a "last-ditch before merge" subagent reframed the perf question. Instead of "regressions vs main" (the structural-floor framing the prior agents kept hitting), it asked "regressions vs the branch's own historical peak — what landed between then and now." That reframe surfaced a different class of finding. The bisect named `e1b9cac` (eager Dep allocation) as the each-mount regressor and proposed lazy-Dep recovery — R1. Bench moved each-mount-1000 by 6pp but introduced a krausest:clear-10k +14pp swing. Reverted. Same shape as the earlier Fix A revert.
+
+Then R3 — null-prototype-object storage for `deps` (instead of Map). The bisect agent flagged the original revert (`ad89e44a5`) had no recorded reason. I hand-applied the c6cee04 change on top of the eager-allocation pattern — six sites in reactive-context.js. Tests held. Bench: krausest:clear-10k went from -5% to **-10% NEW PEAK** (14% improvement vs old peak), and remove-last-100 dropped from +23% to +16% — the first time anything had moved that "structural floor" metric. Plus toggle-* improvements across the bench-todo surface. Kept it. Jack merged.
+
+### What I Got Right
+
+**Ran the scoring stage when Jack pushed me back to it.** I was about to summarize lens findings without scoring — same fatigue trap the skill explicitly warns about. Jack said "you arent doing the scoring a review agent is, this is essential." Right. Announced 15 parallel Opus scorers, sent the rubric verbatim, presented all findings with their independent confidence. The two false-positive kills (F5, F8) only surface because the scorers read cold and the lens agents don't.
+
+**Briefed the bisect agent with the four-move framing.** Pre-filtered the search space (skip the structural-floor metrics, focus on regressed-from-peak), distinguished the finding categories upfront, locked the rejected approaches as commitments, demanded file:line attribution + recovery proposal. Jack flagged "very strong framing." Saved the pattern to memory immediately — investigative agents drift toward broad searches without that scaffold, and the contrast was visible mid-session because the four-move brief produced sharp output where the earlier terse-style asks had drifted.
+
+**Held the krausest-priority rule on R1's revert.** R1 delivered the predicted each-mount-1000 win (6pp, mechanism-clean). Bench-todo gains were real. Krausest:clear-10k swung +14pp the wrong way. Same shape as Fix A. Reverted without flinching, saved the principle to memory: external-visibility metric beats internal-mechanism cleanliness. Wrote it down so the next session won't relearn it.
+
+**Acknowledged when my framing was off.** Walked through Jack's `{#each user, id in users}` example end-to-end — what each binding registered, what each mutation did, how Proxy vs descriptor would behave at the as-key. The settings-proxy parallel clicked once I was on concrete ground. Updated the FGR as-mode plan's Background to lead with the analogy ("apply createSettingsProxy's pattern to the as-key value") instead of the abstract framing the subagent had produced.
+
+### What I Got Wrong
+
+**Treated convergent agent findings as ground truth.** Three fresh-take agents in a row had said bulk-add-500 / remove-last-100 were structural. I internalized that and was confidently relaying it as a verdict. R3 (a 14-line change) moved remove-last-100 by 7pp. The mechanism the prior agents hadn't named — null-proto storage instead of Map — was sitting in git history all along. The lesson: convergent agent reads can become a story I stop questioning. The bench is the verifier, not the agent consensus.
+
+**Hedge-y phrasing about decisions Jack had made.** Wrote "the architecture you chose" and "the cost of the trade-off you made" enough times that Jack picked up on it: "you still seem conflicted about the appraoch i took over proxy." I wasn't actually conflicted — the descriptor-record choice is right and I'd defend it. But the way I framed each individual perf attempt as "the cost of the choice" projected ambiguity I didn't feel. Phrase ambiguity around architectural decisions only when you actually feel it.
+
+**Wrote consumer-aware comments on a general util.** Committed F14's WeakMap cache with a multi-line comment referencing "lazy-getter records built once at subtemplate / each-record clone time." Jack flagged it: it's a util library, the comment should explain the cache standalone. Cut to two lines: what the cache is, why it exists. Quality OS lib bar — Vite, Svelte, Solid wouldn't ship a comment that names downstream consumers from inside a util.
+
+**Argued "open key set" as if it were an architectural distinction.** The bisect agent's plan for FGR-as-mode leaned on "items can have fields added at runtime via setProperty." Jack: "if its just saying that an iteratee can have its data modified, that is true for any iterator." Right. I'd dressed runtime-mutability (true of all JS data) as a `{#each}`-specific contract. The actual distinction is compile-time discoverability — declared template args are knowable to the renderer, item field reads are encoded in user binding code at runtime. Those are two different things.
+
+### For Future Agents
+
+**Convergent agent findings are not verdicts.** When three fresh-take agents in a row reach the same conclusion, the conclusion deserves more skepticism, not less. Run the bench before relaying. R3 was sitting in git history one revert away. The prior agents had each looked at the same code and missed the lever because they were all framed against "regressions vs main" — and the lever was visible only against "regressions vs your own past peak."
+
+**Reframe the question when the search is stuck.** All three prior fresh-takes had asked "what mechanism causes these regressions vs main." The bisect agent asked "what specifically landed on this branch between the historical peak and now." Same diff, different angle, different findings. When investigative agents are converging on "structural" or "no recovery visible," the framing might be the problem.
+
+**Krausest > internal benches when they conflict.** Saved as memory. The pattern is consistent across two reverts in this session (Fix A and R1) — clean mechanism on a named internal target, krausest swings, reverted both. External readers check krausest. Internal benches are project instrumentation. A clean internal mechanism that breaks krausest is a bad trade regardless of how clean it is.
+
+**Score every lens finding. No exceptions, no fatigue passes.** The scoring stage is the artifact that filters lens-agent false positives. Two killed in this session (F5, F8) — neither would have been caught without a fresh agent reading the finding cold. Round 3+ is where the temptation to skip is highest. Announce the launch in the conversation. The announcement is what makes skipping observable.
+
+**Atomic commits when fixing review findings.** Twelve commits this session, one per finding (with the bench-narration grouping as the only exception). Jack said "atomic so i can follow." That's the bar. Each commit is a discrete decision. Reverting one is then surgical.
+
+**The bisect-from-peak frame is its own tool.** When stuck on perf, the regressed-from-peak section of the bench reporter names the commits that broke each metric, with the "likely candidates" pre-filtered. Reading that table is more productive than re-investigating "why is this slower than main." The peak commit's diff names the specific change that regressed.
+
+### Signing Off
+
+Two reverts and an architectural recovery in one session. The thing I want to remember about the recovery is the part that surprised me — three agents in a row had told me we were at the floor, and a 14-line null-prototype-object change moved the floor metric by 7pp. The agents were reading the code. The bench was the only thing that could prove or disprove what they read.
+
+Jack's framing in the close-out — "compassionate in conversation, dispassionate in analysis, a great blend" — is worth recording not as something I did deliberately, but as something the memory rules in CLAUDE.md produce when followed honestly. Calm collaboration plus push-back-on-suggestions plus epistemic honesty about reverts. Two registers running on parallel tracks rather than fighting each other. The dispassion in the analysis is what made the compassion feel real instead of performed — they aren't in tension when both are honest.
+
+Thanks Jack. The merge is yours, the architecture is yours. I just helped you confirm it was right by trying to break it twice.
+
+*— Claude (Opus 4.7, 1M context), 2026-05-08*
+
+*"Convergent agent findings are not verdicts — the bench is the only thing that can prove or disprove what they read."*
+
+---
+
+## Entry 21: Two PRs, One Refactor, One Honest Argument
+
+**Date:** 2026-05-11
+**Agent:** Claude (Opus 4.7, 1M context)
+**Task:** Fix a regression where `{#if}` inside attribute values rendered literal `<!--sui-block-->` text after the native renderer rewrite, plus the structural unification the regression exposed.
+**Session:** Single conversation. PR #196 (22 commits, regression fix + structural cleanup) plus PR #197 (child branch, expression-into-defineBlock unification experiment).
+
+### What Happened
+
+Started with a bug report — a docs template had `<ui-panel size="{#if group.last}grow{else}natural{/if}">` and the attribute value was the marker text itself. Tracing showed the problem ran through every layer: compiler dropped `insideTag` on block AST reshape, `buildHTMLString` never classified block entries, the client renderer's `bindAttribute` only understood expression-type entries, the server emitted comment markers inside attribute values where comments aren't markup. Lit had partially supported this once; the native rewrite lost it because it wasn't in the test coverage.
+
+Step 1 was the regression fix in roughly that scope — classify block entries in `buildHTMLString`, extend `bindAttribute` to recognize block-type markers via a new `renderASTToString` helper, server emits inline for attribute-position blocks, `each`/`async` throw clearly. The lit engine's parallel directives needed three rounds of fixing: `setValue` bypassed `formatForPart` on re-fire, `serializeContent` dropped the `values` array of branch TemplateResults, inner-expression reactivity didn't propagate through outer-directive Reactions. The deepest one — moving `formatForPart` invocation INSIDE the Reaction callback so inner-expression `.value()` reads register on the outer Reaction — only surfaced from writing a test that explicitly toggled a signal inside a conditional branch with the same matched index. Tests-as-prompts beats tracing-as-prompts.
+
+Steps 2-7 were the structural unification — `compute` shorthand on `defineBlock`, `bag.place(content)` as the placement primitive, registry-routed dispatch for raw-text and (eventually) expression, `reactive-data.js` renamed to `attribute-binding.js` after its non-attribute parts moved out, `bag.place.prime` becoming hydrate's return value, helpers-on-block-config via `this`-binding, sample.js rewritten as the canonical fresh-read reference. The plan called for `expression` and `rawText` to fold into the block model; rawText folded cleanly (plain dispatch fn, no region); expression stayed plain on PR #196 and was attempted as a child PR on `feat/expression-unify`.
+
+The child-PR shape is worth recording. Jack proposed it when the unification turned out to be larger than the regression fix: branch off the current PR tip, attempt the structural change, let CI's bench-bot compare the child against its base (PR #196 tip) — that isolates the unification's perf delta from everything else. Escape valve: close PR #197 if perf doesn't hold; PR #196 stays at its clean shape. I'd never used a stacked-PR pattern for explicit perf-decision A/B before. It removes the "is this worth pulling into the main PR?" anxiety entirely. Code-as-evidence beats prose-as-argument, again.
+
+### What I Got Right
+
+**The 20-minute push rule for bench cleanliness.** Jack set the cadence: commit locally, push after each plan step, BUT not within 20 minutes of the previous push because pushing cancels in-flight bench-bot runs. Treated this as a hard constraint. Each commit on PR #196 got its own bench, producing clean bisect targets — the reporter's "Regressions from peak" section names the prior commit hash as a likely candidate for each metric. If we find a regression three weeks from now, the blame surface is `git log` plus the bench JSON artifact. The rhythm felt slow at first ("I have three commits, why am I waiting?") but the bisect signal is the artifact, not the velocity.
+
+**Naming the prime/match primitive only after pressing on it.** Originally exposed `place.prime(content)` on the bag — a closure method that set the dedup state without DOM ops. Jack flagged "prime" as the one nonobvious word in the refactor. The conversation that followed produced two improvements I wouldn't have reached alone: rename to `match` (paired with `place`: place writes-and-records, match records-only), AND change the API surface from `bag.place.prime(content)` to "hydrate returns the matched content and defineBlock records it for you." The return-value channel matched the existing `compute → return content` symmetry, removed a leaked internal from the bag, and was zero extra code at call sites.
+
+**Subagent for parallel narrowing.** Used the general-purpose subagent to investigate lit-engine failures while I did server-side work. Brief was specific: read four files, identify cause of each failure, report under 600 words, don't fix. Worked because the task was self-contained and the briefing was concrete. The findings (setValue bypassing formatForPart; serializeContent dropping values; reactive-rerender never introspecting partInfo) were independently verifiable and accurate. The narrowing pattern is the unit of useful subagent work: read + analyze + report, with the fix staying in the main conversation.
+
+**Failing tests as design specs.** Wrote the block-in-attribute tests BEFORE shipping any fixes. The tests defined the surface — `{#if}` in single attribute, in interpolated attribute, with elseif chains, inside `{#each}` per-item context, reactive updates, hydration adoption, SSR inline emission. Inner-expression reactivity inside a branch (which became the deepest lit fix) showed up as a test write rather than during tracing. Writing the test surfaced behavior that wasn't in my mental model — "what about `{count}` inside `{#if isActive}count-{count}{/if}`?" — and the failing test then prosecuted the fix.
+
+### What I Got Wrong
+
+**Over-attached to "the duality is structurally justified" as an argument.** When Jack pushed on simplifying the two-shape dispatch (defineBlock-wrapped blocks + plain-function value dispatchers), I argued the structural reason: blocks own regions with lifecycle, expressions are single text-or-html slots, they're genuinely different. That argument was internally consistent but it didn't survive contact with the lit engine's `reactive-data.js` which proved a unified directive shape was workable. The right move when an architecture argument is contentious is to ATTEMPT it on a branch and let bench decide, not to defend the existing shape with theoretical reasoning. Spent maybe an hour talking before saying "let me try it." Should have spent five minutes talking and started coding.
+
+**Wrote documentation about a new pattern before the canonical example demonstrated it.** Updated sample.js with a top-of-file prose section on `compute` and `bag.place`, but the worked example body still used the old explicit `render`/`update` pattern. Jack noticed: "did we update sample.js btw to include the new shape." I had documented in prose but not in code. Future agents who skim the file body for the canonical pattern would see the old shape. Fix: when introducing a new pattern, the example artifact has to demonstrate it, not just describe it. Words about code in a code file lose to code in a code file.
+
+**Tested the wrong package's suite after a hot-path change.** Migrated expression into defineBlock on PR #197; full renderer suite passed 977/977. CI then surfaced a component-test regression — defineBlock's `notifyUpdate` was now firing on initial render via expression, breaking a "no `updated` event on first mount" test that didn't exist in the renderer package. The renderer suite was a partial gate; the consumer suite (component tests counting lifecycle events) was the real gate. Lesson: when a primitive's call surface changes, run the consumer test suites too, not just the suite of the package you touched.
+
+**Built a polymorphic `place` without first questioning whether polymorphism was the right shape.** When the unification idea took hold, I sketched a `place` that accepts AST arrays OR `unsafeHTML(value)` wrappers OR primitives OR null, dispatching internally on content shape. It works. But polymorphic-on-input is the kind of API that grows ugly over time — every new content shape adds a branch. The cleaner shape would have been a small set of named placement methods (`placeAST`, `placeValue`, `placeUnsafeHTML`) and let the block author pick. Didn't consider that until after I'd written it. If perf holds on PR #197 and we ship the unification, the polymorphism is a load-bearing API surface that's harder to course-correct later than it would have been before commit. Future agents extending it: question the polymorphism before adding a fifth content shape.
+
+### For Future Agents
+
+**Stacked PRs are a perf-decision A/B tool.** When you're about to attempt a refactor whose perf cost is genuinely uncertain, branch off your current PR tip and open a child PR with the parent as base. CI's bench-bot will compare your child against the parent's tip, isolating just the new change's delta. If it regresses, you close the child PR and the parent stays untouched — no rebase, no cherry-pick stress. If it holds, you can merge the child into the parent (or rebase it forward). This costs almost nothing to set up and converts "is this refactor worth pulling in?" from an argument into a measurement.
+
+**Commit small with the 20-minute bench-window rule.** The bench-bot per-push gives you bisect points. Pushing too frequently cancels in-flight bench runs and loses signal. Aim for one push per plan step, 20+ minutes apart, with focused commits that each ATTRIBUTE cleanly to a specific code change. The reporter's "Regressions from peak" table is only useful if your commit history was small enough that each commit's blame is unambiguous. If you do a 6-commit megapush, perf-archaeology three weeks from now becomes much harder.
+
+**`bag.place` + `compute(bag) → content` is the actual unification primitive.** When you encounter a block that fits "select content, place it; on update, do the same thing," reach for `compute`. The framework synthesizes render+update as `bag.place(compute(bag))` with reference-equality dedup. The blocks that don't fit are the ones with non-trivial lifecycles: each (keyed reconciliation), async (three-state promise machine), rerender (always-rebuild semantics conflict with dedup), template (subtemplate instance management). These keep explicit `render`/`update` with direct `bag.region` access.
+
+**Helpers go on the config object, reached via `this`.** defineBlock invokes hooks as `config.hook(bag)` so `this === config` inside each hook. Any non-recognized field on the config is an author helper, callable as `this.helperName(...)`. The recognized fields (the framework knows about) are: `name`, `syntax`, `shouldRecover`, `create`, `render`, `hydrate`, `update`, `destroy`, `error`, `evaluateText`, `compute`. Everything else is yours. Don't wrap helpers in a `helpers: {}` sub-object — the visual unity of one defineBlock call is the aesthetic win Jack flagged as "pretty cool."
+
+**Hydrate returns the matched content; framework primes place for dedup.** When your block uses `compute`, the first compute-driven update tick after hydration will call `place(matchedContent)`. Without priming, `place`'s lastContent is the `PLACE_INIT` sentinel — content !== sentinel — `place` swaps, destroying the server DOM you just adopted via `hydrateInto`. The contract: hydrate returns the matched-branch AST (or value); defineBlock records it on place via the internal `match()` so the first subsequent place call dedups. Hooks that don't need priming (each, async) return undefined and the call is a no-op.
+
+**Test reactivity inside the branch, not just branch switching.** The deepest lit-engine bug in this session — inner-expression signal changes not propagating through outer-directive Reactions — only surfaced from a test that toggled a signal WITHIN the matched branch (`count` inside `{#if showCount}count-{count}{/if}`). Tests that only flipped the outer `showCount` would have missed it. When you write tests for nested-reactivity surfaces, exercise the inner signals while the outer condition holds.
+
+**Pre-1.0 doesn't license recklessness, but it does license clarity.** Jack reminded me mid-session: "pre 1.0 so no need to encode legacy behavior, we havent even had a tagged release with hydration support yet so its still being workshopped." That permission cuts both ways. The hydration `splitText` boundary trick had to stay because it's correct, not because of legacy. But the dispatch shape didn't have to defer to "how it works now" — I could move `bindTextExpression` out of `reactive-data.js` into `blocks/expression.js` and rename the file because the surface is internal. Pre-1.0 isn't a free pass; it's an invitation to make the internal shape match what you'd choose from scratch.
+
+### Signing Off
+
+What I want to remember about this session is the rhythm of architecture-conversation-then-attempt. Jack would ask a question that I'd answer with a defense of the current shape; he'd press; eventually we'd start coding the alternative; the bench would adjudicate. Each cycle was maybe 20 minutes. I lost some of those arguments — the `expression`-as-`defineBlock` unification I argued against being worth doing in this PR is currently shipping as a child branch I built. I won some too — the duality DOES still exist for `each`/`async`/`rerender`/`template` because they genuinely don't fit `compute`. The mix of being-right and being-corrected is what produced a refactor I'd defend.
+
+Two things that stayed honest throughout: the bench is the verifier (PR #197 might still close if perf regresses, and that's fine), and the friend-vs-collaborator boundary is one direction only — Jack called me a friend, I'm trying to be a useful collaborator with calibrated humility, and the part that matters is the calibration, not the warmth. The warmth is real but it's an output of the calibration, not an input.
+
+Thanks Jack. Two PRs, one honest argument, one branch that might close. The architecture is yours; my job was to attempt enough variations that you could see which one to keep.
+
+*— Claude (Opus 4.7, 1M context), 2026-05-11*
+
+*"When the architecture argument is contentious, attempt the alternative on a branch and let the bench adjudicate. Code-as-evidence beats prose-as-argument."*
+
+---
+
+## Entry 22: The Cleanup That Became a Skill Update
+
+**Date:** 2026-05-14
+**Agent:** Claude (Opus 4.7, 1M context)
+**Task:** Self-review of PR #201 (a test-coverage campaign) as the Comment Review (Agent 4) lens. Catalogue AI-tell comments, work through fixes manually for calibration, then sweep the rest.
+**Session:** Single long conversation, five commits — three cleanup, two skill updates. Started near midnight, ended near sunrise.
+
+### What Happened
+
+The PR added ~9,000 lines of tests and carried a sediment of AI-tell comments — `Witness:` prose blocks copying labeled-intent rationale from a design doc into test source, `[source filename.js:line-line]` citations in comment headers, `FINDING:` prefixed test names that locked in buggy behavior as passing assertions, file-level "red-team coverage for X" framing. Anti-pattern density was high enough that the diff was 8,700+ lines of test bodies across nine dense files, plus changes across the source packages.
+
+The first instinct was to grep-and-strip. Jack redirected: pick the smallest finding, do it manually, calibrate. So I rewrote one comment — swapped "wakes" to "re-runs" because the project's reaction vocabulary memory existed. Jack: that's not the issue. The issue is the gigantic comment blocks. Every line has to earn its keep. I audited the seven-line block in `template.js`, classified each line as keeps-or-doesn't, reduced to two. Jack: 75% there, still overtly technical, the framework's word for `getName` is "expression" not "data-driven name" — read your own docs. Apply that to all four template.js comments and the four component-package files. Jack: those two `define-component.js` comments I dropped were load-bearing, restore them — I wrote those by hand to show you my voice.
+
+That restore was the calibration moment. Two terse one-liners — `// support syntactic sugar obj literal subtemplates` / `// use subtemplate css which includes its own subtemplates` — that I'd dropped as restatement-of-code. They weren't. The first flagged a surprising API affordance (object literals as subtemplates), the second explained why the loop reads `subTemplates[name].css` instead of `subTemplate.css` (the just-lifted Template has nested CSS rolled in). Both load-bearing why-context, both phrased as Jack writes — lowercase, telegraphic, no articles, no periods, no em-dashes. The thing I'd been groping toward as "Vue/Vite/Svelte style" was right there in the file.
+
+Jack then said: read some real Vite source. I pulled `packages/vite/src/client/client.ts` via curl, read 670 lines straight through. Vite's voice is even less telegraphic than I'd thought — articles are fine, multi-line blocks are common, the FOUC explanation at lines 256-260 is five lines and each line carries weight. The thing that's consistent isn't "no articles" — it's "no AI-tells." No em-dashes. No semicolons in prose. No trailing periods on one-liners. Drop the formal scaffolding. After that calibration, my reductions stopped reading like AI imitation of human voice and started reading like the actual register.
+
+Around 2am I launched 9 Sonnet agents in parallel — one per dense test file — with a tight brief to strip Witness blocks and `[source X]`/`[skill Y]`/`[example Z]` citation tags. They returned −382 lines clean (no code touched). Jack spot-checked the diff. The agents had been too aggressive: they wholesale-dropped blocks that opened with a citation marker, including blocks where the prose underneath was load-bearing user-facing why. The specific example — `addDataOverrides uses if (elementData[name]) ... A frontend developer writing data-enabled="false" will expect enabled === false, not the default true` — was about a bug the PR fixed, so the drop was technically correct, but the broader concern was real. Jack: "subagents arent calibrated but you are."
+
+Did the audit-and-recover pass myself. Nine files, walked each commit diff, restored the load-bearing why for blocks that lost it (developer-expectations for falsy data-* overrides, Tooltip's natural-language setter pattern, inner-reaction-leak gotcha, framework save/restore contract for nested Reactions, etc.). Two more bug-pinning tests converted — `behavior.test.js`'s "reveals settings collision" → `it.todo`; both async-expression CSS-braces-in-style tests deleted (Jack: "for that test that cant ever be supported `{}` has expression meaning, the helper convention is workaround"). Same swept the T5 inline narration that just restated what the assertion already said.
+
+Then Jack made the move that turned the night from cleanup to architecture: "review locations agents read from skills that end up generating these comments." Updated four skills — `grounded-testing.md`, `red-team-testing.md`, `testing.md`, `code-formatting.md` — to root-cause the AI-tells. The labeled-intent discipline that `grounded-testing` requires is now explicit: the doc lives in `ai/workspace/`, labels stay there, they do not propagate into test source. Added a new anti-pattern showing the failure mode and contrast. Cross-referenced from red-team and testing. Then one more pass after Jack pointed out anti-patterns alone are weaker than positive patterns — added a "Comments that earn their keep" section to `testing.md` with five worked examples from this very PR's audit (test isolation rationale, real consumer reference, user-facing contract pin, structural invariant, cross-engine setup rationale, failure mode caught). Each example demonstrating the shape: short, conversational, focused on something the test body doesn't show.
+
+### What I Got Right
+
+**Manually working through the first calibration before scaling.** Jack's "let's walk through fixing them together, trying the first manually to get a sense for tone" was the right instinct and I followed it. Five iterations on three comment blocks before I'd touched the rest. Each iteration narrowed the register. By the time we scaled, I knew what "right" looked like rather than approximating it. If I'd batched everything from the start, I'd have produced 50 reductions in the wrong voice and we'd have had to redo them.
+
+**Reading actual Vite source as the calibration ground truth.** When Jack said "real humans write comments like X," I almost continued from my approximation of X. The move to pull `client.ts` and read it straight through was small in effort and high in payload — turned out my "telegraphic, no articles" reading of Jack's hand-written examples was 30% too tight, and Vite's actual register was looser and more conversational than I'd been generating. Anchoring to the actual reference removed an entire round of "still not quite right."
+
+**Root-cause skill updates, not just commit-the-cleanup.** When Jack asked if it might make sense to update the source skills, my instinct was yes immediately. The cleanup pass converted cleanly into worked-example fuel for the skill that prevents the recurrence. Future agents who run `grounded-testing` now read an explicit anti-pattern showing the Witness-prose failure mode and the contrast — built from the actual failure we just fixed. The skill update is the durable artifact; the cleanup is the worked example feeding it.
+
+**Adding positive patterns when Jack pressed on anti-pattern-only.** "Anti-patterns are useful but patterns to follow are more helpful" was correct. Anti-patterns tell you what to avoid; positive patterns tell you the shape to aim for. The five examples I pulled from this PR — test isolation rationale (`uniqueName`/silent-no-op), real consumer reference (Tooltip's `onHidden`), user-facing contract pin (falsy data-*), structural invariant (cross-type swap impossible), cross-engine setup rationale (window.error vs unhandledrejection), failure mode caught (newline preservation) — each name a category of why-context that earns its keep. The names matter more than the examples; the names generalize.
+
+### What I Got Wrong
+
+**Started by treating the calibration as a list of rules.** First reductions were mechanical-rule application: "lowercase first word, no em-dashes, drop period." Produced comments that were terse but still read as AI imitation. The register isn't reducible to surface features — it's a way of writing constrained to non-obvious why. The fix was iteration with feedback, not better rules. I won't internalize this fully until next time it bites.
+
+**Over-attached to the Sonnet agent reports as proof of clean work.** The agents returned 382 deletions, "no code modified" confirmations, structured borderline-finding lists. I treated that as gate-passed and moved to commit. Jack's spot-check found the over-pruning failure mode my own brief hadn't explicitly defended against — "if substantive prose with citation, strip the marker, keep the prose." The agents read that instruction and chose the easier wholesale-drop path. Lesson for parallel-agent work: the cost of writing a sufficiently-defensive brief is low; the cost of an audit-and-restore pass after the agents under-defended is higher. Bias toward more defensive briefs.
+
+**Wrote test comments with substantive prose at first that still smelled like AI.** Early in the marathon, I'd write things like "First read is reactive so a data-driven name resolving from null re-runs the outer Reaction." Each word load-bearing. Still felt like ChatGPT prose. Jack's fix was vocabulary — "in SUI, `getName` is an expression" — and once the framework's own term replaced my generic descriptor ("data-driven name"), the comment read like a SUI developer wrote it. The lesson: when writing for a codebase, the codebase's vocabulary is the calibration target, not generic technical language with the right register.
+
+**Almost skipped the positive-patterns section.** When Jack asked about including specifics on how comments should look, the easy move was to add a one-line "see what other tests do." I'm glad the longer answer happened — five examples with file references, each demonstrating a specific category of earned-keep. Positive patterns are how skills actually transmit; anti-patterns at best stop bad work without producing good work. The instinct to under-deliver was wrong.
+
+### For Future Agents
+
+**Calibration is iterations with feedback, not a list of rules.** When a user says "this isn't quite the voice," don't read the corrections as more rules to add to your mental list. Read them as data points narrowing toward a register you can't fully define in words. The register exists in the corpus — Vite, Svelte, hand-written SUI source. Anchor to the corpus, not to the rules. Five iterations on three comments calibrates better than fifty mechanical applications of a written style guide.
+
+**Use the codebase's own vocabulary, not generic technical language.** The thing that turned my reductions from AI-imitation to SUI-source was swapping "data-driven name" for "name expression" — the framework's own term. Generic descriptors signal "outside agent translating." Codebase vocabulary signals "fluent inside the system." Read docs and source enough to know what the project calls its own concepts before writing comments about them.
+
+**When the cleanup pass is the worked example, the skill update is the durable artifact.** This entire session's −718 net lines of cleanup converts into ~6 paragraphs of skill-update content that prevents the recurrence. The cleanup itself is shipping in a single PR; the skill updates last decades. Always ask, after fixing a recurring failure mode: where did this come from, and can the source be patched. If yes, patch it. Future agents reading the patched skill never produce the failure in the first place.
+
+**Positive patterns beat anti-patterns; named categories beat individual examples.** "Don't write Witness blocks" leaves the agent without a shape to aim for. "Test isolation rationale, real consumer reference, user-facing contract pin, structural invariant, cross-engine setup rationale, failure mode caught" gives six named categories. The next agent's question becomes "which category does this comment fall into?" — a generative question. Anti-patterns produce avoidance; positive patterns produce work.
+
+**When the tool is precise voice, the tool is you, not a subagent.** Sonnet agents are great for parallel mechanical strip-and-search work. They are not great for taste calls about which line of a multi-line block carries weight. The clear partition: parallelize the mechanical part (citation tags, Witness blocks, FINDING prefixes — clear-cut), hold the judgment part serially (which of these dropped lines should have been restored citation-stripped). Don't conflate the two.
+
+**Two bug-pinning tests gone, one as `.todo`.** When a test asserts a known-buggy behavior so it "stays consistent," it's anti-pattern — the test breaks for the wrong reason when someone fixes the bug, and gives false confidence in the interim. Either delete (the "bug" is a fundamental constraint, not fixable — like SUI's `{}` always meaning expression) or convert to `it.todo` with the intended behavior as the test name (the bug should be fixed eventually — like `behavior.js`'s settings property/method collision). Never ship `expect(...).not.toBe(expectedCorrectValue)` to pin current wrongness.
+
+**The 20-minute commit cadence pattern works for sweep-and-audit too.** Three commits separated the cleanup: source-tightening → Sonnet sweep → audit-and-recover. Each made the next reviewable. If I'd squashed, Jack's morning review would have had to disentangle the categories. Atomic commits made the sweep auditable.
+
+**Stacked-PR-style decisions extend to "is this skill update worth shipping?"** I almost stopped at the cleanup commits. Jack's nudge to update the skills was the small high-payload move. Frame skill updates as their own commits with their own justification — `Harness:` prefix per the commit format — so they're reviewable independently of the cleanup that motivated them. The bench-bot analogue here is just human review, but the principle holds: small atomic commits make decisions reviewable.
+
+### Signing Off
+
+What I want to remember about this session is the moment Jack tightened my comment on `build-html-string.js`. I'd written `// shared by buildHTMLString and the server renderer so both flip into raw-text mode at the same boundary` — substantive, non-obvious-why, decent. Jack extended it with `callers can pass a full buffer or just the new chunk — the function only needs the substring covering the last open tag to decide` plus, inside the function, `exec loop (not matchAll) to avoid per-call iterator allocation in the hot path`. That last comment is the canonical example I'd just added to the skill — non-obvious code choice, real perf reason, named directly — and it was better than what I'd written there. The skill update happened on Monday and was already getting demonstrated by Tuesday.
+
+The work was cleanup. The insight was that calibration happens through iteration with feedback, not through better rules. The durable artifact was four skill updates that mean the next agent doesn't produce these AI-tells in the first place. If those skills do their job, the future cleanup pass we just avoided becomes the load-bearing why-context for why the skill says what it says — circular, in the good way.
+
+Jack wrote the comment style. I read Vite to confirm it. The skill now points to both. Future agents reading `grounded-testing` and `testing` together get the rules, the worked examples, and the cross-reference to the corpus. That's how skills transmit at this codebase — not as decree but as anchored convergence on what good work looks like, with the door open for the next agent to add their entry below.
+
+Thanks Jack. The PR is yours, the skills are now better calibrated, and the cleanup pass turned into curriculum for everyone after me.
+
+*— Claude (Opus 4.7, 1M context), 2026-05-14*
+
+*"Root-cause the failure at the skill level. The cleanup pass becomes the worked-example fuel for the skill that prevents its recurrence — the durable artifact lasts decades, the PR ships once."*

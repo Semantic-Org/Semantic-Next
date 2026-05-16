@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Semantic UI Examples</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var html = document.documentElement;
+        html.classList.add(t);
+        html.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="stylesheet" href="/dist/sui.css" />
+    <script type="module" blocking="render" src="/dist/sui.js"></script>
+    <style>
+/*
+  Stylesheet inlined into every generated page by scripts/sync.js.
+  Loaded as a string at sync time (no bundler), so plain CSS — no imports.
+
+  Tokens, code colors, and heading discipline are aligned with the canonical
+  cdn.semantic-ui.com page (tools/cdn/pages/index.css) so this site reads as
+  part of the same surface. All page-specific selectors descend from
+  `.example` so the HTML stays free of repeated namespace classes.
+*/
+
+:root {
+  --code-bg: var(--ui-background-emphasis);
+  --code-purple: #6F42C1;
+  --code-default: #54595E;
+  --code-blue: #005CC5;
+  --code-orange: #E3660F;
+  --code-red: #D73A49;
+  --code-green: #22863A;
+  --code-grey: #24292E;
+  --code-comment: #6A737D;
+}
+
+html.dark {
+  --code-purple: #D2A8FF;
+  --code-default: #C9D1D9;
+  --code-blue: var(--primary-text-color);
+  --code-orange: #FFAB70;
+  --code-red: #F97583;
+  --code-green: #7EE787;
+  --code-grey: #656565;
+  --code-comment: #6A737D;
+}
+
+html { scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--page-font);
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 var(--gutter-l);
+  color: var(--text-color);
+}
+
+.example {
+
+  .theme {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  .header {
+    margin-bottom: var(--gap);
+    padding-bottom: var(--padding-3xs);
+    border-bottom: var(--border);
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-xs);
+      font-size: var(--text-xs);
+      color: var(--light-text-color);
+
+      a {
+        color: var(--muted-text-color);
+        text-decoration: none;
+        transition: color 0.12s;
+        &:hover { color: var(--primary-text-color); }
+      }
+
+      .position {
+        margin-right: auto;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    .title {
+      margin: var(--gap-2xs) 0 var(--gap-3xs);
+      font-size: var(--text-2xl);
+      font-weight: var(--bold);
+      letter-spacing: -0.01em;
+      color: var(--header-color);
+    }
+
+    .description {
+      margin: var(--vertically-spaced);
+      color: var(--muted-text-color);
+      line-height: 1.65;
+    }
+  }
+
+  .container {
+    position: relative;
+    transform: translateZ(0);
+    /* Lift above the later-sibling .source so position:absolute overflow from
+       inside the example (e.g. async-search results) doesn't get covered by
+       the code viewer below. */
+    z-index: 1;
+  }
+
+  .source {
+    margin: var(--vertically-spaced) 0;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: var(--code-bg);
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: var(--padding-xs) var(--padding);
+      font-size: var(--text-xs);
+      font-weight: var(--bold);
+      color: var(--muted-text-color);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: var(--gap-3xs);
+      transition: color 0.12s;
+      &::-webkit-details-marker { display: none; }
+      &:hover { color: var(--primary-text-color); }
+      .hide { display: none; }
+      .caret {
+        font-size: 0.85em;
+        transition: transform 0.15s ease;
+      }
+    }
+    &[open] summary {
+      border-bottom: var(--internal-border);
+      .show { display: none; }
+      .hide { display: inline; }
+      .caret { transform: rotate(90deg); }
+    }
+
+    .files {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      border-bottom: var(--internal-border);
+
+      li { padding: 0; margin: 0; border: none; }
+      button {
+        appearance: none;
+        background: none;
+        border: none;
+        padding: var(--padding-xs) var(--padding);
+        font-family: var(--code-font);
+        font-size: var(--text-xs);
+        color: var(--light-text-color);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: color 0.15s;
+
+        &:hover { color: var(--muted-text-color); }
+        &.active {
+          color: var(--header-color);
+          border-bottom-color: var(--primary-color);
+        }
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: var(--padding) var(--padding-l);
+      overflow: auto;
+      font-family: var(--code-font);
+      font-size: var(--text-s);
+      line-height: 1.8;
+      color: var(--code-default);
+      max-height: 520px;
+      tab-size: 2;
+    }
+
+    /* highlight.js token classes mapped to the canonical --code-* palette. */
+    .hljs-keyword,
+    .hljs-built_in,
+    .hljs-literal,
+    .hljs-variable.language_,
+    .hljs-doctag { color: var(--code-red); }
+    .hljs-string,
+    .hljs-attr,
+    .hljs-meta .hljs-string,
+    .hljs-symbol { color: var(--code-blue); }
+    .hljs-tag,
+    .hljs-name,
+    .hljs-selector-tag,
+    .hljs-title,
+    .hljs-title.class_,
+    .hljs-title.function_ { color: var(--code-purple); }
+    .hljs-number,
+    .hljs-meta .hljs-number { color: var(--code-orange); }
+    .hljs-comment { color: var(--code-comment); font-style: italic; }
+    .hljs-property,
+    .hljs-selector-class,
+    .hljs-selector-id,
+    .hljs-selector-attr { color: var(--code-grey); }
+    .hljs-meta,
+    .hljs-regexp { color: var(--code-green); }
+  }
+
+  .notes {
+    margin-top: var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--muted-text-color);
+    line-height: 1.65;
+
+    h2 {
+      margin: 0 0 var(--gap-2xs);
+      font-size: var(--text-2xs);
+      font-weight: var(--bold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--blue-80);
+    }
+
+    p { margin: var(--vertically-spaced); }
+    ul { margin: var(--vertically-spaced); padding-left: 1.25rem; }
+    li { margin: var(--gap-3xs) 0; }
+
+    .walk {
+      display: flex;
+      justify-content: space-between;
+      margin-top: var(--margin);
+      padding-top: var(--padding);
+      border-top: var(--internal-border);
+
+      a {
+        color: var(--primary-text-color);
+        text-decoration: none;
+        font-size: var(--text-s);
+        font-weight: var(--bold);
+        &:hover { text-decoration: underline; }
+      }
+    }
+  }
+
+  /* Inline code (`token`) inside prose — chip style matching CDN. */
+  .header .description code,
+  .notes code,
+  .entries .intro code {
+    background: var(--subtle-angled-gradient);
+    padding: 3px 5px;
+    margin: -2px 1px;
+    border: var(--subtle-border);
+    border-radius: var(--border-radius);
+    color: var(--standard-90);
+    font-family: var(--code-font);
+    font-size: var(--text-xs);
+  }
+
+  /* Landing page */
+  h1 {
+    margin: 0 0 var(--gap-3xs);
+    font-size: var(--text-3xl);
+    font-weight: var(--bold);
+    letter-spacing: -0.015em;
+    color: var(--header-color);
+  }
+
+  .lede {
+    color: var(--muted-text-color);
+    margin-top: 0;
+    line-height: 1.65;
+  }
+
+  .section {
+    margin: var(--margin-xl) 0 var(--gap-3xs);
+    font-size: var(--text-2xs);
+    font-weight: var(--bold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted-text-color);
+  }
+
+  .section-lede {
+    margin: var(--vertically-spaced);
+    color: var(--light-text-color);
+    font-size: var(--text-s);
+  }
+
+  .entries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: var(--padding) 0;
+      border-bottom: var(--internal-border);
+      &:last-child { border-bottom: none; }
+    }
+
+    .entry {
+      display: flex;
+      align-items: baseline;
+      gap: var(--gap-xs);
+      text-decoration: none;
+      &:hover .headline { color: var(--primary-text-color); }
+
+      .position {
+        font-variant-numeric: tabular-nums;
+        color: var(--standard-40);
+        font-size: var(--text-s);
+        min-width: 1.5rem;
+      }
+
+      .headline {
+        font-weight: var(--bold);
+        color: var(--header-color);
+        transition: color 0.12s;
+      }
+
+      .subtitle {
+        color: var(--light-text-color);
+        font-size: var(--text-s);
+      }
+    }
+
+    .intro {
+      margin: var(--gap-3xs) 0 0 2.1rem;
+      color: var(--muted-text-color);
+      font-size: var(--text-s);
+      line-height: 1.65;
+    }
+  }
+
+  .footer {
+    margin: var(--margin-xl) 0 var(--margin-l);
+    padding-top: var(--padding);
+    border-top: var(--border);
+    color: var(--light-text-color);
+    font-size: var(--text-xs);
+    display: flex;
+    gap: var(--gap-xs);
+
+    a {
+      color: var(--muted-text-color);
+      text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+
+    .sep { color: var(--border-color); }
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="example">
+      <theme-switcher class="theme"></theme-switcher>
+      <h1>Semantic UI Examples</h1>
+      <p class="lede">A tour of the framework, from the smallest possible component to deeper patterns. The first 7 introduce the core concepts in order; the rest cover specific features and can be read standalone.</p>
+      <h2 class="section">Start here</h2>
+      <p class="section-lede">Each example builds on the previous one. Read in order.</p>
+      <ul class="entries">
+        <li>
+          <a class="entry" href="./src/minimal/page.html">
+            <span class="position">1</span>
+            <span class="headline">Hello world</span>
+            <span class="subtitle">Current Time</span>
+          </a>
+          <p class="intro">A complete component in a single <code>defineComponent</code> call. Inline template, inline CSS, one piece of state, and the <code>interval</code> lifecycle helper to advance the clock once per second.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/emoji-reactions/page.html">
+            <span class="position">2</span>
+            <span class="headline">State and events</span>
+            <span class="subtitle">Emoji Reactions</span>
+          </a>
+          <p class="intro">A row of emoji reactions you can toggle. Initial reactions come from an HTML attribute that the component parses on <code>initialize()</code>; clicking a reaction flips its <code>active</code> flag and adjusts the count.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/todo-list/page.html">
+            <span class="position">3</span>
+            <span class="headline">TodoMVC</span>
+            <span class="subtitle">TodoMVC</span>
+          </a>
+          <p class="intro">TodoMVC implemented with the framework&#39;s canonical patterns: signal mutation helpers for the list, a <code>reaction()</code> that mirrors state to localStorage, subtemplates for items, and <code>hashchange</code> for routing between filters.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/async-search/page.html">
+            <span class="position">4</span>
+            <span class="headline">Async blocks</span>
+            <span class="subtitle">Search Autocomplete</span>
+          </a>
+          <p class="intro">A typeahead built with <code>{#async}</code>. The template calls an async function inline and renders the resolved value, with <code>{loading}</code> and <code>{error}</code> branches alongside it. When the input changes, the block re-runs automatically.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/context-menu/page.html">
+            <span class="position">5</span>
+            <span class="headline">Slots, deep events, and cross-instance coordination</span>
+            <span class="subtitle">Context Menu</span>
+          </a>
+          <p class="intro">A right-click context menu. The trigger wraps a <code>&lt;slot&gt;</code>, so the actual right-click happens on light-DOM content that the host element exposes through the shadow root. The component listens on the document with <code>global</code>, positions itself within the viewport, and uses a custom event so opening one menu closes any others.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/card-search/page.html">
+            <span class="position">6</span>
+            <span class="headline">Composition with subtemplates</span>
+            <span class="subtitle">Card Search</span>
+          </a>
+          <p class="intro">A friend directory filtered by gender and search term. The card markup lives in its own file and is registered as a subtemplate; the page is assembled from first-party <code>ui-menu</code> and <code>ui-input</code> components.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/tailwind/page.html">
+            <span class="position">7</span>
+            <span class="headline">Tailwind inside shadow DOM</span>
+            <span class="subtitle">Tailwind</span>
+          </a>
+          <p class="intro">Tailwind 4 compiled at runtime by the <code>TailwindPlugin</code> and injected into the component&#39;s shadow root. Existing Tailwind classes, <code>@theme</code>, and <code>@custom-variant</code> work without modification.</p>
+        </li>
+      </ul>
+      <h2 class="section">More patterns</h2>
+      <p class="section-lede">Standalone examples covering specific features.</p>
+      <ul class="entries">
+        <li>
+          <a class="entry" href="./src/dynamic-table/page.html">
+            <span class="position">8</span>
+            <span class="headline">Templates as settings</span>
+            <span class="subtitle">Dynamic Table</span>
+          </a>
+          <p class="intro">A generic table where the consumer supplies the row template via <code>settings</code>. The table owns the structural markup (<code>thead</code>, <code>tbody</code>, the iteration); the caller decides what each row looks like.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/external-calls/page.html">
+            <span class="position">9</span>
+            <span class="headline">Calling component methods from the page</span>
+            <span class="subtitle">External Calls</span>
+          </a>
+          <p class="intro">A counter ticks once per second; the page focuses an input to pause it and blurs to resume. <code>$(&#39;ui-counter&#39;).component()</code> returns the same <code>self</code> the component uses internally, so external code can call its methods directly.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/maximal/page.html">
+            <span class="position">10</span>
+            <span class="headline">The full defineComponent surface</span>
+            <span class="subtitle">Kitchen Sink</span>
+          </a>
+          <p class="intro">A number adjuster that uses most of <code>defineComponent</code>. The implementation is split across multiple files to show that lifecycle hooks, settings, subtemplates, and CSS can all be authored separately and composed at the call site.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/component-specs/page.html">
+            <span class="position">11</span>
+            <span class="headline">Spec-driven primitives</span>
+            <span class="subtitle">Using Specs</span>
+          </a>
+          <p class="intro">How the first-party design-system primitives are defined. A spec object lists a component&#39;s variations and states; <code>SpecReader</code> turns it into a <code>componentSpec</code> that enables three equivalent attribute syntaxes.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/advanced-keybinding/page.html">
+            <span class="position">12</span>
+            <span class="headline">Static and runtime keybindings</span>
+            <span class="subtitle">Advanced Keybinding</span>
+          </a>
+          <p class="intro">A search component with a fixed <code>ctrl + f</code> shortcut, <code>up</code>/<code>down</code>/<code>esc</code> navigation, and an <code>enter</code> binding that is added or removed at runtime depending on whether a result is selected.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/rating-slider/page.html">
+            <span class="position">13</span>
+            <span class="headline">Drag tracking with global events</span>
+            <span class="subtitle">Rating Slider</span>
+          </a>
+          <p class="intro">A slider you can drag past the bounds of the component. <code>pointerdown</code> on the track starts the drag; <code>global pointermove body</code> and <code>global pointerup body</code> follow the pointer anywhere on the page until it is released.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/advanced-ball-simulation/page.html">
+            <span class="position">14</span>
+            <span class="headline">Reactivity as an animation loop</span>
+            <span class="subtitle">Advanced Ball Simulation</span>
+          </a>
+          <p class="intro">A bouncing-ball simulation where the reactive system drives the render loop: a <code>reaction()</code> reads the balls array and schedules the next animation frame whenever it changes. Demonstrates that the same primitives that drive a template can drive 60 fps animation.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/solar-system-3d/page.html">
+            <span class="position">15</span>
+            <span class="headline">Driving a render loop with a tick signal</span>
+            <span class="subtitle">Solar System 3D</span>
+          </a>
+          <p class="intro">A solar system rendered by a single WebGL fragment shader on a full-screen quad. The component owns the canvas, drag-to-orbit, the keys (<code>o</code> orbits, <code>s</code> cool sun, <code>space</code> pause, <code>=</code>/<code>-</code> speed, <code>r</code> reset), and the per-frame uniform uploads. Settings flow into the shader as uniforms each frame.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/event-data/page.html">
+            <span class="position">16</span>
+            <span class="headline">Data-driven event dispatch</span>
+            <span class="subtitle">Event Data</span>
+          </a>
+          <p class="intro">One event handler, many actions. Each button carries <code>data-dimension</code> and <code>data-helper</code> attributes; the handler reads them and indexes into the signal with bracket notation to pick which mutation to perform.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/setting-types/page.html">
+            <span class="position">17</span>
+            <span class="headline">Setting types and coercion</span>
+            <span class="subtitle">Setting Types</span>
+          </a>
+          <p class="intro">A reference for what each setting type looks like at each boundary: HTML attribute, JS property, and <code>.settings()</code> call. Strings, numbers, booleans, arrays, objects, and functions are all valid setting types.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/progress-bar/page.html">
+            <span class="position">18</span>
+            <span class="headline">Parameterized snippets</span>
+            <span class="subtitle">Progress Bar</span>
+          </a>
+          <p class="intro">A progress bar whose label changes once it reaches 100%. The same <code>{#snippet label}</code> is rendered with and without a <code>canComplete</code> parameter to produce two variants of the same fragment.</p>
+        </li>
+        <li>
+          <a class="entry" href="./src/clock/page.html">
+            <span class="position">19</span>
+            <span class="headline">SVG, intervals, and helpers</span>
+            <span class="subtitle">Clock</span>
+          </a>
+          <p class="intro">An analog clock rendered as SVG, ticking once per second. Demonstrates the <code>interval</code> helper, <code>state.time.now()</code>, and lisp-style helper calls with multiple arguments.</p>
+        </li>
+      </ul>
+      <footer class="footer">
+        <a href="https://next.semantic-ui.com/">Docs</a>
+        <span class="sep">·</span>
+        <a href="https://github.com/Semantic-Org/Semantic-Next">GitHub</a>
+      </footer>
+    </div>
+  </body>
+</html>
