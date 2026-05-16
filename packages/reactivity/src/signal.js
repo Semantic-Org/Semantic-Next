@@ -125,11 +125,10 @@ export class Signal {
   }
 
   set value(newValue) {
-    if (this.equalityFunction(this.currentValue, newValue)) { return; }
-    this.currentValue = (newValue === null || typeof newValue !== 'object')
-      ? newValue
-      : this.protect(newValue);
-    this.notify();
+    if (!this.equalityFunction(this.currentValue, newValue)) {
+      this.currentValue = this.protect(newValue);
+      this.notify();
+    }
   }
 
   get({ clone = true } = {}) {
