@@ -61,11 +61,12 @@ export class Signal {
 
     this.equalityFunction = equalityFunction
       ? wrapFunction(equalityFunction)
-      : (this.safety === 'none' ? Signal.noEquality : Signal.defaultEquality);
+      : (this.safety === 'none' ? Signal.noEquality : Signal.equalityFunction);
 
-    this.cloneFunction = cloneFunction
+    // field named `clone` to match main's hidden class shape
+    this.clone = cloneFunction
       ? wrapFunction(cloneFunction)
-      : Signal.defaultClone;
+      : Signal.cloneFunction;
 
     this.currentValue = this.protect(initialValue);
 
@@ -92,7 +93,7 @@ export class Signal {
     if (isArray(value)) {
       return value.map(v => this.maybeClone(v));
     }
-    return this.cloneFunction(value);
+    return this.clone(value);
   }
 
   get value() {
@@ -131,11 +132,6 @@ export class Signal {
       return (val !== null && typeof val === 'object') ? this.maybeClone(val) : val;
     }
     return this.currentValue;
-  }
-
-  clone() {
-    this.depend();
-    return this.cloneFunction(this.currentValue);
   }
 
   subscribe(callback) {
@@ -230,7 +226,7 @@ export class Signal {
       }
       return;
     }
-    const before = this.cloneFunction(this.currentValue);
+    const before = this.clone(this.currentValue);
     const result = fn(this.currentValue);
     if (result !== undefined) {
       if (isDevelopment && result === this.currentValue) {
@@ -473,12 +469,9 @@ export class Signal {
       Configuration
   --------------------*/
 
-  static defaultEquality = isEqual;
-  static defaultClone = clone;
-  static noEquality = () => false;
-  // Back-compat aliases for the pre-safety static names.
   static equalityFunction = isEqual;
   static cloneFunction = clone;
+  static noEquality = () => false;
 
   static get safety() {
     return config.safety;

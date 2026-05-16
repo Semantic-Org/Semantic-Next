@@ -473,15 +473,21 @@ export class Signal<T> {
 
   /**
    * Default equality function used to dedupe signal writes. Assign to
-   * override library-wide: `Signal.defaultEquality = myEq`.
+   * override library-wide: `Signal.equalityFunction = myEq`.
    */
-  static defaultEquality: (a: any, b: any) => boolean;
+  static equalityFunction: (a: any, b: any) => boolean;
 
   /**
-   * Default clone function used by `signal.clone()`. Assign to override
-   * library-wide: `Signal.defaultClone = myClone`.
+   * Default clone function used by mutate-detection and explicit cloning.
+   * Assign to override library-wide: `Signal.cloneFunction = myClone`.
    */
-  static defaultClone: <V>(value: V) => V;
+  static cloneFunction: <V>(value: V) => V;
+
+  /**
+   * An equality function that always returns false — every set notifies.
+   * Used internally when `safety: 'none'` is set; exposed for completeness.
+   */
+  static noEquality: (a: unknown, b: unknown) => boolean;
 
   /**
    * Bulk-configure library defaults. Equivalent to assigning each key
@@ -491,7 +497,7 @@ export class Signal<T> {
     safety?: 'clone' | 'reference' | 'freeze' | 'none';
     tracing?: boolean;
     stackCapture?: boolean;
-    defaultEquality?: (a: any, b: any) => boolean;
-    defaultClone?: <V>(value: V) => V;
+    equalityFunction?: (a: any, b: any) => boolean;
+    cloneFunction?: <V>(value: V) => V;
   }): void;
 }
