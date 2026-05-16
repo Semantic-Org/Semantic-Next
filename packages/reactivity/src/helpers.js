@@ -27,6 +27,25 @@ export const setStackCapture = (enabled) => {
 export const isTracing = () => mode !== 'off';
 export const isStackCapture = () => mode === 'stack';
 
+// Default value-protection preset for new Signals when `safety` isn't set
+// at the call site.
+//   'clone'     — clone on get/set; mutation isolation, identity unstable
+//   'reference' — no clone; identity stable, mutate-after-get bypasses reactivity
+//   'freeze'    — deep-freeze on set; mutation throws at the call site
+//   'none'      — no clone, no equality dedupe; every set notifies
+let safety = 'clone';
+
+const SAFETY_PRESETS = new Set(['clone', 'reference', 'freeze', 'none']);
+
+export const setSafety = (preset) => {
+  if (!SAFETY_PRESETS.has(preset)) {
+    throw new TypeError(`Invalid safety preset: ${preset}. Must be 'clone', 'reference', 'freeze', or 'none'.`);
+  }
+  safety = preset;
+};
+
+export const getSafety = () => safety;
+
 // Capture a stack trace into target.context. Passes `caller` to
 // Error.captureStackTrace so the framework frame is trimmed from the trace.
 export const captureStack = (target, caller) => {

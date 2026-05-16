@@ -1856,4 +1856,226 @@ describe('Signal API', () => {
       expect(() => signal.push('x')).toThrow();
     });
   });
+
+  /*******************************
+        Safety presets
+  *******************************/
+
+  describe.concurrent('Safety presets', () => {
+    it('defaults to clone', () => {
+      const signal = new Signal({ count: 0 });
+      expect(signal.safety).toBe('clone');
+    });
+
+    it('allowClone: false maps to safety: reference', () => {
+      const signal = new Signal({ count: 0 }, { allowClone: false });
+      expect(signal.safety).toBe('reference');
+    });
+
+    it('explicit safety overrides allowClone', () => {
+      const signal = new Signal({ count: 0 }, { allowClone: false, safety: 'freeze' });
+      expect(signal.safety).toBe('freeze');
+    });
+
+    describe.concurrent('clone', () => {
+      it('returns a fresh reference on every read', () => {
+        const signal = new Signal({ count: 0 }, { safety: 'clone' });
+        const a = signal.get();
+        const b = signal.get();
+        expect(a).not.toBe(b);
+        expect(a).toEqual(b);
+      });
+
+      it('does not freeze stored values', () => {
+        const signal = new Signal({ count: 0 }, { safety: 'clone' });
+        expect(Object.isFrozen(signal.peek())).toBe(false);
+      });
+    });
+
+    describe.concurrent('reference', () => {
+      it('returns the stored reference on every read', () => {
+        const value = { count: 0 };
+        const signal = new Signal(value, { safety: 'reference' });
+        expect(signal.get()).toBe(signal.get());
+      });
+
+      it('does not freeze stored values', () => {
+        const signal = new Signal({ count: 0 }, { safety: 'reference' });
+        expect(Object.isFrozen(signal.peek())).toBe(false);
+      });
+
+      it('deduplicates equal sets via isEqual', () => {
+        const callback = vi.fn();
+        const signal = new Signal({ count: 0 }, { safety: 'reference' });
+        signal.subscribe(callback);
+        Reaction.flush();
+        signal.set({ count: 0 });
+        Reaction.flush();
+        expect(callback).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe.concurrent('freeze', () => {
+      it('deep-freezes object values on set', () => {
+        const signal = new Signal({ count: 0, nested: { a: 1 } }, { safety: 'freeze' });
+        expect(Object.isFrozen(signal.peek())).toBe(true);
+        expect(Object.isFrozen(signal.peek().nested)).toBe(true);
+      });
+
+      it('throws on direct mutation of frozen value', () => {
+        const signal = new Signal({ count: 0 }, { safety: 'freeze' });
+        expect(() => {
+          signal.peek().count = 1;
+        }).toThrow(TypeError);
+      });
+
+      it('push rebuilds and re-freezes', () => {
+        const signal = new Signal(['a'], { safety: 'freeze' });
+        signal.push('b');
+        expect(signal.peek()).toEqual(['a', 'b']);
+        expect(Object.isFrozen(signal.peek())).toBe(true);
+      });
+
+      it('unshift rebuilds and re-freezes', () => {
+        const signal = new Signal(['b'], { safety: 'freeze' });
+        signal.unshift('a');
+        expect(signal.peek()).toEqual(['a', 'b']);
+        expect(Object.isFrozen(signal.peek())).toBe(true);
+      });
+
+      it('splice rebuilds and re-freezes', () => {
+        const signal = new Signal(['a', 'b', 'c'], { safety: 'freeze' });
+        signal.splice(1, 1);
+        expect(signal.peek()).toEqual(['a', 'c']);
+        expect(Object.isFrozen(signal.peek())).toBe(true);
+      });
+
+      it('setIndex rebuilds and re-freezes', () => {
+        const signal = new Signal(['a', 'b'], { safety: 'freeze' });
+        signal.setIndex(0, 'A');
+        expect(signal.peek()).toEqual(['A', 'b']);
+        expect(Object.isFrozen(signal.peek())).toBe(true);
+      });
+
+      it('removeIndex rebuilds and re-freezes', () => {
+        const signal = new Signal(['a', 'b', 'c'], { safety: 'freeze' });
+        signal.removeIndex(1);
+        expect(signal.peek()).toEqual(['a', 'c']);
+        expect(Object.isFrozen(signal.peek())).toBe(true);
+      });
+
+      it('setArrayProperty rebuilds matching entries', () => {
+        const signal = new Signal([{ id: 1, name: 'a' }, { id: 2, name: 'b' }], { safety: 'freeze' });
+        signal.setArrayProperty(0, 'name', 'A');
+        expect(signal.peek()[0]).toEqual({ id: 1, name: 'A' });
+        expect(signal.peek()[1]).toEqual({ id: 2, name: 'b' });
+        expect(Object.isFrozen(signal.peek()[0])).toBe(true);
+      });
+
+      it('setProperty on an object rebuilds the object', () => {
+        const signal = new Signal({ a: 1, b: 2 }, { safety: 'freeze' });
+        signal.setProperty('a', 9);
+        expect(signal.peek()).toEqual({ a: 9, b: 2 });
+        expect(Object.isFrozen(signal.peek())).toBe(true);
+      });
+
+      it('skips class instances (left unfrozen by deepFreeze)', () => {
+        class Custom {
+          constructor() {
+            this.x = 1;
+          }
+        }
+        const instance = new Custom();
+        const signal = new Signal(instance, { safety: 'freeze' });
+        expect(Object.isFrozen(signal.peek())).toBe(false);
+        signal.peek().x = 2;
+        expect(signal.peek().x).toBe(2);
+      });
+    });
+
+    describe.concurrent('none', () => {
+      it('always notifies, even on equal sets', () => {
+        const callback = vi.fn();
+        const signal = new Signal({ count: 0 }, { safety: 'none' });
+        signal.subscribe(callback);
+        Reaction.flush();
+        signal.set({ count: 0 });
+        Reaction.flush();
+        signal.set({ count: 0 });
+        Reaction.flush();
+        expect(callback).toHaveBeenCalledTimes(3);
+      });
+
+      it('does not clone or freeze', () => {
+        const value = { count: 0 };
+        const signal = new Signal(value, { safety: 'none' });
+        expect(signal.peek()).toBe(value);
+        expect(Object.isFrozen(signal.peek())).toBe(false);
+      });
+
+      it('explicit equalityFunction overrides the no-dedupe default', () => {
+        const callback = vi.fn();
+        const signal = new Signal(0, { safety: 'none', equalityFunction: (a, b) => a === b });
+        signal.subscribe(callback);
+        Reaction.flush();
+        signal.set(0);
+        Reaction.flush();
+        expect(callback).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('static config', () => {
+      it('Signal.safety reads the current default', () => {
+        expect(Signal.safety).toBe('clone');
+      });
+
+      it('Signal.safety = preset routes through validation', () => {
+        const original = Signal.safety;
+        try {
+          Signal.safety = 'freeze';
+          expect(Signal.safety).toBe('freeze');
+          const signal = new Signal({});
+          expect(signal.safety).toBe('freeze');
+        }
+        finally {
+          Signal.safety = original;
+        }
+      });
+
+      it('Signal.safety = invalid throws', () => {
+        expect(() => {
+          Signal.safety = 'bogus';
+        }).toThrow(TypeError);
+      });
+
+      it('Signal.configure forwards keys through their setters', () => {
+        const original = Signal.safety;
+        try {
+          Signal.configure({ safety: 'reference' });
+          expect(Signal.safety).toBe('reference');
+        }
+        finally {
+          Signal.safety = original;
+        }
+      });
+
+      it('Signal.tracing accessor proxies to setTracing/isTracing', () => {
+        const original = Signal.tracing;
+        try {
+          Signal.tracing = true;
+          expect(Signal.tracing).toBe(true);
+          Signal.tracing = false;
+          expect(Signal.tracing).toBe(false);
+        }
+        finally {
+          Signal.tracing = original;
+        }
+      });
+
+      it('Signal.noEquality always returns false', () => {
+        expect(Signal.noEquality(1, 1)).toBe(false);
+        expect(Signal.noEquality({}, {})).toBe(false);
+      });
+    });
+  });
 });

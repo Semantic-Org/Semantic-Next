@@ -15,6 +15,8 @@ xx.xx.xxxx
 * **Feature** - Added `{#fn expression}` directive to pass values as-is without auto-invoking functions — mirrors `{#html}` pattern, useful for passing callbacks through property bindings
 
 ### Reactivity
+* **Feature** - Added `safety` constructor option with four presets — `'clone'` (current default, mutation isolation), `'reference'` (no clone, identity stable), `'freeze'` (deep-freeze on set, mutation throws), `'none'` (no clone, no equality dedupe). `allowClone: false` continues to work as a shim for `safety: 'reference'`.
+* **Feature** - Added `Signal.safety`, `Signal.tracing`, `Signal.stackCapture` static accessors and `Signal.configure({...})` for bulk setup.
 * **Feature** - Added `depend()` to register a signal as a dependency without reading the value
 * **Feature** - Added `notify()` to force-trigger subscribers bypassing the equality check
 * **Feature** - Added `hasDependents()` to check if any reactions are subscribed to a signal

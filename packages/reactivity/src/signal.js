@@ -1,5 +1,6 @@
 import {
   clone,
+  deepFreeze,
   isArray,
   isClassInstance,
   isDevelopment,
@@ -11,8 +12,18 @@ import {
 } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
-import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
+import {
+  captureStack,
+  getSafety,
+  isStackCapture,
+  isTracing,
+  setSafety,
+  setStackCapture,
+  setTracing,
+} from './helpers.js';
 import { Reaction } from './reaction.js';
+
+const noEquality = () => false;
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
 
@@ -24,30 +35,43 @@ export class Signal {
     return !!instance?.[IS_SIGNAL];
   }
 
-  constructor(initialValue, { context, equalityFunction, allowClone = true, cloneFunction } = {}) {
+  constructor(initialValue, { context, equalityFunction, allowClone, cloneFunction, safety } = {}) {
     // pass in some metadata for debugging
     this.dependency = new Dependency({
       firstRun: true,
       value: initialValue,
     });
 
-    // allow user to opt out of value cloning
-    this.allowClone = allowClone;
+    // safety preset: explicit > allowClone backward-compat > Signal.safety static default
+    this.safety = safety ?? (allowClone === false ? 'reference' : getSafety());
+    // derived for the existing maybeClone path — only true under 'clone'
+    this.allowClone = this.safety === 'clone';
 
-    // allow custom equality function
+    // allow custom equality function; 'none' skips dedupe entirely
     this.equalityFunction = (equalityFunction)
       ? wrapFunction(equalityFunction)
-      : Signal.equalityFunction;
+      : (this.safety === 'none' ? noEquality : Signal.equalityFunction);
 
     // allow custom clone function
     this.clone = (cloneFunction)
       ? wrapFunction(cloneFunction)
       : Signal.cloneFunction;
 
-    this.currentValue = this.maybeClone(initialValue);
+    this.currentValue = this.protect(initialValue);
 
     // allow debugging context to be set
     this.setContext(context);
+  }
+
+  // Apply the safety preset's storage protection on the way in.
+  // 'clone' — deep-clone (mutation isolation, current default)
+  // 'freeze' — deep-freeze in place (throws on mutation at the call site)
+  // 'reference' / 'none' — store raw (caller owns mutation discipline)
+  protect(value) {
+    if (value === null || typeof value !== 'object') { return value; }
+    if (this.safety === 'clone') { return this.maybeClone(value); }
+    if (this.safety === 'freeze') { return deepFreeze(value); }
+    return value;
   }
 
   // set debugging context for signal removing any present context
@@ -86,20 +110,48 @@ export class Signal {
 
   static equalityFunction = isEqual;
   static cloneFunction = clone;
+  static noEquality = noEquality;
   static setTracing = setTracing;
   static isTracing = isTracing;
   static setStackCapture = setStackCapture;
   static isStackCapture = isStackCapture;
+
+  // Accessor pairs over helpers state, so `Signal.safety = 'freeze'` and
+  // `Object.assign(Signal, { safety: 'freeze', tracing: true })` both work.
+  static get safety() {
+    return getSafety();
+  }
+  static set safety(preset) {
+    setSafety(preset);
+  }
+  static get tracing() {
+    return isTracing();
+  }
+  static set tracing(enabled) {
+    setTracing(enabled);
+  }
+  static get stackCapture() {
+    return isStackCapture();
+  }
+  static set stackCapture(enabled) {
+    setStackCapture(enabled);
+  }
+
+  static configure(config = {}) {
+    Object.assign(Signal, config);
+  }
 
   get value() {
     // Record this Signal as a dependency if inside a Reaction computation
     this.depend();
     const value = this.currentValue;
 
-    // otherwise previous value would be modified if the returned value is mutated negating the equality
-    return (value !== null && typeof value == 'object')
-      ? this.maybeClone(value)
-      : value;
+    // Only 'clone' mode pays the per-read clone — reference/freeze/none all
+    // return the stored value directly.
+    if (this.safety === 'clone' && value !== null && typeof value === 'object') {
+      return this.maybeClone(value);
+    }
+    return value;
   }
 
   canCloneValue(value) {
@@ -118,7 +170,7 @@ export class Signal {
 
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = this.maybeClone(newValue);
+      this.currentValue = this.protect(newValue);
       this.notify();
     }
   }
@@ -203,7 +255,9 @@ export class Signal {
   }
 
   peek() {
-    return this.maybeClone(this.currentValue);
+    // 'clone' returns a fresh copy (mutation isolation); other modes return raw.
+    if (this.safety === 'clone') { return this.maybeClone(this.currentValue); }
+    return this.currentValue;
   }
 
   clear() {
@@ -234,25 +288,46 @@ export class Signal {
     }
   }
 
-  // array helpers — these always change the value, skip clone+compare
+  // array helpers — these always change the value, skip clone+compare.
+  // Under 'freeze' the stored array is frozen, so each helper rebuilds and
+  // re-freezes; other modes mutate in place.
   push(...args) {
-    this.currentValue.push(...args);
+    if (this.safety === 'freeze') {
+      this.currentValue = deepFreeze([...this.currentValue, ...args]);
+    }
+    else {
+      this.currentValue.push(...args);
+    }
     this.notify();
   }
   unshift(...args) {
-    this.currentValue.unshift(...args);
+    if (this.safety === 'freeze') {
+      this.currentValue = deepFreeze([...args, ...this.currentValue]);
+    }
+    else {
+      this.currentValue.unshift(...args);
+    }
     this.notify();
   }
   splice(...args) {
-    this.currentValue.splice(...args);
+    if (this.safety === 'freeze') {
+      const next = [...this.currentValue];
+      next.splice(...args);
+      this.currentValue = deepFreeze(next);
+    }
+    else {
+      this.currentValue.splice(...args);
+    }
     this.notify();
   }
   map(mapFunction) {
-    this.currentValue = Array.prototype.map.call(this.currentValue, mapFunction);
+    const next = Array.prototype.map.call(this.currentValue, mapFunction);
+    this.currentValue = this.safety === 'freeze' ? deepFreeze(next) : next;
     this.notify();
   }
   filter(filterFunction) {
-    this.currentValue = Array.prototype.filter.call(this.currentValue, filterFunction);
+    const next = Array.prototype.filter.call(this.currentValue, filterFunction);
+    this.currentValue = this.safety === 'freeze' ? deepFreeze(next) : next;
     this.notify();
   }
 
@@ -260,11 +335,25 @@ export class Signal {
     return this.get()[index];
   }
   setIndex(index, value) {
-    this.currentValue[index] = value;
+    if (this.safety === 'freeze') {
+      const next = [...this.currentValue];
+      next[index] = value;
+      this.currentValue = deepFreeze(next);
+    }
+    else {
+      this.currentValue[index] = value;
+    }
     this.notify();
   }
   removeIndex(index) {
-    this.currentValue.splice(index, 1);
+    if (this.safety === 'freeze') {
+      const next = [...this.currentValue];
+      next.splice(index, 1);
+      this.currentValue = deepFreeze(next);
+    }
+    else {
+      this.currentValue.splice(index, 1);
+    }
     this.notify();
   }
 
@@ -280,6 +369,17 @@ export class Signal {
       property = indexOrProperty;
     }
     if (index === -1) {
+      return;
+    }
+    if (this.safety === 'freeze') {
+      // rebuild every matching entry — direct mutation would throw on frozen
+      const next = this.currentValue.map((object, currentIndex) => {
+        if (index === 'all' || currentIndex === index) {
+          return { ...object, [property]: value };
+        }
+        return object;
+      });
+      this.set(next);
       return;
     }
     const newValue = this.peek().map((object, currentIndex) => {
@@ -355,6 +455,10 @@ export class Signal {
     else {
       value = property;
       property = idOrProperty;
+      if (this.safety === 'freeze') {
+        this.set({ ...this.currentValue, [property]: value });
+        return;
+      }
       const obj = this.peek();
       obj[property] = value;
       this.set(obj);

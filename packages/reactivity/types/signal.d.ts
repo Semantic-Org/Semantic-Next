@@ -10,8 +10,19 @@ export interface SignalOptions<T> {
   equalityFunction?: (oldValue: T, newValue: T) => boolean;
 
   /**
-   * Whether to allow cloning of values. If false, values are stored by reference
-   * @default true
+   * Value-protection preset.
+   *   'clone' — clone on get/set (mutation isolation, current default)
+   *   'reference' — store raw (identity stable, no mutation isolation)
+   *   'freeze' — deep-freeze on set (throws on mutation at the call site)
+   *   'none' — no clone, no equality dedupe (every set notifies)
+   * @default 'clone'
+   */
+  safety?: 'clone' | 'reference' | 'freeze' | 'none';
+
+  /**
+   * Backward-compat shim: `allowClone: false` is equivalent to `safety: 'reference'`.
+   * Prefer `safety` for new code.
+   * @deprecated use `safety` instead
    */
   allowClone?: boolean;
 
@@ -453,4 +464,40 @@ export class Signal<T> {
    * Returns whether stack capture is currently enabled.
    */
   static isStackCapture(): boolean;
+
+  /**
+   * The default safety preset for new Signals when `safety` isn't passed at
+   * the call site. Set to 'clone' (default), 'reference', 'freeze', or 'none'.
+   */
+  static safety: 'clone' | 'reference' | 'freeze' | 'none';
+
+  /**
+   * Accessor form of {@link Signal.setTracing} / {@link Signal.isTracing}.
+   * `Signal.tracing = true` enables tracing; reading returns the current state.
+   */
+  static tracing: boolean;
+
+  /**
+   * Accessor form of {@link Signal.setStackCapture} / {@link Signal.isStackCapture}.
+   */
+  static stackCapture: boolean;
+
+  /**
+   * An equality function that always returns false — every set notifies.
+   * Used internally when `safety: 'none'` is set; exposed for completeness.
+   */
+  static noEquality: (a: unknown, b: unknown) => boolean;
+
+  /**
+   * Bulk static config setter. Forwards each key through the static accessors
+   * (so validation on `safety` / `tracing` / `stackCapture` runs as if the
+   * properties were set individually).
+   */
+  static configure(config: {
+    safety?: 'clone' | 'reference' | 'freeze' | 'none';
+    tracing?: boolean;
+    stackCapture?: boolean;
+    equalityFunction?: (a: unknown, b: unknown) => boolean;
+    cloneFunction?: <V>(value: V) => V;
+  }): void;
 }
