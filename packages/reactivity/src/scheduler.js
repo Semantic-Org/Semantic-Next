@@ -12,13 +12,6 @@ export class Scheduler {
     Scheduler.scheduleFlush();
   }
 
-  static scheduleFlush() {
-    if (!Scheduler.isFlushScheduled) {
-      Scheduler.isFlushScheduled = true;
-      microtask(flushTask);
-    }
-  }
-
   static maxFlushIterations = 100;
 
   static flush() {
