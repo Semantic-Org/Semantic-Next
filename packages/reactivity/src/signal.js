@@ -53,7 +53,6 @@ export class Signal {
   }
 
   protect(value) {
-    if (value === null || typeof value !== 'object') { return value; }
     if (this.safety === 'freeze') { return deepFreeze(value); }
     if (this.safety === 'clone') { return this.maybeClone(value); }
     return value;
@@ -126,10 +125,11 @@ export class Signal {
   }
 
   set value(newValue) {
-    if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = this.protect(newValue);
-      this.notify();
-    }
+    if (this.equalityFunction(this.currentValue, newValue)) { return; }
+    this.currentValue = (newValue === null || typeof newValue !== 'object')
+      ? newValue
+      : this.protect(newValue);
+    this.notify();
   }
 
   get({ clone = true } = {}) {
