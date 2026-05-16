@@ -1,5 +1,6 @@
 import {
   clone,
+  deepFreeze,
   isArray,
   isClassInstance,
   isDevelopment,
@@ -52,7 +53,10 @@ export class Signal {
   }
 
   protect(value) {
-    return this.maybeClone(value);
+    if (value === null || typeof value !== 'object') { return value; }
+    if (this.safety === 'freeze') { return deepFreeze(value); }
+    if (this.safety === 'clone') { return this.maybeClone(value); }
+    return value;
   }
 
   // set debugging context for signal removing any present context
