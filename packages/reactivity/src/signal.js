@@ -33,6 +33,8 @@ export class Signal {
 
     // allow user to opt out of value cloning
     this.allowClone = allowClone;
+    // unused this commit — establishes hidden class slot for the safety preset
+    this.safety = 'clone';
 
     // allow custom equality function
     this.equalityFunction = (equalityFunction)
