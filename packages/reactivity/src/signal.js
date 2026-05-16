@@ -24,7 +24,7 @@ export class Signal {
     return !!instance?.[IS_SIGNAL];
   }
 
-  constructor(initialValue, { context, equalityFunction, allowClone = true, cloneFunction } = {}) {
+  constructor(initialValue, { context, equalityFunction, allowClone = true, cloneFunction, safety } = {}) {
     // pass in some metadata for debugging
     this.dependency = new Dependency({
       firstRun: true,
@@ -33,8 +33,7 @@ export class Signal {
 
     // allow user to opt out of value cloning
     this.allowClone = allowClone;
-    // unused this commit — establishes hidden class slot for the safety preset
-    this.safety = 'clone';
+    this.safety = safety ?? (allowClone === false ? 'reference' : 'clone');
 
     // allow custom equality function
     this.equalityFunction = (equalityFunction)
