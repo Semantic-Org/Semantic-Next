@@ -367,11 +367,17 @@ truncate('こんにちは世界です', 8, { locale: 'ja' });          // 'こ�
 
 ### Core
 ```javascript
-import { noop, wrapFunction } from '@semantic-ui/utils';
+import { noop, identity, wrapFunction } from '@semantic-ui/utils';
 
-// Identity function — returns its argument
-noop(42);                              // 42
-noop('hello');                         // 'hello'
+// noop — swallows arguments, returns undefined. Use as a reusable empty
+// callback to avoid allocating fresh () => {} closures.
+noop();                                // undefined
+noop(42, 'ignored');                   // undefined
+
+// identity — returns its first argument unchanged. Use as a pass-through
+// default for transforms (e.g. `transform = mapFn ?? identity`).
+identity(42);                          // 42
+identity('hello');                     // 'hello'
 
 // Wraps non-functions into a function that returns the value
 const fn = wrapFunction('default');    // () => 'default'
@@ -827,7 +833,8 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 ### Functions (functions.js)
 | Function | Signature | Returns |
 |----------|-----------|---------|
-| `noop` | `(v)` | `v` (identity function) |
+| `noop` | `()` | `undefined` — swallows args, reusable empty callback |
+| `identity` | `(v)` | `v` — returns first arg unchanged |
 | `wrapFunction` | `(x)` | `x` if function, else `() => x` |
 | `memoize` | `(fn, hashFn?)` | Memoized function |
 | `wait` | `(ms, opts?)` | Promise |

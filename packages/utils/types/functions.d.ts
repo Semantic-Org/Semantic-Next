@@ -78,6 +78,18 @@ export interface ThrottledFunction<T extends (...args: any[]) => any> {
 export function noop(...args: any[]): void;
 
 /**
+ * Identity function — returns its first argument unchanged
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#identity identity}
+ *
+ * @example
+ * ```ts
+ * const transform = mapFn ?? identity;
+ * const mapped = items.map(transform);
+ * ```
+ */
+export function identity<T>(value: T): T;
+
+/**
  * Wraps a value in a function if it isn't already a function
  * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#wrapfunction wrapFunction}
  *

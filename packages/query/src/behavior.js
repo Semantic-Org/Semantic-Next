@@ -4,6 +4,7 @@ import {
   clone,
   each,
   extend,
+  identity,
   isClassInstance,
   isFunction,
   isPlainObject,
@@ -26,7 +27,7 @@ export class Behavior {
     namespace = name,
 
     // returns behavior instance
-    createBehavior = noop,
+    createBehavior = identity,
 
     // event object
     events = {},
@@ -57,7 +58,7 @@ export class Behavior {
     onDestroyed = noop,
 
     // custom invocation fallback
-    customInvocation = noop,
+    customInvocation = identity,
 
     // element index information
     elementIndex = 0,

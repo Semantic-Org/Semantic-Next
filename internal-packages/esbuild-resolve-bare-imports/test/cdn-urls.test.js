@@ -6,7 +6,7 @@ const ROOT = resolve(import.meta.dirname, '../../..');
 const CDN_ROOT = 'https://cdn.semantic-ui.com';
 
 const SUI_PACKAGES = readdirSync(join(ROOT, 'packages'), { withFileTypes: true })
-  .filter(d => d.isDirectory())
+  .filter(d => d.isDirectory() && !d.name.startsWith('.'))
   .map(d => d.name);
 
 // Collect declared subpath exports (e.g. "./template") from each package
