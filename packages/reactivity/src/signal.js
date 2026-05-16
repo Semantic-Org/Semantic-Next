@@ -1,124 +1,114 @@
 import {
   clone,
+  deepFreeze,
   isArray,
   isClassInstance,
   isDevelopment,
   isEqual,
   isNumber,
   isObject,
+  isPlainObject,
   unique,
   wrapFunction,
 } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
-import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
+import { captureStack, config, signalTag } from './helpers.js';
 import { Reaction } from './reaction.js';
 
-const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
+const devProxyCache = new WeakMap();
+
+const frozenTraps = {
+  set(_, prop) {
+    throw frozenError(prop);
+  },
+  deleteProperty(_, prop) {
+    throw frozenError(prop);
+  },
+  defineProperty(_, prop) {
+    throw frozenError(prop);
+  },
+  setPrototypeOf() {
+    throw frozenError('[[Prototype]]');
+  },
+};
+
+function frozenError(prop) {
+  return new TypeError(
+    `Signal value is frozen — cannot set property \`${String(prop)}\`. `
+      + `Use signal.set(newValue), a mutation helper (push, splice, setProperty), `
+      + `or construct with { safety: 'reference' } if storing third-party data.`,
+  );
+}
+
+function devProxyFor(val) {
+  let proxy = devProxyCache.get(val);
+  if (!proxy) { devProxyCache.set(val, proxy = new Proxy(val, frozenTraps)); }
+  return proxy;
+}
 
 export class Signal {
-  get [IS_SIGNAL]() {
-    return true;
-  }
-  static [Symbol.hasInstance](instance) {
-    return !!instance?.[IS_SIGNAL];
-  }
+  constructor(initialValue, options = {}) {
+    const { context, safety, equalityFunction, cloneFunction, allowClone } = options;
 
-  constructor(initialValue, { context, equalityFunction, allowClone = true, cloneFunction } = {}) {
-    // pass in some metadata for debugging
     this.dependency = new Dependency({
       firstRun: true,
       value: initialValue,
     });
 
-    // allow user to opt out of value cloning
-    this.allowClone = allowClone;
+    // allowClone: false is a back-compat shim for safety: 'reference'
+    this.safety = safety ?? (allowClone === false ? 'reference' : config.safety);
 
-    // allow custom equality function
-    this.equalityFunction = (equalityFunction)
+    this.equalityFunction = equalityFunction
       ? wrapFunction(equalityFunction)
-      : Signal.equalityFunction;
+      : (this.safety === 'none' ? Signal.noEquality : Signal.defaultEquality);
 
-    // allow custom clone function
-    this.clone = (cloneFunction)
+    this.cloneFunction = cloneFunction
       ? wrapFunction(cloneFunction)
-      : Signal.cloneFunction;
+      : Signal.defaultClone;
 
-    this.currentValue = this.maybeClone(initialValue);
+    this.currentValue = this.protect(initialValue);
 
-    // allow debugging context to be set
     this.setContext(context);
   }
 
-  // set debugging context for signal removing any present context
-  setContext(additionalContext = {}) {
-    if (!isTracing()) {
-      return;
-    }
-    const defaultContext = {
-      value: this.currentValue,
-    };
-    this.context = {
-      ...defaultContext,
-      ...additionalContext,
-    };
+  /*-------------------
+          Core
+  --------------------*/
+
+  protect(value) {
+    if (value === null || typeof value !== 'object') { return value; }
+    if (this.safety === 'freeze') { return deepFreeze(value); }
+    if (this.safety === 'clone') { return this.maybeClone(value); }
+    return value;
   }
 
-  // add context to signal
-  addContext(additionalContext = {}) {
-    if (!isTracing()) {
-      return;
-    }
-    if (!this.context) {
-      this.context = {};
-    }
-    for (const key in additionalContext) {
-      this.context[key] = additionalContext[key];
-    }
-  }
-
-  // Stack trace capture is gated separately because Error.captureStackTrace
-  // costs ~10-100× a context spread, paid per Signal.notify in tracing-on
-  // dev. Default off; opt in via setStackCapture(true).
-  setTrace() {
-    captureStack(this, this.setTrace);
-  }
-
-  static equalityFunction = isEqual;
-  static cloneFunction = clone;
-  static setTracing = setTracing;
-  static isTracing = isTracing;
-  static setStackCapture = setStackCapture;
-  static isStackCapture = isStackCapture;
-
-  get value() {
-    // Record this Signal as a dependency if inside a Reaction computation
-    this.depend();
-    const value = this.currentValue;
-
-    // otherwise previous value would be modified if the returned value is mutated negating the equality
-    return (value !== null && typeof value == 'object')
-      ? this.maybeClone(value)
-      : value;
-  }
-
-  canCloneValue(value) {
-    return (this.allowClone === true && !isClassInstance(value));
-  }
-
+  // Recursive clone that skips class instances, mirroring main's pre-safety
+  // maybeClone path. Only used when safety === 'clone'.
   maybeClone(value) {
-    if (!this.canCloneValue(value)) {
+    if (value === null || typeof value !== 'object' || isClassInstance(value)) {
       return value;
     }
     if (isArray(value)) {
-      return value.map(value => this.maybeClone(value));
+      return value.map(v => this.maybeClone(v));
     }
-    return this.clone(value);
+    return this.cloneFunction(value);
+  }
+
+  get value() {
+    this.depend();
+    const val = this.currentValue;
+    if (val === null || typeof val !== 'object') { return val; }
+    if (this.safety === 'clone') { return this.maybeClone(val); }
+    if (this.safety === 'freeze' && config.mode !== 'off') {
+      if (isArray(val) || isPlainObject(val)) { return devProxyFor(val); }
+    }
+    return val;
   }
 
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = this.maybeClone(newValue);
+      this.currentValue = this.protect(newValue);
       this.notify();
     }
   }
@@ -132,8 +122,20 @@ export class Signal {
   }
 
   set(newValue) {
-    // equality check in setter
     this.value = newValue;
+  }
+
+  peek() {
+    if (this.safety === 'clone') {
+      const val = this.currentValue;
+      return (val !== null && typeof val === 'object') ? this.maybeClone(val) : val;
+    }
+    return this.currentValue;
+  }
+
+  clone() {
+    this.depend();
+    return this.cloneFunction(this.currentValue);
   }
 
   subscribe(callback) {
@@ -142,10 +144,36 @@ export class Signal {
     });
   }
 
-  // derive a new signal from this signal's value
+  depend() {
+    this.dependency.depend();
+  }
+
+  notify() {
+    if (config.mode !== 'off') {
+      this.setContext();
+      this.setTrace();
+    }
+    this.dependency.changed(this.context);
+  }
+
+  hasDependents() {
+    return this.dependency.subscribers.size > 0;
+  }
+
+  clear() {
+    return this.set(undefined);
+  }
+
+  /*-------------------
+         Complex
+  --------------------*/
+
+  // derive/computed below use WeakRef on the *derived/computed* signal so the
+  // reaction's closure doesn't pin it through source.dep.subscribers, plus
+  // onCleanup against the parent Reaction so inner reactions stop when the
+  // outer re-runs (leak fix from #201).
   derive(computeFn, options = {}) {
     const derivedSignal = new Signal(undefined, options);
-    // weak so the reaction's closure doesn't pin derived through source.dep.subscribers
     const derivedRef = new WeakRef(derivedSignal);
     const source = this;
 
@@ -165,7 +193,6 @@ export class Signal {
     return derivedSignal;
   }
 
-  // static method for computing from multiple signals
   static computed(computeFn, options = {}) {
     const computedSignal = new Signal(undefined, options);
     const computedRef = new WeakRef(computedSignal);
@@ -186,89 +213,108 @@ export class Signal {
     return computedSignal;
   }
 
-  depend() {
-    this.dependency.depend();
-  }
+  /*-------------------
+     Mutation Helpers
+  --------------------*/
 
-  notify() {
-    // Each gate handles itself — setContext on isTracing, setTrace on
-    // isStackCapture. Hot path: both early-return when their flag is off.
-    this.setContext();
-    this.setTrace();
-    this.dependency.changed(this.context);
-  }
-
-  hasDependents() {
-    return this.dependency.subscribers.size > 0;
-  }
-
-  peek() {
-    return this.maybeClone(this.currentValue);
-  }
-
-  clear() {
-    return this.set(undefined);
-  }
-
-  // mutate the current value by a mutation function
-  mutate(mutationFn) {
-    // we use clone in all cases to detect for changes only
-    const beforeClone = this.clone(this.currentValue);
-    const result = mutationFn(this.currentValue);
-
+  mutate(fn) {
+    // freeze: fn must return a new value (in-place throws).
+    // clone/reference/none: fn may mutate in place; dedupe via equalityFunction.
+    if (this.safety === 'freeze') {
+      const result = fn(this.currentValue);
+      if (result !== undefined) {
+        this.value = result;
+      }
+      else {
+        this.notify();
+      }
+      return;
+    }
+    const before = this.cloneFunction(this.currentValue);
+    const result = fn(this.currentValue);
     if (result !== undefined) {
       if (isDevelopment && result === this.currentValue) {
         console.warn(
           'Signal.mutate: returning the same reference that was mutated in place will bypass change detection. Either mutate without returning, or return a new value.',
         );
       }
-      // if the mutation returned a value just set it
       this.value = result;
     }
-    else {
-      // if no value returned check if the value changed from side effects
-      // in this case we want to trigger reactivity
-      if (!this.equalityFunction(beforeClone, this.currentValue)) {
-        this.notify();
-      }
+    else if (!this.equalityFunction(before, this.currentValue)) {
+      this.notify();
     }
   }
 
-  // array helpers — these always change the value, skip clone+compare
   push(...args) {
-    this.currentValue.push(...args);
+    if (this.safety === 'freeze') {
+      this.currentValue = this.protect([...this.currentValue, ...args]);
+    }
+    else {
+      this.currentValue.push(...args);
+    }
     this.notify();
   }
+
   unshift(...args) {
-    this.currentValue.unshift(...args);
+    if (this.safety === 'freeze') {
+      this.currentValue = this.protect([...args, ...this.currentValue]);
+    }
+    else {
+      this.currentValue.unshift(...args);
+    }
     this.notify();
   }
+
   splice(...args) {
-    this.currentValue.splice(...args);
+    if (this.safety === 'freeze') {
+      const next = [...this.currentValue];
+      next.splice(...args);
+      this.currentValue = this.protect(next);
+    }
+    else {
+      this.currentValue.splice(...args);
+    }
     this.notify();
   }
+
   map(mapFunction) {
-    this.currentValue = Array.prototype.map.call(this.currentValue, mapFunction);
+    this.currentValue = this.protect(Array.prototype.map.call(this.currentValue, mapFunction));
     this.notify();
   }
+
   filter(filterFunction) {
-    this.currentValue = Array.prototype.filter.call(this.currentValue, filterFunction);
+    this.currentValue = this.protect(Array.prototype.filter.call(this.currentValue, filterFunction));
     this.notify();
   }
 
   getIndex(index) {
     return this.get()[index];
   }
+
   setIndex(index, value) {
-    this.currentValue[index] = value;
-    this.notify();
-  }
-  removeIndex(index) {
-    this.currentValue.splice(index, 1);
+    if (this.safety === 'freeze') {
+      const next = [...this.currentValue];
+      next[index] = value;
+      this.currentValue = this.protect(next);
+    }
+    else {
+      this.currentValue[index] = value;
+    }
     this.notify();
   }
 
-  // sets
+  removeIndex(index) {
+    if (this.safety === 'freeze') {
+      const next = [...this.currentValue];
+      next.splice(index, 1);
+      this.currentValue = this.protect(next);
+    }
+    else {
+      this.currentValue.splice(index, 1);
+    }
+    this.notify();
+  }
+
   setArrayProperty(indexOrProperty, property, value) {
     let index;
     if (isNumber(indexOrProperty)) {
@@ -279,16 +325,26 @@ export class Signal {
       value = property;
       property = indexOrProperty;
     }
-    if (index === -1) {
-      return;
+    if (index === -1) { return; }
+
+    if (this.safety === 'freeze') {
+      const newValue = this.currentValue.map((object, currentIndex) => {
+        if (index === 'all' || currentIndex === index) {
+          return { ...object, [property]: value };
+        }
+        return object;
+      });
+      this.set(newValue);
     }
-    const newValue = this.peek().map((object, currentIndex) => {
-      if (index == 'all' || currentIndex == index) {
-        object[property] = value;
+    else {
+      const arr = this.currentValue;
+      for (let i = 0; i < arr.length; i++) {
+        if (index === 'all' || i === index) {
+          arr[i][property] = value;
+        }
       }
-      return object;
-    });
-    this.set(newValue);
+      this.notify();
+    }
   }
 
   toggle() {
@@ -298,18 +354,15 @@ export class Signal {
   increment(amount = 1, max) {
     return this.mutate(val => {
       let newAmount = val + amount;
-      if (isNumber(max) && newAmount > max) {
-        newAmount = max;
-      }
+      if (isNumber(max) && newAmount > max) { newAmount = max; }
       return newAmount;
     });
   }
+
   decrement(amount = 1, min) {
     return this.mutate(val => {
       let newAmount = val - amount;
-      if (isNumber(min) && newAmount < min) {
-        newAmount = min;
-      }
+      if (isNumber(min) && newAmount < min) { newAmount = min; }
       return newAmount;
     });
   }
@@ -318,27 +371,29 @@ export class Signal {
     return this.mutate(() => new Date());
   }
 
+  // id-lookup hot path (Krausest keyed-array path) — id checked first and a
+  // raw for loop in getItemIndex to avoid the findIndex callback allocation.
   getIDs(item) {
-    if (!isObject(item)) {
-      return [item];
-    }
+    if (!isObject(item)) { return [item]; }
     return unique([item.id, item._id, item.hash, item.key].filter(Boolean));
   }
+
   getID(item) {
-    if (!isObject(item)) {
-      return item;
-    }
+    if (!isObject(item)) { return item; }
     return item.id || item._id || item.hash || item.key;
   }
+
   hasID(item, id) {
     return this.getID(item) === id;
   }
+
   getItem(id) {
     const index = this.getItemIndex(id);
     if (index !== -1) {
       return this.getIndex(index);
     }
   }
+
   getItemIndex(id) {
     const arr = this.currentValue;
     for (let i = 0; i < arr.length; i++) {
@@ -346,6 +401,7 @@ export class Signal {
     }
     return -1;
   }
+
   setProperty(idOrProperty, property, value) {
     if (isArray(this.currentValue)) {
       const id = idOrProperty;
@@ -355,15 +411,102 @@ export class Signal {
     else {
       value = property;
       property = idOrProperty;
-      const obj = this.peek();
-      obj[property] = value;
-      this.set(obj);
+      if (this.safety === 'freeze') {
+        this.set({ ...this.currentValue, [property]: value });
+      }
+      else {
+        this.currentValue[property] = value;
+        this.notify();
+      }
     }
   }
+
   replaceItem(id, item) {
     return this.setIndex(this.getItemIndex(id), item);
   }
+
   removeItem(id) {
     return this.removeIndex(this.getItemIndex(id));
+  }
+
+  /*-------------------
+         Tracing
+  --------------------*/
+
+  setContext(additionalContext = {}) {
+    if (config.mode === 'off') { return; }
+    const defaultContext = {
+      value: this.currentValue,
+    };
+    this.context = {
+      ...defaultContext,
+      ...additionalContext,
+    };
+  }
+
+  addContext(additionalContext = {}) {
+    if (config.mode === 'off') { return; }
+    if (!this.context) { this.context = {}; }
+    for (const key in additionalContext) {
+      this.context[key] = additionalContext[key];
+    }
+  }
+
+  // Error.captureStackTrace is 10-100× a context spread; gated on stack mode.
+  setTrace() {
+    captureStack(this, this.setTrace);
+  }
+
+  /*-------------------
+      Instance of
+  --------------------*/
+
+  static [Symbol.hasInstance](instance) {
+    return !!instance?.[signalTag];
+  }
+
+  get [signalTag]() {
+    return true;
+  }
+
+  /*-------------------
+      Configuration
+  --------------------*/
+
+  static defaultEquality = isEqual;
+  static defaultClone = clone;
+  static noEquality = () => false;
+  // Back-compat aliases for the pre-safety static names.
+  static equalityFunction = isEqual;
+  static cloneFunction = clone;
+
+  static get safety() {
+    return config.safety;
+  }
+  static set safety(preset) {
+    if (preset !== 'clone' && preset !== 'freeze' && preset !== 'reference' && preset !== 'none') {
+      throw new Error(`Invalid Signal.safety: ${preset}. Must be 'clone', 'freeze', 'reference', or 'none'.`);
+    }
+    config.safety = preset;
+  }
+
+  static get tracing() {
+    return config.mode !== 'off';
+  }
+  static set tracing(enabled) {
+    if (enabled && config.mode === 'off') { config.mode = 'context'; }
+    else if (!enabled) { config.mode = 'off'; }
+  }
+
+  static get stackCapture() {
+    return config.mode === 'stack';
+  }
+  static set stackCapture(enabled) {
+    if (enabled) { config.mode = 'stack'; }
+    else if (config.mode === 'stack') { config.mode = 'context'; }
+  }
+
+  static configure(config = {}) {
+    Object.assign(Signal, config);
   }
 }
