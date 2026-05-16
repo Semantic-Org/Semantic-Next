@@ -7,11 +7,6 @@ export class Scheduler {
   static isFlushScheduled = false;
   static isFlushing = false;
 
-  static scheduleReaction(reaction) {
-    Scheduler.pendingReactions.add(reaction);
-    Scheduler.scheduleFlush();
-  }
-
   static maxFlushIterations = 100;
 
   static flush() {

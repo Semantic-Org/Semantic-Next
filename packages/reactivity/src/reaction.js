@@ -24,7 +24,6 @@ export class Reaction {
     this.boundRun = this.run.bind(this);
   }
 
-
   // callbacks fire before next run() and on stop. use to scope inner reactions to parent
   onCleanup(callback) {
     this.cleanups.push(callback);
@@ -39,23 +38,6 @@ export class Reaction {
     for (let i = 0; i < callbacks.length; i++) {
       callbacks[i]();
     }
-  }
-
-  setContext(additionalContext = {}) {
-    if (!isTracing()) {
-      return;
-    }
-    const defaultContext = {
-      firstRun: this.firstRun,
-    };
-    this.context = {
-      ...defaultContext,
-      ...additionalContext,
-    };
-  }
-
-  setTrace() {
-    captureStack(this, this.setTrace);
   }
 
   addContext(additionalContext = {}) {
