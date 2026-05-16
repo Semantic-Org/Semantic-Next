@@ -2,7 +2,7 @@ import { getEngine } from '@semantic-ui/renderer';
 import { TemplateCompiler } from '@semantic-ui/compiler';
 // direct import avoids circular chunk dependency between component ↔ templating
 import { Template } from '@semantic-ui/templating/template';
-import { adoptStylesheet, each, fatal, isClient, kebabToCamel, noop } from '@semantic-ui/utils';
+import { adoptStylesheet, each, fatal, identity, isClient, kebabToCamel, noop } from '@semantic-ui/utils';
 
 import { getProperties } from './component-helpers.js';
 import { registerComponent } from './component-registry.js';
@@ -16,7 +16,7 @@ export const defineComponent = ({
   delegatesFocus = false,
   templateName = kebabToCamel(tagName),
 
-  createComponent: createComponentFn = noop,
+  createComponent: createComponentFn = identity,
   events = {},
   keys = {},
 

@@ -112,12 +112,10 @@ Behavioral changes and API contracts that downstream agents and consumers will t
 |---|------|-------|------|-------|-------|
 | 2a | [Signal Performance](active/signal-performance.md) | 4-5h + audit | pair | scoped | `safety` preset system (`freeze` / `reference` / `none`) replacing `allowClone`. Audit of `.get()` call sites for get-mutate-set patterns gates the default flip. |
 | 2a.1 | [Fine-Grained Reactivity](active/fine-grained-reactivity.md) | 6-8h | pair | initial | `ReactiveDataContext` — per-key Signal bag — at `{#each}` items, subtemplate `reactiveData`, snippet args. Eliminates the N×M coarse invalidation pattern. Lands after 2a. |
-| 2a.2 | [FGR — As-Mode Per-Field Isolation](active/fgr-as-mode-per-field-isolation.md) | 3-4h | pair | initial | Closes the per-FIELD gap in `{#each todo in todos}` where one field's mutation wakes every binding reading the item. Two `it.fails` contracts in `subtree-spurious` come off. Fast-follow to 2a.1. |
-| 2a.3 | [Reactivity Hardening](reactivity-hardening.md) | 6-8h (up to 16h) | pair | scoped | Council-flagged Reaction/Scheduler/Dependency cleanup — `afterFlush` scheduling, terminal `stop`, throw-safety, set-swap, lazy refcounted computed (audit-cleared), plus benchmarks gating a conditional dep-tracking rewrite. Parallel to `2a`, minimal file overlap. |
 | 2b | [Value Schema](value-schema.md) | 16-24h (2-3d) | pair | initial | Contract for ~20-30 form components. `value` setting + schema + `change` event. Gates form/form-field and the wrapper architecture. |
 | 2c | [State from Settings](state-from-settings.md) | 8h | pair | scoped | `{ default: 'all', from: 'setting' }` in `defaultState`. Eliminates manual shadowing for components that accept initial values from attributes but own them as state. |
 | 2d | [Subtemplate Settings](subtemplate-settings.md) | 8-12h | pair | initial | Reactive `defaultSettings` on subtemplates with merged proxy over parent web component settings. Same upgrade path: add `tagName` and the subtemplate becomes a web component with no API change. |
-| 2e | [Template Match Blocks](template-match-blocks.md) | 8-16h (1-2d) | pair | scoped | `{#match}`/`{is}`/`{else}` — value-based branching. Replaces verbose `{#if is x 'a'}...{else if is x 'b'}` chains. **Sequence after `P16`** so `{#match}` inherits attribute-position support; otherwise it ships with the same hidden regression `{#if}` carries today. |
+| 2e | [Template Match Blocks](template-match-blocks.md) | 8-16h (1-2d) | pair | scoped | `{#match}`/`{is}`/`{else}` — value-based branching. Replaces verbose `{#if is x 'a'}...{else if is x 'b'}` chains. |
 | 2f | [Internationalization](i18n.md) | TBD | pair | initial | i18n as a built-in framework primitive — locale, formatters, RTL, language switching. Lands before Phase 4 to avoid retrofitting 60+ components. Pair session needed to scope. |
 
 ---
@@ -158,8 +156,8 @@ An agent needs eyes and tooling to work in isolation. Phase 4 has two gates befo
 
 Wrappers are the adoption surface for the majority of consumers — React/Vue/Svelte developers using `@semantic-ui/react` etc. rather than registering web components manually. Architecture defines the generation pipeline; per-framework packages are the artifacts. Blocked on Value Schema (2b); iterates alongside Phase 4 primitive generation. Sequenced ahead of authored documentation because adoption needs the wrappers — docs alone don't convert most users.
 
-| # | Plan | Hours | Mode | Scope | Notes |
-|---|------|-------|------|-------|-------|
+| # | What | Hours | Mode | Notes |
+|---|------|-------|------|-------|
 | 5a | [Wrapper Architecture](wrapper-architecture.md) | 40-56h (5-7d) | pair | initial | Generation pipeline for React/Vue/Svelte wrappers. Blocked on value schema. |
 | 5b | Wrapper Packages | 96-160h (12-20d) | pair | initial | `@semantic-ui/react`, `/vue`, `/svelte`. Blocked on wrapper architecture. |
 
@@ -202,9 +200,6 @@ Slot in wherever there's a gap; not phase-gated.
 | P12 | [Template Spread Syntax](template-spread-syntax.md) | 4-8h | pair | scoped | `{>card ...friend}` — object spread in data passing. Ship when component templates demonstrate need. |
 | P13 | [Template Content Projection](template-wrapper-snippets.md) | 12-16h (1.5-2d) | pair | scoped | `{>content}` — content projection for snippets + subtemplates. Ship when component templates demonstrate need. |
 | P14 | [Template Let Bindings](template-let-bindings.md) | 10-14h (1-2d) | pair | scoped | `{#let}...{/let}` — snippet-for-vars. Ship when component templates demonstrate need. |
-| P15 | [Native Renderer — Perf Wins](native-renderer-perf-wins.md) | 4-6h | pair | scoped | Three small renderer cleanups: cache collapse (Option A — keep string cache for unsafeHTML), module-scoped TreeWalker, unsafeHTML dirty-check (~10000× savings ratio at unchanged values). Item 3 ships standalone for clean bench attribution. |
-| P16 | [Block Dispatch Unification](block-dispatch-unification.md) | 20-30h (2.5-4d) | pair | scoped | Restore block-position introspection (regression: `{#if}` in attribute values renders literal comment text) and fold expression handling into the block model. Every AST node dispatches via `getBlock(type)(bag)`; every block receives `entry.classification` and renders position-appropriately, matching Lit's `partInfo` contract. Step 1 ships independently as the regression bugfix. **Should land before `2e Template Match Blocks`** so match inherits attribute-position support. |
-| P17 | [defineBlock — Mount-Cost Reduction](defineblock-mount-cost.md) | 4-6h | pair | scoped | Eliminate per-dispatch closure construction in `defineBlock`. Krausest `create-1000`/`create-10000` wins. **Blocked on `2a.2` (FGR — As-Mode Per-Field Isolation) merge** to avoid `each.js` conflicts. |
 
 ---
 
