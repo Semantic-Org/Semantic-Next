@@ -5,8 +5,8 @@ import { buildData } from './store.js';
 import ast from './template.html?ast';
 
 const defaultState = {
-  rows: { value: [], options: { allowClone: false, equalityFunction: () => false } },
-  selected: { value: 0, options: { allowClone: false, equalityFunction: () => false } },
+  rows: { value: [], options: { safety: 'none', equalityFunction: () => false } },
+  selected: { value: 0, options: { safety: 'none', equalityFunction: () => false } },
 };
 
 const createComponent = ({ state }) => ({
