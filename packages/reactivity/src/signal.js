@@ -45,10 +45,14 @@ export class Signal {
       ? wrapFunction(cloneFunction)
       : Signal.cloneFunction;
 
-    this.currentValue = this.maybeClone(initialValue);
+    this.currentValue = this.protect(initialValue);
 
     // allow debugging context to be set
     this.setContext(context);
+  }
+
+  protect(value) {
+    return this.maybeClone(value);
   }
 
   // set debugging context for signal removing any present context
@@ -119,7 +123,7 @@ export class Signal {
 
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = this.maybeClone(newValue);
+      this.currentValue = this.protect(newValue);
       this.notify();
     }
   }
