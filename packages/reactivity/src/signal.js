@@ -16,6 +16,12 @@ import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } 
 import { Reaction } from './reaction.js';
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
+const noEqualityFn = () => false;
+
+function freezeValue(value) {
+  if (value === null || typeof value !== 'object') { return value; }
+  return deepFreeze(value);
+}
 
 export class Signal {
   get [IS_SIGNAL]() {
@@ -25,37 +31,38 @@ export class Signal {
     return !!instance?.[IS_SIGNAL];
   }
 
-  constructor(initialValue, { context, equalityFunction, allowClone = true, cloneFunction, safety } = {}) {
-    // pass in some metadata for debugging
+  constructor(initialValue, options = {}) {
+    const { context, equalityFunction, allowClone = true, cloneFunction, safety } = options;
+    const effectiveSafety = safety ?? (allowClone === false ? 'reference' : 'clone');
+
+    // Dispatch non-clone modes to specialized subclasses so the hot setter
+    // body in each mode stays byte-tight enough for V8 to inline transitively
+    // through `signal.set()`. new.target gate skips when subclasses call super().
+    if (new.target === Signal && effectiveSafety !== 'clone') {
+      if (effectiveSafety === 'freeze') { return new FreezeSignal(initialValue, options); }
+      if (effectiveSafety === 'none') { return new NoneSignal(initialValue, options); }
+      return new ReferenceSignal(initialValue, options);
+    }
+
     this.dependency = new Dependency({
       firstRun: true,
       value: initialValue,
     });
 
-    // allow user to opt out of value cloning
     this.allowClone = allowClone;
-    this.safety = safety ?? (allowClone === false ? 'reference' : 'clone');
+    this.safety = effectiveSafety;
 
-    // allow custom equality function
     this.equalityFunction = (equalityFunction)
       ? wrapFunction(equalityFunction)
-      : Signal.equalityFunction;
+      : (effectiveSafety === 'none' ? noEqualityFn : Signal.equalityFunction);
 
-    // allow custom clone function
     this.clone = (cloneFunction)
       ? wrapFunction(cloneFunction)
       : Signal.cloneFunction;
 
-    this.currentValue = this.protect(initialValue);
+    this.currentValue = this.maybeClone(initialValue);
 
-    // allow debugging context to be set
     this.setContext(context);
-  }
-
-  protect(value) {
-    if (this.safety === 'freeze') { return deepFreeze(value); }
-    if (this.safety === 'clone') { return this.maybeClone(value); }
-    return value;
   }
 
   // set debugging context for signal removing any present context
@@ -126,7 +133,7 @@ export class Signal {
 
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = this.protect(newValue);
+      this.currentValue = this.maybeClone(newValue);
       this.notify();
     }
   }
@@ -375,3 +382,51 @@ export class Signal {
     return this.removeIndex(this.getItemIndex(id));
   }
 }
+
+class FreezeSignal extends Signal {
+  constructor(initialValue, options) {
+    super(initialValue, options);
+    this.currentValue = freezeValue(initialValue);
+  }
+
+  get value() {
+    this.depend();
+    return this.currentValue;
+  }
+
+  set value(newValue) {
+    if (!this.equalityFunction(this.currentValue, newValue)) {
+      this.currentValue = freezeValue(newValue);
+      this.notify();
+    }
+  }
+
+  peek() {
+    return this.currentValue;
+  }
+}
+
+class ReferenceSignal extends Signal {
+  constructor(initialValue, options) {
+    super(initialValue, options);
+    this.currentValue = initialValue;
+  }
+
+  get value() {
+    this.depend();
+    return this.currentValue;
+  }
+
+  set value(newValue) {
+    if (!this.equalityFunction(this.currentValue, newValue)) {
+      this.currentValue = newValue;
+      this.notify();
+    }
+  }
+
+  peek() {
+    return this.currentValue;
+  }
+}
+
+class NoneSignal extends ReferenceSignal {}
