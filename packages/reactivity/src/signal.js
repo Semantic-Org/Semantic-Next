@@ -77,8 +77,7 @@ export class Signal {
   }
 
   get() {
-    this.depend();
-    return this.currentValue;
+    return this.value;
   }
 
   set(newValue) {
