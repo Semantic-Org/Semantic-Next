@@ -32,35 +32,21 @@ export class Signal {
 
   constructor(initialValue, {
     safety = 'clone',
-    equalityFunction = Signal.equalityFunction,
     cloneFunction = Signal.cloneFunction,
+    equalityFunction = (safety === 'none') ? returnsFalse : Signal.equalityFunction,
     context,
   } = {}) {
-    if (equalityFunction) {
-      this.equalityFunction = equalityFunction;
-    }
-    else if (this.safety === 'none') {
-      this.equalityFunction = returnsFalse;
-    }
-    // for user introspection
-    this.safety = safety;
-
-    // allow custom equality function
-    this.equalityFunction = (equalityFunction)
-      ? wrapFunction(equalityFunction)
-      : Signal.equalityFunction;
-
-    // allow custom clone function
-    this.clone = (cloneFunction)
-      ? wrapFunction(cloneFunction)
-      : Signal.cloneFunction;
-
     // create dependency
     this.dependency = new Dependency({
       firstRun: true,
       value: initialValue,
     });
 
+    // handle custom helpers if user specifies
+    this.cloneFunction = cloneFunction;
+    this.equalityFunction = equalityFunction;
+
+    this.safety = safety;
     this.currentValue = this.protect(initialValue);
 
     // pass through debugging context
@@ -68,7 +54,7 @@ export class Signal {
   }
 
   protect(value) {
-    if (this.safety == 'clone') {
+    if (this.safety === 'clone') {
       return this.clone(value);
     }
     return value;
@@ -80,7 +66,7 @@ export class Signal {
     const value = this.currentValue;
 
     // otherwise previous value would be modified if the returned value is mutated negating the equality
-    return (value !== null && typeof value == 'object')
+    return (value !== null && typeof value === 'object')
       ? this.protect(value)
       : value;
   }
@@ -112,12 +98,16 @@ export class Signal {
     return this.protect(this.currentValue);
   }
 
-  clone() {
+  raw() {
+    return this.currentValue;
+  }
+
+  clone(value = this.currentValue) {
     if (isClassInstance(value)) {
       return value;
     }
     if (isArray(value)) {
-      return value.map(value => this.protect(value));
+      return value.map(arrValue => this.protect(arrValue));
     }
     return this.cloneFunction(value);
   }
@@ -270,7 +260,7 @@ export class Signal {
       return;
     }
     const newValue = this.peek().map((object, currentIndex) => {
-      if (index == 'all' || currentIndex == index) {
+      if (index === 'all' || currentIndex === index) {
         object[property] = value;
       }
       return object;
@@ -365,18 +355,22 @@ export class Signal {
 
   // context lets you pass through metadata with a signal
   // to determine reaction source
-
-  setContext(additionalContext = {}) {
+  setContext(additionalContext) {
     if (!isTracing()) {
       return;
     }
     const defaultContext = {
       value: this.currentValue,
     };
-    this.context = {
-      ...defaultContext,
-      ...additionalContext,
-    };
+    if (!additionalContext) {
+      this.addContext(defaultContext);
+    }
+    else {
+      this.context = {
+        ...defaultContext,
+        ...additionalContext,
+      };
+    }
   }
   addContext(additionalContext = {}) {
     if (!isTracing()) {

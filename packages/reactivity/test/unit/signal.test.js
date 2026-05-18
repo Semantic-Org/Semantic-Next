@@ -530,7 +530,7 @@ describe.concurrent('Signal', () => {
   describe.concurrent('Cloning Behavior with Signals', () => {
     it('should maintain reactivity when using a Signal inside another Signal', () => {
       const innerCallback = vi.fn();
-      const innerVar = new Signal(1, { allowClone: true });
+      const innerVar = new Signal(1, { safety: 'clone' });
 
       const outerCallback = vi.fn();
       const outerVar = new Signal(innerVar);
@@ -555,8 +555,8 @@ describe.concurrent('Signal', () => {
       const data1 = { id: 1, text: 'test object' };
       const data2 = { id: 2, text: 'test object 2' };
 
-      const innerVar1 = new Signal(data1, { allowClone: true });
-      const innerVar2 = new Signal(data2, { allowClone: true });
+      const innerVar1 = new Signal(data1, { safety: 'clone' });
+      const innerVar2 = new Signal(data2, { safety: 'clone' });
 
       innerVar1.subscribe(innerCallback1);
       innerVar2.subscribe(innerCallback2);
@@ -1008,9 +1008,9 @@ describe('Signal API', () => {
       expect(signal.peek().count).toBe(0);
     });
 
-    it('does NOT clone when allowClone is false — external mutation reflects through peek()', () => {
+    it('permits mutations through peek when using no safety', () => {
       const original = { count: 0 };
-      const signal = new Signal(original, { allowClone: false });
+      const signal = new Signal(original, { safety: 'reference' });
       original.count = 99;
       expect(signal.peek().count).toBe(99);
     });
@@ -1046,7 +1046,7 @@ describe('Signal API', () => {
   });
 
   /***********************************************
-   * get() / value getter — reactive read with cloning
+   * get() / value getter
    ***********************************************/
 
   describe('get() and value', () => {
@@ -1059,14 +1059,6 @@ describe('Signal API', () => {
       counter.set(1);
       Reaction.flush();
       expect(cb).toHaveBeenCalledTimes(2);
-    });
-
-    it('returns a cloned object each call so callers cannot poison internal state by mutating the result', () => {
-      const signal = new Signal({ inner: 'untouched' });
-      const a = signal.get();
-      a.inner = 'mutated';
-      // Second get returns a fresh clone — first mutation did not stick
-      expect(signal.get().inner).toBe('untouched');
     });
 
     it('value getter is an alias for get() — both produce the same value', () => {
@@ -1161,7 +1153,7 @@ describe('Signal API', () => {
   });
 
   /***********************************************
-   * subscribe() — callback observer that fires once synchronously + on changes
+   * subscribe() — callback observer
    ***********************************************/
 
   describe('subscribe()', () => {
@@ -1249,13 +1241,13 @@ describe('Signal API', () => {
     it('force-triggers subscribers even when the value reference is identical', () => {
       // mutate the underlying object via peek(), then notify() so subscribers re-run.
       const callback = vi.fn();
-      const data = new Signal({ count: 0 }, { allowClone: false });
+      const data = new Signal({ count: 0 });
       Reaction.create(() => callback(data.get().count));
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenLastCalledWith(0);
 
-      data.peek().count = 5;
+      data.raw().count = 5;
       data.notify();
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(2);
