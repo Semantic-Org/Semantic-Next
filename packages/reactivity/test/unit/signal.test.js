@@ -787,7 +787,7 @@ describe.concurrent('Signal', () => {
         obj => ({ doubled: obj.count * 2 }),
         {
           equalityFunction: (a, b) => a?.doubled === b?.doubled,
-          safety: 'clone',
+          safety: 'reference',
         },
       );
 
