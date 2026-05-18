@@ -45,9 +45,6 @@ export class Signal {
     // for user introspection
     this.safety = safety;
 
-    // allow user to opt out of value cloning
-    this.allowClone = allowClone;
-
     // allow custom equality function
     this.equalityFunction = (equalityFunction)
       ? wrapFunction(equalityFunction)
@@ -64,10 +61,17 @@ export class Signal {
       value: initialValue,
     });
 
-    this.currentValue = this.maybeClone(initialValue);
+    this.currentValue = this.protect(initialValue);
 
     // pass through debugging context
     this.setContext(context);
+  }
+
+  protect(value) {
+    if (this.safety == 'clone') {
+      return this.clone(val);
+    }
+    return value;
   }
 
   get value() {
@@ -77,15 +81,13 @@ export class Signal {
 
     // otherwise previous value would be modified if the returned value is mutated negating the equality
     return (value !== null && typeof value == 'object')
-      ? this.maybeClone(value)
+      ? this.protect(value)
       : value;
   }
 
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = (this.safety === 'clone')
-        ? this.clone()
-        : newValue;
+      this.currentValue = this.protect(newValue);
       this.notify();
     }
   }
@@ -107,7 +109,7 @@ export class Signal {
   }
 
   peek() {
-    return this.maybeClone(this.currentValue);
+    return this.protect(this.currentValue);
   }
 
   clone() {
@@ -115,7 +117,7 @@ export class Signal {
       return value;
     }
     if (isArray(value)) {
-      return value.map(value => this.maybeClone(value));
+      return value.map(value => this.protect(value));
     }
     return this.cloneFunction(value);
   }
