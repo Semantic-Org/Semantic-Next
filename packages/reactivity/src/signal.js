@@ -223,11 +223,21 @@ export class Signal {
     this.notify();
   }
   map(mapFunction) {
-    this.currentValue = Array.prototype.map.call(this.currentValue, mapFunction);
+    const arr = this.currentValue;
+    for (let i = 0; i < arr.length; i++) {
+      arr[i] = mapFunction(arr[i], i, arr);
+    }
     this.notify();
   }
   filter(filterFunction) {
-    this.currentValue = Array.prototype.filter.call(this.currentValue, filterFunction);
+    const arr = this.currentValue;
+    let writeIndex = 0;
+    for (let i = 0; i < arr.length; i++) {
+      if (filterFunction(arr[i], i, arr)) {
+        arr[writeIndex++] = arr[i];
+      }
+    }
+    arr.length = writeIndex;
     this.notify();
   }
 
@@ -243,7 +253,6 @@ export class Signal {
     this.notify();
   }
 
-  // sets
   setArrayProperty(indexOrProperty, property, value) {
     let index;
     if (isNumber(indexOrProperty)) {
@@ -257,13 +266,16 @@ export class Signal {
     if (index === -1) {
       return;
     }
-    const newValue = this.peek().map((object, currentIndex) => {
-      if (index === 'all' || currentIndex === index) {
-        object[property] = value;
+    const arr = this.currentValue;
+    if (index === 'all') {
+      for (let i = 0; i < arr.length; i++) {
+        arr[i][property] = value;
       }
-      return object;
-    });
-    this.set(newValue);
+    }
+    else {
+      arr[index][property] = value;
+    }
+    this.notify();
   }
 
   toggle() {
@@ -316,8 +328,10 @@ export class Signal {
   }
   getItemIndex(id) {
     const arr = this.currentValue;
-    for (let i = 0; i < arr.length; i++) {
-      if (this.hasID(arr[i], id)) { return i; }
+    for (let index = 0; index < arr.length; index++) {
+      if (this.hasID(arr[index], id)) {
+        return index;
+      }
     }
     return -1;
   }
@@ -330,9 +344,8 @@ export class Signal {
     else {
       value = property;
       property = idOrProperty;
-      const obj = this.peek();
-      obj[property] = value;
-      this.set(obj);
+      this.currentValue[property] = value;
+      this.notify();
     }
   }
   replaceItem(id, item) {
