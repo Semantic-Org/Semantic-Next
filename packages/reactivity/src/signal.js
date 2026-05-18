@@ -29,9 +29,10 @@ export class Signal {
   // default clone and equal pulled from utils
   static equalityFunction = isEqual;
   static cloneFunction = clone;
+  static safety = 'clone';
 
   constructor(initialValue, {
-    safety = 'clone',
+    safety = Signal.safety,
     cloneFunction = Signal.cloneFunction,
     equalityFunction = (safety === 'none') ? returnsFalse : Signal.equalityFunction,
     context,
