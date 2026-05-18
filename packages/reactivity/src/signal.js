@@ -31,7 +31,7 @@ export class Signal {
   static cloneFunction = clone;
 
   constructor(initialValue, {
-    safety = 'reference',
+    safety = 'clone',
     equalityFunction = Signal.equalityFunction,
     cloneFunction = Signal.cloneFunction,
     context,
@@ -69,7 +69,7 @@ export class Signal {
 
   protect(value) {
     if (this.safety == 'clone') {
-      return this.clone(val);
+      return this.clone(value);
     }
     return value;
   }
