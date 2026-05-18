@@ -54,6 +54,9 @@ export class Signal {
   }
 
   protect(value) {
+    if (value === null || typeof value !== 'object') {
+      return value;
+    }
     if (this.safety === 'clone') {
       return this.clone(value);
     }
@@ -63,12 +66,7 @@ export class Signal {
   get value() {
     // Record this Signal as a dependency if inside a Reaction computation
     this.depend();
-    const value = this.currentValue;
-
-    // otherwise previous value would be modified if the returned value is mutated negating the equality
-    return (value !== null && typeof value === 'object')
-      ? this.protect(value)
-      : value;
+    return this.protect(this.currentValue);
   }
 
   set value(newValue) {

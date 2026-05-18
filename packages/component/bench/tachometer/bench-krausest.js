@@ -110,7 +110,7 @@ function buildData(count) {
       Component Definition
 *******************************/
 
-const signalOptions = { allowClone: false, safety: 'reference' };
+const signalOptions = { safety: 'reference' };
 
 defineComponent({
   tagName: 'bench-app',
