@@ -986,7 +986,7 @@ RENDERING_ENGINES.forEach(engine => {
           tagName: tag,
           template: '{#each fruit in fruits}<span>{capture fruit}</span>{/each}',
           createComponent: ({ signal }) => {
-            const fruits = signal([ref], { allowClone: false });
+            const fruits = signal([ref], { safety: 'reference' });
             return {
               fruits,
               capture: (fruit) => {
@@ -1017,7 +1017,7 @@ RENDERING_ENGINES.forEach(engine => {
           tagName: tag,
           template: '{#each fruit in fruits}<span>{capture(fruit)}</span>{/each}',
           createComponent: ({ signal }) => {
-            const fruits = signal([ref], { allowClone: false });
+            const fruits = signal([ref], { safety: 'reference' });
             return {
               fruits,
               capture: (fruit) => {
@@ -1047,7 +1047,7 @@ RENDERING_ENGINES.forEach(engine => {
           tagName: tag,
           template: '{#each d in dates}<span>{readTime d}</span>{/each}',
           createComponent: ({ signal }) => {
-            const dates = signal([new Date('2024-01-01T00:00:00Z')], { allowClone: false });
+            const dates = signal([new Date('2024-01-01T00:00:00Z')], { safety: 'reference' });
             return {
               dates,
               readTime: (d) => {
@@ -1079,7 +1079,7 @@ RENDERING_ENGINES.forEach(engine => {
           tagName: tag,
           template: '{#each fruit in fruits}<span>{readCache fruit}</span>{/each}',
           createComponent: ({ signal }) => {
-            const fruits = signal([ref], { allowClone: false });
+            const fruits = signal([ref], { safety: 'reference' });
             return {
               fruits,
               readCache: (fruit) => {

@@ -765,19 +765,24 @@ describe('mid-reaction signal updates', () => {
 *******************************/
 
 describe('Signal — read paths via internals', () => {
-  it('get({ clone: false }) creates a dependency but returns the live reference', () => {
+  it('raw() returns the live reference without creating a dependency', () => {
     const obj = { a: 1 };
     const s = new Signal(obj);
     let lastSeen;
+    let runs = 0;
     Reaction.create(() => {
-      lastSeen = s.get({ clone: false });
+      runs++;
+      lastSeen = s.raw();
     });
 
+    expect(runs).toBe(1);
     expect(lastSeen).toBe(s.currentValue);
 
     s.set({ a: 2 });
     Reaction.flush();
-    expect(lastSeen.a).toBe(2);
+    // raw() did not subscribe — reaction does not re-run
+    expect(runs).toBe(1);
+    expect(lastSeen.a).toBe(1);
   });
 
   it('peek returns a clone (defensive read) but no dependency', () => {
