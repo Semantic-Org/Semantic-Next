@@ -416,9 +416,13 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       if (asValue !== null && typeof asValue === 'object') {
         let changedKeys = null;
         if (record.snapshot !== null && typeof record.snapshot === 'object') {
+          // refreshSnapshotAndDetect updates the snapshot in place — no need
+          // to re-allocate via createSnapshot afterwards.
           changedKeys = refreshSnapshotAndDetect(record.snapshot, asValue);
         }
-        record.snapshot = createSnapshot(asValue);
+        else {
+          record.snapshot = createSnapshot(asValue);
+        }
         if (changedKeys) {
           for (const key of changedKeys) {
             record.dataContext.notifyField(key);
