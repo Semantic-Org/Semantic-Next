@@ -245,6 +245,9 @@ export class Signal {
     return this.get()[index];
   }
   setIndex(index, value) {
+    if (this.currentValue[index] === value) {
+      return;
+    }
     this.currentValue[index] = value;
     this.notify();
   }
@@ -267,15 +270,24 @@ export class Signal {
       return;
     }
     const arr = this.currentValue;
+    let changed = false;
     if (index === 'all') {
       for (let i = 0; i < arr.length; i++) {
-        arr[i][property] = value;
+        if (arr[i][property] !== value) {
+          arr[i][property] = value;
+          changed = true;
+        }
       }
     }
     else {
-      arr[index][property] = value;
+      if (arr[index][property] !== value) {
+        arr[index][property] = value;
+        changed = true;
+      }
     }
-    this.notify();
+    if (changed) {
+      this.notify();
+    }
   }
 
   toggle() {
@@ -344,6 +356,9 @@ export class Signal {
     else {
       value = property;
       property = idOrProperty;
+      if (this.currentValue[property] === value) {
+        return;
+      }
       this.currentValue[property] = value;
       this.notify();
     }

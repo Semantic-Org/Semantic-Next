@@ -249,6 +249,15 @@ SAFETY_MODES.forEach((safety) => {
         sig.setIndex(1, 20);
         expect(sig.raw()).toBe(before);
       });
+
+      it('does not fire reactivity when the value is already what was passed', () => {
+        const sig = new Signal([1, 2, 3], { safety });
+        const sub = subscribe(sig);
+        sig.setIndex(1, 2);
+        Reaction.flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
     });
 
     describe('removeIndex', () => {
@@ -400,6 +409,18 @@ SAFETY_MODES.forEach((safety) => {
         sig.setArrayProperty(0, 'count', 5);
         expect(sig.raw()).toBe(before);
       });
+
+      it('does not fire reactivity when the value is already what was passed', () => {
+        const sig = new Signal(
+          [{ id: 'a', count: 5 }, { id: 'b', count: 0 }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.setArrayProperty(0, 'count', 5);
+        Reaction.flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
     });
 
     describe('setArrayProperty (all-items form)', () => {
@@ -432,6 +453,30 @@ SAFETY_MODES.forEach((safety) => {
         const before = sig.raw();
         sig.setArrayProperty('done', true);
         expect(sig.raw()).toBe(before);
+      });
+
+      it('does not fire reactivity when every item already has the value', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: true }, { id: 'b', done: true }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.setArrayProperty('done', true);
+        Reaction.flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
+
+      it('fires reactivity when at least one item differs', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: true }, { id: 'b', done: false }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.setArrayProperty('done', true);
+        Reaction.flush();
+        expect(sub.count).toBe(1);
+        sub.stop();
       });
     });
 
@@ -467,6 +512,18 @@ SAFETY_MODES.forEach((safety) => {
         sig.setProperty('b', 'title', 'TWO');
         expect(sig.raw()).toBe(before);
       });
+
+      it('does not fire reactivity when the field already has the value', () => {
+        const sig = new Signal(
+          [{ id: 'a', title: 'one' }, { id: 'b', title: 'two' }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.setProperty('b', 'title', 'two');
+        Reaction.flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
     });
 
     describe('setProperty (object form)', () => {
@@ -490,6 +547,15 @@ SAFETY_MODES.forEach((safety) => {
         const before = sig.raw();
         sig.setProperty('count', 7);
         expect(sig.raw()).toBe(before);
+      });
+
+      it('does not fire reactivity when the field already has the value', () => {
+        const sig = new Signal({ name: 'a', count: 7 }, { safety });
+        const sub = subscribe(sig);
+        sig.setProperty('count', 7);
+        Reaction.flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
       });
     });
 
