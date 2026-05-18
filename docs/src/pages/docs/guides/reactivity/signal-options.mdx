@@ -44,60 +44,59 @@ const customEquality = (a, b) => {
 const customVar = new Signal(initialValue, { equalityFunction: customEquality });
 ```
 
-## Value Cloning
+## Safety Presets
 
-By default, Signals automatically clone object and array values during [`get`](/docs/api/reactivity/signal#get) and [`set`](/docs/api/reactivity/signal#set) operations.
+Signals have three safety presets controlling how the stored value is protected against accidental mutation. Set the preset via the `safety` option.
 
-A very common issue when using naive Signals implementations is that it can be very easy to accidentally update an underlying signal value when modifying its value without using `set()` or `value`.
+| Preset | On `set` | On `.get().x = y` | Dedupe | Use case |
+|---|---|---|---|---|
+| `freeze` (default) | deep-freeze plain objects and arrays | throws `TypeError` | `isEqual` | state your code owns end-to-end |
+| `reference` | store raw | silent (no reactivity) | `isEqual` | third-party objects, perf-critical paths |
+| `none` | store raw | silent (no reactivity) | never | event-stream semantics — every `set` notifies |
 
-```javascript
-const countObj = new Signal({ count: 0 });
+### `safety: 'freeze'` — the default
 
-// by default this will not update the current count unless set() is called
-const newObj = countObj.get();
-newObj.count = 1;
-```
-
-Cloning prevents accidental mutation of the Signal's internal state and ensures reliable [equality checks](#equality-comparison).
-
-Disabling cloning (using the [`allowClone`](/docs/api/reactivity/signal#options) option) will reduce the overhead of `set` and `get` calls but will potentially cause unexpected behaviors when modifying arrays and objects.
-```javascript title="Accidental Mutations"
-const countObj = new Signal({ count: 0 }, { allowClone: false });
-
-// this will not trigger reactivity, but the value will change in the next flush
-// this is because the underlying signal was accidentally mutated
-const newObj = countObj.get();
-newObj.count = 1;
-```
-
-### Custom Cloning Function
-
-Similar to the equality check, the cloning function itself can be customized by providing a [`cloneFunction`](/docs/api/reactivity/signal#options) in the constructor options.
+The default deep-freezes object and array values when you call `set()`. Accidental in-place mutation throws at the call site instead of silently dropping the update.
 
 ```javascript
-// Simple JSON clone
-const customClone = (value) => {
-  return JSON.parse(JSON.stringify(value));
-};
+const count = new Signal({ n: 0 });
 
-// Signal using custom clone function
-const customCloneSignal = new Signal({ data: 1 }, { cloneFunction: customClone });
+count.get().n = 1; // TypeError — "Signal value is frozen — cannot set property `n`"
+
+// Correct ways to update:
+count.set({ n: 1 });                // replace the whole value
+count.mutate(prev => ({ n: prev.n + 1 })); // return a new value
+count.setProperty('n', 1);          // mutation helper — rebuilds immutably under freeze
 ```
 
-### Uncloneable Content
+Deep-freeze only walks arrays and plain objects. `Date`, `Map`, `Set`, `RegExp`, DOM nodes, and class instances are stored by reference — their own mutation semantics are preserved.
 
-Some values do not have reliable ways to clone. For instance, there is no universal way to clone a custom class.
+### `safety: 'reference'` — opt-out for borrowed data
 
-**Class instances are not cloned** by default, regardless of the `allowClone` setting. Signals always store and return direct references to class instances.
+Use `reference` when the signal holds objects you didn't construct yourself. Freezing them would poison the lender's internal references; see [Signals and Foreign References](/docs/guides/reactivity/signals#signals-and-foreign-references) for the full heuristic.
 
 ```javascript
-class MyData {
-  constructor(value) { this.value = value; }
-}
+const searchResults = new Signal([], { safety: 'reference' });
+```
 
-const instanceSignal = new Signal(new MyData(10));
+Direct mutation on `.get()` values fails silently under `reference` — the helpers (`push`, `splice`, `setProperty`) remain the safe update path.
 
-const instance1 = instanceSignal.get();
-const instance2 = instanceSignal.get();
-console.log(instance1 === instance2);
+### `safety: 'none'` — event-stream semantics
+
+Use `none` when every `set` should notify subscribers, even if the value is deeply equal to the previous one. Suitable for notification channels where the payload's shape repeats.
+
+```javascript
+const pulse = new Signal(null, { safety: 'none' });
+
+pulse.set({ type: 'heartbeat' });
+pulse.set({ type: 'heartbeat' }); // still notifies, even though isEqual would say equal
+```
+
+## Custom Clone Function
+
+The default `cloneFunction` is used by `signal.clone()` to produce a deep-mutable copy on demand. Override it if you need non-default clone semantics.
+
+```javascript
+const jsonClone = (value) => JSON.parse(JSON.stringify(value));
+const mySignal = new Signal({ data: 1 }, { cloneFunction: jsonClone });
 ```

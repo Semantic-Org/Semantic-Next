@@ -30,9 +30,9 @@ new Signal(initialValue, options);
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
+| safety | `'freeze'` \| `'reference'` \| `'none'` | `'freeze'` | Value-protection preset. See [Signal Options](/docs/guides/reactivity/signal-options) for details. |
 | equalityFunction | Function | isEqual | Custom function to determine if the value has changed |
-| allowClone | boolean | true | Whether to clone the value when getting/setting |
-| cloneFunction | Function | clone | Custom function to clone the value |
+| cloneFunction | Function | clone | Custom function used by `signal.clone()` |
 
 ### Usage
 
@@ -54,27 +54,17 @@ const person = new Signal({ name: 'John', age: 30 }, {
 });
 ```
 
-#### Disabling Cloning for Custom Classes
+#### Holding Borrowed Data
 
-To avoid mutating the source object naively, by default values are cloned when set. However some objects cannot be naively cloned like custom classes.
+The default `safety: 'freeze'` deep-freezes object and array values on `set` to catch accidental in-place mutation. For signals holding objects you don't own — anything returned from a library, fetched from an API, or passed through a callback — opt out with `safety: 'reference'` so the library's own reference isn't poisoned.
 
 ```javascript
 import { Signal } from '@semantic-ui/reactivity';
 
-class CustomClass {
-  constructor(value) {
-    this.value = value;
-  }
-}
-
-const customInstance = new Signal(new CustomClass(42), {
-  allowClone: false,
-  equalityFunction: (a, b) => a.value === b.value
-});
-
-// The CustomClass instance won't be cloned when accessed
-console.log(customInstance.get().value); // Output: 42
+const searchResults = new Signal(pagefindResults, { safety: 'reference' });
 ```
+
+See the [Signals and Foreign References](/docs/guides/reactivity/signals#signals-and-foreign-references) section of the signals guide for the full heuristic.
 
 ## `Get`
 
@@ -212,7 +202,7 @@ someValue.notify();
 ```javascript
 import { Reaction, Signal } from '@semantic-ui/reactivity';
 
-const canvas = new Signal(document.createElement('canvas'), { allowClone: false });
+const canvas = new Signal(document.createElement('canvas'), { safety: 'reference' });
 
 Reaction.create(() => {
   const el = canvas.get();
@@ -298,7 +288,7 @@ console.log(counter.get()); // Output: undefined
 
 ## `Mutate`
 
-Safely mutates the current value using a mutation function. This method ensures reactivity is triggered even when `allowClone` is false or when using custom equality functions.
+Safely mutates the current value using a mutation function. Under `safety: 'freeze'` the mutation function must return a new value (in-place mutation throws). Under `safety: 'reference'` or `'none'` the function may mutate in place and reactivity still fires.
 
 ### Syntax
 ```javascript
@@ -317,24 +307,28 @@ The return value of the mutation function, if any.
 
 ### Usage
 
-#### In-place Mutation
+#### Returning a New Value (works under all safety modes)
 ```javascript
 import { Signal } from '@semantic-ui/reactivity';
 
 const items = new Signal(['apple', 'banana']);
-items.mutate(arr => {
-  arr.push('orange'); // Mutate in place
-});
+items.mutate(arr => [...arr, 'orange']);
 console.log(items.get()); // ['apple', 'banana', 'orange']
+
+const count = new Signal(5);
+count.mutate(val => val * 2);
+console.log(count.get()); // 10
 ```
 
-#### Returning a New Value
+#### In-place Mutation (only under safety: 'reference' or 'none')
 ```javascript
 import { Signal } from '@semantic-ui/reactivity';
 
-const count = new Signal(5);
-count.mutate(val => val * 2); // Return new value
-console.log(count.get()); // 10
+const items = new Signal(['apple', 'banana'], { safety: 'reference' });
+items.mutate(arr => {
+  arr.push('orange'); // Mutate in place — allowed because the value isn't frozen
+});
+console.log(items.get()); // ['apple', 'banana', 'orange']
 ```
 
 #### With Custom Classes
@@ -350,12 +344,13 @@ class Counter {
   }
 }
 
-const counter = new Signal(new Counter(0), { 
-  allowClone: false,
-  equalityFunction: (a, b) => a.value === b.value
+// Class instances aren't frozen by default (deepFreeze skips them),
+// but set safety: 'reference' explicitly when you plan to mutate in place
+const counter = new Signal(new Counter(0), {
+  safety: 'reference',
+  equalityFunction: (a, b) => a.value === b.value,
 });
 
-// Safe mutation that triggers reactivity
 counter.mutate(c => c.increment());
 console.log(counter.get().value); // 1
 ```
