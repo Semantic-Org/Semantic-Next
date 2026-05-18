@@ -6,12 +6,14 @@ import {
   isEqual,
   isNumber,
   isObject,
+  returnsFalse,
   unique,
   wrapFunction,
 } from '@semantic-ui/utils';
 
-import { Dependency } from './dependency.js';
 import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
+
+import { Dependency } from './dependency.js';
 import { Reaction } from './reaction.js';
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
@@ -24,12 +26,24 @@ export class Signal {
     return !!instance?.[IS_SIGNAL];
   }
 
-  constructor(initialValue, { context, equalityFunction, allowClone = true, cloneFunction } = {}) {
-    // pass in some metadata for debugging
-    this.dependency = new Dependency({
-      firstRun: true,
-      value: initialValue,
-    });
+  // default clone and equal pulled from utils
+  static equalityFunction = isEqual;
+  static cloneFunction = clone;
+
+  constructor(initialValue, {
+    safety = 'reference',
+    equalityFunction = Signal.equalityFunction,
+    cloneFunction = Signal.cloneFunction,
+    context,
+  } = {}) {
+    if (equalityFunction) {
+      this.equalityFunction = equalityFunction;
+    }
+    else if (this.safety === 'none') {
+      this.equalityFunction = returnsFalse;
+    }
+    // for user introspection
+    this.safety = safety;
 
     // allow user to opt out of value cloning
     this.allowClone = allowClone;
@@ -44,52 +58,17 @@ export class Signal {
       ? wrapFunction(cloneFunction)
       : Signal.cloneFunction;
 
+    // create dependency
+    this.dependency = new Dependency({
+      firstRun: true,
+      value: initialValue,
+    });
+
     this.currentValue = this.maybeClone(initialValue);
 
-    // allow debugging context to be set
+    // pass through debugging context
     this.setContext(context);
   }
-
-  // set debugging context for signal removing any present context
-  setContext(additionalContext = {}) {
-    if (!isTracing()) {
-      return;
-    }
-    const defaultContext = {
-      value: this.currentValue,
-    };
-    this.context = {
-      ...defaultContext,
-      ...additionalContext,
-    };
-  }
-
-  // add context to signal
-  addContext(additionalContext = {}) {
-    if (!isTracing()) {
-      return;
-    }
-    if (!this.context) {
-      this.context = {};
-    }
-    for (const key in additionalContext) {
-      this.context[key] = additionalContext[key];
-    }
-  }
-
-  // Stack trace capture is gated separately because Error.captureStackTrace
-  // costs ~10-100× a context spread, paid per Signal.notify in tracing-on
-  // dev. Default off; opt in via setStackCapture(true).
-  setTrace() {
-    captureStack(this, this.setTrace);
-  }
-
-  static equalityFunction = isEqual;
-  static cloneFunction = clone;
-  static setTracing = setTracing;
-  static isTracing = isTracing;
-  static setStackCapture = setStackCapture;
-  static isStackCapture = isStackCapture;
 
   get value() {
     // Record this Signal as a dependency if inside a Reaction computation
@@ -102,38 +81,43 @@ export class Signal {
       : value;
   }
 
-  canCloneValue(value) {
-    return (this.allowClone === true && !isClassInstance(value));
-  }
-
-  maybeClone(value) {
-    if (!this.canCloneValue(value)) {
-      return value;
-    }
-    if (isArray(value)) {
-      return value.map(value => this.maybeClone(value));
-    }
-    return this.clone(value);
-  }
-
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.currentValue = this.maybeClone(newValue);
+      this.currentValue = (this.safety === 'clone')
+        ? this.clone()
+        : newValue;
       this.notify();
     }
   }
 
-  get({ clone = true } = {}) {
-    if (!clone) {
-      this.depend();
-      return this.currentValue;
-    }
-    return this.value;
+  get() {
+    this.depend();
+    return this.currentValue;
   }
 
   set(newValue) {
     // equality check in setter
     this.value = newValue;
+  }
+
+  notify() {
+    this.setContext();
+    this.setTrace();
+    this.dependency.changed(this.context);
+  }
+
+  peek() {
+    return this.maybeClone(this.currentValue);
+  }
+
+  clone() {
+    if (isClassInstance(value)) {
+      return value;
+    }
+    if (isArray(value)) {
+      return value.map(value => this.maybeClone(value));
+    }
+    return this.cloneFunction(value);
   }
 
   subscribe(callback) {
@@ -142,20 +126,36 @@ export class Signal {
     });
   }
 
-  // derive a new signal from this signal's value
+  /* Dependencies */
+  hasDependents() {
+    return this.dependency.subscribers.size > 0;
+  }
+
+  depend() {
+    this.dependency.depend();
+  }
+
+  /*******************************
+           Child Signals
+  *******************************/
+
+  // single signal having a derivation
   derive(computeFn, options = {}) {
     const derivedSignal = new Signal(undefined, options);
-    // weak so the reaction's closure doesn't pin derived through source.dep.subscribers
+
+    // weak so the reaction's closure doesn't pin derived
+    // through source.dep.subscribers
     const derivedRef = new WeakRef(derivedSignal);
+
     const source = this;
 
     const reaction = Reaction.create(() => {
-      const d = derivedRef.deref();
-      if (!d) {
+      const currentRef = derivedRef.deref();
+      if (!currentRef) {
         reaction.stop();
         return;
       }
-      d.set(computeFn(source.get()));
+      currentRef.set(computeFn(source.get()));
     });
 
     if (Reaction.current) {
@@ -165,18 +165,18 @@ export class Signal {
     return derivedSignal;
   }
 
-  // static method for computing from multiple signals
+  // multiple signals computing a signal
   static computed(computeFn, options = {}) {
     const computedSignal = new Signal(undefined, options);
     const computedRef = new WeakRef(computedSignal);
 
     const reaction = Reaction.create(() => {
-      const c = computedRef.deref();
-      if (!c) {
+      const ref = computedRef.deref();
+      if (!ref) {
         reaction.stop();
         return;
       }
-      c.set(computeFn());
+      ref.set(computeFn());
     });
 
     if (Reaction.current) {
@@ -186,29 +186,9 @@ export class Signal {
     return computedSignal;
   }
 
-  depend() {
-    this.dependency.depend();
-  }
-
-  notify() {
-    // Each gate handles itself — setContext on isTracing, setTrace on
-    // isStackCapture. Hot path: both early-return when their flag is off.
-    this.setContext();
-    this.setTrace();
-    this.dependency.changed(this.context);
-  }
-
-  hasDependents() {
-    return this.dependency.subscribers.size > 0;
-  }
-
-  peek() {
-    return this.maybeClone(this.currentValue);
-  }
-
-  clear() {
-    return this.set(undefined);
-  }
+  /*******************************
+          Mutation Helpers
+  *******************************/
 
   // mutate the current value by a mutation function
   mutate(mutationFn) {
@@ -232,6 +212,11 @@ export class Signal {
         this.notify();
       }
     }
+  }
+
+  // clears current value
+  clear() {
+    return this.set(undefined);
   }
 
   // array helpers — these always change the value, skip clone+compare
@@ -365,5 +350,47 @@ export class Signal {
   }
   removeItem(id) {
     return this.removeIndex(this.getItemIndex(id));
+  }
+
+  /*******************************
+           Tracing Utils
+  *******************************/
+
+  static setTracing = setTracing;
+  static isTracing = isTracing;
+  static setStackCapture = setStackCapture;
+  static isStackCapture = isStackCapture;
+
+  // context lets you pass through metadata with a signal
+  // to determine reaction source
+
+  setContext(additionalContext = {}) {
+    if (!isTracing()) {
+      return;
+    }
+    const defaultContext = {
+      value: this.currentValue,
+    };
+    this.context = {
+      ...defaultContext,
+      ...additionalContext,
+    };
+  }
+  addContext(additionalContext = {}) {
+    if (!isTracing()) {
+      return;
+    }
+    if (!this.context) {
+      this.context = {};
+    }
+    for (const key in additionalContext) {
+      this.context[key] = additionalContext[key];
+    }
+  }
+
+  // capturing stack pays a 10-100× perf cost
+  // opt in only via setStackCapture(true).
+  setTrace() {
+    captureStack(this, this.setTrace);
   }
 }
