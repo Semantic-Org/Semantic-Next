@@ -104,7 +104,7 @@ export class Signal {
       return value;
     }
     if (isArray(value)) {
-      return value.map(arrValue => this.protect(arrValue));
+      return value.map(arrValue => this.clone(arrValue));
     }
     return this.cloneFunction(value);
   }
