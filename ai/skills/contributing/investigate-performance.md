@@ -14,6 +14,24 @@ type: skill
 
 **Golden rule: profile before you theorize.** A Chrome DevTools trace + a few injected counters localize the mechanism in minutes. Reading framework source files trying to derive why something is slow burns hours and converges on plausible-sounding wrong answers. Start with measurement.
 
+**A conclusion is the measurement chain you produced, not the destination.** Naming a cause is worth nothing without a chain of measurements *you ran in this investigation* that forces it. Two things follow:
+
+- **Investigate the regression a user feels, not the one that's easy to isolate.** A synthetic microbench getting slower (setting a signal to itself, subscribe/unsubscribe churn) is rarely worth acting on. A real component workload getting slower (editing a todo, rendering a list) is the finding. The synthetic bench is tempting because it isolates cleanly — the weight gate in Step 1 keeps you honest about which one to chase.
+- **A prior cause-claim is a hypothesis, not an answer.** The cause may already be written down — a commit message, a PR comment, an `ai/workspace` note, a code comment. Treat it as a lead to test, never as evidence. See "Evidence Integrity" below.
+
+---
+
+## Evidence Integrity — prior claims are leads, not answers
+
+You will read prior explanations of the regression along the way — git log is a legitimate bisection tool, commit messages and workspace notes are right there. The discipline is how you carry what you read:
+
+1. **Treat a prior cause-claim as a hypothesis to test.** "The commit message says it's cross-bench contamination" earns exactly the scrutiny your own untested guess would — design a measurement against it, and leave room for it to be wrong.
+2. **Disclose what you encountered.** If your conclusion matches a claim already written in a commit message, PR comment, or workspace note, say so and show the measurement chain that stands on its own: "claim X appears in <source>; here is what I measured."
+3. **Convergence counts only between measurements** — not between your conclusion and something you read. So don't describe agreement with the git history as independent corroboration.
+4. **If a conclusion isn't reconstructable from measurements you ran, it's a citation, not a finding.** Name it as such.
+
+The information is in the data and you'll find it. Integrity is in how you handle it, not in pretending you didn't.
+
 ---
 
 ## When to Reach for This Skill
@@ -27,36 +45,62 @@ This skill is for that *why* phase, not the *did it regress* phase.
 ## The Flow That Works
 
 ```
-1. Identify the bench targets (weighted)                  → /read-bench-report
-2. Read the relevant V8 skills FIRST                      → ground claims against current engine behavior
-3. Capture Chrome traces, PR vs main, of one bench        → chrome-devtools MCP
-4. Diff hot functions (inclusive + exclusive self-time)   → identify suspects
-5. Inject counters into the bundle                        → tell more-calls vs slower-per-call
-6. Repeat with a tighter hypothesis                       → bisect into the framework path
-7. Spawn /fresh-take subagents if static reasoning loops  → escape solution momentum
+1. Identify weighted targets, clear the weight gate          → /read-bench-report
+2. Read the bench + understand the component it drives       → bench source + authoring skills
+3. Calibrate V8 priors                                       → performance-v8-* skills
+   ── gather (no hypothesis needed) ──
+4. Capture a trace; diff hot functions, current vs baseline  → chrome-devtools MCP
+   → a discounted hypothesis falls out of what the trace shows
+   ── steelman (a hypothesis is required to write the test) ──
+5. Count calls / catch spurious evaluations to confirm it    → injected counters / Playwright
+6. A/B a candidate change locally                            → local tachometer, custom bundles
+7. Read the suspect framework path                           → only after a measurement points at it
+8. Spawn /fresh-take subagents if reasoning loops            → escape solution momentum
 ```
 
-Steps 3-5 are the breakthrough. Each step is cheap (~5-10 minutes) and produces empirical signal.
+Each step is cheap (~5-10 minutes) and produces empirical signal.
+
+**Two kinds of instrument, and the order is not arbitrary.** *Gathering* tools (the Chrome trace, a tachometer baseline diff) need no hypothesis — they run first and hand you one by showing where the cost is. *Steelmanning* tools (counter / Playwright instrumentation of call counts and spurious evaluations) you cannot even write until you have a specific suspicion, because you instrument the exact thing you suspect. So gather first, let the hypothesis fall out of the measurement, then steelman it. If you're reaching for the counter test with nothing specific to count, you haven't gathered enough yet. The hypothesis is born from a measurement, never from a read.
+
+**The question that actually ends a root-cause investigation: *which channel?*** Localizing the cost to a function is not the finding. The finding is naming the channel with a captured measurement: more calls (counter injection), slower per call from GC live-set pressure (heap/scavenge trace), slower per call from JIT tier / IC state (CPU self-time profile), or allocation survival (heap trajectory). "It's a measurement artifact" or "it's contamination" is where you start digging, not where you stop — those are claims about a channel you still have to measure.
 
 ---
 
 ## Step 1 — Identify Targets With Weights
 
-Not all regressions are equal. The PR author or maintainer has weights. Typical pattern in this codebase:
+Not all regressions are equal. Use this fixed heuristic so you don't have to guess what matters:
 
 | package suite | weight | rationale |
 |---|---:|---|
 | `krausest` | 5× | js-framework-benchmark, headline external comparison |
-| `todo`, `template`, `hydrate` | 1× | end-user workloads |
-| `signal`, `compiler-micros`, `renderer-micros` | 0.25× | internal microbenches, useful but not user-facing |
+| `todo`, `template`, `hydrate` | 2× | real component/app workloads — what a user actually feels |
+| `signal`, `compiler-micros`, `renderer-micros`, other synthetics | 0.25× | internal microbenches; a regression here is rarely something anyone acts on |
 
-Build a target table: bench name, weight, **PR-vs-main delta in percentage points**. Order by weight × magnitude. Investigate the heaviest first; stop when remaining gaps are noise-floor adjacent (~±4% on short benches).
+Build a target table: bench name, weight, **PR-vs-main delta in percentage points**, ranked by **weight × magnitude**. A +70% regression on `todo` (2× × 70 = 140) outranks a +27% regression on a `signal` microbench (0.25× × 27 = 6.75) by 20×. The synthetic one is almost never where you should spend the investigation.
 
-**Do not** burn cycles on borderline-noise regressions — `/read-bench-report` documents the noise-floor envelope per duration.
+**The weight gate.** The investigation isn't done until you've *measured* the highest weight×magnitude regressor. If the conclusion rests on the synthetic micro-benches while the top-ranked real-workload regressor (e.g. `todo:edit-cycle-5` +70%) is still unmeasured, the wrong thing got investigated — build that bundle and profile it first. "By analogy to the signal benches" doesn't clear the gate; only a measurement does.
+
+**Do not** burn cycles on borderline-noise regressions — `/read-bench-report` documents the noise-floor envelope per duration. But "low magnitude" is weighted too: a 2× suite just above the noise floor can still outrank a large synthetic swing.
 
 ---
 
-## Step 2 — Ground Claims Against Current V8 Behavior
+## Step 2 — Read the Bench, and Orient on the Component It Drives
+
+Info-gathering, not theorizing — read to learn *what the workload is*, never to conclude *why it's slow* (that comes from measurement). Two reads:
+
+**Read the bench definition.** Open `packages/*/bench/tachometer/bench-*.js` and read the regressing case verbatim. The name is not the workload: `todo:edit-cycle-5` is `editTodo` + `saveTodo` — an `editingId` flip plus a field write that re-renders a row, so it runs the each-block reconciler over object-valued signals; `signal:set-same-10m` is a primitive `set` that never reaches that path. This is what tells you which bench is worth a trace and which code path to instrument.
+
+**For a component regression, orient on how components actually work — from the user-facing side — before you trace.** This is the step renderer investigations skip. The code your trace lands in (`packages/renderer/src/engines/native`) is a *separate package* from `packages/component` and the authoring surface a user writes against. A trace gives you hot function names; it does not tell you how a component behaves in practice — how expression evaluation, each-blocks, computeds, and reactivity actually fire when someone writes a template. Without that model you'll mis-read the trace. Orient first through the authoring curriculum:
+
+- `example-curriculum` — the fastest orientation: a ranked path through real components
+- `component-templating`, `component-state` — how templates, helpers, expressions, and signal mutations behave
+- one or two real examples — the template/expression demos make expression evaluation concrete in a way the renderer source does not
+
+You're not memorizing the API. You're building enough of the user-facing mental model that the trace's hot functions map onto something you understand.
+
+---
+
+## Step 3 — Ground Claims Against Current V8 Behavior
 
 Before reasoning about *why* a regression exists, read these:
 
@@ -72,9 +116,9 @@ A common failure mode: an agent forms a hidden-class polymorphism hypothesis, th
 
 ---
 
-## Step 3 — Capture Chrome DevTools Traces
+## Step 4 — Gather: Capture Chrome DevTools Traces
 
-The chrome-devtools MCP server lets you capture a full V8 sampling trace from inside the conversation. This is the single most informative tool in this flow.
+This is the lead gathering tool — it needs no hypothesis and produces one. (Cheapest first move before tracing: a tachometer baseline diff, Step 6, to confirm the regression reproduces locally and how big it is.) The chrome-devtools MCP server lets you capture a full V8 sampling trace from inside the conversation. This is the single most informative tool in this flow.
 
 **Setup:**
 
@@ -133,7 +177,9 @@ Single Chrome traces are not statistically rigorous — variance is high. But fo
 
 ---
 
-## Step 4 — Inject Counters to Distinguish More-Calls vs Slower-Per-Call
+## Step 5 — Steelman the Hypothesis: Inject Counters / Playwright
+
+This is a steelmanning tool, so it comes *after* the trace has handed you a hypothesis — you instrument the specific thing you now suspect (a helper firing too often, a spurious re-evaluation), to confirm or kill it. If you don't yet have something specific to count, go back and gather.
 
 The trace gives self-time per function. It does NOT give call count. Without call count, you can't tell:
 
@@ -219,9 +265,9 @@ Adding more counters per investigation iteration narrows the suspect down to a s
 
 ---
 
-## Step 5 — Local Tachometer for Hypothesis Tests
+## Step 6 — Local Tachometer: Reproduce, Size, and A/B
 
-When you want to test a hypothesis ("does reordering the bench eliminate the regression?", "does changing this expression form change the result?"), you can run tachometer locally with custom-built bundles.
+Dual-use, and the workhorse of both classes: a baseline diff (current vs reverted) *gathers* — it confirms the regression reproduces locally and how big it is, no hypothesis needed — and a custom-bundle A/B *steelmans* a candidate change ("does reordering the bench eliminate the regression?", "does this expression form change the result?", "does my fix actually fix it?").
 
 **Critical constraint that's easy to miss:** the CI bench workflow at `.github/workflows/benchmarks.yml:115-122` overlays `packages/*/bench/` from main before building either bundle. **This means PR-level changes to bench files are silently discarded by CI.** It's a deliberate anti-gaming defense.
 
@@ -259,9 +305,9 @@ See `/extend-bench-suite` for the full local-tachometer reference.
 
 ---
 
-## Step 6 — Read Bundle Source to Identify Suspect Code Paths
+## Step 7 — Read the Suspect Framework Source
 
-Only AFTER you have an empirical signal (trace + counter data) is reading source code productive. The trace tells you *which function*; you read source to understand *what mechanism within that function* differs between variants.
+Only AFTER a measurement points at a function is reading its source productive. The trace tells you *which function*; you read source to understand *what mechanism within that function* differs between variants. (This is distinct from Step 2's read: there you learn what the bench and component *do*, to aim the measurement; here you read the framework internals the measurement already implicated.)
 
 Cross-reference:
 
@@ -273,7 +319,7 @@ Cross-reference:
 
 ---
 
-## Step 7 — Spawn Fresh-Take Agents When Reasoning Loops
+## Step 8 — Spawn Fresh-Take Agents When Reasoning Loops
 
 When you've been on the same hypothesis for an hour and the data isn't agreeing, you're probably in the failure mode the `fresh-take` skill targets: solution momentum.
 
@@ -300,7 +346,7 @@ The value here is that fresh agents, unanchored to the hypothesis you've been ci
 
 **Equating Chrome trace self-time with call count.** Self-time is sample-based and reflects time spent. Call count requires instrumentation. The two answer different questions.
 
-**Trying to make the regression disappear by changing the bench code.** The bench is there to expose the regression. Routing around it (e.g. rewriting a JS-eval expression to Lisp form) hides the symptom; it doesn't diagnose the cause. The maintainer rightly pushes back on this.
+**"The benchmark is wrong" — editing the bench instead of diagnosing the code.** Faced with a regression, it's tempting to reframe the benchmark as unfair and "fix" it to be more factual — rewriting the workload, reordering benches, loosening thresholds, dropping the case. That hides the symptom rather than diagnosing it, and turns a real regression into a green check. The bench exists to expose the regression. A genuine methodology concern is its own finding, raised with evidence and the maintainer's sign-off — not a unilateral edit, and not the "solution." The urge to touch a bench file mid-investigation is a sign you've stopped investigating. (CI also overlays `packages/*/bench/` from main, so the edit wouldn't take anyway — but that's beside the point.)
 
 ---
 
@@ -308,11 +354,15 @@ The value here is that fresh agents, unanchored to the hypothesis you've been ci
 
 | Phase | Tool | Output |
 |---|---|---|
-| Targets | `/read-bench-report` | weighted bench list |
+| Targets (weight × magnitude) | `/read-bench-report` | ranked list; krausest 5× / todo·template·hydrate 2× / synthetics 0.25× |
+| Weight gate | — | heaviest real-workload regressor is measured, not "by analogy" |
+| Orient | bench source + `example-curriculum`, `component-templating` | what the workload does + how the component works user-side |
 | Ground claims | `performance-v8-*` skills | V8 priors are calibrated |
-| Profile | chrome-devtools MCP `performance_start_trace` | per-function self-time |
-| Distinguish call-count vs per-call | sed-injected `window.__counters` | per-region call counts |
-| Hypothesis test | local tachometer with custom bundles | PR-vs-variant percentChange CI |
+| Gather (no hypothesis) | chrome-devtools `performance_start_trace`; tachometer baseline diff | per-function self-time; reproduces + size |
+| Name the channel | heap trace / CPU self-time / counters | calls vs GC vs JIT vs allocation — measured |
+| Steelman (needs hypothesis) | sed-injected `window.__counters` / Playwright | per-region call counts, spurious evals |
+| A/B a fix | local tachometer with custom bundles | PR-vs-variant percentChange CI |
+| Evidence integrity | — | every prior cause-claim disclosed; conclusion = your measurement chain |
 | Stuck | `/fresh-take` with problem-knowledge brief | independent subagent reads |
 
 ---
@@ -329,3 +379,6 @@ The value here is that fresh agents, unanchored to the hypothesis you've been ci
 | **V8 Memory** | `performance-v8-memory` | GC, allocation cost, Proxy speed |
 | **V8 Stale Advice** | `performance-v8-stale-advice` | Firewall against pre-2022 perf folklore |
 | **Native Renderer** | `native-renderer` | Each-block reconcile, per-item Proxy, binding dispatch |
+| **Example Curriculum** | `example-curriculum` | Orient on how components work user-side before a component perf dig |
+| **Component Templating** | `component-templating` | Template syntax, helpers, expression evaluation in practice |
+| **Component State** | `component-state` | Signal API and mutation-method behavior |
