@@ -98,9 +98,9 @@ const cloneValue = (src, preserveDOM, preserveNonCloneable, seen) => {
       copy.add(cloneValue(v, preserveDOM, preserveNonCloneable, seen));
     }
   }
-  // the one case where the native clone wins: ~6x faster on binary data
-  // where the recursive walk only loses, see cloning.bench.js
   else if (isBinary(src)) {
+    // structuredClone beats hand-rolled in perf for binary dramatically (6x)
+    // loses out to handrolled for other code-shapes see <cloning.bench.js>
     copy = structuredClone(src);
     seen.set(src, copy);
   }
