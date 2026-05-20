@@ -701,11 +701,20 @@ describe('Signal API', () => {
       expect(empty.get()).toBe(null);
     });
 
-    it('clones object initial values by default so external mutations do not leak in', () => {
+    it('does not clone object initial values by default (reference safety shares the reference)', () => {
       const original = { count: 0 };
       const signal = new Signal(original);
       original.count = 99;
-      // Internal state should be insulated from later mutation of the source
+      // Reference safety is the default — the signal shares the reference,
+      // so later mutation of the source is visible through it.
+      expect(signal.peek().count).toBe(99);
+    });
+
+    it('clones object initial values under clone safety so external mutations do not leak in', () => {
+      const original = { count: 0 };
+      const signal = new Signal(original, { safety: 'clone' });
+      original.count = 99;
+      // Clone safety insulates internal state from later source mutation
       expect(signal.peek().count).toBe(0);
     });
 
@@ -738,9 +747,9 @@ describe('Signal API', () => {
       expect(callback).toHaveBeenCalledTimes(2);
     });
 
-    it('uses a custom clone function when provided', () => {
+    it('uses a custom clone function when provided under clone safety', () => {
       const cloneSpy = vi.fn(value => ({ ...value, cloned: true }));
-      const signal = new Signal({ name: 'Alice' }, { cloneFunction: cloneSpy });
+      const signal = new Signal({ name: 'Alice' }, { safety: 'clone', cloneFunction: cloneSpy });
       expect(cloneSpy).toHaveBeenCalled();
       expect(signal.peek().cloned).toBe(true);
     });
@@ -845,8 +854,8 @@ describe('Signal API', () => {
       expect(cb).toHaveBeenCalledTimes(2);
     });
 
-    it('clones object values just like get(), insulating callers from mutation', () => {
-      const signal = new Signal({ level: 1 });
+    it('clones object values just like get() under clone safety, insulating callers from mutation', () => {
+      const signal = new Signal({ level: 1 }, { safety: 'clone' });
       const snapshot = signal.peek();
       snapshot.level = 99;
       expect(signal.peek().level).toBe(1);
