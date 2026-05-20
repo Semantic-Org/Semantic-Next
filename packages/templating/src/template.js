@@ -16,6 +16,7 @@ import {
   isClient,
   isEqual,
   isFunction,
+  isObject,
   isServer,
   kebabToCamel,
   mapObject,
@@ -146,9 +147,7 @@ export const Template = class Template {
       }
       // reference-mode Signals alias their initial value; clone object defaults so an instance can't mutate the prototype's shared declaration
       const defaultValue = config?.value ?? config;
-      return (defaultValue !== null && typeof defaultValue === 'object')
-        ? clone(defaultValue, { preserveNonCloneable: true })
-        : defaultValue;
+      return isObject(defaultValue) ? clone(defaultValue, { preserveNonCloneable: true }) : defaultValue;
     };
 
     each(defaultState, (config, name) => {
