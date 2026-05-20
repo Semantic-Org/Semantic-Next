@@ -56,7 +56,7 @@ This skill is for that *why* phase, not the *did it regress* phase.
 
 ```
 1. Identify weighted targets, clear the weight gate          → /read-bench-report
-2. Read the bench + understand the component it drives       → bench source + authoring skills
+2. Read the bench, parse its template (AST), orient on it    → bench source, validate_template, authoring skills
 3. Calibrate V8 priors                                       → performance-v8-* skills
    ── gather (no hypothesis needed) ──
 4. Capture a trace; diff hot functions, current vs baseline  → chrome-devtools MCP
@@ -66,6 +66,7 @@ This skill is for that *why* phase, not the *did it regress* phase.
 6. A/B a candidate change locally                            → local tachometer, custom bundles
 7. Read the suspect framework path                           → only after a measurement points at it
 8. Spawn /fresh-take subagents if reasoning loops            → escape solution momentum
+9. Locate the fix at the named construct, confirm by re-measure → smallest change that kills the channel, keeps the win
 ```
 
 Each step is cheap (~5-10 minutes) and produces empirical signal.
@@ -73,6 +74,8 @@ Each step is cheap (~5-10 minutes) and produces empirical signal.
 **Two kinds of instrument, and the order is not arbitrary.** *Gathering* tools (the Chrome trace, a tachometer baseline diff) need no hypothesis — they run first and hand you one by showing where the cost is. *Steelmanning* tools (counter / Playwright instrumentation of call counts and spurious evaluations) you cannot even write until you have a specific suspicion, because you instrument the exact thing you suspect. So gather first, let the hypothesis fall out of the measurement, then steelman it. If you're reaching for the counter test with nothing specific to count, you haven't gathered enough yet. The hypothesis is born from a measurement, never from a read.
 
 **The question that actually ends a root-cause investigation: *which channel?*** Localizing the cost to a function is not the finding. The finding is naming the channel with a captured measurement: more calls (counter injection), slower per call from GC live-set pressure (heap/scavenge trace), slower per call from JIT tier / IC state (CPU self-time profile), or allocation survival (heap trajectory). "It's a measurement artifact" or "it's contamination" is where you start digging, not where you stop — those are claims about a channel you still have to measure.
+
+**The gates.** Four checkable stops carry the method, and because each is cleared by producing an *artifact*, the artifact is also the verification — the skill never has to watch over your shoulder. The **weight gate** (Step 1): the heaviest real-workload regressor is measured. The **orientation gate** (Step 2): the expected-reactivity prediction is written before the trace. The **V8 gate** (Step 3): a V8 claim cites the current skill, not stale recall. The **grounding gate** (Step 2): the construct is named before any mechanism claim. None is passed by saying you cleared it — only by the artifact existing.
 
 ---
 
@@ -98,9 +101,11 @@ Normalize those products across all the confident regressors and you get a **foc
 
 ## Step 2 — Read the Bench, and Orient on the Component It Drives
 
-Info-gathering, not theorizing — read to learn *what the workload is*, never to conclude *why it's slow* (that comes from measurement). Two reads:
+Info-gathering, not theorizing — read to learn *what the workload is*, never to conclude *why it's slow* (that comes from measurement). Three grounding moves:
 
 **Read the bench definition.** Open `packages/*/bench/tachometer/bench-*.js` and read the regressing case verbatim. The name is not the workload: `todo:edit-cycle-5` is `editTodo` + `saveTodo` — an `editingId` flip plus a field write that re-renders a row, so it runs the each-block reconciler over object-valued signals; `signal:set-same-10m` is a primitive `set` that never reaches that path. This is what tells you which bench is worth a trace and which code path to instrument.
+
+**Parse the template — don't eyeball it.** Run `validate_template` (Semantic UI MCP) with `includeAST` on the regressing component's template string. The node list tells you exactly which expressions route through JavaScript evaluation (object literals, operators, ternaries), which are bare-variable lookups, which are Lisp-style helper calls, and which are block directives — so when a trace or counter implicates `evaluateJavascript`, you attach it to a *specific AST node* instead of guessing. These benches deliberately mix expression shapes (bare var, data path, Lisp helper, JS object literal, `{#if}`/`{#each}`) precisely to catch a regression in any one shape, so the task is to localize to a shape and a node — not to wave at "expression evaluation occurs." A claim like "+40 `evaluateJavascript` calls on a Lisp-style arg" is refuted on sight by an AST that contains no such JS node.
 
 **For a component regression, orient on how components actually work — from the user-facing side — before you trace.** This is the step renderer investigations skip. The code your trace lands in (`packages/renderer/src/engines/native`) is a *separate package* from `packages/component` and the authoring surface a user writes against. A trace gives you hot function names; it does not tell you how a component behaves in practice — how expression evaluation, each-blocks, computeds, and reactivity actually fire when someone writes a template. Without that model you'll mis-read the trace. Orient first through the authoring curriculum:
 
@@ -109,6 +114,10 @@ Info-gathering, not theorizing — read to learn *what the workload is*, never t
 - one or two real examples — the template/expression demos make expression evaluation concrete in a way the renderer source does not
 
 You're not memorizing the API. You're building enough of the user-facing mental model that the trace's hot functions map onto something you understand.
+
+**The orientation gate.** Before you capture a trace, write the *expected* reactive behavior of the regressing workload from the AST and the component: the expressions and their shapes, what the triggering action mutates, and what each mutation should invalidate — once each. This is a prediction of correct behavior, not a cause-hypothesis; it's the baseline the trace is read against, so the regression shows up as the *gap* between what should fire and what did. Writing it before you measure is also what stops the trace from being read to fit a conclusion you'd already reached. The prediction is part of the deliverable — which is what makes the grounding checkable without anyone looking over your shoulder.
+
+**The grounding gate.** You may not assert a *mechanism* — why the cost exists — until you can name the specific AST node, template construct, or source path it concerns. "Expression evaluation occurs" and "extra reactive work" are not mechanisms; "the `classMap {…}` object-literal node re-evaluates N extra times per `editingId` flip" is. Until you can name the construct, what you have is a measured *effect with an open mechanism* — say exactly that, rather than dressing the effect as a cause.
 
 ---
 
@@ -122,7 +131,7 @@ Before reasoning about *why* a regression exists, read these:
 - `performance-v8-stale-advice` — the firewall against pre-2022 V8 folklore (object.freeze speed, try/catch deopts, blanket monomorphism cargo culting)
 - `performance-v8-compilation` — feedback stability, deopt triggers, what Maglev/Turbofan inline
 
-These exist precisely because agents bring incorrect priors from training data. **Cite them when making claims.** When you find yourself reasoning about V8 IC behavior without a citation, stop and verify.
+**The V8 grounding gate.** Your knowledge of V8 comes from training and has a cutoff; these skills were written to current behavior as of May 2026, and V8 moved in the gap. So a claim about V8 internals — specialization, deopts, IC state, GC, inlining — rests on the skill paragraph that covers it, the way you'd cite any source more recent than your own memory. This isn't a check on you; your recall of this one area is out of date by construction, and the skill is the patch. An uncited V8 claim is running on stale priors — ground it, or drop it.
 
 A common failure mode: an agent forms a hidden-class polymorphism hypothesis, then proceeds for ~30 minutes building elaborate theory around it. The object-model skill explicitly says "two `{a:1, b:2}` literals at different lines share a shape." Reading that one paragraph would have prevented the entire detour.
 
@@ -349,6 +358,26 @@ The value here is that fresh agents, unanchored to the hypothesis you've been ci
 
 ---
 
+## Step 9 — Suggest the Fix, and Confirm It
+
+A diagnosis isn't finished at the channel. The deliverable points at *where* to fix — but a fix locus is earned, not guessed. Two halves: locate, then confirm.
+
+**Locate — only once the mechanism is closed.** You can propose a specific change only when you can name the construct that produces the redundant work: the AST node, the binding, the subscription, the source line (this is what the grounding gate is for). Finding the *smallest correct* change is what demands deep-stack understanding — trace the cost from the symptom (extra `evaluateJavascript` calls) to the code that *schedules* it (which reaction over-fires, which dependency edge is redundant), and propose the minimal change that removes it. If the mechanism is still open — bounded effect, unnamed construct — say so and stop there. "Here is the effect and the candidate locus to investigate" is an honest hand-off; a guessed one-line fix is deflection with a patch on it.
+
+**Name the trade, prefer the root cause.** State what the fix must preserve. Here: kill the redundant wakeups *without* reintroducing the per-read clone that won the other benches. Prefer removing the redundant work at its source over masking it — a memoize or guard that hides the symptom is the bench-editing reflex in a different costume.
+
+**Confirm by re-measuring, never by reasoning.** A fix is unconfirmed until the same chain that found the bug shows it gone:
+
+- Re-run the channel measurement on a build *with* the fix — the metric that was +20% (Δ`Reaction.run`, the +N node evals) goes to ~0.
+- The win survives — re-A/B the benches that improved (`rename-500`); they must still win.
+- No new regression — re-run the weighted set, not just the one bench.
+- Correctness holds — run the component tests; the change alters cost, not behavior.
+- Confirm in CI, since the local machine differs and CI rebuilds benches from main.
+
+"It should be faster now" is the false-composure signature again: re-measure, or it isn't fixed. And land it the way the codebase lands perf fixes — present the change plus the before/after measurement chain for review. A single local A/B is evidence for a proposal, not grounds to self-merge.
+
+---
+
 ## Dead Ends to Avoid
 
 **Static code reading without measurement.** It convinces you of a mechanism, then the data disagrees.
@@ -384,12 +413,16 @@ The constructive move is to confirm, not argue. Tachometer is built for exactly 
 | Targets (weight × magnitude) | `/read-bench-report` | ranked list; krausest 5× / todo·template·hydrate 2× / synthetics 0.25× |
 | Weight gate | — | heaviest real-workload regressor is measured, not "by analogy" |
 | Orient | bench source + `example-curriculum`, `component-templating` | what the workload does + how the component works user-side |
-| Ground claims | `performance-v8-*` skills | V8 priors are calibrated |
+| Parse the template | `validate_template` `includeAST` | which expressions are JS-eval vs bare var vs Lisp vs block — map the symptom to a node |
+| Orientation gate | AST + component model | a written prediction of expected reactivity, before the trace |
+| V8 gate | `performance-v8-*` skills | V8 claims cite current (post-cutoff) behavior, not stale recall |
 | Gather (no hypothesis) | chrome-devtools `performance_start_trace`; tachometer baseline diff | per-function self-time; reproduces + size |
 | Name the channel | heap trace / CPU self-time / counters | calls vs GC vs JIT vs allocation — measured |
+| Grounding gate | — | the AST node/construct named before any mechanism claim |
 | Steelman (needs hypothesis) | sed-injected `window.__counters` / Playwright | per-region call counts, spurious evals |
 | A/B a fix | local tachometer with custom bundles | PR-vs-variant percentChange CI |
 | Evidence integrity | — | every prior cause-claim disclosed; conclusion = your measurement chain |
+| Suggest + confirm fix | re-run the channel measurement on a fixed build | channel metric → 0, win preserved, no new regression, tests pass |
 | Stuck | `/fresh-take` with problem-knowledge brief | independent subagent reads |
 
 ---
