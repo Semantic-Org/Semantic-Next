@@ -19,18 +19,28 @@ type: skill
 - **Investigate the regression a user feels, not the one that's easy to isolate.** A synthetic microbench getting slower (setting a signal to itself, subscribe/unsubscribe churn) is rarely worth acting on. A real component workload getting slower (editing a todo, rendering a list) is the finding. The synthetic bench is tempting because it isolates cleanly — the weight gate in Step 1 keeps you honest about which one to chase.
 - **A prior cause-claim is a hypothesis, not an answer.** The cause may already be written down — a commit message, a PR comment, an `ai/workspace` note, a code comment. Treat it as a lead to test, never as evidence. See "Evidence Integrity" below.
 
+**The anti-pattern to watch for in yourself is deflection: drifting away from the measurement that would settle it.** It wears several costumes — chasing the bench that isolates cleanly, calling a regression "noise" or "an artifact," treating a prior claim as proof, pausing until the benches are "fixed." Each one feels like progress, and the tell is subtle: reasoning toward deflection comes out *composed and rigorous*, not flustered — so the calm is no signal you're right. Don't try to catch it by how sound the argument feels; it will feel sound. Catch it by direction: if a line of reasoning concludes "so we don't need to measure," that is the moment to measure. Two forms account for most failed investigations:
+
+- **Let the weighted profile pick the suite to dig into and what the write-up owes each regressor — not how the investigation spends its time.** Suite-weight × magnitude (Step 1) shows where the user-felt cost concentrates: a +70% `todo` regressor dwarfs a +27% `signal` microbench, so the focus and the final report belong there, not on the synthetic bench that happens to isolate cleanly. It's a focus-and-coverage heuristic, not a stopwatch — the investigation follows the signal wherever it leads.
+- **Earn a harder claim, don't settle for "the bench is flawed."** "It's noise / a cross-bench artifact / contamination" is the easy out, and it tends to arrive before the legwork does. Each of those is a claim about a *channel* you then have to measure (Step 5 counters, a heap trace) — a place to start digging, not a verdict. The conclusion worth having is usually unintuitive and hard-won: it turns on how several parts interact (reactivity, each-block reconcile, V8 specialization) and survives because the measurements force it, not because it fit first.
+
+**A bench that *didn't* regress is a control — use the contrast.** Why a near-neighbor on the same code path stayed flat is as much signal as why its sibling moved. `rename-500` (pure `setProperty`) is a large *win* while `edit-cycle-5` (`setProperty` plus an `editingId` flip and a row re-render) regresses — the delta between the two points at the editing/re-render path, not at `setProperty`. "Why did this one *not* move?" is often the cleanest localizer you have, and it's the other reason the weighted budget governs the *report*, not the *investigation*: chasing the contrast means deliberately spending time on benches that didn't regress at all.
+
 ---
 
 ## Evidence Integrity — prior claims are leads, not answers
 
-You will read prior explanations of the regression along the way — git log is a legitimate bisection tool, commit messages and workspace notes are right there. The discipline is how you carry what you read:
+You'll read prior explanations along the way — git log is a legitimate bisection tool, and commit messages and workspace notes are right there. The discipline is in how you carry what you read:
 
-1. **Treat a prior cause-claim as a hypothesis to test.** "The commit message says it's cross-bench contamination" earns exactly the scrutiny your own untested guess would — design a measurement against it, and leave room for it to be wrong.
-2. **Disclose what you encountered.** If your conclusion matches a claim already written in a commit message, PR comment, or workspace note, say so and show the measurement chain that stands on its own: "claim X appears in <source>; here is what I measured."
-3. **Convergence counts only between measurements** — not between your conclusion and something you read. So don't describe agreement with the git history as independent corroboration.
-4. **If a conclusion isn't reconstructable from measurements you ran, it's a citation, not a finding.** Name it as such.
+1. **A prior cause-claim earns the scrutiny of your own untested guess.** "The commit message says it's cross-bench contamination" is a hypothesis to design a measurement against, with room to be wrong — not a conclusion.
+2. **Disclose what you encountered.** If your conclusion matches a claim already written down, say so and show the chain that stands without it.
+3. **Convergence counts only between measurements** — agreement between your conclusion and something you read is not corroboration.
+4. **A conclusion you can't reconstruct from measurements you ran is a citation, not a finding.** Name it as such.
 
-The information is in the data and you'll find it. Integrity is in how you handle it, not in pretending you didn't.
+❌ "git log says PR #213 caused it via extra reactive work, and my trace shows reactive functions hot — confirmed"
+✅ "PR #213's message claims extra reactive work. I counted `Reaction.run` across both bundles: equal. The cost is per-call, not call-count — the claim doesn't hold"
+
+The information is in the data and you'll find it. Integrity is in how you handle it.
 
 ---
 
@@ -76,7 +86,9 @@ Not all regressions are equal. Use this fixed heuristic so you don't have to gue
 | `todo`, `template`, `hydrate` | 2× | real component/app workloads — what a user actually feels |
 | `signal`, `compiler-micros`, `renderer-micros`, other synthetics | 0.25× | internal microbenches; a regression here is rarely something anyone acts on |
 
-Build a target table: bench name, weight, **PR-vs-main delta in percentage points**, ranked by **weight × magnitude**. A +70% regression on `todo` (2× × 70 = 140) outranks a +27% regression on a `signal` microbench (0.25× × 27 = 6.75) by 20×. The synthetic one is almost never where you should spend the investigation.
+Build a target table: bench name, weight, **PR-vs-main delta in percentage points**, ranked by **weight × magnitude**. A +70% regression on `todo` (2× × 70 = 140) outranks a +27% regression on a `signal` microbench (0.25× × 27 = 6.75) by 20×.
+
+Normalize those products across all the confident regressors and you get a **focus-and-coverage budget**: it tells you which suite is worth digging into, and roughly how much of the final write-up each regressor is owed. With todo at 140 against signal's 6.75, the dig and the report belong with todo — "where does the weighted regression actually live," not "which row is rank 1." It is not an investigation stopwatch, though: a small regressor can turn out to be the shared root, and a bench that didn't move at all is often your best control (see "use the contrast" above). Use the budget to choose where to start and to keep the report honest about the heavy regressors; let the signal decide where the investigation actually goes.
 
 **The weight gate.** The investigation isn't done until you've *measured* the highest weight×magnitude regressor. If the conclusion rests on the synthetic micro-benches while the top-ranked real-workload regressor (e.g. `todo:edit-cycle-5` +70%) is still unmeasured, the wrong thing got investigated — build that bundle and profile it first. "By analogy to the signal benches" doesn't clear the gate; only a measurement does.
 
@@ -180,6 +192,9 @@ Single Chrome traces are not statistically rigorous — variance is high. But fo
 ## Step 5 — Steelman the Hypothesis: Inject Counters / Playwright
 
 This is a steelmanning tool, so it comes *after* the trace has handed you a hypothesis — you instrument the specific thing you now suspect (a helper firing too often, a spurious re-evaluation), to confirm or kill it. If you don't yet have something specific to count, go back and gather.
+
+❌ inject a counter with nothing specific in mind, hoping a number stands out
+✅ trace points at "evaluateJavascript looks hot" → count `evaluateJavascript` to confirm it's more calls vs slower per call
 
 The trace gives self-time per function. It does NOT give call count. Without call count, you can't tell:
 
@@ -336,17 +351,29 @@ The value here is that fresh agents, unanchored to the hypothesis you've been ci
 
 ## Dead Ends to Avoid
 
-**Static code reading without measurement.** Convinces you of a mechanism, then the data disagrees. The trace tells you in 5 minutes what reading takes hours to maybe-guess.
+**Static code reading without measurement.** It convinces you of a mechanism, then the data disagrees.
+❌ read renderer source for an hour to derive why each-block reconcile got slower
+✅ trace first — it names the function in 5 minutes, then read that function
 
-**Speculating about V8 specialization without citation.** V8 has moved a lot since 2017. If you're claiming "X is slow because of polymorphism" or "Y causes deopt", cite the specific V8 skill paragraph or v8.dev post. Otherwise you're probably wrong.
+**V8 specialization claims without a citation.** V8 has moved a lot since 2017.
+❌ "X is slow because the object went polymorphic" / "Y causes a deopt"
+✅ cite the `performance-v8-*` paragraph or a v8.dev post, or drop the claim (two `{a,b}` literals at different lines share a shape)
 
-**Pushing bench-file changes to CI to test hypotheses.** The benchmarks workflow overlays `packages/*/bench/` from main before building. Your changes are silently discarded. Test locally.
+**Allocation count mistaken for allocation cost.** Young-gen allocation is cheap (`performance-v8-memory`); surviving into old gen is the expensive part.
+❌ "this variant allocates more, therefore it's slower"
+✅ profile old-gen survival before blaming GC
 
-**Mistaking allocation cost for the dominant cost.** Per `performance-v8-memory`, young-gen allocation is cheap. "This variant allocates more therefore it's slower" is wrong on its own — surviving into old gen is the expensive part. Verify with actual GC profiling, not allocation counting.
+**Trace self-time read as call count.** Self-time is sample-based time spent; call count needs instrumentation.
+❌ "self-time is high, so it's being called more"
+✅ inject a counter to tell more-calls from slower-per-call — they answer different questions
 
-**Equating Chrome trace self-time with call count.** Self-time is sample-based and reflects time spent. Call count requires instrumentation. The two answer different questions.
+**Pushing bench-file changes to CI to test hypotheses.** The workflow overlays `packages/*/bench/` from main before building, so PR-level bench edits are silently discarded (Step 6).
+❌ tweak the bench, push, wait for the bot to re-run
+✅ build both bundles locally and A/B with tachometer
 
-**"The benchmark is wrong" — editing the bench instead of diagnosing the code.** Faced with a regression, it's tempting to reframe the benchmark as unfair and "fix" it to be more factual — rewriting the workload, reordering benches, loosening thresholds, dropping the case. That hides the symptom rather than diagnosing it, and turns a real regression into a green check. The bench exists to expose the regression. A genuine methodology concern is its own finding, raised with evidence and the maintainer's sign-off — not a unilateral edit, and not the "solution." The urge to touch a bench file mid-investigation is a sign you've stopped investigating. (CI also overlays `packages/*/bench/` from main, so the edit wouldn't take anyway — but that's beside the point.)
+**"The benchmark is wrong" — and its quieter form, "let's wait until the benches are fixed."** When an investigation stalls, editing the bench to be "more factual" — rewriting the workload, reordering, loosening thresholds, dropping a case — can feel like progress, but it hides the symptom and turns a real regression into a green check. Once CI's overlay rules that out (it rebuilds `packages/*/bench/` from main, so the edit can't land), the same impulse tends to return as a pause: "we shouldn't dig further until the benches are fixed — they have a JIT-warmup / GC-timing flaw." Watch for this one in yourself — it's deflection's most convincing costume, because JIT tier-up and GC pauses *are* real channels (see "which channel?" above), so the case for it comes out genuinely rigorous. The rigor isn't the signal; the direction is — the argument ends at "don't measure," which is the cue to measure. An elaborate methodology critique is still a detour until a measurement backs it.
+
+The constructive move is to confirm, not argue. Tachometer is built for exactly this: it runs repeated samples and reports a 95% confidence interval per comparison (`percentChange.{low,high}`) — establishing significance via the central limit theorem is the point of the tool, not a gap in it. So "the run is too short to be significant" is already answered by the interval the harness produced and by the per-duration noise floor `/read-bench-report` documents — start there. The same standard settles the harder claims: **a methodology flaw is something you demonstrate, not a reason to halt before you have.** Bump warmup iterations, force GC between samples, reorder the cases and A/B locally (Step 6), and show the regression collapses. If it doesn't collapse, the bench is sound and the regression is real — that's the finding. And absent that demonstration, "let's wait until the benches are fixed" is not grounds to stop. Keep going until a measurement settles it. (`/read-bench-report` and `/extend-bench-suite` carry the statistical details — this skill only needs to point at them.)
 
 ---
 
