@@ -613,7 +613,12 @@ function adoptServerItems({
         scope: itemScope,
         isElse: false,
         snapshot: createSnapshot(item),
-        fresh: true,
+        // Not fresh: unlike a record created during reconcile, an adopted
+        // record's bindings were wired during hydration, so it already
+        // carries subscribers that a first in-place field mutation must
+        // wake. fresh:true would gate it out of the same-ref snapshot-diff
+        // branch and drop that mutation.
+        fresh: false,
       });
     }
     else {
