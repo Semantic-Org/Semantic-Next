@@ -144,7 +144,11 @@ export const Template = class Template {
       if (dataValue !== undefined) {
         return dataValue;
       }
-      return config?.value ?? config;
+      // reference-mode Signals alias their initial value; clone object defaults so an instance can't mutate the prototype's shared declaration
+      const defaultValue = config?.value ?? config;
+      return (defaultValue !== null && typeof defaultValue === 'object')
+        ? clone(defaultValue, { preserveNonCloneable: true })
+        : defaultValue;
     };
 
     each(defaultState, (config, name) => {
@@ -434,8 +438,7 @@ export const Template = class Template {
       element: this.element,
       ast: this.ast,
       css: this.css,
-      // each template instance needs its own copy of state since signals may be pass-by-reference
-      defaultState: clone(this.defaultState, { preserveNonCloneable: true }),
+      defaultState: this.defaultState,
       defaultSettings: this.defaultSettings,
       events: this.events,
       keys: this.keys,
