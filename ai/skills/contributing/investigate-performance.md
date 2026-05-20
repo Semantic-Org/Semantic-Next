@@ -29,7 +29,7 @@ This skill is for that *why* phase, not the *did it regress* phase.
 ```
 1. Identify the bench targets (weighted)                  → /read-bench-report
 2. Read the relevant V8 skills FIRST                      → ground claims against current engine behavior
-3. Capture Chrome traces, ref vs main, of one bench       → chrome-devtools MCP
+3. Capture Chrome traces, PR vs main, of one bench        → chrome-devtools MCP
 4. Diff hot functions (inclusive + exclusive self-time)   → identify suspects
 5. Inject counters into the bundle                        → tell more-calls vs slower-per-call
 6. Repeat with a tighter hypothesis                       → bisect into the framework path
@@ -50,7 +50,7 @@ Not all regressions are equal. The PR author or maintainer has weights. Typical 
 | `todo`, `template`, `hydrate` | 1× | end-user workloads |
 | `signal`, `compiler-micros`, `renderer-micros` | 0.25× | internal microbenches, useful but not user-facing |
 
-Build a target table: bench name, weight, **ref-vs-clone (or PR-vs-main) delta in percentage points**. Order by weight × magnitude. Investigate the heaviest first; stop when remaining gaps are noise-floor adjacent (~±4% on short benches).
+Build a target table: bench name, weight, **PR-vs-main delta in percentage points**. Order by weight × magnitude. Investigate the heaviest first; stop when remaining gaps are noise-floor adjacent (~±4% on short benches).
 
 **Do not** burn cycles on borderline-noise regressions — `/read-bench-report` documents the noise-floor envelope per duration.
 
@@ -78,23 +78,21 @@ The chrome-devtools MCP server lets you capture a full V8 sampling trace from in
 
 **Setup:**
 
-1. Build the bench bundles you want to compare (e.g. `current` = ref-mode signal.js, `baseline` = clone-mode signal.js):
+1. Build the bench bundles you want to compare. `current` is your working tree (the PR change), `baseline` is the same tree with the change reverted. The pattern is: build one, flip the source line under test, build the other, restore:
 
    ```bash
    cd packages/<pkg>/bench/tachometer
    node build-ci.js current
-   # swap the safety flag, rebuild baseline
-   sed -i "s/static safety = 'reference';/static safety = 'clone';/" \
-     /home/jack/semantic/next/packages/reactivity/src/signal.js
+   # flip the single source line under test, rebuild baseline, then restore it
    node build-ci.js baseline
-   sed -i "s/static safety = 'clone';/static safety = 'reference';/" \
-     /home/jack/semantic/next/packages/reactivity/src/signal.js
    ```
+
+   Keep the flip to the smallest possible diff so the two bundles isolate exactly the change you're investigating.
 
 2. Serve the repo over HTTP from a stable port:
 
    ```bash
-   python3 -m http.server 8766 --directory /home/jack/semantic/next &
+   python3 -m http.server 8766 --directory <repo-root> &
    ```
 
 3. Navigate the MCP browser to the bench page, capture the trace:
@@ -124,10 +122,8 @@ const events = t.traceEvents;
 // 4) Aggregate selfTime by node.callFrame.functionName + url:line
 //    (normalize 'current/' vs 'baseline/' bundle paths)
 // 5) Same for inclusive — walk each sample's stack via parent map built from node.children
-// 6) Diff ref-self vs clone-self per function — biggest positive Δ is your suspect
+// 6) Diff current-self vs baseline-self per function — biggest positive Δ is your suspect
 ```
-
-The full parsing script used in the signal-safety investigation is at `ai/workspace/artifacts/signal-safety-regressions/` if you need a starting point.
 
 **What "hot" looks like.** A regression where 85% of the gap concentrates in 1-2 functions is much easier to diagnose than one spread across 20. If you see the latter, the mechanism is probably structural (allocation pattern, GC, scheduler) rather than a single hot loop.
 
@@ -207,7 +203,7 @@ Run both modes. Compare `byMeasure['toggle-all-200']` across modes:
 - If `evals` count is equal and self-time differs → **per-call cost** is the issue (V8 specialization, IC behavior). Drill deeper into what changes in the per-call path.
 - If `evals` count differs proportionally to the wall-clock delta → **more calls** is the issue. Find which call site is firing extra.
 
-In the signal-safety investigation, this is precisely what cracked it open: ref mode showed +20% eval count *and* +20% wall-clock on every regressing bench, with non-regressing benches showing equal counts. Locked-step 1.20× ratio told us the regression was extra reactive work, not slower per-operation.
+A locked-step ratio is the strongest signal here: when the call-count delta and the wall-clock delta move by the same factor across every regressing bench (and non-regressing benches show equal counts), the regression is extra work being scheduled, not slower per-operation. That distinction points at completely different fixes, so it's worth confirming before you touch source.
 
 ### Counter granularity hierarchy
 
@@ -237,13 +233,13 @@ So: bench-file experiments must be tested LOCALLY, not via CI push. Or, if the c
 # Build both bundles from your working tree
 cd packages/<pkg>/bench/tachometer
 node build-ci.js current
-# Modify source (e.g. swap signal.js mode, edit a bench file)
+# Modify source (e.g. flip the source line under test, edit a bench file)
 node build-ci.js baseline
 # Restore source
 
 # Write tachometer config + HTML files pointing at the two bundle paths
 # Then:
-/home/jack/semantic/next/node_modules/.bin/tachometer \
+<repo-root>/node_modules/.bin/tachometer \
   --config $(pwd)/my-experiment.json \
   --json-file /tmp/experiment.json
 ```
@@ -252,8 +248,8 @@ node build-ci.js baseline
 
 ```bash
 #!/bin/bash
-cd /home/jack/semantic/next/packages/<pkg>/bench/tachometer || exit 1
-exec /home/jack/semantic/next/node_modules/.bin/tachometer \
+cd <repo-root>/packages/<pkg>/bench/tachometer || exit 1
+exec <repo-root>/node_modules/.bin/tachometer \
   --config $(pwd)/my-experiment.json --json-file /tmp/out.json
 ```
 
@@ -284,12 +280,11 @@ When you've been on the same hypothesis for an hour and the data isn't agreeing,
 Per `/fresh-take`:
 
 1. Write a brief that captures **problem knowledge** (observations, constraints, V8 skill references) **but not solution momentum** (your specific hypotheses, code paths you've explored).
-2. Save to `ai/workspace/artifacts/<topic>/<topic>-evaluation.md`.
-3. Spawn 2-3 subagents with different lenses (neutral, challenge, survey).
-4. Audit each subagent's output for V8 skill citations — if they didn't cite `performance-v8-object-model` or `performance-v8-stale-advice`, their priors may be uncalibrated.
-5. Present findings to user without reconciliation, per the skill.
+2. Spawn 2-3 subagents with different lenses (neutral, challenge, survey).
+3. Audit each subagent's output for V8 skill citations — if they didn't cite `performance-v8-object-model` or `performance-v8-stale-advice`, their priors may be uncalibrated.
+4. Present findings to user without reconciliation, per the skill.
 
-This worked in the signal-safety investigation: the Challenge and Survey agents independently identified that *more reactive work* (not slower per-call) was the likely mechanism, which the counter instrumentation then confirmed.
+The value here is that fresh agents, unanchored to the hypothesis you've been circling, often name the mechanism you'd ruled out prematurely. Counter instrumentation can then confirm or kill their read empirically.
 
 ---
 
@@ -301,7 +296,7 @@ This worked in the signal-safety investigation: the Challenge and Survey agents 
 
 **Pushing bench-file changes to CI to test hypotheses.** The benchmarks workflow overlays `packages/*/bench/` from main before building. Your changes are silently discarded. Test locally.
 
-**Mistaking allocation cost for the dominant cost.** Per `performance-v8-memory`, young-gen allocation is cheap. "Clone mode allocates more therefore clone mode is slower" is wrong on its own — surviving into old gen is the expensive part. Verify with actual GC profiling, not allocation counting.
+**Mistaking allocation cost for the dominant cost.** Per `performance-v8-memory`, young-gen allocation is cheap. "This variant allocates more therefore it's slower" is wrong on its own — surviving into old gen is the expensive part. Verify with actual GC profiling, not allocation counting.
 
 **Equating Chrome trace self-time with call count.** Self-time is sample-based and reflects time spent. Call count requires instrumentation. The two answer different questions.
 
@@ -317,8 +312,8 @@ This worked in the signal-safety investigation: the Challenge and Survey agents 
 | Ground claims | `performance-v8-*` skills | V8 priors are calibrated |
 | Profile | chrome-devtools MCP `performance_start_trace` | per-function self-time |
 | Distinguish call-count vs per-call | sed-injected `window.__counters` | per-region call counts |
-| Hypothesis test | local tachometer with custom bundles | ref-vs-X percentChange CI |
-| Stuck | `/fresh-take` with workspace brief | independent subagent reads |
+| Hypothesis test | local tachometer with custom bundles | PR-vs-variant percentChange CI |
+| Stuck | `/fresh-take` with problem-knowledge brief | independent subagent reads |
 
 ---
 
