@@ -4,6 +4,7 @@ import {
   any,
   assignInPlace,
   capitalize,
+  clone,
   debounce,
   each,
   extend,
@@ -433,7 +434,8 @@ export const Template = class Template {
       element: this.element,
       ast: this.ast,
       css: this.css,
-      defaultState: this.defaultState,
+      // each template instance needs its own copy of state since signals may be pass-by-reference
+      defaultState: clone(this.defaultState, { preserveNonCloneable: true }),
       defaultSettings: this.defaultSettings,
       events: this.events,
       keys: this.keys,
