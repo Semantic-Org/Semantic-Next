@@ -26,6 +26,8 @@ type: skill
 
 **A bench that *didn't* regress is a control — use the contrast.** Why a near-neighbor on the same code path stayed flat is as much signal as why its sibling moved. `rename-500` (pure `setProperty`) is a large *win* while `edit-cycle-5` (`setProperty` plus an `editingId` flip and a row re-render) regresses — the delta between the two points at the editing/re-render path, not at `setProperty`. "Why did this one *not* move?" is often the cleanest localizer you have, and it's the other reason the weighted budget governs the *report*, not the *investigation*: chasing the contrast means deliberately spending time on benches that didn't regress at all.
 
+**A uniform effect can't explain a non-uniform profile.** If your mechanism is the same size on every bench (a 1.20× everywhere) but the regressions aren't (+71% on one, +10% on another), the *spread* is unexplained data your conclusion still has to fit. And a multiplier identical on winners and losers — the benches that got *faster* show it too — isn't a per-bench cause at all; it points at shared or inherited state (item count, heap, bench ordering). Differential across benches → the real per-bench cause; uniform across all of them → something environmental upstream.
+
 ---
 
 ## Evidence Integrity — prior claims are leads, not answers
@@ -113,7 +115,7 @@ Info-gathering, not theorizing — read to learn *what the workload is*, never t
 - `component-templating`, `component-state` — how templates, helpers, expressions, and signal mutations behave
 - one or two real examples — the template/expression demos make expression evaluation concrete in a way the renderer source does not
 
-You're not memorizing the API. You're building enough of the user-facing mental model that the trace's hot functions map onto something you understand.
+You're not memorizing the API. You're building enough of the user-facing mental model that the trace's hot functions map onto something you understand. Ground where the measurement points: the user-facing model for template and reactivity bugs, the framework plumbing (state init, lifecycle, scheduling) for the ones that aren't — sometimes the trace leads upstream of the component entirely, to a shared `defaultState` or the scheduler, and that's where to read.
 
 **The orientation gate.** Before you capture a trace, write the *expected* reactive behavior of the regressing workload from the AST and the component: the expressions and their shapes, what the triggering action mutates, and what each mutation should invalidate — once each. This is a prediction of correct behavior, not a cause-hypothesis; it's the baseline the trace is read against, so the regression shows up as the *gap* between what should fire and what did. Writing it before you measure is also what stops the trace from being read to fit a conclusion you'd already reached. The prediction is part of the deliverable — which is what makes the grounding checkable without anyone looking over your shoulder.
 
@@ -374,7 +376,11 @@ A diagnosis isn't finished at the channel. The deliverable points at *where* to 
 - Correctness holds — run the component tests; the change alters cost, not behavior.
 - Confirm in CI, since the local machine differs and CI rebuilds benches from main.
 
+The most decisive of these is *ablation*: remove the suspected cause and show the effect disappears while the win survives — a leak-fix that drops the inflated counter to clone parity proves the leak was the cause in a way correlation can't.
+
 "It should be faster now" is the false-composure signature again: re-measure, or it isn't fixed. And land it the way the codebase lands perf fixes — present the change plus the before/after measurement chain for review. A single local A/B is evidence for a proposal, not grounds to self-merge.
+
+And performance is iterative. A result that moves the needle but leaves a residual you can't fully account for — a magnitude gap, an unexplained second-order effect — is an honest place to close a loop: name the residual precisely, push the fix, re-measure, and open the next loop on what's left. That's a loop boundary, not a failure. What's not allowed is relabeling the residual "noise" or "the machine" to avoid the next loop.
 
 ---
 
@@ -395,6 +401,10 @@ A diagnosis isn't finished at the channel. The deliverable points at *where* to 
 **Trace self-time read as call count.** Self-time is sample-based time spent; call count needs instrumentation.
 ❌ "self-time is high, so it's being called more"
 ✅ inject a counter to tell more-calls from slower-per-call — they answer different questions
+
+**"It's just a machine difference."** When a local repro reproduces the regression's *sign* but not CI's *magnitude*, that gap is a finding to chase, not a shrug — bench ordering and cross-bench state accumulation routinely amplify on CI.
+❌ "local shows +20%, CI shows +71%, must be the machine" → stop
+✅ measure it — does the accumulated/leaked state differ under the full CI run order? a uniform mechanism that yields a 7× spread across benches isn't fully explained yet
 
 **Pushing bench-file changes to CI to test hypotheses.** The workflow overlays `packages/*/bench/` from main before building, so PR-level bench edits are silently discarded (Step 6).
 ❌ tweak the bench, push, wait for the bot to re-run
