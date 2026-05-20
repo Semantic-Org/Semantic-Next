@@ -1,4 +1,14 @@
-import { isArray, isClassInstance, isDate, isMap, isObject, isPlainObject, isRegExp, isSet } from './types.js';
+import {
+  isArray,
+  isBinary,
+  isClassInstance,
+  isDate,
+  isMap,
+  isObject,
+  isPlainObject,
+  isRegExp,
+  isSet,
+} from './types.js';
 
 /*-------------------
         Cloning
@@ -87,6 +97,12 @@ const cloneValue = (src, preserveDOM, preserveNonCloneable, seen) => {
     for (const v of src) {
       copy.add(cloneValue(v, preserveDOM, preserveNonCloneable, seen));
     }
+  }
+  // the one case where the native clone wins: ~6x faster on binary data
+  // where the recursive walk only loses, see cloning.bench.js
+  else if (isBinary(src)) {
+    copy = structuredClone(src);
+    seen.set(src, copy);
   }
   else if (isObject(src)) {
     if (preserveNonCloneable && isClassInstance(src)) {
