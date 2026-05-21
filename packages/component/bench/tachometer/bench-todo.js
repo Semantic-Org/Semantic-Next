@@ -190,6 +190,43 @@ async function markEveryNth(el, n) {
 }
 
 /*******************************
+      Edit Flow
+*******************************/
+
+// Positioned ahead of the mutation-heavy benches (toggle/remove/filter) so the
+// edit path is measured against fresh component state, not the heap and
+// V8-feedback state those benches accumulate across the run.
+
+// edit-start-10: 10 consecutive edit transitions cycling different ids
+// (editingId must change each iter or the signal equality short-circuits).
+const el14 = await setup(100);
+// purpose: Enters edit mode on 10 different items in a row, like double-clicking each one.
+performance.mark(startMark('edit-start-10'));
+for (let i = 0; i < 10; i++) {
+  el14.component.editTodo(getTodos(el14)[40 + i].id);
+  flushWork();
+}
+performance.measure('edit-start-10', startMark('edit-start-10'));
+destroy();
+
+// edit-cycle-5: 5 full edit+save cycles (10 ops + 10 RAFs total). Fresh
+// mount so the first iter sees editingId=null, not the residual from
+// edit-start-10's last iter — otherwise that first transition is an
+// edit→edit hop, which is a different workload than the others.
+const el15 = await setup(100);
+// purpose: Runs 5 full edit-then-save cycles on different items, like editing a row and saving it.
+performance.mark(startMark('edit-cycle-5'));
+for (let i = 0; i < 5; i++) {
+  const id = getTodos(el15)[40 + i].id;
+  el15.component.editTodo(id);
+  flushWork();
+  el15.component.saveTodo(id, `Updated item ${i}`);
+  flushWork();
+}
+performance.measure('edit-cycle-5', startMark('edit-cycle-5'));
+destroy();
+
+/*******************************
       Bulk Creation
       (programmatic data load)
 *******************************/
@@ -408,39 +445,6 @@ for (let i = 0; i < 20; i++) {
   flushWork();
 }
 performance.measure('filter-cycle-20', startMark('filter-cycle-20'));
-destroy();
-
-/*******************************
-      Edit Flow
-*******************************/
-
-// edit-start-10: 10 consecutive edit transitions cycling different ids
-// (editingId must change each iter or the signal equality short-circuits).
-const el14 = await setup(100);
-// purpose: Enters edit mode on 10 different items in a row, like double-clicking each one.
-performance.mark(startMark('edit-start-10'));
-for (let i = 0; i < 10; i++) {
-  el14.component.editTodo(getTodos(el14)[40 + i].id);
-  flushWork();
-}
-performance.measure('edit-start-10', startMark('edit-start-10'));
-destroy();
-
-// edit-cycle-5: 5 full edit+save cycles (10 ops + 10 RAFs total). Fresh
-// mount so the first iter sees editingId=null, not the residual from
-// edit-start-10's last iter — otherwise that first transition is an
-// edit→edit hop, which is a different workload than the others.
-const el15 = await setup(100);
-// purpose: Runs 5 full edit-then-save cycles on different items, like editing a row and saving it.
-performance.mark(startMark('edit-cycle-5'));
-for (let i = 0; i < 5; i++) {
-  const id = getTodos(el15)[40 + i].id;
-  el15.component.editTodo(id);
-  flushWork();
-  el15.component.saveTodo(id, `Updated item ${i}`);
-  flushWork();
-}
-performance.measure('edit-cycle-5', startMark('edit-cycle-5'));
 destroy();
 
 /*******************************
