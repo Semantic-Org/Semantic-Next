@@ -1028,6 +1028,51 @@ describe('SSR hydration — post-hydration list mutations', () => {
     expect(el.shadowRoot.querySelectorAll('li')[2].textContent).toBe('c');
   });
 
+  it('does not spuriously re-evaluate unchanged item bindings after hydration', async () => {
+    // The fix (adopted records start fresh:false) lets the first reconcile
+    // run the per-field snapshot diff. This guards that the diff stays
+    // change-gated: an unrelated mutation must not wake the binding of an
+    // item whose fields are untouched. Counting helper evaluations catches
+    // a binding-level spurious wake that node-identity checks would miss.
+    let nameFires = 0;
+    const el = await ssrAndHydrate({
+      template: '{#each item in items}<li class="r">{markName item.name}</li>{/each}',
+      defaultState: { items: [{ name: 'Red' }, { name: 'Blue' }] },
+      createComponent: ({ state }) => ({
+        markName: (name) => {
+          nameFires++;
+          return name;
+        },
+        renameFirst() {
+          state.items.setArrayProperty(0, 'name', 'Crimson');
+        },
+        appendItem() {
+          state.items.push({ name: 'Green' });
+        },
+      }),
+    });
+
+    expect([...el.shadowRoot.querySelectorAll('li.r')].map(n => n.textContent)).toEqual(['Red', 'Blue']);
+
+    // Append a 3rd item: items 0 and 1 are unchanged. Exactly one new binding
+    // evaluation (the appended item) — the hydrated, server-valid items must
+    // not re-evaluate.
+    const baseline = nameFires;
+    const updated1 = $(el).onNext('updated');
+    el.component.appendItem();
+    await updated1;
+    expect([...el.shadowRoot.querySelectorAll('li.r')].map(n => n.textContent)).toEqual(['Red', 'Blue', 'Green']);
+    expect(nameFires - baseline).toBe(1);
+
+    // Mutate only item 0's field: exactly one re-evaluation (item 0), not 1 or 2.
+    const afterAppend = nameFires;
+    const updated2 = $(el).onNext('updated');
+    el.component.renameFirst();
+    await updated2;
+    expect([...el.shadowRoot.querySelectorAll('li.r')].map(n => n.textContent)).toEqual(['Crimson', 'Blue', 'Green']);
+    expect(nameFires - afterAppend).toBe(1);
+  });
+
   it('each list shrinks after hydration', async () => {
     const el = await ssrAndHydrate({
       template: '{#each item in getItems}<span>{item}</span>{/each}',
@@ -1479,9 +1524,11 @@ describe('SSR hydration — snippet reactivity', () => {
       defaultState: { items: [{ name: 'Red' }, { name: 'Blue' }] },
       createComponent: ({ state }) => ({
         renameFirst() {
-          const items = state.items.peek();
-          items[0] = { ...items[0], name: 'Crimson' };
-          state.items.set([...items]);
+          // In-place field mutation: keeps item identity (refChanged=false),
+          // exercising the same-ref snapshot-diff reconcile path. Under
+          // reference safety this is the canonical mutation; get-mutate-set
+          // through peek() would corrupt set()'s dedup baseline and no-op.
+          state.items.setArrayProperty(0, 'name', 'Crimson');
         },
       }),
     });

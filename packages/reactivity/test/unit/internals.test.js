@@ -785,8 +785,16 @@ describe('Signal — read paths via internals', () => {
     expect(lastSeen.a).toBe(1);
   });
 
-  it('peek returns a clone (defensive read) but no dependency', () => {
+  it('peek returns the live reference by default (reference safety)', () => {
     const s = new Signal([1, 2, 3]);
+    const peeked = s.peek();
+    expect(peeked).toBe(s.raw());
+    peeked.push(99);
+    expect(s.peek()).toEqual([1, 2, 3, 99]);
+  });
+
+  it('peek returns a defensive clone under clone safety', () => {
+    const s = new Signal([1, 2, 3], { safety: 'clone' });
     const peeked = s.peek();
     peeked.push(99);
     expect(s.peek()).toEqual([1, 2, 3]);

@@ -58,21 +58,90 @@ const mixedTypes = {
   map: new Map([['key', 'value']]),
 };
 
+// Deep tree: boundary-call cost of structuredClone is roughly fixed per call,
+// so a large structure is where it can amortize that overhead against the
+// hand-rolled recursive walk. Built from plain objects/arrays only so both
+// paths produce equivalent results.
+const deepTree = (() => {
+  const make = (depth) => {
+    if (depth === 0) { return { leaf: true, n: depth, tag: 'end' }; }
+    return {
+      depth,
+      label: `node-${depth}`,
+      children: [make(depth - 1), make(depth - 1)],
+      values: [depth, depth * 2, depth * 3],
+    };
+  };
+  return make(10);
+})();
+
+// TypedArray-bearing shape. NOTE: clone() does not currently preserve typed
+// arrays (they fall through to the plain-object branch and get mangled into
+// index-keyed objects), so this pair is a correctness contrast, not a like-for-
+// like speed comparison. structuredClone is the only correct option here.
+const typedData = {
+  weights: new Float64Array(1024),
+  ids: new Int32Array(1024),
+  label: 'layer-weights',
+};
+
 /*******************************
          Benchmarks
 *******************************/
 
-describe('clone', () => {
-  bench('flat 8-key object', () => {
+// Grouped by shape so vitest's comparative reporter shows clone vs
+// structuredClone relative within each block.
+
+describe('flat 8-key object', () => {
+  bench('clone', () => {
     clone(flatSettings);
   });
-  bench('20-key wide object', () => {
+  bench('structuredClone', () => {
+    structuredClone(flatSettings);
+  });
+});
+
+describe('20-key wide object', () => {
+  bench('clone', () => {
     clone(wideSettings);
   });
-  bench('nested state with arrays', () => {
+  bench('structuredClone', () => {
+    structuredClone(wideSettings);
+  });
+});
+
+describe('nested state with arrays', () => {
+  bench('clone', () => {
     clone(nestedState);
   });
-  bench('mixed types (Date, RegExp, Set, Map)', () => {
+  bench('structuredClone', () => {
+    structuredClone(nestedState);
+  });
+});
+
+describe('mixed types (Date, RegExp, Set, Map)', () => {
+  bench('clone', () => {
     clone(mixedTypes);
+  });
+  bench('structuredClone', () => {
+    structuredClone(mixedTypes);
+  });
+});
+
+describe('deep tree (depth 10)', () => {
+  bench('clone', () => {
+    clone(deepTree);
+  });
+  bench('structuredClone', () => {
+    structuredClone(deepTree);
+  });
+});
+
+describe('typed arrays (correctness contrast)', () => {
+  bench('clone', () => {
+    clone(typedData);
+  });
+  bench('structuredClone', () => {
+    structuredClone(typedData);
   });
 });
