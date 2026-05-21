@@ -56,6 +56,7 @@ xx.xx.xxxx
 * **Enhancement** - `hashCode` now defaults to zero-allocation FNV-1a for better performance. Use `{ fast: false }` for the previous UMASH algorithm with stronger collision resistance.
 * **Feature** - Added `unescapeHTML()` for converting HTML entities back to characters — the inverse of `escapeHTML`
 * **Bug** - Fixed `escapeHTML()` producing entities without semicolons (e.g. `&amp` instead of `&amp;`)
+* **Bug** - Fixed `clone()` mangling typed arrays, `ArrayBuffer`, and `DataView` into index-keyed plain objects — these now clone into independent buffers of the correct type
 
 ### Component
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.

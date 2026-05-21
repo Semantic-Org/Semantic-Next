@@ -4,6 +4,7 @@ import {
   any,
   assignInPlace,
   capitalize,
+  clone,
   debounce,
   each,
   extend,
@@ -15,6 +16,7 @@ import {
   isClient,
   isEqual,
   isFunction,
+  isObject,
   isServer,
   kebabToCamel,
   mapObject,
@@ -143,7 +145,9 @@ export const Template = class Template {
       if (dataValue !== undefined) {
         return dataValue;
       }
-      return config?.value ?? config;
+      // reference-mode Signals alias their initial value; clone object defaults so an instance can't mutate the prototype's shared declaration
+      const defaultValue = config?.value ?? config;
+      return isObject(defaultValue) ? clone(defaultValue, { preserveNonCloneable: true }) : defaultValue;
     };
 
     each(defaultState, (config, name) => {
@@ -1001,7 +1005,7 @@ export const Template = class Template {
         if (property in target) {
           let signal = template.settingsVars.get(property);
           if (!signal) {
-            // Framework-internal signal over user-owned settings — don't freeze
+            // framework-internal signal over user-owned settings — don't freeze
             signal = new Signal(target[property], { safety: 'reference' });
             template.settingsVars.set(property, signal);
           }

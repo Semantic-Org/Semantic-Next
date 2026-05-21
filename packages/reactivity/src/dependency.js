@@ -1,10 +1,10 @@
-import { captureStack, config } from './helpers.js';
+import { captureStack, isTracing } from './helpers.js';
 import { Scheduler } from './scheduler.js';
 
 export class Dependency {
   constructor(...metadata) {
     this.subscribers = new Set();
-    if (config.mode !== 'off') {
+    if (isTracing()) {
       this.setContext(metadata);
     }
   }
@@ -16,8 +16,19 @@ export class Dependency {
     }
   }
 
+  // Cheap context naming on tracing; stack capture only on stack mode.
+  setContext(context) {
+    if (!isTracing()) {
+      return;
+    }
+    this.context = context || {};
+    captureStack(this, this.setContext);
+  }
+
   changed(context) {
-    if (config.mode !== 'off' && this.subscribers.size > 0) {
+    // Skip tracing-context bookkeeping when no subscribers are listening.
+    if (this.subscribers.size === 0) { return; }
+    if (isTracing()) {
       if (context) {
         this.context = context;
       }
@@ -31,20 +42,7 @@ export class Dependency {
     }
   }
 
-
   remove(reaction) {
     this.subscribers.delete(reaction);
-  }
-
-  /*-------------------
-         Tracing
-  --------------------*/
-
-  setContext(context) {
-    if (config.mode === 'off') {
-      return;
-    }
-    this.context = context || {};
-    captureStack(this, this.setContext);
   }
 }

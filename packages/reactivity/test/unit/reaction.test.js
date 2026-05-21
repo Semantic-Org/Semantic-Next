@@ -1,4 +1,4 @@
-import { Reaction, Scheduler, Signal } from '@semantic-ui/reactivity';
+import { Reaction, Scheduler, setTracing, Signal } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('Reaction', () => {
@@ -258,8 +258,8 @@ describe('Reaction', () => {
       expect(callback).toHaveBeenCalledTimes(3);
     });
 
-    it('should correctly manipulate array with helpers under safety: reference', () => {
-      const items = new Signal([0, 1, 2], { safety: 'reference' });
+    it('should correctly manipulate array with helpers when cloned', () => {
+      const items = new Signal([0, 1, 2], { safety: 'clone' });
       const callback = vi.fn();
 
       Reaction.create(() => {
@@ -327,7 +327,7 @@ describe('Reaction', () => {
 
   describe('Debugging', () => {
     it('Reaction should track current context for debugging', () => {
-      Signal.tracing = true;
+      setTracing(true);
       try {
         const callback = vi.fn();
         let signal = new Signal(1);
@@ -343,7 +343,7 @@ describe('Reaction', () => {
         expect(callback).toHaveBeenCalledWith(2);
       }
       finally {
-        Signal.tracing = false;
+        setTracing(false);
       }
     });
 

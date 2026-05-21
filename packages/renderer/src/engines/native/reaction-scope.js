@@ -1,4 +1,4 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { isTracing, Reaction } from '@semantic-ui/reactivity';
 
 export class ReactionScope {
   constructor() {
@@ -21,8 +21,8 @@ export class ReactionScope {
         return;
       }
       callback(comp);
-    }, Signal.tracing ? { context } : undefined));
-    // Signal.tracing gate prevents flamecharts from resolving as reaction.context.context.context
+    }, isTracing() ? { context } : undefined));
+    // isTracing() prevents flamecarts from resolving as reaction.context.context.context
   }
 
   onDispose(fn) {

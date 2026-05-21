@@ -28,8 +28,7 @@ import { UNWRAP } from '../../helpers.js';
   get method.
 
   We deliberately do not allocate a full Signal per key: Signal wraps
-  a Dependency with allowClone / equalityFunction / clone / currentValue
-  field assignments per instance. The wrapper allocation dominates at
+  a Dependency. The wrapper allocation dominates at
   scale where many records each carry several keys. Equality dedup is
   preserved: `Signal.equalityFunction` is snapshotted at construction,
   matching Signal's per-instance snapshot semantics so the inlined

@@ -10,15 +10,13 @@ export interface SignalOptions<T> {
   equalityFunction?: (oldValue: T, newValue: T) => boolean;
 
   /**
-   * Safety preset controlling how the signal protects its value
-   *  - 'freeze' (default) — deepFreeze on set; mutations throw
-   *  - 'reference' — no protection; dedupe via isEqual
-   *  - 'none' — no protection, no dedupe (event-stream semantics)
+   * Whether to allow cloning of values. If false, values are stored by reference
+   * @default true
    */
-  safety?: 'freeze' | 'reference' | 'none';
+  allowClone?: boolean;
 
   /**
-   * Custom function to clone values (used by signal.clone())
+   * Custom function to clone values when storing or retrieving from the signal
    * @param value - The value to clone
    */
   cloneFunction?: <V>(value: V) => V;
@@ -132,19 +130,9 @@ export class Signal<T> {
   /**
    * Returns the current value without establishing a reactive dependency.
    * Accessing the value with `peek()` will not cause any reactive context to depend on this Signal.
-   * Under `safety: 'freeze'`, the returned reference is frozen — use `clone()`
-   * if you need a mutable copy.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#peek peek}
    */
   peek(): T;
-
-  /**
-   * Tracked read that returns a deep copy of the current value. Use when
-   * handing signal data to libraries that mutate in place, or when the
-   * signal has `safety: 'freeze'` and you need a mutable working copy.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#clone clone}
-   */
-  clone(): T;
 
   /**
    * Sets the signal's value to undefined.
@@ -164,12 +152,9 @@ export class Signal<T> {
   subscribe(callback: (value: T, computation: { stop: () => void; }) => void): { stop: () => void; };
 
   /**
-   * Mutates the current value via a callback function. Under `safety: 'freeze'`
-   * the callback receives a frozen value and must return a new value (in-place
-   * mutation throws). Under `safety: 'reference'` / `'none'` the callback may
-   * mutate in place; a returned non-undefined value replaces the current value,
-   * while undefined-return triggers notify when the value actually changed
-   * (`'reference'`) or unconditionally (`'none'`, event-stream semantics).
+   * Mutates the current value in-place via a callback function.
+   * If the callback returns a value, that value is set. Otherwise the original
+   * value is kept and reactivity is triggered if it changed.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#mutate mutate}
    * @param mutationFn - Function that receives the current value and optionally returns a new value
    */
@@ -445,45 +430,27 @@ export class Signal<T> {
   static computed<T>(computeFn: () => T, options?: SignalOptions<T>): Signal<T>;
 
   /**
-   * Default safety preset for new signals. Assign a preset to change the
-   * library-wide default: `Signal.safety = 'freeze'`.
+   * Enables or disables tracing — cheap debug context attached to signals,
+   * reactions, and dependencies. Off by default.
+   * @param enabled - Whether to enable tracing
    */
-  static safety: 'freeze' | 'reference' | 'none';
+  static setTracing(enabled: boolean): void;
 
   /**
-   * Cheap debug context attached to signals, reactions, and dependencies.
-   * Off by default. Assign to toggle: `Signal.tracing = true`.
+   * Returns whether tracing is currently enabled.
    */
-  static tracing: boolean;
+  static isTracing(): boolean;
 
   /**
-   * Adds stack traces to tracing context via Error.captureStackTrace.
-   * Expensive; opt-in on top of tracing. Assign to toggle:
-   * `Signal.stackCapture = true`.
+   * Enables or disables stack capture — adds stack traces to tracing
+   * context via Error.captureStackTrace. Expensive; opt-in on top of tracing.
+   * Off by default.
+   * @param enabled - Whether to enable stack capture
    */
-  static stackCapture: boolean;
+  static setStackCapture(enabled: boolean): void;
 
   /**
-   * Default equality function used to dedupe signal writes. Assign to
-   * override library-wide: `Signal.defaultEquality = myEq`.
+   * Returns whether stack capture is currently enabled.
    */
-  static defaultEquality: (a: any, b: any) => boolean;
-
-  /**
-   * Default clone function used by `signal.clone()`. Assign to override
-   * library-wide: `Signal.defaultClone = myClone`.
-   */
-  static defaultClone: <V>(value: V) => V;
-
-  /**
-   * Bulk-configure library defaults. Equivalent to assigning each key
-   * individually; `safety` validates on set.
-   */
-  static configure(options: {
-    safety?: 'freeze' | 'reference' | 'none';
-    tracing?: boolean;
-    stackCapture?: boolean;
-    defaultEquality?: (a: any, b: any) => boolean;
-    defaultClone?: <V>(value: V) => V;
-  }): void;
+  static isStackCapture(): boolean;
 }

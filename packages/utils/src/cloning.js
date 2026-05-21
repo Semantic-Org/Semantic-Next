@@ -1,4 +1,14 @@
-import { isArray, isClassInstance, isDate, isMap, isObject, isPlainObject, isRegExp, isSet } from './types.js';
+import {
+  isArray,
+  isBinary,
+  isClassInstance,
+  isDate,
+  isMap,
+  isObject,
+  isPlainObject,
+  isRegExp,
+  isSet,
+} from './types.js';
 
 /*-------------------
         Cloning
@@ -87,6 +97,12 @@ const cloneValue = (src, preserveDOM, preserveNonCloneable, seen) => {
     for (const v of src) {
       copy.add(cloneValue(v, preserveDOM, preserveNonCloneable, seen));
     }
+  }
+  else if (isBinary(src)) {
+    // structuredClone beats hand-rolled in perf for binary dramatically (6x)
+    // loses out to handrolled for other code-shapes see <cloning.bench.js>
+    copy = structuredClone(src);
+    seen.set(src, copy);
   }
   else if (isObject(src)) {
     if (preserveNonCloneable && isClassInstance(src)) {

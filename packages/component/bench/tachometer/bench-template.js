@@ -109,7 +109,7 @@ defineComponent({
   defaultState: {
     items: {
       value: Array.from({ length: 500 }, (_, i) => ({ id: i, label: `item-${i}` })),
-      options: { allowClone: false, safety: 'reference' },
+      options: { safety: 'reference' },
     },
   },
 });

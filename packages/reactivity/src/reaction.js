@@ -1,6 +1,6 @@
-import { isEqual } from '@semantic-ui/utils';
+import { clone, isEqual } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
-import { captureStack, config } from './helpers.js';
+import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
 import { Scheduler } from './scheduler.js';
 
 export class Reaction {
@@ -18,7 +18,7 @@ export class Reaction {
     this.cleanups = [];
     this.firstRun = true;
     this.active = true;
-    if (context && config.mode !== 'off') {
+    if (context && isTracing()) {
       this.setContext(context);
     }
     this.boundRun = this.run.bind(this);
@@ -40,8 +40,25 @@ export class Reaction {
     }
   }
 
+  setContext(additionalContext = {}) {
+    if (!isTracing()) {
+      return;
+    }
+    const defaultContext = {
+      firstRun: this.firstRun,
+    };
+    this.context = {
+      ...defaultContext,
+      ...additionalContext,
+    };
+  }
+
+  setTrace() {
+    captureStack(this, this.setTrace);
+  }
+
   addContext(additionalContext = {}) {
-    if (config.mode === 'off') {
+    if (!isTracing()) {
       return;
     }
     if (!this.context) {
@@ -53,10 +70,11 @@ export class Reaction {
   }
 
   run() {
+    // only run this reaction is marked as active
     if (!this.active) {
       return;
     }
-    if (config.mode !== 'off') {
+    if (isTracing()) {
       this.addContext({
         firstRun: this.firstRun,
       });
@@ -83,7 +101,7 @@ export class Reaction {
     if (!this.active) {
       return;
     }
-    if (context && config.mode !== 'off') {
+    if (context) {
       this.addContext(context);
     }
     Scheduler.scheduleReaction(this);
@@ -100,18 +118,20 @@ export class Reaction {
     this.fireCleanups();
   }
 
+  // Static proxies for developer experience
   static get current() {
     return Scheduler.current;
   }
 
-  /*-------------------
-        Helpers
-  --------------------*/
-
+  // DX pass throughs
   static flush = Scheduler.flush;
   static scheduleFlush = Scheduler.scheduleFlush;
   static afterFlush = Scheduler.afterFlush;
   static getSource = Scheduler.getSource;
+  static setTracing = setTracing;
+  static isTracing = isTracing;
+  static setStackCapture = setStackCapture;
+  static isStackCapture = isStackCapture;
 
   static nonreactive(func) {
     const previousReaction = Scheduler.current;
@@ -141,26 +161,5 @@ export class Reaction {
     Scheduler.current.onCleanup(() => comp.stop());
     comp.run();
     return newValue;
-  }
-
-  /*-------------------
-         Tracing
-  --------------------*/
-
-  setContext(additionalContext = {}) {
-    if (config.mode === 'off') {
-      return;
-    }
-    const defaultContext = {
-      firstRun: this.firstRun,
-    };
-    this.context = {
-      ...defaultContext,
-      ...additionalContext,
-    };
-  }
-
-  setTrace() {
-    captureStack(this, this.setTrace);
   }
 }
