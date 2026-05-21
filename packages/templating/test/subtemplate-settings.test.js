@@ -487,7 +487,7 @@ describe('Subtemplate settings reactivity', () => {
 
   it('does not trigger reactivity when the underlying object is mutated in place', () => {
     // Consumers must REPLACE values via Proxy set, not mutate the stored
-    // object in place. allowClone:false stores by reference, and the Signal's
+    // object in place. safety: 'reference' stores by reference, and the Signal's
     // deep-equality on set() makes a structurally identical replacement after
     // a mutation a no-op.
     const { child } = makeSubtemplatePair({

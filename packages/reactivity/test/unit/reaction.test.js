@@ -258,8 +258,8 @@ describe('Reaction', () => {
       expect(callback).toHaveBeenCalledTimes(3);
     });
 
-    it('should correctly manipulate array with helpers when allowClone is false', () => {
-      const items = new Signal([0, 1, 2], { allowClone: false });
+    it('should correctly manipulate array with helpers when cloned', () => {
+      const items = new Signal([0, 1, 2], { safety: 'clone' });
       const callback = vi.fn();
 
       Reaction.create(() => {

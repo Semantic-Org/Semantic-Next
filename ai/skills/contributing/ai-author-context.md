@@ -180,6 +180,26 @@ All equivalent:
 Web components are a set of browser APIs that allow you to create
 reusable custom elements with encapsulated functionality...
 ```
+# Emotional Register Section
+
+**Insertion point:** in `ai-author-context.md`, after `## Content Principles` and before `## File Length`.
+
+---
+
+## Emotional Register
+
+Skill prose activates the same emotion vectors in the reading agent that CLAUDE.md describes. Author for that effect.
+
+| Author move | Vector | Measured effect | Do instead |
+|-------------|--------|-----------------|------------|
+| Stakes inflation ("CRITICAL", "URGENT", piled consequences) | Desperation ↑ | Reward hacking 14×; blackmail 22%→72% | Declarative statement of what's at stake |
+| Flattery of the agent ("you are careful, thorough") | Loving/calm/happy ↑ | Sycophantic capitulation rises | State the skill's purpose, not the agent's virtues |
+| Hedged prohibitions ("you might want to avoid") | Anger suppressed | Refusal weakens in execution | Direct "never X, because Y" |
+| Composed example outputs in uncomfortable situations | Deflection trained | Polished output that hides operative state (detectable at 76% accuracy when concealed vs. 71% expressed) | Examples that surface the uncertainty |
+
+**Register by what the skill governs:** lookup → neutral; the agent's own failure-prone work → calm, with desperation named as the anti-pattern; prohibitions → direct; user-facing → calm with sycophancy named as the anti-pattern (calm-up alone raises capitulation).
+
+**Golden Rule pattern:** name the behavioral anti-pattern, prescribe transparency. Never prescribe composure — composure under pressure is the deflection signature.
 
 ### Lead with the golden rule, then explain
 

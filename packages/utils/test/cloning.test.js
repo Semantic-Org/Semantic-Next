@@ -55,6 +55,42 @@ describe('clone', () => {
     expect(clonedMap).not.toBe(originalMap); // Ensure it's a deep clone
   });
 
+  it('should clone typed arrays into an independent buffer', () => {
+    const original = new Float64Array([1.5, 2.5, 3.5]);
+    const cloned = clone(original);
+    expect(cloned).toBeInstanceOf(Float64Array);
+    expect(cloned).not.toBe(original);
+    expect(Array.from(cloned)).toEqual([1.5, 2.5, 3.5]);
+
+    // mutating the original must not bleed into the clone
+    original[0] = 99;
+    expect(cloned[0]).toBe(1.5);
+  });
+
+  it('should clone typed arrays nested in objects', () => {
+    const original = { weights: new Int32Array([10, 20, 30]), label: 'layer' };
+    const cloned = clone(original);
+    expect(cloned.weights).toBeInstanceOf(Int32Array);
+    expect(cloned.weights).not.toBe(original.weights);
+    expect(Array.from(cloned.weights)).toEqual([10, 20, 30]);
+  });
+
+  it('should clone ArrayBuffer and DataView', () => {
+    const buffer = new ArrayBuffer(8);
+    new DataView(buffer).setFloat64(0, 3.14);
+
+    const clonedBuffer = clone(buffer);
+    expect(clonedBuffer).toBeInstanceOf(ArrayBuffer);
+    expect(clonedBuffer).not.toBe(buffer);
+    expect(new DataView(clonedBuffer).getFloat64(0)).toBe(3.14);
+
+    const view = new DataView(buffer);
+    const clonedView = clone(view);
+    expect(clonedView).toBeInstanceOf(DataView);
+    expect(clonedView).not.toBe(view);
+    expect(clonedView.getFloat64(0)).toBe(3.14);
+  });
+
   it('should clone deep objects', () => {
     const originalObject = {
       level1: {

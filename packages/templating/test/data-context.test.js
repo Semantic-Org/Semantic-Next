@@ -45,7 +45,7 @@ describe('Template — createReactiveState', () => {
       defaultState: {
         config: {
           value: { x: 1 },
-          options: { equalityFunction: strictEquality, allowClone: false },
+          options: { equalityFunction: strictEquality, safety: 'clone' },
         },
       },
     });

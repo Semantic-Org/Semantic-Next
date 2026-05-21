@@ -15,6 +15,11 @@ export const noop = () => {};
 */
 export const identity = (v) => v;
 
+export const returnsTrue = () => true;
+export const returnsFalse = () => false;
+export const returnsSelf = identity;
+export const returnsUndefined = noop;
+
 /*
   Call function even if its not defined
 */

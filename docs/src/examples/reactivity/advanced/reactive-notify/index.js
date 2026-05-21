@@ -1,6 +1,6 @@
 import { Reaction, Signal } from '@semantic-ui/reactivity';
 
-const data = new Signal({ count: 0 }, { allowClone: false });
+const data = new Signal({ count: 0 }, { safety: 'reference' });
 
 Reaction.create(() => {
   console.log('Count:', data.get().count);
