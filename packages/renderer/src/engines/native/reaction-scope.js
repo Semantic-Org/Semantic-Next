@@ -5,6 +5,8 @@ export class ReactionScope {
     this.reactions = [];
     this.children = [];
     this.disposers = [];
+    this.parent = null;
+    this.index = -1; // this scope's slot in parent.children, for O(1) detach
   }
 
   track(reaction) {
@@ -32,22 +34,31 @@ export class ReactionScope {
   child() {
     const childScope = new ReactionScope();
     childScope.parent = this;
-    this.children.push(childScope);
+    childScope.index = this.children.push(childScope) - 1;
     return childScope;
   }
 
-  dispose() {
-    for (const child of this.children) { child.dispose(); }
+  // `fromParent` is set when the parent is tearing down all its children: the
+  // child then skips the per-child parent-unlink (the parent clears its array
+  // once), turning bulk teardown from O(n²) into O(n) and avoiding a splice
+  // mid-iteration. Standalone dispose detaches via an O(1) swap-pop using the
+  // stored slot index instead of indexOf + splice.
+  dispose(fromParent = false) {
+    for (const child of this.children) { child.dispose(true); }
     this.children = [];
     for (const reaction of this.reactions) { reaction.stop(); }
     this.reactions = [];
     for (const fn of this.disposers) { fn(); }
     this.disposers = [];
-    // Remove from parent to prevent accumulation across branch switches
-    if (this.parent) {
-      const idx = this.parent.children.indexOf(this);
-      if (idx !== -1) { this.parent.children.splice(idx, 1); }
-      this.parent = null;
+    if (!fromParent && this.parent) {
+      const siblings = this.parent.children;
+      const last = siblings.pop();
+      if (last && last !== this && this.index < siblings.length) {
+        siblings[this.index] = last;
+        last.index = this.index;
+      }
     }
+    this.parent = null;
+    this.index = -1;
   }
 }
