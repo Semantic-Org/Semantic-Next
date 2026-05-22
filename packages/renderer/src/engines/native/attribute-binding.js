@@ -72,19 +72,34 @@ export function bindAttribute({
   const isIfDefined = singleEntry?.node.ifDefined || singleEntry?.classification.type === 'boolean';
 
   if (isSingleExpr) {
+    // This reaction is the sole writer of the attribute, so we shadow the
+    // last value we wrote and diff in JS rather than reading it back with
+    // getAttribute (a Blink boundary call) on every re-run. undefined means
+    // "currently absent" — never written, or cleared by an ifDefined miss.
+    // The first run always applies, clearing the parsed marker attribute.
+    let lastWritten;
     scope.reaction(element, (comp) => {
       const value = singleIsBlock
         ? renderASTToString([singleEntry.node], data, renderer)
         : renderer.lookupExpression(singleEntry.node.value, data);
-      if (skipFirstWrite && comp.firstRun) { return; }
+      if (skipFirstWrite && comp.firstRun) {
+        // Server already rendered the attribute; seed the shadow so the first
+        // reactive re-run diffs honestly against what's in the DOM.
+        lastWritten = (isIfDefined && !value) ? undefined : stringifyAttrValue(value);
+        return;
+      }
 
       if (isIfDefined && !value) {
-        element.removeAttribute(attrName);
+        if (comp.firstRun || lastWritten !== undefined) {
+          element.removeAttribute(attrName);
+          lastWritten = undefined;
+        }
       }
       else {
         const strValue = stringifyAttrValue(value);
-        if (element.getAttribute(attrName) !== strValue) {
+        if (comp.firstRun || strValue !== lastWritten) {
           element.setAttribute(attrName, strValue);
+          lastWritten = strValue;
         }
       }
       if (attrName === 'checked' || attrName === 'selected') {
