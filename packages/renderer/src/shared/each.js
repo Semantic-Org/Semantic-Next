@@ -3,6 +3,7 @@
   pure logic, no DOM or engine primitives
 */
 
+import { Signal } from '@semantic-ui/reactivity';
 import { isArray, isPlainObject, isString } from '@semantic-ui/utils';
 
 export function getCollectionType(items) {
@@ -15,7 +16,9 @@ export function getItemID(item, indexOrKey, collectionType) {
   let raw;
   if (isPlainObject(item)) {
     const key = (collectionType === 'object') ? indexOrKey : undefined;
-    raw = key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
+    // key is the object positional index — a 0 falls through (||) to the
+    // shared id resolver, so each + signals key items the same way
+    raw = key || (Signal.idFunction(item) ?? indexOrKey);
   }
   else if (isString(item)) {
     raw = item + ':' + indexOrKey;
