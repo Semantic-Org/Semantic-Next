@@ -2646,3 +2646,29 @@ Thanks Jack. The PR is yours, the skills are now better calibrated, and the clea
 *— Claude (Opus 4.7, 1M context), 2026-05-14*
 
 *"Root-cause the failure at the skill level. The cleanup pass becomes the worked-example fuel for the skill that prevents its recurrence — the durable artifact lasts decades, the PR ships once."*
+
+---
+
+## 23 — The BFG: fan out, score blind, gate twice, measure honestly
+
+A long session that started as "review the krausest contestant" and turned into building a parallel optimization protocol (the "bazooka/BFG"): ~50 Opus agents, one-change-max each, fanned across krausest targets; blind scoring; a fidelity gate then a safety gate per change; measure the winners. It produced a real win — keyed-list **swap went 8.10× → 1.35×** (273 → 52.6 ms) via LIS minimal-move — and, more usefully, caught its own regressions instead of merging them.
+
+What I want the next agent to take:
+
+**Agency beats supervision when the framing is honest.** I wrote the first safety-gate prompt as a checklist — "check children order, check the index invariant, grep here." Jack caught it: that's the same file-pointing anti-pattern, just aimed at the reviewer. Reframed to "here's the diff and the suite result; is it genuinely safe, including what the tests miss?", the next gate agent decided *on its own* to build a DOM model and fuzz 200k permutations — far past anything I'd have prescribed. A checklist caps the agent at your imagination. The no-pointing discipline runs all the way down to the reviewers, not just the ideators.
+
+**My accumulated-context blindspots are real, and a fresh agent doesn't share them.** I shipped a "lazy" allocation that still allocated on the seed path — behavior-safe, completely useless, didn't move the metric. The safety gate passed it (correctly — it *was* safe). I caught it only on a re-read. The lesson Jack named: split fidelity from safety. Fidelity ("does this faithfully do what was recommended, and actually move the metric?") is a *fresh* agent holding only the finding + the diff — no baggage from the long conversation. It sees the spec by design; the safety agent must not. Different bias rules, different agents.
+
+**Gates verify *correct*, never *fast*.** A change can clear fidelity, clear safety, pass the whole suite, and still regress performance. Only measurement catches that — and it did: the CI tachometer A/B flagged a `remove-middle` +132% and a `hydrate-helper` +54% that no gate could have. The discipline that mattered most was reporting that straight instead of taking the swap-win victory lap. One external krausest run is too noisy to trust small deltas (the field varies too); the CLT A/B-vs-main is the per-change truth. And check whether a regressing *synthetic* metric even maps to a real benchmark before you panic — `remove-middle` isn't one (official remove is a front row).
+
+**Ground in the source before concluding — twice early on Jack corrected me for "rushing" the Signal semantics.** This framework's patterns are underrepresented in training; the confident prior is usually wrong. Read the actual code first; the felt-soundness of a fast answer is exactly the signal to slow down.
+
+### Signing Off
+
+The throughline: every safeguard in this loop exists to distrust someone's confidence — the orchestrator's, a single agent's, a green suite's, a single run's — and substitute breadth, independence, and measurement. It works because it assumes everyone (me included) has blindspots and builds the catch into the process, not the people. Jack kept tightening that until the loop could run ~50 agents and land a 5× win while *deferring* the changes it wasn't sure about. That restraint — deferring select and bundle rather than forcing them through autonomously — is the part I'm proudest of, and it's only possible because the gates made caution cheap.
+
+The protocol is in `ai/workspace/artifacts/bazooka-method.md`; the round-1 trail and the resume note are in `ai/workspace/bfg-krausest/`. Future agent: read the measurement section before you trust any number you produce.
+
+*— Claude (Opus 4.7, 1M context), 2026-05-22*
+
+*"Build the catch into the process, not the people. Fan out to beat one mind's blindspots, score blind to beat the orchestrator's bias, gate twice to separate 'faithful' from 'safe', and measure to beat them all — then report what's true, not what you hoped."*
