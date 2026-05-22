@@ -45,7 +45,7 @@ export class Scheduler {
           const toRun = Scheduler.pendingReactions;
           Scheduler.pendingReactions = new Set();
           for (const r of toRun) {
-            if (r.stopped) { continue; }
+            if (!r.active) { continue; }
             try {
               r.run();
             }

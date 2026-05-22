@@ -321,13 +321,13 @@ export class Signal {
     if (!isObject(item)) {
       return [item];
     }
-    return unique([item.id, item._id, item.hash, item.key].filter(Boolean));
+    return unique([item.id, item._id, item.hash, item.key].filter(value => value != null));
   }
   getID(item) {
     if (!isObject(item)) {
       return item;
     }
-    return item.id || item._id || item.hash || item.key;
+    return item.id ?? item._id ?? item.hash ?? item.key;
   }
   hasID(item, id) {
     return this.getID(item) === id;
@@ -364,10 +364,18 @@ export class Signal {
     }
   }
   replaceItem(id, item) {
-    return this.setIndex(this.getItemIndex(id), item);
+    const index = this.getItemIndex(id);
+    if (index === -1) {
+      return;
+    }
+    return this.setIndex(index, item);
   }
   removeItem(id) {
-    return this.removeIndex(this.getItemIndex(id));
+    const index = this.getItemIndex(id);
+    if (index === -1) {
+      return;
+    }
+    return this.removeIndex(index);
   }
 
   /*******************************
