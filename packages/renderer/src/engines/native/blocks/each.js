@@ -232,6 +232,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   let newTail = items.length - 1;
   let oldKeyToIdx;
   let newKeySet;
+  let freshCount = 0;
 
   while (oldHead <= oldTail && newHead <= newTail) {
     const oldHeadRec = oldRecords[oldHead];
@@ -293,6 +294,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
             renderAST,
             isSVG,
           });
+          freshCount++;
         }
         else {
           newRecords[newHead] = oldRecord;
@@ -315,6 +317,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       renderAST,
       isSVG,
     });
+    freshCount++;
     newHead++;
   }
 
@@ -331,14 +334,18 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   // in-place skip suffices.
   let cursor = region.anchor;
   let reordered = false;
-  let lastOldIndex = -1;
-  for (const record of newRecords) {
-    if (!record || record.fragment) { continue; }
-    if (record.index < lastOldIndex) {
-      reordered = true;
-      break;
+  // Fewer than two survivors can't be out of order, so all-fresh reconciles
+  // (replace, create) skip the scan entirely.
+  if (items.length - freshCount > 1) {
+    let lastOldIndex = -1;
+    for (const record of newRecords) {
+      if (!record || record.fragment) { continue; }
+      if (record.index < lastOldIndex) {
+        reordered = true;
+        break;
+      }
+      lastOldIndex = record.index;
     }
-    lastOldIndex = record.index;
   }
   const keep = reordered ? lisKeepSet(newRecords) : null;
   for (let i = 0; i < newRecords.length; i++) {
