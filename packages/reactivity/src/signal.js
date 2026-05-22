@@ -29,12 +29,14 @@ export class Signal {
   // default clone and equal pulled from utils
   static equalityFunction = isEqual;
   static cloneFunction = clone;
+  static idFunction = (item) => item.id ?? item._id ?? item.hash ?? item.key;
   static safety = 'reference';
 
   constructor(initialValue, {
     safety = Signal.safety,
     cloneFunction = Signal.cloneFunction,
     equalityFunction = (safety === 'none') ? returnsFalse : Signal.equalityFunction,
+    idFunction = Signal.idFunction,
     context,
   } = {}) {
     // create dependency
@@ -46,6 +48,7 @@ export class Signal {
     // handle custom helpers if user specifies
     this.cloneFunction = cloneFunction;
     this.equalityFunction = equalityFunction;
+    this.idFunction = idFunction;
 
     this.safety = safety;
     this.currentValue = this.protect(initialValue);
@@ -327,7 +330,7 @@ export class Signal {
     if (!isObject(item)) {
       return item;
     }
-    return item.id ?? item._id ?? item.hash ?? item.key;
+    return this.idFunction(item);
   }
   hasID(item, id) {
     return this.getID(item) === id;

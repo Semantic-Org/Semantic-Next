@@ -69,7 +69,6 @@ export class Reaction {
   }
 
   run() {
-    // only run if this reaction is active
     if (!this.active) {
       return;
     }
