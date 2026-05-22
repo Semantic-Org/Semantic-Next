@@ -5,6 +5,8 @@ export class ReactionScope {
     this.reactions = [];
     this.children = [];
     this.disposers = [];
+    this.parent = null;
+    this.index = -1; // this scope's slot in parent.children, for O(1) detach
   }
 
   track(reaction) {
@@ -32,22 +34,31 @@ export class ReactionScope {
   child() {
     const childScope = new ReactionScope();
     childScope.parent = this;
-    this.children.push(childScope);
+    childScope.index = this.children.push(childScope) - 1;
     return childScope;
   }
 
-  dispose() {
-    for (const child of this.children) { child.dispose(); }
+  // Detach in O(1): a standalone dispose swap-pops itself out of `parent.children`
+  // via its stored slot index instead of indexOf + splice, and `fromParent` lets a
+  // parent tearing down its whole subtree skip the per-child unlink (clearing the
+  // array once). Bulk teardown O(n²) → O(n), and no more splice-mid-iteration.
+  // (Vue's EffectScope: same fromParent + indexed swap-pop.)
+  dispose(fromParent = false) {
+    for (const child of this.children) { child.dispose(true); }
     this.children = [];
     for (const reaction of this.reactions) { reaction.stop(); }
     this.reactions = [];
     for (const fn of this.disposers) { fn(); }
     this.disposers = [];
-    // Remove from parent to prevent accumulation across branch switches
-    if (this.parent) {
-      const idx = this.parent.children.indexOf(this);
-      if (idx !== -1) { this.parent.children.splice(idx, 1); }
-      this.parent = null;
+    if (!fromParent && this.parent) {
+      const siblings = this.parent.children;
+      const last = siblings.pop();
+      if (last && last !== this && this.index < siblings.length) {
+        siblings[this.index] = last;
+        last.index = this.index;
+      }
     }
+    this.parent = null;
+    this.index = -1;
   }
 }
