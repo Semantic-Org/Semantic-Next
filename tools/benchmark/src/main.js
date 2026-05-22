@@ -4,9 +4,14 @@ import mainCSS from '../css/main.css';
 import { buildData } from './store.js';
 import ast from './template.html?ast';
 
+// Pinned to reference safety so equality runs the fast path and each op fires
+// once. Mutations use in-place helpers (push / map / removeItem / new-ref set),
+// never mutate-then-set-same-ref, which would no-op under reference equality.
+const signalOptions = { safety: 'reference' };
+
 const defaultState = {
-  rows: { value: [], options: { safety: 'none' } },
-  selected: { value: 0, options: { safety: 'none' } },
+  rows: { value: [], options: signalOptions },
+  selected: { value: 0, options: signalOptions },
 };
 
 const createComponent = ({ state }) => ({
@@ -16,29 +21,26 @@ const createComponent = ({ state }) => ({
 
   run() {
     state.rows.set(buildData(1000));
-    state.selected.set(0);
   },
 
   runLots() {
     state.rows.set(buildData(10000));
-    state.selected.set(0);
   },
 
   add() {
-    state.rows.set(state.rows.peek().concat(buildData(1000)));
+    state.rows.push(...buildData(1000));
   },
 
   update() {
     const rows = state.rows.peek();
     for (let i = 0, len = rows.length; i < len; i += 10) {
-      rows[i] = { id: rows[i].id, label: rows[i].label + ' !!!' };
+      rows[i].label += ' !!!';
     }
-    state.rows.set(rows);
+    state.rows.notify();
   },
 
   clear() {
     state.rows.set([]);
-    state.selected.set(0);
   },
 
   swapRows() {
@@ -47,22 +49,17 @@ const createComponent = ({ state }) => ({
       const tmp = rows[1];
       rows[1] = rows[998];
       rows[998] = tmp;
-      state.rows.set(rows);
+      state.rows.notify();
     }
   },
 });
 
 const events = {
   'click .lbl'({ state, data }) {
-    state.selected.set(Number(data.id));
+    state.selected.set(data.id);
   },
   'click .remove'({ state, data }) {
-    const id = Number(data.id);
-    const rows = state.rows.peek();
-    const idx = rows.findIndex(r => r.id === id);
-    if (idx !== -1) {
-      state.rows.set([...rows.slice(0, idx), ...rows.slice(idx + 1)]);
-    }
+    state.rows.removeItem(data.id);
   },
 };
 
