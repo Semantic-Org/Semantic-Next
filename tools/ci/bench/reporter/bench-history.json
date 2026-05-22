@@ -16308,6 +16308,867 @@
           "baseline_sha": "87477db3b44d88ab71a31f924c36b9e07a583da0"
         }
       }
+    },
+    {
+      "sha": "1d280ef76e1758d2fdc84b8f115b0622deedb536",
+      "msg": "Bug: Defer Disconnect Teardown (#222)",
+      "parent_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83",
+      "timestamp": "2026-05-22T23:41:28Z",
+      "pr": 222,
+      "metrics": {
+        "parse-cold-normal-500": {
+          "ci": [
+            56.2153,
+            57.3313
+          ],
+          "mean_ms": 56.7733,
+          "percent_delta_ci": [
+            -0.5706,
+            2.2347
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "parse-cold-complex-200": {
+          "ci": [
+            40.9515,
+            41.3782
+          ],
+          "mean_ms": 41.1648,
+          "percent_delta_ci": [
+            -0.2737,
+            1.1194
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "ast-walk-15k": {
+          "ci": [
+            27.6473,
+            27.9491
+          ],
+          "mean_ms": 27.7982,
+          "percent_delta_ci": [
+            -1.7232,
+            0.0391
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "snippet-args-5k": {
+          "ci": [
+            49.6194,
+            50.134
+          ],
+          "mean_ms": 49.8767,
+          "percent_delta_ci": [
+            -0.344,
+            0.907
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "each-100-mount": {
+          "ci": [
+            73.7045,
+            74.9727
+          ],
+          "mean_ms": 74.3386,
+          "percent_delta_ci": [
+            -1.8733,
+            0.465
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "each-100": {
+          "ci": [
+            95.7994,
+            97.432
+          ],
+          "mean_ms": 96.6157,
+          "percent_delta_ci": [
+            -1.4208,
+            0.9341
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "helper-100-mount": {
+          "ci": [
+            45.0005,
+            45.8137
+          ],
+          "mean_ms": 45.4071,
+          "percent_delta_ci": [
+            3.1288,
+            9.6649
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "helper-100-state-change-1k": {
+          "ci": [
+            3.0356,
+            3.2358
+          ],
+          "mean_ms": 3.1357,
+          "percent_delta_ci": [
+            -14.3707,
+            -6.0792
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "create-1k": {
+          "ci": [
+            89.8432,
+            91.7893
+          ],
+          "mean_ms": 90.8163,
+          "percent_delta_ci": [
+            -0.4714,
+            2.025
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "create-10k": {
+          "ci": [
+            853.8221,
+            863.2879
+          ],
+          "mean_ms": 858.555,
+          "percent_delta_ci": [
+            -0.5271,
+            0.9
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "replace-1k": {
+          "ci": [
+            82.2719,
+            83.3106
+          ],
+          "mean_ms": 82.7913,
+          "percent_delta_ci": [
+            -0.0205,
+            1.5602
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "append-1k": {
+          "ci": [
+            81.2574,
+            83.8901
+          ],
+          "mean_ms": 82.5737,
+          "percent_delta_ci": [
+            -3.0164,
+            1.5021
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "update-10th-50": {
+          "ci": [
+            22.1864,
+            23.3861
+          ],
+          "mean_ms": 22.7862,
+          "percent_delta_ci": [
+            -7.4022,
+            -0.3595
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "select-40": {
+          "ci": [
+            46.5665,
+            46.9685
+          ],
+          "mean_ms": 46.7675,
+          "percent_delta_ci": [
+            -0.5587,
+            0.7995
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "swap-rows-20": {
+          "ci": [
+            8.6938,
+            9.0562
+          ],
+          "mean_ms": 8.875,
+          "percent_delta_ci": [
+            -1.486,
+            5.2455
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "remove-row-front-20": {
+          "ci": [
+            11.0186,
+            12.4764
+          ],
+          "mean_ms": 11.7475,
+          "percent_delta_ci": [
+            -3.8441,
+            13.5273
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "remove-row-middle-20": {
+          "ci": [
+            13.0868,
+            15.2932
+          ],
+          "mean_ms": 14.19,
+          "percent_delta_ci": [
+            -5.5514,
+            15.9879
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "remove-row-back-100": {
+          "ci": [
+            14.1589,
+            15.4036
+          ],
+          "mean_ms": 14.7813,
+          "percent_delta_ci": [
+            0.9277,
+            11.4656
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "clear-10k": {
+          "ci": [
+            96.9023,
+            98.6027
+          ],
+          "mean_ms": 97.7525,
+          "percent_delta_ci": [
+            -1.0431,
+            1.5713
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "expr-simple-100k": {
+          "ci": [
+            25.8327,
+            26.1581
+          ],
+          "mean_ms": 25.9954,
+          "percent_delta_ci": [
+            -1.3788,
+            0.5198
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "expr-lisp-50k": {
+          "ci": [
+            43.233,
+            43.8277
+          ],
+          "mean_ms": 43.5304,
+          "percent_delta_ci": [
+            -0.9934,
+            0.9295
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "expr-js-10k": {
+          "ci": [
+            19.914,
+            20.2846
+          ],
+          "mean_ms": 20.0993,
+          "percent_delta_ci": [
+            -0.4236,
+            2.1368
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "build-html-string-10k": {
+          "ci": [
+            50.6558,
+            51.412
+          ],
+          "mean_ms": 51.0339,
+          "percent_delta_ci": [
+            -0.4227,
+            1.7712
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "dom-walker-1000x15": {
+          "ci": [
+            48.5744,
+            49.3828
+          ],
+          "mean_ms": 48.9786,
+          "percent_delta_ci": [
+            -1.8952,
+            0.4948
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "reactive-fanout-500x1200": {
+          "ci": [
+            89.9134,
+            90.7538
+          ],
+          "mean_ms": 90.3336,
+          "percent_delta_ci": [
+            -1.2876,
+            0.7396
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "computed-chain-10x60k": {
+          "ci": [
+            177.6233,
+            179.8803
+          ],
+          "mean_ms": 178.7518,
+          "percent_delta_ci": [
+            -1.5717,
+            1.1241
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "reactive-multi-read-5x160k": {
+          "ci": [
+            189.5455,
+            190.4891
+          ],
+          "mean_ms": 190.0173,
+          "percent_delta_ci": [
+            -1.2204,
+            0.0371
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "reactive-list-replace-1000x1000": {
+          "ci": [
+            315.9413,
+            320.5205
+          ],
+          "mean_ms": 318.2309,
+          "percent_delta_ci": [
+            -1.2273,
+            0.9438
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "reactive-list-filter-1000x300": {
+          "ci": [
+            5.187,
+            5.4003
+          ],
+          "mean_ms": 5.2936,
+          "percent_delta_ci": [
+            -4.1511,
+            1.4406
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "reactive-push-2000x20": {
+          "ci": [
+            37.9971,
+            38.9792
+          ],
+          "mean_ms": 38.4882,
+          "percent_delta_ci": [
+            -1.9605,
+            1.588
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "reactive-set-index-300": {
+          "ci": [
+            1.5698,
+            1.7356
+          ],
+          "mean_ms": 1.6527,
+          "percent_delta_ci": [
+            -2.3169,
+            12.7335
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "reactive-set-property-by-id-200": {
+          "ci": [
+            2.5477,
+            2.7214
+          ],
+          "mean_ms": 2.6345,
+          "percent_delta_ci": [
+            -0.4223,
+            9.2119
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "set-same-10m": {
+          "ci": [
+            19.1337,
+            19.6118
+          ],
+          "mean_ms": 19.3727,
+          "percent_delta_ci": [
+            -1.3571,
+            1.545
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "sub-unsub-100k": {
+          "ci": [
+            29.3985,
+            30.2578
+          ],
+          "mean_ms": 29.8282,
+          "percent_delta_ci": [
+            -3.0733,
+            0.9922
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "reaction-flush-noop-5m": {
+          "ci": [
+            30.1815,
+            32.0403
+          ],
+          "mean_ms": 31.1109,
+          "percent_delta_ci": [
+            -6.9957,
+            3.4819
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "reaction-coalesce-400x100": {
+          "ci": [
+            46.5511,
+            47.1398
+          ],
+          "mean_ms": 46.8455,
+          "percent_delta_ci": [
+            -0.2123,
+            1.4227
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "reaction-dep-diff-45k": {
+          "ci": [
+            37.7486,
+            38.5114
+          ],
+          "mean_ms": 38.13,
+          "percent_delta_ci": [
+            0.4479,
+            3.1342
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "reactive-stable-fanout-5000x100": {
+          "ci": [
+            88.4898,
+            89.3393
+          ],
+          "mean_ms": 88.9145,
+          "percent_delta_ci": [
+            -0.6115,
+            0.7752
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "reactive-stable-deps-3reads-5000x100": {
+          "ci": [
+            197.0693,
+            198.9216
+          ],
+          "mean_ms": 197.9955,
+          "percent_delta_ci": [
+            -0.4697,
+            1
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "computed-unobserved-200x500": {
+          "ci": [
+            18.9858,
+            19.2015
+          ],
+          "mean_ms": 19.0936,
+          "percent_delta_ci": [
+            -1.0533,
+            0.7491
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "computed-subscribe-unsubscribe-10k": {
+          "ci": [
+            9.0033,
+            9.3403
+          ],
+          "mean_ms": 9.1718,
+          "percent_delta_ci": [
+            -2.0876,
+            3.224
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "flush-fanout-allocation-1000x500": {
+          "ci": [
+            76.7178,
+            77.684
+          ],
+          "mean_ms": 77.2009,
+          "percent_delta_ci": [
+            -0.3128,
+            1.2046
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "subtemplate-reactive-data-100x500": {
+          "ci": [
+            32.8025,
+            33.242
+          ],
+          "mean_ms": 33.0222,
+          "percent_delta_ci": [
+            -0.594,
+            1.5712
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "subtemplate-shorthand-props-100x500": {
+          "ci": [
+            29.8359,
+            30.4052
+          ],
+          "mean_ms": 30.1206,
+          "percent_delta_ci": [
+            -1.6194,
+            1.0603
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "snippet-args-per-key-100x500": {
+          "ci": [
+            22.911,
+            23.2334
+          ],
+          "mean_ms": 23.0722,
+          "percent_delta_ci": [
+            -1.9343,
+            0.2628
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "active-indicator-200": {
+          "ci": [
+            25.6248,
+            26.313
+          ],
+          "mean_ms": 25.9689,
+          "percent_delta_ci": [
+            1.8295,
+            6.2314
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "stable-ref-mutate-500": {
+          "ci": [
+            9.8727,
+            10.2673
+          ],
+          "mean_ms": 10.07,
+          "percent_delta_ci": [
+            -4.2636,
+            1.371
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "subtemplate-data-blob-100": {
+          "ci": [
+            122.7358,
+            124.182
+          ],
+          "mean_ms": 123.4589,
+          "percent_delta_ci": [
+            -0.5643,
+            1.037
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "snippet-in-subtemplate-100x1k": {
+          "ci": [
+            15.1298,
+            15.5936
+          ],
+          "mean_ms": 15.3617,
+          "percent_delta_ci": [
+            -3.175,
+            1.1559
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "active-indicator-nested-200": {
+          "ci": [
+            12.5369,
+            12.8675
+          ],
+          "mean_ms": 12.7022,
+          "percent_delta_ci": [
+            -0.2683,
+            3.9384
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "subtemplate-helpers-light-100x500": {
+          "ci": [
+            49.8609,
+            50.5024
+          ],
+          "mean_ms": 50.1817,
+          "percent_delta_ci": [
+            -0.1029,
+            1.7482
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "subtemplate-helpers-heavy-100x500": {
+          "ci": [
+            26.6033,
+            26.8467
+          ],
+          "mean_ms": 26.725,
+          "percent_delta_ci": [
+            -1.5283,
+            -0.1046
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "each-mount-1000": {
+          "ci": [
+            41.7687,
+            42.6258
+          ],
+          "mean_ms": 42.1972,
+          "percent_delta_ci": [
+            5.7499,
+            8.9214
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "bulk-add-500": {
+          "ci": [
+            220.0192,
+            221.5608
+          ],
+          "mean_ms": 220.79,
+          "percent_delta_ci": [
+            -0.3302,
+            0.8408
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "add-20": {
+          "ci": [
+            8.2616,
+            8.425
+          ],
+          "mean_ms": 8.3433,
+          "percent_delta_ci": [
+            0.0492,
+            2.2679
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "toggle-100": {
+          "ci": [
+            8.6304,
+            9.0518
+          ],
+          "mean_ms": 8.8411,
+          "percent_delta_ci": [
+            -4.294,
+            2.5746
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "toggle-all-200": {
+          "ci": [
+            867.6339,
+            873.1683
+          ],
+          "mean_ms": 870.4011,
+          "percent_delta_ci": [
+            -0.5622,
+            0.3959
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "remove-50-front": {
+          "ci": [
+            3.5315,
+            3.584
+          ],
+          "mean_ms": 3.5578,
+          "percent_delta_ci": [
+            -1.3486,
+            0.788
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "remove-50-middle": {
+          "ci": [
+            4.7643,
+            4.9668
+          ],
+          "mean_ms": 4.8656,
+          "percent_delta_ci": [
+            -3.8718,
+            2.3758
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "remove-50-back": {
+          "ci": [
+            4.5369,
+            4.8719
+          ],
+          "mean_ms": 4.7044,
+          "percent_delta_ci": [
+            -5.0967,
+            5.2385
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "clear-completed-250": {
+          "ci": [
+            37.3294,
+            37.7795
+          ],
+          "mean_ms": 37.5544,
+          "percent_delta_ci": [
+            -0.9593,
+            0.8529
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "toggle-first-100": {
+          "ci": [
+            8.6009,
+            9.0771
+          ],
+          "mean_ms": 8.839,
+          "percent_delta_ci": [
+            -5.2582,
+            2.4473
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "toggle-middle-100": {
+          "ci": [
+            6.0663,
+            6.2137
+          ],
+          "mean_ms": 6.14,
+          "percent_delta_ci": [
+            -1.7858,
+            1.5581
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "toggle-last-100": {
+          "ci": [
+            7.7535,
+            8.2765
+          ],
+          "mean_ms": 8.015,
+          "percent_delta_ci": [
+            -4.5473,
+            3.8511
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "remove-first-100": {
+          "ci": [
+            9.5862,
+            9.9158
+          ],
+          "mean_ms": 9.751,
+          "percent_delta_ci": [
+            -5.1222,
+            0.0837
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "remove-middle-100": {
+          "ci": [
+            6.6021,
+            6.8999
+          ],
+          "mean_ms": 6.751,
+          "percent_delta_ci": [
+            -2.3802,
+            3.5723
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "remove-last-100": {
+          "ci": [
+            6.4514,
+            7.0686
+          ],
+          "mean_ms": 6.76,
+          "percent_delta_ci": [
+            -6.0994,
+            6.7524
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "filter-cycle-20": {
+          "ci": [
+            201.209,
+            203.015
+          ],
+          "mean_ms": 202.112,
+          "percent_delta_ci": [
+            -0.4437,
+            0.7112
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "edit-start-10": {
+          "ci": [
+            50.3891,
+            50.8629
+          ],
+          "mean_ms": 50.626,
+          "percent_delta_ci": [
+            -1.9188,
+            0.5066
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "edit-cycle-5": {
+          "ci": [
+            45.5237,
+            46.9603
+          ],
+          "mean_ms": 46.242,
+          "percent_delta_ci": [
+            -1.9221,
+            2.1689
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        },
+        "rename-500": {
+          "ci": [
+            12.07,
+            12.646
+          ],
+          "mean_ms": 12.358,
+          "percent_delta_ci": [
+            -1.4651,
+            4.7551
+          ],
+          "baseline_sha": "9d1a120fce49c28a902bc070add3b79c915a8c83"
+        }
+      }
     }
   ]
 }
