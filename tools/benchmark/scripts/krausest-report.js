@@ -2,8 +2,8 @@
 /*
   Read krausest-history.json.
 
-    node krausest-report.js              latest run's ratio-to-fastest table
-    node krausest-report.js diff A B     per-benchmark ratio change A → B,
+    node scripts/krausest-report.js          latest run's ratio-to-fastest table
+    node scripts/krausest-report.js diff A B  per-benchmark ratio change A to B,
                                          i.e. did we close or widen the gap
 
   Ratios come from the primary history (relative signal). For absolute
@@ -15,7 +15,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const history = JSON.parse(readFileSync(join(HERE, 'krausest-history.json'), 'utf8'));
+const history = JSON.parse(readFileSync(join(HERE, '..', 'krausest-history.json'), 'utf8'));
 const [cmd, a, b] = process.argv.slice(2);
 
 if (cmd === 'diff') {

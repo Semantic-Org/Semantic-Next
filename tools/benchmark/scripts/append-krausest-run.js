@@ -26,7 +26,7 @@
   tree.
 
   Usage:
-    node append-krausest-run.js \
+    node scripts/append-krausest-run.js \
       --results <dir>            js-framework-benchmark webdriver-ts/results
       --wallclock-seconds <n>    bench-only wallclock for the run
       --chrome-version <v>       browser the run used
@@ -41,8 +41,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const HISTORY = join(HERE, 'krausest-history.json');
-const RUNS_DIR = join(HERE, 'krausest-runs');
+const HISTORY = join(HERE, '..', 'krausest-history.json');
+const RUNS_DIR = join(HERE, '..', 'krausest-runs');
 const SCHEMA_VERSION = 1;
 
 // The contestant plus the comparison field.
