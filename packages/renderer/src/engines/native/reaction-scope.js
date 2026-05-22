@@ -38,11 +38,11 @@ export class ReactionScope {
     return childScope;
   }
 
-  // `fromParent` is set when the parent is tearing down all its children: the
-  // child then skips the per-child parent-unlink (the parent clears its array
-  // once), turning bulk teardown from O(n²) into O(n) and avoiding a splice
-  // mid-iteration. Standalone dispose detaches via an O(1) swap-pop using the
-  // stored slot index instead of indexOf + splice.
+  // Detach in O(1): a standalone dispose swap-pops itself out of `parent.children`
+  // via its stored slot index instead of indexOf + splice, and `fromParent` lets a
+  // parent tearing down its whole subtree skip the per-child unlink (clearing the
+  // array once). Bulk teardown O(n²) → O(n), and no more splice-mid-iteration.
+  // (Vue's EffectScope: same fromParent + indexed swap-pop.)
   dispose(fromParent = false) {
     for (const child of this.children) { child.dispose(true); }
     this.children = [];
