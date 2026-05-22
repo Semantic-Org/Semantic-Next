@@ -1,6 +1,7 @@
 import { arrayFromObject, isArray, isEmpty } from '@semantic-ui/utils';
 import { isBlockClose, isBlockOpen, MARKER_VERSION } from '../../../build-html-string.js';
 import { decodeItemKey, getCollectionType, getEachData, getItemID } from '../../../shared/each.js';
+import { lisIndices } from '../../../shared/lis.js';
 import { defineBlock } from '../define-block.js';
 import { ReactiveDataContext } from '../reactive-context.js';
 import { registerBlock } from './registry.js';
@@ -186,6 +187,25 @@ function disposeRecord(record) {
   disposeRecordDOM(record);
 }
 
+// Survivors to leave untouched in Phase 2: the LIS of their old DOM positions.
+// Everything off it is the minimal move set. Fresh records (still carrying their
+// build fragment) are excluded — they always insert.
+function lisKeepSet(records) {
+  const positions = [];
+  const recordIndex = [];
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    if (!record || record.fragment) { continue; }
+    positions.push(record.index);
+    recordIndex.push(i);
+  }
+  const keep = new Set();
+  for (const seqIndex of lisIndices(positions)) {
+    keep.add(recordIndex[seqIndex]);
+  }
+  return keep;
+}
+
 // Lit-style head/tail keyed reconcile (lit-html's repeat directive).
 // Walks both ends inward; lazily builds key→index maps only when forced
 // by non-contiguous changes. Common cases (head/tail unchanged, single
@@ -212,6 +232,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   let newTail = items.length - 1;
   let oldKeyToIdx;
   let newKeySet;
+  let freshCount = 0;
 
   while (oldHead <= oldTail && newHead <= newTail) {
     const oldHeadRec = oldRecords[oldHead];
@@ -273,6 +294,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
             renderAST,
             isSVG,
           });
+          freshCount++;
         }
         else {
           newRecords[newHead] = oldRecord;
@@ -295,6 +317,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       renderAST,
       isSVG,
     });
+    freshCount++;
     newHead++;
   }
 
@@ -303,30 +326,36 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
     if (record !== null) { disposeRecord(record); }
   }
 
-  // Phase 2: linearize DOM order using markers.
-  //
-  // `cursor` is always a currently-attached node that we know the next
-  // item's startMarker should follow. It starts as region.anchor and
-  // advances to each placed record's endMarker. Markers are stable — they
-  // are the invariant that survives inner-block mutations.
-  //
-  // For each record:
-  //   - If the record's startMarker is already the cursor's nextSibling,
-  //     the record is already in the right place; skip insertion.
-  //   - Otherwise, extract its [startMarker .. content .. endMarker]
-  //     range into a fragment, then insert the fragment after the cursor.
-  //     Fresh records start with their content already in the fragment
-  //     we built in createRecord — insert it directly.
+  // Move only records off the LIS of their old DOM positions — minimal moves for
+  // any permutation (Vue `getSequence`, inferno). `record.index` still holds the
+  // *old* position here: Phase 1 never writes it, Phase 3 does afterward. Fresh
+  // records (still carrying their build fragment) always insert. Build the LIS
+  // only on a real reorder; otherwise survivors stay ascending and `cursor`'s
+  // in-place skip suffices.
   let cursor = region.anchor;
-  for (const record of newRecords) {
+  let reordered = false;
+  // Fewer than two survivors can't be out of order, so all-fresh reconciles
+  // (replace, create) skip the scan entirely.
+  if (items.length - freshCount > 1) {
+    let lastOldIndex = -1;
+    for (const record of newRecords) {
+      if (!record || record.fragment) { continue; }
+      if (record.index < lastOldIndex) {
+        reordered = true;
+        break;
+      }
+      lastOldIndex = record.index;
+    }
+  }
+  const keep = reordered ? lisKeepSet(newRecords) : null;
+  for (let i = 0; i < newRecords.length; i++) {
+    const record = newRecords[i];
     if (!record) { continue; }
     if (record.fragment) {
-      // Freshly created record — content and markers are in the fragment.
       cursor.after(record.fragment);
       record.fragment = null;
     }
-    else if (record.startMarker.previousSibling !== cursor) {
-      // Existing record in the wrong position — extract and reinsert.
+    else if (keep ? !keep.has(i) : record.startMarker.previousSibling !== cursor) {
       const fragment = document.createDocumentFragment();
       extractRangeToFragment(record.startMarker, record.endMarker, fragment);
       cursor.after(fragment);
