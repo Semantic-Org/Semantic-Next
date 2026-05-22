@@ -145,7 +145,7 @@ function trapGet(target, prop) {
     }
     return values[prop];
   }
-  if (!target.keysSealed) { target.keySetVersion.depend(); }
+  if (!target.keysSealed) { (target.keySetVersion ??= new Dependency()).depend(); }
   return target.parent[prop];
 }
 
@@ -269,7 +269,11 @@ export class ReactiveDataContext {
     // userland breaks Signal.equalityFunction after this RDC is live,
     // both Signal and RDC fail the same way; no divergence.
     this.equalityFunction = Signal.equalityFunction;
-    this.keySetVersion = new Dependency();
+    // Lazy: only a reader falling through on the unsealed path allocates it
+    // (spread-mode late keys). as-mode reads run post-seal, so it stays null —
+    // the per-row saving. A writer fires it only if a reader already created it
+    // (a changed() on a never-subscribed dep was always a no-op).
+    this.keySetVersion = null;
     this.proxy = new Proxy(this, HANDLER);
 
     if (registerItemContext) {
@@ -288,7 +292,7 @@ export class ReactiveDataContext {
       if (key !== this.asKey || value === null || typeof value !== 'object') {
         this.deps[key] = new Dependency();
       }
-      if (!this.keysSealed) { this.keySetVersion.changed(); }
+      if (!this.keysSealed && this.keySetVersion !== null) { this.keySetVersion.changed(); }
       return;
     }
     const old = this.values[key];
