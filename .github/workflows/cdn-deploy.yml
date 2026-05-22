@@ -43,9 +43,6 @@ jobs:
       - name: Check for bare imports
         run: node tools/cdn/check-bare-imports.js
 
-      - name: Install CDN tools
-        run: cd tools/cdn && npm ci
-
       - name: Worker unit tests
         run: cd tools/cdn && npm run test:unit
 
