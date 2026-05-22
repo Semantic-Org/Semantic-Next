@@ -44,7 +44,7 @@ jobs:
         run: node tools/cdn/check-bare-imports.js
 
       - name: Worker unit tests
-        run: cd tools/cdn && npm run test:unit
+        run: cd tools/cdn && npx vitest run --config vitest.unit.config.js
 
       - name: Extract version
         id: version
