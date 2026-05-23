@@ -348,19 +348,44 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
     }
   }
   const keep = reordered ? lisKeepSet(newRecords) : null;
+  // Coalesce contiguous fresh-record fragments into a single batched
+  // insertion. All-fresh paths (replace, create, append into a live
+  // parent) collapse from N live-DOM insertions to one. `pendingFlush`
+  // pins the live-tree position where the batch should land; the
+  // logical `cursor` advances through the (still-detached) batched
+  // endMarkers so the next survivor's place check stays consistent
+  // once the batch is flushed.
+  let pendingFresh = null;
+  let pendingFlush = null;
   for (let i = 0; i < newRecords.length; i++) {
     const record = newRecords[i];
     if (!record) { continue; }
     if (record.fragment) {
-      cursor.after(record.fragment);
+      if (pendingFresh === null) {
+        pendingFresh = record.fragment;
+        pendingFlush = cursor;
+      }
+      else {
+        pendingFresh.appendChild(record.fragment);
+      }
       record.fragment = null;
     }
-    else if (keep ? !keep.has(i) : record.startMarker.previousSibling !== cursor) {
-      const fragment = document.createDocumentFragment();
-      extractRangeToFragment(record.startMarker, record.endMarker, fragment);
-      cursor.after(fragment);
+    else {
+      if (pendingFresh !== null) {
+        pendingFlush.after(pendingFresh);
+        pendingFresh = null;
+        pendingFlush = null;
+      }
+      if (keep ? !keep.has(i) : record.startMarker.previousSibling !== cursor) {
+        const fragment = document.createDocumentFragment();
+        extractRangeToFragment(record.startMarker, record.endMarker, fragment);
+        cursor.after(fragment);
+      }
     }
     cursor = record.endMarker;
+  }
+  if (pendingFresh !== null) {
+    pendingFlush.after(pendingFresh);
   }
 
   // Phase 3: per-key data updates.
