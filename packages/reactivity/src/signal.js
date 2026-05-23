@@ -158,6 +158,64 @@ export class Signal {
     return derivedSignal;
   }
 
+  // Conditional-membership signal. The returned `select(key)` is reactive
+  // and returns whether `matchFn(key, source.value)` is true. Source changes
+  // wake only the keys whose match result flipped, so N readers cost
+  // O(flipped), not O(N) — the "highlight one of N" pattern (selected row,
+  // active tab, current route). Solid's `createSelector`. The Reaction.run
+  // teardown that already removes stale deps does the per-key
+  // unsubscribe naturally; the empty `keyDeps` Map entry is pruned
+  // opportunistically inside the backing reaction. Round-1 placed the prune
+  // on `onCleanup`, which fires on every benign rerun — that hazard is
+  // designed out here. `select.stop` is exposed for owner-less callers
+  // (a component running outside any Reaction can't rely on the parent
+  // cleanup hook); a WeakRef on `select` also self-stops the backing
+  // reaction once the closure is unreferenced, mirroring
+  // derive/computed's WeakRef-on-output.
+  selector(matchFn = (key, value) => key === value) {
+    const source = this;
+    const keyDeps = new Map();
+    let current = source.peek();
+    let selectRef;
+
+    const reaction = Reaction.create(() => {
+      const next = source.get();
+      if (selectRef && !selectRef.deref()) {
+        reaction.stop();
+        return;
+      }
+      const prev = current;
+      current = next;
+      if (next === prev) { return; }
+      for (const [key, dep] of keyDeps) {
+        if (dep.subscribers.size === 0) {
+          keyDeps.delete(key);
+          continue;
+        }
+        if (matchFn(key, next) !== matchFn(key, prev)) {
+          dep.changed();
+        }
+      }
+    });
+
+    if (Reaction.current) {
+      Reaction.current.onCleanup(() => reaction.stop());
+    }
+
+    const select = (key) => {
+      let dep = keyDeps.get(key);
+      if (dep === undefined) {
+        dep = new Dependency();
+        keyDeps.set(key, dep);
+      }
+      dep.depend();
+      return matchFn(key, current);
+    };
+    select.stop = () => reaction.stop();
+    selectRef = new WeakRef(select);
+    return select;
+  }
+
   // multiple signals computing a signal
   static computed(computeFn, options = {}) {
     const computedSignal = new Signal(undefined, options);
