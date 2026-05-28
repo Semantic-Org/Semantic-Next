@@ -140,7 +140,7 @@ None substantive. All naming decisions resolved in the 2026-05-28 pair session.
 
 ## Dependencies
 
-**Blocks:** [Release 0.18.0](active/release-0-18-0.md). The 0.18.0 release ships this refactor as the last substantive API change before docs polish and tag.
+**Blocks:** [Release 0.18.0](release-0-18-0.md). The 0.18.0 release ships this refactor as the last substantive API change before docs polish and tag.
 
 **Blocked by:** None.
 
