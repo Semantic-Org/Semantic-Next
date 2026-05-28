@@ -14,9 +14,37 @@ import {
 import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
 
 import { Dependency } from './dependency.js';
-import { Reaction } from './reaction.js';
+import { currentReaction, Reaction, reaction as createReaction } from './reaction.js';
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
+
+// shared backing for derive() and computed(). weak ref on the *output* so the
+// derived signal stops self-driving once nothing else holds it. parent-reaction
+// onCleanup ties lifetime to the enclosing scope when present.
+const createDerivedSignal = (reactionBody, options) => {
+  const out = new Signal(undefined, options);
+  const ref = new WeakRef(out);
+  const r = createReaction(() => {
+    const live = ref.deref();
+    if (!live) {
+      r.stop();
+      return;
+    }
+    reactionBody(live);
+  });
+  const parent = currentReaction();
+  if (parent) {
+    parent.onCleanup(() => r.stop());
+  }
+  return out;
+};
+
+export const signal = (initial, options) => new Signal(initial, options);
+
+export const derive = (source, computeFn, options = {}) =>
+  createDerivedSignal((out) => out.set(computeFn(source.get())), options);
+
+export const computed = (computeFn, options = {}) => createDerivedSignal((out) => out.set(computeFn()), options);
 
 export class Signal {
   get [IS_SIGNAL]() {
@@ -134,49 +162,12 @@ export class Signal {
 
   // single signal having a derivation
   derive(computeFn, options = {}) {
-    const derivedSignal = new Signal(undefined, options);
-
-    // weak so the reaction's closure doesn't pin derived
-    // through source.dep.subscribers
-    const derivedRef = new WeakRef(derivedSignal);
-
-    const source = this;
-
-    const reaction = Reaction.create(() => {
-      const currentRef = derivedRef.deref();
-      if (!currentRef) {
-        reaction.stop();
-        return;
-      }
-      currentRef.set(computeFn(source.get()));
-    });
-
-    if (Reaction.current) {
-      Reaction.current.onCleanup(() => reaction.stop());
-    }
-
-    return derivedSignal;
+    return derive(this, computeFn, options);
   }
 
   // multiple signals computing a signal
   static computed(computeFn, options = {}) {
-    const computedSignal = new Signal(undefined, options);
-    const computedRef = new WeakRef(computedSignal);
-
-    const reaction = Reaction.create(() => {
-      const ref = computedRef.deref();
-      if (!ref) {
-        reaction.stop();
-        return;
-      }
-      ref.set(computeFn());
-    });
-
-    if (Reaction.current) {
-      Reaction.current.onCleanup(() => reaction.stop());
-    }
-
-    return computedSignal;
+    return computed(computeFn, options);
   }
 
   /*******************************
