@@ -1,4 +1,4 @@
-import { flush, reaction, Scheduler, match, Signal } from '@semantic-ui/reactivity';
+import { flush, match, reaction, Scheduler, Signal } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 // match(source, matchFn?) — Solid `createSelector` adapted to SUI.
