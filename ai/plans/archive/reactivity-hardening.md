@@ -214,8 +214,13 @@ Total time: 6-8h baseline; up to 16h if Item 9 proceeds.
 
 ## Status
 
-Scoped for Items 1-8. Initial for Item 9 — gated on Item 7 benchmark data with an explicit abandonment path.
+Complete. Items 1-6 + Item 8 shipped in [PR #207](https://github.com/Semantic-Org/Semantic-Next/pull/207); Item 7's benchmark precursor shipped in [PR #203](https://github.com/Semantic-Org/Semantic-Next/pull/203). Item 9 (dep-tracking rewrite) was gated/conditional and not pursued — bench data from Item 7 didn't justify the rewrite.
 
-Item 8's call-site audit ran on 2026-05-13 and surfaced zero framework-internal consumers plus three example consumers, all wrapped in `Reaction.create`. The semantic change to lazy refcounting is invisible to every existing consumer, so Item 8 promotes from deferred decision to in-bundle.
+Originated from a five-frontier-model council fresh-take review of the reactivity package.
 
-Originated from a five-frontier-model council fresh-take review of the reactivity package. Source artifact at `ai/workspace/fresh-takes/reactivity-fresh-take.md` and synthesis at `ai/workspace/fresh-takes/pr-sequence.md`.
+## Completion
+
+- **Estimated:** 6-8h baseline, up to 16h if Item 9 proceeded
+- **Actual:** ~2 days wall-clock (2026-05-13 plan → 2026-05-15 PR #207 merged), with [PR #203](https://github.com/Semantic-Org/Semantic-Next/pull/203) bench precursor mid-stream
+- **Completed:** 2026-05-15
+- **Delta notes:** Item 9 dropped — Item 7's benchmark data didn't surface the kind of stable-dependency churn cost that would justify a dep-tracking rewrite. Items 1-6 and 8 landed cleanly via the sequenced bench bisect approach captured in #207's title.

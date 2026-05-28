@@ -253,7 +253,7 @@ Three layers of `ReactiveDataContext` stack via Proxy fallthrough: a snippet's c
 
 ## Dependencies
 
-- **[Signal Performance](signal-performance.md)** — lands first. The `safety` preset system this plan uses (`safety: 'none'` for internal per-key Signals) arrives with signal-performance. The migration-audit gating work that plan describes is orthogonal to this one, but the preset API needs to be in place before `ReactiveDataContext` is written against it.
+- **[Signal Performance](../signal-performance.md)** — lands first. The `safety` preset system this plan uses (`safety: 'none'` for internal per-key Signals) arrives with signal-performance. The migration-audit gating work that plan describes is orthogonal to this one, but the preset API needs to be in place before `ReactiveDataContext` is written against it.
 - **Snippet zero-reactivity investigation** (open question 1) — blocks session 3 (snippet-site adoption) but not session 1 (each-site) or session 2 (subtemplate-site).
 
 ## Sessions (estimated)
@@ -263,6 +263,15 @@ Three layers of `ReactiveDataContext` stack via Proxy fallthrough: a snippet's c
 3. **Snippet-site adoption + zero-reactivity investigation** (~1-2h pair). Resolve open question 1 first, then adopt ReactiveDataContext for snippet args; flip `snippet args per-key granularity` test to passing; add the new tests.
 4. **Hydration-path integration sanity** (~30m pair). Audit Plan 09's `adoptServerItems`; substitute ReactiveDataContext; re-run the adoption Node-identity test to confirm preservation.
 
+## Completion
+
+> Computed from git log; verify breaks.
+
+- **Estimated:** 6-8h pair
+- **Actual:** ~14-16h active across ~3 bursts over 2.5 days wall-clock (2026-05-05 18:33 EDT → 2026-05-08 02:03 EDT). Merged as [PR #183](https://github.com/Semantic-Org/Semantic-Next/pull/183) at 2026-05-08 09:45 EDT.
+- **Completed:** 2026-05-08
+- **Delta notes:** Roughly 2x the estimate. The primitive + each-site adoption (session 1) landed close to plan, but downstream sessions kept growing: subtemplate-site adoption forced the unification onto the snippet lazy-getter model (`d7add0eb6`), the per-key allocation hot path needed several rounds of V8-targeted tuning (Map → null-prototype, eager → lazy → eager, handler-shape stabilization), and the bench-todo composition surfaced both the `it.fails` per-FIELD gap and a `createComponent`-ordering bug in subtemplate `reactiveData` seeding. Per-FIELD as-mode isolation was carved out into [`fgr-as-mode-per-field-isolation`](fgr-as-mode-per-field-isolation.md) and shipped as a fast-follow ([PR #191](https://github.com/Semantic-Org/Semantic-Next/pull/191)).
+
 ## Status
 
-Initial scope — design decisions locked (primitive shape, Signal-per-key, per-key Reactions, safety preset, plan ordering). Needs open question 1 resolved before session 3; questions 2-4 can be resolved in-session.
+Shipped 2026-05-08. Per-FIELD as-mode follow-up shipped 2026-05-09.
