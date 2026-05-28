@@ -22,7 +22,7 @@ export class Signal {
     return !!instance?.[IS_SIGNAL];
   }
 
-  // default helpers — overridable globally on the class or per-instance via options
+  // default helpers, overridable on the class or per-instance via options
   static equality = isEqual;
   static clone = (value) => clone(value, { preserveNonCloneable: true });
   static id = (item) => item.id ?? item._id ?? item.hash ?? item.key;

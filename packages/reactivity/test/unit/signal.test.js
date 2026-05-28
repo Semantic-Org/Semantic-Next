@@ -655,7 +655,7 @@ describe.concurrent('Signal', () => {
       expect(source.dependency.subscribers.size).toBe(1);
     });
 
-    it('derive inside a parent reaction — parent.stop() cascades to the derived internal reaction', () => {
+    it('parent.stop() cascades to the derived internal reaction when derive is called inside a parent', () => {
       const source = new Signal(1);
       const outer = reaction(() => {
         source.derive(v => v * 2);
@@ -1050,7 +1050,7 @@ describe('Signal API', () => {
   });
 
   /***********************************************
-   * Static defaults — global escape hatch
+   * Static defaults, global escape hatch
    ***********************************************/
 
   describe('static defaults', () => {
@@ -1070,7 +1070,7 @@ describe('Signal API', () => {
       }
     });
 
-    it('snapshots Signal.equality at construction — later static changes do not affect existing signals', () => {
+    it('snapshots Signal.equality at construction so later static changes do not affect existing signals', () => {
       // The renderer's reactive-context.js relies on this contract.
       const original = Signal.equality;
       const customEq = (a, b) => a?.id === b?.id;

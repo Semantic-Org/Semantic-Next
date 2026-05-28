@@ -1,18 +1,18 @@
 import { flush, match, reaction, Scheduler, Signal } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-// match(source, matchFn?) — Solid `createSelector` adapted to SUI.
-// Load-bearing properties verified below:
-//   1. membership flip — only the at-most-2 keys whose match result
+// match(source, matchFn?) is Solid's `createSelector` adapted to SUI.
+// Load-bearing properties verified below.
+//   1. membership flip. Only the at-most-2 keys whose match result
 //      changed re-fire on a source change.
-//   2. re-arm after rerun — Reaction.run's natural dep-set teardown
-//      unsubscribes a row reaction from its per-key dep on rerun;
-//      calling matcher(key) again re-registers the subscription.
-//   3. row-churn doesn't leak — stopped row reactions leave empty
+//   2. re-arm after rerun. Reaction.run's natural dep-set teardown
+//      unsubscribes a row reaction from its per-key dep on rerun. Calling
+//      matcher(key) again re-registers the subscription.
+//   3. row-churn doesn't leak. Stopped row reactions leave empty
 //      keyDeps entries which are pruned opportunistically.
-//   4. owner-less GC — when the returned matcher closure is unreferenced,
+//   4. owner-less GC. When the returned matcher closure is unreferenced,
 //      the backing reaction self-stops on next re-fire (WeakRef).
-//   5. custom matchFn — range-style or other membership predicates work
+//   5. custom matchFn. Range-style or other membership predicates work
 //      and produce the same per-key re-fire discipline.
 
 describe('match', () => {

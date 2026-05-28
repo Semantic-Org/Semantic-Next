@@ -13,15 +13,11 @@ import {
 } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Module-level free-fn surface — direct coverage. Behavior delegation is
-// verified against the class-based suite; these tests pin the factory
-// shape and that each entry actually wires to the underlying impl.
+// Direct coverage for the module-level free-fn surface. Behavior delegation
+// is verified against the class-based suite. These tests pin the factory
+// shape and that each entry wires to the underlying impl.
 
 describe('module-level factories', () => {
-  beforeEach(() => {
-    // shared scheduler state — reset to avoid cross-test bleed.
-  });
-
   describe('signal()', () => {
     it('returns a Signal instance', () => {
       expect(signal(0)).toBeInstanceOf(Signal);

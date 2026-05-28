@@ -407,7 +407,7 @@ describe('Reaction — public API contract', () => {
     });
 
     it('constructs via new Reaction() and satisfies instanceof Reaction', () => {
-      // new Reaction() does NOT auto-run — that's reaction()'s responsibility.
+      // new Reaction() does NOT auto-run, that's reaction()'s responsibility
       const r = new Reaction(() => {});
       expect(r).toBeInstanceOf(Reaction);
       expect(r.active).toBe(true);
