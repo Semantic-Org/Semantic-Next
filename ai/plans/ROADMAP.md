@@ -82,6 +82,7 @@ PHASE 0: RENDERER ARCHITECTURE  ✓ Complete
 Plans with an open PR or live pair work. Updated as ceremony when a PR opens; entries clear when the PR merges (plan archives) or closes without merge (plan returns to its phase). Mirrored by `ai/plans/active/`.
 
 - [Release 0.18.0](active/release-0-18-0.md) — [PR #122](https://github.com/Semantic-Org/Semantic-Next/pull/122) `docs/shippable` (menu trimming + audit pass pending). Ships the next tagged release; last was 0.17.0 in November. Gated on Reactivity Functional Surface (2a) landing first.
+- [Reactivity Functional Surface](active/reactivity-functional-surface.md) — [PR #226](https://github.com/Semantic-Org/Semantic-Next/pull/226) module-level free-fn surface (`signal()`, `reaction()`, `derive()`, `computed()`, `match()`). Removes Reaction class statics for tree-shaking. Gates 0.18.0 ship.
 ---
 
 ## Phase 0 — Renderer Architecture
@@ -108,7 +109,7 @@ Behavioral changes and API contracts that downstream agents and consumers will t
 
 | # | Plan | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
-| 2a | [Reactivity Functional Surface](reactivity-functional-surface.md) | 7-10h | pair | scoped | Module-level free-fn surface (`signal()`, `reaction()`, `derive()`, `computed()`, `selector()`). Removes `Reaction.*` static namespace for tree-shaking; reads like `@semantic-ui/utils`. Gates 0.18.0 ship. Docs migration is a separate PR. |
+| 2a | [Reactivity Functional Surface](active/reactivity-functional-surface.md) | 7-10h | pair | scoped | Module-level free-fn surface (`signal()`, `reaction()`, `derive()`, `computed()`, `match()`). Removes `Reaction.*` static namespace for tree-shaking; reads like `@semantic-ui/utils`. Gates 0.18.0 ship. Docs migration is a separate PR. |
 | 2b | [Value Schema](value-schema.md) | 16-24h (2-3d) | pair | initial | Contract for ~20-30 form components. `value` setting + schema + `change` event. Gates form/form-field and the wrapper architecture. |
 | 2c | [State from Settings](state-from-settings.md) | 8h | pair | scoped | `{ default: 'all', from: 'setting' }` in `defaultState`. Eliminates manual shadowing for components that accept initial values from attributes but own them as state. |
 | 2d | [Subtemplate Settings](subtemplate-settings.md) | 8-12h | pair | initial | Reactive `defaultSettings` on subtemplates with merged proxy over parent web component settings. Same upgrade path: add `tagName` and the subtemplate becomes a web component with no API change. |
