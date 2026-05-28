@@ -9,7 +9,8 @@
 */
 
 import { defineComponent } from '@semantic-ui/component';
-import { Reaction } from '@semantic-ui/reactivity';
+import * as reactivity from '@semantic-ui/reactivity';
+const { Reaction } = reactivity;
 
 const startMark = (name) => `${name}-start`;
 // Pre-measurement / between-metric idle wait. rAF gates `mount()` so any
@@ -22,7 +23,7 @@ const flush = () => new Promise((r) => requestAnimationFrame(r));
 // deltas. The reactivity Scheduler flushes on a microtask, so calling
 // `Reaction.flush()` immediately after a `signal.set` runs every queued
 // Reaction synchronously — exactly what we want to measure.
-const flushWork = () => Reaction.flush();
+const flushWork = reactivity.flush ?? (() => Reaction.flush());
 
 const container = document.createElement('div');
 document.body.appendChild(container);
