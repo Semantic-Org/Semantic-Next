@@ -1,4 +1,14 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import * as reactivity from '@semantic-ui/reactivity';
+
+// Compat shim: bench harness is pinned to main and runs against both this-change
+// (PR source) and tip-of-tree (main source). The functional-surface PR removes
+// the Reaction.X / Signal.computed statics, so we resolve to the module-level
+// helpers when present and fall back to the class statics otherwise. Drop once
+// the migration lands and main no longer needs the fallback.
+const { Reaction, Signal } = reactivity;
+const reaction = reactivity.reaction ?? ((callback, options) => Reaction.create(callback, options));
+const flush = reactivity.flush ?? (() => Reaction.flush());
+const computed = reactivity.computed ?? ((fn, options) => Signal.computed(fn, options));
 
 const startMark = (name) => `${name}-start`;
 
@@ -52,7 +62,7 @@ let sink = null;
   // purpose: Creates and tears down a subscriber on one signal across 100000 cycles. Subscription churn cost.
   performance.mark(startMark('sub-unsub-100k'));
   for (let i = 0; i < 100_000; i++) {
-    const r = Reaction.create(() => {
+    const r = reaction(() => {
       sink = sig.get();
     });
     r.stop();
@@ -69,7 +79,7 @@ let sink = null;
   const sig = new Signal(0);
   const reactions = new Array(500);
   for (let i = 0; i < 500; i++) {
-    reactions[i] = Reaction.create(() => {
+    reactions[i] = reaction(() => {
       sink = sig.get();
     });
   }
@@ -77,7 +87,7 @@ let sink = null;
   performance.mark(startMark('reactive-fanout-500x1200'));
   for (let i = 0; i < 1200; i++) {
     sig.set(i + 1);
-    Reaction.flush();
+    flush();
   }
   performance.measure('reactive-fanout-500x1200', startMark('reactive-fanout-500x1200'));
   for (let i = 0; i < 500; i++) { reactions[i].stop(); }
@@ -93,14 +103,14 @@ let sink = null;
     chain.push(prev.derive(v => v + 1));
   }
   const end = chain[chain.length - 1];
-  const observer = Reaction.create(() => {
+  const observer = reaction(() => {
     sink = end.get();
   });
   // purpose: Propagates a value change from root to leaf through a 10-deep chain of derived signals 60000 times.
   performance.mark(startMark('computed-chain-10x60k'));
   for (let i = 0; i < 60_000; i++) {
     root.set(i + 1);
-    Reaction.flush();
+    flush();
   }
   performance.measure('computed-chain-10x60k', startMark('computed-chain-10x60k'));
   observer.stop();
@@ -111,7 +121,7 @@ let sink = null;
 // run-to-run boundary variance.
 {
   const sigs = [new Signal(0), new Signal(0), new Signal(0), new Signal(0), new Signal(0)];
-  const r = Reaction.create(() => {
+  const r = reaction(() => {
     sink = sigs[0].get() + sigs[1].get() + sigs[2].get() + sigs[3].get() + sigs[4].get();
   });
   // purpose: Changes five signals in turn for 32000 rounds with one subscriber reading all five.
@@ -119,7 +129,7 @@ let sink = null;
   for (let i = 0; i < 32_000; i++) {
     for (let j = 0; j < 5; j++) {
       sigs[j].set(i * 5 + j);
-      Reaction.flush();
+      flush();
     }
   }
   performance.measure('reactive-multi-read-5x160k', startMark('reactive-multi-read-5x160k'));
@@ -135,7 +145,7 @@ let sink = null;
 // Previous 500-iter runs held Inconclusive (observed CI ~5-7× expected).
 {
   const items = new Signal(makeRecords(1000));
-  const r = Reaction.create(() => {
+  const r = reaction(() => {
     const list = items.get();
     let active = 0;
     for (let i = 0; i < list.length; i++) {
@@ -147,7 +157,7 @@ let sink = null;
   performance.mark(startMark('reactive-list-replace-1000x1000'));
   for (let i = 0; i < 1000; i++) {
     items.set(makeRecords(1000));
-    Reaction.flush();
+    flush();
   }
   performance.measure('reactive-list-replace-1000x1000', startMark('reactive-list-replace-1000x1000'));
   r.stop();
@@ -157,7 +167,7 @@ let sink = null;
 {
   const items = new Signal(makeRecords(1000));
   const search = new Signal('');
-  const r = Reaction.create(() => {
+  const r = reaction(() => {
     const list = items.get();
     const term = search.get();
     let count = 0;
@@ -170,7 +180,7 @@ let sink = null;
   performance.mark(startMark('reactive-list-filter-1000x300'));
   for (let i = 0; i < 300; i++) {
     search.set(`q-${i}`);
-    Reaction.flush();
+    flush();
   }
   performance.measure('reactive-list-filter-1000x300', startMark('reactive-list-filter-1000x300'));
   r.stop();
@@ -185,7 +195,7 @@ let sink = null;
 // Previous 1000-cycle run held at ±2.3% (Inconclusive at ±1% expected).
 {
   const sig = new Signal([]);
-  const r = Reaction.create(() => {
+  const r = reaction(() => {
     const list = sig.get();
     let count = 0;
     for (let i = 0; i < list.length; i++) {
@@ -197,10 +207,10 @@ let sink = null;
   performance.mark(startMark('reactive-push-2000x20'));
   for (let c = 0; c < 2000; c++) {
     sig.set([]);
-    Reaction.flush();
+    flush();
     for (let p = 0; p < 20; p++) {
       sig.push({ id: `rec-${p}`, name: `Record ${p}`, active: p % 3 !== 0, tags: ['a', 'b'] });
-      Reaction.flush();
+      flush();
     }
   }
   performance.measure('reactive-push-2000x20', startMark('reactive-push-2000x20'));
@@ -210,7 +220,7 @@ let sink = null;
 // reactive-set-index-300
 {
   const sig = new Signal(makeRecords(1000));
-  const r = Reaction.create(() => {
+  const r = reaction(() => {
     const list = sig.get();
     let active = 0;
     for (let i = 0; i < list.length; i++) {
@@ -227,7 +237,7 @@ let sink = null;
       active: i % 2 === 0,
       tags: ['x'],
     });
-    Reaction.flush();
+    flush();
   }
   performance.measure('reactive-set-index-300', startMark('reactive-set-index-300'));
   r.stop();
@@ -239,7 +249,7 @@ let sink = null;
 // smaller fraction of the total and the CI resolves.
 {
   const sig = new Signal(makeRecords(1000));
-  const r = Reaction.create(() => {
+  const r = reaction(() => {
     const list = sig.get();
     let active = 0;
     for (let i = 0; i < list.length; i++) {
@@ -256,7 +266,7 @@ let sink = null;
   performance.mark(startMark('reactive-set-property-by-id-200'));
   for (let i = 0; i < 200; i++) {
     sig.setProperty(ids[i], 'active', i % 2 === 0);
-    Reaction.flush();
+    flush();
   }
   performance.measure('reactive-set-property-by-id-200', startMark('reactive-set-property-by-id-200'));
   r.stop();
@@ -272,10 +282,10 @@ let sink = null;
 // activity. 5M iterations to comfortably clear σ-floor after V8 inlines
 // the empty path.
 {
-  // purpose: Calls Reaction.flush() 5000000 times with no pending work. Scheduler dispatch overhead.
+  // purpose: Calls flush() 5000000 times with no pending work. Scheduler dispatch overhead.
   performance.mark(startMark('reaction-flush-noop-5m'));
   for (let i = 0; i < 5_000_000; i++) {
-    Reaction.flush();
+    flush();
   }
   performance.measure('reaction-flush-noop-5m', startMark('reaction-flush-noop-5m'));
 }
@@ -288,7 +298,7 @@ let sink = null;
   const sig = new Signal(0);
   const subs = new Array(100);
   for (let i = 0; i < 100; i++) {
-    subs[i] = Reaction.create(() => {
+    subs[i] = reaction(() => {
       sink = sig.get();
     });
   }
@@ -298,7 +308,7 @@ let sink = null;
     for (let setN = 0; setN < 100; setN++) {
       sig.set(burst * 100 + setN + 1);
     }
-    Reaction.flush();
+    flush();
   }
   performance.measure('reaction-coalesce-400x100', startMark('reaction-coalesce-400x100'));
   for (let i = 0; i < 100; i++) { subs[i].stop(); }
@@ -314,14 +324,14 @@ let sink = null;
   const sigA = new Signal('a');
   const sigB = new Signal('b');
   const toggle = new Signal(false);
-  const r = Reaction.create(() => {
+  const r = reaction(() => {
     sink = toggle.get() ? sigA.get() : sigB.get();
   });
   // purpose: Toggles which of two signals a subscriber reads across 45000 cycles. Per-run dep-set diffing.
   performance.mark(startMark('reaction-dep-diff-45k'));
   for (let i = 0; i < 45_000; i++) {
     toggle.set(i % 2 === 0);
-    Reaction.flush();
+    flush();
   }
   performance.measure('reaction-dep-diff-45k', startMark('reaction-dep-diff-45k'));
   r.stop();
@@ -341,7 +351,7 @@ let sink = null;
   const sig = new Signal(0);
   const reactions = new Array(5000);
   for (let i = 0; i < 5000; i++) {
-    reactions[i] = Reaction.create(() => {
+    reactions[i] = reaction(() => {
       sink = sig.get();
     });
   }
@@ -349,7 +359,7 @@ let sink = null;
   performance.mark(startMark('reactive-stable-fanout-5000x100'));
   for (let i = 0; i < 100; i++) {
     sig.set(i + 1);
-    Reaction.flush();
+    flush();
   }
   performance.measure('reactive-stable-fanout-5000x100', startMark('reactive-stable-fanout-5000x100'));
   for (let i = 0; i < 5000; i++) { reactions[i].stop(); }
@@ -362,7 +372,7 @@ let sink = null;
   const sigC = new Signal(0);
   const reactions = new Array(5000);
   for (let i = 0; i < 5000; i++) {
-    reactions[i] = Reaction.create(() => {
+    reactions[i] = reaction(() => {
       sink = sigA.get() + sigB.get() + sigC.get();
     });
   }
@@ -370,7 +380,7 @@ let sink = null;
   performance.mark(startMark('reactive-stable-deps-3reads-5000x100'));
   for (let i = 0; i < 100; i++) {
     sigA.set(i + 1);
-    Reaction.flush();
+    flush();
   }
   performance.measure('reactive-stable-deps-3reads-5000x100', startMark('reactive-stable-deps-3reads-5000x100'));
   for (let i = 0; i < 5000; i++) { reactions[i].stop(); }
@@ -386,7 +396,7 @@ let sink = null;
   const root = new Signal(0);
   const computeds = new Array(200);
   for (let i = 0; i < 200; i++) {
-    computeds[i] = Signal.computed(() => root.get() + i);
+    computeds[i] = computed(() => root.get() + i);
   }
   // anchor to keep the array live for DCE; values read outside any reaction so no subscriber attaches
   let preamble = 0;
@@ -396,7 +406,7 @@ let sink = null;
   performance.mark(startMark('computed-unobserved-200x500'));
   for (let i = 0; i < 500; i++) {
     root.set(i + 1);
-    Reaction.flush();
+    flush();
   }
   performance.measure('computed-unobserved-200x500', startMark('computed-unobserved-200x500'));
 }
@@ -406,8 +416,8 @@ let sink = null;
 {
   const root = new Signal(0);
   const cycle = () => {
-    const c = Signal.computed(() => root.get() + 1);
-    const r = Reaction.create(() => {
+    const c = computed(() => root.get() + 1);
+    const r = reaction(() => {
       sink = c.get();
     });
     r.stop();
@@ -428,7 +438,7 @@ let sink = null;
   const sig = new Signal(0);
   const reactions = new Array(500);
   for (let i = 0; i < 500; i++) {
-    reactions[i] = Reaction.create(() => {
+    reactions[i] = reaction(() => {
       sink = sig.get();
     });
   }
@@ -436,7 +446,7 @@ let sink = null;
   performance.mark(startMark('flush-fanout-allocation-1000x500'));
   for (let i = 0; i < 1000; i++) {
     sig.set(i + 1);
-    Reaction.flush();
+    flush();
   }
   performance.measure('flush-fanout-allocation-1000x500', startMark('flush-fanout-allocation-1000x500'));
   for (let i = 0; i < 500; i++) { reactions[i].stop(); }
