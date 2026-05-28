@@ -11,7 +11,7 @@ import {
   wrapFunction,
 } from '@semantic-ui/utils';
 
-import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
+import { captureStack, isTracing } from './helpers.js';
 
 import { Dependency } from './dependency.js';
 import { currentReaction, Reaction, reaction as createReaction } from './reaction.js';
@@ -157,11 +157,6 @@ export class Signal {
   // single signal having a derivation
   derive(computeFn, options = {}) {
     return derive(this, computeFn, options);
-  }
-
-  // multiple signals computing a signal
-  static computed(computeFn, options = {}) {
-    return computed(computeFn, options);
   }
 
   /*******************************
@@ -369,11 +364,6 @@ export class Signal {
   /*******************************
            Tracing Utils
   *******************************/
-
-  static setTracing = setTracing;
-  static isTracing = isTracing;
-  static setStackCapture = setStackCapture;
-  static isStackCapture = isStackCapture;
 
   // context lets you pass through metadata with a signal
   // to determine reaction source

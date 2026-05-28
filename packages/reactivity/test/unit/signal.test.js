@@ -1,4 +1,4 @@
-import { flush, Reaction, reaction, Signal } from '@semantic-ui/reactivity';
+import { computed, flush, Reaction, reaction, Signal } from '@semantic-ui/reactivity';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe.concurrent('Signal', () => {
@@ -319,7 +319,7 @@ describe.concurrent('Signal', () => {
     it('should create a computed signal from multiple sources', () => {
       const a = new Signal(1);
       const b = new Signal(2);
-      const sum = Signal.computed(() => a.get() + b.get());
+      const sum = computed(() => a.get() + b.get());
 
       expect(sum.get()).toBe(3);
 
@@ -352,7 +352,7 @@ describe.concurrent('Signal', () => {
       const a = new Signal(1);
       const b = new Signal(2);
       const c = new Signal(3);
-      const sum = Signal.computed(() => a.get() + b.get() + c.get());
+      const sum = computed(() => a.get() + b.get() + c.get());
 
       expect(sum.get()).toBe(6);
 
@@ -423,7 +423,7 @@ describe.concurrent('Signal', () => {
     it('should not trigger updates when computed value does not change', () => {
       const a = new Signal(10);
       const b = new Signal(20);
-      const isPositive = Signal.computed(() => a.get() > 0);
+      const isPositive = computed(() => a.get() > 0);
 
       let updateCount = 0;
       reaction(() => {
@@ -452,7 +452,7 @@ describe.concurrent('Signal', () => {
       const base = new Signal(2);
       const doubled = base.derive(val => val * 2);
       const quadrupled = doubled.derive(val => val * 2);
-      const final = Signal.computed(() => quadrupled.get() + 1);
+      const final = computed(() => quadrupled.get() + 1);
 
       expect(final.get()).toBe(9); // 2 * 2 * 2 + 1
 
@@ -521,7 +521,7 @@ describe.concurrent('Signal', () => {
       const a = new Signal(10);
       const b = new Signal(20);
 
-      const result = Signal.computed(() => {
+      const result = computed(() => {
         return useA.get() ? a.get() : b.get();
       });
 
@@ -566,7 +566,7 @@ describe.concurrent('Signal', () => {
       const taxRate = new Signal(0.08);
       const shipping = new Signal(5.00);
 
-      const total = Signal.computed(() => {
+      const total = computed(() => {
         const subtotal = quantity.get() * price.get();
         const tax = subtotal * taxRate.get();
         return subtotal + tax + shipping.get();
@@ -673,7 +673,7 @@ describe.concurrent('Signal', () => {
       const a = new Signal(1);
       const b = new Signal(10);
       reaction(() => {
-        Signal.computed(() => a.get() + b.get());
+        computed(() => a.get() + b.get());
       });
 
       for (let i = 1; i <= 5; i++) {
@@ -1014,7 +1014,7 @@ describe('Signal API', () => {
     it('returns a Signal whose value is the result of the compute function', () => {
       const firstName = new Signal('John');
       const lastName = new Signal('Doe');
-      const fullName = Signal.computed(() => `${firstName.get()} ${lastName.get()}`);
+      const fullName = computed(() => `${firstName.get()} ${lastName.get()}`);
       expect(fullName).toBeInstanceOf(Signal);
       expect(fullName.get()).toBe('John Doe');
     });
@@ -1022,7 +1022,7 @@ describe('Signal API', () => {
     it('updates when ANY tracked dependency changes', () => {
       const a = new Signal(1);
       const b = new Signal(2);
-      const sum = Signal.computed(() => a.get() + b.get());
+      const sum = computed(() => a.get() + b.get());
       expect(sum.get()).toBe(3);
 
       a.set(10);
@@ -1037,7 +1037,7 @@ describe('Signal API', () => {
     it('a reaction observing the computed re-runs when an upstream dependency changes', () => {
       const a = new Signal(1);
       const b = new Signal(2);
-      const sum = Signal.computed(() => a.get() + b.get());
+      const sum = computed(() => a.get() + b.get());
       const observed = vi.fn();
       reaction(() => observed(sum.get()));
       expect(observed).toHaveBeenCalledTimes(1);
@@ -1113,7 +1113,7 @@ describe('Signal API', () => {
     });
 
     it('matches computed signals returned by Signal.computed', () => {
-      expect(Signal.computed(() => 1) instanceof Signal).toBe(true);
+      expect(computed(() => 1) instanceof Signal).toBe(true);
     });
 
     it('does not match plain objects or primitives', () => {
