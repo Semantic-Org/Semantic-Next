@@ -328,37 +328,37 @@ SAFETY_MODES.forEach((safety) => {
         ID utilities (pure)
     *******************************/
 
-    describe('getID', () => {
+    describe('getId', () => {
       it('reads id from any of: id, _id, hash, key', () => {
         const sig = new Signal([], { safety });
-        expect(sig.getID({ id: 'a' })).toBe('a');
-        expect(sig.getID({ _id: 'b' })).toBe('b');
-        expect(sig.getID({ hash: 'c' })).toBe('c');
-        expect(sig.getID({ key: 'd' })).toBe('d');
+        expect(sig.getId({ id: 'a' })).toBe('a');
+        expect(sig.getId({ _id: 'b' })).toBe('b');
+        expect(sig.getId({ hash: 'c' })).toBe('c');
+        expect(sig.getId({ key: 'd' })).toBe('d');
       });
 
       it('returns a string item as its own id', () => {
         const sig = new Signal([], { safety });
-        expect(sig.getID('plain')).toBe('plain');
+        expect(sig.getId('plain')).toBe('plain');
       });
 
       it('treats a falsy-but-present id as the id', () => {
         const sig = new Signal([], { safety });
-        expect(sig.getID({ id: 0 })).toBe(0);
-        expect(sig.getID({ id: '' })).toBe('');
+        expect(sig.getId({ id: 0 })).toBe(0);
+        expect(sig.getId({ id: '' })).toBe('');
       });
 
       it('falls through fields only when the prior is null or undefined', () => {
         const sig = new Signal([], { safety });
-        expect(sig.getID({ id: 0, _id: 'b' })).toBe(0);
-        expect(sig.getID({ id: null, _id: 'b' })).toBe('b');
+        expect(sig.getId({ id: 0, _id: 'b' })).toBe(0);
+        expect(sig.getId({ id: null, _id: 'b' })).toBe('b');
       });
     });
 
-    describe('getIDs', () => {
+    describe('getIds', () => {
       it('collects all distinct ids on an item', () => {
         const sig = new Signal([], { safety });
-        const ids = sig.getIDs({ _id: 'one', id: 'one', key: 'two' });
+        const ids = sig.getIds({ _id: 'one', id: 'one', key: 'two' });
         expect(ids).toContain('one');
         expect(ids).toContain('two');
         expect(ids.length).toBe(2);
@@ -366,27 +366,27 @@ SAFETY_MODES.forEach((safety) => {
 
       it('wraps a non-object item in a one-element array', () => {
         const sig = new Signal([], { safety });
-        expect(sig.getIDs('plain')).toEqual(['plain']);
+        expect(sig.getIds('plain')).toEqual(['plain']);
       });
 
       it('keeps a zero id rather than dropping it', () => {
         const sig = new Signal([], { safety });
-        expect(sig.getIDs({ id: 0 })).toEqual([0]);
+        expect(sig.getIds({ id: 0 })).toEqual([0]);
       });
     });
 
-    describe('hasID', () => {
+    describe('hasId', () => {
       it('returns true when item carries the given id under any recognised field', () => {
         const sig = new Signal([], { safety });
-        expect(sig.hasID({ id: 'x' }, 'x')).toBe(true);
-        expect(sig.hasID({ _id: 'x' }, 'x')).toBe(true);
-        expect(sig.hasID({ hash: 'x' }, 'x')).toBe(true);
-        expect(sig.hasID({ key: 'x' }, 'x')).toBe(true);
+        expect(sig.hasId({ id: 'x' }, 'x')).toBe(true);
+        expect(sig.hasId({ _id: 'x' }, 'x')).toBe(true);
+        expect(sig.hasId({ hash: 'x' }, 'x')).toBe(true);
+        expect(sig.hasId({ key: 'x' }, 'x')).toBe(true);
       });
 
       it('returns false when the id does not match', () => {
         const sig = new Signal([], { safety });
-        expect(sig.hasID({ id: 'x' }, 'y')).toBe(false);
+        expect(sig.hasId({ id: 'x' }, 'y')).toBe(false);
       });
     });
 

@@ -1,7 +1,6 @@
 import {
   clone,
   isArray,
-  isClassInstance,
   isDevelopment,
   isEqual,
   isNumber,
@@ -23,17 +22,17 @@ export class Signal {
     return !!instance?.[IS_SIGNAL];
   }
 
-  // default clone and equal pulled from utils
-  static equalityFunction = isEqual;
-  static cloneFunction = clone;
-  static idFunction = (item) => item.id ?? item._id ?? item.hash ?? item.key;
+  // default helpers — overridable globally on the class or per-instance via options
+  static equality = isEqual;
+  static clone = (value) => clone(value, { preserveNonCloneable: true });
+  static id = (item) => item.id ?? item._id ?? item.hash ?? item.key;
   static safety = 'reference';
 
   constructor(initialValue, {
     safety = Signal.safety,
-    cloneFunction = Signal.cloneFunction,
-    equalityFunction = (safety === 'none') ? returnsFalse : Signal.equalityFunction,
-    idFunction = Signal.idFunction,
+    clone = Signal.clone,
+    equality = (safety === 'none') ? returnsFalse : Signal.equality,
+    id = Signal.id,
     context,
   } = {}) {
     // create dependency
@@ -42,10 +41,10 @@ export class Signal {
       value: initialValue,
     });
 
-    // handle custom helpers if user specifies
-    this.cloneFunction = cloneFunction;
-    this.equalityFunction = equalityFunction;
-    this.idFunction = idFunction;
+    // configured helpers, defaulting to the class statics
+    this.clone = clone;
+    this.equality = equality;
+    this.id = id;
 
     this.safety = safety;
     this.currentValue = this.protect(initialValue);
@@ -71,7 +70,7 @@ export class Signal {
   }
 
   set value(newValue) {
-    if (!this.equalityFunction(this.currentValue, newValue)) {
+    if (!this.equality(this.currentValue, newValue)) {
       this.currentValue = this.protect(newValue);
       this.notify();
     }
@@ -98,16 +97,6 @@ export class Signal {
 
   raw() {
     return this.currentValue;
-  }
-
-  clone(value = this.currentValue) {
-    if (isClassInstance(value)) {
-      return value;
-    }
-    if (isArray(value)) {
-      return value.map(arrValue => this.clone(arrValue));
-    }
-    return this.cloneFunction(value);
   }
 
   /* Dependencies */
@@ -141,7 +130,7 @@ export class Signal {
     else {
       // if no value returned check if the value changed from side effects
       // in this case we want to trigger reactivity
-      if (!this.equalityFunction(beforeClone, this.currentValue)) {
+      if (!this.equality(beforeClone, this.currentValue)) {
         this.notify();
       }
     }
@@ -260,20 +249,20 @@ export class Signal {
     return this.mutate(() => new Date());
   }
 
-  getIDs(item) {
+  getIds(item) {
     if (!isObject(item)) {
       return [item];
     }
     return unique([item.id, item._id, item.hash, item.key].filter(value => value != null));
   }
-  getID(item) {
+  getId(item) {
     if (!isObject(item)) {
       return item;
     }
-    return this.idFunction(item);
+    return this.id(item);
   }
-  hasID(item, id) {
-    return this.getID(item) === id;
+  hasId(item, id) {
+    return this.getId(item) === id;
   }
   getItem(id) {
     const index = this.getItemIndex(id);
@@ -284,7 +273,7 @@ export class Signal {
   getItemIndex(id) {
     const arr = this.currentValue;
     for (let index = 0; index < arr.length; index++) {
-      if (this.hasID(arr[index], id)) {
+      if (this.hasId(arr[index], id)) {
         return index;
       }
     }

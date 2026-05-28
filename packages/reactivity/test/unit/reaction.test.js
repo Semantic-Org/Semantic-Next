@@ -82,7 +82,7 @@ describe('Reaction', () => {
     it('should always re-run when custom isEqual returns false', () => {
       const customIsEqual = () => false;
       let obj = { name: 'Sally', age: 22 };
-      let reactiveObj = new Signal(obj, { equalityFunction: customIsEqual });
+      let reactiveObj = new Signal(obj, { equality: customIsEqual });
       const callback = vi.fn();
 
       reaction(function() {

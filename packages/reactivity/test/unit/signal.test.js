@@ -37,7 +37,7 @@ describe.concurrent('Signal', () => {
       const isEqual = (a, b) => {
         return false;
       };
-      const signal = new Signal('initial', { equalityFunction: isEqual });
+      const signal = new Signal('initial', { equality: isEqual });
       signal.value = 'initial';
       reaction(() => callback(signal.get()));
 
@@ -503,7 +503,7 @@ describe.concurrent('Signal', () => {
       const derived = source.derive(
         obj => ({ doubled: obj.count * 2 }),
         {
-          equalityFunction: (a, b) => a?.doubled === b?.doubled,
+          equality: (a, b) => a?.doubled === b?.doubled,
           safety: 'reference',
         },
       );
@@ -740,7 +740,7 @@ describe('Signal API', () => {
       const callback = vi.fn();
       const user = new Signal(
         { id: 1, name: 'Alice', lastLogin: '2023-01-01' },
-        { equalityFunction: (oldUser, newUser) => oldUser.id === newUser.id },
+        { equality: (oldUser, newUser) => oldUser.id === newUser.id },
       );
       reaction(() => callback(user.get()));
       flush();
@@ -759,29 +759,29 @@ describe('Signal API', () => {
 
     it('uses a custom clone function when provided under clone safety', () => {
       const cloneSpy = vi.fn(value => ({ ...value, cloned: true }));
-      const signal = new Signal({ name: 'Alice' }, { safety: 'clone', cloneFunction: cloneSpy });
+      const signal = new Signal({ name: 'Alice' }, { safety: 'clone', clone: cloneSpy });
       expect(cloneSpy).toHaveBeenCalled();
       expect(signal.peek().cloned).toBe(true);
     });
 
-    it('default idFunction prefers id over _id', () => {
+    it('default id prefers id over _id', () => {
       const signal = new Signal([]);
-      expect(signal.getID({ _id: 'mongo', id: 'app' })).toBe('app');
+      expect(signal.getId({ _id: 'mongo', id: 'app' })).toBe('app');
     });
 
-    it('uses a per-instance idFunction override for getID', () => {
-      const signal = new Signal([], { idFunction: item => item.slug });
-      expect(signal.getID({ slug: 'x', id: 'y' })).toBe('x');
+    it('uses a per-instance id override for getId', () => {
+      const signal = new Signal([], { id: item => item.slug });
+      expect(signal.getId({ slug: 'x', id: 'y' })).toBe('x');
     });
 
-    it('falls back to the static Signal.idFunction when no override is given', () => {
-      const original = Signal.idFunction;
-      Signal.idFunction = item => item.slug;
+    it('falls back to the static Signal.id when no override is given', () => {
+      const original = Signal.id;
+      Signal.id = item => item.slug;
       try {
-        expect(new Signal([]).getID({ slug: 'x', id: 'y' })).toBe('x');
+        expect(new Signal([]).getId({ slug: 'x', id: 'y' })).toBe('x');
       }
       finally {
-        Signal.idFunction = original;
+        Signal.id = original;
       }
     });
   });
@@ -1054,10 +1054,10 @@ describe('Signal API', () => {
    ***********************************************/
 
   describe('static defaults', () => {
-    it('falls back to Signal.equalityFunction when no per-instance equality is provided', () => {
-      const original = Signal.equalityFunction;
+    it('falls back to Signal.equality when no per-instance equality is provided', () => {
+      const original = Signal.equality;
       const customEq = vi.fn(() => true);
-      Signal.equalityFunction = customEq;
+      Signal.equality = customEq;
       try {
         const sig = new Signal({ a: 1 });
         // any set() should consult customEq and short-circuit (returns true)
@@ -1066,34 +1066,34 @@ describe('Signal API', () => {
         expect(sig.peek()).toEqual({ a: 1 });
       }
       finally {
-        Signal.equalityFunction = original;
+        Signal.equality = original;
       }
     });
 
-    it('snapshots Signal.equalityFunction at construction — later static changes do not affect existing signals', () => {
+    it('snapshots Signal.equality at construction — later static changes do not affect existing signals', () => {
       // The renderer's reactive-context.js relies on this contract.
-      const original = Signal.equalityFunction;
+      const original = Signal.equality;
       const customEq = (a, b) => a?.id === b?.id;
-      Signal.equalityFunction = customEq;
+      Signal.equality = customEq;
       const sig = new Signal({ id: 1, label: 'one' });
-      Signal.equalityFunction = original; // restore mid-test
+      Signal.equality = original; // restore mid-test
 
-      // sig still uses customEq via its own this.equalityFunction
+      // sig still uses customEq via its own this.equality
       sig.set({ id: 1, label: 'two' });
       expect(sig.peek().label).toBe('one');
     });
 
-    it('falls back to Signal.cloneFunction under clone safety when no per-instance clone is provided', () => {
-      const original = Signal.cloneFunction;
+    it('falls back to Signal.clone under clone safety when no per-instance clone is provided', () => {
+      const original = Signal.clone;
       const customClone = vi.fn(value => ({ ...value, viaStatic: true }));
-      Signal.cloneFunction = customClone;
+      Signal.clone = customClone;
       try {
         const sig = new Signal({ name: 'x' }, { safety: 'clone' });
         expect(customClone).toHaveBeenCalled();
         expect(sig.peek().viaStatic).toBe(true);
       }
       finally {
-        Signal.cloneFunction = original;
+        Signal.clone = original;
       }
     });
   });

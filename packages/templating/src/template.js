@@ -153,7 +153,7 @@ export const Template = class Template {
     each(defaultState, (config, name) => {
       const initialValue = getInitialValue(config, name);
       if (config?.options) {
-        // complex config { counter: { value: 0, options: { equalityFunction }}}
+        // complex config { counter: { value: 0, options: { equality }}}
         reactiveState[name] = new Signal(initialValue, config.options);
       }
       else {

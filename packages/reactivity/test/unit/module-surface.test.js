@@ -33,7 +33,7 @@ describe('module-level factories', () => {
 
     it('passes options through to the constructor', () => {
       const eq = vi.fn(() => true);
-      const sig = signal({ a: 1 }, { equalityFunction: eq });
+      const sig = signal({ a: 1 }, { equality: eq });
       sig.set({ a: 2 });
       expect(eq).toHaveBeenCalled();
       expect(sig.peek()).toEqual({ a: 1 });

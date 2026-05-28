@@ -37,7 +37,7 @@ describe('Template — createReactiveState', () => {
   });
 
   it('forwards options for complex { value, options } config', () => {
-    // Custom equalityFunction lets us prove options reached the Signal:
+    // Custom equality lets us prove options reached the Signal:
     // strict-reference equality treats two structurally-equal objects as
     // changed, which the default deep equality would not.
     const strictEquality = (a, b) => a === b;
@@ -45,7 +45,7 @@ describe('Template — createReactiveState', () => {
       defaultState: {
         config: {
           value: { x: 1 },
-          options: { equalityFunction: strictEquality, safety: 'clone' },
+          options: { equality: strictEquality, safety: 'clone' },
         },
       },
     });

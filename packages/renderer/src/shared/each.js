@@ -18,7 +18,7 @@ export function getItemID(item, indexOrKey, collectionType) {
     const key = (collectionType === 'object') ? indexOrKey : undefined;
     // key is the object positional index — a 0 falls through (||) to the
     // shared id resolver, so each + signals key items the same way
-    raw = key || (Signal.idFunction(item) ?? indexOrKey);
+    raw = key || (Signal.id(item) ?? indexOrKey);
   }
   else if (isString(item)) {
     raw = item + ':' + indexOrKey;
