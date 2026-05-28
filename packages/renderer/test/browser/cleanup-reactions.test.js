@@ -14,7 +14,7 @@ RENDERING_ENGINES.forEach(engine => {
       return `test-cleanup-${engine}-${++tagCounter}`;
     }
 
-    async function flush(el) {
+    async function settle(el) {
       flush();
       await el.updateComplete;
       await new Promise(r => setTimeout(r, 0));
@@ -52,12 +52,12 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Remove the branch
         el.template.state.showBranch.set(false);
-        await flush(el);
+        await settle(el);
         const countAfterRemoval = spyCount;
 
         // Mutate the signal the removed expression was tracking
         el.template.state.tracked.set('changed');
-        await flush(el);
+        await settle(el);
 
         // Removed branch's reaction should not have fired
         expect(spyCount).toBe(countAfterRemoval);
@@ -88,12 +88,12 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Remove entire if branch (containing the each)
         el.template.state.showList.set(false);
-        await flush(el);
+        await settle(el);
         const countAfterRemoval = itemSpyCount;
 
         // Mutate signal that item expressions were tracking
         el.template.state.tick.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(itemSpyCount).toBe(countAfterRemoval);
       });
@@ -126,12 +126,12 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Swap to else branch
         el.template.state.isA.set(false);
-        await flush(el);
+        await settle(el);
         const aCountAfterSwap = branchASpy;
 
         // Mutate signal that branch A was tracking
         el.template.state.valueA.set('changed-a');
-        await flush(el);
+        await settle(el);
 
         // Branch A's reaction should not fire
         expect(branchASpy).toBe(aCountAfterSwap);
@@ -188,12 +188,12 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Shrink list — remove B and C
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
         const countAfterShrink = removedItemSpy;
 
         // Mutate signal that B and C were tracking
         el.template.state.signal.set('changed');
-        await flush(el);
+        await settle(el);
 
         // Removed items' reactions should not have fired
         expect(removedItemSpy).toBe(countAfterShrink);
@@ -226,12 +226,12 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Empty the list
         el.template.state.showItems.set(false);
-        await flush(el);
+        await settle(el);
         const countAfterEmpty = itemSpy;
 
         // Mutate signal that item expressions were tracking
         el.template.state.tracked.set('changed');
-        await flush(el);
+        await settle(el);
 
         // Item reactions should not fire — they're gone
         expect(itemSpy).toBe(countAfterEmpty);
@@ -264,12 +264,12 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Trigger rerender — old content is destroyed and rebuilt
         el.template.state.key.set(1);
-        await flush(el);
+        await settle(el);
         const countAfterRerender = renderCount;
 
         // Change tracked — only the NEW content reaction should fire
         el.template.state.tracked.set('changed');
-        await flush(el);
+        await settle(el);
 
         // Should increase by exactly 1 (the new content's reaction),
         // not 2 (which would mean old content's reaction also fired)
@@ -311,7 +311,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(destroyed).toBe(false);
 
         el.template.state.showChild.set(false);
-        await flush(el);
+        await settle(el);
 
         expect(destroyed).toBe(true);
       });
@@ -346,12 +346,12 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Remove subtemplate
         el.template.state.showChild.set(false);
-        await flush(el);
+        await settle(el);
         const countAfterRemoval = childSpy;
 
         // Mutate signal the subtemplate was tracking
         el.template.state.tracked.set('changed');
-        await flush(el);
+        await settle(el);
 
         expect(childSpy).toBe(countAfterRemoval);
       });
@@ -422,14 +422,14 @@ RENDERING_ENGINES.forEach(engine => {
         // Swap branches several times to potentially accumulate leaked reactions
         for (let i = 0; i < 5; i++) {
           el.template.state.toggle.set(i % 2 === 0);
-          await flush(el);
+          await settle(el);
         }
         const countAfterSwaps = evalCount;
 
         // Now trigger tracked signal — should cause exactly 1 re-evaluation
         // (the currently active branch), not N (leaked reactions from old branches)
         el.template.state.tracked.set('v1');
-        await flush(el);
+        await settle(el);
 
         // Allow for some variance in how the framework batches, but the key
         // assertion: we should not see 5+ extra evaluations from leaked reactions
@@ -468,13 +468,13 @@ RENDERING_ENGINES.forEach(engine => {
         // Update the list several times
         for (let i = 1; i <= 5; i++) {
           el.template.state.version.set(i);
-          await flush(el);
+          await settle(el);
         }
         const countAfterUpdates = evalCount;
 
         // Trigger signal — should cause exactly 2 evaluations (2 current items)
         el.template.state.signal.set('changed');
-        await flush(el);
+        await settle(el);
 
         const delta = evalCount - countAfterUpdates;
         expect(delta).toBeLessThanOrEqual(2);
@@ -518,7 +518,7 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Search with no matches — flips to the if branch
         el.template.state.search.set('zzz');
-        await flush(el);
+        await settle(el);
 
         expect(el.shadowRoot.querySelectorAll('.message').length).toBe(1);
         expect(el.shadowRoot.querySelectorAll('.item').length).toBe(0);
@@ -551,9 +551,9 @@ RENDERING_ENGINES.forEach(engine => {
         // Cycle: show items → no results → show items, repeatedly
         for (let i = 0; i < 5; i++) {
           el.template.state.search.set('zzz');
-          await flush(el);
+          await settle(el);
           el.template.state.search.set('');
-          await flush(el);
+          await settle(el);
         }
 
         // Should have exactly 2 items, not orphaned duplicates
@@ -578,11 +578,11 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Flip inner to show .b, then remove outer entirely
         el.template.state.inner.set(false);
-        await flush(el);
+        await settle(el);
         expect(el.shadowRoot.querySelectorAll('.b').length).toBe(1);
 
         el.template.state.outer.set(false);
-        await flush(el);
+        await settle(el);
 
         expect(el.shadowRoot.querySelectorAll('.off').length).toBe(1);
         expect(el.shadowRoot.querySelectorAll('.a').length).toBe(0);

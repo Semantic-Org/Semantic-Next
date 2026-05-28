@@ -16,7 +16,7 @@ function shadowText(el) {
   return el.shadowRoot.innerHTML.replace(/<!--[\s\S]*?-->/g, '').trim();
 }
 
-async function flush(el) {
+async function settle(el) {
   flush();
   await el.updateComplete;
   await new Promise(r => setTimeout(r, 0));
@@ -56,17 +56,17 @@ RENDERING_ENGINES.forEach(engine => {
         await el.updateComplete;
 
         await new Promise(r => setTimeout(r, 100));
-        await flush(el);
+        await settle(el);
         expect(shadowText(el)).toContain('dark=false');
 
         el.template.state.darkMode.set(true);
-        await flush(el);
+        await settle(el);
 
         // Should preserve old resolved content while new promise is pending
         expect(shadowText(el)).toContain('dark=false');
 
         await new Promise(r => setTimeout(r, 100));
-        await flush(el);
+        await settle(el);
         expect(shadowText(el)).toContain('dark=true');
       });
     });
@@ -95,14 +95,14 @@ RENDERING_ENGINES.forEach(engine => {
         await el.updateComplete;
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
         el.template.state.version.set(2);
-        await flush(el);
+        await settle(el);
         el.template.state.version.set(3);
-        await flush(el);
+        await settle(el);
 
         await new Promise(r => setTimeout(r, 350));
-        await flush(el);
+        await settle(el);
 
         const content = shadowText(el);
         expect(content).toContain('v3');
@@ -143,14 +143,14 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('Beta');
 
         el.template.state.filterActive.set(true);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('Alpha');
         expect(shadowText(el)).toContain('Gamma');
         expect(shadowText(el)).not.toContain('Beta');
 
         el.template.state.filterActive.set(false);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('Beta');
       });
@@ -183,13 +183,13 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).not.toContain('empty');
 
         el.template.state.populated.set(false);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('empty');
         expect(shadowText(el)).not.toContain('Apple');
 
         el.template.state.populated.set(true);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('Apple');
       });
@@ -229,7 +229,7 @@ RENDERING_ENGINES.forEach(engine => {
         items[0].active = false;
         items[1].active = true;
         el.template.state.tick.increment();
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('N:Alpha');
         expect(shadowText(el)).toContain('Y:Beta');
@@ -264,13 +264,13 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('(Bravo)');
 
         el.template.state.threshold.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('[Alpha]');
         expect(shadowText(el)).toContain('(Bravo)');
 
         el.template.state.threshold.set(2);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('[Alpha]');
         expect(shadowText(el)).toContain('[Bravo]');
@@ -313,7 +313,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('Search');
 
         el.template.state.filtered.set(true);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('Setup');
         expect(shadowText(el)).toContain('Search');
@@ -321,7 +321,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).not.toContain('Start');
 
         el.template.state.filtered.set(false);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('Start');
       });
@@ -376,7 +376,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('Green');
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('Cyan');
         expect(shadowText(el)).toContain('Magenta');
@@ -409,19 +409,19 @@ RENDERING_ENGINES.forEach(engine => {
         await el.updateComplete;
 
         await new Promise(r => setTimeout(r, 100));
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('formatted:initial');
 
         // Change via attribute (the path from Problem 1)
         el.setAttribute('label', 'updated');
-        await flush(el);
+        await settle(el);
 
         // Should preserve old content, not flash empty
         expect(shadowText(el)).toContain('formatted:initial');
 
         await new Promise(r => setTimeout(r, 100));
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('formatted:updated');
       });
@@ -460,7 +460,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(initial).toContain('Gamma:green');
 
         el.template.state.reversed.set(true);
-        await flush(el);
+        await settle(el);
 
         const reversed = shadowText(el);
         // Gamma should come first, Alpha last
@@ -507,7 +507,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('Y:pending');
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('X:done');
         expect(shadowText(el)).toContain('Y:done');
@@ -542,7 +542,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('HIDE:B');
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('HIDE:A');
         expect(shadowText(el)).toContain('SHOW:B');
@@ -576,7 +576,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('[old-B]');
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('[new-A]');
         expect(shadowText(el)).toContain('[new-B]');
@@ -618,7 +618,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('Beta');
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('Changed');
         expect(shadowText(el)).toContain('[done]');
@@ -653,7 +653,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('[Sub-A]');
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         // Both call sites must show their OWN updated content
         expect(shadowText(el)).toContain('[Title-B]');
@@ -685,7 +685,7 @@ RENDERING_ENGINES.forEach(engine => {
         const state = el.template.state;
         state.label.set('updated');
         state.tick.increment();
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('updated:1');
       });
@@ -746,7 +746,7 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Toggle first item — should NOT destroy second item's DOM
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
 
         // Second item's input should still exist and be focusable
         const inputsAfter = el.shadowRoot.querySelectorAll('input.toggle');
@@ -797,7 +797,7 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Toggle the focused item
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
 
         // The first item's checkbox should still be focused
         const inputsAfter = el.shadowRoot.querySelectorAll('input.toggle');
@@ -849,7 +849,7 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Toggle one item
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
 
         // Footer should update to reflect 2 remaining
         expect(shadowText(el)).toContain('2 items left');
@@ -857,7 +857,7 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Toggle another
         el.component.toggleItem('b');
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('1 items left');
       });
@@ -888,13 +888,13 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('HIDE');
 
         el.component.toggle();
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('SHOW');
         expect(shadowText(el)).not.toContain('HIDE');
 
         el.component.toggle();
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('HIDE');
       });
@@ -919,7 +919,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('collapsed');
 
         el.component.toggle();
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('expanded');
         expect(shadowText(el)).not.toContain('collapsed');
@@ -945,7 +945,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('OFF');
 
         el.component.toggle();
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('ON');
         expect(shadowText(el)).not.toContain('OFF');
@@ -986,7 +986,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).not.toContain('parent-setting');
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('override-B');
         expect(shadowText(el)).not.toContain('override-A');
@@ -1071,7 +1071,7 @@ RENDERING_ENGINES.forEach(engine => {
         // Clear and toggle item A only
         evaluatedIds = [];
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
 
         // Unchanged items should NOT have re-evaluated
         expect(evaluatedIds).not.toContain('b');
@@ -1125,7 +1125,7 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Mutate first item only
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
 
         const inputsAfter = el.shadowRoot.querySelectorAll('input.toggle');
         expect(inputsAfter.length).toBe(3);
@@ -1188,14 +1188,14 @@ RENDERING_ENGINES.forEach(engine => {
         // Start editing on item B via its subtemplate instance
         const children = el.template.findChildren('itemTemplate');
         children[1].startEditing();
-        await flush(el);
+        await settle(el);
 
         // Item B should now be in editing mode
         expect(el.shadowRoot.querySelectorAll('input.edit').length).toBe(1);
 
         // Toggle item A — should NOT reset item B's editing state
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
 
         // Item B should still be in editing mode
         expect(el.shadowRoot.querySelectorAll('input.edit').length).toBe(1);
@@ -1248,7 +1248,7 @@ RENDERING_ENGINES.forEach(engine => {
         // Toggle A and B before flushing
         el.component.toggleItem('a');
         el.component.toggleItem('b');
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('First:done');
         expect(shadowText(el)).toContain('Second:done');
@@ -1303,7 +1303,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(countAfterInitial).toBe(2); // one per item
 
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
         await new Promise(r => setTimeout(r, 10));
 
         // Data-only update should NOT re-trigger onRendered
@@ -1350,7 +1350,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('Second');
 
         el.component.removeItem('b');
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).not.toContain('Second');
         expect(shadowText(el)).toContain('First');
@@ -1415,14 +1415,14 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Toggle one item complete
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('2 items left');
         expect(shadowText(el)).not.toContain('3 items left');
 
         // Toggle another
         el.component.toggleItem('b');
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('1 items left');
       });
@@ -1477,14 +1477,14 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Toggle first item complete
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
 
         const liAfter = el.shadowRoot.querySelector('li');
         expect(liAfter.className).toContain('completed');
 
         // Toggle back to incomplete
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
 
         const liAfter2 = el.shadowRoot.querySelector('li');
         expect(liAfter2.className).not.toContain('completed');
@@ -1540,19 +1540,19 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Toggle complete
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
 
         expect(el.shadowRoot.querySelector('li').className).toContain('completed');
 
         // Toggle back — the specific failure case with stale data
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
 
         expect(el.shadowRoot.querySelector('li').className).not.toContain('completed');
 
         // Third toggle to confirm stable cycling
         el.component.toggleItem('a');
-        await flush(el);
+        await settle(el);
 
         expect(el.shadowRoot.querySelector('li').className).toContain('completed');
       });
@@ -1586,7 +1586,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('icon');
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         // label updates reactively, showIcon still default
         expect(shadowText(el)).toContain('v1');
@@ -1629,7 +1629,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('from-parent');
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('Beta');
         expect(shadowText(el)).toContain('from-parent');
@@ -1662,12 +1662,12 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('0 items');
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('10 items');
 
         el.template.state.version.set(3);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('30 items');
       });
@@ -1707,7 +1707,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('B:waiting');
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('A:done');
         expect(shadowText(el)).toContain('B:complete');
@@ -1745,7 +1745,7 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Change the setting that shares the name 'color' with the loop var
         el.component.updateColor();
-        await flush(el);
+        await settle(el);
 
         // Loop variable should still be the item, not the setting
         expect(shadowText(el)).toContain('red');
@@ -1798,7 +1798,7 @@ RENDERING_ENGINES.forEach(engine => {
         await el.updateComplete;
 
         await new Promise(r => setTimeout(r, 50));
-        await flush(el);
+        await settle(el);
 
         // Should show the async result, not the parent state with same name
         expect(shadowText(el)).toContain('async-resolved');
@@ -1848,12 +1848,12 @@ RENDERING_ENGINES.forEach(engine => {
 
         // Bump count multiple times — loop vars should survive each time
         el.component.bump();
-        await flush(el);
+        await settle(el);
         expect(shadowText(el)).toContain('x:1');
         expect(shadowText(el)).toContain('y:1');
 
         el.component.bump();
-        await flush(el);
+        await settle(el);
         expect(shadowText(el)).toContain('x:2');
         expect(shadowText(el)).toContain('y:2');
       });
@@ -1884,7 +1884,7 @@ RENDERING_ENGINES.forEach(engine => {
 
       // Change state — should update span but NOT the snippet's label
       el.component.updateLabel();
-      await flush(el);
+      await settle(el);
 
       expect(shadowText(el)).toContain('v1');
       expect(shadowText(el)).toContain('from-snippet');
@@ -1924,7 +1924,7 @@ RENDERING_ENGINES.forEach(engine => {
         const initialCalls = getLabelCalls;
 
         el.template.state.labelVal.set('second');
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('second');
         expect(shadowText(el)).not.toContain('first');
@@ -1961,7 +1961,7 @@ RENDERING_ENGINES.forEach(engine => {
         const initialCalls = getLabelCalls;
 
         el.template.state.labelVal.set('second');
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('second');
         expect(shadowText(el)).not.toContain('first');
@@ -1998,7 +1998,7 @@ RENDERING_ENGINES.forEach(engine => {
         const initialCalls = getLabelCalls;
 
         el.template.state.labelVal.set('second');
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('second');
         expect(shadowText(el)).not.toContain('first');
