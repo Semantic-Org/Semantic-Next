@@ -44,18 +44,18 @@ export class RenderTemplateDirective extends AsyncDirective {
     if (this.reaction) {
       this.reaction.stop();
     }
-    this.reaction = reaction((reaction) => {
+    this.reaction = reaction((computation) => {
       this.maybeCreateTemplate(); // reactive reference to template
       const dataContext = this.unpackData(this.data); // reactive reference to data
 
       // end reaction if element destroyed
       if (!this.isConnected) {
-        reaction.stop();
+        computation.stop();
         return;
       }
 
       // first run handled by main path
-      if (reaction.firstRun) {
+      if (computation.firstRun) {
         return;
       }
 
@@ -67,7 +67,7 @@ export class RenderTemplateDirective extends AsyncDirective {
       }
 
       // add debug context
-      reaction.addContext({
+      computation.addContext({
         message: `template ${template?.templateName} data context`,
         dataContext: dataContext,
         template: template,

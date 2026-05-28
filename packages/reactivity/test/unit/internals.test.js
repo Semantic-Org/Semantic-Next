@@ -492,7 +492,7 @@ describe('Dependency', () => {
           Reaction.guard
 *******************************/
 
-describe('Reaction.guard', () => {
+describe('guard()', () => {
   it('returns the value when called outside a reactive context', () => {
     const result = guard(() => 42);
     expect(result).toBe(42);
@@ -588,7 +588,7 @@ describe('Reaction.guard', () => {
         Reaction.onCleanup
 *******************************/
 
-describe('Reaction.onCleanup', () => {
+describe('reaction.onCleanup', () => {
   it('fires registered callbacks at the start of the next run()', () => {
     const s = new Signal(0);
     const cleanup = vi.fn();

@@ -1010,7 +1010,7 @@ describe('Signal API', () => {
    * Signal.computed — multi-source computation
    ***********************************************/
 
-  describe('Signal.computed', () => {
+  describe('computed()', () => {
     it('returns a Signal whose value is the result of the compute function', () => {
       const firstName = new Signal('John');
       const lastName = new Signal('Doe');

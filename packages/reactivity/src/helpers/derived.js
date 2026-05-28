@@ -58,13 +58,13 @@ export const match = (source, matchFn = (key, value) => key === value) => {
     }
     const previousValue = currentValue;
     currentValue = nextValue;
-    if (nextValue === previousValue) { return; }
+    const valueChanged = nextValue !== previousValue;
     for (const [key, dep] of keyDeps) {
       if (dep.subscribers.size === 0) {
         keyDeps.delete(key);
         continue;
       }
-      if (matchFn(key, nextValue) !== matchFn(key, previousValue)) {
+      if (valueChanged && matchFn(key, nextValue) !== matchFn(key, previousValue)) {
         dep.changed();
       }
     }
