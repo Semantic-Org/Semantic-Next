@@ -1,4 +1,4 @@
-import { Reaction, Scheduler, selector, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, Scheduler, selector, Signal } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 // selector(source, matchFn?) — Solid `createSelector` adapted to SUI.
@@ -29,7 +29,7 @@ describe('selector', () => {
     const runs = new Map();
     const rs = [];
     for (let i = 0; i < 5; i++) {
-      rs.push(Reaction.create(() => {
+      rs.push(reaction(() => {
         isSelected(i);
         runs.set(i, (runs.get(i) || 0) + 1);
       }));
@@ -50,7 +50,7 @@ describe('selector', () => {
     const source = new Signal('A');
     const isSelected = selector(source);
     let runs = 0;
-    const r = Reaction.create(() => {
+    const r = reaction(() => {
       isSelected('A');
       runs++;
     });
@@ -71,7 +71,7 @@ describe('selector', () => {
     const isSelected = selector(source);
     const rs = [];
     for (let i = 0; i < 50; i++) {
-      rs.push(Reaction.create(() => {
+      rs.push(reaction(() => {
         isSelected(i);
       }));
     }
@@ -83,7 +83,7 @@ describe('selector', () => {
     // the next pass). Verify by registering a fresh reader and confirming
     // it isn't woken by prior keys' churn.
     let runs = 0;
-    const r = Reaction.create(() => {
+    const r = reaction(() => {
       isSelected(99);
       runs++;
     });
@@ -98,7 +98,7 @@ describe('selector', () => {
     const source = new Signal(0);
     const isSelected = selector(source);
     let runs = 0;
-    const r = Reaction.create(() => {
+    const r = reaction(() => {
       isSelected(1);
       runs++;
     });
@@ -119,7 +119,7 @@ describe('selector', () => {
     const runs = new Map();
     const rs = [];
     for (let i = 0; i < 10; i++) {
-      rs.push(Reaction.create(() => {
+      rs.push(reaction(() => {
         inRange(i);
         runs.set(i, (runs.get(i) || 0) + 1);
       }));

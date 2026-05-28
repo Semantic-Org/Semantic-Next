@@ -1,4 +1,4 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, Reaction, reaction, Signal } from '@semantic-ui/reactivity';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Suite contract:
@@ -24,7 +24,7 @@ SAFETY_MODES.forEach((safety) => {
     // discount that first run so .count reflects only post-helper wakeups.
     const subscribe = (signal) => {
       let runs = 0;
-      const reaction = Reaction.create(() => {
+      const r = reaction(() => {
         signal.get();
         runs++;
       });
@@ -32,7 +32,7 @@ SAFETY_MODES.forEach((safety) => {
         get count() {
           return runs - 1;
         },
-        stop: () => reaction.stop(),
+        stop: () => r.stop(),
       };
     };
 
@@ -51,7 +51,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal([1, 2, 3], { safety });
         const sub = subscribe(sig);
         sig.push(4);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -75,7 +75,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal([1, 2, 3], { safety });
         const sub = subscribe(sig);
         sig.unshift(0);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -111,7 +111,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal([1, 2, 3, 4], { safety });
         const sub = subscribe(sig);
         sig.splice(1, 1);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -147,7 +147,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal([1, 2, 3], { safety });
         const sub = subscribe(sig);
         sig.map(x => x + 1);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -189,7 +189,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal([1, 2, 3, 4], { safety });
         const sub = subscribe(sig);
         sig.filter(x => x % 2 === 0);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -216,12 +216,12 @@ SAFETY_MODES.forEach((safety) => {
       it('creates a dependency — setIndex writes re-fire the reaction', () => {
         const sig = new Signal(['red', 'green', 'blue'], { safety });
         const fn = vi.fn();
-        Reaction.create(() => fn(sig.getIndex(0)));
+        reaction(() => fn(sig.getIndex(0)));
         expect(fn).toHaveBeenCalledTimes(1);
         expect(fn).toHaveBeenLastCalledWith('red');
 
         sig.setIndex(0, 'purple');
-        Reaction.flush();
+        flush();
         expect(fn).toHaveBeenCalledTimes(2);
         expect(fn).toHaveBeenLastCalledWith('purple');
       });
@@ -238,7 +238,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal([1, 2, 3], { safety });
         const sub = subscribe(sig);
         sig.setIndex(1, 20);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -254,7 +254,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal([1, 2, 3], { safety });
         const sub = subscribe(sig);
         sig.setIndex(1, 2);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(0);
         sub.stop();
       });
@@ -271,7 +271,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal([1, 2, 3], { safety });
         const sub = subscribe(sig);
         sig.removeIndex(1);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -412,7 +412,7 @@ SAFETY_MODES.forEach((safety) => {
         );
         const sub = subscribe(sig);
         sig.setArrayProperty(0, 'count', 5);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -434,7 +434,7 @@ SAFETY_MODES.forEach((safety) => {
         );
         const sub = subscribe(sig);
         sig.setArrayProperty(0, 'count', 5);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(0);
         sub.stop();
       });
@@ -457,7 +457,7 @@ SAFETY_MODES.forEach((safety) => {
         );
         const sub = subscribe(sig);
         sig.setArrayProperty('done', true);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -479,7 +479,7 @@ SAFETY_MODES.forEach((safety) => {
         );
         const sub = subscribe(sig);
         sig.setArrayProperty('done', true);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(0);
         sub.stop();
       });
@@ -491,7 +491,7 @@ SAFETY_MODES.forEach((safety) => {
         );
         const sub = subscribe(sig);
         sig.setArrayProperty('done', true);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -515,7 +515,7 @@ SAFETY_MODES.forEach((safety) => {
         );
         const sub = subscribe(sig);
         sig.setProperty('b', 'title', 'TWO');
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -537,7 +537,7 @@ SAFETY_MODES.forEach((safety) => {
         );
         const sub = subscribe(sig);
         sig.setProperty('b', 'title', 'two');
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(0);
         sub.stop();
       });
@@ -554,7 +554,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal({ name: 'a', count: 0 }, { safety });
         const sub = subscribe(sig);
         sig.setProperty('count', 7);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -570,7 +570,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal({ name: 'a', count: 7 }, { safety });
         const sub = subscribe(sig);
         sig.setProperty('count', 7);
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(0);
         sub.stop();
       });
@@ -594,7 +594,7 @@ SAFETY_MODES.forEach((safety) => {
         );
         const sub = subscribe(sig);
         sig.replaceItem('a', { id: 'a', v: 100 });
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -616,7 +616,7 @@ SAFETY_MODES.forEach((safety) => {
         );
         const sub = subscribe(sig);
         sig.replaceItem('missing', { id: 'missing', v: 99 });
-        Reaction.flush();
+        flush();
         expect(sig.raw()).toEqual([{ id: 'a', v: 1 }, { id: 'b', v: 2 }]);
         expect(sub.count).toBe(0);
         sub.stop();
@@ -640,7 +640,7 @@ SAFETY_MODES.forEach((safety) => {
         );
         const sub = subscribe(sig);
         sig.removeItem('b');
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -662,7 +662,7 @@ SAFETY_MODES.forEach((safety) => {
         );
         const sub = subscribe(sig);
         sig.removeItem('missing');
-        Reaction.flush();
+        flush();
         expect(sig.raw().map(i => i.id)).toEqual(['a', 'b', 'c']);
         expect(sub.count).toBe(0);
         sub.stop();
@@ -696,7 +696,7 @@ SAFETY_MODES.forEach((safety) => {
         sig.mutate(arr => {
           arr.push(4);
         });
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -720,7 +720,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal(['a', 'b'], { safety });
         const sub = subscribe(sig);
         sig.mutate(() => {});
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(0);
         sub.stop();
       });
@@ -764,9 +764,9 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal(false, { safety });
         const sub = subscribe(sig);
         sig.toggle();
-        Reaction.flush();
+        flush();
         sig.toggle();
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(2);
         sub.stop();
       });
@@ -795,7 +795,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal(5, { safety });
         const sub = subscribe(sig);
         sig.increment();
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -824,7 +824,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal(5, { safety });
         const sub = subscribe(sig);
         sig.decrement();
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -844,7 +844,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal(new Date(0), { safety });
         const sub = subscribe(sig);
         sig.now();
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });
@@ -861,7 +861,7 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal({ a: 1 }, { safety });
         const sub = subscribe(sig);
         sig.clear();
-        Reaction.flush();
+        flush();
         expect(sub.count).toBe(1);
         sub.stop();
       });

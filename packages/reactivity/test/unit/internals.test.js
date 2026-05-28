@@ -1,8 +1,15 @@
 import {
+  afterFlush,
+  currentReaction,
   Dependency,
+  flush,
+  guard,
   isStackCapture,
   isTracing,
+  nonreactive,
   Reaction,
+  reaction,
+  scheduleFlush,
   Scheduler,
   setStackCapture,
   setTracing,
@@ -32,14 +39,14 @@ describe('Scheduler — flush', () => {
     const b = new Signal('Doe');
     const callback = vi.fn();
 
-    Reaction.create(() => {
+    reaction(() => {
       callback(`${a.get()} ${b.get()}`);
     });
     expect(callback).toHaveBeenCalledTimes(1);
 
     a.set('Jane');
     b.set('Smith');
-    Reaction.flush();
+    flush();
 
     expect(callback).toHaveBeenCalledTimes(2);
     expect(callback).toHaveBeenLastCalledWith('Jane Smith');
@@ -50,18 +57,18 @@ describe('Scheduler — flush', () => {
     const downstream = new Signal('idle');
     const log = [];
 
-    Reaction.create(() => {
+    reaction(() => {
       log.push(`upstream:${trigger.get()}`);
       // mid-flush write to a different signal
       downstream.set(`derived-${trigger.peek()}`);
     });
-    Reaction.create(() => {
+    reaction(() => {
       log.push(`downstream:${downstream.get()}`);
     });
 
     log.length = 0;
     trigger.set(1);
-    Reaction.flush();
+    flush();
 
     expect(log).toContain('upstream:1');
     expect(log).toContain('downstream:derived-1');
@@ -72,17 +79,17 @@ describe('Scheduler — flush', () => {
     const reactionLog = [];
     const afterFlushLog = [];
 
-    Reaction.create(() => {
+    reaction(() => {
       reactionLog.push(n.get());
     });
 
     [1, 2, 3, 4, 5].forEach(v => n.set(v));
-    Reaction.afterFlush(() => {
+    afterFlush(() => {
       // afterFlush runs post reaction-drain, so the reaction has already seen the final value (5)
       afterFlushLog.push(n.peek());
     });
 
-    Reaction.flush();
+    flush();
 
     expect(reactionLog[reactionLog.length - 1]).toBe(5);
     expect(afterFlushLog).toEqual([5]);
@@ -90,11 +97,11 @@ describe('Scheduler — flush', () => {
 
   it('runs afterFlush callbacks in registration order', () => {
     const order = [];
-    Reaction.afterFlush(() => order.push('first'));
-    Reaction.afterFlush(() => order.push('second'));
-    Reaction.afterFlush(() => order.push('third'));
+    afterFlush(() => order.push('first'));
+    afterFlush(() => order.push('second'));
+    afterFlush(() => order.push('third'));
 
-    Reaction.flush();
+    flush();
 
     expect(order).toEqual(['first', 'second', 'third']);
   });
@@ -104,14 +111,14 @@ describe('Scheduler — flush', () => {
     const a = new Signal(0);
     const b = new Signal(0);
 
-    Reaction.create(() => {
+    reaction(() => {
       b.set(a.get() + 1);
     });
-    Reaction.create(() => {
+    reaction(() => {
       a.set(b.get() + 1);
     });
 
-    Reaction.flush();
+    flush();
 
     expect(errorSpy).toHaveBeenCalled();
     expect(errorSpy.mock.calls[0][0]).toMatch(/cycle detected/i);
@@ -125,13 +132,13 @@ describe('Scheduler — flush', () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const trigger = new Signal(0);
 
-    Reaction.create(() => {
+    reaction(() => {
       trigger.get();
-      Reaction.afterFlush(() => trigger.set(trigger.peek() + 1));
+      afterFlush(() => trigger.set(trigger.peek() + 1));
     });
 
     trigger.set(1);
-    Reaction.flush();
+    flush();
 
     expect(errorSpy).toHaveBeenCalled();
     expect(errorSpy.mock.calls.some(c => /cycle detected/i.test(c[0]))).toBe(true);
@@ -147,12 +154,12 @@ describe('Scheduler — flush', () => {
     const b = new Signal(0);
     let bSeen = 0;
 
-    Reaction.create(() => {
+    reaction(() => {
       if (a.get() === 1) {
         throw new Error('boom');
       }
     });
-    Reaction.create(() => {
+    reaction(() => {
       bSeen = b.get();
     });
 
@@ -161,7 +168,7 @@ describe('Scheduler — flush', () => {
 
     let caught;
     try {
-      Reaction.flush();
+      flush();
     }
     catch (e) {
       caught = e;
@@ -175,7 +182,7 @@ describe('Scheduler — flush', () => {
     const n = new Signal(0);
     const seen = [];
 
-    Reaction.create(() => {
+    reaction(() => {
       const v = n.get();
       if (v === 1) { throw new Error('once'); }
       seen.push(v);
@@ -183,12 +190,12 @@ describe('Scheduler — flush', () => {
 
     n.set(1);
     try {
-      Reaction.flush();
+      flush();
     }
     catch (_) {}
 
     n.set(2);
-    Reaction.flush();
+    flush();
 
     expect(seen).toContain(2);
   });
@@ -197,11 +204,11 @@ describe('Scheduler — flush', () => {
     const callback = vi.fn();
     const n = new Signal(0);
 
-    Reaction.create(() => callback(n.get()));
+    reaction(() => callback(n.get()));
     expect(callback).toHaveBeenCalledTimes(1);
 
     for (let i = 1; i <= 6; i++) { n.set(i); }
-    Reaction.flush();
+    flush();
 
     expect(callback).toHaveBeenCalledTimes(2);
     expect(callback).toHaveBeenLastCalledWith(6);
@@ -209,8 +216,8 @@ describe('Scheduler — flush', () => {
 
   it('runs afterFlush via microtask without an explicit flush call', async () => {
     const cb = vi.fn();
-    Reaction.afterFlush(cb);
-    Reaction.scheduleFlush();
+    afterFlush(cb);
+    scheduleFlush();
     await Promise.resolve();
     expect(cb).toHaveBeenCalledTimes(1);
   });
@@ -219,14 +226,14 @@ describe('Scheduler — flush', () => {
     const trigger = new Signal(false);
     const settled = vi.fn();
 
-    Reaction.create(() => {
+    reaction(() => {
       if (trigger.get()) {
-        Reaction.afterFlush(settled);
+        afterFlush(settled);
       }
     });
 
     trigger.set(true);
-    Reaction.flush();
+    flush();
 
     expect(settled).toHaveBeenCalledTimes(1);
   });
@@ -236,30 +243,30 @@ describe('Scheduler — flush', () => {
     const recursive = () => {
       runCount++;
       if (runCount < 5) {
-        Reaction.afterFlush(recursive);
+        afterFlush(recursive);
       }
     };
-    Reaction.afterFlush(recursive);
+    afterFlush(recursive);
 
-    Reaction.flush();
+    flush();
     expect(runCount).toBe(5);
   });
 
   it('schedules a flush when afterFlush registers with no pending work', async () => {
     const cb = vi.fn();
-    Reaction.afterFlush(cb);
+    afterFlush(cb);
     await Promise.resolve();
     expect(cb).toHaveBeenCalledTimes(1);
   });
 
   it('keeps draining when an afterFlush callback throws', () => {
     const survivor = vi.fn();
-    Reaction.afterFlush(() => {
+    afterFlush(() => {
       throw new Error('boom');
     });
-    Reaction.afterFlush(survivor);
+    afterFlush(survivor);
 
-    expect(() => Reaction.flush()).toThrow('boom');
+    expect(() => flush()).toThrow('boom');
     expect(survivor).toHaveBeenCalledTimes(1);
   });
 
@@ -267,19 +274,19 @@ describe('Scheduler — flush', () => {
     const source = new Signal('initial');
     const derived = new Signal('initial');
 
-    Reaction.create(() => {
+    reaction(() => {
       derived.set(`reaction-saw-${source.get()}`);
     });
 
     let observedInCb2;
-    Reaction.afterFlush(() => {
+    afterFlush(() => {
       source.set('updated-by-cb1');
-      Reaction.afterFlush(() => {
+      afterFlush(() => {
         observedInCb2 = derived.peek();
       });
     });
 
-    Reaction.flush();
+    flush();
     expect(observedInCb2).toBe('reaction-saw-updated-by-cb1');
   });
 });
@@ -289,22 +296,22 @@ describe('Scheduler — flush', () => {
 *******************************/
 
 describe('Scheduler — current reaction context', () => {
-  it('exposes the currently-running reaction via Reaction.current', () => {
+  it('exposes the currently-running reaction via currentReaction()', () => {
     let seen = null;
-    const r = Reaction.create(function inside() {
-      seen = Reaction.current;
+    const r = reaction(function inside() {
+      seen = currentReaction();
     });
     expect(seen).toBe(r);
   });
 
   it('clears Scheduler.current after a reaction finishes', () => {
-    Reaction.create(() => {});
+    reaction(() => {});
     expect(Scheduler.current).toBe(null);
   });
 
   it('restores Scheduler.current after a reaction throws', () => {
     expect(() => {
-      Reaction.create(() => {
+      reaction(() => {
         throw new Error('mid-run');
       });
     }).toThrow('mid-run');
@@ -321,12 +328,12 @@ describe('Scheduler — current reaction context', () => {
     const trigger = new Signal(0);
     let throwOnce = true;
     const callback = vi.fn();
-    let reaction;
+    let captured;
 
-    // Reaction.create throws because the first run does, so capture the instance via the callback arg
+    // reaction throws because the first run does, so capture the instance via the callback arg
     expect(() => {
-      Reaction.create((r) => {
-        reaction = r;
+      reaction((r) => {
+        captured = r;
         trigger.get();
         callback(r.firstRun);
         if (throwOnce) {
@@ -336,10 +343,10 @@ describe('Scheduler — current reaction context', () => {
       });
     }).toThrow('first run throws');
 
-    expect(reaction.firstRun).toBe(false);
+    expect(captured.firstRun).toBe(false);
 
     trigger.set(1);
-    Reaction.flush();
+    flush();
     expect(callback).toHaveBeenLastCalledWith(false);
   });
 
@@ -348,17 +355,17 @@ describe('Scheduler — current reaction context', () => {
     const inner = new Signal('inner');
     const seen = vi.fn();
 
-    Reaction.create(() => {
-      Reaction.nonreactive(() => inner.get());
+    reaction(() => {
+      nonreactive(() => inner.get());
       seen(outer.get());
     });
 
     inner.set('inner-changed');
-    Reaction.flush();
+    flush();
     expect(seen).toHaveBeenCalledTimes(1);
 
     outer.set('outer-changed');
-    Reaction.flush();
+    flush();
     expect(seen).toHaveBeenCalledTimes(2);
   });
 });
@@ -385,11 +392,11 @@ describe('Dependency', () => {
     const a = vi.fn();
     const b = vi.fn();
 
-    const rA = Reaction.create(() => {
+    const rA = reaction(() => {
       s.get();
       a();
     });
-    Reaction.create(() => {
+    reaction(() => {
       s.get();
       b();
     });
@@ -400,7 +407,7 @@ describe('Dependency', () => {
     expect(s.hasDependents()).toBe(true);
 
     s.set(1);
-    Reaction.flush();
+    flush();
     expect(a).toHaveBeenCalledTimes(1);
     expect(b).toHaveBeenCalledTimes(2);
   });
@@ -408,7 +415,7 @@ describe('Dependency', () => {
   it('stop() cleanly unsubscribes all of a reaction’s dependencies', () => {
     const s1 = new Signal(0);
     const s2 = new Signal(0);
-    const r = Reaction.create(() => {
+    const r = reaction(() => {
       s1.get();
       s2.get();
     });
@@ -424,7 +431,7 @@ describe('Dependency', () => {
 
   it('stop() is idempotent — calling twice does not throw or double-process', () => {
     const s = new Signal(0);
-    const r = Reaction.create(() => s.get());
+    const r = reaction(() => s.get());
 
     expect(() => {
       r.stop();
@@ -437,7 +444,7 @@ describe('Dependency', () => {
     const s = new Signal(0);
     const cb = vi.fn();
 
-    const r = Reaction.create(() => {
+    const r = reaction(() => {
       s.get();
       cb();
     });
@@ -445,7 +452,7 @@ describe('Dependency', () => {
 
     s.set(1);
     r.stop();
-    Reaction.flush();
+    flush();
 
     expect(cb).toHaveBeenCalledTimes(1);
   });
@@ -456,7 +463,7 @@ describe('Dependency', () => {
     const b = new Signal('b');
 
     let lastSeen;
-    Reaction.create(() => {
+    reaction(() => {
       lastSeen = flag.get() ? a.get() : b.get();
     });
     expect(lastSeen).toBe('a');
@@ -464,19 +471,19 @@ describe('Dependency', () => {
     expect(b.hasDependents()).toBe(false);
 
     flag.set(false);
-    Reaction.flush();
+    flush();
     expect(lastSeen).toBe('b');
 
     expect(a.hasDependents()).toBe(false);
     expect(b.hasDependents()).toBe(true);
 
     const cb = vi.fn();
-    Reaction.create(() => {
+    reaction(() => {
       lastSeen = flag.get() ? a.get() : b.get();
       cb();
     });
     a.set('a2');
-    Reaction.flush();
+    flush();
     expect(cb).toHaveBeenCalledTimes(1);
   });
 });
@@ -487,7 +494,7 @@ describe('Dependency', () => {
 
 describe('Reaction.guard', () => {
   it('returns the value when called outside a reactive context', () => {
-    const result = Reaction.guard(() => 42);
+    const result = guard(() => 42);
     expect(result).toBe(42);
     expect(Scheduler.current).toBe(null);
   });
@@ -495,8 +502,8 @@ describe('Reaction.guard', () => {
   it('passes through to the function on first run inside a reaction', () => {
     const s = new Signal(10);
     let observed;
-    Reaction.create(() => {
-      observed = Reaction.guard(() => s.get() * 2);
+    reaction(() => {
+      observed = guard(() => s.get() * 2);
     });
     expect(observed).toBe(20);
   });
@@ -505,8 +512,8 @@ describe('Reaction.guard', () => {
     const callback = vi.fn();
     const obj = new Signal({ a: 1, b: 1 });
 
-    Reaction.create(() => {
-      Reaction.guard(
+    reaction(() => {
+      guard(
         () => obj.get(),
         (oldV, newV) => oldV?.a === newV?.a,
       );
@@ -515,24 +522,24 @@ describe('Reaction.guard', () => {
     expect(callback).toHaveBeenCalledTimes(1);
 
     obj.set({ a: 1, b: 2 });
-    Reaction.flush();
+    flush();
     expect(callback).toHaveBeenCalledTimes(1);
 
     obj.set({ a: 2, b: 2 });
-    Reaction.flush();
+    flush();
     expect(callback).toHaveBeenCalledTimes(2);
   });
 
   // each outer re-run must stop the prior inner comp so the source's subscriber set stays bounded
   it('does not accumulate inner reactions on the source across outer re-runs', () => {
     const counter = new Signal(0);
-    Reaction.create(() => {
-      Reaction.guard(() => counter.get());
+    reaction(() => {
+      guard(() => counter.get());
     });
 
     for (let i = 1; i <= 5; i++) {
       counter.set(i);
-      Reaction.flush();
+      flush();
     }
 
     expect(counter.dependency.subscribers.size).toBe(1);
@@ -540,8 +547,8 @@ describe('Reaction.guard', () => {
 
   it('stops the inner reaction when the outer reaction stops', () => {
     const counter = new Signal(0);
-    const outer = Reaction.create(() => {
-      Reaction.guard(() => counter.get());
+    const outer = reaction(() => {
+      guard(() => counter.get());
     });
     expect(counter.dependency.subscribers.size).toBe(1);
 
@@ -555,8 +562,8 @@ describe('Reaction.guard', () => {
     const downstream = vi.fn();
 
     expect(() => {
-      Reaction.create(() => {
-        const v = Reaction.guard(() => {
+      reaction(() => {
+        const v = guard(() => {
           const x = source.get();
           if (throwOnce) {
             throwOnce = false;
@@ -572,7 +579,7 @@ describe('Reaction.guard', () => {
 
     // a signal change re-fires the inner guard, which now succeeds and propagates upward
     source.set('second');
-    Reaction.flush();
+    flush();
     expect(downstream).toHaveBeenCalledWith('second');
   });
 });
@@ -586,20 +593,20 @@ describe('Reaction.onCleanup', () => {
     const s = new Signal(0);
     const cleanup = vi.fn();
 
-    Reaction.create((self) => {
+    reaction((self) => {
       s.get();
       self.onCleanup(cleanup);
     });
     expect(cleanup).not.toHaveBeenCalled();
 
     s.set(1);
-    Reaction.flush();
+    flush();
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
   it('fires registered callbacks on stop()', () => {
     const cleanup = vi.fn();
-    const r = Reaction.create((self) => {
+    const r = reaction((self) => {
       self.onCleanup(cleanup);
     });
     expect(cleanup).not.toHaveBeenCalled();
@@ -611,7 +618,7 @@ describe('Reaction.onCleanup', () => {
   it('clears the queue after firing — re-runs only fire freshly registered callbacks', () => {
     const s = new Signal(0);
     const cleanup = vi.fn();
-    const r = Reaction.create((self) => {
+    const r = reaction((self) => {
       s.get();
       if (self.firstRun) {
         self.onCleanup(cleanup);
@@ -619,17 +626,17 @@ describe('Reaction.onCleanup', () => {
     });
 
     s.set(1);
-    Reaction.flush();
+    flush();
     expect(cleanup).toHaveBeenCalledTimes(1);
 
     s.set(2);
-    Reaction.flush();
+    flush();
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
   it('fires callbacks in registration order', () => {
     const order = [];
-    const r = Reaction.create((self) => {
+    const r = reaction((self) => {
       self.onCleanup(() => order.push('a'));
       self.onCleanup(() => order.push('b'));
       self.onCleanup(() => order.push('c'));
@@ -709,7 +716,7 @@ describe('helpers — tracing modes', () => {
   });
 
   it('Reaction.setContext is a no-op when tracing is off', () => {
-    const r = Reaction.create(() => {});
+    const r = reaction(() => {});
     r.setContext({ name: 'r1' });
     expect(r.context).toBeUndefined();
   });
@@ -729,13 +736,13 @@ describe('mid-reaction signal updates', () => {
     const n = new Signal(0);
     let runs = 0;
 
-    Reaction.create(() => {
+    reaction(() => {
       runs++;
       const v = n.get();
       if (v < 3) { n.set(v + 1); }
     });
 
-    Reaction.flush();
+    flush();
     expect(n.peek()).toBe(3);
     expect(runs).toBeLessThan(20);
   });
@@ -743,7 +750,7 @@ describe('mid-reaction signal updates', () => {
   it('Signal.set after Reaction.stop does not error or reactivate', () => {
     const n = new Signal(0);
     const cb = vi.fn();
-    const r = Reaction.create(() => {
+    const r = reaction(() => {
       n.get();
       cb();
     });
@@ -753,7 +760,7 @@ describe('mid-reaction signal updates', () => {
     n.set(1);
     n.set(2);
     n.set(3);
-    Reaction.flush();
+    flush();
 
     expect(cb).toHaveBeenCalledTimes(1);
     expect(r.active).toBe(false);
@@ -770,7 +777,7 @@ describe('Signal — read paths via internals', () => {
     const s = new Signal(obj);
     let lastSeen;
     let runs = 0;
-    Reaction.create(() => {
+    reaction(() => {
       runs++;
       lastSeen = s.raw();
     });
@@ -779,7 +786,7 @@ describe('Signal — read paths via internals', () => {
     expect(lastSeen).toBe(s.currentValue);
 
     s.set({ a: 2 });
-    Reaction.flush();
+    flush();
     // raw() did not subscribe — reaction does not re-run
     expect(runs).toBe(1);
     expect(lastSeen.a).toBe(1);
