@@ -659,6 +659,20 @@ describe.concurrent('Signal', () => {
       expect(source.dependency.subscribers.size).toBe(1);
     });
 
+    it('derive inside a parent reaction — parent.stop() cascades to the derived internal reaction', () => {
+      const source = new Signal(1);
+      const outer = Reaction.create(() => {
+        source.derive(v => v * 2);
+      });
+
+      // parent registered itself + spawned a derive reaction subscribing to source
+      expect(source.dependency.subscribers.size).toBe(1);
+
+      outer.stop();
+      // both the parent's direct dep and the derive's internal reaction are gone
+      expect(source.dependency.subscribers.size).toBe(0);
+    });
+
     it('Signal.computed inside a parent reaction does not accumulate subscribers across re-runs', () => {
       const a = new Signal(1);
       const b = new Signal(10);
@@ -1079,6 +1093,55 @@ describe('Signal API', () => {
       Reaction.flush();
       expect(observed).toHaveBeenCalledTimes(2);
       expect(observed).toHaveBeenLastCalledWith(12);
+    });
+  });
+
+  /***********************************************
+   * Static defaults — global escape hatch
+   ***********************************************/
+
+  describe('static defaults', () => {
+    it('falls back to Signal.equalityFunction when no per-instance equality is provided', () => {
+      const original = Signal.equalityFunction;
+      const customEq = vi.fn(() => true);
+      Signal.equalityFunction = customEq;
+      try {
+        const sig = new Signal({ a: 1 });
+        // any set() should consult customEq and short-circuit (returns true)
+        sig.set({ a: 2 });
+        expect(customEq).toHaveBeenCalled();
+        expect(sig.peek()).toEqual({ a: 1 });
+      }
+      finally {
+        Signal.equalityFunction = original;
+      }
+    });
+
+    it('snapshots Signal.equalityFunction at construction — later static changes do not affect existing signals', () => {
+      // The renderer's reactive-context.js relies on this contract.
+      const original = Signal.equalityFunction;
+      const customEq = (a, b) => a?.id === b?.id;
+      Signal.equalityFunction = customEq;
+      const sig = new Signal({ id: 1, label: 'one' });
+      Signal.equalityFunction = original; // restore mid-test
+
+      // sig still uses customEq via its own this.equalityFunction
+      sig.set({ id: 1, label: 'two' });
+      expect(sig.peek().label).toBe('one');
+    });
+
+    it('falls back to Signal.cloneFunction under clone safety when no per-instance clone is provided', () => {
+      const original = Signal.cloneFunction;
+      const customClone = vi.fn(value => ({ ...value, viaStatic: true }));
+      Signal.cloneFunction = customClone;
+      try {
+        const sig = new Signal({ name: 'x' }, { safety: 'clone' });
+        expect(customClone).toHaveBeenCalled();
+        expect(sig.peek().viaStatic).toBe(true);
+      }
+      finally {
+        Signal.cloneFunction = original;
+      }
     });
   });
 

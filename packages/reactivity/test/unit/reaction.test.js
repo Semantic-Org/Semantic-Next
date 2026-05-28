@@ -394,6 +394,14 @@ describe('Reaction — public API contract', () => {
       expect(reaction).toBeInstanceOf(Reaction);
     });
 
+    it('constructs via new Reaction() and satisfies instanceof Reaction', () => {
+      // new Reaction() does NOT auto-run — that's Reaction.create's responsibility.
+      const reaction = new Reaction(() => {});
+      expect(reaction).toBeInstanceOf(Reaction);
+      expect(reaction.active).toBe(true);
+      expect(reaction.firstRun).toBe(true);
+    });
+
     it('runs the callback immediately by default to register dependencies', () => {
       const callback = vi.fn();
       Reaction.create(callback);
