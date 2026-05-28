@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { Reaction } from '@semantic-ui/reactivity';
+import { flush, reaction } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES } from './test-utils.js';
 
@@ -14,7 +14,7 @@ RENDERING_ENGINES.forEach((engine) => {
       return el.shadowRoot.innerHTML.replace(/<!--[\s\S]*?-->/g, '').trim();
     }
     async function flush(el) {
-      Reaction.flush();
+      flush();
       await el.updateComplete;
       await new Promise((r) => setTimeout(r, 0));
     }

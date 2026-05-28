@@ -5,7 +5,7 @@ import { registerBlock } from './registry.js';
 /*
 
   {#rerender} / {#guard} — both compile to AST node.type === 'rerender'.
-  Guard sets node.key (deep-equality-gated re-render via Reaction.guard);
+  Guard sets node.key (deep-equality-gated re-render via guard);
   rerender sets node.expression (any-signal-change re-render via plain
   lookupExpression).
 

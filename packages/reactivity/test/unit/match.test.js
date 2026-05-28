@@ -1,21 +1,21 @@
-import { flush, reaction, Scheduler, selector, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, Scheduler, match, Signal } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-// selector(source, matchFn?) — Solid `createSelector` adapted to SUI.
+// match(source, matchFn?) — Solid `createSelector` adapted to SUI.
 // Load-bearing properties verified below:
 //   1. membership flip — only the at-most-2 keys whose match result
-//      changed wake on a source change.
+//      changed re-fire on a source change.
 //   2. re-arm after rerun — Reaction.run's natural dep-set teardown
 //      unsubscribes a row reaction from its per-key dep on rerun;
-//      calling select(key) again re-registers the subscription.
+//      calling matcher(key) again re-registers the subscription.
 //   3. row-churn doesn't leak — stopped row reactions leave empty
 //      keyDeps entries which are pruned opportunistically.
-//   4. owner-less GC — when the returned select closure is unreferenced,
-//      the backing reaction self-stops on next wakeup (WeakRef).
+//   4. owner-less GC — when the returned matcher closure is unreferenced,
+//      the backing reaction self-stops on next re-fire (WeakRef).
 //   5. custom matchFn — range-style or other membership predicates work
-//      and produce the same per-key wakeup discipline.
+//      and produce the same per-key re-fire discipline.
 
-describe('selector', () => {
+describe('match', () => {
   beforeEach(() => {
     Scheduler.current = null;
     Scheduler.pendingReactions.clear();
@@ -25,12 +25,12 @@ describe('selector', () => {
 
   it('membership flip wakes only old and new key readers', () => {
     const source = new Signal(0);
-    const isSelected = selector(source);
+    const isCurrent = match(source);
     const runs = new Map();
     const rs = [];
     for (let i = 0; i < 5; i++) {
       rs.push(reaction(() => {
-        isSelected(i);
+        isCurrent(i);
         runs.set(i, (runs.get(i) || 0) + 1);
       }));
     }
@@ -48,10 +48,10 @@ describe('selector', () => {
 
   it('re-arms after Reaction.run teardown — A → B → A wakes A again', () => {
     const source = new Signal('A');
-    const isSelected = selector(source);
+    const isCurrent = match(source);
     let runs = 0;
     const r = reaction(() => {
-      isSelected('A');
+      isCurrent('A');
       runs++;
     });
     expect(runs).toBe(1);
@@ -68,11 +68,11 @@ describe('selector', () => {
 
   it('row churn does not leak keyDeps entries', () => {
     const source = new Signal(0);
-    const isSelected = selector(source);
+    const isCurrent = match(source);
     const rs = [];
     for (let i = 0; i < 50; i++) {
       rs.push(reaction(() => {
-        isSelected(i);
+        isCurrent(i);
       }));
     }
     for (const r of rs) { r.stop(); }
@@ -84,7 +84,7 @@ describe('selector', () => {
     // it isn't woken by prior keys' churn.
     let runs = 0;
     const r = reaction(() => {
-      isSelected(99);
+      isCurrent(99);
       runs++;
     });
     expect(runs).toBe(1);
@@ -94,15 +94,15 @@ describe('selector', () => {
     r.stop();
   });
 
-  it('selector exposes stop() for deterministic teardown', () => {
+  it('match exposes stop() for deterministic teardown', () => {
     const source = new Signal(0);
-    const isSelected = selector(source);
+    const isCurrent = match(source);
     let runs = 0;
     const r = reaction(() => {
-      isSelected(1);
+      isCurrent(1);
       runs++;
     });
-    isSelected.stop();
+    isCurrent.stop();
     source.set(1);
     Scheduler.flush();
     // backing reaction was stopped — no fanout, the reader's per-key dep
@@ -115,7 +115,7 @@ describe('selector', () => {
     const source = new Signal(5);
     // "key is less than current value" — flip semantics: increasing
     // value from 5 to 7 flips keys 5 and 6 from false to true.
-    const inRange = selector(source, (key, value) => key < value);
+    const inRange = match(source, (key, value) => key < value);
     const runs = new Map();
     const rs = [];
     for (let i = 0; i < 10; i++) {

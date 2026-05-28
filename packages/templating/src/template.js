@@ -1064,8 +1064,8 @@ export const Template = class Template {
 
   // reactions bound with this.reaction will be scoped to template
   // and be removed when the template is destroyed
-  reaction(reaction) {
-    this.reactions.push(reaction(reaction));
+  reaction(cb) {
+    this.reactions.push(reaction(cb));
   }
 
   signal(value, options) {

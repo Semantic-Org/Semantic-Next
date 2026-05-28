@@ -220,7 +220,7 @@ function mountSnippet({ node, data, region, scope, renderAST, isSVG, self }) {
 // through the lazy getters and register source-signal deps on the
 // caller's Reaction.
 //
-// Initialize is wrapped in Reaction.nonreactive so synchronous reads
+// Initialize is wrapped in nonreactive so synchronous reads
 // of data.foo from inside createComponent or onCreated do not register
 // source-signal deps on the parent's outer Reaction. Reads from later
 // binding-Reaction context still register normally — the wrap only

@@ -125,10 +125,3 @@ export class Scheduler {
     }
   }
 }
-
-// Scheduler statics use `Scheduler.X` qualifiers internally, never `this`,
-// so unbinding for module-level export is safe.
-export const flush = Scheduler.flush;
-export const scheduleFlush = Scheduler.scheduleFlush;
-export const afterFlush = Scheduler.afterFlush;
-export const getSource = Scheduler.getSource;

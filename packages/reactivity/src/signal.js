@@ -11,40 +11,9 @@ import {
   wrapFunction,
 } from '@semantic-ui/utils';
 
-import { captureStack, isTracing } from './helpers.js';
-
 import { Dependency } from './dependency.js';
-import { currentReaction, Reaction, reaction as createReaction } from './reaction.js';
-
-const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
-
-// shared backing for derive() and computed(). weak ref on the *output* so the
-// derived signal stops self-driving once nothing else holds it. parent-reaction
-// onCleanup ties lifetime to the enclosing scope when present.
-const createDerivedSignal = (reactionBody, options) => {
-  const out = new Signal(undefined, options);
-  const ref = new WeakRef(out);
-  const r = createReaction(() => {
-    const live = ref.deref();
-    if (!live) {
-      r.stop();
-      return;
-    }
-    reactionBody(live);
-  });
-  const parent = currentReaction();
-  if (parent) {
-    parent.onCleanup(() => r.stop());
-  }
-  return out;
-};
-
-export const signal = (initial, options) => new Signal(initial, options);
-
-export const derive = (source, computeFn, options = {}) =>
-  createDerivedSignal((out) => out.set(computeFn(source.get())), options);
-
-export const computed = (computeFn, options = {}) => createDerivedSignal((out) => out.set(computeFn()), options);
+import { IS_SIGNAL } from './helpers/identity.js';
+import { captureStack, isTracing } from './helpers/tracing.js';
 
 export class Signal {
   get [IS_SIGNAL]() {
@@ -148,15 +117,6 @@ export class Signal {
 
   depend() {
     this.dependency.depend();
-  }
-
-  /*******************************
-           Child Signals
-  *******************************/
-
-  // single signal having a derivation
-  derive(computeFn, options = {}) {
-    return derive(this, computeFn, options);
   }
 
   /*******************************

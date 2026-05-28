@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { Reaction } from '@semantic-ui/reactivity';
+import { flush, reaction } from '@semantic-ui/reactivity';
 import { ServerRenderer } from '@semantic-ui/renderer';
 
 /*
@@ -88,9 +88,9 @@ const drainMicrotasks = () => new Promise(r => setTimeout(r, 0));
 // `performance.measure` regions where a per-iteration `await rAF` would
 // dominate wall-clock with 16ms idle gaps and bury sub-frame JS-work
 // deltas. The reactivity Scheduler flushes on a microtask, so calling
-// `Reaction.flush()` immediately after a `signal.set` runs every queued
+// `flush()` immediately after a `signal.set` runs every queued
 // Reaction synchronously — exactly what we want to measure.
-const flushWork = () => Reaction.flush();
+const flushWork = () => flush();
 const startMark = (name) => `${name}-start`;
 
 /*******************************

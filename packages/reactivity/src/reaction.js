@@ -1,47 +1,5 @@
-import { isEqual } from '@semantic-ui/utils';
-import { Dependency } from './dependency.js';
-import { captureStack, isTracing } from './helpers.js';
+import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
-
-export const reaction = (callback, options = {}) => {
-  const r = new Reaction(callback, options);
-  if (options.firstRun !== false) {
-    r.run();
-  }
-  return r;
-};
-
-export const nonreactive = (func) => {
-  const previous = Scheduler.current;
-  Scheduler.current = null;
-  try {
-    return func();
-  }
-  finally {
-    Scheduler.current = previous;
-  }
-};
-
-export const guard = (f, equalCheck = isEqual) => {
-  if (!Scheduler.current) {
-    return f();
-  }
-  const dep = new Dependency();
-  let value, newValue;
-  dep.depend();
-  const comp = new Reaction(() => {
-    newValue = f();
-    if (!comp.firstRun && !equalCheck(newValue, value)) {
-      dep.changed();
-    }
-    value = newValue;
-  });
-  Scheduler.current.onCleanup(() => comp.stop());
-  comp.run();
-  return newValue;
-};
-
-export const currentReaction = () => Scheduler.current;
 
 export class Reaction {
   constructor(callback, { context } = {}) {

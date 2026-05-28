@@ -3,7 +3,7 @@
 // going through WebComponentBase or defineComponent. Lifecycle hook
 // firing is renderRoot-agnostic, so light DOM is sufficient throughout.
 
-import { Reaction } from '@semantic-ui/reactivity';
+import { flush, reaction } from '@semantic-ui/reactivity';
 import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -220,7 +220,7 @@ describe('Template — lifecycle', () => {
         fixture.template.markRendered();
 
         fixture.template.state.count.set(1);
-        Reaction.flush();
+        flush();
         await Promise.resolve();
         await Promise.resolve();
 
@@ -241,7 +241,7 @@ describe('Template — lifecycle', () => {
       try {
         fixture.template.markRendered();
         fixture.template.state.count.set(1);
-        Reaction.flush();
+        flush();
         await Promise.resolve();
         await Promise.resolve();
         expect(heard).toHaveBeenCalledTimes(1);
@@ -263,7 +263,7 @@ describe('Template — lifecycle', () => {
         fixture.template.state.a.set(1);
         fixture.template.state.b.set(2);
         fixture.template.state.c.set(3);
-        Reaction.flush();
+        flush();
         await Promise.resolve();
         await Promise.resolve();
         expect(heard).toHaveBeenCalledTimes(1);
@@ -282,7 +282,7 @@ describe('Template — lifecycle', () => {
       fixture.host.addEventListener('updated', heard);
       try {
         fixture.template.state.count.set(1);
-        Reaction.flush();
+        flush();
         await Promise.resolve();
         await Promise.resolve();
         // state reaction only schedules when this.rendered === true
@@ -301,7 +301,7 @@ describe('Template — lifecycle', () => {
       try {
         fixture.template.markRendered();
         fixture.template.state.count.set(1);
-        Reaction.flush();
+        flush();
         expect(fixture.template.updateScheduled).toBe(true);
         expect(fixture.host.updateScheduled).toBe(true);
         await Promise.resolve();
@@ -796,7 +796,7 @@ describe('Template — lifecycle', () => {
       template.reaction(() => {
         runs++;
       });
-      Reaction.flush();
+      flush();
       expect(runs).toBe(1);
       const reactions = template.reactions;
       template.onDestroyed();

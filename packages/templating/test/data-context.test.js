@@ -4,7 +4,7 @@
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, Signal } from '@semantic-ui/reactivity';
 import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
 import { extend } from '@semantic-ui/utils';
@@ -53,14 +53,14 @@ describe('Template — createReactiveState', () => {
     expect(signal).toBeInstanceOf(Signal);
     expect(signal.peek()).toEqual({ x: 1 });
     let observed = 0;
-    const r = Reaction.create(() => {
+    const r = reaction(() => {
       signal.get();
       observed++;
     });
-    Reaction.flush();
+    flush();
     const before = observed;
     signal.set({ x: 1 });
-    Reaction.flush();
+    flush();
     expect(observed).toBeGreaterThan(before);
     r.stop();
   });
