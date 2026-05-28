@@ -88,7 +88,6 @@ export const match = (source, matchFn = (key, value) => key === value) => {
   return matcher;
 };
 
-// instance form on Signal for value-bound derivation, sibling to push/toggle/etc.
 Signal.prototype.derive = function(computeFn, options = {}) {
   return derive(this, computeFn, options);
 };

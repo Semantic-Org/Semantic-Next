@@ -1,9 +1,6 @@
 import { Scheduler } from '../scheduler.js';
 
-// Scheduler static methods use `Scheduler.X` qualifiers internally, never
-// `this`, so unbinding for module-level export is safe. These aliases are
-// the canonical public surface. The static methods on the class are the
-// backing impl.
+// safe to unbind: Scheduler statics qualify `Scheduler.X` internally, never `this`
 export const flush = Scheduler.flush;
 export const scheduleFlush = Scheduler.scheduleFlush;
 export const afterFlush = Scheduler.afterFlush;

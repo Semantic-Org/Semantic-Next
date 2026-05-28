@@ -1,5 +1,3 @@
-// Symbol markers for cross-realm instanceof checks. A consumer running across
-// multiple bundles or iframes can still satisfy `instanceof Signal` because
-// the marker key is registered globally via Symbol.for. Each class installs
-// its own marker getter that its Symbol.hasInstance trap reads.
+// Symbol.for keys survive cross-realm boundaries (bundles, iframes), so
+// `instanceof Signal` works against any realm's class definition.
 export const IS_SIGNAL = Symbol.for('semantic-ui/Signal');

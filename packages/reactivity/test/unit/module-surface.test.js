@@ -13,10 +13,6 @@ import {
 } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Direct coverage for the module-level free-fn surface. Behavior delegation
-// is verified against the class-based suite. These tests pin the factory
-// shape and that each entry wires to the underlying impl.
-
 describe('module-level factories', () => {
   describe('signal()', () => {
     it('returns a Signal instance', () => {
@@ -57,7 +53,7 @@ describe('module-level factories', () => {
       r.stop();
     });
 
-    it('tracks signal reads — a change re-fires the callback', () => {
+    it('tracks signal reads, a change re-fires the callback', () => {
       const s = signal(0);
       const cb = vi.fn(() => s.get());
       const r = reaction(cb);

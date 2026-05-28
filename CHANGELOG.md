@@ -25,7 +25,7 @@ xx.xx.xxxx
 * **BREAKING** - Removed `signal.subscribe(cb)` — compose with `reaction(() => cb(signal.value))`
 * **BREAKING** - Renamed Signal options and statics — `equalityFunction` → `equality`, `cloneFunction` → `clone`, `idFunction` → `id`
 * **BREAKING** - Renamed `signal.getID` / `getIDs` / `hasID` to `getId` / `getIds` / `hasId`
-* **BREAKING** - `Signal.clone` default now applies the full cloning policy (preserves class instances at any depth via `clone(value, { preserveNonCloneable: true })`); user overrides via `Signal.clone = fn` or `new Signal(v, { clone: fn })` fully replace it
+* **BREAKING** - `Signal.clone` default now applies the full cloning policy, preserving class instances at any depth via `clone(value, { preserveNonCloneable: true })`. User overrides via `Signal.clone = fn` or `new Signal(v, { clone: fn })` fully replace it
 * **BREAKING** - Removed `signal.clone(value)` prototype method — instance always carries its configured clone function in `this.clone`
 
 ### Renderer
