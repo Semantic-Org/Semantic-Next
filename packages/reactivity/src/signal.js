@@ -141,12 +141,6 @@ export class Signal {
     return this.cloneFunction(value);
   }
 
-  subscribe(callback) {
-    return Reaction.create((comp) => {
-      callback(this.value, comp);
-    });
-  }
-
   /* Dependencies */
   hasDependents() {
     return this.dependency.subscribers.size > 0;

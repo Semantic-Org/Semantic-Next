@@ -1,4 +1,4 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { Reaction, reaction, Signal } from '@semantic-ui/reactivity';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe.concurrent('Signal', () => {
@@ -39,7 +39,7 @@ describe.concurrent('Signal', () => {
       };
       const signal = new Signal('initial', { equalityFunction: isEqual });
       signal.value = 'initial';
-      signal.subscribe(callback);
+      reaction(() => callback(signal.get()));
 
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
@@ -70,7 +70,7 @@ describe.concurrent('Signal', () => {
         },
       };
       const signal = new Signal(a);
-      signal.subscribe(callback);
+      reaction(() => callback(signal.get()));
 
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
@@ -100,7 +100,7 @@ describe.concurrent('Signal', () => {
         },
       };
       const signal = new Signal(a);
-      signal.subscribe(callback);
+      reaction(() => callback(signal.get()));
 
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
@@ -116,30 +116,23 @@ describe.concurrent('Signal', () => {
   *******************************/
 
   describe.concurrent('Reactivity', () => {
-    it('should notify subscribers on value change', async () => {
+    it('should notify reactions on value change', () => {
       const callback = vi.fn();
-
-      const expectReaction = expect.objectContaining({
-        stop: expect.any(Function),
-      });
-
       const signal = new Signal('initial');
-      signal.subscribe(callback);
+      reaction(() => callback(signal.get()));
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
-      expect(callback).toHaveBeenCalledWith('initial', expectReaction);
+      expect(callback).toHaveBeenLastCalledWith('initial');
 
       signal.value = 'updated';
       Reaction.flush();
-
       expect(callback).toHaveBeenCalledTimes(2);
-      expect(callback).toHaveBeenCalledWith('updated', expectReaction);
+      expect(callback).toHaveBeenLastCalledWith('updated');
 
       signal.set('final');
       Reaction.flush();
-
       expect(callback).toHaveBeenCalledTimes(3);
-      expect(callback).toHaveBeenCalledWith('final', expectReaction);
+      expect(callback).toHaveBeenLastCalledWith('final');
     });
 
     it('Peek should not trigger reactivity', () => {
@@ -256,11 +249,11 @@ describe.concurrent('Signal', () => {
       const outerCallback = vi.fn();
       const outerVar = new Signal(innerVar);
 
-      outerVar.subscribe(outerCallback);
+      reaction(() => outerCallback(outerVar.get()));
       Reaction.flush();
       expect(outerCallback).toHaveBeenCalledTimes(1);
 
-      innerVar.subscribe(innerCallback);
+      reaction(() => innerCallback(innerVar.get()));
       innerVar.set(2);
       Reaction.flush();
 
@@ -279,11 +272,11 @@ describe.concurrent('Signal', () => {
       const innerVar1 = new Signal(data1, { safety: 'clone' });
       const innerVar2 = new Signal(data2, { safety: 'clone' });
 
-      innerVar1.subscribe(innerCallback1);
-      innerVar2.subscribe(innerCallback2);
+      reaction(() => innerCallback1(innerVar1.get()));
+      reaction(() => innerCallback2(innerVar2.get()));
 
       const outerVar = new Signal([]);
-      outerVar.subscribe(outerCallback);
+      reaction(() => outerCallback(outerVar.get()));
 
       Reaction.flush();
       expect(outerCallback).toHaveBeenCalledTimes(1);
@@ -433,7 +426,10 @@ describe.concurrent('Signal', () => {
       const isPositive = Signal.computed(() => a.get() > 0);
 
       let updateCount = 0;
-      isPositive.subscribe(() => updateCount++);
+      reaction(() => {
+        isPositive.get();
+        updateCount++;
+      });
 
       Reaction.flush();
       expect(updateCount).toBe(1);
@@ -599,7 +595,7 @@ describe.concurrent('Signal', () => {
     it('should transition between null and object values', () => {
       const callback = vi.fn();
       const signal = new Signal(null);
-      signal.subscribe(callback);
+      reaction(() => callback(signal.get()));
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
@@ -746,7 +742,7 @@ describe('Signal API', () => {
         { id: 1, name: 'Alice', lastLogin: '2023-01-01' },
         { equalityFunction: (oldUser, newUser) => oldUser.id === newUser.id },
       );
-      user.subscribe(callback);
+      reaction(() => callback(user.get()));
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
@@ -826,7 +822,7 @@ describe('Signal API', () => {
     it('writes a new primitive value and triggers subscribers', () => {
       const callback = vi.fn();
       const counter = new Signal(0);
-      counter.subscribe(callback);
+      reaction(() => callback(counter.get()));
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
@@ -838,7 +834,7 @@ describe('Signal API', () => {
     it('skips re-firing subscribers when the new value is equal under default deep equality', () => {
       const callback = vi.fn();
       const signal = new Signal({ a: 1, b: 2 });
-      signal.subscribe(callback);
+      reaction(() => callback(signal.get()));
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
@@ -850,7 +846,7 @@ describe('Signal API', () => {
     it('treats NaN as equal to NaN (Object.is-style) under default deep equality', () => {
       const callback = vi.fn();
       const signal = new Signal(NaN);
-      signal.subscribe(callback);
+      reaction(() => callback(signal.get()));
       Reaction.flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
@@ -894,49 +890,6 @@ describe('Signal API', () => {
       const snapshot = signal.peek();
       snapshot.level = 99;
       expect(signal.peek().level).toBe(1);
-    });
-  });
-
-  /***********************************************
-   * subscribe() — callback observer
-   ***********************************************/
-
-  describe('subscribe()', () => {
-    it('runs the callback immediately on first subscribe so observers see the current value', () => {
-      const callback = vi.fn();
-      const signal = new Signal('hi');
-      signal.subscribe(callback);
-      // First-run happens synchronously inside Reaction.create
-      expect(callback).toHaveBeenCalledTimes(1);
-      expect(callback.mock.calls[0][0]).toBe('hi');
-    });
-
-    it('passes the new value and a reaction handle to the callback on every fire', () => {
-      const callback = vi.fn();
-      const signal = new Signal('first');
-      signal.subscribe(callback);
-      Reaction.flush();
-
-      signal.set('second');
-      Reaction.flush();
-
-      const lastCall = callback.mock.calls.at(-1);
-      expect(lastCall[0]).toBe('second');
-      expect(lastCall[1]).toHaveProperty('stop');
-      expect(typeof lastCall[1].stop).toBe('function');
-    });
-
-    it('returns a handle whose stop() prevents further fires', () => {
-      const callback = vi.fn();
-      const signal = new Signal(0);
-      const handle = signal.subscribe(callback);
-      Reaction.flush();
-      expect(callback).toHaveBeenCalledTimes(1);
-
-      handle.stop();
-      signal.set(1);
-      Reaction.flush();
-      expect(callback).toHaveBeenCalledTimes(1);
     });
   });
 
