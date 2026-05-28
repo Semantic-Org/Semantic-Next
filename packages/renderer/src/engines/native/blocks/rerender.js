@@ -1,4 +1,4 @@
-import { Reaction } from '@semantic-ui/reactivity';
+import { guard } from '@semantic-ui/reactivity';
 import { defineBlock } from '../define-block.js';
 import { registerBlock } from './registry.js';
 
@@ -13,7 +13,7 @@ import { registerBlock } from './registry.js';
 
 function trackDeps({ node, data, lookupExpression, self }) {
   if (node.key) {
-    Reaction.guard(() => self.evaluator.lookupTokenValue(node.key, data));
+    guard(() => self.evaluator.lookupTokenValue(node.key, data));
   }
   if (node.expression) {
     lookupExpression(node.expression);

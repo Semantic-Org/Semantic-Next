@@ -1,4 +1,4 @@
-import { isTracing, Reaction } from '@semantic-ui/reactivity';
+import { isTracing, reaction } from '@semantic-ui/reactivity';
 
 export class ReactionScope {
   constructor() {
@@ -17,7 +17,7 @@ export class ReactionScope {
   // Combines the track + isConnected guard that every renderer binding uses.
   // Optional `context` is forwarded to Reaction for dev-mode tracing.
   reaction(node, callback, context) {
-    this.track(Reaction.create((comp) => {
+    this.track(reaction((comp) => {
       if (!comp.firstRun && !node.isConnected) {
         comp.stop();
         return;

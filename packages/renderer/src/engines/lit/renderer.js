@@ -1,6 +1,6 @@
 import { html, svg } from 'lit';
 
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { nonreactive, Signal } from '@semantic-ui/reactivity';
 import {
   assignInPlace,
   each,
@@ -333,7 +333,7 @@ export class LitRenderer {
     };
     return (reactive)
       ? () => getValue(expression)
-      : () => Reaction.nonreactive(() => getValue(expression));
+      : () => nonreactive(() => getValue(expression));
   };
 
   getPackedNodeData(node, data, { inheritsData = false } = {}) {

@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { afterFlush, flush, nonreactive, reaction, Signal } from '@semantic-ui/reactivity';
 import {
   any,
   assignInPlace,
@@ -297,13 +297,13 @@ export const Template = class Template {
 
     if (this.element) {
       const el = this.element;
-      const stateReaction = Reaction.create(() => {
+      const stateReaction = reaction(() => {
         // bind to any signal changing
         each(this.state, (signal) => signal.dependency.depend());
         // run onUpdated callback
         if (this.rendered && !this.destroyed) {
           el.updateScheduled = true;
-          Reaction.afterFlush(this.onUpdated);
+          afterFlush(this.onUpdated);
         }
       });
       this.reactions.push(stateReaction);
@@ -886,9 +886,9 @@ export const Template = class Template {
       interval: this.createInterval.bind(this),
       timeout: this.createTimeout.bind(this),
       abortSignal: this.abortSignal,
-      afterFlush: Reaction.afterFlush,
-      nonreactive: Reaction.nonreactive,
-      flush: Reaction.flush,
+      afterFlush: afterFlush,
+      nonreactive: nonreactive,
+      flush: flush,
       data: this.data,
       settings: this.settings || element?.settings,
       state: this.state,
@@ -1065,7 +1065,7 @@ export const Template = class Template {
   // reactions bound with this.reaction will be scoped to template
   // and be removed when the template is destroyed
   reaction(reaction) {
-    this.reactions.push(Reaction.create(reaction));
+    this.reactions.push(reaction(reaction));
   }
 
   signal(value, options) {

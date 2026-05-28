@@ -1,4 +1,4 @@
-import { Reaction } from '@semantic-ui/reactivity';
+import { reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
 import { isClient, isFunction, isPlainObject, isString, mapObject } from '@semantic-ui/utils';
 import { noChange, nothing } from 'lit';
@@ -44,7 +44,7 @@ export class RenderTemplateDirective extends AsyncDirective {
     if (this.reaction) {
       this.reaction.stop();
     }
-    this.reaction = Reaction.create((reaction) => {
+    this.reaction = reaction((reaction) => {
       this.maybeCreateTemplate(); // reactive reference to template
       const dataContext = this.unpackData(this.data); // reactive reference to data
 

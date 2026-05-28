@@ -1,4 +1,4 @@
-import { Reaction } from '@semantic-ui/reactivity';
+import { nonreactive, reaction } from '@semantic-ui/reactivity';
 import { isRecovery, isTracing, unwrap } from '../../helpers.js';
 import { makePlace, UNSAFE_HTML } from './commit-hooks.js';
 
@@ -342,7 +342,7 @@ function defineValueBlock(config) {
         endAnchor: null,
         comment,
       };
-      const adopted = Reaction.nonreactive(() => hydrate.call(config, hydrateState));
+      const adopted = nonreactive(() => hydrate.call(config, hydrateState));
       anchor = adopted.anchor;
       ownedNodes = adopted.ownedNodes || null;
     }
@@ -373,7 +373,7 @@ function defineValueBlock(config) {
     }
 
     const commit = node.unsafeHTML ? commitUnsafeHTML : commitText;
-    scope.track(Reaction.create((comp) => {
+    scope.track(reaction((comp) => {
       if (!comp.firstRun && !anchor.isConnected) {
         comp.stop();
         return;

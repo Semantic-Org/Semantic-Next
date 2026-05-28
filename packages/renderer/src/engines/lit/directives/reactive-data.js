@@ -2,7 +2,7 @@ import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive, PartType } from 'lit/directive.js';
 
-import { Reaction } from '@semantic-ui/reactivity';
+import { reaction } from '@semantic-ui/reactivity';
 import { inArray, isArray, isClient, isObject, isServer } from '@semantic-ui/utils';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
@@ -52,7 +52,7 @@ export class ReactiveDataDirective extends AsyncDirective {
       expression: this.expression.expression,
     };
     let value;
-    this.reaction = Reaction.create((computation) => {
+    this.reaction = reaction((computation) => {
       if (!this.isConnected) {
         computation.stop();
         return;
