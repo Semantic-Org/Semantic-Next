@@ -2,14 +2,17 @@ import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
 
 export class Reaction {
-  constructor(callback, { context } = {}) {
+  constructor(callback, { context, firstRun = true } = {}) {
     this.callback = callback;
     this.dependencies = new Set();
-    this.cleanups = null; // lazy — most reactions register none
+    this.cleanups = null; // lazy, most reactions register none
     this.firstRun = true;
     this.active = true;
     if (context && isTracing()) {
       this.setContext(context);
+    }
+    if (firstRun) {
+      this.run();
     }
   }
 

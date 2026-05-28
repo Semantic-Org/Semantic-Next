@@ -21,15 +21,14 @@ export const guard = (compute, equalCheck = isEqual) => {
   const dep = new Dependency();
   let value, newValue;
   dep.depend();
-  const guardReaction = new Reaction(() => {
+  const guardReaction = new Reaction((r) => {
     newValue = compute();
-    if (!guardReaction.firstRun && !equalCheck(newValue, value)) {
+    if (!r.firstRun && !equalCheck(newValue, value)) {
       dep.changed();
     }
     value = newValue;
   });
   Scheduler.current.onCleanup(() => guardReaction.stop());
-  guardReaction.run();
   return newValue;
 };
 
