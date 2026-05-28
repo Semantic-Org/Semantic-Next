@@ -12,7 +12,9 @@
   "scripts": {
     "dev": "node serve.js",
     "build": "node build.js",
-    "build-prod": "node build.js"
+    "build-prod": "node build.js",
+    "record": "node scripts/append-krausest-run.js",
+    "report": "node scripts/krausest-report.js"
   },
   "dependencies": {
     "@semantic-ui/component": "*",

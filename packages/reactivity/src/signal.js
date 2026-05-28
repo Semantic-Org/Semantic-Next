@@ -30,7 +30,8 @@ export class Signal {
   // default clone and equal pulled from utils
   static equalityFunction = isEqual;
   static cloneFunction = clone;
-
+  static idFunction = (item) => item.id ?? item._id ?? item.hash ?? item.key;
+  
   // safety presets for the stored value:
   //   'freeze'    — deep-freeze on set; downstream mutations throw at the call site
   //   'clone'     — sandbox mode; copy in and out so a consumer can't corrupt state
@@ -42,6 +43,7 @@ export class Signal {
     safety = Signal.safety,
     cloneFunction = Signal.cloneFunction,
     equalityFunction = (safety === 'none') ? returnsFalse : Signal.equalityFunction,
+    idFunction = Signal.idFunction,
     context,
   } = {}) {
     // create dependency
@@ -53,6 +55,7 @@ export class Signal {
     // handle custom helpers if user specifies
     this.cloneFunction = cloneFunction;
     this.equalityFunction = equalityFunction;
+    this.idFunction = idFunction;
 
     this.safety = safety;
     this.currentValue = this.protect(initialValue);
@@ -396,13 +399,13 @@ export class Signal {
     if (!isObject(item)) {
       return [item];
     }
-    return unique([item.id, item._id, item.hash, item.key].filter(Boolean));
+    return unique([item.id, item._id, item.hash, item.key].filter(value => value != null));
   }
   getID(item) {
     if (!isObject(item)) {
       return item;
     }
-    return item.id || item._id || item.hash || item.key;
+    return this.idFunction(item);
   }
   hasID(item, id) {
     return this.getID(item) === id;
@@ -444,10 +447,18 @@ export class Signal {
     }
   }
   replaceItem(id, item) {
-    return this.setIndex(this.getItemIndex(id), item);
+    const index = this.getItemIndex(id);
+    if (index === -1) {
+      return;
+    }
+    return this.setIndex(index, item);
   }
   removeItem(id) {
-    return this.removeIndex(this.getItemIndex(id));
+    const index = this.getItemIndex(id);
+    if (index === -1) {
+      return;
+    }
+    return this.removeIndex(index);
   }
 
   /*******************************

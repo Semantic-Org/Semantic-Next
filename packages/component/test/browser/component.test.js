@@ -306,7 +306,7 @@ describe('Component', () => {
       expect(signal).toBeDefined();
     });
 
-    it('should handle disconnectedCallback correctly', () => {
+    it('should handle disconnectedCallback correctly', async () => {
       const mockTemplate = {
         onDestroyed: vi.fn(),
       };
@@ -322,6 +322,7 @@ describe('Component', () => {
       instance.template = mockTemplate;
 
       instance.disconnectedCallback();
+      await Promise.resolve();
 
       // Instance template's onDestroyed should be called
       expect(mockTemplate.onDestroyed).toHaveBeenCalled();
@@ -561,7 +562,7 @@ describe('Component', () => {
       document.body.appendChild(el);
       await rendered;
       document.body.removeChild(el);
-      // synchronous in disconnectedCallback
+      await Promise.resolve();
       expect(onDestroyed).toHaveBeenCalledTimes(1);
       expect(heard).toHaveBeenCalledTimes(1);
     });
@@ -852,6 +853,7 @@ describe('Component', () => {
       const signal = el.template.abortSignal;
       expect(signal.aborted).toBe(false);
       document.body.removeChild(el);
+      await Promise.resolve();
       expect(signal.aborted).toBe(true);
     });
   });

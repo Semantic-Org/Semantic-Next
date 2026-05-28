@@ -209,12 +209,16 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   disconnectedCallback() {
-    if (this.template) {
+    if (!this.template) { return; }
+    // disconnect+connect in one task is a move, not a removal. defer
+    // teardown so block hydration relocating nested components is safe.
+    queueMicrotask(() => {
+      if (this.isConnected || !this.template) { return; }
       this.template.onDestroyed();
       delete this.template;
       delete this.component;
       delete this.dataContext;
-    }
+    });
   }
 
   attributeChangedCallback(attribute, oldValue, newValue) {

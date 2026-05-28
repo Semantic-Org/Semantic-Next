@@ -7,6 +7,8 @@
   external js-framework-benchmark runner and tachometer measure the same
   workload, so cross-tool numbers stay comparable.
 
+  Some bench are amplified to surpass the noise ceiling.
+
   Operations follow krausest's spec:
     run / runLots — create N rows
     replace        — set fresh N rows on a mounted component
@@ -17,13 +19,6 @@
     remove         — splice one row by id
     clear          — empty the list
 
-  Signals pinned to safety: 'reference' so the bench tracks the reference
-  fast path regardless of Signal.defaultSafety. Krausest publishes
-  best-case for reference-style frameworks; we match that contract.
-
-  Mutations use SUI-idiomatic helpers (push / map / removeItem / new-ref
-  set) instead of mutate-then-set-same-ref so reference equality fires
-  once per op — no spurious renderer fan-out.
 */
 import { defineComponent } from '@semantic-ui/component';
 import { Reaction } from '@semantic-ui/reactivity';
@@ -115,11 +110,11 @@ const signalOptions = { safety: 'reference' };
 defineComponent({
   tagName: 'bench-app',
   template: `<table><tbody>
-    {#each row in rows}
-      <tr class="{classIf (is row.id selected) 'danger'}">
+    {#each rows as row}
+      <tr class="{isSelected row.id}">
         <td class="col-md-1">{row.id}</td>
         <td class="col-md-4"><a class="lbl" data-id="{row.id}">{row.label}</a></td>
-        <td class="col-md-1"><a class="remove" data-id="{row.id}">x</a></td>
+        <td class="col-md-1"><a class="remove" data-id="{row.id}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></td>
         <td class="col-md-6"></td>
       </tr>
     {/each}
@@ -133,33 +128,39 @@ defineComponent({
       // bench access
       getRows: () => state.rows.peek(),
 
+      isSelected(id) {
+        return state.selected.get() === id ? 'danger' : '';
+      },
+
       run(n) {
         state.rows.set(buildData(n));
-        state.selected.set(0);
       },
       add(n) {
         state.rows.push(...buildData(n));
       },
       update() {
-        state.rows.map((row, i) => i % 10 === 0 ? { id: row.id, label: row.label + ' !!!' } : row);
+        const rows = state.rows.peek();
+        for (let i = 0, len = rows.length; i < len; i += 10) {
+          rows[i].label += ' !!!';
+        }
+        state.rows.notify();
       },
       select(id) {
         state.selected.set(id);
       },
       clear() {
         state.rows.set([]);
-        state.selected.set(0);
       },
       swapRows() {
-        // No swap helper exists; two setIndex calls would notify twice.
-        // Construct a new array ref so reference equality fires once.
+        // In-place swap + notify(): one notification, no array allocation.
+        // notify() fires regardless of reference equality, so unlike
+        // set(sameRef) it can't no-op under reference safety.
         const rows = state.rows.peek();
         if (rows.length > 998) {
-          const newRows = [...rows];
-          const tmp = newRows[1];
-          newRows[1] = newRows[newRows.length - 2];
-          newRows[newRows.length - 2] = tmp;
-          state.rows.set(newRows);
+          const tmp = rows[1];
+          rows[1] = rows[rows.length - 2];
+          rows[rows.length - 2] = tmp;
+          state.rows.notify();
         }
       },
       removeRow(id) {

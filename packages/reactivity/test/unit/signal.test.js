@@ -756,6 +756,27 @@ describe('Signal API', () => {
       expect(cloneSpy).toHaveBeenCalled();
       expect(signal.peek().cloned).toBe(true);
     });
+
+    it('default idFunction prefers id over _id', () => {
+      const signal = new Signal([]);
+      expect(signal.getID({ _id: 'mongo', id: 'app' })).toBe('app');
+    });
+
+    it('uses a per-instance idFunction override for getID', () => {
+      const signal = new Signal([], { idFunction: item => item.slug });
+      expect(signal.getID({ slug: 'x', id: 'y' })).toBe('x');
+    });
+
+    it('falls back to the static Signal.idFunction when no override is given', () => {
+      const original = Signal.idFunction;
+      Signal.idFunction = item => item.slug;
+      try {
+        expect(new Signal([]).getID({ slug: 'x', id: 'y' })).toBe('x');
+      }
+      finally {
+        Signal.idFunction = original;
+      }
+    });
   });
 
   /***********************************************

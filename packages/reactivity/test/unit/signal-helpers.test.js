@@ -341,6 +341,18 @@ SAFETY_MODES.forEach((safety) => {
         const sig = new Signal([], { safety });
         expect(sig.getID('plain')).toBe('plain');
       });
+
+      it('treats a falsy-but-present id as the id', () => {
+        const sig = new Signal([], { safety });
+        expect(sig.getID({ id: 0 })).toBe(0);
+        expect(sig.getID({ id: '' })).toBe('');
+      });
+
+      it('falls through fields only when the prior is null or undefined', () => {
+        const sig = new Signal([], { safety });
+        expect(sig.getID({ id: 0, _id: 'b' })).toBe(0);
+        expect(sig.getID({ id: null, _id: 'b' })).toBe('b');
+      });
     });
 
     describe('getIDs', () => {
@@ -355,6 +367,11 @@ SAFETY_MODES.forEach((safety) => {
       it('wraps a non-object item in a one-element array', () => {
         const sig = new Signal([], { safety });
         expect(sig.getIDs('plain')).toEqual(['plain']);
+      });
+
+      it('keeps a zero id rather than dropping it', () => {
+        const sig = new Signal([], { safety });
+        expect(sig.getIDs({ id: 0 })).toEqual([0]);
       });
     });
 
@@ -591,6 +608,19 @@ SAFETY_MODES.forEach((safety) => {
         sig.replaceItem('a', { id: 'a', v: 100 });
         expect(sig.raw()).toBe(before);
       });
+
+      it('is a no-op when no item matches the id', () => {
+        const sig = new Signal(
+          [{ id: 'a', v: 1 }, { id: 'b', v: 2 }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.replaceItem('missing', { id: 'missing', v: 99 });
+        Reaction.flush();
+        expect(sig.raw()).toEqual([{ id: 'a', v: 1 }, { id: 'b', v: 2 }]);
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
     });
 
     describe('removeItem', () => {
@@ -623,6 +653,19 @@ SAFETY_MODES.forEach((safety) => {
         const before = sig.raw();
         sig.removeItem('b');
         expect(sig.raw()).toBe(before);
+      });
+
+      it('is a no-op when no item matches the id (does not delete the last item)', () => {
+        const sig = new Signal(
+          [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.removeItem('missing');
+        Reaction.flush();
+        expect(sig.raw().map(i => i.id)).toEqual(['a', 'b', 'c']);
+        expect(sub.count).toBe(0);
+        sub.stop();
       });
     });
 

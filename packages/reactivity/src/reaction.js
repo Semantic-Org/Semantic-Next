@@ -7,7 +7,7 @@ export class Reaction {
   static create(callback, options = {}) {
     const reaction = new Reaction(callback, options);
     if (options.firstRun !== false) {
-      reaction.boundRun();
+      reaction.run();
     }
     return reaction;
   }
@@ -15,26 +15,25 @@ export class Reaction {
   constructor(callback, { context } = {}) {
     this.callback = callback;
     this.dependencies = new Set();
-    this.cleanups = [];
+    this.cleanups = null; // lazy — most reactions register none
     this.firstRun = true;
     this.active = true;
     if (context && isTracing()) {
       this.setContext(context);
     }
-    this.boundRun = this.run.bind(this);
   }
 
   // callbacks fire before next run() and on stop. use to scope inner reactions to parent
   onCleanup(callback) {
-    this.cleanups.push(callback);
+    (this.cleanups ??= []).push(callback);
   }
 
   fireCleanups() {
-    if (this.cleanups.length === 0) {
+    if (this.cleanups === null) {
       return;
     }
     const callbacks = this.cleanups;
-    this.cleanups = [];
+    this.cleanups = null;
     for (let i = 0; i < callbacks.length; i++) {
       callbacks[i]();
     }
@@ -70,7 +69,6 @@ export class Reaction {
   }
 
   run() {
-    // only run this reaction is marked as active
     if (!this.active) {
       return;
     }
