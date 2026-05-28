@@ -18,6 +18,15 @@ xx.xx.xxxx
 * **Feature** - Added `depend()` to register a signal as a dependency without reading the value
 * **Feature** - Added `notify()` to force-trigger subscribers bypassing the equality check
 * **Feature** - Added `hasDependents()` to check if any reactions are subscribed to a signal
+* **Feature** - Module-level functional surface — `signal`, `reaction`, `derive`, `computed`, `match`, `nonreactive`, `guard`, `afterFlush`, `flush`, `scheduleFlush`, `currentReaction`, `getSource` ship as named exports alongside the classes
+* **Feature** - Added `match(source, matchFn?)` — per-key reactive membership against a source signal, the perf primitive that backs `{#match}` template blocks (Solid's `createSelector` adapted)
+* **BREAKING** - Removed `Reaction.create`, `Reaction.current`, `Reaction.flush`, `Reaction.scheduleFlush`, `Reaction.afterFlush`, `Reaction.getSource`, `Reaction.nonreactive`, `Reaction.guard` — use the module-level exports
+* **BREAKING** - Removed `Signal.computed` — use the module-level `computed` export
+* **BREAKING** - Removed `signal.subscribe(cb)` — compose with `reaction(() => cb(signal.value))`
+* **BREAKING** - Renamed Signal options and statics — `equalityFunction` → `equality`, `cloneFunction` → `clone`, `idFunction` → `id`
+* **BREAKING** - Renamed `signal.getID` / `getIDs` / `hasID` to `getId` / `getIds` / `hasId`
+* **BREAKING** - `Signal.clone` default now applies the full cloning policy (preserves class instances at any depth via `clone(value, { preserveNonCloneable: true })`); user overrides via `Signal.clone = fn` or `new Signal(v, { clone: fn })` fully replace it
+* **BREAKING** - Removed `signal.clone(value)` prototype method — instance always carries its configured clone function in `this.clone`
 
 ### Renderer
 * **Bug** - Fixed property bindings (`.prop={expr}`) incorrectly defaulting to literal mode — properties now evaluate expressions like other bindings, use `{#fn expr}` to pass function references
