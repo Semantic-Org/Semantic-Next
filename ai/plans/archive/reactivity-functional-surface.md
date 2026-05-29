@@ -140,7 +140,7 @@ None substantive. All naming decisions resolved in the 2026-05-28 pair session.
 
 ## Dependencies
 
-**Blocks:** [Release 0.18.0](active/release-0-18-0.md). The 0.18.0 release ships this refactor as the last substantive API change before docs polish and tag.
+**Blocks:** [Release 0.18.0](../active/release-0-18-0.md). The 0.18.0 release ships this refactor as the last substantive API change before docs polish and tag.
 
 **Blocked by:** None.
 
@@ -184,6 +184,13 @@ One focused session, ~6-8h pair after preflight.
 
 Preflight + session: ~7-10h total in one sitting.
 
+## Completion
+
+- **Estimated:** 7-10h pair (preflight + one session)
+- **Actual:** ~3h execution wall-clock (12:48–15:38 ET, 2026-05-28), one sitting, on top of the same-day design session that resolved the API shape
+- **Completed:** 2026-05-28 ([PR #226](https://github.com/Semantic-Org/Semantic-Next/pull/226))
+- **Delta notes:** Came in under estimate because the design decisions (functional surface, naming, clone semantics, scheduler-statics call, `new Reaction()` auto-run unification) were settled in dialogue before and during implementation rather than discovered mid-migration, and the preflight test pass made the callsite migration mechanical. Two detours absorbed the slack: a `sed` rename shadowed `flush`/`reaction` locals and broke tests until renamed (lesson saved to memory), and the bench harness pins bench files from main, so removing the `Reaction` statics required a precursor compat-shim PR ([#227](https://github.com/Semantic-Org/Semantic-Next/pull/227)) before this branch's benches would run. Types deferred to the docs PR (intertwined with the `safety` doc updates). `setArrayProperty` split deferred to its own follow-up.
+
 ## Status
 
-`scoped` — design decisions made in pair session 2026-05-28. Ready to execute. All naming questions resolved; one deferred follow-up (`setArrayProperty`) explicitly out of scope.
+Complete. Shipped via [PR #226](https://github.com/Semantic-Org/Semantic-Next/pull/226). Functional surface, class-static removal, option/helper renames, `match` primitive, and helpers/ reorg all landed. Tachometer clean (2 faster, 0 slower). Follow-ups: docs + types migration (separate PR with `safety` doc work), `setArrayProperty` split.

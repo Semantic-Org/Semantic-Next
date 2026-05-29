@@ -1,4 +1,4 @@
-import { captureStack, isTracing } from './helpers.js';
+import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
 
 export class Dependency {

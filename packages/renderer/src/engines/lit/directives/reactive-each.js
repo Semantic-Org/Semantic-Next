@@ -3,7 +3,7 @@ import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { Reaction } from '@semantic-ui/reactivity';
+import { reaction } from '@semantic-ui/reactivity';
 import { arrayFromObject, clone, isClient, isEmpty, isEqual, isPlainObject } from '@semantic-ui/utils';
 
 import { getCollectionType, getEachData, getItemID } from '../../../shared/each.js';
@@ -38,7 +38,7 @@ export class ReactiveEachDirective extends AsyncDirective {
     let html = this.renderItems();
 
     if (isClient) {
-      this.reaction = Reaction.create((computation) => {
+      this.reaction = reaction((computation) => {
         if (!this.isConnected) {
           computation.stop();
           return;

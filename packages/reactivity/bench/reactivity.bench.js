@@ -32,7 +32,7 @@ describe('Reaction.run — cleanup 5 dependencies', () => {
 
   bench('optimized', () => {
     const deps = makeDeps(Dependency);
-    const r = new Reaction(() => {});
+    const r = new Reaction(() => {}, { firstRun: false });
     for (const d of deps) {
       r.dependencies.add(d);
       d.subscribers.add(r);
@@ -87,7 +87,7 @@ describe('Scheduler.flush — 20 pending reactions', () => {
 
   bench('optimized', () => {
     for (let i = 0; i < 20; i++) {
-      const r = new Reaction(() => {});
+      const r = new Reaction(() => {}, { firstRun: false });
       r.dependencies = new Set();
       Scheduler.pendingReactions.add(r);
     }
@@ -111,7 +111,7 @@ describe('Dependency.depend — in active reaction', () => {
   });
 
   bench('optimized', () => {
-    const r = new Reaction(() => {});
+    const r = new Reaction(() => {}, { firstRun: false });
     Scheduler.current = r;
     const dep = new Dependency();
     dep.depend();

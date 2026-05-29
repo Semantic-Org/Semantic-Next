@@ -1,4 +1,4 @@
-import { Reaction } from '@semantic-ui/reactivity';
+import { nonreactive } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
 import { each, extend, fatal, isPlainObject, isString } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
@@ -65,7 +65,7 @@ function unpackBlobData(node, data, evaluator) {
     each(node.data, (expr, key) => {
       blobData[key] = inItemContext
         ? evaluator.lookupExpressionValue(expr, data)
-        : Reaction.nonreactive(() => evaluator.lookupExpressionValue(expr, data));
+        : nonreactive(() => evaluator.lookupExpressionValue(expr, data));
     });
   }
   return blobData;
@@ -220,7 +220,7 @@ function mountSnippet({ node, data, region, scope, renderAST, isSVG, self }) {
 // through the lazy getters and register source-signal deps on the
 // caller's Reaction.
 //
-// Initialize is wrapped in Reaction.nonreactive so synchronous reads
+// Initialize is wrapped in nonreactive so synchronous reads
 // of data.foo from inside createComponent or onCreated do not register
 // source-signal deps on the parent's outer Reaction. Reads from later
 // binding-Reaction context still register normally — the wrap only
@@ -244,7 +244,7 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
     instance.data = record;
   }
 
-  Reaction.nonreactive(() => instance.initialize());
+  nonreactive(() => instance.initialize());
   return instance;
 }
 
@@ -315,7 +315,7 @@ function clearInstance(self, region) {
 // their own deps via the record at evaluation time.
 function renderInstance(instance, node, blobData) {
   if (node.reactiveData) {
-    return Reaction.nonreactive(() => instance.render(blobData));
+    return nonreactive(() => instance.render(blobData));
   }
   return instance.render(blobData);
 }

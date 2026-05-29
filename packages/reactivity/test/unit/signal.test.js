@@ -1,4 +1,4 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { computed, flush, Reaction, reaction, Signal } from '@semantic-ui/reactivity';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe.concurrent('Signal', () => {
@@ -37,15 +37,15 @@ describe.concurrent('Signal', () => {
       const isEqual = (a, b) => {
         return false;
       };
-      const signal = new Signal('initial', { equalityFunction: isEqual });
+      const signal = new Signal('initial', { equality: isEqual });
       signal.value = 'initial';
-      signal.subscribe(callback);
+      reaction(() => callback(signal.get()));
 
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
       signal.value = 'initial';
-      Reaction.flush();
+      flush();
 
       expect(callback).toHaveBeenCalledTimes(2);
     });
@@ -70,13 +70,13 @@ describe.concurrent('Signal', () => {
         },
       };
       const signal = new Signal(a);
-      signal.subscribe(callback);
+      reaction(() => callback(signal.get()));
 
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
       signal.value = b;
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
@@ -100,13 +100,13 @@ describe.concurrent('Signal', () => {
         },
       };
       const signal = new Signal(a);
-      signal.subscribe(callback);
+      reaction(() => callback(signal.get()));
 
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
       signal.value = b;
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
     });
   });
@@ -116,41 +116,34 @@ describe.concurrent('Signal', () => {
   *******************************/
 
   describe.concurrent('Reactivity', () => {
-    it('should notify subscribers on value change', async () => {
+    it('should notify reactions on value change', () => {
       const callback = vi.fn();
-
-      const expectReaction = expect.objectContaining({
-        stop: expect.any(Function),
-      });
-
       const signal = new Signal('initial');
-      signal.subscribe(callback);
-      Reaction.flush();
+      reaction(() => callback(signal.get()));
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
-      expect(callback).toHaveBeenCalledWith('initial', expectReaction);
+      expect(callback).toHaveBeenLastCalledWith('initial');
 
       signal.value = 'updated';
-      Reaction.flush();
-
+      flush();
       expect(callback).toHaveBeenCalledTimes(2);
-      expect(callback).toHaveBeenCalledWith('updated', expectReaction);
+      expect(callback).toHaveBeenLastCalledWith('updated');
 
       signal.set('final');
-      Reaction.flush();
-
+      flush();
       expect(callback).toHaveBeenCalledTimes(3);
-      expect(callback).toHaveBeenCalledWith('final', expectReaction);
+      expect(callback).toHaveBeenLastCalledWith('final');
     });
 
     it('Peek should not trigger reactivity', () => {
       const signal = new Signal('anything');
-      const reaction = vi.fn((comp) => {
+      const cb = vi.fn((comp) => {
         signal.peek(); // not reactive dependency
       });
-      Reaction.create(reaction);
+      reaction(cb);
 
       signal.set('anything else');
-      expect(reaction).toHaveBeenCalledTimes(1);
+      expect(cb).toHaveBeenCalledTimes(1);
     });
 
     it('Reactive variables should trigger nested dependencies', () => {
@@ -163,9 +156,9 @@ describe.concurrent('Signal', () => {
       const computation2 = () => {
         value3.set(value2.get());
       };
-      Reaction.create(computation1);
-      Reaction.create(computation2);
-      Reaction.flush();
+      reaction(computation1);
+      reaction(computation2);
+      flush();
       expect(value3.get()).toEqual(1);
     });
   });
@@ -177,15 +170,15 @@ describe.concurrent('Signal', () => {
   describe.concurrent('Dependency Management', () => {
     it('depend should register as dependency without reading value', () => {
       const signal = new Signal('secret');
-      const reaction = vi.fn(() => {
+      const cb = vi.fn(() => {
         signal.depend();
       });
-      Reaction.create(reaction);
-      expect(reaction).toHaveBeenCalledTimes(1);
+      reaction(cb);
+      expect(cb).toHaveBeenCalledTimes(1);
 
       signal.set('updated');
-      Reaction.flush();
-      expect(reaction).toHaveBeenCalledTimes(2);
+      flush();
+      expect(cb).toHaveBeenCalledTimes(2);
     });
 
     it('depend should not register dependency outside reactive context', () => {
@@ -199,11 +192,11 @@ describe.concurrent('Signal', () => {
       const callback = vi.fn(() => {
         signal.get();
       });
-      Reaction.create(callback);
+      reaction(callback);
       expect(callback).toHaveBeenCalledTimes(1);
 
       signal.notify();
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(2);
       expect(signal.peek()).toBe('stable');
     });
@@ -213,14 +206,14 @@ describe.concurrent('Signal', () => {
       const callback = vi.fn(() => {
         signal.get();
       });
-      Reaction.create(callback);
+      reaction(callback);
 
       signal.set(42);
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
       signal.notify();
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(2);
     });
 
@@ -231,7 +224,7 @@ describe.concurrent('Signal', () => {
 
     it('hasDependents should return true when inside a reaction', () => {
       const signal = new Signal(0);
-      Reaction.create(() => {
+      reaction(() => {
         signal.get();
       });
       expect(signal.hasDependents()).toBe(true);
@@ -239,11 +232,11 @@ describe.concurrent('Signal', () => {
 
     it('hasDependents should return false after reaction stops', () => {
       const signal = new Signal(0);
-      const reaction = Reaction.create(() => {
+      const r = reaction(() => {
         signal.get();
       });
       expect(signal.hasDependents()).toBe(true);
-      reaction.stop();
+      r.stop();
       expect(signal.hasDependents()).toBe(false);
     });
   });
@@ -256,13 +249,13 @@ describe.concurrent('Signal', () => {
       const outerCallback = vi.fn();
       const outerVar = new Signal(innerVar);
 
-      outerVar.subscribe(outerCallback);
-      Reaction.flush();
+      reaction(() => outerCallback(outerVar.get()));
+      flush();
       expect(outerCallback).toHaveBeenCalledTimes(1);
 
-      innerVar.subscribe(innerCallback);
+      reaction(() => innerCallback(innerVar.get()));
       innerVar.set(2);
-      Reaction.flush();
+      flush();
 
       expect(innerCallback).toHaveBeenCalledTimes(2);
     });
@@ -279,21 +272,21 @@ describe.concurrent('Signal', () => {
       const innerVar1 = new Signal(data1, { safety: 'clone' });
       const innerVar2 = new Signal(data2, { safety: 'clone' });
 
-      innerVar1.subscribe(innerCallback1);
-      innerVar2.subscribe(innerCallback2);
+      reaction(() => innerCallback1(innerVar1.get()));
+      reaction(() => innerCallback2(innerVar2.get()));
 
       const outerVar = new Signal([]);
-      outerVar.subscribe(outerCallback);
+      reaction(() => outerCallback(outerVar.get()));
 
-      Reaction.flush();
+      flush();
       expect(outerCallback).toHaveBeenCalledTimes(1);
 
       outerVar.push(innerVar1);
-      Reaction.flush();
+      flush();
       expect(outerCallback).toHaveBeenCalledTimes(2);
 
       outerVar.push(innerVar2);
-      Reaction.flush();
+      flush();
       expect(outerCallback).toHaveBeenCalledTimes(3);
 
       innerVar1.setProperty('text', 'hello world');
@@ -319,23 +312,23 @@ describe.concurrent('Signal', () => {
       expect(doubled.get()).toBe(20);
 
       source.set(15);
-      Reaction.flush();
+      flush();
       expect(doubled.get()).toBe(30);
     });
 
     it('should create a computed signal from multiple sources', () => {
       const a = new Signal(1);
       const b = new Signal(2);
-      const sum = Signal.computed(() => a.get() + b.get());
+      const sum = computed(() => a.get() + b.get());
 
       expect(sum.get()).toBe(3);
 
       a.set(5);
-      Reaction.flush();
+      flush();
       expect(sum.get()).toBe(7);
 
       b.set(10);
-      Reaction.flush();
+      flush();
       expect(sum.get()).toBe(15);
     });
 
@@ -347,11 +340,11 @@ describe.concurrent('Signal', () => {
       expect(count.get()).toBe(3);
 
       items.push(4);
-      Reaction.flush();
+      flush();
       expect(count.get()).toBe(4);
 
       items.splice(0, 2);
-      Reaction.flush();
+      flush();
       expect(count.get()).toBe(2);
     });
 
@@ -359,23 +352,23 @@ describe.concurrent('Signal', () => {
       const a = new Signal(1);
       const b = new Signal(2);
       const c = new Signal(3);
-      const sum = Signal.computed(() => a.get() + b.get() + c.get());
+      const sum = computed(() => a.get() + b.get() + c.get());
 
       expect(sum.get()).toBe(6);
 
       // Change first dependency
       a.set(10);
-      Reaction.flush();
+      flush();
       expect(sum.get()).toBe(15);
 
       // Change second dependency
       b.set(20);
-      Reaction.flush();
+      flush();
       expect(sum.get()).toBe(33);
 
       // Change third dependency
       c.set(30);
-      Reaction.flush();
+      flush();
       expect(sum.get()).toBe(60);
     });
 
@@ -387,18 +380,18 @@ describe.concurrent('Signal', () => {
       let reactionCount = 0;
       let lastValue = null;
 
-      Reaction.create(() => {
+      reaction(() => {
         lastValue = doubled.get();
         reactionCount++;
       });
 
-      Reaction.flush();
+      flush();
       expect(reactionCount).toBe(1);
       expect(lastValue).toBe(20);
 
       // Changing base signal should trigger reaction on derived
       base.set(15);
-      Reaction.flush();
+      flush();
       expect(reactionCount).toBe(2);
       expect(lastValue).toBe(30);
     });
@@ -413,7 +406,7 @@ describe.concurrent('Signal', () => {
 
       // Directly set derived signal
       derived.set(100);
-      Reaction.flush();
+      flush();
 
       // Derived value changes
       expect(derived.get()).toBe(100);
@@ -422,7 +415,7 @@ describe.concurrent('Signal', () => {
 
       // Next base change will recalculate derived
       base.set(5);
-      Reaction.flush();
+      flush();
       expect(derived.get()).toBe(10);
     });
 
@@ -430,23 +423,26 @@ describe.concurrent('Signal', () => {
     it('should not trigger updates when computed value does not change', () => {
       const a = new Signal(10);
       const b = new Signal(20);
-      const isPositive = Signal.computed(() => a.get() > 0);
+      const isPositive = computed(() => a.get() > 0);
 
       let updateCount = 0;
-      isPositive.subscribe(() => updateCount++);
+      reaction(() => {
+        isPositive.get();
+        updateCount++;
+      });
 
-      Reaction.flush();
+      flush();
       expect(updateCount).toBe(1);
       expect(isPositive.get()).toBe(true);
 
       // Change that doesn't affect result
       a.set(5); // Still positive
-      Reaction.flush();
+      flush();
       expect(updateCount).toBe(1); // No update, value still true
 
       // Change that affects result
       a.set(-5);
-      Reaction.flush();
+      flush();
       expect(updateCount).toBe(2); // Update triggered
       expect(isPositive.get()).toBe(false);
     });
@@ -456,12 +452,12 @@ describe.concurrent('Signal', () => {
       const base = new Signal(2);
       const doubled = base.derive(val => val * 2);
       const quadrupled = doubled.derive(val => val * 2);
-      const final = Signal.computed(() => quadrupled.get() + 1);
+      const final = computed(() => quadrupled.get() + 1);
 
       expect(final.get()).toBe(9); // 2 * 2 * 2 + 1
 
       base.set(3);
-      Reaction.flush();
+      flush();
       expect(doubled.get()).toBe(6);
       expect(quadrupled.get()).toBe(12);
       expect(final.get()).toBe(13);
@@ -488,13 +484,13 @@ describe.concurrent('Signal', () => {
 
       // Add item
       items.push({ id: 4, price: 15, inStock: true });
-      Reaction.flush();
+      flush();
       expect(totalValue.get()).toBe(55);
       expect(inStockCount.get()).toBe(3);
 
       // Modify item property
       items.setArrayProperty(1, 'inStock', true);
-      Reaction.flush();
+      flush();
       expect(totalValue.get()).toBe(75);
       expect(inStockCount.get()).toBe(4);
     });
@@ -507,7 +503,7 @@ describe.concurrent('Signal', () => {
       const derived = source.derive(
         obj => ({ doubled: obj.count * 2 }),
         {
-          equalityFunction: (a, b) => a?.doubled === b?.doubled,
+          equality: (a, b) => a?.doubled === b?.doubled,
           safety: 'reference',
         },
       );
@@ -525,7 +521,7 @@ describe.concurrent('Signal', () => {
       const a = new Signal(10);
       const b = new Signal(20);
 
-      const result = Signal.computed(() => {
+      const result = computed(() => {
         return useA.get() ? a.get() : b.get();
       });
 
@@ -533,17 +529,17 @@ describe.concurrent('Signal', () => {
 
       // Change unused signal - should still trigger update due to dependency tracking
       b.set(30);
-      Reaction.flush();
+      flush();
       expect(result.get()).toBe(10); // Still using 'a'
 
       // Switch condition
       useA.set(false);
-      Reaction.flush();
+      flush();
       expect(result.get()).toBe(30); // Now using 'b'
 
       // Now changes to 'a' should still trigger
       a.set(50);
-      Reaction.flush();
+      flush();
       expect(result.get()).toBe(30); // Still using 'b'
     });
 
@@ -555,11 +551,11 @@ describe.concurrent('Signal', () => {
       expect(displayName.get()).toBe('Alice (30)');
 
       user.setProperty('name', 'Bob');
-      Reaction.flush();
+      flush();
       expect(displayName.get()).toBe('Bob (30)');
 
       user.set({ name: 'Charlie', age: 25 });
-      Reaction.flush();
+      flush();
       expect(displayName.get()).toBe('Charlie (25)');
     });
 
@@ -570,7 +566,7 @@ describe.concurrent('Signal', () => {
       const taxRate = new Signal(0.08);
       const shipping = new Signal(5.00);
 
-      const total = Signal.computed(() => {
+      const total = computed(() => {
         const subtotal = quantity.get() * price.get();
         const tax = subtotal * taxRate.get();
         return subtotal + tax + shipping.get();
@@ -579,7 +575,7 @@ describe.concurrent('Signal', () => {
       expect(total.get()).toBeCloseTo(64.346, 2);
 
       quantity.set(3);
-      Reaction.flush();
+      flush();
       expect(total.get()).toBeCloseTo(40.608, 2);
     });
 
@@ -599,16 +595,16 @@ describe.concurrent('Signal', () => {
     it('should transition between null and object values', () => {
       const callback = vi.fn();
       const signal = new Signal(null);
-      signal.subscribe(callback);
-      Reaction.flush();
+      reaction(() => callback(signal.get()));
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
       signal.set({ name: 'Alice' });
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(2);
 
       signal.set(null);
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(3);
       expect(signal.get()).toBe(null);
     });
@@ -644,13 +640,13 @@ describe.concurrent('Signal', () => {
 
     it('derive inside a parent reaction does not accumulate subscribers across re-runs', () => {
       const source = new Signal(1);
-      Reaction.create(() => {
+      reaction(() => {
         source.derive(v => v * 2);
       });
 
       for (let i = 1; i <= 5; i++) {
         source.set(i);
-        Reaction.flush();
+        flush();
       }
 
       // 1 subscriber: the parent reaction. Each derive() inside spawns an
@@ -659,16 +655,30 @@ describe.concurrent('Signal', () => {
       expect(source.dependency.subscribers.size).toBe(1);
     });
 
+    it('parent.stop() cascades to the derived internal reaction when derive is called inside a parent', () => {
+      const source = new Signal(1);
+      const outer = reaction(() => {
+        source.derive(v => v * 2);
+      });
+
+      // parent registered itself + spawned a derive reaction subscribing to source
+      expect(source.dependency.subscribers.size).toBe(1);
+
+      outer.stop();
+      // both the parent's direct dep and the derive's internal reaction are gone
+      expect(source.dependency.subscribers.size).toBe(0);
+    });
+
     it('Signal.computed inside a parent reaction does not accumulate subscribers across re-runs', () => {
       const a = new Signal(1);
       const b = new Signal(10);
-      Reaction.create(() => {
-        Signal.computed(() => a.get() + b.get());
+      reaction(() => {
+        computed(() => a.get() + b.get());
       });
 
       for (let i = 1; i <= 5; i++) {
         a.set(i);
-        Reaction.flush();
+        flush();
       }
 
       expect(a.dependency.subscribers.size).toBe(1);
@@ -730,48 +740,48 @@ describe('Signal API', () => {
       const callback = vi.fn();
       const user = new Signal(
         { id: 1, name: 'Alice', lastLogin: '2023-01-01' },
-        { equalityFunction: (oldUser, newUser) => oldUser.id === newUser.id },
+        { equality: (oldUser, newUser) => oldUser.id === newUser.id },
       );
-      user.subscribe(callback);
-      Reaction.flush();
+      reaction(() => callback(user.get()));
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
       // Different id — change
       user.set({ id: 2, name: 'Bob', lastLogin: '2023-01-02' });
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(2);
 
       // Same id — no fire even though name changed
       user.set({ id: 2, name: 'Robert', lastLogin: '2023-01-03' });
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(2);
     });
 
     it('uses a custom clone function when provided under clone safety', () => {
       const cloneSpy = vi.fn(value => ({ ...value, cloned: true }));
-      const signal = new Signal({ name: 'Alice' }, { safety: 'clone', cloneFunction: cloneSpy });
+      const signal = new Signal({ name: 'Alice' }, { safety: 'clone', clone: cloneSpy });
       expect(cloneSpy).toHaveBeenCalled();
       expect(signal.peek().cloned).toBe(true);
     });
 
-    it('default idFunction prefers id over _id', () => {
+    it('default id prefers id over _id', () => {
       const signal = new Signal([]);
-      expect(signal.getID({ _id: 'mongo', id: 'app' })).toBe('app');
+      expect(signal.getId({ _id: 'mongo', id: 'app' })).toBe('app');
     });
 
-    it('uses a per-instance idFunction override for getID', () => {
-      const signal = new Signal([], { idFunction: item => item.slug });
-      expect(signal.getID({ slug: 'x', id: 'y' })).toBe('x');
+    it('uses a per-instance id override for getId', () => {
+      const signal = new Signal([], { id: item => item.slug });
+      expect(signal.getId({ slug: 'x', id: 'y' })).toBe('x');
     });
 
-    it('falls back to the static Signal.idFunction when no override is given', () => {
-      const original = Signal.idFunction;
-      Signal.idFunction = item => item.slug;
+    it('falls back to the static Signal.id when no override is given', () => {
+      const original = Signal.id;
+      Signal.id = item => item.slug;
       try {
-        expect(new Signal([]).getID({ slug: 'x', id: 'y' })).toBe('x');
+        expect(new Signal([]).getId({ slug: 'x', id: 'y' })).toBe('x');
       }
       finally {
-        Signal.idFunction = original;
+        Signal.id = original;
       }
     });
   });
@@ -784,11 +794,11 @@ describe('Signal API', () => {
     it('reading inside a Reaction creates a dependency so changes re-run the reaction', () => {
       const counter = new Signal(0);
       const cb = vi.fn(() => counter.get());
-      Reaction.create(cb);
+      reaction(cb);
       expect(cb).toHaveBeenCalledTimes(1);
 
       counter.set(1);
-      Reaction.flush();
+      flush();
       expect(cb).toHaveBeenCalledTimes(2);
     });
 
@@ -812,36 +822,36 @@ describe('Signal API', () => {
     it('writes a new primitive value and triggers subscribers', () => {
       const callback = vi.fn();
       const counter = new Signal(0);
-      counter.subscribe(callback);
-      Reaction.flush();
+      reaction(() => callback(counter.get()));
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
       counter.set(1);
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(2);
     });
 
     it('skips re-firing subscribers when the new value is equal under default deep equality', () => {
       const callback = vi.fn();
       const signal = new Signal({ a: 1, b: 2 });
-      signal.subscribe(callback);
-      Reaction.flush();
+      reaction(() => callback(signal.get()));
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
       signal.set({ a: 1, b: 2 });
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
     it('treats NaN as equal to NaN (Object.is-style) under default deep equality', () => {
       const callback = vi.fn();
       const signal = new Signal(NaN);
-      signal.subscribe(callback);
-      Reaction.flush();
+      reaction(() => callback(signal.get()));
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
       signal.set(NaN);
-      Reaction.flush();
+      flush();
       // Documented contract: set with equal value does not re-fire.
       // For NaN, the framework's deep equality must recognise NaN === NaN
       // or the signal will spuriously re-fire whenever NaN is re-written.
@@ -861,17 +871,17 @@ describe('Signal API', () => {
         counter.get();
         multiplier.peek();
       });
-      Reaction.create(cb);
+      reaction(cb);
       expect(cb).toHaveBeenCalledTimes(1);
 
       // Changing the peeked signal must NOT re-fire the reaction
       multiplier.set(10);
-      Reaction.flush();
+      flush();
       expect(cb).toHaveBeenCalledTimes(1);
 
       // But changing the dep'd signal still does
       counter.set(5);
-      Reaction.flush();
+      flush();
       expect(cb).toHaveBeenCalledTimes(2);
     });
 
@@ -884,49 +894,6 @@ describe('Signal API', () => {
   });
 
   /***********************************************
-   * subscribe() — callback observer
-   ***********************************************/
-
-  describe('subscribe()', () => {
-    it('runs the callback immediately on first subscribe so observers see the current value', () => {
-      const callback = vi.fn();
-      const signal = new Signal('hi');
-      signal.subscribe(callback);
-      // First-run happens synchronously inside Reaction.create
-      expect(callback).toHaveBeenCalledTimes(1);
-      expect(callback.mock.calls[0][0]).toBe('hi');
-    });
-
-    it('passes the new value and a reaction handle to the callback on every fire', () => {
-      const callback = vi.fn();
-      const signal = new Signal('first');
-      signal.subscribe(callback);
-      Reaction.flush();
-
-      signal.set('second');
-      Reaction.flush();
-
-      const lastCall = callback.mock.calls.at(-1);
-      expect(lastCall[0]).toBe('second');
-      expect(lastCall[1]).toHaveProperty('stop');
-      expect(typeof lastCall[1].stop).toBe('function');
-    });
-
-    it('returns a handle whose stop() prevents further fires', () => {
-      const callback = vi.fn();
-      const signal = new Signal(0);
-      const handle = signal.subscribe(callback);
-      Reaction.flush();
-      expect(callback).toHaveBeenCalledTimes(1);
-
-      handle.stop();
-      signal.set(1);
-      Reaction.flush();
-      expect(callback).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  /***********************************************
    * notify() — force-fire bypassing equality
    ***********************************************/
 
@@ -935,14 +902,14 @@ describe('Signal API', () => {
       // mutate the underlying object via peek(), then notify() so subscribers re-run.
       const callback = vi.fn();
       const data = new Signal({ count: 0 });
-      Reaction.create(() => callback(data.get().count));
-      Reaction.flush();
+      reaction(() => callback(data.get().count));
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenLastCalledWith(0);
 
       data.raw().count = 5;
       data.notify();
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(2);
       expect(callback).toHaveBeenLastCalledWith(5);
     });
@@ -962,14 +929,14 @@ describe('Signal API', () => {
     it('registers a dependency in the current reaction so changes re-fire it', () => {
       const theme = new Signal({ mode: 'dark' });
       const callback = vi.fn();
-      Reaction.create(() => {
+      reaction(() => {
         theme.depend();
         callback();
       });
       expect(callback).toHaveBeenCalledTimes(1);
 
       theme.set({ mode: 'light' });
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(2);
     });
 
@@ -992,18 +959,18 @@ describe('Signal API', () => {
 
     it('returns true while a reaction depends on the signal, false after it stops', () => {
       const signal = new Signal(0);
-      const reaction = Reaction.create(() => signal.get());
+      const r = reaction(() => signal.get());
       expect(signal.hasDependents()).toBe(true);
-      reaction.stop();
+      r.stop();
       expect(signal.hasDependents()).toBe(false);
     });
 
     it('returns false after the only subscribing reaction is stopped, even after notify()', () => {
       const signal = new Signal(0);
-      const reaction = Reaction.create(() => signal.get());
-      reaction.stop();
+      const r = reaction(() => signal.get());
+      r.stop();
       signal.notify();
-      Reaction.flush();
+      flush();
       expect(signal.hasDependents()).toBe(false);
     });
   });
@@ -1024,7 +991,7 @@ describe('Signal API', () => {
       const numbers = new Signal([1, 2, 3]);
       const count = numbers.derive(arr => arr.length);
       numbers.push(4);
-      Reaction.flush();
+      flush();
       expect(count.get()).toBe(4);
     });
 
@@ -1033,7 +1000,7 @@ describe('Signal API', () => {
       const doubled = base.derive(v => v * 2);
       const quadrupled = doubled.derive(v => v * 2);
       base.set(3);
-      Reaction.flush();
+      flush();
       expect(doubled.get()).toBe(6);
       expect(quadrupled.get()).toBe(12);
     });
@@ -1043,11 +1010,11 @@ describe('Signal API', () => {
    * Signal.computed — multi-source computation
    ***********************************************/
 
-  describe('Signal.computed', () => {
+  describe('computed()', () => {
     it('returns a Signal whose value is the result of the compute function', () => {
       const firstName = new Signal('John');
       const lastName = new Signal('Doe');
-      const fullName = Signal.computed(() => `${firstName.get()} ${lastName.get()}`);
+      const fullName = computed(() => `${firstName.get()} ${lastName.get()}`);
       expect(fullName).toBeInstanceOf(Signal);
       expect(fullName.get()).toBe('John Doe');
     });
@@ -1055,30 +1022,79 @@ describe('Signal API', () => {
     it('updates when ANY tracked dependency changes', () => {
       const a = new Signal(1);
       const b = new Signal(2);
-      const sum = Signal.computed(() => a.get() + b.get());
+      const sum = computed(() => a.get() + b.get());
       expect(sum.get()).toBe(3);
 
       a.set(10);
-      Reaction.flush();
+      flush();
       expect(sum.get()).toBe(12);
 
       b.set(20);
-      Reaction.flush();
+      flush();
       expect(sum.get()).toBe(30);
     });
 
     it('a reaction observing the computed re-runs when an upstream dependency changes', () => {
       const a = new Signal(1);
       const b = new Signal(2);
-      const sum = Signal.computed(() => a.get() + b.get());
+      const sum = computed(() => a.get() + b.get());
       const observed = vi.fn();
-      Reaction.create(() => observed(sum.get()));
+      reaction(() => observed(sum.get()));
       expect(observed).toHaveBeenCalledTimes(1);
 
       a.set(10);
-      Reaction.flush();
+      flush();
       expect(observed).toHaveBeenCalledTimes(2);
       expect(observed).toHaveBeenLastCalledWith(12);
+    });
+  });
+
+  /***********************************************
+   * Static defaults, global escape hatch
+   ***********************************************/
+
+  describe('static defaults', () => {
+    it('falls back to Signal.equality when no per-instance equality is provided', () => {
+      const original = Signal.equality;
+      const customEq = vi.fn(() => true);
+      Signal.equality = customEq;
+      try {
+        const sig = new Signal({ a: 1 });
+        // any set() should consult customEq and short-circuit (returns true)
+        sig.set({ a: 2 });
+        expect(customEq).toHaveBeenCalled();
+        expect(sig.peek()).toEqual({ a: 1 });
+      }
+      finally {
+        Signal.equality = original;
+      }
+    });
+
+    it('snapshots Signal.equality at construction so later static changes do not affect existing signals', () => {
+      // The renderer's reactive-context.js relies on this contract.
+      const original = Signal.equality;
+      const customEq = (a, b) => a?.id === b?.id;
+      Signal.equality = customEq;
+      const sig = new Signal({ id: 1, label: 'one' });
+      Signal.equality = original; // restore mid-test
+
+      // sig still uses customEq via its own this.equality
+      sig.set({ id: 1, label: 'two' });
+      expect(sig.peek().label).toBe('one');
+    });
+
+    it('falls back to Signal.clone under clone safety when no per-instance clone is provided', () => {
+      const original = Signal.clone;
+      const customClone = vi.fn(value => ({ ...value, viaStatic: true }));
+      Signal.clone = customClone;
+      try {
+        const sig = new Signal({ name: 'x' }, { safety: 'clone' });
+        expect(customClone).toHaveBeenCalled();
+        expect(sig.peek().viaStatic).toBe(true);
+      }
+      finally {
+        Signal.clone = original;
+      }
     });
   });
 
@@ -1097,7 +1113,7 @@ describe('Signal API', () => {
     });
 
     it('matches computed signals returned by Signal.computed', () => {
-      expect(Signal.computed(() => 1) instanceof Signal).toBe(true);
+      expect(computed(() => 1) instanceof Signal).toBe(true);
     });
 
     it('does not match plain objects or primitives', () => {
