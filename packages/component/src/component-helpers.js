@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { Signal } from '@semantic-ui/reactivity';
+import { signal } from '@semantic-ui/reactivity';
 import {
   camelToKebab,
   each,
@@ -251,26 +251,26 @@ export function createSettingsProxy(el) {
   return new Proxy({}, {
     get: (target, property) => {
       const setting = el[property] ?? el.defaultSettings[property];
-      let signal = el.settingsVars.get(property);
-      if (!signal) {
-        signal = new Signal(setting);
-        el.settingsVars.set(property, signal);
+      let settingSignal = el.settingsVars.get(property);
+      if (!settingSignal) {
+        settingSignal = signal(setting);
+        el.settingsVars.set(property, settingSignal);
       }
       else {
-        signal.set(setting);
+        settingSignal.set(setting);
       }
-      signal.depend();
+      settingSignal.depend();
       return setting;
     },
     set: (target, property, value, receiver) => {
       el.setSetting(property, value);
-      let signal = el.settingsVars.get(property);
-      if (signal) {
-        signal.set(value);
+      let settingSignal = el.settingsVars.get(property);
+      if (settingSignal) {
+        settingSignal.set(value);
       }
       else {
-        signal = new Signal(value);
-        el.settingsVars.set(property, signal);
+        settingSignal = signal(value);
+        el.settingsVars.set(property, settingSignal);
       }
       return true;
     },

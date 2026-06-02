@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { afterFlush, flush, nonreactive, reaction, Signal } from '@semantic-ui/reactivity';
+import { afterFlush, flush, nonreactive, reaction, signal } from '@semantic-ui/reactivity';
 import {
   any,
   assignInPlace,
@@ -154,11 +154,11 @@ export const Template = class Template {
       const initialValue = getInitialValue(config, name);
       if (config?.options) {
         // complex config { counter: { value: 0, options: { equality }}}
-        reactiveState[name] = new Signal(initialValue, config.options);
+        reactiveState[name] = signal(initialValue, config.options);
       }
       else {
         // simple config i.e. { counter: 0 }
-        reactiveState[name] = new Signal(initialValue);
+        reactiveState[name] = signal(initialValue);
       }
     });
     return reactiveState;
@@ -882,7 +882,7 @@ export const Template = class Template {
       $: this.$.bind(this),
       $$: this.$$.bind(this),
       reaction: this.reaction.bind(this),
-      signal: this.signal.bind(this),
+      signal: signal,
       interval: this.createInterval.bind(this),
       timeout: this.createTimeout.bind(this),
       abortSignal: this.abortSignal,
@@ -1003,12 +1003,12 @@ export const Template = class Template {
         }
         // own settings first
         if (property in target) {
-          let signal = template.settingsVars.get(property);
-          if (!signal) {
-            signal = new Signal(target[property], { safety: 'reference' });
-            template.settingsVars.set(property, signal);
+          let settingSignal = template.settingsVars.get(property);
+          if (!settingSignal) {
+            settingSignal = signal(target[property], { safety: 'reference' });
+            template.settingsVars.set(property, settingSignal);
           }
-          signal.get(); // track dependency
+          settingSignal.get(); // track dependency
           return target[property];
         }
         // fall back to parent web component settings
@@ -1018,13 +1018,13 @@ export const Template = class Template {
       },
       set: (target, property, value) => {
         target[property] = value;
-        let signal = template.settingsVars.get(property);
-        if (signal) {
-          signal.set(value);
+        let settingSignal = template.settingsVars.get(property);
+        if (settingSignal) {
+          settingSignal.set(value);
         }
         else {
-          signal = new Signal(value, { safety: 'reference' });
-          template.settingsVars.set(property, signal);
+          settingSignal = signal(value, { safety: 'reference' });
+          template.settingsVars.set(property, settingSignal);
         }
         return true;
       },
@@ -1066,10 +1066,6 @@ export const Template = class Template {
   // and be removed when the template is destroyed
   reaction(cb) {
     this.reactions.push(reaction(cb));
-  }
-
-  signal(value, options) {
-    return new Signal(value, options);
   }
 
   clearReactions() {
