@@ -1,6 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
 import { $ } from '@semantic-ui/query';
-import { Reaction } from '@semantic-ui/reactivity';
+import { flush, reaction } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES } from './test-utils.js';
 
@@ -365,7 +365,7 @@ RENDERING_ENGINES.forEach(engine => {
 
         const updated = $(el).onNext('updated');
         el.settings.color = 'red';
-        Reaction.flush();
+        flush();
         el.requestUpdate();
         await updated;
 
@@ -462,7 +462,7 @@ RENDERING_ENGINES.forEach(engine => {
         $(el).on('updated', () => fireCount++);
 
         el.component.increment();
-        Reaction.flush();
+        flush();
 
         // Wait long enough for any stray setTimeout to fire
         await new Promise(r => setTimeout(r, 100));
@@ -485,7 +485,7 @@ RENDERING_ENGINES.forEach(engine => {
         $(el).on('updated', () => fireCount++);
 
         el.component.setColor('red');
-        Reaction.flush();
+        flush();
 
         await new Promise(r => setTimeout(r, 100));
 
@@ -517,7 +517,7 @@ RENDERING_ENGINES.forEach(engine => {
         };
 
         el.component.increment();
-        Reaction.flush();
+        flush();
         await new Promise(r => setTimeout(r, 100));
 
         expect(bumpCount).toBe(0);
@@ -542,7 +542,7 @@ RENDERING_ENGINES.forEach(engine => {
         };
 
         el.component.setColor('red');
-        Reaction.flush();
+        flush();
         await new Promise(r => setTimeout(r, 100));
 
         expect(bumpCount).toBe(1);

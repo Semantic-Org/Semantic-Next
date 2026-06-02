@@ -30,10 +30,10 @@ import { UNWRAP } from '../../helpers.js';
   We deliberately do not allocate a full Signal per key: Signal wraps
   a Dependency. The wrapper allocation dominates at
   scale where many records each carry several keys. Equality dedup is
-  preserved: `Signal.equalityFunction` is snapshotted at construction,
+  preserved: `Signal.equality` is snapshotted at construction,
   matching Signal's per-instance snapshot semantics so the inlined
   dedup behaves identically to a Signal.set call on the same static.
-  Late overrides of `Signal.equalityFunction` after the RDC is
+  Late overrides of `Signal.equality` after the RDC is
   constructed will not retroactively retarget — same blind spot Signal
   itself has.
 
@@ -263,12 +263,12 @@ export class ReactiveDataContext {
     if (asKey !== null) {
       this.fieldDeps = Object.create(null);
     }
-    // Snapshot Signal.equalityFunction at construction. Mirrors Signal's
+    // Snapshot Signal.equality at construction. Mirrors Signal's
     // own per-instance snapshot semantics — late overrides of the static
     // do not retroactively retarget already-constructed instances. If
-    // userland breaks Signal.equalityFunction after this RDC is live,
+    // userland breaks Signal.equality after this RDC is live,
     // both Signal and RDC fail the same way; no divergence.
-    this.equalityFunction = Signal.equalityFunction;
+    this.equality = Signal.equality;
     // Lazy: only a reader falling through on the unsealed path allocates it
     // (spread-mode late keys). as-mode reads run post-seal, so it stays null —
     // the per-row saving. A writer fires it only if a reader already created it
@@ -296,7 +296,7 @@ export class ReactiveDataContext {
       return;
     }
     const old = this.values[key];
-    if (this.equalityFunction(old, value)) { return; }
+    if (this.equality(old, value)) { return; }
     this.values[key] = value;
     const dep = this.deps[key];
     if (dep !== undefined) { dep.changed(); }

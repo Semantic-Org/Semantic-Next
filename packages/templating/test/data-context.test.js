@@ -4,7 +4,7 @@
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, Signal } from '@semantic-ui/reactivity';
 import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
 import { extend } from '@semantic-ui/utils';
@@ -37,7 +37,7 @@ describe('Template — createReactiveState', () => {
   });
 
   it('forwards options for complex { value, options } config', () => {
-    // Custom equalityFunction lets us prove options reached the Signal:
+    // Custom equality lets us prove options reached the Signal:
     // strict-reference equality treats two structurally-equal objects as
     // changed, which the default deep equality would not.
     const strictEquality = (a, b) => a === b;
@@ -45,7 +45,7 @@ describe('Template — createReactiveState', () => {
       defaultState: {
         config: {
           value: { x: 1 },
-          options: { equalityFunction: strictEquality, safety: 'clone' },
+          options: { equality: strictEquality, safety: 'clone' },
         },
       },
     });
@@ -53,14 +53,14 @@ describe('Template — createReactiveState', () => {
     expect(signal).toBeInstanceOf(Signal);
     expect(signal.peek()).toEqual({ x: 1 });
     let observed = 0;
-    const r = Reaction.create(() => {
+    const r = reaction(() => {
       signal.get();
       observed++;
     });
-    Reaction.flush();
+    flush();
     const before = observed;
     signal.set({ x: 1 });
-    Reaction.flush();
+    flush();
     expect(observed).toBeGreaterThan(before);
     r.stop();
   });

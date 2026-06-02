@@ -3,7 +3,7 @@ import { any, each, first, flatten, inArray, isServer, last, noop } from '@seman
 
 import { Icon } from '../../primitives/index.js';
 
-import { Reaction } from '@semantic-ui/reactivity';
+import { afterFlush } from '@semantic-ui/reactivity';
 import css from './inpage-menu.css?raw';
 import template from './inpage-menu.html?raw';
 
@@ -114,7 +114,7 @@ const createComponent = ({ self, state, isServer, signal, reaction, el, dispatch
       const menuIndex = menu.indexOf(menuItem);
       state.openIndex.set(menuIndex);
       state.currentItem.set(itemID);
-      Reaction.afterFlush(() => {
+      afterFlush(() => {
         self.isActivating = false;
       });
     }

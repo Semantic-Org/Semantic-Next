@@ -10,7 +10,7 @@
 import { page, userEvent } from 'vitest/browser';
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { defineComponent } from '../../src/index.js';
-import { Reaction } from '@semantic-ui/reactivity';
+import { flush, reaction } from '@semantic-ui/reactivity';
 
 
 describe('Vitest 4 Browser APIs', () => {
@@ -63,7 +63,7 @@ describe('Vitest 4 Browser APIs', () => {
 
       // Trigger state change and flush reactivity
       el.component.increment();
-      Reaction.flush();
+      flush();
 
       // Now DOM is updated synchronously
       const countEl = el.shadowRoot.querySelector('.count');

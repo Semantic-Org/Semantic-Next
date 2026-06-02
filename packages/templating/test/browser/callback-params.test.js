@@ -1,4 +1,4 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { afterFlush, flush, nonreactive, reaction, Signal } from '@semantic-ui/reactivity';
 import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { Template, TemplateHelpers } from '@semantic-ui/templating';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -138,11 +138,11 @@ describe('Template — callback params', () => {
     it('propagates state mutations reactively through params.state', async () => {
       const { params, fixture } = await captureCreatedParams({ defaultState: { count: 0 } });
       let observed;
-      Reaction.create(() => {
+      reaction(() => {
         observed = params.state.count.get();
       });
       params.state.count.set(7);
-      Reaction.flush();
+      flush();
       expect(observed).toBe(7);
       fixture.cleanup();
     });
@@ -170,23 +170,23 @@ describe('Template — callback params', () => {
         sig.get();
         runs++;
       });
-      Reaction.flush();
+      flush();
       expect(runs).toBe(1);
       expect(fixture.template.reactions.length).toBe(beforeCount + 1);
       sig.set(1);
-      Reaction.flush();
+      flush();
       expect(runs).toBe(2);
       fixture.cleanup();
       sig.set(2);
-      Reaction.flush();
+      flush();
       expect(runs).toBe(2);
     });
 
-    it('exposes flush, afterFlush, and nonreactive as static Reaction helpers', async () => {
+    it('exposes flush, afterFlush, and nonreactive as the module-level helpers', async () => {
       const { params, fixture } = await captureCreatedParams();
-      expect(params.flush).toBe(Reaction.flush);
-      expect(params.afterFlush).toBe(Reaction.afterFlush);
-      expect(params.nonreactive).toBe(Reaction.nonreactive);
+      expect(params.flush).toBe(flush);
+      expect(params.afterFlush).toBe(afterFlush);
+      expect(params.nonreactive).toBe(nonreactive);
       fixture.cleanup();
     });
   });

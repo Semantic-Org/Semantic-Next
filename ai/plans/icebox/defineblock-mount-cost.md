@@ -203,10 +203,8 @@ Recommended: Option 1. The block author API has zero external consumers today; a
 
 ## Dependencies
 
-**Blocked on:** [FGR — As-Mode Per-Field Isolation](active/fgr-as-mode-per-field-isolation.md) merging.
-
-This plan touches `each.js` along with the other 4 block files (renderAST/lookupExpression call-site updates). The fgr-each-as branch is also editing `each.js`. Shipping in parallel would create merge conflicts on `each.js` and tangle bench attribution. Land after fgr-each-as merges; rebase against main; then file as its own PR.
+Previously blocked on [FGR — As-Mode Per-Field Isolation](../archive/fgr-as-mode-per-field-isolation.md), which shipped 2026-05-09 ([PR #191](https://github.com/Semantic-Org/Semantic-Next/pull/191)). Each-block merge conflicts cleared.
 
 ## Status
 
-Scoped — design concrete, code citations verified at `define-block.js:78-96`, per-block closure usage audited. Ready to execute *after* fgr-each-as merges.
+Iceboxed 2026-05-28. Work not done — closures at `define-block.js` still constructed per-dispatch. Removed from the active roadmap's Parallel slot. Plan remains scoped and ready to execute; pull back out when mount-cost bench pressure (krausest `create-1000` / `create-10000`) justifies the API surface change.

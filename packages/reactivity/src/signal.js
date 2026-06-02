@@ -2,7 +2,6 @@ import {
   clone,
   deepFreeze,
   isArray,
-  isClassInstance,
   isDevelopment,
   isEqual,
   isNumber,
@@ -12,12 +11,9 @@ import {
   wrapFunction,
 } from '@semantic-ui/utils';
 
-import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
-
 import { Dependency } from './dependency.js';
-import { Reaction } from './reaction.js';
-
-const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
+import { IS_SIGNAL } from './helpers/identity.js';
+import { captureStack, isTracing } from './helpers/tracing.js';
 
 export class Signal {
   get [IS_SIGNAL]() {
@@ -26,24 +22,23 @@ export class Signal {
   static [Symbol.hasInstance](instance) {
     return !!instance?.[IS_SIGNAL];
   }
-
-  // default clone and equal pulled from utils
-  static equalityFunction = isEqual;
-  static cloneFunction = clone;
-  static idFunction = (item) => item.id ?? item._id ?? item.hash ?? item.key;
   
   // safety presets for the stored value:
   //   'freeze'    — deep-freeze on set; downstream mutations throw at the call site
   //   'clone'     — sandbox mode; copy in and out so a consumer can't corrupt state
   //   'reference' — trust the caller; no protection, dedupe via equality
   //   'none'      — no protection, no dedupe (event-stream semantics)
+  // default helpers, overridable on the class or per-instance via options
+  static equality = isEqual;
+  static clone = (value) => clone(value, { preserveNonCloneable: true });
+  static id = (item) => item.id ?? item._id ?? item.hash ?? item.key;
   static safety = 'freeze';
 
   constructor(initialValue, {
     safety = Signal.safety,
-    cloneFunction = Signal.cloneFunction,
-    equalityFunction = (safety === 'none') ? returnsFalse : Signal.equalityFunction,
-    idFunction = Signal.idFunction,
+    clone = Signal.clone,
+    equality = (safety === 'none') ? returnsFalse : Signal.equality,
+    id = Signal.id,
     context,
   } = {}) {
     // create dependency
@@ -52,10 +47,10 @@ export class Signal {
       value: initialValue,
     });
 
-    // handle custom helpers if user specifies
-    this.cloneFunction = cloneFunction;
-    this.equalityFunction = equalityFunction;
-    this.idFunction = idFunction;
+    // configured helpers, defaulting to the class statics
+    this.clone = clone;
+    this.equality = equality;
+    this.id = id;
 
     this.safety = safety;
     this.currentValue = this.protect(initialValue);
@@ -85,7 +80,7 @@ export class Signal {
   }
 
   set value(newValue) {
-    if (!this.equalityFunction(this.currentValue, newValue)) {
+    if (!this.equality(this.currentValue, newValue)) {
       this.currentValue = this.protect(newValue);
       this.notify();
     }
@@ -114,22 +109,6 @@ export class Signal {
     return this.currentValue;
   }
 
-  clone(value = this.currentValue) {
-    if (isClassInstance(value)) {
-      return value;
-    }
-    if (isArray(value)) {
-      return value.map(arrValue => this.clone(arrValue));
-    }
-    return this.cloneFunction(value);
-  }
-
-  subscribe(callback) {
-    return Reaction.create((comp) => {
-      callback(this.value, comp);
-    });
-  }
-
   /* Dependencies */
   hasDependents() {
     return this.dependency.subscribers.size > 0;
@@ -137,57 +116,6 @@ export class Signal {
 
   depend() {
     this.dependency.depend();
-  }
-
-  /*******************************
-           Child Signals
-  *******************************/
-
-  // single signal having a derivation
-  derive(computeFn, options = {}) {
-    const derivedSignal = new Signal(undefined, options);
-
-    // weak so the reaction's closure doesn't pin derived
-    // through source.dep.subscribers
-    const derivedRef = new WeakRef(derivedSignal);
-
-    const source = this;
-
-    const reaction = Reaction.create(() => {
-      const currentRef = derivedRef.deref();
-      if (!currentRef) {
-        reaction.stop();
-        return;
-      }
-      currentRef.set(computeFn(source.get()));
-    });
-
-    if (Reaction.current) {
-      Reaction.current.onCleanup(() => reaction.stop());
-    }
-
-    return derivedSignal;
-  }
-
-  // multiple signals computing a signal
-  static computed(computeFn, options = {}) {
-    const computedSignal = new Signal(undefined, options);
-    const computedRef = new WeakRef(computedSignal);
-
-    const reaction = Reaction.create(() => {
-      const ref = computedRef.deref();
-      if (!ref) {
-        reaction.stop();
-        return;
-      }
-      ref.set(computeFn());
-    });
-
-    if (Reaction.current) {
-      Reaction.current.onCleanup(() => reaction.stop());
-    }
-
-    return computedSignal;
   }
 
   /*******************************
@@ -226,7 +154,7 @@ export class Signal {
     else {
       // if no value returned check if the value changed from side effects
       // in this case we want to trigger reactivity
-      if (!this.equalityFunction(beforeClone, this.currentValue)) {
+      if (!this.equality(beforeClone, this.currentValue)) {
         this.notify();
       }
     }
@@ -395,20 +323,20 @@ export class Signal {
     return this.mutate(() => new Date());
   }
 
-  getIDs(item) {
+  getIds(item) {
     if (!isObject(item)) {
       return [item];
     }
     return unique([item.id, item._id, item.hash, item.key].filter(value => value != null));
   }
-  getID(item) {
+  getId(item) {
     if (!isObject(item)) {
       return item;
     }
-    return this.idFunction(item);
+    return this.id(item);
   }
-  hasID(item, id) {
-    return this.getID(item) === id;
+  hasId(item, id) {
+    return this.getId(item) === id;
   }
   getItem(id) {
     const index = this.getItemIndex(id);
@@ -419,7 +347,7 @@ export class Signal {
   getItemIndex(id) {
     const arr = this.currentValue;
     for (let index = 0; index < arr.length; index++) {
-      if (this.hasID(arr[index], id)) {
+      if (this.hasId(arr[index], id)) {
         return index;
       }
     }
@@ -464,11 +392,6 @@ export class Signal {
   /*******************************
            Tracing Utils
   *******************************/
-
-  static setTracing = setTracing;
-  static isTracing = isTracing;
-  static setStackCapture = setStackCapture;
-  static isStackCapture = isStackCapture;
 
   // context lets you pass through metadata with a signal
   // to determine reaction source
