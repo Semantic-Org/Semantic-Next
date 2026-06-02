@@ -1,4 +1,4 @@
-import { Reaction } from '@semantic-ui/reactivity';
+import { reaction } from '@semantic-ui/reactivity';
 import { each, isClient } from '@semantic-ui/utils';
 import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
@@ -37,7 +37,7 @@ export class ReactiveConditionalDirective extends AsyncDirective {
     // matchIndex gating is intentionally absent — content can change
     // within the same branch when inner expressions update.
     if (isClient) {
-      this.reaction = Reaction.create((comp) => {
+      this.reaction = reaction((comp) => {
         if (!this.isConnected) {
           comp.stop();
           return;

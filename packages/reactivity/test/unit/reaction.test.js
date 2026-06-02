@@ -1,4 +1,16 @@
-import { Reaction, Scheduler, setTracing, Signal } from '@semantic-ui/reactivity';
+import {
+  afterFlush,
+  currentReaction,
+  flush,
+  guard,
+  nonreactive,
+  Reaction,
+  reaction,
+  scheduleFlush,
+  Scheduler,
+  setTracing,
+  Signal,
+} from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('Reaction', () => {
@@ -14,12 +26,12 @@ describe('Reaction', () => {
       const reactiveValue = new Signal('first');
       const callback = vi.fn();
 
-      Reaction.create(() => {
+      reaction(() => {
         callback(reactiveValue.get());
       });
 
       reactiveValue.set('second');
-      Reaction.flush();
+      flush();
 
       expect(callback).toHaveBeenCalledTimes(2);
       expect(callback).toHaveBeenNthCalledWith(1, 'first');
@@ -30,7 +42,7 @@ describe('Reaction', () => {
       const saying = new Signal('hello');
       const callback = vi.fn();
 
-      Reaction.create((comp) => {
+      reaction((comp) => {
         if (comp.firstRun) {
           callback('First run!');
         }
@@ -41,7 +53,7 @@ describe('Reaction', () => {
       });
 
       saying.set('goodbye');
-      Reaction.flush();
+      flush();
 
       expect(callback).toHaveBeenCalledWith('First run!');
       expect(callback).toHaveBeenCalledWith('Goodbye detected');
@@ -56,12 +68,12 @@ describe('Reaction', () => {
       let reactiveObj = new Signal(obj1);
       const callback = vi.fn();
 
-      Reaction.create(() => {
+      reaction(() => {
         callback(reactiveObj.get());
       });
 
       reactiveObj.set(obj2);
-      Reaction.flush();
+      flush();
 
       // Callback should be called only once due to deep equality
       expect(callback).toHaveBeenCalledTimes(1);
@@ -70,19 +82,19 @@ describe('Reaction', () => {
     it('should always re-run when custom isEqual returns false', () => {
       const customIsEqual = () => false;
       let obj = { name: 'Sally', age: 22 };
-      let reactiveObj = new Signal(obj, { equalityFunction: customIsEqual });
+      let reactiveObj = new Signal(obj, { equality: customIsEqual });
       const callback = vi.fn();
 
-      Reaction.create(function() {
+      reaction(function() {
         reactiveObj.get();
         callback();
       });
 
       // Initial flush to account for the setup of reactive computation
-      Reaction.flush();
+      flush();
 
       reactiveObj.set(reactiveObj.get());
-      Reaction.flush();
+      flush();
 
       // Log runs twice including the initial run due to custom equality function
       expect(callback).toHaveBeenCalledTimes(2);
@@ -96,8 +108,8 @@ describe('Reaction', () => {
       const lastUpdated = new Signal(new Date());
       const callback = vi.fn();
 
-      Reaction.create(() => {
-        const user = Reaction.guard(() => ({
+      reaction(() => {
+        const user = guard(() => ({
           name: userName.get(),
           age: userAge.get(),
         }));
@@ -105,16 +117,16 @@ describe('Reaction', () => {
       });
 
       // Initial flush to account for the setup of reactive computation
-      Reaction.flush();
+      flush();
 
       userName.set('Jane Doe');
-      Reaction.flush();
+      flush();
 
       userAge.set(31);
-      Reaction.flush();
+      flush();
 
       lastUpdated.set(new Date()); // This update should not trigger the reaction guard
-      Reaction.flush();
+      flush();
 
       // Should include initial run plus updates that trigger guard
       expect(callback).toHaveBeenCalledTimes(3);
@@ -125,20 +137,20 @@ describe('Reaction', () => {
       const callback = vi.fn();
 
       const isEven = () =>
-        Reaction.guard(() => {
+        guard(() => {
           return (counter.get() % 2 === 0);
         });
 
-      Reaction.create((comp) => {
+      reaction((comp) => {
         if (isEven()) {
           callback(`${counter.peek()} is even`);
         }
       });
 
       counter.set(1); // No output guard is same
-      Reaction.flush();
+      flush();
       counter.set(2); // Output
-      Reaction.flush();
+      flush();
       counter.set(3); // No output guard is same
 
       // only odd numbers should trigger
@@ -150,18 +162,18 @@ describe('Reaction', () => {
       const reactiveUser = new Signal(user);
       const callback = vi.fn();
 
-      Reaction.create(() => {
-        Reaction.guard(() => {
+      reaction(() => {
+        guard(() => {
           callback(reactiveUser.get());
           return reactiveUser.get();
         });
       });
 
       // Initial flush to account for the setup of reactive computation
-      Reaction.flush();
+      flush();
 
       reactiveUser.set(user);
-      Reaction.flush();
+      flush();
 
       // Callback should be called only once due to deep equality
       expect(callback).toHaveBeenCalledTimes(1);
@@ -171,12 +183,12 @@ describe('Reaction', () => {
       const counter = new Signal(10);
       let peekedValue;
 
-      Reaction.create(() => {
+      reaction(() => {
         peekedValue = counter.peek();
       });
 
       counter.set(20); // This should not trigger the reaction again
-      Reaction.flush();
+      flush();
 
       expect(peekedValue).toBe(10);
     });
@@ -185,14 +197,14 @@ describe('Reaction', () => {
       const reactiveValue = new Signal('Initial Value');
       const callback = vi.fn();
 
-      Reaction.create(() => {
-        Reaction.nonreactive(() => {
+      reaction(() => {
+        nonreactive(() => {
           callback(reactiveValue.get());
         });
       });
 
       reactiveValue.set('Updated Value');
-      Reaction.flush();
+      flush();
 
       // Callback should be called only once due to nonreactive block
       expect(callback).toHaveBeenCalledTimes(1);
@@ -203,13 +215,13 @@ describe('Reaction', () => {
       const number = new Signal(1);
       const callback = vi.fn();
 
-      Reaction.create(() => {
+      reaction(() => {
         callback(number.get());
       });
 
       [2, 3, 4, 5].forEach(value => {
         number.set(value);
-        Reaction.flush(); // Flush after each update
+        flush(); // Flush after each update
       });
 
       expect(callback).toHaveBeenCalledTimes(5); // Initial plus 4 updates
@@ -219,8 +231,8 @@ describe('Reaction', () => {
   describe('Flushing', () => {
     it('afterFlush should call registered callbacks after flushing', async () => {
       const mockCallback = vi.fn();
-      Reaction.afterFlush(mockCallback);
-      Reaction.scheduleFlush();
+      afterFlush(mockCallback);
+      scheduleFlush();
       await new Promise(resolve => setTimeout(resolve, 0)); // Wait for flush
       expect(mockCallback).toHaveBeenCalled();
     });
@@ -228,9 +240,9 @@ describe('Reaction', () => {
     it('afterFlush should call multiple registered callbacks after flushing', async () => {
       const mockCallback = vi.fn();
       const mockCallback2 = vi.fn();
-      Reaction.afterFlush(mockCallback);
-      Reaction.afterFlush(mockCallback2);
-      Reaction.scheduleFlush();
+      afterFlush(mockCallback);
+      afterFlush(mockCallback2);
+      scheduleFlush();
       await new Promise(resolve => setTimeout(resolve, 0)); // Wait for flush
       expect(mockCallback).toHaveBeenCalled();
       expect(mockCallback2).toHaveBeenCalled();
@@ -242,17 +254,17 @@ describe('Reaction', () => {
       const items = new Signal([0, 1, 2]);
       const callback = vi.fn();
 
-      Reaction.create(() => {
+      reaction(() => {
         callback(items.get().length);
       });
 
       // Initial flush to account for the setup of reactive computation
-      Reaction.flush();
+      flush();
 
       items.push(3); // Expect length to be 4
-      Reaction.flush(); // Flush after push
+      flush(); // Flush after push
       items.removeIndex(0); // Expect length to be 3
-      Reaction.flush(); // Flush after removeIndex
+      flush(); // Flush after removeIndex
 
       // Includes the initial run plus each update
       expect(callback).toHaveBeenCalledTimes(3);
@@ -262,17 +274,17 @@ describe('Reaction', () => {
       const items = new Signal([0, 1, 2], { safety: 'clone' });
       const callback = vi.fn();
 
-      Reaction.create(() => {
+      reaction(() => {
         callback(items.get().length);
       });
 
       // Initial flush to account for the setup of reactive computation
-      Reaction.flush();
+      flush();
 
       items.push(3); // Expect length to be 4
-      Reaction.flush(); // Flush after push
+      flush(); // Flush after push
       items.removeIndex(0); // Expect length to be 3
-      Reaction.flush(); // Flush after removeIndex
+      flush(); // Flush after removeIndex
 
       // Includes the initial run plus each update
       expect(callback).toHaveBeenCalledTimes(3);
@@ -286,15 +298,15 @@ describe('Reaction', () => {
       const b = new Signal(0);
 
       // A writes B, B writes A — infinite cycle
-      Reaction.create(() => {
+      reaction(() => {
         b.set(a.get() + 1);
       });
-      Reaction.create(() => {
+      reaction(() => {
         a.set(b.get() + 1);
       });
 
       // Should not hang — flush should break the cycle
-      Reaction.flush();
+      flush();
 
       expect(errorSpy).toHaveBeenCalledTimes(1);
       expect(errorSpy.mock.calls[0][0]).toMatch(/cycle detected/i);
@@ -307,19 +319,19 @@ describe('Reaction', () => {
       const c = new Signal(0);
 
       // Chain: a -> b -> c (converges in 2 passes)
-      Reaction.create(() => {
+      reaction(() => {
         b.set(a.get() * 2);
       });
-      Reaction.create(() => {
+      reaction(() => {
         c.set(b.get() + 10);
       });
 
-      Reaction.flush();
+      flush();
       expect(b.peek()).toBe(2);
       expect(c.peek()).toBe(12);
 
       a.set(5);
-      Reaction.flush();
+      flush();
       expect(b.peek()).toBe(10);
       expect(c.peek()).toBe(20);
     });
@@ -331,15 +343,15 @@ describe('Reaction', () => {
       try {
         const callback = vi.fn();
         let signal = new Signal(1);
-        Reaction.create((comp) => {
+        reaction((comp) => {
           signal.get();
           if (comp.firstRun) {
             return;
           }
-          callback(Reaction.current.context.value);
+          callback(currentReaction().context.value);
         });
         signal.set(2);
-        Reaction.flush();
+        flush();
         expect(callback).toHaveBeenCalledWith(2);
       }
       finally {
@@ -351,7 +363,7 @@ describe('Reaction', () => {
     it('Reaction should track current stack trace with getSource', () => {
       const callback = vi.fn();
       let signal = new Signal(1);
-      Reaction.create((comp) => {
+      reaction((comp) => {
         signal.get();
         if (comp.firstRun) {
           return;
@@ -360,7 +372,7 @@ describe('Reaction', () => {
         try {
           const consoleInfo = console.info;
           console.info = vi.fn();
-          trace = Reaction.getSource();
+          trace = getSource();
           console.info = consoleInfo;
         }
         catch (e) {
@@ -369,7 +381,7 @@ describe('Reaction', () => {
         callback(trace);
       });
       signal.set(2);
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledWith(expect.any(String));
     });
 
@@ -389,42 +401,62 @@ describe('Reaction — public API contract', () => {
   *******************************/
 
   describe('Creation', () => {
-    it('returns the created reaction instance from Reaction.create', () => {
-      const reaction = Reaction.create(() => {});
-      expect(reaction).toBeInstanceOf(Reaction);
+    it('returns the created reaction instance from reaction()', () => {
+      const r = reaction(() => {});
+      expect(r).toBeInstanceOf(Reaction);
+    });
+
+    it('constructs via new Reaction() and satisfies instanceof Reaction', () => {
+      const r = new Reaction(() => {});
+      expect(r).toBeInstanceOf(Reaction);
+      expect(r.active).toBe(true);
+    });
+
+    it('new Reaction() auto-runs the callback on construction', () => {
+      const callback = vi.fn();
+      new Reaction(callback);
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('new Reaction() skips the initial run when firstRun: false is passed', () => {
+      const callback = vi.fn();
+      const r = new Reaction(callback, { firstRun: false });
+      expect(callback).not.toHaveBeenCalled();
+      expect(r.firstRun).toBe(true);
+      expect(r.active).toBe(true);
     });
 
     it('runs the callback immediately by default to register dependencies', () => {
       const callback = vi.fn();
-      Reaction.create(callback);
+      reaction(callback);
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
     it('passes the reaction instance to the callback as its first argument', () => {
       let received;
-      const reaction = Reaction.create((r) => {
-        received = r;
+      const r = reaction((inner) => {
+        received = inner;
       });
-      expect(received).toBe(reaction);
+      expect(received).toBe(r);
     });
 
     it('skips the initial run when firstRun: false is passed', () => {
       const callback = vi.fn();
-      Reaction.create(callback, { firstRun: false });
+      reaction(callback, { firstRun: false });
       expect(callback).not.toHaveBeenCalled();
     });
 
     it('still re-runs the reaction when a tracked signal changes (firstRun: false then manual run)', () => {
       const value = new Signal('a');
       const callback = vi.fn();
-      const reaction = Reaction.create(() => callback(value.get()), { firstRun: false });
+      const r = reaction(() => callback(value.get()), { firstRun: false });
 
       // Manually run to register dependency
-      reaction.run();
+      r.run();
       expect(callback).toHaveBeenCalledTimes(1);
 
       value.set('b');
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(2);
       expect(callback).toHaveBeenLastCalledWith('b');
     });
@@ -437,7 +469,7 @@ describe('Reaction — public API contract', () => {
   describe('firstRun', () => {
     it('reports firstRun=true on the initial execution', () => {
       let observed;
-      Reaction.create((r) => {
+      reaction((r) => {
         observed = r.firstRun;
       });
       expect(observed).toBe(true);
@@ -446,13 +478,13 @@ describe('Reaction — public API contract', () => {
     it('reports firstRun=false on subsequent executions after a signal change', () => {
       const value = new Signal(0);
       const firstRuns = [];
-      Reaction.create((r) => {
+      reaction((r) => {
         value.get();
         firstRuns.push(r.firstRun);
       });
 
       value.set(1);
-      Reaction.flush();
+      flush();
 
       expect(firstRuns).toEqual([true, false]);
     });
@@ -461,13 +493,13 @@ describe('Reaction — public API contract', () => {
       const value = new Signal('initial');
       const callback = vi.fn();
 
-      Reaction.create((r) => {
+      reaction((r) => {
         if (r.firstRun) { return; }
         callback(value.get());
       });
 
       value.set('updated');
-      Reaction.flush();
+      flush();
 
       expect(callback).not.toHaveBeenCalled();
     });
@@ -479,53 +511,53 @@ describe('Reaction — public API contract', () => {
 
   describe('active flag and stop', () => {
     it('reports active=true on a freshly created reaction', () => {
-      const reaction = Reaction.create(() => {});
-      expect(reaction.active).toBe(true);
+      const r = reaction(() => {});
+      expect(r.active).toBe(true);
     });
 
     it('reports active=false after stop()', () => {
-      const reaction = Reaction.create(() => {});
-      reaction.stop();
-      expect(reaction.active).toBe(false);
+      const r = reaction(() => {});
+      r.stop();
+      expect(r.active).toBe(false);
     });
 
     it('does not re-run a stopped reaction when its tracked signal changes', () => {
       const value = new Signal(0);
       const callback = vi.fn();
-      const reaction = Reaction.create(() => callback(value.get()));
+      const r = reaction(() => callback(value.get()));
 
-      reaction.stop();
+      r.stop();
       value.set(1);
-      Reaction.flush();
+      flush();
 
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
     it('treats stop() as idempotent — calling twice does not throw', () => {
-      const reaction = Reaction.create(() => {});
-      reaction.stop();
-      expect(() => reaction.stop()).not.toThrow();
-      expect(reaction.active).toBe(false);
+      const r = reaction(() => {});
+      r.stop();
+      expect(() => r.stop()).not.toThrow();
+      expect(r.active).toBe(false);
     });
 
     it("removes the reaction from a signal's dependents when stop() is called", () => {
       const value = new Signal(0);
-      const reaction = Reaction.create(() => {
+      const r = reaction(() => {
         value.get();
       });
 
       expect(value.hasDependents()).toBe(true);
 
-      reaction.stop();
+      r.stop();
       expect(value.hasDependents()).toBe(false);
     });
 
     it('makes a manually-invoked run() on a stopped reaction a no-op', () => {
       const callback = vi.fn();
-      const reaction = Reaction.create(callback);
-      reaction.stop();
+      const r = reaction(callback);
+      r.stop();
 
-      reaction.run();
+      r.run();
       expect(callback).toHaveBeenCalledTimes(1);
     });
   });
@@ -538,7 +570,7 @@ describe('Reaction — public API contract', () => {
     it('exposes a Set of tracked dependencies', () => {
       const value = new Signal(0);
       let observed;
-      Reaction.create((r) => {
+      reaction((r) => {
         value.get();
         observed = r.dependencies;
       });
@@ -552,7 +584,7 @@ describe('Reaction — public API contract', () => {
       const c = new Signal('C');
       let lastDeps;
 
-      Reaction.create((r) => {
+      reaction((r) => {
         // On first run reads a and b; subsequent runs based on a's value
         if (a.get()) {
           b.get();
@@ -566,18 +598,18 @@ describe('Reaction — public API contract', () => {
       expect(lastDeps.size).toBe(2); // a + b
 
       a.set(false);
-      Reaction.flush();
+      flush();
 
       expect(lastDeps.size).toBe(2); // a + c
 
       // b should no longer notify the reaction
       const callback = vi.fn();
-      Reaction.create(() => {
+      reaction(() => {
         callback(b.get());
       }); // separate reaction proving b is independent
       callback.mockClear();
       b.set('B2');
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1); // separate reaction fires once; main is unaffected
     });
   });
@@ -589,43 +621,43 @@ describe('Reaction — public API contract', () => {
   describe('invalidate', () => {
     it('schedules a re-run on the next flush without a signal change', () => {
       const callback = vi.fn();
-      const reaction = Reaction.create(callback);
+      const r = reaction(callback);
 
-      reaction.invalidate();
-      Reaction.flush();
+      r.invalidate();
+      flush();
 
       expect(callback).toHaveBeenCalledTimes(2); // initial + invalidated re-run
     });
 
     it('does nothing when invalidate is called on a stopped reaction', () => {
       const callback = vi.fn();
-      const reaction = Reaction.create(callback);
+      const r = reaction(callback);
 
-      reaction.stop();
-      expect(reaction.active).toBe(false);
+      r.stop();
+      expect(r.active).toBe(false);
 
-      reaction.invalidate();
-      expect(reaction.active).toBe(false);
-      expect(Scheduler.pendingReactions.has(reaction)).toBe(false);
+      r.invalidate();
+      expect(r.active).toBe(false);
+      expect(Scheduler.pendingReactions.has(r)).toBe(false);
 
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
     it('removes the reaction from pendingReactions when stop is called mid-cycle', () => {
       const s = new Signal(0);
       const callback = vi.fn();
-      const reaction = Reaction.create(() => {
+      const r = reaction(() => {
         callback(s.get());
       });
 
       s.set(1);
-      expect(Scheduler.pendingReactions.has(reaction)).toBe(true);
+      expect(Scheduler.pendingReactions.has(r)).toBe(true);
 
-      reaction.stop();
-      expect(Scheduler.pendingReactions.has(reaction)).toBe(false);
+      r.stop();
+      expect(Scheduler.pendingReactions.has(r)).toBe(false);
 
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
     });
   });
@@ -637,15 +669,15 @@ describe('Reaction — public API contract', () => {
   describe('run', () => {
     it('manually re-runs an active reaction without a signal change', () => {
       const callback = vi.fn();
-      const reaction = Reaction.create(callback);
+      const r = reaction(callback);
 
-      reaction.run();
+      r.run();
       expect(callback).toHaveBeenCalledTimes(2);
     });
 
     it('updates firstRun to false after the initial run() completes', () => {
-      const reaction = Reaction.create(() => {});
-      expect(reaction.firstRun).toBe(false);
+      const r = reaction(() => {});
+      expect(r.firstRun).toBe(false);
     });
   });
 
@@ -655,7 +687,7 @@ describe('Reaction — public API contract', () => {
 
   describe('nonreactive', () => {
     it('returns the value produced by the inner callback', () => {
-      const result = Reaction.nonreactive(() => 42);
+      const result = nonreactive(() => 42);
       expect(result).toBe(42);
     });
 
@@ -664,13 +696,13 @@ describe('Reaction — public API contract', () => {
       const untracked = new Signal('untracked');
       const callback = vi.fn();
 
-      Reaction.create(() => {
+      reaction(() => {
         tracked.get();
-        callback(Reaction.nonreactive(() => untracked.get()));
+        callback(nonreactive(() => untracked.get()));
       });
 
       untracked.set('changed');
-      Reaction.flush();
+      flush();
 
       expect(callback).toHaveBeenCalledTimes(1);
     });
@@ -680,12 +712,12 @@ describe('Reaction — public API contract', () => {
       const untracked = new Signal('x');
       const callback = vi.fn();
 
-      Reaction.create(() => {
-        callback(tracked.get(), Reaction.nonreactive(() => untracked.get()));
+      reaction(() => {
+        callback(tracked.get(), nonreactive(() => untracked.get()));
       });
 
       tracked.set('b');
-      Reaction.flush();
+      flush();
 
       expect(callback).toHaveBeenCalledTimes(2);
       expect(callback).toHaveBeenLastCalledWith('b', 'x');
@@ -693,7 +725,7 @@ describe('Reaction — public API contract', () => {
 
     it('works when called outside of any reaction', () => {
       const value = new Signal(7);
-      const result = Reaction.nonreactive(() => value.get());
+      const result = nonreactive(() => value.get());
       expect(result).toBe(7);
       expect(value.hasDependents()).toBe(false);
     });
@@ -703,14 +735,14 @@ describe('Reaction — public API contract', () => {
       const after = new Signal('after');
       const seen = [];
 
-      Reaction.create(() => {
+      reaction(() => {
         outer.get();
-        Reaction.nonreactive(() => {/* no-op */});
+        nonreactive(() => {/* no-op */});
         seen.push(after.get()); // should still register as dependency
       });
 
       after.set('after2');
-      Reaction.flush();
+      flush();
       expect(seen).toEqual(['after', 'after2']);
     });
 
@@ -718,15 +750,15 @@ describe('Reaction — public API contract', () => {
       const a = new Signal('a');
       const callback = vi.fn();
 
-      Reaction.create(() => {
-        Reaction.nonreactive(() => {
-          Reaction.nonreactive(() => {});
+      reaction(() => {
+        nonreactive(() => {
+          nonreactive(() => {});
           callback(a.get()); // outermost is nonreactive — a should NOT track
         });
       });
 
       a.set('a2');
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
     });
   });
@@ -737,10 +769,10 @@ describe('Reaction — public API contract', () => {
 
   describe('guard', () => {
     it('returns the current value of the inner callback', () => {
-      const reaction = Reaction.create(() => {});
-      Scheduler.current = reaction;
+      const r = reaction(() => {});
+      Scheduler.current = r;
       try {
-        expect(Reaction.guard(() => 'hello')).toBe('hello');
+        expect(guard(() => 'hello')).toBe('hello');
       }
       finally {
         Scheduler.current = null;
@@ -748,7 +780,7 @@ describe('Reaction — public API contract', () => {
     });
 
     it('returns f() directly when called outside of any reaction', () => {
-      const result = Reaction.guard(() => 7);
+      const result = guard(() => 7);
       expect(result).toBe(7);
     });
 
@@ -756,19 +788,19 @@ describe('Reaction — public API contract', () => {
       const source = new Signal({ name: 'A', meta: 1 });
       const callback = vi.fn();
 
-      Reaction.create(() => {
-        const slice = Reaction.guard(() => ({ name: source.get().name }));
+      reaction(() => {
+        const slice = guard(() => ({ name: source.get().name }));
         callback(slice.name);
       });
 
       // Mutate something the guard ignores — guard return is structurally equal
       source.set({ name: 'A', meta: 2 });
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
       // Mutate something the guard observes — guard return changes
       source.set({ name: 'B', meta: 2 });
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(2);
       expect(callback).toHaveBeenLastCalledWith('B');
     });
@@ -778,19 +810,19 @@ describe('Reaction — public API contract', () => {
       const callback = vi.fn();
       const compareById = (a, b) => a?.id === b?.id;
 
-      Reaction.create(() => {
-        const item = Reaction.guard(() => source.get(), compareById);
+      reaction(() => {
+        const item = guard(() => source.get(), compareById);
         callback(item.label);
       });
 
       // Same id, different label — custom check says "equal", no rerun
       source.set({ id: 1, label: 'second' });
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(1);
 
       // Different id — custom check says "not equal", rerun
       source.set({ id: 2, label: 'third' });
-      Reaction.flush();
+      flush();
       expect(callback).toHaveBeenCalledTimes(2);
     });
   });
@@ -804,13 +836,13 @@ describe('Reaction — public API contract', () => {
       const value = new Signal(1);
       const callback = vi.fn();
 
-      Reaction.create(() => callback(value.get()));
+      reaction(() => callback(value.get()));
       value.set(2);
 
       // Pre-flush: callback ran only once (initial)
       expect(callback).toHaveBeenCalledTimes(1);
 
-      Reaction.flush();
+      flush();
 
       // Post-flush: synchronously fired again with the new value
       expect(callback).toHaveBeenCalledTimes(2);
@@ -819,8 +851,8 @@ describe('Reaction — public API contract', () => {
 
     it('runs afterFlush callbacks during flush even when there are no pending reactions', () => {
       const cb = vi.fn();
-      Reaction.afterFlush(cb);
-      Reaction.flush();
+      afterFlush(cb);
+      flush();
       expect(cb).toHaveBeenCalledTimes(1);
     });
 
@@ -828,14 +860,14 @@ describe('Reaction — public API contract', () => {
       const value = new Signal(0);
       const seen = [];
 
-      Reaction.create(() => {
+      reaction(() => {
         seen.push(value.get());
       });
 
       value.set(1);
       value.set(2);
       value.set(3);
-      Reaction.flush();
+      flush();
 
       // Initial run sees 0; the batched updates collapse into a single rerun with 3.
       expect(seen).toEqual([0, 3]);
@@ -850,13 +882,13 @@ describe('Reaction — public API contract', () => {
     it('is idempotent — multiple calls before flush queue only one microtask flush', async () => {
       const value = new Signal('initial');
       const callback = vi.fn();
-      Reaction.create(() => callback(value.get()));
+      reaction(() => callback(value.get()));
       callback.mockClear();
 
       value.set('updated');
-      Reaction.scheduleFlush();
-      Reaction.scheduleFlush();
-      Reaction.scheduleFlush();
+      scheduleFlush();
+      scheduleFlush();
+      scheduleFlush();
 
       await new Promise(resolve => setTimeout(resolve, 0));
 
@@ -866,11 +898,11 @@ describe('Reaction — public API contract', () => {
     it('runs scheduled flush asynchronously via microtask', async () => {
       const value = new Signal(0);
       const callback = vi.fn();
-      Reaction.create(() => callback(value.get()));
+      reaction(() => callback(value.get()));
       callback.mockClear();
 
       value.set(1);
-      Reaction.scheduleFlush();
+      scheduleFlush();
 
       // Before microtask: not yet flushed
       expect(callback).not.toHaveBeenCalled();
@@ -891,84 +923,84 @@ describe('Reaction — public API contract', () => {
       const value = new Signal(0);
       const order = [];
 
-      Reaction.create(() => {
+      reaction(() => {
         value.get();
         order.push('reaction');
       });
       order.length = 0; // clear initial-run record
 
       value.set(1);
-      Reaction.afterFlush(() => order.push('after'));
-      Reaction.flush();
+      afterFlush(() => order.push('after'));
+      flush();
 
       expect(order).toEqual(['reaction', 'after']);
     });
 
     it('runs multiple afterFlush callbacks in registration order', () => {
       const order = [];
-      Reaction.afterFlush(() => order.push(1));
-      Reaction.afterFlush(() => order.push(2));
-      Reaction.afterFlush(() => order.push(3));
-      Reaction.flush();
+      afterFlush(() => order.push(1));
+      afterFlush(() => order.push(2));
+      afterFlush(() => order.push(3));
+      flush();
       expect(order).toEqual([1, 2, 3]);
     });
 
     it('drains the callback queue — callbacks do not re-run on the next flush', () => {
       const cb = vi.fn();
-      Reaction.afterFlush(cb);
-      Reaction.flush();
-      Reaction.flush();
+      afterFlush(cb);
+      flush();
+      flush();
       expect(cb).toHaveBeenCalledTimes(1);
     });
 
     it('exposes the final signal value to the afterFlush callback', () => {
       // Mirrors the after-flush example: only the final value is observed
       const number = new Signal(0);
-      Reaction.create(() => {
+      reaction(() => {
         number.get();
       });
 
       let final;
       [1, 2, 3, 4, 5].forEach(value => number.set(value));
-      Reaction.afterFlush(() => {
+      afterFlush(() => {
         final = number.get();
       });
-      Reaction.flush();
+      flush();
 
       expect(final).toBe(5);
     });
 
     it('drains afterFlush callbacks registered from inside another afterFlush in the same flush', () => {
       const order = [];
-      Reaction.afterFlush(() => {
+      afterFlush(() => {
         order.push('outer');
-        Reaction.afterFlush(() => order.push('inner'));
+        afterFlush(() => order.push('inner'));
       });
-      Reaction.flush();
+      flush();
       expect(order).toEqual(['outer', 'inner']);
     });
   });
 
   /*******************************
-        Reaction.current
+        currentReaction()
   *******************************/
 
-  describe('Reaction.current', () => {
+  describe('currentReaction()', () => {
     it('is null outside of any reaction', () => {
-      expect(Reaction.current).toBeNull();
+      expect(currentReaction()).toBeNull();
     });
 
     it('is the running reaction during its callback execution', () => {
       let seen;
-      const reaction = Reaction.create((r) => {
-        seen = Reaction.current;
+      const r = reaction(() => {
+        seen = currentReaction();
       });
-      expect(seen).toBe(reaction);
+      expect(seen).toBe(r);
     });
 
     it('is null again after the reaction callback returns', () => {
-      Reaction.create(() => {});
-      expect(Reaction.current).toBeNull();
+      reaction(() => {});
+      expect(currentReaction()).toBeNull();
     });
   });
 
@@ -983,9 +1015,9 @@ describe('Reaction — public API contract', () => {
       const outerCallback = vi.fn();
       const innerCallback = vi.fn();
 
-      Reaction.create(() => {
+      reaction(() => {
         outer.get();
-        Reaction.create(() => {
+        reaction(() => {
           innerCallback(inner.get());
         });
         outerCallback(outer.peek());
@@ -997,7 +1029,7 @@ describe('Reaction — public API contract', () => {
 
       // Mutating the inner-only signal should never re-fire the outer.
       inner.set('i2');
-      Reaction.flush();
+      flush();
       expect(outerCallback).toHaveBeenCalledTimes(1);
       expect(innerCallback).toHaveBeenCalledTimes(2);
     });
@@ -1009,9 +1041,9 @@ describe('Reaction — public API contract', () => {
       const inner = new Signal('a');
       const innerCallback = vi.fn();
 
-      Reaction.create(() => {
+      reaction(() => {
         outer.get();
-        Reaction.create(() => {
+        reaction(() => {
           innerCallback(inner.get());
         });
       });
@@ -1021,14 +1053,14 @@ describe('Reaction — public API contract', () => {
 
       // Outer re-runs, creates inner #2. inner #1 was NOT stopped.
       outer.set(2);
-      Reaction.flush();
+      flush();
       expect(innerCallback).toHaveBeenCalledTimes(2);
 
       innerCallback.mockClear();
 
       // Both inner #1 and inner #2 should fire when `inner` changes.
       inner.set('b');
-      Reaction.flush();
+      flush();
       expect(innerCallback).toHaveBeenCalledTimes(2);
     });
 
@@ -1037,10 +1069,10 @@ describe('Reaction — public API contract', () => {
       const innerOnly = new Signal('i');
       const outerCallback = vi.fn();
 
-      Reaction.create(() => {
+      reaction(() => {
         outer.get();
         // Read a signal inside an inner reaction's body — outer should NOT track this signal.
-        Reaction.create(() => {
+        reaction(() => {
           innerOnly.get();
         });
         outerCallback();
@@ -1048,7 +1080,7 @@ describe('Reaction — public API contract', () => {
 
       outerCallback.mockClear();
       innerOnly.set('i2');
-      Reaction.flush();
+      flush();
       expect(outerCallback).not.toHaveBeenCalled();
     });
 
@@ -1059,9 +1091,9 @@ describe('Reaction — public API contract', () => {
       const innerOnly = new Signal('I');
       const callback = vi.fn();
 
-      Reaction.create(() => {
+      reaction(() => {
         const b = beforeInner.get();
-        Reaction.create(() => {
+        reaction(() => {
           innerOnly.get();
         });
         const a = afterInner.get();
@@ -1070,7 +1102,7 @@ describe('Reaction — public API contract', () => {
 
       callback.mockClear();
       afterInner.set('A2');
-      Reaction.flush();
+      flush();
 
       expect(callback).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenCalledWith('B', 'A2');
@@ -1084,33 +1116,33 @@ describe('Reaction — public API contract', () => {
   describe('Error handling', () => {
     it('clears Scheduler.current after a reaction callback throws', () => {
       expect(() => {
-        Reaction.create(() => {
+        reaction(() => {
           throw new Error('boom');
         });
       }).toThrow('boom');
-      expect(Reaction.current).toBeNull();
+      expect(currentReaction()).toBeNull();
     });
 
     it('clears Scheduler.current after a nonreactive callback throws', () => {
       expect(() => {
-        Reaction.create(() => {
-          Reaction.nonreactive(() => {
+        reaction(() => {
+          nonreactive(() => {
             throw new Error('inner');
           });
         });
       }).toThrow('inner');
-      expect(Reaction.current).toBeNull();
+      expect(currentReaction()).toBeNull();
     });
 
     // one bad afterFlush callback must not silently swallow the rest
     it('continues running later afterFlush callbacks when an earlier one throws', () => {
       const callback2 = vi.fn();
-      Reaction.afterFlush(() => {
+      afterFlush(() => {
         throw new Error('first afterFlush failure');
       });
-      Reaction.afterFlush(callback2);
+      afterFlush(callback2);
 
-      expect(() => Reaction.flush()).toThrow('first afterFlush failure');
+      expect(() => flush()).toThrow('first afterFlush failure');
       expect(callback2).toHaveBeenCalled();
     });
 
@@ -1119,17 +1151,17 @@ describe('Reaction — public API contract', () => {
       const trigger = new Signal(0);
       const survivor = vi.fn();
 
-      Reaction.create(() => {
+      reaction(() => {
         trigger.get();
         if (trigger.peek() > 0) { throw new Error('reaction failure'); }
       });
-      Reaction.create(() => {
+      reaction(() => {
         survivor(trigger.get());
       });
 
       survivor.mockClear();
       trigger.set(1);
-      expect(() => Reaction.flush()).toThrow('reaction failure');
+      expect(() => flush()).toThrow('reaction failure');
       expect(survivor).toHaveBeenCalledWith(1);
     });
   });
@@ -1141,13 +1173,13 @@ describe('Reaction — public API contract', () => {
   describe('firstRun pitfall (documented in controls guide)', () => {
     it('demonstrates that an early-return on firstRun yields no dependencies', () => {
       const value = new Signal('a');
-      const reaction = Reaction.create((r) => {
+      const r = reaction((r) => {
         if (r.firstRun) { return; }
         value.get();
       });
 
       // No dependency registered because value.get() never reached on first run
-      expect(reaction.dependencies.size).toBe(0);
+      expect(r.dependencies.size).toBe(0);
       expect(value.hasDependents()).toBe(false);
     });
 
@@ -1155,14 +1187,14 @@ describe('Reaction — public API contract', () => {
       const value = new Signal('a');
       const seen = [];
 
-      Reaction.create((r) => {
+      reaction((r) => {
         const v = value.get();
         if (r.firstRun) { return; }
         seen.push(v);
       });
 
       value.set('b');
-      Reaction.flush();
+      flush();
       expect(seen).toEqual(['b']);
     });
   });

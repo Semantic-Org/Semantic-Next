@@ -139,6 +139,15 @@ The composition works because the subtemplate's getter-descriptor record looks u
 
 2. **Bench verification** (~1h pair). Run `each-mount-1000`, `bulk-add-500`, `remove-last-100`, `bench-todo` against the prior session's baseline. Lock in the lazy boundary (Open Question 2) based on what bulk-add and remove-last show. If regressions exceed the structural floor, defer field-dep allocation further or accept the trade as documented.
 
+## Completion
+
+> Computed from git log; verify breaks.
+
+- **Estimated:** 3-4h pair
+- **Actual:** ~10-12h active across ~4 bursts over ~32h wall-clock (2026-05-08 09:47 EDT → 2026-05-09 17:44 EDT). Merged as [PR #191](https://github.com/Semantic-Org/Semantic-Next/pull/191) at 2026-05-09 17:45 EDT.
+- **Completed:** 2026-05-09
+- **Delta notes:** ~3x the estimate. Each session 1 land surfaced additional contracts not in the original scope: object-iteration as-mode (gated branch + per-FIELD wakeup for non-array iterables), primitive→object item morphs, item-proxy iteration / stringify correctness (devtools showed the RDC instead of the item), and a JS-expression boundary fix for the unwrap protocol. Several perf attempts on the as-mode dep-allocation hot path were applied and reverted (skip-until-first-mutation, drop-dead-dep-registration) before the final shape — eager primitive dep + lazy object-item dep — settled.
+
 ## Status
 
-Initial scope — design decisions locked (Option A with lazy item-proxy on the RDC, per-field deps via `notifyField`, no compile-time hoisting). Three open questions to resolve in-session, all verifiable by writing tests rather than design discussion.
+Shipped 2026-05-09.

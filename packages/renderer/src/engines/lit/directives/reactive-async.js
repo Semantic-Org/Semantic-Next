@@ -2,7 +2,7 @@ import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
-import { Reaction } from '@semantic-ui/reactivity';
+import { reaction } from '@semantic-ui/reactivity';
 import { each, isClient, isPlainObject, isPromise } from '@semantic-ui/utils';
 
 export class ReactiveAsyncDirective extends AsyncDirective {
@@ -38,7 +38,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       async: this.asyncCondition,
     };
 
-    this.reaction = Reaction.create((computation) => {
+    this.reaction = reaction((computation) => {
       if (!this.isConnected) {
         computation.stop();
         return;

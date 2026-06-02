@@ -1,11 +1,11 @@
-import { Reaction } from '@semantic-ui/reactivity';
+import { guard } from '@semantic-ui/reactivity';
 import { defineBlock } from '../define-block.js';
 import { registerBlock } from './registry.js';
 
 /*
 
   {#rerender} / {#guard} — both compile to AST node.type === 'rerender'.
-  Guard sets node.key (deep-equality-gated re-render via Reaction.guard);
+  Guard sets node.key (deep-equality-gated re-render via guard);
   rerender sets node.expression (any-signal-change re-render via plain
   lookupExpression).
 
@@ -13,7 +13,7 @@ import { registerBlock } from './registry.js';
 
 function trackDeps({ node, data, lookupExpression, self }) {
   if (node.key) {
-    Reaction.guard(() => self.evaluator.lookupTokenValue(node.key, data));
+    guard(() => self.evaluator.lookupTokenValue(node.key, data));
   }
   if (node.expression) {
     lookupExpression(node.expression);

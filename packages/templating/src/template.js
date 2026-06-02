@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { afterFlush, flush, nonreactive, reaction, signal } from '@semantic-ui/reactivity';
 import {
   any,
   assignInPlace,
@@ -153,12 +153,12 @@ export const Template = class Template {
     each(defaultState, (config, name) => {
       const initialValue = getInitialValue(config, name);
       if (config?.options) {
-        // complex config { counter: { value: 0, options: { equalityFunction }}}
-        reactiveState[name] = new Signal(initialValue, config.options);
+        // complex config { counter: { value: 0, options: { equality }}}
+        reactiveState[name] = signal(initialValue, config.options);
       }
       else {
         // simple config i.e. { counter: 0 }
-        reactiveState[name] = new Signal(initialValue);
+        reactiveState[name] = signal(initialValue);
       }
     });
     return reactiveState;
@@ -297,13 +297,13 @@ export const Template = class Template {
 
     if (this.element) {
       const el = this.element;
-      const stateReaction = Reaction.create(() => {
+      const stateReaction = reaction(() => {
         // bind to any signal changing
         each(this.state, (signal) => signal.dependency.depend());
         // run onUpdated callback
         if (this.rendered && !this.destroyed) {
           el.updateScheduled = true;
-          Reaction.afterFlush(this.onUpdated);
+          afterFlush(this.onUpdated);
         }
       });
       this.reactions.push(stateReaction);
@@ -882,13 +882,13 @@ export const Template = class Template {
       $: this.$.bind(this),
       $$: this.$$.bind(this),
       reaction: this.reaction.bind(this),
-      signal: this.signal.bind(this),
+      signal: signal,
       interval: this.createInterval.bind(this),
       timeout: this.createTimeout.bind(this),
       abortSignal: this.abortSignal,
-      afterFlush: Reaction.afterFlush,
-      nonreactive: Reaction.nonreactive,
-      flush: Reaction.flush,
+      afterFlush: afterFlush,
+      nonreactive: nonreactive,
+      flush: flush,
       data: this.data,
       settings: this.settings || element?.settings,
       state: this.state,
@@ -1003,12 +1003,12 @@ export const Template = class Template {
         }
         // own settings first
         if (property in target) {
-          let signal = template.settingsVars.get(property);
-          if (!signal) {
-            signal = new Signal(target[property], { safety: 'reference' });
-            template.settingsVars.set(property, signal);
+          let settingSignal = template.settingsVars.get(property);
+          if (!settingSignal) {
+            settingSignal = signal(target[property], { safety: 'reference' });
+            template.settingsVars.set(property, settingSignal);
           }
-          signal.get(); // track dependency
+          settingSignal.get(); // track dependency
           return target[property];
         }
         // fall back to parent web component settings
@@ -1018,13 +1018,13 @@ export const Template = class Template {
       },
       set: (target, property, value) => {
         target[property] = value;
-        let signal = template.settingsVars.get(property);
-        if (signal) {
-          signal.set(value);
+        let settingSignal = template.settingsVars.get(property);
+        if (settingSignal) {
+          settingSignal.set(value);
         }
         else {
-          signal = new Signal(value, { safety: 'reference' });
-          template.settingsVars.set(property, signal);
+          settingSignal = signal(value, { safety: 'reference' });
+          template.settingsVars.set(property, settingSignal);
         }
         return true;
       },
@@ -1064,12 +1064,8 @@ export const Template = class Template {
 
   // reactions bound with this.reaction will be scoped to template
   // and be removed when the template is destroyed
-  reaction(reaction) {
-    this.reactions.push(Reaction.create(reaction));
-  }
-
-  signal(value, options) {
-    return new Signal(value, options);
+  reaction(cb) {
+    this.reactions.push(reaction(cb));
   }
 
   clearReactions() {

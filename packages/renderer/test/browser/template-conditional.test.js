@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { Reaction } from '@semantic-ui/reactivity';
+import { flush, reaction } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES } from './test-utils.js';
 
@@ -13,8 +13,8 @@ RENDERING_ENGINES.forEach((engine) => {
     function shadowText(el) {
       return el.shadowRoot.innerHTML.replace(/<!--[\s\S]*?-->/g, '').trim();
     }
-    async function flush(el) {
-      Reaction.flush();
+    async function settle(el) {
+      flush();
       await el.updateComplete;
       await new Promise((r) => setTimeout(r, 0));
     }
@@ -43,14 +43,14 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelectorAll('.inner').length).toBe(1);
 
         el.template.state.showInner.set(false);
-        await flush(el);
+        await settle(el);
 
         expect(el.shadowRoot.querySelectorAll('.inner').length).toBe(0);
         // Frame must remain — only inner branch should clear.
         expect(el.shadowRoot.querySelectorAll('.frame').length).toBe(1);
 
         el.template.state.showInner.set(true);
-        await flush(el);
+        await settle(el);
 
         expect(el.shadowRoot.querySelectorAll('.inner').length).toBe(1);
       });
@@ -89,7 +89,7 @@ RENDERING_ENGINES.forEach((engine) => {
 
         for (let i = 1; i <= 3; i++) {
           el.template.state.mode.set(i);
-          await flush(el);
+          await settle(el);
         }
         // After cycling 0→1→2→3, only mode-3 DOM should exist
         expect(el.shadowRoot.querySelectorAll('.m1').length).toBe(0);
@@ -99,7 +99,7 @@ RENDERING_ENGINES.forEach((engine) => {
 
         // Round trip back to zero — m3 must clear, mz must reappear
         el.template.state.mode.set(0);
-        await flush(el);
+        await settle(el);
         expect(el.shadowRoot.querySelectorAll('.m3').length).toBe(0);
         expect(el.shadowRoot.querySelectorAll('.mz').length).toBe(1);
       });
@@ -128,12 +128,12 @@ RENDERING_ENGINES.forEach((engine) => {
 
         // Tear down outer
         el.template.state.outer.set(false);
-        await flush(el);
+        await settle(el);
         const afterRemoval = innerEvalCount;
 
         // Mutate the signal — inner branch reactions must be torn down
         el.template.state.tracked.set('y');
-        await flush(el);
+        await settle(el);
 
         // Inner reaction is dead; tracked mutation must not call innerSpy
         expect(innerEvalCount).toBe(afterRemoval);
@@ -168,7 +168,7 @@ RENDERING_ENGINES.forEach((engine) => {
         // guard key unchanged so the block must not re-evaluate
         // inner per-expression reactivity is independent: the guard gates block re-evaluation, not child reactions
         el.template.state.ticker.set(1);
-        await flush(el);
+        await settle(el);
 
         // ticker changed — inner expression's own Reaction should fire,
         // but guard block itself must not have torn down/rebuilt.
@@ -202,7 +202,7 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelector('.b')).toBeFalsy();
 
         el.template.state.which.set('childB');
-        await flush(el);
+        await settle(el);
         expect(el.shadowRoot.querySelector('.a')).toBeFalsy();
         expect(el.shadowRoot.querySelector('.b')).toBeTruthy();
       });
@@ -223,7 +223,7 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelector('.b')).toBeFalsy();
 
         el.template.state.which.set('beta');
-        await flush(el);
+        await settle(el);
         expect(el.shadowRoot.querySelector('.a')).toBeFalsy();
         expect(el.shadowRoot.querySelector('.b')).toBeTruthy();
       });
@@ -244,7 +244,7 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelectorAll('.ok').length).toBe(0);
 
         el.template.state.which.set('target');
-        await flush(el);
+        await settle(el);
 
         expect(el.shadowRoot.querySelectorAll('.ok').length).toBe(1);
       });
@@ -270,7 +270,7 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelectorAll('.cc').length).toBe(0);
 
         el.template.state.which.set('child');
-        await flush(el);
+        await settle(el);
 
         expect(el.shadowRoot.querySelectorAll('.cc').length).toBe(1);
       });
@@ -302,7 +302,7 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelectorAll('.b').length).toBe(0);
 
         el.template.state.mode.set('b');
-        await flush(el);
+        await settle(el);
 
         expect(el.shadowRoot.querySelectorAll('.a').length).toBe(0);
         expect(el.shadowRoot.querySelectorAll('.b').length).toBe(1);
@@ -372,9 +372,9 @@ RENDERING_ENGINES.forEach((engine) => {
         // Cycle three times: hide → show → hide → show → hide
         for (let i = 0; i < 3; i++) {
           el.template.state.show.set(false);
-          await flush(el);
+          await settle(el);
           el.template.state.show.set(true);
-          await flush(el);
+          await settle(el);
         }
         // Final state: visible
         expect(el.shadowRoot.querySelectorAll('.cv').length).toBe(1);
@@ -415,7 +415,7 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(shadowText(el)).toContain('m-0');
 
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('m-1');
         expect(shadowText(el)).not.toContain('m-0');
@@ -440,7 +440,7 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(shadowText(el)).not.toContain('[NO]');
 
         el.template.state.mode.set(false);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('[NO]');
         expect(shadowText(el)).not.toContain('[YES]');
@@ -448,14 +448,14 @@ RENDERING_ENGINES.forEach((engine) => {
         // Mutate the OPPOSITE branch's source — currently-visible branch
         // should be unaffected.
         el.template.state.trueText.set('YEPP');
-        await flush(el);
+        await settle(el);
         // Still false branch — must show NO, not YEPP
         expect(shadowText(el)).toContain('[NO]');
         expect(shadowText(el)).not.toContain('YEPP');
 
         // Now flip back to true — should now reflect the updated trueText
         el.template.state.mode.set(true);
-        await flush(el);
+        await settle(el);
         expect(shadowText(el)).toContain('[YEPP]');
       });
 
@@ -478,19 +478,19 @@ RENDERING_ENGINES.forEach((engine) => {
 
         // Hide
         el.template.state.showCard.set(false);
-        await flush(el);
+        await settle(el);
         expect(el.shadowRoot.querySelector('.placeholder')).toBeTruthy();
         expect(el.shadowRoot.querySelector('.c')).toBeNull();
 
         // Mutate while hidden
         el.template.state.current.set('two');
-        await flush(el);
+        await settle(el);
         // Still hidden — no card
         expect(el.shadowRoot.querySelector('.c')).toBeNull();
 
         // Show again — should pick up the updated 'current'
         el.template.state.showCard.set(true);
-        await flush(el);
+        await settle(el);
         expect(el.shadowRoot.querySelector('.c')?.textContent).toBe('card-two');
       });
 
@@ -522,7 +522,7 @@ RENDERING_ENGINES.forEach((engine) => {
 
         // Object-literal `data={...}` outside #each is non-reactive.
         el.template.state.version.set(1);
-        await flush(el);
+        await settle(el);
 
         expect(shadowText(el)).toContain('v0');
         expect(shadowText(el)).not.toContain('v1');
@@ -588,14 +588,14 @@ RENDERING_ENGINES.forEach((engine) => {
 
         // Swap to B branch
         el.template.state.useA.set(false);
-        await flush(el);
+        await settle(el);
         expect(shadowText(el)).toContain('[bbb]');
 
         const afterSwap = labelEvalCount;
 
         // Mutate A — A branch is GONE. Its arg-getter should NOT re-fire.
         el.template.state.valueA.set('AAA2');
-        await flush(el);
+        await settle(el);
 
         // labelEvalCount should not have advanced past afterSwap
         // (B branch reads valueB, not valueA; A branch was torn down).
@@ -628,7 +628,7 @@ RENDERING_ENGINES.forEach((engine) => {
 
         // Flip branch — rerender block GONE
         el.template.state.showRerender.set(false);
-        await flush(el);
+        await settle(el);
 
         expect(el.shadowRoot.querySelector('.r')).toBeNull();
         expect(el.shadowRoot.querySelector('.alt')).toBeTruthy();
@@ -636,16 +636,16 @@ RENDERING_ENGINES.forEach((engine) => {
 
         // Bump key — rerender block is gone, must NOT fire
         el.template.state.key.set(1);
-        await flush(el);
+        await settle(el);
         // deep mutation also must NOT fire (per-expression reaction is gone)
         el.template.state.deep.set('changed');
-        await flush(el);
+        await settle(el);
 
         expect(rerenderEvalCount).toBe(afterRemoval);
 
         // Bring back — rerender block re-evaluates the inner expression
         el.template.state.showRerender.set(true);
-        await flush(el);
+        await settle(el);
         expect(rerenderEvalCount).toBeGreaterThan(afterRemoval);
         expect(el.shadowRoot.querySelector('.r')?.textContent).toBe('changed');
       });
@@ -672,7 +672,7 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelector('.hl')).toBeNull();
 
         el.template.state.hot.set(true);
-        await flush(el);
+        await settle(el);
 
         expect(el.shadowRoot.querySelector('.hl')).toBeTruthy();
         expect(el.shadowRoot.querySelector('.nh')).toBeNull();
@@ -680,7 +680,7 @@ RENDERING_ENGINES.forEach((engine) => {
 
         // Switch back — clean swap, no orphan
         el.template.state.hot.set(false);
-        await flush(el);
+        await settle(el);
         expect(el.shadowRoot.querySelector('.nh')).toBeTruthy();
         expect(el.shadowRoot.querySelector('.hl')).toBeNull();
       });
@@ -717,7 +717,7 @@ RENDERING_ENGINES.forEach((engine) => {
 
         // Mutate the parent — snippet reflects new value (args are lazy)
         el.template.state.val.set('updated');
-        await flush(el);
+        await settle(el);
         expect(el.shadowRoot.querySelector('.w').textContent).toBe('updated');
       });
 
@@ -760,14 +760,14 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelector('.wrap').children.length).toBe(0);
 
         el.template.state.b.set(true);
-        await flush(el);
+        await settle(el);
         expect(el.shadowRoot.querySelector('.b')).toBeTruthy();
         expect(el.shadowRoot.querySelector('.a')).toBeNull();
         expect(el.shadowRoot.querySelector('.c')).toBeNull();
 
         // All falsy again → empty, no stranded DOM
         el.template.state.b.set(false);
-        await flush(el);
+        await settle(el);
         expect(el.shadowRoot.querySelector('.wrap').children.length).toBe(0);
       });
     });

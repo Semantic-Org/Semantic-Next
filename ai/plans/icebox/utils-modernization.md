@@ -80,4 +80,4 @@ None. Can land anytime — breaking changes batch naturally with other utils cha
 
 ## Status
 
-`initial` — design decisions pending. Created 2026-04-16 off the utils review following the signal-safety PR.
+Iceboxed 2026-05-28. Partial work shipped in [PR #208](https://github.com/Semantic-Org/Semantic-Next/pull/208) (noop/identity split, `returnsX` family of constant-return exports, `hasProperty` reduced to a thin re-export of `Object.hasOwn`). Remaining decisions and additions deferred: `any` removal, `onlyKeys` removal, `first`/`last` signature split into `firstN`/`lastN`, and additions of `pipe`/`tap`/`attempt`/`constant`. Pull back out when the next utils-touching release window opens.

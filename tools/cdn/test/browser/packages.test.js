@@ -40,34 +40,33 @@ describe('CDN Package: @semantic-ui/reactivity', () => {
     expect(flag.get()).toBe(true);
   });
 
-  it('Reaction — tracks signal dependencies', async () => {
-    const { Signal, Reaction } = await cdnImport('reactivity');
+  it('reaction tracks signal dependencies', async () => {
+    const { Signal, reaction, flush } = await cdnImport('reactivity');
 
     const name = new Signal('Alice');
     let tracked;
 
-    Reaction.create(() => {
+    reaction(() => {
       tracked = name.get();
     });
-    Reaction.flush();
     expect(tracked).toBe('Alice');
 
     name.set('Bob');
-    Reaction.flush();
+    flush();
     expect(tracked).toBe('Bob');
   });
 
-  it('Signal.computed — derives from multiple signals', async () => {
-    const { Signal, Reaction } = await cdnImport('reactivity');
+  it('computed derives from multiple signals', async () => {
+    const { Signal, computed, flush } = await cdnImport('reactivity');
 
     const a = new Signal(3);
     const b = new Signal(4);
-    const sum = Signal.computed(() => a.get() + b.get());
+    const sum = computed(() => a.get() + b.get());
 
     expect(sum.get()).toBe(7);
 
     a.set(10);
-    Reaction.flush();
+    flush();
     expect(sum.get()).toBe(14);
   });
 });

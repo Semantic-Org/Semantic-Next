@@ -384,4 +384,4 @@ None — independent of FGR work, of expression-block-unification, and of define
 
 ## Status
 
-Scoped — three items, each with concrete code, verification gates, and Lit-source-grounded patterns. Ready to execute. Can ship as one PR or split (Item 3 standalone is the recommended decomposition for clean bench attribution).
+Iceboxed 2026-05-28. None of the three items shipped — removed from the active roadmap's Parallel slot. Plan content remains valid and ready to execute. Item 3 (unsafeHTML dirty-check) is the highest-impact and is the recommended standalone ship when bench pressure or a renderer-touching window justifies pulling it back out.

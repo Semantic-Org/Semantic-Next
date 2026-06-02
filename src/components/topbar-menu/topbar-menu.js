@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { Signal } from '@semantic-ui/reactivity';
+import { signal } from '@semantic-ui/reactivity';
 import { any, first, isArray, isFunction } from '@semantic-ui/utils';
 import { Icon } from '../../primitives/index.js';
 import css from './topbar-menu.css?raw';
@@ -12,7 +12,7 @@ const defaultSettings = {
 
 const createComponent = function({ self, settings }) {
   return {
-    url: new Signal(settings.activeURL),
+    url: signal(settings.activeURL),
     getMenu() {
       return settings.menu;
     },
