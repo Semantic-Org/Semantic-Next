@@ -1,4 +1,4 @@
-import { Reaction } from '@semantic-ui/reactivity';
+import { getSource, guard, nonreactive } from '@semantic-ui/reactivity';
 import {
   arrayFromObject,
   capitalize,
@@ -217,13 +217,13 @@ export const TemplateHelpers = {
     debugger;
   },
   debugReactivity() {
-    Reaction.getSource();
+    getSource();
   },
   guard: (value) => {
-    return Reaction.guard(wrapFunction(value));
+    return guard(wrapFunction(value));
   },
   nonreactive: (value) => {
-    return Reaction.nonreactive(wrapFunction(value));
+    return nonreactive(wrapFunction(value));
   },
 };
 

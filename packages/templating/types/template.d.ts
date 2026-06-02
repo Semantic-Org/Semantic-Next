@@ -217,9 +217,8 @@ export interface CallParams<
    * count.value = 5; // set value to 5
    *
    * @see https://next.semantic-ui.com/docs/guides/reactivity#signals
-   * @see {@link Template.signal}
    */
-  signal: Template['signal'];
+  signal: <T>(value: T, options?: SignalOptions<T>) => Signal<T>;
 
   /**
    * Executes a callback after all pending reactive updates have been processed.
@@ -868,14 +867,6 @@ export class Template {
    * @param reaction - The function to execute as a reactive effect.
    */
   reaction(reaction: () => void): void;
-
-  /**
-   * Creates a reactive signal.
-   * @param value - The initial value of the signal.
-   * @param options - Options for the signal.
-   * @returns The signal.
-   */
-  signal<T>(value: T, options?: SignalOptions<T>): Signal<T>;
 
   /**
    * Clears all reactions associated with this template.

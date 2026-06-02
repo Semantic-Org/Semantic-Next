@@ -1,4 +1,4 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, Signal } from '@semantic-ui/reactivity';
 import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -441,10 +441,10 @@ describe('Subtemplate settings reactivity', () => {
     });
     let runs = 0;
     let observed;
-    let reaction;
+    let thisReaction;
     try {
       child.initialize();
-      reaction = Reaction.create(() => {
+      thisReaction = reaction(() => {
         runs++;
         observed = child.settings.theme;
       });
@@ -452,13 +452,13 @@ describe('Subtemplate settings reactivity', () => {
       expect(observed).toBe('light');
 
       child.settings.theme = 'dark';
-      Reaction.flush();
+      flush();
 
       expect(runs).toBe(2);
       expect(observed).toBe('dark');
     }
     finally {
-      reaction?.stop();
+      thisReaction?.stop();
     }
   });
 
@@ -467,21 +467,21 @@ describe('Subtemplate settings reactivity', () => {
       childDefaultSettings: { theme: 'light' },
     });
     let runs = 0;
-    let reaction;
+    let thisReaction;
     try {
       child.initialize();
-      reaction = Reaction.create(() => {
+      thisReaction = reaction(() => {
         runs++;
         child.settings.theme;
       });
       expect(runs).toBe(1);
 
       child.updateSubtemplateSettings({ theme: 'dark' });
-      Reaction.flush();
+      flush();
       expect(runs).toBe(2);
     }
     finally {
-      reaction?.stop();
+      thisReaction?.stop();
     }
   });
 
@@ -494,10 +494,10 @@ describe('Subtemplate settings reactivity', () => {
       childDefaultSettings: { todo: { completed: false } },
     });
     let runs = 0;
-    let reaction;
+    let thisReaction;
     try {
       child.initialize();
-      reaction = Reaction.create(() => {
+      thisReaction = reaction(() => {
         runs++;
         const todo = child.settings.todo;
         void todo?.completed;
@@ -505,16 +505,16 @@ describe('Subtemplate settings reactivity', () => {
       expect(runs).toBe(1);
 
       child.settings.todo.completed = true;
-      Reaction.flush();
+      flush();
       expect(runs).toBe(1);
 
       // A structurally distinct replacement does trigger.
       child.settings.todo = { completed: true, label: 'new' };
-      Reaction.flush();
+      flush();
       expect(runs).toBe(2);
     }
     finally {
-      reaction?.stop();
+      thisReaction?.stop();
     }
   });
 });

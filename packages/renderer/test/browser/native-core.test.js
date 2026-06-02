@@ -15,7 +15,7 @@
 */
 
 import { defineComponent } from '@semantic-ui/component';
-import { Reaction } from '@semantic-ui/reactivity';
+import { flush, reaction } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 const ENGINE = 'native';
@@ -793,7 +793,7 @@ describe('ReactionScope hierarchical cleanup', () => {
     await new Promise(r => setTimeout(r, 10));
 
     el.template?.state?.n?.set?.(1);
-    Reaction.flush();
+    flush();
     await new Promise(r => setTimeout(r, 10));
 
     expect(evaluated).toBe(baseline);

@@ -9,7 +9,7 @@
 // light DOM is the right setup — the parent owns the element and the child
 // shares it.
 
-import { Reaction } from '@semantic-ui/reactivity';
+import { flush, reaction } from '@semantic-ui/reactivity';
 import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -174,9 +174,9 @@ describe('Subtemplate settings — reactivity in browser context', () => {
     });
     let runs = 0;
     let observed;
-    let reaction;
+    let thisReaction;
     try {
-      reaction = Reaction.create(() => {
+      thisReaction = reaction(() => {
         runs++;
         observed = fixture.child.settings.theme;
       });
@@ -184,12 +184,12 @@ describe('Subtemplate settings — reactivity in browser context', () => {
       expect(observed).toBe('light');
 
       fixture.child.updateSubtemplateSettings({ theme: 'dark' });
-      Reaction.flush();
+      flush();
       expect(runs).toBe(2);
       expect(observed).toBe('dark');
     }
     finally {
-      reaction?.stop();
+      thisReaction?.stop();
       fixture.cleanup();
     }
   });

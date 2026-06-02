@@ -2,7 +2,7 @@ import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive, PartType } from 'lit/directive.js';
 
-import { Reaction } from '@semantic-ui/reactivity';
+import { guard, reaction } from '@semantic-ui/reactivity';
 import { isClient, wrapFunction } from '@semantic-ui/utils';
 
 import { serializeContent } from './serialize-content.js';
@@ -30,7 +30,7 @@ export class ReactiveRerenderDirective extends AsyncDirective {
     };
 
     if (isClient) {
-      this.reaction = Reaction.create((computation) => {
+      this.reaction = reaction((computation) => {
         if (!this.isConnected) {
           computation.stop();
           return;
@@ -40,7 +40,7 @@ export class ReactiveRerenderDirective extends AsyncDirective {
         // {#guard expression} -> key=expression
         // {#rerender key=expression} -> key=expression
         if (this.condition.keyString) {
-          Reaction.guard(() => this.getValue(this.condition.key()));
+          guard(() => this.getValue(this.condition.key()));
         }
         if (this.condition.expressionString) {
           this.getValue(this.condition.expression());

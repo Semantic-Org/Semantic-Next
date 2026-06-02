@@ -1,6 +1,6 @@
 import { defineComponent, renderToString } from '@semantic-ui/component';
 import { $ } from '@semantic-ui/query';
-import { Reaction } from '@semantic-ui/reactivity';
+import { flush, reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -959,7 +959,7 @@ describe('SSR hydration — post-hydration settings changes', () => {
 
     const updated = $(el).onNext('updated');
     el.settings.color = 'red';
-    Reaction.flush();
+    flush();
     el.requestUpdate();
     await updated;
 

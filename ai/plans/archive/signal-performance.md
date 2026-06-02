@@ -154,4 +154,11 @@ The release-vs-defer call is captured in `release-0-18-0.md`'s open decisions.
 
 ## Status
 
-Scoped. API design finalized. Implementation in flight via [PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) ("Feat: Freeze Signals by Default") — open, perf story unresolved (see `## Bench Results`). The default flip from `'clone'` to `'freeze'` is gated on closing the regressions. Release inclusion (0.18.0 vs 0.19.0) is the open call captured in `release-0-18-0.md`.
+Archived 2026-05-28. The `safety` preset API shipped via [PR #213](https://github.com/Semantic-Org/Semantic-Next/pull/213) on 2026-05-21 with `reference` as the chosen default. The freeze-by-default arc in [PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) is not merging — reference is faster than freeze on the list-reallocation paths that surfaced in the bench bisect, and freeze adds cognitive overhead for end users via unintuitive throw-on-mutate errors.
+
+## Completion
+
+- **Estimated:** ~4-6h pair (Session 1 + Session 2 in original sessions plan)
+- **Actual:** safety preset API shipped via [PR #213](https://github.com/Semantic-Org/Semantic-Next/pull/213) on 2026-05-21 with `reference` default. Freeze-by-default arc in [PR #150](https://github.com/Semantic-Org/Semantic-Next/pull/150) abandoned.
+- **Completed:** 2026-05-21 (preset API shipped); freeze arc closed 2026-05-28
+- **Delta notes:** The plan split cleanly between what shipped and what didn't. Item 1 (`safety` preset system) landed with `'reference'` as the default rather than `'freeze'`. The deep-freeze path remains available via opt-in but is not the default — bench data showed reference reliably faster on list churn while the freeze trade only paid off on read-amortized object access. Throw-on-mutate under freeze also creates an unintuitive error class for end users, which weighed against the default flip. The freeze-specific implementation work in PR #150 is closed out.

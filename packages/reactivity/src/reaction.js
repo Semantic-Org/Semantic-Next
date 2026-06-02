@@ -1,25 +1,18 @@
-import { clone, isEqual } from '@semantic-ui/utils';
-import { Dependency } from './dependency.js';
-import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
+import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
 
 export class Reaction {
-  static create(callback, options = {}) {
-    const reaction = new Reaction(callback, options);
-    if (options.firstRun !== false) {
-      reaction.run();
-    }
-    return reaction;
-  }
-
-  constructor(callback, { context } = {}) {
+  constructor(callback, { context, firstRun = true } = {}) {
     this.callback = callback;
     this.dependencies = new Set();
-    this.cleanups = null; // lazy — most reactions register none
+    this.cleanups = null; // lazy, most reactions register none
     this.firstRun = true;
     this.active = true;
     if (context && isTracing()) {
       this.setContext(context);
+    }
+    if (firstRun) {
+      this.run();
     }
   }
 
@@ -114,50 +107,5 @@ export class Reaction {
     this.dependencies.forEach(dep => dep.remove(this));
     this.dependencies.clear();
     this.fireCleanups();
-  }
-
-  // Static proxies for developer experience
-  static get current() {
-    return Scheduler.current;
-  }
-
-  // DX pass throughs
-  static flush = Scheduler.flush;
-  static scheduleFlush = Scheduler.scheduleFlush;
-  static afterFlush = Scheduler.afterFlush;
-  static getSource = Scheduler.getSource;
-  static setTracing = setTracing;
-  static isTracing = isTracing;
-  static setStackCapture = setStackCapture;
-  static isStackCapture = isStackCapture;
-
-  static nonreactive(func) {
-    const previousReaction = Scheduler.current;
-    Scheduler.current = null;
-    try {
-      return func();
-    }
-    finally {
-      Scheduler.current = previousReaction;
-    }
-  }
-
-  static guard(f, equalCheck = isEqual) {
-    if (!Scheduler.current) {
-      return f();
-    }
-    let dep = new Dependency();
-    let value, newValue;
-    dep.depend();
-    const comp = new Reaction(() => {
-      newValue = f();
-      if (!comp.firstRun && !equalCheck(newValue, value)) {
-        dep.changed();
-      }
-      value = newValue;
-    });
-    Scheduler.current.onCleanup(() => comp.stop());
-    comp.run();
-    return newValue;
   }
 }
