@@ -1,7 +1,7 @@
 import { Dependency } from '../dependency.js';
+import { Reaction } from '../reaction.js';
 import { Scheduler } from '../scheduler.js';
 import { Signal } from '../signal.js';
-import { reaction } from './create.js';
 
 // shared backing for derive() and computed(). weak ref on the derived signal
 // so it stops self-driving once nothing else holds it. parent-reaction
@@ -9,7 +9,7 @@ import { reaction } from './create.js';
 const createDerivedSignal = (reactionBody, options) => {
   const derivedSignal = new Signal(undefined, options);
   const derivedRef = new WeakRef(derivedSignal);
-  const backingReaction = reaction(() => {
+  const backingReaction = new Reaction(() => {
     const liveSignal = derivedRef.deref();
     if (!liveSignal) {
       backingReaction.stop();
@@ -50,7 +50,7 @@ export const match = (source, matchFn = (key, value) => key === value) => {
   let currentValue = source.peek();
   let matcherRef;
 
-  const backingReaction = reaction(() => {
+  const backingReaction = new Reaction(() => {
     const nextValue = source.get();
     if (matcherRef && !matcherRef.deref()) {
       backingReaction.stop();
