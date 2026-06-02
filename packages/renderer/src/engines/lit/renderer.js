@@ -1,6 +1,6 @@
 import { html, svg } from 'lit';
 
-import { nonreactive, Signal } from '@semantic-ui/reactivity';
+import { nonreactive, signal } from '@semantic-ui/reactivity';
 import {
   assignInPlace,
   each,
@@ -57,7 +57,7 @@ export class LitRenderer {
     this.inheritsData = inheritsData; // for subtrees lets us know if this needs to have data updates downstream
     this.protectedKeys = protectedKeys; // keys scoped to this subtree (loop vars, async results) that parent updates cannot overwrite
     this.id = LitRenderer.getID({ ast, data, isSVG });
-    this.dataVersion = new Signal(0, { safety: 'none' });
+    this.dataVersion = signal(0, { safety: 'none' });
 
     // Delegate expression evaluation
     this.evaluator = new ExpressionEvaluator({
