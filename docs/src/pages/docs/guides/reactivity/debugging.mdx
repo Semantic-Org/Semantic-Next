@@ -5,7 +5,6 @@ title: Debugging Reactivity
 description: Tools and techniques for debugging reactive code.
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
-import { Reaction } from '@semantic-ui/reactivity'; // Added import
 
 Debugging reactive code can sometimes be challenging because the cause (a [Signal](/docs/guides/reactivity/signals) change) and effect (a [Reaction](/docs/guides/reactivity/reactions) running) are decoupled.
 
@@ -16,7 +15,7 @@ Semantic UI provides several tools to help trace reactive updates.
 
 ### Current Reaction
 
-When debugging JavaScript code using developer tools you can breakpoint and look at [`Reaction.current`](/docs/api/reactivity/reaction#current) which always holds a reference to the `Reaction` instance that is currently executing its callback.
+When debugging JavaScript code using developer tools you can breakpoint and look at [`Reaction.current`](/docs/api/reactivity/reaction#current), which always holds a reference to the `Reaction` instance that is currently executing its callback.
 
 ```javascript
 
@@ -30,14 +29,14 @@ someCustomCode() {
 
 ### Reactivity Source
 
-To determine *what* caused the current reaction to run, use [`Reaction.getSource()`](/docs/api/reactivity/reaction#getsource).
+To determine *what* caused the current reaction to run, use [`getSource()`](/docs/api/reactivity/debugging#getsource).
 
 When a signal updates its value, it stores a stack trace which can be used to determine the exact location which caused the reaction to rerun.
 
 ```javascript
 // why are you running??
 someCustomCode() {
-  console.log(Reaction.getSource())
+  console.log(getSource())
   /* outputs stack trace of signal set() for example:
 
     at IntersectionObserver.onIntersection /src/components/ InPageMenu/InPageMenu.js:244:13)
@@ -51,9 +50,9 @@ someCustomCode() {
 
 When you are creating a template you might wonder why a particular condition is rerunning.
 
-You can use the [Template helper](/docs/guides/templates/helpers) `debugReactivity` to run `Reaction.getSource()` inside the render function.
+You can use the [Template helper](/docs/guides/templates/helpers) `debugReactivity` to run `getSource()` inside the render function.
 
-This will trigger a `debugger;` breakpoint at that point in the template rendering process and also call [`Reaction.getSource()`](/docs/api/reactivity/reaction#getsource) in the console, helping you trace template updates.
+This will trigger a `debugger;` breakpoint at that point in the template rendering process and also call [`getSource()`](/docs/api/reactivity/debugging#getsource) in the console, helping you trace template updates.
 
 ```sui
 {#if someCondition}

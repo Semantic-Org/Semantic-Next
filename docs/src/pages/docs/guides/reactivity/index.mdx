@@ -25,7 +25,7 @@ A [Reaction](/docs/guides/reactivity/reactions) is a function designed to re-run
 
 ### Dependent Signals
 
-[Dependent signals](/docs/guides/reactivity/dependent-signals) let you create reactive values that automatically update based on other signals. Use `signal.derive()` to transform a single signal, or `Signal.computed()` to combine multiple signals into a computed value.
+[Dependent signals](/docs/guides/reactivity/dependent-signals) let you create reactive values that automatically update based on other signals. Use `signal.derive()` to transform a single signal, or `computed()` to combine multiple signals into a computed value.
 
 
 > **Naming Reactivity** Signals implementations vary in their naming conventions for a reactive context. In Semantic UI it is called a [`reaction`](/docs/guides/reactivity/reactions),    in the [signals proposal](https://github.com/tc39/proposal-signals) a `watcher`, in [Preact](https://preactjs.com/guide/v10/signals/) a `computation` and in [Lit](https://lit.dev/docs/data/signals/) simply `watch`.
@@ -38,11 +38,11 @@ A [Reaction](/docs/guides/reactivity/reactions) is a function designed to re-run
 The [`@semantic-ui/reactivity`](/docs/api/reactivity) package can be used independently from the component framework. It exports core classes [`Signal`](/docs/api/reactivity/signal), [`Reaction`](/docs/api/reactivity/reaction), and [`Dependency`](/docs/api/reactivity/dependency).
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { signal, reaction } from '@semantic-ui/reactivity';
 
-const counter = new Signal(1);
+const counter = signal(1);
 
-Reaction.create(() => {
+reaction(() => {
   console.log(counter.value);
   // outputs 1 2
 });
@@ -84,15 +84,15 @@ You might use a simple system like:
 
 This could be represented in code like this:
 ```javascript
-const today = new Signal( new Date() );
+const today = signal(new Date());
 
 // change signal
-const newDay() => {
+const newDay = () => {
   today.set(new Date());
-}
+};
 
 // rerun reaction
-const checkBirthdays = Reaction.create(() => {
+const checkBirthdays = reaction(() => {
   const currentDay = today.get(); // depend on day of year
 
   // check birthdays
@@ -101,7 +101,7 @@ const checkBirthdays = Reaction.create(() => {
       happyBirthday(person.name);
     }
   });
-}
+});
 ```
 
 <PlaygroundExample id="birthday" direction="horizontal"></PlaygroundExample>

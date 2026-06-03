@@ -1,127 +1,62 @@
 ---
 layout: '@layouts/Guide.astro'
-icon: activity
+icon: git-branch
 title: Dependent Signals
-description: Creating signals that depend on other signals for their values
+description: Signals computed from other signals
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Dependent signals are [signals](/docs/guides/reactivity/signals) whose values automatically update when other signals change. Semantic UI provides two methods for creating dependent signals:
+A dependent signal computes its value from other signals and caches it, recomputing only when an input it actually read changes. Three shapes cover the common cases.
 
-- **[`signal.derive()`](/docs/api/reactivity/signal#derive)** - Transform a single signal into a new signal
-- **[`Signal.computed()`](/docs/api/reactivity/signal#computed)** - Combine multiple signals into a computed value
+## derive — one source
 
-## Derived Signals
+`signal.derive(fn)` transforms a single signal. The result tracks its source and recomputes when that source changes.
+
+```javascript
+const items = signal(['apple', 'banana', 'cherry']);
+const count = items.derive(list => list.length);
+
+count.get(); // 3
+items.push('date');
+count.get(); // 4
+```
 
 <PlaygroundExample id="reactive-derived" />
 
-Use [`derive()`](/docs/api/reactivity/signal#derive) to create a new signal that transforms the value of a single source signal. The derived signal automatically updates whenever the source signal changes.
+## computed — many sources
 
-```javascript title="Basic Derived Signal"
-import { Signal } from '@semantic-ui/reactivity';
+`computed(fn)` reads several signals in its body and recomputes when any of them change.
 
-const numbers = new Signal([1, 2, 3, 4, 5]);
+```javascript
+const price = signal(10);
+const quantity = signal(3);
+const total = computed(() => price.get() * quantity.get());
 
-// Derive the array length
-const count = numbers.derive(arr => arr.length);
-
-console.log(count.get()); // 5
-
-// When numbers changes, count updates automatically
-numbers.push(6);
-console.log(count.get()); // 6
+total.get(); // 30
+quantity.set(4);
+total.get(); // 40
 ```
-
-### When to Use Derived Signals
-
-Use `derive()` when you need to:
-- Transform a single signal's value into a different format
-- Extract specific properties from objects or arrays
-- Create calculated values based on a single data source
-
-```javascript title="Common Derived Signal Patterns"
-const users = new Signal([
-  { name: 'Alice', active: true },
-  { name: 'Bob', active: false }
-]);
-
-// Extract active users
-const activeUsers = users.derive(list => 
-  list.filter(user => user.active)
-);
-
-// Get user names as a string
-const userNames = users.derive(list => 
-  list.map(user => user.name).join(', ')
-);
-```
-
-## Computed Signals
 
 <PlaygroundExample id="reactive-computed" />
 
-Use [`Signal.computed()`](/docs/api/reactivity/signal#computed) to create a signal that depends on multiple other signals. The computed signal recalculates whenever any of its dependencies change.
+> `derive` hands you the source value, `computed` reads its own signals. Use `derive` for a one-to-one transform, `computed` when the value combines several.
 
-```javascript title="Basic Computed Signal"
-import { Signal } from '@semantic-ui/reactivity';
+## match — one of many
 
-const firstName = new Signal('John');
-const lastName = new Signal('Doe');
+`match(source)` returns a selector for the "highlight one of N" pattern: a selected row, the active tab, the current route. Reading a key inside a reaction subscribes only that key, so changing the source re-runs the keys whose state flipped, not all N.
 
-// Compute full name from multiple signals
-const fullName = Signal.computed(() => 
-  `${firstName.get()} ${lastName.get()}`
-);
+```javascript
+const selected = signal('inbox');
+const isSelected = match(selected);
 
-console.log(fullName.get()); // "John Doe"
+isSelected('inbox'); // true
+isSelected('drafts'); // false
 
-// When either signal changes, fullName updates automatically
-firstName.set('Jane');
-console.log(fullName.get()); // "Jane Doe"
+selected.set('drafts'); // re-runs only 'inbox' and 'drafts'
 ```
 
-### When to Use Computed Signals
+<PlaygroundExample id="reactive-match" />
 
-Use `Signal.computed()` when you need to:
-- Combine values from multiple signals
-- Perform calculations that depend on several reactive sources
-- Create conditional values based on multiple state signals
+## Teardown
 
-```javascript title="Common Computed Signal Patterns"
-const quantity = new Signal(3);
-const price = new Signal(10.99);
-const taxRate = new Signal(0.08);
-
-// Calculate total from multiple sources
-const total = Signal.computed(() => {
-  const subtotal = quantity.get() * price.get();
-  const tax = subtotal * taxRate.get();
-  return subtotal + tax;
-});
-
-// Conditional computation
-const isExpensive = Signal.computed(() => 
-  total.get() > 50
-);
-```
-
-## Integration with Reactions
-
-Both derived and computed signals work seamlessly with [reactions](/docs/guides/reactivity/reactions), allowing you to create reactive side effects based on dependent values.
-
-```javascript title="Reacting to Dependent Signals"
-import { Signal, Reaction } from '@semantic-ui/reactivity';
-
-const items = new Signal(['apple', 'banana']);
-const itemCount = items.derive(arr => arr.length);
-
-// React to changes in derived signal
-Reaction.create(() => {
-  console.log(`You have ${itemCount.get()} items`);
-});
-
-// Adding items triggers the reaction
-items.push('cherry'); // Logs: "You have 3 items"
-```
-
-> **Performance** Both `derive()` and `computed()` create efficient reactive dependencies that only update when their source values actually change, thanks to Semantic UI's built-in equality checking.
+Each of these runs a reaction internally. Inside a component it stops automatically with the component. Created standalone, it self-stops once nothing references it, or call `.stop()` to tear it down immediately.

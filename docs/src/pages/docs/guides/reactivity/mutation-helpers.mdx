@@ -14,7 +14,7 @@ A very common pattern when dealing with [signals](/docs/guides/reactivity/signal
 This can create a lot of boilerplate because you will need to access the value nonreactively (e.g. using [`.peek()`](/docs/api/reactivity/signal#peek)) and then update the underlying value before finally setting the value again (e.g. using [`.set()`](/docs/api/reactivity/signal#set)).
 
 ```javascript title="Without Helpers"
-const numbers = new Signal([1, 2, 3]); // Assuming Signal is imported
+const numbers = signal([1, 2, 3]); // Assuming signal is imported
 const newNumbers = numbers.peek();
 newNumbers.push(4);
 numbers.set(newNumbers);
@@ -23,7 +23,7 @@ numbers.set(newNumbers);
 Helpers handle updating an underlying reactive value without having to retrieve and manipulate the value.
 
 ```javascript title="With Helpers"
-const numbers = new Signal([1, 2, 3]); // Assuming Signal is imported
+const numbers = signal([1, 2, 3]); // Assuming signal is imported
 numbers.push(4); // Uses the push helper
 ```
 

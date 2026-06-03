@@ -1,39 +1,39 @@
 ---
 layout: '@layouts/Guide.astro'
-icon: activity
+icon: cpu
 title: Signals
 description: Creating and managing reactive state primitives (Signals)
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-[Signals](/docs/api/reactivity/signal) are the core primitive for reactive state in Semantic UI. They hold a value and automatically track dependencies, notifying dependent computations--[Reactions](/docs/guides/reactivity/reactions)--when their value changes.
+[Signals](/api/reactivity/signal) are the core primitive for reactive state in Semantic UI. They hold a value and automatically track dependencies, notifying dependent computations--[Reactions](/reactivity/reactions)--when their value changes.
 
 ## Creating Signals
 
-To create a signal import `Signal` from the [`@semantic-ui/reactivity`](/docs/api/reactivity) package then initialize it with a value.
+To create a signal import `signal` from the [`@semantic-ui/reactivity`](/api/reactivity) package then initialize it with a value.
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
+import { signal } from '@semantic-ui/reactivity';
 
 // Create signals for different data types
-const counter = new Signal(0);
-const userName = new Signal('Alice');
-const isActive = new Signal(true);
-const items = new Signal(['apple', 'banana']);
-const userProfile = new Signal({ id: 1, name: 'Bob' });
+const counter = signal(0);
+const userName = signal('Alice');
+const isActive = signal(true);
+const items = signal(['apple', 'banana']);
+const userProfile = signal({ id: 1, name: 'Bob' });
 ```
 
 ## Triggering Reactivity
 
 
-A Signal's value can be accessed using [`.get()`](/docs/api/reactivity/signal#get) or [`.value`](/docs/api/reactivity/signal#value).
+A Signal's value can be accessed using [`.get()`](/api/reactivity/signal#get) or [`.value`](/api/reactivity/signal#value).
 
 ```javascript title="Accessing Reactive Values"
 console.log(counter.get()); // Output: 0
 console.log(userName.value); // Output: Alice
 ```
 
-If this occurs *within a reactive context* (like a [Reaction](/docs/guides/reactivity/reactions) or a [template expression](/docs/guides/templates/expressions)) it will establish a reactive dependency and rerun the function whenever the value is updated.
+If this occurs *within a reactive context* (like a [Reaction](/reactivity/reactions) or a [template expression](/templates/expressions)) it will establish a reactive dependency and rerun the function whenever the value is updated.
 
 
 ```javascript title="Triggering Reactivity"
@@ -42,12 +42,12 @@ reaction(() => {
 });
 ```
 
-> **Controlling Reactivity** There are many ways to control the reactivity of signals in your app. For instance to access a Signal's value *without* creating a dependency use the [`.peek()`](/docs/api/reactivity/signal#peek) method. See [Reactive Performance](/docs/guides/reactivity/performance) and [Reactive Controls](/docs/guides/reactivity/controls) for more information.
+> **Controlling Reactivity** There are many ways to control the reactivity of signals in your app. For instance to access a Signal's value *without* creating a dependency use the [`.peek()`](/api/reactivity/signal#peek) method. See [Reactive Performance](/reactivity/performance) and [Reactive Controls](/reactivity/controls) for more information.
 
 
 ## Updating Signal Values
 
-Update a Signal's value using the [`.set()`](/docs/api/reactivity/signal#set) method or by directly assigning to the [`.value`](/docs/api/reactivity/signal#value) property. This will notify any dependent Reactions to re-run.
+Update a Signal's value using the [`.set()`](/api/reactivity/signal#set) method or by directly assigning to the [`.value`](/api/reactivity/signal#value) property. This will notify any dependent Reactions to re-run.
 
 ```javascript
 // Using .set()
@@ -59,7 +59,7 @@ userName.value = 'Charlie';
 console.log(userName.value); // Output: Charlie
 ```
 
-Semantic UI also provides convenient [mutation helpers](/docs/guides/reactivity/mutation-helpers) directly on Signal instances for common update patterns, especially for arrays and objects.
+Semantic UI also provides convenient [mutation helpers](/reactivity/mutation-helpers) directly on Signal instances for common update patterns, especially for arrays and objects.
 
 ```javascript
 // Using a mutation helper
@@ -67,62 +67,27 @@ counter.increment(); // Equivalent to counter.set(counter.peek() + 1)
 console.log(counter.get()); // Output: 2
 ```
 
-## Signals and Foreign References
-
-By default, Signals deep-freeze object and array values on `set()`. This catches the most common reactivity bug — mutating a value in place without notifying subscribers — by throwing a `TypeError` at the mutation site instead of silently dropping the update.
-
-Deep-freezing has one important caveat: if the object you store is *also held internally by a library*, freezing it will break that library the next time it mutates its own reference.
-
-> **When you need `{ safety: 'reference' }`**: if you're storing an object in a signal that you did not construct yourself — anything returned from a library, fetched from an API, or passed through a callback — default to `safety: 'reference'`. Freeze is the right default for state your own code owns end-to-end. For borrowed data, `reference` avoids poisoning the lender's internal references.
-
-### Worked Example: Search Index
-
-Pagefind returns result objects and continues to use them internally — subsequent `.data()` calls on each result mutate pagefind's own cached state. Storing the results under the default freeze mode freezes pagefind's internal objects and later crashes its loader:
-
-```javascript
-const defaultState = {
-  // ❌ default freeze — pagefind's internal mutation of the stored objects will throw
-  rawResults: [],
-};
-```
-
-Opt this specific signal out of freeze:
-
-```javascript
-const defaultState = {
-  // ✓ signal holds third-party-owned data; don't freeze
-  rawResults: { value: [], options: { safety: 'reference' } },
-};
-```
-
-The rest of your component state keeps the default freeze protection — only the signal carrying borrowed data opts out.
-
-### Ad-hoc Construction
-
-For signals created outside a `defaultState` declaration, pass the preset as the second argument:
-
-```javascript
-const results = new Signal(pagefindData, { safety: 'reference' });
-```
-
 ## Creating Derived Signals
 
 Signals can be transformed and combined to create new reactive values:
 
 ```javascript
-const items = new Signal(['apple', 'banana', 'cherry']);
 
-// Transform a single signal with derive()
+import { computed } from '@semantic-ui/reactivity';
+
+const items = signal(['apple', 'banana', 'cherry']);
+
+// Transform an existing signal with signal.derive()
 const itemCount = items.derive(arr => arr.length);
 
 // Combine multiple signals with computed()
-const shoppingList = Signal.computed(() => 
+const shoppingList = computed(() =>
   `You have ${itemCount.get()} items: ${items.get().join(', ')}`
 );
 
 console.log(shoppingList.get()); // "You have 3 items: apple, banana, cherry"
 ```
 
-> **Learn More** For complete information about derived and computed signals, see the [Dependent Signals](/docs/guides/reactivity/dependent-signals) guide.
+> **Learn More** For complete information about derived and computed signals, see the [Dependent Signals](/reactivity/dependent-signals) guide.
 
-> **Advanced Usage** For more configuration options, such as customizing equality checks or value cloning behavior, see the [Signal Options & Configuration](/docs/guides/reactivity/signal-options) guide.
+> **Advanced Usage** For more configuration options, such as customizing equality checks or value cloning behavior, see the [Signal Options & Configuration](/reactivity/signal-options) guide.
