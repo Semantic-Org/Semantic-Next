@@ -1,8 +1,8 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
-let number = new Signal(0);
+let number = signal(0);
 
-Reaction.create(() => {
+reaction(() => {
   console.log(`Called with ${number.get()}`);
 });
 
@@ -10,5 +10,5 @@ Reaction.create(() => {
 // each will resolve in the reaction
 [1, 2, 3, 4, 5].forEach(value => {
   number.set(value);
-  Reaction.flush();
+  flush();
 });

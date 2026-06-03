@@ -1,15 +1,15 @@
 // Helper: decrement
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
-const score = new Signal(100);
+const score = signal(100);
 
-Reaction.create((reaction) => {
+reaction((computation) => {
   const currentScore = score.get();
-  if (!reaction.firstRun) {
+  if (!computation.firstRun) {
     console.log(`Score: ${currentScore}`);
   }
 });
 
 score.decrement(); // Decrement by 1
-Reaction.flush();
+flush();
 score.decrement(10); // Decrement by 10

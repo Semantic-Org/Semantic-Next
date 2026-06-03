@@ -1,16 +1,16 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
-const userData = new Signal({ name: 'Alice', age: 30 });
+const userData = signal({ name: 'Alice', age: 30 });
 
-Reaction.create((reaction) => {
+reaction((computation) => {
   const user = userData.get();
-  if (!reaction.firstRun) {
+  if (!computation.firstRun) {
     console.log(`User data: ${user ? JSON.stringify(user) : 'cleared'}`);
   }
 });
 
-userData.set({ name: 'Bob', age: 25 }); // Update user
-Reaction.flush();
+userData.set({ name: 'Bob', age: 25 });
+flush();
 
-userData.clear(); // Clear to undefined
-Reaction.flush();
+userData.clear();
+flush();
