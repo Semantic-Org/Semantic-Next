@@ -1,37 +1,42 @@
 ---
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
-icon: toggle-left
 title: Boolean Helpers
+icon: toggle-left
 package: "@semantic-ui/reactivity"
 methods: [toggle]
 description: API reference for Boolean Helpers in Semantic UI's reactivity system
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
 
-Boolean Helpers are methods available on Signal instances that contain boolean values. These helpers provide a convenient way to toggle the state of a boolean reactive variable.
+export const components = { blockquote: Blockquote };
 
-## toggle
+Signal helper for boolean values. Flips the stored value in place without a read-mutate-write round trip.
 
-Switches the boolean value of the Signal to its opposite state.
+## Toggling
 
-### Syntax
-```javascript
-signal.toggle()
-```
-
-### Returns
-
-boolean - The new value after toggling.
-
-### Usage
+### toggle
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const isActive = new Signal(false);
-isActive.toggle();
+signal.toggle();
 ```
 
-### Example
+Sets the value to its boolean negation, notifying dependents when it changes. Equivalent to `signal.mutate(value => !value)`.
+
+#### Usage
+
+```javascript
+import { signal } from '@semantic-ui/reactivity';
+
+const isOpen = signal(false);
+isOpen.toggle(); // true
+isOpen.toggle(); // false
+```
+
+> [!note] Coerces non-booleans
+> `toggle()` negates whatever is stored, so a truthy non-boolean becomes `false` and `undefined` becomes `true`. Start from a boolean to keep the value boolean.
+
+#### Example
+
 <PlaygroundExample id="reactive-toggle" direction="horizontal"></PlaygroundExample>

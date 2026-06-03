@@ -1,0 +1,129 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Reactive Controls
+icon: sliders
+package: "@semantic-ui/reactivity"
+methods: [nonreactive, guard, currentReaction]
+description: API reference for the reactivity control functions in Semantic UI
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
+
+export const components = { blockquote: Blockquote };
+
+Free functions that shape how reactivity tracks and propagates inside a reaction. Import them from `@semantic-ui/reactivity`.
+
+## Tracking
+
+### nonreactive
+
+```javascript
+nonreactive(func);
+```
+
+Runs `func` with dependency tracking suspended. Signals read inside it do not subscribe the surrounding reaction. The previous reactive context is restored afterward, even if `func` throws.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| func | function | Function to run without tracking |
+
+#### Returns
+
+The return value of `func`.
+
+#### Usage
+
+```javascript
+import { signal, reaction, nonreactive } from '@semantic-ui/reactivity';
+
+const user = signal({ name: 'Alice', lastLogin: Date.now() });
+
+reaction(() => {
+  const { name } = user.get();
+  // read lastLogin without subscribing to it
+  const lastLogin = nonreactive(() => user.get().lastLogin);
+  console.log(name, lastLogin);
+});
+```
+
+#### Example
+
+<PlaygroundExample id="reactive-vs-nonreactive" direction="horizontal"></PlaygroundExample>
+
+<PlaygroundExample id="nonreactive" direction="horizontal"></PlaygroundExample>
+
+### guard
+
+```javascript
+guard(compute, equalCheck);
+```
+
+Gates downstream reactivity. Re-runs `compute` reactively but propagates to the surrounding reaction only when its return value changes by `equalCheck`. Use it to collapse noisy upstream changes into a single meaningful one, for example deriving an even/odd flag from a counter so the reaction re-runs on parity changes, not every increment.
+
+Called outside a reaction, `guard` has nothing to gate and returns `compute()` directly.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| compute | function | Function whose return value is guarded |
+| equalCheck | function | Optional equality deciding whether the value changed. Defaults to deep equality |
+
+#### Returns
+
+The current guarded value.
+
+#### Usage
+
+```javascript
+import { signal, reaction, guard } from '@semantic-ui/reactivity';
+
+const count = signal(0);
+
+reaction(() => {
+  // re-runs only when parity flips, not on every increment
+  const isEven = guard(() => count.get() % 2 === 0);
+  console.log(isEven ? 'even' : 'odd');
+});
+
+count.set(2); // no re-run, still even
+count.set(3); // re-runs, now odd
+```
+
+> [!note] Cleanup is automatic
+> `guard` registers a child reaction that stops with its parent. There is nothing to dispose.
+
+#### Example
+
+<PlaygroundExample id="reactive-guard" direction="horizontal"></PlaygroundExample>
+
+## Inspecting
+
+### currentReaction
+
+```javascript
+currentReaction();
+```
+
+Returns the reaction currently executing, or `null` when no reaction is running. Useful for conditionally subscribing or for debugging which computation a read belongs to.
+
+#### Returns
+
+The running [`Reaction`](/docs/api/reactivity/reaction), or `null`.
+
+#### Usage
+
+```javascript
+import { signal, reaction, currentReaction } from '@semantic-ui/reactivity';
+
+const value = signal(0);
+
+reaction(() => {
+  if (currentReaction()) {
+    value.depend();
+  }
+});
+```

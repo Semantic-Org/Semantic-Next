@@ -1,0 +1,169 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Derived Signals
+icon: git-branch
+package: "@semantic-ui/reactivity"
+methods: [derive, computed, match, stop]
+description: API reference for derived signals in Semantic UI's reactivity system
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
+
+export const components = { blockquote: Blockquote };
+
+Compute new signals from existing ones, and select per-key membership against a source. Each derivation tracks its inputs and recomputes when they change.
+
+## Deriving
+
+### derive
+
+```javascript
+derive(source, computeFn, options);
+```
+
+Creates a new signal derived from a single source signal, recomputing when the source changes. Also available as the instance method [`source.derive(computeFn)`](#sourcederive).
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| source | [`Signal`](/docs/api/reactivity/signal) | The source signal |
+| computeFn | function | Receives the source value, returns the derived value |
+| options | object | Optional configuration, same shape as [`signal()`](/docs/api/reactivity/signal#signal) |
+
+#### Returns
+
+A new [`Signal`](/docs/api/reactivity/signal) holding the derived value, carrying a [`.stop()`](#stop) method.
+
+#### Usage
+
+```javascript
+import { signal, derive } from '@semantic-ui/reactivity';
+
+const celsius = signal(20);
+const fahrenheit = derive(celsius, c => c * 9 / 5 + 32);
+
+celsius.set(30);
+fahrenheit.peek(); // 86
+```
+
+#### Example
+
+<PlaygroundExample id="reactive-derived" direction="horizontal"></PlaygroundExample>
+
+#### source.derive
+
+```javascript
+signal.derive(computeFn, options);
+```
+
+Instance-method form. Sugar for `derive(signal, computeFn, options)`.
+
+```javascript
+const count = signal(1);
+const doubled = count.derive(n => n * 2);
+```
+
+### computed
+
+```javascript
+computed(computeFn, options);
+```
+
+Creates a new signal computed from many signals. The compute function re-runs whenever any signal it reads changes. Use this when the result depends on more than one source.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| computeFn | function | Reads any number of signals, returns the computed value |
+| options | object | Optional configuration, same shape as [`signal()`](/docs/api/reactivity/signal#signal) |
+
+#### Returns
+
+A new [`Signal`](/docs/api/reactivity/signal) holding the computed value, carrying a [`.stop()`](#stop) method.
+
+#### Usage
+
+```javascript
+import { signal, computed } from '@semantic-ui/reactivity';
+
+const first = signal('Ada');
+const last = signal('Lovelace');
+const fullName = computed(() => `${first.get()} ${last.get()}`);
+
+last.set('Byron');
+fullName.peek(); // 'Ada Byron'
+```
+
+> [!tip] derive vs computed
+> Reach for `derive` when the value comes from one source, `computed` when it draws on several. `derive(source, fn)` passes the source value in for you, `computed(fn)` reads its own signals in the body.
+
+#### Example
+
+<PlaygroundExample id="reactive-computed" direction="horizontal"></PlaygroundExample>
+
+## Selecting
+
+### match
+
+```javascript
+match(source, matchFn);
+```
+
+Creates a per-key reactive selector against a source signal. The returned matcher reports whether `matchFn(key, sourceValue)` holds for a given key. A source change re-fires only the keys whose result flipped, so N readers cost O(flipped) not O(N). This is the "highlight one of N" pattern (selected row, active tab, current route).
+
+#### Parameters
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| source | [`Signal`](/docs/api/reactivity/signal) | | The source signal to match against |
+| matchFn | function | `(key, value) => key === value` | Predicate comparing a key to the source value |
+
+#### Returns
+
+A reactive matcher function `(key) => boolean`, carrying a [`.stop()`](#stop) method. Calling it inside a reaction subscribes only that key.
+
+#### Usage
+
+```javascript
+import { signal, match } from '@semantic-ui/reactivity';
+
+const selected = signal('inbox');
+const isSelected = match(selected);
+
+// reads only re-fire for the keys that flip
+isSelected('inbox'); // true
+isSelected('archive'); // false
+
+selected.set('archive'); // re-fires 'inbox' and 'archive', not the rest
+```
+
+> [!info] Strict reference change
+> `match` re-fires on a strict reference change of the source value, not its equality function. With `safety: 'reference'` mutate then [`notify()`](/docs/api/reactivity/signal#notify) does not produce a new reference, so swap in a fresh value when matchers should re-evaluate.
+
+#### Example
+
+<PlaygroundExample id="reactive-match" direction="horizontal"></PlaygroundExample>
+
+## Teardown
+
+### stop
+
+```javascript
+derived.stop();
+```
+
+Every derivation carries a `stop()` method that tears down its backing reaction. After `stop()`, source changes no longer recompute the signal or re-fire matchers.
+
+A derivation created inside a reaction is stopped automatically when that reaction is cleaned up, and an unreferenced derivation self-stops once it is garbage collected. Call `stop()` directly when an owner-less derivation needs deterministic teardown.
+
+#### Usage
+
+```javascript
+const total = computed(() => first.get() + second.get());
+
+// later, when the owner no longer needs it
+total.stop();
+```

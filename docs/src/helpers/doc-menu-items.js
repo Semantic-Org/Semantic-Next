@@ -139,6 +139,10 @@ export const sidebarMenuAPI = [
     pages: [
       { name: 'Signal', url: '/docs/api/reactivity/signal' },
       { name: 'Reaction', url: '/docs/api/reactivity/reaction' },
+      { name: 'Derived Signals', url: '/docs/api/reactivity/derived' },
+      { name: 'Reactive Controls', url: '/docs/api/reactivity/controls' },
+      { name: 'Flushing', url: '/docs/api/reactivity/flushing' },
+      { name: 'Debugging', url: '/docs/api/reactivity/debugging' },
       { name: 'Scheduler', url: '/docs/api/reactivity/scheduler' },
       { name: 'Dependency', url: '/docs/api/reactivity/dependency' },
       { name: 'Number Helpers', url: '/docs/api/reactivity/number-helpers' },

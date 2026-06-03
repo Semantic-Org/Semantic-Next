@@ -24,6 +24,6 @@ export function guard<T>(compute: () => T, equalCheck?: (newValue: T, oldValue: 
 
 /**
  * Returns the reaction currently executing, or `null` if no reaction is running.
- * @see {@link https://next.semantic-ui.com/docs/api/reactivity/debugging#currentreaction currentReaction}
+ * @see {@link https://next.semantic-ui.com/docs/api/reactivity/controls#currentreaction currentReaction}
  */
 export function currentReaction(): Reaction | null;

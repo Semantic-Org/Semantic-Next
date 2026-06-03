@@ -1,341 +1,250 @@
 ---
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
-icon: database
 title: Collection Helpers
+icon: database
 package: "@semantic-ui/reactivity"
-methods: [setProperty, replaceItem, removeItem, getIDs, getID, hasID, getItemIndex, getItem, setArrayProperty]
+methods: [getId, getIds, hasId, getItem, getItemIndex, setProperty, replaceItem, removeItem]
 description: API reference for Collection Helpers in Semantic UI's reactivity system
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
 
-Collection Helpers provide methods for manipulating arrays of objects with unique identifiers. These helpers make it easy to update, replace, or remove specific items in a collection while maintaining reactivity.
+export const components = { blockquote: Blockquote };
 
-> An object's ID is determined by checking for properties in this order: `_id`, `id`, `hash`, `key`. The first defined value is used as the identifier.
+Look up, update, and remove objects in an array signal by identity. Each item is matched by its id, resolved through the signal's [`id`](/docs/api/reactivity/signal#signal) option, which defaults to the first present of `id`, `_id`, `hash`, or `key`.
 
-## setProperty
+> [!info] Identity
+> The collection helpers match by resolved id, not by position. Reordering the array does not change which item a given id points to. Pass a custom `id` resolver to `signal()` when your items key on a different field.
 
-Sets a property on an object in the collection that matches the given id.
+## Identity
 
-### Syntax
+### getId
+
 ```javascript
-signal.setProperty(id, property, value)
+signal.getId(item);
 ```
 
-### Parameters
+Resolves an item's id through the signal's `id` resolver. A primitive item is its own id.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| id | any | The id of the object to modify |
-| property | string | The name of the property to set |
-| value | any | The value to set for the property |
+| item | object \| primitive | The item to read an id from |
 
-### Usage
+#### Returns
+
+The resolved id, or `undefined` if none is present.
+
+#### Usage
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
+const users = signal([{ id: 'u1', name: 'Alice' }]);
 
-const users = new Signal([
-  { id: 'user1', name: 'Alice' },
-  { id: 'user2', name: 'Bob' }
-]);
-
-users.setProperty('user1', 'status', 'active');
+users.getId(users.peek()[0]); // 'u1'
+users.getId('u1');            // 'u1' — a primitive is its own id
 ```
 
-### Example
-<PlaygroundExample id="reactive-set-property" direction="horizontal"></PlaygroundExample>
+### getIds
 
-
-## replaceItem
-
-Replaces an entire object in the collection that matches the given id.
-
-### Syntax
 ```javascript
-signal.replaceItem(id, newItem)
+signal.getIds(item);
 ```
 
-### Parameters
+Returns every id value present on an object, in `id`, `_id`, `hash`, `key` order. Unlike `getId`, this ignores the signal's resolver and reports all candidate keys.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| id | any | The id of the object to replace |
-| newItem | Object | The new object to replace the old one |
+| item | object \| primitive | The item to read ids from |
 
-### Usage
+#### Returns
+
+An array of the id values found. A primitive returns a single-element array of itself.
+
+#### Usage
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
+const users = signal([{ _id: '1', id: 'u1', name: 'Alice' }]);
 
-const users = new Signal([
-  { id: 'user1', name: 'Alice' },
-  { id: 'user2', name: 'Bob' }
-]);
-
-users.replaceItem('user1', { id: 'user1', name: 'Alex' });
+users.getIds(users.peek()[0]); // ['u1', '1']
 ```
 
-### Example
-<PlaygroundExample id="reactive-replace-item" direction="horizontal"></PlaygroundExample>
+### hasId
 
-
-## removeItem
-
-Removes an object from the collection that matches the given id.
-
-### Syntax
 ```javascript
-signal.removeItem(id)
+signal.hasId(item, id);
 ```
 
-### Parameters
+Reports whether an item resolves to the given id.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| id | any | The id of the object to remove |
+| item | object \| primitive | The item to test |
+| id | string | The id to match against |
 
-### Usage
+#### Returns
+
+`true` if the item's resolved id matches `id`.
+
+## Lookup
+
+### getItem
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const users = new Signal([
-  { id: 'user1', name: 'Alice' },
-  { id: 'user2', name: 'Bob' }
-]);
-
-users.removeItem('user1');
+signal.getItem(id);
 ```
 
-### Example
-<PlaygroundExample id="reactive-remove-item" direction="horizontal"></PlaygroundExample>
+Returns the item in the array matching `id`. Subscribes the running reaction through the underlying read.
 
-
-## getIDs
-
-Gets all possible ID values from an object by checking for `_id`, `id`, `hash`, `key` properties.
-
-### Syntax
-```javascript
-signal.getIDs(item)
-```
-
-### Parameters
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| item | Object or string | The object to get IDs from, or a string ID directly |
+| id | string | The id to look for |
 
-### Returns
+#### Returns
 
-| Type | Description |
-|------|-------------|
-| Array | Array of ID values found in the object |
+The matching item, or `undefined` if none matches.
 
-### Usage
+#### Example
 
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const users = new Signal([
-  { _id: '1', id: 'user1', name: 'Alice' }
-]);
-
-// Using with an object
-const allIds = users.getIDs(users.value[0]); // ['1', 'user1']
-
-// Using with a string
-const stringId = users.getIDs('user1'); // ['user1']
-```
-
-## getID
-
-Gets the first available ID from an object by checking for properties in this order: `_id`, `id`, `hash`, `key`.
-
-### Syntax
-```javascript
-signal.getID(item)
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| item | Object or string | The object to get ID from, or a string ID directly |
-
-### Returns
-
-| Type | Description |
-|------|-------------|
-| string | The first available ID found, or the string passed if a string was provided |
-
-### Usage
-
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const users = new Signal([
-  { _id: '1', id: 'user1', name: 'Alice' }
-]);
-
-// Using with an object
-const id = users.getID(users.value[0]); // '1'
-
-// Using with a string
-const stringId = users.getID('user1'); // 'user1'
-```
-
-## hasID
-
-Checks if an object or string has a specific ID.
-
-### Syntax
-```javascript
-signal.hasID(item, id)
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| item | Object or string | The object or string to check |
-| id | string | ID to look for |
-
-### Returns
-
-| Type | Description |
-|------|-------------|
-| boolean | `true` if the object or string's ID matches the provided `id`, `false` otherwise |
-
-### Usage
-
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const users = new Signal([
-  { _id: '1', id: 'user1', name: 'Alice' }
-]);
-
-// Check if an object has a specific ID
-users.hasID(users.value[0], '1'); // true
-users.hasID(users.value[0], 'user1'); // true
-users.hasID(users.value[0], 'wrongId'); // false
-```
-
-## getItemIndex
-
-Gets the index of an object with the specified ID within the Signal's array value.
-
-### Syntax
-```javascript
-signal.getItem(id)
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| id | string | ID to look for |
-
-### Returns
-
-| Type | Description |
-|------|-------------|
-| number | Index of the matching object in the array, or -1 if not found |
-
-### Usage
-
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const users = new Signal([
-  { id: 'user1', name: 'Alice' },
-  { id: 'user2', name: 'Bob' }
-]);
-
-const indexOfBob = users.getItemIndex('user2'); // 1
-const indexOfUnknown = users.getItemIndex('user3'); // -1
-```
-
-
-## getItem
-
-Gets the actual item/object with the specified ID from the Signal's array value.
-
-### Syntax
-```javascript
-signal.getItem(id)
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| id | string | ID to look for |
-
-### Returns
-
-| Type | Description |
-|------|-------------|
-| Object or undefined | The object with matching ID, or undefined if not found |
-
-### Usage
-
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const users = new Signal([
-  { id: 'user1', name: 'Alice' },
-  { id: 'user2', name: 'Bob' }
-]);
-
-const alice = users.getItem('user1'); // { id: 'user1', name: 'Alice' }
-const bob = users.getItem('user2'); // { id: 'user2', name: 'Bob' }
-const notFound = users.getItem('user3'); // undefined
-```
-
-### Example
 <PlaygroundExample id="reactive-get-item" direction="horizontal"></PlaygroundExample>
 
-## setArrayProperty
+### getItemIndex
 
-Sets a property on one or all objects in an array. This is useful for batch updates of properties across multiple items.
-
-### Syntax
 ```javascript
-// Set property on a specific item by index
-signal.setArrayProperty(index, property, value)
-
-// Set property on all items
-signal.setArrayProperty(property, value)
+signal.getItemIndex(id);
 ```
 
-### Parameters
+Returns the array index of the item matching `id`.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| index | number | (Optional) The index of the item to update. If omitted, updates all items |
-| property | string | The name of the property to set |
-| value | any | The value to set for the property |
+| id | string | The id to look for |
 
-### Usage
+#### Returns
+
+The index of the matching item, or `-1` if none matches.
+
+## Mutation
+
+### setProperty
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const users = new Signal([
-  { id: 'user1', name: 'Alice', status: 'offline' },
-  { id: 'user2', name: 'Bob', status: 'offline' }
-]);
-
-// Set property on a specific item by index
-users.setArrayProperty(0, 'status', 'online');
-// Result: Alice is online, Bob is still offline
-
-// Set property on all items
-users.setArrayProperty('status', 'online');
-// Result: Both Alice and Bob are online
+signal.setProperty(id, property, value);
 ```
 
-<PlaygroundExample id="reactive-set-array-property" direction="horizontal"></PlaygroundExample>
+Sets a single property on the item matching `id`, notifying dependents only when the value changes.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| id | string | The id of the item to modify |
+| property | string | The property to set |
+| value | any | The value to assign |
+
+#### Usage
+
+```javascript
+const users = signal([
+  { id: 'u1', name: 'Alice' },
+  { id: 'u2', name: 'Bob' },
+]);
+
+users.setProperty('u1', 'status', 'active');
+```
+
+##### On a plain object
+
+When the signal holds a single object rather than an array, the id argument drops and `setProperty` takes `(property, value)`.
+
+```javascript
+const profile = signal({ name: 'Alice', status: 'idle' });
+
+profile.setProperty('status', 'active');
+```
+
+#### Example
+
+<PlaygroundExample id="reactive-set-property" direction="horizontal"></PlaygroundExample>
+
+### replaceItem
+
+```javascript
+signal.replaceItem(id, item);
+```
+
+Swaps the item matching `id` for a new one. No-ops if no item matches.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| id | string | The id of the item to replace |
+| item | object | The replacement item |
+
+#### Usage
+
+```javascript
+const users = signal([
+  { id: 'u1', name: 'Alice' },
+  { id: 'u2', name: 'Bob' },
+]);
+
+users.replaceItem('u1', { id: 'u1', name: 'Alex' });
+```
+
+#### Example
+
+<PlaygroundExample id="reactive-replace-item" direction="horizontal"></PlaygroundExample>
+
+### removeItem
+
+```javascript
+signal.removeItem(id);
+```
+
+Removes the item matching `id` from the array. No-ops if no item matches.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| id | string | The id of the item to remove |
+
+#### Usage
+
+```javascript
+const users = signal([
+  { id: 'u1', name: 'Alice' },
+  { id: 'u2', name: 'Bob' },
+]);
+
+users.removeItem('u1');
+```
+
+#### Example
+
+<PlaygroundExample id="reactive-remove-item" direction="horizontal"></PlaygroundExample>
+
+## Batch
+
+### setArrayProperty
+
+```javascript
+signal.setArrayProperty(index, property, value);
+signal.setArrayProperty(property, value);
+```
+
+Sets a property on one item by index, or on every item when the index is omitted. Notifies once if any value changed.
+
+> [!note] Reserved for redesign
+> `setArrayProperty` keys by index rather than id and predates the identity-based helpers above. Prefer `setProperty` for single-item updates. The batch form is slated for a future redesign.
