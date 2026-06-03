@@ -187,6 +187,7 @@ Every callback (`createComponent`, `events`, `onCreated`, `onRendered`, `onDestr
 | `state` | Reactive state (each key is a Signal) |
 | `settings` | Reactive settings proxy |
 | `signal` / `reaction` | Create a new Signal or Reaction |
+| `computed` / `derive` / `match` | Derived signals and per-key selector |
 | `data` | Template data context |
 | `dispatchEvent` | Fire custom events |
 | `findParent` / `findChild` / `findChildren` | Walk the render tree |
@@ -194,7 +195,7 @@ Every callback (`createComponent`, `events`, `onCreated`, `onRendered`, `onDestr
 | `isRendered` | Returns whether component has rendered |
 | `darkMode` | Current dark mode state |
 | `rerender` | Force re-render |
-| `afterFlush` / `nonreactive` | Reactivity timing controls |
+| `afterFlush` / `nonreactive` / `guard` | Reactivity timing controls |
 | `attachEvent` | Attach external event with auto-cleanup |
 | `bindKey` / `unbindKey` | Dynamic keybinding |
 

@@ -100,7 +100,7 @@ Lit's bench harness ([lit/lit `packages/benchmarks`](https://github.com/lit/lit/
 1. **One HTML file** — import map + `<script type="module" src="./bench.js">`
 2. **One JS file** — imports, setup, all benchmark operations in sequence
 3. **`performance.mark()` / `performance.measure()`** — each operation emits a named measure
-4. **`Reaction.flush()`** inside cycle loops — sync drain of pending Reactions, **never `await rAF`**. rAF inside a measured loop gates each iteration on the 16.66ms vsync clock, so 50 cycles wall-clock at ~833ms regardless of work and sub-frame deltas vanish. lit-html benches are fully synchronous in the measured region for the same reason. See `extend-bench-suite` for the full anti-pattern call-out.
+4. **`flush()`** inside cycle loops — sync drain of pending Reactions, **never `await rAF`**. rAF inside a measured loop gates each iteration on the 16.66ms vsync clock, so 50 cycles wall-clock at ~833ms regardless of work and sub-frame deltas vanish. lit-html benches are fully synchronous in the measured region for the same reason. See `extend-bench-suite` for the full anti-pattern call-out.
 5. **`await rAF` only outside measurement** (between metrics, in the `mount()` helper) or as a one-shot tail after a single huge bulk op where the work itself dominates.
 6. **Config** — `"mode": "performance"` with `"entryName"` for each measure
 

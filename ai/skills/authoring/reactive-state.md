@@ -1,7 +1,7 @@
 ---
 title: Reactivity System Guide
 description: Comprehensive guide to the @semantic-ui/reactivity package — a standalone signals-based reactive system with automatic dependency tracking for state management.
-keywords: [signals, reactions, dependency tracking, state management, computed values, derived signals, reactive proxy, Signal.computed, afterFlush]
+keywords: [signals, reactions, dependency tracking, state management, computed values, derived signals, reactive proxy, computed, afterFlush]
 audience: authoring
 skill: reactive-state
 type: skill
@@ -31,42 +31,43 @@ The `@semantic-ui/reactivity` package is a standalone signals-based reactive sys
 
 **Main Exports**:
 ```javascript
-import { Signal, Reaction, Dependency, Scheduler } from '@semantic-ui/reactivity';
+import { signal, reaction, computed, derive, match } from '@semantic-ui/reactivity';
 ```
 
 ---
 
 ## Signal API
 
-### Constructor
+### Creating a Signal
 
 ```javascript
-new Signal(initialValue, options)
+signal(initialValue, options)
 ```
 
 **Parameters**:
 - `initialValue`: Any - The initial value for the signal
 - `options`: Object (optional)
+  - `safety`: `'reference'` | `'clone'` | `'none'` - How the stored value is guarded against outside mutation (default: `'reference'`)
+  - `equality`: Function - Custom equality comparison (default: deep equality)
+  - `clone`: Function - Custom clone, used when `safety` is `'clone'` (default: deep clone)
+  - `id`: Function - Resolves array-item identity for the id-based collection helpers
   - `context`: Object - Debugging context metadata
-  - `equalityFunction`: Function - Custom equality comparison (default: deep equality)
-  - `allowClone`: Boolean - Whether to clone values (default: true)
-  - `cloneFunction`: Function - Custom cloning function (default: deep clone)
 
 **Examples**:
 ```javascript
 // Basic signal
-const count = new Signal(0);
+const count = signal(0);
 
-// Signal with no cloning (for performance or object identity)
-const element = new Signal(domElement, { allowClone: false });
+// 'reference' (the default) stores by reference, no cloning, preserving identity
+const element = signal(domElement, { safety: 'reference' });
 
 // Signal with custom equality
-const user = new Signal(userData, {
-  equalityFunction: (a, b) => a.id === b.id  // Only compare by ID
+const user = signal(userData, {
+  equality: (a, b) => a.id === b.id  // Only compare by ID
 });
 
 // Signal with debugging context
-const items = new Signal([], {
+const items = signal([], {
   context: { name: 'todoItems', source: 'TodoStore' }
 });
 ```
@@ -87,22 +88,11 @@ signal.value = newValue // Property setter, same as set()
 signal.clear()         // Set value to undefined
 ```
 
-#### Subscription
-```javascript
-const unsubscribe = signal.subscribe((value, reaction) => {
-  console.log('Signal changed to:', value);
-  // reaction object provides metadata about the change
-});
-
-// Clean up
-unsubscribe.stop();
-```
-
 ### Data Type Helpers
 
 #### Array Operations
 ```javascript
-const items = new Signal([1, 2, 3]);
+const items = signal([1, 2, 3]);
 
 // Mutation helpers (reactive)
 items.push(4, 5);              // Add items to end
@@ -125,7 +115,7 @@ items.setArrayProperty('completed', true);           // Set property on all item
 
 #### Object Operations
 ```javascript
-const user = new Signal({ name: 'Alice', age: 30 });
+const user = signal({ name: 'Alice', age: 30 });
 
 // Property operations
 user.setProperty('name', 'Bob');                     // Set single property
@@ -134,7 +124,7 @@ user.setProperty('profile', 'bio', 'Software dev');  // Set nested property
 
 #### Number Operations
 ```javascript
-const counter = new Signal(0);
+const counter = signal(0);
 
 counter.increment();           // Add 1
 counter.increment(5);          // Add 5
@@ -147,21 +137,21 @@ counter.decrement(2, 0);       // Subtract 2, min value 0
 
 #### Boolean Operations
 ```javascript
-const flag = new Signal(false);
+const flag = signal(false);
 
 flag.toggle();                 // Flip boolean value
 ```
 
 #### Date Operations
 ```javascript
-const timestamp = new Signal(new Date('2023-01-01'));
+const timestamp = signal(new Date('2023-01-01'));
 
 timestamp.now();               // Set to current date/time
 ```
 
 #### ID-based Operations (for arrays of objects)
 ```javascript
-const users = new Signal([
+const users = signal([
   { id: 1, name: 'Alice' },
   { id: 2, name: 'Bob' }
 ]);
@@ -178,8 +168,8 @@ users.removeItem(1);                      // Remove item with id=1
 #### Custom Equality Functions
 ```javascript
 // Only trigger updates when specific properties change
-const user = new Signal(userData, {
-  equalityFunction: (oldUser, newUser) => {
+const user = signal(userData, {
+  equality: (oldUser, newUser) => {
     return oldUser.id === newUser.id &&
            oldUser.name === newUser.name &&
            oldUser.email === newUser.email;
@@ -190,14 +180,15 @@ const user = new Signal(userData, {
 
 #### Cloning Control
 ```javascript
-// Disable cloning for performance or object identity preservation
-const expensiveObject = new Signal(largeDataStructure, {
-  allowClone: false  // No cloning, use object as-is
+// 'reference' (the default) skips cloning for performance or object identity
+const expensiveObject = signal(largeDataStructure, {
+  safety: 'reference'
 });
 
-// Custom cloning function
-const customSignal = new Signal(data, {
-  cloneFunction: (value) => {
+// 'clone' stores defensive copies, here with a custom clone function
+const customSignal = signal(data, {
+  safety: 'clone',
+  clone: (value) => {
     // Custom cloning logic
     return JSON.parse(JSON.stringify(value));
   }
@@ -206,7 +197,7 @@ const customSignal = new Signal(data, {
 
 #### Debugging Setup
 ```javascript
-const signal = new Signal(initialValue, {
+const userListSignal = signal(initialValue, {
   context: {
     name: 'userList',
     component: 'UserManager',
@@ -215,13 +206,13 @@ const signal = new Signal(initialValue, {
 });
 
 // Enable stack traces for debugging
-signal.setTrace();
+userListSignal.setTrace();
 
 // Add additional context
-signal.addContext({ lastModified: Date.now() });
+userListSignal.addContext({ lastModified: Date.now() });
 
 // Access debugging info
-console.log(signal.context);
+console.log(userListSignal.context);
 ```
 
 ---
@@ -232,53 +223,53 @@ console.log(signal.context);
 
 ```javascript
 // Create and run immediately (default)
-const reaction = Reaction.create((reaction) => {
-  const value = signal.get();  // Creates dependency
+const logReaction = reaction((computation) => {
+  const value = mySignal.get();  // Creates dependency
   console.log('Signal value:', value);
 
-  if (reaction.firstRun) {
+  if (computation.firstRun) {
     console.log('This is the first execution');
   }
 });
 
 // Create without running immediately
-const reaction = Reaction.create(callback, { firstRun: false });
-reaction.boundRun(); // Run manually when ready
+const deferredReaction = reaction(callback, { firstRun: false });
+deferredReaction.boundRun(); // Run manually when ready
 ```
 
 ### Reaction Lifecycle
 
 ```javascript
-const reaction = Reaction.create((reaction) => {
+const myReaction = reaction((computation) => {
   // Reaction logic here
 });
 
 // Check if active
-console.log(reaction.active);  // true
+console.log(myReaction.active);  // true
 
 // Stop the reaction
-reaction.stop();              // Cleans up dependencies, prevents future runs
+myReaction.stop();              // Cleans up dependencies, prevents future runs
 
 // Check if stopped
-console.log(reaction.active); // false
+console.log(myReaction.active); // false
 ```
 
 ### Reaction Context and Debugging
 
 ```javascript
-const reaction = Reaction.create((reaction) => {
+const validatorReaction = reaction((computation) => {
   // Access reaction metadata
-  console.log(reaction.firstRun);    // Boolean: is this the first execution?
-  console.log(reaction.context);     // Debugging context
+  console.log(computation.firstRun);    // Boolean: is this the first execution?
+  console.log(computation.context);     // Debugging context
 }, {
   context: { name: 'userValidator', source: 'ValidationSystem' }
 });
 
 // Add context after creation
-reaction.addContext({ lastRun: Date.now() });
+validatorReaction.addContext({ lastRun: Date.now() });
 
 // Enable stack traces
-reaction.setTrace();
+validatorReaction.setTrace();
 ```
 
 ---
@@ -290,7 +281,7 @@ reaction.setTrace();
 **Single-source transformation**: Creates a new signal that derives its value from this signal.
 
 ```javascript
-const items = new Signal(['apple', 'banana', 'cherry']);
+const items = signal(['apple', 'banana', 'cherry']);
 const itemCount = items.derive(arr => arr.length);
 
 // itemCount automatically updates when items change
@@ -308,16 +299,16 @@ console.log(itemCount.get()); // 4
 - Format data for display
 - Create calculated fields from single data sources
 
-### Static Method: Signal.computed()
+### Function: computed()
 
 **Multi-source computation**: Creates a signal that computes its value from multiple signals.
 
 ```javascript
-const quantity = new Signal(5);
-const price = new Signal(10.99);
-const taxRate = new Signal(0.08);
+const quantity = signal(5);
+const price = signal(10.99);
+const taxRate = signal(0.08);
 
-const total = Signal.computed(() => {
+const total = computed(() => {
   const subtotal = quantity.get() * price.get();
   return subtotal + (subtotal * taxRate.get());
 });
@@ -338,7 +329,7 @@ console.log(total.get()); // Recalculated total
 - Creating pipelines of single-source operations
 - The relationship is clearly "this derives from that"
 
-**Use `Signal.computed()` when:**
+**Use `computed()` when:**
 - Combining **multiple signals** into one value
 - Dependencies come from different sources
 - Creating complex calculations or conditional logic
@@ -347,17 +338,17 @@ console.log(total.get()); // Recalculated total
 
 **Chaining derived signals:**
 ```javascript
-const users = new Signal([...]);
+const users = signal([...]);
 const activeUsers = users.derive(arr => arr.filter(u => u.active));
 const activeCount = activeUsers.derive(arr => arr.length);
 ```
 
 **Mixed derive and computed:**
 ```javascript
-const items = new Signal([...]);
+const items = signal([...]);
 const subtotal = items.derive(arr => arr.reduce((sum, item) => sum + item.price, 0));
-const tax = Signal.computed(() => subtotal.get() * taxRate.get());
-const total = Signal.computed(() => subtotal.get() + tax.get());
+const tax = computed(() => subtotal.get() * taxRate.get());
+const total = computed(() => subtotal.get() + tax.get());
 ```
 
 **Performance considerations:**
@@ -367,35 +358,35 @@ const total = Signal.computed(() => subtotal.get() + tax.get());
 
 ---
 
-## Static Reaction Methods
+## Scheduling and Control Functions
 
 ### Manual Scheduling Control
 
 ```javascript
 // Force immediate execution of all pending reactions
-Reaction.flush();
+flush();
 
 // Run code after all reactions complete
-Reaction.afterFlush(() => {
+afterFlush(() => {
   // All reactive updates are done, safe for DOM operations
   console.log('All reactions finished');
 });
 
 // Schedule a flush (usually automatic)
-Reaction.scheduleFlush();
+scheduleFlush();
 ```
 
 ### Non-reactive Execution
 
 ```javascript
 // Read signals without creating dependencies
-const value = Reaction.nonreactive(() => {
-  return signal.get();  // Won't create dependency in current reaction
+const value = nonreactive(() => {
+  return mySignal.get();  // Won't create dependency in current reaction
 });
 
 // Useful for debugging or conditional logic
-Reaction.create(() => {
-  const shouldProcess = Reaction.nonreactive(() => {
+reaction(() => {
+  const shouldProcess = nonreactive(() => {
     return someOtherSignal.get() > 10;  // Check condition without dependency
   });
 
@@ -410,14 +401,14 @@ Reaction.create(() => {
 
 ```javascript
 // Only trigger reactions if the computed result actually changes
-const result = Reaction.guard(() => {
+const result = guard(() => {
   // Expensive computation
-  return expensiveCalculation(signal.get());
+  return expensiveCalculation(mySignal.get());
 });
 
 // With custom equality check
-const result = Reaction.guard(
-  () => expensiveCalculation(signal.get()),
+const result = guard(
+  () => expensiveCalculation(mySignal.get()),
   (oldResult, newResult) => oldResult.id === newResult.id
 );
 ```
@@ -429,14 +420,14 @@ const result = Reaction.guard(
 ### Basic Reactive State
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { signal, reaction, afterFlush } from '@semantic-ui/reactivity';
 
 // Create reactive state
-const count = new Signal(0);
-const message = new Signal('Hello');
+const count = signal(0);
+const message = signal('Hello');
 
 // Create reactive computations
-Reaction.create(() => {
+reaction(() => {
   const currentCount = count.get();
   const currentMessage = message.get();
 
@@ -452,17 +443,17 @@ count.increment();      // Logs: "Count: 6"
 ### Derived State Pattern
 
 ```javascript
-const items = new Signal([
+const items = signal([
   { id: 1, completed: false },
   { id: 2, completed: true },
   { id: 3, completed: false }
 ]);
 
-const completedCount = new Signal(0);
-const totalCount = new Signal(0);
+const completedCount = signal(0);
+const totalCount = signal(0);
 
 // Automatically compute derived state
-Reaction.create(() => {
+reaction(() => {
   const currentItems = items.get();
 
   totalCount.set(currentItems.length);
@@ -479,19 +470,19 @@ console.log(totalCount.get());     // 4
 
 ```javascript
 // Sync with localStorage
-const preferences = new Signal(
+const preferences = signal(
   JSON.parse(localStorage.getItem('prefs') || '{}')
 );
 
-Reaction.create(() => {
+reaction(() => {
   const prefs = preferences.get();
   localStorage.setItem('prefs', JSON.stringify(prefs));
 });
 
 // Sync with server
-const userData = new Signal(null);
+const userData = signal(null);
 
-Reaction.create(() => {
+reaction(() => {
   const user = userData.get();
   if (user && user.id) {
     // Debounce or batch these requests in real applications
@@ -507,14 +498,14 @@ Reaction.create(() => {
 
 ```javascript
 // Use afterFlush for expensive operations
-const items = new Signal([]);
-const needsRecompute = new Signal(false);
+const items = signal([]);
+const needsRecompute = signal(false);
 
-Reaction.create(() => {
+reaction(() => {
   const currentItems = items.get();
   needsRecompute.set(true);
 
-  Reaction.afterFlush(() => {
+  afterFlush(() => {
     if (needsRecompute.get()) {
       performExpensiveComputation(currentItems);
       needsRecompute.set(false);
@@ -523,7 +514,7 @@ Reaction.create(() => {
 });
 
 // Use peek() to avoid unnecessary dependencies
-Reaction.create(() => {
+reaction(() => {
   const triggerValue = triggerSignal.get();  // Creates dependency
 
   // Read other signals without creating dependencies
@@ -539,7 +530,7 @@ Reaction.create(() => {
 ## Key Principles
 
 1. **Signals hold reactive state**: Use `Signal` for any state that should trigger updates
-2. **Reactions observe changes**: Use `Reaction.create()` for side effects and computations
+2. **Reactions observe changes**: Use `reaction()` for side effects and computations
 3. **Automatic dependency tracking**: Reading a signal inside a reaction creates a dependency
 4. **Equality-based updates**: Signals only trigger updates when values actually change
 5. **Cloning prevents mutations**: Values are cloned by default to prevent accidental mutations

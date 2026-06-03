@@ -234,7 +234,7 @@ If many unrelated metrics suddenly show enormous magnitude changes — 50%+ impr
 
 Past examples of methodology shifts on this suite:
 
-- **`await rAF` → `Reaction.flush()` in cycle loops.** Wall-clock for previously rAF-bound metrics drops from ~833ms (`50 × 16.66ms` frame floor) to whatever the actual work is — often tens of ms. Looks like a 90%+ improvement on every metric that had a 50-cycle loop with `await flush()` inside.
+- **`await rAF` → `flush()` in cycle loops.** Wall-clock for previously rAF-bound metrics drops from ~833ms (`50 × 16.66ms` frame floor) to whatever the actual work is — often tens of ms. Looks like a 90%+ improvement on every metric that had a 50-cycle loop with `await flush()` inside.
 - **`sampleSize` or `timeout` knob changes.** Tighter convergence shifts CIs uniformly; coarser sampling widens them. Distinct from a real change because the shape (CI width vs midpoint) moves, not the midpoint specifically.
 - **Bench-bot reporter rendering changes.** No actual measurement shift, but the comment looks dramatically different — peak attribution, drift footnotes, column headers.
 
