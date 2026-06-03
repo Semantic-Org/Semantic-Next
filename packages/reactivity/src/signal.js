@@ -289,6 +289,10 @@ export class Signal {
   }
   setProperty(idOrProperty, property, value) {
     if (isArray(this.currentValue)) {
+      // a 2-arg call sets the field on every item
+      if (arguments.length < 3) {
+        return this.setArrayProperty(idOrProperty, property);
+      }
       const id = idOrProperty;
       const index = this.getItemIndex(id);
       return this.setArrayProperty(index, property, value);
@@ -302,6 +306,10 @@ export class Signal {
       this.currentValue[property] = value;
       this.notify();
     }
+  }
+
+  setItemProperty(id, property, value) {
+    return this.setArrayProperty(this.getItemIndex(id), property, value);
   }
   replaceItem(id, item) {
     const index = this.getItemIndex(id);

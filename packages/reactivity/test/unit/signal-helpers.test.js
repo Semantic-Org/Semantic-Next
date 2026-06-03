@@ -543,6 +543,53 @@ SAFETY_MODES.forEach((safety) => {
       });
     });
 
+    describe('setItemProperty', () => {
+      it('sets a property on the item matching the id', () => {
+        const sig = new Signal(
+          [{ id: 'a', title: 'one' }, { id: 'b', title: 'two' }],
+          { safety },
+        );
+        sig.setItemProperty('b', 'title', 'TWO');
+        expect(sig.raw().find(i => i.id === 'b').title).toBe('TWO');
+        expect(sig.raw().find(i => i.id === 'a').title).toBe('one');
+      });
+
+      it('is a no-op when no item matches the id', () => {
+        const sig = new Signal(
+          [{ id: 'a', title: 'one' }, { id: 'b', title: 'two' }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.setItemProperty('missing', 'title', 'X');
+        flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
+    });
+
+    describe('setProperty (array form, all items)', () => {
+      it('sets the field on every item', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: false }, { id: 'b', done: false }],
+          { safety },
+        );
+        sig.setProperty('done', true);
+        expect(sig.raw().every(item => item.done === true)).toBe(true);
+      });
+
+      it('fires reactivity once', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: false }, { id: 'b', done: false }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.setProperty('done', true);
+        flush();
+        expect(sub.count).toBe(1);
+        sub.stop();
+      });
+    });
+
     describe('setProperty (object form)', () => {
       it('sets a property on the stored object', () => {
         const sig = new Signal({ name: 'a', count: 0 }, { safety });

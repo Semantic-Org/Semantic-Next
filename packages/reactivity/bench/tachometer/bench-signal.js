@@ -265,7 +265,7 @@ let sink = null;
   // purpose: Finds an item by id and updates one field in a 1000-item list signal across 200 alternating updates.
   performance.mark(startMark('reactive-set-property-by-id-200'));
   for (let i = 0; i < 200; i++) {
-    sig.setProperty(ids[i], 'active', i % 2 === 0);
+    sig.setItemProperty(ids[i], 'active', i % 2 === 0);
     flush();
   }
   performance.measure('reactive-set-property-by-id-200', startMark('reactive-set-property-by-id-200'));

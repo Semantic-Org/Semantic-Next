@@ -110,7 +110,7 @@ defineComponent({
       },
       toggleAll() {
         const allDone = state.todos.get().every(t => t.completed);
-        state.todos.setArrayProperty('completed', !allDone);
+        state.todos.setProperty('completed', !allDone);
       },
       deleteTodo(id) {
         state.todos.removeItem(id);
@@ -126,10 +126,10 @@ defineComponent({
       },
       saveTodo(id, title) {
         state.editingId.set(null);
-        state.todos.setProperty(id, 'title', title);
+        state.todos.setItemProperty(id, 'title', title);
       },
       renameTodo(id, title) {
-        state.todos.setProperty(id, 'title', title);
+        state.todos.setItemProperty(id, 'title', title);
       },
     };
   },
