@@ -84,15 +84,12 @@ const createComponent = ({ self, state, reaction }) => ({
   },
 
   toggleTodo(id) {
-    const todo = state.todos.getItem(id);
-    if (todo) {
-      state.todos.replaceItem(id, { ...todo, completed: !todo.completed });
-    }
+    state.todos.toggleItemProperty(id, 'completed');
   },
 
   toggleAll() {
     const allCompleted = state.todos.get().every(t => t.completed);
-    state.todos.setArrayProperty('completed', !allCompleted);
+    state.todos.setProperty('completed', !allCompleted);
   },
 
   deleteTodo(id) {
@@ -106,7 +103,7 @@ const createComponent = ({ self, state, reaction }) => ({
       self.deleteTodo(id);
       return;
     }
-    state.todos.setProperty(id, 'title', trimmed);
+    state.todos.setItemProperty(id, 'title', trimmed);
   },
 
   clearCompleted() {

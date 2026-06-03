@@ -9,7 +9,7 @@ const users = signal([
 reaction(() => console.log(users.value));
 
 // changes aliceuser's name to 'Allison'
-users.setProperty('aliceuser', 'name', 'Allison');
+users.setItemProperty('aliceuser', 'name', 'Allison');
 
 // changes everyone's health to 'Good'
-users.setArrayProperty('health', 'Good');
+users.setProperty('health', 'Good');

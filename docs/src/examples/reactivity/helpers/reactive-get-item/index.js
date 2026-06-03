@@ -13,4 +13,4 @@ reaction(() => {
 });
 
 // Update user 2's status
-users.setProperty('user2', 'status', 'online');
+users.setItemProperty('user2', 'status', 'online');

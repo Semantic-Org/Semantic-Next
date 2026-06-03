@@ -1,4 +1,4 @@
-// Helper: setArrayProperty
+// Helper: setIndexProperty
 import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
 const tasks = signal([
@@ -13,9 +13,9 @@ reaction(() => {
 });
 
 // Mark first task as completed
-tasks.setArrayProperty(0, 'completed', true);
+tasks.setIndexProperty(0, 'completed', true);
 flush();
 
 // Mark all remaining tasks as completed
-tasks.setArrayProperty('completed', true);
+tasks.setProperty('completed', true);
 flush();

@@ -17,8 +17,8 @@ const records = signal([
 reaction(() => {
   console.log('Records:', records.get());
 });
-// Update the 'name' property for the record at index 1 (or matching by ID in a real use-case)
-records.setArrayProperty(1, 'name', 'Charlie');
+// Update the 'name' property for the record at index 1 (or use setItemProperty to match by ID)
+records.setIndexProperty(1, 'name', 'Charlie');
 
 // --- Boolean Helpers ---
 const flag = signal(true);

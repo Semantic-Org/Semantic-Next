@@ -489,7 +489,7 @@ describe.concurrent('Signal', () => {
       expect(inStockCount.get()).toBe(3);
 
       // Modify item property
-      items.setArrayProperty(1, 'inStock', true);
+      items.setIndexProperty(1, 'inStock', true);
       flush();
       expect(totalValue.get()).toBe(75);
       expect(inStockCount.get()).toBe(4);
