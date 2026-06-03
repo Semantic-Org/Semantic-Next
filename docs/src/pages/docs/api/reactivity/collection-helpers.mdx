@@ -141,7 +141,7 @@ The index of the matching item, or `-1` if none matches.
 signal.setItemProperty(id, property, value);
 ```
 
-Sets a single property on the array item matching `id`, notifying dependents only when the value changes. Resolves the item through `getItemIndex(id)` and writes by index.
+Sets a single property on the array item matching `id`, notifying dependents only when the value changes.
 
 #### Parameters
 
@@ -172,10 +172,10 @@ users.setItemProperty('u1', 'status', 'active');
 signal.setProperty(property, value);
 ```
 
-Sets a field by value type. On an **object** signal, sets that field on the object. On an **array** signal, sets the field on **every item**.
+On an object, sets the property. On an array, sets the property on every item.
 
 > [!note]
-> On an array, `setProperty` writes the field to every item. To target one item by id, use [`setItemProperty`](#setitemproperty). To target one item by index, use [`setIndexProperty`](#setindexproperty).
+> To target a single item, use [`setItemProperty`](#setitemproperty) (by id) or [`setIndexProperty`](#setindexproperty) (by index).
 
 #### Parameters
 
@@ -192,7 +192,7 @@ const profile = signal({ name: 'Alice', status: 'idle' });
 profile.setProperty('status', 'active');
 ```
 
-On an array signal it writes across every item, notifying once if any value changed:
+On an array, it sets the property on every item.
 
 ```javascript
 const todos = signal([
@@ -270,7 +270,7 @@ users.removeItem('u1');
 signal.setIndexProperty(index, property, value);
 ```
 
-Sets a property on the array item at `index`, notifying once if the value changed. Keys by position rather than id; prefer [`setItemProperty`](#setitemproperty) when you have an id.
+Sets a property on the array item at `index`, notifying once if the value changed. Keys by position rather than id, so use [`setItemProperty`](#setitemproperty) when you have one.
 
 #### Parameters
 
@@ -292,7 +292,7 @@ users.setIndexProperty(0, 'status', 'active');
 ```
 
 > [!note]
-> The all-items form is now [`setProperty`](#setproperty), which writes the field across every item in an array signal.
+> To set the property on every item, use [`setProperty`](#setproperty).
 
 ## Toggling
 
@@ -328,7 +328,7 @@ todos.toggleItemProperty('t1', 'done'); // t1.done is now true
 signal.toggleProperty(property);
 ```
 
-Flips a field by value type. On an **object** signal, flips that field on the object. On an **array** signal, flips the field on **every item**.
+On an object, flips the property. On an array, flips the property on every item.
 
 #### Parameters
 

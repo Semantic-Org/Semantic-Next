@@ -46,7 +46,7 @@ Helpers are provided for various types of signal primitives that help with the m
 [Collection helpers](/docs/api/reactivity/collection-helpers) make it easy to update specific values in an array of records by their ID. See methods like [`setItemProperty`](/docs/api/reactivity/collection-helpers#setitemproperty), [`replaceItem`](/docs/api/reactivity/collection-helpers#replaceitem), and [`removeItem`](/docs/api/reactivity/collection-helpers#removeitem).
 
 > [!info]
-> An item's id is matched against its `id`, `_id`, `hash`, and `key` fields, in that order. Pass an `id` resolver to [`signal()`](/docs/api/reactivity/signal#signal) to key on a different field.
+> An item's id resolves from `id`, `_id`, `hash`, or `key`. To match a different field, pass an `id` function to [`signal()`](/docs/api/reactivity/signal#signal), or set `Signal.id` globally.
 
 <PlaygroundExample id="reactive-set-property" direction="horizontal"></PlaygroundExample>
 
