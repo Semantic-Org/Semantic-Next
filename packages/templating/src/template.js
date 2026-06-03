@@ -41,59 +41,6 @@ import { TemplateHelpers } from './template-helpers.js';
 
 const IS_TEMPLATE = Symbol.for('semantic-ui/Template');
 
-// the template whose callback is currently running, set in call(). lets the bag's
-// instance-scoped helpers be shared refs instead of a per-instance bind each: they
-// resolve the owner here rather than capturing it in a closure per instance.
-let currentTemplate = null;
-
-const scoped = {
-  $(...args) {
-    return currentTemplate.$(...args);
-  },
-  $$(...args) {
-    return currentTemplate.$$(...args);
-  },
-  reaction(callback) {
-    return currentTemplate.reaction(callback);
-  },
-  computed(computeFn, options) {
-    return currentTemplate.computed(computeFn, options);
-  },
-  derive(source, computeFn, options) {
-    return currentTemplate.derive(source, computeFn, options);
-  },
-  match(source, matchFn) {
-    return currentTemplate.match(source, matchFn);
-  },
-  interval(...args) {
-    return currentTemplate.createInterval(...args);
-  },
-  timeout(...args) {
-    return currentTemplate.createTimeout(...args);
-  },
-  dispatchEvent(...args) {
-    return currentTemplate.dispatchEvent(...args);
-  },
-  attachEvent(...args) {
-    return currentTemplate.attachEvent(...args);
-  },
-  bindKey(...args) {
-    return currentTemplate.bindKey(...args);
-  },
-  unbindKey(...args) {
-    return currentTemplate.unbindKey(...args);
-  },
-  findParent(...args) {
-    return currentTemplate.findParent(...args);
-  },
-  findChild(...args) {
-    return currentTemplate.findChild(...args);
-  },
-  findChildren(...args) {
-    return currentTemplate.findChildren(...args);
-  },
-};
-
 export const Template = class Template {
   get [IS_TEMPLATE]() {
     return true;
@@ -931,14 +878,7 @@ export const Template = class Template {
       args.push(...additionalArgs);
     }
     const context = thisContext !== undefined ? thisContext : this.element;
-    const previousTemplate = currentTemplate;
-    currentTemplate = this;
-    try {
-      return func.apply(context, args);
-    }
-    finally {
-      currentTemplate = previousTemplate;
-    }
+    return func.apply(context, args);
   }
 
   buildCallParams(additionalData = {}) {
@@ -949,16 +889,16 @@ export const Template = class Template {
       tpl: this.instance,
       self: this.instance,
       component: this.instance,
-      $: scoped.$,
-      $$: scoped.$$,
-      reaction: scoped.reaction,
+      $: this.$.bind(this),
+      $$: this.$$.bind(this),
+      reaction: this.reaction.bind(this),
       signal: signal,
-      computed: scoped.computed,
-      derive: scoped.derive,
-      match: scoped.match,
+      computed: this.computed.bind(this),
+      derive: this.derive.bind(this),
+      match: this.match.bind(this),
       guard: guard,
-      interval: scoped.interval,
-      timeout: scoped.timeout,
+      interval: this.createInterval.bind(this),
+      timeout: this.createTimeout.bind(this),
       abortSignal: this.abortSignal,
       afterFlush: afterFlush,
       nonreactive: nonreactive,
@@ -973,19 +913,19 @@ export const Template = class Template {
         return template.isHydrating || false;
       },
       rerender: () => element?.requestUpdate(),
-      dispatchEvent: scoped.dispatchEvent,
-      attachEvent: scoped.attachEvent,
-      bindKey: scoped.bindKey,
-      unbindKey: scoped.unbindKey,
+      dispatchEvent: this.dispatchEvent.bind(this),
+      attachEvent: this.attachEvent.bind(this),
+      bindKey: this.bindKey.bind(this),
+      unbindKey: this.unbindKey.bind(this),
       abortController: this.abortController,
       helpers: TemplateHelpers,
       template: this,
       templateName: this.templateName,
       templates: Template.renderedTemplates,
       findTemplate: this.findTemplate,
-      findParent: scoped.findParent,
-      findChild: scoped.findChild,
-      findChildren: scoped.findChildren,
+      findParent: this.findParent.bind(this),
+      findChild: this.findChild.bind(this),
+      findChildren: this.findChildren.bind(this),
       content: this.instance.content,
       get darkMode() {
         return element?.isDarkMode?.();
