@@ -1,13 +1,13 @@
 // Helper: getItem (ID-based operations)
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { reaction, signal } from '@semantic-ui/reactivity';
 
-const users = new Signal([
+const users = signal([
   { id: 'user1', name: 'Alice', status: 'online' },
   { id: 'user2', name: 'Bob', status: 'offline' },
   { id: 'user3', name: 'Carol', status: 'online' },
 ]);
 
-Reaction.create(() => {
+reaction(() => {
   const user = users.getItem('user2'); // Find user with id=2
   console.log(`User ${user.name} is ${user.status}`);
 });

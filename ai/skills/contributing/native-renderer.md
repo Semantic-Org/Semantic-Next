@@ -146,7 +146,7 @@ scope.reaction(node, (comp) => {
 });
 ```
 
-`ReactionScope.reaction()` combines `Reaction.create()` + `track` + the `isConnected` guard that every binding needed. The guard prevents Reactions from running after their DOM has been removed (e.g., after a conditional branch swap).
+`ReactionScope.reaction()` combines `reaction()` + `track` + the `isConnected` guard that every binding needed. The guard prevents Reactions from running after their DOM has been removed (e.g., after a conditional branch swap).
 
 ### Expression evaluation
 
@@ -276,7 +276,7 @@ Without recovery, hook throws propagate so failures are loud — the browser log
 | `conditional.js` | `if` | Linear branch match. `matchIndex` = `MAIN_BRANCH_INDEX` (1000) for main body, ≥0 for branches. Server stamps `serverMeta.branchIndex` on the closing marker; mismatch triggers a re-render with a dev warning (env guards `isClient`/`isServer` exempted). |
 | `each.js` | `each` | Keyed reconciliation with per-item `Signal` + Proxy + per-item start/end text-node markers. `WeakSet itemContextProxies` replaces the old `__isItemProxy` flag; `template.js` checks via `isItemContext()` import. Snapshot-based dirty detection avoids full deep-equality on the steady-state path. |
 | `async.js` | `async` | Three states (loading / success / error). Generation counter discards stale promise resolutions. Recovery wraps sync throws and dispatches into `errorContent` via the `error` hook. |
-| `rerender.js` | `rerender` | Both `{#rerender expr}` and `{#guard key}` compile to the same node type. Guard wraps tracking in `Reaction.guard` (deep-equality gate); rerender uses plain `lookupExpression`. |
+| `rerender.js` | `rerender` | Both `{#rerender expr}` and `{#guard key}` compile to the same node type. Guard wraps tracking in `guard` (deep-equality gate); rerender uses plain `lookupExpression`. |
 | `template.js` | `template` | `{>name}` — handles BOTH snippets and subtemplates. Kind detected once on first render (`renderer.snippets[name]` check) and locked on `self.kind`. |
 
 ### Snippet vs. subtemplate dispatch
@@ -286,7 +286,7 @@ Without recovery, hook throws propagate so failures are loud — the browser log
 - **Snippet** — inline expansion via `renderAST` with a snippet-arg overlay Proxy. Args become lazy getters that re-evaluate against parent data, tracking the same Signal deps a fresh-render snippet would. `update` is a no-op (snippets are one-shot at mount; inner expression reactivity is handled by per-marker Reactions wired during render).
 - **Subtemplate** — full `Template.clone()` + `initialize()` + `render()` + `attach()`. Updates re-evaluate the name; if the template identity changed, swap the instance, otherwise call `setDataContext(data, { rerender: false })` + `render(data)`. **`rerender: false`** is critical — the default `rerender: true` clears `Template.rendered`, forcing a from-scratch re-render. `false` preserves it, so updates flow through `bumpDataVersion()` and existing Reactions re-fire in place.
 
-Static `data={...}` reads inside a `{#each}` should be reactive (so item-signal mutations propagate), but outside `{#each}` should stay non-reactive. `unpackNodeData` checks `isItemContext(data)` to switch — inside, plain `lookupExpressionValue`; outside, wrapped in `Reaction.nonreactive`.
+Static `data={...}` reads inside a `{#each}` should be reactive (so item-signal mutations propagate), but outside `{#each}` should stay non-reactive. `unpackNodeData` checks `isItemContext(data)` to switch — inside, plain `lookupExpressionValue`; outside, wrapped in `nonreactive`.
 
 ---
 

@@ -116,7 +116,7 @@ performance.measure('toggle-middle', startMark('toggle-middle'));
 
 ---
 
-## Cycle-loop flushing: `Reaction.flush()`, never `await rAF`
+## Cycle-loop flushing: `flush()`, never `await rAF`
 
 The single most expensive methodology mistake on this suite was waiting for `requestAnimationFrame` between mutations inside a measured region. Don't do it. Fix it on sight if you find it.
 
@@ -152,8 +152,8 @@ This pattern hid an entire reactivity investigation's per-key isolation work —
 
 ```js
 // ✅ Sync drain — wall-clock is the actual work
-import { Reaction } from '@semantic-ui/reactivity';
-const flushWork = () => Reaction.flush();
+import { flush } from '@semantic-ui/reactivity';
+const flushWork = () => flush();
 
 performance.mark('start');
 for (let i = 0; i < 50; i++) {
@@ -163,7 +163,7 @@ for (let i = 0; i < 50; i++) {
 performance.measure('metric', 'start');
 ```
 
-`Reaction.flush()` is a re-export of `Scheduler.flush()`. It walks the queue and runs every pending Reaction inline — same work the microtask would have done, just synchronously, without waiting for vsync. Wall-clock between the marks is now the sum of actual reactive work the loop drove. A 50% per-cycle JS-time win shows up as a 50% wall-clock win, not as no change.
+`flush()` is a re-export of `Scheduler.flush()`. It walks the queue and runs every pending Reaction inline — same work the microtask would have done, just synchronously, without waiting for vsync. Wall-clock between the marks is now the sum of actual reactive work the loop drove. A 50% per-cycle JS-time win shows up as a 50% wall-clock win, not as no change.
 
 ### When `await rAF` is still right
 
@@ -203,7 +203,7 @@ const flushWork = () => Reaction.flush();
 
 **Extend existing if the workload fits an existing bench's fixture.** Most new metrics add to `bench-todo.js` (TodoMVC-style list operations) or `bench-krausest.js` (krausest js-framework-benchmark parity workload). Add the `mark`/`measure` pair to the JS file, add the `entryName` to the appropriate `tachometer-ci*.json`. Done in 5 minutes.
 
-**`bench-krausest.js` has a special contract.** It mirrors `tools/benchmark/src/main.js` (the externally-served krausest contestant) and pins `safety: 'reference'` on its signals so the bench always measures the perf fast path regardless of `Signal.defaultSafety`. New metrics here must use SUI-idiomatic helpers (`push`, `map`, `removeItem`, new-ref `set`) — no mutate-then-set-same-ref patterns, which would silently no-op under reference equality. If you find yourself reaching for `equalityFunction: () => false` to make a new metric fire, the metric belongs in `bench-todo.js` instead.
+**`bench-krausest.js` has a special contract.** It mirrors `tools/benchmark/src/main.js` (the externally-served krausest contestant) and pins `safety: 'reference'` on its signals so the bench always measures the perf fast path regardless of `Signal.safety`. New metrics here must use SUI-idiomatic helpers (`push`, `map`, `removeItem`, new-ref `set`) — no mutate-then-set-same-ref patterns, which would silently no-op under reference equality. If you find yourself reaching for `safety: 'none'` to make a new metric fire, the metric belongs in `bench-todo.js` instead.
 
 **Create a new bench file if the workload is orthogonal.** E.g., a hydration bench needs its own fixture setup; a signal micro-bench has a different harness shape. Then you need:
 

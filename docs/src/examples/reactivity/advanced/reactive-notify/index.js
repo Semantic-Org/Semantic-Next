@@ -1,18 +1,16 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
-const data = new Signal({ count: 0 }, { safety: 'reference' });
+const data = signal({ count: 0 });
 
-Reaction.create(() => {
+reaction(() => {
   console.log('Count:', data.get().count);
 });
 
-// Mutate the object externally — the reference hasn't changed
+// mutate the stored object in place — the reference is unchanged
 data.peek().count = 5;
-
-// set() wouldn't trigger because the reference is the same object
-// notify() forces subscribers to re-run
+// set() would no-op on the same reference, so notify() forces the re-run
 data.notify();
-Reaction.flush();
+flush();
 
 data.peek().count = 10;
 data.notify();

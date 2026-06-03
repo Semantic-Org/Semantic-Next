@@ -4,20 +4,20 @@ import { formatDate } from '@semantic-ui/utils';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
-// state is a reactive data store
+const birthdayCalendar = [
+  { name: 'Jack', birthday: 'August 10' },
+  { name: 'Elliot', birthday: 'January 13' },
+  { name: 'Stevie', birthday: 'January 16' },
+  { name: 'Stew', birthday: 'April 4' },
+  { name: "Stew's Twin Brother", birthday: 'April 4' },
+];
+
 const defaultState = {
   today: null,
-  birthdayNames: [],
 };
 
-const createComponent = ({ self, state, reaction }) => ({
-  birthdayCalendar: [
-    { name: 'Jack', birthday: 'August 10' },
-    { name: 'Elliot', birthday: 'January 13' },
-    { name: 'Stevie', birthday: 'January 16' },
-    { name: 'Stew', birthday: 'April 4' },
-    { name: "Stew's Twin Brother", birthday: 'April 4' },
-  ],
+const createComponent = ({ state }) => ({
+  birthdayCalendar,
 
   getDisplayDate(date = new Date()) {
     return formatDate(date, 'MMMM DD');
@@ -27,32 +27,20 @@ const createComponent = ({ self, state, reaction }) => ({
     return formatDate(new Date(date), 'YYYY-MM-DD');
   },
 
-  checkBirthdays() {
-    reaction(() => {
-      // setup reaction on today
-      let today = state.today.get();
-
-      // find people whose birthday is today
-      let birthdayNames = self.birthdayCalendar
-        .filter(person => person.birthday === today)
-        .map(person => person.name);
-      if (birthdayNames.length) {
-        state.birthdayNames.set(birthdayNames.join(', '));
-      }
-      else {
-        state.birthdayNames.set(undefined);
-      }
-    });
-  },
+  birthdayNames: state.today.derive(today => {
+    const names = birthdayCalendar
+      .filter(person => person.birthday === today)
+      .map(person => person.name);
+    return names.length ? names.join(', ') : undefined;
+  }),
 });
 
 const onCreated = ({ state, self }) => {
   state.today.set(self.getDisplayDate());
-  self.checkBirthdays();
 };
 
 const events = {
-  'change .date-picker'({ state }) {
+  'change .date-picker'({ state, self }) {
     const newDay = new Date(this.value);
     state.today.set(self.getDisplayDate(newDay));
   },

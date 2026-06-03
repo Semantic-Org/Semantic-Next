@@ -1,13 +1,13 @@
 // Helper: removeItem
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { reaction, signal } from '@semantic-ui/reactivity';
 
-const products = new Signal([
+const products = signal([
   { id: 'prod1', name: 'Laptop', stock: 5 },
   { id: 'prod2', name: 'Phone', stock: 0 },
   { id: 'prod3', name: 'Tablet', stock: 3 },
 ]);
 
-Reaction.create(() => {
+reaction(() => {
   console.log('Available products:', products.value);
 });
 

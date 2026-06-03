@@ -1,9 +1,9 @@
 // Schedule Flush: Manual flush scheduling
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, scheduleFlush, signal } from '@semantic-ui/reactivity';
 
-const status = new Signal('idle');
+const status = signal('idle');
 
-Reaction.create(() => {
+reaction(() => {
   console.log('Status:', status.get());
 });
 
@@ -11,13 +11,13 @@ console.log('--- Update and schedule flush ---');
 status.set('loading');
 
 // Schedule a flush to happen (usually automatic)
-Reaction.scheduleFlush();
+scheduleFlush();
 
 console.log('--- Before flush completes ---');
 console.log('Current status:', status.peek());
 
 // Force immediate flush
 console.log('--- Forcing immediate flush ---');
-Reaction.flush();
+flush();
 
 console.log('--- After flush ---');

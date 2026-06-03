@@ -1,0 +1,62 @@
+---
+layout: '@layouts/Guide.astro'
+icon: git-branch
+title: Derived Signals
+description: Signals computed from other signals
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+A derived signal computes its value from other signals and caches it, recomputing only when an input it read changes.
+
+## derive
+
+[`derive`](/docs/api/reactivity/derived-signals#derive) transforms one signal into another. The result tracks its source and recomputes when that source changes.
+
+```javascript
+const items = signal(['apple', 'banana', 'cherry']);
+const count = items.derive(list => list.length);
+
+count.get(); // 3
+items.push('date');
+count.get(); // 4
+```
+
+<PlaygroundExample id="reactive-derived" />
+
+## computed
+
+When a value draws on more than one signal, [`computed`](/docs/api/reactivity/derived-signals#computed) reads them all in its body and recomputes when any of them change.
+
+```javascript
+const price = signal(10);
+const quantity = signal(3);
+const total = computed(() => price.get() * quantity.get());
+
+total.get(); // 30
+quantity.set(4);
+total.get(); // 40
+```
+
+<PlaygroundExample id="reactive-computed" />
+
+> Reach for `derive` when a value comes from a single source, `computed` when it combines several.
+
+## match
+
+Selection is the one-of-N case, like the active row in a table. [`match`](/docs/api/reactivity/derived-signals#match) returns a function you call with a key. Reading a key inside a reaction subscribes only that key, so a source change re-runs the keys whose answer flipped rather than every reader.
+
+```javascript
+const selected = signal('inbox');
+const isSelected = match(selected);
+
+isSelected('inbox'); // true
+isSelected('drafts'); // false
+
+selected.set('drafts'); // re-runs only 'inbox' and 'drafts'
+```
+
+<PlaygroundExample id="reactive-match" />
+
+## Teardown
+
+Each of these runs a reaction under the hood. Inside a component it stops with the component. Created on its own, it self-stops once nothing references it, or call `stop()` to end it immediately.

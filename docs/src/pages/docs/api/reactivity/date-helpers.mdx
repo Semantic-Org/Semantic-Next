@@ -1,42 +1,47 @@
 ---
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
-icon: calendar
 title: Date Helpers
+icon: calendar
 package: "@semantic-ui/reactivity"
 methods: [now]
 description: API reference for Date Helpers in Semantic UI's reactivity system
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
 
-Date Helpers are methods available on Signal instances that contain Date objects. These helpers provide a convenient way to update the date value reactively.
+export const components = { blockquote: Blockquote };
 
-## now
+Signal instance helpers for `Date` values. Available when the signal holds a `Date` (or is null/undefined).
 
-Sets the value of the Signal to the current date and time.
+## Updating
 
-### Syntax
-```javascript
-signal.now()
-```
-
-### Returns
-
-Date - The new Date object representing the current date and time.
-
-### Usage
+### now
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const currentTime = new Signal(new Date());
-
-console.log(currentTime.get()); // Output: current date and time
-
-// After some time...
-currentTime.now();
-console.log(currentTime.get()); // Output: updated current date and time
+signal.now();
 ```
 
-### Example
+Sets the value to the current date and time.
+
+> [!note]
+> `now()` is present only when the signal's value is a `Date`, or null/undefined.
+
+#### Returns
+
+Nothing. The signal is updated in place and dependents re-run if the value changed.
+
+#### Usage
+
+```javascript
+import { signal } from '@semantic-ui/reactivity';
+
+const lastSeen = signal(new Date());
+
+// later, stamp the moment
+lastSeen.now();
+```
+
+#### Example
+
 <PlaygroundExample id="reactive-now" direction="horizontal"></PlaygroundExample>

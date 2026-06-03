@@ -1,238 +1,225 @@
 ---
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
-icon: list
 title: Array Helpers
+icon: list
 package: "@semantic-ui/reactivity"
-methods: [push, unshift, splice, setIndex, removeIndex, getIndex, filter, map]
+methods: [push, unshift, splice, setIndex, removeIndex, getIndex, map, filter]
 description: API reference for Array Helpers in Semantic UI's reactivity system
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
 
-Array Helpers provide convenient ways to modify arrays reactively, ensuring that dependent computations are updated when the array changes.
+export const components = { blockquote: Blockquote };
 
+Mutate a signal holding an array and notify dependents in one call. These helpers change the stored array in place, so they work under the default `safety: 'reference'` without needing a fresh reference.
 
-## push
+> [!info]
+> Unlike [`set`](/docs/api/reactivity/signal#set), most of these helpers skip the equality check and notify dependents unconditionally. The exception is [`setIndex`](#setindex), which notifies only when the indexed value changes.
+
+## Adding
+
+### push
+
+```javascript
+signal.push(...items);
+```
 
 Adds one or more elements to the end of the array.
 
-### Syntax
-```javascript
-signal.push(...elements)
-```
-
-### Parameters
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| ...elements | any | One or more elements to add to the end of the array |
+| ...items | any | Elements to append |
 
-### Usage
+#### Usage
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const fruits = new Signal(['apple']);
-fruits.push('banana'); // ['apple', 'banana']
-fruits.push('orange', 'grape'); // ['apple', 'banana', 'orange', 'grape']
+const fruits = signal(['apple']);
+fruits.push('banana');           // ['apple', 'banana']
+fruits.push('orange', 'grape');  // ['apple', 'banana', 'orange', 'grape']
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="reactive-push" direction="horizontal"></PlaygroundExample>
 
+### unshift
 
-## unshift
+```javascript
+signal.unshift(...items);
+```
 
 Adds one or more elements to the beginning of the array.
 
-### Syntax
-```javascript
-signal.unshift(...elements)
-```
-
-### Parameters
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| ...elements | any | One or more elements to add to the beginning of the array |
+| ...items | any | Elements to prepend |
 
-### Usage
+#### Usage
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const numbers = new Signal([3]);
-numbers.unshift(1, 2); // [1, 2, 3]
+const numbers = signal([3]);
+numbers.unshift(1, 2);  // [1, 2, 3]
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="reactive-unshift" direction="horizontal"></PlaygroundExample>
 
+### splice
 
-## splice
-
-Changes the contents of the array by removing or replacing existing elements and/or adding new elements.
-
-### Syntax
 ```javascript
-signal.splice(start, deleteCount?, ...items)
+signal.splice(start, deleteCount, ...items);
 ```
 
-### Parameters
+Removes or replaces existing elements and inserts new ones, matching `Array.prototype.splice`.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| start | number | The index at which to start changing the array |
-| deleteCount | number | (Optional) Number of elements to remove |
-| ...items | any | (Optional) Elements to insert |
+| start | number | Index at which to start changing the array |
+| deleteCount | number | Number of elements to remove. Optional |
+| ...items | any | Elements to insert. Optional |
 
-### Usage
+#### Usage
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const colors = new Signal(['red', 'green', 'blue']);
-colors.splice(1, 1, 'yellow'); // ['red', 'yellow', 'blue']
+const colors = signal(['red', 'green', 'blue']);
+colors.splice(1, 1, 'yellow');  // ['red', 'yellow', 'blue']
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="reactive-splice" direction="horizontal"></PlaygroundExample>
 
+## Indexing
 
-## setIndex
+### setIndex
 
-Sets the value at a specific index in the array.
-
-### Syntax
 ```javascript
-signal.setIndex(index, value)
+signal.setIndex(index, value);
 ```
 
-### Parameters
+Sets the value at a specific index. Notifies dependents only when the value differs from the current one by `===`.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| index | number | The index at which to set the value |
-| value | any | The value to set |
+| index | number | Index to write |
+| value | any | Value to store at the index |
 
-### Usage
+#### Usage
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const items = new Signal(['a', 'b', 'c']);
-items.setIndex(1, 'x'); // ['a', 'x', 'c']
+const items = signal(['a', 'b', 'c']);
+items.setIndex(1, 'x');  // ['a', 'x', 'c']
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="reactive-set-index" direction="horizontal"></PlaygroundExample>
 
+### removeIndex
 
-## removeIndex
-
-Removes the element at a specific index from the array.
-
-### Syntax
 ```javascript
-signal.removeIndex(index)
+signal.removeIndex(index);
 ```
 
-### Parameters
+Removes the element at a specific index.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| index | number | The index of the element to remove |
+| index | number | Index of the element to remove |
 
-### Usage
+#### Usage
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const letters = new Signal(['a', 'b', 'c']);
-letters.removeIndex(1); // ['a', 'c']
+const letters = signal(['a', 'b', 'c']);
+letters.removeIndex(1);  // ['a', 'c']
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="reactive-remove-index" direction="horizontal"></PlaygroundExample>
 
+### getIndex
 
-## getIndex
-
-Gets the element at a specific index in the array.
-
-### Syntax
 ```javascript
-signal.getIndex(index)
+signal.getIndex(index);
 ```
 
-### Parameters
+Reads the element at a specific index and subscribes the running reaction, like [`get`](/docs/api/reactivity/signal#get).
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| index | number | The index of the element to retrieve |
+| index | number | Index of the element to read |
 
-### Usage
+#### Returns
 
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
+The element at `index`.
 
-const letters = new Signal(['a', 'b', 'c']);
-const secondLetter = letters.getIndex(1); // 'b'
-```
+#### Example
 
-### Example
 <PlaygroundExample id="reactive-get-index" direction="horizontal"></PlaygroundExample>
 
-## filter
+## Transforming
 
-Filters the array to only include elements that pass the test provided by the callback function.
+### map
 
-### Syntax
 ```javascript
-signal.filter(predicate)
+signal.map(callback);
 ```
 
-### Parameters
+Replaces each element with the callback's return value, in place. Unlike `Array.prototype.map` this writes back into the signal rather than returning a new array.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| predicate | Function | Function to test each element of the array. Takes three arguments: the current element, its index, and the array being processed |
+| callback | function | Receives `(value, index, array)`, returns the replacement element |
 
-### Usage
-
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const numbers = new Signal([1, 2, 3, 4, 5]);
-numbers.filter(n => n % 2 === 0); // [2, 4]
-```
-
-### Example
-<PlaygroundExample id="reactive-filter" direction="horizontal"></PlaygroundExample>
-
-## map
-
-Transforms each element in the array using the provided mapping function.
-
-### Syntax
-```javascript
-signal.map(callback)
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| callback | Function | Function to transform each element. Takes three arguments: the current element, its index, and the array being processed |
-
-### Usage
+#### Usage
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const numbers = new Signal([1, 2, 3]);
-numbers.map(n => n * 2); // [2, 4, 6]
+const numbers = signal([1, 2, 3]);
+numbers.map(n => n * 2);  // [2, 4, 6]
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="reactive-map" direction="horizontal"></PlaygroundExample>
+
+### filter
+
+```javascript
+signal.filter(predicate);
+```
+
+Keeps only the elements that pass the predicate, in place. Unlike `Array.prototype.filter` this narrows the stored array rather than returning a new one.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| predicate | function | Receives `(value, index, array)`, returns whether to keep the element |
+
+#### Usage
+
+```javascript
+const numbers = signal([1, 2, 3, 4, 5]);
+numbers.filter(n => n % 2 === 0);  // [2, 4]
+```
+
+#### Example
+
+<PlaygroundExample id="reactive-filter" direction="horizontal"></PlaygroundExample>

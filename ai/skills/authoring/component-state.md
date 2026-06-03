@@ -313,12 +313,12 @@ const defaultState = { counter: 0, isOpen: false };
 // signal() in createComponent — needed when you want signal options or
 // to create signals dynamically
 const createComponent = ({ signal }) => ({
-  element: signal(null, { allowClone: false }),  // custom options
+  element: signal(null, { safety: 'reference' }),  // store the node by reference
   count: signal(0),                               // explicit signal
 });
 ```
 
-Use `defaultState` by default. Use `signal()` when you need `allowClone: false`, custom equality, or signals created conditionally.
+Use `defaultState` by default. Use `signal()` when you need a non-default `safety`, custom equality, or signals created conditionally.
 
 ---
 
@@ -333,16 +333,16 @@ const currentValue = state.counter.peek();
 
 Use `peek()` when you need the current value inside a reaction but don't want that signal to trigger re-runs.
 
-### Reaction.nonreactive — Suppress tracking for a block
+### nonreactive — Suppress tracking for a block
 
 ```js
-const createComponent = ({ state, reaction }) => ({
+const createComponent = ({ state, reaction, nonreactive }) => ({
   initialize() {
     reaction(() => {
       const count = state.counter.get();  // tracked
 
       // Read other signals without tracking them
-      const config = Reaction.nonreactive(() => {
+      const config = nonreactive(() => {
         return state.config.get();
       });
 
@@ -481,7 +481,7 @@ createComponent: () => ({
 ### Reactivity Controls
 ```js
 signal.peek()                             // read without dependency
-Reaction.nonreactive(() => signal.get())  // suppress tracking in block
+nonreactive(() => signal.get())           // suppress tracking in block
 afterFlush(() => { /* post-render */ })    // run after DOM updates
 flush()                                   // force immediate processing
 ```

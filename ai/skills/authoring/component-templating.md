@@ -479,7 +479,7 @@ All helpers are available in any template expression without import.
 
 ### Debug and Reactivity
 
-`log(...args)`, `debugger()`, `debugReactivity()`, `guard(value)` (Reaction.guard), `nonreactive(value)` (Reaction.nonreactive)
+`log(...args)`, `debugger()`, `debugReactivity()`, `guard(value)`, `nonreactive(value)`
 
 ### Custom Helpers
 
@@ -568,5 +568,5 @@ DATA CONTEXT LOOKUP ORDER
 | **Component State** | `component-state` | Settings vs state, signal management |
 | **Component HTML** | `component-html` | Semantic class naming, accessibility, DOM structure |
 | **Component Events** | `component-events` | Event DSL, delegation, `dispatchEvent`, `@event` details |
-| **Reactive State** | `reactive-state` | Signal/Reaction primitives, `Reaction.guard`, `nonreactive` |
+| **Reactive State** | `reactive-state` | Signal/Reaction primitives, `guard`, `nonreactive` |
 | **Component CSS** | `component-css` | Shadow DOM styling, `:host`, `part`, CSS custom properties |

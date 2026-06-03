@@ -1,14 +1,14 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { reaction, signal } from '@semantic-ui/reactivity';
 
-const expensive = new Signal(0);
+const expensive = signal(0);
 
 console.log('Has dependents:', expensive.hasDependents()); // false
 
-const reaction = Reaction.create(() => {
+const handle = reaction(() => {
   console.log('Value:', expensive.get());
 });
 
 console.log('Has dependents:', expensive.hasDependents()); // true
 
-reaction.stop();
+handle.stop();
 console.log('Has dependents:', expensive.hasDependents()); // false

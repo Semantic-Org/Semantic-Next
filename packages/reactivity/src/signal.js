@@ -41,6 +41,9 @@ export class Signal {
       value: initialValue,
     });
 
+    // preserve v8 monomorphism for derived/computed signals with cleanup
+    this.reaction = null;
+
     // configured helpers, defaulting to the class statics
     this.clone = clone;
     this.equality = equality;
@@ -97,6 +100,11 @@ export class Signal {
 
   raw() {
     return this.currentValue;
+  }
+
+  stop() {
+    // cleanup for derived signals only
+    this.reaction?.stop();
   }
 
   /* Dependencies */

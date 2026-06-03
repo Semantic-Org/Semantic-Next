@@ -19,11 +19,11 @@ npm install @semantic-ui/reactivity
 ## Basic Usage
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { signal, reaction } from '@semantic-ui/reactivity';
 
-const counter = new Signal(0);
+const counter = signal(0);
 
-Reaction.create(() => {
+reaction(() => {
   console.log('Counter value:', counter.get());
 });
 
@@ -32,10 +32,14 @@ counter.set(1); // Console: "Counter value: 1"
 
 ## API Sections
 
-* **[Signal](/docs/api/reactivity/signal)** - Core class for creating signals
-* **[Reaction](/docs/api/reactivity/reaction)** - Managing reactive computations
+* **[Signal](/docs/api/reactivity/signal)** - Create reactive values
+* **[Reaction](/docs/api/reactivity/reaction)** - Run computations that re-fire on change
+* **[Derived Signals](/docs/api/reactivity/derived-signals)** - Compute signals from other signals
+* **[Reactive Controls](/docs/api/reactivity/controls)** - Suspend tracking, gate propagation
+* **[Flushing](/docs/api/reactivity/flushing)** - Control when reactions run
+* **[Debugging](/docs/api/reactivity/debugging)** - Trace and inspect reactivity
+* **[Scheduler](/docs/api/reactivity/scheduler)** - The batching engine
 * **[Dependency](/docs/api/reactivity/dependency)** - Low-level dependency tracking
-* **[Flushing](/docs/api/reactivity/flushing)** - Controlling the execution of reactions
 
 ## Reactive Helpers
 
@@ -61,8 +65,8 @@ Semantic UI includes various helpers to make it easy to manipulate data like arr
   - [`replaceItem(item, id)`](/docs/api/reactivity/collection-helpers#replaceitem)
   - [`removeItem(id)`](/docs/api/reactivity/collection-helpers#removeitem)
   - [`getIndex(id)`](/docs/api/reactivity/collection-helpers#getindex)
-  - [`getID(index)`](/docs/api/reactivity/collection-helpers#getid)
-  - [`hasID(index)`](/docs/api/reactivity/collection-helpers#hasid)
+  - [`getId(item)`](/docs/api/reactivity/collection-helpers#getid)
+  - [`hasId(item)`](/docs/api/reactivity/collection-helpers#hasid)
 
 * **[Date Helpers](/docs/api/reactivity/date-helpers)**
   - [`now()`](/docs/api/reactivity/date-helpers#now) for setting to current time

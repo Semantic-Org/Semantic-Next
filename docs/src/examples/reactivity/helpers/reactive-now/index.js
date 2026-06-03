@@ -1,8 +1,8 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { reaction, signal } from '@semantic-ui/reactivity';
 
-const lastUpdated = new Signal(new Date());
+const lastUpdated = signal(new Date());
 
-Reaction.create((reaction) => {
+reaction((computation) => {
   console.clear();
   console.log(`Last updated: ${lastUpdated.get().toLocaleTimeString()}`);
 });

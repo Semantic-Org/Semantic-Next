@@ -1,15 +1,15 @@
 // Helper: removeIndex
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { reaction, signal } from '@semantic-ui/reactivity';
 
-const tasks = new Signal([
+const tasks = signal([
   { text: 'Learn Signals', completed: true },
   { text: 'Write Tests', completed: false },
   { text: 'Update Docs', completed: false },
 ]);
 
-Reaction.create((reaction) => {
+reaction((computation) => {
   const currentTasks = tasks.get();
-  if (!reaction.firstRun) {
+  if (!computation.firstRun) {
     console.log('Remaining tasks:', currentTasks);
   }
 });

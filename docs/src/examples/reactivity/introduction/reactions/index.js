@@ -1,20 +1,20 @@
 // Reaction Basics: Creating reactive computations
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
 // Create signals
-const firstName = new Signal('John');
-const lastName = new Signal('Doe');
+const firstName = signal('John');
+const lastName = signal('Doe');
 
 // Create a reaction that combines the signals
-Reaction.create(() => {
+reaction(() => {
   const full = `${firstName.get()} ${lastName.get()}`;
   console.log('Full name:', full);
 });
 
 // Update signals - reaction runs automatically
 firstName.set('Jane');
-Reaction.flush();
+flush();
 
 // Update another signal
 lastName.set('Smith');
-Reaction.flush();
+flush();

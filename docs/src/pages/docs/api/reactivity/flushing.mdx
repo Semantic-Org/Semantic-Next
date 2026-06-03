@@ -1,74 +1,88 @@
 ---
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
+title: Flushing
 icon: refresh-cw
-title: Flushing Reactions
 package: "@semantic-ui/reactivity"
-methods: [scheduleFlush, flush, afterFlush]
-description: API reference for triggering reactivity
+methods: [flush, afterFlush, scheduleFlush]
+description: API reference for scheduling and flushing reactions in Semantic UI's reactivity system
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
 
-Flushing triggers all reactive contexts to update with their current value.
+export const components = { blockquote: Blockquote };
 
-> See [the dedicated tutorial on flushing](/docs/guides/reactivity/flush) for more information on how to use.
-
-## scheduleFlush
-
-Schedules a flush of all pending reactions.
-
-> **Async Flush** Reactions run using [`microtask`](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide) queues which means that they will not immediately occur unless `flush` is used.
-
-### Syntax
-```javascript
-Reaction.scheduleFlush()
-```
-
-### Usage
+Control when pending reactions run. By default a signal change schedules its dependents onto the microtask queue, these free functions let you flush that queue now, run a callback once it settles, or schedule it yourself.
 
 ```javascript
-import { Reaction } from '@semantic-ui/reactivity';
-
-Reaction.scheduleFlush();
+import { flush, afterFlush, scheduleFlush } from '@semantic-ui/reactivity';
 ```
 
-## flush
+> [!info]
+> Reactions run on the [microtask](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide) queue, so a write does not re-run dependents synchronously. Batched writes within the same tick collapse to a single flush, and dependents observe only the final value. Use `flush()` to force them through now.
 
-Immediately runs all pending reactions.
+## Flushing
 
-### Syntax
-```javascript
-Reaction.flush()
-```
-
-### Usage
+### flush
 
 ```javascript
-import { Reaction } from '@semantic-ui/reactivity';
-
-Reaction.flush();
+flush();
 ```
 
-## afterFlush
+Synchronously drains every pending reaction instead of waiting for the microtask. Batched writes resolve to their final value, errors are captured and rethrown after the queue drains so one faulty reaction cannot jam the rest, and a reactive cycle is broken after a fixed iteration cap.
 
-Schedules a callback to run after the next flush.
+#### Usage
 
-### Syntax
 ```javascript
-Reaction.afterFlush(callback)
+const count = signal(0);
+reaction(() => console.log(count.get()));
+
+count.set(1);
+count.set(2);
+flush(); // logs 2 once, not 1 then 2
 ```
 
-### Parameters
+#### Example
+
+<PlaygroundExample id="reactive-flush" direction="horizontal"></PlaygroundExample>
+
+### scheduleFlush
+
+```javascript
+scheduleFlush();
+```
+
+Schedules pending reactions to run on the next microtask. This is the default behavior when a signal changes and is idempotent within a tick, so calling it repeatedly before the queue drains is a no-op. You rarely call this directly, reach for it only when wiring custom timing around the queue.
+
+#### Example
+
+<PlaygroundExample id="schedule-flush" direction="horizontal"></PlaygroundExample>
+
+## After Flush
+
+### afterFlush
+
+```javascript
+afterFlush(callback);
+```
+
+Registers a callback to run once the next flush drains. Use it for side effects that should happen after all reactions have settled, such as reading layout once the DOM has caught up. Callbacks registered during a flush run in a later pass of the same flush, after the reactions they queued.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| callback | Function | The function to run after the flush |
+| callback | function | Runs after the queue drains |
 
-### Usage
+#### Usage
 
 ```javascript
-import { Reaction } from '@semantic-ui/reactivity';
-
-Reaction.afterFlush(() => {
-  console.log('Flush completed');
+afterFlush(() => {
+  // all reactions have run, DOM is up to date
+  console.log('settled');
 });
 ```
+
+#### Example
+
+<PlaygroundExample id="after-flush" direction="horizontal"></PlaygroundExample>

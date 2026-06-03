@@ -1,14 +1,14 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
-const counter = new Signal(0);
+const counter = signal(0);
 
-Reaction.create((reaction) => {
+reaction((computation) => {
   const count = counter.get();
-  if (!reaction.firstRun) {
+  if (!computation.firstRun) {
     console.log(`Counter: ${count}`);
   }
 });
 
 counter.increment(); // Increment by 1
-Reaction.flush();
+flush();
 counter.increment(10); // Increment by 10

@@ -1,66 +1,107 @@
 /**
- * Configuration options for creating a new Signal instance
+ * Configuration options for creating a new Signal instance.
+ * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#options Signal Options}
  */
 export interface SignalOptions<T> {
   /**
-   * Custom equality function to determine if a value has changed
-   * @param oldValue - The previous value
-   * @param newValue - The new value to compare against
+   * Value-protection preset controlling how the stored value is guarded against
+   * outside mutation. `'reference'` (default) stores the value by reference.
+   * `'clone'` stores and returns defensive copies via `clone`. `'none'` stores
+   * by reference and treats every `set()` as a change (event-stream semantics).
+   * @default 'reference'
    */
-  equalityFunction?: (oldValue: T, newValue: T) => boolean;
+  safety?: 'clone' | 'reference' | 'none';
 
   /**
-   * Whether to allow cloning of values. If false, values are stored by reference
-   * @default true
+   * Determines whether a candidate value differs from the current one. The
+   * signal notifies dependents only when this returns `false`. Snapshotted at
+   * construction, so reassigning `Signal.equality` later does not affect signals
+   * that already exist.
+   * @param oldValue - The current value
+   * @param newValue - The candidate value
    */
-  allowClone?: boolean;
+  equality?: (oldValue: T, newValue: T) => boolean;
 
   /**
-   * Custom function to clone values when storing or retrieving from the signal
-   * @param value - The value to clone
+   * Produces a copy of a value. Used to insulate stored values when `safety` is
+   * `'clone'`, and by `mutate()` to detect in-place changes.
+   * @param value - The value to copy
    */
-  cloneFunction?: <V>(value: V) => V;
+  clone?: <V>(value: V) => V;
+
+  /**
+   * Resolves the identity of an array item for the id-based collection helpers
+   * (`getItem`, `setProperty`, `replaceItem`, `removeItem`). Defaults to the
+   * first present of `id`, `_id`, `hash`, `key`.
+   * @param item - The item to identify
+   */
+  id?: (item: any) => any;
+
+  /**
+   * Debugging context attached to the signal, surfaced in tracing output.
+   */
+  context?: Record<string, any>;
 }
 
 /**
  * A Signal represents a reactive value that automatically triggers updates
  * when modified. It can store any type of value and provides methods for
  * safely mutating that value while maintaining reactivity.
+ *
+ * Create one with the `signal()` factory or `new Signal()` — both are supported.
  * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal Signal Documentation}
  */
 export class Signal<T> {
   /**
-   * Creates a new Signal with an initial value
+   * Default equality (deep) used by signals that don't supply their own. Set
+   * this to change the default for signals created afterward.
+   */
+  static equality: (oldValue: any, newValue: any) => boolean;
+
+  /**
+   * Default clone used by signals that don't supply their own.
+   */
+  static clone: <V>(value: V) => V;
+
+  /**
+   * Default id resolver for the collection helpers. Returns the first present of
+   * `id`, `_id`, `hash`, `key`.
+   */
+  static id: (item: any) => any;
+
+  /**
+   * Default safety preset for new signals.
+   * @default 'reference'
+   */
+  static safety: 'clone' | 'reference' | 'none';
+
+  /**
+   * Creates a new Signal with an initial value.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#constructor constructor}
    * @param initialValue - The initial value to store in the signal
    * @param options - Configuration options for the signal's behavior
    */
-  constructor(initialValue: T, options?: SignalOptions<T>);
-  /**
-   * Creates a new Signal without an initial value
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#constructor constructor}
-   */
-  constructor();
+  constructor(initialValue?: T, options?: SignalOptions<T>);
 
   /**
    * Sets debugging context on the signal, replacing any existing context.
    * Context appears in reactive debugging output and helps trace signal behavior.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#setcontext setContext}
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/debugging Debugging Reactivity}
    * @param additionalContext - Key-value pairs to store as debugging context
    */
   setContext(additionalContext?: Record<string, any>): void;
 
   /**
    * Adds debugging context without replacing existing context.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#addcontext addContext}
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/debugging Debugging Reactivity}
    * @param additionalContext - Key-value pairs to merge into existing context
    */
   addContext(additionalContext?: Record<string, any>): void;
 
   /**
-   * Captures a stack trace into the signal's context for debugging.
-   * Call after setContext to see where the signal was configured.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#settrace setTrace}
+   * Captures a stack trace into the signal's context. Only does work when stack
+   * capture is enabled via `setStackCapture(true)`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/debugging Debugging Reactivity}
    */
   setTrace(): void;
 
@@ -86,14 +127,14 @@ export class Signal<T> {
 
   /**
    * Gets the current value and establishes a reactive dependency.
-   * This is an alias for `value` getter.
+   * This is an alias for the `value` getter.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#get get}
    */
   get(): T;
 
   /**
    * Sets a new value and triggers updates if the value has changed.
-   * This is an alias for `value` setter.
+   * This is an alias for the `value` setter.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#set set}
    * @param newValue - The new value to set
    */
@@ -114,8 +155,8 @@ export class Signal<T> {
 
   /**
    * Force-triggers all subscribers without changing the value. Bypasses the
-   * equality check, useful when external code has mutated something and you
-   * need to notify dependents.
+   * equality check, useful when external code has mutated the stored value
+   * in place (under `safety: 'reference'`) and you need to notify dependents.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#notify notify}
    */
   notify(): void;
@@ -129,10 +170,19 @@ export class Signal<T> {
 
   /**
    * Returns the current value without establishing a reactive dependency.
-   * Accessing the value with `peek()` will not cause any reactive context to depend on this Signal.
+   * Under `safety: 'clone'` the returned value is still a defensive copy.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#peek peek}
    */
   peek(): T;
+
+  /**
+   * Returns the underlying stored value with no dependency tracking and no
+   * clone protection, even under `safety: 'clone'`. This is the live reference,
+   * mutating it bypasses change detection. Prefer `peek()` unless you need the
+   * exact stored object.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#raw raw}
+   */
+  raw(): T;
 
   /**
    * Sets the signal's value to undefined.
@@ -142,19 +192,9 @@ export class Signal<T> {
   clear(): void;
 
   /**
-   * Subscribes to changes in the signal's value.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#subscribe subscribe}
-   * @param callback - Function called whenever the value changes.
-   *                   Receives the new value and a computation object with a `stop` method.
-   * @returns An object with a `stop` method that can be called to unsubscribe,
-   *          preventing further calls to the callback.
-   */
-  subscribe(callback: (value: T, computation: { stop: () => void; }) => void): { stop: () => void; };
-
-  /**
    * Mutates the current value in-place via a callback function.
    * If the callback returns a value, that value is set. Otherwise the original
-   * value is kept and reactivity is triggered if it changed.
+   * value is kept and reactivity is triggered only if it changed.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#mutate mutate}
    * @param mutationFn - Function that receives the current value and optionally returns a new value
    */
@@ -214,14 +254,30 @@ export class Signal<T> {
    */
   removeIndex<U extends any[]>(this: Signal<U>, index: number): void;
 
-  // Object array methods (only available when T is or extends Record<string, any>[])
-  // These methods are for Signals holding arrays of objects, allowing for reactive updates
-  // to properties within those objects.
   /**
-   * Sets a property on an object in the array at a specific index.
+   * Transforms each element in the array in place using the mapping function.
+   * This method is only available when `T` is or extends `any[]`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/array-helpers#map map}
+   * @param callback - Function to transform each element
+   */
+  map<U extends any[]>(this: Signal<U>, callback: (value: U[number], index: number, array: U) => U[number]): void;
+
+  /**
+   * Filters the array in place to the elements that pass the test.
+   * This method is only available when `T` is or extends `any[]`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/array-helpers#filter filter}
+   * @param predicate - Function to test each element
+   */
+  filter<U extends any[]>(this: Signal<U>, predicate: (value: U[number], index: number, array: U) => boolean): void;
+
+  // Object-array methods (only available when T is or extends Record<string, any>[])
+  // These methods are for Signals holding arrays of objects, allowing reactive
+  // updates to properties within those objects.
+  /**
+   * Sets a property on the object at a specific index in the array.
    * This method is only available when `T` is or extends `Record<string, any>[]`.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#setarrayproperty setArrayProperty}
-   * @param index - Index of object to modify
+   * @param index - Index of the object to modify
    * @param property - Property name to set
    * @param value - Value to set for the property
    */
@@ -233,7 +289,7 @@ export class Signal<T> {
   ): void;
 
   /**
-   * Sets a property on all objects in the array.
+   * Sets a property on every object in the array.
    * This method is only available when `T` is or extends `Record<string, any>[]`.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#setarrayproperty setArrayProperty}
    * @param property - Property name to set on all objects
@@ -245,111 +301,11 @@ export class Signal<T> {
     value: U[number][keyof U[number]],
   ): void;
 
-  // Boolean methods (only available when T is or extends boolean)
-  // These methods are available when the Signal's value is a boolean.
   /**
-   * Toggles a boolean value between true and false.
-   * This method is only available when `T` is or extends `boolean`, or is null/undefined.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/boolean-helpers#toggle toggle}
-   */
-  toggle(this: Signal<boolean | null | undefined>): void;
-
-  // Numeric methods (only available when T is or extends number)
-  // These methods are available when the Signal's value is a number.
-  /**
-   * Increments the numeric value.
-   * This method is only available when `T` is or extends `number`, or is null/undefined.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/number-helpers#increment increment}
-   * @param amount - Amount to increment by
-   * @default 1
-   */
-  increment(this: Signal<number | null | undefined>, amount?: number, max?: number): void;
-
-  /**
-   * Decrements the numeric value.
-   * This method is only available when `T` is or extends `number`, or is null/undefined.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/number-helpers#decrement decrement}
-   * @param amount - Amount to decrement by
-   * @param min - Minimum value (floor)
-   * @default 1
-   */
-  decrement(this: Signal<number | null | undefined>, amount?: number, min?: number): void;
-
-  // Date methods (only available when T is or extends Date)
-  // These methods are available when the Signal's value is a Date object.
-  /**
-   * Sets the value to the current date/time.
-   * This method is only available when `T` is or extends `Date`, or is null/undefined.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/date-helpers#now now}
-   */
-  now(this: Signal<Date | null | undefined>): void;
-
-  // Object ID related methods (for arrays or Signal values that are objects with IDs)
-  // These methods facilitate working with objects that have identifier properties
-  // such as `_id`, `id`, `hash`, or `key`.
-  /**
-   * Gets all possible ID values from an object.
-   * Checks for properties: `_id`, `id`, `hash`, `key`.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getids getIDs}
-   * @param item - Object to get IDs from
-   * @returns Array of ID values found in the object.
-   */
-  getIDs(item: { _id?: string; id?: string; hash?: string; key?: string; }): string[];
-  /**
-   * Gets the ID from a string directly (returns the string in an array).
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getids getIDs}
-   * @param item - string to get ID from
-   * @returns Array containing the input string.
-   */
-  getIDs(item: string): [string];
-
-  /**
-   * Gets the first available ID from an object.
-   * Checks for properties in order: `_id`, `id`, `hash`, `key`.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getid getID}
-   * @param item - Object to get ID from
-   * @returns The first available ID found, or undefined if no ID property is present.
-   */
-  getID(item: { _id?: string; id?: string; hash?: string; key?: string; }): string | undefined;
-  /**
-   * Gets the ID from a string directly (returns the string).
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getid getID}
-   * @param item - string to get ID from
-   * @returns The input string as the ID.
-   */
-  getID(item: string): string;
-
-  /**
-   * Checks if an object or string has a specific ID.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#hasid hasID}
-   * @param item - Object or string to check
-   * @param id - ID to look for
-   * @returns `true` if the object or string's ID matches the provided `id`, `false` otherwise.
-   */
-  hasID(item: { _id?: string; id?: string; hash?: string; key?: string; } | string, id: string): boolean;
-
-  /**
-   * Gets the index of an object with the specified ID within the Signal's array value.
-   * Assumes the Signal's value is an array of objects.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getitem getItem}
-   * @param id - ID to look for
-   * @returns The matching object in the array, or undefined if not found.
-   */
-  getItem<U extends Record<string, any>[]>(this: Signal<U>, id: string): U[number] | undefined;
-
-  /**
-   * Gets the index of an object with the specified ID within the Signal's array value.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getitemindex getItemIndex}
-   * @param id - ID to look for
-   * @returns Index of the matching object in the array, or -1 if not found.
-   */
-  getItemIndex<U extends Record<string, any>[]>(this: Signal<U>, id: string): number;
-
-  /**
-   * Sets a property on an object with the specified ID within the Signal's array value.
+   * Sets a property on the object with the specified id within the array.
    * Assumes the Signal's value is an array of objects.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#setproperty setProperty}
-   * @param id - ID of object to modify
+   * @param id - Id of the object to modify
    * @param property - Property name
    * @param value - Value to set
    */
@@ -361,8 +317,7 @@ export class Signal<T> {
   ): void;
 
   /**
-   * Sets a property directly on the Signal's value (if it's an object).
-   * Assumes the Signal's value is an object.
+   * Sets a property directly on the Signal's value when it is a plain object.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#setproperty setProperty}
    * @param property - Property name
    * @param value - Value to set
@@ -370,87 +325,114 @@ export class Signal<T> {
   setProperty<K extends keyof T>(property: K, value: T[K]): void;
 
   /**
-   * Replaces an object with the specified ID in the Signal's array value.
+   * Replaces the object with the specified id in the array.
    * Assumes the Signal's value is an array of objects.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#replaceitem replaceItem}
-   * @param id - ID of object to replace
+   * @param id - Id of the object to replace
    * @param item - New object to insert
    */
   replaceItem<U extends any[]>(this: Signal<U>, id: string, item: U[number]): void;
 
   /**
-   * Removes an object with the specified ID from the Signal's array value.
+   * Removes the object with the specified id from the array.
    * Assumes the Signal's value is an array of objects.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#removeitem removeItem}
-   * @param id - ID of object to remove
+   * @param id - Id of the object to remove
    */
   removeItem(id: string): void;
 
-  // Array transformation methods (only available when T is or extends any[])
-  // These methods transform the array value of the Signal and update the Signal with the new array.
-  // Note: These methods modify the Signal's value in place.
+  // Boolean method (only available when T is or extends boolean)
   /**
-   * Transforms each element in the array using the provided mapping function.
-   * This method is only available when `T` is or extends `any[]`.
-   * Note: This method modifies the Signal's value in place.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/array-helpers#map map}
-   * @param callback - Function to transform each element
+   * Toggles a boolean value between true and false.
+   * This method is only available when `T` is or extends `boolean`, or is null/undefined.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/boolean-helpers#toggle toggle}
    */
-  map<U extends any[], V>(this: Signal<U>, callback: (value: U[number], index: number, array: U) => V): void;
+  toggle(this: Signal<boolean | null | undefined>): void;
+
+  // Numeric methods (only available when T is or extends number)
+  /**
+   * Increments the numeric value, optionally clamping to a maximum.
+   * This method is only available when `T` is or extends `number`, or is null/undefined.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/number-helpers#increment increment}
+   * @param amount - Amount to increment by
+   * @param max - Optional ceiling the result will not exceed
+   * @default 1
+   */
+  increment(this: Signal<number | null | undefined>, amount?: number, max?: number): void;
 
   /**
-   * Filters the array to only include elements that pass the test.
-   * This method is only available when `T` is or extends `any[]`.
-   * Note: This method modifies the Signal's value in place.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/array-helpers#filter filter}
-   * @param predicate - Function to test each element
+   * Decrements the numeric value, optionally clamping to a minimum.
+   * This method is only available when `T` is or extends `number`, or is null/undefined.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/number-helpers#decrement decrement}
+   * @param amount - Amount to decrement by
+   * @param min - Optional floor the result will not fall below
+   * @default 1
    */
-  filter<U extends any[]>(this: Signal<U>, predicate: (value: U[number], index: number, array: U) => boolean): void;
+  decrement(this: Signal<number | null | undefined>, amount?: number, min?: number): void;
+
+  // Date method (only available when T is or extends Date)
+  /**
+   * Sets the value to the current date/time.
+   * This method is only available when `T` is or extends `Date`, or is null/undefined.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/date-helpers#now now}
+   */
+  now(this: Signal<Date | null | undefined>): void;
+
+  // Id-based collection methods (for arrays of objects with identifier fields)
+  // These operate on objects carrying an `id`, `_id`, `hash`, or `key`.
+  /**
+   * Gets every id value present on an object (`id`, `_id`, `hash`, `key`).
+   * A non-object item is returned wrapped in a single-element array.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getids getIds}
+   * @param item - Object (or primitive) to read ids from
+   * @returns Array of the id values found
+   */
+  getIds(item: { _id?: string; id?: string; hash?: string; key?: string; }): string[];
+  getIds(item: string): [string];
 
   /**
-   * Creates a new signal derived from this signal's value.
-   * The computation function receives the current value and returns the derived value.
-   * Updates automatically when this signal changes.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#derive derive}
+   * Gets the first available id from an object, using the signal's `id` resolver.
+   * A primitive item is its own id.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getid getId}
+   * @param item - Object (or primitive) to read an id from
+   * @returns The resolved id, or undefined if none is present
+   */
+  getId(item: { _id?: string; id?: string; hash?: string; key?: string; }): string | undefined;
+  getId(item: string): string;
+
+  /**
+   * Checks whether an object or primitive has the given id.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#hasid hasId}
+   * @param item - Object or primitive to check
+   * @param id - Id to look for
+   * @returns `true` if the item's id matches
+   */
+  hasId(item: { _id?: string; id?: string; hash?: string; key?: string; } | string, id: string): boolean;
+
+  /**
+   * Gets the object with the specified id within the Signal's array value.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getitem getItem}
+   * @param id - Id to look for
+   * @returns The matching object, or undefined if not found
+   */
+  getItem<U extends Record<string, any>[]>(this: Signal<U>, id: string): U[number] | undefined;
+
+  /**
+   * Gets the index of the object with the specified id within the array value.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getitemindex getItemIndex}
+   * @param id - Id to look for
+   * @returns Index of the matching object, or -1 if not found
+   */
+  getItemIndex<U extends Record<string, any>[]>(this: Signal<U>, id: string): number;
+
+  /**
+   * Creates a new signal derived from this signal's value. The compute function
+   * receives the current value and returns the derived value, recomputing when
+   * this signal changes. Sugar for the free `derive`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived-signals#derive derive}
    * @param computeFn - Function that transforms this signal's value
    * @param options - Optional configuration for the derived signal
    * @returns A new Signal containing the derived value
    */
-  derive<U>(computeFn: (value: T) => U, options?: SignalOptions<U>): Signal<U>;
-
-  /**
-   * Creates a computed signal whose value is calculated from other signals.
-   * The computation function is re-run automatically whenever any signals
-   * it depends on change, storing the result in the returned signal.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#computed computed}
-   * @param computeFn - Function that computes the value from other signals
-   * @param options - Optional configuration for the computed signal
-   * @returns A new Signal containing the computed value
-   */
-  static computed<T>(computeFn: () => T, options?: SignalOptions<T>): Signal<T>;
-
-  /**
-   * Enables or disables tracing — cheap debug context attached to signals,
-   * reactions, and dependencies. Off by default.
-   * @param enabled - Whether to enable tracing
-   */
-  static setTracing(enabled: boolean): void;
-
-  /**
-   * Returns whether tracing is currently enabled.
-   */
-  static isTracing(): boolean;
-
-  /**
-   * Enables or disables stack capture — adds stack traces to tracing
-   * context via Error.captureStackTrace. Expensive; opt-in on top of tracing.
-   * Off by default.
-   * @param enabled - Whether to enable stack capture
-   */
-  static setStackCapture(enabled: boolean): void;
-
-  /**
-   * Returns whether stack capture is currently enabled.
-   */
-  static isStackCapture(): boolean;
+  derive<U>(computeFn: (value: T) => U, options?: SignalOptions<U>): Signal<U> & { stop(): void; };
 }

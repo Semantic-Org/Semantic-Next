@@ -233,7 +233,7 @@ Signal.set(newValue)
 
 **Dependency tracking**: `Signal.get()` calls `Dependency.depend()`. If `Scheduler.current` is set (meaning we're inside a Reaction's `run()`), the Reaction is added to the Dependency's subscriber set, and the Dependency is added to the Reaction's dependency set. This bidirectional link enables cleanup.
 
-**Clone by default**: `Signal.set()` and `Signal.get()` clone values for objects and arrays (via `maybeClone`). This prevents mutation-without-notification bugs. Class instances are not cloned (detected via `isClassInstance`). Opt out with `{ allowClone: false }`.
+**Reference by default**: `Signal.set()` and `Signal.get()` store and return values by reference (`safety: 'reference'`). Opt into `{ safety: 'clone' }` to keep defensive copies of objects and arrays (via `protect` → `clone`, skipping class instances detected by `isClassInstance`), which prevents mutation-without-notification bugs at the cost of copying.
 
 **Scheduler batching**: Multiple `Signal.set()` calls in the same synchronous block schedule one microtask flush. All pending Reactions run in the next microtask, ensuring consistent state.
 
@@ -337,9 +337,9 @@ params = {
   $$: this.$$.bind(this),             // shadow-piercing query
   reaction: this.reaction.bind(this),  // create tracked Reaction
   signal: this.signal.bind(this),      // create Signal
-  afterFlush: Reaction.afterFlush,
-  nonreactive: Reaction.nonreactive,
-  flush: Reaction.flush,
+  afterFlush: afterFlush,
+  nonreactive: nonreactive,
+  flush: flush,
   data: this.data,
   settings: this.element?.settings,    // reactive Proxy
   state: this.state,                   // reactive state signals
