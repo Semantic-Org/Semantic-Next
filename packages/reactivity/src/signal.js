@@ -41,7 +41,7 @@ export class Signal {
       value: initialValue,
     });
 
-    // null for source signals, set on derived ones, kept on all so every signal shares one shape
+    // preserve v8 monomorphism for derived/computed signals with cleanup
     this.reaction = null;
 
     // configured helpers, defaulting to the class statics
@@ -102,8 +102,8 @@ export class Signal {
     return this.currentValue;
   }
 
-  // stop the producer reaction, no-op on source signals
   stop() {
+    // cleanup for derived signals only
     this.reaction?.stop();
   }
 
