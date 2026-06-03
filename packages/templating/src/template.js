@@ -1,5 +1,15 @@
 import { $ } from '@semantic-ui/query';
-import { afterFlush, flush, nonreactive, reaction, signal } from '@semantic-ui/reactivity';
+import {
+  afterFlush,
+  computed,
+  derive,
+  flush,
+  guard,
+  match,
+  nonreactive,
+  reaction,
+  signal,
+} from '@semantic-ui/reactivity';
 import {
   any,
   assignInPlace,
@@ -883,6 +893,10 @@ export const Template = class Template {
       $$: this.$$.bind(this),
       reaction: this.reaction.bind(this),
       signal: signal,
+      computed: this.computed.bind(this),
+      derive: this.derive.bind(this),
+      match: this.match.bind(this),
+      guard: guard,
       interval: this.createInterval.bind(this),
       timeout: this.createTimeout.bind(this),
       abortSignal: this.abortSignal,
@@ -1062,10 +1076,26 @@ export const Template = class Template {
           Reactive Helpers
   *******************************/
 
-  // reactions bound with this.reaction will be scoped to template
-  // and be removed when the template is destroyed
+  // scope a reaction, derived signal, or matcher to the template so it stops on destroy
+  trackReaction(reactive) {
+    this.reactions.push(reactive);
+    return reactive;
+  }
+
   reaction(cb) {
-    this.reactions.push(reaction(cb));
+    return this.trackReaction(reaction(cb));
+  }
+
+  computed(computeFn, options) {
+    return this.trackReaction(computed(computeFn, options));
+  }
+
+  derive(source, computeFn, options) {
+    return this.trackReaction(derive(source, computeFn, options));
+  }
+
+  match(source, matchFn) {
+    return this.trackReaction(match(source, matchFn));
   }
 
   clearReactions() {
