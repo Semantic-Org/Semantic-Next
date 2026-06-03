@@ -722,7 +722,7 @@ RENDERING_ENGINES.forEach(engine => {
                 return todos.get();
               },
               toggleItem(id) {
-                todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+                todos.toggleItemProperty(id, 'completed');
               },
             };
           },
@@ -780,7 +780,7 @@ RENDERING_ENGINES.forEach(engine => {
               todos,
               getTodos: () => todos.get(),
               toggleItem(id) {
-                todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+                todos.toggleItemProperty(id, 'completed');
               },
             };
           },
@@ -834,7 +834,7 @@ RENDERING_ENGINES.forEach(engine => {
               getTodos: () => todos.get(),
               getRemaining: () => todos.get().filter(t => !t.completed).length,
               toggleItem(id) {
-                todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+                todos.toggleItemProperty(id, 'completed');
               },
             };
           },
@@ -1052,7 +1052,7 @@ RENDERING_ENGINES.forEach(engine => {
               todos,
               getTodos: () => todos.get(),
               toggleItem(id) {
-                todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+                todos.toggleItemProperty(id, 'completed');
               },
             };
           },
@@ -1106,7 +1106,7 @@ RENDERING_ENGINES.forEach(engine => {
               todos,
               getTodos: () => todos.get(),
               toggleItem(id) {
-                todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+                todos.toggleItemProperty(id, 'completed');
               },
             };
           },
@@ -1170,7 +1170,7 @@ RENDERING_ENGINES.forEach(engine => {
               todos,
               getTodos: () => todos.get(),
               toggleItem(id) {
-                todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+                todos.toggleItemProperty(id, 'completed');
               },
             };
           },
@@ -1230,7 +1230,7 @@ RENDERING_ENGINES.forEach(engine => {
               todos,
               getTodos: () => todos.get(),
               toggleItem(id) {
-                todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+                todos.toggleItemProperty(id, 'completed');
               },
             };
           },
@@ -1286,7 +1286,7 @@ RENDERING_ENGINES.forEach(engine => {
               todos,
               getTodos: () => todos.get(),
               toggleItem(id) {
-                todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+                todos.toggleItemProperty(id, 'completed');
               },
             };
           },
@@ -1400,7 +1400,7 @@ RENDERING_ENGINES.forEach(engine => {
               todos,
               getTodos: () => todos.get(),
               toggleItem(id) {
-                todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+                todos.toggleItemProperty(id, 'completed');
               },
             };
           },
@@ -1433,7 +1433,7 @@ RENDERING_ENGINES.forEach(engine => {
     *******************************/
 
     describe('25. Closure-captured data in subtemplate', () => {
-      it('should update classMap when data.todo.completed changes via setProperty', async () => {
+      it('should update classMap when data.todo.completed changes via toggleItemProperty', async () => {
         const tag = uniqueTag(engine, 'sub-classmap');
 
         const itemTemplate = defineComponent({
@@ -1459,7 +1459,7 @@ RENDERING_ENGINES.forEach(engine => {
               todos,
               getTodos: () => todos.get(),
               toggleItem(id) {
-                todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+                todos.toggleItemProperty(id, 'completed');
               },
             };
           },
@@ -1523,7 +1523,7 @@ RENDERING_ENGINES.forEach(engine => {
               todos,
               getTodos: () => todos.get(),
               toggleItem(id) {
-                todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+                todos.toggleItemProperty(id, 'completed');
               },
             };
           },

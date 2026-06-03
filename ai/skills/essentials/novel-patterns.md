@@ -131,16 +131,16 @@ arr[index] = { ...arr[index], title: newTitle };
 state.todos.set([...arr]);
 
 // ✅ SUI — collection helpers on the signal itself:
-state.todos.setProperty(id, 'title', newTitle);        // update one item's field by id
+state.todos.setItemProperty(id, 'title', newTitle);    // update one item's field by id
 state.todos.replaceItem(id, { ...todo, completed: true }); // replace entire item by id
-state.todos.setArrayProperty('completed', false);      // set a field on ALL items
+state.todos.setProperty('completed', false);           // set a field on ALL items
 state.todos.removeItem(id);                            // remove by id
 state.todos.filter(t => !t.completed);                 // filter in place
 state.todos.push({ id, title, completed: false });     // append
 state.todos.getItem(id);                               // query by id
 ```
 
-**What to notice:** Array signals aren't just reactive wrappers — they're reactive data stores with query semantics. `setProperty(id, field, value)` finds an item by id and updates one field. `setArrayProperty` sets a field across every item. `filter()` mutates in place. These are collection operations, not array manipulation.
+**What to notice:** Array signals aren't just reactive wrappers — they're reactive data stores with query semantics. `setItemProperty(id, field, value)` finds an item by id and updates one field. `setProperty(field, value)` sets a field across every item. `filter()` mutates in place. These are collection operations, not array manipulation.
 
 **Why it matters:** The TodoMVC example implements all CRUD operations without a single get-mutate-set cycle. Compare the SUI version to any other framework's TodoMVC — the state mutation code is dramatically shorter because the signal API matches the intent directly. This is one of the features agents consistently find most natural when reviewing SUI code.
 

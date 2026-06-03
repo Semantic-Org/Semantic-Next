@@ -197,10 +197,10 @@ const createComponent = ({state}) => ({
     state.items.setIndex(index, { ...state.items.getIndex(index), text: newText });
     
     // Or update a property across all items
-    state.items.setArrayProperty('isActive', false);
+    state.items.setProperty('isActive', false);
     
     // Or update a property on a specific item
-    state.items.setArrayProperty(2, 'isActive', true);
+    state.items.setIndexProperty(2, 'isActive', true);
   },
 
   // Object property updates

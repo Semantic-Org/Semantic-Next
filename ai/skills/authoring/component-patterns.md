@@ -53,7 +53,7 @@ const createComponent = ({ self, data, findParent }) => ({
   },
   toggleCompleted() {
     const todos = self.getTodos();
-    todos.setProperty(data.task._id, 'completed', !data.task.completed);
+    todos.toggleItemProperty(data.task._id, 'completed');
   },
 });
 ```

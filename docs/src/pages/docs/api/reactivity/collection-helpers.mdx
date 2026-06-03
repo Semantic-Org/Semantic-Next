@@ -4,7 +4,7 @@ pageType: 'API Reference'
 title: Collection Helpers
 icon: database
 package: "@semantic-ui/reactivity"
-methods: [getId, getIds, hasId, getItem, getItemIndex, setProperty, replaceItem, removeItem]
+methods: [getId, getIds, hasId, getItem, getItemIndex, setItemProperty, setIndexProperty, setProperty, toggleItemProperty, toggleProperty, replaceItem, removeItem]
 description: API reference for Collection Helpers in Semantic UI's reactivity system
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
@@ -135,13 +135,13 @@ The index of the matching item, or `-1` if none matches.
 
 ## Mutation
 
-### setProperty
+### setItemProperty
 
 ```javascript
-signal.setProperty(id, property, value);
+signal.setItemProperty(id, property, value);
 ```
 
-Sets a single property on the item matching `id`, notifying dependents only when the value changes.
+Sets a single property on the array item matching `id`, notifying dependents only when the value changes. Resolves the item through `getItemIndex(id)` and writes by index.
 
 #### Parameters
 
@@ -159,12 +159,32 @@ const users = signal([
   { id: 'u2', name: 'Bob' },
 ]);
 
-users.setProperty('u1', 'status', 'active');
+users.setItemProperty('u1', 'status', 'active');
 ```
 
-##### On a plain object
+#### Example
 
-When the signal holds a single object rather than an array, the id argument drops and `setProperty` takes `(property, value)`.
+<PlaygroundExample id="reactive-set-property" direction="horizontal"></PlaygroundExample>
+
+### setProperty
+
+```javascript
+signal.setProperty(property, value);
+```
+
+Sets a field by value type. On an **object** signal, sets that field on the object. On an **array** signal, sets the field on **every item**.
+
+> [!note]
+> On an array, `setProperty` writes the field to every item. To target one item by id, use [`setItemProperty`](#setitemproperty). To target one item by index, use [`setIndexProperty`](#setindexproperty).
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| property | string | The property to set |
+| value | any | The value to assign |
+
+#### Usage
 
 ```javascript
 const profile = signal({ name: 'Alice', status: 'idle' });
@@ -172,9 +192,16 @@ const profile = signal({ name: 'Alice', status: 'idle' });
 profile.setProperty('status', 'active');
 ```
 
-#### Example
+On an array signal it writes across every item, notifying once if any value changed:
 
-<PlaygroundExample id="reactive-set-property" direction="horizontal"></PlaygroundExample>
+```javascript
+const todos = signal([
+  { id: 't1', done: true },
+  { id: 't2', done: false },
+]);
+
+todos.setProperty('done', false); // every item now done: false
+```
 
 ### replaceItem
 
@@ -235,16 +262,89 @@ users.removeItem('u1');
 
 <PlaygroundExample id="reactive-remove-item" direction="horizontal"></PlaygroundExample>
 
-## Batch
+## By Index
 
-### setArrayProperty
+### setIndexProperty
 
 ```javascript
-signal.setArrayProperty(index, property, value);
-signal.setArrayProperty(property, value);
+signal.setIndexProperty(index, property, value);
 ```
 
-Sets a property on one item by index, or on every item when the index is omitted. Notifies once if any value changed.
+Sets a property on the array item at `index`, notifying once if the value changed. Keys by position rather than id; prefer [`setItemProperty`](#setitemproperty) when you have an id.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| index | number | The array index of the item to modify |
+| property | string | The property to set |
+| value | any | The value to assign |
+
+#### Usage
+
+```javascript
+const users = signal([
+  { id: 'u1', name: 'Alice' },
+  { id: 'u2', name: 'Bob' },
+]);
+
+users.setIndexProperty(0, 'status', 'active');
+```
 
 > [!note]
-> `setArrayProperty` keys by index rather than id and predates the identity-based helpers above. Prefer `setProperty` for single-item updates. The batch form is slated for a future redesign.
+> The all-items form is now [`setProperty`](#setproperty), which writes the field across every item in an array signal.
+
+## Toggling
+
+### toggleItemProperty
+
+```javascript
+signal.toggleItemProperty(id, property);
+```
+
+Flips a boolean field on the array item matching `id`, notifying when it changes.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| id | string | The id of the item to modify |
+| property | string | The boolean property to flip |
+
+#### Usage
+
+```javascript
+const todos = signal([
+  { id: 't1', done: false },
+  { id: 't2', done: true },
+]);
+
+todos.toggleItemProperty('t1', 'done'); // t1.done is now true
+```
+
+### toggleProperty
+
+```javascript
+signal.toggleProperty(property);
+```
+
+Flips a field by value type. On an **object** signal, flips that field on the object. On an **array** signal, flips the field on **every item**.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| property | string | The boolean property to flip |
+
+#### Usage
+
+```javascript
+const panel = signal({ open: false });
+panel.toggleProperty('open'); // open is now true
+
+const todos = signal([
+  { id: 't1', done: true },
+  { id: 't2', done: false },
+]);
+todos.toggleProperty('done'); // every item's done is flipped
+```

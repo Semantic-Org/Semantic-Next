@@ -487,15 +487,12 @@ body {
   },
 
   <span class="hljs-title function_">toggleTodo</span>(<span class="hljs-params">id</span>) {
-    <span class="hljs-keyword">const</span> todo = state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">getItem</span>(id);
-    <span class="hljs-keyword">if</span> (todo) {
-      state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">replaceItem</span>(id, { ...todo, <span class="hljs-attr">completed</span>: !todo.<span class="hljs-property">completed</span> });
-    }
+    state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">toggleItemProperty</span>(id, <span class="hljs-string">&#x27;completed&#x27;</span>);
   },
 
   <span class="hljs-title function_">toggleAll</span>(<span class="hljs-params"></span>) {
     <span class="hljs-keyword">const</span> allCompleted = state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">get</span>().<span class="hljs-title function_">every</span>(<span class="hljs-function"><span class="hljs-params">t</span> =&gt;</span> t.<span class="hljs-property">completed</span>);
-    state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">setArrayProperty</span>(<span class="hljs-string">&#x27;completed&#x27;</span>, !allCompleted);
+    state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">setProperty</span>(<span class="hljs-string">&#x27;completed&#x27;</span>, !allCompleted);
   },
 
   <span class="hljs-title function_">deleteTodo</span>(<span class="hljs-params">id</span>) {
@@ -509,7 +506,7 @@ body {
       self.<span class="hljs-title function_">deleteTodo</span>(id);
       <span class="hljs-keyword">return</span>;
     }
-    state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">setProperty</span>(id, <span class="hljs-string">&#x27;title&#x27;</span>, trimmed);
+    state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">setItemProperty</span>(id, <span class="hljs-string">&#x27;title&#x27;</span>, trimmed);
   },
 
   <span class="hljs-title function_">clearCompleted</span>(<span class="hljs-params"></span>) {
@@ -1086,10 +1083,10 @@ body {
       </details>
       <aside class="notes">
         <h2>New patterns</h2>
-        <p><code>push</code>, <code>removeItem</code>, <code>replaceItem</code>, <code>setProperty</code>, <code>setArrayProperty</code>, <code>filter</code>, <code>getItem</code>, <code>reaction()</code>, <code>{#snippet}</code>, <code>subTemplates</code>, <code>keys</code>, <code>afterFlush</code>, <code>{classMap}</code>, <code>{selectedIf}</code>, <code>{maybePlural}</code>, <code>&#39;global hashchange window&#39;</code>.</p>
+        <p><code>push</code>, <code>removeItem</code>, <code>toggleItemProperty</code>, <code>setItemProperty</code>, <code>setProperty</code>, <code>filter</code>, <code>reaction()</code>, <code>{#snippet}</code>, <code>subTemplates</code>, <code>keys</code>, <code>afterFlush</code>, <code>{classMap}</code>, <code>{selectedIf}</code>, <code>{maybePlural}</code>, <code>&#39;global hashchange window&#39;</code>.</p>
         <h2>What to notice</h2>
         <ul>
-          <li>Each mutation has a named helper: <code>state.todos.push(todo)</code>, <code>removeItem(id)</code>, <code>replaceItem(id, next)</code>, <code>setProperty(id, key, value)</code>, <code>setArrayProperty(&#39;completed&#39;, true)</code>. Helpers describe intent instead of reproducing immutable-update boilerplate.</li>
+          <li>Each mutation has a named helper: <code>state.todos.push(todo)</code>, <code>removeItem(id)</code>, <code>toggleItemProperty(id, &#39;completed&#39;)</code>, <code>setItemProperty(id, key, value)</code>, <code>setProperty(&#39;completed&#39;, true)</code>. Helpers describe intent instead of reproducing immutable-update boilerplate.</li>
           <li><code>reaction(() =&gt; { state.todos.get(); localStorage.setItem(...) })</code> syncs the list to storage. Re-runs when the read signal changes; no dependency array.</li>
           <li>Subtemplates compose with named parameters: <code>{&gt;todoItem id=todo.id title=todo.title ...}</code>. The <code>todoItem</code> template lives in its own file and is registered via <code>subTemplates</code>.</li>
           <li><code>afterFlush(() =&gt; $(&#39;.editing .edit&#39;).focus())</code> runs after the next render commits, which is how you reach into the DOM that the new state just produced.</li>

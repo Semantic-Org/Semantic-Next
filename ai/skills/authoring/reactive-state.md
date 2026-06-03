@@ -109,8 +109,8 @@ items.setIndex(0, 'new');      // Set item at index
 items.removeIndex(0);          // Remove item at index
 
 // Array property operations
-items.setArrayProperty(0, 'completed', true);        // Set property on item at index
-items.setArrayProperty('completed', true);           // Set property on all items
+items.setIndexProperty(0, 'completed', true);        // Set property on item at index
+items.setProperty('completed', true);                // Set property on every item
 ```
 
 #### Object Operations
@@ -119,7 +119,6 @@ const user = signal({ name: 'Alice', age: 30 });
 
 // Property operations
 user.setProperty('name', 'Bob');                     // Set single property
-user.setProperty('profile', 'bio', 'Software dev');  // Set nested property
 ```
 
 #### Number Operations
@@ -158,7 +157,7 @@ const users = signal([
 
 // Find by ID (supports id, _id, hash, key properties)
 const index = users.getItem(1);           // Returns index of item with id=1
-users.setProperty(1, 'name', 'Alice2');   // Set property on item with id=1
+users.setItemProperty(1, 'name', 'Alice2');   // Set property on item with id=1
 users.replaceItem(1, newUserObject);      // Replace entire item with id=1
 users.removeItem(1);                      // Remove item with id=1
 ```

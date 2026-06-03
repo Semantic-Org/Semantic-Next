@@ -416,7 +416,7 @@ let comp = Reaction.create(() => {
 
 ### Array of Objects
 
-`Signal` provides several helpers for manipulating arrays of objects a common data structure when handling structured data.
+`Signal` provides several helpers for manipulating arrays of objects, a common data structure when handling structured data.
 
 ```javascript
 const tasks = new Signal([
@@ -428,7 +428,7 @@ const tasks = new Signal([
 
 ```javascript
 // sets 'write documentation' to complete
-tasks.setProperty('task3_uuid', 'completed', true);
+tasks.setItemProperty('task3_uuid', 'completed', true);
 ```
 
 ```javascript
@@ -439,12 +439,12 @@ tasks.replaceItem('task1_uuid', newTask)
 
 ```javascript
 // gets index of id
-const index = tasks.getIndex('tasks1_uuid')
+const index = tasks.getItemIndex('tasks1_uuid')
 ```
 
 ```javascript
 // gets id from an item
-const id = tasks.getID(tasks.get()[0])
+const id = tasks.getId(tasks.get()[0])
 ```
 
 ```javascript

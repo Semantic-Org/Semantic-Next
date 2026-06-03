@@ -207,10 +207,10 @@ state.items.removeIndex(0);                           // remove by index
 
 // ID-based operations (matches id, _id, hash, or key properties)
 state.items.getItem('abc');                           // find by ID
-state.items.setProperty('abc', 'done', true);         // set property on item by ID
+state.items.setItemProperty('abc', 'done', true);     // set property on item by ID
 state.items.replaceItem('abc', newItem);              // replace entire item
 state.items.removeItem('abc');                        // remove by ID
-state.items.setArrayProperty('active', false);        // set property on all items
+state.items.setProperty('active', false);             // set property on every item
 ```
 
 **Objects / Dates / General:**
