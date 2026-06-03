@@ -21,8 +21,8 @@ const createDerivedSignal = (reactionBody, options) => {
   if (parent) {
     parent.onCleanup(() => backingReaction.stop());
   }
-  // expose stop() so an owner can deterministically tear down the backing reaction
-  derivedSignal.stop = () => backingReaction.stop();
+  // hand the signal its producer so signal.stop() can tear it down
+  derivedSignal.reaction = backingReaction;
   return derivedSignal;
 };
 

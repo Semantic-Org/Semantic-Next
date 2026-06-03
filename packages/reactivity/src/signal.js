@@ -41,6 +41,9 @@ export class Signal {
       value: initialValue,
     });
 
+    // null for source signals, set on derived ones, kept on all so every signal shares one shape
+    this.reaction = null;
+
     // configured helpers, defaulting to the class statics
     this.clone = clone;
     this.equality = equality;
@@ -97,6 +100,11 @@ export class Signal {
 
   raw() {
     return this.currentValue;
+  }
+
+  // stop the producer reaction, no-op on source signals
+  stop() {
+    this.reaction?.stop();
   }
 
   /* Dependencies */
