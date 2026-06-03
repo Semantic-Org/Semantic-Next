@@ -1,512 +1,228 @@
 ---
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
-icon: box
 title: Signal
+icon: box
 package: "@semantic-ui/reactivity"
-methods: [Constructor, Get, Set, Subscribe, Depend, Notify, hasDependents, Peek, Clear, Mutate, Derive, Signal.computed]
+methods: [signal, get, value, peek, raw, set, mutate, clear, depend, notify, hasDependents, derive]
 description: API reference for Signal in Semantic UI's reactivity system
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
 
-`Signal` is the core class for creating signals in Semantic UI's reactivity system. It allows you to create values that can be observed and will trigger reactions when changed.
+export const components = { blockquote: Blockquote };
 
-## Constructor
-Creates a new reactive variable with the given initial value.
+Create reactive values, read and write them, track their dependents, and derive new signals.
 
-### Syntax
+## Creating
+
+### signal
+
 ```javascript
-new Signal(initialValue, options);
+signal(initialValue, options);
 ```
 
+Creates a reactive value.
 
-### Parameters
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| initialValue | any | The initial value of the reactive variable |
-| options | Object | (Optional) Configuration options |
+| initialValue | any | The starting value |
+| options | object | Optional configuration |
 
-### Options
+##### Options
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
-| safety | `'freeze'` \| `'reference'` \| `'none'` | `'freeze'` | Value-protection preset. See [Signal Options](/docs/guides/reactivity/signal-options) for details. |
-| equalityFunction | Function | isEqual | Custom function to determine if the value has changed |
-| cloneFunction | Function | clone | Custom function used by `signal.clone()` |
+| safety | `'clone'` \| `'reference'` \| `'none'` | `'reference'` | Value-protection preset. See [Signal Options](/docs/guides/reactivity/signal-options) |
+| equality | function | deep equality | Decides whether a new value differs from the current one. Snapshotted at construction |
+| clone | function | structured clone | Copies values under `safety: 'clone'` and for change detection in `mutate` |
+| id | function | `id` ?? `_id` ?? `hash` ?? `key` | Resolves an array item's identity for the collection helpers |
 
-### Usage
+#### Example
 
-#### Basic Usage
+<PlaygroundExample id="signals" direction="horizontal"></PlaygroundExample>
 
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
+## Reading
 
-const counter = new Signal(0);
-```
-
-#### Custom Equality Function
+### get
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const person = new Signal({ name: 'John', age: 30 }, {
-  equalityFunction: (a, b) => a.name === b.name && a.age === b.age
-});
+signal.get();
 ```
 
-#### Holding Borrowed Data
+Returns the current value and subscribes the running reaction.
 
-The default `safety: 'freeze'` deep-freezes object and array values on `set` to catch accidental in-place mutation. For signals holding objects you don't own — anything returned from a library, fetched from an API, or passed through a callback — opt out with `safety: 'reference'` so the library's own reference isn't poisoned.
+#### Returns
+
+The current value.
+
+### value
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const searchResults = new Signal(pagefindResults, { safety: 'reference' });
+signal.value;
+signal.value = newValue;
 ```
 
-See the [Signals and Foreign References](/docs/guides/reactivity/signals#signals-and-foreign-references) section of the signals guide for the full heuristic.
+Property accessor for the signal. Reading subscribes the running reaction like `get()`, assigning sets the value like `set()`.
 
-## `Get`
+#### Returns
 
-Returns the current value of the reactive variable.
+The current value.
 
-### Syntax
-```javascript
-someValue.get();
-```
-
-
-### Alias
-
-`value` can be used as an alias for `get()` if preferred
+### peek
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const counter = new Signal(0);
-console.log(counter.value); // Output: 0
-counter.value = 1;
-console.log(counter.value); // Output: 1
+signal.peek();
 ```
 
+Returns the current value without subscribing. Under `safety: 'clone'` the result is still a defensive copy.
 
-### Returns
+#### Returns
 
-`any` - The current value of the reactive variable.
+The current value, with no dependency registered.
 
-### Usage
+#### Example
 
-#### Retrieving the Current Value
+<PlaygroundExample id="reactive-peek" direction="horizontal"></PlaygroundExample>
+
+### raw
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-const counter = new Signal(0);
-console.log(counter.get()); // Output: 0
+signal.raw();
 ```
 
-## `Set`
+Returns the underlying stored value with no dependency tracking and no clone protection, even under `safety: 'clone'`.
 
-Sets a new value for the reactive variable.
+> [!warning] Live reference
+> `raw()` returns the actual stored object, not a copy. Mutating it bypasses change detection. Prefer `peek()` unless you specifically need the stored reference.
 
-### Syntax
+#### Returns
+
+The live stored value.
+
+## Writing
+
+### set
+
 ```javascript
-someValue.set(newValue);
+signal.set(newValue);
 ```
 
-### Parameters
+Sets a new value, notifying dependents when it differs by the equality check.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| newValue | any | The new value to set |
+| newValue | any | The value to store |
 
-### Usage
-
-#### Setting a New Value
+### mutate
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const counter = new Signal(0);
-counter.set(1);
-console.log(counter.get()); // Output: 1
+signal.mutate(mutationFn);
 ```
 
-## `Subscribe`
+Updates the value through a callback. Return a new value to set it, or mutate the current value in place and reactivity fires only if it changed.
 
-Creates a subscription that runs the callback whenever the value changes.
-
-### Parameters
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| callback | Function | Function to be called when the value changes |
+| mutationFn | function | Receives the current value, optionally returns a new one |
 
-### Returns
-
-`Object` - A subscription object with a `stop()` method to unsubscribe.
-
-### Usage
+#### Usage
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
+const items = signal(['apple', 'banana']);
 
-const counter = new Signal(0);
-const subscription = counter.subscribe((newValue) => {
-  console.log('Counter changed:', newValue);
-});
+// return a new value
+items.mutate(list => [...list, 'cherry']);
 
-counter.set(1); // Console: "Counter changed: 1"
-subscription.stop(); // Stops the subscription
+// or mutate in place
+items.mutate(list => { list.push('date'); });
 ```
 
-## `Depend`
+#### Example
 
-Registers this signal as a dependency in the current reactive context without reading or returning the value. This is useful when you want a reaction to re-run when a signal changes, but you don't need the value itself.
+<PlaygroundExample id="reactive-mutate" direction="horizontal"></PlaygroundExample>
 
-### Syntax
-```javascript
-someValue.depend();
-```
-
-### Usage
-
-#### Subscribing Without Reading
+### clear
 
 ```javascript
-import { Reaction, Signal } from '@semantic-ui/reactivity';
-
-const theme = new Signal({ mode: 'dark', colors: { /* ... */ } });
-
-// Re-run when theme changes, but use a different source for rendering
-Reaction.create(() => {
-  theme.depend();
-  console.log('Theme changed, re-rendering...');
-});
-
-theme.set({ mode: 'light', colors: { /* ... */ } });
+signal.clear();
 ```
 
-## `Notify`
+Sets the value to `undefined`, notifying dependents if it was not already undefined.
 
-Force-triggers all subscribers without changing the signal's value. This bypasses the equality check, making it useful when external code has mutated something and you need to notify dependents.
+#### Example
 
-### Syntax
-```javascript
-someValue.notify();
-```
+<PlaygroundExample id="reactive-clear" direction="horizontal"></PlaygroundExample>
 
-### Usage
+## Dependencies
 
-#### Force-Triggering After External Mutation
+### depend
 
 ```javascript
-import { Reaction, Signal } from '@semantic-ui/reactivity';
-
-const canvas = new Signal(document.createElement('canvas'), { safety: 'reference' });
-
-Reaction.create(() => {
-  const el = canvas.get();
-  console.log('Canvas updated');
-});
-
-// External code draws on the canvas — the reference hasn't changed
-// but dependents need to know about it
-canvas.peek().getContext('2d').fillRect(0, 0, 100, 100);
-canvas.notify();
+signal.depend();
 ```
 
-## `hasDependents`
+Subscribes the running reaction without reading the value. Useful when a reaction should re-run on change but reads the value from elsewhere.
 
-Returns whether any reactive contexts are currently subscribed to this signal.
+#### Example
 
-### Syntax
-```javascript
-someValue.hasDependents();
-```
+<PlaygroundExample id="reactive-depend" direction="horizontal"></PlaygroundExample>
 
-### Returns
-
-`boolean` - `true` if at least one reaction depends on this signal.
-
-### Usage
+### notify
 
 ```javascript
-import { Reaction, Signal } from '@semantic-ui/reactivity';
-
-const data = new Signal(null);
-console.log(data.hasDependents()); // false
-
-const reaction = Reaction.create(() => {
-  data.get();
-});
-console.log(data.hasDependents()); // true
-
-reaction.stop();
-console.log(data.hasDependents()); // false
+signal.notify();
 ```
 
-## `Peek`
+Force-triggers dependents without changing the value, bypassing the equality check. Pair it with an in-place mutation under `safety: 'reference'` when the reference has not changed but dependents need to know.
 
-Returns the current value without triggering reactions.
+#### Example
 
-### Syntax
-```javascript
-someValue.peek();
-```
+<PlaygroundExample id="reactive-notify" direction="horizontal"></PlaygroundExample>
 
-### Returns
-
-`any` - The current value of the reactive variable.
-
-### Usage
+### hasDependents
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const counter = new Signal(0);
-console.log(counter.peek()); // Output: 0
+signal.hasDependents();
 ```
 
-## `Clear`
+Reports whether any reaction is currently subscribed to this signal.
 
-Sets the value of the reactive variable to `undefined` and trigger reactions.
+#### Returns
 
-### Syntax
+`true` if at least one reaction depends on the signal.
+
+#### Example
+
+<PlaygroundExample id="reactive-has-dependents" direction="horizontal"></PlaygroundExample>
+
+## Deriving
+
+### derive
+
 ```javascript
-someValue.clear();
+signal.derive(computeFn, options);
 ```
 
-### Usage
+Creates a new signal computed from this one, recomputing when this signal changes. Sugar for the free [`derive(source, computeFn)`](/docs/api/reactivity/derived#derive). For combining several sources see [`computed`](/docs/api/reactivity/derived#computed).
 
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const counter = new Signal(0);
-counter.clear();
-console.log(counter.get()); // Output: undefined
-```
-
-## `Mutate`
-
-Safely mutates the current value using a mutation function. Under `safety: 'freeze'` the mutation function must return a new value (in-place mutation throws). Under `safety: 'reference'` or `'none'` the function may mutate in place and reactivity still fires.
-
-### Syntax
-```javascript
-someValue.mutate(mutationFn);
-```
-
-### Parameters
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| mutationFn | Function | A function that receives the current value and either mutates it in place or returns a new value |
+| computeFn | function | Receives this signal's value, returns the derived value |
+| options | object | Optional configuration, same shape as `signal()` |
 
-### Returns
+#### Returns
 
-The return value of the mutation function, if any.
+A new [`Signal`](/docs/api/reactivity/signal) holding the derived value.
 
-### Usage
+#### Example
 
-#### Returning a New Value (works under all safety modes)
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const items = new Signal(['apple', 'banana']);
-items.mutate(arr => [...arr, 'orange']);
-console.log(items.get()); // ['apple', 'banana', 'orange']
-
-const count = new Signal(5);
-count.mutate(val => val * 2);
-console.log(count.get()); // 10
-```
-
-#### In-place Mutation (only under safety: 'reference' or 'none')
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const items = new Signal(['apple', 'banana'], { safety: 'reference' });
-items.mutate(arr => {
-  arr.push('orange'); // Mutate in place — allowed because the value isn't frozen
-});
-console.log(items.get()); // ['apple', 'banana', 'orange']
-```
-
-#### With Custom Classes
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-class Counter {
-  constructor(value) {
-    this.value = value;
-  }
-  increment() {
-    this.value++;
-  }
-}
-
-// Class instances aren't frozen by default (deepFreeze skips them),
-// but set safety: 'reference' explicitly when you plan to mutate in place
-const counter = new Signal(new Counter(0), {
-  safety: 'reference',
-  equalityFunction: (a, b) => a.value === b.value,
-});
-
-counter.mutate(c => c.increment());
-console.log(counter.get().value); // 1
-```
-
-## `Derive`
-
-Creates a new signal that derives its value from this signal. The derived signal automatically updates when the source signal changes.
-
-### Syntax
-```javascript
-signal.derive(computeFn, options)
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| computeFn | Function | Function that receives the current signal value and returns the derived value |
-| options | Object | (Optional) Same configuration options as Signal constructor |
-
-### Returns
-
-| Type | Description |
-|------|-------------|
-| Signal | A new Signal containing the derived value |
-
-### Usage
-
-#### Basic Derivation
-
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const numbers = new Signal([1, 2, 3, 4, 5]);
-
-// Derive the array length
-const count = numbers.derive(arr => arr.length);
-
-console.log(count.get()); // 5
-
-// When numbers changes, count updates automatically
-numbers.push(6);
-console.log(count.get()); // 6
-```
-
-#### Object Property Extraction
-
-```javascript
-const user = new Signal({ name: 'Alice', age: 30, email: 'alice@example.com' });
-
-// Derive just the display name
-const displayName = user.derive(u => u.name.toUpperCase());
-
-console.log(displayName.get()); // "ALICE"
-```
-
-#### Array Filtering and Transformation
-
-```javascript
-const items = new Signal([
-  { id: 1, name: 'Apple', inStock: true },
-  { id: 2, name: 'Banana', inStock: false },
-  { id: 3, name: 'Orange', inStock: true }
-]);
-
-// Derive available items
-const availableItems = items.derive(list => 
-  list.filter(item => item.inStock)
-);
-
-console.log(availableItems.get().length); // 2
-```
-
-## `Signal.computed`
-
-Creates a computed signal whose value is calculated from multiple signals. The computed signal recalculates whenever any of its dependencies change.
-
-### Syntax
-```javascript
-Signal.computed(computeFn, options)
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| computeFn | Function | Function that accesses other signals and returns the computed value |
-| options | Object | (Optional) Same configuration options as Signal constructor |
-
-### Returns
-
-| Type | Description |
-|------|-------------|
-| Signal | A new Signal containing the computed value |
-
-### Usage
-
-#### Basic Computation
-
-```javascript
-import { Signal } from '@semantic-ui/reactivity';
-
-const firstName = new Signal('John');
-const lastName = new Signal('Doe');
-
-// Compute full name from multiple signals
-const fullName = Signal.computed(() => 
-  `${firstName.get()} ${lastName.get()}`
-);
-
-console.log(fullName.get()); // "John Doe"
-
-// When either signal changes, fullName updates automatically
-firstName.set('Jane');
-console.log(fullName.get()); // "Jane Doe"
-```
-
-#### Mathematical Calculations
-
-```javascript
-const quantity = new Signal(3);
-const price = new Signal(10.99);
-const taxRate = new Signal(0.08);
-
-// Compute total with tax from multiple sources
-const total = Signal.computed(() => {
-  const subtotal = quantity.get() * price.get();
-  const tax = subtotal * taxRate.get();
-  return Number((subtotal + tax).toFixed(2));
-});
-
-console.log(total.get()); // 35.64
-```
-
-#### Conditional Logic
-
-```javascript
-const user = new Signal({ role: 'admin', active: true });
-const permissions = new Signal(['read', 'write']);
-
-// Compute effective permissions based on multiple factors
-const effectivePermissions = Signal.computed(() => {
-  const currentUser = user.get();
-  const basePermissions = permissions.get();
-  
-  if (!currentUser.active) {
-    return [];
-  }
-  
-  if (currentUser.role === 'admin') {
-    return [...basePermissions, 'delete', 'manage'];
-  }
-  
-  return basePermissions;
-});
-
-console.log(effectivePermissions.get()); // ["read", "write", "delete", "manage"]
-```
-
+<PlaygroundExample id="reactive-derived" direction="horizontal"></PlaygroundExample>

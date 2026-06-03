@@ -1,78 +1,63 @@
 import type { Reaction } from './reaction';
 
 /**
- * Manages the scheduling and execution of reactive updates.
- * Batches and processes reactions efficiently using microtasks.
+ * Manages scheduling and execution of reactive updates, batching reactions and
+ * draining them on a microtask. Application code uses the free functions
+ * `flush()`, `scheduleFlush()`, and `afterFlush()` rather than the class directly.
  * @see {@link https://next.semantic-ui.com/docs/api/reactivity/scheduler Scheduler Documentation}
  *
- * @internal This class is primarily used internally by the reactivity system.
+ * @internal Primarily used internally by the reactivity system.
  */
 export class Scheduler {
-  /**
-   * The reaction currently being executed, if any.
-   * Used to track dependencies during reaction execution.
-   */
+  /** The reaction currently executing, if any. */
   static current: Reaction | null;
 
-  /**
-   * Set of reactions waiting to be processed in the next flush.
-   * Reactions are automatically added when their dependencies change.
-   */
-  static readonly pendingReactions: Set<Reaction>;
+  /** Reactions queued to run on the next flush. */
+  static pendingReactions: Set<Reaction>;
 
-  /**
-   * Array of callbacks to execute after the next flush completes.
-   * Used to run side effects after all reactive updates are processed.
-   */
+  /** Callbacks queued to run after the next flush drains. */
   static afterFlushCallbacks: Array<() => void>;
 
-  /**
-   * Whether a flush operation is currently scheduled in the microtask queue.
-   * Prevents multiple flush operations from being scheduled unnecessarily.
-   */
+  /** Whether a flush is scheduled on the microtask queue. */
   static isFlushScheduled: boolean;
 
+  /** Whether a flush is currently draining. */
+  static isFlushing: boolean;
+
+  /** Iteration cap before `flush` declares a reactive cycle and bails. */
+  static maxFlushIterations: number;
+
   /**
-   * Schedules a reaction to be processed in the next flush.
-   * The reaction will be executed when the microtask queue is processed.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/scheduler#schedulereaction scheduleReaction}
-   *
+   * Queues a reaction to run on the next flush.
+   * @internal
    * @param reaction - The reaction to schedule
-   * @internal This method is called internally by the reactivity system.
    */
   static scheduleReaction(reaction: Reaction): void;
 
   /**
-   * Schedules a flush of pending reactions to occur in the next microtask.
-   * Uses queueMicrotask or Promise.resolve() for scheduling.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/scheduler#scheduleflush scheduleFlush}
-   *
-   * @internal This method is called internally by the reactivity system.
+   * Schedules a flush on the next microtask. Idempotent.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/flushing#scheduleflush scheduleFlush}
    */
   static scheduleFlush(): void;
 
   /**
-   * Immediately processes all pending reactions and after-flush callbacks.
-   * Can be called manually to force immediate processing of pending updates.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/scheduler#flush flush}
+   * Synchronously drains all pending reactions and after-flush callbacks. Caps
+   * at `maxFlushIterations` to break reactive cycles, logging an error and
+   * clearing both queues if the cap is exceeded.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/flushing#flush flush}
    */
   static flush(): void;
 
   /**
-   * Registers a callback to execute after the next flush completes.
-   * Useful for running side effects after all reactive updates are processed.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/scheduler#afterflush afterFlush}
-   *
-   * @param callback - Function to execute after the next flush
+   * Registers a callback to run after the next flush drains.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/flushing#afterflush afterFlush}
+   * @param callback - Function to run after updates are processed
    */
   static afterFlush(callback: () => void): void;
 
   /**
-   * Gets the source location that triggered the current reaction.
-   * Useful for debugging reactive updates and understanding update chains.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/scheduler#getsource getSource}
-   *
-   * @returns A formatted stack trace string, or undefined if no source is available
+   * Logs the source of the currently running reaction for debugging.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/debugging#getsource getSource}
    */
-  static getSource(): string | undefined;
+  static getSource(): void;
 }

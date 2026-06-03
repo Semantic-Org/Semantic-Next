@@ -1,211 +1,107 @@
 import type { Dependency } from './dependency';
 
 /**
- * Represents a reactive computation that automatically re-runs when its dependencies change.
- * Used to create side effects and computations that respond to reactive state changes.
+ * A Reaction is a computation that automatically re-runs when the signals it
+ * read change. Used for side effects and computations that respond to reactive
+ * state.
+ *
+ * Create one with the `reaction()` factory or `new Reaction()` — both are
+ * supported. The static helpers that once lived here (`create`, `flush`,
+ * `nonreactive`, `guard`, `getSource`, tracing toggles) are now module-level
+ * functions exported from `@semantic-ui/reactivity`.
  * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction Reaction Documentation}
  */
 export class Reaction {
   /**
-   * Creates a new Reaction that runs the provided callback when dependencies change.
-   * The callback receives the Reaction instance as its parameter.
+   * Creates a new Reaction. The callback runs immediately (tracking the signals
+   * it reads) and re-runs whenever any of them change. The callback receives the
+   * Reaction instance.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#constructor constructor}
-   *
-   * @param callback - Function to run when dependencies change
+   * @param callback - Function to run reactively
+   * @param options - Optional configuration
+   * @param options.context - Debugging context surfaced in tracing output
+   * @param options.firstRun - Whether to run the callback immediately on creation. Defaults to `true`. Set `false` to create the reaction without an initial run.
    */
-  constructor(callback: (computation: Reaction) => void, options?: { context?: Record<string, any>; });
+  constructor(
+    callback: (computation: Reaction) => void,
+    options?: { context?: Record<string, any>; firstRun?: boolean; },
+  );
 
   /**
-   * Indicates if this is the first execution of the reaction.
-   * Useful for initialization logic that should only run once.
+   * Whether the current execution is the reaction's first run. Useful for
+   * initialization that should happen only once. Read the signals you depend on
+   * before any early `if (firstRun) return`, otherwise the reaction registers no
+   * dependencies and never re-runs.
    */
   readonly firstRun: boolean;
 
   /**
-   * Whether the reaction is currently active and responding to changes.
-   * False if the reaction has been stopped.
+   * Whether the reaction is active and responding to changes. `false` once stopped.
    */
   readonly active: boolean;
 
   /**
-   * The current dependency context that triggered this reaction.
-   * Contains information about the value change that caused the reaction to run.
+   * Debugging context for the reaction, populated only when tracing is enabled.
+   * Carries fields like `firstRun` and the triggering `value`.
    */
-  readonly context: {
-    /** The value that triggered the reaction */
-    value: unknown;
-    /** Stack trace showing where the change originated */
-    trace?: string;
-  } | null;
+  readonly context: Record<string, any> | undefined;
 
   /**
-   * Set of current dependencies being tracked by this reaction.
-   * Updated automatically when reactive values are accessed during execution.
+   * The set of dependencies tracked by this reaction, rebuilt on every run.
    */
   readonly dependencies: Set<Dependency>;
 
   /**
+   * Registers a cleanup callback that fires just before the reaction's next run
+   * and once when it stops. Callbacks fire in registration order and the queue
+   * is cleared after firing, so a callback registered on `firstRun` fires once.
+   * Use it to tear down resources or scope inner reactions to this one.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#oncleanup onCleanup}
+   * @param callback - Function to run on the next re-run or on stop
+   */
+  onCleanup(callback: () => void): void;
+
+  /**
    * Sets debugging context on the reaction, replacing any existing context.
-   * Context appears in reactive debugging output and helps trace which reaction
-   * is responding to which change.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#setcontext setContext}
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/debugging Debugging Reactivity}
    * @param additionalContext - Key-value pairs to store as debugging context
    */
   setContext(additionalContext?: Record<string, any>): void;
 
   /**
    * Adds debugging context without replacing existing context.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#addcontext addContext}
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/debugging Debugging Reactivity}
    * @param additionalContext - Key-value pairs to merge into existing context
    */
   addContext(additionalContext?: Record<string, any>): void;
 
   /**
-   * Captures a stack trace into the reaction's context for debugging.
-   * Call after setContext to see where the reaction was configured.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#settrace setTrace}
+   * Captures a stack trace into the reaction's context. Only does work when
+   * stack capture is enabled via `setStackCapture(true)`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/debugging Debugging Reactivity}
    */
   setTrace(): void;
 
   /**
-   * Executes the reaction's callback, tracking accessed reactive values as dependencies.
-   * Called automatically when dependencies change.
+   * Executes the callback, rebuilding the tracked dependency set. Called
+   * automatically on creation and when dependencies change.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#run run}
    */
   run(): void;
 
   /**
-   * Marks the reaction as invalid and schedules it to run again.
-   * Called automatically when dependencies change.
+   * Marks the reaction invalid and schedules it to run again on the next flush.
+   * Called automatically when a dependency changes. Calling it with no arguments
+   * re-runs the reaction without any signal having changed.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#invalidate invalidate}
-   *
    * @param context - Optional metadata about what triggered the invalidation
    */
-  invalidate(context?: { value: unknown; trace?: string; }): void;
+  invalidate(context?: Record<string, any>): void;
 
   /**
-   * Permanently stops the reaction from running.
-   * The reaction will no longer respond to dependency changes.
+   * Permanently stops the reaction. It unsubscribes from all dependencies, fires
+   * its cleanups, and will no longer respond to changes. Idempotent.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#stop stop}
    */
   stop(): void;
-
-  /**
-   * Creates and immediately runs a new reactive computation.
-   * Provides a more convenient way to create reactions than using the constructor.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#create create}
-   *
-   * @param callback - Function to run reactively
-   * @returns The created Reaction instance
-   * @example
-   * ```typescript
-   * const reaction = Reaction.create(comp => {
-   *   console.log(mySignal.get());
-   *   if (comp.firstRun) {
-   *     console.log('First run!');
-   *   }
-   * });
-   * ```
-   */
-  static create(callback: (computation: Reaction) => void): Reaction;
-
-  /**
-   * Gets the currently running reaction, if any.
-   * Used internally to track dependencies during reaction execution.
-   */
-  static get current(): Reaction | null;
-
-  /**
-   * Immediately processes all pending reactive updates.
-   * Forces reactions to run synchronously instead of waiting for the microtask queue.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#flush flush}
-   */
-  static flush(): void;
-
-  /**
-   * Schedules reactive updates to be processed in the next microtask.
-   * This is the default behavior when dependencies change.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#scheduleflush scheduleFlush}
-   */
-  static scheduleFlush(): void;
-
-  /**
-   * Registers a callback to run after the next flush of reactive updates.
-   * Useful for running side effects after all reactions have processed.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#afterflush afterFlush}
-   *
-   * @param callback - Function to run after updates are processed
-   */
-  static afterFlush(callback: () => void): void;
-
-  /**
-   * Gets the source location that triggered the current reaction.
-   * Useful for debugging reactive updates and understanding update chains.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#getsource getSource}
-   *
-   * @returns A formatted stack trace string, or undefined if no source is available
-   */
-  static getSource(): string | undefined;
-
-  /**
-   * Runs a function without establishing any reactive dependencies.
-   * Useful for reading reactive values without creating permanent dependencies.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#nonreactive nonreactive}
-   *
-   * @param callback - Function to run non-reactively
-   * @returns The result of the callback
-   * @example
-   * ```typescript
-   * Reaction.nonreactive(() => {
-   *   // This read won't create a dependency
-   *   const value = mySignal.get();
-   * });
-   * ```
-   */
-  static nonreactive<T>(callback: () => T): T;
-
-  /**
-   * Creates a guarded reactive computation that only triggers updates
-   * when its return value changes according to the equality check.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#guard guard}
-   *
-   * @param callback - Function that returns a value to guard
-   * @param equalityCheck - Optional function to determine if the value has changed
-   * @returns The current value of the guarded computation
-   * @example
-   * ```typescript
-   * const isEven = Reaction.guard(() => {
-   *   return counter.get() % 2 === 0;
-   * });
-   * ```
-   */
-  static guard<T>(
-    callback: () => T,
-    equalityCheck?: (oldValue: T, newValue: T) => boolean,
-  ): T;
-
-  /**
-   * Enables or disables tracing — cheap debug context attached to signals,
-   * reactions, and dependencies. Off by default.
-   * @param enabled - Whether to enable tracing
-   */
-  static setTracing(enabled: boolean): void;
-
-  /**
-   * Returns whether tracing is currently enabled.
-   */
-  static isTracing(): boolean;
-
-  /**
-   * Enables or disables stack capture — adds stack traces to tracing
-   * context via Error.captureStackTrace. Expensive; opt-in on top of tracing.
-   * Off by default.
-   * @param enabled - Whether to enable stack capture
-   */
-  static setStackCapture(enabled: boolean): void;
-
-  /**
-   * Returns whether stack capture is currently enabled.
-   */
-  static isStackCapture(): boolean;
 }
