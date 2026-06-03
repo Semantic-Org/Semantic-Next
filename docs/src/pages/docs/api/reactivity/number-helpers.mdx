@@ -42,7 +42,7 @@ count.increment(5);     // 6
 count.increment(10, 8); // clamped to 8
 ```
 
-> [!note] Clamping is one-shot
+> [!note]
 > `max` clamps the result of this call only. It is not a persistent bound, so a later `increment()` without a `max` can push past it.
 
 #### Example
@@ -75,7 +75,7 @@ score.decrement(10);  // 89
 score.decrement(50, 0); // clamped to 0
 ```
 
-> [!note] Clamping is one-shot
+> [!note]
 > `min` clamps the result of this call only. It is not a persistent bound, so a later `decrement()` without a `min` can drop below it.
 
 #### Example

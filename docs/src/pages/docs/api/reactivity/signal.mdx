@@ -95,7 +95,7 @@ signal.raw();
 
 Returns the underlying stored value with no dependency tracking and no clone protection, even under `safety: 'clone'`.
 
-> [!warning] Live reference
+> [!warning]
 > `raw()` returns the actual stored object, not a copy. Mutating it bypasses change detection. Prefer `peek()` unless you specifically need the stored reference.
 
 #### Returns
@@ -168,7 +168,7 @@ Sets the value to `undefined`, notifying dependents if it was not already undefi
 signal.depend();
 ```
 
-Subscribes the running reaction without reading the value. Useful when a reaction should re-run on change but reads the value from elsewhere.
+Subscribes the running reaction without using the value, the same as writing `const ignore = signal.get()`. Use it when a reaction should re-run on a change but reads the value from elsewhere.
 
 #### Example
 

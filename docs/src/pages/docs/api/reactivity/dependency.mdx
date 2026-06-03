@@ -13,7 +13,7 @@ export const components = { blockquote: Blockquote };
 
 Track reactions by hand. A `Dependency` records which reactions are listening and re-fires them when you say so. Signals own one internally, which is how [`signal.depend()`](/docs/api/reactivity/signal#depend), [`signal.notify()`](/docs/api/reactivity/signal#notify), and [`signal.hasDependents()`](/docs/api/reactivity/signal#hasdependents) work.
 
-> [!info] Advanced
+> [!info]
 > Most code never touches `Dependency` directly. Reach for it when you own a non-signal data source (a store, a cache, an external event) and want reactions to subscribe to it.
 
 ## Creating

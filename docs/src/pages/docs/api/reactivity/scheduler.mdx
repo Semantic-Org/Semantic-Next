@@ -13,7 +13,7 @@ export const components = { blockquote: Blockquote };
 
 The batching engine behind reactivity. Signals queue their dependents here, and `Scheduler` drains them on a microtask. Most code reaches it through the free functions on [Flushing](/docs/api/reactivity/flushing) rather than the class.
 
-> [!info] Use the free functions
+> [!info]
 > [`flush`](/docs/api/reactivity/flushing#flush), [`scheduleFlush`](/docs/api/reactivity/flushing#scheduleflush), [`afterFlush`](/docs/api/reactivity/flushing#afterflush), and [`getSource`](/docs/api/reactivity/debugging#getsource) are exported from `@semantic-ui/reactivity` as standalone functions bound to these statics. Import those instead of touching `Scheduler` directly.
 
 ## Class Statics

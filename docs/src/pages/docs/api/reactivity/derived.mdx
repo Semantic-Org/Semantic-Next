@@ -97,7 +97,7 @@ last.set('Byron');
 fullName.peek(); // 'Ada Byron'
 ```
 
-> [!tip] derive vs computed
+> [!tip]
 > Reach for `derive` when the value comes from one source, `computed` when it draws on several. `derive(source, fn)` passes the source value in for you, `computed(fn)` reads its own signals in the body.
 
 #### Example
@@ -140,7 +140,7 @@ isSelected('archive'); // false
 selected.set('archive'); // re-fires 'inbox' and 'archive', not the rest
 ```
 
-> [!info] Strict reference change
+> [!info]
 > `match` re-fires on a strict reference change of the source value, not its equality function. With `safety: 'reference'` mutate then [`notify()`](/docs/api/reactivity/signal#notify) does not produce a new reference, so swap in a fresh value when matchers should re-evaluate.
 
 #### Example

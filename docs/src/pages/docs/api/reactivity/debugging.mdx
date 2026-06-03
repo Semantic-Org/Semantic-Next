@@ -14,7 +14,7 @@ export const components = { blockquote: Blockquote };
 
 Tools for seeing what reactivity is doing. Tracing attaches debug metadata to signals, reactions, and dependencies, and [`getSource`](#getsource) prints what triggered the reaction currently running.
 
-> [!info] Off by default
+> [!info]
 > Tracing allocates nothing until you turn it on. Leave it off in production and switch it on from the console while debugging.
 
 ## Tracing
@@ -43,7 +43,7 @@ setStackCapture(enabled);
 
 Adds stack traces to the tracing context via `Error.captureStackTrace`. Enabling it implies tracing.
 
-> [!warning] Expensive
+> [!warning]
 > Stack capture runs on every change. Use it to hunt one specific re-run, not as an always-on setting.
 
 #### Parameters
@@ -86,7 +86,7 @@ getSource();
 
 Logs the currently running reaction and, when stack capture is on, where it was created or triggered. Call it from inside a reaction during a flush to trace what scheduled it. Outside a flush it reports that no reaction is running.
 
-> [!tip] Development aid
+> [!tip]
 > `getSource()` writes to the console and returns nothing. Pair it with tracing for named output.
 
 #### Usage

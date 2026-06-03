@@ -1,11 +1,13 @@
-import { isStackCapture, isTracing, setStackCapture, setTracing } from '@semantic-ui/reactivity';
+import { getSource, reaction, setStackCapture, signal } from '@semantic-ui/reactivity';
 
-console.log(isTracing()); // false, off by default
-setTracing(true);
-console.log(isTracing()); // true, now in context mode
+// stack capture records where each reactive change originates
+setStackCapture(true);
 
-setStackCapture(true); // implies tracing, upgrades to stack mode
-console.log(isStackCapture()); // true
+const score = signal(0);
 
-setTracing(false); // off again, also clears stack capture
-console.log(isTracing(), isStackCapture()); // false false
+reaction(() => {
+  score.get();
+  getSource(); // logs a grouped trace of what triggered this run
+});
+
+score.set(10); // re-runs the reaction, getSource traces the change

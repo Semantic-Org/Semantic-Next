@@ -14,7 +14,7 @@ export const components = { blockquote: Blockquote };
 
 Mutate a signal holding an array and notify dependents in one call. These helpers change the stored array in place, so they work under the default `safety: 'reference'` without needing a fresh reference.
 
-> [!info] Notify, don't compare
+> [!info]
 > Unlike [`set`](/docs/api/reactivity/signal#set), most of these helpers skip the equality check and notify dependents unconditionally. The exception is [`setIndex`](#setindex), which notifies only when the indexed value changes.
 
 ## Adding

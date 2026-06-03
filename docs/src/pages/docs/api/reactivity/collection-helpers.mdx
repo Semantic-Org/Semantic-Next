@@ -14,7 +14,7 @@ export const components = { blockquote: Blockquote };
 
 Look up, update, and remove objects in an array signal by identity. Each item is matched by its id, resolved through the signal's [`id`](/docs/api/reactivity/signal#signal) option, which defaults to the first present of `id`, `_id`, `hash`, or `key`.
 
-> [!info] Identity
+> [!info]
 > The collection helpers match by resolved id, not by position. Reordering the array does not change which item a given id points to. Pass a custom `id` resolver to `signal()` when your items key on a different field.
 
 ## Identity
@@ -246,5 +246,5 @@ signal.setArrayProperty(property, value);
 
 Sets a property on one item by index, or on every item when the index is omitted. Notifies once if any value changed.
 
-> [!note] Reserved for redesign
+> [!note]
 > `setArrayProperty` keys by index rather than id and predates the identity-based helpers above. Prefer `setProperty` for single-item updates. The batch form is slated for a future redesign.

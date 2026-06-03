@@ -100,7 +100,7 @@ Registers a cleanup callback that fires just before the reaction's next run and 
 |------|------|-------------|
 | callback | function | Runs on the next re-run or on stop |
 
-> [!info] Fire order
+> [!info]
 > Cleanups fire in registration order, and the queue is cleared after firing. A cleanup registered during `firstRun` fires once, before the second run.
 
 #### Usage
@@ -153,7 +153,7 @@ reaction.firstRun;
 
 `true` while the callback is executing for the first time, `false` on every later run. Useful for one-time initialization.
 
-> [!warning] Read dependencies first
+> [!warning]
 > Read the signals you depend on before any early `if (firstRun) return`. Bail out first and the reaction registers no dependencies and never re-runs.
 
 #### Usage

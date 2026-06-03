@@ -18,7 +18,7 @@ Control when pending reactions run. By default a signal change schedules its dep
 import { flush, afterFlush, scheduleFlush } from '@semantic-ui/reactivity';
 ```
 
-> [!info] Asynchronous by default
+> [!info]
 > Reactions run on the [microtask](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide) queue, so a write does not re-run dependents synchronously. Batched writes within the same tick collapse to a single flush, and dependents observe only the final value. Use `flush()` to force them through now.
 
 ## Flushing
