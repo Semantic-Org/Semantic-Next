@@ -31,7 +31,7 @@ export interface SignalOptions<T> {
 
   /**
    * Resolves the identity of an array item for the id-based collection helpers
-   * (`getItem`, `setProperty`, `replaceItem`, `removeItem`). Defaults to the
+   * (`getItem`, `setItemProperty`, `toggleItemProperty`, `replaceItem`, `removeItem`). Defaults to the
    * first present of `id`, `_id`, `hash`, `key`.
    * @param item - The item to identify
    */
@@ -276,12 +276,12 @@ export class Signal<T> {
   /**
    * Sets a property on the object at a specific index in the array.
    * This method is only available when `T` is or extends `Record<string, any>[]`.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#setarrayproperty setArrayProperty}
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#setindexproperty setIndexProperty}
    * @param index - Index of the object to modify
    * @param property - Property name to set
    * @param value - Value to set for the property
    */
-  setArrayProperty<U extends Record<string, any>[]>(
+  setIndexProperty<U extends Record<string, any>[]>(
     this: Signal<U>,
     index: number,
     property: keyof U[number],
@@ -289,29 +289,29 @@ export class Signal<T> {
   ): void;
 
   /**
-   * Sets a property on every object in the array.
+   * Sets a property on the object with the specified id within the array.
    * This method is only available when `T` is or extends `Record<string, any>[]`.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#setarrayproperty setArrayProperty}
-   * @param property - Property name to set on all objects
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#setitemproperty setItemProperty}
+   * @param id - Id of the object to modify
+   * @param property - Property name to set
    * @param value - Value to set for the property
    */
-  setArrayProperty<U extends Record<string, any>[]>(
+  setItemProperty<U extends Record<string, any>[]>(
     this: Signal<U>,
+    id: string,
     property: keyof U[number],
     value: U[number][keyof U[number]],
   ): void;
 
   /**
-   * Sets a property on the object with the specified id within the array.
-   * Assumes the Signal's value is an array of objects.
+   * Sets a property on every object in the array.
+   * This method is only available when `T` is or extends `Record<string, any>[]`.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#setproperty setProperty}
-   * @param id - Id of the object to modify
-   * @param property - Property name
-   * @param value - Value to set
+   * @param property - Property name to set on all objects
+   * @param value - Value to set for the property
    */
   setProperty<U extends Record<string, any>[]>(
     this: Signal<U>,
-    id: string,
     property: keyof U[number],
     value: U[number][keyof U[number]],
   ): void;
@@ -323,6 +323,37 @@ export class Signal<T> {
    * @param value - Value to set
    */
   setProperty<K extends keyof T>(property: K, value: T[K]): void;
+
+  /**
+   * Toggles a boolean property on the object with the specified id within the array.
+   * This method is only available when `T` is or extends `Record<string, any>[]`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#toggleitemproperty toggleItemProperty}
+   * @param id - Id of the object to modify
+   * @param property - Property name to toggle
+   */
+  toggleItemProperty<U extends Record<string, any>[]>(
+    this: Signal<U>,
+    id: string,
+    property: keyof U[number],
+  ): void;
+
+  /**
+   * Toggles a boolean property on every object in the array.
+   * This method is only available when `T` is or extends `Record<string, any>[]`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#toggleproperty toggleProperty}
+   * @param property - Property name to toggle on all objects
+   */
+  toggleProperty<U extends Record<string, any>[]>(
+    this: Signal<U>,
+    property: keyof U[number],
+  ): void;
+
+  /**
+   * Toggles a boolean property directly on the Signal's value when it is a plain object.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#toggleproperty toggleProperty}
+   * @param property - Property name to toggle
+   */
+  toggleProperty<K extends keyof T>(property: K): void;
 
   /**
    * Replaces the object with the specified id in the array.

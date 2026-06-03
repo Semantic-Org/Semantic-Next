@@ -394,13 +394,13 @@ SAFETY_MODES.forEach((safety) => {
         Collection (id) mutators
     *******************************/
 
-    describe('setArrayProperty (index form)', () => {
+    describe('setIndexProperty', () => {
       it('sets a property on one item by index', () => {
         const sig = new Signal(
           [{ id: 'a', count: 0 }, { id: 'b', count: 0 }],
           { safety },
         );
-        sig.setArrayProperty(0, 'count', 5);
+        sig.setIndexProperty(0, 'count', 5);
         expect(sig.raw()[0].count).toBe(5);
         expect(sig.raw()[1].count).toBe(0);
       });
@@ -411,7 +411,7 @@ SAFETY_MODES.forEach((safety) => {
           { safety },
         );
         const sub = subscribe(sig);
-        sig.setArrayProperty(0, 'count', 5);
+        sig.setIndexProperty(0, 'count', 5);
         flush();
         expect(sub.count).toBe(1);
         sub.stop();
@@ -423,7 +423,7 @@ SAFETY_MODES.forEach((safety) => {
           { safety },
         );
         const before = sig.raw();
-        sig.setArrayProperty(0, 'count', 5);
+        sig.setIndexProperty(0, 'count', 5);
         expect(sig.raw()).toBe(before);
       });
 
@@ -433,110 +433,7 @@ SAFETY_MODES.forEach((safety) => {
           { safety },
         );
         const sub = subscribe(sig);
-        sig.setArrayProperty(0, 'count', 5);
-        flush();
-        expect(sub.count).toBe(0);
-        sub.stop();
-      });
-    });
-
-    describe('setArrayProperty (all-items form)', () => {
-      it('sets a property on every item', () => {
-        const sig = new Signal(
-          [{ id: 'a', done: false }, { id: 'b', done: false }],
-          { safety },
-        );
-        sig.setArrayProperty('done', true);
-        expect(sig.raw().every(item => item.done === true)).toBe(true);
-      });
-
-      it('fires reactivity', () => {
-        const sig = new Signal(
-          [{ id: 'a', done: false }, { id: 'b', done: false }],
-          { safety },
-        );
-        const sub = subscribe(sig);
-        sig.setArrayProperty('done', true);
-        flush();
-        expect(sub.count).toBe(1);
-        sub.stop();
-      });
-
-      it('preserves stored array identity (in-place mutation)', () => {
-        const sig = new Signal(
-          [{ id: 'a', done: false }, { id: 'b', done: false }],
-          { safety },
-        );
-        const before = sig.raw();
-        sig.setArrayProperty('done', true);
-        expect(sig.raw()).toBe(before);
-      });
-
-      it('does not fire reactivity when every item already has the value', () => {
-        const sig = new Signal(
-          [{ id: 'a', done: true }, { id: 'b', done: true }],
-          { safety },
-        );
-        const sub = subscribe(sig);
-        sig.setArrayProperty('done', true);
-        flush();
-        expect(sub.count).toBe(0);
-        sub.stop();
-      });
-
-      it('fires reactivity when at least one item differs', () => {
-        const sig = new Signal(
-          [{ id: 'a', done: true }, { id: 'b', done: false }],
-          { safety },
-        );
-        const sub = subscribe(sig);
-        sig.setArrayProperty('done', true);
-        flush();
-        expect(sub.count).toBe(1);
-        sub.stop();
-      });
-    });
-
-    describe('setProperty (array form, by id)', () => {
-      it('sets a property on the item matching the id', () => {
-        const sig = new Signal(
-          [{ id: 'a', title: 'one' }, { id: 'b', title: 'two' }],
-          { safety },
-        );
-        sig.setProperty('b', 'title', 'TWO');
-        expect(sig.raw().find(i => i.id === 'b').title).toBe('TWO');
-        expect(sig.raw().find(i => i.id === 'a').title).toBe('one');
-      });
-
-      it('fires reactivity', () => {
-        const sig = new Signal(
-          [{ id: 'a', title: 'one' }, { id: 'b', title: 'two' }],
-          { safety },
-        );
-        const sub = subscribe(sig);
-        sig.setProperty('b', 'title', 'TWO');
-        flush();
-        expect(sub.count).toBe(1);
-        sub.stop();
-      });
-
-      it('preserves stored array identity (in-place mutation)', () => {
-        const sig = new Signal(
-          [{ id: 'a', title: 'one' }, { id: 'b', title: 'two' }],
-          { safety },
-        );
-        const before = sig.raw();
-        sig.setProperty('b', 'title', 'TWO');
-        expect(sig.raw()).toBe(before);
-      });
-
-      it('does not fire reactivity when the field already has the value', () => {
-        const sig = new Signal(
-          [{ id: 'a', title: 'one' }, { id: 'b', title: 'two' }],
-          { safety },
-        );
-        const sub = subscribe(sig);
-        sig.setProperty('b', 'title', 'two');
+        sig.setIndexProperty(0, 'count', 5);
         flush();
         expect(sub.count).toBe(0);
         sub.stop();
@@ -552,6 +449,40 @@ SAFETY_MODES.forEach((safety) => {
         sig.setItemProperty('b', 'title', 'TWO');
         expect(sig.raw().find(i => i.id === 'b').title).toBe('TWO');
         expect(sig.raw().find(i => i.id === 'a').title).toBe('one');
+      });
+
+      it('fires reactivity', () => {
+        const sig = new Signal(
+          [{ id: 'a', title: 'one' }, { id: 'b', title: 'two' }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.setItemProperty('b', 'title', 'TWO');
+        flush();
+        expect(sub.count).toBe(1);
+        sub.stop();
+      });
+
+      it('preserves stored array identity (in-place mutation)', () => {
+        const sig = new Signal(
+          [{ id: 'a', title: 'one' }, { id: 'b', title: 'two' }],
+          { safety },
+        );
+        const before = sig.raw();
+        sig.setItemProperty('b', 'title', 'TWO');
+        expect(sig.raw()).toBe(before);
+      });
+
+      it('does not fire reactivity when the field already has the value', () => {
+        const sig = new Signal(
+          [{ id: 'a', title: 'one' }, { id: 'b', title: 'two' }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.setItemProperty('b', 'title', 'two');
+        flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
       });
 
       it('is a no-op when no item matches the id', () => {
@@ -586,6 +517,145 @@ SAFETY_MODES.forEach((safety) => {
         sig.setProperty('done', true);
         flush();
         expect(sub.count).toBe(1);
+        sub.stop();
+      });
+
+      it('preserves stored array identity (in-place mutation)', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: false }, { id: 'b', done: false }],
+          { safety },
+        );
+        const before = sig.raw();
+        sig.setProperty('done', true);
+        expect(sig.raw()).toBe(before);
+      });
+
+      it('does not fire reactivity when every item already has the value', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: true }, { id: 'b', done: true }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.setProperty('done', true);
+        flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
+
+      it('fires reactivity when at least one item differs', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: true }, { id: 'b', done: false }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.setProperty('done', true);
+        flush();
+        expect(sub.count).toBe(1);
+        sub.stop();
+      });
+    });
+
+    describe('toggleItemProperty', () => {
+      it('flips a boolean field on the item matching the id', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: false }, { id: 'b', done: true }],
+          { safety },
+        );
+        sig.toggleItemProperty('a', 'done');
+        expect(sig.raw().find(i => i.id === 'a').done).toBe(true);
+        expect(sig.raw().find(i => i.id === 'b').done).toBe(true);
+      });
+
+      it('fires reactivity once', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: false }, { id: 'b', done: true }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.toggleItemProperty('a', 'done');
+        flush();
+        expect(sub.count).toBe(1);
+        sub.stop();
+      });
+
+      it('preserves stored array identity (in-place mutation)', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: false }, { id: 'b', done: true }],
+          { safety },
+        );
+        const before = sig.raw();
+        sig.toggleItemProperty('a', 'done');
+        expect(sig.raw()).toBe(before);
+      });
+
+      it('is a no-op when no item matches the id', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: false }, { id: 'b', done: true }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.toggleItemProperty('missing', 'done');
+        flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
+    });
+
+    describe('toggleProperty (object form)', () => {
+      it('flips a boolean field on the stored object', () => {
+        const sig = new Signal({ open: false }, { safety });
+        sig.toggleProperty('open');
+        expect(sig.raw().open).toBe(true);
+        sig.toggleProperty('open');
+        expect(sig.raw().open).toBe(false);
+      });
+
+      it('fires reactivity once', () => {
+        const sig = new Signal({ open: false }, { safety });
+        const sub = subscribe(sig);
+        sig.toggleProperty('open');
+        flush();
+        expect(sub.count).toBe(1);
+        sub.stop();
+      });
+
+      it('preserves stored object identity (in-place mutation)', () => {
+        const sig = new Signal({ open: false }, { safety });
+        const before = sig.raw();
+        sig.toggleProperty('open');
+        expect(sig.raw()).toBe(before);
+      });
+    });
+
+    describe('toggleProperty (array form, all items)', () => {
+      it('flips the field on every item independently', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: false }, { id: 'b', done: true }],
+          { safety },
+        );
+        sig.toggleProperty('done');
+        expect(sig.raw().find(i => i.id === 'a').done).toBe(true);
+        expect(sig.raw().find(i => i.id === 'b').done).toBe(false);
+      });
+
+      it('fires reactivity once for the whole batch', () => {
+        const sig = new Signal(
+          [{ id: 'a', done: false }, { id: 'b', done: true }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.toggleProperty('done');
+        flush();
+        expect(sub.count).toBe(1);
+        sub.stop();
+      });
+
+      it('does not fire reactivity on an empty array', () => {
+        const sig = new Signal([], { safety });
+        const sub = subscribe(sig);
+        sig.toggleProperty('done');
+        flush();
+        expect(sub.count).toBe(0);
         sub.stop();
       });
     });
