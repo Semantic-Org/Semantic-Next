@@ -428,7 +428,7 @@ export class Signal<T> {
   /**
    * Creates a new signal derived from this signal's value. The compute function
    * receives the current value and returns the derived value, recomputing when
-   * this signal changes. Sugar for the free `derive(source, computeFn)`.
+   * this signal changes. Sugar for the free `derive`.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived-signals#derive derive}
    * @param computeFn - Function that transforms this signal's value
    * @param options - Optional configuration for the derived signal

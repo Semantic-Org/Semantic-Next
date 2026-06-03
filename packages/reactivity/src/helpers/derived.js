@@ -35,8 +35,8 @@ export const computed = (computeFn, options = {}) =>
 // Per-key reactive membership against a source signal. The returned
 // match(key) function is reactive and returns whether matchFn(key, source.value)
 // holds. Source changes re-fire only the keys whose match result flipped, so N
-// readers cost O(flipped), not O(N). This is the "highlight one of N" pattern
-// (selected row, active tab, current route). Solid's `createSelector` adapted.
+// readers cost O(flipped), not O(N). This is the "highlight one of N" pattern.
+// Solid's `createSelector` adapted.
 //
 // The backing reaction's natural Reaction.run teardown removes a row reaction
 // from its per-key dep on rerun. Calling match(key) again re-registers the

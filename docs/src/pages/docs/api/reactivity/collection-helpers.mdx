@@ -43,7 +43,7 @@ The resolved id, or `undefined` if none is present.
 const users = signal([{ id: 'u1', name: 'Alice' }]);
 
 users.getId(users.peek()[0]); // 'u1'
-users.getId('u1');            // 'u1' — a primitive is its own id
+users.getId('u1');            // 'u1', a primitive is its own id
 ```
 
 ### getIds

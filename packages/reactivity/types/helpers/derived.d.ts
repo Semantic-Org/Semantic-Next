@@ -47,8 +47,8 @@ export function derive<T, U>(
 /**
  * Creates a per-key reactive selector against a source signal. The returned
  * matcher reports whether `matchFn(key, source value)` holds, and a source change
- * re-fires only the keys whose result flipped, the "highlight one of N" pattern
- * (selected row, active tab, current route). Adapted from Solid's `createSelector`.
+ * re-fires only the keys whose result flipped, the "highlight one of N" pattern.
+ * Adapted from Solid's `createSelector`.
  * Defaults to strict-equality matching.
  * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived-signals#match match}
  * @param source - The source signal to match against

@@ -22,7 +22,7 @@ Compute new signals from existing ones, and select per-key membership against a 
 derive(source, computeFn, options);
 ```
 
-Creates a new signal derived from a single source signal, recomputing when the source changes. Also available as the instance method [`source.derive(computeFn)`](#sourcederive).
+Creates a new signal derived from a single source signal, recomputing when the source changes. Also available as the instance method [`source.derive`](#sourcederive).
 
 #### Parameters
 
@@ -58,7 +58,7 @@ fahrenheit.peek(); // 86
 signal.derive(computeFn, options);
 ```
 
-Instance-method form. Sugar for `derive(signal, computeFn, options)`.
+Instance-method form. Sugar for `derive` with this signal as the source.
 
 ```javascript
 const count = signal(1);
@@ -98,7 +98,7 @@ fullName.peek(); // 'Ada Byron'
 ```
 
 > [!tip]
-> Reach for `derive` when the value comes from one source, `computed` when it draws on several. `derive(source, fn)` passes the source value in for you, `computed(fn)` reads its own signals in the body.
+> Reach for `derive` when the value comes from one source, `computed` when it draws on several. `derive` passes the source value in for you, `computed` reads its own signals in the body.
 
 #### Example
 
@@ -112,7 +112,7 @@ fullName.peek(); // 'Ada Byron'
 match(source, matchFn);
 ```
 
-Creates a per-key reactive selector against a source signal. The returned matcher reports whether `matchFn(key, sourceValue)` holds for a given key. A source change re-fires only the keys whose result flipped, so N readers cost O(flipped) not O(N). This is the "highlight one of N" pattern (selected row, active tab, current route).
+Creates a per-key reactive selector against a source signal. The returned matcher reports whether `matchFn(key, sourceValue)` holds for a given key. A source change re-fires only the keys whose result flipped, so N readers cost O(flipped) not O(N). This is the "highlight one of N" pattern.
 
 #### Parameters
 

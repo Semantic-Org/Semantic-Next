@@ -6,11 +6,11 @@ description: Signals computed from other signals
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-A derived signal computes its value from other signals and caches it, recomputing only when an input it actually read changes. Three shapes cover the common cases.
+A derived signal computes its value from other signals and caches it, recomputing only when an input it read changes.
 
-## derive — one source
+## derive
 
-`signal.derive(fn)` transforms a single signal. The result tracks its source and recomputes when that source changes.
+[`derive`](/docs/api/reactivity/derived-signals#derive) transforms one signal into another. The result tracks its source and recomputes when that source changes.
 
 ```javascript
 const items = signal(['apple', 'banana', 'cherry']);
@@ -23,9 +23,9 @@ count.get(); // 4
 
 <PlaygroundExample id="reactive-derived" />
 
-## computed — many sources
+## computed
 
-`computed(fn)` reads several signals in its body and recomputes when any of them change.
+When a value draws on more than one signal, [`computed`](/docs/api/reactivity/derived-signals#computed) reads them all in its body and recomputes when any of them change.
 
 ```javascript
 const price = signal(10);
@@ -39,11 +39,11 @@ total.get(); // 40
 
 <PlaygroundExample id="reactive-computed" />
 
-> `derive` hands you the source value, `computed` reads its own signals. Use `derive` for a one-to-one transform, `computed` when the value combines several.
+> Reach for `derive` when a value comes from a single source, `computed` when it combines several.
 
-## match — one of many
+## match
 
-`match(source)` returns a selector for the "highlight one of N" pattern: a selected row, the active tab, the current route. Reading a key inside a reaction subscribes only that key, so changing the source re-runs the keys whose state flipped, not all N.
+Selection is the one-of-N case, like the active row in a table. [`match`](/docs/api/reactivity/derived-signals#match) returns a function you call with a key. Reading a key inside a reaction subscribes only that key, so a source change re-runs the keys whose answer flipped rather than every reader.
 
 ```javascript
 const selected = signal('inbox');
@@ -59,4 +59,4 @@ selected.set('drafts'); // re-runs only 'inbox' and 'drafts'
 
 ## Teardown
 
-Each of these runs a reaction internally. Inside a component it stops automatically with the component. Created standalone, it self-stops once nothing references it, or call `.stop()` to tear it down immediately.
+Each of these runs a reaction under the hood. Inside a component it stops with the component. Created on its own, it self-stops once nothing references it, or call `stop()` to end it immediately.
