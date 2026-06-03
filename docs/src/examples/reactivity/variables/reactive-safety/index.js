@@ -4,13 +4,13 @@ import { flush, reaction, signal } from '@semantic-ui/reactivity';
 const draft = { label: 'draft' };
 const referenced = signal(draft);
 draft.label = 'edited'; // mutate the original behind the signal
-console.log(referenced.get().label); // edited, reference shares the object
+console.log(referenced.get().label);
 
 // clone: stores and returns copies, guarding state outside code might mutate
 const saved = { label: 'draft' };
 const cloned = signal(saved, { safety: 'clone' });
 saved.label = 'edited';
-console.log(cloned.get().label); // draft, clone kept its own copy
+console.log(cloned.get().label);
 
 // none: skips the equality check so every set re-fires (same as equality: () => false)
 const stream = signal(0, { safety: 'none' });
@@ -21,4 +21,4 @@ reaction(() => {
 });
 stream.set(0); // an equal value still re-fires under none
 flush();
-console.log(runs); // 2, the equal set re-ran anyway
+console.log(runs);
