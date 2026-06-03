@@ -13,6 +13,15 @@ import type { Dependency } from './dependency';
  */
 export class Reaction {
   /**
+   * The reaction currently executing, or `null` outside a reactive run. A static
+   * mirror of `Scheduler.current`, kept on the class so a `debugger` breakpoint can
+   * read the running reaction without an import (devtools consoles can't import
+   * `currentReaction()`).
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#current current}
+   */
+  static readonly current: Reaction | null;
+
+  /**
    * Creates a new Reaction. The callback runs immediately (tracking the signals
    * it reads) and re-runs whenever any of them change. The callback receives the
    * Reaction instance.

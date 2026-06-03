@@ -4,7 +4,7 @@ pageType: 'API Reference'
 title: Reaction
 icon: refresh-cw
 package: "@semantic-ui/reactivity"
-methods: [reaction, run, onCleanup, stop, firstRun, active]
+methods: [reaction, run, onCleanup, stop, firstRun, active, current]
 description: API reference for Reaction in Semantic UI's reactivity system
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
@@ -189,3 +189,15 @@ const counter = reaction((self) => {
 counter.stop();
 counter.active; // false
 ```
+
+### current
+
+```javascript
+Reaction.current;
+```
+
+The reaction currently executing, or `null` outside a reactive run. A static mirror of [`Scheduler.current`](/docs/api/reactivity/scheduler#current), kept on the class so a `debugger` breakpoint can read it without importing [`currentReaction()`](/docs/api/reactivity/controls#currentreaction).
+
+#### Returns
+
+A [`Reaction`](/docs/api/reactivity/reaction) or `null`.
