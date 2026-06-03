@@ -191,8 +191,9 @@ Challenging the harness is sometimes correct. But it requires evidence. Here is 
 
 - PR #143 ([comment](https://github.com/Semantic-Org/Semantic-Next/pull/143#issuecomment-4253067182)) — "Build: Reporter polish" — reports `✅ 0 faster · ❌ 0 slower · 🔍 15 unsure · ⚪ 8 no change`
 - PR #149 ([bench comment](https://github.com/Semantic-Org/Semantic-Next/pull/149)) — "Build: Discover runs all benchmarkable packages" — reports `✅ 0 faster · ❌ 0 slower · 🔍 18 unsure · ⚪ 13 no change`
+- PR #228 ([bench comment](https://github.com/Semantic-Org/Semantic-Next/pull/228)) — "Refactor: Use the signal() factory at internal callsites" — a *bundled hot-path* refactor of `template.js` and `derived.js`, behavior-preserving — reports `✅ 0 faster · ❌ 0 slower`
 
-Two independent null changes, two reports of zero-in-each-confident-bucket. The reporter's "Confidently slower" classification is not prone to false positives on this hardware at 50 samples.
+Three independent null changes, three reports of zero-in-each-confident-bucket. The reporter's "Confidently slower" classification is not prone to false positives on this hardware at 50 samples. #228 is the strongest of the three. It changes the bundled reactive hot path itself, so it also rules out the "any bundle change perturbs V8 and tips a fragile bench" story. Perturbation is falsifiable, and the null series falsifies it.
 
 The reporter does acknowledge the noise floor separately — it has a "Too Fast to Measure Precisely" bucket with per-metric CI width and expected-noise columns. That's where noise-dominated benches land. If a metric is in the *confident* bucket, it has already passed that check.
 
@@ -231,6 +232,18 @@ When proposing a scale change, state up front: which bucket is the bench current
 #### The general principle
 
 When the harness starts feeling like the enemy, the move is to name the specific property you're challenging, produce evidence that contradicts it, and only then discuss harness changes. The default stance is: the harness is correct, the code has a regression, your job is to find it.
+
+#### The elimination trap
+
+The failure above has a quieter cousin that survives careful tracing. When the obvious suspects are ruled out, the conclusion drifts to whatever could not be falsified (V8 internals, GC, bundle layout, harness noise), and "by elimination it must be X" launders "X is the only thing I couldn't disprove" into "X is what the evidence points to." Those are opposite. A claim that survives because nothing can kill it carries no evidentiary weight.
+
+Two specific errors produce this, both from the PR #229 `clear-completed` investigation:
+
+- **Where code runs is not where its cost shows.** `buildCallParams` runs once per instance at create time, and the create-heavy benches (`create-10k`, `bulk-add-500`) were flat, so it was "ruled out." Wrong. The per-instance structure it built (three `.bind()` closures) was paid later, on teardown and multi-flush paths (`clear-completed` +22%, `add-20` +14%). A create-only bench cannot show a cost paid at teardown, so it does not exonerate create-time code. Map a cost to where it is paid, not to where the statement executes.
+
+- **Magnitude hand-bounds do not exonerate.** "Three binds is a few hundred nanoseconds, it cannot be 8ms, so it must be a second-order V8 effect" was the exact reasoning that justified parking the conclusion in fog. The bisect proved three binds were the entire 8ms. An intuition about how much a construct costs is not evidence. The bench is.
+
+The corrective is mechanical, not clever. When you cannot locate a cost by reading, bisect it: revert only the suspect on the same branch and re-bench. The PR #229 cause was found in one CI cycle by reverting three lines, after extended source reading had concluded "emergent V8 effect, profile-only." A controlled revert is cheaper and more honest than any reading-derived mechanism. If a confident finding resists localization, the next move is another bisect, not a foggier hypothesis.
 
 ### Gotchas
 

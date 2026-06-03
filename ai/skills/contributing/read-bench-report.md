@@ -65,6 +65,12 @@ Net modifier uses **count**, not magnitude-weighted score. 9 wins × 5% improvem
 
 Metrics land in Faster or Slower only when their 95% CI is entirely above or below ±2%. This is the confident-signal bucket. If a metric is here, **there's a real perf change to discuss.**
 
+### A confident finding is a real cost, not a measurement artifact
+
+A metric in Faster or Slower has already cleared the noise floor and the per-metric expected-noise check. It is not flakiness, GC jitter, or "bundle perturbation." Those explanations are falsifiable, and they have been falsified: behavior-preserving changes produce `0 faster · 0 slower`, including bundled hot-path refactors (PR #228) as well as non-bundled build edits (PR #143, #149). The harness does not fabricate confident findings.
+
+So when a confident regression lands on a bench whose code you did not touch, the cost is real and reachable, often not where you expect but locatable. Do not migrate the conclusion to the least-falsifiable region (V8 internals, GC, the harness) because reading did not surface it. Bisect instead: revert only the suspect on the same branch and re-bench. The `improve-performance` skill's "elimination trap" has the worked example, a confident +22% that read as a "profile-only V8 effect" and turned out to be three `.bind()` calls, found in one revert cycle.
+
 ### Reading a row
 
 ```
