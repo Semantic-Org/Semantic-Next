@@ -4,7 +4,7 @@ import type { Signal, SignalOptions } from '../signal';
  * A reactive membership selector returned by `match`. Call it with a key to test
  * that key against the source value. Calling it inside a reaction subscribes only
  * that key, so a source change re-fires only the keys whose result flipped.
- * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived#match match}
+ * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived-signals#match match}
  */
 export interface Matcher<K> {
   /**
@@ -22,7 +22,7 @@ export interface Matcher<K> {
 /**
  * Creates a signal computed from other signals. The compute function re-runs
  * whenever any signal it reads changes, storing the result.
- * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived#computed computed}
+ * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived-signals#computed computed}
  * @param computeFn - Function that computes the value from other signals
  * @param options - Optional configuration for the computed signal
  * @returns A new Signal holding the computed value
@@ -32,7 +32,7 @@ export function computed<T>(computeFn: () => T, options?: SignalOptions<T>): Sig
 /**
  * Creates a signal derived from a single source signal, recomputing when the
  * source changes. Also available as the instance method `source.derive(fn)`.
- * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived#derive derive}
+ * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived-signals#derive derive}
  * @param source - The source signal
  * @param computeFn - Function that transforms the source value
  * @param options - Optional configuration for the derived signal
@@ -50,7 +50,7 @@ export function derive<T, U>(
  * re-fires only the keys whose result flipped, the "highlight one of N" pattern
  * (selected row, active tab, current route). Adapted from Solid's `createSelector`.
  * Defaults to strict-equality matching.
- * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived#match match}
+ * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived-signals#match match}
  * @param source - The source signal to match against
  * @param matchFn - Optional predicate comparing a key to the source value
  * @returns A reactive matcher function carrying a `stop` method
