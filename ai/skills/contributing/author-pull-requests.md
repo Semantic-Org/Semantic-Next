@@ -430,6 +430,22 @@ Pick the word that matches the *actual nature* of the change. AI writing reaches
 | update | refresh | Pulling latest within existing version constraints |
 | ensure | (cut entirely) | The verb is almost always implicit; remove it |
 
+### 10. Mechanism in the framing
+
+The bullet-level mechanism tells (#6, #7) have a framing-level twin, and it is the harder one to catch. The opening sentence explains how the change works (the technique, the data flow, why it is safe) instead of the plain reason the PR exists. It survives a length cut, because narrating mechanism *feels* like solid engineering communication rather than padding. It still reads as AI, because the author is proving they understand the code instead of telling the reader why the work is here.
+
+The fix: describe the situation that made the PR necessary, not what the code does. The diff is the "how."
+
+Worked example, a bench-shim precursor (PR #230), across three drafts:
+
+| Draft | Text |
+|---|---|
+| ❌ AI arc | Three paragraphs on how the harness pins bench files from `main`, why `setProperty` changes meaning, what the follow-up collapses. |
+| ❌ Tighter, still mechanism | "Precursor for the collection-helper rename. The bench harness pins bench files from `main`, so this adds the final names additively, giving the rename PR a baseline that already resolves them." |
+| ✅ Goal only | "This shims the bench to allow us to refactor signal mutation helpers and get clean results against baseline." |
+
+The win is not length. The middle draft is already two sentences. It is that the final version names only the goal (clean results against baseline) and trusts the diff with the method names, the additive detail, and even the reason it is a separate PR. First person ("us"), because a person is writing it, not a spec.
+
 ---
 
 ## Recurring failure modes per PR type
