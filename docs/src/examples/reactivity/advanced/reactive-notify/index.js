@@ -1,6 +1,6 @@
 import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
-const data = signal({ count: 0 }, { safety: 'reference' });
+const data = signal({ count: 0 });
 
 reaction(() => {
   console.log('Count:', data.get().count);
