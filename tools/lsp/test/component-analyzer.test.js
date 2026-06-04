@@ -359,6 +359,52 @@ describe('ComponentAnalyzer', () => {
   });
 
   /*******************************
+      Signal-config state shape
+  *******************************/
+
+  describe('signal-config state ({ value, options })', () => {
+    const source = `
+      import { defineComponent } from '@semantic-ui/component';
+      const Comp = defineComponent({
+        tagName: 'config-state',
+        defaultState: {
+          rows: { value: [], options: { equality: 'deep' } },
+          count: { value: 0, options: {} },
+          valueOnly: { value: 7 },
+          plain: { nested: true },
+          flag: false,
+        },
+      });
+    `;
+    const model = analyzeComponent(source, '/virtual/config-state.js');
+
+    it('infers type from the inner value of a { value, options } config', () => {
+      const rows = model.state.find(s => s.name === 'rows');
+      expect(rows.inferredType).toBe('array');
+      expect(rows.defaultValue).toEqual([]);
+
+      const count = model.state.find(s => s.name === 'count');
+      expect(count.inferredType).toBe('number');
+      expect(count.defaultValue).toBe(0);
+    });
+
+    it('leaves plain objects untouched', () => {
+      // value without options is ambiguous, treat as a plain object
+      const valueOnly = model.state.find(s => s.name === 'valueOnly');
+      expect(valueOnly.inferredType).toBe('object');
+
+      const plain = model.state.find(s => s.name === 'plain');
+      expect(plain.inferredType).toBe('object');
+    });
+
+    it('still infers raw values alongside configs', () => {
+      const flag = model.state.find(s => s.name === 'flag');
+      expect(flag.inferredType).toBe('boolean');
+      expect(flag.defaultValue).toBe(false);
+    });
+  });
+
+  /*******************************
       Edge Cases
   *******************************/
 
