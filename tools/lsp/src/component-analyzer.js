@@ -224,6 +224,8 @@ function findReturnExpression(block) {
 
 /*
   Extracts keys and inferred types from an object literal node.
+  State may be a raw value or a `{ value, options }` signal config.
+  Configs unwrap to the inner `value` so the type reflects the default.
 */
 function extractObjectFields(node) {
   const fields = [];
@@ -234,14 +236,29 @@ function extractObjectFields(node) {
     const name = getPropertyName(prop);
     if (!name) { continue; }
 
+    const valueNode = unwrapSignalConfig(prop.value);
     fields.push({
       name,
-      inferredType: inferTypeFromValue(prop.value),
-      defaultValue: getLiteralValue(prop.value),
+      inferredType: inferTypeFromValue(valueNode),
+      defaultValue: getLiteralValue(valueNode),
     });
   }
 
   return fields;
+}
+
+/*
+  Unwraps a `{ value, options }` signal config to its inner `value` node.
+  Requires both keys so it can't misfire on plain state that happens to
+  carry a `value` field.
+*/
+function unwrapSignalConfig(node) {
+  if (!node || node.type !== 'ObjectExpression') { return node; }
+  const props = node.properties.filter(prop => prop.type === 'Property');
+  const keys = props.map(getPropertyName);
+  if (!keys.includes('value') || !keys.includes('options')) { return node; }
+  const valueProp = props.find(prop => getPropertyName(prop) === 'value');
+  return valueProp?.value ?? node;
 }
 
 function extractEventKeys(node) {
