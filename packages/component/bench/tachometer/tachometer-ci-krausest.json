@@ -8,13 +8,15 @@
     {
       "name": "this-change",
       "url": "ci-current-krausest.html",
-      "browser": { "name": "chrome", "headless": true },
+      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
       "measurement": [
         { "mode": "performance", "entryName": "create-1k" },
         { "mode": "performance", "entryName": "create-10k" },
         { "mode": "performance", "entryName": "replace-1k" },
         { "mode": "performance", "entryName": "append-1k" },
         { "mode": "performance", "entryName": "update-10th-50" },
+        { "mode": "performance", "entryName": "update-isolated-50" },
+        { "mode": "performance", "entryName": "update-gc-50" },
         { "mode": "performance", "entryName": "select-40" },
         { "mode": "performance", "entryName": "swap-rows-20" },
         { "mode": "performance", "entryName": "remove-row-front-20" },
@@ -26,13 +28,15 @@
     {
       "name": "tip-of-tree",
       "url": "ci-baseline-krausest.html",
-      "browser": { "name": "chrome", "headless": true },
+      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
       "measurement": [
         { "mode": "performance", "entryName": "create-1k" },
         { "mode": "performance", "entryName": "create-10k" },
         { "mode": "performance", "entryName": "replace-1k" },
         { "mode": "performance", "entryName": "append-1k" },
         { "mode": "performance", "entryName": "update-10th-50" },
+        { "mode": "performance", "entryName": "update-isolated-50" },
+        { "mode": "performance", "entryName": "update-gc-50" },
         { "mode": "performance", "entryName": "select-40" },
         { "mode": "performance", "entryName": "swap-rows-20" },
         { "mode": "performance", "entryName": "remove-row-front-20" },
