@@ -927,6 +927,65 @@ describe('Signal API', () => {
   });
 
   /***********************************************
+   * version — change counter for debug + sync
+   ***********************************************/
+
+  describe('version', () => {
+    it('starts at 0 and increments on each announced change', () => {
+      const signal = new Signal('a');
+      expect(signal.version).toBe(0);
+      signal.set('b');
+      expect(signal.version).toBe(1);
+      signal.set('c');
+      expect(signal.version).toBe(2);
+    });
+
+    it('does not increment when a set is a no-op under equality', () => {
+      const signal = new Signal('a');
+      signal.set('a');
+      expect(signal.version).toBe(0);
+    });
+
+    it('advances with no subscribers — its readers live outside the reactive graph', () => {
+      const signal = new Signal(0);
+      expect(signal.hasDependents()).toBe(false);
+      signal.set(1);
+      expect(signal.version).toBe(1);
+    });
+
+    it('seeds from the version option for external-store alignment', () => {
+      const signal = new Signal({ rows: [] }, { version: 42 });
+      expect(signal.version).toBe(42);
+      signal.set({ rows: [1] });
+      expect(signal.version).toBe(43);
+    });
+
+    it('is writable so it can be realigned to an external revision', () => {
+      const signal = new Signal('a');
+      signal.version = 100;
+      signal.set('b');
+      expect(signal.version).toBe(101);
+    });
+
+    it('reading version does not subscribe the running reaction', () => {
+      const source = new Signal(0);
+      const cb = vi.fn(() => source.version);
+      reaction(cb);
+      expect(cb).toHaveBeenCalledTimes(1);
+
+      source.set(1);
+      flush();
+      expect(cb).toHaveBeenCalledTimes(1);
+    });
+
+    it('a force notify() advances version even without a value change', () => {
+      const signal = new Signal('a');
+      signal.notify();
+      expect(signal.version).toBe(1);
+    });
+  });
+
+  /***********************************************
    * notify() — force-fire bypassing equality
    ***********************************************/
 

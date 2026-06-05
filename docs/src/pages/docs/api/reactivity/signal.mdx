@@ -4,7 +4,7 @@ pageType: 'API Reference'
 title: Signal
 icon: box
 package: "@semantic-ui/reactivity"
-methods: [signal, get, value, peek, raw, set, mutate, clear, depend, notify, hasDependents, derive]
+methods: [signal, get, value, peek, raw, set, mutate, clear, depend, notify, hasDependents, version, derive]
 description: API reference for Signal in Semantic UI's reactivity system
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
@@ -39,6 +39,7 @@ Creates a reactive value.
 | equality | function | deep equality | Decides whether a new value differs from the current one. Snapshotted at construction |
 | clone | function | structured clone | Copies values under `safety: 'clone'` and for change detection in `mutate` |
 | id | function | `id` ?? `_id` ?? `hash` ?? `key` | Resolves an array item's identity for the collection helpers |
+| version | number | `0` | Seeds the change counter, for aligning with an external store's revision |
 
 #### Example
 
@@ -201,6 +202,25 @@ Reports whether any reaction is currently subscribed to this signal.
 #### Example
 
 <PlaygroundExample id="reactive-has-dependents" direction="horizontal"></PlaygroundExample>
+
+### version
+
+```javascript
+signal.version;
+signal.version = revision;
+```
+
+A monotonic integer that increments inside `notify()`, so it advances on every announced change: a `set()` to a non-equal value, an in-place mutation helper, or a force `notify()`. A `set()` that the equality check treats as a no-op leaves it unchanged. Reading it does not subscribe the running reaction.
+
+Assign to it to realign with an external store's revision. Seed the starting value with the `version` option on `signal()`.
+
+#### Returns
+
+The current change count, starting at `0`.
+
+#### Example
+
+<PlaygroundExample id="reactive-version" direction="horizontal"></PlaygroundExample>
 
 ## Deriving
 

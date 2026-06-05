@@ -51,6 +51,7 @@ signal(initialValue, options)
   - `equality`: Function - Custom equality comparison (default: deep equality)
   - `clone`: Function - Custom clone, used when `safety` is `'clone'` (default: deep clone)
   - `id`: Function - Resolves array-item identity for the id-based collection helpers
+  - `version`: Number - Seeds the change counter (default: `0`), for aligning with an external store's revision
   - `context`: Object - Debugging context metadata
 
 **Examples**:
@@ -79,6 +80,7 @@ const items = signal([], {
 signal.get()           // Read value, creates dependency in reactive contexts
 signal.value           // Property accessor, same as get()
 signal.peek()          // Read value WITHOUT creating dependency
+signal.version         // Monotonic change counter, bumps on every notify(), plain read (no dependency)
 ```
 
 #### Writing Values

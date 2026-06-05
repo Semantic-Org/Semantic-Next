@@ -33,6 +33,7 @@ export class Signal {
     clone = Signal.clone,
     equality = (safety === 'none') ? returnsFalse : Signal.equality,
     id = Signal.id,
+    version = 0,
     context,
   } = {}) {
     // create dependency
@@ -51,6 +52,8 @@ export class Signal {
 
     this.safety = safety;
     this.currentValue = this.protect(initialValue);
+    // monotonic change counter for debugging / external-store
+    this.version = version;
 
     // pass through debugging context
     this.setContext(context);
@@ -89,6 +92,7 @@ export class Signal {
   }
 
   notify() {
+    this.version++;
     this.setContext();
     this.setTrace();
     this.dependency.changed(this.context);
