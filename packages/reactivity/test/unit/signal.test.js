@@ -894,6 +894,39 @@ describe('Signal API', () => {
   });
 
   /***********************************************
+   * clone() — tracked detached copy
+   ***********************************************/
+
+  describe('clone()', () => {
+    it('returns a detached copy under reference safety, so mutating it leaves the source intact', () => {
+      // reference safety (the default) hands back the live array from get(),
+      // so an in-place sort would corrupt it — clone() is the safe alternative
+      const signal = new Signal([3, 1, 2]);
+      const copy = signal.clone();
+      copy.sort();
+      expect(copy).toEqual([1, 2, 3]);
+      expect(signal.get()).toEqual([3, 1, 2]);
+    });
+
+    it('reading inside a Reaction creates a dependency so changes re-run the reaction', () => {
+      const items = new Signal([1, 2]);
+      const cb = vi.fn(() => items.clone());
+      reaction(cb);
+      expect(cb).toHaveBeenCalledTimes(1);
+
+      items.push(3);
+      flush();
+      expect(cb).toHaveBeenCalledTimes(2);
+    });
+
+    it('uses the per-instance clone override even when safety is not clone', () => {
+      const cloneSpy = vi.fn(value => ({ ...value, cloned: true }));
+      const signal = new Signal({ name: 'Alice' }, { clone: cloneSpy });
+      expect(signal.clone().cloned).toBe(true);
+    });
+  });
+
+  /***********************************************
    * notify() — force-fire bypassing equality
    ***********************************************/
 

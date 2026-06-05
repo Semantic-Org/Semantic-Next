@@ -45,7 +45,7 @@ export class Signal {
     this.reaction = null;
 
     // configured helpers, defaulting to the class statics
-    this.clone = clone;
+    this.cloneFunction = clone;
     this.equality = equality;
     this.id = id;
 
@@ -61,7 +61,7 @@ export class Signal {
       return value;
     }
     if (this.safety === 'clone') {
-      return this.clone(value);
+      return this.cloneFunction(value);
     }
     return value;
   }
@@ -102,6 +102,13 @@ export class Signal {
     return this.currentValue;
   }
 
+  // detached deep copy that still tracks, so helpers can sort/mutate in place
+  // without the reference-safety footgun of mutating the live value from get()
+  clone() {
+    this.depend();
+    return this.cloneFunction(this.currentValue);
+  }
+
   stop() {
     // cleanup for derived signals only
     this.reaction?.stop();
@@ -123,7 +130,7 @@ export class Signal {
   // mutate the current value by a mutation function
   mutate(mutationFn) {
     // we use clone in all cases to detect for changes only
-    const beforeClone = this.clone(this.currentValue);
+    const beforeClone = this.cloneFunction(this.currentValue);
     const result = mutationFn(this.currentValue);
 
     if (result !== undefined) {

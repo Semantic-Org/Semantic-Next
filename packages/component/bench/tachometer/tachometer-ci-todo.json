@@ -8,7 +8,7 @@
     {
       "name": "this-change",
       "url": "ci-current-todo.html",
-      "browser": { "name": "chrome", "headless": true },
+      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
       "measurement": [
         { "mode": "performance", "entryName": "bulk-add-500" },
         { "mode": "performance", "entryName": "add-20" },
@@ -23,7 +23,7 @@
     {
       "name": "tip-of-tree",
       "url": "ci-baseline-todo.html",
-      "browser": { "name": "chrome", "headless": true },
+      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
       "measurement": [
         { "mode": "performance", "entryName": "bulk-add-500" },
         { "mode": "performance", "entryName": "add-20" },
