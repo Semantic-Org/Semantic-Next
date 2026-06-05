@@ -30,6 +30,17 @@ document.body.appendChild(container);
 
 function destroy() {
   container.innerHTML = '';
+  // Collect on teardown so each op measures on a freed heap, not the old-space
+  // the previous op grew. Runs after every performance.measure, never inside a
+  // measured region.
+  if (globalThis.gc) {
+    try {
+      globalThis.gc({ type: 'major', execution: 'sync', flavor: 'last-resort' });
+    }
+    catch {
+      globalThis.gc();
+    }
+  }
 }
 
 /*******************************
