@@ -51,12 +51,25 @@ function getBuildSlot(ast, isSVG) {
   return entry[isSVG ? 'svg' : 'html'];
 }
 
+// Binds a comment-position marker: a block or expression via bindBlock, a
+// rawText marker via its registered block. Shared by walkAndBind and
+// replayBindingPlan so a new comment type is added in one place.
+function bindCommentMarker(node, type, markerID, entries, data, scope, renderer) {
+  const entry = entries[markerID];
+  if (type === 'expression' || type === 'block') {
+    renderer.bindBlock(node, entry, data, scope);
+  }
+  else if (type === 'rawText') {
+    getBlock('rawText')?.({ comment: node, entry, data, scope, renderer });
+  }
+}
+
 // Walks a cloned fragment and binds every marker: attributes inline,
 // comments deferred until after the walk because their dispatch can replace
 // or remove the comment node, which would invalidate a live walker.
 //
 // With `buildPlan` set it also records an ordered plan of
-// `{kind, nodeIndex, ...payload}` entries that `replayBindingPlan` reuses on
+// `{type, nodeIndex, ...payload}` entries that `replayBindingPlan` reuses on
 // later clones, skipping the per-clone re-walk, attribute re-parse, and
 // marker-predicate matching. See `bindMarkers` for why the plan is built on
 // the second render of an AST, not the first.
@@ -74,6 +87,9 @@ function walkAndBind(root, entries, data, scope, renderer, buildPlan) {
     nodeIndex++;
     if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node;
+      // Collect into an array before binding: bindAttributeExpression can
+      // removeAttribute for property and event bindings, which would mutate
+      // the live NamedNodeMap if we bound while iterating it.
       let attrsToProcess;
       for (let i = 0; i < element.attributes.length; i++) {
         const attr = element.attributes[i];
@@ -85,7 +101,7 @@ function walkAndBind(root, entries, data, scope, renderer, buildPlan) {
         for (const { name: attrName, value: attrValue } of attrsToProcess) {
           const { parts, markerIDs } = parseAttributePartsFn(attrValue);
           for (const id of markerIDs) { processedAttrIDs.add(id); }
-          if (plan) { plan.push({ kind: 'attr', nodeIndex, attrName, parts }); }
+          if (plan) { plan.push({ type: 'attr', nodeIndex, attrName, parts }); }
           renderer.bindAttributeExpression(element, attrName, parts, entries, data, scope);
         }
       }
@@ -93,34 +109,31 @@ function walkAndBind(root, entries, data, scope, renderer, buildPlan) {
     else {
       const text = node.data;
       let markerID;
-      let kind;
+      let type;
       if (isExpressionMarker(text)) {
         markerID = parseExpressionID(text);
-        kind = 'expression';
+        type = 'expression';
       }
       else if (isRawTextMarker(text)) {
         markerID = parseRawTextID(text);
-        kind = 'rawText';
+        type = 'rawText';
       }
       else if (isBlockOpen(text)) {
         markerID = parseBlockOpenID(text);
-        kind = 'block';
+        type = 'block';
       }
-      if (kind && !isNaN(markerID)) {
-        commentsToProcess.push({ comment: node, markerID, kind, nodeIndex });
+      if (type && !isNaN(markerID)) {
+        commentsToProcess.push({ comment: node, markerID, type, nodeIndex });
       }
     }
   }
-  for (const { comment, markerID, kind, nodeIndex: commentNodeIndex } of commentsToProcess) {
-    if (kind === 'expression' && processedAttrIDs.has(markerID)) { continue; }
-    if (plan) { plan.push({ kind, nodeIndex: commentNodeIndex, markerID }); }
-    const entry = entries[markerID];
-    if (kind === 'expression' || kind === 'block') {
-      renderer.bindBlock(comment, entry, data, scope);
-    }
-    else if (kind === 'rawText') {
-      getBlock('rawText')?.({ comment, entry, data, scope, renderer });
-    }
+  for (const { comment, markerID, type, nodeIndex: commentNodeIndex } of commentsToProcess) {
+    // Safe to dedup here: tree order visits an element before any sibling
+    // comment, so an attr marker's owner is recorded before a comment that
+    // shares its ID.
+    if (type === 'expression' && processedAttrIDs.has(markerID)) { continue; }
+    if (plan) { plan.push({ type, nodeIndex: commentNodeIndex, markerID }); }
+    bindCommentMarker(comment, type, markerID, entries, data, scope, renderer);
   }
   if (plan) {
     // Attrs are recorded during the walk and comments after it, so the plan
@@ -132,9 +145,8 @@ function walkAndBind(root, entries, data, scope, renderer, buildPlan) {
 }
 
 // Replays the cached plan against a fresh clone on later renders. Single
-// walker advanced by the recorded nodeIndex. Attrs dispatched inline,
-// comments deferred (their dispatch may replace or remove the comment node,
-// which would invalidate a live walker).
+// walker advanced by the recorded nodeIndex, attrs dispatched inline,
+// comments deferred for the same walker-invalidation reason as walkAndBind.
 function replayBindingPlan(root, plan, entries, data, scope, renderer) {
   if (plan.length === 0) { return; }
   const walker = document.createTreeWalker(
@@ -149,21 +161,15 @@ function replayBindingPlan(root, plan, entries, data, scope, renderer) {
       cursor++;
     }
     const node = walker.currentNode;
-    if (step.kind === 'attr') {
+    if (step.type === 'attr') {
       renderer.bindAttributeExpression(node, step.attrName, step.parts, entries, data, scope);
     }
     else {
-      deferredComments.push({ node, kind: step.kind, markerID: step.markerID });
+      deferredComments.push({ node, type: step.type, markerID: step.markerID });
     }
   }
-  for (const { node, kind, markerID } of deferredComments) {
-    const entry = entries[markerID];
-    if (kind === 'expression' || kind === 'block') {
-      renderer.bindBlock(node, entry, data, scope);
-    }
-    else if (kind === 'rawText') {
-      getBlock('rawText')?.({ comment: node, entry, data, scope, renderer });
-    }
+  for (const { node, type, markerID } of deferredComments) {
+    bindCommentMarker(node, type, markerID, entries, data, scope, renderer);
   }
 }
 
