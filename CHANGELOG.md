@@ -18,6 +18,7 @@ xx.xx.xxxx
 * **Feature** - Added `depend()` to register a signal as a dependency without reading the value
 * **Feature** - Added `notify()` to force-trigger subscribers bypassing the equality check
 * **Feature** - Added `hasDependents()` to check if any reactions are subscribed to a signal
+* **Feature** - Added `version`, a monotonic change counter that bumps on every `notify()`, readable without subscribing and seedable via the `version` option
 * **Feature** - Module-level functional surface — `signal`, `reaction`, `derive`, `computed`, `match`, `nonreactive`, `guard`, `afterFlush`, `flush`, `scheduleFlush`, `currentReaction`, `getSource` ship as named exports alongside the classes
 * **Feature** - Added `match(source, matchFn?)` — per-key reactive membership against a source signal, the perf primitive that backs `{#match}` template blocks (Solid's `createSelector` adapted)
 * **Feature** - Added `setItemProperty`, `setIndexProperty`, `toggleItemProperty`, and `toggleProperty` collection helpers for setting or flipping a field by id, by index, or across every item

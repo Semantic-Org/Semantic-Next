@@ -38,6 +38,12 @@ export interface SignalOptions<T> {
   id?: (item: any) => any;
 
   /**
+   * Seeds the signal's change counter, for aligning `version` with an external
+   * store's revision on hydration. Defaults to `0`.
+   */
+  version?: number;
+
+  /**
    * Debugging context attached to the signal, surfaced in tracing output.
    */
   context?: Record<string, any>;
@@ -192,6 +198,13 @@ export class Signal<T> {
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#clone clone}
    */
   clone(): T;
+
+  /**
+   * Monotonic change counter, bumped on every announced change. Reading it does not
+   * subscribe the running reaction. Seedable via the `version` option and freely assignable.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#version version}
+   */
+  version: number;
 
   /**
    * Sets the signal's value to undefined.
