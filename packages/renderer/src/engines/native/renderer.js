@@ -51,17 +51,17 @@ function getBuildSlot(ast, isSVG) {
   return entry[isSVG ? 'svg' : 'html'];
 }
 
-// First pass for a given AST: walks the cloned fragment, discovers each
-// marker once via the same predicates `bindMarkers` always used, records a
-// `plan` of `{kind, nodeIndex, ...payload}` entries in walker-traversal
-// order, applies the bindings, and returns the plan for caching.
+// Walks a cloned fragment and binds every marker: attributes inline,
+// comments deferred until after the walk because their dispatch can replace
+// or remove the comment node, which would invalidate a live walker.
 //
-// The plan closes a long-standing asymmetry: `entry.attributeParts` is
-// already pre-populated by `populateAttributeBindings` at compile time but
-// the render path re-derives it per clone. Caching it once per AST
-// matches lit-html's `Template.parts` + `TemplateInstance._clone` split.
-function buildAndApplyBindingPlan(root, entries, data, scope, renderer) {
-  const plan = [];
+// With `buildPlan` set it also records an ordered plan of
+// `{kind, nodeIndex, ...payload}` entries that `replayBindingPlan` reuses on
+// later clones, skipping the per-clone re-walk, attribute re-parse, and
+// marker-predicate matching. See `bindMarkers` for why the plan is built on
+// the second render of an AST, not the first.
+function walkAndBind(root, entries, data, scope, renderer, buildPlan) {
+  const plan = buildPlan ? [] : null;
   const processedAttrIDs = new Set();
   const commentsToProcess = [];
   const walker = document.createTreeWalker(
@@ -85,7 +85,7 @@ function buildAndApplyBindingPlan(root, entries, data, scope, renderer) {
         for (const { name: attrName, value: attrValue } of attrsToProcess) {
           const { parts, markerIDs } = parseAttributePartsFn(attrValue);
           for (const id of markerIDs) { processedAttrIDs.add(id); }
-          plan.push({ kind: 'attr', nodeIndex, attrName, parts });
+          if (plan) { plan.push({ kind: 'attr', nodeIndex, attrName, parts }); }
           renderer.bindAttributeExpression(element, attrName, parts, entries, data, scope);
         }
       }
@@ -111,9 +111,9 @@ function buildAndApplyBindingPlan(root, entries, data, scope, renderer) {
       }
     }
   }
-  for (const { comment, markerID, kind, nodeIndex: ni } of commentsToProcess) {
+  for (const { comment, markerID, kind, nodeIndex: commentNodeIndex } of commentsToProcess) {
     if (kind === 'expression' && processedAttrIDs.has(markerID)) { continue; }
-    plan.push({ kind, nodeIndex: ni, markerID });
+    if (plan) { plan.push({ kind, nodeIndex: commentNodeIndex, markerID }); }
     const entry = entries[markerID];
     if (kind === 'expression' || kind === 'block') {
       renderer.bindBlock(comment, entry, data, scope);
@@ -122,17 +122,19 @@ function buildAndApplyBindingPlan(root, entries, data, scope, renderer) {
       getBlock('rawText')?.({ comment, entry, data, scope, renderer });
     }
   }
-  // Plan must replay in walker-traversal order. Attrs pushed during the
-  // walk; comments pushed after the walk (deferred dedup). nodeIndex on
-  // each preserves walker order — sort once to merge.
-  plan.sort((a, b) => a.nodeIndex - b.nodeIndex);
+  if (plan) {
+    // Attrs are recorded during the walk and comments after it, so the plan
+    // holds two runs already in nodeIndex order. One sort merges them into
+    // the single traversal order replay walks in.
+    plan.sort((a, b) => a.nodeIndex - b.nodeIndex);
+  }
   return plan;
 }
 
-// Subsequent passes for a given AST: replay the cached plan against a
-// fresh clone. Single walker, advanced by recorded nodeIndex; attrs
-// dispatched inline, comments deferred (their dispatch may replace/remove
-// the comment node, which would invalidate a live walker).
+// Replays the cached plan against a fresh clone on later renders. Single
+// walker advanced by the recorded nodeIndex. Attrs dispatched inline,
+// comments deferred (their dispatch may replace or remove the comment node,
+// which would invalidate a live walker).
 function replayBindingPlan(root, plan, entries, data, scope, renderer) {
   if (plan.length === 0) { return; }
   const walker = document.createTreeWalker(
@@ -141,17 +143,17 @@ function replayBindingPlan(root, plan, entries, data, scope, renderer) {
   );
   let cursor = 0;
   const deferredComments = [];
-  for (const p of plan) {
-    while (cursor < p.nodeIndex) {
+  for (const step of plan) {
+    while (cursor < step.nodeIndex) {
       walker.nextNode();
       cursor++;
     }
     const node = walker.currentNode;
-    if (p.kind === 'attr') {
-      renderer.bindAttributeExpression(node, p.attrName, p.parts, entries, data, scope);
+    if (step.kind === 'attr') {
+      renderer.bindAttributeExpression(node, step.attrName, step.parts, entries, data, scope);
     }
     else {
-      deferredComments.push({ node, kind: p.kind, markerID: p.markerID });
+      deferredComments.push({ node, kind: step.kind, markerID: step.markerID });
     }
   }
   for (const { node, kind, markerID } of deferredComments) {
@@ -324,18 +326,25 @@ export class Renderer {
 
   bindMarkers(root, entries, data, scope, ast, isSVG = this.isSVG) {
     if (entries.length === 0) { return; }
-    // First call for this AST/namespace builds and caches a binding plan;
-    // later calls replay the plan against a fresh clone. See
-    // `buildAndApplyBindingPlan` / `replayBindingPlan` above. `isSVG`
-    // mirrors `readAST`'s per-call override so the slot lookup matches
+    // `isSVG` mirrors `readAST`'s per-call override so the slot lookup matches
     // the slot `cachedBuildHTMLString` populated.
     const slot = ast ? getBuildSlot(ast, isSVG) : null;
     if (slot && slot.plan) {
       replayBindingPlan(root, slot.plan, entries, data, scope, this);
       return;
     }
-    const plan = buildAndApplyBindingPlan(root, entries, data, scope, this);
-    if (slot) { slot.plan = plan; }
+    // Build the plan on the second render of an AST, never the first. A
+    // component embedded exactly once is common, and building on render 1
+    // makes that case slower than the old single pass: it pays the plan
+    // allocation and sort for a plan nothing ever replays. Deferring to
+    // render 2 keeps a single-use AST at the original walk cost, and only
+    // ASTs actually cloned more than once pay to cache.
+    const buildPlan = slot ? slot.hasRendered : false;
+    const plan = walkAndBind(root, entries, data, scope, this, buildPlan);
+    if (slot) {
+      if (buildPlan) { slot.plan = plan; }
+      else { slot.hasRendered = true; }
+    }
   }
 
   // Raw-text walker — used for <script>, <style>, <textarea>, <title>
