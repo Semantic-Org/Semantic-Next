@@ -8,7 +8,7 @@
     {
       "name": "this-change",
       "url": "ci-current-template.html",
-      "browser": { "name": "chrome", "headless": true },
+      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
       "measurement": [
         { "mode": "performance", "entryName": "subtemplate-reactive-data-100x500" },
         { "mode": "performance", "entryName": "subtemplate-shorthand-props-100x500" },
@@ -26,7 +26,7 @@
     {
       "name": "tip-of-tree",
       "url": "ci-baseline-template.html",
-      "browser": { "name": "chrome", "headless": true },
+      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
       "measurement": [
         { "mode": "performance", "entryName": "subtemplate-reactive-data-100x500" },
         { "mode": "performance", "entryName": "subtemplate-shorthand-props-100x500" },
