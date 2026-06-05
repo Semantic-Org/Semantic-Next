@@ -207,36 +207,6 @@ function getRows(el) {
 }
 
 /*******************************
-      Update (clean heap)
-      Same workload as update-10th-50 but run first, before the
-      create-heavy ops, so the measured region starts on a clean heap.
-      The delta against update-10th-50 isolates suite-ordering GC cost.
-*******************************/
-
-// Warm render / reconcile / update so the first-op cold JIT doesn't
-// skew the isolated measure.
-const elWarm = await mount();
-elWarm.component.run(1000);
-await flush();
-for (let i = 0; i < 10; i++) {
-  elWarm.component.update();
-  flushWork();
-}
-destroy();
-
-const elIso = await mount();
-elIso.component.run(1000);
-await flush();
-// purpose: Same update workload as update-10th-50 but on a clean heap with no create-heavy ops before it. Pairs with update-10th-50 to isolate suite-ordering GC pressure.
-performance.mark(startMark('update-isolated-50'));
-for (let i = 0; i < 50; i++) {
-  elIso.component.update();
-  flushWork();
-}
-performance.measure('update-isolated-50', startMark('update-isolated-50'));
-destroy();
-
-/*******************************
       Create
       (krausest 01_run, 02b_runlots)
 *******************************/
@@ -307,31 +277,6 @@ for (let i = 0; i < 50; i++) {
   flushWork();
 }
 performance.measure('update-10th-50', startMark('update-10th-50'));
-destroy();
-
-/*******************************
-      Update (forced GC)
-      update-10th workload with a full GC before the measured region.
-      If the update-10th-50 delta vanishes here, the carried-in cost is
-      reclaimable GC pressure from the create-heavy ops above.
-*******************************/
-
-const el5b = await mount();
-el5b.component.run(1000);
-await flush();
-// gc() exists only under --js-flags=--expose-gc (set in tachometer-ci-krausest.json).
-// Settle after collecting so the measured region starts on a post-GC heap.
-if (globalThis.gc) {
-  globalThis.gc();
-  await flush();
-}
-// purpose: update-10th workload with a forced GC before the measured region. If the update-10th-50 regression vanishes here it is reclaimable GC pressure.
-performance.mark(startMark('update-gc-50'));
-for (let i = 0; i < 50; i++) {
-  el5b.component.update();
-  flushWork();
-}
-performance.measure('update-gc-50', startMark('update-gc-50'));
 destroy();
 
 /*******************************
