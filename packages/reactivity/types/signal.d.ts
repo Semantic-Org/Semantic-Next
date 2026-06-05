@@ -185,6 +185,15 @@ export class Signal<T> {
   raw(): T;
 
   /**
+   * Returns a detached deep copy of the current value, established as a reactive
+   * dependency. Always copies, even under `safety: 'reference'` where `get()`
+   * returns the live value. Reach for it when you need to sort or mutate the
+   * value in place without corrupting the stored object.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#clone clone}
+   */
+  clone(): T;
+
+  /**
    * Sets the signal's value to undefined.
    * Triggers updates if the value was not already undefined.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#clear clear}
