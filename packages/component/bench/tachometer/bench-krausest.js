@@ -335,6 +335,36 @@ performance.measure('update-gc-50', startMark('update-gc-50'));
 destroy();
 
 /*******************************
+      Update (aggressive GC)
+      update-10th workload after krausest's aggressive last-resort major GC.
+      Pairs against update-gc-50 (plain gc): if this clears the regression
+      and plain gc does not, create-10k's old-space sizing is reclaimable by
+      a between-op GC hook. If a residual survives, only a fresh realm
+      (separate page per op) resets it.
+*******************************/
+
+const el5c = await mount();
+el5c.component.run(1000);
+await flush();
+if (globalThis.gc) {
+  try {
+    globalThis.gc({ type: 'major', execution: 'sync', flavor: 'last-resort' });
+  }
+  catch {
+    globalThis.gc();
+  }
+  await flush();
+}
+// purpose: update-10th workload after an aggressive last-resort major GC (krausest's incantation). Pairs with update-gc-50 to test whether aggressive GC reclaims create-10k old-space sizing that a plain gc leaves.
+performance.mark(startMark('update-gc-aggressive-50'));
+for (let i = 0; i < 50; i++) {
+  el5c.component.update();
+  flushWork();
+}
+performance.measure('update-gc-aggressive-50', startMark('update-gc-aggressive-50'));
+destroy();
+
+/*******************************
       Select
       (krausest 05_select)
       20 selects across spread ids — krausest's published metric is
