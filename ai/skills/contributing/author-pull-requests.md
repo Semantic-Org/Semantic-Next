@@ -71,6 +71,7 @@ After the prefix:
 - **Concept names, not paths.** `Make Integrations Folder`, not `Move integrations/astro/src/`. Paths belong in body bullets if they help; titles work at concept level.
 - **Concrete verbs.** Make / Move / Swap / Group / Add / Remove. Avoid Relocate / Re-anchor / Configure (formal/abstract). Avoid Drop (SQL connotations).
 - **Title is the primary change only.** Secondary work goes in body bullets — never `X and Y` titles.
+- **Grab-bag exception.** When a PR is genuinely several unrelated fixes (not one change plus spillover), name the bundle: `Bug: Assorted Component Bugs / LSP`. Don't manufacture a primary. The one-idea rule is for PRs that have one idea.
 - **Don't lead with `BREAKING:` even for breaking changes.** The Risk score + changelog automation already signal the breaking nature. Use the prefix that describes the change *kind* — `Refactor:`, `Perf:`, `Feat:` — and let the Risk/changelog do the warning work.
 - **Don't leak iteration history into commit subjects** — no "Round 2 fixes," "post-review cleanup," "second pass," or similar. Even with squash-on-merge protecting `main`, branch commits are read by code-review subagents working on the PR, and round-numbering subtly biases them toward assuming earlier rounds caught the obvious issues. State what changed, not which review pass produced it. Same applies inside multi-commit branches that humans bisect.
 
@@ -124,7 +125,7 @@ Failure modes: [bulleted list — only when score ≥ 5 or blast radius is non-o
 
 **Bullet count.** As many bullets as there are distinct outcomes. Two outcomes means two bullets. Don't pad to reach a target. Don't compress past clarity.
 
-**Word target.** Most bodies land 80–200 words. Past 300 is usually restating the diff. After drafting, expect to cut roughly a third. The AI default is twice the length humans actually write.
+**Word target.** Most bodies land 80–200 words. Past 300 is usually restating the diff. After drafting, expect to cut it roughly in half. The AI default is twice the length humans actually write.
 
 ### Large tier
 
@@ -430,6 +431,22 @@ Pick the word that matches the *actual nature* of the change. AI writing reaches
 | update | refresh | Pulling latest within existing version constraints |
 | ensure | (cut entirely) | The verb is almost always implicit; remove it |
 
+### 10. Mechanism in the framing
+
+The bullet-level mechanism tells (#6, #7) have a framing-level twin, and it is the harder one to catch. The opening sentence explains how the change works (the technique, the data flow, why it is safe) instead of the plain reason the PR exists. It survives a length cut, because narrating mechanism *feels* like solid engineering communication rather than padding. It still reads as AI, because the author is proving they understand the code instead of telling the reader why the work is here.
+
+The fix: describe the situation that made the PR necessary, not what the code does. The diff is the "how."
+
+Worked example, a bench-shim precursor (PR #230), across three drafts:
+
+| Draft | Text |
+|---|---|
+| ❌ AI arc | Three paragraphs on how the harness pins bench files from `main`, why `setProperty` changes meaning, what the follow-up collapses. |
+| ❌ Tighter, still mechanism | "Precursor for the collection-helper rename. The bench harness pins bench files from `main`, so this adds the final names additively, giving the rename PR a baseline that already resolves them." |
+| ✅ Goal only | "This shims the bench to allow us to refactor signal mutation helpers and get clean results against baseline." |
+
+The win is not length. The middle draft is already two sentences. It is that the final version names only the goal (clean results against baseline) and trusts the diff with the method names, the additive detail, and even the reason it is a separate PR. First person ("us"), because a person is writing it, not a spec.
+
 ---
 
 ## Recurring failure modes per PR type
@@ -466,13 +483,43 @@ Lead the framing with how the bug surfaced — what someone was doing when they 
 
 ---
 
+## The deletion pass
+
+You will over-write the first draft even having read everything above. Naming the rules doesn't install the reflex, so treat cutting as a separate mandatory pass, not optional polish. Expect to cut it roughly in half.
+
+One test, line by line: **would a reviewer learn this from the diff? If yes, delete it.** What survives is only what the diff can't show: the why, the discovery, the humility check.
+
+Worked example, PR #232 (a grab-bag cleanup), draft then pass:
+
+❌ Draft
+- mobile-menu builds nav-icon items as copies, leaving `settings.menu` untouched
+- nav-menu enriches menu items immutably with a recursive pass, making the per-render `clone(menu)` redundant
+- LSP infers `{ value, options }` signal-config state from its inner value instead of typing the wrapper as `object`
+
+✅ Pass
+- Fixed mutation bug in `mobile-menu`
+- `nav-menu` no longer uses an unneeded clone
+- Fixed issue with LSP for state using advanced `{value, options}` syntax
+
+Every bullet dropped its mechanism because the diff already shows it. The only prose kept across the whole edit was one failure-mode line (`nav-menu now recurses to any depth, was 3`), the single thing the diff can't tell you. The full description went 137 words to 71, about half.
+
+### Cutting the mechanism forces understanding
+
+Cutting looks lazier. It is harder. Removing the implementation detail leaves a gap that only the change's user-facing meaning can fill, and naming that meaning requires knowing the codebase, not just the change site.
+
+The LSP bullet shows it. The draft narrated the change site, unwrapping the config node and reading the inner value. The pass had to answer a different question. What broke for a user? State written with the advanced `{ value, options }` syntax was mistyped. You can't get "advanced `{value, options}` syntax" from the diff. The diff shows AST handling, not that `{ value, options }` is a documented way users declare state with options. That phrase is only available to someone who knows the feature.
+
+So the gate has a second edge. Cutting the mechanism forces the question "what did this mean to a user?" If you can't answer it, that's the signal to go read the repo until you can, not to fall back on narrating the diff.
+
+---
+
 ## After drafting, do this checklist
 
-In order:
+Run this while doing the deletion pass above. In order:
 
 1. **Hemingway pass on the title.** Cut every word that doesn't carry meaning.
 2. **Bullet shape sweep.** Are bullets noun phrases or short verb phrases under ~10 words? Rewrite long ones to be tighter.
-3. **Selectivity sweep.** For each bullet ask: would a reviewer learn this from the diff alone? If yes, the bullet is trivia — drop it. Especially watch for incidental cleanup (a rename mixed with removals, a link fix mixed with moves) — those usually belong silently in the diff.
+3. **Selectivity sweep.** The deletion pass covers the core test. Extra watch item: incidental cleanup (a rename mixed with removals, a link fix mixed with moves) belongs silently in the diff, not the body.
 4. **Roll-up sweep.** Multiple bullets sharing the same action ("Remove A", "Remove B", "Remove C") should collapse to one ("Remove unused tooling configs (A, B, C)").
 5. **Intent rewrite.** For each bullet ask: is there an intent-level rephrasing that captures *why* the change exists? "Move X to Y" describes state; "Create Y for grouping X-class things" describes intent. Prefer intent when the why is crisp.
 6. **Cut justifications.** Search bullets for "now that", "since", "to satisfy", "because", "that doesn't" — usually defensive padding.

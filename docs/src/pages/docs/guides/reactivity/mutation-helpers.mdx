@@ -6,6 +6,9 @@ description: Update reactive values without the boilerplate of manual get/mutate
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 import { Cards, Card } from '@semantic-ui/core';
+import Blockquote from '@components/mdx/Blockquote.astro';
+
+export const components = { blockquote: Blockquote };
 
 ## Helper Usage
 
@@ -14,7 +17,7 @@ A very common pattern when dealing with [signals](/docs/guides/reactivity/signal
 This can create a lot of boilerplate because you will need to access the value nonreactively (e.g. using [`.peek()`](/docs/api/reactivity/signal#peek)) and then update the underlying value before finally setting the value again (e.g. using [`.set()`](/docs/api/reactivity/signal#set)).
 
 ```javascript title="Without Helpers"
-const numbers = new Signal([1, 2, 3]); // Assuming Signal is imported
+const numbers = signal([1, 2, 3]); // Assuming signal is imported
 const newNumbers = numbers.peek();
 newNumbers.push(4);
 numbers.set(newNumbers);
@@ -23,7 +26,7 @@ numbers.set(newNumbers);
 Helpers handle updating an underlying reactive value without having to retrieve and manipulate the value.
 
 ```javascript title="With Helpers"
-const numbers = new Signal([1, 2, 3]); // Assuming Signal is imported
+const numbers = signal([1, 2, 3]); // Assuming signal is imported
 numbers.push(4); // Uses the push helper
 ```
 
@@ -40,7 +43,10 @@ Helpers are provided for various types of signal primitives that help with the m
 
 ### Collection Helpers
 
-[Collection helpers](/docs/api/reactivity/collection-helpers) make it easy to update specific values in an array of records by their ID. `id` will match against `_id`, `id`, `hash`, `key` fields on any object in the array. See methods like [`setProperty`](/docs/api/reactivity/collection-helpers#setproperty), [`replaceItem`](/docs/api/reactivity/collection-helpers#replaceitem), and [`removeItem`](/docs/api/reactivity/collection-helpers#removeitem).
+[Collection helpers](/docs/api/reactivity/collection-helpers) make it easy to update specific values in an array of records by their ID. See methods like [`setItemProperty`](/docs/api/reactivity/collection-helpers#setitemproperty), [`replaceItem`](/docs/api/reactivity/collection-helpers#replaceitem), and [`removeItem`](/docs/api/reactivity/collection-helpers#removeitem).
+
+> [!info]
+> An item's id resolves from `id`, `_id`, `hash`, or `key`. To match a different field, pass an `id` function to [`signal()`](/docs/api/reactivity/signal#signal), or set `Signal.id` globally.
 
 <PlaygroundExample id="reactive-set-property" direction="horizontal"></PlaygroundExample>
 

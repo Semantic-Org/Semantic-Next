@@ -1,23 +1,23 @@
 // Reaction Stop: Stopping reactive computations
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
-const counter = new Signal(0);
+const counter = signal(0);
 
 // Create a reaction
-const reaction = Reaction.create(() => {
+const handle = reaction(() => {
   console.log('Counter:', counter.get());
 });
 
 // Update counter - reaction runs
 counter.set(5);
-Reaction.flush();
+flush();
 
 // Stop the reaction
-reaction.stop();
+handle.stop();
 console.log('Reaction stopped');
 
 // Update counter - reaction does NOT run
 counter.set(10);
-Reaction.flush();
+flush();
 
 console.log('Final counter value:', counter.get());

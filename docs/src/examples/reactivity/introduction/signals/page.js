@@ -1,19 +1,11 @@
 import { $ } from '@semantic-ui/query';
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { reaction, signal } from '@semantic-ui/reactivity';
 
-// Create a signal for the count
-const count = new Signal(0);
+const count = signal(0);
 
-// Update the display whenever count changes
-Reaction.create(() => {
+reaction(() => {
   $('.count').text(count.get());
 });
 
-// Handle button clicks
-$('.increment').on('click', () => {
-  count.increment();
-});
-
-$('.decrement').on('click', () => {
-  count.decrement();
-});
+$('.increment').on('click', () => count.increment());
+$('.decrement').on('click', () => count.decrement());

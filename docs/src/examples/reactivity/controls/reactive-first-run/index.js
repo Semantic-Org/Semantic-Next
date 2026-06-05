@@ -1,16 +1,15 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { reaction, signal } from '@semantic-ui/reactivity';
 
-const message = new Signal('Never shown');
+const message = signal('Never shown');
 
 // Since reactions occur immediately
 // You might want to avoid triggering side effects until a value changes
-Reaction.create((reaction) => {
-
+reaction((computation) => {
   // To permit reactivity the value must be accessed before early exit
   // Otherwise the dependency cannot be determined
   const text = message.get();
 
-  if (!reaction.firstRun) {
+  if (!computation.firstRun) {
     console.log(text);
   }
 });

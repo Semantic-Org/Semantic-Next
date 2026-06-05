@@ -1044,7 +1044,7 @@ describe('SSR hydration — post-hydration list mutations', () => {
           return name;
         },
         renameFirst() {
-          state.items.setArrayProperty(0, 'name', 'Crimson');
+          state.items.setIndexProperty(0, 'name', 'Crimson');
         },
         appendItem() {
           state.items.push({ name: 'Green' });
@@ -1528,7 +1528,7 @@ describe('SSR hydration — snippet reactivity', () => {
           // exercising the same-ref snapshot-diff reconcile path. Under
           // reference safety this is the canonical mutation; get-mutate-set
           // through peek() would corrupt set()'s dedup baseline and no-op.
-          state.items.setArrayProperty(0, 'name', 'Crimson');
+          state.items.setIndexProperty(0, 'name', 'Crimson');
         },
       }),
     });

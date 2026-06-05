@@ -97,8 +97,8 @@ Load these via MCP (`use_skill`) or read directly. The agent picking this up sho
 
 ## Dependencies
 
-- **Upstream:** [Reactivity Functional Surface](archive/reactivity-functional-surface.md) — merged. This is its deferred tail.
-- **Blocks:** [Release 0.18.0](active/release-0-18-0.md) — the release ships with correct docs + types or it ships consumer-facing lies. The types are wrong-at-runtime today, so this gates a clean tag.
+- **Upstream:** [Reactivity Functional Surface](reactivity-functional-surface.md) — merged. This is its deferred tail.
+- **Blocks:** [Release 0.18.0](../active/release-0-18-0.md) — the release ships with correct docs + types or it ships consumer-facing lies. The types are wrong-at-runtime today, so this gates a clean tag.
 
 ## Sessions (estimated)
 
@@ -111,3 +111,11 @@ Total: ~7-10h, dominated by the example pass. Mode: `pair` for the design sessio
 ## Status
 
 `initial` for Part 2 (`setArrayProperty` names unresolved). `scoped` for Part 1 (docs + types) — the migration targets are concrete and verifiable, the only judgment calls are the `subscribe`/`match` page decisions and the safety-section rewrite, all flagged above. Created 2026-05-29 as the deferred tail of the functional-surface refactor. Handing to a fresh agent: read the skills listed above before completing, verify the safety model against `signal.js` source (the existing `freeze` docs are stale), and confirm every example runs.
+
+## Completion
+
+- **Estimated:** 7-10h pair
+- **Actual:** spread across three PRs, 2026-05-29 to 2026-06-03
+- **Completed:** 2026-06-03
+- **Shipped via:** Part 1 docs + types in [#229](https://github.com/Semantic-Org/Semantic-Next/pull/229), bench precursor [#230](https://github.com/Semantic-Org/Semantic-Next/pull/230), Part 2 rename [#231](https://github.com/Semantic-Org/Semantic-Next/pull/231)
+- **Delta notes:** The `setArrayProperty` split folded the all-items form into bare `setProperty` (dispatch on value type) rather than a named `setEach`/`setAll`, since every explicit name read worse. By-id and by-index became `setItemProperty` and `setIndexProperty`, with new `toggleItemProperty`/`toggleProperty`. The rename needed the #230 bench precursor first: the harness pins bench files from main, so main had to resolve the final names additively before #231 could rename and bench apples-to-apples. Bench landed clean (0 faster, 0 slower).

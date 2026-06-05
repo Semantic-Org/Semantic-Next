@@ -6,10 +6,10 @@ description: Stopping, skipping, and suppressing reactive updates
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-[`Reaction.create()`](/docs/api/reactivity/reaction#create) provides the `Reaction` instance as the first argument, which can be used to control when and whether the reaction runs.
+[`reaction()`](/docs/api/reactivity/reaction) provides the `Reaction` instance as the first argument, which can be used to control when and whether the reaction runs.
 
 ```javascript
-Reaction.create((reaction) => {
+reaction((computation) => {
   console.log('Current value:', mySignal.get());
 });
 ```
@@ -20,17 +20,17 @@ Reaction.create((reaction) => {
 
 ### From the Return Value
 
-`Reaction.create()` returns the reaction instance, so you can stop it externally.
+`reaction()` returns the reaction instance, so you can stop it externally.
 
 ```javascript
-const counter = new Signal(0);
+const counter = signal(0);
 
-const reaction = Reaction.create(() => {
+const watcher = reaction(() => {
   console.log('Count:', counter.get());
 });
 
 counter.increment(); // reaction runs
-reaction.stop();
+watcher.stop();
 counter.increment(); // no longer updating
 ```
 
@@ -39,11 +39,11 @@ counter.increment(); // no longer updating
 The reaction instance is also passed as the first argument, so it can stop itself based on a condition.
 
 ```javascript
-const percentComplete = new Signal(0);
-Reaction.create((reaction) => {
+const percentComplete = signal(0);
+reaction((computation) => {
   const currentPercent = percentComplete.get();
   if(currentPercent >= 100) {
-    reaction.stop();
+    computation.stop();
     return;
   }
   console.log('Progress:', currentPercent);
@@ -59,11 +59,11 @@ percentComplete.increment(50); // no longer updating
 Reactions run immediately when created to discover their dependencies. Use [`reaction.firstRun`](/docs/api/reactivity/reaction#firstrun) to skip side effects during this initial execution.
 
 ```javascript
-const score = new Signal(0);
+const score = signal(0);
 
-Reaction.create((reaction) => {
+reaction((computation) => {
   const currentScore = score.get();
-  if (!reaction.firstRun) {
+  if (!computation.firstRun) {
     console.log(`Score: ${currentScore}`);
   }
 });
@@ -74,11 +74,11 @@ Reaction.create((reaction) => {
 Signal accesses must be reachable during the first run to register as dependencies. A common mistake is returning early on the first run, which prevents any dependencies from being established.
 
 ```javascript
-const score = new Signal(0);
+const score = signal(0);
 
 // reaction wont rerun when score changes because dependency is not established
-Reaction.create((reaction) => {
-  if (reaction.firstRun) {
+reaction((computation) => {
+  if (computation.firstRun) {
     return;
   }
   console.log(`Score: ${score.get()}`);
@@ -89,15 +89,15 @@ Reaction.create((reaction) => {
 
 ### Nonreactive
 
-[`Reaction.nonreactive()`](/docs/api/reactivity/reaction#nonreactive) reads reactive values inside a reaction without creating dependencies.
+[`nonreactive()`](/docs/api/reactivity/controls#nonreactive) reads reactive values inside a reaction without creating dependencies.
 
 ```javascript
-const name = new Signal('Alice');
-const status = new Signal('Online');
+const name = signal('Alice');
+const status = signal('Online');
 
-Reaction.create(() => {
+reaction(() => {
   const currentName = name.get(); // dependency created
-  const currentStatus = Reaction.nonreactive(() => status.get()); // no dependency
+  const currentStatus = nonreactive(() => status.get()); // no dependency
   console.log(`${currentName} is ${currentStatus}`);
 });
 
@@ -110,10 +110,10 @@ status.set('Offline'); // does not trigger reaction
 [`signal.peek()`](/docs/api/reactivity/signal#peek) reads a single signal's value without creating a dependency. Same effect as `nonreactive` but scoped to one value.
 
 ```javascript
-const counter = new Signal(0);
-const trigger = new Signal(false);
+const counter = signal(0);
+const trigger = signal(false);
 
-Reaction.create(() => {
+reaction(() => {
   trigger.get(); // dependency created
   const currentCount = counter.peek(); // no dependency
   console.log('Count:', currentCount);
@@ -123,4 +123,4 @@ counter.set(1); // does not trigger reaction
 trigger.set(true); // triggers reaction
 ```
 
-> See [Reactive Performance](/docs/guides/reactivity/performance) for `guard` and `subscribe`, which optimize reactivity for specific patterns.
+> See [Reactive Performance](/docs/guides/reactivity/performance) for `guard`, which optimizes reactivity for specific patterns.

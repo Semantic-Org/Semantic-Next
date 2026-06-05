@@ -1,27 +1,38 @@
 ---
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
-icon: link
 title: Dependency
+icon: link
 package: "@semantic-ui/reactivity"
-methods: [constructor, depend, changed, cleanUp, unsubscribe]
+methods: [Dependency, depend, changed, remove, subscribers]
 description: API reference for Dependency in Semantic UI's reactivity system
 ---
+import Blockquote from '@components/mdx/Blockquote.astro';
 
-`Dependency` is a core class in Semantic UI's reactivity system that manages dependencies between reactive computations and data sources.
+export const components = { blockquote: Blockquote };
 
-> **Advanced Use Only** Dependency **should not be used by most developers directly** to control dependencies, but is instead used internally by `Signal` and `Reaction` to establish reactivity. Only some particular advanced use cases or metaframeworks will need to access this class directly.
+Track reactions by hand. A `Dependency` records which reactions are listening and re-fires them when you say so. Signals own one internally, which is how [`signal.depend()`](/docs/api/reactivity/signal#depend), [`signal.notify()`](/docs/api/reactivity/signal#notify), and [`signal.hasDependents()`](/docs/api/reactivity/signal#hasdependents) work.
 
-## constructor
+> [!info]
+> Most code never touches `Dependency` directly. Reach for it when you own a non-signal data source (a store, a cache, an external event) and want reactions to subscribe to it.
 
-Creates a new Dependency instance.
+## Creating
 
-### Syntax
+### Dependency
+
 ```javascript
-new Dependency()
+new Dependency(...metadata);
 ```
 
-### Usage
+Creates a dependency tracker with an empty set of subscribers.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| metadata | any | Optional debugging context, attached only while [tracing](/docs/api/reactivity/scheduler) is on |
+
+#### Usage
 
 ```javascript
 import { Dependency } from '@semantic-ui/reactivity';
@@ -29,116 +40,98 @@ import { Dependency } from '@semantic-ui/reactivity';
 const dep = new Dependency();
 ```
 
-## depend
+## Subscribing
 
-Registers the current reaction as dependent on this Dependency.
+### depend
 
-### Syntax
 ```javascript
-dependency.depend()
+dependency.depend();
 ```
 
-### Usage
+Records the currently running reaction as a subscriber. A no-op outside a reaction, so it is safe to call anywhere.
+
+#### Usage
 
 ```javascript
-import { Dependency, Reaction } from '@semantic-ui/reactivity';
+import { Dependency, reaction } from '@semantic-ui/reactivity';
 
 const dep = new Dependency();
 
-Reaction.create(() => {
+reaction(() => {
   dep.depend();
-  console.log('This will re-run when dep.changed() is called');
+  // re-runs whenever dep.changed() fires
 });
 ```
 
-## changed
+### subscribers
 
-Notifies all dependent reactions that this dependency has changed, causing them to re-run.
-
-### Syntax
 ```javascript
-dependency.changed(context)
+dependency.subscribers;
 ```
 
-### Parameters
+The live `Set` of reactions currently subscribed. Read it to introspect, do not mutate it directly. Use [`remove`](#remove) to drop a subscriber.
+
+#### Returns
+
+A `Set` of subscribed reactions. Empty when nothing is listening.
+
+## Notifying
+
+### changed
+
+```javascript
+dependency.changed(context);
+```
+
+Invalidates every subscribed reaction, scheduling them to re-run. Skips its bookkeeping entirely when nothing is listening.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| context | any | (Optional) Additional context information to pass to invalidated reactions |
+| context | object | Optional metadata about the change, forwarded to invalidated reactions while tracing is on |
 
-### Usage
+#### Usage
 
 ```javascript
-import { Dependency, Reaction } from '@semantic-ui/reactivity';
+import { Dependency, reaction } from '@semantic-ui/reactivity';
 
 const dep = new Dependency();
 
-Reaction.create(() => {
+reaction(() => {
   dep.depend();
-  console.log('Reaction ran');
+  console.log('ran');
 });
 
-dep.changed(); // Triggers the reaction to re-run
+dep.changed(); // logs 'ran' again
 ```
 
-## cleanUp
+## Removing
 
-Removes a specific reaction from this dependency's list of dependents.
+### remove
 
-### Syntax
 ```javascript
-dependency.cleanUp(reaction)
+dependency.remove(reaction);
 ```
 
-### Parameters
+Drops a single reaction from the subscriber set. The reaction stops re-running on future [`changed`](#changed) calls. Reactions are removed automatically when they stop, so you only need this for manual lifecycle control.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| reaction | Reaction | The reaction to remove from the dependency list |
+| reaction | Reaction | The reaction to drop from the subscriber set |
 
-### Usage
+#### Usage
 
 ```javascript
-import { Dependency, Reaction } from '@semantic-ui/reactivity';
+import { Dependency, reaction } from '@semantic-ui/reactivity';
 
 const dep = new Dependency();
 
-const reaction = Reaction.create(() => {
+const watcher = reaction(() => {
   dep.depend();
-  console.log('Reaction ran');
 });
 
-// Later, when you want to remove this specific reaction:
-dep.cleanUp(reaction);
-```
-
-## unsubscribe
-
-Alias for `cleanUp`. Removes a specific reaction from this dependency's list of dependents.
-
-### Syntax
-```javascript
-dependency.unsubscribe(reaction)
-```
-
-### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| reaction | Reaction | The reaction to unsubscribe from the dependency |
-
-### Usage
-
-```javascript
-import { Dependency, Reaction } from '@semantic-ui/reactivity';
-
-const dep = new Dependency();
-
-const reaction = Reaction.create(() => {
-  dep.depend();
-  console.log('Reaction ran');
-});
-
-// Later, when you want to unsubscribe this specific reaction:
-dep.unsubscribe(reaction);
+dep.remove(watcher); // watcher no longer fires on dep.changed()
 ```

@@ -157,7 +157,8 @@ Every lifecycle callback, event handler, and key binding receives the same destr
 | `self` / `tpl` / `component` | Component instance from `createComponent` |
 | `$` / `$$` | Query scoped to shadow DOM / piercing shadow DOM |
 | `reaction` / `signal` | Create reactive computation / signal |
-| `flush` / `afterFlush` / `nonreactive` | Reactive timing controls |
+| `computed` / `derive` / `match` | Derived signals and per-key selector |
+| `flush` / `afterFlush` / `nonreactive` / `guard` | Reactive timing controls |
 | `settings` | Reactive settings proxy (read/write) |
 | `state` | Reactive state signals |
 | `data` | Full template data context |

@@ -1,8 +1,8 @@
 // Performance: Optimizing reactive computations
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { afterFlush, flush, reaction, signal } from '@semantic-ui/reactivity';
 
-const data = new Signal([1, 2, 3, 4, 5]);
-const triggerUpdate = new Signal(false);
+const data = signal([1, 2, 3, 4, 5]);
+const triggerUpdate = signal(false);
 
 // Expensive computation that we want to optimize
 function expensiveCalculation(arr) {
@@ -11,7 +11,7 @@ function expensiveCalculation(arr) {
 }
 
 // Unoptimized: runs expensive calculation every time
-Reaction.create(() => {
+reaction(() => {
   if (triggerUpdate.get()) {
     const result = expensiveCalculation(data.peek()); // Use peek to avoid dependency
     console.log('Unoptimized result:', result);
@@ -20,10 +20,10 @@ Reaction.create(() => {
 
 // Optimized: use afterFlush to batch expensive operations
 let needsRecalc = false;
-Reaction.create(() => {
+reaction(() => {
   if (triggerUpdate.get()) {
     needsRecalc = true;
-    Reaction.afterFlush(() => {
+    afterFlush(() => {
       if (needsRecalc) {
         const result = expensiveCalculation(data.peek());
         console.log('Optimized result:', result);
@@ -35,4 +35,4 @@ Reaction.create(() => {
 
 // Trigger the calculations
 triggerUpdate.set(true);
-Reaction.flush();
+flush();

@@ -53,9 +53,9 @@ export const sidebarMenuFramework = [
     pages: [
       { name: 'Signals', description: 'Reactive state primitive', url: '/docs/guides/reactivity/signals' },
       {
-        name: 'Dependent Signals',
+        name: 'Derived Signals',
         description: 'Derived and computed signals',
-        url: '/docs/guides/reactivity/dependent-signals',
+        url: '/docs/guides/reactivity/derived-signals',
       },
       { name: 'Reactions', description: 'Reactive computations', url: '/docs/guides/reactivity/reactions' },
       { name: 'Mutations', url: '/docs/guides/reactivity/mutation-helpers' },
@@ -139,6 +139,10 @@ export const sidebarMenuAPI = [
     pages: [
       { name: 'Signal', url: '/docs/api/reactivity/signal' },
       { name: 'Reaction', url: '/docs/api/reactivity/reaction' },
+      { name: 'Derived Signals', url: '/docs/api/reactivity/derived-signals' },
+      { name: 'Reactive Controls', url: '/docs/api/reactivity/controls' },
+      { name: 'Flushing', url: '/docs/api/reactivity/flushing' },
+      { name: 'Debugging', url: '/docs/api/reactivity/debugging' },
       { name: 'Scheduler', url: '/docs/api/reactivity/scheduler' },
       { name: 'Dependency', url: '/docs/api/reactivity/dependency' },
       { name: 'Number Helpers', url: '/docs/api/reactivity/number-helpers' },

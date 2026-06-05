@@ -52,10 +52,10 @@ An interactive, stateful component in ~30 lines of JS. After seeing the floor, t
 
 Every framework has a TodoMVC. SUI's version uses more signal mutation methods than any other example — the single strongest differentiator. Each method describes intent where other frameworks require manual immutable update logic.
 
-**New patterns:** `push`, `removeItem`, `replaceItem`, `setProperty`, `setArrayProperty`, `filter`, `getItem`, `reaction()`, `{#snippet}`, `subTemplates`, `keys`, `afterFlush`, `{classMap}`, `{selectedIf}`, `{maybePlural}`, `'global hashchange window'`.
+**New patterns:** `push`, `removeItem`, `toggleItemProperty`, `setItemProperty`, `setProperty`, `filter`, `reaction()`, `{#snippet}`, `subTemplates`, `keys`, `afterFlush`, `{classMap}`, `{selectedIf}`, `{maybePlural}`, `'global hashchange window'`.
 
 **What to notice:**
-- Count the mutation methods: `push`, `removeItem`, `replaceItem`, `setProperty`, `setArrayProperty`, `filter`, `getItem`, `set`. Compare `state.todos.setArrayProperty('completed', !allCompleted)` to React's `setTodos(prev => prev.map(t => ({...t, completed: !allCompleted})))`.
+- Count the mutation methods: `push`, `removeItem`, `toggleItemProperty`, `setItemProperty`, `setProperty`, `filter`, `set`. Compare `state.todos.setProperty('completed', !allCompleted)` to React's `setTodos(prev => prev.map(t => ({...t, completed: !allCompleted})))`.
 - `reaction(() => { state.todos.get(); localStorage.setItem(...) })` — localStorage sync as a single reaction. No `useEffect` with dependency arrays.
 - `{>todoItem id=todo.id title=todo.title ...}` — subtemplate composition with named parameters.
 - `afterFlush(() => { $('.editing .edit').focus() })` — post-render DOM access.

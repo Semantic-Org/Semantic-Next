@@ -1,23 +1,18 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
-const counter = new Signal(0);
-const multiplier = new Signal(2);
+const counter = signal(0);
+const multiplier = signal(2);
 
-// Reaction that only depends on counter, not multiplier
-Reaction.create(() => {
+reaction(() => {
   const count = counter.get();
-  const multi = multiplier.peek(); // Read without creating dependency
+  const multi = multiplier.peek(); // peek reads without subscribing
   console.log(`${count} x ${multi} = ${count * multi}`);
 });
 
-// Update counter - triggers reaction
 counter.set(5);
-Reaction.flush();
+flush();
 
-// Update multiplier - does NOT trigger reaction (we used peek)
 multiplier.set(10);
-Reaction.flush();
 console.log('Multiplier changed but reaction did not run');
 
-// Update counter again - reaction runs with new multiplier value
 counter.set(7);

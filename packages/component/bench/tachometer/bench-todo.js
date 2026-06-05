@@ -103,14 +103,11 @@ defineComponent({
         state.todos.set(todos.concat(batch));
       },
       toggleTodo(id) {
-        const todo = state.todos.getItem(id);
-        if (todo) {
-          state.todos.replaceItem(id, { ...todo, completed: !todo.completed });
-        }
+        state.todos.toggleItemProperty(id, 'completed');
       },
       toggleAll() {
         const allDone = state.todos.get().every(t => t.completed);
-        state.todos.setArrayProperty('completed', !allDone);
+        state.todos.setProperty('completed', !allDone);
       },
       deleteTodo(id) {
         state.todos.removeItem(id);
@@ -126,10 +123,10 @@ defineComponent({
       },
       saveTodo(id, title) {
         state.editingId.set(null);
-        state.todos.setProperty(id, 'title', title);
+        state.todos.setItemProperty(id, 'title', title);
       },
       renameTodo(id, title) {
-        state.todos.setProperty(id, 'title', title);
+        state.todos.setItemProperty(id, 'title', title);
       },
     };
   },
@@ -455,9 +452,9 @@ destroy();
 
 // Pure setProperty workload — `saveTodo` co-fires editingId, which
 // muddies the signal. `renameTodo` does only the per-id field write,
-// so the metric isolates the per-key broadcast cost. Distinct from
-// `toggle-*` (which uses replaceItem) and `edit-cycle-5` (which mixes
-// in an editingId flip per cycle).
+// so the metric isolates the per-key broadcast cost without the editingId
+// flip in `edit-cycle-5`. Overlaps `toggle-*` on the single-key broadcast,
+// but writes directly instead of read-then-flip.
 const el16 = await setup(100);
 // purpose: Renames items in a 100-item list 500 times via single-field setProperty without editingId co-fires.
 performance.mark(startMark('rename-500'));

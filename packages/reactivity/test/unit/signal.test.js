@@ -489,7 +489,7 @@ describe.concurrent('Signal', () => {
       expect(inStockCount.get()).toBe(3);
 
       // Modify item property
-      items.setArrayProperty(1, 'inStock', true);
+      items.setIndexProperty(1, 'inStock', true);
       flush();
       expect(totalValue.get()).toBe(75);
       expect(inStockCount.get()).toBe(4);
@@ -972,6 +972,41 @@ describe('Signal API', () => {
       signal.notify();
       flush();
       expect(signal.hasDependents()).toBe(false);
+    });
+  });
+
+  /***********************************************
+   * stop() tears down a derived signal's producer
+   ***********************************************/
+
+  describe('stop()', () => {
+    it('halts recomputation of a computed signal, freezing its last value', () => {
+      const a = new Signal(1);
+      const doubled = computed(() => a.get() * 2);
+      expect(doubled.get()).toBe(2);
+
+      doubled.stop();
+      a.set(5);
+      flush();
+      expect(doubled.get()).toBe(2);
+    });
+
+    it('halts recomputation of a derive() signal', () => {
+      const source = new Signal(2);
+      const doubled = source.derive(v => v * 2);
+      expect(doubled.get()).toBe(4);
+
+      doubled.stop();
+      source.set(10);
+      flush();
+      expect(doubled.get()).toBe(4);
+    });
+
+    it('is a safe no-op on a source signal', () => {
+      const source = new Signal(0);
+      expect(() => source.stop()).not.toThrow();
+      source.set(1);
+      expect(source.get()).toBe(1);
     });
   });
 

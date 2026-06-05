@@ -1,12 +1,12 @@
 // Helper: replaceItem
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { reaction, signal } from '@semantic-ui/reactivity';
 
-const contacts = new Signal([
+const contacts = signal([
   { id: 'alice123', name: 'Alice', email: 'alice@email.com' },
   { id: 'bob456', name: 'Bob', email: 'bob@email.com' },
 ]);
 
-Reaction.create(() => console.log('Updated contacts:', contacts.value));
+reaction(() => console.log('Updated contacts:', contacts.value));
 
 // Replace entire contact record
 const newContact = {

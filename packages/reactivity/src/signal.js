@@ -41,6 +41,9 @@ export class Signal {
       value: initialValue,
     });
 
+    // preserve v8 monomorphism for derived/computed signals with cleanup
+    this.reaction = null;
+
     // configured helpers, defaulting to the class statics
     this.clone = clone;
     this.equality = equality;
@@ -97,6 +100,11 @@ export class Signal {
 
   raw() {
     return this.currentValue;
+  }
+
+  stop() {
+    // cleanup for derived signals only
+    this.reaction?.stop();
   }
 
   /* Dependencies */
@@ -188,38 +196,16 @@ export class Signal {
     this.notify();
   }
 
-  setArrayProperty(indexOrProperty, property, value) {
-    let index;
-    if (isNumber(indexOrProperty)) {
-      index = indexOrProperty;
-    }
-    else {
-      index = 'all';
-      value = property;
-      property = indexOrProperty;
-    }
+  setIndexProperty(index, property, value) {
     if (index === -1) {
       return;
     }
     const arr = this.currentValue;
-    let changed = false;
-    if (index === 'all') {
-      for (let i = 0; i < arr.length; i++) {
-        if (arr[i][property] !== value) {
-          arr[i][property] = value;
-          changed = true;
-        }
-      }
+    if (arr[index][property] === value) {
+      return;
     }
-    else {
-      if (arr[index][property] !== value) {
-        arr[index][property] = value;
-        changed = true;
-      }
-    }
-    if (changed) {
-      this.notify();
-    }
+    arr[index][property] = value;
+    this.notify();
   }
 
   toggle() {
@@ -279,21 +265,58 @@ export class Signal {
     }
     return -1;
   }
-  setProperty(idOrProperty, property, value) {
-    if (isArray(this.currentValue)) {
-      const id = idOrProperty;
-      const index = this.getItemIndex(id);
-      return this.setArrayProperty(index, property, value);
+  setProperty(property, value) {
+    const current = this.currentValue;
+    // on an array signal, sets the field on every item
+    if (isArray(current)) {
+      let changed = false;
+      for (let i = 0; i < current.length; i++) {
+        if (current[i][property] !== value) {
+          current[i][property] = value;
+          changed = true;
+        }
+      }
+      if (changed) {
+        this.notify();
+      }
+      return;
     }
-    else {
-      value = property;
-      property = idOrProperty;
-      if (this.currentValue[property] === value) {
+    if (current[property] === value) {
+      return;
+    }
+    current[property] = value;
+    this.notify();
+  }
+
+  setItemProperty(id, property, value) {
+    return this.setIndexProperty(this.getItemIndex(id), property, value);
+  }
+
+  toggleItemProperty(id, property) {
+    const index = this.getItemIndex(id);
+    if (index === -1) {
+      return;
+    }
+    const arr = this.currentValue;
+    arr[index][property] = !arr[index][property];
+    this.notify();
+  }
+
+  toggleProperty(property) {
+    const current = this.currentValue;
+    // on an array signal, flips the field on every item
+    if (isArray(current)) {
+      if (current.length === 0) {
         return;
       }
-      this.currentValue[property] = value;
+      for (let i = 0; i < current.length; i++) {
+        current[i][property] = !current[i][property];
+      }
       this.notify();
+      return;
     }
+    current[property] = !current[property];
+    this.notify();
   }
   replaceItem(id, item) {
     const index = this.getItemIndex(id);

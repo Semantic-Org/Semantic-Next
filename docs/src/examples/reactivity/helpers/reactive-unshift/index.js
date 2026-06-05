@@ -1,16 +1,16 @@
 // Helper: unshift
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, signal } from '@semantic-ui/reactivity';
 import { first } from '@semantic-ui/utils';
 
-const chatMessages = new Signal([
+const chatMessages = signal([
   { user: 'system', text: 'Chat started' },
 ]);
 
-Reaction.create(() => console.log(first(chatMessages.value)));
+reaction(() => console.log(first(chatMessages.value)));
 
 // Add new message to start
 chatMessages.unshift({ user: 'Alice', text: 'Hello!' });
-Reaction.flush();
+flush();
 
 // Add two new messages to start
 chatMessages.unshift(

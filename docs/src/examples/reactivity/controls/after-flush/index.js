@@ -1,9 +1,9 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { afterFlush, reaction, signal } from '@semantic-ui/reactivity';
 
-let number = new Signal(0);
+let number = signal(0);
 
 // add reactive reference to trigger a flush
-Reaction.create(() => {
+reaction(() => {
   number.get();
 });
 
@@ -13,6 +13,6 @@ Reaction.create(() => {
 });
 
 // afterFlush occurs after final value is set
-Reaction.afterFlush(() => {
+afterFlush(() => {
   console.log(`The final value is ${number.get()}`);
 });

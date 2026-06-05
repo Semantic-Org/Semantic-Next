@@ -1,385 +1,203 @@
 ---
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
-icon: refresh-cw
 title: Reaction
+icon: refresh-cw
 package: "@semantic-ui/reactivity"
-methods: [create, nonreactive, guard, run, stop, invalidate, firstRun, active, context, dependencies, flush, scheduleFlush, afterFlush, getSource]
+methods: [reaction, run, onCleanup, stop, firstRun, active, current]
 description: API reference for Reaction in Semantic UI's reactivity system
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
 
-`Reaction` is a core class in Semantic UI's reactivity system that manages reactive computations. When you create a reaction, it will automatically re-run whenever any reactive dependencies (Signals) accessed within it change.
+export const components = { blockquote: Blockquote };
 
-## Methods
+A reaction is a computation that re-runs whenever the signals it read change. Use it for side effects and computations that respond to reactive state.
 
-### create
+## Creating
 
-Creates a new reaction and runs it immediately.
+### reaction
 
-#### Syntax
 ```javascript
-Reaction.create(callback)
+reaction(callback, options);
 ```
+
+Creates a reaction and runs it once immediately, tracking the signals the callback reads. It re-runs whenever any of them change. The callback receives the [`Reaction`](/docs/api/reactivity/reaction) instance.
 
 #### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| callback | Function | Function to run reactively. Receives the reaction instance as its argument. |
+| callback | function | Runs reactively, receiving the reaction instance |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| firstRun | boolean | `true` | Run the callback immediately on creation. Set `false` to create the reaction without an initial run |
+| context | object | `undefined` | Debugging context surfaced in tracing output. See [Debugging Reactivity](/docs/api/reactivity/debugging) |
 
 #### Returns
 
-Reaction - The created reaction instance.
+The created [`Reaction`](/docs/api/reactivity/reaction).
 
 #### Usage
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { signal, reaction } from '@semantic-ui/reactivity';
 
-const counter = new Signal(0);
+const count = signal(0);
 
-const reaction = Reaction.create((reaction) => {
-  console.log('Counter value:', counter.get());
-
-  if (counter.get() > 5) {
-    reaction.stop();
-  }
+const counter = reaction(() => {
+  console.log('count is', count.get());
 });
 
-counter.set(6); // Reaction stops after this update
-counter.set(7); // No output, reaction was stopped
+count.set(1); // logs: count is 1
 ```
 
-### nonreactive
-
-Executes a function without establishing any reactive dependencies.
-
-#### Syntax
-```javascript
-Reaction.nonreactive(callback)
-```
-
-#### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| callback | Function | Function to execute non-reactively |
-
-#### Returns
-
-any - The return value of the callback function.
-
-#### Usage
+Pass `firstRun: false` to defer the initial run until you call [`run()`](#run) yourself.
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+const deferred = reaction(() => {
+  console.log(count.get());
+}, { firstRun: false });
 
-const user = new Signal({ name: 'Alice', lastLogin: new Date() });
-
-Reaction.create(() => {
-  // This will re-run when name changes
-  const name = user.get().name;
-
-  // This won't create a dependency on lastLogin
-  const lastLogin = Reaction.nonreactive(() => user.get().lastLogin);
-
-  console.log(`${name}'s last login:`, lastLogin);
-});
+deferred.run(); // tracks dependencies and logs for the first time
 ```
 
-### guard
+#### Example
 
-Creates a reactive computation that only triggers its parent reaction when its return value changes.
+<PlaygroundExample id="reactions" direction="horizontal"></PlaygroundExample>
 
-#### Syntax
-```javascript
-Reaction.guard(callback)
-```
-
-#### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| callback | Function | Function whose return value is monitored for changes |
-
-#### Returns
-
-any - The current value returned by the callback.
-
-#### Usage
-
-```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
-
-const count = new Signal(0);
-
-Reaction.create(() => {
-  // This will only trigger when the even/odd status changes
-  const isEven = Reaction.guard(() => count.get() % 2 === 0);
-  console.log(`Count is ${isEven ? 'even' : 'odd'}`);
-});
-
-count.set(2); // No output (still even)
-count.set(3); // Outputs: "Count is odd"
-```
-
-## Instance Methods
+## Running
 
 ### run
 
-Executes the reaction's computation.
-
-#### Syntax
 ```javascript
-reaction.run()
+reaction.run();
 ```
+
+Executes the callback, rebuilding the tracked dependency set from scratch. Called automatically on creation and whenever a dependency changes. Call it manually to force a re-run or to perform the first run of a reaction created with `firstRun: false`.
+
+## Lifecycle
+
+### onCleanup
+
+```javascript
+reaction.onCleanup(callback);
+```
+
+Registers a cleanup callback that fires just before the reaction's next run and once when it stops. Use it to tear down resources or scope inner reactions to this one.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| callback | function | Runs on the next re-run or on stop |
+
+> [!info]
+> Cleanups fire in registration order, and the queue is cleared after firing. A cleanup registered during `firstRun` fires once, before the second run.
 
 #### Usage
 
 ```javascript
-const reaction = Reaction.create(() => {
-  // computation
-});
+const channel = signal('updates');
 
-reaction.run(); // Manually trigger the reaction
+reaction((self) => {
+  const socket = subscribe(channel.get());
+  // tears down the old socket before resubscribing, and on stop
+  self.onCleanup(() => socket.close());
+});
 ```
 
 ### stop
 
-Stops the reaction from running again and cleans up its dependencies.
-
-#### Syntax
 ```javascript
-reaction.stop()
+reaction.stop();
 ```
+
+Permanently stops the reaction. It unsubscribes from every dependency, fires its cleanups, and no longer responds to changes. Idempotent.
 
 #### Usage
 
 ```javascript
-const counter = new Signal(0);
-const reaction = Reaction.create(() => {
-  if (counter.get() > 3) {
-    reaction.stop();
-    console.log('Reaction stopped');
+const count = signal(0);
+
+const counter = reaction((self) => {
+  console.log(count.get());
+  if (count.get() > 5) {
+    self.stop(); // detach once the threshold is crossed
   }
 });
+
+count.set(6); // logs 6, then stops
+count.set(7); // no output
 ```
 
-### invalidate
+#### Example
 
-Marks the reaction as invalid, scheduling it to run on the next flush cycle.
+<PlaygroundExample id="stop-reaction" direction="horizontal"></PlaygroundExample>
 
-#### Syntax
-```javascript
-reaction.invalidate(context?)
-```
-
-#### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| context | any | (Optional) Additional context for the invalidation |
-
-#### Usage
-
-```javascript
-const reaction = Reaction.create(() => {
-  // computation
-});
-
-reaction.invalidate(); // Schedule reaction to run again
-```
-
-## Instance Properties
+## Properties
 
 ### firstRun
 
-Boolean indicating if this is the reaction's first execution.
+```javascript
+reaction.firstRun;
+```
+
+`true` while the callback is executing for the first time, `false` on every later run. Useful for one-time initialization.
+
+> [!warning]
+> Read the signals you depend on before any early `if (firstRun) return`. Bail out first and the reaction registers no dependencies and never re-runs.
 
 #### Usage
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+const data = signal({ value: 0 });
 
-const data = new Signal({ value: 0 });
-
-Reaction.create((reaction) => {
-  if (reaction.firstRun) {
-    console.log('Initial setup');
+reaction((self) => {
+  const current = data.get(); // track before branching
+  if (self.firstRun) {
+    console.log('initial setup');
   } else {
-    console.log('Value updated:', data.get().value);
+    console.log('value updated:', current.value);
   }
 });
 ```
+
+#### Example
+
+<PlaygroundExample id="reactive-first-run" direction="horizontal"></PlaygroundExample>
 
 ### active
 
-Boolean indicating if the reaction is active (not stopped).
+```javascript
+reaction.active;
+```
+
+`true` while the reaction is responding to changes, `false` once [`stop()`](#stop) has been called.
 
 #### Usage
 
 ```javascript
-const reaction = Reaction.create((r) => {
-  console.log('Reaction active:', r.active);
-});
-```
-
-### context
-
-Contains information about what triggered the current reaction run.
-
-#### Type
-```javascript
-{
-  value: any;
-  trace?: string;
-} | null
-```
-
-#### Properties
-
-| Name | Type | Description |
-|------|------|-------------|
-| value | any | The value that triggered the reaction |
-| trace | string? | Optional stack trace showing where the change originated |
-
-#### Usage
-
-```javascript
-const counter = new Signal(0);
-Reaction.create((r) => {
-  console.log('Counter:', counter.get());
-  if (r.context) {
-    console.log('Changed value:', r.context.value);
-  }
-});
-```
-
-### dependencies
-
-A Set containing all the dependencies being tracked by this reaction.
-
-#### Type
-```javascript
-Set<Dependency>
-```
-
-#### Usage
-
-```javascript
-const counter = new Signal(0);
-Reaction.create((r) => {
-  counter.get();
-  console.log('Number of dependencies:', r.dependencies.size);
-});
-```
-
-## Scheduling Methods
-
-`Reaction` proxies several useful methods from [`Scheduler`](/docs/api/reactivity/scheduler) so you can call them directly without having to import the [`Scheduler`](/docs/api/reactivity/scheduler) class.
-
-### flush
-
-Immediately executes all pending reactions.
-
-#### Syntax
-```javascript
-Reaction.flush()
-```
-
-#### Usage
-
-```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
-
-const number = new Signal(0);
-Reaction.create(() => {
-  console.log(number.get());
+const counter = reaction((self) => {
+  console.log('active:', self.active);
 });
 
-// Without flush, only final value would be logged
-[1, 2, 3].forEach(value => {
-  number.set(value);
-  Reaction.flush(); // Forces immediate update
-});
-// Logs: 1, 2, 3
+counter.stop();
+counter.active; // false
 ```
 
-### scheduleFlush
-
-Schedules a flush of all pending reactions for the next microtask.
-
-#### Syntax
-```javascript
-Reaction.scheduleFlush()
-```
-
-#### Usage
+### current
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
-
-const value = new Signal(0);
-Reaction.create(() => {
-  console.log(value.get());
-});
-
-value.set(1);
-Reaction.scheduleFlush(); // Schedule update for next microtask
+Reaction.current;
 ```
 
-### afterFlush
-
-Registers a callback to execute after the next flush completes.
-
-#### Syntax
-```javascript
-Reaction.afterFlush(callback)
-```
-
-#### Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| callback | Function | Function to execute after flush completes |
-
-#### Usage
-
-```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
-
-const data = new Signal({ processed: false });
-
-Reaction.create(() => {
-  // Process data
-  const current = data.get();
-});
-
-data.set({ processed: true });
-Reaction.afterFlush(() => {
-  console.log('All reactions completed');
-});
-```
-
-## Debugging
-
-### getSource
-
-Returns the stack trace of the currently running reaction.
-
-#### Syntax
-```javascript
-Reaction.getSource()
-```
+The reaction currently executing, or `null` outside a reactive run. A static mirror of [`Scheduler.current`](/docs/api/reactivity/scheduler#current), kept on the class so a `debugger` breakpoint can read it without importing [`currentReaction()`](/docs/api/reactivity/controls#currentreaction).
 
 #### Returns
 
-string | undefined - The stack trace of the current reaction, or undefined if no reaction is running.
-
-#### Usage
-
-```javascript
-Reaction.create(() => {
-  console.log(Reaction.getSource());
-});
-```
+A [`Reaction`](/docs/api/reactivity/reaction) or `null`.

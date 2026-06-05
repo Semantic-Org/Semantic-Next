@@ -272,6 +272,9 @@ $                       — Shadow DOM-scoped query
 $$                      — Shadow DOM-piercing query
 signal                  — create a Signal
 reaction                — create a Reaction (auto-tracked dependencies)
+computed                — derived Signal from one or more signals
+derive                  — derived Signal from a single source
+match                   — per-key reactive selector
 settings                — reactive settings proxy
 state                   — reactive state object
 data                    — template data context
@@ -283,6 +286,7 @@ rerender                — force re-render
 darkMode                — current dark mode state
 afterFlush              — run callback after reactive flush
 nonreactive             — run code without tracking dependencies
+guard                   — reactive read that blocks propagation when unchanged
 ```
 
 ### Data context merge order (last wins)

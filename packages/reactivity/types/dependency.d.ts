@@ -1,66 +1,44 @@
 /**
- * Tracks dependencies for reactive computations.
- * Manages the relationship between reactive values and their dependent computations.
- * Used internally by Signal and Reaction to establish reactive relationships.
+ * Tracks the reactions subscribed to a reactive value and notifies them when it
+ * changes. Signals own a Dependency internally, you rarely construct one directly.
  * @see {@link https://next.semantic-ui.com/docs/api/reactivity/dependency Dependency Documentation}
  *
- * @internal This class is primarily used internally by the reactivity system.
+ * @internal Primarily used internally by the reactivity system.
  */
 export class Dependency {
-  /**
-   * Set of reactions that depend on this dependency.
-   * Each reaction in this set will be notified when the dependency changes.
-   */
+  /** The reactions currently subscribed to this dependency. */
   readonly subscribers: Set<any>;
 
   /**
    * Creates a new dependency tracker.
-   * Typically created automatically by Signal instances.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/dependency#constructor constructor}
+   * @param metadata - Optional debugging context, attached only when tracing is on
    */
-  constructor();
+  constructor(...metadata: any[]);
 
   /**
-   * Records the currently running reaction as a subscriber.
-   * Called automatically when a reactive value is accessed.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/dependency#depend depend}
-   *
-   * @internal This method is called internally by the reactivity system.
+   * Records the currently running reaction as a subscriber. A no-op outside a reaction.
+   * @internal
    */
   depend(): void;
 
   /**
-   * Notifies all dependent reactions that this dependency has changed.
-   * Triggers dependent reactions to re-run.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/dependency#changed changed}
-   *
-   * @param context - Optional metadata about what triggered the change
-   * @internal This method is called internally by the reactivity system.
+   * Sets debugging context on the dependency. A no-op when tracing is off.
+   * @internal
+   * @param context - Context to attach
    */
-  changed(context?: {
-    /** The new value that caused the change */
-    value?: unknown;
-    /** Stack trace showing where the change originated */
-    trace?: string;
-  }): void;
+  setContext(context?: any): void;
+
+  /**
+   * Notifies all subscribed reactions that this dependency changed.
+   * @internal
+   * @param context - Optional metadata about the change
+   */
+  changed(context?: Record<string, any>): void;
 
   /**
    * Removes a reaction from this dependency's subscribers.
-   * Used during reaction re-runs to clean up old dependencies.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/dependency#cleanup cleanUp}
-   *
+   * @internal
    * @param reaction - The reaction to remove
-   * @internal This method is called internally by the reactivity system.
    */
-  cleanUp(reaction: any): void;
-
-  /**
-   * Unsubscribes a reaction from this dependency.
-   * Used when stopping reactions to remove them from all dependencies.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/dependency#unsubscribe unsubscribe}
-   *
-   * @param reaction - The reaction to unsubscribe
-   * @internal This method is called internally by the reactivity system.
-   */
-  unsubscribe(reaction: any): void;
+  remove(reaction: any): void;
 }
