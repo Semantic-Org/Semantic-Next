@@ -16,6 +16,20 @@ import { buildHTMLString, ExpressionEvaluator, Renderer } from '@semantic-ui/ren
 
 const startMark = (name) => `${name}-start`;
 
+// Collect between ops so each one measures on a freed heap, not the old-space
+// the previous op grew. Runs after every performance.measure, never inside a
+// measured region.
+function settle() {
+  if (globalThis.gc) {
+    try {
+      globalThis.gc({ type: 'major', execution: 'sync', flavor: 'last-resort' });
+    }
+    catch {
+      globalThis.gc();
+    }
+  }
+}
+
 /*******************************
       Fixtures
 *******************************/
@@ -100,6 +114,7 @@ const data = {
     evaluator.evaluate('user.name', data);
   }
   performance.measure('expr-simple-100k', startMark('expr-simple-100k'));
+  settle();
 }
 
 // expr-lisp-50k — Lisp-style helper invocation. Production
@@ -113,6 +128,7 @@ const data = {
     evaluator.evaluate("classIf isActive 'active'", data);
   }
   performance.measure('expr-lisp-50k', startMark('expr-lisp-50k'));
+  settle();
 }
 
 // expr-js-10k — JS expression eval via new Function + Proxy.
@@ -128,6 +144,7 @@ const data = {
     evaluator.evaluate("isOpen ? 'open' : 'closed'", data);
   }
   performance.measure('expr-js-10k', startMark('expr-js-10k'));
+  settle();
 }
 
 /*******************************
@@ -153,6 +170,7 @@ const data = {
     buildHTMLString(buildHTMLStringAST);
   }
   performance.measure('build-html-string-10k', startMark('build-html-string-10k'));
+  settle();
 }
 
 /*******************************
@@ -235,6 +253,7 @@ const data = {
     renderer.bindMarkers(domWalkerFragments[r], domWalkerEntries, domWalkerData, renderer.scope, domWalkerAST);
   }
   performance.measure('dom-walker-1000x15', startMark('dom-walker-1000x15'));
+  settle();
 }
 
 /*******************************

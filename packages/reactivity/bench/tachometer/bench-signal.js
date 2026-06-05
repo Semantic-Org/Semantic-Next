@@ -12,6 +12,20 @@ const computed = reactivity.computed ?? ((fn, options) => Signal.computed(fn, op
 
 const startMark = (name) => `${name}-start`;
 
+// Collect between ops so each one measures on a freed heap, not the old-space
+// the previous op grew. Runs after every performance.measure, never inside a
+// measured region.
+function settle() {
+  if (globalThis.gc) {
+    try {
+      globalThis.gc({ type: 'major', execution: 'sync', flavor: 'last-resort' });
+    }
+    catch {
+      globalThis.gc();
+    }
+  }
+}
+
 /*******************************
       Fixtures
 *******************************/
@@ -58,6 +72,7 @@ let sink = null;
     sig.set(42);
   }
   performance.measure('set-same-10m', startMark('set-same-10m'));
+  settle();
 }
 
 // sub-unsub-100k — measures the per-create/per-destroy cost of a
@@ -75,6 +90,7 @@ let sink = null;
     r.stop();
   }
   performance.measure('sub-unsub-100k', startMark('sub-unsub-100k'));
+  settle();
 }
 
 /*******************************
@@ -98,6 +114,7 @@ let sink = null;
   }
   performance.measure('reactive-fanout-500x1200', startMark('reactive-fanout-500x1200'));
   for (let i = 0; i < 500; i++) { reactions[i].stop(); }
+  settle();
 }
 
 // computed-chain-10x60k — doubled outer iterations (30k → 60k)
@@ -121,6 +138,7 @@ let sink = null;
   }
   performance.measure('computed-chain-10x60k', startMark('computed-chain-10x60k'));
   observer.stop();
+  settle();
 }
 
 // reactive-multi-read-5x160k — doubled outer iterations (16k → 32k,
@@ -141,6 +159,7 @@ let sink = null;
   }
   performance.measure('reactive-multi-read-5x160k', startMark('reactive-multi-read-5x160k'));
   r.stop();
+  settle();
 }
 
 /*******************************
@@ -168,6 +187,7 @@ let sink = null;
   }
   performance.measure('reactive-list-replace-1000x1000', startMark('reactive-list-replace-1000x1000'));
   r.stop();
+  settle();
 }
 
 // reactive-list-filter-1000x300
@@ -191,6 +211,7 @@ let sink = null;
   }
   performance.measure('reactive-list-filter-1000x300', startMark('reactive-list-filter-1000x300'));
   r.stop();
+  settle();
 }
 
 /*******************************
@@ -222,6 +243,7 @@ let sink = null;
   }
   performance.measure('reactive-push-2000x20', startMark('reactive-push-2000x20'));
   r.stop();
+  settle();
 }
 
 // reactive-set-index-300
@@ -248,6 +270,7 @@ let sink = null;
   }
   performance.measure('reactive-set-index-300', startMark('reactive-set-index-300'));
   r.stop();
+  settle();
 }
 
 // reactive-set-property-by-id-200 — alternating front/back averages N/2 scan.
@@ -277,6 +300,7 @@ let sink = null;
   }
   performance.measure('reactive-set-property-by-id-200', startMark('reactive-set-property-by-id-200'));
   r.stop();
+  settle();
 }
 
 /*******************************
@@ -303,6 +327,7 @@ let sink = null;
     });
   }
   performance.measure('mutate-grid-row-edit-600', startMark('mutate-grid-row-edit-600'));
+  settle();
 }
 
 // mutate-doc-nested-200k — edits two nested fields of a small structured
@@ -320,6 +345,7 @@ let sink = null;
     });
   }
   performance.measure('mutate-doc-nested-200k', startMark('mutate-doc-nested-200k'));
+  settle();
 }
 
 /*******************************
@@ -338,6 +364,7 @@ let sink = null;
     flush();
   }
   performance.measure('reaction-flush-noop-5m', startMark('reaction-flush-noop-5m'));
+  settle();
 }
 
 // reaction-coalesce-400x100 — 400 bursts, each setting the signal 100
@@ -362,6 +389,7 @@ let sink = null;
   }
   performance.measure('reaction-coalesce-400x100', startMark('reaction-coalesce-400x100'));
   for (let i = 0; i < 100; i++) { subs[i].stop(); }
+  settle();
 }
 
 // reaction-dep-diff-45k — a subscriber that reads a different signal
@@ -385,6 +413,7 @@ let sink = null;
   }
   performance.measure('reaction-dep-diff-45k', startMark('reaction-dep-diff-45k'));
   r.stop();
+  settle();
 }
 
 /*******************************
@@ -413,6 +442,7 @@ let sink = null;
   }
   performance.measure('reactive-stable-fanout-5000x100', startMark('reactive-stable-fanout-5000x100'));
   for (let i = 0; i < 5000; i++) { reactions[i].stop(); }
+  settle();
 }
 
 // reactive-stable-deps-3reads-5000x100 — median templating shape, 3 stable deps per reaction
@@ -434,6 +464,7 @@ let sink = null;
   }
   performance.measure('reactive-stable-deps-3reads-5000x100', startMark('reactive-stable-deps-3reads-5000x100'));
   for (let i = 0; i < 5000; i++) { reactions[i].stop(); }
+  settle();
 }
 
 // Computed lifecycle — informs Item 8 lazy refcounted computed.
@@ -459,6 +490,7 @@ let sink = null;
     flush();
   }
   performance.measure('computed-unobserved-200x500', startMark('computed-unobserved-200x500'));
+  settle();
 }
 
 // computed-subscribe-unsubscribe-10k — refcount machinery overhead on the subscribe/unsubscribe path.
@@ -476,6 +508,7 @@ let sink = null;
   performance.mark(startMark('computed-subscribe-unsubscribe-10k'));
   for (let i = 0; i < 10_000; i++) { cycle(); }
   performance.measure('computed-subscribe-unsubscribe-10k', startMark('computed-subscribe-unsubscribe-10k'));
+  settle();
 }
 
 // Scheduler allocation — verifies Item 5 set-swap.
@@ -500,6 +533,7 @@ let sink = null;
   }
   performance.measure('flush-fanout-allocation-1000x500', startMark('flush-fanout-allocation-1000x500'));
   for (let i = 0; i < 500; i++) { reactions[i].stop(); }
+  settle();
 }
 
 /*******************************

@@ -15,6 +15,20 @@ import { TemplateCompiler } from '@semantic-ui/compiler';
 
 const startMark = (name) => `${name}-start`;
 
+// Collect between ops so each one measures on a freed heap, not the old-space
+// the previous op grew. Runs after every performance.measure, never inside a
+// measured region.
+function settle() {
+  if (globalThis.gc) {
+    try {
+      globalThis.gc({ type: 'major', execution: 'sync', flavor: 'last-resort' });
+    }
+    catch {
+      globalThis.gc();
+    }
+  }
+}
+
 /*******************************
       Fixtures
 *******************************/
@@ -119,6 +133,7 @@ const kitchenSinkTemplate = `<article class="card">
     new TemplateCompiler(normalTemplate).compile();
   }
   performance.measure('parse-cold-normal-500', startMark('parse-cold-normal-500'));
+  settle();
 }
 
 /*******************************
@@ -135,6 +150,7 @@ const kitchenSinkTemplate = `<article class="card">
     new TemplateCompiler(kitchenSinkTemplate).compile();
   }
   performance.measure('parse-cold-complex-200', startMark('parse-cold-complex-200'));
+  settle();
 }
 
 /*******************************
@@ -157,6 +173,7 @@ const kitchenSinkTemplate = `<article class="card">
     TemplateCompiler.optimizeAST(astWalkAST);
   }
   performance.measure('ast-walk-15k', startMark('ast-walk-15k'));
+  settle();
 }
 
 /*******************************
@@ -188,6 +205,7 @@ const kitchenSinkTemplate = `<article class="card">
     snippetArgsCompiler.parseTemplateString(snippetArgsExprs[3]);
   }
   performance.measure('snippet-args-5k', startMark('snippet-args-5k'));
+  settle();
 }
 
 /*******************************

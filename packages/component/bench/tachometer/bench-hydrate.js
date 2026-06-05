@@ -94,6 +94,20 @@ const drainMicrotasks = () => new Promise(r => setTimeout(r, 0));
 const flushWork = reactivity.flush ?? (() => Reaction.flush());
 const startMark = (name) => `${name}-start`;
 
+// Collect between ops so each one measures on a freed heap, not the old-space
+// the previous op grew. Runs after every performance.measure, never inside a
+// measured region.
+function settle() {
+  if (globalThis.gc) {
+    try {
+      globalThis.gc({ type: 'major', execution: 'sync', flavor: 'last-resort' });
+    }
+    catch {
+      globalThis.gc();
+    }
+  }
+}
+
 /*******************************
       Hydrate Each-100 — Mount
       (DSD parse + connectedCallback
@@ -112,6 +126,7 @@ container.setHTMLUnsafe(dsdHTMLForMount);
 await drainMicrotasks();
 await flush();
 performance.measure('each-100-mount', startMark('each-100-mount'));
+settle();
 const elForMutate = container.firstElementChild;
 
 /*******************************
@@ -126,6 +141,7 @@ performance.mark(startMark('each-100'));
 elForMutate.component.setItems(itemsForMount.slice());
 await flush();
 performance.measure('each-100', startMark('each-100'));
+settle();
 container.innerHTML = '';
 
 /*******************************
@@ -192,6 +208,7 @@ container.setHTMLUnsafe(dsdHTMLForHelper);
 await drainMicrotasks();
 await flush();
 performance.measure('helper-100-mount', startMark('helper-100-mount'));
+settle();
 const elHelper = container.firstElementChild;
 
 /*******************************
@@ -211,6 +228,7 @@ for (let i = 0; i < 1000; i++) {
   flushWork();
 }
 performance.measure('helper-100-state-change-1k', startMark('helper-100-state-change-1k'));
+settle();
 container.innerHTML = '';
 
 /*******************************
