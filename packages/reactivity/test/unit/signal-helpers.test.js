@@ -851,6 +851,28 @@ SAFETY_MODES.forEach((safety) => {
         expect(warnSpy).toHaveBeenCalledTimes(1);
         expect(warnSpy.mock.calls[0][0]).toMatch(/same reference/);
       });
+
+      it('fires reactivity when a deeply nested field changes', () => {
+        const sig = new Signal({ meta: { count: 0 } }, { safety });
+        const sub = subscribe(sig);
+        sig.mutate(doc => {
+          doc.meta.count = 1;
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        sub.stop();
+      });
+
+      it('does not re-fire when a field is written to its existing value', () => {
+        const sig = new Signal({ a: 1 }, { safety });
+        const sub = subscribe(sig);
+        sig.mutate(obj => {
+          obj.a = 1;
+        });
+        flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
     });
 
     /*******************************

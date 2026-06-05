@@ -5,6 +5,7 @@ import {
   isEqual,
   isNumber,
   isObject,
+  observeWrites,
   returnsFalse,
   unique,
   wrapFunction,
@@ -133,25 +134,28 @@ export class Signal {
 
   // mutate the current value by a mutation function
   mutate(mutationFn) {
-    // we use clone in all cases to detect for changes only
-    const beforeClone = this.cloneFunction(this.currentValue);
-    const result = mutationFn(this.currentValue);
+    // detect change by observing writes through a proxy instead of cloning the
+    // whole value up front and deep-comparing after
+    const { proxy, didWrite, revoke } = observeWrites(this.currentValue);
+    const result = mutationFn(proxy);
+    revoke();
 
-    if (result !== undefined) {
-      if (isDevelopment && result === this.currentValue) {
-        console.warn(
-          'Signal.mutate: returning the same reference that was mutated in place will bypass change detection. Either mutate without returning, or return a new value.',
-        );
-      }
-      // if the mutation returned a value just set it
+    // returning the value (or its proxy) can't be stored — that's the in-place
+    // footgun, so fall through to the write-detection path
+    const returnedInPlace = result === proxy || result === this.currentValue;
+
+    if (result !== undefined && !returnedInPlace) {
       this.value = result;
+      return;
     }
-    else {
-      // if no value returned check if the value changed from side effects
-      // in this case we want to trigger reactivity
-      if (!this.equality(beforeClone, this.currentValue)) {
-        this.notify();
-      }
+
+    if (isDevelopment && result !== undefined) {
+      console.warn(
+        'Signal.mutate: returning the same reference that was mutated in place will bypass change detection. Either mutate without returning, or return a new value.',
+      );
+    }
+    if (didWrite()) {
+      this.notify();
     }
   }
 
