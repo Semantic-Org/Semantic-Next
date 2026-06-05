@@ -37,6 +37,68 @@ export const mapObject = (obj, callback) => {
 };
 
 /*
+  Wrap a value in a revocable proxy that records whether a write happened,
+  recursively through nested objects so a deep write (obj.a.b = x) is still
+  trapped — the case a shallow proxy misses. Lets a caller detect a mutation
+  without cloning and deep-comparing. Identical writes (Object.is) don't count.
+*/
+export const observeWrites = (target) => {
+  if (target === null || typeof target !== 'object') {
+    return { proxy: target, didWrite: () => false, revoke: () => {} };
+  }
+  let written = false;
+  const revokers = [];
+  const wrapped = new WeakMap();
+  const handler = {
+    get(object, key) {
+      const value = object[key];
+      if (value === null || typeof value !== 'object') {
+        return value;
+      }
+      let child = wrapped.get(value);
+      if (child === undefined) {
+        child = wrap(value);
+        wrapped.set(value, child);
+      }
+      return child;
+    },
+    set(object, key, value) {
+      if (!Object.is(object[key], value)) {
+        written = true;
+      }
+      object[key] = value;
+      return true;
+    },
+    deleteProperty(object, key) {
+      if (key in object) {
+        written = true;
+      }
+      delete object[key];
+      return true;
+    },
+    defineProperty(object, key, descriptor) {
+      written = true;
+      Object.defineProperty(object, key, descriptor);
+      return true;
+    },
+  };
+  const wrap = (object) => {
+    const { proxy, revoke } = Proxy.revocable(object, handler);
+    revokers.push(revoke);
+    return proxy;
+  };
+  return {
+    proxy: wrap(target),
+    didWrite: () => written,
+    revoke: () => {
+      for (const revoke of revokers) {
+        revoke();
+      }
+    },
+  };
+};
+
+/*
   Shallow-merge sources into target. Preserves source accessors (unlike
   Object.assign, which snapshots getter values) and preserves target
   extensibility (a frozen/sealed source does not lock down target props).

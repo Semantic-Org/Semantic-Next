@@ -9,6 +9,7 @@ import {
   hasProperty,
   keys,
   mapObject,
+  observeWrites,
   onlyKeys,
   pick,
   proxyObject,
@@ -21,6 +22,61 @@ import {
 import { describe, expect, it, vi } from 'vitest';
 
 describe('Object Utilities', () => {
+  describe('observeWrites', () => {
+    it('flags a top-level property write', () => {
+      const { proxy, didWrite } = observeWrites({ a: 1 });
+      proxy.a = 2;
+      expect(didWrite()).toBe(true);
+      expect(proxy.a).toBe(2);
+    });
+
+    it('flags a deeply nested write — the shallow-proxy gotcha', () => {
+      const target = { meta: { count: 0 } };
+      const { proxy, didWrite } = observeWrites(target);
+      proxy.meta.count = 5;
+      expect(didWrite()).toBe(true);
+      expect(target.meta.count).toBe(5);
+    });
+
+    it('flags array element writes and array methods', () => {
+      const arr = [1, 2, 3];
+      const { proxy, didWrite } = observeWrites(arr);
+      proxy.push(4);
+      expect(didWrite()).toBe(true);
+      expect(arr).toEqual([1, 2, 3, 4]);
+    });
+
+    it('flags property deletion', () => {
+      const { proxy, didWrite } = observeWrites({ a: 1 });
+      delete proxy.a;
+      expect(didWrite()).toBe(true);
+    });
+
+    it('does not flag a read-only pass, even through nested objects', () => {
+      const { proxy, didWrite } = observeWrites({ a: { b: 1 } });
+      expect(proxy.a.b).toBe(1);
+      expect(didWrite()).toBe(false);
+    });
+
+    it('does not flag writing a property to its existing value', () => {
+      const { proxy, didWrite } = observeWrites({ a: 1 });
+      proxy.a = 1;
+      expect(didWrite()).toBe(false);
+    });
+
+    it('revoke() makes the proxy throw on further access', () => {
+      const { proxy, revoke } = observeWrites({ a: 1 });
+      revoke();
+      expect(() => proxy.a).toThrow();
+    });
+
+    it('passes a primitive target through untouched', () => {
+      const { proxy, didWrite } = observeWrites(42);
+      expect(proxy).toBe(42);
+      expect(didWrite()).toBe(false);
+    });
+  });
+
   describe('keys', () => {
     it('keys should return the keys of an object', () => {
       expect(keys({ a: 1, b: 2 })).toEqual(['a', 'b']);
@@ -826,7 +882,11 @@ describe('assignInPlace — returnChanged', () => {
 
 describe('deepExtend — preserveNonCloneable option', () => {
   it('should accept preserveDOM and preserveNonCloneable as last arg', () => {
-    class Custom { constructor(v) { this.v = v; } }
+    class Custom {
+      constructor(v) {
+        this.v = v;
+      }
+    }
     const inst = new Custom(1);
     const target = {};
     deepExtend(target, { custom: inst }, { preserveNonCloneable: true });
@@ -834,7 +894,11 @@ describe('deepExtend — preserveNonCloneable option', () => {
   });
 
   it('should clone class instances when preserveNonCloneable is false', () => {
-    class Custom { constructor(v) { this.v = v; } }
+    class Custom {
+      constructor(v) {
+        this.v = v;
+      }
+    }
     const inst = new Custom(1);
     const target = {};
     deepExtend(target, { custom: inst }, { preserveNonCloneable: false });
