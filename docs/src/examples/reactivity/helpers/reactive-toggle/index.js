@@ -1,15 +1,15 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
-const isActive = new Signal(false);
+const isActive = signal(false);
 
 // Reaction logs when value changes
-Reaction.create((reaction) => {
+reaction((computation) => {
   const active = isActive.get();
-  if (!reaction.firstRun) {
+  if (!computation.firstRun) {
     console.log(active);
   }
 });
 
 isActive.toggle();
-Reaction.flush();
+flush();
 isActive.toggle();

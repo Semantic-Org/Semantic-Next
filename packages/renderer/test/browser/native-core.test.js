@@ -925,7 +925,7 @@ describe('reactive-context per-key tracking', () => {
     const baselineB = bSpyCount;
 
     // Mutate only field 'a' (by id-keyed replace).
-    el.template.state.items.setProperty(1, 'a', 'a1');
+    el.template.state.items.setItemProperty(1, 'a', 'a1');
     await waitForUpdate(el);
 
     expect(aSpyCount).toBeGreaterThan(baselineA);

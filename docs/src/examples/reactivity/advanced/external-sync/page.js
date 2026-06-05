@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { reaction, signal } from '@semantic-ui/reactivity';
 
 const defaultPrefs = {
   theme: 'light',
@@ -15,12 +15,12 @@ if (!localStorage.getItem(storageKey)) {
 }
 
 // Use signal to mirror local storage
-const preferences = new Signal(
+const preferences = signal(
   JSON.parse(localStorage.getItem(storageKey) || defaultPrefs),
 );
 
 // Update displays whenever preferences change
-Reaction.create(() => {
+reaction(() => {
   const prefs = preferences.get();
   $('.theme').text(prefs.theme || 'light');
   $('.lang').text(prefs.lang || 'en');
@@ -28,9 +28,9 @@ Reaction.create(() => {
 });
 
 // Sync preferences to localStorage whenever they change (skip first run)
-Reaction.create((reaction) => {
+reaction((computation) => {
   const prefs = preferences.get();
-  if (reaction.firstRun) {
+  if (computation.firstRun) {
     return;
   }
   console.log('Saving to localStorage:', JSON.stringify(prefs));

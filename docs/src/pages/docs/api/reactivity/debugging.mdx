@@ -1,0 +1,101 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Debugging
+icon: bug
+package: "@semantic-ui/reactivity"
+methods: [setTracing, setStackCapture, isTracing, isStackCapture, getSource]
+description: API reference for tracing and inspecting reactivity in Semantic UI
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
+
+export const components = { blockquote: Blockquote };
+
+Tools for seeing what reactivity is doing. Tracing attaches debug metadata to signals, reactions, and dependencies, and [`getSource`](#getsource) prints what triggered the reaction currently running.
+
+> [!info]
+> Tracing allocates nothing until you turn it on. Leave it off in production and switch it on from the console while debugging.
+
+## Tracing
+
+Tracing has three levels: off, context, and stack. Context attaches cheap metadata bags so traces can name what changed. Stack adds a captured trace per change and is expensive.
+
+### setTracing
+
+```javascript
+setTracing(enabled);
+```
+
+Turns context tracing on or off. Disabling it also clears stack capture.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| enabled | boolean | Whether to enable tracing |
+
+### setStackCapture
+
+```javascript
+setStackCapture(enabled);
+```
+
+Adds stack traces to the tracing context via `Error.captureStackTrace`. Enabling it implies tracing.
+
+> [!warning]
+> Stack capture runs on every change. Use it to hunt one specific re-run, not as an always-on setting.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| enabled | boolean | Whether to capture stack traces |
+
+### isTracing
+
+```javascript
+isTracing();
+```
+
+#### Returns
+
+`true` when tracing is on at either level, context or stack.
+
+### isStackCapture
+
+```javascript
+isStackCapture();
+```
+
+#### Returns
+
+`true` when stack capture is on.
+
+## Inspecting
+
+### getSource
+
+```javascript
+getSource();
+```
+
+Logs the currently running reaction and, when stack capture is on, where it was created or triggered. Call it from inside a reaction during a flush to trace what scheduled it. Outside a flush it reports that no reaction is running.
+
+> [!tip]
+> `getSource()` writes to the console and returns nothing. Pair it with tracing for named output.
+
+#### Usage
+
+```javascript
+import { reaction, getSource } from '@semantic-ui/reactivity';
+
+reaction(() => {
+  count.get();
+  getSource(); // logs the reaction and what triggered this run
+});
+```
+
+#### Example
+
+<PlaygroundExample id="reactive-tracing" direction="horizontal"></PlaygroundExample>

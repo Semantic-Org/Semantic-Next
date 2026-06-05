@@ -699,7 +699,7 @@ RENDERING_ENGINES.forEach(engine => {
       // into its constituent properties so a binding reading `todo.completed`
       // subscribes to a per-field dep rather than the whole-item key. The
       // test pins that contract for a future architectural pass.
-      it('mutating one item field via setProperty re-fires only the binding reading that field', async () => {
+      it('mutating one item field via toggleItemProperty re-fires only the binding reading that field', async () => {
         // Per-FIELD precision applies to direct dotted reads in templates.
         // The dotted walk (todo.text, todo.completed) goes through the
         // item proxy, registering per-FIELD deps. Helpers receive the
@@ -725,7 +725,7 @@ RENDERING_ENGINES.forEach(engine => {
                 completedFires++;
                 return String(completed);
               },
-              toggle: () => todos.setProperty('a', 'completed', !todos.getItem('a').completed),
+              toggle: () => todos.toggleItemProperty('a', 'completed'),
             };
           },
         });
@@ -768,8 +768,8 @@ RENDERING_ENGINES.forEach(engine => {
                 readFires++;
                 return `${todo.text} ${todo.completed}`;
               },
-              toggle: () => todos.setProperty('a', 'completed', !todos.getItem('a').completed),
-              rename: () => todos.setProperty('a', 'text', 'renamed'),
+              toggle: () => todos.toggleItemProperty('a', 'completed'),
+              rename: () => todos.setItemProperty('a', 'text', 'renamed'),
             };
           },
         });
@@ -792,7 +792,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
 
       it('mutating one item field does NOT re-fire bindings of unaffected sibling items', async () => {
-        // Each block has 3 items. setProperty on item 'a'.completed
+        // Each block has 3 items. toggling item 'a'.completed
         // should re-fire only item a's completed-binding. Items b and c
         // should not re-fire any bindings (their data is unchanged).
         const fires = { a: 0, b: 0, c: 0 };
@@ -814,7 +814,7 @@ RENDERING_ENGINES.forEach(engine => {
                 fires[todo._id]++;
                 return String(todo.completed);
               },
-              toggleA: () => todos.setProperty('a', 'completed', !todos.getItem('a').completed),
+              toggleA: () => todos.toggleItemProperty('a', 'completed'),
             };
           },
         });
@@ -881,9 +881,9 @@ RENDERING_ENGINES.forEach(engine => {
         expect(fires).toEqual({ aEmoji: 2, aCount: 2, bEmoji: 1, bCount: 1 });
       });
 
-      it('setArrayProperty re-fires only the matching field across every item', async () => {
-        // todo-list toggleAll shape: state.todos.setArrayProperty(
-        // 'completed', true) mutates the completed field on every item.
+      it('array-all setProperty re-fires only the matching field across every item', async () => {
+        // todo-list toggleAll shape: state.todos.setProperty('completed',
+        // true) mutates the completed field on every item.
         // Direct dotted reads (todo.title, todo.completed) register
         // per-FIELD deps; only the completed binding wakes per record.
         let titleFires = 0;
@@ -911,7 +911,7 @@ RENDERING_ENGINES.forEach(engine => {
                 completedFires++;
                 return String(completed);
               },
-              completeAll: () => todos.setArrayProperty('completed', true),
+              completeAll: () => todos.setProperty('completed', true),
             };
           },
         });
@@ -934,7 +934,7 @@ RENDERING_ENGINES.forEach(engine => {
       it('per-field dep registered for an absent field re-fires when the field is added', async () => {
         // A binding reading a key that does not yet exist on the item
         // registers a per-FIELD dep on first render (resolves to
-        // undefined). Later setProperty adds the key; snapshot diff sees
+        // undefined). Later setItemProperty adds the key; snapshot diff sees
         // the new key, notifyField fires the dep, the binding re-fires
         // and reads the new value. Lazy field-dep allocation does not
         // depend on the field existing at registration time.
@@ -953,7 +953,7 @@ RENDERING_ENGINES.forEach(engine => {
                 flagFires++;
                 return String(todo.flag);
               },
-              addFlag: () => todos.setProperty('a', 'flag', true),
+              addFlag: () => todos.setItemProperty('a', 'flag', true),
             };
           },
         });
@@ -1141,7 +1141,7 @@ RENDERING_ENGINES.forEach(engine => {
           template: '{#each fruit in fruits}<span class="json">{stringify fruit}</span>{/each}',
           defaultState: { fruits: [{ _id: 'apple', name: 'Apple', taste: 'Sweet' }] },
           createComponent: ({ state }) => ({
-            ripen: () => state.fruits.setProperty('apple', 'taste', 'Amazing'),
+            ripen: () => state.fruits.setItemProperty('apple', 'taste', 'Amazing'),
           }),
         });
         const el = document.createElement(tag);
@@ -1299,10 +1299,10 @@ RENDERING_ENGINES.forEach(engine => {
       // the as-key dep which wakes every subtemplate binding reading
       // `todo.X`, not just the field that changed. The test pins the
       // contract for the per-field-isolation pass that closes the gap.
-      it('mutating one item field via setProperty re-fires only the matching subtemplate-binding key', async () => {
+      it('mutating one item field via toggleItemProperty re-fires only the matching subtemplate-binding key', async () => {
         // bench-todo's exact composition: {#each todo in todos}{>todoItem
         // id=todo.id title=todo.title completed=todo.completed}{/each}.
-        // setProperty('a', 'completed', true) should re-fire only the
+        // toggleItemProperty('a', 'completed') should re-fire only the
         // completed-reading binding inside item a's todoItem subtemplate.
         // Title and id bindings should not re-fire.
         const fires = { id: 0, title: 0, completed: 0 };
@@ -1335,7 +1335,7 @@ RENDERING_ENGINES.forEach(engine => {
             return {
               todos,
               getTodos: () => todos.get(),
-              toggle: () => todos.setProperty('a', 'completed', !todos.getItem('a').completed),
+              toggle: () => todos.toggleItemProperty('a', 'completed'),
             };
           },
         });

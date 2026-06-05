@@ -2,6 +2,11 @@ import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
 
 export class Reaction {
+  // static mirror of Scheduler.current for debugger breakpoints, where devtools can't import currentReaction()
+  static get current() {
+    return Scheduler.current;
+  }
+
   constructor(callback, { context, firstRun = true } = {}) {
     this.callback = callback;
     this.dependencies = new Set();

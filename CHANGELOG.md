@@ -20,6 +20,7 @@ xx.xx.xxxx
 * **Feature** - Added `hasDependents()` to check if any reactions are subscribed to a signal
 * **Feature** - Module-level functional surface — `signal`, `reaction`, `derive`, `computed`, `match`, `nonreactive`, `guard`, `afterFlush`, `flush`, `scheduleFlush`, `currentReaction`, `getSource` ship as named exports alongside the classes
 * **Feature** - Added `match(source, matchFn?)` — per-key reactive membership against a source signal, the perf primitive that backs `{#match}` template blocks (Solid's `createSelector` adapted)
+* **Feature** - Added `setItemProperty`, `setIndexProperty`, `toggleItemProperty`, and `toggleProperty` collection helpers for setting or flipping a field by id, by index, or across every item
 * **BREAKING** - Removed `Reaction.create`, `Reaction.current`, `Reaction.flush`, `Reaction.scheduleFlush`, `Reaction.afterFlush`, `Reaction.getSource`, `Reaction.nonreactive`, `Reaction.guard` — use the module-level exports
 * **BREAKING** - Removed `Signal.computed` — use the module-level `computed` export
 * **BREAKING** - Removed `signal.subscribe(cb)` — compose with `reaction(() => cb(signal.value))`
@@ -27,6 +28,8 @@ xx.xx.xxxx
 * **BREAKING** - Renamed `signal.getID` / `getIDs` / `hasID` to `getId` / `getIds` / `hasId`
 * **BREAKING** - `Signal.clone` default now applies the full cloning policy, preserving class instances at any depth via `clone(value, { preserveNonCloneable: true })`. User overrides via `Signal.clone = fn` or `new Signal(v, { clone: fn })` fully replace it
 * **BREAKING** - Removed `signal.clone(value)` prototype method — instance always carries its configured clone function in `this.clone`
+* **BREAKING** - Removed `setArrayProperty`. Use `setIndexProperty(index, property, value)` for one item by position, or `setProperty(property, value)` to set the field on every item
+* **BREAKING** - `signal.setProperty` on an array now takes `(property, value)` and sets the field on every item. Use `setItemProperty(id, property, value)` for the previous by-id form
 
 ### Renderer
 * **Bug** - Fixed property bindings (`.prop={expr}`) incorrectly defaulting to literal mode — properties now evaluate expressions like other bindings, use `{#fn expr}` to pass function references

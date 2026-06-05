@@ -5,7 +5,6 @@ title: Reactive Flushing
 description: Understanding how and when reactive changes are processed.
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
-import { Reaction } from '@semantic-ui/reactivity'; // Added import
 
 Changes to [Signals](/docs/guides/reactivity/signals) do not cause dependent [Reactions](/docs/guides/reactivity/reactions) to run immediately. Instead, updates are queued and "flushed" together asynchronously. This batching process uses the browser's [microtask queue](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide).
 
@@ -29,7 +28,7 @@ For example you might have several reactive values that all update the same UI c
 
 ### Synchronous Updates
 
-If you need your updates to propagate immediately you can use [`Reaction.flush()`](/docs/api/reactivity/reaction#flush).
+If you need your updates to propagate immediately you can use [`flush()`](/docs/api/reactivity/flushing#flush).
 
 This processes all pending reactions, and runs a flush cycle immediately  ensuring any code after will occur after all dependencies have been rerun.
 
@@ -38,7 +37,7 @@ This processes all pending reactions, and runs a flush cycle immediately  ensuri
 
 ### After Flush Callback
 
-To schedule a function to run *after* the next asynchronous flush completes, pass a callback to  [`Reaction.afterFlush()`](/docs/api/reactivity/reaction#afterflush).
+To schedule a function to run *after* the next asynchronous flush completes, pass a callback to  [`afterFlush()`](/docs/api/reactivity/flushing#afterflush).
 
 This is often used when reactive updates might cause changes in the DOM. If you naively query for them immediately after the update, the results will not have propagated.
 

@@ -100,16 +100,13 @@ const createComponent = ({ tpl, settings, $, state, flush, afterFlush, dispatchE
 
   // add -> icon if the menu has a sub menu
   addNavIcons(menu) {
-    if (!settings.navIcon) {
+    if (!settings.navIcon || !menu?.menu) {
       return menu;
     }
-    (menu?.menu || []).map(item => {
-      if (item.menu) {
-        item.navIcon = settings.navIcon;
-      }
-      return item;
-    });
-    return menu;
+    return {
+      ...menu,
+      menu: menu.menu.map(item => item.menu ? { ...item, navIcon: settings.navIcon } : item),
+    };
   },
   addTrailingSlash(url) {
     return (url.substr(-1) === '/')

@@ -196,7 +196,6 @@ Slot in wherever there's a gap; not phase-gated.
 | P12 | [Template Spread Syntax](template-spread-syntax.md) | 4-8h | pair | scoped | `{>card ...friend}` — object spread in data passing. Ship when component templates demonstrate need. |
 | P13 | [Template Content Projection](template-wrapper-snippets.md) | 12-16h (1.5-2d) | pair | scoped | `{>content}` — content projection for snippets + subtemplates. Ship when component templates demonstrate need. |
 | P14 | [Template Let Bindings](template-let-bindings.md) | 10-14h (1-2d) | pair | scoped | `{#let}...{/let}` — snippet-for-vars. Ship when component templates demonstrate need. |
-| P15 | [Reactivity Docs + setArrayProperty](reactivity-docs-and-helpers-followup.md) | 7-10h | pair | initial | Deferred tail of the functional-surface refactor. Migrate reactivity guides/API/examples/types off the removed class-static surface, reconcile stale `safety` docs (no `freeze` preset), split `setArrayProperty`. Gates a clean 0.18.0 tag (types ship wrong contracts today). |
 
 ---
 

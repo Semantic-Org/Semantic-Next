@@ -81,12 +81,14 @@ const subCategorySortOrder = {
   'Reactivity': [
     'Introduction',
     'Signals',
+    'Derived',
     'Reactions',
     'Flushing',
+    'Controls',
+    'Dependencies',
+    'Debugging',
     'Settings',
     'Helpers',
-    'Performance',
-    'Controls',
     'Advanced',
   ],
   'Query': [
@@ -108,6 +110,7 @@ const subCategorySortOrder = {
     'Iterators',
     'Logical Operators',
     'Collections',
+    'Utilities',
   ],
   'Utils': [
     'Setup',

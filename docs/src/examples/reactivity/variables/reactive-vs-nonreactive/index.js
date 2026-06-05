@@ -1,11 +1,11 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { reaction, signal } from '@semantic-ui/reactivity';
 
-let person1 = new Signal({ name: 'Sally', age: 22 });
+let person1 = signal({ name: 'Sally', age: 22 });
 let person2 = { name: 'Tom', age: 28 };
-Reaction.create(reaction => {
+reaction(computation => {
   const inner1 = person1.get(); // reactive
   const inner2 = person2; // not reactive
-  if (reaction.firstRun) {
+  if (computation.firstRun) {
     console.log('first run');
   }
   else {

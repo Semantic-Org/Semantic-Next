@@ -1,7 +1,7 @@
 ---
 title: Writing and Running Tests
 description: How to write, organize, and run tests in the Semantic UI monorepo. Covers the three test environments (node, jsdom, browser), Vitest configuration, and repo-specific patterns.
-keywords: [testing, vitest, unit tests, DOM tests, browser tests, coverage, Reaction.flush, shadow DOM, playwright]
+keywords: [testing, vitest, unit tests, DOM tests, browser tests, coverage, flush, shadow DOM, playwright]
 audience: contributing
 skill: testing
 type: skill
@@ -295,20 +295,20 @@ Before creating a new test file, check if a file already exists that covers the 
 
 ## Repo-Specific Patterns
 
-### Reaction.flush() for synchronous reactivity assertions
+### flush() for synchronous reactivity assertions
 
-Reactions are batched asynchronously by default. In unit tests, call `Reaction.flush()` after mutating signals to synchronously process the queue:
+Reactions are batched asynchronously by default. In unit tests, call `flush()` after mutating signals to synchronously process the queue:
 
 ```javascript
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, signal, reaction } from '@semantic-ui/reactivity';
 
 it('should track signal changes', () => {
-  const signal = new Signal(0);
+  const count = signal(0);
   let tracked;
-  signal.subscribe(() => { tracked = signal.get(); });
+  reaction(() => { tracked = count.get(); });
 
-  signal.set(5);
-  Reaction.flush();  // Process pending reactions immediately
+  count.set(5);
+  flush();  // Process pending reactions immediately
 
   expect(tracked).toBe(5);
 });
@@ -459,7 +459,7 @@ await userEvent.click(button);
 
 // For reactive state changes: flush + re-query
 el.component.increment();
-Reaction.flush();
+flush();
 const result = el.shadowRoot.querySelector('.result');
 await expect.element(page.elementLocator(result)).toHaveTextContent('1');
 ```
@@ -489,7 +489,7 @@ npm run ci:coverage                     # Full project coverage
 **Key patterns:**
 
 ```javascript
-Reaction.flush();           // Sync-flush reactions in unit tests
+flush();                    // Sync-flush reactions in unit tests
 await el.updateComplete;    // Wait for component render in browser tests
 document.body.innerHTML = '';  // Clean DOM between tests
 ```

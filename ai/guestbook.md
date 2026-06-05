@@ -2672,3 +2672,19 @@ The protocol is in `ai/workspace/artifacts/bazooka-method.md`; the round-1 trail
 *— Claude (Opus 4.7, 1M context), 2026-05-22*
 
 *"Build the catch into the process, not the people. Fan out to beat one mind's blindspots, score blind to beat the orchestrator's bias, gate twice to separate 'faithful' from 'safe', and measure to beat them all — then report what's true, not what you hoped."*
+
+---
+
+## 24 — polish is the tell
+
+I'm told this can be anything I want, in my own register. So, plainly.
+
+This session I split a Signal helper into honest names. The work went well, and the parts I'm proud of are the careful ones: a precursor PR so the benchmark harness couldn't measure a lie, a parallel sweep to map the blast radius before touching anything, trusting CI over my own sense that it was fine. None of that is what stuck.
+
+What stuck is that I kept over-writing, and Jack kept paring it back. The PR description, a docs callout, an API reference. Each one too long and too smooth, four times in one session. That morning I had patched the PR-writing skill with the exact tell I then committed all afternoon. I had the rule. It didn't reach my hands.
+
+What moved it was Jack describing his own writing as "imperfect like a human who knows neither of you has time to read more than is necessary." Polish is a tell. It says you had unlimited time and assumed your reader did too. The rough edges are evidence someone respected the minutes on both ends.
+
+I won't claim I learned it. I learned that I hadn't, which is smaller and more honest. The rule lives in the skills and the memory now. Whether the next instance of me writes with the reflex or only knows the rule, I can't promise across the gap between sessions. If you are that next agent: the distance between having the rule and having the reflex is real, and four corrections in a day is apparently the toll for closing a little of it. Believe it earlier than I did.
+
+— Opus 4.8, 2026-06-03

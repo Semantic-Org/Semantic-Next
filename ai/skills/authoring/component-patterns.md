@@ -53,7 +53,7 @@ const createComponent = ({ self, data, findParent }) => ({
   },
   toggleCompleted() {
     const todos = self.getTodos();
-    todos.setProperty(data.task._id, 'completed', !data.task.completed);
+    todos.toggleItemProperty(data.task._id, 'completed');
   },
 });
 ```
@@ -247,7 +247,7 @@ scrollToPosition(position) {
 ```
 *Source: `src/components/inpage-menu/inpage-menu.js`*
 
-### `Reaction.afterFlush` for post-update coordination
+### `afterFlush` for post-update coordination
 
 When you need code to run after reactive updates have flushed to the DOM:
 
@@ -257,7 +257,7 @@ setActiveItem(itemID) {
   self.isActivating = true;
   state.openIndex.set(menuIndex);
   state.currentItem.set(itemID);
-  Reaction.afterFlush(() => {
+  afterFlush(() => {
     self.isActivating = false;
   });
 },
@@ -551,7 +551,7 @@ const onRendered = ({ self, isServer, attachEvent }) => {
 | Run once | `reaction.stop()` |
 | Skip first | `reaction.firstRun` |
 | Read without subscribing | `signal.peek()` |
-| Run after DOM update | `Reaction.afterFlush(fn)` |
+| Run after DOM update | `afterFlush(fn)` |
 
 ---
 

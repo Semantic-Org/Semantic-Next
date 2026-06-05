@@ -10,16 +10,16 @@ To provide more granular control over reactivity, Semantic provides several opti
 
 The default options are designed to permit some minor performance overhead as a tradeoff for improved developer experience, but this might not fit all use-cases for [Signals](/docs/guides/reactivity/signals).
 
-Signal options are passed in the second argument to the [`Signal` constructor](/docs/api/reactivity/signal#constructor).
+Signal options are passed as the second argument to [`signal()`](/docs/api/reactivity/signal).
 
 ## Equality Comparison
 
 By default, Signals use a deep equality comparison, [`isEqual`](/docs/api/utils/equality/#isequal), to determine if a new value is actually different from the current value. This prevents [Reactions](/docs/guides/reactivity/reactions) from rerunning if the updated value has not changed.
 
 ```javascript
-import { Signal } from '@semantic-ui/reactivity';
+import { signal } from '@semantic-ui/reactivity';
 
-const person = new Signal({ name: 'John', age: 30 });
+const person = signal({ name: 'John', age: 30 });
 
 // No reactive update triggered (objects are deep equal)
 person.set({ name: 'John', age: 30 });
@@ -30,7 +30,7 @@ person.set({ name: 'Jane', age: 30 });
 
 ### Custom Equality Function
 
-You can provide a custom equality comparison function using the [`equalityFunction`](/docs/api/reactivity/signal#options) option to modify how equality checks are performed. This can potentially speed up comparisons at the cost of potential additional reactivity.
+You can provide a custom equality comparison function using the [`equality`](/docs/api/reactivity/signal#options) option to modify how equality checks are performed. This can potentially speed up comparisons at the cost of potential additional reactivity.
 
 > **When To Use** Custom equality functions can be useful for extremely large objects or data structures where you want to avoid checking their values each time they are accessed.
 
@@ -41,62 +41,45 @@ const customEquality = (a, b) => {
 };
 
 // Signal using custom equality check
-const customVar = new Signal(initialValue, { equalityFunction: customEquality });
+const customVar = signal(initialValue, { equality: customEquality });
 ```
 
-## Safety Presets
+## Safety
 
-Signals have three safety presets controlling how the stored value is protected against accidental mutation. Set the preset via the `safety` option.
+The `safety` option controls how a signal guards its stored value against outside mutation.
 
-| Preset | On `set` | On `.get().x = y` | Dedupe | Use case |
-|---|---|---|---|---|
-| `freeze` (default) | deep-freeze plain objects and arrays | throws `TypeError` | `isEqual` | state your code owns end-to-end |
-| `reference` | store raw | silent (no reactivity) | `isEqual` | third-party objects, perf-critical paths |
-| `none` | store raw | silent (no reactivity) | never | event-stream semantics — every `set` notifies |
+| Preset | Stores | On `get().x = y` | Dedupe |
+|---|---|---|---|
+| `reference` (default) | the value by reference | mutates the signal silently | `isEqual` |
+| `clone` | a defensive copy | mutates the copy, not the signal | `isEqual` |
+| `none` | the value by reference | mutates silently | never |
 
-### `safety: 'freeze'` — the default
+### reference
 
-The default deep-freezes object and array values when you call `set()`. Accidental in-place mutation throws at the call site instead of silently dropping the update.
+The default. The signal stores and returns your value as-is, with no copying. It is the fast path and the right choice for most signals, including objects you own and update through `set()` or the [mutation helpers](/docs/guides/reactivity/mutation-helpers).
 
 ```javascript
-const count = new Signal({ n: 0 });
-
-count.get().n = 1; // TypeError — "Signal value is frozen — cannot set property `n`"
-
-// Correct ways to update:
-count.set({ n: 1 });                // replace the whole value
-count.mutate(prev => ({ n: prev.n + 1 })); // return a new value
-count.setProperty('n', 1);          // mutation helper — rebuilds immutably under freeze
+const user = signal({ name: 'Alice' });
 ```
 
-Deep-freeze only walks arrays and plain objects. `Date`, `Map`, `Set`, `RegExp`, DOM nodes, and class instances are stored by reference — their own mutation semantics are preserved.
+### clone
 
-### `safety: 'reference'` — opt-out for borrowed data
-
-Use `reference` when the signal holds objects you didn't construct yourself. Freezing them would poison the lender's internal references; see [Signals and Foreign References](/docs/guides/reactivity/signals#signals-and-foreign-references) for the full heuristic.
+Stores and returns defensive copies, so outside code holding a reference cannot mutate the signal's value. Reach for it when state might be changed behind your back. Copies use a deep clone by default; pass a `clone` function to override it.
 
 ```javascript
-const searchResults = new Signal([], { safety: 'reference' });
+const config = signal({ theme: 'dark' }, { safety: 'clone' });
+
+const jsonClone = (value) => JSON.parse(JSON.stringify(value));
+const data = signal({ n: 1 }, { safety: 'clone', clone: jsonClone });
 ```
 
-Direct mutation on `.get()` values fails silently under `reference` — the helpers (`push`, `splice`, `setProperty`) remain the safe update path.
+### none
 
-### `safety: 'none'` — event-stream semantics
-
-Use `none` when every `set` should notify subscribers, even if the value is deeply equal to the previous one. Suitable for notification channels where the payload's shape repeats.
+Stores by reference like `reference`, but skips the equality check, so every `set()` notifies even when the value is unchanged. Use it for event-stream signals where each emission matters.
 
 ```javascript
-const pulse = new Signal(null, { safety: 'none' });
+const pulse = signal(null, { safety: 'none' });
 
 pulse.set({ type: 'heartbeat' });
-pulse.set({ type: 'heartbeat' }); // still notifies, even though isEqual would say equal
-```
-
-## Custom Clone Function
-
-The default `cloneFunction` is used by `signal.clone()` to produce a deep-mutable copy on demand. Override it if you need non-default clone semantics.
-
-```javascript
-const jsonClone = (value) => JSON.parse(JSON.stringify(value));
-const mySignal = new Signal({ data: 1 }, { cloneFunction: jsonClone });
+pulse.set({ type: 'heartbeat' }); // still notifies
 ```

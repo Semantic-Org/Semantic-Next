@@ -1,17 +1,17 @@
 // Helper: push
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, signal } from '@semantic-ui/reactivity';
 import { last } from '@semantic-ui/utils';
 
-const notifications = new Signal([
+const notifications = signal([
   { text: 'Welcome!', read: false },
 ]);
 
 // output the last notification in array
-Reaction.create(() => console.log(last(notifications.get())));
+reaction(() => console.log(last(notifications.get())));
 
 // New message notification is last
 notifications.push({ text: 'New message received', read: false });
-Reaction.flush();
+flush();
 
 // System update notification is last
 notifications.push(

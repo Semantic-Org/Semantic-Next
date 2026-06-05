@@ -476,7 +476,7 @@ const html = renderToString(Counter, {});
 3. Build entries from AST: `[{ id: 0, type: 'expression', node: { value: 'count' }, classification: { type: 'text' } }]`
 4. `hydrateMarkers` finds `<!--sui:v1:0-->`, wires a Reaction:
    ```js
-   Reaction.create(() => {
+   reaction(() => {
      const value = this.eval('count', data);  // reads count Signal -> dependency registered
      textNode.data = value ?? '';              // sets "0" (no-op, already correct)
    });

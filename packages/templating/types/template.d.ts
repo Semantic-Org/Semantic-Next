@@ -221,6 +221,30 @@ export interface CallParams<
   signal: <T>(value: T, options?: SignalOptions<T>) => Signal<T>;
 
   /**
+   * Creates a signal computed from other signals, recomputing when any of them change.
+   * @see https://next.semantic-ui.com/docs/api/reactivity/derived#computed
+   */
+  computed: Template['computed'];
+
+  /**
+   * Derives a signal from a single source signal.
+   * @see https://next.semantic-ui.com/docs/api/reactivity/derived#derive
+   */
+  derive: Template['derive'];
+
+  /**
+   * Creates a per-key reactive selector against a source signal.
+   * @see https://next.semantic-ui.com/docs/api/reactivity/derived#match
+   */
+  match: Template['match'];
+
+  /**
+   * Gates downstream reactivity, only propagating when the guarded value changes.
+   * @see https://next.semantic-ui.com/docs/api/reactivity/controls#guard
+   */
+  guard: <T>(compute: () => T, equalCheck?: (newValue: T, oldValue: T) => boolean) => T;
+
+  /**
    * Executes a callback after all pending reactive updates have been processed.
    *
    * Useful for operations that need to happen after the DOM has been updated.
@@ -866,7 +890,29 @@ export class Template {
    * Creates a reactive effect that will re-run whenever its dependencies change.  Reactions are automatically cleaned up when the component is destroyed.
    * @param reaction - The function to execute as a reactive effect.
    */
-  reaction(reaction: () => void): void;
+  reaction(callback: (reaction: Reaction) => void): Reaction;
+
+  /**
+   * Creates a computed signal scoped to the template, stopped when it is destroyed.
+   */
+  computed<T>(computeFn: () => T, options?: SignalOptions<T>): Signal<T> & { stop(): void; };
+
+  /**
+   * Derives a signal from a source signal, scoped to the template, stopped when it is destroyed.
+   */
+  derive<T, U>(
+    source: Signal<T>,
+    computeFn: (value: T) => U,
+    options?: SignalOptions<U>,
+  ): Signal<U> & { stop(): void; };
+
+  /**
+   * Creates a per-key reactive selector scoped to the template, stopped when it is destroyed.
+   */
+  match<V, K = V>(
+    source: Signal<V>,
+    matchFn?: (key: K, value: V) => boolean,
+  ): ((key: K) => boolean) & { stop(): void; };
 
   /**
    * Clears all reactions associated with this template.

@@ -45,9 +45,9 @@ export const CURRICULUM = [
     intro:
       "TodoMVC implemented with the framework's canonical patterns: signal mutation helpers for the list, a `reaction()` that mirrors state to localStorage, subtemplates for items, and `hashchange` for routing between filters.",
     newPatterns:
-      "`push`, `removeItem`, `replaceItem`, `setProperty`, `setArrayProperty`, `filter`, `getItem`, `reaction()`, `{#snippet}`, `subTemplates`, `keys`, `afterFlush`, `{classMap}`, `{selectedIf}`, `{maybePlural}`, `'global hashchange window'`.",
+      "`push`, `removeItem`, `toggleItemProperty`, `setItemProperty`, `setProperty`, `filter`, `reaction()`, `{#snippet}`, `subTemplates`, `keys`, `afterFlush`, `{classMap}`, `{selectedIf}`, `{maybePlural}`, `'global hashchange window'`.",
     whatToNotice: [
-      "Each mutation has a named helper: `state.todos.push(todo)`, `removeItem(id)`, `replaceItem(id, next)`, `setProperty(id, key, value)`, `setArrayProperty('completed', true)`. Helpers describe intent instead of reproducing immutable-update boilerplate.",
+      "Each mutation has a named helper: `state.todos.push(todo)`, `removeItem(id)`, `toggleItemProperty(id, 'completed')`, `setItemProperty(id, key, value)`, `setProperty('completed', true)`. Helpers describe intent instead of reproducing immutable-update boilerplate.",
       '`reaction(() => { state.todos.get(); localStorage.setItem(...) })` syncs the list to storage. Re-runs when the read signal changes; no dependency array.',
       'Subtemplates compose with named parameters: `{>todoItem id=todo.id title=todo.title ...}`. The `todoItem` template lives in its own file and is registered via `subTemplates`.',
       "`afterFlush(() => $('.editing .edit').focus())` runs after the next render commits, which is how you reach into the DOM that the new state just produced.",

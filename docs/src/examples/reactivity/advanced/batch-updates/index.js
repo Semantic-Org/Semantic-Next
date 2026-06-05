@@ -1,11 +1,11 @@
 // Batch Updates: Understanding automatic batching behavior
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
-const firstName = new Signal('John');
-const lastName = new Signal('Doe');
+const firstName = signal('John');
+const lastName = signal('Doe');
 
 // Reaction that depends on both signals
-Reaction.create(() => {
+reaction(() => {
   console.log('Full name:', `${firstName.get()} ${lastName.get()}`);
 });
 
@@ -16,11 +16,11 @@ lastName.set('Smith');
 // Only one reaction will run with the final values
 
 console.log('--- After automatic batching ---');
-Reaction.flush(); // Force immediate execution to see result
+flush(); // Force immediate execution to see result
 
 console.log('--- Manual flush between updates ---');
 firstName.set('Bob');
-Reaction.flush(); // Force execution after first change
+flush(); // Force execution after first change
 
 lastName.set('Johnson');
-Reaction.flush(); // Force execution after second change
+flush(); // Force execution after second change

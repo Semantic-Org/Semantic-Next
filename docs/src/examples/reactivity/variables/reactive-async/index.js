@@ -1,10 +1,10 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { reaction, signal } from '@semantic-ui/reactivity';
 
-let number = new Signal(0);
+let number = signal(0);
 
 // A reaction will always immediately run to determine
 // Its reactive dependencies. This will log "0"
-Reaction.create(() => {
+reaction(() => {
   console.log(number.get());
 });
 

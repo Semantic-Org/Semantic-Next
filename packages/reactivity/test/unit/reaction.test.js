@@ -21,6 +21,19 @@ describe('Reaction', () => {
     Scheduler.afterFlushCallbacks = [];
   });
 
+  describe('current', () => {
+    it('mirrors the running reaction and is null outside a run', () => {
+      expect(Reaction.current).toBe(null);
+      let inside;
+      const r = reaction(() => {
+        inside = Reaction.current;
+      });
+      expect(inside).toBe(r);
+      expect(Reaction.current).toBe(null);
+      r.stop();
+    });
+  });
+
   describe('Basic Usage', () => {
     it('should trigger reaction on reactive value change', () => {
       const reactiveValue = new Signal('first');

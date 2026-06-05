@@ -416,38 +416,38 @@ let comp = Reaction.create(() => {
 
 ### Array of Objects
 
-`Signal` provides several helpers for manipulating arrays of objects a common data structure when handling structured data.
+`Signal` provides several helpers for manipulating arrays of objects, a common data structure when handling structured data.
 
 ```javascript
 const tasks = new Signal([
-  { _id: 'task1_uuid', task: 'Implement feature', completed: true }
-  { _id: 'task2_uuid', task: 'Write Tests', completed: true }
+  { _id: 'task1_uuid', task: 'Implement feature', completed: true },
+  { _id: 'task2_uuid', task: 'Write Tests', completed: true },
   { _id: 'task3_uuid', task: 'Write documentation', completed: false },
 ]);
 ```
 
 ```javascript
 // sets 'write documentation' to complete
-tasks.setProperty('task3_uuid', 'completed', true);
+tasks.setItemProperty('task3_uuid', 'completed', true);
 ```
 
 ```javascript
 // replaces task 1 with new task
-const newTask = { _id: 'tasks1_uuid', task: 'Reimplement feature', completed: false };
+const newTask = { _id: 'task1_uuid', task: 'Reimplement feature', completed: false };
 tasks.replaceItem('task1_uuid', newTask)
 ```
 
 ```javascript
 // gets index of id
-const index = tasks.getIndex('tasks1_uuid')
+const index = tasks.getItemIndex('task1_uuid')
 ```
 
 ```javascript
 // gets id from an item
-const id = tasks.getID(tasks.get()[0])
+const id = tasks.getId(tasks.get()[0])
 ```
 
 ```javascript
 // remove task 2 from list
-tasks.removeItem('tasks2_uuid')
+tasks.removeItem('task2_uuid')
 ```

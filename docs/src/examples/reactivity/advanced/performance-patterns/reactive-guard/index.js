@@ -1,11 +1,11 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { flush, guard, reaction, signal } from '@semantic-ui/reactivity';
 
-const stringNumber = new Signal('');
-const number = new Signal(null);
+const stringNumber = signal('');
+const number = signal(null);
 
-Reaction.create(() => {
+reaction(() => {
   // Guard prevents the number from triggering reactivity unless the parsed value changes
-  const parsedNumber = Reaction.guard(() => {
+  const parsedNumber = guard(() => {
     const value = stringNumber.get();
     return Number(value.trim());
   });
@@ -13,7 +13,7 @@ Reaction.create(() => {
 });
 
 // Downstream reaction
-Reaction.create(() => {
+reaction(() => {
   if (number.get()) {
     console.log(`Number is ${number.get()}`);
   }
@@ -21,12 +21,12 @@ Reaction.create(() => {
 
 // Set number
 stringNumber.set('100');
-Reaction.flush(); // Logs: Processed value changed to: 100
+flush(); // Logs: Processed value changed to: 100
 
 // Change stringNumber in a way that does not change the processed number.
 stringNumber.set('  100  ');
-Reaction.flush(); // No log, because 100 === 100
+flush(); // No log, because 100 === 100
 
 // Change stringNumber so that the processed number changes.
 stringNumber.set('200');
-Reaction.flush(); // Logs: Processed value changed to: 200
+flush(); // Logs: Processed value changed to: 200
