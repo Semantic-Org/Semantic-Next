@@ -74,6 +74,37 @@ performance.mark(startMark('toggle-middle'));
 performance.measure('toggle-middle', startMark('toggle-middle'));
 ```
 
+### Wrap each op in `measureOp`
+
+Raw mark/measure is the primitive, but no-lifecycle suites (`signal`, the `*-micros`, `hydrate`) don't call it directly — each op goes through a `measureOp` wrapper:
+
+```js
+// Mark, run, and measure one op. The collect leads the marks so the op measures
+// on a freed heap (see "Collecting between ops").
+async function measureOp(name, run) {
+  settle();
+  performance.mark(`${name}-start`);
+  const result = run();
+  if (result?.then) { await result; }
+  performance.measure(name, `${name}-start`);
+}
+
+const sig = new Signal(0);                      // setup, before the call
+await measureOp('reactive-fanout-500x1200', () => {
+  for (let i = 0; i < 1200; i++) { sig.set(i + 1); flush(); }
+});
+for (const r of reactions) { r.stop(); }        // teardown, after the call
+```
+
+It buys two things raw mark/measure doesn't:
+
+- **The name is written once.** Raw mark/measure repeats the metric string three times; a typo in any copy silently produces a metric that never matches `entryName` and drops out of the report. `measureOp` makes that impossible.
+- **The collect can't be forgotten** — it's structural, not a `settle()` an author has to remember after each measure.
+
+Only the measured workload goes in `run`. Setup (fixtures, reaction creation) stays before the call, teardown (`.stop()`, `container.innerHTML = ''`) stays after it as plain code — never inside the closure. Use `async () =>` when the region awaits, a plain `() =>` when it's synchronous.
+
+The component suites (`krausest`, `todo`, `template`) are the exception: they mount and destroy a real element per op, so their collect lives in `destroy()` instead.
+
 ### Tachometer config entry
 
 ```json
@@ -87,7 +118,7 @@ performance.measure('toggle-middle', startMark('toggle-middle'));
     {
       "name": "this-change",
       "url": "ci-current-<suite>.html",
-      "browser": { "name": "chrome", "headless": true },
+      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
       "measurement": [
         { "mode": "performance", "entryName": "toggle-middle" }
       ]
@@ -95,7 +126,7 @@ performance.measure('toggle-middle', startMark('toggle-middle'));
     {
       "name": "tip-of-tree",
       "url": "ci-baseline-<suite>.html",
-      "browser": { "name": "chrome", "headless": true },
+      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
       "measurement": [
         { "mode": "performance", "entryName": "toggle-middle" }
       ]
@@ -105,6 +136,8 @@ performance.measure('toggle-middle', startMark('toggle-middle'));
 ```
 
 **Always list the same measurements in both the `this-change` and `tip-of-tree` entries** — tachometer compares pairwise, so the sets must match.
+
+**Both browser entries pass `--js-flags=--expose-gc`** so `globalThis.gc` is defined for the between-op collect (next section) — without the flag the collect silently no-ops and a heavy op poisons the metrics after it.
 
 **Don't change these knob values without a reason:**
 
@@ -196,6 +229,32 @@ const flushWork = () => Reaction.flush();
 ```
 
 `flush` for setup and one-shot mount tails. `flushWork` for everything inside a cycle loop in a measured region. If you're writing a new bench file, copy this pair and use them with intent.
+
+---
+
+## Collecting between ops
+
+Tachometer reloads the page once per *sample*, not per op — a `measurement` array pulls every metric from one load (google/tachometer#196). Every op in a suite shares one heap, in source order, so a heavy-allocation op grows V8's old-space and every op measured *after* it starts on that grown heap. The failure this produces is a **confident regression on an op the PR never touched**: an earlier op's allocation shifts (say a faster `create`), and a later `update` that re-uses the heap measures the difference. Behavior-preserving in the regressing op, real in the measurement, and it clears the noise gate — so it reads as a genuine finding.
+
+The fix is to collect before each op measures, so a heavy op can't poison its successors:
+
+```js
+// Aggressive major collect — reclaims old-space sizing, not just live garbage.
+// A plain gc() leaves ~15% of the sizing behind; last-resort clears it.
+function settle() {
+  if (globalThis.gc) {
+    try { globalThis.gc({ type: 'major', execution: 'sync', flavor: 'last-resort' }); }
+    catch { globalThis.gc(); }
+  }
+}
+```
+
+Two integration points, by suite shape:
+
+- **No-lifecycle suites** (`signal`, `*-micros`, `hydrate`) collect at the *start* of each op, inside `measureOp` — the collect leads the marks. Setup and teardown sit outside the closure as plain code, so by the time the next op runs the previous op's teardown is already unreferenced and reclaimable.
+- **Component suites** (`krausest`, `todo`, `template`) collect at the *end*, inside `destroy()` — they already clear the mounted element there between ops, so the collect rides a hook that runs after every measure.
+
+Either way it's one collect per op, off any measured region. `globalThis.gc` only exists under `--expose-gc`, so the config has to pass it (see the config entry above) — without the flag the collect silently no-ops and the contamination returns.
 
 ---
 
@@ -346,14 +405,14 @@ If the local run works and the noise floor is acceptable, push. CI will run the 
 
 **Files to touch for an extension to an existing suite:**
 
-1. `packages/<pkg>/bench/tachometer/bench-<existing>.js` — add `mark`/`measure` pair
+1. `packages/<pkg>/bench/tachometer/bench-<existing>.js` — wrap the new op in `measureOp` (or, in a component suite, mark/measure with the collect in `destroy()`)
 2. `packages/<pkg>/bench/tachometer/tachometer-ci-<suite>.json` — add `{ mode: 'performance', entryName: '<metric>' }` to BOTH `this-change` and `tip-of-tree` measurement arrays
 
 **Files to touch for a new bench file:**
 
 1. `bench-<name>.js` — workload + marks
 2. `ci-current-<name>.html` / `ci-baseline-<name>.html` — fixtures (copy an existing pair)
-3. `tachometer-ci-<name>.json` — config
+3. `tachometer-ci-<name>.json` — config, with `--js-flags=--expose-gc` in both browser entries
 4. `build-ci.js` — add `'bench-<name>.js'` to `benchFiles` array
 
 **Knobs to leave alone unless you have data:**
