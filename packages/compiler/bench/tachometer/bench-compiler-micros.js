@@ -13,11 +13,9 @@
 
 import { TemplateCompiler } from '@semantic-ui/compiler';
 
-const startMark = (name) => `${name}-start`;
-
-// Collect between ops so each one measures on a freed heap, not the old-space
-// the previous op grew. Runs after every performance.measure, never inside a
-// measured region.
+// Aggressive major collect that reclaims old-space sizing, not just live garbage,
+// so the next op measures on a freed heap. last-resort is krausest's flavor. The
+// plain gc() fallback covers setups that lack it.
 function settle() {
   if (globalThis.gc) {
     try {
@@ -27,6 +25,17 @@ function settle() {
       globalThis.gc();
     }
   }
+}
+
+// Mark, run, and measure one op. The collect leads the marks so the op measures on
+// a freed heap. Because it leads, the previous op's teardown (plain code after its
+// call) has already run and is reclaimable.
+async function measureOp(name, run) {
+  settle();
+  performance.mark(`${name}-start`);
+  const result = run();
+  if (result?.then) { await result; }
+  performance.measure(name, `${name}-start`);
 }
 
 /*******************************
@@ -128,12 +137,11 @@ const kitchenSinkTemplate = `<article class="card">
 // full parse path.
 {
   // purpose: Compiles a TodoMVC-style component template 500 times. Headline metric for normal-component compile throughput.
-  performance.mark(startMark('parse-cold-normal-500'));
-  for (let i = 0; i < 500; i++) {
-    new TemplateCompiler(normalTemplate).compile();
-  }
-  performance.measure('parse-cold-normal-500', startMark('parse-cold-normal-500'));
-  settle();
+  await measureOp('parse-cold-normal-500', () => {
+    for (let i = 0; i < 500; i++) {
+      new TemplateCompiler(normalTemplate).compile();
+    }
+  });
 }
 
 /*******************************
@@ -145,12 +153,11 @@ const kitchenSinkTemplate = `<article class="card">
 // hoisting, slot) that don't show up in the normal-shape headline.
 {
   // purpose: Compiles a feature-dense kitchen-sink template 200 times. Catches parser regressions on uncommon block paths.
-  performance.mark(startMark('parse-cold-complex-200'));
-  for (let i = 0; i < 200; i++) {
-    new TemplateCompiler(kitchenSinkTemplate).compile();
-  }
-  performance.measure('parse-cold-complex-200', startMark('parse-cold-complex-200'));
-  settle();
+  await measureOp('parse-cold-complex-200', () => {
+    for (let i = 0; i < 200; i++) {
+      new TemplateCompiler(kitchenSinkTemplate).compile();
+    }
+  });
 }
 
 /*******************************
@@ -168,12 +175,11 @@ const kitchenSinkTemplate = `<article class="card">
   const astWalkAST = new TemplateCompiler(kitchenSinkTemplate).compile();
 
   // purpose: Walks a kitchen-sink AST through optimizeAST 15000 times. Merge, hoist, and recurse pass.
-  performance.mark(startMark('ast-walk-15k'));
-  for (let i = 0; i < 15_000; i++) {
-    TemplateCompiler.optimizeAST(astWalkAST);
-  }
-  performance.measure('ast-walk-15k', startMark('ast-walk-15k'));
-  settle();
+  await measureOp('ast-walk-15k', () => {
+    for (let i = 0; i < 15_000; i++) {
+      TemplateCompiler.optimizeAST(astWalkAST);
+    }
+  });
 }
 
 /*******************************
@@ -197,15 +203,14 @@ const kitchenSinkTemplate = `<article class="card">
   ];
 
   // purpose: Parses four representative subtemplate-call shapes 5000 times each. Snippet args extraction.
-  performance.mark(startMark('snippet-args-5k'));
-  for (let i = 0; i < 5_000; i++) {
-    snippetArgsCompiler.parseTemplateString(snippetArgsExprs[0]);
-    snippetArgsCompiler.parseTemplateString(snippetArgsExprs[1]);
-    snippetArgsCompiler.parseTemplateString(snippetArgsExprs[2]);
-    snippetArgsCompiler.parseTemplateString(snippetArgsExprs[3]);
-  }
-  performance.measure('snippet-args-5k', startMark('snippet-args-5k'));
-  settle();
+  await measureOp('snippet-args-5k', () => {
+    for (let i = 0; i < 5_000; i++) {
+      snippetArgsCompiler.parseTemplateString(snippetArgsExprs[0]);
+      snippetArgsCompiler.parseTemplateString(snippetArgsExprs[1]);
+      snippetArgsCompiler.parseTemplateString(snippetArgsExprs[2]);
+      snippetArgsCompiler.parseTemplateString(snippetArgsExprs[3]);
+    }
+  });
 }
 
 /*******************************

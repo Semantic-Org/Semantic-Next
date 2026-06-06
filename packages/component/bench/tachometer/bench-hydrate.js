@@ -92,11 +92,9 @@ const drainMicrotasks = () => new Promise(r => setTimeout(r, 0));
 // `Reaction.flush()` immediately after a `signal.set` runs every queued
 // Reaction synchronously — exactly what we want to measure.
 const flushWork = reactivity.flush ?? (() => Reaction.flush());
-const startMark = (name) => `${name}-start`;
-
-// Collect between ops so each one measures on a freed heap, not the old-space
-// the previous op grew. Runs after every performance.measure, never inside a
-// measured region.
+// Aggressive major collect that reclaims old-space sizing, not just live garbage,
+// so the next op measures on a freed heap. last-resort is krausest's flavor. The
+// plain gc() fallback covers setups that lack it.
 function settle() {
   if (globalThis.gc) {
     try {
@@ -106,6 +104,17 @@ function settle() {
       globalThis.gc();
     }
   }
+}
+
+// Mark, run, and measure one op. The collect leads the marks so the op measures on
+// a freed heap. Because it leads, the previous op's teardown (plain code after its
+// call) has already run and is reclaimable.
+async function measureOp(name, run) {
+  settle();
+  performance.mark(`${name}-start`);
+  const result = run();
+  if (result?.then) { await result; }
+  performance.measure(name, `${name}-start`);
 }
 
 /*******************************
@@ -121,12 +130,11 @@ function settle() {
 const itemsForMount = makeItems(1000);
 const dsdHTMLForMount = ssrList(itemsForMount);
 // purpose: Hydrates a server-rendered 1000-item list and waits for it to become interactive without re-rendering.
-performance.mark(startMark('each-100-mount'));
-container.setHTMLUnsafe(dsdHTMLForMount);
-await drainMicrotasks();
-await flush();
-performance.measure('each-100-mount', startMark('each-100-mount'));
-settle();
+await measureOp('each-100-mount', async () => {
+  container.setHTMLUnsafe(dsdHTMLForMount);
+  await drainMicrotasks();
+  await flush();
+});
 const elForMutate = container.firstElementChild;
 
 /*******************************
@@ -137,11 +145,10 @@ const elForMutate = container.firstElementChild;
 // Fresh array reference, same keys as SSR markers — exercises the items
 // dependency wake + per-Signal equality gate without DOM work.
 // purpose: Reassigns the items of a hydrated 1000-item list to a fresh array with the same keys and data.
-performance.mark(startMark('each-100'));
-elForMutate.component.setItems(itemsForMount.slice());
-await flush();
-performance.measure('each-100', startMark('each-100'));
-settle();
+await measureOp('each-100', async () => {
+  elForMutate.component.setItems(itemsForMount.slice());
+  await flush();
+});
 container.innerHTML = '';
 
 /*******************************
@@ -203,12 +210,11 @@ function ssrHelperList(items) {
 const helperItems = makeItems(1000);
 const dsdHTMLForHelper = ssrHelperList(helperItems);
 // purpose: Hydrates a 1000-item list where each item calls a helper that reads state shared across the list.
-performance.mark(startMark('helper-100-mount'));
-container.setHTMLUnsafe(dsdHTMLForHelper);
-await drainMicrotasks();
-await flush();
-performance.measure('helper-100-mount', startMark('helper-100-mount'));
-settle();
+await measureOp('helper-100-mount', async () => {
+  container.setHTMLUnsafe(dsdHTMLForHelper);
+  await drainMicrotasks();
+  await flush();
+});
 const elHelper = container.firstElementChild;
 
 /*******************************
@@ -222,13 +228,12 @@ const elHelper = container.firstElementChild;
 // itemSignal mutations. 1000 cycles walking every item once so the
 // per-cycle two-item repaint pattern accumulates measurable work.
 // purpose: Walks the shared activeID across every item in a hydrated 1000-item list so two items repaint per cycle.
-performance.mark(startMark('helper-100-state-change-1k'));
-for (let i = 0; i < 1000; i++) {
-  elHelper.component.setActive(`id-${i}`);
-  flushWork();
-}
-performance.measure('helper-100-state-change-1k', startMark('helper-100-state-change-1k'));
-settle();
+await measureOp('helper-100-state-change-1k', () => {
+  for (let i = 0; i < 1000; i++) {
+    elHelper.component.setActive(`id-${i}`);
+    flushWork();
+  }
+});
 container.innerHTML = '';
 
 /*******************************
