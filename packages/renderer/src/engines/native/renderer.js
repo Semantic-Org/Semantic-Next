@@ -45,6 +45,134 @@ function cachedBuildHTMLString(ast, options) {
   return entry[slot];
 }
 
+function getBuildSlot(ast, isSVG) {
+  const entry = buildStringCache.get(ast);
+  if (!entry) { return null; }
+  return entry[isSVG ? 'svg' : 'html'];
+}
+
+// Binds a comment-position marker: a block or expression via bindBlock, a
+// rawText marker via its registered block. Shared by walkAndBind and
+// replayBindingPlan so a new comment type is added in one place.
+function bindCommentMarker(node, type, markerID, entries, data, scope, renderer) {
+  const entry = entries[markerID];
+  if (type === 'expression' || type === 'block') {
+    renderer.bindBlock(node, entry, data, scope);
+  }
+  else if (type === 'rawText') {
+    getBlock('rawText')?.({ comment: node, entry, data, scope, renderer });
+  }
+}
+
+// Walks a cloned fragment and binds every marker: attributes inline,
+// comments deferred until after the walk because their dispatch can replace
+// or remove the comment node, which would invalidate a live walker.
+//
+// With `buildPlan` set it also records an ordered plan of
+// `{type, nodeIndex, ...payload}` entries that `replayBindingPlan` reuses on
+// later clones, skipping the per-clone re-walk, attribute re-parse, and
+// marker-predicate matching. See `bindMarkers` for why the plan is built on
+// the second render of an AST, not the first.
+function walkAndBind(root, entries, data, scope, renderer, buildPlan) {
+  const plan = buildPlan ? [] : null;
+  const processedAttrIDs = new Set();
+  const commentsToProcess = [];
+  const walker = document.createTreeWalker(
+    root,
+    NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT,
+  );
+  let nodeIndex = 0;
+  let node;
+  while ((node = walker.nextNode())) {
+    nodeIndex++;
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const element = node;
+      // Collect into an array before binding: bindAttributeExpression can
+      // removeAttribute for property and event bindings, which would mutate
+      // the live NamedNodeMap if we bound while iterating it.
+      let attrsToProcess;
+      for (let i = 0; i < element.attributes.length; i++) {
+        const attr = element.attributes[i];
+        if (attr.value.includes(ATTR_MARKER_PREFIX)) {
+          (attrsToProcess ??= []).push({ name: attr.name, value: attr.value });
+        }
+      }
+      if (attrsToProcess) {
+        for (const { name: attrName, value: attrValue } of attrsToProcess) {
+          const { parts, markerIDs } = parseAttributePartsFn(attrValue);
+          for (const id of markerIDs) { processedAttrIDs.add(id); }
+          if (plan) { plan.push({ type: 'attr', nodeIndex, attrName, parts }); }
+          renderer.bindAttributeExpression(element, attrName, parts, entries, data, scope);
+        }
+      }
+    }
+    else {
+      const text = node.data;
+      let markerID;
+      let type;
+      if (isExpressionMarker(text)) {
+        markerID = parseExpressionID(text);
+        type = 'expression';
+      }
+      else if (isRawTextMarker(text)) {
+        markerID = parseRawTextID(text);
+        type = 'rawText';
+      }
+      else if (isBlockOpen(text)) {
+        markerID = parseBlockOpenID(text);
+        type = 'block';
+      }
+      if (type && !isNaN(markerID)) {
+        commentsToProcess.push({ comment: node, markerID, type, nodeIndex });
+      }
+    }
+  }
+  for (const { comment, markerID, type, nodeIndex: commentNodeIndex } of commentsToProcess) {
+    // Safe to dedup here: tree order visits an element before any sibling
+    // comment, so an attr marker's owner is recorded before a comment that
+    // shares its ID.
+    if (type === 'expression' && processedAttrIDs.has(markerID)) { continue; }
+    if (plan) { plan.push({ type, nodeIndex: commentNodeIndex, markerID }); }
+    bindCommentMarker(comment, type, markerID, entries, data, scope, renderer);
+  }
+  if (plan) {
+    // Attrs are recorded during the walk and comments after it, so the plan
+    // holds two runs already in nodeIndex order. One sort merges them into
+    // the single traversal order replay walks in.
+    plan.sort((a, b) => a.nodeIndex - b.nodeIndex);
+  }
+  return plan;
+}
+
+// Replays the cached plan against a fresh clone on later renders. Single
+// walker advanced by the recorded nodeIndex, attrs dispatched inline,
+// comments deferred for the same walker-invalidation reason as walkAndBind.
+function replayBindingPlan(root, plan, entries, data, scope, renderer) {
+  if (plan.length === 0) { return; }
+  const walker = document.createTreeWalker(
+    root,
+    NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT,
+  );
+  let cursor = 0;
+  const deferredComments = [];
+  for (const step of plan) {
+    while (cursor < step.nodeIndex) {
+      walker.nextNode();
+      cursor++;
+    }
+    const node = walker.currentNode;
+    if (step.type === 'attr') {
+      renderer.bindAttributeExpression(node, step.attrName, step.parts, entries, data, scope);
+    }
+    else {
+      deferredComments.push({ node, type: step.type, markerID: step.markerID });
+    }
+  }
+  for (const { node, type, markerID } of deferredComments) {
+    bindCommentMarker(node, type, markerID, entries, data, scope, renderer);
+  }
+}
+
 export class Renderer {
   static nextId = 0;
   constructor(
@@ -151,7 +279,7 @@ export class Renderer {
     const fragment = this.parseHTML(htmlString, isSVG);
 
     // Phase 3: Walk the DOM tree, find markers, wire bindings
-    this.bindMarkers(fragment, entries, data, scope, ast);
+    this.bindMarkers(fragment, entries, data, scope, ast, isSVG);
 
     return fragment;
   }
@@ -202,79 +330,26 @@ export class Renderer {
     bindAttribute({ element, attrName, parts, entries, data, scope, renderer: this, skipFirstWrite });
   }
 
-  bindMarkers(root, entries, data, scope, ast) {
+  bindMarkers(root, entries, data, scope, ast, isSVG = this.isSVG) {
     if (entries.length === 0) { return; }
-
-    // Single-pass walker over SHOW_ELEMENT | SHOW_COMMENT. Attribute
-    // processing is safe inline (only touches the element's own
-    // attributes); comment processing is deferred because it mutates the
-    // tree structure (replace/remove) and would invalidate the live walker.
-    const processedAttrIDs = new Set();
-    const commentsToProcess = [];
-    const walker = document.createTreeWalker(
-      root,
-      NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT,
-    );
-    let node;
-    while ((node = walker.nextNode())) {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const element = node;
-        // Most elements have zero __sui attrs — defer the array allocation
-        // until we find one. Collect first, then iterate, because
-        // bindAttributeExpression calls element.removeAttribute for property
-        // and event bindings, which mutates the live NamedNodeMap.
-        let attrsToProcess;
-        for (let i = 0; i < element.attributes.length; i++) {
-          const attr = element.attributes[i];
-          if (attr.value.includes(ATTR_MARKER_PREFIX)) {
-            (attrsToProcess ??= []).push({ name: attr.name, value: attr.value });
-          }
-        }
-        if (attrsToProcess) {
-          for (const { name: attrName, value: attrValue } of attrsToProcess) {
-            const { parts, markerIDs } = parseAttributePartsFn(attrValue);
-            for (const id of markerIDs) { processedAttrIDs.add(id); }
-            this.bindAttributeExpression(element, attrName, parts, entries, data, scope);
-          }
-        }
-      }
-      else {
-        const text = node.data;
-        if (isExpressionMarker(text)) {
-          const markerID = parseExpressionID(text);
-          if (!isNaN(markerID)) {
-            // Filter deferred until after the walk: elements visit before
-            // sibling comments in document order, so an attr-marker's
-            // owning element is always recorded before any comment that
-            // would share its ID.
-            commentsToProcess.push({ comment: node, markerID, type: 'expression' });
-          }
-        }
-        else if (isRawTextMarker(text)) {
-          const markerID = parseRawTextID(text);
-          if (!isNaN(markerID)) {
-            commentsToProcess.push({ comment: node, markerID, type: 'rawText' });
-          }
-        }
-        else if (isBlockOpen(text)) {
-          const markerID = parseBlockOpenID(text);
-          if (!isNaN(markerID)) {
-            commentsToProcess.push({ comment: node, markerID, type: 'block' });
-          }
-        }
-      }
+    // `isSVG` mirrors `readAST`'s per-call override so the slot lookup matches
+    // the slot `cachedBuildHTMLString` populated.
+    const slot = ast ? getBuildSlot(ast, isSVG) : null;
+    if (slot && slot.plan) {
+      replayBindingPlan(root, slot.plan, entries, data, scope, this);
+      return;
     }
-
-    for (const { comment, markerID, type } of commentsToProcess) {
-      if (type === 'expression' && processedAttrIDs.has(markerID)) { continue; }
-      const entry = entries[markerID];
-
-      if (type === 'expression' || type === 'block') {
-        this.bindBlock(comment, entry, data, scope);
-      }
-      else if (type === 'rawText') {
-        getBlock('rawText')?.({ comment, entry, data, scope, renderer: this });
-      }
+    // Build the plan on the second render of an AST, never the first. A
+    // component embedded exactly once is common, and building on render 1
+    // makes that case slower than the old single pass: it pays the plan
+    // allocation and sort for a plan nothing ever replays. Deferring to
+    // render 2 keeps a single-use AST at the original walk cost, and only
+    // ASTs actually cloned more than once pay to cache.
+    const buildPlan = slot ? slot.hasRendered : false;
+    const plan = walkAndBind(root, entries, data, scope, this, buildPlan);
+    if (slot) {
+      if (buildPlan) { slot.plan = plan; }
+      else { slot.hasRendered = true; }
     }
   }
 
