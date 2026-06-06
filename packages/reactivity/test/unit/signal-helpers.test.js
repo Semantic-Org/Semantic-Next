@@ -873,6 +873,105 @@ SAFETY_MODES.forEach((safety) => {
         expect(sub.count).toBe(0);
         sub.stop();
       });
+
+      it('fires when a field several levels deep changes', () => {
+        const sig = new Signal({ a: { b: { c: { d: 0 } } } }, { safety });
+        const sub = subscribe(sig);
+        sig.mutate(doc => {
+          doc.a.b.c.d = 42;
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        expect(sig.raw().a.b.c.d).toBe(42);
+        sub.stop();
+      });
+
+      it('fires when a nested field on one row of an array of objects changes', () => {
+        const sig = new Signal(
+          [{ id: 1, meta: { seen: false } }, { id: 2, meta: { seen: false } }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.mutate(rows => {
+          rows[0].meta.seen = true;
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        expect(sig.raw()[0].meta.seen).toBe(true);
+        expect(sig.raw()[1].meta.seen).toBe(false);
+        sub.stop();
+      });
+
+      it('stores a returned nested object without leaking a revoked proxy', () => {
+        const sig = new Signal({ inner: { x: 0 } }, { safety });
+        sig.mutate(v => {
+          v.inner.x = 1;
+          return v.inner;
+        });
+        expect(sig.raw()).toEqual({ x: 1 });
+        expect(() => JSON.stringify(sig.raw())).not.toThrow();
+      });
+
+      // class instances can't be observed (proxying breaks #private fields) nor
+      // snapshot-compared (clone preserves them by reference), so an in-place
+      // method mutation isn't detected, replace the value to signal a change
+      it.todo('fires when a class instance is mutated in place via a method');
+
+      it('stores a returned falsy-but-defined value', () => {
+        for (const value of [0, '', false, null]) {
+          const sig = new Signal('start', { safety });
+          sig.mutate(() => value);
+          expect(sig.raw()).toBe(value);
+        }
+      });
+
+      it('propagates an error thrown inside the callback to the caller', () => {
+        const sig = new Signal({ a: 1, b: 2 }, { safety });
+        expect(() =>
+          sig.mutate(() => {
+            throw new Error('boom');
+          })
+        ).toThrow('boom');
+      });
+
+      // a write applied before the callback throws stays on the value
+      it('does not fire when the callback throws after a partial write', () => {
+        const sig = new Signal({ a: 1, b: 2 }, { safety });
+        const sub = subscribe(sig);
+        expect(() =>
+          sig.mutate(obj => {
+            obj.a = 99;
+            throw new Error('boom');
+          })
+        ).toThrow();
+        flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
+
+      it('fires when a Map entry is added to a Map-valued signal', () => {
+        const sig = new Signal(new Map(), { safety });
+        const sub = subscribe(sig);
+        sig.mutate(map => {
+          map.set('id-1', { name: 'Alice' });
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        expect(sig.raw().get('id-1')).toEqual({ name: 'Alice' });
+        sub.stop();
+      });
+
+      it('fires when a Date-valued signal is mutated via a setter method', () => {
+        const sig = new Signal(new Date('2020-01-01'), { safety });
+        const sub = subscribe(sig);
+        sig.mutate(date => {
+          date.setFullYear(2030);
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        expect(sig.raw().getFullYear()).toBe(2030);
+        sub.stop();
+      });
     });
 
     /*******************************

@@ -1,4 +1,5 @@
 import { clone } from './cloning.js';
+import { noop, returnsFalse } from './functions.js';
 import { each } from './loops.js';
 import { escapeRegExp } from './regexp.js';
 import { isArray, isObject, isPlainObject, isString } from './types.js';
@@ -37,59 +38,120 @@ export const mapObject = (obj, callback) => {
 };
 
 /*
-  Wrap a value in a revocable proxy that records whether a write happened,
-  recursively through nested objects so a deep write (obj.a.b = x) is still
-  trapped — the case a shallow proxy misses. Lets a caller detect a mutation
-  without cloning and deep-comparing. Identical writes (Object.is) don't count.
+  Wrap a value in a revocable proxy that records whether the function writes
+  anything, recursively through nested plain objects and arrays. Returns
+  { proxy, didWrite, revoke }. onWrite(object, key) fires per write. onExotic
+  fires when a Map/Set/Date/class instance is reached, and those pass through
+  unwrapped, since proxying their internal-slot methods throws. Identical writes
+  (Object.is) don't count, and a wrapped child is unwrapped before write-back so
+  the raw graph never stores a draft.
 */
-export const observeWrites = (target) => {
-  if (target === null || typeof target !== 'object') {
-    return { proxy: target, didWrite: () => false, revoke: () => {} };
+export const observeWrites = (target, { onWrite, onExotic } = {}) => {
+  const observable = (value) => isArray(value) || isPlainObject(value);
+
+  // report each exotic at most once. functions are intentionally excluded by the
+  // typeof check, so reading an array method off the proxy doesn't push the
+  // common mutate path into the snapshot fallback
+  let exoticSeen;
+  const reportExotic = (value) => {
+    if (!onExotic || value === null || typeof value !== 'object') {
+      return;
+    }
+    exoticSeen ??= new WeakSet();
+    if (!exoticSeen.has(value)) {
+      exoticSeen.add(value);
+      onExotic(value);
+    }
+  };
+
+  if (!observable(target)) {
+    reportExotic(target);
+    return { proxy: target, didWrite: returnsFalse, revoke: noop, unwrap: (value) => value };
   }
+
   let written = false;
   const revokers = [];
-  const wrapped = new WeakMap();
+  const wrapped = new WeakMap(); // raw -> proxy, for identity and cycles
+  const rawOf = new WeakMap(); // proxy -> raw, to unwrap on write-back
+
+  const markWrite = (object, key) => {
+    written = true;
+    onWrite?.(object, key);
+  };
+
   const handler = {
     get(object, key) {
       const value = object[key];
-      if (value === null || typeof value !== 'object') {
+      if (!observable(value)) {
+        reportExotic(value);
         return value;
       }
-      let child = wrapped.get(value);
-      if (child === undefined) {
-        child = wrap(value);
-        wrapped.set(value, child);
-      }
-      return child;
+      return wrap(value);
     },
     set(object, key, value) {
-      if (!Object.is(object[key], value)) {
-        written = true;
+      // never write a wrapped child back into the raw graph (objects only, a
+      // primitive can't be a proxy so skip the lookup)
+      if (value !== null && typeof value === 'object') {
+        value = rawOf.get(value) ?? value;
       }
+      // a brand-new own key is a write even when its value is undefined
+      const changed = !Object.hasOwn(object, key) || !Object.is(object[key], value);
       object[key] = value;
+      if (changed) {
+        markWrite(object, key);
+      }
       return true;
     },
     deleteProperty(object, key) {
-      if (key in object) {
-        written = true;
-      }
+      // hasOwn, not `in`: delete only removes own keys, so deleting an inherited
+      // key is a no-op, not a write
+      const existed = Object.hasOwn(object, key);
       delete object[key];
+      if (existed) {
+        markWrite(object, key);
+      }
       return true;
     },
     defineProperty(object, key, descriptor) {
-      written = true;
+      if ('value' in descriptor) {
+        descriptor.value = rawOf.get(descriptor.value) ?? descriptor.value;
+      }
+      // mirror set/delete: redefining a property to its current value isn't a write
+      const changed = !Object.hasOwn(object, key)
+        || !('value' in descriptor)
+        || !Object.is(object[key], descriptor.value);
       Object.defineProperty(object, key, descriptor);
+      if (changed) {
+        markWrite(object, key);
+      }
       return true;
     },
   };
+
   const wrap = (object) => {
-    const { proxy, revoke } = Proxy.revocable(object, handler);
-    revokers.push(revoke);
+    let proxy = wrapped.get(object);
+    if (proxy === undefined) {
+      // a frozen object is unwritable, and a get trap may not return a wrapped
+      // child for its non-configurable properties without tripping the proxy
+      // invariant, so leave it raw. a lone non-writable+non-configurable object
+      // property on an unfrozen parent is unsupported and would throw on read
+      if (Object.isFrozen(object)) {
+        wrapped.set(object, object);
+        return object;
+      }
+      const revocable = Proxy.revocable(object, handler);
+      proxy = revocable.proxy;
+      revokers.push(revocable.revoke);
+      wrapped.set(object, proxy);
+      rawOf.set(proxy, object);
+    }
     return proxy;
   };
+
   return {
     proxy: wrap(target),
     didWrite: () => written,
+    unwrap: (value) => rawOf.get(value) ?? value,
     revoke: () => {
       for (const revoke of revokers) {
         revoke();

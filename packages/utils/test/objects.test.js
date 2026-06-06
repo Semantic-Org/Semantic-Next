@@ -30,12 +30,47 @@ describe('Object Utilities', () => {
       expect(proxy.a).toBe(2);
     });
 
-    it('flags a deeply nested write — the shallow-proxy gotcha', () => {
+    it('flags a nested write', () => {
       const target = { meta: { count: 0 } };
       const { proxy, didWrite } = observeWrites(target);
       proxy.meta.count = 5;
       expect(didWrite()).toBe(true);
       expect(target.meta.count).toBe(5);
+    });
+
+    it('flags a write several levels deep', () => {
+      const target = { a: { b: { c: { d: 0 } } } };
+      const { proxy, didWrite } = observeWrites(target);
+      proxy.a.b.c.d = 9;
+      expect(didWrite()).toBe(true);
+      expect(target.a.b.c.d).toBe(9);
+    });
+
+    it('flags a write on a row reached through an array index', () => {
+      const target = [{ id: 1, meta: { seen: false } }, { id: 2, meta: { seen: false } }];
+      const { proxy, didWrite } = observeWrites(target);
+      proxy[0].meta.seen = true;
+      expect(didWrite()).toBe(true);
+      expect(target[0].meta.seen).toBe(true);
+      expect(target[1].meta.seen).toBe(false);
+    });
+
+    it('passes a class instance through unwrapped and reports it as exotic', () => {
+      class Model {
+        constructor() {
+          this.count = 0;
+        }
+      }
+      const model = new Model();
+      let exotic;
+      const { proxy, didWrite } = observeWrites(model, {
+        onExotic: (value) => {
+          exotic = value;
+        },
+      });
+      expect(proxy).toBe(model);
+      expect(didWrite()).toBe(false);
+      expect(exotic).toBe(model);
     });
 
     it('flags array element writes and array methods', () => {
@@ -62,6 +97,115 @@ describe('Object Utilities', () => {
       const { proxy, didWrite } = observeWrites({ a: 1 });
       proxy.a = 1;
       expect(didWrite()).toBe(false);
+    });
+
+    it('does not flag deleting an absent key', () => {
+      const { proxy, didWrite } = observeWrites({ a: 1 });
+      delete proxy.b;
+      expect(didWrite()).toBe(false);
+    });
+
+    it('unwraps wrapped children on write-back, leaving no proxies in the raw graph', () => {
+      const raw = [{ n: 3 }, { n: 1 }, { n: 2 }];
+      const { proxy, revoke } = observeWrites(raw);
+      proxy.sort((a, b) => a.n - b.n);
+      revoke();
+      expect(raw).toEqual([{ n: 1 }, { n: 2 }, { n: 3 }]);
+    });
+
+    it('does not flag a no-op reorder of an already-sorted array', () => {
+      const { proxy, didWrite } = observeWrites([{ n: 1 }, { n: 2 }, { n: 3 }]);
+      proxy.sort((a, b) => a.n - b.n);
+      expect(didWrite()).toBe(false);
+    });
+
+    it('reaches the same proxy back through a cycle', () => {
+      const node = { name: 'a' };
+      node.self = node;
+      const { proxy } = observeWrites(node);
+      expect(proxy.self).toBe(proxy);
+    });
+
+    it('passes Map/Set/Date through unwrapped and reports them as exotic', () => {
+      for (const value of [new Map(), new Set(), new Date()]) {
+        let exotic;
+        const { proxy, didWrite } = observeWrites({ value }, {
+          onExotic: (v) => {
+            exotic = v;
+          },
+        });
+        expect(proxy.value).toBe(value);
+        expect(exotic).toBe(value);
+        expect(didWrite()).toBe(false);
+      }
+    });
+
+    it('reads through a frozen subtree without throwing', () => {
+      const { proxy } = observeWrites({ cfg: Object.freeze({ child: { y: 1 } }) });
+      expect(proxy.cfg.child.y).toBe(1);
+    });
+
+    it('calls onWrite with the object and key at each write', () => {
+      const writes = [];
+      const target = { a: 1 };
+      const { proxy } = observeWrites(target, { onWrite: (object, key) => writes.push([object, key]) });
+      proxy.a = 2;
+      proxy.b = 3;
+      expect(writes).toEqual([[target, 'a'], [target, 'b']]);
+    });
+
+    it('does not flag deleting an inherited key', () => {
+      const { proxy, didWrite } = observeWrites({ a: 1 });
+      delete proxy.toString;
+      expect(didWrite()).toBe(false);
+    });
+
+    it('flags assigning a brand-new key even when the value is undefined', () => {
+      const target = { a: 1 };
+      const { proxy, didWrite } = observeWrites(target);
+      proxy.b = undefined;
+      expect(didWrite()).toBe(true);
+      expect(Object.hasOwn(target, 'b')).toBe(true);
+    });
+
+    it('reports each exotic at most once across repeated access', () => {
+      const calls = [];
+      const { proxy } = observeWrites({ d: new Date() }, { onExotic: (value) => calls.push(value) });
+      expect(proxy.d).toBeInstanceOf(Date);
+      expect(proxy.d).toBeInstanceOf(Date);
+      expect(proxy.d).toBeInstanceOf(Date);
+      expect(calls).toHaveLength(1);
+    });
+
+    it('does not report functions as exotic, keeping array methods on the fast path', () => {
+      let fired = false;
+      const { proxy, didWrite } = observeWrites([1, 2, 3], {
+        onExotic: () => {
+          fired = true;
+        },
+      });
+      proxy.push(4);
+      expect(fired).toBe(false);
+      expect(didWrite()).toBe(true);
+    });
+
+    it('does not flag redefining a property to its current value', () => {
+      const { proxy, didWrite } = observeWrites({ a: 1 });
+      Object.defineProperty(proxy, 'a', { value: 1 });
+      expect(didWrite()).toBe(false);
+    });
+
+    it('flags defining a brand-new property', () => {
+      const { proxy, didWrite } = observeWrites({ a: 1 });
+      Object.defineProperty(proxy, 'b', { value: 2, configurable: true });
+      expect(didWrite()).toBe(true);
+    });
+
+    it('unwrap returns the raw value behind a wrapped child', () => {
+      const target = { inner: { x: 1 } };
+      const { proxy, unwrap } = observeWrites(target);
+      expect(unwrap(proxy.inner)).toBe(target.inner);
+      expect(unwrap(42)).toBe(42);
     });
 
     it('revoke() makes the proxy throw on further access', () => {
