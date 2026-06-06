@@ -10,7 +10,30 @@ const reaction = reactivity.reaction ?? ((callback, options) => Reaction.create(
 const flush = reactivity.flush ?? (() => Reaction.flush());
 const computed = reactivity.computed ?? ((fn, options) => Signal.computed(fn, options));
 
-const startMark = (name) => `${name}-start`;
+// Aggressive major collect that reclaims old-space sizing, not just live garbage,
+// so the next op measures on a freed heap. last-resort is krausest's flavor. The
+// plain gc() fallback covers setups that lack it.
+function settle() {
+  if (globalThis.gc) {
+    try {
+      globalThis.gc({ type: 'major', execution: 'sync', flavor: 'last-resort' });
+    }
+    catch {
+      globalThis.gc();
+    }
+  }
+}
+
+// Mark, run, and measure one op. The collect leads the marks so the op measures on
+// a freed heap. Because it leads, the previous op's teardown (plain code after its
+// call) has already run and is reclaimable.
+async function measureOp(name, run) {
+  settle();
+  performance.mark(`${name}-start`);
+  const result = run();
+  if (result?.then) { await result; }
+  performance.measure(name, `${name}-start`);
+}
 
 /*******************************
       Fixtures
@@ -53,11 +76,11 @@ let sink = null;
 {
   const sig = new Signal(42);
   // purpose: Sets a signal to its current value 10000000 times. Exercises the no-op fast path when nothing changes.
-  performance.mark(startMark('set-same-10m'));
-  for (let i = 0; i < 10_000_000; i++) {
-    sig.set(42);
-  }
-  performance.measure('set-same-10m', startMark('set-same-10m'));
+  await measureOp('set-same-10m', () => {
+    for (let i = 0; i < 10_000_000; i++) {
+      sig.set(42);
+    }
+  });
 }
 
 // sub-unsub-100k — measures the per-create/per-destroy cost of a
@@ -67,14 +90,14 @@ let sink = null;
 {
   const sig = new Signal(0);
   // purpose: Creates and tears down a subscriber on one signal across 100000 cycles. Subscription churn cost.
-  performance.mark(startMark('sub-unsub-100k'));
-  for (let i = 0; i < 100_000; i++) {
-    const r = reaction(() => {
-      sink = sig.get();
-    });
-    r.stop();
-  }
-  performance.measure('sub-unsub-100k', startMark('sub-unsub-100k'));
+  await measureOp('sub-unsub-100k', () => {
+    for (let i = 0; i < 100_000; i++) {
+      const r = reaction(() => {
+        sink = sig.get();
+      });
+      r.stop();
+    }
+  });
 }
 
 /*******************************
@@ -91,12 +114,12 @@ let sink = null;
     });
   }
   // purpose: Fans out one signal's value change to 500 subscribers across 1200 successive updates.
-  performance.mark(startMark('reactive-fanout-500x1200'));
-  for (let i = 0; i < 1200; i++) {
-    sig.set(i + 1);
-    flush();
-  }
-  performance.measure('reactive-fanout-500x1200', startMark('reactive-fanout-500x1200'));
+  await measureOp('reactive-fanout-500x1200', () => {
+    for (let i = 0; i < 1200; i++) {
+      sig.set(i + 1);
+      flush();
+    }
+  });
   for (let i = 0; i < 500; i++) { reactions[i].stop(); }
 }
 
@@ -114,12 +137,12 @@ let sink = null;
     sink = end.get();
   });
   // purpose: Propagates a value change from root to leaf through a 10-deep chain of derived signals 60000 times.
-  performance.mark(startMark('computed-chain-10x60k'));
-  for (let i = 0; i < 60_000; i++) {
-    root.set(i + 1);
-    flush();
-  }
-  performance.measure('computed-chain-10x60k', startMark('computed-chain-10x60k'));
+  await measureOp('computed-chain-10x60k', () => {
+    for (let i = 0; i < 60_000; i++) {
+      root.set(i + 1);
+      flush();
+    }
+  });
   observer.stop();
 }
 
@@ -132,14 +155,14 @@ let sink = null;
     sink = sigs[0].get() + sigs[1].get() + sigs[2].get() + sigs[3].get() + sigs[4].get();
   });
   // purpose: Changes five signals in turn for 32000 rounds with one subscriber reading all five.
-  performance.mark(startMark('reactive-multi-read-5x160k'));
-  for (let i = 0; i < 32_000; i++) {
-    for (let j = 0; j < 5; j++) {
-      sigs[j].set(i * 5 + j);
-      flush();
+  await measureOp('reactive-multi-read-5x160k', () => {
+    for (let i = 0; i < 32_000; i++) {
+      for (let j = 0; j < 5; j++) {
+        sigs[j].set(i * 5 + j);
+        flush();
+      }
     }
-  }
-  performance.measure('reactive-multi-read-5x160k', startMark('reactive-multi-read-5x160k'));
+  });
   r.stop();
 }
 
@@ -161,12 +184,12 @@ let sink = null;
     sink = active;
   });
   // purpose: Replaces a 1000-item list signal with a fresh 1000-item array and rescans it 1000 times.
-  performance.mark(startMark('reactive-list-replace-1000x1000'));
-  for (let i = 0; i < 1000; i++) {
-    items.set(makeRecords(1000));
-    flush();
-  }
-  performance.measure('reactive-list-replace-1000x1000', startMark('reactive-list-replace-1000x1000'));
+  await measureOp('reactive-list-replace-1000x1000', () => {
+    for (let i = 0; i < 1000; i++) {
+      items.set(makeRecords(1000));
+      flush();
+    }
+  });
   r.stop();
 }
 
@@ -184,12 +207,12 @@ let sink = null;
     sink = count;
   });
   // purpose: Changes a search-term signal 300 times, re-scanning a 1000-item list on each change.
-  performance.mark(startMark('reactive-list-filter-1000x300'));
-  for (let i = 0; i < 300; i++) {
-    search.set(`q-${i}`);
-    flush();
-  }
-  performance.measure('reactive-list-filter-1000x300', startMark('reactive-list-filter-1000x300'));
+  await measureOp('reactive-list-filter-1000x300', () => {
+    for (let i = 0; i < 300; i++) {
+      search.set(`q-${i}`);
+      flush();
+    }
+  });
   r.stop();
 }
 
@@ -211,16 +234,16 @@ let sink = null;
     sink = count;
   });
   // purpose: Appends 20 items onto an empty list signal with a subscriber, across 2000 reset cycles.
-  performance.mark(startMark('reactive-push-2000x20'));
-  for (let c = 0; c < 2000; c++) {
-    sig.set([]);
-    flush();
-    for (let p = 0; p < 20; p++) {
-      sig.push({ id: `rec-${p}`, name: `Record ${p}`, active: p % 3 !== 0, tags: ['a', 'b'] });
+  await measureOp('reactive-push-2000x20', () => {
+    for (let c = 0; c < 2000; c++) {
+      sig.set([]);
       flush();
+      for (let p = 0; p < 20; p++) {
+        sig.push({ id: `rec-${p}`, name: `Record ${p}`, active: p % 3 !== 0, tags: ['a', 'b'] });
+        flush();
+      }
     }
-  }
-  performance.measure('reactive-push-2000x20', startMark('reactive-push-2000x20'));
+  });
   r.stop();
 }
 
@@ -236,17 +259,17 @@ let sink = null;
     sink = active;
   });
   // purpose: Replaces one item by index in a 1000-item list signal across 300 updates, with a subscriber.
-  performance.mark(startMark('reactive-set-index-300'));
-  for (let i = 0; i < 300; i++) {
-    sig.setIndex(i % 1000, {
-      id: `rec-${i % 1000}`,
-      name: `Record ${i}`,
-      active: i % 2 === 0,
-      tags: ['x'],
-    });
-    flush();
-  }
-  performance.measure('reactive-set-index-300', startMark('reactive-set-index-300'));
+  await measureOp('reactive-set-index-300', () => {
+    for (let i = 0; i < 300; i++) {
+      sig.setIndex(i % 1000, {
+        id: `rec-${i % 1000}`,
+        name: `Record ${i}`,
+        active: i % 2 === 0,
+        tags: ['x'],
+      });
+      flush();
+    }
+  });
   r.stop();
 }
 
@@ -270,12 +293,12 @@ let sink = null;
     ids[i] = `rec-${idx}`;
   }
   // purpose: Finds an item by id and updates one field in a 1000-item list signal across 200 alternating updates.
-  performance.mark(startMark('reactive-set-property-by-id-200'));
-  for (let i = 0; i < 200; i++) {
-    sig.setItemProperty(ids[i], 'active', i % 2 === 0);
-    flush();
-  }
-  performance.measure('reactive-set-property-by-id-200', startMark('reactive-set-property-by-id-200'));
+  await measureOp('reactive-set-property-by-id-200', () => {
+    for (let i = 0; i < 200; i++) {
+      sig.setItemProperty(ids[i], 'active', i % 2 === 0);
+      flush();
+    }
+  });
   r.stop();
 }
 
@@ -294,15 +317,15 @@ let sink = null;
 {
   const sig = new Signal(makeRecords(1000));
   // purpose: Edits two fields of one row in a 1000-row list signal via mutate(), in place, 600 times. Clone-before/compare-after cost.
-  performance.mark(startMark('mutate-grid-row-edit-600'));
-  for (let i = 0; i < 600; i++) {
-    const idx = i % 1000;
-    sig.mutate(rows => {
-      rows[idx].name = `Record ${i}`;
-      rows[idx].active = !rows[idx].active;
-    });
-  }
-  performance.measure('mutate-grid-row-edit-600', startMark('mutate-grid-row-edit-600'));
+  await measureOp('mutate-grid-row-edit-600', () => {
+    for (let i = 0; i < 600; i++) {
+      const idx = i % 1000;
+      sig.mutate(rows => {
+        rows[idx].name = `Record ${i}`;
+        rows[idx].active = !rows[idx].active;
+      });
+    }
+  });
 }
 
 // mutate-doc-nested-200k — edits two nested fields of a small structured
@@ -312,14 +335,14 @@ let sink = null;
 {
   const sig = new Signal(makeDoc());
   // purpose: Edits two nested fields of a structured document signal via mutate(), in place, 200000 times. Small-object clone/compare baseline.
-  performance.mark(startMark('mutate-doc-nested-200k'));
-  for (let i = 0; i < 200_000; i++) {
-    sig.mutate(doc => {
-      doc.meta.updated = i;
-      doc.body.wordCount = i & 1023;
-    });
-  }
-  performance.measure('mutate-doc-nested-200k', startMark('mutate-doc-nested-200k'));
+  await measureOp('mutate-doc-nested-200k', () => {
+    for (let i = 0; i < 200_000; i++) {
+      sig.mutate(doc => {
+        doc.meta.updated = i;
+        doc.body.wordCount = i & 1023;
+      });
+    }
+  });
 }
 
 /*******************************
@@ -333,11 +356,11 @@ let sink = null;
 // the empty path.
 {
   // purpose: Calls flush() 5000000 times with no pending work. Scheduler dispatch overhead.
-  performance.mark(startMark('reaction-flush-noop-5m'));
-  for (let i = 0; i < 5_000_000; i++) {
-    flush();
-  }
-  performance.measure('reaction-flush-noop-5m', startMark('reaction-flush-noop-5m'));
+  await measureOp('reaction-flush-noop-5m', () => {
+    for (let i = 0; i < 5_000_000; i++) {
+      flush();
+    }
+  });
 }
 
 // reaction-coalesce-400x100 — 400 bursts, each setting the signal 100
@@ -353,14 +376,14 @@ let sink = null;
     });
   }
   // purpose: Sets one signal 100 times then flushes once across 400 bursts so 100 subscribers wake one time per burst.
-  performance.mark(startMark('reaction-coalesce-400x100'));
-  for (let burst = 0; burst < 400; burst++) {
-    for (let setN = 0; setN < 100; setN++) {
-      sig.set(burst * 100 + setN + 1);
+  await measureOp('reaction-coalesce-400x100', () => {
+    for (let burst = 0; burst < 400; burst++) {
+      for (let setN = 0; setN < 100; setN++) {
+        sig.set(burst * 100 + setN + 1);
+      }
+      flush();
     }
-    flush();
-  }
-  performance.measure('reaction-coalesce-400x100', startMark('reaction-coalesce-400x100'));
+  });
   for (let i = 0; i < 100; i++) { subs[i].stop(); }
 }
 
@@ -378,12 +401,12 @@ let sink = null;
     sink = toggle.get() ? sigA.get() : sigB.get();
   });
   // purpose: Toggles which of two signals a subscriber reads across 45000 cycles. Per-run dep-set diffing.
-  performance.mark(startMark('reaction-dep-diff-45k'));
-  for (let i = 0; i < 45_000; i++) {
-    toggle.set(i % 2 === 0);
-    flush();
-  }
-  performance.measure('reaction-dep-diff-45k', startMark('reaction-dep-diff-45k'));
+  await measureOp('reaction-dep-diff-45k', () => {
+    for (let i = 0; i < 45_000; i++) {
+      toggle.set(i % 2 === 0);
+      flush();
+    }
+  });
   r.stop();
 }
 
@@ -406,12 +429,12 @@ let sink = null;
     });
   }
   // purpose: 5000 reactions × 1 signal × 100 invalidations. Per-run Set.delete + add on a stable dep edge.
-  performance.mark(startMark('reactive-stable-fanout-5000x100'));
-  for (let i = 0; i < 100; i++) {
-    sig.set(i + 1);
-    flush();
-  }
-  performance.measure('reactive-stable-fanout-5000x100', startMark('reactive-stable-fanout-5000x100'));
+  await measureOp('reactive-stable-fanout-5000x100', () => {
+    for (let i = 0; i < 100; i++) {
+      sig.set(i + 1);
+      flush();
+    }
+  });
   for (let i = 0; i < 5000; i++) { reactions[i].stop(); }
 }
 
@@ -427,12 +450,12 @@ let sink = null;
     });
   }
   // purpose: 5000 reactions × 3 signals × 100 cycles. Each run clears + re-adds 3 stable dep edges.
-  performance.mark(startMark('reactive-stable-deps-3reads-5000x100'));
-  for (let i = 0; i < 100; i++) {
-    sigA.set(i + 1);
-    flush();
-  }
-  performance.measure('reactive-stable-deps-3reads-5000x100', startMark('reactive-stable-deps-3reads-5000x100'));
+  await measureOp('reactive-stable-deps-3reads-5000x100', () => {
+    for (let i = 0; i < 100; i++) {
+      sigA.set(i + 1);
+      flush();
+    }
+  });
   for (let i = 0; i < 5000; i++) { reactions[i].stop(); }
 }
 
@@ -453,12 +476,12 @@ let sink = null;
   for (let i = 0; i < 200; i++) { preamble += computeds[i].get(); }
   sink = preamble;
   // purpose: 200 unobserved computed signals, root updated 500 times. Measures the eager-recompute cost the refcount removes.
-  performance.mark(startMark('computed-unobserved-200x500'));
-  for (let i = 0; i < 500; i++) {
-    root.set(i + 1);
-    flush();
-  }
-  performance.measure('computed-unobserved-200x500', startMark('computed-unobserved-200x500'));
+  await measureOp('computed-unobserved-200x500', () => {
+    for (let i = 0; i < 500; i++) {
+      root.set(i + 1);
+      flush();
+    }
+  });
 }
 
 // computed-subscribe-unsubscribe-10k — refcount machinery overhead on the subscribe/unsubscribe path.
@@ -473,9 +496,9 @@ let sink = null;
     r.stop();
   };
   // purpose: 10000 create-computed + attach-observer + detach cycles. Lifecycle cost the refcount path must keep acceptable.
-  performance.mark(startMark('computed-subscribe-unsubscribe-10k'));
-  for (let i = 0; i < 10_000; i++) { cycle(); }
-  performance.measure('computed-subscribe-unsubscribe-10k', startMark('computed-subscribe-unsubscribe-10k'));
+  await measureOp('computed-subscribe-unsubscribe-10k', () => {
+    for (let i = 0; i < 10_000; i++) { cycle(); }
+  });
 }
 
 // Scheduler allocation — verifies Item 5 set-swap.
@@ -493,12 +516,12 @@ let sink = null;
     });
   }
   // purpose: 500 subscribers fanout across 1000 flush cycles. Each flush spreads pendingReactions; tests per-flush allocation churn.
-  performance.mark(startMark('flush-fanout-allocation-1000x500'));
-  for (let i = 0; i < 1000; i++) {
-    sig.set(i + 1);
-    flush();
-  }
-  performance.measure('flush-fanout-allocation-1000x500', startMark('flush-fanout-allocation-1000x500'));
+  await measureOp('flush-fanout-allocation-1000x500', () => {
+    for (let i = 0; i < 1000; i++) {
+      sig.set(i + 1);
+      flush();
+    }
+  });
   for (let i = 0; i < 500; i++) { reactions[i].stop(); }
 }
 

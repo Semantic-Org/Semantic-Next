@@ -14,7 +14,30 @@ import { TemplateCompiler } from '@semantic-ui/compiler';
 import { Signal } from '@semantic-ui/reactivity';
 import { buildHTMLString, ExpressionEvaluator, Renderer } from '@semantic-ui/renderer';
 
-const startMark = (name) => `${name}-start`;
+// Aggressive major collect that reclaims old-space sizing, not just live garbage,
+// so the next op measures on a freed heap. last-resort is krausest's flavor. The
+// plain gc() fallback covers setups that lack it.
+function settle() {
+  if (globalThis.gc) {
+    try {
+      globalThis.gc({ type: 'major', execution: 'sync', flavor: 'last-resort' });
+    }
+    catch {
+      globalThis.gc();
+    }
+  }
+}
+
+// Mark, run, and measure one op. The collect leads the marks so the op measures on
+// a freed heap. Because it leads, the previous op's teardown (plain code after its
+// call) has already run and is reclaimable.
+async function measureOp(name, run) {
+  settle();
+  performance.mark(`${name}-start`);
+  const result = run();
+  if (result?.then) { await result; }
+  performance.measure(name, `${name}-start`);
+}
 
 /*******************************
       Fixtures
@@ -94,12 +117,12 @@ const data = {
 {
   const evaluator = new ExpressionEvaluator({ data, helpers });
   // purpose: Evaluates one simple identifier and one dotted path 100000 times each. Property-lookup hot path.
-  performance.mark(startMark('expr-simple-100k'));
-  for (let i = 0; i < 100_000; i++) {
-    evaluator.evaluate('count', data);
-    evaluator.evaluate('user.name', data);
-  }
-  performance.measure('expr-simple-100k', startMark('expr-simple-100k'));
+  await measureOp('expr-simple-100k', () => {
+    for (let i = 0; i < 100_000; i++) {
+      evaluator.evaluate('count', data);
+      evaluator.evaluate('user.name', data);
+    }
+  });
 }
 
 // expr-lisp-50k — Lisp-style helper invocation. Production
@@ -108,11 +131,11 @@ const data = {
 {
   const evaluator = new ExpressionEvaluator({ data, helpers });
   // purpose: Evaluates one Lisp-style helper call 50000 times. Parse-cache lookup and helper dispatch.
-  performance.mark(startMark('expr-lisp-50k'));
-  for (let i = 0; i < 50_000; i++) {
-    evaluator.evaluate("classIf isActive 'active'", data);
-  }
-  performance.measure('expr-lisp-50k', startMark('expr-lisp-50k'));
+  await measureOp('expr-lisp-50k', () => {
+    for (let i = 0; i < 50_000; i++) {
+      evaluator.evaluate("classIf isActive 'active'", data);
+    }
+  });
 }
 
 // expr-js-10k — JS expression eval via new Function + Proxy.
@@ -122,12 +145,12 @@ const data = {
 {
   const evaluator = new ExpressionEvaluator({ data, helpers });
   // purpose: Evaluates one arithmetic expression and one ternary 10000 times each. JS-eval hot path.
-  performance.mark(startMark('expr-js-10k'));
-  for (let i = 0; i < 10_000; i++) {
-    evaluator.evaluate('count + 1', data);
-    evaluator.evaluate("isOpen ? 'open' : 'closed'", data);
-  }
-  performance.measure('expr-js-10k', startMark('expr-js-10k'));
+  await measureOp('expr-js-10k', () => {
+    for (let i = 0; i < 10_000; i++) {
+      evaluator.evaluate('count + 1', data);
+      evaluator.evaluate("isOpen ? 'open' : 'closed'", data);
+    }
+  });
 }
 
 /*******************************
@@ -148,11 +171,11 @@ const data = {
   const buildHTMLStringAST = new TemplateCompiler(buildHTMLStringTemplate).compile();
 
   // purpose: Builds the HTML string for a realistic card AST 10000 times. Raw assembly throughput.
-  performance.mark(startMark('build-html-string-10k'));
-  for (let i = 0; i < 10_000; i++) {
-    buildHTMLString(buildHTMLStringAST);
-  }
-  performance.measure('build-html-string-10k', startMark('build-html-string-10k'));
+  await measureOp('build-html-string-10k', () => {
+    for (let i = 0; i < 10_000; i++) {
+      buildHTMLString(buildHTMLStringAST);
+    }
+  });
 }
 
 /*******************************
@@ -229,12 +252,12 @@ const data = {
   const { entries: domWalkerEntries } = domWalkerRenderers[0].buildHTMLString(domWalkerAST, false);
 
   // purpose: Runs bindMarkers across a 1000-node card fragment 15 times. TreeWalker pass and binding dispatch.
-  performance.mark(startMark('dom-walker-1000x15'));
-  for (let r = 0; r < REPS; r++) {
-    const renderer = domWalkerRenderers[r];
-    renderer.bindMarkers(domWalkerFragments[r], domWalkerEntries, domWalkerData, renderer.scope, domWalkerAST);
-  }
-  performance.measure('dom-walker-1000x15', startMark('dom-walker-1000x15'));
+  await measureOp('dom-walker-1000x15', () => {
+    for (let r = 0; r < REPS; r++) {
+      const renderer = domWalkerRenderers[r];
+      renderer.bindMarkers(domWalkerFragments[r], domWalkerEntries, domWalkerData, renderer.scope, domWalkerAST);
+    }
+  });
 }
 
 /*******************************

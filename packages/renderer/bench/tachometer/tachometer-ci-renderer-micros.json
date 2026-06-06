@@ -8,7 +8,7 @@
     {
       "name": "this-change",
       "url": "ci-current-renderer-micros.html",
-      "browser": { "name": "chrome", "headless": true },
+      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
       "measurement": [
         { "mode": "performance", "entryName": "expr-simple-100k" },
         { "mode": "performance", "entryName": "expr-lisp-50k" },
@@ -20,7 +20,7 @@
     {
       "name": "tip-of-tree",
       "url": "ci-baseline-renderer-micros.html",
-      "browser": { "name": "chrome", "headless": true },
+      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
       "measurement": [
         { "mode": "performance", "entryName": "expr-simple-100k" },
         { "mode": "performance", "entryName": "expr-lisp-50k" },

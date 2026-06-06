@@ -8,7 +8,7 @@
     {
       "name": "this-change",
       "url": "ci-current-hydrate.html",
-      "browser": { "name": "chrome", "headless": true },
+      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
       "measurement": [
         { "mode": "performance", "entryName": "each-100-mount" },
         { "mode": "performance", "entryName": "each-100" },
@@ -19,7 +19,7 @@
     {
       "name": "tip-of-tree",
       "url": "ci-baseline-hydrate.html",
-      "browser": { "name": "chrome", "headless": true },
+      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
       "measurement": [
         { "mode": "performance", "entryName": "each-100-mount" },
         { "mode": "performance", "entryName": "each-100" },
