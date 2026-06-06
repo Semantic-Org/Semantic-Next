@@ -27,7 +27,9 @@
         { "mode": "performance", "entryName": "reactive-stable-deps-3reads-5000x100" },
         { "mode": "performance", "entryName": "computed-unobserved-200x500" },
         { "mode": "performance", "entryName": "computed-subscribe-unsubscribe-10k" },
-        { "mode": "performance", "entryName": "flush-fanout-allocation-1000x500" }
+        { "mode": "performance", "entryName": "flush-fanout-allocation-1000x500" },
+        { "mode": "performance", "entryName": "mutate-grid-row-edit-600" },
+        { "mode": "performance", "entryName": "mutate-doc-nested-200k" }
       ]
     },
     {
@@ -52,7 +54,9 @@
         { "mode": "performance", "entryName": "reactive-stable-deps-3reads-5000x100" },
         { "mode": "performance", "entryName": "computed-unobserved-200x500" },
         { "mode": "performance", "entryName": "computed-subscribe-unsubscribe-10k" },
-        { "mode": "performance", "entryName": "flush-fanout-allocation-1000x500" }
+        { "mode": "performance", "entryName": "flush-fanout-allocation-1000x500" },
+        { "mode": "performance", "entryName": "mutate-grid-row-edit-600" },
+        { "mode": "performance", "entryName": "mutate-doc-nested-200k" }
       ]
     }
   ]
