@@ -45,7 +45,15 @@ const spendBudget = (value, remaining) => {
   if (remaining < 0 || value === null || typeof value !== 'object') {
     return remaining;
   }
-  if (isTrackable(value)) {
+  // arrays count by length so a large list never allocates its key strings
+  // just to overrun the budget
+  if (isArray(value)) {
+    remaining -= value.length;
+    for (let i = 0; remaining >= 0 && i < value.length; i++) {
+      remaining = spendBudget(value[i], remaining);
+    }
+  }
+  else if (isPlainObject(value)) {
     const valueKeys = Object.keys(value);
     remaining -= valueKeys.length;
     for (let i = 0; remaining >= 0 && i < valueKeys.length; i++) {
