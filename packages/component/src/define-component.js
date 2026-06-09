@@ -10,6 +10,7 @@ import { registerComponent } from './component-registry.js';
 export const defineComponent = ({
   template = '',
   ast,
+  preserveWhitespace = false,
   css = '',
   pageCSS = '',
   tagName,
@@ -51,7 +52,7 @@ export const defineComponent = ({
 
   if (!ast) {
     const compiler = new TemplateCompiler(template);
-    ast = compiler.compile();
+    ast = compiler.compile(template, { preserveWhitespace });
   }
 
   each(subTemplates, (subTemplate, name) => {

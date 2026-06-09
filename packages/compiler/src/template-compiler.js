@@ -1,5 +1,6 @@
 import { each, isPlainObject, isString, last } from '@semantic-ui/utils';
 
+import { condenseWhitespace } from './condense-whitespace.js';
 import { StringScanner } from './string-scanner.js';
 
 class TemplateCompiler {
@@ -90,7 +91,10 @@ class TemplateCompiler {
     Creates an AST representation of a template
     from a template string
   */
-  compile(templateString = this.templateString, { includePositions = false, recoverable = false } = {}) {
+  compile(
+    templateString = this.templateString,
+    { includePositions = false, recoverable = false, preserveWhitespace = false } = {},
+  ) {
     this.includePositions = includePositions;
     this.recoverable = recoverable;
     this.errors = [];
@@ -105,6 +109,10 @@ class TemplateCompiler {
     }
 
     templateString = TemplateCompiler.preprocessTemplate(templateString);
+    if (!includePositions && !preserveWhitespace) {
+      // positions mode (LSP) keeps source-faithful offsets
+      templateString = condenseWhitespace(templateString);
+    }
     const scanner = new StringScanner(templateString);
 
     // compile regexp globally once
@@ -557,7 +565,8 @@ class TemplateCompiler {
             addToAST({ type: 'html', html: '<svg ' });
             // Save errors before recursive compile (it resets this.errors)
             const outerErrors = this.errors;
-            addToAST(...this.compile(tag.content, { includePositions, recoverable }));
+            // svg open-tag fragment: attribute text, the outer pass owns whitespace
+            addToAST(...this.compile(tag.content, { includePositions, recoverable, preserveWhitespace: true }));
             // Merge inner errors back and restore outer accumulator
             const innerErrors = this.errors;
             this.errors = outerErrors;

@@ -21,11 +21,11 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          <p>' },
+        { type: 'html', html: '<div><p>' },
         { type: 'expression', value: 'name' },
-        { type: 'html', html: '</p>\n          <p>' },
+        { type: 'html', html: '</p><p>' },
         { type: 'expression', value: 'age' },
-        { type: 'html', html: '</p>\n        </div>' },
+        { type: 'html', html: '</p></div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -40,15 +40,15 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          <p>' },
+        { type: 'html', html: '<div><p>' },
         { type: 'expression', unsafeHTML: true, value: "'<b>John</b>'" },
-        { type: 'html', html: '</p>\n          <p>' },
+        { type: 'html', html: '</p><p>' },
         {
           type: 'expression',
           unsafeHTML: true,
           value: `'<img src="img.png">'`,
         },
-        { type: 'html', html: '</p>\n        </div>' },
+        { type: 'html', html: '</p></div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -63,11 +63,11 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          <p>' },
+        { type: 'html', html: '<div><p>' },
         { type: 'expression', literalValue: true, value: 'handleChange' },
-        { type: 'html', html: '</p>\n          <p>' },
+        { type: 'html', html: '</p><p>' },
         { type: 'expression', literalValue: true, value: 'myCallback' },
-        { type: 'html', html: '</p>\n        </div>' },
+        { type: 'html', html: '</p></div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -82,11 +82,11 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          <p>' },
+        { type: 'html', html: '<div><p>' },
         { type: 'expression', value: true },
-        { type: 'html', html: '</p>\n          <p>' },
+        { type: 'html', html: '</p><p>' },
         { type: 'expression', value: false },
-        { type: 'html', html: '</p>\n        </div>' },
+        { type: 'html', html: '</p></div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -104,16 +104,16 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'if',
           condition: 'condition',
           branches: [],
           content: [
-            { type: 'html', html: '\n            <p>True</p>\n          ' },
+            { type: 'html', html: '<p>True</p>' },
           ],
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -132,25 +132,24 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'if',
           condition: true,
           branches: [],
           content: [
-            { type: 'html', html: '\n            <p>True</p>\n          ' },
+            { type: 'html', html: '<p>True</p>' },
           ],
         },
-        { type: 'html', html: '\n          ' },
         {
           type: 'if',
           condition: false,
           branches: [],
           content: [
-            { type: 'html', html: '\n            <p>False</p>\n          ' },
+            { type: 'html', html: '<p>False</p>' },
           ],
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -165,11 +164,11 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          <p>' },
+        { type: 'html', html: '<div><p>' },
         { type: 'expression', value: 10 },
-        { type: 'html', html: '</p>\n          <p>' },
+        { type: 'html', html: '</p><p>' },
         { type: 'expression', value: 0 },
-        { type: 'html', html: '</p>\n        </div>' },
+        { type: 'html', html: '</p></div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -185,16 +184,16 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'if',
           condition: "'name'",
           content: [
-            { type: 'html', html: '\n            Content\n          ' },
+            { type: 'html', html: ' Content ' },
           ],
           branches: [],
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -212,12 +211,12 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'if',
           condition: 'name',
           content: [
-            { type: 'html', html: '\n            <p>True</p>\n          ' },
+            { type: 'html', html: '<p>True</p>' },
           ],
           branches: [
             {
@@ -226,13 +225,13 @@ describe('TemplateCompiler', () => {
               content: [
                 {
                   type: 'html',
-                  html: '\n            <p>False</p>\n          ',
+                  html: '<p>False</p>',
                 },
               ],
             },
           ],
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -252,12 +251,12 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'if',
           condition: 'name',
           content: [
-            { type: 'html', html: '\n            <p>True</p>\n          ' },
+            { type: 'html', html: '<p>True</p>' },
           ],
           branches: [
             {
@@ -266,7 +265,7 @@ describe('TemplateCompiler', () => {
               content: [
                 {
                   type: 'html',
-                  html: '\n            <p>False</p>\n          ',
+                  html: '<p>False</p>',
                 },
               ],
             },
@@ -276,13 +275,13 @@ describe('TemplateCompiler', () => {
               content: [
                 {
                   type: 'html',
-                  html: '\n            <p>False</p>\n          ',
+                  html: '<p>False</p>',
                 },
               ],
             },
           ],
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -305,7 +304,7 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'if',
           condition: 'name',
@@ -316,7 +315,7 @@ describe('TemplateCompiler', () => {
               content: [
                 {
                   type: 'html',
-                  html: '\n            <p>False</p>\n            ',
+                  html: '<p>False</p>',
                 },
                 {
                   type: 'if',
@@ -324,7 +323,7 @@ describe('TemplateCompiler', () => {
                   content: [
                     {
                       type: 'html',
-                      html: '\n              <p>True</p>\n            ',
+                      html: '<p>True</p>',
                     },
                   ],
                   branches: [
@@ -333,21 +332,20 @@ describe('TemplateCompiler', () => {
                       content: [
                         {
                           type: 'html',
-                          html: '\n              <p>False</p>\n            ',
+                          html: '<p>False</p>',
                         },
                       ],
                     },
                   ],
                 },
-                { type: 'html', html: '\n          ' },
               ],
             },
           ],
           content: [
-            { type: 'html', html: '\n            <p>True</p>\n          ' },
+            { type: 'html', html: '<p>True</p>' },
           ],
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -365,12 +363,12 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'if',
           condition: 'name',
           content: [
-            { type: 'html', html: '\n            <p>True</p>\n          ' },
+            { type: 'html', html: '<p>True</p>' },
           ],
           branches: [
             {
@@ -378,13 +376,13 @@ describe('TemplateCompiler', () => {
               content: [
                 {
                   type: 'html',
-                  html: '\n            <p>False</p>\n          ',
+                  html: '<p>False</p>',
                 },
               ],
             },
           ],
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -407,7 +405,7 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'if',
           condition: 'name',
@@ -417,20 +415,20 @@ describe('TemplateCompiler', () => {
               content: [
                 {
                   type: 'html',
-                  html: '\n            <p>False</p>\n          ',
+                  html: '<p>False</p>',
                 },
               ],
             },
           ],
           content: [
-            { type: 'html', html: '\n            <p>True</p>\n            ' },
+            { type: 'html', html: '<p>True</p>' },
             {
               type: 'if',
               condition: 'age',
               content: [
                 {
                   type: 'html',
-                  html: '\n              <p>True</p>\n            ',
+                  html: '<p>True</p>',
                 },
               ],
               branches: [
@@ -439,16 +437,15 @@ describe('TemplateCompiler', () => {
                   content: [
                     {
                       type: 'html',
-                      html: '\n              <p>False</p>\n            ',
+                      html: '<p>False</p>',
                     },
                   ],
                 },
               ],
             },
-            { type: 'html', html: '\n          ' },
           ],
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -476,7 +473,7 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'if',
           condition: 'name',
@@ -486,20 +483,20 @@ describe('TemplateCompiler', () => {
               content: [
                 {
                   type: 'html',
-                  html: '\n            <p>False</p>\n          ',
+                  html: '<p>False</p>',
                 },
               ],
             },
           ],
           content: [
-            { type: 'html', html: '\n            <p>True</p>\n            ' },
+            { type: 'html', html: '<p>True</p>' },
             {
               type: 'if',
               condition: 'age',
               content: [
                 {
                   type: 'html',
-                  html: '\n              <p>True</p>\n              ',
+                  html: '<p>True</p>',
                 },
                 {
                   type: 'if',
@@ -507,7 +504,7 @@ describe('TemplateCompiler', () => {
                   content: [
                     {
                       type: 'html',
-                      html: '\n                <p>True</p>\n              ',
+                      html: '<p>True</p>',
                     },
                   ],
                   branches: [
@@ -516,13 +513,12 @@ describe('TemplateCompiler', () => {
                       content: [
                         {
                           type: 'html',
-                          html: '\n                <p>False</p>\n              ',
+                          html: '<p>False</p>',
                         },
                       ],
                     },
                   ],
                 },
-                { type: 'html', html: '\n            ' },
               ],
               branches: [
                 {
@@ -530,16 +526,15 @@ describe('TemplateCompiler', () => {
                   content: [
                     {
                       type: 'html',
-                      html: '\n              <p>False</p>\n            ',
+                      html: '<p>False</p>',
                     },
                   ],
                 },
               ],
             },
-            { type: 'html', html: '\n          ' },
           ],
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -554,9 +549,9 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div> ' },
         { type: 'expression', value: 'getValue { nested: value }' },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: ' </div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -570,9 +565,9 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div> ' },
         { type: 'expression', value: 'formatData { user: { name: userName, details: { age: userAge } } }' },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: ' </div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -586,9 +581,9 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div> ' },
         { type: 'expression', value: 'processUser(getData({ id: userId }))' },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: ' </div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -602,9 +597,9 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div> ' },
         { type: 'expression', value: 'formatList([{ id: 1 }, { id: 2 }])' },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: ' </div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -618,9 +613,9 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div> ' },
         { type: 'expression', value: 'isValid({ user: { permissions: { admin: checkAdmin({ org: orgId }) } } })' },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: ' </div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -634,12 +629,12 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div> ' },
         {
           type: 'expression',
           value: "processItems([ { type: 'user', data: { id: 1 } }, { type: 'admin', data: { id: 2 } } ])",
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: ' </div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -655,7 +650,7 @@ describe('TemplateCompiler', () => {
       const expectedAST = [
         { type: 'html', html: '<div disabled=' },
         { type: 'expression', value: 'isDisabled({ user: { status: getStatus({ id: userId }) } })', ifDefined: true },
-        { type: 'html', html: '>\n          Content\n        </div>' },
+        { type: 'html', html: '> Content </div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -676,9 +671,9 @@ describe('TemplateCompiler', () => {
           type: 'each',
           over: 'getItems',
           content: [
-            { type: 'html', html: '\n          <p>' },
+            { type: 'html', html: '<p>' },
             { type: 'expression', value: 'name' },
-            { type: 'html', html: '</p>\n        ' },
+            { type: 'html', html: '</p>' },
           ],
         },
       ];
@@ -745,9 +740,9 @@ describe('TemplateCompiler', () => {
           over: 'getItems',
           as: 'item',
           content: [
-            { type: 'html', html: '\n          <p>' },
+            { type: 'html', html: '<p>' },
             { type: 'expression', value: 'item.name' },
-            { type: 'html', html: '</p>\n        ' },
+            { type: 'html', html: '</p>' },
           ],
         },
       ];
@@ -768,9 +763,9 @@ describe('TemplateCompiler', () => {
           over: 'getItems',
           as: 'item',
           content: [
-            { type: 'html', html: '\n          <p>' },
+            { type: 'html', html: '<p>' },
             { type: 'expression', value: 'item.name' },
-            { type: 'html', html: '</p>\n        ' },
+            { type: 'html', html: '</p>' },
           ],
         },
       ];
@@ -792,11 +787,11 @@ describe('TemplateCompiler', () => {
           as: 'item',
           indexAs: 'idx',
           content: [
-            { type: 'html', html: '\n          <p>' },
+            { type: 'html', html: '<p>' },
             { type: 'expression', value: 'idx + 1' },
             { type: 'html', html: '. ' },
             { type: 'expression', value: 'item.name' },
-            { type: 'html', html: '</p>\n        ' },
+            { type: 'html', html: '</p>' },
           ],
         },
       ];
@@ -819,14 +814,14 @@ describe('TemplateCompiler', () => {
           over: 'products',
           as: 'product',
           content: [
-            { type: 'html', html: '\n          <div>' },
+            { type: 'html', html: '<div>' },
             { type: 'expression', value: 'product.name' },
             { type: 'html', html: ' - ' },
             { type: 'expression', value: 'product.price' },
-            { type: 'html', html: '</div>\n        ' },
+            { type: 'html', html: '</div>' },
           ],
           elseContent: [
-            { type: 'html', html: '\n          <div>No products available</div>\n        ' },
+            { type: 'html', html: '<div>No products available</div>' },
           ],
         },
       ];
@@ -848,11 +843,11 @@ describe('TemplateCompiler', () => {
           as: 'product',
           indexAs: 'idx',
           content: [
-            { type: 'html', html: '\n          <p>' },
+            { type: 'html', html: '<p>' },
             { type: 'expression', value: 'idx' },
             { type: 'html', html: '. ' },
             { type: 'expression', value: 'product.name' },
-            { type: 'html', html: '</p>\n        ' },
+            { type: 'html', html: '</p>' },
           ],
         },
       ];
@@ -874,11 +869,11 @@ describe('TemplateCompiler', () => {
           as: '(product)',
           indexAs: 'position',
           content: [
-            { type: 'html', html: '\n          <p>' },
+            { type: 'html', html: '<p>' },
             { type: 'expression', value: 'position + 1' },
             { type: 'html', html: '. ' },
             { type: 'expression', value: 'product.name' },
-            { type: 'html', html: '</p>\n        ' },
+            { type: 'html', html: '</p>' },
           ],
         },
       ];
@@ -900,11 +895,11 @@ describe('TemplateCompiler', () => {
           as: 'item.value',
           indexAs: '(index + offset)',
           content: [
-            { type: 'html', html: '\n          <p>' },
+            { type: 'html', html: '<p>' },
             { type: 'expression', value: 'index + offset' },
             { type: 'html', html: '. ' },
             { type: 'expression', value: 'item.value.name' },
-            { type: 'html', html: '</p>\n        ' },
+            { type: 'html', html: '</p>' },
           ],
         },
       ];
@@ -926,11 +921,11 @@ describe('TemplateCompiler', () => {
           as: 'product',
           indexAs: 'i',
           content: [
-            { type: 'html', html: '\n          <p>' },
+            { type: 'html', html: '<p>' },
             { type: 'expression', value: 'i + 1' },
             { type: 'html', html: '. ' },
             { type: 'expression', value: 'product.name' },
-            { type: 'html', html: '</p>\n        ' },
+            { type: 'html', html: '</p>' },
           ],
         },
       ];
@@ -954,14 +949,14 @@ describe('TemplateCompiler', () => {
           as: 'product',
           indexAs: 'i',
           content: [
-            { type: 'html', html: '\n          <p>' },
+            { type: 'html', html: '<p>' },
             { type: 'expression', value: 'i + 1' },
             { type: 'html', html: '. ' },
             { type: 'expression', value: 'product.name' },
-            { type: 'html', html: '</p>\n        ' },
+            { type: 'html', html: '</p>' },
           ],
           elseContent: [
-            { type: 'html', html: '\n          <p>No products available</p>\n        ' },
+            { type: 'html', html: '<p>No products available</p>' },
           ],
         },
       ];
@@ -983,18 +978,16 @@ describe('TemplateCompiler', () => {
           type: 'each',
           over: 'getItems',
           content: [
-            { type: 'html', html: '\n          ' },
             {
               type: 'if',
               condition: 'name',
               content: [
-                { type: 'html', html: '\n            <p>' },
+                { type: 'html', html: '<p>' },
                 { type: 'expression', value: 'name' },
-                { type: 'html', html: '</p>\n          ' },
+                { type: 'html', html: '</p>' },
               ],
               branches: [],
             },
-            { type: 'html', html: '\n        ' },
           ],
         },
       ];
@@ -1016,12 +1009,12 @@ describe('TemplateCompiler', () => {
           type: 'each',
           over: 'getItems',
           content: [
-            { type: 'html', html: '\n          <p>' },
+            { type: 'html', html: '<p>' },
             { type: 'expression', value: 'name' },
-            { type: 'html', html: '</p>\n        ' },
+            { type: 'html', html: '</p>' },
           ],
           elseContent: [
-            { type: 'html', html: '\n          <p>No items available</p>\n        ' },
+            { type: 'html', html: '<p>No items available</p>' },
           ],
         },
       ];
@@ -1048,25 +1041,24 @@ describe('TemplateCompiler', () => {
           type: 'each',
           over: 'categories',
           content: [
-            { type: 'html', html: '\n          <h2>' },
+            { type: 'html', html: '<h2>' },
             { type: 'expression', value: 'name' },
-            { type: 'html', html: '</h2>\n          ' },
+            { type: 'html', html: '</h2>' },
             {
               type: 'each',
               over: 'items',
               content: [
-                { type: 'html', html: '\n            <p>' },
+                { type: 'html', html: '<p>' },
                 { type: 'expression', value: 'title' },
-                { type: 'html', html: '</p>\n          ' },
+                { type: 'html', html: '</p>' },
               ],
               elseContent: [
-                { type: 'html', html: '\n            <p>No items in this category</p>\n          ' },
+                { type: 'html', html: '<p>No items in this category</p>' },
               ],
             },
-            { type: 'html', html: '\n        ' },
           ],
           elseContent: [
-            { type: 'html', html: '\n          <p>No categories available</p>\n        ' },
+            { type: 'html', html: '<p>No categories available</p>' },
           ],
         },
       ];
@@ -1092,30 +1084,28 @@ describe('TemplateCompiler', () => {
           type: 'each',
           over: 'items',
           content: [
-            { type: 'html', html: '\n          ' },
             {
               type: 'if',
               condition: 'isActive',
               content: [
-                { type: 'html', html: '\n            <p>Active: ' },
+                { type: 'html', html: '<p>Active: ' },
                 { type: 'expression', value: 'name' },
-                { type: 'html', html: '</p>\n          ' },
+                { type: 'html', html: '</p>' },
               ],
               branches: [
                 {
                   type: 'else',
                   content: [
-                    { type: 'html', html: '\n            <p>Inactive: ' },
+                    { type: 'html', html: '<p>Inactive: ' },
                     { type: 'expression', value: 'name' },
-                    { type: 'html', html: '</p>\n          ' },
+                    { type: 'html', html: '</p>' },
                   ],
                 },
               ],
             },
-            { type: 'html', html: '\n        ' },
           ],
           elseContent: [
-            { type: 'html', html: '\n          <p>No items to display</p>\n        ' },
+            { type: 'html', html: '<p>No items to display</p>' },
           ],
         },
       ];
@@ -1279,9 +1269,9 @@ describe('TemplateCompiler', () => {
       const ast = compiler.compile(template);
       // should match template
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         { type: 'template', name: `'partialName'`, reactiveData: {} },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -1295,13 +1285,13 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'template',
           name: "'partialName'",
           reactiveData: { data1: 'value', data2: 'value' },
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -1339,13 +1329,13 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'template',
           name: 'dynamicName',
           reactiveData: { one: "'one'", two: 'two' },
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -1358,13 +1348,13 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'template',
           name: "'CodePlaygroundPanel'",
           reactiveData: { size: '(getPanelSize)' },
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -1378,13 +1368,13 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'template',
           name: "'CodePlaygroundPanel'",
           reactiveData: { size: '(getPanelSize panel)' },
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -1401,13 +1391,13 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'template',
           name: "'CodePlaygroundPanel'",
           reactiveData: { panel: 'panel', size: '(getPanelSize panel)' },
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -1421,13 +1411,13 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         {
           type: 'template',
           name: "'CodePlaygroundPanel'",
           reactiveData: { size: '(getPanelSize (getPanel))' },
         },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -1443,9 +1433,9 @@ describe('TemplateCompiler', () => {
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
-        { type: 'html', html: '<div>\n          ' },
+        { type: 'html', html: '<div>' },
         { type: 'slot', name: "'name'" },
-        { type: 'html', html: '\n        </div>' },
+        { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
     });
@@ -1550,7 +1540,7 @@ describe('TemplateCompiler', () => {
           type: 'async',
           expression: 'fetchData',
           content: [
-            { type: 'html', html: '\n          <p>Data loaded!</p>\n        ' },
+            { type: 'html', html: '<p>Data loaded!</p>' },
           ],
           loadingContent: [],
           errorContent: [],
@@ -1573,9 +1563,9 @@ describe('TemplateCompiler', () => {
           expression: 'fetchUsers',
           as: 'users',
           content: [
-            { type: 'html', html: '\n          <p>' },
+            { type: 'html', html: '<p>' },
             { type: 'expression', value: 'users.length' },
-            { type: 'html', html: ' users loaded</p>\n        ' },
+            { type: 'html', html: ' users loaded</p>' },
           ],
           loadingContent: [],
           errorContent: [],
@@ -1614,7 +1604,7 @@ describe('TemplateCompiler', () => {
       expect(ast[0].expression).toBe('fetchData');
       expect(ast[0].as).toBe('data');
       expect(ast[0].loadingContent).toEqual([
-        { type: 'html', html: '\n          <p>Loading...</p>\n        ' },
+        { type: 'html', html: '<p>Loading...</p>' },
       ]);
     });
 
@@ -1630,7 +1620,7 @@ describe('TemplateCompiler', () => {
       const ast = compiler.compile(template);
       expect(ast[0].type).toBe('async');
       expect(ast[0].loadingContent).toEqual([
-        { type: 'html', html: '\n          <p>Please wait...</p>\n        ' },
+        { type: 'html', html: '<p>Please wait...</p>' },
       ]);
     });
 
@@ -1646,9 +1636,9 @@ describe('TemplateCompiler', () => {
       const ast = compiler.compile(template);
       expect(ast[0].type).toBe('async');
       expect(ast[0].errorContent).toEqual([
-        { type: 'html', html: '\n          <p>Error: ' },
+        { type: 'html', html: '<p>Error: ' },
         { type: 'expression', value: 'error.message' },
-        { type: 'html', html: '</p>\n        ' },
+        { type: 'html', html: '</p>' },
       ]);
       expect(ast[0].errorAs).toBeNull();
     });
@@ -1666,9 +1656,9 @@ describe('TemplateCompiler', () => {
       expect(ast[0].type).toBe('async');
       expect(ast[0].errorAs).toBe('e');
       expect(ast[0].errorContent).toEqual([
-        { type: 'html', html: '\n          <p>Error: ' },
+        { type: 'html', html: '<p>Error: ' },
         { type: 'expression', value: 'e.message' },
-        { type: 'html', html: '</p>\n        ' },
+        { type: 'html', html: '</p>' },
       ]);
     });
 
@@ -1801,9 +1791,9 @@ describe('TemplateCompiler', () => {
             expression: 'userId',
             key: null,
             content: [
-              { type: 'html', html: '\n            <div>User: ' },
+              { type: 'html', html: '<div>User: ' },
               { type: 'expression', value: 'getUserDisplayName' },
-              { type: 'html', html: '</div>\n          ' },
+              { type: 'html', html: '</div>' },
             ],
           },
         ];
@@ -1824,7 +1814,7 @@ describe('TemplateCompiler', () => {
             expression: 'userId + theme',
             key: null,
             content: [
-              { type: 'html', html: '\n            <div>Content that depends on userId and theme</div>\n          ' },
+              { type: 'html', html: '<div>Content that depends on userId and theme</div>' },
             ],
           },
         ];
@@ -1849,7 +1839,7 @@ describe('TemplateCompiler', () => {
             content: [
               {
                 type: 'html',
-                html: '\n            <expensive-user-dashboard ></expensive-user-dashboard>\n          ',
+                html: '<expensive-user-dashboard ></expensive-user-dashboard>',
               },
             ],
           },
@@ -1871,7 +1861,7 @@ describe('TemplateCompiler', () => {
             expression: null,
             key: 'getComputedKey userId permissions',
             content: [
-              { type: 'html', html: '\n            <complex-component ></complex-component>\n          ' },
+              { type: 'html', html: '<complex-component ></complex-component>' },
             ],
           },
         ];
@@ -1896,7 +1886,7 @@ describe('TemplateCompiler', () => {
             content: [
               {
                 type: 'html',
-                html: '\n            <permission-sensitive-content ></permission-sensitive-content>\n          ',
+                html: '<permission-sensitive-content ></permission-sensitive-content>',
               },
             ],
           },
@@ -1918,7 +1908,7 @@ describe('TemplateCompiler', () => {
             expression: 'state.userId + state.theme',
             key: 'getCacheKey state',
             content: [
-              { type: 'html', html: '\n            <div>Complex content</div>\n          ' },
+              { type: 'html', html: '<div>Complex content</div>' },
             ],
           },
         ];
@@ -2016,8 +2006,7 @@ describe('TemplateCompiler', () => {
         const expectedAST = [
           {
             type: 'html',
-            html:
-              '<ui-header ></ui-header>\n          <main-content-area ></main-content-area>\n          <ui-footer ></ui-footer>',
+            html: '<ui-header ></ui-header><main-content-area ></main-content-area><ui-footer ></ui-footer>',
           },
         ];
         expect(ast).toEqual(expectedAST);
