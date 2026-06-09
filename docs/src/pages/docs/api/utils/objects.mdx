@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Object Utilities
 package: "@semantic-ui/utils"
-methods: [keys, values, filterObject, mapObject, extend, assignInPlace, deepExtend, pick, arrayFromObject, get, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
+methods: [keys, values, filterObject, mapObject, trackWrites, detectChanges, extend, assignInPlace, deepExtend, pick, arrayFromObject, get, set, unset, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
 icon: box
 description: API reference for object manipulation functions
 ---
@@ -122,6 +122,104 @@ import { mapObject } from '@semantic-ui/utils';
 const obj = { a: 1, b: 2, c: 3 };
 const result = mapObject(obj, (value) => value * 2);
 console.log(result); // { a: 2, b: 4, c: 6 }
+```
+
+### trackWrites
+
+```javascript
+function trackWrites(value, callback, { strategy = 'auto', returnPaths = true, onWrite, clone, equality } = {})
+```
+
+Runs a callback against a value and reports whether the callback changed it, with the changed fields as dot paths. Useful for running a user callback against a data structure and determining mutations.
+
+> **Strategy** - The default strategy 'auto' will use `snapshot` for small data structures and `proxy` for larger. Snapshot improves debugging by passing you a real copy, while `proxy` preserve performance at the cost of passing you a `proxyObject` inside your callback
+
+#### Parameters
+
+| Name     | Type     | Description |
+|----------|----------|-------------|
+| value    | any      | The value the callback may change |
+| callback | function | Receives the value (or its tracked wrapper) |
+| options  | object   | Optional configuration |
+
+##### Options
+
+| Name        | Type     | Default   | Description |
+|-------------|----------|-----------|-------------|
+| strategy    | string   | 'auto'    | `'auto'`, `'snapshot'`, or `'proxy'` |
+| returnPaths | boolean  | true      | Return changed fields as dot paths. Pass `false` to skip collection on hot paths that only read `changed` |
+| onWrite     | function | undefined | `(path, target, key)` fires per observed write with the key path from the root. Implies the proxy strategy under `'auto'` |
+| clone       | function | clone     | Clone used for snapshots |
+| equality    | function | isEqual   | Equality used when paths are skipped and for exotic snapshots |
+
+#### Returns
+
+`{ changed, paths, result }` — whether the value changed, the changed fields as dot paths, and the callback's return value.
+
+#### Notes
+
+`paths` is a covering set resolvable through [`get`](#get) — the proxy strategy reports the paths written (pruned so a written parent subsumes its children), the snapshot strategy reports net leaf differences via [`detectChanges`](#detectchanges). A wholesale change to a non-container value reports path `''`. Under the proxy strategy the tracked wrapper is only valid inside the callback — using one after it returns throws.
+
+#### Example
+
+```javascript
+import { trackWrites, get } from '@semantic-ui/utils';
+
+const doc = { meta: { count: 0 } };
+const { changed, paths } = trackWrites(doc, (value) => {
+  value.meta.count++;
+});
+console.log(changed); // true
+console.log(paths); // ['meta.count']
+
+// paths resolve against the value, e.g. for state sync
+paths.forEach((path) => sync(path, get(doc, path)));
+
+// writing the same value is not a change
+trackWrites(doc, (value) => {
+  value.meta.count = 1;
+}); // { changed: false, paths: [], ... }
+
+// skip path collection on hot paths
+trackWrites(doc, mutator, { returnPaths: false }); // { changed, result }
+```
+
+### detectChanges
+
+```javascript
+function detectChanges(before, after)
+```
+
+Structural diff between two values, reported as dot paths from `before` to `after` — added (in after only), removed (in before only), and changed (in both, different values).
+
+#### Parameters
+
+| Name   | Type | Description |
+|--------|------|-------------|
+| before | any  | The value to diff from |
+| after  | any  | The value to diff to |
+
+#### Returns
+
+`{ added, removed, changed }` — arrays of dot paths.
+
+#### Notes
+
+Objects and arrays recurse to leaf paths and arrays diff by index, so a shifted array reports every moved position. Values that can't be walked (Map, Set, Date, class instances) compare by deep equality and report their own path. Differing non-container roots report path `''`.
+
+#### Example
+
+```javascript
+import { detectChanges } from '@semantic-ui/utils';
+
+const before = { name: 'a', temp: true, count: 1 };
+const after = { name: 'b', count: 1, nickname: 'al' };
+
+console.log(detectChanges(before, after));
+// { added: ['nickname'], removed: ['temp'], changed: ['name'] }
+
+console.log(detectChanges({ items: [1, 2, 3] }, { items: [1, 9] }));
+// { added: [], removed: ['items.2'], changed: ['items.1'] }
 ```
 
 ### extend
@@ -344,6 +442,81 @@ console.log(get(obj, 'a.b.c')); // 42
 console.log(get(obj, 'a.b.d')); // undefined
 ```
 
+### set
+
+```javascript
+function set(obj, path, value)
+```
+
+Set a nested object field from a string path, the write twin of [`get`](#get). Creates missing intermediates — arrays when the next segment is a numeric index, objects otherwise.
+
+#### Parameters
+
+| Name  | Type   | Description |
+|-------|--------|-------------|
+| obj   | object | The object to write into |
+| path  | string | The path string (e.g., 'a.b.c', 'items.0.name', or 'items[0].name') |
+| value | any    | The value to set at the path |
+
+#### Returns
+
+The same object reference.
+
+#### Notes
+
+Paths from [`trackWrites`](#trackwrites) and [`detectChanges`](#detectchanges) apply back directly. Prototype-climbing segments (`__proto__`, `constructor`, `prototype`) are refused, and a non-string or empty path is a no-op.
+
+#### Example
+
+```javascript
+import { set, get, trackWrites } from '@semantic-ui/utils';
+
+console.log(set({}, 'a.b.c', 1)); // { a: { b: { c: 1 } } }
+console.log(set({}, 'items.0.name', 'first')); // { items: [{ name: 'first' }] }
+
+// sync changes between objects
+const { paths } = trackWrites(source, mutator);
+paths.forEach((path) => set(replica, path, get(source, path)));
+```
+
+### unset
+
+```javascript
+function unset(obj, path)
+```
+
+Remove a nested object field from a string path, the delete twin of [`get`](#get) and [`set`](#set).
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| obj  | object | The object to remove from |
+| path | string | The path string (e.g., 'a.b.c' or 'items.0') |
+
+#### Returns
+
+The same object reference.
+
+#### Notes
+
+A missing path is a no-op. A removed array index leaves a hole rather than splicing, so sibling index paths stay valid when applying several removals at once. Prototype-climbing segments (`__proto__`, `constructor`, `prototype`) are refused. Pairs with [`detectChanges`](#detectchanges) — apply `removed` paths with `unset` and the rest with `set`.
+
+#### Example
+
+```javascript
+import { unset, set, get, detectChanges } from '@semantic-ui/utils';
+
+const obj = { a: { b: 1, c: 2 } };
+unset(obj, 'a.b');
+console.log(obj); // { a: { c: 2 } }
+
+// apply a full diff
+const diff = detectChanges(before, after);
+[...diff.added, ...diff.changed].forEach((path) => set(replica, path, get(after, path)));
+diff.removed.forEach((path) => unset(replica, path));
+```
+
 ### proxyObject
 
 ```javascript
@@ -463,44 +636,6 @@ console.log(result); // { '1': 'a', '2': 'b', '3': 'b' }
 
 These object utilities provide a robust set of tools for working with objects in JavaScript, enhancing productivity and code readability.
 
-### filterObject
-
-```javascript
-function filterObject(obj, callback)
-```
-
-Filter an object based on a callback function.
-
-#### Parameters
-
-| Name     | Type     | Description |
-|----------|----------|-------------|
-| obj      | object   | The object to filter |
-| callback | function | Function to test each key-value pair |
-
-#### Returns
-
-A new object with the key-value pairs that passed the test.
-
-#### Example
-
-```javascript
-import { filterObject } from '@semantic-ui/utils';
-
-const obj = { a: 1, b: 2, c: 3, d: 4 };
-const result = filterObject(obj, value => value % 2 === 0);
-console.log(result); // { b: 2, d: 4 }
-```
-
-### weightedObjectSearch
-
-```javascript
-function weightedObjectSearch(query = '', objectArray = [], {
-  returnMatches = false,
-  matchAllWords = true,
-  propertiesToMatch = []
-} = {})
-```
 
 Performs a weighted search across an array of objects, with matches prioritized by where they occur in the text.
 
@@ -550,34 +685,4 @@ const detailed = weightedObjectSearch('world', items, {
   returnMatches: true,
 });
 // detailed[0].matches → [{ field: 'title', type: 'startsWith', score: 1, value: 'World News' }]
-```
-
-### proxyObject
-
-```javascript
-function proxyObject(sourceObj = noop, referenceObj = {})
-```
-
-Create a proxy object that combines properties from a source object and a reference object.
-
-> **Source Function Requirement** The sourceObj parameter must be a function that returns the source object, not the object itself. This ensures the proxy always accesses the current state of the source object.
-
-#### Parameters
-
-| Name         | Type     | Description |
-|--------------|----------|-------------|
-| sourceObj    | function | Function that returns the source object |
-| referenceObj | object   | The reference object |
-
-#### Example
-
-```javascript
-import { proxyObject } from '@semantic-ui/utils';
-
-// Correct usage - passing a function
-const source = () => ({ a: 1, b: 2 });
-const proxy = proxyObject(source, { c: 3 });
-
-// Incorrect usage - passing object directly
-const wrong = proxyObject({ a: 1 }, { c: 3 }); // Won't work as expected
 ```

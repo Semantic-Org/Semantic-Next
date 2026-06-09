@@ -217,6 +217,11 @@ export class Signal<T> {
    * Mutates the current value in-place via a callback function.
    * If the callback returns a value, that value is set. Otherwise the original
    * value is kept and reactivity is triggered only if it changed.
+   *
+   * Small values are passed to the callback directly and compared against a
+   * snapshot. Large values are passed as a write-tracking wrapper (shows as
+   * Proxy(Object) in the console) so cost scales with writes — the wrapper is
+   * only valid inside the callback.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#mutate mutate}
    * @param mutationFn - Function that receives the current value and optionally returns a new value
    */

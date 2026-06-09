@@ -851,6 +851,216 @@ SAFETY_MODES.forEach((safety) => {
         expect(warnSpy).toHaveBeenCalledTimes(1);
         expect(warnSpy.mock.calls[0][0]).toMatch(/same reference/);
       });
+
+      it('fires reactivity when a deeply nested field changes', () => {
+        const sig = new Signal({ meta: { count: 0 } }, { safety });
+        const sub = subscribe(sig);
+        sig.mutate(doc => {
+          doc.meta.count = 1;
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        sub.stop();
+      });
+
+      it('does not re-fire when a field is written to its existing value', () => {
+        const sig = new Signal({ a: 1 }, { safety });
+        const sub = subscribe(sig);
+        sig.mutate(obj => {
+          obj.a = 1;
+        });
+        flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
+
+      it('fires when a field several levels deep changes', () => {
+        const sig = new Signal({ a: { b: { c: { d: 0 } } } }, { safety });
+        const sub = subscribe(sig);
+        sig.mutate(doc => {
+          doc.a.b.c.d = 42;
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        expect(sig.raw().a.b.c.d).toBe(42);
+        sub.stop();
+      });
+
+      it('fires when a nested field on one row of an array of objects changes', () => {
+        const sig = new Signal(
+          [{ id: 1, meta: { seen: false } }, { id: 2, meta: { seen: false } }],
+          { safety },
+        );
+        const sub = subscribe(sig);
+        sig.mutate(rows => {
+          rows[0].meta.seen = true;
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        expect(sig.raw()[0].meta.seen).toBe(true);
+        expect(sig.raw()[1].meta.seen).toBe(false);
+        sub.stop();
+      });
+
+      it('stores a returned nested object without leaking a revoked proxy', () => {
+        const sig = new Signal({ inner: { x: 0 } }, { safety });
+        sig.mutate(v => {
+          v.inner.x = 1;
+          return v.inner;
+        });
+        expect(sig.raw()).toEqual({ x: 1 });
+        expect(() => JSON.stringify(sig.raw())).not.toThrow();
+      });
+
+      // class instances can't be observed (proxying breaks #private fields) nor
+      // snapshot-compared (clone preserves them by reference), so an in-place
+      // method mutation isn't detected, replace the value to signal a change
+      it.todo('fires when a class instance is mutated in place via a method');
+
+      it('stores a returned falsy-but-defined value', () => {
+        for (const value of [0, '', false, null]) {
+          const sig = new Signal('start', { safety });
+          sig.mutate(() => value);
+          expect(sig.raw()).toBe(value);
+        }
+      });
+
+      it('propagates an error thrown inside the callback to the caller', () => {
+        const sig = new Signal({ a: 1, b: 2 }, { safety });
+        expect(() =>
+          sig.mutate(() => {
+            throw new Error('boom');
+          })
+        ).toThrow('boom');
+      });
+
+      // a write applied before the callback throws stays on the value
+      it('does not fire when the callback throws after a partial write', () => {
+        const sig = new Signal({ a: 1, b: 2 }, { safety });
+        const sub = subscribe(sig);
+        expect(() =>
+          sig.mutate(obj => {
+            obj.a = 99;
+            throw new Error('boom');
+          })
+        ).toThrow();
+        flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
+
+      it('fires when a Map entry is added to a Map-valued signal', () => {
+        const sig = new Signal(new Map(), { safety });
+        const sub = subscribe(sig);
+        sig.mutate(map => {
+          map.set('id-1', { name: 'Alice' });
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        expect(sig.raw().get('id-1')).toEqual({ name: 'Alice' });
+        sub.stop();
+      });
+
+      it('fires when a Date-valued signal is mutated via a setter method', () => {
+        const sig = new Signal(new Date('2020-01-01'), { safety });
+        const sub = subscribe(sig);
+        sig.mutate(date => {
+          date.setFullYear(2030);
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        expect(sig.raw().getFullYear()).toBe(2030);
+        sub.stop();
+      });
+    });
+
+    // values past the auto budget take the proxy strategy inside mutate, so the
+    // callback sees a tracked wrapper instead of the value itself
+    describe('mutate — large values', () => {
+      const makeRows = () =>
+        Array.from({ length: 200 }, (_, i) => ({
+          id: i,
+          name: `Record ${i}`,
+          active: i % 2 === 0,
+          meta: { seen: false },
+        }));
+
+      it('fires when a nested field on one row changes', () => {
+        const sig = new Signal(makeRows(), { safety });
+        const sub = subscribe(sig);
+        sig.mutate(rows => {
+          rows[3].meta.seen = true;
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        expect(sig.raw()[3].meta.seen).toBe(true);
+        expect(sig.raw()[4].meta.seen).toBe(false);
+        sub.stop();
+      });
+
+      it('does not re-fire when a field is written to its existing value', () => {
+        const sig = new Signal(makeRows(), { safety });
+        const sub = subscribe(sig);
+        sig.mutate(rows => {
+          rows[0].id = 0;
+        });
+        flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
+
+      it('reassigning a filtered list stores a clean graph and fires', () => {
+        const sig = new Signal({ items: makeRows() }, { safety });
+        const sub = subscribe(sig);
+        sig.mutate(value => {
+          value.items = value.items.filter(item => item.active);
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        expect(sig.raw().items).toHaveLength(100);
+        expect(() => JSON.stringify(sig.raw())).not.toThrow();
+        sub.stop();
+      });
+
+      it('a fresh object embedding part of the value stores the raw child', () => {
+        const sig = new Signal({ selected: null, items: makeRows() }, { safety });
+        sig.mutate(value => {
+          value.selected = { row: value.items[7] };
+        });
+        expect(sig.raw().selected.row).toBe(sig.raw().items[7]);
+        expect(() => JSON.stringify(sig.raw())).not.toThrow();
+      });
+
+      it('a returned spread replaces the value without leaking wrappers', () => {
+        const rows = makeRows();
+        const sig = new Signal({ items: rows, count: 0 }, { safety });
+        sig.mutate(value => ({ ...value, count: value.count + 1 }));
+        expect(sig.raw().count).toBe(1);
+        expect(() => JSON.stringify(sig.raw())).not.toThrow();
+      });
+
+      it('a tracked value leaked from the callback throws a clear error', () => {
+        const sig = new Signal(makeRows(), { safety });
+        let leaked;
+        sig.mutate(rows => {
+          leaked = rows[0];
+        });
+        expect(() => leaked.name).toThrow(/after its callback returned/);
+      });
+
+      it('does not fire when the callback throws after a partial write', () => {
+        const sig = new Signal(makeRows(), { safety });
+        const sub = subscribe(sig);
+        expect(() =>
+          sig.mutate(rows => {
+            rows[0].name = 'changed';
+            throw new Error('boom');
+          })
+        ).toThrow();
+        flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
     });
 
     /*******************************

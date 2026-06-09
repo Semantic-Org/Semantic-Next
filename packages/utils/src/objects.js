@@ -1,7 +1,8 @@
 import { clone } from './cloning.js';
+import { isEqual } from './equality.js';
 import { each } from './loops.js';
 import { escapeRegExp } from './regexp.js';
-import { isArray, isObject, isPlainObject, isString } from './types.js';
+import { isArray, isMap, isObject, isPlainObject, isSet, isString } from './types.js';
 
 /*-------------------
        Objects
@@ -34,6 +35,317 @@ export const mapObject = (obj, callback) => {
     Object.entries(obj)
       .map(([key, value]) => [key, callback(value, key)]),
   );
+};
+
+const isTrackable = (value) => isArray(value) || isPlainObject(value);
+
+// counting stops at the budget, so a cycle just burns it down and lands on
+// the proxy strategy, which handles cycles anyway
+const spendBudget = (value, remaining) => {
+  if (remaining < 0 || value === null || typeof value !== 'object') {
+    return remaining;
+  }
+  // arrays count by length so a large list never allocates its key strings
+  // just to overrun the budget
+  if (isArray(value)) {
+    remaining -= value.length;
+    for (let i = 0; remaining >= 0 && i < value.length; i++) {
+      remaining = spendBudget(value[i], remaining);
+    }
+  }
+  else if (isPlainObject(value)) {
+    const valueKeys = Object.keys(value);
+    remaining -= valueKeys.length;
+    for (let i = 0; remaining >= 0 && i < valueKeys.length; i++) {
+      remaining = spendBudget(value[valueKeys[i]], remaining);
+    }
+  }
+  else if (isMap(value) || isSet(value)) {
+    // entry contents stay unwalked, size alone signals the snapshot cost
+    remaining -= value.size;
+  }
+  return remaining;
+};
+
+// snapshots stay imperceptible well past this, but mutate can run in loops so
+// the ceiling is conservative
+const autoBudget = 512;
+const overBudget = (value) => spendBudget(value, autoBudget) < 0;
+
+/*
+  Structural diff from before to after. Reports dot paths grouped as added
+  (in after only), removed (in before only), and changed. Arrays diff by index,
+  values that can't be walked (Map/Set/Date/class instances) compare by deep
+  equality and report their own path. A wholesale change to a non-container
+  root reports path '' (the RFC 6902 root convention).
+*/
+export const detectChanges = (before, after) => {
+  const added = [];
+  const removed = [];
+  const changed = [];
+  const seen = new WeakSet(); // cycle guard, each before-node diffs once
+
+  const walk = (a, b, prefix) => {
+    if (seen.has(a)) {
+      return;
+    }
+    seen.add(a);
+    for (const key of Object.keys(a)) {
+      const path = prefix === '' ? key : `${prefix}.${key}`;
+      if (!Object.hasOwn(b, key)) {
+        removed.push(path);
+        continue;
+      }
+      const valueA = a[key];
+      const valueB = b[key];
+      if (Object.is(valueA, valueB)) {
+        continue;
+      }
+      if (isTrackable(valueA) && isTrackable(valueB) && isArray(valueA) === isArray(valueB)) {
+        walk(valueA, valueB, path);
+      }
+      else if (!isEqual(valueA, valueB)) {
+        changed.push(path);
+      }
+    }
+    for (const key of Object.keys(b)) {
+      if (!Object.hasOwn(a, key)) {
+        added.push(prefix === '' ? key : `${prefix}.${key}`);
+      }
+    }
+  };
+
+  if (isTrackable(before) && isTrackable(after) && isArray(before) === isArray(after)) {
+    walk(before, after, '');
+  }
+  else if (!isEqual(before, after)) {
+    changed.push('');
+  }
+  return { added, removed, changed };
+};
+
+// a recorded parent subsumes its children regardless of write order — syncing
+// 'a' covers 'a.b', and path-conflict stores (mongo) reject both in one update
+const pruneChildPaths = (pathLog) => {
+  const pruned = [];
+  for (const path of pathLog) {
+    let parent = path;
+    let covered = false;
+    let dotIndex;
+    while ((dotIndex = parent.lastIndexOf('.')) !== -1) {
+      parent = parent.slice(0, dotIndex);
+      if (pathLog.has(parent)) {
+        covered = true;
+        break;
+      }
+    }
+    if (!covered) {
+      pruned.push(path);
+    }
+  }
+  return pruned;
+};
+
+/*
+  Run callback against value, report whether it changed it. 'auto' snapshots
+  small values (clone + deep-compare, callback sees the real object) and
+  write-tracks large ones through a proxy so cost scales with writes, not size.
+*/
+export const trackWrites = (value, callback, {
+  strategy = 'auto',
+  onWrite,
+  returnPaths = true,
+  clone: cloneFunction = clone,
+  equality = isEqual,
+} = {}) => {
+  const useProxy = (strategy === 'proxy'
+    || (strategy === 'auto' && (onWrite !== undefined || overBudget(value))))
+    && isTrackable(value)
+    && !Object.isFrozen(value);
+
+  if (!useProxy) {
+    const before = cloneFunction(value);
+    const result = callback(value);
+    if (!returnPaths) {
+      return { changed: !equality(before, value), result };
+    }
+    const diff = detectChanges(before, value);
+    const paths = [...diff.added, ...diff.changed, ...diff.removed];
+    return { changed: paths.length > 0, result, paths };
+  }
+
+  let written = false;
+  let expired = false;
+  let snapshots = null; // exotic -> before clone, for objects the proxy can't observe
+  const wrapped = new WeakMap(); // raw -> proxy, for identity and cycles
+  const rawOf = new WeakMap(); // proxy -> raw, to unwrap on write-back
+  const paths = (onWrite || returnPaths) ? new WeakMap() : null; // raw -> key path from root
+  const pathLog = returnPaths ? new Set() : null; // dot-joined, insertion order
+
+  const expiredError = () =>
+    new Error(
+      'trackWrites: tracked value used after its callback returned. Reads and writes are only valid inside the callback.',
+    );
+
+  // snapshot each exotic at most once, and not at all once a write has already
+  // answered the change question. functions are excluded by the typeof check,
+  // so reading an array method off the proxy doesn't trigger a snapshot
+  const reportExotic = (exotic) => {
+    if (written || exotic === null || typeof exotic !== 'object') {
+      return;
+    }
+    snapshots ??= new Map();
+    if (!snapshots.has(exotic)) {
+      snapshots.set(exotic, cloneFunction(exotic));
+    }
+  };
+
+  const markWrite = (object, key) => {
+    written = true;
+    if (paths === null) {
+      return;
+    }
+    const path = [...paths.get(object), key];
+    // a symbol segment has no dot-path form, it still counts as a write above
+    if (pathLog && !path.some((segment) => typeof segment === 'symbol')) {
+      pathLog.add(path.join('.'));
+    }
+    onWrite?.(path, object, key);
+  };
+
+  // swap any tracked wrapper for its raw object, scanning fresh containers
+  // (a spread, a filter result) for wrappers smuggled inside, so the raw
+  // graph never stores one
+  const unwrapDeep = (value, seen) => {
+    const raw = rawOf.get(value);
+    if (raw !== undefined) {
+      return raw;
+    }
+    // objects already in the graph are kept clean by this very scan
+    if (!isTrackable(value) || wrapped.has(value) || seen?.has(value)) {
+      return value;
+    }
+    (seen ??= new Set()).add(value);
+    for (const key of Object.keys(value)) {
+      const child = value[key];
+      if (child !== null && typeof child === 'object') {
+        const unwrapped = unwrapDeep(child, seen);
+        if (unwrapped !== child) {
+          value[key] = unwrapped;
+        }
+      }
+    }
+    return value;
+  };
+
+  const handler = {
+    get(object, key) {
+      if (expired) {
+        throw expiredError();
+      }
+      const value = object[key];
+      if (!isTrackable(value)) {
+        reportExotic(value);
+        return value;
+      }
+      return wrap(value, object, key);
+    },
+    set(object, key, value) {
+      if (expired) {
+        throw expiredError();
+      }
+      if (value !== null && typeof value === 'object') {
+        value = unwrapDeep(value);
+      }
+      // a brand-new own key is a write even when its value is undefined
+      const changed = !Object.hasOwn(object, key) || !Object.is(object[key], value);
+      object[key] = value;
+      if (changed) {
+        markWrite(object, key);
+      }
+      return true;
+    },
+    deleteProperty(object, key) {
+      if (expired) {
+        throw expiredError();
+      }
+      // hasOwn, not `in`: delete only removes own keys, so deleting an inherited
+      // key is a no-op, not a write
+      const existed = Object.hasOwn(object, key);
+      delete object[key];
+      if (existed) {
+        markWrite(object, key);
+      }
+      return true;
+    },
+    defineProperty(object, key, descriptor) {
+      if (expired) {
+        throw expiredError();
+      }
+      if (descriptor.value !== null && typeof descriptor.value === 'object') {
+        descriptor.value = unwrapDeep(descriptor.value);
+      }
+      // mirror set/delete: redefining a property to its current value isn't a write
+      const changed = !Object.hasOwn(object, key)
+        || !('value' in descriptor)
+        || !Object.is(object[key], descriptor.value);
+      Object.defineProperty(object, key, descriptor);
+      if (changed) {
+        markWrite(object, key);
+      }
+      return true;
+    },
+  };
+
+  const wrap = (object, parent, key) => {
+    let proxy = wrapped.get(object);
+    if (proxy === undefined) {
+      // a frozen object can't be wrapped without tripping the proxy invariant
+      // on its non-configurable properties, so it passes through raw like an
+      // exotic and changes inside it are caught by snapshot. a lone
+      // non-writable+non-configurable object property on an unfrozen parent
+      // is unsupported and would throw on read
+      if (Object.isFrozen(object)) {
+        reportExotic(object);
+        wrapped.set(object, object);
+        return object;
+      }
+      proxy = new Proxy(object, handler);
+      wrapped.set(object, proxy);
+      rawOf.set(proxy, object);
+      if (paths) {
+        paths.set(object, parent === undefined ? [] : [...paths.get(parent), key]);
+      }
+    }
+    return proxy;
+  };
+
+  let result;
+  try {
+    result = callback(wrap(value));
+  }
+  finally {
+    expired = true;
+  }
+  if (result !== null && typeof result === 'object') {
+    // safe after expiry: unwrapping reads raw lookups and fresh containers,
+    // never a tracked wrapper's properties
+    result = unwrapDeep(result);
+  }
+
+  let changed = written;
+  if (!changed && snapshots) {
+    for (const [exotic, before] of snapshots) {
+      if (!equality(before, exotic)) {
+        changed = true;
+        break;
+      }
+    }
+  }
+  if (pathLog) {
+    return { changed, result, paths: pruneChildPaths(pathLog) };
+  }
+  return { changed, result };
 };
 
 /*
@@ -304,6 +616,162 @@ export const get = function(obj, path = '') {
   }
 
   return currentObject;
+};
+
+const isIndexSegment = (part) => /^\d+$/.test(part);
+
+/*
+  Set a nested object field from a string path, the write twin of get, so
+  paths from trackWrites and detectChanges apply back. Creates missing
+  intermediates — arrays when the next segment is an index, objects otherwise.
+*/
+export const set = function(obj, path, value) {
+  if (typeof path !== 'string' || path === '' || obj === null || !isObject(obj)) {
+    return obj;
+  }
+  // a path setter is the classic prototype pollution vector, refuse segments
+  // that climb the prototype chain
+  if (/(^|\.|\[)(__proto__|constructor|prototype)(\.|\[|\]|$)/.test(path)) {
+    return obj;
+  }
+
+  // simple property access — no dots, no brackets
+  if (path.indexOf('.') === -1 && path.indexOf('[') === -1) {
+    obj[path] = value;
+    return obj;
+  }
+
+  const parts = path.split('.');
+  let currentObject = obj;
+  let pathOffset = 0;
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    const isLast = i === parts.length - 1;
+
+    if (part.includes('[')) {
+      const { key, index } = extractBracketAccess(part);
+      if (!isArray(currentObject[key])) {
+        currentObject[key] = [];
+      }
+      if (isLast) {
+        currentObject[key][index] = value;
+        return obj;
+      }
+      if (currentObject[key][index] === null || !isObject(currentObject[key][index])) {
+        currentObject[key][index] = isIndexSegment(parts[i + 1]) ? [] : {};
+      }
+      currentObject = currentObject[key][index];
+    }
+    else if (isLast) {
+      currentObject[part] = value;
+      return obj;
+    }
+    else {
+      if (!(part in currentObject)) {
+        // an existing literal dotted key wins over creating intermediates,
+        // mirroring get()'s resolution
+        const remainingPath = path.substring(pathOffset);
+        if (remainingPath in currentObject) {
+          currentObject[remainingPath] = value;
+          return obj;
+        }
+        const combinedKey = `${part}.${parts[i + 1]}`;
+        if (combinedKey in currentObject) {
+          if (currentObject[combinedKey] === null || !isObject(currentObject[combinedKey])) {
+            currentObject[combinedKey] = isIndexSegment(parts[i + 2]) ? [] : {};
+          }
+          currentObject = currentObject[combinedKey];
+          pathOffset += combinedKey.length + 1;
+          i++;
+          continue;
+        }
+      }
+      if (currentObject[part] === null || !isObject(currentObject[part])) {
+        currentObject[part] = isIndexSegment(parts[i + 1]) ? [] : {};
+      }
+      currentObject = currentObject[part];
+    }
+
+    pathOffset += part.length + 1;
+  }
+
+  return obj;
+};
+
+/*
+  Remove a nested object field from a string path, the delete twin of get/set.
+  A missing path is a no-op, and a removed array index leaves a hole rather
+  than splicing, so sibling index paths stay valid when applying several
+  removals at once.
+*/
+export const unset = function(obj, path) {
+  if (typeof path !== 'string' || path === '' || obj === null || !isObject(obj)) {
+    return obj;
+  }
+  if (/(^|\.|\[)(__proto__|constructor|prototype)(\.|\[|\]|$)/.test(path)) {
+    return obj;
+  }
+
+  // simple property access — no dots, no brackets
+  if (path.indexOf('.') === -1 && path.indexOf('[') === -1) {
+    delete obj[path];
+    return obj;
+  }
+
+  const parts = path.split('.');
+  let currentObject = obj;
+  let pathOffset = 0;
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    const isLast = i === parts.length - 1;
+
+    if (part.includes('[')) {
+      const { key, index } = extractBracketAccess(part);
+      if (!isArray(currentObject[key])) {
+        return obj;
+      }
+      if (isLast) {
+        delete currentObject[key][index];
+        return obj;
+      }
+      currentObject = currentObject[key][index];
+    }
+    else if (isLast) {
+      delete currentObject[part];
+      return obj;
+    }
+    else if (part in currentObject) {
+      currentObject = currentObject[part];
+    }
+    else {
+      // an existing literal dotted key wins, mirroring get()'s resolution
+      const remainingPath = path.substring(pathOffset);
+      if (remainingPath in currentObject) {
+        delete currentObject[remainingPath];
+        return obj;
+      }
+      const combinedKey = `${part}.${parts[i + 1]}`;
+      if (combinedKey in currentObject) {
+        currentObject = currentObject[combinedKey];
+        if (currentObject === null || !isObject(currentObject)) {
+          return obj;
+        }
+        pathOffset += combinedKey.length + 1;
+        i++;
+        continue;
+      }
+      return obj;
+    }
+
+    if (currentObject === null || !isObject(currentObject)) {
+      return obj;
+    }
+    pathOffset += part.length + 1;
+  }
+
+  return obj;
 };
 
 /* This is useful for callbacks or other scenarios where you want to avoid the

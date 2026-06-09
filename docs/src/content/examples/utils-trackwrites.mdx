@@ -1,0 +1,11 @@
+---
+title: 'trackWrites'
+id: 'utils-trackwrites'
+exampleType: 'log'
+category: 'Utils'
+subcategory: 'Objects'
+description: 'Run a callback against a value and report what it changed as dot paths'
+tags: ['utils', 'objects', 'trackWrites', 'change detection', 'mutation', 'paths', 'sync', 'proxy']
+selectedFile: 'index.js'
+tip: 'Paths compose with get(value, path) for state sync. Small values are snapshot-compared so the callback sees the real object, large values get a write-tracking wrapper that shows as Proxy(Object) in the console — pass strategy to pin either path'
+---

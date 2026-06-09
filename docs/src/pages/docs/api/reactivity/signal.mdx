@@ -127,6 +127,8 @@ signal.mutate(mutationFn);
 
 Updates the value through a callback. Return a new value to set it, or mutate the current value in place and reactivity fires only if it changed.
 
+Small values are passed to the callback directly. Large values are passed as a write-tracking wrapper (it shows as `Proxy(Object)` in the console) so detection costs the writes you make, not the size of the value. The wrapper is only valid inside the callback, and changes are detected through it — writes made through outside references won't fire at that scale.
+
 #### Parameters
 
 | Name | Type | Description |

@@ -74,6 +74,121 @@ export function filterObject<T extends object>(
 ): Partial<T>;
 
 /**
+ * Options for trackWrites
+ */
+export interface TrackWritesOptions {
+  /**
+   * How changes are detected (default 'auto').
+   * 'snapshot' clones the value up front and diffs after — the callback
+   * sees the real object, cost scales with value size.
+   * 'proxy' hands the callback a tracked wrapper and records writes — cost
+   * scales with writes, the console shows Proxy(Object) inside the callback.
+   * 'auto' snapshots small values and proxies large ones.
+   */
+  strategy?: 'auto' | 'snapshot' | 'proxy';
+  /**
+   * Return the changed fields as dot paths (default true). Pass false to skip
+   * path collection on hot paths where only `changed` is read.
+   */
+  returnPaths?: boolean;
+  /** Fires per observed write with the key path from the root. Implies the proxy strategy under 'auto'. */
+  onWrite?: (path: string[], target: object, key: string) => void;
+  /** Clone used for snapshots (defaults to clone) */
+  clone?: (value: unknown) => unknown;
+  /** Equality used when paths are skipped and for exotic snapshots (defaults to isEqual) */
+  equality?: (a: unknown, b: unknown) => boolean;
+}
+
+/**
+ * Result of trackWrites
+ */
+export interface TrackWritesResult<R> {
+  /** Whether the callback changed the value */
+  changed: boolean;
+  /** The callback's return value, with any tracked wrappers swapped for raw objects */
+  result: R;
+  /**
+   * A covering set of changed fields as dot paths, resolvable via get().
+   * The proxy strategy reports the paths written (pruned so a written parent
+   * subsumes its children), the snapshot strategy reports net leaf differences.
+   * A wholesale change to a non-container value reports path ''.
+   */
+  paths?: string[];
+}
+
+/**
+ * Runs a callback against a value and reports whether the callback changed it,
+ * with the changed fields as dot paths.
+ * Under the proxy strategy the tracked wrapper is only valid inside the
+ * callback — using one after it returns throws. Writes that never go through
+ * the callback's value (a closure reference) are only seen by the snapshot
+ * strategy.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#trackwrites trackWrites}
+ * @see {@link https://next.semantic-ui.com/examples/utils-trackwrites Example}
+ *
+ * @param value - The value the callback may change
+ * @param callback - Receives the value (or its tracked wrapper) and may mutate it in place or return a replacement
+ * @param options - Strategy, path reporting, and snapshot configuration
+ * @returns Whether the value changed, the changed paths, and the callback's return value
+ *
+ * @example
+ * ```ts
+ * const doc = { meta: { count: 0 } };
+ * const { changed, paths } = trackWrites(doc, (value) => {
+ *   value.meta.count++;
+ * });
+ * // changed === true, paths === ['meta.count']
+ * paths.forEach((path) => sync(path, get(doc, path)));
+ * ```
+ */
+export function trackWrites<T, R = unknown>(
+  value: T,
+  callback: (value: T) => R,
+  options: TrackWritesOptions & { returnPaths: false; },
+): { changed: boolean; result: R; };
+export function trackWrites<T, R = unknown>(
+  value: T,
+  callback: (value: T) => R,
+  options?: TrackWritesOptions,
+): { changed: boolean; result: R; paths: string[]; };
+
+/**
+ * Changes reported by detectChanges, grouped by operation
+ */
+export interface DetectedChanges {
+  /** Dot paths present in after but not before */
+  added: string[];
+  /** Dot paths present in before but not after */
+  removed: string[];
+  /** Dot paths present in both with different values */
+  changed: string[];
+}
+
+/**
+ * Structural diff between two values, reported as dot paths from before to
+ * after. Objects and arrays recurse to leaf paths, arrays diff by index,
+ * values that can't be walked (Map/Set/Date/class instances) compare by deep
+ * equality and report their own path. Differing non-container roots report
+ * path ''.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#detectchanges detectChanges}
+ * @see {@link https://next.semantic-ui.com/examples/utils-detectchanges Example}
+ *
+ * @param before - The value to diff from
+ * @param after - The value to diff to
+ * @returns Added, removed, and changed paths
+ *
+ * @example
+ * ```ts
+ * detectChanges(
+ *   { name: 'a', temp: true },
+ *   { name: 'b', nickname: 'al' },
+ * )
+ * // { added: ['nickname'], removed: ['temp'], changed: ['name'] }
+ * ```
+ */
+export function detectChanges(before: unknown, after: unknown): DetectedChanges;
+
+/**
  * Extends an object with properties from additional sources
  * Properly handles getters and setters
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#extend extend}
@@ -207,6 +322,53 @@ export function get<T extends object, V = any>(
   obj: T,
   path?: string,
 ): V | undefined;
+
+/**
+ * Set a nested object field from a string path, the write twin of get.
+ * Creates missing intermediates — arrays when the next segment is a numeric
+ * index, objects otherwise. Refuses prototype-climbing segments
+ * (__proto__, constructor, prototype). Paths from trackWrites and
+ * detectChanges apply back directly.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#set set}
+ * @see {@link https://next.semantic-ui.com/examples/utils-set Example}
+ *
+ * @param obj - The object to write into
+ * @param path - The path string (e.g., 'a.b.c', 'items.0.name', or 'items[0].name')
+ * @param value - The value to set at the path
+ * @returns The same object reference
+ *
+ * @example
+ * ```ts
+ * set({}, 'a.b.c', 1) // returns { a: { b: { c: 1 } } }
+ * set({}, 'items.0.name', 'first') // creates the array: { items: [{ name: 'first' }] }
+ * ```
+ */
+export function set<T extends object>(
+  obj: T,
+  path: string,
+  value: unknown,
+): T;
+
+/**
+ * Remove a nested object field from a string path, the delete twin of get/set.
+ * A missing path is a no-op. A removed array index leaves a hole rather than
+ * splicing, so sibling index paths stay valid when applying several removals.
+ * Refuses prototype-climbing segments (__proto__, constructor, prototype).
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#unset unset}
+ *
+ * @param obj - The object to remove from
+ * @param path - The path string (e.g., 'a.b.c' or 'items.0')
+ * @returns The same object reference
+ *
+ * @example
+ * ```ts
+ * unset({ a: { b: 1, c: 2 } }, 'a.b') // returns { a: { c: 2 } }
+ * ```
+ */
+export function unset<T extends object>(
+  obj: T,
+  path: string,
+): T;
 
 /**
  * Creates a proxy that combines source and reference objects

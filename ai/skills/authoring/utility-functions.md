@@ -128,7 +128,7 @@ sum([1, 2, 3, 4]);                   // 10
 
 ### Property Access
 ```javascript
-import { get, keys, values, hasProperty } from '@semantic-ui/utils';
+import { get, set, unset, keys, values, hasProperty } from '@semantic-ui/utils';
 
 const data = {
   user: {
@@ -141,6 +141,14 @@ const data = {
 get(data, 'user.profile.name');              // 'Alice'
 get(data, 'user.posts.0.title');             // 'First Post'
 get(data, 'user.profile.bio');               // undefined (no default parameter)
+
+// Nested dot-path writes, creating missing intermediates (arrays for indices)
+set(data, 'user.profile.name', 'Bob');       // writes in place, returns data
+set({}, 'items.0.name', 'first');            // { items: [{ name: 'first' }] }
+
+// Nested dot-path removal, no-op when missing
+unset(data, 'user.profile.bio');             // removes in place, returns data
+// set/unset refuse prototype-climbing segments (__proto__, constructor, prototype)
 
 // hasProperty checks own properties only (shallow, no dot paths)
 hasProperty(data, 'user');                   // true
@@ -185,6 +193,41 @@ onlyKeys({ a: 1, b: 2, c: 3 }, ['a', 'c']); // { a: 1, c: 3 }
 // Filter and transform
 filterObject({ a: 1, b: 5, c: 3 }, (value, key) => value > 2); // { b: 5, c: 3 }
 mapObject({ a: 1, b: 2 }, (value, key) => value * 2);           // { a: 2, b: 4 }
+```
+
+### Change Detection
+```javascript
+import { trackWrites, detectChanges, get } from '@semantic-ui/utils';
+
+// Run a callback against a value, report whether and where it changed
+const doc = { meta: { count: 0 } };
+const { changed, paths, result } = trackWrites(doc, (value) => {
+  value.meta.count++;
+});
+// changed === true, paths === ['meta.count'], writes apply to doc directly
+
+// Paths resolve through get(), e.g. for state sync
+paths.forEach((path) => sync(path, get(doc, path)));
+
+// Writing a value that is already there is not a change
+trackWrites(doc, (value) => { value.meta.count = 1; }); // { changed: false, paths: [] }
+
+// Skip path collection on hot paths that only read changed
+trackWrites(doc, mutator, { returnPaths: false }); // { changed, result }
+
+// 'auto' snapshots small values (callback sees the real object) and proxies
+// large ones (callback sees a tracked wrapper, cost scales with writes).
+// Pin a path with strategy: 'snapshot' | 'proxy'
+trackWrites(bigList, (tracked) => { tracked[500].seen = true; });
+
+// onWrite streams each write with its key path, implies the proxy strategy
+trackWrites(rows, (tracked) => {
+  tracked[3].active = true;
+}, { onWrite: (path, target, key) => console.log(path) }); // ['3', 'active']
+
+// Two-value structural diff, directional from before to after
+detectChanges({ name: 'a', temp: true }, { name: 'b', nickname: 'al' });
+// { added: ['nickname'], removed: ['temp'], changed: ['name'] }
 ```
 
 ### Conversion
@@ -789,6 +832,8 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | Function | Signature | Returns |
 |----------|-----------|---------|
 | `get` | `(obj, dotPath)` | Nested value or undefined |
+| `set` | `(obj, dotPath, value)` | Same object, intermediates created |
+| `unset` | `(obj, dotPath)` | Same object, key removed |
 | `keys` | `(obj)` | `Object.keys` or undefined |
 | `values` | `(obj)` | `Object.values` or undefined |
 | `hasProperty` | `(obj, prop)` | Own property check (shallow) |
@@ -799,6 +844,8 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `onlyKeys` | `(obj, keysArray)` | New object with selected keys |
 | `filterObject` | `(obj, fn(val,key))` | Filtered object |
 | `mapObject` | `(obj, fn(val,key))` | Transformed object |
+| `trackWrites` | `(value, callback, opts?)` | `{ changed, paths, result }` |
+| `detectChanges` | `(before, after)` | `{ added, removed, changed }` paths |
 | `arrayFromObject` | `(obj)` | `[{key, value}, ...]` |
 | `reverseKeys` | `(obj)` | Inverted lookup object |
 | `proxyObject` | `(getterFn, refObj)` | Read-through Proxy |

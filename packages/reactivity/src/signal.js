@@ -6,6 +6,7 @@ import {
   isNumber,
   isObject,
   returnsFalse,
+  trackWrites,
   unique,
   wrapFunction,
 } from '@semantic-ui/utils';
@@ -131,27 +132,29 @@ export class Signal {
           Mutation Helpers
   *******************************/
 
-  // mutate the current value by a mutation function
+  // mutate the current value by a mutation function. detection equality is
+  // deliberately not this.equality — whether the callback changed the value is
+  // a precision question, not a safety question
   mutate(mutationFn) {
-    // we use clone in all cases to detect for changes only
-    const beforeClone = this.cloneFunction(this.currentValue);
-    const result = mutationFn(this.currentValue);
+    const { changed, result } = trackWrites(this.currentValue, mutationFn, {
+      clone: this.cloneFunction,
+      returnPaths: false,
+    });
 
-    if (result !== undefined) {
-      if (isDevelopment && result === this.currentValue) {
-        console.warn(
-          'Signal.mutate: returning the same reference that was mutated in place will bypass change detection. Either mutate without returning, or return a new value.',
-        );
-      }
-      // if the mutation returned a value just set it
+    // returning the mutated value can't be stored, that's the in-place footgun,
+    // so fall through to change detection
+    if (result !== undefined && result !== this.currentValue) {
       this.value = result;
+      return;
     }
-    else {
-      // if no value returned check if the value changed from side effects
-      // in this case we want to trigger reactivity
-      if (!this.equality(beforeClone, this.currentValue)) {
-        this.notify();
-      }
+
+    if (isDevelopment && result !== undefined) {
+      console.warn(
+        'Signal.mutate: returning the same reference that was mutated in place will bypass change detection. Either mutate without returning, or return a new value.',
+      );
+    }
+    if (changed) {
+      this.notify();
     }
   }
 

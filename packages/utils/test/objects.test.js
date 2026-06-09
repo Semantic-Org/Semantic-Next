@@ -3,6 +3,7 @@ import {
   arrayFromObject,
   assignInPlace,
   deepExtend,
+  detectChanges,
   extend,
   filterObject,
   get,
@@ -13,7 +14,10 @@ import {
   pick,
   proxyObject,
   reverseKeys,
+  set,
   some,
+  trackWrites,
+  unset,
   values,
   weightedObjectSearch,
 } from '@semantic-ui/utils';
@@ -21,6 +25,519 @@ import {
 import { describe, expect, it, vi } from 'vitest';
 
 describe('Object Utilities', () => {
+  describe('trackWrites', () => {
+    // 200 records x 4 fields clears the auto budget and forces the proxy strategy
+    const makeLarge = () =>
+      Array.from({ length: 200 }, (_, i) => ({
+        id: i,
+        name: `Record ${i}`,
+        active: i % 2 === 0,
+        meta: { seen: false },
+      }));
+
+    describe('strategy selection', () => {
+      it('hands the callback the value itself when small', () => {
+        const target = { a: { b: 1 } };
+        let received;
+        trackWrites(target, (value) => {
+          received = value;
+        });
+        expect(received).toBe(target);
+      });
+
+      it('hands the callback a tracked wrapper when large', () => {
+        const target = makeLarge();
+        let wrapped;
+        trackWrites(target, (value) => {
+          wrapped = value !== target;
+        });
+        expect(wrapped).toBe(true);
+      });
+
+      it('uses the proxy strategy when onWrite is passed, even when small', () => {
+        const target = { a: 1 };
+        let wrapped;
+        trackWrites(target, (value) => {
+          wrapped = value !== target;
+        }, { onWrite: () => {} });
+        expect(wrapped).toBe(true);
+      });
+
+      it('honors an explicit snapshot strategy on a large value', () => {
+        const target = makeLarge();
+        let received;
+        trackWrites(target, (value) => {
+          received = value;
+        }, { strategy: 'snapshot' });
+        expect(received).toBe(target);
+      });
+
+      it('honors an explicit proxy strategy on a small value', () => {
+        const target = { a: 1 };
+        let wrapped;
+        trackWrites(target, (value) => {
+          wrapped = value !== target;
+        }, { strategy: 'proxy' });
+        expect(wrapped).toBe(true);
+      });
+
+      it('passes a primitive through untouched', () => {
+        let received;
+        const { changed, result } = trackWrites(42, (value) => {
+          received = value;
+          return value + 1;
+        });
+        expect(received).toBe(42);
+        expect(changed).toBe(false);
+        expect(result).toBe(43);
+      });
+    });
+
+    describe('snapshot strategy', () => {
+      it('detects an in-place change', () => {
+        const { changed } = trackWrites({ meta: { count: 0 } }, (value) => {
+          value.meta.count = 1;
+        });
+        expect(changed).toBe(true);
+      });
+
+      it('does not flag a read-only pass', () => {
+        const { changed } = trackWrites({ a: { b: 1 } }, (value) => value.a.b);
+        expect(changed).toBe(false);
+      });
+
+      it('does not flag writing a property to its existing value', () => {
+        const { changed } = trackWrites({ a: 1 }, (value) => {
+          value.a = 1;
+        });
+        expect(changed).toBe(false);
+      });
+
+      it('detects a change to a Map-valued target', () => {
+        const target = new Map();
+        const { changed } = trackWrites(target, (map) => {
+          map.set('k', 'v');
+        });
+        expect(changed).toBe(true);
+        expect(target.get('k')).toBe('v');
+      });
+
+      it('detects a closure write that never touches the callback value', () => {
+        const shared = { x: 1 };
+        const { changed } = trackWrites({ shared }, () => {
+          shared.x = 2;
+        });
+        expect(changed).toBe(true);
+      });
+    });
+
+    describe('proxy strategy', () => {
+      it('flags writes at any depth and applies them to the raw value', () => {
+        const target = makeLarge();
+        const { changed } = trackWrites(target, (rows) => {
+          rows[0].meta.seen = true;
+        });
+        expect(changed).toBe(true);
+        expect(target[0].meta.seen).toBe(true);
+        expect(target[1].meta.seen).toBe(false);
+      });
+
+      it('does not flag writing a property to its existing value', () => {
+        const target = makeLarge();
+        const { changed } = trackWrites(target, (rows) => {
+          rows[0].id = 0;
+        });
+        expect(changed).toBe(false);
+      });
+
+      it('flags array methods that write', () => {
+        const target = [1, 2, 3];
+        const { changed } = trackWrites(target, (arr) => {
+          arr.push(4);
+        }, { strategy: 'proxy' });
+        expect(changed).toBe(true);
+        expect(target).toEqual([1, 2, 3, 4]);
+      });
+
+      it('flags property deletion, but not deleting an absent or inherited key', () => {
+        expect(
+          trackWrites({ a: 1 }, (value) => {
+            delete value.a;
+          }, { strategy: 'proxy' }).changed,
+        ).toBe(true);
+        expect(
+          trackWrites({ a: 1 }, (value) => {
+            delete value.b;
+          }, { strategy: 'proxy' }).changed,
+        ).toBe(false);
+        expect(
+          trackWrites({ a: 1 }, (value) => {
+            delete value.toString;
+          }, { strategy: 'proxy' }).changed,
+        ).toBe(false);
+      });
+
+      it('flags assigning a brand-new key even when the value is undefined', () => {
+        const target = { a: 1 };
+        const { changed } = trackWrites(target, (value) => {
+          value.b = undefined;
+        }, { strategy: 'proxy' });
+        expect(changed).toBe(true);
+        expect(Object.hasOwn(target, 'b')).toBe(true);
+      });
+
+      it('mirrors set/delete semantics for defineProperty', () => {
+        expect(
+          trackWrites({ a: 1 }, (value) => {
+            Object.defineProperty(value, 'a', { value: 1 });
+          }, { strategy: 'proxy' }).changed,
+        ).toBe(false);
+        expect(
+          trackWrites({ a: 1 }, (value) => {
+            Object.defineProperty(value, 'b', { value: 2, configurable: true });
+          }, { strategy: 'proxy' }).changed,
+        ).toBe(true);
+      });
+
+      it('does not flag a no-op reorder of an already-sorted array', () => {
+        const { changed } = trackWrites([{ n: 1 }, { n: 2 }, { n: 3 }], (arr) => {
+          arr.sort((a, b) => a.n - b.n);
+        }, { strategy: 'proxy' });
+        expect(changed).toBe(false);
+      });
+
+      it('reaches the same wrapper back through a cycle', () => {
+        const node = { name: 'a' };
+        node.self = node;
+        trackWrites(node, (tracked) => {
+          expect(tracked.self).toBe(tracked);
+        }, { strategy: 'proxy' });
+      });
+
+      it('passes class instances through raw inside the callback', () => {
+        class Model {
+          constructor() {
+            this.count = 0;
+          }
+        }
+        const model = new Model();
+        trackWrites({ model }, (value) => {
+          expect(value.model).toBe(model);
+        }, { strategy: 'proxy' });
+      });
+    });
+
+    describe('proxy strategy - graph hygiene', () => {
+      it('reassigning a filtered array leaves no wrappers in the raw value', () => {
+        const target = { items: [{ id: 1, done: true }, { id: 2, done: false }] };
+        const { changed } = trackWrites(target, (value) => {
+          value.items = value.items.filter((item) => !item.done);
+        }, { strategy: 'proxy' });
+        expect(changed).toBe(true);
+        expect(target.items).toHaveLength(1);
+        expect(() => JSON.stringify(target)).not.toThrow();
+        expect(target.items[0].id).toBe(2);
+      });
+
+      it('writing a fresh object that embeds a tracked child stores the raw child', () => {
+        const target = { a: null, b: { y: 1 } };
+        trackWrites(target, (value) => {
+          value.a = { child: value.b };
+        }, { strategy: 'proxy' });
+        expect(target.a.child).toBe(target.b);
+        expect(() => JSON.stringify(target)).not.toThrow();
+      });
+
+      it('a returned spread of the tracked value contains no wrappers', () => {
+        const target = { inner: { x: 0 }, count: 1 };
+        const { result } = trackWrites(
+          target,
+          (value) => ({ ...value, count: value.count + 1 }),
+          { strategy: 'proxy' },
+        );
+        expect(result.inner).toBe(target.inner);
+        expect(result.count).toBe(2);
+        expect(() => JSON.stringify(result)).not.toThrow();
+      });
+
+      it('mapped items with nested objects come back raw', () => {
+        const target = { items: [{ meta: { n: 1 } }, { meta: { n: 2 } }] };
+        trackWrites(target, (value) => {
+          value.items = value.items.map((item) => ({ ...item, copied: true }));
+        }, { strategy: 'proxy' });
+        expect(() => JSON.stringify(target)).not.toThrow();
+        expect(target.items[0].meta.n).toBe(1);
+      });
+
+      it('sorting objects writes raw elements back, never wrappers', () => {
+        const target = [{ n: 3 }, { n: 1 }, { n: 2 }];
+        const elements = [...target];
+        trackWrites(target, (arr) => {
+          arr.sort((a, b) => a.n - b.n);
+        }, { strategy: 'proxy' });
+        expect(target).toEqual([{ n: 1 }, { n: 2 }, { n: 3 }]);
+        for (const element of target) {
+          expect(elements).toContain(element);
+        }
+      });
+
+      it('returning the tracked value unwraps to the original', () => {
+        const target = { a: 1 };
+        const { result } = trackWrites(target, (value) => value, { strategy: 'proxy' });
+        expect(result).toBe(target);
+      });
+    });
+
+    describe('proxy strategy - exotic values', () => {
+      it('detects a touched Map mutation by snapshot', () => {
+        const target = { lookup: new Map() };
+        const { changed } = trackWrites(target, (value) => {
+          value.lookup.set('id-1', 'Alice');
+        }, { strategy: 'proxy' });
+        expect(changed).toBe(true);
+      });
+
+      it('detects a touched Date mutation by snapshot', () => {
+        const target = { at: new Date('2020-01-01') };
+        const { changed } = trackWrites(target, (value) => {
+          value.at.setFullYear(2030);
+        }, { strategy: 'proxy' });
+        expect(changed).toBe(true);
+      });
+
+      it('does not flag an exotic that was read but not changed', () => {
+        const target = { lookup: new Map([['k', 'v']]) };
+        const { changed } = trackWrites(target, (value) => value.lookup.get('k'), { strategy: 'proxy' });
+        expect(changed).toBe(false);
+      });
+
+      it('detects a write inside a frozen wrapper with mutable children', () => {
+        const target = { cfg: Object.freeze({ child: { y: 1 } }) };
+        const { changed } = trackWrites(target, (value) => {
+          value.cfg.child.y = 2;
+        }, { strategy: 'proxy' });
+        expect(changed).toBe(true);
+        expect(target.cfg.child.y).toBe(2);
+      });
+    });
+
+    describe('lifecycle', () => {
+      it('a tracked value used after the callback throws a clear error', () => {
+        let leaked;
+        trackWrites({ a: { b: 1 } }, (value) => {
+          leaked = value.a;
+        }, { strategy: 'proxy' });
+        expect(() => leaked.b).toThrow(/after its callback returned/);
+        expect(() => {
+          leaked.b = 2;
+        }).toThrow(/after its callback returned/);
+      });
+
+      it('propagates a thrown error and still expires the wrapper', () => {
+        let leaked;
+        expect(() =>
+          trackWrites({ a: { b: 1 } }, (value) => {
+            leaked = value.a;
+            throw new Error('boom');
+          }, { strategy: 'proxy' })
+        ).toThrow('boom');
+        expect(() => leaked.b).toThrow(/after its callback returned/);
+      });
+
+      it('propagates a thrown error on the snapshot strategy', () => {
+        expect(() =>
+          trackWrites({ a: 1 }, () => {
+            throw new Error('boom');
+          })
+        ).toThrow('boom');
+      });
+    });
+
+    describe('onWrite', () => {
+      it('reports the path, target, and key for each write', () => {
+        const writes = [];
+        const target = { items: [{ name: 'a' }], count: 0 };
+        trackWrites(target, (value) => {
+          value.count = 1;
+          value.items[0].name = 'b';
+        }, { onWrite: (path, object, key) => writes.push([path, object, key]) });
+        expect(writes).toEqual([
+          [['count'], target, 'count'],
+          [['items', '0', 'name'], target.items[0], 'name'],
+        ]);
+      });
+
+      it('does not fire for writes to an existing value', () => {
+        const writes = [];
+        trackWrites({ a: 1 }, (value) => {
+          value.a = 1;
+        }, { onWrite: (path) => writes.push(path) });
+        expect(writes).toEqual([]);
+      });
+    });
+
+    describe('returnPaths', () => {
+      it('returns paths by default, small values still see the real object', () => {
+        const target = { meta: { count: 0 } };
+        let sawReal;
+        const { changed, paths } = trackWrites(target, (value) => {
+          sawReal = value === target;
+          value.meta.count = 1;
+        });
+        expect(sawReal).toBe(true);
+        expect(changed).toBe(true);
+        expect(paths).toEqual(['meta.count']);
+      });
+
+      it('returnPaths: false skips path collection on both strategies', () => {
+        const small = trackWrites({ a: 1 }, (value) => {
+          value.a = 2;
+        }, { returnPaths: false });
+        expect(small.changed).toBe(true);
+        expect(small.paths).toBeUndefined();
+
+        const large = trackWrites(makeLarge(), (rows) => {
+          rows[0].meta.seen = true;
+        }, { returnPaths: false });
+        expect(large.changed).toBe(true);
+        expect(large.paths).toBeUndefined();
+      });
+
+      it('returns written paths deduped in write order on the proxy strategy', () => {
+        const target = { title: '', meta: { tags: ['a'] }, count: 0 };
+        const { paths } = trackWrites(target, (value) => {
+          value.count = 1;
+          value.meta.tags[0] = 'b';
+          value.count = 2;
+        }, { strategy: 'proxy' });
+        expect(paths).toEqual(['count', 'meta.tags.0']);
+      });
+
+      it('reports net leaf changes on the snapshot strategy, resolvable through get()', () => {
+        const target = { items: [{ name: 'a' }, { name: 'b' }] };
+        const { paths } = trackWrites(target, (value) => {
+          value.items[1].name = 'z';
+        });
+        expect(paths).toEqual(['items.1.name']);
+        expect(get(target, paths[0])).toBe('z');
+      });
+
+      it('a write restored to its original value nets out under snapshot', () => {
+        const { changed, paths } = trackWrites({ a: 1 }, (value) => {
+          value.a = 2;
+          value.a = 1;
+        });
+        expect(changed).toBe(false);
+        expect(paths).toEqual([]);
+      });
+
+      it('prunes child paths when a parent was also written, either order (proxy)', () => {
+        const childFirst = trackWrites({ a: { b: 1 } }, (value) => {
+          value.a.b = 2;
+          value.a = { b: 3 };
+        }, { strategy: 'proxy' });
+        expect(childFirst.paths).toEqual(['a']);
+
+        const parentFirst = trackWrites({ a: { b: 1 } }, (value) => {
+          value.a = { b: 3 };
+          value.a.b = 4;
+        }, { strategy: 'proxy' });
+        expect(parentFirst.paths).toEqual(['a']);
+      });
+
+      it('returns an empty array when nothing was written', () => {
+        const { changed, paths } = trackWrites({ a: 1 }, (value) => value.a);
+        expect(changed).toBe(false);
+        expect(paths).toEqual([]);
+      });
+
+      it('records a removed key as a path on both strategies', () => {
+        const snapshot = trackWrites({ a: 1, b: 2 }, (value) => {
+          delete value.b;
+        });
+        expect(snapshot.paths).toEqual(['b']);
+
+        const proxy = trackWrites({ a: 1, b: 2 }, (value) => {
+          delete value.b;
+        }, { strategy: 'proxy' });
+        expect(proxy.paths).toEqual(['b']);
+      });
+
+      it('reports a wholesale root change as the empty path', () => {
+        const date = new Date('2020-01-01');
+        const { changed, paths } = trackWrites(date, (value) => {
+          value.setFullYear(2030);
+        });
+        expect(changed).toBe(true);
+        expect(paths).toEqual(['']);
+      });
+
+      it('counts a symbol-keyed write as changed but skips it in paths (proxy)', () => {
+        const key = Symbol('hidden');
+        const { changed, paths } = trackWrites({ a: 1 }, (value) => {
+          value[key] = 2;
+        }, { strategy: 'proxy' });
+        expect(changed).toBe(true);
+        expect(paths).toEqual([]);
+      });
+    });
+  });
+
+  describe('detectChanges', () => {
+    it('reports added, removed, and changed paths', () => {
+      const before = { name: 'a', temp: true, count: 1 };
+      const after = { name: 'b', count: 1, nickname: 'al' };
+      expect(detectChanges(before, after)).toEqual({
+        added: ['nickname'],
+        removed: ['temp'],
+        changed: ['name'],
+      });
+    });
+
+    it('recurses to leaf paths through nested objects', () => {
+      const before = { user: { profile: { name: 'a', age: 1 } } };
+      const after = { user: { profile: { name: 'b', age: 1 } } };
+      expect(detectChanges(before, after).changed).toEqual(['user.profile.name']);
+    });
+
+    it('diffs arrays by index, length differences as added or removed', () => {
+      expect(detectChanges({ items: [1, 2, 3] }, { items: [1, 9] })).toEqual({
+        added: [],
+        removed: ['items.2'],
+        changed: ['items.1'],
+      });
+    });
+
+    it('reports a kind change (object to array) as changed without recursing', () => {
+      expect(detectChanges({ a: { x: 1 } }, { a: [1] }).changed).toEqual(['a']);
+    });
+
+    it('compares unwalkable values by deep equality at their own path', () => {
+      const before = { at: new Date('2020-01-01'), lookup: new Map([['k', 'v']]) };
+      const after = { at: new Date('2030-01-01'), lookup: new Map([['k', 'v']]) };
+      expect(detectChanges(before, after).changed).toEqual(['at']);
+    });
+
+    it('does not report deep-equal values with different references', () => {
+      expect(detectChanges({ user: { name: 'a' } }, { user: { name: 'a' } }))
+        .toEqual({ added: [], removed: [], changed: [] });
+    });
+
+    it('reports differing non-container roots as the empty path', () => {
+      expect(detectChanges(1, 2).changed).toEqual(['']);
+      expect(detectChanges({ a: 1 }, [1]).changed).toEqual(['']);
+      expect(detectChanges(1, 1).changed).toEqual([]);
+    });
+
+    it('terminates on cyclic structures', () => {
+      const before = { name: 'a' };
+      before.self = before;
+      const after = { name: 'b' };
+      after.self = after;
+      expect(detectChanges(before, after).changed).toEqual(['name']);
+    });
+  });
+
   describe('keys', () => {
     it('keys should return the keys of an object', () => {
       expect(keys({ a: 1, b: 2 })).toEqual(['a', 'b']);
@@ -217,6 +734,154 @@ describe('Object Utilities', () => {
 
       expect(proxy.city).toBe('New Orleans');
       expect(reference.city).toBe('New Orleans');
+    });
+  });
+
+  describe('set', () => {
+    it('sets a simple property', () => {
+      const obj = { a: 1 };
+      expect(set(obj, 'b', 2)).toBe(obj);
+      expect(obj.b).toBe(2);
+    });
+
+    it('sets a nested field from a dot path', () => {
+      const obj = { a: { b: { c: 1 } } };
+      set(obj, 'a.b.c', 9);
+      expect(obj.a.b.c).toBe(9);
+    });
+
+    it('creates missing intermediate objects', () => {
+      const obj = {};
+      set(obj, 'a.b.c', 1);
+      expect(obj).toEqual({ a: { b: { c: 1 } } });
+    });
+
+    it('creates arrays when the next segment is an index', () => {
+      const obj = {};
+      set(obj, 'items.0.name', 'first');
+      expect(Array.isArray(obj.items)).toBe(true);
+      expect(obj.items[0].name).toBe('first');
+    });
+
+    it('supports bracket notation, creating the array when missing', () => {
+      const obj = {};
+      set(obj, 'items[1].name', 'second');
+      expect(Array.isArray(obj.items)).toBe(true);
+      expect(obj.items[1].name).toBe('second');
+    });
+
+    it('overwrites a primitive midpoint with a container', () => {
+      const obj = { a: 5 };
+      set(obj, 'a.b', 1);
+      expect(obj.a).toEqual({ b: 1 });
+    });
+
+    it('assigns to an existing literal dotted key, mirroring get()', () => {
+      const obj = { 'a.b': 1 };
+      set(obj, 'a.b', 2);
+      expect(obj['a.b']).toBe(2);
+      expect(obj.a).toBeUndefined();
+    });
+
+    it('steps into an existing literal dotted key midway', () => {
+      const obj = { 'a.b': { c: 1 } };
+      set(obj, 'a.b.c', 9);
+      expect(obj['a.b'].c).toBe(9);
+      expect(get(obj, 'a.b.c')).toBe(9);
+    });
+
+    it('refuses prototype-climbing segments', () => {
+      const obj = {};
+      set(obj, '__proto__.polluted', true);
+      set(obj, 'constructor.prototype.polluted', true);
+      expect(obj).toEqual({});
+      expect({}.polluted).toBeUndefined();
+    });
+
+    it('no-ops on a non-string path, empty path, or primitive target', () => {
+      const obj = { a: 1 };
+      expect(set(obj, undefined, 2)).toBe(obj);
+      expect(set(obj, '', 2)).toBe(obj);
+      expect(set(42, 'a', 2)).toBe(42);
+      expect(obj).toEqual({ a: 1 });
+    });
+
+    it('round-trips trackWrites paths onto a second object', () => {
+      const source = { meta: { count: 0 }, items: [{ name: 'a' }] };
+      const replica = { meta: { count: 0 }, items: [{ name: 'a' }] };
+      const { paths } = trackWrites(source, (value) => {
+        value.meta.count = 5;
+        value.items[0].name = 'z';
+      });
+      paths.forEach((path) => set(replica, path, get(source, path)));
+      expect(replica).toEqual(source);
+    });
+
+    it('applies a detectChanges diff onto a copy of before', () => {
+      const before = { name: 'a', count: 1, meta: { temp: true, keep: 1 } };
+      const after = { name: 'b', count: 1, nickname: 'al', meta: { keep: 1 } };
+      const diff = detectChanges(before, after);
+      const replica = structuredClone(before);
+      [...diff.added, ...diff.changed].forEach((path) => set(replica, path, get(after, path)));
+      diff.removed.forEach((path) => unset(replica, path));
+      expect(replica).toEqual(after);
+    });
+  });
+
+  describe('unset', () => {
+    it('removes a simple property', () => {
+      const obj = { a: 1, b: 2 };
+      expect(unset(obj, 'b')).toBe(obj);
+      expect(obj).toEqual({ a: 1 });
+    });
+
+    it('removes a nested field from a dot path', () => {
+      const obj = { a: { b: { c: 1, d: 2 } } };
+      unset(obj, 'a.b.c');
+      expect(obj).toEqual({ a: { b: { d: 2 } } });
+    });
+
+    it('no-ops on a missing path without creating intermediates', () => {
+      const obj = { a: 1 };
+      unset(obj, 'x.y.z');
+      expect(obj).toEqual({ a: 1 });
+    });
+
+    it('leaves a hole at a removed array index so sibling paths stay valid', () => {
+      const obj = { items: ['a', 'b', 'c'] };
+      unset(obj, 'items.1');
+      expect(Object.hasOwn(obj.items, 1)).toBe(false);
+      expect(obj.items[2]).toBe('c');
+      expect(obj.items.length).toBe(3);
+    });
+
+    it('supports bracket notation', () => {
+      const obj = { items: ['a', 'b'] };
+      unset(obj, 'items[0]');
+      expect(Object.hasOwn(obj.items, 0)).toBe(false);
+    });
+
+    it('removes an existing literal dotted key, mirroring get()', () => {
+      const obj = { 'a.b': 1, c: 2 };
+      unset(obj, 'a.b');
+      expect(Object.hasOwn(obj, 'a.b')).toBe(false);
+      expect(obj.c).toBe(2);
+    });
+
+    it('refuses prototype-climbing segments', () => {
+      const obj = { a: 1 };
+      unset(obj, '__proto__.toString');
+      unset(obj, 'constructor.prototype');
+      expect(typeof obj.toString).toBe('function');
+    });
+
+    it('no-ops on a non-string path, empty path, primitive target, or primitive midpoint', () => {
+      const obj = { a: 1 };
+      expect(unset(obj, undefined)).toBe(obj);
+      expect(unset(obj, '')).toBe(obj);
+      expect(unset(42, 'a')).toBe(42);
+      unset(obj, 'a.b.c');
+      expect(obj).toEqual({ a: 1 });
     });
   });
 
@@ -826,7 +1491,11 @@ describe('assignInPlace — returnChanged', () => {
 
 describe('deepExtend — preserveNonCloneable option', () => {
   it('should accept preserveDOM and preserveNonCloneable as last arg', () => {
-    class Custom { constructor(v) { this.v = v; } }
+    class Custom {
+      constructor(v) {
+        this.v = v;
+      }
+    }
     const inst = new Custom(1);
     const target = {};
     deepExtend(target, { custom: inst }, { preserveNonCloneable: true });
@@ -834,7 +1503,11 @@ describe('deepExtend — preserveNonCloneable option', () => {
   });
 
   it('should clone class instances when preserveNonCloneable is false', () => {
-    class Custom { constructor(v) { this.v = v; } }
+    class Custom {
+      constructor(v) {
+        this.v = v;
+      }
+    }
     const inst = new Custom(1);
     const target = {};
     deepExtend(target, { custom: inst }, { preserveNonCloneable: false });
