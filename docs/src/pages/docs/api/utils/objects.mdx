@@ -130,7 +130,7 @@ console.log(result); // { a: 2, b: 4, c: 6 }
 function trackWrites(value, callback, { strategy = 'auto', onWrite, clone, equality } = {})
 ```
 
-Runs a callback against a value and reports whether the callback changed it. The callback can mutate the value in place or return a replacement.
+Runs a callback against a value and reports whether the callback changed it. Useful for running a user callback against a data structure and determining mutations.
 
 > **Strategy** - The default strategy 'auto' will use `snapshot` for small data structures and `proxy` for larger. Snapshot improves debugging by passing you a real copy, while `proxy` preserve performance at the cost of passing you a `proxyObject` inside your callback
 
