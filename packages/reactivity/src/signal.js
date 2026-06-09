@@ -138,6 +138,7 @@ export class Signal {
   mutate(mutationFn) {
     const { changed, result } = trackWrites(this.currentValue, mutationFn, {
       clone: this.cloneFunction,
+      returnPaths: false,
     });
 
     // returning the mutated value can't be stored, that's the in-place footgun,

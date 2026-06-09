@@ -79,18 +79,23 @@ export function filterObject<T extends object>(
 export interface TrackWritesOptions {
   /**
    * How changes are detected (default 'auto').
-   * 'snapshot' clones the value up front and deep-compares after — the callback
+   * 'snapshot' clones the value up front and diffs after — the callback
    * sees the real object, cost scales with value size.
    * 'proxy' hands the callback a tracked wrapper and records writes — cost
    * scales with writes, the console shows Proxy(Object) inside the callback.
    * 'auto' snapshots small values and proxies large ones.
    */
   strategy?: 'auto' | 'snapshot' | 'proxy';
+  /**
+   * Return the changed fields as dot paths (default true). Pass false to skip
+   * path collection on hot paths where only `changed` is read.
+   */
+  returnPaths?: boolean;
   /** Fires per observed write with the key path from the root. Implies the proxy strategy under 'auto'. */
   onWrite?: (path: string[], target: object, key: string) => void;
   /** Clone used for snapshots (defaults to clone) */
   clone?: (value: unknown) => unknown;
-  /** Equality used to compare snapshots (defaults to isEqual) */
+  /** Equality used when paths are skipped and for exotic snapshots (defaults to isEqual) */
   equality?: (a: unknown, b: unknown) => boolean;
 }
 
@@ -102,10 +107,18 @@ export interface TrackWritesResult<R> {
   changed: boolean;
   /** The callback's return value, with any tracked wrappers swapped for raw objects */
   result: R;
+  /**
+   * A covering set of changed fields as dot paths, resolvable via get().
+   * The proxy strategy reports the paths written (pruned so a written parent
+   * subsumes its children), the snapshot strategy reports net leaf differences.
+   * A wholesale change to a non-container value reports path ''.
+   */
+  paths?: string[];
 }
 
 /**
- * Runs a callback against a value and reports whether the callback changed it.
+ * Runs a callback against a value and reports whether the callback changed it,
+ * with the changed fields as dot paths.
  * Under the proxy strategy the tracked wrapper is only valid inside the
  * callback — using one after it returns throws. Writes that never go through
  * the callback's value (a closure reference) are only seen by the snapshot
@@ -115,27 +128,65 @@ export interface TrackWritesResult<R> {
  *
  * @param value - The value the callback may change
  * @param callback - Receives the value (or its tracked wrapper) and may mutate it in place or return a replacement
- * @param options - Strategy, write reporting, and snapshot configuration
- * @returns Whether the value changed and the callback's return value
+ * @param options - Strategy, path reporting, and snapshot configuration
+ * @returns Whether the value changed, the changed paths, and the callback's return value
  *
  * @example
  * ```ts
  * const doc = { meta: { count: 0 } };
- * const { changed } = trackWrites(doc, (value) => {
+ * const { changed, paths } = trackWrites(doc, (value) => {
  *   value.meta.count++;
  * });
- * // changed === true, doc.meta.count === 1
- *
- * trackWrites(rows, (tracked) => {
- *   tracked[3].active = true;
- * }, { onWrite: (path) => console.log(path) }); // ['3', 'active']
+ * // changed === true, paths === ['meta.count']
+ * paths.forEach((path) => sync(path, get(doc, path)));
  * ```
  */
 export function trackWrites<T, R = unknown>(
   value: T,
   callback: (value: T) => R,
+  options: TrackWritesOptions & { returnPaths: false; },
+): { changed: boolean; result: R; };
+export function trackWrites<T, R = unknown>(
+  value: T,
+  callback: (value: T) => R,
   options?: TrackWritesOptions,
-): TrackWritesResult<R>;
+): { changed: boolean; result: R; paths: string[]; };
+
+/**
+ * Changes reported by detectChanges, grouped by operation
+ */
+export interface DetectedChanges {
+  /** Dot paths present in after but not before */
+  added: string[];
+  /** Dot paths present in before but not after */
+  removed: string[];
+  /** Dot paths present in both with different values */
+  changed: string[];
+}
+
+/**
+ * Structural diff between two values, reported as dot paths from before to
+ * after. Objects and arrays recurse to leaf paths, arrays diff by index,
+ * values that can't be walked (Map/Set/Date/class instances) compare by deep
+ * equality and report their own path. Differing non-container roots report
+ * path ''.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#detectchanges detectChanges}
+ * @see {@link https://next.semantic-ui.com/examples/utils-detectchanges Example}
+ *
+ * @param before - The value to diff from
+ * @param after - The value to diff to
+ * @returns Added, removed, and changed paths
+ *
+ * @example
+ * ```ts
+ * detectChanges(
+ *   { name: 'a', temp: true },
+ *   { name: 'b', nickname: 'al' },
+ * )
+ * // { added: ['nickname'], removed: ['temp'], changed: ['name'] }
+ * ```
+ */
+export function detectChanges(before: unknown, after: unknown): DetectedChanges;
 
 /**
  * Extends an object with properties from additional sources

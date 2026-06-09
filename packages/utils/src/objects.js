@@ -65,6 +65,80 @@ const autoBudget = 512;
 const overBudget = (value) => spendBudget(value, autoBudget) < 0;
 
 /*
+  Structural diff from before to after. Reports dot paths grouped as added
+  (in after only), removed (in before only), and changed. Arrays diff by index,
+  values that can't be walked (Map/Set/Date/class instances) compare by deep
+  equality and report their own path. A wholesale change to a non-container
+  root reports path '' (the RFC 6902 root convention).
+*/
+export const detectChanges = (before, after) => {
+  const added = [];
+  const removed = [];
+  const changed = [];
+  const seen = new WeakSet(); // cycle guard, each before-node diffs once
+
+  const walk = (a, b, prefix) => {
+    if (seen.has(a)) {
+      return;
+    }
+    seen.add(a);
+    for (const key of Object.keys(a)) {
+      const path = prefix === '' ? key : `${prefix}.${key}`;
+      if (!Object.hasOwn(b, key)) {
+        removed.push(path);
+        continue;
+      }
+      const valueA = a[key];
+      const valueB = b[key];
+      if (Object.is(valueA, valueB)) {
+        continue;
+      }
+      if (isTrackable(valueA) && isTrackable(valueB) && isArray(valueA) === isArray(valueB)) {
+        walk(valueA, valueB, path);
+      }
+      else if (!isEqual(valueA, valueB)) {
+        changed.push(path);
+      }
+    }
+    for (const key of Object.keys(b)) {
+      if (!Object.hasOwn(a, key)) {
+        added.push(prefix === '' ? key : `${prefix}.${key}`);
+      }
+    }
+  };
+
+  if (isTrackable(before) && isTrackable(after) && isArray(before) === isArray(after)) {
+    walk(before, after, '');
+  }
+  else if (!isEqual(before, after)) {
+    changed.push('');
+  }
+  return { added, removed, changed };
+};
+
+// a recorded parent subsumes its children regardless of write order — syncing
+// 'a' covers 'a.b', and path-conflict stores (mongo) reject both in one update
+const pruneChildPaths = (pathLog) => {
+  const pruned = [];
+  for (const path of pathLog) {
+    let parent = path;
+    let covered = false;
+    let dotIndex;
+    while ((dotIndex = parent.lastIndexOf('.')) !== -1) {
+      parent = parent.slice(0, dotIndex);
+      if (pathLog.has(parent)) {
+        covered = true;
+        break;
+      }
+    }
+    if (!covered) {
+      pruned.push(path);
+    }
+  }
+  return pruned;
+};
+
+/*
   Run callback against value, report whether it changed it. 'auto' snapshots
   small values (clone + deep-compare, callback sees the real object) and
   write-tracks large ones through a proxy so cost scales with writes, not size.
@@ -72,6 +146,7 @@ const overBudget = (value) => spendBudget(value, autoBudget) < 0;
 export const trackWrites = (value, callback, {
   strategy = 'auto',
   onWrite,
+  returnPaths = true,
   clone: cloneFunction = clone,
   equality = isEqual,
 } = {}) => {
@@ -83,7 +158,12 @@ export const trackWrites = (value, callback, {
   if (!useProxy) {
     const before = cloneFunction(value);
     const result = callback(value);
-    return { changed: !equality(before, value), result };
+    if (!returnPaths) {
+      return { changed: !equality(before, value), result };
+    }
+    const diff = detectChanges(before, value);
+    const paths = [...diff.added, ...diff.changed, ...diff.removed];
+    return { changed: paths.length > 0, result, paths };
   }
 
   let written = false;
@@ -91,7 +171,8 @@ export const trackWrites = (value, callback, {
   let snapshots = null; // exotic -> before clone, for objects the proxy can't observe
   const wrapped = new WeakMap(); // raw -> proxy, for identity and cycles
   const rawOf = new WeakMap(); // proxy -> raw, to unwrap on write-back
-  const paths = onWrite ? new WeakMap() : null; // raw -> key path from root
+  const paths = (onWrite || returnPaths) ? new WeakMap() : null; // raw -> key path from root
+  const pathLog = returnPaths ? new Set() : null; // dot-joined, insertion order
 
   const expiredError = () =>
     new Error(
@@ -113,9 +194,15 @@ export const trackWrites = (value, callback, {
 
   const markWrite = (object, key) => {
     written = true;
-    if (onWrite) {
-      onWrite([...paths.get(object), key], object, key);
+    if (paths === null) {
+      return;
     }
+    const path = [...paths.get(object), key];
+    // a symbol segment has no dot-path form, it still counts as a write above
+    if (pathLog && !path.some((segment) => typeof segment === 'symbol')) {
+      pathLog.add(path.join('.'));
+    }
+    onWrite?.(path, object, key);
   };
 
   // swap any tracked wrapper for its raw object, scanning fresh containers
@@ -246,6 +333,9 @@ export const trackWrites = (value, callback, {
         break;
       }
     }
+  }
+  if (pathLog) {
+    return { changed, result, paths: pruneChildPaths(pathLog) };
   }
   return { changed, result };
 };
