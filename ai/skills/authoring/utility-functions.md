@@ -189,27 +189,37 @@ mapObject({ a: 1, b: 2 }, (value, key) => value * 2);           // { a: 2, b: 4 
 
 ### Change Detection
 ```javascript
-import { trackWrites } from '@semantic-ui/utils';
+import { trackWrites, detectChanges, get } from '@semantic-ui/utils';
 
-// Run a callback against a value, report whether it changed it
+// Run a callback against a value, report whether and where it changed
 const doc = { meta: { count: 0 } };
-const { changed, result } = trackWrites(doc, (value) => {
+const { changed, paths, result } = trackWrites(doc, (value) => {
   value.meta.count++;
 });
-// changed === true, in-place writes apply to doc directly
+// changed === true, paths === ['meta.count'], writes apply to doc directly
+
+// Paths resolve through get(), e.g. for state sync
+paths.forEach((path) => sync(path, get(doc, path)));
 
 // Writing a value that is already there is not a change
-trackWrites(doc, (value) => { value.meta.count = 1; }); // { changed: false }
+trackWrites(doc, (value) => { value.meta.count = 1; }); // { changed: false, paths: [] }
+
+// Skip path collection on hot paths that only read changed
+trackWrites(doc, mutator, { returnPaths: false }); // { changed, result }
 
 // 'auto' snapshots small values (callback sees the real object) and proxies
 // large ones (callback sees a tracked wrapper, cost scales with writes).
 // Pin a path with strategy: 'snapshot' | 'proxy'
 trackWrites(bigList, (tracked) => { tracked[500].seen = true; });
 
-// onWrite reports each write with its key path, implies the proxy strategy
+// onWrite streams each write with its key path, implies the proxy strategy
 trackWrites(rows, (tracked) => {
   tracked[3].active = true;
 }, { onWrite: (path, target, key) => console.log(path) }); // ['3', 'active']
+
+// Two-value structural diff, directional from before to after
+detectChanges({ name: 'a', temp: true }, { name: 'b', nickname: 'al' });
+// { added: ['nickname'], removed: ['temp'], changed: ['name'] }
 ```
 
 ### Conversion
@@ -824,7 +834,8 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `onlyKeys` | `(obj, keysArray)` | New object with selected keys |
 | `filterObject` | `(obj, fn(val,key))` | Filtered object |
 | `mapObject` | `(obj, fn(val,key))` | Transformed object |
-| `trackWrites` | `(value, callback, opts?)` | `{ changed, result }` |
+| `trackWrites` | `(value, callback, opts?)` | `{ changed, paths, result }` |
+| `detectChanges` | `(before, after)` | `{ added, removed, changed }` paths |
 | `arrayFromObject` | `(obj)` | `[{key, value}, ...]` |
 | `reverseKeys` | `(obj)` | Inverted lookup object |
 | `proxyObject` | `(getterFn, refObj)` | Read-through Proxy |

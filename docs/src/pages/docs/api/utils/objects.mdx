@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Object Utilities
 package: "@semantic-ui/utils"
-methods: [keys, values, filterObject, mapObject, trackWrites, extend, assignInPlace, deepExtend, pick, arrayFromObject, get, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
+methods: [keys, values, filterObject, mapObject, trackWrites, detectChanges, extend, assignInPlace, deepExtend, pick, arrayFromObject, get, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
 icon: box
 description: API reference for object manipulation functions
 ---
@@ -127,10 +127,10 @@ console.log(result); // { a: 2, b: 4, c: 6 }
 ### trackWrites
 
 ```javascript
-function trackWrites(value, callback, { strategy = 'auto', onWrite, clone, equality } = {})
+function trackWrites(value, callback, { strategy = 'auto', returnPaths = true, onWrite, clone, equality } = {})
 ```
 
-Runs a callback against a value and reports whether the callback changed it. Useful for running a user callback against a data structure and determining mutations.
+Runs a callback against a value and reports whether the callback changed it, with the changed fields as dot paths. Useful for running a user callback against a data structure and determining mutations.
 
 > **Strategy** - The default strategy 'auto' will use `snapshot` for small data structures and `proxy` for larger. Snapshot improves debugging by passing you a real copy, while `proxy` preserve performance at the cost of passing you a `proxyObject` inside your callback
 
@@ -144,41 +144,82 @@ Runs a callback against a value and reports whether the callback changed it. Use
 
 ##### Options
 
-| Name     | Type     | Default   | Description |
-|----------|----------|-----------|-------------|
-| strategy | string   | 'auto'    | `'auto'`, `'snapshot'`, or `'proxy'` |
-| onWrite  | function | undefined | `(path, target, key)` fires per observed write with the key path from the root. Implies the proxy strategy under `'auto'` |
-| clone    | function | clone     | Clone used for snapshots |
-| equality | function | isEqual   | Equality used to compare snapshots |
+| Name        | Type     | Default   | Description |
+|-------------|----------|-----------|-------------|
+| strategy    | string   | 'auto'    | `'auto'`, `'snapshot'`, or `'proxy'` |
+| returnPaths | boolean  | true      | Return changed fields as dot paths. Pass `false` to skip collection on hot paths that only read `changed` |
+| onWrite     | function | undefined | `(path, target, key)` fires per observed write with the key path from the root. Implies the proxy strategy under `'auto'` |
+| clone       | function | clone     | Clone used for snapshots |
+| equality    | function | isEqual   | Equality used when paths are skipped and for exotic snapshots |
 
 #### Returns
 
-`{ changed, result }` — whether the value changed, and the callback's return value.
+`{ changed, paths, result }` — whether the value changed, the changed fields as dot paths, and the callback's return value.
 
 #### Notes
 
-Under the proxy strategy the tracked wrapper is only valid inside the callback — using one after it returns throws.
+`paths` is a covering set resolvable through [`get`](#get) — the proxy strategy reports the paths written (pruned so a written parent subsumes its children), the snapshot strategy reports net leaf differences via [`detectChanges`](#detectchanges). A wholesale change to a non-container value reports path `''`. Under the proxy strategy the tracked wrapper is only valid inside the callback — using one after it returns throws.
 
 #### Example
 
 ```javascript
-import { trackWrites } from '@semantic-ui/utils';
+import { trackWrites, get } from '@semantic-ui/utils';
 
 const doc = { meta: { count: 0 } };
-const { changed } = trackWrites(doc, (value) => {
+const { changed, paths } = trackWrites(doc, (value) => {
   value.meta.count++;
 });
 console.log(changed); // true
+console.log(paths); // ['meta.count']
+
+// paths resolve against the value, e.g. for state sync
+paths.forEach((path) => sync(path, get(doc, path)));
 
 // writing the same value is not a change
 trackWrites(doc, (value) => {
   value.meta.count = 1;
-}); // { changed: false, ... }
+}); // { changed: false, paths: [], ... }
 
-// report each write with its path
-trackWrites(rows, (tracked) => {
-  tracked[3].active = true;
-}, { onWrite: (path) => console.log(path) }); // ['3', 'active']
+// skip path collection on hot paths
+trackWrites(doc, mutator, { returnPaths: false }); // { changed, result }
+```
+
+### detectChanges
+
+```javascript
+function detectChanges(before, after)
+```
+
+Structural diff between two values, reported as dot paths from `before` to `after` — added (in after only), removed (in before only), and changed (in both, different values).
+
+#### Parameters
+
+| Name   | Type | Description |
+|--------|------|-------------|
+| before | any  | The value to diff from |
+| after  | any  | The value to diff to |
+
+#### Returns
+
+`{ added, removed, changed }` — arrays of dot paths.
+
+#### Notes
+
+Objects and arrays recurse to leaf paths and arrays diff by index, so a shifted array reports every moved position. Values that can't be walked (Map, Set, Date, class instances) compare by deep equality and report their own path. Differing non-container roots report path `''`.
+
+#### Example
+
+```javascript
+import { detectChanges } from '@semantic-ui/utils';
+
+const before = { name: 'a', temp: true, count: 1 };
+const after = { name: 'b', count: 1, nickname: 'al' };
+
+console.log(detectChanges(before, after));
+// { added: ['nickname'], removed: ['temp'], changed: ['name'] }
+
+console.log(detectChanges({ items: [1, 2, 3] }, { items: [1, 9] }));
+// { added: [], removed: ['items.2'], changed: ['items.1'] }
 ```
 
 ### extend
