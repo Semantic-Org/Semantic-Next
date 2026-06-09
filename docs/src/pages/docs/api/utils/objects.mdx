@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Object Utilities
 package: "@semantic-ui/utils"
-methods: [keys, values, filterObject, mapObject, trackWrites, detectChanges, extend, assignInPlace, deepExtend, pick, arrayFromObject, get, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
+methods: [keys, values, filterObject, mapObject, trackWrites, detectChanges, extend, assignInPlace, deepExtend, pick, arrayFromObject, get, set, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
 icon: box
 description: API reference for object manipulation functions
 ---
@@ -440,6 +440,43 @@ import { get } from '@semantic-ui/utils';
 const obj = { a: { b: { c: 42 } } };
 console.log(get(obj, 'a.b.c')); // 42
 console.log(get(obj, 'a.b.d')); // undefined
+```
+
+### set
+
+```javascript
+function set(obj, path, value)
+```
+
+Set a nested object field from a string path, the write twin of [`get`](#get). Creates missing intermediates — arrays when the next segment is a numeric index, objects otherwise.
+
+#### Parameters
+
+| Name  | Type   | Description |
+|-------|--------|-------------|
+| obj   | object | The object to write into |
+| path  | string | The path string (e.g., 'a.b.c', 'items.0.name', or 'items[0].name') |
+| value | any    | The value to set at the path |
+
+#### Returns
+
+The same object reference.
+
+#### Notes
+
+Paths from [`trackWrites`](#trackwrites) and [`detectChanges`](#detectchanges) apply back directly. Prototype-climbing segments (`__proto__`, `constructor`, `prototype`) are refused, and a non-string or empty path is a no-op.
+
+#### Example
+
+```javascript
+import { set, get, trackWrites } from '@semantic-ui/utils';
+
+console.log(set({}, 'a.b.c', 1)); // { a: { b: { c: 1 } } }
+console.log(set({}, 'items.0.name', 'first')); // { items: [{ name: 'first' }] }
+
+// sync changes between objects
+const { paths } = trackWrites(source, mutator);
+paths.forEach((path) => set(replica, path, get(source, path)));
 ```
 
 ### proxyObject

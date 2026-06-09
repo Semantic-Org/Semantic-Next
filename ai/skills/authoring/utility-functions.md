@@ -128,7 +128,7 @@ sum([1, 2, 3, 4]);                   // 10
 
 ### Property Access
 ```javascript
-import { get, keys, values, hasProperty } from '@semantic-ui/utils';
+import { get, set, keys, values, hasProperty } from '@semantic-ui/utils';
 
 const data = {
   user: {
@@ -141,6 +141,11 @@ const data = {
 get(data, 'user.profile.name');              // 'Alice'
 get(data, 'user.posts.0.title');             // 'First Post'
 get(data, 'user.profile.bio');               // undefined (no default parameter)
+
+// Nested dot-path writes, creating missing intermediates (arrays for indices)
+set(data, 'user.profile.name', 'Bob');       // writes in place, returns data
+set({}, 'items.0.name', 'first');            // { items: [{ name: 'first' }] }
+// refuses prototype-climbing segments (__proto__, constructor, prototype)
 
 // hasProperty checks own properties only (shallow, no dot paths)
 hasProperty(data, 'user');                   // true
@@ -824,6 +829,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | Function | Signature | Returns |
 |----------|-----------|---------|
 | `get` | `(obj, dotPath)` | Nested value or undefined |
+| `set` | `(obj, dotPath, value)` | Same object, intermediates created |
 | `keys` | `(obj)` | `Object.keys` or undefined |
 | `values` | `(obj)` | `Object.values` or undefined |
 | `hasProperty` | `(obj, prop)` | Own property check (shallow) |
