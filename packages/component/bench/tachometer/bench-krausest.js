@@ -106,31 +106,24 @@ function buildData(count) {
       Component Definition
 *******************************/
 
-const signalOptions = { safety: 'reference' };
-
 defineComponent({
   tagName: 'bench-app',
-  template: `<table><tbody>
-    {#each rows as row}
-      <tr class="{isSelected row.id}">
-        <td class="col-md-1">{row.id}</td>
-        <td class="col-md-4"><a class="lbl" data-id="{row.id}">{row.label}</a></td>
-        <td class="col-md-1"><a class="remove" data-id="{row.id}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></td>
-        <td class="col-md-6"></td>
-      </tr>
-    {/each}
-  </tbody></table>`,
+  // single line: inter-tag whitespace compiles to per-row text nodes
+  template:
+    `<table><tbody>{#each rows as row}<tr class="{isSelected row.id}"><td class="col-md-1">{row.id}</td><td class="col-md-4"><a class="lbl" data-id="{row.id}">{row.label}</a></td><td class="col-md-1"><a class="remove" data-id="{row.id}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></td><td class="col-md-6"></td></tr>{/each}</tbody></table>`,
   defaultState: {
-    rows: { value: [], options: signalOptions },
-    selected: { value: 0, options: signalOptions },
+    rows: [],
+    selected: 0,
   },
-  createComponent({ state }) {
+  createComponent({ state, match }) {
+    // per-key selector: selection change re-fires only the flipped rows
+    const selectedMatch = match(state.selected);
     return {
       // bench access
       getRows: () => state.rows.peek(),
 
       isSelected(id) {
-        return state.selected.get() === id ? 'danger' : '';
+        return selectedMatch(id) ? 'danger' : '';
       },
 
       run(n) {
