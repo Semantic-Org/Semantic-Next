@@ -324,6 +324,32 @@ export function get<T extends object, V = any>(
 ): V | undefined;
 
 /**
+ * Set a nested object field from a string path, the write twin of get.
+ * Creates missing intermediates — arrays when the next segment is a numeric
+ * index, objects otherwise. Refuses prototype-climbing segments
+ * (__proto__, constructor, prototype). Paths from trackWrites and
+ * detectChanges apply back directly.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#set set}
+ * @see {@link https://next.semantic-ui.com/examples/utils-set Example}
+ *
+ * @param obj - The object to write into
+ * @param path - The path string (e.g., 'a.b.c', 'items.0.name', or 'items[0].name')
+ * @param value - The value to set at the path
+ * @returns The same object reference
+ *
+ * @example
+ * ```ts
+ * set({}, 'a.b.c', 1) // returns { a: { b: { c: 1 } } }
+ * set({}, 'items.0.name', 'first') // creates the array: { items: [{ name: 'first' }] }
+ * ```
+ */
+export function set<T extends object>(
+  obj: T,
+  path: string,
+  value: unknown,
+): T;
+
+/**
  * Creates a proxy that combines source and reference objects
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#proxyobject proxyObject}
  *

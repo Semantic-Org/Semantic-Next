@@ -610,6 +610,87 @@ export const get = function(obj, path = '') {
   return currentObject;
 };
 
+const isIndexSegment = (part) => /^\d+$/.test(part);
+
+/*
+  Set a nested object field from a string path, the write twin of get, so
+  paths from trackWrites and detectChanges apply back. Creates missing
+  intermediates — arrays when the next segment is an index, objects otherwise.
+*/
+export const set = function(obj, path, value) {
+  if (typeof path !== 'string' || path === '' || obj === null || !isObject(obj)) {
+    return obj;
+  }
+  // a path setter is the classic prototype pollution vector, refuse segments
+  // that climb the prototype chain
+  if (/(^|\.|\[)(__proto__|constructor|prototype)(\.|\[|\]|$)/.test(path)) {
+    return obj;
+  }
+
+  // simple property access — no dots, no brackets
+  if (path.indexOf('.') === -1 && path.indexOf('[') === -1) {
+    obj[path] = value;
+    return obj;
+  }
+
+  const parts = path.split('.');
+  let currentObject = obj;
+  let pathOffset = 0;
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    const isLast = i === parts.length - 1;
+
+    if (part.includes('[')) {
+      const { key, index } = extractBracketAccess(part);
+      if (!isArray(currentObject[key])) {
+        currentObject[key] = [];
+      }
+      if (isLast) {
+        currentObject[key][index] = value;
+        return obj;
+      }
+      if (currentObject[key][index] === null || !isObject(currentObject[key][index])) {
+        currentObject[key][index] = isIndexSegment(parts[i + 1]) ? [] : {};
+      }
+      currentObject = currentObject[key][index];
+    }
+    else if (isLast) {
+      currentObject[part] = value;
+      return obj;
+    }
+    else {
+      if (!(part in currentObject)) {
+        // an existing literal dotted key wins over creating intermediates,
+        // mirroring get()'s resolution
+        const remainingPath = path.substring(pathOffset);
+        if (remainingPath in currentObject) {
+          currentObject[remainingPath] = value;
+          return obj;
+        }
+        const combinedKey = `${part}.${parts[i + 1]}`;
+        if (combinedKey in currentObject) {
+          if (currentObject[combinedKey] === null || !isObject(currentObject[combinedKey])) {
+            currentObject[combinedKey] = isIndexSegment(parts[i + 2]) ? [] : {};
+          }
+          currentObject = currentObject[combinedKey];
+          pathOffset += combinedKey.length + 1;
+          i++;
+          continue;
+        }
+      }
+      if (currentObject[part] === null || !isObject(currentObject[part])) {
+        currentObject[part] = isIndexSegment(parts[i + 1]) ? [] : {};
+      }
+      currentObject = currentObject[part];
+    }
+
+    pathOffset += part.length + 1;
+  }
+
+  return obj;
+};
+
 /* This is useful for callbacks or other scenarios where you want to avoid the
    values of a reference object becoming stale when a source object changes
 */

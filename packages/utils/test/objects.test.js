@@ -14,6 +14,7 @@ import {
   pick,
   proxyObject,
   reverseKeys,
+  set,
   some,
   trackWrites,
   values,
@@ -732,6 +733,97 @@ describe('Object Utilities', () => {
 
       expect(proxy.city).toBe('New Orleans');
       expect(reference.city).toBe('New Orleans');
+    });
+  });
+
+  describe('set', () => {
+    it('sets a simple property', () => {
+      const obj = { a: 1 };
+      expect(set(obj, 'b', 2)).toBe(obj);
+      expect(obj.b).toBe(2);
+    });
+
+    it('sets a nested field from a dot path', () => {
+      const obj = { a: { b: { c: 1 } } };
+      set(obj, 'a.b.c', 9);
+      expect(obj.a.b.c).toBe(9);
+    });
+
+    it('creates missing intermediate objects', () => {
+      const obj = {};
+      set(obj, 'a.b.c', 1);
+      expect(obj).toEqual({ a: { b: { c: 1 } } });
+    });
+
+    it('creates arrays when the next segment is an index', () => {
+      const obj = {};
+      set(obj, 'items.0.name', 'first');
+      expect(Array.isArray(obj.items)).toBe(true);
+      expect(obj.items[0].name).toBe('first');
+    });
+
+    it('supports bracket notation, creating the array when missing', () => {
+      const obj = {};
+      set(obj, 'items[1].name', 'second');
+      expect(Array.isArray(obj.items)).toBe(true);
+      expect(obj.items[1].name).toBe('second');
+    });
+
+    it('overwrites a primitive midpoint with a container', () => {
+      const obj = { a: 5 };
+      set(obj, 'a.b', 1);
+      expect(obj.a).toEqual({ b: 1 });
+    });
+
+    it('assigns to an existing literal dotted key, mirroring get()', () => {
+      const obj = { 'a.b': 1 };
+      set(obj, 'a.b', 2);
+      expect(obj['a.b']).toBe(2);
+      expect(obj.a).toBeUndefined();
+    });
+
+    it('steps into an existing literal dotted key midway', () => {
+      const obj = { 'a.b': { c: 1 } };
+      set(obj, 'a.b.c', 9);
+      expect(obj['a.b'].c).toBe(9);
+      expect(get(obj, 'a.b.c')).toBe(9);
+    });
+
+    it('refuses prototype-climbing segments', () => {
+      const obj = {};
+      set(obj, '__proto__.polluted', true);
+      set(obj, 'constructor.prototype.polluted', true);
+      expect(obj).toEqual({});
+      expect({}.polluted).toBeUndefined();
+    });
+
+    it('no-ops on a non-string path, empty path, or primitive target', () => {
+      const obj = { a: 1 };
+      expect(set(obj, undefined, 2)).toBe(obj);
+      expect(set(obj, '', 2)).toBe(obj);
+      expect(set(42, 'a', 2)).toBe(42);
+      expect(obj).toEqual({ a: 1 });
+    });
+
+    it('round-trips trackWrites paths onto a second object', () => {
+      const source = { meta: { count: 0 }, items: [{ name: 'a' }] };
+      const replica = { meta: { count: 0 }, items: [{ name: 'a' }] };
+      const { paths } = trackWrites(source, (value) => {
+        value.meta.count = 5;
+        value.items[0].name = 'z';
+      });
+      paths.forEach((path) => set(replica, path, get(source, path)));
+      expect(replica).toEqual(source);
+    });
+
+    it('applies a detectChanges diff onto a copy of before', () => {
+      const before = { name: 'a', count: 1 };
+      const after = { name: 'b', count: 1, nickname: 'al' };
+      const diff = detectChanges(before, after);
+      const replica = { ...before };
+      [...diff.added, ...diff.changed].forEach((path) => set(replica, path, get(after, path)));
+      diff.removed.forEach((path) => delete replica[path]);
+      expect(replica).toEqual(after);
     });
   });
 
