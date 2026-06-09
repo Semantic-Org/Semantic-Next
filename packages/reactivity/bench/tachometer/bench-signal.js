@@ -305,18 +305,17 @@ let sink = null;
 /*******************************
       Mutate dirty-detection
       (no subscriber — isolates the
-       clone-before / compare-after
-       cost the proxy rewrite targets)
+       change-detection cost on both
+       sides of the auto strategy)
 *******************************/
 
 // mutate-grid-row-edit-600 — edits two fields of one row in a 1000-row grid
-// in place. mutate() clones the whole list up front and deep-compares after, so
-// the cost is O(list) (~340µs/op here) no matter how little the callback
-// touches — the shape a revocable-proxy dirty-check would collapse to O(touched).
-// 600 iters lands ~200ms, comfortably above the σ-floor.
+// in place. Past the auto budget mutate tracks writes through a proxy, so the
+// cost is O(writes) regardless of list size — this guards the proxy side of
+// the strategy. 600 iters lands well above the σ-floor.
 {
   const sig = new Signal(makeRecords(1000));
-  // purpose: Edits two fields of one row in a 1000-row list signal via mutate(), in place, 600 times. Clone-before/compare-after cost.
+  // purpose: Edits two fields of one row in a 1000-row list signal via mutate(), in place, 600 times. Proxy-strategy write-tracking cost.
   await measureOp('mutate-grid-row-edit-600', () => {
     for (let i = 0; i < 600; i++) {
       const idx = i % 1000;
@@ -329,12 +328,12 @@ let sink = null;
 }
 
 // mutate-doc-nested-200k — edits two nested fields of a small structured
-// document in place. Cheap to clone and compare (~1.1µs/op), so this is where a
-// per-call Proxy setup cost has to earn itself — the honesty counterpart to the
-// grid case, not a win-flattering one. 200k iters lands ~230ms.
+// document in place. Under the auto budget mutate snapshots and deep-compares
+// (~1.1µs/op), plus the budget walk that picks the strategy — this guards the
+// snapshot side and the dispatch cost. 200k iters lands ~230ms.
 {
   const sig = new Signal(makeDoc());
-  // purpose: Edits two nested fields of a structured document signal via mutate(), in place, 200000 times. Small-object clone/compare baseline.
+  // purpose: Edits two nested fields of a structured document signal via mutate(), in place, 200000 times. Snapshot-strategy small-object baseline.
   await measureOp('mutate-doc-nested-200k', () => {
     for (let i = 0; i < 200_000; i++) {
       sig.mutate(doc => {
