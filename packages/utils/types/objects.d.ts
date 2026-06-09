@@ -74,6 +74,70 @@ export function filterObject<T extends object>(
 ): Partial<T>;
 
 /**
+ * Options for trackWrites
+ */
+export interface TrackWritesOptions {
+  /**
+   * How changes are detected (default 'auto').
+   * 'snapshot' clones the value up front and deep-compares after — the callback
+   * sees the real object, cost scales with value size.
+   * 'proxy' hands the callback a tracked wrapper and records writes — cost
+   * scales with writes, the console shows Proxy(Object) inside the callback.
+   * 'auto' snapshots small values and proxies large ones.
+   */
+  strategy?: 'auto' | 'snapshot' | 'proxy';
+  /** Fires per observed write with the key path from the root. Implies the proxy strategy under 'auto'. */
+  onWrite?: (path: string[], target: object, key: string) => void;
+  /** Clone used for snapshots (defaults to clone) */
+  clone?: (value: unknown) => unknown;
+  /** Equality used to compare snapshots (defaults to isEqual) */
+  equality?: (a: unknown, b: unknown) => boolean;
+}
+
+/**
+ * Result of trackWrites
+ */
+export interface TrackWritesResult<R> {
+  /** Whether the callback changed the value */
+  changed: boolean;
+  /** The callback's return value, with any tracked wrappers swapped for raw objects */
+  result: R;
+}
+
+/**
+ * Runs a callback against a value and reports whether the callback changed it.
+ * Under the proxy strategy the tracked wrapper is only valid inside the
+ * callback — using one after it returns throws. Writes that never go through
+ * the callback's value (a closure reference) are only seen by the snapshot
+ * strategy.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#trackwrites trackWrites}
+ * @see {@link https://next.semantic-ui.com/examples/utils-trackwrites Example}
+ *
+ * @param value - The value the callback may change
+ * @param callback - Receives the value (or its tracked wrapper) and may mutate it in place or return a replacement
+ * @param options - Strategy, write reporting, and snapshot configuration
+ * @returns Whether the value changed and the callback's return value
+ *
+ * @example
+ * ```ts
+ * const doc = { meta: { count: 0 } };
+ * const { changed } = trackWrites(doc, (value) => {
+ *   value.meta.count++;
+ * });
+ * // changed === true, doc.meta.count === 1
+ *
+ * trackWrites(rows, (tracked) => {
+ *   tracked[3].active = true;
+ * }, { onWrite: (path) => console.log(path) }); // ['3', 'active']
+ * ```
+ */
+export function trackWrites<T, R = unknown>(
+  value: T,
+  callback: (value: T) => R,
+  options?: TrackWritesOptions,
+): TrackWritesResult<R>;
+
+/**
  * Extends an object with properties from additional sources
  * Properly handles getters and setters
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#extend extend}

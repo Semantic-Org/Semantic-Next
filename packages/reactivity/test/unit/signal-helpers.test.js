@@ -974,6 +974,95 @@ SAFETY_MODES.forEach((safety) => {
       });
     });
 
+    // values past the auto budget take the proxy strategy inside mutate, so the
+    // callback sees a tracked wrapper instead of the value itself
+    describe('mutate — large values', () => {
+      const makeRows = () =>
+        Array.from({ length: 200 }, (_, i) => ({
+          id: i,
+          name: `Record ${i}`,
+          active: i % 2 === 0,
+          meta: { seen: false },
+        }));
+
+      it('fires when a nested field on one row changes', () => {
+        const sig = new Signal(makeRows(), { safety });
+        const sub = subscribe(sig);
+        sig.mutate(rows => {
+          rows[3].meta.seen = true;
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        expect(sig.raw()[3].meta.seen).toBe(true);
+        expect(sig.raw()[4].meta.seen).toBe(false);
+        sub.stop();
+      });
+
+      it('does not re-fire when a field is written to its existing value', () => {
+        const sig = new Signal(makeRows(), { safety });
+        const sub = subscribe(sig);
+        sig.mutate(rows => {
+          rows[0].id = 0;
+        });
+        flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
+
+      it('reassigning a filtered list stores a clean graph and fires', () => {
+        const sig = new Signal({ items: makeRows() }, { safety });
+        const sub = subscribe(sig);
+        sig.mutate(value => {
+          value.items = value.items.filter(item => item.active);
+        });
+        flush();
+        expect(sub.count).toBe(1);
+        expect(sig.raw().items).toHaveLength(100);
+        expect(() => JSON.stringify(sig.raw())).not.toThrow();
+        sub.stop();
+      });
+
+      it('a fresh object embedding part of the value stores the raw child', () => {
+        const sig = new Signal({ selected: null, items: makeRows() }, { safety });
+        sig.mutate(value => {
+          value.selected = { row: value.items[7] };
+        });
+        expect(sig.raw().selected.row).toBe(sig.raw().items[7]);
+        expect(() => JSON.stringify(sig.raw())).not.toThrow();
+      });
+
+      it('a returned spread replaces the value without leaking wrappers', () => {
+        const rows = makeRows();
+        const sig = new Signal({ items: rows, count: 0 }, { safety });
+        sig.mutate(value => ({ ...value, count: value.count + 1 }));
+        expect(sig.raw().count).toBe(1);
+        expect(() => JSON.stringify(sig.raw())).not.toThrow();
+      });
+
+      it('a tracked value leaked from the callback throws a clear error', () => {
+        const sig = new Signal(makeRows(), { safety });
+        let leaked;
+        sig.mutate(rows => {
+          leaked = rows[0];
+        });
+        expect(() => leaked.name).toThrow(/after its callback returned/);
+      });
+
+      it('does not fire when the callback throws after a partial write', () => {
+        const sig = new Signal(makeRows(), { safety });
+        const sub = subscribe(sig);
+        expect(() =>
+          sig.mutate(rows => {
+            rows[0].name = 'changed';
+            throw new Error('boom');
+          })
+        ).toThrow();
+        flush();
+        expect(sub.count).toBe(0);
+        sub.stop();
+      });
+    });
+
     /*******************************
         Primitive-value helpers
     *******************************/

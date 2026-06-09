@@ -5,8 +5,8 @@ import {
   isEqual,
   isNumber,
   isObject,
-  observeWrites,
   returnsFalse,
+  trackWrites,
   unique,
   wrapFunction,
 } from '@semantic-ui/utils';
@@ -132,41 +132,17 @@ export class Signal {
           Mutation Helpers
   *******************************/
 
-  // mutate the current value by a mutation function
+  // mutate the current value by a mutation function. detection equality is
+  // deliberately not this.equality — whether the callback changed the value is
+  // a precision question, not a safety question
   mutate(mutationFn) {
-    let snapshots = null;
-    const { proxy, didWrite, revoke, unwrap } = observeWrites(this.currentValue, {
-      // exotic values (Map/Set/Date/class instances) can't be observed through the
-      // proxy, so snapshot the ones the callback touches and compare them after
-      onExotic: (exotic) => {
-        if (!snapshots) {
-          snapshots = new Map();
-        }
-        if (!snapshots.has(exotic)) {
-          snapshots.set(exotic, this.cloneFunction(exotic));
-        }
-      },
+    const { changed, result } = trackWrites(this.currentValue, mutationFn, {
+      clone: this.cloneFunction,
     });
-    // unwrap so a returned draft (the proxy, or a nested one) is stored as raw,
-    // never as a revoked proxy
-    const result = unwrap(mutationFn(proxy));
-    revoke();
 
-    let changed = didWrite();
-    if (snapshots && !changed) {
-      for (const [exotic, before] of snapshots) {
-        if (!this.equality(before, exotic)) {
-          changed = true;
-          break;
-        }
-      }
-    }
-
-    // returning the value (or its proxy) can't be stored, that's the in-place
-    // footgun, so fall through to change detection
-    const returnedInPlace = result === proxy || result === this.currentValue;
-
-    if (result !== undefined && !returnedInPlace) {
+    // returning the mutated value can't be stored, that's the in-place footgun,
+    // so fall through to change detection
+    if (result !== undefined && result !== this.currentValue) {
       this.value = result;
       return;
     }

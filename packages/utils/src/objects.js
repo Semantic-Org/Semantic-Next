@@ -1,8 +1,8 @@
 import { clone } from './cloning.js';
-import { noop, returnsFalse } from './functions.js';
+import { isEqual } from './equality.js';
 import { each } from './loops.js';
 import { escapeRegExp } from './regexp.js';
-import { isArray, isObject, isPlainObject, isString } from './types.js';
+import { isArray, isMap, isObject, isPlainObject, isSet, isString } from './types.js';
 
 /*-------------------
        Objects
@@ -37,62 +37,144 @@ export const mapObject = (obj, callback) => {
   );
 };
 
+const isTrackable = (value) => isArray(value) || isPlainObject(value);
+
+// counting stops at the budget, so a cycle just burns it down and lands on
+// the proxy strategy, which handles cycles anyway
+const spendBudget = (value, remaining) => {
+  if (remaining < 0 || value === null || typeof value !== 'object') {
+    return remaining;
+  }
+  if (isTrackable(value)) {
+    const valueKeys = Object.keys(value);
+    remaining -= valueKeys.length;
+    for (let i = 0; remaining >= 0 && i < valueKeys.length; i++) {
+      remaining = spendBudget(value[valueKeys[i]], remaining);
+    }
+  }
+  else if (isMap(value) || isSet(value)) {
+    // entry contents stay unwalked, size alone signals the snapshot cost
+    remaining -= value.size;
+  }
+  return remaining;
+};
+
+// snapshots stay imperceptible well past this, but mutate can run in loops so
+// the ceiling is conservative
+const autoBudget = 512;
+const overBudget = (value) => spendBudget(value, autoBudget) < 0;
+
 /*
-  Wrap a value in a revocable proxy that records whether the function writes
-  anything, recursively through nested plain objects and arrays. Returns
-  { proxy, didWrite, revoke }. onWrite(object, key) fires per write. onExotic
-  fires when a Map/Set/Date/class instance is reached, and those pass through
-  unwrapped, since proxying their internal-slot methods throws. Identical writes
-  (Object.is) don't count, and a wrapped child is unwrapped before write-back so
-  the raw graph never stores a draft.
+  Run callback against value and report whether the callback changed it.
+  Returns { changed, result } where result is the callback's return value.
+
+  Two strategies. 'snapshot' clones the value up front and deep-compares after,
+  so the callback sees the real object — cost scales with value size. 'proxy'
+  hands the callback a tracked wrapper and records writes as they happen — cost
+  scales with writes, and the console shows Proxy(Object) inside the callback.
+  'auto' (default) snapshots small values and proxies large ones, sizing by a
+  budgeted walk.
+
+  Map/Set/Date/class instances can't be proxied (their internal-slot methods
+  throw), so the proxy strategy snapshots the ones the callback touches and
+  compares them after. Writes that never go through the tracked value (a
+  closure reference to part of it) are only seen by the snapshot strategy.
+
+  onWrite(path, target, key) fires per observed write and implies the proxy
+  strategy under 'auto'. Identical writes (Object.is) don't count.
 */
-export const observeWrites = (target, { onWrite, onExotic } = {}) => {
-  const observable = (value) => isArray(value) || isPlainObject(value);
+export const trackWrites = (value, callback, {
+  strategy = 'auto',
+  onWrite,
+  clone: cloneFunction = clone,
+  equality = isEqual,
+} = {}) => {
+  const useProxy = (strategy === 'proxy'
+    || (strategy === 'auto' && (onWrite !== undefined || overBudget(value))))
+    && isTrackable(value)
+    && !Object.isFrozen(value);
 
-  // report each exotic at most once. functions are intentionally excluded by the
-  // typeof check, so reading an array method off the proxy doesn't push the
-  // common mutate path into the snapshot fallback
-  let exoticSeen;
-  const reportExotic = (value) => {
-    if (!onExotic || value === null || typeof value !== 'object') {
-      return;
-    }
-    exoticSeen ??= new WeakSet();
-    if (!exoticSeen.has(value)) {
-      exoticSeen.add(value);
-      onExotic(value);
-    }
-  };
-
-  if (!observable(target)) {
-    reportExotic(target);
-    return { proxy: target, didWrite: returnsFalse, revoke: noop, unwrap: (value) => value };
+  if (!useProxy) {
+    const before = cloneFunction(value);
+    const result = callback(value);
+    return { changed: !equality(before, value), result };
   }
 
   let written = false;
-  const revokers = [];
+  let expired = false;
+  let snapshots = null; // exotic -> before clone, for objects the proxy can't observe
   const wrapped = new WeakMap(); // raw -> proxy, for identity and cycles
   const rawOf = new WeakMap(); // proxy -> raw, to unwrap on write-back
+  const paths = onWrite ? new WeakMap() : null; // raw -> key path from root
+
+  const expiredError = () =>
+    new Error(
+      'trackWrites: tracked value used after its callback returned. Reads and writes are only valid inside the callback.',
+    );
+
+  // snapshot each exotic at most once, and not at all once a write has already
+  // answered the change question. functions are excluded by the typeof check,
+  // so reading an array method off the proxy doesn't trigger a snapshot
+  const reportExotic = (exotic) => {
+    if (written || exotic === null || typeof exotic !== 'object') {
+      return;
+    }
+    snapshots ??= new Map();
+    if (!snapshots.has(exotic)) {
+      snapshots.set(exotic, cloneFunction(exotic));
+    }
+  };
 
   const markWrite = (object, key) => {
     written = true;
-    onWrite?.(object, key);
+    if (onWrite) {
+      onWrite([...paths.get(object), key], object, key);
+    }
+  };
+
+  // swap any tracked wrapper for its raw object, scanning fresh containers
+  // (a spread, a filter result) for wrappers smuggled inside, so the raw
+  // graph never stores one
+  const unwrapDeep = (value, seen) => {
+    const raw = rawOf.get(value);
+    if (raw !== undefined) {
+      return raw;
+    }
+    // objects already in the graph are kept clean by this very scan
+    if (!isTrackable(value) || wrapped.has(value) || seen?.has(value)) {
+      return value;
+    }
+    (seen ??= new Set()).add(value);
+    for (const key of Object.keys(value)) {
+      const child = value[key];
+      if (child !== null && typeof child === 'object') {
+        const unwrapped = unwrapDeep(child, seen);
+        if (unwrapped !== child) {
+          value[key] = unwrapped;
+        }
+      }
+    }
+    return value;
   };
 
   const handler = {
     get(object, key) {
+      if (expired) {
+        throw expiredError();
+      }
       const value = object[key];
-      if (!observable(value)) {
+      if (!isTrackable(value)) {
         reportExotic(value);
         return value;
       }
-      return wrap(value);
+      return wrap(value, object, key);
     },
     set(object, key, value) {
-      // never write a wrapped child back into the raw graph (objects only, a
-      // primitive can't be a proxy so skip the lookup)
+      if (expired) {
+        throw expiredError();
+      }
       if (value !== null && typeof value === 'object') {
-        value = rawOf.get(value) ?? value;
+        value = unwrapDeep(value);
       }
       // a brand-new own key is a write even when its value is undefined
       const changed = !Object.hasOwn(object, key) || !Object.is(object[key], value);
@@ -103,6 +185,9 @@ export const observeWrites = (target, { onWrite, onExotic } = {}) => {
       return true;
     },
     deleteProperty(object, key) {
+      if (expired) {
+        throw expiredError();
+      }
       // hasOwn, not `in`: delete only removes own keys, so deleting an inherited
       // key is a no-op, not a write
       const existed = Object.hasOwn(object, key);
@@ -113,8 +198,11 @@ export const observeWrites = (target, { onWrite, onExotic } = {}) => {
       return true;
     },
     defineProperty(object, key, descriptor) {
-      if ('value' in descriptor) {
-        descriptor.value = rawOf.get(descriptor.value) ?? descriptor.value;
+      if (expired) {
+        throw expiredError();
+      }
+      if (descriptor.value !== null && typeof descriptor.value === 'object') {
+        descriptor.value = unwrapDeep(descriptor.value);
       }
       // mirror set/delete: redefining a property to its current value isn't a write
       const changed = !Object.hasOwn(object, key)
@@ -128,36 +216,52 @@ export const observeWrites = (target, { onWrite, onExotic } = {}) => {
     },
   };
 
-  const wrap = (object) => {
+  const wrap = (object, parent, key) => {
     let proxy = wrapped.get(object);
     if (proxy === undefined) {
-      // a frozen object is unwritable, and a get trap may not return a wrapped
-      // child for its non-configurable properties without tripping the proxy
-      // invariant, so leave it raw. a lone non-writable+non-configurable object
-      // property on an unfrozen parent is unsupported and would throw on read
+      // a frozen object can't be wrapped without tripping the proxy invariant
+      // on its non-configurable properties, so it passes through raw like an
+      // exotic and changes inside it are caught by snapshot. a lone
+      // non-writable+non-configurable object property on an unfrozen parent
+      // is unsupported and would throw on read
       if (Object.isFrozen(object)) {
+        reportExotic(object);
         wrapped.set(object, object);
         return object;
       }
-      const revocable = Proxy.revocable(object, handler);
-      proxy = revocable.proxy;
-      revokers.push(revocable.revoke);
+      proxy = new Proxy(object, handler);
       wrapped.set(object, proxy);
       rawOf.set(proxy, object);
+      if (paths) {
+        paths.set(object, parent === undefined ? [] : [...paths.get(parent), key]);
+      }
     }
     return proxy;
   };
 
-  return {
-    proxy: wrap(target),
-    didWrite: () => written,
-    unwrap: (value) => rawOf.get(value) ?? value,
-    revoke: () => {
-      for (const revoke of revokers) {
-        revoke();
+  let result;
+  try {
+    result = callback(wrap(value));
+  }
+  finally {
+    expired = true;
+  }
+  if (result !== null && typeof result === 'object') {
+    // safe after expiry: unwrapping reads raw lookups and fresh containers,
+    // never a tracked wrapper's properties
+    result = unwrapDeep(result);
+  }
+
+  let changed = written;
+  if (!changed && snapshots) {
+    for (const [exotic, before] of snapshots) {
+      if (!equality(before, exotic)) {
+        changed = true;
+        break;
       }
-    },
-  };
+    }
+  }
+  return { changed, result };
 };
 
 /*
