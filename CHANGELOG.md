@@ -15,6 +15,8 @@ xx.xx.xxxx
 * **Feature** - Added `{#fn expression}` directive to pass values as-is without auto-invoking functions — mirrors `{#html}` pattern, useful for passing callbacks through property bindings
 
 ### Reactivity
+* **Enhancement** - `mutate()` on large values now detects changes by tracking writes through a proxy instead of clone-and-compare, so editing one row of a big list costs the writes, not the list. The callback sees a tracked wrapper at that scale (shows as `Proxy(Object)` in the console), and the wrapper is only valid inside the callback. Small values keep the previous snapshot behavior and see the real object
+* **Enhancement** - `mutate()` now fires reactivity when the callback returns the same reference it mutated in place — previously a silent no-op behind a dev warning
 * **Feature** - Added `depend()` to register a signal as a dependency without reading the value
 * **Feature** - Added `notify()` to force-trigger subscribers bypassing the equality check
 * **Feature** - Added `hasDependents()` to check if any reactions are subscribed to a signal
@@ -51,6 +53,7 @@ xx.xx.xxxx
 * **Feature** - Added `includeMargin`, `includePadding`, and `includeBorder` options to `naturalWidth()` and `naturalHeight()` — allows measuring unconstrained intrinsic dimensions while preserving the element's box model.
 
 ### Utils
+* **Feature** - Added [`trackWrites`](https://next.semantic-ui.com/docs/api/utils/objects#trackwrites) — runs a callback against a value and reports whether the callback changed it. Snapshots small values so the callback sees the real object, write-tracks large ones through a proxy so cost scales with writes instead of value size, with a `strategy` option to pin either path and `onWrite` for per-write key paths
 * **BREAKING** - `noop` now returns `undefined` (truly no-op). Previously it returned its first argument (identity). Use the new `identity` export if you need the old behavior.
 * **Feature** - Added `identity` export — returns its first argument unchanged.
 * **Feature** - Added [`deepFreeze`](https://next.semantic-ui.com/docs/api/utils/cloning#deepfreeze) — recursively freezes a value in place and returns the same reference. Walks arrays and plain objects only, leaving `Date`, `Map`, `Set`, `RegExp`, DOM nodes, and custom class instances untouched so their internal slots keep working. Cycle-safe via an internal `WeakSet`; already-frozen inputs take a fast-path no-op.

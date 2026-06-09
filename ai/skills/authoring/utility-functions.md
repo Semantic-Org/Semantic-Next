@@ -187,6 +187,31 @@ filterObject({ a: 1, b: 5, c: 3 }, (value, key) => value > 2); // { b: 5, c: 3 }
 mapObject({ a: 1, b: 2 }, (value, key) => value * 2);           // { a: 2, b: 4 }
 ```
 
+### Change Detection
+```javascript
+import { trackWrites } from '@semantic-ui/utils';
+
+// Run a callback against a value, report whether it changed it
+const doc = { meta: { count: 0 } };
+const { changed, result } = trackWrites(doc, (value) => {
+  value.meta.count++;
+});
+// changed === true, in-place writes apply to doc directly
+
+// Writing a value that is already there is not a change
+trackWrites(doc, (value) => { value.meta.count = 1; }); // { changed: false }
+
+// 'auto' snapshots small values (callback sees the real object) and proxies
+// large ones (callback sees a tracked wrapper, cost scales with writes).
+// Pin a path with strategy: 'snapshot' | 'proxy'
+trackWrites(bigList, (tracked) => { tracked[500].seen = true; });
+
+// onWrite reports each write with its key path, implies the proxy strategy
+trackWrites(rows, (tracked) => {
+  tracked[3].active = true;
+}, { onWrite: (path, target, key) => console.log(path) }); // ['3', 'active']
+```
+
 ### Conversion
 ```javascript
 import { arrayFromObject, reverseKeys } from '@semantic-ui/utils';
@@ -799,6 +824,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `onlyKeys` | `(obj, keysArray)` | New object with selected keys |
 | `filterObject` | `(obj, fn(val,key))` | Filtered object |
 | `mapObject` | `(obj, fn(val,key))` | Transformed object |
+| `trackWrites` | `(value, callback, opts?)` | `{ changed, result }` |
 | `arrayFromObject` | `(obj)` | `[{key, value}, ...]` |
 | `reverseKeys` | `(obj)` | Inverted lookup object |
 | `proxyObject` | `(getterFn, refObj)` | Read-through Proxy |

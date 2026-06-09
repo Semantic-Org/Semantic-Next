@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Object Utilities
 package: "@semantic-ui/utils"
-methods: [keys, values, filterObject, mapObject, extend, assignInPlace, deepExtend, pick, arrayFromObject, get, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
+methods: [keys, values, filterObject, mapObject, trackWrites, extend, assignInPlace, deepExtend, pick, arrayFromObject, get, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
 icon: box
 description: API reference for object manipulation functions
 ---
@@ -122,6 +122,63 @@ import { mapObject } from '@semantic-ui/utils';
 const obj = { a: 1, b: 2, c: 3 };
 const result = mapObject(obj, (value) => value * 2);
 console.log(result); // { a: 2, b: 4, c: 6 }
+```
+
+### trackWrites
+
+```javascript
+function trackWrites(value, callback, { strategy = 'auto', onWrite, clone, equality } = {})
+```
+
+Runs a callback against a value and reports whether the callback changed it. The callback can mutate the value in place or return a replacement.
+
+> **Strategy** - The default strategy 'auto' will use `snapshot` for small data structures and `proxy` for larger. Snapshot improves debugging by passing you a real copy, while `proxy` preserve performance at the cost of passing you a `proxyObject` inside your callback
+
+#### Parameters
+
+| Name     | Type     | Description |
+|----------|----------|-------------|
+| value    | any      | The value the callback may change |
+| callback | function | Receives the value (or its tracked wrapper) |
+| options  | object   | Optional configuration |
+
+##### Options
+
+| Name     | Type     | Default   | Description |
+|----------|----------|-----------|-------------|
+| strategy | string   | 'auto'    | `'auto'`, `'snapshot'`, or `'proxy'` |
+| onWrite  | function | undefined | `(path, target, key)` fires per observed write with the key path from the root. Implies the proxy strategy under `'auto'` |
+| clone    | function | clone     | Clone used for snapshots |
+| equality | function | isEqual   | Equality used to compare snapshots |
+
+#### Returns
+
+`{ changed, result }` — whether the value changed, and the callback's return value.
+
+#### Notes
+
+Under the proxy strategy the tracked wrapper is only valid inside the callback — using one after it returns throws.
+
+#### Example
+
+```javascript
+import { trackWrites } from '@semantic-ui/utils';
+
+const doc = { meta: { count: 0 } };
+const { changed } = trackWrites(doc, (value) => {
+  value.meta.count++;
+});
+console.log(changed); // true
+
+// writing the same value is not a change
+trackWrites(doc, (value) => {
+  value.meta.count = 1;
+}); // { changed: false, ... }
+
+// report each write with its path
+trackWrites(rows, (tracked) => {
+  tracked[3].active = true;
+}, { onWrite: (path) => console.log(path) }); // ['3', 'active']
 ```
 
 ### extend
@@ -463,44 +520,6 @@ console.log(result); // { '1': 'a', '2': 'b', '3': 'b' }
 
 These object utilities provide a robust set of tools for working with objects in JavaScript, enhancing productivity and code readability.
 
-### filterObject
-
-```javascript
-function filterObject(obj, callback)
-```
-
-Filter an object based on a callback function.
-
-#### Parameters
-
-| Name     | Type     | Description |
-|----------|----------|-------------|
-| obj      | object   | The object to filter |
-| callback | function | Function to test each key-value pair |
-
-#### Returns
-
-A new object with the key-value pairs that passed the test.
-
-#### Example
-
-```javascript
-import { filterObject } from '@semantic-ui/utils';
-
-const obj = { a: 1, b: 2, c: 3, d: 4 };
-const result = filterObject(obj, value => value % 2 === 0);
-console.log(result); // { b: 2, d: 4 }
-```
-
-### weightedObjectSearch
-
-```javascript
-function weightedObjectSearch(query = '', objectArray = [], {
-  returnMatches = false,
-  matchAllWords = true,
-  propertiesToMatch = []
-} = {})
-```
 
 Performs a weighted search across an array of objects, with matches prioritized by where they occur in the text.
 
@@ -550,34 +569,4 @@ const detailed = weightedObjectSearch('world', items, {
   returnMatches: true,
 });
 // detailed[0].matches → [{ field: 'title', type: 'startsWith', score: 1, value: 'World News' }]
-```
-
-### proxyObject
-
-```javascript
-function proxyObject(sourceObj = noop, referenceObj = {})
-```
-
-Create a proxy object that combines properties from a source object and a reference object.
-
-> **Source Function Requirement** The sourceObj parameter must be a function that returns the source object, not the object itself. This ensures the proxy always accesses the current state of the source object.
-
-#### Parameters
-
-| Name         | Type     | Description |
-|--------------|----------|-------------|
-| sourceObj    | function | Function that returns the source object |
-| referenceObj | object   | The reference object |
-
-#### Example
-
-```javascript
-import { proxyObject } from '@semantic-ui/utils';
-
-// Correct usage - passing a function
-const source = () => ({ a: 1, b: 2 });
-const proxy = proxyObject(source, { c: 3 });
-
-// Incorrect usage - passing object directly
-const wrong = proxyObject({ a: 1 }, { c: 3 }); // Won't work as expected
 ```
