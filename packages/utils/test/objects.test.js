@@ -17,6 +17,7 @@ import {
   set,
   some,
   trackWrites,
+  unset,
   values,
   weightedObjectSearch,
 } from '@semantic-ui/utils';
@@ -817,13 +818,70 @@ describe('Object Utilities', () => {
     });
 
     it('applies a detectChanges diff onto a copy of before', () => {
-      const before = { name: 'a', count: 1 };
-      const after = { name: 'b', count: 1, nickname: 'al' };
+      const before = { name: 'a', count: 1, meta: { temp: true, keep: 1 } };
+      const after = { name: 'b', count: 1, nickname: 'al', meta: { keep: 1 } };
       const diff = detectChanges(before, after);
-      const replica = { ...before };
+      const replica = structuredClone(before);
       [...diff.added, ...diff.changed].forEach((path) => set(replica, path, get(after, path)));
-      diff.removed.forEach((path) => delete replica[path]);
+      diff.removed.forEach((path) => unset(replica, path));
       expect(replica).toEqual(after);
+    });
+  });
+
+  describe('unset', () => {
+    it('removes a simple property', () => {
+      const obj = { a: 1, b: 2 };
+      expect(unset(obj, 'b')).toBe(obj);
+      expect(obj).toEqual({ a: 1 });
+    });
+
+    it('removes a nested field from a dot path', () => {
+      const obj = { a: { b: { c: 1, d: 2 } } };
+      unset(obj, 'a.b.c');
+      expect(obj).toEqual({ a: { b: { d: 2 } } });
+    });
+
+    it('no-ops on a missing path without creating intermediates', () => {
+      const obj = { a: 1 };
+      unset(obj, 'x.y.z');
+      expect(obj).toEqual({ a: 1 });
+    });
+
+    it('leaves a hole at a removed array index so sibling paths stay valid', () => {
+      const obj = { items: ['a', 'b', 'c'] };
+      unset(obj, 'items.1');
+      expect(Object.hasOwn(obj.items, 1)).toBe(false);
+      expect(obj.items[2]).toBe('c');
+      expect(obj.items.length).toBe(3);
+    });
+
+    it('supports bracket notation', () => {
+      const obj = { items: ['a', 'b'] };
+      unset(obj, 'items[0]');
+      expect(Object.hasOwn(obj.items, 0)).toBe(false);
+    });
+
+    it('removes an existing literal dotted key, mirroring get()', () => {
+      const obj = { 'a.b': 1, c: 2 };
+      unset(obj, 'a.b');
+      expect(Object.hasOwn(obj, 'a.b')).toBe(false);
+      expect(obj.c).toBe(2);
+    });
+
+    it('refuses prototype-climbing segments', () => {
+      const obj = { a: 1 };
+      unset(obj, '__proto__.toString');
+      unset(obj, 'constructor.prototype');
+      expect(typeof obj.toString).toBe('function');
+    });
+
+    it('no-ops on a non-string path, empty path, primitive target, or primitive midpoint', () => {
+      const obj = { a: 1 };
+      expect(unset(obj, undefined)).toBe(obj);
+      expect(unset(obj, '')).toBe(obj);
+      expect(unset(42, 'a')).toBe(42);
+      unset(obj, 'a.b.c');
+      expect(obj).toEqual({ a: 1 });
     });
   });
 

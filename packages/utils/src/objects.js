@@ -699,6 +699,81 @@ export const set = function(obj, path, value) {
   return obj;
 };
 
+/*
+  Remove a nested object field from a string path, the delete twin of get/set.
+  A missing path is a no-op, and a removed array index leaves a hole rather
+  than splicing, so sibling index paths stay valid when applying several
+  removals at once.
+*/
+export const unset = function(obj, path) {
+  if (typeof path !== 'string' || path === '' || obj === null || !isObject(obj)) {
+    return obj;
+  }
+  if (/(^|\.|\[)(__proto__|constructor|prototype)(\.|\[|\]|$)/.test(path)) {
+    return obj;
+  }
+
+  // simple property access — no dots, no brackets
+  if (path.indexOf('.') === -1 && path.indexOf('[') === -1) {
+    delete obj[path];
+    return obj;
+  }
+
+  const parts = path.split('.');
+  let currentObject = obj;
+  let pathOffset = 0;
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    const isLast = i === parts.length - 1;
+
+    if (part.includes('[')) {
+      const { key, index } = extractBracketAccess(part);
+      if (!isArray(currentObject[key])) {
+        return obj;
+      }
+      if (isLast) {
+        delete currentObject[key][index];
+        return obj;
+      }
+      currentObject = currentObject[key][index];
+    }
+    else if (isLast) {
+      delete currentObject[part];
+      return obj;
+    }
+    else if (part in currentObject) {
+      currentObject = currentObject[part];
+    }
+    else {
+      // an existing literal dotted key wins, mirroring get()'s resolution
+      const remainingPath = path.substring(pathOffset);
+      if (remainingPath in currentObject) {
+        delete currentObject[remainingPath];
+        return obj;
+      }
+      const combinedKey = `${part}.${parts[i + 1]}`;
+      if (combinedKey in currentObject) {
+        currentObject = currentObject[combinedKey];
+        if (currentObject === null || !isObject(currentObject)) {
+          return obj;
+        }
+        pathOffset += combinedKey.length + 1;
+        i++;
+        continue;
+      }
+      return obj;
+    }
+
+    if (currentObject === null || !isObject(currentObject)) {
+      return obj;
+    }
+    pathOffset += part.length + 1;
+  }
+
+  return obj;
+};
+
 /* This is useful for callbacks or other scenarios where you want to avoid the
    values of a reference object becoming stale when a source object changes
 */

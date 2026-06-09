@@ -350,6 +350,27 @@ export function set<T extends object>(
 ): T;
 
 /**
+ * Remove a nested object field from a string path, the delete twin of get/set.
+ * A missing path is a no-op. A removed array index leaves a hole rather than
+ * splicing, so sibling index paths stay valid when applying several removals.
+ * Refuses prototype-climbing segments (__proto__, constructor, prototype).
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#unset unset}
+ *
+ * @param obj - The object to remove from
+ * @param path - The path string (e.g., 'a.b.c' or 'items.0')
+ * @returns The same object reference
+ *
+ * @example
+ * ```ts
+ * unset({ a: { b: 1, c: 2 } }, 'a.b') // returns { a: { c: 2 } }
+ * ```
+ */
+export function unset<T extends object>(
+  obj: T,
+  path: string,
+): T;
+
+/**
  * Creates a proxy that combines source and reference objects
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#proxyobject proxyObject}
  *
