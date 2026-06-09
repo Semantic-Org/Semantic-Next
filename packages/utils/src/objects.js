@@ -65,23 +65,9 @@ const autoBudget = 512;
 const overBudget = (value) => spendBudget(value, autoBudget) < 0;
 
 /*
-  Run callback against value and report whether the callback changed it.
-  Returns { changed, result } where result is the callback's return value.
-
-  Two strategies. 'snapshot' clones the value up front and deep-compares after,
-  so the callback sees the real object — cost scales with value size. 'proxy'
-  hands the callback a tracked wrapper and records writes as they happen — cost
-  scales with writes, and the console shows Proxy(Object) inside the callback.
-  'auto' (default) snapshots small values and proxies large ones, sizing by a
-  budgeted walk.
-
-  Map/Set/Date/class instances can't be proxied (their internal-slot methods
-  throw), so the proxy strategy snapshots the ones the callback touches and
-  compares them after. Writes that never go through the tracked value (a
-  closure reference to part of it) are only seen by the snapshot strategy.
-
-  onWrite(path, target, key) fires per observed write and implies the proxy
-  strategy under 'auto'. Identical writes (Object.is) don't count.
+  Run callback against value, report whether it changed it. 'auto' snapshots
+  small values (clone + deep-compare, callback sees the real object) and
+  write-tracks large ones through a proxy so cost scales with writes, not size.
 */
 export const trackWrites = (value, callback, {
   strategy = 'auto',
