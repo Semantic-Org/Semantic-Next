@@ -10,25 +10,28 @@ import { each, escapeRegExp } from '@semantic-ui/utils';
 // * `scanner.isEOF()` - true if `pos` is at or beyond the end of `input`
 // * `scanner.fatal(msg)` - throw an error indicating a problem at `pos`
 
-// match/search variants of caller regexes, built once per unique pattern.
-// sticky (y) anchors at lastIndex so matching never slices the remaining
-// input, the cost the old rest()-based scanner paid on every operation.
-const regExpVariants = new WeakMap();
+// sticky (y) variants match at lastIndex without slicing the remaining
+// input. built on first use and kept on the pattern itself.
 const stringVariants = new Map();
 
 function getVariants(pattern) {
-  const cache = typeof pattern === 'string' ? stringVariants : regExpVariants;
-  let variants = cache.get(pattern);
-  if (!variants) {
-    const source = typeof pattern === 'string' ? escapeRegExp(pattern) : pattern.source;
-    const flags = typeof pattern === 'string' ? '' : pattern.flags.replace(/[gy]/g, '');
-    variants = {
-      // y itself anchors, so a leading ^ (which always means start-of-input
-      // here, no m flags in play) would wrongly pin matches to position 0
-      sticky: new RegExp(source.startsWith('^') ? source.slice(1) : source, flags + 'y'),
-      search: new RegExp(source, flags + 'g'),
-    };
-    cache.set(pattern, variants);
+  const isString = typeof pattern === 'string';
+  const cached = isString ? stringVariants.get(pattern) : pattern.scannerVariants;
+  if (cached) {
+    return cached;
+  }
+  const source = isString ? escapeRegExp(pattern) : pattern.source;
+  const flags = isString ? '' : pattern.flags.replace(/[gy]/g, '');
+  const variants = {
+    // y anchors at lastIndex itself, a leading ^ would pin matches to 0
+    sticky: new RegExp(source.startsWith('^') ? source.slice(1) : source, flags + 'y'),
+    search: new RegExp(source, flags + 'g'),
+  };
+  if (isString) {
+    stringVariants.set(pattern, variants);
+  }
+  else {
+    pattern.scannerVariants = variants;
   }
   return variants;
 }

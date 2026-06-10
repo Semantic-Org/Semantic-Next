@@ -69,10 +69,16 @@ class TemplateCompiler {
   static doubleBracketRegExp = this.generateRegExpPatterns('{{', '}}');
   static doubleBracketParserRegExp = this.generateParserRegExpPatterns('{{', '}}');
 
+  // entry arrays so parseTag's per-tag loop avoids for-in key iteration
+  static singleBracketRegExpEntries = Object.entries(this.singleBracketRegExp);
+  static doubleBracketRegExpEntries = Object.entries(this.doubleBracketRegExp);
+
   static htmlRegExp = {
     SVG_OPEN: /^\<svg\s*/i,
     SVG_CLOSE: /^\<\/svg\s*/i,
   };
+
+  static htmlRegExpEntries = Object.entries(this.htmlRegExp);
 
   static preprocessRegExp = {
     WEB_COMPONENT_SELF_CLOSING: /<(\w+(?:-\w+)+)([^>]*)\/>/g,
@@ -125,6 +131,9 @@ class TemplateCompiler {
     const parserRegExp = (syntax == 'doubleBracket')
       ? TemplateCompiler.doubleBracketParserRegExp
       : TemplateCompiler.singleBracketParserRegExp;
+    const tagPatterns = (syntax == 'doubleBracket')
+      ? TemplateCompiler.doubleBracketRegExpEntries
+      : TemplateCompiler.singleBracketRegExpEntries;
 
     const parseTag = (scanner) => {
       // if this expression contains nested expressions like { one { two } }
@@ -166,25 +175,25 @@ class TemplateCompiler {
       };
 
       // look for each special expression like if/each/else
-      for (let type in tagRegExp) {
-        if (scanner.matches(tagRegExp[type])) {
-          const context = scanner.getContext(); // context is used for better error handling
-          scanner.consume(tagRegExp[type]);
+      for (const [type, regex] of tagPatterns) {
+        if (scanner.matches(regex)) {
+          // attribute context decides ifDefined, only expressions consume it
+          const context = (type === 'EXPRESSION') ? scanner.getContext() : null;
+          scanner.consume(regex);
           const rawContent = getTagContent();
           scanner.consume(parserRegExp.EXPRESSION_END);
           const content = this.getValue(rawContent);
-          return { type, content, ...context }; // Include context in the return value
+          return { type, content, ...context };
         }
       }
 
       // look for each primitive like <svg>
-      for (let type in htmlRegExp) {
-        if (scanner.matches(htmlRegExp[type])) {
-          scanner.consume(htmlRegExp[type]);
-          const context = scanner.getContext(); // context is used for better error handling
+      for (const [type, regex] of TemplateCompiler.htmlRegExpEntries) {
+        if (scanner.matches(regex)) {
+          scanner.consume(regex);
           const content = this.getValue(scanner.consumeUntil(parserRegExp.TAG_CLOSE).trim());
           scanner.consume(parserRegExp.TAG_CLOSE);
-          return { type, content, ...context }; // Include context in the return value
+          return { type, content };
         }
       }
 
