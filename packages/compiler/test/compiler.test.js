@@ -1963,6 +1963,30 @@ describe('TemplateCompiler', () => {
     });
   });
 
+  describe('ast optimization', () => {
+    it('merges adjacent html nodes in else branch content', () => {
+      const compiler = new TemplateCompiler();
+      const template = '{#if x}<b>y</b>{else}<div><svg viewBox="0 0 1 1"></svg></div>{/if}';
+      const ast = compiler.compile(template);
+      expect(ast[0].branches[0].content).toEqual([
+        { type: 'html', html: '<div><svg viewBox="0 0 1 1">' },
+        { type: 'svg', content: [{ type: 'html', html: '</svg>' }] },
+        { type: 'html', html: '</div>' },
+      ]);
+    });
+
+    it('merges adjacent html nodes in async loading content', () => {
+      const compiler = new TemplateCompiler();
+      const template = '{#async op}<b>done</b>{loading}<div><svg viewBox="0 0 1 1"></svg></div>{/async}';
+      const ast = compiler.compile(template);
+      expect(ast[0].loadingContent).toEqual([
+        { type: 'html', html: '<div><svg viewBox="0 0 1 1">' },
+        { type: 'svg', content: [{ type: 'html', html: '</svg>' }] },
+        { type: 'html', html: '</div>' },
+      ]);
+    });
+  });
+
   describe('preprocessing', () => {
     describe('web component self-closing tags', () => {
       it('should handle single-hyphen web components', () => {

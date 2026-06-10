@@ -84,7 +84,7 @@ class TemplateCompiler {
     WEB_COMPONENT_SELF_CLOSING: /<(\w+(?:-\w+)+)([^>]*)\/>/g,
   };
 
-  // this is used by condense whitespace to determine what ast notes contain html
+  // ast properties holding child content, the shared walk set for optimize and condense
   static contentProperties = ['content', 'elseContent', 'loadingContent', 'errorContent'];
 
   static templateRegExp = {
@@ -872,12 +872,17 @@ class TemplateCompiler {
         if (currentHtmlNode) {
           currentHtmlNode = null;
         }
-        if (isArray(node.content)) {
-          node.content = this.optimizeAST(node.content);
+        for (const prop of TemplateCompiler.contentProperties) {
+          if (isArray(node[prop])) {
+            node[prop] = this.optimizeAST(node[prop]);
+          }
         }
-        // Process else block if it exists
-        if (node.else && node.else.content) {
-          node.else.content = this.optimizeAST(node.else.content);
+        if (isArray(node.branches)) {
+          for (const branch of node.branches) {
+            if (isArray(branch.content)) {
+              branch.content = this.optimizeAST(branch.content);
+            }
+          }
         }
 
         // Separate snippets from other nodes
