@@ -2,7 +2,7 @@ import { getEngine } from '@semantic-ui/renderer';
 import { TemplateCompiler } from '@semantic-ui/compiler';
 // direct import avoids circular chunk dependency between component ↔ templating
 import { Template } from '@semantic-ui/templating/template';
-import { adoptStylesheet, each, fatal, identity, isClient, kebabToCamel, noop } from '@semantic-ui/utils';
+import { adoptStylesheet, each, fatal, identity, isClient, isObject, kebabToCamel, noop } from '@semantic-ui/utils';
 
 import { getProperties } from './component-helpers.js';
 import { registerComponent } from './component-registry.js';
@@ -44,7 +44,7 @@ export const defineComponent = ({
 } = {}) => {
 
   // Resolve engine: accepts an engine object or a string name from the registry
-  const engine = typeof renderingEngine === 'object'
+  const engine = isObject(renderingEngine)
     ? renderingEngine
     : getEngine(renderingEngine);
 

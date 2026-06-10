@@ -1,4 +1,4 @@
-import { each, isPlainObject, isString, last } from '@semantic-ui/utils';
+import { each, isArray, isPlainObject, isString, last } from '@semantic-ui/utils';
 
 import { condenseWhitespace } from './condense-whitespace.js';
 import { StringScanner } from './string-scanner.js';
@@ -872,7 +872,7 @@ class TemplateCompiler {
         if (currentHtmlNode) {
           currentHtmlNode = null;
         }
-        if (Array.isArray(node.content)) {
+        if (isArray(node.content)) {
           node.content = this.optimizeAST(node.content);
         }
         // Process else block if it exists

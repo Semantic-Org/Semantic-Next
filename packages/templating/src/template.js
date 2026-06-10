@@ -321,7 +321,7 @@ export const Template = class Template {
     }
 
     // Resolve renderer class from engine object or registry
-    const engine = typeof this.renderingEngine === 'object'
+    const engine = isObject(this.renderingEngine)
       ? this.renderingEngine
       : getEngine(this.renderingEngine);
     if (!engine) {

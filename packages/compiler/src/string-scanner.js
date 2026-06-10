@@ -1,4 +1,4 @@
-import { each, escapeRegExp } from '@semantic-ui/utils';
+import { each, escapeRegExp, isString } from '@semantic-ui/utils';
 
 // A StringScanner has an immutable source document (string) `input` and a current
 // position `pos`, an index into the string, which can be set at will.
@@ -15,19 +15,19 @@ import { each, escapeRegExp } from '@semantic-ui/utils';
 const stringVariants = new Map();
 
 function getVariants(pattern) {
-  const isString = typeof pattern === 'string';
-  const cached = isString ? stringVariants.get(pattern) : pattern.scannerVariants;
+  const stringPattern = isString(pattern);
+  const cached = stringPattern ? stringVariants.get(pattern) : pattern.scannerVariants;
   if (cached) {
     return cached;
   }
-  const source = isString ? escapeRegExp(pattern) : pattern.source;
-  const flags = isString ? '' : pattern.flags.replace(/[gy]/g, '');
+  const source = stringPattern ? escapeRegExp(pattern) : pattern.source;
+  const flags = stringPattern ? '' : pattern.flags.replace(/[gy]/g, '');
   const variants = {
     // y anchors at lastIndex itself, a leading ^ would pin matches to 0
     sticky: new RegExp(source.startsWith('^') ? source.slice(1) : source, flags + 'y'),
     search: new RegExp(source, flags + 'g'),
   };
-  if (isString) {
+  if (stringPattern) {
     stringVariants.set(pattern, variants);
   }
   else {
@@ -104,7 +104,7 @@ export class StringScanner {
     if (!pattern) {
       return;
     }
-    const regex = typeof pattern === 'string'
+    const regex = isString(pattern)
       ? new RegExp(escapeRegExp(pattern), 'gm') // Global flag for multiple matches
       : new RegExp(pattern, 'gm');
 
@@ -204,7 +204,7 @@ export class StringScanner {
   fatal(msg) {
     msg = msg || 'Parse error';
 
-    const input = typeof this.input === 'string' ? this.input : '';
+    const input = isString(this.input) ? this.input : '';
     const lines = input.split('\n');
     let lineNumber = 0;
     let charCount = 0;
