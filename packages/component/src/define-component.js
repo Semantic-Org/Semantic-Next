@@ -13,7 +13,7 @@ const WHITESPACE_SENSITIVE_CSS = /white-space(?:-collapse)?\s*:\s*(?:pre|preserv
 export const defineComponent = ({
   template = '',
   ast,
-  preserveWhitespace = false,
+  preserveWhitespace = 'auto',
   css = '',
   pageCSS = '',
   tagName,
@@ -54,8 +54,11 @@ export const defineComponent = ({
   }
 
   if (!ast) {
+    if (preserveWhitespace === 'auto') {
+      preserveWhitespace = WHITESPACE_SENSITIVE_CSS.test(css);
+    }
     const compiler = new TemplateCompiler(template);
-    ast = compiler.compile(template, { preserveWhitespace: preserveWhitespace || WHITESPACE_SENSITIVE_CSS.test(css) });
+    ast = compiler.compile(template, { preserveWhitespace });
   }
 
   each(subTemplates, (subTemplate, name) => {

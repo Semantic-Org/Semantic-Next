@@ -17,6 +17,15 @@ describe('whitespace-sensitive css', () => {
     expect(component.ast[0].html).toContain('\n');
   });
 
+  it('explicit false overrides the css heuristic', () => {
+    const component = defineComponent({
+      template,
+      css: 'li { white-space: pre-wrap; }',
+      preserveWhitespace: false,
+    });
+    expect(component.ast[0].html).toBe('<ul><li>a</li></ul>');
+  });
+
   it('preserves whitespace for white-space-collapse values', () => {
     const component = defineComponent({ template, css: '.code { white-space-collapse: preserve; }' });
     expect(component.ast[0].html).toContain('\n');
