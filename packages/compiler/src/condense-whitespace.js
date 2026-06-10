@@ -72,6 +72,8 @@ function condenseString(html, state) {
   let i = 0;
   const len = html.length;
   let lastWasTagEnd = false;
+  // tracked so the self-closing check never indexes out, which would flatten the cons string mid-build
+  let lastTagChar;
 
   while (i < len) {
     if (state.rawText) {
@@ -104,11 +106,12 @@ function condenseString(html, state) {
       else if (ch === '>') {
         state.inTag = false;
         lastWasTagEnd = true;
-        if (state.pendingRawText && out[out.length - 2] !== '/') {
+        if (state.pendingRawText && lastTagChar !== '/') {
           state.rawText = state.pendingRawText;
         }
         state.pendingRawText = null;
       }
+      lastTagChar = ch;
       continue;
     }
 
