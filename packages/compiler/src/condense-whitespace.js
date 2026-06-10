@@ -35,9 +35,11 @@ function condenseLevel(nodes, contentProperties, state) {
       edges.set(node, { startClean, endClean: !state.rawText && !state.inTag });
     }
     else {
-      const entryState = { ...state };
+      // most non-html nodes are leaf expressions, snapshot state only when descending
+      let entryState = null;
       for (const prop of contentProperties) {
         if (isArray(node[prop])) {
+          entryState ??= { ...state };
           condenseLevel(node[prop], contentProperties, state);
           Object.assign(state, entryState);
         }
@@ -45,6 +47,7 @@ function condenseLevel(nodes, contentProperties, state) {
       if (isArray(node.branches)) {
         for (const branch of node.branches) {
           if (isArray(branch.content)) {
+            entryState ??= { ...state };
             condenseLevel(branch.content, contentProperties, state);
             Object.assign(state, entryState);
           }
