@@ -1,0 +1,24 @@
+import { describe, expect, it } from 'vitest';
+
+import { defineComponent } from '../../src/define-component.js';
+
+const template = `<ul>
+  <li>a</li>
+</ul>`;
+
+describe('whitespace-sensitive css', () => {
+  it('condenses template whitespace by default', () => {
+    const component = defineComponent({ template });
+    expect(component.ast[0].html).toBe('<ul><li>a</li></ul>');
+  });
+
+  it('preserves whitespace when css makes it significant', () => {
+    const component = defineComponent({ template, css: 'li { white-space: pre-wrap; }' });
+    expect(component.ast[0].html).toContain('\n');
+  });
+
+  it('preserves whitespace for white-space-collapse values', () => {
+    const component = defineComponent({ template, css: '.code { white-space-collapse: preserve; }' });
+    expect(component.ast[0].html).toContain('\n');
+  });
+});

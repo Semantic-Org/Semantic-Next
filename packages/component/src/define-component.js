@@ -7,6 +7,9 @@ import { adoptStylesheet, each, fatal, identity, isClient, kebabToCamel, noop } 
 import { getProperties } from './component-helpers.js';
 import { registerComponent } from './component-registry.js';
 
+// user css can make whitespace significant, keep the template intact when it might
+const WHITESPACE_SENSITIVE_CSS = /white-space(?:-collapse)?\s*:\s*(?:pre|preserve|break-spaces)/;
+
 export const defineComponent = ({
   template = '',
   ast,
@@ -52,7 +55,7 @@ export const defineComponent = ({
 
   if (!ast) {
     const compiler = new TemplateCompiler(template);
-    ast = compiler.compile(template, { preserveWhitespace });
+    ast = compiler.compile(template, { preserveWhitespace: preserveWhitespace || WHITESPACE_SENSITIVE_CSS.test(css) });
   }
 
   each(subTemplates, (subTemplate, name) => {
