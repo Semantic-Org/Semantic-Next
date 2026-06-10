@@ -10,6 +10,29 @@ import { each, escapeRegExp } from '@semantic-ui/utils';
 // * `scanner.isEOF()` - true if `pos` is at or beyond the end of `input`
 // * `scanner.fatal(msg)` - throw an error indicating a problem at `pos`
 
+// match/search variants of caller regexes, built once per unique pattern.
+// sticky (y) anchors at lastIndex so matching never slices the remaining
+// input, the cost the old rest()-based scanner paid on every operation.
+const regExpVariants = new WeakMap();
+const stringVariants = new Map();
+
+function getVariants(pattern) {
+  const cache = typeof pattern === 'string' ? stringVariants : regExpVariants;
+  let variants = cache.get(pattern);
+  if (!variants) {
+    const source = typeof pattern === 'string' ? escapeRegExp(pattern) : pattern.source;
+    const flags = typeof pattern === 'string' ? '' : pattern.flags.replace(/[gy]/g, '');
+    variants = {
+      // y itself anchors, so a leading ^ (which always means start-of-input
+      // here, no m flags in play) would wrongly pin matches to position 0
+      sticky: new RegExp(source.startsWith('^') ? source.slice(1) : source, flags + 'y'),
+      search: new RegExp(source, flags + 'g'),
+    };
+    cache.set(pattern, variants);
+  }
+  return variants;
+}
+
 export class StringScanner {
   static DEBUG_MODE = true;
 
@@ -19,7 +42,9 @@ export class StringScanner {
   }
 
   matches(regex) {
-    return regex.test(this.rest());
+    const { sticky } = getVariants(regex);
+    sticky.lastIndex = this.pos;
+    return sticky.test(this.input);
   }
 
   rest() {
@@ -48,33 +73,27 @@ export class StringScanner {
   }
 
   consume(pattern) {
-    const regex = typeof pattern === 'string'
-      ? new RegExp(escapeRegExp(pattern))
-      : new RegExp(pattern);
-
-    // Match from the current position
-    const substring = this.input.substring(this.pos);
-    const match = regex.exec(substring);
-    if (match && match.index === 0) {
-      // Ensure match starts at the beginning of the substring
-      this.pos += match[0].length; // Advance position by the length of the match
+    const { sticky } = getVariants(pattern);
+    sticky.lastIndex = this.pos;
+    const match = sticky.exec(this.input);
+    if (match) {
+      this.pos += match[0].length;
       return match[0];
     }
     return null;
   }
 
   consumeUntil(pattern) {
-    const regex = typeof pattern === 'string'
-      ? new RegExp(escapeRegExp(pattern))
-      : new RegExp(pattern);
-    const match = regex.exec(this.input.substring(this.pos));
+    const { search } = getVariants(pattern);
+    search.lastIndex = this.pos;
+    const match = search.exec(this.input);
     if (!match) {
-      const consumedText = this.input.substr(this.pos);
+      const consumedText = this.input.slice(this.pos);
       this.pos = this.input.length;
       return consumedText;
     }
-    const consumedText = this.input.substring(this.pos, this.pos + match.index);
-    this.pos += match.index;
+    const consumedText = this.input.slice(this.pos, match.index);
+    this.pos = match.index;
     return consumedText;
   }
 
