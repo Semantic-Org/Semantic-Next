@@ -1,11 +1,12 @@
 /*
   Whitespace condensing for template strings, run before parsing.
 
-  Cross-line whitespace is removed only when both sides are tag or block
-  boundaries — indentation between elements is formatting. Runs touching
-  text or an expression collapse to a single space, which is rendering-
-  neutral under normal `white-space`, so {first}\n{last} reads "first last".
-  Same-line spacing always survives: "same line means the space is real".
+  The language rule, not a neutrality claim: cross-line whitespace between
+  tag or block boundaries is formatting and is removed — same-line spacing
+  is content and survives. Runs touching text or an expression collapse to
+  a single space (that part is rendering-neutral under normal `white-space`,
+  so {first}\n{last} reads "first last"). Inline siblings split across
+  lines lose their word break; keep them on one line or use &#32;.
 
   Runs in the browser for every runtime-compiled template, so it stays a
   single pass over the source string. The parser then scans fewer bytes.
@@ -13,9 +14,18 @@
 
 const RAW_TEXT_TAGS = new Set(['pre', 'textarea', 'script', 'style']);
 
-// {#block} {/block} {>template} and branch keywords are structural markers,
-// everything else in braces renders inline like text
-const BLOCK_MARKER = /^\{\{?\s*(?:[#/>]|(?:else|elseif|before|loading|error|catch)\b)/;
+// boundary requires `[\s}]` after the keyword, mirroring the parser's
+// reservation — {error.message} is an expression, {error as e} is a branch.
+// #html and #fn render inline content, so they classify as text.
+const BLOCK_MARKER = /^\{\{?\s*(?:#(?!html[\s}]|fn[\s}])|[/>]|(?:elseif|else|before|loading|error|catch)(?=[\s}]))/;
+
+// boundary-checked close so </press-thing> can't end a <pre> region
+const RAW_TEXT_CLOSE = {
+  pre: /<\/pre\s*>/gi,
+  textarea: /<\/textarea\s*>/gi,
+  script: /<\/script\s*>/gi,
+  style: /<\/style\s*>/gi,
+};
 
 function isWhitespaceChar(ch) {
   return ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r';
@@ -54,6 +64,21 @@ export function condenseWhitespace(template) {
         else if (c === '"' || c === "'") {
           quote = c;
         }
+        else if (c === '{') {
+          // unquoted attribute expression: braces win over `>`, same
+          // precedence the parser uses, so {x > y} can't end the tag
+          let depth = 1;
+          while (i < len && depth > 0) {
+            const b = template[i];
+            i++;
+            if (b === '{') {
+              depth++;
+            }
+            else if (b === '}') {
+              depth--;
+            }
+          }
+        }
         else if (c === '>') {
           break;
         }
@@ -65,8 +90,10 @@ export function condenseWhitespace(template) {
       const nameMatch = /^<([a-zA-Z][\w-]*)/.exec(tag);
       const rawName = nameMatch && nameMatch[1].toLowerCase();
       if (rawName && RAW_TEXT_TAGS.has(rawName) && !tag.endsWith('/>')) {
-        const close = template.toLowerCase().indexOf('</' + rawName, i);
-        const stop = close === -1 ? len : close;
+        const closeRegExp = RAW_TEXT_CLOSE[rawName];
+        closeRegExp.lastIndex = i;
+        const closeMatch = closeRegExp.exec(template);
+        const stop = closeMatch ? closeMatch.index : len;
         out += template.slice(i, stop);
         i = stop;
       }
@@ -109,7 +136,7 @@ export function condenseWhitespace(template) {
       }
       const next = template[j];
       const nextKind = (next === undefined || next === '<'
-          || (next === '{' && BLOCK_MARKER.test(template.slice(j, j + 12))))
+          || (next === '{' && BLOCK_MARKER.test(template.slice(j, j + 24))))
         ? 'boundary'
         : 'text';
       if (!(hasNewline && prevKind === 'boundary' && nextKind === 'boundary')) {
