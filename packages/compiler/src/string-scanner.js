@@ -10,34 +10,34 @@ import { each, escapeRegExp, isString } from '@semantic-ui/utils';
 // * `scanner.isEOF()` - true if `pos` is at or beyond the end of `input`
 // * `scanner.fatal(msg)` - throw an error indicating a problem at `pos`
 
-// sticky (y) variants match at lastIndex without slicing the remaining
-// input. built on first use and kept on the pattern itself.
-const stringVariants = new Map();
-
-function getVariants(pattern) {
-  const stringPattern = isString(pattern);
-  const cached = stringPattern ? stringVariants.get(pattern) : pattern.scannerVariants;
-  if (cached) {
-    return cached;
-  }
-  const source = stringPattern ? escapeRegExp(pattern) : pattern.source;
-  const flags = stringPattern ? '' : pattern.flags.replace(/[gy]/g, '');
-  const variants = {
-    // y anchors at lastIndex itself, a leading ^ would pin matches to 0
-    sticky: new RegExp(source.startsWith('^') ? source.slice(1) : source, flags + 'y'),
-    search: new RegExp(source, flags + 'g'),
-  };
-  if (stringPattern) {
-    stringVariants.set(pattern, variants);
-  }
-  else {
-    pattern.scannerVariants = variants;
-  }
-  return variants;
-}
-
 export class StringScanner {
   static DEBUG_MODE = true;
+
+  static stringVariants = new Map();
+
+  // sticky (y) variants match at lastIndex without slicing the remaining
+  // input. built on first use and kept on the pattern itself.
+  static getVariants(pattern) {
+    const stringPattern = isString(pattern);
+    const cached = stringPattern ? StringScanner.stringVariants.get(pattern) : pattern.scannerVariants;
+    if (cached) {
+      return cached;
+    }
+    const source = stringPattern ? escapeRegExp(pattern) : pattern.source;
+    const flags = stringPattern ? '' : pattern.flags.replace(/[gy]/g, '');
+    const variants = {
+      // y anchors at lastIndex itself, a leading ^ would pin matches to 0
+      sticky: new RegExp(source.startsWith('^') ? source.slice(1) : source, flags + 'y'),
+      search: new RegExp(source, flags + 'g'),
+    };
+    if (stringPattern) {
+      StringScanner.stringVariants.set(pattern, variants);
+    }
+    else {
+      pattern.scannerVariants = variants;
+    }
+    return variants;
+  }
 
   constructor(input) {
     this.input = input;
@@ -45,7 +45,7 @@ export class StringScanner {
   }
 
   matches(regex) {
-    const { sticky } = getVariants(regex);
+    const { sticky } = StringScanner.getVariants(regex);
     sticky.lastIndex = this.pos;
     return sticky.test(this.input);
   }
@@ -76,7 +76,7 @@ export class StringScanner {
   }
 
   consume(pattern) {
-    const { sticky } = getVariants(pattern);
+    const { sticky } = StringScanner.getVariants(pattern);
     sticky.lastIndex = this.pos;
     const match = sticky.exec(this.input);
     if (match) {
@@ -87,7 +87,7 @@ export class StringScanner {
   }
 
   consumeUntil(pattern) {
-    const { search } = getVariants(pattern);
+    const { search } = StringScanner.getVariants(pattern);
     search.lastIndex = this.pos;
     const match = search.exec(this.input);
     if (!match) {
