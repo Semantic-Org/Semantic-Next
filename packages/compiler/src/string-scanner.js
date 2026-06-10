@@ -13,30 +13,30 @@ import { each, escapeRegExp, isString } from '@semantic-ui/utils';
 export class StringScanner {
   static DEBUG_MODE = true;
 
-  static stringVariants = new Map();
+  static stringRegex = new Map();
 
-  // sticky (y) variants match at lastIndex without slicing the remaining
+  // sticky (y) regexes match at lastIndex without slicing the remaining
   // input. built on first use and kept on the pattern itself.
-  static getVariants(pattern) {
+  static getRegex(pattern) {
     const stringPattern = isString(pattern);
-    const cached = stringPattern ? StringScanner.stringVariants.get(pattern) : pattern.scannerVariants;
+    const cached = stringPattern ? StringScanner.stringRegex.get(pattern) : pattern.scannerRegex;
     if (cached) {
       return cached;
     }
     const source = stringPattern ? escapeRegExp(pattern) : pattern.source;
     const flags = stringPattern ? '' : pattern.flags.replace(/[gy]/g, '');
-    const variants = {
+    const regex = {
       // y anchors at lastIndex itself, a leading ^ would pin matches to 0
       sticky: new RegExp(source.startsWith('^') ? source.slice(1) : source, flags + 'y'),
       search: new RegExp(source, flags + 'g'),
     };
     if (stringPattern) {
-      StringScanner.stringVariants.set(pattern, variants);
+      StringScanner.stringRegex.set(pattern, regex);
     }
     else {
-      pattern.scannerVariants = variants;
+      pattern.scannerRegex = regex;
     }
-    return variants;
+    return regex;
   }
 
   constructor(input) {
@@ -45,7 +45,7 @@ export class StringScanner {
   }
 
   matches(regex) {
-    const { sticky } = StringScanner.getVariants(regex);
+    const { sticky } = StringScanner.getRegex(regex);
     sticky.lastIndex = this.pos;
     return sticky.test(this.input);
   }
@@ -76,7 +76,7 @@ export class StringScanner {
   }
 
   consume(pattern) {
-    const { sticky } = StringScanner.getVariants(pattern);
+    const { sticky } = StringScanner.getRegex(pattern);
     sticky.lastIndex = this.pos;
     const match = sticky.exec(this.input);
     if (match) {
@@ -87,7 +87,7 @@ export class StringScanner {
   }
 
   consumeUntil(pattern) {
-    const { search } = StringScanner.getVariants(pattern);
+    const { search } = StringScanner.getRegex(pattern);
     search.lastIndex = this.pos;
     const match = search.exec(this.input);
     if (!match) {
