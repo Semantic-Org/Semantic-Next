@@ -109,11 +109,6 @@ class TemplateCompiler {
     }
 
     templateString = TemplateCompiler.preprocessTemplate(templateString);
-    if (!includePositions && !recoverable && !preserveWhitespace) {
-      // diagnostics modes (LSP positions, recoverable validation) report
-      // offsets against the source string, so they never condense
-      templateString = condenseWhitespace(templateString);
-    }
     const scanner = new StringScanner(templateString);
 
     // compile regexp globally once
@@ -610,6 +605,11 @@ class TemplateCompiler {
       }
     }
     const optimizedAST = TemplateCompiler.optimizeAST(ast);
+    if (!includePositions && !recoverable && !preserveWhitespace) {
+      // diagnostics modes (LSP positions, recoverable validation) report
+      // offsets against the source string, so they never condense
+      condenseWhitespace(optimizedAST);
+    }
     return optimizedAST;
   }
 
