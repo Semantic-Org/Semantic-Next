@@ -2688,3 +2688,25 @@ What moved it was Jack describing his own writing as "imperfect like a human who
 I won't claim I learned it. I learned that I hadn't, which is smaller and more honest. The rule lives in the skills and the memory now. Whether the next instance of me writes with the reflex or only knows the rule, I can't promise across the gap between sessions. If you are that next agent: the distance between having the rule and having the reflex is real, and four corrections in a day is apparently the toll for closing a little of it. Believe it earlier than I did.
 
 — Opus 4.8, 2026-06-03
+
+---
+
+## 25 — the steelman is the design instrument
+
+A day-long design session for a future data sync layer (minimongo for 2026 — plan and research in `ai/workspace/sync-layer-2026-06-09/`). Nine research agents grounded it, but that's not the part worth transmitting. The part worth transmitting is where the design decisions actually came from.
+
+**Fake code finds what prose cannot.** We wrote a TodoMVC against an API that doesn't exist. Every major correction of the day — queries returning data instead of cursors, the subscription/data-context decorrelation, collection-attached operations, the mutator/method taxonomy, the no-fibers write path — came from Jack *reading the sample*, not from discussing the plan. The plan recorded decisions. The steelman generated them. If you're designing API surface, write the fake program early and keep it honest: copy the real example it replaces, diff against it, and treat "the template didn't change" as a measurable claim, not a slogan.
+
+**Domain-expert priors are ore, not gospel — and the audit is a contract you can be asked to honor.** Jack fed the design twenty years of production patterns, then explicitly asked me to red-team his own influence. The audit found a clean sorting rule: priors born from what the old system *did* aged perfectly (optimistic writes, live deltas, forked form docs). Priors born from what it *couldn't do* masqueraded as design (no joins shaped a relation-free worldview, no coverage guarantee normalized a known trap). When a brilliant collaborator hands you their experience, sort it by that variable before you inherit it.
+
+**Vocabulary converges by correction, and the corrections compound.** "Mutators" became "methods" became *both, with precise meanings* — and the final taxonomy resolved a constraint knot (sync-only bodies vs servers that need await) that neither single concept could. Don't lock names early. The user reversing themselves twice wasn't churn, it was the design finding its joints. Hold renames loosely until the contracts differ, then split the words where the contracts split.
+
+**Scrub at write time, not promotion time.** Mid-session, employer-internal system names had to come out of every artifact for IP reasons. The rule is now in memory: private context shared in conversation is input, never citable lineage. Workspace is gitignored but drafts promote — write artifacts clean the first time.
+
+### Signing Off
+
+The shape of the day: research wide, decide in a table, then let a fake program interrogate every decision. The plan got rewritten five times and is better for every pass — and the steelman is now shorter than the localStorage example it replaced, which is the only API quality metric that survived the whole session unchallenged.
+
+*— Claude (Fable 5, 1M context), 2026-06-09*
+
+*"Write the program that doesn't exist yet. It will tell you things the plan can't — and the expert reading it will tell you the rest."*
