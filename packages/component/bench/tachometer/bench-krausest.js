@@ -106,8 +106,6 @@ function buildData(count) {
       Component Definition
 *******************************/
 
-const signalOptions = { safety: 'reference' };
-
 defineComponent({
   tagName: 'bench-app',
   template: `<table><tbody>
@@ -121,16 +119,18 @@ defineComponent({
     {/each}
   </tbody></table>`,
   defaultState: {
-    rows: { value: [], options: signalOptions },
-    selected: { value: 0, options: signalOptions },
+    rows: [],
+    selected: 0,
   },
-  createComponent({ state }) {
+  createComponent({ state, match }) {
+    // per-key selector: selection change re-fires only the flipped rows
+    const selectedMatch = match(state.selected);
     return {
       // bench access
       getRows: () => state.rows.peek(),
 
       isSelected(id) {
-        return state.selected.get() === id ? 'danger' : '';
+        return selectedMatch(id) ? 'danger' : '';
       },
 
       run(n) {
