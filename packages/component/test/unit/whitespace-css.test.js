@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { defineComponent } from '../../src/define-component.js';
+import { defineComponent } from '@semantic-ui/component';
 
 const template = `<ul>
   <li>a</li>
