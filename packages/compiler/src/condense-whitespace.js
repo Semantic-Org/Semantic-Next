@@ -24,15 +24,12 @@ const RAW_TEXT_CLOSE = {
   style: /<\/style\s*>/gi,
 };
 
-// every content array a block node may render
-const ALTERNATIVE_PROPS = ['content', 'elseContent', 'loadingContent', 'errorContent'];
-
-export function condenseWhitespace(ast) {
-  condenseLevel(ast, { inTag: false, quote: null, rawText: null, pendingRawText: null });
+export function condenseWhitespace(ast, contentProperties) {
+  condenseLevel(ast, contentProperties, { inTag: false, quote: null, rawText: null, pendingRawText: null });
   return ast;
 }
 
-function condenseLevel(nodes, state) {
+function condenseLevel(nodes, contentProperties, state) {
   const edges = new Map();
   for (const node of nodes) {
     if (node.type === 'html') {
@@ -42,16 +39,16 @@ function condenseLevel(nodes, state) {
     }
     else {
       const entryState = { ...state };
-      for (const prop of ALTERNATIVE_PROPS) {
+      for (const prop of contentProperties) {
         if (isArray(node[prop])) {
-          condenseLevel(node[prop], state);
+          condenseLevel(node[prop], contentProperties, state);
           Object.assign(state, entryState);
         }
       }
       if (isArray(node.branches)) {
         for (const branch of node.branches) {
           if (isArray(branch.content)) {
-            condenseLevel(branch.content, state);
+            condenseLevel(branch.content, contentProperties, state);
             Object.assign(state, entryState);
           }
         }

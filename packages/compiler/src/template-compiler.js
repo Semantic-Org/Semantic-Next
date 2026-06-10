@@ -78,6 +78,9 @@ class TemplateCompiler {
     WEB_COMPONENT_SELF_CLOSING: /<(\w+(?:-\w+)+)([^>]*)\/>/g,
   };
 
+  // this is used by condense whitespace to determine what ast notes contain html
+  static contentProperties = ['content', 'elseContent', 'loadingContent', 'errorContent'];
+
   static templateRegExp = {
     VERBOSE_KEYWORD: /^(template|snippet)\W/g,
     VERBOSE_PROPERTIES: /(\w+)\s*=\s*(((?!\w+\s*=).)+)/gms,
@@ -604,13 +607,10 @@ class TemplateCompiler {
         }
       }
     }
-    const optimizedAST = TemplateCompiler.optimizeAST(ast);
-    if (!includePositions && !recoverable && !preserveWhitespace) {
-      // diagnostics modes (LSP positions, recoverable validation) report
-      // offsets against the source string, so they never condense
-      condenseWhitespace(optimizedAST);
-    }
-    return optimizedAST;
+    // diagnostics modes (LSP positions, recoverable validation) report
+    // offsets against the source string, so they never condense
+    const condense = !includePositions && !recoverable && !preserveWhitespace;
+    return TemplateCompiler.optimizeAST(ast, { condense });
   }
 
   getValue(expression) {
@@ -839,7 +839,7 @@ class TemplateCompiler {
   }
 
   // joins neighboring html nodes into a single node and moves snippets to front
-  static optimizeAST(ast) {
+  static optimizeAST(ast, { condense = false } = {}) {
     const optimizedAST = [];
     const snippets = [];
     const otherNodes = [];
@@ -899,6 +899,9 @@ class TemplateCompiler {
     }
 
     // Return snippets first, then other nodes
+    if (condense) {
+      condenseWhitespace(allNodes, TemplateCompiler.contentProperties);
+    }
     return allNodes;
   }
 }
