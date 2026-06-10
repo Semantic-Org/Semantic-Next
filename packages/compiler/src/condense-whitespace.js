@@ -1,21 +1,16 @@
 import { isArray } from '@semantic-ui/utils';
 
 /*
-  Whitespace condensing over the compiled AST, after optimizeAST.
+  condenses template whitespace after optimizeAST. cross-line runs between
+  tag or block boundaries are formatting and are removed, everything else
+  collapses to a single space. same-line spacing is content and survives.
 
-  The language rule, not a neutrality claim: cross-line whitespace between
-  tag or block boundaries is formatting and is removed — same-line spacing
-  is content and survives. Runs touching text or an expression collapse to
-  a single space (that part is rendering-neutral under normal `white-space`,
-  so {first}\n{last} reads "first last"). Inline siblings split across
-  lines lose their word break; keep them on one line or use &#32;.
+  running post-parse keeps the grammar in one place: markers like {else}
+  are already consumed into content arrays, so their whitespace is
+  array-edge whitespace and classification is just node structure.
 
-  Working post-parse keeps the grammar defined once: block markers like
-  {else} or {loading} never reach this pass — the parser consumed them
-  into content arrays, so their whitespace is array-edge whitespace and
-  classification is node structure. Only html chunks need scanning, and
-  scanner state (open tag, quote, raw-text element) threads across chunks
-  because they split mid-tag at attribute expressions: `<tr class="` {x} `">`.
+  scanner state (open tag, quote, raw text) threads across html chunks
+  because attribute expressions split tags mid-chunk: `<tr class="` {x} `">`
 */
 
 // raw-text elements whose content is never condensed
