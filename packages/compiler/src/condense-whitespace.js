@@ -13,16 +13,13 @@ import { isArray } from '@semantic-ui/utils';
   because attribute expressions split tags mid-chunk: `<tr class="` {x} `">`
 */
 
-// raw-text elements whose content is never condensed
+// whitespace-significant tags, not the html raw-text set (pre is markup, title condenses fine)
 const RAW_TEXT_TAGS = new Set(['pre', 'textarea', 'script', 'style']);
 
 // boundary-checked close so </press-thing> can't end a <pre> region
-const RAW_TEXT_CLOSE = {
-  pre: /<\/pre\s*>/gi,
-  textarea: /<\/textarea\s*>/gi,
-  script: /<\/script\s*>/gi,
-  style: /<\/style\s*>/gi,
-};
+const RAW_TEXT_CLOSE = Object.fromEntries(
+  [...RAW_TEXT_TAGS].map((tag) => [tag, new RegExp(`</${tag}\\s*>`, 'gi')]),
+);
 
 export function condenseWhitespace(ast, contentProperties) {
   condenseLevel(ast, contentProperties, { inTag: false, quote: null, rawText: null, pendingRawText: null });
