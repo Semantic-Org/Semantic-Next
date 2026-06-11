@@ -1,5 +1,3 @@
-import { ReactiveDataContext } from './reactive-context.js';
-
 /*
 
   Block scope resolution for event handlers — the `scope` callback param.
@@ -48,7 +46,7 @@ export function markScopeRange(startNode, endNode, owner) {
 }
 
 function getLayer(owner) {
-  if (owner.dataContext instanceof ReactiveDataContext) {
+  if (owner.dataContext) {
     return owner.dataContext.values;
   }
   const { data, keys } = owner;

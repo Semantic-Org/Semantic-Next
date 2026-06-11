@@ -40,11 +40,11 @@ export class DynamicRegion {
     if (!lastNode) { return; }
     if (!this.endAnchor) {
       this.endAnchor = document.createTextNode('');
+      // closed regions are one backward hop for scope resolution — also
+      // keeps scans out of region content that contains scope stamps
+      this.endAnchor[SCOPE_END] = this.anchor;
     }
     lastNode.after(this.endAnchor);
-    // closed regions are one backward hop for scope resolution — also
-    // keeps scans out of region content that contains scope stamps
-    this.endAnchor[SCOPE_END] = this.anchor;
   }
 
   getLastNode() {

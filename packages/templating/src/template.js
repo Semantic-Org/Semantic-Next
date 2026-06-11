@@ -626,6 +626,7 @@ export const Template = class Template {
           const elValue = targetElement?.value ?? event.target?.value ?? event?.detail?.value;
           // params built explicitly so `scope` can be a lazy getter —
           // call()'s additionalData spread would evaluate it eagerly
+          let resolvedScope;
           const params = {
             ...(template.callParams || template.buildCallParams()),
             event: event,
@@ -636,13 +637,10 @@ export const Template = class Template {
               ...elData,
               ...eventData,
             },
+            get scope() {
+              return resolvedScope ??= template.getEventScope(targetElement);
+            },
           };
-          let resolvedScope;
-          Object.defineProperty(params, 'scope', {
-            configurable: true,
-            enumerable: true,
-            get: () => resolvedScope ??= template.getEventScope(targetElement),
-          });
           return template.call(boundEvent, { params });
         };
         const domEventSettings = {};
