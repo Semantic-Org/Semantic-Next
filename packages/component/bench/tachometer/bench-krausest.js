@@ -106,9 +106,7 @@ function buildData(count) {
       Component Definition
 *******************************/
 
-defineComponent({
-  tagName: 'bench-app',
-  template: `<table><tbody>
+const benchTemplate = `<table><tbody>
     {#each rows as row}
       <tr class="{isSelected row.id}">
         <td class="col-md-1">{row.id}</td>
@@ -117,7 +115,22 @@ defineComponent({
         <td class="col-md-6"></td>
       </tr>
     {/each}
-  </tbody></table>`,
+  </tbody></table>`;
+
+// same rows minus the two per-row data-id bindings — the standard-vs-lean
+// gap within one run prices what those bindings cost
+const leanBenchTemplate = `<table><tbody>
+    {#each rows as row}
+      <tr class="{isSelected row.id}">
+        <td class="col-md-1">{row.id}</td>
+        <td class="col-md-4"><a class="lbl">{row.label}</a></td>
+        <td class="col-md-1"><a class="remove"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a></td>
+        <td class="col-md-6"></td>
+      </tr>
+    {/each}
+  </tbody></table>`;
+
+const benchDefinition = {
   defaultState: {
     rows: [],
     selected: 0,
@@ -169,7 +182,10 @@ defineComponent({
       },
     };
   },
-});
+};
+
+defineComponent({ tagName: 'bench-app', template: benchTemplate, ...benchDefinition });
+defineComponent({ tagName: 'bench-app-lean', template: leanBenchTemplate, ...benchDefinition });
 
 /*******************************
       Benchmark Runner
@@ -191,8 +207,8 @@ const flush = () => new Promise(r => requestAnimationFrame(r));
 const flushWork = reactivity.flush ?? (() => Reaction.flush());
 const startMark = (name) => `${name}-start`;
 
-async function mount() {
-  const el = document.createElement('bench-app');
+async function mount(tag = 'bench-app') {
+  const el = document.createElement(tag);
   container.appendChild(el);
   flushWork();
   return el;
@@ -394,6 +410,40 @@ performance.mark(startMark('clear-10k'));
 el11.component.clear();
 await flush();
 performance.measure('clear-10k', startMark('clear-10k'));
+destroy();
+
+/*******************************
+      Lean Twins
+      Same ops on the app without per-row data-id bindings. Twins are
+      compared against their standard counterparts within a run — the
+      gap prices the two bindings at create and teardown, where their
+      cost is paid (they never re-fire).
+*******************************/
+
+const el12 = await mount('bench-app-lean');
+// purpose: Renders a fresh 1000-row table without per-row data-id bindings.
+performance.mark(startMark('create-1k-lean'));
+el12.component.run(1000);
+await flush();
+performance.measure('create-1k-lean', startMark('create-1k-lean'));
+destroy();
+
+const el13 = await mount('bench-app-lean');
+// purpose: Renders a fresh 10000-row table without per-row data-id bindings.
+performance.mark(startMark('create-10k-lean'));
+el13.component.run(10000);
+await flush();
+performance.measure('create-10k-lean', startMark('create-10k-lean'));
+destroy();
+
+const el14 = await mount('bench-app-lean');
+el14.component.run(10000);
+await flush();
+// purpose: Clears a 10000-row table built without per-row data-id bindings.
+performance.mark(startMark('clear-10k-lean'));
+el14.component.clear();
+await flush();
+performance.measure('clear-10k-lean', startMark('clear-10k-lean'));
 destroy();
 
 /*******************************

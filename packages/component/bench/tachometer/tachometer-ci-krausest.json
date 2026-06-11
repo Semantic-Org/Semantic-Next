@@ -20,7 +20,10 @@
         { "mode": "performance", "entryName": "remove-row-front-20" },
         { "mode": "performance", "entryName": "remove-row-middle-20" },
         { "mode": "performance", "entryName": "remove-row-back-100" },
-        { "mode": "performance", "entryName": "clear-10k" }
+        { "mode": "performance", "entryName": "clear-10k" },
+        { "mode": "performance", "entryName": "create-1k-lean" },
+        { "mode": "performance", "entryName": "create-10k-lean" },
+        { "mode": "performance", "entryName": "clear-10k-lean" }
       ]
     },
     {
@@ -38,7 +41,10 @@
         { "mode": "performance", "entryName": "remove-row-front-20" },
         { "mode": "performance", "entryName": "remove-row-middle-20" },
         { "mode": "performance", "entryName": "remove-row-back-100" },
-        { "mode": "performance", "entryName": "clear-10k" }
+        { "mode": "performance", "entryName": "clear-10k" },
+        { "mode": "performance", "entryName": "create-1k-lean" },
+        { "mode": "performance", "entryName": "create-10k-lean" },
+        { "mode": "performance", "entryName": "clear-10k-lean" }
       ]
     }
   ]
