@@ -24,9 +24,7 @@ import { ReactiveDataContext } from './reactive-context.js';
   the same live-sibling invariant each's reconcile relies on.
 
   Owner shapes:
-    each record        — .dataContext (RDC), layer is the live values
-                         bag; .regionAnchor compresses the rest of the
-                         list to one hop after collection
+    each record        — .dataContext (RDC), layer is the live values bag
     { data, keys }     — subtemplate/snippet/async descriptor; keys
                          limits the layer to declared args (args records
                          also carry copied parent descriptors that
@@ -42,10 +40,10 @@ export const SCOPE_END = Symbol('sui-scope-end');
 // the layer to declared keys without recomputing them
 export const DECLARED_KEYS = Symbol('sui-declared-keys');
 
-export function markScopeRange(startNode, endNode, owner, jumpTarget = startNode) {
+export function markScopeRange(startNode, endNode, owner) {
   startNode[SCOPE_OWNER] = owner;
   if (endNode) {
-    endNode[SCOPE_END] = jumpTarget;
+    endNode[SCOPE_END] = startNode;
   }
 }
 
@@ -85,9 +83,6 @@ export function resolveScopeLayers(target, { rootNode, startNode } = {}) {
         const owner = sibling[SCOPE_OWNER];
         if (owner !== undefined) {
           layers.push(getLayer(owner));
-          if (owner.regionAnchor) {
-            sibling = owner.regionAnchor;
-          }
         }
       }
       sibling = sibling.previousSibling;

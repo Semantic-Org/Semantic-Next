@@ -142,7 +142,7 @@ function snapshotForRecord(item, collectionType) {
   return collectionType === 'object' && item != null ? createSnapshot(item.value) : createSnapshot(item);
 }
 
-function createRecord({ key, item, index, collectionType, node, data, scope, renderAST, isSVG, regionAnchor }) {
+function createRecord({ key, item, index, collectionType, node, data, scope, renderAST, isSVG }) {
   const eachData = getEachData(item, index, collectionType, node);
   const itemScope = scope.child();
   const dataContext = new ReactiveDataContext(data, {
@@ -179,13 +179,9 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
     // current data and have no stale subscribers to wake) from steady-
     // state records (which need notifyKey broadcasts on in-place mutation).
     fresh: true,
-    // The each block's region anchor — scope resolution jumps here after
-    // collecting this record's layer, skipping sibling rows in one hop.
-    regionAnchor,
   };
-  // scope stamps for event-handler resolution: the end stamp jumps a
-  // backward scan past the whole list, not just this record
-  markScopeRange(startMarker, endMarker, record, regionAnchor);
+  // scope stamps for event-handler resolution
+  markScopeRange(startMarker, endMarker, record);
   return record;
 }
 
@@ -301,7 +297,6 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
             scope,
             renderAST,
             isSVG,
-            regionAnchor: region.anchor,
           });
           freshCount++;
         }
@@ -515,7 +510,6 @@ function renderElse({ records, node, data, scope, region, renderAST, isSVG }) {
     isElse: true,
     snapshot: null,
     fresh: false,
-    regionAnchor: null,
   });
 }
 
@@ -658,9 +652,8 @@ function adoptServerItems({
         // wake. fresh:true would gate it out of the same-ref snapshot-diff
         // branch and drop that mutation.
         fresh: false,
-        regionAnchor: region.anchor,
       };
-      markScopeRange(startMarker, endMarker, record, region.anchor);
+      markScopeRange(startMarker, endMarker, record);
       newRecords.push(record);
     }
     else {
@@ -674,7 +667,6 @@ function adoptServerItems({
         scope,
         renderAST,
         isSVG,
-        regionAnchor: region.anchor,
       });
       insertAfter.after(record.fragment);
       record.fragment = null;
@@ -740,7 +732,6 @@ const eachBlock = defineBlock({
           isElse: true,
           snapshot: null,
           fresh: false,
-          regionAnchor: null,
         });
       }
       return;
