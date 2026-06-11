@@ -425,7 +425,7 @@ body {
 
 <span class="hljs-keyword">const</span> events = {
   <span class="hljs-string">&#x27;click .reaction&#x27;</span>({ self, data }) {
-    self.<span class="hljs-title function_">toggle</span>(data.<span class="hljs-property">i</span>);
+    self.<span class="hljs-title function_">toggle</span>(data.<span class="hljs-property">index</span>);
   },
 };
 
@@ -440,7 +440,7 @@ body {
 });
 </code></pre>
         <pre id="src-emoji-reactions-1" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;reactions&quot;</span>&gt;</span>
-  {#each reaction, i in reactionState}
+  {#each reaction, index in reactionState}
     <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;reaction {activeIf reaction.active}&quot;</span>&gt;</span>
       <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;emoji&quot;</span>&gt;</span>{reaction.emoji}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
       {#if reaction.count}

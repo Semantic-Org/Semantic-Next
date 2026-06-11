@@ -1,5 +1,5 @@
 <div class="reactions">
-  {#each reaction, i in reactionState}
+  {#each reaction, index in reactionState}
     <button class="reaction {activeIf reaction.active}">
       <span class="emoji">{reaction.emoji}</span>
       {#if reaction.count}

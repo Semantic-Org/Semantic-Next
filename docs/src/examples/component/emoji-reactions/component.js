@@ -30,7 +30,7 @@ const createComponent = ({ state, settings }) => ({
 
 const events = {
   'click .reaction'({ self, data }) {
-    self.toggle(data.i);
+    self.toggle(data.index);
   },
 };
 
