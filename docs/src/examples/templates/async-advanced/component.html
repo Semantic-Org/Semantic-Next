@@ -5,7 +5,7 @@
       {#async getResults searchTerm as searchResults}
         {#if hasAny searchResults}
           {#each searchResults}
-            <div class="result" data-id="{id}" data-title="{title}">
+            <div class="result">
               {title}
             </div>
           {/each}

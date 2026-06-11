@@ -96,9 +96,8 @@ const createComponent = ({ self, state, settings, $, isServer, dispatchEvent, ti
 
 const events = {
   'click .swatch'({ self, settings, data, event }) {
-    const { color, shade } = data;
-    if (settings.showCopy && color && shade) {
-      self.copyColor(color, shade);
+    if (settings.showCopy && data.name && data.shade) {
+      self.copyColor(data.name, data.shade.name);
     }
   },
 };

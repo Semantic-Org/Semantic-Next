@@ -1,10 +1,10 @@
 <li class="{classMap {completed: completed, editing: editing}}">
   <div class="view">
-    <input class="toggle" type="checkbox" checked={completed} data-id="{id}" />
-    <label data-id="{id}">{title}</label>
-    <button class="destroy" data-id="{id}"></button>
+    <input class="toggle" type="checkbox" checked={completed} />
+    <label>{title}</label>
+    <button class="destroy"></button>
   </div>
   {#if editing}
-    <input class="edit" value="{title}" data-id="{id}" />
+    <input class="edit" value="{title}" />
   {/if}
 </li>

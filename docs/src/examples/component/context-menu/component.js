@@ -140,7 +140,7 @@ const events = {
   },
 
   'click .item'({ self, settings, data }) {
-    self.selectItem(settings.items[data.index], data.index);
+    self.selectItem(data.item, data.index);
     return false;
   },
 

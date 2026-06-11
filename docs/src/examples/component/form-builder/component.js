@@ -175,11 +175,11 @@ const events = {
   },
   
   'input input, textarea'({ target, self, data }) {
-    self.setFieldValue(data.name, target.value);
+    self.setFieldValue(data.field.name, target.value);
   },
   
   'change select'({ target, self, data }) {
-    self.setFieldValue(data.name, target.value);
+    self.setFieldValue(data.field.name, target.value);
   },
 };
 

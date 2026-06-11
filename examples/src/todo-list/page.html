@@ -1036,12 +1036,12 @@ body {
 </code></pre>
         <pre id="src-todo-list-3" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{classMap {completed: completed, editing: editing}}&quot;</span>&gt;</span>
   <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;view&quot;</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;toggle&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">checked</span>=<span class="hljs-string">{completed}</span> <span class="hljs-attr">data-id</span>=<span class="hljs-string">&quot;{id}&quot;</span> /&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">data-id</span>=<span class="hljs-string">&quot;{id}&quot;</span>&gt;</span>{title}<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;destroy&quot;</span> <span class="hljs-attr">data-id</span>=<span class="hljs-string">&quot;{id}&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;toggle&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">checked</span>=<span class="hljs-string">{completed}</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>{title}<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;destroy&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
   <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
   {#if editing}
-    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;edit&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;{title}&quot;</span> <span class="hljs-attr">data-id</span>=<span class="hljs-string">&quot;{id}&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;edit&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;{title}&quot;</span> /&gt;</span>
   {/if}
 <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
 </code></pre>

@@ -553,7 +553,7 @@ body {
   },
 
   <span class="hljs-string">&#x27;click .item&#x27;</span>({ self, settings, data }) {
-    self.<span class="hljs-title function_">selectItem</span>(settings.<span class="hljs-property">items</span>[data.<span class="hljs-property">index</span>], data.<span class="hljs-property">index</span>);
+    self.<span class="hljs-title function_">selectItem</span>(data.<span class="hljs-property">item</span>, data.<span class="hljs-property">index</span>);
     <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
   },
 
@@ -584,7 +584,6 @@ body {
       {else}
         <span class="hljs-tag">&lt;<span class="hljs-name">div</span>
           <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;item {activeIf (activeIndex == index)}&quot;</span>
-          <span class="hljs-attr">data-index</span>=<span class="hljs-string">&quot;{index}&quot;</span>
           <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;menuitem&quot;</span>
           <span class="hljs-attr">part</span>=<span class="hljs-string">&quot;menu-item&quot;</span>
           <span class="hljs-attr">tabindex</span>=<span class="hljs-string">&quot;{activeIndex == index ? &#x27;0&#x27; : &#x27;-1&#x27;}&quot;</span>

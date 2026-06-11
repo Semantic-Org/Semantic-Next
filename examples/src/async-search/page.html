@@ -542,7 +542,7 @@ body {
       {#async getResults searchTerm as searchResults}
         {#if hasAny searchResults}
           {#each searchResults}
-            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{activeIf is index selectedIndex} result&quot;</span> <span class="hljs-attr">data-id</span>=<span class="hljs-string">&quot;{id}&quot;</span> <span class="hljs-attr">data-title</span>=<span class="hljs-string">&quot;{title}&quot;</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{activeIf is index selectedIndex} result&quot;</span>&gt;</span>
               {title}
             <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
           {/each}
