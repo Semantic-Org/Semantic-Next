@@ -107,11 +107,13 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         fixture.renderRoot.innerHTML = '<button class="btn" data-id="7" data-kind="attr" value="hello">Click</button>';
         try {
           const btn = fixture.renderRoot.querySelector('.btn');
-          btn.dispatchEvent(new CustomEvent('custom', {
-            bubbles: true,
-            composed: true,
-            detail: { kind: 'detail' },
-          }));
+          btn.dispatchEvent(
+            new CustomEvent('custom', {
+              bubbles: true,
+              composed: true,
+              detail: { kind: 'detail' },
+            }),
+          );
           expect(captured.data).toEqual({ id: 7, kind: 'detail' });
           expect(captured.value).toBe('hello');
           expect(captured.clicked).toBe(btn);

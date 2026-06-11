@@ -1,9 +1,9 @@
 // Block scope layers in the event-handler `data` param: each item vars,
 // subtemplate args, snippet args, async vars, resolved from the event
 // target's position via the boundary-marker bracket scan and merged into
-// data above data-* attributes and below event.detail. Layer resolution
-// is a native-engine contract — lit contributes no scope keys, asserted
-// at the bottom of the engine loop.
+// data below data-* attributes, with event.detail above all. Layer
+// resolution is a native-engine contract — lit contributes no scope keys,
+// asserted at the bottom of the engine loop.
 
 import { defineComponent } from '@semantic-ui/component';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -189,7 +189,7 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(captured).toEqual({});
       });
 
-      it.skipIf(isLit)('merges scope over data attributes and detail over scope', async () => {
+      it.skipIf(isLit)('merges template vars below data attributes and detail above all', async () => {
         const tag = uniqueTag();
         let captured;
         defineComponent({
@@ -209,8 +209,11 @@ RENDERING_ENGINES.forEach((engine) => {
         const el = await mount(tag);
         const row = el.shadowRoot.querySelector('.row');
         clickOn(row);
-        expect(captured.id).toBe('from-scope');
+        // an explicit attribute keeps answering while it exists — delete
+        // it and the template layer takes over through the same read
+        expect(captured.id).toBe('from-attr');
         expect(captured.extra).toBe('attr-only');
+        expect(captured.name).toBe('Alpha');
 
         row.dispatchEvent(
           new CustomEvent('click', {

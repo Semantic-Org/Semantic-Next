@@ -161,7 +161,7 @@ In addition to the [standard arguments](/docs/guides/components/lifecycle) that 
 | el                | the component's host element                          |
 | target            | the dom element that dispatched the event             |
 | event             | the native event object                               |
-| data              | data attributes, template scope at the target, and event.detail — merged in that order, later sources win |
+| data              | template scope at the target, data attributes, and event.detail — merged in that order, later sources win |
 | value             | value of the dispatching element (form fields, custom event detail) |
 | isDeep            | the event came from inside another web component's shadow tree |
 
@@ -192,7 +192,7 @@ const events = {
 
 In many cases you want to access data particular to an event. Event handlers can use `data` to achieve this.
 
-`data` merges three sources: data attributes on the dispatching element, the template scope at that element, and `event.detail`. When keys overlap, later sources win.
+`data` merges three sources: the template scope at the dispatching element, its data attributes, and `event.detail`. When keys overlap, later sources win.
 
 ### Template Scope
 

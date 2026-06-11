@@ -787,15 +787,7 @@ export const Template = class Template {
   // peeked, nothing subscribes.
   getEventData(target, event) {
     return nonreactive(() => {
-      // dataset is always stringified for atts, we want native values
-      const eventData = mapObject({ ...target?.dataset }, (stringValue) => {
-        try {
-          return JSON.parse(stringValue);
-        }
-        catch (e) {
-          return stringValue;
-        }
-      });
+      const data = {};
       const layers = this.renderer?.resolveScopeLayers?.(target, {
         // same live-boundary rule as isNodeInTemplate — stored parentNode
         // can be a dead build fragment for subtemplates attached mid-render
@@ -807,11 +799,23 @@ export const Template = class Template {
           const layer = layers[i];
           for (const key in layer) {
             const value = layer[key];
-            eventData[key] = (value instanceof Signal) ? value.peek() : value;
+            data[key] = (value instanceof Signal) ? value.peek() : value;
           }
         }
       }
-      return Object.assign(eventData, event?.detail);
+      // dataset is always stringified for attrs, we want native values.
+      // explicit attributes and detail shadow template vars — a handler
+      // keeps its value while a data-* attr exists and falls through to
+      // the template layer when the attr is removed
+      const attrData = mapObject({ ...target?.dataset }, (stringValue) => {
+        try {
+          return JSON.parse(stringValue);
+        }
+        catch (e) {
+          return stringValue;
+        }
+      });
+      return Object.assign(data, attrData, event?.detail);
     });
   }
 
