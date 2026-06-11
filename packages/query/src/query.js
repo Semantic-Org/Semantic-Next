@@ -943,6 +943,12 @@ export class Query {
       if (typeof el.dispatchEvent !== 'function') {
         return;
       }
+      // form.submit() fires no submit event and can't be prevented —
+      // route submit through requestSubmit so handlers see a cancelable event
+      if (eventName === 'submit' && isFunction(el.requestSubmit)) {
+        el.requestSubmit();
+        return;
+      }
       // trigger native handler
       if (isFunction(el[eventName])) {
         el[eventName]();

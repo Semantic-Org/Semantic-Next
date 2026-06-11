@@ -8,6 +8,7 @@ import {
   match,
   nonreactive,
   reaction,
+  Signal,
   signal,
 } from '@semantic-ui/reactivity';
 import {
@@ -610,18 +611,6 @@ export const Template = class Template {
           // prepare data for users event handler
           const targetElement = this;
           const boundEvent = userHandler.bind(targetElement);
-          const eventData = event?.detail || {};
-          // dataset is always stringified for atts, we want this as native values
-          const elData = mapObject({ ...targetElement?.dataset }, (stringValue) => {
-            let value;
-            try {
-              value = JSON.parse(stringValue);
-            }
-            catch (e) {
-              value = stringValue;
-            }
-            return value;
-          });
           const elValue = targetElement?.value ?? event.target?.value ?? event?.detail?.value;
           return template.call(boundEvent, {
             additionalData: {
@@ -629,10 +618,7 @@ export const Template = class Template {
               isDeep,
               target: targetElement,
               value: elValue,
-              data: {
-                ...elData,
-                ...eventData,
-              },
+              data: template.getEventData(targetElement, event),
             },
           });
         };
@@ -789,6 +775,48 @@ export const Template = class Template {
       return isAfterStart && isBeforeEnd;
     };
     return isNodeInRange(getRootChild(node));
+  }
+
+  // Everything acting at an event target, merged into one bag:
+  // data-* attributes (JSON-parsed), block scope vars (each item vars,
+  // subtemplate args, snippet args, async vars) with the innermost
+  // layer winning, then event.detail — later sources win on shared
+  // keys. Scope resolution is the engine's (boundary-marker bracket
+  // scan in native); engines without it contribute no scope keys.
+  // Snapshot semantics: values are copied at dispatch, signal values
+  // peeked, nothing subscribes.
+  getEventData(target, event) {
+    return nonreactive(() => {
+      const data = {};
+      const layers = this.renderer?.resolveScopeLayers?.(target, {
+        // same live-boundary rule as isNodeInTemplate — stored parentNode
+        // can be a dead build fragment for subtemplates attached mid-render
+        rootNode: this.startNode?.parentNode || this.parentNode || this.renderRoot,
+        startNode: this.startNode,
+      });
+      if (layers) {
+        for (let i = layers.length - 1; i >= 0; i--) {
+          const layer = layers[i];
+          for (const key in layer) {
+            const value = layer[key];
+            data[key] = (value instanceof Signal) ? value.peek() : value;
+          }
+        }
+      }
+      // dataset is always stringified for attrs, we want native values.
+      // explicit attributes and detail shadow template vars — a handler
+      // keeps its value while a data-* attr exists and falls through to
+      // the template layer when the attr is removed
+      const attrData = mapObject({ ...target?.dataset }, (stringValue) => {
+        try {
+          return JSON.parse(stringValue);
+        }
+        catch (e) {
+          return stringValue;
+        }
+      });
+      return Object.assign(data, attrData, event?.detail);
+    });
   }
 
   render(additionalData = {}) {

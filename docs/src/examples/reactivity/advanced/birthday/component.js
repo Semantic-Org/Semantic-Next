@@ -45,7 +45,7 @@ const events = {
     state.today.set(self.getDisplayDate(newDay));
   },
   'click a.birthday'({ state, data }) {
-    state.today.set(data.birthday);
+    state.today.set(data.friend.birthday);
   },
 };
 

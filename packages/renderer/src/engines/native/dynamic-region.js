@@ -1,3 +1,5 @@
+import { SCOPE_END, SCOPE_OWNER } from './scope-context.js';
+
 export class DynamicRegion {
   constructor(parentNode, marker) {
     this.parentNode = parentNode;
@@ -16,6 +18,10 @@ export class DynamicRegion {
     this.ownedNodes = [];
     // endAnchor is reusable across fills.
     if (this.endAnchor) { this.endAnchor.remove(); }
+    // the owner stamp dies with the content — the endAnchor's removal
+    // takes the END jump with it, so a stale owner here would leak the
+    // old layer into later siblings' scans
+    this.anchor[SCOPE_OWNER] = undefined;
   }
 
   setContent(fragment, scope) {
@@ -34,6 +40,9 @@ export class DynamicRegion {
     if (!lastNode) { return; }
     if (!this.endAnchor) {
       this.endAnchor = document.createTextNode('');
+      // closed regions are one backward hop for scope resolution — also
+      // keeps scans out of region content that contains scope stamps
+      this.endAnchor[SCOPE_END] = this.anchor;
     }
     lastNode.after(this.endAnchor);
   }

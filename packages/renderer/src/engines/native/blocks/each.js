@@ -4,6 +4,7 @@ import { decodeItemKey, getCollectionType, getEachData, getItemID } from '../../
 import { lisIndices } from '../../../shared/lis.js';
 import { defineBlock } from '../define-block.js';
 import { ReactiveDataContext } from '../reactive-context.js';
+import { markScopeRange } from '../scope-context.js';
 import { registerBlock } from './registry.js';
 
 export const SUI_ITEM_MARKER = `sui-item:${MARKER_VERSION}:`;
@@ -159,7 +160,7 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
   const endMarker = document.createTextNode('');
   fragment.insertBefore(startMarker, fragment.firstChild);
   fragment.appendChild(endMarker);
-  return {
+  const record = {
     key,
     item,
     index,
@@ -179,6 +180,9 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
     // state records (which need notifyKey broadcasts on in-place mutation).
     fresh: true,
   };
+  // scope stamps for event-handler resolution
+  markScopeRange(startMarker, endMarker, record);
+  return record;
 }
 
 function disposeRecord(record) {
@@ -632,7 +636,7 @@ function adoptServerItems({
       insertAfter.after(fragment);
       insertAfter = endMarker;
 
-      newRecords.push({
+      const record = {
         key,
         item,
         index: i,
@@ -648,7 +652,9 @@ function adoptServerItems({
         // wake. fresh:true would gate it out of the same-ref snapshot-diff
         // branch and drop that mutation.
         fresh: false,
-      });
+      };
+      markScopeRange(startMarker, endMarker, record);
+      newRecords.push(record);
     }
     else {
       const record = createRecord({

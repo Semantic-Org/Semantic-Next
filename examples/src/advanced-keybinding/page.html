@@ -539,7 +539,7 @@ body {
   <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;results&quot;</span>&gt;</span>
     {#if hasAny results}
       {#each result in results}
-        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{activeIf is index selectedIndex}result&quot;</span> <span class="hljs-attr">data-index</span>=<span class="hljs-string">&quot;{index}&quot;</span>&gt;</span>{result}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;{activeIf is index selectedIndex}result&quot;</span>&gt;</span>{result}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
       {/each}
     {else if searchTerm}
       <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;empty&quot;</span>&gt;</span>

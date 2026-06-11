@@ -1,5 +1,6 @@
 import { each, isPlainObject, isPromise } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
+import { markScopeRange } from '../scope-context.js';
 import { registerBlock } from './registry.js';
 
 /*
@@ -22,6 +23,13 @@ import { registerBlock } from './registry.js';
   • neither          → { this: value }
 
 */
+
+// empty fills have no inside to resolve — and stamping one would land the
+// END jump on the anchor itself, masking the owner stamp of a later fill
+function stampAsyncScope(region, data) {
+  if (region.ownedNodes.length === 0) { return; }
+  markScopeRange(region.anchor, region.endAnchor || region.getLastNode(), { data });
+}
 
 function createSuccessDataContext(node, value) {
   if (node.as) { return { [node.as]: value }; }
@@ -58,6 +66,7 @@ function evaluateAndRender(ctx, { skipLoadingRender = false } = {}) {
       isSVG,
     });
     region.setContent(fragment, stateScope);
+    stampAsyncScope(region, extraData);
   };
 
   if (isPromise(result)) {
@@ -104,6 +113,7 @@ function renderErrorState(ctx, err) {
     isSVG,
   });
   region.setContent(fragment, stateScope);
+  stampAsyncScope(region, errorData);
 }
 
 const asyncBlock = defineBlock({

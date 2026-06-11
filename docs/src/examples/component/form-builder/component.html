@@ -1,5 +1,5 @@
 {#snippet textInput}
-  <div class="field {classMap getFieldClasses field}" data-name="{field.name}">
+  <div class="field {classMap getFieldClasses field}">
     <label for="{field.name}">
       {field.label}
       {#if field.required}<span class="required">*</span>{/if}
@@ -10,7 +10,7 @@
       name="{field.name}"
       value="{getFieldValue field.name}"
       placeholder="{field.placeholder}"
-      data-name="{field.name}"
+     
     />
     {#if shouldShowError field.name}
       <div class="error">{getFieldError field.name}</div>
@@ -22,7 +22,7 @@
 {/snippet}
 
 {#snippet selectInput}
-  <div class="field {classMap getFieldClasses field}" data-name="{field.name}">
+  <div class="field {classMap getFieldClasses field}">
     <label for="{field.name}">
       {field.label}
       {#if field.required}<span class="required">*</span>{/if}
@@ -30,7 +30,7 @@
     <select
       id="{field.name}"
       name="{field.name}"
-      data-name="{field.name}"
+     
     >
       <option value="" {#if isEmpty (getFieldValue field.name)}selected{/if}>
         {field.placeholder || 'Select...'}
@@ -51,7 +51,7 @@
 {/snippet}
 
 {#snippet textareaInput}
-  <div class="field-container {classMap getFieldClasses field}" data-name="{field.name}">
+  <div class="field-container {classMap getFieldClasses field}">
     <label for="{field.name}">
       {field.label}
       {#if field.required}<span class="required">*</span>{/if}
@@ -59,7 +59,7 @@
     <textarea
       id="{field.name}"
       name="{field.name}"
-      data-name="{field.name}"
+     
       placeholder="{field.placeholder || ''}"
       value="{getFieldValue field.name}"></textarea>
     {#if shouldShowError field.name}

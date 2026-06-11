@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  font-family: var(--page-font);
+}
+
+.playlist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  .song {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--padding-3xs) var(--padding-xs);
+    border: var(--subtle-border);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--gap-3xs);
+    transition: var(--transition);
+
+    &.playing {
+      border-color: var(--primary-border-color);
+      background: var(--primary-5);
+    }
+
+    .number {
+      color: var(--standard-50);
+    }
+
+    .title {
+      flex: 1;
+    }
+  }
+}

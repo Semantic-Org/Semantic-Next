@@ -82,7 +82,7 @@ const onRendered = ({ self, settings }) => {
 
 const events = {
   'click .preset'({ self, settings, data }) {
-    const preset = settings.presets[data.index];
+    const preset = data.preset;
     self.applyTheme(preset);
   },
 

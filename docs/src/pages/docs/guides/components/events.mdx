@@ -161,7 +161,7 @@ In addition to the [standard arguments](/docs/guides/components/lifecycle) that 
 | el                | the component's host element                          |
 | target            | the dom element that dispatched the event             |
 | event             | the native event object                               |
-| data              | event.detail + data attributes on the dispatching element |
+| data              | template scope at the target, data attributes, and event.detail — merged in that order, later sources win |
 | value             | value of the dispatching element (form fields, custom event detail) |
 | isDeep            | the event came from inside another web component's shadow tree |
 
@@ -191,6 +191,33 @@ const events = {
 ## Event Data
 
 In many cases you want to access data particular to an event. Event handlers can use `data` to achieve this.
+
+`data` merges three sources: the template scope at the dispatching element, its data attributes, and `event.detail`. When keys overlap, later sources win.
+
+### Template Scope
+
+Template vars acting at the dispatching element — [each](/docs/guides/templates/loops) item vars, subtemplate args, snippet args — are available directly on `data`. List handlers can read row identity from the each scope without round-tripping it through data attributes.
+
+```html
+<ul>
+  {#each song in songs}
+    <li>
+      {song.title}
+      <ui-button class="play">Play</ui-button>
+    </li>
+  {/each}
+</ul>
+```
+
+```javascript
+const events = {
+  'click .play'({ self, data }) {
+    self.play(data.song.id);
+  }
+};
+```
+
+<PlaygroundExample id="list-event-data" direction="horizontal"></PlaygroundExample>
 
 ### HTML Metadata
 

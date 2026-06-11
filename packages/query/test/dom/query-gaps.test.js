@@ -253,7 +253,7 @@ describe('Query - Untested API Methods', () => {
       const $el = $('#target');
 
       await expect(
-        $el.onNext('never-fires', { timeout: 50 })
+        $el.onNext('never-fires', { timeout: 50 }),
       ).rejects.toThrow(/timeout/i);
     });
   });
@@ -389,7 +389,9 @@ describe('Query - Untested API Methods', () => {
       registerBehavior({
         name: 'testBehaviorOne',
         createBehavior: () => ({
-          greet() { return 'hello'; },
+          greet() {
+            return 'hello';
+          },
         }),
       });
 
@@ -425,7 +427,9 @@ describe('Query - Untested API Methods', () => {
       registerBehavior({
         name: 'testBehaviorInstance',
         createBehavior: () => ({
-          getValue() { return 42; },
+          getValue() {
+            return 42;
+          },
         }),
       });
 
@@ -441,7 +445,9 @@ describe('Query - Untested API Methods', () => {
       registerBehavior({
         name: 'testBehaviorCall',
         createBehavior: () => ({
-          multiply(x) { return x * 2; },
+          multiply(x) {
+            return x * 2;
+          },
         }),
       });
 
@@ -460,7 +466,9 @@ describe('Query - Untested API Methods', () => {
           size: 10,
         },
         createBehavior: ({ settings }) => ({
-          getSettings() { return settings; },
+          getSettings() {
+            return settings;
+          },
         }),
       });
 
@@ -861,6 +869,21 @@ describe('Query - Untested API Methods', () => {
       document.querySelectorAll('.t')[1].myProp = 'b';
       const result = $('.t').prop('myProp');
       expect(result).toEqual(['a', 'b']);
+    });
+  });
+
+  describe('trigger', () => {
+    it('fires a cancelable submit event when triggering submit on a form', () => {
+      document.body.innerHTML = '<form id="form"><input name="a" /></form>';
+      const form = document.querySelector('#form');
+      let received = null;
+      form.addEventListener('submit', (event) => {
+        received = event;
+        event.preventDefault();
+      });
+      $('#form').trigger('submit');
+      expect(received).toBeInstanceOf(Event);
+      expect(received.defaultPrevented).toBe(true);
     });
   });
 });
