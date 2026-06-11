@@ -30,4 +30,14 @@ describe('whitespace-sensitive css', () => {
     const component = defineComponent({ template, css: '.code { white-space-collapse: preserve; }' });
     expect(component.ast[0].html).toContain('\n');
   });
+
+  it('still condenses for non-sensitive white-space values', () => {
+    const component = defineComponent({ template, css: 'li { white-space: nowrap; }' });
+    expect(component.ast[0].html).toBe('<ul><li>a</li></ul>');
+  });
+
+  it('explicit true preserves without css', () => {
+    const component = defineComponent({ template, preserveWhitespace: true });
+    expect(component.ast[0].html).toContain('\n');
+  });
 });

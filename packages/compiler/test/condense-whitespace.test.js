@@ -126,6 +126,53 @@ describe('condenseWhitespace', () => {
       ]);
     });
 
+    it('preserves whitespace inside script', () => {
+      const ast = compile(`<script>
+  let a = 1
+  let b = 2
+</script><div>
+  <p>a</p>
+</div>`);
+      expect(ast).toEqual([
+        { type: 'html', html: '<script>\n  let a = 1\n  let b = 2\n</script><div><p>a</p></div>' },
+      ]);
+    });
+
+    it('preserves whitespace inside style', () => {
+      const ast = compile(`<style>
+  @import url(a.css);
+  @import url(b.css);
+</style><div>
+  <p>a</p>
+</div>`);
+      expect(ast).toEqual([
+        { type: 'html', html: '<style>\n  @import url(a.css);\n  @import url(b.css);\n</style><div><p>a</p></div>' },
+      ]);
+    });
+
+    it('preserves textarea content when an expression splits the open tag', () => {
+      const ast = compile(`<textarea class="{fieldClass}">  keep
+    this  </textarea><div>
+  <p>a</p>
+</div>`);
+      expect(ast).toEqual([
+        { type: 'html', html: '<textarea class="' },
+        { type: 'expression', value: 'fieldClass' },
+        { type: 'html', html: '">  keep\n    this  </textarea><div><p>a</p></div>' },
+      ]);
+    });
+
+    it('does not treat a self-closed split tag as raw text', () => {
+      const ast = compile(`<textarea class="{x}"/><div>
+  <p>a</p>
+</div>`);
+      expect(ast).toEqual([
+        { type: 'html', html: '<textarea class="' },
+        { type: 'expression', value: 'x' },
+        { type: 'html', html: '"/><div><p>a</p></div>' },
+      ]);
+    });
+
     it('preserves pre content across an expression boundary', () => {
       const ast = compile(`<pre>  before
 {code}
