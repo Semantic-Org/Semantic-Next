@@ -24,7 +24,10 @@ const createComponent = ({ el, self, settings, data, $ }) => ({
     if (inArray(settings.type, formActions)) {
       const form = self.getForm();
       if (form) {
-        $(form).trigger(settings.type);
+        // submit routes through requestSubmit — trigger('submit') resolves
+        // to form.submit(), which fires no submit event and can't be prevented
+        const action = (settings.type === 'submit') ? 'requestSubmit' : settings.type;
+        $(form).trigger(action);
       }
     }
   },
