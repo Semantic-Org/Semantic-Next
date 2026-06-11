@@ -59,8 +59,6 @@ function evaluateAndRender(ctx, { skipLoadingRender = false } = {}) {
       isSVG,
     });
     region.setContent(fragment, stateScope);
-    // always restamp — loading's empty layer overwrites a stale success
-    // owner under fresh loading DOM
     markScopeRange(region.anchor, region.endAnchor || region.getLastNode(), { data: extraData });
   };
 

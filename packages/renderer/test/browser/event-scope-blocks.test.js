@@ -251,6 +251,34 @@ RENDERING_ENGINES.forEach((engine) => {
         // settings/state/self params
         expect('items' in captured).toBe(false);
       });
+
+      it.skipIf(isLit)('drops the subtemplate layer once the invocation clears', async () => {
+        const tag = uniqueTag();
+        let captured;
+        const rowItem = defineComponent({
+          renderingEngine: engine,
+          template: '<span class="lbl">{id}</span>',
+        });
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<div>{>template name=maybeRow data={id: 7}}<button class="after">after</button></div>',
+          subTemplates: { rowItem },
+          defaultState: { maybeRow: 'rowItem' },
+          events: {
+            'click .after'({ scope }) {
+              captured = scope;
+            },
+          },
+        });
+        const el = await mount(tag);
+        expect(el.shadowRoot.querySelector('.lbl')).not.toBeNull();
+        el.template.state.maybeRow.set(null);
+        await waitForUpdate(el);
+        expect(el.shadowRoot.querySelector('.lbl')).toBeNull();
+        clickOn(el.shadowRoot.querySelector('.after'));
+        expect(captured).toEqual({});
+      });
     });
 
     describe('event scope — async layers', () => {
