@@ -1,7 +1,7 @@
 <div class="cases">
 
   <div class="case">
-    <h4>cross-line whitespace between tags drops — boxes touch, no gaps</h4>
+    <h4>Cross-line whitespace between tags condenses away</h4>
     <ul class="boxes">
       <li>a</li>
       <li>b</li>
@@ -10,7 +10,7 @@
   </div>
 
   <div class="case">
-    <h4>each blocks condense the same way — boxes touch, no gaps</h4>
+    <h4>Each blocks condense the same way</h4>
     <ul class="boxes">
       {#each letter in letters}
         <li>{letter}</li>
@@ -19,35 +19,30 @@
   </div>
 
   <div class="case">
-    <h4>same-line space survives</h4>
+    <h4>Same-line spacing is content and survives</h4>
     <p><b>same</b> <i>line</i> spacing kept</p>
   </div>
 
   <div class="case">
-    <h4>cross-line run between expressions collapses to one space</h4>
+    <h4>Cross-line runs between expressions collapse to one space</h4>
     <p>{first}
-      {last} — expected exactly one space</p>
+      {last}</p>
   </div>
 
   <div class="case">
-    <h4>tight bindings stay tight</h4>
-    <p>{first}{last} — expected no space</p>
-  </div>
-
-  <div class="case">
-    <h4>expression-split attributes keep their spacing</h4>
+    <h4>Whitespace inside attribute values is preserved</h4>
     <div class="{boxClass} padded box">styled via split class attribute</div>
   </div>
 
   <div class="case">
-    <h4>pre content exact</h4>
+    <h4>Pre content is never condensed</h4>
     <pre>  two leading spaces
       nested indent
   back out</pre>
   </div>
 
   <div class="case">
-    <h4>textarea with split attributes keeps content exact</h4>
+    <h4>Textarea content is never condensed</h4>
     <textarea class="{fieldClass}" rows="4">  two leading spaces
       nested indent
 done</textarea>
