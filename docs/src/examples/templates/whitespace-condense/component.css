@@ -1,0 +1,34 @@
+.case {
+  margin-bottom: 20px;
+
+  h4 {
+    font-size: 13px;
+    font-weight: var(--bold);
+    margin: 0 0 6px;
+    opacity: 0.7;
+  }
+}
+.boxes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: inline-block;
+    padding: 6px 14px;
+    background: #3b82f6;
+    color: var(--white);
+    border: 1px solid #1d4ed8;
+  }
+}
+.box {
+  display: inline-block;
+  border: 1px solid #1d4ed8;
+}
+.box.padded {
+  padding: 8px 16px;
+}
+.box.blue {
+  background: #3b82f6;
+  color: var(--white);
+}

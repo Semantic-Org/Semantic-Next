@@ -1,0 +1,12 @@
+h4 {
+  font-size: 13px;
+  font-weight: var(--bold);
+  margin: 0 0 6px;
+  opacity: 0.7;
+}
+.poem {
+  white-space: pre-line;
+  border-left: 3px solid #3b82f6;
+  padding-left: 14px;
+  font-style: italic;
+}
