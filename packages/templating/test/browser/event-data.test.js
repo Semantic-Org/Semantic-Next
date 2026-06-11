@@ -1,10 +1,11 @@
-// Browser tests for the event-handler `scope` param at the Template level:
-// the plain-object contract, lazy resolution, per-dispatch memoization, and
-// the empty result for targets under no block scope. Block-layer resolution
-// (each/subtemplate/snippet/async) is covered in the renderer suite at
+// Browser tests for the event-handler `data` param at the Template level:
+// the merged-bag contract (data attributes, block scope, event.detail —
+// later sources win) and the empty result for targets carrying none of
+// the three. Block-layer resolution (each/subtemplate/snippet/async) is
+// covered in the renderer suite at
 // packages/renderer/test/browser/event-scope-blocks.test.js.
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
@@ -71,14 +72,14 @@ function clickOn(element, init = {}) {
 
 RENDER_TARGETS.forEach(({ name, target }) => {
   describe(name, () => {
-    describe('event scope param', () => {
-      it('is a plain empty object for targets under no block scope', async () => {
+    describe('event data param', () => {
+      it('is a plain empty object when no source contributes', async () => {
         let captured;
         const fixture = await mountTemplate({
           target,
           events: {
-            'click .btn'({ scope }) {
-              captured = scope;
+            'click .btn'({ data }) {
+              captured = data;
             },
           },
         });
@@ -93,67 +94,28 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         }
       });
 
-      it('resolves lazily — handlers that never read scope never resolve it', async () => {
-        const fixture = await mountTemplate({
-          target,
-          events: {
-            'click .btn'() {},
-          },
-        });
-        fixture.renderRoot.innerHTML = '<button class="btn">Click</button>';
-        const spy = vi.spyOn(fixture.template, 'getEventScope');
-        try {
-          clickOn(fixture.renderRoot.querySelector('.btn'));
-          expect(spy).not.toHaveBeenCalled();
-        }
-        finally {
-          fixture.cleanup();
-        }
-      });
-
-      it('resolves once per dispatch when read repeatedly', async () => {
-        let first;
-        let second;
-        const fixture = await mountTemplate({
-          target,
-          events: {
-            'click .btn'(params) {
-              first = params.scope;
-              second = params.scope;
-            },
-          },
-        });
-        fixture.renderRoot.innerHTML = '<button class="btn">Click</button>';
-        const spy = vi.spyOn(fixture.template, 'getEventScope');
-        try {
-          clickOn(fixture.renderRoot.querySelector('.btn'));
-          expect(spy).toHaveBeenCalledTimes(1);
-          expect(first).toBe(second);
-        }
-        finally {
-          fixture.cleanup();
-        }
-      });
-
-      it('leaves the existing handler params unchanged alongside scope', async () => {
+      it('merges data attributes and event.detail with detail winning', async () => {
         let captured;
         const fixture = await mountTemplate({
           target,
           events: {
-            'click .btn'({ scope, data, value, target: clicked, event }) {
-              captured = { scope, data, value, clicked, event };
+            'custom .btn'({ data, value, target: clicked, event }) {
+              captured = { data, value, clicked, event };
             },
           },
         });
-        fixture.renderRoot.innerHTML = '<button class="btn" data-id="7" value="hello">Click</button>';
+        fixture.renderRoot.innerHTML = '<button class="btn" data-id="7" data-kind="attr" value="hello">Click</button>';
         try {
           const btn = fixture.renderRoot.querySelector('.btn');
-          clickOn(btn);
-          expect(captured.scope).toEqual({});
-          expect(captured.data).toEqual({ id: 7 });
+          btn.dispatchEvent(new CustomEvent('custom', {
+            bubbles: true,
+            composed: true,
+            detail: { kind: 'detail' },
+          }));
+          expect(captured.data).toEqual({ id: 7, kind: 'detail' });
           expect(captured.value).toBe('hello');
           expect(captured.clicked).toBe(btn);
-          expect(captured.event).toBeInstanceOf(MouseEvent);
+          expect(captured.event).toBeInstanceOf(CustomEvent);
         }
         finally {
           fixture.cleanup();
@@ -163,13 +125,13 @@ RENDER_TARGETS.forEach(({ name, target }) => {
   });
 });
 
-describe('event scope param — non-delegated dialects', () => {
+describe('event data param — non-delegated dialects', () => {
   it('resolves to an empty object for naked-selector host events', async () => {
     let captured;
     const fixture = await mountTemplate({
       events: {
-        'click'({ scope }) {
-          captured = scope;
+        'click'({ data }) {
+          captured = data;
         },
       },
     });
@@ -186,8 +148,8 @@ describe('event scope param — non-delegated dialects', () => {
     let captured;
     const fixture = await mountTemplate({
       events: {
-        'global hashchange window'({ scope }) {
-          captured = scope;
+        'global hashchange window'({ data }) {
+          captured = data;
         },
       },
     });

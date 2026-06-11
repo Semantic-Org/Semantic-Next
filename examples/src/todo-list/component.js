@@ -123,19 +123,19 @@ const events = {
     self.toggleAll();
   },
 
-  'change .toggle'({ self, scope }) {
-    self.toggleTodo(scope.id);
+  'change .toggle'({ self, data }) {
+    self.toggleTodo(data.id);
   },
 
-  'dblclick .todo-list label'({ state, scope, $, afterFlush }) {
-    state.editingId.set(scope.id);
+  'dblclick .todo-list label'({ state, data, $, afterFlush }) {
+    state.editingId.set(data.id);
     afterFlush(() => {
       $('.editing .edit').focus();
     });
   },
 
-  'click .destroy'({ self, scope }) {
-    self.deleteTodo(scope.id);
+  'click .destroy'({ self, data }) {
+    self.deleteTodo(data.id);
   },
 
   'keydown .edit'({ target, event }) {
@@ -144,9 +144,9 @@ const events = {
     }
   },
 
-  'focusout .edit'({ self, state, scope, value }) {
+  'focusout .edit'({ self, state, data, value }) {
     if (state.editingId.get() !== null) {
-      self.saveTodo(scope.id, value);
+      self.saveTodo(data.id, value);
     }
   },
 

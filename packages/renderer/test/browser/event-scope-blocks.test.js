@@ -1,7 +1,8 @@
-// Block scope layers in the event-handler `scope` param: each item vars,
+// Block scope layers in the event-handler `data` param: each item vars,
 // subtemplate args, snippet args, async vars, resolved from the event
-// target's position via the boundary-marker bracket scan. Layer resolution
-// is a native-engine contract — lit degrades to an empty object, asserted
+// target's position via the boundary-marker bracket scan and merged into
+// data above data-* attributes and below event.detail. Layer resolution
+// is a native-engine contract — lit contributes no scope keys, asserted
 // at the bottom of the engine loop.
 
 import { defineComponent } from '@semantic-ui/component';
@@ -49,8 +50,8 @@ RENDERING_ENGINES.forEach((engine) => {
             ],
           },
           events: {
-            'click .row'({ scope }) {
-              captured = scope;
+            'click .row'({ data }) {
+              captured = data;
             },
           },
         });
@@ -72,8 +73,8 @@ RENDERING_ENGINES.forEach((engine) => {
             items: [{ id: 'a', name: 'Alpha' }],
           },
           events: {
-            'click .row'({ scope }) {
-              captured = scope;
+            'click .row'({ data }) {
+              captured = data;
             },
           },
         });
@@ -95,8 +96,8 @@ RENDERING_ENGINES.forEach((engine) => {
           template: '<ul>{#each item in items}<li class="row">{item.name}</li>{/each}</ul>',
           defaultState: { items: [a, b] },
           events: {
-            'click .row'({ scope }) {
-              captured = scope;
+            'click .row'({ data }) {
+              captured = data;
             },
           },
         });
@@ -129,8 +130,8 @@ RENDERING_ENGINES.forEach((engine) => {
             ],
           },
           events: {
-            'click .cell'({ scope }) {
-              captured = scope;
+            'click .cell'({ data }) {
+              captured = data;
             },
           },
         });
@@ -154,8 +155,8 @@ RENDERING_ENGINES.forEach((engine) => {
             showExtra: false,
           },
           events: {
-            'click .extra'({ scope }) {
-              captured = scope;
+            'click .extra'({ data }) {
+              captured = data;
             },
           },
         });
@@ -178,14 +179,48 @@ RENDERING_ENGINES.forEach((engine) => {
             items: [{ id: 'a', name: 'Alpha' }, { id: 'b', name: 'Beta' }],
           },
           events: {
-            'click .after'({ scope }) {
-              captured = scope;
+            'click .after'({ data }) {
+              captured = data;
             },
           },
         });
         const el = await mount(tag);
         clickOn(el.shadowRoot.querySelector('.after'));
         expect(captured).toEqual({});
+      });
+
+      it.skipIf(isLit)('merges scope over data attributes and detail over scope', async () => {
+        const tag = uniqueTag();
+        let captured;
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template:
+            '<ul>{#each items}<li class="row" data-id="from-attr" data-extra="attr-only">{name}</li>{/each}</ul>',
+          defaultState: {
+            items: [{ id: 'from-scope', name: 'Alpha' }],
+          },
+          events: {
+            'click .row'({ data }) {
+              captured = data;
+            },
+          },
+        });
+        const el = await mount(tag);
+        const row = el.shadowRoot.querySelector('.row');
+        clickOn(row);
+        expect(captured.id).toBe('from-scope');
+        expect(captured.extra).toBe('attr-only');
+
+        row.dispatchEvent(
+          new CustomEvent('click', {
+            bubbles: true,
+            composed: true,
+            detail: { id: 'from-detail' },
+          }),
+        );
+        expect(captured.id).toBe('from-detail');
+        expect(captured.name).toBe('Alpha');
       });
     });
 
@@ -198,8 +233,8 @@ RENDERING_ENGINES.forEach((engine) => {
           renderingEngine: engine,
           template: '<li><a class="lbl">{name}</a></li>',
           events: {
-            'click .lbl'({ scope }) {
-              ownScope = scope;
+            'click .lbl'({ data }) {
+              ownScope = data;
             },
           },
         });
@@ -212,8 +247,8 @@ RENDERING_ENGINES.forEach((engine) => {
             items: [{ id: 7, name: 'Seven' }],
           },
           events: {
-            'click .lbl'({ scope }) {
-              parentScope = scope;
+            'click .lbl'({ data }) {
+              parentScope = data;
             },
           },
         });
@@ -239,8 +274,8 @@ RENDERING_ENGINES.forEach((engine) => {
             items: ['parent-key'],
           },
           events: {
-            'click .badge'({ scope }) {
-              captured = scope;
+            'click .badge'({ data }) {
+              captured = data;
             },
           },
         });
@@ -266,8 +301,8 @@ RENDERING_ENGINES.forEach((engine) => {
           subTemplates: { rowItem },
           defaultState: { maybeRow: 'rowItem' },
           events: {
-            'click .after'({ scope }) {
-              captured = scope;
+            'click .after'({ data }) {
+              captured = data;
             },
           },
         });
@@ -293,8 +328,8 @@ RENDERING_ENGINES.forEach((engine) => {
             getData: () => ({ x: 5 }),
           }),
           events: {
-            'click .res'({ scope }) {
-              captured = scope;
+            'click .res'({ data }) {
+              captured = data;
             },
           },
         });
@@ -315,8 +350,8 @@ RENDERING_ENGINES.forEach((engine) => {
             check: () => state.fail.get() ? Promise.reject(new Error('boom')) : 'ok',
           }),
           events: {
-            'click .boom'({ scope }) {
-              captured = scope;
+            'click .boom'({ data }) {
+              captured = data;
             },
           },
         });
@@ -344,8 +379,8 @@ RENDERING_ENGINES.forEach((engine) => {
             items: [{ id: 'a', name: 'Alpha' }],
           },
           events: {
-            'click .row'({ scope }) {
-              captured = scope;
+            'click .row'({ data }) {
+              captured = data;
             },
           },
         });

@@ -611,37 +611,16 @@ export const Template = class Template {
           // prepare data for users event handler
           const targetElement = this;
           const boundEvent = userHandler.bind(targetElement);
-          const eventData = event?.detail || {};
-          // dataset is always stringified for atts, we want this as native values
-          const elData = mapObject({ ...targetElement?.dataset }, (stringValue) => {
-            let value;
-            try {
-              value = JSON.parse(stringValue);
-            }
-            catch (e) {
-              value = stringValue;
-            }
-            return value;
-          });
           const elValue = targetElement?.value ?? event.target?.value ?? event?.detail?.value;
-          // params built explicitly so `scope` can be a lazy getter —
-          // call()'s additionalData spread would evaluate it eagerly
-          let resolvedScope;
-          const params = {
-            ...(template.callParams || template.buildCallParams()),
-            event: event,
-            isDeep,
-            target: targetElement,
-            value: elValue,
-            data: {
-              ...elData,
-              ...eventData,
+          return template.call(boundEvent, {
+            additionalData: {
+              event: event,
+              isDeep,
+              target: targetElement,
+              value: elValue,
+              data: template.getEventData(targetElement, event),
             },
-            get scope() {
-              return resolvedScope ??= template.getEventScope(targetElement);
-            },
-          };
-          return template.call(boundEvent, { params });
+          });
         };
         const domEventSettings = {};
         const eventSettings = { abortController: this.eventController, eventSettings: domEventSettings };
@@ -798,15 +777,25 @@ export const Template = class Template {
     return isNodeInRange(getRootChild(node));
   }
 
-  // Block scope vars acting at an event target — each item vars,
-  // subtemplate args, snippet args, async vars — materialized into a
-  // plain object, innermost layer winning. Resolution is the engine's
-  // (boundary-marker bracket scan in native); engines without it
-  // resolve to an empty object. Snapshot semantics: values are copied
-  // at dispatch, signal values peeked, nothing subscribes.
-  getEventScope(target) {
+  // Everything acting at an event target, merged into one bag:
+  // data-* attributes (JSON-parsed), block scope vars (each item vars,
+  // subtemplate args, snippet args, async vars) with the innermost
+  // layer winning, then event.detail — later sources win on shared
+  // keys. Scope resolution is the engine's (boundary-marker bracket
+  // scan in native); engines without it contribute no scope keys.
+  // Snapshot semantics: values are copied at dispatch, signal values
+  // peeked, nothing subscribes.
+  getEventData(target, event) {
     return nonreactive(() => {
-      const eventScope = {};
+      // dataset is always stringified for atts, we want native values
+      const eventData = mapObject({ ...target?.dataset }, (stringValue) => {
+        try {
+          return JSON.parse(stringValue);
+        }
+        catch (e) {
+          return stringValue;
+        }
+      });
       const layers = this.renderer?.resolveScopeLayers?.(target, {
         // same live-boundary rule as isNodeInTemplate — stored parentNode
         // can be a dead build fragment for subtemplates attached mid-render
@@ -818,11 +807,11 @@ export const Template = class Template {
           const layer = layers[i];
           for (const key in layer) {
             const value = layer[key];
-            eventScope[key] = (value instanceof Signal) ? value.peek() : value;
+            eventData[key] = (value instanceof Signal) ? value.peek() : value;
           }
         }
       }
-      return eventScope;
+      return Object.assign(eventData, event?.detail);
     });
   }
 

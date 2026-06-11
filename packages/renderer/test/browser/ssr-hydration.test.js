@@ -483,8 +483,8 @@ describe('SSR hydration — subtemplates', () => {
       subTemplates: { child },
       defaultState: { rowId: 7, rowName: 'Seven', secret: 'hidden' },
       events: {
-        'click .lbl'({ scope }) {
-          captured = scope;
+        'click .lbl'({ data }) {
+          captured = data;
         },
       },
     });
