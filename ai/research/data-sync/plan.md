@@ -1,0 +1,441 @@
+# Data Sync Layer — minimongo for 2026
+
+Draft from the 2026-06-09 design session. Decision record reflects that conversation. The workload this design answers to is [`scenario.md`](scenario.md) — when they disagree, the scenario wins or gets amended.
+
+## Goal
+
+Linear's architecture as a framework primitive: in-memory reactive collections queried locally, field-granular deltas pushed live over a socket, optimistic mutations that survive reload. Meteor's data layer DX — `collection.find()` in templates, latency compensation, no API layer — without its server economics (mergebox, oplog tailing) or its coupling (mongo-only, inseparable from the runtime).
+
+The organizing insight: tiny realtime updates beat CRUD on every UX metric. The live delta path is the product. Persistence, offline posture, and partial-sync sophistication are all second-order.
+
+## Architecture
+
+Three separable layers. The unbundling is the lesson of both Meteor (couldn't extract minimongo/DDP from the runtime, so fixes never escaped the platform) and 2026 (Electric ships read-path only, TanStack DB ships store only).
+
+```
+@semantic-ui/schema     schema language: definition, normalization, validation, serialization — shared by component values, collections, operation args
+@semantic-ui/data       collections, reactive find, mutators + actions — standalone, no network
+@semantic-ui/sync       protocol client: channels, cursors, delta apply, outbox, persistence
+reference server        node + redis, the protocol is the contract not the implementation
+```
+
+Layer 1 works alone. Local-only collections are useful in themselves and absorb the `storeAs`/`saveStateID` localStorage persistence that sidebar-toggle, panels, and theme-switcher each hand-roll today.
+
+## Adoption Gradient
+
+SUI ships today as web components + signals over a CDN tag — zero server, zero data-layer LOC. That track is permanent and primary. The data stack is a gradient above it, not a successor: the formalization gradient's graduation rule (start at the lowest rung that works) extended to data.
+
+```
+defaultState          signals in a component — the CDN counter, untouched
+local collections     @semantic-ui/data alone: queries, drafts, forms, local persistence — no network
+synced collections    + @semantic-ui/sync + any server speaking the protocol
+```
+
+History sorts by whether the lower track stayed first-class: Svelte/Kit and Vue/Nuxt thrived on complete standalone layers, Meteor died fused, Ember Data was optional-in-theory and gravitational-in-practice. Enforced commitments, not intentions:
+
+- **Dependency direction is law: UI packages never import data packages.** Primitives consume values via settings — the design system contract stays data-free, so SUI-as-UI-library composes with any data layer (TanStack Query, tRPC, Convex). Ours is one producer among many.
+- **`subscriptions` integrates through defineComponent extension points** (callParams, lifecycle), not core component code. The component package has zero knowledge of collections, the CDN bundle stays data-free at the byte level.
+- **The no-server quickstart remains the quickstart.** Every data feature demos its local rung before its synced rung.
+- **Graduation is additive** — the steelman's templates were unchanged from the localStorage original. Rung 2 to 3 costs a subscriptions block and a server, not a rewrite.
+- **The server is a maintenance boundary, not just a portability one.** The protocol is the commitment, the reference server is an implementation others can own, and the data track can run its own release cadence without the UI track feeling it.
+
+## Decision Record
+
+| # | Decision | Call | Why |
+|---|---|---|---|
+| 1 | Conflict model | Server-authoritative rebase for optimistic writes. No CRDTs. | Field consensus by 2026 (Zero, Convex, Instant, Replicache). It is Meteor's method-stub model with the names changed. Rebase = replay pending mutators over fresh server state, so no `saveOriginals` cloning and no patch inversion. Collaborative text can embed a CRDT doc later. |
+| 2 | Client store | Memory-first. `Map<id, doc>` per collection, per-doc and per-query `Dependency`. | Sync reads keep mutators and reactivity uncolored (the fibers lesson at API scale). Raw Dependency over Signal-per-key per the RDC design note. References out, writes through declared operations, dev-mode freeze for safety — the `safety: 'reference'` doctrine. |
+| 3 | Storage | IndexedDB write-behind. Snapshot store (lazy, idle-flushed, reconstructible) + outbox (eager, durable). | The Zero/Linear/LiveStore convergence. No SQLite wasm: ~940KB bundle, ~500ms init vs 46ms, broken multi-tab on Android Chrome. Web Locks leader election + BroadcastChannel. WebKit storage is evictable, full resync is a protocol state regardless. |
+| 4 | Partial sync | Channel-scoped replicas, not queries-as-subscriptions. | Linear model: the developer declares scopes (workspace, team, document), everything in a channel syncs, queries run locally. No server query evaluation, no per-query invalidation infra. Lazy hydration per channel keeps boot constant in workspace size. Query-driven sync can arrive later behind the same seam. |
+| 5 | Query language | Mongo-subset selectors run locally against the pool. | Not nostalgia: selectors are statically analyzable, enabling field-intersection invalidation (a write to `title` never re-runs a `{completed: true}` query). Opaque JS predicates kill that. No `$where`, no aggregations. |
+| 6 | Realtime default | Tiered: routed channels live by default, recompute channels choose explicitly (`live: false` is the searchIndex default). | The 90% is live where liveness is nearly free (write-time routing). Recompute liveness has real unit economics (engine queries/sec scale with viewers × write pressure), so it is a knob, not a constraint — a nonreactive search index is a deliberate purchase of staleness budget (scenario taxonomy: soft fail, generous bound, enormous discount). `publish.once` was the Meteor community's own correction; here it is a first-class tier. |
+| 7 | Transport | WebSocket default. Cursor is the protocol core, delivery is pluggable. | Opaque monotonic cursor per channel, progress held client-side, explicit cursor-expired → resnapshot transition. Reconnect and mobile fall out of the cursor, not the socket. Long-poll/SSE delivery can slot in later without protocol change. |
+| 8 | Invalidation routing | Write-path capture primary, CDC as optional adapter backstop. Tailing is never required and never per-instance. | redis-oplog made structural: owned writes route changed docs → channels with no log reverse-engineering, carrying rich info (paths, attribution, txid). Adapters may expose `watch()` (pg logical replication, mongo change streams) as a second event source into the same router — covers external writers (migrations, cron, DBAs, triggers). Meteor's pathology was unfiltered per-instance × per-client processing, not tailing itself; CDC here lands once and selector-matches through the shared delta log. |
+| 9 | Server posture | Protocol-first. Reference Node + Redis implementation. | Portable because conformance-tested, not because small (ruled, R2 brief 5 — the spec outgrew the weekend claim; the conformance suite is the anti-DDP portability test). SUI doesn't own the vertical — that requirement is what made Meteor's magic a business liability. |
+| 10 | Offline posture | Offline-tolerant, not offline-first. | Outbox survives reload and replays on reconnect. No long-offline merge promises for shared data — that's where complexity explodes for users who wanted optimistic UI. |
+
+## Client Store
+
+A collection holds canonical docs in a `Map<id, doc>`. Reactivity is the `match()` / ReactiveDataContext pattern: raw `Dependency` per doc and per registered query, `depend()` in the read path, `changed()` from the write path.
+
+`find()` called inside any Reaction is live — every template binding runs in a Reaction, so reads are reactive in templates with zero framework changes. This is the Tracker dividend and the core reason this layer feels native in SUI when it can't in React/Svelte/Solid.
+
+Contract with the renderer (all already rewarded by the each-block):
+
+- Stable ids via the `Signal.id` convention (`id`/`_id`/`hash`/`key`)
+- Result arrays reference-stable: fresh objects only for changed docs → reconcile's same-ref fast path
+- Depth-1 granularity: nested changes apply as top-level field reference swaps so the per-field diff and FGR deps see them
+- Write `undefined`, never `delete` (removed keys slip the snapshot diff by design)
+
+Query invalidation: each registered query compiles its selector to a field set. A write's changed paths (from trackWrites) intersect against those sets, only intersecting queries re-run. Re-run + deep-equal dedup on emit, not IVM — at app-data scale the reconcile absorbs the output cheaply. Bench before reaching for differential dataflow.
+
+**Two stages, two sections — provision, then read.** `subscriptions` declares what this component needs from the server, deduped with other components (the wire's client-side refcounting made component-visible): `subscriptions: ({ subscribe }) => ({ todos: subscribe('todos') })`. `queries` declares the reads that run over the pool once data is there: `queries: () => ({ todos: () => Todos.find() })`. The stages are real and separable — a route or parent can provision while leaf components read (route-level subscribe falls out of the split; the earlier fused scoped-handle design had structurally blocked it by tethering reads to the subscriber's own handle).
+
+**Bags and the flat context.** Destructured lifecycle params are categories of things, never the things themselves (`state.count`, `settings.name`, `queries.todos`): `subscriptions.*` and `queries.*` are two JS bags named for their sections, alongside `state.*` and `settings.*`. The template flat context is **queries, settings, state, instance** — subscriptions never merge. Templates consume subscription status or window meta through named instance derivations, the established example pattern (card-search's `getVisibleFriends`): `invoices() { return subscriptions.invoices }` and the template reads `{invoices.total}` through the instance layer. Same-name dual declaration (`subscriptions.todos` + `queries.todos`) is legal and unambiguous — `{todos}` is always the query.
+
+**Handles are subscription-stage objects** (ws-protocol §6 already specifies exactly this): routed channels return status only — `{ ready, stale, lastDeltaAt }` — no data face; their data lives in the pool and queries are how it's read. Recompute channels (searchIndex) additionally carry the irreducible window face — membership, order, `total`, `pages` — because server-side relevance cannot be reconstructed from the pool; reading the window off the handle is subscription-stage data, not a pool query. Handle gaps for protocol v2: `error` (a `nosub` refusal surfaces nowhere today) and `refresh()` for `refresh: 'manual'` windows. No client-side lifecycle callbacks (`onReady`/`onStop`): status is reactive reads, per the no-onChange-sugar doctrine, and refcounted unsubscribe rides the component lifecycle.
+
+**The binding boundary, restated for two stages**: query language stops at the two sections — channel args in `subscriptions`, selectors in `queries` entries. Downstream derivations are instance helpers in pure JS (`completedTodos() { return queries.todos.filter(todo => todo.completed) }`), templates consume named derivations (`{count completedTodos}`) — no mongo mixed into component logic or template expressions. No computed wrappers anywhere — the closure is the reactive context; execution sharing on named finds is the query registry's job (selector-hash cache, N dep subscribers, never component memoization). The settings parallel holds for `queries`: a reactive proxy bridge, trap-get → ambient dep registration → plain array out. Field-intersection sophistication concentrates where selectors actually live: subscriptions, searchIndex args, and queries entries. The trinity reads: subscriptions provision, queries read, instance helpers derive, state is local — both sections introspectable for SSR prefetch, each one static callParam key in the registry.
+
+**The coverage checker is promoted from proposal to v1 requirement.** Pool reads return whatever live channels have provisioned — unfusing the handle re-exposes the silently-incomplete-query trap, and the dev-mode selector-subsumption warning ("this query is not covered by any live channel") is now load-bearing, not optional. Both sides are statically analyzable (query selectors and channel selectors are mongo-subset), and the same machinery extends to field-level coverage against projections.
+
+**Pagination splits by layer.** `skip`/`limit`/`sort` are query description, not cursor state — they live in the options argument and the result's provenance. Over a channel-scoped replica most pagination is windowing over local data: reactive, free, and the page-shift-on-insert wart demotes from consistency bug to presentation choice. Where data is too big to sync wholesale, the window moves into channel args — and for **routed channels** (log-replayed) it is keyset-anchored, never offset-anchored (`subscribe('messages', { roomID, before, limit: 50 })`): offset windows shift under live inserts, corrupting replay and load-more (the Meteor skip/limit publication pathology). Load-more subscribes the next window. Range predicates stay statically matchable for routing. **Recompute channels** (searchIndex) tolerate offset-style `page` args because each response is a fresh snapshot per args — there is no log to replay against, so nothing shifts underneath a page boundary.
+
+**`find()` returns data, not a cursor.** Meteor's cursor did four jobs, all relocated: granular rendering moved downstream (each-block reconcile consumes a reactive array re-read, there is no observeChanges consumer), dep registration is ambient (the read registers, no fetch step), observer lifecycle is Reaction cleanup/scope disposal, and the query-description-for-server job is served by **result-with-provenance** — the returned array carries `{ collection, selector, options }` as metadata, so channels get docs for the snapshot and the selector for routing from one call, and the coverage checker and devtools read the same provenance. Field consensus (Zero, Convex, Instant, TanStack DB): queries return data, the query object survives only as an inert description. `count(selector)` stays first-class with a value-guarded dep (`find().length` would re-fire on any result change). Imperative observation deferred — `reaction` + compare today, an additive `observe(selector, callbacks)` utility if demand shows. Removes the cursor/array trap class outright.
+
+## Collection Helpers
+
+Isomorphic presentation helpers on docs — `helpers: { fullName() { return this.firstName + ' ' + this.lastName } }` — the same function running in a server email body and a client template. Docs are created through one chokepoint (wire revival already constructs them), which attaches the collection's helper prototype: fields as own props, helpers on the proto, JSON/wire clean by construction, schema-field name collisions throw at registration. Folder convention applies at scale (`collections/invoices/helpers/`).
+
+Templates need zero changes: the renderer already auto-calls zero-arg functions on data objects with `this` bound, so `{record.summary}` works, and dotted traversal calls intermediate functions, so `{record.client.name}` walks a relation helper mid-path.
+
+**Relation helpers are the v1 relations story** (closes priors-audit #2 at the presentation layer): `client() { return Clients.findOne(this.clientID) }` — reactive, isomorphic, and client-side N+1 is free because pool lookups are Map gets, not round trips. Server-side action bodies still batch (adapter reads are real I/O). Channel-level joins remain out: the sync side of relations stays an open question, the render side is solved.
+
+Boundary: computed fields are stored derivations (recompute-and-write when inputs change, override-aware), helpers are unstored derivations (evaluated where read, never wired). Stored vs unstored is the whole boundary — the moment a helper needs to be filtered, sorted, or projected server-side, it graduates to computed and becomes a real written field.
+
+Primitive integration (bucket: primitive-fixable, one marker fixes all four): a `DOC_PROTO` symbol on collection prototypes — `isTrackable` accepts it (else mutator bodies fall to exotic-snapshot handling), `clone`/`preserveNonCloneable` deep-copies-and-reattaches instead of passing by reference (else rebase shadows corrupt), `isEqual` treats marked protos as plain (belt-and-suspenders given the single chokepoint), IDB hydration re-attaches after structuredClone strips. Open trace: helper reactivity granularity inside as-mode each (item-proxy `this` → per-field deps, raw `this` → whole-item dep — both correct, needs the test).
+
+## Write Path
+
+Two write vehicles, roughly 50/50 in production code, selected by use case:
+
+| | **Mutators** — the realtime half | **Actions** — the awaited server half |
+|---|---|---|
+| Body | isomorphic, sync (trackWrites envelope) | server-only, async allowed |
+| Simulation | full optimistic apply | none — effects arrive via the delta stream |
+| Call site | fire-and-forget, effects visible now | `await` — a promise to complete an action |
+| Offline | outbox: durable, replays on reconnect | rejects fast when disconnected |
+| Rebase | pending set, replayed over fresh state | nothing to rebase |
+| Use | toggles, drags, inline edits — latency-compensated interactions | business operations: 50-100 LOC, external services, server reads |
+
+The call site tells the truth: mutators are sync (uncolored, per the sync-callbacks doctrine), actions are honestly network-async. An action's promise resolves after its result arrives and its deltas have applied locally (the result cursor says when) — read-your-writes for the non-optimistic half, no flicker window after the await. Both attach to a primary collection as pure namespace — the noun organizes, it does not confine: bodies write any collection through the same ambient envelope (multi-collection does not make a mutator an action — simulation and contract do), and routing never cared (deltas route by changed doc, not by declaration). Definition is registration: wire names derive (`todos.add`), the server's dispatch/permission registry is the config object, and `Todos.` enumerates the write API.
+
+Expert form is a four-phase pipeline — **permission → schema → check → run** (tRPC/Convex/validated-method convergence):
+
+```js
+add: {
+  permission: (args, { user }) => !!user,                  // server enforces, client uses for affordances (Todos.add.allowed)
+  schema: { title: String },                               // arg shape, both sides — also the wire contract: revival + unknown-key stripping
+  check({ title }) { if (!title.trim()) throw ... },       // imperative validation, side-effect free
+  run({ title }) { Todos.insert({ title: title.trim() }) }, // the write, optimistic then authoritative
+}
+```
+
+Slot rationale is execution profile, not topic: `permission` is the server gate (aligned with channel auth signature), `schema` doubles as the args wire contract (Date args revive, unknown keys strip — which makes `Todos.toggle(data)` with an event data bag safe), `check` is side-effect free so drafts dry-run schema+check for pre-flight field errors without applying, `run` is the body (`run` not `update` — `this.update` is a CRUD verb in the same lexical scope, same word for a different concept is the bad kind). Args are named records — follows from the schema slot, and what wire, optional-arg evolution, and tooling want. Four phases is the pipeline, permanently: throttle/audit/logging are sibling options, not phases. Hook proliferation is the historical failure mode of slot designs.
+
+**Mutators take one of two body slots — the word is true by construction.** `mutate(doc, args)` is `Signal.mutate`'s contract lifted to docs: the framework resolves the doc (the targeting `id` arg is consumed by resolution, not passed through), runs the body through trackWrites, and the operation is statically known to touch exactly one doc — the dominant case, and the routing/conflict machinery can exploit the guarantee. `run(args)` is the arbitrary body (inserts, selector-scoped writes, multi-collection) with ambient CRUD. One body slot per operation, both is a dev error. Actions always use `run` (async allowed). A mutator is a thing that has a `mutate()` — the registry name stops being jargon and starts being a description.
+
+**Two validation contracts, one optional — and the doc gate filters, not just validates.** The args schema is the wire contract — revival, unknown-key stripping, early shape errors — and ops may skip it. The collection schema is the doc contract and is never skipped: every operation's write set passes through it before commit (types, `options` membership, computed-write rules, per-field permission tokens), client-side for instant errors, server as authority. **Writes to undeclared paths are ignored** — filtered at the gate, dev mode logs the dropped paths — so the collection schema is the complete write surface: a reviewer reads the schema and knows everything any mutator can land, however large the bodies (a deliberate property of this design, for exactly that reviewability reason).. `unsafe: true` on an Object field opts a region out — arbitrary structure permitted beneath that path — which is also the mechanism for deliberately loose regions (jurisdictional variant blobs, `{ ...foo, ...spread }` dumps, server-only scratch like `internal`). A schema-less `setStatus` still cannot write an illegal status, and a typo'd field name cannot write anything at all.
+
+**Privilege is ambient, bodies are `this`-free.** Raw `insert`/`update`/`remove` exist on the collection but throw outside a running operation — bodies call `Todos.insert(...)` directly via the imported binding. Sound because mutator bodies are sync (a module-level flag on the client) and the server envelope rides AsyncLocalStorage since action bodies await (see Execution Without Fibers). The symmetry is the teaching line: reads inside a Reaction register ambiently, writes inside an operation authorize ambiently — one mental model, both directions. Cross-collection writes need zero API: `Invoices.update(...)` inside a Todos mutator is privileged by the same envelope. Cost: CRUD + query names are reserved against operation names (the public delete mutator is `delete`, raw is `remove`), and privilege legality is invisible at the call site — carried by a precise dev error. There is still no unguarded public write: the no-allow/deny stance stays structural. Local-only collections expose CRUD freely. (Ruled, R2 brief 3: ambient stays — terseness wins at the small rung — with the soundness fix as a v1 requirement, not a note: the snapshot-branch expiry guard or forced proxy on operation bodies.)
+
+**Registration is a gradient: inline config for small collections, file-per-operation for scale.** The `actions:`/`mutators:` config map stays canonical for small collections and the no-build CDN rung (no glob loading exists there). At production scale — major collections carry hundreds of operations — the registry moves to the folder convention:
+
+```
+collections/invoices/
+  invoices.js        ← collection: schema + core config
+  actions/approve.js ← import { Invoices } from '../invoices.js'; Invoices.action('approve', {...})
+  mutators/set-status.js
+```
+
+Late attachment via `Invoices.action(name, opts)` / `Invoices.mutator(name, opts)` / `Invoices.publish(name, def)` / `Invoices.searchIndex(name, def)`, open during module load, **sealed at `listen()`** — post-seal registration throws, duplicate names throw at load. Loading convention replaces Meteor's eager-load: `loadCollections('./collections')` on the server, `import.meta.glob('./collections/**/{actions,mutators}/*.js', { eager: true })` in bundled clients (publications/search are server-only, never globbed client-side). Both forms share one registration path, mixing allowed. The law covers all four registries: writes and reads alike are file-per-entry at scale, never shared-file literals.
+
+The governance argument *inverts* at scale: file-per-operation is the audit structure (ls the folder, blame per operation, CODEOWNERS per file, one-operation diffs), where a shared literal is a merge-conflict magnet — every concurrent addition collides artificially, the failure mode of every single-file migration registry. General law: **any registry that grows monotonically with team size is file-per-entry, convention-loaded, and sealed — never an array or literal in a shared file.** Publications and search indexes ride the same convention (`collections/invoices/publications/`, `collections/invoices/search/`) — server-only files, never client-globbed.
+
+Still rejected: tRPC-style fluent chains (foreign vocabulary in a declarative-config codebase). Slot signatures are uniform `(args, ctx)` — args mirror the call site, ctx carries `session`/`user`, matching channel handlers. Tree-shaking cost (loading the collection's operations) acknowledged, minor — and the folder convention lets clients glob only `mutators/` when actions are server-only.
+
+**Practice is bimodal, the middle rungs are rare.** Mutators simulate fully, actions not at all — `isServer` guards and a separate `simulate` slot exist as escape hatches but production code clusters at the poles (50/50). Stated semantic, not a bug: simulations read the pool, authoritative bodies read storage — divergence is corrected by the rebase on confirm. External side effects in action bodies use the operation id as their idempotency key (the protocol already dedupes by it).
+
+Both vehicles share the four-phase pipeline, ambient privilege, namespacing, and wire shape. A mutator's simulation runs synchronously against the local pool:
+
+```js
+collection.update(id, doc => { doc.completed = true })
+// internally: trackWrites(doc, fn, { returnPaths: true })
+//   → changed paths → fire per-doc/per-field deps → wire-ready $set
+```
+
+Flow: optimistic apply → outbox write (durable, at mutation time) → send → server runs authoritative version → delta broadcast → client rebases by discarding speculative state and replaying remaining pending mutators on top.
+
+Notes:
+
+- Mutator bodies are sync-only (trackWrites proxies expire at callback return — also the sync-callbacks doctrine); action bodies are async
+- Client generates doc ids. `generateID` is 32-bit, too weak — use `crypto.randomUUID()` or upgrade utils
+- `pruneChildPaths` yields the changed path set — value-less and index-addressed (the reactivity review's finding), so the wire write picks values via `get` per path, and array segments translate to id-addressed form for schema-declared keyed arrays before send (see Repeating groups)
+- Clone cost is a non-goal: Meteor-era apps cloned liberally and stayed fast where it mattered. The place it would compound — per-inbound-delta apply — is avoided by field swaps incidentally, not as a crusade
+
+## Execution Without Fibers
+
+Meteor's server-side sync CRUD was fibers suspending the stack during I/O. Node removed that, Meteor 3 paid with `insertAsync` everywhere. This design splits the problem by what actually blocks:
+
+**Writes never await, anywhere.** A write is a command: `insert` buffers the doc and returns a synchronously generated id, `update(id, fn)` buffers the pair, `remove(selector)` buffers the selector. The body completes, then the framework applies the command log to storage in one async transaction — read-modify-write per update, with `fn` executing inside the transaction through trackWrites for delta paths, all under the mandatory txid. Read-your-writes inside a body is served by the buffer overlay. This is the server-side mirror of the client's write-behind, and the `update(id, fn)` callback shape is accidentally the post-fibers shape — the doc-dependent logic already lives next to the read it needs.
+
+**Reads are the one true coloring, quarantined to action bodies.** Client reads are pool reads, sync, always. Mutator bodies are sync both sides: pool reads on the client, reads deferred into update callbacks on the server — stated constraint: mutator bodies may not read storage outside an update callback. Needing to branch on storage state is the signal the operation wanted to be an action. Action bodies are already honestly async, so `await Todos.find(...)` server-side is true coloring, not contagion.
+
+**The isomorphism trade, stated.** Convex and Zero ship `await tx.insert(...)` because they split client and server implementations per operation. Single-body isomorphic mutators force sync bodies, which force command buffering. One body to write and reason about, paid for with bodies-command-transactions-execute. The split-implementation model remains available as the `simulate` slot.
+
+**Infrastructure:** server envelope rides AsyncLocalStorage (method bodies await — a module flag would cross-contaminate concurrent requests; ALS is the post-fibers replacement for the fiber-locals behind `Meteor.userId()`). Client keeps the module flag (mutators are sync there). Server-only pipeline slots (`permission`) may be async; client-dry-runnable slots (`check`) stay sync. Worker-per-request + `Atomics.wait` would give true sync server reads — that is rebuilding fibers from threads, named and rejected. Durability ordering for external effects (write outbox entry, then call the external service, then flush) is an open server-side pattern, deferred with the method id as idempotency key.
+
+## Protocol Sketch
+
+JSON wire, field-granular like DDP's `changed` messages (which were right — Meteor had granularity at the wire and lost it twice before the DOM).
+
+**The authoritative message schema lives in [`ws-protocol.md`](ws-protocol.md)** — the Tier 1.3 deliverable, v2 synthesis folding its five-voice review still pending. Shape in brief: writes ride `call { id, name, args }` (both vehicles, the wire doesn't distinguish), `result` carries settlement and txid but **no cursor**, the read path is `snapshot`/`delta`/`reset` plus `nosub` and `live`, and the txid envelope on deltas marks a transaction's effects. An earlier inline sketch here predated that spec with different fields — trust the spec.
+
+**Connection protocol.** Governing principle: no session to resume, only positions to continue from — all durable progress is client-held (channel cursors, outbox) or server-derivable (idempotency ledger), so any node answers any reconnect, no sticky sessions. Handshake: `hello { protocol, clientID, auth? }` → `welcome { protocol, lastCallID, heartbeat }` | `rejected { reason, retryAfter? }`. `clientID` is stable per browser profile, persisted beside the outbox, owned by the leader tab — identity outlives connections (Replicache lineage). **ACKs are a high-water mark, not frames**: `welcome.lastCallID` comes free from the idempotency ledger — client discards acked outbox entries, replays the rest; steady-state `result` messages ack per call. At-least-once + idempotent receiver, no exactly-once handshake (MQTT's lesson). Resume: batched `sub`s with stored cursors → tail replay or `reset` per channel; an epoch rides *inside* the opaque cursor (`epoch:offset`, Centrifugo's server-amnesia lesson) so wiped logs and restarted offsets surface as `reset`, invisible to the client. Replay order is correctness-irrelevant — `synced ⊕ pending` re-derives regardless — so subs go first for fastest screen freshness, outbox races alongside. Heartbeats are app-level and server-initiated (browser WS exposes no ping API; the server pays for zombies), intervals set in `welcome`; missed pings catch half-open TCP, reconnect uses exponential backoff + jitter (thundering herd). Backpressure: `reset` is the universal pressure valve — slow consumers get log collapse + resnapshot, one bounded payload, never per-client buffering (the Socket.IO recovery buffer is a mini-mergebox, rejected). Lineage: take Centrifugo position/epoch/recovery, Replicache lastMutationID, Electric client-held progress, MQTT at-least-once, DDP versioned hello. Reject: DDP session resume (never implementable), per-session replay buffers, exactly-once machinery.
+
+Boot state machine, designed in from day one even though IDB lands second (Linear's perceived speed is substantially this path):
+
+```
+hydrate (IDB → pool, render immediately) → catch-up (sub with stored cursor) → live
+```
+
+Fixed by the spec: cursor semantics, ordering guarantees, the catch-up/live state machine, the reset path. Pluggable: wire encoding, live delivery mechanism, server change capture, fan-out infrastructure, auth.
+
+## The Sync Loop
+
+The client invariant: **visible state = synced ⊕ pending** — server-confirmed state with unconfirmed mutators replayed on top. Every sync event updates one side and re-derives.
+
+**Downstream.** Per channel: *client has applied everything up to cursor N.* Fresh sub → snapshot. Live → field-granular delta, applied as top-level field swaps. Reconnect → tail replay from stored cursor. Cursor expired → `reset` → snapshot path (storage loss, log truncation, and migration all collapse here, which is why reset is a protocol state not an error). Boot with persistence enters the same machine from disk: hydrate pool from IDB snapshot, render, then "reconnect" with the snapshot's cursor.
+
+**Upstream.** Mutator call, synchronously: optimistic apply via trackWrites, append to pending set, append to durable outbox, send. (Actions skip all of this: no pending entry, no outbox — the promise settles on result + local delta application, and rejects fast offline.) Server runs authoritative impl in a transaction, routes deltas to channels, replies `result { id, status }` — settlement carries no cursor: the txid on the call's deltas marks *your effects in the stream* (ws-protocol §2). When those deltas have applied, the speculative version is dropped as the authoritative ones carry the same effects in. No flicker without observer-pausing machinery.
+
+**Rebase mechanics.** Copy-on-write shadows for only the docs touched by pending mutators (first touch stashes the confirmed version). Delta for an untouched doc applies directly — the common case, zero overhead. Delta for a shadowed doc applies to the shadow, then pending mutators replay over it in order. Confirm/reject removes the mutator from pending and replays the remainder — rejection is not an undo implementation, the effect just stops being replayed. Cost O(pending writes), and pending is the in-flight window. Client-generated doc ids let create-then-edit chains survive replay.
+
+**Guarantees.** Read-your-writes (pending always replayed), per-channel causal order (the log), monotonic reads (cursor never regresses), disjoint-path concurrency (id-addressed path deltas + touched-paths commits — including disjoint subdocs of the same array). Same-path concurrency is last-write-wins at the server, stated as the semantic — except on replay of aged entries, where conflict detection applies:
+
+**Replay conflict handling — parking-first (ruled, R2 brief 2).** Aged outbox entries park instead of replaying: dead-letter retains content, an explicit confirm surface (field-routed, validation-shaped) lets the user decide — the hard-fail bar met with zero server metadata. Within the realistic envelope, same-path concurrency stays honest last-write-wins by decree. The per-path last-write map (a second durable write per write, forever) is built only if production instrumentation shows confirm-fatigue on parked replays — the review's per-path refinement is retained as the design if earned, not the default. Per-doc versions stay rejected (~100% false-positive under field-level collaboration).
+
+**Protocol-level requirements this implies:**
+
+- **Mutation idempotency** — server dedupes by call id against the per-clientID ledger, whose high-water mark doubles as the reconnect ACK (`welcome.lastCallID`, ws-protocol §5). Reconnect-retry must not double-apply (Meteor's `$inc` hazard).
+- **Cross-channel atomicity** — ruled (R2 brief 1): grouping moves server-side. Live flow gets one-frame-per-tx-per-socket (atomic apply free by framing). At resume, the server regroups tail frames by txid across the resume batch — per-request computation, stateless-node invariant holds. The client hold-group machinery, its timeout valve, and spans-on-every-frame are deleted.
+- **Multi-tab** — leader (Web Locks) owns socket, outbox, and the rebase engine, broadcasts applied pool changes over BroadcastChannel. Followers are consumers whose operation calls forward to the leader. One rebase engine per profile, not per tab.
+
+## Ephemeral Collections (True Realtime)
+
+The third timescale: live cursors, presence, typing indicators — 15-30Hz throttled updates where staleness is the only sin and history is anti-valuable (a late cursor position must be dropped, never delivered; replay would animate ghosts). The durable pipeline is correct but mispriced by orders of magnitude here: IDB outbox writes per mousemove, ledger dedup for harmless duplicates, storage persistence of ephemera, a channel log faithfully recording movement history.
+
+One flag re-prices it: `collection('cursors', { ephemeral: true, expires: 'connection' })`. Server holds an in-memory latest-per-key map per channel instance (late-joiner snapshot = the map), fans out immediately, **conflates under backpressure** (a slow consumer's pending frame is replaced, never queued — the presence-system discipline, inverse of durable). Writes fire-and-forget, no cursor (no log to have a position in), no ack, keys expire with connection liveness. Client surface unchanged: `{#each cursor in Cursors.find()}` — same templates, same per-field deps; one peer's move = one field dep = one style write. Client-side interpolation (render 60fps, network 20Hz) is app-space.
+
+Load: 5 movers × 20Hz × 10 subscribers ≈ 1,000 tiny sends/sec server-side — trivial. Client peak ~100 single-field dep fires/sec — krausest-grade.
+
+**Graduation rule**: data that must survive reconnect (the durable review highlight, not the cursor that drew it) moves tiers by deleting the flag. The full timescale ladder: ephemeral (15-30Hz, conflated, connection-scoped) → durable realtime (debounced mutators, synced ⊕ pending) → refresh (seconds, polled). Three physics, one client surface.
+
+## Channels (Publications and Permissions)
+
+Provenance: `Meteor.publish`'s API shape, Electric's shape semantics (selector-defined replica with an offset log), redis-oplog's write-time channel routing, LiveGraph/Instant's shared subscription state.
+
+**Publications attach to collections — the pub of pub/sub.** `Invoices.publish(name, def)` late-attached, one file per publication under `collections/invoices/publications/`, loaded by the same glob/`loadCollections` convention as operations, sealed at `listen()` — or the inline `publications:` key at the small rung. The wire channel address derives as `collection.name` (`Invoices.publish('byId', ...)` → `records.byId`), and the nameless late-attach form (`Todos.publish(def)`) claims the bare collection name. Vocabulary line: a **publication** is the collection-attached declaration, a **channel** is the runtime instance its `(name, args)` becomes on the wire — publication declares, channel runs. Attachment is namespace, not confinement (the mutator rule): handlers may return docs from other collections, delta frames already carry `collection` per frame. server.js holds infrastructure only — storage, `can()`, `listen()` — never domain content: a centralized `channels:` literal is the same monotonically-growing shared-file registry the registration-gradient law forbids.
+
+**Publication config, production-shaped.** `permission` — capability token(s) resolved by the app's `can(ctx, token)`, function form as escape hatch (declarative tokens are auditable: "what can an auditor see" is a grep). `filter` — baseline selector ANDed into every query, static object or `fn(ctx)` (soft-delete and tenant scoping declared once, not remembered per handler — the static form joins field-set analysis). `fields` — projection inclusion list. `handler(ctx, args)` — auth-resolved query, async allowed server-side, delegates to search backends freely; **args are this publication's declared contract** (`{ id }`, `{ roomID, before }`), distinct per publication, opaque to the wire.
+
+**Search indexes are their own verb.** `Invoices.searchIndex(name, { permission, filter, search, fields, where, sort, pageSize, engine })` — not `publish` with a factory argument, because to the end user an indexed window is a different thing than a publication (different arg contract, different liveness defaults, different mental model) even though both compile to plain channels underneath. The precedent is the write side: mutators and actions both ride `call` on the wire, and register separately because the user contract is bimodal. Folder convention: `collections/invoices/search/`, beside `publications/` — the heritage layout's own split. The generated handler's **arg contract is the standardized window vocabulary** — `query` (search text, `''` = the default window), `where`/`sort` validated against the declared whitelists, `page` — versus a publication's handler-declared args; the derived address (`invoices.table` vs `records.byId`) tells the subscriber which contract they're in. Declared searchable fields are auditable (matching an undeclared field would leak contents via result membership), returned projection, client-suppliable filter/sort whitelists, built-in pagination riding the handle (`total`, `pages`). Domain args are a separate declared object, distinct from the window vocabulary at the callsite — `args: { organizationID: String }` in the factory, required to subscribe, flowing into `permission(ctx, args)` and `filter(ctx, args)` — because one object is user-shaped (query/where/sort/page) and the other is required identity, and they must read as different things. `query: ''` is the default window — the primitive is the indexed table view, search is one parameter. **Liveness is the factory's first knob.** `live: false` (default): subscribe → snapshot → done — no cursor, no log, no standing recompute, no window state; args changes re-query (typing/paging already re-subscribe). `refresh: 'own-writes' | seconds | 'manual'` covers the trifecta's page-updates-on-insert for the actor and every dashboard's refresh habit, without making co-editors' churn anyone's standing cost. `live: true` opts into the full recompute-diff machinery (write-flag debounce, emit floor, membership deltas) for dashboards that earn it. This resolves the personal-args economics finding by default — the recompute machinery that would scale poorly past ~50 personal-args viewers simply doesn't run unless asked. And the `refresh: seconds` tier is honest polling — the SWR-grade baseline most of the industry ships contentedly — except that poll results upsert reference-stable with deep-equal dedup into per-field deps, so an unchanged row renders nothing and a changed row renders one cell. Even the humble tier is surgical here.
+
+Search fields take the house dual form: flat list (default word-prefix matching — admin tables are incremental typeahead, not submitted queries, so stemming defaults would fight the second keystroke) or per-field expert form `{ match: 'exact'|'prefix'|'word'|'text', weight, language }`. That four-word vocabulary plus weights is the entire portable contract: engines implement it (substring scan at recompute-diff grain, pgSearch → tsvector/pg_trgm with emitted index DDL, elastic natively and beyond), analyzers/synonyms/mappings stay inside engine config, and index-time analysis is a computed field (stored by definition) — replacing the common hand-rolled-analyzer-into-a-dedicated-search-field pattern with a declarative schema key.. Relevance is a sort mode (non-empty query + no explicit sort orders by weighted score, reordering rides the recompute-diff). Deferred: query-syntax parsing (`status:open`) as an engine/userland hook, numeric search (structured filtering is `where`), fuzzy (an engine capability behind the same `match` word). The `engine` knob plugs matching strategy and `local()` can run the same declaration client-side over a synced working set, keeping component code regime-agnostic. Underneath, it is a plain channel — same sharing, cursor, log, recompute-diff, projection ledger — so the concept count holds: the verb pair is the server-side formalization gradient (ad-hoc publication : searchIndex :: component : primitive), and userland factories ride the plain verb (`Invoices.publish(name, myFactory(opts))`).
+
+**Search channel mechanics.** Args are reactive via the function form (`subscribe('invoices.table', () => ({ query, where, sort, page }))`), re-subscribing overlap-then-swap. Window liveness via **shared recompute-diff**: write-time field-intersection flags the channel, debounce, re-run query, diff previous window ids, emit enter/leave/field deltas. Per channel instance — shared by all subscribers of the same search, triggered by relevant writes, only while subscribed. Resolves the windowed-channels deferral with a mechanism: the displaced-doc leave-delta falls out of the diff. Not the Meteor poll-and-diff pathology, which was per-observer-per-client on a timer.
+
+**Shared per `(name, args)`.** One channel instance regardless of subscriber count: resolved selector, monotonic cursor, bounded delta log, subscriber set. 500 subscribers to `project(42)` cost one selector match per write and one delta fanned 500 ways. This is the structural fix for Meteor's per-client-per-publication observer cost.
+
+**Subscribe.** Handler runs once per subscriber — the read auth gate, throw → `nosub` — and resolves the selector. No cursor or expired cursor → snapshot. Valid cursor → log tail replay. Reconnect is just the second path.
+
+**Routing and membership transitions.** Server writes all pass through declared operations, so changed docs + fields are known at write time. Changed fields intersect channel selector field sets (the same static-analyzability trick as client query invalidation), affected channels re-match the doc before/after: entered → full-doc delta, left → removal delta, stayed → field delta. An operation moves a todo from project A to B → A sees remove, B sees add. Once per channel, not per client. No oplog.
+
+**Field projections — named publications, mergebox still dead.** Channels carry a declared, static `fields` inclusion list, deep paths allowed (`fields: ['title', 'completed', 'meta.progress']`). Projection is part of channel identity — never computed per-subscriber — so instances stay shared per (name, args) and field lists stay statically analyzable. Role-based visibility = separate named channels behind different auth gates ('records.summary' vs 'records.admin'), a well-established publication shape.
+
+Deep paths work because every layer is already path-based: server projection is path-picking (`get`/`set`), delta filtering is path-prefix intersection (a write to an unprojected field emits no delta for that channel — projections cut fan-out, not just payload), client apply is set-by-path with top-level reference swap for the renderer's depth-1 contract. Meteor's `fields: {'my.deep.field': 1}` failure was mergebox top-level merge granularity, not a database limitation.
+
+**The union moves client-side at path granularity.** The eviction ledger extends to doc → projected-path → contributing channels. Union is conflict-free (same authoritative row). Unsub recomputes visible projection = union of remaining channels' paths, prunes outside it — well-defined, fiddly, needs its tests early. Overlapping channels deliver duplicate field deltas, idempotent on apply: bandwidth for memory, deliberately. Server per-client state remains the subscription list, nothing else.
+
+**Fail-closed by default.** Inclusion lists only (a new schema field crosses the wire nowhere until listed). Schema-level `private: true` is the backstop — never crosses the wire regardless of channel config. Covers user-private, permission-gated, and server-only-metadata fields with defense in depth.
+
+**Synergies:** field-level coverage checking (query reads `email`, dev warns when no live channel projects `email` — the missing-field trap killed like the missing-doc trap), and forms over partial docs are structurally clobber-safe since commit writes touched paths only.
+
+**Permissions: two gates, no third surface.** Read auth in the channel handler at subscribe time. Write auth in the server half of the method (throw → client rebase discards the optimistic apply). Meteor's `allow`/`deny` has no equivalent by construction — no wire message edits a document, only named operations, so you authorize operations not edits (the Zero/Convex conclusion). Session arrives at the WS handshake (outside the protocol) and flows into both gates as `ctx.session`.
+
+**Revocation (open).** Meteor streamed until resubscribe after access loss. v1: explicit `server.revoke(channel, args)` force-unsubs and resets affected clients, called from membership-changing operations. Reactive auth (channel re-evaluating its handler on membership change) is the elegant version and deferred.
+
+**Multi-node.** Channel log as a Redis stream, cursor = stream id, cross-node fan-out via pub/sub. Single-node dev uses an in-memory ring buffer. The protocol can't tell the difference.
+
+## Security Posture
+
+Field survey sorts permission designs into five postures: token-embedded capabilities (Ably, Centrifugo, PowerSync bucket params — fast, revocation lags tokens), declarative rules engines (Firebase, InstantDB, Zero's ZQL rules — maximal granularity, the default-open footgun genre), code gates at named entry points (Convex, Zero mutators, Meteor publish+methods — the field's convergence for writes), fully external proxy auth (Electric's gatekeeper — composable, every deployment builds its own gate), and the graveyard (Meteor allow/deny — raw-CRUD validators, insecure-by-default).
+
+**This design: permissions baked into the domain registries, deliberately absent from the wire.** Authorization completes at subscribe time (channel `permission` token → app `can()`, handler, `filter` baseline) and call time (operation `permission` slot) — frames carry no permission semantics, which is also what keeps fan-out one-serialization-shared. Composition: code gates for writes (the convergence), capability tokens resolved server-side per subscribe (auditable vocabulary without token-revocation lag), schema `private: true` + fail-closed projections as the declarative field-level floor, session credentials at the handshake outside the protocol. allow/deny is structurally unreachable — raw CRUD does not exist on the wire.
+
+**Row-level security without a rules engine: the resolved selector is the row rule.** Auth-incorporating channel selectors govern membership matching on every write — visibility is re-checked by the same machinery that routes deltas. Row rules express as filter selectors; cross-doc rules express in async channel handlers. Defense in depth, in order: handshake credential → `can()` token → handler logic → `filter` baseline → `fields` projection → `private` floor.
+
+## External Writers — the God-Eye Backstop
+
+The owned-write-path view is incomplete and subtly wrong even about itself: triggers, defaults, and cascades mutate rows after the core's UPDATE, so "I saw the write" diverges from what the database recorded. `migrate() { ... }` writing directly to storage produces silently stale clients whose data appears on refresh — the worst failure shape. The fix is not giving up write-path capture, it's adding the second source:
+
+**`watch()` — optional sixth adapter function.** `watch(fromPosition) → async iterable of { collection, id, before, after, position }`. Postgres: logical replication slot with `REPLICA IDENTITY FULL` (before/after row images — the same constraint the adapter already carries for membership transitions). Mongo: change streams. No native CDC: scoped poll-and-diff as a degraded implementation. Memory: not needed, all writes are in-core.
+
+**Two streams, one router, asymmetric by design.** Write-path events are rich (trackWrites paths, mutation attribution, txid for confirmation). CDC events are complete (external writers, triggers). Both feed the same channel selector-matching and delta log. Dedup via origin markers on core transactions (the bidirectional-replication trick) — CDC events with a known origin drop. External events carry no mutation attribution, correctly: nothing pending to confirm.
+
+**Log collapse for bulk writes.** A million-row migration must not stream a million deltas. When a channel's pending delta volume crosses a threshold, drop the log tail and emit `reset` — clients resnapshot. Cursor-expiry already makes reset a first-class state, so bulk writes from any source degrade to the cheaper path.
+
+**The dual stream audits itself.** Dev mode cross-checks: every write-path event should reappear in CDC with matching content. Divergence = a trigger/default/bug mutating data behind the mutator — surfaced as a warning, not discovered as drift.
+
+**Posture:** in-ecosystem writers (your own migrations) write through server-side collections and get capture free. Production postgres turns on `watch`. The `touch` API demotes to precision tool. Tailing is never required for the core to function and never per-instance unfiltered work.
+
+**Migration discipline** (bulk writes of many documents against a live, operated system, per scenario.md): bulk writers are path-granular — whole-doc read-transform-writeback loses the lost-update race against live operators and is the named anti-pattern; `update(selector, fn)` through trackWrites is path-granular automatically, raw SQL column updates naturally so. Batched small transactions, never one giant txid (spans-size and hold-group pathologies). Detail channels receive one delta each (no storm); overview channels log-collapse to snapshot by design; router matching cost is the real load, bounded by active channels off-peak. Schema-reshaping migrations bump affected channels' cursor epochs (reset → resnapshot under the new shape), and stale bundles surface a reload affordance via `welcome` caps.
+
+## Schemas
+
+Schema composition (fragments, spreads, cross-package imports) is a first-class requirement, ahead of the variants/discriminator story: large enterprise schemas routinely compose a central collection from hundreds of subschemas across many files, often imported across package boundaries. — **schema composition (fragments, spreads, cross-package imports) is a first-class requirement**, ahead of the variants/discriminator story. The per-collection folder convention (schema + subschemas/ + helpers/ + methods + permissions + publications + search) mirrors how large domain registries tend to organize at scale.
+
+Schemas live in `@semantic-ui/schema` — a standalone package because its three consumers (component values via the value-schema contract, collections, method args) must not depend on each other, and UI-only users get value schemas with zero data-layer presence. One doctrine across the framework: `componentSpec` drives every representation of a component, the schema drives every representation of its data.
+
+The serialization constraint and the authoring question resolve as two layers: **constructors are the authoring idiom everywhere** (`type: String`, `Date`, `Boolean`, `Array` — collection schemas, mutator args, value-schema read identically), and **string names are the serialized projection** at the encode/replay boundary (`String` → `'string'` on encode, mapped back on replay). Constructors fail loud (`type: Strng` is a ReferenceError at load; `'strng'` is a runtime hunt), and built-ins map completely. Extended types (`crdt`, etc.) are exported tokens from their packages, same rule — never magic strings. Function-valued parts (function defaults, `computed`, dynamic `options`) are runtime-only, marked or stripped from the JSON projection. Rules: fields are optional by default — `required: true` is the opt-in (insert-required fields are rare in practice and the marker tends to be noise; real presence rules live in mutator `check`). Nesting via `schema:`, arrays via `type: Array` + `schema`. `computed` fields are **stored, derived, and writable** — there is no virtual tier (an unstored derivation is a helper; stored-vs-unstored is the whole boundary, and the former `materialize:` flag is deleted — it was the definition pretending to be an option). The derivation runs at write time whenever its inputs change (changed-path intersection, `deps` as the governor/skip-hint), persists in the same transaction, and the field is ordinary thereafter: projected, synced, indexed, queryable, zero read-time cost — a stored generated column with the expression in the schema. Computed fields are overridable by default (the heritage norm — derived values exist to be corrected). Override state lives in a reserved `_overrides` subdoc mirroring the field's full path (`a.b.c` → `_overrides.a.b.c: true`) — a single reserved key instead of N minted siblings, queryable (`where: { '_overrides.dueDate': true }` for the audit case), and projections carry the mirrored `_overrides` prefix alongside any projected overridable field. A direct write is legal and meaningful — it flips the flag, and while overridden the derivation stops writing; clearing the flag in any mutator (an ordinary field write) resumes recompute on the next input change. `overridable: false` opts out for strictly derivation-owned fields (the `searchText` class — overriding an analyzer blob is nonsense), where direct writes are a dev error. Smart-default-with-manual-override is the pattern (`expectedPaymentDate: { type: Date, computed: invoice => ... }`, user corrects it when the heuristic is wrong), and the flag is what prevents the heuristic from silently clobbering a human decision — a hard fail per the taxonomy, prevented structurally. In ad-hoc form schemas (no collection), computed is draft-scoped: derived reactively as preview, delivered via `values()`. Computed recompute runs in the client's optimistic apply — same isomorphic function, same changed-path trigger as the server — because that is how computed fields stay live locally: offline and on refresh-tier channels no prompt server delta arrives to correct them, and rebase replay must re-derive computed consequences or synced⊕pending lies. The wire never carries client-computed values regardless (server recomputes as authority, its delta confirms — a no-op under deep-equal dedup). Two exceptions, both resolving to honest staleness rather than garbage (a classic fail point of client-side derivation: a compute over unprojected fields derives an empty value): the contribution ledger knows which paths the client's channels project, so a compute whose deps aren't fully projected skips local recompute and keeps the last-synced value, automatic and per-doc. And `serverOnly: true` opts a compute out of client execution entirely — the field updates only through server deltas (the declared acceptance of that lag), the body is elided from the client bundle (the heuristic's body never ships), and it is required when the compute reads any `private` field (dev error otherwise — private inputs provably never exist client-side).
+
+Shaped by heritage final-state examples, three computed refinements: the function receives its current value (`computed: (invoice, current) => current ?? new Date()` — the stamp-once pattern: derive when triggered, never overwrite), nested-subschema computeds receive the doc alongside the row (parent-scope reads), and **cross-collection deps are deferred with the seam named** — re-deriving an invoice field when a *referenced company* changes is the materialized-join problem (reverse index + fan-out), but the write router already matches every changed doc against channel selectors, and a reverse-dep registry is the same machinery with a second consumer. Until it earns building: relation helpers cover the UI case live (pool lookups over synced reference collections, no denormalization), and an explicit denorm write in the foreign-key-setting mutator covers server-side search/sort over cross-aggregate values. Field errors are path-addressable (forms route by `name`). The package is the natural home for the Standard Schema v1 interface (priors audit #3). Tension to resolve in the value-schema plan's court: schema is metadata at the component layer and an enforced boundary at the server mutation gate — same language, contextual enforcement.
+
+```js
+export const Todos = collection('todos', {
+  schema: {
+    title:     String,
+    dueDate:   Date,
+    completed: { type: Boolean, default: false },
+  },
+});
+```
+
+One schema, five consumers:
+
+1. **Wire revival** — wire stays plain JSON, no EJSON `$type` tags. The pool boundary hydrates `date` fields per schema. Resolves the rich-types open question.
+2. **Form binding** — drafts and the `{#form}` block bind inputs by schema path, input type inference (calendar holds a Date because the schema says so). Meets the value-schema contract (value setting + change event).
+3. **Validation, isomorphic** — client-side at draft commit for instant field errors, server-side at write time as authority. Same schema object both halves.
+4. **Defaults** on insert and insert-mode forms.
+5. **Wire privacy** — `private: true` fields never cross the wire regardless of channel projections (see Field Projections).
+6. **Tooling** — types, wrapper generation, agent consumption.
+
+Schemas are optional. A schemaless collection works and loses revival, forms, and validation.
+
+## Drafts and Forms
+
+The dominant page shape in enterprise apps: reproduce a server doc client-side, fork it into a form, edit decoupled from live updates, sync only behind cancel/submit. The fork lives in `@semantic-ui/data` as a draft — a doc-scoped pending-write buffer with explicit commit:
+
+```js
+const draft = Todos.draft(id);       // clone of pool doc, decoupled from live deltas
+draft.set('address.city', 'Reno');   // tracked path write
+draft.changes();                     // touched paths only
+draft.values();                      // full current values (the insert-mode commit payload)
+draft.dirty();                       // reactive
+draft.stale();                       // pool doc moved underneath (base-cursor check)
+draft.revert(path);                  // clear a computed field's override, resume derivation
+draft.commit();                      // validate → touched-path write → rebase
+draft.discard();
+```
+
+`{#form collection='todos' doc=todo}` is sugar over a draft: binds children by `name` = schema path, routes `deep change` events into path writes, exposes `dirty`/`stale`/field errors in its data context (errors route to inputs by path since `name` is the path). Without `doc`, forks from schema defaults and commit becomes insert. `{#form draft=myDraft}` is the expert binding — the component creates and owns the draft (lifecycle, commit wiring), the block contributes only binding and chrome. Renderer block registry is pluggable (`registerBlock`), compiler-side block-name registration to verify.
+
+The composition win: touched-paths-only commit through a field-granular write makes the fork/edit/commit pattern concurrency-safe by default — concurrent edits to disjoint fields both survive, where whole-doc PUT forms clobber. Live deltas keep flowing into the pool during the edit without disturbing the fork, and `stale()` is one reactive read, not a feature.
+
+**Computed fields are first-class form states — the autofill-trust affordance.** A bound input whose schema field is computed-and-overridable carries its derivation state as a data attribute (`data-field-state="computed" | "overridden"` — the §6 pure-CSS pattern at field grain), themes style the states (tokens-space), and overridden fields get a revert affordance wired to `draft.revert(path)` — clear the `_overrides` entry, resume derivation, all an ordinary path write underneath. The product shape this enables: complex forms where many fields autofill from heuristics and the user confidently corrects the wrong ones — derivation state legible at a glance, every correction reversible, no correction ever silently clobbered by the next recompute. Requires the full vertical (schema knows computed, override is per-field data, per-field reactivity, owned input primitives) — no sync engine or component library can ship it alone. The invoice-editor steelman demonstrates it.
+
+Lessons from production schema-bound form systems:
+
+- **Ad-hoc schemas**: forms bound a collection schema or an inline one. `{#form schema={...}}` with a collection-less draft must work — commit surfaces as a submit event instead of a collection write. Every form is schema-bound, the schema just has two sources.
+- **Transient fields** (`omitField`): controls that participate in the form UI but are excluded from `changes()`/commit — e.g. a dropdown driving navigation. A `transient` flag on the binding.
+- **Value domain in schema, presentation on the component**: schema fields may carry `options` (even function-valued) — that is data. Classes, labels, layout stay on the input primitive.
+- **Chrome optional** (`useForm: false` precedent): the draft API is the contract, the block's submit/cancel chrome is opt-in.
+- **No per-field onChange sugar tier**: Blaze-era form systems needed per-field change watchers because watching a forked doc field meant manual Tracker wiring. Draft fields are reactive reads — `reaction(() => draft.get('field'), fn)` in createComponent is the feature, auto-disposed.
+- **Repeating groups**: arrays of sub-schemas (`items: { type: 'array', schema: {...} }`) are the enterprise workload — line items, attachments, parties. Row ops on the draft mirror Signal helper names (`draft.push('items', {})`, `draft.removeIndex('items', i)`). The form block resolves relative `name='.description'` inside an each over an array field (the `.` prefix marks a row-relative path). Commit translates positional paths to **id-addressed paths** for schema-declared id-bearing subdoc arrays (`items[id=r7].amount` — the schema knows which arrays carry ids, the same identity the keyed each-block renders by), and structural changes travel as ops (insert/remove by id), never whole-array `$set` folds: under concurrent multi-user editing the arrays are where the concurrency lives, and whole-array folding silently clobbers co-editors' rows. Arrays without id'd subdocs fall back to whole-array `$set` with the concurrency caveat stated — and in practice that fallback is the common case by count (most arrays are small value-lists), while keyed arrays are the common case by concurrency. The schema mints row ids for declared keyed arrays at insert, so id-addressing never depends on the app remembering to add them.
+- **Path-scoped drafts**: production forms often edit a fragment of a larger doc (a nested subsection inside a parent record), seeded via ad-hoc `doc:`. `Invoices.draft(id, { path: 'billing.address' })` makes commit automatic for that case.
+- **Computed fields**: Blaze-era declared-deps derivation did two jobs. Manual tracking dissolves — auto-tracking sees what the function reads: `computed: row => row.quantity * row.unitPrice`, row-scoping falls out of the function receiving the row. The reactivity-governor job survives as the opt-in form: `computed: { deps: ['items'], value: row => ... }` runs the body `nonreactive` and registers only listed fields — an escape valve for expensive derivations, now optional, same doctrine as `nonreactive`/`guard`/`peek`.
+- **Computed fields on the server are not reactive**: they run as plain synchronous functions inside the operation body, once per write, triggered by changed-path intersection with their inputs (`deps` doubles as the skip-hint, re-run-all-on-doc is the simple default). A pathological computed degrades to a slow write — bounded per write, one stack trace — not a reactive storm. Server-killing derivations need a server-side reactive graph to multiply through, and this design has none.
+- **Dynamic defaults**: just `default`, accepting a value or a function evaluated at fork time.
+
+**Principle — over-reactivity is Meteor's failure mode, so every layer carries a limiter.** Per-field deps bound DOM work, selector field-sets bound which queries re-run, channel matching bounds fan-out, drafts decouple forms from the live stream, `deps` bounds computed fields, and the server has no reactive runtime at all. Delivery liveness is tiered (Decision 6: routed channels live by default, recompute channels choose); these limiters govern computation fan-out per delta — different axes, not in tension.
+
+## What Exists vs Gaps
+
+| Need | Status |
+|---|---|
+| Per-key reactive channels | `Dependency`, `match()`, RDC pattern — exists |
+| Mutation capture with paths | `trackWrites` `returnPaths`/`onWrite` — exists (PR #242, plus `detectChanges(before, after)` for two-value diffs) |
+| Keyed list reconcile + per-field DOM updates | each-block + `notifyField` — exists (PR #183) |
+| Doc identity convention | `Signal.id` — exists |
+| Deep clone / equality / partial compare | `clone`, `isEqual({ partial })` — exists |
+| Path get | `get(obj, path)` — exists |
+| Path set | `set(obj, path, value)` — exists (PR #242), creates intermediates, blocks prototype-climbing paths from the wire |
+| UUID-grade ids | missing (`generateID` is 32-bit) |
+| IDB snapshot/outbox layer | missing |
+| Protocol + server | missing |
+| Rich types on wire (Date minimum) | missing — clone/equality injection exists, wire needs a stance (EJSON question) |
+
+## Not in v1
+
+CRDTs, IVM/differential dataflow, client-composed queries-as-subscriptions, SQLite/OPFS, offline-first, SSR hydration handoff. The last is an adjacent gap worth noting: the snapshot is naturally serializable and is the obvious vehicle when SSR handoff gets tackled.
+
+## Priors Audit — Where 2026 Voted Against the Meteor Shape
+
+Three places the modern field genuinely superseded the Meteor-era prior, flagged for conscious decision rather than inheritance:
+
+1. **Channels inherit the silently-incomplete-query trap.** A local query returns whatever subscribed channels happen to hold — correct-looking, wrong. The classic Meteor publication bug, and the reason the field moved to queries-as-subscriptions (the query is the subscription, coverage cannot drift). Proposed synthesis: keep channels, make coverage statically checkable — query selectors and channel selectors are both mongo-subset, so selector subsumption is decidable, and dev mode warns when a query is not covered by any live channel. Same static-analyzability bet already used for invalidation. **Decided (2026-06-11, with the two-stage section split): pool reads are the read surface, the checker ships v1-required.**
+2. **Relations are absent because minimongo had none.** 2026 went relational (ZQL joins, InstaQL graph, SQL engines, TanStack DB live joins). Reactive joins were a real Meteor pathology (publish-composite) that single-collection channels reproduce client-side. Needs a stated position: cross-collection channel selectors, client `lookup` sugar, or explicit relations-are-app-space with the composition shown.
+3. **Schema interop.** The object-literal schema is SimpleSchema lineage and predates Standard Schema v1 (the ecosystem interop layer Zod/Valibot/ArkType implement and TanStack-class tools consume) and the schema-to-types table stakes. Answer is likely implement/emit the standard interface from the SUI schema, not adopt Zod. Cheap early, expensive to retrofit.
+
+Transport (WS-default over HTTP-first read path) moved on discussion rather than evidence — cheap to revisit because the cursor core and pluggable delivery were kept regardless.
+
+## De-risking — Where the Sketch Is Sketchiest
+
+Ranked by load-bearing × unverified × cheap-to-derisk (audit 2026-06-10). Superseded in part by [`reactivity-review.md`](reactivity-review.md) — the four-bucket source audit with adversarial checks — which verified the Tier 1 concerns are real, falsified two plan claims, and mapped 10 unaddressed scheduler interactions.
+
+**Tier 1 — assertions wearing confidence, spend compute first:**
+
+1. **Rebase × scheduler spike.** `synced ⊕ pending` is prose. The scheduler has no topological ordering (diamond glitches observable), computeds are eager, and intermediate states are readable synchronously — a rebase replaying N mutators fires per-field deps N× with mid-rebase state visible to peeks. Spike: ~500 lines of pool + pending + shadow rebase against the real reactivity package, adversarial interleaving tests (delta mid-flush, reject during another's flight, replay reading mid-rebase state).
+2. **Query registry + re-run bench.** Sort fields are dependencies (a `createdAt` write reorders results the selector never mentions — currently unstated). `$or`/`$in` complicate field-set compilation. Fresh selector objects per template evaluation mean selector hashing on the hot path. Registry lifecycle/refcount unspecified. And "re-run + reconcile absorbs it" is unbenched on the central read path. Spike + bench at 5k docs / 20 live queries / write storms — if re-run collapses, IVM moves from deferred to required, an architecture pivot best found now.
+3. **Protocol spec — delivered.** [`ws-protocol.md`](ws-protocol.md) is the Tier 1.3 deliverable: `result` carries no cursor (txid subsumes — the named hole, resolved), refcounting is client-side, reconnect batching, reset-while-queued ordering, and backpressure (reset as the universal valve) are all specified. Remaining: the v2 synthesis folding the five-voice review and the vet's protocol findings (trimmed outcomes, spans/hold-groups deleted per brief 1 ruling — server-side regrouping, ephemeral frame, epoch-bump API, retention knob, derived channel addresses `collection.name`).
+
+**Tier 2 — scope decisions, not prototypes:**
+
+4. **Windowed channels — resolved by mechanism, not cut.** The displaced-doc problem dissolves under shared recompute-diff (see Search channels): window membership state is just the previous result ids per channel instance, and the diff produces the leave-delta naturally. Remaining derisk: bench the recompute-diff loop under write churn and tune the debounce.
+5. **Multi-tab choreography doc.** Leader death mid-mutation: outbox in shared IDB survives, but the pending set was leader memory — new leader rehydrates outbox, re-applies to its pool, rebroadcasts. Well-trodden (Replicache/Linear), unprototyped here.
+6. **Local-vs-synced collection rule.** Local collections expose CRUD (the storeAs story), synced ones don't. Same class? Retroactive CRUD lock when a local collection gets subscribed? One crisp rule.
+
+**Tier 3 — cheap benches:** returnPaths → get(path) → wire-`$set` pipeline, contribution-ledger overhead, IDB flush sizing. (Corrected by the reactivity review: returnPaths does NOT force the proxy strategy — the snapshot branch produces paths via `detectChanges`, so small docs keep the cheap path.)
+
+**Retraction:** the priors-audit claim that selector subsumption is "decidable" holds for conjunctive equality/range selectors and is nontrivial with `$or`/`$in`/`$exists` — decidable for the v1 subset, real implementation work, not a footnote.
+
+## Build Sequence
+
+How to build is a separate question from what to build. Phases gate on each other; 0a gates everything.
+
+**Phase 0a — DX steelman corpus (the gate for all API decisions).** Every part a consumer will feel gets decided before implementation, via mock-code scenario apps reviewed through a human developer lens — the method that produced five major API revisions in one session of TodoMVC reading. The corpus is also the regression contract: implementation must match it, divergence is a flagged decision not silent drift (conformance tests : protocol :: steelman corpus : DX). Reviewed mock code becomes the docs examples corpus at ship time. Scenarios chosen to stress heritage-shaped surfaces: invoice editor (repeating groups, path-scoped drafts, computed fields, projections per role, field errors, stale-mid-edit), chat/inbox (windowed channel, lazy hydration, reconnect feel, unsimulated method), settings panel (local-only rung, storeAs replacement), relations stressor (forces the priors-audit hole to be decided by feel), consumer test file (testing DX — memory adapter, no network), TodoMVC (exists, realtime baseline), plus edge-state pages (rejected mutation, permission denied, boot-from-IDB, reset moment). Third reviewer net: fresh agents build variations cold against the mock API — their misuse is friction data predicting human stumbles, and examples are agent training data anyway. Exit: every consumer-felt surface survives a full review pass with zero API changes.
+
+**Phase 0b — kill-or-confirm spikes (parallel with 0a, agent-heavy).** Rebase × scheduler harness and query-registry + re-run bench, per the de-risking tier 1 and reactivity-review test specs. Decision batch (selector grammar, sync-only enforcement, local-vs-synced CRUD rule) resolves through 0a examples, not in the abstract.
+
+**Phase 1 — `@semantic-ui/schema`.** Smallest package, zero deps, shared dependency of value-schema (already in the roadmap Phase 2 contracts window), collections, and method args. Ships value to the component track even if the data layer pauses.
+
+**Phase 2 — `@semantic-ui/data`, local-only.** Tests-as-specification first (behavioral contract suite before implementation), the local TodoMVC as acceptance fixture diffable against the localStorage original, bench suite from day one. Ships standalone — local collections + drafts replace the hand-rolled storeAs pattern. The adoption gradient enforced by build order.
+
+**Phase 3 — protocol spec + reference server (partially parallel with 2).** Spec as a real document with state machines, then a conformance suite against the spec — the portability story made executable (a future non-JS server validates by running it). Memory adapter first, postgres second, `watch()` third.
+
+**Phase 4 — `@semantic-ui/sync` client.** Rebase engine (spike-validated), cursor machine, outbox, subscription handles (status + window faces), contribution/projection ledger, coverage checker. Synced TodoMVC as a two-browser-context Playwright e2e, CI as e2e source of truth. IDB persistence last within the phase, boot state machine designed in from the start.
+
+**Phase 5 — component surface.** `subscriptions` via defineComponent extension points, `{#form}` interlocking with value-schema. Sequenced last because everything it exposes must exist.
+
+**Cross-cutting:** atomic commits with bench-cadence pushes, pair autonomy for API surface, agent autonomy for test campaigns (coverage-campaign workflow maps to Phase 2), per-phase just-in-time re-derivation of specifics from source (the plan is a decision record, not gospel). Scheduling honesty: not on the launch critical path — schema rides the Phase 2 contracts window, spikes and steelman run opportunistically at agent cadence, phases 2-5 stage until the component pipeline can spare attention.
+
+## Open Questions
+
+- Package names. `query` and `store`-adjacent names collide with `packages/query`. `@semantic-ui/data` + `@semantic-ui/sync` is the working assumption.
+- Component surface: module-scope collections (the existing app-state pattern, also Meteor's) vs a `buildCallParams` key vs both. Subscription teardown should ride `abortSignal` either way.
+- Eager introspection of the `queries` section (SSR data handoff, devtools): entries are function-valued by constraint — `find()` registers deps at call time, so eager values freeze (the per-evaluation call is load-bearing; the lazy-getter binding machinery already exists in buildArgsRecord). The earlier fold-into-one-section guidance is superseded: two sections is the ruled shape (provision vs read are different stages, 2026-06-11).
+- Method declaration shape: single isomorphic definition (Meteor) vs explicit client/server pair (Zero). Leaning single definition with a server-only guard section.
+- Channel auth/args validation contract on the server side.
+- Does the collection feed renderer `notifyField` directly, or always re-emit arrays and let reconcile diff? Start with re-emit, measure.
+- Draft conflict surface: is `stale()` enough, or do drafts want per-field stale (this field changed underneath you)? Per-field is derivable from the same base-cursor diff, defer until a real flow needs it.
+- Bundle hygiene for big action bodies: 50-100 LOC server sections ship to the client in the isomorphic module. Modern answer is compile-time `isServer` elision (define + DCE through the existing build), with a `.server.js` companion-module convention as the escape hatch for genuinely large server-only logic. Needs a decided story before real apps write real actions.
+
+## Dependencies
+
+- `trackWrites` `returnPaths` ships with PR #242 (this branch)
+- ROADMAP Phase 2 contracts window is where component-facing API surface belongs if this lands on the roadmap
+- Value Schema plan: a future form-data story should align with the schema contract
+
+## Status
+
+Initial scope, drafted from the 2026-06-09 session. Autonomy: pair. Research corpus in [`research/`](research/).
