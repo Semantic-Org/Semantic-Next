@@ -24,6 +24,13 @@ import { registerBlock } from './registry.js';
 
 */
 
+// empty fills have no inside to resolve — and stamping one would land the
+// END jump on the anchor itself, masking the owner stamp of a later fill
+function stampAsyncScope(region, data) {
+  if (region.ownedNodes.length === 0) { return; }
+  markScopeRange(region.anchor, region.endAnchor || region.getLastNode(), { data });
+}
+
 function createSuccessDataContext(node, value) {
   if (node.as) { return { [node.as]: value }; }
   if (node.parts && isPlainObject(value)) {
@@ -59,7 +66,7 @@ function evaluateAndRender(ctx, { skipLoadingRender = false } = {}) {
       isSVG,
     });
     region.setContent(fragment, stateScope);
-    markScopeRange(region.anchor, region.endAnchor || region.getLastNode(), { data: extraData });
+    stampAsyncScope(region, extraData);
   };
 
   if (isPromise(result)) {
@@ -106,7 +113,7 @@ function renderErrorState(ctx, err) {
     isSVG,
   });
   region.setContent(fragment, stateScope);
-  markScopeRange(region.anchor, region.endAnchor || region.getLastNode(), { data: errorData });
+  stampAsyncScope(region, errorData);
 }
 
 const asyncBlock = defineBlock({

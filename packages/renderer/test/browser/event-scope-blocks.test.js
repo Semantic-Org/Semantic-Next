@@ -302,6 +302,34 @@ RENDERING_ENGINES.forEach((engine) => {
         clickOn(el.shadowRoot.querySelector('.res'));
         expect(captured.result).toEqual({ x: 5 });
       });
+
+      it.skipIf(isLit)('stamps error vars after an empty success fill', async () => {
+        const tag = uniqueTag();
+        let captured;
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '{#async check}{error as err}<button class="boom">{err.message}</button>{/async}',
+          defaultState: { fail: false },
+          createComponent: ({ state }) => ({
+            check: () => state.fail.get() ? Promise.reject(new Error('boom')) : 'ok',
+          }),
+          events: {
+            'click .boom'({ scope }) {
+              captured = scope;
+            },
+          },
+        });
+        const el = await mount(tag);
+        el.template.state.fail.set(true);
+        await waitForUpdate(el);
+        await waitForUpdate(el);
+        const button = el.shadowRoot.querySelector('.boom');
+        expect(button).not.toBeNull();
+        clickOn(button);
+        expect(captured.err).toBeInstanceOf(Error);
+        expect(captured.err.message).toBe('boom');
+      });
     });
 
     describe('event scope — engine degradation', () => {
