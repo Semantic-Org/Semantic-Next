@@ -810,7 +810,9 @@ export const Template = class Template {
     return nonreactive(() => {
       const eventScope = {};
       const layers = this.renderer?.resolveScopeLayers?.(target, {
-        rootNode: this.parentNode || this.renderRoot,
+        // same live-boundary rule as isNodeInTemplate — stored parentNode
+        // can be a dead build fragment for subtemplates attached mid-render
+        rootNode: this.startNode?.parentNode || this.parentNode || this.renderRoot,
         startNode: this.startNode,
       });
       if (layers) {

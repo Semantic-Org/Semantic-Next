@@ -193,9 +193,15 @@ RENDERING_ENGINES.forEach((engine) => {
       it.skipIf(isLit)('exposes subtemplate args to the parent handler without data attributes', async () => {
         const tag = uniqueTag();
         let parentScope;
+        let ownScope;
         const rowItem = defineComponent({
           renderingEngine: engine,
           template: '<li><a class="lbl">{name}</a></li>',
+          events: {
+            'click .lbl'({ scope }) {
+              ownScope = scope;
+            },
+          },
         });
         defineComponent({
           tagName: tag,
@@ -216,6 +222,9 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(parentScope.id).toBe(7);
         expect(parentScope.name).toBe('Seven');
         expect(parentScope.item).toEqual({ id: 7, name: 'Seven' });
+        // the subtemplate's own handler sees its own tree only — the
+        // parent's row vars sit beyond its start anchor
+        expect(ownScope).toEqual({});
       });
 
       it.skipIf(isLit)('limits snippet layers to declared args', async () => {
