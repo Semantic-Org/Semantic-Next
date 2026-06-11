@@ -23,13 +23,13 @@ const createComponent = ({ state }) => ({
 
 const events = {
 
-  // scope holds the template vars at the clicked row
-  // i.e. {#each song in songs} provides scope.song and scope.index
-  'click .play'({ state, scope }) {
-    state.nowPlaying.set(scope.song.id);
+  // data includes the template vars at the clicked row
+  // i.e. {#each song in songs} provides data.song and data.index
+  'click .play'({ state, data }) {
+    state.nowPlaying.set(data.song.id);
   },
-  'click .remove'({ state, scope }) {
-    state.songs.removeItem(scope.song.id);
+  'click .remove'({ state, data }) {
+    state.songs.removeItem(data.song.id);
   },
 };
 
