@@ -8,6 +8,7 @@ import {
   match,
   nonreactive,
   reaction,
+  Signal,
   signal,
 } from '@semantic-ui/reactivity';
 import {
@@ -623,18 +624,26 @@ export const Template = class Template {
             return value;
           });
           const elValue = targetElement?.value ?? event.target?.value ?? event?.detail?.value;
-          return template.call(boundEvent, {
-            additionalData: {
-              event: event,
-              isDeep,
-              target: targetElement,
-              value: elValue,
-              data: {
-                ...elData,
-                ...eventData,
-              },
+          // params built explicitly so `scope` can be a lazy getter —
+          // call()'s additionalData spread would evaluate it eagerly
+          const params = {
+            ...(template.callParams || template.buildCallParams()),
+            event: event,
+            isDeep,
+            target: targetElement,
+            value: elValue,
+            data: {
+              ...elData,
+              ...eventData,
             },
+          };
+          let resolvedScope;
+          Object.defineProperty(params, 'scope', {
+            configurable: true,
+            enumerable: true,
+            get: () => resolvedScope ??= template.getEventScope(targetElement),
           });
+          return template.call(boundEvent, { params });
         };
         const domEventSettings = {};
         const eventSettings = { abortController: this.eventController, eventSettings: domEventSettings };
@@ -785,6 +794,32 @@ export const Template = class Template {
       return isAfterStart && isBeforeEnd;
     };
     return isNodeInRange(getRootChild(node));
+  }
+
+  // Block scope vars acting at an event target — each item vars,
+  // subtemplate args, snippet args, async vars — materialized into a
+  // plain object, innermost layer winning. Resolution is the engine's
+  // (boundary-marker bracket scan in native); engines without it
+  // resolve to an empty object. Snapshot semantics: values are copied
+  // at dispatch, signal values peeked, nothing subscribes.
+  getEventScope(target) {
+    return nonreactive(() => {
+      const eventScope = {};
+      const layers = this.renderer?.resolveScopeLayers?.(target, {
+        rootNode: this.parentNode || this.renderRoot,
+        startNode: this.startNode,
+      });
+      if (layers) {
+        for (let i = layers.length - 1; i >= 0; i--) {
+          const layer = layers[i];
+          for (const key in layer) {
+            const value = layer[key];
+            eventScope[key] = (value instanceof Signal) ? value.peek() : value;
+          }
+        }
+      }
+      return eventScope;
+    });
   }
 
   render(additionalData = {}) {

@@ -3,6 +3,7 @@ import { Template } from '@semantic-ui/templating';
 import { each, extend, fatal, isPlainObject, isString } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
 import { isItemContext } from '../reactive-context.js';
+import { DECLARED_KEYS, markScopeRange } from '../scope-context.js';
 import { registerBlock } from './registry.js';
 
 /*
@@ -158,6 +159,9 @@ function buildArgsRecord({ node, parentData, evaluator, target }) {
   // up with the same own-property shape.
   const record = {};
   extend(record, target);
+  // scope resolution reads declared keys only — the copied parent
+  // descriptors freeze at mount and would mask fresher outer layers
+  Object.defineProperty(record, DECLARED_KEYS, { value: keys });
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
     const val = values[i];
@@ -211,6 +215,27 @@ function prepareSnippet({ node, data, self }) {
 function mountSnippet({ node, data, region, scope, renderAST, isSVG, self }) {
   const { snippet, snippetData } = prepareSnippet({ node, data, self });
   region.setContent(renderAST({ ast: snippet.content, data: snippetData, scope, isSVG }));
+  stampArgsScope(region, snippetData);
+}
+
+// scope stamps for event-handler resolution. No-arg invocations add no
+// layer (snippetData === parent data, no DECLARED_KEYS), empty regions
+// have no inside to resolve.
+function stampArgsScope(region, argsRecord) {
+  const keys = argsRecord[DECLARED_KEYS];
+  if (!keys || region.ownedNodes.length === 0) { return; }
+  markScopeRange(region.anchor, region.endAnchor || region.getLastNode(), { data: argsRecord, keys });
+}
+
+// Subtemplates declare args two ways: a reactiveData record installed as
+// instance.data (live getters, DECLARED_KEYS stashed) or an eager blob.
+// blobKeys arrive captured before render — setDataContext merges state
+// and instance onto instance.data in place, so reading keys afterwards
+// would leak the whole context into the layer.
+function stampInstanceScope(region, instance, blobKeys) {
+  const keys = instance.data[DECLARED_KEYS] || blobKeys;
+  if (keys.length === 0 || region.ownedNodes.length === 0) { return; }
+  markScopeRange(region.anchor, region.endAnchor || region.getLastNode(), { data: instance.data, keys });
 }
 
 // Build the subtemplate's lazy-getter record and clone the Template
@@ -363,8 +388,10 @@ const templateBlock = defineBlock({
       node,
     });
     setupSettingsMirror({ node, data, scope, region, self });
+    const blobKeys = Object.keys(blobData);
     const fragment = renderInstance(self.currentInstance, node);
     region.setContent(fragment);
+    stampInstanceScope(region, self.currentInstance, blobKeys);
     attachToRenderRoot(self.currentInstance, region, self);
   },
 
@@ -378,6 +405,7 @@ const templateBlock = defineBlock({
         // Snippet args reactivity is anchored on the block scope; a child
         // would dispose with the next region.clear() and break arg reactivity.
         hydrateInto({ innerAST: snippet.content, data: snippetData, asChild: false });
+        stampArgsScope(region, snippetData);
       }
       return;
     }
@@ -410,6 +438,7 @@ const templateBlock = defineBlock({
 
     self.currentInstance.markRendered();
     if (region.ownedNodes.length > 0) {
+      stampInstanceScope(region, self.currentInstance, Object.keys(blobData));
       attachToRenderRoot(self.currentInstance, region, self, { startNode: region.ownedNodes[0] });
     }
   },
@@ -457,8 +486,10 @@ const templateBlock = defineBlock({
         node,
       });
       setupSettingsMirror({ node, data, scope, region, self });
+      const blobKeys = Object.keys(blobData);
       const fragment = renderInstance(self.currentInstance, node);
       region.setContent(fragment);
+      stampInstanceScope(region, self.currentInstance, blobKeys);
       attachToRenderRoot(self.currentInstance, region, self);
     }
     else {

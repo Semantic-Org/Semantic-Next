@@ -1,3 +1,5 @@
+import { SCOPE_END } from './scope-context.js';
+
 export class DynamicRegion {
   constructor(parentNode, marker) {
     this.parentNode = parentNode;
@@ -36,6 +38,9 @@ export class DynamicRegion {
       this.endAnchor = document.createTextNode('');
     }
     lastNode.after(this.endAnchor);
+    // closed regions are one backward hop for scope resolution — also
+    // keeps scans out of region content that contains scope stamps
+    this.endAnchor[SCOPE_END] = this.anchor;
   }
 
   getLastNode() {

@@ -20,6 +20,7 @@ import { bindAttribute } from './attribute-binding.js';
 import { getBlock } from './blocks/registry.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
+import { resolveScopeLayers } from './scope-context.js';
 
 // import block registry
 import './blocks/index.js';
@@ -610,5 +611,13 @@ export class Renderer {
   bumpDataVersion() {
     this.dataDep.changed();
     this.notifyUpdate();
+  }
+
+  // engine contract: block scope layers acting at a DOM position,
+  // innermost first, or null when the node is outside the template's
+  // tree. Engines without block scope resolution omit the method and
+  // event `scope` degrades to an empty object.
+  resolveScopeLayers(target, bounds) {
+    return resolveScopeLayers(target, bounds);
   }
 }

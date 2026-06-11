@@ -1,5 +1,6 @@
 import { each, isPlainObject, isPromise } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
+import { markScopeRange } from '../scope-context.js';
 import { registerBlock } from './registry.js';
 
 /*
@@ -58,6 +59,9 @@ function evaluateAndRender(ctx, { skipLoadingRender = false } = {}) {
       isSVG,
     });
     region.setContent(fragment, stateScope);
+    // always restamp — loading's empty layer overwrites a stale success
+    // owner under fresh loading DOM
+    markScopeRange(region.anchor, region.endAnchor || region.getLastNode(), { data: extraData });
   };
 
   if (isPromise(result)) {
@@ -104,6 +108,7 @@ function renderErrorState(ctx, err) {
     isSVG,
   });
   region.setContent(fragment, stateScope);
+  markScopeRange(region.anchor, region.endAnchor || region.getLastNode(), { data: errorData });
 }
 
 const asyncBlock = defineBlock({

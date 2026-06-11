@@ -4,6 +4,7 @@ import { decodeItemKey, getCollectionType, getEachData, getItemID } from '../../
 import { lisIndices } from '../../../shared/lis.js';
 import { defineBlock } from '../define-block.js';
 import { ReactiveDataContext } from '../reactive-context.js';
+import { markScopeRange } from '../scope-context.js';
 import { registerBlock } from './registry.js';
 
 export const SUI_ITEM_MARKER = `sui-item:${MARKER_VERSION}:`;
@@ -141,7 +142,7 @@ function snapshotForRecord(item, collectionType) {
   return collectionType === 'object' && item != null ? createSnapshot(item.value) : createSnapshot(item);
 }
 
-function createRecord({ key, item, index, collectionType, node, data, scope, renderAST, isSVG }) {
+function createRecord({ key, item, index, collectionType, node, data, scope, renderAST, isSVG, regionAnchor }) {
   const eachData = getEachData(item, index, collectionType, node);
   const itemScope = scope.child();
   const dataContext = new ReactiveDataContext(data, {
@@ -159,7 +160,7 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
   const endMarker = document.createTextNode('');
   fragment.insertBefore(startMarker, fragment.firstChild);
   fragment.appendChild(endMarker);
-  return {
+  const record = {
     key,
     item,
     index,
@@ -178,7 +179,14 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
     // current data and have no stale subscribers to wake) from steady-
     // state records (which need notifyKey broadcasts on in-place mutation).
     fresh: true,
+    // The each block's region anchor — scope resolution jumps here after
+    // collecting this record's layer, skipping sibling rows in one hop.
+    regionAnchor,
   };
+  // scope stamps for event-handler resolution: the end stamp jumps a
+  // backward scan past the whole list, not just this record
+  markScopeRange(startMarker, endMarker, record, regionAnchor);
+  return record;
 }
 
 function disposeRecord(record) {
@@ -293,6 +301,7 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
             scope,
             renderAST,
             isSVG,
+            regionAnchor: region.anchor,
           });
           freshCount++;
         }
@@ -506,6 +515,7 @@ function renderElse({ records, node, data, scope, region, renderAST, isSVG }) {
     isElse: true,
     snapshot: null,
     fresh: false,
+    regionAnchor: null,
   });
 }
 
@@ -632,7 +642,7 @@ function adoptServerItems({
       insertAfter.after(fragment);
       insertAfter = endMarker;
 
-      newRecords.push({
+      const record = {
         key,
         item,
         index: i,
@@ -648,7 +658,10 @@ function adoptServerItems({
         // wake. fresh:true would gate it out of the same-ref snapshot-diff
         // branch and drop that mutation.
         fresh: false,
-      });
+        regionAnchor: region.anchor,
+      };
+      markScopeRange(startMarker, endMarker, record, region.anchor);
+      newRecords.push(record);
     }
     else {
       const record = createRecord({
@@ -661,6 +674,7 @@ function adoptServerItems({
         scope,
         renderAST,
         isSVG,
+        regionAnchor: region.anchor,
       });
       insertAfter.after(record.fragment);
       record.fragment = null;
@@ -726,6 +740,7 @@ const eachBlock = defineBlock({
           isElse: true,
           snapshot: null,
           fresh: false,
+          regionAnchor: null,
         });
       }
       return;
