@@ -760,8 +760,12 @@ export const Template = class Template {
   // Find the direct child of the renderRoot that is an ancestor of the event.target
   // then confirm position
   isNodeInTemplate(node) {
+    // subtemplates attach while their content is still in the build
+    // fragment, so stored parentNode can be a dead fragment — the start
+    // anchor's live parent is the real boundary at event time
+    const parentNode = this.startNode?.parentNode || this.parentNode;
     const getRootChild = (node) => {
-      while (node && node.parentNode !== this.parentNode) {
+      while (node && node.parentNode !== parentNode) {
         if (node.parentNode === null && node.host) {
           node = node.host;
         }
