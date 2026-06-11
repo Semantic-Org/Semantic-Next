@@ -1,11 +1,11 @@
 .case {
-  margin-bottom: var(--margin-l);
+  margin-bottom: 20px;
 
   h4 {
-    font-size: var(--text-s);
+    font-size: 13px;
     font-weight: var(--bold);
     color: var(--muted-text-color);
-    margin: 0 0 var(--margin-xs);
+    margin: 0 0 6px;
   }
 }
 .boxes {
@@ -15,7 +15,7 @@
 
   li {
     display: inline-block;
-    padding: var(--padding-xs) var(--padding-s);
+    padding: 6px 14px;
     background: var(--blue-background-color);
     color: var(--blue-text-color);
     border: var(--blue-border);
@@ -26,7 +26,7 @@
   border: var(--blue-border);
 }
 .box.padded {
-  padding: var(--padding-xs) var(--padding-m);
+  padding: 8px 16px;
 }
 .box.blue {
   background: var(--blue-background-color);
