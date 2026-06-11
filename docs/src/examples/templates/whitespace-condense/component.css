@@ -1,0 +1,34 @@
+.case {
+  margin-bottom: 20px;
+
+  h4 {
+    font-size: 13px;
+    font-weight: var(--bold);
+    color: var(--muted-text-color);
+    margin: 0 0 6px;
+  }
+}
+.boxes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: inline-block;
+    padding: 6px 14px;
+    background: var(--blue-background-color);
+    color: var(--blue-text-color);
+    border: var(--blue-border);
+  }
+}
+.box {
+  display: inline-block;
+  border: var(--blue-border);
+}
+.box.padded {
+  padding: 8px 16px;
+}
+.box.blue {
+  background: var(--blue-background-color);
+  color: var(--blue-text-color);
+}

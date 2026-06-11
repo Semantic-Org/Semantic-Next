@@ -1,0 +1,12 @@
+h4 {
+  font-size: 13px;
+  font-weight: var(--bold);
+  color: var(--muted-text-color);
+  margin: 0 0 6px;
+}
+.poem {
+  white-space: pre-line;
+  border-left: 3px solid var(--blue-border-color);
+  padding-left: 14px;
+  font-style: italic;
+}

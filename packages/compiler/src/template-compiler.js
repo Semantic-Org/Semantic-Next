@@ -1,5 +1,6 @@
-import { each, isPlainObject, isString, last } from '@semantic-ui/utils';
+import { each, isArray, isPlainObject, isString, last } from '@semantic-ui/utils';
 
+import { condenseWhitespace } from './condense-whitespace.js';
 import { StringScanner } from './string-scanner.js';
 
 class TemplateCompiler {
@@ -68,14 +69,23 @@ class TemplateCompiler {
   static doubleBracketRegExp = this.generateRegExpPatterns('{{', '}}');
   static doubleBracketParserRegExp = this.generateParserRegExpPatterns('{{', '}}');
 
+  // entry arrays so parseTag's per-tag loop avoids for-in key iteration
+  static singleBracketRegExpEntries = Object.entries(this.singleBracketRegExp);
+  static doubleBracketRegExpEntries = Object.entries(this.doubleBracketRegExp);
+
   static htmlRegExp = {
     SVG_OPEN: /^\<svg\s*/i,
     SVG_CLOSE: /^\<\/svg\s*/i,
   };
 
+  static htmlRegExpEntries = Object.entries(this.htmlRegExp);
+
   static preprocessRegExp = {
     WEB_COMPONENT_SELF_CLOSING: /<(\w+(?:-\w+)+)([^>]*)\/>/g,
   };
+
+  // ast properties holding child content, the shared walk set for optimize and condense
+  static contentProperties = ['content', 'elseContent', 'loadingContent', 'errorContent'];
 
   static templateRegExp = {
     VERBOSE_KEYWORD: /^(template|snippet)\W/g,
@@ -90,7 +100,10 @@ class TemplateCompiler {
     Creates an AST representation of a template
     from a template string
   */
-  compile(templateString = this.templateString, { includePositions = false, recoverable = false } = {}) {
+  compile(
+    templateString = this.templateString,
+    { includePositions = false, recoverable = false, preserveWhitespace = false } = {},
+  ) {
     this.includePositions = includePositions;
     this.recoverable = recoverable;
     this.errors = [];
@@ -118,6 +131,9 @@ class TemplateCompiler {
     const parserRegExp = (syntax == 'doubleBracket')
       ? TemplateCompiler.doubleBracketParserRegExp
       : TemplateCompiler.singleBracketParserRegExp;
+    const tagPatterns = (syntax == 'doubleBracket')
+      ? TemplateCompiler.doubleBracketRegExpEntries
+      : TemplateCompiler.singleBracketRegExpEntries;
 
     const parseTag = (scanner) => {
       // if this expression contains nested expressions like { one { two } }
@@ -159,25 +175,25 @@ class TemplateCompiler {
       };
 
       // look for each special expression like if/each/else
-      for (let type in tagRegExp) {
-        if (scanner.matches(tagRegExp[type])) {
-          const context = scanner.getContext(); // context is used for better error handling
-          scanner.consume(tagRegExp[type]);
+      for (const [type, regex] of tagPatterns) {
+        if (scanner.matches(regex)) {
+          // attribute context decides ifDefined, only expressions consume it
+          const context = (type === 'EXPRESSION') ? scanner.getContext() : null;
+          scanner.consume(regex);
           const rawContent = getTagContent();
           scanner.consume(parserRegExp.EXPRESSION_END);
           const content = this.getValue(rawContent);
-          return { type, content, ...context }; // Include context in the return value
+          return { type, content, ...context };
         }
       }
 
       // look for each primitive like <svg>
-      for (let type in htmlRegExp) {
-        if (scanner.matches(htmlRegExp[type])) {
-          scanner.consume(htmlRegExp[type]);
-          const context = scanner.getContext(); // context is used for better error handling
+      for (const [type, regex] of TemplateCompiler.htmlRegExpEntries) {
+        if (scanner.matches(regex)) {
+          scanner.consume(regex);
           const content = this.getValue(scanner.consumeUntil(parserRegExp.TAG_CLOSE).trim());
           scanner.consume(parserRegExp.TAG_CLOSE);
-          return { type, content, ...context }; // Include context in the return value
+          return { type, content };
         }
       }
 
@@ -557,7 +573,8 @@ class TemplateCompiler {
             addToAST({ type: 'html', html: '<svg ' });
             // Save errors before recursive compile (it resets this.errors)
             const outerErrors = this.errors;
-            addToAST(...this.compile(tag.content, { includePositions, recoverable }));
+            // svg open-tag fragment: attribute text, the outer pass owns whitespace
+            addToAST(...this.compile(tag.content, { includePositions, recoverable, preserveWhitespace: true }));
             // Merge inner errors back and restore outer accumulator
             const innerErrors = this.errors;
             this.errors = outerErrors;
@@ -599,8 +616,10 @@ class TemplateCompiler {
         }
       }
     }
-    const optimizedAST = TemplateCompiler.optimizeAST(ast);
-    return optimizedAST;
+    // diagnostics modes (LSP positions, recoverable validation) report
+    // offsets against the source string, so they never condense
+    const condense = !includePositions && !recoverable && !preserveWhitespace;
+    return TemplateCompiler.optimizeAST(ast, { condense });
   }
 
   getValue(expression) {
@@ -829,7 +848,7 @@ class TemplateCompiler {
   }
 
   // joins neighboring html nodes into a single node and moves snippets to front
-  static optimizeAST(ast) {
+  static optimizeAST(ast, { condense = false } = {}) {
     const optimizedAST = [];
     const snippets = [];
     const otherNodes = [];
@@ -853,12 +872,17 @@ class TemplateCompiler {
         if (currentHtmlNode) {
           currentHtmlNode = null;
         }
-        if (Array.isArray(node.content)) {
-          node.content = this.optimizeAST(node.content);
+        for (const prop of TemplateCompiler.contentProperties) {
+          if (isArray(node[prop])) {
+            node[prop] = this.optimizeAST(node[prop]);
+          }
         }
-        // Process else block if it exists
-        if (node.else && node.else.content) {
-          node.else.content = this.optimizeAST(node.else.content);
+        if (isArray(node.branches)) {
+          for (const branch of node.branches) {
+            if (isArray(branch.content)) {
+              branch.content = this.optimizeAST(branch.content);
+            }
+          }
         }
 
         // Separate snippets from other nodes
@@ -889,6 +913,9 @@ class TemplateCompiler {
     }
 
     // Return snippets first, then other nodes
+    if (condense) {
+      condenseWhitespace(allNodes, TemplateCompiler.contentProperties);
+    }
     return allNodes;
   }
 }

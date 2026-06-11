@@ -5,6 +5,11 @@
 /*
   Escape Special Chars for RegExp
 */
+
+const escapingRegExp = /([.*+?^=!:${}()|\[\]\/\\])/g;
+
 export const escapeRegExp = (string) => {
-  return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+  return RegExp.escape
+    ? RegExp.escape(string)
+    : string.replace(escapingRegExp, '\\$1');
 };

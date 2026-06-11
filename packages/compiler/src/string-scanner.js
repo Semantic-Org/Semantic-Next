@@ -1,4 +1,4 @@
-import { each, escapeRegExp } from '@semantic-ui/utils';
+import { each, escapeRegExp, isString } from '@semantic-ui/utils';
 
 // A StringScanner has an immutable source document (string) `input` and a current
 // position `pos`, an index into the string, which can be set at will.
@@ -13,13 +13,41 @@ import { each, escapeRegExp } from '@semantic-ui/utils';
 export class StringScanner {
   static DEBUG_MODE = true;
 
+  static stringRegex = new Map();
+
+  // sticky (y) regexes match at lastIndex without slicing the remaining
+  // input. built on first use and kept on the pattern itself.
+  static getRegex(pattern) {
+    const stringPattern = isString(pattern);
+    const cached = stringPattern ? StringScanner.stringRegex.get(pattern) : pattern.scannerRegex;
+    if (cached) {
+      return cached;
+    }
+    const source = stringPattern ? escapeRegExp(pattern) : pattern.source;
+    const flags = stringPattern ? '' : pattern.flags.replace(/[gy]/g, '');
+    const regex = {
+      // y anchors at lastIndex itself, a leading ^ would pin matches to 0
+      sticky: new RegExp(source.startsWith('^') ? source.slice(1) : source, flags + 'y'),
+      search: new RegExp(source, flags + 'g'),
+    };
+    if (stringPattern) {
+      StringScanner.stringRegex.set(pattern, regex);
+    }
+    else {
+      pattern.scannerRegex = regex;
+    }
+    return regex;
+  }
+
   constructor(input) {
     this.input = input;
     this.pos = 0;
   }
 
   matches(regex) {
-    return regex.test(this.rest());
+    const { sticky } = StringScanner.getRegex(regex);
+    sticky.lastIndex = this.pos;
+    return sticky.test(this.input);
   }
 
   rest() {
@@ -48,33 +76,27 @@ export class StringScanner {
   }
 
   consume(pattern) {
-    const regex = typeof pattern === 'string'
-      ? new RegExp(escapeRegExp(pattern))
-      : new RegExp(pattern);
-
-    // Match from the current position
-    const substring = this.input.substring(this.pos);
-    const match = regex.exec(substring);
-    if (match && match.index === 0) {
-      // Ensure match starts at the beginning of the substring
-      this.pos += match[0].length; // Advance position by the length of the match
+    const { sticky } = StringScanner.getRegex(pattern);
+    sticky.lastIndex = this.pos;
+    const match = sticky.exec(this.input);
+    if (match) {
+      this.pos += match[0].length;
       return match[0];
     }
     return null;
   }
 
   consumeUntil(pattern) {
-    const regex = typeof pattern === 'string'
-      ? new RegExp(escapeRegExp(pattern))
-      : new RegExp(pattern);
-    const match = regex.exec(this.input.substring(this.pos));
+    const { search } = StringScanner.getRegex(pattern);
+    search.lastIndex = this.pos;
+    const match = search.exec(this.input);
     if (!match) {
-      const consumedText = this.input.substr(this.pos);
+      const consumedText = this.input.slice(this.pos);
       this.pos = this.input.length;
       return consumedText;
     }
-    const consumedText = this.input.substring(this.pos, this.pos + match.index);
-    this.pos += match.index;
+    const consumedText = this.input.slice(this.pos, match.index);
+    this.pos = match.index;
     return consumedText;
   }
 
@@ -82,7 +104,7 @@ export class StringScanner {
     if (!pattern) {
       return;
     }
-    const regex = typeof pattern === 'string'
+    const regex = isString(pattern)
       ? new RegExp(escapeRegExp(pattern), 'gm') // Global flag for multiple matches
       : new RegExp(pattern, 'gm');
 
@@ -182,7 +204,7 @@ export class StringScanner {
   fatal(msg) {
     msg = msg || 'Parse error';
 
-    const input = typeof this.input === 'string' ? this.input : '';
+    const input = isString(this.input) ? this.input : '';
     const lines = input.split('\n');
     let lineNumber = 0;
     let charCount = 0;

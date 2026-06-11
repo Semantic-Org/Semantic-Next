@@ -4,7 +4,7 @@ pageType: 'API Reference'
 title: TemplateCompiler
 icon: code
 description: API reference for the TemplateCompiler class in Semantic UI Templating
-package: '@semantic-ui/templating'
+package: '@semantic-ui/compiler'
 methods: ['compile', 'parseTemplateString', 'detectSyntax', 'preprocessTemplate', 'optimizeAST']
 ---
 
@@ -33,15 +33,28 @@ const compiler = new TemplateCompiler('<div>{{name}}</div>');
 
 ### compile
 
-Compiles the template string into an [Abstract Syntax Tree (AST)](/docs/api/templating/ast).
+Compiles the template string into an [Abstract Syntax Tree (AST)](/docs/api/templating/ast). By default the compiler condenses template whitespace: cross-line whitespace between tag or block boundaries is removed and other runs collapse to a single space. Same-line spacing is preserved.
 
 #### Syntax
 ```javascript
-compiler.compile()
+compiler.compile(templateString, options)
 ```
 
+#### Parameters
+| Name           | Type   | Description                                          |
+|----------------|--------|------------------------------------------------------|
+| templateString | string | Template to compile. Defaults to the constructor string |
+| options        | Object | Compile options                                      |
+
+#### Options
+| Name               | Type    | Description                                                        |
+|--------------------|---------|--------------------------------------------------------------------|
+| preserveWhitespace | boolean | Skip whitespace condensing                                          |
+| includePositions   | boolean | Add `start`/`end` source offsets to AST nodes. Skips condensing     |
+| recoverable        | boolean | Collect errors on `compiler.errors` instead of throwing. Skips condensing |
+
 #### Returns
-`Object` - The compiled [AST]](/api/templating/ast) representation of the template.
+`Object[]` - The compiled [AST](/docs/api/templating/ast) representation of the template.
 
 #### Usage
 ```javascript
@@ -120,17 +133,18 @@ console.log(processed); // '<ui-icon icon="foo"></ui-icon>'
 
 ### optimizeAST
 
-Optimizes the compiled [AST](/docs/api/templating/ast) by joining neighboring HTML nodes.
+Optimizes the compiled [AST](/docs/api/templating/ast) by joining neighboring HTML nodes and hoisting snippet definitions.
 
 #### Syntax
 ```javascript
-TemplateCompiler.optimizeAST(ast)
+TemplateCompiler.optimizeAST(ast, options)
 ```
 
 #### Parameters
-| Name | Type     | Description             |
-|------|----------|-------------------------|
-| ast  | Object[] | The AST to optimize     |
+| Name    | Type     | Description                                      |
+|---------|----------|--------------------------------------------------|
+| ast     | Object[] | The AST to optimize                              |
+| options | Object   | `{ condense }` runs the whitespace condensing pass |
 
 #### Returns
 `Object[]` - The optimized AST.
@@ -143,7 +157,7 @@ const optimizedAST = TemplateCompiler.optimizeAST(ast);
 
 ## Server Side Compilations
 
-You can precompile your templates on the serve then load them on the client using modern build tooling like esbuild or rollup and JSON imports.
+You can precompile your templates on the server then load them on the client using modern build tooling like esbuild or rollup and JSON imports.
 
 ### Server
 

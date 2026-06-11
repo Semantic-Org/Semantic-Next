@@ -46,6 +46,7 @@ defineComponent(options)
 | tagName          | string   | The custom element name for the web component               |
 | template         | string   | The HTML template string for the component                  |
 | ast              | Object[] | Precompiled Abstract Syntax Tree of the template            |
+| preserveWhitespace | boolean \| 'auto' | Keep template whitespace instead of condensing it. `'auto'` (default) preserves only when css makes whitespace significant |
 | css              | string   | CSS styles for the component                                |
 | pageCSS          | string   | Global CSS styles to be added when the component is defined |
 | state            | Object   | Initial state configuration for the component               |

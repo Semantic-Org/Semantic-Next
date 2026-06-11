@@ -63,6 +63,7 @@ export const Template = class Template {
     templateName,
     ast,
     template,
+    preserveWhitespace = false,
     data,
     element,
     renderRoot,
@@ -86,7 +87,7 @@ export const Template = class Template {
     // if we are rendering many of same template we want to pass in AST for performance
     if (!ast) {
       const compiler = new TemplateCompiler(template);
-      ast = compiler.compile();
+      ast = compiler.compile(template, { preserveWhitespace });
     }
     this.events = events;
     this.observers = [];
@@ -320,7 +321,7 @@ export const Template = class Template {
     }
 
     // Resolve renderer class from engine object or registry
-    const engine = typeof this.renderingEngine === 'object'
+    const engine = isObject(this.renderingEngine)
       ? this.renderingEngine
       : getEngine(this.renderingEngine);
     if (!engine) {

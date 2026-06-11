@@ -2,14 +2,18 @@ import { getEngine } from '@semantic-ui/renderer';
 import { TemplateCompiler } from '@semantic-ui/compiler';
 // direct import avoids circular chunk dependency between component ↔ templating
 import { Template } from '@semantic-ui/templating/template';
-import { adoptStylesheet, each, fatal, identity, isClient, kebabToCamel, noop } from '@semantic-ui/utils';
+import { adoptStylesheet, each, fatal, identity, isClient, isObject, kebabToCamel, noop } from '@semantic-ui/utils';
 
 import { getProperties } from './component-helpers.js';
 import { registerComponent } from './component-registry.js';
 
+// user css can make whitespace significant, keep the template intact when it might
+const WHITESPACE_SENSITIVE_CSS = /white-space(?:-collapse)?\s*:\s*(?:pre|preserve|break-spaces)/;
+
 export const defineComponent = ({
   template = '',
   ast,
+  preserveWhitespace = 'auto',
   css = '',
   pageCSS = '',
   tagName,
@@ -40,7 +44,7 @@ export const defineComponent = ({
 } = {}) => {
 
   // Resolve engine: accepts an engine object or a string name from the registry
-  const engine = typeof renderingEngine === 'object'
+  const engine = isObject(renderingEngine)
     ? renderingEngine
     : getEngine(renderingEngine);
 
@@ -50,8 +54,11 @@ export const defineComponent = ({
   }
 
   if (!ast) {
+    if (preserveWhitespace === 'auto') {
+      preserveWhitespace = WHITESPACE_SENSITIVE_CSS.test(css);
+    }
     const compiler = new TemplateCompiler(template);
-    ast = compiler.compile();
+    ast = compiler.compile(template, { preserveWhitespace });
   }
 
   each(subTemplates, (subTemplate, name) => {
