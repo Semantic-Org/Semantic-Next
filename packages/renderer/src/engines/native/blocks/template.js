@@ -215,27 +215,17 @@ function prepareSnippet({ node, data, self }) {
 function mountSnippet({ node, data, region, scope, renderAST, isSVG, self }) {
   const { snippet, snippetData } = prepareSnippet({ node, data, self });
   region.setContent(renderAST({ ast: snippet.content, data: snippetData, scope, isSVG }));
-  stampArgsScope(region, snippetData);
+  stampScope(region, snippetData);
 }
 
-// scope stamps for event-handler resolution. No-arg invocations add no
-// layer (snippetData === parent data, no DECLARED_KEYS), empty regions
-// have no inside to resolve.
-function stampArgsScope(region, argsRecord) {
-  const keys = argsRecord[DECLARED_KEYS];
-  if (!keys || region.ownedNodes.length === 0) { return; }
-  markScopeRange(region.anchor, region.endAnchor || region.getLastNode(), { data: argsRecord, keys });
-}
-
-// Subtemplates declare args two ways: a reactiveData record installed as
-// instance.data (live getters, DECLARED_KEYS stashed) or an eager blob.
-// blobKeys arrive captured before render — setDataContext merges state
-// and instance onto instance.data in place, so reading keys afterwards
-// would leak the whole context into the layer.
-function stampInstanceScope(region, instance, blobKeys) {
-  const keys = instance.data[DECLARED_KEYS] || blobKeys;
-  if (keys.length === 0 || region.ownedNodes.length === 0) { return; }
-  markScopeRange(region.anchor, region.endAnchor || region.getLastNode(), { data: instance.data, keys });
+// scope stamps for event-handler resolution. Data records carry their
+// declared keys from construction (buildArgsRecord, cloneInstance) —
+// no-arg invocations carry none and add no layer, empty regions have
+// no inside to resolve.
+function stampScope(region, data) {
+  const keys = data[DECLARED_KEYS];
+  if (!keys?.length || region.ownedNodes.length === 0) { return; }
+  markScopeRange(region.anchor, region.endAnchor || region.getLastNode(), { data, keys });
 }
 
 // Build the subtemplate's lazy-getter record and clone the Template
@@ -267,6 +257,11 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
   if (node?.reactiveData) {
     const record = buildArgsRecord({ node, parentData, evaluator: self.evaluator, target: instance.data });
     instance.data = record;
+  }
+  else {
+    // blob keys recorded before setDataContext merges the full context
+    // onto this object — reading them later would leak it into the layer
+    Object.defineProperty(instance.data, DECLARED_KEYS, { value: Object.keys(instance.data) });
   }
 
   nonreactive(() => instance.initialize());
@@ -388,10 +383,9 @@ const templateBlock = defineBlock({
       node,
     });
     setupSettingsMirror({ node, data, scope, region, self });
-    const blobKeys = Object.keys(blobData);
     const fragment = renderInstance(self.currentInstance, node);
     region.setContent(fragment);
-    stampInstanceScope(region, self.currentInstance, blobKeys);
+    stampScope(region, self.currentInstance.data);
     attachToRenderRoot(self.currentInstance, region, self);
   },
 
@@ -405,7 +399,7 @@ const templateBlock = defineBlock({
         // Snippet args reactivity is anchored on the block scope; a child
         // would dispose with the next region.clear() and break arg reactivity.
         hydrateInto({ innerAST: snippet.content, data: snippetData, asChild: false });
-        stampArgsScope(region, snippetData);
+        stampScope(region, snippetData);
       }
       return;
     }
@@ -438,7 +432,7 @@ const templateBlock = defineBlock({
 
     self.currentInstance.markRendered();
     if (region.ownedNodes.length > 0) {
-      stampInstanceScope(region, self.currentInstance, Object.keys(blobData));
+      stampScope(region, self.currentInstance.data);
       attachToRenderRoot(self.currentInstance, region, self, { startNode: region.ownedNodes[0] });
     }
   },
@@ -486,10 +480,9 @@ const templateBlock = defineBlock({
         node,
       });
       setupSettingsMirror({ node, data, scope, region, self });
-      const blobKeys = Object.keys(blobData);
       const fragment = renderInstance(self.currentInstance, node);
       region.setContent(fragment);
-      stampInstanceScope(region, self.currentInstance, blobKeys);
+      stampScope(region, self.currentInstance.data);
       attachToRenderRoot(self.currentInstance, region, self);
     }
     else {

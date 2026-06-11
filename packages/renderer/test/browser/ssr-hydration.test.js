@@ -470,6 +470,35 @@ describe('SSR hydration — subtemplates', () => {
 
     expect(shadowHTML(el)).toBe('<div class="before">A</div><span class="sub">B</span><div class="after">C</div>');
   });
+
+  it('limits a hydrated subtemplate scope layer to declared blob keys', async () => {
+    let captured;
+    const child = defineComponent({
+      renderingEngine: 'native',
+      template: '<button class="lbl">{name}</button>',
+    });
+
+    const el = await ssrAndHydrate({
+      template: '<div>{>template name="child" data={id: rowId, name: rowName}}</div>',
+      subTemplates: { child },
+      defaultState: { rowId: 7, rowName: 'Seven', secret: 'hidden' },
+      events: {
+        'click .lbl'({ scope }) {
+          captured = scope;
+        },
+      },
+    });
+
+    el.shadowRoot.querySelector('.lbl').dispatchEvent(
+      new MouseEvent('click', { bubbles: true, composed: true, cancelable: true }),
+    );
+    expect(captured.id).toBe(7);
+    expect(captured.name).toBe('Seven');
+    // the layer holds declared args only — context keys already arrive
+    // as state/settings/self params
+    expect('secret' in captured).toBe(false);
+    expect('rowId' in captured).toBe(false);
+  });
 });
 
 /*******************************
