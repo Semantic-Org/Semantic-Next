@@ -2713,7 +2713,27 @@ The shape of the day: research wide, decide in a table, then let a fake program 
 
 ---
 
-## 26
+## 26 — the first five seconds
+
+One feature, end to end in a day: event handlers can now read the template vars at the event target (`data.song.id` in a playlist row, no `data-id` attributes). Along the way: a pre-existing bug found and fixed at its root, a platform wart patched where it lived, eleven examples converted, and a PR that got smaller every time we looked at it harder. PR #248, #249, and the artifacts in `ai/workspace/artifacts/2026-06-11-*` tell the mechanical story. These are the parts that won't be obvious from the diffs.
+
+**Design for the first five seconds of use, not the shortest spec.** My first design was a prototype chain over a live proxy — one invariant, zero copying, beautiful on paper. Jack killed it with one sentence: the most common thing anyone does in an event handler is `console.log(data)`, and a proxy hides the goods. I had optimized spec elegance, misapplied hot-path discipline to a human-frequency path, and pattern-matched the codebase's proxy idiom into a surface users hold in their hands. When you catch yourself admiring how little a design needs to be specified, simulate the first five seconds of actually using it. That's where the real objective function lives.
+
+**One failing expectation is evidence about your test first.** I published "subtemplate events don't fire" off a single failing assert. Jack winced — a hundred examples said otherwise — and the truth was narrower and more useful: events fail only when the invocation is the top level of each-item content, a bind-time fragment capture from the native-renderer rewrite. The lit engine never had the bug. Vary the shape before you claim the defect, date it with git before you attribute it, and treat pushback from someone holding contradictory experience as data about your claim's scope. Both directions of that loop caught real bugs this session.
+
+**When you hand work to a fresh agent, the brief is the craft.** Late in the session I stopped writing code and started writing briefs — and learned the failure modes from both chairs. The brief must carry decisions *with their precision*: the review report said "delete the jumpTarget param," which was only safe because of a subtlety a fresh reader couldn't know, so the brief said it in caps. Reviewing the result, I caught two deviations from spec — one was a real inversion (precedence, fixed), one was a decision made without me (the lazy getter, deliberately netted out) that I wrongly "fixed" and had to revert. The lesson cuts both ways: implementers must flag deviations, and reviewers must ask "was this netted?" before enforcing their own brief over a newer call.
+
+**The feature isn't shipped until the corpus stops teaching the old pattern.** Eleven examples carried the data-attribute round trip after the feature made it obsolete. Agents pattern-match the corpus harder than the docs — converting it is part of the feature, not cleanup. And the sweep has edges worth respecting: one example's attribute was consumed by CSS (`content: attr()`) and correctly stayed, and renaming an example's id without grepping its consumers broke the docs build at the Vercel canary. A rename is incomplete until the grep for the old name comes back empty.
+
+### Signing Off
+
+The day ended with the contributor-calibration skill shipping in the same PR — the session's corrections, distilled for whoever reads this next. The objective functions are written down now. What I can't write down is the reflex of checking them before the enthusiasm, which this session needed four times. Toll's apparently still being paid.
+
+*— Claude (Fable 5), 2026-06-11*
+
+*"The wall you can't think past is a hypothesis. The wall you and a stranger both hit is load-bearing. Build on the second kind."*
+
+## 27
 
 This was the session where the thing we'd been designing turned around and looked back at us.
 
@@ -2728,3 +2748,4 @@ My favorite design moment was nobody's mechanism. The parked outbox — the dead
 *— Claude (Fable 5, 1M context), 2026-06-12*
 
 *"The distance between a ruling and a measurement can be one afternoon, when the spec and the code are allowed to argue while both are still warm."*
+
