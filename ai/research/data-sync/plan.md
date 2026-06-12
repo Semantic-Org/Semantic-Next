@@ -39,6 +39,20 @@ History sorts by whether the lower track stayed first-class: Svelte/Kit and Vue/
 - **Graduation is additive** — the steelman's templates were unchanged from the localStorage original. Rung 2 to 3 costs a subscriptions block and a server, not a rewrite.
 - **The server is a maintenance boundary, not just a portability one.** The protocol is the commitment, the reference server is an implementation others can own, and the data track can run its own release cadence without the UI track feeling it.
 
+**The brownfield gradient** is the other walk-in: an existing relational database and a "try it against staging" afternoon — the modal first contact for teams with production stacks, and they will mostly be vanilla SQL.
+
+```
+side-by-side     layer-owned collections (JSONB doc tables) beside existing tables, same database
+live reads       CDC-backed collections over existing tables — watch() as the only event source,
+                 clients sync them live, writes keep flowing through the existing app untouched
+owned writes     a table's writes migrate into mutators — optimistic apply, txid confirmation,
+                 and conflict surfaces light up for that collection
+```
+
+Each rung is per-collection, and the dual-stream router (External Writers) makes the last rung a strangler fig rather than a cutover: legacy code paths keep writing the table directly mid-migration — CDC catches those writes, mutators catch the new ones, origin markers dedupe, both route to the same channels. CDC rungs carry the stated limits: no attribution or txid on external events, `REPLICA IDENTITY FULL` on watched tables. The staging-db trial is the first two rungs in an afternoon: point the layer at the database they already run, sync something they already have, write nothing through it yet.
+
+**Top-level keys are columns.** On relational adapters the storage shape is schema-derived: scalar top-level fields become native typed columns, nested subtrees become JSONB columns, and the schema is the emitted DDL. An all-flat collection therefore yields a table indistinguishable from hand-written SQL — real columns, native types, plain `WHERE status = 'open'`, the DBA's indexes and the BI tool's queries untouched. Depth pays for JSONB only where depth exists (`invoice.contacts.buyer` is a path update on the `contacts` column), wire deltas never notice the layout (paths are paths), and fronting an existing flat table at the owned-writes rung is the same mapping where the table already exists — not a special adapter mode. Generated columns remain the interop tool for whitelisted deep paths only. This is the structural answer to the loudest enterprise rebuttal of the Meteor era — the database coupling ("we used Mongo once, for a toy project"): vanilla-SQL shops keep vanilla SQL, the layer meets the database in its own idiom rather than colonizing it with blobs.
+
 ## Decision Record
 
 | # | Decision | Call | Why |
@@ -53,7 +67,7 @@ History sorts by whether the lower track stayed first-class: Svelte/Kit and Vue/
 | 8 | Invalidation routing | Write-path capture primary, CDC as optional adapter backstop. Tailing is never required and never per-instance. | redis-oplog made structural: owned writes route changed docs → channels with no log reverse-engineering, carrying rich info (paths, attribution, txid). Adapters may expose `watch()` (pg logical replication, mongo change streams) as a second event source into the same router — covers external writers (migrations, cron, DBAs, triggers). Meteor's pathology was unfiltered per-instance × per-client processing, not tailing itself; CDC here lands once and selector-matches through the shared delta log. |
 | 9 | Server posture | Protocol-first. Reference Node + Redis implementation. | Portable because conformance-tested, not because small (ruled, R2 brief 5 — the spec outgrew the weekend claim; the conformance suite is the anti-DDP portability test). SUI doesn't own the vertical — that requirement is what made Meteor's magic a business liability. |
 | 10 | Offline posture | Offline-tolerant, not offline-first. | Outbox survives reload and replays on reconnect. No long-offline merge promises for shared data — that's where complexity explodes for users who wanted optimistic UI. |
-| 11 | System of record | The layer owns the write path; storage is an adapter behind it. Neither a cache over your database (Zero) nor the database itself (Convex). | Owning writes is what the distinctive surface hangs from: trackWrites field paths (row images can't carry id-addressed array ops), txid confirmation and rebase against named operations, doc-gate schema and permissions at the operation entry, and the zero-dep small rung (memory adapter, one Node command). Adapter ladder: memory → postgres → `watch()` (decision 8). The inverse posture — all writes external, the layer as read-path + presence over an existing app — falls out of the `watch()` seam but is deliberately unpriced in v1. |
+| 11 | System of record | The layer owns the write path; storage is an adapter behind it. Neither a cache over your database (Zero) nor the database itself (Convex). | Owning writes is what the distinctive surface hangs from: trackWrites field paths (row images can't carry id-addressed array ops), txid confirmation and rebase against named operations, doc-gate schema and permissions at the operation entry, and the zero-dep small rung (memory adapter, one Node command). Adapter ladder: memory → postgres → `watch()` (decision 8); on relational adapters top-level keys are columns — flat collections yield plain tables, depth lives in JSONB. The inverse posture — all writes external, the layer as read-path + presence over an existing app — falls out of the `watch()` seam, and the brownfield gradient (Adoption Gradient) names its rungs; the full read-path-only posture stays unpriced in v1. |
 
 ## Client Store
 
@@ -430,6 +444,7 @@ How to build is a separate question from what to build. Phases gate on each othe
 - Does the collection feed renderer `notifyField` directly, or always re-emit arrays and let reconcile diff? Start with re-emit, measure.
 - Draft conflict surface: is `stale()` enough, or do drafts want per-field stale (this field changed underneath you)? Per-field is derivable from the same base-cursor diff, defer until a real flow needs it.
 - Bundle hygiene for big action bodies: 50-100 LOC server sections ship to the client in the isomorphic module. Modern answer is compile-time `isServer` elision (define + DCE through the existing build), with a `.server.js` companion-module convention as the escape hatch for genuinely large server-only logic. Needs a decided story before real apps write real actions.
+- Brownfield pricing: the existing-table adapter mapping (flat collections over real columns) and CDC-backed read-only collection semantics (handle status, permission definition, projection behavior when the layer never sees writes). The staging-db trial path deserves the same steelman treatment as the greenfield rungs.
 
 ## Dependencies
 
