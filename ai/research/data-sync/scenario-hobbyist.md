@@ -27,7 +27,7 @@ A weekend project, a classroom exercise, an agent-authored microapp, an internal
 | Time to first realtime | minutes (~), empty file → two browsers syncing |
 | Concepts before first sync | ≤3: collection, subscribe, mutator (~) |
 | Setup steps | script tag + one server command (~) |
-| Client bundle (sync layer) | small enough to not embarrass the CDN rung (~, number TBD) |
+| Client bundle (sync layer) | core synced rung ≤30KB gzip target, 40KB hard bar (~) — line-item budget and CI gates in plan.md Bundle Budget |
 | Server deps | zero beyond Node (~) |
 | Config required | none — every knob has a hobbyist-correct default |
 
