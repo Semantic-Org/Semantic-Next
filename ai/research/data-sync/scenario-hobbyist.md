@@ -1,6 +1,6 @@
 # Scenario II — The Hobbyist (Equal Constitutional Standing)
 
-Status: **proposed — awaiting confirmation.** This document has equal standing with [`scenario.md`](scenario.md). Protocol-mandatory machinery must justify itself against *both* scenarios, and **features this persona doesn't need must cost this persona nothing** — no bytes, no concepts, no setup steps. The majority of adopters live here. Open source is built on hobbyists being happy, and the easy case must be fast and painless or the hard case never gets its chance.
+Status: **proposed — awaiting confirmation.** Values marked ~ are working assumptions to confirm or correct. This document has equal standing with [`scenario.md`](scenario.md). Protocol-mandatory machinery must justify itself against *both* scenarios, and **features this persona doesn't need must cost this persona nothing** — no bytes, no concepts, no setup steps. The majority of adopters live here. Open source is built on hobbyists being happy, and the easy case must be fast and painless or the hard case never gets its chance.
 
 ## The Persona
 
