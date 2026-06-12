@@ -5,14 +5,16 @@ Everything from the DB sync layer design session, one folder.
 - [`scenario.md`](scenario.md) — **the ground truth workload**: document shape, channel topology, write/read/concurrency model, ownership partition, canonical load figures, parameters awaiting confirmation. When design and scenario disagree, scenario wins or gets amended
 - [`plan.md`](plan.md) — the design: architecture, decision record, sync loop, channels, schemas, drafts, priors audit, de-risking
 - [`reactivity-review.md`](reactivity-review.md) — four-bucket audit of every plan claim vs packages/reactivity source, adversarially checked, plus the unaddressed-interaction permutation map
-- [`ws-protocol.md`](ws-protocol.md) — the full wire spec recommendation (Fable synthesis over three research voices): framing, message schemas, connection state machine, resume choreography, consumer surface
+- [`ws-protocol.md`](ws-protocol.md) — the full wire spec recommendation, synthesized over three research voices: framing, message schemas, connection state machine, resume choreography, consumer surface
 - [`ws-protocol-review.md`](ws-protocol-review.md) — five-voice referee choir on the wire spec: invariants ×2, lost-work ×2, realistic-usage walkthrough. Six-theme revision list up top
-- [`vetting-report.md`](vetting-report.md) — **the gate**: five-lens Fable vet of the complete corpus (coherence, cold read, drift, blind DX ×2 — full per-lens reports and blind-dev builds remain in the private workspace). Verdict: revise-then-build, with the ranked revision list
+- [`vetting-report.md`](vetting-report.md) — **the gate**: five-lens vet of the complete corpus (coherence, cold read, drift, plus two blind developer-experience builds — full per-lens reports and builds remain in the private workspace). Verdict: revise-then-build, with the ranked revision list
+- [`reference-comparison.md`](reference-comparison.md) — the 2026-06-12 comparison against Zero, Supabase Realtime, and Convex: 28 ranked amendments (the structural ones since ruled into the plan), needs-bench items, watch list, and the rejected attacks with their reasons — the spec's tested armor. Dossiers and adversarial reviews in [`research/`](research/)
 - [`todomvc/`](todomvc/) — API steelman: the `examples/src/todo-list/` TodoMVC rewritten against the fake sync API, templates unchanged
 - [`invoices-table/`](invoices-table/) — trifecta steelman: table + searchIndex channel factory + row menu + edit/add modals, with the 0a sore-point review list. Uses inline config (correct at its scale) — the invoice-editor scenario should demonstrate the `collections/[name]/{methods,mutators}/` folder convention
 - [`research/`](research/) — nine-agent research pass that grounded it
   - `primitives-*.md` — repo readers: reactivity, trackWrites, renderer, component surface, prior art
   - `landscape-*.md` — web research: Meteor retrospective, 2026 engines, client storage, transport
+  - `deep-*.md` / `crossexam-*.md` — the reference comparison's three system dossiers (Zero, Supabase Realtime, Convex) and their adversarial reviews (2026-06-12)
 
 ## Concept Coverage Map
 
