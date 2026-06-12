@@ -6,11 +6,11 @@ A realtime data layer for the framework: in-memory reactive collections queried 
 
 ## Design
 
-The complete design corpus lives at [`ai/research/data-sync/`](../../research/data-sync/) — plan with decision record, two ground-truth scenarios, wire protocol and its five-voice review, API steelmen (todomvc, orders-table), vetting reports, and the research pass that grounded it. Gate verdict: revise-then-build, R2 rulings folded in.
+The complete design corpus lives at [`ai/research/data-sync/`](../../research/data-sync/) — plan with decision record, two ground-truth scenarios, wire protocol and its five-voice review, API steelmen (todomvc, invoices-table), vetting reports, and the research pass that grounded it. Gate verdict: revise-then-build, R2 rulings folded in.
 
 ## Sequencing
 
-Ships post-1.0, after the component catalog — long simmer intended. The schema language ships first as [`schema-package`](../schema-package.md) (Phase 2, gates Value Schema interop). Remaining pre-build gates per the corpus: protocol v2 synthesis, the order-editor steelman + API reference, and the two Tier-1 spikes (rebase×scheduler, query-registry bench).
+Ships post-1.0, after the component catalog — long simmer intended. The schema language ships first as [`schema-package`](../schema-package.md) (Phase 2, gates Value Schema interop). Remaining pre-build gates per the corpus: protocol v2 synthesis, the invoice-editor steelman + API reference, and the two Tier-1 spikes (rebase×scheduler, query-registry bench).
 
 ## Status
 
