@@ -1,10 +1,10 @@
 <div class="toolbar">
   <ui-input class="search" icon="search" placeholder="Search invoices…" />
   <ui-dropdown class="status" value={status}>
-    <ui-menu-item value="all">All</ui-menu-item>
-    <ui-menu-item value="draft">Draft</ui-menu-item>
-    <ui-menu-item value="open">Open</ui-menu-item>
-    <ui-menu-item value="closed">Closed</ui-menu-item>
+    <dropdown-item value="all">All</dropdown-item>
+    <dropdown-item value="draft">Draft</dropdown-item>
+    <dropdown-item value="open">Open</dropdown-item>
+    <dropdown-item value="closed">Closed</dropdown-item>
   </ui-dropdown>
   <ui-button class="add" primary icon="plus">Add Invoice</ui-button>
 </div>
@@ -31,8 +31,8 @@
           <td>{formatDate invoice.createdAt 'MMM D'}</td>
           <td>
             <ui-menu class="row-actions" icon="ellipsis-vertical">
-              <ui-menu-item data-action="edit" data-id={invoice.id}>Edit</ui-menu-item>
-              <ui-menu-item data-action="delete" data-id={invoice.id}>Delete</ui-menu-item>
+              <dropdown-item data-action="edit" data-id={invoice.id}>Edit</dropdown-item>
+              <dropdown-item data-action="delete" data-id={invoice.id}>Delete</dropdown-item>
             </ui-menu>
           </td>
         </tr>
