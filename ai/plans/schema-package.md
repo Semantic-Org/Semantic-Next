@@ -11,7 +11,7 @@ The language is largely decided — full decision record in [`ai/research/data-s
 - Constructor types are the authoring idiom (`type: String`, `Date`, `Boolean`, `Array`), string names exist only as the serialized projection. Extended types are exported package tokens, never magic strings.
 - Fields are optional by default (`required: true` is the rare opt-in). Nesting via `schema:`, arrays via `type: Array` + `schema`, composition (fragments, spreads, cross-package imports) is first-class.
 - `computed` fields are stored, derived, writable-with-override (`_overrides` subdoc, mirrored nesting), with `deps` as the reactivity governor and `serverOnly` for server-confined derivations.
-- `private: true` is wire privacy. Field-level write `permission` tokens are proposed, pending confirmation.
+- `private: true` is wire privacy. Field-level write `permission` tokens are confirmed (2026-06-12) — the write-side twin of `private`, checked at the doc gate so shared mutators inherit per-field authorization from the schema.
 - The doc gate filters: writes to undeclared paths are ignored (dev-logged), `unsafe: true` marks loose regions.
 - Standard Schema v1 interface for ecosystem interop. Path-addressable field errors.
 
