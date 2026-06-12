@@ -57,12 +57,16 @@ Each rung is per-collection, and the dual-stream router (External Writers) makes
 
 Client bytes are user-facing perf (runtime-first thesis), and the framework the sync layer rides on is already heavy — bundle size is SUI's worst Krausest offender — so the data track inherits a deficit, not a surplus. The architecture chosen is the client-growing one (decisions 2-4: the replica road puts the matcher, rebase engine, and persistence client-side), and the thin-road existence proof is 18.3KB gzip — a 2026 queries-as-subscriptions client, measured. The discipline: every KB above that proof must be attributable to a named capability the thin road lacks (offline outbox, render-first boot, local queries).
 
-| line item | budget (gzip) |
-|---|---|
-| core synced rung (pool, matcher, protocol client, outbox, rebase) | ≤30KB target, 40KB hard bar |
-| `@semantic-ui/data` local rung alone | ≤15KB |
-| opt-in tiers (persistence, drafts/forms, `local()` search, parking UI) | priced per tier, never in the hobbyist path |
-| boot shim, if the split ships | ≤10KB |
+| line item | bar (gzip) | projected (gzip, central) |
+|---|---|---|
+| core synced rung (pool, matcher, protocol client, outbox, rebase, consumer surface, multi-tab, projection ledger, revival, SSE fallback) | ≤30KB target, 40KB hard bar | ~16KB |
+| `@semantic-ui/data` local rung alone | ≤15KB | ~6KB |
+| `@semantic-ui/schema` — shared with value-schema, ships with the UI track regardless of sync | priced with the UI track | ~5KB |
+| opt-in tiers: drafts/forms + `{#form}` block | per tier, never in the hobbyist path | ~3KB |
+| opt-in tiers: persistence, parking surface, `local()` search | per tier | ~0.5-1KB each |
+| boot shim, if the split ships | ≤10KB | — |
+
+Projections are Fermi from the working POC's own corpus: 11.1 minified bytes per source line, gzip ≈ 0.34 and brotli ≈ 0.31 of minified, remaining surface estimated by analog against shipped POC components (drafts vs the rebase engine, multi-tab vs the connection machine). Honest band ×0.7-1.5. The growth is flat machinery — choreography and validation, nothing with a planner or pipeline shape in it. Anchors against the field's measured numbers (not marketing dist sizes): full stack with forms lands near a third of Zero's ~96KB-gzip client, the core rung near a sixth. CI replaces projections with actuals as packages land — drift between the columns is reviewable per PR, not discovered at the end.
 
 Bars are merge gates, not dashboards: CI measures every line item (minified, gzip and brotli both reported — the bars gate on gzip) on every PR touching the data packages and reports the table in the PR — a breach is a refactor trigger, never note-and-proceed. Past ~50KB core the light-replica story inverts and the decision 4 conversation reopens.
 
