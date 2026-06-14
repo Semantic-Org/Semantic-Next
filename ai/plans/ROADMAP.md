@@ -109,6 +109,7 @@ Behavioral changes and API contracts that downstream agents and consumers will t
 | # | Plan | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
 | 2b | [Value Schema](value-schema.md) | 16-24h (2-3d) | pair | initial | Contract for ~20-30 form components. `value` setting + schema + `change` event. Gates form/form-field and the wrapper architecture. |
+| 2g | [Schema Package](schema-package.md) | 16-24h (2-3d) | pair | initial | Extract `@semantic-ui/schema` — one schema language for component values, collections, operation args. Constructor types, optional-by-default, Standard Schema interop. Interlocks with 2b; gates the post-1.0 data layer. |
 | 2c | [State from Settings](state-from-settings.md) | 8h | pair | scoped | `{ default: 'all', from: 'setting' }` in `defaultState`. Eliminates manual shadowing for components that accept initial values from attributes but own them as state. |
 | 2d | [Subtemplate Settings](subtemplate-settings.md) | 8-12h | pair | initial | Reactive `defaultSettings` on subtemplates with merged proxy over parent web component settings. Same upgrade path: add `tagName` and the subtemplate becomes a web component with no API change. |
 | 2e | [Template Match Blocks](template-match-blocks.md) | 8-16h (1-2d) | pair | scoped | `{#match}`/`{is}`/`{else}` — value-based branching. Replaces verbose `{#if is x 'a'}...{else if is x 'b'}` chains. |
@@ -203,6 +204,7 @@ Slot in wherever there's a gap; not phase-gated.
 
 Plans drafted but not on the active roadmap. See `ai/plans/icebox/` for files.
 
+- [Data Sync Layer](icebox/data-sync.md) — realtime data layer (collections, publications, drafts, cursor-core protocol). Design corpus at `ai/research/data-sync/`, gate-vetted. Post-1.0 by design — simmering until the component catalog ships. Schema language extracts early via Phase 2g.
 - [Block Runtime Diagnostics](icebox/block-runtime-diagnostics.md) — resolution-trail capture for Lisp data paths, JS-eval error surfacing, public `report()` API for block authors, tracing default-on-in-dev, always-on breadcrumb on first block throw.
 - [Renderer + Evaluator Perf](icebox/renderer-evaluator-perf.md) — concrete hot-path optimizations: item-proxy clone elimination, `Signal.peek` non-cloning, comment-marker reuse as `DynamicRegion` anchor, V8-targeted `ExpressionEvaluator` rewrite.
 - [WASM Renderer](icebox/wasm-renderer.md) — Rust/WASM server renderer for the docs-site hot path. Open questions on streaming, bundle size, AST caching.

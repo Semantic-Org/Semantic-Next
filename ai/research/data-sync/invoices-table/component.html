@@ -1,0 +1,56 @@
+<div class="toolbar">
+  <ui-input class="search" icon="search" placeholder="Search invoices…" />
+  <ui-dropdown class="status" value={status}>
+    <dropdown-item value="all">All</dropdown-item>
+    <dropdown-item value="draft">Draft</dropdown-item>
+    <dropdown-item value="open">Open</dropdown-item>
+    <dropdown-item value="closed">Closed</dropdown-item>
+  </ui-dropdown>
+  <ui-button class="add" primary icon="plus">Add Invoice</ui-button>
+</div>
+
+{#if not invoices.ready}
+  <ui-spinner />
+{else}
+  <ui-table>
+    <thead>
+      <tr>
+        <th data-field="client">Client <ui-icon name={sortIcon 'client'} /></th>
+        <th data-field="status">Status</th>
+        <th data-field="total">Total <ui-icon name={sortIcon 'total'} /></th>
+        <th data-field="createdAt">Created <ui-icon name={sortIcon 'createdAt'} /></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {#each invoice in invoices}
+        <tr>
+          <td>{invoice.client}</td>
+          <td><ui-label class={invoice.status} warning={invoice.isOverdue}>{invoice.status}</ui-label></td>
+          <td>{formatMoney invoice.total}</td>
+          <td>{formatDate invoice.createdAt 'MMM D'}</td>
+          <td>
+            <ui-menu class="row-actions" icon="ellipsis-vertical">
+              <dropdown-item data-action="edit" data-id={invoice.id}>Edit</dropdown-item>
+              <dropdown-item data-action="delete" data-id={invoice.id}>Delete</dropdown-item>
+            </ui-menu>
+          </td>
+        </tr>
+      {/each}
+    </tbody>
+  </ui-table>
+
+  <footer class="pagination">
+    <span>{invoices.total} invoices</span>
+    <ui-button class="prev" disabled={page == 1}>Prev</ui-button>
+    <span>{page} / {invoices.pages}</span>
+    <ui-button class="next" disabled={page == invoices.pages}>Next</ui-button>
+  </footer>
+{/if}
+
+{#if adding}
+  <invoice-modal />
+{/if}
+{#if editingID}
+  <invoice-modal invoice-id={editingID} />
+{/if}
