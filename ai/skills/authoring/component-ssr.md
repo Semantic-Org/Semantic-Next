@@ -1,7 +1,7 @@
 ---
 title: Server-Side Rendering
-description: How Semantic UI components render on the server — Lit SSR integration, isServer/isClient guards, lifecycle behavior during SSR, hydration, and patterns for writing SSR-safe components.
-keywords: [SSR, server-side rendering, isServer, isClient, Lit SSR, hydration, astro, server rendering, declarative shadow DOM]
+description: How Semantic UI components render on the server. Native renderToString SSR, isServer/isClient guards, lifecycle behavior during SSR, self-hydration, and patterns for writing SSR-safe components.
+keywords: [SSR, server-side rendering, isServer, isClient, renderToString, hydration, astro, server rendering, declarative shadow DOM]
 audience: authoring
 skill: component-ssr
 type: skill
@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `component-ssr`
 > **Purpose:** SUI-specific SSR patterns — what the framework auto-guards, the two scopes where `isServer`/`isClient` are available, lifecycle behavior during server rendering, and canonical guard patterns from first-party components.
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-06-14
 
 ---
 
@@ -87,8 +87,8 @@ These are guarded internally — you do not need to protect them in component co
 | `dispatchEvent` | `template.js` | Silently returns (no-op) |
 | Key bindings (`keys`) | `template.js` `bindKeys()` | Skipped entirely |
 | Theme observer (`onThemeChanged`) | `template.js` `attachEvents()` | MutationObserver and event listener skipped |
-| `darkMode` getter | `define-component.js` `getData()` | Returns `undefined` instead of querying DOM |
-| `isDarkMode()` | `web-component.js` | Returns `undefined` on server |
+| `darkMode` getter | `engines/native/base.js` `getData()` | Returns `undefined` instead of querying DOM |
+| `isDarkMode()` | `component-helpers.js` | Returns `undefined` on server |
 | Reactive directive reactions | All 6 renderer directives | Reactions only created on client; server gets a single evaluated value |
 | `adoptStylesheet` | `utils/css.js` | Returns immediately (no-op) |
 | Subtemplate CSS merging | `define-component.js` | Concatenated into parent CSS for DSD `<template>` output |
@@ -251,28 +251,32 @@ const createComponent = ({ isClient }) => ({
 
 ## SSR Pipeline
 
-SUI uses `@semantic-ui/astro-lit` (a maintained fork of `@astrojs/lit`) which uses `@lit-labs/ssr` to render components on the server.
+SUI server-renders through its own native renderer. No Lit, no DOM shim. The published `@semantic-ui/astro` integration is a thin adapter whose `renderToStaticMarkup` calls `renderToString` from `@semantic-ui/component`. The host framework only emits the server HTML and loads the component JS. it never hydrates the component itself.
 
 ### Server Render Flow
 
-1. Astro calls `renderToStaticMarkup(tagName, props, slots)`
-2. A `LitElementRenderer` instance is created for the tag
-3. Properties and attributes are set on the instance
-4. `connectedCallback()` fires (triggers `willUpdate` → `initialize` → `onCreated`)
-5. Shadow DOM contents are rendered as a `<template shadowrootmode="open">` (Declarative Shadow DOM)
-6. Slots are serialized into the light DOM
+1. `renderToString(ComponentClass, attrs)` clones the prototype template, forcing the native engine
+2. `template.initialize()` runs `createComponent` with `isServer: true` (same factory the client runs)
+3. `ServerRenderer` walks the AST and produces an HTML string with hydration comment markers
+4. `expandCustomElements` recursively renders nested components as their own DSD
+5. The output wraps in `<template shadowrootmode="open">` (Declarative Shadow DOM) with the component CSS
 
-### Hydration Flow
+### Self-Hydration Flow
 
-1. Browser parses DSD `<template shadowrootmode>` — shadow roots are created natively
-2. For browsers without DSD support, a polyfill (`@webcomponents/template-shadowroot`) runs on `DOMContentLoaded`
-3. `lit-element-hydrate-support.js` patches LitElement to reuse existing shadow DOM instead of re-rendering
-4. `defer-hydration` attribute is removed, triggering the client-side update cycle
-5. The full lifecycle fires on the client — state is re-initialized, reactions are created, events are bound
+The component hydrates itself in its own `connectedCallback`. there is no host-driven hydration step.
+
+1. The browser parses the DSD natively and attaches the shadow root before any JS runs, so the user sees styled content immediately
+2. The component JS loads, `customElements.define` upgrades the element, the constructor detects the existing shadow root
+3. `connectedCallback` sees server content and `canHydrate()` confirms the marker version matches, then defers wiring (one microtask) so the browser paints first
+4. `hydrate()` clones the template, runs `createComponent` again client-side, and wires Reactions to the existing DOM via the comment markers
+
+`hydrate: false` (server-only components) stamps an `ssr` attribute on the element. `connectedCallback` early-returns on it, so the DSD stays visible but inert. The client integration removes the attribute when a `client:*` directive opts the component into hydration.
+
+For the full phase-by-phase walk (markers, `canHydrate`, `_hydrating`, `skipFirstWrite`), see `ssr-hydration`. For the AST and engine selection, see `render-pipeline`.
 
 ### Key Implication
 
-Components render **twice**: once on the server (HTML generation) and once on the client (hydration). Your `createComponent` and `onCreated` run in both environments. State set during SSR does not transfer — the client re-initializes from defaults. This is why `isClient` guards exist: not to prevent errors, but to prevent side effects (localStorage writes, observer creation, event binding) from executing in the wrong environment.
+`createComponent` and `onCreated` run in **both** environments — once on the server (HTML generation) and once on the client (hydration). State set during SSR does not transfer. the client re-initializes from defaults. This is why `isClient` guards exist: not to prevent errors, but to prevent side effects (localStorage writes, observer creation, event binding) from executing in the wrong environment.
 
 ---
 
@@ -282,9 +286,9 @@ On the client, subtemplates adopt their CSS at runtime via `adoptStylesheet`. On
 
 ```javascript
 // Inside defineComponent — this runs automatically
-each(subTemplates, (template) => {
-  if (template.css) {
-    css += template.css;
+each(subTemplates, (subTemplate, name) => {
+  if (subTemplates[name].css) {
+    css += subTemplates[name].css;
   }
 });
 ```
@@ -326,6 +330,8 @@ const onCreated = ({ state, self, isClient }) => {
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
+| **SSR & Hydration Pipeline** | `ssr-hydration` | Deep dive on markers, DSD parsing, the hydrate-or-render decision |
+| **Render Pipeline** | `render-pipeline` | AST, engine selection, expression evaluation |
 | **Component Behaviors** | `component-behaviors` | Attaching behaviors (always need `isClient` guard) |
 | **Component Lifecycle** | `component-lifecycle` | Understanding hook execution order and params |
 | **Component Authoring** | `component-authoring` | Full `defineComponent` guide |
