@@ -1,6 +1,7 @@
 {
   "name": "@semantic-ui/query",
   "version": "0.18.0",
+  "type": "module",
   "title": "Semantic UI Query",
   "description": "DOM querying and manipulation library for Semantic UI",
   "author": "Jack Lukic <jack@semantic-ui.com>",

@@ -5,6 +5,7 @@
   "author": "Jack Lukic",
   "license": "ISC",
   "version": "0.18.0",
+  "type": "module",
   "sideEffects": [
     "./src/index.js",
     "./src/engines/*/register.js"
