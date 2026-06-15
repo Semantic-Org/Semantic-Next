@@ -30,48 +30,51 @@ export const semanticUI = createUnplugin((options, meta) => {
   // Vite resolves ?raw natively, so only contribute ?ast there. Every other
   // bundler needs both.
   const handleRaw = meta?.framework !== 'vite';
-  // vite only contributes ?ast, so gate on that alone there
   const includeRe = handleRaw ? SUI_RE : AST_RE;
 
   return {
     name: '@semantic-ui/build',
 
-    // gate the hooks to ?raw/?ast imports so they never run for every module.
-    // esbuild filters natively, loadInclude covers the other bundlers.
+    // hook filters keep the hooks off every other module. Rollup, Rolldown,
+    // webpack, and rspack apply { filter } as a native pre-filter. esbuild
+    // filters at its own Go level via the dedicated block below.
     esbuild: {
       onResolveFilter: includeRe,
       onLoadFilter: includeRe,
     },
-    loadInclude(id) {
-      return includeRe.test(id);
+
+    resolveId: {
+      filter: { id: includeRe },
+      handler(id, importer) {
+        const wantsRaw = handleRaw && RAW_RE.test(id);
+        const wantsAst = AST_RE.test(id);
+        if (!wantsRaw && !wantsAst) {
+          return;
+        }
+        const file = cleanUrl(id);
+        // esbuild does not expose this.resolve, so map the path ourselves rather
+        // than lean on the bundler's resolver. components import co-located files
+        // (./component.html?raw), which is exactly this relative case.
+        const resolved = importer && file[0] === '.'
+          ? resolvePath(dirname(cleanUrl(importer)), file)
+          : file;
+        return resolved + id.slice(file.length);
+      },
     },
 
-    resolveId(id, importer) {
-      const wantsRaw = handleRaw && RAW_RE.test(id);
-      const wantsAst = AST_RE.test(id);
-      if (!wantsRaw && !wantsAst) {
-        return;
-      }
-      const file = cleanUrl(id);
-      // esbuild does not expose this.resolve, so map the path ourselves rather
-      // than lean on the bundler's resolver. components import co-located files
-      // (./component.html?raw), which is exactly this relative case.
-      const resolved = importer && file[0] === '.'
-        ? resolvePath(dirname(cleanUrl(importer)), file)
-        : file;
-      return resolved + id.slice(file.length);
-    },
-
-    async load(id) {
-      if (handleRaw && RAW_RE.test(id)) {
-        const text = await readFile(cleanUrl(id), 'utf8');
-        return `export default ${JSON.stringify(text)};`;
-      }
-      if (AST_RE.test(id)) {
-        const template = await readFile(cleanUrl(id), 'utf8');
-        const ast = new TemplateCompiler(template).compile();
-        return `export default ${JSON.stringify(ast)};`;
-      }
+    load: {
+      filter: { id: includeRe },
+      async handler(id) {
+        if (handleRaw && RAW_RE.test(id)) {
+          const text = await readFile(cleanUrl(id), 'utf8');
+          return `export default ${JSON.stringify(text)};`;
+        }
+        if (AST_RE.test(id)) {
+          const template = await readFile(cleanUrl(id), 'utf8');
+          const ast = new TemplateCompiler(template).compile();
+          return `export default ${JSON.stringify(ast)};`;
+        }
+      },
     },
   };
 });
