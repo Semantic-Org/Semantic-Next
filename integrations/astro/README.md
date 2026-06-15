@@ -1,6 +1,6 @@
 # @semantic-ui/astro
 
-Astro integration for Semantic UI. Configures Vite, registers SSR + hydration entry points, and emits import maps so Semantic UI's web components render at build time and hydrate in the browser.
+Use Semantic UI components in Astro. They render on the server, so the page arrives fully styled with no flash before they upgrade. Mark a component with a `client:*` directive to make it interactive, and it upgrades itself in the browser. You write no hydration code.
 
 ## Install
 

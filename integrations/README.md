@@ -4,7 +4,7 @@ Use Semantic UI with your server or build tool. Each integration is a thin adapt
 
 Two kinds:
 
-**Renderers** expand the tags in your HTML into Declarative Shadow DOM (the HTML that renders a component fully styled before its JavaScript loads), so the page ships pre-rendered and hydrates with no flash of an unupgraded element. You write `<my-button>`, the renderer emits its DSD.
+**Renderers** render your components on the server so the page arrives fully styled, with no flash before they upgrade. You write no hydration code. Each tag becomes Declarative Shadow DOM (the HTML that renders a component fully styled before its JavaScript loads), which the browser builds on its own, and the component upgrades itself once its script loads. You write `<my-button>`, the renderer emits its DSD.
 
 **Loaders** add the `?raw` and `?ast` import suffixes you use when authoring components in a bundler. They build your components, they don't render them.
 
