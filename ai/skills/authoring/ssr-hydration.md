@@ -120,10 +120,10 @@ A server-rendered component passes through five phases from definition to intera
    v
 4. JS LOADS: Custom element upgrade
    |
-   +-- Browser calls constructor() -> detects existing shadowRoot -> sets _hydrating flag
+   +-- Browser calls constructor() -> detects existing shadowRoot -> sets isHydrating flag
    +-- Browser calls connectedCallback() -> detects DSD content
    +-- canHydrate() checks marker version
-   +-- requestAnimationFrame(() => hydrate()) — deferred so browser can paint first
+   +-- queueMicrotask(() => hydrate()) — deferred so browser can paint first
    |
    v
 5. HYDRATION: hydrate(prototypeTemplate)
@@ -266,13 +266,13 @@ constructor() {
   // until hydration completes — attribute parsing fires before
   // connectedCallback and would schedule a render cascade
   if (this.shadowRoot) {
-    this._hydrating = true;
+    this.isHydrating = true;
   }
   // ... initialize settings, property store
 }
 ```
 
-The `_hydrating` flag prevents attribute-triggered re-renders during the upgrade phase. Without this, `attributeChangedCallback` would fire for every server-rendered attribute and schedule renders before the template is ready.
+The `isHydrating` flag prevents attribute-triggered re-renders during the upgrade phase. Without this, `attributeChangedCallback` would fire for every server-rendered attribute and schedule renders before the template is ready.
 
 ### connectedCallback — The Decision Point
 
@@ -288,8 +288,10 @@ connectedCallback() {
   }
 
   if (hasServerContent && this.canHydrate()) {
-    // DSD present and markers are compatible — defer hydration
-    requestAnimationFrame(() => this.hydrate(prototypeTemplate));
+    // DSD present and markers are compatible — defer hydration via
+    // microtask so a frame of events isn't lost (rAF leaves a full
+    // frame unbound)
+    queueMicrotask(() => this.hydrate(prototypeTemplate));
   } else {
     if (hasServerContent) {
       this.shadowRoot.innerHTML = ''; // version mismatch — discard
@@ -309,7 +311,7 @@ Three paths:
 
 **`canHydrate()`** walks shadow root comments looking for versioned markers (`sui:v1:` or `sui-block:v1:`). If found, it checks the version matches `MARKER_VERSION`. No markers means static content — safe to hydrate (nothing to wire).
 
-**`requestAnimationFrame`** — Hydration is deferred one frame so the browser can paint the server-rendered content first. The user sees the visual immediately; interactivity arrives on the next frame.
+**`queueMicrotask`** — Hydration is deferred to a microtask so the browser can paint the server-rendered content first without blocking the parser. Microtask is chosen over `requestAnimationFrame` because rAF leaves a full frame where events would be lost before the bindings are wired.
 
 ---
 
@@ -326,9 +328,13 @@ hydrate(prototypeTemplate) {
   // 1. Remove server <style> — CSS is handled via adoptedStyleSheets
   this.shadowRoot.querySelector('style')?.remove();
 
-  // 2. Clone template with data context (same as fullRender)
-  this.template = prototypeTemplate.clone({ data: this.getData(), element: this, renderRoot });
-  this.template._isHydrating = true;
+  const data = this.getData();
+
+  // 2. Clone template with data context. No renderRoot — avoids triggering
+  // attach() from the constructor. initialize() then runs createComponent.
+  this.template = prototypeTemplate.clone({ data, element: this });
+  this.template.initialize();
+  this.template.isHydrating = true;
   this.component = this.template.instance;
 
   // 3. Build entries from AST (cached on prototype — depends only on AST, not data)
@@ -336,17 +342,29 @@ hydrate(prototypeTemplate) {
     const { entries } = this.template.renderer.buildHTMLString(this.template.ast);
     prototypeTemplate._hydrationEntries = entries;
   }
+  const entries = prototypeTemplate._hydrationEntries;
 
   // 4. Walk server DOM, wire Reactions to existing nodes
-  this.template.renderer.hydrateMarkers(
-    this.shadowRoot, entries, data, scope
-  );
+  this.template.renderer.hydrateMarkers({
+    root: this.shadowRoot,
+    entries,
+    data: this.template.renderer.data,
+    scope: this.template.renderer.scope,
+  });
 
-  // 5. Clean up
-  this.template._isHydrating = false;
-  this._hydrating = false;
-  this.removeMarkers();  // remove all comment markers for clean DevTools
-  setTimeout(() => this.template?.onRendered(), 0);
+  // 5. Clear flags, mark rendered, attach events
+  this.template.isHydrating = false;
+  this.template.markRendered();
+  this.isHydrating = false;
+  this.template.attach(this.renderRoot);
+
+  queueMicrotask(() => this.template?.onRendered());
+
+  // defer marker cleanup to a post-paint rAF — keeps the synchronous
+  // hydration path lean. isConnected guards teardown before it fires
+  requestAnimationFrame(() => {
+    if (this.isConnected) { this.removeMarkers(); }
+  });
 }
 ```
 
@@ -414,9 +432,9 @@ PR #175 first attempted to preserve the lazy path with a static-AST classifier t
 
 **Trust-then-wire** — Hydration doesn't re-evaluate conditions to validate server output. It trusts the DOM and wires Reactions. If state truly diverges (e.g., `initialize()` changes a setting), the Reaction fires naturally on the next microtask and updates the DOM. See `ssr-principles` for the full rationale.
 
-**`_isHydrating` flag** — Set during hydration wiring. `createComponent` callbacks receive `isHydrating: true` so they can skip client-only setup that would conflict with the wiring pass. Template lifecycle events (`created`, `rendered`) are suppressed during hydration to avoid double-firing.
+**`template.isHydrating` flag** — Set during hydration wiring. `createComponent` callbacks receive `isHydrating: true` so they can skip client-only setup that would conflict with the wiring pass. Template lifecycle events (`created`, `rendered`) are suppressed during hydration to avoid double-firing.
 
-**`_hydrating` flag on element** — Set during constructor if DSD is detected. Prevents `attributeChangedCallback` from triggering `adjustPropertyFromAttribute` and `requestUpdate` during the upgrade phase. Cleared after hydration completes.
+**`isHydrating` flag on element** — Set during constructor if DSD is detected. Prevents `attributeChangedCallback` from triggering `adjustPropertyFromAttribute` and `requestUpdate` during the upgrade phase. Cleared after hydration completes.
 
 **Marker removal** — After hydration, `removeMarkers()` walks the shadow root and removes all `sui` comment nodes. This keeps DevTools clean and is possible because all Reactions are already wired to real DOM nodes (text nodes, elements), not to the markers themselves.
 
@@ -466,9 +484,9 @@ const html = renderToString(Counter, {});
 **Browser parse:** Shadow root created with content. User sees "Count: 0" immediately.
 
 **JS loads:** `customElements.define('ui-counter', ...)` upgrades the element.
-- Constructor detects `this.shadowRoot` exists, sets `_hydrating = true`
+- Constructor detects `this.shadowRoot` exists, sets `isHydrating = true`
 - `connectedCallback` detects DSD content, `canHydrate()` finds `sui:v1:` marker
-- Defers: `requestAnimationFrame(() => this.hydrate(prototypeTemplate))`
+- Defers: `queueMicrotask(() => this.hydrate(prototypeTemplate))`
 
 **Hydration:**
 1. Remove `<style>` tag (CSS moves to `adoptedStyleSheets`)
@@ -481,7 +499,7 @@ const html = renderToString(Counter, {});
      textNode.data = value ?? '';              // sets "0" (no-op, already correct)
    });
    ```
-5. Remove marker comments, clear `_hydrating`
+5. Clear `isHydrating`, attach events, defer marker-comment removal to a post-paint rAF
 
 **Live:** One second later, `state.count.increment()` fires. The count Signal updates to 1. The Reaction re-evaluates, sets `textNode.data = '1'`. The counter is ticking.
 
@@ -489,7 +507,7 @@ const html = renderToString(Counter, {});
 
 ## Astro Integration
 
-Semantic UI components render in Astro via the standard `client:*` directives. The integration uses the `source` export condition in `package.json` so Astro's Vite build processes component source directly.
+Semantic UI components render in Astro via the standard `client:*` directives. The integration (`integrations/astro/src/index.js`) sets `vite.ssr.noExternal: [/^@semantic-ui\//]` so Astro's Vite build bundles component source directly rather than treating the packages as external.
 
 ```astro
 ---
@@ -528,7 +546,7 @@ HYDRATION MARKERS
 
 HYDRATION DECISION
   No shadow root              -> fullRender (standard client path)
-  DSD + canHydrate()          -> requestAnimationFrame -> hydrate()
+  DSD + canHydrate()          -> queueMicrotask -> hydrate()
   DSD + version mismatch      -> discard server DOM -> fullRender
   hasAttribute('ssr')         -> skip entirely (server-only component)
 
