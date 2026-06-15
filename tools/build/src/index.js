@@ -21,6 +21,7 @@ import { createUnplugin } from 'unplugin';
 
 const RAW_RE = /[?&]raw(?:&|$)/;
 const AST_RE = /[?&]ast(?:&|$)/;
+const SUI_RE = /[?&](?:raw|ast)(?:&|$)/;
 
 // drop the ?query / #hash so we read the real file off disk
 const cleanUrl = (id) => id.replace(/[?#][^]*$/, '');
@@ -29,9 +30,21 @@ export const semanticUI = createUnplugin((options, meta) => {
   // Vite resolves ?raw natively, so only contribute ?ast there. Every other
   // bundler needs both.
   const handleRaw = meta?.framework !== 'vite';
+  // vite only contributes ?ast, so gate on that alone there
+  const includeRe = handleRaw ? SUI_RE : AST_RE;
 
   return {
     name: '@semantic-ui/build',
+
+    // gate the hooks to ?raw/?ast imports so they never run for every module.
+    // esbuild filters natively, loadInclude covers the other bundlers.
+    esbuild: {
+      onResolveFilter: includeRe,
+      onLoadFilter: includeRe,
+    },
+    loadInclude(id) {
+      return includeRe.test(id);
+    },
 
     resolveId(id, importer) {
       const wantsRaw = handleRaw && RAW_RE.test(id);
