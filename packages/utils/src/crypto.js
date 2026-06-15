@@ -183,13 +183,21 @@ const PRESETS = {
   token: { length: 27, timestamp: false, alphaFirst: false, checksum: true, upper: false },
 };
 
-// position-weighted sum mod 31 (prime), over the case-folded prefix+body, so a
-// typo anywhere — prefix included — fails. Result indexes 0..30 into the base32
-// alphabet, so the check char is always URL/CSS-safe (never the 32nd symbol).
+// position-weighted sum over each char's base32 value (not its char code) so an
+// adjacent swap shifts the sum by a - b, nonzero whenever the two differ — every
+// adjacent transposition is caught. Weighting by position spreads substitutions.
+// Computed over the case-folded prefix+body so a typo anywhere fails; prefix
+// chars outside the alphabet fall back to their char code. Result is a base32
+// index, so the check char is always URL/CSS-safe.
+const charValue = (char) => {
+  const value = BASE32_UPPER.indexOf(char);
+  return value === -1 ? char.charCodeAt(0) : value;
+};
+
 const checksumValue = (canonical) => {
   let sum = 0;
   for (let i = 0; i < canonical.length; i++) {
-    sum = (sum + canonical.charCodeAt(i) * (i + 1)) % 31;
+    sum = (sum + charValue(canonical[i]) * (i + 1)) % 32;
   }
   return sum;
 };

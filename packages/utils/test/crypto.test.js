@@ -261,6 +261,21 @@ describe('ID/Hashing Functions', () => {
         expect(isValidID(swapped, { usage: 'token' })).toBe(false);
       });
 
+      // weighting char *values*, not char codes, closes the gap where digit/letter
+      // pairs 31 apart in ASCII (e.g. 9 and x) aliased to the same checksum
+      it('catches every adjacent transposition with no alias gap', () => {
+        for (let n = 0; n < 200; n++) {
+          const id = generateID({ usage: 'token' });
+          for (let i = 0; i < id.length - 2; i++) {
+            if (id[i] === id[i + 1]) {
+              continue;
+            }
+            const swapped = id.slice(0, i) + id[i + 1] + id[i] + id.slice(i + 2);
+            expect(isValidID(swapped, { usage: 'token' })).toBe(false);
+          }
+        }
+      });
+
       it('catches a typo in the prefix', () => {
         const id = generateID({ usage: 'token', prefix: 'sk_' });
         const corrupt = 'sl_' + id.slice(3);
