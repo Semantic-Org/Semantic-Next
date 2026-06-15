@@ -1,0 +1,33 @@
+{
+  "name": "@semantic-ui/server",
+  "version": "0.1.0",
+  "description": "Framework-agnostic server-side rendering for Semantic UI",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "license": "MIT",
+  "homepage": "https://next.semantic-ui.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Semantic-Org/Semantic-Next.git",
+    "directory": "integrations/server"
+  },
+  "keywords": [
+    "semantic-ui",
+    "ssr",
+    "server-side-rendering",
+    "web-components",
+    "declarative-shadow-dom"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@semantic-ui/component": "*"
+  }
+}

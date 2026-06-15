@@ -1,5 +1,5 @@
+import semanticUI from '@semantic-ui/esbuild';
 import * as esbuild from 'esbuild';
-import { astPlugin } from './esbuild-plugin-ast.js';
 
 const ctx = await esbuild.context({
   entryPoints: ['src/main.js'],
@@ -12,7 +12,7 @@ const ctx = await esbuild.context({
     '.html': 'text',
     '.css': 'text',
   },
-  plugins: [astPlugin],
+  plugins: [semanticUI()],
 });
 
 await ctx.watch();

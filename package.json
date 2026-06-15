@@ -391,7 +391,8 @@
     "tools/mcp",
     "tools/lsp",
     "tools/benchmark",
-    "tools/cdn"
+    "tools/cdn",
+    "tools/build"
   ],
   "simple-git-hooks": {
     "pre-commit": "bash tools/hooks/pre-commit",

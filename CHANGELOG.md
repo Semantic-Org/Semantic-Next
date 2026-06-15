@@ -143,6 +143,12 @@ xx.xx.xxxx
 * **Button** - Added `solid`, `outline` and `ghost` variations
 * **Menu** - `menu-item` now uses `value` attr. Menu will now automatically select items when values are present.
 
+### Integrations
+* **Feature** - Added `@semantic-ui/server` for rendering components to Declarative Shadow DOM on any server (Express, Hono, node:http)
+* **Feature** - Added `@semantic-ui/eleventy` to expand Semantic UI tags to DSD at build time
+* **Feature** - Added `@semantic-ui/vite`, `@semantic-ui/esbuild`, `@semantic-ui/rollup`, and `@semantic-ui/build` with `?raw` and `?ast` loaders for component templates across every bundler, where `?ast` precompiles a template to its AST at build time
+* **Feature** - Exported `expandCustomElements` from `@semantic-ui/component` for server and static rendering
+
 ## 0.17.0
 
 Released 09.19.2025

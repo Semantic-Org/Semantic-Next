@@ -1,0 +1,42 @@
+{
+  "name": "@semantic-ui/eleventy",
+  "version": "0.1.0",
+  "description": "Eleventy plugin that server-renders Semantic UI components to Declarative Shadow DOM",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "license": "MIT",
+  "homepage": "https://next.semantic-ui.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Semantic-Org/Semantic-Next.git",
+    "directory": "integrations/eleventy"
+  },
+  "keywords": [
+    "eleventy-plugin",
+    "eleventy",
+    "11ty",
+    "semantic-ui",
+    "ssr",
+    "declarative-shadow-dom"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "peerDependencies": {
+    "@11ty/eleventy": ">=3"
+  },
+  "peerDependenciesMeta": {
+    "@11ty/eleventy": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@semantic-ui/component": "*"
+  }
+}

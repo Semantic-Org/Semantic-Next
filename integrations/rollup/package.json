@@ -1,0 +1,36 @@
+{
+  "name": "@semantic-ui/rollup",
+  "version": "0.1.0",
+  "description": "Rollup and Rolldown plugin for Semantic UI",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "license": "MIT",
+  "homepage": "https://next.semantic-ui.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Semantic-Org/Semantic-Next.git",
+    "directory": "integrations/rollup"
+  },
+  "keywords": [
+    "rollup-plugin",
+    "rollup",
+    "rolldown",
+    "semantic-ui",
+    "web-components"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@semantic-ui/build": "*"
+  },
+  "peerDependencies": {
+    "rollup": ">=4"
+  }
+}

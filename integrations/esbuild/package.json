@@ -1,0 +1,35 @@
+{
+  "name": "@semantic-ui/esbuild",
+  "version": "0.1.0",
+  "description": "esbuild plugin for Semantic UI",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "license": "MIT",
+  "homepage": "https://next.semantic-ui.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Semantic-Org/Semantic-Next.git",
+    "directory": "integrations/esbuild"
+  },
+  "keywords": [
+    "esbuild-plugin",
+    "esbuild",
+    "semantic-ui",
+    "web-components"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@semantic-ui/build": "*"
+  },
+  "peerDependencies": {
+    "esbuild": ">=0.25"
+  }
+}

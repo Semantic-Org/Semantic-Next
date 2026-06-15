@@ -1,0 +1,37 @@
+{
+  "name": "@semantic-ui/build",
+  "version": "0.1.0",
+  "description": "Raw and AST loaders for Semantic UI components across every bundler",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "license": "MIT",
+  "homepage": "https://next.semantic-ui.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Semantic-Org/Semantic-Next.git",
+    "directory": "tools/build"
+  },
+  "keywords": [
+    "semantic-ui",
+    "unplugin",
+    "esbuild",
+    "vite",
+    "rollup",
+    "ast",
+    "raw",
+    "web-components"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@semantic-ui/compiler": "*",
+    "unplugin": "^3.0.0"
+  }
+}

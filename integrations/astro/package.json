@@ -29,7 +29,7 @@
     "./client": "./src/client.js"
   },
   "peerDependencies": {
-    "astro": ">=5"
+    "astro": "^6.0.0"
   },
   "dependencies": {
     "@semantic-ui/component": "*",
