@@ -30,11 +30,6 @@
     "@semantic-ui/build": "*"
   },
   "peerDependencies": {
-    "esbuild": ">=0.19"
-  },
-  "peerDependenciesMeta": {
-    "esbuild": {
-      "optional": true
-    }
+    "esbuild": ">=0.25"
   }
 }

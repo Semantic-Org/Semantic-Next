@@ -31,11 +31,6 @@
     "@semantic-ui/build": "*"
   },
   "peerDependencies": {
-    "vite": ">=5"
-  },
-  "peerDependenciesMeta": {
-    "vite": {
-      "optional": true
-    }
+    "vite": ">=6"
   }
 }

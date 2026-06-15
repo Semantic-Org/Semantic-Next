@@ -32,10 +32,5 @@
   },
   "peerDependencies": {
     "rollup": ">=4"
-  },
-  "peerDependenciesMeta": {
-    "rollup": {
-      "optional": true
-    }
   }
 }
