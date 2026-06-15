@@ -9,6 +9,7 @@
 export function getContainerRenderer() {
   return {
     name: '@semantic-ui/astro',
+    clientEntrypoint: '@semantic-ui/astro/client',
     serverEntrypoint: '@semantic-ui/astro/server',
   };
 }
