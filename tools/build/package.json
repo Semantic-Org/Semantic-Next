@@ -1,20 +1,23 @@
 {
-  "name": "@semantic-ui/vite",
+  "name": "@semantic-ui/build",
   "version": "0.1.0",
-  "description": "Vite plugin for Semantic UI with AST loading and SSR config",
+  "description": "Raw and AST loaders for Semantic UI components across every bundler",
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "license": "MIT",
   "homepage": "https://next.semantic-ui.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Semantic-Org/Semantic-Next.git",
-    "directory": "integrations/vite"
+    "directory": "tools/build"
   },
   "keywords": [
-    "vite-plugin",
-    "vite",
     "semantic-ui",
-    "ssr",
+    "unplugin",
+    "esbuild",
+    "vite",
+    "rollup",
+    "ast",
+    "raw",
     "web-components"
   ],
   "type": "module",
@@ -28,14 +31,7 @@
     ".": "./src/index.js"
   },
   "dependencies": {
-    "@semantic-ui/build": "*"
-  },
-  "peerDependencies": {
-    "vite": ">=5"
-  },
-  "peerDependenciesMeta": {
-    "vite": {
-      "optional": true
-    }
+    "@semantic-ui/compiler": "*",
+    "unplugin": "^3.0.0"
   }
 }

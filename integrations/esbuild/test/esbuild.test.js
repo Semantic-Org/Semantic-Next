@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import * as esbuild from 'esbuild';
 import { describe, expect, it } from 'vitest';
 
-import { semanticUI } from '../src/index.js';
+import semanticUI from '../src/index.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 

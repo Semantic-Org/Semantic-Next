@@ -26,6 +26,9 @@
   "exports": {
     ".": "./src/index.js"
   },
+  "dependencies": {
+    "@semantic-ui/build": "*"
+  },
   "peerDependencies": {
     "esbuild": ">=0.19"
   },

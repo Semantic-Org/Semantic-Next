@@ -1,6 +1,6 @@
 # @semantic-ui/esbuild
 
-esbuild plugin for Semantic UI. Adds the `?raw` import suffix that components use for their templates and styles, so an esbuild build resolves them the way Vite does natively.
+esbuild plugin for Semantic UI. Adds the `?raw` and `?ast` import suffixes components use for their templates and styles, which esbuild has no built-in loader for.
 
 ## Install
 
@@ -12,7 +12,7 @@ npm install @semantic-ui/esbuild
 
 ```js
 import * as esbuild from 'esbuild';
-import { semanticUI } from '@semantic-ui/esbuild';
+import semanticUI from '@semantic-ui/esbuild';
 
 await esbuild.build({
   entryPoints: ['src/app.js'],
@@ -23,11 +23,18 @@ await esbuild.build({
 });
 ```
 
-Components can now import their template and CSS as raw text:
+Components can import their template and CSS as text:
 
 ```js
 import template from './component.html?raw';
 import css from './component.css?raw';
+```
+
+Or precompile the template to its AST at build time, so the runtime skips compilation:
+
+```js
+import ast from './component.html?ast';
+defineComponent({ tagName: 'my-widget', ast, css });
 ```
 
 ## Notes

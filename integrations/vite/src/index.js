@@ -1,22 +1,25 @@
 /*
   Vite plugin for Semantic UI.
 
-  Bundles the @semantic-ui/* packages through Vite's SSR pipeline instead of
-  leaving them external. The core packages (component, renderer, templating,
-  reactivity, query) ship raw ESM source with no "type":"module" field, so
-  Node's native loader would treat them as CommonJS and throw on the ESM
-  syntax. Passing them through Vite's transform sidesteps that.
+  Adds the ?ast loader (Vite resolves ?raw natively) and configures the SSR
+  pipeline so the framework packages bundle through Vite instead of Node's
+  loader. Pair it with @semantic-ui/server for the actual rendering.
 */
 
-export default function semanticUI() {
-  return {
-    name: '@semantic-ui/vite',
-    config() {
-      return {
-        ssr: {
-          noExternal: [/^@semantic-ui\//],
-        },
-      };
+import { semanticUI } from '@semantic-ui/build';
+
+export default function semanticUIVite() {
+  return [
+    semanticUI.vite(),
+    {
+      name: '@semantic-ui/vite:ssr',
+      config() {
+        return {
+          ssr: {
+            noExternal: [/^@semantic-ui\//],
+          },
+        };
+      },
     },
-  };
+  ];
 }
