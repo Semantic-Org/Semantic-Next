@@ -1,6 +1,6 @@
 # @semantic-ui/vite
 
-Vite plugin for Semantic UI. Write your components, drop in the plugin, and any registered tag in your HTML is server-rendered to Declarative Shadow DOM at build time, so it hydrates with no flash of an unupgraded element.
+Vite plugin for Semantic UI. Author your components, point the plugin at them, and every registered tag in your HTML is server-rendered to Declarative Shadow DOM at build time, so it hydrates with no flash of an unupgraded element.
 
 ## Install
 
@@ -22,7 +22,7 @@ export default defineConfig({
 });
 ```
 
-`components` points at the module(s) whose import registers your components (where you call `defineComponent`). Then write your own tags directly in HTML:
+`components` points at the module(s) whose import registers yours (where you call `defineComponent`). Then write your tags directly in HTML:
 
 ```html
 <my-button>Get started</my-button>
@@ -34,12 +34,10 @@ and the build expands every registered tag into DSD:
 <my-button><template shadowrootmode="open"><style>...</style>...</template>Get started</my-button>
 ```
 
+A tag whose component isn't registered passes through untouched and self-hydrates on the client. Expansion skips markup that already carries a shadow root, so it's safe to re-run and composes with server-rendered fragments.
+
 First-party components register the same way: `import '@semantic-ui/core/button'` makes `<ui-button>` expandable.
 
-## What it does
+## Authoring
 
-- **Auto-expands** the registered tags in your HTML to DSD. The plugin runs your components through one Vite SSR pass so their `?raw`/`?ast` imports resolve and the same registry feeds the renderer.
-- Adds the **`?ast` loader** for build-time template precompilation (Vite resolves `?raw` natively).
-- Sets **`ssr.noExternal`** for `@semantic-ui/*` so the framework bundles through Vite.
-
-Tags whose components aren't registered pass through untouched and self-hydrate on the client. Expansion skips markup that already carries a shadow root, so it's safe to re-run and composes with server-rendered fragments. Omit `components` and the plugin is loaders plus SSR config only.
+The plugin also adds the `?ast` loader for build-time template precompilation. Vite resolves `?raw` natively. Omit `components` and you get those loaders without the auto-expansion.

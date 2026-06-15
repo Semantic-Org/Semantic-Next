@@ -1,6 +1,6 @@
 # @semantic-ui/esbuild
 
-esbuild plugin for Semantic UI. Adds the `?raw` and `?ast` import suffixes components use for their templates and styles, which esbuild has no built-in loader for.
+esbuild plugin for authoring Semantic UI components. Adds the `?raw` and `?ast` import suffixes their templates and styles use, which esbuild has no built-in loader for.
 
 ## Install
 
@@ -23,7 +23,7 @@ await esbuild.build({
 });
 ```
 
-Components can import their template and CSS as text:
+Import a component's template and css as text:
 
 ```js
 import template from './component.html?raw';
@@ -37,7 +37,4 @@ import ast from './component.html?ast';
 defineComponent({ tagName: 'my-widget', ast, css });
 ```
 
-## Notes
-
-- Keep `format: 'esm'`. `@semantic-ui/utils` references `import.meta.env` (optional-chained, so safe), which an esbuild `cjs` target would reject.
-- For a browser bundle, set `platform: 'browser'` so `@semantic-ui/*` resolve to their prebuilt browser bundles. For a Node build, esbuild bundles the raw source directly.
+For a browser bundle, set `platform: 'browser'` so `@semantic-ui/*` resolve to their prebuilt browser bundles. For a Node build, esbuild bundles the source directly.

@@ -24,7 +24,7 @@ export default defineConfig({
 
 - `@semantic-ui/astro` — integration factory (`astro.config.mjs`)
 - `@semantic-ui/astro/server` — SSR entry (Astro renders web components to HTML)
-- `@semantic-ui/astro/client` — hydration entry (browser-side wake-up)
+- `@semantic-ui/astro/client` — hydration entry (browser-side)
 
 ## Docs
 

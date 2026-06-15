@@ -1,18 +1,20 @@
 # Semantic UI integrations
 
-Use Semantic UI with your framework, build tool, or server. Every integration is a thin adapter over the framework's own renderer or compiler. Components server-render to Declarative Shadow DOM and self-hydrate when their JavaScript loads.
+Use Semantic UI with your server or build tool. Each integration is a thin adapter over the framework's own renderer or compiler.
 
-| Integration | Package | Use it for |
-|---|---|---|
-| [Astro](./astro) | `@semantic-ui/astro` | Components in Astro with `client:*` directives |
-| [Eleventy](./eleventy) | `@semantic-ui/eleventy` | Static sites, expand tags to DSD at build time |
-| [Vite](./vite) | `@semantic-ui/vite` | AST loader and SSR config for Vite |
-| [esbuild](./esbuild) | `@semantic-ui/esbuild` | `?raw` and `?ast` loaders for esbuild |
-| [Rollup](./rollup) | `@semantic-ui/rollup` | `?raw` and `?ast` loaders for Rollup and Rolldown |
-| [Server](./server) | `@semantic-ui/server` | Render on any server (Express, Hono, node:http) |
+Two kinds:
 
-## How it works
+**Renderers** expand the tags in your HTML into Declarative Shadow DOM, so a page ships pre-rendered shadow content that hydrates with no flash of an unupgraded element. You write `<my-button>`, the renderer emits its DSD.
 
-Semantic UI components are custom elements that self-hydrate from Declarative Shadow DOM. On the server, `renderToString` turns a component into a DSD string with no DOM shim. It's pure string work that runs in Node, Bun, Deno, or at the edge. In the browser, the component's `connectedCallback` finds that DSD and wires up reactivity. The host framework only emits the HTML and loads the component JS, which is why each integration stays small.
+**Loaders** add the `?raw` and `?ast` import suffixes you use when authoring components in a bundler. They build your components, they don't render them.
 
-The bundler integrations (Vite, esbuild, Rollup) share one engine, `@semantic-ui/build`, which adds the `?raw` and `?ast` import suffixes components use for their templates and styles. Each named package wraps the entry for its bundler.
+| Integration | Package | Kind | Use it for |
+|---|---|---|---|
+| [Server](./server) | `@semantic-ui/server` | renderer | Expand tags to DSD on any server (Express, Hono, node:http) |
+| [Vite](./vite) | `@semantic-ui/vite` | renderer | Author and auto-expand your components in Vite |
+| [Eleventy](./eleventy) | `@semantic-ui/eleventy` | renderer | Expand tags to DSD at build time for static sites |
+| [Astro](./astro) | `@semantic-ui/astro` | renderer | Components in Astro with `client:*` directives |
+| [esbuild](./esbuild) | `@semantic-ui/esbuild` | loader | Author your components with esbuild |
+| [Rollup](./rollup) | `@semantic-ui/rollup` | loader | Author your components with Rollup or Rolldown |
+
+The bundler loaders (Vite, esbuild, Rollup) share one engine, [`@semantic-ui/build`](../tools/build). Reach for that directly only for a bundler without a named package.

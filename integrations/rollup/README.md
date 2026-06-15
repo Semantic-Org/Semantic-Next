@@ -1,6 +1,6 @@
 # @semantic-ui/rollup
 
-Rollup plugin for Semantic UI. Adds the `?raw` and `?ast` import suffixes components use for their templates and styles. The same plugin drives Rolldown and Vite 8 through their Rollup-compatible plugin API.
+Rollup plugin for authoring Semantic UI components. Adds the `?raw` and `?ast` import suffixes their templates and styles use. The same plugin drives Rolldown and Vite 8 through their Rollup-compatible plugin API.
 
 ## Install
 
@@ -19,7 +19,7 @@ export default {
 };
 ```
 
-Components can import their template and CSS as text:
+Import a component's template and css as text:
 
 ```js
 import template from './component.html?raw';

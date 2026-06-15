@@ -1,6 +1,6 @@
 # @semantic-ui/eleventy
 
-Eleventy plugin that server-renders Semantic UI components in your built HTML to Declarative Shadow DOM. Static pages ship pre-rendered, styled shadow content that self-hydrates when the component JavaScript loads.
+Eleventy plugin that expands the Semantic UI tags in your built HTML into Declarative Shadow DOM at build time. Static pages ship pre-rendered, styled shadow content that self-hydrates when the component JavaScript loads.
 
 Requires Eleventy 3 (ESM config).
 
@@ -18,24 +18,32 @@ import semanticUI from '@semantic-ui/eleventy';
 
 export default function (eleventyConfig) {
   eleventyConfig.addPlugin(semanticUI, {
-    components: ['@semantic-ui/core/button', '@semantic-ui/core/icon'],
+    components: ['./src/components/index.js'],
   });
 }
 ```
 
-Write Semantic UI tags directly in your templates:
+`components` is where you import yours. A tag expands once its component is registered, so list every module your pages pull in. First-party components register the same way:
 
-```html
-<ui-button emphasis="primary">Get started</ui-button>
+```js
+components: ['@semantic-ui/core/button', '@semantic-ui/core/icon'],
 ```
 
-The plugin expands every registered tag into DSD at build time. Load the component runtime on the page to make them interactive:
+Write your tags directly in templates:
+
+```html
+<my-button emphasis="primary">Get started</my-button>
+```
+
+The plugin expands every registered tag into DSD. Unregistered tags pass through untouched. Load the component runtime to make them interactive:
 
 ```html
 <script type="module" src="/semantic-ui.js"></script>
 ```
 
+Components authored with inline template and css strings register on import in Node. If yours use `?raw` template imports, build them through a bundler integration like [`@semantic-ui/vite`](../vite).
+
 ## Options
 
-- `components` — module specifiers to import for their component registrations. A tag is only expanded once its component has been imported, so list every component your pages use. Unlisted tags pass through untouched.
-- `hydrate` — default `true`. Pass `false` to emit static markup that is never claimed by the runtime.
+- `components` — module specifiers to import for their registrations
+- `hydrate` — default `true`. Pass `false` to emit static markup the runtime never claims
