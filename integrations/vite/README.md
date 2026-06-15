@@ -1,6 +1,6 @@
 # @semantic-ui/vite
 
-Vite plugin for Semantic UI. Author your components, point the plugin at them, and every registered tag in your HTML is server-rendered to Declarative Shadow DOM at build time, so it hydrates with no flash of an unupgraded element.
+Vite plugin for Semantic UI. Author your components, point the plugin at them, and every registered tag in your HTML is server-rendered to Declarative Shadow DOM (the HTML that renders a component fully styled before its JavaScript loads) at build time, so it hydrates with no flash of an unupgraded element.
 
 ## Install
 

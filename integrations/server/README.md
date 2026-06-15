@@ -1,6 +1,6 @@
 # @semantic-ui/server
 
-Server-render Semantic UI components to Declarative Shadow DOM on any server or build step. The output self-hydrates when the component JavaScript loads in the browser. Pure string work, no DOM shim, so it runs in Node, Bun, Deno, or at the edge.
+Server-render Semantic UI components to Declarative Shadow DOM (the HTML that renders a component fully styled before its JavaScript loads) on any server or build step. The output self-hydrates when the component JavaScript loads in the browser. Pure string work, no DOM shim, so it runs in Node, Bun, Deno, or at the edge.
 
 ## Install
 

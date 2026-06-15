@@ -1,6 +1,6 @@
 # @semantic-ui/eleventy
 
-Eleventy plugin that expands the Semantic UI tags in your built HTML into Declarative Shadow DOM at build time. Static pages ship pre-rendered, styled shadow content that self-hydrates when the component JavaScript loads.
+Eleventy plugin that expands the Semantic UI tags in your built HTML into Declarative Shadow DOM (the HTML that renders a component fully styled before its JavaScript loads) at build time. Static pages ship pre-rendered and self-hydrate when the component JavaScript loads.
 
 Requires Eleventy 3 (ESM config).
 
