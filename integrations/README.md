@@ -20,8 +20,8 @@ SUI components do not need any additional code to support hydration in your clie
 ## Loaders
 
 These integrations support two special use cases which improve experience authoring Semantic UI components
-* `?raw` - Let's you load raw assets like css or templates on the server using `import foo.html?raw`
-* `?ast` - Let's you import a Semantic UI template as an AST to pass directly to `defineComponent` and avoid runtime compilation
+* `?raw` - Lets you load raw assets like css or templates on the server using `import foo.html?raw`
+* `?ast` - Lets you import a Semantic UI template as an AST to pass directly to `defineComponent` and avoid runtime compilation
   
 | Package | Use it for |
 |---|---|
