@@ -4,8 +4,8 @@ id: 'utils-generateid'
 exampleType: 'log'
 category: 'Utils'
 subcategory: 'Crypto'
-description: 'Generate random alphanumeric IDs'
-tags: ['utils', 'crypto', 'generateid', 'random']
+description: 'Generate unique ids with usage presets, prefixes, and checksums'
+tags: ['utils', 'crypto', 'generateid', 'ulid', 'uuid', 'id', 'random']
 selectedFile: 'index.js'
-tip: 'Uses cryptographically secure random by default, accepts custom seed for reproducible IDs'
+tip: 'The usage preset encodes the consensus length and shape per channel so you do not have to reason about collision budgets — db is a sortable ULID, page is letter-first for CSS ids, slug is URL-sized, token carries a checksum. Pair with isValidID and parseID'
 ---

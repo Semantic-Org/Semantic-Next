@@ -4,8 +4,8 @@ id: 'utils-hashcode'
 exampleType: 'log'
 category: 'Utils'
 subcategory: 'Crypto'
-description: 'Generate hash codes with fast FNV-1a default or stronger UMASH mode'
-tags: ['utils', 'crypto', 'hashcode', 'hash', 'fnv', 'umash', 'fast']
+description: 'Deterministic 53-bit hash for cache keys and content identity'
+tags: ['utils', 'crypto', 'hashcode', 'hash', 'cyrb53', 'cache']
 selectedFile: 'index.js'
-tip: 'Defaults to zero-allocation FNV-1a for performance. Use `{ fast: false }` for stronger collision resistance via UMASH'
+tip: 'Deterministic — the same input always hashes the same, which is what makes it a cache or memo key. For unique ids use generateID instead'
 ---
