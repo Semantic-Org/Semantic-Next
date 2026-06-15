@@ -203,11 +203,14 @@ const checksumValue = (canonical) => {
 };
 
 // accept loose: fold to the canonical uppercase form Crockford decodes to —
-// I/L → 1, O → 0, lowercase → upper, hyphens dropped
+// I/L → 1, O → 0, lowercase → upper, hyphens dropped. The uppercase pass is
+// ASCII-only on purpose: String.toUpperCase() expands a handful of code points
+// (ß → SS, ﬀ → FF, …) into extra valid base32 letters, which would let a short
+// string fold up to a passing length. Untouched non-ascii then fails isBase32.
 const fold = (value) =>
   value
     .replace(/-/g, '')
-    .toUpperCase()
+    .replace(/[a-z]/g, (c) => c.toUpperCase())
     .replace(/[ILO]/g, (c) => (c === 'O' ? '0' : '1'));
 
 const isBase32 = (folded) => {
@@ -235,9 +238,16 @@ const resolveConfig = (options) => {
     throw new Error(`generateID: unknown usage '${usage}'`);
   }
   const pick = (key) => options[key] ?? globalConfig[key] ?? preset[key];
+  const length = options.length ?? globalConfig.length ?? preset.length;
+  // a timestamped id is at least the 10-char clock plus a random char, so a
+  // shorter length is incoherent — fail loud rather than emit an id that can't
+  // round-trip through isValidID
+  if (preset.timestamp && length < 11) {
+    throw new Error(`generateID: length must be at least 11 for usage '${usage}'`);
+  }
   return {
     usage,
-    length: options.length ?? globalConfig.length ?? preset.length,
+    length,
     prefix: options.prefix ?? globalConfig.prefix ?? '',
     checksum: pick('checksum'),
     format: options.format ?? globalConfig.format ?? 'crockford',

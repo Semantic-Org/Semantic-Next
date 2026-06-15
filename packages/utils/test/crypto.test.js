@@ -178,6 +178,12 @@ describe('ID/Hashing Functions', () => {
       it('a non-object argument is ignored (legacy seedless call)', () => {
         expect(generateID(12345)).toHaveLength(26);
       });
+
+      // the 10-char clock plus a random char is the floor; a shorter length would
+      // emit a 10-char id that isValidID then rejects, so fail loud instead
+      it('throws when length is below the timestamp floor for db', () => {
+        expect(() => generateID({ usage: 'db', length: 9 })).toThrow(/at least 11/);
+      });
     });
 
     describe('config', () => {
@@ -294,6 +300,13 @@ describe('ID/Hashing Functions', () => {
         const id = generateID({ usage: 'slug', group: 4 });
         expect(isValidID(id, { usage: 'slug', group: 4 })).toBe(true);
         expect(isValidID(id, { usage: 'slug' })).toBe(true);
+      });
+
+      // ß uppercases to 'SS' and ﬀ to 'FF' — a length-changing fold would let a
+      // too-short string pass the length and alphabet guards, so fold is ascii-only
+      it('rejects unicode that toUpperCase would expand into base32 letters', () => {
+        expect(isValidID('0'.repeat(24) + 'ß', { usage: 'db' })).toBe(false);
+        expect(isValidID('F' + '0'.repeat(24) + 'ß', { usage: 'token' })).toBe(false);
       });
     });
 
