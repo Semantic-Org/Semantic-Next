@@ -22,7 +22,8 @@
     "@semantic-ui/renderer": "*",
     "@semantic-ui/reactivity": "*",
     "@semantic-ui/utils": "*",
-    "@semantic-ui/compiler": "*"
+    "@semantic-ui/compiler": "*",
+    "@semantic-ui/esbuild": "*"
   },
   "devDependencies": {
     "esbuild": "^0.28.0"

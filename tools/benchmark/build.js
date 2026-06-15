@@ -1,5 +1,5 @@
+import semanticUI from '@semantic-ui/esbuild';
 import * as esbuild from 'esbuild';
-import { astPlugin } from './esbuild-plugin-ast.js';
 
 await esbuild.build({
   entryPoints: ['src/main.js'],
@@ -12,7 +12,7 @@ await esbuild.build({
     '.html': 'text',
     '.css': 'text',
   },
-  plugins: [astPlugin],
+  plugins: [semanticUI()],
 });
 
 console.log('Build complete: dist/main.js');
