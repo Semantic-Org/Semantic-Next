@@ -2,9 +2,13 @@
 
 Use Semantic UI with your server or build tool. Each integration is a thin adapter over the framework's own renderer or compiler.
 
-## Renderers
+## Server Side Hydration
 
-These plugins find web components in your html and render them as DSD (Declarative Shadow DOM). This allows them to appear fully styled before the component loads on the client. SUI components do not need clientside shims to support hydration as their own lifecycle events will detect the DSD and upgrade the component.
+These plugins can be used to render SUI components on the server. 
+
+They work by finding web components in your html and then rendering them as DSD (Declarative Shadow DOM). This allows them to appear fully styled before the component loads on the client. 
+
+SUI components do not need any additional code to support hydration in your client bundle as their own lifecycle events will detect the DSD and upgrade the component on the client.
 
 | Package | Use it for |
 |---|---|
