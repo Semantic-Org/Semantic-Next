@@ -1,6 +1,6 @@
 # @semantic-ui/vite
 
-Vite plugin for Semantic UI. Adds the `?ast` loader for build-time template compilation (Vite resolves `?raw` natively) and configures Vite's SSR pipeline so the framework packages bundle correctly. Pair it with [`@semantic-ui/server`](../server) for the rendering.
+Vite plugin for Semantic UI. Write your components, drop in the plugin, and any registered tag in your HTML is server-rendered to Declarative Shadow DOM at build time, so it hydrates with no flash of an unupgraded element.
 
 ## Install
 
@@ -16,21 +16,30 @@ import { defineConfig } from 'vite';
 import semanticUI from '@semantic-ui/vite';
 
 export default defineConfig({
-  plugins: [semanticUI()],
+  plugins: [
+    semanticUI({ components: ['./src/components/index.js'] }),
+  ],
 });
 ```
 
-This sets `ssr.noExternal` for `@semantic-ui/*` so the packages pass through Vite's transform, and adds the `?ast` loader for precompiled templates:
+`components` points at the module(s) whose import registers your components (where you call `defineComponent`). Then write your own tags directly in HTML:
 
-```js
-import ast from './component.html?ast';
-defineComponent({ tagName: 'my-widget', ast, css });
+```html
+<my-button>Get started</my-button>
 ```
 
-## Why noExternal is needed
+and the build expands every registered tag into DSD:
 
-The core packages ship raw ESM source without a `type: module` field. Left external, Node treats their `.js` files as CommonJS and throws on the ESM syntax. Bundling them through Vite avoids the ambiguity.
+```html
+<my-button><template shadowrootmode="open"><style>...</style>...</template>Get started</my-button>
+```
 
-## Resolution note
+First-party components register the same way: `import '@semantic-ui/core/button'` makes `<ui-button>` expandable.
 
-By default `@semantic-ui/core` resolves to its prebuilt bundle. To bundle raw source instead, add `source` to `resolve.conditions` in your Vite config.
+## What it does
+
+- **Auto-expands** the registered tags in your HTML to DSD. The plugin runs your components through one Vite SSR pass so their `?raw`/`?ast` imports resolve and the same registry feeds the renderer.
+- Adds the **`?ast` loader** for build-time template precompilation (Vite resolves `?raw` natively).
+- Sets **`ssr.noExternal`** for `@semantic-ui/*` so the framework bundles through Vite.
+
+Tags whose components aren't registered pass through untouched and self-hydrate on the client. Expansion skips markup that already carries a shadow root, so it's safe to re-run and composes with server-rendered fragments. Omit `components` and the plugin is loaders plus SSR config only.
