@@ -4,7 +4,7 @@ Use Semantic UI with your server or build tool. Each integration is a thin adapt
 
 ## Renderers
 
-Render your components on the server so the page arrives fully styled, with no flash before they upgrade. You write no hydration code. Each tag becomes Declarative Shadow DOM (the HTML that renders a component fully styled before its JavaScript loads), which the browser builds on its own, and the component upgrades itself once its script loads. You write `<my-button>`, the renderer emits its DSD.
+These plugins find web components in your html and render them as DSD (Declarative Shadow DOM). This allows them to appear fully styled before the component loads on the client. SUI components do not need clientside shims to support hydration as their own lifecycle events will detect the DSD and upgrade the component.
 
 | Package | Use it for |
 |---|---|
@@ -15,8 +15,10 @@ Render your components on the server so the page arrives fully styled, with no f
 
 ## Loaders
 
-Add the `?raw` and `?ast` import suffixes you use when authoring components in a bundler. They build your components, they don't render them.
-
+These integrations support two special use cases which improve experience authoring Semantic UI components
+* `?raw` - Let's you load raw assets like css or templates on the server using `import foo.html?raw`
+* `?ast` - Let's you import a Semantic UI template as an AST to pass directly to `defineComponent` and avoid runtime compilation
+  
 | Package | Use it for |
 |---|---|
 | [`@semantic-ui/esbuild`](./esbuild) | esbuild |
