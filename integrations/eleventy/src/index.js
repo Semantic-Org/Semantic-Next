@@ -14,9 +14,9 @@ import { expandCustomElements, renderToString } from '@semantic-ui/component';
 export default function semanticUI(eleventyConfig, options = {}) {
   const { components = [], hydrate = true } = options;
 
-  // populate the component registry before any page is transformed.
-  // eleventy.before re-fires on --serve rebuilds, so registration survives
-  // incremental builds where a top-level import would go stale.
+  // register components before any page transform. the specifiers come from
+  // options so the imports are dynamic, which needs an async context. the
+  // event re-fires per rebuild, but module imports are cached, so it's a no-op.
   eleventyConfig.on('eleventy.before', async () => {
     await Promise.all(components.map((component) => import(component)));
   });

@@ -52,7 +52,22 @@ app.get('/', (req, res) => {
 });
 ```
 
-The `<script>` loads the component runtime, which hydrates the server-rendered DSD in place. The same pattern works with Hono, Fastify, or a plain `node:http` server — the render functions just return strings.
+The `<script>` loads the component runtime, which hydrates the server-rendered DSD in place.
+
+## With Hono or any Fetch-based runtime
+
+`render` returns a string, so web-standard runtimes (Hono, Deno, Bun, edge) work the same way through a `Response`:
+
+```js
+import { Hono } from 'hono';
+import { render } from '@semantic-ui/server';
+import { Button } from '@semantic-ui/core';
+
+const app = new Hono();
+app.get('/', (c) => c.html(render(Button, {}, { slots: { default: 'Hello' } })));
+```
+
+Fastify and a plain `node:http` server work the same way.
 
 ## API
 
