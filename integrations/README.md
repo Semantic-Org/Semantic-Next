@@ -17,9 +17,10 @@ SUI components do not need any additional code to support hydration in your clie
 | [`@semantic-ui/eleventy`](./eleventy) | Static sites |
 | [`@semantic-ui/astro`](./astro) | Astro |
 
-## Loaders
+## Build Pipeline Tools
 
-These integrations support two special use cases which improve experience authoring Semantic UI components
+SUI provides tools to support build pipelines to improve the experience authoring Semantic UI components.
+
 * `?raw` - Lets you load raw assets like css or templates on the server using `import foo.html?raw`
 * `?ast` - Lets you import a Semantic UI template as an AST to pass directly to `defineComponent` and avoid runtime compilation
   
