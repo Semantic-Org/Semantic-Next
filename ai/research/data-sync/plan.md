@@ -199,6 +199,14 @@ Notes:
 - `pruneChildPaths` yields the changed path set — value-less and index-addressed (the reactivity review's finding), so the wire write picks values via `get` per path, and array segments translate to id-addressed form for schema-declared keyed arrays before send (see Repeating groups)
 - Clone cost is a non-goal: Meteor-era apps cloned liberally and stayed fast where it mattered. The place it would compound — per-inbound-delta apply — is avoided by field swaps incidentally, not as a crusade
 
+### Write capture — `trackWrites`
+
+`trackWrites(doc, fn, opts)` is the layer's write-capture primitive, lifted from its first consumer (`Signal.mutate`). It runs the mutator body and reports `{ changed, result, paths }` — `paths` only when `returnPaths: true`. The data layer always passes `returnPaths: true`, and `onWrite` for the per-write streaming path (outbox append, optimistic dep fires); a signal passes `returnPaths: false` because a signal's reactive granularity is the whole cell, so a path has nowhere to route — `returnPaths: false` is the floor, the data layer lives above it. The body runs synchronously: the tracked proxy expires at callback return, which is the root of the sync-only mutator constraint, not a separate rule.
+
+The contract the layer relies on is that `paths` is deliberately thin — value-less, kind-less, positional (see the Write Path note above on `pruneChildPaths`, and Repeating groups for id-addressing). Richness is reconstructed by the consumer at the point it is needed, not carried in the capture: new values read via `get(doc, path)` against the post-apply doc, op-kind inferred from value-presence (undefined means cleared) plus channel-membership re-match, base values taken from the rebase shadow — never the proxy trap, whose intermediate value is a partially-rebased replay artifact — and id-addressed array paths translated by schema-aware lookup at commit. The capture stays a position log because every richer datum has a more authoritative downstream source; widening the return would only manufacture a second, staler one.
+
+`trackWrites` is the owned-write engine — a mutation the layer performs and watches, both the client optimistic apply and the server authoritative apply. Its twin is `detectChanges(before, after)`, which diffs two finished images rather than watching a mutation, and is the external-write engine behind `watch()` CDC (External Writers). Owned writes capture, external writes diff — the dual-stream router's two capture engines, not redundant paths.
+
 ## Execution Without Fibers
 
 Meteor's server-side sync CRUD was fibers suspending the stack during I/O. Node removed that, Meteor 3 paid with `insertAsync` everywhere. This design splits the problem by what actually blocks:
