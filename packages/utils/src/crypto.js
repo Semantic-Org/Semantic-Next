@@ -274,7 +274,8 @@ const buildCode = (config) => {
   format 'uuid' for an RFC UUIDv7. See isValidID / parseID for the inverse.
 */
 export const generateID = (options = {}) => {
-  // a bare number keeps the legacy seed-less call working as a short page id
+  // tolerate a non-object arg (null, or a leftover legacy numeric seed) instead
+  // of throwing in resolveConfig — it falls through to the default usage
   if (typeof options !== 'object' || options === null) {
     options = {};
   }

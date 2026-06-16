@@ -168,8 +168,9 @@ describe('ID/Hashing Functions', () => {
         expect(generateID({ usage: 'page', group: 4 })).toMatch(/^[a-z0-9]{4}-[a-z0-9]{4}$/);
       });
 
-      it('a non-object argument is ignored (legacy seedless call)', () => {
+      it('ignores a non-object argument, falling through to the default usage', () => {
         expect(generateID(12345)).toHaveLength(26);
+        expect(generateID(null)).toHaveLength(26);
       });
 
       // the 10-char clock plus a random char is the floor; a shorter length would
