@@ -1,5 +1,5 @@
 import { bench, describe } from 'vitest';
-import { generateID, hashCode, isValidID, parseID, tokenize } from '../src/crypto.js';
+import { generateID, hashCode, isValidID, parseID } from '../src/crypto.js';
 
 /*******************************
        Test Data — Realistic
@@ -17,15 +17,6 @@ const mediumCSS = `
 .ui.button.secondary { background: var(--secondary); color: white; }
 `;
 
-// Component names — tokenize's primary use case
-const componentNames = [
-  'My Custom Button',
-  'dropdown-menu',
-  'FormField_Input',
-  'sidebar navigation',
-  'Modal__Overlay',
-];
-
 /*******************************
          Benchmarks
 *******************************/
@@ -36,12 +27,6 @@ describe('hashCode', () => {
   });
   bench('medium CSS (~500 chars)', () => {
     hashCode(mediumCSS);
-  });
-});
-
-describe('tokenize', () => {
-  bench('5 component names', () => {
-    for (let i = 0; i < componentNames.length; i++) { tokenize(componentNames[i]); }
   });
 });
 

@@ -4,21 +4,6 @@
  */
 
 /**
- * Converts a string to a URL-friendly token
- * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#tokenize tokenize}
- *
- * @param str - The input string
- * @returns The tokenized string
- *
- * @example
- * ```ts
- * tokenize('Hello World') // returns 'hello-world'
- * tokenize('A simple-test_string') // returns 'a-simple-test-string'
- * ```
- */
-export function tokenize(str?: string): string;
-
-/**
  * Options for the `prettifyHash` function.
  */
 interface PrettifyHashOptions {

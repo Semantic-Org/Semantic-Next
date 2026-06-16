@@ -2,17 +2,6 @@
       Identity
 --------------------*/
 
-const WHITESPACE_RE = /\s+/g;
-const NON_WORD_RE = /[^\w-]+/g;
-const UNDERSCORE_RE = /_/g;
-
-export const tokenize = (str = '') => {
-  return (str || '').replace(WHITESPACE_RE, '-')
-    .replace(NON_WORD_RE, '')
-    .replace(UNDERSCORE_RE, '-')
-    .toLowerCase();
-};
-
 export const prettifyHash = (numericHash, { minLength = 6, padChar = '0' } = {}) => {
   numericHash = parseInt(numericHash, 10);
   if (numericHash === 0) {

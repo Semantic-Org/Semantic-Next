@@ -259,3 +259,15 @@ export const reverseString = (str = '', options = {}) => {
   // Fallback to Array.from for older environments (handles basic emojis)
   return Array.from(str).reverse().join('');
 };
+
+const WHITESPACE_RE = /\s+/g;
+const NON_WORD_RE = /[^\w-]+/g;
+const UNDERSCORE_RE = /_/g;
+
+// normalize a string into a lowercase, hyphen-joined token (slug-style)
+export const tokenize = (str = '') => {
+  return (str || '').replace(WHITESPACE_RE, '-')
+    .replace(NON_WORD_RE, '')
+    .replace(UNDERSCORE_RE, '-')
+    .toLowerCase();
+};

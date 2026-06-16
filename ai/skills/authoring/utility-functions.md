@@ -369,7 +369,11 @@ toTitleCase('the quick brown fox');      // 'The Quick Brown Fox' (respects stop
 
 ### Text Processing
 ```javascript
-import { joinWords, getArticle, escapeHTML, unescapeHTML, reverseString } from '@semantic-ui/utils';
+import { joinWords, getArticle, escapeHTML, unescapeHTML, reverseString, tokenize } from '@semantic-ui/utils';
+
+// Slug-style token (lowercase, hyphen-joined, special chars stripped)
+tokenize('Hello World!');                           // 'hello-world'
+tokenize('FormField_Input');                        // 'formfield-input'
 
 // Smart word joining with Oxford comma
 joinWords(['apple', 'banana', 'orange']);           // 'apple, banana, and orange'
@@ -672,7 +676,7 @@ oklchToHex('#ff5733');                 // '#ff5733' (hex passthrough)
 
 ```javascript
 import {
-  hashCode, prettifyHash, generateID, isValidID, parseID, getRandomSeed, tokenize,
+  hashCode, prettifyHash, generateID, isValidID, parseID, getRandomSeed,
 } from '@semantic-ui/utils';
 
 // Deterministic 53-bit hash (cyrb53) — same input, same output. Cache/memo keys.
@@ -697,9 +701,6 @@ isValidID(id, { usage: 'token', prefix: 'sk_' });   // checksum + shape, reads l
 parseID(dbId, { usage: 'db' });                     // { prefix, body, checksum, timestamp }
 
 getRandomSeed();                                    // cryptographically random uint32
-
-// URL-friendly slug
-tokenize('Hello World!');                           // 'hello-world'
 ```
 
 ---

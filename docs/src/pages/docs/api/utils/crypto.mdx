@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Crypto Utilities
 package: "@semantic-ui/utils"
-methods: [tokenize, hashCode, generateID, isValidID, parseID, prettifyHash, getRandomSeed]
+methods: [hashCode, generateID, isValidID, parseID, prettifyHash, getRandomSeed]
 icon: lock
 description: API reference for cryptographic utility functions
 ---
@@ -11,33 +11,6 @@ description: API reference for cryptographic utility functions
 The Crypto utilities provide functions for generating unique identifiers and hash codes in JavaScript. These functions are useful for creating unique keys, generating consistent hashes for objects, and other cryptographic purposes.
 
 ## Functions
-
-### tokenize
-
-```javascript
-function tokenize(str = '')
-```
-
-Converts a string to a URL-friendly token.
-
-#### Parameters
-
-| Name | Type   | Description |
-|------|--------|-------------|
-| str  | string | The input string |
-
-#### Returns
-
-The tokenized string.
-
-#### Example
-
-```javascript
-import { tokenize } from '@semantic-ui/utils';
-
-console.log(tokenize('Hello World')); // "hello-world"
-console.log(tokenize('A simple-test_string')); // "a-simple-test-string"
-```
 
 ### hashCode
 

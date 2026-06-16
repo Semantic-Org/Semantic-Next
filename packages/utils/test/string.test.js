@@ -7,6 +7,7 @@ import {
   joinWords,
   kebabToCamel,
   reverseString,
+  tokenize,
   toTitleCase,
   truncate,
   unescapeHTML,
@@ -386,7 +387,7 @@ describe('toTitleCase — edge cases', () => {
 
 describe('escapeHTML / unescapeHTML', () => {
   it('should escape single quotes (apostrophes)', () => {
-    expect(escapeHTML("it's")).toBe("it&#39;s");
+    expect(escapeHTML("it's")).toBe('it&#39;s');
   });
 
   it('should escape ampersands', () => {
@@ -396,5 +397,30 @@ describe('escapeHTML / unescapeHTML', () => {
   it('should round-trip all special characters', () => {
     const original = '<div class="test">&\'value\'</div>';
     expect(unescapeHTML(escapeHTML(original))).toBe(original);
+  });
+});
+
+describe('tokenize', () => {
+  it('lowercases and hyphen-joins words', () => {
+    expect(tokenize('Hello World')).toBe('hello-world');
+    expect(tokenize('A simple-test_string')).toBe('a-simple-test-string');
+  });
+
+  it('strips special characters', () => {
+    expect(tokenize('Hello! @World #2024')).toBe('hello-world-2024');
+  });
+
+  it('collapses runs of whitespace into one hyphen', () => {
+    expect(tokenize('hello   world')).toBe('hello-world');
+  });
+
+  it('converts underscores to hyphens', () => {
+    expect(tokenize('some_thing')).toBe('some-thing');
+  });
+
+  it('returns an empty string for null, undefined, and empty input', () => {
+    expect(tokenize(null)).toBe('');
+    expect(tokenize(undefined)).toBe('');
+    expect(tokenize('')).toBe('');
   });
 });

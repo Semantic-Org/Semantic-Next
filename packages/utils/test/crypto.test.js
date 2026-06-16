@@ -1,4 +1,4 @@
-import { generateID, getRandomSeed, hashCode, isValidID, parseID, prettifyHash, tokenize } from '@semantic-ui/utils';
+import { generateID, getRandomSeed, hashCode, isValidID, parseID, prettifyHash } from '@semantic-ui/utils';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -6,13 +6,6 @@ const CROCKFORD = /^[0-9a-z]+$/;
 const CROCKFORD_UPPER = /^[0-9A-Z]+$/;
 
 describe('ID/Hashing Functions', () => {
-  describe('tokenize', () => {
-    it('should convert a string to a token', () => {
-      expect(tokenize('Hello World')).toBe('hello-world');
-      expect(tokenize('A simple-test_string')).toBe('a-simple-test-string');
-    });
-  });
-
   describe('prettifyHash', () => {
     it('should return padded "0" for input 0 with default settings', () => {
       expect(prettifyHash(0)).toBe('000000');
