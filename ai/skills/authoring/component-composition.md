@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `component-composition`
 > **Purpose:** How to structure parent-child component relationships — when to use configuration, slots, passed templates, or imperative coordination.
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-06-16
 
 ---
 
@@ -59,7 +59,7 @@ The core is a single `{#each}...{else}...{/each}` block:
 <div class="{uiClasses}menu" part="menu">
   {#each item in items}
     <menu-item
-      active={isValueActive value item}
+      active={isCurrentValue value item}
       href={item.href}
       value={item.value}
       exportparts="item"
