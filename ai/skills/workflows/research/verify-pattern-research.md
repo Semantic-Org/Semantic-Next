@@ -9,7 +9,7 @@ workflow: verify-pattern-research
 
 # Pattern Research E&O Verification Workflow
 
-> Last Updated: 2025-11-10
+> Last Updated: 2026-06-16
 > Version: 1.2
 
 **Purpose**: Systematically verify pattern research meta-analysis documents for errors and omissions (E&O)
@@ -455,7 +455,7 @@ Check mode?
 ### Example 1: Single Subagent with Iterations
 
 ```markdown
-User: "Please verify ai/research/modal/pattern-research.md for E&O"
+User: "Please verify ai/research/components/modal/pattern-research.md for E&O"
 
 Agent: I'll verify the modal pattern research. Let me ask:
 
@@ -511,7 +511,7 @@ Status: Ready for use
 ### Example 2: Parallel Subagents with User Validation
 
 ```markdown
-User: "Please verify ai/research/aspect-ratio/pattern-research.md for E&O"
+User: "Please verify ai/research/components/aspect-ratio/pattern-research.md for E&O"
 
 Agent: I'll verify the aspect-ratio pattern research. Let me ask:
 
