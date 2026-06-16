@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `icon-system`
 > **Purpose:** How the icon system is built, how its artifacts are generated, and how to extend it
-> **Last Updated:** 2026-03-19
+> **Last Updated:** 2026-06-16
 
 ---
 
@@ -35,7 +35,7 @@ CSS icon sets  +  icons.meta.js (aliases)
 
 **Location:** `packages/specs/src/icons/mappings.js`
 
-This single file defines all 481 canonical icon names. Each entry contains:
+This single file defines every canonical icon name. Each entry contains:
 
 ```js
 'arrow-down': {
@@ -64,7 +64,7 @@ This single file defines all 481 canonical icon names. Each entry contains:
 
 | File | Purpose | Edited by hand? |
 |------|---------|-----------------|
-| `packages/specs/src/icons/categories.js` | Display order for the 33 icon categories | Yes |
+| `packages/specs/src/icons/categories.js` | Display order for the icon categories | Yes |
 | `packages/specs/src/icons/index.js` | Re-exports `iconMappings`, `ICON_CATEGORIES`, and `ICON_NAMES` | Rarely |
 | `packages/specs/src/icons/icons.meta.js` | Generated — `iconNames[]`, `iconAliasGroups[]`, `iconAliases{}` | **No** (auto-generated) |
 
@@ -80,7 +80,7 @@ Generates the JS alias resolution data:
 
 ```
 mappings.js  →  icons.meta.js
-                 ├─ iconNames[]       (481 canonical names)
+                 ├─ iconNames[]       (canonical names)
                  ├─ iconAliasGroups[] (grouped alias arrays)
                  └─ iconAliases{}     (flat lookup: alias → canonical)
 ```
@@ -235,7 +235,7 @@ Moving resolution to a single JS module (`icons.meta.js`) eliminated this redund
 
 ### How shorthand attributes work
 
-The spec system enables `<ui-icon home>` to work as shorthand for `<ui-icon icon="home">`. The spec's `content` definition lists all 481 canonical names as `options` for the `icon` attribute. The compiled `icon.component.js` maps each name in `optionAttributes`:
+The spec system enables `<ui-icon home>` to work as shorthand for `<ui-icon icon="home">`. The spec's `content` definition lists every canonical name as `options` for the `icon` attribute. The compiled `icon.component.js` maps each name in `optionAttributes`:
 
 ```js
 optionAttributes: {
@@ -256,7 +256,7 @@ When the component sees an unknown attribute like `home`, it checks `optionAttri
 
 **Location:** `packages/specs/src/icons/categories.js`
 
-The 31 categories are sorted by typical web app usage frequency:
+The categories are sorted by typical web app usage frequency:
 
 ```
 navigation, action, status, user, form, data, file, media,
@@ -339,7 +339,7 @@ Unlike the five monochrome sets:
 
 ## Icon Selection Methodology
 
-The 481 canonical names were chosen through a multi-pass AI-assisted process documented in `ai/research/icons/`. The selection applied a "semantic name test": would an agent or developer reach for this name when building a UI? Icons that passed express a clear UI concept (`notifications`, `dashboard`, `upload`) rather than a visual description (`bell-outline-24px`).
+The canonical names were chosen through a multi-pass AI-assisted process documented in `ai/research/icons/`. The selection applied a "semantic name test": would an agent or developer reach for this name when building a UI? Icons that passed express a clear UI concept (`notifications`, `dashboard`, `upload`) rather than a visual description (`bell-outline-24px`).
 
 Key principles:
 - **Intent over shape** — canonical names describe what the icon communicates, not what it looks like
