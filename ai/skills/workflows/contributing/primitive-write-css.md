@@ -267,7 +267,7 @@ Define CSS variables on `:host`:
 :host {
   --button-primary-color: var(--primary-color);
   --button-primary-text-color: var(--white);
-  --button-primary-color-hover: var(--primary-color-hover);
+  --button-primary-color-hover: oklch(from var(--button-primary-color) calc(l + var(--hover-lightness)) c h);
 
   --button-secondary-color: var(--secondary-color);
   --button-secondary-text-color: var(--white);

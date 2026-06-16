@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `design-tokens`
 > **Purpose:** Reference for available CSS design tokens in Semantic UI
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-06-16
 
 CSS tokens are CSS custom properties that provide consistent, theme-aware values for styling components.
 
@@ -512,8 +512,8 @@ Pre-configured for common use cases - **prefer these over raw scale values**:
 ### Brand Colors
 
 ```css
---primary-color / --primary       /* Primary brand (default: blue) */
---secondary-color / --secondary   /* Secondary brand (default: slate) */
+--primary-color                   /* Primary brand (default: blue) */
+--secondary-color                 /* Secondary brand (default: slate) */
 
 /* Full scale available */
 --primary-0 through --primary-100
