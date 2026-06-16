@@ -7,6 +7,7 @@
   "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
   "type": "module",
+  "sideEffects": false,
   "engines": {
     "node": ">=24"
   },
