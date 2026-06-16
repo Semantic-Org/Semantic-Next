@@ -28,7 +28,7 @@ The monorepo builds two fundamentally different things:
     depends on
 @semantic-ui/component (depends on query, reactivity, renderer, templating, utils)
 @semantic-ui/query (depends on utils)
-@semantic-ui/specs (depends on utils)
+@semantic-ui/specs (depends on compiler, utils)
 ```
 
 Packages can be used standalone without core. Core requires the packages.
@@ -63,7 +63,7 @@ If you bypass wireit and run builds out of order, you get missing-module errors.
 | `npm run build` | Full build (packages + UI + specs + framework) |
 | `npm run build:ui` | UI only (deps + components + specs + icons + framework) |
 | `npm run build:ui-deps` | CSS bundles + spec generation only |
-| `npm run build:packages` | All 8 packages in parallel |
+| `npm run build:packages` | Every package in parallel |
 | `npm run dev` | Watch mode + Astro docs dev server |
 | `npm run watch` | Watch UI deps + framework + icons |
 

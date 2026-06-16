@@ -47,7 +47,7 @@ This is different from projects that keep main at the last-published version and
 | CHANGELOG section exists for the version | Philosophy pages being written |
 | The shippable audit was done | Tier-2/Tier-3 component pages being authored |
 
-The "shippable audit" pattern: walk the four user-landing surfaces (`docs/src/menus.js`, `docs/src/pages/index.astro`, the site footer, the start page); hide stubs via menu trimming following the precedent in PR #122. Every release re-runs this audit against whatever was added since.
+The "shippable audit" pattern: walk the four user-landing surfaces (`docs/src/helpers/menus.js`, `docs/src/pages/index.astro`, the site footer, the start page); hide stubs via menu trimming following the precedent in PR #122. Every release re-runs this audit against whatever was added since.
 
 ---
 
@@ -101,13 +101,12 @@ Single sitting. The order matters; each step gates the next:
 ```
 utils                         (zero deps)
   ↓
-reactivity, query, specs      (depend only on utils)
+reactivity, query             (depend only on utils)
   ↓
 compiler                      (depends on utils)
   ↓
-renderer                      (depends on reactivity, utils)
-  ↓
-templating                    (depends on compiler, renderer, reactivity, query, utils)
+specs                         (depends on compiler, utils)
+renderer ↔ templating         (mutually dependent — publish together; renderer needs reactivity+templating+utils, templating needs compiler+renderer+query+reactivity+utils)
   ↓
 component                     (depends on templating, renderer, reactivity, query, utils)
   ↓
