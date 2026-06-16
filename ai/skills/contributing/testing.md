@@ -49,7 +49,7 @@ packages/
 ├── query/test/dom/                 ← DOM (basic query logic)
 ├── query/test/browser/             ← Browser (shadow DOM traversal)
 ├── reactivity/test/unit/           ← Unit (pure signal/reaction logic)
-├── renderer/test/browser/          ← Browser (Lit rendering)
+├── renderer/test/browser/          ← Browser (renderer rendering, native + lit)
 ├── templating/test/                ← Root-level unit tests (compiler)
 ├── templating/test/browser/        ← Browser (scanner in real DOM)
 ├── utils/test/                     ← Root-level unit tests (arrays, objects, etc.)
@@ -266,7 +266,7 @@ import { unique, filterEmpty } from '@semantic-ui/utils';
 import { $, $$ } from '@semantic-ui/query';
 import { Reaction, Signal } from '@semantic-ui/reactivity';
 import { TemplateCompiler } from '@semantic-ui/compiler';
-import { LitRenderer } from '@semantic-ui/renderer';
+import { LitRenderer } from '@semantic-ui/renderer/lit';
 ```
 
 One exception: `packages/component/test/browser/component.test.js` uses a relative import:

@@ -36,7 +36,7 @@ The corrective is one question, asked of every test:
 
 If the answer is "an internal function would return a different value," the test is mirror, not contract.
 
-This is harder than it looks because the codebase is novel in ways your training data doesn't cover. The `{#each}` reconciler uses a heuristic key chain (`_id || id || key || hash || _hash || value || index`) — not React's explicit `key={...}`. Reactivity is Tracker-style, not signals-as-React-hooks. Templates have a dual Lisp + JS dialect. Event DSL has `deep`/`global`/`bind` modifiers with subtle semantics. Your strongest priors are loudest precisely where the surface *looks* superficially similar.
+This is harder than it looks because the codebase is novel in ways your training data doesn't cover. The `{#each}` reconciler uses a heuristic key chain (`id ?? _id ?? hash ?? key`, falling back to object key or index) — not React's explicit `key={...}`. Reactivity is Tracker-style, not signals-as-React-hooks. Templates have a dual Lisp + JS dialect. Event DSL has `deep`/`global`/`bind` modifiers with subtle semantics. Your strongest priors are loudest precisely where the surface *looks* superficially similar.
 
 The defaults this skill is designed to override:
 
@@ -375,7 +375,7 @@ The fix: widen. The synthesis can be plural. Multiple `[synthesis]` lines for a 
 
 Don't assume a feature exists or behaves a certain way based on similar frameworks (React, Vue, Svelte, Lit). The repo has genuinely novel features that look superficially similar but aren't:
 
-- **React's `key={...}` for keyed list rendering** → here, `{#each}` reconciles via a heuristic chain (`_id || id || key || hash || _hash || value || index`); `key` is also the iterator variable for object iteration. Explicit user-controlled keying is a planned feature with `key=expression` syntax (not `@key`).
+- **React's `key={...}` for keyed list rendering** → here, `{#each}` reconciles via a heuristic chain (`id ?? _id ?? hash ?? key`, falling back to object key or index); `key` is also the iterator variable for object iteration. Explicit user-controlled keying is a planned feature with `key=expression` syntax (not `@key`).
 - **React's `useEffect` cleanup** → here, callbacks use AbortController auto-cleanup tied to component lifetime.
 - **Vue's `:key` / Svelte's `{#each items as item (key)}`** → not present; see the heuristic above.
 - **`@`-prefixed syntax** → reserved for events (`@click={fn}`); not generic markup metadata.

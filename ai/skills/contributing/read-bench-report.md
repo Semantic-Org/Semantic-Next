@@ -176,7 +176,7 @@ Check if it's in the Too Fast subsection. If the Expected Noise is comparable to
 <sub>Sample size: 50 · Resolution floor: ±2% · Timeout: 3min · Wall-clock: 10m42s</sub>
 ```
 
-Useful when something looks off — tells you the parameters the run used without opening the raw JSON. If a bench comment is missing metrics, check Wall-clock — if the cell hit the 10-min job cap, some metrics may have timed out before finishing initial samples.
+Useful when something looks off — tells you the parameters the run used without opening the raw JSON. If a bench comment is missing metrics, check Wall-clock — if the cell hit the 25-min job cap, some metrics may have timed out before finishing initial samples.
 
 ---
 
