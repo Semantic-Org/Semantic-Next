@@ -81,8 +81,7 @@ This guide is for AI agents embodying a sophisticated technical evaluator person
 **Phase 1: Foundation Context**
 1. Read `/docs/src/helpers/menus.js` - This is the canonical source of truth for documentation structure and navigation order
 2. Read `/docs/src/pages/index.astro` - Homepage positioning, value propositions, and feature highlights
-3. Read `/docs/src/pages/introduction.mdx` - Framework overview and positioning
-4. See `repo-guide` — understanding file locations and search patterns
+3. See `repo-guide` — understanding file locations and search patterns
 
 **Phase 2: Core Architecture Understanding**
 Read files in `/docs/src/pages/docs/guides/components/` with human-motivated completion patterns:
@@ -228,7 +227,6 @@ Based on generated questions, choose 2-3 focus areas:
 1. **Performance Claims Verification** (High): `reactivity/performance.mdx` + `ball-simulation` example + source verification
 2. **Learning Curve Assessment** (High): Start with simplest examples (`minimal/`) → progress to complex (`todo-list/`)
 3. **Production Readiness** (Medium): `advanced/ssr.mdx` + `advanced/common-issues.mdx`
-4. **Framework Integration** (Medium): `usage/framework.mdx` + React/Vue examples
 
 **For Senior Architect - Architecture Quality Priority:**
 1. **Component Composition Patterns** (High): `components/events.mdx` + `todo-list/` + `accordion/` examples
@@ -439,7 +437,7 @@ Location: `/docs/src/examples/`
 **Priority Examples for Technical Assessment:**
 
 1. **Component Architecture Patterns**
-   - `/docs/src/examples/framework/todo-list/` - Parent-child communication, state management
+   - `/docs/src/examples/component/todo-list/` - Parent-child communication, state management
    - `/docs/src/examples/framework/complex/accordion/` - Component composition and events
    - `/docs/src/examples/framework/minimal/component.js` - Simplest component pattern
 
@@ -470,7 +468,7 @@ When evaluating architectural claims or investigating specific features:
 
 **Component System:**
 - `/packages/component/src/define-component.js` - Core component creation
-- `/packages/component/src/web-component.js` - Base web component implementation
+- `/packages/component/src/engines/native/base.js` - Base web component implementation
 
 **Reactivity System:**
 - `/packages/reactivity/src/signal.js` - Signal implementation
@@ -478,7 +476,7 @@ When evaluating architectural claims or investigating specific features:
 - `/packages/reactivity/src/dependency.js` - Dependency tracking
 
 **Template System:**
-- `/packages/templating/src/compiler/template-compiler.js` - AST compilation
+- `/packages/compiler/src/template-compiler.js` - AST compilation
 - `/packages/templating/src/template.js` - Template runtime
 
 **Query Library:**

@@ -24,7 +24,7 @@ The first 7 carry the core argument. The rest fill pattern gaps. Each entry list
 
 ### 1. `minimal` — The Floor
 
-A complete component in 6 lines. Inline template and CSS as strings. This is the absolute minimum — proof that the simplest case is trivially simple before any complexity is introduced.
+A complete component in a few lines. Inline template and CSS as strings. This is the absolute minimum — proof that the simplest case is trivially simple before any complexity is introduced.
 
 **New patterns:** Inline template/CSS strings (no `getText`), `onCreated` lifecycle hook, `formatDate` helper.
 
