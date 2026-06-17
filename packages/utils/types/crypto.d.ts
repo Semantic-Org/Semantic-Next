@@ -4,74 +4,73 @@
  */
 
 /**
- * Options for the `prettifyHash` function.
+ * A {@link hashCode} usage preset. Each names what the hash is for and carries
+ * the default width and encoding for that intent.
+ * - `hash` — in-heap keys: a 53-bit number (the default)
+ * - `content` — keys that cross a boundary: a 64-bit Crockford string (the short tier; use `fingerprint` for large or growing sets)
+ * - `fingerprint` — dedup and change detection: a 128-bit Crockford string
+ * - `secure` — adversarial resistance: an async SHA-256 string (needs a secure context)
  */
-interface PrettifyHashOptions {
-  /**
-   * Minimum length of the output string. Will pad with padChar if necessary.
-   * @default 6
-   */
-  minLength?: number;
-  /**
-   * Character to use for padding.
-   * @default '0'
-   */
-  padChar?: string;
-}
+export type HashUsage = 'hash' | 'content' | 'fingerprint' | 'secure';
 
 /**
- * Converts a numeric hash value to a prettified alphanumeric string using base-36 encoding
- * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#prettifyhash prettifyHash}
- * @see {@link https://next.semantic-ui.com/examples/utils-prettifyhash Example}
- *
- * @param numericHash - The numeric hash value to convert
- * @param options - Options for prettifying the hash
- * @returns The prettified hash string. Returns padded "0" if input parses to 0 or NaN
- *
- * @example
- * ```ts
- * prettifyHash(123) // returns '00003F'
- * prettifyHash(123, { minLength: 8 }) // returns '0000003F'
- * prettifyHash(123, { minLength: 4, padChar: 'X' }) // returns 'XX3F'
- * ```
+ * Output encoding for {@link hashCode}. Defaults per usage and can be overridden.
+ * `number` is only valid for usages at or below the 53-bit safe-integer ceiling.
  */
-export function prettifyHash(numericHash: number, options?: PrettifyHashOptions): string;
+export type HashFormat = 'number' | 'crockford' | 'hex';
+
+type HashInput = string | number | boolean | object | null | undefined;
 
 /**
- * Options for the `hashCode` function.
+ * Options for {@link hashCode}.
  */
 interface HashCodeOptions {
   /**
-   * Whether to prettify the resulting hash (convert to a base-36 string).
-   * @default false
+   * What the hash is for. Sets the default width and encoding.
+   * @default 'hash'
    */
-  prettify?: boolean;
+  usage?: HashUsage;
   /**
-   * A seed value for the hash function.
+   * Output encoding, overriding the usage default.
+   */
+  format?: HashFormat;
+  /**
+   * Namespacing seed. The same input under two seeds yields independent hashes.
    * @default 0
    */
   seed?: number;
 }
 
 /**
- * Deterministic 53-bit hash (cyrb53) of the given input. The same input always
- * produces the same value — use it for cache keys, memo keys, and content
- * identity, not for unique ids (use {@link generateID}).
+ * Deterministic content hash. The same input always produces the same output.
+ * Pick a usage by what the hash is for: `hash` for in-heap keys (a number),
+ * `content` for short keys that cross a boundary, `fingerprint` for dedup and
+ * change detection, `secure` for adversarial resistance (async SHA-256). `format`
+ * overrides the encoding and `seed` namespaces the result. Set global defaults
+ * via the mutable `hashCode.config`. For unique ids use {@link generateID}.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#hashcode hashCode}
  * @see {@link https://next.semantic-ui.com/examples/utils-hashcode Example}
  *
- * @param input - The input string or object. Plain objects are stringified via JSON.stringify; null and undefined become ""
- * @param options - Options for the hash function
- * @returns A 53-bit integer hash, or a prettified base-36 string when prettify is true
+ * @param input - The value to hash. Plain objects are stringified via JSON.stringify; null and undefined become ""
+ * @param options - Usage preset, encoding, and seed
+ * @returns A 53-bit number (`hash`), an encoded string (`content` / `fingerprint`), or a `Promise<string>` (`secure`)
  *
  * @example
  * ```ts
- * hashCode('test')
- * hashCode('test', { prettify: true })
- * hashCode({ a: 1 }, { seed: 42 })
+ * hashCode('test')                                // 53-bit number
+ * hashCode('test', { usage: 'content' })          // 64-bit crockford string
+ * hashCode('test', { usage: 'fingerprint' })      // 128-bit crockford string
+ * await hashCode('test', { usage: 'secure' })     // SHA-256 string
+ * hashCode('test', { usage: 'content', format: 'hex' })
  * ```
  */
-export function hashCode(input: string | object | null | undefined, options?: HashCodeOptions): number | string;
+export function hashCode(input: HashInput, options?: HashCodeOptions & { usage?: 'hash'; format?: 'number'; }): number;
+export function hashCode(input: HashInput, options: HashCodeOptions & { usage: 'secure'; }): Promise<string>;
+export function hashCode(input: HashInput, options: HashCodeOptions): string;
+export namespace hashCode {
+  /** Global defaults, lowest precedence (call options > config > preset). */
+  let config: HashCodeOptions;
+}
 
 /**
  * Generates a cryptographically secure random 32-bit seed via crypto.getRandomValues.
@@ -92,10 +91,11 @@ export function getRandomSeed(): number;
  * carries the consensus length, alphabet, and structure for that channel.
  * - `db` — persisted records: 26-char sortable ULID (leaks creation time)
  * - `page` — DOM/CSS ids and ephemeral keys: 8 chars, always letter-first
- * - `slug` — URLs and share links: 11 chars
+ * - `link` — URLs and share links: 11 chars
  * - `token` — unguessable ids: 27 chars with a checksum, never timestamped
+ * - `code` — human-typed codes (license, redemption, backup): 12 chars, uppercase, checksummed, grouped
  */
-export type IdUsage = 'db' | 'page' | 'slug' | 'token';
+export type IdUsage = 'db' | 'page' | 'link' | 'token' | 'code';
 
 /**
  * Options for {@link generateID}, {@link isValidID}, and {@link parseID}.
@@ -117,9 +117,14 @@ interface GenerateIDOptions {
   prefix?: string;
   /**
    * Append a trailing checksum character that catches transcription typos.
-   * Defaults to the preset's setting (on for `token`).
+   * Defaults to the preset's setting (on for `token` and `code`).
    */
   checksum?: boolean;
+  /**
+   * Emit uppercase Crockford, overriding the preset's case (on for `db` and
+   * `code`). Validation is case-insensitive either way.
+   */
+  upper?: boolean;
   /**
    * Output format. 'uuid' emits an RFC UUIDv7; the other Crockford options are
    * then ignored except `prefix`.
@@ -127,8 +132,8 @@ interface GenerateIDOptions {
    */
   format?: 'crockford' | 'uuid';
   /**
-   * Hyphenate the output every n characters for display. Validation ignores the hyphens.
-   * @default false
+   * Hyphenate the output every n characters for display. Validation ignores the
+   * hyphens. Defaults to the preset's setting (4 for `code`, off otherwise).
    */
   group?: number | false;
 }
@@ -163,6 +168,7 @@ interface ParsedID {
  * generateID()                                  // '01KV61ZF26Z6BG7T04NVKSPJ7K'
  * generateID({ usage: 'page' })                 // 'dzadahv3'
  * generateID({ usage: 'token', prefix: 'sk_' }) // 'sk_…' with checksum
+ * generateID({ usage: 'code' })                 // 'ABCD-EFGH-JKLM' grouped, checksummed
  * generateID({ format: 'uuid' })                // RFC UUIDv7
  * ```
  */

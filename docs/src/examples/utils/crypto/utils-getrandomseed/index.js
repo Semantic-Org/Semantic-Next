@@ -1,7 +1,5 @@
 import { getRandomSeed } from '@semantic-ui/utils';
 
-console.log(getRandomSeed());
-console.log(getRandomSeed());
-console.log(getRandomSeed());
+// a cryptographically random 32-bit unsigned integer, fresh on each call
 console.log(getRandomSeed());
 console.log(getRandomSeed());

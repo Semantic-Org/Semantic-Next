@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Crypto Utilities
 package: "@semantic-ui/utils"
-methods: [hashCode, generateID, isValidID, parseID, prettifyHash, getRandomSeed]
+methods: [hashCode, generateID, isValidID, parseID, getRandomSeed]
 icon: lock
 description: API reference for cryptographic utility functions
 ---
@@ -15,44 +15,61 @@ The Crypto utilities provide functions for generating unique identifiers and has
 ### hashCode
 
 ```javascript
-function hashCode(input, { prettify = false, seed = 0 } = {})
+function hashCode(input, { usage = 'hash', format, seed = 0 } = {})
 ```
 
-Deterministic 53-bit hash ([cyrb53](https://github.com/bryc/code/blob/master/jshash/experimental/cyrb53.js)) of the given input. The same input always produces the same value, so it suits cache keys, memo keys, and content identity. For unique ids use [generateID](#generateid) instead.
+Deterministic content hash: the same input always produces the same output. Pick a `usage` by what the hash is for, not by algorithm (it runs [cyrb53](https://github.com/bryc/code/blob/master/jshash/experimental/cyrb53.js) for the sync rungs and SHA-256 for `secure`). The return type follows the usage. For unique ids that are not derived from content, use [generateID](#generateid) instead.
+
+#### Usage presets
+
+| usage   | shape | for |
+|---------|-------|-----|
+| `hash`  | 53-bit number | in-heap keys (Map keys, memo keys); the default |
+| `content` | 64-bit Crockford string (13 chars) | short keys that cross a boundary (a URL, a DOM id, storage); use `fingerprint` for large or growing sets |
+| `fingerprint` | 128-bit Crockford string (26 chars) | dedup and change detection, where a collision is a bug |
+| `secure` | async SHA-256 string (52 chars) | adversarial resistance; needs a secure context (https or localhost) |
 
 #### Parameters
 
-| Name     | Type    | Description |
-|----------|---------|-------------|
-| input    | any     | The value to hash. Plain objects are stringified via JSON.stringify; null and undefined become "" |
-| options  | object  | Optional configuration |
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| input   | any    | The value to hash. Plain objects are stringified via JSON.stringify; null and undefined become "" |
+| options | object | Optional configuration |
 
 ##### Options
 
-| Name     | Type    | Default     | Description |
-|----------|---------|-------------|-------------|
-| prettify | boolean | false       | If true, returns a base-36 string instead of a number |
-| seed     | number  | 0           | Seed value for the hash function |
+| Name   | Type   | Default    | Description |
+|--------|--------|------------|-------------|
+| usage  | string | `'hash'`   | A usage preset: `hash`, `content`, `fingerprint`, or `secure` |
+| format | string | preset's   | Output encoding: `'crockford'`, `'hex'`, or `'number'`. `'number'` is only valid at or below 53 bits |
+| seed   | number | 0          | Namespacing seed. The same input under two seeds yields independent hashes |
+
+Defaults can be set globally on the mutable `hashCode.config` object (precedence: call options > config > preset).
 
 #### Returns
 
-A 53-bit integer hash, or a prettified base-36 string if `prettify` is true.
+A 53-bit number (`hash`), an encoded string (`content` / `fingerprint`), or a `Promise<string>` (`secure`). `format` overrides the encoding.
 
 #### Example
 
 ```javascript
 import { hashCode } from '@semantic-ui/utils';
 
-console.log(hashCode("Hello, world!"));
-console.log(hashCode("Hello, world!", { prettify: true }));
+console.log(hashCode("Hello, world!"));                             // 53-bit number
+console.log(hashCode("Hello, world!", { usage: 'content' }));      // 64-bit crockford string
+console.log(hashCode("Hello, world!", { usage: 'fingerprint' }));  // 128-bit crockford string
+console.log(await hashCode("Hello, world!", { usage: 'secure' })); // SHA-256 string
+console.log(hashCode("Hello, world!", { usage: 'content', format: 'hex' }));
 console.log(hashCode({ a: 1, b: [2, 3] }));
-console.log(hashCode("Hello, world!", { seed: 42 }));
+
+// global default for a whole app
+hashCode.config = { usage: 'content' };
 ```
 
 ### generateID
 
 ```javascript
-function generateID({ usage = 'db', length, prefix, checksum, format = 'crockford', group } = {})
+function generateID({ usage = 'db', length, prefix, checksum, upper, format = 'crockford', group } = {})
 ```
 
 Generates a unique id. Defaults to a sortable 26-char [ULID](https://github.com/ulid/spec) (usage `db`). Each `usage` preset names what the id is for and carries the length, alphabet, and structure that fits that channel. The inverse is [isValidID](#isvalidid) and [parseID](#parseid).
@@ -63,19 +80,21 @@ Generates a unique id. Defaults to a sortable 26-char [ULID](https://github.com/
 |---------|-------|-----|
 | `db`    | 26-char sortable ULID (uppercase) | persisted records; sorts by creation time, leaks it |
 | `page`  | 8 chars, always letter-first | DOM/CSS ids and ephemeral in-memory keys |
-| `slug`  | 11 chars | URLs and shareable links |
+| `link`  | 11 chars | URLs and shareable links |
 | `token` | 27 chars with a checksum, never timestamped | unguessable ids (reset links, capability URLs) |
+| `code`  | 12 uppercase chars, grouped, checksummed | human-typed codes (license, redemption, backup) |
 
 #### Options
 
 | Name     | Type             | Default      | Description |
 |----------|------------------|--------------|-------------|
-| usage    | string           | `'db'`       | A usage preset: `db`, `page`, `slug`, or `token` |
+| usage    | string           | `'db'`       | A usage preset: `db`, `page`, `link`, `token`, or `code` |
 | length   | number           | preset's     | Total characters after the prefix. Overrides the preset width |
 | prefix   | string           | `''`         | A verbatim prefix (typed-id convention, e.g. `usr_`). Not counted in length |
-| checksum | boolean          | preset's     | Append a trailing check character that catches typos. On by default for `token` |
+| checksum | boolean          | preset's     | Append a trailing check character that catches typos. On by default for `token` and `code` |
+| upper    | boolean          | preset's     | Emit uppercase Crockford, overriding the preset case. Validation is case-insensitive either way |
 | format   | string           | `'crockford'`| `'uuid'` emits an RFC UUIDv7; other Crockford options are then ignored except `prefix` |
-| group    | number \| false  | `false`      | Hyphenate the output every n characters for display |
+| group    | number \| false  | preset's     | Hyphenate the output every n characters for display. `4` for `code`, off otherwise |
 
 Defaults can be set globally on the mutable `generateID.config` object (precedence: call options > config > preset).
 
@@ -90,8 +109,9 @@ import { generateID } from '@semantic-ui/utils';
 
 console.log(generateID());                                  // '01KV61ZF26Z6BG7T04NVKSPJ7K'
 console.log(generateID({ usage: 'page' }));                 // 'dzadahv3'
-console.log(generateID({ usage: 'slug' }));                 // '9zv38gp9ybm'
+console.log(generateID({ usage: 'link' }));                 // '9zv38gp9ybm'
 console.log(generateID({ usage: 'token', prefix: 'sk_' })); // 'sk_…' with a checksum
+console.log(generateID({ usage: 'code' }));                 // 'ABCD-EFGH-JKLM' grouped, checksummed
 console.log(generateID({ length: 17 }));                    // 17-char id
 console.log(generateID({ format: 'uuid' }));                // RFC UUIDv7
 
@@ -156,43 +176,6 @@ const id = generateID({ usage: 'db', prefix: 'doc_' });
 const parsed = parseID(id, { usage: 'db', prefix: 'doc_' });
 console.log(parsed.prefix);    // 'doc_'
 console.log(parsed.timestamp); // Date — when the id was minted
-```
-
-### prettifyHash
-
-```javascript
-function prettifyHash(numericHash, { minLength = 6, padChar = '0' } = {})
-```
-
-Converts a numeric hash value to a prettified alphanumeric string using base-36 encoding.
-
-#### Parameters
-
-| Name        | Type   | Description |
-|-------------|--------|-------------|
-| numericHash | number | The numeric hash value to convert |
-| options     | object | Optional configuration |
-
-##### Options
-
-| Name      | Type   | Default | Description |
-|-----------|--------|---------|-------------|
-| minLength | number | 6       | Minimum length of the output string. Will pad with padChar if necessary |
-| padChar   | string | '0'     | Character to use for padding |
-
-#### Returns
-
-The prettified hash string. Returns padded "0" if input parses to 0 or NaN.
-
-#### Example
-
-```javascript
-import { prettifyHash } from '@semantic-ui/utils';
-
-console.log(prettifyHash(123)); // "00003F"
-console.log(prettifyHash(123, { minLength: 8 })); // "0000003F"
-console.log(prettifyHash(123, { minLength: 4, padChar: 'X' })); // "XX3F"
-console.log(prettifyHash(0)); // "000000"
 ```
 
 ### getRandomSeed

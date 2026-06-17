@@ -4,8 +4,8 @@ id: 'utils-hashcode'
 exampleType: 'log'
 category: 'Utils'
 subcategory: 'Crypto'
-description: 'Deterministic 53-bit hash for cache keys and content identity'
-tags: ['utils', 'crypto', 'hashcode', 'hash', 'cyrb53', 'cache']
+description: 'Deterministic content hash with usage presets for keys, dedup, and secure identity'
+tags: ['utils', 'crypto', 'hashcode', 'hash', 'content', 'fingerprint', 'secure', 'cyrb53']
 selectedFile: 'index.js'
-tip: 'Deterministic — the same input always hashes the same, which is what makes it a cache or memo key. For unique ids use generateID instead'
+tip: 'Pick a usage by what the hash is for, not the algorithm. The return type follows: a number for in-heap keys, a crockford string for content and fingerprint, a Promise for secure. For unique ids that are not derived from content, use generateID'
 ---

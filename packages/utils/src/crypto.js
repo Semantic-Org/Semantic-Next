@@ -1,27 +1,12 @@
 /*-------------------
-      Identity
+      Alphabets
 --------------------*/
 
-export const prettifyHash = (numericHash, { minLength = 6, padChar = '0' } = {}) => {
-  numericHash = parseInt(numericHash, 10);
-  if (numericHash === 0) {
-    return minLength > 1 ? padChar.repeat(minLength - 1) + '0' : '0';
-  }
-
-  let result = '';
-  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  while (numericHash > 0) {
-    result = chars[numericHash % chars.length] + result;
-    numericHash = Math.floor(numericHash / chars.length);
-  }
-
-  // Pad if needed
-  if (result.length < minLength) {
-    result = padChar.repeat(minLength - result.length) + result;
-  }
-
-  return result;
-};
+// Crockford base32, excludes I L O U for visual clarity and to dodge accidental
+// profanity. Shared by the hash encoders here and the id codes further down.
+const BASE32 = '0123456789abcdefghjkmnpqrstvwxyz';
+const BASE32_UPPER = BASE32.toUpperCase();
+const HEX = '0123456789abcdef';
 
 /*-------------------
       Hashing
@@ -31,7 +16,7 @@ const normalizeForHash = (input) => {
   if (input == null) {
     return '';
   }
-  // only plain objects get JSON-serialized; Date/class instances keep their toString
+  // only plain objects get JSON-serialized. Date/class instances keep their toString
   if (typeof input === 'object' && input.toString === Object.prototype.toString) {
     try {
       return JSON.stringify(input);
@@ -43,12 +28,12 @@ const normalizeForHash = (input) => {
   return String(input);
 };
 
-/*
-  Deterministic 53-bit hash (cyrb53). Same input → same output, for cache keys,
-  memo keys, and content identity. Not for unique ids — use generateID.
-*/
-export const hashCode = (input, { prettify = false, seed = 0 } = {}) => {
-  const str = normalizeForHash(input);
+// cyrb53 (bryc) is a fast hash with good avalanche. The seed shifts the whole
+// sequence, so two seeds over one input give independent values — that is how
+// fingerprint reaches its width without a second algorithm. The two 32-bit lanes
+// carry 64 bits: the number form caps at 53 to stay exact in a JS number, the
+// string forms spend all 64.
+const cyrb53Lanes = (str, seed = 0) => {
   let h1 = 0xdeadbeef ^ seed;
   let h2 = 0x41c6ce57 ^ seed;
   for (let i = 0; i < str.length; i++) {
@@ -60,9 +45,147 @@ export const hashCode = (input, { prettify = false, seed = 0 } = {}) => {
   h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
   h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  const hash = 4294967296 * (2097151 & h2) + (h1 >>> 0);
-  return prettify ? prettifyHash(hash) : hash;
+  return [h1 >>> 0, h2 >>> 0];
 };
+
+const cyrb53 = (str, seed = 0) => {
+  const [h1, h2] = cyrb53Lanes(str, seed);
+  return 4294967296 * (2097151 & h2) + h1;
+};
+
+// the full 64 bits as 8 bytes, big-endian, for the string tiers
+const cyrb64Bytes = (str, seed = 0) => {
+  const [h1, h2] = cyrb53Lanes(str, seed);
+  return [
+    (h2 >>> 24) & 255,
+    (h2 >>> 16) & 255,
+    (h2 >>> 8) & 255,
+    h2 & 255,
+    (h1 >>> 24) & 255,
+    (h1 >>> 16) & 255,
+    (h1 >>> 8) & 255,
+    h1 & 255,
+  ];
+};
+
+// crockford base32 of a byte array, 5 bits at a time. value is drained below 5
+// bits before each new byte, so the running shifts never overflow.
+const bytesToBase32 = (bytes) => {
+  let out = '';
+  let bits = 0;
+  let value = 0;
+  for (let i = 0; i < bytes.length; i++) {
+    value = (value << 8) | bytes[i];
+    bits += 8;
+    while (bits >= 5) {
+      bits -= 5;
+      out += BASE32[(value >>> bits) & 31];
+    }
+    value &= (1 << bits) - 1;
+  }
+  if (bits > 0) {
+    out += BASE32[(value << (5 - bits)) & 31];
+  }
+  return out;
+};
+
+const bytesToHex = (bytes) => {
+  let out = '';
+  for (let i = 0; i < bytes.length; i++) {
+    out += HEX[bytes[i] >> 4] + HEX[bytes[i] & 15];
+  }
+  return out;
+};
+
+// SubtleCrypto only exists in a secure context, so secure throws rather than
+// silently dropping to a weaker hash.
+const sha256 = async (str, seed) => {
+  const subtle = globalThis.crypto?.subtle;
+  if (!subtle) {
+    throw new Error("hashCode: usage 'secure' needs a secure context (https or localhost)");
+  }
+  const body = new TextEncoder().encode(str);
+  let data = body;
+  // salt with a fixed-width binary seed prefix so input content can't spoof it
+  // (the old `${seed}:` form let '5:foo' at seed 0 collide with 'foo' at seed 5).
+  // seed 0 stays unsalted, so it's a plain SHA-256 of the input.
+  if (seed) {
+    data = new Uint8Array(body.length + 4);
+    data[0] = seed >>> 24;
+    data[1] = seed >>> 16;
+    data[2] = seed >>> 8;
+    data[3] = seed;
+    data.set(body, 4);
+  }
+  return new Uint8Array(await subtle.digest('SHA-256', data));
+};
+
+/*
+  Usage presets. usage names what the hash is for and the default encoding. bits
+  is the width, which decides one cyrb53 pass or two and bars the 'number' format
+  above the 53-bit safe-integer ceiling. content's 64 bits is the short boundary
+  key, fingerprint's 128 the collision-safe one for large or growing sets. secure
+  is the only async, crypto rung.
+*/
+const HASH_PRESETS = {
+  hash: { bits: 53, format: 'number' },
+  content: { bits: 64, format: 'crockford' },
+  fingerprint: { bits: 128, format: 'crockford' },
+  secure: { bits: 256, format: 'crockford' },
+};
+const HASH_FORMATS = new Set(['number', 'crockford', 'hex']);
+
+const resolveHashConfig = (options) => {
+  const globalConfig = hashCode.config;
+  const usage = options.usage ?? globalConfig.usage ?? 'hash';
+  const preset = HASH_PRESETS[usage];
+  if (!preset) {
+    throw new Error(`hashCode: unknown usage '${usage}'`);
+  }
+  const format = options.format ?? globalConfig.format ?? preset.format;
+  if (!HASH_FORMATS.has(format)) {
+    throw new Error(`hashCode: unknown format '${format}'`);
+  }
+  // a hash wider than 53 bits can't round-trip through a JS number, so fail loud
+  if (format === 'number' && preset.bits > 53) {
+    throw new Error(`hashCode: format 'number' can't hold the '${usage}' hash`);
+  }
+  return { usage, format, seed: options.seed ?? globalConfig.seed ?? 0, bits: preset.bits };
+};
+
+/*
+  Deterministic content hash, same input same output. Pick a usage by what the
+  hash is for, not by algorithm:
+    hash         53-bit number for in-heap keys (the default)
+    content      64-bit crockford string for keys that leave the heap
+    fingerprint  128-bit crockford string for dedup and change detection
+    secure       async SHA-256 string for adversarial resistance
+  format overrides the encoding ('crockford' | 'hex' | 'number'), seed namespaces
+  the output, and hashCode.config sets global defaults. For unique ids that are
+  not derived from content, use generateID.
+*/
+export const hashCode = (input, options = {}) => {
+  const config = resolveHashConfig(options);
+  const str = normalizeForHash(input);
+
+  if (config.usage === 'secure') {
+    return sha256(str, config.seed).then((bytes) => config.format === 'hex' ? bytesToHex(bytes) : bytesToBase32(bytes));
+  }
+
+  if (config.format === 'number') {
+    return cyrb53(str, config.seed);
+  }
+  // string tiers spend the full 64 bits per pass; fingerprint adds a second
+  // seeded pass for 128
+  let bytes = cyrb64Bytes(str, config.seed);
+  if (config.bits > 64) {
+    bytes = bytes.concat(cyrb64Bytes(str, config.seed + 1));
+  }
+  return config.format === 'hex' ? bytesToHex(bytes) : bytesToBase32(bytes);
+};
+
+// global defaults, lowest precedence (call options > config > preset). mirrors generateID.config
+hashCode.config = {};
 
 /*-------------------
       Entropy
@@ -92,16 +215,13 @@ const randomByte = () => {
       Identity codes
 --------------------*/
 
-// Crockford base32 — excludes I L O U (visual ambiguity, accidental profanity).
-// 32 is a power of two, so byte & 31 samples it without modulo bias.
-const BASE32 = '0123456789abcdefghjkmnpqrstvwxyz';
-const BASE32_UPPER = BASE32.toUpperCase();
 // the 22 letters, for a guaranteed-alpha first char (valid CSS identifier)
 const ALPHA = 'abcdefghjkmnpqrstvwxyz';
 const ALPHA_UPPER = ALPHA.toUpperCase();
 // 256 - (256 % 22): bytes at or above this would bias the 22-letter draw
 const ALPHA_CUTOFF = 242;
 
+// 32 is a power of two, so byte & 31 samples the alphabet with no modulo bias
 const randomCode = (alphabet) => alphabet[randomByte() & 31];
 
 const randomAlpha = (letters) => {
@@ -163,19 +283,21 @@ const uuidV7 = () => {
   Preset contracts. length = total emitted chars after the prefix (a checksum,
   when on, spends the last slot so width stays constant per config).
   alphaFirst forces a letter lead for valid CSS identifiers. timestamp prepends
-  the sortable ULID clock. upper emits canonical uppercase.
+  the sortable ULID clock. upper emits uppercase. group sets a default display
+  grouping. code is the read-aloud tier: short, uppercase, checksummed, grouped.
 */
 const PRESETS = {
   db: { length: 26, timestamp: true, alphaFirst: false, checksum: false, upper: true },
   page: { length: 8, timestamp: false, alphaFirst: true, checksum: false, upper: false },
-  slug: { length: 11, timestamp: false, alphaFirst: false, checksum: false, upper: false },
+  link: { length: 11, timestamp: false, alphaFirst: false, checksum: false, upper: false },
   token: { length: 27, timestamp: false, alphaFirst: false, checksum: true, upper: false },
+  code: { length: 12, timestamp: false, alphaFirst: false, checksum: true, upper: true, group: 4 },
 };
 
 // position-weighted sum over each char's base32 value (not its char code) so an
 // adjacent swap shifts the sum by a - b, nonzero whenever the two differ — every
 // adjacent transposition is caught. Weighting by position spreads substitutions.
-// Computed over the case-folded prefix+body so a typo anywhere fails; prefix
+// Computed over the case-folded prefix+body so a typo anywhere fails. prefix
 // chars outside the alphabet fall back to their char code. Result is a base32
 // index, so the check char is always URL/CSS-safe.
 const charValue = (char) => {
@@ -239,11 +361,11 @@ const resolveConfig = (options) => {
     length,
     prefix: options.prefix ?? globalConfig.prefix ?? '',
     checksum: pick('checksum'),
+    upper: pick('upper'),
     format: options.format ?? globalConfig.format ?? 'crockford',
-    group: options.group ?? globalConfig.group ?? false,
+    group: pick('group') ?? false,
     timestamp: preset.timestamp,
     alphaFirst: preset.alphaFirst,
-    upper: preset.upper,
   };
 };
 

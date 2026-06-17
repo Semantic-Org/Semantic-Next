@@ -1,4 +1,4 @@
-import { generateID, getRandomSeed, hashCode, isValidID, parseID, prettifyHash } from '@semantic-ui/utils';
+import { generateID, getRandomSeed, hashCode, isValidID, parseID } from '@semantic-ui/utils';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -6,92 +6,145 @@ const CROCKFORD = /^[0-9a-z]+$/;
 const CROCKFORD_UPPER = /^[0-9A-Z]+$/;
 
 describe('ID/Hashing Functions', () => {
-  describe('prettifyHash', () => {
-    it('should return padded "0" for input 0 with default settings', () => {
-      expect(prettifyHash(0)).toBe('000000');
-    });
-
-    it('should convert a number to base 36 representation', () => {
-      expect(prettifyHash(10)).toBe('00000A');
-      expect(prettifyHash(35)).toBe('00000Z');
-      expect(prettifyHash(36)).toBe('000010');
-    });
-
-    it('should handle large numbers correctly', () => {
-      const largeNumber = 123456789012345;
-      expect(prettifyHash(largeNumber)).toMatch(/^[0-9A-Z]+$/);
-    });
-
-    it('should respect custom minLength', () => {
-      expect(prettifyHash(123, { minLength: 8 })).toBe('0000003F');
-      expect(prettifyHash(123, { minLength: 3 })).toBe('03F');
-      expect(prettifyHash(123, { minLength: 1 })).toBe('3F');
-    });
-
-    it('should respect custom padChar', () => {
-      expect(prettifyHash(123, { minLength: 8, padChar: 'X' })).toBe('XXXXXX3F');
-      expect(prettifyHash(123, { minLength: 6, padChar: '-' })).toBe('----3F');
-    });
-
-    it('should handle negative numbers by returning padded 0', () => {
-      expect(prettifyHash(-123)).toBe('000000');
-    });
-
-    it('should handle NaN by returning padded 0', () => {
-      expect(prettifyHash(NaN)).toBe('000000');
-    });
-  });
-
   describe('hashCode', () => {
-    it('should produce consistent hash code for the same input', () => {
-      expect(hashCode('Test String')).toBe(hashCode('Test String'));
+    afterEach(() => {
+      hashCode.config = {};
     });
 
-    it('should produce unique hash codes for different inputs', () => {
+    it('produces a consistent number for the same input (default usage)', () => {
+      expect(hashCode('Test String')).toBe(hashCode('Test String'));
+      expect(typeof hashCode('Test String')).toBe('number');
+    });
+
+    it('produces different hashes for different inputs', () => {
       expect(hashCode('Test String 1')).not.toBe(hashCode('Test String 2'));
     });
 
-    it('should hash objects, dates, and numbers distinctly', () => {
+    it('hashes objects, dates, and numbers distinctly', () => {
       expect(hashCode({ a: 1 })).not.toBe(hashCode({ a: 2 }));
       expect(hashCode(new Date(2020, 0, 1))).not.toBe(hashCode(new Date(2020, 0, 2)));
       expect(hashCode(5151)).not.toBe(hashCode(2121));
     });
 
-    it('should be case-sensitive', () => {
+    it('is case-sensitive', () => {
       expect(hashCode('Test String')).not.toBe(hashCode('test string'));
     });
 
-    it('should stay within 53-bit safe-integer range', () => {
+    it('stays within the 53-bit safe-integer range', () => {
       const hash = hashCode('a'.repeat(100000));
       expect(Number.isSafeInteger(hash)).toBe(true);
       expect(hash).toBeGreaterThanOrEqual(0);
     });
 
-    it('should not throw on special, unicode, emoji, or control input', () => {
+    it('does not throw on special, unicode, emoji, or control input', () => {
       for (const value of ['!@#$%^&*()', '你好世界 こんにちは', '😀😃😄', '\n\r\t\b\f']) {
         expect(typeof hashCode(value)).toBe('number');
       }
     });
 
-    it('should handle null and undefined', () => {
+    it('handles null and undefined', () => {
       expect(typeof hashCode(null)).toBe('number');
       expect(typeof hashCode(undefined)).toBe('number');
     });
 
-    it('should not throw on non-finite numeric fields', () => {
+    it('does not throw on non-finite numeric fields', () => {
       for (const value of [Infinity, -Infinity, NaN, Number.MAX_SAFE_INTEGER]) {
         expect(() => hashCode({ value })).not.toThrow();
       }
     });
 
-    it('should return a prettified string when prettify is true', () => {
-      const result = hashCode('test', { prettify: true });
-      expect(typeof result).toBe('string');
-      expect(result).toMatch(/^[0-9A-Z]+$/);
+    it('separates hashes by seed', () => {
+      expect(hashCode('test', { seed: 1 })).not.toBe(hashCode('test', { seed: 2 }));
     });
 
-    it('should separate hashes by seed', () => {
-      expect(hashCode('test', { seed: 1 })).not.toBe(hashCode('test', { seed: 2 }));
+    describe('usage presets', () => {
+      it('content is a 64-bit crockford string, deterministic', () => {
+        const result = hashCode('hello', { usage: 'content' });
+        expect(typeof result).toBe('string');
+        expect(result).toHaveLength(13);
+        expect(result).toMatch(CROCKFORD);
+        expect(result).toBe(hashCode('hello', { usage: 'content' }));
+      });
+
+      it('fingerprint is twice the width of content, deterministic, and distinguishes inputs', () => {
+        const result = hashCode('hello', { usage: 'fingerprint' });
+        expect(result).toHaveLength(26);
+        expect(result).toMatch(CROCKFORD);
+        expect(result).toBe(hashCode('hello', { usage: 'fingerprint' }));
+        expect(hashCode('a', { usage: 'fingerprint' })).not.toBe(hashCode('b', { usage: 'fingerprint' }));
+      });
+
+      it('fingerprint reaches 128 real bits, not a doubled 64-bit hash', () => {
+        // 128 bits comes from cyrb53(seed) ++ cyrb53(seed+1). if the two passes
+        // correlated, the second lane would track the first and the width is a lie.
+        // independent 64-bit lanes differ in ~32 of 64 bits on average (avalanche).
+        let totalDistance = 0;
+        const samples = 500;
+        for (let n = 0; n < samples; n++) {
+          const hex = hashCode('input-' + n, { usage: 'fingerprint', format: 'hex' });
+          let diff = BigInt('0x' + hex.slice(0, 16)) ^ BigInt('0x' + hex.slice(16));
+          while (diff > 0n) {
+            totalDistance += Number(diff & 1n);
+            diff >>= 1n;
+          }
+        }
+        const meanDistance = totalDistance / samples;
+        expect(meanDistance).toBeGreaterThan(28);
+        expect(meanDistance).toBeLessThan(36);
+      });
+
+      it('secure resolves to a 52-char crockford string, deterministic', async () => {
+        const result = await hashCode('hello', { usage: 'secure' });
+        expect(typeof result).toBe('string');
+        expect(result).toHaveLength(52);
+        expect(result).toMatch(CROCKFORD);
+        expect(result).toBe(await hashCode('hello', { usage: 'secure' }));
+      });
+
+      it('throws on an unknown usage', () => {
+        expect(() => hashCode('x', { usage: 'nope' })).toThrow(/unknown usage/);
+      });
+    });
+
+    describe('format', () => {
+      it('secure in hex matches the standard SHA-256 of the input', async () => {
+        // sha256('hello')
+        const known = '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824';
+        expect(await hashCode('hello', { usage: 'secure', format: 'hex' })).toBe(known);
+      });
+
+      it('content in hex is 16 lowercase hex chars', () => {
+        const result = hashCode('hello', { usage: 'content', format: 'hex' });
+        expect(result).toHaveLength(16);
+        expect(result).toMatch(/^[0-9a-f]+$/);
+      });
+
+      it('number format returns the raw integer for the hash usage', () => {
+        expect(hashCode('hello', { usage: 'hash', format: 'number' })).toBe(hashCode('hello'));
+      });
+
+      it('throws when number format cannot hold a wider hash', () => {
+        expect(() => hashCode('x', { usage: 'content', format: 'number' })).toThrow(/can't hold/);
+        expect(() => hashCode('x', { usage: 'fingerprint', format: 'number' })).toThrow(/can't hold/);
+      });
+
+      it('throws on an unknown format', () => {
+        expect(() => hashCode('x', { format: 'base64' })).toThrow(/unknown format/);
+      });
+    });
+
+    describe('config', () => {
+      it('global config sets the default usage', () => {
+        hashCode.config = { usage: 'content' };
+        const result = hashCode('hello');
+        expect(typeof result).toBe('string');
+        expect(result).toHaveLength(13);
+      });
+
+      it('call options override global config', () => {
+        hashCode.config = { usage: 'content' };
+        expect(typeof hashCode('hello', { usage: 'hash' })).toBe('number');
+      });
     });
   });
 
@@ -130,8 +183,8 @@ describe('ID/Hashing Functions', () => {
         }
       });
 
-      it('slug is 11 chars, lowercase', () => {
-        const id = generateID({ usage: 'slug' });
+      it('link is 11 chars, lowercase', () => {
+        const id = generateID({ usage: 'link' });
         expect(id).toHaveLength(11);
         expect(id).toMatch(CROCKFORD);
       });
@@ -140,6 +193,13 @@ describe('ID/Hashing Functions', () => {
         const id = generateID({ usage: 'token' });
         expect(id).toHaveLength(27);
         expect(isValidID(id, { usage: 'token' })).toBe(true);
+      });
+
+      it('code is 12 uppercase chars, grouped in fours, self-validating', () => {
+        const id = generateID({ usage: 'code' });
+        // 'ABCD-EFGH-JKLM' — the last char is the checksum, validation folds the hyphens
+        expect(id).toMatch(/^[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+        expect(isValidID(id, { usage: 'code' })).toBe(true);
       });
 
       it('throws on an unknown usage', () => {
@@ -168,6 +228,11 @@ describe('ID/Hashing Functions', () => {
         expect(generateID({ usage: 'page', group: 4 })).toMatch(/^[a-z0-9]{4}-[a-z0-9]{4}$/);
       });
 
+      it('upper overrides the preset case at generation', () => {
+        expect(generateID({ usage: 'page', upper: true })).toMatch(CROCKFORD_UPPER);
+        expect(generateID({ usage: 'db', upper: false })).toMatch(CROCKFORD);
+      });
+
       it('ignores a non-object argument, falling through to the default usage', () => {
         expect(generateID(12345)).toHaveLength(26);
         expect(generateID(null)).toHaveLength(26);
@@ -188,7 +253,7 @@ describe('ID/Hashing Functions', () => {
 
       it('call options override global config', () => {
         generateID.config = { usage: 'page' };
-        expect(generateID({ usage: 'slug' })).toHaveLength(11);
+        expect(generateID({ usage: 'link' })).toHaveLength(11);
       });
 
       it('an explicit false checksum overrides the token preset default', () => {
@@ -220,7 +285,7 @@ describe('ID/Hashing Functions', () => {
 
   describe('isValidID', () => {
     it('round-trips every preset against its own config', () => {
-      for (const usage of ['db', 'page', 'slug', 'token']) {
+      for (const usage of ['db', 'page', 'link', 'token', 'code']) {
         expect(isValidID(generateID({ usage }), { usage })).toBe(true);
       }
     });
@@ -291,9 +356,9 @@ describe('ID/Hashing Functions', () => {
       });
 
       it('validates a grouped id by ignoring the hyphens', () => {
-        const id = generateID({ usage: 'slug', group: 4 });
-        expect(isValidID(id, { usage: 'slug', group: 4 })).toBe(true);
-        expect(isValidID(id, { usage: 'slug' })).toBe(true);
+        const id = generateID({ usage: 'link', group: 4 });
+        expect(isValidID(id, { usage: 'link', group: 4 })).toBe(true);
+        expect(isValidID(id, { usage: 'link' })).toBe(true);
       });
 
       // ß uppercases to 'SS' and ﬀ to 'FF' — a length-changing fold would let a

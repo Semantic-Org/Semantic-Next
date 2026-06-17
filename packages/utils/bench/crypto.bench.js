@@ -31,8 +31,8 @@ describe('hashCode', () => {
 });
 
 // page and db are the hot tiers — minted per template instance and per record.
-// token and slug are minted rarely, so the checksum pass and longer body are
-// not on any hot path. The shared entropy pool is what keeps the per-id draw
+// token, link, and code are minted rarely, so the checksum pass and longer body
+// are not on any hot path. The shared entropy pool is what keeps the per-id draw
 // near a memory read rather than a fresh getRandomValues syscall.
 describe('generateID', () => {
   bench('page (8 char, hot path)', () => {
@@ -41,11 +41,14 @@ describe('generateID', () => {
   bench('db (26 char ULID, hot path)', () => {
     generateID();
   });
-  bench('slug (11 char)', () => {
-    generateID({ usage: 'slug' });
+  bench('link (11 char)', () => {
+    generateID({ usage: 'link' });
   });
   bench('token (27 char + checksum)', () => {
     generateID({ usage: 'token' });
+  });
+  bench('code (12 char + checksum, grouped)', () => {
+    generateID({ usage: 'code' });
   });
   bench('uuid (RFC v7)', () => {
     generateID({ format: 'uuid' });
