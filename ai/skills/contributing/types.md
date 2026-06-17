@@ -140,7 +140,7 @@ The `"types"` top-level field is the legacy resolution path. The `exports["."].t
 `.d.ts` files import types from sibling packages using the published package name, not relative paths:
 
 ```typescript
-// packages/component/types/web-component.d.ts
+// packages/component/types/engines/native/base.d.ts
 import type { Query } from '@semantic-ui/query';
 import type { Signal } from '@semantic-ui/reactivity';
 import type { Template } from '@semantic-ui/templating';
@@ -243,7 +243,7 @@ This allows partial object updates on object signals while keeping primitive sig
 
 ```typescript
 export interface CallParams<
-  TState extends Record<string, Signal<any>> = Record<string, Signal<any>>,
+  TState extends Record<string, any> = Record<string, any>,
   TSettings extends Record<string, any> = Record<string, any>,
   TComponentInstance extends Record<string, any> = Record<string, any>,
   TProperties extends Record<string, any> = Record<string, any>,

@@ -9,7 +9,7 @@ type: skill
 
 # Code Formatting Guide
 
-> Last Updated: 2025-11-14
+> Last Updated: 2026-06-16
 
 **Purpose**: Code formatting standards and comment hierarchy
 **Audience**: All developers

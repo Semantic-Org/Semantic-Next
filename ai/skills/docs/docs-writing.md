@@ -16,12 +16,12 @@ type: skill
 
 ## Two Writing Modes
 
-Semantic UI docs span ~120 pages across two distinct writing modes:
+Semantic UI docs span two distinct writing modes:
 
 | Mode | Pages | Voice | When |
 |------|-------|-------|------|
-| **Reference** | ~106 guides, API docs, lessons | Concise, direct, code-forward | Teaching how to use something |
-| **Persuasive** | ~14 gateway/index pages | Problem-first, instability-driven | Earning attention from uncommitted readers |
+| **Reference** | guides, API docs, lessons | Concise, direct, code-forward | Teaching how to use something |
+| **Persuasive** | gateway/index pages | Problem-first, instability-driven | Earning attention from uncommitted readers |
 
 Reference is the default. Most pages assume the reader has already decided to learn — respect their time. Persuasive mode applies only to gateway pages where readers are deciding whether to care.
 

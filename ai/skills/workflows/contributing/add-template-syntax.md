@@ -24,10 +24,12 @@ Adding new template syntax involves 6 main steps:
 ## File Locations
 
 ```
-packages/templating/src/compiler/template-compiler.js    # Template parser
-packages/renderer/src/lit/renderer.js                    # Render logic
-packages/renderer/src/lit/directives/*.js                # Lit directives
-packages/templating/test/compiler.test.js                # Compiler tests
+packages/compiler/src/template-compiler.js               # Template parser
+packages/renderer/src/engines/native/renderer.js         # Native render logic (default)
+packages/renderer/src/engines/native/blocks/             # One block file per syntax (defineBlock)
+packages/renderer/src/engines/lit/renderer.js            # Lit render logic (optional engine)
+packages/renderer/src/engines/lit/directives/*.js        # Lit directives (optional engine)
+packages/compiler/test/compiler.test.js                  # Compiler tests
 packages/renderer/test/*.test.js                         # Renderer tests
 docs/src/pages/docs/guides/templates/*.mdx                # User guide documentation
 docs/src/pages/docs/api/templating/ast.mdx               # API docs - AST reference
@@ -39,7 +41,7 @@ CHANGELOG.md                                             # Change log
 ## Step 1: Implementation
 
 ### 1.1 Template Compiler
-Add parsing logic to `/packages/templating/src/compiler/template-compiler.js`
+Add parsing logic to `/packages/compiler/src/template-compiler.js`
 
 #### Key Steps:
 1. Add new token patterns to `basePatterns` (used by `generateRegExpPatterns()`)
@@ -68,7 +70,20 @@ static basePatterns = {
 ```
 
 ### 1.2 Renderer Implementation
-Add evaluation logic to `/packages/renderer/src/lit/renderer.js`
+
+The default native engine and the optional Lit engine add syntax differently. For the default native engine, add a block under `/packages/renderer/src/engines/native/blocks/` (see 1.2a). For the optional Lit engine, add evaluation logic to `/packages/renderer/src/engines/lit/renderer.js` (see 1.2b).
+
+#### 1.2a Native Block (default engine)
+
+Copy `packages/renderer/src/engines/native/blocks/sample.js` to `your-syntax.js`. Implement the hooks you need (`create` / `render` / `hydrate` / `update`), then register the block at the bottom of the file:
+
+```javascript
+registerBlock('newsyntax', yourDispatch);
+```
+
+Add a side-effect import to `blocks/index.js` so the registration runs. Inside the hooks, use the author-bag closures — `lookupExpression(expr)`, `renderAST({ ast })` — rather than reaching through `ctx.renderer`. See the `native-renderer` skill for the full bag and lifecycle.
+
+#### 1.2b Lit Renderer (optional engine)
 
 #### Key Steps:
 1. Add case in `readAST()` switch statement
@@ -98,8 +113,8 @@ evaluateNewSyntax(node, data) {
 }
 ```
 
-### 1.3 Directive Implementation
-Create directive in `/packages/renderer/src/lit/directives/`
+### 1.3 Directive Implementation (Lit engine)
+Create directive in `/packages/renderer/src/engines/lit/directives/`
 
 #### Key Components:
 1. Extend `AsyncDirective` for reactive features
@@ -112,7 +127,7 @@ Create directive in `/packages/renderer/src/lit/directives/`
 > **See Also:** See `testing` for testing patterns and conventions.
 
 ### 2.1 Compiler Tests
-Add tests to `/packages/templating/test/compiler.test.js`
+Add tests to `/packages/compiler/test/compiler.test.js`
 
 #### Test Categories:
 1. **Basic parsing** - Verify AST structure
@@ -334,7 +349,7 @@ For syntax with multiple parameters:
 ## Key Conventions
 
 1. **AST Consistency** - Follow existing AST node patterns
-2. **Expression Evaluation** - Use `lookupTokenValue` for reactive expressions
-3. **Content Rendering** - Use `renderContent` for nested AST
-4. **Directive Patterns** - Follow existing directive structures
+2. **Expression Evaluation** - native blocks use the `lookupExpression(expr)` bag closure; the Lit renderer uses `lookupTokenValue`
+3. **Content Rendering** - native blocks use `renderAST({ ast })`; the Lit renderer uses `renderContent` for nested AST
+4. **Block / Directive Patterns** - follow existing native blocks (`defineBlock` + `registerBlock`) or existing Lit directive structures
 5. **Test Coverage** - Test both single expressions and complex cases

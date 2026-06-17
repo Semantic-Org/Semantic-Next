@@ -1,6 +1,6 @@
 ---
 title: Writing Guide Pages
-description: How to write instructional guide pages for Semantic UI — the most common page type (~106 of ~120 pages). Covers progressive complexity, code-to-prose ratio, and the structural template. Load when creating or editing any page in docs/src/pages/docs/guides/.
+description: How to write instructional guide pages for Semantic UI. Covers progressive complexity, code-to-prose ratio, and the structural template. Load when creating or editing any page in docs/src/pages/docs/guides/.
 keywords: [guide pages, instructional writing, progressive complexity, code examples, technical writing]
 audience: docs
 skill: docs-page-guide
@@ -10,7 +10,7 @@ type: skill
 # Writing Guide Pages
 
 > **Skill:** `docs-page-guide`
-> **Purpose:** How to write the most common documentation page type — instructional guides that teach concepts with progressive complexity
+> **Purpose:** How to write instructional guide pages — pages that teach concepts with progressive complexity
 
 **Golden rule: one sentence of prose per code block, not one paragraph.** The code is the lesson. Prose provides the minimum context to understand what the code demonstrates and why it matters. If the reader needs more than a sentence to understand the example, the example is too complex for that point in the page.
 

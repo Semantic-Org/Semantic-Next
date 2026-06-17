@@ -41,7 +41,7 @@ packages/renderer/src/
 │   │   ├── server.js         # ServerRenderer — emits versioned-marker DSD
 │   │   ├── dynamic-region.js # Anchored region with ownedNodes + childScopes
 │   │   ├── reaction-scope.js # Hierarchical Reaction cleanup
-│   │   ├── reactive-data.js  # bindAttribute / bindTextExpression / bindRawTextContent
+│   │   ├── attribute-binding.js # bindAttribute (attribute/property/event/interpolated)
 │   │   ├── define-block.js   # defineBlock — block lifecycle + recovery + tracing
 │   │   └── blocks/
 │   │       ├── registry.js       # registerBlock / getBlock — Map<type, dispatch>
@@ -51,6 +51,8 @@ packages/renderer/src/
 │   │       ├── async.js          # {#async expr} / loading / success / error
 │   │       ├── rerender.js       # {#rerender} / {#guard}
 │   │       ├── template.js       # {>name} — both subtemplates AND snippets
+│   │       ├── expression.js     # text-position {expr} markers
+│   │       ├── raw-text.js       # raw-text element bodies (script/style/textarea)
 │   │       └── sample.js         # documented template for new blocks
 │   └── lit/                  # Optional engine. Imports trigger registration.
 ```
@@ -115,7 +117,7 @@ For SVG content, wraps in `<svg xmlns="...">` before parsing to get the correct 
 
 **Single TreeWalker pass** with `NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT`. Attribute processing happens inline (touches only the element's own attributes). Comment processing is collected and deferred to a second loop because it mutates the tree (replace/remove) and would invalidate the live walker.
 
-Attribute classification dispatch (in `reactive-data.js#bindAttribute`):
+Attribute classification dispatch (in `attribute-binding.js#bindAttribute`):
 
 | Binding type | Detection | DOM operation |
 |---|---|---|
@@ -126,17 +128,17 @@ Attribute classification dispatch (in `reactive-data.js#bindAttribute`):
 
 Comment processing dispatches by marker prefix:
 
-- `sui:v1:` (`COMMENT_MARKER`) → `bindTextExpression` — replaces comment with reactive text node (or unsafeHTML / literal handling)
-- `sui-rawtext:v1:` (`RAW_TEXT_MARKER`) → `bindRawTextContent` — sets `textContent` on the raw-text element via `evaluateRawTextNodes`
+- `sui:v1:` (`COMMENT_MARKER`) → `bindBlock` — the `expression` block replaces the comment with a reactive text node (or unsafeHTML / literal handling)
+- `sui-rawtext:v1:` (`RAW_TEXT_MARKER`) → the `rawText` block — sets `textContent` on the raw-text element
 - `sui-block:v1:` (`BLOCK_MARKER`) → `bindBlock` — looks up the block in the registry, builds a `DynamicRegion` from the comment, dispatches
 
 If a comment marker's ID was already consumed by an attribute binding (the entry classification was `insideTag`), the comment is skipped. Attribute IDs are tracked in a `Set` finalized after the walk.
 
 ---
 
-## Reactive Bindings — `reactive-data.js`
+## Reactive Bindings — `attribute-binding.js`
 
-Three exports: `bindAttribute`, `bindTextExpression`, `bindRawTextContent`. Each is a single binding function (no class). All three accept `{ scope, renderer, ... }` and use `scope.reaction(node, callback)` to register.
+One export: `bindAttribute`, a single binding function (no class). It accepts `{ scope, renderer, ... }` and uses `scope.reaction(node, callback)` to register. Text and raw-text binding live in the `expression` and `rawText` blocks (`blocks/expression.js`, `blocks/raw-text.js`), dispatched from comment markers.
 
 ```js
 // reaction-scope.js
@@ -233,11 +235,14 @@ Every hook receives an interned per-instance bag (same hidden-class shape across
   lookupExpression,      // (expr) => renderer.lookupExpression(expr, data)
   renderAST,             // ({ ast, scope?, data?, isSVG? }) => fragment
   hydrateInnerContent,   // ({ ownedNodes, innerAST, data?, scope? })
+  hydrateInto,           // ({ innerAST, data?, scope?, asChild }) — hydrate into the region
+  childContext,          // (parent, extras) => child data context
+  place,                 // (astOrNull) => commit AST to the region (reference-equality dedup)
   hook, err              // populated only when error() runs
 }
 ```
 
-`lookupExpression`, `renderAST`, `hydrateInnerContent` are pre-bound closures over `renderer` so blocks don't need to reach through `ctx.renderer.*`.
+`lookupExpression`, `renderAST`, `hydrateInnerContent`, `hydrateInto`, `childContext`, and `place` are pre-bound closures over `renderer` so blocks don't need to reach through `ctx.renderer.*`.
 
 ### Lifecycle: how dispatch wires the block
 
@@ -278,6 +283,8 @@ Without recovery, hook throws propagate so failures are loud — the browser log
 | `async.js` | `async` | Three states (loading / success / error). Generation counter discards stale promise resolutions. Recovery wraps sync throws and dispatches into `errorContent` via the `error` hook. |
 | `rerender.js` | `rerender` | Both `{#rerender expr}` and `{#guard key}` compile to the same node type. Guard wraps tracking in `guard` (deep-equality gate); rerender uses plain `lookupExpression`. |
 | `template.js` | `template` | `{>name}` — handles BOTH snippets and subtemplates. Kind detected once on first render (`renderer.snippets[name]` check) and locked on `self.kind`. |
+| `expression.js` | `expression` | Text-position `{expr}` markers. Reactive text node, with unsafeHTML / literal handling. |
+| `raw-text.js` | `rawText` | Raw-text element bodies (`script`/`style`/`textarea`) where comment markers can't live. |
 
 ### Snippet vs. subtemplate dispatch
 
@@ -294,7 +301,7 @@ Static `data={...}` reads inside a `{#each}` should be reactive (so item-signal 
 
 The server (`ServerRenderer`) emits HTML with the same versioned markers + `data-sui-bind` stamps. The client `WebComponentBase.hydrate()` calls `Template.render()`, which routes to `renderer.hydrate()` for first-mount-from-server.
 
-### `hydrateMarkers(root, entries, data, scope, { ast })`
+### `hydrateMarkers({ root, entries, data, scope })`
 
 Two passes:
 

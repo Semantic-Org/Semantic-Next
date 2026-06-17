@@ -4,7 +4,7 @@ description: Workflow for crafting concise, scannable documentation headers for 
 keywords: [documentation, copywriting, examples, descriptions, tips, playground, headers]
 audience: contributing
 type: workflow
-workflow: refine-example-copy
+workflow: docs-refine-example-copy
 ---
 
 # Example Documentation Copy Refinement Workflow

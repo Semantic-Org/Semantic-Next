@@ -262,7 +262,7 @@ Either way it's one collect per op, off any measured region. `globalThis.gc` onl
 
 **Extend existing if the workload fits an existing bench's fixture.** Most new metrics add to `bench-todo.js` (TodoMVC-style list operations) or `bench-krausest.js` (krausest js-framework-benchmark parity workload). Add the `mark`/`measure` pair to the JS file, add the `entryName` to the appropriate `tachometer-ci*.json`. Done in 5 minutes.
 
-**`bench-krausest.js` has a special contract.** It mirrors `tools/benchmark/src/main.js` (the externally-served krausest contestant) and pins `safety: 'reference'` on its signals so the bench always measures the perf fast path regardless of `Signal.safety`. New metrics here must use SUI-idiomatic helpers (`push`, `map`, `removeItem`, new-ref `set`) — no mutate-then-set-same-ref patterns, which would silently no-op under reference equality. If you find yourself reaching for `safety: 'none'` to make a new metric fire, the metric belongs in `bench-todo.js` instead.
+**`bench-krausest.js` has a special contract.** It mirrors `tools/benchmark/src/main.js` (the externally-served krausest contestant) and relies on the global `Signal.safety = 'reference'` default (reference equality), so the bench always measures the perf fast path. New metrics here must use SUI-idiomatic helpers (`push`, `map`, `removeItem`, new-ref `set`) — no mutate-then-set-same-ref patterns, which would silently no-op under reference equality. If you find yourself reaching for `safety: 'none'` to make a new metric fire, the metric belongs in `bench-todo.js` instead.
 
 **Create a new bench file if the workload is orthogonal.** E.g., a hydration bench needs its own fixture setup; a signal micro-bench has a different harness shape. Then you need:
 

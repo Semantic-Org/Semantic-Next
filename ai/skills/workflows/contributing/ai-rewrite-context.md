@@ -71,4 +71,4 @@ Apply changes in this order:
 
 ## File Locations
 
-Write the rewritten file directly to `ai/{audience}/{skill-id}.md` based on the frontmatter `audience` field. The original is in git if you need to compare or revert.
+Write the rewritten file directly to `ai/skills/{audience}/{skill-id}.md` based on the frontmatter `audience` field. The original is in git if you need to compare or revert.

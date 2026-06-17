@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `adjust-theme`
 > **Purpose:** Control light/dark mode across pages, sections, and individual components
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-06-16
 
 ---
 
@@ -246,7 +246,7 @@ When token-based styling isn't enough (e.g., different visual effects per theme)
 
   @container style(--dark-mode: true) {
     backdrop-filter: blur(8px) brightness(1.1);
-    box-shadow: 0 0 20px var(--primary-color-20);
+    box-shadow: 0 0 20px var(--primary-20);
   }
 
   @container style(--light-mode: true) {

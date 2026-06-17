@@ -391,7 +391,7 @@ For each marker:
 
 ### The skipFirstWrite contract
 
-When debugging "my signal mutation doesn't update the DOM after hydration," name `skipFirstWrite: true` explicitly — it's the grep-able load-bearing mechanism in `packages/renderer/src/engines/native/reactive-data.js` and surfacing it lets the reader navigate the code path directly.
+When debugging "my signal mutation doesn't update the DOM after hydration," name `skipFirstWrite: true` explicitly — it's the grep-able load-bearing mechanism in `packages/renderer/src/engines/native/attribute-binding.js` and surfacing it lets the reader navigate the code path directly.
 
 Per-binding Reactions wired during hydration use `skipFirstWrite: true`:
 
@@ -592,7 +592,8 @@ packages/renderer/src/
 ├── expression-evaluator.js                           Shared expression evaluation
 ├── engines/native/server.js                          ServerRenderer — AST -> HTML string
 ├── engines/native/renderer.js                        Renderer — hydrateMarkers(), hydrateAttributes()
-├── engines/native/reactive-data.js                   bindAttribute / bindTextExpression with skipFirstWrite
+├── engines/native/attribute-binding.js               bindAttribute (attribute-position skipFirstWrite)
+│                                                      text-position hydrate lives in blocks/expression.js
 └── engines/native/blocks/
     └── each.js                                       each.hydrate (eager adoptServerItems), item proxy
 

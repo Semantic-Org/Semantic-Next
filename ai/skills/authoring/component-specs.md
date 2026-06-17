@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `component-specs`
 > **Purpose:** Guide to the @semantic-ui/specs package — declarative component metadata, spec file format, SpecReader API, shared terms system, and build pipeline integration for spec-driven web components.
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-06-16
 
 ---
 
@@ -76,7 +76,7 @@ Property Definitions & Attribute Mapping
 **Parallel Pipeline for Documentation**:
 ```
 Component Definition (button.spec.js)
-    ↓ SpecReader.getDefinition()
+    ↓ DocsSpecReader.getDefinition()
 Documentation Objects with Examples
     ↓ Template System
 Rendered Documentation Pages
@@ -198,7 +198,7 @@ Tiers are cumulative: `standard` ⊂ `extended` ⊂ `full`. The value is the **l
 At build time, these are aggregated into `dist/presets.json` which the CDN upload script reads and publishes to R2. The CDN Worker uses presets to resolve URLs like `/core@canary/standard` into the correct set of component imports.
 
 Tiers:
-- **`standard`** (~40-50 components) — General-purpose UI for building typical apps. The "don't think about it" default.
+- **`standard`** — General-purpose UI for building typical apps. The "don't think about it" default.
 - **`extended`** — Standard + specialized components (rich form inputs, data viz, niche patterns).
 - **`full`** — Every user-facing component.
 
@@ -526,8 +526,12 @@ const componentSpec = reader.getWebComponentSpec();
 ### Generating Documentation
 
 ```javascript
+// Doc-generation methods live on DocsSpecReader (also from '@semantic-ui/specs')
+import { DocsSpecReader } from '@semantic-ui/specs';
+const docsReader = new DocsSpecReader(buttonSpec);
+
 // Get complete definition with examples
-const definition = reader.getDefinition();
+const definition = docsReader.getDefinition();
 
 // Result structure:
 {
@@ -539,28 +543,28 @@ const definition = reader.getDefinition();
 }
 
 // Generate navigation menu for documentation
-const menu = reader.getDefinitionMenu();
+const menu = docsReader.getDefinitionMenu();
 
 // Get ordered examples for display
-const examples = reader.getOrderedExamples();
+const examples = docsReader.getOrderedExamples();
 ```
 
 ### Attribute Dialect Support
 
-SpecReader supports three attribute dialects for flexibility:
+`getCodeFromModifiers` lives on `DocsSpecReader` and renders example code in three attribute dialects:
 
 ```javascript
 // Standard dialect (modifier-based)
-reader.getCodeFromModifiers('large primary');
+docsReader.getCodeFromModifiers('large primary');
 // Result: <ui-button large primary>Click Me</ui-button>
 
 // Verbose dialect (explicit attributes)
-const verboseReader = new SpecReader(spec, { dialect: 'verbose' });
+const verboseReader = new DocsSpecReader(spec, { dialect: 'verbose' });
 verboseReader.getCodeFromModifiers('large primary');
 // Result: <ui-button size="large" emphasis="primary">Click Me</ui-button>
 
 // Classic dialect (class-based)
-const classicReader = new SpecReader(spec, { dialect: 'classic' });
+const classicReader = new DocsSpecReader(spec, { dialect: 'classic' });
 classicReader.getCodeFromModifiers('large primary');
 // Result: <ui-button class="large primary">Click Me</ui-button>
 ```

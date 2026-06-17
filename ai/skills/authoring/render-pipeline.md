@@ -23,7 +23,7 @@ Template String
      |
      v
 +-----------------+
-| TemplateCompiler |  packages/templating/src/compiler/
+| TemplateCompiler |  packages/compiler/src/
 |                  |  string -> AST (array of node objects)
 +-----------------+
          |
@@ -125,7 +125,7 @@ The engines are hot-swappable — two components on the same page can use differ
 
 ## Stage 1: TemplateCompiler
 
-`packages/templating/src/compiler/template-compiler.js`
+`packages/compiler/src/template-compiler.js`
 
 The compiler transforms a template string into an AST — a flat array of node objects. It has no knowledge of rendering, reactivity, or components.
 
@@ -567,8 +567,8 @@ lookupExpressionValue (multi-token):
 ### Key files
 
 ```
-packages/templating/src/compiler/string-scanner.js        StringScanner (char-by-char parsing)
-packages/templating/src/compiler/template-compiler.js      TemplateCompiler (string -> AST)
+packages/compiler/src/string-scanner.js                    StringScanner (char-by-char parsing)
+packages/compiler/src/template-compiler.js                 TemplateCompiler (string -> AST)
 packages/templating/src/template.js                        Template (lifecycle, state, events)
 packages/templating/src/template-helpers.js                Built-in template helpers
 

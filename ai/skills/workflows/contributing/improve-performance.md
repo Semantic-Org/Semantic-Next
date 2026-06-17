@@ -525,15 +525,17 @@ npx tachometer --config tachometer-ci-<suite>.json
 # (don't ship tuned numbers; the JSON config is the committed config)
 ```
 
-`npm run bench:component` from the bench dir runs the full battery. Prefer the per-suite invocation above when iterating on one area.
+The component-level battery (krausest/todo/template/hydrate) lives in `packages/component/bench/tachometer/`; run a suite with the per-suite invocation above against its `tachometer-ci-<suite>.json`.
 
 ## Packages with Bench Infrastructure
 
 | Package | vitest bench | profile.js | tachometer | Notes |
 |---------|-------------|------------|------------|-------|
-| `packages/utils` | `bench/` | — | — | 6 bench files covering equality, objects, cloning, strings, types, crypto |
-| `packages/reactivity` | `bench/` | — | — | Reaction, Dependency, Scheduler benchmarks |
-| `packages/renderer` | `bench/` | `bench/profile.js` | `bench/tachometer/` | Expression evaluator, V8 profiling, component-level benchmarks |
+| `packages/utils` | `bench/` | — | — | Bench files covering equality, objects, cloning, strings, types, crypto |
+| `packages/reactivity` | `bench/` | — | `bench/tachometer/` | Reaction, Dependency, Scheduler benchmarks; signal tachometer |
+| `packages/renderer` | `bench/` | `bench/profile.js` | `bench/tachometer/` | Expression evaluator, V8 profiling; renderer micros + signature tachometer |
+| `packages/component` | — | — | `bench/tachometer/` | Component-level tachometer battery: krausest, todo, template, hydrate |
+| `packages/compiler` | — | — | `bench/tachometer/` | Compiler micros tachometer |
 
 ## Related Workflows
 

@@ -54,7 +54,7 @@ Each report contains tables organized by Semantic UI's component model:
 
 ### Individual Framework Reports
 
-Located in `ai/research/[component]/[framework]/usage-patterns.md`, these provide:
+Located in `ai/research/components/[component]/[framework]/usage-patterns.md`, these provide:
 - Exact implementation details
 - Code examples from actual documentation
 - Framework-specific philosophy
@@ -64,7 +64,7 @@ These are your primary sources - like field notes in linguistic research.
 
 ### URL Verification File
 
-Located in `ai/research/[component]/url-verification.md`, this tracks:
+Located in `ai/research/components/[component]/url-verification.md`, this tracks:
 - Which URLs were actually accessible
 - Any redirects or broken links
 - What was included/excluded from research
@@ -157,7 +157,7 @@ This approach gives us:
    - Review research with Semantic UI philosophy in mind
    - Make informed decisions about what to include
 
-3. **Specify** (`spec-authoring-guide.md`)
+3. **Specify** (`primitive-refine.md`)
    - Document chosen patterns in spec format
    - Include usageLevel based on research
 

@@ -23,7 +23,7 @@ The test system has two independent config layers. Changes to one do not affect 
 | **Global** | `tests/configs/vitest/` | All packages at once | `npm test` from root |
 | **Package** | `packages/*/vitest.config.js` | Single package | `npm test` from package dir |
 
-When changing test infrastructure (pool, reporters, timeouts), **both layers may need updates** — 7 global configs + 8 package configs.
+When changing test infrastructure (pool, reporters, timeouts), **both layers may need updates** — 7 global configs + 9 package configs.
 
 ---
 
@@ -192,7 +192,7 @@ export default {
 |------|-------|
 | Global configs | `tests/configs/vitest/` |
 | Project definitions | `tests/configs/vitest/projects/{node,jsdom,browser}.js` |
-| Package configs | `packages/*/vitest.config.js` (8 files) |
+| Package configs | `packages/*/vitest.config.js` (9 files) |
 | Setup stubs | `tests/setup/{node,dom,browser}-setup.js` |
 | CI workflow | `.github/workflows/ci.yml` |
 | CI results | `tests/results/` |

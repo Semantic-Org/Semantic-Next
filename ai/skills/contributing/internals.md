@@ -12,13 +12,13 @@ dependsOn: [mental-model]
 
 > **Skill:** `internals`
 > **Purpose:** Internal architecture for contributors. Read `mental-model` first for the user-facing concepts this builds on.
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-06-16
 
 ---
 
 ## Prerequisite
 
-This guide assumes familiarity with the concepts in `ai/essentials/mental-model.md` — defineComponent, template syntax, reactivity, Query, and the spec system. This document explains **how those systems work internally**.
+This guide assumes familiarity with the concepts in `ai/skills/essentials/mental-model.md` — defineComponent, template syntax, reactivity, Query, and the spec system. This document explains **how those systems work internally**.
 
 ---
 
@@ -29,15 +29,16 @@ This guide assumes familiarity with the concepts in `ai/essentials/mental-model.
 @semantic-ui/reactivity     ← depends on utils only
 @semantic-ui/query           ← depends on utils only
 @semantic-ui/specs           ← depends on utils only
-@semantic-ui/renderer        ← depends on reactivity, templating, utils, lit (peer)
-@semantic-ui/templating      ← depends on renderer, reactivity, query, utils
-@semantic-ui/component       ← depends on query, reactivity, renderer, templating, utils, lit (peer)
+@semantic-ui/compiler        ← depends on utils only
+@semantic-ui/renderer        ← depends on reactivity, templating, utils, lit (optional peer)
+@semantic-ui/templating      ← depends on compiler, renderer, reactivity, query, utils
+@semantic-ui/component       ← depends on compiler, query, reactivity, renderer, templating, utils, lit (optional peer)
 @semantic-ui/tailwind        ← depends on component, utils, tailwindcss-iso
 ```
 
 **The standalone trio** — `reactivity`, `query`, and `utils` have zero framework dependencies. They can be used independently in any JavaScript environment. This is a deliberate architectural principle, not an accident.
 
-**The rendering layer** — `renderer` and `component` depend on Lit. Templates compile to a renderer-agnostic AST; the renderer translates that AST to DOM. Currently Lit-HTML is the only backend, but the AST interface is stable and a vanilla DOM renderer is architecturally viable.
+**The rendering layer** — templates compile to a renderer-agnostic AST; an engine translates that AST to DOM. The native engine (zero dependencies, extends `HTMLElement`) is the default backend. Lit is an optional peer engine, registered only when imported. The AST interface is stable, so additional engines can target other platforms.
 
 ### Key Source Locations
 
@@ -45,16 +46,20 @@ This guide assumes familiarity with the concepts in `ai/essentials/mental-model.
 packages/
 ├── component/src/
 │   ├── define-component.js    # defineComponent — the single entry point
-│   ├── web-component.js       # WebComponentBase extends LitElement
-│   └── helpers/               # attribute handling, property adjustment
+│   ├── component-helpers.js   # getProperties, createSettingsProxy, getUIClasses, isDarkMode
+│   └── engines/
+│       ├── native/base.js     # WebComponentBase extends HTMLElement (default)
+│       └── lit/base.js        # LitWebComponentBase extends LitElement (optional)
+├── compiler/src/
+│   ├── template-compiler.js   # TemplateCompiler — string → AST
+│   └── string-scanner.js      # StringScanner (char-by-char)
 ├── templating/src/
 │   ├── template.js            # Template class — the core abstraction
-│   ├── template-helpers.js    # Built-in template helper functions
-│   └── compiler/              # TemplateCompiler, StringScanner
+│   └── template-helpers.js    # Built-in template helper functions
 ├── renderer/src/
-│   └── lit/
-│       ├── renderer.js        # LitRenderer — AST → Lit tagged templates
-│       └── directives/        # 6 AsyncDirectives for reactive bindings
+│   └── engines/
+│       ├── native/renderer.js # Renderer — AST → DOM (default)
+│       └── lit/               # LitRenderer + directives (optional engine)
 ├── reactivity/src/
 │   ├── signal.js              # Signal class
 │   ├── reaction.js            # Reaction class
@@ -163,12 +168,13 @@ The raw DOM element (`el`) is available but rarely needed. This separation means
 ## The AST Pipeline
 
 ```
-Template String → TemplateCompiler → AST → LitRenderer → Lit TemplateResult → DOM
+Template String → TemplateCompiler → AST → Renderer → DOM        (native, default)
+                                          → LitRenderer → Lit TemplateResult → DOM   (lit, optional)
 ```
 
 ### TemplateCompiler
 
-Location: `packages/templating/src/compiler/template-compiler.js`
+Location: `packages/compiler/src/template-compiler.js`
 
 The compiler uses a `StringScanner` to parse template strings into an AST. It handles both `{}` and `{{}}` bracket syntax (separate regex sets, identical output).
 
@@ -188,7 +194,7 @@ The AST is a plain array of objects — JSON-serializable, renderer-agnostic. Pr
 
 ### LitRenderer
 
-Location: `packages/renderer/src/lit/renderer.js`
+Location: `packages/renderer/src/engines/lit/renderer.js` (optional engine; the default native renderer is at `packages/renderer/src/engines/native/renderer.js`)
 
 Walks the AST and builds a Lit tagged template literal (`html\`...\``). Dynamic regions use Lit AsyncDirectives:
 
@@ -250,17 +256,17 @@ button.spec.js → SpecReader.getWebComponentSpec() → button.component.js
                                                       ↓
                                               defineComponent({ componentSpec })
                                                       ↓
-                                              WebComponentBase.getProperties()
+                                              getProperties()
                                                       ↓
-                                              Lit static properties + observedAttributes
+                                              property accessors + observedAttributes
 ```
 
-**Property generation** (`web-component.js:getProperties()`):
-- Spec `attributes` → Lit properties with type conversion
-- Spec `properties` → Lit properties without HTML attributes (functions, classes)
+**Property generation** (`component-helpers.js` `getProperties()`):
+- Spec `attributes` → properties with type conversion
+- Spec `properties` → properties without HTML attributes (functions, classes)
 - Spec `optionAttributes` → alias properties (`primary` → `emphasis="primary"`)
 
-**The `{uiClasses}` class computation** (`web-component.js:getUIClasses()`):
+**The `{uiClasses}` class computation** (`component-helpers.js` `getUIClasses()`):
 - Iterates all spec attributes on the element
 - Boolean attributes (`active=true`) → class name (`"active"`)
 - Value attributes (`emphasis="primary"`) → value as class (`"primary"`)
@@ -360,17 +366,17 @@ Note that `$` is bound to the template, not the element — `this.$()` filters r
 
 ## WebComponentBase
 
-Location: `packages/component/src/web-component.js`
+Location: `packages/component/src/engines/native/base.js` (native, default) and `packages/component/src/engines/lit/base.js` (lit, optional)
 
-Extends `LitElement` with Semantic UI-specific functionality:
+The native `WebComponentBase` extends `HTMLElement` directly. The lit `LitWebComponentBase` extends `LitElement`. Spec-driven functionality lives in shared module functions in `packages/component/src/component-helpers.js`, consumed by both bases:
 
-- **`getProperties()`** — generates Lit `static properties` from a componentSpec
+- **`getProperties()`** — generates property accessors + `observedAttributes` from a componentSpec
 - **`createSettingsProxy()`** — creates a reactive Proxy over element properties. Reading a setting returns the current property value; the proxy enables `settings.foo` syntax in callbacks
 - **`getUIClasses()`** — computes the `{uiClasses}` CSS class string from active spec attributes
 - **`isDarkMode()`** — detects dark mode via Query on closest ancestor
 - **`$$(selector)`** — queries original (slotted) DOM
 
-The `requestUpdate()` method (inherited from LitElement) is the critical interface contract — called by `Template.call()` params as `rerender()` and by `adjustPropertyFromAttribute()`. Any alternative base class must provide this method.
+The `requestUpdate()` method is the critical interface contract — called by `Template.call()` params as `rerender()` and by `adjustPropertyFromAttribute()`. The native base defines it directly (`engines/native/base.js`); the lit base inherits it from LitElement. Any base class must provide this method.
 
 ---
 
