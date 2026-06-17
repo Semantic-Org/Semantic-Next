@@ -372,10 +372,10 @@ This final step ensures that the work is discoverable and that project-wide trac
     - Include all corrections made, evidence citations, and confidence level
     - Keep entries evidence-focused for auditability
 
-3.  **Update the shared checklist (`ai/workspace/artifacts/eo-list.md`):**
-    - This single file is the source of truth for pattern research status and E&O verification
+3.  **Update your E&O tracking checklist (e.g. `ai/workspace/artifacts/eo-list.md`):**
+    - Use it as your running record of pattern research status and E&O verification
     - Flip the component entry to `[+]` when you start, `[x]` when you finish, and back to `[ ]` if you hand off
-    - Include the latest version number and "Last Reviewed" date so teammates can see validation state
+    - Include the latest version number and "Last Reviewed" date so the validation state is visible when you return to it
 
 ---
 

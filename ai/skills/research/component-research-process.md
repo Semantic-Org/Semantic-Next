@@ -55,7 +55,7 @@ The entire process is broken down into five distinct steps, often handled by spe
 -   **Rationale**: To guarantee the integrity, accuracy, and reliability of the research before it is presented for critical design decisions.
 -   **Artifacts**:
     1.  A verified and corrected `pattern-research.md`, which includes an updated `> Last Reviewed: YYYY-MM-DD` date.
-    2.  An updated central tracking file, `ai/workspace/artifacts/eo-list.md`, marking the component's verification status.
+    2.  An updated E&O tracking file in your `ai/workspace/` (e.g. `artifacts/eo-list.md`), marking the component's verification status.
 
 ### Step 5: Spec Extension & Editorial Review (The "Decision")
 
@@ -72,7 +72,7 @@ The entire process is broken down into five distinct steps, often handled by spe
 
 Any agent tasked with working on components must understand this ecosystem. Before modifying a component or its research, consult the relevant artifacts:
 
-1.  `ai/workspace/artifacts/eo-list.md`: To check the E&O verification status of all component research.
+1.  Your `ai/workspace/` E&O tracker (e.g. `artifacts/eo-list.md`), if you keep one: the verification status of prior component research.
 2.  `ai/research/components/[component]/pattern-research.md`: To understand the broader landscape of existing patterns and see when it was last verified.
 3.  `ai/research/components/[component]/spec-decisions.md`: To understand the historical context and rationale behind the current specification.
 4.  `src/primitives/[component]/specs/[component].spec.json`: To see the final, implemented outcome of the research.
