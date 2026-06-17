@@ -2,6 +2,7 @@
   "name": "@semantic-ui/renderer",
   "version": "0.18.0",
   "type": "module",
+  "sideEffects": ["./src/engines/native/blocks/*.js"],
   "title": "Semantic UI Renderer",
   "description": "High-performance template rendering system with reactive directives",
   "author": "Jack Lukic",
