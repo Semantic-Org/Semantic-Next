@@ -41,25 +41,12 @@ When adding or modifying utility functions, complete these 7 mandatory steps in 
 
 ### Example Pattern
 ```javascript
-export const prettifyHash = (numericHash, { minLength = 6, padChar = '0' } = {}) => {
-  numericHash = parseInt(numericHash, 10);
-  if (numericHash === 0) { 
-    return minLength > 1 ? padChar.repeat(minLength - 1) + '0' : '0'; 
+export const clamp = (value, { min = 0, max = 1 } = {}) => {
+  // use the existing predicate, not typeof value === 'number'
+  if (!isNumber(value)) {
+    return min;
   }
-  
-  let result = '';
-  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  while (numericHash > 0) {
-    result = chars[numericHash % chars.length] + result;
-    numericHash = Math.floor(numericHash / chars.length);
-  }
-  
-  // Pad if needed
-  if (result.length < minLength) {
-    result = padChar.repeat(minLength - result.length) + result;
-  }
-  
-  return result;
+  return Math.min(Math.max(value, min), max);
 };
 ```
 
@@ -68,7 +55,7 @@ export const prettifyHash = (numericHash, { minLength = 6, padChar = '0' } = {})
 > **See Also:** See `testing` for guidance on test types, organization, and patterns.
 
 ### Test Location
-`/packages/utils/test/utils.test.js`
+`/packages/utils/test/[module].test.js`
 
 ### Test Structure
 1. Use `Read` tool to find the correct `describe` block for your module
@@ -86,18 +73,21 @@ export const prettifyHash = (numericHash, { minLength = 6, padChar = '0' } = {})
 
 ### Test Pattern
 ```javascript
-describe('prettifyHash', () => {
-  it('should return padded "0" for input 0 with default settings', () => {
-    expect(prettifyHash(0)).toBe('000000');
+describe('clamp', () => {
+  it('clamps into the default 0..1 range', () => {
+    expect(clamp(2)).toBe(1);
+    expect(clamp(-2)).toBe(0);
+    expect(clamp(0.5)).toBe(0.5);
   });
 
-  it('should respect custom minLength', () => {
-    expect(prettifyHash(123, { minLength: 8 })).toBe('0000003F');
-    expect(prettifyHash(123, { minLength: 3 })).toBe('03F');
+  it('respects a custom min and max', () => {
+    expect(clamp(50, { min: 0, max: 10 })).toBe(10);
+    expect(clamp(5, { min: 0, max: 10 })).toBe(5);
   });
 
-  it('should handle negative numbers by returning padded 0', () => {
-    expect(prettifyHash(-123)).toBe('000000');
+  it('falls back to min for non-numbers', () => {
+    expect(clamp(null, { min: 3 })).toBe(3);
+    expect(clamp('x')).toBe(0);
   });
 });
 ```
@@ -118,21 +108,21 @@ describe('prettifyHash', () => {
 ### Type Definition Pattern
 ```typescript
 /**
- * Converts a numeric hash value to a prettified alphanumeric string using base-36 encoding
- * @see {@link https://next.semantic-ui.com/api/utils/crypto#prettifyhash prettifyHash}
- * @see {@link https://next.semantic-ui.com/examples/utils-prettifyhash Example}
+ * Clamps a number into a range, returning `min` for non-numeric input
+ * @see {@link https://next.semantic-ui.com/api/utils/numbers#clamp clamp}
+ * @see {@link https://next.semantic-ui.com/examples/utils-clamp Example}
  *
- * @param numericHash - The numeric hash value to convert
- * @param options - Options for prettifying the hash
- * @returns The prettified hash string. Returns padded "0" if input parses to 0 or NaN
+ * @param value - The number to clamp
+ * @param options - The range to clamp into
+ * @returns The value limited to [min, max], or min when value is not a number
  *
  * @example
  * ```ts
- * prettifyHash(123) // returns '00003F'
- * prettifyHash(123, { minLength: 8 }) // returns '0000003F'
+ * clamp(2)                       // returns 1
+ * clamp(50, { min: 0, max: 10 }) // returns 10
  * ```
  */
-export function prettifyHash(numericHash: number, options?: PrettifyHashOptions): string;
+export function clamp(value: number, options?: ClampOptions): number;
 ```
 
 ### Required Elements
@@ -292,7 +282,7 @@ Always use exact string matching from `Read` output, including whitespace and in
 3. Follow the subcategory organization from existing examples
 
 ### When Updating Tests
-1. The test file has sections like `describe('ID/Hashing Functions')` - find the right one
+1. Each module has its own test file (e.g. `crypto.test.js`) with `describe` sections like `describe('ID/Hashing Functions')` - find or add the right one
 2. Tests should match actual behavior, not expected behavior
 3. When functions parse invalid input to defaults, test for the actual default
 
@@ -301,7 +291,7 @@ Always use exact string matching from `Read` output, including whitespace and in
 - Predicate functions: `isSomething` (returns boolean)
 - Transformation functions: `somethingToOther` (converts types)
 - Action functions: `doSomething` (performs action)
-- Utility functions: `prettifyHash`, `generateID` (specific utilities)
+- Utility functions: `clamp`, `generateID` (specific utilities)
 
 ## Error Prevention
 

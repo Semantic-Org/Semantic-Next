@@ -676,24 +676,26 @@ oklchToHex('#ff5733');                 // '#ff5733' (hex passthrough)
 
 ```javascript
 import {
-  hashCode, prettifyHash, generateID, isValidID, parseID, getRandomSeed,
+  hashCode, generateID, isValidID, parseID, getRandomSeed,
 } from '@semantic-ui/utils';
 
-// Deterministic 53-bit hash (cyrb53) — same input, same output. Cache/memo keys.
-hashCode('input string');                          // numeric hash
-hashCode('input', { prettify: true });             // base-36 string
-hashCode('input', { seed: 0xABCD });               // seeded hash
-
-// Numeric hash to alphanumeric string
-prettifyHash(123456);                               // '002N9C'
-prettifyHash(123, { minLength: 8, padChar: 'X' });  // 'XXXXXX3F'
+// Deterministic content hash. usage picks the guarantee and return type, like generateID.
+hashCode('input string');                                // 53-bit number for in-heap keys (default)
+hashCode('input', { usage: 'content' });                 // 64-bit crockford string for boundary-crossing keys
+hashCode('input', { usage: 'fingerprint' });             // 128-bit crockford string for dedup / change detection
+await hashCode('input', { usage: 'secure' });            // async SHA-256 string (needs a secure context)
+hashCode('input', { usage: 'content', format: 'hex' });  // override the encoding
+hashCode('input', { seed: 0xABCD });                     // seed namespaces the hash
+hashCode.config = { usage: 'content' };                  // app-wide default
 
 // Unique ids — the usage preset carries the consensus length/shape per channel.
-// db: sortable ULID (default) · page: 8-char letter-first CSS id · slug: URL ·
-// token: 27-char + checksum. Plus length, prefix, checksum, format:'uuid', group.
+// db: sortable ULID (default) · page: 8-char letter-first CSS id · link: URL ·
+// token: 27-char + checksum · code: grouped uppercase human-typed code.
+// Plus length, prefix, checksum, upper, format:'uuid', group.
 generateID();                                       // '01KV61ZF26Z6BG7T04NVKSPJ7K'
 generateID({ usage: 'page' });                      // 'dzadahv3'
 generateID({ usage: 'token', prefix: 'sk_' });      // 'sk_…' with checksum
+generateID({ usage: 'code' });                      // 'ABCD-EFGH-JKLM' grouped, checksummed
 generateID.config = { usage: 'page' };              // app-wide default
 
 // Validate offline before a lookup, parse the parts back out
