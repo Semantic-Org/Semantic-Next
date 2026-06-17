@@ -369,7 +369,11 @@ toTitleCase('the quick brown fox');      // 'The Quick Brown Fox' (respects stop
 
 ### Text Processing
 ```javascript
-import { joinWords, getArticle, escapeHTML, unescapeHTML, reverseString } from '@semantic-ui/utils';
+import { joinWords, getArticle, escapeHTML, unescapeHTML, reverseString, tokenize } from '@semantic-ui/utils';
+
+// Slug-style token (lowercase, hyphen-joined, special chars stripped)
+tokenize('Hello World!');                           // 'hello-world'
+tokenize('FormField_Input');                        // 'formfield-input'
 
 // Smart word joining with Oxford comma
 joinWords(['apple', 'banana', 'orange']);           // 'apple, banana, and orange'
@@ -671,25 +675,32 @@ oklchToHex('#ff5733');                 // '#ff5733' (hex passthrough)
 ## Crypto and Hashing (crypto.js)
 
 ```javascript
-import { hashCode, prettifyHash, generateID, getRandomSeed, tokenize } from '@semantic-ui/utils';
+import {
+  hashCode, prettifyHash, generateID, isValidID, parseID, getRandomSeed,
+} from '@semantic-ui/utils';
 
-// FNV-1a hashing (default, zero allocation)
+// Deterministic 53-bit hash (cyrb53) — same input, same output. Cache/memo keys.
 hashCode('input string');                          // numeric hash
-hashCode('input', { prettify: true });             // 'XXXXXX' (alphanumeric)
+hashCode('input', { prettify: true });             // base-36 string
 hashCode('input', { seed: 0xABCD });               // seeded hash
-hashCode('input', { fast: false });                // UMASH mode (stronger collisions)
 
 // Numeric hash to alphanumeric string
 prettifyHash(123456);                               // '002N9C'
 prettifyHash(123, { minLength: 8, padChar: 'X' });  // 'XXXXXX3F'
 
-// ID generation
-generateID();                                       // 'A7B3X9' (random)
-generateID(12345);                                  // '00009IX' (reproducible from seed)
-getRandomSeed();                                    // cryptographically random uint32
+// Unique ids — the usage preset carries the consensus length/shape per channel.
+// db: sortable ULID (default) · page: 8-char letter-first CSS id · slug: URL ·
+// token: 27-char + checksum. Plus length, prefix, checksum, format:'uuid', group.
+generateID();                                       // '01KV61ZF26Z6BG7T04NVKSPJ7K'
+generateID({ usage: 'page' });                      // 'dzadahv3'
+generateID({ usage: 'token', prefix: 'sk_' });      // 'sk_…' with checksum
+generateID.config = { usage: 'page' };              // app-wide default
 
-// URL-friendly slug
-tokenize('Hello World!');                           // 'hello-world'
+// Validate offline before a lookup, parse the parts back out
+isValidID(id, { usage: 'token', prefix: 'sk_' });   // checksum + shape, reads loose
+parseID(dbId, { usage: 'db' });                     // { prefix, body, checksum, timestamp }
+
+getRandomSeed();                                    // cryptographically random uint32
 ```
 
 ---

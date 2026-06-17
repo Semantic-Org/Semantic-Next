@@ -268,3 +268,18 @@ export function unescapeHTML(string: string): string;
  * ```
  */
 export function reverseString(str?: string, options?: ReverseStringOptions): string;
+
+/**
+ * Converts a string to a lowercase, hyphen-joined token (slug-style)
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#tokenize tokenize}
+ *
+ * @param str - The input string
+ * @returns The tokenized string
+ *
+ * @example
+ * ```ts
+ * tokenize('Hello World') // returns 'hello-world'
+ * tokenize('A simple-test_string') // returns 'a-simple-test-string'
+ * ```
+ */
+export function tokenize(str?: string): string;

@@ -11,5 +11,5 @@ console.log(hashCode('test string', { prettify: true }));
 console.log(hashCode('same string', { seed: 123 }));
 console.log(hashCode('same string', { seed: 456 }));
 
-// UMASH mode for stronger collision resistance
-console.log(hashCode('hello world', { fast: false }));
+// deterministic — the same input always hashes the same
+console.log(hashCode('hello world') === hashCode('hello world'));

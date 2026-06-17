@@ -1,5 +1,5 @@
 import { bench, describe } from 'vitest';
-import { hashCode, tokenize } from '../src/crypto.js';
+import { generateID, hashCode, isValidID, parseID } from '../src/crypto.js';
 
 /*******************************
        Test Data — Realistic
@@ -17,20 +17,11 @@ const mediumCSS = `
 .ui.button.secondary { background: var(--secondary); color: white; }
 `;
 
-// Component names — tokenize's primary use case
-const componentNames = [
-  'My Custom Button',
-  'dropdown-menu',
-  'FormField_Input',
-  'sidebar navigation',
-  'Modal__Overlay',
-];
-
 /*******************************
          Benchmarks
 *******************************/
 
-describe('hashCode (default fast path)', () => {
+describe('hashCode', () => {
   bench('short CSS (~40 chars)', () => {
     hashCode(shortCSS);
   });
@@ -39,8 +30,42 @@ describe('hashCode (default fast path)', () => {
   });
 });
 
-describe('tokenize', () => {
-  bench('5 component names', () => {
-    for (let i = 0; i < componentNames.length; i++) { tokenize(componentNames[i]); }
+// page and db are the hot tiers — minted per template instance and per record.
+// token and slug are minted rarely, so the checksum pass and longer body are
+// not on any hot path. The shared entropy pool is what keeps the per-id draw
+// near a memory read rather than a fresh getRandomValues syscall.
+describe('generateID', () => {
+  bench('page (8 char, hot path)', () => {
+    generateID({ usage: 'page' });
+  });
+  bench('db (26 char ULID, hot path)', () => {
+    generateID();
+  });
+  bench('slug (11 char)', () => {
+    generateID({ usage: 'slug' });
+  });
+  bench('token (27 char + checksum)', () => {
+    generateID({ usage: 'token' });
+  });
+  bench('uuid (RFC v7)', () => {
+    generateID({ format: 'uuid' });
+  });
+});
+
+const dbID = generateID();
+const tokenID = generateID({ usage: 'token', prefix: 'sk_' });
+
+describe('isValidID', () => {
+  bench('db (length + alphabet)', () => {
+    isValidID(dbID, { usage: 'db' });
+  });
+  bench('token (+ checksum verify)', () => {
+    isValidID(tokenID, { usage: 'token', prefix: 'sk_' });
+  });
+});
+
+describe('parseID', () => {
+  bench('db (+ timestamp decode)', () => {
+    parseID(dbID, { usage: 'db' });
   });
 });

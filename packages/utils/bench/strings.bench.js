@@ -1,5 +1,5 @@
 import { bench, describe } from 'vitest';
-import { camelToKebab, escapeHTML, kebabToCamel } from '../src/strings.js';
+import { camelToKebab, escapeHTML, kebabToCamel, tokenize } from '../src/strings.js';
 
 /*******************************
        Test Data — Realistic
@@ -31,6 +31,15 @@ const kebabAttrs = [
 const cleanText = 'This is a normal paragraph with no special characters at all';
 const dirtyText = 'User said: "Hello <world> & \'goodbye\'!"';
 
+// Component names — tokenize's primary use case
+const componentNames = [
+  'My Custom Button',
+  'dropdown-menu',
+  'FormField_Input',
+  'sidebar navigation',
+  'Modal__Overlay',
+];
+
 /*******************************
          Benchmarks
 *******************************/
@@ -59,5 +68,11 @@ describe('escapeHTML', () => {
   });
   bench('dirty string (needs escaping)', () => {
     escapeHTML(dirtyText);
+  });
+});
+
+describe('tokenize', () => {
+  bench('5 component names', () => {
+    for (let i = 0; i < componentNames.length; i++) { tokenize(componentNames[i]); }
   });
 });
