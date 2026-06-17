@@ -36,7 +36,7 @@ Mark phases in_progress/completed as you progress.
 
 When multiple agents are working on the component research list simultaneously:
 
-1. **Check next.md for available components:**
+1. **Check `ai/research/components/_list/ui-list-exhaustive.md` for available components:**
    ```bash
    # Look for components marked [ ] (not started)
    # Skip components marked [+] (in progress by another agent)
@@ -204,7 +204,7 @@ Include actual code examples from the docs.
 
 Save to: `ai/research/components/[component]/[framework-name]/usage-patterns.md`
 
-Example: `ai/research/divider/ant-design/usage-patterns.md`
+Example: `ai/research/components/divider/ant-design/usage-patterns.md`
 
 **Report Template:**
 ```markdown

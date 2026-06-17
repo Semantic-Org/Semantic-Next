@@ -50,7 +50,7 @@ If the answer is "the server reimplements what the client does via a different c
 | Concern | Shared implementation | Used by |
 |---------|----------------------|---------|
 | Attribute → property conversion | `fromAttribute` converters in `resolvedProperties` | `deserializeAttrs`, `attributeChangedCallback` |
-| Option attribute resolution | `resolveOptionAttributes` in `component-helpers.js` | `renderToString`, `deserializeAttrs` |
+| Option attribute resolution | `resolveAttributeAliases` in `component-helpers.js` | `renderToString`, `expandCustomElements` |
 | `{uiClasses}` class computation | `getUIClasses` in `component-helpers.js` | `renderToString`, `WebComponentBase.getData()` |
 | Expression evaluation | `ExpressionEvaluator` | `ServerRenderer`, `Renderer` (client) |
 | AST compilation | `TemplateCompiler` | Shared — compiled once, used everywhere |
@@ -142,7 +142,7 @@ TRUST-THEN-WIRE
 
 SHARED HELPERS
   fromAttribute converters    → attribute string → typed value
-  resolveOptionAttributes     → tiny → size="tiny"
+  resolveAttributeAliases     → tiny → size="tiny"
   getUIClasses                → spec attrs → class string
   overlaySettingsSignals      → settings → reactive data context
 

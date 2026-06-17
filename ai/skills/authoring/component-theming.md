@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `component-theming`
 > **Purpose:** Build custom components whose styles automatically adapt to light/dark mode and respond to runtime theme changes
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-06-16
 
 ---
 
@@ -109,7 +109,7 @@ Some visual effects genuinely need different parameters per theme (e.g., shadows
 
   @container style(--dark-mode: true) {
     backdrop-filter: blur(8px) brightness(1.1);
-    box-shadow: 0 0 20px var(--primary-color-20);
+    box-shadow: 0 0 20px var(--primary-20);
   }
 
   @container style(--light-mode: true) {

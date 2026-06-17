@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `component-css`
 > **Purpose:** Canonical patterns for writing CSS inside a component's shadow DOM — nesting, container queries, responsive design, state management, theming, and design token usage.
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-06-16
 
 ---
 
@@ -46,16 +46,16 @@ Write minimal, maintainable CSS that leverages the design token system and mirro
 
         .header {
           font-weight: var(--bold);
-          margin-bottom: var(--compact-spacing);
+          margin-bottom: var(--spacing-xs);
         }
 
         .items {
           display: flex;
           flex-direction: column;
-          gap: var(--compact-spacing);
+          gap: var(--gap-xs);
 
           .item {
-            padding: var(--compact-spacing);
+            padding: var(--padding-xs);
             cursor: pointer;
 
             &:hover {
@@ -84,7 +84,7 @@ Write minimal, maintainable CSS that leverages the design token system and mirro
 
       .actions {
         display: flex;
-        gap: var(--compact-spacing);
+        gap: var(--gap-xs);
       }
     }
   }
@@ -371,7 +371,7 @@ Semantic UI uses a sophisticated theme system where CSS variables automatically 
 /* Allow external override */
 my-component {
   --component-max-width: 800px;
-  --component-spacing: var(--compact-spacing);
+  --component-spacing: var(--spacing-xs);
 }
 ```
 

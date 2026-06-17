@@ -28,7 +28,7 @@ workflow: docs-add-links
 ### 3.1 Map Available Documentation
 ```bash
 # Get complete file listing to understand available targets
-find /home/jack/semantic/next/docs/src/pages -name "*.mdx" -type f | sort
+find docs/src/pages -name "*.mdx" -type f | sort
 ```
 
 ### 3.2 Understand Link Context Strategy
@@ -53,7 +53,7 @@ For each potential link, use this systematic approach:
 #### Step 1: Broad Discovery
 ```bash
 # Find files related to your keyword
-find /home/jack/semantic/next/docs/src/pages -name "*[keyword]*" -type f
+find docs/src/pages -name "*[keyword]*" -type f
 # Alternative: use Glob tool with pattern like "**/[keyword]*"
 ```
 
@@ -61,7 +61,7 @@ find /home/jack/semantic/next/docs/src/pages -name "*[keyword]*" -type f
 ```bash
 # Search for the concept within files using Grep tool
 # Look for: function names, section headers, detailed explanations
-grep -r "your-keyword" /home/jack/semantic/next/docs/src/pages/
+grep -r "your-keyword" docs/src/pages/
 ```
 
 #### Step 3: Section Header Discovery

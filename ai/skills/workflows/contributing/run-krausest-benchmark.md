@@ -171,16 +171,16 @@ Append the run to the history store. The recorder reads the harness `results/` d
 
 ```bash
 cd <sui-repo>
-node tools/benchmark/append-krausest-run.js \
+node tools/benchmark/scripts/append-krausest-run.js \
   --results <benchmark-repo>/webdriver-ts/results \
   --wallclock-seconds <n> \
   --chrome-version <version the run used>
-node tools/benchmark/krausest-report.js          # confirm the entry
+node tools/benchmark/scripts/krausest-report.js          # confirm the entry
 ```
 
 The recorder is idempotent on SHA (re-running replaces, never duplicates) and takes `--sha`/`--msg` (default: this repo's git HEAD). **The workflow is complete when `krausest-history.json` and `krausest-runs/<sha>.json` carry the new entry.**
 
-To compare two recorded runs later: `node tools/benchmark/krausest-report.js diff <shaA> <shaB>`.
+To compare two recorded runs later: `node tools/benchmark/scripts/krausest-report.js diff <shaA> <shaB>`.
 
 ---
 
@@ -198,7 +198,7 @@ cd webdriver-ts && npm run bench -- --headless --framework keyed/semantic-ui --b
 # 5. full run (idle machine, ~45-90 min)
 cd webdriver-ts && START=$(date +%s) && npm run bench -- --headless --framework keyed/<...> ; echo "$(( $(date +%s)-START ))s"
 # 6. record
-node <sui-repo>/tools/benchmark/append-krausest-run.js --results <benchmark-repo>/webdriver-ts/results --wallclock-seconds <n> --chrome-version <v>
+node <sui-repo>/tools/benchmark/scripts/append-krausest-run.js --results <benchmark-repo>/webdriver-ts/results --wallclock-seconds <n> --chrome-version <v>
 ```
 
 ---

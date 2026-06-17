@@ -112,7 +112,7 @@ Once features are decided, write the `.spec.js` file. Load the `component-specs`
 - **All `name` fields use Title Case**: "Primary", "Top Attached", "Very Padded"
 - `name`: PascalCase component name — "Button", "Modal"
 - `tagName`: Always `ui-[kebab-case]`
-- `exportName`: Always `UI[PascalName]`
+- `exportName`: Bare PascalCase component name — "Button", "Buttons" (no prefix)
 
 #### Description Convention
 Use **imperative mood without the component noun**:
@@ -125,9 +125,9 @@ Use **imperative mood without the component noun**:
 - Options: "appear [intensity] [property]" — "appear extremely small"
 
 #### Value Format
-Option values must be the **full hyphenated form** for two-way attribute lookup:
-- ✅ `value: 'very-padded'`, `value: 'top-attached'`
-- ❌ `value: 'very'`, `value: 'top'`
+Option `value` is the bare value relative to its attribute — `padded="very"`, `attached="top"` — matching the shared-term constants:
+- ✅ `value: 'very'` (on `padded`), `value: 'top'` (on `attached`)
+- ❌ `value: 'very-padded'`, `value: 'top-attached'`
 
 #### includeAttributeClass
 
@@ -234,13 +234,13 @@ Before finalizing a spec:
 2. ✓ All imports from `@semantic-ui/specs`
 3. ✓ Pure data (JSON-serializable — no functions, dates, regexes)
 4. ✓ All required metadata: `uiType`, `name`, `description`, `tagName`, `exportName`
-5. ✓ Naming: `tagName` is `ui-*`, `exportName` is `UI*`
+5. ✓ Naming: `tagName` is `ui-*`, `exportName` is bare PascalCase (no prefix)
 6. ✓ All `name` fields use Title Case
 7. ✓ Types are mutually exclusive, variations are stackable
 8. ✓ Descriptions use imperative mood without the noun
 9. ✓ Usage levels assigned (1-5)
 10. ✓ `includeAttributeClass` only on features with options that share CSS
-11. ✓ Option values use full hyphenated form
+11. ✓ Option values use the bare value relative to the attribute
 12. ✓ Shared terms used where available
 13. ✓ Template literals for HTML examples
 14. ✓ Plural sections only share obvious visual variations

@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `component-patterns`
 > **Purpose:** Decision trees and production patterns for component communication, DOM querying, race condition prevention, resource cleanup, async reactions, lazy loading, scroll handling, and key anti-patterns.
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-06-16
 
 ---
 
@@ -46,29 +46,21 @@ How should component A talk to component B?
 Use when a child needs to read or mutate parent state. The child knows about the parent by name.
 
 ```javascript
-// todo-item.js — child component
-const createComponent = ({ self, data, findParent }) => ({
-  getTodos() {
-    return findParent('todoList').todos;
+// panel.js — child accesses parent coordinator, then drives its state
+const createComponent = ({ el, self, findParent, settings }) => ({
+  getPanels() {
+    return findParent('uiPanels');
   },
-  toggleCompleted() {
-    const todos = self.getTodos();
-    todos.toggleItemProperty(data.task._id, 'completed');
+  minimize() {
+    const panels = self.getPanels();
+    settings.minimized = true;
+    panels.setPanelMinimized(panels.getPanelIndex(el));
   },
 });
 ```
-*Source: `docs/src/examples/framework/todo-list/todo-item.js`*
+*Source: `src/components/panels/panel.js`*
 
 The argument to `findParent` is the **camelCase component name**, not the tag name. `findParent('uiPanels')` finds `<ui-panels>`, not `findParent('ui-panels')`.
-
-```javascript
-// panel.js — child accesses parent coordinator
-getPanels() {
-  const panels = findParent('uiPanels');
-  return panels;
-},
-```
-*Source: `src/components/panels/panel.js`*
 
 ### Pattern 2: Parent listens to child via event delegation
 
@@ -120,7 +112,7 @@ $('context-menu.box').settings({
   ],
 });
 ```
-*Source: `docs/src/examples/context-menu/page.js`*
+*Source: `docs/src/examples/component/context-menu/page.js`*
 
 Use `initialize` instead of `settings` when the script may run before the component is in the DOM.
 

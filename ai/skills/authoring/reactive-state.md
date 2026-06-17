@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `reactive-state`
 > **Purpose:** Comprehensive guide to the @semantic-ui/reactivity package — a standalone signals-based reactive system with automatic dependency tracking for state management.
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-06-16
 
 ---
 
@@ -158,7 +158,8 @@ const users = signal([
 ]);
 
 // Find by ID (supports id, _id, hash, key properties)
-const index = users.getItem(1);           // Returns index of item with id=1
+const user = users.getItem(1);            // Returns the item with id=1
+const userIndex = users.getItemIndex(1);  // Returns its index (-1 if absent)
 users.setItemProperty(1, 'name', 'Alice2');   // Set property on item with id=1
 users.replaceItem(1, newUserObject);      // Replace entire item with id=1
 users.removeItem(1);                      // Remove item with id=1

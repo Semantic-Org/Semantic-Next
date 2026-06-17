@@ -31,7 +31,7 @@ The build pipeline runs every time mappings changes. The generation pipeline run
 
 The optimization target is **agent hit rate**: the names a developer or AI agent reaches for on first pass. Misses cost — broken icon, fallback, or a manual import that breaks flow. Three jobs flow from this:
 
-1. **Cover what agents reach for on first pass** — drives the canonical roster (~482 names converged from ~1,668 Lucide primaries).
+1. **Cover what agents reach for on first pass** — drives the canonical roster, converged down from the larger set of Lucide primaries.
 2. **Bridge naming gaps** — drives aliases. Library-native names from training data (`zap` → `bolt`, `house` → `home`), intent names (`delete` → `trash`, `edit` → `pencil`), shorthand (`down` → `arrow-down`).
 3. **Let agents pick correctly without seeing the glyph** — drives `visual` and `usage` fields, surfaced through the MCP `get_icon` tool.
 
@@ -59,7 +59,7 @@ Under `ai/research/icons/`:
 | `pipeline/merge-mappings.mjs` | Merge cross-library data into `mappings.js` |
 | `pipeline/apply-promotions.mjs` | Apply a promotion table to `mappings.js` |
 
-Every research output lands in `mappings.js` losslessly. The corpus is preserved as the audit trail (why this 482? why is `home` canonical and `house` the alias?) and as priors for future re-runs.
+Every research output lands in `mappings.js` losslessly. The corpus is preserved as the audit trail (why this roster? why is `home` canonical and `house` the alias?) and as priors for future re-runs.
 
 ## The five passes
 
@@ -79,7 +79,7 @@ After any mutation to `mappings.js`, run `cd packages/specs && npm run build:ico
 - **Library rename refresh** — see workflow `maintain-icon-vocabulary` (Phosphor rename scenario).
 - **Adding a new library** — see workflow `maintain-icon-vocabulary` (new library scenario).
 - **Inspecting an entry** — `mcp__semantic-ui__get_icon` with `query: 'home'` returns canonical, aliases, visual, usage, and all library-native names.
-- **Browsing by category** — `mcp__semantic-ui__get_icon` with `category: 'navigation'`. 32 categories listed in `packages/specs/src/icons/categories.js`.
+- **Browsing by category** — `mcp__semantic-ui__get_icon` with `category: 'navigation'`. Categories are listed in `packages/specs/src/icons/categories.js`.
 
 ## Related Skills
 

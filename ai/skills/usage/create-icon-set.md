@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `create-icon-set`
 > **Purpose:** Guide for creating custom icon sets for use with SUI's icon component
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-06-16
 
 ---
 
@@ -166,7 +166,7 @@ The `set` attribute creates a CSS fallback chain — if the specific icon doesn'
 
 ## Shorthand Support & Canonical Icon Names
 
-Semantic UI supports shorthand syntax like `<ui-icon close>` instead of `<ui-icon icon="close">`. Shorthand works for a curated set of ~320 **canonical icon names** — standardized names like `close`, `search`, `notifications` that express intent rather than visual shape.
+Semantic UI supports shorthand syntax like `<ui-icon close>` instead of `<ui-icon icon="close">`. Shorthand works for a curated set of **canonical icon names** — standardized names like `close`, `search`, `notifications` that express intent rather than visual shape.
 
 To enable shorthand for your icon set, review the canonical names exported as `ICON_NAMES` from `@semantic-ui/specs`, then map your native icon names to the canonical names your set can support.
 

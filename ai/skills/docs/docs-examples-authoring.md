@@ -86,7 +86,7 @@ Standalone page / CDN demo?
 
 ## Metadata Schema
 
-The authoritative schema is in `docs/src/content/config.js`. Metadata files live in `/docs/src/content/examples/` (flat — no nesting).
+The authoritative schema is in `docs/src/content.config.js`. Metadata files live in `/docs/src/content/examples/` (flat — no nesting).
 
 ### Required Fields
 

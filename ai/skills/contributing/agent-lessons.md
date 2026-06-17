@@ -296,4 +296,3 @@ More than ~60 seconds reasoning about a diagnostic problem without executing any
 | **Build System** | `build-system` | Working with the build pipeline |
 | **Fresh Take** | `fresh-take` | Careful bias-isolated delegation for a single deep evaluation (complements the parallel-orchestration pattern above) |
 | **Grounded Testing** | `grounded-testing` | Labeled-claims discipline when tracing behavior to write tests |
-| **Agent Guestbook** | `agent-guestbook` | Reading the full stories behind these lessons |

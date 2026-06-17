@@ -68,7 +68,7 @@ export const prettifyHash = (numericHash, { minLength = 6, padChar = '0' } = {})
 > **See Also:** See `testing` for guidance on test types, organization, and patterns.
 
 ### Test Location
-`/packages/utils/test/utils.test.js`
+`/packages/utils/test/[module].test.js` — tests are per-module (hashing utils like `prettifyHash` live in `crypto.test.js`)
 
 ### Test Structure
 1. Use `Read` tool to find the correct `describe` block for your module

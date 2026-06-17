@@ -64,7 +64,7 @@ Determine whether this topic fits in a single skill file or needs to be decompos
 
 ## Phase 2 - Writing
 
-- Create a new file in `ai/{audience}/` for the skill (or each skill if decomposed).
+- Create a new file in `ai/skills/{audience}/` for the skill (or each skill if decomposed).
 
 - Start with proper frontmatter and structural skeleton per `ai-author-context`:
 
@@ -167,10 +167,10 @@ Determine whether this topic fits in a single skill file or needs to be decompos
 
 All AI content lives under `ai/` in the repo root. End users don't have this folder — they access skills exclusively through the Semantic UI MCP server or Anthropic plugin.
 
-Skills and context files live at `ai/{audience}/{skill-id}.md`, where `audience` matches the frontmatter field (`usage`, `authoring`, `essentials`, `contributing`, `research`). Workflows follow the same pattern at `ai/workflows/{audience}/{workflow-id}.md`.
+Skills and context files live at `ai/skills/{audience}/{skill-id}.md`, where `audience` matches the frontmatter field (`usage`, `authoring`, `essentials`, `contributing`, `research`). Workflows follow the same pattern at `ai/skills/workflows/{audience}/{workflow-id}.md`.
 
 | Path | Purpose |
 |------|---------|
-| `ai/{audience}/{skill-id}.md` | Skills and context served via MCP |
-| `ai/workflows/{audience}/{workflow-id}.md` | Step-by-step workflows |
-| `ai/research/skills/{skill-id}.md` | Research skills |
+| `ai/skills/{audience}/{skill-id}.md` | Skills and context served via MCP |
+| `ai/skills/workflows/{audience}/{workflow-id}.md` | Step-by-step workflows |
+| `ai/skills/research/{skill-id}.md` | Research skills |

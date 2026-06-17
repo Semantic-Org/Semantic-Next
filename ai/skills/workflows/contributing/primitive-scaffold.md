@@ -89,7 +89,7 @@ export default {
   name: '[PrimitiveName]',
   description: '[Brief description of primitive purpose]',
   tagName: 'ui-[primitive-name]',
-  exportName: 'UI[PrimitiveName]',
+  exportName: '[PrimitiveName]',
   content: [],
   types: [],
   states: [],
@@ -108,7 +108,7 @@ export default {
 **Naming Conventions**:
 - `name`: PascalCase (e.g., "Button", "Table", "Modal")
 - `tagName`: Always `ui-[kebab-case]`
-- `exportName`: Always `UI[PascalName]`
+- `exportName`: Bare PascalCase component name (no prefix)
 
 ### Step 2: Create HTML Template
 
@@ -135,7 +135,7 @@ import componentSpec from './specs/[primitive-name].component.js';
 
 const createComponent = ({ $ }) => ({});
 
-const UI[PrimitiveName] = defineComponent({
+const [PrimitiveName] = defineComponent({
   tagName: 'ui-[primitive-name]',
   componentSpec,
   template,
@@ -143,13 +143,13 @@ const UI[PrimitiveName] = defineComponent({
   createComponent,
 });
 
-export { UI[PrimitiveName] };
+export { [PrimitiveName] };
 ```
 
 **Important**:
 - Import from `[primitive-name].component.js` (auto-generated), NOT the JSON directly
 - Always include `createComponent` even if empty
-- Export using destructuring: `export { UI[PrimitiveName] }`
+- Export using destructuring: `export { [PrimitiveName] }`
 
 ### Step 4: Create CSS Structure
 
@@ -254,7 +254,7 @@ Create `/src/primitives/[primitive-name]/css/theme/content/[primitive-name]-vari
 Create `/src/primitives/[primitive-name]/index.js`:
 
 ```javascript
-export { UI[PrimitiveName] } from './[primitive-name].js';
+export { [PrimitiveName] } from './[primitive-name].js';
 ```
 
 #### 5b. Spec Export
@@ -272,7 +272,7 @@ Edit `/src/primitives/index.js`:
 
 ```javascript
 // Add in alphabetical order
-export { UI[PrimitiveName] } from './[primitive-name]/index.js';
+export { [PrimitiveName] } from './[primitive-name]/index.js';
 ```
 
 #### 6b. Update Spec Barrels
@@ -326,16 +326,16 @@ Edit `/docs/src/components/UIComponent.astro`:
 ```javascript
 import {
   // ... existing imports
-  UI[PrimitiveName],
+  [PrimitiveName],
 } from '@semantic-ui/core';
 ```
 
 2. Add rendering case (maintain alphabetical order):
 ```jsx
-{inArray(componentName, ['ui-[primitive-name]', 'UI[PrimitiveName]']) && (
-  <UI[PrimitiveName] {...attributes} client:visible>
+{inArray(componentName, ['ui-[primitive-name]', '[PrimitiveName]']) && (
+  <[PrimitiveName] {...attributes} client:visible>
     <slot />
-  </UI[PrimitiveName]>
+  </[PrimitiveName]>
 )}
 ```
 
@@ -377,7 +377,7 @@ export default {
   supportsPlural: true,
   pluralName: '[PluralName]',
   pluralTagName: 'ui-[plural-name]',
-  pluralExportName: 'UI[PluralName]',
+  pluralExportName: '[PluralName]',
   pluralDescription: '[PluralName] can exist together as a group',
   pluralContent: [],
   pluralSharedTypes: [],
@@ -403,12 +403,12 @@ src/primitives/[primitive-name]/
 Create `/src/primitives/[primitive-name]/plural/[plural-name].html`:
 
 ```html
-<div class="{{uiClasses}} [plural-name]">
-  {{>slot}}
+<div class="{uiClasses} [plural-name]">
+  {>slot}
 </div>
 ```
 
-**Critical**: Plural templates use `{{uiClasses}}` with double curly braces and spaces
+**Critical**: Plural templates use `{uiClasses}` with a space before the plural name (unlike the singular `{uiClasses}[primitive-name]` form, which has no space)
 
 ### Step 4: Create Plural Component
 
@@ -421,7 +421,7 @@ import css from '../[primitive-name]-bundle.css?raw';
 import componentSpec from '../specs/[plural-name].component.js';
 import template from './[plural-name].html?raw';
 
-export const UI[PluralName] = defineComponent({
+export const [PluralName] = defineComponent({
   tagName: 'ui-[plural-name]',
   singularTag: 'ui-[primitive-name]',
   plural: true,
@@ -443,8 +443,8 @@ export const UI[PluralName] = defineComponent({
 Edit `/src/primitives/[primitive-name]/index.js`:
 
 ```javascript
-export { UI[PrimitiveName] } from './[primitive-name].js';
-export { UI[PluralName] } from './plural/[plural-name].js';
+export { [PrimitiveName] } from './[primitive-name].js';
+export { [PluralName] } from './plural/[plural-name].js';
 ```
 
 ### Step 6: Update Primitives Index
@@ -453,7 +453,7 @@ Edit `/src/primitives/index.js`:
 
 ```javascript
 // Add both singular and plural exports
-export { UI[PrimitiveName], UI[PluralName] } from './[primitive-name]/index.js';
+export { [PrimitiveName], [PluralName] } from './[primitive-name]/index.js';
 ```
 
 ### Step 7: Update Documentation
@@ -478,23 +478,23 @@ Add both to `/docs/src/components/UIComponent.astro`:
 ```javascript
 import {
   // ... existing imports
-  UI[PrimitiveName],
-  UI[PluralName],
+  [PrimitiveName],
+  [PluralName],
 } from '@semantic-ui/core';
 ```
 
 Add rendering cases for both:
 
 ```jsx
-{inArray(componentName, ['ui-[primitive-name]', 'UI[PrimitiveName]']) && (
-  <UI[PrimitiveName] {...attributes} client:visible>
+{inArray(componentName, ['ui-[primitive-name]', '[PrimitiveName]']) && (
+  <[PrimitiveName] {...attributes} client:visible>
     <slot />
-  </UI[PrimitiveName]>
+  </[PrimitiveName]>
 )}
-{inArray(componentName, ['ui-[plural-name]', 'UI[PluralName]']) && (
-  <UI[PluralName] {...attributes} client:visible>
+{inArray(componentName, ['ui-[plural-name]', '[PluralName]']) && (
+  <[PluralName] {...attributes} client:visible>
     <slot />
-  </UI[PluralName]>
+  </[PluralName]>
 )}
 
 ### Component with Settings
@@ -531,7 +531,7 @@ settings: [
 1. **Importing spec JSON directly** - Always import from generated `.component.js`
 2. **Space in template class** - Must be `{uiClasses}component` not `{uiClasses} component`
 3. **Missing createComponent** - Even if empty, it's required
-4. **Wrong export syntax** - Use `export { UIComponent }` not `export default`
+4. **Wrong export syntax** - Use `export { ComponentName }` not `export default`
 5. **Forgetting barrel updates** - Must update all export points
 6. **CSS layer in wrong place** - Layers go in barrel files, not main CSS or individual files
 7. **Missing CSS barrel files** - Need both definition and theme barrels

@@ -9,7 +9,7 @@ workflow: verify-pattern-research
 
 # Pattern Research E&O Verification Workflow
 
-> Last Updated: 2025-11-10
+> Last Updated: 2026-06-16
 > Version: 1.2
 
 **Purpose**: Systematically verify pattern research meta-analysis documents for errors and omissions (E&O)
@@ -372,10 +372,10 @@ This final step ensures that the work is discoverable and that project-wide trac
     - Include all corrections made, evidence citations, and confidence level
     - Keep entries evidence-focused for auditability
 
-3.  **Update the shared checklist (`ai/workspace/artifacts/eo-list.md`):**
-    - This single file is the source of truth for pattern research status and E&O verification
+3.  **Update your E&O tracking checklist (e.g. `ai/workspace/artifacts/eo-list.md`):**
+    - Use it as your running record of pattern research status and E&O verification
     - Flip the component entry to `[+]` when you start, `[x]` when you finish, and back to `[ ]` if you hand off
-    - Include the latest version number and "Last Reviewed" date so teammates can see validation state
+    - Include the latest version number and "Last Reviewed" date so the validation state is visible when you return to it
 
 ---
 
@@ -455,7 +455,7 @@ Check mode?
 ### Example 1: Single Subagent with Iterations
 
 ```markdown
-User: "Please verify ai/research/modal/pattern-research.md for E&O"
+User: "Please verify ai/research/components/modal/pattern-research.md for E&O"
 
 Agent: I'll verify the modal pattern research. Let me ask:
 
@@ -511,7 +511,7 @@ Status: Ready for use
 ### Example 2: Parallel Subagents with User Validation
 
 ```markdown
-User: "Please verify ai/research/aspect-ratio/pattern-research.md for E&O"
+User: "Please verify ai/research/components/aspect-ratio/pattern-research.md for E&O"
 
 Agent: I'll verify the aspect-ratio pattern research. Let me ask:
 

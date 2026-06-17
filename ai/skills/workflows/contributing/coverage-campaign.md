@@ -21,7 +21,7 @@ workflow: coverage-campaign
 - Parallel exploration of disjoint sub-surfaces would be faster than serial sweep
 - There is a canonical user-facing doc (or set of docs) that defines the contract
 
-Canonical example: `packages/templating/src/template.js` (~1,150 lines, one trivial existing test, multiple documented surfaces — events, lifecycle, dispatch, attachEvent, key bindings, DOM scoping, subtemplate plumbing).
+Canonical example: `packages/templating/src/template.js` (a large file with one trivial existing test and multiple documented surfaces — events, lifecycle, dispatch, attachEvent, key bindings, DOM scoping, subtemplate plumbing).
 
 ## When NOT to Use
 
