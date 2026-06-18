@@ -1,7 +1,7 @@
 ---
 title: Component Events Guide
 description: Event handling in Semantic UI components — the event DSL, delegation, dispatching custom events, event data, handler return values, @event template syntax, attachEvent, and cross-component communication patterns.
-keywords: [events, event DSL, delegation, dispatchEvent, attachEvent, deep events, global events, bind events, custom events, event data, "@event", keys, keyboard, findParent, findChild]
+keywords: [events, event DSL, delegation, dispatchEvent, attachEvent, deep events, global events, bind events, custom events, event data, block scope, each item data, list handlers, "@event", keys, keyboard, findParent, findChild]
 audience: authoring
 skill: component-events
 type: skill
@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `component-events`
 > **Purpose:** Event handling in Semantic UI components — the DSL syntax, delegation model, dispatching, data flow, and the decision tree for cross-component communication
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-06-18
 
 ---
 
@@ -104,7 +104,7 @@ Every event handler receives the standard callback params (`self`, `$`, `$$`, `s
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `event` | Event | The native DOM event object |
-| `data` | Object | Merged: `event.detail` + `data-*` attributes from the target element |
+| `data` | Object | Merged bag at the target: block scope vars + `data-*` attributes + `event.detail` — later sources win on shared keys |
 | `value` | any | Shortcut: `target.value \|\| event.target.value \|\| event.detail.value` |
 | `target` | Element | The element matching the selector (not the event origin) |
 | `isDeep` | boolean | `true` if the event came from inside a child component's shadow DOM |
@@ -124,6 +124,52 @@ Inside the handler, `this` refers to the DOM element matching the selector. This
 
 ## Event Data
 
+`data` merges three sources at the dispatching element, later sources winning on shared keys:
+
+1. **Block scope vars** — template vars active at the target (lowest priority)
+2. **`data-*` attributes** — parsed off the target element
+3. **`event.detail`** — payload from `dispatchEvent` (highest priority)
+
+Values are a snapshot taken at dispatch — signals are peeked, nothing subscribes. `data` is a plain bag, not live bindings.
+
+### Block Scope Vars
+
+Template vars acting at the target are merged onto `data` automatically. The scope-creating blocks contribute:
+
+| Block | Contributes |
+|-------|-------------|
+| `{#each item in items}` | the item var and the index var |
+| Subtemplates | their declared args |
+| Snippets | their declared args |
+| `{#async}` | the resolved value var(s) |
+
+This removes the data-attribute round-trip for list handlers — read row identity straight off the each scope:
+
+```html
+<ul>
+  {#each song in songs}
+    <li>
+      {song.title}
+      <ui-button class="play">Play</ui-button>
+    </li>
+  {/each}
+</ul>
+```
+
+```js
+const events = {
+  // {#each song in songs} puts song and index on data at the clicked row
+  'click .play'({ state, data }) {
+    state.nowPlaying.set(data.song.id);
+  },
+};
+```
+
+**Gotchas:**
+- The innermost block wins when nested scopes share a key.
+- Subtemplates and snippets contribute only their *declared* args, not their full data context. No-arg invocations add nothing.
+- `data-*` attributes shadow template vars (higher precedence), so a handler reading a `data-*` value keeps it. Existing handlers are unaffected — remove the `data-*` attr to fall through to the scope layer.
+
 ### HTML Data Attributes
 
 Data attributes on the target element are automatically parsed and available via `data`:
@@ -139,19 +185,27 @@ Data attributes on the target element are automatically parsed and available via
 }
 ```
 
-This pattern is powerful for reducing handler count — one handler, many data-driven targets:
+This collapses handler count — one handler covers many data-driven targets. Handlers receive `state`, `settings`, and `self` as standard params, so the parsed `data` can pick which signal and method to call:
+
+```html
+<ui-button data-dimension="width"  data-helper="increment">Grow width</ui-button>
+<ui-button data-dimension="width"  data-helper="decrement">Shrink width</ui-button>
+<ui-button data-dimension="height" data-helper="increment">Grow height</ui-button>
+<ui-button data-dimension="height" data-helper="decrement">Shrink height</ui-button>
+```
 
 ```js
-// ✅ One handler driven by data attributes
-'click ui-button'({ self, data }) {
+// ✅ One handler, driven by the parsed data attributes
+'click ui-button'({ state, settings, data }) {
+  // data.dimension = 'width', data.helper = 'increment'
   state[data.dimension][data.helper](settings.delta);
-}
+},
 
-// ❌ Separate handler per button
-'click .increase.width': ({ self }) => self.increaseWidth(),
-'click .decrease.width': ({ self }) => self.decreaseWidth(),
-'click .increase.height': ({ self }) => self.increaseHeight(),
-'click .decrease.height': ({ self }) => self.decreaseHeight(),
+// ❌ A near-identical handler per button
+'click .grow.width'({ state, settings })    { state.width.increment(settings.delta); },
+'click .shrink.width'({ state, settings })  { state.width.decrement(settings.delta); },
+'click .grow.height'({ state, settings })   { state.height.increment(settings.delta); },
+'click .shrink.height'({ state, settings }) { state.height.decrement(settings.delta); },
 ```
 
 ### Custom Event Data
@@ -413,7 +467,7 @@ const createComponent = ({ findParent }) => ({
 ### Handler Params (event-specific)
 ```
 event    — native Event
-data     — { ...dataset, ...event.detail }
+data     — { ...blockScope, ...dataset, ...event.detail }  // later wins
 value    — target.value || event.target.value || detail.value
 target   — element matching selector
 isDeep   — boolean
