@@ -1,6 +1,6 @@
 # Sync Protocol v1 — Wire Design
 
-Extends [`plan.md`](plan.md) (Protocol Sketch, Sync Loop, Channels). This is the Tier 1.3 deliverable: the spec the weekend-portability test runs against. Everything here preserves the plan's spine — opaque monotonic client-held cursors with epoch inside, at-least-once + idempotent receiver, reset as the universal pressure valve, leader-tab single socket, txid atomicity, `synced ⊕ pending` re-derivation. Where the plan flagged holes (result cursor across channels, duplicate-sub refcounting, reconnect batching, reset-while-outbox-queued, backpressure), this document resolves them. Where the reactivity review imposed timing constraints (no mid-flush apply), this document encodes them as client apply discipline.
+Extends [`plan.md`](plan.md) (Protocol Sketch, Sync Loop, Channels). This is the Tier 1.3 deliverable: the spec the weekend-portability test runs against. Everything here preserves the plan's spine — opaque monotonic client-held cursors with epoch inside, at-least-once + idempotent receiver, reset as the universal pressure valve, leader-tab single socket, within-channel atomicity (cross-channel `txid` reserved, not in v1 — see §2), `synced ⊕ pending` re-derivation. Where the plan flagged holes (result cursor across channels, duplicate-sub refcounting, reconnect batching, reset-while-outbox-queued, backpressure), this document resolves them. Where the reactivity review imposed timing constraints (no mid-flush apply), this document encodes them as client apply discipline.
 
 Lineage shorthand used throughout: Centrifugo (epoch/offset recovery), Replicache/Zero (cookie + lastMutationID + poke brackets), PowerSync (checkpoint apply boundary), MQTT 5 (reason codes, at-least-once), graphql-ws (close codes, init gate), DDP (field-granular change vocabulary, versioned hello). Rejected as lineage: Ably/Socket.IO server-held replay buffers (a mini-mergebox), graphql-ws's server-tracked subscription registry (no resume), MQTT durable sessions (server-held queues).
 
@@ -40,7 +40,7 @@ server → client
   rejected { type, code, reason, retryAfter?, redirect? }
   ping     { type, authExpiresIn? }
   auth     { type, ok, expiresIn?, code? }
-  snapshot { type, channel, docs, cursor? }             cursor present = terminal chunk
+  snapshot { type, channel, docs, cursor?, total?, order? }             cursor present = terminal chunk
   live     { type, channel, cursor }                    caught up to stream head
   delta    { type, channel, cursor, txid?, spans?, changes }
   result   { type, id, status, value?, error?, txid?, spans? }
@@ -48,7 +48,7 @@ server → client
   nosub    { type, channel, code, reason? }             subscribe denied or revoked
 ```
 
-Additions over the plan's sketch: `live` (catch-up boundary), `nosub` (the plan's "throw → nosub" made concrete, doubling as the revocation push), `auth` (mid-connection token refresh), snapshot chunking, and the txid/spans envelope on `delta`/`result`. The plan's `method` message is named `call` on the wire — both mutators and methods ride it, the wire does not distinguish (deltas route by changed doc, not by declaration).
+Additions over the plan's sketch: `live` (catch-up boundary), `nosub` (the plan's "throw → nosub" made concrete, doubling as the revocation push), `auth` (mid-connection token refresh), snapshot chunking, and the txid/spans envelope on `delta`/`result` (the txid/spans envelope is **reserved, not implemented in v1** — see the cross-channel atomicity note below). The plan's `method` message is named `call` on the wire — both mutators and methods ride it, the wire does not distinguish (deltas route by changed doc, not by declaration).
 
 ### client → server
 
@@ -100,6 +100,8 @@ One delta frame is one transaction's effects on one channel: all changes a tx pr
 **`nosub { channel, code, reason? }`** — subscribe denied (handler throw → 4102, bad args → 4201) or server-initiated revocation (`server.revoke(channel, args)` → 4202, the plan's v1 revocation answer). On revocation the client drops the channel, recomputes the projection union, and prunes — same path as a local unsub, pushed from the server.
 
 ### Cross-channel atomicity — txid + spans
+
+> **v1 status — not implemented (implementation decision, 2026-06-19).** No measured workload required cross-*independent*-channel atomic visibility, so `txid`/`spans` are **not built in v1**. Atomicity is guaranteed **within a channel/frame**; a transaction spanning multiple collections is served by a single channel that spans them and emits its combined effects in one framed batch (one cursor advance), so the client never observes a partial multi-collection transaction without transaction-group bookkeeping. The design below is retained as the **reserved** mechanism — the wire fields are already optional, so it returns without a breaking change if a workload demands it. v1 `delta`/`result` therefore omit `txid`/`spans`.
 
 The plan mandates: every multi-collection method is one server transaction emitting deltas across channels with independent cursors, txid on deltas, client holds application until the set is complete. The completeness question — how does the client know it has the whole set without per-client server state? — is answered by `spans`.
 
@@ -253,10 +255,12 @@ Subscription handles scope degradation to the data that is actually degraded —
 const handle = subscribe('invoices', () => ({ teamID }))
 handle.ready        // first live received — initial data complete (never flickers back)
 handle.stale        // disconnected past grace, or reset pending — data live-but-old
-handle.lastDeltaAt  // last applied frame (delta, snapshot, or live)
+handle.state        // 'loading' | 'stale' | 'current' — the staleness lifecycle as one enum
+handle.freshness    // declared contract: 'live' | '<duration>' | 'manual' (disclosed on the live frame)
+handle.updatedAt    // wall-clock ms of the channel's last server-side change (wire-disclosed; absolute staleness — supersedes the client-side lastDeltaAt)
 ```
 
-`stale` flips true when the connection leaves `connected` past the 5s grace or the channel receives `reset`, and false at the channel's next `live` — per-channel freshness through reconnect, driven by the §5 choreography. A derived per-channel pending count (pending mutators touching the channel's docs) is specified as derivable from the pending set; whether it ships on the handle awaits the bench (§8).
+`stale` flips true when the connection leaves `connected` past the 5s grace or the channel receives `reset`, and false at the channel's next `live` — per-channel freshness through reconnect, driven by the §5 choreography. A derived per-channel pending count (pending mutators touching the channel's docs) is specified as derivable from the pending set; whether it ships on the handle awaits the bench (§8). A `reason` for `nosub` refusals (error-surfacing on the handle) remains an open v2 gap — denials surface through the connection-level signals, not yet per-handle.
 
 ### Pure-CSS degradation
 
@@ -301,7 +305,7 @@ Past 10s of outage the overlay turns playable: a one-canvas paddle game against 
 
 **Capability flags.** `hello.caps` / `welcome.caps`, string arrays; the intersection is active. The core message set (§2) is mandatory and never cap-gated. Capabilities are additive behaviors negotiated per connection — candidates: `encoding:msgpack` (the plan's pluggable wire encoding, exercised), `compress:permessage-deflate` policy, `redirect` (4501 handling), `result-cache` (ledger replays cached results). A capability that every implementation ends up requiring graduates into the next protocol version — caps are the staging area, the version is the contract.
 
-**What is fixed forever** (the plan's spec/pluggable split, restated as evolution policy): cursor opacity, the catch-up/live state machine, reset-as-state, at-least-once + idempotent receiver, txid grouping. These are load-bearing for every implementation; no capability may weaken them.
+**What is fixed forever** (the plan's spec/pluggable split, restated as evolution policy): cursor opacity, the catch-up/live state machine, reset-as-state, at-least-once + idempotent receiver. These are load-bearing for every implementation; no capability may weaken them. (Cross-channel `txid` grouping was a candidate for this list but is **not** fixed-forever: it is unimplemented in v1 and reserved — see §2.)
 
 ## 8. Open Questions
 
@@ -310,7 +314,7 @@ What the spec phase must still pin — none block the conformance-suite skeleton
 1. **Canonical args beyond plain JSON** — channel args containing schema-revived types (Dates, at minimum) need a pinned serialization into the JCS channel address before two implementations exist. Likely answer: args are wire-plain by construction (schema revival happens above the address), but it must be stated, not assumed.
 2. **Watermark + ledger durability policy** — concrete TTLs for the reference server, the unknown-clientID acceptance posture as a stated risk, and whether `result-cache` is core or a capability.
 3. **Tx-hold timeout interactions** — the 10s default, and whether the gap-resubscribe path interacts with projection-union pruning when the missing channel was concurrently unsubscribed.
-4. **Progressive snapshot paint** — strictly-atomic commit at `live` is correct, but huge-channel first boot may want chunk-progressive rendering. Decide whether boot gets a marked exception or the discipline holds everywhere (the silently-incomplete-query trap argues: holds everywhere).
+4. **Progressive snapshot paint — RESOLVED (2026-06-19).** Strictly-atomic commit at `live` holds by default; progressive chunk-by-chunk reveal is a marked exception permitted **only on a verifiably cold pool** — the snapshot carries an `order` and a declared `total`, and the channel has no local docs, no pending mutators, and no rebase shadows. Then chunk one is the window, revealed immediately, with the order verified at `live` (dropped and re-sorted if a local edit disturbed it). With any local state (a second position would exist) or no `order` hint, the atomic buffer-and-commit discipline holds — the silently-incomplete-query trap this question worried about. The declared `total` makes the Meteor-era climbing row count structurally impossible.
 5. **Per-channel pending counts** — derivable from pending set × channel membership; bench the derivation before promising it on the handle.
 6. **Smoothing constants** — 5s reconnecting grace, 30s offline threshold, 1s saved smooth are research-derived defaults; validate against the Phase 0a edge-state pages (reconnect feel, reset moment) before freezing.
 7. **Batch frame limits** — max array length and message size defaults for the reference server, and whether limits are cap-advertised or fixed.
