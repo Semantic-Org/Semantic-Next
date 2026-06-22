@@ -1,22 +1,72 @@
-# Sync layer design — 2026-06-09
+# Data sync layer — START HERE
 
-Everything from the DB sync layer design session, one folder.
+> Read this before `plan.md` or `scenario.md`. Those carry design intent. The decisions are
+> settled, here and in `reference-comparison.md`. Agents keep reopening ground that was
+> already closed because they start in the planning docs and read rulings as open questions.
+> Don't.
 
-- [`scenario.md`](scenario.md) — **the ground truth workload**: document shape, channel topology, write/read/concurrency model, ownership partition, canonical load figures, parameters awaiting confirmation. When design and scenario disagree, scenario wins or gets amended
-- [`plan.md`](plan.md) — the design: architecture, decision record, sync loop, channels, schemas, drafts, priors audit, de-risking
-- [`reactivity-review.md`](reactivity-review.md) — four-bucket audit of every plan claim vs packages/reactivity source, adversarially checked, plus the unaddressed-interaction permutation map
-- [`ws-protocol.md`](ws-protocol.md) — the full wire spec recommendation, synthesized over three research voices: framing, message schemas, connection state machine, resume choreography, consumer surface
-- [`ws-protocol-review.md`](ws-protocol-review.md) — five-voice referee choir on the wire spec: invariants ×2, lost-work ×2, realistic-usage walkthrough. Six-theme revision list up top
-- [`vetting-report.md`](vetting-report.md) — **the gate**: five-lens vet of the complete corpus (coherence, cold read, drift, plus two blind developer-experience builds — full per-lens reports and builds remain in the private workspace). Verdict: revise-then-build, with the ranked revision list
-- [`reference-comparison.md`](reference-comparison.md) — the 2026-06-12 comparison against Zero, Supabase Realtime, and Convex: 28 ranked amendments (the structural ones since ruled into the plan), needs-bench items, watch list, and the rejected attacks with their reasons — the spec's tested armor. Dossiers and adversarial reviews in [`research/`](research/)
-- [`todomvc/`](todomvc/) — API steelman: the `examples/src/todo-list/` TodoMVC rewritten against the fake sync API, templates unchanged
-- [`invoices-table/`](invoices-table/) — trifecta steelman: table + searchIndex channel factory + row menu + edit/add modals, with the 0a sore-point review list. Uses inline config (correct at its scale) — the invoice-editor scenario should demonstrate the `collections/[name]/{methods,mutators}/` folder convention
-- [`research/`](research/) — nine-agent research pass that grounded it
-  - `primitives-*.md` — repo readers: reactivity, trackWrites, renderer, component surface, prior art
-  - `landscape-*.md` — web research: Meteor retrospective, 2026 engines, client storage, transport
-  - `deep-*.md` / `crossexam-*.md` — the reference comparison's three system dossiers (Zero, Supabase Realtime, Convex) and their adversarial reviews (2026-06-12)
+**Status.** The design is settled. `plan.md` is the spec and carries the dated rulings,
+`reference-comparison.md` is the decision record. The design is validated by a working
+prototype. The packages land in this repo on a feature branch once the first robust storage
+adapter is proven. Until then this corpus is the canonical design reference.
 
-## Concept Coverage Map
+## Settled, do not relitigate
+
+Each item is closed. The cited ruling holds the reasoning and the rejected alternatives. If
+you believe one is wrong, the bar is the rejected-attacks section of `reference-comparison.md`,
+which already argues the strongest form of the counter-case. Beat that, in writing, before
+reopening anything.
+
+- **Offline-tolerant, not offline-first.** Park-then-verify with per-path evidence, no
+  long-offline merge for shared data. (plan Decision 10, comparison amendment 3)
+- **Per-doc serial apply.** `SELECT FOR UPDATE` or an in-process queue, group-commit for hot
+  docs. Not OCC, not free last-write-wins interleave. (amendment 2)
+- **Write-path is the primary change feed.** CDC and `watch()` are the integration backstop
+  for writes that originate outside the layer, never the primary delta source. (amendment 4)
+- **Two-level cursor.** Per-channel, opaque, client-held. The cursor (gap detection) and the
+  log (an economics knob, `retention: 0` is legal) are separate commitments. Single-node is
+  free by mortality, multi-node is a transactional outbox plus an idempotent receiver.
+  (amendments 4 and 8)
+- **Shared fan-out per `(name, args)`.** Stateless nodes, no per-client view records, no
+  sticky sessions. (comparison, Zero rejection 4)
+- **Adoption gradient.** Local collections graduate to synced without a rewrite. The
+  brownfield trial defaults to poll-and-diff `watch()`, logical replication is the production
+  graduation. Top-level scalar keys become typed columns, depth lives in JSONB. (plan
+  Adoption Gradient, amendment 10, Decision 11)
+- **Channel-scoped pools with re-run and reconcile.** Not client-side IVM, not a thin
+  server-only client. (Decision 4, amendment 22)
+- **Authorize operations,** at subscribe and at call, never per-edit or per-message. (plan
+  Security Posture, amendment 5)
+- **The layer owns the write path, storage is an adapter behind it.** Not a cache over your
+  database, not the database itself. (Decision 11)
+
+## Read in this order
+
+1. **`scenario.md`** — the ground-truth workload. When the design and the scenario disagree,
+   the scenario wins or gets amended.
+2. **`plan.md`** — the design and decision record. Carries the dated rulings inline.
+3. **`reference-comparison.md`** — the 28 rulings against Zero, Supabase Realtime, and Convex,
+   plus the rejected attacks (the spec's tested armor). The "what is settled and why" doc.
+4. **`ws-protocol.md`** — the wire spec.
+5. **`research/`** — the nine-agent grounding pass. Read only when going deep on one axis.
+
+## The folder
+
+- `scenario.md` / `scenario-hobbyist.md` — the ground-truth workload, and the hobbyist rung.
+- `plan.md` — architecture, decision record, sync loop, channels, schemas, priors audit.
+- `reference-comparison.md` — rulings, needs-bench, watch list, rejected attacks. Dossiers in
+  `research/`.
+- `ws-protocol.md` — the wire spec. `ws-protocol-review.md` is its referee pass.
+- `reactivity-review.md` — every plan claim audited against `packages/reactivity` source.
+- `vetting-report.md` — the five-lens vet of the corpus, verdict revise-then-build.
+- `r2-briefs.md` — the round-2 design briefs.
+- `storage-and-scale.md` — the storage shape and scale framing.
+- `todomvc/`, `invoices-table/` — API steelmans, real example templates against the sync API.
+- `research/` — the grounding pass: `primitives-*` (repo readers), `landscape-*` (web
+  research: Meteor, 2026 engines, storage, transport), `deep-*` and `crossexam-*` (the
+  reference dossiers and their adversarial reviews).
+
+## Concept coverage map
 
 | Concept | todomvc | invoices-table | invoice-editor (unbuilt) |
 |---|---|---|---|
@@ -37,4 +87,10 @@ Everything from the DB sync layer design session, one folder.
 
 The unbuilt column is the invoice-editor's commission.
 
-Context worth keeping with the artifacts: in the Meteor-era architecture, redis-oplog handles oplog tailing, per-write deep-clone cost is a known but minor tax, and the absence of fine-grained reactivity at the partial border is the structural cost this plan targets. Linear (performance.dev breakdown) independently rebuilt the same architecture this plan proposes — memory pool, IDB write-behind, field deltas over WS, Redis sync state.
+## Context worth keeping
+
+In the Meteor-era architecture, redis-oplog handles oplog tailing, per-write deep-clone cost
+is a known but minor tax, and the absence of fine-grained reactivity at the partial border is
+the structural cost this plan targets. Linear (performance.dev breakdown) independently
+rebuilt the same architecture this plan proposes: memory pool, IDB write-behind, field deltas
+over WS, Redis sync state.
