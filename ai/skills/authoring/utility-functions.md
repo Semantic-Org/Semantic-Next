@@ -150,6 +150,14 @@ set({}, 'items.0.name', 'first');            // { items: [{ name: 'first' }] }
 unset(data, 'user.profile.bio');             // removes in place, returns data
 // set/unset refuse prototype-climbing segments (__proto__, constructor, prototype)
 
+// Keyed array addressing — [#id] selects an element by identity, [0] by position.
+// set replaces a present key or appends an absent one, unset splices (no hole)
+const cart = { items: [{ id: 'a', qty: 1 }, { id: 'b', qty: 2 }] };
+get(cart, 'items[#b].qty');                  // 2 (by id, survives a reorder)
+set(cart, 'items[#c]', { id: 'c', qty: 3 }); // appends, no element had id 'c'
+unset(cart, 'items[#a]');                    // splices out the 'a' element
+set(cart, 'items[#x].qty', 9, ['sku']);      // 4th arg overrides the id field list
+
 // hasProperty checks own properties only (shallow, no dot paths)
 hasProperty(data, 'user');                   // true
 hasProperty(data, 'toString');               // false (inherited)
@@ -197,7 +205,7 @@ mapObject({ a: 1, b: 2 }, (value, key) => value * 2);           // { a: 2, b: 4 
 
 ### Change Detection
 ```javascript
-import { trackWrites, detectChanges, get } from '@semantic-ui/utils';
+import { trackWrites, detectChanges, elementKey, get } from '@semantic-ui/utils';
 
 // Run a callback against a value, report whether and where it changed
 const doc = { meta: { count: 0 } };
@@ -215,12 +223,21 @@ trackWrites(doc, (value) => { value.meta.count = 1; }); // { changed: false, pat
 // Skip path collection on hot paths that only read changed
 trackWrites(doc, mutator, { returnPaths: false }); // { changed, result }
 
-// 'auto' snapshots small values (callback sees the real object) and proxies
-// large ones (callback sees a tracked wrapper, cost scales with writes).
-// Pin a path with strategy: 'snapshot' | 'proxy'
-trackWrites(bigList, (tracked) => { tracked[500].seen = true; });
+// Paths id-address keyed arrays by default — a field edit across a collection
+// reads back per record (todos[#id].complete), not by index, and survives a
+// reorder. Zero config, the marquee component case
+const db = { todos: [{ id: 'a', complete: false }, { id: 'b', complete: false }] };
+trackWrites(db, (d) => { for (const t of d.todos) { t.complete = true; } });
+// paths: ['todos[#a].complete', 'todos[#b].complete']
 
-// onWrite streams each write with its key path, implies the proxy strategy
+// Keyed paths come from the snapshot diff, so they force snapshot even for a
+// large value (callback sees the real object). The proxy strategy is the
+// positional opt-out — it only sees the index a write went through, no identity
+trackWrites(db, mutator, { strategy: 'proxy' });   // paths like ['todos.0.complete']
+trackWrites(db, mutator, { keyed: false });        // positional, snapshot path
+trackWrites(bigList, (v) => { v[500].seen = true; }, { keyed: false }); // proxy, no clone
+
+// onWrite streams each write with its key path, implies the proxy strategy (positional)
 trackWrites(rows, (tracked) => {
   tracked[3].active = true;
 }, { onWrite: (path, target, key) => console.log(path) }); // ['3', 'active']
@@ -228,6 +245,21 @@ trackWrites(rows, (tracked) => {
 // Two-value structural diff, directional from before to after
 detectChanges({ name: 'a', temp: true }, { name: 'b', nickname: 'al' });
 // { added: ['nickname'], removed: ['temp'], changed: ['name'] }
+
+// elementKey — the identity of an array element, first present id field wins
+elementKey({ id: 'a', _id: 'x' });           // 'a'
+elementKey({ name: 'n' });                   // undefined (no id field)
+elementKey({ sku: 's1' }, ['sku']);          // 's1' (custom key list)
+
+// detectChanges diffs arrays of keyed objects by identity by DEFAULT, not by
+// index, so a prepend is one add by key instead of a positional cascade. Emits
+// field[#id] paths that apply back through get/set/unset and survive a reorder.
+// Any array that isn't cleanly keyed (scalar, unkeyed, duplicate, or a key with
+// . [ ] or #) falls back to positional. { keyed: false } forces the index walk
+const before = { lineItems: [{ id: 'a', qty: 1 }, { id: 'b', qty: 1 }] };
+const after = { lineItems: [{ id: 'z', qty: 9 }, { id: 'a', qty: 1 }, { id: 'b', qty: 5 }] };
+detectChanges(before, after);
+// { added: ['lineItems[#z]'], removed: [], changed: ['lineItems[#b].qty'] }
 ```
 
 ### Conversion
@@ -842,9 +874,9 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 ### Objects (objects.js)
 | Function | Signature | Returns |
 |----------|-----------|---------|
-| `get` | `(obj, dotPath)` | Nested value or undefined |
-| `set` | `(obj, dotPath, value)` | Same object, intermediates created |
-| `unset` | `(obj, dotPath)` | Same object, key removed |
+| `get` | `(obj, dotPath, keys?)` | Nested value or undefined (`[#id]` selects by identity) |
+| `set` | `(obj, dotPath, value, keys?)` | Same object, intermediates created (`[#id]` replaces or appends) |
+| `unset` | `(obj, dotPath, keys?)` | Same object, key removed (`[#id]` splices) |
 | `keys` | `(obj)` | `Object.keys` or undefined |
 | `values` | `(obj)` | `Object.values` or undefined |
 | `hasProperty` | `(obj, prop)` | Own property check (shallow) |
@@ -855,8 +887,9 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `onlyKeys` | `(obj, keysArray)` | New object with selected keys |
 | `filterObject` | `(obj, fn(val,key))` | Filtered object |
 | `mapObject` | `(obj, fn(val,key))` | Transformed object |
-| `trackWrites` | `(value, callback, opts?)` | `{ changed, paths, result }` |
-| `detectChanges` | `(before, after)` | `{ added, removed, changed }` paths |
+| `trackWrites` | `(value, callback, opts?)` | `{ changed, paths, result }` (keyed `field[#id]` paths by default) |
+| `elementKey` | `(item, keys?)` | First present id field, or undefined |
+| `detectChanges` | `(before, after, opts?)` | `{ added, removed, changed }` paths (keyed by identity by default, `{ keyed: false }` for positional) |
 | `arrayFromObject` | `(obj)` | `[{key, value}, ...]` |
 | `reverseKeys` | `(obj)` | Inverted lookup object |
 | `proxyObject` | `(getterFn, refObj)` | Read-through Proxy |

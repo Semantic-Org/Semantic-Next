@@ -11,6 +11,26 @@ console.log('Paths:', paths);
 // Paths resolve through get(), e.g. for state sync
 console.log('Values:', paths.map((path) => get(doc, path)));
 
+// Keyed paths by default — a field edit across a collection reads back per
+// record (todos[#id].complete), not by array index, with zero configuration
+const db = { todos: [{ id: 'a', complete: false }, { id: 'b', complete: false }] };
+const completeAll = trackWrites(db, (d) => {
+  for (const todo of d.todos) { todo.complete = true; }
+});
+console.log('Keyed:', completeAll.paths);
+
+// A structural op is one keyed element add
+const pushed = trackWrites(db, (d) => {
+  d.todos.push({ id: 'c', complete: false });
+});
+console.log('Pushed:', pushed.paths);
+
+// The proxy strategy is the positional opt-out (no element identity)
+const positional = trackWrites(db, (d) => {
+  d.todos[0].complete = false;
+}, { strategy: 'proxy' });
+console.log('Positional:', positional.paths);
+
 // Writing a value that is already there is not a change
 const settings = { theme: 'dark' };
 const noop = trackWrites(settings, (value) => {
@@ -28,10 +48,3 @@ const fast = trackWrites(doc, (value) => {
   value.title = 'Updated';
 }, { returnPaths: false });
 console.log('Fast:', fast.changed, fast.paths);
-
-// Large values use a tracked wrapper so cost scales with writes, not size
-const records = Array.from({ length: 1000 }, (_, i) => ({ id: i, seen: false }));
-const big = trackWrites(records, (tracked) => {
-  tracked[500].seen = true;
-});
-console.log('Big:', big.paths);
