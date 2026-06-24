@@ -223,6 +223,7 @@ export class LitRenderer {
       return value;
     };
     let matchArguments = mapObject(node, directiveMap);
+    matchArguments.expression = node.discriminant; // raw string for the directive's debug label
     return reactiveMatch(matchArguments);
   }
 

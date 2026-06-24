@@ -35,7 +35,7 @@ export class ReactiveMatchDirective extends AsyncDirective {
 
     let initialFormatted = nothing;
     const context = {
-      message: `match statement: {#match ${matchBlock.discriminant}}`,
+      message: `match statement: {#match ${matchBlock.expression}}`,
       match: matchBlock,
     };
 
