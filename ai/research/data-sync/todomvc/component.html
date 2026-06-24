@@ -42,8 +42,8 @@
     {#if count completedTodos}
       <button class="clear-completed">Clear completed</button>
     {/if}
-    <button class="publish" disabled={publishing}>
-      {publishing ? 'Publishing…' : 'Publish'}
+    <button class="share" disabled={sharing}>
+      {sharing ? 'Sharing…' : 'Share'}
     </button>
     {#if shareUrl}
       <a class="share-link" href="{shareUrl}">{shareUrl}</a>

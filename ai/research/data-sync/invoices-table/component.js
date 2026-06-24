@@ -28,13 +28,11 @@ const subscriptions = ({ subscribe, state }) => ({
   }),
 });
 
-const createComponent = ({ self, state, subscriptions }) => ({
+const createComponent = ({ self, state }) => ({
 
-  // subscriptions never join the template data context — the window (and its
-  // server-computed window order/meta) reaches templates through this named bridge
-  invoices() {
-    return subscriptions.invoices;
-  },
+  // the search-index window surfaces directly: {#each invoice in invoices},
+  // {invoices.total}, {not invoices.ready} read the handle (iterable + meta).
+  // events still reach it through the bag — subscriptions.invoices.pages
 
   sortIcon(field) {
     const sort = state.sort.get();
