@@ -23,6 +23,7 @@ import { reactiveAsync } from './directives/reactive-async.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveEach } from './directives/reactive-each.js';
+import { reactiveMatch } from './directives/reactive-match.js';
 import { reactiveRerender } from './directives/reactive-rerender.js';
 import { renderTemplate } from './directives/render-template.js';
 
@@ -135,6 +136,10 @@ export class LitRenderer {
           this.addValue(this.evaluateConditional(node, data));
           break;
 
+        case 'match':
+          this.addValue(this.evaluateMatch(node, data));
+          break;
+
         case 'each':
           this.addValue(this.evaluateEach(node, data));
           break;
@@ -193,6 +198,32 @@ export class LitRenderer {
     node.expression = node.condition; // store original expression for debugging
     let conditionalArguments = mapObject(node, directiveMap);
     return reactiveConditional(conditionalArguments);
+  }
+
+  /*
+    The match directive takes a discriminant and {is}/{else} branches.
+    Like conditional, it has no access to the renderer, so expression and
+    content evaluation are passed through as thunks. Each case value becomes
+    its own thunk so the directive can compare them against the discriminant.
+  */
+  evaluateMatch(node, data) {
+    const directiveMap = (value, key) => {
+      if (key == 'branches') {
+        return value.map((branch) => mapObject(branch, directiveMap));
+      }
+      if (key == 'discriminant') {
+        return () => this.evaluateExpression(value, data);
+      }
+      if (key == 'values') {
+        return value.map((caseValue) => () => this.evaluateExpression(caseValue, data));
+      }
+      if (key == 'content') {
+        return () => this.renderContent({ ast: value, data });
+      }
+      return value;
+    };
+    let matchArguments = mapObject(node, directiveMap);
+    return reactiveMatch(matchArguments);
   }
 
   /*

@@ -207,6 +207,46 @@ describe('renderToString', () => {
     });
   });
 
+  describe('match', () => {
+    it('renders the matching case', () => {
+      const ast = compile(
+        `{#match status}{is 'loading'}<span>wait</span>{is 'done'}<span>ready</span>{else}<span>idle</span>{/match}`,
+      );
+      const result = renderToString({ ast, data: { status: 'done' } });
+      expect(stripMarkers(dsdContent(result))).toBe('<span>ready</span>');
+    });
+
+    it('renders a multi-value case', () => {
+      const ast = compile(`{#match status}{is 'loading' 'pending'}<span>wait</span>{else}<span>done</span>{/match}`);
+      const result = renderToString({ ast, data: { status: 'pending' } });
+      expect(stripMarkers(dsdContent(result))).toBe('<span>wait</span>');
+    });
+
+    it('renders else when no case matches', () => {
+      const ast = compile(`{#match status}{is 'loading'}<span>wait</span>{else}<span>idle</span>{/match}`);
+      const result = renderToString({ ast, data: { status: 'mystery' } });
+      expect(stripMarkers(dsdContent(result))).toBe('<span>idle</span>');
+    });
+
+    it('renders empty when no case matches and there is no else', () => {
+      const ast = compile(`<div>{#match status}{is 'loading'}<span>wait</span>{/match}</div>`);
+      const result = renderToString({ ast, data: { status: 'other' } });
+      expect(stripMarkers(dsdContent(result))).toBe('<div></div>');
+    });
+
+    it('stamps the matched branch index on the close marker', () => {
+      const ast = compile(`{#match s}{is 'a'}<i>A</i>{is 'b'}<i>B</i>{else}<i>C</i>{/match}`);
+      expect(dsdContent(renderToString({ ast, data: { s: 'a' } }))).toContain('<!--/sui-block:v1:0:b0-->');
+      expect(dsdContent(renderToString({ ast, data: { s: 'b' } }))).toContain('<!--/sui-block:v1:0:b1-->');
+      expect(dsdContent(renderToString({ ast, data: { s: 'z' } }))).toContain('<!--/sui-block:v1:0:b2-->');
+    });
+
+    it('stamps b-1 when no case matches and there is no else', () => {
+      const ast = compile(`{#match s}{is 'a'}<i>A</i>{/match}`);
+      expect(dsdContent(renderToString({ ast, data: { s: 'z' } }))).toContain('<!--/sui-block:v1:0:b-1-->');
+    });
+  });
+
   /*******************************
           Each Loops
   *******************************/
