@@ -15,8 +15,11 @@ class TemplateCompiler {
     ELSEIF: '^{OPEN}\\s*else\\s*if\\s+',
     ELSE: '^{OPEN}\\s*else\\s*',
     MATCH: '^{OPEN}\\s*#match\\s+',
-    // `is` is a case label only inside {#match}; parseTag gates this token
-    // to match context so {is a b} stays the equality helper everywhere else
+    // `is`/`isExactly` are case labels only inside {#match}. parseTag gates
+    // these tokens to match context so {is a b} / {isExactly a b} stay the
+    // equality helpers everywhere else. `is` matches loosely (==), isExactly
+    // strictly (===).
+    ISEXACTLY: '^{OPEN}\\s*isExactly\\s+',
     IS: '^{OPEN}\\s*is\\s+',
     EACH: '^{OPEN}\\s*#each\\s+',
     SNIPPET: '^{OPEN}\\s*#snippet\\s+',
@@ -186,7 +189,7 @@ class TemplateCompiler {
 
       // look for each special expression like if/each/else
       for (const [type, regex] of tagPatterns) {
-        if (type === 'IS' && !inMatchBlock) { continue; }
+        if ((type === 'IS' || type === 'ISEXACTLY') && !inMatchBlock) { continue; }
         if (scanner.matches(regex)) {
           // attribute context decides ifDefined, only expressions consume it
           const context = (type === 'EXPRESSION') ? scanner.getContext() : null;
@@ -405,12 +408,13 @@ class TemplateCompiler {
             break;
           }
 
-          case 'IS': {
-            // parseTag only emits IS inside a match block, so currentCondition
+          case 'IS':
+          case 'ISEXACTLY': {
+            // parseTag only emits these inside a match block, so currentCondition
             // is always the match node here — no orphan guard needed.
             newNode = {
               ...newNode,
-              type: 'is',
+              type: tag.type === 'ISEXACTLY' ? 'isExactly' : 'is',
               values: TemplateCompiler.parseMatchValues(String(tag.content)),
               content: [],
             };
@@ -886,10 +890,10 @@ class TemplateCompiler {
   }
 
   /* Splits {#match} case values into top-level expression tokens,
-     respecting quotes and balanced parens: `'a' 'b'` → ["'a'", "'b'"],
-     `(resolve x) 'b'` → ["(resolve x)", "'b'"]. A JS expression with
-     spaces needs parens to read as one value, consistent with Lisp-style
-     arguments where whitespace separates tokens. */
+     respecting quotes and balanced parens, so `'a' 'b'` yields
+     ["'a'", "'b'"] and `(resolve x) 'b'` yields ["(resolve x)", "'b'"].
+     A JS expression with spaces needs parens to read as one value,
+     consistent with Lisp-style arguments where whitespace separates tokens. */
   static parseMatchValues(valuesString = '') {
     const s = valuesString.trim();
     const isSpace = (ch) => ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r';

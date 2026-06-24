@@ -603,6 +603,23 @@ describe('TemplateCompiler', () => {
       expect(ast[0].branches[1].type).toBe('else');
     });
 
+    it('should parse {isExactly} cases as their own branch type', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{#match s}{is 'a'}A{isExactly 1}One{else}B{/match}`);
+      expect(ast[0].branches.map((b) => b.type)).toEqual(['is', 'isExactly', 'else']);
+      expect(ast[0].branches[1].values).toEqual(['1']);
+    });
+
+    it('should not treat {isExactly} as a case keyword outside a match block', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`<b>{isExactly a b}</b>`);
+      expect(ast).toEqual([
+        { type: 'html', html: '<b>' },
+        { type: 'expression', value: 'isExactly a b' },
+        { type: 'html', html: '</b>' },
+      ]);
+    });
+
     it('should throw on {/match} without an open match', () => {
       const compiler = new TemplateCompiler();
       expect(() => compiler.compile(`done{/match}`)).toThrow();
