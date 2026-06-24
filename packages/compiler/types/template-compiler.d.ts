@@ -5,6 +5,8 @@ export interface ASTNode {
   value?: any;
   condition?: string;
   branches?: ASTNode[];
+  discriminant?: string; // For match blocks — the value branched on
+  values?: string[]; // For match {is} cases — expressions compared to the discriminant
   name?: string;
   over?: string;
   as?: string;

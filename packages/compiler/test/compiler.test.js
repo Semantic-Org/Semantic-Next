@@ -539,6 +539,75 @@ describe('TemplateCompiler', () => {
       expect(ast).toEqual(expectedAST);
     });
   });
+  describe('match blocks', () => {
+    it('should compile a basic match block', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{#match status}{is 'loading'}Wait{is 'done'}Ready{else}Idle{/match}`);
+      expect(ast).toEqual([
+        {
+          type: 'match',
+          discriminant: 'status',
+          content: [],
+          branches: [
+            { type: 'is', values: ["'loading'"], content: [{ type: 'html', html: 'Wait' }] },
+            { type: 'is', values: ["'done'"], content: [{ type: 'html', html: 'Ready' }] },
+            { type: 'else', content: [{ type: 'html', html: 'Idle' }] },
+          ],
+        },
+      ]);
+    });
+
+    it('should split multiple values per case', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{#match s}{is 'a' 'b' 'c'}x{/match}`);
+      expect(ast[0].branches[0].values).toEqual(["'a'", "'b'", "'c'"]);
+    });
+
+    it('should keep parenthesized expressions as a single value', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{#match s}{is (resolve x) 'b'}y{/match}`);
+      expect(ast[0].branches[0].values).toEqual(['(resolve x)', "'b'"]);
+    });
+
+    it('should support an identifier discriminant and case values', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{#match userRole}{is adminRole}A{else}B{/match}`);
+      expect(ast[0].discriminant).toBe('userRole');
+      expect(ast[0].branches[0].values).toEqual(['adminRole']);
+    });
+
+    it('should not treat {is} as a case keyword outside a match block', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`<b>{is a 'x'}</b>`);
+      expect(ast).toEqual([
+        { type: 'html', html: '<b>' },
+        { type: 'expression', value: "is a 'x'" },
+        { type: 'html', html: '</b>' },
+      ]);
+    });
+
+    it('should support nested match blocks', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{#match a}{is 1}{#match b}{is 2}deep{/match}{/match}`);
+      const inner = ast[0].branches[0].content[0];
+      expect(inner.type).toBe('match');
+      expect(inner.discriminant).toBe('b');
+      expect(inner.branches[0].values).toEqual(['2']);
+    });
+
+    it('should compile match in double-bracket syntax', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{{#match m}}{{is 1}}one{{else}}other{{/match}}`);
+      expect(ast[0].type).toBe('match');
+      expect(ast[0].branches[0].values).toEqual(['1']);
+      expect(ast[0].branches[1].type).toBe('else');
+    });
+
+    it('should throw on {/match} without an open match', () => {
+      const compiler = new TemplateCompiler();
+      expect(() => compiler.compile(`done{/match}`)).toThrow();
+    });
+  });
   describe('nested expressions', () => {
     it('should handle single level of nesting in expressions', () => {
       const compiler = new TemplateCompiler();
