@@ -494,10 +494,11 @@ export class ServerRenderer {
     return html;
   }
 
-  // Value-based branching — discriminant evaluated once, each {is} case
-  // matched by loose == against its values, {else} as fallback. branchIndex
-  // is the chosen branch's index in node.branches (-1 = no match), stamped
-  // on the close marker so the client can detect a hydration mismatch.
+  // Value-based branching — discriminant evaluated once, each case matched
+  // against its values ({is} loose ==, {isExactly} strict ===), {else} as
+  // fallback. branchIndex is the chosen branch's index in node.branches
+  // (-1 = no match), stamped on the close marker so the client can detect a
+  // hydration mismatch.
   renderMatch(node, data, scope) {
     const id = scope.entryId++;
     const classification = analyzePosition(scope.htmlBuffer);
@@ -508,9 +509,11 @@ export class ServerRenderer {
     if (node.branches) {
       for (let i = 0; i < node.branches.length; i++) {
         const branch = node.branches[i];
-        if (branch.type === 'is') {
+        if (branch.type === 'is' || branch.type === 'isExactly') {
+          const strict = branch.type === 'isExactly';
           for (const value of branch.values) {
-            if (this.evaluator.lookupExpressionValue(value, data) == discriminant) {
+            const resolved = this.evaluator.lookupExpressionValue(value, data);
+            if (strict ? resolved === discriminant : resolved == discriminant) {
               branchIndex = i;
               matchedAST = branch.content;
               break;

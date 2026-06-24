@@ -139,5 +139,49 @@ RENDERING_ENGINES.forEach((engine) => {
       expect(el.shadowRoot.querySelector('.flag').textContent).toBe('true');
       expect(el.shadowRoot.querySelector('.lit')).toBeTruthy();
     });
+
+    it('{isExactly} matches strictly, distinguishing values that == collapses', async () => {
+      const el = await mount({
+        template:
+          `{#match v}{isExactly ''}<span class="empty">empty</span>{isExactly 0}<span class="zero">zero</span>{else}<span class="other">other</span>{/match}`,
+        defaultState: { v: 0 },
+      });
+      // 0 === '' is false, 0 === 0 is true — strict skips the empty-string case
+      expect(el.shadowRoot.querySelector('.zero')).toBeTruthy();
+      expect(el.shadowRoot.querySelector('.empty')).toBeFalsy();
+    });
+
+    it('{is} collapses falsy values where {isExactly} would not', async () => {
+      const el = await mount({
+        template: `{#match v}{is ''}<span class="empty">empty</span>{is 0}<span class="zero">zero</span>{/match}`,
+        defaultState: { v: 0 },
+      });
+      // 0 == '' is true — loose matches the empty-string case first
+      expect(el.shadowRoot.querySelector('.empty')).toBeTruthy();
+    });
+
+    it('{isExactly} separates null from undefined', async () => {
+      const el = await mount({
+        template:
+          `{#match v}{isExactly undefined}<span class="u">undef</span>{isExactly null}<span class="n">null</span>{else}<span class="o">other</span>{/match}`,
+        defaultState: { v: null },
+      });
+      // null === undefined is false, null === null is true
+      expect(el.shadowRoot.querySelector('.n')).toBeTruthy();
+      expect(el.shadowRoot.querySelector('.u')).toBeFalsy();
+    });
+
+    it('mixes {is} and {isExactly} cases in one match', async () => {
+      const el = await mount({
+        template:
+          `{#match v}{is 'loading'}<span class="a">load</span>{isExactly 0}<span class="b">zero</span>{else}<span class="c">other</span>{/match}`,
+        defaultState: { v: 0 },
+      });
+      expect(el.shadowRoot.querySelector('.b')).toBeTruthy();
+
+      el.template.state.v.set('loading');
+      await settle(el);
+      expect(el.shadowRoot.querySelector('.a')).toBeTruthy();
+    });
   });
 });

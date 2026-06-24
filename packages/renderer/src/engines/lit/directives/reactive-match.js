@@ -9,8 +9,9 @@ import { serializeContent } from './serialize-content.js';
 
 /*
   Value-based branching for {#match}. The discriminant is evaluated once,
-  then each {is} case matches on loose == against any of its values, with
-  {else} as fallback — identical semantics to the native match block.
+  then each case matches against any of its values ({is} loose ==, {isExactly}
+  strict ===), with {else} as fallback — identical semantics to the native
+  match block.
 
   Lit's choose() directive does the body dispatch: we resolve the matching
   branch index ourselves (== + multi-value, which choose's strict === can't
@@ -74,9 +75,11 @@ export class ReactiveMatchDirective extends AsyncDirective {
     let matchedKey = -1;
     for (let i = 0; i < branches.length; i++) {
       const branch = branches[i];
-      if (branch.type === 'is') {
+      if (branch.type === 'is' || branch.type === 'isExactly') {
         cases.push([i, branch.content]);
-        if (matchedKey === -1 && branch.values.some((value) => value() == discriminant)) {
+        const strict = branch.type === 'isExactly';
+        const hit = branch.values.some((value) => strict ? value() === discriminant : value() == discriminant);
+        if (matchedKey === -1 && hit) {
           matchedKey = i;
         }
       }

@@ -245,6 +245,14 @@ describe('renderToString', () => {
       const ast = compile(`{#match s}{is 'a'}<i>A</i>{/match}`);
       expect(dsdContent(renderToString({ ast, data: { s: 'z' } }))).toContain('<!--/sui-block:v1:0:b-1-->');
     });
+
+    it('matches {isExactly} strictly', () => {
+      const ast = compile(
+        `{#match v}{isExactly ''}<span>empty</span>{isExactly 0}<span>zero</span>{else}<span>other</span>{/match}`,
+      );
+      // 0 === '' is false, so strict skips the empty-string case
+      expect(stripMarkers(dsdContent(renderToString({ ast, data: { v: 0 } })))).toBe('<span>zero</span>');
+    });
   });
 
   /*******************************

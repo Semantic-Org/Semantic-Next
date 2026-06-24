@@ -4,11 +4,11 @@ import { registerBlock } from './registry.js';
 
 /*
 
-  {#match} / {is} / {else} — value-based branching compiled as a single AST
-  node with node.discriminant + node.branches[]. The discriminant is
-  evaluated once, then each {is} case matches when the discriminant loosely
-  equals (==, like the `is` helper) any of its values; {else} is the
-  fallback. First match wins, no fall-through.
+  {#match} / {is} / {isExactly} / {else} — value-based branching compiled as
+  a single AST node with node.discriminant + node.branches[]. The discriminant
+  is evaluated once, then each case matches when the discriminant equals any
+  of its values: {is} loosely (==, like the `is` helper), {isExactly} strictly
+  (===). {else} is the fallback. First match wins, no fall-through.
 
   matchIndex is the index of the chosen branch in node.branches (-1 when
   nothing matched). Unlike {#if} there's no main body, so no MAIN_BRANCH
@@ -36,9 +36,11 @@ const match = defineBlock({
     if (node.branches?.length) {
       for (let i = 0; i < node.branches.length; i++) {
         const branch = node.branches[i];
-        if (branch.type === 'is') {
+        if (branch.type === 'is' || branch.type === 'isExactly') {
+          const strict = branch.type === 'isExactly';
           for (let v = 0; v < branch.values.length; v++) {
-            if (lookupExpression(branch.values[v]) == discriminant) {
+            const value = lookupExpression(branch.values[v]);
+            if (strict ? value === discriminant : value == discriminant) {
               return { matchIndex: i, contentAST: branch.content };
             }
           }
@@ -86,9 +88,11 @@ const match = defineBlock({
     const discriminant = lookup(node.discriminant);
     if (node.branches) {
       for (const branch of node.branches) {
-        if (branch.type === 'is') {
+        if (branch.type === 'is' || branch.type === 'isExactly') {
+          const strict = branch.type === 'isExactly';
           for (const value of branch.values) {
-            if (lookup(value) == discriminant) {
+            const resolved = lookup(value);
+            if (strict ? resolved === discriminant : resolved == discriminant) {
               return renderer.evaluateRawTextNodes(branch.content, data);
             }
           }
