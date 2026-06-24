@@ -1,0 +1,17 @@
+.status {
+  padding: var(--12px) var(--16px);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  color: var(--standard-40);
+
+  &.loading {
+    color: var(--primary-text-color);
+  }
+  &.success {
+    color: var(--positive-text-color);
+  }
+  &.error {
+    color: var(--negative-text-color);
+  }
+}

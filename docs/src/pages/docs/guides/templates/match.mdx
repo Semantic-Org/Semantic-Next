@@ -1,0 +1,135 @@
+---
+layout: '@layouts/Guide.astro'
+title: Match
+description: Value-based branching on a single discriminant
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Basic Usage
+
+`{#match}` branches on a single value. Name the value once, then list the cases it can take.
+
+```sui
+{#match status}
+  {is 'loading'}
+    Loading...
+  {is 'error'}
+    Error: {message}
+  {is 'success'}
+    {data}
+  {else}
+    Idle
+{/match}
+```
+
+Each `{is}` case matches when the value loosely equals (`==`) one of its listed values. The first matching case wins, there is no fall-through. `{else}` is the fallback when nothing else matches.
+
+<PlaygroundExample id="match-basic"></PlaygroundExample>
+
+## Multiple Values per Case
+
+A case can list several values separated by spaces. It matches when the discriminant equals any of them.
+
+```sui
+{#match plan}
+  {is 'free' 'trial'}
+    Limited features
+  {is 'pro' 'team' 'enterprise'}
+    All features
+  {else}
+    Unknown plan
+{/match}
+```
+
+<PlaygroundExample id="match-multi-value"></PlaygroundExample>
+
+## Expression Case Values
+
+Case values are [expressions](/docs/guides/templates/expressions) evaluated against the data context, not just literals. A case can compare against a variable or a computed value.
+
+```sui
+{#match role}
+  {is adminRole}
+    Full access
+  {is 'guest'}
+    Read only
+  {is (resolveRole user)}
+    Custom
+{/match}
+```
+
+A JavaScript expression that contains spaces needs parentheses so it reads as a single value, the same way Lisp-style arguments are tokenized by whitespace.
+
+```sui
+{#match key}
+  {is (mode + 'x')}
+    Matched
+{/match}
+```
+
+## Reactivity
+
+The discriminant is reactive. When it changes, the block re-matches and swaps to the newly matching case, the same as `{#if}`.
+
+```sui
+{#match step}
+  {is 1}
+    <p>Choose a plan</p>
+  {is 2}
+    <p>Enter payment</p>
+  {is 3}
+    <p>Confirm</p>
+{/match}
+```
+
+## Match vs If
+
+Reach for `{#match}` when you branch on the discrete values of one variable. It names that variable once instead of repeating it in every condition.
+
+```sui
+{#if status == 'loading'}
+  Loading...
+{else if status == 'error'}
+  Error
+{else if status == 'success'}
+  Done
+{/if}
+```
+
+The same logic with `{#match}`:
+
+```sui
+{#match status}
+  {is 'loading'}
+    Loading...
+  {is 'error'}
+    Error
+  {is 'success'}
+    Done
+{/match}
+```
+
+Stay with `{#if}` for unrelated conditions, ranges, or boolean tests, where there is no single value to branch on.
+
+```sui
+{#if temperature > 90}
+  Hot
+{else if isWeekend}
+  Relax
+{/if}
+```
+
+## The `is` Keyword
+
+Inside a `{#match}` block, `is` opens a case, so it shadows the `is` equality [helper](/docs/guides/templates/helpers) there. To compare values directly in a case body, use `==` or the JavaScript form `is(x, y)`.
+
+```sui
+{#match tab}
+  {is 'profile'}
+    {#if role == 'admin'}
+      Admin profile
+    {/if}
+{/match}
+```
+
+Everywhere outside a match block, `{is x y}` is the equality helper, unchanged.

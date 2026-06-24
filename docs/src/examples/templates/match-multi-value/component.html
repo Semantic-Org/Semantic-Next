@@ -1,0 +1,15 @@
+<div class="plan {plan}">
+  Plan: {plan}
+  <span class="features">
+    {#match plan}
+      {is 'free' 'trial'}
+        Limited features
+      {is 'pro' 'team' 'enterprise'}
+        All features
+      {else}
+        Unknown plan
+    {/match}
+  </span>
+</div>
+<br>
+<ui-button @click={cycle}>Next Plan</ui-button>

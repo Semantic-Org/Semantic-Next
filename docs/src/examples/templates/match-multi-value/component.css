@@ -1,0 +1,11 @@
+.plan {
+  padding: var(--12px) var(--16px);
+  border: var(--border);
+  border-radius: var(--border-radius);
+
+  .features {
+    display: block;
+    font-weight: bold;
+    color: var(--muted-text-color);
+  }
+}

@@ -146,6 +146,33 @@ Conditions accept any expression style:
 
 ---
 
+## Match
+
+Value-based branching on a single discriminant. Name the value once, list its cases. Replaces repetitive `{#if is x 'a'}{else if is x 'b'}` chains.
+
+```html
+{#match status}
+  {is 'loading'}
+    Loading...
+  {is 'error'}
+    Error: {message}
+  {is 'success'}
+    {data}
+  {else}
+    Idle
+{/match}
+```
+
+- Each `{is}` case matches when the discriminant loosely equals (`==`) any of its space-separated values: `{is 'free' 'trial'}`
+- Case values are expressions, not just literals: `{is adminRole}`, `{is (resolveRole user)}`. A JS expression with spaces needs parens to read as one value
+- First match wins, no fall-through. `{else}` is the fallback. With no match and no `{else}`, nothing renders
+- The discriminant is reactive — changing it re-matches, same as `{#if}`
+- **`is` is a reserved case keyword inside `{#match}`.** To compare values directly in a case body, use `==` or `is(x, y)`. Outside a match block, `{is x y}` is the normal equality helper
+
+Reach for `{#match}` for the discrete values of one variable. Stay with `{#if}` for ranges, booleans, or unrelated conditions.
+
+---
+
 ## Loops
 
 ### Syntax Variants
@@ -513,6 +540,9 @@ ATTRIBUTES
 
 CONDITIONALS
   {#if expr}...{else if expr}...{else}...{/if}
+
+MATCH
+  {#match value}{is 'a' 'b'}...{is 'c'}...{else}...{/match}  value-based branching
 
 LOOPS
   {#each items}...{/each}             direct context ({this}, {name})

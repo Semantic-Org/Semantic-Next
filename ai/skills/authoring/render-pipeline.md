@@ -134,7 +134,7 @@ The compiler transforms a template string into an AST — a flat array of node o
 1. **Preprocess** — expand self-closing web component tags (`<ui-icon />` -> `<ui-icon></ui-icon>`)
 2. **Detect syntax** — check whether the template uses `{}` or `{{}}` brackets (one syntax per template, first expression wins)
 3. **Scan** — `StringScanner` walks the string character-by-character, advancing to the next expression or SVG tag
-4. **Parse tags** — for each `{expression}`, the compiler matches against regex patterns in priority order: `#if`, `#each`, `#async`, `#snippet`, `#rerender`, `#guard`, `>slot`, `>template`, `#html`, `#fn`, and finally plain `expression`
+4. **Parse tags** — for each `{expression}`, the compiler matches against regex patterns in priority order: `#if`, `#match`, `#each`, `#async`, `#snippet`, `#rerender`, `#guard`, `>slot`, `>template`, `#html`, `#fn`, and finally plain `expression`
 5. **Build AST** — two stacks drive nesting:
    - `contentStack` — tracks which node receives child AST nodes (push on open, pop on close)
    - `conditionStack` — tracks nodes that support branching (`if`, `each`, `async`)
@@ -224,6 +224,7 @@ Notable patterns in the AST output:
 | `html` | Static markup between expressions | `html` |
 | `expression` | `{value}`, `{formatDate date}` | `value`, `unsafeHTML?`, `ifDefined?`, `booleanAttribute?` |
 | `if` | `{#if cond}...{else if}...{else}...{/if}` | `condition`, `content`, `branches` |
+| `match` | `{#match value}{is 'a' 'b'}...{else}...{/match}` | `discriminant`, `branches` (each `{ type: 'is', values, content }` or `{ type: 'else', content }`) |
 | `each` | `{#each item in items}...{else}...{/each}` | `over`, `as`, `indexAs?`, `content`, `elseContent?` |
 | `async` | `{#async expr as data}{loading}{error as e}{/async}` | `expression`, `as`, `content`, `loadingContent`, `errorContent`, `errorAs` |
 | `rerender` | `{#rerender expr}` / `{#guard fn}` | `expression`, `key`, `content` |

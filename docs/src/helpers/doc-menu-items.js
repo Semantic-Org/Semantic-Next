@@ -36,6 +36,7 @@ export const sidebarMenuFramework = [
     pages: [
       { name: 'Expressions', url: '/docs/guides/templates/expressions' },
       { name: 'Conditionals', url: '/docs/guides/templates/conditionals' },
+      { name: 'Match', url: '/docs/guides/templates/match' },
       { name: 'Loops', url: '/docs/guides/templates/loops' },
       { name: 'Async', url: '/docs/guides/templates/async' },
       { name: 'Slots', url: '/docs/guides/templates/slots' },
