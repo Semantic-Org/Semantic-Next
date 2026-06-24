@@ -58,6 +58,13 @@ async function copyPackages() {
     }
   }
 
+  // the playground links icon-set CSS by raw url (headLibraryJS), not through
+  // the bundle, so it needs the source files and their svgs
+  await copyDir(
+    path.resolve(BASE_DIR, 'src/primitives/icon/sets'),
+    path.resolve(DOCS_PACKAGES_DIR, '@semantic-ui/core/src/primitives/icon/sets'),
+  );
+
   // copy each package's bundle dir (skip packages without dist/bundle)
   for (const pkg of packages) {
     const pkgSrc = path.resolve(BASE_DIR, 'packages', pkg, 'dist', 'bundle');
