@@ -137,7 +137,7 @@ The compiler transforms a template string into an AST — a flat array of node o
 4. **Parse tags** — for each `{expression}`, the compiler matches against regex patterns in priority order: `#if`, `#match`, `#each`, `#async`, `#snippet`, `#rerender`, `#guard`, `>slot`, `>template`, `#html`, `#fn`, and finally plain `expression`
 5. **Build AST** — two stacks drive nesting:
    - `contentStack` — tracks which node receives child AST nodes (push on open, pop on close)
-   - `conditionStack` — tracks nodes that support branching (`if`, `each`, `async`)
+   - `conditionStack` — tracks nodes that support branching (`if`, `match`, `each`, `async`)
 6. **Optimize** — join adjacent HTML nodes, hoist snippets to the front
 
 ### The AST Format
