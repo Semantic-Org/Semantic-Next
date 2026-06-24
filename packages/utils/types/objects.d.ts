@@ -83,7 +83,9 @@ export interface TrackWritesOptions {
    * sees the real object, cost scales with value size.
    * 'proxy' hands the callback a tracked wrapper and records writes — cost
    * scales with writes, the console shows Proxy(Object) inside the callback.
-   * 'auto' snapshots small values and proxies large ones.
+   * 'auto' snapshots small values and proxies large ones, but yields to
+   * snapshot even on a large value when keyed paths are requested (the default),
+   * since those come from the snapshot diff.
    */
   strategy?: 'auto' | 'snapshot' | 'proxy';
   /**
@@ -91,7 +93,20 @@ export interface TrackWritesOptions {
    * path collection on hot paths where only `changed` is read.
    */
   returnPaths?: boolean;
-  /** Fires per observed write with the key path from the root. Implies the proxy strategy under 'auto'. */
+  /**
+   * Id-address paths for keyed arrays (default true), so `todos[#id].complete`
+   * instead of `todos.0.complete` — the same convention as detectChanges, and
+   * paths that survive a reorder. Keyed paths are produced by the snapshot diff,
+   * so requesting them (the default, with `returnPaths` true) forces the
+   * snapshot strategy even on a large value. The proxy strategy (explicit, or
+   * implied by `onWrite`) only ever sees the index a write went through, so its
+   * paths stay positional regardless. Set false to keep the proxy's no-clone
+   * behaviour on a large value where it matters more than id-addressing.
+   */
+  keyed?: boolean;
+  /** Identity fields for keyed paths, first present wins (default ['id', '_id', 'hash', 'key']) */
+  keys?: string[];
+  /** Fires per observed write with the key path from the root. Implies the proxy strategy under 'auto', so its paths are positional. */
   onWrite?: (path: string[], target: object, key: string) => void;
   /** Clone used for snapshots (defaults to clone) */
   clone?: (value: unknown) => unknown;
@@ -110,7 +125,8 @@ export interface TrackWritesResult<R> {
   /**
    * A covering set of changed fields as dot paths, resolvable via get().
    * The proxy strategy reports the paths written (pruned so a written parent
-   * subsumes its children), the snapshot strategy reports net leaf differences.
+   * subsumes its children, always positional), the snapshot strategy reports
+   * net leaf differences (id-addressed `field[#id]` for keyed arrays by default).
    * A wholesale change to a non-container value reports path ''.
    */
   paths?: string[];
@@ -119,16 +135,22 @@ export interface TrackWritesResult<R> {
 /**
  * Runs a callback against a value and reports whether the callback changed it,
  * with the changed fields as dot paths.
- * Under the proxy strategy the tracked wrapper is only valid inside the
- * callback — using one after it returns throws. Writes that never go through
- * the callback's value (a closure reference) are only seen by the snapshot
- * strategy.
+ * Paths are id-addressed for keyed arrays by default (`todos[#id].complete`),
+ * the same convention as detectChanges, so editing a field on every record of a
+ * collection reads back as per-record writes rather than array indices. Keyed
+ * paths come from the snapshot diff, so requesting them forces the snapshot
+ * strategy even on a large value; an explicit `strategy: 'proxy'` (or `onWrite`)
+ * keeps the no-clone proxy whose paths are positional by construction. Opt out
+ * with `keyed: false`. Under the proxy strategy the tracked wrapper is only
+ * valid inside the callback — using one after it returns throws. Writes that
+ * never go through the callback's value (a closure reference) are only seen by
+ * the snapshot strategy.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#trackwrites trackWrites}
  * @see {@link https://next.semantic-ui.com/examples/utils-trackwrites Example}
  *
  * @param value - The value the callback may change
  * @param callback - Receives the value (or its tracked wrapper) and may mutate it in place or return a replacement
- * @param options - Strategy, path reporting, and snapshot configuration
+ * @param options - Strategy, path reporting, keyed addressing, and snapshot configuration
  * @returns Whether the value changed, the changed paths, and the callback's return value
  *
  * @example
@@ -139,6 +161,14 @@ export interface TrackWritesResult<R> {
  * });
  * // changed === true, paths === ['meta.count']
  * paths.forEach((path) => sync(path, get(doc, path)));
+ *
+ * // keyed paths by default — a field edit across a collection reads back
+ * // per record, not by index
+ * const db = { todos: [{ id: 'a', complete: false }, { id: 'b', complete: false }] };
+ * const { paths: keyedPaths } = trackWrites(db, (d) => {
+ *   for (const todo of d.todos) todo.complete = true;
+ * });
+ * // keyedPaths === ['todos[#a].complete', 'todos[#b].complete']
  * ```
  */
 export function trackWrites<T, R = unknown>(
@@ -153,6 +183,28 @@ export function trackWrites<T, R = unknown>(
 ): { changed: boolean; result: R; paths: string[]; };
 
 /**
+ * Identity of an array element: the value of the first present field in `keys`,
+ * or undefined for a scalar or an object carrying none of them. The
+ * element-identity convention shared with reactivity's Signal.id and the
+ * renderer's getItemID, and what the keyed `detectChanges` mode and the keyed
+ * `get`/`set`/`unset` path grammar match on.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#elementkey elementKey}
+ * @see {@link https://next.semantic-ui.com/examples/utils-elementkey Example}
+ *
+ * @param item - The array element to read identity from
+ * @param keys - Candidate identity fields, first present wins (default ['id', '_id', 'hash', 'key'])
+ * @returns The identity value, or undefined when none of the fields are present
+ *
+ * @example
+ * ```ts
+ * elementKey({ id: 'a', _id: 'x' }) // returns 'a'
+ * elementKey({ name: 'n' }) // returns undefined
+ * elementKey({ sku: 's1' }, ['sku']) // returns 's1'
+ * ```
+ */
+export function elementKey(item: unknown, keys?: string[]): unknown;
+
+/**
  * Changes reported by detectChanges, grouped by operation
  */
 export interface DetectedChanges {
@@ -165,16 +217,40 @@ export interface DetectedChanges {
 }
 
 /**
+ * Options for detectChanges
+ */
+export interface DetectChangesOptions {
+  /**
+   * Diff cleanly-keyed arrays by element identity instead of by index (default
+   * true). A keyed array emits `field[#identity]` paths — `field[#z]` for a
+   * whole-element add/remove/replace, `field[#b].qty` for a field change — so a
+   * prepend or reorder is one add by key, not a positional cascade of rewrites.
+   * Any array that isn't cleanly keyed (an unkeyed element, a duplicate key, or
+   * a key value carrying `.` `[` `]` or a leading `#`) falls back to the
+   * positional walk, so an emitted keyed path always parses back through
+   * get/set/unset. Pass `false` for the legacy positional output.
+   */
+  keyed?: boolean;
+  /** Identity fields a keyed element is matched on, first present wins (default ['id', '_id', 'hash', 'key']) */
+  keys?: string[];
+}
+
+/**
  * Structural diff between two values, reported as dot paths from before to
- * after. Objects and arrays recurse to leaf paths, arrays diff by index,
- * values that can't be walked (Map/Set/Date/class instances) compare by deep
- * equality and report their own path. Differing non-container roots report
- * path ''.
+ * after. Objects recurse to leaf paths, values that can't be walked
+ * (Map/Set/Date/class instances) compare by deep equality and report their own
+ * path. Differing non-container roots report path ''.
+ *
+ * Arrays of uniquely-keyed objects diff by element identity by default,
+ * emitting `field[#identity]` paths that survive a reorder. Pass
+ * `{ keyed: false }` for the legacy positional walk, where arrays diff by index
+ * and a shifted array reports every moved position.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#detectchanges detectChanges}
  * @see {@link https://next.semantic-ui.com/examples/utils-detectchanges Example}
  *
  * @param before - The value to diff from
  * @param after - The value to diff to
+ * @param options - Keyed-mode and identity-field configuration
  * @returns Added, removed, and changed paths
  *
  * @example
@@ -184,9 +260,20 @@ export interface DetectedChanges {
  *   { name: 'b', nickname: 'al' },
  * )
  * // { added: ['nickname'], removed: ['temp'], changed: ['name'] }
+ *
+ * // arrays of keyed objects diff by identity by default — a prepend is one add
+ * detectChanges(
+ *   { items: [{ id: 'a', qty: 1 }, { id: 'b', qty: 1 }] },
+ *   { items: [{ id: 'z', qty: 9 }, { id: 'a', qty: 1 }, { id: 'b', qty: 5 }] },
+ * )
+ * // { added: ['items[#z]'], removed: [], changed: ['items[#b].qty'] }
  * ```
  */
-export function detectChanges(before: unknown, after: unknown): DetectedChanges;
+export function detectChanges(
+  before: unknown,
+  after: unknown,
+  options?: DetectChangesOptions,
+): DetectedChanges;
 
 /**
  * Extends an object with properties from additional sources
@@ -303,11 +390,15 @@ export function pick<T extends object, K extends keyof T>(
 ): Pick<T, K>;
 
 /**
- * Access a nested object field with a string path
+ * Access a nested object field with a string path. A bracket segment whose body
+ * starts with `#` selects an array element by identity (`items[#id]`) rather
+ * than position (`items[0]`); identity is matched String-coerced via
+ * {@link elementKey}.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#get get}
  *
  * @param obj - The object to traverse
- * @param path - The path string (e.g., 'a.b.c' or 'items[0].name')
+ * @param path - The path string (e.g., 'a.b.c', 'items[0].name', or 'items[#id].name')
+ * @param keys - Identity fields for keyed `[#id]` segments (default ['id', '_id', 'hash', 'key'])
  * @returns The value at the path or undefined if not found
  *
  * @example
@@ -316,11 +407,13 @@ export function pick<T extends object, K extends keyof T>(
  * get(obj, 'a.b.c') // returns 1
  * get(obj, 'a.b.d') // returns undefined
  * get(obj, 'items[0].name') // supports array indexing
+ * get(obj, 'items[#b].qty') // selects the element whose id is 'b'
  * ```
  */
 export function get<T extends object, V = any>(
   obj: T,
   path?: string,
+  keys?: string[],
 ): V | undefined;
 
 /**
@@ -329,24 +422,34 @@ export function get<T extends object, V = any>(
  * index, objects otherwise. Refuses prototype-climbing segments
  * (__proto__, constructor, prototype). Paths from trackWrites and
  * detectChanges apply back directly.
+ *
+ * A `[#id]` segment addresses an array element by identity: a present key
+ * replaces in place (or writes the field through it), an absent key appends a
+ * new element (a field write through an absent key is a no-op). The proto guard
+ * is not extended to keyed bodies — a `[#__proto__]` value only ===-compares
+ * against {@link elementKey} output, it is never used as a property name.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#set set}
  * @see {@link https://next.semantic-ui.com/examples/utils-set Example}
  *
  * @param obj - The object to write into
- * @param path - The path string (e.g., 'a.b.c', 'items.0.name', or 'items[0].name')
+ * @param path - The path string (e.g., 'a.b.c', 'items.0.name', 'items[0].name', or 'items[#id]')
  * @param value - The value to set at the path
+ * @param keys - Identity fields for keyed `[#id]` segments (default ['id', '_id', 'hash', 'key'])
  * @returns The same object reference
  *
  * @example
  * ```ts
  * set({}, 'a.b.c', 1) // returns { a: { b: { c: 1 } } }
  * set({}, 'items.0.name', 'first') // creates the array: { items: [{ name: 'first' }] }
+ * set(doc, 'items[#b].qty', 5) // writes through the element whose id is 'b'
+ * set(doc, 'items[#z]', { id: 'z' }) // appends, since no element has id 'z'
  * ```
  */
 export function set<T extends object>(
   obj: T,
   path: string,
   value: unknown,
+  keys?: string[],
 ): T;
 
 /**
@@ -354,20 +457,26 @@ export function set<T extends object>(
  * A missing path is a no-op. A removed array index leaves a hole rather than
  * splicing, so sibling index paths stay valid when applying several removals.
  * Refuses prototype-climbing segments (__proto__, constructor, prototype).
+ *
+ * A `[#id]` segment removes the matched array element, splicing it out (no
+ * positional hole — there are no sibling index paths to keep valid).
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#unset unset}
  *
  * @param obj - The object to remove from
- * @param path - The path string (e.g., 'a.b.c' or 'items.0')
+ * @param path - The path string (e.g., 'a.b.c', 'items.0', or 'items[#id]')
+ * @param keys - Identity fields for keyed `[#id]` segments (default ['id', '_id', 'hash', 'key'])
  * @returns The same object reference
  *
  * @example
  * ```ts
  * unset({ a: { b: 1, c: 2 } }, 'a.b') // returns { a: { c: 2 } }
+ * unset(doc, 'items[#b]') // splices out the element whose id is 'b'
  * ```
  */
 export function unset<T extends object>(
   obj: T,
   path: string,
+  keys?: string[],
 ): T;
 
 /**

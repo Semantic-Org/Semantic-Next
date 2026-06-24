@@ -79,7 +79,63 @@ const overBudget = (value) => spendBudget(value, autoBudget) < 0;
   equality and report their own path. A wholesale change to a non-container
   root reports path '' (the RFC 6902 root convention).
 */
-export const detectChanges = (before, after) => {
+// the identity fields a keyed array element is matched on, first present wins —
+// the same convention as reactivity's Signal.id and the renderer's getItemID
+const DEFAULT_ELEMENT_KEYS = ['id', '_id', 'hash', 'key'];
+
+/*
+  identity of an array element: the value of the first present field in `keys`,
+  or undefined for a scalar or an object carrying none of them. shared by the
+  keyed diff and the keyed path resolver so emit and apply agree on identity.
+*/
+export const elementKey = (item, keys = DEFAULT_ELEMENT_KEYS) => {
+  if (!isPlainObject(item)) {
+    return undefined;
+  }
+  for (const field of keys) {
+    if (item[field] != null) {
+      return item[field];
+    }
+  }
+  return undefined;
+};
+
+// resolve a keyed array segment to a live index, -1 if absent. identity compares
+// String-coerced because the path carries a string and ids may be number or string
+const findKeyed = (array, keyValue, keys = DEFAULT_ELEMENT_KEYS) => {
+  if (!isArray(array)) {
+    return -1;
+  }
+  for (let i = 0; i < array.length; i++) {
+    const id = elementKey(array[i], keys);
+    if (id != null && String(id) === keyValue) {
+      return i;
+    }
+  }
+  return -1;
+};
+
+// index a keyed array by stringified identity for set-wise diffing. returns null
+// (caller falls back to the positional walk) when an element is unkeyed, two share
+// a key, or a key value can't ride the dot-bracket path grammar (contains . [ ] or
+// a leading #) — so detectChanges never emits a keyed path get/set/unset can't parse
+const keyedMap = (array, keys) => {
+  const map = new Map();
+  for (const item of array) {
+    const id = elementKey(item, keys);
+    if (id == null) {
+      return null;
+    }
+    const keyValue = String(id);
+    if (map.has(keyValue) || /[.[\]]/.test(keyValue) || keyValue.charCodeAt(0) === 35) {
+      return null;
+    }
+    map.set(keyValue, item);
+  }
+  return map;
+};
+
+export const detectChanges = (before, after, { keyed = true, keys = DEFAULT_ELEMENT_KEYS } = {}) => {
   const added = [];
   const removed = [];
   const changed = [];
@@ -90,6 +146,39 @@ export const detectChanges = (before, after) => {
       return;
     }
     seen.add(a);
+    // keyed arrays diff as sets on element identity, so an insert or reorder is an
+    // add/remove of one element by key, not a positional cascade of id rewrites.
+    // emits the field[#key] form get/set/unset apply; falls back to the positional
+    // walk below when an array isn't cleanly keyed (keyedMap returns null)
+    if (keyed && isArray(a) && isArray(b)) {
+      const mapA = keyedMap(a, keys);
+      const mapB = keyedMap(b, keys);
+      if (mapA && mapB) {
+        for (const [keyValue, itemA] of mapA) {
+          const path = `${prefix}[#${keyValue}]`;
+          if (!mapB.has(keyValue)) {
+            removed.push(path);
+            continue;
+          }
+          const itemB = mapB.get(keyValue);
+          if (Object.is(itemA, itemB)) {
+            continue;
+          }
+          if (isTrackable(itemA) && isTrackable(itemB) && isArray(itemA) === isArray(itemB)) {
+            walk(itemA, itemB, path);
+          }
+          else if (!isEqual(itemA, itemB)) {
+            changed.push(path);
+          }
+        }
+        for (const [keyValue] of mapB) {
+          if (!mapA.has(keyValue)) {
+            added.push(`${prefix}[#${keyValue}]`);
+          }
+        }
+        return;
+      }
+    }
     for (const key of Object.keys(a)) {
       const path = prefix === '' ? key : `${prefix}.${key}`;
       if (!Object.hasOwn(b, key)) {
@@ -150,16 +239,29 @@ const pruneChildPaths = (pathLog) => {
   Run callback against value, report whether it changed it. 'auto' snapshots
   small values (clone + deep-compare, callback sees the real object) and
   write-tracks large ones through a proxy so cost scales with writes, not size.
+
+  Paths are id-addressed for keyed arrays by default (todos[#id].complete), the
+  same convention as detectChanges — so `each(items, item => item.x = 1)` reads
+  back as per-record writes, not array indices. Keyed paths come from the
+  snapshot diff, so requesting them forces the snapshot strategy; the proxy
+  strategy (explicit, or implied by onWrite) only ever sees the index a write went
+  through, so its paths stay positional. Opt out with `keyed: false` where the
+  proxy's no-clone behaviour on a large value matters more than id-addressing.
 */
 export const trackWrites = (value, callback, {
   strategy = 'auto',
   onWrite,
   returnPaths = true,
+  keyed = true,
+  keys = DEFAULT_ELEMENT_KEYS,
   clone: cloneFunction = clone,
   equality = isEqual,
 } = {}) => {
+  // keyed paths are produced by the snapshot diff, so when they are actually
+  // wanted the auto size-heuristic yields to snapshot. an explicit proxy strategy
+  // or an onWrite stream still wins, and its paths are positional by construction
   const useProxy = (strategy === 'proxy'
-    || (strategy === 'auto' && (onWrite !== undefined || overBudget(value))))
+    || (strategy === 'auto' && (onWrite !== undefined || (overBudget(value) && !(keyed && returnPaths)))))
     && isTrackable(value)
     && !Object.isFrozen(value);
 
@@ -169,7 +271,7 @@ export const trackWrites = (value, callback, {
     if (!returnPaths) {
       return { changed: !equality(before, value), result };
     }
-    const diff = detectChanges(before, value);
+    const diff = detectChanges(before, value, { keyed, keys });
     const paths = [...diff.added, ...diff.changed, ...diff.removed];
     return { changed: paths.length > 0, result, paths };
   }
@@ -549,11 +651,16 @@ export const arrayFromObject = (obj) => {
 const extractBracketAccess = (part) => {
   const bracketIndex = part.indexOf('[');
   const key = part.substring(0, bracketIndex);
-  const index = parseInt(part.substring(bracketIndex + 1, part.indexOf(']')), 10);
-  return { key, index };
+  const body = part.substring(bracketIndex + 1, part.indexOf(']'));
+  // a leading # marks a keyed element selector (field[#identity]) vs a numeric
+  // positional index (field[2]); the identity rides as a raw string value
+  if (body.charCodeAt(0) === 35) {
+    return { key, keyValue: body.slice(1) };
+  }
+  return { key, index: parseInt(body, 10) };
 };
 
-export const get = function(obj, path = '') {
+export const get = function(obj, path = '', keys = DEFAULT_ELEMENT_KEYS) {
   if (typeof path !== 'string') {
     return undefined;
   }
@@ -579,14 +686,16 @@ export const get = function(obj, path = '') {
     let part = parts[i];
 
     if (part.includes('[')) {
-      const { key, index } = extractBracketAccess(part);
-
-      if (key in currentObject && isArray(currentObject[key]) && index < currentObject[key].length) {
-        currentObject = currentObject[key][index];
-      }
-      else {
+      const access = extractBracketAccess(part);
+      const array = currentObject[access.key];
+      if (!isArray(array)) {
         return undefined;
       }
+      const index = 'keyValue' in access ? findKeyed(array, access.keyValue, keys) : access.index;
+      if (index < 0 || index >= array.length) {
+        return undefined;
+      }
+      currentObject = array[index];
     }
     else {
       if (part in currentObject) {
@@ -625,7 +734,7 @@ const isIndexSegment = (part) => /^\d+$/.test(part);
   paths from trackWrites and detectChanges apply back. Creates missing
   intermediates — arrays when the next segment is an index, objects otherwise.
 */
-export const set = function(obj, path, value) {
+export const set = function(obj, path, value, keys = DEFAULT_ELEMENT_KEYS) {
   if (typeof path !== 'string' || path === '' || obj === null || !isObject(obj)) {
     return obj;
   }
@@ -650,18 +759,38 @@ export const set = function(obj, path, value) {
     const isLast = i === parts.length - 1;
 
     if (part.includes('[')) {
-      const { key, index } = extractBracketAccess(part);
-      if (!isArray(currentObject[key])) {
-        currentObject[key] = [];
+      const access = extractBracketAccess(part);
+      if (!isArray(currentObject[access.key])) {
+        currentObject[access.key] = [];
       }
-      if (isLast) {
-        currentObject[key][index] = value;
-        return obj;
+      const array = currentObject[access.key];
+      if ('keyValue' in access) {
+        const index = findKeyed(array, access.keyValue, keys);
+        if (isLast) {
+          if (index === -1) {
+            array.push(value); // keyed add: an absent key appends a new element
+          }
+          else {
+            array[index] = value; // keyed replace: a present key overwrites in place
+          }
+          return obj;
+        }
+        if (index === -1) {
+          return obj; // a field write to a vanished element is a no-op
+        }
+        currentObject = array[index];
       }
-      if (currentObject[key][index] === null || !isObject(currentObject[key][index])) {
-        currentObject[key][index] = isIndexSegment(parts[i + 1]) ? [] : {};
+      else {
+        const { index } = access;
+        if (isLast) {
+          array[index] = value;
+          return obj;
+        }
+        if (array[index] === null || !isObject(array[index])) {
+          array[index] = isIndexSegment(parts[i + 1]) ? [] : {};
+        }
+        currentObject = array[index];
       }
-      currentObject = currentObject[key][index];
     }
     else if (isLast) {
       currentObject[part] = value;
@@ -705,7 +834,7 @@ export const set = function(obj, path, value) {
   than splicing, so sibling index paths stay valid when applying several
   removals at once.
 */
-export const unset = function(obj, path) {
+export const unset = function(obj, path, keys = DEFAULT_ELEMENT_KEYS) {
   if (typeof path !== 'string' || path === '' || obj === null || !isObject(obj)) {
     return obj;
   }
@@ -728,15 +857,30 @@ export const unset = function(obj, path) {
     const isLast = i === parts.length - 1;
 
     if (part.includes('[')) {
-      const { key, index } = extractBracketAccess(part);
-      if (!isArray(currentObject[key])) {
+      const access = extractBracketAccess(part);
+      const array = currentObject[access.key];
+      if (!isArray(array)) {
         return obj;
       }
-      if (isLast) {
-        delete currentObject[key][index];
-        return obj;
+      if ('keyValue' in access) {
+        const index = findKeyed(array, access.keyValue, keys);
+        if (index === -1) {
+          return obj;
+        }
+        if (isLast) {
+          array.splice(index, 1); // keyed removal splices: no positional siblings to keep valid
+          return obj;
+        }
+        currentObject = array[index];
       }
-      currentObject = currentObject[key][index];
+      else {
+        const { index } = access;
+        if (isLast) {
+          delete array[index];
+          return obj;
+        }
+        currentObject = array[index];
+      }
     }
     else if (isLast) {
       delete currentObject[part];

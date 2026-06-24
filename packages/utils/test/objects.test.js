@@ -4,6 +4,7 @@ import {
   assignInPlace,
   deepExtend,
   detectChanges,
+  elementKey,
   extend,
   filterObject,
   get,
@@ -45,12 +46,24 @@ describe('Object Utilities', () => {
         expect(received).toBe(target);
       });
 
-      it('hands the callback a tracked wrapper when large', () => {
+      it('snapshots a large value under the default, since keyed paths come from the snapshot diff', () => {
+        // keyed is the default and keyed paths are produced by detectChanges over
+        // a snapshot, so the auto size-heuristic yields to snapshot — the callback
+        // sees the real object, not a wrapper
+        const target = makeLarge();
+        let received;
+        trackWrites(target, (value) => {
+          received = value;
+        });
+        expect(received).toBe(target);
+      });
+
+      it('hands the callback a tracked wrapper when large and { keyed: false }', () => {
         const target = makeLarge();
         let wrapped;
         trackWrites(target, (value) => {
           wrapped = value !== target;
-        });
+        }, { keyed: false });
         expect(wrapped).toBe(true);
       });
 
@@ -481,6 +494,120 @@ describe('Object Utilities', () => {
         expect(paths).toEqual([]);
       });
     });
+
+    describe('keyed paths', () => {
+      // the marquee case — editing a field on every record of a collection reads
+      // back as per-record writes, not array indices, with zero configuration
+      it('reports per-record keyed paths for a field edit across a collection', () => {
+        const db = {
+          todos: [
+            { id: 'a', complete: false },
+            { id: 'b', complete: false },
+            { id: 'c', complete: false },
+          ],
+        };
+        const { changed, paths } = trackWrites(db, (d) => {
+          for (const todo of d.todos) {
+            todo.complete = true;
+          }
+        });
+        expect(changed).toBe(true);
+        expect(paths).toEqual([
+          'todos[#a].complete',
+          'todos[#b].complete',
+          'todos[#c].complete',
+        ]);
+      });
+
+      it('reports a structural push as a single keyed element add', () => {
+        const db = { todos: [{ id: 'a' }, { id: 'b' }] };
+        const { paths } = trackWrites(db, (d) => {
+          d.todos.push({ id: 'z' });
+        });
+        expect(paths).toEqual(['todos[#z]']);
+      });
+
+      it('forces the snapshot strategy on a large value when keyed paths are wanted', () => {
+        // 200 records clears the auto budget, but keyed paths come from the
+        // snapshot diff, so the callback still sees the real object
+        const db = {
+          todos: Array.from({ length: 200 }, (_, i) => ({ id: `t${i}`, complete: false })),
+        };
+        let sawReal;
+        const { paths } = trackWrites(db, (d) => {
+          sawReal = d === db;
+          d.todos[5].complete = true;
+        });
+        expect(sawReal).toBe(true);
+        expect(paths).toEqual(['todos[#t5].complete']);
+      });
+
+      it('yields positional paths under an explicit proxy strategy', () => {
+        // the proxy only sees the index a write went through, so its paths are
+        // positional by construction — the perf opt-out that drops identity
+        const db = { todos: [{ id: 'a', complete: false }, { id: 'b', complete: false }] };
+        const { paths } = trackWrites(db, (d) => {
+          for (const todo of d.todos) {
+            todo.complete = true;
+          }
+        }, { strategy: 'proxy' });
+        expect(paths).toEqual(['todos.0.complete', 'todos.1.complete']);
+      });
+
+      it('yields positional paths under { keyed: false }', () => {
+        const db = { todos: [{ id: 'a', x: 0 }] };
+        const { paths } = trackWrites(db, (d) => {
+          d.todos[0].x = 1;
+        }, { keyed: false });
+        expect(paths).toEqual(['todos.0.x']);
+      });
+
+      it('honors a custom key list for the emitted paths', () => {
+        const db = { rows: [{ sku: 's1', q: 1 }, { sku: 's2', q: 1 }] };
+        const { paths } = trackWrites(db, (d) => {
+          d.rows[1].q = 2;
+        }, { keys: ['sku'] });
+        expect(paths).toEqual(['rows[#s2].q']);
+      });
+
+      it('still reports changed with no paths under { returnPaths: false }', () => {
+        const db = { todos: [{ id: 'a', complete: false }] };
+        const { changed, paths } = trackWrites(db, (d) => {
+          d.todos[0].complete = true;
+        }, { returnPaths: false });
+        expect(changed).toBe(true);
+        expect(paths).toBeUndefined();
+      });
+    });
+  });
+
+  describe('elementKey', () => {
+    it('returns the first present default key field', () => {
+      expect(elementKey({ id: 'a', _id: 'x' })).toBe('a');
+      expect(elementKey({ _id: 'b' })).toBe('b');
+      expect(elementKey({ hash: 'h' })).toBe('h');
+      expect(elementKey({ key: 'k' })).toBe('k');
+    });
+
+    it('returns undefined for a scalar or an object carrying no key field', () => {
+      expect(elementKey('x')).toBeUndefined();
+      expect(elementKey(7)).toBeUndefined();
+      expect(elementKey(null)).toBeUndefined();
+      expect(elementKey({ name: 'n' })).toBeUndefined();
+    });
+
+    it('honors a custom key list', () => {
+      expect(elementKey({ sku: 's1' }, ['sku'])).toBe('s1');
+      expect(elementKey({ id: 'a', sku: 's1' }, ['sku', 'id'])).toBe('s1');
+    });
+
+    it('treats null and undefined fields as absent, skipping to the next key', () => {
+      expect(elementKey({ id: null, _id: 'b' })).toBe('b');
+      expect(elementKey({ id: undefined, key: 'k' })).toBe('k');
+      // a falsy-but-present value is still an identity
+      expect(elementKey({ id: 0 })).toBe(0);
+      expect(elementKey({ id: '' })).toBe('');
+    });
   });
 
   describe('detectChanges', () => {
@@ -535,6 +662,100 @@ describe('Object Utilities', () => {
       const after = { name: 'b' };
       after.self = after;
       expect(detectChanges(before, after).changed).toEqual(['name']);
+    });
+
+    describe('keyed mode', () => {
+      it('diffs by identity by default, { keyed: false } opts back to the positional cascade', () => {
+        const before = { lineItems: [{ id: 'a', qty: 1 }, { id: 'b', qty: 1 }] };
+        const after = { lineItems: [{ id: 'z', qty: 9 }, { id: 'a', qty: 1 }, { id: 'b', qty: 5 }] };
+        // keyed is the default now — a prepend plus an edit is one add by key
+        expect(detectChanges(before, after)).toEqual({
+          added: ['lineItems[#z]'],
+          removed: [],
+          changed: ['lineItems[#b].qty'],
+        });
+        // the explicit opt-out restores the index walk, where a prepend cascades
+        expect(detectChanges(before, after, { keyed: false })).toEqual({
+          added: ['lineItems.2'],
+          removed: [],
+          changed: ['lineItems.0.id', 'lineItems.0.qty', 'lineItems.1.id'],
+        });
+      });
+
+      it('diffs by identity under an explicit { keyed: true } too', () => {
+        const before = { lineItems: [{ id: 'a', qty: 1 }, { id: 'b', qty: 1 }] };
+        const after = { lineItems: [{ id: 'z', qty: 9 }, { id: 'a', qty: 1 }, { id: 'b', qty: 5 }] };
+        expect(detectChanges(before, after, { keyed: true })).toEqual({
+          added: ['lineItems[#z]'],
+          removed: [],
+          changed: ['lineItems[#b].qty'],
+        });
+      });
+
+      it('emits the whole-element path for a removed element', () => {
+        const before = { items: [{ id: 'a' }, { id: 'b' }] };
+        const after = { items: [{ id: 'a' }] };
+        expect(detectChanges(before, after, { keyed: true })).toEqual({
+          added: [],
+          removed: ['items[#b]'],
+          changed: [],
+        });
+      });
+
+      it('recurses through nested keyed arrays', () => {
+        const before = { rows: [{ id: 'r1', tags: [{ id: 't1', on: false }] }] };
+        const after = { rows: [{ id: 'r1', tags: [{ id: 't1', on: true }] }] };
+        expect(detectChanges(before, after, { keyed: true }).changed)
+          .toEqual(['rows[#r1].tags[#t1].on']);
+      });
+
+      it('honors a custom key list', () => {
+        const before = { a: [{ sku: 's1', q: 1 }] };
+        const after = { a: [{ sku: 's1', q: 2 }] };
+        expect(detectChanges(before, after, { keyed: true, keys: ['sku'] }).changed)
+          .toEqual(['a[#s1].q']);
+      });
+
+      it('matches a number id against its String-coerced key', () => {
+        const before = { a: [{ id: 7, q: 1 }] };
+        const after = { a: [{ id: 7, q: 2 }] };
+        expect(detectChanges(before, after, { keyed: true }).changed).toEqual(['a[#7].q']);
+      });
+
+      it('falls back to positional emit when an array has a duplicate key', () => {
+        const before = { a: [{ id: 'x' }] };
+        const after = { a: [{ id: 'x' }, { id: 'x' }] };
+        // a keyed map can't represent two elements under one key, so the
+        // positional walk runs and emits a parseable path instead
+        expect(detectChanges(before, after, { keyed: true }).added).toEqual(['a.1']);
+      });
+
+      it('falls back to positional emit when a key value carries a dot', () => {
+        const before = { a: [{ id: 'x.y', v: 1 }] };
+        const after = { a: [{ id: 'x.y', v: 2 }] };
+        expect(detectChanges(before, after, { keyed: true }).changed).toEqual(['a.0.v']);
+      });
+
+      it('falls back to positional emit when an element is unkeyed', () => {
+        const before = { a: [{ id: 'x', v: 1 }, { v: 2 }] };
+        const after = { a: [{ id: 'x', v: 1 }, { v: 3 }] };
+        expect(detectChanges(before, after, { keyed: true }).changed).toEqual(['a.1.v']);
+      });
+
+      it('round-trips an emitted keyed delta onto a replica in a different order', () => {
+        const before = { lineItems: [{ id: 'a', qty: 1 }, { id: 'b', qty: 1 }] };
+        const after = { lineItems: [{ id: 'z', qty: 9 }, { id: 'a', qty: 1 }, { id: 'b', qty: 5 }] };
+        const diff = detectChanges(before, after, { keyed: true });
+        // the replica holds the same elements shuffled, the delta still lands by id
+        const replica = { lineItems: [{ id: 'b', qty: 1 }, { id: 'a', qty: 1 }] };
+        [...diff.added, ...diff.changed].forEach((path) => set(replica, path, get(after, path)));
+        diff.removed.forEach((path) => unset(replica, path));
+        expect(replica.lineItems).toEqual([
+          { id: 'b', qty: 5 },
+          { id: 'a', qty: 1 },
+          { id: 'z', qty: 9 },
+        ]);
+      });
     });
   });
 
@@ -826,6 +1047,54 @@ describe('Object Utilities', () => {
       diff.removed.forEach((path) => unset(replica, path));
       expect(replica).toEqual(after);
     });
+
+    describe('keyed addressing', () => {
+      it('replaces the matched element in place when the key is present', () => {
+        const doc = { items: [{ id: 'a', n: 1 }, { id: 'b', n: 2 }] };
+        set(doc, 'items[#a]', { id: 'a', n: 100 });
+        expect(doc.items).toEqual([{ id: 'a', n: 100 }, { id: 'b', n: 2 }]);
+      });
+
+      it('appends a new element when the key is absent', () => {
+        const doc = { items: [{ id: 'a', n: 1 }] };
+        set(doc, 'items[#d]', { id: 'd', n: 4 });
+        expect(doc.items.map((x) => x.id)).toEqual(['a', 'd']);
+      });
+
+      it('writes a field through a present key', () => {
+        const doc = { items: [{ id: 'a', n: 1 }, { id: 'b', n: 2 }] };
+        set(doc, 'items[#b].n', 20);
+        expect(doc.items[1].n).toBe(20);
+      });
+
+      it('is a no-op for a field write through an absent key', () => {
+        const doc = { items: [{ id: 'a', n: 1 }] };
+        set(doc, 'items[#gone].n', 999);
+        expect(doc.items).toEqual([{ id: 'a', n: 1 }]);
+      });
+
+      it('matches a number id against its String-coerced key', () => {
+        const doc = { items: [{ id: 7, n: 1 }] };
+        set(doc, 'items[#7].n', 9);
+        expect(doc.items[0].n).toBe(9);
+      });
+
+      it('honors a custom key list', () => {
+        const doc = { a: [{ sku: 's1', q: 1 }] };
+        set(doc, 'a[#s1].q', 9, ['sku']);
+        expect(doc.a[0].q).toBe(9);
+      });
+
+      it('appends through a [#__proto__] keyed value without polluting Object.prototype', () => {
+        // the proto guard regex is intentionally not extended to keyed bodies — the
+        // value only ever ===-compares, it is never used as a property name
+        const doc = { a: [{ id: 'real' }] };
+        set(doc, 'a[#__proto__]', { id: '__proto__' });
+        expect(doc.a).toHaveLength(2);
+        expect({}.polluted).toBeUndefined();
+        expect(Object.prototype.polluted).toBeUndefined();
+      });
+    });
   });
 
   describe('unset', () => {
@@ -882,6 +1151,33 @@ describe('Object Utilities', () => {
       expect(unset(42, 'a')).toBe(42);
       unset(obj, 'a.b.c');
       expect(obj).toEqual({ a: 1 });
+    });
+
+    describe('keyed addressing', () => {
+      it('splices the matched element out, leaving no positional hole', () => {
+        const doc = { items: [{ id: 'a' }, { id: 'b' }, { id: 'c' }] };
+        unset(doc, 'items[#b]');
+        expect(doc.items.map((x) => x.id)).toEqual(['a', 'c']);
+        expect(doc.items.length).toBe(2);
+      });
+
+      it('no-ops when the key is absent', () => {
+        const doc = { items: [{ id: 'a' }] };
+        unset(doc, 'items[#gone]');
+        expect(doc.items).toEqual([{ id: 'a' }]);
+      });
+
+      it('removes a field through a present key', () => {
+        const doc = { items: [{ id: 'a', n: 1, drop: true }] };
+        unset(doc, 'items[#a].drop');
+        expect(doc.items[0]).toEqual({ id: 'a', n: 1 });
+      });
+
+      it('honors a custom key list', () => {
+        const doc = { a: [{ sku: 's1' }, { sku: 's2' }] };
+        unset(doc, 'a[#s1]', ['sku']);
+        expect(doc.a.map((x) => x.sku)).toEqual(['s2']);
+      });
     });
   });
 
@@ -961,6 +1257,44 @@ describe('Object Utilities', () => {
     it('should handle combined dotted keys with further nesting', () => {
       const obj = { 'a.b': { c: 42 } };
       expect(get(obj, 'a.b.c')).toBe(42);
+    });
+
+    describe('keyed addressing', () => {
+      it('reads a field through a present key', () => {
+        const doc = { items: [{ id: 'a', n: 1 }, { id: 'b', n: 2 }] };
+        expect(get(doc, 'items[#b].n')).toBe(2);
+      });
+
+      it('returns the matched element when the path ends at the key', () => {
+        const doc = { items: [{ id: 'a', n: 1 }, { id: 'b', n: 2 }] };
+        expect(get(doc, 'items[#a]')).toEqual({ id: 'a', n: 1 });
+      });
+
+      it('returns undefined for an absent key', () => {
+        const doc = { items: [{ id: 'a', n: 1 }] };
+        expect(get(doc, 'items[#zzz].n')).toBeUndefined();
+        expect(get(doc, 'items[#zzz]')).toBeUndefined();
+      });
+
+      it('selects by identity, not position — [#42] matches id "42", [1] stays positional', () => {
+        const doc = { a: [{ id: '42', v: 'by-id' }, { id: 'x', v: 'other' }] };
+        expect(get(doc, 'a[#42].v')).toBe('by-id');
+        expect(get(doc, 'a[1].v')).toBe('other');
+      });
+
+      it('matches a number id against its String-coerced key', () => {
+        expect(get({ a: [{ id: 7, v: 'seven' }] }, 'a[#7].v')).toBe('seven');
+      });
+
+      it('honors a custom key list', () => {
+        const doc = { a: [{ sku: 's1', q: 1 }] };
+        expect(get(doc, 'a[#s1].q', ['sku'])).toBe(1);
+      });
+
+      it('recurses through nested keyed arrays', () => {
+        const doc = { rows: [{ id: 'r1', tags: [{ id: 't1', on: true }] }] };
+        expect(get(doc, 'rows[#r1].tags[#t1].on')).toBe(true);
+      });
     });
   });
 

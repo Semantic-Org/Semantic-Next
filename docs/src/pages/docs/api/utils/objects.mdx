@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Object Utilities
 package: "@semantic-ui/utils"
-methods: [keys, values, filterObject, mapObject, trackWrites, detectChanges, extend, assignInPlace, deepExtend, pick, arrayFromObject, get, set, unset, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
+methods: [keys, values, filterObject, mapObject, trackWrites, elementKey, detectChanges, extend, assignInPlace, deepExtend, pick, arrayFromObject, get, set, unset, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
 icon: box
 description: API reference for object manipulation functions
 ---
@@ -127,12 +127,12 @@ console.log(result); // { a: 2, b: 4, c: 6 }
 ### trackWrites
 
 ```javascript
-function trackWrites(value, callback, { strategy = 'auto', returnPaths = true, onWrite, clone, equality } = {})
+function trackWrites(value, callback, { strategy = 'auto', returnPaths = true, keyed = true, keys = ['id', '_id', 'hash', 'key'], onWrite, clone, equality } = {})
 ```
 
 Runs a callback against a value and reports whether the callback changed it, with the changed fields as dot paths. Useful for running a user callback against a data structure and determining mutations.
 
-> **Strategy** - The default strategy 'auto' will use `snapshot` for small data structures and `proxy` for larger. Snapshot improves debugging by passing you a real copy, while `proxy` preserve performance at the cost of passing you a `proxyObject` inside your callback
+> **Strategy** - The default strategy 'auto' will use `snapshot` for small data structures and `proxy` for larger. Snapshot improves debugging by passing you a real copy, while `proxy` preserves performance at the cost of passing you a `proxyObject` inside your callback. Keyed paths (the default) come from the snapshot diff, so when they are wanted `'auto'` yields to `snapshot` even for a large value — an explicit `'proxy'` strategy keeps the no-clone path at the cost of positional paths.
 
 #### Parameters
 
@@ -148,7 +148,9 @@ Runs a callback against a value and reports whether the callback changed it, wit
 |-------------|----------|-----------|-------------|
 | strategy    | string   | 'auto'    | `'auto'`, `'snapshot'`, or `'proxy'` |
 | returnPaths | boolean  | true      | Return changed fields as dot paths. Pass `false` to skip collection on hot paths that only read `changed` |
-| onWrite     | function | undefined | `(path, target, key)` fires per observed write with the key path from the root. Implies the proxy strategy under `'auto'` |
+| keyed       | boolean  | true      | Id-address paths for keyed arrays (`todos[#id].complete` instead of `todos.0.complete`). Forces the snapshot strategy when paths are wanted, since keyed paths come from the snapshot diff. Pass `false` to keep the proxy's no-clone behaviour on a large value |
+| keys        | string[] | `['id', '_id', 'hash', 'key']` | Identity fields for keyed paths, first present wins |
+| onWrite     | function | undefined | `(path, target, key)` fires per observed write with the key path from the root. Implies the proxy strategy under `'auto'`, so its paths are positional |
 | clone       | function | clone     | Clone used for snapshots |
 | equality    | function | isEqual   | Equality used when paths are skipped and for exotic snapshots |
 
@@ -158,7 +160,7 @@ Runs a callback against a value and reports whether the callback changed it, wit
 
 #### Notes
 
-`paths` is a covering set resolvable through [`get`](#get) — the proxy strategy reports the paths written (pruned so a written parent subsumes its children), the snapshot strategy reports net leaf differences via [`detectChanges`](#detectchanges). A wholesale change to a non-container value reports path `''`. Under the proxy strategy the tracked wrapper is only valid inside the callback — using one after it returns throws.
+`paths` is a covering set resolvable through [`get`](#get). The snapshot strategy reports net leaf differences via [`detectChanges`](#detectchanges) and id-addresses keyed arrays by default (`field[#id]`). The proxy strategy reports the paths written (pruned so a written parent subsumes its children) and these are always positional — the proxy only sees the index a write went through. A wholesale change to a non-container value reports path `''`. Under the proxy strategy the tracked wrapper is only valid inside the callback — using one after it returns throws.
 
 #### Example
 
@@ -175,29 +177,72 @@ console.log(paths); // ['meta.count']
 // paths resolve against the value, e.g. for state sync
 paths.forEach((path) => sync(path, get(doc, path)));
 
-// writing the same value is not a change
-trackWrites(doc, (value) => {
-  value.meta.count = 1;
-}); // { changed: false, paths: [], ... }
+// keyed paths by default — a field edit across a collection reads back per
+// record, not by index, with zero configuration
+const db = { todos: [{ id: 'a', complete: false }, { id: 'b', complete: false }] };
+const completeAll = trackWrites(db, (d) => {
+  for (const todo of d.todos) { todo.complete = true; }
+});
+console.log(completeAll.paths); // ['todos[#a].complete', 'todos[#b].complete']
+
+// the proxy strategy is the positional opt-out (no element identity)
+trackWrites(db, mutator, { strategy: 'proxy' }); // paths like ['todos.0.complete']
 
 // skip path collection on hot paths
 trackWrites(doc, mutator, { returnPaths: false }); // { changed, result }
 ```
 
+### elementKey
+
+```javascript
+function elementKey(item, keys = ['id', '_id', 'hash', 'key'])
+```
+
+The identity of an array element — the value of the first present field in `keys`, or `undefined` for a scalar or an object carrying none of them. The same convention as reactivity's `Signal.id` and the renderer's `getItemID`, and what the keyed [`detectChanges`](#detectchanges) mode and the keyed [`get`](#get) / [`set`](#set) / [`unset`](#unset) grammar match on.
+
+#### Parameters
+
+| Name | Type     | Description |
+|------|----------|-------------|
+| item | any      | The array element to read identity from |
+| keys | string[] | Candidate identity fields, first present wins |
+
+#### Returns
+
+The identity value, or `undefined` when none of the fields are present.
+
+#### Example
+
+```javascript
+import { elementKey } from '@semantic-ui/utils';
+
+console.log(elementKey({ id: 'a', _id: 'x' })); // 'a'
+console.log(elementKey({ name: 'n' }));         // undefined
+console.log(elementKey({ sku: 's1' }, ['sku'])); // 's1'
+```
+
 ### detectChanges
 
 ```javascript
-function detectChanges(before, after)
+function detectChanges(before, after, { keyed = true, keys = ['id', '_id', 'hash', 'key'] } = {})
 ```
 
 Structural diff between two values, reported as dot paths from `before` to `after` — added (in after only), removed (in before only), and changed (in both, different values).
 
 #### Parameters
 
-| Name   | Type | Description |
-|--------|------|-------------|
-| before | any  | The value to diff from |
-| after  | any  | The value to diff to |
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| before  | any    | The value to diff from |
+| after   | any    | The value to diff to |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name  | Type     | Default | Description |
+|-------|----------|---------|-------------|
+| keyed | boolean  | true    | Diff arrays of uniquely-keyed objects by element identity instead of by index. Pass `false` for the legacy positional walk |
+| keys  | string[] | `['id', '_id', 'hash', 'key']` | Identity fields a keyed element is matched on |
 
 #### Returns
 
@@ -205,7 +250,9 @@ Structural diff between two values, reported as dot paths from `before` to `afte
 
 #### Notes
 
-Objects and arrays recurse to leaf paths and arrays diff by index, so a shifted array reports every moved position. Values that can't be walked (Map, Set, Date, class instances) compare by deep equality and report their own path. Differing non-container roots report path `''`.
+Objects recurse to leaf paths. Values that can't be walked (Map, Set, Date, class instances) compare by deep equality and report their own path. Differing non-container roots report path `''`.
+
+By default, an array whose elements are each uniquely keyed (see [`elementKey`](#elementkey)) diffs by identity instead of position. It emits `field[#identity]` paths — `field[#z]` for a whole-element add, remove, or replace, `field[#b].qty` for a field change — so a prepend or reorder is one add by key, not a positional cascade of index rewrites. Any array that isn't cleanly keyed (a scalar or unkeyed element, a duplicate key, or a key value carrying `.`, `[`, `]`, or a leading `#`) falls back to the positional walk, so an emitted keyed path always parses back through [`get`](#get) / [`set`](#set) / [`unset`](#unset). Pass `{ keyed: false }` for the legacy positional output, where arrays diff by index and a shifted array reports every moved position.
 
 #### Example
 
@@ -218,8 +265,19 @@ const after = { name: 'b', count: 1, nickname: 'al' };
 console.log(detectChanges(before, after));
 // { added: ['nickname'], removed: ['temp'], changed: ['name'] }
 
+// arrays of keyed objects diff by identity — a prepend plus an edit is one add
+const cartBefore = { lineItems: [{ id: 'a', qty: 1 }, { id: 'b', qty: 1 }] };
+const cartAfter = { lineItems: [{ id: 'z', qty: 9 }, { id: 'a', qty: 1 }, { id: 'b', qty: 5 }] };
+console.log(detectChanges(cartBefore, cartAfter));
+// { added: ['lineItems[#z]'], removed: [], changed: ['lineItems[#b].qty'] }
+
+// scalar arrays (no element identity) fall back to the positional walk
 console.log(detectChanges({ items: [1, 2, 3] }, { items: [1, 9] }));
 // { added: [], removed: ['items.2'], changed: ['items.1'] }
+
+// { keyed: false } restores the positional cascade for keyed objects too
+console.log(detectChanges(cartBefore, cartAfter, { keyed: false }));
+// { added: ['lineItems.2'], removed: [], changed: ['lineItems.0.id', 'lineItems.0.qty', 'lineItems.1.id'] }
 ```
 
 ### extend
@@ -416,21 +474,26 @@ console.log(result); // [{ key: 'a', value: 1 }, { key: 'b', value: 2 }, { key: 
 ### get
 
 ```javascript
-function get(obj, path = '')
+function get(obj, path = '', keys = ['id', '_id', 'hash', 'key'])
 ```
 
 Access a nested object field from a string path, like 'a.b.c'.
 
 #### Parameters
 
-| Name | Type   | Description |
-|------|--------|-------------|
-| obj  | object | The object to access |
-| path | string | The path to the desired property |
+| Name | Type     | Description |
+|------|----------|-------------|
+| obj  | object   | The object to access |
+| path | string   | The path to the desired property |
+| keys | string[] | Identity fields for keyed `[#id]` segments |
 
 #### Returns
 
 The value at the specified path, or undefined if not found.
+
+#### Notes
+
+A bracket segment whose body starts with `#` selects an array element by identity (`items[#id]`) rather than by position (`items[0]`). Identity is matched String-coerced (a number `id` of `7` matches `[#7]`), see [`elementKey`](#elementkey). Returns the element when the path ends at the key, or `undefined` when no element matches.
 
 #### Example
 
@@ -440,23 +503,27 @@ import { get } from '@semantic-ui/utils';
 const obj = { a: { b: { c: 42 } } };
 console.log(get(obj, 'a.b.c')); // 42
 console.log(get(obj, 'a.b.d')); // undefined
+
+const doc = { items: [{ id: 'a', n: 1 }, { id: 'b', n: 2 }] };
+console.log(get(doc, 'items[#b].n')); // 2 (selected by identity, not position)
 ```
 
 ### set
 
 ```javascript
-function set(obj, path, value)
+function set(obj, path, value, keys = ['id', '_id', 'hash', 'key'])
 ```
 
 Set a nested object field from a string path, the write twin of [`get`](#get). Creates missing intermediates — arrays when the next segment is a numeric index, objects otherwise.
 
 #### Parameters
 
-| Name  | Type   | Description |
-|-------|--------|-------------|
-| obj   | object | The object to write into |
-| path  | string | The path string (e.g., 'a.b.c', 'items.0.name', or 'items[0].name') |
-| value | any    | The value to set at the path |
+| Name  | Type     | Description |
+|-------|----------|-------------|
+| obj   | object   | The object to write into |
+| path  | string   | The path string (e.g., 'a.b.c', 'items.0.name', 'items[0].name', or 'items[#id]') |
+| value | any      | The value to set at the path |
+| keys  | string[] | Identity fields for keyed `[#id]` segments |
 
 #### Returns
 
@@ -465,6 +532,8 @@ The same object reference.
 #### Notes
 
 Paths from [`trackWrites`](#trackwrites) and [`detectChanges`](#detectchanges) apply back directly. Prototype-climbing segments (`__proto__`, `constructor`, `prototype`) are refused, and a non-string or empty path is a no-op.
+
+A `[#id]` segment addresses an array element by identity (see [`elementKey`](#elementkey)): a present key replaces the element in place (or writes the field through it), an absent key appends a new element (a field write through an absent key is a no-op). The prototype-pollution guard is intentionally not extended to keyed bodies — a `[#__proto__]` value is only `===`-compared against element identities, it is never used as a property name, so it appends an inert element rather than touching `Object.prototype`.
 
 #### Example
 
@@ -477,22 +546,28 @@ console.log(set({}, 'items.0.name', 'first')); // { items: [{ name: 'first' }] }
 // sync changes between objects
 const { paths } = trackWrites(source, mutator);
 paths.forEach((path) => set(replica, path, get(source, path)));
+
+// keyed addressing — replace by identity, append when absent
+const doc = { items: [{ id: 'a', n: 1 }] };
+set(doc, 'items[#a]', { id: 'a', n: 100 }); // replaces in place
+set(doc, 'items[#b]', { id: 'b', n: 2 });   // appends, no element had id 'b'
 ```
 
 ### unset
 
 ```javascript
-function unset(obj, path)
+function unset(obj, path, keys = ['id', '_id', 'hash', 'key'])
 ```
 
 Remove a nested object field from a string path, the delete twin of [`get`](#get) and [`set`](#set).
 
 #### Parameters
 
-| Name | Type   | Description |
-|------|--------|-------------|
-| obj  | object | The object to remove from |
-| path | string | The path string (e.g., 'a.b.c' or 'items.0') |
+| Name | Type     | Description |
+|------|----------|-------------|
+| obj  | object   | The object to remove from |
+| path | string   | The path string (e.g., 'a.b.c', 'items.0', or 'items[#id]') |
+| keys | string[] | Identity fields for keyed `[#id]` segments |
 
 #### Returns
 
@@ -501,6 +576,8 @@ The same object reference.
 #### Notes
 
 A missing path is a no-op. A removed array index leaves a hole rather than splicing, so sibling index paths stay valid when applying several removals at once. Prototype-climbing segments (`__proto__`, `constructor`, `prototype`) are refused. Pairs with [`detectChanges`](#detectchanges) — apply `removed` paths with `unset` and the rest with `set`.
+
+A `[#id]` segment removes the matched array element by identity (see [`elementKey`](#elementkey)), splicing it out — there are no sibling index paths to keep valid, so the splice is safe.
 
 #### Example
 

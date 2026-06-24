@@ -5,7 +5,7 @@ exampleType: 'log'
 category: 'Utils'
 subcategory: 'Objects'
 description: 'Run a callback against a value and report what it changed as dot paths'
-tags: ['utils', 'objects', 'trackWrites', 'change detection', 'mutation', 'paths', 'sync', 'proxy']
+tags: ['utils', 'objects', 'trackWrites', 'change detection', 'mutation', 'paths', 'sync', 'proxy', 'keyed']
 selectedFile: 'index.js'
-tip: 'Paths compose with get(value, path) for state sync. Small values are snapshot-compared so the callback sees the real object, large values get a write-tracking wrapper that shows as Proxy(Object) in the console — pass strategy to pin either path'
+tip: 'Paths id-address keyed arrays by default (todos[#id].complete), so a field edit across a collection reads back per record, not by index — and survives a reorder. Those paths come from the snapshot diff, so they force the snapshot strategy; pass strategy: proxy (or keyed: false) for the no-clone positional path on a large value'
 ---
