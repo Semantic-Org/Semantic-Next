@@ -13,7 +13,7 @@ xx.xx.xxxx
 
 ### Templates
 * **Feature** - Added `{#fn expression}` directive to pass values as-is without auto-invoking functions — mirrors `{#html}` pattern, useful for passing callbacks through property bindings
-* **Feature** - Added `{#match}` blocks for value-based branching — name a discriminant once and list `{is value}` cases, replacing repetitive `{#if is x 'a'}{else if is x 'b'}` chains
+* **Feature** - Added `{#match}` blocks for value-based branching — name a discriminant once and list `{is value}` cases (loose `==`) or `{isExactly value}` cases (strict `===`, to tell `undefined` from `null` or split the falsy set), replacing repetitive `{#if is x 'a'}{else if is x 'b'}` chains
 
 ### Reactivity
 * **Enhancement** - `mutate()` on large values now detects changes by tracking writes through a proxy instead of clone-and-compare, so editing one row of a big list costs the writes, not the list. The callback sees a tracked wrapper at that scale (shows as `Proxy(Object)` in the console), and the wrapper is only valid inside the callback. Small values keep the previous snapshot behavior and see the real object

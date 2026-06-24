@@ -67,6 +67,27 @@ A JavaScript expression that contains spaces needs parentheses so it reads as a 
 {/match}
 ```
 
+## Exact Matching
+
+`{is}` compares with `==`, so it coerces. `null` and `undefined` fall into the same case, as do the loosely equal falsy values `0`, `''`, and `false`. `{isExactly}` compares with `===` instead, with no coercion. It takes the same values, expressions, and multiple-value lists as `{is}`, and is a case keyword the same way.
+
+Strict matching is what separates a value you have not fetched from one you fetched and found empty.
+
+```sui
+{#match user}
+  {isExactly undefined}
+    Loading...
+  {isExactly null}
+    No user found
+  {else}
+    {user.name}
+{/match}
+```
+
+With `{is undefined}` and `{is null}`, both cases match either value, so the first one wins for both. `{isExactly}` keeps them apart. The same is true of the falsy set: `{is 0}` also matches `''` and `false`, while `{isExactly 0}` matches only the number.
+
+<PlaygroundExample id="match-exact"></PlaygroundExample>
+
 ## Reactivity
 
 The discriminant is reactive. When it changes, the block re-matches and swaps to the newly matching case, the same as `{#if}`.
@@ -121,7 +142,7 @@ Stay with `{#if}` for unrelated conditions, ranges, or boolean tests, where ther
 
 ## The `is` Keyword
 
-Inside a `{#match}` block, `is` opens a case, so it shadows the `is` equality [helper](/docs/guides/templates/helpers) there. To compare values directly in a case body, use `==` or the JavaScript form `is(x, y)`.
+Inside a `{#match}` block, `is` opens a case, so it shadows the `is` equality [helper](/docs/guides/templates/helpers) there. `isExactly` is gated the same way. To compare values directly in a case body, use `==` or the JavaScript form `is(x, y)`.
 
 ```sui
 {#match tab}
@@ -132,4 +153,4 @@ Inside a `{#match}` block, `is` opens a case, so it shadows the `is` equality [h
 {/match}
 ```
 
-Everywhere outside a match block, `{is x y}` is the equality helper, unchanged.
+Everywhere outside a match block, `{is x y}` and `{isExactly x y}` are the equality helpers, unchanged.

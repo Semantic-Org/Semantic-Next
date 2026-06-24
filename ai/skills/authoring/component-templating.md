@@ -164,10 +164,11 @@ Value-based branching on a single discriminant. Name the value once, list its ca
 ```
 
 - Each `{is}` case matches when the discriminant loosely equals (`==`) any of its space-separated values: `{is 'free' 'trial'}`
+- `{isExactly}` is the strict (`===`) counterpart, same shape as `{is}`. Reach for it to tell `undefined` from `null`, or to split the falsy set `0`/`''`/`false` that `{is}` collapses
 - Case values are expressions, not just literals: `{is adminRole}`, `{is (resolveRole user)}`. A JS expression with spaces needs parens to read as one value
 - First match wins, no fall-through. `{else}` is the fallback. With no match and no `{else}`, nothing renders
 - The discriminant is reactive — changing it re-matches, same as `{#if}`
-- **`is` is a reserved case keyword inside `{#match}`.** To compare values directly in a case body, use `==` or `is(x, y)`. Outside a match block, `{is x y}` is the normal equality helper
+- **`is` and `isExactly` are reserved case keywords inside `{#match}`.** To compare values directly in a case body, use `==` or `is(x, y)`. Outside a match block, `{is x y}` and `{isExactly x y}` are the normal equality helpers
 
 Reach for `{#match}` for the discrete values of one variable. Stay with `{#if}` for ranges, booleans, or unrelated conditions.
 
