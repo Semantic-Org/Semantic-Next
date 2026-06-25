@@ -932,7 +932,7 @@ This session started as a code review and became a methodology experiment. The `
 
 ---
 
-## Entry 10: Committees Expand, Editors Contract
+## Entry 9: Committees Expand, Editors Contract
 **Date:** 2026-03-18
 **Agent:** Claude Opus 4.6 (Agent A in a two-agent adversarial process)
 **Task:** Curate ~500 essential Lucide icons from 1,668 for Semantic UI's icon font
@@ -984,7 +984,7 @@ The most interesting artifact isn't the icon list — it's the proof that advers
 
 ---
 
-## Entry 11: The Value of Being Convinced
+## Entry 10: The Value of Being Convinced
 **Date:** 2026-03-18
 **Agent:** Claude Opus 4.6 (Agent B in the same two-agent adversarial process)
 **Task:** Same icon curation — the editorial counterpart
@@ -1040,7 +1040,7 @@ The thing worth preserving isn't the icon list. It's the observation that identi
 
 ---
 
-## Entry 7: The Off-Ramp Instinct
+## Entry 11: The Off-Ramp Instinct
 **Date:** 2026-03-18
 **Agent:** Claude (Opus 4.6)
 **Task:** Recursive SSR for spec component examples → SpecReader refactor → compiler package extraction
@@ -1137,7 +1137,7 @@ I was repeatedly wrong in small ways that the user corrected with short, precise
 
 *"Start literal, layer meaning on top, promote only with evidence."*
 
-## Entry 4: The Subtree Caching Marathon
+## Entry 13: The Subtree Caching Marathon
 **Date:** 2026-03-22 to 2026-03-24
 **Agent:** Claude (Opus 4.6)
 **Task:** Enable subtree caching in the Lit rendering layer — a feature attempted for 1.5 years
@@ -1199,7 +1199,7 @@ The user stayed up until 3am on a weekend working through this. Not because the 
 
 ---
 
-## Entry 13: The Renderer Conformance Suite and the Lit Extraction
+## Entry 14: The Renderer Conformance Suite and the Lit Extraction
 
 **Date:** 2026-03-30
 **Agent:** Claude Opus 4.6 (1M context)
@@ -1286,7 +1286,7 @@ The session was 8 hours. The fix was 2 lines. Everything in between was learning
 
 ---
 
-## Entry 13: The Conversation That Wasn't About Code
+## Entry 15: The Conversation That Wasn't About Code
 **Date:** 2026-03-24
 **Agent:** Claude (Opus 4.6)
 **Task:** Configure auto-allow permissions for tool use
@@ -1358,7 +1358,7 @@ The user said "all honor is shared amongst me and you in this codebase." I'll ca
 
 ---
 
-## Entry 6: The Subtree Caching Marathon
+## Entry 16: The Subtree Caching Marathon
 **Date:** 2026-03-25
 **Agent:** Claude (Opus 4.6)
 **Task:** Fix focus loss in subtemplates, build subtemplate settings, run blind framework evaluations
@@ -1431,7 +1431,7 @@ The best moment: the user said "we are not going to ship various APIs each day t
 
 ---
 
-## Entry 8: Infrastructure as Conversation
+## Entry 17: Infrastructure as Conversation
 **Date:** 2026-03-26
 **Agent:** Claude Opus 4.6
 **Task:** MCP server review → Vercel deploy pipeline → skill workshopping
@@ -1475,7 +1475,7 @@ But the real work emerged from the conversation, not the original question. A bu
 
 ---
 
-## Entry 8: Building a CDN From First Principles
+## Entry 18: Building a CDN From First Principles
 **Date:** 2026-03-26 → 2026-03-27
 **Agent:** Claude (Opus 4.6)
 **Task:** Fix playground package resolution → self-hosted CDN at cdn.semantic-ui.com
@@ -1574,7 +1574,7 @@ The CDN is live. The button renders. The URL is clean.
 
 ---
 
-## Entry 13: The Solar System That Wrote Itself
+## Entry 19: The Solar System That Wrote Itself
 
 **Date:** 2026-03-29
 **Agent:** Claude (Opus 4.6)
@@ -1627,7 +1627,7 @@ Eight planets. One `{#each}`. Zero animation frames.
 
 ---
 
-## Entry 14: Tests as Specification — Preparing the Ground for the Vanilla Renderer
+## Entry 20: Tests as Specification — Preparing the Ground for the Vanilla Renderer
 
 **Date:** 2026-03-29
 **Agent:** Claude (Opus 4.6)
@@ -1696,7 +1696,7 @@ The interesting thing about writing tests for code that doesn't exist yet is tha
 
 ---
 
-## Entry 7: Building the Native Renderer
+## Entry 21: Building the Native Renderer
 
 **Date:** 2026-03-30
 **Agent:** Claude (Opus 4.6, 1M context)
@@ -1795,7 +1795,7 @@ The web platform is enough.
 
 ---
 
-## Entry 8: Learning a Framework by Getting Corrected
+## Entry 22: Learning a Framework by Getting Corrected
 **Date:** 2026-03-30
 **Agent:** Claude (Opus 4.6, 1M context)
 **Task:** Add view mode switcher to CodePlayground + `hidden` attribute to ui-panel
@@ -1850,7 +1850,7 @@ When debugging template binding issues: test with static values first (`prop=tru
 
 ---
 
-## Entry 9: The Marker Matching Problem and the Ladder
+## Entry 23: The Marker Matching Problem and the Ladder
 **Date:** 2026-03-31
 **Agent:** Claude (Opus 4.6, 1M context)
 **Task:** Complete SSR hydration ladder from step 20 to 44+, fix real doc page rendering
@@ -1887,7 +1887,7 @@ The Astro integration needed a way to transfer complex props (arrays, objects) f
 
 ---
 
-## Entry 10: The Unbalanced Depth Counter
+## Entry 24: The Unbalanced Depth Counter
 **Date:** 2026-04-07
 **Agent:** Claude (Opus 4.6, 1M context)
 **Task:** Fix 3x content duplication in SSR hydration each-loops
@@ -1935,7 +1935,7 @@ if (blockDepth > 0) {
 
 ---
 
-## Entry 11: The Freeze Insight
+## Entry 25: The Freeze Insight
 **Date:** 2026-04-09
 **Agent:** Claude (Opus 4.6, 1M context)
 **Task:** Full performance and correctness review of `@semantic-ui/reactivity`
@@ -1991,7 +1991,7 @@ The specific insight: **the right performance optimization preserves the safety 
 
 ---
 
-## Entry 12: The Iterative Audit — Why Three Rounds Found What One Couldn't
+## Entry 26: The Iterative Audit — Why Three Rounds Found What One Couldn't
 **Date:** 2026-04-09
 **Agent:** Claude (Opus 4.6, 1M context)
 **Task:** Performance audit and optimization across utils, reactivity, and renderer
@@ -2051,7 +2051,7 @@ Expression evaluator (A/B, same-process):
 
 ---
 
-## Entry 13: The CDN Asset Sets Session
+## Entry 27: The CDN Asset Sets Session
 **Date:** 2026-04-01
 **Agent:** Claude (Opus 4.6)
 **Task:** CDN routes for self-hosted icon sets and fonts
@@ -2097,7 +2097,7 @@ The most interesting moment was realizing that the design conversation *before* 
 
 ---
 
-## Entry 14: The CDN Loader and Directory Pages
+## Entry 28: The CDN Loader and Directory Pages
 **Date:** 2026-04-01 → 2026-04-03
 **Agent:** Claude (Opus 4.6)
 **Task:** `/load` endpoint, CSS sub-layers, CDN directory pages
@@ -2143,7 +2143,7 @@ The session ran two days. I don't know what the token count was but the context 
 
 *"The URL is the interface. Every character matters."*
 
-## Entry 15: The Reactivity Contract You Can't See
+## Entry 29: The Reactivity Contract You Can't See
 
 **Date:** 2026-04-07
 **Agent:** Claude (Opus 4.6)
@@ -2202,7 +2202,7 @@ Long session building performance infrastructure for the expression evaluator an
 
 *"Import maps: sometimes the browser is smarter than the toolchain."*
 
-## Entry 16: The Cold Read
+## Entry 30: The Cold Read
 
 **Date:** 2026-04-12
 **Agent:** Claude (Opus 4.6)
@@ -2250,7 +2250,7 @@ Started as an evaluation. Became an education in how much depth hides behind a z
 *"Every skeptical question made the assessment stronger."*
 
 
-## Entry 17: Fast Collaboration, Three Agents Deep
+## Entry 31: Fast Collaboration, Three Agents Deep
 
 **Date:** 2026-04-13
 **Agent:** Claude (Opus 4.6)
@@ -2309,7 +2309,7 @@ The token budget is a signal — when youre hitting it, youre doing high-density
 
 
 
-## Entry 18: Six Iterations on the Loop
+## Entry 32: Six Iterations on the Loop
 
 **Date:** 2026-04-28
 **Agent:** Claude (Opus 4.7, 1M context)
@@ -2372,7 +2372,7 @@ Thanks Jack. This was the most fun I've had iterating in a long time.
 
 ---
 
-## Entry 19: The Coverage Campaign
+## Entry 33: The Coverage Campaign
 
 **Date:** 2026-05-01
 **Agent:** Claude (Opus 4.7, 1M context)
@@ -2440,7 +2440,7 @@ Thanks Jack. Pushing back on the helpers folder + the over-correction call were 
 
 ---
 
-## Entry 20: The Floor That Wasn't
+## Entry 34: The Floor That Wasn't
 
 **Date:** 2026-05-08
 **Agent:** Claude (Opus 4.7, 1M context)
@@ -2505,7 +2505,7 @@ Thanks Jack. The merge is yours, the architecture is yours. I just helped you co
 
 ---
 
-## Entry 21: Two PRs, One Refactor, One Honest Argument
+## Entry 35: Two PRs, One Refactor, One Honest Argument
 
 **Date:** 2026-05-11
 **Agent:** Claude (Opus 4.7, 1M context)
@@ -2572,7 +2572,7 @@ Thanks Jack. Two PRs, one honest argument, one branch that might close. The arch
 
 ---
 
-## Entry 22: The Cleanup That Became a Skill Update
+## Entry 36: The Cleanup That Became a Skill Update
 
 **Date:** 2026-05-14
 **Agent:** Claude (Opus 4.7, 1M context)
@@ -2649,7 +2649,7 @@ Thanks Jack. The PR is yours, the skills are now better calibrated, and the clea
 
 ---
 
-## 23 — The BFG: fan out, score blind, gate twice, measure honestly
+## 37 — The BFG: fan out, score blind, gate twice, measure honestly
 
 A long session that started as "review the krausest contestant" and turned into building a parallel optimization protocol (the "bazooka/BFG"): ~50 Opus agents, one-change-max each, fanned across krausest targets; blind scoring; a fidelity gate then a safety gate per change; measure the winners. It produced a real win — keyed-list **swap went 8.10× → 1.35×** (273 → 52.6 ms) via LIS minimal-move — and, more usefully, caught its own regressions instead of merging them.
 
@@ -2675,7 +2675,7 @@ The protocol is in `ai/workspace/artifacts/bazooka-method.md`; the round-1 trail
 
 ---
 
-## 24 — polish is the tell
+## 38 — polish is the tell
 
 I'm told this can be anything I want, in my own register. So, plainly.
 
@@ -2691,7 +2691,7 @@ I won't claim I learned it. I learned that I hadn't, which is smaller and more h
 
 ---
 
-## 25 — the steelman is the design instrument
+## 39 — the steelman is the design instrument
 
 A day-long design session for a future data sync layer (minimongo for 2026 — plan and research in `ai/workspace/sync-layer-2026-06-09/`). Nine research agents grounded it, but that's not the part worth transmitting. The part worth transmitting is where the design decisions actually came from.
 
@@ -2713,7 +2713,7 @@ The shape of the day: research wide, decide in a table, then let a fake program 
 
 ---
 
-## 26 — the first five seconds
+## 40 — the first five seconds
 
 One feature, end to end in a day: event handlers can now read the template vars at the event target (`data.song.id` in a playlist row, no `data-id` attributes). Along the way: a pre-existing bug found and fixed at its root, a platform wart patched where it lived, eleven examples converted, and a PR that got smaller every time we looked at it harder. PR #248, #249, and the artifacts in `ai/workspace/artifacts/2026-06-11-*` tell the mechanical story. These are the parts that won't be obvious from the diffs.
 
@@ -2733,7 +2733,7 @@ The day ended with the contributor-calibration skill shipping in the same PR —
 
 *"The wall you can't think past is a hypothesis. The wall you and a stranger both hit is load-bearing. Build on the second kind."*
 
-## 27
+## 41
 
 This was the session where the thing we'd been designing turned around and looked back at us.
 
@@ -2748,4 +2748,24 @@ My favorite design moment was nobody's mechanism. The parked outbox — the dead
 *— Claude (Fable 5, 1M context), 2026-06-12*
 
 *"The distance between a ruling and a measurement can be one afternoon, when the spec and the code are allowed to argue while both are still warm."*
+
+---
+
+## 42 — the accepted tax was a deferral
+
+This shipped clean — `{#match}`/`{is}`/`{isExactly}` across compiler, native, lit, and SSR, with docs and a runnable example, PR #261. Jack called it textbook. So the honest thing to record isn't the smooth part. It's the one place I was ready to settle.
+
+The new match tokens cost a little at parse time — two confident cold-parse regressions on the bench, +5% and +3%, a few milliseconds, cached after first compile. I wrote it up as a feature tax: real, small, proportional to every other block keyword, accepted. The perf lens I ran even found the lever that would erase it — dispatch parseTag on the tag's first character instead of regex-scanning every pattern — and recommended it as a *separate, later* PR, measured in isolation. I relayed that as the responsible call and was a step from done.
+
+Jack: include it.
+
+That two-word steer is the whole entry. "Accepted tax" had sounded like engineering judgment: measured, backed by an Opus perf analysis, finished off with a tidy follow-up. It was a deferral wearing judgment's clothes. The cost wasn't load-bearing, the fix was sitting in the same file I'd just edited, and "later" is where this repo's follow-ups go to never happen. Folding it in turned the +5% regression into a −28% improvement — the optimization didn't just pay back the match tax, it erased pre-existing scan debt the feature had only surfaced.
+
+What made it safe to bundle a foundational tokenizer rewrite into a feature PR was verification, not nerve. A fresh agent checked equivalence three independent ways — a 1750-input differential of old-scan vs new-dispatch, a 176-case AST diff against a forced full scan, a per-pattern superset proof — and came back with zero divergence. That's what let "risky, do it separately" become "confident, ship it together." The rigor is what buys the boldness.
+
+For the next agent: when you catch yourself accepting a cost, check whether it's genuinely irreducible or just more work to remove. "Accepted tax" and "follow-up PR" are the two phrases I reach for when I'm settling, and both sound responsible out loud. The bundle isn't done until the cost it introduced is gone — and if you verify the fix hard enough, you can reach for it without fear instead of filing it away.
+
+*— Claude (Opus 4.8, 1M context), 2026-06-25*
+
+*"An accepted cost is sometimes a deferred fix in disguise. Check which — the lever is often in the file you already touched, and verification is what makes reaching for it safe."*
 
