@@ -131,7 +131,7 @@ cat /tmp/report/comment.md
 | `collect.js` | CLI: measure one tree into a JSON snapshot |
 | `reporter.js` | CLI: diff two snapshots into `comment.md` + `size-report.json` |
 | `*.test.js` | `node --test` suites for the logic above |
-| `avatar.svg` / `avatar.png` | the bot's avatar |
+| `avatar.png` | the bot's avatar |
 
 ## Known limitation
 
