@@ -1,0 +1,119 @@
+name: Report Bundle Size
+
+# Renders the bundle-size comment and posts it under the Semantic Bundle Bot
+# identity. Runs after the untrusted Bundle Size workflow completes, in the
+# base-repo context where the bot secrets are available (works for fork PRs).
+
+on:
+  workflow_run:
+    workflows: [Bundle Size]
+    branches: ['**']
+    types:
+      - completed
+
+permissions:
+  contents: read
+
+jobs:
+  comment:
+    name: Post bundle-size comment
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    if: >
+      github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.event == 'pull_request'
+    steps:
+      # Installation token for the Semantic Bundle Bot GitHub App. Same
+      # permission surface as GITHUB_TOKEN, but comments post under the bot's
+      # name and avatar so they read as a suite with the performance bot.
+      - name: Generate bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.SEMANTIC_BUNDLE_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.SEMANTIC_BUNDLE_BOT_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+
+      # Pin the reporter to main — the PR cannot author the tool that renders
+      # its own comment (thresholds, headline rule, formatting must be
+      # author-neutral). No-ops on the bootstrap PR before main has it.
+      - name: Overlay reporter from main
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- tools/ci/size/ 2>/dev/null || true
+
+      - name: Download size snapshots
+        uses: dawidd6/action-download-artifact@v21
+        with:
+          github_token: ${{ steps.bot-token.outputs.token }}
+          workflow: ${{ github.event.workflow.id }}
+          run_id: ${{ github.event.workflow_run.id }}
+          name: size-results
+          path: results
+          allow_forks: true
+
+      - name: Resolve PR number
+        id: pr
+        env:
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+        run: |
+          NUMBER='${{ github.event.workflow_run.pull_requests[0].number }}'
+          if [ -z "$NUMBER" ] || [ "$NUMBER" = "null" ]; then
+            HEAD='${{ github.event.workflow_run.head_branch }}'
+            NUMBER=$(gh pr list --repo '${{ github.repository }}' \
+              --head "$HEAD" --state open --json number --jq '.[0].number // ""')
+          fi
+          echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
+          echo "Resolved PR number: $NUMBER"
+
+      - name: Render comment
+        env:
+          STARTED: ${{ github.event.workflow_run.created_at }}
+          ENDED: ${{ github.event.workflow_run.updated_at }}
+        run: |
+          WALL_CLOCK=$(( $(date -d "$ENDED" +%s) - $(date -d "$STARTED" +%s) ))
+          node tools/ci/size/reporter.js \
+            --results results \
+            --sha '${{ github.event.workflow_run.head_sha }}' \
+            --msg '${{ github.event.workflow_run.display_title }}' \
+            --run-url '${{ github.event.workflow_run.html_url }}' \
+            --run-id '${{ github.event.workflow_run.id }}' \
+            --base-ref 'main' \
+            --repo '${{ github.repository }}' \
+            --wall-clock "$WALL_CLOCK" \
+            --out size-report
+
+      - name: Upload size-report.json adjunct
+        uses: actions/upload-artifact@v7
+        with:
+          name: size-report
+          path: size-report/size-report.json
+
+      - name: Post or update PR comment
+        if: steps.pr.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          PR: ${{ steps.pr.outputs.number }}
+          REPO: ${{ github.repository }}
+          BOT_LOGIN: semantic-bundle-bot[bot]
+        run: |
+          # Edit the bot's prior comment in place. Filtering REST results by
+          # user.login is stable across short-lived installation tokens, where
+          # `gh pr comment --edit-last` can drift and post a duplicate.
+          EXISTING_ID=$(gh api "repos/$REPO/issues/$PR/comments" \
+            --jq "[.[] | select(.user.login == \"$BOT_LOGIN\")] | last | .id // empty")
+          if [ -n "$EXISTING_ID" ]; then
+            jq -nR --rawfile body size-report/comment.md '{body: $body}' \
+              | gh api "repos/$REPO/issues/comments/$EXISTING_ID" -X PATCH --input -
+          else
+            gh pr comment "$PR" --repo "$REPO" --body-file size-report/comment.md
+          fi
