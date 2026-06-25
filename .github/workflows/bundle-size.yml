@@ -1,0 +1,82 @@
+name: Bundle Size
+
+# Measures shipped bundle sizes on the PR head and the merge base, then hands
+# both snapshots to the report workflow. This job is untrusted (it builds PR
+# code) so it holds only `contents: read` and never posts — the workflow_run
+# reporter holds the bot credentials. Same split as the Benchmarks suite.
+
+on:
+  pull_request:
+    paths:
+      # shipped code — the measurement target
+      - 'packages/**'
+      - 'src/**'
+      # build scripts shape the output bytes, so a change here is a real
+      # (and measurable) size change, not a harness edit
+      - 'internal-packages/scripts/**'
+      # the size harness itself — self-test on its own PRs
+      - 'tools/ci/size/**'
+      - '.github/workflows/bundle-size.yml'
+
+concurrency:
+  group: bundle-size-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Author-neutral scorecard: the size harness (manifest, measure, loc,
+      # reporter) always comes from main, so a PR can't reshape how its own
+      # bundles are weighed. Build scripts are deliberately NOT pinned — a real
+      # minification or tree-shaking win should show up as a win. First-PR
+      # bootstrap: main has no tools/ci/size yet, so this no-ops and the PR's
+      # own harness runs (self-test), same as the bench suite.
+      - name: Overlay size harness from main
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- tools/ci/size/ 2>/dev/null || true
+
+      - name: Build and measure PR head
+        run: |
+          npm run build
+          mkdir -p results
+          node tools/ci/size/collect.js --root . --label current --out results/current.json
+
+      # Swap shipped source and build scripts to the merge base, rebuild, and
+      # measure. node_modules is reused — a faithful-enough baseline, since
+      # dep bumps rarely move first-party bundle bytes. Files the PR adds are
+      # dropped so the lines-of-code delta counts new files honestly.
+      - name: Build and measure merge base
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+          BASELINE_SHA=$(git rev-parse FETCH_HEAD)
+          ADDED=$(git diff --name-only --diff-filter=A FETCH_HEAD HEAD -- packages src internal-packages || true)
+          git checkout FETCH_HEAD -- packages src internal-packages 2>/dev/null || true
+          if [ -n "$ADDED" ]; then echo "$ADDED" | xargs -r rm -f; fi
+          npm run build
+          node tools/ci/size/collect.js --root . --label baseline --out results/baseline.json
+          echo "$BASELINE_SHA" > results/baseline-sha.txt
+
+      - name: Upload size snapshots
+        uses: actions/upload-artifact@v7
+        with:
+          name: size-results
+          path: results/*
