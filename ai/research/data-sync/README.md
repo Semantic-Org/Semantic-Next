@@ -45,15 +45,18 @@ reopening anything.
 1. **`scenario.md`** — the ground-truth workload. When the design and the scenario disagree,
    the scenario wins or gets amended.
 2. **`plan.md`** — the design and decision record. Carries the dated rulings inline.
-3. **`reference-comparison.md`** — the 28 rulings against Zero, Supabase Realtime, and Convex,
+3. **`component-data-surface.md`** — the component-author surface (`subscriptions`, the `db` handle,
+   the plural write path). Refines plan's Client Store / Write Path / Channels.
+4. **`reference-comparison.md`** — the 28 rulings against Zero, Supabase Realtime, and Convex,
    plus the rejected attacks (the spec's tested armor). The "what is settled and why" doc.
-4. **`ws-protocol.md`** — the wire spec.
-5. **`research/`** — the nine-agent grounding pass. Read only when going deep on one axis.
+5. **`ws-protocol.md`** — the wire spec.
+6. **`research/`** — the nine-agent grounding pass. Read only when going deep on one axis.
 
 ## The folder
 
 - `scenario.md` / `scenario-hobbyist.md` — the ground-truth workload, and the hobbyist rung.
 - `plan.md` — architecture, decision record, sync loop, channels, schemas, priors audit.
+- `component-data-surface.md` — the component-author data surface: subscriptions, the `db` signal handle, the plural write path.
 - `reference-comparison.md` — rulings, needs-bench, watch list, rejected attacks. Dossiers in
   `research/`.
 - `ws-protocol.md` — the wire spec. `ws-protocol-review.md` is its referee pass.
