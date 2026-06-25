@@ -159,7 +159,7 @@ Codes are terminal-state instructions, not prose: 4001/4100-without-callback/410
 
 ## 3. Client Connection State Machine
 
-Owned by the leader tab. Followers mirror state over BroadcastChannel and never open sockets — the protocol sees exactly one connection per clientID, and any node answers any reconnect (no sticky sessions).
+Owned by the leader tab. Followers mirror state over BroadcastChannel and never open sockets — the protocol sees exactly one connection per clientID, and any node answers any reconnect (no sticky sessions). **[Superseded 2026-06-14: v1 is independent-clients, each tab with its own clientID, not leader/follower. This connection-ownership model is deferred to a measured need. See plan.md Multi-tab and sync-poc decisions/Q-multi-tab.md.]**
 
 ```
 connecting ──welcome──▶ connected ◀──welcome── reconnecting ──30s──▶ offline
