@@ -81,6 +81,52 @@ class TemplateCompiler {
   static singleBracketRegExpEntries = Object.entries(this.singleBracketRegExp);
   static doubleBracketRegExpEntries = Object.entries(this.doubleBracketRegExp);
 
+  // First non-whitespace character(s) each tag pattern can match after the
+  // open bracket. parseTag dispatches on this so a tag tries only the patterns
+  // that can open with its character instead of scanning all of them — a plain
+  // {expression} no longer regex-tests every block keyword first. EXPRESSION is
+  // the catch-all (null = any character) and stays last in every bucket.
+  static firstCharsForPattern(source) {
+    let s = source.slice('^{OPEN}'.length);
+    if (s.startsWith('>')) { return new Set(['>']); } // {>template}/{>slot}, no leading space
+    if (s.startsWith('\\s*')) { s = s.slice(3); }
+    if (s === '') { return null; } // EXPRESSION catch-all
+    if (s.startsWith('#')) { return new Set(['#']); }
+    if (s.startsWith('\\/')) { return new Set(['/']); }
+    const alternation = s.match(/^\\?\(([^)]+)\)/); // (before|loading), (error|catch)
+    if (alternation) { return new Set(alternation[1].split('|').map((word) => word[0])); }
+    return new Set([s[0]]);
+  }
+
+  static dispatchCharsByType = Object.fromEntries(
+    Object.entries(this.basePatterns).map(([type, source]) => [type, this.firstCharsForPattern(source)]),
+  );
+
+  // Bucket the compiled pattern entries by the characters that can open them,
+  // preserving declaration order so first-match-wins is unchanged. Catch-all
+  // patterns (EXPRESSION) append to every bucket and are the fallback for
+  // characters no keyword starts with.
+  static buildDispatchBuckets(entries) {
+    const byChar = new Map();
+    const catchAll = [];
+    for (const entry of entries) {
+      const chars = this.dispatchCharsByType[entry[0]];
+      if (chars === null) {
+        catchAll.push(entry);
+        continue;
+      }
+      for (const char of chars) {
+        if (!byChar.has(char)) { byChar.set(char, []); }
+        byChar.get(char).push(entry);
+      }
+    }
+    for (const bucket of byChar.values()) { bucket.push(...catchAll); }
+    return { byChar, fallback: catchAll };
+  }
+
+  static singleBracketDispatch = this.buildDispatchBuckets(this.singleBracketRegExpEntries);
+  static doubleBracketDispatch = this.buildDispatchBuckets(this.doubleBracketRegExpEntries);
+
   static htmlRegExp = {
     SVG_OPEN: /^\<svg\s*/i,
     SVG_CLOSE: /^\<\/svg\s*/i,
@@ -139,9 +185,10 @@ class TemplateCompiler {
     const parserRegExp = (syntax == 'doubleBracket')
       ? TemplateCompiler.doubleBracketParserRegExp
       : TemplateCompiler.singleBracketParserRegExp;
-    const tagPatterns = (syntax == 'doubleBracket')
-      ? TemplateCompiler.doubleBracketRegExpEntries
-      : TemplateCompiler.singleBracketRegExpEntries;
+    const dispatch = (syntax == 'doubleBracket')
+      ? TemplateCompiler.doubleBracketDispatch
+      : TemplateCompiler.singleBracketDispatch;
+    const openLength = (syntax == 'doubleBracket') ? 2 : 1;
 
     const parseTag = (scanner) => {
       // if this expression contains nested expressions like { one { two } }
@@ -182,22 +229,40 @@ class TemplateCompiler {
         return content;
       };
 
-      // `is` reads as a case label only inside {#match}. Outside one,
-      // {is a b} is the equality helper, so skip the IS token unless the
-      // open condition is a match block (mirrors async-only {before}/{error}).
-      const inMatchBlock = last(conditionStack)?.type === 'match';
+      // Dispatch on the tag's first significant character so only the patterns
+      // that can open with it are tried (a plain {expression} skips every block
+      // keyword). All tag patterns require the open bracket, so a tag that
+      // doesn't start with one — e.g. an <svg> primitive — falls straight
+      // through to the HTML scan below.
+      if (scanner.peek() === '{') {
+        // `is`/`isExactly` read as case labels only inside {#match}. Outside
+        // one, {is a b} is the equality helper, so skip those tokens unless the
+        // open condition is a match block (mirrors async-only {before}/{error}).
+        const inMatchBlock = last(conditionStack)?.type === 'match';
 
-      // look for each special expression like if/each/else
-      for (const [type, regex] of tagPatterns) {
-        if ((type === 'IS' || type === 'ISEXACTLY') && !inMatchBlock) { continue; }
-        if (scanner.matches(regex)) {
-          // attribute context decides ifDefined, only expressions consume it
-          const context = (type === 'EXPRESSION') ? scanner.getContext() : null;
-          scanner.consume(regex);
-          const rawContent = getTagContent();
-          scanner.consume(parserRegExp.EXPRESSION_END);
-          const content = this.getValue(rawContent);
-          return { type, content, ...context };
+        // first non-whitespace character after the open bracket
+        let charPos = scanner.pos + openLength;
+        const input = scanner.input;
+        while (
+          charPos < input.length
+          && (input[charPos] === ' ' || input[charPos] === '\t' || input[charPos] === '\n' || input[charPos] === '\r')
+        ) {
+          charPos++;
+        }
+        const dispatchChar = charPos < input.length ? input[charPos] : '';
+        const entries = dispatch.byChar.get(dispatchChar) || dispatch.fallback;
+
+        for (const [type, regex] of entries) {
+          if ((type === 'IS' || type === 'ISEXACTLY') && !inMatchBlock) { continue; }
+          if (scanner.matches(regex)) {
+            // attribute context decides ifDefined, only expressions consume it
+            const context = (type === 'EXPRESSION') ? scanner.getContext() : null;
+            scanner.consume(regex);
+            const rawContent = getTagContent();
+            scanner.consume(parserRegExp.EXPRESSION_END);
+            const content = this.getValue(rawContent);
+            return { type, content, ...context };
+          }
         }
       }
 

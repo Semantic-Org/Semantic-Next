@@ -625,6 +625,70 @@ describe('TemplateCompiler', () => {
       expect(() => compiler.compile(`done{/match}`)).toThrow();
     });
   });
+  describe('tag dispatch', () => {
+    // parseTag dispatches on the first character; identifiers that merely start
+    // with a keyword's letters must still parse as plain expressions.
+    it('treats keyword-prefixed identifiers as expressions', () => {
+      const compiler = new TemplateCompiler();
+      const identifiers = [
+        'items',
+        'email',
+        'count',
+        'label',
+        'branch',
+        'isActive',
+        'beforeText',
+        'loadingState',
+        'catchPhrase',
+        'errorRate',
+        'ifReady',
+      ];
+      for (const id of identifiers) {
+        expect(compiler.compile(`{${id}}`)).toEqual([{ type: 'expression', value: id }]);
+      }
+    });
+
+    it('declares dispatch characters for every pattern, with EXPRESSION as the catch-all', () => {
+      const { dispatchCharsByType, basePatterns } = TemplateCompiler;
+      for (const type of Object.keys(basePatterns)) {
+        const chars = dispatchCharsByType[type];
+        if (type === 'EXPRESSION') {
+          expect(chars).toBeNull();
+        }
+        else {
+          expect(chars instanceof Set && chars.size > 0).toBe(true);
+        }
+      }
+    });
+
+    it('only places a pattern in buckets for characters its regex can open with', () => {
+      // The bucketing is only safe if a pattern never matches a tag whose first
+      // character lands it in a different bucket. Verify each non-catch-all
+      // pattern matches a probe iff that probe's first char is declared.
+      const { singleBracketRegExp, dispatchCharsByType } = TemplateCompiler;
+      const probes = {
+        '#': '#each x',
+        '/': '/each',
+        '>': '>child',
+        e: 'else ',
+        i: 'is x',
+        b: 'before ',
+        l: 'loading ',
+        c: 'catch ',
+        x: 'xyz',
+      };
+      for (const [type, regex] of Object.entries(singleBracketRegExp)) {
+        if (type === 'EXPRESSION') { continue; }
+        const declared = dispatchCharsByType[type];
+        for (const [char, body] of Object.entries(probes)) {
+          const sticky = new RegExp(regex.source, 'y');
+          if (sticky.test(`{${body}}`)) {
+            expect(declared.has(char)).toBe(true);
+          }
+        }
+      }
+    });
+  });
   describe('nested expressions', () => {
     it('should handle single level of nesting in expressions', () => {
       const compiler = new TemplateCompiler();
