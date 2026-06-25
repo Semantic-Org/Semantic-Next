@@ -35,25 +35,31 @@ New packages and primitives are picked up automatically — no edit here.
 
 ## The comment
 
-The headline is a sister to the perf bot: `{✅ Improvement | ❌ Regression |
-🟡 Mixed | ⚪ No Meaningful Change} for {sha} on Bundle Analysis`. Smaller is the
-good direction. The alert sentence leads with `@semantic-ui/component` — the
-bundle you need to ship any component — or, when that didn't move, the changed
-bundle whose package shipped the most code.
+The title leads with the two numbers a reviewer wants: `{state} Bundle size:
+{headline bundle} {brotli delta} brotli · {shipped LOC} for {sha}`. The headline
+bundle is `@semantic-ui/component` whenever it moved — it already contains
+reactivity, renderer, templating and the rest, so its delta is the real cost a
+component shipper pays, with no cross-bundle sum to double-count. When component
+didn't move, the changed bundle whose package shipped the most code is promoted.
+The largest single increase, if it's a different bundle, is named in the alert.
 
-Each changed bundle gets a row: `change` (brotli %, with a significance icon),
-`size` (brotli absolute), then byte deltas for brotli / gzip / raw. Significance
-mirrors the perf bot's severity emoji, graded on whichever is larger, percent or
-absolute brotli:
+State is a small vocabulary, with red reserved for CI-failing growth:
 
-| tier | brotli ≥ | larger | smaller |
-|---|---|:---:|:---:|
-| significant | 1% or 500 B | ❗ | ⭐ |
-| very significant | 5% or 2 KB | ‼️ | 🌟 |
-| extreme | 15% or 8 KB | 🚨 | 🏆 |
+| state | icon | alert | when |
+|---|:---:|---|---|
+| no meaningful change | ⚪ | NOTE | nothing cleared the JND |
+| improvement | 🟢 | NOTE | only shrinks |
+| mixed | 🟡 | WARNING | both directions, or a small lone increase |
+| warning | 🟡 | WARNING | a bundle grew ≥ 512 B or ≥ 2% |
+| regression | 🔴 | CAUTION | a bundle grew ≥ 5 KB (or ≥ 10% on a ≥ 2 KB move) |
 
-Percent alone over-flags tiny bundles and under-flags the framework, so a change
-escalates if it clears either axis.
+Severity keys off the worst single bundle's brotli growth, never a sum. A bundle
+counts as changed only past a just-noticeable difference (128 B or 0.5% brotli),
+so sub-noise wiggles stay quiet. Percent can escalate a tier, but only paired
+with a real absolute move — a tiny primitive at +100 B / +14% is not a
+regression. The changed-bundles table shows `brotli` (absolute), `Δ brotli`, and
+`change` (percent), sorted increases-first; severity lives in the sort and the
+banner, not per-row icons.
 
 ## How it runs
 

@@ -6,12 +6,14 @@
     - comment.md        (the PR comment)
 
   Sizes are exact bytes from a deterministic build, so a nonzero delta is a
-  real change — there's no confidence interval to reason about. The whole job
-  is: which bundles moved, by how much, and which way the wind blows.
+  real change — there's no confidence interval to reason about.
 
-  Headline: `@semantic-ui/component` whenever its bundle moved — it's the
-  entry point you need to ship any component. When it didn't move, the changed
-  bundle whose package shipped the most code is promoted instead.
+  The headline is `@semantic-ui/component` whenever its bundle moved. It already
+  contains reactivity, renderer, templating and the rest, so its delta is the
+  real cost a component shipper pays — there's no cross-bundle sum to take (the
+  bundles overlap, so summing would double-count). The other changed bundles
+  are shown for context. When component didn't move, the changed bundle whose
+  package shipped the most code is promoted to headline instead.
 
   Usage:
     node reporter.js --results <dir> --sha <sha> --repo <owner/name> [--msg ...]
@@ -32,63 +34,31 @@ const repo = args.repo ?? process.env.GITHUB_REPOSITORY ?? '';
 const wallClockSec = args['wall-clock'] ? Number(args['wall-clock']) : null;
 const outDir = args.out ?? './size-report';
 
-// The bundle the headline speaks for whenever it moved — the entry point you
-// need to ship any component.
 const HEADLINE_ID = 'pkg-component';
 
-// Headline banner states, a sister to the performance bot's: smaller is the
-// good direction (✅), larger the bad one (❌), so the two comments read with
-// one shared grammar. `added` folds into larger, `removed` into smaller.
-function determineState(summary) {
-  const larger = summary.grew + summary.added;
-  const smaller = summary.shrank + summary.removed;
-  if (smaller > 0 && larger === 0) { return { key: 'improvement', emoji: '✅', heading: 'Improvement', alert: 'TIP' }; }
-  if (larger > 0 && smaller === 0) {
-    return {
-      key: 'regression',
-      emoji: '❌',
-      heading: 'Regression',
-      alert: 'CAUTION',
-    };
-  }
-  if (larger > 0 && smaller > 0) {
-    const modifier = larger > smaller ? 'mostly larger' : smaller > larger ? 'mostly smaller' : 'balanced';
-    return { key: 'mixed', emoji: '🟡', heading: `Mixed (${modifier})`, alert: 'WARNING' };
-  }
-  return { key: 'no-change', emoji: '⚪', heading: 'No Meaningful Change', alert: 'NOTE' };
-}
+// Just-noticeable difference: a bundle is "changed" only when its brotli delta
+// clears one of these. Below them the movement isn't worth a reviewer's eye.
+const JND = { bytes: 128, percent: 0.5 };
 
-// Significance tiers, graded on whichever is larger — percent or absolute
-// brotli. Percent alone over-flags tiny bundles (+100 B is +18% on a 500 B
-// primitive) and under-flags big ones (+600 B is +0.4% on the framework), so
-// a change escalates if it clears either axis. Emoji match the perf bot's
-// severity set so the two comments read as one suite: ❗‼️🚨 for growth,
-// ⭐🌟🏆 for savings (mapped from its slower / faster glyphs). Below the
-// first tier a row shows bare numbers, no emoji.
-const SEVERITY_TIERS = [
-  { pct: 15, abs: 8192, grew: '🚨', shrank: '🏆', grewWord: 'grew sharply', shrankWord: 'shrank sharply' },
-  { pct: 5, abs: 2048, grew: '‼️', shrank: '🌟', grewWord: 'grew a lot', shrankWord: 'shrank a lot' },
-  { pct: 1, abs: 500, grew: '❗', shrank: '⭐', grewWord: 'grew', shrankWord: 'shrank' },
-];
+// Severity keys off the worst single bundle's brotli growth, never a sum.
+// Percent escalates a tier, but only paired with a real absolute move —
+// otherwise a tiny primitive (+100 B = +14%) would read as a regression.
+// `percentFloor` is the absolute a percent must clear to escalate to regression.
+const SEVERITY = {
+  warning: { bytes: 512, percent: 2 },
+  regression: { bytes: 5120, percent: 10, percentFloor: 2048 },
+  fail: { bytes: 10240 },
+};
 
-function severityTier(deltaBytes, baseBytes) {
-  const abs = Math.abs(deltaBytes);
-  const pct = baseBytes > 0 ? (abs / baseBytes) * 100 : (abs > 0 ? Infinity : 0);
-  for (let i = 0; i < SEVERITY_TIERS.length; i++) {
-    const t = SEVERITY_TIERS[i];
-    if (pct >= t.pct || abs >= t.abs) { return SEVERITY_TIERS.length - i; } // 3 = extreme … 1 = significant
-  }
-  return 0;
-}
-
-function severityEmoji(metric) {
-  if (metric.status === 'unchanged') { return ''; }
-  const base = metric.base?.brotli ?? 0;
-  const tier = severityTier(metric.delta.brotli, base);
-  if (tier === 0) { return ''; }
-  const t = SEVERITY_TIERS[SEVERITY_TIERS.length - tier];
-  return metric.delta.brotli > 0 ? t.grew : t.shrank;
-}
+// Five states, a small vocabulary. Red/failure language (🔴 CAUTION) is
+// reserved for CI-failing growth — warnings stay yellow.
+const STATE_INFO = {
+  'no-change': { emoji: '⚪', alert: 'NOTE', word: '' },
+  improvement: { emoji: '🟢', alert: 'NOTE', word: ' improvement' },
+  mixed: { emoji: '🟡', alert: 'WARNING', word: '' },
+  warning: { emoji: '🟡', alert: 'WARNING', word: ' warning' },
+  regression: { emoji: '🔴', alert: 'CAUTION', word: ' regression' },
+};
 
 const baselineSha = readBaselineSha(resultsDir);
 const current = readJson(path.join(resultsDir, 'current.json'));
@@ -102,16 +72,12 @@ fs.writeFileSync(path.join(outDir, 'size-report.json'), JSON.stringify(report, n
 fs.writeFileSync(path.join(outDir, 'comment.md'), markdown);
 
 const headlineMetric = report.metrics.find((m) => m.id === report.headline);
-console.log(
-  `${report.summary.grew} grew, ${report.summary.shrank} shrank, `
-    + `${report.summary.unchanged} unchanged. headline: ${headlineMetric?.label ?? 'none'}`,
-);
+console.log(`state: ${report.state}. headline: ${headlineMetric?.label ?? 'none'}. ${report.changed.length} changed.`);
 
 /* ----------------------------- build ----------------------------- */
 
 function buildReport(cur, base) {
-  // union of both sides so a package deleted by the PR (gone from head,
-  // still in base) is still reported as removed
+  // union of both sides so a package deleted by the PR is still reported
   const ids = new Set([...Object.keys(cur.targets), ...Object.keys(base.targets ?? {})]);
   const metrics = [];
   for (const id of ids) {
@@ -123,18 +89,25 @@ function buildReport(cur, base) {
 
   const loc = diffLoc(cur.loc, base.loc);
 
-  const summary = { grew: 0, shrank: 0, unchanged: 0, added: 0, removed: 0 };
+  const summary = { larger: 0, smaller: 0, unchanged: 0, added: 0, removed: 0 };
   for (const m of metrics) { summary[m.status]++; }
 
   const changed = metrics.filter((m) => m.status !== 'unchanged');
-  const headline = pickHeadline(metrics, changed, loc);
-
-  // headline first, then biggest mover by absolute brotli delta
+  // increases first by absolute delta, then decreases by absolute delta
   changed.sort((a, b) => {
-    if (a.id === headline?.id) { return -1; }
-    if (b.id === headline?.id) { return 1; }
+    const aPos = a.delta.brotli > 0;
+    const bPos = b.delta.brotli > 0;
+    if (aPos !== bPos) { return aPos ? -1 : 1; }
     return Math.abs(b.delta.brotli) - Math.abs(a.delta.brotli);
   });
+
+  const headline = pickHeadline(metrics, changed, loc);
+  const increases = changed.filter((m) => m.delta.brotli > 0);
+  const largest = increases.length
+    ? increases.reduce((a, b) => (b.delta.brotli > a.delta.brotli ? b : a))
+    : null;
+  const state = classifyState(increases, changed.filter((m) => m.delta.brotli < 0));
+  const fail = changed.some((m) => m.delta.brotli >= SEVERITY.fail.bytes);
 
   return {
     head: { sha, msg, ref: process.env.GITHUB_HEAD_REF || '' },
@@ -142,11 +115,14 @@ function buildReport(cur, base) {
     run: { url: runUrl, id: runId || extractRunId(runUrl) },
     repo,
     wall_clock_seconds: wallClockSec,
-    state: determineState(summary).key,
+    state,
+    fail,
     summary,
+    total_bundles: metrics.length,
     headline: headline ? headline.id : null,
-    metrics,
+    largest_increase: largest ? largest.id : null,
     changed: changed.map((m) => m.id),
+    metrics,
     loc,
   };
 }
@@ -160,52 +136,63 @@ function diffTarget(id, head, base) {
     headline: !!(head?.headline ?? base?.headline),
   };
   if (head?.exists && !base?.exists) {
-    return { ...descriptor, status: 'added', head: sizes(head), base: null, delta: sizes(head) };
+    return { ...descriptor, status: 'added', head: sizes(head), base: null, delta: sizes(head), pct: null };
   }
   if (!head?.exists && base?.exists) {
-    return { ...descriptor, status: 'removed', head: null, base: sizes(base), delta: negate(sizes(base)) };
+    return { ...descriptor, status: 'removed', head: null, base: sizes(base), delta: negate(sizes(base)), pct: -100 };
   }
   const delta = {
     raw: head.raw - base.raw,
     gzip: head.gzip - base.gzip,
     brotli: head.brotli - base.brotli,
   };
+  const pct = base.brotli > 0 ? (delta.brotli / base.brotli) * 100 : 0;
+  const meaningful = Math.abs(delta.brotli) >= JND.bytes || Math.abs(pct) >= JND.percent;
   let status = 'unchanged';
-  if (delta.brotli > 0) { status = 'grew'; }
-  else if (delta.brotli < 0) { status = 'shrank'; }
-  return { ...descriptor, status, head: sizes(head), base: sizes(base), delta };
+  if (meaningful) { status = delta.brotli > 0 ? 'larger' : 'smaller'; }
+  return { ...descriptor, status, head: sizes(head), base: sizes(base), delta, pct };
 }
 
 function diffLoc(cur, base) {
   const scopes = new Set([...Object.keys(cur.byScope), ...Object.keys(base.byScope)]);
   const byScope = {};
   for (const scope of scopes) {
-    const h = cur.byScope[scope] ?? { code: 0, comment: 0, blank: 0, files: 0 };
-    const b = base.byScope[scope] ?? { code: 0, comment: 0, blank: 0, files: 0 };
-    byScope[scope] = {
-      code: h.code,
-      comment: h.comment,
-      codeDelta: h.code - b.code,
-      commentDelta: h.comment - b.comment,
-    };
+    const h = cur.byScope[scope] ?? { code: 0, comment: 0 };
+    const b = base.byScope[scope] ?? { code: 0, comment: 0 };
+    byScope[scope] = { codeDelta: h.code - b.code, commentDelta: h.comment - b.comment };
   }
   return {
     total: {
-      code: cur.total.code,
-      comment: cur.total.comment,
       codeDelta: cur.total.code - base.total.code,
       commentDelta: cur.total.comment - base.total.comment,
-      blankDelta: cur.total.blank - base.total.blank,
     },
     byScope,
   };
+}
+
+function classifyState(increases, decreases) {
+  if (increases.length === 0 && decreases.length === 0) { return 'no-change'; }
+  if (increases.some(isRegression)) { return 'regression'; }
+  if (increases.length > 0 && decreases.length > 0) { return 'mixed'; }
+  if (increases.length > 0) {
+    return increases.some(isWarning) ? 'warning' : 'mixed'; // a small increase with no offset reads as mixed
+  }
+  return 'improvement';
+}
+
+function isRegression(m) {
+  if (m.delta.brotli >= SEVERITY.regression.bytes) { return true; }
+  return m.pct != null && m.pct >= SEVERITY.regression.percent && m.delta.brotli >= SEVERITY.regression.percentFloor;
+}
+
+function isWarning(m) {
+  return m.delta.brotli >= SEVERITY.warning.bytes || (m.pct != null && m.pct >= SEVERITY.warning.percent);
 }
 
 function pickHeadline(metrics, changed, loc) {
   const component = metrics.find((m) => m.id === HEADLINE_ID);
   if (component && component.status !== 'unchanged') { return component; }
   if (changed.length > 0) {
-    // promote the changed bundle whose package shipped the most code
     return [...changed].sort((a, b) => {
       const la = Math.abs(loc.byScope[a.scope]?.codeDelta ?? 0);
       const lb = Math.abs(loc.byScope[b.scope]?.codeDelta ?? 0);
@@ -220,15 +207,21 @@ function pickHeadline(metrics, changed, loc) {
 
 function renderMarkdown(report) {
   const lines = [];
-  const banner = determineState(report.summary);
+  const info = STATE_INFO[report.state];
   const headline = report.metrics.find((m) => m.id === report.headline);
+  const loc = report.loc.total;
   const shortSha = report.head.sha.slice(0, 7);
   const shaLink = report.repo
     ? `[\`${shortSha}\`](https://github.com/${report.repo}/commit/${report.head.sha})`
     : `\`${shortSha}\``;
 
-  // ── banner: sister to the perf bot — same {state} for {sha} on {suite} shape ──
-  lines.push(`### ${banner.emoji} ${banner.heading} for ${shaLink} on Bundle Analysis 📦`);
+  // ── title: the two numbers a reviewer wants up front ──
+  const titleMid = report.state === 'no-change'
+    ? 'no meaningful change'
+    : `\`${headline.label}\` ${signedSize(headline.delta.brotli)} brotli`;
+  lines.push(
+    `### ${info.emoji} Bundle size${info.word}: ${titleMid} · ${signedLoc(loc.codeDelta)} shipped LOC for ${shaLink}`,
+  );
   lines.push('');
 
   const meta = [`**Base:** ${baseLink(report)}`];
@@ -244,20 +237,33 @@ function renderMarkdown(report) {
     lines.push('');
   }
 
-  // ── alert: verdict in one sentence ──
-  lines.push(`> [!${banner.alert}]`);
-  lines.push(`> ${verdictSentence(report, headline)}`);
+  // ── alert: one human-readable interpretation ──
+  lines.push(`> [!${info.alert}]`);
+  for (const v of verdictLines(report, headline)) { lines.push(`> ${v}`); }
   lines.push('');
 
-  // ── count line ──
-  const larger = report.summary.grew + report.summary.added;
-  const smaller = report.summary.shrank + report.summary.removed;
-  lines.push(`**✅ ${smaller} smaller · ❌ ${larger} larger · ⚪ ${report.summary.unchanged} unchanged**`);
+  // ── summary counts + the two LOC numbers ──
+  const larger = report.summary.larger + report.summary.added;
+  const smaller = report.summary.smaller + report.summary.removed;
+  lines.push(
+    `**${larger} larger · ${smaller} smaller · ${report.summary.unchanged} unchanged`
+      + ` · ${signedLoc(loc.codeDelta)} shipped LOC · ${signedLoc(loc.commentDelta)} comment LOC**`,
+  );
+  lines.push('');
+
+  // ── signal table ──
+  lines.push('| signal | result |');
+  lines.push('|---|---:|');
+  const headlineRow = headline ? `\`${headline.label}\` brotli` : 'Headline brotli';
+  lines.push(`| ${headlineRow} | ${headline ? headlineCell(headline) : '0 B'} |`);
+  lines.push(`| Shipped LOC | ${signedLoc(loc.codeDelta)} |`);
+  lines.push(`| Comment LOC | ${signedLoc(loc.commentDelta)} |`);
+  lines.push(`| Changed bundles | ${report.changed.length} / ${report.total_bundles} |`);
   lines.push('');
   lines.push('---');
   lines.push('');
 
-  // ── the story: bundles that moved (expanded) ──
+  // ── the story: bundles that changed ──
   const changed = report.changed.map((id) => report.metrics.find((m) => m.id === id));
   if (changed.length === 0) {
     lines.push('No bundle changed size. 🎉');
@@ -266,23 +272,17 @@ function renderMarkdown(report) {
   else {
     lines.push(`#### Bundles that changed (${changed.length})`);
     lines.push('');
-    lines.push('| bundle | change | size | Δ brotli | Δ gzip | Δ raw |');
-    lines.push('|---|---|---|---|---|---|');
+    lines.push('| bundle | brotli | Δ brotli | change |');
+    lines.push('|---|---:|---:|---:|');
     for (const m of changed) { lines.push(changedRow(m, report.headline)); }
     lines.push('');
-    lines.push(
-      '<sub>change = brotli % · ❗ ‼️ 🚨 larger · ⭐ 🌟 🏆 smaller · 🎯 headline · size is brotli, Δ columns are byte deltas</sub>',
-    );
+    lines.push('<sub>Sorted by absolute brotli delta, increases first. 🎯 = bundle most relevant to this PR.</sub>');
     lines.push('');
   }
 
-  // ── full matrix (collapsed) ──
-  renderFullMatrix(lines, report);
+  renderLocByScope(lines, report);
+  renderAllBundles(lines, report);
 
-  // ── lines of code (collapsed) ──
-  renderLoc(lines, report);
-
-  // ── footer ──
   lines.push('---');
   const footer = ['brotli q11 · gzip l9', `vs \`${report.base.ref}\``, 'fresh build both sides'];
   if (report.wall_clock_seconds != null) { footer.push(formatWall(report.wall_clock_seconds)); }
@@ -291,70 +291,88 @@ function renderMarkdown(report) {
   return lines.join('\n');
 }
 
-function verdictSentence(report, headline) {
+function verdictLines(report, headline) {
+  const loc = report.loc.total;
   if (report.state === 'no-change') {
-    return 'No shipped bundle changed size.';
+    let s = 'No shipped bundle changed size.';
+    if (loc.codeDelta === 0 && loc.commentDelta !== 0) { s += ' PR changes are comments-only.'; }
+    return [s];
   }
-  if (headline.status === 'added') {
-    return `New \`${headline.label}\` bundle ships at ${formatSize(headline.head.brotli)} brotli.`;
+  const verb = headline.delta.brotli > 0 ? 'grew' : 'shrank';
+  let s =
+    `\`${headline.label}\` ${verb} **${signedSize(headline.delta.brotli)}** brotli to ${
+      formatSize(headline.head.brotli)
+    }`
+    + ` (${signedPct(headline.delta.brotli, headline.base?.brotli)}) across **${
+      signedLoc(loc.codeDelta)
+    } shipped LOC**.`;
+  const largest = report.largest_increase ? report.metrics.find((m) => m.id === report.largest_increase) : null;
+  if (largest && largest.id !== headline.id) {
+    s += ` Largest increase: \`${largest.label}\` **${signedSize(largest.delta.brotli)}**`
+      + ` (${signedPct(largest.delta.brotli, largest.base?.brotli)}).`;
   }
-  if (headline.status === 'removed') {
-    return `\`${headline.label}\` removed, dropping ${formatSize(Math.abs(headline.delta.brotli))} brotli.`;
-  }
-  return `\`${headline.label}\` ${changeVerb(headline)} **${signedSize(headline.delta.brotli)}** brotli `
-    + `to ${formatSize(headline.head.brotli)} (${signedPct(headline.delta.brotli, headline.base.brotli)}).`;
+  return [s];
 }
 
-// tier-aware adjective for the headline sentence: 'edged up' below the first
-// significance tier, then 'grew' / 'grew a lot' / 'grew sharply'.
-function changeVerb(metric) {
-  const grew = metric.delta.brotli > 0;
-  const tier = severityTier(metric.delta.brotli, metric.base?.brotli ?? 0);
-  if (tier === 0) { return grew ? 'edged up' : 'edged down'; }
-  const t = SEVERITY_TIERS[SEVERITY_TIERS.length - tier];
-  return grew ? t.grewWord : t.shrankWord;
+function headlineCell(m) {
+  if (m.delta.brotli === 0) { return '0 B'; }
+  return `${signedSize(m.delta.brotli)} (${signedPct(m.delta.brotli, m.base?.brotli)})`;
 }
 
-// Columns lead with what a scroller scans for: the percent change (with its
-// severity icon) and the absolute brotli size. The three trailing columns are
-// byte deltas — running gzip/raw sizes live in the full matrix.
 function changedRow(m, headlineId) {
   const mark = m.id === headlineId ? ' 🎯' : '';
-  return `| \`${m.label}\`${mark} | ${changeCell(m)} | ${sizeCell(m)} `
-    + `| ${signedSize(m.delta.brotli)} | ${signedSize(m.delta.gzip)} | ${signedSize(m.delta.raw)} |`;
+  const brotliAbs = m.status === 'removed' ? '—' : formatSize(m.head.brotli);
+  const change = m.status === 'added'
+    ? 'new'
+    : m.status === 'removed'
+    ? 'removed'
+    : signedPct(m.delta.brotli, m.base.brotli);
+  return `| \`${m.label}\`${mark} | ${brotliAbs} | ${signedSize(m.delta.brotli)} | ${change} |`;
 }
 
-function changeCell(m) {
-  const sev = severityEmoji(m);
-  const tail = sev ? ` ${sev}` : '';
-  if (m.status === 'added') { return `**new**${tail}`; }
-  if (m.status === 'removed') { return `**removed**${tail}`; }
-  return `${signedPct(m.delta.brotli, m.base.brotli)}${tail}`;
-}
-
-function sizeCell(m) {
-  if (m.status === 'removed') { return '—'; }
-  return formatSize(m.head.brotli);
-}
-
-function renderFullMatrix(lines, report) {
-  const ordered = [...report.metrics].sort((a, b) => {
-    const order = { package: 0, framework: 1, primitive: 2 };
-    if (order[a.group] !== order[b.group]) { return order[a.group] - order[b.group]; }
-    return a.label.localeCompare(b.label);
-  });
+function renderLocByScope(lines, report) {
+  const loc = report.loc.total;
+  const moved = Object.entries(report.loc.byScope)
+    .filter(([, v]) => v.codeDelta !== 0 || v.commentDelta !== 0)
+    .sort((a, b) => Math.abs(b[1].codeDelta) - Math.abs(a[1].codeDelta));
   lines.push('<details>');
-  lines.push(`<summary>All ${ordered.length} bundles</summary>`);
+  lines.push(
+    `<summary>LOC by scope: ${signedLoc(loc.codeDelta)} shipped LOC · ${
+      signedLoc(loc.commentDelta)
+    } comment LOC</summary>`,
+  );
   lines.push('');
-  lines.push('| bundle | group | brotli | Δ brotli | gzip | raw |');
-  lines.push('|---|---|---|---|---|---|');
-  for (const m of ordered) {
+  if (moved.length === 0) {
+    lines.push('No change in shipped source lines.');
+  }
+  else {
+    lines.push('Shipped LOC excludes comments and blank lines.');
+    lines.push('');
+    lines.push('| scope | shipped LOC | comment LOC |');
+    lines.push('|---|---:|---:|');
+    for (const [scope, v] of moved) {
+      lines.push(`| \`${scope}\` | ${signedLoc(v.codeDelta)} | ${signedLoc(v.commentDelta)} |`);
+    }
+  }
+  lines.push('');
+  lines.push('</details>');
+  lines.push('');
+}
+
+function renderAllBundles(lines, report) {
+  lines.push('<details>');
+  lines.push(`<summary>All ${report.total_bundles} bundles, gzip, and raw sizes</summary>`);
+  lines.push('');
+  lines.push('| bundle | group | brotli | Δ brotli | gzip | Δ gzip | raw | Δ raw |');
+  lines.push('|---|---|---:|---:|---:|---:|---:|---:|');
+  for (const m of report.metrics) {
     const head = m.head ?? { brotli: 0, gzip: 0, raw: 0 };
-    const dBr = m.status === 'unchanged' ? '—' : signedSize(m.delta.brotli);
+    const mark = m.id === report.headline ? ' 🎯' : '';
     lines.push(
-      `| \`${m.label}\` | ${m.group} | ${formatSize(head.brotli)} | ${dBr} | ${formatSize(head.gzip)} | ${
-        formatSize(head.raw)
-      } |`,
+      `| \`${m.label}\`${mark} | ${m.group} | ${formatSize(head.brotli)} | ${deltaOrDash(m, 'brotli')}`
+        + ` | ${formatSize(head.gzip)} | ${deltaOrDash(m, 'gzip')} | ${formatSize(head.raw)} | ${
+          deltaOrDash(m, 'raw')
+        } |`,
     );
   }
   lines.push('');
@@ -362,30 +380,8 @@ function renderFullMatrix(lines, report) {
   lines.push('');
 }
 
-function renderLoc(lines, report) {
-  const t = report.loc.total;
-  const moved = Object.entries(report.loc.byScope)
-    .filter(([, v]) => v.codeDelta !== 0 || v.commentDelta !== 0)
-    .sort((a, b) => Math.abs(b[1].codeDelta) - Math.abs(a[1].codeDelta));
-  const summary = `${signed(t.codeDelta)} code · ${signed(t.commentDelta)} comments`;
-  lines.push('<details>');
-  lines.push(`<summary>Lines shipped (comments stripped): ${summary}</summary>`);
-  lines.push('');
-  if (moved.length === 0) {
-    lines.push('No change in shipped source lines.');
-  }
-  else {
-    lines.push('Code lines that actually ship, comments and blanks removed.');
-    lines.push('');
-    lines.push('| scope | code | comments |');
-    lines.push('|---|---|---|');
-    for (const [scope, v] of moved) {
-      lines.push(`| \`${scope}\` | ${signed(v.codeDelta)} | ${signed(v.commentDelta)} |`);
-    }
-  }
-  lines.push('');
-  lines.push('</details>');
-  lines.push('');
+function deltaOrDash(m, key) {
+  return m.delta[key] === 0 ? '—' : signedSize(m.delta[key]);
 }
 
 /* ----------------------------- format ----------------------------- */
@@ -400,25 +396,25 @@ function negate(s) {
 
 function formatSize(bytes) {
   const n = Math.abs(bytes);
-  if (n >= 1024) { return `${(bytes / 1024).toFixed(1)} KB`; }
-  return `${bytes} B`;
+  return n >= 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${bytes} B`;
 }
 
 function signedSize(bytes) {
-  const sign = bytes > 0 ? '+' : bytes < 0 ? '-' : '±';
+  if (bytes === 0) { return '0 B'; }
+  const sign = bytes > 0 ? '+' : '-';
   const n = Math.abs(bytes);
   return n >= 1024 ? `${sign}${(n / 1024).toFixed(2)} KB` : `${sign}${n} B`;
 }
 
 function signedPct(delta, base) {
-  if (!base) { return 'n/a'; }
+  if (!base) { return 'new'; }
   const pct = (delta / base) * 100;
-  const sign = pct > 0 ? '+' : pct < 0 ? '' : '±';
-  return `${sign}${pct.toFixed(1)}%`;
+  if (pct === 0) { return '0%'; }
+  return `${pct > 0 ? '+' : '-'}${Math.abs(pct).toFixed(1)}%`;
 }
 
-function signed(n) {
-  return n > 0 ? `+${n}` : `${n}`;
+function signedLoc(n) {
+  return `${n >= 0 ? '+' : '-'}${Math.abs(n)}`;
 }
 
 function baseLink(report) {

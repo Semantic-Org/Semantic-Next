@@ -2,10 +2,9 @@
   Tests for reporter.js. Run with:
     node --test tools/ci/size/reporter.test.js
 
-  These assert the decision logic (state, summary counts, headline choice,
-  per-bundle classification) via the JSON adjunct, and only sample the
-  markdown lightly — exact wording is meant to be tuned without breaking
-  these.
+  These assert the decision logic (state, headline choice, largest-increase,
+  per-bundle classification) via the JSON adjunct, and sample the markdown
+  lightly — exact wording is meant to be tuned without breaking these.
 */
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -51,111 +50,128 @@ function snapshot(targets, locData) {
   return { label: 'x', targets: map, loc: locData };
 }
 
-// Run the real CLI against two snapshots, return parsed outputs.
 function run(current, baseline) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'size-reporter-'));
   fs.writeFileSync(path.join(dir, 'current.json'), JSON.stringify(current));
   fs.writeFileSync(path.join(dir, 'baseline.json'), JSON.stringify(baseline));
   fs.writeFileSync(path.join(dir, 'baseline-sha.txt'), 'baseaaaa');
   const out = path.join(dir, 'out');
-  execFileSync('node', [
-    REPORTER,
-    '--results',
-    dir,
-    '--sha',
-    'headbbbb1234',
-    '--repo',
-    'o/r',
-    '--out',
-    out,
-  ]);
+  execFileSync('node', [REPORTER, '--results', dir, '--sha', 'headbbbb1234', '--repo', 'o/r', '--out', out]);
   const json = JSON.parse(fs.readFileSync(path.join(out, 'size-report.json'), 'utf8'));
   const md = fs.readFileSync(path.join(out, 'comment.md'), 'utf8');
   fs.rmSync(dir, { recursive: true, force: true });
   return { json, md };
 }
 
-test('a lone growth is a regression headlined by that bundle', () => {
-  const cur = snapshot([tgt('pkg-component', [5000, 6000, 15000], { headline: true })], loc({ component: [120, 0] }));
-  const base = snapshot([tgt('pkg-component', [4700, 5640, 14000], { headline: true })], loc({ component: [0, 0] }));
-  const { json, md } = run(cur, base);
+// brotli grows past the regression byte threshold (>= 5120)
+test('a large single growth is a regression', () => {
+  const cur = snapshot(
+    [tgt('pkg-component', [56000, 60000, 170000], { headline: true })],
+    loc({ component: [200, 0] }),
+  );
+  const base = snapshot([tgt('pkg-component', [50000, 54000, 155000], { headline: true })], loc({ component: [0, 0] }));
+  const { json } = run(cur, base);
   assert.equal(json.state, 'regression');
-  assert.equal(json.summary.grew, 1);
   assert.equal(json.headline, 'pkg-component');
-  assert.match(md, /Bundle Analysis/);
-  assert.match(md, /component/);
 });
 
-test('a lone shrink is an improvement', () => {
-  const cur = snapshot([tgt('pkg-utils', [4000, 4800, 12000])], loc({ utils: [0, 0] }));
-  const base = snapshot([tgt('pkg-utils', [4600, 5520, 13800])], loc({ utils: [40, 0] }));
+// crosses the warning threshold (>= 512 B / >= 2%) but not regression, no offsetting shrink
+test('a moderate growth with no offset is a warning', () => {
+  const cur = snapshot([tgt('pkg-utils', [15700, 17000, 44000])], loc({ utils: [60, 0] }));
+  const base = snapshot([tgt('pkg-utils', [15000, 16200, 42000])], loc({ utils: [0, 0] }));
   const { json } = run(cur, base);
-  assert.equal(json.state, 'improvement');
-  assert.equal(json.summary.shrank, 1);
+  assert.equal(json.state, 'warning');
   assert.equal(json.headline, 'pkg-utils');
 });
 
-test('identical snapshots are no meaningful change', () => {
-  const t = [tgt('pkg-component', [5000, 6000, 15000])];
-  const { json, md } = run(snapshot(t, loc({ component: [10, 0] })), snapshot(t, loc({ component: [10, 0] })));
-  assert.equal(json.state, 'no-change');
-  assert.equal(json.summary.grew, 0);
-  assert.equal(json.summary.shrank, 0);
-  assert.match(md, /No Meaningful Change/);
+// a small primitive at +10%+ is a warning, not a regression — percent alone
+// can't escalate to regression without a real absolute move
+test('a high-percent but small-absolute growth stays a warning', () => {
+  const cur = snapshot(
+    [tgt('prim-button', [13200, 16500, 137000], { group: 'primitive', scope: 'design-system' })],
+    loc({ 'design-system': [40, 0] }),
+  );
+  const base = snapshot(
+    [tgt('prim-button', [12000, 15100, 128500], { group: 'primitive', scope: 'design-system' })],
+    loc({ 'design-system': [0, 0] }),
+  );
+  const { json } = run(cur, base);
+  assert.equal(json.state, 'warning'); // +1.2 KB / +10% — not a regression
 });
 
-test('component stays the headline even when another bundle grew more', () => {
+test('growth alongside a shrink is mixed', () => {
   const cur = snapshot([
-    tgt('pkg-component', [5300, 6300, 16000], { headline: true }),
-    tgt('pkg-reactivity', [9000, 10000, 28000]),
-  ], loc({ component: [10, 0], reactivity: [400, 0] }));
+    tgt('pkg-component', [51000, 60000, 160000], { headline: true }),
+    tgt('pkg-specs', [38000, 45000, 150000]),
+  ], loc({ component: [20, 0], specs: [-40, 0] }));
   const base = snapshot([
-    tgt('pkg-component', [5000, 6000, 15000], { headline: true }),
-    tgt('pkg-reactivity', [5000, 6000, 16000] /* grew +4000, far more */),
-  ], loc({ component: [0, 0], reactivity: [0, 0] }));
+    tgt('pkg-component', [50000, 59000, 158000], { headline: true }),
+    tgt('pkg-specs', [40000, 47000, 156000]),
+  ], loc({ component: [0, 0], specs: [0, 0] }));
+  const { json } = run(cur, base);
+  assert.equal(json.state, 'mixed');
+});
+
+test('only shrinks is an improvement', () => {
+  const cur = snapshot([tgt('pkg-utils', [14000, 15000, 40000])], loc({ utils: [0, 0] }));
+  const base = snapshot([tgt('pkg-utils', [15000, 16200, 42000])], loc({ utils: [-40, 0] }));
+  const { json } = run(cur, base);
+  assert.equal(json.state, 'improvement');
+});
+
+// a sub-JND wiggle (< 128 B and < 0.5%) is not a change
+test('a sub-JND delta is no meaningful change', () => {
+  const cur = snapshot([tgt('pkg-component', [50050, 54000, 155000], { headline: true })], loc({ component: [0, 0] }));
+  const base = snapshot([tgt('pkg-component', [50000, 54000, 155000], { headline: true })], loc({ component: [0, 0] }));
+  const { json, md } = run(cur, base);
+  assert.equal(json.state, 'no-change');
+  assert.equal(json.summary.unchanged, 1);
+  assert.match(md, /No Meaningful Change|no meaningful change/i);
+});
+
+test('comments-only change is reassured as such', () => {
+  const t = [tgt('pkg-templating', [28600, 32000, 95000])];
+  const { json, md } = run(snapshot(t, loc({ templating: [0, 200] })), snapshot(t, loc({ templating: [0, 0] })));
+  assert.equal(json.state, 'no-change');
+  assert.match(md, /comments-only/);
+});
+
+test('component is the headline and the bigger grower is the largest increase', () => {
+  const cur = snapshot([
+    tgt('pkg-component', [50600, 59000, 159000], { headline: true }),
+    tgt('pkg-renderer', [47000, 52000, 162000]),
+  ], loc({ component: [10, 0], renderer: [120, 0] }));
+  const base = snapshot([
+    tgt('pkg-component', [50000, 58400, 158000], { headline: true }),
+    tgt('pkg-renderer', [43000, 48000, 151000]),
+  ], loc({ component: [0, 0], renderer: [0, 0] }));
   const { json } = run(cur, base);
   assert.equal(json.headline, 'pkg-component');
-  assert.equal(json.state, 'regression');
-  assert.equal(json.summary.grew, 2);
+  assert.equal(json.largest_increase, 'pkg-renderer');
+  assert.equal(json.state, 'warning');
 });
 
 test('with component flat, the bundle whose package shipped the most code is promoted', () => {
   const cur = snapshot([
-    tgt('pkg-component', [5000, 6000, 15000], { headline: true }),
-    tgt('pkg-query', [4200, 5000, 13000]),
-    tgt('pkg-utils', [4100, 4900, 12500]),
+    tgt('pkg-component', [50000, 59000, 158000], { headline: true }),
+    tgt('pkg-query', [4600, 5000, 13000]),
+    tgt('pkg-utils', [4700, 5100, 13200]),
   ], loc({ component: [0, 0], query: [30, 0], utils: [150, 0] }));
   const base = snapshot([
-    tgt('pkg-component', [5000, 6000, 15000], { headline: true }),
-    tgt('pkg-query', [4000, 4800, 12500]),
-    tgt('pkg-utils', [4000, 4800, 12200]),
+    tgt('pkg-component', [50000, 59000, 158000], { headline: true }),
+    tgt('pkg-query', [4000, 4400, 12000]),
+    tgt('pkg-utils', [4000, 4400, 12000]),
   ], loc({ component: [0, 0], query: [0, 0], utils: [0, 0] }));
   const { json } = run(cur, base);
-  // utils shipped more code (150 vs 30), so it leads even though both grew
   assert.equal(json.headline, 'pkg-utils');
-});
-
-test('mixed directions report a mixed state', () => {
-  const cur = snapshot([
-    tgt('pkg-component', [5300, 6300, 16000], { headline: true }),
-    tgt('pkg-specs', [4000, 4800, 12000]),
-  ], loc({ component: [10, 0], specs: [-50, 0] }));
-  const base = snapshot([
-    tgt('pkg-component', [5000, 6000, 15000], { headline: true }),
-    tgt('pkg-specs', [4600, 5520, 13800]),
-  ], loc({ component: [0, 0], specs: [0, 0] }));
-  const { json } = run(cur, base);
-  assert.equal(json.state, 'mixed');
-  assert.equal(json.summary.grew, 1);
-  assert.equal(json.summary.shrank, 1);
 });
 
 test('a bundle present only on the head reads as added', () => {
   const cur = snapshot([
-    tgt('pkg-component', [5000, 6000, 15000], { headline: true }),
+    tgt('pkg-component', [50000, 59000, 158000], { headline: true }),
     tgt('pkg-new', [1200, 1400, 4000]),
   ], loc({ component: [0, 0], new: [80, 0] }));
-  const base = snapshot([tgt('pkg-component', [5000, 6000, 15000], { headline: true })], loc({ component: [0, 0] }));
+  const base = snapshot([tgt('pkg-component', [50000, 59000, 158000], { headline: true })], loc({ component: [0, 0] }));
   const { json } = run(cur, base);
   const added = json.metrics.find((m) => m.id === 'pkg-new');
   assert.equal(added.status, 'added');
