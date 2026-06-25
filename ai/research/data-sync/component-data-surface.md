@@ -13,7 +13,7 @@ state.todos.toggleItemProperty(id, 'completed')   // local
 db.todos.toggleItemProperty(id, 'completed')      // synced — same call, now optimistic + durable + on the wire
 ```
 
-The fine-grained reactivity is the existing reconcile + `notifyField` path over reference-stable arrays. The synced handle does not need per-doc dependencies to be granular — it needs to know *what* changed, which the signal's write helpers and `trackWrites` already report. We do not reimplement the signal to get FGR.
+`db.<name>` is a real `Signal` instance — `instanceof Signal` holds, so it composes with `reaction` / `computed` / `derive` like any signal, and it reuses the helper surface rather than reimplementing it (less shipped code, not more). Its reactivity is as fine-grained as `state`'s — the existing reconcile + `notifyField` path over reference-stable arrays — with the finer per-doc / per-query path still available through `find(selector)` / `queries`. (The wrapper cost the renderer's data context avoids by hand-rolling `Dependency` is a render-loop, one-allocation-per-key concern; `db.<name>` is one signal per collection, allocated once at subscribe, off that path.)
 
 ## Stages of upgrading a `state` value to a `db` value
 
@@ -71,7 +71,7 @@ Invoices.searchIndex('table', { … });
 
 The late-attach registrars — `.publish`, `.action`, `.mutator`, `.searchIndex` — are **reserved names**: an operation cannot be called `publish` (it would collide with the publication registrar), the same rule that already reserves CRUD verbs. todomvc's share action is `share`, not `publish`, for exactly this reason; invoices-table's edit mutator is `save`, not `update`.
 
-## The contract — and why the mechanism is left open
+## The contract
 
 `db.<name>` is defined by behavior, not mechanism. Any implementation must hold these invariants:
 
@@ -81,7 +81,7 @@ The late-attach registrars — `.publish`, `.action`, `.mutator`, `.searchIndex`
 4. **Inbound applies don't echo.** A server delta updates local state and the UI without being re-sent.
 5. **Durability per the existing model.** Optimistic apply is synchronous; the outbox commit reports through the status surface (`saving` → `saved`).
 
-The **mechanism** — whether sync observes the handle as a reaction diffing against the synced baseline, threads the change forward through the write itself, captures a per-write descriptor, or something else — is a real engineering decision with a real perf surface (a per-write diff cost versus a per-write capture cost versus a hot-path tax). It is deliberately left open here, to be settled with a design pass and a benchmark against the invariants above, not fixed by a design-conversation sketch.
+`db.<name>` is a thin real `Signal`; that settles invariants 1–2 and the mental model. What's left is wiring at the pool layer — how a local write reaches the outbox, and how the per-collection signal sits over the pool's existing store — evident enough to a fresh agent that it isn't worth prescribing here. The invariants above are the contract; the technique is the implementer's, settled against them with a benchmark.
 
 ## What this amends in `plan.md`
 
