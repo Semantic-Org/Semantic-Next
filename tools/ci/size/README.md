@@ -33,6 +33,16 @@ The bundles are discovered from the workspace, not hand-listed (`targets.js`):
 
 New packages and primitives are picked up automatically — no edit here.
 
+**Tree-shaken packages.** A few packages are consumed piecemeal — `utils` is just
+independent functions — so their whole-package bundle is an upper bound, not a
+per-consumer cost: a new export adds bytes there but tree-shakes to zero for
+real consumers, and its real cost (if any) already shows up in the `component`
+bundle. Those packages are listed in `TREE_SHAKEN` in `targets.js`. They're
+still measured and shown (marked `†`), but they don't drive the verdict. This is
+opt-out: every other package, including ones not built yet, counts as a real
+shipped bundle by default. The standalone trio's other members (`reactivity`,
+`query`) stay in — they're real products whose bundle size is a genuine signal.
+
 ## The comment
 
 The title leads with the two numbers a reviewer wants: `{state} Bundle size:

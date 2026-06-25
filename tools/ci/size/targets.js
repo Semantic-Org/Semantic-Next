@@ -23,6 +23,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+// Packages consumed so piecemeal that their whole-package bundle is an upper
+// bound, not a per-consumer cost — a new export adds bytes here but tree-shakes
+// to zero for real consumers. These are still measured and shown, but they
+// don't drive the severity banner. Opt-out, not opt-in: every other package
+// (including ones not built yet, like form / data / sync) counts as a real
+// shipped bundle by default. `utils` is pure independent functions; the rest
+// of the trio (reactivity, query) are standalone products whose bundle is a
+// real signal, so they stay in.
+const TREE_SHAKEN = new Set(['utils']);
+
 // org-stripped, lowercased package name — matches the build's output filename
 // rule (internal-packages/scripts/src/lib/build.js).
 function bundleName(pkgName) {
@@ -48,6 +58,7 @@ function discoverPackages(repoRoot) {
       scope: name,
       file: `packages/${entry}/dist/bundle/${name}.min.js`,
       headline: name === 'component',
+      treeShaken: TREE_SHAKEN.has(name),
     });
   }
   return out;

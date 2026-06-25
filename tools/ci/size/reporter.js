@@ -93,21 +93,27 @@ function buildReport(cur, base) {
   for (const m of metrics) { summary[m.status]++; }
 
   const changed = metrics.filter((m) => m.status !== 'unchanged');
-  // increases first by absolute delta, then decreases by absolute delta
+  // real signals first, then tree-shaken; within each, increases first by
+  // absolute delta, then decreases
   changed.sort((a, b) => {
+    if (a.treeShaken !== b.treeShaken) { return a.treeShaken ? 1 : -1; }
     const aPos = a.delta.brotli > 0;
     const bPos = b.delta.brotli > 0;
     if (aPos !== bPos) { return aPos ? -1 : 1; }
     return Math.abs(b.delta.brotli) - Math.abs(a.delta.brotli);
   });
 
-  const headline = pickHeadline(metrics, changed, loc);
-  const increases = changed.filter((m) => m.delta.brotli > 0);
+  // Severity, headline, and largest-increase consider only real signals.
+  // Tree-shaken whole-package bundles (utils) are an upper bound — shown, but
+  // they never raise the banner on their own.
+  const realChanged = changed.filter((m) => !m.treeShaken);
+  const headline = pickHeadline(metrics, realChanged, loc);
+  const increases = realChanged.filter((m) => m.delta.brotli > 0);
   const largest = increases.length
     ? increases.reduce((a, b) => (b.delta.brotli > a.delta.brotli ? b : a))
     : null;
-  const state = classifyState(increases, changed.filter((m) => m.delta.brotli < 0));
-  const fail = changed.some((m) => m.delta.brotli >= SEVERITY.fail.bytes);
+  const state = classifyState(increases, realChanged.filter((m) => m.delta.brotli < 0));
+  const fail = realChanged.some((m) => m.delta.brotli >= SEVERITY.fail.bytes);
 
   return {
     head: { sha, msg, ref: process.env.GITHUB_HEAD_REF || '' },
@@ -134,6 +140,7 @@ function diffTarget(id, head, base) {
     group: head?.group ?? base?.group ?? 'package',
     scope: head?.scope ?? base?.scope ?? null,
     headline: !!(head?.headline ?? base?.headline),
+    treeShaken: !!(head?.treeShaken ?? base?.treeShaken),
   };
   if (head?.exists && !base?.exists) {
     return { ...descriptor, status: 'added', head: sizes(head), base: null, delta: sizes(head), pct: null };
@@ -276,7 +283,12 @@ function renderMarkdown(report) {
     lines.push('|---|---:|---:|---:|');
     for (const m of changed) { lines.push(changedRow(m, report.headline)); }
     lines.push('');
-    lines.push('<sub>Sorted by absolute brotli delta, increases first. 🎯 = bundle most relevant to this PR.</sub>');
+    let caption = 'Sorted by absolute brotli delta, increases first. 🎯 = bundle most relevant to this PR.';
+    if (changed.some((m) => m.treeShaken)) {
+      caption +=
+        ' † = consumed piecemeal, so the whole-package bundle is an upper bound and does not drive the verdict.';
+    }
+    lines.push(`<sub>${caption}</sub>`);
     lines.push('');
   }
 
@@ -294,6 +306,12 @@ function renderMarkdown(report) {
 function verdictLines(report, headline) {
   const loc = report.loc.total;
   if (report.state === 'no-change') {
+    const treeShakenChanged = report.changed
+      .map((id) => report.metrics.find((m) => m.id === id))
+      .some((m) => m.treeShaken);
+    if (treeShakenChanged) {
+      return ['No change to the bundles real consumers ship. A tree-shaken package moved — see the table.'];
+    }
     let s = 'No shipped bundle changed size.';
     if (loc.codeDelta === 0 && loc.commentDelta !== 0) { s += ' PR changes are comments-only.'; }
     return [s];
@@ -320,7 +338,7 @@ function headlineCell(m) {
 }
 
 function changedRow(m, headlineId) {
-  const mark = m.id === headlineId ? ' 🎯' : '';
+  const mark = m.id === headlineId ? ' 🎯' : m.treeShaken ? ' †' : '';
   const brotliAbs = m.status === 'removed' ? '—' : formatSize(m.head.brotli);
   const change = m.status === 'added'
     ? 'new'
@@ -367,7 +385,7 @@ function renderAllBundles(lines, report) {
   lines.push('|---|---|---:|---:|---:|---:|---:|---:|');
   for (const m of report.metrics) {
     const head = m.head ?? { brotli: 0, gzip: 0, raw: 0 };
-    const mark = m.id === report.headline ? ' 🎯' : '';
+    const mark = m.id === report.headline ? ' 🎯' : m.treeShaken ? ' †' : '';
     lines.push(
       `| \`${m.label}\`${mark} | ${m.group} | ${formatSize(head.brotli)} | ${deltaOrDash(m, 'brotli')}`
         + ` | ${formatSize(head.gzip)} | ${deltaOrDash(m, 'gzip')} | ${formatSize(head.raw)} | ${

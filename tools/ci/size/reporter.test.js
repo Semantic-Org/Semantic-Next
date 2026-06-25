@@ -25,6 +25,7 @@ function tgt(id, [brotli, gzip, raw], opts = {}) {
     group: opts.group ?? 'package',
     scope: opts.scope ?? label,
     headline: !!opts.headline,
+    treeShaken: !!opts.treeShaken,
     exists: true,
     brotli,
     gzip,
@@ -164,6 +165,32 @@ test('with component flat, the bundle whose package shipped the most code is pro
   ], loc({ component: [0, 0], query: [0, 0], utils: [0, 0] }));
   const { json } = run(cur, base);
   assert.equal(json.headline, 'pkg-utils');
+});
+
+// a tree-shaken whole-package bundle (utils) is an upper bound — it grows in
+// the report but does not raise the banner, since real consumers tree-shake
+test('a tree-shaken package growth does not drive the banner', () => {
+  const cur = snapshot([
+    tgt('pkg-component', [50000, 59000, 158000], { headline: true }),
+    tgt('pkg-utils', [16000, 17500, 45000], { treeShaken: true }),
+  ], loc({ component: [0, 0], utils: [120, 0] }));
+  const base = snapshot([
+    tgt('pkg-component', [50000, 59000, 158000], { headline: true }),
+    tgt('pkg-utils', [15000, 16200, 42000], { treeShaken: true }),
+  ], loc({ component: [0, 0], utils: [0, 0] }));
+  const { json, md } = run(cur, base);
+  assert.equal(json.state, 'no-change'); // +1 KB utils alone is not a regression
+  assert.equal(json.headline, 'pkg-component'); // not promoted to utils
+  assert.match(md, /tree-shaken|upper bound/i);
+});
+
+// a non-flagged standalone package (reactivity) is a real signal and does drive severity
+test('a standalone package growth is a real warning', () => {
+  const cur = snapshot([tgt('pkg-reactivity', [5700, 6200, 17000])], loc({ reactivity: [40, 0] }));
+  const base = snapshot([tgt('pkg-reactivity', [5000, 5400, 15000])], loc({ reactivity: [0, 0] }));
+  const { json } = run(cur, base);
+  assert.equal(json.state, 'warning');
+  assert.equal(json.headline, 'pkg-reactivity');
 });
 
 test('a bundle present only on the head reads as added', () => {

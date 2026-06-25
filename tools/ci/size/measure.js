@@ -22,7 +22,14 @@ export function measureBuffer(buf) {
 export function measureTargets(repoRoot, targets) {
   const out = {};
   for (const t of targets) {
-    const descriptor = { id: t.id, label: t.label, group: t.group, file: t.file, headline: !!t.headline };
+    const descriptor = {
+      id: t.id,
+      label: t.label,
+      group: t.group,
+      file: t.file,
+      headline: !!t.headline,
+      treeShaken: !!t.treeShaken,
+    };
     const abs = path.join(repoRoot, t.file);
     if (!fs.existsSync(abs)) {
       out[t.id] = { ...descriptor, exists: false };
