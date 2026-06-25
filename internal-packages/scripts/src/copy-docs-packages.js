@@ -58,12 +58,30 @@ async function copyPackages() {
     }
   }
 
-  // the playground links icon-set CSS by raw url (headLibraryJS), not through
-  // the bundle, so it needs the source files and their svgs
-  await copyDir(
-    path.resolve(BASE_DIR, 'src/primitives/icon/sets'),
-    path.resolve(DOCS_PACKAGES_DIR, '@semantic-ui/core/src/primitives/icon/sets'),
-  );
+  // icon-set CSS is loaded by a raw <link> in the playground (headLibraryJS),
+  // not through the bundle, so the source files and their svgs have to ship too
+  const iconSetsSubPath = '@semantic-ui/core/src/primitives/icon/sets';
+  const iconSetsDest = path.resolve(DOCS_PACKAGES_DIR, iconSetsSubPath);
+  await copyDir(path.resolve(BASE_DIR, 'src/primitives/icon/sets'), iconSetsDest);
+
+  // a relative url() inside a custom property resolves against the document, not
+  // the stylesheet (Chrome), so './svg/x.svg' 404s in the playground sandbox.
+  // rewrite to the absolute path each deploy serves its own copied svgs from.
+  for (const entry of await fs.readdir(iconSetsDest, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    const setDir = path.join(iconSetsDest, entry.name);
+    const webBase = `/packages/${iconSetsSubPath}/${entry.name}`;
+    for (const file of await fs.readdir(setDir)) {
+      if (!file.endsWith('.css')) {
+        continue;
+      }
+      const cssPath = path.join(setDir, file);
+      const css = await fs.readFile(cssPath, 'utf8');
+      await fs.writeFile(cssPath, css.replaceAll("url('./", `url('${webBase}/`));
+    }
+  }
 
   // copy each package's bundle dir (skip packages without dist/bundle)
   for (const pkg of packages) {
