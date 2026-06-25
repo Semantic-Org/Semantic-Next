@@ -53,7 +53,7 @@ Plans live in one of these sections based on their current state:
 
 | Section | What goes here |
 |---|---|
-| **Currently Open** | Plans with an open PR or live pair work. Mirrored by `ai/plans/active/`. Updated as ceremony when a PR opens; entries clear when the PR merges or closes without merge. Typically 1-2 entries. |
+| **Currently Open** | Plans with an open PR or live pair work. Mirrored by `ai/plans/active/`. Updated as ceremony when a PR opens; the entry is cleared by the completion commit (Step 4) once the PR is merge-ready, or reversed if the PR closes without merging. Typically 1-2 entries. |
 | **Phase tables** | The phase the plan belongs to, in priority order within the phase. |
 | **Blocked on [X]** | Waiting on a specific dependency. Group by blocker. |
 | **Parallel** | Slot in wherever there's a gap; not phase-gated. |
@@ -209,7 +209,7 @@ Work happens on a feature branch, committed incrementally, merged via PR.
      - [Plan Name](active/plan-name.md) — [PR #N](https://github.com/Semantic-Org/Semantic-Next/pull/N) brief context.
      ```
 
-   If the PR closes without merging, reverse all of the above. If the PR merges and the plan is complete, follow the archive flow below.
+   If the PR closes without merging, reverse all of the above. When the user confirms the PR is ready to merge, run the completion flow (Step 4) as the final commit on the branch — the merge then carries the archived state to `main`.
 8. **Self-review the PR** using the `contributing/code-review` skill — it owns the full process (lens agents, scoring, iterative loop, false-positive rules). Fix findings, rerun until clean.
 9. **Post-merge verification** (when applicable). Only relevant for work that affects live infrastructure — CI pipelines, CDN endpoints, MCP deploys, etc. After the user merges and CI runs, verify the live endpoints behave correctly. Not needed for pure source changes.
 
@@ -231,7 +231,7 @@ When progress is made on a plan:
 
 ## Step 4: Completing a Plan
 
-When a plan is done:
+Run this when the user confirms the PR is ready to merge — **as the final commit on the PR branch, not after the merge lands.** Committing the completion on the branch means the merge carries the archived state to `main` in one stroke, with no post-merge cleanup. (Wait until after merge and the agent who did the work is gone, so the cleanup strands on the user and the active/ + Currently Open entries rot.)
 
 1. **Record actuals in the plan file.** Before archiving, add a `## Completion` section to the plan:
 
@@ -261,10 +261,11 @@ Example output: "~6.5h wall clock (14:09–20:32 ET), ~4h active across 3 bursts
 
 Present the analysis to the user and ask if it sounds right before recording. They may know about breaks or context that commits don't capture.
 
-2. **Move the file**: `mv ai/plans/{plan}.md ai/plans/archive/`.
-3. **Remove from active sections** in ROADMAP.md.
+2. **Move the file**: `git mv ai/plans/active/{plan}.md ai/plans/archive/{plan}.md`. `active/` and `archive/` sit at the same depth under `ai/plans/`, so internal links and links to the file need no path changes (unlike the `plans/` → `active/` move in Step 2.5).
+3. **Remove from ROADMAP.md active sections** — the `## Currently Open` entry, plus the plan's row in its phase table and any phase-tree listing. Completed plans live only in `archive/`, not in ROADMAP.
 4. **Check downstream** — did completing this plan unblock other plans? If so, move those from their blocked section to Do Next or Up Next.
 5. **Promote from Up Next** — if Do Next has room, pull the highest priority item from Up Next.
+6. **Commit on the branch.** Stage the move, the ROADMAP edits, and the `## Completion` record in one commit (`Chore:` prefix) so the PR's merge archives everything atomically.
 
 The archive directory is the catalog of completed work; each plan's `## Completion` section is its self-record. ROADMAP.md does not maintain a separate Archive section — the directory listing and individual plan files are sufficient.
 
