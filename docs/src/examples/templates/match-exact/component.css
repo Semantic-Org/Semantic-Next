@@ -1,0 +1,7 @@
+.user {
+  padding: var(--12px) var(--16px);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  color: var(--muted-text-color);
+}

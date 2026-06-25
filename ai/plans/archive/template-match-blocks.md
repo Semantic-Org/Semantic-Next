@@ -129,4 +129,11 @@ None — independent of all other roadmap items. Cleanest of the four template e
 
 ## Status
 
-Scoped. Ready to implement.
+Complete. Shipped in PR #261.
+
+## Completion
+
+- **Estimated:** 8-16h (1-2d) pair
+- **Actual:** ~10.5h wall-clock in one session (2026-06-24 14:21 → 2026-06-25 01:01 ET). Git-burst analysis undercounts here — most work lived between commits: three parallel code-review rounds, ~5 tachometer bench cycles (~10-15min each), and the isExactly/dispatch design discussions.
+- **Completed:** 2026-06-25
+- **Delta notes:** Landed within estimate, but ran as a single mostly-autonomous agent session rather than the planned multi-session pair, with the user steering at decision points. Scope grew deliberately past the plan: added `{isExactly}` (strict `===`) beside `{is}` (loose `==`) to close the one case coercion can't express, and folded in a `parseTag` first-character dispatch that turned the construct's cold-parse tokenizer cost into a net −28% improvement (erasing pre-existing scan debt). The dispatch rewrite was adversarially verified for tokenization equivalence (1750-input differential + 176-case AST diff + per-pattern superset proof).

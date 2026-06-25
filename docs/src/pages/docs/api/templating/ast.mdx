@@ -79,6 +79,48 @@ Represents an if/else if/else control structure.
 }
 ```
 
+### Match
+
+Represents a value-based branch on a single discriminant. Each branch is a case or an `else` fallback, evaluated in order with the first match winning. A case branch's `type` is `'is'` for loose matching (`==`) or `'isExactly'` for strict matching (`===`).
+
+#### Example
+```javascript
+{#match status}
+  {is 'loading' 'pending'}
+    Loading...
+  {isExactly 'error'}
+    Error: {message}
+  {else}
+    Idle
+{/match}
+```
+
+#### Produces
+```javascript
+{
+  type: 'match',
+  discriminant: 'status',     // the expression branched on
+  branches: [
+    {
+      type: 'is',                          // loose match (==)
+      values: ["'loading'", "'pending'"],  // case values
+      content: [/* nested AST nodes */]
+    },
+    {
+      type: 'isExactly',                   // strict match (===)
+      values: ["'error'"],
+      content: [/* nested AST nodes */]
+    },
+    {
+      type: 'else',
+      content: [/* nested AST nodes */]
+    }
+  ]
+}
+```
+
+The match node also carries an empty `content` array, an inert whitespace sink that holds any text before the first case. It is never rendered.
+
 ### Each Loop
 
 Represents a loop structure for iterating over arrays or objects, with optional handling for empty collections.

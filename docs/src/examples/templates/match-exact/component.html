@@ -1,0 +1,12 @@
+<div class="user">
+  {#match user}
+    {isExactly undefined}
+      Loading...
+    {isExactly null}
+      No user found
+    {else}
+      {user.name}
+  {/match}
+</div>
+<br>
+<ui-button @click={cycle}>Next State</ui-button>

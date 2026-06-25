@@ -51,8 +51,7 @@ PHASE 0: RENDERER ARCHITECTURE  ✓ Complete
 │     ├─ Reactivity Functional Surface
 │     ├─ Value Schema
 │     ├─ State from Settings
-│     ├─ Subtemplate Settings
-│     └─ Template Match Blocks
+│     └─ Subtemplate Settings
 │
 ├─→ PHASE 3: NAMING + TOKENS
 │     ├─ Naming Conventions
@@ -112,7 +111,6 @@ Behavioral changes and API contracts that downstream agents and consumers will t
 | 2g | [Schema Package](schema-package.md) | 16-24h (2-3d) | pair | initial | Extract `@semantic-ui/schema` — one schema language for component values, collections, operation args. Constructor types, optional-by-default, Standard Schema interop. Interlocks with 2b; gates the post-1.0 data layer. |
 | 2c | [State from Settings](state-from-settings.md) | 8h | pair | scoped | `{ default: 'all', from: 'setting' }` in `defaultState`. Eliminates manual shadowing for components that accept initial values from attributes but own them as state. |
 | 2d | [Subtemplate Settings](subtemplate-settings.md) | 8-12h | pair | initial | Reactive `defaultSettings` on subtemplates with merged proxy over parent web component settings. Same upgrade path: add `tagName` and the subtemplate becomes a web component with no API change. |
-| 2e | [Template Match Blocks](template-match-blocks.md) | 8-16h (1-2d) | pair | scoped | `{#match}`/`{is}`/`{else}` — value-based branching. Replaces verbose `{#if is x 'a'}...{else if is x 'b'}` chains. |
 | 2f | [Internationalization](i18n.md) | TBD | pair | initial | i18n as a built-in framework primitive — locale, formatters, RTL, language switching. Lands before Phase 4 to avoid retrofitting 60+ components. Pair session needed to scope. |
 
 ---

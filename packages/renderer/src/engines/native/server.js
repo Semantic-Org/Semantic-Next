@@ -291,6 +291,10 @@ export class ServerRenderer {
           html += this.renderConditional(node, data, scope);
           break;
 
+        case 'match':
+          html += this.renderMatch(node, data, scope);
+          break;
+
         case 'each':
           html += this.renderEach(node, data, scope);
           break;
@@ -466,6 +470,56 @@ export class ServerRenderer {
             matchedAST = branch.content;
             break;
           }
+        }
+        else if (branch.type === 'else') {
+          branchIndex = i;
+          matchedAST = branch.content;
+          break;
+        }
+      }
+    }
+
+    if (classification.insideTag) {
+      const inner = matchedAST
+        ? renderASTToString(matchedAST, data, this.stringRenderer())
+        : '';
+      return this.emitAttributeBlock(id, inner, scope);
+    }
+
+    let html = `<!--${BLOCK_MARKER}${id}-->`;
+    if (matchedAST) {
+      html += this.renderNodes(matchedAST, data);
+    }
+    html += `<!--${formatBlockClose(id, { branchIndex })}-->`;
+    return html;
+  }
+
+  // Value-based branching — discriminant evaluated once, each case matched
+  // against its values ({is} loose ==, {isExactly} strict ===), {else} as
+  // fallback. branchIndex is the chosen branch's index in node.branches
+  // (-1 = no match), stamped on the close marker so the client can detect a
+  // hydration mismatch.
+  renderMatch(node, data, scope) {
+    const id = scope.entryId++;
+    const classification = analyzePosition(scope.htmlBuffer);
+
+    let matchedAST = null;
+    let branchIndex = -1;
+    const discriminant = this.evaluator.lookupExpressionValue(node.discriminant, data);
+    if (node.branches) {
+      for (let i = 0; i < node.branches.length; i++) {
+        const branch = node.branches[i];
+        if (branch.type === 'is' || branch.type === 'isExactly') {
+          const strict = branch.type === 'isExactly';
+          for (const value of branch.values) {
+            const resolved = this.evaluator.lookupExpressionValue(value, data);
+            if (strict ? resolved === discriminant : resolved == discriminant) {
+              branchIndex = i;
+              matchedAST = branch.content;
+              break;
+            }
+          }
+          if (branchIndex !== -1) { break; }
         }
         else if (branch.type === 'else') {
           branchIndex = i;

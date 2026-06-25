@@ -250,6 +250,49 @@ describe('SSR hydration — conditionals', () => {
 });
 
 /*******************************
+            Match
+*******************************/
+
+describe('SSR hydration — match', () => {
+  it('hydrates the matched case', async () => {
+    const el = await ssrAndHydrate({
+      template:
+        `<div>{#match status}{is 'loading'}<span class="a">Wait</span>{is 'done'}<span class="b">Ready</span>{else}<span class="c">Idle</span>{/match}</div>`,
+      defaultState: { status: 'done' },
+    });
+    expect(shadowHTML(el)).toBe('<div><span class="b">Ready</span></div>');
+  });
+
+  it('hydrates the else fallback', async () => {
+    const el = await ssrAndHydrate({
+      template: `<div>{#match status}{is 'loading'}<span>Wait</span>{else}<span>Idle</span>{/match}</div>`,
+      defaultState: { status: 'mystery' },
+    });
+    expect(shadowHTML(el)).toBe('<div><span>Idle</span></div>');
+  });
+
+  it('match is reactive after hydration', async () => {
+    const el = await ssrAndHydrate({
+      template:
+        `{#match status}{is 'loading'}<span>Wait</span>{is 'done'}<span>Ready</span>{else}<span>Idle</span>{/match}`,
+      defaultState: { status: 'loading' },
+      createComponent: ({ state }) => ({
+        finish() {
+          state.status.set('done');
+        },
+      }),
+    });
+    expect(shadowHTML(el)).toBe('<span>Wait</span>');
+
+    const updated = $(el).onNext('updated');
+    el.component.finish();
+    await updated;
+
+    expect(shadowHTML(el)).toBe('<span>Ready</span>');
+  });
+});
+
+/*******************************
           Each loops
 *******************************/
 

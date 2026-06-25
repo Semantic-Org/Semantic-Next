@@ -539,6 +539,156 @@ describe('TemplateCompiler', () => {
       expect(ast).toEqual(expectedAST);
     });
   });
+  describe('match blocks', () => {
+    it('should compile a basic match block', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{#match status}{is 'loading'}Wait{is 'done'}Ready{else}Idle{/match}`);
+      expect(ast).toEqual([
+        {
+          type: 'match',
+          discriminant: 'status',
+          content: [],
+          branches: [
+            { type: 'is', values: ["'loading'"], content: [{ type: 'html', html: 'Wait' }] },
+            { type: 'is', values: ["'done'"], content: [{ type: 'html', html: 'Ready' }] },
+            { type: 'else', content: [{ type: 'html', html: 'Idle' }] },
+          ],
+        },
+      ]);
+    });
+
+    it('should split multiple values per case', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{#match s}{is 'a' 'b' 'c'}x{/match}`);
+      expect(ast[0].branches[0].values).toEqual(["'a'", "'b'", "'c'"]);
+    });
+
+    it('should keep parenthesized expressions as a single value', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{#match s}{is (resolve x) 'b'}y{/match}`);
+      expect(ast[0].branches[0].values).toEqual(['(resolve x)', "'b'"]);
+    });
+
+    it('should support an identifier discriminant and case values', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{#match userRole}{is adminRole}A{else}B{/match}`);
+      expect(ast[0].discriminant).toBe('userRole');
+      expect(ast[0].branches[0].values).toEqual(['adminRole']);
+    });
+
+    it('should not treat {is} as a case keyword outside a match block', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`<b>{is a 'x'}</b>`);
+      expect(ast).toEqual([
+        { type: 'html', html: '<b>' },
+        { type: 'expression', value: "is a 'x'" },
+        { type: 'html', html: '</b>' },
+      ]);
+    });
+
+    it('should support nested match blocks', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{#match a}{is 1}{#match b}{is 2}deep{/match}{/match}`);
+      const inner = ast[0].branches[0].content[0];
+      expect(inner.type).toBe('match');
+      expect(inner.discriminant).toBe('b');
+      expect(inner.branches[0].values).toEqual(['2']);
+    });
+
+    it('should compile match in double-bracket syntax', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{{#match m}}{{is 1}}one{{else}}other{{/match}}`);
+      expect(ast[0].type).toBe('match');
+      expect(ast[0].branches[0].values).toEqual(['1']);
+      expect(ast[0].branches[1].type).toBe('else');
+    });
+
+    it('should parse {isExactly} cases as their own branch type', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`{#match s}{is 'a'}A{isExactly 1}One{else}B{/match}`);
+      expect(ast[0].branches.map((b) => b.type)).toEqual(['is', 'isExactly', 'else']);
+      expect(ast[0].branches[1].values).toEqual(['1']);
+    });
+
+    it('should not treat {isExactly} as a case keyword outside a match block', () => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`<b>{isExactly a b}</b>`);
+      expect(ast).toEqual([
+        { type: 'html', html: '<b>' },
+        { type: 'expression', value: 'isExactly a b' },
+        { type: 'html', html: '</b>' },
+      ]);
+    });
+
+    it('should throw on {/match} without an open match', () => {
+      const compiler = new TemplateCompiler();
+      expect(() => compiler.compile(`done{/match}`)).toThrow();
+    });
+  });
+  describe('tag dispatch', () => {
+    // parseTag dispatches on the first character; identifiers that merely start
+    // with a keyword's letters must still parse as plain expressions.
+    it('treats keyword-prefixed identifiers as expressions', () => {
+      const compiler = new TemplateCompiler();
+      const identifiers = [
+        'items',
+        'email',
+        'count',
+        'label',
+        'branch',
+        'isActive',
+        'beforeText',
+        'loadingState',
+        'catchPhrase',
+        'errorRate',
+        'ifReady',
+      ];
+      for (const id of identifiers) {
+        expect(compiler.compile(`{${id}}`)).toEqual([{ type: 'expression', value: id }]);
+      }
+    });
+
+    it('declares dispatch characters for every pattern, with EXPRESSION as the catch-all', () => {
+      const { dispatchCharsByType, basePatterns } = TemplateCompiler;
+      for (const type of Object.keys(basePatterns)) {
+        const chars = dispatchCharsByType[type];
+        if (type === 'EXPRESSION') {
+          expect(chars).toBeNull();
+        }
+        else {
+          expect(chars instanceof Set && chars.size > 0).toBe(true);
+        }
+      }
+    });
+
+    it('only places a pattern in buckets for characters its regex can open with', () => {
+      // The bucketing is only safe if a pattern never matches a tag whose first
+      // character lands it in a different bucket. Verify each non-catch-all
+      // pattern matches a probe iff that probe's first char is declared.
+      const { singleBracketRegExp, dispatchCharsByType } = TemplateCompiler;
+      const probes = {
+        '#': '#each x',
+        '/': '/each',
+        '>': '>child',
+        e: 'else ',
+        i: 'is x',
+        b: 'before ',
+        l: 'loading ',
+        c: 'catch ',
+        x: 'xyz',
+      };
+      for (const [type, regex] of Object.entries(singleBracketRegExp)) {
+        if (type === 'EXPRESSION') { continue; }
+        const declared = dispatchCharsByType[type];
+        for (const [char, body] of Object.entries(probes)) {
+          const sticky = new RegExp(regex.source, 'y');
+          if (sticky.test(`{${body}}`)) {
+            expect(declared.has(char)).toBe(true);
+          }
+        }
+      }
+    });
+  });
   describe('nested expressions', () => {
     it('should handle single level of nesting in expressions', () => {
       const compiler = new TemplateCompiler();
