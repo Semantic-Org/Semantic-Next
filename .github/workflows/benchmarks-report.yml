@@ -34,7 +34,7 @@ jobs:
           client-id: ${{ secrets.SEMANTIC_PERF_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_PERF_BOT_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
@@ -169,7 +169,7 @@ jobs:
       # Check out main's tip for the commit target. We push back to main,
       # so we need the most recent state — not the bench's head_sha (which
       # may have been superseded by a later merge during the ~10-min bench).
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 2  # need HEAD~1 for parent_sha lookup
