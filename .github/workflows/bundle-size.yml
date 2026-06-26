@@ -64,12 +64,17 @@ jobs:
       # measure. node_modules is reused — a faithful-enough baseline, since
       # dep bumps rarely move first-party bundle bytes. Files the PR adds are
       # dropped so the lines-of-code delta counts new files honestly.
+      #
+      # Root package.json and the lockfile are swapped too: build:packages
+      # lists each package's :build explicitly, so a PR that adds (or removes)
+      # a package would otherwise leave the base build pointing at a :build
+      # target that doesn't exist on the base side.
       - name: Build and measure merge base
         run: |
           git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
           BASELINE_SHA=$(git rev-parse FETCH_HEAD)
           ADDED=$(git diff --name-only --diff-filter=A FETCH_HEAD HEAD -- packages src internal-packages || true)
-          git checkout FETCH_HEAD -- packages src internal-packages 2>/dev/null || true
+          git checkout FETCH_HEAD -- packages src internal-packages package.json package-lock.json 2>/dev/null || true
           if [ -n "$ADDED" ]; then echo "$ADDED" | xargs -r rm -f; fi
           npm run build
           node tools/ci/size/collect.js --root . --label baseline --out results/baseline.json
