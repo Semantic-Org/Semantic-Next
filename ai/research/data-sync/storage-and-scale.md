@@ -22,6 +22,27 @@ This is Meteor's oplog idea done right, and the model the modern CDC sync engine
 
 The scale-correct contract is that **the adapter owns the ordered change stream + durable offsets** (the cursor comes *from* the adapter) — not the kernel computing an in-process cursor over a passive doc store, which is the current in-memory adapter's shape. Building the first log-backed adapter is what validates whether the seam is in the right place (the in-memory adapter never stressed it, because in-process the kernel legitimately *can* own the cursor). Likely first target: **Postgres logical replication** — a replication slot decoding the WAL (`pgoutput`/`wal2json`), LSN = offset, the slot's exported snapshot solving consistent-snapshot-at-offset. (The raw WAL is physical; you consume *logical decoding* of it.)
 
+## Collection indexes — what a collection indexes (NOT the `searchIndex` channel)
+
+**Disambiguation first, because the names collide.** A **storage index** (this note) is a backend structure declared *on a collection* — *what to index* — and is purely an acceleration. The **`searchIndex` channel** is a different thing one layer up: a client-driven *search* (personal `query/where/sort/page`, non-reactive by default — `live: false` + `refresh: 'own-writes'`), i.e. **searching from the client over a channel that is not live pub/sub** — you issue a query and get a window, you are not pushed every change. A `searchIndex` channel *runs a query that storage indexes can accelerate*, but it is a channel/query construct, not an index; the same storage indexes back it and ordinary live channels alike.
+
+The read-path need these storage indexes serve: **a sorted or windowed channel (or a `searchIndex` query) must not fetch the whole collection and sort/page in memory.** It splits two ways:
+
+- **Sort + keyset paging** — built in the Postgres adapter (candidate A): `ORDER BY` + `LIMIT` and a nested keyset `WHERE` reproduce the JS `compileSort` order byte-for-byte (per-key direction, the missing-class `NULLS` placement, a `COLLATE "C"` id tiebreak), so a window is O(window), never fetch-all or `OFFSET`. To be **index-backed** it wants a composite btree that mirrors the `ORDER BY` (`(k1 dir1, …, id)`); correct without one, just unseeked.
+- **Text / search** — a `where` over text (prefix / containment / full-text) falls back to a JS match floor today (the SQL pushdown declines string-range and `$prefix` on collation grounds, exactly as it declines those operators in the `WHERE` pushdown). A **full-text or vector storage index** — Postgres GIN over a `tsvector`, a vector index for embeddings — is what lets that predicate **push down** instead of scanning. This is what makes a `searchIndex` channel's text query cheap, but the index is declared on the collection, not on the channel.
+
+Both are the **same collection-level declaration** (adapter-agnostic, not per-adapter storage config):
+
+```js
+defineCollection('records', {
+  indexes: [{ keys: { status: 1, dueAt: -1 } }, { keys: { title: 1 }, type: 'fulltext' }],
+})
+```
+
+Realized through a new adapter-contract method **`ensureIndex(collection, spec)`**, called by the server at registration. Postgres builds a composite btree from the *same* per-key direction/`NULLS`/`COLLATE` mapping its `ORDER BY` emits (so the planner uses it for the keyset), and a GIN/`tsvector` (or vector) index for a search `type`; the in-memory adapter no-ops (it scans); a future dedicated search adapter realizes its own. One `type` field spans `btree` (sort/keyset) and `fulltext`/`vector` (text/search) — the `id` tiebreak and `COLLATE` are implied so the index matches the adapter's own ordering. Declare-explicit — an index is a write-cost choice — with a framework diagnostic when a published sort or a `searchIndex` query has no matching index, not blind auto-derivation.
+
+**Status:** the sort/limit/keyset pushdown is built + panel-reviewed in the Postgres adapter (sync-poc); the collection-level index declaration + the `ensureIndex` seam land with **schema** (separate PR).
+
 ## The one fork: who owns the write path
 
 - **Tail the DB's CDC** (Postgres logical replication, Mongo oplog): captures *every* writer, including services that never heard of channels. Coupled to the DB's change stream; coarse (per-row, the box filters).
