@@ -1,0 +1,39 @@
+{
+  "name": "@semantic-ui/smoke",
+  "version": "0.18.0",
+  "type": "module",
+  "sideEffects": false,
+  "title": "Bundle Smoke Test",
+  "description": "Throwaway package to smoke-test the bundle-size bot (discovery + regression). Not for merge.",
+  "license": "ISC",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "browser": "./dist/bundle/smoke.min.js",
+      "importmap": "./dist/cdn/smoke.min.js"
+    }
+  },
+  "scripts": {
+    "build": "wireit"
+  },
+  "devDependencies": {
+    "@semantic-ui/internal-scripts": "^0.18.0"
+  },
+  "files": ["src", "dist"],
+  "wireit": {
+    "build": {
+      "dependencies": ["build:esm", "build:bundle", "build:cdn"]
+    },
+    "build:esm": {
+      "command": "node ../../internal-packages/scripts/src/build-esm.js"
+    },
+    "build:bundle": {
+      "command": "node ../../internal-packages/scripts/src/build-bundle.js"
+    },
+    "build:cdn": {
+      "command": "node ../../internal-packages/scripts/src/build-cdn.js"
+    }
+  }
+}

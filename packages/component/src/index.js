@@ -10,3 +10,5 @@ export { NativeEngine } from './engines/native/register.js';
 export { expandCustomElements } from './expand-custom-elements.js';
 export { setRecovery, setStackCapture, setTracing } from './helpers.js';
 export { renderToString } from './render-to-string.js';
+// smoke test: pulls @semantic-ui/smoke into the component bundle. Not for merge.
+export { byKey, records, total } from '@semantic-ui/smoke';

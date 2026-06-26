@@ -250,6 +250,7 @@
         "./packages/query:build",
         "./packages/reactivity:build",
         "./packages/renderer:build",
+        "./packages/smoke:build",
         "./packages/specs:build",
         "./packages/tailwind:build",
         "./packages/templating:build",
@@ -294,7 +295,9 @@
       "command": "node ./internal-packages/scripts/src/build-specs.js"
     },
     "build:icons": {
-      "dependencies": ["./packages/specs:build:icons"]
+      "dependencies": [
+        "./packages/specs:build:icons"
+      ]
     },
     "build:ui-framework": {
       "command": "node ./internal-packages/scripts/src/build-ui-framework.js"
@@ -311,7 +314,9 @@
       "service": true
     },
     "watch:icons": {
-      "dependencies": ["./packages/specs:watch:icons"]
+      "dependencies": [
+        "./packages/specs:watch:icons"
+      ]
     },
     "prepublishOnly": {
       "command": "node ./scripts/prepare.js",
