@@ -35,9 +35,11 @@ jobs:
           client-id: ${{ secrets.SEMANTIC_BUNDLE_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_BUNDLE_BOT_PRIVATE_KEY }}
 
+      # Run the reporter from main, not the PR head. The head SHA it reports
+      # comes from the event payload, so the PR tree is never checked out here.
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: main
 
       - uses: actions/setup-node@v6
         with:
@@ -65,12 +67,12 @@ jobs:
         id: pr
         env:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           NUMBER='${{ github.event.workflow_run.pull_requests[0].number }}'
           if [ -z "$NUMBER" ] || [ "$NUMBER" = "null" ]; then
-            HEAD='${{ github.event.workflow_run.head_branch }}'
             NUMBER=$(gh pr list --repo '${{ github.repository }}' \
-              --head "$HEAD" --state open --json number --jq '.[0].number // ""')
+              --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number // ""')
           fi
           echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
           echo "Resolved PR number: $NUMBER"
@@ -79,12 +81,13 @@ jobs:
         env:
           STARTED: ${{ github.event.workflow_run.created_at }}
           ENDED: ${{ github.event.workflow_run.updated_at }}
+          DISPLAY_TITLE: ${{ github.event.workflow_run.display_title }}
         run: |
           WALL_CLOCK=$(( $(date -d "$ENDED" +%s) - $(date -d "$STARTED" +%s) ))
           node tools/ci/size/reporter.js \
             --results results \
             --sha '${{ github.event.workflow_run.head_sha }}' \
-            --msg '${{ github.event.workflow_run.display_title }}' \
+            --msg "$DISPLAY_TITLE" \
             --run-url '${{ github.event.workflow_run.html_url }}' \
             --run-id '${{ github.event.workflow_run.id }}' \
             --base-ref 'main' \
