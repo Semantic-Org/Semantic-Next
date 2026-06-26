@@ -36,7 +36,7 @@ jobs:
 
       # Run the reporter from main, not the PR head. The head SHA it reports
       # comes from the event payload, so the PR tree is never checked out here.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: main
 
@@ -61,7 +61,8 @@ jobs:
           run_id: ${{ github.event.workflow_run.id }}
           name_is_regexp: true
           name: results-.*
-          path: results
+          # Untrusted artifacts: extract outside the checkout tree.
+          path: ${{ runner.temp }}/bench-results
           allow_forks: true
 
       - name: Resolve PR number
@@ -105,7 +106,7 @@ jobs:
           # main-history is still loaded for drift quantification but excluded
           # from the comparison set.
           node tools/ci/bench/reporter/reporter.js \
-            --results results \
+            --results ${{ runner.temp }}/bench-results \
             --sha '${{ github.event.workflow_run.head_sha }}' \
             --msg "$DISPLAY_TITLE" \
             --run-url '${{ github.event.workflow_run.html_url }}' \
@@ -173,7 +174,7 @@ jobs:
       # Check out main's tip for the commit target. We push back to main,
       # so we need the most recent state — not the bench's head_sha (which
       # may have been superseded by a later merge during the ~10-min bench).
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 2  # need HEAD~1 for parent_sha lookup
@@ -191,7 +192,8 @@ jobs:
           run_id: ${{ github.event.workflow_run.id }}
           name_is_regexp: true
           name: results-.*
-          path: results
+          # Untrusted artifacts: extract outside the checkout tree.
+          path: ${{ runner.temp }}/bench-results
           allow_forks: true
 
       - name: Append history entry
@@ -207,9 +209,9 @@ jobs:
           # one workflow_run benched against the same baseline.
           BENCHED_SHA='${{ github.event.workflow_run.head_sha }}'
           PARENT_SHA=$(git rev-parse "$BENCHED_SHA^" 2>/dev/null || echo '')
-          BASELINE_SHA=$(find results -name baseline-sha.txt -type f -exec cat {} \; -quit)
+          BASELINE_SHA=$(find "${{ runner.temp }}/bench-results" -name baseline-sha.txt -type f -exec cat {} \; -quit)
           node tools/ci/bench/reporter/append-history.js \
-            --results results \
+            --results ${{ runner.temp }}/bench-results \
             --sha "$BENCHED_SHA" \
             --msg "$DISPLAY_TITLE" \
             --parent-sha "$PARENT_SHA" \

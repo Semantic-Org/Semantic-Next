@@ -37,7 +37,7 @@ jobs:
 
       # Run the reporter from main, not the PR head. The head SHA it reports
       # comes from the event payload, so the PR tree is never checked out here.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: main
 
@@ -60,7 +60,8 @@ jobs:
           workflow: ${{ github.event.workflow.id }}
           run_id: ${{ github.event.workflow_run.id }}
           name: size-results
-          path: results
+          # Untrusted artifacts: extract outside the checkout tree.
+          path: ${{ runner.temp }}/size-results
           allow_forks: true
 
       - name: Resolve PR number
@@ -85,7 +86,7 @@ jobs:
         run: |
           WALL_CLOCK=$(( $(date -d "$ENDED" +%s) - $(date -d "$STARTED" +%s) ))
           node tools/ci/size/reporter.js \
-            --results results \
+            --results ${{ runner.temp }}/size-results \
             --sha '${{ github.event.workflow_run.head_sha }}' \
             --msg "$DISPLAY_TITLE" \
             --run-url '${{ github.event.workflow_run.html_url }}' \
