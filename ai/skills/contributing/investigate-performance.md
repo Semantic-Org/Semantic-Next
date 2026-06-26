@@ -48,7 +48,7 @@ The information is in the data and you'll find it. Integrity is in how you handl
 
 ## When to Reach for This Skill
 
-The bench bot reports a confident regression on a PR (`/read-bench-report` shows it in the ❌ Slower bucket). You've ruled out noise (CIs are tight, multiple runs reproduce). The CI bench delta is real — now you need to know *why*.
+The bench bot reports a confident regression on a PR (`/read-ci-reports` shows it in the ❌ Slower bucket). You've ruled out noise (CIs are tight, multiple runs reproduce). The CI bench delta is real — now you need to know *why*.
 
 This skill is for that *why* phase, not the *did it regress* phase.
 
@@ -57,7 +57,7 @@ This skill is for that *why* phase, not the *did it regress* phase.
 ## The Flow That Works
 
 ```
-1. Identify weighted targets, clear the weight gate          → /read-bench-report
+1. Identify weighted targets, clear the weight gate          → /read-ci-reports
 2. Read the bench, parse its template (AST), orient on it    → bench source, validate_template, authoring skills
 3. Calibrate V8 priors                                       → performance-v8-* skills
    ── gather (no hypothesis needed) ──
@@ -97,7 +97,7 @@ Normalize those products across all the confident regressors and you get a **foc
 
 **The weight gate.** The investigation isn't done until you've *measured* the highest weight×magnitude regressor. If the conclusion rests on the synthetic micro-benches while the top-ranked real-workload regressor (e.g. `todo:edit-cycle-5` +70%) is still unmeasured, the wrong thing got investigated — build that bundle and profile it first. "By analogy to the signal benches" doesn't clear the gate; only a measurement does.
 
-**Do not** burn cycles on borderline-noise regressions — `/read-bench-report` documents the noise-floor envelope per duration. But "low magnitude" is weighted too: a 2× suite just above the noise floor can still outrank a large synthetic swing.
+**Do not** burn cycles on borderline-noise regressions — `/read-ci-reports` documents the noise-floor envelope per duration. But "low magnitude" is weighted too: a 2× suite just above the noise floor can still outrank a large synthetic swing.
 
 ---
 
@@ -412,7 +412,7 @@ And performance is iterative. A result that moves the needle but leaves a residu
 
 **"The benchmark is wrong" — and its quieter form, "let's wait until the benches are fixed."** When an investigation stalls, editing the bench to be "more factual" — rewriting the workload, reordering, loosening thresholds, dropping a case — can feel like progress, but it hides the symptom and turns a real regression into a green check. Once CI's overlay rules that out (it rebuilds `packages/*/bench/` from main, so the edit can't land), the same impulse tends to return as a pause: "we shouldn't dig further until the benches are fixed — they have a JIT-warmup / GC-timing flaw." Watch for this one in yourself — it's deflection's most convincing costume, because JIT tier-up and GC pauses *are* real channels (see "which channel?" above), so the case for it comes out genuinely rigorous. The rigor isn't the signal; the direction is — the argument ends at "don't measure," which is the cue to measure. An elaborate methodology critique is still a detour until a measurement backs it.
 
-The constructive move is to confirm, not argue. Tachometer is built for exactly this: it runs repeated samples and reports a 95% confidence interval per comparison (`percentChange.{low,high}`) — establishing significance via the central limit theorem is the point of the tool, not a gap in it. So "the run is too short to be significant" is already answered by the interval the harness produced and by the per-duration noise floor `/read-bench-report` documents — start there. The same standard settles the harder claims: **a methodology flaw is something you demonstrate, not a reason to halt before you have.** Bump warmup iterations, force GC between samples, reorder the cases and A/B locally (Step 6), and show the regression collapses. If it doesn't collapse, the bench is sound and the regression is real — that's the finding. And absent that demonstration, "let's wait until the benches are fixed" is not grounds to stop. Keep going until a measurement settles it. (`/read-bench-report` and `/extend-bench-suite` carry the statistical details — this skill only needs to point at them.)
+The constructive move is to confirm, not argue. Tachometer is built for exactly this: it runs repeated samples and reports a 95% confidence interval per comparison (`percentChange.{low,high}`) — establishing significance via the central limit theorem is the point of the tool, not a gap in it. So "the run is too short to be significant" is already answered by the interval the harness produced and by the per-duration noise floor `/read-ci-reports` documents — start there. The same standard settles the harder claims: **a methodology flaw is something you demonstrate, not a reason to halt before you have.** Bump warmup iterations, force GC between samples, reorder the cases and A/B locally (Step 6), and show the regression collapses. If it doesn't collapse, the bench is sound and the regression is real — that's the finding. And absent that demonstration, "let's wait until the benches are fixed" is not grounds to stop. Keep going until a measurement settles it. (`/read-ci-reports` and `/extend-bench-suite` carry the statistical details — this skill only needs to point at them.)
 
 ---
 
@@ -420,7 +420,7 @@ The constructive move is to confirm, not argue. Tachometer is built for exactly 
 
 | Phase | Tool | Output |
 |---|---|---|
-| Targets (weight × magnitude) | `/read-bench-report` | ranked list; krausest 5× / todo·template·hydrate 2× / synthetics 0.25× |
+| Targets (weight × magnitude) | `/read-ci-reports` | ranked list; krausest 5× / todo·template·hydrate 2× / synthetics 0.25× |
 | Weight gate | — | heaviest real-workload regressor is measured, not "by analogy" |
 | Orient | bench source + `example-curriculum`, `component-templating` | what the workload does + how the component works user-side |
 | Parse the template | `validate_template` `includeAST` | which expressions are JS-eval vs bare var vs Lisp vs block — map the symptom to a node |
@@ -441,7 +441,7 @@ The constructive move is to confirm, not argue. Tachometer is built for exactly 
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Reading Bench Reports** | `/read-bench-report` | Interpreting the bench-bot PR comment |
+| **Reading CI Reports** | `/read-ci-reports` | Interpreting the bench-bot PR comment |
 | **Extend Bench Suite** | `/extend-bench-suite` | Adding a new bench, local tachometer setup |
 | **Improve Performance** | `/improve-performance` | Audit-fix-measure cycle for an entire package |
 | **Fresh Take** | `/fresh-take` | Escaping solution momentum with subagent delegation |

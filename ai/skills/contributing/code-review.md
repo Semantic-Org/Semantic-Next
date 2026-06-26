@@ -96,23 +96,27 @@ Three lenses on the diff under a high-confidence bar. Comments are out of scope 
 
 **Confidence bar:** return only findings where the simpler/cheaper form is unambiguously better. Skip taste-based preferences and judgment calls — those are nitpicks here.
 
-### Agent 6 — Performance Review
-Anchor: `ai/skills/workflows/contributing/improve-performance.md`. Tachometer is the committed source of truth for performance in this repo; CI posts a bench reporter comment on the PR with per-metric verdicts (faster / slower / no change / unsure) and an `Expected Noise` column.
+### Agent 6 — Performance Review (runtime + shipped size)
+Anchors: `ai/skills/workflows/contributing/improve-performance.md` for runtime, and `read-ci-reports` for how to read every CI report comment. The CI bots are the committed evidence — don't speculate about runtime or size without them. Today two post: the **performance bot** (tachometer — per-metric runtime verdicts with an `Expected Noise` column) and the **bundle-size bot** (per-bundle brotli/gzip deltas + shipped LOC). A runtime memory-footprint bot is planned; when it lands it reads the same way and `read-ci-reports` will carry it, so treat that skill as the home for all three. Shipped bytes are user-facing performance here, so size is in scope alongside runtime.
 
-**Step 0 — Applicability check.** The benchmarks workflow runs only when a PR touches paths in its `paths:` filter (currently `packages/**` or `.github/workflows/benchmarks.yml`). Run `gh pr diff {number} --name-only` first. If none of the changed files match those paths, abort immediately with: *"PR scope doesn't trigger benchmarks (no `packages/**` or `benchmarks.yml` changes). Performance review N/A."* Don't fetch comments, don't speculate — the workflow won't have run.
+**Step 0 — Applicability check.** Run `gh pr diff {number} --name-only` first.
+- Tachometer runs only on `packages/**` (or `benchmarks.yml`).
+- The bundle-size bot runs on `packages/**`, `src/**`, or `internal-packages/scripts/**`.
 
-**Step 1 — Find the tachometer comment.** Use `gh pr view {number} --comments` or `gh api repos/{owner}/{repo}/issues/{number}/comments`. The bench reporter's comment is recognizable by the per-metric verdict table.
+If the diff matches neither, abort with: *"PR scope triggers no perf or size CI. Performance review N/A."* If it matches one but not the other, review only the one that ran.
 
-**If absent (despite applicable scope) — abort.** Return: *"Tachometer hasn't run yet on this PR. Rerun Agent 6 in a separate pass once CI catches up."* Don't speculate about performance without data.
+**Step 1 — Find the bot comments.** Use `gh pr view {number} --comments` or `gh api repos/{owner}/{repo}/issues/{number}/comments`. The tachometer comment is recognizable by its per-metric verdict table; the bundle-size comment by its `Bundle size …` banner and `semantic-bundle-bot` author. **If an applicable comment is absent — abort that half:** *"<bot> hasn't run yet; rerun once CI catches up."*
 
-**If present — investigate each regression honestly.** For every metric flagged "slower," judge:
+**Runtime (tachometer) — investigate each "slower" honestly.** For every metric flagged slower, judge:
 
 - **Tax on correctness?** A regression may be acceptable if the change fixes a bug, removes a footgun, or restores an invariant the old fast path was skipping. Read the PR description and the changed lines to judge intent.
 - **Or does it need iteration?** A regression is unacceptable when nothing about the change demands the slowdown.
 
-**Ignore "unsure" verdicts** where the reported CI width is at or near the metric's `Expected Noise` floor — those are physics of short benches, not regressions.
+Ignore "unsure" verdicts where the CI width is at or near the metric's `Expected Noise` floor — physics of short benches, not regressions.
 
-**If a concrete recovery is visible in the diff itself** — extra allocation, unnecessary work, redundant computation, missed early return, repeated regex compile, etc. — call it out with file/line and the proposed simpler/faster form. Don't speculate beyond the changeset.
+**Shipped size (bundle bot) — investigate each confident growth.** A 🔴 regression or a 🟡 warning on a real (non-`†`) bundle is real shipped cost; judge it the same way — a tax the change demands (a feature's payload) versus avoidable bloat. An unexpected `component` (headline) growth on a PR that shouldn't have touched the runtime is worth a flag. Ignore `†` tree-shaken rows and sub-JND wiggles — `read-ci-reports` explains why neither is a per-consumer cost.
+
+**If a concrete recovery is visible in the diff itself** — extra allocation, redundant work, missed early return (runtime), or a heavy import, an un-tree-shakeable re-export, a large inlined asset (size) — call it out with file/line and the simpler form. Don't speculate beyond the changeset.
 
 ## Handling Results
 

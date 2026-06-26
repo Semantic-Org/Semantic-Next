@@ -24,7 +24,7 @@ These are what the project optimizes, in the order conflicts resolve. When two o
 |---|---|
 | User-felt behavior | A change users can feel beats any internal metric. A perf win below human perception that costs debugging ergonomics is a net loss. |
 | Externally visible benchmarks | The js-framework-benchmark numbers are the public record. A change that wins internal benches and loses krausest gets reverted — internal metrics do not compensate. |
-| Shipped bytes | Most compiles happen in the browser via CDN, so runtime-package size is user-facing performance. Measure minified + brotli on any runtime-shipped change without being asked — CI reports timing only, so byte costs are silent by default. |
+| Shipped bytes | Most compiles happen in the browser via CDN, so runtime-package size is user-facing performance. The bundle-size bot reports brotli/gzip deltas per PR (`read-ci-reports`); still sanity-check minified + brotli on any runtime-shipped change, and read the bot's verdict rather than assuming bytes are free. |
 | First-contact ergonomics | Design APIs for the first five seconds of real use. The most common act on any value a handler receives is logging it — a design that survives spec review but fails `console.log` inspection is the wrong design. |
 | Best API over compatibility | Pre-1.0, propose the cleanest design first and verify actual blast radius. Do not preserve dual formats to protect output that was buggy — wipe and reset beats compatibility cruft. |
 | Smallest structure the constraint demands | Size a change from the constraint and the existing seam, not from pattern completion. When the implementation estimate far exceeds the conceptual delta, that gap is the signal you are building symmetry, not solving the problem. |
@@ -117,6 +117,6 @@ When measured:         the data wins, update cleanly
 |-------|---------|-------------|
 | **Fresh Take** | `fresh-take` | Delegating for an uncontaminated second opinion |
 | **Improve Performance** | `improve-performance` | The full audit, trace, fix, measure cycle |
-| **Reading Bench Reports** | `read-bench-report` | Interpreting CI bench verdicts on a PR |
+| **Reading CI Reports** | `read-ci-reports` | Interpreting CI bench and bundle-size verdicts on a PR |
 | **Authoring Pull Requests** | `author-pull-requests` | Titles and descriptions that scale with the diff |
 | **Agent Lessons** | `agent-lessons` | Distilled traps from previous agent sessions |
