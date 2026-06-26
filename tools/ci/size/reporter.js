@@ -225,7 +225,7 @@ function renderMarkdown(report) {
   // ── title: the two numbers a reviewer wants up front ──
   const titleMid = report.state === 'no-change'
     ? 'no meaningful change'
-    : `\`${headline.label}\` ${signedSize(headline.delta.brotli)} brotli`;
+    : `\`${escapeCode(headline.label)}\` ${signedSize(headline.delta.brotli)} brotli`;
   lines.push(
     `### ${info.emoji} Bundle size${info.word}: ${titleMid} · ${signedLoc(loc.codeDelta)} shipped LOC for ${shaLink}`,
   );
@@ -240,7 +240,7 @@ function renderMarkdown(report) {
   lines.push(meta.join(' · '));
   lines.push('');
   if (report.head.msg) {
-    lines.push(`<sup>${escape(report.head.msg)}</sup>`);
+    lines.push(`<sup>${escapeText(report.head.msg)}</sup>`);
     lines.push('');
   }
 
@@ -261,7 +261,7 @@ function renderMarkdown(report) {
   // ── signal table ──
   lines.push('| signal | result |');
   lines.push('|---|---:|');
-  const headlineRow = headline ? `\`${headline.label}\` brotli` : 'Headline brotli';
+  const headlineRow = headline ? `\`${escapeCode(headline.label)}\` brotli` : 'Headline brotli';
   lines.push(`| ${headlineRow} | ${headline ? headlineCell(headline) : '0 B'} |`);
   lines.push(`| Shipped LOC | ${signedLoc(loc.codeDelta)} |`);
   lines.push(`| Comment LOC | ${signedLoc(loc.commentDelta)} |`);
@@ -318,7 +318,7 @@ function verdictLines(report, headline) {
   }
   const verb = headline.delta.brotli > 0 ? 'grew' : 'shrank';
   let s =
-    `\`${headline.label}\` ${verb} **${signedSize(headline.delta.brotli)}** brotli to ${
+    `\`${escapeCode(headline.label)}\` ${verb} **${signedSize(headline.delta.brotli)}** brotli to ${
       formatSize(headline.head.brotli)
     }`
     + ` (${signedPct(headline.delta.brotli, headline.base?.brotli)}) across **${
@@ -326,7 +326,7 @@ function verdictLines(report, headline) {
     } shipped LOC**.`;
   const largest = report.largest_increase ? report.metrics.find((m) => m.id === report.largest_increase) : null;
   if (largest && largest.id !== headline.id) {
-    s += ` Largest increase: \`${largest.label}\` **${signedSize(largest.delta.brotli)}**`
+    s += ` Largest increase: \`${escapeCode(largest.label)}\` **${signedSize(largest.delta.brotli)}**`
       + ` (${signedPct(largest.delta.brotli, largest.base?.brotli)}).`;
   }
   return [s];
@@ -345,7 +345,7 @@ function changedRow(m, headlineId) {
     : m.status === 'removed'
     ? 'removed'
     : signedPct(m.delta.brotli, m.base.brotli);
-  return `| \`${m.label}\`${mark} | ${brotliAbs} | ${signedSize(m.delta.brotli)} | ${change} |`;
+  return `| \`${escapeCode(m.label)}\`${mark} | ${brotliAbs} | ${signedSize(m.delta.brotli)} | ${change} |`;
 }
 
 function renderLocByScope(lines, report) {
@@ -369,7 +369,7 @@ function renderLocByScope(lines, report) {
     lines.push('| scope | shipped LOC | comment LOC |');
     lines.push('|---|---:|---:|');
     for (const [scope, v] of moved) {
-      lines.push(`| \`${scope}\` | ${signedLoc(v.codeDelta)} | ${signedLoc(v.commentDelta)} |`);
+      lines.push(`| \`${escapeCode(scope)}\` | ${signedLoc(v.codeDelta)} | ${signedLoc(v.commentDelta)} |`);
     }
   }
   lines.push('');
@@ -387,7 +387,9 @@ function renderAllBundles(lines, report) {
     const head = m.head ?? { brotli: 0, gzip: 0, raw: 0 };
     const mark = m.id === report.headline ? ' 🎯' : m.treeShaken ? ' †' : '';
     lines.push(
-      `| \`${m.label}\`${mark} | ${m.group} | ${formatSize(head.brotli)} | ${deltaOrDash(m, 'brotli')}`
+      `| \`${escapeCode(m.label)}\`${mark} | ${escapeText(m.group)} | ${formatSize(head.brotli)} | ${
+        deltaOrDash(m, 'brotli')
+      }`
         + ` | ${formatSize(head.gzip)} | ${deltaOrDash(m, 'gzip')} | ${formatSize(head.raw)} | ${
           deltaOrDash(m, 'raw')
         } |`,
@@ -437,7 +439,7 @@ function signedLoc(n) {
 
 function baseLink(report) {
   if (!report.repo) { return `\`${report.base.ref}\``; }
-  const target = report.base.sha
+  const target = isHexSha(report.base.sha)
     ? `https://github.com/${report.repo}/commit/${report.base.sha}`
     : `https://github.com/${report.repo}/tree/${report.base.ref}`;
   return `[${report.base.ref}](${target})`;
@@ -465,8 +467,27 @@ function extractRunId(url) {
   return m ? m[1] : '';
 }
 
-function escape(s) {
-  return s.replace(/[<>]/g, (c) => (c === '<' ? '&lt;' : '&gt;'));
+// Render untrusted text (commit titles, bundle groups) as literal: entity-
+// encode the HTML trio, then backslash-escape the markdown link/image/code
+// and table punctuation so artifact- or title-supplied text can't smuggle a
+// link, image, code span, raw HTML, or extra table cell into the comment.
+function escapeText(s) {
+  return String(s ?? '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/[\x00-\x1f\x7f]/g, '')
+    .replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c])
+    .replace(/[\\`\[\]!|]/g, '\\$&');
+}
+
+// Sanitize an untrusted value rendered inside a `code span` (often a table
+// cell): a backtick or pipe can't be escaped there, so drop them with any
+// control chars. No-op for identifiers and hex shas.
+function escapeCode(s) {
+  return String(s ?? '').replace(/[`|\x00-\x1f\x7f]/g, '');
+}
+
+function isHexSha(s) {
+  return typeof s === 'string' && /^[0-9a-f]{7,64}$/i.test(s);
 }
 
 function parseArgs(argv) {

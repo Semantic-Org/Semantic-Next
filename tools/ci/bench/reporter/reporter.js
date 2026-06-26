@@ -1226,7 +1226,7 @@ function escapeText(s) {
     .replace(/[\r\n]+/g, ' ')
     .replace(/[\x00-\x1f\x7f]/g, '')
     .replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c])
-    .replace(/[\\`\[\]!]/g, '\\$&');
+    .replace(/[\\`\[\]!|]/g, '\\$&');
 }
 
 // Sanitize an untrusted value rendered inside a `code span` (often a table

@@ -1434,3 +1434,22 @@ test('glossary: rows sort alphabetically and skip metrics without a purpose', ()
   const glossarySlice = markdown.slice(glossaryStart, glossaryEnd);
   assert.ok(!glossarySlice.includes('beta'), 'beta excluded from glossary');
 });
+
+test('security — malicious title, metric name, and baseline sha are neutralized', () => {
+  // A fork PR controls the commit title, the artifact JSON (metric names),
+  // and baseline-sha.txt. None may inject markup into the bot's comment.
+  const dir = writeHandcraftedResults('ev`il|name', [8, 9], [10, 11], [-30, -20], 'notahex)evil');
+  const { markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'deadbeef',
+    msg: '[pwn](https://evil.example) <img src=x>',
+    repo: 'owner/repo',
+  });
+  assert.ok(markdown.includes('evilname'), 'metric name rendered with dangerous chars stripped');
+  assert.ok(!markdown.includes('ev`il|name'), 'backtick and pipe stripped from metric name');
+  assert.ok(markdown.includes('\\[pwn\\]'), 'title brackets escaped — no live link');
+  assert.ok(markdown.includes('&lt;img src=x'), 'raw HTML entity-encoded in title');
+  assert.ok(!markdown.includes('<img src=x'), 'no raw HTML tag survives');
+  assert.ok(!markdown.includes('/commit/notahex'), 'non-hex baseline sha is not linked as a commit');
+  assert.ok(markdown.includes('/tree/main'), 'base falls back to the ref tree');
+});
