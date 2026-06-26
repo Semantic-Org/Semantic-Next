@@ -387,7 +387,7 @@ function renderMarkdown(report) {
   lines.push('');
 
   if (report.head.msg) {
-    lines.push(`<sup>${escape(report.head.msg)}</sup>`);
+    lines.push(`<sup>${escapeText(report.head.msg)}</sup>`);
     lines.push('');
   }
 
@@ -686,8 +686,8 @@ function formatDriftFootnote({ idx, metric, drift, currentBaseline, peakBaseline
   const sign = drift.magnitude > 0 ? '+' : '';
   const links = drift.chain_len === 1 ? '1 main commit' : `${drift.chain_len} main commits`;
   return (
-    `⚠️${idx} main moved ${sign}${drift.magnitude.toFixed(0)}pp on \`${metric}\` `
-    + `between baselines (\`${peakSha}\` → \`${currentSha}\`, chained across ${links}). `
+    `⚠️${idx} main moved ${sign}${drift.magnitude.toFixed(0)}pp on \`${escapeCode(metric)}\` `
+    + `between baselines (\`${escapeCode(peakSha)}\` → \`${escapeCode(currentSha)}\`, chained across ${links}). `
     + `Comparison may include main-side change.`
   );
 }
@@ -827,7 +827,7 @@ function benchPrefix(sourcePath) {
 function metricLink(m, report) {
   const prefix = benchPrefix(m.source?.path);
   const display = prefix ? `${prefix}:${m.name}` : m.name;
-  const label = `\`${display}\``;
+  const label = `\`${escapeCode(display)}\``;
   if (!report.repo || !m.source) { return label; }
   const hashPart = m.source.line ? `#L${m.source.line}` : '';
   return `[${label}](https://github.com/${report.repo}/blob/${report.head.sha}/${m.source.path}${hashPart})`;
@@ -858,7 +858,7 @@ function commitOrPrLink(entry, repo) {
  */
 function baseLinkFor(report) {
   if (!report.repo) { return `\`${report.base.ref}\``; }
-  const target = report.base.sha
+  const target = isHexSha(report.base.sha)
     ? `https://github.com/${report.repo}/commit/${report.base.sha}`
     : `https://github.com/${report.repo}/tree/${report.base.ref}`;
   return `[${report.base.ref}](${target})`;
@@ -1217,6 +1217,25 @@ function required(args, key) {
   return args[key];
 }
 
-function escape(s) {
-  return s.replace(/[<>]/g, (c) => (c === '<' ? '&lt;' : '&gt;'));
+// Render untrusted text (commit titles) as literal: entity-encode the HTML
+// trio, then backslash-escape the markdown link/image/code punctuation so a
+// crafted title can't smuggle a link, image, code span, or raw HTML into the
+// bot's comment.
+function escapeText(s) {
+  return String(s ?? '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/[\x00-\x1f\x7f]/g, '')
+    .replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c])
+    .replace(/[\\`\[\]!]/g, '\\$&');
+}
+
+// Sanitize an untrusted value rendered inside a `code span` (often a table
+// cell): a backtick or pipe can't be escaped there, so drop them with any
+// control chars. No-op for identifiers and hex shas.
+function escapeCode(s) {
+  return String(s ?? '').replace(/[`|\x00-\x1f\x7f]/g, '');
+}
+
+function isHexSha(s) {
+  return typeof s === 'string' && /^[0-9a-f]{7,64}$/i.test(s);
 }

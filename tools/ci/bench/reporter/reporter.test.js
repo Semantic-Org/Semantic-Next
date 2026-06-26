@@ -302,7 +302,7 @@ test('base header — falls back to baseline-sha.txt sidecar when --base-sha uns
   // already carries baseline-sha.txt — the reporter should use that as the
   // fallback so the Base link pins to the actual measurement baseline,
   // not a moving branch tip.
-  const dir = writeHandcraftedResults('m', [10, 11], [10, 11], [-1, 1], 'sidecarSha123');
+  const dir = writeHandcraftedResults('m', [10, 11], [10, 11], [-1, 1], 'ba5e1100ba5e1100ba5e1100ba5e1100ba5e1100');
   const { report, markdown } = runReporter({
     resultsDir: dir,
     sha: 'abc',
@@ -310,8 +310,11 @@ test('base header — falls back to baseline-sha.txt sidecar when --base-sha uns
     // No baseSha CLI arg
     repo: 'owner/repo',
   });
-  assert.equal(report.base.sha, 'sidecarSha123', 'sidecar SHA threaded into report.base');
-  assert.ok(markdown.includes('/commit/sidecarSha123'), 'Base link uses commit URL with sidecar SHA');
+  assert.equal(report.base.sha, 'ba5e1100ba5e1100ba5e1100ba5e1100ba5e1100', 'sidecar SHA threaded into report.base');
+  assert.ok(
+    markdown.includes('/commit/ba5e1100ba5e1100ba5e1100ba5e1100ba5e1100'),
+    'Base link uses commit URL with sidecar SHA',
+  );
   assert.ok(!markdown.includes('/tree/main'), 'no fallback to moving branch tip');
 });
 
