@@ -23,17 +23,17 @@ In both, the headline names the one thing that matters. Chase that; collapse the
 
 ## The reports
 
-Two bots each post one comment on a PR today, and a runtime memory-footprint report is planned. They share a grammar — separate confident signal from noise, headline the metric that matters, collapse the rest — but they measure different things and reason about uncertainty differently. This skill is the home for reading all of them; it grows a section per report, so consult whichever the PR triggered.
+Three bots each post one comment on a PR. They share a grammar — separate confident signal from noise, headline the metric that matters, collapse the rest — but they measure different things and reason about uncertainty differently. This skill is the home for reading all of them; it grows a section per report, so consult whichever the PR triggered.
 
-| | Performance bot | Bundle-size bot |
-|---|---|---|
-| Comment title | `… on Benchmark Suite 📊` | `Bundle size … 📦` |
-| Measures | runtime, in real headless Chrome | shipped bytes (brotli / gzip / raw) + lines of code |
-| Uncertainty | statistical — 95% CI, noise floor | none — deterministic build, a delta is exact |
-| Confident signal | the Faster / Slower buckets | the state itself (sub-noise filtered) |
-| Raw adjunct | `bench-report.json` | `size-report.json` |
+| | Performance bot | Bundle-size bot | Heap bot |
+|---|---|---|---|
+| Comment title | `… on Benchmark Suite 📊` | `Bundle size … 📦` | `… on Heap Analysis 🧠` |
+| Measures | runtime, in real headless Chrome | shipped bytes (brotli / gzip / raw) + lines of code | runtime memory: teardown-invariant leaks + footprint |
+| Uncertainty | statistical — 95% CI, noise floor | none — deterministic build, a delta is exact | split — counts are exact, heap KB is statistical |
+| Confident signal | the Faster / Slower buckets | the state itself (sub-noise filtered) | the leak verdict (a broken count invariant) |
+| Raw adjunct | `bench-report.json` | `size-report.json` | `memory-report.json` |
 
-The load-bearing difference: a bench number carries a confidence interval, so **Unsure** is a real category and most of the bench skill is about not mistaking it for a regression. A bundle number is exact, so there is no Unsure — instead the bot suppresses sub-threshold wiggles and marks which bundles are real shipped cost versus tree-shaken upper bounds.
+The load-bearing difference: a bench number carries a confidence interval, so **Unsure** is a real category and most of the bench skill is about not mistaking it for a regression. A bundle number is exact, so there is no Unsure — instead the bot suppresses sub-threshold wiggles and marks which bundles are real shipped cost versus tree-shaken upper bounds. The heap bot is a hybrid: its **gate is exact** (a live-instance count either returns to baseline or it doesn't), but its **footprint trend is statistical** (heap KB is noisy even post-GC) — so read the leak verdict like a bundle delta and the footprint like a bench sample.
 
 ---
 
@@ -391,6 +391,97 @@ The `size-report.json` artifact (linked from **Raw:**) carries the structured ou
 
 ---
 
+## Reading a heap report — the heap bot
+
+This bot canaries runtime memory. It is a hybrid of the other two: the **gate is deterministic** like the bundle bot, the **footprint is statistical** like the bench bot, and the headline is a **leak verdict**, not a memory number.
+
+The gate works by churning the framework: it mounts a scene, tears it down, and repeats **7** (prime) times, then asserts that the count of each live framework structure has returned **exactly** to its pre-churn baseline. A residual is a leak — reported as a per-cycle multiple, so `+7000` after 7 cycles reads as `+1000/cycle`. This is the same thing reactive frameworks assert internally (Vue's `effectScope.spec` checks `scope.effects.length === 0` after `stop()`); it's exact and cheap precisely because it counts live instances (via CDP `queryObjects`) rather than weighing bytes.
+
+### Comment anatomy
+
+```
+### <state-emoji> <verdict> for <sha> on Heap Analysis 🧠
+
+**Base:** [main](commit) · **Run:** [#id] · **Raw:** [memory-report.json]
+
+<sup>Commit message</sup>
+
+> [!<alert>]
+> One-sentence verdict, led by the leak.
+
+**<broken count> · <held count> · 📊 <footprint state>**
+
+| invariant | baseline | after 7 cycles | verdict |   ← the story, expanded
+
+<details> Footprint by scene (post-GC retained heap) </details>
+<details> Reactivity micro (Node, --expose-gc) </details>
+
+<sub>7 cycles · GC ×2/sample · Chrome NNN (pinned) · counts exact · heap ±4% floor · wall-clock</sub>
+```
+
+### The state — what the banner says
+
+Red is reserved for a **broken teardown invariant** — a real leak. Footprint movement alone never goes red.
+
+| State | Emoji | Alert | When |
+|-------|:---:|:---:|------|
+| No leak | ⚪ | `[!NOTE]` | All invariants held, footprint within noise |
+| Improvement | 🟢 | `[!TIP]` | The PR fixes a leak `main` had |
+| Watch | 🟡 | `[!WARNING]` | Invariants held, but footprint grew past the floor |
+| Leak | 🔴 | `[!CAUTION]` | An invariant grew — counts didn't return to baseline |
+
+The leak verdict is computed per side and compared: a residual on the head that the base didn't have is **broken** (the PR introduced it); an equal pre-existing residual is **held** (not blamed on this PR); a clean head where the base leaked is **fixed**.
+
+### The invariants — counts are exact, not sampled
+
+The invariants target SUI's own churned structures, each created per-component or per-each-item and disposed on teardown, so a clean cycle nets to baseline:
+
+| invariant | what a residual means |
+|---|---|
+| `Reaction` | a binding's reaction wasn't stopped (`ReactionScope.dispose` missed it) |
+| `ReactionScope` | a scope wasn't disposed — its whole subtree leaks |
+| `DynamicRegion` | an each / if / async block's region wasn't cleared |
+| `Dependency` | a `subscribers` Set still holds a dead reaction |
+| `Signal` | a per-key value cell outlived its item |
+| detached DOM | marker-bounded item content wasn't removed — survives as detached `<tr>`/`<td>` |
+
+A residual is exact — there's no confidence interval, no Unsure. `🎯` marks the invariant this PR moved. Determinism rests on a correct `settle()` (drain async teardown, then GC twice); if the gate ever flakes, `settle()` read too early — that's a harness bug, not a threshold to widen.
+
+### The footprint — statistical, never a gate
+
+Post-GC retained heap for a mounted scene and a Node reactivity micro live in collapsed `<details>`. Both are classified against a percent noise floor (±4% to start) and **never fail CI** — heap KB is noisy even post-GC (fragmentation, JIT/IC caches). It's a footprint *trend*. The micro's residual-after-teardown is a trend signal too, not a leak claim (V8 doesn't hand freed pages back to the OS).
+
+### memory-report.json — for agents
+
+| Field | Agent use |
+|-------|-----------|
+| `state` | One-shot verdict — `no-leak` / `improvement` / `watch` / `leak` |
+| `fail` | `true` when an invariant broke (a real leak) |
+| `summary` | Counts: `broken` / `held` / `fixed` |
+| `headline` | The invariant id this PR moved |
+| `invariants[].verdict` | Per-invariant `held` / `broken` / `fixed` |
+| `invariants[].residual` / `.perCycle` | The leak size and per-cycle multiple |
+| `footprint` / `reactivity_micro` | The statistical trend — read, don't gate on |
+
+#### ✅ Good agent query
+
+"If any `invariants[]` entry has `verdict: broken`, that's a real leak — name the structure (`label`), the residual size (`residual`), and the per-cycle rate (`perCycle`). That's the confident signal; the leaked structure and its multiple are the lead for tracing the leak."
+
+#### ❌ Bad agent query
+
+"Flag the footprint growth." Heap KB is a noisy trend, never a gate — a `watch` is worth a glance, not a block. The broken count invariant is the only confident leak signal.
+
+### Tier 2 — retainer attribution (planned)
+
+Naming *what retains* a leaked object — the backward retainer path from a leaked structure to a GC root — is a planned Tier-2 follow-up, not part of today's comment. The bot today reports the broken invariant(s), the exact counts, and the per-cycle multiple; it does not yet capture a `.heapsnapshot` or print a retainer shape. When wired, Tier 2 will run only on a broken invariant and surface the retainer path that names the holder.
+
+### What to chase / what to ignore (heap)
+
+- **Chase:** any 🔴 broken invariant (a confident leak) — the structure and its per-cycle multiple are the lead.
+- **Ignore:** a 🟡 watch on its own (footprint within a few percent is runner drift, not a leak), and the reactivity-micro residual (V8 page-return noise).
+
+---
+
 ## Quick Reference
 
 **Performance — section inclusion thresholds:**
@@ -419,10 +510,19 @@ The `size-report.json` artifact (linked from **Raw:**) carries the structured ou
 - `🔴 Regression` — ≥ 5 KB, or ≥ 10% on a ≥ 2 KB move
 - JND floor (counts as changed): 128 B or 0.5% brotli · `†` = tree-shaken upper bound, never raises the banner
 
+**Heap — state (on the teardown count invariants after 7 churn cycles):**
+
+- `⚪ No leak` — every invariant returned to baseline, footprint within noise
+- `🟢 Improvement` — the PR fixes a leak `main` had
+- `🟡 Watch` — invariants held but footprint grew past the ±4% floor (never fails CI)
+- `🔴 Leak` — an invariant didn't return to baseline (exact count, reported as a per-cycle multiple)
+- Counts are exact (no floor) · heap KB is statistical (±4% floor) · `🎯` = the invariant this PR moved
+
 **What to ignore:**
 
 - Bench: Unsure rows in "Too Fast to Measure Precisely" on zero-delta PRs (physics); noise in No Change (absence of signal is the signal for a refactor); count modifiers in Mixed states (magnitude in the tables matters more).
 - Bundle: a `†` tree-shaken bundle growing alone (⚪ by design); sub-JND wiggles (already filtered).
+- Heap: a 🟡 watch on its own (footprint within a few percent is runner drift); the reactivity-micro residual (V8 page-return noise, not a leak).
 
 ---
 

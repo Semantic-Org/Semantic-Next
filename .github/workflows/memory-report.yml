@@ -1,0 +1,129 @@
+name: Report Heap Analysis
+
+# Renders the heap comment and posts it under the Semantic Heap Bot identity.
+# Runs after the untrusted Heap Analysis workflow completes, in the base-repo
+# context where the bot secrets are available (works for fork PRs).
+
+on:
+  workflow_run:
+    workflows: [Heap Analysis]
+    branches: ['**']
+    types:
+      - completed
+
+permissions:
+  contents: read
+
+jobs:
+  comment:
+    name: Post heap comment
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    if: >
+      github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.event == 'pull_request'
+    steps:
+      # Installation token for the Semantic Heap Bot GitHub App. Comments post
+      # under the bot's name and avatar so they read as a suite with the
+      # performance and bundle bots.
+      - name: Generate bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.SEMANTIC_HEAP_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.SEMANTIC_HEAP_BOT_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+
+      # Pin the reporter to main — the PR cannot author the tool that renders
+      # its own comment (thresholds, leak verdict, formatting must be
+      # author-neutral). No-ops on the bootstrap PR before main has it.
+      - name: Overlay reporter from main
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- tools/ci/memory/ 2>/dev/null || true
+
+      - name: Download memory snapshots
+        uses: dawidd6/action-download-artifact@v21
+        with:
+          github_token: ${{ steps.bot-token.outputs.token }}
+          workflow: ${{ github.event.workflow.id }}
+          run_id: ${{ github.event.workflow_run.id }}
+          name: memory-results
+          path: results
+          allow_forks: true
+
+      # Untrusted values (the PR title and fork branch name) reach the shell
+      # only through env, never interpolated into the run: script, so a crafted
+      # title like $(…) can't execute with the bot token. Always quote on use.
+      - name: Resolve PR number
+        id: pr
+        env:
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          REPO: ${{ github.repository }}
+        run: |
+          NUMBER="$PR_NUMBER"
+          if [ -z "$NUMBER" ] || [ "$NUMBER" = "null" ]; then
+            NUMBER=$(gh pr list --repo "$REPO" \
+              --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number // ""')
+          fi
+          echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
+          echo "Resolved PR number: $NUMBER"
+
+      - name: Render comment
+        env:
+          STARTED: ${{ github.event.workflow_run.created_at }}
+          ENDED: ${{ github.event.workflow_run.updated_at }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          MSG: ${{ github.event.workflow_run.display_title }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          REPO: ${{ github.repository }}
+        run: |
+          WALL_CLOCK=$(( $(date -d "$ENDED" +%s) - $(date -d "$STARTED" +%s) ))
+          node tools/ci/memory/reporter.js \
+            --results results \
+            --sha "$HEAD_SHA" \
+            --msg "$MSG" \
+            --run-url "$RUN_URL" \
+            --run-id "$RUN_ID" \
+            --base-ref 'main' \
+            --repo "$REPO" \
+            --wall-clock "$WALL_CLOCK" \
+            --out memory-report
+
+      - name: Upload memory-report.json adjunct
+        uses: actions/upload-artifact@v7
+        with:
+          name: memory-report
+          path: memory-report/memory-report.json
+
+      - name: Post or update PR comment
+        if: steps.pr.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          PR: ${{ steps.pr.outputs.number }}
+          REPO: ${{ github.repository }}
+          BOT_LOGIN: semantic-heap-bot[bot]
+        run: |
+          # Edit the bot's prior comment in place. Filtering REST results by
+          # user.login is stable across short-lived installation tokens, where
+          # `gh pr comment --edit-last` can drift and post a duplicate.
+          EXISTING_ID=$(gh api "repos/$REPO/issues/$PR/comments" \
+            --jq "[.[] | select(.user.login == \"$BOT_LOGIN\")] | last | .id // empty")
+          if [ -n "$EXISTING_ID" ]; then
+            jq -nR --rawfile body memory-report/comment.md '{body: $body}' \
+              | gh api "repos/$REPO/issues/comments/$EXISTING_ID" -X PATCH --input -
+          else
+            gh pr comment "$PR" --repo "$REPO" --body-file memory-report/comment.md
+          fi

@@ -1,0 +1,108 @@
+name: Heap Analysis
+
+# Canaries runtime memory: teardown-invariant leaks (the gate), component
+# footprint, and the reactivity micro, on the PR head and the merge base. Hands
+# both snapshots to the report workflow. This job is untrusted (it builds and
+# runs PR code in a browser) so it holds only `contents: read` and never posts —
+# the workflow_run reporter holds the bot credentials. Same split as the Bundle
+# Size and Benchmarks suites.
+
+on:
+  pull_request:
+    paths:
+      # the churn-prone code memory actually leaks from — narrower than the
+      # bundle bot's src/** (CSS doesn't leak)
+      - 'packages/reactivity/**'
+      - 'packages/renderer/**'
+      - 'packages/templating/**'
+      - 'packages/component/**'
+      # the heap harness itself — self-test on its own PRs
+      - 'tools/ci/memory/**'
+      - '.github/workflows/memory.yml'
+
+concurrency:
+  group: memory-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Reuse the same browser cache the E2E/coverage jobs in ci.yml populate —
+      # identical key, so the Chromium download is restored, not re-fetched.
+      - name: Cache Playwright
+        uses: actions/cache@v5
+        with:
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+          path: ~/.cache/ms-playwright
+
+      # The Chromium version is whatever the repo's playwright dep resolves to
+      # (pinned in package-lock.json) — stable across runs so GC / snapshot
+      # internals don't drift, and reported in the comment footer.
+      - name: Install Chromium
+        run: npx playwright install chromium
+
+      # Author-neutral harness: the heap scorecard (runner, reporter, targets,
+      # census, retainers) always comes from main, so a PR can't reshape how its
+      # own memory is judged. The bench driver (bench-memory.js + build-ci.js)
+      # is NOT pinned — it's the measured surface, same as the bundle bot leaves
+      # build scripts unpinned. First-PR bootstrap: main has no tools/ci/memory
+      # yet, so this no-ops and the PR's own harness runs (self-test).
+      - name: Overlay heap harness from main
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- tools/ci/memory/ 2>/dev/null || true
+
+      - name: Build and measure PR head
+        run: |
+          node packages/component/bench/tachometer/build-ci.js current
+          mkdir -p results
+          node tools/ci/memory/collect.js --label current --side current --out results/current.json
+
+      # Swap shipped source to the merge base, rebuild the baseline bundle, and
+      # measure. node_modules is reused. Files the PR adds are dropped.
+      #
+      # Root package.json and the lockfile are swapped too (the #264 fix): a PR
+      # that adds or removes a package would otherwise leave the base build
+      # pointing at a workspace shape that doesn't exist on the base side.
+      - name: Build and measure merge base
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+          BASELINE_SHA=$(git rev-parse FETCH_HEAD)
+          ADDED=$(git diff --name-only --diff-filter=A FETCH_HEAD HEAD -- packages package.json package-lock.json || true)
+          git checkout FETCH_HEAD -- packages package.json package-lock.json 2>/dev/null || true
+          if [ -n "$ADDED" ]; then echo "$ADDED" | xargs -r rm -f; fi
+          # Keep the bench driver from the PR head on both sides: it's the
+          # measurement instrument, not the measured code, and on a PR that
+          # first adds it the base ref has no bench-memory.js at all. Only the
+          # framework source under packages/{reactivity,renderer,...}/src
+          # differs between the two builds.
+          git checkout HEAD -- packages/component/bench/tachometer/ 2>/dev/null || true
+          node packages/component/bench/tachometer/build-ci.js baseline
+          node tools/ci/memory/collect.js --label baseline --side baseline --out results/baseline.json
+          echo "$BASELINE_SHA" > results/baseline-sha.txt
+
+      - name: Upload memory snapshots
+        uses: actions/upload-artifact@v7
+        with:
+          name: memory-results
+          path: results/*
