@@ -471,7 +471,7 @@ CLI overrides for iteration speed (don't ship tuned numbers — these are for sh
 | `--auto-sample-conditions=0%` | Zero-delta dry runs converge fastest with `0%` |
 | `--json-file=out.json` | Save raw output to inspect offline |
 
-**Reading the output.** Tachometer prints a per-metric verdict: `faster`, `slower`, `unsure`, or `no change`, with the 95% CI for percent-delta. Verdict definitions match the bench-bot's PR comment — see the `read-bench-report` skill. Two things specifically to check:
+**Reading the output.** Tachometer prints a per-metric verdict: `faster`, `slower`, `unsure`, or `no change`, with the 95% CI for percent-delta. Verdict definitions match the bench-bot's PR comment — see the `read-ci-reports` skill. Two things specifically to check:
 
 - Confidence interval **width** as a percent of the mean. That's your local noise floor for each metric.
 - Whether the verdict matches your hypothesis. A `faster` verdict at the magnitude you expected is the signal. `unsure` with a CI tight to the noise floor means the bench is too short to resolve the change at this scale — amplify the workload (more iterations) or measure something else.

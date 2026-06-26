@@ -1,22 +1,47 @@
 ---
-title: Reading Bench Reports on PRs
-description: How to interpret the in-house bench reporter's PR comment — state banner, severity emoji, the two Unsure subsections, and the JSON adjunct for agent consumption.
-keywords: [benchmark, tachometer, PR comment, bench report, noise floor, unsure, autoresearch, confidence interval]
+title: Reading CI Reports on PRs
+description: How to interpret the two CI bot comments on a PR — the performance bot (tachometer bench) and the bundle-size bot. What each section means, what to chase, what to ignore.
+keywords: [benchmark, tachometer, bundle size, PR comment, bench report, bundle report, regression, headline, noise floor, unsure, JND, tree-shaken, severity, confidence interval, ci reports]
 audience: contributing
-skill: read-bench-report
+skill: read-ci-reports
 type: skill
 ---
 
-# Reading Bench Reports on PRs
+# Reading CI Reports on PRs
 
-> **Skill:** `read-bench-report`
-> **Purpose:** Correctly interpret the bench reporter comment on a PR — what each section means, what to chase, what to ignore.
+> **Skill:** `read-ci-reports`
+> **Purpose:** Correctly interpret the two CI bot comments on a PR — the performance bot and the bundle-size bot. What each section means, what to chase, what to ignore.
 
-**Golden rule: confident signals live in the Faster and Slower sections.** `🔍 Unsure` means "the measurement did not resolve," *not* "regression to investigate." A metric in "Too Fast to Measure Precisely" will stay unsure on zero-delta PRs by physics — chasing it wastes time. A metric in "Inconclusive" might resolve with more samples but isn't an actionable signal today.
+**Golden rule: read for confident signal, not noise.**
+
+- *Performance:* the signal lives in the Faster and Slower buckets. `🔍 Unsure` means "the measurement did not resolve," never "regression to investigate."
+- *Bundle size:* the state is deterministic signal, but a tree-shaken `†` bundle is an upper bound (not a per-consumer cost), and sub-noise wiggles are already filtered out.
+
+In both, the headline names the one thing that matters. Chase that; collapse the rest.
 
 ---
 
-## Comment Anatomy
+## The reports
+
+Two bots each post one comment on a PR today, and a runtime memory-footprint report is planned. They share a grammar — separate confident signal from noise, headline the metric that matters, collapse the rest — but they measure different things and reason about uncertainty differently. This skill is the home for reading all of them; it grows a section per report, so consult whichever the PR triggered.
+
+| | Performance bot | Bundle-size bot |
+|---|---|---|
+| Comment title | `… on Benchmark Suite 📊` | `Bundle size … 📦` |
+| Measures | runtime, in real headless Chrome | shipped bytes (brotli / gzip / raw) + lines of code |
+| Uncertainty | statistical — 95% CI, noise floor | none — deterministic build, a delta is exact |
+| Confident signal | the Faster / Slower buckets | the state itself (sub-noise filtered) |
+| Raw adjunct | `bench-report.json` | `size-report.json` |
+
+The load-bearing difference: a bench number carries a confidence interval, so **Unsure** is a real category and most of the bench skill is about not mistaking it for a regression. A bundle number is exact, so there is no Unsure — instead the bot suppresses sub-threshold wiggles and marks which bundles are real shipped cost versus tree-shaken upper bounds.
+
+---
+
+## Reading a performance report — the bench bot
+
+**Confident signals live in the Faster and Slower sections.** `🔍 Unsure` means "the measurement did not resolve," *not* "regression to investigate." A metric in "Too Fast to Measure Precisely" will stay unsure on zero-delta PRs by physics — chasing it wastes time. A metric in "Inconclusive" might resolve with more samples but isn't an actionable signal today.
+
+### Comment anatomy
 
 Every bench comment follows the same shape. Top to bottom:
 
@@ -42,9 +67,7 @@ Every bench comment follows the same shape. Top to bottom:
 <sub>Sample size · Resolution floor · Timeout · Wall-clock</sub>
 ```
 
----
-
-## Top Header State — What the Headline Says
+### Header state — what the headline says
 
 Six possible states based on the count of faster and slower metrics. The emoji and the GitHub alert color both encode the state; use either as your entry point.
 
@@ -59,19 +82,17 @@ Six possible states based on the count of faster and slower metrics. The emoji a
 
 Net modifier uses **count**, not magnitude-weighted score. 9 wins × 5% improvement outweighs 1 regression × 30% regression in user-observable impact, but the count-based label still says "Net Positive." The individual tables show magnitudes — trust those for the real tradeoff judgment.
 
----
-
-## Faster / Slower — The Headline Verdicts
+### Faster / Slower — the headline verdicts
 
 Metrics land in Faster or Slower only when their 95% CI is entirely above or below ±2%. This is the confident-signal bucket. If a metric is here, **there's a real perf change to discuss.**
 
-### A confident finding is a real cost, not a measurement artifact
+#### A confident finding is a real cost, not a measurement artifact
 
 A metric in Faster or Slower has already cleared the noise floor and the per-metric expected-noise check. It is not flakiness, GC jitter, or "bundle perturbation." Those explanations are falsifiable, and they have been falsified: behavior-preserving changes produce `0 faster · 0 slower`, including bundled hot-path refactors (PR #228) as well as non-bundled build edits (PR #143, #149). The harness does not fabricate confident findings.
 
 So when a confident regression lands on a bench whose code you did not touch, the cost is real and reachable, often not where you expect but locatable. Do not migrate the conclusion to the least-falsifiable region (V8 internals, GC, the harness) because reading did not surface it. Bisect instead: revert only the suspect on the same branch and re-bench. The `improve-performance` skill's "elimination trap" has the worked example, a confident +22% that read as a "profile-only V8 effect" and turned out to be three `.bind()` calls, found in one revert cycle.
 
-### Reading a row
+#### Reading a row
 
 ```
 | `update-10th` | -62% (34ms) 🌟 |
@@ -82,7 +103,7 @@ So when a confident regression lands on a bench whose code you did not touch, th
 - **`(34ms)`** — midpoint absolute-ms delta, unsigned (sign inferred from the section — Faster means time *saved*, Slower means time *added*).
 - **`🌟`** — severity emoji. Appears *after* the values so number columns align vertically; lets you scan magnitudes at a glance.
 
-### Severity emoji by |midpoint%|
+#### Severity emoji by |midpoint%|
 
 | Threshold | Faster | Slower | Category |
 |---|:---:|:---:|---|
@@ -93,7 +114,7 @@ So when a confident regression lands on a bench whose code you did not touch, th
 
 Rows sorted by `|midpoint|` descending, so the biggest effects are at the top.
 
-### Teaser pattern for big PRs
+#### Teaser pattern for big PRs
 
 If Faster or Slower has more than 15 rows, the section shows a top-5 teaser above a collapsible with the full list:
 
@@ -108,9 +129,7 @@ If Faster or Slower has more than 15 rows, the section shows a top-5 teaser abov
 
 The teaser prevents the comment from blowing up while keeping the headline-worthy wins visible.
 
----
-
-## No Change — Confirmed Unchanged
+### No Change — confirmed unchanged
 
 Metrics with CI entirely inside ±2%. These are the *positive* signal for a refactor or cleanup PR — proof you didn't regress anything. Always collapsed so the list doesn't dominate mixed-outcome comments, but expand when:
 
@@ -119,13 +138,11 @@ Metrics with CI entirely inside ±2%. These are the *positive* signal for a refa
 
 Don't expand reflexively on a mixed PR — the Faster/Slower tables have the story.
 
----
-
-## Unsure — The Two Subsections
+### Unsure — the two subsections
 
 Unsure metrics have CIs that straddle the ±2% threshold. The reporter splits them into two buckets by **duration-derived noise analysis**, because they need different responses.
 
-### Inconclusive — boundary cases, more samples might help
+#### Inconclusive — boundary cases, more samples might help
 
 ```
 | `bulk-add-50` | +0.2% – +3.8% | ±4% |
@@ -136,15 +153,15 @@ Unsure metrics have CIs that straddle the ±2% threshold. The reporter splits th
 
 A metric lands in Inconclusive when its observed CI width is **more than 2× the expected width** for its duration. That's the "we tried to resolve and couldn't" signal — either more sampling time would settle it, or the bench is genuinely noisier than its duration predicts (worth a second look at the bench itself).
 
-### ✅ When to investigate an Inconclusive row
+#### ✅ When to investigate an Inconclusive row
 
 `create-1k` (~130ms mean) shows CI width ~3.5% while expected is ~1.3%. **2.7× expected** — long benches shouldn't have wide CIs. That's a "this bench has unusual per-sample variance" signal worth tracing to a setup issue or a legitimate GC/allocation pattern.
 
-### ❌ When NOT to investigate
+#### ❌ When NOT to investigate
 
 `bulk-add-50` shows CI `+0.2% to +3.8%` with expected `±4%`. **Roughly 1× expected** — this is the boundary CI narrowing right up against the expected noise floor. More samples won't narrow it materially. Treat as no-signal.
 
-### Too Fast to Measure Precisely — physics-limited, ignore
+#### Too Fast to Measure Precisely — physics-limited, ignore
 
 ```
 | `clear` | -10.2% – +10.7% | ~13ms | ±12% |
@@ -158,19 +175,17 @@ These are benches whose duration is short enough that per-sample OS/GC/JIT jitte
 
 **These benches still work under real perf deltas.** A genuine 30% improvement on `clear` will clear the ±12% noise floor and show up in the Faster section. What they *won't* do is confirm "no change" — they'll default to unsure whenever the true delta is smaller than the noise floor.
 
-### ❌ Common mistake
+#### ❌ Common mistake
 
 > "`remove-last` is marked unsure — we regressed it!"
 
 Check if it's in the Too Fast subsection. If the Expected Noise is comparable to the observed CI width, the bench is noise-floor-limited and the verdict is neither regression nor improvement. **Not a regression signal.**
 
-### ✅ Correct reading
+#### ✅ Correct reading
 
 > "`remove-last` is in Too Fast to Measure Precisely — mean ~8ms, expected noise ±20%. Zero-delta PRs will always show this as unsure. Move on unless there's a substantive change in the PR that should have affected this code path."
 
----
-
-## Footer Metadata
+### Footer metadata
 
 ```
 <sub>Sample size: 50 · Resolution floor: ±2% · Timeout: 3min · Wall-clock: 10m42s</sub>
@@ -178,9 +193,7 @@ Check if it's in the Too Fast subsection. If the Expected Noise is comparable to
 
 Useful when something looks off — tells you the parameters the run used without opening the raw JSON. If a bench comment is missing metrics, check Wall-clock — if the cell hit the 25-min job cap, some metrics may have timed out before finishing initial samples.
 
----
-
-## JSON Adjunct — for Agents
+### bench-report.json — for agents
 
 The `bench-report.json` artifact (linked from the **Raw:** line in the metadata header) contains the full structured output:
 
@@ -212,7 +225,7 @@ The `bench-report.json` artifact (linked from the **Raw:** line in the metadata 
 }
 ```
 
-### Fields agents care about
+#### Fields agents care about
 
 | Field | Agent use |
 |-------|-----------|
@@ -224,17 +237,15 @@ The `bench-report.json` artifact (linked from the **Raw:** line in the metadata 
 | `metrics[].observed_noise_ratio` | Ratio ≤ 2 → expected; > 2 → investigate |
 | `metrics[].source` | Jump to bench source at this SHA |
 
-### ✅ Good agent query
+#### ✅ Good agent query
 
 "For any metric with `status: slower` and `observed_noise_ratio < 1.5`, the regression is real and the CI is tight — worth surfacing to the reviewer."
 
-### ❌ Bad agent query
+#### ❌ Bad agent query
 
 "Count all `unsure` entries and flag regression." Unsure ≠ regression; the category is defined by "CI straddles ±2% boundary," not direction. Count `slower` instead.
 
----
-
-## Methodology shifts — uniform suite-wide swings
+### Methodology shifts — uniform suite-wide swings
 
 If many unrelated metrics suddenly show enormous magnitude changes — 50%+ improvements or regressions across benches that share no functional code path — suspect a measurement methodology shift, not a real perf change. The signature: shifts are **uniform** across metrics whose only commonality is the bench harness, often coincident with a bench-infra commit on main.
 
@@ -248,9 +259,7 @@ Real perf changes have **selective** shape: faster where the PR touched, flat wh
 
 Methodology-shift symptoms also fire the bench-bot's per-PR peak history. The first run after a methodology shift on main will show every metric as either `New Peak` or `Regression from peak` — the prior PR push was on the old methodology, the new one isn't comparable. After a few main commits land on the new methodology, peaks rebuild from those entries and the noise resolves. **Trust the second-run report more than the first.**
 
----
-
-## Reading Decision Tree
+### Decision tree
 
 ```
 Headline state says Improvement or No Meaningful Change
@@ -274,9 +283,117 @@ An agent needs the data
 
 ---
 
+## Reading a bundle-size report — the bundle bot
+
+This bot measures the bytes a PR actually ships. Sizes come from a deterministic build, so a nonzero delta is a real change — there's no confidence interval, and no Unsure. Instead the bot filters two ways: it suppresses sub-noise wiggles (a just-noticeable-difference floor), and it marks bundles whose whole-package size is an upper bound rather than a per-consumer cost.
+
+### Comment anatomy
+
+```
+### <state-emoji> Bundle size<word>: <headline bundle> <Δ brotli> · <shipped LOC> for <sha>
+
+**Base:** [main](commit) · **Run:** [#id] · **Raw:** [size-report.json]
+
+<sup>Commit message</sup>
+
+> [!<alert>]
+> One-sentence verdict, led by the headline bundle.
+
+**N larger · N smaller · N unchanged · ±N shipped LOC · ±N comment LOC**
+
+| signal | result |       ← headline brotli, shipped LOC, comment LOC, changed count
+
+#### Bundles that changed (N)
+| bundle | brotli | Δ brotli | change |
+
+<details> LOC by scope </details>
+<details> All bundles, gzip, and raw </details>
+
+<sub>brotli q11 · gzip l9 · vs main · fresh build both sides · wall-clock</sub>
+```
+
+The title leads with the two numbers worth scanning: the **headline bundle's brotli delta** and **shipped LOC**.
+
+### The state — what the banner says
+
+Red is reserved for CI-failing-grade growth; warnings stay yellow. Severity keys off the **worst single bundle**, never a cross-bundle sum (the bundles overlap, so summing double-counts).
+
+| State | Emoji | Alert | When |
+|-------|:---:|:---:|------|
+| No meaningful change | ⚪ | `[!NOTE]` | Nothing cleared the JND, or only tree-shaken bundles moved |
+| Improvement | 🟢 | `[!NOTE]` | Only shrinks |
+| Mixed | 🟡 | `[!WARNING]` | Both directions, or a lone small increase |
+| Warning | 🟡 | `[!WARNING]` | A real bundle grew ≥ 512 B or ≥ 2% |
+| Regression | 🔴 | `[!CAUTION]` | A real bundle grew ≥ 5 KB, or ≥ 10% on a ≥ 2 KB move |
+
+Percent can escalate a tier, but only paired with a real absolute move — a tiny primitive at +100 B / +14% is a warning, not a regression.
+
+### The headline bundle
+
+The headline is **`@semantic-ui/component`** whenever its bundle moved. It already contains reactivity, renderer, templating and the rest, so its delta is the real cost a component shipper pays — there is no cross-bundle sum to take. When component didn't move, the changed package whose source shipped the most code is promoted to headline instead. The single **largest increase**, when it's a different bundle, is named in the alert (`🎯` marks the headline; the largest grower may sit below it in the table).
+
+### Deterministic — a delta is exact, not a sample
+
+There is no confidence interval to reason about; the build is reproducible. The bot filters two ways instead:
+
+- **JND (just-noticeable difference): 128 B or 0.5% brotli.** Below this, a bundle counts as unchanged — a sub-noise wiggle, not worth a reviewer's eye.
+- **Tree-shaken `†` (e.g. `utils`).** A few packages are consumed piecemeal, so their whole-package bundle is an *upper bound*, not a per-consumer cost: a new export adds bytes there but tree-shakes to zero for real consumers, and its real cost (if any) already shows up in the `component` bundle. These rows are measured and shown, marked `†`, but they never raise the banner.
+
+### Reading a changed row
+
+```
+| `component` 🎯 | 57.1 KB | +8.76 KB | +18.1% |
+```
+
+- **bundle** — name; `🎯` = the headline (PR-relevant) bundle, `†` = tree-shaken upper bound.
+- **brotli** — absolute size on the PR head.
+- **Δ brotli** — signed delta. `new` / `removed` for added or deleted bundles.
+- **change** — brotli percent.
+
+Sorted increases-first by absolute Δ, real signals before tree-shaken. Severity lives in the sort and the banner, not per-row emoji.
+
+### The two LOC numbers
+
+The bot also counts lines of code, so a comment-heavy PR doesn't read as a big change.
+
+- **Shipped LOC** — code lines that ship, comments and blank lines stripped. The real "how much code changed."
+- **Comment LOC** — non-executable. A PR with `+0 shipped LOC · +200 comment LOC` is comments-only, and the verdict says so.
+
+The two axes are independent: a CSS change grows a bundle with `+0 shipped LOC`; a new tree-shaken `utils` helper adds shipped LOC with no real-consumer bundle change (`⚪`, with the LOC delta carrying the signal).
+
+### size-report.json — for agents
+
+The `size-report.json` artifact (linked from **Raw:**) carries the structured output:
+
+| Field | Agent use |
+|-------|-----------|
+| `state` | One-shot verdict — `no-change` / `improvement` / `mixed` / `warning` / `regression` |
+| `fail` | `true` past the CI-failing threshold (≥ 10 KB). Advisory — not wired to block merges. |
+| `summary` | Counts: `larger` / `smaller` / `unchanged` / `added` / `removed` |
+| `headline` / `largest_increase` | Bundle ids — the PR-relevant bundle and the biggest grower |
+| `metrics[].status` | Per-bundle classification |
+| `metrics[].delta` / `.pct` | Exact byte and percent deltas |
+| `metrics[].treeShaken` | `true` → upper bound; exclude from severity reasoning |
+| `loc.total` / `loc.byScope` | Shipped + comment LOC deltas, overall and per package |
+
+#### ✅ Good agent query
+
+"For any `metrics[]` entry with `status: larger` and `treeShaken: false` whose `delta.brotli ≥ 5120`, the regression is real shipped cost — surface it."
+
+#### ❌ Bad agent query
+
+"Flag every bundle that grew." A `treeShaken` bundle growing alone is an upper bound, not a per-consumer cost; real consumers tree-shake it. Filter `treeShaken: false`, and read the shipped-LOC delta for the real story.
+
+### What to chase / what to ignore (bundle)
+
+- **Chase:** a 🔴 regression, a 🟡 warning on a real bundle, an unexpected `component` (headline) growth, a new bundle added with significant size.
+- **Ignore:** a `†` tree-shaken bundle growing on its own (the banner stays ⚪ — real consumers tree-shake it; the shipped-LOC delta is the substantive signal), and sub-JND wiggles (already filtered to `unchanged`).
+
+---
+
 ## Quick Reference
 
-**What each section's inclusion threshold means:**
+**Performance — section inclusion thresholds:**
 
 - `✅ Faster` — CI entirely below -2% (confident improvement)
 - `❌ Slower` — CI entirely above +2% (confident regression)
@@ -284,7 +401,7 @@ An agent needs the data
 - `🔍 Unsure > Inconclusive` — CI straddles ±2% AND observed/expected ratio > 2× (could resolve with more samples or bench is unusually noisy)
 - `🔍 Unsure > Too Fast to Measure Precisely` — CI straddles ±2% AND observed ≤ 2× expected (noise floor limited by duration; won't resolve)
 
-**Severity emoji cheat sheet:**
+**Performance — severity emoji:**
 
 | Emoji | Faster / Slower | |midpoint%| |
 |:---:|---|---|
@@ -293,11 +410,19 @@ An agent needs the data
 | ⭐ / ❗ | Significant | 15 – 35% |
 | (none) | Below threshold | < 15% |
 
+**Bundle — state thresholds (on the worst single real bundle's brotli growth):**
+
+- `⚪ No meaningful change` — nothing cleared the JND, or only `†` bundles moved
+- `🟢 Improvement` — only shrinks
+- `🟡 Mixed` — both directions, or a lone small increase
+- `🟡 Warning` — ≥ 512 B or ≥ 2%
+- `🔴 Regression` — ≥ 5 KB, or ≥ 10% on a ≥ 2 KB move
+- JND floor (counts as changed): 128 B or 0.5% brotli · `†` = tree-shaken upper bound, never raises the banner
+
 **What to ignore:**
 
-- Unsure rows in "Too Fast to Measure Precisely" on zero-delta PRs — physics.
-- Noise in the No Change section — that's the *absence* of signal, which is the signal for a refactor.
-- Count modifiers in Mixed states (Net Positive/Negative/Balanced) — magnitude in the tables matters more than count.
+- Bench: Unsure rows in "Too Fast to Measure Precisely" on zero-delta PRs (physics); noise in No Change (absence of signal is the signal for a refactor); count modifiers in Mixed states (magnitude in the tables matters more).
+- Bundle: a `†` tree-shaken bundle growing alone (⚪ by design); sub-JND wiggles (already filtered).
 
 ---
 
@@ -306,4 +431,6 @@ An agent needs the data
 | Skill | Command | Use when... |
 |-------|---------|-------------|
 | **Extend Bench Suite** | `/extend-bench-suite` | Adding a new benchmark to the suite |
+| **Improve Performance** | `/improve-performance` | The audit → trace → fix → measure cycle |
+| **Investigate Performance** | `/investigate-performance` | A confident bench regression you need to localize |
 | **Agent Lessons** | `/agent-lessons` | Understanding how past perf work went |
