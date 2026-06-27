@@ -16,9 +16,13 @@ on:
       - 'packages/renderer/**'
       - 'packages/templating/**'
       - 'packages/component/**'
-      # the heap harness itself — self-test on its own PRs
-      - 'tools/ci/memory/**'
+      # this workflow — changes take effect on the PR's own run (pull_request
+      # uses PR-head YAML), so self-test
       - '.github/workflows/memory.yml'
+      # The harness (tools/ci/memory/**) is deliberately NOT listed. The measure
+      # job overlays it from main before every run, so a PR-side harness edit
+      # can't affect its own comment — harness changes land on main first, same
+      # as the bench suite.
 
 concurrency:
   group: memory-${{ github.ref }}
