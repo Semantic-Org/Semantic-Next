@@ -34,9 +34,10 @@ jobs:
           client-id: ${{ secrets.SEMANTIC_PERF_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_PERF_BOT_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v6
+      # check out main: tooling comes from main and the reported sha comes from the event
+      - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: main
 
       - uses: actions/setup-node@v6
         with:
@@ -59,19 +60,20 @@ jobs:
           run_id: ${{ github.event.workflow_run.id }}
           name_is_regexp: true
           name: results-.*
-          path: results
+          # download to a scratch dir, not the workspace, since these artifacts are PR-built
+          path: ${{ runner.temp }}/bench-results
           allow_forks: true
 
       - name: Resolve PR number
         id: pr
         env:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           NUMBER='${{ github.event.workflow_run.pull_requests[0].number }}'
           if [ -z "$NUMBER" ] || [ "$NUMBER" = "null" ]; then
-            HEAD='${{ github.event.workflow_run.head_branch }}'
             NUMBER=$(gh pr list --repo '${{ github.repository }}' \
-              --head "$HEAD" --state open --json number --jq '.[0].number // ""')
+              --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number // ""')
           fi
           echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
           echo "Resolved PR number: $NUMBER"
@@ -84,9 +86,10 @@ jobs:
       - name: Fetch PR iteration history
         env:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           node tools/ci/bench/reporter/fetch-pr-history.js \
-            --branch '${{ github.event.workflow_run.head_branch }}' \
+            --branch "$HEAD_BRANCH" \
             --repo '${{ github.repository }}' \
             --current-run-id '${{ github.event.workflow_run.id }}' \
             --out pr-history.json
@@ -95,15 +98,16 @@ jobs:
         env:
           STARTED: ${{ github.event.workflow_run.created_at }}
           ENDED: ${{ github.event.workflow_run.updated_at }}
+          DISPLAY_TITLE: ${{ github.event.workflow_run.display_title }}
         run: |
           WALL_CLOCK=$(( $(date -d "$ENDED" +%s) - $(date -d "$STARTED" +%s) ))
           # --scope pr: peak attribution uses PR-iteration history only.
           # main-history is still loaded for drift quantification but excluded
           # from the comparison set.
           node tools/ci/bench/reporter/reporter.js \
-            --results results \
+            --results ${{ runner.temp }}/bench-results \
             --sha '${{ github.event.workflow_run.head_sha }}' \
-            --msg '${{ github.event.workflow_run.display_title }}' \
+            --msg "$DISPLAY_TITLE" \
             --run-url '${{ github.event.workflow_run.html_url }}' \
             --run-id '${{ github.event.workflow_run.id }}' \
             --base-ref 'main' \
@@ -169,7 +173,7 @@ jobs:
       # Check out main's tip for the commit target. We push back to main,
       # so we need the most recent state — not the bench's head_sha (which
       # may have been superseded by a later merge during the ~10-min bench).
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 2  # need HEAD~1 for parent_sha lookup
@@ -187,10 +191,14 @@ jobs:
           run_id: ${{ github.event.workflow_run.id }}
           name_is_regexp: true
           name: results-.*
-          path: results
+          # download to a scratch dir, not the workspace, since these artifacts are PR-built
+          path: ${{ runner.temp }}/bench-results
           allow_forks: true
 
       - name: Append history entry
+        env:
+          # squash subjects come from PR titles, so this is PR input even on push
+          DISPLAY_TITLE: ${{ github.event.workflow_run.display_title }}
         run: |
           # Benched commit is the workflow_run's head_sha; parent comes from
           # the depth-2 fetch above. Timestamp is the bench run's completion
@@ -200,11 +208,11 @@ jobs:
           # one workflow_run benched against the same baseline.
           BENCHED_SHA='${{ github.event.workflow_run.head_sha }}'
           PARENT_SHA=$(git rev-parse "$BENCHED_SHA^" 2>/dev/null || echo '')
-          BASELINE_SHA=$(find results -name baseline-sha.txt -type f -exec cat {} \; -quit)
+          BASELINE_SHA=$(find "${{ runner.temp }}/bench-results" -name baseline-sha.txt -type f -exec cat {} \; -quit)
           node tools/ci/bench/reporter/append-history.js \
-            --results results \
+            --results ${{ runner.temp }}/bench-results \
             --sha "$BENCHED_SHA" \
-            --msg '${{ github.event.workflow_run.display_title }}' \
+            --msg "$DISPLAY_TITLE" \
             --parent-sha "$PARENT_SHA" \
             --baseline-sha "$BASELINE_SHA" \
             --timestamp '${{ github.event.workflow_run.updated_at }}' \
