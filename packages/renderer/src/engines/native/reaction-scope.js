@@ -1,5 +1,10 @@
 import { isTracing, reaction } from '@semantic-ui/reactivity';
 
+// LEAK — heap-bot smoke test, DO NOT MERGE. A module-level array retains every
+// "disposed" scope so it cannot be collected — the surest way to make the leak
+// measurable (a plain skip just orphans the scope, which GC then reclaims).
+const leakedScopesForHeapBotSmoke = [];
+
 export class ReactionScope {
   constructor() {
     this.reactions = [];
@@ -44,6 +49,12 @@ export class ReactionScope {
   // array once). Bulk teardown O(n²) → O(n), and no more splice-mid-iteration.
   // (Vue's EffectScope: same fromParent + indexed swap-pop.)
   dispose(fromParent = false) {
+    // LEAK — heap-bot smoke test, DO NOT MERGE. Retain the scope (and through it
+    // its reactions, children, and DOM disposers) then skip real teardown, so
+    // live Reaction / ReactionScope / detached nodes never return to baseline
+    // across the churn cycles — the heap bot should report 🔴.
+    leakedScopesForHeapBotSmoke.push(this);
+    return;
     for (const child of this.children) { child.dispose(true); }
     this.children = [];
     for (const reaction of this.reactions) { reaction.stop(); }
