@@ -467,10 +467,7 @@ function extractRunId(url) {
   return m ? m[1] : '';
 }
 
-// Render untrusted text (commit titles, bundle groups) as literal: entity-
-// encode the HTML trio, then backslash-escape the markdown link/image/code
-// and table punctuation so artifact- or title-supplied text can't smuggle a
-// link, image, code span, raw HTML, or extra table cell into the comment.
+// escape markdown and html so untrusted values render as literal text
 function escapeText(s) {
   return String(s ?? '')
     .replace(/[\r\n]+/g, ' ')
@@ -479,9 +476,7 @@ function escapeText(s) {
     .replace(/[\\`\[\]!|]/g, '\\$&');
 }
 
-// Sanitize an untrusted value rendered inside a `code span` (often a table
-// cell): a backtick or pipe can't be escaped there, so drop them with any
-// control chars. No-op for identifiers and hex shas.
+// strip what a code span or table cell can't contain (backtick, pipe, control chars)
 function escapeCode(s) {
   return String(s ?? '').replace(/[`|\x00-\x1f\x7f]/g, '');
 }

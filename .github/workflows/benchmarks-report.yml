@@ -34,8 +34,7 @@ jobs:
           client-id: ${{ secrets.SEMANTIC_PERF_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_PERF_BOT_PRIVATE_KEY }}
 
-      # Run the reporter from main, not the PR head. The head SHA it reports
-      # comes from the event payload, so the PR tree is never checked out here.
+      # check out main: tooling comes from main and the reported sha comes from the event
       - uses: actions/checkout@v7
         with:
           ref: main
@@ -61,7 +60,7 @@ jobs:
           run_id: ${{ github.event.workflow_run.id }}
           name_is_regexp: true
           name: results-.*
-          # Untrusted artifacts: extract outside the checkout tree.
+          # download to a scratch dir, not the workspace, since these artifacts are PR-built
           path: ${{ runner.temp }}/bench-results
           allow_forks: true
 
@@ -192,13 +191,13 @@ jobs:
           run_id: ${{ github.event.workflow_run.id }}
           name_is_regexp: true
           name: results-.*
-          # Untrusted artifacts: extract outside the checkout tree.
+          # download to a scratch dir, not the workspace, since these artifacts are PR-built
           path: ${{ runner.temp }}/bench-results
           allow_forks: true
 
       - name: Append history entry
         env:
-          # Squash subjects come from PR titles, so untrusted even on push.
+          # squash subjects come from PR titles, so this is PR input even on push
           DISPLAY_TITLE: ${{ github.event.workflow_run.display_title }}
         run: |
           # Benched commit is the workflow_run's head_sha; parent comes from

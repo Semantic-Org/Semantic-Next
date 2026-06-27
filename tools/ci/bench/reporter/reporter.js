@@ -1217,10 +1217,7 @@ function required(args, key) {
   return args[key];
 }
 
-// Render untrusted text (commit titles) as literal: entity-encode the HTML
-// trio, then backslash-escape the markdown link/image/code punctuation so a
-// crafted title can't smuggle a link, image, code span, or raw HTML into the
-// bot's comment.
+// escape markdown and html so untrusted values render as literal text
 function escapeText(s) {
   return String(s ?? '')
     .replace(/[\r\n]+/g, ' ')
@@ -1229,9 +1226,7 @@ function escapeText(s) {
     .replace(/[\\`\[\]!|]/g, '\\$&');
 }
 
-// Sanitize an untrusted value rendered inside a `code span` (often a table
-// cell): a backtick or pipe can't be escaped there, so drop them with any
-// control chars. No-op for identifiers and hex shas.
+// strip what a code span or table cell can't contain (backtick, pipe, control chars)
 function escapeCode(s) {
   return String(s ?? '').replace(/[`|\x00-\x1f\x7f]/g, '');
 }

@@ -1,8 +1,7 @@
 name: Report Bundle Size
 
 # Renders the bundle-size comment and posts it under the Semantic Bundle Bot
-# identity. Runs after the untrusted Bundle Size workflow completes, in the
-# base-repo context where the bot secrets are available (works for fork PRs).
+# identity after the Bundle Size workflow completes.
 
 on:
   workflow_run:
@@ -35,8 +34,7 @@ jobs:
           client-id: ${{ secrets.SEMANTIC_BUNDLE_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_BUNDLE_BOT_PRIVATE_KEY }}
 
-      # Run the reporter from main, not the PR head. The head SHA it reports
-      # comes from the event payload, so the PR tree is never checked out here.
+      # check out main: tooling comes from main and the reported sha comes from the event
       - uses: actions/checkout@v7
         with:
           ref: main
@@ -60,7 +58,7 @@ jobs:
           workflow: ${{ github.event.workflow.id }}
           run_id: ${{ github.event.workflow_run.id }}
           name: size-results
-          # Untrusted artifacts: extract outside the checkout tree.
+          # download to a scratch dir, not the workspace, since these artifacts are PR-built
           path: ${{ runner.temp }}/size-results
           allow_forks: true
 
