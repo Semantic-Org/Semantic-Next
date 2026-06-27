@@ -159,7 +159,9 @@ function diffInvariants(cur, base) {
       moveResidual,
       baseResidual,
       baseMoveResidual,
-      perCycle: cycles > 0 ? headResidual / cycles : headResidual,
+      // rounded: a per-cycle leak count is a whole-instance average, and the
+      // raw quotient prints as an ugly float (40024 / 7 = 5717.714…)
+      perCycle: cycles > 0 ? Math.round(headResidual / cycles) : headResidual,
       verdict,
     });
   }
