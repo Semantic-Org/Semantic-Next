@@ -246,7 +246,7 @@ function renderMarkdown(report) {
   lines.push(meta.join(' · '));
   lines.push('');
   if (report.head.msg) {
-    lines.push(`<sup>${escape(report.head.msg)}</sup>`);
+    lines.push(`<sup>${escapeText(report.head.msg)}</sup>`);
     lines.push('');
   }
 
@@ -292,7 +292,7 @@ function verdictLines(report) {
     const broken = report.invariants.filter((i) => i.verdict === 'broken');
     const lead = broken[0];
     const detached = broken.find((i) => i.id === 'detachedNodes');
-    let s = `\`${stripTicks(lead.label)}\` grows ${signed(lead.residual)} after ${
+    let s = `\`${escapeCode(lead.label)}\` grows ${signed(lead.residual)} after ${
       report.churn?.cycles ?? '?'
     } teardown cycles`;
     if (lead.perCycle && Math.abs(lead.perCycle) >= 1) {
@@ -306,7 +306,7 @@ function verdictLines(report) {
     return [s];
   }
   if (report.state === 'improvement') {
-    const fixed = report.invariants.filter((i) => i.verdict === 'fixed').map((i) => stripTicks(i.label));
+    const fixed = report.invariants.filter((i) => i.verdict === 'fixed').map((i) => escapeCode(i.label));
     return [`teardown now nets to zero where \`${baseRef}\` leaked: ${fixed.join(', ')}.`];
   }
   if (report.state === 'watch') {
@@ -336,7 +336,7 @@ function invariantRow(inv, headlineId) {
   else {
     verdict = '✅ held';
   }
-  return `| ${inv.label}${mark} | ${inv.baseline} | ${inv.afterChurn} | ${verdict} |`;
+  return `| ${escapeText(inv.label)}${mark} | ${inv.baseline} | ${inv.afterChurn} | ${verdict} |`;
 }
 
 function renderFootprint(lines, report) {
@@ -348,7 +348,7 @@ function renderFootprint(lines, report) {
   for (const op of report.footprint.ops) {
     const delta = op.deltaKb == null ? 'new' : signedKb(op.deltaKb);
     const tag = op.deltaKb == null ? '' : op.withinNoise ? 'within noise' : op.deltaKb > 0 ? 'grew' : 'shrank';
-    lines.push(`| \`${op.label}\` | ${formatKb(op.headKb)} | ${delta} | ${tag} |`);
+    lines.push(`| \`${escapeCode(op.label)}\` | ${formatKb(op.headKb)} | ${delta} | ${tag} |`);
   }
   lines.push('');
   lines.push('</details>');
@@ -421,13 +421,9 @@ function signedPct(pct) {
   return `${pct > 0 ? '+' : '-'}${Math.abs(pct).toFixed(1)}%`;
 }
 
-function stripTicks(s) {
-  return s.replace(/`/g, '');
-}
-
 function baseLink(report) {
   if (!report.repo) { return `\`${report.base.ref}\``; }
-  const target = report.base.sha
+  const target = isHexSha(report.base.sha)
     ? `https://github.com/${report.repo}/commit/${report.base.sha}`
     : `https://github.com/${report.repo}/tree/${report.base.ref}`;
   return `[${report.base.ref}](${target})`;
@@ -455,8 +451,22 @@ function extractRunId(url) {
   return m ? m[1] : '';
 }
 
-function escape(s) {
-  return s.replace(/[<>]/g, (c) => (c === '<' ? '&lt;' : '&gt;'));
+// escape markdown and html so untrusted values render as literal text
+function escapeText(s) {
+  return String(s ?? '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/[\x00-\x1f\x7f]/g, '')
+    .replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c])
+    .replace(/[\\`\[\]!|]/g, '\\$&');
+}
+
+// strip what a code span or table cell can't contain (backtick, pipe, control chars)
+function escapeCode(s) {
+  return String(s ?? '').replace(/[`|\x00-\x1f\x7f]/g, '');
+}
+
+function isHexSha(s) {
+  return typeof s === 'string' && /^[0-9a-f]{7,64}$/i.test(s);
 }
 
 function parseArgs(argv) {

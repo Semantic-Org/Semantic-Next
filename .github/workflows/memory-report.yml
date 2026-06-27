@@ -35,9 +35,10 @@ jobs:
           client-id: ${{ secrets.SEMANTIC_HEAP_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_HEAP_BOT_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v6
+      # check out main: tooling comes from main and the reported sha comes from the event
+      - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: main
 
       - uses: actions/setup-node@v6
         with:
@@ -58,12 +59,10 @@ jobs:
           workflow: ${{ github.event.workflow.id }}
           run_id: ${{ github.event.workflow_run.id }}
           name: memory-results
-          path: results
+          # download to a scratch dir, not the workspace, since these artifacts are PR-built
+          path: ${{ runner.temp }}/memory-results
           allow_forks: true
 
-      # Untrusted values (the PR title and fork branch name) reach the shell
-      # only through env, never interpolated into the run: script, so a crafted
-      # title like $(…) can't execute with the bot token. Always quote on use.
       - name: Resolve PR number
         id: pr
         env:
@@ -92,7 +91,7 @@ jobs:
         run: |
           WALL_CLOCK=$(( $(date -d "$ENDED" +%s) - $(date -d "$STARTED" +%s) ))
           node tools/ci/memory/reporter.js \
-            --results results \
+            --results ${{ runner.temp }}/memory-results \
             --sha "$HEAD_SHA" \
             --msg "$MSG" \
             --run-url "$RUN_URL" \
