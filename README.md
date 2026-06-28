@@ -50,3 +50,5 @@ Please see [CONTRIBUTING.md](CONTRIBUTING.md) for development setup instructions
 ## License
 
 MIT
+
+<!-- deploy-bot smoke test, safe to revert -->
