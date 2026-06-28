@@ -74,9 +74,9 @@ jobs stay inert (the deploy jobs still run, a self-test).
      `VERCEL_DOCS_PROJECT_ID`, `VERCEL_MCP_PROJECT_ID`.
 3. Create the labels `Preview` and `Preview MCP`, kept out of the auto-labeler so
    they stay a manual gate.
-4. Each Vercel project's automatic Git deployments are off
-   (`git.deploymentEnabled: false` in `docs/vercel.json` and
-   `tools/mcp/vercel.json`), so the only previews are the ones this bot makes.
+4. Automatic Git deployments are off for both Vercel projects: the docs project
+   (Root Directory `./`) via the root `vercel.json`, and the MCP project via
+   `tools/mcp/vercel.json`. The only previews are the ones this bot makes.
 
 ## Running locally
 
