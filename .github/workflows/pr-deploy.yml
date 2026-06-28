@@ -19,16 +19,18 @@ permissions:
 
 jobs:
   # Posts the Building comment with an ETA. Holds the bot token but runs no PR
-  # code — it renders from main's reporter against the event payload.
+  # code. It renders from main's reporter against the event payload.
   announce:
     name: Announce deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: >
       github.event.pull_request.head.repo.full_name == github.repository
       && (contains(github.event.pull_request.labels.*.name, 'Preview')
       || contains(github.event.pull_request.labels.*.name, 'Preview MCP'))
     permissions:
       pull-requests: write
+      issues: write
     steps:
       - name: Generate bot token
         id: bot-token
@@ -38,7 +40,7 @@ jobs:
           private-key: ${{ secrets.SEMANTIC_DEPLOY_BOT_PRIVATE_KEY }}
 
       # check out main: tooling and the local action come from main, the reported
-      # facts come from the event — so a PR can't author its own deploy comment
+      # facts come from the event, so a PR can't author its own deploy comment
       - uses: actions/checkout@v7
         with:
           ref: main
@@ -101,11 +103,12 @@ jobs:
           bot-login: semantic-deploy-bot[bot]
           body-file: deploy-report/comment.md
 
-  # Deploys the docs site. Holds the Vercel token and contents:read only — no
-  # comment token — and uploads a facts file the report workflow reads.
+  # Deploys the docs site. Holds the Vercel token and contents:read only, no
+  # comment token, and uploads a facts file the report workflow reads.
   docs:
     name: Deploy docs preview
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     if: >
       github.event.pull_request.head.repo.full_name == github.repository
       && contains(github.event.pull_request.labels.*.name, 'Preview')
@@ -149,6 +152,7 @@ jobs:
   mcp:
     name: Deploy mcp preview
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     if: >
       github.event.pull_request.head.repo.full_name == github.repository
       && contains(github.event.pull_request.labels.*.name, 'Preview MCP')

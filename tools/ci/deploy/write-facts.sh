@@ -2,8 +2,7 @@
 # Turn a deploy step's captured output into the facts file the report workflow
 # reads. Reads url.txt / inspect.txt from the workspace root (written by the
 # deploy step) rather than taking them as arguments, so a deploy URL never lands
-# in a shell command line. A ready deploy needs a zero exit and a URL; anything
-# else is failed.
+# in a shell command line.
 #
 # Usage: write-facts.sh <target-id> <deploy-exit-code>
 set -euo pipefail

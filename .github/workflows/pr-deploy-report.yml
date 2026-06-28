@@ -17,8 +17,10 @@ jobs:
   comment:
     name: Post deploy comment
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       pull-requests: write
+      issues: write
     if: github.event.workflow_run.event == 'pull_request'
     steps:
       - name: Generate bot token
@@ -28,7 +30,7 @@ jobs:
           client-id: ${{ secrets.SEMANTIC_DEPLOY_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_DEPLOY_BOT_PRIVATE_KEY }}
 
-      # tooling and the local action come from main; the reported facts come from
+      # tooling and the local action come from main. the reported facts come from
       # the deploy run's artifacts
       - uses: actions/checkout@v7
         with:
@@ -69,26 +71,42 @@ jobs:
           echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
           echo "Resolved PR number: $NUMBER"
 
+      # An unlabeled PR push still completes a skipped PR Deploy run, which fires
+      # workflow_run. Only comment when a deploy actually produced facts: a real
+      # failure uploads a failed facts file, a no-deploy run uploads none.
+      - name: Check for deploy facts
+        id: facts
+        run: |
+          COUNT=$(find "${{ runner.temp }}/deploy-facts" -name '*.json' 2>/dev/null | wc -l)
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          echo "Deploy facts found: $COUNT"
+
+      # display_title (the PR title / commit subject) is untrusted, so it rides an
+      # env var and is never interpolated into the shell command line
       - name: Render comment
+        if: steps.facts.outputs.count != '0'
+        env:
+          DISPLAY_TITLE: ${{ github.event.workflow_run.display_title }}
         run: |
           node tools/ci/deploy/reporter.js \
             --mode final \
             --facts ${{ runner.temp }}/deploy-facts \
             --sha '${{ github.event.workflow_run.head_sha }}' \
-            --msg "${{ github.event.workflow_run.display_title }}" \
+            --msg "$DISPLAY_TITLE" \
             --run-url '${{ github.event.workflow_run.html_url }}' \
             --run-id '${{ github.event.workflow_run.id }}' \
             --repo '${{ github.repository }}' \
             --out deploy-report
 
       - name: Upload preview-report.json adjunct
+        if: steps.facts.outputs.count != '0'
         uses: actions/upload-artifact@v7
         with:
           name: preview-report
           path: deploy-report/preview-report.json
 
       - name: Post or update comment
-        if: steps.pr.outputs.number != ''
+        if: steps.facts.outputs.count != '0' && steps.pr.outputs.number != ''
         uses: ./.github/actions/sticky-bot-comment
         with:
           token: ${{ steps.bot-token.outputs.token }}

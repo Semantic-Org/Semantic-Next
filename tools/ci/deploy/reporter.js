@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /*
   Deploy-bot reporter. Renders the PR comment for the deploy suite member, one
-  row per target (docs, mcp; more later). Two modes:
+  row per target (docs and mcp now, more later). Two modes:
 
     --mode deploying  the announce job posts this when a labeled deploy starts.
                       Requested targets read Building with an ETA; the rest NA.
@@ -12,9 +12,9 @@
   The comment is intentionally tight: title, one table, one Run line. The exact
   deploy URL lives in the footer so both link columns stay fixed-width.
 
-  Nothing free-text reaches the markdown — the only rendered values are a hex
-  sha, the constant target ids, formatted clock times, and sanitized https URLs
-  — so there's no comment-injection surface to escape. The commit subject is
+  Nothing free-text reaches the markdown. The only rendered values are a hex
+  sha, the constant target ids, formatted clock times, and sanitized https URLs,
+  so there's no comment-injection surface to escape. The commit subject is
   carried in the JSON adjunct only.
 
   Usage:
@@ -90,7 +90,7 @@ function buildFinal() {
     const f = facts.get(t.id);
     if (!f) { return { id: t.id, status: 'na' }; }
     const url = sanitizeUrl(f.url);
-    // a "ready" with no usable URL can't be a working preview — read it failed
+    // a ready deploy with no usable URL can't be a working preview, so read it failed
     const status = f.status === 'ready' && url ? 'ready' : 'failed';
     return {
       id: t.id,
@@ -103,8 +103,8 @@ function buildFinal() {
   const attempted = targets.filter((t) => t.status !== 'na');
   const failed = attempted.filter((t) => t.status === 'failed');
   const ready = attempted.filter((t) => t.status === 'ready');
-  // nothing deployed reads as failed, not a hollow "ready" — only reachable if a
-  // labeled run produced no facts at all
+  // nothing deployed reads as failed rather than a hollow ready (only reachable
+  // if a labeled run produced no facts at all)
   let state = attempted.length === 0 ? 'failed' : 'ready';
   if (failed.length > 0) { state = ready.length > 0 ? 'partial' : 'failed'; }
   return { mode, state, head: { sha, msg }, run: { url: runUrl, id: runId }, repo, targets };
@@ -198,8 +198,8 @@ function parseSeconds(v) {
   return v != null && v !== '' && Number.isFinite(n) && n > 0 ? n : null;
 }
 
-// only render a URL we're sure can't break out of markdown/HTML — https host,
-// optional port, optional path without whitespace, quotes, parens, or brackets
+// only render a URL we're sure can't break out of markdown or HTML: an https
+// host, optional port, and a path with no whitespace, quotes, parens, or brackets
 function sanitizeUrl(u) {
   return typeof u === 'string' && /^https:\/\/[a-z0-9.-]+(?::\d+)?(?:\/[^\s)<>"'`]*)?$/i.test(u)
     ? u
