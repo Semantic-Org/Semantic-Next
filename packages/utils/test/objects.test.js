@@ -2,6 +2,7 @@ import {
   any,
   arrayFromObject,
   assignInPlace,
+  clone,
   deepExtend,
   detectChanges,
   elementKey,
@@ -17,6 +18,7 @@ import {
   reverseKeys,
   set,
   some,
+  trackReads,
   trackWrites,
   unset,
   values,
@@ -577,6 +579,321 @@ describe('Object Utilities', () => {
         }, { returnPaths: false });
         expect(changed).toBe(true);
         expect(paths).toBeUndefined();
+      });
+    });
+  });
+
+  describe('trackReads', () => {
+    describe('value reads', () => {
+      it('reports the path of a leaf read', () => {
+        const { reads } = trackReads({ user: { name: 'Alice' } }, (value) => value.user.name);
+        expect(reads).toEqual(['user.name']);
+      });
+
+      it('reports several independent leaf reads', () => {
+        const state = { a: { b: 1 }, c: 2 };
+        const { reads } = trackReads(state, (value) => value.a.b + value.c);
+        expect(reads).toEqual(['a.b', 'c']);
+      });
+
+      it('records a read of a currently-missing property', () => {
+        const { reads } = trackReads({ a: 1 }, (value) => value.missing);
+        expect(reads).toEqual(['missing']);
+      });
+
+      it('prunes an ancestor read when a descendant was also read', () => {
+        const state = { user: { name: 'Alice' } };
+        const { reads } = trackReads(state, (value) => {
+          const user = value.user;
+          return user.name;
+        });
+        expect(reads).toEqual(['user.name']);
+      });
+
+      it('keeps a bare container read when nothing under it was read', () => {
+        const state = { user: { name: 'Alice' } };
+        const { reads } = trackReads(state, (value) => value.user);
+        expect(reads).toEqual(['user']);
+      });
+
+      it('returns the callback result, with tracked wrappers unwrapped', () => {
+        const state = { user: { name: 'Alice' } };
+        const { result } = trackReads(state, (value) => value.user);
+        expect(result).toBe(state.user);
+        expect(() => result.name).not.toThrow();
+      });
+
+      it('unwraps tracked wrappers smuggled inside a fresh result container', () => {
+        const state = { a: { x: 1 }, b: { y: 2 } };
+        const { result } = trackReads(state, (value) => [value.a, value.b]);
+        expect(result[0]).toBe(state.a);
+        expect(result[1]).toBe(state.b);
+      });
+    });
+
+    describe('structural reads', () => {
+      it('reading length is a structural dependency, not a value read', () => {
+        const state = { items: [1, 2, 3] };
+        const { reads, structure } = trackReads(state, (value) => value.items.length);
+        expect(structure).toContain('items');
+        expect(reads).not.toContain('items.length');
+      });
+
+      it('iterating an array records structure plus each element value', () => {
+        const state = { items: [{ id: 'a', n: 1 }, { id: 'b', n: 2 }] };
+        const { reads, structure } = trackReads(state, (value) => {
+          let total = 0;
+          for (const item of value.items) {
+            total += item.n;
+          }
+          return total;
+        });
+        expect(structure).toEqual(['items']);
+        expect(reads).toEqual(['items[#a].n', 'items[#b].n']);
+      });
+
+      it('map records structure (depends on growth) and element values', () => {
+        const state = { items: [{ id: 'a', name: 'x' }, { id: 'b', name: 'y' }] };
+        const { reads, structure } = trackReads(state, (value) => value.items.map((item) => item.name));
+        expect(structure).toEqual(['items']);
+        expect(reads).toEqual(['items[#a].name', 'items[#b].name']);
+      });
+
+      it('a positional index read is a value read, not structural', () => {
+        const state = { items: [10, 20, 30] };
+        const { reads, structure } = trackReads(state, (value) => value.items[1]);
+        expect(reads).toEqual(['items.1']);
+        expect(structure).toEqual([]);
+      });
+
+      it('Object.keys records a structural read of the object', () => {
+        const state = { config: { a: 1, b: 2 } };
+        const { reads, structure } = trackReads(state, (value) => Object.keys(value.config));
+        expect(structure).toContain('config');
+        // reading the key set is not reading the values
+        expect(reads).not.toContain('config.a');
+      });
+
+      it('Object.values records structure plus each value read', () => {
+        const state = { config: { a: 1, b: 2 } };
+        const { reads, structure } = trackReads(state, (value) => Object.values(value.config));
+        expect(structure).toEqual(['config']);
+        expect(reads).toEqual(['config.a', 'config.b']);
+      });
+
+      it('the structure of the root array reports the empty path', () => {
+        const { structure } = trackReads([1, 2, 3], (value) => value.length);
+        expect(structure).toEqual(['']);
+      });
+    });
+
+    describe('existence reads', () => {
+      it('`in` records the property path as a value dependency', () => {
+        const state = { roles: { admin: true } };
+        const { reads } = trackReads(state, (value) => 'admin' in value.roles);
+        expect(reads).toEqual(['roles.admin']);
+      });
+    });
+
+    describe('functions and exotics', () => {
+      it('reading a method is not a dependency (only the container reached for it)', () => {
+        const state = { items: [1, 2] };
+        const { reads, structure } = trackReads(state, (value) => {
+          const fn = value.items.reduce;
+          return typeof fn;
+        });
+        // value.items is a real value read; the .reduce method itself is not
+        expect(reads).toEqual(['items']);
+        expect(structure).toEqual([]);
+      });
+
+      it('the reads a method performs are tracked', () => {
+        const state = { items: [{ id: 'a', n: 1 }, { id: 'b', n: 2 }] };
+        const { reads, structure } = trackReads(state, (value) => value.items.reduce((sum, item) => sum + item.n, 0));
+        expect(structure).toEqual(['items']);
+        expect(reads).toEqual(['items[#a].n', 'items[#b].n']);
+      });
+
+      it('reading an exotic is a single read, no recursion into internals', () => {
+        const state = { when: new Date(2020, 0, 1), tags: new Set([1, 2]) };
+        const { reads } = trackReads(state, (value) => {
+          value.when.getFullYear();
+          return value.tags.has(1);
+        });
+        expect(reads).toEqual(['when', 'tags']);
+      });
+
+      it('a Map read does not descend into entries', () => {
+        const state = { lookup: new Map([['k', { deep: 1 }]]) };
+        const { reads } = trackReads(state, (value) => value.lookup.get('k'));
+        expect(reads).toEqual(['lookup']);
+      });
+    });
+
+    describe('keyed addressing', () => {
+      it('id-addresses keyed array elements by default', () => {
+        const db = { todos: [{ id: 'a', done: false }, { id: 'b', done: true }] };
+        const { reads } = trackReads(db, (value) => value.todos.map((t) => t.done));
+        expect(reads).toEqual(['todos[#a].done', 'todos[#b].done']);
+      });
+
+      it('keyed: false uses positional paths', () => {
+        const db = { todos: [{ id: 'a', done: false }, { id: 'b', done: true }] };
+        const { reads } = trackReads(db, (value) => value.todos.map((t) => t.done), {
+          keyed: false,
+        });
+        expect(reads).toEqual(['todos.0.done', 'todos.1.done']);
+      });
+
+      it('honors a custom key list', () => {
+        const db = { rows: [{ sku: 's1', qty: 1 }] };
+        const { reads } = trackReads(db, (value) => value.rows[0].qty, { keys: ['sku'] });
+        expect(reads).toEqual(['rows[#s1].qty']);
+      });
+
+      it('falls back to positional when an element is unkeyed', () => {
+        const db = { rows: [{ qty: 1 }] };
+        const { reads } = trackReads(db, (value) => value.rows[0].qty);
+        expect(reads).toEqual(['rows.0.qty']);
+      });
+
+      it('keyed read paths resolve back through get()', () => {
+        const db = { todos: [{ id: 'a', done: false }, { id: 'b', done: true }] };
+        const { reads } = trackReads(db, (value) => value.todos.map((t) => t.done));
+        expect(reads.map((path) => get(db, path))).toEqual([false, true]);
+      });
+    });
+
+    describe('nesting and cycles', () => {
+      it('tracks reads at full depth', () => {
+        const state = { a: { b: { c: { d: 1 } } } };
+        const { reads } = trackReads(state, (value) => value.a.b.c.d);
+        expect(reads).toEqual(['a.b.c.d']);
+      });
+
+      it('is safe on a cyclic structure', () => {
+        const node = { name: 'root' };
+        node.self = node;
+        let result;
+        const { reads } = trackReads(node, (value) => {
+          result = value.self.self.name;
+          return result;
+        });
+        expect(result).toBe('root');
+        // a cycle collapses to first-seen paths (same as trackWrites): the
+        // self-edge and the leaf, with no runaway
+        expect(reads).toEqual(['self', 'name']);
+      });
+
+      it('returns the same wrapper for an object reached twice', () => {
+        const shared = { x: 1 };
+        const state = { a: shared, b: shared };
+        let same;
+        trackReads(state, (value) => {
+          same = value.a === value.b;
+        });
+        expect(same).toBe(true);
+      });
+    });
+
+    describe('no mutation', () => {
+      it('does not mutate the input', () => {
+        const state = { a: { b: 1 }, items: [{ id: 'x', n: 1 }] };
+        const before = clone(state);
+        trackReads(state, (value) => {
+          value.a.b;
+          value.items.map((item) => item.n);
+          return Object.keys(value);
+        });
+        expect(state).toEqual(before);
+      });
+
+      it('throws if the callback writes through the wrapper', () => {
+        expect(() =>
+          trackReads({ a: 1 }, (value) => {
+            value.a = 2;
+          })
+        ).toThrow(/read-only/);
+      });
+
+      it('throws if the callback deletes through the wrapper', () => {
+        expect(() =>
+          trackReads({ a: 1 }, (value) => {
+            delete value.a;
+          })
+        ).toThrow(/read-only/);
+      });
+    });
+
+    describe('lifecycle', () => {
+      it('a tracked value used after the callback throws a clear error', () => {
+        let leaked;
+        trackReads({ a: { b: 1 } }, (value) => {
+          leaked = value.a;
+        });
+        expect(() => leaked.b).toThrow(/after its callback returned/);
+      });
+
+      it('propagates a thrown error and still expires the wrapper', () => {
+        let leaked;
+        expect(() =>
+          trackReads({ a: { b: 1 } }, (value) => {
+            leaked = value.a;
+            throw new Error('boom');
+          })
+        ).toThrow('boom');
+        expect(() => leaked.b).toThrow(/after its callback returned/);
+      });
+    });
+
+    describe('onRead', () => {
+      it('streams each read with its path and type', () => {
+        const events = [];
+        const state = { count: 1, items: [{ id: 'a', n: 1 }] };
+        trackReads(state, (value) => {
+          value.count;
+          value.items.map((item) => item.n);
+        }, { onRead: (path, type) => events.push([type, path]) });
+        expect(events).toEqual([
+          ['value', 'count'],
+          ['value', 'items'],
+          ['structure', 'items'],
+          ['value', 'items[#a]'],
+          ['value', 'items[#a].n'],
+        ]);
+      });
+
+      it('returnPaths: false skips collection but still streams', () => {
+        const events = [];
+        const out = trackReads({ a: { b: 1 } }, (value) => value.a.b, {
+          returnPaths: false,
+          onRead: (path) => events.push(path),
+        });
+        expect(out.reads).toBeUndefined();
+        expect(out.structure).toBeUndefined();
+        expect(events).toEqual(['a', 'a.b']);
+      });
+    });
+
+    describe('non-trackable and frozen roots', () => {
+      it('a primitive root tracks nothing and still returns the result', () => {
+        const { reads, structure, result } = trackReads(42, (value) => value + 1);
+        expect(reads).toEqual([]);
+        expect(structure).toEqual([]);
+        expect(result).toBe(43);
+      });
+
+      it('a frozen root has no dependencies (immutable) and runs raw', () => {
+        const frozen = Object.freeze({ a: 1 });
+        const { reads, result } = trackReads(frozen, (value) => value.a);
+        expect(reads).toEqual([]);
+        expect(result).toBe(1);
+      });
+
+      it('a frozen subtree is read at its boundary but not descended', () => {
+        const state = { config: Object.freeze({ a: 1 }) };
+        const { reads } = trackReads(state, (value) => value.config.a);
+        expect(reads).toEqual(['config']);
       });
     });
   });

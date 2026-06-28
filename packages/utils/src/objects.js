@@ -115,10 +115,15 @@ const findKeyed = (array, keyValue, keys = DEFAULT_ELEMENT_KEYS) => {
   return -1;
 };
 
+// a key value can ride the dot-bracket path grammar only when it carries no
+// . [ ] and no leading # (which marks a keyed selector). shared by the keyed
+// diff and the keyed read paths so an emitted path always parses back through get
+const isKeyedPathSafe = (keyValue) => !/[.[\]]/.test(keyValue) && keyValue.charCodeAt(0) !== 35;
+
 // index a keyed array by stringified identity for set-wise diffing. returns null
 // (caller falls back to the positional walk) when an element is unkeyed, two share
-// a key, or a key value can't ride the dot-bracket path grammar (contains . [ ] or
-// a leading #) — so detectChanges never emits a keyed path get/set/unset can't parse
+// a key, or a key value can't ride the dot-bracket path grammar — so detectChanges
+// never emits a keyed path get/set/unset can't parse
 const keyedMap = (array, keys) => {
   const map = new Map();
   for (const item of array) {
@@ -127,7 +132,7 @@ const keyedMap = (array, keys) => {
       return null;
     }
     const keyValue = String(id);
-    if (map.has(keyValue) || /[.[\]]/.test(keyValue) || keyValue.charCodeAt(0) === 35) {
+    if (map.has(keyValue) || !isKeyedPathSafe(keyValue)) {
       return null;
     }
     map.set(keyValue, item);
@@ -229,6 +234,31 @@ const pruneChildPaths = (pathLog) => {
       }
     }
     if (!covered) {
+      pruned.push(path);
+    }
+  }
+  return pruned;
+};
+
+// the read mirror of pruneChildPaths: a deeper read subsumes its ancestors.
+// reading todos[#a].complete makes a bare todos[#a] or todos read redundant,
+// since a write to an ancestor already covers the descendant by prefix
+const pruneAncestorPaths = (pathLog) => {
+  const hasDescendant = new Set();
+  for (const path of pathLog) {
+    // walk up each segment boundary — '.' for keys, '[' for keyed elements
+    let cut = path.length;
+    while (cut > 0) {
+      cut = Math.max(path.lastIndexOf('.', cut - 1), path.lastIndexOf('[', cut - 1));
+      if (cut <= 0) {
+        break;
+      }
+      hasDescendant.add(path.slice(0, cut));
+    }
+  }
+  const pruned = [];
+  for (const path of pathLog) {
+    if (!hasDescendant.has(path)) {
       pruned.push(path);
     }
   }
@@ -448,6 +478,220 @@ export const trackWrites = (value, callback, {
     return { changed, result, paths: pruneChildPaths(pathLog) };
   }
   return { changed, result };
+};
+
+/*
+  Run callback against value, report which paths it READ. The read companion to
+  trackWrites: where trackWrites answers "what did this change", trackReads
+  answers "what did this depend on". A reactive system collects a computed's
+  dependencies as it runs, a memoizer derives a cache key from the values it
+  touched, an auditor checks least-privilege access, a prefetcher learns what to
+  warm.
+
+  Reads are observable only through a proxy — there is no before/after to diff,
+  so unlike trackWrites there is no snapshot strategy. The value is wrapped
+  read-only: the callback may read any depth, but a write through the wrapper
+  throws, so the input is never mutated (and a computed stays honest). Reads are
+  only valid inside the callback; a wrapper used after it returns throws.
+
+  Two kinds of dependency come back, kept apart because they invalidate on
+  different writes:
+    reads     — value paths (todos[#id].complete). Re-run when that value
+                changes. Pairs with detectChanges `changed`.
+    structure — container paths whose shape was read: an array's `.length`,
+                iteration, spread, or Object.keys. Re-run when the container
+                grows, shrinks, or re-keys. Pairs with detectChanges
+                `added`/`removed`. A value-only tracker misses array growth
+                because reading `.length` leaves no value path behind, which is
+                why structure is a first-class result, not folded into reads.
+
+  Reading a method (`.reduce`) is not itself a dependency — the property reads it
+  then performs are. An exotic (Date/Map/Set/RegExp) is a single read with no
+  recursion into its internals. Keyed arrays id-address by default
+  (todos[#id].complete), the same convention as trackWrites and detectChanges, so
+  a read dependency matches a write to the same record and survives a reorder.
+  trackWrites gets keyed paths from its snapshot and leaves its proxy positional;
+  trackReads has no snapshot, so it resolves identity in the proxy itself.
+*/
+export const trackReads = (value, callback, {
+  onRead,
+  returnPaths = true,
+  keyed = true,
+  keys = DEFAULT_ELEMENT_KEYS,
+} = {}) => {
+  // a non-container has no paths to read, and a frozen tree is immutable so it
+  // has no dependencies worth tracking (a proxy also can't stand in for its
+  // non-writable, non-configurable properties). either way, just run it.
+  if (!isTrackable(value) || Object.isFrozen(value)) {
+    const result = callback(value);
+    return returnPaths ? { reads: [], structure: [], result } : { result };
+  }
+
+  let expired = false;
+  const wrapped = new WeakMap(); // raw -> proxy, for identity and cycles
+  const rawOf = new WeakMap(); // proxy -> raw, to unwrap the result
+  const paths = (onRead || returnPaths) ? new WeakMap() : null; // raw -> path string from root
+  const readLog = returnPaths ? new Set() : null; // value paths
+  const structureLog = returnPaths ? new Set() : null; // container shape paths
+
+  const expiredError = () =>
+    new Error(
+      'trackReads: tracked value used after its callback returned. Reads are only valid inside the callback.',
+    );
+  const readonlyError = () => new Error('trackReads: tracked value is read-only, the callback must not mutate it.');
+
+  // path of object[key], id-addressed when object is a keyed array so a read
+  // dependency matches the write side and survives a reorder
+  const childPath = (parentPath, parent, key, childValue) => {
+    if (keyed && isArray(parent)) {
+      const id = elementKey(childValue, keys);
+      if (id != null && isKeyedPathSafe(String(id))) {
+        return `${parentPath}[#${String(id)}]`;
+      }
+    }
+    return parentPath === '' ? String(key) : `${parentPath}.${String(key)}`;
+  };
+
+  const recordRead = (object, key, childValue, type) => {
+    if (paths === null) {
+      return;
+    }
+    const parentPath = paths.get(object);
+    // `in` checks a literal key, never an identity, so it stays positional
+    const path = type === 'has'
+      ? (parentPath === '' ? String(key) : `${parentPath}.${String(key)}`)
+      : childPath(parentPath, object, key, childValue);
+    readLog?.add(path);
+    onRead?.(path, type, object, key);
+  };
+
+  const recordStructure = (object) => {
+    if (paths === null) {
+      return;
+    }
+    const path = paths.get(object);
+    structureLog?.add(path);
+    onRead?.(path, 'structure', object, undefined);
+  };
+
+  // swap any tracked wrapper for its raw object, scanning fresh containers the
+  // result was assembled from. mirrors trackWrites and is safe after expiry: it
+  // reads raw lookups and fresh containers, never a wrapper's properties
+  const unwrapDeep = (value, seen) => {
+    const raw = rawOf.get(value);
+    if (raw !== undefined) {
+      return raw;
+    }
+    if (!isTrackable(value) || wrapped.has(value) || seen?.has(value)) {
+      return value;
+    }
+    (seen ??= new Set()).add(value);
+    for (const key of Object.keys(value)) {
+      const child = value[key];
+      if (child !== null && typeof child === 'object') {
+        const unwrapped = unwrapDeep(child, seen);
+        if (unwrapped !== child) {
+          value[key] = unwrapped;
+        }
+      }
+    }
+    return value;
+  };
+
+  const handler = {
+    get(object, key) {
+      if (expired) {
+        throw expiredError();
+      }
+      const value = object[key];
+      // an array's length is a structural read: it answers "how long" not
+      // "what's at N", and iteration/spread/most array methods route through it
+      if (isArray(object) && key === 'length') {
+        recordStructure(object);
+        return value;
+      }
+      // a symbol key has no dot-path form (Symbol.iterator etc.); pass it
+      // through untracked — the length and index reads it drives are tracked
+      if (typeof key === 'symbol') {
+        return value;
+      }
+      // reading a method is not a dependency; the reads it performs (via `this`
+      // being the wrapper) are tracked as they happen
+      if (typeof value === 'function') {
+        return value;
+      }
+      recordRead(object, key, value, 'value');
+      // descend into containers; an exotic or primitive is a single read with no
+      // recursion. a frozen child is immutable, so it has no further
+      // dependencies and a proxy can't stand in for it
+      if (isTrackable(value) && !Object.isFrozen(value)) {
+        return wrap(value, object, key);
+      }
+      return value;
+    },
+    has(object, key) {
+      if (expired) {
+        throw expiredError();
+      }
+      // `'x' in obj` depends on whether obj.x exists, which a value path on
+      // obj.x captures already (undefined <-> defined is a value change). skip
+      // arrays: their built-in methods probe each index with HasProperty for
+      // sparse-hole handling, which is machinery, not a user dependency
+      if (!isArray(object)) {
+        recordRead(object, key, undefined, 'has');
+      }
+      return Reflect.has(object, key);
+    },
+    ownKeys(object) {
+      if (expired) {
+        throw expiredError();
+      }
+      // Object.keys / spread / for...in read the key set: a structural dependency
+      recordStructure(object);
+      return Reflect.ownKeys(object);
+    },
+    set() {
+      throw expired ? expiredError() : readonlyError();
+    },
+    deleteProperty() {
+      throw expired ? expiredError() : readonlyError();
+    },
+    defineProperty() {
+      throw expired ? expiredError() : readonlyError();
+    },
+  };
+
+  const wrap = (object, parent, key) => {
+    let proxy = wrapped.get(object);
+    if (proxy === undefined) {
+      proxy = new Proxy(object, handler);
+      wrapped.set(object, proxy);
+      rawOf.set(proxy, object);
+      if (paths) {
+        paths.set(
+          object,
+          parent === undefined ? '' : childPath(paths.get(parent), parent, key, object),
+        );
+      }
+    }
+    return proxy;
+  };
+
+  let result;
+  try {
+    result = callback(wrap(value));
+  }
+  finally {
+    expired = true;
+  }
+  if (result !== null && typeof result === 'object') {
+    result = unwrapDeep(result);
+  }
+
+  if (!returnPaths) {
+    return { result };
+  }
+  return { reads: pruneAncestorPaths(readLog), structure: [...structureLog], result };
 };
 
 /*
