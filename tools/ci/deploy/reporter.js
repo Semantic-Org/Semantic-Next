@@ -97,7 +97,6 @@ function buildFinal() {
       status,
       url: status === 'ready' ? url : null,
       host: status === 'ready' ? hostOf(url) : null,
-      inspect: sanitizeUrl(f.inspect) || null,
     };
   });
   const attempted = targets.filter((t) => t.status !== 'na');
@@ -143,7 +142,7 @@ function renderFinalTable(lines, r) {
   lines.push('|---|---|---|---|');
   for (const t of r.targets) {
     if (t.status === 'ready') {
-      lines.push(`| \`${t.id}\` | 🟢 Ready | [Preview](${t.url}) | [logs](${t.inspect || r.run.url}) |`);
+      lines.push(`| \`${t.id}\` | 🟢 Ready | [Preview](${t.url}) | [logs](${r.run.url}) |`);
     }
     else if (t.status === 'failed') {
       lines.push(`| \`${t.id}\` | 🔴 Failed | — | [logs](${r.run.url}) |`);
@@ -159,7 +158,6 @@ function footer(r) {
   const parts = [];
   if (r.run.url) { parts.push(`**Run:** [${r.run.id ? `#${r.run.id}` : 'run'}](${r.run.url})`); }
   if (r.mode === 'final') {
-    if (r.run.url) { parts.push(`**Raw:** [\`preview-report.json\`](${r.run.url}/artifacts)`); }
     for (const t of r.targets) {
       if (t.status === 'ready' && t.host) { parts.push(`\`${t.id}\` \`${t.host}\``); }
     }
