@@ -6,8 +6,9 @@ export interface ReactiveObjectOptions {
   /**
    * Value-protection preset controlling how the backing object is guarded against
    * outside mutation. `'reference'` (default) reads and stores by reference.
-   * `'clone'` returns defensive copies on read and clones the inbound object on
-   * `replace`. `'none'` treats every `set()` as a change (event-stream semantics).
+   * `'clone'` returns defensive copies on read and clones inbound objects on
+   * `set` and `replace`. `'none'` treats every `set()` as a change (event-stream
+   * semantics).
    * @default 'reference'
    */
   safety?: 'clone' | 'reference' | 'none';
@@ -34,7 +35,10 @@ export interface ReactiveObjectOptions {
  * single Signal holding an object would wake every reader on any change.
  *
  * Addressed by the `@semantic-ui/utils` path grammar: dotted keys, positional
- * `[i]` indices, and keyed `[#id]` array segments.
+ * `[i]` indices, and keyed `[#id]` array segments. Reactivity is keyed by the
+ * literal path string, so an element must be addressed consistently: a reader of
+ * `todos[#a].done` is not woken by a positional write to `todos[0].done` that
+ * hits the same element.
  *
  * Create one with the `reactiveObject()` factory or `new ReactiveObject()`.
  * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object ReactiveObject Documentation}
@@ -67,13 +71,15 @@ export class ReactiveObject {
   /**
    * Tracked read. Subscribes the current reaction to this path alone, so a later
    * write to a disjoint path will not re-fire it.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#get get}
    * @param path - The path to read
    */
   get(path: string): any;
 
   /**
-   * Untracked read. With a path, the value there; without, the whole backing
+   * Untracked read. With a path the value there, without one the whole backing
    * object. Subscribes to nothing.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#peek peek}
    * @param path - Optional path to read
    */
   peek(path?: string): any;
@@ -81,6 +87,7 @@ export class ReactiveObject {
   /**
    * Whether any live reaction subscribes to a path, or to the whole object when
    * no path is given.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#hasdependents hasDependents}
    * @param path - Optional path to check
    */
   hasDependents(path?: string): boolean;
@@ -88,7 +95,9 @@ export class ReactiveObject {
   /**
    * Single-path write, equality-gated. Wakes readers of this path, of its
    * ancestors, and of any descendant whose resolved value changed. A same-value
-   * write wakes nobody.
+   * write, or one the backing object drops (a field under an absent keyed
+   * element), wakes nobody and returns `false`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#set set}
    * @param path - The path to write
    * @param value - The value to set
    * @returns Whether the write changed anything
@@ -96,8 +105,10 @@ export class ReactiveObject {
   set(path: string, value: any): boolean;
 
   /**
-   * Removes a path so the key leaves the object — it reads back absent, not
-   * undefined-valued. A no-op when the path is already absent.
+   * Removes a path so the key leaves the object. It reads back absent, not
+   * undefined-valued. A no-op when the path is already absent, which includes a
+   * key whose value is explicitly `undefined`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#remove remove}
    * @param path - The path to remove
    * @returns Whether the removal changed anything
    */
@@ -105,27 +116,31 @@ export class ReactiveObject {
 
   /**
    * Bulk inbound swap: replaces the whole backing object and reseeds every live
-   * reader against the new object, waking only paths whose value changed —
+   * reader against the new object, waking only paths whose value changed,
    * including deep readers under a wholesale-replaced subtree. Dead cells are
    * evicted in the pass.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#replace replace}
    * @param nextObject - The replacement backing object
    */
   replace(nextObject: object): void;
 
   /**
    * Replaces the backing object with an empty one.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#clear clear}
    */
   clear(): void;
 
   /**
    * Sweeps cells nobody subscribes to. `replace` and subtree writes sweep as they
-   * go; this is the explicit hook for an instance driven only by `set`/`remove`.
+   * go. This is the explicit hook for an instance driven only by `set`/`remove`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#prune prune}
    */
   prune(): void;
 
   /**
-   * Drops every cell. Live subscribers stop receiving wakes; future reads mint
+   * Drops every cell. Live subscribers stop receiving wakes, future reads mint
    * fresh cells.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#stop stop}
    */
   stop(): void;
 }

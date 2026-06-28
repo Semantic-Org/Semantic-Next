@@ -29,7 +29,9 @@
         { "mode": "performance", "entryName": "computed-subscribe-unsubscribe-10k" },
         { "mode": "performance", "entryName": "flush-fanout-allocation-1000x500" },
         { "mode": "performance", "entryName": "mutate-grid-row-edit-600" },
-        { "mode": "performance", "entryName": "mutate-doc-nested-200k" }
+        { "mode": "performance", "entryName": "mutate-doc-nested-200k" },
+        { "mode": "performance", "entryName": "reactive-object-field-write-40k" },
+        { "mode": "performance", "entryName": "reactive-object-replace-15k" }
       ]
     },
     {
@@ -56,7 +58,9 @@
         { "mode": "performance", "entryName": "computed-subscribe-unsubscribe-10k" },
         { "mode": "performance", "entryName": "flush-fanout-allocation-1000x500" },
         { "mode": "performance", "entryName": "mutate-grid-row-edit-600" },
-        { "mode": "performance", "entryName": "mutate-doc-nested-200k" }
+        { "mode": "performance", "entryName": "mutate-doc-nested-200k" },
+        { "mode": "performance", "entryName": "reactive-object-field-write-40k" },
+        { "mode": "performance", "entryName": "reactive-object-replace-15k" }
       ]
     }
   ]

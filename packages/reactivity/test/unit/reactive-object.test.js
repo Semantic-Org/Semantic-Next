@@ -128,7 +128,7 @@ describe('ReactiveObject', () => {
       a.stop();
     });
 
-    it('wakes ancestor readers — a leaf write changes the value seen at a container', () => {
+    it('wakes ancestor readers when a leaf write changes the value seen at a container', () => {
       const ro = reactiveObject({ user: { name: 'Ann', age: 30 } });
       const container = trackPath(ro, 'user');
       const sibling = trackPath(ro, 'user.age');
@@ -150,7 +150,7 @@ describe('ReactiveObject', () => {
       const name = trackPath(ro, 'user.name');
       const age = trackPath(ro, 'user.age');
 
-      // replace the whole subtree at 'user'; name changes, age does not
+      // replace the whole subtree at 'user', name changes but age does not
       ro.set('user', { name: 'Bob', age: 30 });
       flush();
       expect(name.runs).toBe(2); // 'Ann' -> 'Bob'
@@ -263,7 +263,7 @@ describe('ReactiveObject', () => {
       expect(ro.cells.size).toBe(0);
     });
 
-    it('reads never allocate per write — churn does not grow the cell map', () => {
+    it('reads never allocate per write, so churn does not grow the cell map', () => {
       const ro = reactiveObject({ n: 0 });
       const n = trackPath(ro, 'n');
       for (let i = 1; i <= 100; i++) {
@@ -309,11 +309,11 @@ describe('ReactiveObject', () => {
       r.stop();
     });
 
-    it('set schedules rather than runs — readers fire on flush, not inside set', () => {
+    it('set schedules rather than runs, so readers fire on flush not inside set', () => {
       const ro = reactiveObject({ a: 1 });
       const a = trackPath(ro, 'a');
       ro.set('a', 2);
-      expect(a.runs).toBe(1); // not yet — scheduled, not synchronous
+      expect(a.runs).toBe(1); // not yet, scheduled rather than synchronous
       flush();
       expect(a.runs).toBe(2);
       a.stop();
@@ -362,6 +362,28 @@ describe('ReactiveObject', () => {
       aDone.stop();
       bDone.stop();
     });
+
+    it('a wholesale array write wakes a keyed-element descendant whose value changed', () => {
+      const ro = reactiveObject({
+        todos: [
+          { id: 'a', done: false },
+          { id: 'b', done: false },
+        ],
+      });
+      const aDone = trackPath(ro, 'todos[#a].done');
+      const bDone = trackPath(ro, 'todos[#b].done');
+      // replace the whole array in place: #a flips, #b is unchanged
+      ro.set('todos', [
+        { id: 'a', done: true },
+        { id: 'b', done: false },
+      ]);
+      flush();
+      expect(aDone.runs).toBe(2);
+      expect(aDone.last).toBe(true);
+      expect(bDone.runs).toBe(1); // unchanged keyed element, equality-gated
+      aDone.stop();
+      bDone.stop();
+    });
   });
 
   describe('options', () => {
@@ -379,6 +401,36 @@ describe('ReactiveObject', () => {
       const first = ro.peek('a');
       first.x = 999; // mutating the read copy must not leak into the backing object
       expect(ro.peek('a').x).toBe(1);
+    });
+  });
+
+  describe('write-side safety', () => {
+    it("set() under 'clone' safety stores a defensive copy, so a later caller mutation does not leak", () => {
+      const ro = reactiveObject({}, { safety: 'clone' });
+      const inbound = { x: 1 };
+      ro.set('obj', inbound);
+      inbound.x = 999;
+      expect(ro.peek('obj').x).toBe(1);
+    });
+
+    it('a write the backing object drops reports no change and wakes nobody', () => {
+      // utils set() no-ops on a field under an absent keyed element
+      const ro = reactiveObject({ todos: [{ id: 'a', done: false }] });
+      const arr = trackPath(ro, 'todos');
+      expect(ro.set('todos[#c].done', true)).toBe(false);
+      flush();
+      expect(arr.runs).toBe(1);
+      arr.stop();
+    });
+
+    it("under 'none' safety a dropped write still reports no change and wakes nobody", () => {
+      // 'none' skips the equality check, but a write that never lands is not a change
+      const ro = reactiveObject({ todos: [{ id: 'a', done: false }] }, { safety: 'none' });
+      const arr = trackPath(ro, 'todos');
+      expect(ro.set('todos[#c].done', true)).toBe(false);
+      flush();
+      expect(arr.runs).toBe(1);
+      arr.stop();
     });
   });
 });

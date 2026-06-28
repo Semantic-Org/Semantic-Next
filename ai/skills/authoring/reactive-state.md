@@ -226,6 +226,8 @@ A `Signal` holding an object wakes **every** reader on any change. `ReactiveObje
 
 It addresses values through the same path grammar as the utils `get`/`set`/`unset` — dotted keys, positional `[i]` indices, and keyed `[#id]` array segments.
 
+Reactivity is keyed by the literal path string, so address an element consistently. A reader of `todos[#a3f].done` is not woken by a positional write to `todos[0].done` that hits the same element.
+
 ### Creating
 
 ```javascript

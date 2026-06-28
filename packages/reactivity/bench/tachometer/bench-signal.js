@@ -5,7 +5,7 @@ import * as reactivity from '@semantic-ui/reactivity';
 // the Reaction.X / Signal.computed statics, so we resolve to the module-level
 // helpers when present and fall back to the class statics otherwise. Drop once
 // the migration lands and main no longer needs the fallback.
-const { Reaction, Signal } = reactivity;
+const { Reaction, Signal, ReactiveObject } = reactivity;
 const reaction = reactivity.reaction ?? ((callback, options) => Reaction.create(callback, options));
 const flush = reactivity.flush ?? (() => Reaction.flush());
 const computed = reactivity.computed ?? ((fn, options) => Signal.computed(fn, options));
@@ -522,6 +522,69 @@ let sink = null;
     }
   });
   for (let i = 0; i < 500; i++) { reactions[i].stop(); }
+}
+
+/*******************************
+      ReactiveObject path-granular reactivity
+      (guarded: a pre-ReactiveObject baseline
+       arm lacks the export, so the section no-ops)
+*******************************/
+
+if (ReactiveObject) {
+  const docPaths = [
+    'title',
+    'meta.author',
+    'meta.created',
+    'meta.updated',
+    'settings.theme',
+    'settings.fontSize',
+    'settings.autosave',
+    'body.wordCount',
+  ];
+
+  // reactive-object-field-write-40k — eight readers on distinct leaf paths, one
+  // field edited repeatedly. The fine-grained win: a single reader wakes per
+  // write despite eight subscribers, plus the ancestor walk up to the root.
+  {
+    const ro = new ReactiveObject(makeDoc());
+    const reactions = docPaths.map(path =>
+      reaction(() => {
+        sink = ro.get(path);
+      })
+    );
+    // purpose: Edits one field of an eight-reader document 40000 times. Only the written path's reader wakes.
+    await measureOp('reactive-object-field-write-40k', () => {
+      for (let i = 0; i < 40_000; i++) {
+        ro.set('meta.updated', i);
+        flush();
+      }
+    });
+    for (const r of reactions) { r.stop(); }
+  }
+
+  // reactive-object-replace-15k — a fresh document arrives and replace() reseeds
+  // every live reader by full path, waking only the few whose value changed. The
+  // sync-layer shape, a loaded record refreshed wholesale.
+  {
+    const ro = new ReactiveObject(makeDoc());
+    const reactions = docPaths.map(path =>
+      reaction(() => {
+        sink = ro.get(path);
+      })
+    );
+    // purpose: Replaces the whole backing document 15000 times against eight live readers. O(cells) reseed.
+    await measureOp('reactive-object-replace-15k', () => {
+      for (let i = 0; i < 15_000; i++) {
+        const next = makeDoc();
+        next.meta.updated = i;
+        next.title = (i & 1) ? 'A' : 'B';
+        next.settings.theme = (i & 1) ? 'dark' : 'light';
+        ro.replace(next);
+        flush();
+      }
+    });
+    for (const r of reactions) { r.stop(); }
+  }
 }
 
 /*******************************

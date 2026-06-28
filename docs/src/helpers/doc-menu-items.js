@@ -139,6 +139,7 @@ export const sidebarMenuAPI = [
     icon: 'activity',
     pages: [
       { name: 'Signal', url: '/docs/api/reactivity/signal' },
+      { name: 'Reactive Object', url: '/docs/api/reactivity/reactive-object' },
       { name: 'Reaction', url: '/docs/api/reactivity/reaction' },
       { name: 'Derived Signals', url: '/docs/api/reactivity/derived-signals' },
       { name: 'Reactive Controls', url: '/docs/api/reactivity/controls' },
