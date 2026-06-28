@@ -192,6 +192,76 @@ trackWrites(db, mutator, { strategy: 'proxy' }); // paths like ['todos.0.complet
 trackWrites(doc, mutator, { returnPaths: false }); // { changed, result }
 ```
 
+### trackReads
+
+```javascript
+function trackReads(value, callback, { returnPaths = true, keyed = true, keys = ['id', '_id', 'hash', 'key'], onRead } = {})
+```
+
+Runs a callback against a value and reports which paths it **read** — the read companion to [`trackWrites`](#trackwrites). Where `trackWrites` answers "what did this change", `trackReads` answers "what did this depend on": collecting a computed function's dependencies, deriving a memoization key from the values it touched, auditing least-privilege access, or learning what to prefetch.
+
+> **Proxy only** - Reads are observable only through a proxy (there is no before/after to diff, so unlike `trackWrites` there is no snapshot strategy). The value is wrapped **read-only**: the callback may read any depth, but a write through the wrapper throws, so the input is never mutated. The wrapper is only valid inside the callback — using one after it returns throws.
+
+#### Parameters
+
+| Name     | Type     | Description |
+|----------|----------|-------------|
+| value    | any      | The value the callback reads from |
+| callback | function | Receives the value (or its read-only tracked wrapper) and returns anything |
+| options  | object   | Optional configuration |
+
+##### Options
+
+| Name        | Type     | Default   | Description |
+|-------------|----------|-----------|-------------|
+| returnPaths | boolean  | true      | Return the read paths. Pass `false` to skip collection and rely on `onRead` |
+| keyed       | boolean  | true      | Id-address paths for keyed arrays (`todos[#id].done` instead of `todos.0.done`), the same convention as `trackWrites`. Pass `false` for positional paths |
+| keys        | string[] | `['id', '_id', 'hash', 'key']` | Identity fields for keyed paths, first present wins |
+| onRead      | function | undefined | `(path, type, target, key)` fires per read with its type (`'value'`, `'has'`, or `'structure'`) — the unpruned live stream for dependency collectors and auditors |
+
+#### Returns
+
+`{ reads, structure, result }` — the value paths read, the container shapes read, and the callback's return value.
+
+#### Notes
+
+Two dependency kinds come back, kept apart because they invalidate on different writes:
+
+* `reads` — value paths (`todos[#id].done`), resolvable through [`get`](#get), pruned so a deeper read subsumes its ancestors. Pairs with [`detectChanges`](#detectchanges) `changed`.
+* `structure` — container paths whose **shape** was read: an array's `.length`, iteration, spread, or `Object.keys`. Pairs with `detectChanges` `added`/`removed`.
+
+Surfacing `structure` separately is the array-growth case: reading an array's length leaves no value path behind, so a value-only dependency set would silently miss a `push`. Reading a method (`.reduce`) is not itself a dependency — the property reads that method then performs are. An exotic (`Date`/`Map`/`Set`/`RegExp`) is a single read with no recursion into its internals. A frozen subtree is immutable, so it has no dependencies and is read only at its boundary.
+
+#### Example
+
+```javascript
+import { trackReads, get } from '@semantic-ui/utils';
+
+const state = { todos: [{ id: 'a', done: false }, { id: 'b', done: true }] };
+const { reads, structure } = trackReads(state, (value) =>
+  value.todos.map((todo) => todo.done));
+console.log(reads);     // ['todos[#a].done', 'todos[#b].done']
+console.log(structure); // ['todos']
+
+// reads resolve back through get(), e.g. for a memoization key — and the keyed
+// paths survive a reorder of the list
+reads.map((path) => get(state, path)); // [false, true]
+
+// pair with the write side: re-run when a read value changes (changed) or when
+// a read container grows or shrinks (added/removed)
+// reads     ↔ detectChanges.changed
+// structure ↔ detectChanges.added / removed
+
+// onRead streams each read live, typed, for dependency collectors
+trackReads(state, (value) => value.todos.length, {
+  onRead: (path, type) => console.log(type, path), // 'value' todos, 'structure' todos
+});
+
+// positional opt-out, and hot-path streaming without collection
+trackReads(state, reader, { keyed: false });        // paths like ['todos.0.done']
+trackReads(state, reader, { returnPaths: false, onRead });
+```
+
 ### elementKey
 
 ```javascript

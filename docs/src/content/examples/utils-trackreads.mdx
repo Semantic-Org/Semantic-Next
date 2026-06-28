@@ -1,0 +1,11 @@
+---
+title: 'trackReads'
+id: 'utils-trackreads'
+exampleType: 'log'
+category: 'Utils'
+subcategory: 'Objects'
+description: 'Run a callback against a value and report which paths it read as dot paths'
+tags: ['utils', 'objects', 'trackReads', 'dependencies', 'reactivity', 'memoize', 'paths', 'proxy', 'keyed']
+selectedFile: 'index.js'
+tip: 'The read companion to trackWrites. Two buckets come back because they invalidate on different writes — reads (value paths, pair with detectChanges changed) and structure (an array length / iteration / Object.keys, pair with detectChanges added/removed). Surfacing structure apart is the array-growth case: reading length leaves no value path, so a value-only set silently misses a push. Element reads id-address by default (todos[#id]) so a read dependency matches a write to the same record and survives a reorder'
+---
