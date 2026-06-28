@@ -32,8 +32,8 @@ runs:
         # Edit the bot's prior comment in place. Filtering REST results by
         # user.login is stable across short-lived installation tokens, where
         # `gh pr comment --edit-last` can drift and post a duplicate.
-        EXISTING_ID=$(gh api "repos/$REPO/issues/$PR/comments" \
-          --jq "[.[] | select(.user.login == \"$BOT_LOGIN\")] | last | .id // empty")
+        EXISTING_ID=$(gh api --paginate "repos/$REPO/issues/$PR/comments" \
+          --jq ".[] | select(.user.login == \"$BOT_LOGIN\") | .id" | tail -n1)
         if [ -n "$EXISTING_ID" ]; then
           jq -nR --rawfile body "$BODY_FILE" '{body: $body}' \
             | gh api "repos/$REPO/issues/comments/$EXISTING_ID" -X PATCH --input -

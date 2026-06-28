@@ -103,8 +103,8 @@ jobs:
           bot-login: semantic-deploy-bot[bot]
           body-file: deploy-report/comment.md
 
-  # Deploys the docs site. Holds the Vercel token and contents:read only, no
-  # comment token, and uploads a facts file the report workflow reads.
+  # Holds the Vercel token and contents:read only, no comment token, and uploads
+  # a facts file the report workflow reads.
   docs:
     name: Deploy docs preview
     runs-on: ubuntu-latest
@@ -147,8 +147,8 @@ jobs:
           name: deploy-facts-docs
           path: deploy-facts/docs.json
 
-  # Deploys the MCP server. Same shape as docs, with the project's local build
-  # step (mirrors the production deploy in release-deploy.yml).
+  # Same shape as docs, with the project's local build step (mirrors the
+  # production deploy in release-deploy.yml).
   mcp:
     name: Deploy mcp preview
     runs-on: ubuntu-latest

@@ -61,7 +61,7 @@ test('deploying, seeded: EST clock, ETA, build time; unrequested target NA', () 
   ]);
   assert.match(md, /Deploying Preview/);
   assert.match(md, /🟡 Building/);
-  assert.match(md, /8:10 PM/); // 00:10 UTC → 20:10 EDT
+  assert.match(md, /8:10 PM/); // 00:10 UTC is 20:10 EDT
   assert.match(md, /8:13 PM/); // + 180s
   assert.match(md, /~3m/);
   assert.match(md, /`mcp` \| ⚪ NA/);
