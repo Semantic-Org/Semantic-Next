@@ -63,7 +63,8 @@ reopening anything.
 - `reactivity-review.md` — every plan claim audited against `packages/reactivity` source.
 - `vetting-report.md` — the five-lens vet of the corpus, verdict revise-then-build.
 - `r2-briefs.md` — the round-2 design briefs.
-- `storage-and-scale.md` — the storage shape and scale framing.
+- `storage-and-scale.md` — the storage shape and scale framing, and per-subscriber cost by liveness tier.
+- `hosting.md` — hosting & deployment economics: the cost surface, why per-message billing is out, the three rungs (dogfood / provider / self-host), and a dated pricing snapshot.
 - `todomvc/`, `invoices-table/` — API steelmans, real example templates against the sync API.
 - `research/` — the grounding pass: `primitives-*` (repo readers), `landscape-*` (web
   research: Meteor, 2026 engines, storage, transport), `deep-*` and `crossexam-*` (the
