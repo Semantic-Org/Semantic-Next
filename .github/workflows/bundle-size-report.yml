@@ -102,20 +102,10 @@ jobs:
 
       - name: Post or update PR comment
         if: steps.pr.outputs.number != ''
-        env:
-          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
-          PR: ${{ steps.pr.outputs.number }}
-          REPO: ${{ github.repository }}
-          BOT_LOGIN: semantic-bundle-bot[bot]
-        run: |
-          # Edit the bot's prior comment in place. Filtering REST results by
-          # user.login is stable across short-lived installation tokens, where
-          # `gh pr comment --edit-last` can drift and post a duplicate.
-          EXISTING_ID=$(gh api "repos/$REPO/issues/$PR/comments" \
-            --jq "[.[] | select(.user.login == \"$BOT_LOGIN\")] | last | .id // empty")
-          if [ -n "$EXISTING_ID" ]; then
-            jq -nR --rawfile body size-report/comment.md '{body: $body}' \
-              | gh api "repos/$REPO/issues/comments/$EXISTING_ID" -X PATCH --input -
-          else
-            gh pr comment "$PR" --repo "$REPO" --body-file size-report/comment.md
-          fi
+        uses: ./.github/actions/sticky-bot-comment
+        with:
+          token: ${{ steps.bot-token.outputs.token }}
+          repo: ${{ github.repository }}
+          pr-number: ${{ steps.pr.outputs.number }}
+          bot-login: semantic-bundle-bot[bot]
+          body-file: size-report/comment.md

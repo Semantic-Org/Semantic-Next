@@ -1,5 +1,5 @@
 # Deploy docs site and MCP server to production on tagged releases.
-# Preview deploys happen automatically on push to main (via Vercel Git integration).
+# Previews are label-gated by the Deploy Bot (tools/ci/deploy). Vercel's automatic Git deploys are off.
 # Requires: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_DOCS_PROJECT_ID, VERCEL_MCP_PROJECT_ID
 
 name: Release Deploy

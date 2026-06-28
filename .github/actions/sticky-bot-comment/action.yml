@@ -1,0 +1,42 @@
+name: Sticky bot comment
+description: Post a comment on a PR under a bot identity, or edit the bot's prior comment in place.
+
+inputs:
+  token:
+    description: GitHub App installation token for the bot.
+    required: true
+  repo:
+    description: owner/name of the repository.
+    required: true
+  pr-number:
+    description: Pull request number to comment on.
+    required: true
+  bot-login:
+    description: The bot's comment-author login, e.g. semantic-deploy-bot[bot].
+    required: true
+  body-file:
+    description: Path to the rendered comment body.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        REPO: ${{ inputs.repo }}
+        PR: ${{ inputs.pr-number }}
+        BOT_LOGIN: ${{ inputs.bot-login }}
+        BODY_FILE: ${{ inputs.body-file }}
+      run: |
+        # Edit the bot's prior comment in place. Filtering REST results by
+        # user.login is stable across short-lived installation tokens, where
+        # `gh pr comment --edit-last` can drift and post a duplicate.
+        EXISTING_ID=$(gh api --paginate "repos/$REPO/issues/$PR/comments" \
+          --jq ".[] | select(.user.login == \"$BOT_LOGIN\") | .id" | tail -n1)
+        if [ -n "$EXISTING_ID" ]; then
+          jq -nR --rawfile body "$BODY_FILE" '{body: $body}' \
+            | gh api "repos/$REPO/issues/comments/$EXISTING_ID" -X PATCH --input -
+        else
+          gh pr comment "$PR" --repo "$REPO" --body-file "$BODY_FILE"
+        fi

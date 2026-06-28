@@ -1,5 +1,5 @@
 {
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- ./tools/mcp/ ./ai/skills/",
+  "git": { "deploymentEnabled": false },
   "installCommand": "cd ../.. && npm install",
   "buildCommand": "npm run build:vercel",
   "outputDirectory": "dist",
