@@ -101,7 +101,7 @@ cat /tmp/report/comment.md
 
 | file | role |
 |---|---|
-| `targets.js` | the deploy targets and their labels, in display order |
+| `targets.js` | the deploy targets, in display order |
 | `reporter.js` | CLI: facts (or in-flight timing) into `comment.md` + `preview-report.json` |
 | `write-facts.sh` | turns a deploy step's captured output into a target's facts file |
 | `reporter.test.js` | `node --test` suite for the rendering and state logic |

@@ -37,7 +37,7 @@ jobs:
           client-id: ${{ secrets.SEMANTIC_DEPLOY_BOT_CLIENT_ID }}
           private-key: ${{ secrets.SEMANTIC_DEPLOY_BOT_PRIVATE_KEY }}
 
-      # tooling and the local action come from main. the reported facts come from
+      # tooling and the local action come from main. The reported facts come from
       # the deploy run's artifacts
       - uses: actions/checkout@v7
         with:

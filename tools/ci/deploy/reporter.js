@@ -4,7 +4,7 @@
   row per target (docs and mcp now, more later). Two modes:
 
     --mode deploying  the announce job posts this when a labeled deploy starts.
-                      Requested targets read Building with an ETA; the rest NA.
+                      Requested targets read Building with an ETA. The rest NA.
     --mode final      the report job posts this when the deploy run completes.
                       Each target reads Ready (with a preview link) or Failed,
                       from the facts file its deploy job uploaded.

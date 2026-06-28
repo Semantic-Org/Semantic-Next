@@ -48,7 +48,7 @@ function run(extra, facts) {
   };
 }
 
-test('deploying, seeded: EST clock, ETA, build time; unrequested target NA', () => {
+test('deploying, seeded: EST clock, ETA, build time, unrequested target NA', () => {
   const { md, json } = run([
     '--mode',
     'deploying',
