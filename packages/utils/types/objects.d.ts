@@ -182,6 +182,113 @@ export function trackWrites<T, R = unknown>(
   options?: TrackWritesOptions,
 ): { changed: boolean; result: R; paths: string[]; };
 
+/** The kind of read an onRead event reports */
+export type ReadType = 'value' | 'has' | 'structure';
+
+/**
+ * Options for trackReads
+ */
+export interface TrackReadsOptions {
+  /**
+   * Return the read paths (default true). Pass false to skip collection and
+   * rely on `onRead` for streaming consumers.
+   */
+  returnPaths?: boolean;
+  /**
+   * Id-address paths for keyed arrays (default true), so `todos[#id].complete`
+   * instead of `todos.0.complete` — the same convention as trackWrites and
+   * detectChanges, so a read dependency matches a write to the same record and
+   * survives a reorder. Unlike trackWrites (whose proxy is positional and gets
+   * keyed paths from its snapshot diff), trackReads resolves identity in the
+   * proxy itself. Set false for positional paths.
+   */
+  keyed?: boolean;
+  /** Identity fields for keyed paths, first present wins (default ['id', '_id', 'hash', 'key']) */
+  keys?: string[];
+  /**
+   * Fires per observed read with the path from the root, the read type
+   * (`'value'`, `'has'`, or `'structure'`), the raw target, and the key. The
+   * unpruned live stream, for dependency collectors and access auditors.
+   */
+  onRead?: (path: string, type: ReadType, target: object, key: PropertyKey | undefined) => void;
+}
+
+/**
+ * Result of trackReads
+ */
+export interface TrackReadsResult<R> {
+  /**
+   * Value paths the callback read (`todos[#id].complete`), resolvable through
+   * get(). Pruned so a deeper read subsumes its ancestors. Re-run a dependent
+   * computation when one of these values changes (pairs with detectChanges
+   * `changed`).
+   */
+  reads: string[];
+  /**
+   * Container paths whose shape the callback read — an array's `.length`,
+   * iteration, spread, or Object.keys. Re-run when the container grows, shrinks,
+   * or re-keys (pairs with detectChanges `added`/`removed`). Separate from
+   * `reads` because reading a length leaves no value path behind, so a
+   * value-only dependency set silently misses array growth.
+   */
+  structure: string[];
+  /** The callback's return value, with any tracked wrappers swapped for raw objects */
+  result: R;
+}
+
+/**
+ * Runs a callback against a value and reports which paths it READ — the read
+ * companion to trackWrites. Where trackWrites answers "what did this change",
+ * trackReads answers "what did this depend on": a reactive system collects a
+ * computed's dependencies as it runs, a memoizer derives a cache key from the
+ * values it touched, an auditor checks least-privilege access, a prefetcher
+ * learns what to warm.
+ *
+ * Reads are observable only through a proxy, so unlike trackWrites there is no
+ * snapshot strategy. The value is wrapped read-only: the callback may read any
+ * depth, but a write through the wrapper throws, so the input is never mutated.
+ * Reads are only valid inside the callback — a wrapper used after it returns
+ * throws.
+ *
+ * Two dependency kinds come back, kept apart because they invalidate on
+ * different writes: `reads` (value paths, pair with detectChanges `changed`) and
+ * `structure` (container shape paths, pair with detectChanges `added`/`removed`).
+ * Surfacing structure separately is the array-growth case: reading `.length`
+ * leaves no value path, so a value-only set would miss a push. Reading a method
+ * is not a dependency (the reads it then performs are); an exotic
+ * (Date/Map/Set/RegExp) is a single read with no recursion. Keyed arrays
+ * id-address by default.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#trackreads trackReads}
+ * @see {@link https://next.semantic-ui.com/examples/utils-trackreads Example}
+ *
+ * @param value - The value the callback reads from
+ * @param callback - Receives the value (or its read-only tracked wrapper) and returns anything
+ * @param options - Path reporting, keyed addressing, and the onRead stream
+ * @returns The value paths read, the container shapes read, and the callback's return value
+ *
+ * @example
+ * ```ts
+ * const state = { todos: [{ id: 'a', done: false }, { id: 'b', done: true }] };
+ * const { reads, structure } = trackReads(state, (value) =>
+ *   value.todos.map((todo) => todo.done));
+ * // reads === ['todos[#a].done', 'todos[#b].done'] — re-run when a value changes
+ * // structure === ['todos'] — re-run when the list grows or shrinks
+ *
+ * // existence and value reads both resolve through get()
+ * reads.map((path) => get(state, path)); // [false, true]
+ * ```
+ */
+export function trackReads<T, R = unknown>(
+  value: T,
+  callback: (value: T) => R,
+  options: TrackReadsOptions & { returnPaths: false; },
+): { result: R; };
+export function trackReads<T, R = unknown>(
+  value: T,
+  callback: (value: T) => R,
+  options?: TrackReadsOptions,
+): TrackReadsResult<R>;
+
 /**
  * Identity of an array element: the value of the first present field in `keys`,
  * or undefined for a scalar or an object carrying none of them. The

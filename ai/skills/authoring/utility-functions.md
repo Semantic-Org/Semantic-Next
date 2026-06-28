@@ -205,7 +205,7 @@ mapObject({ a: 1, b: 2 }, (value, key) => value * 2);           // { a: 2, b: 4 
 
 ### Change Detection
 ```javascript
-import { trackWrites, detectChanges, elementKey, get } from '@semantic-ui/utils';
+import { trackWrites, trackReads, detectChanges, elementKey, get } from '@semantic-ui/utils';
 
 // Run a callback against a value, report whether and where it changed
 const doc = { meta: { count: 0 } };
@@ -241,6 +241,25 @@ trackWrites(bigList, (v) => { v[500].seen = true; }, { keyed: false }); // proxy
 trackWrites(rows, (tracked) => {
   tracked[3].active = true;
 }, { onWrite: (path, target, key) => console.log(path) }); // ['3', 'active']
+
+// trackReads is the READ companion to trackWrites: it reports which paths a
+// callback read, not what it changed. Proxy-only (reads can't be diffed), and
+// the wrapper is read-only — a write through it throws, so the input is never
+// mutated. For dependency collection, memo keys, access audits, prefetch
+const state = { todos: [{ id: 'a', done: false }, { id: 'b', done: true }] };
+const { reads, structure } = trackReads(state, (value) => value.todos.map((t) => t.done));
+// reads === ['todos[#a].done', 'todos[#b].done']  (value deps, keyed by default)
+// structure === ['todos']                          (shape dep: grew or shrank)
+
+// The two buckets pair with detectChanges: reads ↔ changed, structure ↔
+// added/removed. Surfacing structure apart is the array-growth case — reading
+// .length / iterating leaves no value path, so a value-only set misses a push
+reads.map((path) => get(state, path)); // [false, true] — paths survive a reorder
+
+// onRead streams each read live (typed), returnPaths: false skips collection
+trackReads(state, (value) => value.todos.length, {
+  onRead: (path, type) => track(type, path), // 'value' todos, then 'structure' todos
+});
 
 // Two-value structural diff, directional from before to after
 detectChanges({ name: 'a', temp: true }, { name: 'b', nickname: 'al' });
@@ -888,6 +907,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `filterObject` | `(obj, fn(val,key))` | Filtered object |
 | `mapObject` | `(obj, fn(val,key))` | Transformed object |
 | `trackWrites` | `(value, callback, opts?)` | `{ changed, paths, result }` (keyed `field[#id]` paths by default) |
+| `trackReads` | `(value, callback, opts?)` | `{ reads, structure, result }` — read companion to `trackWrites`, read-only proxy, keyed by default |
 | `elementKey` | `(item, keys?)` | First present id field, or undefined |
 | `detectChanges` | `(before, after, opts?)` | `{ added, removed, changed }` paths (keyed by identity by default, `{ keyed: false }` for positional) |
 | `arrayFromObject` | `(obj)` | `[{key, value}, ...]` |
