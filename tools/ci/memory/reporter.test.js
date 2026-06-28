@@ -94,6 +94,16 @@ test('a per-cycle reaction leak is a broken invariant with the right multiple', 
   assert.match(md, /\+1000\/cycle/);
 });
 
+test('a per-cycle multiple that does not divide evenly is rounded, not a float', () => {
+  // 40024 residual over 7 cycles = 5717.71… → rounded to 5718
+  const cur = snapshot({ over: { afterChurn: { Reaction: 40024 } } });
+  const { json, md } = run(cur, snapshot());
+  const reaction = json.invariants.find((i) => i.id === 'Reaction');
+  assert.equal(reaction.perCycle, 5718);
+  assert.match(md, /\+5718\/cycle/);
+  assert.doesNotMatch(md, /5717\.7|\.\d{3}\/cycle/); // no raw float in the output
+});
+
 test('detached DOM survivors are reported alongside the lead invariant', () => {
   const cur = snapshot({ over: { afterChurn: { Reaction: 7000, detachedNodes: 7000 } } });
   const { json, md } = run(cur, snapshot());
