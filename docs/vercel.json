@@ -1,5 +1,5 @@
 {
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- ./docs/ ./packages/",
+  "git": { "deploymentEnabled": false },
   "headers": [
     {
       "source": "/packages/(.*)",

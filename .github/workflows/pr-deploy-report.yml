@@ -1,0 +1,98 @@
+name: Report PR Deploy
+
+# Renders the final deploy comment from the facts each deploy job uploaded and
+# posts it under Semantic Deploy Bot, editing the Building comment in place. Runs
+# in the base-repo context where the bot secrets live and never executes PR code.
+
+on:
+  workflow_run:
+    workflows: [PR Deploy]
+    types:
+      - completed
+
+permissions:
+  contents: read
+
+jobs:
+  comment:
+    name: Post deploy comment
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    if: github.event.workflow_run.event == 'pull_request'
+    steps:
+      - name: Generate bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.SEMANTIC_DEPLOY_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.SEMANTIC_DEPLOY_BOT_PRIVATE_KEY }}
+
+      # tooling and the local action come from main; the reported facts come from
+      # the deploy run's artifacts
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+
+      - name: Overlay deploy tooling from main
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- tools/ci/deploy/ 2>/dev/null || true
+
+      - name: Download deploy facts
+        uses: dawidd6/action-download-artifact@v21
+        with:
+          github_token: ${{ steps.bot-token.outputs.token }}
+          workflow: ${{ github.event.workflow.id }}
+          run_id: ${{ github.event.workflow_run.id }}
+          name_is_regexp: true
+          name: deploy-facts-.*
+          # PR-built artifacts land in a scratch dir, never the workspace
+          path: ${{ runner.temp }}/deploy-facts
+          if_no_artifact_found: warn
+
+      - name: Resolve PR number
+        id: pr
+        env:
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          NUMBER='${{ github.event.workflow_run.pull_requests[0].number }}'
+          if [ -z "$NUMBER" ] || [ "$NUMBER" = "null" ]; then
+            NUMBER=$(gh pr list --repo '${{ github.repository }}' \
+              --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number // ""')
+          fi
+          echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
+          echo "Resolved PR number: $NUMBER"
+
+      - name: Render comment
+        run: |
+          node tools/ci/deploy/reporter.js \
+            --mode final \
+            --facts ${{ runner.temp }}/deploy-facts \
+            --sha '${{ github.event.workflow_run.head_sha }}' \
+            --msg "${{ github.event.workflow_run.display_title }}" \
+            --run-url '${{ github.event.workflow_run.html_url }}' \
+            --run-id '${{ github.event.workflow_run.id }}' \
+            --repo '${{ github.repository }}' \
+            --out deploy-report
+
+      - name: Upload preview-report.json adjunct
+        uses: actions/upload-artifact@v7
+        with:
+          name: preview-report
+          path: deploy-report/preview-report.json
+
+      - name: Post or update comment
+        if: steps.pr.outputs.number != ''
+        uses: ./.github/actions/sticky-bot-comment
+        with:
+          token: ${{ steps.bot-token.outputs.token }}
+          repo: ${{ github.repository }}
+          pr-number: ${{ steps.pr.outputs.number }}
+          bot-login: semantic-deploy-bot[bot]
+          body-file: deploy-report/comment.md

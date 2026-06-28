@@ -1,0 +1,194 @@
+name: PR Deploy
+
+# Deploys a PR's requested targets on a label and reports them as one comment by
+# Semantic Deploy Bot. Restricted to in-repo branches: a deploy needs the Vercel
+# token in the same job that builds PR code, so forks are out of scope (they get
+# no deploy). The comment is posted by the companion `pr-deploy-report.yml`,
+# whose token-holding jobs never run PR code. See tools/ci/deploy/README.md.
+
+on:
+  pull_request:
+    types: [labeled, synchronize, reopened]
+
+concurrency:
+  group: pr-deploy-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Posts the Building comment with an ETA. Holds the bot token but runs no PR
+  # code — it renders from main's reporter against the event payload.
+  announce:
+    name: Announce deploy
+    runs-on: ubuntu-latest
+    if: >
+      github.event.pull_request.head.repo.full_name == github.repository
+      && (contains(github.event.pull_request.labels.*.name, 'Preview')
+      || contains(github.event.pull_request.labels.*.name, 'Preview MCP'))
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Generate bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.SEMANTIC_DEPLOY_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.SEMANTIC_DEPLOY_BOT_PRIVATE_KEY }}
+
+      # check out main: tooling and the local action come from main, the reported
+      # facts come from the event — so a PR can't author its own deploy comment
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+
+      - name: Overlay deploy tooling from main
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- tools/ci/deploy/ 2>/dev/null || true
+
+      # Estimate the ETA from the median wall-clock of recent successful runs.
+      # Empty until ~3 exist to seed it, so the comment hides the estimate.
+      - name: Estimate build time
+        id: estimate
+        env:
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          SECONDS_EST=$(gh api \
+            "repos/$REPO/actions/workflows/pr-deploy.yml/runs?event=pull_request&status=success&per_page=10" \
+            --jq '[ .workflow_runs[]
+                    | select(.run_started_at and .updated_at)
+                    | ((.updated_at | fromdateiso8601) - (.run_started_at | fromdateiso8601)) ]
+                  | map(select(. > 0)) | sort
+                  | if length >= 3
+                    then (if (length % 2) == 1 then .[(length / 2) | floor]
+                          else ((.[length / 2 - 1] + .[length / 2]) / 2) end)
+                    else "" end' 2>/dev/null || true)
+          echo "seconds=$SECONDS_EST" >> "$GITHUB_OUTPUT"
+
+      - name: Render building comment
+        run: |
+          TARGETS=""
+          if [ "${{ contains(github.event.pull_request.labels.*.name, 'Preview') }}" = "true" ]; then
+            TARGETS="docs"
+          fi
+          if [ "${{ contains(github.event.pull_request.labels.*.name, 'Preview MCP') }}" = "true" ]; then
+            TARGETS="${TARGETS:+$TARGETS,}mcp"
+          fi
+          node tools/ci/deploy/reporter.js \
+            --mode deploying \
+            --targets "$TARGETS" \
+            --started "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --build-seconds "${{ steps.estimate.outputs.seconds }}" \
+            --sha '${{ github.event.pull_request.head.sha }}' \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --run-id '${{ github.run_id }}' \
+            --repo '${{ github.repository }}' \
+            --out deploy-report
+
+      - name: Post building comment
+        uses: ./.github/actions/sticky-bot-comment
+        with:
+          token: ${{ steps.bot-token.outputs.token }}
+          repo: ${{ github.repository }}
+          pr-number: ${{ github.event.pull_request.number }}
+          bot-login: semantic-deploy-bot[bot]
+          body-file: deploy-report/comment.md
+
+  # Deploys the docs site. Holds the Vercel token and contents:read only — no
+  # comment token — and uploads a facts file the report workflow reads.
+  docs:
+    name: Deploy docs preview
+    runs-on: ubuntu-latest
+    if: >
+      github.event.pull_request.head.repo.full_name == github.repository
+      && contains(github.event.pull_request.labels.*.name, 'Preview')
+    permissions:
+      contents: read
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DOCS_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+      - run: npm ci
+
+      - name: Deploy docs preview
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set +e
+          npx vercel deploy --token="$VERCEL_TOKEN" >url.txt 2>inspect.log
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+          set -e
+          cat inspect.log
+          grep -oE 'https://vercel\.com/[^[:space:]]+' inspect.log | head -1 > inspect.txt || true
+
+      - name: Write facts
+        if: always()
+        run: bash tools/ci/deploy/write-facts.sh docs '${{ steps.deploy.outputs.code }}'
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: deploy-facts-docs
+          path: deploy-facts/docs.json
+
+  # Deploys the MCP server. Same shape as docs, with the project's local build
+  # step (mirrors the production deploy in release-deploy.yml).
+  mcp:
+    name: Deploy mcp preview
+    runs-on: ubuntu-latest
+    if: >
+      github.event.pull_request.head.repo.full_name == github.repository
+      && contains(github.event.pull_request.labels.*.name, 'Preview MCP')
+    permissions:
+      contents: read
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MCP_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+      - run: npm ci
+
+      - name: Build MCP server
+        run: npm run build:vercel
+        working-directory: tools/mcp
+
+      - name: Deploy mcp preview
+        id: deploy
+        working-directory: tools/mcp
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set +e
+          npx vercel deploy --token="$VERCEL_TOKEN" >"$GITHUB_WORKSPACE/url.txt" 2>"$GITHUB_WORKSPACE/inspect.log"
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+          set -e
+          cat "$GITHUB_WORKSPACE/inspect.log"
+          grep -oE 'https://vercel\.com/[^[:space:]]+' "$GITHUB_WORKSPACE/inspect.log" | head -1 \
+            > "$GITHUB_WORKSPACE/inspect.txt" || true
+
+      - name: Write facts
+        if: always()
+        run: bash tools/ci/deploy/write-facts.sh mcp '${{ steps.deploy.outputs.code }}'
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: deploy-facts-mcp
+          path: deploy-facts/mcp.json
