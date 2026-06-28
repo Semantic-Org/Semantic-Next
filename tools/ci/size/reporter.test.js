@@ -204,3 +204,39 @@ test('a bundle present only on the head reads as added', () => {
   assert.equal(added.status, 'added');
   assert.equal(json.summary.added, 1);
 });
+
+test('security — malicious label, group, title, and baseline sha are neutralized', () => {
+  // On a fork PR the artifact (labels, groups, baseline-sha) and the commit
+  // title are attacker-controlled; none may inject markup into the comment.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'size-reporter-sec-'));
+  const opts = { headline: true, label: 'ev`il|lbl', group: 'grp [x](http://evil)' };
+  const cur = snapshot([tgt('pkg-component', [56000, 60000, 170000], opts)], loc({ component: [200, 0] }));
+  const base = snapshot([tgt('pkg-component', [50000, 54000, 155000], opts)], loc({ component: [0, 0] }));
+  fs.writeFileSync(path.join(dir, 'current.json'), JSON.stringify(cur));
+  fs.writeFileSync(path.join(dir, 'baseline.json'), JSON.stringify(base));
+  fs.writeFileSync(path.join(dir, 'baseline-sha.txt'), 'notahex) [x](http://evil)');
+  const out = path.join(dir, 'out');
+  execFileSync('node', [
+    REPORTER,
+    '--results',
+    dir,
+    '--sha',
+    'headbbbb1234',
+    '--repo',
+    'o/r',
+    '--msg',
+    '[pwn](https://evil.example) <img src=x>',
+    '--out',
+    out,
+  ]);
+  const md = fs.readFileSync(path.join(out, 'comment.md'), 'utf8');
+  fs.rmSync(dir, { recursive: true, force: true });
+  assert.ok(md.includes('evillbl'), 'label rendered with backtick/pipe stripped');
+  assert.ok(!md.includes('ev`il|lbl'), 'backtick and pipe stripped from label');
+  assert.ok(md.includes('grp \\[x\\]'), 'group brackets escaped — no live link');
+  assert.ok(md.includes('\\[pwn\\]'), 'title brackets escaped — no live link');
+  assert.ok(md.includes('&lt;img src=x'), 'raw HTML entity-encoded in title');
+  assert.ok(!md.includes('<img src=x'), 'no raw HTML tag survives');
+  assert.ok(!md.includes('/commit/notahex'), 'non-hex baseline sha is not linked as a commit');
+  assert.ok(md.includes('/tree/main'), 'base falls back to the ref tree');
+});

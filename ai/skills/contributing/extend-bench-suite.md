@@ -397,7 +397,7 @@ This converges in under two minutes on a typical metric and reads the floor with
 - Mean duration is in the range you estimated — if it's 10× shorter than expected, something's wrong with the workload (early return? optimiser elision? `await flush()` skipped?).
 - No `ReferenceError` or `undefined is not a function` in the Chrome console. Open `ci-current-<suite>.html` in a browser to debug interactively.
 
-If the local run works and the noise floor is acceptable, push. CI will run the same config in matrix form and the in-house reporter will render the PR comment — see `read-bench-report` for what each section means. Local floor and GHA floor will not match exactly — record both in the PR body so reviewers know what to expect.
+If the local run works and the noise floor is acceptable, push. CI will run the same config in matrix form and the in-house reporter will render the PR comment — see `read-ci-reports` for what each section means. Local floor and GHA floor will not match exactly — record both in the PR body so reviewers know what to expect.
 
 ---
 
@@ -429,5 +429,5 @@ If the local run works and the noise floor is acceptable, push. CI will run the 
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Reading Bench Reports** | `/read-bench-report` | Reviewing a bench comment on a PR |
+| **Reading CI Reports** | `/read-ci-reports` | Reviewing a bench comment on a PR |
 | **Internals** | `/internals` | Understanding the renderer's hot paths when picking what to benchmark |

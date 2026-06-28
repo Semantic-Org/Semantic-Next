@@ -1,11 +1,12 @@
-name: Report Bundle Size
+name: Report Heap Analysis
 
-# Renders the bundle-size comment and posts it under the Semantic Bundle Bot
-# identity after the Bundle Size workflow completes.
+# Renders the heap comment and posts it under the Semantic Heap Bot identity.
+# Runs after the untrusted Heap Analysis workflow completes, in the base-repo
+# context where the bot secrets are available (works for fork PRs).
 
 on:
   workflow_run:
-    workflows: [Bundle Size]
+    workflows: [Heap Analysis]
     branches: ['**']
     types:
       - completed
@@ -15,7 +16,7 @@ permissions:
 
 jobs:
   comment:
-    name: Post bundle-size comment
+    name: Post heap comment
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -24,15 +25,15 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
       && github.event.workflow_run.event == 'pull_request'
     steps:
-      # Installation token for the Semantic Bundle Bot GitHub App. Same
-      # permission surface as GITHUB_TOKEN, but comments post under the bot's
-      # name and avatar so they read as a suite with the performance bot.
+      # Installation token for the Semantic Heap Bot GitHub App. Comments post
+      # under the bot's name and avatar so they read as a suite with the
+      # performance and bundle bots.
       - name: Generate bot token
         id: bot-token
         uses: actions/create-github-app-token@v3
         with:
-          client-id: ${{ secrets.SEMANTIC_BUNDLE_BOT_CLIENT_ID }}
-          private-key: ${{ secrets.SEMANTIC_BUNDLE_BOT_PRIVATE_KEY }}
+          client-id: ${{ secrets.SEMANTIC_HEAP_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.SEMANTIC_HEAP_BOT_PRIVATE_KEY }}
 
       # check out main: tooling comes from main and the reported sha comes from the event
       - uses: actions/checkout@v7
@@ -44,33 +45,35 @@ jobs:
           node-version-file: '.node-version'
 
       # Pin the reporter to main — the PR cannot author the tool that renders
-      # its own comment (thresholds, headline rule, formatting must be
+      # its own comment (thresholds, leak verdict, formatting must be
       # author-neutral). No-ops on the bootstrap PR before main has it.
       - name: Overlay reporter from main
         run: |
           git fetch origin main --depth=1
-          git checkout origin/main -- tools/ci/size/ 2>/dev/null || true
+          git checkout origin/main -- tools/ci/memory/ 2>/dev/null || true
 
-      - name: Download size snapshots
+      - name: Download memory snapshots
         uses: dawidd6/action-download-artifact@v21
         with:
           github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
           run_id: ${{ github.event.workflow_run.id }}
-          name: size-results
+          name: memory-results
           # download to a scratch dir, not the workspace, since these artifacts are PR-built
-          path: ${{ runner.temp }}/size-results
+          path: ${{ runner.temp }}/memory-results
           allow_forks: true
 
       - name: Resolve PR number
         id: pr
         env:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          REPO: ${{ github.repository }}
         run: |
-          NUMBER='${{ github.event.workflow_run.pull_requests[0].number }}'
+          NUMBER="$PR_NUMBER"
           if [ -z "$NUMBER" ] || [ "$NUMBER" = "null" ]; then
-            NUMBER=$(gh pr list --repo '${{ github.repository }}' \
+            NUMBER=$(gh pr list --repo "$REPO" \
               --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number // ""')
           fi
           echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
@@ -80,25 +83,29 @@ jobs:
         env:
           STARTED: ${{ github.event.workflow_run.created_at }}
           ENDED: ${{ github.event.workflow_run.updated_at }}
-          DISPLAY_TITLE: ${{ github.event.workflow_run.display_title }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          MSG: ${{ github.event.workflow_run.display_title }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          REPO: ${{ github.repository }}
         run: |
           WALL_CLOCK=$(( $(date -d "$ENDED" +%s) - $(date -d "$STARTED" +%s) ))
-          node tools/ci/size/reporter.js \
-            --results ${{ runner.temp }}/size-results \
-            --sha '${{ github.event.workflow_run.head_sha }}' \
-            --msg "$DISPLAY_TITLE" \
-            --run-url '${{ github.event.workflow_run.html_url }}' \
-            --run-id '${{ github.event.workflow_run.id }}' \
+          node tools/ci/memory/reporter.js \
+            --results ${{ runner.temp }}/memory-results \
+            --sha "$HEAD_SHA" \
+            --msg "$MSG" \
+            --run-url "$RUN_URL" \
+            --run-id "$RUN_ID" \
             --base-ref 'main' \
-            --repo '${{ github.repository }}' \
+            --repo "$REPO" \
             --wall-clock "$WALL_CLOCK" \
-            --out size-report
+            --out memory-report
 
-      - name: Upload size-report.json adjunct
+      - name: Upload memory-report.json adjunct
         uses: actions/upload-artifact@v7
         with:
-          name: size-report
-          path: size-report/size-report.json
+          name: memory-report
+          path: memory-report/memory-report.json
 
       - name: Post or update PR comment
         if: steps.pr.outputs.number != ''
@@ -106,7 +113,7 @@ jobs:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
           PR: ${{ steps.pr.outputs.number }}
           REPO: ${{ github.repository }}
-          BOT_LOGIN: semantic-bundle-bot[bot]
+          BOT_LOGIN: semantic-heap-bot[bot]
         run: |
           # Edit the bot's prior comment in place. Filtering REST results by
           # user.login is stable across short-lived installation tokens, where
@@ -114,8 +121,8 @@ jobs:
           EXISTING_ID=$(gh api "repos/$REPO/issues/$PR/comments" \
             --jq "[.[] | select(.user.login == \"$BOT_LOGIN\")] | last | .id // empty")
           if [ -n "$EXISTING_ID" ]; then
-            jq -nR --rawfile body size-report/comment.md '{body: $body}' \
+            jq -nR --rawfile body memory-report/comment.md '{body: $body}' \
               | gh api "repos/$REPO/issues/comments/$EXISTING_ID" -X PATCH --input -
           else
-            gh pr comment "$PR" --repo "$REPO" --body-file size-report/comment.md
+            gh pr comment "$PR" --repo "$REPO" --body-file memory-report/comment.md
           fi

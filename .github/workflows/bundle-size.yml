@@ -14,9 +14,12 @@ on:
       # build scripts shape the output bytes, so a change here is a real
       # (and measurable) size change, not a harness edit
       - 'internal-packages/scripts/**'
-      # the size harness itself — self-test on its own PRs
-      - 'tools/ci/size/**'
+      # this workflow — changes take effect on the PR's own run, so self-test
       - '.github/workflows/bundle-size.yml'
+      # The harness (tools/ci/size/**) is deliberately NOT listed. The measure
+      # job overlays it from main before every run, so a PR-side harness edit
+      # can't affect its own comment — harness changes land on main first, same
+      # as the bench suite.
 
 concurrency:
   group: bundle-size-${{ github.ref }}
@@ -30,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
