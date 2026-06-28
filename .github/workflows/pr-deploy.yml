@@ -131,11 +131,10 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           set +e
-          npx vercel deploy --token="$VERCEL_TOKEN" >url.txt 2>inspect.log
+          npx vercel deploy --token="$VERCEL_TOKEN" >url.txt 2>deploy.log
           echo "code=$?" >> "$GITHUB_OUTPUT"
           set -e
-          cat inspect.log
-          grep -oE 'https://vercel\.com/[^[:space:]]+' inspect.log | head -1 > inspect.txt || true
+          cat deploy.log
 
       - name: Write facts
         if: always()
@@ -180,12 +179,10 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           set +e
-          npx vercel deploy --token="$VERCEL_TOKEN" >"$GITHUB_WORKSPACE/url.txt" 2>"$GITHUB_WORKSPACE/inspect.log"
+          npx vercel deploy --token="$VERCEL_TOKEN" >"$GITHUB_WORKSPACE/url.txt" 2>"$GITHUB_WORKSPACE/deploy.log"
           echo "code=$?" >> "$GITHUB_OUTPUT"
           set -e
-          cat "$GITHUB_WORKSPACE/inspect.log"
-          grep -oE 'https://vercel\.com/[^[:space:]]+' "$GITHUB_WORKSPACE/inspect.log" | head -1 \
-            > "$GITHUB_WORKSPACE/inspect.txt" || true
+          cat "$GITHUB_WORKSPACE/deploy.log"
 
       - name: Write facts
         if: always()

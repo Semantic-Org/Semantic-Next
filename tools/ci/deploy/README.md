@@ -24,8 +24,8 @@ stops further deploys. Only people with write access can label.
 ## The comment
 
 One row per target. `🟢 Ready` carries a `Preview` link (the exact URL sits in
-the footer so the link columns stay fixed-width), `🔴 Failed` links the run logs,
-and `⚪ NA` is a target this PR didn't request. While a deploy is in flight the
+the footer so the link columns stay fixed-width), the `logs` column links the
+Actions run, and `⚪ NA` is a target this PR didn't request. While a deploy is in flight the
 table shows start time, an ETA, and the expected build time (median of recent
 deploys, hidden until a few runs seed it). All times are US Eastern.
 
@@ -116,5 +116,3 @@ cat /tmp/report/comment.md
 - **Whole-run ETA.** The estimate is the median of recent run wall-clocks, not
   per-target. Fine while docs is the common case, per-target is a later
   refinement.
-- **Logs link.** Ready targets link the provider's inspector when the CLI
-  surfaces it, otherwise the Actions run.
