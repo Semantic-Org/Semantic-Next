@@ -235,7 +235,6 @@ export const detectChanges = (before, after, {
   else if (!equality(before, after)) {
     changed.push('');
   }
-
   return { added, removed, changed };
 };
 
@@ -322,7 +321,7 @@ export const trackWrites = (value, callback, {
     if (!returnPaths) {
       return { changed: !equality(before, value), result };
     }
-    const diff = detectChanges(before, value, { keyed, keys });
+    const diff = detectChanges(before, value, { keyed, keys, equality });
     const paths = [...diff.added, ...diff.changed, ...diff.removed];
     return { changed: paths.length > 0, result, paths };
   }

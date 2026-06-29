@@ -110,7 +110,7 @@ export interface TrackWritesOptions {
   onWrite?: (path: string[], target: object, key: string) => void;
   /** Clone used for snapshots (defaults to clone) */
   clone?: (value: unknown) => unknown;
-  /** Equality used when paths are skipped and for exotic snapshots (defaults to isEqual) */
+  /** Equality deciding what counts as a change across the snapshot path diff, the no-paths fast path, and exotic snapshots (defaults to isEqual). The same option detectChanges takes */
   equality?: (a: unknown, b: unknown) => boolean;
 }
 

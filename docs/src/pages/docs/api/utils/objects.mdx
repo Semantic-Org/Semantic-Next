@@ -152,7 +152,7 @@ Runs a callback against a value and reports whether the callback changed it, wit
 | keys        | string[] | `['id', '_id', 'hash', 'key']` | Identity fields for keyed paths, first present wins |
 | onWrite     | function | undefined | `(path, target, key)` fires per observed write with the key path from the root. Implies the proxy strategy under `'auto'`, so its paths are positional |
 | clone       | function | clone     | Clone used for snapshots |
-| equality    | function | isEqual   | Equality used when paths are skipped and for exotic snapshots |
+| equality    | function | isEqual   | Equality deciding what counts as a change, across the path diff, the `returnPaths: false` fast path, and exotic snapshots |
 
 #### Returns
 

@@ -38,6 +38,25 @@ describe('Object Utilities', () => {
         meta: { seen: false },
       }));
 
+    describe('equality', () => {
+      it('forwards a custom comparator into the snapshot path diff', () => {
+        // loose == treats 1 and '1' as equal, so the write is not a change and emits no path
+        const result = trackWrites({ a: 1 }, (value) => {
+          value.a = '1';
+        }, { equality: (x, y) => x == y });
+        expect(result.changed).toBe(false);
+        expect(result.paths).toEqual([]);
+      });
+
+      it('emits the path under the default strict comparator', () => {
+        const result = trackWrites({ a: 1 }, (value) => {
+          value.a = '1';
+        });
+        expect(result.changed).toBe(true);
+        expect(result.paths).toEqual(['a']);
+      });
+    });
+
     describe('strategy selection', () => {
       it('hands the callback the value itself when small', () => {
         const target = { a: { b: 1 } };
