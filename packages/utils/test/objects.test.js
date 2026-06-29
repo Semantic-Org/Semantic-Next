@@ -981,6 +981,31 @@ describe('Object Utilities', () => {
       expect(detectChanges(before, after).changed).toEqual(['name']);
     });
 
+    describe('ignoreKeys', () => {
+      it('diffs an ignored key as one whole value, never descending into it', () => {
+        // the key holds a [#1] segment that would mis-parse as a keyed wire path if descended
+        const before = { _overrides: { 'a[#1].b': true } };
+        const after = { _overrides: { 'a[#1].b': false } };
+        expect(detectChanges(before, after, { ignoreKeys: ['_overrides'] })).toEqual({
+          added: [],
+          removed: [],
+          changed: ['_overrides'],
+        });
+      });
+
+      it('adds or removes an opaque path whole, not as nested keys', () => {
+        expect(detectChanges({}, { _overrides: { x: true } }, { ignoreKeys: ['_overrides'] }).added)
+          .toEqual(['_overrides']);
+        expect(detectChanges({ _overrides: { x: true } }, {}, { ignoreKeys: ['_overrides'] }).removed)
+          .toEqual(['_overrides']);
+      });
+
+      it('emits nothing for an unchanged opaque path', () => {
+        expect(detectChanges({ _overrides: { x: true } }, { _overrides: { x: true } }, { ignoreKeys: ['_overrides'] }))
+          .toEqual({ added: [], removed: [], changed: [] });
+      });
+    });
+
     describe('keyed mode', () => {
       it('diffs by identity by default, { keyed: false } opts back to the positional cascade', () => {
         const before = { lineItems: [{ id: 'a', qty: 1 }, { id: 'b', qty: 1 }] };

@@ -140,11 +140,15 @@ const keyedMap = (array, keys) => {
   return map;
 };
 
-export const detectChanges = (before, after, { keyed = true, keys = DEFAULT_ELEMENT_KEYS } = {}) => {
+export const detectChanges = (before, after, { keyed = true, keys = DEFAULT_ELEMENT_KEYS, ignoreKeys = null } = {}) => {
   const added = [];
   const removed = [];
   const changed = [];
   const seen = new WeakSet(); // cycle guard, each before-node diffs once
+  // an ignored TOP-LEVEL key's value is diffed as one whole, never descended into — for a subtree
+  // whose own sub-keys are path strings that would mis-parse as wire paths if emitted nested (e.g.
+  // the _overrides map keyed by `contacts[#id].field`). a change anywhere inside emits the key itself
+  const ignoreSet = ignoreKeys ? new Set(ignoreKeys) : null;
 
   const walk = (a, b, prefix) => {
     if (seen.has(a)) {
@@ -193,6 +197,10 @@ export const detectChanges = (before, after, { keyed = true, keys = DEFAULT_ELEM
       const valueA = a[key];
       const valueB = b[key];
       if (Object.is(valueA, valueB)) {
+        continue;
+      }
+      if (prefix === '' && ignoreSet?.has(key)) {
+        if (!isEqual(valueA, valueB)) { changed.push(path); }
         continue;
       }
       if (isTrackable(valueA) && isTrackable(valueB) && isArray(valueA) === isArray(valueB)) {
