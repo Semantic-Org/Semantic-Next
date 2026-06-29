@@ -119,14 +119,14 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DOCS_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v7
-      # build on the Vercel project's Node (22.x), not the repo's .node-version,
-      # so `vercel build` reproduces what the project's remote build produces
+      # build on the Vercel project's configured Node (22.x), not the repo's
+      # .node-version (26), so `vercel build` reproduces the remote build
       - uses: actions/setup-node@v6
         with:
           node-version: '22.x'
           cache: 'npm'
 
-      # Build in CI and ship the prebuilt output, so Vercel runs no remote build
+      # build in CI and ship the prebuilt output, so Vercel runs no remote build
       # (near-zero Vercel build minutes). `vercel build` runs the project's own
       # install + build:docs, so the output matches a remote build.
       - name: Build and deploy docs preview
@@ -152,8 +152,8 @@ jobs:
           name: deploy-facts-docs
           path: deploy-facts/docs.json
 
-  # Same shape as docs, with the project's local build step (mirrors the
-  # production deploy in release-deploy.yml).
+  # builds the MCP server, then deploys it (remote build), mirroring the
+  # production deploy in release-deploy.yml.
   mcp:
     name: Deploy mcp preview
     runs-on: ubuntu-latest
