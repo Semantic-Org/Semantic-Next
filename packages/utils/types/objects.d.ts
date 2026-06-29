@@ -340,6 +340,24 @@ export interface DetectChangesOptions {
   keyed?: boolean;
   /** Identity fields a keyed element is matched on, first present wins (default ['id', '_id', 'hash', 'key']) */
   keys?: string[];
+  /**
+   * Comparator that decides whether two leaf values count as changed (default
+   * the package `isEqual`). The same option `trackWrites` takes — pass a looser
+   * rule (`==`, an epsilon for floats) to diff loosely-typed data.
+   */
+  equality?: (a: unknown, b: unknown) => boolean;
+  /**
+   * Key names dropped from the result at any depth, so a volatile or local-only
+   * field (`updatedAt`, a client annotation) never reaches the changeset.
+   */
+  ignoreKeys?: string[];
+  /**
+   * Key names diffed as one whole value, never descended into, at any depth. The
+   * key reports as a single path when it changes — the same leaf treatment a
+   * Map/Date already gets, for a subtree whose own keys aren't path-addressable
+   * (a map keyed by dynamic `contacts[#id].field` strings).
+   */
+  collapseKeys?: string[];
 }
 
 /**
@@ -357,7 +375,7 @@ export interface DetectChangesOptions {
  *
  * @param before - The value to diff from
  * @param after - The value to diff to
- * @param options - Keyed-mode and identity-field configuration
+ * @param options - Keyed mode, identity fields, custom equality, and key filtering
  * @returns Added, removed, and changed paths
  *
  * @example
@@ -374,6 +392,14 @@ export interface DetectChangesOptions {
  *   { items: [{ id: 'z', qty: 9 }, { id: 'a', qty: 1 }, { id: 'b', qty: 5 }] },
  * )
  * // { added: ['items[#z]'], removed: [], changed: ['items[#b].qty'] }
+ *
+ * // ignoreKeys drops a field at any depth; collapseKeys reports a subtree whole
+ * detectChanges(
+ *   { name: 'a', _overrides: { 'contacts[#1].field': true }, updatedAt: 1 },
+ *   { name: 'b', _overrides: { 'contacts[#1].field': false }, updatedAt: 2 },
+ *   { ignoreKeys: ['updatedAt'], collapseKeys: ['_overrides'] },
+ * )
+ * // { added: [], removed: [], changed: ['name', '_overrides'] }
  * ```
  */
 export function detectChanges(

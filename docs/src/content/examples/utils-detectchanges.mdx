@@ -7,5 +7,5 @@ subcategory: 'Objects'
 description: 'Structural diff between two values as added, removed, and changed paths'
 tags: ['utils', 'objects', 'detectChanges', 'diff', 'change detection', 'sync']
 selectedFile: 'index.js'
-tip: 'Paths resolve through get(after, path) for changed and added fields — removed paths no longer exist in after, which is how you distinguish unset from set-to-undefined'
+tip: 'Paths resolve through get(after, path) for changed and added fields — removed paths no longer exist in after, which is how you distinguish unset from set-to-undefined. collapseKeys reports a subtree as one path when its own keys are dynamic strings that would mis-parse as wire paths, ignoreKeys drops a field at any depth, and equality swaps the comparator for loosely-typed data'
 ---

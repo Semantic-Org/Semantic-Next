@@ -981,28 +981,85 @@ describe('Object Utilities', () => {
       expect(detectChanges(before, after).changed).toEqual(['name']);
     });
 
-    describe('ignoreKeys', () => {
-      it('diffs an ignored key as one whole value, never descending into it', () => {
-        // the key holds a [#1] segment that would mis-parse as a keyed wire path if descended
-        const before = { _overrides: { 'a[#1].b': true } };
-        const after = { _overrides: { 'a[#1].b': false } };
-        expect(detectChanges(before, after, { ignoreKeys: ['_overrides'] })).toEqual({
-          added: [],
-          removed: [],
-          changed: ['_overrides'],
-        });
-      });
-
-      it('adds or removes an opaque path whole, not as nested keys', () => {
-        expect(detectChanges({}, { _overrides: { x: true } }, { ignoreKeys: ['_overrides'] }).added)
-          .toEqual(['_overrides']);
-        expect(detectChanges({ _overrides: { x: true } }, {}, { ignoreKeys: ['_overrides'] }).removed)
-          .toEqual(['_overrides']);
-      });
-
-      it('emits nothing for an unchanged opaque path', () => {
-        expect(detectChanges({ _overrides: { x: true } }, { _overrides: { x: true } }, { ignoreKeys: ['_overrides'] }))
+    describe('equality', () => {
+      it('uses a custom comparator to decide what counts as changed', () => {
+        expect(detectChanges({ a: 1 }, { a: '1' }, { equality: (x, y) => x == y }))
           .toEqual({ added: [], removed: [], changed: [] });
+      });
+
+      it('defaults to strict isEqual', () => {
+        expect(detectChanges({ a: 1 }, { a: '1' }).changed).toEqual(['a']);
+      });
+
+      it('threads the comparator through keyed element fields', () => {
+        const near = (x, y) => (typeof x === 'number' ? Math.abs(x - y) < 0.01 : x === y);
+        const before = { items: [{ id: 'a', n: 1 }] };
+        const after = { items: [{ id: 'a', n: 1.0001 }] };
+        expect(detectChanges(before, after, { equality: near }).changed).toEqual([]);
+      });
+    });
+
+    describe('ignoreKeys', () => {
+      it('drops an ignored key from the changeset', () => {
+        expect(detectChanges({ a: 1, b: 2 }, { a: 9, b: 2 }, { ignoreKeys: ['a'] }))
+          .toEqual({ added: [], removed: [], changed: [] });
+      });
+
+      it('drops an ignored key at any depth', () => {
+        const before = { u: { updatedAt: 1, name: 'x' } };
+        const after = { u: { updatedAt: 2, name: 'y' } };
+        expect(detectChanges(before, after, { ignoreKeys: ['updatedAt'] }).changed).toEqual(['u.name']);
+      });
+
+      it('drops an ignored field inside keyed array elements', () => {
+        const before = { items: [{ id: 'a', updatedAt: 1, v: 1 }] };
+        const after = { items: [{ id: 'a', updatedAt: 2, v: 2 }] };
+        expect(detectChanges(before, after, { ignoreKeys: ['updatedAt'] }).changed).toEqual(['items[#a].v']);
+      });
+
+      it('suppresses an ignored key that was added or removed', () => {
+        expect(detectChanges({ keep: 1 }, { keep: 1, _local: 9 }, { ignoreKeys: ['_local'] }).added).toEqual([]);
+        expect(detectChanges({ keep: 1, _local: 9 }, { keep: 1 }, { ignoreKeys: ['_local'] }).removed).toEqual([]);
+      });
+    });
+
+    describe('collapseKeys', () => {
+      it('reports a change inside a collapsed key as the key itself', () => {
+        // the subtree's own keys are dynamic path strings that would mis-parse as
+        // keyed wire paths if descended, so the key reports as one whole value
+        const before = { _overrides: { 'contacts[#1].field': true } };
+        const after = { _overrides: { 'contacts[#1].field': false } };
+        expect(detectChanges(before, after, { collapseKeys: ['_overrides'] }))
+          .toEqual({ added: [], removed: [], changed: ['_overrides'] });
+      });
+
+      it('still reports a wholesale add or remove of the collapsed key', () => {
+        expect(detectChanges({}, { _overrides: { x: 1 } }, { collapseKeys: ['_overrides'] }).added)
+          .toEqual(['_overrides']);
+        expect(detectChanges({ _overrides: { x: 1 } }, {}, { collapseKeys: ['_overrides'] }).removed)
+          .toEqual(['_overrides']);
+      });
+
+      it('reports an inside removal as a change to the key, not a removal of it', () => {
+        expect(detectChanges({ K: { x: 1, y: 2 } }, { K: { x: 1 } }, { collapseKeys: ['K'] }))
+          .toEqual({ added: [], removed: [], changed: ['K'] });
+      });
+
+      it('emits nothing for an unchanged collapsed key', () => {
+        expect(detectChanges({ K: { x: 1 } }, { K: { x: 1 } }, { collapseKeys: ['K'] }))
+          .toEqual({ added: [], removed: [], changed: [] });
+      });
+
+      it('collapses by key name at any depth', () => {
+        expect(detectChanges({ a: { K: { x: 1 } } }, { a: { K: { x: 2 } } }, { collapseKeys: ['K'] }).changed)
+          .toEqual(['a.K']);
+      });
+
+      it('collapses a keyed array to the key instead of per-element paths', () => {
+        const before = { items: [{ id: 'a', q: 1 }] };
+        const after = { items: [{ id: 'a', q: 2 }, { id: 'b' }] };
+        expect(detectChanges(before, after, { collapseKeys: ['items'] }))
+          .toEqual({ added: [], removed: [], changed: ['items'] });
       });
     });
 

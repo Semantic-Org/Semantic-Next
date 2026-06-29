@@ -140,15 +140,19 @@ const keyedMap = (array, keys) => {
   return map;
 };
 
-export const detectChanges = (before, after, { keyed = true, keys = DEFAULT_ELEMENT_KEYS, ignoreKeys = null } = {}) => {
+export const detectChanges = (before, after, {
+  keyed = true,
+  keys = DEFAULT_ELEMENT_KEYS,
+  equality = isEqual,
+  ignoreKeys = null,
+  collapseKeys = null,
+} = {}) => {
   const added = [];
   const removed = [];
   const changed = [];
   const seen = new WeakSet(); // cycle guard, each before-node diffs once
-  // an ignored TOP-LEVEL key's value is diffed as one whole, never descended into — for a subtree
-  // whose own sub-keys are path strings that would mis-parse as wire paths if emitted nested (e.g.
-  // the _overrides map keyed by `contacts[#id].field`). a change anywhere inside emits the key itself
   const ignoreSet = ignoreKeys ? new Set(ignoreKeys) : null;
+  const collapseSet = collapseKeys ? new Set(collapseKeys) : null;
 
   const walk = (a, b, prefix) => {
     if (seen.has(a)) {
@@ -176,7 +180,7 @@ export const detectChanges = (before, after, { keyed = true, keys = DEFAULT_ELEM
           if (isTrackable(itemA) && isTrackable(itemB) && isArray(itemA) === isArray(itemB)) {
             walk(itemA, itemB, path);
           }
-          else if (!isEqual(itemA, itemB)) {
+          else if (!equality(itemA, itemB)) {
             changed.push(path);
           }
         }
@@ -189,6 +193,9 @@ export const detectChanges = (before, after, { keyed = true, keys = DEFAULT_ELEM
       }
     }
     for (const key of Object.keys(a)) {
+      if (ignoreSet?.has(key)) {
+        continue;
+      }
       const path = prefix === '' ? key : `${prefix}.${key}`;
       if (!Object.hasOwn(b, key)) {
         removed.push(path);
@@ -199,18 +206,23 @@ export const detectChanges = (before, after, { keyed = true, keys = DEFAULT_ELEM
       if (Object.is(valueA, valueB)) {
         continue;
       }
-      if (prefix === '' && ignoreSet?.has(key)) {
-        if (!isEqual(valueA, valueB)) { changed.push(path); }
-        continue;
-      }
-      if (isTrackable(valueA) && isTrackable(valueB) && isArray(valueA) === isArray(valueB)) {
+      // a collapsed key is diffed as one whole value, never descended into, the
+      // same leaf treatment a Map/Date already gets. lets a subtree whose own keys
+      // aren't path-addressable report the key itself instead of nested paths
+      if (
+        !collapseSet?.has(key)
+        && isTrackable(valueA) && isTrackable(valueB) && isArray(valueA) === isArray(valueB)
+      ) {
         walk(valueA, valueB, path);
       }
-      else if (!isEqual(valueA, valueB)) {
+      else if (!equality(valueA, valueB)) {
         changed.push(path);
       }
     }
     for (const key of Object.keys(b)) {
+      if (ignoreSet?.has(key)) {
+        continue;
+      }
       if (!Object.hasOwn(a, key)) {
         added.push(prefix === '' ? key : `${prefix}.${key}`);
       }
@@ -220,9 +232,10 @@ export const detectChanges = (before, after, { keyed = true, keys = DEFAULT_ELEM
   if (isTrackable(before) && isTrackable(after) && isArray(before) === isArray(after)) {
     walk(before, after, '');
   }
-  else if (!isEqual(before, after)) {
+  else if (!equality(before, after)) {
     changed.push('');
   }
+
   return { added, removed, changed };
 };
 

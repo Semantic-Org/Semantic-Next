@@ -23,3 +23,32 @@ console.log(
     { updated: new Date('2030-01-01') },
   ).changed,
 );
+
+// Keyed arrays of objects diff by identity — a prepend is one add, not a cascade
+console.log(
+  detectChanges(
+    { items: [{ id: 'a', qty: 1 }, { id: 'b', qty: 1 }] },
+    { items: [{ id: 'z', qty: 9 }, { id: 'a', qty: 1 }, { id: 'b', qty: 5 }] },
+  ),
+);
+
+// equality — a custom comparator decides what counts as changed
+console.log(detectChanges({ a: 1 }, { a: '1' }, { equality: (x, y) => x == y }));
+
+// ignoreKeys — drop a volatile or local-only field at any depth
+console.log(
+  detectChanges(
+    { user: { name: 'a', updatedAt: 1 } },
+    { user: { name: 'b', updatedAt: 2 } },
+    { ignoreKeys: ['updatedAt'] },
+  ).changed,
+);
+
+// collapseKeys — diff a subtree as one whole value, never descending into it
+console.log(
+  detectChanges(
+    { _overrides: { 'contacts[#1].field': true } },
+    { _overrides: { 'contacts[#1].field': false } },
+    { collapseKeys: ['_overrides'] },
+  ).changed,
+);
