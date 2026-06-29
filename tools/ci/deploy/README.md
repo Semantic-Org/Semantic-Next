@@ -45,7 +45,7 @@ Two workflows, three jobs:
     `contents: read` only (no comment token), and upload a facts file. `docs`
     builds in the runner (`vercel build` on Node 22.x to match the project) and
     ships the output with `--prebuilt`, so Vercel spends no build minutes on it.
-    `mcp` still builds remotely.
+    `mcp` builds remotely.
 - **`pr-deploy-report.yml`** (on `workflow_run` completion) renders the final
   comment from the facts and posts it under the bot, editing the Building comment
   in place.
@@ -112,8 +112,8 @@ cat /tmp/report/comment.md
 
 ## Known limits
 
-- **mcp still builds remotely.** The docs deploy builds in CI and ships prebuilt
-  output, so Vercel spends no build minutes on it. The mcp deploy still builds on
+- **mcp builds remotely.** The docs deploy builds in CI and ships prebuilt
+  output, so Vercel spends no build minutes on it. The mcp deploy builds on
   Vercel (prebuilt for its serverless-function build is unverified), a later
   follow-up.
 - **Whole-run ETA.** The estimate is the median of recent run wall-clocks, not
