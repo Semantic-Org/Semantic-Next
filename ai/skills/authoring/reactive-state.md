@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `reactive-state`
 > **Purpose:** Comprehensive guide to the @semantic-ui/reactivity package — a standalone signals-based reactive system with automatic dependency tracking for state management.
-> **Last Updated:** 2026-06-16
+> **Last Updated:** 2026-06-28
 
 ---
 
@@ -23,15 +23,16 @@ The `@semantic-ui/reactivity` package is a standalone signals-based reactive sys
 
 ```
 @semantic-ui/reactivity
-├── Signal      ← Core reactive primitive for state
-├── Reaction    ← Reactive computations and side effects
-├── Dependency  ← Internal dependency tracking system
-└── Scheduler   ← Internal update batching and timing
+├── Signal          ← Core reactive primitive for state
+├── ReactiveObject  ← Path-granular reactivity over a plain object
+├── Reaction        ← Reactive computations and side effects
+├── Dependency      ← Internal dependency tracking system
+└── Scheduler       ← Internal update batching and timing
 ```
 
 **Main Exports**:
 ```javascript
-import { signal, reaction, computed, derive, match } from '@semantic-ui/reactivity';
+import { signal, reactiveObject, reaction, computed, derive, match } from '@semantic-ui/reactivity';
 ```
 
 ---
@@ -215,6 +216,56 @@ userListSignal.addContext({ lastModified: Date.now() });
 
 // Access debugging info
 console.log(userListSignal.context);
+```
+
+---
+
+## ReactiveObject API
+
+A `Signal` holding an object wakes **every** reader on any change. `ReactiveObject` is the fine-grained alternative: its unit of reactivity is a **path** into the object, so a reader of one path wakes only when that path's value changes. Reach for it when many readers observe different slices of one large, churning object (a form model, a loaded record, an inbound document) and you want each woken only by its own slice.
+
+It addresses values through the same path grammar as the utils `get`/`set`/`unset` — dotted keys, positional `[i]` indices, and keyed `[#id]` array segments.
+
+Reactivity is keyed by the literal path string, so address an element consistently. A reader of `todos[#a3f].done` is not woken by a positional write to `todos[0].done` that hits the same element.
+
+### Creating
+
+```javascript
+const model = reactiveObject({ user: { name: 'Ann' } }, options);
+```
+
+`options` mirrors Signal's `safety` / `equality` / `clone` (no `id` / `version` / `context` — identity rides in the path grammar's `[#id]` segments). The statics `ReactiveObject.equality` / `ReactiveObject.clone` / `ReactiveObject.safety` set the defaults for instances created afterward.
+
+### Reading
+
+```javascript
+model.get('user.name')     // tracked — subscribes the current reaction to THIS path alone
+model.peek('user.name')    // untracked single-path read
+model.peek()               // untracked whole-object read (no path), for a working copy or derivation
+model.hasDependents(path?) // any live subscriber on a path, or on the whole object
+```
+
+### Writing
+
+```javascript
+model.set('user.name', 'Bob')      // equality-gated; a same-value write wakes nobody. returns whether it changed
+model.set('items[#a3f].done', true) // keyed array element
+model.remove('user.name')          // the key LEAVES the object (reads back absent, not undefined). returns changed
+model.replace(freshObject)         // bulk inbound swap — reseeds every live reader by full path
+model.clear()                      // replace({})
+```
+
+A write wakes the exact path, its **ancestors** (the value seen at a container changed), and any **descendant** whose resolved value changed — never a disjoint sibling. `replace` is the path for fresh data arriving wholesale: it re-resolves every cell against the new object, so a reader of a deep path under a wholesale-replaced subtree is woken correctly (a shallow top-key diff would miss it).
+
+A write does set + wake and nothing else — no `onChange` hook. `wake` schedules subscriber reactions, it does not run them synchronously, so consumer logic layered after a write (recomputing a derived field in a reaction) never re-enters the write within the same call.
+
+### Teardown
+
+Cells are lazy (one `Dependency` per read path, shared by all readers of that path) so churning the object never grows the cell map — only distinct paths ever read do. Subscriber-less cells are evicted opportunistically on every `replace` and on subtree writes. For an instance driven only by `set`/`remove`, `prune()` sweeps dead cells explicitly and `stop()` drops them all.
+
+```javascript
+model.prune()   // reclaim cells nobody subscribes to
+model.stop()    // drop every cell; live subscribers stop receiving wakes
 ```
 
 ---

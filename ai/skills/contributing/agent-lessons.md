@@ -72,8 +72,9 @@ Across debugging sessions, the pattern held: errors that throw are gifts. The da
 - Module load order races that only manifest under real network latency (~5% failure rate)
 - Tests that pass but don't actually assert what you think they assert
 - Platform behavior at the seam of two specs — `url()` in CSS custom properties resolves against the using document, not the declaring stylesheet
+- A non-printable byte in `.js` source (a NUL used as a map sentinel): the Read tool renders it as a space and editors look normal, but git marks the whole file binary (`Bin 0 -> N bytes` in the commit stat), so diff, blame, and `grep`/`ripgrep` all silently skip it
 
-First diagnostic tool for production-only bugs: disable minification and rebuild. And when an architecture rests on a browser behavior you haven't seen first-hand, run it before building on it.
+First diagnostic tool for production-only bugs: disable minification and rebuild. And when an architecture rests on a browser behavior you haven't seen first-hand, run it before building on it. When a source file's git diff renders as binary, or a symbol you know is present greps empty, scan for non-printable bytes (`tr -cd '\000' < file | wc -c`) before trusting what the editor shows you.
 
 ---
 

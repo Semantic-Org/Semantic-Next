@@ -1,0 +1,177 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Reactive Object
+icon: braces
+package: "@semantic-ui/reactivity"
+methods: [reactiveObject, get, peek, hasDependents, set, remove, replace, clear, prune, stop]
+description: API reference for ReactiveObject in Semantic UI's reactivity system
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
+
+export const components = { blockquote: Blockquote };
+
+Fine-grained reactivity over a plain object, at the granularity of a path. A reader of one path wakes only when that path's value changes, where a [Signal](/docs/api/reactivity/signal) holding an object wakes every reader on any change.
+
+Paths use the `@semantic-ui/utils` grammar: dotted keys (`user.name`), positional indices (`list[0]`), and keyed array segments (`todos[#a3f].done`). Cells are keyed by the literal path string, so address an element consistently. A reader of `todos[#a3f].done` is not woken by a positional write to `todos[0].done` that hits the same element.
+
+## Creating
+
+### reactiveObject
+
+```javascript
+reactiveObject(initialValue, options);
+```
+
+Creates a reactive wrapper over a plain object. `initialValue` defaults to `{}`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| initialValue | object | The backing object |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| safety | `'clone'` \| `'reference'` \| `'none'` | `'reference'` | Value-protection preset. `clone` copies on read and on inbound `set`/`replace`, `none` re-fires on every `set`. See [Signal Options](/docs/guides/reactivity/signal-options) |
+| equality | function | deep equality | Decides whether a written value differs from the value already at a path |
+| clone | function | structured clone | Copies values under `safety: 'clone'` |
+
+#### Example
+
+<PlaygroundExample id="reactive-object" direction="horizontal"></PlaygroundExample>
+
+## Reading
+
+### get
+
+```javascript
+reactiveObject.get(path);
+```
+
+Returns the value at `path` and subscribes the running reaction to that path alone, so a later write to a disjoint path will not re-fire it.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| path | string | The path to read |
+
+#### Returns
+
+The value at `path`, or `undefined` if absent.
+
+### peek
+
+```javascript
+reactiveObject.peek();
+reactiveObject.peek(path);
+```
+
+Untracked read that subscribes to nothing. With a path, the value there. Without one, the whole backing object.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| path | string | Optional path to read |
+
+#### Returns
+
+The value at `path`, or the whole backing object when no path is given.
+
+### hasDependents
+
+```javascript
+reactiveObject.hasDependents();
+reactiveObject.hasDependents(path);
+```
+
+Whether any live reaction subscribes to `path`, or to the whole object when no path is given.
+
+#### Returns
+
+`true` when a live subscriber exists.
+
+## Writing
+
+### set
+
+```javascript
+reactiveObject.set(path, value);
+```
+
+Writes `value` at `path`, waking readers of that path, of its ancestors, and of any descendant whose resolved value changed.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| path | string | The path to write |
+| value | any | The value to set |
+
+#### Returns
+
+`true` when the write changed the value, `false` for an equality-gated no-op or a write the backing object drops.
+
+### remove
+
+```javascript
+reactiveObject.remove(path);
+```
+
+Removes `path` so the key leaves the object, reading back absent rather than undefined-valued. A no-op when the path is already absent.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| path | string | The path to remove |
+
+#### Returns
+
+`true` when the removal changed the object.
+
+### replace
+
+```javascript
+reactiveObject.replace(nextObject);
+```
+
+Swaps the whole backing object and reseeds every live reader against the new one, waking only the paths whose value changed, including deep readers under a wholesale-replaced subtree. The path for fresh data arriving in bulk.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| nextObject | object | The replacement backing object |
+
+### clear
+
+```javascript
+reactiveObject.clear();
+```
+
+Replaces the backing object with an empty one.
+
+## Teardown
+
+### prune
+
+```javascript
+reactiveObject.prune();
+```
+
+Sweeps cells nobody subscribes to. `replace` and subtree writes sweep as they go, so this is the explicit hook for an instance driven only by `set` and `remove`.
+
+### stop
+
+```javascript
+reactiveObject.stop();
+```
+
+Drops every cell. Live subscribers stop receiving wakes and future reads mint fresh cells.

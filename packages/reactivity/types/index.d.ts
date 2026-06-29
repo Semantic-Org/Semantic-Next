@@ -6,11 +6,12 @@
 
 export { Dependency } from './dependency';
 export { Reaction } from './reaction';
+export { ReactiveObject, ReactiveObjectOptions } from './reactive-object';
 export { Scheduler } from './scheduler';
 export { Signal, SignalOptions } from './signal';
 
 export { currentReaction, guard, nonreactive } from './helpers/control';
-export { reaction, signal } from './helpers/create';
+export { reaction, reactiveObject, signal } from './helpers/create';
 export { computed, derive, match } from './helpers/derived';
 export type { Matcher } from './helpers/derived';
 export { afterFlush, flush, getSource, scheduleFlush } from './helpers/schedule';
