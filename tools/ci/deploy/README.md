@@ -44,8 +44,8 @@ Two workflows, three jobs:
   - `docs` and `mcp` each deploy their target with the Vercel token and
     `contents: read` only (no comment token), and upload a facts file. Both
     build in the runner (`vercel build`) and ship the output with `--prebuilt`,
-    so Vercel runs no build for either. docs reuses a `.wireit`/astro cache
-    across runs.
+    so Vercel runs no build for either. `docs` reuses wireit's GitHub Actions
+    cache and astro's cache across runs.
 - **`pr-deploy-report.yml`** (on `workflow_run` completion) renders the final
   comment from the facts and posts it under the bot, editing the Building comment
   in place.

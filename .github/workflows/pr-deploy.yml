@@ -124,19 +124,16 @@ jobs:
           node-version-file: '.node-version'
           cache: 'npm'
 
-      # reuse the wireit + astro build outputs across runs so the runner build
-      # isn't fully cold each time. both tools re-hash their inputs, so a stale
-      # restore is a no-op, never a wrong build
+      # wireit's GitHub Actions cache (as in ci.yml), so vercel build reuses the
+      # per-package build outputs instead of rebuilding all nine each run.
+      - uses: google/wireit@setup-github-actions-caching/v1
+      # astro's incremental cache, which the wireit cache doesn't cover
       - uses: actions/cache@v6
         with:
-          path: |
-            .wireit
-            packages/*/.wireit
-            internal-packages/*/.wireit
-            docs/node_modules/.astro
-          key: docs-build-${{ runner.os }}-${{ github.sha }}
+          path: docs/node_modules/.astro
+          key: docs-astro-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
-            docs-build-${{ runner.os }}-
+            docs-astro-${{ runner.os }}-
 
       # build in CI and ship the prebuilt output, so Vercel runs no remote build
       # (near-zero Vercel build minutes). `vercel build` runs the project's own
@@ -164,7 +161,8 @@ jobs:
           name: deploy-facts-docs
           path: deploy-facts/docs.json
 
-  # same prebuilt flow as the docs job, run from tools/mcp (the mcp project's root)
+  # same prebuilt flow as the docs job, from tools/mcp (the mcp project's root).
+  # no build cache: build:vercel is a direct esbuild bundle, not wireit/astro.
   mcp:
     name: Deploy mcp preview
     runs-on: ubuntu-latest
