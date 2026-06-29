@@ -31,8 +31,11 @@ const updateTourSection = () => {
   });
 };
 
-$(window).on('scroll', updateTourSection);
-updateTourSection();
+/* Only bind scroll listener when tour ribbon is present */
+if ($tourCopies.length) {
+  $(window).on('scroll', updateTourSection);
+  updateTourSection();
+}
 
 /*-------------------------------
       Showcase Tab Switching

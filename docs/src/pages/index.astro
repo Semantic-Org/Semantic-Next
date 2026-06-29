@@ -30,6 +30,7 @@ import { demoSteps } from '../data/homepage.js';
     import '../javascript/homepage.js';
   </script>
   <ribbons>
+    <!-- Tour ribbon hidden until PlaygroundExamples are created
     <ribbon class="tour">
       <Container>
         <div class="content">
@@ -85,30 +86,19 @@ import { demoSteps } from '../data/homepage.js';
         <div class="visual">
           <div class="sticky">
             <div class="example active" data-section="templates">
-              <!-- TODO: PlaygroundExample for templates -->
-              <div class="placeholder">
-                <Icon code></Icon>
-                <span>Templates Example</span>
-              </div>
+              <PlaygroundExample id="tour-templates"></PlaygroundExample>
             </div>
             <div class="example" data-section="specs">
-              <!-- TODO: PlaygroundExample for specs -->
-              <div class="placeholder">
-                <Icon file-json></Icon>
-                <span>Specs Example</span>
-              </div>
+              <PlaygroundExample id="tour-specs"></PlaygroundExample>
             </div>
             <div class="example" data-section="components">
-              <!-- TODO: PlaygroundExample for components -->
-              <div class="placeholder">
-                <Icon box></Icon>
-                <span>Components Example</span>
-              </div>
+              <PlaygroundExample id="tour-components"></PlaygroundExample>
             </div>
           </div>
         </div>
       </Container>
     </ribbon>
+    -->
     <ribbon class="proof">
       <Container>
         <Cards three spaced stackable>
@@ -167,15 +157,15 @@ import { demoSteps } from '../data/homepage.js';
           <a href="/ui/start/install">Installation</a>
           <a href="/ui/start/why-semantic">Why Semantic?</a>
           <a href="/ui/start/whats-new">What's New?</a>
-          <a href="/ui/roadmap">Roadmap</a>
+          <!-- <a href="/ui/roadmap">Roadmap</a> -->
         </div>
         <div class="column">
           <h4><Icon layers></Icon> UI Framework</h4>
           <a href="/ui/primitives">Primitives</a>
-          <a href="/ui/components">Components</a>
-          <a href="/ui/behaviors">Behaviors</a>
-          <a href="/ui/css/tokens">CSS Tokens</a>
-          <a href="/ui/css/concepts">Styling Guide</a>
+          <!-- <a href="/ui/components">Components</a> -->
+          <!-- <a href="/ui/behaviors">Behaviors</a> -->
+          <!-- <a href="/ui/css/tokens">CSS Tokens</a> -->
+          <!-- <a href="/ui/css/concepts">Styling Guide</a> -->
         </div>
         <div class="column">
           <h4><Icon book-open></Icon> Guides</h4>
