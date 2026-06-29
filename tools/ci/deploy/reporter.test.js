@@ -89,12 +89,12 @@ test('final, all ready (docs only): preview link, footer host, mcp NA', () => {
       id: 'docs',
       status: 'ready',
       url: 'https://semantic-next-abc.vercel.app',
-      inspect: 'https://vercel.com/semantic-ui/semantic-next/xyz',
     },
   ]);
   assert.match(md, /Preview Ready/);
   assert.match(md, /\[Preview\]\(https:\/\/semantic-next-abc\.vercel\.app\)/);
-  assert.match(md, /\[logs\]\(https:\/\/vercel\.com\/semantic-ui\/semantic-next\/xyz\)/);
+  assert.match(md, /\[logs\]\(https:\/\/github\.com\/Semantic-Org\/Semantic-Next\/actions\/runs\/123\)/);
+  assert.doesNotMatch(md, /\*\*Raw:\*\*/);
   assert.match(md, /`docs` `semantic-next-abc\.vercel\.app`/);
   assert.match(md, /`mcp` \| ⚪ NA/);
   assert.equal(json.state, 'ready');
@@ -134,7 +134,7 @@ test('final: a "ready" with a markdown-breakout URL drops to failed', () => {
   assert.equal(json.targets.find((t) => t.id === 'docs').status, 'failed');
 });
 
-test('final: ready with no inspect URL falls back to the run URL for logs', () => {
+test('final: ready logs link the run', () => {
   const { md } = run(['--mode', 'final'], [{ id: 'docs', status: 'ready', url: 'https://d.vercel.app' }]);
   assert.match(md, /\[logs\]\(https:\/\/github\.com\/Semantic-Org\/Semantic-Next\/actions\/runs\/123\)/);
 });
