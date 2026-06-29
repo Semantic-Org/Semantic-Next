@@ -119,19 +119,25 @@ jobs:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DOCS_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v7
+      # build on the Vercel project's Node (22.x), not the repo's .node-version,
+      # so `vercel build` reproduces what the project's remote build produces
       - uses: actions/setup-node@v6
         with:
-          node-version-file: '.node-version'
+          node-version: '22.x'
           cache: 'npm'
-      - run: npm ci
 
-      - name: Deploy docs preview
+      # Build in CI and ship the prebuilt output, so Vercel runs no remote build
+      # (near-zero Vercel build minutes). `vercel build` runs the project's own
+      # install + build:docs, so the output matches a remote build.
+      - name: Build and deploy docs preview
         id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
+          npx vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+          npx vercel build --token="$VERCEL_TOKEN"
           set +e
-          npx vercel deploy --token="$VERCEL_TOKEN" >url.txt 2>deploy.log
+          npx vercel deploy --prebuilt --token="$VERCEL_TOKEN" >url.txt 2>deploy.log
           echo "code=$?" >> "$GITHUB_OUTPUT"
           set -e
           cat deploy.log
