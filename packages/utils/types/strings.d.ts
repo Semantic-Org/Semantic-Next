@@ -58,6 +58,18 @@ export interface KebabToCamelOptions {
 }
 
 /**
+ * Options for humanizing an identifier
+ */
+export interface HumanizeOptions {
+  /** Title-case the result instead of sentence case, respecting stop words (default: false) */
+  titleCase?: boolean;
+  /** Drop a trailing "id" segment, e.g. user_id -> User (default: true) */
+  dropId?: boolean;
+  /** Treat input as CONSTANT_CASE, sentence-casing shouting enums like IN_PROGRESS instead of preserving them as acronyms (default: false) */
+  constantCase?: boolean;
+}
+
+/**
  * Options for camel-to-kebab conversion
  */
 export interface CamelToKebabOptions {
@@ -283,3 +295,23 @@ export function reverseString(str?: string, options?: ReverseStringOptions): str
  * ```
  */
 export function tokenize(str?: string): string;
+
+/**
+ * Converts a machine identifier into human-readable label text, the display-side inverse of tokenize
+ * Splits snake_case, kebab-case, camelCase, and PascalCase, keeping acronym runs intact (HTTP, XML)
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#humanize humanize}
+ * @see {@link https://next.semantic-ui.com/examples/utils-humanize Example}
+ *
+ * @param str - The identifier to humanize (null/undefined/non-string returns empty string)
+ * @param options - Humanization options
+ * @returns The humanized label
+ *
+ * @example
+ * ```ts
+ * humanize('first_name') // returns 'First name'
+ * humanize('getHTTPResponse') // returns 'Get HTTP response'
+ * humanize('user_id') // returns 'User' (drops trailing id)
+ * humanize('employee_salary', { titleCase: true }) // returns 'Employee Salary'
+ * ```
+ */
+export function humanize(str?: string, options?: HumanizeOptions): string;

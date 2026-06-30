@@ -4,6 +4,7 @@ import {
   capitalizeWords,
   escapeHTML,
   getArticle,
+  humanize,
   joinWords,
   kebabToCamel,
   reverseString,
@@ -422,5 +423,99 @@ describe('tokenize', () => {
     expect(tokenize(null)).toBe('');
     expect(tokenize(undefined)).toBe('');
     expect(tokenize('')).toBe('');
+  });
+});
+
+describe('humanize', () => {
+  it('humanizes snake, kebab, camel, and Pascal identifiers', () => {
+    expect(humanize('first_name')).toBe('First name');
+    expect(humanize('user-profile')).toBe('User profile');
+    expect(humanize('createdAt')).toBe('Created at');
+    expect(humanize('EmployeeSalary')).toBe('Employee salary');
+  });
+
+  it('keeps acronym runs intact', () => {
+    expect(humanize('getHTTPResponse')).toBe('Get HTTP response');
+    expect(humanize('parseXMLToJSON')).toBe('Parse XML to JSON');
+    expect(humanize('IOError')).toBe('IO error');
+  });
+
+  it('preserves a leading acronym', () => {
+    expect(humanize('URLParser')).toBe('URL parser');
+  });
+
+  it('splits letter and digit boundaries', () => {
+    expect(humanize('address_line_1')).toBe('Address line 1');
+    expect(humanize('phone2')).toBe('Phone 2');
+  });
+
+  it('drops a trailing id segment by default', () => {
+    expect(humanize('user_id')).toBe('User');
+    expect(humanize('productID')).toBe('Product');
+    expect(humanize('order-id')).toBe('Order');
+  });
+
+  it('never drops id when it is the only word', () => {
+    expect(humanize('id')).toBe('Id');
+  });
+
+  it('only drops a standalone id, not id inside a word', () => {
+    expect(humanize('valid')).toBe('Valid');
+    expect(humanize('uuid')).toBe('Uuid');
+    expect(humanize('user_ids')).toBe('User ids');
+  });
+
+  it('keeps the id segment when dropId is false', () => {
+    expect(humanize('user_id', { dropId: false })).toBe('User id');
+  });
+
+  it('title-cases with stop words when titleCase is set', () => {
+    expect(humanize('employee_salary', { titleCase: true })).toBe('Employee Salary');
+    expect(humanize('terms_of_service', { titleCase: true })).toBe('Terms of Service');
+    expect(humanize('getHTTPResponse', { titleCase: true })).toBe('Get HTTP Response');
+  });
+
+  it('preserves shouting acronyms by default but sentence-cases them with constantCase', () => {
+    expect(humanize('IN_PROGRESS')).toBe('IN PROGRESS');
+    expect(humanize('IN_PROGRESS', { constantCase: true })).toBe('In progress');
+    expect(humanize('FIRST_NAME', { constantCase: true })).toBe('First name');
+    expect(humanize('USER_ID', { constantCase: true })).toBe('User');
+    expect(humanize('MAX_RETRIES', { constantCase: true, titleCase: true })).toBe('Max Retries');
+  });
+
+  it('normalizes already-spaced and mixed-case input', () => {
+    expect(humanize('First Name')).toBe('First name');
+    expect(humanize('  spaced   out  ')).toBe('Spaced out');
+  });
+
+  it('keeps plural acronyms intact', () => {
+    expect(humanize('URLs')).toBe('URLs');
+    expect(humanize('getURLs')).toBe('Get URLs');
+    expect(humanize('userIDs')).toBe('User IDs');
+    expect(humanize('parsePDFs')).toBe('Parse PDFs');
+    expect(humanize('UUIDs')).toBe('UUIDs');
+  });
+
+  it('preserves accented and caseless letters', () => {
+    expect(humanize('café_table')).toBe('Café table');
+    expect(humanize('東京_station')).toBe('東京 station');
+  });
+
+  it('keeps combining-mark scripts and modifier letters whole', () => {
+    expect(humanize('हिन्दी')).toBe('हिन्दी');
+    expect(humanize('مُحَمَّد')).toBe('مُحَمَّد');
+    expect(humanize('Iʻll')).toBe('Iʻll');
+  });
+
+  it('is independent of unicode normalization form', () => {
+    expect(humanize('café'.normalize('NFD'))).toBe('Café');
+  });
+
+  it('returns an empty string for empty, separator-only, and non-string input', () => {
+    expect(humanize('')).toBe('');
+    expect(humanize('___')).toBe('');
+    expect(humanize(null)).toBe('');
+    expect(humanize(undefined)).toBe('');
+    expect(humanize(42)).toBe('');
   });
 });
