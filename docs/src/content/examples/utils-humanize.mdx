@@ -7,5 +7,5 @@ subcategory: 'Strings'
 description: 'Convert a machine identifier into human-readable label text'
 tags: ['utils', 'strings', 'humanize', 'case', 'label']
 selectedFile: 'index.js'
-tip: 'Keeps acronyms intact (HTTP, plural URLs) and drops a trailing id, so user_id becomes User. titleCase for headers, constantCase to sentence-case shouting enums like IN_PROGRESS'
+tip: 'Rescues common lowercase acronyms (id, url, api) by default and keeps embedded ones like HTTP intact. Extend the vocabulary app-wide with humanize.config.terms, and use titleCase for headers or constantCase for shouting enums'
 ---

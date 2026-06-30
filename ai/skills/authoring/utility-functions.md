@@ -437,8 +437,13 @@ toTitleCase('the quick brown fox');      // 'The Quick Brown Fox' (respects stop
 humanize('first_name');                  // 'First name'
 humanize('getURLsFromPage');             // 'Get URLs from page' (acronyms, including plurals, stay intact)
 humanize('user_id');                     // 'User' (dropId default; pass { dropId: false } to keep)
+humanize('api_url');                     // 'API URL' (built-in vocabulary: id, url, api)
 humanize('terms_of_service', { titleCase: true });   // 'Terms of Service'
 humanize('IN_PROGRESS', { constantCase: true });     // 'In progress' (sentence-case a shouting enum)
+
+// Extend the vocabulary app-wide once at boot, every call inherits it
+humanize.config.terms.sku = 'SKU';
+humanize('product_sku');                 // 'Product SKU'
 ```
 
 ### Text Processing

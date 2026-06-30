@@ -346,10 +346,10 @@ console.log(tokenize("User's Name_123")); // "users-name-123"
 ### humanize
 
 ```javascript
-function humanize(str = '', { titleCase = false, dropId = true } = {})
+function humanize(str = '', options = {})
 ```
 
-Converts a machine identifier into human-readable label text, the display-side inverse of `tokenize`. Splits `snake_case`, `kebab-case`, `camelCase`, and `PascalCase`, keeping acronym runs intact, and sentence-cases the result.
+Converts a machine identifier into human-readable label text, the display-side inverse of `tokenize`. Splits `snake_case`, `kebab-case`, `camelCase`, and `PascalCase`, keeping acronym runs intact, and sentence-cases the result. Common lowercase acronyms (`id`, `url`, `api`) are rescued by a built-in vocabulary you can extend app-wide through [`humanize.config`](#humanizeconfig).
 
 #### Parameters
 
@@ -365,6 +365,7 @@ Converts a machine identifier into human-readable label text, the display-side i
 | titleCase    | boolean | false   | Title-case the result instead of sentence case, keeping stop words lowercase |
 | dropId       | boolean | true    | Drop a trailing `id` segment, e.g. `user_id` becomes `User` |
 | constantCase | boolean | false   | Treat input as `CONSTANT_CASE`, sentence-casing shouting enums like `IN_PROGRESS` instead of preserving them as acronyms |
+| terms        | object  | —       | Per-call term overrides (`{ oauth: 'OAuth' }`), a lowercased token mapped to its display string, layered over `humanize.config.terms` |
 
 #### Returns
 
@@ -386,13 +387,35 @@ console.log(humanize('getURLsFromPage')); // 'Get URLs from page'
 
 // Drops a trailing id by default
 console.log(humanize('user_id')); // 'User'
-console.log(humanize('order_id', { dropId: false })); // 'Order id'
+console.log(humanize('order_id', { dropId: false })); // 'Order ID'
+
+// Built-in vocabulary rescues common lowercase acronyms
+console.log(humanize('api_url')); // 'API URL'
+console.log(humanize('avatar_url')); // 'Avatar URL'
 
 // Title case for headers, respecting stop words
 console.log(humanize('terms_of_service', { titleCase: true })); // 'Terms of Service'
 
 // Sentence-case a shouting enum for a status label
 console.log(humanize('IN_PROGRESS', { constantCase: true })); // 'In progress'
+```
+
+#### humanize.config
+
+`humanize.config` holds the global defaults plus a `terms` vocabulary, a lowercased token mapped to its exact display string. It ships seeded with `{ id: 'ID', url: 'URL', api: 'API' }`. Set it once at app boot and every call inherits it, so a large codebase pins its vocabulary in one place. A per-call `terms` option layers over it for one-off overrides.
+
+```javascript
+import { humanize } from '@semantic-ui/utils';
+
+// set an app-wide vocabulary once
+humanize.config.terms.sku = 'SKU';
+humanize.config.terms.oauth = 'OAuth';
+
+console.log(humanize('product_sku')); // 'Product SKU'
+console.log(humanize('oauth_token')); // 'OAuth token'
+
+// a per-call term layers over the global vocabulary
+console.log(humanize('gpu_count', { terms: { gpu: 'GPU' } })); // 'GPU count'
 ```
 
 ### escapeHTML

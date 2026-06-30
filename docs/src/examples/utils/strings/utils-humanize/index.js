@@ -12,3 +12,8 @@ console.log(humanize('terms_of_service', { titleCase: true }));
 console.log(humanize('getURLsFromPage'));
 console.log(humanize('IN_PROGRESS', { constantCase: true }));
 console.log(humanize('café_résumé'));
+
+console.log(humanize('avatar_url'));
+
+humanize.config.terms.sku = 'SKU';
+console.log(humanize('product_sku'));

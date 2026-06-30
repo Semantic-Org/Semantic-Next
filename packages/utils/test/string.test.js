@@ -456,7 +456,7 @@ describe('humanize', () => {
   });
 
   it('never drops id when it is the only word', () => {
-    expect(humanize('id')).toBe('Id');
+    expect(humanize('id')).toBe('ID');
   });
 
   it('only drops a standalone id, not id inside a word', () => {
@@ -466,7 +466,7 @@ describe('humanize', () => {
   });
 
   it('keeps the id segment when dropId is false', () => {
-    expect(humanize('user_id', { dropId: false })).toBe('User id');
+    expect(humanize('user_id', { dropId: false })).toBe('User ID');
   });
 
   it('title-cases with stop words when titleCase is set', () => {
@@ -517,5 +517,36 @@ describe('humanize', () => {
     expect(humanize(null)).toBe('');
     expect(humanize(undefined)).toBe('');
     expect(humanize(42)).toBe('');
+  });
+
+  it('rescues common lowercase acronyms (id, url, api) by default', () => {
+    expect(humanize('api_url')).toBe('API URL');
+    expect(humanize('image_url')).toBe('Image URL');
+    expect(humanize('id_card')).toBe('ID card');
+  });
+
+  it('matches the whole token, never a substring', () => {
+    expect(humanize('valid')).toBe('Valid');
+    expect(humanize('curl_command')).toBe('Curl command');
+  });
+
+  it('reads inherited Object members as ordinary words, not term overrides', () => {
+    expect(humanize('constructor')).toBe('Constructor');
+    expect(humanize('toString')).toBe('To string');
+  });
+
+  it('layers per-call terms over the default vocabulary', () => {
+    expect(humanize('oauth_api', { terms: { oauth: 'OAuth' } })).toBe('OAuth API');
+  });
+
+  it('reads humanize.config for set-once-forget customization', () => {
+    const savedTerms = humanize.config.terms;
+    humanize.config.terms = { ...savedTerms, sku: 'SKU' };
+    try {
+      expect(humanize('product_sku')).toBe('Product SKU');
+    }
+    finally {
+      humanize.config.terms = savedTerms;
+    }
   });
 });

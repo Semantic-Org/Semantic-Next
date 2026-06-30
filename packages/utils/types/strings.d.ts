@@ -67,6 +67,19 @@ export interface HumanizeOptions {
   dropId?: boolean;
   /** Treat input as CONSTANT_CASE, sentence-casing shouting enums like IN_PROGRESS instead of preserving them as acronyms (default: false) */
   constantCase?: boolean;
+  /** Per-call term overrides, a lowercased token mapped to its exact display string, layered over `humanize.config.terms` */
+  terms?: Record<string, string>;
+}
+
+/**
+ * Global humanize defaults and term vocabulary. Set once at app boot and every call inherits it.
+ */
+export interface HumanizeConfig {
+  titleCase: boolean;
+  dropId: boolean;
+  constantCase: boolean;
+  /** Token vocabulary, a lowercased token mapped to its exact display string. Seeded with `id`, `url`, `api` */
+  terms: Record<string, string>;
 }
 
 /**
@@ -311,7 +324,16 @@ export function tokenize(str?: string): string;
  * humanize('first_name') // returns 'First name'
  * humanize('getHTTPResponse') // returns 'Get HTTP response'
  * humanize('user_id') // returns 'User' (drops trailing id)
+ * humanize('api_url') // returns 'API URL' (default vocabulary)
  * humanize('employee_salary', { titleCase: true }) // returns 'Employee Salary'
+ *
+ * // set an app-wide vocabulary once
+ * humanize.config.terms.sku = 'SKU';
+ * humanize('product_sku') // returns 'Product SKU'
  * ```
  */
 export function humanize(str?: string, options?: HumanizeOptions): string;
+export namespace humanize {
+  /** Global defaults and term vocabulary. Set once at app boot and every call inherits it */
+  let config: HumanizeConfig;
+}
