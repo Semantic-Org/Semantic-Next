@@ -421,7 +421,7 @@ if (isCI) { ... }           // detects GitHub Actions, GitLab CI, Jenkins, etc.
 
 ### Case Conversion
 ```javascript
-import { kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase } from '@semantic-ui/utils';
+import { kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase, humanize } from '@semantic-ui/utils';
 
 kebabToCamel('my-component-name');       // 'myComponentName'
 kebabToCamel('grid-2x2');               // 'grid_2x2' (digit segments use _ for lossless round-trip)
@@ -432,6 +432,13 @@ camelToKebab('arrowDownAZ');            // 'arrow-down-a-z'
 capitalize('hello world');               // 'Hello world'
 capitalizeWords('hello world');          // 'Hello World'
 toTitleCase('the quick brown fox');      // 'The Quick Brown Fox' (respects stop words: the, a, of, etc.)
+
+// Identifier -> label (inverse of tokenize). Keeps acronyms whole, drops a trailing id, sentence-cases
+humanize('first_name');                  // 'First name'
+humanize('getURLsFromPage');             // 'Get URLs from page' (acronyms, including plurals, stay intact)
+humanize('user_id');                     // 'User' (dropId default; pass { dropId: false } to keep)
+humanize('terms_of_service', { titleCase: true });   // 'Terms of Service'
+humanize('IN_PROGRESS', { constantCase: true });     // 'In progress' (sentence-case a shouting enum)
 ```
 
 ### Text Processing

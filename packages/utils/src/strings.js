@@ -104,6 +104,43 @@ export const toTitleCase = (str = '') => {
     .join(' ');
 };
 
+// split an identifier into words: acronym runs stay whole (getHTTPResponse -> get, HTTP, Response),
+// a plural acronym keeps its trailing s (userIDs -> user, IDs), and caseless scripts keep their
+// combining marks so vocalized Devanagari/Arabic/Hebrew/Thai don't shatter per codepoint
+const HUMANIZE_WORD_RE =
+  /\p{Lu}{2,}s(?![\p{Ll}\p{M}])|\p{Lu}+(?=\p{Lu}\p{Ll})|[\p{Lu}\p{Lt}]?[\p{Ll}\p{Lm}\p{M}]+|\p{Lu}+|[\p{Lo}\p{Lm}\p{M}]+|\p{N}+/gu;
+
+const PLURAL_ACRONYM_RE = /^\p{Lu}{2,}s$/u;
+
+const isAcronym = (word) =>
+  (word.length > 1 && word === word.toUpperCase() && word !== word.toLowerCase()) || PLURAL_ACRONYM_RE.test(word);
+
+export const humanize = (str = '', { titleCase = false, dropId = true, constantCase = false } = {}) => {
+  if (!isString(str)) { return ''; }
+
+  // normalize so decomposed accents (NFD café, ÉCOLE) collapse before the casing pass
+  const words = str.normalize('NFC').match(HUMANIZE_WORD_RE);
+  if (!words) { return ''; }
+
+  // strip a trailing id segment (user_id -> User), but never the only word
+  if (dropId && words.length > 1 && words[words.length - 1].toLowerCase() === 'id') {
+    words.pop();
+  }
+
+  const cased = words.map((word, index) => {
+    // constantCase opts out of acronym preservation so shouting enums (IN_PROGRESS) sentence-case
+    if (!constantCase && isAcronym(word)) { return word; }
+    const lower = word.toLowerCase();
+    if (titleCase) {
+      const isEdge = index === 0 || index === words.length - 1;
+      return (isEdge || !stopWords.has(lower)) ? capitalize(lower) : lower;
+    }
+    return index === 0 ? capitalize(lower) : lower;
+  });
+
+  return cased.join(' ');
+};
+
 export const joinWords = (words, {
   separator = ', ',
   lastSeparator = ' and ',

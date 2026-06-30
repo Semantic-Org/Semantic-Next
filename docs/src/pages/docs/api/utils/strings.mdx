@@ -343,6 +343,58 @@ console.log(tokenize("Hello World!")); // "hello-world"
 console.log(tokenize("User's Name_123")); // "users-name-123"
 ```
 
+### humanize
+
+```javascript
+function humanize(str = '', { titleCase = false, dropId = true } = {})
+```
+
+Converts a machine identifier into human-readable label text, the display-side inverse of `tokenize`. Splits `snake_case`, `kebab-case`, `camelCase`, and `PascalCase`, keeping acronym runs intact, and sentence-cases the result.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| str     | string | The identifier to humanize |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name         | Type    | Default | Description |
+|--------------|---------|---------|-------------|
+| titleCase    | boolean | false   | Title-case the result instead of sentence case, keeping stop words lowercase |
+| dropId       | boolean | true    | Drop a trailing `id` segment, e.g. `user_id` becomes `User` |
+| constantCase | boolean | false   | Treat input as `CONSTANT_CASE`, sentence-casing shouting enums like `IN_PROGRESS` instead of preserving them as acronyms |
+
+#### Returns
+
+The humanized label, or `''` for empty or non-string input.
+
+#### Example
+
+```javascript
+import { humanize } from '@semantic-ui/utils';
+
+// Basic usage
+console.log(humanize('first_name')); // 'First name'
+console.log(humanize('user-profile')); // 'User profile'
+console.log(humanize('createdAt')); // 'Created at'
+
+// Keeps acronyms whole, including plurals
+console.log(humanize('getHTTPResponse')); // 'Get HTTP response'
+console.log(humanize('getURLsFromPage')); // 'Get URLs from page'
+
+// Drops a trailing id by default
+console.log(humanize('user_id')); // 'User'
+console.log(humanize('order_id', { dropId: false })); // 'Order id'
+
+// Title case for headers, respecting stop words
+console.log(humanize('terms_of_service', { titleCase: true })); // 'Terms of Service'
+
+// Sentence-case a shouting enum for a status label
+console.log(humanize('IN_PROGRESS', { constantCase: true })); // 'In progress'
+```
+
 ### escapeHTML
 
 ```javascript
