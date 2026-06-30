@@ -124,9 +124,10 @@ jobs:
           node-version-file: '.node-version'
           cache: 'npm'
 
-      # wireit's GitHub Actions cache (as in ci.yml), so vercel build reuses the
-      # per-package build outputs instead of rebuilding all nine each run.
-      - uses: google/wireit@setup-github-actions-caching/v1
+      # wireit's GitHub Actions cache, so vercel build reuses the per-package
+      # build outputs instead of rebuilding all nine each run. v2 sets the
+      # ACTIONS_RESULTS_URL the current cache service needs; v1 silently no-ops.
+      - uses: google/wireit@setup-github-actions-caching/v2
       # astro's incremental cache, which the wireit cache doesn't cover
       - uses: actions/cache@v6
         with:
