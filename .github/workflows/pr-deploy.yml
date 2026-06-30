@@ -161,8 +161,10 @@ jobs:
           name: deploy-facts-docs
           path: deploy-facts/docs.json
 
-  # same prebuilt flow as the docs job, from tools/mcp (the mcp project's root).
-  # no build cache: build:vercel is a direct esbuild bundle, not wireit/astro.
+  # same prebuilt flow as the docs job, run from the repo root (not tools/mcp):
+  # the mcp project's Root Directory is tools/mcp, which vercel applies relative
+  # to the working directory, so running from tools/mcp doubles it to
+  # tools/mcp/tools/mcp. no build cache: build:vercel is an esbuild bundle.
   mcp:
     name: Deploy mcp preview
     runs-on: ubuntu-latest
@@ -186,17 +188,16 @@ jobs:
       # `vercel build` runs the mcp project's own install + build:vercel.
       - name: Build and deploy mcp preview
         id: deploy
-        working-directory: tools/mcp
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           npx vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
           npx vercel build --token="$VERCEL_TOKEN"
           set +e
-          npx vercel deploy --prebuilt --token="$VERCEL_TOKEN" >"$GITHUB_WORKSPACE/url.txt" 2>"$GITHUB_WORKSPACE/deploy.log"
+          npx vercel deploy --prebuilt --token="$VERCEL_TOKEN" >url.txt 2>deploy.log
           echo "code=$?" >> "$GITHUB_OUTPUT"
           set -e
-          cat "$GITHUB_WORKSPACE/deploy.log"
+          cat deploy.log
 
       - name: Write facts
         if: always()
