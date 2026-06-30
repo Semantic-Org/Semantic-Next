@@ -115,8 +115,12 @@ const PLURAL_ACRONYM_RE = /^\p{Lu}{2,}s$/u;
 const isAcronym = (word) =>
   (word.length > 1 && word === word.toUpperCase() && word !== word.toLowerCase()) || PLURAL_ACRONYM_RE.test(word);
 
-export const humanize = (str = '', { titleCase = false, dropId = true, constantCase = false } = {}) => {
+export const humanize = (str = '', options = {}) => {
   if (!isString(str)) { return ''; }
+
+  const { titleCase, dropId, constantCase } = { ...humanize.config, ...options };
+  // call terms layer over the global vocabulary so an app sets it once and overrides per call
+  const terms = options.terms ? { ...humanize.config.terms, ...options.terms } : humanize.config.terms;
 
   // normalize so decomposed accents (NFD café, ÉCOLE) collapse before the casing pass
   const words = str.normalize('NFC').match(HUMANIZE_WORD_RE);
@@ -128,9 +132,11 @@ export const humanize = (str = '', { titleCase = false, dropId = true, constantC
   }
 
   const cased = words.map((word, index) => {
+    const lower = word.toLowerCase();
+    // hasOwn so a token like 'constructor' or '__proto__' can't read an inherited Object member
+    if (Object.hasOwn(terms, lower)) { return terms[lower]; }
     // constantCase opts out of acronym preservation so shouting enums (IN_PROGRESS) sentence-case
     if (!constantCase && isAcronym(word)) { return word; }
-    const lower = word.toLowerCase();
     if (titleCase) {
       const isEdge = index === 0 || index === words.length - 1;
       return (isEdge || !stopWords.has(lower)) ? capitalize(lower) : lower;
@@ -139,6 +145,15 @@ export const humanize = (str = '', { titleCase = false, dropId = true, constantC
   });
 
   return cased.join(' ');
+};
+
+// global defaults plus a token vocabulary, seeded with the highest-frequency lowercase acronyms.
+// extend once at app boot (humanize.config.terms.sku = 'SKU') and every call inherits it
+humanize.config = {
+  titleCase: false,
+  dropId: true,
+  constantCase: false,
+  terms: { id: 'ID', url: 'URL', api: 'API' },
 };
 
 export const joinWords = (words, {
