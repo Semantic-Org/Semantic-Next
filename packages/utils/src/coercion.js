@@ -29,7 +29,7 @@ const matchesToken = (tokens, normalized) => {
 
 // the editable boolean vocabulary and defaults, set once at app boot (toBoolean.config.truthy.push('oui'))
 // and every call inherits it. per-call truthy/falsy/loose/onInvalid still win over these
-export const toBoolean = configured(
+export const toBoolean = /* @__PURE__ */ configured(
   (value, options = {}) => {
     const config = toBoolean.config;
     const loose = options.loose ?? config.loose;

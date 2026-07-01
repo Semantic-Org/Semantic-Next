@@ -29,7 +29,7 @@ const getOrdinal = (d) => d + ((d >= 11 && d <= 13) ? 'th' : (ordinalSuffix[d % 
 // timezone abbreviations are ambiguous by nature (IST is Kolkata, Jerusalem, or Dublin depending on
 // who you ask), so the picks are editable once at app boot (formatDate.config.timezones.IST =
 // 'Asia/Jerusalem'). full IANA names always pass through untouched
-export const formatDate = configured((date, format = 'LLL', {
+export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
   locale = 'default',
   hour12 = true,
   timezone = 'UTC',
