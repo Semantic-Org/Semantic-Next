@@ -2,6 +2,7 @@ export * from './arrays';
 export * from './browser';
 export * from './cache';
 export * from './cloning';
+export * from './coercion';
 export * from './colors';
 export * from './crypto';
 export * from './css';

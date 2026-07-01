@@ -1,0 +1,198 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Coercion Utilities
+package: "@semantic-ui/utils"
+methods: [toBoolean, toNumber, toInteger, toDate, toString]
+icon: replace
+description: API reference for best-effort type coercion functions
+---
+
+The Coercion utilities turn loose input — attribute strings, query params, form values, JSON — into the type you actually want. Each returns the target type or `null` when the input has no clean representation, so a failed coercion is a value you can guard with `??`, never an `Invalid Date`, `NaN`, or `"[object Object]"` that poisons code downstream.
+
+```javascript
+const page = toNumber(params.get('page')) ?? 1;
+const when = toDate(input.value) ?? new Date();
+```
+
+Each helper is also exported as `coerceBoolean`, `coerceNumber`, `coerceInteger`, `coerceDate`, and `coerceString` for callers who think in coercion terms.
+
+## Functions
+
+### toBoolean
+
+```javascript
+function toBoolean(value, { falsy, loose = false } = {})
+```
+
+Coerces a value to a boolean, or `null` when it recognizes no boolean reading. Booleans pass through, numbers read by zero-ness, and strings match a generous set case-insensitively: `true`, `t`, `yes`, `y`, `on`, `enabled` read as `true`, and `false`, `f`, `no`, `n`, `off`, `disabled`, `null`, `undefined`, `nan` read as `false`, alongside numeric strings by their value. Anything else returns `null`.
+
+#### Parameters
+
+| Name     | Type    | Description |
+|----------|---------|-------------|
+| value    | unknown | The value to coerce |
+| settings | object  | Optional configuration |
+
+##### Options
+
+| Name  | Type                 | Default | Description |
+|-------|----------------------|---------|-------------|
+| falsy | string \| string[]   | —       | Extra tokens to treat as false, layered over the built-in set |
+| loose | boolean              | false   | Coerce unrecognized input via native truthiness instead of returning `null` |
+
+#### Returns
+
+`true`, `false`, or `null` if unrecognized. Never `null` under `loose`.
+
+#### Example
+
+```javascript
+import { toBoolean } from '@semantic-ui/utils';
+
+console.log(toBoolean('yes')); // true
+console.log(toBoolean('off')); // false
+console.log(toBoolean('false')); // false (not the native Boolean('false') === true)
+console.log(toBoolean('1')); // true
+
+// unrecognized input is null, so it composes with ??
+console.log(toBoolean('banana')); // null
+console.log(toBoolean('banana') ?? false); // false
+
+// loose falls back to native truthiness, never null
+console.log(toBoolean('banana', { loose: true })); // true
+
+// extend the falsy set without losing the defaults
+console.log(toBoolean('nope', { falsy: ['nope'] })); // false
+```
+
+### toNumber
+
+```javascript
+function toNumber(value)
+```
+
+Coerces a value to a finite number, or `null` when it can't be converted. Numeric strings parse via `Number` (so hex, scientific, and surrounding whitespace are fine), booleans read as `1` and `0`, and `NaN`, `Infinity`, blanks, unit-tagged strings, arrays, and objects return `null`. It never hands back `NaN` or `Infinity`.
+
+#### Parameters
+
+| Name  | Type    | Description |
+|-------|---------|-------------|
+| value | unknown | The value to coerce |
+
+#### Returns
+
+The finite number, or `null` if unconvertible.
+
+#### Example
+
+```javascript
+import { toNumber } from '@semantic-ui/utils';
+
+console.log(toNumber('3.14')); // 3.14
+console.log(toNumber('  42 ')); // 42
+console.log(toNumber('5px')); // null
+console.log(toNumber('1e999')); // null (overflow to Infinity)
+console.log(toNumber(true)); // 1
+
+console.log(toNumber('abc') ?? 0); // 0
+```
+
+### toInteger
+
+```javascript
+function toInteger(value)
+```
+
+Coerces a value to an integer by truncating toward zero, or `null` when it's unconvertible or non-finite. Equivalent to `toNumber` followed by a truncation, so `Infinity` joins the `null` bucket.
+
+#### Parameters
+
+| Name  | Type    | Description |
+|-------|---------|-------------|
+| value | unknown | The value to coerce |
+
+#### Returns
+
+The truncated integer, or `null` if unconvertible.
+
+#### Example
+
+```javascript
+import { toInteger } from '@semantic-ui/utils';
+
+console.log(toInteger('3.9')); // 3
+console.log(toInteger('-3.9')); // -3
+console.log(toInteger(42.7)); // 42
+console.log(toInteger(Infinity)); // null
+```
+
+### toDate
+
+```javascript
+function toDate(value)
+```
+
+Coerces a value to a Date, or `null` when it can't be parsed — never an `Invalid Date`. Accepts a Date, a number read as epoch milliseconds, or an **ISO-8601 string**. Ambiguous or locale-dependent spellings return `null` rather than a guessed date: bare years, slash and text dates, and day overflow all reject, so `'01/15/2024'` and `'2024-02-30'` never become a wrong Date. A zoneless datetime resolves in the ambient timezone (the user's zone on the client) and is returned as a UTC instant, the same as native `new Date` on an `<input type="datetime-local">` value. A date-only string is read as UTC, and a timestamp passed as a string is rejected, so pass a number for epoch ms.
+
+#### Parameters
+
+| Name  | Type    | Description |
+|-------|---------|-------------|
+| value | unknown | The value to coerce |
+
+#### Returns
+
+The Date, or `null` if unparseable.
+
+#### Example
+
+```javascript
+import { toDate } from '@semantic-ui/utils';
+
+console.log(toDate('2024-01-01')); // Date for 2024-01-01
+console.log(toDate(1700000000000)); // Date from epoch ms
+console.log(toDate('01/15/2024')); // null (ambiguous format)
+console.log(toDate('banana')); // null (never an Invalid Date)
+
+const when = toDate(userInput) ?? new Date();
+```
+
+### toString
+
+```javascript
+function toString(value, { loose = false } = {})
+```
+
+Coerces a value to a string, or `null` when there is no faithful string form. Strings pass through and a finite `number`, a `boolean`, or a `bigint` goes through `String()`. Objects, arrays, functions, symbols, non-finite numbers, and nullish return `null`, so a String field never silently stores `"[object Object]"` or `"NaN"`. Under `loose`, objects and arrays render with JSON for display output, still returning `null` on unserializable input rather than throwing.
+
+#### Parameters
+
+| Name     | Type    | Description |
+|----------|---------|-------------|
+| value    | unknown | The value to coerce |
+| settings | object  | Optional configuration |
+
+##### Options
+
+| Name  | Type    | Default | Description |
+|-------|---------|---------|-------------|
+| loose | boolean | false   | Render objects and arrays with JSON instead of returning `null` |
+
+#### Returns
+
+The string, or `null` if there is no faithful string form.
+
+The `loose` output is a display string, not a round-trippable serialization — JSON drops `undefined` and functions and rewrites `Date` and `NaN`, so it should not be fed back through `toDate` or `toNumber`.
+
+#### Example
+
+```javascript
+import { toString } from '@semantic-ui/utils';
+
+console.log(toString(42)); // '42'
+console.log(toString(true)); // 'true'
+console.log(toString({ a: 1 })); // null
+console.log(toString({ a: 1 }, { loose: true })); // '{"a":1}'
+console.log(toString([1, 2], { loose: true })); // '[1,2]'
+```

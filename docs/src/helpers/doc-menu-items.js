@@ -187,6 +187,7 @@ export const sidebarMenuAPI = [
       { name: 'Browser', url: '/docs/api/utils/browser' },
       { name: 'Cache', url: '/docs/api/utils/cache' },
       { name: 'Cloning', url: '/docs/api/utils/cloning' },
+      { name: 'Coercion', url: '/docs/api/utils/coercion' },
       { name: 'Colors', url: '/docs/api/utils/colors' },
       { name: 'Crypto', url: '/docs/api/utils/crypto' },
       { name: 'Dates', url: '/docs/api/utils/dates' },

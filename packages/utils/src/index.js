@@ -2,6 +2,7 @@ export * from './arrays.js';
 export * from './browser.js';
 export * from './cache.js';
 export * from './cloning.js';
+export * from './coercion.js';
 export * from './colors.js';
 export * from './crypto.js';
 export * from './css.js';

@@ -489,6 +489,33 @@ truncate('こんにちは世界です', 8, { locale: 'ja' });          // 'こ�
 
 ---
 
+## Coercion Utilities (coercion.js)
+
+Best-effort conversion of loose input (attribute strings, query params, JSON) to a target type. Each returns the type or `null` when there is no clean reading, so results compose with `??`. Also exported as `coerceBoolean`/`coerceNumber`/`coerceInteger`/`coerceDate`/`coerceString`.
+
+```javascript
+import { toBoolean, toNumber, toInteger, toDate, toString } from '@semantic-ui/utils';
+
+toBoolean('yes');                       // true (generous: true/t/yes/y/on/enabled, false/f/no/n/off/disabled, numeric)
+toBoolean('banana');                    // null (unrecognized, composes with ??)
+toBoolean('banana', { loose: true });   // true (native truthiness fallback, never null)
+toBoolean('nope', { falsy: ['nope'] }); // false (extend the falsy set)
+
+toNumber('3.14');                       // 3.14
+toNumber('5px');                        // null (never NaN or Infinity)
+toNumber('abc') ?? 0;                   // 0
+
+toInteger('3.9');                       // 3 (truncates toward zero)
+toInteger(Infinity);                    // null
+
+toDate('2024-01-01');                   // Date (ISO strings, epoch-ms numbers, Dates only)
+toDate('01/15/2024');                   // null (ambiguous format, never a guessed date)
+
+toString(42);                           // '42'
+toString({ a: 1 });                     // null (never "[object Object]")
+toString({ a: 1 }, { loose: true });    // '{"a":1}' (render objects for display)
+```
+
 ## Function Utilities (functions.js)
 
 ### Core
