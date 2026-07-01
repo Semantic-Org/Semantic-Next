@@ -152,7 +152,11 @@ helper in functions.js), never a bare `fn.config = {...}` statement — a top-le
 property assignment is a side effect bundlers must keep, which ships the function
 and its vocabulary to every consumer of the module even when nothing imports it.
 The pure annotation is load-bearing and stays at the callsite: bundlers do not
-trust an imported function to be pure, so the factory cannot carry it for you.
+trust an imported function to be pure, so the factory cannot carry it for you,
+and build flags cannot either — esbuild's `pure` option only matches global call
+targets, and the package's `exports.import` points at source, so downstream
+bundlers only see what is written in the files. Measured in PR #283's A/B:
+removing the five annotations cost the component bundle 371 B brotli.
 
 Then propose an implementation that takes the algorithmic wins (caching expensive
 constructors, avoiding O(n²) patterns, eliminating per-call allocations) while
