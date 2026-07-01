@@ -1,5 +1,8 @@
-# Deploy docs site and MCP server to production on tagged releases.
-# Previews are label-gated by the Deploy Bot (tools/ci/deploy). Vercel's automatic Git deploys are off.
+# Deploy the docs site and MCP server to production on tagged releases.
+# Builds in CI and ships prebuilt (no Vercel build minutes), matching the PR
+# preview (pr-deploy.yml) and staging (staging-deploy.yml) flows. Previews are
+# label-gated by the Deploy Bot; staging tracks main. Vercel's own Git deploys
+# are off, so these workflows are the only deploy path.
 # Requires: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_DOCS_PROJECT_ID, VERCEL_MCP_PROJECT_ID
 
 name: Release Deploy
@@ -13,53 +16,63 @@ concurrency:
   group: release-deploy
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   deploy-docs:
     name: Deploy Docs to Production
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DOCS_PROJECT_ID }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.node-version'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      # same caches as the preview and staging deploys (shared docs-astro- prefix)
+      - uses: google/wireit@setup-github-actions-caching/v2
+      - uses: actions/cache@v6
+        with:
+          path: docs/node_modules/.astro
+          key: docs-astro-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            docs-astro-${{ runner.os }}-
 
-      - name: Deploy docs to production
-        run: npx vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build and deploy docs to production
         env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DOCS_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          npx vercel build --prod --token="$VERCEL_TOKEN"
+          npx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
 
+  # runs from the repo root, not tools/mcp: the mcp project's Root Directory is
+  # tools/mcp, which vercel applies relative to the working directory, so running
+  # from tools/mcp doubles the path to tools/mcp/tools/mcp.
   deploy-mcp:
     name: Deploy MCP to Production
     needs: deploy-docs
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MCP_PROJECT_ID }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.node-version'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build MCP server
-        run: npm run build:vercel
-        working-directory: tools/mcp
-
-      - name: Deploy MCP to production
-        run: npx vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: tools/mcp
+      - name: Build and deploy mcp to production
         env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MCP_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npx vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          npx vercel build --prod --token="$VERCEL_TOKEN"
+          npx vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
