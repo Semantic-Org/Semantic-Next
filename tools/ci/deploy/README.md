@@ -42,7 +42,10 @@ Two workflows, three jobs:
     code, rendering from `main`'s reporter against the event, and estimates the
     ETA from recent run durations via the Actions API.
   - `docs` and `mcp` each deploy their target with the Vercel token and
-    `contents: read` only (no comment token), and upload a facts file.
+    `contents: read` only (no comment token), and upload a facts file. Both
+    build in the runner (`vercel build`) and ship the output with `--prebuilt`,
+    so Vercel runs no build for either. `docs` reuses wireit's GitHub Actions
+    cache and astro's cache across runs.
 - **`pr-deploy-report.yml`** (on `workflow_run` completion) renders the final
   comment from the facts and posts it under the bot, editing the Building comment
   in place.
@@ -109,10 +112,10 @@ cat /tmp/report/comment.md
 
 ## Known limits
 
-- **Remote build for now.** Targets build on Vercel, only on labeled PRs, so the
-  per-push spend is already gone. Building on Actions and uploading with
-  `vercel deploy --prebuilt` would cut Vercel build minutes to near zero, a
-  follow-up once verified against the MCP build.
+- **Build Node vs runtime Node.** The runner builds on `.node-version` (26); a
+  Vercel project's serverless functions run on the project's own configured
+  Node. docs is a static build so this is moot for it; keep the mcp project's
+  Node in step if its functions need a specific version.
 - **Whole-run ETA.** The estimate is the median of recent run wall-clocks, not
   per-target. Fine while docs is the common case, per-target is a later
   refinement.

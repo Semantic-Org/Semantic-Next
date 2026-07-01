@@ -123,15 +123,31 @@ jobs:
         with:
           node-version-file: '.node-version'
           cache: 'npm'
-      - run: npm ci
 
-      - name: Deploy docs preview
+      # wireit's GitHub Actions cache, so vercel build reuses the per-package
+      # build outputs instead of rebuilding all nine each run. v2 sets the
+      # ACTIONS_RESULTS_URL the current cache service needs; v1 silently no-ops.
+      - uses: google/wireit@setup-github-actions-caching/v2
+      # astro's incremental cache, which the wireit cache doesn't cover
+      - uses: actions/cache@v6
+        with:
+          path: docs/node_modules/.astro
+          key: docs-astro-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            docs-astro-${{ runner.os }}-
+
+      # build in CI and ship the prebuilt output, so Vercel runs no remote build
+      # (near-zero Vercel build minutes). `vercel build` runs the project's own
+      # install + build:docs, so the output matches a remote build.
+      - name: Build and deploy docs preview
         id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
+          npx vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+          npx vercel build --token="$VERCEL_TOKEN"
           set +e
-          npx vercel deploy --token="$VERCEL_TOKEN" >url.txt 2>deploy.log
+          npx vercel deploy --prebuilt --token="$VERCEL_TOKEN" >url.txt 2>deploy.log
           echo "code=$?" >> "$GITHUB_OUTPUT"
           set -e
           cat deploy.log
@@ -146,8 +162,10 @@ jobs:
           name: deploy-facts-docs
           path: deploy-facts/docs.json
 
-  # Same shape as docs, with the project's local build step (mirrors the
-  # production deploy in release-deploy.yml).
+  # same prebuilt flow as the docs job, run from the repo root (not tools/mcp):
+  # the mcp project's Root Directory is tools/mcp, which vercel applies relative
+  # to the working directory, so running from tools/mcp doubles it to
+  # tools/mcp/tools/mcp. no build cache: build:vercel is an esbuild bundle.
   mcp:
     name: Deploy mcp preview
     runs-on: ubuntu-latest
@@ -166,23 +184,21 @@ jobs:
         with:
           node-version-file: '.node-version'
           cache: 'npm'
-      - run: npm ci
 
-      - name: Build MCP server
-        run: npm run build:vercel
-        working-directory: tools/mcp
-
-      - name: Deploy mcp preview
+      # build in CI and ship the prebuilt output, so Vercel runs no remote build.
+      # `vercel build` runs the mcp project's own install + build:vercel.
+      - name: Build and deploy mcp preview
         id: deploy
-        working-directory: tools/mcp
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
+          npx vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+          npx vercel build --token="$VERCEL_TOKEN"
           set +e
-          npx vercel deploy --token="$VERCEL_TOKEN" >"$GITHUB_WORKSPACE/url.txt" 2>"$GITHUB_WORKSPACE/deploy.log"
+          npx vercel deploy --prebuilt --token="$VERCEL_TOKEN" >url.txt 2>deploy.log
           echo "code=$?" >> "$GITHUB_OUTPUT"
           set -e
-          cat "$GITHUB_WORKSPACE/deploy.log"
+          cat deploy.log
 
       - name: Write facts
         if: always()

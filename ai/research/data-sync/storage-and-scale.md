@@ -57,3 +57,19 @@ A per-channel snapshot memo (build the ordered/projected/encoded snapshot once p
 ## Relation to other deferrals
 
 Durable storage, cross-channel transactions (`txid`), and async authz are all deferred. The change-log model is the foundation that collapses several of these into one decision: multi-box fan-out, durable cross-box resume, and the out-of-band-writer problem are the *same* problem once the change source is a real log.
+
+## Per-subscriber cost by liveness tier
+
+The single fact to hold when reasoning about hosting cost, capacity, or provider economics: **per-subscriber cost is a function of the publication's declared liveness, not the connection count.** The freshness contract resolves to three delivery knobs (window, push, resume); read economically, it sets a per-subscriber standing cost that spans from ~0 to the live-routed ceiling. The fact is easy to lose because Decision 6, Channels, and Ephemeral Collections each describe one slice of it in isolation, and flattening it into a flat per-connection rate (egress = connections × a fixed budget) overcounts by the ratio of live to snapshot subscriptions, which the design pushes toward snapshot by default. This table is the consolidation.
+
+| tier | when used | standing egress / subscriber | worker CPU | durability |
+|---|---|---|---|---|
+| searchIndex `live: false` (the searchIndex default) | tables, search, dashboards at rest | ~0 — one snapshot at subscribe, nothing until args change | only at subscribe | none |
+| searchIndex `refresh: 'own-writes'` | the actor's own page-insert updates | ~0 from co-editors — re-snapshot only on this viewer's writes | per own-write | none |
+| searchIndex `refresh: N s` | dashboards' refresh habit | change-rate-bounded; recompute-diff emits nothing on no-change | one recompute / N s | none |
+| routed channel `<duration>` (coalesced live) | hot docs tolerating a staleness bound | coalesced — a hot doc's writes fold to one delta per window | cheap write-time routing | log |
+| routed channel `live` (the realtime default) | the record you are actively editing | the 5-10 KB/s/subscriber ceiling — write-rate × delta size | cheap write-time routing | log |
+| searchIndex `live: true` | dashboards that earn it (opt-in) | membership deltas | expensive recompute (queries/s × viewers × writes) — the cost cliff | window state |
+| ephemeral (presence/cursors) | active collaborative surface | high message count (15-30Hz), tiny payloads, conflated at ~30Hz | cheap conflation | none |
+
+A realistic user's footprint is mostly the ~0 tiers, plus a few `live` channels on the record they are actively editing, plus ephemeral while collaborating. So the cost driver is live-delta-volume, concentrated in `live` routed, `live: true` recompute, and ephemeral, not connection count. Whole-doc frames are unavailable at any price on the live-routed tier by design (150-200KB aggregates at tens of writes/sec blow the 5-10 KB/s budget), which is the structural reason field-granular deltas and projections exist. `live: true` recompute is the one tier with superlinear unit economics and is opt-in for exactly that reason (Decision 6: "recompute liveness has real unit economics, so it is a knob"). The hosting reading of this table is in [`hosting.md`](hosting.md).

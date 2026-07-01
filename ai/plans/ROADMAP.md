@@ -203,6 +203,7 @@ Slot in wherever there's a gap; not phase-gated.
 Plans drafted but not on the active roadmap. See `ai/plans/icebox/` for files.
 
 - [Data Sync Layer](icebox/data-sync.md) — realtime data layer (collections, publications, drafts, cursor-core protocol). Design corpus at `ai/research/data-sync/`, gate-vetted. Post-1.0 by design — simmering until the component catalog ships. Schema language extracts early via Phase 2g.
+- [Data Sync Dogfooding](icebox/data-sync-dogfooding.md) — preview/staging/prod hosting for the sync backend via a `sync` Deploy Bot target (Fly + Neon branch, teardown). Economics in `ai/research/data-sync/hosting.md`. Gated on the sync server packaging and the Deploy Bot landing on `main`.
 - [Block Runtime Diagnostics](icebox/block-runtime-diagnostics.md) — resolution-trail capture for Lisp data paths, JS-eval error surfacing, public `report()` API for block authors, tracing default-on-in-dev, always-on breadcrumb on first block throw.
 - [Renderer + Evaluator Perf](icebox/renderer-evaluator-perf.md) — concrete hot-path optimizations: item-proxy clone elimination, `Signal.peek` non-cloning, comment-marker reuse as `DynamicRegion` anchor, V8-targeted `ExpressionEvaluator` rewrite.
 - [WASM Renderer](icebox/wasm-renderer.md) — Rust/WASM server renderer for the docs-site hot path. Open questions on streaming, bundle size, AST caching.
