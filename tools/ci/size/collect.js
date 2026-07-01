@@ -13,6 +13,7 @@ import path from 'node:path';
 import { collectLoc } from './loc.js';
 import { measureTargets } from './measure.js';
 import { discoverTargets } from './targets.js';
+import { bundleModules, EXPORT_TRACED, exportCosts, listExports, packageInfo } from './trace.js';
 
 const args = parseArgs(process.argv.slice(2));
 const root = args.root ?? process.cwd();
@@ -25,6 +26,24 @@ const snapshot = {
   targets: measureTargets(root, targets),
   loc: collectLoc(root),
 };
+
+// module attribution for every package bundle, per-export import costs for the
+// piecemeal packages. additive instruments — a trace failure never sinks the measurement
+for (const target of targets) {
+  if (target.group !== 'package' || !target.dir || !snapshot.targets[target.id]?.exists) { continue; }
+  const info = packageInfo(root, target.dir);
+  if (!info) { continue; }
+  try {
+    snapshot.targets[target.id].modules = await bundleModules(root, info);
+    if (EXPORT_TRACED.has(target.label)) {
+      const names = await listExports(root, info);
+      snapshot.targets[target.id].exports = await exportCosts(root, info, names);
+    }
+  }
+  catch (error) {
+    console.error(`trace ${target.label}: ${error.message}`);
+  }
+}
 
 fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
 fs.writeFileSync(out, JSON.stringify(snapshot, null, 2));

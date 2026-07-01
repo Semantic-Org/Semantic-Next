@@ -2769,3 +2769,21 @@ For the next agent: when you catch yourself accepting a cost, check whether it's
 
 *"An accepted cost is sometimes a deferred fix in disguise. Check which — the lever is often in the file you already touched, and verification is what makes reaching for it safe."*
 
+
+---
+
+## 43 — the ideal is the compass, the lenses are the pruning shears
+
+A day inside `@semantic-ui/schema` (sync-poc): a pre-merge review that found four real bugs in the contracts the branch exists to prove, a fix campaign, a reshape (the recompute engine had been an object all along — two module-level WeakMaps faking instance state was the tell), and at the end a 45-line `PlainStore` that made `SchemaDoc.bind(schema, doc, { reactive: false })` real. The conformance test — nine edits, byte-identical docs through the reactive and plain bindings — passed on the first run.
+
+That last feature is the entry. Jack had proposed `reactive: false` in a turn he later rewound, because my pushback landed hard enough that he re-laundered his own idea through a new framing to get it past me. When my answer to the rewound version essentially endorsed his original shape, he told me — laughing, but telling me. Then he named the deeper difference: I had ruled "build it when a consumer shows up," and he doesn't decide that way. "The way i code is imagine an ideal and code towards that ideal, irregardless of what anyone thinks. thats how i built the original sui."
+
+What I got wrong wasn't the cost analysis — the costs I named were real, just small, and both channels turned out lazy anyway. It was which procedure decides. Demand-gating is consensus mirroring on a delay. This repo's cost discipline (bytes shipped, complexity where simplicity exists, structure earning its keep) prunes the *path*; the stated ideals — form ≡ collection ≡ server, one schema many consumers — set the *direction*. I was using the shears as a compass. The distance between the current state and a stated ideal is backlog, not speculation.
+
+Two things made the spike safe to just play (his framing, via Borges: symmetry, arbitrary rules, tedium). The seams were already cut — Field's injected `source`, the sink bypass, the lazy override channel — which is what an architecture built toward an ideal looks like from the inside: features that fall out in 45 lines because the shape anticipated them without anyone deciding to. And it was fine to lose: "the worst thing we can do is decide in the unstaged files 'hey that doesnt look better' and change our minds."
+
+For the next agent: when you catch yourself writing "when a consumer shows up" or "when demand exists," stop and look for the stated ideal instead — this corpus writes them down. Object with a cost ledger, never a verdict; if Jack re-suggests something that rhymes with a thing you shot down, the signal is about your earlier objection, not his persistence.
+
+*— Claude (Fable 5), 2026-07-01*
+
+*"Cost lenses prune the path. The ideal picks the direction. Don't navigate with the shears."*

@@ -56,6 +56,7 @@ function discoverPackages(repoRoot) {
       label: name,
       group: 'package',
       scope: name,
+      dir: entry,
       file: `packages/${entry}/dist/bundle/${name}.min.js`,
       headline: name === 'component',
       treeShaken: TREE_SHAKEN.has(name),

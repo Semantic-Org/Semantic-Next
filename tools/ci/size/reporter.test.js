@@ -240,3 +240,79 @@ test('security — malicious label, group, title, and baseline sha are neutraliz
   assert.ok(!md.includes('/commit/notahex'), 'non-hex baseline sha is not linked as a commit');
   assert.ok(md.includes('/tree/main'), 'base falls back to the ref tree');
 });
+
+/* ------------------------- trace sections ------------------------- */
+
+test('module attribution renders for changed bundles and names the mover', () => {
+  const head = tgt('pkg-component', [50000, 56000, 170000], { headline: true });
+  const base = tgt('pkg-component', [49600, 55700, 169000], { headline: true });
+  head.modules = { 'utils/strings.js': 5000, 'component/index.js': 900 };
+  base.modules = { 'utils/strings.js': 3900, 'component/index.js': 900 };
+  const { json: report, md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
+  const metric = report.metrics.find((m) => m.id === 'pkg-component');
+  assert.equal(metric.moduleDeltas.length, 1);
+  assert.equal(metric.moduleDeltas[0].key, 'utils/strings.js');
+  assert.equal(metric.moduleDeltas[0].delta, 1100);
+  assert.ok(md.includes('Δ by module'), 'attribution section renders');
+  assert.ok(md.includes('utils/strings.js'), 'mover named');
+});
+
+test('module attribution stays hidden when no bundle changed', () => {
+  const head = tgt('pkg-component', [50000, 56000, 170000]);
+  const base = tgt('pkg-component', [50000, 56000, 170000]);
+  head.modules = { 'utils/strings.js': 5000 };
+  base.modules = { 'utils/strings.js': 3900 };
+  const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
+  assert.ok(!md.includes('Δ by module'), 'no attribution without a changed bundle');
+});
+
+test('export costs report movers, surface changes, and the verdict line past the floor', () => {
+  const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  head.exports = { toNumber: 1072, toBoolean: 900, brandNew: 300 };
+  base.exports = { toNumber: 366, toBoolean: 900, oldGone: 250 };
+  const { json: report, md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
+  const metric = report.metrics.find((m) => m.id === 'pkg-utils');
+  assert.equal(metric.exportDeltas.changed[0].name, 'toNumber');
+  assert.equal(metric.exportDeltas.changed[0].delta, 706);
+  assert.equal(metric.exportDeltas.added[0].name, 'brandNew');
+  assert.equal(metric.exportDeltas.removed[0].name, 'oldGone');
+  assert.ok(md.includes('Export costs'), 'export section renders');
+  assert.ok(md.includes('Import costs moved'), 'verdict line renders past the floor');
+  assert.ok(md.includes('| `utils` | `brandNew` | 300 B | new |'), 'added export rendered');
+});
+
+test('export movement below the verdict floor stays out of the alert', () => {
+  const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  head.exports = { small: 400 };
+  base.exports = { small: 350 };
+  const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
+  assert.ok(!md.includes('Import costs moved'), 'no verdict line for a 50 B mover');
+  assert.ok(md.includes('Export costs'), 'section still lists the mover');
+});
+
+test('snapshots without trace fields render exactly as before', () => {
+  const head = tgt('pkg-component', [50000, 56000, 170000]);
+  const base = tgt('pkg-component', [49600, 55700, 169000]);
+  const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
+  assert.ok(!md.includes('Δ by module'), 'no attribution section');
+  assert.ok(!md.includes('Export costs'), 'no export section');
+});
+
+test('hostile export and module names render inert', () => {
+  const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  head.exports = { 'evil`|name': 5000 };
+  base.exports = { 'evil`|name': 100 };
+  head.modules = { 'bad`|[x](y).js': 900 };
+  base.modules = { 'bad`|[x](y).js': 100 };
+  const headB = tgt('pkg-b', [50000, 56000, 170000]);
+  const baseB = tgt('pkg-b', [49000, 55000, 168000]);
+  headB.modules = { 'bad`|[x](y).js': 2000 };
+  baseB.modules = { 'bad`|[x](y).js': 100 };
+  const { md } = run(snapshot([head, headB], loc({})), snapshot([base, baseB], loc({})));
+  assert.ok(!md.includes('evil`|name'), 'backtick and pipe stripped from export name');
+  assert.ok(md.includes('evilname'), 'export still listed');
+  assert.ok(!md.includes('bad`|'), 'module key stripped of code-span breakers');
+});
