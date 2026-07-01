@@ -13,12 +13,29 @@ export type OnInvalid = 'null' | 'passthrough';
  * Options for boolean coercion
  */
 export interface ToBooleanSettings {
-  /** Extra lowercase tokens to treat as false, layered over the built-in set */
+  /** Tokens to treat as true for this call, winning over the config vocabulary */
+  truthy?: string | string[];
+  /** Tokens to treat as false for this call, winning over the config vocabulary and a truthy match */
   falsy?: string | string[];
   /** Coerce unrecognized input via native truthiness instead of returning null (default: false) */
   loose?: boolean;
   /** How a failed coercion resolves (default: 'null'). `loose` takes precedence when both are set */
   onInvalid?: OnInvalid;
+}
+
+/**
+ * The global boolean vocabulary and defaults, read by every {@link toBoolean} call. Set once at app
+ * boot (e.g. `toBoolean.config.truthy.push('oui')`); per-call settings still win over it.
+ */
+export interface ToBooleanConfig {
+  /** Tokens recognized as true, case-insensitive */
+  truthy: string[];
+  /** Tokens recognized as false, case-insensitive */
+  falsy: string[];
+  /** Default for `loose` */
+  loose: boolean;
+  /** Default for `onInvalid` */
+  onInvalid: OnInvalid;
 }
 
 /**
@@ -81,6 +98,10 @@ export function toBoolean<T>(value: T, settings: ToBooleanSettings & { onInvalid
  * ```
  */
 export function toBoolean(value: unknown, settings?: ToBooleanSettings): boolean | null;
+export namespace toBoolean {
+  /** The global boolean vocabulary and defaults. Set once at app boot; per-call settings win over it */
+  let config: ToBooleanConfig;
+}
 
 /** Coerces to a finite number, returning the original value on failure. @see {@link toNumber} */
 export function toNumber<T>(value: T, settings: ToNumberSettings & { onInvalid: 'passthrough'; }): number | T;

@@ -84,6 +84,27 @@ describe('toBoolean', () => {
     // a recognized value is unaffected by either setting
     expect(toBoolean('yes', { onInvalid: 'passthrough' })).toBe(true);
   });
+
+  it('takes a per-call truthy override', () => {
+    expect(toBoolean('yep', { truthy: ['yep'] })).toBe(true);
+    expect(toBoolean('nope', { truthy: ['yep'] })).toBe(null);
+  });
+
+  it('reads toBoolean.config for the vocabulary and defaults, with per-call winning', () => {
+    const savedTruthy = toBoolean.config.truthy;
+    const savedOnInvalid = toBoolean.config.onInvalid;
+    toBoolean.config.truthy = [...savedTruthy, 'oui'];
+    toBoolean.config.onInvalid = 'passthrough';
+    try {
+      expect(toBoolean('oui')).toBe(true);
+      expect(toBoolean('banana')).toBe('banana');
+      expect(toBoolean('banana', { onInvalid: 'null' })).toBe(null);
+    }
+    finally {
+      toBoolean.config.truthy = savedTruthy;
+      toBoolean.config.onInvalid = savedOnInvalid;
+    }
+  });
 });
 
 describe('toNumber', () => {

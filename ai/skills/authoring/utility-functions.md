@@ -499,7 +499,11 @@ import { toBoolean, toNumber, toInteger, toDate, toString } from '@semantic-ui/u
 toBoolean('yes');                       // true (generous: true/t/yes/y/on/enabled, false/f/no/n/off/disabled, numeric)
 toBoolean('banana');                    // null (unrecognized, composes with ??)
 toBoolean('banana', { loose: true });   // true (native truthiness fallback, never null)
-toBoolean('nope', { falsy: ['nope'] }); // false (extend the falsy set)
+toBoolean('nope', { falsy: ['nope'] }); // false (extend the falsy set for this call)
+
+// the recognized vocabulary and loose/onInvalid defaults live in an editable toBoolean.config
+// (mirrors humanize.config), set once at app boot; per-call settings still win
+toBoolean.config.truthy.push('oui');    // teach it another spelling globally
 
 toNumber('3.14');                       // 3.14
 toNumber('5px');                        // null (never NaN or Infinity)

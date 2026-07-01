@@ -40,7 +40,8 @@ Coerces a value to a boolean, or `null` when it recognizes no boolean reading. B
 
 | Name      | Type                 | Default  | Description |
 |-----------|----------------------|----------|-------------|
-| falsy     | string \| string[]   | —        | Extra tokens to treat as false, layered over the built-in set |
+| truthy    | string \| string[]   | —        | Extra tokens to treat as true for this call, winning over the config vocabulary |
+| falsy     | string \| string[]   | —        | Extra tokens to treat as false for this call, winning over the config vocabulary and a truthy match |
 | loose     | boolean              | false    | Coerce unrecognized input via native truthiness instead of returning `null` |
 | onInvalid | 'null' \| 'passthrough' | 'null' | How an unrecognized value resolves (`loose` takes precedence when both are set) |
 
@@ -67,6 +68,25 @@ console.log(toBoolean('banana', { loose: true })); // true
 
 // extend the falsy set without losing the defaults
 console.log(toBoolean('nope', { falsy: ['nope'] })); // false
+```
+
+#### toBoolean.config
+
+`toBoolean.config` holds the recognized vocabulary (`truthy`, `falsy`) and the defaults for `loose` and `onInvalid`. Edit it once at app boot and every call inherits it, so a locale or domain adds its own spellings in one place instead of passing `truthy`/`falsy` on every call. Per-call settings still win over it.
+
+```javascript
+import { toBoolean } from '@semantic-ui/utils';
+
+// teach it another language, once
+toBoolean.config.truthy.push('oui', 'sí');
+toBoolean.config.falsy.push('non', 'nein');
+
+console.log(toBoolean('oui')); // true
+console.log(toBoolean('non')); // false
+
+// flip a default for every call
+toBoolean.config.onInvalid = 'passthrough';
+console.log(toBoolean('banana')); // 'banana'
 ```
 
 ### toNumber
