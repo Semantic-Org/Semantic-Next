@@ -23,6 +23,7 @@ This is not lodash. This is a first-principles utility library for 2026.
 - **Common case is the fast case.** The most common call pattern should be the most optimized path.
 - **First principles, not tradition.** Every API decision should be defensible on its own merits. Don't inherit conventions from other languages or libraries without examining whether they still make sense.
 - **Algorithmic wins, not micro-optimizations.** Take the big wins: caching expensive constructors, avoiding O(n²) patterns, eliminating redundant allocations. Skip micro-optimizations that save nanoseconds but cost readability — a switch statement over an object lookup, a manual while loop over `.replace()`, a `for` loop over `.reduce()`. The code should read like what it *does*, not like what V8 does with it. Code-golf your way through the performance wins; if an optimization requires more lines than it saves in microseconds, it's not worth it.
+- **Everything arbitrary is a setting.** A constant embedded in a util is either *mechanical* (spec-defined, derivable — the base64 alphabet, ISO-8601 shape) or *arbitrary* (a judgment call two reasonable apps would make differently — which strings read as `true`, which words stay lowercase in a title, which IANA zone `IST` means). Mechanical stays a constant. Arbitrary must be reachable from the outside, or every downstream app that disagrees vendors the whole function. The test: is this a fact, or a pick? Two shapes, matching what ships today: a per-call option when callsites within one app legitimately differ (`toDate`'s `{ epoch: 'seconds' }`), and an `fn.config` the function reads at call time when it's set-once-per-app vocabulary or defaults (`toBoolean.config.truthy`, `toTitleCase.config.stopWords`, `formatDate.config.timezones`, `humanize.config.terms`). Per-call always wins over config. The counterweight: don't config what nothing diverges on, and don't config what the type system can't follow — a global default that flips a return type makes the published overloads lie. This anchors the design to the *population* of callsites, not the first one that comes to mind.
 
 ## Step 1: Establish Intent
 
@@ -136,6 +137,15 @@ most frequent? What call patterns dominate? What sizes are typical? Use these
 patterns as a reference when making implementation decisions — type check
 ordering, fast paths, allocation strategy, and branching should all optimize
 for the most common real-world case first, with rarer cases handled after.
+
+Everything arbitrary is a setting. After drafting, list every constant your
+implementation embeds and classify each: mechanical (spec-defined or derivable,
+stays a constant) or arbitrary (a judgment call two reasonable apps would make
+differently — a vocabulary, a threshold, a default policy). Anything arbitrary
+must surface as an option (when callsites within one app differ) or as an
+`fn.config` object the function reads at call time (when it is set-once-per-app),
+with per-call winning over config. Do not design for only the first callsite
+that comes to mind.
 
 Then propose an implementation that takes the algorithmic wins (caching expensive
 constructors, avoiding O(n²) patterns, eliminating per-call allocations) while
