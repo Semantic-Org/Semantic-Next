@@ -1,5 +1,5 @@
 import { identity } from './functions.js';
-import { isArray, isFunction } from './types.js';
+import { isArray, isFunction, isString } from './types.js';
 
 /*-------------------
        Strings
@@ -67,6 +67,111 @@ export const capitalizeWords = (str = '') => {
   return str.replace(/\b\w+/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
 };
 
+// the pure-annotated Object.assign keeps the function and its config one droppable expression, so a
+// bundle that never imports it carries neither. a plain `fn.config = {}` assignment is a top-level
+// side effect bundlers must keep, which would ship the vocabulary to every consumer of this module
+
+// the words that stay lowercase mid-title. style guides disagree here (AP capitalizes long
+// prepositions, Chicago lowercases them all), so the list is editable once at app boot.
+// humanize's titleCase mode reads the same vocabulary
+export const toTitleCase = /* @__PURE__ */ Object.assign(
+  (str = '') => {
+    if (!isString(str)) {
+      return;
+    }
+    const stopWords = toTitleCase.config.stopWords;
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map((word, index, arr) => {
+        // Always capitalize the first word, last word, and any word not in stopWords
+        if (index === 0 || index === arr.length - 1 || !stopWords.includes(word)) {
+          return word.charAt(0).toUpperCase() + word.slice(1);
+        }
+        return word;
+      })
+      .join(' ');
+  },
+  {
+    config: {
+      stopWords: [
+        'the',
+        'a',
+        'an',
+        'and',
+        'but',
+        'for',
+        'at',
+        'by',
+        'from',
+        'to',
+        'in',
+        'on',
+        'of',
+        'or',
+        'nor',
+        'with',
+        'as',
+      ],
+    },
+  },
+);
+
+// split an identifier into words: acronym runs stay whole (getHTTPResponse -> get, HTTP, Response),
+// a plural acronym keeps its trailing s (userIDs -> user, IDs), and caseless scripts keep their
+// combining marks so vocalized Devanagari/Arabic/Hebrew/Thai don't shatter per codepoint
+const HUMANIZE_WORD_RE =
+  /\p{Lu}{2,}s(?![\p{Ll}\p{M}])|\p{Lu}+(?=\p{Lu}\p{Ll})|[\p{Lu}\p{Lt}]?[\p{Ll}\p{Lm}\p{M}]+|\p{Lu}+|[\p{Lo}\p{Lm}\p{M}]+|\p{N}+/gu;
+
+const PLURAL_ACRONYM_RE = /^\p{Lu}{2,}s$/u;
+
+const isAcronym = (word) =>
+  (word.length > 1 && word === word.toUpperCase() && word !== word.toLowerCase()) || PLURAL_ACRONYM_RE.test(word);
+
+// global defaults plus a token vocabulary, seeded with the highest-frequency lowercase acronyms.
+// extend once at app boot (humanize.config.terms.sku = 'SKU') and every call inherits it
+export const humanize = /* @__PURE__ */ Object.assign(
+  (str = '', options = {}) => {
+    if (!isString(str)) { return ''; }
+
+    const { titleCase, dropId, constantCase } = { ...humanize.config, ...options };
+    // call terms layer over the global vocabulary so an app sets it once and overrides per call
+    const terms = options.terms ? { ...humanize.config.terms, ...options.terms } : humanize.config.terms;
+
+    // normalize so decomposed accents (NFD café, ÉCOLE) collapse before the casing pass
+    const words = str.normalize('NFC').match(HUMANIZE_WORD_RE);
+    if (!words) { return ''; }
+
+    // strip a trailing id segment (user_id -> User), but never the only word
+    if (dropId && words.length > 1 && words[words.length - 1].toLowerCase() === 'id') {
+      words.pop();
+    }
+
+    const cased = words.map((word, index) => {
+      const lower = word.toLowerCase();
+      // hasOwn so a token like 'constructor' or '__proto__' can't read an inherited Object member
+      if (Object.hasOwn(terms, lower)) { return terms[lower]; }
+      // constantCase opts out of acronym preservation so shouting enums (IN_PROGRESS) sentence-case
+      if (!constantCase && isAcronym(word)) { return word; }
+      if (titleCase) {
+        const isEdge = index === 0 || index === words.length - 1;
+        return (isEdge || !toTitleCase.config.stopWords.includes(lower)) ? capitalize(lower) : lower;
+      }
+      return index === 0 ? capitalize(lower) : lower;
+    });
+
+    return cased.join(' ');
+  },
+  {
+    config: {
+      titleCase: false,
+      dropId: true,
+      constantCase: false,
+      terms: { id: 'ID', url: 'URL', api: 'API' },
+    },
+  },
+);
+
 export const joinWords = (words, {
   separator = ', ',
   lastSeparator = ' and ',
@@ -103,6 +208,46 @@ export const joinWords = (words, {
 
   return result + lastSeparator + lastWord;
 };
+
+const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
+
+// words whose sound contradicts their spelling, where the vowel heuristic reads them wrong.
+// extend once at app boot (getArticle.config.exceptions.faq = 'an') and every call inherits it
+export const getArticle = /* @__PURE__ */ Object.assign(
+  (word, settings = {}) => {
+    const lower = word.toLowerCase();
+    const exceptions = getArticle.config.exceptions;
+    // hasOwn so a word like 'constructor' can't read an inherited Object member as its article
+    const article = Object.hasOwn(exceptions, lower)
+      ? exceptions[lower]
+      : (vowels.has(lower[0]) ? 'an' : 'a');
+    const finalArticle = (settings.capitalize)
+      ? capitalize(article)
+      : article;
+
+    return settings.includeWord
+      ? `${finalArticle} ${word}`
+      : finalArticle;
+  },
+  {
+    config: {
+      exceptions: {
+        hour: 'an',
+        honest: 'an',
+        honor: 'an',
+        honour: 'an',
+        heir: 'an',
+        unique: 'a',
+        university: 'a',
+        unicorn: 'a',
+        user: 'a',
+        one: 'a',
+        once: 'a',
+        euro: 'a',
+      },
+    },
+  },
+);
 
 export const truncate = (text, length, options = {}) => {
   const {

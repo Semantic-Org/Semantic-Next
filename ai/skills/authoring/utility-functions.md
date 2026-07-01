@@ -417,9 +417,9 @@ if (isCI) { ... }           // detects GitHub Actions, GitLab CI, Jenkins, etc.
 
 ---
 
-## String Utilities (strings.js, humanize.js, to-title-case.js, get-article.js)
+## String Utilities (strings.js)
 
-The configured vocabulary functions (`humanize`, `toTitleCase`, `getArticle`) live in their own modules so a bundle only carries the ones it imports — their `fn.config` assignments would otherwise ride into every consumer of strings.js.
+The configured vocabulary functions (`humanize`, `toTitleCase`, `getArticle`, and coercion's `toBoolean`) attach their config via `/* @__PURE__ */ Object.assign(fn, { config })` — one droppable expression, so a bundle that never imports the function carries neither it nor its vocabulary. A plain `fn.config = {}` assignment is a top-level side effect bundlers must keep, which ships the vocabulary to every consumer of the module. Use the pure pattern for any new configured function.
 
 ### Case Conversion
 ```javascript

@@ -147,6 +147,12 @@ must surface as an option (when callsites within one app differ) or as an
 with per-call winning over config. Do not design for only the first callsite
 that comes to mind.
 
+Attach a config with `/* @__PURE__ */ Object.assign(fn, { config: {...} })`,
+never a bare `fn.config = {...}` statement — a top-level property assignment is
+a side effect bundlers must keep, which ships the function and its vocabulary
+to every consumer of the module even when nothing imports it. The pure-annotated
+form keeps the pair one droppable expression.
+
 Then propose an implementation that takes the algorithmic wins (caching expensive
 constructors, avoiding O(n²) patterns, eliminating per-call allocations) while
 keeping the code readable and compact. If a micro-optimization (switch vs object

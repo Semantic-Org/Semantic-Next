@@ -26,38 +26,43 @@ const matchesToken = (tokens, normalized) => {
   return false;
 };
 
-export const toBoolean = (value, options = {}) => {
-  const config = toBoolean.config;
-  const loose = options.loose ?? config.loose;
-  const onInvalid = options.onInvalid ?? config.onInvalid;
-  if (isBoolean(value)) { return value; }
-  if (isNumber(value)) { return !Number.isNaN(value) && value !== 0; }
-  if (isString(value)) {
-    const normalized = value.trim().toLowerCase();
-    // per-call tokens win over the config vocabulary, and falsy wins over truthy within each layer,
-    // so a token pushed into both config lists by separate boot-time extensions reads as false
-    if (options.falsy != null && matchesToken(options.falsy, normalized)) { return false; }
-    if (options.truthy != null && matchesToken(options.truthy, normalized)) { return true; }
-    if (matchesToken(config.falsy, normalized)) { return false; }
-    if (matchesToken(config.truthy, normalized)) { return true; }
-    // a numeric string reads by its value ('1' -> true, '0'/'0.0' -> false)
-    if (normalized !== '') {
-      const asNumber = Number(normalized);
-      if (!Number.isNaN(asNumber)) { return asNumber !== 0; }
-    }
-  }
-  // unrecognized: truthiness under loose (loose wins over onInvalid), else the onInvalid result
-  return loose ? Boolean(value) : onInvalidResult(value, onInvalid);
-};
-
 // the editable boolean vocabulary and defaults, set once at app boot (toBoolean.config.truthy.push('oui'))
-// and every call inherits it. per-call truthy/falsy/loose/onInvalid still win over these
-toBoolean.config = {
-  truthy: ['true', 't', 'yes', 'y', 'on', 'enabled', 'enable'],
-  falsy: ['false', 'f', 'no', 'n', 'off', 'disabled', 'disable', 'null', 'undefined', 'nan'],
-  loose: false,
-  onInvalid: 'null',
-};
+// and every call inherits it. per-call truthy/falsy/loose/onInvalid still win over these. the
+// pure-annotated Object.assign keeps the function and its config one droppable expression, so a
+// bundle that only imports the other coercers carries neither
+export const toBoolean = /* @__PURE__ */ Object.assign(
+  (value, options = {}) => {
+    const config = toBoolean.config;
+    const loose = options.loose ?? config.loose;
+    const onInvalid = options.onInvalid ?? config.onInvalid;
+    if (isBoolean(value)) { return value; }
+    if (isNumber(value)) { return !Number.isNaN(value) && value !== 0; }
+    if (isString(value)) {
+      const normalized = value.trim().toLowerCase();
+      // per-call tokens win over the config vocabulary, and falsy wins over truthy within each layer,
+      // so a token pushed into both config lists by separate boot-time extensions reads as false
+      if (options.falsy != null && matchesToken(options.falsy, normalized)) { return false; }
+      if (options.truthy != null && matchesToken(options.truthy, normalized)) { return true; }
+      if (matchesToken(config.falsy, normalized)) { return false; }
+      if (matchesToken(config.truthy, normalized)) { return true; }
+      // a numeric string reads by its value ('1' -> true, '0'/'0.0' -> false)
+      if (normalized !== '') {
+        const asNumber = Number(normalized);
+        if (!Number.isNaN(asNumber)) { return asNumber !== 0; }
+      }
+    }
+    // unrecognized: truthiness under loose (loose wins over onInvalid), else the onInvalid result
+    return loose ? Boolean(value) : onInvalidResult(value, onInvalid);
+  },
+  {
+    config: {
+      truthy: ['true', 't', 'yes', 'y', 'on', 'enabled', 'enable'],
+      falsy: ['false', 'f', 'no', 'n', 'off', 'disabled', 'disable', 'null', 'undefined', 'nan'],
+      loose: false,
+      onInvalid: 'null',
+    },
+  },
+);
 
 export const toNumber = (value, { onInvalid = 'null' } = {}) => {
   // isNumber admits NaN and Infinity, both of which poison arithmetic, so only a finite number survives
