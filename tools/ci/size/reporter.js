@@ -163,9 +163,25 @@ function diffTarget(id, head, base) {
   let status = 'unchanged';
   if (meaningful) { status = delta.brotli > 0 ? 'larger' : 'smaller'; }
   const metric = { ...descriptor, status, head: sizes(head), base: sizes(base), delta, pct };
-  if (head.modules && base.modules) { metric.moduleDeltas = diffModules(head.modules, base.modules); }
-  if (head.exports || base.exports) { metric.exportDeltas = diffExports(head.exports ?? {}, base.exports ?? {}); }
+  // both sides or nothing: a one-sided trace failure (swallowed by collect on purpose) must
+  // degrade to no section, never to a false mass added/removed diff
+  if (head.modules && base.modules) {
+    metric.moduleDeltas = diffModules(byteMap(head.modules), byteMap(base.modules));
+  }
+  if (head.exports && base.exports) {
+    metric.exportDeltas = diffExports(byteMap(head.exports), byteMap(base.exports));
+  }
   return metric;
+}
+
+// snapshots are artifacts from the unprivileged job — keep only finite-number byte values
+// on a clean prototype so a crafted field can't reach the comment or the arithmetic
+function byteMap(map) {
+  const clean = Object.create(null);
+  for (const [key, value] of Object.entries(map)) {
+    if (typeof value === 'number' && Number.isFinite(value)) { clean[key] = value; }
+  }
+  return clean;
 }
 
 // per-module minified-byte movement inside a bundle, above the trace floor
@@ -188,11 +204,11 @@ function diffExports(head, base) {
   const added = [];
   const removed = [];
   for (const name of names) {
-    const inHead = name in head;
-    const inBase = name in base;
+    const inHead = Object.hasOwn(head, name);
+    const inBase = Object.hasOwn(base, name);
     if (inHead && !inBase) { added.push({ name, bytes: head[name] }); }
     else if (!inHead && inBase) { removed.push({ name, bytes: base[name] }); }
-    else if (Math.abs(head[name] - base[name]) >= TRACE.export) {
+    else if (inHead && inBase && Math.abs(head[name] - base[name]) >= TRACE.export) {
       changed.push({ name, head: head[name], base: base[name], delta: head[name] - base[name] });
     }
   }
@@ -471,30 +487,33 @@ function renderExportCosts(lines, report) {
   else {
     lines.push('| package | export | min | Δ min |');
     lines.push('|---|---|---:|---:|');
-    // a systemic leak moves every export of a module at once — cap the table and
-    // point at the raw report rather than scrolling the comment
+    // a systemic leak or surface sweep moves many exports at once — cap every row
+    // kind and point at the raw report rather than scrolling the comment
     let rows = 0;
     let hidden = 0;
+    const push = (line) => {
+      if (rows >= TRACE.maxRows * 2) {
+        hidden++;
+        return;
+      }
+      rows++;
+      lines.push(line);
+    };
     for (const m of moved) {
       for (const e of m.exportDeltas.changed) {
-        if (rows >= TRACE.maxRows * 2) {
-          hidden++;
-          continue;
-        }
-        rows++;
-        lines.push(
+        push(
           `| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | ${formatSize(e.head)} | ${signedSize(e.delta)} |`,
         );
       }
       for (const e of m.exportDeltas.added) {
-        lines.push(`| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | ${formatSize(e.bytes)} | new |`);
+        push(`| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | ${formatSize(e.bytes)} | new |`);
       }
       for (const e of m.exportDeltas.removed) {
-        lines.push(`| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | — | removed |`);
+        push(`| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | — | removed |`);
       }
     }
     if (hidden > 0) {
-      lines.push(`| | <sub>+ ${hidden} smaller movers in \`size-report.json\`</sub> | | |`);
+      lines.push(`| | <sub>+ ${hidden} more in \`size-report.json\`</sub> | | |`);
     }
     lines.push('');
     lines.push(
@@ -573,12 +592,15 @@ function negate(s) {
   return { raw: -s.raw, gzip: -s.gzip, brotli: -s.brotli };
 }
 
+// snapshot fields are artifact data — a non-numeric value renders as a dash, never as markdown
 function formatSize(bytes) {
+  if (typeof bytes !== 'number' || !Number.isFinite(bytes)) { return '—'; }
   const n = Math.abs(bytes);
   return n >= 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${bytes} B`;
 }
 
 function signedSize(bytes) {
+  if (typeof bytes !== 'number' || !Number.isFinite(bytes)) { return '—'; }
   if (bytes === 0) { return '0 B'; }
   const sign = bytes > 0 ? '+' : '-';
   const n = Math.abs(bytes);

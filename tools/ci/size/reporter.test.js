@@ -296,8 +296,65 @@ test('snapshots without trace fields render exactly as before', () => {
   const head = tgt('pkg-component', [50000, 56000, 170000]);
   const base = tgt('pkg-component', [49600, 55700, 169000]);
   const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
-  assert.ok(!md.includes('Δ by module'), 'no attribution section');
-  assert.ok(!md.includes('Export costs'), 'no export section');
+  // pin the full section inventory, not just the absence of the new headers —
+  // a placeholder or reordering for traceless snapshots must fail this
+  const sections = [...md.matchAll(/<summary>([^<:(]+)/g)].map((m) => m[1].trim());
+  assert.deepEqual(sections, ['LOC by scope', 'All 1 bundles, gzip, and raw sizes']);
+  // and pin the alert block verbatim so verdict drift for old snapshots is loud
+  const alert = md.split('\n').filter((l) => l.startsWith('> ')).join('\n');
+  assert.equal(
+    alert,
+    '> [!WARNING]\n> `component` grew **+400 B** brotli to 48.8 KB (+0.8%) across **+0 shipped LOC**.',
+  );
+});
+
+test('a one-sided trace failure degrades to no section, never a mass surface diff', () => {
+  const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  base.exports = { a: 100, b: 200, c: 300 };
+  base.modules = { 'utils/a.js': 500 };
+  const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
+  assert.ok(!md.includes('Export costs'), 'no export section from a head-side trace failure');
+  assert.ok(!md.includes('removed'), 'no false removed rows');
+});
+
+test('exports named after Object.prototype members diff correctly', () => {
+  const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  head.exports = { keep: 100 };
+  base.exports = { keep: 100, toString: 800 };
+  const { json, md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
+  const metric = json.metrics.find((m) => m.id === 'pkg-utils');
+  assert.equal(metric.exportDeltas.removed[0].name, 'toString');
+  assert.ok(md.includes('| `utils` | `toString` | — | removed |'), 'removed row rendered');
+});
+
+test('poisoned byte values in a snapshot never reach the comment', () => {
+  const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  head.exports = { real: 400, evil: '](http://evil) <img src=x>' };
+  base.exports = { real: 100, evil: 50 };
+  const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
+  assert.ok(!md.includes('evil)'), 'crafted string filtered before rendering');
+  assert.ok(!md.includes('<img'), 'no HTML from byte fields');
+  assert.ok(md.includes('| `utils` | `real` | 400 B | +300 B |'), 'legit rows still render');
+});
+
+test('added and removed export rows respect the table cap', () => {
+  const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  head.exports = {};
+  base.exports = {};
+  for (let i = 0; i < 40; i++) {
+    head.exports['added' + i] = 100 + i;
+    base.exports['gone' + i] = 100 + i;
+  }
+  head.exports.shared = 100;
+  base.exports.shared = 100;
+  const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
+  const rowCount = md.split('\n').filter((l) => l.startsWith('| `utils` |')).length;
+  assert.ok(rowCount <= 16, 'row count capped, got ' + rowCount);
+  assert.ok(md.includes('more in `size-report.json`'), 'overflow pointer rendered');
 });
 
 test('hostile export and module names render inert', () => {

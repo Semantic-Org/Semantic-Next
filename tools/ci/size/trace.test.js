@@ -90,3 +90,16 @@ test('exportCosts expose a retention leak as a cost jump on an unrelated export'
     `leaky ${leakyCosts.small} B should exceed fixed ${fixedCosts.small} B`,
   );
 });
+
+test('reserved-word export names price via aliased imports without darkening the package', async () => {
+  const { root, info } = makeFixture();
+  fs.appendFileSync(
+    path.join(root, 'packages', 'demo', 'src', 'index.js'),
+    "\nexport default function fallback() { return 'd'; }\n",
+  );
+  const names = await listExports(root, info);
+  assert.ok(names.includes('default'), 'default enumerated');
+  const costs = await exportCosts(root, info, names);
+  assert.ok(costs.default > 0, 'default priced through the alias form');
+  assert.ok(costs.small > 0, 'sibling exports still priced');
+});

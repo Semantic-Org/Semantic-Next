@@ -92,17 +92,26 @@ export async function exportCosts(repoRoot, { entry, external }, names) {
   for (let i = 0; i < names.length; i += CONCURRENCY) {
     const chunk = names.slice(i, i + CONCURRENCY);
     const results = await Promise.all(chunk.map(async (name) => {
-      const result = await build(repoRoot, {
-        external,
-        stdin: {
-          contents: `import { ${name} } from ${JSON.stringify(entry)}; console.log(${name});`,
-          resolveDir: repoRoot,
-          loader: 'js',
-        },
-      });
-      return [name, result.outputFiles[0].contents.length];
+      try {
+        // alias the binding so reserved-word export names (default, new) import legally
+        const result = await build(repoRoot, {
+          external,
+          stdin: {
+            contents: `import { ${name} as probe } from ${JSON.stringify(entry)}; console.log(probe);`,
+            resolveDir: repoRoot,
+            loader: 'js',
+          },
+        });
+        return [name, result.outputFiles[0].contents.length];
+      }
+      catch {
+        // one unpriceable export must not dark the rest of the package's canaries
+        return null;
+      }
     }));
-    for (const [name, bytes] of results) { costs[name] = bytes; }
+    for (const priced of results) {
+      if (priced) { costs[priced[0]] = priced[1]; }
+    }
   }
   return costs;
 }
