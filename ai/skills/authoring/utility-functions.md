@@ -419,7 +419,7 @@ if (isCI) { ... }           // detects GitHub Actions, GitLab CI, Jenkins, etc.
 
 ## String Utilities (strings.js)
 
-The configured vocabulary functions (`humanize`, `toTitleCase`, `getArticle`, and coercion's `toBoolean`) attach their config via `/* @__PURE__ */ Object.assign(fn, { config })` — one droppable expression, so a bundle that never imports the function carries neither it nor its vocabulary. A plain `fn.config = {}` assignment is a top-level side effect bundlers must keep, which ships the vocabulary to every consumer of the module. Use the pure pattern for any new configured function.
+The vocabulary functions (`humanize`, `toTitleCase`, `getArticle`, plus `toBoolean` and `formatDate`) attach their config via `/* @__PURE__ */ configured(fn, {...})` — one droppable expression, so a bundle that never imports the function carries neither it nor its vocabulary. A plain `fn.config = {}` assignment is a top-level side effect bundlers must keep, which ships the vocabulary to every consumer of the module. Use `configured` (functions.js) with the pure annotation for any new configured function.
 
 ### Case Conversion
 ```javascript
@@ -555,7 +555,7 @@ fromBase64('!!!');                      // null (malformed input never throws, w
 
 ### Core
 ```javascript
-import { noop, identity, wrapFunction } from '@semantic-ui/utils';
+import { noop, identity, wrapFunction, configured } from '@semantic-ui/utils';
 
 // noop — swallows arguments, returns undefined. Use as a reusable empty
 // callback to avoid allocating fresh () => {} closures.
@@ -566,6 +566,10 @@ noop(42, 'ignored');                   // undefined
 // default for transforms (e.g. `transform = mapFn ?? identity`).
 identity(42);                          // 42
 identity('hello');                     // 'hello'
+
+// configured — attaches an editable fn.config as one tree-shakable expression.
+// annotate the callsite /* @__PURE__ */ so non-importers drop fn and config together
+const greet = /* @__PURE__ */ configured((n) => `${greet.config.greeting} ${n}`, { greeting: 'hi' });
 
 // Wraps non-functions into a function that returns the value
 const fn = wrapFunction('default');    // () => 'default'

@@ -1,3 +1,5 @@
+import { configured } from './functions.js';
+
 /*-------------------
         Dates
 --------------------*/
@@ -24,7 +26,10 @@ const ordinalSuffix = ['th', 'st', 'nd', 'rd'];
 const pad2 = (n) => (n < 10 ? '0' + n : '' + n);
 const getOrdinal = (d) => d + ((d >= 11 && d <= 13) ? 'th' : (ordinalSuffix[d % 10] || 'th'));
 
-export const formatDate = (date, format = 'LLL', {
+// timezone abbreviations are ambiguous by nature (IST is Kolkata, Jerusalem, or Dublin depending on
+// who you ask), so the picks are editable once at app boot (formatDate.config.timezones.IST =
+// 'Asia/Jerusalem'). full IANA names always pass through untouched
+export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
   locale = 'default',
   hour12 = true,
   timezone = 'UTC',
@@ -118,12 +123,7 @@ export const formatDate = (date, format = 'LLL', {
   return formatString.replace(tokenRegExp, (match, escaped) => {
     return escaped !== undefined ? escaped : tokens[match];
   });
-};
-
-// abbreviation -> IANA zone. abbreviations are ambiguous by nature (IST is Kolkata, Jerusalem, or
-// Dublin depending on who you ask), so the picks are editable once at app boot
-// (formatDate.config.timezones.IST = 'Asia/Jerusalem'). full IANA names always pass through untouched
-formatDate.config = {
+}, {
   timezones: {
     ET: 'America/New_York',
     CT: 'America/Chicago',
@@ -148,4 +148,4 @@ formatDate.config = {
     JST: 'Asia/Tokyo',
     SGT: 'Asia/Singapore',
   },
-};
+});

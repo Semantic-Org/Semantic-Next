@@ -1,4 +1,4 @@
-import { identity } from './functions.js';
+import { configured, identity } from './functions.js';
 import { isArray, isFunction, isString } from './types.js';
 
 /*-------------------
@@ -67,14 +67,10 @@ export const capitalizeWords = (str = '') => {
   return str.replace(/\b\w+/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
 };
 
-// the pure-annotated Object.assign keeps the function and its config one droppable expression, so a
-// bundle that never imports it carries neither. a plain `fn.config = {}` assignment is a top-level
-// side effect bundlers must keep, which would ship the vocabulary to every consumer of this module
-
 // the words that stay lowercase mid-title. style guides disagree here (AP capitalizes long
 // prepositions, Chicago lowercases them all), so the list is editable once at app boot.
 // humanize's titleCase mode reads the same vocabulary
-export const toTitleCase = /* @__PURE__ */ Object.assign(
+export const toTitleCase = /* @__PURE__ */ configured(
   (str = '') => {
     if (!isString(str)) {
       return;
@@ -93,27 +89,25 @@ export const toTitleCase = /* @__PURE__ */ Object.assign(
       .join(' ');
   },
   {
-    config: {
-      stopWords: [
-        'the',
-        'a',
-        'an',
-        'and',
-        'but',
-        'for',
-        'at',
-        'by',
-        'from',
-        'to',
-        'in',
-        'on',
-        'of',
-        'or',
-        'nor',
-        'with',
-        'as',
-      ],
-    },
+    stopWords: [
+      'the',
+      'a',
+      'an',
+      'and',
+      'but',
+      'for',
+      'at',
+      'by',
+      'from',
+      'to',
+      'in',
+      'on',
+      'of',
+      'or',
+      'nor',
+      'with',
+      'as',
+    ],
   },
 );
 
@@ -130,7 +124,7 @@ const isAcronym = (word) =>
 
 // global defaults plus a token vocabulary, seeded with the highest-frequency lowercase acronyms.
 // extend once at app boot (humanize.config.terms.sku = 'SKU') and every call inherits it
-export const humanize = /* @__PURE__ */ Object.assign(
+export const humanize = /* @__PURE__ */ configured(
   (str = '', options = {}) => {
     if (!isString(str)) { return ''; }
 
@@ -163,12 +157,10 @@ export const humanize = /* @__PURE__ */ Object.assign(
     return cased.join(' ');
   },
   {
-    config: {
-      titleCase: false,
-      dropId: true,
-      constantCase: false,
-      terms: { id: 'ID', url: 'URL', api: 'API' },
-    },
+    titleCase: false,
+    dropId: true,
+    constantCase: false,
+    terms: { id: 'ID', url: 'URL', api: 'API' },
   },
 );
 
@@ -213,7 +205,7 @@ const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
 
 // words whose sound contradicts their spelling, where the vowel heuristic reads them wrong.
 // extend once at app boot (getArticle.config.exceptions.faq = 'an') and every call inherits it
-export const getArticle = /* @__PURE__ */ Object.assign(
+export const getArticle = /* @__PURE__ */ configured(
   (word, settings = {}) => {
     const lower = word.toLowerCase();
     const exceptions = getArticle.config.exceptions;
@@ -230,21 +222,19 @@ export const getArticle = /* @__PURE__ */ Object.assign(
       : finalArticle;
   },
   {
-    config: {
-      exceptions: {
-        hour: 'an',
-        honest: 'an',
-        honor: 'an',
-        honour: 'an',
-        heir: 'an',
-        unique: 'a',
-        university: 'a',
-        unicorn: 'a',
-        user: 'a',
-        one: 'a',
-        once: 'a',
-        euro: 'a',
-      },
+    exceptions: {
+      hour: 'an',
+      honest: 'an',
+      honor: 'an',
+      honour: 'an',
+      heir: 'an',
+      unique: 'a',
+      university: 'a',
+      unicorn: 'a',
+      user: 'a',
+      one: 'a',
+      once: 'a',
+      euro: 'a',
     },
   },
 );

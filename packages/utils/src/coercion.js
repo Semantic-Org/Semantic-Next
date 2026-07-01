@@ -1,3 +1,4 @@
+import { configured } from './functions.js';
 import { isArray, isBoolean, isDate, isNumber, isObject, isString } from './types.js';
 
 /*-------------------
@@ -27,10 +28,8 @@ const matchesToken = (tokens, normalized) => {
 };
 
 // the editable boolean vocabulary and defaults, set once at app boot (toBoolean.config.truthy.push('oui'))
-// and every call inherits it. per-call truthy/falsy/loose/onInvalid still win over these. the
-// pure-annotated Object.assign keeps the function and its config one droppable expression, so a
-// bundle that only imports the other coercers carries neither
-export const toBoolean = /* @__PURE__ */ Object.assign(
+// and every call inherits it. per-call truthy/falsy/loose/onInvalid still win over these
+export const toBoolean = /* @__PURE__ */ configured(
   (value, options = {}) => {
     const config = toBoolean.config;
     const loose = options.loose ?? config.loose;
@@ -55,12 +54,10 @@ export const toBoolean = /* @__PURE__ */ Object.assign(
     return loose ? Boolean(value) : onInvalidResult(value, onInvalid);
   },
   {
-    config: {
-      truthy: ['true', 't', 'yes', 'y', 'on', 'enabled', 'enable'],
-      falsy: ['false', 'f', 'no', 'n', 'off', 'disabled', 'disable', 'null', 'undefined', 'nan'],
-      loose: false,
-      onInvalid: 'null',
-    },
+    truthy: ['true', 't', 'yes', 'y', 'on', 'enabled', 'enable'],
+    falsy: ['false', 'f', 'no', 'n', 'off', 'disabled', 'disable', 'null', 'undefined', 'nan'],
+    loose: false,
+    onInvalid: 'null',
   },
 );
 
