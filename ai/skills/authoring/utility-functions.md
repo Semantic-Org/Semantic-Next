@@ -279,6 +279,22 @@ const before = { lineItems: [{ id: 'a', qty: 1 }, { id: 'b', qty: 1 }] };
 const after = { lineItems: [{ id: 'z', qty: 9 }, { id: 'a', qty: 1 }, { id: 'b', qty: 5 }] };
 detectChanges(before, after);
 // { added: ['lineItems[#z]'], removed: [], changed: ['lineItems[#b].qty'] }
+
+// equality swaps the leaf comparator (defaults to isEqual, like trackWrites)
+detectChanges({ a: 1 }, { a: '1' }, { equality: (x, y) => x == y }); // no change
+
+// ignoreKeys drops key names at any depth — keep volatile/local fields out of a changeset
+detectChanges({ name: 'a', updatedAt: 1 }, { name: 'b', updatedAt: 2 }, { ignoreKeys: ['updatedAt'] });
+// { added: [], removed: [], changed: ['name'] }
+
+// collapseKeys diffs a key as one whole value, never descending — same leaf
+// treatment a Map/Date gets, for a subtree whose own keys aren't wire paths
+detectChanges(
+  { _overrides: { 'contacts[#1].field': true } },
+  { _overrides: { 'contacts[#1].field': false } },
+  { collapseKeys: ['_overrides'] },
+);
+// { added: [], removed: [], changed: ['_overrides'] }
 ```
 
 ### Conversion
@@ -405,7 +421,7 @@ if (isCI) { ... }           // detects GitHub Actions, GitLab CI, Jenkins, etc.
 
 ### Case Conversion
 ```javascript
-import { kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase } from '@semantic-ui/utils';
+import { kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase, humanize } from '@semantic-ui/utils';
 
 kebabToCamel('my-component-name');       // 'myComponentName'
 kebabToCamel('grid-2x2');               // 'grid_2x2' (digit segments use _ for lossless round-trip)
@@ -416,6 +432,18 @@ camelToKebab('arrowDownAZ');            // 'arrow-down-a-z'
 capitalize('hello world');               // 'Hello world'
 capitalizeWords('hello world');          // 'Hello World'
 toTitleCase('the quick brown fox');      // 'The Quick Brown Fox' (respects stop words: the, a, of, etc.)
+
+// Identifier -> label (inverse of tokenize). Keeps acronyms whole, drops a trailing id, sentence-cases
+humanize('first_name');                  // 'First name'
+humanize('getURLsFromPage');             // 'Get URLs from page' (acronyms, including plurals, stay intact)
+humanize('user_id');                     // 'User' (dropId default; pass { dropId: false } to keep)
+humanize('api_url');                     // 'API URL' (built-in vocabulary: id, url, api)
+humanize('terms_of_service', { titleCase: true });   // 'Terms of Service'
+humanize('IN_PROGRESS', { constantCase: true });     // 'In progress' (sentence-case a shouting enum)
+
+// Extend the vocabulary app-wide once at boot, every call inherits it
+humanize.config.terms.sku = 'SKU';
+humanize('product_sku');                 // 'Product SKU'
 ```
 
 ### Text Processing
@@ -909,7 +937,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `trackWrites` | `(value, callback, opts?)` | `{ changed, paths, result }` (keyed `field[#id]` paths by default) |
 | `trackReads` | `(value, callback, opts?)` | `{ reads, structure, result }` — read companion to `trackWrites`, read-only proxy, keyed by default |
 | `elementKey` | `(item, keys?)` | First present id field, or undefined |
-| `detectChanges` | `(before, after, opts?)` | `{ added, removed, changed }` paths (keyed by identity by default, `{ keyed: false }` for positional) |
+| `detectChanges` | `(before, after, opts?)` | `{ added, removed, changed }` paths (keyed by identity by default, `{ keyed: false }` for positional; `equality`, `ignoreKeys`, `collapseKeys`) |
 | `arrayFromObject` | `(obj)` | `[{key, value}, ...]` |
 | `reverseKeys` | `(obj)` | Inverted lookup object |
 | `proxyObject` | `(getterFn, refObj)` | Read-through Proxy |
