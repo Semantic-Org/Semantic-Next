@@ -70,7 +70,7 @@ export const capitalizeWords = (str = '') => {
 // the words that stay lowercase mid-title. style guides disagree here (AP capitalizes long
 // prepositions, Chicago lowercases them all), so the list is editable once at app boot.
 // humanize's titleCase mode reads the same vocabulary
-export const toTitleCase = /* @__PURE__ */ configured(
+export const toTitleCase = configured(
   (str = '') => {
     if (!isString(str)) {
       return;
@@ -124,7 +124,7 @@ const isAcronym = (word) =>
 
 // global defaults plus a token vocabulary, seeded with the highest-frequency lowercase acronyms.
 // extend once at app boot (humanize.config.terms.sku = 'SKU') and every call inherits it
-export const humanize = /* @__PURE__ */ configured(
+export const humanize = configured(
   (str = '', options = {}) => {
     if (!isString(str)) { return ''; }
 
@@ -205,7 +205,7 @@ const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
 
 // words whose sound contradicts their spelling, where the vowel heuristic reads them wrong.
 // extend once at app boot (getArticle.config.exceptions.faq = 'an') and every call inherits it
-export const getArticle = /* @__PURE__ */ configured(
+export const getArticle = configured(
   (word, settings = {}) => {
     const lower = word.toLowerCase();
     const exceptions = getArticle.config.exceptions;
