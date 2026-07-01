@@ -72,6 +72,18 @@ describe('toBoolean', () => {
     expect(toBoolean('y', { falsy: ['y'] })).toBe(false);
     expect(toBoolean('on', { falsy: ['on'] })).toBe(false);
   });
+
+  it('onInvalid: passthrough returns the original on an unrecognized value, loose wins over it', () => {
+    const obj = {};
+    expect(toBoolean('banana')).toBe(null);
+    expect(toBoolean('banana', { onInvalid: 'null' })).toBe(null);
+    expect(toBoolean('banana', { onInvalid: 'passthrough' })).toBe('banana');
+    expect(toBoolean(obj, { onInvalid: 'passthrough' })).toBe(obj);
+    // loose takes precedence over onInvalid
+    expect(toBoolean('banana', { loose: true, onInvalid: 'passthrough' })).toBe(true);
+    // a recognized value is unaffected by either setting
+    expect(toBoolean('yes', { onInvalid: 'passthrough' })).toBe(true);
+  });
 });
 
 describe('toNumber', () => {
@@ -105,6 +117,18 @@ describe('toNumber', () => {
     expect(toNumber([5])).toBe(null);
     expect(toNumber({})).toBe(null);
   });
+
+  it('onInvalid: passthrough returns the original value on failure, null stays the default', () => {
+    const obj = {};
+    expect(toNumber('abc')).toBe(null);
+    expect(toNumber('abc', { onInvalid: 'null' })).toBe(null);
+    expect(toNumber('abc', { onInvalid: 'passthrough' })).toBe('abc');
+    expect(toNumber(Infinity, { onInvalid: 'passthrough' })).toBe(Infinity);
+    expect(toNumber(obj, { onInvalid: 'passthrough' })).toBe(obj);
+    // a coercible value is unaffected by either setting
+    expect(toNumber('42', { onInvalid: 'null' })).toBe(42);
+    expect(toNumber('42', { onInvalid: 'passthrough' })).toBe(42);
+  });
 });
 
 describe('toInteger', () => {
@@ -120,6 +144,16 @@ describe('toInteger', () => {
     expect(toInteger('Infinity')).toBe(null);
     expect(toInteger('abc')).toBe(null);
     expect(toInteger(null)).toBe(null);
+  });
+
+  it('onInvalid: passthrough returns the original value on failure, never a truncated NaN artifact', () => {
+    expect(toInteger('abc')).toBe(null);
+    expect(toInteger('abc', { onInvalid: 'null' })).toBe(null);
+    expect(toInteger('abc', { onInvalid: 'passthrough' })).toBe('abc');
+    expect(toInteger(Infinity, { onInvalid: 'passthrough' })).toBe(Infinity);
+    // a coercible value still truncates, unaffected by either setting
+    expect(toInteger('3.9', { onInvalid: 'null' })).toBe(3);
+    expect(toInteger('3.9', { onInvalid: 'passthrough' })).toBe(3);
   });
 });
 
@@ -170,6 +204,19 @@ describe('toDate', () => {
     const fallback = new Date('2000-01-01');
     expect(toDate('nonsense') ?? fallback).toBe(fallback);
   });
+
+  it('onInvalid: passthrough returns the original value on failure, null stays the default', () => {
+    const invalid = new Date('banana');
+    expect(toDate('not-a-date')).toBe(null);
+    expect(toDate('not-a-date', { onInvalid: 'null' })).toBe(null);
+    expect(toDate('not-a-date', { onInvalid: 'passthrough' })).toBe('not-a-date');
+    // the calendar round-trip and Invalid Date failure branches preserve the original too
+    expect(toDate('2024-02-30', { onInvalid: 'passthrough' })).toBe('2024-02-30');
+    expect(toDate(invalid, { onInvalid: 'passthrough' })).toBe(invalid);
+    // a valid date is unaffected by either setting
+    expect(toDate('2024-01-01', { onInvalid: 'null' })?.toISOString()).toBe('2024-01-01T00:00:00.000Z');
+    expect(toDate('2024-01-01', { onInvalid: 'passthrough' })?.toISOString()).toBe('2024-01-01T00:00:00.000Z');
+  });
 });
 
 describe('toString', () => {
@@ -201,6 +248,22 @@ describe('toString', () => {
     circular.self = circular;
     expect(toString(circular, { loose: true })).toBe(null);
     expect(toString(() => {}, { loose: true })).toBe(null);
+  });
+
+  it('onInvalid: passthrough returns the original value on failure and rides alongside loose', () => {
+    const sym = Symbol('x');
+    const fn = () => {};
+    expect(toString(sym)).toBe(null);
+    expect(toString(sym, { onInvalid: 'null' })).toBe(null);
+    expect(toString(sym, { onInvalid: 'passthrough' })).toBe(sym);
+    expect(toString(fn, { onInvalid: 'passthrough' })).toBe(fn);
+    expect(toString(NaN, { onInvalid: 'passthrough' })).toBe(NaN);
+    // onInvalid merges into the same options object without disturbing loose
+    expect(toString({ a: 1 }, { loose: true, onInvalid: 'passthrough' })).toBe('{"a":1}');
+    expect(toString(fn, { loose: true, onInvalid: 'passthrough' })).toBe(fn);
+    // a coercible value is unaffected by either setting
+    expect(toString(5, { onInvalid: 'null' })).toBe('5');
+    expect(toString(5, { onInvalid: 'passthrough' })).toBe('5');
   });
 });
 

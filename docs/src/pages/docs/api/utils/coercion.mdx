@@ -17,12 +17,14 @@ const when = toDate(input.value) ?? new Date();
 
 Each helper is also exported as `coerceBoolean`, `coerceNumber`, `coerceInteger`, `coerceDate`, and `coerceString` for callers who think in coercion terms.
 
+Every helper accepts an `onInvalid` setting. It defaults to `'null'` (the failed coercion returns `null`, composing with `??`). Pass `{ onInvalid: 'passthrough' }` to return the *original* value instead, so a schema or validator can flag the bad input rather than see an erasing `null` — and the TypeScript return widens to include the input type (`number | string` for `toNumber(str, { onInvalid: 'passthrough' })`).
+
 ## Functions
 
 ### toBoolean
 
 ```javascript
-function toBoolean(value, { falsy, loose = false } = {})
+function toBoolean(value, { falsy, loose = false, onInvalid = 'null' } = {})
 ```
 
 Coerces a value to a boolean, or `null` when it recognizes no boolean reading. Booleans pass through, numbers read by zero-ness, and strings match a generous set case-insensitively: `true`, `t`, `yes`, `y`, `on`, `enabled` read as `true`, and `false`, `f`, `no`, `n`, `off`, `disabled`, `null`, `undefined`, `nan` read as `false`, alongside numeric strings by their value. Anything else returns `null`.
@@ -36,10 +38,11 @@ Coerces a value to a boolean, or `null` when it recognizes no boolean reading. B
 
 ##### Options
 
-| Name  | Type                 | Default | Description |
-|-------|----------------------|---------|-------------|
-| falsy | string \| string[]   | —       | Extra tokens to treat as false, layered over the built-in set |
-| loose | boolean              | false   | Coerce unrecognized input via native truthiness instead of returning `null` |
+| Name      | Type                 | Default  | Description |
+|-----------|----------------------|----------|-------------|
+| falsy     | string \| string[]   | —        | Extra tokens to treat as false, layered over the built-in set |
+| loose     | boolean              | false    | Coerce unrecognized input via native truthiness instead of returning `null` |
+| onInvalid | 'null' \| 'passthrough' | 'null' | How an unrecognized value resolves (`loose` takes precedence when both are set) |
 
 #### Returns
 
@@ -69,16 +72,17 @@ console.log(toBoolean('nope', { falsy: ['nope'] })); // false
 ### toNumber
 
 ```javascript
-function toNumber(value)
+function toNumber(value, { onInvalid = 'null' } = {})
 ```
 
 Coerces a value to a finite number, or `null` when it can't be converted. Numeric strings parse via `Number` (so hex, scientific, and surrounding whitespace are fine), booleans read as `1` and `0`, and `NaN`, `Infinity`, blanks, unit-tagged strings, arrays, and objects return `null`. It never hands back `NaN` or `Infinity`.
 
 #### Parameters
 
-| Name  | Type    | Description |
-|-------|---------|-------------|
-| value | unknown | The value to coerce |
+| Name     | Type    | Description |
+|----------|---------|-------------|
+| value    | unknown | The value to coerce |
+| settings | object  | Optional configuration (`onInvalid`, see above) |
 
 #### Returns
 
@@ -101,16 +105,17 @@ console.log(toNumber('abc') ?? 0); // 0
 ### toInteger
 
 ```javascript
-function toInteger(value)
+function toInteger(value, { onInvalid = 'null' } = {})
 ```
 
-Coerces a value to an integer by truncating toward zero, or `null` when it's unconvertible or non-finite. Equivalent to `toNumber` followed by a truncation, so `Infinity` joins the `null` bucket.
+Coerces a value to an integer by truncating toward zero, or `null` when it's unconvertible or non-finite. Equivalent to `toNumber` followed by a truncation, so `Infinity` joins the `null` bucket. Under `{ onInvalid: 'passthrough' }` it returns the original value, never a truncated `NaN`.
 
 #### Parameters
 
-| Name  | Type    | Description |
-|-------|---------|-------------|
-| value | unknown | The value to coerce |
+| Name     | Type    | Description |
+|----------|---------|-------------|
+| value    | unknown | The value to coerce |
+| settings | object  | Optional configuration (`onInvalid`, see above) |
 
 #### Returns
 
@@ -130,16 +135,17 @@ console.log(toInteger(Infinity)); // null
 ### toDate
 
 ```javascript
-function toDate(value)
+function toDate(value, { onInvalid = 'null' } = {})
 ```
 
 Coerces a value to a Date, or `null` when it can't be parsed — never an `Invalid Date`. Accepts a Date, a number read as epoch milliseconds, or an **ISO-8601 string**. Ambiguous or locale-dependent spellings return `null` rather than a guessed date: bare years, slash and text dates, and day overflow all reject, so `'01/15/2024'` and `'2024-02-30'` never become a wrong Date. A zoneless datetime resolves in the ambient timezone (the user's zone on the client) and is returned as a UTC instant, the same as native `new Date` on an `<input type="datetime-local">` value. A date-only string is read as UTC, and a timestamp passed as a string is rejected, so pass a number for epoch ms.
 
 #### Parameters
 
-| Name  | Type    | Description |
-|-------|---------|-------------|
-| value | unknown | The value to coerce |
+| Name     | Type    | Description |
+|----------|---------|-------------|
+| value    | unknown | The value to coerce |
+| settings | object  | Optional configuration (`onInvalid`, see above) |
 
 #### Returns
 
@@ -161,7 +167,7 @@ const when = toDate(userInput) ?? new Date();
 ### toString
 
 ```javascript
-function toString(value, { loose = false } = {})
+function toString(value, { loose = false, onInvalid = 'null' } = {})
 ```
 
 Coerces a value to a string, or `null` when there is no faithful string form. Strings pass through and a finite `number`, a `boolean`, or a `bigint` goes through `String()`. Objects, arrays, functions, symbols, non-finite numbers, and nullish return `null`, so a String field never silently stores `"[object Object]"` or `"NaN"`. Under `loose`, objects and arrays render with JSON for display output, still returning `null` on unserializable input rather than throwing.
@@ -175,9 +181,10 @@ Coerces a value to a string, or `null` when there is no faithful string form. St
 
 ##### Options
 
-| Name  | Type    | Default | Description |
-|-------|---------|---------|-------------|
-| loose | boolean | false   | Render objects and arrays with JSON instead of returning `null` |
+| Name      | Type    | Default | Description |
+|-----------|---------|---------|-------------|
+| loose     | boolean | false   | Render objects and arrays with JSON instead of returning `null` |
+| onInvalid | 'null' \| 'passthrough' | 'null' | How a value with no faithful string form resolves |
 
 #### Returns
 

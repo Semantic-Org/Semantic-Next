@@ -514,6 +514,10 @@ toDate('01/15/2024');                   // null (ambiguous format, never a guess
 toString(42);                           // '42'
 toString({ a: 1 });                     // null (never "[object Object]")
 toString({ a: 1 }, { loose: true });    // '{"a":1}' (render objects for display)
+
+// every helper takes onInvalid: 'passthrough' to return the original value on failure (for a schema
+// or validator to flag) instead of the default null. this is exactly toX(v) ?? v, baked in
+toNumber('5px', { onInvalid: 'passthrough' });  // '5px'
 ```
 
 ## Function Utilities (functions.js)

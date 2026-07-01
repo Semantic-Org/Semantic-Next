@@ -17,7 +17,12 @@ const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\
 // fold -0 to 0 so a coerced value never trips Object.is or 1/x downstream
 const normalizeZero = (number) => (number === 0 ? 0 : number);
 
-export const toBoolean = (value, { falsy, loose = false } = {}) => {
+// the return for a failed coercion. 'null' (the default) tames the value so the result composes with
+// ??, 'passthrough' preserves the original so a downstream validator can flag the bad input instead of
+// seeing an erasing null. a 'throw' mode can slot in here later without a new option
+const onInvalidResult = (value, mode) => (mode === 'passthrough' ? value : null);
+
+export const toBoolean = (value, { falsy, loose = false, onInvalid = 'null' } = {}) => {
   if (isBoolean(value)) { return value; }
   if (isNumber(value)) { return !Number.isNaN(value) && value !== 0; }
   if (isString(value)) {
@@ -37,70 +42,72 @@ export const toBoolean = (value, { falsy, loose = false } = {}) => {
       if (!Number.isNaN(asNumber)) { return asNumber !== 0; }
     }
   }
-  // unrecognized: null by default, native truthiness under loose
-  return loose ? Boolean(value) : null;
+  // unrecognized: truthiness under loose (loose wins over onInvalid), else the onInvalid result
+  return loose ? Boolean(value) : onInvalidResult(value, onInvalid);
 };
 
-export const toNumber = (value) => {
+export const toNumber = (value, { onInvalid = 'null' } = {}) => {
   // isNumber admits NaN and Infinity, both of which poison arithmetic, so only a finite number survives
-  if (isNumber(value)) { return Number.isFinite(value) ? normalizeZero(value) : null; }
+  if (isNumber(value)) { return Number.isFinite(value) ? normalizeZero(value) : onInvalidResult(value, onInvalid); }
   if (isBoolean(value)) { return value ? 1 : 0; }
   if (isString(value)) {
     const trimmed = value.trim();
-    if (trimmed === '') { return null; }
+    if (trimmed === '') { return onInvalidResult(value, onInvalid); }
     const asNumber = Number(trimmed);
-    return Number.isFinite(asNumber) ? normalizeZero(asNumber) : null;
+    return Number.isFinite(asNumber) ? normalizeZero(asNumber) : onInvalidResult(value, onInvalid);
   }
-  return null;
+  return onInvalidResult(value, onInvalid);
 };
 
-export const toInteger = (value) => {
+export const toInteger = (value, { onInvalid = 'null' } = {}) => {
+  // resolve failure with the default (null) toNumber so passthrough returns the original value here,
+  // never Math.trunc's NaN artifact from truncating an uncoercible input
   const asNumber = toNumber(value);
-  if (asNumber === null) { return null; }
+  if (asNumber === null) { return onInvalidResult(value, onInvalid); }
   // Math.trunc carries the sign, so -0.5 lands on -0 without the normalize
   return normalizeZero(Math.trunc(asNumber));
 };
 
-export const toDate = (value) => {
+export const toDate = (value, { onInvalid = 'null' } = {}) => {
   // isDate admits Invalid Date, so reject it explicitly. a poisoned Date must never escape
-  if (isDate(value)) { return Number.isNaN(value.getTime()) ? null : value; }
+  if (isDate(value)) { return Number.isNaN(value.getTime()) ? onInvalidResult(value, onInvalid) : value; }
   // numbers are epoch milliseconds. a timestamp passed as a string is rejected below, on purpose
   if (isNumber(value) && !Number.isNaN(value)) {
     const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? null : date;
+    return Number.isNaN(date.getTime()) ? onInvalidResult(value, onInvalid) : date;
   }
   if (isString(value)) {
     const trimmed = value.trim();
-    if (!ISO_DATE_RE.test(trimmed)) { return null; }
+    if (!ISO_DATE_RE.test(trimmed)) { return onInvalidResult(value, onInvalid); }
     const date = new Date(trimmed);
-    if (Number.isNaN(date.getTime())) { return null; }
+    if (Number.isNaN(date.getTime())) { return onInvalidResult(value, onInvalid); }
     // new Date rolls a bad day (2024-02-30 -> Mar 1), so confirm the calendar date round-trips.
     // setUTCFullYear avoids Date.UTC remapping a year of 0-99 into the 1900s
     const [year, month, day] = trimmed.slice(0, 10).split('-').map(Number);
     const probe = new Date(0);
     probe.setUTCFullYear(year, month - 1, day);
-    if (probe.getUTCMonth() !== month - 1 || probe.getUTCDate() !== day) { return null; }
+    if (probe.getUTCMonth() !== month - 1 || probe.getUTCDate() !== day) { return onInvalidResult(value, onInvalid); }
     return date;
   }
-  return null;
+  return onInvalidResult(value, onInvalid);
 };
 
-export const toString = (value, { loose = false } = {}) => {
+export const toString = (value, { loose = false, onInvalid = 'null' } = {}) => {
   if (isString(value)) { return value; }
-  if (value == null) { return null; }
+  if (value == null) { return onInvalidResult(value, onInvalid); }
   // a non-finite number has no faithful string form, matching toNumber's rejection of NaN and Infinity
-  if (isNumber(value)) { return Number.isFinite(value) ? String(value) : null; }
+  if (isNumber(value)) { return Number.isFinite(value) ? String(value) : onInvalidResult(value, onInvalid); }
   if (isBoolean(value) || typeof value === 'bigint') { return String(value); }
   // loose opts into rendering objects and arrays for display, staying inside the never-throw contract
   if (loose && isObject(value)) {
     try {
-      return JSON.stringify(value) ?? null;
+      return JSON.stringify(value) ?? onInvalidResult(value, onInvalid);
     }
     catch {
-      return null;
+      return onInvalidResult(value, onInvalid);
     }
   }
-  return null; // objects without loose, plus functions and symbols
+  return onInvalidResult(value, onInvalid); // objects without loose, plus functions and symbols
 };
 
 // coerceX aliases for callers who think in coercion terms (zod's z.coerce.*)
