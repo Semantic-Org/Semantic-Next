@@ -524,6 +524,26 @@ toString({ a: 1 }, { loose: true });    // '{"a":1}' (render objects for display
 toNumber('5px', { onInvalid: 'passthrough' });  // '5px'
 ```
 
+---
+
+## Bytes Utilities (bytes.js)
+
+Unicode-safe base64 encode/decode, the pair `btoa`/`atob` never were (they only speak Latin1).
+
+```javascript
+import { toBase64, fromBase64 } from '@semantic-ui/utils';
+
+toBase64('héllo 👋');                    // 'aMOpbGxvIPCfkYs=' (UTF-8, emoji and accents survive)
+toBase64(new Uint8Array([1, 2, 3]));    // 'AQID' (string, ArrayBuffer, or typed array)
+toBase64('a?b>c', { urlSafe: true });   // 'YT9iPmM' (-/_ alphabet, no padding, for tokens/URLs)
+
+fromBase64('aMOpbGxv');                 // 'héllo' (UTF-8 string by default)
+fromBase64('AQID', { as: 'bytes' });    // Uint8Array [1, 2, 3]
+fromBase64('YT9iPmM');                  // 'a?b>c' (accepts both alphabets, no flag needed)
+```
+
+---
+
 ## Function Utilities (functions.js)
 
 ### Core

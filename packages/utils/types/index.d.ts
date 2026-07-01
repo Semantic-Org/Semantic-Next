@@ -1,5 +1,6 @@
 export * from './arrays';
 export * from './browser';
+export * from './bytes';
 export * from './cache';
 export * from './cloning';
 export * from './coercion';
