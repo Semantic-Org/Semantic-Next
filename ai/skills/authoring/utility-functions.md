@@ -419,6 +419,8 @@ if (isCI) { ... }           // detects GitHub Actions, GitLab CI, Jenkins, etc.
 
 ## String Utilities (strings.js)
 
+The vocabulary functions (`humanize`, `toTitleCase`, `getArticle`, plus `toBoolean` and `formatDate`) attach their config via `/* @__PURE__ */ configured(fn, {...})` — one droppable expression, so a bundle that never imports the function carries neither it nor its vocabulary. A plain `fn.config = {}` assignment is a top-level side effect bundlers must keep, which ships the vocabulary to every consumer of the module. Use `configured` (functions.js) with the pure annotation for any new configured function.
+
 ### Case Conversion
 ```javascript
 import { kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase, humanize } from '@semantic-ui/utils';
@@ -432,6 +434,7 @@ camelToKebab('arrowDownAZ');            // 'arrow-down-a-z'
 capitalize('hello world');               // 'Hello world'
 capitalizeWords('hello world');          // 'Hello World'
 toTitleCase('the quick brown fox');      // 'The Quick Brown Fox' (respects stop words: the, a, of, etc.)
+toTitleCase.config.stopWords.push('versus'); // stop words are editable at boot, humanize titleCase reads the same list
 
 // Identifier -> label (inverse of tokenize). Keeps acronyms whole, drops a trailing id, sentence-cases
 humanize('first_name');                  // 'First name'
@@ -463,8 +466,10 @@ joinWords(['a', 'b'], { quotes: true });            // '"a" and "b"'
 // Grammar helpers
 getArticle('apple');                                // 'an'
 getArticle('banana');                               // 'a'
+getArticle('hour');                                 // 'an' (exceptions vocabulary for sound-vs-spelling words)
 getArticle('apple', { includeWord: true });         // 'an apple'
 getArticle('apple', { capitalize: true });          // 'An'
+getArticle.config.exceptions.faq = 'an';            // extend the exceptions once at boot
 
 // HTML escaping (returns '' for falsy input)
 escapeHTML('<script>alert("xss")</script>');        // '&lt;script&gt;...'
@@ -489,11 +494,68 @@ truncate('こんにちは世界です', 8, { locale: 'ja' });          // 'こ�
 
 ---
 
+## Coercion Utilities (coercion.js)
+
+Best-effort conversion of loose input (attribute strings, query params, JSON) to a target type. Each returns the type or `null` when there is no clean reading, so results compose with `??`. Also exported as `coerceBoolean`/`coerceNumber`/`coerceInteger`/`coerceDate`/`coerceString`.
+
+```javascript
+import { toBoolean, toNumber, toInteger, toDate, toString } from '@semantic-ui/utils';
+
+toBoolean('yes');                       // true (generous: true/t/yes/y/on/enabled, false/f/no/n/off/disabled, numeric)
+toBoolean('banana');                    // null (unrecognized, composes with ??)
+toBoolean('banana', { loose: true });   // true (native truthiness fallback, never null)
+toBoolean('nope', { falsy: ['nope'] }); // false (extend the falsy set for this call)
+
+// the recognized vocabulary and loose/onInvalid defaults live in an editable toBoolean.config
+// (mirrors humanize.config), set once at app boot; per-call settings still win
+toBoolean.config.truthy.push('oui');    // teach it another spelling globally
+
+toNumber('3.14');                       // 3.14
+toNumber('5px');                        // null (never NaN or Infinity)
+toNumber('abc') ?? 0;                   // 0
+
+toInteger('3.9');                       // 3 (truncates toward zero)
+toInteger(Infinity);                    // null
+
+toDate('2024-01-01');                   // Date (ISO strings, epoch-ms numbers, Dates only)
+toDate(1700000000, { epoch: 'seconds' }); // Date from a unix-second timestamp (a JWT exp)
+toDate('01/15/2024');                   // null (ambiguous format, never a guessed date)
+
+toString(42);                           // '42'
+toString({ a: 1 });                     // null (never "[object Object]")
+toString({ a: 1 }, { loose: true });    // '{"a":1}' (render objects for display)
+
+// every helper takes onInvalid: 'passthrough' to return the original value on failure (for a schema
+// or validator to flag) instead of the default null. this is exactly toX(v) ?? v, baked in
+toNumber('5px', { onInvalid: 'passthrough' });  // '5px'
+```
+
+---
+
+## Bytes Utilities (bytes.js)
+
+Unicode-safe base64 encode/decode, the pair `btoa`/`atob` never were (they only speak Latin1).
+
+```javascript
+import { toBase64, fromBase64 } from '@semantic-ui/utils';
+
+toBase64('héllo 👋');                    // 'aMOpbGxvIPCfkYs=' (UTF-8, emoji and accents survive)
+toBase64(new Uint8Array([1, 2, 3]));    // 'AQID' (string, ArrayBuffer, or typed array)
+toBase64('a?b>c', { urlSafe: true });   // 'YT9iPmM' (-/_ alphabet, no padding, for tokens/URLs)
+
+fromBase64('aMOpbGxv');                 // 'héllo' (UTF-8 string by default)
+fromBase64('AQID', { as: 'bytes' });    // Uint8Array [1, 2, 3]
+fromBase64('YT9iPmM');                  // 'a?b>c' (accepts both alphabets, no flag needed)
+fromBase64('!!!');                      // null (malformed input never throws, whitespace is stripped)
+```
+
+---
+
 ## Function Utilities (functions.js)
 
 ### Core
 ```javascript
-import { noop, identity, wrapFunction } from '@semantic-ui/utils';
+import { noop, identity, wrapFunction, configured } from '@semantic-ui/utils';
 
 // noop — swallows arguments, returns undefined. Use as a reusable empty
 // callback to avoid allocating fresh () => {} closures.
@@ -504,6 +566,10 @@ noop(42, 'ignored');                   // undefined
 // default for transforms (e.g. `transform = mapFn ?? identity`).
 identity(42);                          // 42
 identity('hello');                     // 'hello'
+
+// configured — attaches an editable fn.config as one tree-shakable expression.
+// annotate the callsite /* @__PURE__ */ so non-importers drop fn and config together
+const greet = /* @__PURE__ */ configured((n) => `${greet.config.greeting} ${n}`, { greeting: 'hi' });
 
 // Wraps non-functions into a function that returns the value
 const fn = wrapFunction('default');    // () => 'default'
@@ -715,6 +781,7 @@ formatDate(date, 'dddd, MMMM D');     // 'Monday, December 25'
 formatDate(date, 'MMMM DD, YYYY', { locale: 'fr-FR', timezone: 'Europe/Paris' });
 formatDate(date, 'LT', { timezone: 'local' });   // use browser's local timezone
 formatDate(date, 'LT', { timezone: 'PT' });       // shorthand timezone aliases supported
+formatDate.config.timezones.IST = 'Asia/Jerusalem'; // shorthand aliases are editable at boot, IANA names pass through
 ```
 
 **Available tokens:** `YYYY`, `YY`, `MMMM`, `MMM`, `MM`, `M`, `DD`, `D`, `Do`, `dddd`, `ddd`, `HH`, `hh`, `h`, `mm`, `ss`, `a`

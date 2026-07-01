@@ -1,4 +1,4 @@
-import { debounce, identity, memoize, noop, throttle, wait, wrapFunction } from '@semantic-ui/utils';
+import { configured, debounce, identity, memoize, noop, throttle, wait, wrapFunction } from '@semantic-ui/utils';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -15,6 +15,15 @@ describe('function utilities', () => {
     const obj = { a: 1 };
     expect(identity(obj)).toBe(obj);
     expect(identity()).toBeUndefined();
+  });
+
+  it('configured attaches an editable config and returns the same function', () => {
+    const config = { greeting: 'hello' };
+    const greet = configured((name) => `${greet.config.greeting} ${name}`, config);
+    expect(greet.config).toBe(config);
+    expect(greet('world')).toBe('hello world');
+    greet.config.greeting = 'hi';
+    expect(greet('world')).toBe('hi world');
   });
   it('wrapFunction should return the same function if a function is passed', () => {
     const func = () => 'test';

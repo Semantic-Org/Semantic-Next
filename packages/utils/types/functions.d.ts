@@ -105,6 +105,26 @@ export function identity<T>(value: T): T;
 export function wrapFunction<T>(x: T | (() => T)): () => T;
 
 /**
+ * Attaches an editable config object to a function as one expression, the mechanism behind
+ * `fn.config` on utilities like `toBoolean` and `formatDate`. Annotate the callsite with a
+ * pure comment (`@__PURE__`) so a bundle that never imports the function drops it and its
+ * config together — a bare `fn.config = {}` assignment is a side effect bundlers keep for
+ * every consumer of the module.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#configured configured}
+ *
+ * @param fn - The function to attach the config to
+ * @param config - The editable config object, readable as `fn.config`
+ * @returns The same function with `config` attached
+ *
+ * @example
+ * ```ts
+ * export const greet = configured((name) => `${greet.config.greeting} ${name}`, { greeting: 'hello' });
+ * greet.config.greeting = 'hi'; // editable once at app boot
+ * ```
+ */
+export function configured<F, C>(fn: F, config: C): F & { config: C; };
+
+/**
  * Creates a memoized version of a function
  * Caches return values based on input arguments
  * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#memoize memoize}

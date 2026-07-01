@@ -177,6 +177,18 @@ describe('Date Utilities', () => {
       expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'ET' })).toBe('2023-05-18 11:34:56');
       expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'PT' })).toBe('2023-05-18 08:34:56');
     });
+
+    it('reads shorthand aliases from formatDate.config.timezones, editable at boot', () => {
+      const savedZone = formatDate.config.timezones.IST;
+      formatDate.config.timezones.IST = 'Asia/Jerusalem';
+      try {
+        expect(formatDate(date, 'HH:mm', { timezone: 'IST' })).toBe('18:34');
+      }
+      finally {
+        formatDate.config.timezones.IST = savedZone;
+      }
+      expect(formatDate(date, 'HH:mm', { timezone: 'IST' })).toBe('21:04');
+    });
     /*
     it('should format date with local timezone', () => {
       expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'local' })).toBe('2023-05-18 ' + date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }));

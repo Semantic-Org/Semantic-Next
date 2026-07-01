@@ -220,6 +220,27 @@ describe('String Utilities', () => {
       expect(getArticle('APPLE')).toBe('an');
       expect(getArticle('BANANA')).toBe('a');
     });
+
+    it('reads sound-contradicts-spelling words from the exceptions vocabulary', () => {
+      expect(getArticle('hour')).toBe('an');
+      expect(getArticle('honest')).toBe('an');
+      expect(getArticle('university')).toBe('a');
+      expect(getArticle('one')).toBe('a');
+    });
+
+    it('reads inherited Object members as ordinary words, not exceptions', () => {
+      expect(getArticle('constructor')).toBe('a');
+    });
+
+    it('extends via getArticle.config.exceptions, set once and inherited', () => {
+      getArticle.config.exceptions.faq = 'an';
+      try {
+        expect(getArticle('FAQ', { includeWord: true })).toBe('an FAQ');
+      }
+      finally {
+        delete getArticle.config.exceptions.faq;
+      }
+    });
   });
 
   describe('truncate', () => {
@@ -383,6 +404,18 @@ describe('toTitleCase — edge cases', () => {
 
   it('should capitalize last word even if stopword', () => {
     expect(toTitleCase('living in the')).toBe('Living in The');
+  });
+
+  it('reads its stop words from toTitleCase.config, shared with humanize titleCase', () => {
+    toTitleCase.config.stopWords.push('versus');
+    try {
+      expect(toTitleCase('cats versus dogs today')).toBe('Cats versus Dogs Today');
+      expect(humanize('cats_versus_dogs_today', { titleCase: true })).toBe('Cats versus Dogs Today');
+    }
+    finally {
+      toTitleCase.config.stopWords.pop();
+    }
+    expect(toTitleCase('cats versus dogs today')).toBe('Cats Versus Dogs Today');
   });
 });
 

@@ -38,6 +38,7 @@ When adding or modifying utility functions, complete these 7 mandatory steps in 
 - Follow existing code formatting in the file
 - Export functions as named exports
 - Place related functions together in the file
+- Everything arbitrary is a setting — an embedded judgment call (a vocabulary, a threshold, a default policy) belongs in an option or an `fn.config`, not a constant. See the design principles in `design-util-function` for the mechanical-vs-arbitrary test
 
 ### Example Pattern
 ```javascript

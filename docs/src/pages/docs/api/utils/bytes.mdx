@@ -1,0 +1,95 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Bytes Utilities
+package: "@semantic-ui/utils"
+methods: [toBase64, fromBase64]
+icon: binary
+description: API reference for byte encoding functions
+---
+
+The Bytes utilities encode and decode binary data. `toBase64` and `fromBase64` are the unicode-safe pair that `btoa`/`atob` never were — a string round-trips through its UTF-8 bytes, so emoji and accents survive, and they read and write the URL-safe alphabet transparently.
+
+```javascript
+fromBase64(toBase64('héllo 👋')); // 'héllo 👋'
+```
+
+## Functions
+
+### toBase64
+
+```javascript
+function toBase64(input, { urlSafe = false } = {})
+```
+
+Encodes a string or binary data to a base64 string. A string is encoded as its UTF-8 bytes, so `btoa`'s Latin1-only limit never bites. `input` may be a string, an `ArrayBuffer`, any typed array, or an array of byte values. Anything else returns `null` rather than encoding garbage — a bare number would otherwise read as a buffer length and silently encode zero-fill.
+
+#### Parameters
+
+| Name     | Type    | Description |
+|----------|---------|-------------|
+| input    | string \| ArrayBuffer \| TypedArray \| number[] | The value to encode |
+| settings | object  | Optional configuration |
+
+##### Options
+
+| Name    | Type    | Default | Description |
+|---------|---------|---------|-------------|
+| urlSafe | boolean | false   | Emit the URL-safe alphabet (`-`/`_`, no padding) instead of standard base64 |
+
+#### Returns
+
+The base64 string, or `null` for input outside the accepted types.
+
+#### Example
+
+```javascript
+import { toBase64 } from '@semantic-ui/utils';
+
+console.log(toBase64('hello')); // 'aGVsbG8='
+console.log(toBase64('héllo')); // 'aMOpbGxv' (unicode-safe)
+console.log(toBase64(new Uint8Array([1, 2, 3]))); // 'AQID'
+
+// URL-safe for tokens and query params (no + / or padding)
+console.log(toBase64('a?b>c', { urlSafe: true }));
+```
+
+### fromBase64
+
+```javascript
+function fromBase64(base64, { as = 'string' } = {})
+```
+
+Decodes a base64 string to a UTF-8 string or raw bytes, or `null` when the input is not a string or not decodable base64 — it never throws. Accepts both the standard and URL-safe alphabets, tolerates missing padding, and strips whitespace, so a value from `toBase64(..., { urlSafe: true })` or a line-wrapped MIME/PEM block decodes without any extra flag.
+
+#### Parameters
+
+| Name     | Type   | Description |
+|----------|--------|-------------|
+| base64   | string | The base64 string to decode |
+| settings | object | Optional configuration |
+
+##### Options
+
+| Name | Type              | Default    | Description |
+|------|-------------------|------------|-------------|
+| as   | 'string' \| 'bytes' | 'string' | Decode to a UTF-8 string or a `Uint8Array` |
+
+#### Returns
+
+The decoded UTF-8 string, or a `Uint8Array` when `as` is `'bytes'`, or `null` if undecodable.
+
+#### Example
+
+```javascript
+import { fromBase64 } from '@semantic-ui/utils';
+
+console.log(fromBase64('aMOpbGxv')); // 'héllo'
+console.log(fromBase64('AQID', { as: 'bytes' })); // Uint8Array [1, 2, 3]
+
+// the URL-safe alphabet decodes with no extra flag
+console.log(fromBase64('YT9iPmM')); // 'a?b>c'
+
+// malformed input is null, never a throw
+console.log(fromBase64('!!!') ?? ''); // ''
+```
