@@ -60,6 +60,8 @@ export interface ToIntegerSettings {
 export interface ToDateSettings {
   /** How a failed coercion resolves (default: 'null') */
   onInvalid?: OnInvalid;
+  /** How a number reads: epoch milliseconds, or unix seconds for a JWT exp / unix timestamp (default: 'milliseconds') */
+  epoch?: 'milliseconds' | 'seconds';
 }
 
 /**

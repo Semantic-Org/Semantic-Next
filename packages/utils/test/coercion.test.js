@@ -85,9 +85,22 @@ describe('toBoolean', () => {
     expect(toBoolean('yes', { onInvalid: 'passthrough' })).toBe(true);
   });
 
-  it('takes a per-call truthy override', () => {
+  it('takes a per-call truthy override, winning over the config vocabulary', () => {
     expect(toBoolean('yep', { truthy: ['yep'] })).toBe(true);
     expect(toBoolean('nope', { truthy: ['yep'] })).toBe(null);
+    expect(toBoolean('false', { truthy: ['false'] })).toBe(true);
+  });
+
+  it('reads a token in both config lists as false, falsy wins within a layer', () => {
+    toBoolean.config.truthy.push('ok');
+    toBoolean.config.falsy.push('ok');
+    try {
+      expect(toBoolean('ok')).toBe(false);
+    }
+    finally {
+      toBoolean.config.truthy.pop();
+      toBoolean.config.falsy.pop();
+    }
   });
 
   it('reads toBoolean.config for the vocabulary and defaults, with per-call winning', () => {
@@ -185,10 +198,21 @@ describe('toDate', () => {
     expect(toDate(1700000000000)?.toISOString()).toBe('2023-11-14T22:13:20.000Z');
   });
 
+  it('reads a number as unix seconds under epoch, for JWT exp and unix timestamps', () => {
+    expect(toDate(1700000000, { epoch: 'seconds' })?.toISOString()).toBe('2023-11-14T22:13:20.000Z');
+    expect(toDate(1700000000)?.toISOString()).not.toBe('2023-11-14T22:13:20.000Z');
+  });
+
   it('resolves a zoneless datetime in the ambient zone, honors an explicit offset', () => {
     expect(toDate('2024-06-30T09:00')?.getTime()).toBe(new Date('2024-06-30T09:00').getTime());
     expect(toDate('2024-06-30T09:00Z')?.toISOString()).toBe('2024-06-30T09:00:00.000Z');
     expect(toDate('2024-06-30T09:00:00+00:00')?.toISOString()).toBe('2024-06-30T09:00:00.000Z');
+  });
+
+  it('normalizes the space separator and no-colon offset to the spec form before parsing', () => {
+    expect(toDate('2024-01-01 12:00')?.getTime()).toBe(new Date('2024-01-01T12:00').getTime());
+    expect(toDate('2024-01-01T09:00+0530')?.toISOString()).toBe('2024-01-01T03:30:00.000Z');
+    expect(toDate('2024-01-01T09:00+05:30')?.toISOString()).toBe('2024-01-01T03:30:00.000Z');
   });
 
   it('passes a valid Date through by reference', () => {

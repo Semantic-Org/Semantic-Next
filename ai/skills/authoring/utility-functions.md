@@ -432,6 +432,7 @@ camelToKebab('arrowDownAZ');            // 'arrow-down-a-z'
 capitalize('hello world');               // 'Hello world'
 capitalizeWords('hello world');          // 'Hello World'
 toTitleCase('the quick brown fox');      // 'The Quick Brown Fox' (respects stop words: the, a, of, etc.)
+toTitleCase.config.stopWords.push('versus'); // stop words are editable at boot, humanize titleCase reads the same list
 
 // Identifier -> label (inverse of tokenize). Keeps acronyms whole, drops a trailing id, sentence-cases
 humanize('first_name');                  // 'First name'
@@ -463,8 +464,10 @@ joinWords(['a', 'b'], { quotes: true });            // '"a" and "b"'
 // Grammar helpers
 getArticle('apple');                                // 'an'
 getArticle('banana');                               // 'a'
+getArticle('hour');                                 // 'an' (exceptions vocabulary for sound-vs-spelling words)
 getArticle('apple', { includeWord: true });         // 'an apple'
 getArticle('apple', { capitalize: true });          // 'An'
+getArticle.config.exceptions.faq = 'an';            // extend the exceptions once at boot
 
 // HTML escaping (returns '' for falsy input)
 escapeHTML('<script>alert("xss")</script>');        // '&lt;script&gt;...'
@@ -513,6 +516,7 @@ toInteger('3.9');                       // 3 (truncates toward zero)
 toInteger(Infinity);                    // null
 
 toDate('2024-01-01');                   // Date (ISO strings, epoch-ms numbers, Dates only)
+toDate(1700000000, { epoch: 'seconds' }); // Date from a unix-second timestamp (a JWT exp)
 toDate('01/15/2024');                   // null (ambiguous format, never a guessed date)
 
 toString(42);                           // '42'
@@ -540,6 +544,7 @@ toBase64('a?b>c', { urlSafe: true });   // 'YT9iPmM' (-/_ alphabet, no padding, 
 fromBase64('aMOpbGxv');                 // 'héllo' (UTF-8 string by default)
 fromBase64('AQID', { as: 'bytes' });    // Uint8Array [1, 2, 3]
 fromBase64('YT9iPmM');                  // 'a?b>c' (accepts both alphabets, no flag needed)
+fromBase64('!!!');                      // null (malformed input never throws, whitespace is stripped)
 ```
 
 ---
@@ -770,6 +775,7 @@ formatDate(date, 'dddd, MMMM D');     // 'Monday, December 25'
 formatDate(date, 'MMMM DD, YYYY', { locale: 'fr-FR', timezone: 'Europe/Paris' });
 formatDate(date, 'LT', { timezone: 'local' });   // use browser's local timezone
 formatDate(date, 'LT', { timezone: 'PT' });       // shorthand timezone aliases supported
+formatDate.config.timezones.IST = 'Asia/Jerusalem'; // shorthand aliases are editable at boot, IANA names pass through
 ```
 
 **Available tokens:** `YYYY`, `YY`, `MMMM`, `MMM`, `MM`, `M`, `DD`, `D`, `Do`, `dddd`, `ddd`, `HH`, `hh`, `h`, `mm`, `ss`, `a`

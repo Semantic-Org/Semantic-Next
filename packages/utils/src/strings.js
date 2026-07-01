@@ -67,41 +67,47 @@ export const capitalizeWords = (str = '') => {
   return str.replace(/\b\w+/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
 };
 
-const stopWords = new Set([
-  'the',
-  'a',
-  'an',
-  'and',
-  'but',
-  'for',
-  'at',
-  'by',
-  'from',
-  'to',
-  'in',
-  'on',
-  'of',
-  'or',
-  'nor',
-  'with',
-  'as',
-]);
-
 export const toTitleCase = (str = '') => {
   if (!isString(str)) {
     return;
   }
+  const stopWords = toTitleCase.config.stopWords;
   return str
     .toLowerCase()
     .split(' ')
     .map((word, index, arr) => {
       // Always capitalize the first word, last word, and any word not in stopWords
-      if (index === 0 || index === arr.length - 1 || !stopWords.has(word)) {
+      if (index === 0 || index === arr.length - 1 || !stopWords.includes(word)) {
         return word.charAt(0).toUpperCase() + word.slice(1);
       }
       return word;
     })
     .join(' ');
+};
+
+// the words that stay lowercase mid-title. style guides disagree here (AP capitalizes long
+// prepositions, Chicago lowercases them all), so the list is editable once at app boot.
+// humanize's titleCase mode reads the same vocabulary
+toTitleCase.config = {
+  stopWords: [
+    'the',
+    'a',
+    'an',
+    'and',
+    'but',
+    'for',
+    'at',
+    'by',
+    'from',
+    'to',
+    'in',
+    'on',
+    'of',
+    'or',
+    'nor',
+    'with',
+    'as',
+  ],
 };
 
 // split an identifier into words: acronym runs stay whole (getHTTPResponse -> get, HTTP, Response),
@@ -139,7 +145,7 @@ export const humanize = (str = '', options = {}) => {
     if (!constantCase && isAcronym(word)) { return word; }
     if (titleCase) {
       const isEdge = index === 0 || index === words.length - 1;
-      return (isEdge || !stopWords.has(lower)) ? capitalize(lower) : lower;
+      return (isEdge || !toTitleCase.config.stopWords.includes(lower)) ? capitalize(lower) : lower;
     }
     return index === 0 ? capitalize(lower) : lower;
   });
@@ -196,10 +202,12 @@ export const joinWords = (words, {
 const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
 
 export const getArticle = (word, settings = {}) => {
-  const firstLetter = word.toLowerCase()[0];
-  const article = vowels.has(firstLetter)
-    ? 'an'
-    : 'a';
+  const lower = word.toLowerCase();
+  const exceptions = getArticle.config.exceptions;
+  // hasOwn so a word like 'constructor' can't read an inherited Object member as its article
+  const article = Object.hasOwn(exceptions, lower)
+    ? exceptions[lower]
+    : (vowels.has(lower[0]) ? 'an' : 'a');
   const finalArticle = (settings.capitalize)
     ? capitalize(article)
     : article;
@@ -207,6 +215,25 @@ export const getArticle = (word, settings = {}) => {
   return settings.includeWord
     ? `${finalArticle} ${word}`
     : finalArticle;
+};
+
+// words whose sound contradicts their spelling, where the vowel heuristic reads them wrong.
+// extend once at app boot (getArticle.config.exceptions.faq = 'an') and every call inherits it
+getArticle.config = {
+  exceptions: {
+    hour: 'an',
+    honest: 'an',
+    honor: 'an',
+    honour: 'an',
+    heir: 'an',
+    unique: 'a',
+    university: 'a',
+    unicorn: 'a',
+    user: 'a',
+    one: 'a',
+    once: 'a',
+    euro: 'a',
+  },
 };
 
 export const truncate = (text, length, options = {}) => {

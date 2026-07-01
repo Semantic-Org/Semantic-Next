@@ -34,11 +34,12 @@ export const toBoolean = (value, options = {}) => {
   if (isNumber(value)) { return !Number.isNaN(value) && value !== 0; }
   if (isString(value)) {
     const normalized = value.trim().toLowerCase();
-    // per-call tokens override the config vocabulary, a falsy token winning over a truthy match
+    // per-call tokens win over the config vocabulary, and falsy wins over truthy within each layer,
+    // so a token pushed into both config lists by separate boot-time extensions reads as false
     if (options.falsy != null && matchesToken(options.falsy, normalized)) { return false; }
     if (options.truthy != null && matchesToken(options.truthy, normalized)) { return true; }
-    if (matchesToken(config.truthy, normalized)) { return true; }
     if (matchesToken(config.falsy, normalized)) { return false; }
+    if (matchesToken(config.truthy, normalized)) { return true; }
     // a numeric string reads by its value ('1' -> true, '0'/'0.0' -> false)
     if (normalized !== '') {
       const asNumber = Number(normalized);
@@ -80,18 +81,23 @@ export const toInteger = (value, { onInvalid = 'null' } = {}) => {
   return normalizeZero(Math.trunc(asNumber));
 };
 
-export const toDate = (value, { onInvalid = 'null' } = {}) => {
+export const toDate = (value, { onInvalid = 'null', epoch = 'milliseconds' } = {}) => {
   // isDate admits Invalid Date, so reject it explicitly. a poisoned Date must never escape
   if (isDate(value)) { return Number.isNaN(value.getTime()) ? onInvalidResult(value, onInvalid) : value; }
-  // numbers are epoch milliseconds. a timestamp passed as a string is rejected below, on purpose
+  // numbers are epoch milliseconds unless the caller declares seconds (a JWT exp, most unix
+  // timestamps), where the ms reading would produce a valid but wrong date in 1970.
+  // a timestamp passed as a string is rejected below, on purpose
   if (isNumber(value) && !Number.isNaN(value)) {
-    const date = new Date(value);
+    const date = new Date(epoch === 'seconds' ? value * 1000 : value);
     return Number.isNaN(date.getTime()) ? onInvalidResult(value, onInvalid) : date;
   }
   if (isString(value)) {
     const trimmed = value.trim();
     if (!ISO_DATE_RE.test(trimmed)) { return onInvalidResult(value, onInvalid); }
-    const date = new Date(trimmed);
+    // hand the engine only the spec's form (T separator, colon offset). v8 happens to accept the
+    // space form and a bare +0530, stricter engines do not, so acceptance must not ride on leniency
+    const spec = trimmed.replace(' ', 'T').replace(/([+-]\d{2})(\d{2})$/, '$1:$2');
+    const date = new Date(spec);
     if (Number.isNaN(date.getTime())) { return onInvalidResult(value, onInvalid); }
     // new Date rolls a bad day (2024-02-30 -> Mar 1), so confirm the calendar date round-trips.
     // setUTCFullYear avoids Date.UTC remapping a year of 0-99 into the 1900s

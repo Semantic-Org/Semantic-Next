@@ -28,39 +28,45 @@ Formats a date according to the specified format string and options.
 
 #### Timezone Shorthand
 
-`formatDate` provides additional shorthand timezones that can be used instead of their city counterparts.
+`formatDate` accepts shorthand timezone aliases alongside full IANA names. The aliases live in `formatDate.config.timezones`, a shorthand-to-IANA map you can edit once at app boot — abbreviations are ambiguous by nature (`IST` is Kolkata, Jerusalem, or Dublin depending on who you ask), so the picks are yours to remap. Full IANA names always pass through untouched.
 
 ```javascript
-const shorthand = reverseKeys({
-    // North America
-    'America/New_York': ['ET'],
-    'America/Chicago': ['CT'],
-    'America/Denver': ['MT'],
-    'America/Los_Angeles': ['PT'],
-    'America/Anchorage': ['AKT'],
-    'Pacific/Honolulu': ['HT'],
-    'America/Halifax': ['AT'],
+formatDate.config.timezones = {
+  // North America
+  ET: 'America/New_York',
+  CT: 'America/Chicago',
+  MT: 'America/Denver',
+  PT: 'America/Los_Angeles',
+  AKT: 'America/Anchorage',
+  HT: 'Pacific/Honolulu',
+  AT: 'America/Halifax',
 
-    // South America
-    'America/Sao_Paulo': ['BRT'],
+  // South America
+  BRT: 'America/Sao_Paulo',
 
-    // Europe
-    'Europe/London': ['UK', 'WET'],
-    'Europe/Paris': ['CET', 'ECT'],
-    'Europe/Helsinki': ['EET'],
-    'Europe/Dublin': ['IRST'], // Note disambiguation with India
+  // Europe
+  UK: 'Europe/London',
+  WET: 'Europe/London',
+  CET: 'Europe/Paris',
+  ECT: 'Europe/Paris',
+  EET: 'Europe/Helsinki',
+  IRST: 'Europe/Dublin',
 
-    // Australia/Oceania
-    'Australia/Sydney': ['AET'],
-    'Australia/Adelaide': ['ACT'],
-    'Australia/Perth': ['AWT'],
-    'Pacific/Auckland': ['NZT'],
+  // Australia/Oceania
+  AET: 'Australia/Sydney',
+  ACT: 'Australia/Adelaide',
+  AWT: 'Australia/Perth',
+  NZT: 'Pacific/Auckland',
 
-    // Asia
-    'Asia/Kolkata': ['IST', 'INST'], // Note disambiguation with Ireland
-    'Asia/Tokyo': ['JST'],
-    'Asia/Singapore': ['SGT']
-});
+  // Asia
+  IST: 'Asia/Kolkata',
+  INST: 'Asia/Kolkata',
+  JST: 'Asia/Tokyo',
+  SGT: 'Asia/Singapore',
+};
+
+// remap an ambiguous alias for your app, once
+formatDate.config.timezones.IST = 'Asia/Jerusalem';
 ```
 
 #### Parameters

@@ -22,13 +22,13 @@ fromBase64(toBase64('héllo 👋')); // 'héllo 👋'
 function toBase64(input, { urlSafe = false } = {})
 ```
 
-Encodes a string or binary data to a base64 string. A string is encoded as its UTF-8 bytes, so `btoa`'s Latin1-only limit never bites. `input` may be a string, an `ArrayBuffer`, or any typed array.
+Encodes a string or binary data to a base64 string. A string is encoded as its UTF-8 bytes, so `btoa`'s Latin1-only limit never bites. `input` may be a string, an `ArrayBuffer`, any typed array, or an array of byte values. Anything else returns `null` rather than encoding garbage — a bare number would otherwise read as a buffer length and silently encode zero-fill.
 
 #### Parameters
 
 | Name     | Type    | Description |
 |----------|---------|-------------|
-| input    | string \| ArrayBuffer \| TypedArray | The value to encode |
+| input    | string \| ArrayBuffer \| TypedArray \| number[] | The value to encode |
 | settings | object  | Optional configuration |
 
 ##### Options
@@ -39,7 +39,7 @@ Encodes a string or binary data to a base64 string. A string is encoded as its U
 
 #### Returns
 
-The base64 string.
+The base64 string, or `null` for input outside the accepted types.
 
 #### Example
 
@@ -57,10 +57,10 @@ console.log(toBase64('a?b>c', { urlSafe: true }));
 ### fromBase64
 
 ```javascript
-function fromBase64(base64 = '', { as = 'string' } = {})
+function fromBase64(base64, { as = 'string' } = {})
 ```
 
-Decodes a base64 string to a UTF-8 string or raw bytes. Accepts both the standard and URL-safe alphabets and tolerates missing padding, so a value from `toBase64(..., { urlSafe: true })` decodes without any extra flag.
+Decodes a base64 string to a UTF-8 string or raw bytes, or `null` when the input is not a string or not decodable base64 — it never throws. Accepts both the standard and URL-safe alphabets, tolerates missing padding, and strips whitespace, so a value from `toBase64(..., { urlSafe: true })` or a line-wrapped MIME/PEM block decodes without any extra flag.
 
 #### Parameters
 
@@ -77,7 +77,7 @@ Decodes a base64 string to a UTF-8 string or raw bytes. Accepts both the standar
 
 #### Returns
 
-The decoded UTF-8 string, or a `Uint8Array` when `as` is `'bytes'`.
+The decoded UTF-8 string, or a `Uint8Array` when `as` is `'bytes'`, or `null` if undecodable.
 
 #### Example
 
@@ -89,4 +89,7 @@ console.log(fromBase64('AQID', { as: 'bytes' })); // Uint8Array [1, 2, 3]
 
 // the URL-safe alphabet decodes with no extra flag
 console.log(fromBase64('YT9iPmM')); // 'a?b>c'
+
+// malformed input is null, never a throw
+console.log(fromBase64('!!!') ?? ''); // ''
 ```

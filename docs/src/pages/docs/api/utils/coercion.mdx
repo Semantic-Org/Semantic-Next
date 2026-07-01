@@ -24,7 +24,7 @@ Every helper accepts an `onInvalid` setting. It defaults to `'null'` (the failed
 ### toBoolean
 
 ```javascript
-function toBoolean(value, { falsy, loose = false, onInvalid = 'null' } = {})
+function toBoolean(value, { truthy, falsy, loose = false, onInvalid = 'null' } = {})
 ```
 
 Coerces a value to a boolean, or `null` when it recognizes no boolean reading. Booleans pass through, numbers read by zero-ness, and strings match a generous set case-insensitively: `true`, `t`, `yes`, `y`, `on`, `enabled` read as `true`, and `false`, `f`, `no`, `n`, `off`, `disabled`, `null`, `undefined`, `nan` read as `false`, alongside numeric strings by their value. Anything else returns `null`.
@@ -155,7 +155,7 @@ console.log(toInteger(Infinity)); // null
 ### toDate
 
 ```javascript
-function toDate(value, { onInvalid = 'null' } = {})
+function toDate(value, { onInvalid = 'null', epoch = 'milliseconds' } = {})
 ```
 
 Coerces a value to a Date, or `null` when it can't be parsed — never an `Invalid Date`. Accepts a Date, a number read as epoch milliseconds, or an **ISO-8601 string**. Ambiguous or locale-dependent spellings return `null` rather than a guessed date: bare years, slash and text dates, and day overflow all reject, so `'01/15/2024'` and `'2024-02-30'` never become a wrong Date. A zoneless datetime resolves in the ambient timezone (the user's zone on the client) and is returned as a UTC instant, the same as native `new Date` on an `<input type="datetime-local">` value. A date-only string is read as UTC, and a timestamp passed as a string is rejected, so pass a number for epoch ms.
@@ -165,7 +165,14 @@ Coerces a value to a Date, or `null` when it can't be parsed — never an `Inval
 | Name     | Type    | Description |
 |----------|---------|-------------|
 | value    | unknown | The value to coerce |
-| settings | object  | Optional configuration (`onInvalid`, see above) |
+| settings | object  | Optional configuration |
+
+##### Options
+
+| Name      | Type    | Default | Description |
+|-----------|---------|---------|-------------|
+| epoch     | 'milliseconds' \| 'seconds' | 'milliseconds' | How a number reads. Pass `'seconds'` for unix-second timestamps (a JWT `exp`), where the millisecond reading would produce a valid but wrong 1970 date |
+| onInvalid | 'null' \| 'passthrough' | 'null' | How a failed coercion resolves (see above) |
 
 #### Returns
 
@@ -178,6 +185,7 @@ import { toDate } from '@semantic-ui/utils';
 
 console.log(toDate('2024-01-01')); // Date for 2024-01-01
 console.log(toDate(1700000000000)); // Date from epoch ms
+console.log(toDate(payload.exp, { epoch: 'seconds' })); // Date from a unix-second JWT exp
 console.log(toDate('01/15/2024')); // null (ambiguous format)
 console.log(toDate('banana')); // null (never an Invalid Date)
 

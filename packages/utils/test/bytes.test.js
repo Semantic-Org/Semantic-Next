@@ -16,6 +16,19 @@ describe('toBase64', () => {
   it('encodes binary input', () => {
     expect(toBase64(new Uint8Array([1, 2, 3]))).toBe('AQID');
     expect(toBase64(new Uint8Array([1, 2, 3]).buffer)).toBe('AQID');
+    expect(toBase64([1, 2, 3])).toBe('AQID');
+  });
+
+  it('encodes only the view, not its whole backing buffer', () => {
+    const buffer = new Uint8Array([1, 2, 3, 4, 5, 6]).buffer;
+    expect(toBase64(new Uint8Array(buffer, 2, 3))).toBe(toBase64(new Uint8Array([3, 4, 5])));
+  });
+
+  it('returns null for input outside the accepted types', () => {
+    expect(toBase64(5)).toBe(null);
+    expect(toBase64({})).toBe(null);
+    expect(toBase64(null)).toBe(null);
+    expect(toBase64(undefined)).toBe(null);
   });
 
   it('emits the url-safe alphabet with no padding under urlSafe', () => {
@@ -40,6 +53,19 @@ describe('fromBase64', () => {
     expect(fromBase64('YT9iPmN-ZmZmZg')).toBe('a?b>c~ffff'); // url-safe, unpadded
     expect(fromBase64('YT9iPmN+ZmZmZg==')).toBe('a?b>c~ffff'); // standard, padded
   });
+
+  it('strips whitespace before the padding math, so line-wrapped base64 decodes', () => {
+    expect(fromBase64('aGVs\nbG8=\n')).toBe('hello');
+    expect(fromBase64('  aGVsbG8=  ')).toBe('hello');
+  });
+
+  it('returns null for malformed or non-string input, never throwing', () => {
+    expect(fromBase64('!!!not-base64!!!')).toBe(null);
+    expect(fromBase64('AAAAA')).toBe(null); // length % 4 === 1 is invalid at any padding
+    expect(fromBase64(null)).toBe(null);
+    expect(fromBase64(undefined)).toBe(null);
+    expect(fromBase64(42)).toBe(null);
+  });
 });
 
 describe('base64 round-trip', () => {
@@ -50,5 +76,12 @@ describe('base64 round-trip', () => {
     }
     const bytes = new Uint8Array([0, 127, 128, 255, 42]);
     expect(Array.from(fromBase64(toBase64(bytes), { as: 'bytes' }))).toEqual(Array.from(bytes));
+  });
+
+  it('round-trips input larger than the encode chunk size', () => {
+    const big = new Uint8Array(70000).map((byte, index) => index % 256);
+    const back = fromBase64(toBase64(big), { as: 'bytes' });
+    expect(back.length).toBe(70000);
+    expect(back.every((byte, index) => byte === index % 256)).toBe(true);
   });
 });
