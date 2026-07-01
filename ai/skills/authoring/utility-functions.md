@@ -417,7 +417,9 @@ if (isCI) { ... }           // detects GitHub Actions, GitLab CI, Jenkins, etc.
 
 ---
 
-## String Utilities (strings.js)
+## String Utilities (strings.js, humanize.js, to-title-case.js, get-article.js)
+
+The configured vocabulary functions (`humanize`, `toTitleCase`, `getArticle`) live in their own modules so a bundle only carries the ones it imports — their `fn.config` assignments would otherwise ride into every consumer of strings.js.
 
 ### Case Conversion
 ```javascript

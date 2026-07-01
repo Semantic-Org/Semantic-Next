@@ -1,4 +1,4 @@
-import { toTitleCase } from './strings.js';
+import { toTitleCase } from './to-title-case.js';
 
 /*-------------------
        Logging
