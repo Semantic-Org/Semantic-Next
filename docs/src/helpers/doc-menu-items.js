@@ -185,6 +185,7 @@ export const sidebarMenuAPI = [
     pages: [
       { name: 'Arrays', url: '/docs/api/utils/arrays' },
       { name: 'Browser', url: '/docs/api/utils/browser' },
+      { name: 'Bytes', url: '/docs/api/utils/bytes' },
       { name: 'Cache', url: '/docs/api/utils/cache' },
       { name: 'Cloning', url: '/docs/api/utils/cloning' },
       { name: 'Colors', url: '/docs/api/utils/colors' },
