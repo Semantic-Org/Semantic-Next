@@ -82,14 +82,7 @@ const overBudget = (value) => spendBudget(value, autoBudget) < 0;
 */
 // the identity fields a keyed array element is matched on, first present wins —
 // the same convention as reactivity's Signal.id and the renderer's getItemID
-/*
-  identity of an array element: the value of the first present field in `keys`,
-  or undefined for a scalar or an object carrying none of them. shared by the
-  keyed diff and the keyed path resolver so emit and apply agree on identity.
-  the field vocabulary is the one identity config for the whole keyed grammar,
-  set once at boot (elementKey.config.keys.unshift('sku')) — every keys default
-  below reads it live, per-call keys still win
-*/
+// identity of an array element, shared by every keyed helper, vocabulary adjustable at boot
 export const elementKey = /* @__PURE__ */ configured(
   (item, keys = elementKey.config.keys) => {
     if (!isObject(item)) {
