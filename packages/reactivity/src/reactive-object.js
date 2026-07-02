@@ -33,14 +33,6 @@ export class ReactiveObject {
   static clone = (value) => clone(value, { preserveNonCloneable: true });
   static safety = 'reference';
 
-  static resolveRelative(base, suffix) {
-    // suffix starts after the connector '.'
-    if (suffix.charCodeAt(0) === CHAR_CODES.DOT) {
-      return get(base, suffix.slice(1));
-    }
-    return get(base, suffix);
-  }
-
   constructor(initialValue = {}, {
     safety = ReactiveObject.safety,
     clone = ReactiveObject.clone,
@@ -121,10 +113,13 @@ export class ReactiveObject {
     const keyed = this.hasKeyedCells ? keyedPath(this.value, path) : path;
     const stored = this.protect(value);
     set(this.value, path, stored);
-    // set() can silently no-op, confirm it landed by identity since equality may be returnsFalse
+
+    // for non-existent deep paths set() can silently no-op
+    // if value doesnt exist then nothing happened
     if (!Object.is(get(this.value, path), stored)) {
       return false;
     }
+
     this.wake(path, previous, stored);
     if (keyed !== path) {
       this.wake(keyed, previous, stored);
@@ -199,10 +194,9 @@ export class ReactiveObject {
         this.cells.delete(cellPath);
         continue;
       }
-      const suffix = cellPath.slice(path.length);
-      if (
-        !this.equality(ReactiveObject.resolveRelative(previous, suffix), ReactiveObject.resolveRelative(next, suffix))
-      ) {
+      // get() cannot parse a leading '.', a leading '[' resolves against the subtree directly
+      const suffix = cellPath.slice(boundary === CHAR_CODES.DOT ? path.length + 1 : path.length);
+      if (!this.equality(get(previous, suffix), get(next, suffix))) {
         dep.changed();
       }
     }
