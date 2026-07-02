@@ -163,7 +163,7 @@ jobs:
           set -e
           cat deploy.log
           if [ -s url.txt ]; then
-            npx vercel alias set "$(cat url.txt)" "$BRANCH_URL" --token="$VERCEL_TOKEN"
+            npx vercel alias set "$(cat url.txt)" "$BRANCH_URL" --token="$VERCEL_TOKEN" --scope "$VERCEL_ORG_ID"
           fi
 
       - name: Write facts
