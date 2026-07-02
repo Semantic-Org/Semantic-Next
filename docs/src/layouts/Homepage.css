@@ -219,6 +219,7 @@ body {
         position: sticky;
         top: 4rem;
         display: grid;
+        perspective: 1400px;
       }
     }
 
@@ -236,13 +237,20 @@ body {
       }
     }
 
-    /* echoes the hero result card (see AIPrompt) */
+    /* echoes the hero result card (see AIPrompt), angled toward the copy */
     .demo {
       background: var(--subtle-angled-gradient);
       border: var(--glow-border);
       border-radius: var(--border-radius-l);
       box-shadow: var(--floating-shadow);
       padding: var(--padding-s);
+      transform: rotateY(-6deg) rotateX(1.5deg);
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s ease;
+
+      &:hover {
+        transform: rotateY(0deg) rotateX(0deg);
+        box-shadow: var(--floating-shadow), 0 24px 60px rgba(0, 0, 0, 0.45);
+      }
 
       .pane {
         padding: var(--padding-s);
