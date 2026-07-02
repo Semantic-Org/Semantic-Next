@@ -51,9 +51,6 @@ export class ReactiveObject {
     equality = (safety === 'none') ? returnsFalse : ReactiveObject.equality,
   } = {}) {
     this.cells = new Map();
-    // whether any reader has ever addressed a keyed [#id] path. the keyed-twin wake in set/remove
-    // serves only those readers, so until one exists writes skip twin resolution entirely. sticky:
-    // cells are minted far more often than stores are torn down
     this.hasKeyedCells = false;
     this.cloneFunction = clone;
     this.equality = equality;
@@ -76,6 +73,7 @@ export class ReactiveObject {
     if (dep === undefined) {
       dep = new Dependency();
       this.cells.set(path, dep);
+      // track if cell is keyed to improve perf on set
       if (!this.hasKeyedCells && path.includes('[#')) {
         this.hasKeyedCells = true;
       }
@@ -126,10 +124,6 @@ export class ReactiveObject {
     if (this.equality(previous, value)) {
       return false;
     }
-    // cells key on the literal path string, so the positional spelling of an identity-bearing
-    // element never matches the keyed cells readers hold. resolve the keyed twin before the write
-    // moves anything and wake it alongside the literal path — gated on a keyed reader existing,
-    // so a store nobody addresses by identity never pays for the resolution
     const keyed = this.hasKeyedCells ? keyedPath(this.value, path) : path;
     const stored = this.protect(value);
     set(this.value, path, stored);
