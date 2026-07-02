@@ -121,10 +121,7 @@ export class ReactiveObject {
     const keyed = this.hasKeyedCells ? keyedPath(this.value, path) : path;
     const stored = this.protect(value);
     set(this.value, path, stored);
-    // utils set() silently no-ops on a path through an absent keyed element, a
-    // guarded segment (__proto__ and friends), or an empty path. detect a write
-    // that didn't land by identity, not equality, since equality is returnsFalse
-    // under safety 'none'.
+    // set() can silently no-op, confirm it landed by identity since equality may be returnsFalse
     if (!Object.is(get(this.value, path), stored)) {
       return false;
     }
