@@ -433,4 +433,81 @@ describe('ReactiveObject', () => {
       arr.stop();
     });
   });
+
+  describe('keyed-address canonicalization', () => {
+    it('a positional write wakes the keyed reader of the same element', () => {
+      const ro = reactiveObject({ todos: [{ id: 'a', done: false }, { id: 'b', done: false }] });
+      const keyed = trackPath(ro, 'todos[#a].done');
+      expect(ro.set('todos.0.done', true)).toBe(true);
+      flush();
+      expect(keyed.runs).toBe(2);
+      expect(keyed.last).toBe(true);
+      keyed.stop();
+    });
+
+    it('a positional remove wakes the keyed reader, ancestors included', () => {
+      const ro = reactiveObject({ todos: [{ id: 'a', done: true }] });
+      const keyed = trackPath(ro, 'todos[#a].done');
+      const row = trackPath(ro, 'todos[#a]');
+      expect(ro.remove('todos.0.done')).toBe(true);
+      flush();
+      expect(keyed.runs).toBe(2);
+      expect(keyed.last).toBe(undefined);
+      expect(row.runs).toBe(2);
+      keyed.stop();
+      row.stop();
+    });
+
+    it('a keyless array stays positional: no phantom keyed wake, the literal reader still fires', () => {
+      const ro = reactiveObject({ tags: ['x', 'y'] });
+      const literal = trackPath(ro, 'tags.1');
+      expect(ro.set('tags.1', 'z')).toBe(true);
+      flush();
+      expect(literal.runs).toBe(2);
+      expect(literal.last).toBe('z');
+      literal.stop();
+    });
+
+    it('a whole-array write wakes a keyed descendant reader whose value moved', () => {
+      // the descendant scan resolves the cell's [#id] suffix directly against the old and new
+      // subtree values (the array-root bracket path)
+      const ro = reactiveObject({ todos: [{ id: 'a', done: false }] });
+      const keyed = trackPath(ro, 'todos[#a].done');
+      ro.set('todos', [{ id: 'a', done: true }]);
+      flush();
+      expect(keyed.runs).toBe(2);
+      expect(keyed.last).toBe(true);
+
+      ro.set('todos', [{ id: 'a', done: true, note: 'x' }]); // same done value: no re-fire
+      flush();
+      expect(keyed.runs).toBe(2);
+      keyed.stop();
+    });
+
+    it('twin resolution is gated on a keyed reader existing, and arms when one appears', () => {
+      const ro = reactiveObject({ todos: [{ id: 'a', done: false }] });
+      const literal = trackPath(ro, 'todos.0.done');
+      ro.set('todos.0.done', true);
+      flush();
+      expect(ro.hasKeyedCells).toBe(false);
+
+      const keyed = trackPath(ro, 'todos[#a].done');
+      expect(ro.hasKeyedCells).toBe(true);
+      ro.set('todos.0.done', false);
+      flush();
+      expect(keyed.runs).toBe(2);
+      expect(keyed.last).toBe(false);
+      literal.stop();
+      keyed.stop();
+    });
+
+    it('a keyed write stays single-wake: the keyed reader fires, position stays the reader contract', () => {
+      const ro = reactiveObject({ todos: [{ id: 'a', done: false }] });
+      const keyed = trackPath(ro, 'todos[#a].done');
+      expect(ro.set('todos[#a].done', true)).toBe(true);
+      flush();
+      expect(keyed.runs).toBe(2);
+      keyed.stop();
+    });
+  });
 });
