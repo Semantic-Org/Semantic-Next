@@ -289,9 +289,7 @@ export function trackReads<T, R = unknown>(
   options?: TrackReadsOptions,
 ): TrackReadsResult<R>;
 
-/** The identity vocabulary every keyed default resolves from. Extend by assignment
- * (`elementKey.config.keys = ['sku', ...]`) — the default array is frozen, and the default
- * vocabulary runs a static fast path. */
+/** The identity vocabulary every keyed default resolves from. */
 export interface ElementKeyConfig {
   /** Candidate identity fields, first present wins. Default `['id', '_id', 'hash', 'key']`. */
   keys: string[];
@@ -302,7 +300,7 @@ export interface ElementKeyConfig {
  * or undefined for a scalar or an object carrying none of them. What the keyed
  * `detectChanges` mode and the keyed `get`/`set`/`unset` path grammar match on. The field vocabulary is the one
  * identity config for the whole keyed grammar, set once at app boot
- * (`elementKey.config.keys = ['sku', ...]`) — every `keys` default reads it
+ * (`elementKey.config.keys.unshift('sku')`) — every `keys` default reads it
  * live, per-call `keys` still wins.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#elementkey elementKey}
  * @see {@link https://next.semantic-ui.com/examples/utils-elementkey Example}

@@ -82,16 +82,13 @@ const overBudget = (value) => spendBudget(value, autoBudget) < 0;
 */
 // the identity fields a keyed array element is matched on, first present wins —
 // identity of an array element, shared by every keyed helper, vocabulary adjustable at boot
-// (by assignment: elementKey.config.keys = ['sku', ...]). the default vocabulary runs a static
-// chain, a custom one pays the field loop
-const defaultKeys = Object.freeze(['id', '_id', 'hash', 'key']);
-
 export const elementKey = /* @__PURE__ */ configured(
   (item, keys = elementKey.config.keys) => {
     if (!isObject(item)) {
       return undefined;
     }
-    if (keys === defaultKeys) {
+    // fast track the default vocabulary, a static chain instead of the field loop
+    if (keys.length === 4 && keys[0] === 'id' && keys[1] === '_id' && keys[2] === 'hash' && keys[3] === 'key') {
       return item.id ?? item._id ?? item.hash ?? item.key;
     }
     for (const field of keys) {
@@ -101,7 +98,7 @@ export const elementKey = /* @__PURE__ */ configured(
     }
     return undefined;
   },
-  { keys: defaultKeys },
+  { keys: ['id', '_id', 'hash', 'key'] },
 );
 
 // resolve a keyed array segment to a live index, -1 if absent. identity compares
