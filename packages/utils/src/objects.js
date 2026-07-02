@@ -92,7 +92,7 @@ const overBudget = (value) => spendBudget(value, autoBudget) < 0;
 */
 export const elementKey = /* @__PURE__ */ configured(
   (item, keys = elementKey.config.keys) => {
-    if (!isPlainObject(item)) {
+    if (!isObject(item)) {
       return undefined;
     }
     for (const field of keys) {
