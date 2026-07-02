@@ -128,7 +128,7 @@ sum([1, 2, 3, 4]);                   // 10
 
 ### Property Access
 ```javascript
-import { get, set, unset, keys, values, hasProperty } from '@semantic-ui/utils';
+import { get, set, unset, keyedPath, keys, values, hasProperty } from '@semantic-ui/utils';
 
 const data = {
   user: {
@@ -157,6 +157,13 @@ get(cart, 'items[#b].qty');                  // 2 (by id, survives a reorder)
 set(cart, 'items[#c]', { id: 'c', qty: 3 }); // appends, no element had id 'c'
 unset(cart, 'items[#a]');                    // splices out the 'a' element
 set(cart, 'items[#x].qty', 9, ['sku']);      // 4th arg overrides the id field list
+
+// keyedPath — rewrite a positional path to the keyed [#id] spelling, resolved
+// against the object now, so it survives a later reorder (the form detectChanges
+// emits in keyed mode). Returns the input string itself when nothing rewrites
+const order = { items: [{ id: 'a', qty: 1 }, { id: 'b', qty: 2 }] };
+keyedPath(order, 'items.0.qty');             // 'items[#a].qty'
+keyedPath(order, 'plain.0.n');               // 'plain.0.n' unchanged (unresolved, same ref)
 
 // hasProperty checks own properties only (shallow, no dot paths)
 hasProperty(data, 'user');                   // true
@@ -991,6 +998,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `get` | `(obj, dotPath, keys?)` | Nested value or undefined (`[#id]` selects by identity) |
 | `set` | `(obj, dotPath, value, keys?)` | Same object, intermediates created (`[#id]` replaces or appends) |
 | `unset` | `(obj, dotPath, keys?)` | Same object, key removed (`[#id]` splices) |
+| `keyedPath` | `(obj, dotPath, keys?)` | Positional path rewritten to keyed `field[#id]` form, or the same string when nothing rewrites |
 | `keys` | `(obj)` | `Object.keys` or undefined |
 | `values` | `(obj)` | `Object.values` or undefined |
 | `hasProperty` | `(obj, prop)` | Own property check (shallow) |

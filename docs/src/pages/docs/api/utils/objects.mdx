@@ -687,6 +687,50 @@ const diff = detectChanges(before, after);
 diff.removed.forEach((path) => unset(replica, path));
 ```
 
+### keyedPath
+
+```javascript
+function keyedPath(obj, path, keys = ['id', '_id', 'hash', 'key'])
+```
+
+The keyed spelling of a positional path — rewrites each positional array segment (`items.0` or `items[1]`) to its `[#id]` form where the addressed element carries a path-safe identity, resolved against `obj` at call time. A positional address is only stable while the array doesn't move, the keyed address survives a reorder — the same identity [`detectChanges`](#detectchanges) emits in its keyed mode.
+
+#### Parameters
+
+| Name | Type     | Description |
+|------|----------|-------------|
+| obj  | object   | The object the path addresses |
+| path | string   | The path string (e.g., 'items.0.qty' or 'items[1]') |
+| keys | string[] | Identity fields for keyed `[#id]` segments |
+
+#### Returns
+
+The keyed spelling as a new string, or the input `path` itself (the same reference) when nothing rewrites — so `keyedPath(obj, path) === path` cheaply tells you the address was already stable.
+
+#### Notes
+
+Only a segment whose element carries a path-safe identity (see [`elementKey`](#elementkey)) rewrites. Keyless arrays, inner value lists, unresolvable paths, and already-keyed spellings pass through unchanged. A leading index (the root itself being an array) stays positional, since [`get`](#get) and [`set`](#set) can't parse a leading bracket. The emitted `[#id]` paths apply back through [`get`](#get)/[`set`](#set)/[`unset`](#unset) and match the keyed output of [`detectChanges`](#detectchanges).
+
+#### Example
+
+```javascript
+import { keyedPath, get } from '@semantic-ui/utils';
+
+const doc = { items: [{ id: 'a', qty: 1 }, { id: 'b', qty: 2 }] };
+console.log(keyedPath(doc, 'items.0.qty')); // 'items[#a].qty'
+console.log(keyedPath(doc, 'items[1]'));    // 'items[#b]'
+
+// keyless and unresolvable paths pass through — same reference when nothing rewrites
+const path = 'plain.0.n';
+console.log(keyedPath({ plain: [{ n: 1 }] }, path) === path); // true
+
+// the keyed address survives a reorder that shifts every positional index
+const target = keyedPath(doc, 'items.1.qty'); // 'items[#b].qty'
+doc.items.unshift({ id: 'z', qty: 9 });
+console.log(get(doc, 'items.1.qty')); // 1 (positional now hits a)
+console.log(get(doc, target));        // 2 (keyed still hits b)
+```
+
 ### proxyObject
 
 ```javascript
