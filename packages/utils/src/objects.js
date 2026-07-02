@@ -1182,15 +1182,14 @@ export const unset = function(obj, path, keys = DEFAULT_ELEMENT_KEYS) {
   return obj;
 };
 
-// a positional segment can address an identity-bearing element (todos.0 where the element carries
-// an id), but reactivity and override state key by the literal path string, so the positional and
-// keyed spellings of one location never meet. canonicalPath rewrites positional segments to their
-// keyed form ([#id]) where the addressed element carries a path-safe identity, resolving against
-// the doc at call time. returns the input string itself when nothing rewrites, so callers compare
-// by reference to skip the rewritten case
+// a path can address an identity-bearing array element two ways: by position (items.0.qty) or by
+// key (items[#a].qty). the positional spelling is only stable while the array doesn't move;
+// keyedPath resolves it to the keyed spelling against a live object, rewriting each positional
+// segment whose element carries a path-safe identity. returns the input string itself when
+// nothing rewrites, so callers compare by reference
 const HAS_POSITIONAL_SEGMENT = /(^|\.|\[)\d/;
 
-export const canonicalPath = (obj, path, keys = DEFAULT_ELEMENT_KEYS) => {
+export const keyedPath = (obj, path, keys = DEFAULT_ELEMENT_KEYS) => {
   if (typeof path !== 'string' || !HAS_POSITIONAL_SEGMENT.test(path) || obj === null || !isObject(obj)) {
     return path;
   }

@@ -2,7 +2,6 @@ import {
   any,
   arrayFromObject,
   assignInPlace,
-  canonicalPath,
   clone,
   deepExtend,
   detectChanges,
@@ -11,6 +10,7 @@ import {
   filterObject,
   get,
   hasProperty,
+  keyedPath,
   keys,
   mapObject,
   onlyKeys,
@@ -2269,7 +2269,7 @@ describe('deepExtend — preserveNonCloneable option', () => {
   });
 });
 
-describe('canonicalPath', () => {
+describe('keyedPath', () => {
   const doc = () => ({
     lines: [{ id: 'a', tax: 1, tags: ['x', 'y'] }, { id: 'b' }],
     plain: [{ n: 1 }],
@@ -2277,29 +2277,29 @@ describe('canonicalPath', () => {
   });
 
   it('rewrites positional segments to the keyed form where elements carry identity', () => {
-    expect(canonicalPath(doc(), 'lines.0.tax')).toBe('lines[#a].tax');
-    expect(canonicalPath(doc(), 'lines[1]')).toBe('lines[#b]');
-    expect(canonicalPath(doc(), 'deep.rows.0.cell.v')).toBe('deep.rows[#7].cell.v');
+    expect(keyedPath(doc(), 'lines.0.tax')).toBe('lines[#a].tax');
+    expect(keyedPath(doc(), 'lines[1]')).toBe('lines[#b]');
+    expect(keyedPath(doc(), 'deep.rows.0.cell.v')).toBe('deep.rows[#7].cell.v');
   });
 
   it('leaves keyless arrays and inner value-lists positional', () => {
-    expect(canonicalPath(doc(), 'plain.0.n')).toBe('plain.0.n');
-    expect(canonicalPath(doc(), 'lines.0.tags.1')).toBe('lines[#a].tags.1');
+    expect(keyedPath(doc(), 'plain.0.n')).toBe('plain.0.n');
+    expect(keyedPath(doc(), 'lines.0.tags.1')).toBe('lines[#a].tags.1');
   });
 
   it('returns the input string itself when nothing rewrites, for reference comparison', () => {
     const keyed = 'lines[#a].tax';
-    expect(canonicalPath(doc(), keyed)).toBe(keyed);
+    expect(keyedPath(doc(), keyed)).toBe(keyed);
     const scalar = 'title';
-    expect(canonicalPath(doc(), scalar)).toBe(scalar);
+    expect(keyedPath(doc(), scalar)).toBe(scalar);
     const unresolvable = 'nope.0.x';
-    expect(canonicalPath(doc(), unresolvable)).toBe(unresolvable);
+    expect(keyedPath(doc(), unresolvable)).toBe(unresolvable);
   });
 
   it('leaves an unsafe or absent identity positional', () => {
     const dotted = { rows: [{ id: 'a.b' }] };
-    expect(canonicalPath(dotted, 'rows.0')).toBe('rows.0');
+    expect(keyedPath(dotted, 'rows.0')).toBe('rows.0');
     const holes = { rows: [undefined] };
-    expect(canonicalPath(holes, 'rows.0')).toBe('rows.0');
+    expect(keyedPath(holes, 'rows.0')).toBe('rows.0');
   });
 });
