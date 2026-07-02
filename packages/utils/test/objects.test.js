@@ -2334,9 +2334,13 @@ describe('array-root bracket paths', () => {
 });
 
 describe('elementKey.config.keys', () => {
+  it('the default vocabulary is frozen: extend by assignment, never mutation', () => {
+    expect(() => elementKey.config.keys.push('sku')).toThrow();
+  });
+
   it('the configured vocabulary reaches the whole keyed grammar, per-call keys still win', () => {
-    const original = [...elementKey.config.keys];
-    elementKey.config.keys.unshift('sku');
+    const original = elementKey.config.keys;
+    elementKey.config.keys = ['sku', ...original];
     try {
       const doc = { rows: [{ sku: 'A1', qty: 1 }] };
       expect(elementKey(doc.rows[0])).toBe('A1');

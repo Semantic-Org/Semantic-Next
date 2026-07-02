@@ -83,10 +83,17 @@ const overBudget = (value) => spendBudget(value, autoBudget) < 0;
 // the identity fields a keyed array element is matched on, first present wins —
 // the same convention as reactivity's Signal.id and the renderer's getItemID
 // identity of an array element, shared by every keyed helper, vocabulary adjustable at boot
+// (by assignment: elementKey.config.keys = ['sku', ...]). the default vocabulary runs a static
+// chain, a custom one pays the field loop
+const defaultKeys = Object.freeze(['id', '_id', 'hash', 'key']);
+
 export const elementKey = /* @__PURE__ */ configured(
   (item, keys = elementKey.config.keys) => {
     if (!isObject(item)) {
       return undefined;
+    }
+    if (keys === defaultKeys) {
+      return item.id ?? item._id ?? item.hash ?? item.key;
     }
     for (const field of keys) {
       if (item[field] != null) {
@@ -95,7 +102,7 @@ export const elementKey = /* @__PURE__ */ configured(
     }
     return undefined;
   },
-  { keys: ['id', '_id', 'hash', 'key'] },
+  { keys: defaultKeys },
 );
 
 // resolve a keyed array segment to a live index, -1 if absent. identity compares
