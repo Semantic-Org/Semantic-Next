@@ -81,7 +81,6 @@ const overBudget = (value) => spendBudget(value, autoBudget) < 0;
   root reports path '' (the RFC 6902 root convention).
 */
 // the identity fields a keyed array element is matched on, first present wins —
-// the same convention as reactivity's Signal.id and the renderer's getItemID
 // identity of an array element, shared by every keyed helper, vocabulary adjustable at boot
 // (by assignment: elementKey.config.keys = ['sku', ...]). the default vocabulary runs a static
 // chain, a custom one pays the field loop
