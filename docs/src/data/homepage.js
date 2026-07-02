@@ -68,13 +68,13 @@ export const tourExamples = {
     state.dragging.set(true);
     return 'cancel';
   },
-  'global pointermove body'({ $, state, event }) {
+  'global pointermove html'({ $, state, event }) {
     if (!state.dragging.get()) return;
     const area = $('.area').bounds();
     state.x.set(event.clientX - area.left);
     state.y.set(event.clientY - area.top);
   },
-  'global pointerup body'({ state }) {
+  'global pointerup html'({ state }) {
     state.dragging.set(false);
   },
 };`,
