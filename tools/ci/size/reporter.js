@@ -212,41 +212,68 @@ function diffModules(head, base) {
   return deltas;
 }
 
-// co-movement groups: exports sharing a module-graph fingerprint move together,
-// so the diff is computed per group and reported through its master alone —
-// the cheapest member (purest probe of the shared graph), ties broken by
-// shortest-then-alphabetical name so labels stay stable across PRs
+// co-movement groups: a row is one distinct finding — exports sharing the same
+// graph transition (head fingerprint, base fingerprint) AND the same delta
+// magnitude move together, and are reported through their master alone: the
+// cheapest member (purest probe), ties broken shortest-then-alphabetical so
+// labels stay stable across PRs. graph-merging changes (a leak pulls new
+// modules into many graphs) split honestly because base fingerprints differ,
+// and statement-level shaking quirks split on the delta bucket
 function diffExports(head, base) {
   const changed = [];
   const added = [];
   const removed = [];
-  for (const group of clusterByGraph(head)) {
-    const master = pickMaster(group);
-    // anchor the delta on a member priced on both sides, preferring the master —
-    // re-mastering after a rename must not misread as growth
-    const anchor = Object.hasOwn(base, master.name)
-      ? master
-      : group.find((member) => Object.hasOwn(base, member.name));
-    if (!anchor) {
-      added.push({ name: master.name, bytes: master.cost, groupSize: group.length });
-      continue;
-    }
-    const baseCost = base[anchor.name].cost;
-    const delta = anchor.cost - baseCost;
-    if (Math.abs(delta) >= TRACE.export) {
-      changed.push({
-        name: master.name,
-        head: anchor.cost,
-        base: baseCost,
-        delta,
-        pct: baseCost > 0 ? (delta / baseCost) * 100 : null,
-        groupSize: group.length,
-      });
+  const groups = new Map();
+  for (const [name, entry] of Object.entries(head)) {
+    const baseEntry = Object.hasOwn(base, name) ? base[name] : null;
+    const delta = baseEntry ? entry.cost - baseEntry.cost : null;
+    const key = baseEntry ? `${entry.graph}\u0000${baseEntry.graph}` : `${entry.graph}\u0000<new>`;
+    if (!groups.has(key)) { groups.set(key, []); }
+    groups.get(key).push({ name, cost: entry.cost, base: baseEntry?.cost ?? null, delta });
+  }
+  const livingGraphs = new Set(
+    Object.entries(head)
+      .filter(([name]) => Object.hasOwn(base, name))
+      .map(([, entry]) => entry.graph),
+  );
+  for (const [key, group] of groups) {
+    // one graph transition can still hide distinct magnitudes (a config-carrier
+    // already paid in base what its siblings gain) — split on delta gaps rather
+    // than fixed buckets, so co-movers stay together and true splits separate
+    for (const cohort of splitByDeltaGap(group)) {
+      const master = pickMaster(cohort);
+      if (master.delta === null) {
+        // a new export sharing a living group's graph is a slave — silent. only a
+        // graph-novel surface is news
+        if (!livingGraphs.has(key.split('\u0000')[0])) {
+          added.push({ name: master.name, bytes: master.cost, groupSize: cohort.length });
+        }
+        continue;
+      }
+      if (Math.abs(master.delta) >= TRACE.export) {
+        changed.push({
+          name: master.name,
+          head: master.cost,
+          base: master.base,
+          delta: master.delta,
+          pct: master.base > 0 ? (master.delta / master.base) * 100 : null,
+          groupSize: cohort.length,
+        });
+      }
     }
   }
   // a base group none of whose members survive is a removed surface
-  for (const group of clusterByGraph(base)) {
-    if (group.some((member) => Object.hasOwn(head, member.name))) { continue; }
+  const baseGroups = new Map();
+  for (const [name, entry] of Object.entries(base)) {
+    if (Object.hasOwn(head, name)) { continue; }
+    if (!baseGroups.has(entry.graph)) { baseGroups.set(entry.graph, []); }
+    baseGroups.get(entry.graph).push({ name, cost: entry.cost, delta: null, base: entry.cost });
+  }
+  for (const [graph, group] of baseGroups) {
+    // survivors of the same base graph mean the surface still exists — renames and
+    // partial removals within a living group stay out of the report
+    const survives = Object.entries(base).some(([name, entry]) => entry.graph === graph && Object.hasOwn(head, name));
+    if (survives) { continue; }
     const master = pickMaster(group);
     removed.push({ name: master.name, bytes: master.cost, groupSize: group.length });
   }
@@ -257,13 +284,20 @@ function diffExports(head, base) {
   return { changed, added, removed };
 }
 
-function clusterByGraph(map) {
-  const groups = new Map();
-  for (const [name, { cost, graph }] of Object.entries(map)) {
-    if (!groups.has(graph)) { groups.set(graph, []); }
-    groups.get(graph).push({ name, cost, graph });
+function splitByDeltaGap(group) {
+  const withDelta = group.filter((m) => m.delta !== null).sort((a, b) => a.delta - b.delta);
+  const fresh = group.filter((m) => m.delta === null);
+  const cohorts = fresh.length ? [fresh] : [];
+  let current = [];
+  for (const member of withDelta) {
+    if (current.length && member.delta - current[current.length - 1].delta > 64) {
+      cohorts.push(current);
+      current = [];
+    }
+    current.push(member);
   }
-  return [...groups.values()];
+  if (current.length) { cohorts.push(current); }
+  return cohorts;
 }
 
 function pickMaster(group) {

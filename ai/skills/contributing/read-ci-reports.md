@@ -301,10 +301,8 @@ This bot measures the bytes a PR actually ships. Sizes come from a deterministic
 
 **N larger · N smaller · N unchanged · ±N shipped LOC · ±N comment LOC**
 
-| signal | result |       ← headline brotli, shipped LOC, comment LOC, changed count
-
-#### Bundles that changed (N)
-| bundle | brotli | Δ brotli | change |
+#### Bundles that changed (N of M)
+| bundle | brotli | Δ brotli | change | from |
 
 <details> Tracked import costs (query · reactivity · utils) </details>
 <details> LOC by scope </details>
