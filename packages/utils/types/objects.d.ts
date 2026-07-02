@@ -613,6 +613,30 @@ export function unset<T extends object>(
 ): T;
 
 /**
+ * Rewrite positional array segments to their keyed `[#id]` form where the addressed element
+ * carries a path-safe identity, resolving against the object at call time
+ * (`todos.0.done` -> `todos[#a].done`). Segments over keyless arrays, unresolvable paths, and
+ * already-keyed spellings pass through. Returns the input string itself when nothing rewrites,
+ * so callers can compare by reference.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#canonicalpath canonicalPath}
+ *
+ * @param obj - The object the path addresses
+ * @param path - The path string (e.g., 'items.0.qty' or 'items[1]')
+ * @param keys - Identity fields for keyed segments (default ['id', '_id', 'hash', 'key'])
+ * @returns The keyed spelling, or the input path when nothing rewrites
+ *
+ * @example
+ * ```ts
+ * canonicalPath({ items: [{ id: 'a', qty: 1 }] }, 'items.0.qty') // 'items[#a].qty'
+ * ```
+ */
+export function canonicalPath(
+  obj: object,
+  path: string,
+  keys?: string[],
+): string;
+
+/**
  * Creates a proxy that combines source and reference objects
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#proxyobject proxyObject}
  *

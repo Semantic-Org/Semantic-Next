@@ -1182,6 +1182,82 @@ export const unset = function(obj, path, keys = DEFAULT_ELEMENT_KEYS) {
   return obj;
 };
 
+// a positional segment can address an identity-bearing element (todos.0 where the element carries
+// an id), but reactivity and override state key by the literal path string, so the positional and
+// keyed spellings of one location never meet. canonicalPath rewrites positional segments to their
+// keyed form ([#id]) where the addressed element carries a path-safe identity, resolving against
+// the doc at call time. returns the input string itself when nothing rewrites, so callers compare
+// by reference to skip the rewritten case
+const HAS_POSITIONAL_SEGMENT = /(^|\.|\[)\d/;
+
+export const canonicalPath = (obj, path, keys = DEFAULT_ELEMENT_KEYS) => {
+  if (typeof path !== 'string' || !HAS_POSITIONAL_SEGMENT.test(path) || obj === null || !isObject(obj)) {
+    return path;
+  }
+  const parts = path.split('.');
+  // a leading index means the root itself is an array; get/set cannot parse a leading bracket, so
+  // that spelling stays positional
+  if (isIndexSegment(parts[0])) {
+    return path;
+  }
+  const out = [];
+  let currentObject = obj;
+  let changed = false;
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (currentObject === null || !isObject(currentObject)) {
+      return path;
+    }
+    if (part.includes('[')) {
+      const access = extractBracketAccess(part);
+      const array = currentObject[access.key];
+      if (!isArray(array)) {
+        return path;
+      }
+      const index = 'keyValue' in access ? findKeyed(array, access.keyValue, keys) : access.index;
+      const element = array[index];
+      if ('keyValue' in access) {
+        out.push(part);
+      }
+      else {
+        const id = elementKey(element, keys);
+        const keyValue = id != null ? String(id) : null;
+        if (keyValue !== null && isKeyedPathSafe(keyValue)) {
+          out.push(`${access.key}[#${keyValue}]`);
+          changed = true;
+        }
+        else {
+          out.push(part);
+        }
+      }
+      currentObject = element;
+    }
+    else if (isIndexSegment(part) && isArray(currentObject)) {
+      const element = currentObject[Number(part)];
+      const id = elementKey(element, keys);
+      const keyValue = id != null ? String(id) : null;
+      if (keyValue !== null && isKeyedPathSafe(keyValue)) {
+        out[out.length - 1] += `[#${keyValue}]`;
+        changed = true;
+      }
+      else {
+        out.push(part);
+      }
+      currentObject = element;
+    }
+    else if (part in currentObject) {
+      out.push(part);
+      currentObject = currentObject[part];
+    }
+    else {
+      // an unresolvable segment (including get()'s literal dotted-key forms) holds no positional
+      // rewrite; leave the spelling alone
+      return path;
+    }
+  }
+  return changed ? out.join('.') : path;
+};
+
 /* This is useful for callbacks or other scenarios where you want to avoid the
    values of a reference object becoming stale when a source object changes
 */
