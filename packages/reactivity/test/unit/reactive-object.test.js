@@ -468,6 +468,23 @@ describe('ReactiveObject', () => {
       literal.stop();
     });
 
+    it('twin resolution is gated on a keyed reader existing, and arms when one appears', () => {
+      const ro = reactiveObject({ todos: [{ id: 'a', done: false }] });
+      const literal = trackPath(ro, 'todos.0.done');
+      ro.set('todos.0.done', true);
+      flush();
+      expect(ro.hasKeyedCells).toBe(false);
+
+      const keyed = trackPath(ro, 'todos[#a].done');
+      expect(ro.hasKeyedCells).toBe(true);
+      ro.set('todos.0.done', false);
+      flush();
+      expect(keyed.runs).toBe(2);
+      expect(keyed.last).toBe(false);
+      literal.stop();
+      keyed.stop();
+    });
+
     it('a keyed write stays single-wake: the keyed reader fires, position stays the reader contract', () => {
       const ro = reactiveObject({ todos: [{ id: 'a', done: false }] });
       const keyed = trackPath(ro, 'todos[#a].done');
