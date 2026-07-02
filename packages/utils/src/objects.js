@@ -951,7 +951,8 @@ export const get = function(obj, path = '', keys = DEFAULT_ELEMENT_KEYS) {
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
-      const array = currentObject[access.key];
+      // an empty key ([0].x against an array root) addresses the current value as the array
+      const array = access.key === '' ? currentObject : currentObject[access.key];
       if (!isArray(array)) {
         return undefined;
       }
@@ -1024,10 +1025,20 @@ export const set = function(obj, path, value, keys = DEFAULT_ELEMENT_KEYS) {
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
-      if (!isArray(currentObject[access.key])) {
-        currentObject[access.key] = [];
+      let array;
+      if (access.key === '') {
+        // an empty key addresses the current value as the array; it can't be vivified in place
+        if (!isArray(currentObject)) {
+          return obj;
+        }
+        array = currentObject;
       }
-      const array = currentObject[access.key];
+      else {
+        if (!isArray(currentObject[access.key])) {
+          currentObject[access.key] = [];
+        }
+        array = currentObject[access.key];
+      }
       if ('keyValue' in access) {
         const index = findKeyed(array, access.keyValue, keys);
         if (isLast) {
@@ -1122,7 +1133,7 @@ export const unset = function(obj, path, keys = DEFAULT_ELEMENT_KEYS) {
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
-      const array = currentObject[access.key];
+      const array = access.key === '' ? currentObject : currentObject[access.key];
       if (!isArray(array)) {
         return obj;
       }

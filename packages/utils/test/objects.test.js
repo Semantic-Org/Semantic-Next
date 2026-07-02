@@ -2303,3 +2303,32 @@ describe('keyedPath', () => {
     expect(keyedPath(holes, 'rows.0')).toBe('rows.0');
   });
 });
+
+describe('array-root bracket paths', () => {
+  it('get resolves a leading bracket segment against an array root', () => {
+    const arr = [{ id: 'a', done: false }, { id: 'b', done: true }];
+    expect(get(arr, '[0].done')).toBe(false);
+    expect(get(arr, '[#b].done')).toBe(true);
+    expect(get(arr, '[#zzz].done')).toBe(undefined);
+    expect(get({ x: 1 }, '[0].y')).toBe(undefined);
+  });
+
+  it('set writes through a leading bracket segment, no-op when the root is not an array', () => {
+    const arr = [{ id: 'a', done: false }];
+    set(arr, '[#a].done', true);
+    expect(arr[0].done).toBe(true);
+    set(arr, '[0].qty', 5);
+    expect(arr[0].qty).toBe(5);
+    const obj = { x: 1 };
+    set(obj, '[0].y', 2);
+    expect(obj).toEqual({ x: 1 });
+  });
+
+  it('unset removes through a leading bracket segment', () => {
+    const arr = [{ id: 'a', done: true, note: 'x' }];
+    unset(arr, '[#a].note');
+    expect(arr[0]).toEqual({ id: 'a', done: true });
+    unset(arr, '[#a]');
+    expect(arr.length).toBe(0);
+  });
+});
