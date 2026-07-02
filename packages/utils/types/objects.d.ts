@@ -289,17 +289,24 @@ export function trackReads<T, R = unknown>(
   options?: TrackReadsOptions,
 ): TrackReadsResult<R>;
 
+/** The identity vocabulary every keyed default resolves from. */
+export interface ElementKeyConfig {
+  /** Candidate identity fields, first present wins. Default `['id', '_id', 'hash', 'key']`. */
+  keys: string[];
+}
+
 /**
  * Identity of an array element: the value of the first present field in `keys`,
- * or undefined for a scalar or an object carrying none of them. The
- * element-identity convention shared with reactivity's Signal.id and the
- * renderer's getItemID, and what the keyed `detectChanges` mode and the keyed
- * `get`/`set`/`unset` path grammar match on.
+ * or undefined for a scalar or an object carrying none of them. What the keyed
+ * `detectChanges` mode and the keyed `get`/`set`/`unset` path grammar match on. The field vocabulary is the one
+ * identity config for the whole keyed grammar, set once at app boot
+ * (`elementKey.config.keys.unshift('sku')`) — every `keys` default reads it
+ * live, per-call `keys` still wins.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#elementkey elementKey}
  * @see {@link https://next.semantic-ui.com/examples/utils-elementkey Example}
  *
  * @param item - The array element to read identity from
- * @param keys - Candidate identity fields, first present wins (default ['id', '_id', 'hash', 'key'])
+ * @param keys - Candidate identity fields, first present wins (default `elementKey.config.keys`)
  * @returns The identity value, or undefined when none of the fields are present
  *
  * @example
@@ -310,6 +317,9 @@ export function trackReads<T, R = unknown>(
  * ```
  */
 export function elementKey(item: unknown, keys?: string[]): unknown;
+export namespace elementKey {
+  let config: ElementKeyConfig;
+}
 
 /**
  * Changes reported by detectChanges, grouped by operation
@@ -611,6 +621,31 @@ export function unset<T extends object>(
   path: string,
   keys?: string[],
 ): T;
+
+/**
+ * The keyed spelling of a positional path: rewrites each positional array segment to its `[#id]`
+ * form where the addressed element carries a path-safe identity, resolving against the object at
+ * call time (`items.0.qty` -> `items[#a].qty`). A positional address is only stable while the
+ * array doesn't move; the keyed address survives reordering. Segments over keyless arrays,
+ * unresolvable paths, and already-keyed spellings pass through. Returns the input string itself
+ * when nothing rewrites, so callers can compare by reference.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#keyedpath keyedPath}
+ *
+ * @param obj - The object the path addresses
+ * @param path - The path string (e.g., 'items.0.qty' or 'items[1]')
+ * @param keys - Identity fields for keyed segments (default ['id', '_id', 'hash', 'key'])
+ * @returns The keyed spelling, or the input path when nothing rewrites
+ *
+ * @example
+ * ```ts
+ * keyedPath({ items: [{ id: 'a', qty: 1 }] }, 'items.0.qty') // 'items[#a].qty'
+ * ```
+ */
+export function keyedPath(
+  obj: object,
+  path: string,
+  keys?: string[],
+): string;
 
 /**
  * Creates a proxy that combines source and reference objects

@@ -10,6 +10,7 @@ import {
   filterObject,
   get,
   hasProperty,
+  keyedPath,
   keys,
   mapObject,
   onlyKeys,
@@ -2265,5 +2266,102 @@ describe('deepExtend — preserveNonCloneable option', () => {
     deepExtend(target, { custom: inst }, { preserveNonCloneable: false });
     expect(target.custom).not.toBe(inst);
     expect(target.custom.v).toBe(1);
+  });
+});
+
+describe('keyedPath', () => {
+  const doc = () => ({
+    lines: [{ id: 'a', tax: 1, tags: ['x', 'y'] }, { id: 'b' }],
+    plain: [{ n: 1 }],
+    deep: { rows: [{ _id: 7, cell: { v: 1 } }] },
+  });
+
+  it('rewrites positional segments to the keyed form where elements carry identity', () => {
+    expect(keyedPath(doc(), 'lines.0.tax')).toBe('lines[#a].tax');
+    expect(keyedPath(doc(), 'lines[1]')).toBe('lines[#b]');
+    expect(keyedPath(doc(), 'deep.rows.0.cell.v')).toBe('deep.rows[#7].cell.v');
+  });
+
+  it('leaves keyless arrays and inner value-lists positional', () => {
+    expect(keyedPath(doc(), 'plain.0.n')).toBe('plain.0.n');
+    expect(keyedPath(doc(), 'lines.0.tags.1')).toBe('lines[#a].tags.1');
+  });
+
+  it('returns the input string itself when nothing rewrites, for reference comparison', () => {
+    const keyed = 'lines[#a].tax';
+    expect(keyedPath(doc(), keyed)).toBe(keyed);
+    const scalar = 'title';
+    expect(keyedPath(doc(), scalar)).toBe(scalar);
+    const unresolvable = 'nope.0.x';
+    expect(keyedPath(doc(), unresolvable)).toBe(unresolvable);
+  });
+
+  it('leaves an unsafe or absent identity positional', () => {
+    const dotted = { rows: [{ id: 'a.b' }] };
+    expect(keyedPath(dotted, 'rows.0')).toBe('rows.0');
+    const holes = { rows: [undefined] };
+    expect(keyedPath(holes, 'rows.0')).toBe('rows.0');
+  });
+});
+
+describe('array-root bracket paths', () => {
+  it('get resolves a leading bracket segment against an array root', () => {
+    const arr = [{ id: 'a', done: false }, { id: 'b', done: true }];
+    expect(get(arr, '[0].done')).toBe(false);
+    expect(get(arr, '[#b].done')).toBe(true);
+    expect(get(arr, '[#zzz].done')).toBe(undefined);
+    expect(get({ x: 1 }, '[0].y')).toBe(undefined);
+  });
+
+  it('set writes through a leading bracket segment, no-op when the root is not an array', () => {
+    const arr = [{ id: 'a', done: false }];
+    set(arr, '[#a].done', true);
+    expect(arr[0].done).toBe(true);
+    set(arr, '[0].qty', 5);
+    expect(arr[0].qty).toBe(5);
+    const obj = { x: 1 };
+    set(obj, '[0].y', 2);
+    expect(obj).toEqual({ x: 1 });
+  });
+
+  it('unset removes through a leading bracket segment', () => {
+    const arr = [{ id: 'a', done: true, note: 'x' }];
+    unset(arr, '[#a].note');
+    expect(arr[0]).toEqual({ id: 'a', done: true });
+    unset(arr, '[#a]');
+    expect(arr.length).toBe(0);
+  });
+});
+
+describe('elementKey.config.keys', () => {
+  it('the vocabulary extends by mutation like every configured util, the fast path stays true', () => {
+    elementKey.config.keys.push('sku');
+    try {
+      expect(elementKey({ sku: 'A1' })).toBe('A1');
+      expect(elementKey({ id: 'x', sku: 'A1' })).toBe('x');
+    }
+    finally {
+      elementKey.config.keys.pop();
+    }
+    expect(elementKey({ sku: 'A1' })).toBe(undefined);
+  });
+
+  it('the configured vocabulary reaches the whole keyed grammar, per-call keys still win', () => {
+    const original = [...elementKey.config.keys];
+    elementKey.config.keys = ['sku', ...original];
+    try {
+      const doc = { rows: [{ sku: 'A1', qty: 1 }] };
+      expect(elementKey(doc.rows[0])).toBe('A1');
+      expect(get(doc, 'rows[#A1].qty')).toBe(1);
+      expect(keyedPath(doc, 'rows.0.qty')).toBe('rows[#A1].qty');
+      set(doc, 'rows[#A1].qty', 2);
+      expect(doc.rows[0].qty).toBe(2);
+      const diff = detectChanges({ rows: [{ sku: 'A1', qty: 1 }] }, doc);
+      expect(diff.changed).toContain('rows[#A1].qty');
+      expect(elementKey(doc.rows[0], ['qty'])).toBe(2);
+    }
+    finally {
+      elementKey.config.keys = original;
+    }
   });
 });

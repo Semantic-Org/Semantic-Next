@@ -1,5 +1,6 @@
 import { clone } from './cloning.js';
 import { isEqual } from './equality.js';
+import { configured } from './functions.js';
 import { each } from './loops.js';
 import { escapeRegExp } from './regexp.js';
 import { isArray, isMap, isObject, isPlainObject, isSet, isString } from './types.js';
@@ -80,29 +81,29 @@ const overBudget = (value) => spendBudget(value, autoBudget) < 0;
   root reports path '' (the RFC 6902 root convention).
 */
 // the identity fields a keyed array element is matched on, first present wins —
-// the same convention as reactivity's Signal.id and the renderer's getItemID
-const DEFAULT_ELEMENT_KEYS = ['id', '_id', 'hash', 'key'];
-
-/*
-  identity of an array element: the value of the first present field in `keys`,
-  or undefined for a scalar or an object carrying none of them. shared by the
-  keyed diff and the keyed path resolver so emit and apply agree on identity.
-*/
-export const elementKey = (item, keys = DEFAULT_ELEMENT_KEYS) => {
-  if (!isPlainObject(item)) {
-    return undefined;
-  }
-  for (const field of keys) {
-    if (item[field] != null) {
-      return item[field];
+// identity of an array element, shared by every keyed helper, vocabulary adjustable at boot
+export const elementKey = /* @__PURE__ */ configured(
+  (item, keys = elementKey.config.keys) => {
+    if (!isObject(item)) {
+      return undefined;
     }
-  }
-  return undefined;
-};
+    // fast track the default vocabulary, a static chain instead of the field loop
+    if (keys.length === 4 && keys[0] === 'id' && keys[1] === '_id' && keys[2] === 'hash' && keys[3] === 'key') {
+      return item.id ?? item._id ?? item.hash ?? item.key;
+    }
+    for (const field of keys) {
+      if (item[field] != null) {
+        return item[field];
+      }
+    }
+    return undefined;
+  },
+  { keys: ['id', '_id', 'hash', 'key'] },
+);
 
 // resolve a keyed array segment to a live index, -1 if absent. identity compares
 // String-coerced because the path carries a string and ids may be number or string
-const findKeyed = (array, keyValue, keys = DEFAULT_ELEMENT_KEYS) => {
+const findKeyed = (array, keyValue, keys = elementKey.config.keys) => {
   if (!isArray(array)) {
     return -1;
   }
@@ -142,7 +143,7 @@ const keyedMap = (array, keys) => {
 
 export const detectChanges = (before, after, {
   keyed = true,
-  keys = DEFAULT_ELEMENT_KEYS,
+  keys = elementKey.config.keys,
   equality = isEqual,
   ignoreKeys = null,
   collapseKeys = null,
@@ -303,7 +304,7 @@ export const trackWrites = (value, callback, {
   onWrite,
   returnPaths = true,
   keyed = true,
-  keys = DEFAULT_ELEMENT_KEYS,
+  keys = elementKey.config.keys,
   clone: cloneFunction = clone,
   equality = isEqual,
 } = {}) => {
@@ -537,7 +538,7 @@ export const trackReads = (value, callback, {
   onRead,
   returnPaths = true,
   keyed = true,
-  keys = DEFAULT_ELEMENT_KEYS,
+  keys = elementKey.config.keys,
 } = {}) => {
   // a non-container has no paths to read, and a frozen tree is immutable so it
   // has no dependencies worth tracking (a proxy also can't stand in for its
@@ -924,7 +925,7 @@ const extractBracketAccess = (part) => {
   return { key, index: parseInt(body, 10) };
 };
 
-export const get = function(obj, path = '', keys = DEFAULT_ELEMENT_KEYS) {
+export const get = function(obj, path = '', keys = elementKey.config.keys) {
   if (typeof path !== 'string') {
     return undefined;
   }
@@ -951,7 +952,8 @@ export const get = function(obj, path = '', keys = DEFAULT_ELEMENT_KEYS) {
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
-      const array = currentObject[access.key];
+      // an empty key ([0].x against an array root) addresses the current value as the array
+      const array = access.key === '' ? currentObject : currentObject[access.key];
       if (!isArray(array)) {
         return undefined;
       }
@@ -998,12 +1000,11 @@ const isIndexSegment = (part) => /^\d+$/.test(part);
   paths from trackWrites and detectChanges apply back. Creates missing
   intermediates — arrays when the next segment is an index, objects otherwise.
 */
-export const set = function(obj, path, value, keys = DEFAULT_ELEMENT_KEYS) {
+export const set = function(obj, path, value, keys = elementKey.config.keys) {
   if (typeof path !== 'string' || path === '' || obj === null || !isObject(obj)) {
     return obj;
   }
-  // a path setter is the classic prototype pollution vector, refuse segments
-  // that climb the prototype chain
+  // refuse prototype pollution (__proto__ and friends)
   if (/(^|\.|\[)(__proto__|constructor|prototype)(\.|\[|\]|$)/.test(path)) {
     return obj;
   }
@@ -1024,10 +1025,20 @@ export const set = function(obj, path, value, keys = DEFAULT_ELEMENT_KEYS) {
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
-      if (!isArray(currentObject[access.key])) {
-        currentObject[access.key] = [];
+      let array;
+      if (access.key === '') {
+        // an empty key addresses the current value as the array; it can't be vivified in place
+        if (!isArray(currentObject)) {
+          return obj;
+        }
+        array = currentObject;
       }
-      const array = currentObject[access.key];
+      else {
+        if (!isArray(currentObject[access.key])) {
+          currentObject[access.key] = [];
+        }
+        array = currentObject[access.key];
+      }
       if ('keyValue' in access) {
         const index = findKeyed(array, access.keyValue, keys);
         if (isLast) {
@@ -1098,7 +1109,7 @@ export const set = function(obj, path, value, keys = DEFAULT_ELEMENT_KEYS) {
   than splicing, so sibling index paths stay valid when applying several
   removals at once.
 */
-export const unset = function(obj, path, keys = DEFAULT_ELEMENT_KEYS) {
+export const unset = function(obj, path, keys = elementKey.config.keys) {
   if (typeof path !== 'string' || path === '' || obj === null || !isObject(obj)) {
     return obj;
   }
@@ -1122,7 +1133,7 @@ export const unset = function(obj, path, keys = DEFAULT_ELEMENT_KEYS) {
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
-      const array = currentObject[access.key];
+      const array = access.key === '' ? currentObject : currentObject[access.key];
       if (!isArray(array)) {
         return obj;
       }
@@ -1180,6 +1191,81 @@ export const unset = function(obj, path, keys = DEFAULT_ELEMENT_KEYS) {
   }
 
   return obj;
+};
+
+// a path can address an identity-bearing array element two ways: by position (items.0.qty) or by
+// key (items[#a].qty). the positional spelling is only stable while the array doesn't move;
+// keyedPath resolves it to the keyed spelling against a live object, rewriting each positional
+// segment whose element carries a path-safe identity. returns the input string itself when
+// nothing rewrites, so callers compare by reference
+const HAS_POSITIONAL_SEGMENT = /(^|\.|\[)\d/;
+
+export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
+  if (typeof path !== 'string' || !HAS_POSITIONAL_SEGMENT.test(path) || obj === null || !isObject(obj)) {
+    return path;
+  }
+  const parts = path.split('.');
+  // a leading index means the root itself is an array; get/set cannot parse a leading bracket, so
+  // that spelling stays positional
+  if (isIndexSegment(parts[0])) {
+    return path;
+  }
+  const out = [];
+  let currentObject = obj;
+  let changed = false;
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (currentObject === null || !isObject(currentObject)) {
+      return path;
+    }
+    if (part.includes('[')) {
+      const access = extractBracketAccess(part);
+      const array = currentObject[access.key];
+      if (!isArray(array)) {
+        return path;
+      }
+      const index = 'keyValue' in access ? findKeyed(array, access.keyValue, keys) : access.index;
+      const element = array[index];
+      if ('keyValue' in access) {
+        out.push(part);
+      }
+      else {
+        const id = elementKey(element, keys);
+        const keyValue = id != null ? String(id) : null;
+        if (keyValue !== null && isKeyedPathSafe(keyValue)) {
+          out.push(`${access.key}[#${keyValue}]`);
+          changed = true;
+        }
+        else {
+          out.push(part);
+        }
+      }
+      currentObject = element;
+    }
+    else if (isIndexSegment(part) && isArray(currentObject)) {
+      const element = currentObject[Number(part)];
+      const id = elementKey(element, keys);
+      const keyValue = id != null ? String(id) : null;
+      if (keyValue !== null && isKeyedPathSafe(keyValue)) {
+        out[out.length - 1] += `[#${keyValue}]`;
+        changed = true;
+      }
+      else {
+        out.push(part);
+      }
+      currentObject = element;
+    }
+    else if (part in currentObject) {
+      out.push(part);
+      currentObject = currentObject[part];
+    }
+    else {
+      // an unresolvable segment (including get()'s literal dotted-key forms) holds no positional
+      // rewrite; leave the spelling alone
+      return path;
+    }
+  }
+  return changed ? out.join('.') : path;
 };
 
 /* This is useful for callbacks or other scenarios where you want to avoid the
