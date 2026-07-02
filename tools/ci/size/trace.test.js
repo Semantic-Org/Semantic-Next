@@ -14,7 +14,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
 
-import { bundleModules, exportCosts, listExports, moduleKey, packageInfo } from './trace.js';
+import { bundleModules, exportCosts, moduleKey, packageInfo } from './trace.js';
 
 function makeFixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'size-trace-'));
@@ -64,11 +64,6 @@ test('bundleModules attributes minified bytes per source module', async () => {
   assert.ok(modules['demo/vocab.js'] > modules['demo/small.js']);
 });
 
-test('listExports enumerates the public surface statically', async () => {
-  const { root, info } = makeFixture();
-  assert.deepEqual(await listExports(root, info), ['clean', 'leaky', 'small']);
-});
-
 test('exportCosts expose a retention leak as a cost jump on an unrelated export', async () => {
   const { root, info } = makeFixture();
   const leakyCosts = await exportCosts(root, info, ['small']);
@@ -97,9 +92,7 @@ test('reserved-word export names price via aliased imports without darkening the
     path.join(root, 'packages', 'demo', 'src', 'index.js'),
     "\nexport default function fallback() { return 'd'; }\n",
   );
-  const names = await listExports(root, info);
-  assert.ok(names.includes('default'), 'default enumerated');
-  const costs = await exportCosts(root, info, names);
+  const costs = await exportCosts(root, info, ['default', 'small', 'clean']);
   assert.ok(costs.default > 0, 'default priced through the alias form');
   assert.ok(costs.small > 0, 'sibling exports still priced');
 });

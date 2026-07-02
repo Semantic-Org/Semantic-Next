@@ -338,21 +338,28 @@ function renderMarkdown(report) {
   else {
     lines.push(`#### Bundles that changed (${changed.length})`);
     lines.push('');
-    lines.push('| bundle | brotli | Δ brotli | change |');
-    lines.push('|---|---:|---:|---:|');
-    for (const m of changed) { lines.push(changedRow(m, report.headline)); }
+    // the `from` column appears only when attribution exists — traceless snapshots
+    // render the table exactly as before
+    const attributed = changed.some((m) => m.moduleDeltas?.length);
+    lines.push(
+      attributed ? '| bundle | brotli | Δ brotli | change | from |' : '| bundle | brotli | Δ brotli | change |',
+    );
+    lines.push(attributed ? '|---|---:|---:|---:|---|' : '|---|---:|---:|---:|');
+    for (const m of changed) { lines.push(changedRow(m, report.headline, attributed)); }
     lines.push('');
     let caption = 'Sorted by absolute brotli delta, increases first. 🎯 = bundle most relevant to this PR.';
     if (changed.some((m) => m.treeShaken)) {
       caption +=
         ' † = consumed piecemeal, so the whole-package bundle is an upper bound and does not drive the verdict.';
     }
+    if (attributed) {
+      caption += ' `from` = share of the movement by source module, from the harness build.';
+    }
     lines.push(`<sub>${caption}</sub>`);
     lines.push('');
   }
 
-  renderModuleDeltas(lines, report);
-  renderExportCosts(lines, report);
+  renderTrackedExports(lines, report);
   renderLocByScope(lines, report);
   renderAllBundles(lines, report);
 
@@ -380,13 +387,13 @@ function verdictLines(report, headline) {
     return withExportVerdict(report, [s]);
   }
   const verb = headline.delta.brotli > 0 ? 'grew' : 'shrank';
+  const source = dominantSource(headline);
   let s =
     `\`${escapeCode(headline.label)}\` ${verb} **${signedSize(headline.delta.brotli)}** brotli to ${
       formatSize(headline.head.brotli)
     }`
-    + ` (${signedPct(headline.delta.brotli, headline.base?.brotli)}) across **${
-      signedLoc(loc.codeDelta)
-    } shipped LOC**.`;
+    + ` (${signedPct(headline.delta.brotli, headline.base?.brotli)}${source ? `, from \`${escapeCode(source)}\`` : ''})`
+    + ` across **${signedLoc(loc.codeDelta)} shipped LOC**.`;
   const largest = report.largest_increase ? report.metrics.find((m) => m.id === report.largest_increase) : null;
   if (largest && largest.id !== headline.id) {
     s += ` Largest increase: \`${escapeCode(largest.label)}\` **${signedSize(largest.delta.brotli)}**`
@@ -410,7 +417,7 @@ function withExportVerdict(report, lines) {
     .map((e) => `\`${escapeCode(e.name)}\` **${signedSize(e.delta)}** min (\`${escapeCode(e.label)}\`)`)
     .join(', ');
   const more = movers.length > 2 ? ` and ${movers.length - 2} more` : '';
-  return [...lines, `Import costs moved: ${shown}${more} — see Export costs.`];
+  return [...lines, `Import costs moved: ${shown}${more} — see Tracked import costs.`];
 }
 
 function headlineCell(m) {
@@ -418,7 +425,7 @@ function headlineCell(m) {
   return `${signedSize(m.delta.brotli)} (${signedPct(m.delta.brotli, m.base?.brotli)})`;
 }
 
-function changedRow(m, headlineId) {
+function changedRow(m, headlineId, attributed) {
   const mark = m.id === headlineId ? ' 🎯' : m.treeShaken ? ' †' : '';
   const brotliAbs = m.status === 'removed' ? '—' : formatSize(m.head.brotli);
   const change = m.status === 'added'
@@ -426,99 +433,72 @@ function changedRow(m, headlineId) {
     : m.status === 'removed'
     ? 'removed'
     : signedPct(m.delta.brotli, m.base.brotli);
-  return `| \`${escapeCode(m.label)}\`${mark} | ${brotliAbs} | ${signedSize(m.delta.brotli)} | ${change} |`;
+  const row = `| \`${escapeCode(m.label)}\`${mark} | ${brotliAbs} | ${signedSize(m.delta.brotli)} | ${change}`;
+  return attributed ? `${row} | ${fromCell(m)} |` : `${row} |`;
 }
 
-// where the bytes moved: per-module attribution for each changed bundle
-function renderModuleDeltas(lines, report) {
-  const attributed = report.changed
-    .map((id) => report.metrics.find((m) => m.id === id))
-    .filter((m) => m.moduleDeltas?.length);
-  if (!attributed.length) { return; }
-  const total = attributed.reduce((n, m) => n + m.moduleDeltas.length, 0);
-  const counts = `${total} module${total === 1 ? '' : 's'} across ${attributed.length} bundle${
-    attributed.length === 1 ? '' : 's'
-  }`;
-  lines.push('<details>');
-  lines.push(`<summary>Δ by module — where the bytes moved (${counts})</summary>`);
-  lines.push('');
-  lines.push('| bundle | module | Δ min |');
-  lines.push('|---|---|---:|');
-  for (const m of attributed) {
-    const shown = m.moduleDeltas.slice(0, TRACE.maxRows);
-    for (const d of shown) {
-      lines.push(`| \`${escapeCode(m.label)}\` | \`${escapeCode(d.key)}\` | ${signedSize(d.delta)} |`);
-    }
-    const hidden = m.moduleDeltas.length - shown.length;
-    if (hidden > 0) {
-      lines.push(`| \`${escapeCode(m.label)}\` | <sub>+ ${hidden} smaller movers</sub> | |`);
-    }
-  }
-  lines.push('');
-  lines.push(
-    "<sub>Minified bytes before compression, from the harness's own bundle pass."
-      + ' Attribution is blame, not arithmetic — shared modules appear in every importer.</sub>',
-  );
-  lines.push('');
-  lines.push('</details>');
-  lines.push('');
+// one tight cell: where the movement came from, top sources by share of the
+// total module-level movement, at most two named
+function fromCell(m) {
+  const deltas = m.moduleDeltas ?? [];
+  if (!deltas.length) { return '—'; }
+  const total = deltas.reduce((n, d) => n + Math.abs(d.delta), 0);
+  if (total === 0) { return '—'; }
+  const parts = deltas.slice(0, 2)
+    .map((d) => `\`${escapeCode(d.key)}\` ${Math.round((Math.abs(d.delta) / total) * 100)}%`);
+  if (deltas.length > 2) { parts.push('…'); }
+  return parts.join(' · ');
 }
 
-// per-export import costs for the piecemeal packages — every export is a retention canary
-function renderExportCosts(lines, report) {
+function dominantSource(m) {
+  const deltas = m.moduleDeltas ?? [];
+  if (!deltas.length) { return null; }
+  const total = deltas.reduce((n, d) => n + Math.abs(d.delta), 0);
+  if (total === 0) { return null; }
+  const top = deltas[0];
+  return Math.abs(top.delta) / total >= 0.6 ? top.key : null;
+}
+
+// tracked import costs: the curated sentinel exports, rows only when one moved.
+// curation keeps this table worth reading — a row here is always a finding
+function renderTrackedExports(lines, report) {
   const traced = report.metrics.filter((m) => m.exportDeltas !== undefined);
   if (!traced.length) { return; }
   const moved = traced.filter((m) => m.exportDeltas);
-  const counts = { changed: 0, added: 0, removed: 0 };
-  for (const m of moved) {
-    counts.changed += m.exportDeltas.changed.length;
-    counts.added += m.exportDeltas.added.length;
-    counts.removed += m.exportDeltas.removed.length;
-  }
-  const summary = moved.length
-    ? `${counts.changed} moved · ${counts.added} added · ${counts.removed} removed`
-    : 'no movement';
+  const count = moved.reduce(
+    (n, m) => n + m.exportDeltas.changed.length + m.exportDeltas.added.length + m.exportDeltas.removed.length,
+    0,
+  );
   lines.push('<details>');
-  lines.push(`<summary>Export costs (${traced.map((m) => escapeText(m.label)).join(' · ')}): ${summary}</summary>`);
+  lines.push(
+    `<summary>Tracked import costs (${traced.map((m) => escapeText(m.label)).join(' · ')}): ${
+      count === 0 ? 'no movement' : `${count} moved`
+    }</summary>`,
+  );
   lines.push('');
   if (!moved.length) {
-    lines.push("No export's import cost moved.");
+    lines.push("No tracked export's import cost moved.");
   }
   else {
     lines.push('| package | export | min | Δ min |');
     lines.push('|---|---|---:|---:|');
-    // a systemic leak or surface sweep moves many exports at once — cap every row
-    // kind and point at the raw report rather than scrolling the comment
-    let rows = 0;
-    let hidden = 0;
-    const push = (line) => {
-      if (rows >= TRACE.maxRows * 2) {
-        hidden++;
-        return;
-      }
-      rows++;
-      lines.push(line);
-    };
     for (const m of moved) {
       for (const e of m.exportDeltas.changed) {
-        push(
+        lines.push(
           `| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | ${formatSize(e.head)} | ${signedSize(e.delta)} |`,
         );
       }
       for (const e of m.exportDeltas.added) {
-        push(`| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | ${formatSize(e.bytes)} | new |`);
+        lines.push(`| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | ${formatSize(e.bytes)} | new |`);
       }
       for (const e of m.exportDeltas.removed) {
-        push(`| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | — | removed |`);
+        lines.push(`| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | — | removed |`);
       }
-    }
-    if (hidden > 0) {
-      lines.push(`| | <sub>+ ${hidden} more in \`size-report.json\`</sub> | | |`);
     }
     lines.push('');
     lines.push(
-      '<sub>The minified cost of importing just this export. Blame, not arithmetic —'
-        + ' shared internals count in every export that uses them.</sub>',
+      '<sub>The minified cost of importing just this sentinel export, standalone. Curated list in'
+        + ' targets.js — untracked exports are chosen to track with one of these.</sub>',
     );
   }
   lines.push('');

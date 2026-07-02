@@ -33,6 +33,35 @@ import path from 'node:path';
 // real signal, so they stay in.
 const TREE_SHAKEN = new Set(['utils']);
 
+// Sentinel exports, priced standalone on every PR. Curated, not enumerated —
+// a handful per package whose import cost is a shipped contract, chosen so the
+// exports not listed track with one that is (`$$` mirrors `$`, `coerceX`
+// aliases `toX`, a family shares its module). A single export can grow 40%
+// while the whole-package bundle barely wiggles — this is where that shows.
+export const TRACKED_EXPORTS = {
+  utils: [
+    'kebabToCamel', // the attribute codec path — the original retention probe
+    'toNumber', // coercion family — a non-carrier, so it pays if toBoolean's config leaks
+    'humanize', // strings vocabulary family, pulls toTitleCase
+    'formatDate', // dates module + timezone config
+    'each', // the universal iterator, most-imported util
+    'get', // object path machinery
+    'clone', // cloning family
+    'isEqual', // equality family, rides in most bundles
+    'toBase64', // bytes module
+    'generateID', // crypto family
+  ],
+  query: [
+    '$', // the engine — $$ and Query mirror it
+    'registerBehavior', // the behavior stack on top
+  ],
+  reactivity: [
+    'signal', // the core cell
+    'reaction', // the subscriber side
+    'reactiveObject', // fine-grained path reactivity
+  ],
+};
+
 // org-stripped, lowercased package name — matches the build's output filename
 // rule (internal-packages/scripts/src/lib/build.js).
 function bundleName(pkgName) {

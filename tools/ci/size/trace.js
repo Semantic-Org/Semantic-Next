@@ -1,29 +1,23 @@
 /*
-  Export and module tracing for the size bot, built on esbuild's metafile.
+  Source tracing for the size bot, built on esbuild's metafile. Static — no PR
+  code is executed, esbuild parses only. The harness builds these itself so the
+  numbers come from the main-pinned harness on both sides of the diff.
 
-  Two instruments, both static (no PR code is executed — esbuild parses only):
-    - bundleModules: per-module minified byte attribution inside a package
-      bundle, so a bundle delta can say WHERE the bytes moved.
-    - exportCosts: for piecemeal (tree-shaken) packages, the minified cost of
-      importing each export alone. Every export becomes its own retention
-      canary — a config assignment or module side effect that defeats tree
-      shaking shows up as that export's cost jumping.
-
-  The harness builds these itself rather than reading the package build's
-  output, so the numbers come from the main-pinned harness on both sides of
-  the diff. Attribution is blame, never arithmetic — shared modules appear in
-  every importer's cost, so rows must not be summed.
+  Two instruments, both rendered sparsely (SNR is the reporter's contract):
+    - bundleModules: per-module minified bytes inside a package bundle. The
+      reporter reduces this to one `from` cell on a changed bundle — where the
+      delta came from, never a table of everything.
+    - exportCosts: the minified cost of importing each TRACKED export alone.
+      The tracked list is curated in targets.js — a handful of sentinels per
+      package whose import price is a shipped contract, because a single
+      export can grow 40% while the whole-package bundle barely wiggles.
 */
 import fs from 'node:fs';
 import path from 'node:path';
 
 import * as esbuild from 'esbuild';
 
-// piecemeal packages whose per-export import cost is a shipped-bytes contract
-export const EXPORT_TRACED = new Set(['utils', 'reactivity', 'query']);
-
-const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
-const CONCURRENCY = 16;
+const CONCURRENCY = 8;
 
 export function packageInfo(repoRoot, packageDir) {
   const packagePath = path.join(repoRoot, 'packages', packageDir, 'package.json');
@@ -81,12 +75,6 @@ export async function bundleModules(repoRoot, { entry, external }) {
   return modules;
 }
 
-export async function listExports(repoRoot, { entry, external }) {
-  const result = await build(repoRoot, { entryPoints: [entry], external, minify: false });
-  const output = Object.values(result.metafile.outputs)[0];
-  return (output.exports ?? []).filter((name) => IDENTIFIER.test(name)).sort();
-}
-
 export async function exportCosts(repoRoot, { entry, external }, names) {
   const costs = {};
   for (let i = 0; i < names.length; i += CONCURRENCY) {
@@ -105,7 +93,8 @@ export async function exportCosts(repoRoot, { entry, external }, names) {
         return [name, result.outputFiles[0].contents.length];
       }
       catch {
-        // one unpriceable export must not dark the rest of the package's canaries
+        // a tracked export that fails to price (removed, renamed) reads as absent —
+        // the reporter renders that as `removed`, which is the honest signal
         return null;
       }
     }));

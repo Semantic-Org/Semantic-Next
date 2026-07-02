@@ -13,7 +13,8 @@ import path from 'node:path';
 import { collectLoc } from './loc.js';
 import { measureTargets } from './measure.js';
 import { discoverTargets } from './targets.js';
-import { bundleModules, EXPORT_TRACED, exportCosts, listExports, packageInfo } from './trace.js';
+import { TRACKED_EXPORTS } from './targets.js';
+import { bundleModules, exportCosts, packageInfo } from './trace.js';
 
 const args = parseArgs(process.argv.slice(2));
 const root = args.root ?? process.cwd();
@@ -35,9 +36,9 @@ for (const target of targets) {
   if (!info) { continue; }
   try {
     snapshot.targets[target.id].modules = await bundleModules(root, info);
-    if (EXPORT_TRACED.has(target.label)) {
-      const names = await listExports(root, info);
-      snapshot.targets[target.id].exports = await exportCosts(root, info, names);
+    const tracked = TRACKED_EXPORTS[target.label];
+    if (tracked) {
+      snapshot.targets[target.id].exports = await exportCosts(root, info, tracked);
     }
   }
   catch (error) {

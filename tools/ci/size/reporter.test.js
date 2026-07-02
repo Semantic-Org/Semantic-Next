@@ -243,7 +243,7 @@ test('security — malicious label, group, title, and baseline sha are neutraliz
 
 /* ------------------------- trace sections ------------------------- */
 
-test('module attribution renders for changed bundles and names the mover', () => {
+test('attribution renders as a from column on changed bundles', () => {
   const head = tgt('pkg-component', [50000, 56000, 170000], { headline: true });
   const base = tgt('pkg-component', [49600, 55700, 169000], { headline: true });
   head.modules = { 'utils/strings.js': 5000, 'component/index.js': 900 };
@@ -253,20 +253,20 @@ test('module attribution renders for changed bundles and names the mover', () =>
   assert.equal(metric.moduleDeltas.length, 1);
   assert.equal(metric.moduleDeltas[0].key, 'utils/strings.js');
   assert.equal(metric.moduleDeltas[0].delta, 1100);
-  assert.ok(md.includes('Δ by module'), 'attribution section renders');
-  assert.ok(md.includes('utils/strings.js'), 'mover named');
+  assert.ok(md.includes('| bundle | brotli | Δ brotli | change | from |'), 'from column added');
+  assert.ok(md.includes('`utils/strings.js` 100%'), 'source named with share');
 });
 
-test('module attribution stays hidden when no bundle changed', () => {
+test('the from column stays hidden when no bundle changed', () => {
   const head = tgt('pkg-component', [50000, 56000, 170000]);
   const base = tgt('pkg-component', [50000, 56000, 170000]);
   head.modules = { 'utils/strings.js': 5000 };
   base.modules = { 'utils/strings.js': 3900 };
   const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
-  assert.ok(!md.includes('Δ by module'), 'no attribution without a changed bundle');
+  assert.ok(!md.includes('| from |'), 'no from column without a changed bundle');
 });
 
-test('export costs report movers, surface changes, and the verdict line past the floor', () => {
+test('tracked import costs report movers, surface changes, and the verdict line past the floor', () => {
   const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
   const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
   head.exports = { toNumber: 1072, toBoolean: 900, brandNew: 300 };
@@ -277,7 +277,7 @@ test('export costs report movers, surface changes, and the verdict line past the
   assert.equal(metric.exportDeltas.changed[0].delta, 706);
   assert.equal(metric.exportDeltas.added[0].name, 'brandNew');
   assert.equal(metric.exportDeltas.removed[0].name, 'oldGone');
-  assert.ok(md.includes('Export costs'), 'export section renders');
+  assert.ok(md.includes('Tracked import costs'), 'tracked section renders');
   assert.ok(md.includes('Import costs moved'), 'verdict line renders past the floor');
   assert.ok(md.includes('| `utils` | `brandNew` | 300 B | new |'), 'added export rendered');
 });
@@ -289,7 +289,7 @@ test('export movement below the verdict floor stays out of the alert', () => {
   base.exports = { small: 350 };
   const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
   assert.ok(!md.includes('Import costs moved'), 'no verdict line for a 50 B mover');
-  assert.ok(md.includes('Export costs'), 'section still lists the mover');
+  assert.ok(md.includes('Tracked import costs'), 'section still lists the mover');
 });
 
 test('snapshots without trace fields render exactly as before', () => {
@@ -300,6 +300,8 @@ test('snapshots without trace fields render exactly as before', () => {
   // a placeholder or reordering for traceless snapshots must fail this
   const sections = [...md.matchAll(/<summary>([^<:(]+)/g)].map((m) => m[1].trim());
   assert.deepEqual(sections, ['LOC by scope', 'All 1 bundles, gzip, and raw sizes']);
+  assert.ok(md.includes('| bundle | brotli | Δ brotli | change |'), 'legacy table header');
+  assert.ok(!md.includes('| from |'), 'no from column for traceless snapshots');
   // and pin the alert block verbatim so verdict drift for old snapshots is loud
   const alert = md.split('\n').filter((l) => l.startsWith('> ')).join('\n');
   assert.equal(
@@ -314,7 +316,7 @@ test('a one-sided trace failure degrades to no section, never a mass surface dif
   base.exports = { a: 100, b: 200, c: 300 };
   base.modules = { 'utils/a.js': 500 };
   const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
-  assert.ok(!md.includes('Export costs'), 'no export section from a head-side trace failure');
+  assert.ok(!md.includes('Tracked import costs'), 'no tracked section from a head-side trace failure');
   assert.ok(!md.includes('removed'), 'no false removed rows');
 });
 
@@ -338,23 +340,6 @@ test('poisoned byte values in a snapshot never reach the comment', () => {
   assert.ok(!md.includes('evil)'), 'crafted string filtered before rendering');
   assert.ok(!md.includes('<img'), 'no HTML from byte fields');
   assert.ok(md.includes('| `utils` | `real` | 400 B | +300 B |'), 'legit rows still render');
-});
-
-test('added and removed export rows respect the table cap', () => {
-  const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
-  const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
-  head.exports = {};
-  base.exports = {};
-  for (let i = 0; i < 40; i++) {
-    head.exports['added' + i] = 100 + i;
-    base.exports['gone' + i] = 100 + i;
-  }
-  head.exports.shared = 100;
-  base.exports.shared = 100;
-  const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
-  const rowCount = md.split('\n').filter((l) => l.startsWith('| `utils` |')).length;
-  assert.ok(rowCount <= 16, 'row count capped, got ' + rowCount);
-  assert.ok(md.includes('more in `size-report.json`'), 'overflow pointer rendered');
 });
 
 test('hostile export and module names render inert', () => {
