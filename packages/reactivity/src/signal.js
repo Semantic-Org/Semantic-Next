@@ -27,7 +27,7 @@ export class Signal {
   // default helpers, overridable on the class or per-instance via options
   static equality = isEqual;
   static clone = (value) => clone(value, { preserveNonCloneable: true });
-  static id = (item) => elementKey.config.keys.reduce((value, key) => value ?? item[key], undefined);
+  static id = elementKey;
   static safety = 'reference';
 
   constructor(initialValue, {
