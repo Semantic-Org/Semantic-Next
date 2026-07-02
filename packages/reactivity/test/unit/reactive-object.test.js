@@ -468,6 +468,22 @@ describe('ReactiveObject', () => {
       literal.stop();
     });
 
+    it('a whole-array write wakes a keyed descendant reader whose value moved', () => {
+      // the descendant scan resolves the cell's [#id] suffix directly against the old and new
+      // subtree values (the array-root bracket path)
+      const ro = reactiveObject({ todos: [{ id: 'a', done: false }] });
+      const keyed = trackPath(ro, 'todos[#a].done');
+      ro.set('todos', [{ id: 'a', done: true }]);
+      flush();
+      expect(keyed.runs).toBe(2);
+      expect(keyed.last).toBe(true);
+
+      ro.set('todos', [{ id: 'a', done: true, note: 'x' }]); // same done value: no re-fire
+      flush();
+      expect(keyed.runs).toBe(2);
+      keyed.stop();
+    });
+
     it('twin resolution is gated on a keyed reader existing, and arms when one appears', () => {
       const ro = reactiveObject({ todos: [{ id: 'a', done: false }] });
       const literal = trackPath(ro, 'todos.0.done');

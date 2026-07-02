@@ -3,35 +3,24 @@ import { clone, get, isEqual, isObject, keyedPath, returnsFalse, set, unset } fr
 import { Dependency } from './dependency.js';
 import { IS_REACTIVE_OBJECT } from './helpers/identity.js';
 
-// utils get() can't resolve a path that begins with a bracket segment, so a
-// descendant suffix like `[#id].done` is read by rehoming the subtree under a
-// wrapper key and resolving `relativeRoot + suffix` against it.
-const relativeRoot = 'root';
+/*
+  Fine-grained reactivity over a plain object. Identical to signal but
+  only reactive for each path
 
-const resolveRelative = (base, suffix) => {
-  // suffix begins with the boundary that followed the written path. '.' for a
-  // nested key, '[' for an index or keyed-element segment
-  if (suffix.charCodeAt(0) === 46) { // '.'
-    return get(base, suffix.slice(1));
-  }
-  return get({ [relativeRoot]: base }, relativeRoot + suffix);
+  Tracked dependencies [cells] are stored in a map by path and are created lazily on read
+
+  Path strings support the syntax of get()/set() which permit '#id' and '[0]' array syntax
+  i.e. obj.get('foo.baz[#myid]'); or obj.get('foo.0.baz');
+
+*/
+
+const CHAR_CODES = {
+  'BRACKET': '['.charCodeAt(0),
+  'DOT': '.'.charCodeAt(0),
 };
 
-/*
-  Fine-grained reactivity over a plain object, at the granularity of a PATH. A
-  reader of one path is woken only when the value at that path changes, where a
-  single Signal holding an object would wake every reader on any change.
-
-  Internally a Map of path -> Dependency, one cell minted lazily per read path.
-  The match() helper's per-key-dependency pattern generalized to the utils path
-  grammar (dotted keys, positional [i] indices, keyed [#id] array segments).
-
-  Reactivity is keyed by the literal path string, so an element must be addressed
-  consistently. A reader of `todos[#a].done` is woken by writes to that path, not
-  by a positional write to `todos[0].done` that happens to hit the same element.
-  Read and write through the same scheme.
-*/
 export class ReactiveObject {
+  // stamp so it works anywhere
   get [IS_REACTIVE_OBJECT]() {
     return true;
   }
@@ -39,11 +28,18 @@ export class ReactiveObject {
     return !!instance?.[IS_REACTIVE_OBJECT];
   }
 
-  // default helpers, overridable on the class or per-instance via options,
-  // mirroring Signal so the two primitives configure the same way
+  // permit user to adjust defaults globally
   static equality = isEqual;
   static clone = (value) => clone(value, { preserveNonCloneable: true });
   static safety = 'reference';
+
+  static resolveRelative(base, suffix) {
+    // suffix starts after the connector '.'
+    if (suffix.charCodeAt(0) === CHAR_CODES.DOT) {
+      return get(base, suffix.slice(1));
+    }
+    return get(base, suffix);
+  }
 
   constructor(initialValue = {}, {
     safety = ReactiveObject.safety,
@@ -68,12 +64,14 @@ export class ReactiveObject {
     return value;
   }
 
+  // a 'cell' is just a path that carries a dependency
   cell(path) {
     let dep = this.cells.get(path);
     if (dep === undefined) {
       dep = new Dependency();
       this.cells.set(path, dep);
-      // track if cell is keyed to improve perf on set
+
+      // track if cell is keyed to avoid unnecessary work on set
       if (!this.hasKeyedCells && path.includes('[#')) {
         this.hasKeyedCells = true;
       }
@@ -85,13 +83,13 @@ export class ReactiveObject {
               Reads
   *******************************/
 
-  // tracked read: subscribes the current reaction to this path alone
+  // tracked
   get(path) {
     this.cell(path).depend();
     return this.protect(get(this.value, path));
   }
 
-  // untracked read. with a path the value there, without one the whole object
+  // untracked
   peek(path) {
     if (path === undefined) {
       return this.protect(this.value);
@@ -115,10 +113,6 @@ export class ReactiveObject {
               Writes
   *******************************/
 
-  // single-path write, equality-gated. stores a protected copy under clone
-  // safety, then confirms the write actually landed before waking. wakes readers
-  // of this path, of its ancestors, and of any descendant whose resolved value
-  // changed. returns whether anything changed.
   set(path, value) {
     const previous = get(this.value, path);
     if (this.equality(previous, value)) {
@@ -141,9 +135,6 @@ export class ReactiveObject {
     return true;
   }
 
-  // remove a path so the key LEAVES the object. it reads back absent, not
-  // undefined-valued. a no-op when the path is already absent, which includes a
-  // key whose value is explicitly undefined (it reads as absent, so it stays).
   remove(path) {
     const previous = get(this.value, path);
     if (previous === undefined) {
@@ -158,12 +149,6 @@ export class ReactiveObject {
     return true;
   }
 
-  // bulk inbound swap: replace the whole backing object and reseed every live
-  // reader against the new object, waking only paths whose value changed. a
-  // reader of a deep path under a wholesale-replaced subtree re-resolves
-  // correctly because each cell is re-read by its full path, where a shallow
-  // old-vs-new diff emitting only the top changed key would miss it. dead cells
-  // are evicted in the same pass.
   replace(nextObject) {
     const previous = this.value;
     const next = this.protect(nextObject);
@@ -173,6 +158,7 @@ export class ReactiveObject {
         this.cells.delete(path);
         continue;
       }
+      // permit FGR on the diff
       if (!this.equality(get(previous, path), get(next, path))) {
         dep.changed();
       }
@@ -183,15 +169,10 @@ export class ReactiveObject {
     this.replace({});
   }
 
-  // wake readers affected by a write or removal at `path`. `previous` is the
-  // value that was there before, `next` the value there now.
   wake(path, previous, next) {
     this.cells.get(path)?.changed();
 
-    // ancestors: past the equality gate the value at `path` genuinely changed,
-    // so every container holding it changed too. they can't be equality-gated,
-    // because set() mutated them in place and old and new are the same
-    // reference, so wake unconditionally. walk up the segment boundaries.
+    // ancestors are guaranteed to have changed
     let cut = path.length;
     while (cut > 0) {
       cut = Math.max(path.lastIndexOf('.', cut - 1), path.lastIndexOf('[', cut - 1));
@@ -201,19 +182,20 @@ export class ReactiveObject {
       this.cells.get(path.slice(0, cut))?.changed();
     }
 
-    // descendants: only a subtree write or removal can move them, so when
-    // neither the old nor the new value is a container there are none and leaf
-    // writes stay O(depth). each candidate is equality-gated on its resolved
-    // value.
+    // if old/new value are not containers safe to stop here
     if (!isObject(previous) && !isObject(next)) {
       return;
     }
+
+    // special logic for cells to notify children
     for (const [cellPath, dep] of this.cells) {
       if (cellPath.length <= path.length || !cellPath.startsWith(path)) {
         continue;
       }
       const boundary = cellPath.charCodeAt(path.length);
-      if (boundary !== 46 && boundary !== 91) { // '.' or '['
+
+      // if this path has '.' or '[' we arent there yet
+      if (boundary !== CHAR_CODES.DOT && boundary !== CHAR_CODES.BRACKET) {
         continue;
       }
       if (dep.subscribers.size === 0) {
@@ -221,7 +203,9 @@ export class ReactiveObject {
         continue;
       }
       const suffix = cellPath.slice(path.length);
-      if (!this.equality(resolveRelative(previous, suffix), resolveRelative(next, suffix))) {
+      if (
+        !this.equality(ReactiveObject.resolveRelative(previous, suffix), ReactiveObject.resolveRelative(next, suffix))
+      ) {
         dep.changed();
       }
     }
@@ -231,9 +215,7 @@ export class ReactiveObject {
             Teardown
   *******************************/
 
-  // sweep cells nobody subscribes to. replace() and subtree writes sweep as
-  // they go, this is the explicit hook for a long-lived instance driven only by
-  // set/remove that wants to reclaim cells for vanished paths.
+  // remove any keys that arent being watched
   prune() {
     for (const [path, dep] of this.cells) {
       if (dep.subscribers.size === 0) {
@@ -242,8 +224,7 @@ export class ReactiveObject {
     }
   }
 
-  // drop every cell. live subscribers stop receiving wakes (their Dependency is
-  // no longer reachable from this object), and future reads mint fresh cells.
+  // drop every dependency to end wakes
   stop() {
     this.cells.clear();
   }
