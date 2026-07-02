@@ -45,6 +45,11 @@ function loc(map) {
   return { total, byScope };
 }
 
+// export entry in the new traced shape: distinct graph unless shared is given
+function exp(cost, graph) {
+  return { cost, graph: graph ?? `g${cost}` };
+}
+
 function snapshot(targets, locData) {
   const map = {};
   for (const t of targets) { map[t.id] = t; }
@@ -269,8 +274,8 @@ test('the from column stays hidden when no bundle changed', () => {
 test('tracked import costs report movers, surface changes, and the verdict line past the floor', () => {
   const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
   const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
-  head.exports = { toNumber: 1072, toBoolean: 900, brandNew: 300 };
-  base.exports = { toNumber: 366, toBoolean: 900, oldGone: 250 };
+  head.exports = { toNumber: exp(1072, 'coercion'), toBoolean: exp(900, 'bool'), brandNew: exp(300, 'fresh') };
+  base.exports = { toNumber: exp(366, 'coercion'), toBoolean: exp(900, 'bool'), oldGone: exp(250, 'gone') };
   const { json: report, md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
   const metric = report.metrics.find((m) => m.id === 'pkg-utils');
   assert.equal(metric.exportDeltas.changed[0].name, 'toNumber');
@@ -285,8 +290,8 @@ test('tracked import costs report movers, surface changes, and the verdict line 
 test('export movement below the verdict floor stays out of the alert', () => {
   const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
   const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
-  head.exports = { small: 400 };
-  base.exports = { small: 350 };
+  head.exports = { small: exp(400, 's') };
+  base.exports = { small: exp(350, 's') };
   const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
   assert.ok(!md.includes('Import costs moved'), 'no verdict line for a 50 B mover');
   assert.ok(md.includes('Tracked import costs'), 'section still lists the mover');
@@ -313,7 +318,7 @@ test('snapshots without trace fields render exactly as before', () => {
 test('a one-sided trace failure degrades to no section, never a mass surface diff', () => {
   const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
   const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
-  base.exports = { a: 100, b: 200, c: 300 };
+  base.exports = { a: exp(100), b: exp(200), c: exp(300) };
   base.modules = { 'utils/a.js': 500 };
   const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
   assert.ok(!md.includes('Tracked import costs'), 'no tracked section from a head-side trace failure');
@@ -323,8 +328,8 @@ test('a one-sided trace failure degrades to no section, never a mass surface dif
 test('exports named after Object.prototype members diff correctly', () => {
   const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
   const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
-  head.exports = { keep: 100 };
-  base.exports = { keep: 100, toString: 800 };
+  head.exports = { keep: exp(100, 'k') };
+  base.exports = { keep: exp(100, 'k'), toString: exp(800, 'proto') };
   const { json, md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
   const metric = json.metrics.find((m) => m.id === 'pkg-utils');
   assert.equal(metric.exportDeltas.removed[0].name, 'toString');
@@ -334,19 +339,71 @@ test('exports named after Object.prototype members diff correctly', () => {
 test('poisoned byte values in a snapshot never reach the comment', () => {
   const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
   const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
-  head.exports = { real: 400, evil: '](http://evil) <img src=x>' };
-  base.exports = { real: 100, evil: 50 };
+  head.exports = { real: exp(400, 'r'), evil: { cost: '](http://evil) <img src=x>', graph: 'r' } };
+  base.exports = { real: exp(100, 'r'), evil: exp(50, 'r') };
   const { md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
   assert.ok(!md.includes('evil)'), 'crafted string filtered before rendering');
   assert.ok(!md.includes('<img'), 'no HTML from byte fields');
-  assert.ok(md.includes('| `utils` | `real` | 400 B | +300 B |'), 'legit rows still render');
+  assert.ok(md.includes('| `utils` | `real` | 400 B | +300 B (+300%) |'), 'legit rows still render');
+});
+
+test('a co-moving group renders one row named by its master, slaves silent', () => {
+  const head = tgt('pkg-query', [39000, 44000, 130000], { treeShaken: true });
+  const base = tgt('pkg-query', [39000, 44000, 130000], { treeShaken: true });
+  // six exports, one graph — the engine moved +1450 for all of them
+  for (
+    const [name, cost] of [
+      ['$', 40190],
+      ['$$', 40190],
+      ['Query', 40195],
+      ['useAlias', 40260],
+      ['exportGlobals', 40300],
+      ['restoreGlobals', 40310],
+    ]
+  ) {
+    head.exports = head.exports ?? {};
+    base.exports = base.exports ?? {};
+    head.exports[name] = exp(cost, 'engine');
+    base.exports[name] = exp(cost - 1450, 'engine');
+  }
+  const { json, md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
+  const metric = json.metrics.find((m) => m.id === 'pkg-query');
+  assert.equal(metric.exportDeltas.changed.length, 1, 'one row per group');
+  assert.equal(metric.exportDeltas.changed[0].name, '$', 'cheapest-shortest member is master');
+  assert.equal(metric.exportDeltas.changed[0].groupSize, 6);
+  assert.ok(md.includes('| `query` | `$` |'), 'master rendered');
+  assert.ok(!md.includes('$$'), 'slaves never rendered');
+  assert.ok(md.includes('(+4%)'), 'percent shown on the delta');
+});
+
+test('a removed group renders once through its base master', () => {
+  const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  head.exports = { stay: exp(100, 'k') };
+  base.exports = { stay: exp(100, 'k'), gone: exp(300, 'dead'), goneAlias: exp(305, 'dead') };
+  const { json, md } = run(snapshot([head], loc({})), snapshot([base], loc({})));
+  const metric = json.metrics.find((m) => m.id === 'pkg-utils');
+  assert.equal(metric.exportDeltas.removed.length, 1, 'one removed row for the group');
+  assert.equal(metric.exportDeltas.removed[0].name, 'gone');
+  assert.ok(!md.includes('goneAlias'), 'removed slave not listed');
+});
+
+test('re-mastering anchors the delta on a both-sides member, not the rename', () => {
+  const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
+  // aa is new and cheapest (becomes master), bb existed both sides and did not move
+  head.exports = { aa: exp(90, 'fam'), bb: exp(100, 'fam') };
+  base.exports = { bb: exp(100, 'fam') };
+  const { json } = run(snapshot([head], loc({})), snapshot([base], loc({})));
+  const metric = json.metrics.find((m) => m.id === 'pkg-utils');
+  assert.equal(metric.exportDeltas, null, 'no false growth from a new cheaper member');
 });
 
 test('hostile export and module names render inert', () => {
   const head = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
   const base = tgt('pkg-utils', [17000, 19000, 50000], { treeShaken: true });
-  head.exports = { 'evil`|name': 5000 };
-  base.exports = { 'evil`|name': 100 };
+  head.exports = { 'evil`|name': exp(5000, 'e') };
+  base.exports = { 'evil`|name': exp(100, 'e') };
   head.modules = { 'bad`|[x](y).js': 900 };
   base.modules = { 'bad`|[x](y).js': 100 };
   const headB = tgt('pkg-b', [50000, 56000, 170000]);

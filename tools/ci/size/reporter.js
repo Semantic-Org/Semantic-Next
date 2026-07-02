@@ -169,7 +169,7 @@ function diffTarget(id, head, base) {
     metric.moduleDeltas = diffModules(byteMap(head.modules), byteMap(base.modules));
   }
   if (head.exports && base.exports) {
-    metric.exportDeltas = diffExports(byteMap(head.exports), byteMap(base.exports));
+    metric.exportDeltas = diffExports(exportMap(head.exports), exportMap(base.exports));
   }
   return metric;
 }
@@ -180,6 +180,21 @@ function byteMap(map) {
   const clean = Object.create(null);
   for (const [key, value] of Object.entries(map)) {
     if (typeof value === 'number' && Number.isFinite(value)) { clean[key] = value; }
+  }
+  return clean;
+}
+
+// export entries carry { cost, graph } — same trust boundary, same filtering
+function exportMap(map) {
+  const clean = Object.create(null);
+  for (const [name, value] of Object.entries(map)) {
+    if (
+      value && typeof value === 'object'
+      && typeof value.cost === 'number' && Number.isFinite(value.cost)
+      && typeof value.graph === 'string'
+    ) {
+      clean[name] = { cost: value.cost, graph: value.graph };
+    }
   }
   return clean;
 }
@@ -197,26 +212,62 @@ function diffModules(head, base) {
   return deltas;
 }
 
-// per-export import-cost movement plus the export-surface diff
+// co-movement groups: exports sharing a module-graph fingerprint move together,
+// so the diff is computed per group and reported through its master alone —
+// the cheapest member (purest probe of the shared graph), ties broken by
+// shortest-then-alphabetical name so labels stay stable across PRs
 function diffExports(head, base) {
-  const names = new Set([...Object.keys(head), ...Object.keys(base)]);
   const changed = [];
   const added = [];
   const removed = [];
-  for (const name of names) {
-    const inHead = Object.hasOwn(head, name);
-    const inBase = Object.hasOwn(base, name);
-    if (inHead && !inBase) { added.push({ name, bytes: head[name] }); }
-    else if (!inHead && inBase) { removed.push({ name, bytes: base[name] }); }
-    else if (inHead && inBase && Math.abs(head[name] - base[name]) >= TRACE.export) {
-      changed.push({ name, head: head[name], base: base[name], delta: head[name] - base[name] });
+  for (const group of clusterByGraph(head)) {
+    const master = pickMaster(group);
+    // anchor the delta on a member priced on both sides, preferring the master —
+    // re-mastering after a rename must not misread as growth
+    const anchor = Object.hasOwn(base, master.name)
+      ? master
+      : group.find((member) => Object.hasOwn(base, member.name));
+    if (!anchor) {
+      added.push({ name: master.name, bytes: master.cost, groupSize: group.length });
+      continue;
     }
+    const baseCost = base[anchor.name].cost;
+    const delta = anchor.cost - baseCost;
+    if (Math.abs(delta) >= TRACE.export) {
+      changed.push({
+        name: master.name,
+        head: anchor.cost,
+        base: baseCost,
+        delta,
+        pct: baseCost > 0 ? (delta / baseCost) * 100 : null,
+        groupSize: group.length,
+      });
+    }
+  }
+  // a base group none of whose members survive is a removed surface
+  for (const group of clusterByGraph(base)) {
+    if (group.some((member) => Object.hasOwn(head, member.name))) { continue; }
+    const master = pickMaster(group);
+    removed.push({ name: master.name, bytes: master.cost, groupSize: group.length });
   }
   changed.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
   added.sort((a, b) => a.name.localeCompare(b.name));
   removed.sort((a, b) => a.name.localeCompare(b.name));
   if (!changed.length && !added.length && !removed.length) { return null; }
   return { changed, added, removed };
+}
+
+function clusterByGraph(map) {
+  const groups = new Map();
+  for (const [name, { cost, graph }] of Object.entries(map)) {
+    if (!groups.has(graph)) { groups.set(graph, []); }
+    groups.get(graph).push({ name, cost, graph });
+  }
+  return [...groups.values()];
+}
+
+function pickMaster(group) {
+  return [...group].sort((a, b) => a.cost - b.cost || a.name.length - b.name.length || (a.name < b.name ? -1 : 1))[0];
 }
 
 function diffLoc(cur, base) {
@@ -317,18 +368,6 @@ function renderMarkdown(report) {
   );
   lines.push('');
 
-  // ── signal table ──
-  lines.push('| signal | result |');
-  lines.push('|---|---:|');
-  const headlineRow = headline ? `\`${escapeCode(headline.label)}\` brotli` : 'Headline brotli';
-  lines.push(`| ${headlineRow} | ${headline ? headlineCell(headline) : '0 B'} |`);
-  lines.push(`| Shipped LOC | ${signedLoc(loc.codeDelta)} |`);
-  lines.push(`| Comment LOC | ${signedLoc(loc.commentDelta)} |`);
-  lines.push(`| Changed bundles | ${report.changed.length} / ${report.total_bundles} |`);
-  lines.push('');
-  lines.push('---');
-  lines.push('');
-
   // ── the story: bundles that changed ──
   const changed = report.changed.map((id) => report.metrics.find((m) => m.id === id));
   if (changed.length === 0) {
@@ -336,7 +375,7 @@ function renderMarkdown(report) {
     lines.push('');
   }
   else {
-    lines.push(`#### Bundles that changed (${changed.length})`);
+    lines.push(`#### Bundles that changed (${changed.length} of ${report.total_bundles})`);
     lines.push('');
     // the `from` column appears only when attribution exists — traceless snapshots
     // render the table exactly as before
@@ -420,11 +459,6 @@ function withExportVerdict(report, lines) {
   return [...lines, `Import costs moved: ${shown}${more} — see Tracked import costs.`];
 }
 
-function headlineCell(m) {
-  if (m.delta.brotli === 0) { return '0 B'; }
-  return `${signedSize(m.delta.brotli)} (${signedPct(m.delta.brotli, m.base?.brotli)})`;
-}
-
 function changedRow(m, headlineId, attributed) {
   const mark = m.id === headlineId ? ' 🎯' : m.treeShaken ? ' †' : '';
   const brotliAbs = m.status === 'removed' ? '—' : formatSize(m.head.brotli);
@@ -459,8 +493,9 @@ function dominantSource(m) {
   return Math.abs(top.delta) / total >= 0.6 ? top.key : null;
 }
 
-// tracked import costs: the curated sentinel exports, rows only when one moved.
-// curation keeps this table worth reading — a row here is always a finding
+// tracked import costs: one row per moved co-movement group, named by its
+// master. slaves are priced but never listed — covariance that is known is
+// kept out of mind, so a row here is always a distinct finding
 function renderTrackedExports(lines, report) {
   const traced = report.metrics.filter((m) => m.exportDeltas !== undefined);
   if (!traced.length) { return; }
@@ -484,8 +519,13 @@ function renderTrackedExports(lines, report) {
     lines.push('|---|---|---:|---:|');
     for (const m of moved) {
       for (const e of m.exportDeltas.changed) {
+        const pct = e.pct != null && Math.abs(e.pct) >= 1
+          ? ` (${e.pct > 0 ? '+' : '-'}${Math.abs(e.pct).toFixed(0)}%)`
+          : '';
         lines.push(
-          `| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | ${formatSize(e.head)} | ${signedSize(e.delta)} |`,
+          `| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | ${formatSize(e.head)} | ${
+            signedSize(e.delta)
+          }${pct} |`,
         );
       }
       for (const e of m.exportDeltas.added) {
@@ -497,8 +537,8 @@ function renderTrackedExports(lines, report) {
     }
     lines.push('');
     lines.push(
-      '<sub>The minified cost of importing just this sentinel export, standalone. Curated list in'
-        + ' targets.js — untracked exports are chosen to track with one of these.</sub>',
+      '<sub>The minified cost of importing just this export, standalone. One row per co-movement'
+        + ' group, named by its master — full per-export pricing in size-report.json.</sub>',
     );
   }
   lines.push('');

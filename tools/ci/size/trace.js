@@ -7,16 +7,18 @@
     - bundleModules: per-module minified bytes inside a package bundle. The
       reporter reduces this to one `from` cell on a changed bundle — where the
       delta came from, never a table of everything.
-    - exportCosts: the minified cost of importing each TRACKED export alone.
-      The tracked list is curated in targets.js — a handful of sentinels per
-      package whose import price is a shipped contract, because a single
-      export can grow 40% while the whole-package bundle barely wiggles.
+    - exportCosts: the minified cost of importing each export alone, plus its
+      module-graph fingerprint. Exports with the same fingerprint co-move by
+      construction, so the reporter renders one row per group, named by its
+      master — a single export can grow 40% while the whole-package bundle
+      barely wiggles, and that is the row this exists to show.
 */
 import fs from 'node:fs';
 import path from 'node:path';
 
 import * as esbuild from 'esbuild';
 
+const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 const CONCURRENCY = 8;
 
 export function packageInfo(repoRoot, packageDir) {
@@ -75,6 +77,12 @@ export async function bundleModules(repoRoot, { entry, external }) {
   return modules;
 }
 
+export async function listExports(repoRoot, { entry, external }) {
+  const result = await build(repoRoot, { entryPoints: [entry], external, minify: false });
+  const output = Object.values(result.metafile.outputs)[0];
+  return (output.exports ?? []).filter((name) => IDENTIFIER.test(name)).sort();
+}
+
 export async function exportCosts(repoRoot, { entry, external }, names) {
   const costs = {};
   for (let i = 0; i < names.length; i += CONCURRENCY) {
@@ -90,11 +98,18 @@ export async function exportCosts(repoRoot, { entry, external }, names) {
             loader: 'js',
           },
         });
-        return [name, result.outputFiles[0].contents.length];
+        const output = Object.values(result.metafile.outputs)[0];
+        // the fingerprint: exports sharing a graph co-move, the reporter groups on it
+        const graph = Object.keys(output.inputs)
+          .filter((input) => !input.startsWith('<'))
+          .map(moduleKey)
+          .sort()
+          .join('|');
+        return [name, { cost: result.outputFiles[0].contents.length, graph }];
       }
       catch {
-        // a tracked export that fails to price (removed, renamed) reads as absent —
-        // the reporter renders that as `removed`, which is the honest signal
+        // an unpriceable export (removed, renamed) reads as absent — the reporter
+        // renders a group that lost its last member as removed
         return null;
       }
     }));

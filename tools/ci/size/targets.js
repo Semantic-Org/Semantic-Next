@@ -33,34 +33,21 @@ import path from 'node:path';
 // real signal, so they stay in.
 const TREE_SHAKEN = new Set(['utils']);
 
-// Sentinel exports, priced standalone on every PR. Curated, not enumerated —
-// a handful per package whose import cost is a shipped contract, chosen so the
-// exports not listed track with one that is (`$$` mirrors `$`, `coerceX`
-// aliases `toX`, a family shares its module). A single export can grow 40%
-// while the whole-package bundle barely wiggles — this is where that shows.
-export const TRACKED_EXPORTS = {
-  utils: [
-    'kebabToCamel', // the attribute codec path — the original retention probe
-    'toNumber', // coercion family — a non-carrier, so it pays if toBoolean's config leaks
-    'humanize', // strings vocabulary family, pulls toTitleCase
-    'formatDate', // dates module + timezone config
-    'each', // the universal iterator, most-imported util
-    'get', // object path machinery
-    'clone', // cloning family
-    'isEqual', // equality family, rides in most bundles
-    'toBase64', // bytes module
-    'generateID', // crypto family
-  ],
-  query: [
-    '$', // the engine — $$ and Query mirror it
-    'registerBehavior', // the behavior stack on top
-  ],
-  reactivity: [
-    'signal', // the core cell
-    'reaction', // the subscriber side
-    'reactiveObject', // fine-grained path reactivity
-  ],
-};
+// Packages whose per-export import cost is traced. Consumption model per the
+// 2026-07-02 study (ai/workspace measured every export's module graph):
+//   - utils: 139 exports over 39 distinct graphs — maximally piecemeal, every
+//     mover is signal. Clusters are module families (type guards, casing,
+//     coercion), so grouped rendering collapses a family to one row.
+//   - reactivity: 22 exports over 13 graphs — piecemeal with a heavy shared
+//     core (computed/derive/match co-move at ~15 KB, signal at ~14 KB).
+//   - query: 7 exports over 2 graphs — one engine, two doors. $ carries $$,
+//     Query, and the global helpers; registerBehavior adds the behavior stack.
+// Every export is priced; the reporter renders one row per co-movement group,
+// named by its master. Framework internals (renderer, templating, component)
+// are consumed whole — bundle rows and the `from` column already cover them,
+// so they are never export-traced. Future piecemeal packages (data, schema,
+// time) join this list with their consumption model noted.
+export const TRACED_PACKAGES = new Set(['utils', 'reactivity', 'query']);
 
 // org-stripped, lowercased package name — matches the build's output filename
 // rule (internal-packages/scripts/src/lib/build.js).

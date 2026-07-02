@@ -14,7 +14,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
 
-import { bundleModules, exportCosts, moduleKey, packageInfo } from './trace.js';
+import { bundleModules, exportCosts, listExports, moduleKey, packageInfo } from './trace.js';
 
 function makeFixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'size-trace-'));
@@ -81,9 +81,11 @@ test('exportCosts expose a retention leak as a cost jump on an unrelated export'
 
   // the diff a PR comment would show: small's import cost drops when the leak is fixed
   assert.ok(
-    leakyCosts.small > fixedCosts.small,
-    `leaky ${leakyCosts.small} B should exceed fixed ${fixedCosts.small} B`,
+    leakyCosts.small.cost > fixedCosts.small.cost,
+    `leaky ${leakyCosts.small.cost} B should exceed fixed ${fixedCosts.small.cost} B`,
   );
+  // the fingerprint names the graph so co-movers can be grouped
+  assert.ok(leakyCosts.small.graph.includes('demo/small.js'), 'graph carries module keys');
 });
 
 test('reserved-word export names price via aliased imports without darkening the package', async () => {
@@ -92,7 +94,9 @@ test('reserved-word export names price via aliased imports without darkening the
     path.join(root, 'packages', 'demo', 'src', 'index.js'),
     "\nexport default function fallback() { return 'd'; }\n",
   );
-  const costs = await exportCosts(root, info, ['default', 'small', 'clean']);
-  assert.ok(costs.default > 0, 'default priced through the alias form');
-  assert.ok(costs.small > 0, 'sibling exports still priced');
+  const names = await listExports(root, info);
+  assert.ok(names.includes('default'), 'default enumerated');
+  const costs = await exportCosts(root, info, names);
+  assert.ok(costs.default.cost > 0, 'default priced through the alias form');
+  assert.ok(costs.small.cost > 0, 'sibling exports still priced');
 });
