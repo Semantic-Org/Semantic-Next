@@ -1,6 +1,5 @@
 import {
   clone,
-  elementKey,
   isArray,
   isDevelopment,
   isEqual,
@@ -26,8 +25,11 @@ export class Signal {
 
   // default helpers, overridable on the class or per-instance via options
   static equality = isEqual;
+
+  // permits non cloneables like CustomClass() to be stored in signals
   static clone = (value) => clone(value, { preserveNonCloneable: true });
-  static id = elementKey;
+
+  static id = (item) => item.id ?? item._id ?? item.hash ?? item.key;
   static safety = 'reference';
 
   constructor(initialValue, {
