@@ -112,9 +112,22 @@ inputs are all handled by Query at runtime, not by owning a content AST. The Tie
 components (roadmap 4c) are presentation that compose with this binding (`<ui-form>` is the coordinator;
 `<ui-form-field>` is chrome the form wires like any other named child).
 
+## onChanged, the path-keyed escape hatch
+
+A heritage-proven form-level hook: `onChanged: { 'field.path'() { ... } }`, arbitrary logic keyed by
+the path that moved. The mechanics fall out of the schema engine rather than needing their own:
+the recompute pass already computes the changed-path set on every write, so onChanged is a fourth
+consumer of that fan (after deps, resetOn, and the wire diff) and inherits the shared path grammar
+for free — relative paths, wildcards into arrays (`items.*.qty`), keyed rows. Two semantics are
+load-bearing: handlers dispatch AFTER the cascade settles (side effects never interleave with
+derivation), and a prior-value ctx rides the same `old()` stash the transition computeds use. It
+binds at the instance level (the form / SchemaDoc), never on the shared Schema definition — a
+side effect on a reused definition runs everywhere the schema is embedded, which is spooky action
+the form author didn't sign up for.
+
 ## Open questions
 
 - the `live` keyword vs doc-nature for the live/local switch (mind the collision with the freshness `live`)
 - where the reverse-cycle reactivity sits (one form reaction pushing by path vs each input owning its path)
 - initial-value-on-mount ergonomics (the one bit of form-awareness an input needs, via `closest`)
-- `onChange` firing semantics (after the write + coercion, per-path and a `'*'` catch-all)
+- `onChanged` residuals: per-path vs a `'*'` catch-all, and whether coercion runs before the handler sees the value
