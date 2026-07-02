@@ -10,14 +10,13 @@ createPlasma('#plasma', { ...plasmaConfig, fadeInClass: false });
 
 const $tourExamples = $('.tour .example');
 const $tourCopies = $('.tour .content .copy');
-const sections = ['templates', 'specs', 'components'];
 
 const updateTourSection = () => {
-  let activeSection = sections[0];
-  $tourCopies.each((copy, index) => {
-    const bounds = $(copy).bounds();
-    if (bounds.top < window.innerHeight / 3) {
-      activeSection = sections[index];
+  let activeSection = $tourCopies.first().data('section');
+  $tourCopies.each((copy) => {
+    const $copy = $(copy);
+    if ($copy.bounds().top < window.innerHeight / 3) {
+      activeSection = $copy.data('section');
     }
   });
   $tourExamples.each((example) => {

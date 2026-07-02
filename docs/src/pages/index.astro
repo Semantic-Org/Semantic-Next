@@ -1,9 +1,11 @@
 ---
 import Homepage from '../layouts/Homepage.astro';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import ExamplePreview from '@components/ExamplePreview/ExamplePreview.astro';
+import { Code } from 'astro-expressive-code/components';
 import { Button, Container, Cards, Card, Menu, Icon, MenuItem } from '@semantic-ui/core'
 import { AIPrompt } from '@components/AIPrompt/AIPrompt.js';
-import { demoSteps } from '../data/homepage.js';
+import { demoSteps, tourExamples } from '../data/homepage.js';
 
 ---
 <Homepage>
@@ -33,76 +35,132 @@ import { demoSteps } from '../data/homepage.js';
     <ribbon class="tour">
       <Container>
         <div class="content">
-          <div class="copy" data-section="templates">
-            <h4 class="sub header">Component Authoring</h4>
-            <h3 class="header">Expressive Templates</h3>
-            <p>Write templates with full JavaScript expressions or natural language-style Lisp syntax. Signals surgically update only what changed — no virtual DOM diffing.</p>
+          <div class="copy" data-section="state">
+            <h4 class="sub header">Reactive State</h4>
+            <h3 class="header">Signals That Say What They Mean</h3>
+            <p>Array signals are small data stores. Toggle a field by id, set a property across every item, filter in place. Every handler in this component is a single call.</p>
             <ul class="feature-list">
               <li>
                 <Icon check></Icon>
-                Full JavaScript in templates — ternaries, method calls, destructuring
+                <code>toggleItemProperty</code>, <code>setProperty</code>, <code>filter</code> — mutation with change detection built in
               </li>
               <li>
                 <Icon check></Icon>
-                NL-style Lisp syntax for cleaner AI generation and human readability
+                Each expression updates its own DOM node. No spread chains, no virtual DOM.
+              </li>
+            </ul>
+            <Button subtle icon-after icon="right-chevron" href="/docs/guides/reactivity">Reactivity Guide</Button>
+          </div>
+          <div class="copy" data-section="templates">
+            <h4 class="sub header">Templating</h4>
+            <h3 class="header">Async Belongs in the Template</h3>
+            <p>An <code>&#123;#async&#125;</code> block renders a promise's loading, error, and success states declaratively, then re-runs when the signals it reads change. Type in the preview and watch it re-fire.</p>
+            <ul class="feature-list">
+              <li>
+                <Icon check></Icon>
+                <code>&#123;loading&#125;</code> and <code>&#123;error&#125;</code> inline, no imperative state juggling
+              </li>
+              <li>
+                <Icon check></Icon>
+                Expressions speak JavaScript, Lisp style, or both in the same template
               </li>
             </ul>
             <Button subtle icon-after icon="right-chevron" href="/docs/guides/templates">Templating Guide</Button>
           </div>
-          <div class="copy" data-section="specs">
-            <h4 class="sub header">Designed for Agents</h4>
-            <h3 class="header">Specs as Code Contracts</h3>
-            <p>Every component ships with a machine-readable spec. Agents know what's valid, how things compose, and what's contextually appropriate — no hallucination.</p>
+          <div class="copy" data-section="events">
+            <h4 class="sub header">Events &amp; Keys</h4>
+            <h3 class="header">Interactions as Declarations</h3>
+            <p>Event maps bind CSS selectors to handlers. The <code>global</code> prefix tracks the pointer across the whole page, so the drag below keeps working after your cursor leaves the component.</p>
             <ul class="feature-list">
               <li>
                 <Icon check></Icon>
-                Types, variations, and states with natural language descriptions
+                <code>'global pointermove body'</code> — drag tracking from inside Shadow DOM
+              </li>
+              <li>
+                <Icon check></Icon>
+                Listeners and keybindings clean up automatically on destroy
+              </li>
+            </ul>
+            <Button subtle icon-after icon="right-chevron" href="/docs/guides/components/events">Events Guide</Button>
+          </div>
+          <div class="copy" data-section="specs">
+            <h4 class="sub header">Designed for Agents</h4>
+            <h3 class="header">Specs as Code Contracts</h3>
+            <p>The hero demo above runs on this. Every first-party component ships a machine-readable spec of its types, variations, and states, so agents generate valid markup because invalid markup isn't in the contract.</p>
+            <ul class="feature-list">
+              <li>
+                <Icon check></Icon>
+                Three equivalent dialects: <code>large</code>, <code>size="large"</code>, <code>class="large"</code>
               </li>
               <li>
                 <Icon check></Icon>
                 <code>usageLevel</code> tells agents what's common vs. niche
               </li>
             </ul>
-            <Button subtle icon-after icon="right-chevron" href="/docs/guides/specs">Component Specs</Button>
-          </div>
-          <div class="copy" data-section="components">
-            <h4 class="sub header">No Build Required</h4>
-            <h3 class="header">Runtime Components</h3>
-            <p>Define reactive web components with signals, Shadow DOM, and lifecycle hooks. Templates compile in the browser in under a millisecond — no bundler needed.</p>
-            <ul class="feature-list">
-              <li>
-                <Icon check></Icon>
-                Signals with built-in helpers — <code>toggle()</code>, <code>increment()</code>, <code>push()</code>
-              </li>
-              <li>
-                <Icon check></Icon>
-                Standard ESM — works in any agent sandbox, CDN, or import map
-              </li>
-            </ul>
-            <Button subtle icon-after icon="right-chevron" href="/docs/guides/components">Component Guide</Button>
+            <Button subtle icon-after icon="right-chevron" href="/docs/guides/components/specs">Component Specs</Button>
           </div>
         </div>
         <div class="visual">
           <div class="sticky">
-            <div class="example active" data-section="templates">
-              <!-- TODO: PlaygroundExample for templates -->
-              <div class="placeholder">
-                <Icon code></Icon>
-                <span>Templates Example</span>
+            <div class="example active" data-section="state">
+              <div class="demo">
+                <div class="pane">
+                  <div class="label">Code</div>
+                  <Code code={tourExamples.state.code} lang={tourExamples.state.lang} frame="none" wrap />
+                </div>
+                <div class="pane">
+                  <div class="label">Preview</div>
+                  <ExamplePreview id="packing-list" height="230" />
+                </div>
+              </div>
+            </div>
+            <div class="example" data-section="templates">
+              <div class="demo">
+                <div class="pane">
+                  <div class="label">Code</div>
+                  <Code code={tourExamples.templates.code} lang={tourExamples.templates.lang} frame="none" wrap />
+                </div>
+                <div class="pane">
+                  <div class="label">Preview</div>
+                  <ExamplePreview id="async-search" height="230" />
+                </div>
+              </div>
+            </div>
+            <div class="example" data-section="events">
+              <div class="demo">
+                <div class="pane">
+                  <div class="label">Code</div>
+                  <Code code={tourExamples.events.code} lang={tourExamples.events.lang} frame="none" wrap />
+                </div>
+                <div class="pane">
+                  <div class="label">Preview</div>
+                  <ExamplePreview id="drag-dot" height="230" />
+                </div>
               </div>
             </div>
             <div class="example" data-section="specs">
-              <!-- TODO: PlaygroundExample for specs -->
-              <div class="placeholder">
-                <Icon file-json></Icon>
-                <span>Specs Example</span>
-              </div>
-            </div>
-            <div class="example" data-section="components">
-              <!-- TODO: PlaygroundExample for components -->
-              <div class="placeholder">
-                <Icon box></Icon>
-                <span>Components Example</span>
+              <div class="demo">
+                <div class="pane">
+                  <div class="label">Code</div>
+                  <Code code={tourExamples.specs.code} lang={tourExamples.specs.lang} frame="none" wrap />
+                </div>
+                <div class="pane">
+                  <div class="label">Preview</div>
+                  <div class="dialects">
+                    <div class="dialect">
+                      <code>&lt;ui-button large&gt;</code>
+                      <ui-button large>Save</ui-button>
+                    </div>
+                    <div class="dialect">
+                      <code>&lt;ui-button size="large"&gt;</code>
+                      <ui-button size="large">Save</ui-button>
+                    </div>
+                    <div class="dialect">
+                      <code>&lt;ui-button class="large"&gt;</code>
+                      <ui-button class="large">Save</ui-button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -113,19 +171,19 @@ import { demoSteps } from '../data/homepage.js';
       <Container>
         <Cards three spaced stackable>
           <Card>
-            <Icon sparkles></Icon>
-            <div class="header">Designed for Agents</div>
-            <div class="description">Machine-readable specs translate natural language to valid, composable UI code.</div>
+            <Icon globe></Icon>
+            <div class="header">Real Web Components</div>
+            <div class="description">Standards-based custom elements with Shadow DOM. Drop them into React, Vue, Rails, or plain HTML.</div>
           </Card>
           <Card>
             <Icon zap></Icon>
-            <div class="header">No Build Necessary</div>
-            <div class="description">Signals, expression evaluation, and modern ESM running directly in the browser.</div>
+            <div class="header">No Build Step</div>
+            <div class="description">Templates compile in the browser in under a millisecond. Ship from a CDN, an import map, or npm.</div>
           </Card>
           <Card>
             <Icon layers></Icon>
             <div class="header">Complete UI Library</div>
-            <div class="description">A full component library with composable primitives and JIT Tailwind in Shadow DOM.</div>
+            <div class="description">Spec-driven primitives, themed components, and behaviors, with JIT Tailwind inside Shadow DOM.</div>
           </Card>
         </Cards>
       </Container>
@@ -134,25 +192,25 @@ import { demoSteps } from '../data/homepage.js';
       <Container>
         <div class="header">
           <h3 class="ui header">See It In Action</h3>
-          <Menu client:load selection inset class="menu" value="card-search">
-            <MenuItem client:load value="card-search">Card Search</MenuItem>
-            <MenuItem client:load value="temperature-converter">Temperature Converer</MenuItem>
-            <MenuItem client:load value="advanced-ball-simulation">Ball Simulation</MenuItem>
-            <MenuItem client:load value="spectrum-analyzer">Spectrum Analyzer</MenuItem>
-          </Menu>
         </div>
+        <Menu client:load selection inset fluid evenly-spaced class="menu" value="card-search">
+          <MenuItem client:load value="card-search">Card Search</MenuItem>
+          <MenuItem client:load value="todo-list">TodoMVC</MenuItem>
+          <MenuItem client:load value="solar-system-3d">Solar System 3D</MenuItem>
+          <MenuItem client:load value="tailwind">Tailwind</MenuItem>
+        </Menu>
         <div class="examples">
           <div class="example active" data-example="card-search">
             <PlaygroundExample height="800" id="card-search"></PlaygroundExample>
           </div>
-          <div class="example" data-example="temperature-converter">
-            <PlaygroundExample height="800" id="temperature-converter"></PlaygroundExample>
+          <div class="example" data-example="todo-list">
+            <PlaygroundExample height="800" id="todo-list"></PlaygroundExample>
           </div>
-          <div class="example" data-example="advanced-ball-simulation">
-            <PlaygroundExample height="800" id="advanced-ball-simulation"></PlaygroundExample>
+          <div class="example" data-example="solar-system-3d">
+            <PlaygroundExample height="800" id="solar-system-3d"></PlaygroundExample>
           </div>
-          <div class="example" data-example="spectrum-analyzer">
-            <PlaygroundExample height="800" id="spectrum-analyzer"></PlaygroundExample>
+          <div class="example" data-example="tailwind">
+            <PlaygroundExample height="800" id="tailwind"></PlaygroundExample>
           </div>
         </div>
       </Container>

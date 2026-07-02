@@ -18,6 +18,84 @@ export const plasmaConfig = {
   },
 };
 
+// Tour — instructive code excerpts, each paired with a live example render.
+// Excerpts mirror the example source at docs/src/examples/component/{id}
+export const tourExamples = {
+  state: {
+    lang: 'js',
+    example: 'packing-list',
+    code: `const events = {
+  'click .item'({ state, data }) {
+    state.items.toggleItemProperty(data.item.id, 'packed');
+  },
+  'keydown .new'({ state, event, value, target }) {
+    if (event.key !== 'Enter' || !value.trim()) return;
+    state.items.push({ id: generateID(), title: value, packed: false });
+    target.value = '';
+  },
+  'click .pack'({ state }) {
+    state.items.setProperty('packed', true);
+  },
+  'click .clear'({ state }) {
+    state.items.filter((item) => !item.packed);
+  },
+};`,
+  },
+  templates: {
+    lang: 'sui',
+    example: 'async-search',
+    code: `{#async getResults searchTerm as searchResults}
+  {#if hasAny searchResults}
+    {#each searchResults}
+      <div class="{activeIf is index selectedIndex} result">
+        {title}
+      </div>
+    {/each}
+  {else}
+    {>message type='noResults'}
+  {/if}
+{loading}
+  {>message type='loading'}
+{error as e}
+  {>message type='error'}
+{/async}`,
+  },
+  events: {
+    lang: 'js',
+    example: 'drag-dot',
+    code: `const events = {
+  'pointerdown .dot'({ state }) {
+    state.dragging.set(true);
+    return 'cancel';
+  },
+  'global pointermove body'({ $, state, event }) {
+    if (!state.dragging.get()) return;
+    const area = $('.area').bounds();
+    state.x.set(event.clientX - area.left);
+    state.y.set(event.clientY - area.top);
+  },
+  'global pointerup body'({ state }) {
+    state.dragging.set(false);
+  },
+};`,
+  },
+  specs: {
+    lang: 'js',
+    code: `// button.spec.js
+{
+  name: 'Size',
+  attribute: 'size',
+  usageLevel: 1,
+  description: 'vary in size',
+  options: [
+    { value: 'small', description: 'appear small' },
+    { value: 'medium', description: 'appear normal sized' },
+    { value: 'large', description: 'appear larger than normal' },
+  ],
+}`,
+  },
+};
+
 // Hero demo — each step is a prompt + the resulting code/UI
 export const demoSteps = [
   {

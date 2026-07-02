@@ -218,52 +218,89 @@ body {
       .sticky {
         position: sticky;
         top: 4rem;
+        display: grid;
       }
     }
 
+    /* examples stack in the same grid cell and crossfade as sections scroll */
     .example {
-      display: none;
+      grid-area: 1 / 1;
+      min-width: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
 
       &.active {
-        display: block;
+        opacity: 1;
+        pointer-events: auto;
       }
     }
 
-    .placeholder {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 400px;
+    /* echoes the hero result card (see AIPrompt) */
+    .demo {
+      background: var(--subtle-angled-gradient);
       border: var(--glow-border);
       border-radius: var(--border-radius-l);
-      background-image: var(--subtle-angled-gradient);
-      color: var(--standard-30);
-      gap: 1rem;
+      box-shadow: var(--floating-shadow);
+      padding: var(--padding-s);
 
-      ui-icon {
-        font-size: 48px;
-        opacity: 0.3;
+      .pane {
+        padding: var(--padding-s);
+
+        + .pane {
+          border-top: var(--border);
+        }
       }
-      span {
-        font-size: 14px;
+
+      .label {
+        font-size: var(--text-2xs);
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        color: var(--secondary-text-color);
+        margin-bottom: var(--gap-s);
+      }
+
+      .expressive-code pre {
+        background: transparent !important;
+        border: none;
+        margin: 0;
+        overflow-x: auto;
+        scrollbar-width: thin;
+
+        code {
+          font-size: 12.5px;
+        }
+      }
+
+      .dialects {
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap-s);
+      }
+
+      .dialect {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--gap);
+
+        code {
+          font-size: 13px;
+          color: var(--standard-50);
+        }
       }
     }
 
     .copy {
-      min-height: 100dvh;
+      min-height: 85dvh;
       margin-bottom: 4rem;
       padding-right: 2rem;
+      align-content: center;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
-  }
-
-  /*******************************
-        Proof Cards
-  *******************************/
-
-  .proof {
   }
 
   /*******************************
@@ -272,10 +309,7 @@ body {
 
   .showcase {
     .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
 
       h3 {
         margin: 0;
@@ -283,7 +317,8 @@ body {
     }
 
     .menu {
-      font-size: 15px;
+      font-size: 16px;
+      margin-bottom: 2rem;
     }
 
     .example {
@@ -453,14 +488,14 @@ body {
         .content {
           padding-right: 0rem;
         }
+        .copy {
+          min-height: 0;
+          margin-bottom: 3rem;
+          padding-right: 0;
+        }
       }
 
       &.showcase {
-        .header {
-          flex-direction: column;
-          gap: 1rem;
-          align-items: flex-start;
-        }
         .menu {
           overflow-x: auto;
           max-width: 100%;

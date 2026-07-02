@@ -1,0 +1,21 @@
+:host {
+  display: block;
+  --example-preview-height: 240px;
+}
+
+playground-preview {
+  display: block;
+  width: 100%;
+  height: var(--example-preview-height);
+  border: none;
+  background: transparent;
+  --playground-preview-toolbar-background: transparent;
+}
+
+playground-preview::part(preview-loading-indicator) {
+  top: 0;
+}
+
+playground-preview::part(preview-toolbar) {
+  display: none;
+}
