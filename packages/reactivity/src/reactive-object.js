@@ -1,4 +1,4 @@
-import { clone, get, isEqual, isObject, returnsFalse, set, unset } from '@semantic-ui/utils';
+import { canonicalPath, clone, get, isEqual, isObject, returnsFalse, set, unset } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
 import { IS_REACTIVE_OBJECT } from './helpers/identity.js';
@@ -119,6 +119,10 @@ export class ReactiveObject {
     if (this.equality(previous, value)) {
       return false;
     }
+    // a positional spelling of an identity-bearing element (todos.0.done) never string-matches the
+    // keyed cells readers hold (todos[#a].done), so the keyed twin is resolved before the write
+    // moves anything and woken alongside the literal path
+    const canonical = canonicalPath(this.value, path);
     const stored = this.protect(value);
     set(this.value, path, stored);
     // utils set() silently no-ops on a path through an absent keyed element, a
@@ -129,6 +133,9 @@ export class ReactiveObject {
       return false;
     }
     this.wake(path, previous, stored);
+    if (canonical !== path) {
+      this.wake(canonical, previous, stored);
+    }
     return true;
   }
 
@@ -140,8 +147,12 @@ export class ReactiveObject {
     if (previous === undefined) {
       return false;
     }
+    const canonical = canonicalPath(this.value, path);
     unset(this.value, path);
     this.wake(path, previous, undefined);
+    if (canonical !== path) {
+      this.wake(canonical, previous, undefined);
+    }
     return true;
   }
 
