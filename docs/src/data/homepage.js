@@ -96,6 +96,35 @@ export const tourExamples = {
   },
 };
 
+// No-build ribbon — mirrors the cdn-authoring example
+export const nobuildExample = {
+  lang: 'html',
+  example: 'cdn-authoring',
+  code: `<html>
+  <head>
+    <script src="https://cdn.semantic-ui.com/load" authoring css><\/script>
+    <script type="module">
+      import { defineComponent } from '@semantic-ui/component';
+
+      defineComponent({
+        tagName: 'my-counter',
+        template: \`
+          <button class="tick">Tick</button>
+          <span>Count: {count}</span>
+        \`,
+        defaultState: { count: 0 },
+        events: {
+          'click .tick'({ state }) { state.count.increment(); },
+        },
+      });
+    <\/script>
+  </head>
+  <body>
+    <my-counter></my-counter>
+  </body>
+</html>`,
+};
+
 // Hero demo — each step is a prompt + the resulting code/UI
 export const demoSteps = [
   {

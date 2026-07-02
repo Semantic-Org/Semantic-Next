@@ -5,6 +5,28 @@ import { createPlasma } from './plasma.js';
 createPlasma('#plasma', { ...plasmaConfig, fadeInClass: false });
 
 /*-------------------------------
+      Scroll Reveals
+-------------------------------*/
+
+// gates the hidden initial states so content stays visible without js
+document.body.classList.add('motion');
+
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.2 });
+
+// note: expressive-code blocks contain their own `.copy` button, so tour
+// copy blocks are scoped under .content
+document
+  .querySelectorAll('.tour .content .copy, .nobuild .demo, .nobuild .intro, .showcase ui-container')
+  .forEach((el) => revealObserver.observe(el));
+
+/*-------------------------------
       Tour Scroll Switching
 -------------------------------*/
 

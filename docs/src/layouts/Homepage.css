@@ -194,6 +194,50 @@ body {
       font-size: 24px;
       font-weight: bold;
     }
+
+    /* code + preview panes stacked in shared perspective, echoing the
+       hero result card. panes are separate planes: preview floats above
+       the code on the z axis */
+    .demo {
+      transform: rotateX(6deg) rotateY(-14deg);
+      transform-style: preserve-3d;
+
+      .pane {
+        background-color: oklch(0.16 0.015 260 / 0.75);
+        background-image: var(--subtle-angled-gradient);
+        border: var(--glow-border);
+        border-radius: var(--border-radius-l);
+        box-shadow: var(--floating-shadow);
+        padding: var(--padding-s) var(--padding);
+        backdrop-filter: blur(6px);
+      }
+
+      .pane.preview {
+        margin: -1.25rem 0 0 2.5rem;
+        transform: translateZ(55px);
+        box-shadow: 0 35px 70px -20px rgba(0, 0, 0, 0.8), var(--floating-shadow);
+      }
+
+      .label {
+        font-size: var(--text-2xs);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--secondary-text-color);
+        margin-bottom: var(--gap-s);
+      }
+
+      .expressive-code pre {
+        background: transparent !important;
+        border: none;
+        margin: 0;
+        overflow-x: auto;
+        scrollbar-width: thin;
+
+        code {
+          font-size: 12.5px;
+        }
+      }
+    }
   }
 
   /*******************************
@@ -219,7 +263,19 @@ body {
         position: sticky;
         top: 4rem;
         display: grid;
-        perspective: 1400px;
+        perspective: 1600px;
+
+        /* ambient glow the cards float on */
+        &:before {
+          content: '';
+          position: absolute;
+          inset: -3rem -4rem;
+          background:
+            radial-gradient(45% 40% at 75% 15%, oklch(0.5 0.13 240 / 0.3), transparent 70%),
+            radial-gradient(38% 35% at 15% 85%, oklch(0.75 0.09 45 / 0.12), transparent 70%);
+          filter: blur(24px);
+          pointer-events: none;
+        }
       }
     }
 
@@ -237,64 +293,47 @@ body {
       }
     }
 
-    /* echoes the hero result card (see AIPrompt), angled toward the copy */
-    .demo {
-      background: var(--subtle-angled-gradient);
-      border: var(--glow-border);
-      border-radius: var(--border-radius-l);
-      box-shadow: var(--floating-shadow);
-      padding: var(--padding-s);
-      transform: rotateY(-6deg) rotateX(1.5deg);
-      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s ease;
+    .agent.flow {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap-s);
 
-      &:hover {
-        transform: rotateY(0deg) rotateX(0deg);
-        box-shadow: var(--floating-shadow), 0 24px 60px rgba(0, 0, 0, 0.45);
-      }
-
-      .pane {
-        padding: var(--padding-s);
-
-        + .pane {
-          border-top: var(--border);
-        }
-      }
-
-      .label {
-        font-size: var(--text-2xs);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--secondary-text-color);
-        margin-bottom: var(--gap-s);
-      }
-
-      .expressive-code pre {
-        background: transparent !important;
-        border: none;
-        margin: 0;
-        overflow-x: auto;
-        scrollbar-width: thin;
-
-        code {
-          font-size: 12.5px;
-        }
-      }
-
-      .dialects {
-        display: flex;
-        flex-direction: column;
-        gap: var(--gap-s);
-      }
-
-      .dialect {
+      .step {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: var(--gap);
+        gap: var(--gap-xs);
+      }
 
-        code {
-          font-size: 13px;
-          color: var(--standard-50);
+      .prompt {
+        color: var(--standard-60);
+        font-style: italic;
+
+        ui-icon {
+          color: var(--secondary-text-color);
+        }
+      }
+
+      .markup code {
+        font-size: 12.5px;
+        color: var(--standard-70);
+        background: var(--standard-5);
+        padding: var(--padding-3xs) var(--padding-2xs);
+        border-radius: var(--border-radius-s);
+      }
+
+      .result {
+        justify-content: space-between;
+
+        .valid {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--gap-3xs);
+          font-size: var(--text-xs);
+          color: var(--green-text-color);
+
+          ui-icon {
+            font-size: 12px;
+          }
         }
       }
     }
@@ -308,6 +347,32 @@ body {
       &:last-child {
         margin-bottom: 0;
       }
+    }
+  }
+
+  /*******************************
+        No-Build Section
+  *******************************/
+
+  .nobuild {
+    ui-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 4rem;
+      perspective: 1600px;
+    }
+
+    /* demo leads, mirrored tilt faces the copy on the right */
+    .demo {
+      flex: 1 1 55%;
+      min-width: 0;
+      transform: rotateX(6deg) rotateY(14deg);
+    }
+
+    .intro {
+      flex: 1 1 45%;
+      max-width: 34rem;
     }
   }
 
@@ -441,6 +506,66 @@ body {
   }
 }
 
+/*******************************
+        Scroll Motion
+*******************************/
+
+/* hidden states only apply once homepage.js tags the body,
+   so content stays visible without js */
+@media (prefers-reduced-motion: no-preference) {
+
+  body.motion {
+
+    .tour .content .copy,
+    .nobuild .demo,
+    .nobuild .intro,
+    .showcase ui-container {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+
+      &.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* keep the perspective tilt while revealing */
+    .nobuild .demo {
+      transform: rotateX(6deg) rotateY(20deg) translateY(36px);
+
+      &.visible {
+        transform: rotateX(6deg) rotateY(14deg) translateY(0);
+      }
+    }
+
+    /* incoming tour card settles as it crossfades in */
+    .tour .example .demo {
+      transform: rotateX(6deg) rotateY(-19deg) scale(0.985);
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tour .example.active .demo {
+      transform: rotateX(6deg) rotateY(-14deg) scale(1);
+    }
+
+    /* ambient glow breathes slowly behind the cards */
+    .tour .sticky:before {
+      animation: glow-drift 14s ease-in-out infinite alternate;
+    }
+  }
+}
+
+@keyframes glow-drift {
+  from {
+    transform: translate3d(-1.5%, -2%, 0) scale(1);
+    opacity: 0.85;
+  }
+  to {
+    transform: translate3d(1.5%, 2%, 0) scale(1.06);
+    opacity: 1;
+  }
+}
+
 @keyframes masthead {
  0% {
   background-position: 0% 0%;
@@ -453,36 +578,116 @@ body {
 
 @layer responsive.mobile {
 
+  /* tablet — enough room for side-by-side tour, not for the 500px rails */
+  @media only screen and (min-width: 768px) and (max-width: 1099px) {
+
+    aboveFold {
+      height: auto;
+      padding: 7rem 0 4rem;
+
+      ui-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3rem;
+      }
+
+      .text {
+        margin-right: 0;
+      }
+
+      .visual {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 100%;
+        max-width: 560px;
+        height: auto;
+        margin: 0;
+        /* room for the prompt's -100px results shift, tuned for the side rail */
+        padding-top: 100px;
+
+        .sticky {
+          position: static;
+          width: 100%;
+        }
+      }
+    }
+
+    .tour {
+      ui-container {
+        gap: 2.5rem;
+      }
+
+      .visual {
+        width: 380px;
+        flex: 0 0 380px;
+      }
+
+      .copy {
+        padding-right: 0;
+      }
+    }
+
+    .nobuild {
+      ui-container {
+        flex-direction: column-reverse;
+        gap: 3rem;
+      }
+
+      .demo,
+      .intro {
+        width: 100%;
+        max-width: 640px;
+      }
+    }
+  }
+
   @media only screen and (max-width: 767px) {
 
     aboveFold {
-      height: 90vh;
+      height: auto;
+      padding: 5rem 0 3rem;
 
       content:before {
         background-image: none;
       }
-      .image {
-        max-width: calc(100% - 2rem);
-        max-height: 175px;
-        object-fit: contain;
-        margin: 0rem auto 1rem;
-        float: none;
-        display: block;
+      ui-container {
+        flex-direction: column;
+        gap: 1rem;
       }
       .text {
         text-align: center;
+        margin: 0;
       }
       h1 {
         font-size: 32px;
+      }
+      .visual {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 100%;
+        height: auto;
+        margin: 0;
+        /* room for the prompt's -100px results shift, tuned for the side rail */
+        padding-top: 100px;
+
+        .sticky {
+          position: static;
+          width: 100%;
+        }
       }
     }
 
     ribbon  {
       padding: 2rem 1rem;
 
-      &.proof {
-        ui-cards {
-          flex-direction: column;
+      .demo {
+        transform: none;
+
+        .pane.preview {
+          margin: var(--margin-s) 0 0;
+          transform: none;
         }
       }
 
@@ -500,6 +705,17 @@ body {
           min-height: 0;
           margin-bottom: 3rem;
           padding-right: 0;
+        }
+      }
+
+      &.nobuild {
+        ui-container {
+          flex-direction: column-reverse;
+          gap: 2rem;
+        }
+        .demo,
+        .intro {
+          width: 100%;
         }
       }
 
