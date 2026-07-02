@@ -194,8 +194,10 @@ export class ReactiveObject {
         this.cells.delete(cellPath);
         continue;
       }
-      // get() cannot parse a leading '.', a leading '[' resolves against the subtree directly
+
+      // get() cannot parse a leading '.'
       const suffix = cellPath.slice(boundary === CHAR_CODES.DOT ? path.length + 1 : path.length);
+
       if (!this.equality(get(previous, suffix), get(next, suffix))) {
         dep.changed();
       }
