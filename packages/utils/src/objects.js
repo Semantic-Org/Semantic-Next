@@ -1,5 +1,6 @@
 import { clone } from './cloning.js';
 import { isEqual } from './equality.js';
+import { configured } from './functions.js';
 import { each } from './loops.js';
 import { escapeRegExp } from './regexp.js';
 import { isArray, isMap, isObject, isPlainObject, isSet, isString } from './types.js';
@@ -81,28 +82,32 @@ const overBudget = (value) => spendBudget(value, autoBudget) < 0;
 */
 // the identity fields a keyed array element is matched on, first present wins —
 // the same convention as reactivity's Signal.id and the renderer's getItemID
-const DEFAULT_ELEMENT_KEYS = ['id', '_id', 'hash', 'key'];
-
 /*
   identity of an array element: the value of the first present field in `keys`,
   or undefined for a scalar or an object carrying none of them. shared by the
   keyed diff and the keyed path resolver so emit and apply agree on identity.
+  the field vocabulary is the one identity config for the whole keyed grammar,
+  set once at boot (elementKey.config.keys.unshift('sku')) — every keys default
+  below reads it live, per-call keys still win
 */
-export const elementKey = (item, keys = DEFAULT_ELEMENT_KEYS) => {
-  if (!isPlainObject(item)) {
-    return undefined;
-  }
-  for (const field of keys) {
-    if (item[field] != null) {
-      return item[field];
+export const elementKey = /* @__PURE__ */ configured(
+  (item, keys = elementKey.config.keys) => {
+    if (!isPlainObject(item)) {
+      return undefined;
     }
-  }
-  return undefined;
-};
+    for (const field of keys) {
+      if (item[field] != null) {
+        return item[field];
+      }
+    }
+    return undefined;
+  },
+  { keys: ['id', '_id', 'hash', 'key'] },
+);
 
 // resolve a keyed array segment to a live index, -1 if absent. identity compares
 // String-coerced because the path carries a string and ids may be number or string
-const findKeyed = (array, keyValue, keys = DEFAULT_ELEMENT_KEYS) => {
+const findKeyed = (array, keyValue, keys = elementKey.config.keys) => {
   if (!isArray(array)) {
     return -1;
   }
@@ -142,7 +147,7 @@ const keyedMap = (array, keys) => {
 
 export const detectChanges = (before, after, {
   keyed = true,
-  keys = DEFAULT_ELEMENT_KEYS,
+  keys = elementKey.config.keys,
   equality = isEqual,
   ignoreKeys = null,
   collapseKeys = null,
@@ -303,7 +308,7 @@ export const trackWrites = (value, callback, {
   onWrite,
   returnPaths = true,
   keyed = true,
-  keys = DEFAULT_ELEMENT_KEYS,
+  keys = elementKey.config.keys,
   clone: cloneFunction = clone,
   equality = isEqual,
 } = {}) => {
@@ -537,7 +542,7 @@ export const trackReads = (value, callback, {
   onRead,
   returnPaths = true,
   keyed = true,
-  keys = DEFAULT_ELEMENT_KEYS,
+  keys = elementKey.config.keys,
 } = {}) => {
   // a non-container has no paths to read, and a frozen tree is immutable so it
   // has no dependencies worth tracking (a proxy also can't stand in for its
@@ -924,7 +929,7 @@ const extractBracketAccess = (part) => {
   return { key, index: parseInt(body, 10) };
 };
 
-export const get = function(obj, path = '', keys = DEFAULT_ELEMENT_KEYS) {
+export const get = function(obj, path = '', keys = elementKey.config.keys) {
   if (typeof path !== 'string') {
     return undefined;
   }
@@ -999,12 +1004,11 @@ const isIndexSegment = (part) => /^\d+$/.test(part);
   paths from trackWrites and detectChanges apply back. Creates missing
   intermediates — arrays when the next segment is an index, objects otherwise.
 */
-export const set = function(obj, path, value, keys = DEFAULT_ELEMENT_KEYS) {
+export const set = function(obj, path, value, keys = elementKey.config.keys) {
   if (typeof path !== 'string' || path === '' || obj === null || !isObject(obj)) {
     return obj;
   }
-  // a path setter is the classic prototype pollution vector, refuse segments
-  // that climb the prototype chain
+  // refuse prototype pollution (__proto__ and friends)
   if (/(^|\.|\[)(__proto__|constructor|prototype)(\.|\[|\]|$)/.test(path)) {
     return obj;
   }
@@ -1109,7 +1113,7 @@ export const set = function(obj, path, value, keys = DEFAULT_ELEMENT_KEYS) {
   than splicing, so sibling index paths stay valid when applying several
   removals at once.
 */
-export const unset = function(obj, path, keys = DEFAULT_ELEMENT_KEYS) {
+export const unset = function(obj, path, keys = elementKey.config.keys) {
   if (typeof path !== 'string' || path === '' || obj === null || !isObject(obj)) {
     return obj;
   }
@@ -1200,7 +1204,7 @@ export const unset = function(obj, path, keys = DEFAULT_ELEMENT_KEYS) {
 // nothing rewrites, so callers compare by reference
 const HAS_POSITIONAL_SEGMENT = /(^|\.|\[)\d/;
 
-export const keyedPath = (obj, path, keys = DEFAULT_ELEMENT_KEYS) => {
+export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
   if (typeof path !== 'string' || !HAS_POSITIONAL_SEGMENT.test(path) || obj === null || !isObject(obj)) {
     return path;
   }

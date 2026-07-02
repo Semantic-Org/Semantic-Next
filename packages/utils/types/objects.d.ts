@@ -289,17 +289,26 @@ export function trackReads<T, R = unknown>(
   options?: TrackReadsOptions,
 ): TrackReadsResult<R>;
 
+/** The editable identity vocabulary every keyed default resolves from. */
+export interface ElementKeyConfig {
+  /** Candidate identity fields, first present wins. Default `['id', '_id', 'hash', 'key']`. */
+  keys: string[];
+}
+
 /**
  * Identity of an array element: the value of the first present field in `keys`,
  * or undefined for a scalar or an object carrying none of them. The
  * element-identity convention shared with reactivity's Signal.id and the
  * renderer's getItemID, and what the keyed `detectChanges` mode and the keyed
- * `get`/`set`/`unset` path grammar match on.
+ * `get`/`set`/`unset` path grammar match on. The field vocabulary is the one
+ * identity config for the whole keyed grammar, set once at app boot
+ * (`elementKey.config.keys.unshift('sku')`) — every `keys` default reads it
+ * live, per-call `keys` still wins.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#elementkey elementKey}
  * @see {@link https://next.semantic-ui.com/examples/utils-elementkey Example}
  *
  * @param item - The array element to read identity from
- * @param keys - Candidate identity fields, first present wins (default ['id', '_id', 'hash', 'key'])
+ * @param keys - Candidate identity fields, first present wins (default `elementKey.config.keys`)
  * @returns The identity value, or undefined when none of the fields are present
  *
  * @example
@@ -310,6 +319,9 @@ export function trackReads<T, R = unknown>(
  * ```
  */
 export function elementKey(item: unknown, keys?: string[]): unknown;
+export namespace elementKey {
+  let config: ElementKeyConfig;
+}
 
 /**
  * Changes reported by detectChanges, grouped by operation

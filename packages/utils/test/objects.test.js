@@ -2332,3 +2332,24 @@ describe('array-root bracket paths', () => {
     expect(arr.length).toBe(0);
   });
 });
+
+describe('elementKey.config.keys', () => {
+  it('the configured vocabulary reaches the whole keyed grammar, per-call keys still win', () => {
+    const original = [...elementKey.config.keys];
+    elementKey.config.keys.unshift('sku');
+    try {
+      const doc = { rows: [{ sku: 'A1', qty: 1 }] };
+      expect(elementKey(doc.rows[0])).toBe('A1');
+      expect(get(doc, 'rows[#A1].qty')).toBe(1);
+      expect(keyedPath(doc, 'rows.0.qty')).toBe('rows[#A1].qty');
+      set(doc, 'rows[#A1].qty', 2);
+      expect(doc.rows[0].qty).toBe(2);
+      const diff = detectChanges({ rows: [{ sku: 'A1', qty: 1 }] }, doc);
+      expect(diff.changed).toContain('rows[#A1].qty');
+      expect(elementKey(doc.rows[0], ['qty'])).toBe(2);
+    }
+    finally {
+      elementKey.config.keys = original;
+    }
+  });
+});
