@@ -43,7 +43,7 @@ export function bindAttribute({
     const realAttrName = classification.attribute;
     const expr = entries[parts[0].markerID];
     scope.reaction(element, (comp) => {
-      const value = computeExpressionValue(expr.node, data, renderer);
+      const value = computeExpressionValue({ node: expr.node, data, renderer });
       if (skipFirstWrite && comp.firstRun) { return; }
       element[realAttrName] = value;
     });
@@ -58,7 +58,7 @@ export function bindAttribute({
     const realAttrName = classification.attribute;
     const expr = entries[parts[0].markerID];
     const handler = (...args) => {
-      const value = renderer.evaluator.lookupTokenValue(expr.node.value, data);
+      const value = computeExpressionValue({ node: expr.node, data, renderer, literal: true });
       if (isFunction(value)) { value(...args); }
     };
     element.addEventListener(realAttrName, handler);
