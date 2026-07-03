@@ -139,18 +139,32 @@ jobs:
       # build in CI and ship the prebuilt output, so Vercel runs no remote build
       # (near-zero Vercel build minutes). `vercel build` runs the project's own
       # install + build:docs, so the output matches a remote build.
+      #
+      # remote builds get VERCEL_URL injected; prebuilt CI builds don't, and
+      # without it the astro `site` falls back to dev.semantic-ui.com and bakes
+      # loopback URLs into the playground import maps. bake the stable branch
+      # alias instead and point it at the deployment afterwards.
       - name: Build and deploy docs preview
         id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
+          BRANCH_SLUG=$(echo "$GITHUB_HEAD_REF" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          BRANCH_URL="semantic-next-git-${BRANCH_SLUG}-semantic-ui.vercel.app"
           npx vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
-          npx vercel build --token="$VERCEL_TOKEN"
+          if [ -f .vercel/.env.preview.local ]; then
+            sed -i '/^VERCEL_URL=/d' .vercel/.env.preview.local
+            echo "VERCEL_URL=$BRANCH_URL" >> .vercel/.env.preview.local
+          fi
+          VERCEL_URL="$BRANCH_URL" npx vercel build --token="$VERCEL_TOKEN"
           set +e
           npx vercel deploy --prebuilt --token="$VERCEL_TOKEN" >url.txt 2>deploy.log
           echo "code=$?" >> "$GITHUB_OUTPUT"
           set -e
           cat deploy.log
+          if [ -s url.txt ]; then
+            npx vercel alias set "$(cat url.txt)" "$BRANCH_URL" --token="$VERCEL_TOKEN" --scope "$VERCEL_ORG_ID"
+          fi
 
       - name: Write facts
         if: always()

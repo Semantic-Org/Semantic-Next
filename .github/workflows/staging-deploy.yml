@@ -1,0 +1,55 @@
+name: Staging Deploy
+
+# Deploys the docs site to the staging environment (staging.semantic-ui.com) on
+# every push to main. Replaces Vercel's branch tracking for that environment so
+# the build runs in CI and ships prebuilt, matching the PR preview flow and
+# spending no Vercel build minutes. See tools/ci/deploy/README.md.
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  # a newer main push supersedes an in-flight staging build
+  group: staging-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    name: Deploy docs to staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DOCS_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+
+      # same caches as the PR deploy, shared via the docs-astro- prefix: wireit's
+      # per-package outputs + astro's incremental cache, so vercel build reuses
+      # them instead of rebuilding from scratch.
+      - uses: google/wireit@setup-github-actions-caching/v2
+      - uses: actions/cache@v6
+        with:
+          path: docs/node_modules/.astro
+          key: docs-astro-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            docs-astro-${{ runner.os }}-
+
+      # build in CI and ship prebuilt to the staging environment, so Vercel runs
+      # no remote build. the CLI pairs --environment (pull) with --target
+      # (build/deploy) for a custom environment.
+      - name: Build and deploy docs to staging
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npx vercel pull --yes --environment=staging --token="$VERCEL_TOKEN"
+          npx vercel build --target=staging --token="$VERCEL_TOKEN"
+          npx vercel deploy --prebuilt --target=staging --token="$VERCEL_TOKEN"

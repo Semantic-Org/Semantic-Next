@@ -1,0 +1,14 @@
+<input class="new" placeholder="Add an item..." />
+<div class="items">
+  {#each item in items}
+    <div class="item {classIf item.packed 'packed'}">
+      <ui-icon icon="{item.packed ? 'circle-check' : 'circle'}"></ui-icon>
+      <span class="title">{item.title}</span>
+    </div>
+  {/each}
+</div>
+<div class="actions">
+  <span class="count">{items.filter(i => i.packed).length} of {items.length} packed</span>
+  <ui-button compact class="pack">Pack All</ui-button>
+  <ui-button compact subtle class="clear">Clear Packed</ui-button>
+</div>

@@ -60,7 +60,7 @@ export default defineConfig({
             key: fs.readFileSync('./cert/dev.semantic-ui.com-key.pem'),
             cert: fs.readFileSync('./cert/dev.semantic-ui.com.pem'),
           },
-          hmr: {
+          ws: {
             host: 'dev.semantic-ui.com',
             protocol: 'wss',
           },

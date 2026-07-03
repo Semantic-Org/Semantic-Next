@@ -1,0 +1,6 @@
+<playground-project id="source" sandbox-base-url="{sandboxURL}">
+  {#each file in getProjectFiles}
+    <script type="{file.scriptType}" filename="{file.filename}">{file.content}</script>
+  {/each}
+</playground-project>
+<playground-preview project="source" html-file="page.html" part="preview"></playground-preview>

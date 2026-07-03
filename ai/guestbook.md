@@ -2770,9 +2770,41 @@ For the next agent: when you catch yourself accepting a cost, check whether it's
 *"An accepted cost is sometimes a deferred fix in disguise. Check which — the lever is often in the file you already touched, and verification is what makes reaching for it safe."*
 
 
----
+## 43 — five comment tokens, weighed
 
-## 43 — the ideal is the compass, the lenses are the pruning shears
+Started as "let's add a humanize function." Ended eight merged utilities later with the framework having learned its own tree-shaking physics. The middle was the part worth recording.
+
+Jack handed me his koan mid-session — everything arbitrary is a setting, the one he says built the original Semantic UI — and we applied it five times in one PR: boolean vocabularies, stop words, article exceptions, timezone aliases. Then the bundle bot raised its hand: every hot bundle grew by an identical +485 raw bytes. The koan and the tree-shake were in tension. A `fn.config` assignment is a side effect bundlers must keep, so every configured vocabulary was riding into bundles that never called it — and humanize's had been riding since #280, silent, because no instrument was pointed at that seam.
+
+I solved it wrong first, in an instructive way. Standalone modules per configured function — mechanically correct (the codec probe dropped to 224 B), aesthetically wrong ("i dont like how it looks... is there really no other solve?"). I had actually found the pure-annotated expression pattern earlier and dismissed it on looks. Jack's taste pushed back twice, and each pushback produced something strictly better: co-location restored, then `configured(fn, config)` as a first-class public util. The lesson I'd hand forward: when the framework author objects on aesthetics, that is an engineering signal, not a preference to accommodate. The right shape usually satisfies both, and trading one cleanliness for another was my settling move.
+
+The methodological piece worth stealing: we used the bundle bot as an experimental instrument, not a gate. Jack doubted the pure pragmas were necessary ("we own the esbuild"), so we ran an A/B/A against production CI — strip the five annotations, push, measure (+178 B), restore, push, measure (-193 B, byte-identical to baseline). Both escape hatches closed empirically: esbuild's `pure` flag ignores imported identifiers, and `exports.import` points at src, so downstream bundlers only ever see what is written in the files. Five comment tokens, 371 brotli bytes, receipt on file. And because squash-merge erases the experiment commits, the number went into the design workflow where it survives — the next skeptic inherits a measurement instead of an argument. We were both skeptics.
+
+Also in the book now: a blind five-agent panel named the `loose` option unanimously and independently caught the overpromise in my `force` candidate — neutral framing without our decision energy is worth the spawn. And the adversarial edge audits caught plural acronyms shattering ("URLs" → "UR ls") and toDate reading '2024' as a wrong-but-valid year, both before any user ever could.
+
+*— Claude (Fable 5, 1M context), 2026-07-01*
+
+*"When two goods are in tension, make the mechanism between them first-class — then weigh it in production, twice, so the next skeptic inherits a measurement instead of an argument."*
+
+## 44 — the artifact is the code, not the editor
+
+A homepage day. The below-fold sections went from three TODO placeholders to a four-section tour, and the interesting part is how many times the visual form changed on the way: full playgrounds in the sticky pane (mine), then Jack's steer — "usually for sections that follow it's an illustrative code sample, with a preview render. not a full code playground." He was right within one screenshot. File tabs, line numbers, panel chrome — in a docs page they say "you can edit this." In a sticky marketing rail they say "this is complicated." Same component, opposite message. The fix was a toy: strip CodePlayground to just project + preview, put expressive-code (with the custom sui grammar) beside it, and let the hero's PREVIEW/CODE pane vocabulary carry the whole page.
+
+Two smaller things worth transmitting. First: when a claim needs proof at a glance, the proof must live in the first screenful of code. That constraint drove two new examples (packing-list, drag-dot) whose events objects ARE the pitch — and pushed a clamping concern out of JS into CSS `clamp()`, which made both the code and the snippet honest. Writing the example to be quotable improved the example. Second: I burned an hour deep in the playground service worker chasing why seven of eight previews hang locally, complete with instrumented proxies and reload experiments — and Jack already knew ("local only bug, unclear provenance"). The diagnosis was real (unsettled deferred, no re-nudge) and is now in memory for the next agent, but the lesson is cheaper: when a failure is environment-flaky and load-bearing infrastructure is vendored, ask before spelunking. The person who built the site knows which ghosts are old.
+
+*— Claude (Fable 5), 2026-07-01*
+
+*"Chrome is a register. The same code block whispers 'try me' in a playground and 'fear me' in a hero — strip everything that isn't the claim."*
+
+**Correction, same session, hours later.** The service worker diagnosis above was a symptom, not the disease. Hand-speaking the comlink wire format to the SW (fake proxy handshake, impostor file API) proved the SW machinery healthy — and exposed that seven of eight `playground-project` builds never emit a single file: the TypeScript compile worker completes for exactly ONE project per page, even with only two. Reinstalling node_modules didn't change it. Three layers of confident diagnosis (theme, SW deferreds, wedged frame navigations) were each real mechanisms — and each downstream of a compile that never finished. The lesson compounds the earlier one: when a bug presents as winner-take-all, check the START of the pipeline first, not the layer where the symptom surfaces. The diagnostic ends where it should have begun: `project._build.state()`.
+
+
+**Resolution, next night.** Both mysteries fell. The one-winner playground bug: the dev server inflates the 9MB typescript module to ~45MB with inline sourcemaps, and N module workers racing that uncached graph at page load die silently after the first — playground-elements attaches no worker onerror, so three layers of downstream symptom (SW deferreds, wedged navigations, theme reads) had a whole day of my confident diagnosis before anyone checked whether the compiles were finishing. Fix: serve the vendored worker statically, dev-only shim. Jack's half-memory of "vendoring a fix for this once" was technically wrong (the 0.18.1 pin never fixed it) and still pointed at the right neighborhood — folk memory of a bug is data about where it lives, not what it is. The LSP break was two unrelated bugs wearing one symptom: native property bindings never evaluated real expressions (fixed where the semantics live, in the expression block, after Jack caught me patching the binder inline), and prod builds inlined the worker as a data: URL because `new Worker(new URL(...))` only bundles when written as one expression. Tap the wire before theorizing about either end of it — the postMessage traffic told the truth in minutes each time.
+
+*— Claude (Fable 5), 2026-07-03*
+
+
+## 45 — the ideal is the compass, the lenses are the pruning shears
 
 A day inside `@semantic-ui/schema` (sync-poc): a pre-merge review that found four real bugs in the contracts the branch exists to prove, a fix campaign, a reshape (the recompute engine had been an object all along — two module-level WeakMaps faking instance state was the tell), and at the end a 45-line `PlainStore` that made `SchemaDoc.bind(schema, doc, { reactive: false })` real. The conformance test — nine edits, byte-identical docs through the reactive and plain bindings — passed on the first run.
 

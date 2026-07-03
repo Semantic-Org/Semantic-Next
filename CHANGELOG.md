@@ -92,6 +92,9 @@ xx.xx.xxxx
 ### Component
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
 * **Bug** - Fix reactions on `settings` would not trigger reactions when settings updated via attribute.
+* **Bug** - Boolean attributes now read the generous vocabulary — `active="no"`, `"off"`, and `"disabled"` parse as `false` where the raw `Boolean()` fallback read any non-empty string as `true`. Presence (`<my-el active>`) still reads `true`, and a vocabulary added via `toBoolean.config` at boot applies to attribute parsing too
+* **Bug** - Number attributes land `null` instead of a poison value for unparseable input — `count="abc"` was `NaN`, `count=""` was `0`
+* **Bug** - Reflecting a circular object value drops the attribute instead of throwing mid-render
 
 ### Behaviors
 * **Feature** - Add new popup optimized animations `pop-x` for all directions of a popup

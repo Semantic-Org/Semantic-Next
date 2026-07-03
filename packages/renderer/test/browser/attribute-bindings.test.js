@@ -566,6 +566,40 @@ RENDERING_ENGINES.forEach(engine => {
   });
 
   /*******************************
+   Expression Property Binding
+*******************************/
+
+  describe('expression in property position', () => {
+    it('should set a property from a lisp-style call', async () => {
+      const tag = uniqueTag();
+      const childTag = uniqueTag();
+
+      defineComponent({
+        renderingEngine: engine,
+        tagName: childTag,
+        template: '<span>child</span>',
+      });
+
+      defineComponent({
+        renderingEngine: engine,
+        tagName: tag,
+        template: `<${childTag} .items={getItems filename}></${childTag}>`,
+        defaultState: { filename: 'component.html' },
+        createComponent: () => ({
+          getItems: (name) => [name, 'extra'],
+        }),
+      });
+
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      await el.rendered;
+
+      const child = el.shadowRoot.querySelector(childTag);
+      expect(child.items).toEqual(['component.html', 'extra']);
+    });
+  });
+
+  /*******************************
    Settings-Driven Attribute
 *******************************/
 

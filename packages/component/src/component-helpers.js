@@ -12,6 +12,8 @@ import {
   isString,
   kebabToCamel,
   keys,
+  toBoolean,
+  toNumber,
   unique,
 } from '@semantic-ui/utils';
 import { resolveAllowedValue } from './helpers/resolve-attribute.js';
@@ -138,14 +140,11 @@ export function getPropertySettings({ name, type = String, propertyOnly = false 
   }
   else if (type == Boolean) {
     property.converter = {
+      // presence reads as true (<my-el active>), otherwise the boolean vocabulary decides — 'no',
+      // 'off', and '0' were truthy under the old raw Boolean(value) fallback. loose keeps the
+      // result a real boolean, and an app extending toBoolean.config at boot is honored here
       fromAttribute: (value) => {
-        if (inArray(value, ['false', '0', 'null', 'undefined'])) {
-          return false;
-        }
-        if (inArray(value, ['', true, 'true'])) {
-          return true;
-        }
-        return Boolean(value);
+        return value === '' ? true : toBoolean(value, { loose: true });
       },
       toAttribute: (value) => {
         return String(value);
@@ -154,8 +153,9 @@ export function getPropertySettings({ name, type = String, propertyOnly = false 
   }
   else if (type == Number) {
     property.converter = {
+      // toNumber lands null where raw Number() minted a poison value ('abc' -> NaN, '' -> 0)
       fromAttribute: (value) => {
-        return value === null ? null : Number(value);
+        return value === null ? null : toNumber(value);
       },
       toAttribute: (value) => {
         return value == null ? null : String(value);
@@ -173,8 +173,15 @@ export function getPropertySettings({ name, type = String, propertyOnly = false 
           return null;
         }
       },
+      // a circular value drops the attribute rather than throwing mid-render
       toAttribute: (value) => {
-        return value == null ? null : JSON.stringify(value);
+        if (value == null) { return null; }
+        try {
+          return JSON.stringify(value) ?? null;
+        }
+        catch {
+          return null;
+        }
       },
     };
   }

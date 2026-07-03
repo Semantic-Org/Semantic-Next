@@ -1,0 +1,35 @@
+:host {
+  display: block;
+  font-family: var(--page-font);
+}
+
+.area {
+  position: relative;
+  height: 160px;
+  border: var(--border);
+  border-radius: var(--border-radius);
+  background: var(--standard-5);
+}
+
+.dot {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+  border-radius: var(--circular-radius);
+  background: var(--primary-color);
+  box-shadow: var(--raised-shadow);
+  cursor: grab;
+  touch-action: none;
+
+  &.dragging {
+    cursor: grabbing;
+    box-shadow: var(--floating-shadow);
+  }
+}
+
+.readout {
+  font-size: var(--small);
+  color: var(--standard-60);
+  font-variant-numeric: tabular-nums;
+}
