@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Function Utilities
 package: "@semantic-ui/utils"
-methods: [noop, wrapFunction, memoize, debounce, throttle]
+methods: [noop, wrapFunction, configured, memoize, debounce, throttle]
 icon: command
 description: API reference for function manipulation utility functions
 ---
@@ -69,6 +69,43 @@ console.log(f1()); // 'Hello'
 
 const f2 = wrapFunction('World');
 console.log(f2()); // 'World'
+```
+
+### configured
+
+```javascript
+function configured(fn, config)
+```
+
+Attaches an editable config object to a function as a single expression — the mechanism behind `fn.config` on utilities like `toBoolean`, `toTitleCase`, and `formatDate`. The function reads `fn.config` at call time, so an app edits the config once at boot and every call inherits it.
+
+Annotate the callsite with `/* @__PURE__ */` so bundlers treat the whole expression as droppable: a bundle that never imports the function then carries neither it nor its config. A bare `fn.config = {}` assignment is a top-level side effect bundlers must keep, which would ship the config to every consumer of the module.
+
+#### Parameters
+
+| Name   | Type     | Description |
+|--------|----------|-------------|
+| fn     | function | The function to attach the config to |
+| config | object   | The editable config, readable as `fn.config` |
+
+#### Returns
+
+The same function with `config` attached.
+
+#### Example
+
+```javascript
+import { configured } from '@semantic-ui/utils';
+
+export const greet = /* @__PURE__ */ configured(
+  (name) => `${greet.config.greeting} ${name}`,
+  { greeting: 'hello' },
+);
+
+console.log(greet('world')); // 'hello world'
+
+greet.config.greeting = 'hi'; // edit once at app boot
+console.log(greet('world')); // 'hi world'
 ```
 
 ### memoize

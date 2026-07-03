@@ -1,0 +1,11 @@
+---
+title: 'keyedPath'
+id: 'utils-keyedpath'
+exampleType: 'log'
+category: 'Utils'
+subcategory: 'Objects'
+description: 'Rewrite a positional array path to its keyed [#id] form so it survives reordering'
+tags: ['utils', 'objects', 'keyedPath', 'path', 'keyed', 'reorder']
+selectedFile: 'index.js'
+tip: 'Returns the input string itself when nothing rewrites — a keyless array, an unresolvable path, or an already-keyed spelling — so a result === path check cheaply tells you the address was already stable. The [#id] segment it emits is the same one detectChanges produces in keyed mode, so a canonicalized path applies back through get, set, and unset'
+---

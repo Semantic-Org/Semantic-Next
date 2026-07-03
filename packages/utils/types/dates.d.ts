@@ -172,3 +172,19 @@ interface DateFormatOptionsCustom extends Omit<Intl.DateTimeFormatOptions, 'time
  */
 export function formatDate(date: Date, format: DatePreset | DateToken, options?: DateFormatOptionsPreset): string;
 export function formatDate(date: Date, format?: string, options?: DateFormatOptionsCustom): string;
+
+/**
+ * The timezone alias vocabulary for {@link formatDate} — shorthand abbreviation mapped to an IANA
+ * zone. Abbreviations are ambiguous by nature (IST is Kolkata, Jerusalem, or Dublin depending on
+ * who you ask), so the picks are editable once at app boot
+ * (e.g. `formatDate.config.timezones.IST = 'Asia/Jerusalem'`). Full IANA names always pass through.
+ */
+export interface FormatDateConfig {
+  /** Shorthand abbreviation mapped to its IANA zone */
+  timezones: Record<string, string>;
+}
+
+export namespace formatDate {
+  /** The timezone alias vocabulary. Set once at app boot; full IANA names bypass it */
+  let config: FormatDateConfig;
+}

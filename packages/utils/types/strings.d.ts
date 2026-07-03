@@ -161,8 +161,18 @@ export function capitalize(str?: string): string;
 export function capitalizeWords(str?: string): string;
 
 /**
+ * The stop-word vocabulary for title casing, read by every {@link toTitleCase} call and by
+ * {@link humanize}'s titleCase mode. Style guides disagree on the list, so it is editable once
+ * at app boot (e.g. `toTitleCase.config.stopWords.push('versus')`).
+ */
+export interface ToTitleCaseConfig {
+  /** Words kept lowercase mid-title (first and last words always capitalize) */
+  stopWords: string[];
+}
+
+/**
  * Converts a string to title case, following common English title capitalization rules
- * Handles stop words (a, an, the, etc.) appropriately
+ * Stop words stay lowercase mid-title, read from the editable `toTitleCase.config.stopWords`
  * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#totitlecase toTitleCase}
  *
  * @param str - The string to convert to title case
@@ -175,6 +185,10 @@ export function capitalizeWords(str?: string): string;
  * ```
  */
 export function toTitleCase(str?: string): string;
+export namespace toTitleCase {
+  /** The stop-word vocabulary. Set once at app boot; humanize's titleCase mode reads the same list */
+  let config: ToTitleCaseConfig;
+}
 
 /**
  * Joins an array of words into a grammatically correct sentence
@@ -194,7 +208,18 @@ export function toTitleCase(str?: string): string;
 export function joinWords(words: string[], options?: JoinWordsOptions): string;
 
 /**
+ * The exceptions vocabulary for {@link getArticle} — words whose sound contradicts their spelling,
+ * where the vowel heuristic reads them wrong. Editable once at app boot
+ * (e.g. `getArticle.config.exceptions.faq = 'an'`).
+ */
+export interface GetArticleConfig {
+  /** Lowercased word mapped to its article, checked before the vowel heuristic */
+  exceptions: Record<string, string>;
+}
+
+/**
  * Gets the appropriate indefinite article (a/an) for a word
+ * Sound-contradicts-spelling words (hour, university) come from the editable `getArticle.config.exceptions`
  * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#getarticle getArticle}
  *
  * @param word - The word to get the article for
@@ -205,10 +230,15 @@ export function joinWords(words: string[], options?: JoinWordsOptions): string;
  * ```ts
  * getArticle('house') // returns 'a'
  * getArticle('elephant') // returns 'an'
+ * getArticle('hour') // returns 'an' (exceptions vocabulary)
  * getArticle('user', { capitalize: true }) // returns 'A'
  * ```
  */
 export function getArticle(word: string, options?: GetArticleOptions): string;
+export namespace getArticle {
+  /** The exceptions vocabulary. Set once at app boot; per-word lookup runs before the vowel heuristic */
+  let config: GetArticleConfig;
+}
 
 /**
  * Truncates text to a specified length with Unicode-aware word boundary handling

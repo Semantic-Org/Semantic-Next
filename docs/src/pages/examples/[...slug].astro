@@ -1,6 +1,5 @@
 ---
 import { getCollection } from 'astro:content';
-import { markdown } from '@astropub/md'
 import { each, tokenize } from '@semantic-ui/utils';
 import {
   getExampleFiles,
@@ -9,6 +8,7 @@ import {
   getPanelIndexes,
 } from '@helpers/playground.js';
 import { getFolder } from '@helpers/loading.js';
+import { renderMarkdownInline } from '@helpers/markdown.js';
 import Playground from '@layouts/Playground.astro';
 import CodePlayground from '@components/CodePlayground/CodePlayground.js';
 import Sidebar from '@components/Sidebar.astro';
@@ -53,7 +53,7 @@ const panelIndexes = getPanelIndexes(files, {
   type: example.exampleType
 });
 
-const tip = String(await markdown.inline(example.tip));
+const tip = await renderMarkdownInline(example.tip);
 
 const searchMeta = {
   ...entry.data,

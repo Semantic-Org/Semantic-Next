@@ -1,33 +1,8 @@
-import { reverseKeys } from './objects.js';
+import { configured } from './functions.js';
 
 /*-------------------
         Dates
 --------------------*/
-
-const timezoneMap = {
-  ET: 'America/New_York',
-  CT: 'America/Chicago',
-  MT: 'America/Denver',
-  PT: 'America/Los_Angeles',
-  AKT: 'America/Anchorage',
-  HT: 'Pacific/Honolulu',
-  AT: 'America/Halifax',
-  UK: 'Europe/London',
-  WET: 'Europe/London',
-  CET: 'Europe/Paris',
-  ECT: 'Europe/Paris',
-  EET: 'Europe/Helsinki',
-  IRST: 'Europe/Dublin',
-  AET: 'Australia/Sydney',
-  ACT: 'Australia/Adelaide',
-  AWT: 'Australia/Perth',
-  NZT: 'Pacific/Auckland',
-  BRT: 'America/Sao_Paulo',
-  IST: 'Asia/Kolkata',
-  INST: 'Asia/Kolkata',
-  JST: 'Asia/Tokyo',
-  SGT: 'Asia/Singapore',
-};
 
 const presetFormats = {
   LT: 'h:mm a',
@@ -51,7 +26,10 @@ const ordinalSuffix = ['th', 'st', 'nd', 'rd'];
 const pad2 = (n) => (n < 10 ? '0' + n : '' + n);
 const getOrdinal = (d) => d + ((d >= 11 && d <= 13) ? 'th' : (ordinalSuffix[d % 10] || 'th'));
 
-export const formatDate = (date, format = 'LLL', {
+// timezone abbreviations are ambiguous by nature (IST is Kolkata, Jerusalem, or Dublin depending on
+// who you ask), so the picks are editable once at app boot (formatDate.config.timezones.IST =
+// 'Asia/Jerusalem'). full IANA names always pass through untouched
+export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
   locale = 'default',
   hour12 = true,
   timezone = 'UTC',
@@ -59,7 +37,10 @@ export const formatDate = (date, format = 'LLL', {
 } = {}) => {
   if (date == null || isNaN(date.getTime?.())) { return 'Invalid Date'; }
 
-  const resolvedTimezone = timezone === 'local' ? undefined : (timezoneMap[timezone] || timezone);
+  const timezones = formatDate.config.timezones;
+  const resolvedTimezone = timezone === 'local'
+    ? undefined
+    : (Object.hasOwn(timezones, timezone) ? timezones[timezone] : timezone);
   const formatString = presetFormats[format] || format;
   const resolvedLocale = locale === 'default' ? undefined : locale;
 
@@ -142,4 +123,29 @@ export const formatDate = (date, format = 'LLL', {
   return formatString.replace(tokenRegExp, (match, escaped) => {
     return escaped !== undefined ? escaped : tokens[match];
   });
-};
+}, {
+  timezones: {
+    ET: 'America/New_York',
+    CT: 'America/Chicago',
+    MT: 'America/Denver',
+    PT: 'America/Los_Angeles',
+    AKT: 'America/Anchorage',
+    HT: 'Pacific/Honolulu',
+    AT: 'America/Halifax',
+    UK: 'Europe/London',
+    WET: 'Europe/London',
+    CET: 'Europe/Paris',
+    ECT: 'Europe/Paris',
+    EET: 'Europe/Helsinki',
+    IRST: 'Europe/Dublin',
+    AET: 'Australia/Sydney',
+    ACT: 'Australia/Adelaide',
+    AWT: 'Australia/Perth',
+    NZT: 'Pacific/Auckland',
+    BRT: 'America/Sao_Paulo',
+    IST: 'Asia/Kolkata',
+    INST: 'Asia/Kolkata',
+    JST: 'Asia/Tokyo',
+    SGT: 'Asia/Singapore',
+  },
+});

@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: String Utilities
 package: "@semantic-ui/utils"
-methods: [kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase, joinWords, getArticle, truncate, tokenize, escapeHTML, unescapeHTML, reverseString]
+methods: [kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase, humanize, joinWords, getArticle, truncate, tokenize, escapeHTML, unescapeHTML, reverseString]
 icon: type
 description: API reference for string manipulation functions
 ---
@@ -174,6 +174,17 @@ console.log(toTitleCase('the quick brown fox')); // 'The Quick Brown Fox'
 console.log(toTitleCase('a tale of two cities')); // 'A Tale of Two Cities'
 ```
 
+#### toTitleCase.config
+
+The stop words that stay lowercase mid-title live in `toTitleCase.config.stopWords`. Style guides disagree here — AP capitalizes longer prepositions, Chicago lowercases them all — so the list is editable once at app boot, and [`humanize`](#humanize)'s `titleCase` mode reads the same vocabulary.
+
+```javascript
+import { toTitleCase } from '@semantic-ui/utils';
+
+toTitleCase.config.stopWords.push('versus');
+console.log(toTitleCase('cats versus dogs')); // 'Cats versus Dogs'
+```
+
 ### joinWords
 
 ```javascript
@@ -229,9 +240,7 @@ console.log(joinWords(fruits, { transform: word => word.toUpperCase() }));
 function getArticle(word, settings = {})
 ```
 
-Determines the appropriate indefinite article ('a' or 'an') for a given word.
-
-> **Handling Special Cases** This function uses a simple vowel check to determine the article. While this works for most cases, it may not be accurate for all words (e.g., "hour" or "unicorn"). For more complex cases, a more sophisticated algorithm or dictionary lookup might be necessary.
+Determines the appropriate indefinite article ('a' or 'an') for a given word, using a vowel check plus an exceptions vocabulary for words whose sound contradicts their spelling (`hour`, `university`).
 
 #### Parameters
 
@@ -257,7 +266,19 @@ import { getArticle } from '@semantic-ui/utils';
 
 console.log(getArticle('apple')); // 'an'
 console.log(getArticle('banana')); // 'a'
-console.log(getArticle('hour', { capitalize: true })); // 'An'
+console.log(getArticle('hour', { capitalize: true })); // 'An' (exceptions vocabulary)
+console.log(getArticle('university')); // 'a' (sounds like "you")
+```
+
+#### getArticle.config
+
+The exceptions vocabulary lives in `getArticle.config.exceptions`, a lowercased word mapped to its article, checked before the vowel heuristic. It ships seeded with the common sound-contradicts-spelling words and is editable once at app boot.
+
+```javascript
+import { getArticle } from '@semantic-ui/utils';
+
+getArticle.config.exceptions.faq = 'an';
+console.log(getArticle('FAQ', { includeWord: true })); // 'an FAQ'
 ```
 
 ### truncate
