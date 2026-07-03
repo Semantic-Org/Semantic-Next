@@ -9,6 +9,8 @@
   briefly while the owning page re-registers and re-pushes files.
 */
 
+import { engineVersion } from '../generated/version.js';
+
 const namespace = 'sui-playground-v1';
 const sessions = new Map();
 const recoveries = new Map();
@@ -45,16 +47,17 @@ const connectSession = (sessionId, port) => {
       port.postMessage({ type: 'ack', requestId });
     }
     else if (type === 'ping') {
-      port.postMessage({ type: 'ack', requestId, version: BUILD_VERSION });
+      port.postMessage({ type: 'ack', requestId, version: engineVersion });
     }
   };
-  port.postMessage({ type: 'connected', version: BUILD_VERSION });
+  port.postMessage({ type: 'connected', version: engineVersion });
 };
 
 const settleRecovery = (sessionId) => {
   const recovery = recoveries.get(sessionId);
   if (recovery) {
     recoveries.delete(sessionId);
+    clearTimeout(recovery.timer);
     recovery.resolve();
   }
 };
@@ -62,16 +65,17 @@ const settleRecovery = (sessionId) => {
 const requestRecovery = async (sessionId) => {
   let recovery = recoveries.get(sessionId);
   if (!recovery) {
-    let resolve;
-    const promise = new Promise((res) => {
-      resolve = res;
+    recovery = {};
+    recovery.promise = new Promise((resolve) => {
+      recovery.resolve = resolve;
       // expired recoveries must clear, or the next fetch short-circuits on a settled promise
-      setTimeout(() => {
-        recoveries.delete(sessionId);
-        res();
+      recovery.timer = setTimeout(() => {
+        if (recoveries.get(sessionId) === recovery) {
+          recoveries.delete(sessionId);
+        }
+        resolve();
       }, recoveryTimeout);
     });
-    recovery = { promise, resolve };
     recoveries.set(sessionId, recovery);
     const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const client of clients) {

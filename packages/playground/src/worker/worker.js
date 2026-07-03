@@ -27,7 +27,8 @@ const getServiceModule = async () => {
 
 const getLanguageService = async (session) => {
   if (!session.languageService) {
-    const { createLanguageService } = await getServiceModule();
+    const { createLanguageService, loadLibs } = await getServiceModule();
+    await loadLibs();
     session.languageService = createLanguageService(() => session.files);
   }
   return session.languageService;

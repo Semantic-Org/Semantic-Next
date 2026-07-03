@@ -20,3 +20,16 @@
   position: absolute;
   inset: 0;
 }
+
+.error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  font-family: var(--monospace-font, monospace);
+  font-size: var(--small, 13px);
+  color: var(--error-text-color, #b91c1c);
+  white-space: pre-wrap;
+}

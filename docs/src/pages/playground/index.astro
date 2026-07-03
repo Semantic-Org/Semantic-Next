@@ -17,10 +17,11 @@
     import { readPlaygroundLink } from '@helpers/link-encoder.js';
 
     // Read files from URL
-    const link = readPlaygroundLink(window.location.hash) || {};
-    const files = link?.files || {};
+    const linkPromise = readPlaygroundLink(window.location.hash);
 
-    $('astro-island').on('astro:hydrate', () => {
+    $('astro-island').on('astro:hydrate', async () => {
+      const link = await linkPromise;
+      const files = link?.files || {};
       const $playground = $('code-playground#playground');
       if ($playground.exists()) {
         $playground

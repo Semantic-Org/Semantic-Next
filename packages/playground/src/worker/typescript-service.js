@@ -53,6 +53,8 @@ export const createLanguageService = (getFiles) => {
   let version = 0;
   const fileVersions = new Map();
 
+  const libPath = '/lib/lib.d.ts';
+
   const host = {
     getScriptFileNames: () =>
       getFiles().filter(file => /\.(ts|tsx|js|jsx|mjs)$/.test(file.name)).map(file => `/${file.name}`),
@@ -67,7 +69,7 @@ export const createLanguageService = (getFiles) => {
     },
     getCurrentDirectory: () => '/',
     getCompilationSettings: () => compilerOptions,
-    getDefaultLibFileName: (options) => `/lib/${ts.getDefaultLibFileName(options)}`,
+    getDefaultLibFileName: () => libPath,
     fileExists: (fileName) => {
       return defaultLibs.has(fileName) || getFiles().some(file => `/${file.name}` === fileName);
     },
@@ -83,6 +85,10 @@ export const createLanguageService = (getFiles) => {
       version += 1;
       if (fileName) {
         fileVersions.set(`/${fileName}`, version);
+      }
+      else {
+        // whole-project reset must outrank stale per-file pins
+        fileVersions.clear();
       }
     },
     getCompletions(fileName, offset) {
@@ -125,11 +131,27 @@ export const createLanguageService = (getFiles) => {
   };
 };
 
-/* Bundled lib.d.ts set — populated at asset build time via esbuild define/loader */
+/*
+  Default libs — a single concatenated lib.d.ts (es2022 + dom closure) built by
+  scripts/build-assets.js and fetched once, lazily, alongside this chunk.
+*/
 const defaultLibs = new Map();
 
 export const registerLib = (fileName, content) => {
   defaultLibs.set(fileName, content);
 };
 
-export default { transpile, createLanguageService, registerLib };
+let libsPromise;
+export const loadLibs = () => {
+  if (!libsPromise) {
+    libsPromise = fetch(new URL('./lib.d.ts', import.meta.url))
+      .then(response => (response.ok ? response.text() : ''))
+      .then(content => registerLib('/lib/lib.d.ts', content))
+      .catch(() => {
+        // without libs the service still completes local symbols; globals go untyped
+      });
+  }
+  return libsPromise;
+};
+
+export default { transpile, createLanguageService, registerLib, loadLibs };

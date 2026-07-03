@@ -91,14 +91,6 @@ const defaultSettings = {
     'page.ts',
   ],
 
-  // types to use
-  scriptTypes: {
-    'text/css': 'sample/css',
-    'text/importmap': 'sample/importmap',
-    'text/html': 'sample/html',
-    'text/javascript': 'sample/js',
-  },
-
   // titles to appear to users
   fileTitles: {
     'component.js': 'component.js',
@@ -239,7 +231,7 @@ const createComponent = (
     else {
       self.project = new PlaygroundProject({
         files,
-        sandboxUrl: settings.sandboxURL.endsWith('/') ? settings.sandboxURL : `${settings.sandboxURL}/`,
+        sandboxUrl: settings.sandboxURL,
       });
       self.project.build();
     }
@@ -310,12 +302,12 @@ const createComponent = (
   },
 
   fileEdited(filename, content) {
-    self.project?.editFile(filename, content);
-    const currentFiles = state.currentFiles.peek();
-    if (currentFiles?.[filename]) {
-      currentFiles[filename].content = content;
-      state.currentFiles.set(currentFiles);
+    const file = state.currentFiles.peek()?.[filename];
+    if (!file || file.content === content) {
+      return;
     }
+    self.project?.editFile(filename, content);
+    state.currentFiles.setProperty(filename, { ...file, content });
   },
 
   getLayout() {
@@ -415,9 +407,6 @@ const createComponent = (
     }
   },
 
-  getScriptType(type) {
-    return get(settings.scriptTypes, type);
-  },
   getPanelSize(file) {
     let size = get(settings.panelSizes, file.filename);
     if (size === 'natural' && !file.content) {
@@ -505,7 +494,6 @@ const createComponent = (
       _id: filename,
       filename,
       ...file,
-      scriptType: self.getScriptType(file.contentType),
       panelIndex: self.getPanelIndex(filename),
       sortIndex: self.getSort(filename),
       label: self.getFileLabel(filename),
@@ -661,9 +649,6 @@ const onCreated = ({ self, attachEvent }) => {
 };
 
 const onRendered = ({ isClient, self, state, $, settings }) => {
-  // TODO: CM6 Migration - these plugins need to be rewritten as CM6 extensions
-  // addSearch(CodeMirror);
-
   self.addPanelSettings();
   self.setupComponents();
 

@@ -93,14 +93,20 @@ export const createServingAdapter = ({
     const port = channel.port1;
     port.start();
     const connected = new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('Sandbox session connect timeout')), 10000);
       const onMessage = (event) => {
         if (event.data?.type === 'connected') {
-          clearTimeout(timer);
-          port.removeEventListener('message', onMessage);
+          cleanup();
           resolve(event.data.version);
         }
       };
+      const cleanup = () => {
+        clearTimeout(timer);
+        port.removeEventListener('message', onMessage);
+      };
+      const timer = setTimeout(() => {
+        cleanup();
+        reject(new Error('Sandbox session connect timeout'));
+      }, 10000);
       port.addEventListener('message', onMessage);
     });
     worker.postMessage({ type: 'connect', sessionId }, [channel.port2]);
@@ -123,27 +129,38 @@ export const createServingAdapter = ({
       const port = await portPromise;
       const requestId = ++requestCounter;
       return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error(`Sandbox session ${message.type} timeout`)), timeout);
         const onMessage = (event) => {
           if (event.data?.type === 'ack' && event.data.requestId === requestId) {
-            clearTimeout(timer);
-            port.removeEventListener('message', onMessage);
+            cleanup();
             resolve(event.data);
           }
         };
+        const cleanup = () => {
+          clearTimeout(timer);
+          port.removeEventListener('message', onMessage);
+        };
+        const timer = setTimeout(() => {
+          cleanup();
+          reject(new Error(`Sandbox session ${message.type} timeout`));
+        }, timeout);
         port.addEventListener('message', onMessage);
         port.postMessage({ ...message, requestId });
       });
     };
 
-    /* a dead port (worker replaced or terminated) answers nothing — reconnect and retry once */
+    /*
+      A dead port (worker replaced or terminated) answers nothing — reconnect
+      and retry once. Retried setFiles always carries the latest payload so a
+      slow first attempt can't resurrect files a newer send already replaced.
+    */
     const send = async (message) => {
       try {
         return await sendOnce(message, 3000);
       }
       catch {
         portPromise = openPort(sessionId);
-        return sendOnce(message, 10000);
+        const retry = message.type === 'setFiles' ? { ...message, files: lastFiles } : message;
+        return sendOnce(retry, 10000);
       }
     };
 
@@ -161,7 +178,12 @@ export const createServingAdapter = ({
       recover() {
         portPromise = openPort(sessionId);
         if (lastFiles) {
-          send({ type: 'setFiles', files: lastFiles }).then(() => onRecover?.());
+          send({ type: 'setFiles', files: lastFiles })
+            .then(() => onRecover?.())
+            .catch((error) => {
+              // the 404 recovery page remains the backstop; surface the failure instead of wedging silently
+              console.error('[playground] sandbox session recovery failed', error);
+            });
         }
       },
     };

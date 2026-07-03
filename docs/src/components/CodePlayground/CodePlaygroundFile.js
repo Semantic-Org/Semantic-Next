@@ -1,5 +1,7 @@
 import { adoptStylesheet, defineComponent } from '@semantic-ui/component';
+import { isHTMLFile, isScriptFile } from '@semantic-ui/playground';
 import { createEditor, intelligence } from '@semantic-ui/playground/editor';
+import { debounce } from '@semantic-ui/utils';
 
 import css from './CodePlaygroundFile.css?raw';
 import template from './CodePlaygroundFile.html?raw';
@@ -8,10 +10,6 @@ import { getClient } from './lib/lsp-client.js';
 
 const defaultSettings = {
   lineNumbers: true,
-};
-
-const defaultState = {
-  initialized: false,
 };
 
 const createComponent = ({ self, el, settings, state, data, reaction, findParent, $ }) => ({
@@ -28,10 +26,10 @@ const createComponent = ({ self, el, settings, state, data, reaction, findParent
 
   getFileExtensions(filename) {
     const parent = self.getParent();
-    if ((filename || '').endsWith('.html')) {
+    if (isHTMLFile(filename)) {
       return [getClient().plugin(filename)];
     }
-    if (/\.(ts|js|mjs|jsx|tsx)$/.test(filename || '')) {
+    if (isScriptFile(filename)) {
       return intelligence({
         fileName: filename,
         completions: (file, offset) => parent.project.getCompletions(file, offset),
@@ -46,6 +44,7 @@ const createComponent = ({ self, el, settings, state, data, reaction, findParent
     if (!parent) {
       return;
     }
+    self.refreshDiagnostics = debounce(self.requestDiagnostics, 600);
     self.editor = createEditor({
       parent,
       lineNumbers: Boolean(data.lineNumbers),
@@ -62,28 +61,25 @@ const createComponent = ({ self, el, settings, state, data, reaction, findParent
 
   syncFile() {
     const filename = self.getFilename();
+    const content = self.getParent()?.getFileContent(filename);
     if (!self.editor) {
       self.createEditor();
     }
     if (!filename || !self.editor) {
       return;
     }
-    const content = self.getParent()?.getFileContent(filename) ?? '';
-    self.editor.openFile(filename, content);
+    self.editor.openFile(filename, content ?? '');
   },
 
-  refreshDiagnostics(filename) {
-    if (!/\.(ts|js|mjs)$/.test(filename || '')) {
+  async requestDiagnostics(filename) {
+    if (!isScriptFile(filename)) {
       return;
     }
-    clearTimeout(self.diagnosticsTimer);
-    self.diagnosticsTimer = setTimeout(async () => {
-      const parent = self.getParent();
-      const diagnostics = await parent?.project?.getDiagnostics(filename).catch(() => null);
-      if (diagnostics && self.editor?.fileName === filename) {
-        self.editor.setDiagnostics(diagnostics);
-      }
-    }, 600);
+    const parent = self.getParent();
+    const diagnostics = await parent?.project?.getDiagnostics(filename).catch(() => null);
+    if (diagnostics && self.editor?.fileName === filename) {
+      self.editor.setDiagnostics(diagnostics);
+    }
   },
 
   configureCodeEditors() {
@@ -115,14 +111,16 @@ const events = {
   },
 };
 
-const onRendered = ({ self, reaction, state }) => {
-  self.createEditor();
-  reaction(() => self.syncFile());
-  state.initialized.set(true);
+const onRendered = ({ self, reaction }) => {
+  reaction(() => {
+    // tracks the parent's files signal too, so external resets reach the open editor
+    self.getParent()?.currentFiles?.get();
+    self.syncFile();
+  });
 };
 
 const onDestroyed = ({ self }) => {
-  clearTimeout(self.diagnosticsTimer);
+  self.refreshDiagnostics?.cancel();
   self.editor?.destroy();
 };
 
@@ -133,7 +131,6 @@ const CodePlaygroundFile = defineComponent({
   onRendered,
   onDestroyed,
   events,
-  defaultState,
   defaultSettings,
 });
 

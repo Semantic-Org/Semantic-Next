@@ -77,7 +77,7 @@ tools/lsp/
 
 ### Playground Integration — VALIDATED
 
-The documentation playground (`docs/src/components/CodePlayground/`) uses playground-elements (Google) which wraps CodeMirror 6. The LSP integrates via `@codemirror/lsp-client`:
+The documentation playground (`docs/src/components/CodePlayground/`) runs on `@semantic-ui/playground`, whose editor adapter owns CodeMirror 6 directly. The LSP integrates via `@codemirror/lsp-client`:
 
 ```
 CodePlayground                       Browser Worker
@@ -94,9 +94,8 @@ CodePlaygroundFile                   LanguageService
 **Integration findings (validated in this session):**
 
 - **Playground-elements `extensions` property** replaces (not accumulates) CM6 extensions via a dedicated Compartment. Safe to set reactively per file switch.
-- **Language compartment** must be reconfigured imperatively via duck-typing playground-elements' internal compartment — the `extensions` property doesn't override language.
-- **Syntax reconfiguration timing** requires `requestAnimationFrame` deferral — playground-elements' `setState()` on file switch overwrites synchronous compartment changes.
-- **`no-completions` attribute** must be set on `<playground-file-editor>` when LSP completions are active, to prevent playground-elements' built-in `autocompletion()` from duplicating results. Two `autocompletion()` plugins on the same view = duplicate completion requests.
+- **Language routing** is owned by the editor adapter (`packages/playground/src/editor/languages.js`) — `.html` files get `templateLang`, no imperative compartment surgery needed.
+- **Per-file extensions** flow through the adapter's `getFileExtensions(filename)` — the LSP plugin attaches there for `.html` files and composes with the engine's TypeScript sources for `.js`/`.ts` files.
 - **Vite `resolve.dedupe`** must include `@codemirror/state`, `@codemirror/view`, `@codemirror/language`, `@codemirror/autocomplete` — without this, multiple CM6 instances cause `instanceof` failures (`Unrecognized extension value`).
 - **File URIs** are normalized by `browser-client.js` — consumers pass bare filenames (`component.html`), the client adds `file:///`.
 - **Component model** is populated via a custom `sui/setFiles` notification — the playground sends all project files to the Worker on load, the Worker's in-memory resolver serves them to `LanguageService.getModel()`.
@@ -175,7 +174,7 @@ The JS phase builds typed completions for `self.`, `settings.`, `state.` inside 
 - The `LanguageService` already serves JS files — extend `getCompletions` and `getHover` to handle JS contexts (inside `createComponent`, `events`, lifecycle callbacks)
 - The `ComponentAnalyzer` already extracts the model — use it to provide `self.`, `settings.`, `state.` completions in JS expressions
 - The browser Worker already receives all files via `sui/setFiles` — JS analysis is available without additional plumbing
-- playground-elements' built-in TS completions are low quality (flat global dump) — the LSP should replace them for SUI component files via `no-completions` + LSP extensions, same pattern as template files
+- the engine's tooling worker already serves generic TypeScript completions/hover/diagnostics for `.js`/`.ts` files — Phase 1 layers SUI-aware typed completions (`self.`, `settings.`, `state.`) on top, composing as an additional completion source through the same adapter seam
 - Test on the playground first, then package for VS Code
 
 **Dogfooding principle:** The playground integration validates the generalized LSP. If a feature doesn't work in the browser Worker, it won't work in a Rust/WASM target either. The playground enforces the abstraction — no Node APIs leak through because the Worker would crash.

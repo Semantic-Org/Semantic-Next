@@ -1,4 +1,4 @@
-import { generateID } from '@semantic-ui/utils';
+import { debounce, generateID } from '@semantic-ui/utils';
 
 import { normalizeFiles } from './files.js';
 import { createServingAdapter } from './serving/sw-adapter.js';
@@ -34,6 +34,7 @@ export class PlaygroundProject {
     serving,
     sessionId = generateID(),
   } = {}) {
+    const scope = sandboxUrl.endsWith('/') ? sandboxUrl : `${sandboxUrl}/`;
     this.sessionId = sessionId;
     this.importMap = importMap;
     this.cdnBaseUrl = cdnBaseUrl;
@@ -41,8 +42,9 @@ export class PlaygroundProject {
     this.diagnostics = {};
     this.listeners = new Map();
     this.buildCounter = 0;
-    this.worker = getToolingWorker({ workerUrl });
-    this.serving = serving ?? getServingAdapter({ sandboxUrl });
+    this.buildDebounced = debounce(() => this.build(), 250);
+    this.worker = getToolingWorker({ workerUrl: workerUrl ?? `${scope}tooling-worker.js` });
+    this.serving = serving ?? getServingAdapter({ sandboxUrl: scope });
     this.session = this.serving.createSession(this.sessionId, {
       onRecover: () => this.emit('recovered'),
     });
@@ -84,11 +86,6 @@ export class PlaygroundProject {
     this.buildDebounced();
   }
 
-  buildDebounced() {
-    clearTimeout(this.buildTimer);
-    this.buildTimer = setTimeout(() => this.build(), 250);
-  }
-
   async build() {
     this.buildCounter += 1;
     const sequence = this.buildCounter;
@@ -105,6 +102,10 @@ export class PlaygroundProject {
       }
       this.diagnostics = result.diagnostics;
       await this.session.setFiles(result.files);
+      // the push can take seconds during session recovery — a newer build may have started
+      if (sequence !== this.buildCounter) {
+        return;
+      }
       if (!this.previewUrl) {
         this.previewUrl = this.session.baseUrl;
         this.emit('urlChanged', this.previewUrl);
@@ -133,7 +134,7 @@ export class PlaygroundProject {
   }
 
   destroy() {
-    clearTimeout(this.buildTimer);
+    this.buildDebounced.cancel();
     this.buildCounter += 1;
     this.worker.notify('destroySession', { sessionId: this.sessionId });
     this.session.destroy();

@@ -28,8 +28,18 @@ const markerPattern = new RegExp(
   'g',
 );
 
+const hasMarkers = (text) => {
+  return text.includes('sui-') || text.includes('playground-');
+};
+
+/*
+  Returns regions plus orphaned markers (unmatched opens are treated as
+  running to end of content — injected preludes rely on it; unmatched ends
+  stay orphans so their comment still hides).
+*/
 const findRegions = (text) => {
   const regions = [];
+  const orphans = [];
   const open = {};
   for (const match of text.matchAll(markerPattern)) {
     const keyword = match[1] ?? match[3];
@@ -37,20 +47,25 @@ const findRegions = (text) => {
     const type = keywords[keyword];
     const marker = { from: match.index, to: match.index + match[0].length };
     if (!isEnd) {
+      if (open[type]) {
+        orphans.push(open[type]);
+      }
       open[type] = marker;
     }
     else if (open[type]) {
       regions.push({ type, start: open[type], end: marker });
       open[type] = null;
     }
+    else {
+      orphans.push(marker);
+    }
   }
-  // an unclosed marker hides through end of content (injected preludes rely on it)
   for (const [type, marker] of Object.entries(open)) {
     if (marker) {
       regions.push({ type, start: marker, end: { from: text.length, to: text.length } });
     }
   }
-  return regions;
+  return { regions, orphans };
 };
 
 /* extend a range over surrounding whitespace so hidden regions don't leave blank lines */
@@ -78,19 +93,19 @@ const extendRange = (text, from, to) => {
 const expandFold = StateEffect.define();
 
 class FoldWidget extends WidgetType {
-  constructor(index) {
+  constructor(position) {
     super();
-    this.index = index;
+    this.position = position;
   }
   eq(other) {
-    return other.index === this.index;
+    return other.position === this.position;
   }
   toDOM(view) {
     const marker = document.createElement('span');
     marker.className = 'cm-foldMarker';
     marker.textContent = '…';
     marker.title = 'Show hidden code';
-    marker.onclick = () => view.dispatch({ effects: expandFold.of(this.index) });
+    marker.onclick = () => view.dispatch({ effects: expandFold.of(this.position) });
     return marker;
   }
   ignoreEvent() {
@@ -99,32 +114,51 @@ class FoldWidget extends WidgetType {
 }
 
 const buildDecorations = ({ doc, mode, expanded }) => {
-  const text = doc.toString();
   const builder = new RangeSetBuilder();
   if (mode === 'off-visible') {
     return builder.finish();
   }
-  const regions = findRegions(text);
-  regions.forEach((region, index) => {
-    const hideMarkersOnly = mode === 'off'
-      || (region.type === 'fold' && expanded.has(index));
-    if (hideMarkersOnly) {
-      for (const marker of [region.start, region.end]) {
-        if (marker.from < marker.to) {
-          const range = extendRange(text, marker.from, marker.to);
-          builder.add(range.from, range.to, Decoration.replace({}));
-        }
-      }
-      return;
+  const text = doc.toString();
+  if (!hasMarkers(text)) {
+    return builder.finish();
+  }
+  const { regions, orphans } = findRegions(text);
+  const ranges = [];
+  const hideMarker = (marker) => {
+    if (marker.from < marker.to) {
+      const range = extendRange(text, marker.from, marker.to);
+      ranges.push({ from: range.from, to: range.to, decoration: Decoration.replace({}) });
+    }
+  };
+  for (const region of regions) {
+    const markersOnly = mode === 'off'
+      || (region.type === 'fold' && expanded.has(region.start.from));
+    if (markersOnly) {
+      hideMarker(region.start);
+      hideMarker(region.end);
+      continue;
     }
     const range = extendRange(text, region.start.from, region.end.to);
-    if (region.type === 'hide') {
-      builder.add(range.from, range.to, Decoration.replace({}));
+    const decoration = region.type === 'hide'
+      ? Decoration.replace({})
+      : Decoration.replace({ widget: new FoldWidget(region.start.from) });
+    ranges.push({ from: range.from, to: range.to, decoration });
+  }
+  for (const orphan of orphans) {
+    if (mode !== 'off-visible') {
+      hideMarker(orphan);
     }
-    else {
-      builder.add(range.from, range.to, Decoration.replace({ widget: new FoldWidget(index) }));
+  }
+  // builder requires sorted, non-overlapping ranges — nested regions collapse into the outermost
+  ranges.sort((a, b) => a.from - b.from || b.to - a.to);
+  let coveredTo = -1;
+  for (const range of ranges) {
+    if (range.from < coveredTo) {
+      continue;
     }
-  });
+    builder.add(range.from, range.to, range.decoration);
+    coveredTo = range.to;
+  }
   return builder.finish();
 };
 
@@ -134,7 +168,11 @@ export const pragmas = (mode = 'on') => {
       return { expanded: new Set(), decorations: buildDecorations({ doc: state.doc, mode, expanded: new Set() }) };
     },
     update(value, transaction) {
+      /* expanded folds are keyed by start-marker position, mapped through edits */
       let expanded = value.expanded;
+      if (transaction.docChanged && expanded.size) {
+        expanded = new Set([...expanded].map(position => transaction.changes.mapPos(position)));
+      }
       for (const effect of transaction.effects) {
         if (effect.is(expandFold)) {
           expanded = new Set(expanded).add(effect.value);

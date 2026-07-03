@@ -22,6 +22,16 @@ describe('buildFiles', () => {
     expect(find(result, 'component.html').content).toBe('<b>Count: {count}</b>');
   });
 
+  it('does not mistake a fragment containing <header> for a document', async () => {
+    const content = '<header class="hero">{title}</header>';
+    const result = await buildFiles({
+      cdnBaseUrl,
+      importMap,
+      files: [{ name: 'component.html', content, contentType: 'text/html' }],
+    });
+    expect(find(result, 'component.html').content).toBe(content);
+  });
+
   it('serves non-script files verbatim', async () => {
     const content = '{ "answer": 42 }';
     const result = await buildFiles({

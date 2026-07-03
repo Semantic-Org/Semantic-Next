@@ -246,6 +246,7 @@
     "build:packages": {
       "dependencies": [
         "./packages/compiler:build",
+        "./packages/playground:build",
         "./packages/component:build",
         "./packages/query:build",
         "./packages/reactivity:build",

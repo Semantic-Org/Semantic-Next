@@ -19,6 +19,7 @@ const defaultSettings = {
 
 const defaultState = {
   loading: true,
+  buildError: '',
 };
 
 const createComponent = ({ self, settings, state, $, isServer }) => ({
@@ -29,10 +30,11 @@ const createComponent = ({ self, settings, state, $, isServer }) => ({
     self.ownsProject = !settings.project;
     self.project = settings.project ?? new PlaygroundProject({
       files: settings.files,
-      sandboxUrl: settings.sandboxURL.endsWith('/') ? settings.sandboxURL : `${settings.sandboxURL}/`,
+      sandboxUrl: settings.sandboxURL,
     });
     self.unsubscribe = [
       self.project.on('buildDone', () => self.showPreview()),
+      self.project.on('buildError', (error) => self.showError(error)),
       self.project.on('recovered', () => self.reload()),
     ];
     if (self.ownsProject) {
@@ -49,7 +51,13 @@ const createComponent = ({ self, settings, state, $, isServer }) => ({
 
   showPreview() {
     state.loading.set(false);
+    state.buildError.set('');
     self.replaceFrame();
+  },
+
+  showError(error) {
+    state.loading.set(false);
+    state.buildError.set(error?.message || 'Build failed');
   },
 
   /*
@@ -81,11 +89,23 @@ const createComponent = ({ self, settings, state, $, isServer }) => ({
 const events = {
   'global message window'({ self, event }) {
     if (
-      event.data?.type === 'sui-playground-session-missing'
-      && event.data.sessionId === self.project?.sessionId
+      event.data?.type !== 'sui-playground-session-missing'
+      || event.data.sessionId !== self.project?.sessionId
     ) {
-      self.project.build().then(() => self.replaceFrame());
+      return;
     }
+    // one rebuild per missing-session signal — a persistently failing build
+    // would otherwise loop message → build → 404 page → message forever
+    if (self.recovering) {
+      return;
+    }
+    self.recovering = true;
+    self.project.build().then((result) => {
+      self.recovering = false;
+      if (result) {
+        self.replaceFrame();
+      }
+    });
   },
 };
 

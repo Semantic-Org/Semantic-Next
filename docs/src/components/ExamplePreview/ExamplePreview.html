@@ -2,4 +2,7 @@
   {#if loading}
     <div class="loading" part="loading"></div>
   {/if}
+  {#if buildError}
+    <div class="error" part="error">{buildError}</div>
+  {/if}
 </div>

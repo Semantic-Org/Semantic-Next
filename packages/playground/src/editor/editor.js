@@ -113,6 +113,10 @@ export const createEditor = ({
         fileStates.set(currentFile, view.state);
       }
       if (currentFile === fileName) {
+        // same file, externally changed content (project reset) — apply as an edit
+        if (view.state.doc.toString() !== content) {
+          adapter.setContent(content);
+        }
         return;
       }
       let state = fileStates.get(fileName);

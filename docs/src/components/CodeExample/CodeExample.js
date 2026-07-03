@@ -68,8 +68,8 @@ const events = {
   'click ui-icon.show'({ state }) {
     state.codeVisible.toggle();
   },
-  'click ui-icon.playground'({ settings, self, event }) {
-    const playgroundLink = self.getPlaygroundLink(settings.code);
+  async 'click ui-icon.playground'({ settings, self, event }) {
+    const playgroundLink = await self.getPlaygroundLink(settings.code);
     openLink(playgroundLink, { newWindow: true, event });
   },
 };

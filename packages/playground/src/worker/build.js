@@ -44,16 +44,17 @@ const readImportMap = (files) => {
 /*
   The import map must reach every served document for bare specifiers to resolve
   natively. Documents only — html files without document structure are template
-  fragments (component.html) and must serve byte-identical.
+  fragments (component.html) and must serve byte-identical. Word boundaries
+  matter: a fragment containing <header> is not a document.
 */
-const isDocument = (html) => /<!doctype|<html|<head|<body/i.test(html);
+const isDocument = (html) => /<!doctype|<html[\s>]|<head[\s>]|<body[\s>]/i.test(html);
 
 const injectImportMap = (html, importMap) => {
   if (!importMap || !isDocument(html) || html.includes('type="importmap"')) {
     return html;
   }
   const tag = `<script type="importmap">${JSON.stringify(importMap)}</script>`;
-  const headMatch = html.match(/<head[^>]*>/i);
+  const headMatch = html.match(/<head(\s[^>]*)?>/i);
   if (headMatch) {
     const index = headMatch.index + headMatch[0].length;
     return `${html.slice(0, index)}\n${tag}${html.slice(index)}`;
@@ -79,11 +80,8 @@ export const buildFiles = async ({ files, importMap, cdnBaseUrl }) => {
         }
       }
       source = rewriteBareImports({ source, importMap: projectMap, cdnBaseUrl, dependencies });
-      output.push({
-        name: file.name.replace(/\.tsx?$/, '.js'),
-        content: source,
-        contentType: getContentType('file.js'),
-      });
+      const name = file.name.replace(/\.tsx?$/, '.js');
+      output.push({ name, content: source, contentType: getContentType(name) });
       continue;
     }
     if (isHTMLFile(file.name)) {

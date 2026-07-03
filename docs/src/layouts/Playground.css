@@ -165,37 +165,6 @@
     }
   }
 
-  playground {
-
-    playground-preview {
-      margin: 0rem;
-      background-color: var(--page-background);
-    }
-    /* Reskin Toolbar */
-    playground-preview::part(preview-toolbar) {
-      font-size: 11px;
-      text-transform: uppercase;
-      font-weight: bold;
-      background: var(--subtle-gradient);
-      box-shadow: var(--subtle-bottom-lip-shadow);
-    }
-    playground-preview::part(preview-loading-indicator) {
-      --mdc-theme-primary: #49B1D2;
-      height: 4px;
-      overflow: hidden;
-      top: -26px;
-      width: 71px;
-      left: 22px;
-    }
-    playground-file-editor::part(dialog) {
-      display: none !important;
-      opacity: 0;
-    }
-  }
-
-  playground-ide {
-    height: 100%;
-  }
 }
 
 
