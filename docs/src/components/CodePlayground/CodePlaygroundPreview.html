@@ -1,15 +1,13 @@
 {#if showMenu}
   <div class="menu">
     <ui-menu value={tab} items={getMenu} class="preview" part="menu"></ui-menu>
-    {#if exampleURL}
-      {>links}
-    {/if}
+    {>links}
   </div>
 {else}
   {>links}
 {/if}
 {#if is tab 'preview'}
-  <playground-preview part="preview" project="source" html-file="page.html"> </playground-preview>
+  <example-preview part="preview" .project={getProject} htmlFile="page.html"></example-preview>
 {else if is tab 'ast'}
   <header>
       The AST is a representation of the template content, for more information <a href="/docs/api/templating/ast" target="_blank">see the AST docs</a>.
@@ -21,8 +19,13 @@
 
 {#snippet links}
   <div class="links">
-    <a href="{exampleURL}" class="sandbox link" data-text="View in Playground">
-      <ui-icon terminal link></ui-icon>
+    <a class="reload link" data-text="Reload Preview">
+      <ui-icon rotate-cw link></ui-icon>
     </a>
+    {#if exampleURL}
+      <a href="{exampleURL}" class="sandbox link" data-text="View in Playground">
+        <ui-icon terminal link></ui-icon>
+      </a>
+    {/if}
   </div>
 {/snippet}

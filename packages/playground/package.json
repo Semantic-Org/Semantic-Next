@@ -39,7 +39,17 @@
   "dependencies": {
     "@semantic-ui/utils": "^0.18.0",
     "es-module-lexer": "^1.5.4",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "@codemirror/autocomplete": "^6.20.0",
+    "@codemirror/commands": "^6.10.1",
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-javascript": "^6.2.4",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/lint": "^6.9.1",
+    "@codemirror/search": "^6.5.11",
+    "@codemirror/state": "^6.7.0",
+    "@codemirror/view": "^6.43.4",
+    "@lezer/highlight": "^1.2.3"
   },
   "devDependencies": {
     "@semantic-ui/internal-scripts": "^0.18.0"

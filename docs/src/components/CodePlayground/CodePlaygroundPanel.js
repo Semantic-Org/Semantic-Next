@@ -11,8 +11,8 @@ const createComponent = () => ({
 });
 
 const events = {
-  'click .label'({ $$ }) {
-    $$('playground-code-editor').focus();
+  'click .label'({ findChildren }) {
+    findChildren('CodePlaygroundFile')[0]?.focus();
   },
   'focus ui-panel'({ $$ }) {
     $$('.label').addClass('active');

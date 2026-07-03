@@ -1,14 +1,1 @@
-<playground-file-editor
-  part="file"
-  line-numbers
-  no-completions
-  project="source"
-  filename="{filename}"
-  .extensions={getExtensions filename}
->
-</playground-file-editor>
-{#if initialized}
-  {#rerender filename}
-    {setSyntax filename}
-  {/rerender}
-{/if}
+<div class="file-editor" part="file"></div>

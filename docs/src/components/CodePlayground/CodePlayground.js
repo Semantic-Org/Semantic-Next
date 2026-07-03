@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
+import { PlaygroundProject } from '@semantic-ui/playground';
 import { each, firstMatch, get, idleCallback, inArray, moveToFront, sortBy } from '@semantic-ui/utils';
 
-import './lib/playground-worker-fix.js';
 import * as componentSpecs from '@semantic-ui/core/component-specs';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
@@ -14,10 +14,6 @@ import { Panel, Panels } from '@semantic-ui/core';
 
 import css from './CodePlayground.css?raw';
 import template from './CodePlayground.html?raw';
-
-import 'playground-elements/playground-project.js';
-import 'playground-elements/playground-file-editor.js';
-import 'playground-elements/playground-preview.js';
 
 const defaultSettings = {
   // an object containing the files for the project
@@ -175,8 +171,6 @@ const defaultState = {
   viewMode: 'split',
 
   currentFiles: [],
-
-  projectFiles: [],
 };
 
 const createComponent = (
@@ -236,11 +230,19 @@ const createComponent = (
   },
 
   setFiles(files) {
-    // project files tracks changes in files setting
-    state.projectFiles.set(files);
-
     // current files tracks file modifications
     state.currentFiles.set(files);
+
+    if (self.project) {
+      self.project.setFiles(files);
+    }
+    else {
+      self.project = new PlaygroundProject({
+        files,
+        sandboxUrl: settings.sandboxURL.endsWith('/') ? settings.sandboxURL : `${settings.sandboxURL}/`,
+      });
+      self.project.build();
+    }
 
     // send files to LSP worker for component analysis
     const client = getClient();
@@ -296,15 +298,24 @@ const createComponent = (
   },
 
   configureLayout() {
-    // this will update <playground-project> to reference current file values
-    // this wil be read by playground-elements causing values to be reset otherwise
-    state.projectFiles.set(state.currentFiles.peek());
-
     // we will need to rerun code editor config on each file
     const playgroundFiles = findChildren('CodePlaygroundFile');
     each(playgroundFiles, (component) => {
       component.configureCodeEditors();
     });
+  },
+
+  getFileContent(filename) {
+    return state.currentFiles.peek()?.[filename]?.content ?? '';
+  },
+
+  fileEdited(filename, content) {
+    self.project?.editFile(filename, content);
+    const currentFiles = state.currentFiles.peek();
+    if (currentFiles?.[filename]) {
+      currentFiles[filename].content = content;
+      state.currentFiles.set(currentFiles);
+    }
   },
 
   getLayout() {
@@ -441,9 +452,6 @@ const createComponent = (
   shouldCombineMenus() {
     return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value === 'mobile';
   },
-  getProjectFiles() {
-    return self.getFileArray({ files: state.projectFiles.get() });
-  },
   getFileArray({ files = state.currentFiles.value, filter } = {}) {
     let fileArray = [];
 
@@ -579,13 +587,6 @@ const createComponent = (
     return panels;
   },
 
-  reloadPreview() {
-    const iframe = $$('playground-preview').find('iframe').get(0);
-    if (iframe) {
-      iframe.contentWindow.location.reload();
-    }
-  },
-
   toggleTabs() {
     const newLayout = (state.layout.get() == 'tabs')
       ? 'panels'
@@ -616,9 +617,9 @@ const createComponent = (
       });
     }
     else {
-      $$(`playground-file-editor[filename="${filename}"]`)
-        .find('playground-code-editor')
-        .focus();
+      const file = findChildren('CodePlaygroundFile')
+        .find(component => component.getFilename?.() === filename);
+      file?.focus();
     }
   },
 
@@ -653,16 +654,6 @@ const createComponent = (
     panelHeight = Math.max(panelHeight, 50);
     $('ui-panels').first().css('height', `${panelHeight + 15}px`);
   },
-
-  updateCurrentFiles(currentFilesArray = []) {
-    const currentFiles = state.currentFiles.peek();
-    each(currentFilesArray, (file) => {
-      if (currentFiles[file.name]) {
-        currentFiles[file.name].content = file.content;
-      }
-    });
-    state.currentFiles.set(currentFiles);
-  },
 });
 
 const onCreated = ({ self, attachEvent }) => {
@@ -681,8 +672,8 @@ const onRendered = ({ isClient, self, state, $, settings }) => {
   }
 };
 
-const onThemeChanged = ({ self }) => {
-  self.reloadPreview();
+const onDestroyed = ({ self }) => {
+  self.project?.destroy();
 };
 
 const keys = {
@@ -724,10 +715,6 @@ const events = {
   'resizeEnd ui-panel'({ state }) {
     state.resizing.set(false);
   },
-  'bind compileStart playground-project'({ self, target }) {
-    const currentFilesArray = target._files;
-    self.updateCurrentFiles(currentFilesArray);
-  },
 };
 
 const CodePlayground = defineComponent({
@@ -742,7 +729,7 @@ const CodePlayground = defineComponent({
   events,
   defaultState,
   keys,
-  onThemeChanged,
+  onDestroyed,
   subTemplates: {
     CodePlaygroundPanel,
     CodePlaygroundPreview,

@@ -12,13 +12,13 @@ ui-panel.code-group {
     min-height: 30px;
 
     &.minimized {
-      playground-file-editor {
+      .file-editor {
         height: 0px;
         flex-grow: 0;
       }
     }
 
-    playground-file-editor {
+    .file-editor {
       flex: 1 1 0;
       height: 100%;
       overflow: hidden;

@@ -101,10 +101,6 @@
 
     &.inline {
       margin: var(--vertically-spaced);
-
-      playground-preview::part(preview-loading-indicator) {
-        top: 0px;
-      }
     }
 
     .masthead {
@@ -217,10 +213,10 @@
       }
 
       &.horizontal {
-        playground-preview {
+        example-preview {
           flex: 1 1 auto;
         }
-        playground-file-editor {
+        .file-editor {
           border-radius: 0px 0px 0px var(--border-radius);
         }
         ui-panel {
@@ -239,7 +235,7 @@
           }
         }
 
-        playground-preview,
+        example-preview,
         pretty-json {
           border: var(--border);
           border-left: none;
@@ -249,10 +245,10 @@
       }
 
       &.vertical {
-        playground-preview {
+        example-preview {
           border-top: none;
         }
-        playground-file-editor {
+        .file-editor {
           border-bottom: none;
         }
         ui-panel {
@@ -270,7 +266,7 @@
         ::part(handle) {
           margin: ;
         }
-        playground-preview,
+        example-preview,
         pretty-json {
           border: var(--border);
           border-top: none;
@@ -278,23 +274,19 @@
         }
       }
 
-      playground-file-editor {
+      .file-editor {
         border: var(--border);
         overflow: hidden;
         flex: 1 1 auto;
         border-radius: var(--attached-border-radius);
       }
-      playground-preview {
+      example-preview {
         background-color: var(--page-background) !important;
         height: var(--inline-code-height);
         border-radius: 0px 0px ;
         border: var(--border);
         overflow: hidden;
         border-radius: var(--bottom-attached-border-radius);
-      }
-      playground-preview::part(preview-toolbar) {
-        background: #000;
-        box-shadow: none;
       }
 
       .links {
@@ -358,13 +350,10 @@
       .links {
         font-size: 18px;
       }
-      playground-file-editor {
+      .file-editor {
         flex: 1 1 0px;
         height: 100%;
         overflow: hidden;
-      }
-      playground-preview::part(preview-reload-button) {
-        margin-top: -3px;
       }
     }
 
@@ -384,7 +373,7 @@
       transition: none;
     }
 
-    &.resizing playground-preview {
+    &.resizing example-preview {
       pointer-events: none;
     }
 
@@ -394,38 +383,12 @@
 
 
     /* Reskin */
-    playground-preview {
+    example-preview {
       margin: 0rem;
       flex: 1 1 0;
       background: var(--playground-code-background) !important;
     }
-    playground-preview::part(preview-toolbar) {
-      background: transparent;
-      position: absolute;
-      top: -40px;
-      height: 39px;
-      border: none;
-      left: 0px;
-      width: 100%;
-      pointer-events: none;
-      color: transparent;
-    }
-    playground-preview::part(preview-reload-button) {
-      pointer-events: auto;
-      color: var(--standard-80);
-      margin-right: 5px;
-      margin-top: 7px;
-    }
-    playground-preview::part(preview-loading-indicator) {
-      --mdc-theme-primary: var(--code-blue);
-      height: 3px;
-      overflow: hidden;
-      top: -5px;
-    }
 
-    playground-ide {
-      flex: 1 1 auto;
-    }
 
   }
 

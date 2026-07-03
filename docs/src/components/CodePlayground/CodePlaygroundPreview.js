@@ -1,6 +1,7 @@
 import { TemplateCompiler } from '@semantic-ui/compiler';
 import { defineComponent } from '@semantic-ui/component';
 import { Tooltip } from '@semantic-ui/core';
+import '@components/ExamplePreview/ExamplePreview.js';
 import css from './CodePlaygroundPreview.css?raw';
 import template from './CodePlaygroundPreview.html?raw';
 import './lib/pretty-json.js';
@@ -28,6 +29,14 @@ const createComponent = ({ self, afterFlush, reaction, findParent, data, state, 
       menu.push({ label: 'AST', value: 'ast', badge: ast.length });
     }
     return menu;
+  },
+
+  getProject() {
+    return findParent('codePlayground')?.project;
+  },
+
+  reloadPreview() {
+    $('example-preview').component()?.reload();
   },
 
   calculateAST() {
@@ -85,6 +94,9 @@ const onRendered = ({ reaction, self, $, isClient }) => {
 const events = {
   'change ui-menu'({ state, data }) {
     state.tab.set(data.value);
+  },
+  'click .links .reload'({ self }) {
+    self.reloadPreview();
   },
 };
 

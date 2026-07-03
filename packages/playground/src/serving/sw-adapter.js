@@ -56,6 +56,17 @@ export const createServingAdapter = ({
         .then(async (registration) => {
           await workerActivated(registration);
           registration.update();
+          // a replacing worker severs every session port — reconnect once it activates
+          registration.addEventListener('updatefound', () => {
+            const incoming = registration.installing;
+            incoming?.addEventListener('statechange', () => {
+              if (incoming.state === 'activated') {
+                for (const session of sessions.values()) {
+                  session.recover();
+                }
+              }
+            });
+          });
           return registration;
         });
       navigator.serviceWorker.addEventListener('message', (event) => {
@@ -108,11 +119,11 @@ export const createServingAdapter = ({
     let lastFiles = null;
     let requestCounter = 0;
 
-    const send = async (message) => {
+    const sendOnce = async (message, timeout) => {
       const port = await portPromise;
       const requestId = ++requestCounter;
       return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error(`Sandbox session ${message.type} timeout`)), 10000);
+        const timer = setTimeout(() => reject(new Error(`Sandbox session ${message.type} timeout`)), timeout);
         const onMessage = (event) => {
           if (event.data?.type === 'ack' && event.data.requestId === requestId) {
             clearTimeout(timer);
@@ -123,6 +134,17 @@ export const createServingAdapter = ({
         port.addEventListener('message', onMessage);
         port.postMessage({ ...message, requestId });
       });
+    };
+
+    /* a dead port (worker replaced or terminated) answers nothing — reconnect and retry once */
+    const send = async (message) => {
+      try {
+        return await sendOnce(message, 3000);
+      }
+      catch {
+        portPromise = openPort(sessionId);
+        return sendOnce(message, 10000);
+      }
     };
 
     const session = {

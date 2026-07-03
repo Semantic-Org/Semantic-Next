@@ -8,7 +8,7 @@
     border-bottom-width: 1px;
   }
 
-  playground-preview {
+  example-preview {
     position: relative;
     touch-action: none;
   }

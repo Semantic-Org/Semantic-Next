@@ -1,19 +1,10 @@
 import { adoptStylesheet, defineComponent } from '@semantic-ui/component';
+import { createEditor, intelligence } from '@semantic-ui/playground/editor';
 
 import css from './CodePlaygroundFile.css?raw';
 import template from './CodePlaygroundFile.html?raw';
 import codeMirrorCSS from './lib/codemirror.css?raw';
-
-import { acceptCompletion } from '@codemirror/autocomplete';
-import { Prec } from '@codemirror/state';
-import { keymap } from '@codemirror/view';
-
-import { templateLang } from './lang/template-lang.js';
 import { getClient } from './lib/lsp-client.js';
-
-// Highest precedence so it fires before playground-elements' indent handler.
-// acceptCompletion returns false when no completion is active, falling through to indent.
-const tabCompletion = Prec.highest(keymap.of([{ key: 'Tab', run: acceptCompletion }]));
 
 const defaultSettings = {
   lineNumbers: true,
@@ -23,135 +14,91 @@ const defaultState = {
   initialized: false,
 };
 
-const createComponent = ({ self, settings, state, data, $, $$ }) => ({
-
-  hasLSP(filename) {
-    return (filename || '').includes('.html');
+const createComponent = ({ self, el, settings, state, data, reaction, findParent, $ }) => ({
+  getFilename() {
+    return data.filename?.get ? data.filename.get() : data.filename;
   },
 
-  getExtensions(filename) {
-    // cache the full array per filename to avoid duplicate registrations
-    if (!self.extensionCache) {
-      self.extensionCache = {};
+  getParent() {
+    if (!self.parent) {
+      self.parent = findParent('codePlayground');
     }
-    if (self.extensionCache[filename]) {
-      return self.extensionCache[filename];
-    }
-    const isHTML = (filename || '').includes('.html');
-    if (!isHTML) {
-      self.extensionCache[filename] = [];
-      return [];
-    }
-    const extension = [getClient().plugin(filename), tabCompletion];
-    self.extensionCache[filename] = extension;
-    return extension;
+    return self.parent;
   },
 
-  setSyntax(filename) {
-    // Defer to run after playground-elements finishes its setState() on file switch
-    requestAnimationFrame(() => {
-      self.setEditorInstance();
-      const isHTML = (filename || '').includes('.html');
-      if (self.editorView && isHTML) {
-        self.setLanguage(templateLang);
-        const contentEl = self.editorView.contentDOM;
-        if (contentEl) {
-          contentEl.setAttribute('data-language', 'html');
-        }
+  getFileExtensions(filename) {
+    const parent = self.getParent();
+    if ((filename || '').endsWith('.html')) {
+      return [getClient().plugin(filename)];
+    }
+    if (/\.(ts|js|mjs|jsx|tsx)$/.test(filename || '')) {
+      return intelligence({
+        fileName: filename,
+        completions: (file, offset) => parent.project.getCompletions(file, offset),
+        hover: (file, offset) => parent.project.getHover(file, offset),
+      });
+    }
+    return [];
+  },
+
+  createEditor() {
+    self.editor = createEditor({
+      parent: $('.file-editor').el(),
+      lineNumbers: Boolean(data.lineNumbers),
+      lineWrapping: Boolean(data.lineWrapping),
+      tabSize: 2,
+      onChange: (filename, content) => {
+        self.getParent()?.fileEdited(filename, content);
+        self.refreshDiagnostics(filename);
+      },
+      getFileExtensions: self.getFileExtensions,
+    });
+    adoptStylesheet(codeMirrorCSS, el.shadowRoot);
+  },
+
+  syncFile() {
+    const filename = self.getFilename();
+    if (!filename || !self.editor) {
+      return;
+    }
+    const content = self.getParent()?.getFileContent(filename) ?? '';
+    self.editor.openFile(filename, content);
+  },
+
+  refreshDiagnostics(filename) {
+    if (!/\.(ts|js|mjs)$/.test(filename || '')) {
+      return;
+    }
+    clearTimeout(self.diagnosticsTimer);
+    self.diagnosticsTimer = setTimeout(async () => {
+      const parent = self.getParent();
+      const diagnostics = await parent?.project?.getDiagnostics(filename).catch(() => null);
+      if (diagnostics && self.editor?.fileName === filename) {
+        self.editor.setDiagnostics(diagnostics);
       }
-    });
-    return '';
-  },
-
-  setEditorInstance() {
-    const editorEl = $$('playground-code-editor').get(0);
-    const view = editorEl?._editorView;
-
-    if (!view) {
-      return;
-    }
-
-    self.editorEl = editorEl;
-    self.editorView = view;
-
-    // Find the language compartment by duck-typing LanguageSupport shape
-    const compartmentEntries = [...view.state.config.compartments.entries()];
-    const languageCompartment = compartmentEntries.find(([comp, value]) =>
-      value?.language && value?.support && value?.extension
-    )?.[0];
-
-    if (!languageCompartment && !self.retried) {
-      self.retried = true;
-      requestIdleCallback(() => self.setEditorInstance());
-    }
-
-    self.languageCompartment = languageCompartment;
-  },
-
-  setLanguage(lang) {
-    if (!self.languageCompartment) {
-      return;
-    }
-    self.editorView.dispatch({
-      effects: self.languageCompartment.reconfigure(lang),
-    });
+    }, 600);
   },
 
   configureCodeEditors() {
-    // add custom styles
-    if (self.editorEl) {
-      adoptStylesheet(codeMirrorCSS, self.editorEl.shadowRoot);
-    }
-
-    const $editor = $('playground-file-editor');
-
-    if (data.lineNumbers) {
-      $editor.addAttr('line-numbers');
-    }
-    else {
-      $editor.removeAttr('line-numbers');
-    }
-    if (data.lineWrapping) {
-      $editor.addAttr('line-wrapping');
-    }
-    else {
-      $editor.removeAttr('line-wrapping');
-    }
+    self.editor?.setLineNumbers(Boolean(data.lineNumbers));
+    self.editor?.setLineWrapping(Boolean(data.lineWrapping));
   },
 
   setCodeSize({ width = null, height = null } = {}) {
-    self.editorView.dom.style.width = width;
-    self.editorView.dom.style.height = height;
+    if (self.editor) {
+      self.editor.view.dom.style.width = width;
+      self.editor.view.dom.style.height = height;
+    }
   },
 
-  setupFolds(view = self.editorView) {
-    if (!view.contentDOM) {
-      return;
-    }
-    const $widgets = $$(view.contentDOM).find('.cm-foldMarker');
-    $widgets.each(function() {
-      const $widget = $(this);
-      const $comment = $(this).prev('.tok-comment');
-      $widget
-        .off('.clear')
-        .on('click.clear', function() {
-          const pos = view.posAtDOM($comment.el());
-          const line = view.state.doc.lineAt(pos);
-          view.dispatch({
-            changes: {
-              from: line.from,
-              to: Math.min(line.to + 1, view.state.doc.length), // +1 for newline
-              insert: '',
-            },
-          });
-        });
-    });
+  focus() {
+    self.editor?.focus();
   },
 });
 
 const events = {
-  'click .label'({ $ }) {
-    $('playground-code-editor').focus();
+  'click .label'({ self }) {
+    self.focus();
   },
   'focus ui-panel'({ $$ }) {
     $$('.label').addClass('active');
@@ -161,13 +108,15 @@ const events = {
   },
 };
 
-const onRendered = ({ self, state }) => {
-  requestIdleCallback(() => {
-    self.setEditorInstance();
-    self.configureCodeEditors();
-    self.setupFolds();
-    state.initialized.set(true);
-  });
+const onRendered = ({ self, reaction, state }) => {
+  self.createEditor();
+  reaction(() => self.syncFile());
+  state.initialized.set(true);
+};
+
+const onDestroyed = ({ self }) => {
+  clearTimeout(self.diagnosticsTimer);
+  self.editor?.destroy();
 };
 
 const CodePlaygroundFile = defineComponent({
@@ -175,6 +124,7 @@ const CodePlaygroundFile = defineComponent({
   css,
   createComponent,
   onRendered,
+  onDestroyed,
   events,
   defaultState,
   defaultSettings,
