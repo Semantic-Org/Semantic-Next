@@ -1,4 +1,5 @@
 import { isFunction } from '@semantic-ui/utils';
+import { computeExpressionValue } from './blocks/expression.js';
 import { renderASTToString, stringifyAttrValue } from './commit-hooks.js';
 
 /*
@@ -42,7 +43,7 @@ export function bindAttribute({
     const realAttrName = classification.attribute;
     const expr = entries[parts[0].markerID];
     scope.reaction(element, (comp) => {
-      const value = renderer.evaluator.lookupTokenValue(expr.node.value, data);
+      const value = computeExpressionValue(expr.node, data, renderer);
       if (skipFirstWrite && comp.firstRun) { return; }
       element[realAttrName] = value;
     });

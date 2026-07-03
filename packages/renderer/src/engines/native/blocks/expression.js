@@ -13,6 +13,18 @@ import { registerBlock } from './registry.js';
 
 */
 
+// The literalValue path uses `lookupTokenValue` because it doesn't
+// auto-invoke functions (needed for `{#fn handler}` and event-binding
+// shapes where the value is a function reference, not its call result).
+// Shared with bindAttribute so property positions (.foo={expr}) resolve
+// expression markers with the same semantics as text positions.
+export function computeExpressionValue(node, data, renderer) {
+  if (node.literalValue) {
+    return renderer.evaluator.lookupTokenValue(node.value, data);
+  }
+  return renderer.lookupExpression(node.value, data);
+}
+
 const expression = defineBlock({
   name: 'expression',
   type: 'value',
@@ -24,15 +36,9 @@ const expression = defineBlock({
   static: (node) => Boolean(node.literalValue),
 
   // No `create` hook — renderer.evaluator is reached directly via the bag.
-  // The literalValue path uses `lookupTokenValue` because it doesn't
-  // auto-invoke functions (needed for `{#fn handler}` and event-binding
-  // shapes where the value is a function reference, not its call result).
   compute({ node, data, renderer }) {
-    if (node.literalValue) {
-      return renderer.evaluator.lookupTokenValue(node.value, data);
-    }
-    const value = renderer.lookupExpression(node.value, data);
-    if (node.unsafeHTML) {
+    const value = computeExpressionValue(node, data, renderer);
+    if (node.unsafeHTML && !node.literalValue) {
       return unsafeHTML(value);
     }
     return value;
