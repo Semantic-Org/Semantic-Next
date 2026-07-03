@@ -1,6 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { each, get } from '@semantic-ui/utils';
 
+import '@components/CodePlayground/lib/playground-worker-fix.js';
 import css from './ExamplePreview.css?raw';
 import template from './ExamplePreview.html?raw';
 
