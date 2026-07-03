@@ -1,9 +1,9 @@
+import { getFolder } from '@helpers/loading.js';
+import { renderMarkdownInline } from '@helpers/markdown.js';
 import { getLessonContent, getNextLesson, getPreviousLesson } from '@helpers/navigation.js';
 import { getExampleFiles, getPanelIndexes } from '@helpers/playground.js';
-import { getFolder } from '@helpers/loading.js';
 import { asyncEach, isEmpty } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
-import { markdown } from '@astropub/md';
 
 const lessons = await getCollection('lessons');
 const lessonDocsById = new Map(lessons.map((doc) => [doc.id, doc]));
@@ -55,16 +55,19 @@ export async function GET({ props }) {
   const solutionResult = await loadFiles(lesson.id, ['solution']);
   const solutionFiles = solutionResult.files;
 
-  const lessonHTML = `<pageContent>${await markdown.inline(lessonDoc.body)}</pageContent>`;
+  const lessonHTML = `<pageContent>${await renderMarkdownInline(lessonDoc.body)}</pageContent>`;
 
-  return new Response(JSON.stringify({
-    lesson,
-    lessonHTML,
-    files,
-    solutionFiles,
-    previousLesson,
-    nextLesson,
-  }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return new Response(
+    JSON.stringify({
+      lesson,
+      lessonHTML,
+      files,
+      solutionFiles,
+      previousLesson,
+      nextLesson,
+    }),
+    {
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
 }
