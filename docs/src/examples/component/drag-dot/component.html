@@ -1,0 +1,4 @@
+<div class="area">
+  <div class="dot {classIf dragging 'dragging'}" style="left: clamp(0px, {x}px, 100%); top: clamp(0px, {y}px, 100%);"></div>
+</div>
+<p class="readout">{dragging ? `${Math.round(x)}, ${Math.round(y)}` : 'Drag the dot'}</p>

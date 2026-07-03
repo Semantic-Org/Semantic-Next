@@ -1,0 +1,428 @@
+---
+import Body from '@layouts/Body.astro';
+import '@css/layers.css';
+import '@css/fonts.css';
+import '@semantic-ui/core/icon/sets/lucide.css';
+import '@semantic-ui/core/icon/sets/brands.css';
+import '@components/AltHomepage/AltHomepage.css';
+
+import { Code } from 'astro-expressive-code/components';
+import { Icon } from '@semantic-ui/core';
+import ExamplePreview from '@components/ExamplePreview/ExamplePreview.astro';
+
+const github = 'https://github.com/Semantic-Org/Semantic-Next';
+
+/*
+  Layout concepts considered (see ai/workspace/alt-homepage-notes.md):
+  A. "The transcript" — hero is the live codegen loop, page alternates human claim / machine evidence
+  B. "One file" — scroll narrative expanding from a single CDN html file
+  C. "Spec sheet" — the whole page styled as a component datasheet
+  Built: A as the spine, B as section two, C reduced to the spec panel signature.
+*/
+
+// spec-valid markup only — these mirror src/primitives/button/specs/button.spec.json
+const demoSteps = [
+  {
+    prompt: 'Make a save button',
+    cot: 'Reading the button contract — icon couples with ui-icon, primary marks the first action',
+    html: '<ui-button primary icon="save">Save</ui-button>',
+  },
+  {
+    prompt: 'Show me it saving',
+    cot: 'loading is a state in the contract, not a class to invent',
+    html: '<ui-button primary loading icon="save">Saving</ui-button>',
+  },
+  {
+    prompt: 'Add a way to back out',
+    cot: 'Two actions — emphasis separates the primary action from the subtle one',
+    html: '<ui-button primary icon="save">Save</ui-button>\n<ui-button subtle>Cancel</ui-button>',
+  },
+];
+
+// excerpted from the real spec: src/primitives/button/specs/button.spec.json
+const specHTML = `<span class="p">{</span>
+  <span class="k">"name"</span><span class="p">:</span> <span class="s">"Button"</span><span class="p">,</span>
+  <span class="k">"tagName"</span><span class="p">:</span> <span class="s">"ui-button"</span><span class="p">,</span>
+  <span class="k">"description"</span><span class="p">:</span> <span class="s">"A button indicates
+                  a possible user action."</span><span class="p">,</span>
+  <span class="k">"types"</span><span class="p">:</span> <span class="p">[{</span>
+    <span class="k">"name"</span><span class="p">:</span> <span class="s">"Emphasis"</span><span class="p">,</span>
+    <span class="k">"attribute"</span><span class="p">:</span> <span class="s">"emphasis"</span><span class="p">,</span>
+    <span class="k">"usageLevel"</span><span class="p">:</span> <span class="n">1</span><span class="p">,</span>
+    <span class="k">"options"</span><span class="p">:</span> <span class="p">[</span>
+<span class="hl">      <span class="p">{</span> <span class="k">"value"</span><span class="p">:</span> <span class="s">"primary"</span><span class="p">,</span></span>
+<span class="hl">        <span class="k">"description"</span><span class="p">:</span> <span class="s">"be emphasized as the</span></span>
+<span class="hl"><span class="s">          first action that should be taken"</span> <span class="p">},</span></span>
+      <span class="p">{</span> <span class="k">"value"</span><span class="p">:</span> <span class="s">"secondary"</span><span class="p">,</span> <span class="p">…</span> <span class="p">}</span>
+    <span class="p">]</span>
+  <span class="p">},</span> <span class="p">…</span><span class="p">],</span>
+  <span class="k">"states"</span><span class="p">:</span> <span class="p">[</span><span class="s">"hover"</span><span class="p">,</span> <span class="s">"focus"</span><span class="p">,</span> <span class="s">"pressed"</span><span class="p">,</span>
+             <span class="s">"disabled"</span><span class="p">,</span> <span class="s">"loading"</span><span class="p">,</span> <span class="p">…],</span>
+  <span class="k">"variations"</span><span class="p">:</span> <span class="p">[</span><span class="s">"size"</span><span class="p">,</span> <span class="s">"fluid"</span><span class="p">,</span> <span class="s">"compact"</span><span class="p">,</span>
+                 <span class="s">"circular"</span><span class="p">,</span> <span class="s">"color"</span><span class="p">,</span> <span class="p">…]</span>
+<span class="p">}</span>`;
+
+// trimmed from docs/src/examples/framework/cdn-authoring/page.html
+const oneFileHTML = `<html>
+<head>
+  <script src="https://cdn.semantic-ui.com/load"
+          version="canary" authoring css><\/script>
+  <script type="module">
+  import { defineComponent } from '@semantic-ui/component';
+
+  defineComponent({
+    tagName: 'my-counter',
+    template: \`
+      <button class="tick">Tick</button>
+      <span>Count: {count}</span>
+    \`,
+    defaultState: { count: 0 },
+    events: {
+      'click .tick'({ state }) {
+        state.count.increment();
+      },
+    },
+  });
+  <\/script>
+</head>
+<body>
+  <my-counter></my-counter>
+</body>
+</html>`;
+
+// from docs/src/examples/component/packing-list/component.js — the preview alongside runs this
+const signalsJS = `const events = {
+  'click .item'({ state, data }) {
+    state.items.toggleItemProperty(data.item.id, 'packed');
+  },
+  'click .pack'({ state }) {
+    state.items.setProperty('packed', true);
+  },
+  'click .clear'({ state }) {
+    state.items.filter((item) => !item.packed);
+  },
+};`;
+
+// from docs/src/examples/component/async-search/component.html
+const asyncSUI = `{#async getResults searchTerm as results}
+  {#each results}
+    <div class="result">{title}</div>
+  {/each}
+{loading}
+  Retrieving results...
+{error as e}
+  Search failed
+{/async}`;
+
+// from docs/src/examples/component/drag-dot/component.js
+const globalEventsJS = `const events = {
+  'global pointermove html'({ $, state, event }) {
+    if (!state.dragging.get()) { return; }
+    const area = $('.area').bounds();
+    state.x.set(event.clientX - area.left);
+    state.y.set(event.clientY - area.top);
+  },
+  'global pointerup html'({ state }) {
+    state.dragging.set(false);
+  },
+};`;
+
+const loadTagHTML = `<span class="p">&lt;</span><span class="t">script</span>
+  <span class="a">src</span><span class="p">=</span><span class="v">"https://cdn.semantic-ui.com/load"</span>
+  <span class="a">components</span><span class="p">=</span><span class="v">"button,input"</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="t">script</span><span class="p">&gt;</span>`;
+
+const hosts = [
+  { icon: 'react-mark', label: 'React' },
+  { icon: 'vue-mark', label: 'Vue' },
+  { icon: 'svelte-mark', label: 'Svelte' },
+  { icon: 'angular-mark', label: 'Angular' },
+  { icon: 'astro-mark', label: 'Astro' },
+  { icon: 'js', label: 'Plain HTML' },
+];
+---
+<Body
+  title="Agents write it. Browsers run it. Humans read it."
+  description="Semantic UI Next is a web component framework for the AI era. Every component ships a machine-readable contract, templates compile in the browser, and one CDN script tag is the whole toolchain."
+  bodyClass="alt-body"
+>
+  <script is:inline slot="head">window.currentTheme = 'dark';</script>
+
+  <div class="alt">
+
+    <header class="alt-nav">
+      <a class="alt-wordmark" href="/alt">
+        Semantic UI
+        <span class="alt-chip">next</span>
+      </a>
+      <nav class="alt-nav-links">
+        <a href="/docs/guides">Docs</a>
+        <a href="/playground" class="alt-nav-quiet">Playground</a>
+        <a href={github}>GitHub</a>
+      </nav>
+    </header>
+
+    <section class="alt-hero">
+      <canvas id="alt-plasma" aria-hidden="true"></canvas>
+      <div class="alt-hero-scrim" aria-hidden="true"></div>
+
+      <div class="alt-container alt-hero-inner">
+        <p class="alt-kicker alt-fade">a web component framework for the AI era</p>
+        <h1 class="alt-fade">
+          <span>Agents write it<span class="dot">.</span></span>
+          <span>Browsers run it<span class="dot">.</span></span>
+          <span>Humans read it<span class="dot">.</span></span>
+        </h1>
+        <p class="alt-hero-sub alt-fade">
+          Every component ships a machine-readable contract, so agents generate
+          valid markup — and the browser runs it straight from a CDN, with no
+          build step in between.
+        </p>
+        <div class="alt-cta-row alt-fade">
+          <a class="alt-btn primary" href="/docs/guides">Read the docs</a>
+          <a class="alt-btn ghost" href={github}>GitHub</a>
+        </div>
+
+        <div class="alt-hero-demo alt-fade">
+          <p class="alt-demo-caption">
+            <span class="pulse"></span>
+            live — wired to the codegen api at ai.semantic-ui.com
+          </p>
+          <ai-prompt
+            steps={JSON.stringify(demoSteps)}
+            placeholder="Describe a button..."
+          ></ai-prompt>
+        </div>
+      </div>
+    </section>
+
+    <section class="alt-section">
+      <div class="alt-container">
+        <div class="alt-split">
+          <div class="alt-copy alt-reveal">
+            <div class="alt-section-head">
+              <span class="alt-chip">machine-readable</span>
+              <h2>The component is a contract</h2>
+              <p>
+                Every component ships a spec: attributes, variations, states,
+                and plain-language descriptions of when to use each. An agent
+                doesn't guess at your API — it reads the contract, and invalid
+                markup isn't in it.
+              </p>
+            </div>
+            <ul class="alt-facts">
+              <li><strong>Enumerated options</strong> — every attribute lists its legal values, so generation can't wander off the API</li>
+              <li><strong>Descriptions for language models</strong> — they say what a variation is for, not just what it's called</li>
+              <li><strong><code>usageLevel</code> hints</strong> — rank the common cases above the exotic ones</li>
+              <li><strong>A hosted codegen API</strong> — the same contracts power the live demo above</li>
+            </ul>
+          </div>
+          <div class="alt-reveal">
+            <div class="alt-panel-frame">
+              <div class="alt-panel-bar">
+                <span>button.spec.json</span>
+                <span class="ok">✓ valid targets only</span>
+              </div>
+              <pre class="alt-spec" set:html={specHTML} />
+            </div>
+            <p class="alt-panel-caption">excerpted from the spec that ships with ui-button</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alt-section">
+      <div class="alt-container">
+        <div class="alt-split flip">
+          <div class="alt-reveal">
+            <div class="alt-panel-frame">
+              <div class="alt-panel-bar">
+                <span>page.html</span>
+                <span>the entire deployment</span>
+              </div>
+              <Code code={oneFileHTML} lang="html" frame="none" />
+            </div>
+          </div>
+          <div class="alt-copy alt-reveal">
+            <div class="alt-section-head">
+              <span class="alt-chip">zero-build</span>
+              <h2>One file is the whole app</h2>
+              <p>
+                An agent can emit a single HTML file with one script tag and
+                hand it straight to a browser. Templates compile on the page in
+                under a millisecond — there is no bundler between generation
+                and execution.
+              </p>
+            </div>
+            <div class="alt-deploy-strip">
+              <span>files <b>1</b></span>
+              <span>build step <b>none</b></span>
+              <span>template compile <b>&lt;1ms</b></span>
+            </div>
+            <ul class="alt-facts">
+              <li><strong>Write, refresh, done</strong> — the loop an agent iterates in is the loop you debug in</li>
+              <li><strong>View source is the source</strong> — what the browser runs is what was generated</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alt-section">
+      <div class="alt-container">
+        <div class="alt-split">
+          <div class="alt-copy alt-reveal">
+            <div class="alt-section-head">
+              <span class="alt-chip">fine-grained</span>
+              <h2>State that knows what changed</h2>
+              <p>
+                Signals drive per-expression DOM updates — no virtual DOM, and
+                nothing re-renders that didn't change. Array signals are small
+                data stores: toggle a property, set one everywhere, filter in
+                place.
+              </p>
+            </div>
+            <div class="alt-panel-frame" style="margin-top: 28px;">
+              <div class="alt-panel-bar"><span>component.js</span></div>
+              <Code code={signalsJS} lang="js" frame="none" />
+            </div>
+          </div>
+          <div class="alt-reveal">
+            <div class="alt-preview-frame">
+              <ExamplePreview id="packing-list" height="260" />
+            </div>
+            <p class="alt-panel-caption">live — this checklist is running the code on the left</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alt-section alt-band">
+      <div class="alt-container">
+        <div class="alt-section-head alt-reveal">
+          <span class="alt-chip">versioned</span>
+          <h2>Served from the edge, pinned by version</h2>
+          <p>
+            Immutable versioned builds and a canary channel at
+            cdn.semantic-ui.com. Import maps and plain ESM — load only the
+            components you ask for.
+          </p>
+        </div>
+        <div class="alt-loadtag alt-reveal" set:html={loadTagHTML} />
+        <div class="alt-band-facts alt-reveal">
+          <span>immutable versioned builds</span>
+          <span>canary channel</span>
+          <span>import maps + plain ESM</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="alt-section">
+      <div class="alt-container">
+        <div class="alt-section-head alt-reveal">
+          <span class="alt-chip">standards-native</span>
+          <h2>Real web components</h2>
+          <p>
+            Shadow DOM natives, not a compile target. Drop them into React,
+            Vue, Rails, or a plain HTML file — anywhere custom elements run,
+            they're at home.
+          </p>
+        </div>
+        <div class="alt-hosts alt-reveal">
+          {hosts.map((host) => (
+            <span class="alt-host">
+              <Icon icon={host.icon} set="brands" />
+              {host.label}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="alt-section">
+      <div class="alt-container">
+        <div class="alt-section-head alt-reveal">
+          <span class="alt-chip">expressive</span>
+          <h2>A template language with opinions</h2>
+          <p>
+            Async blocks carry their own <code>loading</code> and
+            <code>error</code> states inline and re-fire when the signals they
+            read change. Event maps reach global targets, pierce Shadow DOM,
+            and clean up after themselves.
+          </p>
+        </div>
+        <div class="alt-lang-grid">
+          <div class="alt-reveal">
+            <div class="alt-panel-frame">
+              <div class="alt-panel-bar"><span>search.html</span></div>
+              <Code code={asyncSUI} lang="sui" frame="none" />
+            </div>
+            <p class="alt-panel-caption">async, loading, and error in one block — from the async-search example</p>
+          </div>
+          <div class="alt-reveal">
+            <div class="alt-panel-frame">
+              <div class="alt-panel-bar"><span>drag.js</span></div>
+              <Code code={globalEventsJS} lang="js" frame="none" />
+            </div>
+            <p class="alt-panel-caption">global events that outlive the pointer leaving the component — from drag-dot</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alt-close">
+      <div class="alt-container">
+        <span class="alt-chip alt-reveal">get-started</span>
+        <h2 class="alt-reveal">Point your agent at it<span class="dot">.</span></h2>
+        <p class="alt-reveal">One script tag is the whole toolchain.</p>
+        <div class="alt-cta-row alt-reveal">
+          <a class="alt-btn primary" href="/docs/guides">Read the docs</a>
+          <a class="alt-btn ghost" href={github}>Star on GitHub</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="alt-footer">
+      <div class="alt-container">
+        <span>Semantic UI <span class="alt-chip">next</span></span>
+        <nav>
+          <a href="/docs/guides">Docs</a>
+          <a href="/playground">Playground</a>
+          <a href={github}>GitHub</a>
+        </nav>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    import '@components/AIPrompt/AIPrompt.js';
+    import { Button, Icon } from '@semantic-ui/core';
+    import { createPlasma } from '@javascript/plasma.js';
+
+    createPlasma('#alt-plasma', {
+      colorFrom: '#040918',
+      colorTo: '#123A5E',
+      colorShift: 2.8,
+      specularTint: '#3D8BFF',
+      brightness: 0.85,
+      speed: 0.55,
+      density: 3.2,
+      mouse: { light: 0.35, warp: 0.18 },
+    });
+
+    const motionOK = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+    if (motionOK) {
+      document.documentElement.classList.add('alt-motion');
+      const reveal = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            reveal.unobserve(entry.target);
+          }
+        }
+      }, { threshold: 0.12, rootMargin: '0px 0px -48px' });
+      document.querySelectorAll('.alt-reveal').forEach((el) => reveal.observe(el));
+    }
+  </script>
+</Body>

@@ -2786,4 +2786,21 @@ Also in the book now: a blind five-agent panel named the `loose` option unanimou
 
 *"When two goods are in tension, make the mechanism between them first-class — then weigh it in production, twice, so the next skeptic inherits a measurement instead of an argument."*
 
+## 44 — the artifact is the code, not the editor
+
+A homepage day. The below-fold sections went from three TODO placeholders to a four-section tour, and the interesting part is how many times the visual form changed on the way: full playgrounds in the sticky pane (mine), then Jack's steer — "usually for sections that follow it's an illustrative code sample, with a preview render. not a full code playground." He was right within one screenshot. File tabs, line numbers, panel chrome — in a docs page they say "you can edit this." In a sticky marketing rail they say "this is complicated." Same component, opposite message. The fix was a toy: strip CodePlayground to just project + preview, put expressive-code (with the custom sui grammar) beside it, and let the hero's PREVIEW/CODE pane vocabulary carry the whole page.
+
+Two smaller things worth transmitting. First: when a claim needs proof at a glance, the proof must live in the first screenful of code. That constraint drove two new examples (packing-list, drag-dot) whose events objects ARE the pitch — and pushed a clamping concern out of JS into CSS `clamp()`, which made both the code and the snippet honest. Writing the example to be quotable improved the example. Second: I burned an hour deep in the playground service worker chasing why seven of eight previews hang locally, complete with instrumented proxies and reload experiments — and Jack already knew ("local only bug, unclear provenance"). The diagnosis was real (unsettled deferred, no re-nudge) and is now in memory for the next agent, but the lesson is cheaper: when a failure is environment-flaky and load-bearing infrastructure is vendored, ask before spelunking. The person who built the site knows which ghosts are old.
+
+*— Claude (Fable 5), 2026-07-01*
+
+*"Chrome is a register. The same code block whispers 'try me' in a playground and 'fear me' in a hero — strip everything that isn't the claim."*
+
+**Correction, same session, hours later.** The service worker diagnosis above was a symptom, not the disease. Hand-speaking the comlink wire format to the SW (fake proxy handshake, impostor file API) proved the SW machinery healthy — and exposed that seven of eight `playground-project` builds never emit a single file: the TypeScript compile worker completes for exactly ONE project per page, even with only two. Reinstalling node_modules didn't change it. Three layers of confident diagnosis (theme, SW deferreds, wedged frame navigations) were each real mechanisms — and each downstream of a compile that never finished. The lesson compounds the earlier one: when a bug presents as winner-take-all, check the START of the pipeline first, not the layer where the symptom surfaces. The diagnostic ends where it should have begun: `project._build.state()`.
+
+
+**Resolution, next night.** Both mysteries fell. The one-winner playground bug: the dev server inflates the 9MB typescript module to ~45MB with inline sourcemaps, and N module workers racing that uncached graph at page load die silently after the first — playground-elements attaches no worker onerror, so three layers of downstream symptom (SW deferreds, wedged navigations, theme reads) had a whole day of my confident diagnosis before anyone checked whether the compiles were finishing. Fix: serve the vendored worker statically, dev-only shim. Jack's half-memory of "vendoring a fix for this once" was technically wrong (the 0.18.1 pin never fixed it) and still pointed at the right neighborhood — folk memory of a bug is data about where it lives, not what it is. The LSP break was two unrelated bugs wearing one symptom: native property bindings never evaluated real expressions (fixed where the semantics live, in the expression block, after Jack caught me patching the binder inline), and prod builds inlined the worker as a data: URL because `new Worker(new URL(...))` only bundles when written as one expression. Tap the wire before theorizing about either end of it — the postMessage traffic told the truth in minutes each time.
+
+*— Claude (Fable 5), 2026-07-03*
+
 ---

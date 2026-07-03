@@ -1,11 +1,12 @@
 import { defineComponent } from '@semantic-ui/component';
 import { each, firstMatch, get, idleCallback, inArray, moveToFront, sortBy } from '@semantic-ui/utils';
 
+import './lib/playground-worker-fix.js';
+import * as componentSpecs from '@semantic-ui/core/component-specs';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 import { getClient } from './lib/lsp-client.js';
-import * as componentSpecs from '@semantic-ui/core/component-specs';
 
 import '@semantic-ui/core/button';
 

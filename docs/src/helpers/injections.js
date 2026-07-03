@@ -441,7 +441,13 @@ export const headLibraryJS = `
 <link rel="stylesheet" href="${suiBase}/src/primitives/icon/sets/lucide/lucide.css"></link>
 <script>
   document.querySelector('html').removeAttribute('style');
-  if(localStorage.getItem('theme') == 'dark') {
+  /* inherit theme from the embedding page when framed, since pages like the
+     homepage can force a theme without persisting it to localStorage */
+  const parentTheme = window.frameElement?.ownerDocument?.documentElement;
+  const isDark = parentTheme
+    ? parentTheme.classList.contains('dark')
+    : localStorage.getItem('theme') == 'dark';
+  if(isDark) {
     document.querySelector('html').classList.add('dark');
   }
   function dispatchCustomEvent(eventName) {

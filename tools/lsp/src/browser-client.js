@@ -1,4 +1,4 @@
-import { LSPClient, serverCompletion, hoverTooltips, serverDiagnostics } from '@codemirror/lsp-client';
+import { hoverTooltips, LSPClient, serverCompletion, serverDiagnostics } from '@codemirror/lsp-client';
 
 /*
   Browser LSP client — connects to the SUI language server Worker.
@@ -16,8 +16,12 @@ function toURI(fileOrURI) {
 }
 
 export function createClient({ timeout = 10000 } = {}) {
-  const workerURL = new URL('./worker.js', import.meta.url);
-  const worker = new Worker(workerURL, { type: 'module' });
+  // single-expression form: bundlers only detect a worker entry (and bundle
+  // its import graph into an emitted asset) when the URL is inline. Assigning
+  // the URL to a variable first demotes it to a generic asset reference,
+  // which small files inline as a data: URL whose relative imports can't
+  // resolve — the worker then dies on boot in production builds.
+  const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
   worker.onerror = (e) => console.error('[LSP] Worker error:', e);
 
   const listeners = new WeakMap();

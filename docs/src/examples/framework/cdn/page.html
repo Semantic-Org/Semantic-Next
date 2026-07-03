@@ -3,7 +3,11 @@
     <script src="https://cdn.semantic-ui.com/load" version="canary" components="standard" css></script>
 <!-- playground-hide -->
     <script>
-      if(localStorage.getItem('theme') == 'dark') {
+      const parentTheme = window.frameElement?.ownerDocument?.documentElement;
+      const isDark = parentTheme
+        ? parentTheme.classList.contains('dark')
+        : localStorage.getItem('theme') == 'dark';
+      if(isDark) {
         document.querySelector('html').classList.add('dark');
       }
     </script>

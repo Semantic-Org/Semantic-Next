@@ -1,0 +1,672 @@
+/*******************************
+        Alt Homepage
+*******************************/
+
+/*
+  Two-voice system:
+  amber mono = the machine voice (specs, attributes, everything an agent reads/writes)
+  blue       = the human voice (actions, links, everything a person touches)
+*/
+
+body.alt-body {
+  --alt-ink: #0A0F1E;
+  --alt-ink-2: #0D1428;
+  --alt-panel: #101830;
+  --alt-code-bg: #080C14;
+  --alt-line: rgba(148, 168, 220, 0.14);
+  --alt-line-strong: rgba(148, 168, 220, 0.26);
+  --alt-text: #E9EDF8;
+  --alt-dim: #9AA5C2;
+  --alt-faint: #667092;
+  --alt-blue: #4C9FFF;
+  --alt-blue-deep: #1D68D8;
+  --alt-amber: #FFB454;
+  --alt-green: #45D08C;
+  --alt-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  background: var(--alt-ink);
+  color: var(--alt-text);
+  font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.alt a {
+  color: var(--alt-blue);
+  text-decoration: none;
+}
+.alt a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.alt :focus-visible {
+  outline: 2px solid var(--alt-amber);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.alt ::selection {
+  background: rgba(76, 159, 255, 0.35);
+}
+
+.alt-container {
+  max-width: 1140px;
+  margin-inline: auto;
+  padding-inline: clamp(20px, 4vw, 40px);
+}
+
+/*******************************
+            Nav
+*******************************/
+
+.alt-nav {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding: 22px clamp(20px, 4vw, 40px);
+}
+
+.alt-wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  color: var(--alt-text);
+}
+.alt-wordmark:hover {
+  text-decoration: none;
+}
+
+.alt-chip {
+  font-family: var(--alt-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  color: var(--alt-amber);
+  background: rgba(255, 180, 84, 0.1);
+  border: 1px solid rgba(255, 180, 84, 0.32);
+  border-radius: 6px;
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+
+.alt-nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.5vw, 30px);
+  font-size: 0.92rem;
+}
+.alt-nav-links a {
+  color: var(--alt-dim);
+}
+.alt-nav-links a:hover {
+  color: var(--alt-text);
+  text-decoration: none;
+}
+
+/*******************************
+            Hero
+*******************************/
+
+.alt-hero {
+  position: relative;
+  overflow: hidden;
+  padding-top: clamp(120px, 16vh, 170px);
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--alt-line);
+}
+
+.alt-hero canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+.alt-hero canvas.loaded {
+  opacity: 0.62;
+}
+
+/* scrim keeps text legible over plasma and dissolves it into the page */
+.alt-hero-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(90% 65% at 50% 0%, rgba(10, 15, 30, 0) 0%, rgba(10, 15, 30, 0.62) 72%, var(--alt-ink) 100%),
+    linear-gradient(to bottom, rgba(10, 15, 30, 0.25), rgba(10, 15, 30, 0.55) 55%, var(--alt-ink) 96%);
+  pointer-events: none;
+}
+
+.alt-hero-inner {
+  position: relative;
+  text-align: center;
+}
+
+.alt-kicker {
+  font-family: var(--alt-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: var(--alt-amber);
+}
+
+.alt-hero h1 {
+  font-size: clamp(2.55rem, 6.4vw, 4.8rem);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+  margin: 22px 0 0;
+}
+.alt-hero h1 span {
+  display: block;
+}
+.alt-hero h1 .dot {
+  display: inline;
+  color: var(--alt-amber);
+}
+
+.alt-hero-sub {
+  max-width: 620px;
+  margin: 26px auto 0;
+  font-size: 1.13rem;
+  color: var(--alt-dim);
+}
+
+.alt-cta-row {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 34px;
+  flex-wrap: wrap;
+}
+
+.alt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 12px 24px;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.alt-btn.primary {
+  background: var(--alt-blue-deep);
+  color: #fff;
+}
+.alt-btn.primary:hover {
+  background: #2a77e8;
+  text-decoration: none;
+}
+.alt-btn.ghost {
+  color: var(--alt-text);
+  border: 1px solid var(--alt-line-strong);
+  background: rgba(16, 24, 48, 0.5);
+}
+.alt-btn.ghost:hover {
+  border-color: var(--alt-dim);
+  text-decoration: none;
+}
+
+/* the live prompt */
+.alt-hero-demo {
+  position: relative;
+  max-width: 720px;
+  margin: clamp(120px, 16vh, 170px) auto 0;
+  text-align: left;
+}
+
+.alt-demo-caption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--alt-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--alt-faint);
+}
+.alt-demo-caption .pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--alt-green);
+  box-shadow: 0 0 0 0 rgba(69, 208, 140, 0.5);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .alt-demo-caption .pulse {
+    animation: alt-pulse 2.4s ease-out infinite;
+  }
+}
+@keyframes alt-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(69, 208, 140, 0.5); }
+  70% { box-shadow: 0 0 0 9px rgba(69, 208, 140, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(69, 208, 140, 0); }
+}
+
+/* ai-prompt translates itself up 100px once results exist (its steady state on
+   this page — the demo starts on load). The resting gap below the caption is
+   sized so the lifted prompt lands 14px under it. */
+.alt-hero-demo ai-prompt {
+  display: block;
+  min-height: 120px;
+  margin-top: 104px;
+}
+.alt-demo-caption {
+  margin-bottom: 10px;
+}
+
+/*******************************
+          Sections
+*******************************/
+
+.alt-section {
+  padding-block: clamp(76px, 10vw, 128px);
+}
+.alt-section + .alt-section {
+  border-top: 1px solid var(--alt-line);
+}
+
+.alt-section-head {
+  max-width: 660px;
+}
+.alt-section-head h2 {
+  font-size: clamp(1.85rem, 3.4vw, 2.7rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin: 18px 0 0;
+}
+.alt-section-head p {
+  font-size: 1.08rem;
+  color: var(--alt-dim);
+  margin: 18px 0 0;
+}
+.alt-section-head p code,
+.alt-copy code {
+  font-family: var(--alt-mono);
+  font-size: 0.86em;
+  color: var(--alt-amber);
+  background: rgba(255, 180, 84, 0.08);
+  border: 1px solid rgba(255, 180, 84, 0.18);
+  border-radius: 5px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+.alt-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  gap: clamp(36px, 5vw, 72px);
+  align-items: start;
+  margin-top: clamp(36px, 5vw, 56px);
+}
+/* flip sections put the panel first in DOM (left on desktop);
+   on narrow screens copy reads first */
+
+.alt-facts {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 13px;
+}
+.alt-facts li {
+  position: relative;
+  padding-left: 22px;
+  color: var(--alt-dim);
+  font-size: 1rem;
+}
+.alt-facts li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.52em;
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--alt-amber);
+  transform: rotate(45deg);
+}
+.alt-facts li strong {
+  color: var(--alt-text);
+  font-weight: 700;
+}
+
+/*******************************
+         Code Panels
+*******************************/
+
+.alt-panel-frame {
+  background: var(--alt-code-bg);
+  border: 1px solid var(--alt-line);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -32px rgba(0, 0, 0, 0.8);
+}
+
+.alt-panel-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--alt-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.03em;
+  color: var(--alt-faint);
+  padding: 11px 18px;
+  border-bottom: 1px solid var(--alt-line);
+  background: rgba(148, 168, 220, 0.04);
+}
+.alt-panel-bar .ok {
+  color: var(--alt-green);
+}
+
+.alt-panel-frame .expressive-code {
+  --ec-brdWd: 0;
+  --ec-brdRad: 0;
+  --ec-codeFontSize: 0.8rem;
+  --ec-codePadBlk: 18px;
+  --ec-codePadInl: 18px;
+}
+.alt-panel-frame .expressive-code pre {
+  background: transparent !important;
+}
+
+.alt-panel-caption {
+  font-family: var(--alt-mono);
+  font-size: 0.75rem;
+  color: var(--alt-faint);
+  margin-top: 14px;
+  letter-spacing: 0.03em;
+}
+
+/*******************************
+        Spec Panel (signature)
+*******************************/
+
+.alt-spec {
+  font-family: var(--alt-mono);
+  font-size: 0.79rem;
+  line-height: 1.72;
+  margin: 0;
+  padding: 20px 22px;
+  overflow-x: auto;
+  color: var(--alt-dim);
+}
+.alt-spec .k { color: var(--alt-amber); }
+.alt-spec .s { color: #C4D6F5; }
+.alt-spec .n { color: var(--alt-green); }
+.alt-spec .p { color: var(--alt-faint); }
+.alt-spec .hl {
+  display: inline-block;
+  width: auto;
+  min-width: 100%;
+  background: rgba(76, 159, 255, 0.09);
+  box-shadow: inset 2px 0 0 var(--alt-blue);
+  margin-inline: -22px;
+  padding-inline: 22px;
+}
+
+/*******************************
+       Deployment strip
+*******************************/
+
+.alt-deploy-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 34px;
+  font-family: var(--alt-mono);
+  font-size: 0.85rem;
+  color: var(--alt-faint);
+  margin-top: 22px;
+}
+.alt-deploy-strip span b {
+  font-weight: normal;
+  color: var(--alt-green);
+}
+
+/*******************************
+        Live preview panel
+*******************************/
+
+.alt-preview-frame {
+  background: var(--alt-panel);
+  border: 1px solid var(--alt-line);
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 24px 60px -32px rgba(0, 0, 0, 0.8);
+}
+.alt-preview-frame example-preview {
+  display: block;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/*******************************
+          CDN band
+*******************************/
+
+.alt-band {
+  background: var(--alt-ink-2);
+  border-block: 1px solid var(--alt-line);
+  text-align: center;
+}
+.alt-band .alt-section-head {
+  margin-inline: auto;
+}
+
+.alt-loadtag {
+  font-family: var(--alt-mono);
+  font-size: clamp(0.82rem, 2vw, 1.18rem);
+  line-height: 1.7;
+  background: var(--alt-code-bg);
+  border: 1px solid var(--alt-line);
+  border-radius: 14px;
+  padding: clamp(18px, 3vw, 30px) clamp(18px, 4vw, 44px);
+  margin: 44px auto 0;
+  max-width: 860px;
+  overflow-x: auto;
+  white-space: pre;
+  text-align: left;
+  color: var(--alt-faint);
+}
+.alt-loadtag .t { color: #7FA3D8; }
+.alt-loadtag .a { color: var(--alt-blue); }
+.alt-loadtag .v { color: var(--alt-amber); }
+
+.alt-band-facts {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px 40px;
+  margin-top: 30px;
+  font-size: 0.95rem;
+  color: var(--alt-dim);
+}
+.alt-band-facts span {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+.alt-band-facts span::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--alt-amber);
+  transform: rotate(45deg) translateY(-1px);
+}
+
+/*******************************
+        Standards row
+*******************************/
+
+.alt-hosts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 40px;
+}
+.alt-host {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-family: var(--alt-mono);
+  font-size: 0.85rem;
+  color: var(--alt-dim);
+  background: var(--alt-panel);
+  border: 1px solid var(--alt-line);
+  border-radius: 10px;
+  padding: 12px 18px;
+}
+.alt-host ui-icon {
+  font-size: 20px;
+}
+
+/*******************************
+       Language section
+*******************************/
+
+.alt-lang-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 32px);
+  margin-top: clamp(36px, 5vw, 56px);
+}
+.alt-lang-grid .alt-panel-caption {
+  padding-inline: 4px;
+}
+
+/*******************************
+         Closing CTA
+*******************************/
+
+.alt-close {
+  text-align: center;
+  padding-block: clamp(90px, 12vw, 150px);
+}
+.alt-close h2 {
+  font-size: clamp(2rem, 4.4vw, 3.3rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+  margin: 18px 0 0;
+}
+.alt-close h2 .dot {
+  color: var(--alt-amber);
+}
+.alt-close p {
+  color: var(--alt-dim);
+  font-size: 1.08rem;
+  max-width: 520px;
+  margin: 18px auto 0;
+}
+
+/*******************************
+           Footer
+*******************************/
+
+.alt-footer {
+  border-top: 1px solid var(--alt-line);
+  padding-block: 34px;
+}
+.alt-footer .alt-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 0.88rem;
+  color: var(--alt-faint);
+}
+.alt-footer nav {
+  display: flex;
+  gap: 26px;
+}
+.alt-footer a {
+  color: var(--alt-dim);
+}
+
+/*******************************
+        Motion / reveal
+*******************************/
+
+@media (prefers-reduced-motion: no-preference) {
+  html.alt-motion .alt-reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+  html.alt-motion .alt-reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .alt-hero .alt-fade {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: alt-rise 0.85s cubic-bezier(0.2, 0.6, 0.2, 1) forwards;
+  }
+  .alt-hero .alt-fade:nth-child(2) { animation-delay: 0.08s; }
+  .alt-hero .alt-fade:nth-child(3) { animation-delay: 0.16s; }
+  .alt-hero .alt-fade:nth-child(4) { animation-delay: 0.24s; }
+  .alt-hero-demo.alt-fade { animation-delay: 0.36s; }
+}
+@keyframes alt-rise {
+  to { opacity: 1; transform: none; }
+}
+
+/*******************************
+         Responsive
+*******************************/
+
+@media (max-width: 960px) {
+  .alt-split,
+  .alt-lang-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .alt-split.flip > :first-child {
+    order: 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .alt-nav-links a.alt-nav-quiet {
+    display: none;
+  }
+  .alt-hero {
+    padding-top: 108px;
+  }
+  .alt-hero-demo {
+    margin-top: 84px;
+  }
+  .alt-kicker {
+    font-size: 0.7rem;
+  }
+  .alt-demo-caption {
+    align-items: flex-start;
+  }
+  .alt-demo-caption .pulse {
+    margin-top: 5px;
+  }
+  .alt-spec {
+    font-size: 0.72rem;
+    padding: 16px;
+  }
+  .alt-spec .hl {
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+  .alt-loadtag {
+    white-space: pre-wrap;
+    font-size: 0.72rem;
+  }
+}

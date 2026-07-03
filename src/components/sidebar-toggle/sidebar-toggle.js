@@ -1,4 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
+import { Tooltip } from '../../behaviors/index.js';
 import { Icon } from '../../primitives/index.js';
 import css from './sidebar-toggle.css?raw';
 import template from './sidebar-toggle.html?raw';
