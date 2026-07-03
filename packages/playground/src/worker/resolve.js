@@ -59,7 +59,9 @@ export const rewriteBareImports = ({ source, importMap, cdnBaseUrl, dependencies
       continue;
     }
     const url = toCdnUrl({ specifier: entry.n, cdnBaseUrl, dependencies });
-    result += source.slice(last, entry.s) + url;
+    // dynamic-import spans include the quotes; static import spans don't
+    const replacement = entry.d > -1 ? `'${url}'` : url;
+    result += source.slice(last, entry.s) + replacement;
     last = entry.e;
   }
   return result + source.slice(last);

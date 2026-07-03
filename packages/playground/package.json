@@ -52,7 +52,9 @@
     "@lezer/highlight": "^1.2.3"
   },
   "devDependencies": {
-    "@semantic-ui/internal-scripts": "^0.18.0"
+    "@semantic-ui/internal-scripts": "^0.18.0",
+    "fflate": "^0.8.2",
+    "vitest": "^3.0.0"
   },
   "wireit": {
     "build": {
