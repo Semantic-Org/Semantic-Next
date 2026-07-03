@@ -65,7 +65,11 @@ const requestRecovery = async (sessionId) => {
     let resolve;
     const promise = new Promise((res) => {
       resolve = res;
-      setTimeout(res, recoveryTimeout);
+      // expired recoveries must clear, or the next fetch short-circuits on a settled promise
+      setTimeout(() => {
+        recoveries.delete(sessionId);
+        res();
+      }, recoveryTimeout);
     });
     recovery = { promise, resolve };
     recoveries.set(sessionId, recovery);
