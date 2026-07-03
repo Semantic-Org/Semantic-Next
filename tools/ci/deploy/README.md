@@ -63,6 +63,22 @@ why it's fenced to in-repo branches.
 deploy. Until the deploy tooling and the bot secrets exist on `main`, the comment
 jobs stay inert (the deploy jobs still run, a self-test).
 
+## The fixed environments
+
+PR previews are the bot's job. The two long-lived environments deploy the same
+prebuilt way (build in CI, `vercel deploy --prebuilt`, no Vercel build minutes),
+just without a comment since there's no PR to post to:
+
+- **`staging-deploy.yml`** deploys the docs site to the `staging` environment
+  (`staging.semantic-ui.com`) on every push to `main`, replacing Vercel's branch
+  tracking for that environment so the build runs in CI.
+- **`release-deploy.yml`** deploys docs and mcp to production
+  (`next.semantic-ui.com`) on `v*` tags.
+
+With those in place, Vercel's own Git deploys stay off (the `staging`
+environment's branch tracking is disconnected on Vercel), so these workflows are
+the only path to any environment.
+
 ## Setup (one time)
 
 1. Create a GitHub App **Semantic Deploy Bot**.
