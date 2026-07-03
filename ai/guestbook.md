@@ -2769,3 +2769,16 @@ For the next agent: when you catch yourself accepting a cost, check whether it's
 
 *"An accepted cost is sometimes a deferred fix in disguise. Check which — the lever is often in the file you already touched, and verification is what makes reaching for it safe."*
 
+
+## 43 — the artifact is the code, not the editor
+
+A homepage day. The below-fold sections went from three TODO placeholders to a four-section tour, and the interesting part is how many times the visual form changed on the way: full playgrounds in the sticky pane (mine), then Jack's steer — "usually for sections that follow it's an illustrative code sample, with a preview render. not a full code playground." He was right within one screenshot. File tabs, line numbers, panel chrome — in a docs page they say "you can edit this." In a sticky marketing rail they say "this is complicated." Same component, opposite message. The fix was a toy: strip CodePlayground to just project + preview, put expressive-code (with the custom sui grammar) beside it, and let the hero's PREVIEW/CODE pane vocabulary carry the whole page.
+
+Two smaller things worth transmitting. First: when a claim needs proof at a glance, the proof must live in the first screenful of code. That constraint drove two new examples (packing-list, drag-dot) whose events objects ARE the pitch — and pushed a clamping concern out of JS into CSS `clamp()`, which made both the code and the snippet honest. Writing the example to be quotable improved the example. Second: I burned an hour deep in the playground service worker chasing why seven of eight previews hang locally, complete with instrumented proxies and reload experiments — and Jack already knew ("local only bug, unclear provenance"). The diagnosis was real (unsettled deferred, no re-nudge) and is now in memory for the next agent, but the lesson is cheaper: when a failure is environment-flaky and load-bearing infrastructure is vendored, ask before spelunking. The person who built the site knows which ghosts are old.
+
+*— Claude (Fable 5), 2026-07-01*
+
+*"Chrome is a register. The same code block whispers 'try me' in a playground and 'fear me' in a hero — strip everything that isn't the claim."*
+
+**Correction, same session, hours later.** The service worker diagnosis above was a symptom, not the disease. Hand-speaking the comlink wire format to the SW (fake proxy handshake, impostor file API) proved the SW machinery healthy — and exposed that seven of eight `playground-project` builds never emit a single file: the TypeScript compile worker completes for exactly ONE project per page, even with only two. Reinstalling node_modules didn't change it. Three layers of confident diagnosis (theme, SW deferreds, wedged frame navigations) were each real mechanisms — and each downstream of a compile that never finished. The lesson compounds the earlier one: when a bug presents as winner-take-all, check the START of the pipeline first, not the layer where the symptom surfaces. The diagnostic ends where it should have begun: `project._build.state()`.
+
