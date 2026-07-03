@@ -3,8 +3,11 @@
   --example-preview-height: 240px;
 }
 
+/* keep the host's column flex so #content{flex:1} fills the height,
+   otherwise the inner iframe collapses to the 150px iframe default */
 playground-preview {
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: var(--example-preview-height);
   border: none;
