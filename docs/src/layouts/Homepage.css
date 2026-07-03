@@ -195,26 +195,22 @@ body {
       font-weight: bold;
     }
 
-    /* code + preview panes stacked in shared perspective, echoing the
-       hero result card. panes are separate planes: preview floats above
-       the code on the z axis */
+    /* code + preview cards stacked and offset, echoing the hero result
+       card. depth comes from the overlap and shadows: cards rest FLAT so
+       text rasterizes crisply and the gpu isn't compositing transformed
+       iframe layers. the 3d angle only appears during the scroll-in settle */
     .demo {
-      transform: rotateX(6deg) rotateY(-14deg);
-      transform-style: preserve-3d;
-
       .pane {
-        background-color: oklch(0.16 0.015 260 / 0.75);
+        background-color: oklch(0.16 0.015 260 / 0.92);
         background-image: var(--subtle-angled-gradient);
         border: var(--glow-border);
         border-radius: var(--border-radius-l);
         box-shadow: var(--floating-shadow);
         padding: var(--padding-s) var(--padding);
-        backdrop-filter: blur(6px);
       }
 
       .pane.preview {
         margin: -1.25rem 0 0 2.5rem;
-        transform: translateZ(55px);
         box-shadow: 0 35px 70px -20px rgba(0, 0, 0, 0.8), var(--floating-shadow);
       }
 
@@ -363,11 +359,9 @@ body {
       perspective: 1600px;
     }
 
-    /* demo leads, mirrored tilt faces the copy on the right */
     .demo {
       flex: 1 1 55%;
       min-width: 0;
-      transform: rotateX(6deg) rotateY(14deg);
     }
 
     .intro {
@@ -530,39 +524,25 @@ body {
       }
     }
 
-    /* keep the perspective tilt while revealing */
+    /* cards arrive angled in perspective and settle flat, so text
+       rasterizes crisply at rest and compositing is transition-only */
     .nobuild .demo {
-      transform: rotateX(6deg) rotateY(20deg) translateY(36px);
+      transform: rotateX(5deg) rotateY(16deg) translateY(36px);
+      transition: opacity 0.7s ease, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 
       &.visible {
-        transform: rotateX(6deg) rotateY(14deg) translateY(0);
+        transform: none;
       }
     }
 
     /* incoming tour card settles as it crossfades in */
     .tour .example .demo {
-      transform: rotateX(6deg) rotateY(-19deg) scale(0.985);
-      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      transform: rotateX(5deg) rotateY(-16deg) scale(0.985);
+      transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .tour .example.active .demo {
-      transform: rotateX(6deg) rotateY(-14deg) scale(1);
+      transform: none;
     }
-
-    /* ambient glow breathes slowly behind the cards */
-    .tour .sticky:before {
-      animation: glow-drift 14s ease-in-out infinite alternate;
-    }
-  }
-}
-
-@keyframes glow-drift {
-  from {
-    transform: translate3d(-1.5%, -2%, 0) scale(1);
-    opacity: 0.85;
-  }
-  to {
-    transform: translate3d(1.5%, 2%, 0) scale(1.06);
-    opacity: 1;
   }
 }
 
