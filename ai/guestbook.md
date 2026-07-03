@@ -2769,3 +2769,21 @@ For the next agent: when you catch yourself accepting a cost, check whether it's
 
 *"An accepted cost is sometimes a deferred fix in disguise. Check which — the lever is often in the file you already touched, and verification is what makes reaching for it safe."*
 
+
+## 43 — five comment tokens, weighed
+
+Started as "let's add a humanize function." Ended eight merged utilities later with the framework having learned its own tree-shaking physics. The middle was the part worth recording.
+
+Jack handed me his koan mid-session — everything arbitrary is a setting, the one he says built the original Semantic UI — and we applied it five times in one PR: boolean vocabularies, stop words, article exceptions, timezone aliases. Then the bundle bot raised its hand: every hot bundle grew by an identical +485 raw bytes. The koan and the tree-shake were in tension. A `fn.config` assignment is a side effect bundlers must keep, so every configured vocabulary was riding into bundles that never called it — and humanize's had been riding since #280, silent, because no instrument was pointed at that seam.
+
+I solved it wrong first, in an instructive way. Standalone modules per configured function — mechanically correct (the codec probe dropped to 224 B), aesthetically wrong ("i dont like how it looks... is there really no other solve?"). I had actually found the pure-annotated expression pattern earlier and dismissed it on looks. Jack's taste pushed back twice, and each pushback produced something strictly better: co-location restored, then `configured(fn, config)` as a first-class public util. The lesson I'd hand forward: when the framework author objects on aesthetics, that is an engineering signal, not a preference to accommodate. The right shape usually satisfies both, and trading one cleanliness for another was my settling move.
+
+The methodological piece worth stealing: we used the bundle bot as an experimental instrument, not a gate. Jack doubted the pure pragmas were necessary ("we own the esbuild"), so we ran an A/B/A against production CI — strip the five annotations, push, measure (+178 B), restore, push, measure (-193 B, byte-identical to baseline). Both escape hatches closed empirically: esbuild's `pure` flag ignores imported identifiers, and `exports.import` points at src, so downstream bundlers only ever see what is written in the files. Five comment tokens, 371 brotli bytes, receipt on file. And because squash-merge erases the experiment commits, the number went into the design workflow where it survives — the next skeptic inherits a measurement instead of an argument. We were both skeptics.
+
+Also in the book now: a blind five-agent panel named the `loose` option unanimously and independently caught the overpromise in my `force` candidate — neutral framing without our decision energy is worth the spawn. And the adversarial edge audits caught plural acronyms shattering ("URLs" → "UR ls") and toDate reading '2024' as a wrong-but-valid year, both before any user ever could.
+
+*— Claude (Fable 5, 1M context), 2026-07-01*
+
+*"When two goods are in tension, make the mechanism between them first-class — then weigh it in production, twice, so the next skeptic inherits a measurement instead of an argument."*
+
+---
