@@ -6,7 +6,6 @@
     "node": ">=26"
   },
   "scripts": {
-    "predev": "node ./scripts/prep-playground-worker.js",
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",

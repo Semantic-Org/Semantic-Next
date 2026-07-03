@@ -9,10 +9,11 @@
   with a silent error (playground-elements attaches no error handler),
   so its compile never emits and its preview never commits.
 
-  In dev the worker is redirected to the static copy under
-  /sandbox/, which bypasses the transform pipeline (see
-  scripts/prep-playground-worker.js). Production serves bundler-emitted
-  assets and doesn't hit any of this.
+  In dev the worker is redirected to the vendored copy under
+  public/sandbox/ (kept current alongside the other playground files
+  when upgrading playground-elements), which bypasses the transform
+  pipeline. Production serves bundler-emitted assets and doesn't hit
+  any of this.
 */
 
 if (import.meta.env.DEV && typeof window !== 'undefined') {

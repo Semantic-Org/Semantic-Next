@@ -25,6 +25,3 @@ pnpm-debug.log*
 cert/*.pem
 cert/*.pfx
 cert/*.srl
-
-# playground compile worker, copied from node_modules by predev
-public/sandbox/internal/
