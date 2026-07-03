@@ -7,10 +7,26 @@
   "mcpServers": {
     "semantic-ui": {
       "command": "bash",
-      "args": ["-c", "cd tools/mcp && npm run build --silent && node dist/index.js"]
+      "args": [
+        "-c",
+        "cd tools/mcp && npm run build --silent && node dist/index.js"
+      ]
     }
   },
   "enabledPlugins": {
     "typescript-lsp@claude-plugins-official": true
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/core-edit-gate.sh"
+          }
+        ]
+      }
+    ]
   }
 }
