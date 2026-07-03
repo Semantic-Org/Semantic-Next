@@ -1,0 +1,65 @@
+{
+  "name": "@semantic-ui/playground",
+  "version": "0.18.0",
+  "type": "module",
+  "title": "Semantic UI Playground",
+  "description": "Sandbox engine for live code examples — project model, tooling worker, serving layer, and editor adapter",
+  "author": "Jack Lukic <jack@semantic-ui.com>",
+  "homepage": "https://next.semantic-ui.com",
+  "license": "ISC",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    },
+    "./project": {
+      "import": "./src/project.js"
+    },
+    "./serving": {
+      "import": "./src/serving/sw-adapter.js"
+    },
+    "./editor": {
+      "import": "./src/editor/index.js"
+    },
+    "./assets/*": "./dist/assets/*",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "wireit",
+    "test": "vitest",
+    "test:watch": "vitest --watch"
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@semantic-ui/utils": "^0.18.0",
+    "es-module-lexer": "^1.5.4",
+    "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@semantic-ui/internal-scripts": "^0.18.0"
+  },
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "build:assets"
+      ]
+    },
+    "build:assets": {
+      "command": "node scripts/build-assets.js",
+      "files": [
+        "src/worker/**",
+        "src/serving/service-worker.js",
+        "scripts/build-assets.js"
+      ],
+      "output": [
+        "dist/assets/**"
+      ]
+    }
+  }
+}

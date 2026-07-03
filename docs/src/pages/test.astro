@@ -3,16 +3,82 @@ import Body from '../layouts/Body.astro';
 import '../css/layers.css';
 import '../css/fonts.css';
 
-import { Menu } from '@semantic-ui/core';
-import { LitRenderer } from '@semantic-ui/renderer/lit';
+import { importMap } from './examples/importmap.json.js';
 ---
 <Body>
-<div style="padding: 24px; max-width: 600px;">
-  <h3>Menu Test</h3>
-  <Menu client:load value="one" items={[
-    { label: 'One', value: 'one' },
-    { label: 'Two', value: 'two' },
-    { label: 'Three', value: 'three' },
-  ]} />
+<div style="padding: 24px; max-width: 1100px;">
+  <h3>Playground Engine Test</h3>
+  <pre id="status" style="font-size: 12px; min-height: 80px;"></pre>
+  <div style="display: flex; gap: 16px;">
+    <iframe id="frame-getText" title="getText project" style="flex: 1; height: 220px; border: 1px solid #444; background: white;"></iframe>
+    <iframe id="frame-typescript" title="typescript project" style="flex: 1; height: 220px; border: 1px solid #444; background: white;"></iframe>
+    <iframe id="frame-tailwind" title="tailwind project" style="flex: 1; height: 220px; border: 1px solid #444; background: white;"></iframe>
+  </div>
 </div>
+<script type="application/json" id="importmap-data" set:html={JSON.stringify(importMap)}></script>
+<script>
+  import { PlaygroundProject } from '@semantic-ui/playground';
+
+  const importMap = JSON.parse(document.getElementById('importmap-data').textContent);
+  const status = document.getElementById('status');
+  const log = (line) => {
+    status.textContent += `${line}\n`;
+    console.log(`[engine-test] ${line}`);
+  };
+
+  window.engineTest = { projects: {} };
+  const run = (label, frameId, files) => {
+    const project = new PlaygroundProject({ files, importMap });
+    window.engineTest.projects[label] = project;
+    project.on('buildStart', () => log(`${label}: build start`));
+    project.on('buildError', (error) => log(`${label}: BUILD ERROR ${error.message}`));
+    project.on('buildDone', () => {
+      log(`${label}: build done → ${project.previewUrl}`);
+      document.getElementById(frameId).src = `${project.previewUrl}page.html`;
+    });
+    project.build();
+    return project;
+  };
+
+  run('getText', 'frame-getText', {
+    'component.js': `
+      import { defineComponent, getText } from '@semantic-ui/component';
+      const template = await getText('./component.html');
+      defineComponent({
+        tagName: 'engine-test-counter',
+        template,
+        defaultState: { count: 0 },
+        events: { 'click button'({ state }) { state.count.increment(); } },
+      });
+    `,
+    'component.html': `<button>Tick</button> <b>Count: {count}</b>`,
+    'page.html': `<html><head><script type="module" src="./component.js"><\/script></head><body><engine-test-counter></engine-test-counter></body></html>`,
+  });
+
+  run('tailwind', 'frame-tailwind', {
+    'component.js': `
+      import { defineComponent } from '@semantic-ui/component';
+      import { TailwindPlugin } from '@semantic-ui/tailwind';
+      let definition = {
+        tagName: 'engine-test-tailwind',
+        template: '<div class="p-4 rounded-xl bg-indigo-600 text-white font-bold">wasm compiled</div>',
+      };
+      definition = await TailwindPlugin(definition);
+      defineComponent(definition);
+    `,
+    'page.html': `<html><head><script type="module" src="./component.js"><\/script></head><body><engine-test-tailwind></engine-test-tailwind></body></html>`,
+  });
+
+  run('typescript', 'frame-typescript', {
+    'index.ts': `
+      interface Greeting { subject: string; volume: number; }
+      const greeting: Greeting = { subject: 'engine', volume: 11 };
+      const target = document.getElementById('out') as HTMLElement;
+      const data = await fetch('./data.json').then((response) => response.json());
+      target.textContent = \`hello \${greeting.subject} at volume \${greeting.volume} (\${data.source})\`;
+    `,
+    'data.json': `{ "source": "relative fetch" }`,
+    'page.html': `<html><head><script type="module" src="./index.js"><\/script></head><body><div id="out">loading…</div></body></html>`,
+  });
+</script>
 </Body>
