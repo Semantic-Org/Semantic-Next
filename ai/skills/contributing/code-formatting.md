@@ -64,19 +64,10 @@ For large CSS files, config files, and organized code files, use three-level com
 
 ## Comment Guidelines
 
-- **Use title case, not all caps**: `/* Primary Button */` not `/* PRIMARY BUTTON */`
-- **Don't overuse comments** - only where they provide value as breadcrumbs
-- Use simple, concise comments: `/* Remove duplicates from an array */`
-- Consider how Vue, Vite, Svelte use comments - minimal and purposeful
-- Match existing style in the file you're editing
+- **Use title case, not all caps** in section headers: `/* Primary Button */` not `/* PRIMARY BUTTON */`
+- Keep headers concise and match the existing style in the file you're editing
 
-### Comments in code (and tests)
-
-- Non-obvious *why* only — never narrate what well-named code already says
-- Lowercase first word, conversational voice, no em-dashes (`—`), no semicolons in prose, no unicode arrows (`→`)
-- Drop trailing periods on one-liners
-- Multi-line is fine when each line carries weight (constraint, why, mechanism); not when the second line is filler
-- In tests specifically: no `[source X]` / `[skill X]` / `[example X]` / `[inference]` citation tags, no `Witness:` / `FINDING:` prefixed prose, no inline narration that restates an assertion. See `testing.md` and `grounded-testing.md` for the testing-specific rules.
+> **Comment content** (what earns a comment, intent-over-mechanism phrasing, voice, pruning) lives in the `code-comments` skill. This file covers only the mechanical hierarchy and formatting.
 
 ## Application
 
