@@ -301,11 +301,10 @@ This bot measures the bytes a PR actually ships. Sizes come from a deterministic
 
 **N larger · N smaller · N unchanged · ±N shipped LOC · ±N comment LOC**
 
-| signal | result |       ← headline brotli, shipped LOC, comment LOC, changed count
+#### Bundles that changed (N of M)
+| bundle | brotli | Δ brotli | change | from |
 
-#### Bundles that changed (N)
-| bundle | brotli | Δ brotli | change |
-
+<details> Tracked import costs (query · reactivity · utils) </details>
 <details> LOC by scope </details>
 <details> All bundles, gzip, and raw </details>
 
@@ -384,10 +383,18 @@ The `size-report.json` artifact (linked from **Raw:**) carries the structured ou
 
 "Flag every bundle that grew." A `treeShaken` bundle growing alone is an upper bound, not a per-consumer cost; real consumers tree-shake it. Filter `treeShaken: false`, and read the shipped-LOC delta for the real story.
 
+### Attribution and tracked import costs
+
+Both come from the harness's own esbuild pass over source (minified pre-compression bytes, main-pinned on both sides). Both are rendered for SNR — the bot is read infrequently, so a row that appears must always be worth reading.
+
+- **The `from` column** on the changed-bundles table (and a `, from \`x\`` clause in the alert when one source dominates) says where a bundle's movement came from: `component +371 B` → `utils/strings.js 100%`. One cell, at most two sources named. Traceless snapshots render the table without the column.
+- **Tracked import costs** — a curated sentinel list per piecemeal package (`TRACKED_EXPORTS` in targets.js), each priced standalone per PR. Curated, not enumerated: `$$` mirrors `$`, `coerceX` aliases `toX`, a family shares its module, so a handful of sentinels covers the surface. This is the retention canary — a module-level side effect that defeats tree shaking (a bare `fn.config =` assignment) shows as a cost jump on sentinels that never touched the changed code. Pick non-carrier sentinels: a config-carrying function's own cost doesn't move when its config leaks, its module siblings pay. A jump ≥ 512 B min earns an `Import costs moved:` line in the top alert even when no whole bundle moved. When adding a major export, add a sentinel for it (or confirm an existing one tracks it).
+- `size-report.json` carries the structured forms: `metrics[].moduleDeltas` and `metrics[].exportDeltas`.
+
 ### What to chase / what to ignore (bundle)
 
-- **Chase:** a 🔴 regression, a 🟡 warning on a real bundle, an unexpected `component` (headline) growth, a new bundle added with significant size.
-- **Ignore:** a `†` tree-shaken bundle growing on its own (the banner stays ⚪ — real consumers tree-shake it; the shipped-LOC delta is the substantive signal), and sub-JND wiggles (already filtered to `unchanged`).
+- **Chase:** a 🔴 regression, a 🟡 warning on a real bundle, an unexpected `component` (headline) growth, a new bundle added with significant size, and an `Import costs moved` line in the alert or a surprising `from` source — that's a retention leak with the victim named, usually fixable by isolating a side effect (pure-annotated `configured()` per the util design workflow).
+- **Ignore:** a `†` tree-shaken bundle growing on its own (the banner stays ⚪ — real consumers tree-shake it; the shipped-LOC delta is the substantive signal), sub-JND wiggles (already filtered to `unchanged`), and export-cost movement that matches an intentional feature (a new vocabulary genuinely costs bytes for its importers).
 
 ---
 

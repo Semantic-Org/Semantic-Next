@@ -40,6 +40,11 @@ const HEADLINE_ID = 'pkg-component';
 // clears one of these. Below them the movement isn't worth a reviewer's eye.
 const JND = { bytes: 128, percent: 0.5 };
 
+// Trace floors are minified (pre-compression) bytes — attribution and export
+// costs come from the harness's own esbuild pass, where brotli can't attribute.
+// `verdict` is the per-export growth that earns a line in the top alert.
+const TRACE = { module: 16, export: 16, verdict: 512, maxRows: 8 };
+
 // Severity keys off the worst single bundle's brotli growth, never a sum.
 // Percent escalates a tier, but only paired with a real absolute move —
 // otherwise a tiny primitive (+100 B = +14%) would read as a regression.
@@ -157,7 +162,146 @@ function diffTarget(id, head, base) {
   const meaningful = Math.abs(delta.brotli) >= JND.bytes || Math.abs(pct) >= JND.percent;
   let status = 'unchanged';
   if (meaningful) { status = delta.brotli > 0 ? 'larger' : 'smaller'; }
-  return { ...descriptor, status, head: sizes(head), base: sizes(base), delta, pct };
+  const metric = { ...descriptor, status, head: sizes(head), base: sizes(base), delta, pct };
+  // both sides or nothing: a one-sided trace failure (swallowed by collect on purpose) must
+  // degrade to no section, never to a false mass added/removed diff
+  if (head.modules && base.modules) {
+    metric.moduleDeltas = diffModules(byteMap(head.modules), byteMap(base.modules));
+  }
+  if (head.exports && base.exports) {
+    metric.exportDeltas = diffExports(exportMap(head.exports), exportMap(base.exports));
+  }
+  return metric;
+}
+
+// snapshots are artifacts from the unprivileged job — keep only finite-number byte values
+// on a clean prototype so a crafted field can't reach the comment or the arithmetic
+function byteMap(map) {
+  const clean = Object.create(null);
+  for (const [key, value] of Object.entries(map)) {
+    if (typeof value === 'number' && Number.isFinite(value)) { clean[key] = value; }
+  }
+  return clean;
+}
+
+// export entries carry { cost, graph } — same trust boundary, same filtering
+function exportMap(map) {
+  const clean = Object.create(null);
+  for (const [name, value] of Object.entries(map)) {
+    if (
+      value && typeof value === 'object'
+      && typeof value.cost === 'number' && Number.isFinite(value.cost)
+      && typeof value.graph === 'string'
+    ) {
+      clean[name] = { cost: value.cost, graph: value.graph };
+    }
+  }
+  return clean;
+}
+
+// per-module minified-byte movement inside a bundle, above the trace floor
+function diffModules(head, base) {
+  const keys = new Set([...Object.keys(head), ...Object.keys(base)]);
+  const deltas = [];
+  for (const key of keys) {
+    const h = head[key] ?? 0;
+    const b = base[key] ?? 0;
+    if (Math.abs(h - b) >= TRACE.module) { deltas.push({ key, head: h, base: b, delta: h - b }); }
+  }
+  deltas.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+  return deltas;
+}
+
+// co-movement groups: a row is one distinct finding — exports sharing the same
+// graph transition (head fingerprint, base fingerprint) AND the same delta
+// magnitude move together, and are reported through their master alone: the
+// cheapest member (purest probe), ties broken shortest-then-alphabetical so
+// labels stay stable across PRs. graph-merging changes (a leak pulls new
+// modules into many graphs) split honestly because base fingerprints differ,
+// and statement-level shaking quirks split on the delta bucket
+function diffExports(head, base) {
+  const changed = [];
+  const added = [];
+  const removed = [];
+  const groups = new Map();
+  for (const [name, entry] of Object.entries(head)) {
+    const baseEntry = Object.hasOwn(base, name) ? base[name] : null;
+    const delta = baseEntry ? entry.cost - baseEntry.cost : null;
+    const key = baseEntry ? `${entry.graph}\u0000${baseEntry.graph}` : `${entry.graph}\u0000<new>`;
+    if (!groups.has(key)) { groups.set(key, []); }
+    groups.get(key).push({ name, cost: entry.cost, base: baseEntry?.cost ?? null, delta });
+  }
+  const livingGraphs = new Set(
+    Object.entries(head)
+      .filter(([name]) => Object.hasOwn(base, name))
+      .map(([, entry]) => entry.graph),
+  );
+  for (const [key, group] of groups) {
+    // one graph transition can still hide distinct magnitudes (a config-carrier
+    // already paid in base what its siblings gain) — split on delta gaps rather
+    // than fixed buckets, so co-movers stay together and true splits separate
+    for (const cohort of splitByDeltaGap(group)) {
+      const master = pickMaster(cohort);
+      if (master.delta === null) {
+        // a new export sharing a living group's graph is a slave — silent. only a
+        // graph-novel surface is news
+        if (!livingGraphs.has(key.split('\u0000')[0])) {
+          added.push({ name: master.name, bytes: master.cost, groupSize: cohort.length });
+        }
+        continue;
+      }
+      if (Math.abs(master.delta) >= TRACE.export) {
+        changed.push({
+          name: master.name,
+          head: master.cost,
+          base: master.base,
+          delta: master.delta,
+          pct: master.base > 0 ? (master.delta / master.base) * 100 : null,
+          groupSize: cohort.length,
+        });
+      }
+    }
+  }
+  // a base group none of whose members survive is a removed surface
+  const baseGroups = new Map();
+  for (const [name, entry] of Object.entries(base)) {
+    if (Object.hasOwn(head, name)) { continue; }
+    if (!baseGroups.has(entry.graph)) { baseGroups.set(entry.graph, []); }
+    baseGroups.get(entry.graph).push({ name, cost: entry.cost, delta: null, base: entry.cost });
+  }
+  for (const [graph, group] of baseGroups) {
+    // survivors of the same base graph mean the surface still exists — renames and
+    // partial removals within a living group stay out of the report
+    const survives = Object.entries(base).some(([name, entry]) => entry.graph === graph && Object.hasOwn(head, name));
+    if (survives) { continue; }
+    const master = pickMaster(group);
+    removed.push({ name: master.name, bytes: master.cost, groupSize: group.length });
+  }
+  changed.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+  added.sort((a, b) => a.name.localeCompare(b.name));
+  removed.sort((a, b) => a.name.localeCompare(b.name));
+  if (!changed.length && !added.length && !removed.length) { return null; }
+  return { changed, added, removed };
+}
+
+function splitByDeltaGap(group) {
+  const withDelta = group.filter((m) => m.delta !== null).sort((a, b) => a.delta - b.delta);
+  const fresh = group.filter((m) => m.delta === null);
+  const cohorts = fresh.length ? [fresh] : [];
+  let current = [];
+  for (const member of withDelta) {
+    if (current.length && member.delta - current[current.length - 1].delta > 64) {
+      cohorts.push(current);
+      current = [];
+    }
+    current.push(member);
+  }
+  if (current.length) { cohorts.push(current); }
+  return cohorts;
+}
+
+function pickMaster(group) {
+  return [...group].sort((a, b) => a.cost - b.cost || a.name.length - b.name.length || (a.name < b.name ? -1 : 1))[0];
 }
 
 function diffLoc(cur, base) {
@@ -258,18 +402,6 @@ function renderMarkdown(report) {
   );
   lines.push('');
 
-  // ── signal table ──
-  lines.push('| signal | result |');
-  lines.push('|---|---:|');
-  const headlineRow = headline ? `\`${escapeCode(headline.label)}\` brotli` : 'Headline brotli';
-  lines.push(`| ${headlineRow} | ${headline ? headlineCell(headline) : '0 B'} |`);
-  lines.push(`| Shipped LOC | ${signedLoc(loc.codeDelta)} |`);
-  lines.push(`| Comment LOC | ${signedLoc(loc.commentDelta)} |`);
-  lines.push(`| Changed bundles | ${report.changed.length} / ${report.total_bundles} |`);
-  lines.push('');
-  lines.push('---');
-  lines.push('');
-
   // ── the story: bundles that changed ──
   const changed = report.changed.map((id) => report.metrics.find((m) => m.id === id));
   if (changed.length === 0) {
@@ -277,21 +409,30 @@ function renderMarkdown(report) {
     lines.push('');
   }
   else {
-    lines.push(`#### Bundles that changed (${changed.length})`);
+    lines.push(`#### Bundles that changed (${changed.length} of ${report.total_bundles})`);
     lines.push('');
-    lines.push('| bundle | brotli | Δ brotli | change |');
-    lines.push('|---|---:|---:|---:|');
-    for (const m of changed) { lines.push(changedRow(m, report.headline)); }
+    // the `from` column appears only when attribution exists — traceless snapshots
+    // render the table exactly as before
+    const attributed = changed.some((m) => m.moduleDeltas?.length);
+    lines.push(
+      attributed ? '| bundle | brotli | Δ brotli | change | from |' : '| bundle | brotli | Δ brotli | change |',
+    );
+    lines.push(attributed ? '|---|---:|---:|---:|---|' : '|---|---:|---:|---:|');
+    for (const m of changed) { lines.push(changedRow(m, report.headline, attributed)); }
     lines.push('');
     let caption = 'Sorted by absolute brotli delta, increases first. 🎯 = bundle most relevant to this PR.';
     if (changed.some((m) => m.treeShaken)) {
       caption +=
         ' † = consumed piecemeal, so the whole-package bundle is an upper bound and does not drive the verdict.';
     }
+    if (attributed) {
+      caption += ' `from` = share of the movement by source module, from the harness build.';
+    }
     lines.push(`<sub>${caption}</sub>`);
     lines.push('');
   }
 
+  renderTrackedExports(lines, report);
   renderLocByScope(lines, report);
   renderAllBundles(lines, report);
 
@@ -310,34 +451,49 @@ function verdictLines(report, headline) {
       .map((id) => report.metrics.find((m) => m.id === id))
       .some((m) => m.treeShaken);
     if (treeShakenChanged) {
-      return ['No change to the bundles real consumers ship. A tree-shaken package moved — see the table.'];
+      return withExportVerdict(report, [
+        'No change to the bundles real consumers ship. A tree-shaken package moved — see the table.',
+      ]);
     }
     let s = 'No shipped bundle changed size.';
     if (loc.codeDelta === 0 && loc.commentDelta !== 0) { s += ' PR changes are comments-only.'; }
-    return [s];
+    return withExportVerdict(report, [s]);
   }
   const verb = headline.delta.brotli > 0 ? 'grew' : 'shrank';
+  const source = dominantSource(headline);
   let s =
     `\`${escapeCode(headline.label)}\` ${verb} **${signedSize(headline.delta.brotli)}** brotli to ${
       formatSize(headline.head.brotli)
     }`
-    + ` (${signedPct(headline.delta.brotli, headline.base?.brotli)}) across **${
-      signedLoc(loc.codeDelta)
-    } shipped LOC**.`;
+    + ` (${signedPct(headline.delta.brotli, headline.base?.brotli)}${source ? `, from \`${escapeCode(source)}\`` : ''})`
+    + ` across **${signedLoc(loc.codeDelta)} shipped LOC**.`;
   const largest = report.largest_increase ? report.metrics.find((m) => m.id === report.largest_increase) : null;
   if (largest && largest.id !== headline.id) {
     s += ` Largest increase: \`${escapeCode(largest.label)}\` **${signedSize(largest.delta.brotli)}**`
       + ` (${signedPct(largest.delta.brotli, largest.base?.brotli)}).`;
   }
-  return [s];
+  return withExportVerdict(report, [s]);
 }
 
-function headlineCell(m) {
-  if (m.delta.brotli === 0) { return '0 B'; }
-  return `${signedSize(m.delta.brotli)} (${signedPct(m.delta.brotli, m.base?.brotli)})`;
+// a per-export cost jump is real shipped cost for piecemeal consumers even when
+// no whole bundle moved, so past the verdict floor it earns a line up top
+function withExportVerdict(report, lines) {
+  const movers = [];
+  for (const m of report.metrics) {
+    for (const e of m.exportDeltas?.changed ?? []) {
+      if (e.delta >= TRACE.verdict) { movers.push({ ...e, label: m.label }); }
+    }
+  }
+  if (!movers.length) { return lines; }
+  movers.sort((a, b) => b.delta - a.delta);
+  const shown = movers.slice(0, 2)
+    .map((e) => `\`${escapeCode(e.name)}\` **${signedSize(e.delta)}** min (\`${escapeCode(e.label)}\`)`)
+    .join(', ');
+  const more = movers.length > 2 ? ` and ${movers.length - 2} more` : '';
+  return [...lines, `Import costs moved: ${shown}${more} — see Tracked import costs.`];
 }
 
-function changedRow(m, headlineId) {
+function changedRow(m, headlineId, attributed) {
   const mark = m.id === headlineId ? ' 🎯' : m.treeShaken ? ' †' : '';
   const brotliAbs = m.status === 'removed' ? '—' : formatSize(m.head.brotli);
   const change = m.status === 'added'
@@ -345,7 +501,83 @@ function changedRow(m, headlineId) {
     : m.status === 'removed'
     ? 'removed'
     : signedPct(m.delta.brotli, m.base.brotli);
-  return `| \`${escapeCode(m.label)}\`${mark} | ${brotliAbs} | ${signedSize(m.delta.brotli)} | ${change} |`;
+  const row = `| \`${escapeCode(m.label)}\`${mark} | ${brotliAbs} | ${signedSize(m.delta.brotli)} | ${change}`;
+  return attributed ? `${row} | ${fromCell(m)} |` : `${row} |`;
+}
+
+// one tight cell: where the movement came from, top sources by share of the
+// total module-level movement, at most two named
+function fromCell(m) {
+  const deltas = m.moduleDeltas ?? [];
+  if (!deltas.length) { return '—'; }
+  const total = deltas.reduce((n, d) => n + Math.abs(d.delta), 0);
+  if (total === 0) { return '—'; }
+  const parts = deltas.slice(0, 2)
+    .map((d) => `\`${escapeCode(d.key)}\` ${Math.round((Math.abs(d.delta) / total) * 100)}%`);
+  if (deltas.length > 2) { parts.push('…'); }
+  return parts.join(' · ');
+}
+
+function dominantSource(m) {
+  const deltas = m.moduleDeltas ?? [];
+  if (!deltas.length) { return null; }
+  const total = deltas.reduce((n, d) => n + Math.abs(d.delta), 0);
+  if (total === 0) { return null; }
+  const top = deltas[0];
+  return Math.abs(top.delta) / total >= 0.6 ? top.key : null;
+}
+
+// tracked import costs: one row per moved co-movement group, named by its
+// master. slaves are priced but never listed — covariance that is known is
+// kept out of mind, so a row here is always a distinct finding
+function renderTrackedExports(lines, report) {
+  const traced = report.metrics.filter((m) => m.exportDeltas !== undefined);
+  if (!traced.length) { return; }
+  const moved = traced.filter((m) => m.exportDeltas);
+  const count = moved.reduce(
+    (n, m) => n + m.exportDeltas.changed.length + m.exportDeltas.added.length + m.exportDeltas.removed.length,
+    0,
+  );
+  lines.push('<details>');
+  lines.push(
+    `<summary>Tracked import costs (${traced.map((m) => escapeText(m.label)).join(' · ')}): ${
+      count === 0 ? 'no movement' : `${count} moved`
+    }</summary>`,
+  );
+  lines.push('');
+  if (!moved.length) {
+    lines.push("No tracked export's import cost moved.");
+  }
+  else {
+    lines.push('| package | export | min | Δ min |');
+    lines.push('|---|---|---:|---:|');
+    for (const m of moved) {
+      for (const e of m.exportDeltas.changed) {
+        const pct = e.pct != null && Math.abs(e.pct) >= 1
+          ? ` (${e.pct > 0 ? '+' : '-'}${Math.abs(e.pct).toFixed(0)}%)`
+          : '';
+        lines.push(
+          `| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | ${formatSize(e.head)} | ${
+            signedSize(e.delta)
+          }${pct} |`,
+        );
+      }
+      for (const e of m.exportDeltas.added) {
+        lines.push(`| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | ${formatSize(e.bytes)} | new |`);
+      }
+      for (const e of m.exportDeltas.removed) {
+        lines.push(`| \`${escapeCode(m.label)}\` | \`${escapeCode(e.name)}\` | — | removed |`);
+      }
+    }
+    lines.push('');
+    lines.push(
+      '<sub>The minified cost of importing just this export, standalone. One row per co-movement'
+        + ' group, named by its master — full per-export pricing in size-report.json.</sub>',
+    );
+  }
+  lines.push('');
+  lines.push('</details>');
+  lines.push('');
 }
 
 function renderLocByScope(lines, report) {
@@ -414,12 +646,15 @@ function negate(s) {
   return { raw: -s.raw, gzip: -s.gzip, brotli: -s.brotli };
 }
 
+// snapshot fields are artifact data — a non-numeric value renders as a dash, never as markdown
 function formatSize(bytes) {
+  if (typeof bytes !== 'number' || !Number.isFinite(bytes)) { return '—'; }
   const n = Math.abs(bytes);
   return n >= 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${bytes} B`;
 }
 
 function signedSize(bytes) {
+  if (typeof bytes !== 'number' || !Number.isFinite(bytes)) { return '—'; }
   if (bytes === 0) { return '0 B'; }
   const sign = bytes > 0 ? '+' : '-';
   const n = Math.abs(bytes);

@@ -33,6 +33,22 @@ import path from 'node:path';
 // real signal, so they stay in.
 const TREE_SHAKEN = new Set(['utils']);
 
+// Packages whose per-export import cost is traced. Consumption model per the
+// 2026-07-02 study (ai/workspace measured every export's module graph):
+//   - utils: 139 exports over 39 distinct graphs — maximally piecemeal, every
+//     mover is signal. Clusters are module families (type guards, casing,
+//     coercion), so grouped rendering collapses a family to one row.
+//   - reactivity: 22 exports over 13 graphs — piecemeal with a heavy shared
+//     core (computed/derive/match co-move at ~15 KB, signal at ~14 KB).
+//   - query: 7 exports over 2 graphs — one engine, two doors. $ carries $$,
+//     Query, and the global helpers; registerBehavior adds the behavior stack.
+// Every export is priced; the reporter renders one row per co-movement group,
+// named by its master. Framework internals (renderer, templating, component)
+// are consumed whole — bundle rows and the `from` column already cover them,
+// so they are never export-traced. Future piecemeal packages (data, schema,
+// time) join this list with their consumption model noted.
+export const TRACED_PACKAGES = new Set(['utils', 'reactivity', 'query']);
+
 // org-stripped, lowercased package name — matches the build's output filename
 // rule (internal-packages/scripts/src/lib/build.js).
 function bundleName(pkgName) {
@@ -56,6 +72,7 @@ function discoverPackages(repoRoot) {
       label: name,
       group: 'package',
       scope: name,
+      dir: entry,
       file: `packages/${entry}/dist/bundle/${name}.min.js`,
       headline: name === 'component',
       treeShaken: TREE_SHAKEN.has(name),
