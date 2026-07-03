@@ -42,8 +42,12 @@ const createComponent = ({ self, el, settings, state, data, reaction, findParent
   },
 
   createEditor() {
+    const parent = $('.file-editor').el();
+    if (!parent) {
+      return;
+    }
     self.editor = createEditor({
-      parent: $('.file-editor').el(),
+      parent,
       lineNumbers: Boolean(data.lineNumbers),
       lineWrapping: Boolean(data.lineWrapping),
       tabSize: 2,
@@ -58,6 +62,9 @@ const createComponent = ({ self, el, settings, state, data, reaction, findParent
 
   syncFile() {
     const filename = self.getFilename();
+    if (!self.editor) {
+      self.createEditor();
+    }
     if (!filename || !self.editor) {
       return;
     }
