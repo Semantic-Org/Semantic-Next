@@ -30,8 +30,10 @@ host and classified by billing dimension:
 3. **Storage adapter.** The change log is the adapter's change stream (Postgres logical
    replication, Mongo change streams, libSQL replication, or a transactional outbox). A
    separate priced axis with its own billing unit per engine.
-4. **Coordination.** Multi-node fan-out and the ephemeral tier ride Redis pub/sub; the log
-   may be a Redis stream or the DB's CDC. Zero at single-node (the in-memory ring buffer).
+4. **Coordination.** Multi-node fan-out and the ephemeral tier ride Streams-protocol
+   pub/sub (redis/valkey — valkey is the open continuation after the 2024 relicense); the
+   log may be a stream on the same bus or the DB's CDC. Zero at single-node (the in-memory
+   ring buffer).
 
 ## Per-message billing is architecturally disqualified
 
@@ -70,9 +72,9 @@ docs page when packages land:
 
 | tier | host | storage engine | notes |
 |---|---|---|---|
-| hobbyist | $5 VPS (Vultr/Hetzner) or Fly free | SQLite / in-memory adapter | single node, no Redis, minutes to two browsers syncing |
+| hobbyist | $5 VPS (Vultr/Hetzner) or Fly free | SQLite / in-memory adapter | single node, no coordination service, minutes to two browsers syncing |
 | small-prod | Fly (always-on) or Railway | Neon (usage) or Fly MPG | one worker + managed Postgres, optional Upstash Redis |
-| enterprise | bare metal (Hetzner/OVH) or own cloud | own Postgres / Mongo + Redis | stateless-worker fleet + durable log; egress-free bare metal is the cost story |
+| enterprise | bare metal (Hetzner/OVH) or own cloud | own Postgres / Mongo + a Streams-protocol bus (redis/valkey) | stateless-worker fleet + durable log; egress-free bare metal is the cost story |
 
 Gotchas that ship with that page: WebSocket idle-timeouts (some hosts close long-lived
 sockets), egress metering (fan-out is bandwidth-heavy on metered hosts), managed-Postgres
