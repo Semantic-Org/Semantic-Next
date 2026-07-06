@@ -1,6 +1,7 @@
 import { TemplateCompiler } from '@semantic-ui/compiler';
 import { defineComponent } from '@semantic-ui/component';
-import { Tooltip } from '@semantic-ui/core';
+// bare side-effect import: a named import gets elided by the bundler, dropping registration
+import '@semantic-ui/core';
 import css from './CodePlaygroundPreview.css?raw';
 import template from './CodePlaygroundPreview.html?raw';
 import './lib/pretty-json.js';

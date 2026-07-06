@@ -1,4 +1,5 @@
-import { CopyButton, Tooltip } from '@semantic-ui/core';
+// bare side-effect import: a named import gets elided by the bundler, dropping registration
+import '@semantic-ui/core';
 import pretty from 'pretty';
 import { codeToHtml } from 'shiki';
 
