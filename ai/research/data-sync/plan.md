@@ -430,7 +430,7 @@ Lessons from production schema-bound form systems:
 
 ## Not in v1
 
-CRDTs, IVM/differential dataflow, client-composed queries-as-subscriptions, SQLite/OPFS, offline-first, SSR hydration handoff. The last is an adjacent gap worth noting: the snapshot is naturally serializable and is the obvious vehicle when SSR handoff gets tackled.
+CRDTs, IVM/differential dataflow, client-composed queries-as-subscriptions, SQLite/OPFS (client-side storage — the server-side sqlite adapter is separate and planned), offline-first, SSR hydration handoff. The last is an adjacent gap worth noting: the snapshot is naturally serializable and is the obvious vehicle when SSR handoff gets tackled.
 
 ## Priors Audit — Where 2026 Voted Against the Meteor Shape
 
@@ -505,4 +505,4 @@ How to build is a separate question from what to build. Phases gate on each othe
 
 ## Status
 
-Initial scope, drafted from the 2026-06-09 session. Autonomy: pair. Research corpus in [`research/`](research/).
+Settled design, validated by a working prototype (sync-poc); the packages do not exist in this repo yet, and the work is post-1.0, off the launch critical path. This corpus is the canonical reference until packages land. Autonomy: pair. Research corpus in [`research/`](research/).
