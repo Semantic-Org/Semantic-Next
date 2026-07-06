@@ -1,6 +1,6 @@
 # Storage & multi-box scale — the change-log model
 
-Status: **design note.** Storage is an adapter seam; no production adapter is built yet. This records the scale-shape decision so the public API can be hardened around it rather than around the single-process reference.
+Status: **design note.** Storage is an adapter seam; postgres is the priority hardening target (sort/keyset pushdown proven in the prototype), no production adapter shipped yet. This records the scale-shape decision so the public API can be hardened around it rather than around the single-process reference.
 
 ## Where the current implementation sits
 
@@ -22,6 +22,16 @@ This is Meteor's oplog idea done right, and the model the modern CDC sync engine
 
 The scale-correct contract is that **the adapter owns the ordered change stream + durable offsets** (the cursor comes *from* the adapter) — not the kernel computing an in-process cursor over a passive doc store, which is the current in-memory adapter's shape. Building the first log-backed adapter is what validates whether the seam is in the right place (the in-memory adapter never stressed it, because in-process the kernel legitimately *can* own the cursor). Likely first target: **Postgres logical replication** — a replication slot decoding the WAL (`pgoutput`/`wal2json`), LSN = offset, the slot's exported snapshot solving consistent-snapshot-at-offset. (The raw WAL is physical; you consume *logical decoding* of it.)
 
+## The sqlite-family adapter
+
+One sqlite-family adapter, three drivers behind it, differentiated by capability flags the way memory and postgres already are (`scanSnapshotAtCall`, `ensureIndex`) — ruled 2026-07-05 (at 80), with postgres stability the priority and this adapter sequenced after. The vocabulary is engine names, never products:
+
+- **sqlite** (`node:sqlite`) — the zero-dep floor and correctness oracle (FTS5, generated columns, JSON). No change feed: the framework owns capture, and write-path-primary makes that free single-process. Single writer, a synchronous driver behind the async seam.
+- **libsql** — the production-grade networked rung: embedded replicas, SQLCipher, vector. Physical page replication, no CDC; async is a client wrapper, so the adapter must batch aggressively (the bulk substrate and `getMany` serve this).
+- **turso** (the Rust engine) — the realtime-native rung, **beta, opt-in and version-pinned**, its differentiators exactly what the layer otherwise hand-builds: queryable CDC (txn-grouped), MVCC concurrent writes (commit-time conflicts, so the adapter needs retry loops), an async-native engine, logical sync with partial bootstrap. Footguns on record: unindexed COUNT ~19× slower (window totals want cached/indexed counts), large-result joins pathological, full-mode CDC ~3× write amplification.
+
+**The no-config fallback is the sqlite outfile** (ruled at 90): postgres always falls back to a local sqlite database when no server is configured, with a boot warning that fires every boot — informative, not shaming (`no postgres server specified to 'dbServer' - using ./data/app.db (sqlite)`). Memory stays explicit-only — the conformance oracle and ephemeral substrate, never a silent default. **Which engine the docs market as THE default is deferred to the docs freeze**, decided with the flavor-build evidence in hand.
+
 ## Collection indexes — what a collection indexes (NOT the `searchIndex` channel)
 
 **Disambiguation first, because the names collide.** A **storage index** (this note) is a backend structure declared *on a collection* — *what to index* — and is purely an acceleration. The **`searchIndex` channel** is a different thing one layer up: a client-driven *search* (personal `query/where/sort/page`, non-reactive by default — `live: false` + `refresh: 'own-writes'`), i.e. **searching from the client over a channel that is not live pub/sub** — you issue a query and get a window, you are not pushed every change. A `searchIndex` channel *runs a query that storage indexes can accelerate*, but it is a channel/query construct, not an index; the same storage indexes back it and ordinary live channels alike.
@@ -41,7 +51,7 @@ defineCollection('records', {
 
 Realized through a new adapter-contract method **`ensureIndex(collection, spec)`**, called by the server at registration. Postgres builds a composite btree from the *same* per-key direction/`NULLS`/`COLLATE` mapping its `ORDER BY` emits (so the planner uses it for the keyset), and a GIN/`tsvector` (or vector) index for a search `type`; the in-memory adapter no-ops (it scans); a future dedicated search adapter realizes its own. One `type` field spans `btree` (sort/keyset) and `fulltext`/`vector` (text/search) — the `id` tiebreak and `COLLATE` are implied so the index matches the adapter's own ordering. Declare-explicit — an index is a write-cost choice — with a framework diagnostic when a published sort or a `searchIndex` query has no matching index, not blind auto-derivation.
 
-**Status:** the sort/limit/keyset pushdown is built + panel-reviewed in the Postgres adapter (sync-poc); the collection-level index declaration + the `ensureIndex` seam land with **schema** (separate PR).
+**Status:** the sort/limit/keyset pushdown is built + panel-reviewed in the prototype Postgres adapter (sync-poc). The collection `indexes:` config is the sole index-declaration surface (ruled 2026-07-04), realized at registration through `ensureIndex` (declared = created, degrade-not-crash), with search text-mode fields warning hard and ensuring the index. The declaration + `ensureIndex` seam land with the **schema** package (separate PR).
 
 ## The one fork: who owns the write path
 

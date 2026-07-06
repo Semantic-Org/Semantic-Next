@@ -1,5 +1,7 @@
 # Reactivity Review — plan.md vs packages/reactivity
 
+> Note: the `file:line` citations below predate the #231 signal-helper renames — refresh them against current source before leaning on any specific line reference.
+
 Audit of every reactivity-touching claim in [`plan.md`](plan.md) against the real source (2026-06-10). One classifier agent traced `packages/reactivity/src`, `trackWrites` (working tree), and the renderer's RDC/each where the plan depends on them. Seven adversarial agents then attacked the high-stakes calls — refuters against "works-traced", rescuers against "plan-must-change" — tracing independently, without the classifier's reasoning.
 
 Epistemics: "works-traced" means the mechanism is unconditionally present in source with the trace cited. Traces are still hypotheses by house rules — the file:line citations are what make them checkable, and anything that graduates into implementation gets its failing test regardless.

@@ -1,6 +1,6 @@
 # Scenario — The Workload This Layer Exists To Serve
 
-Status: **proposed — awaiting confirmation.** Values marked ~ are working assumptions to confirm or correct. Once confirmed, this document is the ground truth that benches, steelmen, referee briefs, and protocol decisions cite. When a design choice and this document disagree, this document wins or gets amended — never silently ignored.
+Status: **stipulated.** The parameters here (values marked ~) remain working assumptions, stipulated for design purposes and pending confirmation. This document is nonetheless the ground truth that benches, steelmen, referee briefs, and protocol decisions cite; when a design choice and this document disagree, this document wins or gets amended, never silently ignored.
 
 ## The Domain
 
