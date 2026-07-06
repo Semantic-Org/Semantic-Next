@@ -46,10 +46,18 @@ jobs:
       # build in CI and ship prebuilt to the staging environment, so Vercel runs
       # no remote build. the CLI pairs --environment (pull) with --target
       # (build/deploy) for a custom environment.
+      #
+      # remote builds get VERCEL_URL injected; prebuilt CI builds don't, and
+      # without it the astro `site` falls back to dev.semantic-ui.com and bakes
+      # dev URLs into the playground import maps. bake the staging domain instead.
       - name: Build and deploy docs to staging
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           npx vercel pull --yes --environment=staging --token="$VERCEL_TOKEN"
-          npx vercel build --target=staging --token="$VERCEL_TOKEN"
+          if [ -f .vercel/.env.staging.local ]; then
+            sed -i '/^VERCEL_URL=/d' .vercel/.env.staging.local
+            echo "VERCEL_URL=staging.semantic-ui.com" >> .vercel/.env.staging.local
+          fi
+          VERCEL_URL="staging.semantic-ui.com" npx vercel build --target=staging --token="$VERCEL_TOKEN"
           npx vercel deploy --prebuilt --target=staging --token="$VERCEL_TOKEN"
