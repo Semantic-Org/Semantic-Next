@@ -44,7 +44,7 @@ Three packages that unbundle deliberately (the lesson of Meteor, fused and unabl
 @semantic-ui/schema   definition, validation, serialization — shared by component values, collections, op args
 @semantic-ui/data     collections, reactive find, mutators + actions — standalone, no network
 @semantic-ui/sync     protocol client: channels, cursors, delta apply, outbox, persistence
-reference server      node + redis — one implementation of the protocol, not the protocol itself
+reference server      node, coordination behind a seam — one implementation of the protocol, not the protocol itself
 ```
 
 `@semantic-ui/data` works alone: local collections with queries, drafts, and local persistence, no network. That is the first rung and a useful library in itself. The full design and decision record live in **`plan.md`**.
@@ -64,7 +64,7 @@ Each client holds an **opaque cursor** per channel marking how far it has consum
 The server story is a gradient, mirroring the adoption gradient:
 
 - **No server.** Local collections run on the CDN tag with zero backend, SUI's existing story.
-- **One server.** The reference node + redis implementation, one command, for hobbyist and small-prod. The current kernel is single-process and in-memory, deliberately this tier.
+- **One server.** The reference node implementation, one command, for hobbyist and small-prod — no external coordination service at this tier. The current kernel is single-process and in-memory, deliberately this tier.
 - **Many servers.** Stateless fan-out workers at scale.
 
 What makes the jump possible is a **stateless-by-design protocol**: there is no session to resume, only positions to continue from. All durable progress is client-held (cursors, outbox) or server-derivable (the idempotency ledger), so there are no sticky sessions and any node answers any reconnect, a serverless-friendly posture. The one new requirement at fleet scale is a **durable, totally-ordered change log as the source of truth**: the cursor becomes the log offset, every box agrees on it, and sync nodes become stateless workers tailing it. This is Meteor's oplog idea done right and the model the modern CDC engines use, with Postgres logical replication (the LSN as offset) the likely first log-backed adapter. The one fork is who owns the write path, a transactional outbox for owned writes versus tailing the database's CDC for every writer, and the two compose. The scale model is **`storage-and-scale.md`**, the server posture **`plan.md`** Decision 9.
@@ -89,7 +89,7 @@ Eleven calls from the 2026-06-09 session, all settled (full reasoning and reject
 6. **Realtime default** — tiered. Routed channels live by default, recompute channels (searchIndex) choose, `live: false` is their default.
 7. **Transport** — WebSocket default, the opaque cursor is the protocol core, delivery pluggable.
 8. **Invalidation routing** — write-path capture primary, CDC `watch()` the optional backstop for external writers.
-9. **Server posture** — protocol-first, reference node + redis, portable because conformance-tested not because small.
+9. **Server posture** — protocol-first, reference node implementation with coordination behind a seam, portable because conformance-tested not because small.
 10. **Offline posture** — offline-tolerant, not offline-first. Outbox survives reload and replays. No long-offline merge for shared data.
 11. **System of record** — the layer owns the write path, storage is an adapter behind it.
 
