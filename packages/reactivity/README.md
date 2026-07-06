@@ -32,10 +32,10 @@ You can create a reaction by simply creating a variable then modifying its value
 
 ```javascript
 
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Signal, reaction } from '@semantic-ui/reactivity';
 
 let reactiveValue = new Signal('first');
-Reaction.create(computation => {
+reaction(computation => {
   console.log(reactiveValue.get());
 });
 
@@ -50,10 +50,10 @@ saying.set('second');  // option 2
 
 ```javascript
 
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Signal, reaction } from '@semantic-ui/reactivity';
 
 let saying = new Signal('hello');
-Reaction.create(comp => {
+reaction(comp => {
   if(comp.firstRun) {
     console.log('First run!');
   }
@@ -76,7 +76,7 @@ Objects
 let obj1 = { name: 'Sally', age: 22 };
 let obj2 = { name: 'Sally', age: 22 };
 let reactiveObj = new Signal(obj1);
-Reaction.create(comp => {
+reaction(comp => {
   console.log(reactiveObj.get());
 });
 reactiveObj.set(obj2);
@@ -91,7 +91,7 @@ let obj1 = { name: 'Sally', age: 22 };
 let obj2 = { name: 'Sally', age: 23 };
 let reactiveObj = new Signal(obj1);
 
-Reaction.create(comp => {
+reaction(comp => {
   console.log(reactiveObj.get());
 });
 
@@ -108,7 +108,7 @@ const customIsEqual = (a, b) => {
 }
 let reactiveObj = new Signal({ name: 'Sally', age: 22 }, customIsEqual);
 
-Reaction.create(comp => {
+reaction(comp => {
   const obj = reactiveObj.get();
   console.log('Log');
 });
@@ -123,14 +123,14 @@ You can use the `set` helper to declaratively update values like arrays and obje
 Objects
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Signal, reaction } from '@semantic-ui/reactivity';
 
 let person = {
   name: 'Jack',
   age: 32,
 }
 let reactivePerson = new Signal(person);
-Reaction.create(comp => {
+reaction(comp => {
   console.log(reactivePerson.get().name);
 });
 
@@ -150,7 +150,7 @@ let rows = [
 ];
 let reactiveRows = new Signal(rows);
 
-Reaction.create(comp => {
+reaction(comp => {
   console.log(reactiveRows.get().length);
 });
 
@@ -200,10 +200,10 @@ console.log('Value is now false again');
 You can use `firstRun` to determine if this calculation is running from an initial value being set. Keep in mind though if you leave the function early on first run it will never set up a reactive reference to unreachable code.
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Signal, reaction } from '@semantic-ui/reactivity';
 
 let saying = new Signal('hello');
-Reaction.create(comp => {
+reaction(comp => {
   if(comp.firstRun) {
     return;
   }
@@ -212,7 +212,7 @@ Reaction.create(comp => {
   // outputs nothing (early termination on first run prevents reactive var from being referenced)
 });
 
-Reaction.create(comp => {
+reaction(comp => {
   let saying = saying.get();
   if(comp.firstRun) {
     return;
@@ -242,8 +242,8 @@ You can help fine-tune reactivity by using guard to only pay attention to certai
       date: lastUpdated,
     };
   };
-  Reaction.create((comp) => {
-    Reaction.guard(() => {
+  reaction((comp) => {
+    guard(() => {
       let user = getUserInfo(); // we only want to call this function if name/age changes
       return {
         name: user.name,
@@ -279,13 +279,13 @@ console.log(`Current value without establishing dependency: ${currentValue}`);
 ```
 
 ### Nonreactive
-The `Reaction.nonreactive` function allows you to perform computations or access reactive variables without establishing a reactive dependency. This is useful when you need to read from a reactive source but don't want the surrounding computation to re-run when the source changes.
+The `nonreactive` function allows you to perform computations or access reactive variables without establishing a reactive dependency. This is useful when you need to read from a reactive source but don't want the surrounding computation to re-run when the source changes.
 
 ```javascript
 const reactiveValue = new Signal('Initial Value');
 
 // Perform a non-reactive read
-Reaction.nonreactive(() => {
+nonreactive(() => {
   const value = reactiveValue.get();
   console.log(`Read inside nonreactive: ${value}`);
 });
@@ -297,42 +297,42 @@ reactiveValue.set('Updated Value'); // Does not trigger the console.log inside n
 
 When a `Signal` updates an update is enqueued and flushes asynchronously when the microtask queue is processed. This means that intermediary values will not be processed when updating code in a loop.
 
-You can trigger the queue to be immediately flushed to prevent this by using the `Reaction.flush()` helper.
+You can trigger the queue to be immediately flushed to prevent this by using the `flush()` helper.
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Signal, reaction, flush } from '@semantic-ui/reactivity';
 
 let number = new Signal(1);
-Reaction.create(comp => {
+reaction(comp => {
   console.log(number.get());
 });
 
 [1,2,3,4,5].forEach(value => number.set(value));
 
 let number = new Signal(1);
-Reaction.create(comp => {
+reaction(comp => {
   console.log(number.get());
 });
 
 [1,2,3,4,5].forEach(value => {
   number.set(value);
-  Reaction.flush();
+  flush();
 });
 // outputs 1,2,3,4,5
 ```
 
 ### Accessing Computation
 
-You can access the current computation either using the returned value from `create` or as the first parameter of the callback.
+You can access the current computation either using the returned value from `reaction` or as the first parameter of the callback.
 
 This can be helpful to inspect the listeners or to stop the computation using the `stop` method.
 
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+import { Signal, reaction, flush } from '@semantic-ui/reactivity';
 
 let number = new Signal(1);
-Reaction.create(comp => {
+reaction(comp => {
   if(number.get() > 3) {
     comp.stop();
     return;
@@ -340,7 +340,7 @@ Reaction.create(comp => {
   console.log(number.get());
 });
 
-let comp = Reaction.create(() => {
+let comp = reaction(() => {
   if(number.get() > 3) {
     comp.stop();
     return;
@@ -350,7 +350,7 @@ let comp = Reaction.create(() => {
 
 [1,2,3,4,5].forEach(value => {
   number.set(value);
-  Reaction.flush();
+  flush();
 });
 // both output 1,2,3
 

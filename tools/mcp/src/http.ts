@@ -23,7 +23,7 @@
  * the SDK for middleware environments (Express body-parser, Vercel, etc.)
  * that consume the body before the transport sees it.
  *
- * BUILD: esbuild bundles this into a single api/mcp.js file (see build.js).
+ * BUILD: esbuild bundles this into a single dist/api/mcp.js file (see build.js).
  * Vercel's own TS compilation choked on the framework packages — they use
  * ESM export maps without "type": "module" which works at runtime but
  * confuses Vercel's bundler. Pre-bundling with esbuild sidesteps this.
