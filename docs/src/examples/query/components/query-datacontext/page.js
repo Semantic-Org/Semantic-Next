@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { Reaction } from '@semantic-ui/reactivity';
+import { reaction } from '@semantic-ui/reactivity';
 
 // can only read data after component is rendered
 // see <https://next.semantic-ui.com//components/lifecycle#dom-lifecycle-events>
@@ -8,7 +8,7 @@ $('ui-demo').on('rendered', () => {
   console.log('Data context is', data);
 
   // we can actually use internal signals to create reactions!
-  Reaction.create(() => {
+  reaction(() => {
     $('.counter').text(data.count.get());
   });
 });

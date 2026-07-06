@@ -2,12 +2,12 @@
   <head>
     <script src="https://cdn.semantic-ui.com/load" version="canary" reactivity css></script>
     <script type="module">
-      import { Signal, Reaction } from '@semantic-ui/reactivity';
+      import { Signal, reaction } from '@semantic-ui/reactivity';
 
       const count = new Signal(0);
       const doubled = count.derive(n => n * 2);
 
-      Reaction.create(() => {
+      reaction(() => {
         document.querySelector('#count').textContent = count.value;
         document.querySelector('#doubled').textContent = doubled.value;
       });
