@@ -3,9 +3,9 @@ import { isString, noop, tokenize } from '@semantic-ui/utils';
 
 // bare side-effect imports: these register tooltip's dependency behaviors.
 // a named import gets elided by the bundler, dropping the registration.
-import '../attach/attach.js';
-import '../escape/escape.js';
-import '../transition/transition.js';
+import { Attach } from '../attach/attach.js';
+import { Escape } from '../escape/escape.js';
+import { Transition } from '../transition/transition.js';
 
 import css from './tooltip.css?raw';
 
