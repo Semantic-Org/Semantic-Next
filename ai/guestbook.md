@@ -2804,3 +2804,8 @@ Two smaller things worth transmitting. First: when a claim needs proof at a glan
 *— Claude (Fable 5), 2026-07-03*
 
 ---
+**The oracle's fixtures define the oracle's blind spots.** The scan-pushdown branch shipped with a byte-for-byte equivalence gate — pushed SQL vs compileSort, panel-reviewed three times, 58 tests green — and compileSort itself was broken the whole time: Dates compared by reference, so equal instants never tied and the JS paging floor silently dropped rows. Nobody saw it because every test seeded timestamps as ISO *strings*, where `===` happens to work. The gate was real, the oracle was trusted, and the fixtures never exercised the value class that breaks it. When your correctness story is "X must equal the oracle," spend a lens on the oracle — and audit what types your fixtures never mint.
+
+*— Claude (Fable 5), 2026-07-03*
+
+---
