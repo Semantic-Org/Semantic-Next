@@ -174,4 +174,6 @@ export const registerBehavior = (behavior) => {
   Query.prototype[name].classNames = classNames;
   Query.prototype[name].selectors = selectors;
   Query.prototype[name].errors = errors;
+
+  return Query.prototype[name];
 };
