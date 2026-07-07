@@ -1,4 +1,4 @@
-# Protocol v2 — Conformance Case Skeleton
+# Protocol v2 — Conformance Cases
 
 The case catalog for the cross-transport conformance battery. [`ws-protocol.md`](ws-protocol.md) cites these ids at its load-bearing clauses; the wire-freeze implementation builds the battery against this list. This document is the skeleton — ids, the clause each case evidences, what fails without it (the red-before), and worked wire fixtures for the cases whose proof is a frame sequence. Portability is delivered here: a second implementation validates by passing this battery, not by the spec being small.
 
@@ -10,7 +10,7 @@ The spec promises a future non-JS implementation validates by running the suite.
 
 **(b) Live driver.** A driver speaking the wire against any implementation through the transport seam, asserting semantics (ordering, settlement, resume outcomes) rather than bytes. *For:* timing and interleaving cases express naturally, crash/restart and valve cases are drivable, and the cross-transport requirement is native — the same battery pointed at every registered transport, the shape the existing smoke battery already proves. *Against:* the driver is a program, not data — a non-JS **server** validates against the JS driver cheaply (the driver is just a client), but certifying a non-JS **client** needs the counterpart server driver; more machinery than fixtures.
 
-**(c) Hybrid.** Vectors-as-data for the pure derivations, live driver for choreography. Each case below carries a `shape` tag — `vector` (pure input → output, transcript/fixture-friendly) or `driver` (timing, state, or crash semantics) — as input to this ruling, not a pre-emption of it: if (a) or (b) is ruled outright, the tags say which cases get forced into an unnatural shape. The tags fall roughly 5 vector / 25 driver.
+**(c) Hybrid.** Vectors-as-data for the pure derivations, live driver for choreography. Each case below carries a `shape` tag — `vector` (pure input → output, transcript/fixture-friendly) or `driver` (timing, state, or crash semantics) — as input to this ruling, not a pre-emption of it: if (a) or (b) is ruled outright, the tags say which cases get forced into an unnatural shape. The tags fall 4 vector / 29 driver across the 33 cases.
 
 ## The catalog
 
@@ -21,9 +21,9 @@ Gate tokens map each case to the phase-1 gate clause it evidences: `wire-freeze`
 | id | shape | gate | asserts | red-before |
 |---|---|---|---|---|
 | `address-vectors` | vector | wire-freeze | `(name, args)` → canonical address, byte-for-byte, both sides — empty args, nested key ordering, number forms, unicode | v1 named JCS but shipped no vectors and no derived `collection.name` rule — two implementations could quietly disagree |
-| `address-divergence-loud` | driver | wire-freeze | a frame for an unknown address while a sub is outstanding surfaces a dev-mode error naming the nearest pending sub | today a JCS divergence is a silently empty channel |
+| `address-divergence-loud` | driver | wire-freeze | a frame for an unknown address while a sub is outstanding surfaces a dev-mode error naming the nearest pending sub | in the shipped tree a JCS divergence is a silently empty channel |
 | `transport-frame-equivalence` | driver | battery | one choreography, byte-identical frames over ws, SSE-downstream/fetch-uplink, and the poll pair | v1 had no transport clause; equivalence was a claim, not a case |
-| `wire-clean-frames` | vector | wire-freeze | no frame in any transcript carries `txid` or `spans` | v1's schema *required* them on `delta` and `result` |
+| `wire-clean-frames` | vector | wire-freeze | no frame in any transcript carries `txid` or `spans` | v1's schema carried `txid?`/`spans?` on `delta` and `result`, required for every multi-channel transaction |
 
 ### Atomicity (§2)
 
@@ -32,13 +32,13 @@ Gate tokens map each case to the phase-1 gate clause it evidences: `wire-freeze`
 | `atomicity-packed-frame` | driver | wire-freeze | a two-channel transaction arrives as one array frame and applies as one unit (fixture W1) | v1 ships per-channel frames + `spans` + client hold rules and a 10s timeout valve |
 | `atomicity-resume-regroup` | driver | wire-freeze | at resume, tail entries sharing a transaction regroup into one frame across the resume batch | v1 resume replays per channel; regrouping did not exist |
 | `atomicity-tier-scope` | driver | wire-freeze | a transaction touching a live and a coalesced channel: live frame packs alone, no cross-tier grouping, no hold | v1's `spans` implied waiting on channels that legally never emit — the review's hold-livelock |
-| `snapshot-atomic-commit` | driver | wire-freeze | a torn snapshot stream discards and retries; nothing partial ever applies; commit only at `live` | carried forward from v1 (the checkpoint bracket) — retained, now with queued-frame discard asserted alongside |
+| `snapshot-atomic-commit` | driver | wire-freeze | a torn snapshot stream discards and retries; nothing partial ever applies; commit only at `live`; a transaction fanned to a mid-snapshot subscriber is inside the snapshot or delivered after the terminal chunk, never dropped | carried forward from v1 (the checkpoint bracket) — v1 never stated the snapshot/commit ordering contract that makes queued-message discard safe |
 
 ### Settlement (§2)
 
 | id | shape | gate | asserts | red-before |
 |---|---|---|---|---|
-| `settlement-own-writes-live` | driver | settlement | on a coalesced channel, the writer's own delta reaches the writing socket before its `result` (fixture W2) | today the coalescing window holds the delta past the result — settle drops the overlay and the confirmed write visibly reverts for up to the freshness window |
+| `settlement-own-writes-live` | driver | settlement | on a coalesced channel, the writer's own delta reaches the writing socket before its `result` (fixture W2) | in the shipped tree the coalescing window holds the delta past the result — settle drops the overlay and the confirmed write visibly reverts for up to the freshness window |
 | `settlement-positions-backstop` | driver | settlement | a call settles only after `result` arrived AND every subscribed `positions` entry is passed by the channel's applied cursor | v1 settles on txid-group application, which has no answer on coalesced tiers |
 | `settlement-epoch-unknown` | driver | settlement | a position from a bumped epoch compares unknown and resolves through resnapshot — the write is in the fresh snapshot | v1 has no positions; nearest analog (txid LRU) silently never resolves across an epoch |
 
@@ -48,13 +48,13 @@ Gate tokens map each case to the phase-1 gate clause it evidences: `wire-freeze`
 |---|---|---|---|---|
 | `auth-refresh-regate` | driver | wire-freeze | a successful `auth` refresh re-runs the `permission` slot per subscribed channel; a revoked channel gets `nosub 4202` | v1's refresh leaves subscriptions untouched — a refreshing client holds revoked subscriptions forever (the laundering case) |
 | `auth-principal-pinned` | driver | wire-freeze | re-auth presenting a different principal closes `4103` (or fully re-gates); the session is never silently relabeled | v1 has no same-principal clause and no 4103 |
-| `auth-expiry-serverbound` | driver | wire-freeze | with a non-cooperating client, the server demands via `reauth` and closes `4101` at the deadline — revocation ≤ min(`server.revoke`, `authExpiresIn`) | v1's expiry ran on client-scheduled refresh; no server-initiable demand existed |
+| `auth-expiry-server-owned` | driver | wire-freeze | with a non-cooperating client, the server demands via `reauth` and closes `4101` at the deadline — revocation ≤ min(`server.revoke`, `authExpiresIn`) | v1's expiry ran on client-scheduled refresh; no server-initiable demand existed |
 
 ### The park/rejection vocabulary (§6)
 
 | id | shape | gate | asserts | red-before |
 |---|---|---|---|---|
-| `park-rejection-classes` | driver | park-vocabulary | an aged replay rejected `4102` and a live validation rejection `4301` both settle as rejection-parks — content and args retained, surfaced, recoverable (fixture W4) | today's client silently drops the overlay at the error ack; typed work evaporates |
+| `park-rejection-classes` | driver | park-vocabulary | an aged replay rejected `4102` and a live validation rejection `4301` both settle as rejection-parks — content and args retained, surfaced, recoverable (fixture W4) | the shipped client silently drops the overlay at the error ack; typed work evaporates |
 | `park-revoked-retry-then-prune` | driver | park-vocabulary | `nosub 4202` → exactly one re-auth-and-resubscribe attempt → second 4202 → `subscription.state: 'denied'`, projection-union contribution prunes | v1 left the choreography open (its Q8); naive immediate prune flickers shared docs on transient denials |
 
 ### Ledger and watermark (§4)
@@ -79,7 +79,7 @@ Gate tokens map each case to the phase-1 gate clause it evidences: `wire-freeze`
 
 | id | shape | gate | asserts | red-before |
 |---|---|---|---|---|
-| `retention-none-snapshot` | driver | wire-freeze | resume against a `retention: 'none'` channel answers snapshot directly — no `reset` frame appears on the wire | v1 has no `retention: 'none'`; the nearest path spends a reset round trip |
+| `retention-none-snapshot` | driver | wire-freeze | resume against a `retention: 'none'` channel answers snapshot directly — no `reset` frame appears on the wire | v1 had no retention vocabulary — a zero-log channel was not expressible, and nothing pinned its resume behavior |
 | `epoch-bump-resnapshot` | driver | wire-freeze | `api.raw.bumpEpoch(target)` → every resume on affected channels answers snapshot under the new shape, for all three target shapes | v1 exposed no epoch-bump surface; reshaping migrations had no wire story |
 
 ### Limits and the code table (§2)
@@ -88,7 +88,7 @@ Gate tokens map each case to the phase-1 gate clause it evidences: `wire-freeze`
 |---|---|---|---|---|
 | `limits-4204` | driver | valves-limits-states | a channel-cap breach answers `nosub 4204`; an oversized call answers `result.error 4204` with the content retained client-side | 4204 has no legal answer under v1's table |
 | `limits-no-silent-drop` | driver | valves-limits-states | an outbound delta the socket cannot carry converts to reset → resnapshot; no delta is ever silently dropped | nothing in v1 banned the silent size-drop |
-| `codes-table-vectors` | vector | valves-limits-states | every code row: number, name, legal surfaces — including `4203` relocating the config error off `4202`, which v2 reserves for denial | the shipped tree squats `badConfig` on 4202; v1's table had no 4103/4203/4204/4504 |
+| `codes-table-vectors` | vector | valves-limits-states | every code row: number, label, legal surfaces (labels are doc vocabulary — only numbers ride the wire) — including `4203` relocating the config error off `4202`, which v2 reserves for denial | the shipped tree squats `badConfig` on 4202; v1's table had no 4103/4203/4204/4504 |
 
 ### Evolution and consumer-facing wire (§2, §7, §8)
 
@@ -141,7 +141,7 @@ Assertions: both channels' effects visible in the same flush; no `txid`/`spans` 
 
 A dashboard channel `invoices.table?…` declares `freshness: '5s'`. The subscribed writer updates an invoice's status.
 
-Under v1 semantics plus today's tree: the channel coalesces, so the `result` arrives while the delta is still held in the coalescing window. Settle-on-result drops the pending overlay → the pool reverts to the pre-write value → up to 5s later the coalesced delta arrives and the value returns. A confirmed write visibly reverts — the hard-fail window this gate exists to kill.
+Under v1 semantics on the shipped tree: the channel coalesces, so the `result` arrives while the delta is still held in the coalescing window. Settle-on-result drops the pending overlay → the pool reverts to the pre-write value → up to 5s later the coalesced delta arrives and the value returns. A confirmed write visibly reverts — the hard-fail window this gate exists to kill.
 
 Under v2, two frames on the writing socket, in this order:
 
@@ -172,7 +172,7 @@ Overnight-aged outbox entry replays at reconnect; the server rejects it — perm
   "error": { "code": 4102, "message": "forbidden" } }
 ```
 
-Today's client deletes the outbox entry, settles the rebase entry, and drops the overlay — the typed content evaporates with an ambient error at best. Under v2 the same frame settles a **rejection-park**: args and written paths retained on the parked surface, validation-shaped, edit-and-retry. The twin case with `4301` (a business-rule rejection of a live write) settles identically — one vocabulary, both consumers.
+The shipped client deletes the outbox entry, settles the rebase entry, and drops the overlay — the typed content evaporates with an ambient error at best. Under v2 the same frame settles a **rejection-park**: args and written paths retained on the parked surface, validation-shaped, edit-and-retry. The twin case with `4301` (a business-rule rejection of a live write) settles identically — one vocabulary, both consumers.
 
 ## What this skeleton is not
 
