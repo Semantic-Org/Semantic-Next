@@ -29,6 +29,12 @@ reopening anything.
   (amendments 4 and 8)
 - **Shared fan-out per `(name, args)`.** Stateless nodes, no per-client view records, no
   sticky sessions. (comparison, Zero rejection 4)
+- **The wire is protocol v2, frozen with auth aboard.** One frame per transaction per socket
+  on live-state channels, completion positions on `result` (txid never rides the wire), and
+  the auth seams ride the freeze: the `reauth` frame, the server-owned expiry bound
+  (revocation ≤ min(explicit `server.revoke`, `authExpiresIn`)), the same-principal clause,
+  retry-then-prune revocation. Every wire change now costs a protocol version.
+  (`ws-protocol.md` + `ws-protocol-conformance.md`, ratified 2026-07-07)
 - **Adoption gradient.** Local collections graduate to synced without a rewrite. The
   brownfield trial defaults to poll-and-diff `watch()`, logical replication is the production
   graduation. Top-level scalar keys become typed columns, depth lives in JSONB. (plan

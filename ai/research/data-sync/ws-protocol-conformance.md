@@ -2,15 +2,17 @@
 
 The case catalog for the cross-transport conformance battery. [`ws-protocol.md`](ws-protocol.md) cites these ids at its load-bearing clauses; the wire-freeze implementation builds the battery against this list. This document is the skeleton — ids, the clause each case evidences, what fails without it (the red-before), and worked wire fixtures for the cases whose proof is a frame sequence. Portability is delivered here: a second implementation validates by passing this battery, not by the spec being small.
 
-## The harness question (open — decided with the maintainer at ratification)
+## The harness (ruled at ratification, 2026-07-07): the hybrid
 
-The spec promises a future non-JS implementation validates by running the suite. Two harness shapes, and a hybrid:
+**Ruled (c), delegated at 70:** vectors-as-data carry the four pure derivations (`address-vectors`, `wire-clean-frames`, `codes-table-vectors`, `freshness-disclosure`) as JSON fixture files any implementation consumes directly; a live driver carries the twenty-nine choreography cases, riding the smoke idiom (a node script, exit 0/1), pointed at every registered transport — the cross-transport battery clause verbatim. The named cost: certifying a non-JS **client** needs the counterpart server-side driver, deferred until such a client exists; a non-JS **server** certifies against the JS driver-as-client, language-neutral by the wire.
+
+The alternatives, priced (the decision record):
 
 **(a) Recorded wire transcripts.** Golden fixtures — JSON frame sequences with expected replies — replayed against an implementation, asserting emitted frames match modulo a declared nondeterminism map (cursors, timestamps, minted ids). *For:* the fixture is a language-neutral artifact (a Rust server runs the same files with a thin driver), diffs are reviewable in PRs, byte-identity claims (address vectors, serialize-once fan-out) are native, CI is cheap. *Against:* choreography with real timing — own-writes-before-result ordering, packed-frame boundaries under concurrent writers, backpressure valves, heartbeat dead-men, crash/restart cases — encodes one legal interleaving where the spec allows many, so transcripts either over-constrain or multiply; the nondeterminism normalization becomes its own machinery; the server-side MUSTs (per-doc serial apply, commit visibility) are not transcript-checkable at all.
 
 **(b) Live driver.** A driver speaking the wire against any implementation through the transport seam, asserting semantics (ordering, settlement, resume outcomes) rather than bytes. *For:* timing and interleaving cases express naturally, crash/restart and valve cases are drivable, and the cross-transport requirement is native — the same battery pointed at every registered transport, the shape the existing smoke battery already proves. *Against:* the driver is a program, not data — a non-JS **server** validates against the JS driver cheaply (the driver is just a client), but certifying a non-JS **client** needs the counterpart server driver; more machinery than fixtures.
 
-**(c) Hybrid.** Vectors-as-data for the pure derivations, live driver for choreography. Each case below carries a `shape` tag — `vector` (pure input → output, transcript/fixture-friendly) or `driver` (timing, state, or crash semantics) — as input to this ruling, not a pre-emption of it: if (a) or (b) is ruled outright, the tags say which cases get forced into an unnatural shape. The tags fall 4 vector / 29 driver across the 33 cases.
+**(c) Hybrid** — the ruling above. Each case below carries a `shape` tag — `vector` (pure input → output, fixture-friendly) or `driver` (timing, state, or crash semantics) — the input that carried the ruling: the tags fall 4 vector / 29 driver across the 33 cases, and a single-shape harness would have forced the 29 into an unnatural form.
 
 ## The catalog
 
