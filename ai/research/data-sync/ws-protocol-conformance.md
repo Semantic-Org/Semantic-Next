@@ -88,7 +88,7 @@ Gate tokens map each case to the phase-1 gate clause it evidences: `wire-freeze`
 |---|---|---|---|---|
 | `limits-4204` | driver | valves-limits-states | a channel-cap breach answers `nosub 4204`; an oversized call answers `result.error 4204` with the content retained client-side | 4204 has no legal answer under v1's table |
 | `limits-no-silent-drop` | driver | valves-limits-states | an outbound delta the socket cannot carry converts to reset → resnapshot; no delta is ever silently dropped | nothing in v1 banned the silent size-drop |
-| `codes-table-vectors` | vector | valves-limits-states | every code row: number, label, legal surfaces (labels are doc vocabulary — only numbers ride the wire) — including `4203` relocating the config error off `4202`, which v2 reserves for denial | the shipped tree squats `badConfig` on 4202; v1's table had no 4103/4203/4204/4504 |
+| `codes-table-vectors` | vector | valves-limits-states | every code row: number, name, legal surfaces (names are doc vocabulary — only numbers ride the wire) — including `4203` relocating the config error off `4202`, which v2 reserves for denial | the shipped tree squats `badConfig` on 4202; v1's table had no 4103/4203/4204/4504 |
 
 ### Evolution and consumer-facing wire (§2, §7, §8)
 
@@ -174,6 +174,6 @@ Overnight-aged outbox entry replays at reconnect; the server rejects it — perm
 
 The shipped client deletes the outbox entry, settles the rebase entry, and drops the overlay — the typed content evaporates with an ambient error at best. Under v2 the same frame settles a **rejection-park**: args and written paths retained on the parked surface, validation-shaped, edit-and-retry. The twin case with `4301` (a business-rule rejection of a live write) settles identically — one vocabulary, both consumers.
 
-## What this skeleton is not
+## What this document is not
 
-The battery build — harness code, fixture tooling, CI wiring — belongs to the wire-freeze implementation row. Cases proving *implementation* behavior that v2 newly specifies (settlement, parks, terminal states) go red only once that row starts; cases pinning already-shipped choreography (`freshness-disclosure`, `visibility-fanout-skip`, `snapshot-atomic-commit`, `transport-frame-equivalence`) can green immediately and act as regression armor. The server-side MUSTs (per-doc serial apply, commit visibility — spec §4) are deliberately absent here: they are storage/adapter conformance obligations, already pinned in the adapter suites (the xmin-horizon case), not wire cases.
+The battery build — harness code, fixture tooling, CI wiring — belongs to the wire-freeze implementation. Cases proving *implementation* behavior that v2 newly specifies (settlement, parks, terminal states) go red only once that build starts; cases pinning already-shipped choreography (`freshness-disclosure`, `visibility-fanout-skip`, `snapshot-atomic-commit`, `transport-frame-equivalence`) can green immediately and act as regression armor. The server-side MUSTs (per-doc serial apply, commit visibility — spec §4) are deliberately absent here: they are storage/adapter conformance obligations, already pinned in the adapter suites (the xmin-horizon case), not wire cases.
