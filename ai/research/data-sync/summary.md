@@ -103,7 +103,7 @@ Meteor's sync server CRUD was fibers suspending the stack during I/O. This desig
 
 ## The sync loop
 
-The client invariant is **visible state = synced ⊕ pending**, server-confirmed state with unconfirmed mutators replayed on top. Downstream per channel: a snapshot, then field-granular deltas applied as top-level field swaps, with reconnect replaying the tail from the stored cursor. Upstream: optimistic apply, append to the pending set and durable outbox, send, the server runs the authoritative impl and routes deltas, the speculative version dropping when its txid applies. Rebase uses copy-on-write shadows for only the docs pending mutators touched. Aged offline replay is **park-then-verify**: outbox entries carry the base value of each path they wrote, verified against fresh state on reconnect, with review the default posture so nothing aged auto-applies. The parked surface is a product, reactive and typed and agent-legible, not an apology.
+The client invariant is **visible state = synced ⊕ pending**, server-confirmed state with unconfirmed mutators replayed on top. Downstream per channel: a snapshot, then field-granular deltas applied as top-level field swaps, with reconnect replaying the tail from the stored cursor. Upstream: optimistic apply, append to the pending set and durable outbox, send, the server runs the authoritative impl and routes deltas, the speculative version dropping when its result arrives and its completion positions pass. Rebase uses copy-on-write shadows for only the docs pending mutators touched. Aged offline replay is **park-then-verify**: outbox entries carry the base value of each path they wrote, verified against fresh state on reconnect, with review the default posture so nothing aged auto-applies. The parked surface is a product, reactive and typed and agent-legible, not an apology.
 
 ## Channels
 
@@ -132,6 +132,6 @@ Phases gate on each other, with 0a (the DX steelman corpus) gating all API decis
 | Every settled ruling and the rejected-attacks armor | `reference-comparison.md` |
 | The wire protocol, message by message | `ws-protocol.md` |
 | Multi-box scale, the change-log model | `storage-and-scale.md` |
-| Referee passes (protocol, reactivity) | `ws-protocol-review.md`, `reactivity-review.md` |
+| Referee passes (reactivity) | `reactivity-review.md` |
 | Worked API examples | `todomvc/`, `invoices-table/` |
 | The grounding research and reference dossiers | `research/` |

@@ -29,6 +29,12 @@ reopening anything.
   (amendments 4 and 8)
 - **Shared fan-out per `(name, args)`.** Stateless nodes, no per-client view records, no
   sticky sessions. (comparison, Zero rejection 4)
+- **The wire is protocol v2, frozen with auth aboard.** One frame per transaction per socket
+  on live-state channels, completion positions on `result` (txid never rides the wire), and
+  the auth seams ride the freeze: the `reauth` frame, the server-owned expiry bound
+  (revocation ≤ min(explicit `server.revoke`, `authExpiresIn`)), the same-principal clause,
+  retry-then-prune revocation. Every wire change now costs a protocol version.
+  (`ws-protocol.md` + `ws-protocol-conformance.md`, ratified 2026-07-07)
 - **Adoption gradient.** Local collections graduate to synced without a rewrite. The
   brownfield trial defaults to poll-and-diff `watch()`, logical replication is the production
   graduation. Top-level scalar keys become typed columns, depth lives in JSONB. (plan
@@ -59,7 +65,7 @@ reopening anything.
 - `component-data-surface.md` — the component-author data surface: subscriptions, the `db` signal handle, the plural write path.
 - `reference-comparison.md` — rulings, needs-bench, watch list, rejected attacks. Dossiers in
   `research/`.
-- `ws-protocol.md` — the wire spec. `ws-protocol-review.md` is its referee pass.
+- `ws-protocol.md` — the wire spec.
 - `reactivity-review.md` — every plan claim audited against `packages/reactivity` source.
 - `vetting-report.md` — the five-lens vet of the corpus, verdict revise-then-build.
 - `r2-briefs.md` — the round-2 design briefs.

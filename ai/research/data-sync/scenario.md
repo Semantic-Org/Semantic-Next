@@ -44,7 +44,7 @@ Costs, named: in-doc append-only logs are the bloat failure mode to police (inli
 Migrations run **weekly** (~): a migration script (a `migrations/add-record-field.js` shape) updates every record in the database — thousands of docs — while some records are actively being operated on. Off-peak, but never empty. Rules:
 
 - **Bulk writers are path-granular.** Whole-doc read-transform-writeback is the named anti-pattern: it loses the lost-update race against live operators' commits and reverts their committed work in storage. In-ecosystem migrations through `update(selector, fn)` are path-granular automatically (trackWrites emits only changed paths). Raw SQL column updates are naturally granular. App-code whole-doc save-back is contraband.
-- **Batched and paced.** Small transactions (~500 docs), no cross-batch atomicity — one giant transaction mints a txid spanning thousands of channel addresses (hold-group and spans-size pathologies in one move).
+- **Batched and paced.** Small transactions (~500 docs), no cross-batch atomicity — one transaction is one atomic frame per socket, so a giant transaction means a giant frame and collapses every overview channel at once; batching keeps frames bounded and the live path paced.
 - **Expected impact:** detail channels (`records.byId`) receive one delta each — no storm. Overview/searchIndex channels hit log collapse and reset to snapshot, by design. The real cost is router selector-matching (docs × active channels), bounded off-peak.
 - **Concurrent operation during the window is normal.** Disjoint-path merging keeps operators safe; per-path conflict evidence prevents post-migration false-conflict storms (per-doc versioning would flag every reconnecting operator). A migration rewriting the same path an operator edited conflicts honestly.
 - **Schema mutations ride epochs:** a reshaping migration bumps affected channels' cursor epochs → clients reset and resnapshot under the new shape. Stale bundles that no longer validate get a reload affordance via `welcome` capabilities, not mysterious rejections.
@@ -75,7 +75,7 @@ Two failure categories with different budgets, treated differently everywhere:
 
 Disconnects are routine, not exceptional: dev-server restarts (constant during development), laptop sleep, network blips, half-open sockets. The design partitions responsibility — the channel does not have to handle everything:
 
-- **Protocol must own:** write durability ordering, watermark/ledger dedup, replay choreography, txid grouping, heartbeat-based detection, conflict evidence and outcome codes, reset/backpressure, id-addressed paths.
+- **Protocol must own:** write durability ordering, watermark/ledger dedup, replay choreography, transaction framing, heartbeat-based detection, conflict evidence and outcome codes, reset/backpressure, id-addressed paths.
 - **Consumer surface owns:** connection state signals and smoothing (blip vs outage tiers), queued-writes presentation, per-channel staleness, page-lifecycle guards and storage persistence, boot ordering (snapshot → outbox → pending → render), dead-letter retention of rejected content, field-routed conflict delivery.
 - **App-space owns:** conflict presentation and restore affordances, region degradation policy (which UI dims or disables when disconnected), dashboard churn presentation, presence (pending an ephemeral frame type), copy and tone.
 

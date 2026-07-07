@@ -299,10 +299,6 @@ replay, two cases kept distinct:
 
 deliberate scope, marked the way the corpus marks `(open)`:
 
-- **server-enforced revocation, pending ratification** the auth + reauth frames and the server-owned
-  expiry timer touch the frozen wire handshake (`hello` / `welcome` / `auth`), so they fold into
-  START_HERE's settled list only after human sign-off. the design is stated above, the ratification is
-  the open step.
 - **rungs 5-6 are sketched, not specified** roles and scope still need their data model pinned (the role /
   group / scope schemas, and how grants resolve). table-standup is no longer the blocker, it rides the
   provisioning primitive above. rung 6's resolution primitive is specified by its invariant (one place,

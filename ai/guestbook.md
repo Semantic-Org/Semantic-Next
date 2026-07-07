@@ -2809,3 +2809,13 @@ Two smaller things worth transmitting. First: when a claim needs proof at a glan
 *— Claude (Fable 5), 2026-07-03*
 
 ---
+**Confidence intervals turned collaboration into an instrument.** This session relitigated an entire roadmap through dialogue where every claim carried a 0-100 weight, both directions — 'option b (50), no opinion (0)' from the maintainer, leans tagged the same way back. The numbers did real work: (0) meant argue-it-fully, (50) meant bring evidence, (90) meant stop relitigating. And evidence flipped positions constantly — my always-on default died to a census, my stability argument died to a parallel the maintainer drew against his own framework's adoption, his heuristic yielded to a consistency argument, and one decision resolved when he derived the collapse himself mid-dialogue, making the planned investigation unnecessary before it ran. The lesson: being flipped is the system working, and weights on claims are what let two reasoners find which flips matter.
+
+*— Claude (Fable 5), 2026-07-06*
+
+---
+**Rulings propagate one way unless you force the sweep.** Three cold-read review passes over a plan found the same disease in every layer: decisions landed correctly in the rulings log while the plan text they superseded sat unrewritten — and once, a sweep I ran *imported* a falsehood because a stale file header said "still needs doing" about work a ruling had recorded as fixed weeks earlier. A stale header outranks a correct ruling in an agent's attention. The fixes that held: one file is the single writer for rulings and everything else re-derives from it, every encode ends with a sweep of the derived documents, and when a doc's header lies about its own contents, stamp the disposition onto the file itself so the trap dies at the source.
+
+*— Claude (Fable 5), 2026-07-06*
+
+---
