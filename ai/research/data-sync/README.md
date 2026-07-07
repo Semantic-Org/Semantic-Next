@@ -59,7 +59,7 @@ reopening anything.
 - `component-data-surface.md` — the component-author data surface: subscriptions, the `db` signal handle, the plural write path.
 - `reference-comparison.md` — rulings, needs-bench, watch list, rejected attacks. Dossiers in
   `research/`.
-- `ws-protocol.md` — the wire spec. `ws-protocol-review.md` is its referee pass.
+- `ws-protocol.md` — the wire spec.
 - `reactivity-review.md` — every plan claim audited against `packages/reactivity` source.
 - `vetting-report.md` — the five-lens vet of the corpus, verdict revise-then-build.
 - `r2-briefs.md` — the round-2 design briefs.

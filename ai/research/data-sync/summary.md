@@ -132,6 +132,6 @@ Phases gate on each other, with 0a (the DX steelman corpus) gating all API decis
 | Every settled ruling and the rejected-attacks armor | `reference-comparison.md` |
 | The wire protocol, message by message | `ws-protocol.md` |
 | Multi-box scale, the change-log model | `storage-and-scale.md` |
-| Referee passes (protocol, reactivity) | `ws-protocol-review.md`, `reactivity-review.md` |
+| Referee passes (reactivity) | `reactivity-review.md` |
 | Worked API examples | `todomvc/`, `invoices-table/` |
 | The grounding research and reference dossiers | `research/` |
