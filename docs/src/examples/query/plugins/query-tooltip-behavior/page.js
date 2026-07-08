@@ -1,4 +1,4 @@
-import { Tooltip } from '@semantic-ui/core';
+import '@semantic-ui/core';
 import { $ } from '@semantic-ui/query';
 
 // Basic tooltip using data-text attribute

@@ -60,7 +60,7 @@ export const registerBehavior = (behavior) => {
   // may be called via side effects which should not throw an error
   // when multiple components rely on same behavior
   if (Query.behaviors.has(name)) {
-    return;
+    return Query.prototype[name];
   }
 
   // Register this behavior
