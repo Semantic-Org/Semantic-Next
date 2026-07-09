@@ -13,6 +13,7 @@ import {
   lineNumbers as cmLineNumbers,
 } from '@codemirror/view';
 import { classHighlighter } from '@lezer/highlight';
+import { adoptStylesheet } from '@semantic-ui/utils';
 
 import { highlightStyle } from './highlight.js';
 import { getLanguage, getLanguageFamily } from './languages.js';
@@ -77,6 +78,8 @@ export const createEditor = ({
   readonly = false,
   pragmaMode = 'on',
   tabSize = 2,
+  // CSS text adopted into the editor's root — the host themes without touching internals
+  theme,
   onChange,
   // fires with measureEditor() output when CM reports layout geometry changes
   onSizeChange,
@@ -149,7 +152,11 @@ export const createEditor = ({
 
   // explicit root — CM injects its structural styles there; inside shadow DOM
   // the default (document) leaves the editor unstyled
-  const view = new EditorView({ parent, root: parent.getRootNode() });
+  const root = parent.getRootNode();
+  const view = new EditorView({ parent, root });
+  if (theme) {
+    adoptStylesheet(theme, root);
+  }
 
   const adapter = {
     view,

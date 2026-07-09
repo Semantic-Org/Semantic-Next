@@ -1,4 +1,4 @@
-import { adoptStylesheet, defineComponent } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
 import { isHTMLFile, isScriptFile } from '@semantic-ui/playground';
 import { createEditor, intelligence } from '@semantic-ui/playground/editor';
 import { debounce } from '@semantic-ui/utils';
@@ -12,7 +12,7 @@ const defaultSettings = {
   lineNumbers: true,
 };
 
-const createComponent = ({ self, el, settings, state, data, reaction, findParent, dispatchEvent, $ }) => ({
+const createComponent = ({ self, settings, state, data, reaction, findParent, dispatchEvent, $ }) => ({
   getFilename() {
     return data.filename?.get ? data.filename.get() : data.filename;
   },
@@ -60,8 +60,8 @@ const createComponent = ({ self, el, settings, state, data, reaction, findParent
         dispatchEvent('fileSizeChanged', { filename, ...size });
       },
       getFileExtensions: self.getFileExtensions,
+      theme: codeMirrorCSS,
     });
-    adoptStylesheet(codeMirrorCSS, el.shadowRoot);
   },
 
   syncFile() {
