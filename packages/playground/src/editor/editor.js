@@ -29,6 +29,19 @@ import { pragmas } from './pragmas.js';
 
 const severities = { error: 'error', warning: 'warning', info: 'info' };
 
+/* classed markers so hosts can style open/closed states — CM's defaults are bare text */
+const gutters = () => [
+  cmLineNumbers(),
+  foldGutter({
+    markerDOM(open) {
+      const marker = document.createElement('span');
+      marker.className = open ? 'cm-foldMarker-open' : 'cm-foldMarker-closed';
+      marker.textContent = open ? '⌄' : '›';
+      return marker;
+    },
+  }),
+];
+
 export const createEditor = ({
   parent,
   lineNumbers = false,
@@ -84,7 +97,7 @@ export const createEditor = ({
       ...completionKeymap,
       indentWithTab,
     ]),
-    compartments.lineNumbers.of(lineNumbers ? [cmLineNumbers(), foldGutter()] : []),
+    compartments.lineNumbers.of(lineNumbers ? gutters() : []),
     compartments.lineWrapping.of(lineWrapping ? EditorView.lineWrapping : []),
     compartments.readonly.of(readonly ? EditorState.readOnly.of(true) : []),
   ];
@@ -154,7 +167,7 @@ export const createEditor = ({
     },
 
     setLineNumbers(enabled) {
-      view.dispatch({ effects: compartments.lineNumbers.reconfigure(enabled ? [cmLineNumbers(), foldGutter()] : []) });
+      view.dispatch({ effects: compartments.lineNumbers.reconfigure(enabled ? gutters() : []) });
     },
 
     setLineWrapping(enabled) {

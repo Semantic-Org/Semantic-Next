@@ -53,6 +53,16 @@
     padding-left: 4px;
   }
 
+  /* the U+2304 caret glyph sits on the baseline — lift it to optical center */
+  .cm-foldGutter .cm-foldMarker-open {
+    display: inline-block;
+    transform: translateY(-4px);
+  }
+  .cm-foldGutter .cm-foldMarker-closed,
+  .cm-foldGutter .cm-foldMarker-open {
+    cursor: pointer;
+  }
+
   .cm-activeLine,
   .cm-activeLineGutter {
     background: transparent;
