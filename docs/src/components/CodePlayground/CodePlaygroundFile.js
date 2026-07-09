@@ -12,7 +12,7 @@ const defaultSettings = {
   lineNumbers: true,
 };
 
-const createComponent = ({ self, el, settings, state, data, reaction, findParent, $ }) => ({
+const createComponent = ({ self, el, settings, state, data, reaction, findParent, dispatchEvent, $ }) => ({
   getFilename() {
     return data.filename?.get ? data.filename.get() : data.filename;
   },
@@ -54,6 +54,11 @@ const createComponent = ({ self, el, settings, state, data, reaction, findParent
         self.getParent()?.fileEdited(filename, content);
         self.refreshDiagnostics(filename);
       },
+      onSizeChange: (size) => {
+        const filename = self.getFilename();
+        self.getParent()?.fileSizeChanged(filename, size);
+        dispatchEvent('fileSizeChanged', { filename, ...size });
+      },
       getFileExtensions: self.getFileExtensions,
     });
     adoptStylesheet(codeMirrorCSS, el.shadowRoot);
@@ -92,6 +97,10 @@ const createComponent = ({ self, el, settings, state, data, reaction, findParent
       self.editor.view.dom.style.width = width;
       self.editor.view.dom.style.height = height;
     }
+  },
+
+  measure() {
+    return self.editor?.measure();
   },
 
   focus() {

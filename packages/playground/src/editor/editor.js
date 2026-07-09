@@ -29,6 +29,30 @@ import { pragmas } from './pragmas.js';
 
 const severities = { error: 'error', warning: 'warning', info: 'info' };
 
+/*
+  Natural code dimensions for pane snapping. Deliberately measured from the
+  DOM, not CM's height model — contentHeight/scrollWidth drift from rendered
+  reality around content padding and fold widgets (verified against the
+  previous implementation's tuned values).
+*/
+export const measureEditor = (editorElement) => {
+  if (!editorElement) {
+    return { gutterWidth: 0, lineWidth: 0, naturalWidth: 0, naturalHeight: 0 };
+  }
+  const gutter = editorElement.querySelector('.cm-gutters');
+  const gutterWidth = gutter?.getBoundingClientRect().width ?? 0;
+  const range = document.createRange();
+  let lineWidth = 0;
+  for (const line of editorElement.querySelectorAll('.cm-line')) {
+    range.selectNodeContents(line);
+    lineWidth = Math.max(lineWidth, range.getBoundingClientRect().width);
+  }
+  const naturalHeight = (gutter && Number.parseFloat(getComputedStyle(gutter).minHeight))
+    || editorElement.querySelector('.cm-content')?.getBoundingClientRect().height
+    || 0;
+  return { gutterWidth, lineWidth, naturalWidth: gutterWidth + lineWidth, naturalHeight };
+};
+
 /* classed markers so hosts can style open/closed states — CM's defaults are bare text */
 const gutters = () => [
   cmLineNumbers(),
@@ -50,6 +74,8 @@ export const createEditor = ({
   pragmaMode = 'on',
   tabSize = 2,
   onChange,
+  // fires with measureEditor() output when CM reports layout geometry changes
+  onSizeChange,
   // (fileName) => Extension[] — per-file intelligence (LSP plugins, completion sources)
   getFileExtensions,
 } = {}) => {
@@ -67,6 +93,9 @@ export const createEditor = ({
   const notifyChange = EditorView.updateListener.of((update) => {
     if (update.docChanged && currentFile) {
       onChange?.(currentFile, update.state.doc.toString());
+    }
+    if (onSizeChange && (update.geometryChanged || update.docChanged)) {
+      onSizeChange(measureEditor(update.view.dom));
     }
   });
 
@@ -142,6 +171,10 @@ export const createEditor = ({
       }
       currentFile = fileName;
       view.setState(state);
+      // the initial layout isn't a view update — measure once it lands
+      if (onSizeChange) {
+        view.requestMeasure({ read: () => onSizeChange(measureEditor(view.dom)) });
+      }
     },
 
     getContent() {
@@ -179,14 +212,7 @@ export const createEditor = ({
     },
 
     measure() {
-      const gutter = view.dom.querySelector('.cm-gutters');
-      const lines = [...view.dom.querySelectorAll('.cm-line')];
-      const gutterWidth = gutter?.offsetWidth ?? 0;
-      const lineWidth = Math.max(0, ...lines.map(line => line.scrollWidth));
-      return {
-        naturalWidth: gutterWidth + lineWidth,
-        naturalHeight: Number.parseFloat(gutter ? getComputedStyle(gutter).minHeight : '0') || view.contentHeight,
-      };
+      return measureEditor(view.dom);
     },
 
     focus() {

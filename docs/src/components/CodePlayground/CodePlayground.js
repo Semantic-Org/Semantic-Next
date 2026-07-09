@@ -1,5 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
 import { PlaygroundProject } from '@semantic-ui/playground';
+import { measureEditor } from '@semantic-ui/playground/editor';
 import { each, firstMatch, get, idleCallback, inArray, moveToFront, sortBy } from '@semantic-ui/utils';
 
 import * as componentSpecs from '@semantic-ui/core/component-specs';
@@ -364,29 +365,22 @@ const createComponent = (
 
   getNaturalPanelSize(panel, { direction, minimized }) {
     const $panel = $$(panel);
+    const code = measureEditor($panel.find('.cm-editor').el());
     if (direction === 'horizontal') {
       const $menu = $panel.find('ui-menu .menu').first();
-      const $gutter = $panel.find('.cm-gutters').first();
-      const $lines = $panel.find('.cm-line');
 
       const extraSpacing = 5; // DO NOT DECREASE from testing with inline playground to avoid scrollbars in all cases.
+      const additionalSpace = 18; // add space so its not cramped
       const menuWidth = $menu.width() + 11 || 0;
       const minWidths = [200, menuWidth];
-      const gutterWidth = $gutter.width();
 
-      if ($lines.count() > 0) {
-        const additionalSpace = 18; // add space so its not cramped
-        const lineWidths = $lines.naturalWidth().map(val => val + additionalSpace);
-        minWidths.push(...lineWidths);
+      if (code.lineWidth > 0) {
+        minWidths.push(code.lineWidth + additionalSpace);
       }
 
-      const size = Math.max(...minWidths) + gutterWidth + extraSpacing;
-      return size;
+      return Math.max(...minWidths) + code.gutterWidth + extraSpacing;
     }
     else {
-      // gutters gets minheight which is code height
-      const $gutter = $panel.find('.cm-gutters').first();
-
       // label height and menu need to be added to code height
       const $label = $panel.find('.label').first();
       const $menu = $panel.find('.menu').first();
@@ -394,16 +388,19 @@ const createComponent = (
       const extraSpacing = 2; // rounding
       const labelHeight = $label.height() || 0;
       const menuHeight = $menu.height() || 0;
-      let size;
       if (minimized) {
-        size = labelHeight;
+        return labelHeight;
       }
-      else {
-        const codeHeight = parseFloat($gutter.css('min-height'));
-        const height = codeHeight + labelHeight + menuHeight + extraSpacing;
-        size = Math.max(height, 100);
-      }
-      return size;
+      const height = code.naturalHeight + labelHeight + menuHeight + extraSpacing;
+      return Math.max(height, 100);
+    }
+  },
+
+  fileSizeChanged(filename, size) {
+    // inline natural sizing keys off the first real layout instead of a rAF guess
+    if (settings.inline && settings.maxHeight == 'natural' && !self.naturalHeightApplied) {
+      self.naturalHeightApplied = true;
+      self.setNaturalHeight(size);
     }
   },
 
@@ -630,11 +627,13 @@ const createComponent = (
     });
   },
 
-  setNaturalHeight() {
+  setNaturalHeight(size) {
     if (isServer) {
       return;
     }
-    const codeHeight = parseFloat($$('.cm-gutters').first().css('min-height')) || 100;
+    const codeHeight = size?.naturalHeight
+      || findChildren('CodePlaygroundFile')[0]?.measure()?.naturalHeight
+      || 100;
     const menuHeight = $$('ui-panel .menu').first().height() || 0;
     const offset = 5; // from trial & error avoids tiny scrollbars
     let panelHeight = menuHeight + codeHeight + offset;
@@ -651,10 +650,6 @@ const onCreated = ({ self, attachEvent }) => {
 const onRendered = ({ isClient, self, state, $, settings }) => {
   self.addPanelSettings();
   self.setupComponents();
-
-  if (settings.inline && settings.maxHeight == 'natural') {
-    requestAnimationFrame(() => self.setNaturalHeight());
-  }
 };
 
 const onDestroyed = ({ self }) => {
