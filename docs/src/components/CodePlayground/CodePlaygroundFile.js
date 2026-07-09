@@ -14,7 +14,7 @@ const defaultSettings = {
 
 const createComponent = ({ self, settings, state, data, reaction, findParent, dispatchEvent, $ }) => ({
   getFilename() {
-    return data.filename?.get ? data.filename.get() : data.filename;
+    return data.filename;
   },
 
   getParent() {
