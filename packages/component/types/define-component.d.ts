@@ -1,7 +1,7 @@
 import { CallParams, FactoryParams, Template } from '@semantic-ui/templating';
 import { CSSResult } from 'lit';
 import { PropertyValues } from 'lit';
-import { WebComponentBase } from './engines/native/base';
+import { WebComponentBase } from './engines/native/base.js';
 
 /**
  * Extended call parameters for event handlers, including event-specific data.

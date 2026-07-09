@@ -722,7 +722,7 @@ export function hasProperty<T extends object>(
  */
 export function reverseKeys<T extends object>(
   obj: T,
-): { [K in T[keyof T]]: string | string[]; };
+): { [K in T[keyof T] & PropertyKey]: string | string[]; };
 
 /**
  * Converts an object to an array of key-value pairs

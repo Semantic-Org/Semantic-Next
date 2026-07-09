@@ -1,4 +1,4 @@
-import type { Reaction } from './reaction';
+import type { Reaction } from './reaction.js';
 
 /**
  * Manages scheduling and execution of reactive updates, batching reactions and

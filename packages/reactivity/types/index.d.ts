@@ -4,15 +4,15 @@
  * @see {@link https://next.semantic-ui.com/docs/api/reactivity Reactivity Documentation}
  */
 
-export { Dependency } from './dependency';
-export { Reaction } from './reaction';
-export { ReactiveObject, ReactiveObjectOptions } from './reactive-object';
-export { Scheduler } from './scheduler';
-export { Signal, SignalOptions } from './signal';
+export { Dependency } from './dependency.js';
+export { Reaction } from './reaction.js';
+export { ReactiveObject, ReactiveObjectOptions } from './reactive-object.js';
+export { Scheduler } from './scheduler.js';
+export { Signal, SignalOptions } from './signal.js';
 
-export { currentReaction, guard, nonreactive } from './helpers/control';
-export { reaction, reactiveObject, signal } from './helpers/create';
-export { computed, derive, match } from './helpers/derived';
-export type { Matcher } from './helpers/derived';
-export { afterFlush, flush, getSource, scheduleFlush } from './helpers/schedule';
-export { isStackCapture, isTracing, setStackCapture, setTracing } from './helpers/tracing';
+export { currentReaction, guard, nonreactive } from './helpers/control.js';
+export { reaction, reactiveObject, signal } from './helpers/create.js';
+export { computed, derive, match } from './helpers/derived.js';
+export type { Matcher } from './helpers/derived.js';
+export { afterFlush, flush, getSource, scheduleFlush } from './helpers/schedule.js';
+export { isStackCapture, isTracing, setStackCapture, setTracing } from './helpers/tracing.js';

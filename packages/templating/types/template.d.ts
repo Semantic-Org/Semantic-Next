@@ -1,8 +1,8 @@
+import { ASTNode } from '@semantic-ui/compiler';
 import { Query, QueryOptions } from '@semantic-ui/query';
 import { Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
 import { Renderer } from '@semantic-ui/renderer';
-import { ASTNode } from './compiler/template-compiler';
-import { TemplateHelpers } from './template-helpers';
+import { TemplateHelpers } from './template-helpers.js';
 
 export interface TemplateSettings {
   /** The name of the template. */
