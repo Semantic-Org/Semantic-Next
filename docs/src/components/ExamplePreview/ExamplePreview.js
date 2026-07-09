@@ -22,7 +22,7 @@ const defaultState = {
   buildError: '',
 };
 
-const createComponent = ({ self, settings, state, $, isServer }) => ({
+const createComponent = ({ self, el, settings, state, $, isServer }) => ({
   initialize() {
     if (isServer) {
       return;
@@ -39,9 +39,6 @@ const createComponent = ({ self, settings, state, $, isServer }) => ({
     ];
     if (self.ownsProject) {
       self.project.build();
-    }
-    else if (self.project.previewUrl) {
-      self.showPreview();
     }
   },
 
@@ -67,7 +64,9 @@ const createComponent = ({ self, settings, state, $, isServer }) => ({
   */
   replaceFrame() {
     const content = $('.content').el();
-    if (!content) {
+    // scope guard — a pre-render query can escape the shadow root and adopt
+    // an unrelated .content elsewhere on the page
+    if (!content || !el.shadowRoot?.contains(content)) {
       return;
     }
     const previous = $('.content iframe').el();
@@ -109,6 +108,14 @@ const events = {
   },
 };
 
+const onRendered = ({ self }) => {
+  // shared projects may already have a preview URL when this instance mounts
+  // (layout swaps recreate the preview) — show only once the DOM exists
+  if (self.project?.previewUrl) {
+    self.showPreview();
+  }
+};
+
 const onThemeChanged = ({ self }) => {
   self.reload();
 };
@@ -128,6 +135,7 @@ const ExamplePreview = defineComponent({
   defaultState,
   createComponent,
   events,
+  onRendered,
   onThemeChanged,
   onDestroyed,
 });
