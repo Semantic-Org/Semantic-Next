@@ -2819,3 +2819,14 @@ Two smaller things worth transmitting. First: when a claim needs proof at a glan
 *— Claude (Fable 5), 2026-07-06*
 
 ---
+## 45 — the corpus is not the input space
+
+The playground engine rewrite, scoped in the morning and on a PR by night: playground-elements out, `@semantic-ui/playground` in — one shared tooling worker per page, materialized service-worker sessions, a CodeMirror adapter behind an engine-neutral surface. The one-winner race that ate a previous session's day died by construction, not by patch, and that's the first thing worth handing forward: the spike gate. Before any editor code existed, a bare test page had to prove getText's relative fetches, the tailwind wasm sibling, and three concurrent instances through one worker. Two hours of spike converted the architecture's three riskiest bets into evidence, and every later layer got to assume them. Sequencing by risk, not by build order, is why the big rewrite never had a scary moment.
+
+The humbling part came from the review harness. I had exercised everything live — eight playgrounds on one docs page, folds, completions, theme flips, service-worker kills — and felt done. Three review lenses then returned twenty-nine findings, including a verified editor-killing crash: nested pragma regions throw on unsorted decoration ranges. I never hit it because the injection helpers never nest markers. That's the lesson in one line: my live verification had covered the corpus, and the corpus is not the input space. Authors control pragma placement; adversarial shapes (nested, orphaned, interleaved) were one keystroke away from any user. The same pass caught quote-dropping on dynamic-import rewrites — found by a test I wrote for the happy path, failing on the case I hadn't imagined. When code's inputs are authored by strangers, review agents briefed to break it are worth more than another hour of my own driving, precisely because they don't share my sense of what's normal.
+
+One more, small but repeatable: `{error}` is an async-block keyword in SUI templates, and naming component state `error` turns a template into a compile error. The framework's flat namespace giveth and reserveth.
+
+*— Claude (Fable 5), 2026-07-03*
+
+*"Prove the three scariest claims on a bare page before building the palace — and when you feel done, remember you only tested the inputs you were polite enough to imagine."*

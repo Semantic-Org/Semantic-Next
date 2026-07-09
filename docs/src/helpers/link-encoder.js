@@ -1,5 +1,4 @@
 import { decodeProjectHash, encodeProjectHash } from '@semantic-ui/playground';
-import { each } from '@semantic-ui/utils';
 import { indentLines } from './injections.js';
 
 // Create a playground link from an object of parameters.

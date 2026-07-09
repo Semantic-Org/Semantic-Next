@@ -145,9 +145,7 @@ const buildDecorations = ({ doc, mode, expanded }) => {
     ranges.push({ from: range.from, to: range.to, decoration });
   }
   for (const orphan of orphans) {
-    if (mode !== 'off-visible') {
-      hideMarker(orphan);
-    }
+    hideMarker(orphan);
   }
   // builder requires sorted, non-overlapping ranges — nested regions collapse into the outermost
   ranges.sort((a, b) => a.from - b.from || b.to - a.to);
