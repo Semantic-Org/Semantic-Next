@@ -12,7 +12,7 @@ The alternatives, priced (the decision record):
 
 **(b) Live driver.** A driver speaking the wire against any implementation through the transport seam, asserting semantics (ordering, settlement, resume outcomes) rather than bytes. *For:* timing and interleaving cases express naturally, crash/restart and valve cases are drivable, and the cross-transport requirement is native — the same battery pointed at every registered transport, the shape the existing smoke battery already proves. *Against:* the driver is a program, not data — a non-JS **server** validates against the JS driver cheaply (the driver is just a client), but certifying a non-JS **client** needs the counterpart server driver; more machinery than fixtures.
 
-**(c) Hybrid** — the ruling above. Each case below carries a `shape` tag — `vector` (pure input → output, fixture-friendly) or `driver` (timing, state, or crash semantics) — the input that carried the ruling: the tags fall 4 vector / 29 driver across the 34 cases, and a single-shape harness would have forced the 29 into an unnatural form.
+**(c) Hybrid** — the ruling above. Each case below carries a `shape` tag — `vector` (pure input → output, fixture-friendly) or `driver` (timing, state, or crash semantics) — the input that carried the ruling: the tags fall 4 vector / 30 driver across the 34 cases, and a single-shape harness would have forced the 30 into an unnatural form.
 
 ## The catalog
 
