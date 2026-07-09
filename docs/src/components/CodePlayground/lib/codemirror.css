@@ -5,7 +5,7 @@
 
 /* Editor chrome */
 .cm-editor {
-  background: transparent;
+  background: var(--playground-code-background);
   color: var(--playground-code-default-color);
   font-size: var(--playground-code-font-size);
 
