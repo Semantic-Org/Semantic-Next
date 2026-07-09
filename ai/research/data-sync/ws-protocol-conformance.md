@@ -12,7 +12,7 @@ The alternatives, priced (the decision record):
 
 **(b) Live driver.** A driver speaking the wire against any implementation through the transport seam, asserting semantics (ordering, settlement, resume outcomes) rather than bytes. *For:* timing and interleaving cases express naturally, crash/restart and valve cases are drivable, and the cross-transport requirement is native — the same battery pointed at every registered transport, the shape the existing smoke battery already proves. *Against:* the driver is a program, not data — a non-JS **server** validates against the JS driver cheaply (the driver is just a client), but certifying a non-JS **client** needs the counterpart server driver; more machinery than fixtures.
 
-**(c) Hybrid** — the ruling above. Each case below carries a `shape` tag — `vector` (pure input → output, fixture-friendly) or `driver` (timing, state, or crash semantics) — the input that carried the ruling: the tags fall 4 vector / 29 driver across the 33 cases, and a single-shape harness would have forced the 29 into an unnatural form.
+**(c) Hybrid** — the ruling above. Each case below carries a `shape` tag — `vector` (pure input → output, fixture-friendly) or `driver` (timing, state, or crash semantics) — the input that carried the ruling: the tags fall 4 vector / 30 driver across the 34 cases, and a single-shape harness would have forced the 30 into an unnatural form.
 
 ## The catalog
 
@@ -34,6 +34,7 @@ Gate tokens map each case to the phase-1 gate clause it evidences: `wire-freeze`
 | `atomicity-packed-frame` | driver | wire-freeze | a two-channel transaction arrives as one array frame and applies as one unit (fixture W1) | v1 ships per-channel frames + `spans` + client hold rules and a 10s timeout valve |
 | `atomicity-resume-regroup` | driver | wire-freeze | at resume, tail entries sharing a transaction regroup into one frame across the resume batch | v1 resume replays per channel; regrouping did not exist |
 | `atomicity-tier-scope` | driver | wire-freeze | a transaction touching a live and a coalesced channel: live frame packs alone, no cross-tier grouping, no hold | v1's `spans` implied waiting on channels that legally never emit — the review's hold-livelock |
+| `atomicity-composite-plain-packing` | driver | wire-freeze | a transaction touching a live composite and a plain live channel packs both into one array frame on a subscriber of both — the composite+plain crossing carries no two-frame carve-out (D14 closed in code) | the row-5 implementation initially fanned the composite's frame mid-route, tearing the crossing into two applies |
 | `snapshot-atomic-commit` | driver | wire-freeze | a torn snapshot stream discards and retries; nothing partial ever applies; commit only at `live`; a transaction fanned to a mid-snapshot subscriber is inside the snapshot or delivered after the terminal chunk, never dropped | carried forward from v1 (the checkpoint bracket) — v1 never stated the snapshot/commit ordering contract that makes queued-message discard safe |
 
 ### Settlement (§2)
