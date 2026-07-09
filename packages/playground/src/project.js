@@ -1,4 +1,4 @@
-import { debounce, generateID } from '@semantic-ui/utils';
+import { generateID } from '@semantic-ui/utils';
 
 import { normalizeFiles } from './files.js';
 import { createServingAdapter } from './serving/sw-adapter.js';
@@ -42,7 +42,8 @@ export class PlaygroundProject {
     this.diagnostics = {};
     this.listeners = new Map();
     this.buildCounter = 0;
-    this.buildDebounced = debounce(() => this.build(), 250);
+    this.buildQueued = false;
+    this.lastBuild = Promise.resolve();
     this.worker = getToolingWorker({ workerUrl: workerUrl ?? `${scope}tooling-worker.js` });
     this.serving = serving ?? getServingAdapter({ sandboxUrl: scope });
     this.session = this.serving.createSession(this.sessionId, {
@@ -83,7 +84,21 @@ export class PlaygroundProject {
     file.content = content;
     this.worker.notify('updateFile', { sessionId: this.sessionId, name, content });
     this.emit('filesChanged');
-    this.buildDebounced();
+    this.buildCoalesced();
+  }
+
+  /*
+    Edits build immediately; edits arriving mid-build coalesce into exactly one
+    follow-up. No timer — preview latency stays at build cost, not debounce cost.
+  */
+  async buildCoalesced() {
+    if (this.buildQueued) {
+      return;
+    }
+    this.buildQueued = true;
+    await this.lastBuild;
+    this.buildQueued = false;
+    this.lastBuild = this.build();
   }
 
   async build() {
@@ -134,7 +149,6 @@ export class PlaygroundProject {
   }
 
   destroy() {
-    this.buildDebounced.cancel();
     this.buildCounter += 1;
     this.worker.notify('destroySession', { sessionId: this.sessionId });
     this.session.destroy();
