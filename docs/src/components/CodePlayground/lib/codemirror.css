@@ -49,6 +49,10 @@
     color: var(--playground-code-gutter-color, #6c6c6c);
   }
 
+  .cm-lineNumbers .cm-gutterElement {
+    color: var(--playground-code-linenumber-color);
+  }
+
   .cm-line {
     padding-left: 4px;
   }
