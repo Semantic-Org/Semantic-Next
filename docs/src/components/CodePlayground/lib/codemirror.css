@@ -314,7 +314,22 @@
   transition: var(--playground-fold-transition);
 }
 .cm-foldMarker:hover {
-  background-color: #183a528f;
+  background-color: var(--primary-background-color);
+  color: var(--primary-text-color);
+}
+
+/* gutter folds use CM's placeholder — same treatment as pragma fold markers */
+.cm-foldPlaceholder {
+  color: var(--playground-fold-color);
+  background: var(--playground-fold-background);
+  border: none;
+  border-radius: var(--playground-fold-border-radius);
+  padding: 0px 5px;
+  margin: 0 var(--gap-xs);
+  transition: var(--playground-fold-transition);
+}
+.cm-foldPlaceholder:hover {
+  background-color: var(--primary-background-color);
   color: var(--primary-text-color);
 }
 
