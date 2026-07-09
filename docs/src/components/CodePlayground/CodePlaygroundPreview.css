@@ -44,6 +44,11 @@
     transition: var(--transition);
   }
 
+  /* icons carry trailing margin for inline text spacing — none wanted in a square button */
+  .links a ui-icon {
+    margin: 0;
+  }
+
   .links a:hover {
     background: var(--standard-5);
     color: var(--standard-90);
