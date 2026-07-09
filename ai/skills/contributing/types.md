@@ -104,11 +104,13 @@ export { Signal } from './signal.js';
 
 ```typescript
 // types/index.d.ts
-export { Dependency } from './dependency';
-export { Reaction } from './reaction';
-export { Scheduler } from './scheduler';
-export { Signal, SignalOptions } from './signal';
+export { Dependency } from './dependency.js';
+export { Reaction } from './reaction.js';
+export { Scheduler } from './scheduler.js';
+export { Signal, SignalOptions } from './signal.js';
 ```
+
+Relative imports in `.d.ts` files always carry the `.js` extension, mirroring the source they describe. Extensionless relative imports fail to resolve under `--moduleResolution nodenext`, which is how Node-backend TypeScript consumers see the published packages. The extension is `.js` (never `.d.ts` or `.ts`) — TypeScript maps it to the sibling `.d.ts` itself.
 
 Note that `types/index.d.ts` can also export interfaces and type aliases that don't exist in the JS source (like `SignalOptions`). These are types-only constructs that help consumers but have no runtime equivalent.
 
