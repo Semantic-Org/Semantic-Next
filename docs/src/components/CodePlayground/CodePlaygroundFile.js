@@ -92,13 +92,6 @@ const createComponent = ({ self, el, settings, state, data, reaction, findParent
     self.editor?.setLineWrapping(Boolean(data.lineWrapping));
   },
 
-  setCodeSize({ width = null, height = null } = {}) {
-    if (self.editor) {
-      self.editor.view.dom.style.width = width;
-      self.editor.view.dom.style.height = height;
-    }
-  },
-
   measure() {
     return self.editor?.measure();
   },

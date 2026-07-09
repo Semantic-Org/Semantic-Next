@@ -30,12 +30,16 @@ import { pragmas } from './pragmas.js';
 const severities = { error: 'error', warning: 'warning', info: 'info' };
 
 /*
-  Natural code dimensions for pane snapping. Deliberately measured from the
-  DOM, not CM's height model — contentHeight/scrollWidth drift from rendered
-  reality around content padding and fold widgets (verified against the
-  previous implementation's tuned values).
+  Natural code dimensions for pane snapping. Accepts an editor element or any
+  container holding one. Deliberately measured from the DOM, not CM's height
+  model — contentHeight/scrollWidth drift from rendered reality around content
+  padding and fold widgets (verified against the previous implementation's
+  tuned values).
 */
-export const measureEditor = (editorElement) => {
+export const measureEditor = (element) => {
+  const editorElement = element?.classList?.contains('cm-editor')
+    ? element
+    : element?.querySelector('.cm-editor');
   if (!editorElement) {
     return { gutterWidth: 0, lineWidth: 0, naturalWidth: 0, naturalHeight: 0 };
   }

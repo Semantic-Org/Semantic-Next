@@ -365,7 +365,7 @@ const createComponent = (
 
   getNaturalPanelSize(panel, { direction, minimized }) {
     const $panel = $$(panel);
-    const code = measureEditor($panel.find('.cm-editor').el());
+    const code = measureEditor(panel);
     if (direction === 'horizontal') {
       const $menu = $panel.find('ui-menu .menu').first();
 
