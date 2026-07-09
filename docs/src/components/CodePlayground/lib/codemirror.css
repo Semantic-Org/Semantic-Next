@@ -61,6 +61,7 @@
   .cm-foldGutter .cm-foldMarker-closed,
   .cm-foldGutter .cm-foldMarker-open {
     cursor: pointer;
+    font-family: var(--font-family, sans-serif);
     transition: var(--transition);
   }
   .cm-foldGutter .cm-gutterElement:hover span {
@@ -301,6 +302,8 @@
 
 /* Fold Markers - CM6 uses .cm-foldMarker */
 .cm-foldMarker {
+  cursor: pointer;
+  font-family: var(--font-family, sans-serif);
   color: var(--playground-fold-color);
   background: var(--playground-fold-background);
   border-radius: var(--playground-fold-border-radius);
@@ -320,6 +323,8 @@
 
 /* gutter folds use CM's placeholder — doubled class to outrank CM's own .ͼx .cm-foldPlaceholder rule */
 .cm-foldPlaceholder.cm-foldPlaceholder {
+  cursor: pointer;
+  font-family: var(--font-family, sans-serif);
   color: var(--playground-fold-color);
   background: var(--playground-fold-background);
   border: none;
