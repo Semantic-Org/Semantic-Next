@@ -1,9 +1,85 @@
 /*
-  This is injected into the shadow DOM of the playground-element component
-  that renders the Code Mirror instance.
-
-  It is the only way to access .cm-* classes
+  Adopted into the shadow root that hosts the CodeMirror instance —
+  editor chrome, scrollbars, and the syntax palette live here.
 */
+
+/* Editor chrome */
+.cm-editor {
+  background: transparent;
+  color: var(--playground-code-default-color);
+  font-size: var(--playground-code-font-size);
+
+  &.cm-focused {
+    outline: none;
+  }
+
+  .cm-scroller {
+    font-family: monospace;
+    line-height: 1.4;
+
+    &::-webkit-scrollbar {
+      -webkit-appearance: none;
+      width: var(--scrollbar-width);
+      height: var(--scrollbar-height);
+    }
+    &::-webkit-scrollbar-track {
+      background: var(--track-background);
+      border-radius: var(--track-border-radius);
+    }
+    &::-webkit-scrollbar-thumb {
+      cursor: pointer;
+      border-radius: var(--thumb-border-radius);
+      background: var(--thumb-background);
+      transition: var(--thumb-transition);
+    }
+    &::-webkit-scrollbar-thumb:window-inactive {
+      background: var(--thumb-inactive-background);
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: var(--thumb-hover-background);
+    }
+    &::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+  }
+
+  .cm-gutters {
+    background: transparent;
+    border-right: none;
+    color: var(--playground-code-gutter-color, #6c6c6c);
+  }
+
+  .cm-line {
+    padding-left: 4px;
+  }
+
+  .cm-activeLine,
+  .cm-activeLineGutter {
+    background: transparent;
+  }
+
+  .cm-cursor {
+    border-left-color: var(--playground-code-cursor-color);
+  }
+
+  .cm-selectionBackground,
+  &.cm-focused .cm-selectionBackground {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .cm-panels {
+    background: var(--playground-code-background);
+    color: var(--playground-code-default-color);
+    border-bottom: var(--playground-header-border);
+  }
+
+  .cm-searchMatch {
+    background: rgba(73, 177, 210, 0.25);
+  }
+  .cm-searchMatch-selected {
+    background: rgba(73, 177, 210, 0.5);
+  }
+}
 
 
 
@@ -250,7 +326,8 @@
     .tok-keyword {
       color: var(--code-default);
     }
-    .tok-propertyName {
+    .tok-propertyName,
+    .tok-variableName {
       color: var(--code-grey);
     }
     .tok-atom {
@@ -295,11 +372,3 @@
 }
 
 
-/* Fix some missing CM6 tokens by inference */
-.ͼo .tok-operator + .tok-propertyName {
-  color: var(--playground-code-string-2-color);
-}
-.ͼo .tok-operator + .tok-propertyName:last-child,
-.ͼo .tok-operator + .tok-propertyName ~ .tok-propertyName {
-  color: var(--playground-code-callee-color);
-}

@@ -4,6 +4,18 @@ import { javascript } from '@codemirror/lang-javascript';
 import { getExtension } from '../files.js';
 import { templateLang } from './template-lang.js';
 
+/* normalized family, exposed as data-language on the editor content for theming hooks */
+export const getLanguageFamily = (fileName) => {
+  const extension = getExtension(fileName);
+  if (['js', 'mjs', 'jsx', 'ts', 'tsx', 'json'].includes(extension)) {
+    return 'js';
+  }
+  if (['html', 'css'].includes(extension)) {
+    return extension;
+  }
+  return 'text';
+};
+
 /*
   Language routing by filename. html maps to the SUI template language —
   fragments and pages alike are authored in it.

@@ -1,6 +1,6 @@
 import { acceptCompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
-import { bracketMatching, indentOnInput, indentUnit, syntaxHighlighting } from '@codemirror/language';
+import { bracketMatching, foldGutter, indentOnInput, indentUnit, syntaxHighlighting } from '@codemirror/language';
 import { setDiagnostics } from '@codemirror/lint';
 import { highlightSelectionMatches, search, searchKeymap } from '@codemirror/search';
 import { Compartment, EditorState, Prec } from '@codemirror/state';
@@ -14,7 +14,8 @@ import {
 } from '@codemirror/view';
 import { classHighlighter } from '@lezer/highlight';
 
-import { getLanguage } from './languages.js';
+import { highlightStyle } from './highlight.js';
+import { getLanguage, getLanguageFamily } from './languages.js';
 import { pragmas } from './pragmas.js';
 
 /*
@@ -68,6 +69,8 @@ export const createEditor = ({
     closeBrackets(),
     search({ top: true }),
     highlightSelectionMatches(),
+    syntaxHighlighting(highlightStyle),
+    // tok-* classes stay available as CSS hooks for language-specific overrides
     syntaxHighlighting(classHighlighter),
     pragmas(pragmaMode),
     notifyChange,
@@ -81,7 +84,7 @@ export const createEditor = ({
       ...completionKeymap,
       indentWithTab,
     ]),
-    compartments.lineNumbers.of(lineNumbers ? cmLineNumbers() : []),
+    compartments.lineNumbers.of(lineNumbers ? [cmLineNumbers(), foldGutter()] : []),
     compartments.lineWrapping.of(lineWrapping ? EditorView.lineWrapping : []),
     compartments.readonly.of(readonly ? EditorState.readOnly.of(true) : []),
   ];
@@ -92,6 +95,7 @@ export const createEditor = ({
       extensions: [
         ...baseExtensions,
         compartments.language.of(getLanguage(fileName)),
+        EditorView.contentAttributes.of({ 'data-language': getLanguageFamily(fileName) }),
         compartments.perFile.of(getFileExtensions?.(fileName) ?? []),
       ],
     });
@@ -150,7 +154,7 @@ export const createEditor = ({
     },
 
     setLineNumbers(enabled) {
-      view.dispatch({ effects: compartments.lineNumbers.reconfigure(enabled ? cmLineNumbers() : []) });
+      view.dispatch({ effects: compartments.lineNumbers.reconfigure(enabled ? [cmLineNumbers(), foldGutter()] : []) });
     },
 
     setLineWrapping(enabled) {
