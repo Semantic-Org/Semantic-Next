@@ -1,4 +1,4 @@
-import type { Signal, SignalOptions } from '../signal';
+import type { Signal, SignalOptions } from '../signal.js';
 
 /**
  * A reactive membership selector returned by `match`. Call it with a key to test

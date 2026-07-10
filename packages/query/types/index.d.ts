@@ -1,5 +1,5 @@
-import { Behavior, BehaviorConfig } from './behavior';
-import { CSSOptions, EventHandler, EventOptions, Query, QueryOptions } from './query';
+import { Behavior, BehaviorConfig } from './behavior.js';
+import { CSSOptions, EventHandler, EventOptions, Query, QueryOptions } from './query.js';
 
 /**
  * The main function for creating a Query instance.  This is often aliased as `$`.

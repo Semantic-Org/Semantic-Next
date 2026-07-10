@@ -1,4 +1,4 @@
-import type { Reaction } from '../reaction';
+import type { Reaction } from '../reaction.js';
 
 /**
  * Runs a function without tracking dependencies. Signals read inside do not

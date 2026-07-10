@@ -1,2 +1,2 @@
-export * from './string-scanner';
-export * from './template-compiler';
+export * from './string-scanner.js';
+export * from './template-compiler.js';

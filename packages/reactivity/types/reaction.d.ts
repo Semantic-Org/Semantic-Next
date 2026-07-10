@@ -1,4 +1,4 @@
-import type { Dependency } from './dependency';
+import type { Dependency } from './dependency.js';
 
 /**
  * A Reaction is a computation that automatically re-runs when the signals it

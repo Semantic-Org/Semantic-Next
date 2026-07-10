@@ -1,4 +1,4 @@
-import { Query } from './query';
+import { Query } from './query.js';
 
 export interface BehaviorConfig {
   /** Behavior name */
@@ -104,7 +104,6 @@ export class Behavior {
   lookup(query: string): any;
   callMethod(query: string, ...methodArgs: any[]): any;
   setting(name: string, value?: any): any;
-  settings(newSettings?: Record<string, any>): Record<string, any> | this;
   call(func: Function, options?: { additionalParams?: Record<string, any>; }): any;
   destroy(): void;
 

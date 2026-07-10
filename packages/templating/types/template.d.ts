@@ -1,8 +1,7 @@
+import { ASTNode } from '@semantic-ui/compiler';
 import { Query, QueryOptions } from '@semantic-ui/query';
 import { Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
-import { Renderer } from '@semantic-ui/renderer';
-import { ASTNode } from './compiler/template-compiler';
-import { TemplateHelpers } from './template-helpers';
+import { TemplateHelpers } from './template-helpers.js';
 
 export interface TemplateSettings {
   /** The name of the template. */
@@ -654,8 +653,8 @@ export class Template {
   renderRoot?: ShadowRoot | HTMLElement;
   /** The rendering engine — 'native' (default), 'lit', or an engine object. */
   renderingEngine: string | object;
-  /** The renderer instance used for rendering. */
-  renderer: Renderer;
+  /** The renderer instance used for rendering. Typed `any` until renderer types are authored. */
+  renderer: any;
   /** Optional start marker node for insertion. */
   startNode?: Node;
   /** Optional end marker node for insertion.. */
