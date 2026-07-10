@@ -161,7 +161,14 @@ export class Scheduler {
     if (Scheduler.isSettled()) {
       return Promise.resolve();
     }
-    Scheduler.settledDeferred ??= Promise.withResolvers();
+    // hand-rolled deferred, Promise.withResolvers is too new for the CDN runtime floor
+    if (Scheduler.settledDeferred === null) {
+      const deferred = {};
+      deferred.promise = new Promise((resolve) => {
+        deferred.resolve = resolve;
+      });
+      Scheduler.settledDeferred = deferred;
+    }
     return Scheduler.settledDeferred.promise;
   }
 
