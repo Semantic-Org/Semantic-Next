@@ -498,6 +498,121 @@ RENDERING_ENGINES.forEach((engine) => {
     });
 
     /*******************************
+       Record reuse — removed fields
+    *******************************/
+
+    describe('each reconcile — removed fields on reused records', () => {
+      // Menu-shaped data: no _id/id/key fields, so getItemID falls back to
+      // positional index and filtering reuses records across different
+      // logical items. Fields present on the old item but absent from the
+      // new one must clear, not linger.
+      const sections = [
+        { name: 'Overview', url: '/overview', pages: [{ name: 'Intro', url: '/intro' }] },
+        { name: 'Components', url: '/components', pages: [{ name: 'Button', url: '/button' }] },
+        { name: 'Templates', url: '/templates', pages: [{ name: 'Syntax', url: '/syntax' }] },
+        { name: 'Reactivity', url: '/reactivity', pages: [{ name: 'Signals', url: '/signals' }] },
+        { name: 'Query', url: '/query', pages: [{ name: 'Traversal', url: '/traversal' }] },
+        { name: 'Advanced', url: '/advanced', pages: [{ name: 'SSR', url: '/ssr' }] },
+      ];
+
+      it('clears a conditional field binding after filtering down and back (as-mode)', async () => {
+        // Mirrors nav-menu search: filtering spreads a `highlight` field onto
+        // matches, clearing the term removes it. Shrink 6 → 1 → 6 must not
+        // leave the reused record rendering the filtered item's fields.
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<ul>{#each section in getSections}<li>{#if section.highlight}<b>{section.highlight}</b>{else}{section.name}{/if}</li>{/each}</ul>',
+          defaultState: { term: '' },
+          createComponent: ({ state }) => ({
+            getSections() {
+              const term = state.term.get();
+              if (!term) { return sections; }
+              return sections
+                .filter((section) => section.name.toLowerCase().includes(term))
+                .map((section) => ({ ...section, highlight: section.name.toUpperCase() }));
+            },
+          }),
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        expect(listText(el)).toEqual(['Overview', 'Components', 'Templates', 'Reactivity', 'Query', 'Advanced']);
+
+        el.template.state.term.set('quer');
+        await waitForUpdate(el);
+        expect(listText(el)).toEqual(['QUERY']);
+
+        el.template.state.term.set('');
+        await waitForUpdate(el);
+        expect(listText(el)).toEqual(['Overview', 'Components', 'Templates', 'Reactivity', 'Query', 'Advanced']);
+        expect(el.shadowRoot.querySelectorAll('b').length).toBe(0);
+      });
+
+      it('clears a text binding when the replacing item lacks the field (as-mode)', async () => {
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<ul>{#each item in items}<li>{item.name}|{item.badge}</li>{/each}</ul>',
+          defaultState: { items: [{ name: 'Alpha', badge: 'hot' }] },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        expect(listText(el)).toEqual(['Alpha|hot']);
+
+        el.template.state.items.set([{ name: 'Beta' }]);
+        await waitForUpdate(el);
+        expect(listText(el)).toEqual(['Beta|']);
+      });
+
+      it('clears a spread-mode binding when the replacing item lacks the field', async () => {
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<ul>{#each items}<li>{name}|{badge}</li>{/each}</ul>',
+          defaultState: { items: [{ name: 'Alpha', badge: 'hot' }] },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        expect(listText(el)).toEqual(['Alpha|hot']);
+
+        el.template.state.items.set([{ name: 'Beta' }]);
+        await waitForUpdate(el);
+        expect(listText(el)).toEqual(['Beta|']);
+      });
+
+      it('clears a nested each when the replacing item lacks the list field (as-mode)', async () => {
+        // The sidebar corruption's "lost section" shape: a reused record whose
+        // old item had `pages` but the new one doesn't must drop the sublist.
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<ul>{#each section in items}<li>{section.name}{#if section.pages}<span>{#each page in section.pages}<i>{page.name}</i>{/each}</span>{/if}</li>{/each}</ul>',
+          defaultState: { items: [sections[4]] },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        expect(listText(el)).toEqual(['QueryTraversal']);
+
+        el.template.state.items.set([{ name: 'Plain', url: '/plain' }]);
+        await waitForUpdate(el);
+        expect(listText(el)).toEqual(['Plain']);
+        expect(el.shadowRoot.querySelectorAll('i').length).toBe(0);
+      });
+    });
+
+    /*******************************
            Object iteration
     *******************************/
 

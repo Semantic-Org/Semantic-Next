@@ -55,14 +55,21 @@ function createSnapshot(item) {
 }
 
 // Returns the list of changed keys (or null if nothing changed) and
-// updates `snapshot` to match `item` in place. Added keys register on
-// the iteration that introduces them; removed keys slip past — the
-// common case has a stable prop set, and the alternative would
-// pessimize the hot path for a never-observed contract.
+// updates `snapshot` to match `item` in place. Removed keys count as
+// changed: heuristic (positional) keying reuses records across logical
+// items whose field sets differ — e.g. a filter that spreads `highlight`
+// onto matches — and a field the new item lacks must wake its bindings,
+// not linger. Callers distinguish removal via `key in item`.
 function refreshSnapshotAndDetect(snapshot, item) {
   if (snapshot === null || typeof snapshot !== 'object') { return null; }
   if (item === null || typeof item !== 'object') { return null; }
   let changedKeys = null;
+  for (const key in snapshot) {
+    if (!Object.prototype.hasOwnProperty.call(item, key)) {
+      (changedKeys ??= []).push(key);
+      delete snapshot[key];
+    }
+  }
   for (const key in item) {
     if (!Object.prototype.hasOwnProperty.call(item, key)) { continue; }
     if (snapshot[key] !== item[key]) {
@@ -480,7 +487,12 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
           }
           else {
             for (const key of changedKeys) {
-              record.dataContext.setKey(key, item[key]);
+              if (Object.prototype.hasOwnProperty.call(item, key)) {
+                record.dataContext.setKey(key, item[key]);
+              }
+              else {
+                record.dataContext.removeKey(key);
+              }
             }
             record.dataContext.notifyKey('this');
           }
