@@ -2,24 +2,12 @@ import { reaction, signal } from '@semantic-ui/reactivity';
 
 const query = signal('gala');
 
-const search = (term, abortSignal) =>
-  new Promise((resolve) => {
-    const timer = setTimeout(() => resolve(`${term} apples`), 100);
-    abortSignal.addEventListener('abort', () => {
-      clearTimeout(timer);
-      console.log(`"${term}" aborted`);
-      resolve(null);
-    });
-  });
+const search = (term) => new Promise((resolve) => setTimeout(() => resolve(`${term} apples`), 1000));
 
-reaction(async (comp) => {
+reaction(async () => {
   const term = query.get(); // tracked, read before the first await
-  const results = await search(term, comp.abortSignal);
-  if (results) {
-    console.log(`found ${results}`);
-  }
+  console.log(`found ${await search(term)}`);
 });
 
-// writes while a run is in flight abort it and coalesce into one re-run
-query.set('fuji');
+// a change mid-flight coalesces into one re-run after the current run settles
 query.set('honeycrisp');
