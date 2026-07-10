@@ -2,7 +2,11 @@ import { reaction, signal } from '@semantic-ui/reactivity';
 
 const query = signal('gala');
 
-const search = (term) => new Promise((resolve) => setTimeout(() => resolve(`${term} apples`), 1000));
+const search = (term) => {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(`${term} apples`), 1000);
+  });
+};
 
 reaction(async () => {
   const term = query.get(); // tracked, read before the first await
