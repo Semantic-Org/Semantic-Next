@@ -91,7 +91,10 @@ export class LitRenderer {
 
   cachedRender(data) {
     if (data) {
-      this.updateData(data);
+      // direct content updates pass the complete merged context — keys the
+      // new context lacks (e.g. an each item that dropped a field) must
+      // clear, not linger from the previous render
+      this.updateData(data, { preserveExistingData: false });
       this.bumpDataVersion();
     }
     return this.litTemplate;

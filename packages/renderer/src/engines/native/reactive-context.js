@@ -307,6 +307,21 @@ export class ReactiveDataContext {
     if (dep !== undefined) { dep.changed(); }
   }
 
+  // Restores fresh-record semantics for a key the item no longer carries:
+  // reads fall through to the parent again instead of shadowing with a
+  // stale value. Woken subscribers re-read via the fallthrough branch and
+  // pick up keySetVersion, so a later re-add wakes them again.
+  removeKey(key) {
+    if (!(key in this.values)) { return; }
+    delete this.values[key];
+    const dep = this.deps[key];
+    if (dep !== undefined) {
+      delete this.deps[key];
+      dep.changed();
+    }
+    if (!this.keysSealed && this.keySetVersion !== null) { this.keySetVersion.changed(); }
+  }
+
   notifyField(fieldName) {
     if (this.fieldDeps === null) { return; }
     const dep = this.fieldDeps[fieldName];
@@ -315,7 +330,12 @@ export class ReactiveDataContext {
     if (bareDep !== undefined) { bareDep.changed(); }
   }
 
+  // Full replacement: keys absent from nextValues are removed, not left
+  // shadowing. Seed calls run against empty values so the sweep is free.
   replace(nextValues) {
+    for (const key in this.values) {
+      if (!(key in nextValues)) { this.removeKey(key); }
+    }
     for (const key in nextValues) {
       this.setKey(key, nextValues[key]);
     }
