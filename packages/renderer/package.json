@@ -10,10 +10,8 @@
   "license": "ISC",
   "main": "src/index.js",
   "module": "src/index.js",
-  "types": "types/index.d.ts",
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
       "import": "./src/index.js",
       "browser": "./dist/bundle/index.min.js",
       "importmap": "./dist/cdn/index.min.js"
