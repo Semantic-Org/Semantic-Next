@@ -1,9 +1,100 @@
 /*
-  This is injected into the shadow DOM of the playground-element component
-  that renders the Code Mirror instance.
-
-  It is the only way to access .cm-* classes
+  Adopted into the shadow root that hosts the CodeMirror instance —
+  editor chrome, scrollbars, and the syntax palette live here.
 */
+
+/* Editor chrome */
+.cm-editor {
+  background: var(--playground-code-background);
+  color: var(--playground-code-default-color);
+  font-size: var(--playground-code-font-size);
+
+  &.cm-focused {
+    outline: none;
+  }
+
+  .cm-scroller {
+    font-family: monospace;
+    line-height: 1.4;
+
+    &::-webkit-scrollbar {
+      -webkit-appearance: none;
+      width: var(--scrollbar-width);
+      height: var(--scrollbar-height);
+    }
+    &::-webkit-scrollbar-track {
+      background: var(--track-background);
+      border-radius: var(--track-border-radius);
+    }
+    &::-webkit-scrollbar-thumb {
+      cursor: pointer;
+      border-radius: var(--thumb-border-radius);
+      background: var(--thumb-background);
+      transition: var(--thumb-transition);
+    }
+    &::-webkit-scrollbar-thumb:window-inactive {
+      background: var(--thumb-inactive-background);
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: var(--thumb-hover-background);
+    }
+    &::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+  }
+
+  .cm-gutters {
+    background: transparent;
+    border-right: none;
+    color: var(--playground-code-linenumber-color);
+  }
+
+  .cm-line {
+    padding-left: 4px;
+  }
+
+  /* the U+2304 caret glyph sits on the baseline — lift it to optical center */
+  .cm-foldGutter .cm-foldMarker-open {
+    display: inline-block;
+    transform: translateY(-4px);
+  }
+  .cm-foldGutter .cm-foldMarker-closed,
+  .cm-foldGutter .cm-foldMarker-open {
+    cursor: pointer;
+    font-family: var(--font-family, sans-serif);
+    transition: var(--transition);
+  }
+  .cm-foldGutter .cm-gutterElement:hover span {
+    color: var(--playground-code-gutter-color, #6c6c6c);
+  }
+
+  .cm-activeLine,
+  .cm-activeLineGutter {
+    background: transparent;
+  }
+
+  .cm-cursor {
+    border-left-color: var(--playground-code-cursor-color);
+  }
+
+  .cm-selectionBackground,
+  &.cm-focused .cm-selectionBackground {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .cm-panels {
+    background: var(--playground-code-background);
+    color: var(--playground-code-default-color);
+    border-bottom: var(--playground-header-border);
+  }
+
+  .cm-searchMatch {
+    background: rgba(73, 177, 210, 0.25);
+  }
+  .cm-searchMatch-selected {
+    background: rgba(73, 177, 210, 0.5);
+  }
+}
 
 
 
@@ -211,6 +302,8 @@
 
 /* Fold Markers - CM6 uses .cm-foldMarker */
 .cm-foldMarker {
+  cursor: pointer;
+  font-family: var(--font-family, sans-serif);
   color: var(--playground-fold-color);
   background: var(--playground-fold-background);
   border-radius: var(--playground-fold-border-radius);
@@ -224,7 +317,24 @@
   transition: var(--playground-fold-transition);
 }
 .cm-foldMarker:hover {
-  background-color: #183a528f;
+  background-color: var(--primary-background-color);
+  color: var(--primary-text-color);
+}
+
+/* gutter folds use CM's placeholder — doubled class to outrank CM's own .ͼx .cm-foldPlaceholder rule */
+.cm-foldPlaceholder.cm-foldPlaceholder {
+  cursor: pointer;
+  font-family: var(--font-family, sans-serif);
+  color: var(--playground-fold-color);
+  background: var(--playground-fold-background);
+  border: none;
+  border-radius: var(--playground-fold-border-radius);
+  padding: 0px 5px;
+  margin: 0 var(--gap-xs);
+  transition: var(--playground-fold-transition);
+}
+.cm-foldPlaceholder.cm-foldPlaceholder:hover {
+  background-color: var(--primary-background-color);
   color: var(--primary-text-color);
 }
 
@@ -250,7 +360,8 @@
     .tok-keyword {
       color: var(--code-default);
     }
-    .tok-propertyName {
+    .tok-propertyName,
+    .tok-variableName {
       color: var(--code-grey);
     }
     .tok-atom {
@@ -295,11 +406,3 @@
 }
 
 
-/* Fix some missing CM6 tokens by inference */
-.ͼo .tok-operator + .tok-propertyName {
-  color: var(--playground-code-string-2-color);
-}
-.ͼo .tok-operator + .tok-propertyName:last-child,
-.ͼo .tok-operator + .tok-propertyName ~ .tok-propertyName {
-  color: var(--playground-code-callee-color);
-}

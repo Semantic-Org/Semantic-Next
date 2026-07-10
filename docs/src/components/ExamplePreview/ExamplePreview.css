@@ -3,22 +3,33 @@
   --example-preview-height: 240px;
 }
 
-/* keep the host's column flex so #content{flex:1} fills the height,
-   otherwise the inner iframe collapses to the 150px iframe default */
-playground-preview {
-  display: flex;
-  flex-direction: column;
+.content {
+  position: relative;
   width: 100%;
   height: var(--example-preview-height);
+}
+
+.content iframe {
+  width: 100%;
+  height: 100%;
   border: none;
   background: transparent;
-  --playground-preview-toolbar-background: transparent;
 }
 
-playground-preview::part(preview-loading-indicator) {
-  top: 0;
+.loading {
+  position: absolute;
+  inset: 0;
 }
 
-playground-preview::part(preview-toolbar) {
-  display: none;
+.error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  font-family: var(--monospace-font, monospace);
+  font-size: var(--small, 13px);
+  color: var(--error-text-color, #b91c1c);
+  white-space: pre-wrap;
 }

@@ -1,7 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
+import { PlaygroundProject } from '@semantic-ui/playground';
+import { measureEditor } from '@semantic-ui/playground/editor';
 import { each, firstMatch, get, idleCallback, inArray, moveToFront, sortBy } from '@semantic-ui/utils';
 
-import './lib/playground-worker-fix.js';
 import * as componentSpecs from '@semantic-ui/core/component-specs';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
@@ -14,10 +15,6 @@ import { Panel, Panels } from '@semantic-ui/core';
 
 import css from './CodePlayground.css?raw';
 import template from './CodePlayground.html?raw';
-
-import 'playground-elements/playground-project.js';
-import 'playground-elements/playground-file-editor.js';
-import 'playground-elements/playground-preview.js';
 
 const defaultSettings = {
   // an object containing the files for the project
@@ -95,14 +92,6 @@ const defaultSettings = {
     'page.ts',
   ],
 
-  // types to use
-  scriptTypes: {
-    'text/css': 'sample/css',
-    'text/importmap': 'sample/importmap',
-    'text/html': 'sample/html',
-    'text/javascript': 'sample/js',
-  },
-
   // titles to appear to users
   fileTitles: {
     'component.js': 'component.js',
@@ -175,8 +164,6 @@ const defaultState = {
   viewMode: 'split',
 
   currentFiles: [],
-
-  projectFiles: [],
 };
 
 const createComponent = (
@@ -236,11 +223,19 @@ const createComponent = (
   },
 
   setFiles(files) {
-    // project files tracks changes in files setting
-    state.projectFiles.set(files);
-
     // current files tracks file modifications
     state.currentFiles.set(files);
+
+    if (self.project) {
+      self.project.setFiles(files);
+    }
+    else {
+      self.project = new PlaygroundProject({
+        files,
+        sandboxUrl: settings.sandboxURL,
+      });
+      self.project.build();
+    }
 
     // send files to LSP worker for component analysis
     const client = getClient();
@@ -296,15 +291,24 @@ const createComponent = (
   },
 
   configureLayout() {
-    // this will update <playground-project> to reference current file values
-    // this wil be read by playground-elements causing values to be reset otherwise
-    state.projectFiles.set(state.currentFiles.peek());
-
     // we will need to rerun code editor config on each file
     const playgroundFiles = findChildren('CodePlaygroundFile');
     each(playgroundFiles, (component) => {
       component.configureCodeEditors();
     });
+  },
+
+  getFileContent(filename) {
+    return state.currentFiles.peek()?.[filename]?.content ?? '';
+  },
+
+  fileEdited(filename, content) {
+    const file = state.currentFiles.peek()?.[filename];
+    if (!file || file.content === content) {
+      return;
+    }
+    self.project?.editFile(filename, content);
+    state.currentFiles.setProperty(filename, { ...file, content });
   },
 
   getLayout() {
@@ -361,29 +365,22 @@ const createComponent = (
 
   getNaturalPanelSize(panel, { direction, minimized }) {
     const $panel = $$(panel);
+    const code = measureEditor(panel);
     if (direction === 'horizontal') {
       const $menu = $panel.find('ui-menu .menu').first();
-      const $gutter = $panel.find('.cm-gutters').first();
-      const $lines = $panel.find('.cm-line');
 
       const extraSpacing = 5; // DO NOT DECREASE from testing with inline playground to avoid scrollbars in all cases.
+      const additionalSpace = 18; // add space so its not cramped
       const menuWidth = $menu.width() + 11 || 0;
       const minWidths = [200, menuWidth];
-      const gutterWidth = $gutter.width();
 
-      if ($lines.count() > 0) {
-        const additionalSpace = 18; // add space so its not cramped
-        const lineWidths = $lines.naturalWidth().map(val => val + additionalSpace);
-        minWidths.push(...lineWidths);
+      if (code.lineWidth > 0) {
+        minWidths.push(code.lineWidth + additionalSpace);
       }
 
-      const size = Math.max(...minWidths) + gutterWidth + extraSpacing;
-      return size;
+      return Math.max(...minWidths) + code.gutterWidth + extraSpacing;
     }
     else {
-      // gutters gets minheight which is code height
-      const $gutter = $panel.find('.cm-gutters').first();
-
       // label height and menu need to be added to code height
       const $label = $panel.find('.label').first();
       const $menu = $panel.find('.menu').first();
@@ -391,22 +388,22 @@ const createComponent = (
       const extraSpacing = 2; // rounding
       const labelHeight = $label.height() || 0;
       const menuHeight = $menu.height() || 0;
-      let size;
       if (minimized) {
-        size = labelHeight;
+        return labelHeight;
       }
-      else {
-        const codeHeight = parseFloat($gutter.css('min-height'));
-        const height = codeHeight + labelHeight + menuHeight + extraSpacing;
-        size = Math.max(height, 100);
-      }
-      return size;
+      const height = code.naturalHeight + labelHeight + menuHeight + extraSpacing;
+      return Math.max(height, 100);
     }
   },
 
-  getScriptType(type) {
-    return get(settings.scriptTypes, type);
+  fileSizeChanged(filename, size) {
+    // inline natural sizing keys off the first real layout instead of a rAF guess
+    if (settings.inline && settings.maxHeight == 'natural' && !self.naturalHeightApplied) {
+      self.naturalHeightApplied = true;
+      self.setNaturalHeight(size);
+    }
   },
+
   getPanelSize(file) {
     let size = get(settings.panelSizes, file.filename);
     if (size === 'natural' && !file.content) {
@@ -440,9 +437,6 @@ const createComponent = (
   // when inline or on mobile or stacked we want only one menu
   shouldCombineMenus() {
     return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value === 'mobile';
-  },
-  getProjectFiles() {
-    return self.getFileArray({ files: state.projectFiles.get() });
   },
   getFileArray({ files = state.currentFiles.value, filter } = {}) {
     let fileArray = [];
@@ -497,7 +491,6 @@ const createComponent = (
       _id: filename,
       filename,
       ...file,
-      scriptType: self.getScriptType(file.contentType),
       panelIndex: self.getPanelIndex(filename),
       sortIndex: self.getSort(filename),
       label: self.getFileLabel(filename),
@@ -579,13 +572,6 @@ const createComponent = (
     return panels;
   },
 
-  reloadPreview() {
-    const iframe = $$('playground-preview').find('iframe').get(0);
-    if (iframe) {
-      iframe.contentWindow.location.reload();
-    }
-  },
-
   toggleTabs() {
     const newLayout = (state.layout.get() == 'tabs')
       ? 'panels'
@@ -616,9 +602,9 @@ const createComponent = (
       });
     }
     else {
-      $$(`playground-file-editor[filename="${filename}"]`)
-        .find('playground-code-editor')
-        .focus();
+      const file = findChildren('CodePlaygroundFile')
+        .find(component => component.getFilename?.() === filename);
+      file?.focus();
     }
   },
 
@@ -641,27 +627,19 @@ const createComponent = (
     });
   },
 
-  setNaturalHeight() {
+  setNaturalHeight(size) {
     if (isServer) {
       return;
     }
-    const codeHeight = parseFloat($$('.cm-gutters').first().css('min-height')) || 100;
+    const codeHeight = size?.naturalHeight
+      || findChildren('CodePlaygroundFile')[0]?.measure()?.naturalHeight
+      || 100;
     const menuHeight = $$('ui-panel .menu').first().height() || 0;
     const offset = 5; // from trial & error avoids tiny scrollbars
     let panelHeight = menuHeight + codeHeight + offset;
     panelHeight = Math.min(panelHeight, 600);
     panelHeight = Math.max(panelHeight, 50);
     $('ui-panels').first().css('height', `${panelHeight + 15}px`);
-  },
-
-  updateCurrentFiles(currentFilesArray = []) {
-    const currentFiles = state.currentFiles.peek();
-    each(currentFilesArray, (file) => {
-      if (currentFiles[file.name]) {
-        currentFiles[file.name].content = file.content;
-      }
-    });
-    state.currentFiles.set(currentFiles);
   },
 });
 
@@ -670,19 +648,12 @@ const onCreated = ({ self, attachEvent }) => {
 };
 
 const onRendered = ({ isClient, self, state, $, settings }) => {
-  // TODO: CM6 Migration - these plugins need to be rewritten as CM6 extensions
-  // addSearch(CodeMirror);
-
   self.addPanelSettings();
   self.setupComponents();
-
-  if (settings.inline && settings.maxHeight == 'natural') {
-    requestAnimationFrame(() => self.setNaturalHeight());
-  }
 };
 
-const onThemeChanged = ({ self }) => {
-  self.reloadPreview();
+const onDestroyed = ({ self }) => {
+  self.project?.destroy();
 };
 
 const keys = {
@@ -724,10 +695,6 @@ const events = {
   'resizeEnd ui-panel'({ state }) {
     state.resizing.set(false);
   },
-  'bind compileStart playground-project'({ self, target }) {
-    const currentFilesArray = target._files;
-    self.updateCurrentFiles(currentFilesArray);
-  },
 };
 
 const CodePlayground = defineComponent({
@@ -742,7 +709,7 @@ const CodePlayground = defineComponent({
   events,
   defaultState,
   keys,
-  onThemeChanged,
+  onDestroyed,
   subTemplates: {
     CodePlaygroundPanel,
     CodePlaygroundPreview,

@@ -8,7 +8,7 @@
     border-bottom-width: 1px;
   }
 
-  playground-preview {
+  example-preview {
     position: relative;
     touch-action: none;
   }
@@ -17,6 +17,41 @@
     flex: 1 1 auto;
     overflow-y: auto;
     padding: var(--padding);
+  }
+
+  .menu {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .menu .links {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    color: var(--standard-60);
+    transition: var(--transition);
+  }
+
+  /* icons carry trailing margin for inline text spacing — none wanted in a square button */
+  .links a ui-icon {
+    margin: 0;
+  }
+
+  .links a:hover {
+    background: var(--standard-5);
+    color: var(--standard-90);
   }
 
   ui-panel > .links {

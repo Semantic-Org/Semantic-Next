@@ -37,7 +37,8 @@ searchMeta = {
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Language" content="en">
     <meta name="description" content={description} />
-    <meta name="viewport" content="width=device-width" />
+    <!-- maximum-scale suppresses iOS's auto-zoom on sub-16px editors; Safari still allows user pinch-zoom -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="preload" href="/fonts/lato/LatoLatin-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/lato/LatoLatin-Semibold.woff2" as="font" type="font/woff2" crossorigin />

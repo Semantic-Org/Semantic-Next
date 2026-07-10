@@ -69,8 +69,17 @@ const events = {
     state.codeVisible.toggle();
   },
   'click ui-icon.playground'({ settings, self, event }) {
-    const playgroundLink = self.getPlaygroundLink(settings.code);
-    openLink(playgroundLink, { newWindow: true, event });
+    // the window must open inside the synchronous gesture — Safari blocks
+    // popups opened after an await, and the link encode is async
+    const popup = window.open('', '_blank');
+    self.getPlaygroundLink(settings.code).then((playgroundLink) => {
+      if (popup) {
+        popup.location = playgroundLink;
+      }
+      else {
+        openLink(playgroundLink, { newWindow: true, event });
+      }
+    });
   },
 };
 

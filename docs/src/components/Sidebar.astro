@@ -19,7 +19,9 @@ const sidebarSubheader = sidebarHeader || (showSidebarNav) ? 'Categories' : 'Nav
 ---
 <script>
 import { $, $$ } from '@semantic-ui/query';
-import { Tooltip } from '@semantic-ui/core';
+// side-effect import — a named binding is type-elided by the Astro transform,
+// so tooltip registration silently depended on other islands' import order
+import '@semantic-ui/core/behaviors/tooltip';
 import { idleCallback } from '@semantic-ui/utils';
 
 const isCollapsed = () => {
