@@ -334,13 +334,13 @@ const userId = signal(1);
 const locale = signal('en');
 const user = signal(null);
 
-reaction(async (computation) => {
+reaction(async (comp) => {
   const id = userId.get();                     // tracked before the first await
   const res = await fetch(`/api/users/${id}`, {
-    signal: computation.abortSignal,           // aborts when the run is superseded
+    signal: comp.abortSignal,                  // aborts when the run is superseded
   });
-  const language = computation.track(() => locale.get());  // reads after an await need track()
-  user.set(localize(await res.json(), language));          // writes never need track
+  const language = comp.track(() => locale.get());  // reads after an await need track()
+  user.set(localize(await res.json(), language));   // writes never need track
 });
 ```
 

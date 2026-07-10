@@ -149,9 +149,9 @@ import { signal, reaction } from '@semantic-ui/reactivity';
 const userId = signal(1);
 const user = signal(null);
 
-reaction(async (computation) => {
+reaction(async (comp) => {
   const id = userId.get(); // tracked, read before the first await
-  const res = await fetch(`/api/users/${id}`, { signal: computation.abortSignal });
+  const res = await fetch(`/api/users/${id}`, { signal: comp.abortSignal });
   user.set(await res.json()); // writes never need track
 });
 ```
@@ -185,10 +185,10 @@ The callback's return value.
 const query = signal('');
 const page = signal(1);
 
-reaction(async (computation) => {
+reaction(async (comp) => {
   const q = query.get(); // tracked normally
   const results = await search(q);
-  const n = computation.track(() => page.get()); // page re-runs the reaction too
+  const n = comp.track(() => page.get()); // page re-runs the reaction too
   show(results, n);
 });
 ```
@@ -207,10 +207,10 @@ A per-run [`AbortSignal`](https://developer.mozilla.org/en-US/docs/Web/API/Abort
 const query = signal('');
 const results = signal([]);
 
-reaction(async (computation) => {
+reaction(async (comp) => {
   const q = query.get();
   // the previous run's request aborts automatically when query changes
-  const res = await fetch(`/search?q=${q}`, { signal: computation.abortSignal });
+  const res = await fetch(`/search?q=${q}`, { signal: comp.abortSignal });
   results.set(await res.json());
 });
 ```
