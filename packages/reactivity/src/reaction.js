@@ -1,3 +1,5 @@
+import { isPromise } from '@semantic-ui/utils';
+
 import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
 
@@ -11,6 +13,7 @@ export class Reaction {
     this.callback = callback;
     this.dependencies = new Set();
     this.cleanups = null; // lazy, most reactions register none
+    this.async = null; // lazy async run state, most reactions never allocate it
     this.firstRun = true;
     this.active = true;
     if (context && isTracing()) {
@@ -23,6 +26,11 @@ export class Reaction {
 
   // callbacks fire before next run() and on stop. use to scope inner reactions to parent
   onCleanup(callback) {
+    // registered after stop, its run is already torn down
+    if (!this.active) {
+      callback();
+      return;
+    }
     (this.cleanups ??= []).push(callback);
   }
 
@@ -70,6 +78,16 @@ export class Reaction {
     if (!this.active) {
       return;
     }
+    if (this.async !== null) {
+      // runs never overlap. a run requested mid-flight starts after the current one settles
+      if (this.async.settling !== null) {
+        this.async.rerun = true;
+        return;
+      }
+      // supersede the previous run's abort signal so this run reads a fresh one
+      this.async.controller?.abort();
+      this.async.controller = null;
+    }
     if (isTracing()) {
       this.addContext({
         firstRun: this.firstRun,
@@ -79,17 +97,23 @@ export class Reaction {
     // save/restore so nested run() (guard, computed, derive) doesn't strand the parent
     const previousReaction = Scheduler.current;
     Scheduler.current = this;
+    let result;
     try {
       for (const dep of this.dependencies) {
         dep.remove(this);
       }
       this.dependencies.clear();
-      this.callback(this);
+      result = this.callback(this);
     }
     finally {
-      // firstRun advances even on throw so a re-invalidation re-tracks from a known baseline
-      this.firstRun = false;
       Scheduler.current = previousReaction;
+      if (isPromise(result)) {
+        this.beginSettle(result);
+      }
+      else {
+        // firstRun advances even on throw so a re-invalidation re-tracks from a known baseline
+        this.firstRun = false;
+      }
     }
   }
 
@@ -100,8 +124,91 @@ export class Reaction {
     if (context) {
       this.addContext(context);
     }
+    if (this.async !== null) {
+      this.async.controller?.abort();
+      if (this.async.settling !== null) {
+        this.async.rerun = true;
+        return;
+      }
+    }
     Scheduler.scheduleReaction(this);
   }
+
+  /*******************************
+           Async Runs
+  *******************************/
+
+  // a callback that returns a promise stays in flight until it settles. invalidations
+  // abort the run and coalesce into one re-run after settle, started at the flush
+  // drain point. cleanups and dep-tracking stay coherent because runs never overlap.
+
+  // re-enter dependency tracking for a sync block after an await. reads inside the
+  // callback register on this reaction, accumulating into the current run
+  track(callback) {
+    if (!this.active) {
+      return callback();
+    }
+    const previousReaction = Scheduler.current;
+    Scheduler.current = this;
+    try {
+      return callback();
+    }
+    finally {
+      Scheduler.current = previousReaction;
+    }
+  }
+
+  // per-run AbortSignal, aborted when the run is superseded by invalidate, re-run, or stop
+  get abortSignal() {
+    const state = this.asyncState();
+    state.controller ??= new AbortController();
+    return state.controller.signal;
+  }
+
+  // get-or-create the lazy async state. one creation site keeps the shape monomorphic
+  asyncState() {
+    return this.async ??= {
+      deferred: false,
+      settling: null,
+      rerun: false,
+      controller: null,
+    };
+  }
+
+  beginSettle(promise) {
+    const state = this.asyncState();
+    // once a run has gone async, re-runs schedule at the flush drain point
+    state.deferred = true;
+    state.settling = promise;
+    Scheduler.settlingReactions.add(this);
+    promise.then(
+      () => this.finishSettle(),
+      (error) => {
+        // aborts from supersession are expected cancels, anything else is reported
+        if (!(error?.name === 'AbortError' && state.controller?.signal.aborted)) {
+          console.error('Reaction: uncaught error in async run', error);
+        }
+        this.finishSettle();
+      },
+    );
+  }
+
+  finishSettle() {
+    const state = this.async;
+    state.settling = null;
+    // async first runs complete at settle so continuations observe firstRun correctly
+    this.firstRun = false;
+    if (state.rerun && this.active) {
+      state.rerun = false;
+      Scheduler.scheduleReaction(this);
+    }
+    Scheduler.settlingReactions.delete(this);
+    Scheduler.checkSettled();
+  }
+
+  /*******************************
+            Teardown
+  *******************************/
 
   stop() {
     if (!this.active) {
@@ -109,6 +216,11 @@ export class Reaction {
     }
     this.active = false;
     Scheduler.pendingReactions.delete(this);
+    Scheduler.pendingAsyncReactions.delete(this);
+    if (this.async !== null) {
+      this.async.controller?.abort();
+      this.async.rerun = false;
+    }
     this.dependencies.forEach(dep => dep.remove(this));
     this.dependencies.clear();
     this.fireCleanups();
