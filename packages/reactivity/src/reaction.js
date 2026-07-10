@@ -4,7 +4,7 @@ import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
 
 export class Reaction {
-  // static mirror of Scheduler.current for debugger breakpoints, where devtools can't import currentReaction()
+  // static mirror of Scheduler.current for debugger breakpoints in dev console
   static get current() {
     return Scheduler.current;
   }
@@ -12,8 +12,8 @@ export class Reaction {
   constructor(callback, { context, firstRun = true } = {}) {
     this.callback = callback;
     this.dependencies = new Set();
-    this.cleanups = null; // lazy, most reactions register none
-    this.async = null; // lazy async run state, most reactions never allocate it
+    this.cleanups = null; // lazy only use if cleanup registered
+    this.async = null; // lazy only use if async
     this.firstRun = true;
     this.active = true;
     if (context && isTracing()) {
@@ -144,13 +144,13 @@ export class Reaction {
       state.rerun = true;
       return true;
     }
-    // supersede the previous run's abort signal so this run reads a fresh one
+    // supersede the previous run's abort signal for each fresh run
     state.controller?.abort();
     state.controller = null;
     return false;
   }
 
-  // re-enter dependency tracking for a sync block after an await. reads inside the
+  // re-enter dep tracking for a sync block after an await. reads inside the
   // callback register on this reaction, accumulating into the current run
   track(callback) {
     if (!this.active) {
@@ -166,14 +166,14 @@ export class Reaction {
     }
   }
 
-  // per-run AbortSignal, aborted when the run is superseded by invalidate, re-run, or stop
+  // per run abort signal, aborted if: invalidated, re-run or stopped
   get abortSignal() {
     const state = this.asyncState();
     state.controller ??= new AbortController();
     return state.controller.signal;
   }
 
-  // get-or-create the lazy async state. one creation site keeps the shape monomorphic
+  // get-or-create async -- keep the shape monomorphic
   asyncState() {
     return this.async ??= {
       deferred: false,
@@ -192,7 +192,7 @@ export class Reaction {
     promise.then(
       () => this.finishSettle(),
       (error) => {
-        // aborts from supersession are expected cancels, anything else is reported
+        // check if this is a user aborting or a real error
         if (!(error?.name === 'AbortError' && state.controller?.signal.aborted)) {
           console.error('Reaction: uncaught error in async run', error);
         }
@@ -204,7 +204,7 @@ export class Reaction {
   finishSettle() {
     const state = this.async;
     state.settling = null;
-    // async first runs complete at settle so continuations observe firstRun correctly
+    // if async firstRun completes when promise resolves
     this.firstRun = false;
     if (state.rerun && this.active) {
       state.rerun = false;
