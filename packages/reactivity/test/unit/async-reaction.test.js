@@ -413,6 +413,31 @@ describe('Async Reactions', () => {
       expect(Scheduler.pendingAsyncReactions.size).toBe(0);
       expect(Scheduler.pendingReactions.size).toBe(0);
     });
+
+    it('settled() waits for a stopped run still in flight', async () => {
+      // stop() leaves the run in settlingReactions on purpose, its body is still executing
+      const opened = gate();
+      const instance = reaction(async () => {
+        await opened.promise; // never reads abortSignal, nothing hastens the settle
+      });
+
+      instance.stop();
+      let resolved = false;
+      settled().then(() => {
+        resolved = true;
+      });
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(Scheduler.settlingReactions.size).toBe(1);
+      expect(resolved).toBe(false);
+
+      opened.resolve();
+      await settled();
+
+      expect(resolved).toBe(true);
+      expect(Scheduler.settlingReactions.size).toBe(0);
+    });
   });
 
   /*******************************

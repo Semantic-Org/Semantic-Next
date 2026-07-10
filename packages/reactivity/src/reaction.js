@@ -172,7 +172,7 @@ export class Reaction {
     return state.controller.signal;
   }
 
-  // get-or-create async -- keep the shape monomorphic
+  // all fields preset so the hidden class stays monomorphic
   asyncState() {
     return this.async ??= {
       deferred: false,
@@ -203,7 +203,7 @@ export class Reaction {
   finishSettle() {
     const state = this.async;
     state.settling = null;
-    // if async firstRun completes when promise resolves
+    // async first run ends only now, when the promise settles
     this.firstRun = false;
     if (state.rerun && this.active) {
       state.rerun = false;
@@ -230,6 +230,7 @@ export class Reaction {
     if (this.async !== null) {
       this.async.controller?.abort();
       this.async.rerun = false;
+      // an in-flight run stays in settlingReactions, its body is still executing so settled() waits
     }
     this.dependencies.forEach(dep => dep.remove(this));
     this.dependencies.clear();
