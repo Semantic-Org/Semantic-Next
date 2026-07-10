@@ -78,15 +78,8 @@ export class Reaction {
     if (!this.active) {
       return;
     }
-    if (this.async !== null) {
-      // runs never overlap. a run requested mid-flight starts after the current one settles
-      if (this.async.settling !== null) {
-        this.async.rerun = true;
-        return;
-      }
-      // supersede the previous run's abort signal so this run reads a fresh one
-      this.async.controller?.abort();
-      this.async.controller = null;
+    if (this.async !== null && this.resetAsync()) {
+      return;
     }
     if (isTracing()) {
       this.addContext({
@@ -142,6 +135,20 @@ export class Reaction {
   // a callback that returns a promise stays in flight until it settles. invalidations
   // abort the run and coalesce into one re-run after settle, started at the flush
   // drain point. cleanups and dep-tracking stay coherent because runs never overlap.
+
+  // fresh abort scope for a starting run. true means a run is already in
+  // flight, runs never overlap, so this one defers until the current settles
+  resetAsync() {
+    const state = this.async;
+    if (state.settling !== null) {
+      state.rerun = true;
+      return true;
+    }
+    // supersede the previous run's abort signal so this run reads a fresh one
+    state.controller?.abort();
+    state.controller = null;
+    return false;
+  }
 
   // re-enter dependency tracking for a sync block after an await. reads inside the
   // callback register on this reaction, accumulating into the current run
@@ -216,8 +223,9 @@ export class Reaction {
       return;
     }
     this.active = false;
-    Scheduler.pendingReactions.delete(this);
-    if (Scheduler.pendingAsyncReactions.size > 0) {
+    // pending sets can only hold entries while a flush is scheduled or running
+    if (Scheduler.isFlushScheduled || Scheduler.isFlushing) {
+      Scheduler.pendingReactions.delete(this);
       Scheduler.pendingAsyncReactions.delete(this);
     }
     if (this.async !== null) {

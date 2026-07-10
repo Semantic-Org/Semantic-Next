@@ -35,6 +35,18 @@ export class Scheduler {
 
   static flush() {
     Scheduler.isFlushScheduled = false;
+    // bare dispatch with nothing pending exits before the try/finally frame.
+    // a waiter can be parked here when scheduled work was stopped before the flush
+    if (
+      Scheduler.pendingReactions.size === 0
+      && Scheduler.pendingAsyncReactions.size === 0
+      && Scheduler.afterFlushCallbacks.length === 0
+    ) {
+      if (Scheduler.settledDeferred !== null) {
+        Scheduler.checkSettled();
+      }
+      return;
+    }
     Scheduler.isFlushing = true;
     // capture first error but finish draining so one faulty reaction or afterFlush callback can't jam the queue
     let firstError;
