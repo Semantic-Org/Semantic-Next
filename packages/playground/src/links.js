@@ -1,19 +1,17 @@
 import { fromBase64, toBase64 } from '@semantic-ui/utils';
+import { deflateSync, inflateSync, strFromU8, strToU8 } from 'fflate';
 
 /*
   Share-link encoding — the whole project travels in the URL hash, so links work
-  with no storage backend. Format: URL-safe base64 of raw-deflated JSON, byte-
-  compatible with links produced by the docs site's fflate-based encoder.
+  with no storage backend. Format: URL-safe base64 of raw-deflated JSON.
+
+  fflate on purpose: Safari's native CompressionStream('deflate-raw') has been
+  observed emitting corrupt streams (bad back-references), so the codec stays
+  deterministic across engines. Async signatures are kept for API stability.
 */
 
-const pipeThrough = async (bytes, transform) => {
-  const stream = new Blob([bytes]).stream().pipeThrough(transform);
-  return new Uint8Array(await new Response(stream).arrayBuffer());
-};
-
 export const encodeProjectHash = async (files) => {
-  const bytes = new TextEncoder().encode(JSON.stringify(files));
-  const compressed = await pipeThrough(bytes, new CompressionStream('deflate-raw'));
+  const compressed = deflateSync(strToU8(JSON.stringify(files)));
   return toBase64(compressed, { urlSafe: true });
 };
 
@@ -22,6 +20,5 @@ export const decodeProjectHash = async (encoded) => {
   if (!compressed) {
     throw new Error('Malformed project hash');
   }
-  const bytes = await pipeThrough(compressed, new DecompressionStream('deflate-raw'));
-  return JSON.parse(new TextDecoder().decode(bytes));
+  return JSON.parse(strFromU8(inflateSync(compressed)));
 };
