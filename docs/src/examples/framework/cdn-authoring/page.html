@@ -21,17 +21,6 @@
         },
       });
     </script>
-<!-- playground-hide -->
-    <script>
-      const parentTheme = window.frameElement?.ownerDocument?.documentElement;
-      const isDark = parentTheme
-        ? parentTheme.classList.contains('dark')
-        : localStorage.getItem('theme') == 'dark';
-      if(isDark) {
-        document.querySelector('html').classList.add('dark');
-      }
-    </script>
-<!-- playground-hide-end -->
   </head>
   <body>
     <my-counter></my-counter>
