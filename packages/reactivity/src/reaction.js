@@ -107,7 +107,8 @@ export class Reaction {
     }
     finally {
       Scheduler.current = previousReaction;
-      if (isPromise(result)) {
+      // undefined check first, callbacks almost never return a value
+      if (result !== undefined && isPromise(result)) {
         this.beginSettle(result);
       }
       else {
@@ -216,7 +217,9 @@ export class Reaction {
     }
     this.active = false;
     Scheduler.pendingReactions.delete(this);
-    Scheduler.pendingAsyncReactions.delete(this);
+    if (Scheduler.pendingAsyncReactions.size > 0) {
+      Scheduler.pendingAsyncReactions.delete(this);
+    }
     if (this.async !== null) {
       this.async.controller?.abort();
       this.async.rerun = false;

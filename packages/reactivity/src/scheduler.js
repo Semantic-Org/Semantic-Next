@@ -13,12 +13,14 @@ export class Scheduler {
   static isFlushing = false;
 
   static scheduleReaction(reaction) {
-    // known-async reactions start at the drain point, so intra-flush glitches never
-    // launch a run and same-flush invalidations coalesce to one start
-    const pending = (reaction.async !== null && reaction.async.deferred)
-      ? Scheduler.pendingAsyncReactions
-      : Scheduler.pendingReactions;
-    pending.add(reaction);
+    if (reaction.async === null || !reaction.async.deferred) {
+      Scheduler.pendingReactions.add(reaction);
+    }
+    else {
+      // known-async reactions start at the drain point, so intra-flush glitches never
+      // launch a run and same-flush invalidations coalesce to one start
+      Scheduler.pendingAsyncReactions.add(reaction);
+    }
     Scheduler.scheduleFlush();
   }
 
@@ -104,7 +106,10 @@ export class Scheduler {
     }
     finally {
       Scheduler.isFlushing = false;
-      Scheduler.checkSettled();
+      // field check inline, most flushes have no settled() waiter
+      if (Scheduler.settledDeferred !== null) {
+        Scheduler.checkSettled();
+      }
     }
 
     if (firstError) { throw firstError; }
