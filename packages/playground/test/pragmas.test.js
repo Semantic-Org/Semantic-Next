@@ -51,10 +51,12 @@ describe('pragmas', () => {
     expect(state.sliceDoc(ranges[0].from, ranges[0].to)).toContain('sui-fold-end');
   });
 
-  it('treats an unclosed open marker as running to end of content', () => {
-    const state = create(`visible\n/* sui-hide */\neverything below hides`);
-    const [range] = decorationRanges(state);
-    expect(range.to).toBe(state.doc.length);
+  it('hides only the marker itself while an open marker is unmatched', () => {
+    const doc = `visible\n/* sui-hide */\nstill visible while typing`;
+    const state = create(doc);
+    const ranges = decorationRanges(state);
+    expect(ranges).toHaveLength(1);
+    expect(state.sliceDoc(ranges[0].from, ranges[0].to)).not.toContain('still visible');
   });
 
   it('renders nothing in off-visible mode', () => {

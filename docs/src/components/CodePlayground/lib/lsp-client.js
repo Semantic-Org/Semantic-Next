@@ -7,6 +7,13 @@ let client = null;
 export function getClient() {
   if (!client) {
     client = createClient();
+    // tearing down an editor cancels in-flight LSP requests; the client's
+    // internal promises reject with cancellations nothing can catch
+    window.addEventListener('unhandledrejection', (event) => {
+      if (event.reason?.message === 'The operation was cancelled.') {
+        event.preventDefault();
+      }
+    });
   }
   return client;
 }

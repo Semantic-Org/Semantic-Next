@@ -33,9 +33,9 @@ const hasMarkers = (text) => {
 };
 
 /*
-  Returns regions plus orphaned markers (unmatched opens are treated as
-  running to end of content — injected preludes rely on it; unmatched ends
-  stay orphans so their comment still hides).
+  Returns regions plus orphaned markers. Unmatched markers (either end) hide
+  only themselves — a half-typed open marker must not swallow the rest of the
+  document while someone is writing it.
 */
 const findRegions = (text) => {
   const regions = [];
@@ -60,9 +60,9 @@ const findRegions = (text) => {
       orphans.push(marker);
     }
   }
-  for (const [type, marker] of Object.entries(open)) {
+  for (const marker of Object.values(open)) {
     if (marker) {
-      regions.push({ type, start: marker, end: { from: text.length, to: text.length } });
+      orphans.push(marker);
     }
   }
   return { regions, orphans };
