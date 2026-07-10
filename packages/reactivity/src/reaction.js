@@ -136,8 +136,7 @@ export class Reaction {
   // abort the run and coalesce into one re-run after settle, started at the flush
   // drain point. cleanups and dep-tracking stay coherent because runs never overlap.
 
-  // fresh abort scope for a starting run. true means a run is already in
-  // flight, runs never overlap, so this one defers until the current settles
+  // fresh abort scope for a starting run, true means defer until the in-flight run settles
   resetAsync() {
     const state = this.async;
     if (state.settling !== null) {

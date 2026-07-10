@@ -104,10 +104,10 @@ Registers a cleanup callback that fires just before the reaction's next run and 
 ```javascript
 const channel = signal('updates');
 
-reaction((self) => {
+reaction((comp) => {
   const socket = subscribe(channel.get());
   // tears down the old socket before resubscribing, and on stop
-  self.onCleanup(() => socket.close());
+  comp.onCleanup(() => socket.close());
 });
 ```
 
@@ -124,10 +124,10 @@ Permanently stops the reaction. It unsubscribes from every dependency, fires its
 ```javascript
 const count = signal(0);
 
-const counter = reaction((self) => {
+const counter = reaction((comp) => {
   console.log(count.get());
   if (count.get() > 5) {
-    self.stop(); // detach once the threshold is crossed
+    comp.stop(); // detach once the threshold is crossed
   }
 });
 
@@ -233,9 +233,9 @@ reaction.firstRun;
 ```javascript
 const data = signal({ value: 0 });
 
-reaction((self) => {
+reaction((comp) => {
   const current = data.get(); // track before branching
-  if (self.firstRun) {
+  if (comp.firstRun) {
     console.log('initial setup');
   } else {
     console.log('value updated:', current.value);
@@ -258,8 +258,8 @@ reaction.active;
 #### Usage
 
 ```javascript
-const counter = reaction((self) => {
-  console.log('active:', self.active);
+const counter = reaction((comp) => {
+  console.log('active:', comp.active);
 });
 
 counter.stop();

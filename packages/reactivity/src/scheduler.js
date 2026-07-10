@@ -155,8 +155,6 @@ export class Scheduler {
       && !Scheduler.isFlushing;
   }
 
-  // resolves once every pending reaction, in-flight async run, and afterFlush
-  // callback has completed, including the cascades they schedule
   static settled() {
     if (Scheduler.isSettled()) {
       return Promise.resolve();
