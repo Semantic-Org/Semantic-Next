@@ -523,7 +523,8 @@ RENDERING_ENGINES.forEach((engine) => {
         defineComponent({
           tagName: tag,
           renderingEngine: engine,
-          template: '<ul>{#each section in getSections}<li>{#if section.highlight}<b>{section.highlight}</b>{else}{section.name}{/if}</li>{/each}</ul>',
+          template:
+            '<ul>{#each section in getSections}<li>{#if section.highlight}<b>{section.highlight}</b>{else}{section.name}{/if}</li>{/each}</ul>',
           defaultState: { term: '' },
           createComponent: ({ state }) => ({
             getSections() {
@@ -596,7 +597,8 @@ RENDERING_ENGINES.forEach((engine) => {
         defineComponent({
           tagName: tag,
           renderingEngine: engine,
-          template: '<ul>{#each section in items}<li>{section.name}{#if section.pages}<span>{#each page in section.pages}<i>{page.name}</i>{/each}</span>{/if}</li>{/each}</ul>',
+          template:
+            '<ul>{#each section in items}<li>{section.name}{#if section.pages}<span>{#each page in section.pages}<i>{page.name}</i>{/each}</span>{/if}</li>{/each}</ul>',
           defaultState: { items: [sections[4]] },
         });
         const el = document.createElement(tag);
