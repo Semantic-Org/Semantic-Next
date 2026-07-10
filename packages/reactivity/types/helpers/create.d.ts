@@ -1,6 +1,6 @@
-import type { Reaction } from '../reaction';
-import type { ReactiveObject, ReactiveObjectOptions } from '../reactive-object';
-import type { Signal, SignalOptions } from '../signal';
+import type { Reaction } from '../reaction.js';
+import type { ReactiveObject, ReactiveObjectOptions } from '../reactive-object.js';
+import type { Signal, SignalOptions } from '../signal.js';
 
 /**
  * Creates a reactive value. The factory form of `new Signal()`.
