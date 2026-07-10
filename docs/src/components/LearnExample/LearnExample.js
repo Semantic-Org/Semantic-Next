@@ -184,8 +184,9 @@ const events = {
   'click .solve'({ settings, self }) {
     self.setFiles(settings.solutionFiles);
   },
-  'click .toggle-menu'({ self }) {
+  'click .toggle-menu'({ self, event }) {
     self.toggleNavMenu();
+    event.stopPropagation();
   },
   'click ui-button.layout'({ $ }) {
     $('code-playground').component().toggleTabs();
