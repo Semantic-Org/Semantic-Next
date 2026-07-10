@@ -1,3 +1,5 @@
+import { isDevelopment, isPromise } from '@semantic-ui/utils';
+
 import { Dependency } from '../dependency.js';
 import { Reaction } from '../reaction.js';
 import { Scheduler } from '../scheduler.js';
@@ -9,13 +11,13 @@ import { Signal } from '../signal.js';
 const createDerivedSignal = (reactionBody, options) => {
   const derivedSignal = new Signal(undefined, options);
   const derivedRef = new WeakRef(derivedSignal);
-  const backingReaction = new Reaction(() => {
+  const backingReaction = new Reaction((computation) => {
     const liveSignal = derivedRef.deref();
     if (!liveSignal) {
       backingReaction.stop();
       return;
     }
-    reactionBody(liveSignal);
+    reactionBody(liveSignal, computation);
   });
   const parent = Scheduler.current;
   if (parent) {
@@ -26,11 +28,27 @@ const createDerivedSignal = (reactionBody, options) => {
   return derivedSignal;
 };
 
+// derived signals hold plain values, an async compute would store the promise itself
+const warnAsyncCompute = (value, computation, name) => {
+  if (isDevelopment && computation.firstRun && isPromise(value)) {
+    console.warn(
+      `${name}: compute returned a promise so the signal holds the promise, not its value. use reaction() with an async callback and set() the result`,
+    );
+  }
+  return value;
+};
+
 export const derive = (source, computeFn, options = {}) =>
-  createDerivedSignal((derivedSignal) => derivedSignal.set(computeFn(source.get())), options);
+  createDerivedSignal(
+    (derivedSignal, computation) => derivedSignal.set(warnAsyncCompute(computeFn(source.get()), computation, 'derive')),
+    options,
+  );
 
 export const computed = (computeFn, options = {}) =>
-  createDerivedSignal((derivedSignal) => derivedSignal.set(computeFn()), options);
+  createDerivedSignal(
+    (derivedSignal, computation) => derivedSignal.set(warnAsyncCompute(computeFn(), computation, 'computed')),
+    options,
+  );
 
 // Per-key reactive membership against a source signal. The returned
 // match(key) function is reactive and returns whether matchFn(key, source.value)

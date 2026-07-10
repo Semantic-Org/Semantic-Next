@@ -14,5 +14,5 @@ export { currentReaction, guard, nonreactive } from './helpers/control.js';
 export { reaction, reactiveObject, signal } from './helpers/create.js';
 export { computed, derive, match } from './helpers/derived.js';
 export type { Matcher } from './helpers/derived.js';
-export { afterFlush, flush, getSource, scheduleFlush } from './helpers/schedule.js';
+export { afterFlush, flush, getSource, scheduleFlush, settled } from './helpers/schedule.js';
 export { isStackCapture, isTracing, setStackCapture, setTracing } from './helpers/tracing.js';
