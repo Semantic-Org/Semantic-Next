@@ -4,7 +4,7 @@ pageType: 'API Reference'
 title: Reaction
 icon: refresh-cw
 package: "@semantic-ui/reactivity"
-methods: [reaction, run, onCleanup, stop, firstRun, active, current]
+methods: [reaction, run, onCleanup, stop, track, abortSignal, firstRun, active, current]
 description: API reference for Reaction in Semantic UI's reactivity system
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
@@ -138,6 +138,82 @@ count.set(7); // no output
 #### Example
 
 <PlaygroundExample id="stop-reaction" direction="horizontal"></PlaygroundExample>
+
+## Async Reactions
+
+A reaction callback may be `async`. Return a promise and the run is treated as asynchronous: the reaction tracks the signals read before the first `await`, then stays in flight until the promise settles.
+
+```javascript
+import { signal, reaction } from '@semantic-ui/reactivity';
+
+const userId = signal(1);
+const user = signal(null);
+
+reaction(async (computation) => {
+  const id = userId.get(); // tracked, read before the first await
+  const res = await fetch(`/api/users/${id}`, { signal: computation.abortSignal });
+  user.set(await res.json()); // writes never need track
+});
+```
+
+Runs never overlap. When a dependency changes while a run is in flight, the reaction aborts that run's [`abortSignal`](#abortsignal) and coalesces every change into a single re-run. The re-run starts once the in-flight promise settles, so the latest run wins and intermediate states never launch a run of their own. Rejections report through `console.error` and never surface as unhandled rejections.
+
+> [!info]
+> An async re-run starts at the flush drain point, after pending sync reactions and before the `afterFlush` snapshot. [`firstRun`](#firstrun) stays `true` through the whole first run, including continuations after an `await`, and flips once the promise settles.
+
+### track
+
+```javascript
+reaction.track(callback);
+```
+
+Re-enters dependency tracking for a synchronous block after an `await`. Signals read inside the callback register on the reaction and accumulate into the current run, so an async reaction can depend on values it reads past its first `await`. Reads after an `await` without `track()` register nothing.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| callback | function | Synchronous function whose signal reads should register on the reaction |
+
+#### Returns
+
+The callback's return value.
+
+#### Usage
+
+```javascript
+const query = signal('');
+const page = signal(1);
+
+reaction(async (computation) => {
+  const q = query.get(); // tracked normally
+  const results = await search(q);
+  const n = computation.track(() => page.get()); // page re-runs the reaction too
+  show(results, n);
+});
+```
+
+### abortSignal
+
+```javascript
+reaction.abortSignal;
+```
+
+A per-run [`AbortSignal`](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal), created on first access and aborted when the run is superseded by an invalidation, a re-run, or [`stop()`](#stop). Pass it to `fetch` or any abortable work to cancel in-flight IO when the reaction re-runs. Sync reactions get one too, the signal a run reads aborts just before the next run reads a fresh one.
+
+#### Usage
+
+```javascript
+const query = signal('');
+const results = signal([]);
+
+reaction(async (computation) => {
+  const q = query.get();
+  // the previous run's request aborts automatically when query changes
+  const res = await fetch(`/search?q=${q}`, { signal: computation.abortSignal });
+  results.set(await res.json());
+});
+```
 
 ## Properties
 

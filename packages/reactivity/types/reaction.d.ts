@@ -25,6 +25,13 @@ export class Reaction {
    * Creates a new Reaction. The callback runs immediately (tracking the signals
    * it reads) and re-runs whenever any of them change. The callback receives the
    * Reaction instance.
+   *
+   * The callback may be `async`. A callback that returns a promise runs
+   * asynchronously: runs never overlap, an invalidation while a run is in flight
+   * aborts its `abortSignal` and coalesces into a single re-run that starts once
+   * the in-flight promise settles (the latest run wins). Reads after an `await`
+   * no longer track. Use `track()` to re-enter dependency tracking. Rejections
+   * report via `console.error` rather than surfacing as unhandled rejections.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#constructor constructor}
    * @param callback - Function to run reactively
    * @param options - Optional configuration
@@ -32,7 +39,7 @@ export class Reaction {
    * @param options.firstRun - Whether to run the callback immediately on creation. Defaults to `true`. Set `false` to create the reaction without an initial run.
    */
   constructor(
-    callback: (computation: Reaction) => void,
+    callback: (computation: Reaction) => void | Promise<void>,
     options?: { context?: Record<string, any>; firstRun?: boolean; },
   );
 
@@ -41,6 +48,10 @@ export class Reaction {
    * initialization that should happen only once. Read the signals you depend on
    * before any early `if (firstRun) return`, otherwise the reaction registers no
    * dependencies and never re-runs.
+   *
+   * A sync reaction flips this to `false` when the callback returns. An async
+   * reaction holds it `true` through the whole first run, including continuations
+   * after an `await`, and flips only once the returned promise settles.
    */
   readonly firstRun: boolean;
 
@@ -61,10 +72,22 @@ export class Reaction {
   readonly dependencies: Set<Dependency>;
 
   /**
+   * A per-run `AbortSignal`, created on first access and aborted when the run is
+   * superseded by an invalidation, a re-run, or `stop()`. Pass it to `fetch` or
+   * any abortable work to cancel in-flight IO when the reaction re-runs. Sync
+   * reactions get one too: the signal a run reads aborts just before the next run
+   * reads a fresh one.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#abortsignal abortSignal}
+   */
+  readonly abortSignal: AbortSignal;
+
+  /**
    * Registers a cleanup callback that fires just before the reaction's next run
    * and once when it stops. Callbacks fire in registration order and the queue
    * is cleared after firing, so a callback registered on `firstRun` fires once.
-   * Use it to tear down resources or scope inner reactions to this one.
+   * Use it to tear down resources or scope inner reactions to this one. In an
+   * async run a cleanup registered after an `await` still fires before the next
+   * run, and a cleanup registered after `stop()` fires immediately.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#oncleanup onCleanup}
    * @param callback - Function to run on the next re-run or on stop
    */
@@ -97,6 +120,17 @@ export class Reaction {
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#run run}
    */
   run(): void;
+
+  /**
+   * Re-enters dependency tracking for a synchronous block after an `await`.
+   * Signals read inside the callback register on this reaction and accumulate
+   * into the current run, so an async reaction can depend on values it reads past
+   * its first `await`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#track track}
+   * @param callback - Synchronous function whose signal reads should be tracked
+   * @returns The callback's return value
+   */
+  track<T>(callback: () => T): T;
 
   /**
    * Marks the reaction invalid and schedules it to run again on the next flush.

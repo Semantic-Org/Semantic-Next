@@ -35,6 +35,11 @@ xx.xx.xxxx
 * **BREAKING** - Removed `signal.clone(value)` prototype method — instance always carries its configured clone function in `this.clone`
 * **BREAKING** - Removed `setArrayProperty`. Use `setIndexProperty(index, property, value)` for one item by position, or `setProperty(property, value)` to set the field on every item
 * **BREAKING** - `signal.setProperty` on an array now takes `(property, value)` and sets the field on every item. Use `setItemProperty(id, property, value)` for the previous by-id form
+* **Feature** - Reactions support async callbacks — runs never overlap, a mid-flight invalidation aborts the run and coalesces into one re-run after it settles, and async re-runs start once the sync flush is stable
+* **Feature** - Added `computation.track(callback)` to re-enter dependency tracking after an `await`
+* **Feature** - Added `computation.abortSignal`, a per-run `AbortSignal` aborted when the run is superseded — sync reactions get it too, for cancelling detached fetches on re-run
+* **Feature** - Added `settled()`, a promise that resolves once all reactions, in-flight async runs, and `afterFlush` callbacks complete
+* **Enhancement** - `computed` and `derive` warn in development when the compute function returns a promise
 
 ### Renderer
 * **Bug** - Fixed property bindings (`.prop={expr}`) incorrectly defaulting to literal mode — properties now evaluate expressions like other bindings, use `{#fn expr}` to pass function references

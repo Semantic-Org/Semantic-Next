@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `reactive-state`
 > **Purpose:** Comprehensive guide to the @semantic-ui/reactivity package — a standalone signals-based reactive system with automatic dependency tracking for state management.
-> **Last Updated:** 2026-06-28
+> **Last Updated:** 2026-07-10
 
 ---
 
@@ -287,7 +287,7 @@ const logReaction = reaction((computation) => {
 
 // Create without running immediately
 const deferredReaction = reaction(callback, { firstRun: false });
-deferredReaction.boundRun(); // Run manually when ready
+deferredReaction.run(); // Run manually when ready
 ```
 
 ### Reaction Lifecycle
@@ -324,6 +324,35 @@ validatorReaction.addContext({ lastRun: Date.now() });
 // Enable stack traces
 validatorReaction.setTrace();
 ```
+
+### Async Reactions
+
+A reaction callback can be async. Return a promise and the run is treated as asynchronous.
+
+```javascript
+const userId = signal(1);
+const locale = signal('en');
+const user = signal(null);
+
+reaction(async (computation) => {
+  const id = userId.get();                     // tracked before the first await
+  const res = await fetch(`/api/users/${id}`, {
+    signal: computation.abortSignal,           // aborts when the run is superseded
+  });
+  const language = computation.track(() => locale.get());  // reads after an await need track()
+  user.set(localize(await res.json(), language));          // writes never need track
+});
+```
+
+**Lifecycle**:
+- Runs never overlap. An invalidation while a run is in flight aborts `computation.abortSignal` and coalesces into one re-run that starts after the in-flight promise settles (latest-wins)
+- Async re-runs start at the flush drain point, after pending sync reactions and before the `afterFlush` snapshot, so same-flush invalidations coalesce and intermediate sync states never launch a run
+- `firstRun` stays `true` through the whole first async run including continuations, flipping once the promise settles
+- Rejections report via `console.error` and never surface as unhandled rejections
+
+**`computation.track(callback)`**: Re-enters dependency tracking for a synchronous block after an `await`. Reads inside register on the reaction and accumulate into the current run. Returns the callback's return value.
+
+**`computation.abortSignal`**: A per-run `AbortSignal`, aborted when the run is superseded by an invalidation, re-run, or `stop()`. Sync reactions get it too, for cancelling a detached `fetch` before the re-run reads a fresh one.
 
 ---
 
@@ -418,6 +447,9 @@ const total = computed(() => subtotal.get() + tax.get());
 ```javascript
 // Force immediate execution of all pending reactions
 flush();
+
+// Wait for full quiescence, including in-flight async runs (flush does not)
+await settled();
 
 // Run code after all reactions complete
 afterFlush(() => {
