@@ -7,5 +7,5 @@ category: 'Reactivity'
 subcategory: 'Introduction'
 tags: ['reactivity', 'reaction', 'async', 'abort']
 description: Aborts stale runs and re-runs with the latest values
-tip: 'Async runs never overlap — an invalidation mid-flight aborts `comp.abortSignal` and coalesces every change into a single re-run that starts once the in-flight promise settles'
+tip: 'Runs never overlap. Mid-flight changes abort the run and coalesce into one re-run after settle'
 ---
