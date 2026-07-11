@@ -682,6 +682,97 @@ describe('Resource', () => {
             Identity
   *******************************/
 
+  describe('Concurrency', () => {
+    const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    it('overlap starts a new fetch immediately while one is in flight', async () => {
+      const term = signal('a');
+      const gates = [gate(), gate()];
+      let fetches = 0;
+      const results = resource(async () => {
+        term.get();
+        return gates[fetches++].promise;
+      }, { concurrency: 'overlap' });
+
+      term.set('b');
+      flush();
+
+      expect(fetches).toBe(2); // no waiting for the first settle
+      expect(results.loading).toBe(true);
+
+      gates[0].resolve('stale');
+      gates[1].resolve('fresh');
+      await tick();
+
+      expect(results.get()).toBe('fresh');
+      expect(results.loading).toBe(false);
+    });
+
+    it('the latest run wins when settles arrive out of order', async () => {
+      const term = signal('a');
+      const gates = [gate(), gate()];
+      let fetches = 0;
+      const results = resource(async () => {
+        term.get();
+        return gates[fetches++].promise;
+      }, { concurrency: 'overlap' });
+
+      term.set('b');
+      flush();
+
+      gates[1].resolve('fresh'); // the newer run lands first
+      await tick();
+
+      expect(results.get()).toBe('fresh');
+      expect(results.loading).toBe(false);
+
+      gates[0].resolve('stale'); // the stale run must not clobber
+      await tick();
+
+      expect(results.get()).toBe('fresh');
+      expect(results.loading).toBe(false);
+    });
+
+    it('a superseded overlap run still aborts for fetchers that read the signal', async () => {
+      const term = signal('a');
+      const abortSignals = [];
+      const results = resource(async (comp) => {
+        term.get();
+        abortSignals.push(comp.abortSignal);
+        return new Promise(() => {}); // never settles, the abort is the observable
+      }, { concurrency: 'overlap' });
+
+      term.set('b');
+      flush();
+
+      expect(abortSignals[0].aborted).toBe(true);
+      expect(abortSignals[1].aborted).toBe(false);
+      results.stop();
+    });
+
+    it('stop() during overlapping fetches resets the faces', async () => {
+      const term = signal('a');
+      const gates = [gate(), gate()];
+      let fetches = 0;
+      const results = resource(async () => {
+        term.get();
+        return gates[fetches++].promise;
+      }, { concurrency: 'overlap' });
+      term.set('b');
+      flush();
+
+      results.stop();
+      expect(results.loading).toBe(false);
+
+      gates[0].resolve('a');
+      gates[1].resolve('b');
+      await tick();
+
+      expect(results.get()).toBe(undefined); // stopped runs land nothing
+      expect(results.loading).toBe(false);
+    });
+  });
+
   describe('Hardening', () => {
     it('comp.stop() after an await clears loading and drops the settle', async () => {
       // the only in-fetcher stop available on a first run, the handle binding is unassigned
