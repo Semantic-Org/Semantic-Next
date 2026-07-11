@@ -135,6 +135,42 @@ describe('Resource', () => {
       expect(results.getItem('a').n).toBe(1);
     });
 
+    it('onError fires on a rejection with coherent faces', async () => {
+      const boom = new Error('boom');
+      const seen = [];
+      const results = resource(async () => {
+        throw boom;
+      }, {
+        onError: (error) => seen.push({ error, loading: results.loading, settled: results.settled }),
+      });
+      await settled();
+
+      expect(seen).toEqual([{ error: boom, loading: false, settled: true }]);
+    });
+
+    it('onError skips fulfilled settles and superseded rejections', async () => {
+      const term = signal('a');
+      const gates = [gate(), gate()];
+      let runCount = 0;
+      const errors = [];
+      const results = resource(async () => {
+        term.get();
+        const outcome = await gates[runCount++].promise;
+        if (outcome instanceof Error) {
+          throw outcome;
+        }
+        return outcome;
+      }, { onError: (error) => errors.push(error) });
+
+      term.set('b'); // supersedes run 1, its rejection must not report
+      gates[0].reject(new Error('stale'));
+      gates[1].resolve('fine');
+      await settled();
+
+      expect(errors).toEqual([]);
+      expect(results.get()).toBe('fine');
+    });
+
     it('forwards safety options to the underlying signal', async () => {
       const stored = { count: 1 };
       const results = resource(async () => stored, { safety: 'clone' });

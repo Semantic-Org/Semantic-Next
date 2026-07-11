@@ -36,6 +36,7 @@ Creates a resource and runs the fetcher immediately. The fetcher runs as an [asy
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
 | initialValue | any | `undefined` | The value [`get()`](#get) returns before the first settle |
+| onError | function | `undefined` | Called with the rejection error after the faces settle. Superseded runs never report |
 | equality | function | deep equality | Becomes the refresh dedup, so a refetch producing an equal value wakes no value readers |
 | safety | `'clone'` \| `'reference'` \| `'none'` | `'reference'` | Value-protection preset. See [Signal Options](/docs/guides/reactivity/signal-options) |
 | id | function | `id` ?? `_id` ?? `hash` ?? `key` | Resolves an array item's identity for `getItem` and the collection helpers |

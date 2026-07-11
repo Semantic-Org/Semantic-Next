@@ -13,6 +13,13 @@ export interface ResourceOptions<T> extends SignalOptions<T> {
    * `undefined`.
    */
   initialValue?: T;
+
+  /**
+   * Called when a fetch rejects, after the `error` face is set and the faces
+   * settle. Superseded runs never report. For value-only consumers that would
+   * otherwise miss rejections landing silently in the `error` face.
+   */
+  onError?: (error: unknown) => void;
 }
 
 /**

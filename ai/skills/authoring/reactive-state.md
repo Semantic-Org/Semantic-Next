@@ -389,7 +389,7 @@ The value surface (`get`, `peek`, `getItem`, equality dedup) is inherited. A `Re
 | `error` | the error from the last rejected fetch, cleared on the next fulfilled settle, `undefined` otherwise |
 | `settled` | latches `true` after the first completed fetch (fulfilled or rejected) and stays `true` |
 
-A skeleton state is `loading && !settled`, a refresh shimmer is `loading && settled`. Rejections land in `error` and never reach `console.error` or surface as unhandled rejections.
+A skeleton state is `loading && !settled`, a refresh shimmer is `loading && settled`. Rejections land in `error` and never reach `console.error` or surface as unhandled rejections. Value-only consumers that never read the `error` face can pass `onError` in options — it fires after the faces settle, and superseded runs never report.
 
 **Teardown**: `stop()` ends re-fires, clears loading, and leaves the last value readable. A resource created inside a reaction tears down with its parent, an unreferenced handle self-stops, and `settled()` waits for in-flight fetches.
 
