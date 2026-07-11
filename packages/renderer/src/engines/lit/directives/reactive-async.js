@@ -1,19 +1,23 @@
-import { noChange, nothing } from 'lit';
+import { noChange } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
-import { reaction } from '@semantic-ui/reactivity';
-import { each, isClient, isPlainObject, isPromise } from '@semantic-ui/utils';
+import { nonreactive, reaction, resource } from '@semantic-ui/reactivity';
+import { each, isClient, isPlainObject } from '@semantic-ui/utils';
+
+/*
+  {#async ...} backed by a Resource, overlap concurrency — a re-fire starts its
+  fetch immediately and the newest run's settle wins, matching what the block
+  always did for template expressions that can't thread an abort signal. The
+  directive's reaction reads the faces and renders the branch that matches.
+*/
 
 export class ReactiveAsyncDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
-    this.generation = 0;
-    this.state = 'loading'; // 'loading', 'success', 'error'
-    this.resolvedValue = null;
-    this.hasResolved = false;
-    this.error = null;
+    this.resource = null;
+    this.syncThrew = false;
   }
 
   render(asyncCondition) {
@@ -24,7 +28,23 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       return noChange;
     }
 
-    // Create a new reaction that watches for reactive changes on client
+    // fetcher reads through `this` so a re-render's fresh closures flow in.
+    // created nonreactive so an enclosing reaction can't tear it down,
+    // disconnected() owns the teardown
+    this.resource = nonreactive(() =>
+      resource(() => {
+        this.syncThrew = false;
+        try {
+          return this.asyncCondition.expression();
+        }
+        catch (error) {
+          // flagged so a synchronous throw with no error branch stays loud
+          this.syncThrew = true;
+          throw error;
+        }
+      }, { concurrency: 'overlap' })
+    );
+
     if (isClient) {
       this.watchChanges();
     }
@@ -33,7 +53,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
   }
 
   watchChanges() {
-    let context = {
+    const context = {
       message: `async block: {#async ${this.asyncCondition.expression}}`,
       async: this.asyncCondition,
     };
@@ -44,102 +64,54 @@ export class ReactiveAsyncDirective extends AsyncDirective {
         return;
       }
 
-      // Evaluate the expression to get the promise or value
-      const expressionResult = this.asyncCondition.expression();
+      // face reads register here, a flip re-runs and re-renders
+      const rendered = this.renderCurrentState(this.asyncCondition);
 
-      // Handle the result
-      this.handleExpressionResult(expressionResult, this.asyncCondition);
-
-      // Render based on current state (after first run)
       if (!computation.firstRun) {
-        const rendered = this.renderCurrentState(this.asyncCondition);
         this.setValue(rendered);
       }
     }, { context });
   }
 
-  handleExpressionResult(result, asyncCondition) {
-    const currentGeneration = ++this.generation;
-
-    // Preserve previous resolved value for stale-while-revalidate
-    this.state = 'loading';
-    this.error = null;
-
-    // Check if result is a promise
-    if (isPromise(result)) {
-      // Handle promise
-      result
-        .then((value) => {
-          if (currentGeneration < this.generation) {
-            return;
-          }
-          this.state = 'success';
-          this.resolvedValue = value;
-          this.hasResolved = true;
-          if (this.isConnected) {
-            const rendered = this.renderCurrentState(asyncCondition);
-            this.setValue(rendered);
-          }
-        })
-        .catch((error) => {
-          if (currentGeneration < this.generation) { return; }
-          this.state = 'error';
-          this.resolvedValue = null;
-          this.hasResolved = false;
-          this.error = error;
-          if (this.isConnected) {
-            const rendered = this.renderCurrentState(asyncCondition);
-            this.setValue(rendered);
-          }
-        });
-    }
-    else {
-      // Synchronous value
-      this.state = 'success';
-      this.resolvedValue = result;
-      this.hasResolved = true;
-    }
-  }
-
   renderCurrentState(asyncCondition) {
-    switch (this.state) {
-      case 'loading':
-        if (asyncCondition.loadingContent) {
-          return asyncCondition.loadingContent();
-        }
-        // No loading block: preserve previous content if available
-        if (this.hasResolved && asyncCondition.content) {
-          const successData = this.createSuccessDataContext(asyncCondition);
-          return asyncCondition.content(successData);
-        }
-        return noChange;
+    const handle = this.resource;
 
-      case 'error':
-        if (asyncCondition.errorContent) {
-          // Create data context with error
-          const errorData = asyncCondition.errorAs
-            ? { [asyncCondition.errorAs]: this.error }
-            : { this: this.error };
-
-          return asyncCondition.errorContent(errorData);
-        }
-        return noChange;
-
-      case 'success':
-        if (asyncCondition.content) {
-          // Create data context with resolved value
-          const successData = this.createSuccessDataContext(asyncCondition);
-          return asyncCondition.content(successData);
-        }
-        return noChange;
-
-      default:
-        return noChange;
+    if (handle.loading) {
+      if (asyncCondition.loadingContent) {
+        return asyncCondition.loadingContent();
+      }
+      // No loading block: preserve previous content if available
+      if (handle.settled && asyncCondition.content) {
+        return asyncCondition.content(this.createSuccessDataContext(asyncCondition));
+      }
+      return noChange;
     }
+
+    const error = handle.error;
+    if (error !== undefined) {
+      if (asyncCondition.errorContent) {
+        const errorData = asyncCondition.errorAs
+          ? { [asyncCondition.errorAs]: error }
+          : { this: error };
+        return asyncCondition.errorContent(errorData);
+      }
+      if (this.syncThrew) {
+        throw error;
+      }
+      return noChange;
+    }
+
+    if (!handle.settled) {
+      return noChange;
+    }
+    if (asyncCondition.content) {
+      return asyncCondition.content(this.createSuccessDataContext(asyncCondition));
+    }
+    return noChange;
   }
 
   createSuccessDataContext(asyncCondition) {
-    const value = this.resolvedValue;
+    const value = this.resource.get();
 
     // Handle {#async expression as alias}
     if (asyncCondition.as) {
@@ -150,14 +122,12 @@ export class ReactiveAsyncDirective extends AsyncDirective {
     if (asyncCondition.parts && isPlainObject(value)) {
       const data = {};
 
-      // Extract specified properties
       each(asyncCondition.parts, (prop) => {
         if (prop in value) {
           data[prop] = value[prop];
         }
       });
 
-      // Handle rest parameter
       if (asyncCondition.rest) {
         const restObj = { ...value };
         each(asyncCondition.parts, (prop) => {
@@ -174,14 +144,14 @@ export class ReactiveAsyncDirective extends AsyncDirective {
   }
 
   disconnected() {
-    if (this.reaction) {
-      this.reaction.stop();
-      this.reaction = null;
-    }
+    this.reaction?.stop();
+    this.reaction = null;
+    this.resource?.stop();
+    this.resource = null;
   }
 
   reconnected() {
-    // Lit calls render() on reconnect which recreates the reaction
+    // Lit calls render() on reconnect which recreates the reaction and resource
   }
 }
 
