@@ -1,5 +1,6 @@
 import type { Reaction } from '../reaction.js';
 import type { ReactiveObject, ReactiveObjectOptions } from '../reactive-object.js';
+import type { Resource, ResourceOptions } from '../resource.js';
 import type { Signal, SignalOptions } from '../signal.js';
 
 /**
@@ -33,3 +34,17 @@ export function reaction(
  * @returns A new ReactiveObject
  */
 export function reactiveObject(initialValue?: object, options?: ReactiveObjectOptions): ReactiveObject;
+
+/**
+ * Creates a Signal whose value an async fetcher produces. The factory form of
+ * `new Resource()`. The fetcher runs immediately and re-fires when the signals
+ * it reads before its first `await` change.
+ * @see {@link https://next.semantic-ui.com/docs/api/reactivity/resource resource}
+ * @param fetcher - Produces the value, receiving the backing computation
+ * @param options - Configuration for the resource's behavior
+ * @returns A new Resource
+ */
+export function resource<T>(
+  fetcher: (computation: Reaction) => T | Promise<T>,
+  options?: ResourceOptions<T>,
+): Resource<T>;

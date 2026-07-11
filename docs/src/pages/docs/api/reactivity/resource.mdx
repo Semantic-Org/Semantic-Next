@@ -1,0 +1,154 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Resource
+icon: database
+package: "@semantic-ui/reactivity"
+methods: [resource, get, loading, error, settled, refresh, stop]
+description: API reference for Resource in Semantic UI's reactivity system
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
+
+export const components = { blockquote: Blockquote };
+
+A resource is a [Signal](/docs/api/reactivity/signal) whose value an async fetcher produces. It tracks the signals the fetcher reads, refetches when they change, and exposes fetch status through three independent faces ([`loading`](#loading), [`error`](#error), and [`settled`](#settled)) while the value itself holds last-good through a refresh and through a rejection.
+
+## Creating
+
+### resource
+
+```javascript
+resource(fetcher, options);
+```
+
+Creates a resource and runs the fetcher immediately. The fetcher runs as an [async reaction](/docs/api/reactivity/reaction#async-reactions): signals read before its first `await` are tracked, and changing one re-fires the fetch. It receives the backing [`Reaction`](/docs/api/reactivity/reaction) as its argument, so [`comp.abortSignal`](/docs/api/reactivity/reaction#abortsignal) cancels superseded IO and [`comp.track()`](/docs/api/reactivity/reaction#track) re-enters tracking after an `await`. A synchronous (non-promise) return settles at once, without a fetch ever going in flight.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| fetcher | function | Produces the value, receiving the backing computation |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| initialValue | any | `undefined` | The value [`get()`](#get) returns before the first settle |
+| equality | function | deep equality | Becomes the refresh dedup, so a refetch producing an equal value wakes no value readers |
+| safety | `'clone'` \| `'reference'` \| `'none'` | `'reference'` | Value-protection preset. See [Signal Options](/docs/guides/reactivity/signal-options) |
+| id | function | `id` ?? `_id` ?? `hash` ?? `key` | Resolves an array item's identity for `getItem` and the collection helpers |
+| context | object | `undefined` | Debugging context surfaced in tracing output |
+
+#### Usage
+
+```javascript
+import { resource, signal } from '@semantic-ui/reactivity';
+
+const query = signal('');
+
+const results = resource(async (comp) => {
+  const term = query.get(); // tracked, refetches when query changes
+  if (term.length < 2) {
+    return []; // sync return settles now, no fetch in flight
+  }
+  const res = await fetch(`/search?q=${term}`, { signal: comp.abortSignal });
+  return res.json();
+}, { initialValue: [] });
+```
+
+> [!info]
+> Runs never overlap. When a tracked read changes or [`refresh()`](#refresh) fires while a fetch is in flight, that run's [`abortSignal`](/docs/api/reactivity/reaction#abortsignal) aborts and a superseded run drops its settle entirely, with no value, no error, and no face flip from a stale run. The latest run wins.
+
+> [!warning]
+> The abort is cooperative. A fetcher that ignores `comp.abortSignal` and returns a promise that never settles blocks the next refetch, since runs never overlap. Pass the abort signal to your `fetch` or timers so a superseded run can actually cancel.
+
+#### Example
+
+<PlaygroundExample id="resource" direction="horizontal"></PlaygroundExample>
+
+## Value
+
+### get
+
+```javascript
+resource.get();
+```
+
+Returns the produced value and subscribes the running reaction, the same tracked read as any [Signal](/docs/api/reactivity/signal#get). It returns [`initialValue`](#resource) before the first settle, then the last fulfilled payload, held across a refresh in flight and across a rejection. A resource is a Signal, so [`peek()`](/docs/api/reactivity/signal#peek), [`getItem()`](/docs/api/reactivity/collection-helpers#getitem) (with the `id` option), and equality dedup all apply.
+
+#### Returns
+
+The current value.
+
+## Faces
+
+Each face is an independently reactive read that re-runs only at its own transitions, so a reader of one face is untouched by changes to the others.
+
+### loading
+
+```javascript
+resource.loading;
+```
+
+`true` while a fetch is in flight, `false` otherwise. A synchronous fetcher return never flips it. A skeleton state is `loading && !settled`, a refresh shimmer is `loading && settled`.
+
+### error
+
+```javascript
+resource.error;
+```
+
+The error from the most recent rejected fetch, or `undefined` when the last settle fulfilled. Cleared on the next fulfilled settle. Rejections land here and never reach `console.error` or surface as unhandled rejections.
+
+### settled
+
+```javascript
+resource.settled;
+```
+
+Latches `true` after the first completed fetch (fulfilled or rejected) and stays `true` for the resource's life. Its reader re-runs once, at that first settle.
+
+## Refreshing
+
+### refresh
+
+```javascript
+resource.refresh();
+```
+
+Re-fires the fetcher by invalidating the backing reaction. The stored value holds until the refresh settles, so readers keep the last-good value through the reload.
+
+#### Usage
+
+```javascript
+const feed = resource(async (comp) => {
+  const res = await fetch('/feed', { signal: comp.abortSignal });
+  return res.json();
+});
+
+feed.refresh(); // reload, get() stays on the last payload until it lands
+```
+
+## Teardown
+
+### stop
+
+```javascript
+resource.stop();
+```
+
+Permanently stops the resource. Re-fires end, the loading face clears (a stopped resource can never be fetching), and the last value stays readable. A resource created inside a reaction stops with its parent, and an unreferenced handle self-stops once nothing holds it. Idempotent.
+
+> [!info]
+> [`settled()`](/docs/api/reactivity/flushing#settled) from the package waits for in-flight fetches, resolving once every resource and reaction is quiet.
+
+#### Usage
+
+```javascript
+const feed = resource(async () => (await fetch('/feed')).json());
+
+feed.stop();
+feed.get(); // still the last value, but no longer refetches
+```
