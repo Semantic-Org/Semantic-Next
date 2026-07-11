@@ -20,13 +20,26 @@ export interface ResourceOptions<T> extends SignalOptions<T> {
    * otherwise miss rejections landing silently in the `error` face.
    */
   onError?: (error: unknown) => void;
+
+  /**
+   * How a refetch behaves when a tracked read or `refresh()` fires while a run
+   * is in flight. `'latest'` (the default) serializes runs: the in-flight run
+   * aborts through `computation.abortSignal` and the refetch coalesces into one
+   * re-run after it settles, so at most one fetch is ever in flight. `'overlap'`
+   * starts every fetch immediately and lets the newest run's settle win, for
+   * fetchers that cannot cooperate with cancellation. Overlap costs concurrent
+   * fetches under churn, and its runs are invisible to `settled()` because the
+   * backing reaction stays synchronous. Defaults to `'latest'`.
+   */
+  concurrency?: 'latest' | 'overlap';
 }
 
 /**
  * A Resource is a Signal whose value an async fetcher produces. The fetcher runs
  * as an async reaction: signals it reads before its first `await` are tracked
- * and re-fire the fetch when they change, runs never overlap, and a superseded
- * run aborts through `computation.abortSignal` (latest-wins). The stored value
+ * and re-fire the fetch when they change. By default runs never overlap and a
+ * superseded run aborts through `computation.abortSignal` (latest-wins), which
+ * the `concurrency` option can relax to overlapping runs. The stored value
  * holds last-good through a refresh and through a rejection. Fetch status lives
  * in the separate `loading`, `error`, and `settled` faces, each reactive on its
  * own.
