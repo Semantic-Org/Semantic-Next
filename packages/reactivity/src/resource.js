@@ -1,4 +1,4 @@
-import { isPromise } from '@semantic-ui/utils';
+import { extend, isPromise } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
 import { IS_RESOURCE } from './helpers/identity.js';
@@ -22,15 +22,21 @@ export class Resource extends Signal {
     return !!value?.[IS_RESOURCE];
   }
 
+  // per-instance face state, preset so the hidden class stays monomorphic
+  static defaults = {
+    loadingValue: false,
+    errorValue: undefined,
+    settledValue: false,
+    loadingDependency: null,
+    errorDependency: null,
+    settledDependency: null,
+  };
+
   constructor(fetcher, options = {}) {
     super(options.initialValue, options);
+    extend(this, Resource.defaults);
     this.fetcher = fetcher;
-    this.loadingValue = false;
-    this.errorValue = undefined;
-    this.settledValue = false;
-    this.loadingDependency = null;
-    this.errorDependency = null;
-    this.settledDependency = null;
+    this.onError = options.onError ?? null;
     // weakly held so the backing reaction self-stops once nothing else holds the handle
     const resourceRef = new WeakRef(this);
     const backingReaction = new Reaction((computation) => {
@@ -153,6 +159,8 @@ export class Resource extends Signal {
       this.errorDependency?.changed();
     }
     this.finishFetch();
+    // after the faces settle so the callback observes coherent state
+    this.onError?.(error);
   }
 
   finishFetch() {
