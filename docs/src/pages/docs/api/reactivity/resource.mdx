@@ -59,7 +59,7 @@ const results = resource(async (comp) => {
 ```
 
 > [!info]
-> Runs never overlap. When a tracked read changes or [`refresh()`](#refresh) fires while a fetch is in flight, that run's [`abortSignal`](/docs/api/reactivity/reaction#abortsignal) aborts and a superseded run drops its settle entirely, with no value, no error, and no face flip from a stale run. The latest run wins.
+> Runs never overlap. When a tracked read changes or [`refresh()`](#refresh) fires while a fetch is in flight, that run's [`abortSignal`](/docs/api/reactivity/reaction#abortsignal) aborts and a superseded run drops its settle entirely, with no value, no error, and no face flip from a stale run. Supersession is signaled once the fetch is in flight, so a write from inside the fetcher's own synchronous head re-fires the fetch and converges on the latest value rather than dropping. The latest run wins.
 
 > [!warning]
 > The abort is cooperative. A fetcher that ignores `comp.abortSignal` and returns a promise that never settles blocks the next refetch, since runs never overlap. Pass the abort signal to your `fetch` or timers so a superseded run can actually cancel.

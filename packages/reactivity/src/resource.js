@@ -108,13 +108,27 @@ export class Resource extends Signal {
         if (!abortSignal.aborted) {
           this.fulfillFetch(value);
         }
+        else {
+          this.dropFetch(computation);
+        }
       },
       (error) => {
         if (!abortSignal.aborted) {
           this.rejectFetch(error);
         }
+        else {
+          this.dropFetch(computation);
+        }
       },
     );
+  }
+
+  // a settle dropped by supersession leaves loading for the trailing re-run,
+  // one dropped by a stop mid-flight has no re-run coming and resets the faces
+  dropFetch(computation) {
+    if (!computation.active) {
+      this.stop();
+    }
   }
 
   beginFetch() {

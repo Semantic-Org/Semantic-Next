@@ -134,6 +134,16 @@ describe('Resource', () => {
       expect(results.getItem('b')).toEqual({ key: 'b', n: 2 });
       expect(results.getItem('a').n).toBe(1);
     });
+
+    it('forwards safety options to the underlying signal', async () => {
+      const stored = { count: 1 };
+      const results = resource(async () => stored, { safety: 'clone' });
+      await settled();
+
+      results.get().count = 99; // mutating the defensive copy
+
+      expect(results.peek().count).toBe(1);
+    });
   });
 
   /*******************************
@@ -268,6 +278,79 @@ describe('Resource', () => {
       expect(results.error).toBeInstanceOf(Error);
       expect(results.get()).toEqual([]);
     });
+
+    it('a synchronous fetcher throw lands in error, not out of the constructor', () => {
+      let handle;
+      expect(() => {
+        handle = resource(() => {
+          throw new Error('boom');
+        }, { initialValue: [] });
+      }).not.toThrow();
+
+      expect(handle.error).toBeInstanceOf(Error);
+      expect(handle.settled).toBe(true);
+      expect(handle.loading).toBe(false);
+      expect(handle.get()).toEqual([]);
+    });
+
+    it('a reader of value and faces re-runs once per transition, always coherent', async () => {
+      const gates = [gate(), gate()];
+      let run = 0;
+      const results = resource(async () => {
+        const outcome = await gates[run++].promise;
+        if (outcome instanceof Error) {
+          throw outcome;
+        }
+        return outcome;
+      }, { initialValue: 'init' });
+      const observed = [];
+      reaction(() =>
+        observed.push({
+          value: results.get(),
+          loading: results.loading,
+          error: results.error,
+          settled: results.settled,
+        })
+      );
+
+      gates[0].resolve('a');
+      await settled();
+      results.refresh();
+      gates[1].resolve(new Error('boom'));
+      await settled();
+
+      expect(observed).toEqual([
+        { value: 'init', loading: true, error: undefined, settled: false },
+        { value: 'a', loading: false, error: undefined, settled: true },
+        { value: 'a', loading: true, error: undefined, settled: true },
+        { value: 'a', loading: false, error: expect.any(Error), settled: true },
+      ]);
+    });
+
+    it('error holds through an in-flight refresh until the next settle', async () => {
+      const opened = gate();
+      let shouldFail = true;
+      const results = resource(async () => {
+        if (shouldFail) {
+          throw new Error('boom');
+        }
+        return opened.promise;
+      });
+      await settled();
+
+      shouldFail = false;
+      results.refresh();
+      flush();
+
+      expect(results.loading).toBe(true);
+      expect(results.error).toBeInstanceOf(Error); // the swr shape, stale error beside a live refresh
+
+      opened.resolve('good');
+      await settled();
+
+      expect(results.error).toBe(undefined);
+      expect(results.get()).toBe('good');
+    });
   });
 
   /*******************************
@@ -375,6 +458,42 @@ describe('Resource', () => {
 
       expect(resolved).toBe(true);
       expect(results.get()).toBe('x');
+    });
+
+    it('stacked refresh() calls while in flight coalesce to one refetch', async () => {
+      const gates = [gate(), gate()];
+      let fetches = 0;
+      const results = resource(async () => gates[fetches++].promise);
+
+      results.refresh();
+      results.refresh();
+      results.refresh();
+      gates[0].resolve('stale');
+      gates[1].resolve('fresh');
+      await settled();
+
+      expect(fetches).toBe(2);
+      expect(results.get()).toBe('fresh');
+    });
+
+    it('a reentrant head write converges on the latest value', async () => {
+      // supersession is signaled through the abort controller, which exists only
+      // once the fetch is in flight. a write from the fetcher's own head re-fires
+      // and converges, the pinned contract is termination, not zero stale flushes
+      const term = signal(0);
+      let fetches = 0;
+      const results = resource(async () => {
+        const value = term.get();
+        if (value === 0) {
+          term.set(1);
+        }
+        fetches++;
+        return `result-for-${value}`;
+      });
+      await settled();
+
+      expect(fetches).toBe(2);
+      expect(results.get()).toBe('result-for-1');
     });
   });
 
@@ -526,6 +645,52 @@ describe('Resource', () => {
   /*******************************
             Identity
   *******************************/
+
+  describe('Hardening', () => {
+    it('comp.stop() after an await clears loading and drops the settle', async () => {
+      // the only in-fetcher stop available on a first run, the handle binding is unassigned
+      const opened = gate();
+      const results = resource(async (comp) => {
+        await opened.promise;
+        comp.stop();
+        return 'late';
+      });
+      expect(results.loading).toBe(true);
+
+      opened.resolve();
+      await settled();
+
+      expect(results.loading).toBe(false);
+      expect(results.get()).toBe(undefined);
+      expect(results.settled).toBe(false);
+    });
+
+    it('a parent rerun replaces a resource mid-flight', async () => {
+      const rerun = signal(0);
+      const opened = gate();
+      const handles = [];
+      reaction(() => {
+        const generation = rerun.get();
+        handles.push(resource(async () => {
+          if (generation === 0) {
+            await opened.promise;
+          }
+          return `fresh-${generation}`;
+        }));
+      });
+      expect(handles[0].loading).toBe(true);
+
+      rerun.set(1); // parent rerun, not stop
+      flush();
+
+      expect(handles[0].loading).toBe(false);
+      opened.resolve();
+      await settled();
+
+      expect(handles[0].get()).toBe(undefined); // the replaced handle's settle dropped
+      expect(handles[1].get()).toBe('fresh-1');
+    });
+  });
 
   describe('Identity', () => {
     it('a resource is a Signal and a Resource, a signal is not a Resource', () => {
