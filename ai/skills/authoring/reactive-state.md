@@ -356,6 +356,47 @@ reaction(async (comp) => {
 
 ---
 
+## Resource
+
+A `Resource` is a `Signal` whose value an async fetcher produces. The fetcher runs as an async reaction — signals it reads before the first `await` are tracked and refetch when they change, runs never overlap, and a superseded run aborts through `comp.abortSignal` (latest-wins). The value holds last-good through a refresh and through a rejection, while fetch status lives in three independent faces.
+
+```javascript
+import { resource, signal } from '@semantic-ui/reactivity';
+
+const query = signal('');
+
+const results = resource(async (comp) => {
+  const term = query.get();                 // tracked, refetches when query changes
+  if (term.length < 2) {
+    return [];                              // sync return settles now, no fetch in flight
+  }
+  const res = await fetch(`/search?q=${term}`, { signal: comp.abortSignal });
+  return res.json();
+}, { initialValue: [] });
+
+results.get();      // [] before the first settle, then the last good payload
+results.loading;    // true while a fetch is in flight
+results.refresh();  // re-fire the fetcher
+```
+
+The value surface (`get`, `peek`, `getItem`, equality dedup) is inherited. A `Resource` is a `Signal`, so `handle instanceof Signal` and `handle instanceof Resource` are both true, and a plain signal is not a `Resource`.
+
+**Faces**: each is an independently reactive read that re-runs only at its own transitions.
+
+| Face | Reads |
+|------|-------|
+| `loading` | `true` while a fetch is in flight, `false` otherwise. A synchronous return never flips it |
+| `error` | the error from the last rejected fetch, cleared on the next fulfilled settle, `undefined` otherwise |
+| `settled` | latches `true` after the first completed fetch (fulfilled or rejected) and stays `true` |
+
+A skeleton state is `loading && !settled`, a refresh shimmer is `loading && settled`. Rejections land in `error` and never reach `console.error` or surface as unhandled rejections. Value-only consumers that never read the `error` face can pass `onError` in options — it fires after the faces settle, and superseded runs never report.
+
+**Teardown**: `stop()` ends re-fires, clears loading, and leaves the last value readable. A resource created inside a reaction tears down with its parent, an unreferenced handle self-stops, and `settled()` waits for in-flight fetches.
+
+**Caveat**: `comp.abortSignal` is cooperative. A fetcher that ignores it and returns a promise that never settles blocks the next refetch, since runs never overlap. Pass the abort signal to your IO so a superseded run can actually cancel.
+
+---
+
 ## Derived and Computed Values
 
 ### Instance Method: derive()

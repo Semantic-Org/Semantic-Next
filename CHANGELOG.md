@@ -39,6 +39,9 @@ xx.xx.xxxx
 * **Feature** - Added `computation.track(callback)` to re-enter dependency tracking after an `await`
 * **Feature** - Added `computation.abortSignal`, a per-run `AbortSignal` aborted when the run is superseded — sync reactions get it too, for cancelling detached fetches on re-run
 * **Feature** - Added `settled()`, a promise that resolves once all reactions, in-flight async runs, and `afterFlush` callbacks complete
+* **Feature** - Added `resource(fetcher)` — a Signal whose value an async fetcher produces, with reactive `loading`/`error`/`settled` faces, latest-wins refetches that abort superseded runs, and a value that holds last-good through refresh and rejection
+* **Feature** - Added `onError` to resource options for value-only consumers — rejections still land in the `error` face, superseded runs never report
+* **Feature** - Added `Resource` class export for `instanceof` checks and subclassing
 * **Enhancement** - `computed` and `derive` warn in development when the compute function returns a promise
 
 ### Renderer

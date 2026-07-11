@@ -2,7 +2,9 @@
   "name": "@semantic-ui/reactivity",
   "version": "0.18.0",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./src/helpers/derived.js"
+  ],
   "title": "Semantic UI Reactivity",
   "description": "A signals based reactive state management system",
   "author": "Jack Lukic <jack@semantic-ui.com>",

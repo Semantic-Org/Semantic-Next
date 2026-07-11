@@ -175,6 +175,13 @@ export class Signal<T> {
   hasDependents(): boolean;
 
   /**
+   * Stops the backing reaction of a derived or computed signal. A no-op on a
+   * plain signal, which has no producer to tear down.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#stop stop}
+   */
+  stop(): void;
+
+  /**
    * Returns the current value without establishing a reactive dependency.
    * Under `safety: 'clone'` the returned value is still a defensive copy.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#peek peek}

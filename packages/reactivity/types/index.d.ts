@@ -7,11 +7,12 @@
 export { Dependency } from './dependency.js';
 export { Reaction } from './reaction.js';
 export { ReactiveObject, ReactiveObjectOptions } from './reactive-object.js';
+export { Resource, ResourceOptions } from './resource.js';
 export { Scheduler } from './scheduler.js';
 export { Signal, SignalOptions } from './signal.js';
 
 export { currentReaction, guard, nonreactive } from './helpers/control.js';
-export { reaction, reactiveObject, signal } from './helpers/create.js';
+export { reaction, reactiveObject, resource, signal } from './helpers/create.js';
 export { computed, derive, match } from './helpers/derived.js';
 export type { Matcher } from './helpers/derived.js';
 export { afterFlush, flush, getSource, scheduleFlush, settled } from './helpers/schedule.js';
