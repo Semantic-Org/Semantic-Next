@@ -6,8 +6,7 @@ export { Scheduler } from './scheduler.js';
 export { Signal } from './signal.js';
 
 export { currentReaction, guard, nonreactive } from './helpers/control.js';
-export { reaction, reactiveObject, signal } from './helpers/create.js';
+export { reaction, reactiveObject, resource, signal } from './helpers/create.js';
 export { computed, derive, match } from './helpers/derived.js';
 export { afterFlush, flush, getSource, scheduleFlush, settled } from './helpers/schedule.js';
 export { isStackCapture, isTracing, setStackCapture, setTracing } from './helpers/tracing.js';
-export { resource } from './resource.js';

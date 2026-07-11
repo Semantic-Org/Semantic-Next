@@ -81,7 +81,7 @@ describe('Resource', () => {
       expect(results.get()).toBe('B');
     });
 
-    it('holds the last-good value while a refetch is in flight', async () => {
+    it('holds the last-good value while a refresh is in flight', async () => {
       const dep = signal(0);
       const gates = [gate(), gate()];
       let runCount = 0;
@@ -105,7 +105,7 @@ describe('Resource', () => {
       expect(results.loading).toBe(false);
     });
 
-    it('an equal refetch payload fires no value readers', async () => {
+    it('an equal refresh payload fires no value readers', async () => {
       let fetches = 0;
       const results = resource(async () => {
         fetches++;
@@ -403,6 +403,73 @@ describe('Resource', () => {
 
       expect(fetches).toBe(1);
       expect(results.get()).toBe(1);
+    });
+
+    it('parent cleanup tears down the resource, not just its reaction', async () => {
+      const opened = gate();
+      let handle;
+      const parent = reaction(() => {
+        handle = resource(async () => {
+          await opened.promise;
+          return 'late';
+        });
+      });
+      expect(handle.loading).toBe(true);
+
+      parent.stop();
+      expect(handle.loading).toBe(false);
+
+      opened.resolve();
+      await settled();
+
+      expect(handle.get()).toBe(undefined); // the dropped settle never lands
+    });
+
+    it('stop() from inside the fetcher lands no state', async () => {
+      const opened = gate();
+      let handle;
+      let runCount = 0;
+      handle = resource((computation) => {
+        if (++runCount === 1) {
+          return 'first';
+        }
+        handle.stop();
+        return opened.promise;
+      });
+      await settled();
+      expect(handle.get()).toBe('first');
+
+      handle.refresh();
+      await settled();
+      expect(handle.loading).toBe(false);
+
+      opened.resolve('escaped');
+      await settled();
+
+      expect(handle.get()).toBe('first'); // the stopped run's settle never lands
+      expect(handle.loading).toBe(false);
+    });
+
+    it('refresh() works during the first run', () => {
+      let threw = false;
+      class Probe extends Resource {
+        runFetch(computation) {
+          if (!this.probed) {
+            this.probed = true;
+            try {
+              this.refresh();
+            }
+            catch {
+              threw = true;
+            }
+          }
+          return super.runFetch(computation);
+        }
+      }
+      const handle = new Probe(() => 'x');
+      handle.stop();
+
+      expect(threw).toBe(false);
     });
 
     it('stop() mid-flight clears loading', async () => {

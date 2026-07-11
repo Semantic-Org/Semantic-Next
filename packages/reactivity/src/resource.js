@@ -8,7 +8,7 @@ import { Signal } from './signal.js';
 
 /*
   a signal whose value a fetcher produces through a backing async reaction.
-  the value holds last-good through refetch and rejection. status lives in
+  the value holds last-good through refresh and rejection. status lives in
   three independent faces (loading, error, settled) so a reader re-runs
   only when the face it reads flips.
 */
@@ -40,13 +40,19 @@ export class Resource extends Signal {
         return;
       }
       return liveResource.runFetch(computation);
-    });
-    // scope to the enclosing reaction when present
+    }, { firstRun: false });
+    // scope to the enclosing reaction when present. teardown goes through the
+    // resource so the faces reset, not just the reaction
     const parent = Scheduler.current;
     if (parent) {
-      parent.onCleanup(() => backingReaction.stop());
+      parent.onCleanup(() => {
+        resourceRef.deref()?.stop();
+        backingReaction.stop();
+      });
     }
-    this.reaction = backingReaction; // signal.stop() tears down the backing reaction
+    // wired before the first run so the fetcher can reach refresh() and stop()
+    this.reaction = backingReaction;
+    backingReaction.run();
   }
 
   /*******************************
@@ -68,13 +74,13 @@ export class Resource extends Signal {
     return this.settledValue;
   }
 
-  refresh() {
-    this.reaction.invalidate();
-  }
-
   /*******************************
          Fetch Lifecycle
   *******************************/
+
+  refresh() {
+    this.reaction.invalidate();
+  }
 
   runFetch(computation) {
     let result;
@@ -85,6 +91,10 @@ export class Resource extends Signal {
       this.rejectFetch(error);
       return;
     }
+    // stopped from inside the fetcher, nothing may land
+    if (!computation.active) {
+      return;
+    }
     // a sync return settles without a fetch ever being in flight
     if (!isPromise(result)) {
       this.fulfillFetch(result);
@@ -92,15 +102,15 @@ export class Resource extends Signal {
     }
     this.beginFetch();
     // a superseded run's settle is dropped, the trailing re-run owns the next state
-    const runSignal = computation.abortSignal;
+    const abortSignal = computation.abortSignal;
     return result.then(
       (value) => {
-        if (!runSignal.aborted) {
+        if (!abortSignal.aborted) {
           this.fulfillFetch(value);
         }
       },
       (error) => {
-        if (!runSignal.aborted) {
+        if (!abortSignal.aborted) {
           this.rejectFetch(error);
         }
       },
@@ -155,5 +165,3 @@ export class Resource extends Signal {
     }
   }
 }
-
-export const resource = (fetcher, options) => new Resource(fetcher, options);
