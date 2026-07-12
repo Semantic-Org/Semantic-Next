@@ -128,7 +128,7 @@ sum([1, 2, 3, 4]);                   // 10
 
 ### Property Access
 ```javascript
-import { get, set, unset, keyedPath, keys, values, hasProperty } from '@semantic-ui/utils';
+import { get, has, set, unset, keyedPath, keys, values, hasProperty } from '@semantic-ui/utils';
 
 const data = {
   user: {
@@ -141,6 +141,11 @@ const data = {
 get(data, 'user.profile.name');              // 'Alice'
 get(data, 'user.posts.0.title');             // 'First Post'
 get(data, 'user.profile.bio');               // undefined (no default parameter)
+
+// Existence check that tells a stored undefined from a missing path (get can't)
+has(data, 'user.profile.name');              // true
+has({ profile: { bio: undefined } }, 'profile.bio'); // true (key exists, value is undefined)
+has(data, 'user.profile.avatar');            // false (never set)
 
 // Nested dot-path writes, creating missing intermediates (arrays for indices)
 set(data, 'user.profile.name', 'Bob');       // writes in place, returns data
@@ -996,6 +1001,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | Function | Signature | Returns |
 |----------|-----------|---------|
 | `get` | `(obj, dotPath, keys?)` | Nested value or undefined (`[#id]` selects by identity) |
+| `has` | `(obj, dotPath, keys?)` | Boolean, true when the path resolves even to a stored `undefined` (`get` can't tell that from missing) |
 | `set` | `(obj, dotPath, value, keys?)` | Same object, intermediates created (`[#id]` replaces or appends) |
 | `unset` | `(obj, dotPath, keys?)` | Same object, key removed (`[#id]` splices) |
 | `keyedPath` | `(obj, dotPath, keys?)` | Positional path rewritten to keyed `field[#id]` form, or the same string when nothing rewrites |

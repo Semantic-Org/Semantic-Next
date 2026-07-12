@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `reactive-state`
 > **Purpose:** Comprehensive guide to the @semantic-ui/reactivity package — a standalone signals-based reactive system with automatic dependency tracking for state management.
-> **Last Updated:** 2026-07-10
+> **Last Updated:** 2026-07-12
 
 ---
 
@@ -234,7 +234,7 @@ Reactivity is keyed by the literal path string, so address an element consistent
 const model = reactiveObject({ user: { name: 'Ann' } }, options);
 ```
 
-`options` mirrors Signal's `safety` / `equality` / `clone` (no `id` / `version` / `context` — identity rides in the path grammar's `[#id]` segments). The statics `ReactiveObject.equality` / `ReactiveObject.clone` / `ReactiveObject.safety` set the defaults for instances created afterward.
+`options` mirrors Signal's `safety` / `equality` / `clone` / `version` (no `id` / `context` — identity rides in the path grammar's `[#id]` segments). The statics `ReactiveObject.equality` / `ReactiveObject.clone` / `ReactiveObject.safety` set the defaults for instances created afterward.
 
 ### Reading
 
@@ -242,7 +242,13 @@ const model = reactiveObject({ user: { name: 'Ann' } }, options);
 model.get('user.name')     // tracked — subscribes the current reaction to THIS path alone
 model.peek('user.name')    // untracked single-path read
 model.peek()               // untracked whole-object read (no path), for a working copy or derivation
+model.raw('user.name')     // live reference, no clone even under safety: 'clone' (peek copies)
+model.raw()                // the whole backing object, live
+model.clone('user.tags')   // tracked, detached deep copy — mutate it freely, the reader still re-runs
+model.has('user.name')     // tracked existence — tells a stored undefined from an absent key
+model.depend('user.name')  // subscribe to a path without reading it
 model.hasDependents(path?) // any live subscriber on a path, or on the whole object
+model.version              // monotonic change counter, bumps on wake-causing writes, read adds no dep
 ```
 
 ### Writing
@@ -250,6 +256,7 @@ model.hasDependents(path?) // any live subscriber on a path, or on the whole obj
 ```javascript
 model.set('user.name', 'Bob')      // equality-gated; a same-value write wakes nobody. returns whether it changed
 model.set('items[#a3f].done', true) // keyed array element
+model.notify('user')               // force-wake a path + all descendants after an in-place raw() mutation
 model.remove('user.name')          // the key LEAVES the object (reads back absent, not undefined). returns changed
 model.replace(freshObject)         // bulk inbound swap — reseeds every live reader by full path
 model.clear()                      // replace({})
@@ -258,6 +265,8 @@ model.clear()                      // replace({})
 A write wakes the exact path, its **ancestors** (the value seen at a container changed), and any **descendant** whose resolved value changed — never a disjoint sibling. `replace` is the path for fresh data arriving wholesale: it re-resolves every cell against the new object, so a reader of a deep path under a wholesale-replaced subtree is woken correctly (a shallow top-key diff would miss it).
 
 A write does set + wake and nothing else — no `onChange` hook. `wake` schedules subscriber reactions, it does not run them synchronously, so consumer logic layered after a write (recomputing a derived field in a reaction) never re-enters the write within the same call.
+
+`version` bumps on every wake-causing write — a changed `set`, a successful `remove`, each `replace` / `clear` / `notify` — and seeds from the `version` option, the same counter `Signal` carries. To announce a mutation you made to the stored object in place through `raw` (the live reference, uncloned even under `safety: 'clone'` where `peek` copies), call `notify(path)`: it force-wakes the path and every descendant under it, since with no before image there is nothing to diff.
 
 ### Teardown
 

@@ -27,6 +27,13 @@ export interface ReactiveObjectOptions {
    * @param value - The value to copy
    */
   clone?: <V>(value: V) => V;
+
+  /**
+   * Seeds the monotonic change counter, so it can start aligned with an
+   * external store's revision.
+   * @default 0
+   */
+  version?: number;
 }
 
 /**
@@ -93,6 +100,56 @@ export class ReactiveObject {
   hasDependents(path?: string): boolean;
 
   /**
+   * Subscribes the current reaction to a path without reading its value, the
+   * path-scoped twin of `Signal.depend()`. Use it when a reaction should re-run
+   * on a change but reads the value from elsewhere.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#depend depend}
+   * @param path - The path to subscribe to
+   */
+  depend(path: string): void;
+
+  /**
+   * Tracked existence check. Distinguishes a stored `undefined` from a missing
+   * path, and wakes through the same cell as `get()` when the key is removed or
+   * re-added.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#has has}
+   * @param path - The path to test
+   * @returns Whether the path is present
+   */
+  has(path: string): boolean;
+
+  /**
+   * Returns the live stored reference with no dependency and no clone
+   * protection, even under `safety: 'clone'` where `peek()` still copies. With
+   * no path, the whole backing object. Mutating the result bypasses change
+   * detection.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#raw raw}
+   * @param path - Optional path to read
+   * @returns The live stored value
+   */
+  raw(path?: string): any;
+
+  /**
+   * Tracked, detached deep copy at a path: mutating the copy never touches the
+   * stored value, and the reader still re-runs on a later write. Always copies,
+   * even under `safety: 'reference'`. With no path, clones the whole object
+   * untracked, mirroring `peek()`'s no-path form.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#clone clone}
+   * @param path - Optional path to copy
+   * @returns A detached copy of the value
+   */
+  clone(path?: string): any;
+
+  /**
+   * Monotonic change counter, the `Signal.version` twin. Bumps on every
+   * wake-causing write: a changed `set()`, a successful `remove()`, and every
+   * `replace()`, `clear()`, and `notify()`. An equality-gated no-op `set()`
+   * leaves it unchanged. Reading it registers no dependency. Seed it with the
+   * `version` option, or assign it to realign with an external store's revision.
+   */
+  version: number;
+
+  /**
    * Single-path write, equality-gated. Wakes readers of this path, of its
    * ancestors, and of any descendant whose resolved value changed. A same-value
    * write, or one the backing object drops (a field under an absent keyed
@@ -105,9 +162,18 @@ export class ReactiveObject {
   set(path: string, value: any): boolean;
 
   /**
+   * Force-wakes a path after an in-place mutation, the `Signal.notify()` twin.
+   * Wakes the exact path, its ancestors, and every descendant under it (with no
+   * before image to diff, the whole subtree fires). Bumps `version`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#notify notify}
+   * @param path - The path whose subtree changed in place
+   */
+  notify(path: string): void;
+
+  /**
    * Removes a path so the key leaves the object. It reads back absent, not
-   * undefined-valued. A no-op when the path is already absent, which includes a
-   * key whose value is explicitly `undefined`.
+   * undefined-valued. The guard keys on presence, so a key holding a stored
+   * `undefined` is removable, and only an already-absent path is a no-op.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#remove remove}
    * @param path - The path to remove
    * @returns Whether the removal changed anything
