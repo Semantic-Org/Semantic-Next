@@ -61,6 +61,15 @@ export class Reaction {
   readonly active: boolean;
 
   /**
+   * Count of started executions, including the initial run. A magnitude probe
+   * for overreactivity — read it at a breakpoint through the callback's
+   * computation argument, or sum it across reactions to assert wake counts in
+   * fine-grained reactivity tests. A run deferred while an async run is in
+   * flight counts only once it actually starts.
+   */
+  readonly runs: number;
+
+  /**
    * Debugging context for the reaction, populated only when tracing is enabled.
    * Carries fields like `firstRun` and the triggering `value`.
    */

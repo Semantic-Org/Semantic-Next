@@ -313,6 +313,7 @@ console.log(myReaction.active); // false
 const validatorReaction = reaction((computation) => {
   // Access reaction metadata
   console.log(computation.firstRun);    // Boolean: is this the first execution?
+  console.log(computation.runs);        // Count of started executions, an overreactivity probe
   console.log(computation.context);     // Debugging context
 }, {
   context: { name: 'userValidator', source: 'ValidationSystem' }

@@ -42,6 +42,7 @@ xx.xx.xxxx
 * **Feature** - Added `settled()`, a promise that resolves once all reactions, in-flight async runs, and `afterFlush` callbacks complete
 * **Feature** - Added `resource(fetcher)` — a Signal whose value an async fetcher produces, with reactive `loading`/`error`/`settled` faces, latest-wins refetches that abort superseded runs, and a value that holds last-good through refresh and rejection
 * **Feature** - Added `onError` to resource options for value-only consumers — rejections still land in the `error` face, superseded runs never report
+* **Feature** - Added `runs` to reactions — a count of started executions for wake-count assertions and overreactivity probes
 * **Feature** - Added `concurrency` to resource options — `'latest'` (default) serializes runs with abort-and-coalesce, `'overlap'` starts every fetch immediately with newest-settle-wins for fetchers that cannot cooperate with cancellation
 * **Feature** - Added `Resource` class export for `instanceof` checks and subclassing
 * **Enhancement** - `computed` and `derive` warn in development when the compute function returns a promise
