@@ -58,7 +58,7 @@ client → server
   visibility  { type, value }                            'visible' | 'hidden'
   sub         { type, channel, name, args?, cursor? }    cursor omitted = need snapshot
   unsub       { type, channel }
-  call        { type, id, name, args }
+  call        { type, id, name, docID?, args }          docID present = mutator (the doc address)
 
 server → client
   welcome     { type, protocol, lastCallID, heartbeat, authExpiresIn?, limits?, caps? }
@@ -78,7 +78,7 @@ No frame carries `txid` or `spans` — transaction identity is server-side only,
 
 One additional type name, `ephemeral`, is reserved (§8) — name only, schema deferred to the ephemeral-collections design.
 
-The write vocabulary: **mutators** (isomorphic, optimistic, outboxed, replayed) and **actions** (server-only, awaited, unsimulated) both ride `call` — the wire does not distinguish, deltas route by changed doc, not by declaration.
+The write vocabulary: **mutators** (isomorphic, optimistic, outboxed, replayed) and **actions** (server-only, awaited, unsimulated) both ride `call` — deltas route by changed doc, not by declaration. A mutator call carries its doc address in `docID`; an action never does (the id type carries the kind either way, §below).
 
 ### client → server
 
@@ -99,10 +99,12 @@ Duplicate-sub refcounting is entirely client-side, keyed by channel address. Fir
 
 **`unsub { channel }`** — fire-and-forget, no ack. The server stops sending and drops the subscriber entry. Frames already in flight may arrive after; the client ignores frames for channels it no longer holds (at-least-once posture).
 
-**`call { id, name, args }`** — the only write vehicle on the wire. No generic document-mutation message exists by construction (the no-allow/deny invariant: you authorize operations, not edits). `id` is the idempotency key, deduped by the server ledger. Two id forms by kind:
+**`call { id, name, docID?, args }`** — the only write vehicle on the wire. No generic document-mutation message exists by construction (the no-allow/deny invariant: you authorize operations, not edits). `id` is the idempotency key, deduped by the server ledger. Two id forms by kind:
 
 - **Outbox calls (mutators)**: `id` is a JSON number — the durable outbox sequence, monotonic per clientID, persisted beside the entry. Numeric ids participate in the `lastCallID` watermark (Replicache lastMutationID semantics: anything at-or-below the watermark is settled, re-send is a no-op).
 - **Action calls**: `id` is a string UUID. Actions reject fast when disconnected and are never replayed from the outbox, so they need dedup (the ledger) but not ordering (the watermark). The id type carries the kind with zero extra fields.
+
+`docID` is the doc address, required on mutator calls and never sent on actions — a mutator is by definition a named mutation of one doc, and the address is the machinery's key (the per-doc serial apply, the optimistic overlay, insert identity), never the definition's business. It rides its own seat so `args` stay **shape-free**: absent a declared args schema the server assumes nothing about the payload, and a declared schema owns the whole args namespace (no reserved keys). For the CRUD carriers this means `$insert` args are `{ doc }` with identity stamped from `docID` on both sides (a doc smuggling a different id cannot desync the storage key), `$patch` args are `{ fields, cleared? }`, and `$remove` args are empty. An address-less mutator call rejects `badArgs`; a `docID` on an action is ignored per the unknown-field posture.
 
 ### server → client
 
