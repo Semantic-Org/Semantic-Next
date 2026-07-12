@@ -14,6 +14,7 @@ export class Reaction {
     this.dependencies = new Set();
     this.cleanups = null; // lazy only use if cleanup registered
     this.async = null; // lazy only use if async
+    this.runs = 0; // started executions, a magnitude probe for overreactivity
     this.firstRun = true;
     this.active = true;
     if (context && isTracing()) {
@@ -81,6 +82,7 @@ export class Reaction {
     if (this.async !== null && this.resetAsync()) {
       return;
     }
+    this.runs++;
     if (isTracing()) {
       this.addContext({
         firstRun: this.firstRun,
