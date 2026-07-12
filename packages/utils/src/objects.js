@@ -119,7 +119,19 @@ const findKeyed = (array, keyValue, keys = elementKey.config.keys) => {
 // a key value can ride the dot-bracket path grammar only when it carries no
 // . [ ] and no leading # (which marks a keyed selector). shared by the keyed
 // diff and the keyed read paths so an emitted path always parses back through get
-const isKeyedPathSafe = (keyValue) => !/[.[\]]/.test(keyValue) && keyValue.charCodeAt(0) !== 35;
+const HAS_PATH_SYNTAX = /[.[\]]/;
+const isKeyedPathSafe = (keyValue) => !HAS_PATH_SYNTAX.test(keyValue) && keyValue.charCodeAt(0) !== 35;
+
+// an element's identity spelled for a path, null when the element is unkeyed
+// or its key can't ride the grammar
+const keyValueFrom = (element, keys) => {
+  const id = elementKey(element, keys);
+  if (id == null) {
+    return null;
+  }
+  const keyValue = String(id);
+  return isKeyedPathSafe(keyValue) ? keyValue : null;
+};
 
 // index a keyed array by stringified identity for set-wise diffing. returns null
 // (caller falls back to the positional walk) when an element is unkeyed, two share
@@ -128,12 +140,8 @@ const isKeyedPathSafe = (keyValue) => !/[.[\]]/.test(keyValue) && keyValue.charC
 const keyedMap = (array, keys) => {
   const map = new Map();
   for (const item of array) {
-    const id = elementKey(item, keys);
-    if (id == null) {
-      return null;
-    }
-    const keyValue = String(id);
-    if (map.has(keyValue) || !isKeyedPathSafe(keyValue)) {
+    const keyValue = keyValueFrom(item, keys);
+    if (keyValue === null || map.has(keyValue)) {
       return null;
     }
     map.set(keyValue, item);
@@ -286,6 +294,35 @@ const pruneAncestorPaths = (pathLog) => {
   return pruned;
 };
 
+// both trackers swap any tracked wrapper for its raw object, scanning fresh
+// containers (a spread, a filter result) for wrappers smuggled inside, so the
+// raw graph never stores one. safe after expiry: it reads raw lookups and
+// fresh containers, never a wrapper's properties
+const createUnwrap = (wrapped, rawOf) => {
+  const unwrapDeep = (value, seen) => {
+    const raw = rawOf.get(value);
+    if (raw !== undefined) {
+      return raw;
+    }
+    // objects already in the graph are kept clean by this very scan
+    if (!isTrackable(value) || wrapped.has(value) || seen?.has(value)) {
+      return value;
+    }
+    (seen ??= new Set()).add(value);
+    for (const key of Object.keys(value)) {
+      const child = value[key];
+      if (child !== null && typeof child === 'object') {
+        const unwrapped = unwrapDeep(child, seen);
+        if (unwrapped !== child) {
+          value[key] = unwrapped;
+        }
+      }
+    }
+    return value;
+  };
+  return unwrapDeep;
+};
+
 /*
   Run callback against value, report whether it changed it. 'auto' snapshots
   small values (clone + deep-compare, callback sees the real object) and
@@ -366,30 +403,7 @@ export const trackWrites = (value, callback, {
     onWrite?.(path, object, key);
   };
 
-  // swap any tracked wrapper for its raw object, scanning fresh containers
-  // (a spread, a filter result) for wrappers smuggled inside, so the raw
-  // graph never stores one
-  const unwrapDeep = (value, seen) => {
-    const raw = rawOf.get(value);
-    if (raw !== undefined) {
-      return raw;
-    }
-    // objects already in the graph are kept clean by this very scan
-    if (!isTrackable(value) || wrapped.has(value) || seen?.has(value)) {
-      return value;
-    }
-    (seen ??= new Set()).add(value);
-    for (const key of Object.keys(value)) {
-      const child = value[key];
-      if (child !== null && typeof child === 'object') {
-        const unwrapped = unwrapDeep(child, seen);
-        if (unwrapped !== child) {
-          value[key] = unwrapped;
-        }
-      }
-    }
-    return value;
-  };
+  const unwrapDeep = createUnwrap(wrapped, rawOf);
 
   const handler = {
     get(object, key) {
@@ -481,8 +495,6 @@ export const trackWrites = (value, callback, {
     expired = true;
   }
   if (result !== null && typeof result === 'object') {
-    // safe after expiry: unwrapping reads raw lookups and fresh containers,
-    // never a tracked wrapper's properties
     result = unwrapDeep(result);
   }
 
@@ -565,9 +577,9 @@ export const trackReads = (value, callback, {
   // dependency matches the write side and survives a reorder
   const childPath = (parentPath, parent, key, childValue) => {
     if (keyed && isArray(parent)) {
-      const id = elementKey(childValue, keys);
-      if (id != null && isKeyedPathSafe(String(id))) {
-        return `${parentPath}[#${String(id)}]`;
+      const keyValue = keyValueFrom(childValue, keys);
+      if (keyValue !== null) {
+        return `${parentPath}[#${keyValue}]`;
       }
     }
     return parentPath === '' ? String(key) : `${parentPath}.${String(key)}`;
@@ -595,29 +607,7 @@ export const trackReads = (value, callback, {
     onRead?.(path, 'structure', object, undefined);
   };
 
-  // swap any tracked wrapper for its raw object, scanning fresh containers the
-  // result was assembled from. mirrors trackWrites and is safe after expiry: it
-  // reads raw lookups and fresh containers, never a wrapper's properties
-  const unwrapDeep = (value, seen) => {
-    const raw = rawOf.get(value);
-    if (raw !== undefined) {
-      return raw;
-    }
-    if (!isTrackable(value) || wrapped.has(value) || seen?.has(value)) {
-      return value;
-    }
-    (seen ??= new Set()).add(value);
-    for (const key of Object.keys(value)) {
-      const child = value[key];
-      if (child !== null && typeof child === 'object') {
-        const unwrapped = unwrapDeep(child, seen);
-        if (unwrapped !== child) {
-          value[key] = unwrapped;
-        }
-      }
-    }
-    return value;
-  };
+  const unwrapDeep = createUnwrap(wrapped, rawOf);
 
   const handler = {
     get(object, key) {
@@ -910,9 +900,6 @@ export const arrayFromObject = (obj) => {
   return arr;
 };
 
-/*
-  Access a nested object field from a string, like 'a.b.c'
-*/
 const extractBracketAccess = (part) => {
   const bracketIndex = part.indexOf('[');
   const key = part.substring(0, bracketIndex);
@@ -925,18 +912,14 @@ const extractBracketAccess = (part) => {
   return { key, index: parseInt(body, 10) };
 };
 
-export const get = function(obj, path = '', keys = elementKey.config.keys) {
-  if (typeof path !== 'string') {
-    return undefined;
-  }
+// the one walk under get and has. resolves the dot-bracket grammar to the
+// stored value, MISSING when the path never lands on one. a stored undefined
+// resolves as undefined, so has can tell it apart from a missing path
+const MISSING = Symbol('missing');
 
-  // Simple property access — no dots, no brackets
-  if (path.indexOf('.') === -1 && path.indexOf('[') === -1) {
-    return (obj !== null && isObject(obj)) ? obj[path] : undefined;
-  }
-
+const resolvePath = (obj, path, keys) => {
   if (obj === null || !isObject(obj)) {
-    return undefined;
+    return MISSING;
   }
 
   const parts = path.split('.');
@@ -945,45 +928,42 @@ export const get = function(obj, path = '', keys = elementKey.config.keys) {
 
   for (let i = 0; i < parts.length; i++) {
     if (currentObject === null || !isObject(currentObject)) {
-      return undefined;
+      return MISSING;
     }
 
-    let part = parts[i];
+    const part = parts[i];
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
       // an empty key ([0].x against an array root) addresses the current value as the array
       const array = access.key === '' ? currentObject : currentObject[access.key];
       if (!isArray(array)) {
-        return undefined;
+        return MISSING;
       }
       const index = 'keyValue' in access ? findKeyed(array, access.keyValue, keys) : access.index;
       if (index < 0 || index >= array.length) {
-        return undefined;
+        return MISSING;
       }
       currentObject = array[index];
     }
+    else if (part in currentObject) {
+      currentObject = currentObject[part];
+    }
     else {
-      if (part in currentObject) {
-        currentObject = currentObject[part];
+      // an existing literal dotted key wins, the whole remainder first (obj['a.b.c'])
+      const remainingPath = path.substring(pathOffset);
+      if (remainingPath in currentObject) {
+        currentObject = currentObject[remainingPath];
+        break;
+      }
+      // then this and the next part combined (obj['a.b'])
+      const combinedKey = `${part}.${parts[i + 1]}`;
+      if (combinedKey in currentObject) {
+        currentObject = currentObject[combinedKey];
+        i++;
       }
       else {
-        // Try remaining path as a single dotted key (e.g., obj['a.b.c'])
-        const remainingPath = path.substring(pathOffset);
-        if (remainingPath in currentObject) {
-          currentObject = currentObject[remainingPath];
-          break;
-        }
-
-        // Try combining current + next part as a dotted key (e.g., obj['a.b'])
-        const combinedKey = `${part}.${parts[i + 1]}`;
-        if (combinedKey in currentObject) {
-          currentObject = currentObject[combinedKey];
-          i++;
-        }
-        else {
-          return undefined;
-        }
+        return MISSING;
       }
     }
 
@@ -993,7 +973,46 @@ export const get = function(obj, path = '', keys = elementKey.config.keys) {
   return currentObject;
 };
 
-const isIndexSegment = (part) => /^\d+$/.test(part);
+/*
+  Access a nested object field from a string, like 'a.b.c'
+*/
+export const get = function(obj, path = '', keys = elementKey.config.keys) {
+  if (typeof path !== 'string') {
+    return undefined;
+  }
+  // simple property access — no dots, no brackets
+  if (path.indexOf('.') === -1 && path.indexOf('[') === -1) {
+    return (obj !== null && isObject(obj)) ? obj[path] : undefined;
+  }
+  const value = resolvePath(obj, path, keys);
+  return value === MISSING ? undefined : value;
+};
+
+/*
+  Existence twin of get — true when the path resolves to a real location,
+  even one holding undefined. get() conflates a missing path with a stored
+  undefined, has() is how callers tell them apart.
+*/
+export const has = function(obj, path = '', keys = elementKey.config.keys) {
+  if (typeof path !== 'string') {
+    return false;
+  }
+  // simple property access — no dots, no brackets
+  if (path.indexOf('.') === -1 && path.indexOf('[') === -1) {
+    return obj !== null && isObject(obj) && path in obj;
+  }
+  return resolvePath(obj, path, keys) !== MISSING;
+};
+
+const INDEX_SEGMENT = /^\d+$/;
+const isIndexSegment = (part) => INDEX_SEGMENT.test(part);
+
+// set and unset act only on a real path into a real object, and refuse
+// prototype pollution (__proto__ and friends)
+const CLIMBS_PROTOTYPE = /(^|\.|\[)(__proto__|constructor|prototype)(\.|\[|\]|$)/;
+const isWritablePath = (obj, path) =>
+  typeof path === 'string' && path !== '' && obj !== null && isObject(obj)
+  && !CLIMBS_PROTOTYPE.test(path);
 
 /*
   Set a nested object field from a string path, the write twin of get, so
@@ -1001,11 +1020,7 @@ const isIndexSegment = (part) => /^\d+$/.test(part);
   intermediates — arrays when the next segment is an index, objects otherwise.
 */
 export const set = function(obj, path, value, keys = elementKey.config.keys) {
-  if (typeof path !== 'string' || path === '' || obj === null || !isObject(obj)) {
-    return obj;
-  }
-  // refuse prototype pollution (__proto__ and friends)
-  if (/(^|\.|\[)(__proto__|constructor|prototype)(\.|\[|\]|$)/.test(path)) {
+  if (!isWritablePath(obj, path)) {
     return obj;
   }
 
@@ -1110,10 +1125,7 @@ export const set = function(obj, path, value, keys = elementKey.config.keys) {
   removals at once.
 */
 export const unset = function(obj, path, keys = elementKey.config.keys) {
-  if (typeof path !== 'string' || path === '' || obj === null || !isObject(obj)) {
-    return obj;
-  }
-  if (/(^|\.|\[)(__proto__|constructor|prototype)(\.|\[|\]|$)/.test(path)) {
+  if (!isWritablePath(obj, path)) {
     return obj;
   }
 
@@ -1230,9 +1242,8 @@ export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
         out.push(part);
       }
       else {
-        const id = elementKey(element, keys);
-        const keyValue = id != null ? String(id) : null;
-        if (keyValue !== null && isKeyedPathSafe(keyValue)) {
+        const keyValue = keyValueFrom(element, keys);
+        if (keyValue !== null) {
           out.push(`${access.key}[#${keyValue}]`);
           changed = true;
         }
@@ -1244,9 +1255,8 @@ export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
     }
     else if (isIndexSegment(part) && isArray(currentObject)) {
       const element = currentObject[Number(part)];
-      const id = elementKey(element, keys);
-      const keyValue = id != null ? String(id) : null;
-      if (keyValue !== null && isKeyedPathSafe(keyValue)) {
+      const keyValue = keyValueFrom(element, keys);
+      if (keyValue !== null) {
         out[out.length - 1] += `[#${keyValue}]`;
         changed = true;
       }
