@@ -9,6 +9,7 @@ import {
   extend,
   filterObject,
   get,
+  has,
   hasProperty,
   keyedPath,
   keys,
@@ -1597,6 +1598,38 @@ describe('Object Utilities', () => {
         unset(doc, 'a[#s1]', ['sku']);
         expect(doc.a.map((x) => x.sku)).toEqual(['s2']);
       });
+    });
+  });
+
+  describe('has', () => {
+    it('distinguishes a stored undefined from a missing path', () => {
+      const obj = { a: undefined, b: { c: undefined } };
+      expect(has(obj, 'a')).toBe(true);
+      expect(has(obj, 'b.c')).toBe(true);
+      expect(has(obj, 'missing')).toBe(false);
+      expect(has(obj, 'b.missing')).toBe(false);
+      expect(has(obj, 'a.deeper')).toBe(false);
+    });
+
+    it('resolves array indices and keyed segments', () => {
+      const obj = { items: [{ id: 'x', done: undefined }, { id: 'y' }] };
+      expect(has(obj, 'items[0]')).toBe(true);
+      expect(has(obj, 'items[2]')).toBe(false);
+      expect(has(obj, 'items[#x].done')).toBe(true);
+      expect(has(obj, 'items[#x].missing')).toBe(false);
+      expect(has(obj, 'items[#z]')).toBe(false);
+    });
+
+    it('resolves literal dotted keys like get does', () => {
+      const obj = { 'a.b': 1, outer: { 'x.y': undefined } };
+      expect(has(obj, 'a.b')).toBe(true);
+      expect(has(obj, 'outer.x.y')).toBe(true);
+    });
+
+    it('rejects non-object roots and non-string paths', () => {
+      expect(has(null, 'a')).toBe(false);
+      expect(has(5, 'a')).toBe(false);
+      expect(has({ a: 1 }, 42)).toBe(false);
     });
   });
 
