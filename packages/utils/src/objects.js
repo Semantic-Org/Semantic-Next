@@ -961,6 +961,8 @@ const resolvePath = (obj, path, keys) => {
       if (combinedKey in currentObject) {
         currentObject = currentObject[combinedKey];
         i++;
+        // the loop footer advances past the first part only, cover the consumed second
+        pathOffset += parts[i].length + 1;
       }
       else {
         return MISSING;

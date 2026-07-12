@@ -1626,6 +1626,15 @@ describe('Object Utilities', () => {
       expect(has(obj, 'outer.x.y')).toBe(true);
     });
 
+    it('resolves consecutive literal dotted keys', () => {
+      // a combined-key hop must advance the remainder cursor past both parts,
+      // or the next literal-key probe substrings from mid-key
+      const obj = { 'a.b': { 'c.d.e': 1 } };
+      expect(get(obj, 'a.b.c.d.e')).toBe(1);
+      expect(has(obj, 'a.b.c.d.e')).toBe(true);
+      expect(has(obj, 'a.b.c.d.x')).toBe(false);
+    });
+
     it('rejects non-object roots and non-string paths', () => {
       expect(has(null, 'a')).toBe(false);
       expect(has(5, 'a')).toBe(false);
