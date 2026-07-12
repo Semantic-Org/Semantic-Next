@@ -414,6 +414,29 @@ describe('Async Reactions', () => {
       expect(Scheduler.pendingReactions.size).toBe(0);
     });
 
+    it('runs counts started executions', async () => {
+      const dep = signal(0);
+      const opened = gate();
+      const instance = reaction(async () => {
+        dep.get();
+        await opened.promise;
+      });
+      expect(instance.runs).toBe(1);
+
+      dep.set(1); // deferred mid-flight, not started yet
+      expect(instance.runs).toBe(1);
+
+      opened.resolve();
+      await settled();
+      expect(instance.runs).toBe(2);
+
+      // framework-created reactions are countable without instrumentation
+      const doubled = computed(() => dep.get() * 2);
+      dep.set(2);
+      flush();
+      expect(doubled.reaction.runs).toBe(2);
+    });
+
     it('settled() waits for a stopped run still in flight', async () => {
       // stop() leaves the run in settlingReactions on purpose, its body is still executing
       const opened = gate();
