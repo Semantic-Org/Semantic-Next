@@ -30,6 +30,7 @@ export class Resource extends Signal {
     loadingDependency: null,
     errorDependency: null,
     settledDependency: null,
+    runId: 0,
   };
 
   constructor(fetcher, options = {}) {
@@ -37,6 +38,7 @@ export class Resource extends Signal {
     extend(this, Resource.defaults);
     this.fetcher = fetcher;
     this.onError = options.onError ?? null;
+    this.concurrency = options.concurrency ?? 'latest';
     // weakly held so the backing reaction self-stops once nothing else holds the handle
     const resourceRef = new WeakRef(this);
     const backingReaction = new Reaction((computation) => {
@@ -107,6 +109,31 @@ export class Resource extends Signal {
       return;
     }
     this.beginFetch();
+    if (this.concurrency === 'overlap') {
+      // the promise stays out of the backing reaction, so re-fires start at once
+      // instead of waiting for the in-flight settle. the newest run owns the
+      // settle, tracked by runId since nothing is aborted for it
+      const runId = ++this.runId;
+      result.then(
+        (value) => {
+          if (runId === this.runId && computation.active) {
+            this.fulfillFetch(value);
+          }
+          else {
+            this.dropFetch(computation);
+          }
+        },
+        (error) => {
+          if (runId === this.runId && computation.active) {
+            this.rejectFetch(error);
+          }
+          else {
+            this.dropFetch(computation);
+          }
+        },
+      );
+      return;
+    }
     // a superseded run's settle is dropped, the trailing re-run owns the next state
     const abortSignal = computation.abortSignal;
     return result.then(

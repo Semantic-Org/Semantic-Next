@@ -358,7 +358,7 @@ reaction(async (comp) => {
 
 ## Resource
 
-A `Resource` is a `Signal` whose value an async fetcher produces. The fetcher runs as an async reaction — signals it reads before the first `await` are tracked and refetch when they change, runs never overlap, and a superseded run aborts through `comp.abortSignal` (latest-wins). The value holds last-good through a refresh and through a rejection, while fetch status lives in three independent faces.
+A `Resource` is a `Signal` whose value an async fetcher produces. The fetcher runs as an async reaction — signals it reads before the first `await` are tracked and refetch when they change, by default runs never overlap and a superseded run aborts through `comp.abortSignal` (latest-wins). The value holds last-good through a refresh and through a rejection, while fetch status lives in three independent faces.
 
 ```javascript
 import { resource, signal } from '@semantic-ui/reactivity';
@@ -393,7 +393,9 @@ A skeleton state is `loading && !settled`, a refresh shimmer is `loading && sett
 
 **Teardown**: `stop()` ends re-fires, clears loading, and leaves the last value readable. A resource created inside a reaction tears down with its parent, an unreferenced handle self-stops, and `settled()` waits for in-flight fetches.
 
-**Caveat**: `comp.abortSignal` is cooperative. A fetcher that ignores it and returns a promise that never settles blocks the next refetch, since runs never overlap. Pass the abort signal to your IO so a superseded run can actually cancel.
+**Concurrency**: `concurrency` defaults to `'latest'`, which serializes runs. A refetch fired mid-flight aborts the in-flight run and coalesces into one re-run after it settles, so at most one fetch is in flight and `settled()` tracks it. Pass `'overlap'` for fetchers that cannot cooperate with cancellation. Every invalidation fetches immediately, concurrent runs are allowed, and the newest run's settle wins. Overlap costs concurrent fetches under churn, and its runs are invisible to `settled()` because the backing reaction stays synchronous.
+
+**Caveat**: in the default `'latest'` mode `comp.abortSignal` is cooperative. A fetcher that ignores it and returns a promise that never settles blocks the next refetch, since runs never overlap. Pass the abort signal to your IO so a superseded run can actually cancel, or switch to `concurrency: 'overlap'` so an uncancellable fetch never blocks the next one.
 
 ---
 
