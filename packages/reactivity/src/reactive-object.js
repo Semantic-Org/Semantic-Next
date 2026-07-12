@@ -1,4 +1,4 @@
-import { clone, get, isEqual, isObject, keyedPath, returnsFalse, set, unset } from '@semantic-ui/utils';
+import { clone, get, has, isEqual, isObject, keyedPath, returnsFalse, set, unset } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
 import { IS_REACTIVE_OBJECT } from './helpers/identity.js';
@@ -37,12 +37,15 @@ export class ReactiveObject {
     safety = ReactiveObject.safety,
     clone = ReactiveObject.clone,
     equality = (safety === 'none') ? returnsFalse : ReactiveObject.equality,
+    version = 0,
   } = {}) {
     this.cells = new Map();
     this.hasKeyedCells = false;
     this.cloneFunction = clone;
     this.equality = equality;
     this.safety = safety;
+    // monotonic change counter, bumps on every wake-causing write
+    this.version = version;
     this.value = this.protect(initialValue);
   }
 
@@ -101,6 +104,34 @@ export class ReactiveObject {
     return (this.cells.get(path)?.subscribers.size ?? 0) > 0;
   }
 
+  // tracked subscription without a read
+  depend(path) {
+    this.cell(path).depend();
+  }
+
+  // tracked existence, distinguishes a stored undefined from a missing path
+  has(path) {
+    this.cell(path).depend();
+    return has(this.value, path);
+  }
+
+  // live reference, no protect
+  raw(path) {
+    if (path === undefined) {
+      return this.value;
+    }
+    return get(this.value, path);
+  }
+
+  // tracked detached copy at a path, the whole-object form is untracked like peek()
+  clone(path) {
+    if (path === undefined) {
+      return this.cloneFunction(this.value);
+    }
+    this.cell(path).depend();
+    return this.cloneFunction(get(this.value, path));
+  }
+
   /*******************************
               Writes
   *******************************/
@@ -120,6 +151,7 @@ export class ReactiveObject {
       return false;
     }
 
+    this.version++;
     this.wake(path, previous, stored);
     if (keyed !== path) {
       this.wake(keyed, previous, stored);
@@ -127,13 +159,26 @@ export class ReactiveObject {
     return true;
   }
 
+  // force-wake a path after an in-place mutation, like Signal.notify. with no
+  // before image every descendant under the path wakes too
+  notify(path) {
+    this.version++;
+    const keyed = this.hasKeyedCells ? keyedPath(this.value, path) : path;
+    this.wake(path, undefined, undefined, true);
+    if (keyed !== path) {
+      this.wake(keyed, undefined, undefined, true);
+    }
+  }
+
   remove(path) {
-    const previous = get(this.value, path);
-    if (previous === undefined) {
+    // presence-guarded so a stored undefined is still removable
+    if (!has(this.value, path)) {
       return false;
     }
+    const previous = get(this.value, path);
     const keyed = this.hasKeyedCells ? keyedPath(this.value, path) : path;
     unset(this.value, path);
+    this.version++;
     this.wake(path, previous, undefined);
     if (keyed !== path) {
       this.wake(keyed, previous, undefined);
@@ -142,6 +187,7 @@ export class ReactiveObject {
   }
 
   replace(nextObject) {
+    this.version++;
     const previous = this.value;
     const next = this.protect(nextObject);
     this.value = next;
@@ -161,7 +207,7 @@ export class ReactiveObject {
     this.replace({});
   }
 
-  wake(path, previous, next) {
+  wake(path, previous, next, force = false) {
     this.cells.get(path)?.changed();
 
     // ancestors are guaranteed to have changed
@@ -175,7 +221,7 @@ export class ReactiveObject {
     }
 
     // if old/new value are not containers safe to stop here
-    if (!isObject(previous) && !isObject(next)) {
+    if (!force && !isObject(previous) && !isObject(next)) {
       return;
     }
 
@@ -192,6 +238,11 @@ export class ReactiveObject {
       }
       if (dep.subscribers.size === 0) {
         this.cells.delete(cellPath);
+        continue;
+      }
+      // a forced wake has no before image, every descendant fires
+      if (force) {
+        dep.changed();
         continue;
       }
 
