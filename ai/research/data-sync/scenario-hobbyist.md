@@ -33,7 +33,7 @@ A weekend project, a classroom exercise, an agent-authored microapp, an internal
 
 ## What This Persona Never Sees (and must never pay for)
 
-Projections and role tiers, search index factories, conflict surfaces and parking queues, per-path evidence, CDC and the god-eye, migration tooling, multi-tab leader complexity beyond it-just-working, txid machinery, epoch bumps, capability negotiation. Every one of these must be tree-shaken, defaulted away, or server-tier-absent at this rung. **The hard fails still bind** — silent data loss is equally unacceptable at small scale — but the conversion machinery is simpler: the outbox, the reload, and honest last-write-wins cover this persona's entire failure model.
+Projections and role tiers, search index factories, conflict surfaces and parking queues, per-path evidence, CDC and the god-eye, migration tooling, multi-tab complexity beyond it-just-working, txid machinery, epoch bumps, capability negotiation. Every one of these must be tree-shaken, defaulted away, or server-tier-absent at this rung. **The hard fails still bind** — silent data loss is equally unacceptable at small scale — but the conversion machinery is simpler: the outbox, the reload, and honest last-write-wins cover this persona's entire failure model.
 
 ## The Constitutional Function
 

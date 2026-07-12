@@ -39,7 +39,7 @@ Stage 1 is the change a developer feels; stages 2–3 are the one-time cost of h
 ## Behavior you get without writing it
 
 - Refresh mid-session: instant boot from IndexedDB, catch-up in background
-- Two tabs: same pool via leader election, zero extra sockets
+- Two tabs: two independent clients, each its own socket and pool, converging live
 - Two browsers: live field-granular updates (check a box in one, watch the other)
 - Kill the server, toggle a todo, restart: the outbox replays
 - Server rejects a write: the toggle visually reverts, no code for it here
