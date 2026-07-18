@@ -5,12 +5,22 @@ const flushTask = () => Scheduler.flush();
 export class Scheduler {
   static current = null;
   static pendingReactions = new Set();
+  static pendingAsyncReactions = new Set();
+  static settlingReactions = new Set();
   static afterFlushCallbacks = [];
+  static settledDeferred = null;
   static isFlushScheduled = false;
   static isFlushing = false;
 
   static scheduleReaction(reaction) {
-    Scheduler.pendingReactions.add(reaction);
+    if (reaction.async === null || !reaction.async.deferred) {
+      Scheduler.pendingReactions.add(reaction);
+    }
+    else {
+      // known-async reactions start at the drain point, so intra-flush glitches never
+      // launch a run and same-flush invalidations coalesce to one start
+      Scheduler.pendingAsyncReactions.add(reaction);
+    }
     Scheduler.scheduleFlush();
   }
 
@@ -25,39 +35,72 @@ export class Scheduler {
 
   static flush() {
     Scheduler.isFlushScheduled = false;
+    // bare dispatch with nothing pending exits before the try/finally frame.
+    // a waiter can be parked here when scheduled work was stopped before the flush
+    if (
+      Scheduler.pendingReactions.size === 0
+      && Scheduler.pendingAsyncReactions.size === 0
+      && Scheduler.afterFlushCallbacks.length === 0
+    ) {
+      if (Scheduler.settledDeferred !== null) {
+        Scheduler.checkSettled();
+      }
+      return;
+    }
     Scheduler.isFlushing = true;
     // capture first error but finish draining so one faulty reaction or afterFlush callback can't jam the queue
     let firstError;
     let iterations = 0;
     try {
-      // alternate: drain all pending reactions, then run one snapshot of afterFlush callbacks.
-      // afterFlushes registered during the batch land in the next alternation, which drains
-      // any reactions they queued before the next batch runs.
-      while (Scheduler.pendingReactions.size > 0 || Scheduler.afterFlushCallbacks.length > 0) {
+      // alternate: drain all pending reactions, start async re-runs, then run one snapshot
+      // of afterFlush callbacks. work queued during a phase lands in the next alternation,
+      // so afterFlush always observes a stable sync world.
+      while (
+        Scheduler.pendingReactions.size > 0
+        || Scheduler.pendingAsyncReactions.size > 0
+        || Scheduler.afterFlushCallbacks.length > 0
+      ) {
         while (Scheduler.pendingReactions.size > 0) {
           if (++iterations > Scheduler.maxFlushIterations) {
-            console.error('Reactive cycle detected: flush exceeded maximum iterations');
-            Scheduler.pendingReactions.clear();
-            Scheduler.afterFlushCallbacks.length = 0;
+            Scheduler.reportCycle();
             break;
           }
           // set-swap: avoid the per-pass array spread. new invalidations land in the next pass.
           const toRun = Scheduler.pendingReactions;
           Scheduler.pendingReactions = new Set();
-          for (const r of toRun) {
-            if (!r.active) { continue; }
+          for (const reaction of toRun) {
+            if (!reaction.active) { continue; }
             try {
-              r.run();
+              reaction.run();
             }
             catch (e) {
               if (!firstError) { firstError = e; }
             }
           }
         }
+        if (Scheduler.pendingAsyncReactions.size > 0) {
+          if (++iterations > Scheduler.maxFlushIterations) {
+            Scheduler.reportCycle();
+            break;
+          }
+          // async heads run synchronously here, their tails stay in flight
+          const toStart = Scheduler.pendingAsyncReactions;
+          Scheduler.pendingAsyncReactions = new Set();
+          for (const reaction of toStart) {
+            if (!reaction.active) { continue; }
+            try {
+              reaction.run();
+            }
+            catch (e) {
+              if (!firstError) { firstError = e; }
+            }
+          }
+          // heads may have queued sync work, drain it before the afterFlush snapshot
+          continue;
+        }
         if (Scheduler.afterFlushCallbacks.length > 0) {
           if (++iterations > Scheduler.maxFlushIterations) {
-            console.error('Reactive cycle detected: flush exceeded maximum iterations');
-            Scheduler.afterFlushCallbacks.length = 0;
+            Scheduler.reportCycle();
             break;
           }
           const callbacks = Scheduler.afterFlushCallbacks;
@@ -75,15 +118,56 @@ export class Scheduler {
     }
     finally {
       Scheduler.isFlushing = false;
+      // field check inline, most flushes have no settled() waiter
+      if (Scheduler.settledDeferred !== null) {
+        Scheduler.checkSettled();
+      }
     }
 
     if (firstError) { throw firstError; }
+  }
+
+  // a cycle keeps scheduling work faster than the flush drains it. clear everything and bail
+  static reportCycle() {
+    console.error('Reactive cycle detected: flush exceeded maximum iterations');
+    Scheduler.pendingReactions.clear();
+    Scheduler.pendingAsyncReactions.clear();
+    Scheduler.afterFlushCallbacks.length = 0;
   }
 
   static afterFlush(callback) {
     Scheduler.afterFlushCallbacks.push(callback);
     if (!Scheduler.isFlushing) {
       Scheduler.scheduleFlush();
+    }
+  }
+
+  /*******************************
+           Quiescence
+  *******************************/
+
+  static isSettled() {
+    return Scheduler.pendingReactions.size === 0
+      && Scheduler.pendingAsyncReactions.size === 0
+      && Scheduler.settlingReactions.size === 0
+      && Scheduler.afterFlushCallbacks.length === 0
+      && !Scheduler.isFlushScheduled
+      && !Scheduler.isFlushing;
+  }
+
+  static settled() {
+    if (Scheduler.isSettled()) {
+      return Promise.resolve();
+    }
+    Scheduler.settledDeferred ??= Promise.withResolvers();
+    return Scheduler.settledDeferred.promise;
+  }
+
+  static checkSettled() {
+    if (Scheduler.settledDeferred !== null && Scheduler.isSettled()) {
+      const deferred = Scheduler.settledDeferred;
+      Scheduler.settledDeferred = null;
+      deferred.resolve();
     }
   }
 

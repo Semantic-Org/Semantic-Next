@@ -34,7 +34,7 @@ Lineage shorthand used throughout: Centrifugo (epoch/offset recovery), Replicach
 
 **Channel address.** Channels are shared per `(name, args)` (plan invariant), so both sides must derive the same instance key. Addresses derive as `collection.name` — `Invoices.publish('byId', ...)` yields `invoices.byId`, and the nameless late-attach form claims the bare collection name. The wire `channel` field is the canonical address: the derived name when args are empty, otherwise `name + '?' + JCS(args)` where JCS is RFC 8785 canonical JSON (lexicographically sorted keys, minimal number forms, no whitespace). The client computes it locally for refcounting before the server ever sees the sub; the server computes it for instance sharing and serializes each delta once per channel, fanning identical bytes to every subscriber — the 500-subscriber economics in the plan depend on no per-subscriber fields in fan-out frames. `sub` carries `args` as a parsed object alongside the address so handlers receive structured args without re-parsing; the server derives the address from `(name, args)` itself and treats the client's string as advisory.
 
-**Channel args are wire-plain by construction.** The client's subscribe door serializes typed args value-driven — a value announces its type by constructor, and the type registry's `to()` projects it to its wire form (`Date` → ISO string) — **before** address derivation, so the authoring surface accepts rich values while no live class ever participates in the address. Both sides then derive from the same wire-plain bytes, and a Date-passer and an ISO-string-passer land on one shared channel. Schema revival happens above the address, server-side, per the publication's args schema. Two obligations follow: a registered type's `to()` must be deterministic (same value, same bytes — addresses flow through it), and a value no registry names (a `Map`, an unregistered class) is refused at address derivation rather than silently mis-derived. This is stated, not assumed — it is what makes two independent implementations derive identical addresses *(conformance: `address-vectors`)*.
+**Channel args are plain JSON by construction.** Encoding happens above the address: args cross as their encoded forms, and no typed value (a Date, a custom value class) ever participates in address derivation. This is stated, not assumed — it is what makes two independent implementations derive identical addresses *(conformance: `address-vectors`)*.
 
 **Address divergence fails loudly.** If client and server JCS implementations diverge, server frames carry an address the client never registered and the channel would be silently empty — the named silent-death mode. A frame for an unknown address while a sub is outstanding MUST surface as a dev-mode error naming the nearest pending subscription, and the conformance suite carries derivation vectors both sides must match byte-for-byte *(conformance: `address-divergence-loud`)*.
 
@@ -58,7 +58,7 @@ client → server
   visibility  { type, value }                            'visible' | 'hidden'
   sub         { type, channel, name, args?, cursor? }    cursor omitted = need snapshot
   unsub       { type, channel }
-  call        { type, id, name, args }
+  call        { type, id, name, docID?, args }          docID present = mutator (the doc address)
 
 server → client
   welcome     { type, protocol, lastCallID, heartbeat, authExpiresIn?, limits?, caps? }
@@ -78,7 +78,7 @@ No frame carries `txid` or `spans` — transaction identity is server-side only,
 
 One additional type name, `ephemeral`, is reserved (§8) — name only, schema deferred to the ephemeral-collections design.
 
-The write vocabulary: **mutators** (isomorphic, optimistic, outboxed, replayed) and **actions** (server-only, awaited, unsimulated) both ride `call` — the wire does not distinguish, deltas route by changed doc, not by declaration.
+The write vocabulary: **mutators** (isomorphic, optimistic, outboxed, replayed) and **actions** (server-only, awaited, unsimulated) both ride `call` — deltas route by changed doc, not by declaration. A mutator call carries its doc address in `docID`; an action never does (the id type carries the kind either way, §below).
 
 ### client → server
 
@@ -99,10 +99,12 @@ Duplicate-sub refcounting is entirely client-side, keyed by channel address. Fir
 
 **`unsub { channel }`** — fire-and-forget, no ack. The server stops sending and drops the subscriber entry. Frames already in flight may arrive after; the client ignores frames for channels it no longer holds (at-least-once posture).
 
-**`call { id, name, args }`** — the only write vehicle on the wire. No generic document-mutation message exists by construction (the no-allow/deny invariant: you authorize operations, not edits). `id` is the idempotency key, deduped by the server ledger. Two id forms by kind:
+**`call { id, name, docID?, args }`** — the only write vehicle on the wire. No generic document-mutation message exists by construction (the no-allow/deny invariant: you authorize operations, not edits). `id` is the idempotency key, deduped by the server ledger. Two id forms by kind:
 
 - **Outbox calls (mutators)**: `id` is a JSON number — the durable outbox sequence, monotonic per clientID, persisted beside the entry. Numeric ids participate in the `lastCallID` watermark (Replicache lastMutationID semantics: anything at-or-below the watermark is settled, re-send is a no-op).
 - **Action calls**: `id` is a string UUID. Actions reject fast when disconnected and are never replayed from the outbox, so they need dedup (the ledger) but not ordering (the watermark). The id type carries the kind with zero extra fields.
+
+`docID` is the doc address, required on mutator calls and never sent on actions — a mutator is by definition a named mutation of one doc, and the address is the machinery's key (the per-doc serial apply, the optimistic overlay, insert identity), never the definition's business. It rides its own seat so `args` stay **shape-free**: absent a declared args schema the server assumes nothing about the payload, and a declared schema owns the whole args namespace (no reserved keys). For the CRUD carriers this means `$insert` args are `{ doc }` with identity stamped from `docID` on both sides (a doc smuggling a different id cannot desync the storage key), `$patch` args are `{ fields, cleared?, inc? }` (`inc` carries relative numeric deltas, path → amount, commutative under replay), and `$remove` args are empty. An address-less mutator call rejects `badArgs`; a `docID` on an action is ignored per the unknown-field posture.
 
 ### server → client
 
@@ -129,6 +131,8 @@ Duplicate-sub refcounting is entirely client-side, keyed by channel address. Fir
 ```
 
 `add` carries `doc` (full projected doc — membership entered), `change` carries `fields` (path → value) and/or `cleared` (array of removed paths — the client writes `undefined`, never deletes, per the renderer's snapshot-diff contract), `remove` carries id only (membership left). DDP's added/changed/removed vocabulary, field-granular, extended with path granularity for deep projections.
+
+**Encoded values.** Every schema-typed value crosses every frame in its canonical json-codec encoded form: a Date as its ISO-8601 UTC string, bytes as base64, a bigint as its decimal string, a registered value class as whatever its declared encode emits. This governs `delta` `fields` values, `add` and `snapshot` docs, `call` `args`, and `result` `value` uniformly — no frame ever carries a live class instance, and no frame invents a type tag: encoded JSON is anonymous. Encoding is value-driven at the sending doors (a value announces its type by constructor); decoding is schema-driven at the receiving pool boundary (only the collection schema can name an anonymous form back). Codecs are guard-idempotent — encoding an already-encoded form and decoding an already-typed value are both passthroughs — which is what makes producer-encoded frames and multi-door seams safe by construction *(conformance: `encoded-values`)*.
 
 **Paths are id-addressed for schema-declared keyed arrays.** A path segment addresses a keyed-array element by identity — `items[#r7].amount` — never by position: positional paths do not survive on the wire for declared keyed arrays, because whole-array folding makes every concurrent intra-array edit a silent wholesale clobber, and the arrays are where concurrency concentrates (scenario, Concurrency Model). Element insert travels as a `fields` write whose path is the keyed address carrying the full element; element removal travels through `cleared`, where an id-addressed element clear is the one structural case — it splices the element out (never leaves a hole), and the array itself takes a fresh reference so the renderer's diff sees it. Un-keyed value-lists keep whole-array semantics — common by count, rare by concurrency.
 

@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `reactive-state`
 > **Purpose:** Comprehensive guide to the @semantic-ui/reactivity package — a standalone signals-based reactive system with automatic dependency tracking for state management.
-> **Last Updated:** 2026-06-28
+> **Last Updated:** 2026-07-12
 
 ---
 
@@ -234,7 +234,7 @@ Reactivity is keyed by the literal path string, so address an element consistent
 const model = reactiveObject({ user: { name: 'Ann' } }, options);
 ```
 
-`options` mirrors Signal's `safety` / `equality` / `clone` (no `id` / `version` / `context` — identity rides in the path grammar's `[#id]` segments). The statics `ReactiveObject.equality` / `ReactiveObject.clone` / `ReactiveObject.safety` set the defaults for instances created afterward.
+`options` mirrors Signal's `safety` / `equality` / `clone` / `version` (no `id` / `context` — identity rides in the path grammar's `[#id]` segments). The statics `ReactiveObject.equality` / `ReactiveObject.clone` / `ReactiveObject.safety` set the defaults for instances created afterward.
 
 ### Reading
 
@@ -242,7 +242,13 @@ const model = reactiveObject({ user: { name: 'Ann' } }, options);
 model.get('user.name')     // tracked — subscribes the current reaction to THIS path alone
 model.peek('user.name')    // untracked single-path read
 model.peek()               // untracked whole-object read (no path), for a working copy or derivation
+model.raw('user.name')     // live reference, no clone even under safety: 'clone' (peek copies)
+model.raw()                // the whole backing object, live
+model.clone('user.tags')   // tracked, detached deep copy — mutate it freely, the reader still re-runs
+model.has('user.name')     // tracked existence — tells a stored undefined from an absent key
+model.depend('user.name')  // subscribe to a path without reading it
 model.hasDependents(path?) // any live subscriber on a path, or on the whole object
+model.version              // monotonic change counter, bumps on wake-causing writes, read adds no dep
 ```
 
 ### Writing
@@ -250,6 +256,7 @@ model.hasDependents(path?) // any live subscriber on a path, or on the whole obj
 ```javascript
 model.set('user.name', 'Bob')      // equality-gated; a same-value write wakes nobody. returns whether it changed
 model.set('items[#a3f].done', true) // keyed array element
+model.notify('user')               // force-wake a path + all descendants after an in-place raw() mutation
 model.remove('user.name')          // the key LEAVES the object (reads back absent, not undefined). returns changed
 model.replace(freshObject)         // bulk inbound swap — reseeds every live reader by full path
 model.clear()                      // replace({})
@@ -258,6 +265,8 @@ model.clear()                      // replace({})
 A write wakes the exact path, its **ancestors** (the value seen at a container changed), and any **descendant** whose resolved value changed — never a disjoint sibling. `replace` is the path for fresh data arriving wholesale: it re-resolves every cell against the new object, so a reader of a deep path under a wholesale-replaced subtree is woken correctly (a shallow top-key diff would miss it).
 
 A write does set + wake and nothing else — no `onChange` hook. `wake` schedules subscriber reactions, it does not run them synchronously, so consumer logic layered after a write (recomputing a derived field in a reaction) never re-enters the write within the same call.
+
+`version` bumps on every wake-causing write — a changed `set`, a successful `remove`, each `replace` / `clear` / `notify` — and seeds from the `version` option, the same counter `Signal` carries. To announce a mutation you made to the stored object in place through `raw` (the live reference, uncloned even under `safety: 'clone'` where `peek` copies), call `notify(path)`: it force-wakes the path and every descendant under it, since with no before image there is nothing to diff.
 
 ### Teardown
 
@@ -287,7 +296,7 @@ const logReaction = reaction((computation) => {
 
 // Create without running immediately
 const deferredReaction = reaction(callback, { firstRun: false });
-deferredReaction.boundRun(); // Run manually when ready
+deferredReaction.run(); // Run manually when ready
 ```
 
 ### Reaction Lifecycle
@@ -313,6 +322,7 @@ console.log(myReaction.active); // false
 const validatorReaction = reaction((computation) => {
   // Access reaction metadata
   console.log(computation.firstRun);    // Boolean: is this the first execution?
+  console.log(computation.runs);        // Count of started executions, an overreactivity probe
   console.log(computation.context);     // Debugging context
 }, {
   context: { name: 'userValidator', source: 'ValidationSystem' }
@@ -324,6 +334,78 @@ validatorReaction.addContext({ lastRun: Date.now() });
 // Enable stack traces
 validatorReaction.setTrace();
 ```
+
+### Async Reactions
+
+A reaction callback can be async. Return a promise and the run is treated as asynchronous.
+
+```javascript
+const userId = signal(1);
+const locale = signal('en');
+const user = signal(null);
+
+reaction(async (comp) => {
+  const id = userId.get();                     // tracked before the first await
+  const res = await fetch(`/api/users/${id}`, {
+    signal: comp.abortSignal,                  // aborts when the run is superseded
+  });
+  const language = comp.track(() => locale.get());  // reads after an await need track()
+  user.set(localize(await res.json(), language));   // writes never need track
+});
+```
+
+**Lifecycle**:
+- Runs never overlap. An invalidation while a run is in flight aborts `computation.abortSignal` and coalesces into one re-run that starts after the in-flight promise settles (latest-wins)
+- Async re-runs start at the flush drain point, after pending sync reactions and before the `afterFlush` snapshot, so same-flush invalidations coalesce and intermediate sync states never launch a run
+- `firstRun` stays `true` through the whole first async run including continuations, flipping once the promise settles
+- Rejections report via `console.error` and never surface as unhandled rejections
+
+**`computation.track(callback)`**: Re-enters dependency tracking for a synchronous block after an `await`. Reads inside register on the reaction and accumulate into the current run. Returns the callback's return value.
+
+**`computation.abortSignal`**: A per-run `AbortSignal`, aborted when the run is superseded by an invalidation, re-run, or `stop()`. Sync reactions get it too, for cancelling a detached `fetch` before the re-run reads a fresh one.
+
+---
+
+## Resource
+
+A `Resource` is a `Signal` whose value an async fetcher produces. The fetcher runs as an async reaction — signals it reads before the first `await` are tracked and refetch when they change, by default runs never overlap and a superseded run aborts through `comp.abortSignal` (latest-wins). The value holds last-good through a refresh and through a rejection, while fetch status lives in three independent faces.
+
+```javascript
+import { resource, signal } from '@semantic-ui/reactivity';
+
+const query = signal('');
+
+const results = resource(async (comp) => {
+  const term = query.get();                 // tracked, refetches when query changes
+  if (term.length < 2) {
+    return [];                              // sync return settles now, no fetch in flight
+  }
+  const res = await fetch(`/search?q=${term}`, { signal: comp.abortSignal });
+  return res.json();
+}, { initialValue: [] });
+
+results.get();      // [] before the first settle, then the last good payload
+results.loading;    // true while a fetch is in flight
+results.refresh();  // re-fire the fetcher
+```
+
+The value surface (`get`, `peek`, `getItem`, equality dedup) is inherited. A `Resource` is a `Signal`, so `handle instanceof Signal` and `handle instanceof Resource` are both true, and a plain signal is not a `Resource`.
+
+**Faces**: each is an independently reactive read that re-runs only at its own transitions.
+
+| Face | Reads |
+|------|-------|
+| `loading` | `true` while a fetch is in flight, `false` otherwise. A synchronous return never flips it |
+| `error` | the error from the last rejected fetch, cleared on the next fulfilled settle, `undefined` otherwise |
+| `settled` | latches `true` after the first completed fetch (fulfilled or rejected) and stays `true` |
+
+A skeleton state is `loading && !settled`, a refresh shimmer is `loading && settled`. Rejections land in `error` and never reach `console.error` or surface as unhandled rejections. Value-only consumers that never read the `error` face can pass `onError` in options — it fires after the faces settle, and superseded runs never report.
+
+**Teardown**: `stop()` ends re-fires, clears loading, and leaves the last value readable. A resource created inside a reaction tears down with its parent, an unreferenced handle self-stops, and `settled()` waits for in-flight fetches.
+
+**Concurrency**: `concurrency` defaults to `'latest'`, which serializes runs. A refetch fired mid-flight aborts the in-flight run and coalesces into one re-run after it settles, so at most one fetch is in flight and `settled()` tracks it. Pass `'overlap'` for fetchers that cannot cooperate with cancellation. Every invalidation fetches immediately, concurrent runs are allowed, and the newest run's settle wins. Overlap costs concurrent fetches under churn, and its runs are invisible to `settled()` because the backing reaction stays synchronous.
+
+**Caveat**: in the default `'latest'` mode `comp.abortSignal` is cooperative. A fetcher that ignores it and returns a promise that never settles blocks the next refetch, since runs never overlap. Pass the abort signal to your IO so a superseded run can actually cancel, or switch to `concurrency: 'overlap'` so an uncancellable fetch never blocks the next one.
 
 ---
 
@@ -418,6 +500,9 @@ const total = computed(() => subtotal.get() + tax.get());
 ```javascript
 // Force immediate execution of all pending reactions
 flush();
+
+// Wait for full quiescence, including in-flight async runs (flush does not)
+await settled();
 
 // Run code after all reactions complete
 afterFlush(() => {

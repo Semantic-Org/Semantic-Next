@@ -14,6 +14,7 @@ xx.xx.xxxx
 ### Templates
 * **Feature** - Added `{#fn expression}` directive to pass values as-is without auto-invoking functions — mirrors `{#html}` pattern, useful for passing callbacks through property bindings
 * **Feature** - Added `{#match}` blocks for value-based branching — name a discriminant once and list `{is value}` cases (loose `==`) or `{isExactly value}` cases (strict `===`, to tell `undefined` from `null` or split the falsy set), replacing repetitive `{#if is x 'a'}{else if is x 'b'}` chains
+* **Enhancement** - `{#async}` blocks in both engines are backed by the resource primitive — same behavior, one shared lifecycle, and the lit engine now holds the last value through a rejection like the native engine
 
 ### Reactivity
 * **Enhancement** - `mutate()` on large values now detects changes by tracking writes through a proxy instead of clone-and-compare, so editing one row of a big list costs the writes, not the list. The callback sees a tracked wrapper at that scale (shows as `Proxy(Object)` in the console), and the wrapper is only valid inside the callback. Small values keep the previous snapshot behavior and see the real object
@@ -25,6 +26,7 @@ xx.xx.xxxx
 * **Feature** - Module-level functional surface — `signal`, `reaction`, `derive`, `computed`, `match`, `nonreactive`, `guard`, `afterFlush`, `flush`, `scheduleFlush`, `currentReaction`, `getSource` ship as named exports alongside the classes
 * **Feature** - Added `match(source, matchFn?)` — per-key reactive membership against a source signal, the perf primitive that backs `{#match}` template blocks (Solid's `createSelector` adapted)
 * **Feature** - Added `ReactiveObject` / `reactiveObject(initial, options)` — fine-grained reactivity over a plain object at the granularity of a PATH (dotted keys, positional `[i]` indices, keyed `[#id]` array segments). A reader of one path wakes only when that path's value changes, where a `Signal` holding an object wakes every reader on any change. Carries `get`/`peek`/`set`/`remove`/`replace`/`clear`, equality-gated writes that also wake overlapping ancestor and descendant readers, deep-reader reseed on bulk inbound `replace`, and `prune`/`stop` teardown. Shares Signal's `safety`/`equality`/`clone` configuration
+* **Feature** - `ReactiveObject` gains the Signal-parity surface — `depend(path)` (subscribe to a path without reading it), `has(path)` (tracked existence that tells a stored `undefined` from an absent key), `notify(path)` (force-wake a path and every descendant after an in-place mutation), `raw(path?)` (the live reference, never cloned even under `safety: 'clone'`), and `clone(path)` (a tracked, detached copy) — plus a monotonic `version` counter seedable via the `version` option. `remove(path)` now keys on presence, so a key holding a stored `undefined` is removable
 * **Feature** - Added `setItemProperty`, `setIndexProperty`, `toggleItemProperty`, and `toggleProperty` collection helpers for setting or flipping a field by id, by index, or across every item
 * **BREAKING** - Removed `Reaction.create`, `Reaction.current`, `Reaction.flush`, `Reaction.scheduleFlush`, `Reaction.afterFlush`, `Reaction.getSource`, `Reaction.nonreactive`, `Reaction.guard` — use the module-level exports
 * **BREAKING** - Removed `Signal.computed` — use the module-level `computed` export
@@ -35,6 +37,16 @@ xx.xx.xxxx
 * **BREAKING** - Removed `signal.clone(value)` prototype method — instance always carries its configured clone function in `this.clone`
 * **BREAKING** - Removed `setArrayProperty`. Use `setIndexProperty(index, property, value)` for one item by position, or `setProperty(property, value)` to set the field on every item
 * **BREAKING** - `signal.setProperty` on an array now takes `(property, value)` and sets the field on every item. Use `setItemProperty(id, property, value)` for the previous by-id form
+* **Feature** - Reactions support async callbacks — runs never overlap, a mid-flight invalidation aborts the run and coalesces into one re-run after it settles, and async re-runs start once the sync flush is stable
+* **Feature** - Added `computation.track(callback)` to re-enter dependency tracking after an `await`
+* **Feature** - Added `computation.abortSignal`, a per-run `AbortSignal` aborted when the run is superseded — sync reactions get it too, for cancelling detached fetches on re-run
+* **Feature** - Added `settled()`, a promise that resolves once all reactions, in-flight async runs, and `afterFlush` callbacks complete
+* **Feature** - Added `resource(fetcher)` — a Signal whose value an async fetcher produces, with reactive `loading`/`error`/`settled` faces, latest-wins refetches that abort superseded runs, and a value that holds last-good through refresh and rejection
+* **Feature** - Added `onError` to resource options for value-only consumers — rejections still land in the `error` face, superseded runs never report
+* **Feature** - Added `runs` to reactions — a count of started executions for wake-count assertions and overreactivity probes
+* **Feature** - Added `concurrency` to resource options — `'latest'` (default) serializes runs with abort-and-coalesce, `'overlap'` starts every fetch immediately with newest-settle-wins for fetchers that cannot cooperate with cancellation
+* **Feature** - Added `Resource` class export for `instanceof` checks and subclassing
+* **Enhancement** - `computed` and `derive` warn in development when the compute function returns a promise
 
 ### Renderer
 * **Bug** - Fixed property bindings (`.prop={expr}`) incorrectly defaulting to literal mode — properties now evaluate expressions like other bindings, use `{#fn expr}` to pass function references
@@ -73,6 +85,7 @@ xx.xx.xxxx
 * **Feature** - Added [`detectChanges`](https://next.semantic-ui.com/docs/api/utils/objects#detectchanges) — structural diff between two values reported as added, removed, and changed dot paths. Also powers `trackWrites` path reporting on the snapshot side
 * **Feature** - Added [`set`](https://next.semantic-ui.com/docs/api/utils/objects#set) — write twin of `get` for string paths, creating missing intermediates (arrays for numeric segments) and refusing prototype-climbing segments. Paths from `trackWrites` and `detectChanges` apply back directly
 * **Feature** - Added [`unset`](https://next.semantic-ui.com/docs/api/utils/objects#unset) — delete twin of `get`/`set` for string paths. Applies `detectChanges` removed paths, leaves holes at array indices so sibling paths stay valid across multiple removals
+* **Feature** - Added [`has`](https://next.semantic-ui.com/docs/api/utils/objects#has), the existence twin of `get`. Returns true when a string path resolves to a real location, even one holding `undefined`, which `get` reports the same as a missing path. Shares `get`'s resolver and full path grammar (dotted keys, `[0]` indices, `[#id]` keyed segments, literal dotted-key fallbacks)
 * **BREAKING** - `noop` now returns `undefined` (truly no-op). Previously it returned its first argument (identity). Use the new `identity` export if you need the old behavior.
 * **Feature** - Added `identity` export — returns its first argument unchanged.
 * **Feature** - Added [`deepFreeze`](https://next.semantic-ui.com/docs/api/utils/cloning#deepfreeze) — recursively freezes a value in place and returns the same reference. Walks arrays and plain objects only, leaving `Date`, `Map`, `Set`, `RegExp`, DOM nodes, and custom class instances untouched so their internal slots keep working. Cycle-safe via an internal `WeakSet`; already-frozen inputs take a fast-path no-op.

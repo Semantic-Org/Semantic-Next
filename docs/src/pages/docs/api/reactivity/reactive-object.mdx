@@ -4,7 +4,7 @@ pageType: 'API Reference'
 title: Reactive Object
 icon: braces
 package: "@semantic-ui/reactivity"
-methods: [reactiveObject, get, peek, hasDependents, set, remove, replace, clear, prune, stop]
+methods: [reactiveObject, get, peek, hasDependents, depend, has, raw, clone, version, set, notify, remove, replace, clear, prune, stop]
 description: API reference for ReactiveObject in Semantic UI's reactivity system
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
@@ -40,6 +40,7 @@ Creates a reactive wrapper over a plain object. `initialValue` defaults to `{}`.
 | safety | `'clone'` \| `'reference'` \| `'none'` | `'reference'` | Value-protection preset. `clone` copies on read and on inbound `set`/`replace`, `none` re-fires on every `set`. See [Signal Options](/docs/guides/reactivity/signal-options) |
 | equality | function | deep equality | Decides whether a written value differs from the value already at a path |
 | clone | function | structured clone | Copies values under `safety: 'clone'` |
+| version | number | `0` | Seeds the change counter, for aligning with an external store's revision |
 
 #### Example
 
@@ -97,6 +98,110 @@ Whether any live reaction subscribes to `path`, or to the whole object when no p
 
 `true` when a live subscriber exists.
 
+### depend
+
+```javascript
+reactiveObject.depend(path);
+```
+
+Subscribes the running reaction to `path` without reading its value, the path-scoped twin of a Signal's `depend`. Use it when a reaction should re-run when a path changes but reads the value from elsewhere.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| path | string | The path to subscribe to |
+
+#### Example
+
+<PlaygroundExample id="reactive-object-depend" direction="horizontal"></PlaygroundExample>
+
+### has
+
+```javascript
+reactiveObject.has(path);
+```
+
+Tracked existence check that distinguishes a stored `undefined` from a missing path, subscribing the running reaction to `path`. It wakes through the same cell as `get`, so removing or re-adding the key re-runs the reader.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| path | string | The path to test |
+
+#### Returns
+
+`true` when the path is present, even if its value is `undefined`.
+
+#### Example
+
+<PlaygroundExample id="reactive-object-has" direction="horizontal"></PlaygroundExample>
+
+### raw
+
+```javascript
+reactiveObject.raw();
+reactiveObject.raw(path);
+```
+
+Returns the live stored reference with no dependency tracking and no clone protection, even under `safety: 'clone'` where `peek` still copies. With a path, the value there. Without one, the whole backing object.
+
+> [!warning]
+> `raw` hands back the actual stored value, not a copy. Mutating it bypasses change detection, so pair it with `notify` to announce the change. Prefer `peek` unless you need the live reference.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| path | string | Optional path to read |
+
+#### Returns
+
+The live stored value, or the whole backing object when no path is given.
+
+### clone
+
+```javascript
+reactiveObject.clone(path);
+reactiveObject.clone();
+```
+
+Returns a detached deep copy at `path` and subscribes the running reaction to it, so mutating the copy never touches the stored value while a later write still re-runs the reader. Always copies, even under `safety: 'reference'`. With no path, clones the whole backing object untracked, mirroring `peek`'s no-path form.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| path | string | Optional path to copy |
+
+#### Returns
+
+A detached copy of the value at `path`, or of the whole object when no path is given.
+
+#### Example
+
+<PlaygroundExample id="reactive-object-clone" direction="horizontal"></PlaygroundExample>
+
+### version
+
+```javascript
+reactiveObject.version;
+reactiveObject.version = revision;
+```
+
+A monotonic integer that bumps on every wake-causing write: a `set` to a non-equal value, a successful `remove`, and every `replace`, `clear`, and `notify`. An equality-gated no-op `set` leaves it unchanged. Reading it does not subscribe the running reaction.
+
+Assign to it to realign with an external store's revision, and seed the starting value with the `version` option on `reactiveObject`.
+
+#### Returns
+
+The current change count, starting at `0`.
+
+#### Example
+
+<PlaygroundExample id="reactive-object-version" direction="horizontal"></PlaygroundExample>
+
 ## Writing
 
 ### set
@@ -118,13 +223,31 @@ Writes `value` at `path`, waking readers of that path, of its ancestors, and of 
 
 `true` when the write changed the value, `false` for an equality-gated no-op or a write the backing object drops.
 
+### notify
+
+```javascript
+reactiveObject.notify(path);
+```
+
+Force-wakes `path` after an in-place mutation, the path-scoped twin of a Signal's `notify`. It wakes the exact path, its ancestors, and every descendant under it, since with no before image there is nothing to diff. Pair it with `raw` when you mutate the stored object directly and readers need to know. Bumps `version`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| path | string | The path whose subtree changed in place |
+
+#### Example
+
+<PlaygroundExample id="reactive-object-notify" direction="horizontal"></PlaygroundExample>
+
 ### remove
 
 ```javascript
 reactiveObject.remove(path);
 ```
 
-Removes `path` so the key leaves the object, reading back absent rather than undefined-valued. A no-op when the path is already absent.
+Removes `path` so the key leaves the object, reading back absent rather than undefined-valued. It keys on presence, so a key holding a stored `undefined` is still removable, and only an already-absent path is a no-op.
 
 #### Parameters
 

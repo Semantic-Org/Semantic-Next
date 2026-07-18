@@ -1,14 +1,17 @@
-import { each, isPlainObject, isPromise } from '@semantic-ui/utils';
+import { nonreactive, resource } from '@semantic-ui/reactivity';
+import { each, isPlainObject } from '@semantic-ui/utils';
 import { defineBlock } from '../define-block.js';
 import { markScopeRange } from '../scope-context.js';
 import { registerBlock } from './registry.js';
 
 /*
 
-  {#async ...} — three-state construct (loading / success / error). The
-  generation counter on self discards stale promise resolutions: each
-  re-evaluation bumps self.generation, and pending .then/.catch callbacks
-  bail out if their captured generation is less than the current one.
+  {#async ...} — three-state construct (loading / success / error) backed by a
+  Resource. The expression runs as the resource's fetcher, so its reads re-fire
+  the fetch and the value holds last-good through a refetch. Overlap concurrency
+  matches what the block always did: a re-fire starts its fetch immediately and
+  the newest run's settle wins, template expressions can't thread an abort signal.
+  The block's own reaction reads the faces and renders the branch that matches.
 
   States:
   • sync value            → render node.content with success data context
@@ -48,74 +51,6 @@ function createSuccessDataContext(node, value) {
   return { this: value };
 }
 
-// Shared helper invoked from render/update: evaluates the expression,
-// fans out to loading/success/error based on result shape. On hydrate the
-// server already rendered the current state, so we skip the synchronous
-// loadingContent re-render (see hydrate hook).
-function evaluateAndRender(ctx, { skipLoadingRender = false } = {}) {
-  const { node, data, scope, region, renderAST, lookupExpression, childContext, self, isSVG } = ctx;
-  const result = lookupExpression(node.expression);
-  const currentGen = ++self.generation;
-
-  const renderState = (ast, extraData = {}) => {
-    const stateScope = scope.child();
-    const fragment = renderAST({
-      ast,
-      data: childContext(data, extraData),
-      scope: stateScope,
-      isSVG,
-    });
-    region.setContent(fragment, stateScope);
-    stampAsyncScope(region, extraData);
-  };
-
-  if (isPromise(result)) {
-    if (!skipLoadingRender) {
-      if (node.loadingContent?.length) {
-        renderState(node.loadingContent);
-      }
-      else if (self.hasResolved && node.content?.length) {
-        // Re-show last resolved value while a new promise is in flight.
-        // Better than flashing empty when the template has no loadingContent.
-        renderState(node.content, createSuccessDataContext(node, self.resolvedValue));
-      }
-    }
-
-    result.then((value) => {
-      if (currentGen < self.generation) { return; }
-      self.resolvedValue = value;
-      self.hasResolved = true;
-      renderState(node.content, createSuccessDataContext(node, value));
-    }).catch((error) => {
-      if (currentGen < self.generation) { return; }
-      if (node.errorContent?.length) {
-        const errorData = node.errorAs ? { [node.errorAs]: error } : { this: error };
-        renderState(node.errorContent, errorData);
-      }
-    });
-  }
-  else {
-    self.resolvedValue = result;
-    self.hasResolved = true;
-    renderState(node.content, createSuccessDataContext(node, result));
-  }
-}
-
-function renderErrorState(ctx, err) {
-  const { node, data, scope, region, renderAST, childContext, isSVG } = ctx;
-  if (!node.errorContent?.length) { return; }
-  const stateScope = scope.child();
-  const errorData = node.errorAs ? { [node.errorAs]: err } : { this: err };
-  const fragment = renderAST({
-    ast: node.errorContent,
-    data: childContext(data, errorData),
-    scope: stateScope,
-    isSVG,
-  });
-  region.setContent(fragment, stateScope);
-  stampAsyncScope(region, errorData);
-}
-
 const asyncBlock = defineBlock({
   name: 'async',
   syntax: (node) => `{#async ${node.expression}}`,
@@ -126,30 +61,105 @@ const asyncBlock = defineBlock({
   shouldRecover: (node) => Boolean(node.errorContent?.length),
 
   create() {
-    return { generation: 0, hasResolved: false, resolvedValue: null };
+    return { resource: null, syncThrew: false };
+  },
+
+  // the resource owns expression evaluation, its backing reaction tracks the
+  // reads. created nonreactive so the block's own re-runs can't tear it down,
+  // destroy() owns the teardown instead
+  ensureResource({ self, node, lookupExpression }) {
+    if (self.resource === null) {
+      self.resource = nonreactive(() =>
+        resource(() => {
+          self.syncThrew = false;
+          try {
+            return lookupExpression(node.expression);
+          }
+          catch (error) {
+            // flagged so a synchronous throw with no error branch stays loud
+            self.syncThrew = true;
+            throw error;
+          }
+        }, { concurrency: 'overlap' })
+      );
+    }
+    return self.resource;
+  },
+
+  renderState(ctx, ast, extraData = {}) {
+    const { data, scope, region, renderAST, childContext, isSVG } = ctx;
+    const stateScope = scope.child();
+    const fragment = renderAST({
+      ast,
+      data: childContext(data, extraData),
+      scope: stateScope,
+      isSVG,
+    });
+    region.setContent(fragment, stateScope);
+    stampAsyncScope(region, extraData);
+  },
+
+  // face-driven branch chooser. the face reads register on the block's own
+  // reaction, so a flip re-runs update() without re-evaluating the expression
+  renderCurrent(ctx, { preservePending = false } = {}) {
+    const { node, self } = ctx;
+    const handle = self.resource;
+    if (handle.loading) {
+      if (preservePending) { return; }
+      if (node.loadingContent?.length) {
+        this.renderState(ctx, node.loadingContent);
+      }
+      else if (handle.settled && node.content?.length) {
+        // re-show the held value while a new fetch is in flight
+        this.renderState(ctx, node.content, createSuccessDataContext(node, handle.get()));
+      }
+      return;
+    }
+    const error = handle.error;
+    if (error !== undefined) {
+      if (node.errorContent?.length) {
+        const errorData = node.errorAs ? { [node.errorAs]: error } : { this: error };
+        this.renderState(ctx, node.errorContent, errorData);
+      }
+      else if (self.syncThrew) {
+        throw error;
+      }
+      return;
+    }
+    if (!handle.settled) { return; }
+    if (node.content?.length) {
+      this.renderState(ctx, node.content, createSuccessDataContext(node, handle.get()));
+    }
   },
 
   render(ctx) {
-    evaluateAndRender(ctx);
+    this.ensureResource(ctx);
+    this.renderCurrent(ctx);
   },
 
   hydrate(ctx) {
-    // skipLoadingRender splits behavior by branch: pending promise
-    // preserves server's loadingContent (no flash); sync value still
-    // re-renders success because server emitted loadingContent that
-    // doesn't match the resolved value.
-    evaluateAndRender(ctx, { skipLoadingRender: true });
+    this.ensureResource(ctx);
+    // pending keeps the server's loadingContent in place, a sync settle
+    // re-renders because the server emitted loading that no longer matches
+    this.renderCurrent(ctx, { preservePending: true });
   },
 
   update(ctx) {
-    evaluateAndRender(ctx);
+    this.renderCurrent(ctx);
   },
 
-  // Sync throws in expression evaluation route here; promise rejections are
-  // handled inside evaluateAndRender's .catch. Both end up rendering the
+  destroy(ctx) {
+    ctx.self.resource?.stop();
+  },
+
+  // Sync throws in expression evaluation route here through the block's
+  // reaction; promise rejections land in the error face. Both render the
   // same errorContent path.
   error({ err, ...ctx }) {
-    renderErrorState(ctx, err);
+    const { node } = ctx;
+    if (!node.errorContent?.length) { return; }
+    const errorData = node.errorAs ? { [node.errorAs]: err } : { this: err };
+    this.renderState(ctx, node.errorContent, errorData);
   },
   // No evaluateText: async cannot operate in raw-text contexts (promise
   // lifecycle needs per-invocation state and DOM region tracking the text

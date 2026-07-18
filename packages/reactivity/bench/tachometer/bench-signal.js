@@ -585,6 +585,53 @@ if (ReactiveObject) {
     });
     for (const r of reactions) { r.stop(); }
   }
+
+  /*******************************
+          Resource
+  *******************************/
+
+  // resource ships after the async-reaction work, skip when benching an older source
+  const resource = reactivity.resource;
+  const settled = reactivity.settled;
+
+  if (resource && settled) {
+    {
+      const term = new Signal(0);
+      const handle = resource(async () => term.get() * 2);
+      await settled();
+      // purpose: Churns the head signal through 1000 sequential fetch lifecycles awaiting quiescence each. Invalidate, drain-slot start, and settle cost per cycle.
+      await measureOp('resource-refetch-1k', async () => {
+        for (let i = 1; i <= 1000; i++) {
+          term.set(i);
+          await settled();
+        }
+      });
+      sink = handle.get();
+      handle.stop();
+    }
+
+    {
+      const term = new Signal(0);
+      const handle = resource(async () => term.get());
+      await settled();
+      const readers = [];
+      for (let i = 0; i < 200; i++) {
+        const mode = i % 3;
+        readers.push(reaction(() => {
+          sink = mode === 0 ? handle.get() : mode === 1 ? handle.loading : handle.settled;
+        }));
+      }
+      // purpose: 200 readers split across value, loading, and settled faces over 100 refetch cycles. Value and loading fan out per cycle, the latched settled face stays silent.
+      await measureOp('resource-face-fanout-200x100', async () => {
+        for (let i = 1; i <= 100; i++) {
+          term.set(i);
+          await settled();
+        }
+      });
+      for (const r of readers) { r.stop(); }
+      handle.stop();
+    }
+  }
 }
 
 /*******************************

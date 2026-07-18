@@ -141,6 +141,7 @@ export const sidebarMenuAPI = [
       { name: 'Signal', url: '/docs/api/reactivity/signal' },
       { name: 'Reactive Object', url: '/docs/api/reactivity/reactive-object' },
       { name: 'Reaction', url: '/docs/api/reactivity/reaction' },
+      { name: 'Resource', url: '/docs/api/reactivity/resource' },
       { name: 'Derived Signals', url: '/docs/api/reactivity/derived-signals' },
       { name: 'Reactive Controls', url: '/docs/api/reactivity/controls' },
       { name: 'Flushing', url: '/docs/api/reactivity/flushing' },

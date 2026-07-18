@@ -2,7 +2,8 @@
  * Synchronously processes all pending reactions instead of waiting for the
  * microtask queue. Batched writes resolve to their final value, errors are
  * captured and rethrown after the queue drains, and a reactive cycle is broken
- * after a fixed iteration cap.
+ * after a fixed iteration cap. Does not wait for in-flight async runs. Use
+ * `settled()` for full quiescence.
  * @see {@link https://next.semantic-ui.com/docs/api/reactivity/flushing#flush flush}
  */
 export function flush(): void;
@@ -21,6 +22,16 @@ export function scheduleFlush(): void;
  * @param callback - Function to run after updates are processed
  */
 export function afterFlush(callback: () => void): void;
+
+/**
+ * Returns a promise that resolves once every pending reaction, in-flight async
+ * run, and `afterFlush` callback has completed, including the cascades they
+ * schedule. Resolves immediately when the system is already idle. Unlike
+ * `flush()`, which stays synchronous and returns before an in-flight async run
+ * settles, `settled()` awaits those runs.
+ * @see {@link https://next.semantic-ui.com/docs/api/reactivity/flushing#settled settled}
+ */
+export function settled(): Promise<void>;
 
 /**
  * Logs the source of the currently running reaction to the console, for

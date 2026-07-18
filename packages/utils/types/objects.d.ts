@@ -560,6 +560,33 @@ export function get<T extends object, V = any>(
 ): V | undefined;
 
 /**
+ * Existence twin of get. Returns true when the path resolves to a real
+ * location, even one holding undefined. get() reports a missing path and a
+ * stored undefined the same way, so has() is how callers tell them apart.
+ * Understands the same path grammar as get (dotted keys, [0] indices, [#id]
+ * keyed segments, and literal dotted-key fallbacks).
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#has has}
+ * @see {@link https://next.semantic-ui.com/examples/utils-has Example}
+ *
+ * @param obj - The object to traverse
+ * @param path - The path string (e.g., 'a.b.c', 'items[0].name', or 'items[#id].name')
+ * @param keys - Identity fields for keyed `[#id]` segments (default ['id', '_id', 'hash', 'key'])
+ * @returns True when the path resolves to a stored location, false otherwise
+ *
+ * @example
+ * ```ts
+ * has({ a: undefined }, 'a') // returns true (key exists, value is undefined)
+ * has({ a: undefined }, 'b') // returns false (no such path)
+ * has({ items: [{ id: 'b' }] }, 'items[#b]') // selects by identity
+ * ```
+ */
+export function has<T extends object>(
+  obj: T,
+  path?: string,
+  keys?: string[],
+): boolean;
+
+/**
  * Set a nested object field from a string path, the write twin of get.
  * Creates missing intermediates — arrays when the next segment is a numeric
  * index, objects otherwise. Refuses prototype-climbing segments

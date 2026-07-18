@@ -4,7 +4,7 @@ pageType: 'API Reference'
 title: Flushing
 icon: refresh-cw
 package: "@semantic-ui/reactivity"
-methods: [flush, afterFlush, scheduleFlush]
+methods: [flush, afterFlush, scheduleFlush, settled]
 description: API reference for scheduling and flushing reactions in Semantic UI's reactivity system
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
@@ -12,10 +12,10 @@ import Blockquote from '@components/mdx/Blockquote.astro';
 
 export const components = { blockquote: Blockquote };
 
-Control when pending reactions run. By default a signal change schedules its dependents onto the microtask queue, these free functions let you flush that queue now, run a callback once it settles, or schedule it yourself.
+Control when pending reactions run. By default a signal change schedules its dependents onto the microtask queue, these free functions let you flush that queue now, run a callback once it settles, wait for asynchronous runs to finish, or schedule it yourself.
 
 ```javascript
-import { flush, afterFlush, scheduleFlush } from '@semantic-ui/reactivity';
+import { flush, afterFlush, scheduleFlush, settled } from '@semantic-ui/reactivity';
 ```
 
 > [!info]
@@ -29,7 +29,7 @@ import { flush, afterFlush, scheduleFlush } from '@semantic-ui/reactivity';
 flush();
 ```
 
-Synchronously drains every pending reaction instead of waiting for the microtask. Batched writes resolve to their final value, errors are captured and rethrown after the queue drains so one faulty reaction cannot jam the rest, and a reactive cycle is broken after a fixed iteration cap.
+Synchronously drains every pending reaction instead of waiting for the microtask. Batched writes resolve to their final value, errors are captured and rethrown after the queue drains so one faulty reaction cannot jam the rest, and a reactive cycle is broken after a fixed iteration cap. In-flight [async reactions](/docs/api/reactivity/reaction#async-reactions) are not awaited, use [`settled()`](#settled) to wait for full quiescence.
 
 #### Usage
 
@@ -86,3 +86,33 @@ afterFlush(() => {
 #### Example
 
 <PlaygroundExample id="after-flush" direction="horizontal"></PlaygroundExample>
+
+## Settling
+
+### settled
+
+```javascript
+await settled();
+```
+
+Returns a promise that resolves once the reactive system is fully quiet, after every pending reaction, in-flight async run, and `afterFlush` callback has completed, including any cascades they schedule. Resolves immediately when nothing is pending.
+
+[`flush()`](#flush) drains the sync queue and returns, but it does not wait for in-flight [async reactions](/docs/api/reactivity/reaction#async-reactions). `settled()` is the async counterpart that waits for those runs and the work they schedule.
+
+#### Returns
+
+A promise that resolves when the system is idle.
+
+#### Usage
+
+```javascript
+const userId = signal(1);
+const user = signal(null);
+
+reaction(async () => {
+  user.set(await fetchUser(userId.get()));
+});
+
+userId.set(2);
+await settled(); // resolves after the async re-run and its cascades finish
+```

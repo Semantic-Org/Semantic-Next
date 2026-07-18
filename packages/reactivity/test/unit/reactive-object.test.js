@@ -510,4 +510,121 @@ describe('ReactiveObject', () => {
       keyed.stop();
     });
   });
+
+  describe('api parity', () => {
+    it('depend(path) subscribes without a read', () => {
+      const ro = reactiveObject({ user: { name: 'Ann' } });
+      let runs = 0;
+      const r = reaction(() => {
+        ro.depend('user.name');
+        runs++;
+      });
+
+      ro.set('user.name', 'Bea');
+      flush();
+
+      expect(runs).toBe(2);
+      r.stop();
+    });
+
+    it('notify(path) force-wakes the path, its ancestors, and all descendants', () => {
+      const ro = reactiveObject({ user: { profile: { name: 'Ann', age: 30 } }, other: 1 });
+      const exact = trackPath(ro, 'user.profile');
+      const ancestor = trackPath(ro, 'user');
+      const descendantA = trackPath(ro, 'user.profile.name');
+      const descendantB = trackPath(ro, 'user.profile.age');
+      const sibling = trackPath(ro, 'other');
+
+      ro.raw('user.profile').name = 'Bea'; // in-place, invisible to set()
+      ro.notify('user.profile');
+      flush();
+
+      expect(exact.runs).toBe(2);
+      expect(ancestor.runs).toBe(2);
+      expect(descendantA.runs).toBe(2);
+      expect(descendantA.last).toBe('Bea');
+      expect(descendantB.runs).toBe(2); // no before image, every descendant wakes
+      expect(sibling.runs).toBe(1);
+      [exact, ancestor, descendantA, descendantB, sibling].forEach((tracked) => tracked.stop());
+    });
+
+    it('version counts changes and seeds from options', () => {
+      const ro = reactiveObject({ a: 1 }, { version: 5 });
+      expect(ro.version).toBe(5);
+
+      ro.set('a', 2);
+      expect(ro.version).toBe(6);
+      ro.set('a', 2); // deduped, no bump
+      expect(ro.version).toBe(6);
+      ro.remove('a');
+      expect(ro.version).toBe(7);
+      ro.replace({ b: 1 });
+      expect(ro.version).toBe(8);
+      ro.notify('b');
+      expect(ro.version).toBe(9);
+    });
+
+    it('raw() returns the live reference under clone safety', () => {
+      const ro = reactiveObject({ list: [1] }, { safety: 'clone' });
+
+      expect(ro.peek('list')).not.toBe(ro.raw('list')); // peek clones, raw does not
+      expect(ro.raw('list')).toBe(ro.raw('list'));
+      expect(ro.raw().list).toBe(ro.raw('list'));
+    });
+
+    it('clone(path) is a tracked, detached copy', () => {
+      const ro = reactiveObject({ user: { tags: ['a'] } });
+      let copy;
+      let runs = 0;
+      const r = reaction(() => {
+        copy = ro.clone('user.tags');
+        runs++;
+      });
+
+      copy.push('b'); // detached, the stored value is untouched
+      expect(ro.peek('user.tags')).toEqual(['a']);
+
+      ro.set('user.tags', ['c']);
+      flush();
+
+      expect(runs).toBe(2);
+      expect(copy).toEqual(['c']);
+      r.stop();
+    });
+
+    it('has(path) distinguishes stored undefined from absent, reactively', () => {
+      const ro = reactiveObject({ form: { email: 'a@b.c' } });
+      const state = { runs: 0, last: undefined };
+      const r = reaction(() => {
+        state.last = ro.has('form.email');
+        state.runs++;
+      });
+      expect(state.last).toBe(true);
+
+      ro.set('form.email', undefined); // value to undefined transition stays present
+      flush();
+      expect(state.runs).toBe(2);
+      expect(state.last).toBe(true);
+
+      ro.remove('form.email');
+      flush();
+      expect(state.runs).toBe(3);
+      expect(state.last).toBe(false);
+
+      ro.set('form.email', 'new@b.c');
+      flush();
+      expect(state.runs).toBe(4);
+      expect(state.last).toBe(true);
+      r.stop();
+    });
+
+    it('remove() removes a key holding a stored undefined', () => {
+      const ro = reactiveObject({ a: 'x' });
+      ro.set('a', undefined);
+
+      expect(ro.has('a')).toBe(true);
+      expect(ro.remove('a')).toBe(true); // the guard keys on presence, not value
+      expect(ro.has('a')).toBe(false);
+    });
+  });
 });

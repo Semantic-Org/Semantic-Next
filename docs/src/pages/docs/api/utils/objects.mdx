@@ -601,6 +601,45 @@ const doc = { items: [{ id: 'a', n: 1 }, { id: 'b', n: 2 }] };
 console.log(get(doc, 'items[#b].n')); // 2 (selected by identity, not position)
 ```
 
+### has
+
+```javascript
+function has(obj, path = '', keys = ['id', '_id', 'hash', 'key'])
+```
+
+Existence twin of [`get`](#get). Returns `true` when the path resolves to a real location, even one holding `undefined`. `get` reports a missing path and a stored `undefined` the same way, so `has` is how you tell them apart.
+
+#### Parameters
+
+| Name | Type     | Description |
+|------|----------|-------------|
+| obj  | object   | The object to check |
+| path | string   | The path to test for |
+| keys | string[] | Identity fields for keyed `[#id]` segments |
+
+#### Returns
+
+`true` when the path resolves to a stored location, `false` otherwise.
+
+#### Notes
+
+Understands the same path grammar as [`get`](#get): dotted keys, `[0]` indices, `[#id]` keyed segments (see [`elementKey`](#elementkey)), and literal dotted-key fallbacks. A non-object root or a non-string path returns `false`.
+
+#### Example
+
+```javascript
+import { has, get } from '@semantic-ui/utils';
+
+const preferences = { theme: 'dark', notifications: undefined };
+console.log(get(preferences, 'notifications')); // undefined
+console.log(has(preferences, 'notifications')); // true (key exists, value is undefined)
+console.log(has(preferences, 'timezone'));      // false (never set)
+
+const doc = { items: [{ id: 'a', done: undefined }] };
+console.log(has(doc, 'items[#a].done')); // true (resolves to a stored undefined)
+console.log(has(doc, 'items[#a].note')); // false
+```
+
 ### set
 
 ```javascript
