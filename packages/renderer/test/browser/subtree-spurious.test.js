@@ -1165,7 +1165,7 @@ RENDERING_ENGINES.forEach(engine => {
 
       it('replacing a primitive item with an object on the same key wakes the binding', async () => {
         // Edge: array as-mode where items[i] morphs primitive → object
-        // at the same key. getItemID for both falls back to indexOrKey
+        // at the same key. getItemId for both falls back to indexOrKey
         // when the object has no _id/id/key/hash, so the record is
         // reused. Path A's snapshot is the prior primitive; the diff
         // must recover (re-snapshot from the object and fire wakeups)

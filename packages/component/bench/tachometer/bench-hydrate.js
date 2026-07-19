@@ -170,19 +170,19 @@ defineComponent({
     </ul>
   `,
   defaultState: {
-    activeID: null,
+    activeId: null,
     items: [],
   },
   createComponent({ self, state }) {
     return {
       isCurrent(item) {
-        return state.activeID.get() === item.id;
+        return state.activeId.get() === item.id;
       },
       getItemClasses(item) {
         return { active: self.isCurrent(item), card: true };
       },
       setActive(id) {
-        state.activeID.set(id);
+        state.activeId.set(id);
       },
     };
   },
@@ -191,7 +191,7 @@ defineComponent({
 const HelperCtor = customElements.get('bench-hydrate-helper');
 
 function ssrHelperList(items) {
-  const cloned = HelperCtor.template.clone({ data: { items, activeID: null }, renderingEngine: 'native' });
+  const cloned = HelperCtor.template.clone({ data: { items, activeId: null }, renderingEngine: 'native' });
   cloned.initialize();
   const server = new ServerRenderer({
     ast: cloned.ast,
@@ -205,7 +205,7 @@ function ssrHelperList(items) {
 }
 
 // Same mount-window shape as above, but with a per-item attribute that
-// calls a helper closing over external `state.activeID`. Sensitive to
+// calls a helper closing over external `state.activeId`. Sensitive to
 // regressions in per-item Reaction wiring at hydrate time.
 const helperItems = makeItems(1000);
 const dsdHTMLForHelper = ssrHelperList(helperItems);
@@ -227,7 +227,7 @@ const elHelper = container.firstElementChild;
 // wired at hydrate are reactive to external state, not just to
 // itemSignal mutations. 1000 cycles walking every item once so the
 // per-cycle two-item repaint pattern accumulates measurable work.
-// purpose: Walks the shared activeID across every item in a hydrated 1000-item list so two items repaint per cycle.
+// purpose: Walks the shared activeId across every item in a hydrated 1000-item list so two items repaint per cycle.
 await measureOp('helper-100-state-change-1k', () => {
   for (let i = 0; i < 1000; i++) {
     elHelper.component.setActive(`id-${i}`);

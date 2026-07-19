@@ -66,13 +66,13 @@ export function isExpressionMarker(commentData) {
 export function isRawTextMarker(commentData) {
   return commentData.startsWith(RAW_TEXT_MARKER);
 }
-export function parseBlockOpenID(commentData) {
+export function parseBlockOpenId(commentData) {
   return +commentData.slice(BLOCK_MARKER.length);
 }
-export function parseExpressionID(commentData) {
+export function parseExpressionId(commentData) {
   return +commentData.slice(COMMENT_MARKER.length);
 }
-export function parseRawTextID(commentData) {
+export function parseRawTextId(commentData) {
   return +commentData.slice(RAW_TEXT_MARKER.length);
 }
 
@@ -85,7 +85,7 @@ const ATTR_MARKER_RE = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFF
 // lookup via entries[id].attributeParts.
 export function parseAttributeParts(attrValue) {
   const parts = [];
-  const markerIDs = [];
+  const markerIds = [];
   let lastIndex = 0;
   let match;
   ATTR_MARKER_RE.lastIndex = 0;
@@ -93,15 +93,15 @@ export function parseAttributeParts(attrValue) {
     if (match.index > lastIndex) {
       parts.push({ static: attrValue.slice(lastIndex, match.index) });
     }
-    const markerID = +match[1];
-    parts.push({ markerID });
-    markerIDs.push(markerID);
+    const markerId = +match[1];
+    parts.push({ markerId });
+    markerIds.push(markerId);
     lastIndex = ATTR_MARKER_RE.lastIndex;
   }
   if (lastIndex < attrValue.length) {
     parts.push({ static: attrValue.slice(lastIndex) });
   }
-  return { parts, markerIDs };
+  return { parts, markerIds };
 }
 
 // HTML raw text elements — browser treats content as text, not markup
@@ -334,9 +334,9 @@ function populateAttributeBindings(htmlString, entries) {
   let match;
   while ((match = ATTR_WITH_MARKER_RE.exec(htmlString)) !== null) {
     const attrValue = match[1] !== undefined ? match[1] : match[2];
-    const { parts, markerIDs } = parseAttributeParts(attrValue);
-    if (markerIDs.length === 0) { continue; }
-    const entry = entries[markerIDs[0]];
+    const { parts, markerIds } = parseAttributeParts(attrValue);
+    if (markerIds.length === 0) { continue; }
+    const entry = entries[markerIds[0]];
     if (!entry) { continue; }
     entry.attributeParts = parts;
   }

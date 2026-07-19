@@ -6,7 +6,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { reaction } from '@semantic-ui/reactivity';
 import { arrayFromObject, clone, isClient, isEmpty, isEqual, isPlainObject } from '@semantic-ui/utils';
 
-import { getCollectionType, getEachData, getItemID } from '../../../shared/each.js';
+import { getCollectionType, getEachData, getItemId } from '../../../shared/each.js';
 
 export class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -78,7 +78,7 @@ export class ReactiveEachDirective extends AsyncDirective {
     // Collect current keys and prune snapshots for removed items
     const currentKeys = new Set();
     items.forEach((item, indexOrKey) => {
-      currentKeys.add(getItemID(item, indexOrKey, collectionType));
+      currentKeys.add(getItemId(item, indexOrKey, collectionType));
     });
     this._itemSnapshots.forEach((_, key) => {
       if (!currentKeys.has(key)) {
@@ -88,7 +88,7 @@ export class ReactiveEachDirective extends AsyncDirective {
 
     return repeat(
       items,
-      (item, indexOrKey) => getItemID(item, indexOrKey, collectionType),
+      (item, indexOrKey) => getItemId(item, indexOrKey, collectionType),
       (item, indexOrKey) => this.getTemplate(item, indexOrKey, collectionType),
     );
   }
@@ -98,7 +98,7 @@ export class ReactiveEachDirective extends AsyncDirective {
   }
 
   getTemplate(item, indexOrKey, collectionType) {
-    const key = getItemID(item, indexOrKey, collectionType);
+    const key = getItemId(item, indexOrKey, collectionType);
 
     // skip unchanged items to avoid redundant re-renders
     // index is part of the snapshot so reorders re-evaluate template expressions that bind it

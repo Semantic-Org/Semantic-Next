@@ -108,9 +108,9 @@ Utility includes the following helpers:
 
 ### Identity
 - `tokenize(str)` - Returns a tokenized version of a string
-- `prettifyID(num)` - Converts numeric ID to human-readable string
+- `prettifyId(num)` - Converts numeric ID to human-readable string
 - `hashCode(input, options)` - Creates a hash code from input
-- `generateID()` - Generates a pseudo-random unique identifier
+- `generateId()` - Generates a pseudo-random unique identifier
 
 ### Errors
 - `fatal(message, options)` - Throws a custom error asynchronously

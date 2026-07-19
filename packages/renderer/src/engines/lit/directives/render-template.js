@@ -111,12 +111,12 @@ export class RenderTemplateDirective extends AsyncDirective {
     }
 
     // Preserve existing clone when the same prototype is reused.
-    if (this.template && this.templateID === template.id) {
+    if (this.template && this.templateId === template.id) {
       return;
     }
 
     // store template id
-    this.templateID = template.id;
+    this.templateId = template.id;
     this.template = template.clone({
       templateName,
       data: this.unpackData(this.data),

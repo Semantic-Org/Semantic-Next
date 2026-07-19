@@ -33,7 +33,7 @@ const createComponent = function({ self, settings }) {
       }
       return;
     },
-    getActiveID() {
+    getActiveId() {
       const activeItem = first(settings.menu, (item) => self.isActiveItem(item));
       return activeItem?._id;
     },

@@ -48,7 +48,7 @@ const defaultSettings = {
   saveState: true,
 
   // prefix local storage values with this
-  saveID: 'sandbox',
+  saveId: 'sandbox',
 
   // initial view mode from url param (code, split, preview)
   viewMode: '',
@@ -550,8 +550,8 @@ const createComponent = (
   },
   getFirstPageFile() {
   },
-  getSaveID(group, index) {
-    return [settings.saveID, group, index].filter(val => val !== undefined).join('-');
+  getSaveId(group, index) {
+    return [settings.saveId, group, index].filter(val => val !== undefined).join('-');
   },
   getPanels() {
     let panels = [[], []];

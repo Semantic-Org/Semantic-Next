@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import * as reactivity from '@semantic-ui/reactivity';
 const { Reaction } = reactivity;
-import { generateID } from '@semantic-ui/utils';
+import { generateId } from '@semantic-ui/utils';
 
 /*******************************
       Subtemplate Definition
@@ -92,13 +92,13 @@ defineComponent({
 
       // actions
       addOne(title) {
-        state.todos.push({ id: generateID(), title, completed: false });
+        state.todos.push({ id: generateId(), title, completed: false });
       },
       addBulk(n) {
         const todos = state.todos.peek();
         const batch = new Array(n);
         for (let i = 0; i < n; i++) {
-          batch[i] = { id: generateID(), title: `Todo item ${todos.length + i + 1}`, completed: false };
+          batch[i] = { id: generateId(), title: `Todo item ${todos.length + i + 1}`, completed: false };
         }
         state.todos.set(todos.concat(batch));
       },

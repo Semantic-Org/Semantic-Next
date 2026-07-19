@@ -30,7 +30,7 @@ export async function getStaticPaths() {
     let panelIndexes;
     await asyncEach(fileFolders, async (folder) => {
       files = await getExampleFiles({
-        contentID: lesson.id,
+        contentId: lesson.id,
         allFiles: allLessonFiles,
         basePath: '../../content/lessons/',
         subFolder: folder,
@@ -48,7 +48,7 @@ export async function getStaticPaths() {
     });
 
     let solutionFiles = await getExampleFiles({
-      contentID: lesson.id,
+      contentId: lesson.id,
       allFiles: allLessonFiles,
       basePath: '../../content/lessons/',
       subFolder: 'solution',
@@ -83,7 +83,7 @@ const menu = await getSidebarMenu({url: activeURL});
 
 const playgroundConfig = {
   panelIndexes,
-  saveID: 'learn',
+  saveId: 'learn',
   selectedFile: lesson.selectedFile
 };
 ---

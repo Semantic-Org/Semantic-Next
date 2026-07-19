@@ -1,5 +1,5 @@
 import { bench, describe } from 'vitest';
-import { generateID, hashCode, isValidID, parseID } from '../src/crypto.js';
+import { generateId, hashCode, isValidId, parseId } from '../src/crypto.js';
 
 /*******************************
        Test Data — Realistic
@@ -34,41 +34,41 @@ describe('hashCode', () => {
 // token, link, and code are minted rarely, so the checksum pass and longer body
 // are not on any hot path. The shared entropy pool is what keeps the per-id draw
 // near a memory read rather than a fresh getRandomValues syscall.
-describe('generateID', () => {
+describe('generateId', () => {
   bench('page (8 char, hot path)', () => {
-    generateID({ usage: 'page' });
+    generateId({ usage: 'page' });
   });
   bench('db (26 char ULID, hot path)', () => {
-    generateID();
+    generateId();
   });
   bench('link (11 char)', () => {
-    generateID({ usage: 'link' });
+    generateId({ usage: 'link' });
   });
   bench('token (27 char + checksum)', () => {
-    generateID({ usage: 'token' });
+    generateId({ usage: 'token' });
   });
   bench('code (12 char + checksum, grouped)', () => {
-    generateID({ usage: 'code' });
+    generateId({ usage: 'code' });
   });
   bench('uuid (RFC v7)', () => {
-    generateID({ format: 'uuid' });
+    generateId({ format: 'uuid' });
   });
 });
 
-const dbID = generateID();
-const tokenID = generateID({ usage: 'token', prefix: 'sk_' });
+const dbId = generateId();
+const tokenId = generateId({ usage: 'token', prefix: 'sk_' });
 
-describe('isValidID', () => {
+describe('isValidId', () => {
   bench('db (length + alphabet)', () => {
-    isValidID(dbID, { usage: 'db' });
+    isValidId(dbId, { usage: 'db' });
   });
   bench('token (+ checksum verify)', () => {
-    isValidID(tokenID, { usage: 'token', prefix: 'sk_' });
+    isValidId(tokenId, { usage: 'token', prefix: 'sk_' });
   });
 });
 
-describe('parseID', () => {
+describe('parseId', () => {
   bench('db (+ timestamp decode)', () => {
-    parseID(dbID, { usage: 'db' });
+    parseId(dbId, { usage: 'db' });
   });
 });

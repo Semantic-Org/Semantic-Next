@@ -1,5 +1,5 @@
 import { getAllFiles } from '@helpers/loading.js';
-import { getExampleFiles, getExampleID } from '@helpers/playground.js';
+import { getExampleFiles, getExampleId } from '@helpers/playground.js';
 import { asyncMap, each } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
 import { execSync } from 'child_process';
@@ -50,9 +50,9 @@ export async function GET() {
   const examples = await getCollection('examples', ({ data }) => !data.hidden);
 
   const exampleItems = await asyncMap(examples, async (example) => {
-    const contentID = getExampleID(example);
+    const contentId = getExampleId(example);
     const files = await getExampleFiles({
-      contentID,
+      contentId,
       allFiles: allExampleFiles,
       basePath: '../../examples',
       includeFolder: example.exampleType == 'folder',

@@ -162,7 +162,7 @@ const resolveHashConfig = (options) => {
     secure       async SHA-256 string for adversarial resistance
   format overrides the encoding ('crockford' | 'hex' | 'number'), seed namespaces
   the output, and hashCode.config sets global defaults. For unique ids that are
-  not derived from content, use generateID.
+  not derived from content, use generateId.
 */
 export const hashCode = (input, options = {}) => {
   const config = resolveHashConfig(options);
@@ -184,7 +184,7 @@ export const hashCode = (input, options = {}) => {
   return config.format === 'hex' ? bytesToHex(bytes) : bytesToBase32(bytes);
 };
 
-// global defaults, lowest precedence (call options > config > preset). mirrors generateID.config
+// global defaults, lowest precedence (call options > config > preset). mirrors generateId.config
 hashCode.config = {};
 
 /*-------------------
@@ -342,19 +342,19 @@ const group = (id, size) => {
 };
 
 const resolveConfig = (options) => {
-  const globalConfig = generateID.config;
+  const globalConfig = generateId.config;
   const usage = options.usage ?? globalConfig.usage ?? 'db';
   const preset = PRESETS[usage];
   if (!preset) {
-    throw new Error(`generateID: unknown usage '${usage}'`);
+    throw new Error(`generateId: unknown usage '${usage}'`);
   }
   const pick = (key) => options[key] ?? globalConfig[key] ?? preset[key];
   const length = options.length ?? globalConfig.length ?? preset.length;
   // a timestamped id is at least the 10-char clock plus a random char, so a
   // shorter length is incoherent — fail loud rather than emit an id that can't
-  // round-trip through isValidID
+  // round-trip through isValidId
   if (preset.timestamp && length < 11) {
-    throw new Error(`generateID: length must be at least 11 for usage '${usage}'`);
+    throw new Error(`generateId: length must be at least 11 for usage '${usage}'`);
   }
   return {
     usage,
@@ -393,9 +393,9 @@ const buildCode = (config) => {
 /*
   Generate a unique id. Defaults to a sortable 26-char ULID (usage 'db'). Pass
   a usage preset, an explicit length, a typed prefix, a trailing checksum, or
-  format 'uuid' for an RFC UUIDv7. See isValidID / parseID for the inverse.
+  format 'uuid' for an RFC UUIDv7. See isValidId / parseId for the inverse.
 */
-export const generateID = (options = {}) => {
+export const generateId = (options = {}) => {
   // tolerate a non-object arg (null, or a leftover legacy numeric seed) instead
   // of throwing in resolveConfig — it falls through to the default usage
   if (typeof options !== 'object' || options === null) {
@@ -409,14 +409,14 @@ export const generateID = (options = {}) => {
 };
 
 // global defaults, lowest precedence (call options > config > preset)
-generateID.config = {};
+generateId.config = {};
 
 /*
   Offline validation — the cheap rejection before an expensive lookup. Reads
   loose (folds case, I/L → 1, O → 0, ignores hyphens), then checks prefix,
   length, alphabet, and checksum against the same config that would mint it.
 */
-export const isValidID = (id, options = {}) => {
+export const isValidId = (id, options = {}) => {
   if (typeof id !== 'string') {
     return false;
   }
@@ -446,11 +446,11 @@ export const isValidID = (id, options = {}) => {
 
 /*
   Split a valid id into { prefix, body, checksum }, decoding timestamp for the
-  db preset. Returns null for anything isValidID rejects — there is no in-band
+  db preset. Returns null for anything isValidId rejects — there is no in-band
   signal, so parsing always needs the config that minted it.
 */
-export const parseID = (id, options = {}) => {
-  if (!isValidID(id, options)) {
+export const parseId = (id, options = {}) => {
+  if (!isValidId(id, options)) {
     return null;
   }
   const config = resolveConfig(options);

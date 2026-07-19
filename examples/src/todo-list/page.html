@@ -403,7 +403,7 @@ body {
           <li><button type="button" data-target="src-todo-list-6">page.css</button></li>
         </ul>
         <pre id="src-todo-list-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
-<span class="hljs-keyword">import</span> { generateID } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
+<span class="hljs-keyword">import</span> { generateId } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
 
 <span class="hljs-keyword">import</span> { todoItem } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./todo-item.js&#x27;</span>;
 
@@ -480,7 +480,7 @@ body {
     <span class="hljs-keyword">const</span> trimmed = title.<span class="hljs-title function_">trim</span>();
     <span class="hljs-keyword">if</span> (!trimmed) <span class="hljs-keyword">return</span>;
     state.<span class="hljs-property">todos</span>.<span class="hljs-title function_">push</span>({
-      <span class="hljs-attr">id</span>: <span class="hljs-title function_">generateID</span>(),
+      <span class="hljs-attr">id</span>: <span class="hljs-title function_">generateId</span>(),
       <span class="hljs-attr">title</span>: trimmed,
       <span class="hljs-attr">completed</span>: <span class="hljs-literal">false</span>,
     });

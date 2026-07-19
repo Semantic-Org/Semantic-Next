@@ -30,7 +30,7 @@ export const tourExamples = {
   },
   'keydown .new'({ state, event, value, target }) {
     if (event.key !== 'Enter' || !value.trim()) return;
-    state.items.push({ id: generateID(), title: value, packed: false });
+    state.items.push({ id: generateId(), title: value, packed: false });
     target.value = '';
   },
   'click .pack'({ state }) {

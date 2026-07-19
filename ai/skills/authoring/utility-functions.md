@@ -834,7 +834,7 @@ oklchToHex('#ff5733');                 // '#ff5733' (hex passthrough)
 
 ```javascript
 import {
-  hashCode, prettifyHash, generateID, isValidID, parseID, getRandomSeed,
+  hashCode, prettifyHash, generateId, isValidId, parseId, getRandomSeed,
 } from '@semantic-ui/utils';
 
 // Deterministic 53-bit hash (cyrb53) — same input, same output. Cache/memo keys.
@@ -849,14 +849,14 @@ prettifyHash(123, { minLength: 8, padChar: 'X' });  // 'XXXXXX3F'
 // Unique ids — the usage preset carries the consensus length/shape per channel.
 // db: sortable ULID (default) · page: 8-char letter-first CSS id · slug: URL ·
 // token: 27-char + checksum. Plus length, prefix, checksum, format:'uuid', group.
-generateID();                                       // '01KV61ZF26Z6BG7T04NVKSPJ7K'
-generateID({ usage: 'page' });                      // 'dzadahv3'
-generateID({ usage: 'token', prefix: 'sk_' });      // 'sk_…' with checksum
-generateID.config = { usage: 'page' };              // app-wide default
+generateId();                                       // '01KV61ZF26Z6BG7T04NVKSPJ7K'
+generateId({ usage: 'page' });                      // 'dzadahv3'
+generateId({ usage: 'token', prefix: 'sk_' });      // 'sk_…' with checksum
+generateId.config = { usage: 'page' };              // app-wide default
 
 // Validate offline before a lookup, parse the parts back out
-isValidID(id, { usage: 'token', prefix: 'sk_' });   // checksum + shape, reads loose
-parseID(dbId, { usage: 'db' });                     // { prefix, body, checksum, timestamp }
+isValidId(id, { usage: 'token', prefix: 'sk_' });   // checksum + shape, reads loose
+parseId(dbId, { usage: 'db' });                     // { prefix, body, checksum, timestamp }
 
 getRandomSeed();                                    // cryptographically random uint32
 ```

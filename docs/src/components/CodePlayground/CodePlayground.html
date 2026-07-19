@@ -53,7 +53,7 @@
     direction="{getTabDirection}"
     style={getStyle}
     saveState={saveState}
-    saveStateID="{getSaveID}"
+    saveStateId="{getSaveId}"
     exportparts="panels"
   >
     <ui-panel
@@ -132,7 +132,7 @@
     class="fullscreen"
     direction="horizontal"
     saveState={saveState}
-    saveStateID="{getSaveID 'row'}"
+    saveStateId="{getSaveId 'row'}"
     exportparts="panels"
     part="full-panels"
   >
@@ -144,7 +144,7 @@
         <ui-panels
           class="files"
           saveState=true
-          saveStateID="{getSaveID 'column' index}"
+          saveStateId="{getSaveId 'column' index}"
           exportparts="panels">
           {#each panel in panelGroup}
             {>CodePlaygroundPanel

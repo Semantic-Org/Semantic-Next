@@ -303,15 +303,15 @@ Released 07.14.2025
 * **Improvement** - Vitest now runs without watch for `npm test`; Vitest configs have been added for each package.
 
 #### Utils
-* **Breaking** - `prettifyID` has been renamed to [`prettifyHash`](https://next.semantic-ui.com/api/utils/crypto#prettifyhash) to better reflect its purpose of converting numeric hash values to alphanumeric strings.
+* **Breaking** - `prettifyId` has been renamed to [`prettifyHash`](https://next.semantic-ui.com/api/utils/crypto#prettifyhash) to better reflect its purpose of converting numeric hash values to alphanumeric strings.
 * **Feature** - [`prettifyHash`](https://next.semantic-ui.com/api/utils/crypto#prettifyhash) now supports `minLength` and `padChar` options for customizing output format. See [example](https://next.semantic-ui.com/examples/utils-prettifyhash).
 * **Feature** - Added [`getRandomSeed()`](https://next.semantic-ui.com/api/utils/crypto#getrandomseed) function that uses `crypto.getRandomValues` when available for cryptographically secure random seeds. See [example](https://next.semantic-ui.com/examples/utils-getrandomseed).
-* **Feature** - [`generateID`](https://next.semantic-ui.com/api/utils/crypto#generateid) now accepts an optional seed parameter for reproducible ID generation. See [example](https://next.semantic-ui.com/examples/utils-generateid).
+* **Feature** - [`generateId`](https://next.semantic-ui.com/api/utils/crypto#generateid) now accepts an optional seed parameter for reproducible ID generation. See [example](https://next.semantic-ui.com/examples/utils-generateid).
 * **Feature** - [`hashCode`](https://next.semantic-ui.com/api/utils/crypto#hashcode) now uses the renamed [`prettifyHash`](https://next.semantic-ui.com/api/utils/crypto#prettifyhash) internally when `prettify: true` option is set. See [example](https://next.semantic-ui.com/examples/utils-hashcode).
 * **Feature** - [`sortBy`](https://next.semantic-ui.com/api/utils/arrays#sortby) now supports multi-key sorting by accepting an array of keys. See [example](https://next.semantic-ui.com/examples/utils-sortby).
 * **Enhancement** - [`sortBy`](https://next.semantic-ui.com/api/utils/arrays#sortby) now uses `localeCompare` with `numeric: true` for proper string sorting (e.g., "item10" comes after "item2").
 * **Enhancement** - [`sortBy`](https://next.semantic-ui.com/api/utils/arrays#sortby) comparator function now receives key index as fifth parameter for multi-key sorting.
-* **Enhancement** - [`generateID`](https://next.semantic-ui.com/api/utils/crypto#generateid) now uses `crypto.getRandomValues` via [`getRandomSeed()`](https://next.semantic-ui.com/api/utils/crypto#getrandomseed) for better randomness.
+* **Enhancement** - [`generateId`](https://next.semantic-ui.com/api/utils/crypto#generateid) now uses `crypto.getRandomValues` via [`getRandomSeed()`](https://next.semantic-ui.com/api/utils/crypto#getrandomseed) for better randomness.
 * **Bug** - [`isBinary`](https://next.semantic-ui.com/api/utils/types#isbinary) now detects all types of typed arrays including Int8Array, Float32Array, BigInt64Array, etc.
 
 ## 0.12.4-1
