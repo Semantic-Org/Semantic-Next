@@ -1,5 +1,5 @@
 import { defineComponent, getText } from '@semantic-ui/component';
-import { each, generateID } from '@semantic-ui/utils';
+import { each, generateId } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -43,7 +43,7 @@ const createComponent = ({ self, $, reaction, signal, state, timeout }) => ({
   createBall({ x, y }) {
     // create ball
     const ball = signal({
-      _id: generateID(),
+      _id: generateId(),
       x,
       y,
       radius: Math.random() * 15 + 10,

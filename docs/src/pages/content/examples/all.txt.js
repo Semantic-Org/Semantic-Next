@@ -1,5 +1,5 @@
 import { getAllFiles } from '@helpers/loading.js';
-import { getExampleFiles, getExampleID } from '@helpers/playground.js';
+import { getExampleFiles, getExampleId } from '@helpers/playground.js';
 import { asyncMap, each } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
 
@@ -20,7 +20,7 @@ export async function GET(settings) {
   };
   await asyncMap(examples, async (example) => {
     let files = await getExampleFiles({
-      contentID: getExampleID(example),
+      contentId: getExampleId(example),
       allFiles: allExampleFiles,
       basePath: '../../../examples',
       includeFolder: example.exampleType == 'folder',

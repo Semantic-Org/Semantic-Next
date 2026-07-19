@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { each, generateID } from '@semantic-ui/utils';
+import { each, generateId } from '@semantic-ui/utils';
 
 import css from './component.css?raw';
 import template from './component.html?raw';
@@ -87,7 +87,7 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
     const angle = Math.random() * 2 * Math.PI;
     const speed = randomInRange(settings.velocity, settings.velocityVariance);
     return {
-      _id: generateID(),
+      _id: generateId(),
       x,
       y,
       radius: randomInRange(settings.radius, settings.radiusVariance),

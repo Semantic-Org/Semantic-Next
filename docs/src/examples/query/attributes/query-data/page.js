@@ -1,21 +1,21 @@
 import { $ } from '@semantic-ui/query';
 
 // Get specific data attributes
-const displayID = function() {
-  const userID = $('.user').data('id');
+const displayId = function() {
+  const userId = $('.user').data('id');
   const allData = $('.user').data();
-  $('.id').text(`User id is: ${userID}`);
+  $('.id').text(`User id is: ${userId}`);
   $('.data').text(JSON.stringify(allData));
 };
 
-const setID = (userID) => {
+const setId = (userId) => {
   // set id to 99
-  $('.user').data('id', userID);
+  $('.user').data('id', userId);
 };
 
 $('ui-button').on('click', () => {
-  setID(99);
-  displayID();
+  setId(99);
+  displayId();
 });
 
-displayID();
+displayId();

@@ -276,17 +276,17 @@ const createBehavior = (
 
     // pass through animation id for easier debugging / inspection of animations
     // i.e. "fade in" , "fade out", "bounce"
-    const animationID = (direction)
+    const animationId = (direction)
       ? `${cssAnimations.name} ${direction}`
       : `${cssAnimations.name}`;
 
-    debug('Starting animation', animationID);
+    debug('Starting animation', animationId);
 
     // Create and start multiple animations (one per CSS property)
     const activeAnimations = animationsToPlay.map(animData => {
       const options = {
         ...animData.timing,
-        id: animationID,
+        id: animationId,
         fill: 'none',
       };
 

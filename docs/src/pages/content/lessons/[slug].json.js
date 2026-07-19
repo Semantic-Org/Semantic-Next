@@ -29,7 +29,7 @@ const loadFiles = async (lessonId, subFolderCandidates) => {
   let panelIndexes;
   await asyncEach(subFolderCandidates, async (folder) => {
     files = await getExampleFiles({
-      contentID: lessonId,
+      contentId: lessonId,
       allFiles: allLessonFiles,
       basePath: '../../../content/lessons/',
       subFolder: folder,

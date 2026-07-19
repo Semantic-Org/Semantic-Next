@@ -2,7 +2,7 @@
   <h5 class="header">{header}</h5>
 {/if}
 {#each section in menu}
-  <div class="{classMap getTitleClasses section index}title" data-id={getAnchorID section} data-index="{index}">
+  <div class="{classMap getTitleClasses section index}title" data-id={getAnchorId section} data-index="{index}">
     <span class="text">
       {section.title}
     </span>
@@ -15,8 +15,8 @@
       <div class="menu">
         {#each item in section.items}
           <a
-            href="#{getAnchorID item}"
-            data-id="{getAnchorID item}"
+            href="#{getAnchorId item}"
+            data-id="{getAnchorId item}"
             class="{classMap getItemClasses item}">
             {item.title}
           </a>

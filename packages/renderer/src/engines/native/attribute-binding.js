@@ -30,8 +30,8 @@ export function bindAttribute({
   renderer,
   skipFirstWrite = false,
 }) {
-  const firstMarker = parts.find((p) => p.markerID !== undefined);
-  const firstEntry = entries[firstMarker?.markerID];
+  const firstMarker = parts.find((p) => p.markerId !== undefined);
+  const firstEntry = entries[firstMarker?.markerId];
   const { classification } = firstEntry || {};
   const bindingType = classification?.type;
   const firstIsBlock = firstEntry && firstEntry.type !== 'expression';
@@ -41,7 +41,7 @@ export function bindAttribute({
       throw new Error(`{#${firstEntry.type}} cannot be used in property position (.${classification.attribute}=).`);
     }
     const realAttrName = classification.attribute;
-    const expr = entries[parts[0].markerID];
+    const expr = entries[parts[0].markerId];
     scope.reaction(element, (comp) => {
       const value = computeExpressionValue({ node: expr.node, data, renderer });
       if (skipFirstWrite && comp.firstRun) { return; }
@@ -56,7 +56,7 @@ export function bindAttribute({
       throw new Error(`{#${firstEntry.type}} cannot be used in event position (@${classification.attribute}=).`);
     }
     const realAttrName = classification.attribute;
-    const expr = entries[parts[0].markerID];
+    const expr = entries[parts[0].markerId];
     const handler = (...args) => {
       const value = computeExpressionValue({ node: expr.node, data, renderer, literal: true });
       if (isFunction(value)) { value(...args); }
@@ -67,8 +67,8 @@ export function bindAttribute({
     return;
   }
 
-  const isSingleExpr = parts.length === 1 && parts[0].markerID !== undefined;
-  const singleEntry = isSingleExpr ? entries[parts[0].markerID] : null;
+  const isSingleExpr = parts.length === 1 && parts[0].markerId !== undefined;
+  const singleEntry = isSingleExpr ? entries[parts[0].markerId] : null;
   const singleIsBlock = isSingleExpr && singleEntry.type !== 'expression';
   const isIfDefined = singleEntry?.node.ifDefined || singleEntry?.classification.type === 'boolean';
 
@@ -109,8 +109,8 @@ export function bindAttribute({
         // write — server content is trusted. Block markers register the
         // same deps via the branch evaluation inside renderASTToString.
         for (const part of parts) {
-          if (part.markerID !== undefined) {
-            evaluateMarkerToString(entries[part.markerID], data, renderer);
+          if (part.markerId !== undefined) {
+            evaluateMarkerToString(entries[part.markerId], data, renderer);
           }
         }
         return;
@@ -121,7 +121,7 @@ export function bindAttribute({
           value += part.static;
         }
         else {
-          value += evaluateMarkerToString(entries[part.markerID], data, renderer);
+          value += evaluateMarkerToString(entries[part.markerId], data, renderer);
         }
       }
       element.setAttribute(attrName, value);

@@ -401,7 +401,7 @@ body {
           <li><button type="button" data-target="src-advanced-ball-simulation-3">page.html</button></li>
         </ul>
         <pre id="src-advanced-ball-simulation-0"><code class="hljs language-javascript"><span class="hljs-keyword">import</span> { defineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/component&#x27;</span>;
-<span class="hljs-keyword">import</span> { each, generateID } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
+<span class="hljs-keyword">import</span> { each, generateId } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@semantic-ui/utils&#x27;</span>;
 
 <span class="hljs-keyword">import</span> css <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.css?raw&#x27;</span>;
 <span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./component.html?raw&#x27;</span>;
@@ -489,7 +489,7 @@ body {
     <span class="hljs-keyword">const</span> angle = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">2</span> * <span class="hljs-title class_">Math</span>.<span class="hljs-property">PI</span>;
     <span class="hljs-keyword">const</span> speed = <span class="hljs-title function_">randomInRange</span>(settings.<span class="hljs-property">velocity</span>, settings.<span class="hljs-property">velocityVariance</span>);
     <span class="hljs-keyword">return</span> {
-      <span class="hljs-attr">_id</span>: <span class="hljs-title function_">generateID</span>(),
+      <span class="hljs-attr">_id</span>: <span class="hljs-title function_">generateId</span>(),
       x,
       y,
       <span class="hljs-attr">radius</span>: <span class="hljs-title function_">randomInRange</span>(settings.<span class="hljs-property">radius</span>, settings.<span class="hljs-property">radiusVariance</span>),

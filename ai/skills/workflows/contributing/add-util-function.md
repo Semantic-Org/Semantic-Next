@@ -302,7 +302,7 @@ Always use exact string matching from `Read` output, including whitespace and in
 - Predicate functions: `isSomething` (returns boolean)
 - Transformation functions: `somethingToOther` (converts types)
 - Action functions: `doSomething` (performs action)
-- Utility functions: `prettifyHash`, `generateID` (specific utilities)
+- Utility functions: `prettifyHash`, `generateId` (specific utilities)
 
 ## Error Prevention
 

@@ -66,7 +66,7 @@ export const hideComponentBoilerplate = (code) => {
   examples
 */
 export const getExampleFiles = async ({
-  contentID, // content id
+  contentId, // content id
   allFiles = {}, // import.meta.glob cannot be used here so you must pass in file collection
   basePath = '../../examples/', // base path to content collection from file location
   subFolder = '', // sub folder inside content collection that contains example
@@ -81,14 +81,14 @@ export const getExampleFiles = async ({
   includeImportMap = true, // whether to map imports to node_modules
   includePackageJSON = true, // whether to include a package.json file defining project deps
 } = {}) => {
-  if (!contentID) {
+  if (!contentId) {
     return;
   }
   let hasComponent = false;
   let exampleFiles = {};
 
-  let deepPath = `${basePath}.*/${contentID}/${subFolder}`;
-  let shallowPath = `${basePath}${contentID}/${subFolder}`;
+  let deepPath = `${basePath}.*/${contentId}/${subFolder}`;
+  let shallowPath = `${basePath}${contentId}/${subFolder}`;
   let pathRegExpString = `${deepPath}|${shallowPath}`;
   const pathRegExp = new RegExp(pathRegExpString, 'i');
   await asyncEach(allFiles, async (file, path) => {
@@ -121,7 +121,7 @@ export const getExampleFiles = async ({
           content: fileContent.default,
         };
       }
-      else if (inArray(fileName, ['component.js', `${contentID}.js`])) {
+      else if (inArray(fileName, ['component.js', `${contentId}.js`])) {
         const fileContent = await file();
         let fileText = fileContent.default;
         hasComponent = fileText.search('defineComponent') > -1;
@@ -149,21 +149,21 @@ export const getExampleFiles = async ({
         };
         return;
       }
-      else if (inArray(fileName, ['component.html', `${contentID}.html`])) {
+      else if (inArray(fileName, ['component.html', `${contentId}.html`])) {
         const fileContent = await file();
         exampleFiles['component.html'] = {
           contentType: 'text/html',
           content: fileContent.default,
         };
       }
-      else if (inArray(fileName, ['component.css', `${contentID}.css`])) {
+      else if (inArray(fileName, ['component.css', `${contentId}.css`])) {
         const fileContent = await file();
         exampleFiles['component.css'] = {
           contentType: 'text/css',
           content: fileContent.default,
         };
       }
-      if (includeLog && inArray(fileName, ['index.js', `${contentID}.js`])) {
+      if (includeLog && inArray(fileName, ['index.js', `${contentId}.js`])) {
         const fileContent = await file();
         exampleFiles['index.js'] = {
           contentType: 'text/javascript',
@@ -182,7 +182,7 @@ export const getExampleFiles = async ({
         tagName = matches[1];
       }
       else {
-        tagName = camelToKebab(contentID);
+        tagName = camelToKebab(contentId);
       }
     }
 
@@ -382,15 +382,15 @@ export const getSandboxURL = () => {
   return `/sandbox/`;
 };
 
-export const getExampleID = (example) => {
+export const getExampleId = (example) => {
   if (isString(example)) {
     return example;
   }
   if (example.data) {
     example = example.data;
   }
-  const exampleID = example?.id || tokenize(example?.title);
-  return exampleID;
+  const exampleId = example?.id || tokenize(example?.title);
+  return exampleId;
 };
 
 export const getPackageJSON = () => {

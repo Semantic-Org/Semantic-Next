@@ -1,4 +1,4 @@
-import { generateID, getRandomSeed, hashCode, isValidID, parseID } from '@semantic-ui/utils';
+import { generateId, getRandomSeed, hashCode, isValidId, parseId } from '@semantic-ui/utils';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -161,21 +161,21 @@ describe('ID/Hashing Functions', () => {
     });
   });
 
-  describe('generateID', () => {
+  describe('generateId', () => {
     afterEach(() => {
-      generateID.config = {};
+      generateId.config = {};
     });
 
     describe('presets', () => {
       it('defaults to a 26-char uppercase ULID', () => {
-        const id = generateID();
+        const id = generateId();
         expect(id).toHaveLength(26);
         expect(id).toMatch(CROCKFORD_UPPER);
       });
 
       it('page is 8 chars, lowercase, always letter-first', () => {
         for (let i = 0; i < 200; i++) {
-          const id = generateID({ usage: 'page' });
+          const id = generateId({ usage: 'page' });
           expect(id).toHaveLength(8);
           expect(id).toMatch(CROCKFORD);
           // a leading digit is an invalid CSS identifier — page must never produce one
@@ -184,80 +184,80 @@ describe('ID/Hashing Functions', () => {
       });
 
       it('link is 11 chars, lowercase', () => {
-        const id = generateID({ usage: 'link' });
+        const id = generateId({ usage: 'link' });
         expect(id).toHaveLength(11);
         expect(id).toMatch(CROCKFORD);
       });
 
       it('token is 27 chars and self-validates via its checksum', () => {
-        const id = generateID({ usage: 'token' });
+        const id = generateId({ usage: 'token' });
         expect(id).toHaveLength(27);
-        expect(isValidID(id, { usage: 'token' })).toBe(true);
+        expect(isValidId(id, { usage: 'token' })).toBe(true);
       });
 
       it('code is 12 uppercase chars, grouped in fours, self-validating', () => {
-        const id = generateID({ usage: 'code' });
+        const id = generateId({ usage: 'code' });
         // 'ABCD-EFGH-JKLM' — the last char is the checksum, validation folds the hyphens
         expect(id).toMatch(/^[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
-        expect(isValidID(id, { usage: 'code' })).toBe(true);
+        expect(isValidId(id, { usage: 'code' })).toBe(true);
       });
 
       it('throws on an unknown usage', () => {
-        expect(() => generateID({ usage: 'nope' })).toThrow(/unknown usage/);
+        expect(() => generateId({ usage: 'nope' })).toThrow(/unknown usage/);
       });
     });
 
     describe('options', () => {
       it('length overrides the preset width', () => {
-        expect(generateID({ length: 17 })).toHaveLength(17);
+        expect(generateId({ length: 17 })).toHaveLength(17);
       });
 
       it('prefix is prepended verbatim, length counts the part after it', () => {
-        const id = generateID({ usage: 'page', prefix: 'tab-' });
+        const id = generateId({ usage: 'page', prefix: 'tab-' });
         expect(id.startsWith('tab-')).toBe(true);
         expect(id.slice('tab-'.length)).toHaveLength(8);
       });
 
       it('format uuid emits an RFC UUIDv7', () => {
-        expect(generateID({ format: 'uuid' })).toMatch(
+        expect(generateId({ format: 'uuid' })).toMatch(
           /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
         );
       });
 
       it('group hyphenates every n chars', () => {
-        expect(generateID({ usage: 'page', group: 4 })).toMatch(/^[a-z0-9]{4}-[a-z0-9]{4}$/);
+        expect(generateId({ usage: 'page', group: 4 })).toMatch(/^[a-z0-9]{4}-[a-z0-9]{4}$/);
       });
 
       it('upper overrides the preset case at generation', () => {
-        expect(generateID({ usage: 'page', upper: true })).toMatch(CROCKFORD_UPPER);
-        expect(generateID({ usage: 'db', upper: false })).toMatch(CROCKFORD);
+        expect(generateId({ usage: 'page', upper: true })).toMatch(CROCKFORD_UPPER);
+        expect(generateId({ usage: 'db', upper: false })).toMatch(CROCKFORD);
       });
 
       it('ignores a non-object argument, falling through to the default usage', () => {
-        expect(generateID(12345)).toHaveLength(26);
-        expect(generateID(null)).toHaveLength(26);
+        expect(generateId(12345)).toHaveLength(26);
+        expect(generateId(null)).toHaveLength(26);
       });
 
       // the 10-char clock plus a random char is the floor; a shorter length would
-      // emit a 10-char id that isValidID then rejects, so fail loud instead
+      // emit a 10-char id that isValidId then rejects, so fail loud instead
       it('throws when length is below the timestamp floor for db', () => {
-        expect(() => generateID({ usage: 'db', length: 9 })).toThrow(/at least 11/);
+        expect(() => generateId({ usage: 'db', length: 9 })).toThrow(/at least 11/);
       });
     });
 
     describe('config', () => {
       it('global config sets the default usage', () => {
-        generateID.config = { usage: 'page' };
-        expect(generateID()).toHaveLength(8);
+        generateId.config = { usage: 'page' };
+        expect(generateId()).toHaveLength(8);
       });
 
       it('call options override global config', () => {
-        generateID.config = { usage: 'page' };
-        expect(generateID({ usage: 'link' })).toHaveLength(11);
+        generateId.config = { usage: 'page' };
+        expect(generateId({ usage: 'link' })).toHaveLength(11);
       });
 
       it('an explicit false checksum overrides the token preset default', () => {
-        const plain = generateID({ usage: 'token', checksum: false });
+        const plain = generateId({ usage: 'token', checksum: false });
         expect(plain).toHaveLength(27);
       });
     });
@@ -266,7 +266,7 @@ describe('ID/Hashing Functions', () => {
       it('produces unique ids across many mints', () => {
         const seen = new Set();
         for (let i = 0; i < 5000; i++) {
-          seen.add(generateID({ usage: 'page' }));
+          seen.add(generateId({ usage: 'page' }));
         }
         expect(seen.size).toBe(5000);
       });
@@ -274,7 +274,7 @@ describe('ID/Hashing Functions', () => {
       it('db ids minted across milliseconds sort chronologically', () => {
         const ids = [];
         for (let i = 0; i < 4; i++) {
-          ids.push(generateID());
+          ids.push(generateId());
           const start = Date.now();
           while (Date.now() - start < 2) { /* spin past the ms boundary */ }
         }
@@ -283,103 +283,103 @@ describe('ID/Hashing Functions', () => {
     });
   });
 
-  describe('isValidID', () => {
+  describe('isValidId', () => {
     it('round-trips every preset against its own config', () => {
       for (const usage of ['db', 'page', 'link', 'token', 'code']) {
-        expect(isValidID(generateID({ usage }), { usage })).toBe(true);
+        expect(isValidId(generateId({ usage }), { usage })).toBe(true);
       }
     });
 
     it('rejects an id validated against the wrong usage', () => {
-      expect(isValidID(generateID({ usage: 'page' }), { usage: 'db' })).toBe(false);
+      expect(isValidId(generateId({ usage: 'page' }), { usage: 'db' })).toBe(false);
     });
 
     it('rejects a missing or mistyped prefix', () => {
-      const id = generateID({ usage: 'db', prefix: 'usr_' });
-      expect(isValidID(id, { usage: 'db', prefix: 'usr_' })).toBe(true);
-      expect(isValidID(id, { usage: 'db', prefix: 'org_' })).toBe(false);
-      expect(isValidID(id, { usage: 'db' })).toBe(false);
+      const id = generateId({ usage: 'db', prefix: 'usr_' });
+      expect(isValidId(id, { usage: 'db', prefix: 'usr_' })).toBe(true);
+      expect(isValidId(id, { usage: 'db', prefix: 'org_' })).toBe(false);
+      expect(isValidId(id, { usage: 'db' })).toBe(false);
     });
 
     it('rejects a non-string', () => {
-      expect(isValidID(12345, { usage: 'db' })).toBe(false);
-      expect(isValidID(null, { usage: 'db' })).toBe(false);
+      expect(isValidId(12345, { usage: 'db' })).toBe(false);
+      expect(isValidId(null, { usage: 'db' })).toBe(false);
     });
 
     describe('checksum', () => {
       it('catches a single-character substitution', () => {
-        const id = generateID({ usage: 'token', prefix: 'sk_' });
+        const id = generateId({ usage: 'token', prefix: 'sk_' });
         const at = 6;
         const swap = id[at] === 'a' ? 'b' : 'a';
         const corrupt = id.slice(0, at) + swap + id.slice(at + 1);
-        expect(isValidID(corrupt, { usage: 'token', prefix: 'sk_' })).toBe(false);
+        expect(isValidId(corrupt, { usage: 'token', prefix: 'sk_' })).toBe(false);
       });
 
       it('catches a transposition of two adjacent characters', () => {
         let id;
         // body chars 4 and 5 must differ for the swap to be a real change
         do {
-          id = generateID({ usage: 'token' });
+          id = generateId({ usage: 'token' });
         }
         while (id[4] === id[5]);
         const swapped = id.slice(0, 4) + id[5] + id[4] + id.slice(6);
-        expect(isValidID(swapped, { usage: 'token' })).toBe(false);
+        expect(isValidId(swapped, { usage: 'token' })).toBe(false);
       });
 
       // weighting char *values*, not char codes, closes the gap where digit/letter
       // pairs 31 apart in ASCII (e.g. 9 and x) aliased to the same checksum
       it('catches every adjacent transposition with no alias gap', () => {
         for (let n = 0; n < 200; n++) {
-          const id = generateID({ usage: 'token' });
+          const id = generateId({ usage: 'token' });
           for (let i = 0; i < id.length - 2; i++) {
             if (id[i] === id[i + 1]) {
               continue;
             }
             const swapped = id.slice(0, i) + id[i + 1] + id[i] + id.slice(i + 2);
-            expect(isValidID(swapped, { usage: 'token' })).toBe(false);
+            expect(isValidId(swapped, { usage: 'token' })).toBe(false);
           }
         }
       });
 
       it('catches a typo in the prefix', () => {
-        const id = generateID({ usage: 'token', prefix: 'sk_' });
+        const id = generateId({ usage: 'token', prefix: 'sk_' });
         const corrupt = 'sl_' + id.slice(3);
-        expect(isValidID(corrupt, { usage: 'token', prefix: 'sl_' })).toBe(false);
+        expect(isValidId(corrupt, { usage: 'token', prefix: 'sl_' })).toBe(false);
       });
     });
 
     describe('accept loose', () => {
       it('accepts a lowercased db id with I/L/O transcribed and hyphens added', () => {
-        const id = generateID();
+        const id = generateId();
         const sloppy = id.toLowerCase().replace(/1/g, 'l').replace(/0/g, 'o');
-        expect(isValidID(sloppy, { usage: 'db' })).toBe(true);
+        expect(isValidId(sloppy, { usage: 'db' })).toBe(true);
       });
 
       it('validates a grouped id by ignoring the hyphens', () => {
-        const id = generateID({ usage: 'link', group: 4 });
-        expect(isValidID(id, { usage: 'link', group: 4 })).toBe(true);
-        expect(isValidID(id, { usage: 'link' })).toBe(true);
+        const id = generateId({ usage: 'link', group: 4 });
+        expect(isValidId(id, { usage: 'link', group: 4 })).toBe(true);
+        expect(isValidId(id, { usage: 'link' })).toBe(true);
       });
 
       // ß uppercases to 'SS' and ﬀ to 'FF' — a length-changing fold would let a
       // too-short string pass the length and alphabet guards, so fold is ascii-only
       it('rejects unicode that toUpperCase would expand into base32 letters', () => {
-        expect(isValidID('0'.repeat(24) + 'ß', { usage: 'db' })).toBe(false);
-        expect(isValidID('F' + '0'.repeat(24) + 'ß', { usage: 'token' })).toBe(false);
+        expect(isValidId('0'.repeat(24) + 'ß', { usage: 'db' })).toBe(false);
+        expect(isValidId('F' + '0'.repeat(24) + 'ß', { usage: 'token' })).toBe(false);
       });
     });
 
     it('validates the uuid format', () => {
-      const id = generateID({ format: 'uuid', prefix: 'usr_' });
-      expect(isValidID(id, { format: 'uuid', prefix: 'usr_' })).toBe(true);
-      expect(isValidID('usr_not-a-uuid', { format: 'uuid', prefix: 'usr_' })).toBe(false);
+      const id = generateId({ format: 'uuid', prefix: 'usr_' });
+      expect(isValidId(id, { format: 'uuid', prefix: 'usr_' })).toBe(true);
+      expect(isValidId('usr_not-a-uuid', { format: 'uuid', prefix: 'usr_' })).toBe(false);
     });
   });
 
-  describe('parseID', () => {
+  describe('parseId', () => {
     it('splits prefix, body, and checksum', () => {
-      const id = generateID({ usage: 'token', prefix: 'sk_' });
-      const parsed = parseID(id, { usage: 'token', prefix: 'sk_' });
+      const id = generateId({ usage: 'token', prefix: 'sk_' });
+      const parsed = parseId(id, { usage: 'token', prefix: 'sk_' });
       expect(parsed.prefix).toBe('sk_');
       expect(parsed.body).toHaveLength(26);
       expect(parsed.checksum).toHaveLength(1);
@@ -387,18 +387,18 @@ describe('ID/Hashing Functions', () => {
 
     it('decodes the db timestamp to within a second of now', () => {
       const before = Date.now();
-      const parsed = parseID(generateID({ usage: 'db' }), { usage: 'db' });
+      const parsed = parseId(generateId({ usage: 'db' }), { usage: 'db' });
       expect(parsed.timestamp).toBeInstanceOf(Date);
       expect(Math.abs(parsed.timestamp.getTime() - before)).toBeLessThan(1000);
     });
 
     it('returns null for an id the config rejects', () => {
-      expect(parseID('not-valid', { usage: 'db' })).toBe(null);
+      expect(parseId('not-valid', { usage: 'db' })).toBe(null);
     });
 
     it('parses the uuid format', () => {
-      const id = generateID({ format: 'uuid', prefix: 'usr_' });
-      const parsed = parseID(id, { format: 'uuid', prefix: 'usr_' });
+      const id = generateId({ format: 'uuid', prefix: 'usr_' });
+      const parsed = parseId(id, { format: 'uuid', prefix: 'usr_' });
       expect(parsed.prefix).toBe('usr_');
       expect(parsed.body).toMatch(/^[0-9a-f-]+$/);
     });

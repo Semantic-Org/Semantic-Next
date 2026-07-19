@@ -34,7 +34,7 @@ import {
   RAW_TEXT_MARKER,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
-import { encodeItemKey, getEachData, getItemID } from '../../shared/each.js';
+import { encodeItemKey, getEachData, getItemId } from '../../shared/each.js';
 import { SUI_ITEM_MARKER } from './blocks/each.js';
 import { renderASTToString, stringifyAttrValue } from './commit-hooks.js';
 import { childContext } from './define-block.js';
@@ -566,7 +566,7 @@ export class ServerRenderer {
       for (let i = 0; i < items.length; i++) {
         const eachData = getEachData(items[i], i, collectionType, node);
         const itemData = childContext(data, eachData);
-        const key = getItemID(items[i], i, collectionType);
+        const key = getItemId(items[i], i, collectionType);
         html += `<!--${SUI_ITEM_MARKER}${encodeItemKey(key)}-->`;
         html += this.renderNodes(node.content, itemData);
       }

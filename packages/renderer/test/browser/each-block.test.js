@@ -88,7 +88,7 @@ RENDERING_ENGINES.forEach((engine) => {
 
       // Same Lit-repeat key-collapse limitation as the duplicate-id case above.
       it.skipIf(engine === 'lit')('treats id missing → falls back to value property in key chain', async () => {
-        // getItemID chain: _id || id || key || hash || _hash || value || indexOrKey
+        // getItemId chain: _id || id || key || hash || _hash || value || indexOrKey
         // Objects with only `value` set should collide if the value matches.
         const tag = uniqueTag();
         defineComponent({
@@ -168,7 +168,7 @@ RENDERING_ENGINES.forEach((engine) => {
         document.body.appendChild(el);
         await el.rendered;
 
-        // isPlainObject([new Person]) is false → getItemID returns indexOrKey.
+        // isPlainObject([new Person]) is false → getItemId returns indexOrKey.
         // Both items still render.
         expect(listText(el)).toEqual(['Alice', 'Bob']);
       });
@@ -502,7 +502,7 @@ RENDERING_ENGINES.forEach((engine) => {
     *******************************/
 
     describe('each reconcile — removed fields on reused records', () => {
-      // Menu-shaped data: no _id/id/key fields, so getItemID falls back to
+      // Menu-shaped data: no _id/id/key fields, so getItemId falls back to
       // positional index and filtering reuses records across different
       // logical items. Fields present on the old item but absent from the
       // new one must clear, not linger.

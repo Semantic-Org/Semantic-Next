@@ -24,7 +24,7 @@ const defaultSettings = {
 
   // whether to save the learn/example panes
   saveState: true,
-  saveStateID: 'learn',
+  saveStateId: 'learn',
 
   files: {}, // files to display alongside lesson
   solutionFiles: {}, // solution files for lessons with a solve button
