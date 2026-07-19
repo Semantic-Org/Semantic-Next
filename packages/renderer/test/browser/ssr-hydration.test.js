@@ -428,12 +428,12 @@ describe('SSR hydration — each loops', () => {
     const el = await ssrAndHydrate({
       template:
         '{#each item in items}<a data-id="{item.id}" class="{classMap getItemClasses item}">{item.id}</a>{/each}',
-      defaultState: { activeID: null },
+      defaultState: { activeId: null },
       defaultSettings: { items: [{ id: 'a' }, { id: 'b' }] },
       createComponent: ({ state }) => ({
         getItemClasses(item) {
           helperCalls++;
-          return { active: state.activeID.get() === item.id, item: true };
+          return { active: state.activeId.get() === item.id, item: true };
         },
       }),
     });
@@ -443,7 +443,7 @@ describe('SSR hydration — each loops', () => {
     expect(el.shadowRoot.querySelectorAll('a')).toHaveLength(2);
     const initial = helperCalls;
 
-    el.template.state.activeID.set('a');
+    el.template.state.activeId.set('a');
     await new Promise(r => setTimeout(r, 30));
 
     // Pin: helper must be re-invoked when its read signal changes.

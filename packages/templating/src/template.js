@@ -20,7 +20,7 @@ import {
   each,
   extend,
   fatal,
-  generateID,
+  generateId,
   get,
   getKeyFromEvent,
   inArray,
@@ -113,7 +113,7 @@ export const Template = class Template {
     this.onCreatedCallback = onCreated;
     this.onUpdatedCallback = onUpdated;
     this.onThemeChangedCallback = onThemeChanged;
-    this.id = generateID({ usage: 'page' });
+    this.id = generateId({ usage: 'page' });
     this.isPrototype = isPrototype;
     if (isPrototype) {
       this.template = template;

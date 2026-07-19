@@ -1,4 +1,4 @@
-import { generateID } from '@semantic-ui/utils';
+import { generateId } from '@semantic-ui/utils';
 
 import { normalizeFiles } from './files.js';
 import { createServingAdapter } from './serving/sw-adapter.js';
@@ -32,7 +32,7 @@ export class PlaygroundProject {
     sandboxUrl = '/sandbox/',
     workerUrl,
     serving,
-    sessionId = generateID(),
+    sessionId = generateId(),
   } = {}) {
     const scope = sandboxUrl.endsWith('/') ? sandboxUrl : `${sandboxUrl}/`;
     this.sessionId = sessionId;

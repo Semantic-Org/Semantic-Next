@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Crypto Utilities
 package: "@semantic-ui/utils"
-methods: [hashCode, generateID, isValidID, parseID, getRandomSeed]
+methods: [hashCode, generateId, isValidId, parseId, getRandomSeed]
 icon: lock
 description: API reference for cryptographic utility functions
 ---
@@ -18,7 +18,7 @@ The Crypto utilities provide functions for generating unique identifiers and has
 function hashCode(input, { usage = 'hash', format, seed = 0 } = {})
 ```
 
-Deterministic content hash: the same input always produces the same output. Pick a `usage` by what the hash is for, not by algorithm (it runs [cyrb53](https://github.com/bryc/code/blob/master/jshash/experimental/cyrb53.js) for the sync rungs and SHA-256 for `secure`). The return type follows the usage. For unique ids that are not derived from content, use [generateID](#generateid) instead.
+Deterministic content hash: the same input always produces the same output. Pick a `usage` by what the hash is for, not by algorithm (it runs [cyrb53](https://github.com/bryc/code/blob/master/jshash/experimental/cyrb53.js) for the sync rungs and SHA-256 for `secure`). The return type follows the usage. For unique ids that are not derived from content, use [generateId](#generateid) instead.
 
 #### Usage presets
 
@@ -66,13 +66,13 @@ console.log(hashCode({ a: 1, b: [2, 3] }));
 hashCode.config = { usage: 'content' };
 ```
 
-### generateID
+### generateId
 
 ```javascript
-function generateID({ usage = 'db', length, prefix, checksum, upper, format = 'crockford', group } = {})
+function generateId({ usage = 'db', length, prefix, checksum, upper, format = 'crockford', group } = {})
 ```
 
-Generates a unique id. Defaults to a sortable 26-char [ULID](https://github.com/ulid/spec) (usage `db`). Each `usage` preset names what the id is for and carries the length, alphabet, and structure that fits that channel. The inverse is [isValidID](#isvalidid) and [parseID](#parseid).
+Generates a unique id. Defaults to a sortable 26-char [ULID](https://github.com/ulid/spec) (usage `db`). Each `usage` preset names what the id is for and carries the length, alphabet, and structure that fits that channel. The inverse is [isValidId](#isvalidid) and [parseId](#parseid).
 
 #### Usage presets
 
@@ -96,7 +96,7 @@ Generates a unique id. Defaults to a sortable 26-char [ULID](https://github.com/
 | format   | string           | `'crockford'`| `'uuid'` emits an RFC UUIDv7; other Crockford options are then ignored except `prefix` |
 | group    | number \| false  | preset's     | Hyphenate the output every n characters for display. `4` for `code`, off otherwise |
 
-Defaults can be set globally on the mutable `generateID.config` object (precedence: call options > config > preset).
+Defaults can be set globally on the mutable `generateId.config` object (precedence: call options > config > preset).
 
 #### Returns
 
@@ -105,24 +105,24 @@ The generated id string.
 #### Example
 
 ```javascript
-import { generateID } from '@semantic-ui/utils';
+import { generateId } from '@semantic-ui/utils';
 
-console.log(generateID());                                  // '01KV61ZF26Z6BG7T04NVKSPJ7K'
-console.log(generateID({ usage: 'page' }));                 // 'dzadahv3'
-console.log(generateID({ usage: 'link' }));                 // '9zv38gp9ybm'
-console.log(generateID({ usage: 'token', prefix: 'sk_' })); // 'sk_…' with a checksum
-console.log(generateID({ usage: 'code' }));                 // 'ABCD-EFGH-JKLM' grouped, checksummed
-console.log(generateID({ length: 17 }));                    // 17-char id
-console.log(generateID({ format: 'uuid' }));                // RFC UUIDv7
+console.log(generateId());                                  // '01KV61ZF26Z6BG7T04NVKSPJ7K'
+console.log(generateId({ usage: 'page' }));                 // 'dzadahv3'
+console.log(generateId({ usage: 'link' }));                 // '9zv38gp9ybm'
+console.log(generateId({ usage: 'token', prefix: 'sk_' })); // 'sk_…' with a checksum
+console.log(generateId({ usage: 'code' }));                 // 'ABCD-EFGH-JKLM' grouped, checksummed
+console.log(generateId({ length: 17 }));                    // 17-char id
+console.log(generateId({ format: 'uuid' }));                // RFC UUIDv7
 
 // global default for a whole app
-generateID.config = { usage: 'page' };
+generateId.config = { usage: 'page' };
 ```
 
-### isValidID
+### isValidId
 
 ```javascript
-function isValidID(id, options)
+function isValidId(id, options)
 ```
 
 Validates an id offline against the same options that would generate it — the cheap rejection before an expensive lookup. Reads loose: folds case, maps `I`/`L` to `1` and `O` to `0`, and ignores hyphens, then checks the prefix, length, alphabet, and checksum.
@@ -132,7 +132,7 @@ Validates an id offline against the same options that would generate it — the 
 | Name    | Type   | Description |
 |---------|--------|-------------|
 | id      | string | The id to validate |
-| options | object | The same options used to generate it (see [generateID](#generateid)) |
+| options | object | The same options used to generate it (see [generateId](#generateid)) |
 
 #### Returns
 
@@ -141,27 +141,27 @@ Validates an id offline against the same options that would generate it — the 
 #### Example
 
 ```javascript
-import { generateID, isValidID } from '@semantic-ui/utils';
+import { generateId, isValidId } from '@semantic-ui/utils';
 
-const id = generateID({ usage: 'token', prefix: 'sk_' });
-console.log(isValidID(id, { usage: 'token', prefix: 'sk_' })); // true
-console.log(isValidID('sk_typoatthestart', { usage: 'token', prefix: 'sk_' })); // false
+const id = generateId({ usage: 'token', prefix: 'sk_' });
+console.log(isValidId(id, { usage: 'token', prefix: 'sk_' })); // true
+console.log(isValidId('sk_typoatthestart', { usage: 'token', prefix: 'sk_' })); // false
 ```
 
-### parseID
+### parseId
 
 ```javascript
-function parseID(id, options)
+function parseId(id, options)
 ```
 
-Splits a valid id into `{ prefix, body, checksum }`, decoding `timestamp` for the `db` preset. Returns `null` for anything [isValidID](#isvalidid) rejects. There is no in-band signal, so parsing always needs the config that minted the id.
+Splits a valid id into `{ prefix, body, checksum }`, decoding `timestamp` for the `db` preset. Returns `null` for anything [isValidId](#isvalidid) rejects. There is no in-band signal, so parsing always needs the config that minted the id.
 
 #### Parameters
 
 | Name    | Type   | Description |
 |---------|--------|-------------|
 | id      | string | The id to parse |
-| options | object | The same options used to generate it (see [generateID](#generateid)) |
+| options | object | The same options used to generate it (see [generateId](#generateid)) |
 
 #### Returns
 
@@ -170,10 +170,10 @@ Splits a valid id into `{ prefix, body, checksum }`, decoding `timestamp` for th
 #### Example
 
 ```javascript
-import { generateID, parseID } from '@semantic-ui/utils';
+import { generateId, parseId } from '@semantic-ui/utils';
 
-const id = generateID({ usage: 'db', prefix: 'doc_' });
-const parsed = parseID(id, { usage: 'db', prefix: 'doc_' });
+const id = generateId({ usage: 'db', prefix: 'doc_' });
+const parsed = parseId(id, { usage: 'db', prefix: 'doc_' });
 console.log(parsed.prefix);    // 'doc_'
 console.log(parsed.timestamp); // Date — when the id was minted
 ```

@@ -1,5 +1,5 @@
-import { getExampleFiles, getExampleID } from '@helpers/playground.js';
 import { getFolder } from '@helpers/loading.js';
+import { getExampleFiles, getExampleId } from '@helpers/playground.js';
 import { asyncMap, each, mapObject } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
 
@@ -16,10 +16,10 @@ export async function getStaticPaths() {
 
 // Read file contents per-request so dev HMR sees edits.
 const loadFiles = async (example) => {
-  const contentID = getExampleID(example);
-  const allExampleFiles = await getFolder(contentID, '../../../examples/');
+  const contentId = getExampleId(example);
+  const allExampleFiles = await getFolder(contentId, '../../../examples/');
   let files = await getExampleFiles({
-    contentID,
+    contentId,
     allFiles: allExampleFiles,
     basePath: '../../../examples/',
     includeFolder: example.exampleType == 'folder',

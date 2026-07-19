@@ -32,7 +32,7 @@ export class LitRenderer {
 
   static useSubtreeCache = true;
 
-  static getID({ ast, key, position, isSVG } = {}) {
+  static getId({ ast, key, position, isSVG } = {}) {
     if (key !== undefined) {
       return hashCode({ ast, key });
     }
@@ -48,7 +48,7 @@ export class LitRenderer {
     this.ast = ast || '';
     this.data = data;
     this.renderTrees = {}; // stores templates but garbage collectable
-    this.treeIDs = []; // stored content ids
+    this.treeIds = []; // stored content ids
     this.template = template;
     this.subTemplates = subTemplates;
     this.resetHTML();
@@ -57,7 +57,7 @@ export class LitRenderer {
     this.isSVG = isSVG;
     this.inheritsData = inheritsData; // for subtrees lets us know if this needs to have data updates downstream
     this.protectedKeys = protectedKeys; // keys scoped to this subtree (loop vars, async results) that parent updates cannot overwrite
-    this.id = LitRenderer.getID({ ast, data, isSVG });
+    this.id = LitRenderer.getId({ ast, data, isSVG });
     this.dataVersion = signal(0, { safety: 'none' });
 
     // Delegate expression evaluation
@@ -487,8 +487,8 @@ export class LitRenderer {
   // subtrees are rendered as separate contexts stored as weakrefs for gc
   renderContent({ ast, data, key, position, cache = true, isSVG = this.isSVG, protectedKeys } = {}) {
     if (cache && LitRenderer.useSubtreeCache) {
-      const contentID = LitRenderer.getID({ ast, key, position, isSVG });
-      const treeRef = this.renderTrees[contentID];
+      const contentId = LitRenderer.getId({ ast, key, position, isSVG });
+      const treeRef = this.renderTrees[contentId];
       const existingTree = treeRef ? treeRef.deref() : undefined;
 
       if (existingTree) {
@@ -505,8 +505,8 @@ export class LitRenderer {
         helpers: this.helpers,
         template: this.template,
       });
-      this.treeIDs.push(contentID);
-      this.renderTrees[contentID] = new WeakRef(tree);
+      this.treeIds.push(contentId);
+      this.renderTrees[contentId] = new WeakRef(tree);
       return tree.render();
     }
 
@@ -538,7 +538,7 @@ export class LitRenderer {
   }
 
   updateSubtreeData(newData) {
-    each(this.renderTrees, (ref, contentID) => {
+    each(this.renderTrees, (ref, contentId) => {
       // use deref to allow mem cleanup of subtrees
       const tree = ref.deref();
       if (tree?.inheritsData) {

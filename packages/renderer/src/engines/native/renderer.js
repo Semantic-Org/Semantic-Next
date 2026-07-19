@@ -10,9 +10,9 @@ import {
   isExpressionMarker,
   isRawTextMarker,
   parseAttributeParts as parseAttributePartsFn,
-  parseBlockOpenID,
-  parseExpressionID,
-  parseRawTextID,
+  parseBlockOpenId,
+  parseExpressionId,
+  parseRawTextId,
   parseServerMeta,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
@@ -55,8 +55,8 @@ function getBuildSlot(ast, isSVG) {
 // Binds a comment-position marker: a block or expression via bindBlock, a
 // rawText marker via its registered block. Shared by walkAndBind and
 // replayBindingPlan so a new comment type is added in one place.
-function bindCommentMarker(node, type, markerID, entries, data, scope, renderer) {
-  const entry = entries[markerID];
+function bindCommentMarker(node, type, markerId, entries, data, scope, renderer) {
+  const entry = entries[markerId];
   if (type === 'expression' || type === 'block') {
     renderer.bindBlock(node, entry, data, scope);
   }
@@ -76,7 +76,7 @@ function bindCommentMarker(node, type, markerID, entries, data, scope, renderer)
 // the second render of an AST, not the first.
 function walkAndBind(root, entries, data, scope, renderer, buildPlan) {
   const plan = buildPlan ? [] : null;
-  const processedAttrIDs = new Set();
+  const processedAttrIds = new Set();
   const commentsToProcess = [];
   const walker = document.createTreeWalker(
     root,
@@ -100,8 +100,8 @@ function walkAndBind(root, entries, data, scope, renderer, buildPlan) {
       }
       if (attrsToProcess) {
         for (const { name: attrName, value: attrValue } of attrsToProcess) {
-          const { parts, markerIDs } = parseAttributePartsFn(attrValue);
-          for (const id of markerIDs) { processedAttrIDs.add(id); }
+          const { parts, markerIds } = parseAttributePartsFn(attrValue);
+          for (const id of markerIds) { processedAttrIds.add(id); }
           if (plan) { plan.push({ type: 'attr', nodeIndex, attrName, parts }); }
           renderer.bindAttributeExpression(element, attrName, parts, entries, data, scope);
         }
@@ -109,32 +109,32 @@ function walkAndBind(root, entries, data, scope, renderer, buildPlan) {
     }
     else {
       const text = node.data;
-      let markerID;
+      let markerId;
       let type;
       if (isExpressionMarker(text)) {
-        markerID = parseExpressionID(text);
+        markerId = parseExpressionId(text);
         type = 'expression';
       }
       else if (isRawTextMarker(text)) {
-        markerID = parseRawTextID(text);
+        markerId = parseRawTextId(text);
         type = 'rawText';
       }
       else if (isBlockOpen(text)) {
-        markerID = parseBlockOpenID(text);
+        markerId = parseBlockOpenId(text);
         type = 'block';
       }
-      if (type && !isNaN(markerID)) {
-        commentsToProcess.push({ comment: node, markerID, type, nodeIndex });
+      if (type && !isNaN(markerId)) {
+        commentsToProcess.push({ comment: node, markerId, type, nodeIndex });
       }
     }
   }
-  for (const { comment, markerID, type, nodeIndex: commentNodeIndex } of commentsToProcess) {
+  for (const { comment, markerId, type, nodeIndex: commentNodeIndex } of commentsToProcess) {
     // Safe to dedup here: tree order visits an element before any sibling
     // comment, so an attr marker's owner is recorded before a comment that
     // shares its ID.
-    if (type === 'expression' && processedAttrIDs.has(markerID)) { continue; }
-    if (plan) { plan.push({ type, nodeIndex: commentNodeIndex, markerID }); }
-    bindCommentMarker(comment, type, markerID, entries, data, scope, renderer);
+    if (type === 'expression' && processedAttrIds.has(markerId)) { continue; }
+    if (plan) { plan.push({ type, nodeIndex: commentNodeIndex, markerId }); }
+    bindCommentMarker(comment, type, markerId, entries, data, scope, renderer);
   }
   if (plan) {
     // Attrs are recorded during the walk and comments after it, so the plan
@@ -166,11 +166,11 @@ function replayBindingPlan(root, plan, entries, data, scope, renderer) {
       renderer.bindAttributeExpression(node, step.attrName, step.parts, entries, data, scope);
     }
     else {
-      deferredComments.push({ node, type: step.type, markerID: step.markerID });
+      deferredComments.push({ node, type: step.type, markerId: step.markerId });
     }
   }
-  for (const { node, type, markerID } of deferredComments) {
-    bindCommentMarker(node, type, markerID, entries, data, scope, renderer);
+  for (const { node, type, markerId } of deferredComments) {
+    bindCommentMarker(node, type, markerId, entries, data, scope, renderer);
   }
 }
 
@@ -433,22 +433,22 @@ export class Renderer {
       }
 
       if (isExpressionMarker(text)) {
-        const markerID = parseExpressionID(text);
-        if (!isNaN(markerID)) {
-          commentsToProcess.push({ comment, markerID, type: 'expression' });
+        const markerId = parseExpressionId(text);
+        if (!isNaN(markerId)) {
+          commentsToProcess.push({ comment, markerId, type: 'expression' });
         }
       }
       else if (isBlockOpen(text)) {
-        const markerID = parseBlockOpenID(text);
-        if (!isNaN(markerID)) {
-          commentsToProcess.push({ comment, markerID, type: 'block' });
+        const markerId = parseBlockOpenId(text);
+        if (!isNaN(markerId)) {
+          commentsToProcess.push({ comment, markerId, type: 'block' });
           blockDepth++;
         }
       }
     }
 
-    for (const { comment, markerID, type } of commentsToProcess) {
-      const entry = entries[markerID];
+    for (const { comment, markerId, type } of commentsToProcess) {
+      const entry = entries[markerId];
       if (!entry) { continue; }
 
       if (type === 'expression') {

@@ -1,6 +1,6 @@
 import { arrayFromObject, isArray, isEmpty } from '@semantic-ui/utils';
 import { isBlockClose, isBlockOpen, MARKER_VERSION } from '../../../build-html-string.js';
-import { decodeItemKey, getCollectionType, getEachData, getItemID } from '../../../shared/each.js';
+import { decodeItemKey, getCollectionType, getEachData, getItemId } from '../../../shared/each.js';
 import { lisIndices } from '../../../shared/lis.js';
 import { defineBlock } from '../define-block.js';
 import { ReactiveDataContext } from '../reactive-context.js';
@@ -234,7 +234,7 @@ function lisKeepSet(records) {
 //          mutated.
 function reconcile({ records, items, collectionType, node, data, scope, region, renderAST, isSVG }) {
   const oldRecords = records.slice();
-  const newKeys = items.map((item, i) => getItemID(item, i, collectionType));
+  const newKeys = items.map((item, i) => getItemId(item, i, collectionType));
   const newRecords = new Array(items.length);
 
   let oldHead = 0;
@@ -604,7 +604,7 @@ function adoptServerItems({
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    const key = getItemID(item, i, collectionType);
+    const key = getItemId(item, i, collectionType);
     const serverGroup = !usedKeys.has(key) ? serverByKey.get(key) : null;
 
     if (serverGroup) {

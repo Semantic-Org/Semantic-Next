@@ -1,5 +1,5 @@
 import { defineComponent, getText } from '@semantic-ui/component';
-import { generateID } from '@semantic-ui/utils';
+import { generateId } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -152,7 +152,7 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
   createRocket({ x, y }) {
     const randomInRange = (avg, variance) => avg + (Math.random() - 0.5) * 2 * variance;
     return {
-      _id: generateID(),
+      _id: generateId(),
       type: 'rocket',
       x,
       y,
@@ -171,7 +171,7 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
       const speed = settings.sparkSpeed
         + (Math.random() - 0.5) * 2 * settings.sparkSpeedVariance;
       sparks.push({
-        _id: generateID(),
+        _id: generateId(),
         type: 'spark',
         x: rocket.x,
         y: rocket.y,

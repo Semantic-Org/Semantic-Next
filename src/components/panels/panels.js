@@ -7,7 +7,7 @@ import template from './panels.html?raw';
 const defaultSettings = {
   direction: 'vertical',
   saveState: false,
-  saveStateID: 'panels',
+  saveStateId: 'panels',
 };
 
 const createComponent = ({ self, el, settings, $ }) => ({
@@ -34,7 +34,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
       };
     });
     if (self.isLayoutCorrectSize(panelSizes)) {
-      localStorage.setItem(settings.saveStateID, JSON.stringify({ panels: panelSizes }));
+      localStorage.setItem(settings.saveStateId, JSON.stringify({ panels: panelSizes }));
     }
   },
 
@@ -50,7 +50,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
     if (!settings.saveState) {
       return;
     }
-    let storedLayout = localStorage.getItem(settings.saveStateID);
+    let storedLayout = localStorage.getItem(settings.saveStateId);
     if (storedLayout) {
       let details;
       try {
@@ -122,7 +122,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
         }
         return p;
       });
-      localStorage.setItem(settings.saveStateID, JSON.stringify({ panels: storedLayout }));
+      localStorage.setItem(settings.saveStateId, JSON.stringify({ panels: storedLayout }));
     }
 
     each(storedLayout, (stored, index) => {

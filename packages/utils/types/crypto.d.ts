@@ -47,7 +47,7 @@ interface HashCodeOptions {
  * `content` for short keys that cross a boundary, `fingerprint` for dedup and
  * change detection, `secure` for adversarial resistance (async SHA-256). `format`
  * overrides the encoding and `seed` namespaces the result. Set global defaults
- * via the mutable `hashCode.config`. For unique ids use {@link generateID}.
+ * via the mutable `hashCode.config`. For unique ids use {@link generateId}.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#hashcode hashCode}
  * @see {@link https://next.semantic-ui.com/examples/utils-hashcode Example}
  *
@@ -87,7 +87,7 @@ export namespace hashCode {
 export function getRandomSeed(): number;
 
 /**
- * A usage preset for {@link generateID}. Each names what the id is for and
+ * A usage preset for {@link generateId}. Each names what the id is for and
  * carries the consensus length, alphabet, and structure for that channel.
  * - `db` — persisted records: 26-char sortable ULID (leaks creation time)
  * - `page` — DOM/CSS ids and ephemeral keys: 8 chars, always letter-first
@@ -98,7 +98,7 @@ export function getRandomSeed(): number;
 export type IdUsage = 'db' | 'page' | 'link' | 'token' | 'code';
 
 /**
- * Options for {@link generateID}, {@link isValidID}, and {@link parseID}.
+ * Options for {@link generateId}, {@link isValidId}, and {@link parseId}.
  */
 interface GenerateIDOptions {
   /**
@@ -139,9 +139,9 @@ interface GenerateIDOptions {
 }
 
 /**
- * The parsed parts of an id, from {@link parseID}.
+ * The parsed parts of an id, from {@link parseId}.
  */
-interface ParsedID {
+interface ParsedId {
   /** The prefix, or '' if none */
   prefix: string;
   /** The id body, without prefix or checksum */
@@ -155,9 +155,9 @@ interface ParsedID {
 /**
  * Generate a unique id. Defaults to a sortable 26-char ULID (usage `db`). Pass
  * a usage preset, an explicit length, a typed prefix, a trailing checksum, or
- * format 'uuid' for an RFC UUIDv7. See {@link isValidID} / {@link parseID} for
- * the inverse. Override defaults globally via the mutable `generateID.config`.
- * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#generateid generateID}
+ * format 'uuid' for an RFC UUIDv7. See {@link isValidId} / {@link parseId} for
+ * the inverse. Override defaults globally via the mutable `generateId.config`.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#generateid generateId}
  * @see {@link https://next.semantic-ui.com/examples/utils-generateid Example}
  *
  * @param options - Usage preset and id-shape options
@@ -165,15 +165,15 @@ interface ParsedID {
  *
  * @example
  * ```ts
- * generateID()                                  // '01KV61ZF26Z6BG7T04NVKSPJ7K'
- * generateID({ usage: 'page' })                 // 'dzadahv3'
- * generateID({ usage: 'token', prefix: 'sk_' }) // 'sk_…' with checksum
- * generateID({ usage: 'code' })                 // 'ABCD-EFGH-JKLM' grouped, checksummed
- * generateID({ format: 'uuid' })                // RFC UUIDv7
+ * generateId()                                  // '01KV61ZF26Z6BG7T04NVKSPJ7K'
+ * generateId({ usage: 'page' })                 // 'dzadahv3'
+ * generateId({ usage: 'token', prefix: 'sk_' }) // 'sk_…' with checksum
+ * generateId({ usage: 'code' })                 // 'ABCD-EFGH-JKLM' grouped, checksummed
+ * generateId({ format: 'uuid' })                // RFC UUIDv7
  * ```
  */
-export function generateID(options?: GenerateIDOptions): string;
-export namespace generateID {
+export function generateId(options?: GenerateIDOptions): string;
+export namespace generateId {
   /** Global defaults, lowest precedence (call options > config > preset). */
   let config: GenerateIDOptions;
 }
@@ -182,7 +182,7 @@ export namespace generateID {
  * Offline validation — the cheap rejection before an expensive lookup. Reads
  * loose (folds case, I/L → 1, O → 0, ignores hyphens), then checks prefix,
  * length, alphabet, and checksum against the same config that would mint it.
- * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#isvalidid isValidID}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#isvalidid isValidId}
  *
  * @param id - The id to validate
  * @param options - The same options used to generate it
@@ -190,16 +190,16 @@ export namespace generateID {
  *
  * @example
  * ```ts
- * isValidID(id, { usage: 'token', prefix: 'sk_' })
+ * isValidId(id, { usage: 'token', prefix: 'sk_' })
  * ```
  */
-export function isValidID(id: string, options?: GenerateIDOptions): boolean;
+export function isValidId(id: string, options?: GenerateIDOptions): boolean;
 
 /**
  * Split a valid id into its parts, decoding the timestamp for the `db` preset.
- * Returns null for anything {@link isValidID} rejects. There is no in-band
+ * Returns null for anything {@link isValidId} rejects. There is no in-band
  * signal, so parsing always needs the config that minted the id.
- * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#parseid parseID}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#parseid parseId}
  *
  * @param id - The id to parse
  * @param options - The same options used to generate it
@@ -207,7 +207,7 @@ export function isValidID(id: string, options?: GenerateIDOptions): boolean;
  *
  * @example
  * ```ts
- * parseID(id, { usage: 'db' }) // { prefix, body, checksum, timestamp }
+ * parseId(id, { usage: 'db' }) // { prefix, body, checksum, timestamp }
  * ```
  */
-export function parseID(id: string, options?: GenerateIDOptions): ParsedID | null;
+export function parseId(id: string, options?: GenerateIDOptions): ParsedId | null;

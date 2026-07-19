@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import { each, tokenize } from '@semantic-ui/utils';
 import {
   getExampleFiles,
-  getExampleID,
+  getExampleId,
   getSandboxURL,
   getPanelIndexes,
 } from '@helpers/playground.js';
@@ -31,12 +31,12 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const sandboxURL = getSandboxURL();
 const example = entry.data;
-const exampleID = example.id || tokenize(example.title);
-const allExampleFiles = await getFolder(exampleID, '../../examples/');
+const exampleId = example.id || tokenize(example.title);
+const allExampleFiles = await getFolder(exampleId, '../../examples/');
 
 const isFolder = example.exampleType == 'folder';
 let files = await getExampleFiles({
-  contentID: getExampleID(example),
+  contentId: getExampleId(example),
   allFiles: allExampleFiles,
   basePath: '../../examples/',
   includeFolder: isFolder,

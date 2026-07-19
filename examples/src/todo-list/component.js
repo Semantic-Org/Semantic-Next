@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { generateID } from '@semantic-ui/utils';
+import { generateId } from '@semantic-ui/utils';
 
 import { todoItem } from './todo-item.js';
 
@@ -76,7 +76,7 @@ const createComponent = ({ self, state, reaction }) => ({
     const trimmed = title.trim();
     if (!trimmed) return;
     state.todos.push({
-      id: generateID(),
+      id: generateId(),
       title: trimmed,
       completed: false,
     });

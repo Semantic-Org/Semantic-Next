@@ -584,7 +584,7 @@ describe('Lit engine registration', () => {
     // Already imported at top of file — assert the shape.
     expect(LitRenderer).toBeDefined();
     expect(typeof LitRenderer).toBe('function');
-    expect(typeof LitRenderer.getID).toBe('function');
+    expect(typeof LitRenderer.getId).toBe('function');
     // useSubtreeCache is a documented static toggle
     expect(typeof LitRenderer.useSubtreeCache).toBe('boolean');
   });
@@ -815,7 +815,7 @@ describe('LitRenderer — snippet args via reactiveData', () => {
   });
 });
 
-describe('LitRenderer — getID and subtree cache identity', () => {
+describe('LitRenderer — getId and subtree cache identity', () => {
   it('subtree cache reuses same renderer when called with the same AST + key', () => {
     // Render an each block twice; the per-item subtree should be cached.
     const ast = [{
@@ -839,17 +839,17 @@ describe('LitRenderer — getID and subtree cache identity', () => {
     expect(ids2.sort()).toEqual(ids1.sort());
   });
 
-  it('getID returns a stable hash for the same ast + key tuple', () => {
+  it('getId returns a stable hash for the same ast + key tuple', () => {
     const ast = [{ type: 'expression', value: 'x' }];
-    const a = LitRenderer.getID({ ast, key: 'k1' });
-    const b = LitRenderer.getID({ ast, key: 'k1' });
+    const a = LitRenderer.getId({ ast, key: 'k1' });
+    const b = LitRenderer.getId({ ast, key: 'k1' });
     expect(a).toBe(b);
   });
 
-  it('getID returns different hashes for different keys with same ast', () => {
+  it('getId returns different hashes for different keys with same ast', () => {
     const ast = [{ type: 'expression', value: 'x' }];
-    const a = LitRenderer.getID({ ast, key: 'k1' });
-    const b = LitRenderer.getID({ ast, key: 'k2' });
+    const a = LitRenderer.getId({ ast, key: 'k1' });
+    const b = LitRenderer.getId({ ast, key: 'k2' });
     expect(a).not.toBe(b);
   });
 });

@@ -307,9 +307,9 @@ Custom events can be emitted from your component using `dispatchEvent` and can i
 
 ```javascript
 const createComponent = ({dispatchEvent}) => {
-  scrollToItem(itemID) {
+  scrollToItem(itemId) {
     // handle scrolling to item
-    dispatchEvent('itemactive', { itemID, position });
+    dispatchEvent('itemactive', { itemId, position });
   },
 };
 ```
@@ -337,7 +337,7 @@ You can listen to a custom event the same way as a normal browser event, however
 // from another component
 const events = {
   'itemactive inpage-menu'({self, data}) {
-    const { itemID, position } = data;
+    const { itemId, position } = data;
     // do something with metadata
   }
 };
@@ -348,7 +348,7 @@ You can also use [query](/docs/guides/query) to listen to custom events from you
 import { $ } from '@semantic-ui/query';
 
 $('inpage-menu', 'itemactive', (event) => {
-  const { itemID, position } = event.details;
+  const { itemId, position } = event.details;
   // do something with metadata
 })
 ```
@@ -357,7 +357,7 @@ Or simply use vanilla javascript
 ```javascript
 const el = document.querySelector('inpage-menu');
 el.addEventListener('itemactive', (event) => {
-  const { itemID, position } = event.details;
+  const { itemId, position } = event.details;
 });
 ```
 

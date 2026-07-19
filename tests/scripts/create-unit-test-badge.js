@@ -25,9 +25,9 @@ const getJSON = async () => {
     // Fetch the latest workflow run
     const branchURL = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/runs?branch=${branchName}`;
     const runsResponse = await axios.get(branchURL, { headers });
-    const lastRunID = runsResponse.data.workflow_runs[0].id;
+    const lastRunId = runsResponse.data.workflow_runs[0].id;
     // Fetch artifacts for the latest workflow run
-    const artifactURL = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/runs/${lastRunID}/artifacts`
+    const artifactURL = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/runs/${lastRunId}/artifacts`
     const artifactsResponse = await axios.get(artifactURL, { headers });
 
     const artifact = artifactsResponse.data.artifacts.find(artifact => artifact.name == artifactName);
