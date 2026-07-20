@@ -39,7 +39,7 @@ jobs:
         with:
           ref: main
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: '.node-version'
 
@@ -167,7 +167,7 @@ jobs:
           fetch-depth: 2  # need HEAD~1 for parent_sha lookup
           token: ${{ steps.bot-token.outputs.token }}
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: '.node-version'
 
