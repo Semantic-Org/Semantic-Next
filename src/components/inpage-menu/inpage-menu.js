@@ -18,13 +18,13 @@ const defaultSettings = {
   useAccordion: true,
 
   // get page element associated with a menu item
-  getElement: (itemID) => document.getElementById(itemID),
+  getElement: (itemId) => document.getElementById(itemId),
 
   // get page element id from menu item
-  getAnchorID: (item) => item?.id,
+  getAnchorId: (item) => item?.id,
 
   // get menu item id from page element
-  getActiveElementID: (element) => element?.id,
+  getActiveElementId: (element) => element?.id,
 };
 
 const defaultState = {
@@ -94,26 +94,26 @@ const createComponent = ({ self, state, isServer, signal, reaction, el, dispatch
 
   setFirstItemActive() {
     const menu = self.getFlattenedMenu();
-    const itemID = first(menu)?.id;
-    self.setActiveItem(itemID);
+    const itemId = first(menu)?.id;
+    self.setActiveItem(itemId);
   },
 
   setLastItemActive() {
     const menu = self.getFlattenedMenu();
-    const itemID = last(menu)?.id;
-    self.setActiveItem(itemID);
+    const itemId = last(menu)?.id;
+    self.setActiveItem(itemId);
   },
 
-  setActiveItem(itemID) {
+  setActiveItem(itemId) {
     self.isActivating = true;
     const menu = settings.menu; // shorthand
     const menuItem = menu.find((item) =>
-      item?.items && item.items.some((subItem) => settings.getAnchorID(subItem) === itemID)
+      item?.items && item.items.some((subItem) => settings.getAnchorId(subItem) === itemId)
     );
     if (menuItem) {
       const menuIndex = menu.indexOf(menuItem);
       state.openIndex.set(menuIndex);
-      state.currentItem.set(itemID);
+      state.currentItem.set(itemId);
       afterFlush(() => {
         self.isActivating = false;
       });
@@ -147,29 +147,29 @@ const createComponent = ({ self, state, isServer, signal, reaction, el, dispatch
 
   isCurrentItem(item) {
     const currentItem = state.currentItem.get();
-    const itemID = settings.getAnchorID(item);
-    return currentItem && currentItem === itemID;
+    const itemId = settings.getAnchorId(item);
+    return currentItem && currentItem === itemId;
   },
 
   isVisibleItem(item) {
-    const itemID = settings.getAnchorID(item);
+    const itemId = settings.getAnchorId(item);
     const visibleItems = state.visibleItems.get();
-    return inArray(itemID, visibleItems);
+    return inArray(itemId, visibleItems);
   },
 
-  scrollToItem(itemID, offset = Number(settings.scrollOffset)) {
-    const element = settings.getElement(itemID);
+  scrollToItem(itemId, offset = Number(settings.scrollOffset)) {
+    const element = settings.getElement(itemId);
     if (element) {
       const targetPosition = element.offsetTop + offset;
-      state.currentItem.set(itemID);
+      state.currentItem.set(itemId);
       requestAnimationFrame(() => {
         self.scrollToPosition(targetPosition, {
           onSamePage() {
-            dispatchEvent('samePageActive', { element, itemID });
+            dispatchEvent('samePageActive', { element, itemId });
           },
         });
       });
-      dispatchEvent('active', { itemID });
+      dispatchEvent('active', { itemId });
     }
   },
 
@@ -213,8 +213,8 @@ const createComponent = ({ self, state, isServer, signal, reaction, el, dispatch
     // observe intersection of each id in menu items
     each(settings.menu, (section) => {
       each(section?.items, (item) => {
-        const itemID = settings.getAnchorID(item);
-        const sectionElement = settings.getElement(itemID);
+        const itemId = settings.getAnchorId(item);
+        const sectionElement = settings.getElement(itemId);
         if (sectionElement) {
           self.observer.observe(sectionElement);
         }
@@ -228,13 +228,13 @@ const createComponent = ({ self, state, isServer, signal, reaction, el, dispatch
     let newVisibleItems = [...currentVisibleItems];
 
     entries.forEach(entry => {
-      const itemID = settings.getActiveElementID(entry.target);
-      if (itemID) {
-        if (entry.isIntersecting && !newVisibleItems.includes(itemID)) {
-          newVisibleItems.push(itemID);
+      const itemId = settings.getActiveElementId(entry.target);
+      if (itemId) {
+        if (entry.isIntersecting && !newVisibleItems.includes(itemId)) {
+          newVisibleItems.push(itemId);
         }
         else if (!entry.isIntersecting) {
-          newVisibleItems = newVisibleItems.filter(id => id !== itemID);
+          newVisibleItems = newVisibleItems.filter(id => id !== itemId);
         }
       }
     });
@@ -249,10 +249,10 @@ const createComponent = ({ self, state, isServer, signal, reaction, el, dispatch
 
   bindHashChange() {
     const scrollToHash = (event) => {
-      const itemID = location.hash.substr(1);
-      if (itemID) {
-        self.setActiveItem(itemID);
-        self.scrollToItem(itemID);
+      const itemId = location.hash.substr(1);
+      if (itemId) {
+        self.setActiveItem(itemId);
+        self.scrollToItem(itemId);
       }
       else {
         self.setFirstItemActive();
@@ -284,9 +284,9 @@ const createComponent = ({ self, state, isServer, signal, reaction, el, dispatch
     }
   },
 
-  setHash(itemID) {
+  setHash(itemId) {
     // this avoids triggering default scrolling behavior by using pushState
-    const hash = `#${itemID}`;
+    const hash = `#${itemId}`;
     if (window.location.hash !== hash) {
       history.pushState(null, '', hash);
     }

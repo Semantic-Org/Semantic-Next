@@ -177,12 +177,12 @@ export { subCategorySortOrder };
 
 /* Create dynamic menu entries for examples based on actual categories */
 const exampleCategoryMenus = exampleCategorySortOrder.map(category => {
-  const categoryID = category.toLowerCase().replace(/\s+/g, '-');
+  const categoryId = category.toLowerCase().replace(/\s+/g, '-');
   return {
-    _id: `examples-${categoryID}`,
+    _id: `examples-${categoryId}`,
     name: category,
-    url: `/examples/${categoryID}`, // handled by navigation
-    baseURL: `/examples/${categoryID}`,
+    url: `/examples/${categoryId}`, // handled by navigation
+    baseURL: `/examples/${categoryId}`,
   };
 });
 

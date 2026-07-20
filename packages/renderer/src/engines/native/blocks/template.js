@@ -321,7 +321,7 @@ function clearInstance(self, region) {
   if (self.currentInstance) {
     self.currentInstance.onDestroyed();
     self.currentInstance = null;
-    self.currentTemplateID = null;
+    self.currentTemplateId = null;
     teardownSettingsMirror(self);
     region.clear();
   }
@@ -352,7 +352,7 @@ const templateBlock = defineBlock({
       parentTemplate: renderer.template,
       dataDep: renderer.dataDep,
       templateType: null,
-      currentTemplateID: null,
+      currentTemplateId: null,
       currentSnippet: null,
       currentInstance: null,
       settingsScope: null,
@@ -373,7 +373,7 @@ const templateBlock = defineBlock({
     const blobData = unpackBlobData(node, data, self.evaluator);
     if (!template) { return; }
 
-    self.currentTemplateID = template.id;
+    self.currentTemplateId = template.id;
     self.currentInstance = cloneInstance({
       template,
       templateName,
@@ -409,7 +409,7 @@ const templateBlock = defineBlock({
     const blobData = unpackBlobData(node, data, self.evaluator);
     if (!template) { return; }
 
-    self.currentTemplateID = template.id;
+    self.currentTemplateId = template.id;
     self.currentInstance = cloneInstance({
       template,
       templateName,
@@ -467,10 +467,10 @@ const templateBlock = defineBlock({
       return;
     }
 
-    if (template.id !== self.currentTemplateID) {
+    if (template.id !== self.currentTemplateId) {
       if (self.currentInstance) { self.currentInstance.onDestroyed(); }
       teardownSettingsMirror(self);
-      self.currentTemplateID = template.id;
+      self.currentTemplateId = template.id;
       self.currentInstance = cloneInstance({
         template,
         templateName,

@@ -1003,7 +1003,7 @@ describe('each loop edge cases', () => {
   });
 
   it('uses item.id as the encoded item key when present', () => {
-    // Anchor: shared/each.js getItemID — prefers id over index.
+    // Anchor: shared/each.js getItemId — prefers id over index.
     const ast = compile('{#each item in items}<li>{item.name}</li>{/each}');
     const html = render({ ast, data: { items: [{ id: 'alpha', name: 'A' }] } });
     expect(html).toContain('sui-item:v1:alpha');

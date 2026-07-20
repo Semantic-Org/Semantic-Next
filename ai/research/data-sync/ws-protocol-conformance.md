@@ -4,7 +4,7 @@ The case catalog for the cross-transport conformance battery. [`ws-protocol.md`]
 
 ## The harness (ruled at ratification, 2026-07-07): the hybrid
 
-**Ruled (c), delegated at 70:** vectors-as-data carry the four pure derivations (`address-vectors`, `wire-clean-frames`, `codes-table-vectors`, `freshness-disclosure`) as JSON fixture files any implementation consumes directly; a live driver carries the twenty-nine choreography cases, riding the smoke idiom (a node script, exit 0/1), pointed at every registered transport — the cross-transport battery clause verbatim. The named cost: certifying a non-JS **client** needs the counterpart server-side driver, deferred until such a client exists; a non-JS **server** certifies against the JS driver-as-client, language-neutral by the wire.
+**Ruled (c), delegated at 70:** vectors-as-data carry the five pure derivations (`address-vectors`, `wire-clean-frames`, `codes-table-vectors`, `freshness-disclosure`, `encoded-values`) as JSON fixture files any implementation consumes directly; a live driver carries the twenty-nine choreography cases, riding the smoke idiom (a node script, exit 0/1), pointed at every registered transport — the cross-transport battery clause verbatim. The named cost: certifying a non-JS **client** needs the counterpart server-side driver, deferred until such a client exists; a non-JS **server** certifies against the JS driver-as-client, language-neutral by the wire.
 
 The alternatives, priced (the decision record):
 
@@ -12,7 +12,7 @@ The alternatives, priced (the decision record):
 
 **(b) Live driver.** A driver speaking the wire against any implementation through the transport seam, asserting semantics (ordering, settlement, resume outcomes) rather than bytes. *For:* timing and interleaving cases express naturally, crash/restart and valve cases are drivable, and the cross-transport requirement is native — the same battery pointed at every registered transport, the shape the existing smoke battery already proves. *Against:* the driver is a program, not data — a non-JS **server** validates against the JS driver cheaply (the driver is just a client), but certifying a non-JS **client** needs the counterpart server driver; more machinery than fixtures.
 
-**(c) Hybrid** — the ruling above. Each case below carries a `shape` tag — `vector` (pure input → output, fixture-friendly) or `driver` (timing, state, or crash semantics) — the input that carried the ruling: the tags fall 4 vector / 30 driver across the 34 cases, and a single-shape harness would have forced the 30 into an unnatural form.
+**(c) Hybrid** — the ruling above. Each case below carries a `shape` tag — `vector` (pure input → output, fixture-friendly) or `driver` (timing, state, or crash semantics) — the input that carried the ruling: the tags fall 5 vector / 30 driver across the 35 cases, and a single-shape harness would have forced the 30 into an unnatural form.
 
 ## The catalog
 
@@ -26,6 +26,7 @@ Gate tokens map each case to the phase-1 gate clause it evidences: `wire-freeze`
 | `address-divergence-loud` | driver | wire-freeze | a frame for an unknown address while a sub is outstanding surfaces a dev-mode error naming the nearest pending sub | in the shipped tree a JCS divergence is a silently empty channel |
 | `transport-frame-equivalence` | driver | battery | one choreography, byte-identical frames over ws, SSE-downstream/fetch-uplink, and the poll pair | v1 had no transport clause; equivalence was a claim, not a case |
 | `wire-clean-frames` | vector | wire-freeze | no frame in any transcript carries `txid` or `spans` | v1's schema carried `txid?`/`spans?` on `delta` and `result`, required for every multi-channel transaction |
+| `encoded-values` | vector | wire-freeze | every rich value in any frame crosses as its canonical encoded form (Date ISO-8601 Z, bytes base64, bigint decimal string, a registered class's declared encode); double-encode is identity; decode at the pool boundary rebuilds typed values per collection schema | at ratification v2 had no value-encoding clause — two implementations could ship different bytes for the same Date and neither would notice |
 
 ### Atomicity (§2)
 

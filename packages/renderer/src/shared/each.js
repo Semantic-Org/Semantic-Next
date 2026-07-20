@@ -12,7 +12,7 @@ export function getCollectionType(items) {
 
 // Stringified — Map / === compare by value identity, and the server's
 // KEY is always serialized as text inside the comment marker.
-export function getItemID(item, indexOrKey, collectionType) {
+export function getItemId(item, indexOrKey, collectionType) {
   let raw;
   if (isPlainObject(item)) {
     const key = (collectionType === 'object') ? indexOrKey : undefined;

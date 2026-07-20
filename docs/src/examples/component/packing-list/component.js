@@ -1,5 +1,5 @@
 import { defineComponent, getText } from '@semantic-ui/component';
-import { generateID } from '@semantic-ui/utils';
+import { generateId } from '@semantic-ui/utils';
 
 const template = await getText('./component.html');
 const css = await getText('./component.css');
@@ -20,7 +20,7 @@ const events = {
     if (event.key !== 'Enter' || !value.trim()) {
       return;
     }
-    state.items.push({ id: generateID(), title: value.trim(), packed: false });
+    state.items.push({ id: generateId(), title: value.trim(), packed: false });
     target.value = '';
   },
   'click .pack'({ state }) {
