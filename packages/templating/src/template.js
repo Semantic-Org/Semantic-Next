@@ -248,14 +248,22 @@ export const Template = class Template {
     // this is necessary for tree traversal with findParent/getChild
     template.instance.templateName = this.templateName;
 
-    const eventSettings = { composed: false };
+    // lifecycle reports on the component, so it fires from the host even for a
+    // subtemplate, where a user event comes from the subtemplate's own content
+    const dispatchLifecycle = (eventName) =>
+      this.dispatchEvent(
+        eventName,
+        { component: this.instance },
+        { composed: false },
+        { triggerCallback: false, origin: this.element },
+      );
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
       this.resolveLifecyclePromise('created');
       if (!this.isHydrating) {
-        this.dispatchEvent('created', { component: this.instance }, eventSettings, { triggerCallback: false });
+        dispatchLifecycle('created');
       }
     };
     this.onRendered = () => {
@@ -268,7 +276,7 @@ export const Template = class Template {
       }
       this.resolveLifecyclePromise('rendered');
       if (!this.isHydrating) {
-        this.dispatchEvent('rendered', { component: this.instance }, eventSettings, { triggerCallback: false });
+        dispatchLifecycle('rendered');
       }
     };
     this.onUpdated = () => {
@@ -281,7 +289,7 @@ export const Template = class Template {
         }
         this.call(this.onUpdatedCallback);
         this.resolveLifecyclePromise('updated');
-        this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
+        dispatchLifecycle('updated');
       });
     };
 
@@ -302,7 +310,7 @@ export const Template = class Template {
       this.removeParent();
       this.call(this.onDestroyedCallback);
       this.resolveLifecyclePromise('destroyed');
-      this.dispatchEvent('destroyed', { component: this.instance }, eventSettings, { triggerCallback: false });
+      dispatchLifecycle('destroyed');
     };
 
     this.initialized = true;
