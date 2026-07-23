@@ -248,14 +248,22 @@ export const Template = class Template {
     // this is necessary for tree traversal with findParent/getChild
     template.instance.templateName = this.templateName;
 
-    const eventSettings = { composed: false };
+    // uncomposed so a subtemplates lifecycle stops at the shadow root
+    const dispatchLifecycle = (eventName) =>
+      this.dispatchEvent(
+        eventName,
+        { component: this.instance, templateName: this.templateName },
+        { composed: false },
+        { triggerCallback: false },
+      );
 
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
       this.resolveLifecyclePromise('created');
-      if (!this.isHydrating) {
-        this.dispatchEvent('created', { component: this.instance }, eventSettings, { triggerCallback: false });
+      // created fires before attach so theres no content to raise it from
+      if (!this.isHydrating && !this.isSubtemplate()) {
+        dispatchLifecycle('created');
       }
     };
     this.onRendered = () => {
@@ -268,7 +276,7 @@ export const Template = class Template {
       }
       this.resolveLifecyclePromise('rendered');
       if (!this.isHydrating) {
-        this.dispatchEvent('rendered', { component: this.instance }, eventSettings, { triggerCallback: false });
+        dispatchLifecycle('rendered');
       }
     };
     this.onUpdated = () => {
@@ -281,7 +289,7 @@ export const Template = class Template {
         }
         this.call(this.onUpdatedCallback);
         this.resolveLifecyclePromise('updated');
-        this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
+        dispatchLifecycle('updated');
       });
     };
 
@@ -302,7 +310,7 @@ export const Template = class Template {
       this.removeParent();
       this.call(this.onDestroyedCallback);
       this.resolveLifecyclePromise('destroyed');
-      this.dispatchEvent('destroyed', { component: this.instance }, eventSettings, { triggerCallback: false });
+      dispatchLifecycle('destroyed');
     };
 
     this.initialized = true;
@@ -609,7 +617,8 @@ export const Template = class Template {
           }
 
           // prepare data for users event handler
-          const targetElement = this;
+          // the element that was hit, not whatever the listener sits on
+          const targetElement = selector ? this : event.target;
           const boundEvent = userHandler.bind(targetElement);
           const elValue = targetElement?.value ?? event.target?.value ?? event?.detail?.value;
           return template.call(boundEvent, {
@@ -619,6 +628,10 @@ export const Template = class Template {
               target: targetElement,
               value: elValue,
               data: template.getEventData(targetElement, event),
+              // events dispatched from event handlers originate from the element
+              dispatchEvent: (name, data, settings) => (
+                template.dispatchEvent(name, data, settings, { origin: targetElement })
+              ),
             },
           });
         };
@@ -641,8 +654,9 @@ export const Template = class Template {
             $(this.renderRoot).on(eventName, selector, eventHandler, eventSettings);
           }
           else {
-            // naked: bind on host so events on the host's own surface fire
-            $(this.element).on(eventName, eventHandler, eventSettings);
+            // a subtemplate has no host of its own, so 'click' means its own scope
+            const root = this.isSubtemplate() ? this.renderRoot : this.element;
+            $(root).on(eventName, eventHandler, eventSettings);
           }
         }
       });
@@ -737,6 +751,11 @@ export const Template = class Template {
   // Find the direct child of the renderRoot that is an ancestor of the event.target
   // then confirm position
   isNodeInTemplate(node) {
+    // the host is the tags own boundary, a subtemplate only borrows it
+    const host = this.renderRoot?.host;
+    if (host && node === host) {
+      return !this.isSubtemplate();
+    }
     // subtemplates attach while their content is still in the build
     // fragment, so stored parentNode can be a dead fragment — the start
     // anchor's live parent is the real boundary at event time
@@ -1006,8 +1025,18 @@ export const Template = class Template {
     }
   }
 
+  // only content inside this template bubbles through the templates around it
+  getEventOrigin() {
+    for (let node = this.startNode; node && node !== this.endNode; node = node.nextSibling) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        return node;
+      }
+    }
+    return this.element;
+  }
+
   // dispatches an event from this template
-  dispatchEvent(eventName, eventData, eventSettings, { triggerCallback = true } = {}) {
+  dispatchEvent(eventName, eventData, eventSettings, { triggerCallback = true, origin = this.getEventOrigin() } = {}) {
     if (Template.isServer) {
       return;
     }
@@ -1018,7 +1047,7 @@ export const Template = class Template {
       wrapFunction(callback).call(this.element, eventData);
     }
 
-    return $(this.element).dispatchEvent(eventName, eventData, eventSettings);
+    return $(origin).dispatchEvent(eventName, eventData, eventSettings);
   }
 
   /*******************************

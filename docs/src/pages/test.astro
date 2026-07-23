@@ -7,6 +7,16 @@ import { importMap } from './examples/importmap.json.js';
 ---
 <Body>
 <div style="padding: 24px; max-width: 1100px;">
+  <h3>Naked event bindings</h3>
+  <p style="max-width: 62ch; font-size: 14px; line-height: 1.5;">
+    An event key with no selector binds on the host element, and shadow retargeting rewrites
+    <code>event.target</code> to the host for anything raised inside the shadow root. Subtemplates
+    listen at the render root instead, where the target survives. Click each demo and watch the log.
+  </p>
+  <div id="event-cases" style="display: grid; gap: 16px;"></div>
+</div>
+
+<div style="padding: 24px; max-width: 1100px;">
   <h3>Playground Engine Test</h3>
   <pre id="status" style="font-size: 12px; min-height: 80px;"></pre>
   <div style="display: flex; gap: 16px;">
@@ -16,6 +26,321 @@ import { importMap } from './examples/importmap.json.js';
   </div>
 </div>
 <script type="application/json" id="importmap-data" set:html={JSON.stringify(importMap)}></script>
+
+<script>
+  import { defineComponent } from '@semantic-ui/component';
+
+  const container = document.getElementById('event-cases');
+
+  // each case renders its own source, mounts a live component, and appends a line
+  // per handler call — a case that stays on "no handler calls" is the failure
+  const addCase = ({ status, title, expected, source, tagName, onElement }) => {
+    const card = document.createElement('section');
+    card.style.cssText = 'border: 1px solid #444; border-radius: 6px; padding: 14px 16px;';
+    const works = status === 'works';
+    card.innerHTML = `
+      <div style="display: flex; align-items: baseline; gap: 10px;">
+        <span style="font: 600 11px/1 monospace; letter-spacing: .06em; padding: 4px 7px; border-radius: 3px;
+          background: ${works ? '#1b5e20' : '#7f1d1d'}; color: #fff;">${works ? 'WORKS' : 'BROKEN'}</span>
+        <strong data-title style="font-size: 14px;"></strong>
+      </div>
+      <p data-expected style="font-size: 13px; opacity: .8; margin: 8px 0;"></p>
+      <pre data-source style="font-size: 12px; line-height: 1.45; overflow-x: auto; padding: 10px;
+        background: rgba(127,127,127,.12); border-radius: 4px;"></pre>
+      <div data-demo style="display: flex; gap: 8px; align-items: center; margin: 10px 0;"></div>
+      <pre data-log style="font-size: 12px; margin: 0; min-height: 2.4em; opacity: .85;">no handler calls</pre>
+    `;
+    card.querySelector('[data-title]').textContent = title;
+    card.querySelector('[data-expected]').textContent = expected;
+    card.querySelector('[data-source]').textContent = source.trim();
+
+    const logEl = card.querySelector('[data-log]');
+    const lines = [];
+    const log = (line) => {
+      lines.push(line);
+      logEl.textContent = lines.join('\n');
+    };
+
+    // runs before connect so a case can catch lifecycle events
+    const element = document.createElement(tagName);
+    onElement?.(element, log);
+    card.querySelector('[data-demo]').appendChild(element);
+    container.appendChild(card);
+
+    return log;
+  };
+
+  /* open — a page listener counts one lifecycle event per subtemplate instance */
+
+  addCase({
+    status: 'broken',
+    title: 'Lifecycle events reaching the page',
+    expected: 'A page listener on the tag should see one created and one rendered, whatever the template is built from. It sees one per subtemplate instance.',
+    tagName: 'lab-lifecycle',
+    source: `
+defineComponent({
+  tagName: 'lab-lifecycle',
+  template: '<div>{> panel}<ul>{#each item in rows}{> row label=item.label}{/each}</ul></div>',
+  defaultState: { rows: [{ label: 'a' }, { label: 'b' }, { label: 'c' }] },
+  subTemplates: { panel, row },
+});
+
+// on the page
+element.addEventListener('created', ...);
+element.addEventListener('rendered', ...);`,
+    onElement(element, log) {
+      const counts = { created: 0, rendered: 0 };
+      for (const name of ['created', 'rendered']) {
+        element.addEventListener(name, (event) => {
+          counts[name] += 1;
+          log(`${name} ×${counts[name]} from ${event.detail?.component?.templateName ?? '?'}`);
+        });
+      }
+    },
+  });
+  defineComponent({
+    tagName: 'lab-lifecycle',
+    templateName: 'theTag',
+    template: '<div>{> panel}<ul>{#each item in rows}{> row label=item.label}{/each}</ul></div>',
+    defaultState: { rows: [{ label: 'a' }, { label: 'b' }, { label: 'c' }] },
+    subTemplates: {
+      panel: { templateName: 'panel', template: '<div class="panel">panel</div>' },
+      row: { templateName: 'row', template: '<li>{label}</li>' },
+    },
+  });
+
+  /* open — composed:false should stop at the component, not before it */
+
+  const logQuiet = addCase({
+    status: 'broken',
+    title: 'Uncomposed event from a subtemplate',
+    expected: 'The tag should hear it and the page should not. Neither hears it — the tag listens on its host, which is outside the shadow root.',
+    tagName: 'lab-quiet',
+    source: `
+subTemplates: {
+  inner: {
+    template: '<button class="btn">emit</button>',
+    events: {
+      'click .btn'({ dispatchEvent }) {
+        dispatchEvent('quiet', { n: 1 }, { composed: false });
+      },
+    },
+  },
+},
+events: { quiet() { log('tag heard it'); } },`,
+    onElement(element, log) {
+      document.addEventListener('quiet', () => log('page heard it (should not)'));
+    },
+  });
+  defineComponent({
+    tagName: 'lab-quiet',
+    template: '<div>{> inner}</div>',
+    subTemplates: {
+      inner: {
+        template: '<button class="btn">emit</button>',
+        events: {
+          'click .btn'({ dispatchEvent }) { dispatchEvent('quiet', { n: 1 }, { composed: false }); },
+        },
+      },
+    },
+    events: { quiet() { logQuiet('tag heard it'); } },
+  });
+
+  /* 1 — the mechanism, on a template that works today */
+
+  const logRetarget = addCase({
+    status: 'works',
+    title: 'Top-level tag, naked click',
+    expected: 'Fires. Note the reported target is the tag itself, not the button that was clicked.',
+    tagName: 'lab-retarget',
+    source: `
+defineComponent({
+  tagName: 'lab-retarget',
+  template: '<button class="btn">click me</button>',
+  events: {
+    click({ event }) { log(event.target.tagName); },
+  },
+});`,
+  });
+  defineComponent({
+    tagName: 'lab-retarget',
+    template: '<button class="btn">click me</button>',
+    events: {
+      click({ event }) {
+        logRetarget(`fired — event.target is <${event.target.tagName.toLowerCase()}>`);
+      },
+    },
+  });
+
+  /* 2 — same binding inside a subtemplate */
+
+  const logSub = addCase({
+    status: 'works',
+    title: 'Subtemplate, naked click',
+    expected: 'Fires for a click inside the item, and stays silent for the button outside it.',
+    tagName: 'lab-subtemplate',
+    source: `
+defineComponent({
+  tagName: 'lab-subtemplate',
+  template: '<div>{> item}<button class="outside">outside item</button></div>',
+  subTemplates: {
+    item: {
+      template: '<button class="btn">inside item</button>',
+      events: { click() { log('item handler'); } },
+    },
+  },
+});`,
+  });
+  defineComponent({
+    tagName: 'lab-subtemplate',
+    template: '<div>{> item}<button class="outside">outside item</button></div>',
+    subTemplates: {
+      item: {
+        template: '<button class="btn">inside item</button>',
+        events: { click() { logSub('item handler fired'); } },
+      },
+    },
+  });
+
+  /* 3 — the scoping question: which row owns the click */
+
+  const logEach = addCase({
+    status: 'works',
+    title: 'Each row, naked click',
+    expected: 'Fires for the row that was clicked, and only that row.',
+    tagName: 'lab-each',
+    source: `
+defineComponent({
+  tagName: 'lab-each',
+  template: '<div>{#each rows}{> row label=label}{/each}</div>',
+  defaultState: { rows: [{ label: 'A' }, { label: 'B' }] },
+  subTemplates: {
+    row: {
+      template: '<button class="btn">row {label}</button>',
+      events: { click({ data }) { log(data.label); } },
+    },
+  },
+});`,
+  });
+  defineComponent({
+    tagName: 'lab-each',
+    template: '<div>{#each rows}{> row label=label}{/each}</div>',
+    defaultState: { rows: [{ label: 'A' }, { label: 'B' }] },
+    subTemplates: {
+      row: {
+        template: '<button class="btn">row {label}</button>',
+        events: {
+          click({ data }) { logEach(`row ${data?.label ?? '(no data)'} fired`); },
+        },
+      },
+    },
+  });
+
+  /* 4 — control: the same subtemplate with a selector */
+
+  const logSelector = addCase({
+    status: 'works',
+    title: 'Subtemplate, click with a selector',
+    expected: 'Fires. Subtemplate events are attached — only the naked form is unreachable.',
+    tagName: 'lab-selector',
+    source: `
+defineComponent({
+  tagName: 'lab-selector',
+  template: '<div>{> item}</div>',
+  subTemplates: {
+    item: {
+      template: '<button class="btn">click me</button>',
+      events: { 'click .btn'() { log('item handler'); } },
+    },
+  },
+});`,
+  });
+  defineComponent({
+    tagName: 'lab-selector',
+    template: '<div>{> item}</div>',
+    subTemplates: {
+      item: {
+        template: '<button class="btn">click me</button>',
+        events: { 'click .btn'() { logSelector('item handler fired'); } },
+      },
+    },
+  });
+
+  /* 5 — the reported shape: one subtemplate emits, a sibling listens */
+
+  const logSibling = addCase({
+    status: 'works',
+    title: 'Subtemplate emits, sibling subtemplate listens',
+    expected: 'Silent, and should stay silent — the event fired on the host, which is not inside the listener\'s range.',
+    tagName: 'lab-sibling',
+    source: `
+defineComponent({
+  tagName: 'lab-sibling',
+  template: '<div>{> sender}{> listener}</div>',
+  subTemplates: {
+    sender: {
+      template: '<button class="btn">emit custom</button>',
+      events: { 'click .btn'({ dispatchEvent }) { dispatchEvent('custom', { n: 1 }); } },
+    },
+    listener: {
+      template: '<span></span>',
+      events: { custom({ data }) { log(data.n); } },
+    },
+  },
+});`,
+  });
+  defineComponent({
+    tagName: 'lab-sibling',
+    template: '<div>{> sender}{> listener}</div>',
+    subTemplates: {
+      sender: {
+        template: '<button class="btn">emit custom</button>',
+        events: {
+          'click .btn'({ dispatchEvent }) { dispatchEvent('custom', { n: 1 }); },
+        },
+      },
+      listener: {
+        template: '<span></span>',
+        events: { custom({ data }) { logSibling(`listener heard custom, n=${data?.n}`); } },
+      },
+    },
+  });
+
+  /* 6 — same emit, heard by the top-level tag */
+
+  const logTop = addCase({
+    status: 'works',
+    title: 'Subtemplate emits, top-level tag listens',
+    expected: 'Fires. The top-level template has no range markers, so the containment check is skipped.',
+    tagName: 'lab-top-listener',
+    source: `
+defineComponent({
+  tagName: 'lab-top-listener',
+  template: '<div>{> sender}</div>',
+  subTemplates: {
+    sender: {
+      template: '<button class="btn">emit custom</button>',
+      events: { 'click .btn'({ dispatchEvent }) { dispatchEvent('custom', { n: 1 }); } },
+    },
+  },
+  events: { custom({ data }) { log(data.n); } },
+});`,
+  });
+  defineComponent({
+    tagName: 'lab-top-listener',
+    template: '<div>{> sender}</div>',
+    subTemplates: {
+      sender: {
+        template: '<button class="btn">emit custom</button>',
+        events: {
+          'click .btn'({ dispatchEvent }) { dispatchEvent('custom', { n: 1 }); },
+        },
+      },
+    },
+    events: { custom({ data }) { logTop(`tag heard custom, n=${data?.n}`); } },
+  });
+</script>
+
 <script>
   import { PlaygroundProject } from '@semantic-ui/playground';
 
