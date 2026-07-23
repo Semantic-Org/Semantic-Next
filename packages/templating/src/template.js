@@ -654,13 +654,15 @@ export const Template = class Template {
             $(this.renderRoot).on(eventName, selector, eventHandler, eventSettings);
           }
           else if (this.isSubtemplate()) {
-            // inside the shadow root event.target survives retargeting
+            // if we are on a subtemplate permits 'click' to mean {>item} scope not
             $(this.renderRoot).on(eventName, eventHandler, eventSettings);
           }
           else {
-            // naked: bind on host so events on the host's own surface fire
+            // the common case - a regular old event
             $(this.element).on(eventName, eventHandler, eventSettings);
-            // uncomposed events never reach the host, so catch them where they rise
+
+            // if this is a custom event that isnt composed (an internal custom event)
+            // we want to fire it still
             $(this.renderRoot).on(eventName, function(event) {
               if (!event.composed) {
                 eventHandler.call(this, event);
