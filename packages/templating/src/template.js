@@ -248,12 +248,11 @@ export const Template = class Template {
     // this is necessary for tree traversal with findParent/getChild
     template.instance.templateName = this.templateName;
 
-    // uncomposed, so a subtemplate's lifecycle stops at the shadow root. the
-    // component hears its own internals, the page only hears the component
+    // uncomposed so a subtemplates lifecycle stops at the shadow root
     const dispatchLifecycle = (eventName) =>
       this.dispatchEvent(
         eventName,
-        { component: this.instance },
+        { component: this.instance, templateName: this.templateName },
         { composed: false },
         { triggerCallback: false },
       );
@@ -262,7 +261,8 @@ export const Template = class Template {
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
       this.resolveLifecyclePromise('created');
-      if (!this.isHydrating) {
+      // created fires before attach so theres no content to raise it from
+      if (!this.isHydrating && !this.isSubtemplate()) {
         dispatchLifecycle('created');
       }
     };
@@ -617,8 +617,7 @@ export const Template = class Template {
           }
 
           // prepare data for users event handler
-          // a delegated binding lands on the matched element, a naked one lands
-          // on whatever the listener sits on, so the event carries the real target
+          // the element that was hit, not whatever the listener sits on
           const targetElement = selector ? this : event.target;
           const boundEvent = userHandler.bind(targetElement);
           const elValue = targetElement?.value ?? event.target?.value ?? event?.detail?.value;
@@ -655,8 +654,7 @@ export const Template = class Template {
             $(this.renderRoot).on(eventName, selector, eventHandler, eventSettings);
           }
           else if (this.isSubtemplate()) {
-            // listening at the root keeps event.target as the node that was hit,
-            // so the range check can tell whose content it landed in
+            // inside the shadow root event.target survives retargeting
             $(this.renderRoot).on(eventName, eventHandler, eventSettings);
           }
           else {
@@ -756,9 +754,7 @@ export const Template = class Template {
   // Find the direct child of the renderRoot that is an ancestor of the event.target
   // then confirm position
   isNodeInTemplate(node) {
-    // the host is the tag's own outer boundary, and retargeting reports it as
-    // event.target for anything raised inside the shadow tree. subtemplates
-    // borrow the same host but sit inside it, so it is never theirs.
+    // the host is the tags own boundary, a subtemplate only borrows it
     const host = this.renderRoot?.host;
     if (host && node === host) {
       return !this.isSubtemplate();
@@ -1032,8 +1028,7 @@ export const Template = class Template {
     }
   }
 
-  // an event only bubbles through the templates containing this one if it comes
-  // from this template's own content. a tag has nowhere to sit but its host
+  // only content inside this template bubbles through the templates around it
   getEventOrigin() {
     for (let node = this.startNode; node && node !== this.endNode; node = node.nextSibling) {
       if (node.nodeType === Node.ELEMENT_NODE) {

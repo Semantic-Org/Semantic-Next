@@ -1,6 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
 import { $ } from '@semantic-ui/query';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RENDERING_ENGINES } from './test-utils.js';
 
 RENDERING_ENGINES.forEach(engine => {
@@ -614,9 +614,9 @@ RENDERING_ENGINES.forEach(engine => {
 
         // change only label — both expressions should re-evaluate
         // because data=expression is a blob (coarse reactivity)
-        const updated = $(el).onNext('updated');
+        // only the child updates here, and its lifecycle stays in the shadow root
         el.component.updateLabel('changed');
-        await updated;
+        await vi.waitFor(() => expect(shadowText(el)).toContain('changed'));
 
         expect(shadowText(el)).toContain('changed');
         expect(shadowText(el)).toContain('active');

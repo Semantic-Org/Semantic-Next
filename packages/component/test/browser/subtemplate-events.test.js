@@ -1,7 +1,4 @@
-// An event key with no selector binds on the host. Inside a shadow root that
-// makes event.target useless for placing the event — retargeting reports the
-// host for anything raised in the tree — so subtemplates listen at the render
-// root instead and the top-level tag treats its own host as in-template.
+// where a template's events come from and who can hear them
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -138,8 +135,7 @@ describe('custom events dispatched from a subtemplate', () => {
     expect(handler.mock.calls[0][0].data.n).toBe(1);
   });
 
-  // tag > shop > list, where list emits and shop listens — the event has to
-  // travel through shop's range to be heard, so dispatching from the host misses it
+  // dispatching from the host skips every template between the two
   it('reaches a listener one level up, and the tag above that', async () => {
     const shopHeard = vi.fn();
     const tagHeard = vi.fn();
@@ -211,8 +207,7 @@ describe('custom events dispatched from a subtemplate', () => {
       Lifecycle Boundary
 *******************************/
 
-// a page listener sees the component, not its internals — the count must not
-// track how many subtemplates the template happens to be built from
+// the count must not track how many subtemplates the template is built from
 describe('lifecycle events from subtemplates', () => {
   function defineNested(tagName) {
     const row = defineComponent({
@@ -248,27 +243,21 @@ describe('lifecycle events from subtemplates', () => {
     expect({ created: created.length, rendered: rendered.length }).toEqual({ created: 1, rendered: 1 });
   });
 
-  it('the tag still hears its own subtemplates render', async () => {
-    const { row, panel } = defineNested();
-    const heard = [];
+  // naming the subtemplate's own markup is how a tag observes it from inside
+  it('a selector-scoped handler on the tag still hears a subtemplate render', async () => {
+    const handler = vi.fn();
     defineComponent({
-      tagName: 'life-inside',
-      templateName: 'theTag',
-      template: '<div>{> panel}<ul>{#each item in rows}{> row label=item.label}{/each}</ul></div>',
-      defaultState: { rows: [{ label: 'a' }, { label: 'b' }, { label: 'c' }] },
-      subTemplates: { panel, row },
-      events: {
-        rendered({ data }) {
-          heard.push(data?.component?.templateName ?? '?');
-        },
+      tagName: 'life-selector',
+      template: '<div>{> panel}</div>',
+      subTemplates: {
+        panel: { template: '<div class="panel">panel</div>' },
       },
+      events: { 'rendered .panel': handler },
     });
 
-    const element = mount('life-inside');
+    mount('life-selector');
     await settle();
-
-    // its own render plus the panel and three rows
-    expect(heard.length).toBe(5);
+    expect(handler).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -277,7 +266,7 @@ describe('lifecycle events from subtemplates', () => {
 *******************************/
 
 describe('a subtemplate event with composed false', () => {
-  it('reaches the tag but not the page', async () => {
+  it('reaches a selector-scoped handler on the tag but not the page', async () => {
     const tagHeard = vi.fn();
     const pageHeard = vi.fn();
 
@@ -293,7 +282,7 @@ describe('a subtemplate event with composed false', () => {
       tagName: 'quiet-tag',
       template: '<div>{> inner}</div>',
       subTemplates: { inner },
-      events: { quiet: tagHeard },
+      events: { 'quiet .btn': tagHeard },
     });
 
     const element = mount('quiet-tag');

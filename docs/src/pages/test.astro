@@ -34,7 +34,7 @@ import { importMap } from './examples/importmap.json.js';
 
   // each case renders its own source, mounts a live component, and appends a line
   // per handler call — a case that stays on "no handler calls" is the failure
-  const addCase = ({ status, title, expected, source, tagName }) => {
+  const addCase = ({ status, title, expected, source, tagName, onElement }) => {
     const card = document.createElement('section');
     card.style.cssText = 'border: 1px solid #444; border-radius: 6px; padding: 14px 16px;';
     const works = status === 'works';
@@ -53,17 +53,98 @@ import { importMap } from './examples/importmap.json.js';
     card.querySelector('[data-title]').textContent = title;
     card.querySelector('[data-expected]').textContent = expected;
     card.querySelector('[data-source]').textContent = source.trim();
-    card.querySelector('[data-demo]').appendChild(document.createElement(tagName));
-    container.appendChild(card);
 
     const logEl = card.querySelector('[data-log]');
     const lines = [];
-
-    return (line) => {
+    const log = (line) => {
       lines.push(line);
       logEl.textContent = lines.join('\n');
     };
+
+    // runs before connect so a case can catch lifecycle events
+    const element = document.createElement(tagName);
+    onElement?.(element, log);
+    card.querySelector('[data-demo]').appendChild(element);
+    container.appendChild(card);
+
+    return log;
   };
+
+  /* open — a page listener counts one lifecycle event per subtemplate instance */
+
+  addCase({
+    status: 'broken',
+    title: 'Lifecycle events reaching the page',
+    expected: 'A page listener on the tag should see one created and one rendered, whatever the template is built from. It sees one per subtemplate instance.',
+    tagName: 'lab-lifecycle',
+    source: `
+defineComponent({
+  tagName: 'lab-lifecycle',
+  template: '<div>{> panel}<ul>{#each item in rows}{> row label=item.label}{/each}</ul></div>',
+  defaultState: { rows: [{ label: 'a' }, { label: 'b' }, { label: 'c' }] },
+  subTemplates: { panel, row },
+});
+
+// on the page
+element.addEventListener('created', ...);
+element.addEventListener('rendered', ...);`,
+    onElement(element, log) {
+      const counts = { created: 0, rendered: 0 };
+      for (const name of ['created', 'rendered']) {
+        element.addEventListener(name, (event) => {
+          counts[name] += 1;
+          log(`${name} ×${counts[name]} from ${event.detail?.component?.templateName ?? '?'}`);
+        });
+      }
+    },
+  });
+  defineComponent({
+    tagName: 'lab-lifecycle',
+    templateName: 'theTag',
+    template: '<div>{> panel}<ul>{#each item in rows}{> row label=item.label}{/each}</ul></div>',
+    defaultState: { rows: [{ label: 'a' }, { label: 'b' }, { label: 'c' }] },
+    subTemplates: {
+      panel: { templateName: 'panel', template: '<div class="panel">panel</div>' },
+      row: { templateName: 'row', template: '<li>{label}</li>' },
+    },
+  });
+
+  /* open — composed:false should stop at the component, not before it */
+
+  const logQuiet = addCase({
+    status: 'broken',
+    title: 'Uncomposed event from a subtemplate',
+    expected: 'The tag should hear it and the page should not. Neither hears it — the tag listens on its host, which is outside the shadow root.',
+    tagName: 'lab-quiet',
+    source: `
+subTemplates: {
+  inner: {
+    template: '<button class="btn">emit</button>',
+    events: {
+      'click .btn'({ dispatchEvent }) {
+        dispatchEvent('quiet', { n: 1 }, { composed: false });
+      },
+    },
+  },
+},
+events: { quiet() { log('tag heard it'); } },`,
+    onElement(element, log) {
+      document.addEventListener('quiet', () => log('page heard it (should not)'));
+    },
+  });
+  defineComponent({
+    tagName: 'lab-quiet',
+    template: '<div>{> inner}</div>',
+    subTemplates: {
+      inner: {
+        template: '<button class="btn">emit</button>',
+        events: {
+          'click .btn'({ dispatchEvent }) { dispatchEvent('quiet', { n: 1 }, { composed: false }); },
+        },
+      },
+    },
+    events: { quiet() { logQuiet('tag heard it'); } },
+  });
 
   /* 1 — the mechanism, on a template that works today */
 
