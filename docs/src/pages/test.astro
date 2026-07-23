@@ -9,10 +9,9 @@ import { importMap } from './examples/importmap.json.js';
 <div style="padding: 24px; max-width: 1100px;">
   <h3>Naked event bindings</h3>
   <p style="max-width: 62ch; font-size: 14px; line-height: 1.5;">
-    An event key with no selector binds on the host element. Shadow retargeting rewrites
-    <code>event.target</code> to the host for anything raised inside the shadow root, so the containment
-    check in <code>isNodeInTemplate</code> is handed the host no matter where the event started.
-    Click each demo and watch the log.
+    An event key with no selector binds on the host element, and shadow retargeting rewrites
+    <code>event.target</code> to the host for anything raised inside the shadow root. Subtemplates
+    listen at the render root instead, where the target survives. Click each demo and watch the log.
   </p>
   <div id="event-cases" style="display: grid; gap: 16px;"></div>
 </div>
@@ -95,9 +94,9 @@ defineComponent({
   /* 2 — same binding inside a subtemplate */
 
   const logSub = addCase({
-    status: 'broken',
+    status: 'works',
     title: 'Subtemplate, naked click',
-    expected: 'Clicking inside the item should fire. Clicking outside it should not. Neither fires.',
+    expected: 'Fires for a click inside the item, and stays silent for the button outside it.',
     tagName: 'lab-subtemplate',
     source: `
 defineComponent({
@@ -125,9 +124,9 @@ defineComponent({
   /* 3 — the scoping question: which row owns the click */
 
   const logEach = addCase({
-    status: 'broken',
+    status: 'works',
     title: 'Each row, naked click',
-    expected: 'Clicking a row should fire that row only. No row fires.',
+    expected: 'Fires for the row that was clicked, and only that row.',
     tagName: 'lab-each',
     source: `
 defineComponent({
