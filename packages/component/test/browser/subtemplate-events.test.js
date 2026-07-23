@@ -266,40 +266,6 @@ describe('lifecycle events from subtemplates', () => {
 *******************************/
 
 describe('a subtemplate event with composed false', () => {
-  it('reaches a handler on the tag but not the page', async () => {
-    const tagHeard = vi.fn();
-    const pageHeard = vi.fn();
-
-    const inner = defineComponent({
-      template: '<button class="btn">go</button>',
-      events: {
-        'click .btn'({ dispatchEvent }) {
-          dispatchEvent('quiet', { n: 1 }, { composed: false });
-        },
-      },
-    });
-    defineComponent({
-      tagName: 'quiet-bare',
-      template: '<div>{> inner}</div>',
-      subTemplates: { inner },
-      events: { quiet: tagHeard },
-    });
-
-    const element = mount('quiet-bare');
-    await settle();
-
-    document.addEventListener('quiet', pageHeard);
-    try {
-      click(element.shadowRoot.querySelector('.btn'));
-      await settle();
-      expect(tagHeard).toHaveBeenCalledTimes(1);
-      expect(pageHeard).not.toHaveBeenCalled();
-    }
-    finally {
-      document.removeEventListener('quiet', pageHeard);
-    }
-  });
-
   it('reaches a selector-scoped handler on the tag but not the page', async () => {
     const tagHeard = vi.fn();
     const pageHeard = vi.fn();

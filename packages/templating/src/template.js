@@ -653,21 +653,10 @@ export const Template = class Template {
           if (selector) {
             $(this.renderRoot).on(eventName, selector, eventHandler, eventSettings);
           }
-          else if (this.isSubtemplate()) {
-            // if we are on a subtemplate permits 'click' to mean {>item} scope not
-            $(this.renderRoot).on(eventName, eventHandler, eventSettings);
-          }
           else {
-            // the common case - a regular old event
-            $(this.element).on(eventName, eventHandler, eventSettings);
-
-            // if this is a custom event that isnt composed (an internal custom event)
-            // we want to fire it still
-            $(this.renderRoot).on(eventName, function(event) {
-              if (!event.composed) {
-                eventHandler.call(this, event);
-              }
-            }, eventSettings);
+            // a subtemplate has no host of its own, so 'click' means its own scope
+            const root = this.isSubtemplate() ? this.renderRoot : this.element;
+            $(root).on(eventName, eventHandler, eventSettings);
           }
         }
       });
