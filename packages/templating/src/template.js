@@ -660,6 +660,12 @@ export const Template = class Template {
           else {
             // naked: bind on host so events on the host's own surface fire
             $(this.element).on(eventName, eventHandler, eventSettings);
+            // uncomposed events never reach the host, so catch them where they rise
+            $(this.renderRoot).on(eventName, function(event) {
+              if (!event.composed) {
+                eventHandler.call(this, event);
+              }
+            }, eventSettings);
           }
         }
       });
