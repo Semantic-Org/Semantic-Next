@@ -208,6 +208,111 @@ describe('custom events dispatched from a subtemplate', () => {
 });
 
 /*******************************
+      Lifecycle Boundary
+*******************************/
+
+// a page listener sees the component, not its internals — the count must not
+// track how many subtemplates the template happens to be built from
+describe('lifecycle events from subtemplates', () => {
+  function defineNested(tagName) {
+    const row = defineComponent({
+      templateName: 'row',
+      template: '<li>{label}</li>',
+    });
+    const panel = defineComponent({
+      templateName: 'panel',
+      template: '<div class="panel">panel</div>',
+    });
+    return { row, panel, tagName };
+  }
+
+  it('a page listener on the tag sees one created and one rendered', async () => {
+    const { row, panel } = defineNested();
+    const created = [];
+    const rendered = [];
+    defineComponent({
+      tagName: 'life-once',
+      templateName: 'theTag',
+      template: '<div>{> panel}<ul>{#each item in rows}{> row label=item.label}{/each}</ul></div>',
+      defaultState: { rows: [{ label: 'a' }, { label: 'b' }, { label: 'c' }] },
+      subTemplates: { panel, row },
+    });
+
+    const element = document.createElement('life-once');
+    element.addEventListener('created', () => created.push(1));
+    element.addEventListener('rendered', () => rendered.push(1));
+    document.body.appendChild(element);
+    mounted.push(element);
+    await settle();
+
+    expect({ created: created.length, rendered: rendered.length }).toEqual({ created: 1, rendered: 1 });
+  });
+
+  it('the tag still hears its own subtemplates render', async () => {
+    const { row, panel } = defineNested();
+    const heard = [];
+    defineComponent({
+      tagName: 'life-inside',
+      templateName: 'theTag',
+      template: '<div>{> panel}<ul>{#each item in rows}{> row label=item.label}{/each}</ul></div>',
+      defaultState: { rows: [{ label: 'a' }, { label: 'b' }, { label: 'c' }] },
+      subTemplates: { panel, row },
+      events: {
+        rendered({ data }) {
+          heard.push(data?.component?.templateName ?? '?');
+        },
+      },
+    });
+
+    const element = mount('life-inside');
+    await settle();
+
+    // its own render plus the panel and three rows
+    expect(heard.length).toBe(5);
+  });
+});
+
+/*******************************
+      Uncomposed Events
+*******************************/
+
+describe('a subtemplate event with composed false', () => {
+  it('reaches the tag but not the page', async () => {
+    const tagHeard = vi.fn();
+    const pageHeard = vi.fn();
+
+    const inner = defineComponent({
+      template: '<button class="btn">go</button>',
+      events: {
+        'click .btn'({ dispatchEvent }) {
+          dispatchEvent('quiet', { n: 1 }, { composed: false });
+        },
+      },
+    });
+    defineComponent({
+      tagName: 'quiet-tag',
+      template: '<div>{> inner}</div>',
+      subTemplates: { inner },
+      events: { quiet: tagHeard },
+    });
+
+    const element = mount('quiet-tag');
+    await settle();
+
+    document.addEventListener('quiet', pageHeard);
+    try {
+      click(element.shadowRoot.querySelector('.btn'));
+      await settle();
+      expect(tagHeard).toHaveBeenCalledTimes(1);
+      expect(pageHeard).not.toHaveBeenCalled();
+    }
+    finally {
+      document.removeEventListener('quiet', pageHeard);
+    }
+  });
+});
+
+/*******************************
         Unchanged Paths
 *******************************/
 

@@ -248,14 +248,14 @@ export const Template = class Template {
     // this is necessary for tree traversal with findParent/getChild
     template.instance.templateName = this.templateName;
 
-    // lifecycle reports on the component, so it fires from the host even for a
-    // subtemplate, where a user event comes from the subtemplate's own content
+    // uncomposed, so a subtemplate's lifecycle stops at the shadow root. the
+    // component hears its own internals, the page only hears the component
     const dispatchLifecycle = (eventName) =>
       this.dispatchEvent(
         eventName,
         { component: this.instance },
         { composed: false },
-        { triggerCallback: false, origin: this.element },
+        { triggerCallback: false },
       );
 
     this.onCreated = () => {
