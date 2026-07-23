@@ -189,9 +189,9 @@ defineComponent({
   /* 5 — the reported shape: one subtemplate emits, a sibling listens */
 
   const logSibling = addCase({
-    status: 'broken',
+    status: 'works',
     title: 'Subtemplate emits, sibling subtemplate listens',
-    expected: 'The listener subtemplate should hear the custom event. It never fires.',
+    expected: 'Silent, and should stay silent — the event fired on the host, which is not inside the listener\'s range.',
     tagName: 'lab-sibling',
     source: `
 defineComponent({
