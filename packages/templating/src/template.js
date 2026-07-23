@@ -609,7 +609,9 @@ export const Template = class Template {
           }
 
           // prepare data for users event handler
-          const targetElement = this;
+          // a delegated binding lands on the matched element, a naked one lands
+          // on whatever the listener sits on, so the event carries the real target
+          const targetElement = selector ? this : event.target;
           const boundEvent = userHandler.bind(targetElement);
           const elValue = targetElement?.value ?? event.target?.value ?? event?.detail?.value;
           return template.call(boundEvent, {
@@ -619,6 +621,10 @@ export const Template = class Template {
               target: targetElement,
               value: elValue,
               data: template.getEventData(targetElement, event),
+              // events dispatched from event handlers originate from the element
+              dispatchEvent: (name, data, settings) => (
+                template.dispatchEvent(name, data, settings, { origin: targetElement })
+              ),
             },
           });
         };
@@ -639,6 +645,11 @@ export const Template = class Template {
         else {
           if (selector) {
             $(this.renderRoot).on(eventName, selector, eventHandler, eventSettings);
+          }
+          else if (this.isSubtemplate()) {
+            // listening at the root keeps event.target as the node that was hit,
+            // so the range check can tell whose content it landed in
+            $(this.renderRoot).on(eventName, eventHandler, eventSettings);
           }
           else {
             // naked: bind on host so events on the host's own surface fire
@@ -737,6 +748,13 @@ export const Template = class Template {
   // Find the direct child of the renderRoot that is an ancestor of the event.target
   // then confirm position
   isNodeInTemplate(node) {
+    // the host is the tag's own outer boundary, and retargeting reports it as
+    // event.target for anything raised inside the shadow tree. subtemplates
+    // borrow the same host but sit inside it, so it is never theirs.
+    const host = this.renderRoot?.host;
+    if (host && node === host) {
+      return !this.isSubtemplate();
+    }
     // subtemplates attach while their content is still in the build
     // fragment, so stored parentNode can be a dead fragment — the start
     // anchor's live parent is the real boundary at event time
@@ -1006,8 +1024,19 @@ export const Template = class Template {
     }
   }
 
+  // an event only bubbles through the templates containing this one if it comes
+  // from this template's own content. a tag has nowhere to sit but its host
+  getEventOrigin() {
+    for (let node = this.startNode; node && node !== this.endNode; node = node.nextSibling) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        return node;
+      }
+    }
+    return this.element;
+  }
+
   // dispatches an event from this template
-  dispatchEvent(eventName, eventData, eventSettings, { triggerCallback = true } = {}) {
+  dispatchEvent(eventName, eventData, eventSettings, { triggerCallback = true, origin = this.getEventOrigin() } = {}) {
     if (Template.isServer) {
       return;
     }
@@ -1018,7 +1047,7 @@ export const Template = class Template {
       wrapFunction(callback).call(this.element, eventData);
     }
 
-    return $(this.element).dispatchEvent(eventName, eventData, eventSettings);
+    return $(origin).dispatchEvent(eventName, eventData, eventSettings);
   }
 
   /*******************************
