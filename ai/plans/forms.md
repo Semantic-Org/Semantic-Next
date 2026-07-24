@@ -43,8 +43,8 @@ The db is the formalization gradient on top of a reactive doc, not a preconditio
 <ui-form doc={invoice} schema={invoiceSchema} onChange={handlers}>
   <ui-input name="client" label="Client" />
   <ui-input name="total"  label="Total" />
-  {#if isDeed}
-    <ui-input name="grantor" />
+  {#if isRecurring}
+    <ui-input name="renewsOn" />
   {/if}
 </ui-form>
 ```
@@ -74,7 +74,7 @@ deltas); a **local** plain doc writes the form only. But the dominant real patte
 **gather a payload and hit a server endpoint**:
 
 ```js
-'click .save'() { methodCall('createClosing', self.form.get()); } // { invoice, email, user }
+'click .save'() { methodCall('submitInvoice', self.form.get()); } // { invoice, email, user }
 ```
 
 So the form is a **payload gatherer**: bind, read with `get()`, send wherever. Multi-collection payloads
@@ -97,7 +97,7 @@ components bind identically.
 A subfield-cluster component (`<address-input>`, `<date-range-input>`) is a nested form scoped to a
 sub-path. It renders its subfields as named controls re-rooted under its `name` (`name="address.city"`,
 …); the outer form binds them at any shadow depth via `$$` + composedPath delegation, field-granular
-(concurrency-safe — the dividend, and why the heritage bound `address.*` rather than one blob). Internal
+(concurrency-safe — the dividend, and why binding `address.*` beats one opaque blob). Internal
 transient UI (a "last 7 days" preset, an autocomplete) stays unnamed and drives the named (possibly
 hidden) output controls; their composed changes reach the form. **The schema field shape makes the one
 real call:** a sub-schema field -> bind the named parts (granular); an opaque value -> one named control
@@ -114,7 +114,7 @@ components (roadmap 4c) are presentation that compose with this binding (`<ui-fo
 
 ## onChanged, the path-keyed escape hatch
 
-A heritage-proven form-level hook: `onChanged: { 'field.path'() { ... } }`, arbitrary logic keyed by
+A form-level hook: `onChanged: { 'field.path'() { ... } }`, arbitrary logic keyed by
 the path that moved. The mechanics fall out of the schema engine rather than needing their own:
 the recompute pass already computes the changed-path set on every write, so onChanged is a fourth
 consumer of that fan (after deps, resetOn, and the wire diff) and inherits the shared path grammar

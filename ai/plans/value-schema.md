@@ -27,7 +27,7 @@ The existing settings proxy (`web-component.js`) is already bidirectional — co
 }
 ```
 
-Lightweight object literal schema (Qualia pattern), not Zod. Zero dependencies. The schema is metadata for tooling (wrapper type generation, agent consumption), not a validation boundary.
+Lightweight object literal schema, not Zod. Zero dependencies. The schema is metadata for tooling (wrapper type generation, agent consumption), not a validation boundary.
 
 **What the schema enables:**
 - Wrapper generation — TypeScript types for value prop per component

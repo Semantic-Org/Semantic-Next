@@ -239,7 +239,7 @@ packages/<name>/
 
 ## Naming
 
-**Name intent, not mechanism.** A mechanism name describes plumbing (`depValue`: it stores a value and uses `dependency()` underneath). An intent name describes what it is for (`computed`: this value is computed from other fields). Internal precision that requires onboarding loses to a name that is 80% right with zero teaching — this surface is read by people and agents with no training round.
+**Name intent, not mechanism.** A mechanism name describes plumbing (`trackedCell`: it stores a value and registers a dependency underneath). An intent name describes what it is for (`computed`: this value is computed from other fields). Internal precision that requires onboarding loses to a name that is 80% right with zero teaching — this surface is read by people and agents with no training round.
 
 The same rule renames classes: `ComputedIndex` described its data structure, `RecomputeEngine` describes its role — and everything around it already called it "the recompute engine". When docs and comments consistently use a different word than the identifier, the identifier is wrong.
 
@@ -330,7 +330,7 @@ export const thing = (options) => new Thing(options);
 | Ambient singleton threaded through calls | registry class + helpers-module doors |
 | Load-time registration side effects | value-dependency catalog list, `sideEffects: false` |
 | Out-param accumulator | pure `<noun>From(input)` builder |
-| Mechanism name (`depValue`, `ComputedIndex`) | intent name (`computed`, `RecomputeEngine`) |
+| Mechanism name (`trackedCell`, `ComputedIndex`) | intent name (`computed`, `RecomputeEngine`) |
 | Comment explaining a clunky guard | utils vocabulary that says it directly |
 
 ---
