@@ -7,7 +7,7 @@ tested against a real client and a real storage adapter, as cheaply as an open-s
 project with a few maintainers can afford. Three environments: a per-PR preview (bursty,
 torn down), an always-on staging on merge to `main`, and prod on a tagged release. The
 host and storage choices and their economics are settled in
-[`../../research/data-sync/hosting.md`](../../research/data-sync/hosting.md); this plan is
+[`../../research/sync/infra/hosting.md`](../../research/sync/infra/hosting.md); this plan is
 the action path that lands them, built on the **Deploy Bot** that already exists.
 
 ## Why icebox (the gate)

@@ -6,7 +6,7 @@ A realtime data layer for the framework: in-memory reactive collections queried 
 
 ## Design
 
-The complete design corpus lives at [`ai/research/data-sync/`](../../research/data-sync/) — plan with decision record, two ground-truth scenarios, wire protocol and its five-voice review, API steelmen (todomvc, invoices-table), vetting reports, and the research pass that grounded it. Gate verdict: revise-then-build, R2 rulings folded in.
+The complete design corpus lives at [`ai/research/sync/`](../../research/sync/) — plan with decision record, two ground-truth scenarios, wire protocol and its five-voice review, API steelmen (todomvc, invoices-table), vetting reports, and the research pass that grounded it. Gate verdict: revise-then-build, R2 rulings folded in.
 
 ## Sequencing
 
