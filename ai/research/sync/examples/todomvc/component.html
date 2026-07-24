@@ -1,0 +1,52 @@
+<section class="todoapp">
+  <header class="header">
+    <h1>todos</h1>
+    <input class="new-todo" placeholder="What needs to be done?" autofocus />
+  </header>
+  {#if todos.length}
+    <section class="main">
+      <input id="toggle-all" class="toggle-all" type="checkbox" checked={allCompleted} />
+      <label for="toggle-all">Mark all as complete</label>
+      <ul class="todo-list">
+        {#each todo in filteredTodos}
+          {>todoItem
+            id=todo.id
+            title=todo.title
+            completed=todo.completed
+            editing=(isEditing todo.id)
+          }
+        {/each}
+      </ul>
+    </section>
+    {>footer}
+  {/if}
+</section>
+
+{#if not sync.connection.isConnected}
+  <div class="connection-banner">
+    {sync.connection.status == 'reconnecting' ? 'reconnecting…' : 'offline'}
+    {#if sync.writes.pending}— {sync.writes.pending} unsaved {maybePlural sync.writes.pending}{/if}
+  </div>
+{/if}
+
+{#snippet footer}
+  <footer class="footer">
+    <span class="todo-count">
+      <strong>{count activeTodos}</strong> item{maybePlural count activeTodos} left
+    </span>
+    <ul class="filters">
+      <li><a class="{selectedIf is filter 'all'}" href="#/">All</a></li>
+      <li><a class="{selectedIf is filter 'active'}" href="#/active">Active</a></li>
+      <li><a class="{selectedIf is filter 'completed'}" href="#/completed">Completed</a></li>
+    </ul>
+    {#if count completedTodos}
+      <button class="clear-completed">Clear completed</button>
+    {/if}
+    <button class="share" disabled={sharing}>
+      {sharing ? 'Sharing…' : 'Share'}
+    </button>
+    {#if shareUrl}
+      <a class="share-link" href="{shareUrl}">{shareUrl}</a>
+    {/if}
+  </footer>
+{/snippet}

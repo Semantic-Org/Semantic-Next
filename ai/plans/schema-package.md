@@ -1,11 +1,10 @@
 # Schema Package — @semantic-ui/schema
 
 > Status: **scoped** (was initial). Roadmap 2g. Mode: pair. Interlocks with [Value Schema](value-schema.md)
-> (2b) and gates the data layer ([icebox](icebox/data-sync.md)). Grounded in the heritage of a mature
-> production Meteor app of this class (a SimpleSchema-lineage schema language, a dependent-value layer,
-> and a two-way-binding form layer), its form-component showcase, and
-> `ai/research/data-sync/plan.md` §Schemas. Worked example throughout: the invoices collection in
-> `ai/research/data-sync/invoices-table/collections/invoices/`.
+> (2b) and gates the data layer ([icebox](icebox/sync.md)). The field-shape language descends from
+> SimpleSchema, the binding model from Meteor-era two-way forms, and the field semantics from
+> `ai/research/sync/design/plan.md` §Schemas. Worked example throughout: the invoices collection in
+> `ai/research/sync/examples/invoices-table/collections/invoices/`.
 
 ## What it is
 
@@ -27,8 +26,7 @@ validation, and inferred labels/widgets.
 **Constructors are the authoring idiom everywhere.** `type: String`, `Date`, `Boolean`, `Number`,
 `Array`. Constructors fail loud at load (`type: Strng` is a ReferenceError, not a runtime hunt). String
 names (`'string'`) exist only as the serialized projection at the wire/replay boundary. Extended types
-are exported tokens from their packages, same rule, never magic strings. This is settled by ground truth,
-not preference: the surveyed heritage corpus is ~5,580 constructor sites and ~0 string-as-type.
+are exported tokens from their packages, same rule, never magic strings.
 
 ```js
 export const Invoices = collection('invoices', {
@@ -42,10 +40,12 @@ export const Invoices = collection('invoices', {
 });
 ```
 
-Field props, the lean set (census-backed, ~9 carry ~all real usage): `type`, `optional`, `label`,
+Field props, the lean set that carries essentially all real usage: `type`, `optional`, `label`,
 `default`, `allowed` (the enum/options domain), plus the data-layer keys `computed`, `private`,
-`serverOnly`, `unsafe`. SimpleSchema cruft stays out: `regEx`, `minCount`/`maxCount`, `custom`,
-`autoValue`, `denyInsert`/`denyUpdate`, `Integer`, `oneOf`. They were ~0 in production.
+`serverOnly`, `unsafe`. SimpleSchema's long tail stays out: `regEx`, `minCount`/`maxCount`, `custom`,
+`autoValue`, `denyInsert`/`denyUpdate`, `Integer`, `oneOf`. Each is either a validation rule that reads
+better in the operation's `check` slot, where the cross-field context lives, or a job this design
+already hands to `computed` and per-field `permission`.
 
 **Inferred, not declared** (the "many things inferred" half of the thesis):
 - **label** humanizes from the field key, `label` is the override
@@ -55,25 +55,25 @@ Field props, the lean set (census-backed, ~9 carry ~all real usage): `type`, `op
 - **coercion/revival** and the wire `'string'` projection come from `type`
 - the **doc TS type** is inferred from the schema
 
-**Nesting** via `schema:`, **arrays** via `type: Array` + `schema`. The heritage bracket form
-(`[Schema]`, `[String]`) is widespread and reads naturally, so accept it as sugar for `type: Array,
+**Nesting** via `schema:`, **arrays** via `type: Array` + `schema`. SimpleSchema's bracket form
+(`[Schema]`, `[String]`) is familiar and reads naturally, so accept it as sugar for `type: Array,
 schema:` (open: confirm during build).
 
-**Composition is first-class** and the real enterprise shape (the surveyed app's orders collection is ~199
-subschemas across ~97 files and several packages). The idioms that ship: subschema as a `type:`,
-cross-file and cross-package imports, and **array-merge** (`new Schema([Base, { extraFields }])`) for
-extend. Object-spread of field maps is NOT the heritage idiom, so ship an explicit merge/extend
+**Composition is first-class.** A back-office document schema of any maturity spreads across hundreds of
+subschemas, many files, and several packages, so composition is load-bearing rather than a nicety. The
+idioms that ship: subschema as a `type:`, cross-file and cross-package imports, and **array-merge**
+(`new Schema([Base, { extraFields }])`) for extend, following SimpleSchema's own merge form.
+Object-spread of field maps does not compose field options correctly, so ship an explicit merge/extend
 primitive rather than assuming `{ ...spread }` covers it. Parameterized factory subschemas and
 discriminated/pivot variants are real patterns to design for (variants deferred, seam named).
 
 ## Optional-by-default, and the escape-valve cascade
 
 **Fields are optional by default. `required: true` is the rare opt-in.** This is the deliberate
-inversion of Zod/Valibot/ArkType (required-by-default), and it is empirically decisive: a surveyed production Orders
-collection has **3 fields marked required out of 2,417**, the framework forcing the rest optional, with
-~1,700 filled by defaults/computeds. A document of that shape is *inherently partial* (born with a
-handful of fields, grown over time, patched a field at a time), so required-by-default fights the grain
-of the data, not just the wire. `Invoices.insert({ client: 'Acme' })` must succeed, not throw 2,400
+inversion of Zod/Valibot/ArkType (required-by-default). A large back-office document is *inherently
+partial*: born with a handful of fields, grown over time, patched a field at a time, and mostly filled
+by defaults and computeds rather than by an author. Required-by-default fights the grain of that data,
+not just the wire. `Invoices.insert({ client: 'Acme' })` must succeed, not throw a thousand
 missing-field errors.
 
 The default is set by an **escape-valve cascade modeled on `Signal`** (`reactivity/src/signal.js`: a
@@ -86,11 +86,11 @@ field.optional ?? schemaOptions.optional ?? Schema.optional   // Schema.optional
 
 So an args/validation schema that wants Zod-style required-by-default flips it once
 (`schema({ ... }, { optional: false })`), no per-field annotation, no separate language mode. The same
-cascade carries any field-option default (cf. the heritage form layer's `defaultFieldOptions` two-layer model, with the
-static tier on top). The inferred TS type threads the resolved cascade: an unmarked field infers
-`T | undefined`, a `required` field infers non-optional `T`, so the type and the runtime agree and the
-doc-gate makes `required` trustworthy (the heritage's documented pain was a type that claimed required
-while the runtime forced optional, so the types could not be trusted, the doc-gate removes that).
+cascade carries any field-option default, with the static tier on top. The inferred TS type threads the
+resolved cascade: an unmarked field infers `T | undefined`, a `required` field infers non-optional `T`,
+so the type and the runtime agree and the doc-gate makes `required` trustworthy. The failure mode this
+closes is a type that claims required while the runtime forces optional, which makes the types
+untrustworthy everywhere they are read.
 
 ## What the schema does (the field semantics)
 
@@ -100,8 +100,8 @@ schema supplies the **meaning** a bound field carries, and only that:
 - **validate(doc | args)** to path-addressable field errors (`{ path, message }`), client-side for
   instant feedback, server-side as authority, the same schema object both halves
 - **normalize / coerce** the type-driven storage round-trip (a `total: Number` field stores a number,
-  not a `"$1,200.00"` string, which kills the heritage footgun where the input *format* silently chose
-  the stored type)
+  not a `"$1,200.00"` string, which kills the footgun where the input *format* silently chooses the
+  stored type)
 - **revive** wire JSON to typed values per the schema (ISO string to `Date`), the pool boundary hydrates
 - **defaults** on insert and insert-mode forms
 - **doc-type inference** for consumers
@@ -118,8 +118,8 @@ inputs (`deps` as the governor/skip-hint), persists in the same transaction, and
 thereafter (projected, synced, indexed, queryable, zero read-time cost, a stored generated column with
 the expression in the schema). Overridable by default (derived values exist to be corrected). Override
 state lives in a single reserved `_overrides` subdoc mirroring the field path (`a.b.c` ->
-`_overrides.a.b.c: true`), queryable, one reserved key instead of N minted siblings (an improvement over
-the heritage, which minted sibling override keys). A direct write flips the flag and the derivation
+`_overrides.a.b.c: true`), queryable, one reserved key instead of a minted sibling per overridable
+field. A direct write flips the flag and the derivation
 stops writing until the flag clears. `overridable: false` for strictly derivation-owned fields (the
 `searchText` analyzer-blob class). `serverOnly: true` elides the body from the client bundle and is
 required when the compute reads any `private` field. Cross-collection deps are deferred with the seam
@@ -184,6 +184,6 @@ recompute engine, or binding. Each consumer registers its own keys and enforceme
 ## Open questions for the build
 
 - accept `[Schema]` / `[String]` bracket-array as sugar for `type: Array, schema:` (lean yes)
-- the explicit merge/extend primitive shape (array-merge is the heritage idiom, not object-spread)
+- the explicit merge/extend primitive shape (array-merge, not object-spread)
 - exact `coerce`/`revive` surface and the `InferInput`/`InferOutput` (revive = decode) types story
 - which field-option defaults beyond `optional` ride the cascade

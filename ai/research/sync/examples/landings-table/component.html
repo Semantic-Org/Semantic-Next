@@ -1,0 +1,58 @@
+<div class="toolbar">
+  <ui-input class="search" icon="search" placeholder="Search landings…" />
+  <ui-dropdown class="status" value={status}>
+    <dropdown-item value="all">All</dropdown-item>
+    <dropdown-item value="draft">Draft</dropdown-item>
+    <dropdown-item value="submitted">Submitted</dropdown-item>
+    <dropdown-item value="settled">Settled</dropdown-item>
+  </ui-dropdown>
+  <ui-button class="add" primary icon="plus">Add Landing</ui-button>
+</div>
+
+{#if not landings.ready}
+  <ui-spinner />
+{else}
+  <ui-table>
+    <thead>
+      <tr>
+        <th data-field="vessel">Vessel <ui-icon name={sortIcon 'vessel'} /></th>
+        <th data-field="port">Port</th>
+        <th data-field="status">Status</th>
+        <th data-field="weight">Weight <ui-icon name={sortIcon 'weight'} /></th>
+        <th data-field="landedAt">Landed <ui-icon name={sortIcon 'landedAt'} /></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {#each landing in landings}
+        <tr>
+          <td>{landing.vessel}</td>
+          <td>{landing.port}</td>
+          <td><ui-label class={landing.status} warning={landing.isFilingLate}>{landing.status}</ui-label></td>
+          <td>{formatNumber landing.weight} kg</td>
+          <td>{formatDate landing.landedAt 'MMM D'}</td>
+          <td>
+            <ui-menu class="row-actions" icon="ellipsis-vertical">
+              <dropdown-item data-action="edit" data-id={landing.id}>Edit</dropdown-item>
+              <dropdown-item data-action="delete" data-id={landing.id}>Delete</dropdown-item>
+            </ui-menu>
+          </td>
+        </tr>
+      {/each}
+    </tbody>
+  </ui-table>
+
+  <footer class="pagination">
+    <span>{landings.total} landings</span>
+    <ui-button class="prev" disabled={page == 1}>Prev</ui-button>
+    <span>{page} / {landings.pages}</span>
+    <ui-button class="next" disabled={page == landings.pages}>Next</ui-button>
+  </footer>
+{/if}
+
+{#if adding}
+  <landing-modal />
+{/if}
+{#if editingID}
+  <landing-modal landing-id={editingID} />
+{/if}

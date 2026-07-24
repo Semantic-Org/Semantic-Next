@@ -1,0 +1,21 @@
+<ui-modal header={isEditing ? 'Edit Landing' : 'Add Landing'}>
+  {#if isEditing and not detail.ready}
+    <ui-spinner />
+  {else}
+    {#form draft=draft}
+      <ui-input name="vessel" label="Vessel" autofocus />
+      <ui-input name="port" label="Port" />
+      <ui-input name="weight" label="Weight (kg)" type="number" />
+      {#if isEditing}
+        <ui-input name="notes" label="Notes" textarea />
+      {/if}
+    {/form}
+    {#if draft.stale}
+      <ui-label warning>This landing changed while you were editing</ui-label>
+    {/if}
+    <ui-button class="save" primary disabled={not draft.dirty}>
+      {isEditing ? 'Save' : 'Create'}
+    </ui-button>
+    <ui-button class="cancel">Cancel</ui-button>
+  {/if}
+</ui-modal>
