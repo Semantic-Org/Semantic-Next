@@ -11,7 +11,7 @@ number.
 This is the economic consequence of the liveness model in [`storage-and-scale.md`](storage-and-scale.md)
 (per-subscriber cost by liveness tier) and the scale shape it describes (stateless fan-out
 workers tailing a durable change log). The dogfooding action plan derived from it lives at
-[`../../plans/icebox/data-sync-dogfooding.md`](../../../plans/icebox/data-sync-dogfooding.md).
+[`../../plans/icebox/data-sync-dogfooding.md`](../../../plans/icebox/sync-dogfooding.md).
 
 ## The cost surface — four lines
 

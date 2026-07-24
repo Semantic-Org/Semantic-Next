@@ -5,7 +5,7 @@ import { Landings } from '../landings.js';
 Landings.publish('detail', {
   permission: 'landings_view',
   filter: { deletedAt: null },
-  fields: ['vessel', 'port', 'status', 'weight', 'notes', 'landedAt'],
+  fields: ['vessel', 'port', 'status', 'weight', 'value', 'notes', 'landedAt'],
   handler(ctx, { id }) {
     return Landings.find({ id });
   },

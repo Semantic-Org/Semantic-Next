@@ -4,11 +4,11 @@ import { Landings } from '../landings.js';
 // per operation — adding a mutator never touches a shared file
 Landings.mutator('create', {
   permission: (args, { user }) => !!user,
-  schema: { vessel: String, port: String },
+  schema: { vessel: String, port: String, weight: Number },
   check({ vessel }) {
     if (!vessel.trim()) { throw new Error('vessel required'); }
   },
-  run({ vessel, port }) {
-    return Landings.insert({ vessel: vessel.trim(), port });
+  run({ vessel, port, weight }) {
+    return Landings.insert({ vessel: vessel.trim(), port, weight });
   },
 });

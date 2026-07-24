@@ -16,7 +16,7 @@ export const Landings = collection('landings', {
     searchText: {
       type: String,
       private: true,
-      computed: landing => [landing.vessel, landing.port, landing.status].join(' '),
+      computed: landing => [landing.vessel, landing.port, landing.status, String(landing.weight)].join(' '),
     },
     landedAt: { type: Date, default: () => new Date() },
     deletedAt: Date,

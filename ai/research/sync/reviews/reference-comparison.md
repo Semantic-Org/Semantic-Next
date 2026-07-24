@@ -128,7 +128,7 @@ Headline: no architectural decision flips. One place the spec is *wrong* rather 
 
 **Change** — plan.md Write Path, gated through Phase 0a steelman (consumer-felt API). Return the pending entry the outbox already creates as a lazy handle: `const write = Todos.toggle(id)` stays sync and fire-and-forget (return value ignorable), `write.status` is a reactive read (`'pending' | 'ok' | 'rejected' | 'parked'`), `write.server` is a promise allocated only on first access. No coloring — nothing requires `await`, the 90% case ignores the return entirely, the sync-callbacks doctrine intact. No hot-path allocation beyond existing outbox bookkeeping. `status: 'parked'` ties into the amendment-3 taxonomy. Serves confirmed-write sequencing without graduating to an action.
 **Source lesson** — Zero exposes `.client`/`.server` settlement stages per mutation — honest in their model because mutators are async anyway. The cross-exam found ours can have per-call settlement uncolored because the bookkeeping already exists on the wire (`result` per call) and in the outbox.
-**Anchor** — plan.md Write Path's own 50/50 split: business flows occasionally need confirmed-write sequencing below the action threshold.
+**Anchor** — plan.md Write Path's two first-class vehicles: business flows occasionally need confirmed-write sequencing below the action threshold.
 **Seats** — Zero seat, unanimous (reconsider resolved to adopt, 0a-gated).
 **Effort** — section.
 
