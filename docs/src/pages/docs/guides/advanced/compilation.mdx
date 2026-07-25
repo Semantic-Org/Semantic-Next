@@ -9,7 +9,7 @@ description: Moving template and spec compilation into a build step
 
 Templates compile in the browser by default, and that is the point. A component works from a `<script>` tag with no build step at all.
 
-A template compiles once per component definition, not per instance. A page rendering a thousand buttons compiles that template once, in well under a millisecond, and never again.
+A template compiles once per component definition, not per instance. A component used in a thousand places on a page compiles once, in well under a millisecond, and never again.
 
 Compile ahead when you already have a build and want that cost paid before the browser starts, which usually means a long-running server or a static site. Most projects will measure no difference.
 
