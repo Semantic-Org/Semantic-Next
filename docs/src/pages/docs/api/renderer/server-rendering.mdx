@@ -6,9 +6,9 @@ title: Server Rendering
 description: How server rendering and hydration work in Semantic UI
 ---
 
-Server rendering exists here for first paint. The server produces [Declarative Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM), the browser renders it before any JavaScript arrives, and the client later attaches reactivity to the DOM that is already on screen.
+The server renders a component to [Declarative Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM). The browser paints it before any JavaScript arrives, and the client later attaches reactivity to the DOM already on screen.
 
-This page covers how that works. For using it, see the [server rendering guide](/docs/guides/advanced/ssr).
+> **Usage Guide** See the [server rendering guide](/docs/guides/advanced/ssr) for setting server rendering up in a project.
 
 ## The Pipeline
 

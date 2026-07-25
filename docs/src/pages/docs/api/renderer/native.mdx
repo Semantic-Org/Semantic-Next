@@ -6,7 +6,7 @@ title: Native Renderer
 description: API reference for the default rendering engine in Semantic UI
 ---
 
-The native engine is the default. `Renderer` extends `HTMLElement` directly with no framework dependency underneath it, and `ServerRenderer` produces the HTML string that [`renderToString`](/docs/api/renderer/server-rendering) returns.
+The native engine is the default. Its factory produces components that extend `HTMLElement` directly, `Renderer` walks the AST into DOM, and `ServerRenderer` produces the HTML string that [`renderToString`](/docs/api/renderer/server-rendering) returns.
 
 ## Fine Grained Reactivity
 
