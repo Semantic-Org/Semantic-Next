@@ -26,6 +26,7 @@ export const sidebarMenuFramework = [
       { name: 'DOM', url: '/docs/guides/components/dom' },
       { name: 'Styling', url: '/docs/guides/components/styling' },
       { name: 'Key Bindings', url: '/docs/guides/components/keys' },
+      { name: 'Server Side Rendering', url: '/docs/guides/components/ssr' },
       { name: 'Specs', url: '/docs/guides/components/specs' },
     ],
   },
@@ -87,7 +88,6 @@ export const sidebarMenuFramework = [
     icon: 'server',
     pages: [
       { name: 'Common Issues', url: '/docs/guides/advanced/common-issues' },
-      { name: 'Server Side Rendering', url: '/docs/guides/advanced/ssr' },
     ],
   },
 ];

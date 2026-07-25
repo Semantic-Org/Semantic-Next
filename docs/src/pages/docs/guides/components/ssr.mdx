@@ -1,0 +1,105 @@
+---
+layout: '@layouts/Guide.astro'
+title: Server Side Rendering
+icon: server
+description: Rendering components on the server so content appears before JavaScript loads
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Purpose of SSR
+
+When a webpage is loaded custom tags are upgraded, this means to have content on initial load that matches the final styling you will need to use an SSR solution.
+
+Without SSR you will see a flash of unstyled content when the UI component is upgraded to its final rendered shadow DOM.
+
+![Component Upgrading](/gif/ssr.gif)
+
+Server rendering sends the component's shadow DOM with the page, so the browser paints it while parsing rather than waiting for the component to upgrade.
+
+> For how the server output and client hydration fit together see the [server rendering API reference](/docs/api/renderer/server-rendering).
+
+## Rendering on the Server
+
+`renderToString` exported from `@semantic-ui/component` takes a component and its attributes and returns the element with its shadow DOM inlined.
+
+```javascript {6}
+import { defineComponent, renderToString } from '@semantic-ui/component';
+
+const Card = defineComponent({ tagName: 'my-card', template, css });
+
+const html = renderToString(Card, { title: 'Hello' });
+```
+
+The output wraps your rendered content in a `<template shadowrootmode="open">` which the HTML parser converts into a real shadow root.
+
+```html {2}
+<my-card title="Hello">
+  <template shadowrootmode="open">
+    <style>/* component css */</style>
+    <div class="card">Hello</div>
+  </template>
+</my-card>
+```
+
+Nested components are expanded for you. A template containing `<ui-icon>` produces that icon's shadow DOM in the same pass.
+
+<PlaygroundExample id="server-rendering" direction="horizontal"></PlaygroundExample>
+
+### Static Output
+
+Pass `hydrate: false` for markup that should never become interactive.
+
+```javascript {1}
+const html = renderToString(Card, { title: 'Hello' }, { hydrate: false });
+```
+
+The element receives an `ssr` attribute and the client leaves it alone.
+
+## Building Components for SSR
+
+When a component is rendered on the server it is rendered in isolation so its not possible to directly access `window` or other parts of the DOM from your component.
+
+Components provide an `isClient` and `isServer` boolean to [callbacks](/docs/guides/components/lifecycle#callback-arguments) to allow you to have separate code paths for the server and client.
+
+```javascript {2,4}
+const createComponent = ({ isServer, state }) => ({
+  initialize() {
+    if (isServer) {
+      return;
+    }
+    state.width.set(window.innerWidth);
+  },
+});
+```
+
+### Client Only Code
+
+Some common values that might be useful in a component but should be prevented from running on the server
+
+* Accessing `navigator.userAgent` to determine browser type
+* Accessing `window` or `document` or other DOM elements
+* Accessing `localStorage`
+
+Timers and event listeners created through [callback arguments](/docs/guides/components/lifecycle#callback-arguments) are already inert on the server and need no guard.
+
+### Async Data
+
+[`{#async}`](/docs/guides/templates/async) renders its `loading` branch on the server. The promise is never awaited because the server cannot update markup it has already sent.
+
+```sui {4}
+{#async loadUser as user}
+  <h2>{user.name}</h2>
+{loading}
+  <div class="skeleton"></div>
+{/async}
+```
+
+The skeleton ships in the HTML and the client resolves the promise after hydration. Data that must be present at first paint should arrive as a [setting](/docs/guides/components/settings) rather than be fetched inside the component.
+
+## Hydration
+
+Hydration attaches reactivity to the server's DOM instead of replacing it. Nothing re-renders and nothing is compared against what the client would have produced.
+
+`createComponent` runs again on the client, so anything skipped under `isServer` runs then. [State](/docs/guides/components/state) initialized on both sides needs to produce the same value, otherwise the first update will visibly correct it.
+
+Components carrying markers from an older build are discarded and rendered fresh, so a deploy that changes a template cannot leave mismatched bindings behind.
