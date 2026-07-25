@@ -13,6 +13,8 @@ A template compiles once per component definition, rather than per instance. A c
 
 Precompiling earns its place when you already have a build and want that cost paid before the browser starts, which usually means a long-running server or a static site.
 
+> **Already Server Rendering** [Server rendering](/docs/guides/components/ssr) puts a build in front of your components, so the precondition is already met. A long-running server compiles at boot rather than per request either way, so what precompiling removes is startup cost.
+
 ## Templates
 
 Keeping html and css [in their own files](/docs/guides/components/create#organizing-code) is the recommended way to author a component. [`getText`](/docs/api/utils/browser#gettext) fetches them at runtime and needs no build. With a bundler they arrive as static imports instead: `?raw` for text, and `?ast` for a template compiled during the build.
@@ -64,7 +66,3 @@ defineComponent({
 ```
 
 > See the [SpecReader reference](/docs/api/specs/spec-reader) for what a resolved spec contains.
-
-## Precompiled Components on a Server
-
-Both paths matter more when a component is defined once and rendered many times, which is the shape of [server rendering](/docs/guides/components/ssr). A long-running server pays each compile once at boot rather than per request either way, so the gain is startup time rather than throughput.

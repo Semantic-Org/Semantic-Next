@@ -31,6 +31,8 @@ Most projects reach for an adapter rather than rendering components by hand. Eac
 
 Your client bundle needs no hydration code. A component detects the server's shadow DOM on upgrade and wires itself.
 
+> **Compiling Ahead** An adapter means you already have a build, so templates and specs can be [compiled during it](/docs/guides/advanced/compilation) rather than in the browser.
+
 ## Rendering on the Server
 
 The adapters are built on `renderToString`, exported from `@semantic-ui/component`. It takes a component and its attributes and returns the element with its shadow DOM inlined.
