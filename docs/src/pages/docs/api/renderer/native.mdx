@@ -1,0 +1,64 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+icon: zap
+title: Native Renderer
+description: API reference for the default rendering engine in Semantic UI
+---
+
+The native engine is the default. `Renderer` extends `HTMLElement` directly with no framework dependency underneath it, and `ServerRenderer` produces the HTML string that [`renderToString`](/docs/api/component/server-rendering) returns.
+
+## Fine Grained Reactivity
+
+Every dynamic position in a template gets its own `Reaction`. When a signal changes, only the reactions that read it wake, and each writes to the one DOM position it owns.
+
+```html
+<h1>{title}</h1>
+<span class="count">{count}</span>
+```
+
+Changing `count` wakes one reaction and assigns one text node. `title` is untouched, its reaction never runs, and the surrounding element is never revisited.
+
+There is no render loop, no virtual DOM, and no component-level re-render. The AST is walked exactly once, when the instance first renders. After that the tree is inert and updates flow only through the individual reactions bound during that walk.
+
+This is the fact worth carrying into everything else on this page: rendering is a one-time wiring step, and reactivity is what runs afterward.
+
+## Rendering
+
+`Renderer.render()` returns a `DocumentFragment` in three phases.
+
+| Phase | Produces |
+|------|----------|
+| Assemble | One HTML string with a marker at every dynamic position, plus an `entries` array describing each marker |
+| Parse | A single `innerHTML` assignment on a `<template>`, so the browser resolves nesting |
+| Bind | Two `TreeWalker` passes that find the markers and create a reaction per binding |
+
+Assembly is a pure function, which is what lets the client and the server share it. Parsed templates are cached by their HTML string and cloned per instance, so a component rendered a hundred times parses once.
+
+### Markers
+
+| Position | Marker |
+|------|------|
+| Text content | `<!--sui:v1:0-->` |
+| Attribute value | `__sui0__` |
+| Block directive | `<!--sui-block:v1:0-->` |
+
+Each marker carries an index into `entries`. Whether a marker is an attribute or text, boolean or quoted, property or event is decided during assembly by `analyzePosition`, not at bind time.
+
+## Block Directives
+
+`{#if}`, `{#each}`, `{#async}` and `{#rerender}` own a region of DOM rather than a single position. Each keeps a persistent anchor node, the nodes it inserted, and the reaction scopes belonging to them.
+
+When a branch swaps or a row leaves a keyed list, the region disposes its child scopes before removing nodes. Disposal is hierarchical, so a nested block tears down with its parent: reactions stop, timers clear, and delegated listeners unbind without the template tracking them individually.
+
+The anchor stays put, so replacement content lands in the same position.
+
+## Server Rendering
+
+`ServerRenderer` walks the same AST and emits a string instead of nodes. It shares assembly with the client renderer, so both agree on markup and on where the dynamic positions are.
+
+The markers it emits are what the client binds to on hydration. Because both sides derive them from one function, the client wires the existing tree rather than re-rendering it.
+
+Markers carry a version. Before hydrating, the client reads the first one it finds and compares it. On a mismatch it discards the server content and renders from scratch, so a stale payload costs a render rather than producing a tree whose bindings point at the wrong positions.
+
+See [Server Rendering](/docs/api/component/server-rendering) for the `renderToString` API.

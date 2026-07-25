@@ -1,38 +1,44 @@
 ---
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
-title: Renderer API Reference
 icon: brush
-description: API reference for Semantic UI's rendering engine
+title: Renderer
+description: API reference for rendering engines in Semantic UI
 ---
 
-These docs provide a reference to how template `AST` are rendered to the DOM for UI components.
+`@semantic-ui/renderer` is the last step in producing a component. [Component](/docs/api/component) defines it, the [template compiler](/docs/api/templating) turns its template into an [AST](/docs/api/templating/ast), and the renderer turns that AST into DOM and keeps it in sync with state.
 
-Semantic currently uses [Google's Lit](https://www.lit.dev) as its primary rendering engine, with the possibility of supporting other rendering targets in the future.
+The AST describes structure, never how that structure is produced, so the renderer behind it is swappable. Two engines ship with the framework: `native` renders directly to DOM and is the default, `lit` renders through `lit-html`.
+
+> **Reference Only** Most projects never import this package. Components pull the native engine in through `@semantic-ui/component`, and the [components guide](/docs/guides/components) covers everything you need to build with them.
 
 ## Installation
+
+The renderer can be used standalone to render an AST without the component layer.
 
 ```bash
 npm install @semantic-ui/renderer
 ```
 
-## API Sections
-
-* [Lit Renderer](/docs/api/renderer/lit-renderer) - Core rendering engine based on Lit
-* [Lit Directives](/docs/api/renderer/lit-directives) - Custom directives for reactive rendering
-
 ## Basic Usage
 
+Components select an engine by name.
+
 ```javascript
-import { LitRenderer } from '@semantic-ui/renderer';
+import { defineComponent } from '@semantic-ui/component';
 
-const renderer = new LitRenderer({
-  ast: templateAST,
-  data: {
-    user: { name: 'John' }
-  },
-  template: parentTemplate
+defineComponent({
+  tagName: 'my-card',
+  template,
+  renderingEngine: 'lit',
 });
-
-const html = renderer.render();
 ```
+
+Omitting `renderingEngine` uses `native`.
+
+## API Sections
+
+* **[Rendering Engines](/docs/api/renderer/engines)** - Registering an engine, and the modules an engine reuses.
+* **[Native Renderer](/docs/api/renderer/native)** - The default engine, and the server renderer behind `renderToString`.
+* **[Lit Renderer](/docs/api/renderer/lit-renderer)** - The engine contract implemented against `lit-html`.
+* **[Lit Directives](/docs/api/renderer/lit-directives)** - How the Lit engine binds reactive values.

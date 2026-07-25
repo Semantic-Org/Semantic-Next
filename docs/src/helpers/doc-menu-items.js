@@ -222,8 +222,9 @@ export const sidebarMenuAPI = [
     url: '/docs/api/renderer',
     icon: 'brush',
     pages: [
+      { name: 'Rendering Engines', url: '/docs/api/renderer/engines' },
+      { name: 'Native Renderer', url: '/docs/api/renderer/native' },
       { name: 'Lit Renderer', url: '/docs/api/renderer/lit-renderer' },
-      { name: 'Lit Directives', url: '/docs/api/renderer/lit-directives' },
     ],
   },
 ];
