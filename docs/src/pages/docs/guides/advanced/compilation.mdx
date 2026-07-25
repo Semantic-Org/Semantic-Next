@@ -9,9 +9,9 @@ description: Moving template and spec compilation into a build step
 
 Templates compile in the browser by default, and that is the point. A component works from a `<script>` tag with no build step at all.
 
-Compilation is also fast enough that moving it is rarely the reason a page feels slow. The nineteen first-party primitives compile in roughly a millisecond in total, and a single template lands well under a tenth of that.
+A template compiles once per component definition, not per instance. A page rendering a thousand buttons compiles that template once, in well under a millisecond, and never again.
 
-Compile ahead when you already have a build and want the cost paid once, which usually means a long-running server or a static site. Most projects will measure no difference.
+Compile ahead when you already have a build and want that cost paid before the browser starts, which usually means a long-running server or a static site. Most projects will measure no difference.
 
 ## Templates
 
