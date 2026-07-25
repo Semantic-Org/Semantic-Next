@@ -35,7 +35,8 @@ Performs a deep equality comparison between two values.
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
 | loose | boolean | `false` | Uses `==` instead of `===` for leaf value comparison |
-| ignoreKeys | string[] | `[]` | Array of property names to skip during comparison |
+| ignoreKeys | string[] | `[]` | Array of property names to skip during comparison, at the top level only |
+| deepIgnore | boolean | `false` | Applies `ignoreKeys` at every depth instead of just the top level |
 | partial | boolean | `false` | Checks if `a` is a structural subset of `b` |
 
 #### Returns

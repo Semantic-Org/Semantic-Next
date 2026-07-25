@@ -1,26 +1,22 @@
-// Batch Updates: Understanding automatic batching behavior
 import { flush, reaction, signal } from '@semantic-ui/reactivity';
 
-const firstName = signal('John');
-const lastName = signal('Doe');
+const width = signal(1024);
+const height = signal(768);
 
-// Reaction that depends on both signals
 reaction(() => {
-  console.log('Full name:', `${firstName.get()} ${lastName.get()}`);
+  console.log('Viewport:', `${width.get()} x ${height.get()}`);
 });
 
-console.log('--- Multiple synchronous updates ---');
-// These updates are automatically batched
-firstName.set('Jane');
-lastName.set('Smith');
-// Only one reaction will run with the final values
+console.log('--- Two writes in one tick ---');
+width.set(1280);
+height.set(720);
 
-console.log('--- After automatic batching ---');
-flush(); // Force immediate execution to see result
+// one run, with both final values
+flush();
 
-console.log('--- Manual flush between updates ---');
-firstName.set('Bob');
-flush(); // Force execution after first change
+console.log('--- A flush between the writes ---');
+width.set(800);
+flush();
 
-lastName.set('Johnson');
-flush(); // Force execution after second change
+height.set(600);
+flush();

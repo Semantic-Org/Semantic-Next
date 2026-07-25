@@ -1,11 +1,12 @@
 ---
-title: 'Performance Optimization'
-shortTitle: 'Performance'
+title: 'Deferring Expensive Work'
+shortTitle: 'Deferring Work'
 id: 'performance-patterns'
+sortIndex: 2
 exampleType: 'log'
 category: 'Reactivity'
 subcategory: 'Flushing'
-tags: ['reactivity', 'performance', 'optimization', 'afterFlush']
-description: 'Using afterFlush and other techniques to optimize expensive reactive computations'
-tip: 'Use afterFlush() to defer expensive operations until all reactions have completed'
+tags: ['reactivity', 'performance', 'afterFlush', 'flush']
+description: Moving a costly step out of the reaction body and into afterFlush
+tip: 'A reaction fed by another reaction re-runs on each pass of the queue, so one write can produce several runs inside a single flush'
 ---

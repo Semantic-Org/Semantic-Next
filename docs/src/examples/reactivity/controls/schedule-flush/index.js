@@ -1,4 +1,3 @@
-// Schedule Flush: Manual flush scheduling
 import { flush, reaction, scheduleFlush, signal } from '@semantic-ui/reactivity';
 
 const status = signal('idle');

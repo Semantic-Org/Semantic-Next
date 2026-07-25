@@ -1,0 +1,35 @@
+:host {
+  display: block;
+  font-family: var(--page-font);
+}
+
+.entries {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    padding: var(--padding);
+    border-bottom: var(--border);
+  }
+
+  .badge {
+    margin-left: auto;
+    padding: 0 var(--padding);
+    border-radius: var(--circular-radius);
+    font-size: var(--text-xs);
+  }
+
+  .large {
+    background: var(--primary-5);
+    color: var(--primary-text-color);
+  }
+
+  .small {
+    background: var(--standard-10);
+    color: var(--text-color);
+  }
+}

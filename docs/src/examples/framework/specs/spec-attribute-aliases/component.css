@@ -1,0 +1,20 @@
+.marker {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-xs);
+  padding: var(--padding-2xs) var(--padding-xs);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-family: var(--code-font);
+  font-size: var(--text-s);
+
+  .written {
+    flex: 0 0 14em;
+    color: var(--header-color);
+    font-weight: var(--bold);
+  }
+
+  .pair {
+    color: var(--muted-text-color);
+  }
+}
