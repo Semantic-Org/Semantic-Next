@@ -912,7 +912,7 @@ class TemplateCompiler {
   */
   static parseSlotName(slotString = '') {
     const regExp = TemplateCompiler.templateRegExp;
-    // getValue has already coerced numeric names, and a bare {>slot} arrives undefined
+    // a bare {>slot} arrives undefined
     const text = String(slotString ?? '').trim();
     if (!text) {
       return undefined; // default slot, keeps the key out of a serialized AST
