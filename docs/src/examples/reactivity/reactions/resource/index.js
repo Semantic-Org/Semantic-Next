@@ -17,7 +17,7 @@ const results = resource(async (comp) => {
   return search(term, comp.abortSignal);
 }, { initialValue: 'nothing yet' });
 
-// re-runs only when a face it reads flips
+// re-runs only when the status it reads flips
 reaction(() => {
   console.log(results.loading ? 'loading...' : `showing: ${results.get()}`);
 });
