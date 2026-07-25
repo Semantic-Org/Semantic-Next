@@ -31,47 +31,6 @@ describe('TemplateCompiler - Extended Coverage', () => {
   });
 
   /*-----------------------------------------
-    getValue
-  -----------------------------------------*/
-
-  describe('getValue', () => {
-    it('should convert "true" to boolean true', () => {
-      const compiler = new TemplateCompiler();
-      expect(compiler.getValue('true')).toBe(true);
-    });
-
-    it('should convert "false" to boolean false', () => {
-      const compiler = new TemplateCompiler();
-      expect(compiler.getValue('false')).toBe(false);
-    });
-
-    it('should convert numeric strings to numbers', () => {
-      const compiler = new TemplateCompiler();
-      expect(compiler.getValue('42')).toBe(42);
-      expect(compiler.getValue('0')).toBe(0);
-      expect(compiler.getValue('3.14')).toBe(3.14);
-      expect(compiler.getValue('-7')).toBe(-7);
-    });
-
-    it('should return non-numeric strings as-is', () => {
-      const compiler = new TemplateCompiler();
-      expect(compiler.getValue('hello')).toBe('hello');
-      expect(compiler.getValue('user.name')).toBe('user.name');
-    });
-
-    it('should return whitespace-only strings as-is', () => {
-      const compiler = new TemplateCompiler();
-      expect(compiler.getValue('  ')).toBe('  ');
-    });
-
-    it('should pass through undefined and null', () => {
-      const compiler = new TemplateCompiler();
-      expect(compiler.getValue(undefined)).toBe(undefined);
-      expect(compiler.getValue(null)).toBe(null);
-    });
-  });
-
-  /*-----------------------------------------
     parseIteratorString (static)
   -----------------------------------------*/
 

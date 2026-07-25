@@ -72,7 +72,9 @@ describe('TemplateCompiler', () => {
       expect(ast).toEqual(expectedAST);
     });
 
-    it('should preserve boolean values', () => {
+    // literals stay source text in the AST. the evaluator resolves them, so
+    // every expression field is a string no matter what the author wrote
+    it('should keep boolean literals as expressions', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
@@ -83,9 +85,9 @@ describe('TemplateCompiler', () => {
       const ast = compiler.compile(template);
       const expectedAST = [
         { type: 'html', html: '<div><p>' },
-        { type: 'expression', value: true },
+        { type: 'expression', value: 'true' },
         { type: 'html', html: '</p><p>' },
-        { type: 'expression', value: false },
+        { type: 'expression', value: 'false' },
         { type: 'html', html: '</p></div>' },
       ];
       expect(ast).toEqual(expectedAST);
@@ -118,7 +120,7 @@ describe('TemplateCompiler', () => {
       expect(ast).toEqual(expectedAST);
     });
 
-    it('should preserve boolean values in conditionals', () => {
+    it('should keep boolean literals in conditionals', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
@@ -135,7 +137,7 @@ describe('TemplateCompiler', () => {
         { type: 'html', html: '<div>' },
         {
           type: 'if',
-          condition: true,
+          condition: 'true',
           branches: [],
           content: [
             { type: 'html', html: '<p>True</p>' },
@@ -143,7 +145,7 @@ describe('TemplateCompiler', () => {
         },
         {
           type: 'if',
-          condition: false,
+          condition: 'false',
           branches: [],
           content: [
             { type: 'html', html: '<p>False</p>' },
@@ -154,7 +156,7 @@ describe('TemplateCompiler', () => {
       expect(ast).toEqual(expectedAST);
     });
 
-    it('should preserve numerical values', () => {
+    it('should keep numeric literals as expressions', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
@@ -165,9 +167,9 @@ describe('TemplateCompiler', () => {
       const ast = compiler.compile(template);
       const expectedAST = [
         { type: 'html', html: '<div><p>' },
-        { type: 'expression', value: 10 },
+        { type: 'expression', value: '10' },
         { type: 'html', html: '</p><p>' },
-        { type: 'expression', value: 0 },
+        { type: 'expression', value: '0' },
         { type: 'html', html: '</p></div>' },
       ];
       expect(ast).toEqual(expectedAST);
