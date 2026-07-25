@@ -258,9 +258,8 @@ class TemplateCompiler {
             // attribute context decides ifDefined, only expressions consume it
             const context = (type === 'EXPRESSION') ? scanner.getContext() : null;
             scanner.consume(regex);
-            const rawContent = getTagContent();
+            const content = getTagContent();
             scanner.consume(parserRegExp.EXPRESSION_END);
-            const content = this.getValue(rawContent);
             return { type, content, ...context };
           }
         }
@@ -270,7 +269,7 @@ class TemplateCompiler {
       for (const [type, regex] of TemplateCompiler.htmlRegExpEntries) {
         if (scanner.matches(regex)) {
           scanner.consume(regex);
-          const content = this.getValue(scanner.consumeUntil(parserRegExp.TAG_CLOSE).trim());
+          const content = scanner.consumeUntil(parserRegExp.TAG_CLOSE).trim();
           scanner.consume(parserRegExp.TAG_CLOSE);
           return { type, content };
         }
@@ -744,19 +743,6 @@ class TemplateCompiler {
     // offsets against the source string, so they never condense
     const condense = !includePositions && !recoverable && !preserveWhitespace;
     return TemplateCompiler.optimizeAST(ast, { condense });
-  }
-
-  getValue(expression) {
-    if (expression == 'true') {
-      return true;
-    }
-    else if (expression == 'false') {
-      return false;
-    }
-    else if (isString(expression) && expression.trim() !== '' && Number.isFinite(+expression)) {
-      return Number(expression);
-    }
-    return expression;
   }
 
   parseRerenderExpression(content) {
