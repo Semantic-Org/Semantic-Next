@@ -270,6 +270,10 @@ const createComponent = ({ state, settings }) => ({
 /* playground-fold-end */
 ```
 
+`/* playground-hide */` and `/* playground-hide-end */` are the harder version: the region disappears from the
+editor entirely rather than collapsing. Use it only for scaffolding the lesson forces on you, never to make a
+lesson look shorter than it is. Full reference in the `docs-examples-authoring` skill.
+
 ---
 
 ## Writing the Code
