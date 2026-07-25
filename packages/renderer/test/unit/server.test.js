@@ -114,6 +114,30 @@ describe('renderToString', () => {
       expect(stripMarkers(dsdContent(result))).toBe('<span>42</span>');
     });
 
+    // false and 0 are the ones worth guarding. a literal resolving falsy
+    // disappears rather than throwing, so it never surfaces as a failure
+    it('renders literal expressions', () => {
+      const cases = [
+        ['true', 'true'],
+        ['false', 'false'],
+        ['null', ''],
+        ['1', '1'],
+        ['0', '0'],
+        ['-7', '-7'],
+        ['3.14', '3.14'],
+        ["'baz'", 'baz'],
+      ];
+      for (const [expression, expected] of cases) {
+        const ast = compile(`<div>{${expression}}</div>`);
+        expect(stripMarkers(dsdContent(renderToString({ ast })))).toBe(`<div>${expected}</div>`);
+      }
+    });
+
+    it('renders a literal expression in an attribute', () => {
+      const ast = compile('<div class="{1}">x</div>');
+      expect(stripMarkers(dsdContent(renderToString({ ast })))).toBe('<div class="1">x</div>');
+    });
+
     it('escapes HTML in text expressions', () => {
       const ast = compile('<div>{text}</div>');
       const result = renderToString({ ast, data: { text: '<script>alert(1)</script>' } });
@@ -196,6 +220,13 @@ describe('renderToString', () => {
       const ast = compile('<div>{#if show}<span>content</span>{/if}</div>');
       const result = renderToString({ ast, data: { show: false } });
       expect(stripMarkers(dsdContent(result))).toBe('<div></div>');
+    });
+
+    it('renders a literal condition', () => {
+      const yes = compile('<div>{#if true}<span>yes</span>{else}<span>no</span>{/if}</div>');
+      expect(stripMarkers(dsdContent(renderToString({ ast: yes })))).toBe('<div><span>yes</span></div>');
+      const no = compile('<div>{#if false}<span>yes</span>{else}<span>no</span>{/if}</div>');
+      expect(stripMarkers(dsdContent(renderToString({ ast: no })))).toBe('<div><span>no</span></div>');
     });
 
     it('preserves block markers for hydration', () => {
