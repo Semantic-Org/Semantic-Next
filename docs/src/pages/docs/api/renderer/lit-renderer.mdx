@@ -5,321 +5,50 @@ title: Lit Renderer
 icon: code
 description: API reference for the Lit rendering engine in Semantic UI
 package: '@semantic-ui/renderer'
-methods: ['render', 'setData', 'evaluateExpression', 'evaluateTemplate', 'evaluateConditional', 'evaluateEach']
 ---
 
-Semantic templates compile to an AST that can be read by a rendering engine to generate the html for your UI component.
+The Lit engine renders components through [Lit](https://lit.dev). `LitRenderer` turns an AST into a `TemplateResult`, and the factory produces components extending `LitElement` rather than `HTMLElement`.
 
-The renderer handles things like dynamic expression evaluation, reactive DOM updates, and all the gnitty gritty to render your component to a page.
+It exists as an alternative target for projects already invested in Lit, and as a worked example of the [engine contract](/docs/api/renderer/engines) built against a library the framework does not otherwise depend on.
 
-Semantic ships with a single primary rendering engine written to wrap Lit's powerful and efficient rendering called `LitRenderer`.
-
-Additional rendering engines may be written in the future to render UI components to other targets than just web.
-
-> **Advanced Use** It is not recommended to use the LitRenderer class directly unless you are wrapping SUI for a custom implementation. `LitRenderer` is used automatically from `defineComponent` to render your component.
-
-## Import
+> **Registration** The Lit engine is not registered by default. Import it once, anywhere in your bundle, before defining a component that asks for it.
 
 ```javascript
-import { LitRenderer } from '@semantic-ui/renderer';
-```
+import '@semantic-ui/component/engines/lit/register.js';
 
-## Constructor
-
-```javascript
-new LitRenderer(options)
-```
-
-### Parameters
-
-| Name      | Type   | Required | Description                            |
-|-----------|--------|----------|----------------------------------------|
-| options   | Object | Yes      | Configuration options for the renderer |
-
-### Options Object
-
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| ast | Array | Yes | Abstract syntax tree of the template |
-| data | Object | No | Initial data context |
-| template | Template | Yes | Parent template instance |
-| subTemplates | Object | No | Map of available subtemplates |
-| snippets | Object | No | Map of template snippets |
-| helpers | Object | No | Map of template helper functions |
-| isSVG | boolean | No | Whether content should be rendered as SVG |
-
-### Example
-
-```javascript
-const renderer = new LitRenderer({
-  ast: templateAST,
-  data: {
-    user: { name: 'John' }
-  },
-  template: parentTemplate,
-  subTemplates: {
-    header: headerTemplate,
-    footer: footerTemplate
-  }
+defineComponent({
+  tagName: 'my-card',
+  template,
+  renderingEngine: 'lit',
 });
 ```
 
-## Methods
+## Producing a TemplateResult
 
-### render
+Lit's API expects a tagged template literal. The AST is a runtime data structure, so the renderer assembles the two halves Lit would otherwise receive from source text: an array of static strings, and an array of values to interpolate between them.
 
-```javascript
-render({ ast, data } = {})
-```
+Walking the AST fills both. Static markup accumulates into the strings, and each dynamic position contributes a directive instance to the values. The finished pair goes to Lit's `html` tag, which returns the `TemplateResult` that `render()` hands back to `LitElement`. SVG content uses Lit's `svg` tag, chosen at the same point.
 
-Renders the template with the current data context and returns a Lit template result.
+## Reactivity
 
-#### Parameters
+Each reactive block type has a directive: expressions, conditionals, `{#each}`, `{#match}`, `{#async}`, `{#rerender}`, and subtemplate calls. Every directive holds its own `Reaction`, and when a signal it read changes, the directive calls Lit's `setValue()` to update that position alone.
 
-| Name    | Type    | Required | Description                    |
-|---------|---------|----------|--------------------------------|
-| options | Object  | No       | Render configuration options   |
+Signal changes are fine grained under both engines, and the AST is walked once under both. What differs is the layer above.
 
-#### Options Object
+`LitElement` runs its own update cycle. A change to a Lit reactive property schedules `willUpdate`, `render`, and `updated`, and `render()` returns the template's cached result for Lit to diff. Under the [native engine](/docs/api/renderer/native) there is no such cycle, and a signal change reaches its binding with nothing scheduled around it.
 
-| Property | Type  | Default | Description                |
-|----------|-------|---------|----------------------------|
-| ast      | Array | this.ast| Template AST to render     |
-| data     | Object| this.data| Data context for rendering |
+The cost is small, since the diff compares a result Lit has already committed. It is a difference in shape rather than an equivalent path.
 
-#### Returns
+## Server Rendering
 
-A Lit template result.
+The Lit engine registers no `serverRenderer`, so components using it render on the client only. Lit maintains its own SSR packages, which operate on Lit's rendering rather than on the AST. Components that need [server rendering](/docs/api/renderer/server-rendering) should use the native engine.
 
-#### Example
+## Direct Use
+
+`LitRenderer` is constructed by `Template.initialize()` with the [arguments every engine renderer receives](/docs/api/renderer/engines#renderer). Constructing one directly is only useful when embedding the rendering pipeline in something other than a component.
 
 ```javascript
-// Basic render
-const html = renderer.render();
-
-// Render with new data
-const html = renderer.render({
-  data: { count: 5 }
-});
-
-// Render with new AST and data
-const html = renderer.render({
-  ast: newTemplateAST,
-  data: { items: ['one', 'two'] }
-});
+import { LitRenderer } from '@semantic-ui/renderer/lit';
 ```
 
-### setData
-
-```javascript
-setData(newData)
-```
-
-Updates the data context and triggers reactive updates.
-
-#### Parameters
-
-| Name    | Type   | Required | Description         |
-|---------|--------|----------|---------------------|
-| newData | Object | Yes      | New data context    |
-
-#### Example
-
-```javascript
-renderer.setData({
-  count: 10,
-  user: { name: 'Jane' }
-});
-```
-
-### evaluateExpression
-
-```javascript
-evaluateExpression(expression, data, options)
-```
-
-Evaluates a template expression in the given data context.
-
-#### Parameters
-
-| Name       | Type   | Required | Description                  |
-|------------|--------|----------|------------------------------|
-| expression | string | Yes      | Expression to evaluate       |
-| data       | Object | No       | Data context for evaluation  |
-| options    | Object | No       | Evaluation options          |
-
-#### Options Object
-
-| Property     | Type    | Default | Description                                    |
-|--------------|---------|---------|------------------------------------------------|
-| asDirective  | boolean | false   | Return result as a Lit directive               |
-| ifDefined    | boolean | false   | Use Lit's ifDefined directive                  |
-| unsafeHTML   | boolean | false   | Use Lit's unsafeHTML directive                 |
-| literalValue | boolean | false   | Pass value as-is without auto-invoking functions |
-
-#### Returns
-
-The evaluated expression result or a Lit directive if `asDirective` is true.
-
-#### Example
-
-```javascript
-// Simple property access
-const value = renderer.evaluateExpression('user.name', {
-  user: { name: 'John' }
-});
-
-// With directive options
-const directive = renderer.evaluateExpression('content', data, {
-  asDirective: true,
-  unsafeHTML: true
-});
-```
-
-### evaluateTemplate
-
-```javascript
-evaluateTemplate(node, data)
-```
-
-Evaluates a template node with given data.
-
-#### Parameters
-
-| Name | Type   | Required | Description              |
-|------|--------|----------|--------------------------|
-| node | Object | Yes      | Template node to evaluate |
-| data | Object | No       | Data context            |
-
-#### Node Object
-
-| Property | Type   | Required | Description            |
-|----------|--------|----------|------------------------|
-| name     | string | Yes      | Template name to render |
-| data     | Object | No       | Template data context  |
-
-#### Returns
-
-A Lit template result.
-
-#### Example
-
-```javascript
-const result = renderer.evaluateTemplate({
-  name: 'itemTemplate',
-  data: {
-    item: { id: 1, text: 'Test' }
-  }
-}, contextData);
-```
-
-### evaluateConditional
-
-```javascript
-evaluateConditional(node, data)
-```
-
-Evaluates a conditional template node.
-
-#### Parameters
-
-| Name | Type   | Required | Description                |
-|------|--------|----------|----------------------------|
-| node | Object | Yes      | Conditional node to evaluate|
-| data | Object | No       | Data context              |
-
-#### Node Object
-
-| Property  | Type    | Required | Description           |
-|-----------|---------|----------|-----------------------|
-| condition | string  | Yes      | Condition to evaluate |
-| content   | Array   | Yes      | Content if true      |
-| branches  | Array   | No       | Else/elseif branches |
-
-#### Returns
-
-A Lit directive for conditional rendering.
-
-#### Example
-
-```javascript
-const result = renderer.evaluateConditional({
-  condition: 'isVisible',
-  content: [/* template content */],
-  branches: [
-    {
-      type: 'elseif',
-      condition: 'isLoading',
-      content: [/* loading content */]
-    },
-    {
-      type: 'else',
-      content: [/* else content */]
-    }
-  ]
-}, data);
-```
-
-### evaluateEach
-
-```javascript
-evaluateEach(node, data)
-```
-
-Evaluates an iteration template node.
-
-#### Parameters
-
-| Name | Type   | Required | Description              |
-|------|--------|----------|--------------------------|
-| node | Object | Yes      | Each node to evaluate    |
-| data | Object | No       | Data context            |
-
-#### Node Object
-
-| Property | Type   | Required | Description            |
-|----------|--------|----------|------------------------|
-| over     | string | Yes      | Array to iterate over |
-| content  | Array  | Yes      | Template for each item|
-| as       | string | No       | Item alias name       |
-
-#### Returns
-
-A Lit directive for iteration.
-
-#### Example
-
-```javascript
-const result = renderer.evaluateEach({
-  over: 'items',
-  content: [/* item template */],
-  as: 'item'
-}, {
-  items: ['one', 'two', 'three']
-});
-```
-
-## Expression Types
-
-The renderer supports various expression types in templates, for more information see the documentation on [template expression](/docs/guides/templates/expressions).
-
-### Simple Properties
-```javascript
-{ user.name }
-```
-
-### Nested Expressions
-```javascript
-{ helper (otherHelper value) }
-```
-
-### Boolean Attributes
-```javascript
-<div hidden={ isHidden }></div>
-```
-
-### Template Helpers
-```javascript
-{ formatDate date "MM/DD/YYYY" }
-```
-
+It is absent from the package's main entry point, so importing `@semantic-ui/renderer` never pulls Lit into a bundle that does not use it.
