@@ -6,7 +6,7 @@ title: Native Renderer
 description: API reference for the default rendering engine in Semantic UI
 ---
 
-The native engine is the default. `Renderer` extends `HTMLElement` directly with no framework dependency underneath it, and `ServerRenderer` produces the HTML string that [`renderToString`](/docs/api/component/server-rendering) returns.
+The native engine is the default. `Renderer` extends `HTMLElement` directly with no framework dependency underneath it, and `ServerRenderer` produces the HTML string that [`renderToString`](/docs/api/renderer/server-rendering) returns.
 
 ## Fine Grained Reactivity
 
@@ -55,10 +55,6 @@ The anchor stays put, so replacement content lands in the same position.
 
 ## Server Rendering
 
-`ServerRenderer` walks the same AST and emits a string instead of nodes. It shares assembly with the client renderer, so both agree on markup and on where the dynamic positions are.
+`ServerRenderer` walks the same AST and emits a string instead of nodes. Both renderers share assembly, so they agree on the markup and on where the dynamic positions are. That shared origin is what lets the client wire the server's tree instead of replacing it.
 
-The markers it emits are what the client binds to on hydration. Because both sides derive them from one function, the client wires the existing tree rather than re-rendering it.
-
-Markers carry a version. Before hydrating, the client reads the first one it finds and compares it. On a mismatch it discards the server content and renders from scratch, so a stale payload costs a render rather than producing a tree whose bindings point at the wrong positions.
-
-See [Server Rendering](/docs/api/component/server-rendering) for the `renderToString` API.
+See [Server Rendering](/docs/api/renderer/server-rendering) for how that handoff works.

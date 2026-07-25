@@ -224,6 +224,7 @@ export const sidebarMenuAPI = [
     pages: [
       { name: 'Rendering Engines', url: '/docs/api/renderer/engines' },
       { name: 'Native Renderer', url: '/docs/api/renderer/native' },
+      { name: 'Server Rendering', url: '/docs/api/renderer/server-rendering' },
       { name: 'Lit Renderer', url: '/docs/api/renderer/lit-renderer' },
     ],
   },

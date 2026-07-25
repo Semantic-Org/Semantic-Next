@@ -1,0 +1,80 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+icon: server
+title: Server Rendering
+description: How server rendering and hydration work in Semantic UI
+---
+
+Server rendering exists here for first paint. The server produces [Declarative Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM), the browser renders it before any JavaScript arrives, and the client later attaches reactivity to the DOM that is already on screen.
+
+This page covers how that works. For using it, see the [server rendering guide](/docs/guides/advanced/ssr).
+
+## The Pipeline
+
+```
+renderToString()      HTML string with markers, wrapped in <template shadowrootmode="open">
+      |
+      v
+browser parse         shadow root created, content visible, no JavaScript yet
+      |
+      v
+element upgrade       custom element defined, existing shadow root detected
+      |
+      v
+hydrate()             reactions wired to the existing DOM
+```
+
+The definition is the same on both sides. `createComponent` runs on the server and again on the client, so a component is written once and the environment decides what happens.
+
+## Server Rendering
+
+`ServerRenderer` walks the same AST as the client renderer and shares its expression evaluator, but produces a string. There are no reactions, no signals, and no DOM regions on the server. Nothing is reactive, because nothing there ever changes.
+
+It stamps a marker at each dynamic position so the client can find it later.
+
+| Position | Server output |
+|------|------|
+| Text expression | `<!--sui:v1:3-->Hello` |
+| Block open | `<!--sui-block:v1:5-->` |
+| Block close | `<!--/sui-block:v1:5:b1000-->` |
+| Attribute expression | evaluated inline, no marker |
+
+Block close markers carry which branch was taken, so the client knows what the server chose without re-evaluating the condition.
+
+Two behaviours follow from having no reactivity. `{#async}` renders its `loading` branch and never awaits the promise, because the server has no way to update what it already sent. Timers and listeners registered through the callback params are no-ops.
+
+Nested components expand recursively. The renderer scans its own output for custom element tags, looks each one up in the registry, and renders it as nested Declarative Shadow DOM.
+
+## Declarative Shadow DOM
+
+The browser handles `<template shadowrootmode="open">` during HTML parsing. It creates the shadow root, moves the content in, and drops the template. This happens before scripts run, so the styled component is on screen without waiting for the bundle.
+
+Component CSS ships inside that template as a `<style>` tag. Hydration removes it, having moved the styles to `adoptedStyleSheets`.
+
+## Hydration
+
+Hydration trusts the server. It does not re-render, re-evaluate conditions, or diff the result against what the client would have produced. It walks the markers and wires a reaction to each position.
+
+The mechanism that makes trust possible is that the first run of every wired reaction is evaluated but not written:
+
+```javascript
+if (comp.firstRun && hydrating) {
+  compute(state);   // read the signals, registering dependencies
+  return;           // leave the DOM alone
+}
+```
+
+The evaluation cannot be skipped. Reading a signal inside a running reaction is the only way to register a dependency on it, so the run is what teaches the binding which signals it cares about. The write can be skipped, because the server already produced that value. Every subsequent run writes normally.
+
+That is the whole trick, and it is why hydration costs a pass over existing nodes rather than a render.
+
+Markers are removed after wiring completes. The reactions hold references to real text nodes and elements rather than to the comments, so nothing depends on them once binding is done.
+
+## Version Mismatch
+
+Markers carry a version. Before hydrating, the client reads the first marker it finds and compares it against the version it was built with.
+
+On a mismatch it discards the server content and renders from scratch. A stale payload costs one render, rather than producing a tree whose bindings point at positions that have since moved.
+
+An element carrying an `ssr` attribute is skipped entirely. Its markup stays as delivered and no JavaScript claims it.
