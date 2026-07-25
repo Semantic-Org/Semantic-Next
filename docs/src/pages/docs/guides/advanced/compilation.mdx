@@ -7,11 +7,9 @@ description: Moving template and spec compilation into a build step
 
 ## Compiling Ahead
 
-Moving template compilation into a build step reads like an obvious optimization. For most projects it changes nothing measurable.
+Moving template compilation into a build step reads like an obvious optimization. For most projects it changes nothing measurable, since a template compiles once per component definition rather than per instance, in well under a millisecond.
 
-A template compiles once per component definition, rather than per instance. A component used in a thousand places on a page compiles once, in well under a millisecond, and never again. Compiling at runtime is also what allows a component to work from a `<script>` tag with no build step.
-
-Precompiling earns its place when you already have a build and want that cost paid before the browser starts, which usually means a long-running server or a static site.
+Precompiling earns its place when you already have a build: a long-running server, or a static site.
 
 > **Already Server Rendering** [Server rendering](/docs/guides/components/ssr) puts a build in front of your components, so the precondition is already met. A long-running server compiles at boot rather than per request either way, so what precompiling removes is startup cost.
 
