@@ -5,13 +5,13 @@ icon: cpu
 description: Moving template and spec compilation into a build step
 ---
 
-## When to Bother
+## Compiling Ahead
 
-Templates compile in the browser by default, and that is the point. A component works from a `<script>` tag with no build step at all.
+Moving template compilation into a build step reads like an obvious optimization. For most projects it changes nothing measurable.
 
-A template compiles once per component definition, not per instance. A component used in a thousand places on a page compiles once, in well under a millisecond, and never again.
+A template compiles once per component definition, rather than per instance. A component used in a thousand places on a page compiles once, in well under a millisecond, and never again. Compiling at runtime is also what allows a component to work from a `<script>` tag with no build step.
 
-Compile ahead when you already have a build and want that cost paid before the browser starts, which usually means a long-running server or a static site. Most projects will measure no difference.
+Precompiling earns its place when you already have a build and want that cost paid before the browser starts, which usually means a long-running server or a static site.
 
 ## Templates
 
@@ -30,7 +30,7 @@ defineComponent({
 });
 ```
 
-`defineComponent` takes [`ast`](/docs/api/templating/ast) in place of `template`, and when it receives one the compiler never runs. Only the template changes. Css is text either way.
+`defineComponent` takes [`ast`](/docs/api/templating/ast) in place of `template`, and when it receives one the compiler never runs. Only the template changes, and CSS is text either way.
 
 The loaders are built on [unplugin](https://unplugin.unjs.io), so they run in esbuild, Vite, Rollup, Rolldown, webpack, and rspack.
 
