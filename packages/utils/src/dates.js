@@ -17,7 +17,7 @@ const presetFormats = {
   llll: 'ddd, MMM D, YYYY h:mm a',
 };
 
-const tokenRegExp = /\[([^\]]*)]|YYYY|YY|MMMM|MMM|MM|M|Do|DD|D|dddd|ddd|HH|hh|h|mm|ss|a/g;
+const tokenRegExp = /\[([^\]]*)]|YYYY|YY|MMMM|MMM|MM|M|Do|DD|D|dddd|ddd|HH|hh|h|mm|ss|a|A/g;
 const needsNumericMonth = /\bMM?\b/;
 const formatterCache = new Map();
 const monthFormatterCache = new Map();
@@ -116,6 +116,7 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
     mm: minute,
     ss: second,
     a: hour12 ? (hour24Value < 12 ? 'am' : 'pm') : '',
+    A: hour12 ? (hour24Value < 12 ? 'AM' : 'PM') : '',
   };
 
   // single-pass replacement
