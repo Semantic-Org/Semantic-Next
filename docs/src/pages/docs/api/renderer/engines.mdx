@@ -152,5 +152,3 @@ These resolve identity the same way the shipped engines do, so an engine reconci
 ## Writing an Engine
 
 The two shipped engines are worked examples of the same contract. [Native](/docs/api/renderer/native) assembles an HTML string, parses it once, then binds markers. [Lit](/docs/api/renderer/lit-renderer) accumulates static strings and directive instances, then hands both to `lit-html`.
-
-They agree on the AST, the evaluator, and list identity. They differ only in what they produce and how they update it.

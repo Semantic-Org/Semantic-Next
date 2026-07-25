@@ -29,7 +29,7 @@ The definition is the same on both sides. `createComponent` runs on the server a
 
 ## Server Rendering
 
-`ServerRenderer` walks the same AST as the client renderer and shares its expression evaluator, but produces a string. There are no reactions, no signals, and no DOM regions on the server. Nothing is reactive, because nothing there ever changes.
+`ServerRenderer` walks the same AST as the client renderer and shares its expression evaluator, but produces a string. Nothing it emits is reactive, because nothing on the server changes after it is sent.
 
 It stamps a marker at each dynamic position so the client can find it later.
 
@@ -54,9 +54,9 @@ Component CSS ships inside that template as a `<style>` tag. Hydration removes i
 
 ## Hydration
 
-Hydration trusts the server. It does not re-render, re-evaluate conditions, or diff the result against what the client would have produced. It walks the markers and wires a reaction to each position.
+Hydration trusts the server. It walks the markers and wires a reaction to each position, without re-rendering or checking the result against what the client would have produced.
 
-The mechanism that makes trust possible is that the first run of every wired reaction is evaluated but not written:
+The first run of every wired reaction evaluates but does not write:
 
 ```javascript
 if (comp.firstRun && hydrating) {
@@ -65,9 +65,7 @@ if (comp.firstRun && hydrating) {
 }
 ```
 
-The evaluation cannot be skipped. Reading a signal inside a running reaction is the only way to register a dependency on it, so the run is what teaches the binding which signals it cares about. The write can be skipped, because the server already produced that value. Every subsequent run writes normally.
-
-This is why hydration costs a walk over existing nodes rather than a render.
+Reading a signal inside a running reaction is the only way to register a dependency on it, so the evaluation cannot be skipped. The write can be, because the server already produced that value. Every run after the first writes normally.
 
 Markers are removed after wiring completes. The reactions hold references to real text nodes and elements rather than to the comments, so nothing depends on them once binding is done.
 

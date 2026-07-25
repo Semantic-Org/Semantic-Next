@@ -19,9 +19,7 @@ Dynamic positions get their own `Reaction`. When a signal changes, only the reac
 
 Changing `count` wakes one reaction and assigns one text node. `title` is untouched and its reaction never runs.
 
-There is no render loop, no virtual DOM, and no component-level re-render. The AST is walked once, when the instance first renders. After that, updates flow only through the reactions bound during that walk.
-
-Rendering is a one-time wiring step. Reactivity is what runs afterward.
+The AST is walked once, when the instance first renders. After that, updates flow only through the reactions bound during that walk. Nothing re-renders at the component level.
 
 ## Rendering
 
