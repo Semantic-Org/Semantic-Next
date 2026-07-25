@@ -6,7 +6,9 @@ title: Server Rendering
 description: How server rendering and hydration work in Semantic UI
 ---
 
-The server renders a component to [Declarative Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM). The browser paints it before any JavaScript arrives, and the client later attaches reactivity to the DOM already on screen.
+Server rendering turns a component into an HTML string and wraps its shadow content in [Declarative Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM), a `<template shadowrootmode="open">` element that the HTML parser converts into a real shadow root without running any JavaScript.
+
+A web component is otherwise empty markup until its script loads, defines the element, and mounts it. Delivered this way it is on screen at first paint, and the only work left for the client is attaching reactivity to DOM that already exists.
 
 > **Usage Guide** See the [server rendering guide](/docs/guides/advanced/ssr) for setting server rendering up in a project.
 
@@ -48,9 +50,9 @@ Nested components expand recursively. The renderer scans its own output for cust
 
 ## Declarative Shadow DOM
 
-The browser handles `<template shadowrootmode="open">` during HTML parsing. It creates the shadow root, moves the content in, and drops the template. This happens before scripts run, so the styled component is on screen without waiting for the bundle.
+The parser attaches the shadow root, moves the content into it, and drops the template element.
 
-Component CSS ships inside that template as a `<style>` tag. Hydration removes it, having moved the styles to `adoptedStyleSheets`.
+Component CSS travels inside that template as a `<style>` tag, since `adoptedStyleSheets` cannot cross the network. Hydration removes the tag once the stylesheet has been adopted.
 
 ## Hydration
 
