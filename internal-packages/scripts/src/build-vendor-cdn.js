@@ -15,6 +15,15 @@ import { CDN_CONFIG } from './lib/config.js';
 const ROOT = process.env.BASE_DIR || process.cwd();
 const OUT_DIR = join(ROOT, 'dist', 'vendor-cdn');
 
+// An export path is server-only when a whole segment is "server" or "node" (./server, ./node),
+// not merely when one contains those words
+function isServerOnlyPath(exportPath) {
+  return exportPath
+    .replace(/^\.\/?/, '')
+    .split('/')
+    .some(segment => segment === 'server' || segment === 'node');
+}
+
 // Vendor packages and their entry points to build
 // Each entry maps sub-paths to source files relative to node_modules
 function getVendorEntries() {
@@ -79,8 +88,10 @@ function getVendorEntries() {
 
     // Walk exports to find all JS entry points
     for (const [exportPath, conditions] of Object.entries(exports)) {
-      // Skip server-only export paths
-      if (exportPath.includes('server') || exportPath.includes('node')) { continue; }
+      // Skip server-only export paths. match whole segments, since a substring test also
+      // catches browser-safe entries that merely contain the word (lit-html's ./is-server.js,
+      // lit's ./decorators/query-assigned-nodes.js)
+      if (isServerOnlyPath(exportPath)) { continue; }
 
       let source;
       if (typeof conditions === 'string') {
@@ -101,7 +112,10 @@ function getVendorEntries() {
       }
 
       if (!source || typeof source !== 'string') { continue; }
-      if (!source.endsWith('.js') && !source.endsWith('.mjs')) { continue; }
+      // stylesheets are imported with ?raw by vendor bundles (tailwindcss-iso pulls in
+      // tailwind's preflight/theme/utilities), so they ship verbatim rather than bundled
+      const isStyle = source.endsWith('.css');
+      if (!isStyle && !source.endsWith('.js') && !source.endsWith('.mjs')) { continue; }
       // Skip types
       if (source.includes('.d.')) { continue; }
 
@@ -116,6 +130,7 @@ function getVendorEntries() {
         subpath: exportPath,
         source: sourcePath,
         outfile: outPath,
+        copy: isStyle,
       });
     }
   }
@@ -202,6 +217,11 @@ async function buildVendorCDN() {
 
   for (const entry of entries) {
     mkdirSync(dirname(entry.outfile), { recursive: true });
+
+    if (entry.copy) {
+      copyFileSync(entry.source, entry.outfile);
+      continue;
+    }
 
     // Merge all deps: SUI deps + this vendor package's own deps
     const vendorPkgJson = JSON.parse(readFileSync(
