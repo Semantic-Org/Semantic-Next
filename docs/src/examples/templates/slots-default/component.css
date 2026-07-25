@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.note {
+  padding: var(--padding);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  background: var(--standard-5);
+
+  .label {
+    color: var(--muted-text-color);
+    font-weight: var(--bold);
+  }
+}

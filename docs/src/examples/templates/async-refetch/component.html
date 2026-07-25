@@ -1,0 +1,21 @@
+<ui-menu inset selection value="{userId}" items="{users}"></ui-menu>
+
+<div class="panes">
+  <div class="pane">
+    <h4>No loading branch</h4>
+    {#async loadProfile userId as profile}
+      <div class="name">{profile.name}</div>
+      <div class="role">{profile.role}</div>
+    {/async}
+  </div>
+
+  <div class="pane">
+    <h4>Loading branch</h4>
+    {#async loadProfile userId as profile}
+      <div class="name">{profile.name}</div>
+      <div class="role">{profile.role}</div>
+    {loading}
+      <div class="waiting">Loading...</div>
+    {/async}
+  </div>
+</div>

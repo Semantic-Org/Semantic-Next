@@ -1,0 +1,9 @@
+.ticker {
+  margin: var(--margin) 0;
+  padding: var(--padding-s);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  background: var(--green-background-color);
+  color: var(--green-text-color);
+  font-family: var(--code-font);
+}
