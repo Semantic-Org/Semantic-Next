@@ -114,10 +114,19 @@ describe('renderToString', () => {
       expect(stripMarkers(dsdContent(result))).toBe('<span>42</span>');
     });
 
-    // false and 0 are the ones worth guarding — a literal that resolves falsy
-    // used to disappear rather than throw, so it never surfaced as a failure
+    // false and 0 are the ones worth guarding. a literal resolving falsy
+    // disappears rather than throwing, so it never surfaces as a failure
     it('renders literal expressions', () => {
-      const cases = [['true', 'true'], ['false', 'false'], ['1', '1'], ['0', '0'], ["'baz'", 'baz']];
+      const cases = [
+        ['true', 'true'],
+        ['false', 'false'],
+        ['null', ''],
+        ['1', '1'],
+        ['0', '0'],
+        ['-7', '-7'],
+        ['3.14', '3.14'],
+        ["'baz'", 'baz'],
+      ];
       for (const [expression, expected] of cases) {
         const ast = compile(`<div>{${expression}}</div>`);
         expect(stripMarkers(dsdContent(renderToString({ ast })))).toBe(`<div>${expected}</div>`);

@@ -149,14 +149,6 @@ export class TemplateCompiler {
   errors: { message: string; pos: number; }[];
 
   /**
-   * Extracts value
-   * @internal
-   * @param expression string containing value
-   * @returns the value
-   */
-  getValue(expression: string): any;
-
-  /**
    * Parses a template string expression (e.g., `templateName data1=value1 data2=value2`).
    * @param {string} expression -
    * @returns {TemplateInfo} Parsed template info.

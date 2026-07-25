@@ -72,7 +72,7 @@ describe('TemplateCompiler', () => {
       expect(ast).toEqual(expectedAST);
     });
 
-    // literals stay source text in the AST — the evaluator resolves them, so
+    // literals stay source text in the AST. the evaluator resolves them, so
     // every expression field is a string no matter what the author wrote
     it('should keep boolean literals as expressions', () => {
       const compiler = new TemplateCompiler();
