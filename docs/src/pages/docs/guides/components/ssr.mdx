@@ -18,9 +18,22 @@ Server rendering sends the component's shadow DOM with the page, so the browser 
 
 > For how the server output and client hydration fit together see the [server rendering API reference](/docs/api/renderer/server-rendering).
 
+## Server Adapters
+
+Most projects reach for an adapter rather than rendering components by hand. Each one finds registered tags in your HTML and expands them into Declarative Shadow DOM.
+
+| Package | Use it for |
+|---|---|
+| [`@semantic-ui/server`](https://github.com/Semantic-Org/Semantic-Next/tree/main/integrations/server) | Any server, including Express, Hono, and `node:http` |
+| [`@semantic-ui/vite`](https://github.com/Semantic-Org/Semantic-Next/tree/main/integrations/vite) | Vite |
+| [`@semantic-ui/eleventy`](https://github.com/Semantic-Org/Semantic-Next/tree/main/integrations/eleventy) | Static sites |
+| [`@semantic-ui/astro`](https://github.com/Semantic-Org/Semantic-Next/tree/main/integrations/astro) | Astro |
+
+Your client bundle needs no hydration code. A component detects the server's shadow DOM on upgrade and wires itself.
+
 ## Rendering on the Server
 
-`renderToString` exported from `@semantic-ui/component` takes a component and its attributes and returns the element with its shadow DOM inlined.
+The adapters are built on `renderToString`, exported from `@semantic-ui/component`. It takes a component and its attributes and returns the element with its shadow DOM inlined.
 
 ```javascript {6}
 import { defineComponent, renderToString } from '@semantic-ui/component';
