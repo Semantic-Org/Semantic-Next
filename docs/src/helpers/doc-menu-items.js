@@ -87,6 +87,7 @@ export const sidebarMenuFramework = [
     url: '/docs/guides/advanced',
     icon: 'server',
     pages: [
+      { name: 'Server Compilation', url: '/docs/guides/advanced/compilation' },
       { name: 'Common Issues', url: '/docs/guides/advanced/common-issues' },
     ],
   },

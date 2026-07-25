@@ -1,0 +1,70 @@
+---
+layout: '@layouts/Guide.astro'
+title: Server Compilation
+icon: cpu
+description: Moving template and spec compilation into a build step
+---
+
+## When to Bother
+
+Templates compile in the browser by default, and that is the point. A component works from a `<script>` tag with no build step at all.
+
+Compilation is also fast enough that moving it is rarely the reason a page feels slow. The nineteen first-party primitives compile in roughly a millisecond in total, and a single template lands well under a tenth of that.
+
+Compile ahead when you already have a build and want the cost paid once, which usually means a long-running server or a static site. Most projects will measure no difference.
+
+## Templates
+
+Keeping html and css [in their own files](/docs/guides/components/create#organizing-code) is the recommended way to author a component. [`getText`](/docs/api/utils/browser#gettext) fetches them at runtime and needs no build. With a bundler they arrive as static imports instead: `?raw` for text, and `?ast` for a template compiled during the build.
+
+Compiling ahead needs the import graph, so it is reachable only on the bundler path.
+
+```javascript {1}
+import ast from './component.html?ast';
+import css from './component.css?raw';
+
+defineComponent({
+  tagName: 'my-card',
+  ast,
+  css,
+});
+```
+
+`defineComponent` takes [`ast`](/docs/api/templating/ast) in place of `template`, and when it receives one the compiler never runs. Only the template changes. Css is text either way.
+
+The loaders are built on [unplugin](https://unplugin.unjs.io), so they run in esbuild, Vite, Rollup, Rolldown, webpack, and rspack.
+
+| Package | Use it for |
+|---|---|
+| [`@semantic-ui/vite`](https://github.com/Semantic-Org/Semantic-Next/tree/main/integrations/vite) | Vite |
+| [`@semantic-ui/esbuild`](https://github.com/Semantic-Org/Semantic-Next/tree/main/integrations/esbuild) | esbuild |
+| [`@semantic-ui/rollup`](https://github.com/Semantic-Org/Semantic-Next/tree/main/integrations/rollup) | Rollup and Rolldown |
+
+## Specs
+
+A [component spec](/docs/guides/components/specs) is read into a `componentSpec` at definition time. `writeComponentSpec` does that read during a build and writes the result as a module.
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs/server';
+import buttonSpec from './button.spec.js';
+
+new SpecReader(buttonSpec).writeComponentSpec('./generated/button.spec.js');
+```
+
+The generated module exports the resolved spec, which `defineComponent` accepts directly.
+
+```javascript {4}
+import componentSpec from './generated/button.spec.js';
+
+defineComponent({
+  componentSpec,
+  template,
+  css,
+});
+```
+
+> See the [SpecReader reference](/docs/api/specs/spec-reader) for what a resolved spec contains.
+
+## Precompiled Components on a Server
+
+Both paths matter more when a component is defined once and rendered many times, which is the shape of [server rendering](/docs/guides/components/ssr). A long-running server pays each compile once at boot rather than per request either way, so the gain is startup time rather than throughput.
