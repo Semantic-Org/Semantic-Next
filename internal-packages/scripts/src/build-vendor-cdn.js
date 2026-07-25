@@ -1,5 +1,5 @@
 import * as esbuild from 'esbuild';
-import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 
 import { resolveBareImports } from '@semantic-ui/esbuild-resolve-bare-imports';
@@ -89,8 +89,11 @@ function getVendorEntries() {
       else if (typeof conditions === 'object') {
         // Skip exports that only have node/default (no browser entry)
         if (conditions.node && !conditions.browser && !conditions.import) { continue; }
-        // Prefer browser-compatible entry
-        source = conditions.browser || conditions.import || conditions.module || conditions.default;
+        // cdn/jsdelivr/importmap first, matching the entry the URL rewriter resolves in
+        // lib/config.js. these conditions point at prebuilt browser bundles, and if the two
+        // disagree the rewritten import references a vendor file this build never emits
+        source = conditions.cdn || conditions.jsdelivr || conditions.importmap
+          || conditions.browser || conditions.import || conditions.module || conditions.default;
         // Handle nested conditions (e.g., lit's browser.development/default)
         if (typeof source === 'object') {
           source = source.default || source.development || source.production;
@@ -118,6 +121,22 @@ function getVendorEntries() {
   }
 
   return entries;
+}
+
+// prebuilt browser bundles can reference sibling assets as runtime strings rather than imports
+// (tailwindcss-iso's dist bundle holds "./tailwindcss_oxide_bg-<hash>.wasm?url"), which esbuild
+// cannot see and will not emit. copy them so the reference resolves once served from /vendor/
+function copySiblingAssets(sourcePath, outfile) {
+  const sourceDir = dirname(sourcePath);
+  const outDir = dirname(outfile);
+
+  for (const file of readdirSync(sourceDir, { withFileTypes: true })) {
+    if (!file.isFile() || !file.name.endsWith('.wasm')) { continue; }
+    const dest = join(outDir, file.name);
+    // esbuild's file loader already emits anything reachable by import
+    if (existsSync(dest)) { continue; }
+    copyFileSync(join(sourceDir, file.name), dest);
+  }
 }
 
 // Collect all vendor dependencies and their versions for the resolver
@@ -236,6 +255,8 @@ async function buildVendorCDN() {
       console.warn(`  Failed to build ${entry.packageName}/${entry.subpath}: ${err.message}`);
       continue;
     }
+
+    copySiblingAssets(entry.source, entry.outfile);
   }
 
   console.log(`Vendor CDN build complete → dist/vendor-cdn/`);
