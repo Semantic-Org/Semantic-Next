@@ -67,7 +67,7 @@ if (comp.firstRun && hydrating) {
 
 The evaluation cannot be skipped. Reading a signal inside a running reaction is the only way to register a dependency on it, so the run is what teaches the binding which signals it cares about. The write can be skipped, because the server already produced that value. Every subsequent run writes normally.
 
-That is the whole trick, and it is why hydration costs a pass over existing nodes rather than a render.
+This is why hydration costs a walk over existing nodes rather than a render.
 
 Markers are removed after wiring completes. The reactions hold references to real text nodes and elements rather than to the comments, so nothing depends on them once binding is done.
 

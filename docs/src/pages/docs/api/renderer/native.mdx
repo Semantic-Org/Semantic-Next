@@ -10,18 +10,18 @@ The native engine is the default. `Renderer` extends `HTMLElement` directly with
 
 ## Fine Grained Reactivity
 
-Every dynamic position in a template gets its own `Reaction`. When a signal changes, only the reactions that read it wake, and each writes to the one DOM position it owns.
+Dynamic positions get their own `Reaction`. When a signal changes, only the reactions that read it wake, and each writes to the one DOM position it owns.
 
 ```html
 <h1>{title}</h1>
 <span class="count">{count}</span>
 ```
 
-Changing `count` wakes one reaction and assigns one text node. `title` is untouched, its reaction never runs, and the surrounding element is never revisited.
+Changing `count` wakes one reaction and assigns one text node. `title` is untouched and its reaction never runs.
 
-There is no render loop, no virtual DOM, and no component-level re-render. The AST is walked exactly once, when the instance first renders. After that the tree is inert and updates flow only through the individual reactions bound during that walk.
+There is no render loop, no virtual DOM, and no component-level re-render. The AST is walked once, when the instance first renders. After that, updates flow only through the reactions bound during that walk.
 
-This is the fact worth carrying into everything else on this page: rendering is a one-time wiring step, and reactivity is what runs afterward.
+Rendering is a one-time wiring step. Reactivity is what runs afterward.
 
 ## Rendering
 
@@ -33,7 +33,7 @@ This is the fact worth carrying into everything else on this page: rendering is 
 | Parse | A single `innerHTML` assignment on a `<template>`, so the browser resolves nesting |
 | Bind | Two `TreeWalker` passes that find the markers and create a reaction per binding |
 
-Assembly is a pure function, which is what lets the client and the server share it. Parsed templates are cached by their HTML string and cloned per instance, so a component rendered a hundred times parses once.
+Assembly is a pure function, which is what lets the client and the server share it. Parsed templates are cached by their HTML string and cloned per instance, so repeated instances of a component parse once.
 
 ### Markers
 
