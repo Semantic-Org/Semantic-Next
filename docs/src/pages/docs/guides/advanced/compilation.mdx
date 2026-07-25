@@ -11,7 +11,7 @@ Moving template compilation into a build step reads like an obvious optimization
 
 Precompiling earns its place when you already have a build: a long-running server, or a static site.
 
-> **Already Server Rendering** [Server rendering](/docs/guides/components/ssr) puts a build in front of your components, so the precondition is already met. A long-running server compiles at boot rather than per request either way, so what precompiling removes is startup cost.
+> **Already Server Rendering** [Server rendering](/docs/guides/components/ssr) means you already have a build, so the only cost is changing an import. A long-running server compiles at boot rather than per request either way, so what precompiling removes is startup cost.
 
 ## Templates
 
