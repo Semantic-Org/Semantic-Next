@@ -581,7 +581,7 @@ describe('TemplateCompiler - Extended Coverage', () => {
       const compiler = new TemplateCompiler();
       const ast = compiler.compile("{{>slot 'content'}}");
       expect(ast[0].type).toBe('slot');
-      expect(ast[0].name).toBe("'content'");
+      expect(ast[0].name).toBe('content');
     });
   });
 

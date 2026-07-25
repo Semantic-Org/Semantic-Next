@@ -1,11 +1,11 @@
 ---
 title: 'Resource'
 shortTitle: 'Resource'
-sortIndex: 2
+sortIndex: 3
 exampleType: 'log'
 category: 'Reactivity'
-subcategory: 'Reactions'
+subcategory: 'Async'
 tags: ['reactivity', 'resource', 'async', 'fetch']
 description: A Signal whose value an async fetcher produces
-tip: 'A face reader wakes only when it flips, so loading logs once across the refetch'
+tip: 'loading tracks its own dependency, so a reader of it wakes when loading flips and not when error or settled do'
 ---

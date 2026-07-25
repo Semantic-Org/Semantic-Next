@@ -337,6 +337,7 @@ export class SpecReader {
   getPropertyType({ spec, section, allowedValues = [], withPrototype = false } = {}) {
     let types = {
       string: 'string',
+      number: 'number',
       boolean: 'boolean',
       object: 'object',
       array: 'array',

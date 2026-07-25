@@ -1,0 +1,26 @@
+:host {
+  display: block;
+}
+
+.card {
+  max-width: 320px;
+  border: var(--border);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+
+  .header {
+    padding: var(--padding);
+    border-bottom: var(--border);
+    background: var(--standard-5);
+    font-weight: var(--bold);
+  }
+
+  .content {
+    padding: var(--padding);
+  }
+
+  .footer {
+    padding: var(--padding);
+    border-top: var(--border);
+  }
+}

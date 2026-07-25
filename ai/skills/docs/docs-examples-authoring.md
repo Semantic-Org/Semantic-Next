@@ -203,6 +203,40 @@ index.js           # Complete demonstration code
 - **Left panel**: Component files (`component.js/html/css`, `index.js`) — expand to fill
 - **Right panel**: Page files (`page.html/css/js`) — smaller sizing
 
+### Hiding and Folding Code
+
+Paired comment markers control what the editor shows. They never change what runs, so the example still
+executes exactly as written.
+
+```javascript
+/* playground-hide */
+Template.isServer = true;
+/* playground-hide-end */
+
+/* playground-fold */
+const fixture = [ /* twenty lines of sample data */ ];
+/* playground-fold-end */
+```
+
+HTML files use the comment form instead: `<!-- playground-fold -->` … `<!-- playground-fold-end -->`.
+
+| Marker | Effect | Use for |
+|---|---|---|
+| `playground-hide` | Gone from the editor, still present in output | Injected scaffolding the reader should never think about |
+| `playground-fold` | Collapsed behind a clickable `…` | Real code that would drown the lesson, but that a curious reader should be able to open |
+
+Expanding a fold reveals the region without revealing the markers, so a reader never sees a pragma either way.
+An unmatched marker hides only itself rather than swallowing the rest of the file.
+
+`sui-hide` / `sui-fold` are accepted aliases. Don't write them in new examples.
+
+**Prefer neither.** A line worth hiding is usually a line worth not writing. Reach for `fold` when the example
+genuinely needs bulk (a data fixture, a shader source) and for `hide` only when the playground environment
+forces something a real consumer would not write. If you hide a load-bearing line, say why in a comment
+directly above it, since the reader is entitled to know the example depends on it.
+
+Implementation lives in `packages/playground/src/editor/pragmas.js`.
+
 ---
 
 ## CSS and HTML Rules

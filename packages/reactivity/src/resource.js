@@ -8,9 +8,9 @@ import { Signal } from './signal.js';
 
 /*
   a signal whose value a fetcher produces through a backing async reaction.
-  the value holds last-good through refresh and rejection. status lives in
-  three independent faces (loading, error, settled) so a reader re-runs
-  only when the face it reads flips.
+  the value holds last-good through refresh and rejection. loading, error and
+  settled each track their own dependency, so a reader re-runs only when the
+  one it reads flips.
 */
 
 export class Resource extends Signal {
@@ -22,7 +22,7 @@ export class Resource extends Signal {
     return !!value?.[IS_RESOURCE];
   }
 
-  // per-instance face state, preset so the hidden class stays monomorphic
+  // per-instance status, preset so the hidden class stays monomorphic
   static defaults = {
     loadingValue: false,
     errorValue: undefined,
@@ -50,7 +50,7 @@ export class Resource extends Signal {
       return liveResource.runFetch(computation);
     }, { firstRun: false });
     // scope to the enclosing reaction when present. teardown goes through the
-    // resource so the faces reset, not just the reaction
+    // resource so the status resets, not just the reaction
     const parent = Scheduler.current;
     if (parent) {
       parent.onCleanup(() => {
@@ -64,7 +64,7 @@ export class Resource extends Signal {
   }
 
   /*******************************
-             Faces
+             Status
   *******************************/
 
   get loading() {
@@ -157,7 +157,7 @@ export class Resource extends Signal {
   }
 
   // a settle dropped by supersession leaves loading for the trailing re-run,
-  // one dropped by a stop mid-flight has no re-run coming and resets the faces
+  // one dropped by a stop mid-flight has no re-run coming and resets the status
   dropFetch(computation) {
     if (!computation.active) {
       this.stop();
@@ -186,7 +186,7 @@ export class Resource extends Signal {
       this.errorDependency?.changed();
     }
     this.finishFetch();
-    // after the faces settle so the callback observes coherent state
+    // after the status settles so the callback observes coherent state
     this.onError?.(error);
   }
 
@@ -207,7 +207,7 @@ export class Resource extends Signal {
 
   stop() {
     super.stop();
-    // nothing can ever be in flight again, a frozen loading face would lie
+    // nothing can ever be in flight again, a frozen loading flag would lie
     if (this.loadingValue) {
       this.loadingValue = false;
       this.loadingDependency?.changed();

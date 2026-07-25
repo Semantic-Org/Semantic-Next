@@ -5,7 +5,7 @@ title: Date Helpers
 icon: calendar
 description: API reference for date formatting template helpers
 package: '@semantic-ui/templating'
-methods: ['formatDate', 'formatDateTime', 'formatDateTimeSeconds']
+methods: ['formatDate', 'formatDateTime', 'formatTime']
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
@@ -91,17 +91,17 @@ formatDateTime(date, 'YYYY-MM-DD HH:mm'); // '2023-05-15 14:30'
 formatDateTime(date, 'YYYY-MM-DD hh:mm A', { hour12: true }); // '2023-05-15 02:30 PM'
 ```
 
-### formatDateTimeSeconds
-Formats a date with time and seconds according to the specified format string.
+### formatTime
+Formats the time portion of a date. The default `LTS` preset is `h:mm:ss a`.
 
 #### Template Syntax
 ```sui
-{formatDateTimeSeconds someDate 'YYYY-MM-DD HH:mm:ss' (object timezone='America/New_York')}
+{formatTime someDate 'h:mm:ss a' (object timezone='America/New_York')}
 ```
 
 #### JavaScript Syntax
 ```javascript
-formatDateTimeSeconds(someDate, 'YYYY-MM-DD HH:mm:ss', { timezone: 'America/New_York' })
+formatTime(someDate, 'h:mm:ss a', { timezone: 'America/New_York' })
 ```
 
 #### Parameters
@@ -120,13 +120,14 @@ formatDateTimeSeconds(someDate, 'YYYY-MM-DD HH:mm:ss', { timezone: 'America/New_
 | timezone | string  | 'local'   | The timezone to use. Use 'local' for the local timezone |
 
 #### Returns
-`string` - The formatted date, time, and seconds string.
+`string` - The formatted time string.
 
 #### Example
 ```javascript
 const date = new Date('2023-05-15T14:30:45Z');
-formatDateTimeSeconds(date, 'YYYY-MM-DD HH:mm:ss'); // '2023-05-15 14:30:45'
-formatDateTimeSeconds(date, 'YYYY-MM-DD hh:mm:ss A', \{ timezone: 'America/New_York', hour12: true }); // '2023-05-15 10:30:45 AM'
+formatTime(date, undefined, \{ timezone: 'UTC' }); // '2:30:45 pm'
+formatTime(date, 'HH:mm:ss', \{ timezone: 'UTC' }); // '14:30:45'
+formatTime(date, 'h:mm:ss A', \{ timezone: 'America/New_York' }); // '10:30:45 AM'
 ```
 
 > **Note**: The 'local' timezone uses the timezone of the environment where the code is running. This is useful for displaying dates in the user's local time without needing to detect the timezone programmatically.

@@ -148,6 +148,8 @@ class TemplateCompiler {
     DATA_OBJECT: /(\w+)\s*:\s*([^,}]+)/g, // parses { one: 'two' }
     SINGLE_QUOTES: /\'/g,
     AS_KEYWORD: /\bas\b/,
+    SLOT_NAME_ATTRIBUTE: /^name\s*=\s*(.+)$/, // {>slot name="header"}
+    QUOTED_VALUE: /^(['"])(.*)\1$/, // {>slot 'header'}
   };
 
   /*
@@ -568,7 +570,7 @@ class TemplateCompiler {
           case 'SLOT': {
             newNode = {
               ...newNode,
-              name: tag.content,
+              name: TemplateCompiler.parseSlotName(tag.content),
             };
             addToAST(newNode);
             break;
@@ -885,6 +887,26 @@ class TemplateCompiler {
       parts,
       rest,
     };
+  }
+
+  /*
+    Extracts a slot name from the raw tag text. The bare token {>slot header} is canonical, but
+    quoted and name= spellings both read naturally enough that people write them, and until this
+    parsed them the punctuation stayed in the name: {>slot 'header'} produced a slot called
+    'header' with the quotes, which no consumer slot="header" can ever match. Dynamic names and
+    multiple attributes are not supported.
+  */
+  static parseSlotName(slotString = '') {
+    const regExp = TemplateCompiler.templateRegExp;
+    // a bare {>slot} arrives undefined
+    const text = String(slotString ?? '').trim();
+    if (!text) {
+      return undefined; // default slot, keeps the key out of a serialized AST
+    }
+    const attribute = text.match(regExp.SLOT_NAME_ATTRIBUTE);
+    const value = attribute ? attribute[1].trim() : text;
+    const quoted = value.match(regExp.QUOTED_VALUE);
+    return quoted ? quoted[2] : value;
   }
 
   /* Extracts parts of an iterator like each..as each..in */

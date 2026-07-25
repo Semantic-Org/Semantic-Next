@@ -1,0 +1,33 @@
+.scroll {
+  height: 180px;
+  overflow-y: auto;
+  /* lets the last section reach the top of the container */
+  padding-bottom: 100px;
+  border-radius: var(--border-radius);
+  /* outline, not border, so the box top is the content top */
+  outline: var(--border);
+
+  .section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 110px;
+    border-bottom: var(--border);
+    transition: var(--transition);
+
+    &.active {
+      background: var(--primary-10);
+      color: var(--primary-color);
+      font-weight: var(--bold);
+    }
+  }
+}
+
+.readout {
+  margin: var(--vertically-spaced);
+  padding: var(--padding);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-family: var(--code-font);
+  font-size: var(--small);
+}

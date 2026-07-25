@@ -1,0 +1,6 @@
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--padding-2xs) var(--padding-xs);
+  border-bottom: var(--border);
+}

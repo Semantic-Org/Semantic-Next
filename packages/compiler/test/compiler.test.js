@@ -1576,20 +1576,42 @@ describe('TemplateCompiler', () => {
   });
 
   describe('slots', () => {
+    // a slot name has to survive as an exact string, Query matches it with el.name == name
+    const slotName = (slot) => {
+      const compiler = new TemplateCompiler();
+      const ast = compiler.compile(`<div>${slot}</div>`);
+      return ast.find((node) => node.type === 'slot').name;
+    };
+
     it('should compile a template with a slot', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {>slot 'name'}
+          {>slot header}
         </div>
       `;
       const ast = compiler.compile(template);
       const expectedAST = [
         { type: 'html', html: '<div>' },
-        { type: 'slot', name: "'name'" },
+        { type: 'slot', name: 'header' },
         { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
+    });
+
+    it('should leave a default slot unnamed', () => {
+      expect(slotName('{>slot}')).toBeUndefined();
+    });
+
+    it('should strip quotes from a slot name', () => {
+      expect(slotName(`{>slot 'header'}`)).toEqual('header');
+      expect(slotName('{>slot "header"}')).toEqual('header');
+    });
+
+    it('should accept a name attribute on a slot', () => {
+      expect(slotName('{>slot name=header}')).toEqual('header');
+      expect(slotName('{>slot name="header"}')).toEqual('header');
+      expect(slotName(`{>slot name='header'}`)).toEqual('header');
     });
   });
   describe('boolean attributes', () => {

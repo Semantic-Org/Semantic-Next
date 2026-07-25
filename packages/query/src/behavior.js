@@ -674,7 +674,7 @@ export class Behavior {
         el: self.element,
         $el: self.$(self.element),
         self: selfProxy,
-        abortSignal: this.controller,
+        abortSignal: this.controller.signal,
         behavior: selfProxy,
         namespace: self.namespace,
         attachEvent: self.attachEvent.bind(this),

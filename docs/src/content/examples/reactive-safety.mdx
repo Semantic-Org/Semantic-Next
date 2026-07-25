@@ -4,8 +4,8 @@ shortTitle: 'Safety'
 id: 'reactive-safety'
 exampleType: 'log'
 category: 'Reactivity'
-subcategory: 'Settings'
+subcategory: 'Signal Options'
 tags: ['reactivity', 'signals', 'safety', 'clone']
 description: 'How clone, reference, and none guard a signal value'
-tip: 'clone insulates the stored value from outside mutation, reference (the default) shares it, and none also re-fires on every set.'
+tip: 'reference (the default) shares the live value in both directions, so mutating what get() hands back writes through. clone insulates it, and none also re-fires on every set.'
 ---

@@ -6,6 +6,10 @@ const referenced = signal(draft);
 draft.label = 'edited'; // mutate the original behind the signal
 console.log(referenced.get().label);
 
+// the leak runs both ways, what get() hands back is the live value
+referenced.get().label = 'edited via get';
+console.log(referenced.peek().label);
+
 // clone: stores and returns copies, guarding state outside code might mutate
 const saved = { label: 'draft' };
 const cloned = signal(saved, { safety: 'clone' });

@@ -1,0 +1,15 @@
+<ui-button @click={rotate}>Move first row to the bottom</ui-button>
+
+<h2>Items with an id</h2>
+<ul>
+{#each fruit in fruits}
+  <li>{fruit.name} <input placeholder="type a note"></li>
+{/each}
+</ul>
+
+<h2>Same items, ids stripped</h2>
+<ul>
+{#each fruit in withoutIds}
+  <li>{fruit.name} <input placeholder="type a note"></li>
+{/each}
+</ul>

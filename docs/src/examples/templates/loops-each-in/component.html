@@ -1,5 +1,13 @@
+<h2>each ... in</h2>
 <ul>
 {#each fruit in fruits}
+  <li>{fruit.name} - {fruit.taste}</li>
+{/each}
+</ul>
+
+<h2>each ... as</h2>
+<ul>
+{#each fruits as fruit}
   <li>{fruit.name} - {fruit.taste}</li>
 {/each}
 </ul>

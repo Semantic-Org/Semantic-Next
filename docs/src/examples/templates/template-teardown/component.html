@@ -1,0 +1,7 @@
+<ui-button @click={toggle}>{mounted ? 'Unmount' : 'Mount'} ticker</ui-button>
+
+{#if mounted}
+  {>ticker}
+{/if}
+
+<div class="log">from ticker: {status}</div>

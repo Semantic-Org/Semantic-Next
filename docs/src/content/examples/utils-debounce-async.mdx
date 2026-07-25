@@ -1,11 +1,12 @@
 ---
 title: 'debounce (async)'
 id: 'utils-debounce-async'
+sortIndex: 6
 exampleType: 'log'
 category: 'Utils'
 subcategory: 'Functions'
-description: 'Debounce asynchronous functions with promise sharing'
-tags: ['utils', 'functions', 'debounce', 'async', 'promise']
+description: 'Calls share one promise, and cancel() rejects it for everyone awaiting'
+tags: ['utils', 'functions', 'debounce', 'async', 'promise', 'cancel', 'pending']
 selectedFile: 'index.js'
-tip: 'Multiple calls to a debounced async function share the same promise until it settles'
+tip: '`cancel()` rejects the shared promise with an Error whose `code` is `CANCELLED`, so an `await` on a debounced call needs a catch'
 ---

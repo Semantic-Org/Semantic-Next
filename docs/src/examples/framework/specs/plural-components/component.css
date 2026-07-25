@@ -1,0 +1,44 @@
+/* a group sets --chip-size, the chips it slots inherit it */
+:host {
+  font-size: var(--chip-size, var(--size-s));
+}
+
+.chip {
+  display: inline-flex;
+  padding: var(--padding-2xs) var(--padding-s);
+  border: var(--border);
+  border-radius: var(--circular-radius);
+  color: var(--text-color);
+
+  &.small {
+    font-size: var(--size-xs);
+  }
+
+  &.large {
+    font-size: var(--size-l);
+  }
+
+  &.primary {
+    border-color: transparent;
+    background: var(--primary-5);
+    color: var(--primary-text-color);
+  }
+}
+
+.chips {
+  display: inline-flex;
+  gap: var(--gap-2xs);
+
+  &.small {
+    --chip-size: var(--size-xs);
+  }
+
+  &.large {
+    --chip-size: var(--size-l);
+  }
+
+  &.stacked {
+    flex-direction: column;
+    align-items: start;
+  }
+}

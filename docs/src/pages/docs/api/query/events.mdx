@@ -82,16 +82,35 @@ $('form').on('submit', (e) => {
 
 ```javascript
 $('selector').off(eventName, handler);
+$('selector').off(eventName);
+$('selector').off('.namespace');
 ```
 
-Removes event handlers attached with `on()`.
+Removes event handlers attached with `on()`. Both arguments are optional.
 
 #### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| eventName | string | Space-separated event types to remove |
-| handler | function | The handler function to remove |
+| eventName | string | Space-separated event types, each optionally carrying `.namespace` suffixes |
+| handler | function | The handler function to remove. Omit it to remove every handler matching the event and namespace |
+
+##### Namespaces
+
+Tag a handler at bind time and remove the group later without holding a reference to it:
+
+```javascript
+$('.pad').on('pointermove.tracking', onMove);
+$('.pad').on('pointerleave.tracking', onLeave);
+$('.pad').on('click.marking', onMark);
+
+$('.pad').off('.tracking');        // both tracking handlers, any event type
+$('.pad').off('pointermove.tracking'); // just that one
+```
+
+A handler may carry several namespaces (`click.a.b`), and `off()` removes it when every namespace it is given matches.
+
+<PlaygroundExample id="query-event-namespaces" direction="horizontal"></PlaygroundExample>
 
 #### Returns
 
