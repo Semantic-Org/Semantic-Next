@@ -76,6 +76,14 @@ export class ReactiveObject {
   constructor(initialValue?: object, options?: ReactiveObjectOptions);
 
   /**
+   * The live backing object, swapped wholesale by `replace()`. Reading it
+   * registers no dependency and writing through it wakes nobody, so reach for
+   * `get()`, `set()`, and `raw()` instead unless you need the store itself.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#raw raw}
+   */
+  value: object;
+
+  /**
    * Tracked read. Subscribes the current reaction to this path alone, so a later
    * write to a disjoint path will not re-fire it.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reactive-object#get get}

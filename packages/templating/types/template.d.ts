@@ -1,15 +1,30 @@
 import { ASTNode } from '@semantic-ui/compiler';
-import { Query, QueryOptions } from '@semantic-ui/query';
-import { Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
+import { EventHandler, Query, QueryOptions } from '@semantic-ui/query';
+import { Matcher, Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
 import { TemplateHelpers } from './template-helpers.js';
+
+/** Anything the `$` and `$$` helpers accept as a starting point for a query. */
+export type QuerySelector =
+  | string
+  | Node
+  | NodeList
+  | HTMLCollection
+  | Element[]
+  | Query
+  | typeof Query.globalThisProxy;
+
+/** Lifecycle events a template resolves promises for. */
+export type LifecycleEvent = 'created' | 'rendered' | 'updated' | 'destroyed';
 
 export interface TemplateSettings {
   /** The name of the template. */
   templateName?: string;
   /** The compiled Abstract Syntax Tree (AST) of the template. */
   ast?: ASTNode[];
-  /** The raw template string. */
+  /** The raw template string. Compiled to an AST when `ast` is not supplied. */
   template?: string;
+  /** Keep template whitespace instead of condensing it. Only read when compiling `template`. */
+  preserveWhitespace?: boolean;
   /** The data context for the template. */
   data?: DataContext;
   /** The DOM element associated with the template. */
@@ -18,20 +33,22 @@ export interface TemplateSettings {
   renderRoot?: ShadowRoot | HTMLElement;
   /** CSS styles for the template (as a string). */
   css?: string;
-  /** Event handlers for the template. */
-  events?: Record<string, (params: CallParams) => void>;
+  /** Event handlers for the template, keyed by event DSL strings like `"click .button"`. */
+  events?: Record<string, (this: HTMLElement, params: CallParams) => void>;
   /** Key bindings for the template. */
   keys?: KeyBindings;
   /** Default state for the template. */
   defaultState?: Record<string, any>;
+  /** Default settings, used by subtemplates that declare their own settings. */
+  defaultSettings?: Record<string, any>;
   /** Sub-templates used within the template. */
-  subTemplates?: Record<string, Function>;
+  subTemplates?: Record<string, Template>;
   /** A function to create a component instance associated with the template. */
-  createComponent?: (this: Template) => any;
+  createComponent?: (params: FactoryParams) => Record<string, any>;
   /** The parent template (if this is a nested template). */
   parentTemplate?: Template;
-  /** The rendering engine to use ('lit' or a custom engine name). */
-  renderingEngine?: 'lit' | string;
+  /** The rendering engine — 'native' (default), 'lit', or an engine object. */
+  renderingEngine?: string | object;
   /** Indicates if this is a prototype template. */
   isPrototype?: boolean;
   /** Whether to automatically attach styles to the renderRoot. */
@@ -159,10 +176,7 @@ export interface CallParams<
    *
    * @see https://next.semantic-ui.com/docs/guides/components/dom#querying-elements
    */
-  $: (
-    selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy,
-    args?: QueryOptions,
-  ) => Query;
+  $: (selector: QuerySelector, args?: QueryOptions) => Query;
 
   /**
    * A function for querying DOM elements, piercing through shadow DOM boundaries.
@@ -178,10 +192,7 @@ export interface CallParams<
    *
    * @see https://next.semantic-ui.com/docs/guides/components/dom#piercing-shadow-dom
    */
-  $$: (
-    selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy,
-    args?: QueryOptions,
-  ) => Query;
+  $$: (selector: QuerySelector, args?: QueryOptions) => Query;
 
   /**
    * Creates a reactive effect that automatically re-runs when its dependencies change.
@@ -217,7 +228,7 @@ export interface CallParams<
    *
    * @see https://next.semantic-ui.com/docs/guides/reactivity#signals
    */
-  signal: <T>(value: T, options?: SignalOptions<T>) => Signal<T>;
+  signal: <T>(value?: T, options?: SignalOptions<T>) => Signal<T>;
 
   /**
    * Creates a signal computed from other signals, recomputing when any of them change.
@@ -242,6 +253,36 @@ export interface CallParams<
    * @see https://next.semantic-ui.com/docs/api/reactivity/controls#guard
    */
   guard: <T>(compute: () => T, equalCheck?: (newValue: T, oldValue: T) => boolean) => T;
+
+  /**
+   * `setInterval` scoped to the component. The interval is cleared when the
+   * component is destroyed.
+   *
+   * @param callback - Function to run on each tick
+   * @param ms - Delay between ticks in milliseconds
+   * @returns The interval id, for clearing it early
+   *
+   * @example
+   * interval(() => state.seconds.increment(), 1000);
+   *
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
+   */
+  interval: (callback: () => void, ms?: number) => ReturnType<typeof setInterval>;
+
+  /**
+   * `setTimeout` scoped to the component. The timeout is cleared when the
+   * component is destroyed.
+   *
+   * @param callback - Function to run after the delay
+   * @param ms - Delay in milliseconds
+   * @returns The timeout id, for clearing it early
+   *
+   * @example
+   * timeout(() => state.visible.set(false), 3000);
+   *
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
+   */
+  timeout: (callback: () => void, ms?: number) => ReturnType<typeof setTimeout>;
 
   /**
    * Executes a callback after all pending reactive updates have been processed.
@@ -369,6 +410,14 @@ export interface CallParams<
   isClient: boolean;
 
   /**
+   * Indicates if the component is hydrating server-rendered markup.
+   *
+   * True from the start of hydration until the existing DOM has been adopted,
+   * so lifecycle hooks can skip work that the server already did.
+   */
+  isHydrating: boolean;
+
+  /**
    * Dispatches a custom event from the component's element.
    *
    * @param eventName - Name of the custom event
@@ -488,19 +537,19 @@ export interface CallParams<
   templates: Map<string, Template[]>;
 
   /**
-   * Finds a template by its name.
+   * Finds the first rendered template with a given name, anywhere on the page.
    *
    * @param templateName - Name of the template to find
-   * @returns The template instance or undefined if not found
+   * @returns The rendered template instance or undefined if not found
    *
    * @example
    * const navTemplate = findTemplate('navigation');
    * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
-  findTemplate: (templateName: string) => Template | undefined;
+  findTemplate: (templateName: string) => RenderedTemplate | undefined;
 
   /**
-   * Finds a parent template by name.
+   * Finds a parent template by name. Omit the name to match the nearest parent.
    *
    * @param templateName - Name of the parent template to find
    * @returns The rendered template instance or undefined if not found
@@ -509,10 +558,10 @@ export interface CallParams<
    * const parentForm = findParent('form');
    * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
-  findParent: (templateName: string) => RenderedTemplate | undefined;
+  findParent: (templateName?: string) => RenderedTemplate | undefined;
 
   /**
-   * Finds a child template by name.
+   * Finds a child template by name. Omit the name to match the first child.
    *
    * @param templateName - Name of the child template to find
    * @returns The rendered template instance or undefined if not found
@@ -521,10 +570,10 @@ export interface CallParams<
    * const childInput = findChild('input');
    * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
-  findChild: (templateName: string) => RenderedTemplate | undefined;
+  findChild: (templateName?: string) => RenderedTemplate | undefined;
 
   /**
-   * Finds all child templates by name.
+   * Finds all child templates by name. Omit the name to match every child.
    *
    * @param templateName - Name of the child templates to find
    * @returns Array of rendered template instances
@@ -533,7 +582,15 @@ export interface CallParams<
    * const allItems = findChildren('list-item');
    * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
-  findChildren: (templateName: string) => RenderedTemplate[];
+  findChildren: (templateName?: string) => RenderedTemplate[];
+
+  /**
+   * The component instance's `content` property, when it defines one.
+   *
+   * Subtemplates commonly expose their rendered content this way so a parent
+   * can pass it through.
+   */
+  content: any;
 
   /**
    * Indicates if dark mode is active.
@@ -562,15 +619,14 @@ export interface EventData {
   [key: string]: any;
 }
 
-export interface EventSettings {
-  /** An AbortController for managing the event listener. */
-  abortController?: AbortController;
-  /** If true return value of event handler, else do not */
-  returnHandler?: boolean;
-  [key: string]: any;
-}
+/**
+ * Settings for an event a template dispatches. Defaults to a bubbling,
+ * cancelable, composed event; `detail` is filled from the dispatched data.
+ */
+export type EventSettings = CustomEventInit;
 
-export type KeyBindingHandler = (params: CallParams) => void;
+/** Returning `true` leaves the browser default in place; anything else calls preventDefault. */
+export type KeyBindingHandler = (params: CallParams) => void | boolean;
 
 export interface KeyBindings {
   /** Maps key sequences (e.g., "Ctrl+Shift+A") to handler functions. */
@@ -582,10 +638,11 @@ export interface ParsedEvent {
   /**
    * The type of event binding:
    * - 'deep': Listens deeply within the DOM, even if originating from a descendant not matching the selector.
-   * - 'global': Listens on the global scope (document).
-   * - 'delegated': Uses event delegation within the template's root.
+   * - 'global': Listens on the global scope (the selector, or `window` when there is none).
+   * - 'bind': Binds directly to the matched elements once the template has rendered.
+   * - 'delegate': Uses event delegation within the template's root. The default.
    */
-  eventType: 'deep' | 'global' | 'delegated';
+  eventType: 'deep' | 'global' | 'bind' | 'delegate';
   /** The CSS selector for event delegation. */
   selector: string;
 }
@@ -625,16 +682,20 @@ export class Template {
   data: DataContext;
   /** Default state for the template. */
   defaultState?: Record<string, any>;
+  /** Default settings, used by subtemplates that declare their own settings. */
+  defaultSettings?: Record<string, any>;
   /** The DOM element associated with the template. */
   element?: HTMLElement;
-  /** Event handlers for the template. */
-  events?: Record<string, Function>;
+  /** Event handlers for the template, keyed by event DSL strings like `"click .button"`. */
+  events?: Record<string, (this: HTMLElement, params: CallParams) => void>;
   /** Unique identifier for the template instance. */
   id: string;
   /** Instance methods and properties created by the `createComponent` function. */
   instance: Record<string, any>;
   /** Indicates if this is a prototype template. */
   isPrototype: boolean;
+  /** Whether the template is adopting server-rendered markup rather than building it. */
+  isHydrating?: boolean;
   /** Key bindings for the template. */
   keys: KeyBindings;
   /** Callback function invoked after the template is created. */
@@ -643,32 +704,44 @@ export class Template {
   onDestroyedCallback: (params: CallParams) => void;
   /** Callback function invoked after the template is rendered. */
   onRenderedCallback: (params: CallParams) => void;
+  /** Callback function invoked after the template is updated. */
+  onUpdatedCallback: (params: CallParams) => void;
   /** Callback function invoked when the theme changes. */
   onThemeChangedCallback: (params: CallParams) => void;
   /** The parent template (if this is a nested template). */
   parentTemplate?: Template;
   /** Array of reactive reactions associated with the template. */
   reactions: Reaction[];
+  /** Mutation observers watching for theme changes, disconnected on destroy. */
+  observers: MutationObserver[];
   /** The root element where the template is rendered (ShadowRoot or HTMLElement). */
   renderRoot?: ShadowRoot | HTMLElement;
   /** The rendering engine — 'native' (default), 'lit', or an engine object. */
   renderingEngine: string | object;
-  /** The renderer instance used for rendering. Typed `any` until renderer types are authored. */
+  /** The renderer instance for the active engine. Engines supply their own class, so this stays open. */
   renderer: any;
+  /** The most recent `render()` result: a DocumentFragment on the client, markup on the server. */
+  html?: any;
   /** Optional start marker node for insertion. */
   startNode?: Node;
   /** Optional end marker node for insertion.. */
   endNode?: Node;
   /** The reactive state of the template. */
   state: Record<string, Signal<any>>;
+  /** Settings proxy, present on subtemplates that declare `defaultSettings`. */
+  settings?: Record<string, any>;
+  /** Shadow signals backing `settings`, created as each setting is read or written. */
+  settingsVars?: Map<string, Signal<any>>;
   /** The constructed stylesheet for the template (if `attachStyles` is true). */
   stylesheet?: CSSStyleSheet;
   /** Sub-templates used within the template. */
-  subTemplates?: Record<string, Function>; // Assuming subTemplates are functions that return templates.
+  subTemplates?: Record<string, Template>;
   /** The name of the template. */
   templateName: string;
+  /** The raw template string. Retained on prototype templates so they can be cloned. */
+  template?: string;
   /** A function to create a component instance associated with the template. */
-  createComponent?: (this: Template) => any;
+  createComponent?: (params: FactoryParams) => Record<string, any>;
   /** Whether to automatically attach styles to the renderRoot. */
   attachStyles: boolean;
 
@@ -682,18 +755,34 @@ export class Template {
   /** The parent node */
   parentNode: HTMLElement | ShadowRoot | undefined;
 
-  /** The parent template (if this is a nested template). */
-  _parentTemplate?: Template;
   /** Child templates */
   _childTemplates?: Template[];
-  /** Abort controller for events. */
+  /** Abort controller tied to the template's lifetime, aborted on destroy. */
+  abortController: AbortController;
+  /** Abort signal tied to the template's lifetime, fired on destroy. */
+  abortSignal: AbortSignal;
+  /** Abort controller for events, replaced on each attach cycle. */
   eventController?: AbortController;
+  /** Cached standard arguments, rebuilt once per template in `initialize()`. */
+  callParams?: CallParams;
+  /** Promises handed out by `lifecyclePromise`, keyed by lifecycle event. */
+  lifecyclePromises: Partial<Record<LifecycleEvent, Promise<void>>>;
+  /** Resolvers for the pending lifecycle promises. */
+  lifecycleResolvers: Partial<Record<LifecycleEvent, () => void>>;
   /** The key sequence */
   currentSequence?: string;
   /** the current key */
   currentKey?: string;
   /** The key timeout */
   resetSequence?: ReturnType<typeof setTimeout>;
+  /** Whether document keybindings are already bound, so rebinding cannot stack listeners. */
+  hasKeybindings?: boolean;
+  /** One-shot hook run after the next render, used by events that cannot be delegated. */
+  onRenderOnce?: () => void;
+  /** Whether an `onUpdated` callback is already queued for this microtask. */
+  updateScheduled?: boolean;
+  /** Whether the data context was replaced, so the renderer needs a version bump. */
+  dataReplaced?: boolean;
 
   /**
    * Creates a new Template instance.
@@ -702,12 +791,19 @@ export class Template {
   constructor(settings?: TemplateSettings);
 
   /**
+   * Returns the settings needed to recreate this template, the inverse of the
+   * constructor. Lifecycle callbacks come back under their `onCreated` style names.
+   */
+  toDefinition(): TemplateSettings;
+
+  /**
    * Creates a reactive state object from the default state and initial data.
+   * Values present in `data` win over the declared defaults.
    * @param defaultState - The default state object.
    * @param data - Initial data to merge with the default state.
    * @returns The reactive state object.
    */
-  createReactiveState(defaultState: Record<string, any>, data: DataContext): Record<string, Signal<any>>;
+  createReactiveState(defaultState?: Record<string, any>, data?: DataContext): Record<string, Signal<any>>;
 
   /**
    * Sets the data context for the template.
@@ -718,10 +814,20 @@ export class Template {
   setDataContext(data: DataContext, options?: { rerender?: boolean; }): void;
 
   /**
+   * Whether this template is rendered inside another template rather than as a component.
+   */
+  isSubtemplate(): boolean;
+
+  /**
    * Sets the parent template for this template instance.
    * @param parentTemplate - The parent template instance.
    */
   setParent(parentTemplate: Template): void;
+
+  /**
+   * Detaches this template from its parent, removing it from the parent's children.
+   */
+  removeParent(): void;
 
   /**
    * Sets the element associated with this template.
@@ -753,6 +859,14 @@ export class Template {
   getDataContext(): DataContext;
 
   /**
+   * Overlays settings signals onto a data context so the renderer tracks settings
+   * reactively. Applied after every spread so Signals win over plain duplicates.
+   * @param context - The data context to overlay onto. Mutated in place.
+   * @returns The same context.
+   */
+  overlaySettingsSignals(context: DataContext): DataContext;
+
+  /**
    * Adopts the template's stylesheet to the renderRoot (if using a ShadowRoot).
    */
   adoptStylesheet(): Promise<void>;
@@ -773,14 +887,19 @@ export class Template {
 
   /**
    * Attaches event listeners to the template's renderRoot based on the provided event configuration.
-   * @param events - An object mapping event strings to handler functions.
+   * @param events - An object mapping event strings to handler functions. Defaults to the template's own events.
    */
-  attachEvents(events?: Record<string, Function>): void;
+  attachEvents(events?: Record<string, (this: HTMLElement, params: CallParams) => void>): void;
 
   /**
    * Removes all event listeners attached by the template.
    */
   removeEvents(): void;
+
+  /**
+   * Disconnects the mutation observers watching for theme changes.
+   */
+  removeObservers(): void;
 
   /**
    * Binds keybindings to the template
@@ -809,9 +928,26 @@ export class Template {
   isNodeInTemplate(node: Node): boolean;
 
   /**
-   * Renders the template, producing a lit-html TemplateResult.
+   * Collects everything acting at an event target: block scope vars (each item
+   * vars, subtemplate args, snippet args) with the innermost layer winning, then
+   * `data-*` attributes parsed as JSON, then `event.detail`. Values are snapshot
+   * at dispatch, so nothing here subscribes.
+   * @param target - The element the event fired on.
+   * @param event - The event being handled.
+   */
+  getEventData(target?: Element | null, event?: Event): EventData;
+
+  /**
+   * The node events dispatched by this template originate from: the first element
+   * in its rendered range, falling back to the component's own element.
+   */
+  getEventOrigin(): Element | undefined;
+
+  /**
+   * Renders the template through the active engine.
    * @param additionalData - Additional data to be merged into the template's data context.
-   * @returns The rendered lit-html TemplateResult.
+   * @returns Whatever the engine's renderer produces: a DocumentFragment on the client,
+   * markup on the server.
    */
   render(additionalData?: DataContext): any;
 
@@ -822,52 +958,67 @@ export class Template {
   markRendered(): void;
 
   /**
+   * Engine-facing flag setter: marks the template destroyed and drops its child templates.
+   */
+  markDestroyed(): void;
+
+  /**
    * Queries for DOM elements within the template's renderRoot (similar to jQuery's $).
-   * @param selector - The CSS selector.
+   * @param selector - The CSS selector, or a node to wrap.
    * @param options - query settings
    * @returns A Query object representing the matched elements.
    */
-  $(selector: string, options?: QuerySettings): Query;
+  $(selector: QuerySelector, options?: QuerySettings): Query;
   /**
    * Queries for DOM elements within the template's renderRoot, piercing shadow DOM boundaries (similar to jQuery's $$).
-   * @param selector - The CSS selector.
+   * @param selector - The CSS selector, or a node to wrap.
    * @param options - query settings
    * @returns A Query object representing the matched elements.
    */
-  $$(selector: string, options?: QuerySettings): Query;
+  $$(selector: QuerySelector, options?: QuerySettings): Query;
 
   /**
    * Calls a function within the template's context, providing convenient access to template helpers and data.
    * @param func - The function to call.
    * @param options - options
+   * @param options.params - Standard arguments to pass, replacing the cached ones.
+   * @param options.additionalData - Extra keys merged into the standard arguments.
+   * @param options.additionalArgs - Arguments appended after the standard arguments.
+   * @param options.thisContext - `this` for the call. Defaults to the template's element.
    * @returns The return value of the called function, or undefined if the function is not defined.
    */
   call<T>(
-    func: ((params: CallParams) => T) | undefined,
+    func: ((params: CallParams, ...args: any[]) => T) | undefined,
     options?: {
       params?: CallParams;
       additionalData?: Record<string, any>;
-      firstArg?: any;
       additionalArgs?: any[];
+      thisContext?: any;
     },
   ): T | undefined;
 
   /**
-   * Attaches an event listener using event delegation.
-   * @param selector - The CSS selector to delegate the event to.
+   * Builds the standard arguments handed to lifecycle callbacks and event handlers.
+   * @param additionalData - Extra keys merged into the result.
+   */
+  buildCallParams(additionalData?: Record<string, any>): CallParams;
+
+  /**
+   * Attaches an event listener to elements outside the template, cleaned up when
+   * the template is destroyed.
+   * @param selector - The CSS selector, or a node to bind to.
    * @param eventName - The name of the event (e.g., "click", "input").
    * @param eventHandler - The event handler function.
-   * @param options
-   * @param options.eventSettings - event settings
-   * @param options.querySettings - query settings
-   * @returns A Query object for managing the event listener.
+   * @param options - Native `addEventListener` options (passive, capture, once, ...),
+   * plus `querySettings` for resolving the selector.
+   * @returns The created handler, or an array of handlers when the selector matched several elements.
    */
   attachEvent(
-    selector: string,
+    selector: QuerySelector,
     eventName: string,
-    eventHandler: (event: Event) => void,
-    options?: { eventSettings?: EventSettings; querySettings?: { pierceShadow?: boolean; }; },
-  ): Query;
+    eventHandler: EventListener,
+    options?: AddEventListenerOptions & { querySettings?: QueryOptions; },
+  ): EventHandler | EventHandler[];
 
   /**
    * Dispatches a custom event from the template's element.
@@ -876,20 +1027,68 @@ export class Template {
    * @param eventSettings - event settings
    * @param options
    * @param options.triggerCallback - whether to trigger the callback. default `true`
-   * @returns A Query object for managing the event.
+   * @param options.origin - node to dispatch from. defaults to the template's event origin
+   * @returns A Query object for the origin, or undefined when rendering on the server.
    */
   dispatchEvent(
     eventName: string,
     eventData?: EventData,
     eventSettings?: EventSettings,
-    options?: { triggerCallback?: boolean; },
-  ): Query;
+    options?: { triggerCallback?: boolean; origin?: Node; },
+  ): Query | undefined;
+
+  /**
+   * Returns a promise that resolves after the named lifecycle event fires.
+   * One-shot events (created, rendered, destroyed) resolve once and stay resolved.
+   * Recurring events (updated) hand out a fresh promise each call.
+   * @param name - The lifecycle event to wait on.
+   */
+  lifecyclePromise(name: LifecycleEvent): Promise<void>;
+
+  /**
+   * Resolves the pending promise for a lifecycle event, if anything is waiting on it.
+   * @param eventName - The lifecycle event that fired.
+   */
+  resolveLifecyclePromise(eventName: LifecycleEvent): void;
+
+  /**
+   * Creates the settings proxy for a subtemplate that declares `defaultSettings`,
+   * falling back to the parent component's settings for anything it does not own.
+   */
+  createSubtemplateSettings(): void;
+
+  /**
+   * Pushes matching values from a data context into the subtemplate's settings.
+   * @param dataContext - The data context to read from.
+   */
+  updateSubtemplateSettings(dataContext: DataContext): void;
+
+  /**
+   * `setInterval` scoped to the template, cleared when the template is destroyed.
+   * @param callback - Function to run on each tick.
+   * @param ms - Delay between ticks in milliseconds.
+   */
+  createInterval(callback: () => void, ms?: number): ReturnType<typeof setInterval>;
+
+  /**
+   * `setTimeout` scoped to the template, cleared when the template is destroyed.
+   * @param callback - Function to run after the delay.
+   * @param ms - Delay in milliseconds.
+   */
+  createTimeout(callback: () => void, ms?: number): ReturnType<typeof setTimeout>;
+
+  /**
+   * Scopes a reaction, derived signal, or matcher to the template so it stops on destroy.
+   * @param reactive - Anything with a `stop` method.
+   * @returns The same value, for chaining.
+   */
+  trackReaction<T extends { stop(): void; }>(reactive: T): T;
 
   /**
    * Creates a reactive effect that will re-run whenever its dependencies change.  Reactions are automatically cleaned up when the component is destroyed.
-   * @param reaction - The function to execute as a reactive effect.
+   * @param callback - The function to execute as a reactive effect.
    */
-  reaction(callback: (reaction: Reaction) => void): Reaction;
+  reaction(callback: (reaction: Reaction) => void | Promise<void>): Reaction;
 
   /**
    * Creates a computed signal scoped to the template, stopped when it is destroyed.
@@ -908,10 +1107,7 @@ export class Template {
   /**
    * Creates a per-key reactive selector scoped to the template, stopped when it is destroyed.
    */
-  match<V, K = V>(
-    source: Signal<V>,
-    matchFn?: (key: K, value: V) => boolean,
-  ): ((key: K) => boolean) & { stop(): void; };
+  match<V, K = V>(source: Signal<V>, matchFn?: (key: K, value: V) => boolean): Matcher<K>;
 
   /**
    * Clears all reactions associated with this template.
@@ -919,31 +1115,32 @@ export class Template {
   clearReactions(): void;
 
   /**
-   * Finds a template instance by its name.
+   * Finds the first rendered template with a given name, anywhere on the page.
    * @param templateName - The name of the template to find.
-   * @returns The Template instance, or undefined if not found.
+   * @returns The rendered template instance, or undefined if not found.
    */
-  findTemplate: (templateName: string) => Template | undefined;
+  findTemplate: (templateName: string) => RenderedTemplate | undefined;
 
   /**
    * Finds a parent template instance by its name.
-   * @param templateName - The name of the parent template to find.
+   * @param templateName - The name of the parent template to find. Omit to match the nearest parent.
    * @returns The rendered template instance, or undefined if not found.
    */
-  findParent: (templateName: string) => RenderedTemplate | undefined;
+  findParent: (templateName?: string) => RenderedTemplate | undefined;
 
   /**
    * Finds a child template by name.
-   * @param {string} templateName name of template
-   * @returns {RenderedTemplate | undefined} Rendered template instance or undefined
+   * @param templateName - The name of the template to find. Omit to match the first child.
+   * @returns Rendered template instance or undefined
    */
-  findChild(templateName: string): RenderedTemplate | undefined;
+  findChild: (templateName?: string) => RenderedTemplate | undefined;
 
   /**
-   * @param {string} templateName - template to find
+   * Finds every child template with a given name.
+   * @param templateName - The name of the templates to find. Omit to match every child.
    * @returns The rendered template instances, or an empty array if not found.
    */
-  findChildren(templateName: string): RenderedTemplate[];
+  findChildren: (templateName?: string) => RenderedTemplate[];
 
   /**
    * Adds a template instance to the static registry of rendered templates.
@@ -965,34 +1162,34 @@ export class Template {
   static getTemplates(templateName: string): Template[];
 
   /**
-   * Finds a single rendered template instance by its name.
+   * Finds a single rendered template by its name, merging its instance and data context.
    * @param templateName - The name of the template to find.
-   * @returns The Template instance, or undefined if not found.
+   * @returns The rendered template instance, or undefined if not found.
    */
-  static findTemplate(templateName: string): Template | undefined;
+  static findTemplate(templateName: string): RenderedTemplate | undefined;
   /**
    * Finds a parent of the provided template
-   * @param {Template} template - template instance
-   * @param {string} templateName - name of template
-   * @returns {RenderedTemplate | undefined} Returns rendered template
+   * @param template - template instance
+   * @param templateName - name of template. Omit to match the nearest parent.
+   * @returns Returns rendered template
    */
-  static findParentTemplate(template: Template, templateName: string): RenderedTemplate | undefined;
+  static findParentTemplate(template: Template, templateName?: string): RenderedTemplate | undefined;
 
   /**
    * Finds all child templates with a given name within a parent template.
    * @param template - The parent Template instance.
-   * @param templateName - The name of the child templates to find.
+   * @param templateName - The name of the child templates to find. Omit to match every child.
    * @returns An array of rendered template instances.
    */
-  static findChildTemplates(template: Template, templateName: string): RenderedTemplate[];
+  static findChildTemplates(template: Template, templateName?: string): RenderedTemplate[];
 
   /**
    * Finds a single, direct child, template
-   * @param {Template} template - template to search
-   * @param {string} templateName - name of template to find
-   * @returns {RenderedTemplate | undefined} Returns rendered template instance.
+   * @param template - template to search
+   * @param templateName - name of template to find. Omit to match the first child.
+   * @returns Returns rendered template instance.
    */
-  static findChildTemplate(template: Template, templateName: string): RenderedTemplate | undefined;
+  static findChildTemplate(template: Template, templateName?: string): RenderedTemplate | undefined;
   /**
    * Lifecycle callback invoked after the template is created.
    */

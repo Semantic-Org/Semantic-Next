@@ -1,3 +1,5 @@
+import type { Reaction } from './reaction.js';
+
 /**
  * Tracks the reactions subscribed to a reactive value and notifies them when it
  * changes. Signals own a Dependency internally, you rarely construct one directly.
@@ -7,7 +9,13 @@
  */
 export class Dependency {
   /** The reactions currently subscribed to this dependency. */
-  readonly subscribers: Set<any>;
+  readonly subscribers: Set<Reaction>;
+
+  /**
+   * Debugging metadata, populated only when tracing is on. The constructor form
+   * stores the rest arguments as-is, so it is not always a plain object.
+   */
+  readonly context: any;
 
   /**
    * Creates a new dependency tracker.
@@ -40,5 +48,5 @@ export class Dependency {
    * @internal
    * @param reaction - The reaction to remove
    */
-  remove(reaction: any): void;
+  remove(reaction: Reaction): void;
 }

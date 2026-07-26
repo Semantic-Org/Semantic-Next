@@ -27,10 +27,10 @@ export function roundNumber(number: number, digits?: number): number;
  * Rounds a number to a specified number of decimals.
  * Handles very large and very small numbers correctly.
  * Returns the original value if it's not a finite number.
- * @see {@link https://next.semantic-ui.com/docs/api/utils/numbers#decimals decimals}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/numbers#rounddecimal roundDecimal}
  *
  * @param number - The number to round
- * @param digits - Number of decimals (default: 2)
+ * @param decimals - Number of decimals (default: 2)
  * @returns The rounded number
  *
  * @example
@@ -41,4 +41,4 @@ export function roundNumber(number: number, digits?: number): number;
  * roundDecimal(Infinity) // returns Infinity
  * ```
  */
-export function roundDecimal(number: number, digits?: number): number;
+export function roundDecimal(number: number, decimals?: number): number;

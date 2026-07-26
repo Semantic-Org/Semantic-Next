@@ -15,9 +15,9 @@ export interface RGBColor {
  *
  * @param oklchString - The color string in the format "oklch(L C H)" or "oklch(L, C, H)".
  *                      L: Lightness (0-1), C: Chroma (0-~0.4), H: Hue (0-360).
- * @returns An object with r, g, b properties (0-255), or an empty string if the input is invalid.
+ * @returns An object with r, g, b properties (0-255), or null if the input is invalid.
  */
-export function oklchToRgb(oklchString?: string): RGBColor | '';
+export function oklchToRgb(oklchString?: string): RGBColor | null;
 
 /**
  * Converts an OKLCH color string to a hex color string (e.g., "#RRGGBB"),

@@ -88,12 +88,17 @@ export function getText(src: string, settings?: FetchSettings): Promise<string>;
 export function getJSON<T = any>(src: string, settings?: FetchSettings): Promise<T>;
 
 /**
+ * Retrieves the user's local IP addresses using WebRTC ICE gathering
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/browser#getipaddress getIPAddress}
+ */
+export function getIPAddress(options: GetIPAddressOptions & { type: 'local' | 'all'; }): Promise<string[]>;
+/**
  * Retrieves the user's IP address using WebRTC ICE gathering
  * @see {@link https://next.semantic-ui.com/docs/api/utils/browser#getipaddress getIPAddress}
  * @see {@link https://next.semantic-ui.com/examples/utils-getipaddress Example}
  *
  * @param options - Configuration options for IP retrieval
- * @returns Promise resolving to IP address(es). Returns a single string for 'public' type, or an array of strings for 'local'/'all' types
+ * @returns Promise resolving to IP address(es). Returns a single string for 'public' type (the default), or an array of strings for 'local'/'all' types. Rejects when no address is found before the timeout
  *
  * @example
  * ```ts
@@ -106,6 +111,11 @@ export function getJSON<T = any>(src: string, settings?: FetchSettings): Promise
  * console.log(localIPs); // ['192.168.1.100', '10.0.0.5']
  * ```
  */
+export function getIPAddress(options?: GetIPAddressOptions & { type?: 'public'; }): Promise<string>;
+/**
+ * Retrieves the user's IP address using WebRTC ICE gathering
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/browser#getipaddress getIPAddress}
+ */
 export function getIPAddress(options?: GetIPAddressOptions): Promise<string | string[]>;
 
 /**
@@ -114,3 +124,17 @@ export function getIPAddress(options?: GetIPAddressOptions): Promise<string | st
  * @param callback - The function to call when idle
  */
 export function idleCallback(callback: () => void): void;
+
+/**
+ * Queues a callback on the microtask queue, falling back to a resolved promise
+ * where `queueMicrotask` is unavailable. Runs before the next render and before
+ * any timer, which is what makes it the scheduling primitive behind reactive flushes.
+ *
+ * @param fn - The function to run on the next microtask
+ *
+ * @example
+ * ```ts
+ * microtask(() => flushPendingWork());
+ * ```
+ */
+export function microtask(fn: () => void): void;

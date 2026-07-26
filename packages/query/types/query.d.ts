@@ -1,17 +1,39 @@
 type PlainObject<T = any> = Record<string, T>;
 
 /**
+ * Anything a Query collection can be built from.
+ */
+export type QuerySelector =
+  | string
+  | Node
+  | NodeList
+  | HTMLCollection
+  | Element[]
+  | Query
+  | typeof globalThis;
+
+/**
+ * Verbosity of Query and Behavior logging, from quietest to loudest.
+ */
+export type LogLevel = 'silent' | 'error' | 'warn' | 'info' | 'debug';
+
+/**
  * Options for initializing a Query instance.
  */
 export interface QueryOptions {
   /**
-   * The root element to search within. Defaults to `document`.
+   * The root to search within. Defaults to `document`.
+   * A shadow root or document fragment is a valid root.
    */
-  root?: Document | Element;
+  root?: Document | DocumentFragment | Element;
   /**
    * Whether to pierce through shadow DOM boundaries. Defaults to `false`.
    */
   pierceShadow?: boolean;
+  /**
+   * The collection `end()` returns to. Set automatically when a traversal chains.
+   */
+  prevObject?: Query | null;
 }
 
 /**
@@ -46,7 +68,7 @@ export interface EventOptions {
  */
 export interface EventHandler {
   /** The element the event listener is attached to. */
-  el: HTMLElement | typeof globalThis;
+  el: Element | Document | typeof globalThis;
   /** The name of the event. */
   eventName: string;
   /** The namespaces of the event, if any. */
@@ -136,6 +158,65 @@ export interface NaturalHeightOptions {
 }
 
 /**
+ * Ways to narrow a collection: a CSS selector, a predicate run over the
+ * elements, element(s) to keep, or another Query instance.
+ */
+export type QueryFilter =
+  | string
+  | Element
+  | Element[]
+  | Query
+  | ((element: Element, index: number, elements: Element[]) => boolean);
+
+/**
+ * Options shared by intersection checks.
+ */
+export interface IntersectionOptions {
+  /** Which sides must intersect ('all' or specific sides). Defaults to 'all'. */
+  sides?: 'all' | 'top' | 'bottom' | 'left' | 'right' | Array<'top' | 'bottom' | 'left' | 'right'>;
+  /** Minimum intersection ratio (0-1). Defaults to 0. */
+  threshold?: number;
+  /** Whether source must be fully contained in target. Defaults to false. */
+  fully?: boolean;
+  /** Whether all elements must intersect (true) or any element (false). Defaults to false. */
+  all?: boolean;
+}
+
+/**
+ * Intersection data returned when `returnDetails` is true.
+ */
+export interface IntersectionDetails {
+  /** Whether the element intersects after threshold, sides, and containment checks. */
+  intersects: boolean;
+  /** Whether the top edge falls inside the target. */
+  top: boolean;
+  /** Whether the bottom edge falls inside the target. */
+  bottom: boolean;
+  /** Whether the left edge falls inside the target. */
+  left: boolean;
+  /** Whether the right edge falls inside the target. */
+  right: boolean;
+  /** Portion of the element covered by the intersection (0-1). */
+  ratio: number;
+  /** The intersection rectangle, relative to the target, or `null` when there is none. */
+  rect: {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width: number;
+    height: number;
+  } | null;
+  /** The element's own edges, relative to the target. */
+  elementPosition: {
+    top: number;
+    left: number;
+    bottom: number;
+    right: number;
+  };
+}
+
+/**
  * A minimal toolkit for querying and performing modifications
  * across DOM nodes based off a selector.
  * @see {@link https://next.semantic-ui.com/docs/api/query Query API Reference}
@@ -146,29 +227,65 @@ export class Query {
    * A proxy object that provides access to the globalThis object.
    * This avoids storing a direct reference to globalThis, reducing memory footprint.
    */
-  static globalThisProxy: object;
+  static globalThisProxy: typeof globalThis;
   /**
-   * An array of event handlers for teardown purposes.
-   */
-  static eventHandlers: EventHandler[];
-  /**
-   * Map of registered behaviors
+   * Map of registered behaviors, keyed by behavior name.
    */
   static behaviors: Map<string, any>;
   /**
-   * Development mode flag
+   * Whether the framework is running a development build.
    */
-  static development?: boolean;
+  static isDevelopment: boolean;
   /**
-   * Global settings for Query
+   * Log level shared by every Query instance and behavior.
+   * Defaults to `debug` in development and `silent` otherwise.
    */
-  static settings?: {
-    logLevel?: string;
-    performance?: boolean;
-  };
+  static logLevel: LogLevel;
+  /**
+   * Whether behavior methods are wrapped in performance marks and measures.
+   */
+  static logPerformance: boolean;
+  /**
+   * Handlers attached to an element, used by `off()` to remove every handler on it.
+   * @internal
+   */
+  static eventRegistry: WeakMap<object, Set<EventHandler>>;
+  /**
+   * The element a handler is attached to, used by `off(handler)` to remove a single handler.
+   * @internal
+   */
+  static handlerRegistry: WeakMap<EventHandler, Element | Document | typeof globalThis>;
+  /**
+   * Cached `naturalDisplay()` results, keyed by element.
+   * @internal
+   */
+  static elementDisplayCache: WeakMap<Element, { rulesHash: number; displayValue: string; }>;
+  /**
+   * Events attached as passive listeners unless `passive: false` is passed.
+   */
+  static autoPassiveEvents: string[];
+  /**
+   * Tag name to natural display value, used by `naturalDisplay()` when no stylesheet rule matches.
+   */
+  static naturalDisplayMap: Readonly<Record<string, string>>;
+
+  /**
+   * Checks whether an element is the window, or the proxy standing in for it.
+   * @param el - The element to test.
+   */
+  static isWindow(el: unknown): el is typeof globalThis;
+
+  /**
+   * Wraps a single element, skipping selector resolution.
+   * @internal Fast path used by `each()` to build the `this` of a callback.
+   * @param el - The element to wrap.
+   * @param options - Options inherited from the collection being iterated.
+   * @returns A single element Query instance.
+   */
+  static wrap(el: Element, options?: QueryOptions): Query;
 
   /** The original selector used to create the Query instance. */
-  selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy;
+  selector: QuerySelector;
   /** The number of elements in the Query instance. */
   length: number;
   /** Options for the Query instance (root, pierceShadow). */
@@ -177,21 +294,25 @@ export class Query {
   isBrowser?: boolean;
   /** Indicates if the Query instance represents the global object. */
   isGlobal?: boolean;
+  /** The collection this one was chained from, returned by `end()`. */
+  prevObject?: Query | null;
 
-  /** Array-like access to elements. */
-  [index: number]: Element | typeof Query.globalThisProxy;
+  /** Array-like access to elements. A collection of the global object holds `Query.globalThisProxy` here. */
+  [index: number]: Element;
 
   /**
    * Creates a new Query instance.
    * @param selector - The selector used to query for elements. Can be a CSS selector string,
    *                   a single DOM element, a NodeList, an HTMLCollection, an array of elements,
-   *                   or the window/globalThis object.
+   *                   an existing Query instance, or the window/globalThis object.
    * @param options - Optional settings for the Query instance.
    */
-  constructor(
-    selector?: string | Node | NodeList | HTMLCollection | Element[] | typeof globalThis,
-    options?: QueryOptions,
-  );
+  constructor(selector?: QuerySelector, options?: QueryOptions);
+
+  /**
+   * Iterates the elements in the collection, enabling `for...of`, spread, and `Array.from`.
+   */
+  [Symbol.iterator](): Iterator<Element>;
 
   /**
    * Creates a new Query instance with the provided elements, preserving the original options.
@@ -209,7 +330,11 @@ export class Query {
    * @param includeRoot - Whether to include the root element in the search. Defaults to `true`.
    * @returns An array of matching elements.
    */
-  querySelectorAllDeep(root: Element | Document, selector: string | Element, includeRoot?: boolean): Element[];
+  querySelectorAllDeep(
+    root: Element | Document | DocumentFragment,
+    selector: string | Element,
+    includeRoot?: boolean,
+  ): Element[];
 
   /**
    * Iterates over each element in the Query instance.
@@ -257,26 +382,26 @@ export class Query {
    * Returns the index of the first element in the current set,
    * relative to its siblings (optionally filtered by a selector).
    * @see https://next.semantic-ui.com/docs/api/query/size-and-position#index
-   * @param siblingFilter - Optional CSS selector, function or Query to filter the siblings.
+   * @param siblingFilter - Optional CSS selector, predicate, element(s) or Query to filter the siblings.
    * @returns The index of the element, or -1 if not found.
    */
-  index(siblingFilter?: string | Function | Query): number;
+  index(siblingFilter?: QueryFilter): number;
 
   /**
    * Find the index of the first element matching the filter within current Query set.
    * @see https://next.semantic-ui.com/docs/api/query/size-and-position#index
-   * @param filter - Optional CSS selector, function or Query to identify element within selection.
+   * @param filter - Optional CSS selector, predicate, element(s) or Query to identify element within selection.
    * @returns The index of the element, or -1 if not found.
    */
-  indexOf(filter?: string | Function | Query): number;
+  indexOf(filter?: QueryFilter): number;
 
   /**
-   * Filters the current set of elements based on a selector, function, or another Query instance.
+   * Filters the current set of elements based on a selector, predicate, element(s) or another Query instance.
    * @see https://next.semantic-ui.com/docs/api/query/iterators#filter
-   * @param filter - A CSS selector, a filter function, or a Query instance.
+   * @param filter - A CSS selector, a predicate, element(s), or a Query instance. Without one the collection is returned unchanged.
    * @returns A new Query instance containing the filtered elements.
    */
-  filter(filter: string | Function | Query): Query;
+  filter(filter?: QueryFilter): Query;
 
   /**
    * Checks if *all* elements in the current set match a selector.
@@ -344,12 +469,13 @@ export class Query {
   getEventAlias(eventName: string): string;
 
   /**
-   * Splits a space-separated string of event names into an array, applying event aliases.
+   * Splits a space-separated string of event names into their name and namespaces,
+   * applying event aliases. A bare namespace like `.foo` parses to a null event name.
    * @see https://next.semantic-ui.com/docs/api/query/events#on
    * @param eventNames - A space-separated string of event names.
-   * @returns An array of event names.
+   * @returns An array of parsed events.
    */
-  getEventArray(eventNames: string): string[];
+  getEventArray(eventNames: string): Array<{ eventName: string | null; namespaces: string[] | null; }>;
 
   /**
    * Attaches an event listener to each element in the current set, returning the created handler(s).
@@ -397,15 +523,35 @@ export class Query {
    * @returns The Query instance for chaining.
    */
   on(eventNames: string, targetSelector: string, handler: EventListener, options?: EventOptions): this;
+
   /**
-   * Attaches an event listener to each element in the current set, using standard options.
+   * Attaches a one-shot event listener to each element in the current set, returning the created handler(s).
+   * @see https://next.semantic-ui.com/docs/api/query/events#one
    * @param eventNames - A space-separated string of event names.
    * @param handler - The event handler function.
-   * @param options - Optional event listener options.
-   * @returns The Query instance for chaining, or the event handler if `returnHandler` is true.
+   * @param options - Event listener options with `returnHandler` set to true.
+   * @returns The event handler, or an array of handlers when more than one was created.
    */
-  on(eventNames: string, handler: EventListener, options?: AddEventListenerOptions): this;
-
+  one(
+    eventNames: string,
+    handler: EventListener,
+    options: EventOptions & { returnHandler: true; },
+  ): EventHandler | EventHandler[];
+  /**
+   * Attaches a delegated one-shot event listener to each element in the current set, returning the created handler(s).
+   * @see https://next.semantic-ui.com/docs/api/query/events#one
+   * @param eventNames - A space-separated string of event names.
+   * @param targetSelector - A CSS selector for event delegation.
+   * @param handler - The event handler function.
+   * @param options - Event listener options with `returnHandler` set to true.
+   * @returns The event handler, or an array of handlers when more than one was created.
+   */
+  one(
+    eventNames: string,
+    targetSelector: string,
+    handler: EventListener,
+    options: EventOptions & { returnHandler: true; },
+  ): EventHandler | EventHandler[];
   /**
    * Attaches an event listener that is executed at most once to each element in the current set.
    * @see https://next.semantic-ui.com/docs/api/query/events#one
@@ -424,14 +570,6 @@ export class Query {
    * @returns The Query instance for chaining.
    */
   one(eventNames: string, targetSelector: string, handler: EventListener, options?: EventOptions): this;
-  /**
-   * Attaches an event listener that is executed at most once to each element in the current set.
-   * @param eventNames - A space-separated string of event names.
-   * @param handler - The event handler function.
-   * @param options - Optional event listener options.
-   * @returns The Query instance for chaining.
-   */
-  one(eventNames: string, handler: EventListener, options?: AddEventListenerOptions): this;
 
   /**
    * Returns a Promise that resolves when the next occurrence of the specified event fires on the first element in the current set.
@@ -462,6 +600,21 @@ export class Query {
    */
   intercept(
     eventNames: string,
+    handler: EventListener,
+    options: EventOptions & { returnHandler: true; },
+  ): EventHandler | EventHandler[];
+  /**
+   * Attaches a delegated capture-phase event listener, returning the created handler(s).
+   * @see https://next.semantic-ui.com/docs/api/query/events#intercept
+   * @param eventNames - A space-separated string of event names.
+   * @param targetSelector - A CSS selector for event delegation.
+   * @param handler - The event handler function.
+   * @param options - Event listener options with `returnHandler` set to true.
+   * @returns The event handler, or an array of handlers when more than one was created.
+   */
+  intercept(
+    eventNames: string,
+    targetSelector: string,
     handler: EventListener,
     options: EventOptions & { returnHandler: true; },
   ): EventHandler | EventHandler[];
@@ -502,21 +655,22 @@ export class Query {
   off(handler: EventListener): this;
 
   /**
-   * Triggers an event on each element in the current set.
+   * Triggers an event on each element in the current set. Native methods like
+   * `focus` are called directly, anything else dispatches a CustomEvent.
    * @see https://next.semantic-ui.com/docs/api/query/events#trigger
    * @param eventName - The name of the event to trigger.
-   * @param eventParams - Optional parameters to be passed to the event.
+   * @param eventSettings - Optional CustomEvent settings (bubbles, cancelable, composed, detail).
    * @returns The Query instance for chaining.
    */
-  trigger(eventName: string, eventParams?: PlainObject): this;
+  trigger(eventName: string, eventSettings?: CustomEventInit): this;
 
   /**
    * Triggers a 'click' event on each element in the current set.
    * @see https://next.semantic-ui.com/docs/api/query/events#trigger
-   * @param eventParams - Optional parameters to be passed to the event.
+   * @param eventSettings - Optional CustomEvent settings (bubbles, cancelable, composed, detail).
    * @returns The Query instance for chaining.
    */
-  click(eventParams?: PlainObject): this;
+  click(eventSettings?: CustomEventInit): this;
 
   /**
    * Dispatches a custom event on each element in the current set.
@@ -526,7 +680,7 @@ export class Query {
    * @param eventSettings - Optional settings for the custom event (bubbles, cancelable, composed).
    * @returns The Query instance for chaining.
    */
-  dispatchEvent(eventName: string, eventData?: PlainObject, eventSettings?: PlainObject): this;
+  dispatchEvent(eventName: string, eventData?: PlainObject, eventSettings?: CustomEventInit): this;
 
   /**
    * Removes each element in the current set from the DOM.
@@ -769,12 +923,18 @@ export class Query {
   el(): Element | undefined;
 
   /**
-   * Gets the element at the specified index, or all elements if no index is provided.
+   * Gets the element at the specified index.
    * @see https://next.semantic-ui.com/docs/api/query/utilities#get
    * @param index - The index of the element to retrieve.
-   * @returns The element at the specified index, or an array of all elements.
+   * @returns The element at the specified index, or `undefined` when the index is out of range.
    */
-  get(index?: number): Element | Element[] | (Element | typeof Query.globalThisProxy)[] | undefined;
+  get(index: number): Element | undefined;
+  /**
+   * Gets every element in the current set.
+   * @see https://next.semantic-ui.com/docs/api/query/utilities#get
+   * @returns An array of all elements.
+   */
+  get(): Element[];
 
   /**
    * Gets a new Query instance containing the element at the specified index.
@@ -1225,11 +1385,24 @@ export class Query {
   outerHeight(options?: { includeMargin?: boolean; }): number | number[] | undefined;
 
   /**
-   * Gets or sets the position of elements.
+   * Gets or sets the position of elements. A numeric `top` or `left` makes it a setter.
    * @see https://next.semantic-ui.com/docs/api/query/dimensions#position
    */
-  // Setter overload
-  position(options: { top?: number; left?: number; relativeTo?: string | Element | Query; }): this;
+  // Setter overloads, one for each coordinate that can drive the move
+  position(options: {
+    top: number;
+    left?: number;
+    relativeTo?: string | Element | Query;
+    type?: 'global' | 'local' | 'relative';
+    precision?: 'pixel' | 'subpixel';
+  }): this;
+  position(options: {
+    left: number;
+    top?: number;
+    relativeTo?: string | Element | Query;
+    type?: 'global' | 'local' | 'relative';
+    precision?: 'pixel' | 'subpixel';
+  }): this;
   // Getter with all coordinates
   position(options?: {
     relativeTo?: string | Element | Query;
@@ -1340,17 +1513,9 @@ export class Query {
    */
   intersects(
     target: string | Element | Query,
-    options?: {
-      /** Which sides must intersect ('all' or specific sides). Defaults to 'all'. */
-      sides?: 'all' | 'top' | 'bottom' | 'left' | 'right' | Array<'top' | 'bottom' | 'left' | 'right'>;
-      /** Minimum intersection ratio (0-1). Defaults to 0. */
-      threshold?: number;
-      /** Whether source must be fully contained in target. Defaults to false. */
-      fully?: boolean;
+    options?: IntersectionOptions & {
       /** Whether to return detailed intersection data. Defaults to false. */
       returnDetails?: false;
-      /** Whether all elements must intersect (true) or any element (false). Defaults to false. */
-      all?: boolean;
     },
   ): boolean;
 
@@ -1359,89 +1524,46 @@ export class Query {
    * @see https://next.semantic-ui.com/docs/api/query/dimensions#intersects
    * @param target - The target element(s) to check intersection with.
    * @param options - Configuration options with returnDetails set to true.
-   * @returns Detailed intersection data object or array of objects.
+   * @returns Detailed intersection data for a single element, an array for multiple elements,
+   * or `null` when the selection or target is empty.
    */
   intersects(
     target: string | Element | Query,
-    options: {
-      /** Which sides must intersect ('all' or specific sides). Defaults to 'all'. */
-      sides?: 'all' | 'top' | 'bottom' | 'left' | 'right' | Array<'top' | 'bottom' | 'left' | 'right'>;
-      /** Minimum intersection ratio (0-1). Defaults to 0. */
-      threshold?: number;
-      /** Whether source must be fully contained in target. Defaults to false. */
-      fully?: boolean;
+    options: IntersectionOptions & {
       /** Must be true to get detailed intersection data. */
       returnDetails: true;
-      /** Whether all elements must intersect (true) or any element (false). Defaults to false. */
-      all?: boolean;
     },
-  ):
-    | {
-      intersects: boolean;
-      top: boolean;
-      bottom: boolean;
-      left: boolean;
-      right: boolean;
-      ratio: number;
-      rect: {
-        left: number;
-        top: number;
-        right: number;
-        bottom: number;
-        width: number;
-        height: number;
-      } | null;
-      elementPosition: {
-        top: number;
-        left: number;
-        bottom: number;
-        right: number;
-      };
-    }
-    | Array<{
-      intersects: boolean;
-      top: boolean;
-      bottom: boolean;
-      left: boolean;
-      right: boolean;
-      ratio: number;
-      rect: {
-        left: number;
-        top: number;
-        right: number;
-        bottom: number;
-        width: number;
-        height: number;
-      } | null;
-      elementPosition: {
-        top: number;
-        left: number;
-        bottom: number;
-        right: number;
-      };
-    }>
-    | null;
+  ): IntersectionDetails | IntersectionDetails[] | null;
 
   /**
    * Checks if elements in the selection are within the viewport.
    * @see https://next.semantic-ui.com/docs/api/query/visibility#isinview
    * @param options - Configuration options.
-   * @param options.threshold - Minimum percentage (0-1) of element that must be visible. Defaults to 0.
-   * @param options.fully - Whether element must be fully within viewport. Defaults to false.
    * @param options.viewport - The viewport element to check against. Defaults to clipping parent if not specified.
-   * @param options.sides - Which sides must intersect ('all' or specific sides). Defaults to 'all'.
-   * @param options.returnDetails - Whether to return detailed intersection data. Defaults to false.
-   * @param options.all - Whether all elements must be in view (true) or any element (false). Defaults to false.
-   * @returns Boolean indicating if elements are in view, or detailed intersection data if returnDetails is true.
+   * @returns `true` when the elements are in view, `false` otherwise.
    */
-  isInView(options?: {
-    threshold?: number;
-    fully?: boolean;
-    viewport?: string | Element | Query;
-    sides?: 'all' | 'top' | 'bottom' | 'left' | 'right' | Array<'top' | 'bottom' | 'left' | 'right'>;
-    returnDetails?: boolean;
-    all?: boolean;
-  }): boolean;
+  isInView(
+    options?: IntersectionOptions & {
+      viewport?: string | Element | Query;
+      /** Whether to return detailed intersection data. Defaults to false. */
+      returnDetails?: false;
+    },
+  ): boolean;
+  /**
+   * Checks how elements in the selection overlap the viewport, returning detailed information.
+   * @see https://next.semantic-ui.com/docs/api/query/visibility#isinview
+   * @param options - Configuration options with returnDetails set to true.
+   * @param options.viewport - The viewport element to check against. Defaults to clipping parent if not specified.
+   * @returns Detailed intersection data for a single element, an array for multiple elements,
+   * or `null` when the selection is empty.
+   */
+  isInView(
+    options: IntersectionOptions & {
+      viewport?: string | Element | Query;
+      /** Must be true to get detailed intersection data. */
+      returnDetails: true;
+    },
+  ): IntersectionDetails | IntersectionDetails[] | null;
 
   /**
    * Shows hidden elements by setting their display to the natural display value.
@@ -1507,9 +1629,10 @@ export class Query {
   /**
    * Triggers a submit event on form elements.
    * @see https://next.semantic-ui.com/docs/api/query/events#submit
+   * @param eventSettings - Optional CustomEvent settings used when the element has no `requestSubmit`.
    * @returns The Query instance for chaining.
    */
-  submit(eventSettings?: Record<string, any>): this;
+  submit(eventSettings?: CustomEventInit): this;
 
   /**
    * Gets elements assigned to a named slot in a shadow DOM component.
@@ -1537,5 +1660,3 @@ export class Query {
    */
   containsDeep(container: Element, target: Element): boolean;
 }
-
-export default Query;

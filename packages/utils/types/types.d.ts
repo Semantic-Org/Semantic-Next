@@ -132,6 +132,22 @@ export function isEmpty(x: unknown): boolean;
 export function isClassInstance(obj: unknown): boolean;
 
 /**
+ * Checks if the value is iterable, meaning it carries a `Symbol.iterator` method.
+ * True for arrays, strings, Sets, Maps, typed arrays, and NodeLists. This is the
+ * branch `each` takes before falling back to indexed array-like access.
+ * @param x - The value to check
+ *
+ * @example
+ * ```typescript
+ * isIterable([1, 2, 3]);         // true
+ * isIterable('abc');             // true
+ * isIterable(new Set());         // true
+ * isIterable({ length: 2 });     // false
+ * ```
+ */
+export function isIterable(x: unknown): x is Iterable<unknown>;
+
+/**
  * Checks if the value is a Set instance
  * @see {@link https://next.semantic-ui.com/docs/api/utils/types#isset isSet}
  * @param x - The value to check
