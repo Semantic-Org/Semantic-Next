@@ -49,20 +49,35 @@ const readImportMap = (files) => {
 */
 const isDocument = (html) => /<!doctype|<html[\s>]|<head[\s>]|<body[\s>]/i.test(html);
 
+const insertInHead = (html, content) => {
+  const headMatch = html.match(/<head(\s[^>]*)?>/i);
+  if (headMatch) {
+    const index = headMatch.index + headMatch[0].length;
+    return `${html.slice(0, index)}\n${content}${html.slice(index)}`;
+  }
+  return `${content}\n${html}`;
+};
+
 const injectImportMap = (html, importMap) => {
   if (!importMap || !isDocument(html) || html.includes('type="importmap"')) {
     return html;
   }
-  const tag = `<script type="importmap">${JSON.stringify(importMap)}</script>`;
-  const headMatch = html.match(/<head(\s[^>]*)?>/i);
-  if (headMatch) {
-    const index = headMatch.index + headMatch[0].length;
-    return `${html.slice(0, index)}\n${tag}${html.slice(index)}`;
-  }
-  return `${tag}\n${html}`;
+  return insertInHead(html, `<script type="importmap">${JSON.stringify(importMap)}</script>`);
 };
 
-export const buildFiles = async ({ files, importMap, cdnBaseUrl }) => {
+/*
+  Same contract as the import map: served documents only, fragments stay
+  byte-identical. Reaches documents that author their own <html> — where
+  host-level file injections never apply — without touching editor source.
+*/
+const injectHeadHTML = (html, headHTML) => {
+  if (!headHTML || !isDocument(html)) {
+    return html;
+  }
+  return insertInHead(html, headHTML);
+};
+
+export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML }) => {
   const dependencies = readDependencies(files);
   const projectMap = importMap ?? readImportMap(files);
   const diagnostics = {};
@@ -85,7 +100,7 @@ export const buildFiles = async ({ files, importMap, cdnBaseUrl }) => {
       continue;
     }
     if (isHTMLFile(file.name)) {
-      output.push({ ...file, content: injectImportMap(file.content, projectMap) });
+      output.push({ ...file, content: injectHeadHTML(injectImportMap(file.content, projectMap), headHTML) });
       continue;
     }
     // everything else serves verbatim — runtime relative fetches (getText et al) depend on it

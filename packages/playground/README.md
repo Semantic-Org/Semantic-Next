@@ -38,6 +38,10 @@ Import-map entries pass through untouched — the map is injected into served do
 
 JS files take the fast path: `es-module-lexer` scan plus import rewriting, no TypeScript load. The TypeScript module (a ~3.5MB lazy chunk) loads only when a project contains `.ts` files or requests completions/hover/diagnostics — render-only sessions never pay for it.
 
+## Host head injection
+
+`new PlaygroundProject({ headHTML })` injects host-supplied HTML into the `<head>` of every served document at build time, alongside the import map — including documents the project authors itself. Fragments serve byte-identical and editor source is untouched, so an embedding host can sync its theme into previews, add instrumentation, or set a `<base>` without polluting what the user reads and edits. Mechanism lives here; policy (what to inject) stays with the host.
+
 ## Pragmas
 
 Special comments shape what the editor shows without changing what builds:
