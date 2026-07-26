@@ -51,6 +51,31 @@ describe('LanguageService', () => {
     });
   });
 
+  describe('diagnostics', () => {
+    it('reports recoverable compile errors with in-bounds ranges', async () => {
+      const { TemplateCompiler } = await import('@semantic-ui/compiler');
+      const text = '<b>hi</b>\n{else}';
+      const withCompiler = new LanguageService({ compiler: TemplateCompiler });
+      withCompiler.didOpen('file:///broken.html', text, 1);
+      const diagnostics = await withCompiler.getDiagnostics('file:///broken.html');
+      expect(diagnostics).toHaveLength(1);
+      expect(diagnostics[0].message).toContain('{else}');
+      const { start, end } = diagnostics[0].range;
+      expect(start).toEqual({ line: 1, character: 0 });
+      // one bad range takes down the whole publish in @codemirror/lsp-client
+      const lastLine = text.split('\n')[end.line];
+      expect(end.character).toBeLessThanOrEqual(lastLine.length);
+      expect(end.character).toBeGreaterThan(start.character);
+    });
+
+    it('returns no diagnostics for a valid template', async () => {
+      const { TemplateCompiler } = await import('@semantic-ui/compiler');
+      const withCompiler = new LanguageService({ compiler: TemplateCompiler });
+      withCompiler.didOpen('file:///ok.html', '{#if open}<b>hi</b>{/if}', 1);
+      expect(await withCompiler.getDiagnostics('file:///ok.html')).toEqual([]);
+    });
+  });
+
   describe('completions with component model', () => {
     it('returns component methods for expression context', () => {
       service.didOpen(buttonUri, buttonHtml);
@@ -85,6 +110,46 @@ describe('LanguageService', () => {
       expect(names).toContain('each');
       expect(names).toContain('async');
       expect(names).toContain('snippet');
+      expect(names).toContain('match');
+      expect(names).toContain('fn');
+    });
+
+    it('attaches documentation with an example and docs link', () => {
+      service.didOpen('test://block-docs', '<div>{#}</div>');
+      const items = service.getCompletions('test://block-docs', { line: 0, character: 7 });
+      const match = items.find(i => i.label === 'match');
+      expect(match.detail).toBe('Branches on the value of a single discriminant');
+      expect(match.documentation.value).toContain('{#match status}');
+      expect(match.documentation.value).toContain('[docs](/docs/guides/templates/match)');
+    });
+
+    it('offers case labels inside a match block', () => {
+      service.didOpen('test://match-case', '{#match status}\n  {}\n{/match}');
+      const items = service.getCompletions('test://match-case', { line: 1, character: 3 });
+      const names = items.map(i => i.label);
+      expect(names).toContain('is');
+      expect(names).toContain('isExactly');
+      expect(names).toContain('else');
+    });
+
+    it('offers section keywords inside an async block', () => {
+      service.didOpen('test://async-section', '{#async getResults as result}\n  {}\n{/async}');
+      const items = service.getCompletions('test://async-section', { line: 1, character: 3 });
+      const names = items.map(i => i.label);
+      expect(names).toContain('loading');
+      expect(names).toContain('before');
+      expect(names).toContain('error');
+      expect(names).toContain('catch');
+    });
+
+    it('does not offer case labels in a block that has no cases', () => {
+      service.didOpen('test://no-case', '{#each items}\n  {}\n{/each}');
+      const items = service.getCompletions('test://no-case', { line: 1, character: 3 });
+      const names = items.map(i => i.label);
+      expect(names).toContain('else');
+      expect(names).not.toContain('is');
+      expect(names).not.toContain('isExactly');
+      expect(names).not.toContain('loading');
     });
   });
 
@@ -137,6 +202,114 @@ describe('LanguageService', () => {
       service.didOpen('test://hover-unknown', '{xyzNothing}');
       const result = service.getHover('test://hover-unknown', { line: 0, character: 5 });
       expect(result).toBeNull();
+    });
+
+    it('describes an opening block keyword', () => {
+      service.didOpen('test://hover-if', '{#if isActive}yes{/if}');
+      const result = service.getHover('test://hover-if', { line: 0, character: 3 });
+      expect(result.contents.value).toContain('**{#if}**');
+      expect(result.contents.value).toContain('[docs](/docs/guides/templates/conditionals)');
+    });
+
+    it('describes a closing block keyword', () => {
+      service.didOpen('test://hover-close', '{#each items}{name}{/each}');
+      const result = service.getHover('test://hover-close', { line: 0, character: 22 });
+      expect(result.contents.value).toContain('**{/each}**');
+      expect(result.contents.value).toContain('Iterates over a collection');
+    });
+
+    it('describes else inside an if block', () => {
+      service.didOpen('test://hover-else', '{#if isActive}yes{else}no{/if}');
+      const result = service.getHover('test://hover-else', { line: 0, character: 20 });
+      expect(result.contents.value).toContain('**{else}**');
+    });
+
+    it('describes a match case label inside a match block', () => {
+      service.didOpen('test://hover-is', "{#match status}{is 'ready'}Ready{/match}");
+      const result = service.getHover('test://hover-is', { line: 0, character: 17 });
+      expect(result.contents.value).toContain('**{is}**');
+      expect(result.contents.value).toContain('[docs](/docs/guides/templates/match)');
+    });
+
+    it('keeps is as the equality helper outside a match block', () => {
+      service.didOpen('test://hover-is-helper', '{#if is a b}yes{/if}');
+      const result = service.getHover('test://hover-is-helper', { line: 0, character: 6 });
+      expect(result.contents.value).toContain('is(a, b): boolean');
+    });
+
+    it('keeps guard as the helper when written without #', () => {
+      service.didOpen('test://hover-guard', '{guard value}');
+      const result = service.getHover('test://hover-guard', { line: 0, character: 4 });
+      expect(result.contents.value).toContain('guard(value)');
+      expect(result.contents.value).not.toContain('**{#guard}**');
+    });
+
+    it('describes the async loading section', () => {
+      service.didOpen('test://hover-loading', '{#async getUser as user}{user}{loading}wait{/async}');
+      const result = service.getHover('test://hover-loading', { line: 0, character: 34 });
+      expect(result.contents.value).toContain('**{loading}**');
+    });
+  });
+
+  describe('signature help', () => {
+    // | marks the cursor and is stripped before the document is opened
+    function signatureAt(template) {
+      const offset = template.indexOf('|');
+      const text = template.replace('|', '');
+      service.didOpen('test://signature', text);
+      return service.getSignatureHelp('test://signature', service.offsetToPosition(text, offset));
+    }
+
+    it('returns the helper signature with the first argument active', () => {
+      const help = signatureAt("{formatDate |date 'h:mm a'}");
+      expect(help.signatures).toHaveLength(1);
+      expect(help.signatures[0].label).toBe('formatDate(date, format?, options?): string');
+      expect(help.activeSignature).toBe(0);
+      expect(help.activeParameter).toBe(0);
+    });
+
+    it('moves the active parameter as the cursor crosses arguments', () => {
+      expect(signatureAt("{formatDate date |'h:mm a'}").activeParameter).toBe(1);
+      expect(signatureAt('{truncate |text 20}').activeParameter).toBe(0);
+      expect(signatureAt('{truncate text |20}').activeParameter).toBe(1);
+      expect(signatureAt('{truncate text 20 |}').activeParameter).toBe(2);
+    });
+
+    it('handles the parenthesized call form', () => {
+      const help = signatureAt("{formatDate(date, |'h:mm a')}");
+      expect(help.signatures[0].label).toBe('formatDate(date, format?, options?): string');
+      expect(help.activeParameter).toBe(1);
+    });
+
+    it('marks parameters by range in the label', () => {
+      const { label, parameters } = signatureAt('{classIf |isActive}').signatures[0];
+      expect(parameters.map(p => label.slice(...p.label))).toEqual(['expr', 'trueClass', 'falseClass?']);
+    });
+
+    it('documents the helper', () => {
+      const help = signatureAt('{joinComma |names}');
+      expect(help.signatures[0].documentation.value).toBe('Joins array with commas and "and"');
+    });
+
+    it('holds the active parameter on a rest parameter', () => {
+      expect(signatureAt("{concat 'a' |}").activeParameter).toBe(0);
+      expect(signatureAt("{concat 'a' 'b' 'c' |}").activeParameter).toBe(0);
+    });
+
+    it('returns null outside a helper call', () => {
+      expect(signatureAt('{userName |}')).toBeNull();
+      expect(signatureAt('{count + |2}')).toBeNull();
+      expect(signatureAt('<div class="wide|">')).toBeNull();
+    });
+
+    it('returns null at a block tag position', () => {
+      expect(signatureAt('{#each |items}')).toBeNull();
+      expect(signatureAt('{#eac|h items}')).toBeNull();
+      expect(signatureAt("{#match plan}{is |'free'}{/match}")).toBeNull();
+    });
+
+    it('returns null for an unopened document', () => {
+      expect(service.getSignatureHelp('test://never-opened', { line: 0, character: 0 })).toBeNull();
     });
   });
 

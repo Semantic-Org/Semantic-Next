@@ -1,5 +1,12 @@
-import { getCompletionContext, getWordAtOffset, formatAttributeDoc } from './server-helpers.js';
-import { formatHelperSignature, getHelper, helpers } from './helper-registry.js';
+import { formatBlockDoc, getBlock, getBlockKeywords } from './block-registry.js';
+import { formatHelperSignature, getHelper, getHelperSignature, helpers } from './helper-registry.js';
+import {
+  formatAttributeDoc,
+  getBlockKeywordAtOffset,
+  getCompletionContext,
+  getHelperCallAtOffset,
+  getWordAtOffset,
+} from './server-helpers.js';
 import { SpecRegistry } from './spec-registry.js';
 
 /*
@@ -22,7 +29,6 @@ const Markdown = 'markdown';
 const Severity = { Error: 1, Warning: 2, Info: 3, Hint: 4 };
 
 export class LanguageService {
-
   /*
     resolver: { readFile, exists, listDir, glob }
     analyzer: function(source, filePath) → ComponentModel
@@ -88,6 +94,13 @@ export class LanguageService {
     return computeHover(doc.text, offset, model, this.specRegistry);
   }
 
+  getSignatureHelp(uri, position) {
+    const doc = this.documents.get(uri);
+    if (!doc) { return null; }
+    const offset = this.positionToOffset(doc.text, position);
+    return computeSignatureHelp(doc.text, offset);
+  }
+
   async getDiagnostics(uri) {
     const doc = this.documents.get(uri);
     if (!doc) { return []; }
@@ -99,7 +112,7 @@ export class LanguageService {
   async getCompiler() {
     if (this._compiler) { return this._compiler; }
     try {
-      const mod = await import('@semantic-ui/templating');
+      const mod = await import('@semantic-ui/compiler');
       this._compiler = mod.TemplateCompiler;
       this._warn('TemplateCompiler resolved via dynamic import (no injected compiler)');
       return this._compiler;
@@ -129,7 +142,9 @@ export class LanguageService {
       this.models.set(uri, model);
       return model;
     }
-    catch { return null; }
+    catch {
+      return null;
+    }
   }
 
   resolveComponentFile(templateUri) {
@@ -184,7 +199,10 @@ export class LanguageService {
     let line = 0;
     let lastNewline = -1;
     for (let i = 0; i < offset && i < text.length; i++) {
-      if (text[i] === '\n') { line++; lastNewline = i; }
+      if (text[i] === '\n') {
+        line++;
+        lastNewline = i;
+      }
     }
     return { line, character: offset - lastNewline - 1 };
   }
@@ -212,9 +230,17 @@ export function uriToPath(uri) {
 }
 
 // Minimal path ops — no 'path' import needed
-function pathDirname(p) { const i = p.lastIndexOf('/'); return i > 0 ? p.substring(0, i) : '/'; }
-function pathBasename(p, ext) { const b = p.substring(p.lastIndexOf('/') + 1); return ext && b.endsWith(ext) ? b.slice(0, -ext.length) : b; }
-function pathJoin(dir, file) { return dir.endsWith('/') ? dir + file : dir + '/' + file; }
+function pathDirname(p) {
+  const i = p.lastIndexOf('/');
+  return i > 0 ? p.substring(0, i) : '/';
+}
+function pathBasename(p, ext) {
+  const b = p.substring(p.lastIndexOf('/') + 1);
+  return ext && b.endsWith(ext) ? b.slice(0, -ext.length) : b;
+}
+function pathJoin(dir, file) {
+  return dir.endsWith('/') ? dir + file : dir + '/' + file;
+}
 
 /*******************************
     Pure Completion Logic
@@ -225,7 +251,7 @@ function computeCompletions(text, offset, model, specRegistry) {
 
   switch (context.type) {
     case 'expression':
-      return getExpressionCompletions(model, context.prefix);
+      return getExpressionCompletions(model, context.prefix, context.sections);
     case 'block':
       return getBlockCompletions();
     case 'block-joiner':
@@ -245,8 +271,17 @@ function computeCompletions(text, offset, model, specRegistry) {
   }
 }
 
-function getExpressionCompletions(model, prefix = '') {
+function getExpressionCompletions(model, prefix = '', sections = []) {
   const items = [];
+  for (const name of sections) {
+    items.push({
+      label: name,
+      kind: Kind.Keyword,
+      detail: getBlock(name).description,
+      documentation: { kind: Markdown, value: formatBlockDoc(name) },
+      sortText: '0' + name,
+    });
+  }
   if (model) {
     for (const method of model.instance) {
       items.push({
@@ -291,20 +326,17 @@ function getExpressionCompletions(model, prefix = '') {
 }
 
 function getBlockCompletions() {
-  return [
-    { label: 'if', kind: Kind.Keyword, detail: 'Conditional block' },
-    { label: 'each', kind: Kind.Keyword, detail: 'Loop block' },
-    { label: 'async', kind: Kind.Keyword, detail: 'Async block' },
-    { label: 'snippet', kind: Kind.Keyword, detail: 'Reusable template section' },
-    { label: 'rerender', kind: Kind.Keyword, detail: 'Force re-render on key change' },
-    { label: 'guard', kind: Kind.Keyword, detail: 'Re-render only when value changes' },
-    { label: 'html', kind: Kind.Keyword, detail: 'Raw HTML output' },
-  ];
+  return getBlockKeywords().map(name => ({
+    label: name,
+    kind: Kind.Keyword,
+    detail: getBlock(name).description,
+    documentation: { kind: Markdown, value: formatBlockDoc(name) },
+  }));
 }
 
 function getReferenceCompletions(text, model) {
   const items = [
-    { label: 'template', kind: Kind.Keyword, detail: 'Verbose subtemplate ({>template name=\'x\' data={...}})' },
+    { label: 'template', kind: Kind.Keyword, detail: "Verbose subtemplate ({>template name='x' data={...}})" },
     { label: 'slot', kind: Kind.Keyword, detail: 'Content projection slot' },
   ];
 
@@ -367,9 +399,28 @@ function getAttributeValueCompletions(tagName, attributeName, specRegistry) {
 }
 
 function getEventBindingCompletions() {
-  const events = ['click', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mouseout',
-    'keydown', 'keyup', 'keypress', 'input', 'change', 'focus', 'blur', 'submit',
-    'touchstart', 'touchend', 'touchmove', 'scroll', 'wheel', 'contextmenu'];
+  const events = [
+    'click',
+    'dblclick',
+    'mousedown',
+    'mouseup',
+    'mouseover',
+    'mouseout',
+    'keydown',
+    'keyup',
+    'keypress',
+    'input',
+    'change',
+    'focus',
+    'blur',
+    'submit',
+    'touchstart',
+    'touchend',
+    'touchmove',
+    'scroll',
+    'wheel',
+    'contextmenu',
+  ];
   return events.map(e => ({ label: e, kind: Kind.Event, detail: `@${e} event binding` }));
 }
 
@@ -391,6 +442,12 @@ function getTagNameCompletions(specRegistry) {
 *******************************/
 
 function computeHover(text, offset, model) {
+  // Blocks resolve first: {#guard} is the block, {guard x} the helper
+  const blockKeyword = getBlockKeywordAtOffset(text, offset);
+  if (blockKeyword) {
+    return { contents: { kind: Markdown, value: formatBlockDoc(blockKeyword.name, blockKeyword.tag) } };
+  }
+
   const word = getWordAtOffset(text, offset);
   if (!word) { return null; }
 
@@ -402,19 +459,64 @@ function computeHover(text, offset, model) {
   if (model) {
     const method = model.instance.find(m => m.name === word);
     if (method) {
-      return { contents: { kind: Markdown, value: `**${word}**(${method.params.map(p => p.name).join(', ')})\n\nComponent method` } };
+      return {
+        contents: {
+          kind: Markdown,
+          value: `**${word}**(${method.params.map(p => p.name).join(', ')})\n\nComponent method`,
+        },
+      };
     }
     const stateField = model.state.find(s => s.name === word);
     if (stateField) {
-      return { contents: { kind: Markdown, value: `**${word}**: Signal\\<${stateField.inferredType}\\>\n\nState (default: ${JSON.stringify(stateField.defaultValue)})` } };
+      return {
+        contents: {
+          kind: Markdown,
+          value: `**${word}**: Signal\\<${stateField.inferredType}\\>\n\nState (default: ${
+            JSON.stringify(stateField.defaultValue)
+          })`,
+        },
+      };
     }
     const settingField = model.settings.find(s => s.name === word);
     if (settingField) {
-      return { contents: { kind: Markdown, value: `**${word}**: ${settingField.inferredType}\n\nSetting (default: ${JSON.stringify(settingField.defaultValue)})` } };
+      return {
+        contents: {
+          kind: Markdown,
+          value: `**${word}**: ${settingField.inferredType}\n\nSetting (default: ${
+            JSON.stringify(settingField.defaultValue)
+          })`,
+        },
+      };
     }
   }
 
   return null;
+}
+
+/*******************************
+    Pure Signature Help
+*******************************/
+
+function computeSignatureHelp(text, offset) {
+  const call = getHelperCallAtOffset(text, offset);
+  if (!call) { return null; }
+
+  const signature = getHelperSignature(call.name);
+  if (!signature) { return null; }
+
+  const helper = getHelper(call.name);
+  const isVariadic = helper.params.at(-1)?.name.startsWith('...');
+  return {
+    signatures: [{
+      ...signature,
+      documentation: { kind: Markdown, value: helper.description },
+    }],
+    activeSignature: 0,
+    // a rest parameter stays highlighted however many arguments follow it
+    activeParameter: isVariadic
+      ? Math.min(call.argIndex, helper.params.length - 1)
+      : call.argIndex,
+  };
 }
 
 /*******************************
@@ -427,13 +529,9 @@ function computeDiagnostics(text, TemplateCompiler) {
     const compiler = new TemplateCompiler(text);
     compiler.compile(undefined, { recoverable: true });
     for (const error of compiler.errors || []) {
-      const pos = offsetToPos(text, error.pos ?? 0);
       diagnostics.push({
         severity: Severity.Error,
-        range: {
-          start: pos,
-          end: { line: pos.line, character: pos.character + 10 },
-        },
+        range: diagnosticRange(text, error.pos ?? 0),
         message: error.message || 'Template error',
         source: 'sui',
       });
@@ -443,7 +541,7 @@ function computeDiagnostics(text, TemplateCompiler) {
     // Compiler threw even in recoverable mode — fallback to single diagnostic
     diagnostics.push({
       severity: Severity.Error,
-      range: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } },
+      range: diagnosticRange(text, 0),
       message: e.message || 'Template compile error',
       source: 'sui',
     });
@@ -451,11 +549,31 @@ function computeDiagnostics(text, TemplateCompiler) {
   return diagnostics;
 }
 
+/*
+  Spans the offending tag, from the error offset to its closing brace or end of
+  line. Positions must stay inside the document: the LSP spec says clients may
+  clamp, but @codemirror/lsp-client throws on out-of-range positions and one bad
+  range takes down the whole publish.
+*/
+function diagnosticRange(text, offset) {
+  offset = Math.min(offset, text.length);
+  const lineEnd = text.indexOf('\n', offset);
+  const close = text.indexOf('}', offset);
+  let endOffset = lineEnd === -1 ? text.length : lineEnd;
+  if (close !== -1 && close < endOffset) {
+    endOffset = close + 1;
+  }
+  return { start: offsetToPos(text, offset), end: offsetToPos(text, Math.max(endOffset, offset)) };
+}
+
 function offsetToPos(text, offset) {
   let line = 0;
   let lastNewline = -1;
   for (let i = 0; i < offset && i < text.length; i++) {
-    if (text[i] === '\n') { line++; lastNewline = i; }
+    if (text[i] === '\n') {
+      line++;
+      lastNewline = i;
+    }
   }
   return { line, character: offset - lastNewline - 1 };
 }

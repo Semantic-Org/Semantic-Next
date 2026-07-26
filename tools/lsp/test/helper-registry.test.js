@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { formatHelperSignature, getHelper, getHelperNames, helpers } from '../src/helper-registry.js';
+import {
+  formatHelperSignature,
+  getHelper,
+  getHelperNames,
+  getHelperSignature,
+  helpers,
+} from '../src/helper-registry.js';
 
 describe('HelperRegistry', () => {
   it('contains all major helpers', () => {
@@ -52,6 +58,26 @@ describe('HelperRegistry', () => {
     expect(formatHelperSignature('classIf')).toBe('classIf(expr, trueClass, falseClass?): string');
     expect(formatHelperSignature('not')).toBe('not(a): boolean');
     expect(formatHelperSignature('concat')).toBe('concat(...args): string');
+  });
+
+  it('ranges parameters by offset in the signature label', () => {
+    const { label, parameters } = getHelperSignature('hasAny');
+    expect(label).toBe('hasAny(a): boolean');
+    // offsets rather than substrings — 'a' also appears inside the helper name
+    expect(parameters).toEqual([{ label: [7, 8] }]);
+    expect(label.slice(7, 8)).toBe('a');
+  });
+
+  it('ranges optional and rest parameters', () => {
+    const date = getHelperSignature('formatDate');
+    expect(date.parameters.map(p => date.label.slice(...p.label))).toEqual(['date', 'format?', 'options?']);
+    const concat = getHelperSignature('concat');
+    expect(concat.parameters.map(p => concat.label.slice(...p.label))).toEqual(['...args']);
+  });
+
+  it('returns no signature for an unknown helper', () => {
+    expect(getHelperSignature('nonExistentHelper')).toBeNull();
+    expect(formatHelperSignature('nonExistentHelper')).toBeNull();
   });
 
   it('has descriptions for all helpers', () => {

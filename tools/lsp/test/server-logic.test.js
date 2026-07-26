@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { formatAttributeDoc, getCompletionContext, getWordAtOffset } from '../src/server-helpers.js';
+import {
+  formatAttributeDoc,
+  getBlockKeywordAtOffset,
+  getCompletionContext,
+  getHelperCallAtOffset,
+  getOpenBlocks,
+  getWordAtOffset,
+} from '../src/server-helpers.js';
 
 describe('getCompletionContext', () => {
   describe('expression context', () => {
@@ -65,6 +72,59 @@ describe('getCompletionContext', () => {
       // where expression completions (variables, helpers) are appropriate
       expect(getCompletionContext('{#each }', 7)).toMatchObject({ type: 'expression' });
       expect(getCompletionContext('{#snippet }', 10)).toMatchObject({ type: 'expression' });
+    });
+  });
+
+  describe('block section context', () => {
+    it('offers case labels at tag start inside a match block', () => {
+      const text = '{#match status}{}{/match}';
+      const offset = 16; // inside the bare {}
+      expect(getCompletionContext(text, offset)).toMatchObject({
+        type: 'expression',
+        sections: ['else', 'is', 'isExactly'],
+      });
+    });
+
+    it('offers async sections at tag start inside an async block', () => {
+      const text = '{#async getUser as user}{}{/async}';
+      const offset = 25;
+      expect(getCompletionContext(text, offset)).toMatchObject({
+        type: 'expression',
+        sections: ['loading', 'before', 'error', 'catch'],
+      });
+    });
+
+    it('keeps offering sections while the keyword is typed', () => {
+      const text = '{#match status}{isEx}{/match}';
+      const offset = 20; // after "{isEx"
+      expect(getCompletionContext(text, offset)).toMatchObject({
+        prefix: 'isEx',
+        sections: ['else', 'is', 'isExactly'],
+      });
+    });
+
+    it('drops sections once the tag holds an expression', () => {
+      // {#match} case values are expressions, so past the first token this is
+      // no longer a keyword position
+      const text = '{#match status}{is name}{/match}';
+      const offset = 23; // on "name"
+      expect(getCompletionContext(text, offset).sections).toBeUndefined();
+    });
+
+    it('drops sections after the block closes', () => {
+      const text = '{#match status}{/match}{}';
+      const offset = 24;
+      expect(getCompletionContext(text, offset).sections).toBeUndefined();
+    });
+
+    it('reports the innermost block when blocks nest', () => {
+      const text = '{#async getUser as user}{#match user.role}{}{/match}{/async}';
+      const offset = 43;
+      expect(getCompletionContext(text, offset)).toMatchObject({ sections: ['else', 'is', 'isExactly'] });
+    });
+
+    it('offers no sections outside a block', () => {
+      expect(getCompletionContext('{}', 1).sections).toBeUndefined();
     });
   });
 
@@ -330,6 +390,143 @@ describe('getWordAtOffset', () => {
     expect(getWordAtOffset(text, 12)).toBe('is');
     expect(getWordAtOffset(text, 17)).toBe('index');
     expect(getWordAtOffset(text, 25)).toBe('selectedIndex');
+  });
+});
+
+describe('getOpenBlocks', () => {
+  it('returns the blocks open at an offset, outermost first', () => {
+    const text = '{#each items}{#if active}|{/if}{/each}';
+    expect(getOpenBlocks(text, text.indexOf('|'))).toEqual(['each', 'if']);
+  });
+
+  it('pops closed blocks', () => {
+    const text = '{#if a}yes{/if}|';
+    expect(getOpenBlocks(text, text.indexOf('|'))).toEqual([]);
+  });
+
+  it('ignores expression modifiers that never open a scope', () => {
+    const text = '{#html raw}|';
+    expect(getOpenBlocks(text, text.indexOf('|'))).toEqual([]);
+  });
+
+  it('handles double-brace syntax', () => {
+    const text = '{{#match status}}|{{/match}}';
+    expect(getOpenBlocks(text, text.indexOf('|'))).toEqual(['match']);
+  });
+
+  it('recovers from an unbalanced inner close', () => {
+    // {/if} with no open if must not pop the each
+    const text = '{#each items}{/if}|{/each}';
+    expect(getOpenBlocks(text, text.indexOf('|'))).toEqual(['each']);
+  });
+
+  it('returns nothing for plain markup', () => {
+    expect(getOpenBlocks('<div>{name}</div>', 8)).toEqual([]);
+  });
+});
+
+describe('getBlockKeywordAtOffset', () => {
+  it('resolves an opening keyword', () => {
+    const text = '{#rerender userId}';
+    expect(getBlockKeywordAtOffset(text, 4)).toEqual({ name: 'rerender', tag: '{#rerender}' });
+  });
+
+  it('resolves a closing keyword', () => {
+    const text = '{#guard value}x{/guard}';
+    expect(getBlockKeywordAtOffset(text, 18)).toEqual({ name: 'guard', tag: '{/guard}' });
+  });
+
+  it('resolves else if as a single keyword', () => {
+    const text = '{#if a}1{else if b}2{/if}';
+    expect(getBlockKeywordAtOffset(text, 14)).toEqual({ name: 'else if', tag: '{else if}' });
+  });
+
+  it('resolves a case label only inside a match block', () => {
+    const inMatch = "{#match plan}{is 'free'}Free{/match}";
+    expect(getBlockKeywordAtOffset(inMatch, 15)).toEqual({ name: 'is', tag: '{is}' });
+    // same tag, no enclosing match — this is the equality helper
+    expect(getBlockKeywordAtOffset("{is plan 'free'}", 2)).toBeNull();
+  });
+
+  it('resolves an async section only inside an async block', () => {
+    const inAsync = '{#async load as data}{data}{error as e}{e}{/async}';
+    expect(getBlockKeywordAtOffset(inAsync, 30)).toEqual({ name: 'error', tag: '{error}' });
+    expect(getBlockKeywordAtOffset('{error}', 3)).toBeNull();
+  });
+
+  it('returns null for a block keyword written as a bare expression', () => {
+    // {guard x} is the reactivity helper, {#guard x} is the block
+    expect(getBlockKeywordAtOffset('{guard value}', 3)).toBeNull();
+  });
+
+  it('returns null past the keyword', () => {
+    expect(getBlockKeywordAtOffset('{#if isActive}', 10)).toBeNull();
+  });
+
+  it('returns null outside a tag', () => {
+    expect(getBlockKeywordAtOffset('{#if a}text', 9)).toBeNull();
+    expect(getBlockKeywordAtOffset('plain text', 4)).toBeNull();
+  });
+
+  it('returns null for unknown keywords', () => {
+    expect(getBlockKeywordAtOffset('{#nope thing}', 4)).toBeNull();
+  });
+});
+
+describe('getHelperCallAtOffset', () => {
+  // | marks the cursor
+  const callAt = (text) => getHelperCallAtOffset(text, text.indexOf('|'));
+
+  it('advances the argument index across Lisp arguments', () => {
+    expect(callAt("{formatDate |date 'h:mm a'}")).toEqual({ name: 'formatDate', argIndex: 0 });
+    expect(callAt("{formatDate dat|e 'h:mm a'}")).toEqual({ name: 'formatDate', argIndex: 0 });
+    expect(callAt("{formatDate date |'h:mm a'}")).toEqual({ name: 'formatDate', argIndex: 1 });
+  });
+
+  it('keeps a quoted argument whole', () => {
+    // the space inside 'h:mm a' does not start a new argument
+    expect(callAt("{formatDate date 'h:m|m a'}")).toEqual({ name: 'formatDate', argIndex: 1 });
+  });
+
+  it('splits the parenthesized form on commas', () => {
+    expect(callAt("{formatDate(|date, 'h:mm a')}")).toEqual({ name: 'formatDate', argIndex: 0 });
+    expect(callAt("{formatDate(date, |'h:mm a')}")).toEqual({ name: 'formatDate', argIndex: 1 });
+    expect(callAt("{formatDate(date, 'h:mm a')|}")).toBeNull();
+  });
+
+  it('resolves the innermost call', () => {
+    expect(callAt("{concat 'at ' (formatDate date |'h:mm a')}")).toEqual({ name: 'formatDate', argIndex: 1 });
+    // a finished subexpression counts as one argument of the outer call
+    expect(callAt('{maybe isOn (concat a b) |}')).toEqual({ name: 'maybe', argIndex: 2 });
+  });
+
+  it('reads arguments of a block tag', () => {
+    expect(callAt('{#if hasAny |items}')).toEqual({ name: 'hasAny', argIndex: 0 });
+    expect(callAt('{#each |items}')).toBeNull();
+    expect(callAt('{#eac|h items}')).toBeNull();
+    expect(callAt('{/each|}')).toBeNull();
+  });
+
+  it('skips a section keyword to reach its arguments', () => {
+    const inMatch = "{#match plan}{is |'free'}{/match}";
+    expect(callAt(inMatch)).toBeNull();
+    // same tag with no enclosing match is the equality helper
+    expect(callAt("{is plan |'free'}")).toEqual({ name: 'is', argIndex: 1 });
+  });
+
+  it('returns null while the name is still being typed', () => {
+    expect(callAt('{formatDa|}')).toBeNull();
+    expect(callAt('<div>{|}</div>')).toBeNull();
+  });
+
+  it('returns null for JS expressions and non-expression positions', () => {
+    expect(callAt('{count + |2}')).toBeNull();
+    expect(callAt("{>template name=|'x'}")).toBeNull();
+    expect(callAt('<div class="wide|">')).toBeNull();
+  });
+
+  it('reports the name unchecked, leaving helper lookup to the caller', () => {
+    expect(callAt('{userName |}')).toEqual({ name: 'userName', argIndex: 0 });
   });
 });
 

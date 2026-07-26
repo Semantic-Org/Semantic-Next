@@ -1,9 +1,9 @@
-import { readFileSync, readdirSync, existsSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { globSync } from 'glob';
+import { dirname, resolve } from 'path';
 
-import { LanguageService } from './language-service.js';
 import { analyzeComponent } from './component-analyzer.js';
+import { LanguageService } from './language-service.js';
 
 /*
   Node entry point — wires fs/path/glob into the isomorphic core.
@@ -25,7 +25,7 @@ export async function createService(projectRoot) {
   // Try to load the compiler for diagnostics
   let compiler = null;
   try {
-    const mod = await import('@semantic-ui/templating');
+    const mod = await import('@semantic-ui/compiler');
     compiler = mod.TemplateCompiler;
   }
   catch { /* will fall back inside LanguageService */ }
@@ -40,6 +40,6 @@ export async function createService(projectRoot) {
   return service;
 }
 
-export { LanguageService } from './language-service.js';
 export { analyzeComponent } from './component-analyzer.js';
+export { LanguageService } from './language-service.js';
 export { SpecRegistry } from './spec-registry.js';

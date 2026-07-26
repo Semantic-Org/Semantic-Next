@@ -4,10 +4,25 @@
   and documentation formatting — no LSP connection dependencies.
 */
 
+import { getBlock, getSectionKeywords, hasClosingTag } from './block-registry.js';
+
 const blockJoiners = {
   each: ['in', 'as'],
   async: ['as'],
 };
+
+// {#name} and {/name} in either bracket syntax, {{#each}} matches on its inner brace
+const blockTagPattern = /\{\s*(#|\/)(\w+)/g;
+
+// Leading keyword of a tag: optional # or / marker, then the keyword itself
+const tagKeywordPattern = /^(\s*)([#/]?)(else\s+if|[A-Za-z]\w*)/;
+
+// A name followed directly by ( is a JS call, so its arguments split on commas
+const callNamePattern = /^[A-Za-z_$][\w$]*$/;
+
+// A bare operator token means the tag holds a JS expression rather than a
+// Lisp call, the same split ExpressionEvaluator makes when it classifies one
+const operatorTokenPattern = /^[+\-*/%=<>!&|?:~^]+$/;
 
 /*
   Determines what kind of completion context the cursor is in.
@@ -73,7 +88,14 @@ export function getCompletionContext(text, offset) {
         }
         // Extract the current word being typed for filtering
         const prefix = afterBrace.match(/(\w*)$/)?.[1] || '';
-        return { type: 'expression', prefix };
+        const context = { type: 'expression', prefix };
+        // A bare word at the start of a tag can still be a section keyword
+        // ({is}, {loading}) when the enclosing block accepts one
+        if (afterBrace === prefix) {
+          const sections = getSectionKeywords(getOpenBlocks(text, j).at(-1));
+          if (sections.length) { context.sections = sections; }
+        }
+        return context;
       }
     }
     j--;
@@ -109,6 +131,156 @@ export function getCompletionContext(text, offset) {
   }
 
   return { type: 'none' };
+}
+
+/*
+  Block tags open at an offset, outermost first. A pragmatic scan that counts
+  open and close tags rather than parsing, which is enough to tell whether the
+  cursor sits inside a {#match} or {#async} body.
+*/
+export function getOpenBlocks(text, offset) {
+  const stack = [];
+  blockTagPattern.lastIndex = 0;
+  let match;
+  while ((match = blockTagPattern.exec(text)) !== null) {
+    if (match.index >= offset) { break; }
+    const [, marker, name] = match;
+    if (marker === '#') {
+      if (hasClosingTag(name)) { stack.push(name); }
+      continue;
+    }
+    const opened = stack.lastIndexOf(name);
+    if (opened !== -1) { stack.length = opened; }
+  }
+  return stack;
+}
+
+/*
+  The block keyword an offset lands on, with the tag as written so hover can
+  echo it back. Section keywords only resolve inside a parent that accepts
+  them, which keeps {is a b} the equality helper everywhere outside {#match}.
+*/
+export function getBlockKeywordAtOffset(text, offset) {
+  const start = text.lastIndexOf('{', offset);
+  if (start === -1 || text.substring(start + 1, offset).includes('}')) { return null; }
+
+  const match = text.substring(start + 1).match(tagKeywordPattern);
+  if (!match) { return null; }
+  const [, leading, marker, name] = match;
+
+  const keywordStart = start + 1 + leading.length;
+  if (offset < keywordStart || offset > keywordStart + marker.length + name.length) { return null; }
+
+  const block = getBlock(name);
+  if (!block) { return null; }
+
+  if (marker) {
+    return block.type === 'block' ? { name, tag: `{${marker}${name}}` } : null;
+  }
+  if (block.type !== 'section') { return null; }
+  return block.parents.includes(getOpenBlocks(text, start).at(-1)) ? { name, tag: `{${name}}` } : null;
+}
+
+/*
+  The innermost call an offset sits inside, with the index of the argument under
+  the cursor. Lisp arguments separate on whitespace and a parenthesized call
+  separates on commas, mirroring how ExpressionEvaluator tokenizes both forms.
+  The name is returned unchecked — the caller decides whether it is a helper.
+*/
+export function getHelperCallAtOffset(text, offset) {
+  const open = findExpressionStart(text, offset);
+  if (open === -1) { return null; }
+
+  let start = open + 1;
+  const tag = text.substring(start, offset);
+  // {>name key=value} carries settings rather than helper arguments
+  if (tag.trimStart().startsWith('>')) { return null; }
+
+  const match = tag.match(tagKeywordPattern);
+  if (match) {
+    const [, leading, marker, keyword] = match;
+    if (marker === '/') { return null; }
+    const block = getBlock(keyword);
+    const isSection = block?.type === 'section' && block.parents.includes(getOpenBlocks(text, open).at(-1));
+    // {#if hasAny items} and {else if hasAny items} still call a helper, so the
+    // tag keyword is stepped over rather than read as the call
+    if (marker === '#' || isSection) {
+      start += leading.length + marker.length + keyword.length;
+    }
+  }
+
+  const stack = [{ name: null, args: 0, commas: false, invalid: false }];
+  let token = '';
+  let quote = null;
+
+  const endToken = () => {
+    const frame = stack.at(-1);
+    if (token && !frame.commas) {
+      if (operatorTokenPattern.test(token)) { frame.invalid = true; }
+      else if (frame.name === null) { frame.name = token; }
+      else { frame.args++; }
+    }
+    token = '';
+  };
+
+  for (let i = start; i < offset; i++) {
+    const char = text[i];
+    if (quote) {
+      token += char;
+      if (char === quote) { quote = null; }
+    }
+    else if (char === "'" || char === '"') {
+      quote = char;
+      token += char;
+    }
+    else if (char === '(') {
+      const name = callNamePattern.test(token) ? token : null;
+      if (!name) { endToken(); }
+      token = '';
+      stack.push({ name, args: 0, commas: name !== null, invalid: false });
+    }
+    else if (char === ')') {
+      endToken();
+      if (stack.length > 1) {
+        stack.pop();
+        // a finished call counts as one completed argument of its parent, and
+        // in head position it leaves nothing for the parent to be a call of
+        const parent = stack.at(-1);
+        if (!parent.commas) {
+          if (parent.name === null) { parent.invalid = true; }
+          else { parent.args++; }
+        }
+      }
+    }
+    else if (char === ',') {
+      endToken();
+      const frame = stack.at(-1);
+      if (frame.commas) { frame.args++; }
+    }
+    else if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
+      endToken();
+    }
+    else {
+      token += char;
+    }
+  }
+
+  const frame = stack.at(-1);
+  if (!frame.name || frame.invalid) { return null; }
+  return { name: frame.name, argIndex: frame.args };
+}
+
+// The unmatched { opening the expression an offset sits in
+function findExpressionStart(text, offset) {
+  let depth = 0;
+  for (let i = offset - 1; i >= 0; i--) {
+    if (text[i] === '}') { depth++; }
+    else if (text[i] === '{') {
+      if (depth === 0) { return i; }
+      depth--;
+    }
+  }
+  return -1;
 }
 
 export function getWordAtOffset(text, offset) {

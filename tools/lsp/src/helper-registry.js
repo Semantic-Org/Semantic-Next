@@ -276,9 +276,26 @@ export function getHelperNames() {
   return Object.keys(helpers);
 }
 
+/*
+  Signature label plus the range each parameter occupies in it. Parameter hints
+  resolve by offset rather than by substring, so `hasAny(a)` highlights the
+  argument instead of the `a` inside the helper name.
+*/
+export function getHelperSignature(name) {
+  const helper = helpers[name];
+  if (!helper) { return null; }
+  const parameters = [];
+  let label = `${name}(`;
+  for (const param of helper.params) {
+    if (parameters.length) { label += ', '; }
+    const text = param.optional ? `${param.name}?` : param.name;
+    parameters.push({ label: [label.length, label.length + text.length] });
+    label += text;
+  }
+  label += `): ${helper.returns}`;
+  return { label, parameters };
+}
+
 export function formatHelperSignature(name) {
-  const h = helpers[name];
-  if (!h) { return null; }
-  const params = h.params.map(p => p.optional ? `${p.name}?` : p.name).join(', ');
-  return `${name}(${params}): ${h.returns}`;
+  return getHelperSignature(name)?.label ?? null;
 }
