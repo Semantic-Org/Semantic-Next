@@ -62,6 +62,16 @@ rpc.handle('getCompletions', async ({ sessionId, file, offset }) => {
   return service.getCompletions(file, offset);
 });
 
+rpc.handle('getCompletionDetail', async ({ sessionId, file, offset, name }) => {
+  const service = await getLanguageService(getSession(sessionId));
+  return service.getCompletionDetail(file, offset, name);
+});
+
+rpc.handle('getSignatureHelp', async ({ sessionId, file, offset }) => {
+  const service = await getLanguageService(getSession(sessionId));
+  return service.getSignatureHelp(file, offset);
+});
+
 rpc.handle('getHover', async ({ sessionId, file, offset }) => {
   const service = await getLanguageService(getSession(sessionId));
   return service.getHover(file, offset);

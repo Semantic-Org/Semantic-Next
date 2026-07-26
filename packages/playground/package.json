@@ -67,7 +67,9 @@
       "files": [
         "src/worker/**",
         "src/serving/service-worker.js",
-        "scripts/build-assets.js"
+        "scripts/build-assets.js",
+        "../*/types/**",
+        "../*/package.json"
       ],
       "output": [
         "dist/assets/**"

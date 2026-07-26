@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import { createRequire } from 'module';
-import { dirname, resolve } from 'path';
+import { dirname, resolve, sep } from 'path';
 
 import * as esbuild from 'esbuild';
 
@@ -9,6 +9,7 @@ import * as esbuild from 'esbuild';
   - tooling-worker.js (+ lazy typescript-service chunk via code splitting)
   - service-worker.js
   - lib.d.ts (concatenated default-lib closure for the language service)
+  - types.json (@semantic-ui package declarations for import intelligence)
   Consumers serve dist/assets/ statically — the assets never enter a dev
   server's transform pipeline, which is what made per-instance workers race.
 */
@@ -71,9 +72,38 @@ const collectLib = async (name) => {
 };
 await fs.writeFile(resolve(outDir, 'chunks/lib.d.ts'), await collectLib('lib.es2022.full.d.ts'));
 
+/*
+  Package declarations, keyed by the virtual /node_modules paths the language
+  service resolves against. Sibling packages that ship types/ participate;
+  package.json is synthesized because only the types entry matters here.
+  @semantic-ui/core stays out until the component layer ships.
+*/
+const packagesDir = resolve(baseDir, '..');
+const typeFiles = {};
+for (const entry of await fs.readdir(packagesDir, { withFileTypes: true })) {
+  const typesDir = resolve(packagesDir, entry.name, 'types');
+  if (!entry.isDirectory() || !(await fs.stat(typesDir).catch(() => false))) {
+    continue;
+  }
+  const pkg = JSON.parse(await fs.readFile(resolve(packagesDir, entry.name, 'package.json'), 'utf-8'));
+  typeFiles[`/node_modules/${pkg.name}/package.json`] = JSON.stringify({
+    name: pkg.name,
+    version: pkg.version,
+    types: './types/index.d.ts',
+    exports: { '.': { types: './types/index.d.ts' } },
+  });
+  for (const file of await fs.readdir(typesDir, { recursive: true })) {
+    const name = file.split(sep).join('/');
+    if (name.endsWith('.d.ts')) {
+      typeFiles[`/node_modules/${pkg.name}/types/${name}`] = await fs.readFile(resolve(typesDir, file), 'utf-8');
+    }
+  }
+}
+await fs.writeFile(resolve(outDir, 'chunks/types.json'), JSON.stringify(typeFiles));
+
 const sizes = await Promise.all(
   (await fs.readdir(outDir, { recursive: true }))
-    .filter(name => /\.(js|ts)$/.test(name))
+    .filter(name => /\.(js|ts|json)$/.test(name))
     .map(async (name) => {
       const stats = await fs.stat(resolve(outDir, name));
       return `${name}: ${(stats.size / 1024).toFixed(0)}KB`;

@@ -140,6 +140,14 @@ export class PlaygroundProject {
     return this.worker.request('getCompletions', { sessionId: this.sessionId, file, offset });
   }
 
+  async getCompletionDetail(file, offset, name) {
+    return this.worker.request('getCompletionDetail', { sessionId: this.sessionId, file, offset, name });
+  }
+
+  async getSignatureHelp(file, offset) {
+    return this.worker.request('getSignatureHelp', { sessionId: this.sessionId, file, offset });
+  }
+
   async getHover(file, offset) {
     return this.worker.request('getHover', { sessionId: this.sessionId, file, offset });
   }
