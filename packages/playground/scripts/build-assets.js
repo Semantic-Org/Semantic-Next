@@ -23,7 +23,7 @@ await fs.rm(outDir, { recursive: true, force: true });
 await fs.mkdir(outDir, { recursive: true });
 
 /* generated before bundling so both the page side and the worker bundles import one version value */
-const version = `export const engineVersion = ${JSON.stringify(packageFile.version)};\n`;
+const version = `export const engineVersion = '${packageFile.version}';\n`;
 await fs.writeFile(resolve(baseDir, 'src/generated/version.js'), version);
 
 const shared = {
