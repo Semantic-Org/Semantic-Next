@@ -42,10 +42,15 @@ const createComponent = ({ self, afterFlush, reaction, findParent, data, state, 
   calculateAST() {
     let template = self.getTemplate();
     if (template !== undefined) {
-      const compiler = new TemplateCompiler(template);
-      const ast = compiler.compile();
-      state.ast.set(ast);
-      afterFlush(self.updateJSON);
+      try {
+        const compiler = new TemplateCompiler(template);
+        const ast = compiler.compile(undefined, { recoverable: true });
+        state.ast.set(ast);
+        afterFlush(self.updateJSON);
+      }
+      catch {
+        // mid-edit templates are transiently invalid; keep the last good AST
+      }
     }
   },
 
