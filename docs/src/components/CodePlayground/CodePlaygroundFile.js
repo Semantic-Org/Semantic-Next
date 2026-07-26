@@ -33,7 +33,11 @@ const createComponent = ({ self, settings, state, data, reaction, findParent, di
       return intelligence({
         fileName: filename,
         completions: (file, offset) => parent.project.getCompletions(file, offset),
+        completionDetail: (file, offset, name) => parent.project.getCompletionDetail(file, offset, name),
+        signatures: (file, offset) => parent.project.getSignatureHelp(file, offset),
         hover: (file, offset) => parent.project.getHover(file, offset),
+        // jsdoc @link urls point at production docs; serve them from the current host
+        resolveLink: (url) => url.replace(/^https:\/\/next\.semantic-ui\.com(?=\/)/, ''),
       });
     }
     return [];
