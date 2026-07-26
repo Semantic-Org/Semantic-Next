@@ -374,6 +374,53 @@
   font-weight: 600;
 }
 
+/* LSP tooltips (template files) - same typography as the intelligence tooltips */
+.cm-lsp-documentation {
+  max-width: 440px;
+  font-family: var(--font-family);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ac-fg-dim);
+
+  p {
+    margin: 0;
+  }
+  p + p {
+    margin-top: 6px;
+  }
+  strong {
+    color: var(--ac-fg);
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ac-fg);
+  }
+  pre {
+    margin: 6px 0 0;
+    padding-top: 6px;
+    border-top: 1px solid var(--hairline);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  a {
+    color: var(--ac-accent);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+.cm-tooltip.cm-lsp-signature-tooltip {
+  max-width: 440px;
+
+  .cm-lsp-active-parameter {
+    color: var(--ac-accent);
+    font-weight: 600;
+  }
+}
+
 
 /* Autocomplete - CM6 uses .cm-tooltip-autocomplete */
 

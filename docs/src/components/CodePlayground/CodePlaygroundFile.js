@@ -66,6 +66,14 @@ const createComponent = ({ self, settings, state, data, reaction, findParent, di
       getFileExtensions: self.getFileExtensions,
       theme: codeMirrorCSS,
     });
+    // lsp tooltips render markdown links; open them in a new tab so the session survives
+    parent.addEventListener('click', (event) => {
+      const anchor = event.target.closest?.('a');
+      if (anchor && anchor.closest('.cm-lsp-documentation')) {
+        event.preventDefault();
+        window.open(anchor.getAttribute('href'), '_blank', 'noopener');
+      }
+    });
   },
 
   syncFile() {
