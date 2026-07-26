@@ -3,6 +3,7 @@ import { PlaygroundProject } from '@semantic-ui/playground';
 import { measureEditor } from '@semantic-ui/playground/editor';
 import { each, firstMatch, get, idleCallback, inArray, moveToFront, sortBy } from '@semantic-ui/utils';
 
+import { iframeHeadHTML } from '@helpers/injections.js';
 import * as componentSpecs from '@semantic-ui/core/component-specs';
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
@@ -233,6 +234,7 @@ const createComponent = (
       self.project = new PlaygroundProject({
         files,
         sandboxUrl: settings.sandboxURL,
+        headHTML: iframeHeadHTML,
       });
       self.project.build();
     }
