@@ -51,6 +51,40 @@ describe('LanguageService', () => {
     });
   });
 
+  describe('scope variables', () => {
+    it('hover explains an each alias, shadowing helpers of the same name', () => {
+      const withScope = new LanguageService({});
+      const text = '{#each value, key in person}{value}{/each}';
+      withScope.didOpen('file:///scope.html', text, 1);
+      const hover = withScope.getHover('file:///scope.html', { line: 0, character: text.indexOf('{value}') + 2 });
+      expect(hover.contents.value).toContain('current item of `person`');
+      expect(hover.contents.value).toContain('{#each value, key in person}');
+    });
+
+    it('resolves the head of a dotted path', () => {
+      const withScope = new LanguageService({});
+      const text = '{#each fruit in fruits}{fruit.taste}{/each}';
+      withScope.didOpen('file:///scope3.html', text, 1);
+      const head = withScope.getHover('file:///scope3.html', { line: 0, character: text.indexOf('fruit.taste') + 2 });
+      expect(head.contents.value).toContain('current item of `fruits`');
+      // a property segment is not the binding, so it stays quiet
+      const property = withScope.getHover('file:///scope3.html', { line: 0, character: text.indexOf('.taste') + 3 });
+      expect(property).toBeNull();
+    });
+
+    it('completions inside a block offer its bindings first', () => {
+      const withScope = new LanguageService({});
+      const text = '{#async fetchData as data}{d}{error as e}{e}{/async}';
+      withScope.didOpen('file:///scope2.html', text, 1);
+      const inBody = withScope.getCompletions('file:///scope2.html', { line: 0, character: text.indexOf('{d}') + 2 });
+      const data = inBody.find(item => item.label === 'data');
+      expect(data.detail).toBe('resolved value of `fetchData`');
+      expect(data.sortText < '0a').toBe(true);
+      const inError = withScope.getCompletions('file:///scope2.html', { line: 0, character: text.indexOf('{e}') + 2 });
+      expect(inError.map(item => item.label)).toContain('e');
+    });
+  });
+
   describe('diagnostics', () => {
     it('reports recoverable compile errors with in-bounds ranges', async () => {
       const { TemplateCompiler } = await import('@semantic-ui/compiler');

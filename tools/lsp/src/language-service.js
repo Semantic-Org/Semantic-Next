@@ -5,6 +5,8 @@ import {
   getBlockKeywordAtOffset,
   getCompletionContext,
   getHelperCallAtOffset,
+  getIdentifierAtOffset,
+  getScopeVariables,
   getWordAtOffset,
 } from './server-helpers.js';
 import { SpecRegistry } from './spec-registry.js';
@@ -19,6 +21,7 @@ import { SpecRegistry } from './spec-registry.js';
 const Kind = {
   Method: 2,
   Function: 3,
+  Variable: 6,
   Property: 10,
   Keyword: 14,
   Reference: 18,
@@ -251,7 +254,7 @@ function computeCompletions(text, offset, model, specRegistry) {
 
   switch (context.type) {
     case 'expression':
-      return getExpressionCompletions(model, context.prefix, context.sections);
+      return getExpressionCompletions(model, context.prefix, context.sections, getScopeVariables(text, offset));
     case 'block':
       return getBlockCompletions();
     case 'block-joiner':
@@ -271,8 +274,21 @@ function computeCompletions(text, offset, model, specRegistry) {
   }
 }
 
-function getExpressionCompletions(model, prefix = '', sections = []) {
+function getExpressionCompletions(model, prefix = '', sections = [], scopeVariables = []) {
   const items = [];
+  // block-scope bindings shadow everything else, same as the renderer's data layering
+  for (const variable of scopeVariables) {
+    items.push({
+      label: variable.name,
+      kind: Kind.Variable,
+      detail: variable.description,
+      documentation: {
+        kind: Markdown,
+        value: `**${variable.name}**\n\n${variable.description}\n\nScoped to \`${variable.tag}\``,
+      },
+      sortText: '0!' + variable.name,
+    });
+  }
   for (const name of sections) {
     items.push({
       label: name,
@@ -448,8 +464,27 @@ function computeHover(text, offset, model) {
     return { contents: { kind: Markdown, value: formatBlockDoc(blockKeyword.name, blockKeyword.tag) } };
   }
 
-  const word = getWordAtOffset(text, offset);
+  let word = getWordAtOffset(text, offset);
   if (!word) { return null; }
+
+  // in a dotted path like {fruit.taste} the hovered segment is the lookup:
+  // the head resolves as a name, later segments are property accesses on it
+  const identifier = getIdentifierAtOffset(text, offset);
+  if (identifier) {
+    if (!identifier.head) { return null; }
+    word = identifier.name;
+  }
+
+  // block-scope bindings shadow helpers and component data, like the renderer
+  const scopeVariable = getScopeVariables(text, offset).find(variable => variable.name === word);
+  if (scopeVariable) {
+    return {
+      contents: {
+        kind: Markdown,
+        value: `**${word}**\n\n${scopeVariable.description}\n\nScoped to \`${scopeVariable.tag}\``,
+      },
+    };
+  }
 
   const helper = getHelper(word);
   if (helper) {

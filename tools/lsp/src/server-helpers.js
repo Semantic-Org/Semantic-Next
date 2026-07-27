@@ -156,6 +156,144 @@ export function getOpenBlocks(text, offset) {
 }
 
 /*
+  Block-scope variables visible at an offset: each aliases, async resolved
+  values, and error bindings. The values are unknowable statically, but what
+  each name corresponds to is not, so completions and hover surface that
+  provenance. An inner binding wins a name, matching how the renderer layers
+  data contexts.
+*/
+export function getScopeVariables(text, offset) {
+  const frames = [];
+  blockTagPattern.lastIndex = 0;
+  let match;
+  while ((match = blockTagPattern.exec(text)) !== null) {
+    if (match.index >= offset) { break; }
+    const [, marker, name] = match;
+    if (marker === '#') {
+      if (hasClosingTag(name)) {
+        frames.push({ name, start: match.index, content: readTagContent(text, blockTagPattern.lastIndex) });
+      }
+      continue;
+    }
+    const opened = frames.map(frame => frame.name).lastIndexOf(name);
+    if (opened !== -1) { frames.length = opened; }
+  }
+
+  const variables = new Map();
+  const add = (name, description, tag) => {
+    if (name && /^[A-Za-z_$][\w$]*$/.test(name)) {
+      variables.set(name, { name, description, tag });
+    }
+  };
+
+  const lastAsync = frames.findLast?.(frame => frame.name === 'async')
+    ?? [...frames].reverse().find(frame => frame.name === 'async');
+
+  for (const frame of frames) {
+    const tag = `{#${frame.name} ${frame.content.trim()}}`;
+    if (frame.name === 'each') {
+      const { as, indexAs, over } = parseIteratorBinding(frame.content);
+      // an aliasless each spreads the item into context and binds it as `this`
+      add(as || 'this', `current item of \`${over}\``, tag);
+      if (indexAs) {
+        add(indexAs, `index (or key) of \`${over}\``, tag);
+      }
+      else {
+        // getEachData names the implicit binding index for arrays, key for objects
+        add('index', `index in \`${over}\` (implicit for arrays)`, tag);
+        add('key', `key in \`${over}\` (implicit for objects)`, tag);
+      }
+    }
+    if (frame.name === 'async') {
+      const { expression, names, rest } = parseAsyncBinding(frame.content);
+      const destructured = names.length > 1 || rest;
+      for (const name of names) {
+        add(
+          name,
+          destructured
+            ? `destructured from the resolved value of \`${expression}\``
+            : `resolved value of \`${expression}\``,
+          tag,
+        );
+      }
+      add(rest, `remaining properties of the resolved value of \`${expression}\``, tag);
+      // section bindings apply to the innermost async only
+      if (frame === lastAsync) {
+        const section = lastSectionBinding(text, frame.start, offset);
+        if (section) {
+          add(section.binding, `error thrown by \`${expression}\``, `{${section.keyword} as ${section.binding}}`);
+        }
+      }
+    }
+  }
+  return [...variables.values()];
+}
+
+/* mirrors TemplateCompiler.parseIteratorString: item[, index] in over / over as item[, index] */
+function parseIteratorBinding(content) {
+  const inParts = content.split(' in ');
+  const asParts = content.split(' as ');
+  let bindings;
+  let over;
+  if (inParts.length > 1) {
+    over = inParts.slice(1).join(' in ').trim();
+    bindings = inParts[0];
+  }
+  else if (asParts.length > 1) {
+    over = asParts[0].trim();
+    bindings = asParts.slice(1).join(' as ');
+  }
+  else {
+    return { over: content.trim() };
+  }
+  const [as, indexAs] = bindings.split(',').map(part => part.trim());
+  return { as, indexAs, over };
+}
+
+/* mirrors TemplateCompiler.parseAsyncString: expr as name / expr as {a, b, ...rest} */
+function parseAsyncBinding(content) {
+  const asParts = content.split(' as ');
+  const expression = asParts[0].trim();
+  if (asParts.length < 2) { return { expression, names: [], rest: null }; }
+  const target = asParts.slice(1).join(' as ').trim();
+  if (!target.startsWith('{')) { return { expression, names: [target], rest: null }; }
+  const names = [];
+  let rest = null;
+  for (const part of target.replace(/^\{|\}$/g, '').split(',').map(p => p.trim()).filter(Boolean)) {
+    if (part.startsWith('...')) { rest = part.slice(3).trim(); }
+    else { names.push(part); }
+  }
+  return { expression, names, rest };
+}
+
+/* the async section the offset sits in, when it binds an error alias */
+function lastSectionBinding(text, from, offset) {
+  const sectionPattern = /\{\s*(before|loading|error|catch)\b([^}]*)\}/g;
+  const body = text.substring(from, offset);
+  let match;
+  let last = null;
+  while ((match = sectionPattern.exec(body)) !== null) {
+    last = match;
+  }
+  if (!last || (last[1] !== 'error' && last[1] !== 'catch')) { return null; }
+  const binding = last[2].match(/\bas\s+([A-Za-z_$][\w$]*)/)?.[1];
+  return binding ? { keyword: last[1], binding } : null;
+}
+
+/* tag content from just past the keyword to its balanced closing brace */
+function readTagContent(text, from) {
+  let depth = 1;
+  for (let i = from; i < text.length; i++) {
+    if (text[i] === '{') { depth++; }
+    else if (text[i] === '}') {
+      depth--;
+      if (depth === 0) { return text.substring(from, i); }
+    }
+  }
+  return text.substring(from);
+}
+
+/*
   The block keyword an offset lands on, with the tag as written so hover can
   echo it back. Section keywords only resolve inside a parent that accepts
   them, which keeps {is a b} the equality helper everywhere outside {#match}.
@@ -291,6 +429,20 @@ export function getWordAtOffset(text, offset) {
   const word = text.substring(start, end);
   // Strip dots from edges
   return word.replace(/^\.+|\.+$/g, '') || null;
+}
+
+/*
+  The single path segment under the cursor: hovering fruit in {fruit.taste}
+  yields fruit. Only a head segment can name a binding, helper, or field —
+  anything after a dot is a property access on it.
+*/
+export function getIdentifierAtOffset(text, offset) {
+  let start = offset;
+  let end = offset;
+  while (start > 0 && /[\w$]/.test(text[start - 1])) { start--; }
+  while (end < text.length && /[\w$]/.test(text[end])) { end++; }
+  if (start === end) { return null; }
+  return { name: text.substring(start, end), head: text[start - 1] !== '.' };
 }
 
 export function formatAttributeDoc(attr, meta, spec) {

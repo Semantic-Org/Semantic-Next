@@ -5,6 +5,7 @@ import {
   getCompletionContext,
   getHelperCallAtOffset,
   getOpenBlocks,
+  getScopeVariables,
   getWordAtOffset,
 } from '../src/server-helpers.js';
 
@@ -422,6 +423,69 @@ describe('getOpenBlocks', () => {
 
   it('returns nothing for plain markup', () => {
     expect(getOpenBlocks('<div>{name}</div>', 8)).toEqual([]);
+  });
+});
+
+describe('getScopeVariables', () => {
+  const at = (text) => getScopeVariables(text, text.indexOf('|'));
+  const names = (text) => at(text).map(variable => variable.name);
+
+  it('binds the each..in alias plus the implicit index and key', () => {
+    const text = '{#each fruit in fruits}{|}{/each}';
+    expect(at(text)[0]).toEqual({
+      name: 'fruit',
+      description: 'current item of `fruits`',
+      tag: '{#each fruit in fruits}',
+    });
+    expect(names(text)).toEqual(['fruit', 'index', 'key']);
+    expect(at(text)[1].description).toBe('index in `fruits` (implicit for arrays)');
+  });
+
+  it('an explicit index alias replaces the implicit bindings', () => {
+    const text = '{#each value, key in person}{|}{/each}';
+    expect(names(text)).toEqual(['value', 'key']);
+    expect(at(text)[1].description).toBe('index (or key) of `person`');
+    expect(names('{#each fruits as fruit, idx}{|}{/each}')).toEqual(['fruit', 'idx']);
+  });
+
+  it('binds the each..as form', () => {
+    expect(names('{#each fruits as fruit}{|}{/each}')).toEqual(['fruit', 'index', 'key']);
+  });
+
+  it('binds this and the implicit index for an aliasless each', () => {
+    expect(names('{#each numbers}{|}{/each}')).toEqual(['this', 'index', 'key']);
+    expect(at('{#each numbers}{|}{/each}')[0].description).toBe('current item of `numbers`');
+  });
+
+  it('binds the async resolved value, including call expressions', () => {
+    const text = '{#async getResults searchTerm as searchResults}{|}{/async}';
+    expect(at(text)).toEqual([
+      {
+        name: 'searchResults',
+        description: 'resolved value of `getResults searchTerm`',
+        tag: '{#async getResults searchTerm as searchResults}',
+      },
+    ]);
+  });
+
+  it('binds destructured async values', () => {
+    const text = '{#async fetchUser as {name, email, ...meta}}{|}{/async}';
+    expect(names(text)).toEqual(['name', 'email', 'meta']);
+    expect(at(text)[0].description).toBe('destructured from the resolved value of `fetchUser`');
+  });
+
+  it('binds the error alias inside the error section only', () => {
+    const text = '{#async fetchData as data}{data}{error as e}{|}{/async}';
+    expect(names(text)).toContain('e');
+    const before = '{#async fetchData as data}{|}{error as e}{/async}';
+    expect(names(before)).not.toContain('e');
+  });
+
+  it('drops bindings once the block closes and lets inner bindings shadow', () => {
+    expect(names('{#each fruit in fruits}{/each}{|}')).toEqual([]);
+    const nested = '{#each item in outer}{#each item in item.children}{|}{/each}{/each}';
+    const item = at(nested).find(variable => variable.name === 'item');
+    expect(item.description).toBe('current item of `item.children`');
   });
 });
 
