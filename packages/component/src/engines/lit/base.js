@@ -1,4 +1,3 @@
-import { $ } from '@semantic-ui/query';
 import { camelToKebab, each, isFunction, isServer } from '@semantic-ui/utils';
 import { LitElement } from 'lit';
 
@@ -238,15 +237,21 @@ class LitWebComponentBase extends LitElement {
             DOM Helpers
   *******************************/
 
-  $(selector, { root = this?.renderRoot || this.shadowRoot } = {}) {
-    if (!root) {
+  // see the native base: the element's DOM API delegates to the template
+  $(...args) {
+    if (!this.template) {
       console.error('Cannot query DOM until element has rendered.');
+      return;
     }
-    return $(selector, { root });
+    return this.template.$(...args);
   }
 
-  $$(selector) {
-    return $(selector, { root: this.originalDOM.content });
+  $$(...args) {
+    if (!this.template) {
+      console.error('Cannot query DOM until element has rendered.');
+      return;
+    }
+    return this.template.$$(...args);
   }
 
   call(

@@ -321,7 +321,7 @@ const buttons = this.$('button');
 $$(selector)
 ```
 
-Queries the original DOM content.
+Queries the component's rendered DOM, descending into nested components' shadow roots. Use `$` to stay inside your own component and `$$` to reach an element inside one you render.
 
 #### Parameters
 
@@ -336,7 +336,7 @@ Query result set.
 #### Example
 
 ```javascript
-const content = this.$$('.content');
+const buried = el.$$('.inside-a-child-component');
 ```
 
 ### call
