@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+# Local half of the PR description policy, matching .github/workflows/pr-description.yml.
+# A git hook cannot cover this: `gh pr create` talks to the API and never writes
+# a commit, so this runs as a Claude Code PreToolUse hook. Tool call on stdin,
+# exit 2 rejects it.
+
+payload=$(cat)
+command=$(printf '%s' "$payload" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("tool_input",{}).get("command",""))' 2>/dev/null)
+
+case "$command" in
+  *"gh pr create"*|*"gh pr edit"*) ;;
+  *) exit 0 ;;
+esac
+
+# keep in sync with the workflow
+agents='Claude|Codex|Copilot|Cursor|Devin|Aider|Gemini|Windsurf|Cline|OpenHands|Jules\[bot\]'
+pattern="(Generated (with|by)[[:space:]]*\[?(${agents})|🤖 Generated (with|by)|Co-authored-by:.*(${agents}))"
+
+# the text may be inline (--title/--body) or in a file (--body-file/-F)
+text="$command"
+for file in $(printf '%s' "$command" | grep -oE '(--body-file|-F)[= ]+[^ ]+' | sed -E 's/(--body-file|-F)[= ]+//'); do
+  [ -f "$file" ] && text="$text
+$(cat "$file")"
+done
+
+if printf '%s' "$text" | grep -qiE "$pattern"; then
+  cat >&2 <<'EOF'
+Drop the generated-with footer before opening this PR.
+
+The description belongs to whoever puts their name on the change: one
+sentence on why it exists, then the bullets from
+.github/pull_request_template.md. Write it as a summary a reviewer can
+check the diff against, and leave the attribution off.
+
+The PR Description workflow enforces the same policy on GitHub, and
+tools/hooks/commit-msg covers commit trailers.
+EOF
+  exit 2
+fi
+
+exit 0

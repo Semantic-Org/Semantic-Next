@@ -128,3 +128,9 @@ chore: update dependencies
 4. **Code Review:** Respond promptly to maintainers’ feedback.
 
 Significant changes should ideally be discussed in an issue or discussion thread beforehand.
+
+### Coding Agents
+
+Use whatever tools you work best with, including coding agents. We ask one thing in return: write the pull request description yourself, in your own words, following the [template](.github/pull_request_template.md).
+
+Every pull request spends a maintainer's attention, and a description you wrote is the cheapest way to show that attention is warranted. You can't summarize what you don't understand, which is why we ask for the summary rather than for a promise. A CI check looks for leftover generated footers and asks you to replace them.
