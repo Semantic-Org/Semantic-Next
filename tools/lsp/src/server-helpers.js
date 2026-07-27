@@ -468,6 +468,17 @@ export function getTemplateReferenceAtOffset(text, offset) {
   const open = findExpressionStart(text, offset);
   if (open === -1) { return null; }
   const content = readTagContent(text, open + 1);
+
+  // {#snippet actions} declares a name in the same namespace {>actions} reads
+  const declaration = content.match(/^(\s*)#snippet(\s+)([\w-]*)/);
+  if (declaration) {
+    const [, space, gap, name] = declaration;
+    const start = open + 1 + space.length + '#snippet'.length + gap.length;
+    return name && offset >= start && offset <= start + name.length
+      ? { kind: 'declaration', name }
+      : null;
+  }
+
   const arrow = content.match(/^(\s*)>(\s*)([\w-]*)/);
   if (!arrow) { return null; }
   const [, leadingSpace, arrowSpace, name] = arrow;

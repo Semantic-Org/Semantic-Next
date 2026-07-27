@@ -314,7 +314,7 @@ function getExpressionCompletions(model, prefix = '', sections = [], scopeVariab
       detail: variable.description,
       documentation: {
         kind: Markdown,
-        value: `**${variable.name}**\n\n${variable.description}\n\nScoped to \`${variable.tag}\``,
+        value: `**${variable.name}**\n\n*${variable.description}*\n\n*Scoped to* \`${variable.tag}\``,
       },
       sortText: '0!' + variable.name,
     });
@@ -507,11 +507,11 @@ function computeHover(text, offset, model) {
   if (attributeBinding) {
     const { kind, name } = attributeBinding;
     const value = kind === 'event'
-      ? `**@${name}**\n\nBinds a \`${name}\` event from inside the template. The expression names the handler, `
-        + `like a setting or template method.\n\n\`\`\`html\n<div @${name}={doSomething}></div>\n\`\`\`\n\n`
+      ? `**@${name}**\n\n*Binds a \`${name}\` event from inside the template. The expression names the handler, `
+        + `like a setting or template method.*\n\n\`\`\`html\n<div @${name}={doSomething}></div>\n\`\`\`\n\n`
         + `[docs](/docs/guides/components/events#event-handler)`
-      : `**.${name}**\n\nPasses the value as the \`${name}\` property instead of an attribute. Useful for `
-        + `unserializable content like functions, or for modifying raw DOM properties directly.\n\n`
+      : `**.${name}**\n\n*Passes the value as the \`${name}\` property instead of an attribute. Useful for `
+        + `unserializable content like functions, or for modifying raw DOM properties directly.*\n\n`
         + `\`\`\`html\n<ui-chart .${name}={getComplexData}>\n\`\`\`\n\n`
         + `[docs](/docs/guides/templates/expressions#properties)`;
     return { contents: { kind: Markdown, value } };
@@ -534,7 +534,7 @@ function computeHover(text, offset, model) {
     return {
       contents: {
         kind: Markdown,
-        value: `**${word}**\n\n${scopeVariable.description}\n\nScoped to \`${scopeVariable.tag}\``,
+        value: `**${word}**\n\n*${scopeVariable.description}*\n\n*Scoped to* \`${scopeVariable.tag}\``,
       },
     };
   }
@@ -615,40 +615,67 @@ function formatDescription(field) {
   return field.description ? `\n\n*${field.description}*` : '';
 }
 
+const subtemplateDocs = '/docs/guides/templates/subtemplates';
+const snippetDocs = '/docs/guides/templates/snippets';
+
+function referenceDoc(header, description, docsPath) {
+  return `**${header}**\n\n*${description}*\n\n[docs](${docsPath})`;
+}
+
 function formatReferenceHover(reference, text, model) {
+  const { name } = reference;
+  if (reference.kind === 'declaration') {
+    return referenceDoc(name, `Snippet defined in this template. Render it with \`{>${name}}\``, snippetDocs);
+  }
   if (reference.kind === 'key') {
     // `data` sets the whole context in both forms; `name` selects the template
     // only in the verbose {>template} form, elsewhere it is an ordinary key
-    if (reference.template === 'template' && reference.name === 'name') {
-      return `**name**\n\nSelects which template \`{>template}\` renders. Accepts a template name or an `
-        + `expression resolving to one.\n\n[docs](/docs/guides/templates/subtemplates)`;
+    if (reference.template === 'template' && name === 'name') {
+      return referenceDoc(
+        'name',
+        'Selects which template `{>template}` renders. Accepts a template name or an expression resolving to one.',
+        subtemplateDocs,
+      );
     }
-    if (reference.name === 'data') {
-      return `**data**\n\nSets the data context for the rendered template. Accepts an expression or an `
-        + `inline object.\n\n[docs](/docs/guides/templates/subtemplates)`;
+    if (name === 'data') {
+      return referenceDoc(
+        'data',
+        'Sets the data context for the rendered template. Accepts an expression or an inline object.',
+        subtemplateDocs,
+      );
     }
-    return `**${reference.name}**\n\nDefines \`${reference.name}\` in the data context of \`{>${reference.template}}\`. `
-      + `The value right of \`=\` is evaluated in this template's scope.\n\n[docs](/docs/guides/templates/subtemplates)`;
+    return referenceDoc(
+      name,
+      `Defines \`${name}\` in the data context of \`{>${reference.template}}\`. `
+        + `The value right of \`=\` is evaluated in this template's scope.`,
+      subtemplateDocs,
+    );
   }
-  const { name } = reference;
   if (name === 'template') {
-    return `**{>template}**\n\nVerbose subtemplate reference, for dynamic names and explicit data: `
-      + `\`{>template name='x' data={...}}\`\n\n[docs](/docs/guides/templates/subtemplates)`;
+    return referenceDoc(
+      '{>template}',
+      `Verbose subtemplate reference, for dynamic names and explicit data: \`{>template name='x' data={...}}\``,
+      subtemplateDocs,
+    );
   }
   if (name === 'slot') {
-    return `**{>slot}**\n\nContent projection slot. Renders content placed between the component's tags.`
-      + `\n\n[docs](/docs/guides/templates/slots)`;
+    return referenceDoc(
+      '{>slot}',
+      `Content projection slot. Renders content placed between the component's tags.`,
+      '/docs/guides/templates/slots',
+    );
   }
   if (new RegExp(`\\{#snippet\\s+${name}[\\s}]`).test(text)) {
-    return `**{>${name}}**\n\nRenders the \`${name}\` snippet defined in this template`
-      + `\n\n[docs](/docs/guides/templates/snippets)`;
+    return referenceDoc(`{>${name}}`, `Renders the \`${name}\` snippet defined in this template`, snippetDocs);
   }
   if (model?.subTemplates?.[name]) {
-    return `**{>${name}}**\n\nRenders the \`${name}\` subtemplate from the component definition`
-      + `\n\n[docs](/docs/guides/templates/subtemplates)`;
+    return referenceDoc(
+      `{>${name}}`,
+      `Renders the \`${name}\` subtemplate from the component definition`,
+      subtemplateDocs,
+    );
   }
-  return `**{>${name}}**\n\nRenders the \`${name}\` subtemplate or snippet`
-    + `\n\n[docs](/docs/guides/templates/subtemplates)`;
+  return referenceDoc(`{>${name}}`, `Renders the \`${name}\` subtemplate or snippet`, subtemplateDocs);
 }
 
 /*******************************

@@ -98,6 +98,18 @@ describe('LanguageService', () => {
       expect(hover.contents.value).not.toContain('current item');
     });
 
+    it('resolves a snippet declaration name', () => {
+      const service2 = new LanguageService({});
+      const text = '{#snippet actions}<ui-button>Go</ui-button>{/snippet}';
+      service2.didOpen('file:///decl.html', text, 1);
+      const hover = service2.getHover('file:///decl.html', { line: 0, character: text.indexOf('actions') + 2 });
+      expect(hover.contents.value).toContain('Snippet defined in this template');
+      expect(hover.contents.value).toContain('{>actions}');
+      // the keyword itself still resolves as the block
+      const keyword = service2.getHover('file:///decl.html', { line: 0, character: 3 });
+      expect(keyword.contents.value).toContain('{#snippet}');
+    });
+
     it('treats name and data as reserved keys of the verbose form', () => {
       const service2 = new LanguageService({});
       const text = '{#each rows as row}{> template\n  name=rowTemplate\n  data=row\n}{/each}';
