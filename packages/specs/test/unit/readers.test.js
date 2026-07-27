@@ -1066,3 +1066,50 @@ describe('DocsSpecReader.parseAttributeString', () => {
     });
   });
 });
+
+/* ==================================================================
+   DocsSpecReader — getAttributeString
+   ================================================================== */
+
+describe('DocsSpecReader.getAttributeString', () => {
+  const reader = (dialect) => new DocsSpecReader(minimalButtonSpec(), { dialect });
+
+  it('renders option values as bare modifiers in the standard dialect', () => {
+    const result = reader('standard').getAttributeString({ emphasis: 'primary' });
+    expect(result).toBe(' primary');
+  });
+
+  it('collects option values into a class list in the classic dialect', () => {
+    const result = reader('classic').getAttributeString({ emphasis: 'primary' });
+    expect(result).toBe(' class="primary"');
+  });
+
+  it('names the parent attribute in the verbose dialect', () => {
+    // quoteCharacter defaults to ' here, while getAttributeStringFromModifiers defaults to "
+    const result = reader('verbose').getAttributeString({ emphasis: 'primary' });
+    expect(result.trim()).toBe(`emphasis='primary'`);
+  });
+
+  it('honors an explicit quote character', () => {
+    const result = reader('verbose').getAttributeString({ emphasis: 'primary' }, { quoteCharacter: '"' });
+    expect(result.trim()).toBe(`emphasis="primary"`);
+  });
+
+  it('keeps values that are not options as ordinary attribute pairs', () => {
+    const result = reader('standard').getAttributeString({ icon: 'search' });
+    expect(result).toBe(` icon='search'`);
+  });
+
+  it('renders modifiers and plain attributes together', () => {
+    const result = reader('standard').getAttributeString({ emphasis: 'primary', icon: 'search' });
+    expect(result).toBe(` primary icon='search'`);
+  });
+
+  it('collapses a boolean attribute to its name', () => {
+    expect(reader('standard').getAttributeString({ disabled: true })).toBe(' disabled');
+  });
+
+  it('returns an empty string when there is nothing to render', () => {
+    expect(reader('standard').getAttributeString({})).toBe('');
+  });
+});

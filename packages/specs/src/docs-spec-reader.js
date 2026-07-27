@@ -620,37 +620,31 @@ export class DocsSpecReader extends SpecReader {
     joinWith = '=',
     quoteCharacter = `'`,
   } = {}) {
-    let attributeString;
-    let modifiers = [];
-    let categoryAttributes = clone(attributes);
-    let componentSpec = this.getWebComponentSpec();
-    each(attributes, (value, key) => {
-      const parentAttribute = componentSpec.optionAttributes[value];
-      if (parentAttribute) {
+    const componentSpec = this.getWebComponentSpec();
+    const modifiers = [];
+    const categoryAttributes = {};
+
+    // optionAttributes is a value → attribute lookup, so a value naming an
+    // option (`large`) is a modifier and everything else stays a pair
+    each(attributes, (value, attribute) => {
+      if (componentSpec?.optionAttributes?.[value]) {
         modifiers.push(value);
       }
       else {
-        categoryAttributes[key] = value;
+        categoryAttributes[attribute] = value;
       }
     });
-    if (modifiers.length) {
-      const modifierString = modifierAttributes.join(' ');
-      if (dialect == SpecReader.DIALECT_TYPES.standard) {
-        // <ui-button large red>
-        attributeString += ` ${modifierString}`;
-      }
-      else if (dialect == SpecReader.DIALECT_TYPES.classic) {
-        // <ui-button class="large red">
-        return ` class="${modifierString}"`;
-      }
-    }
-    else if (dialect == SpecReader.DIALECT_TYPES.verbose || keys(categoryAttributes)) {
-      let attributeString = ' ';
-      each(attributes, (value, attribute) => {
-        const singleAttr = this.getSingleAttributeString(attribute, value, { joinWith, quoteCharacter });
-        attributeString += ` ${singleAttr}`;
-      });
-    }
+
+    // modifiers route through the shared path so dialect rendering and the
+    // reserved-name collision rules stay defined in exactly one place
+    let attributeString = modifiers.length
+      ? this.getAttributeStringFromModifiers(modifiers.join(' '), { dialect, joinWith, quoteCharacter })
+      : '';
+
+    each(categoryAttributes, (value, attribute) => {
+      attributeString += ` ${this.getSingleAttributeString(attribute, value, { joinWith, quoteCharacter })}`;
+    });
+
     return attributeString;
   }
 
