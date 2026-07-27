@@ -1,8 +1,5 @@
 <div class="component">
-  <div class="actions">
-    <ui-menu inset selection value="{filter}" items="{filters}" class="menu"></ui-menu>
-    <ui-input search tiny placeholder="Search friends..." value={searchTerm} class="search"></ui-input>
-  </div>
+  {> actions}
   <div class="cards">
     {#each friend in getVisibleFriends}
       {> card
@@ -17,3 +14,10 @@
     {/each}
   </div>
 </div>
+
+{#snippet actions}
+  <div class="actions">
+    <ui-menu inset selection value="{filter}" items="{filters}" class="menu"></ui-menu>
+    <ui-input search tiny placeholder="Search friends..." value={searchTerm} class="search"></ui-input>
+  </div>
+{/snippet}
