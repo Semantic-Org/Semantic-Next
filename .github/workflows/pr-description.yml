@@ -1,0 +1,47 @@
+name: PR Description
+
+# Reads the PR title and body only, so it runs safely on fork pull requests
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  description:
+    name: Written in your own words
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check title and body
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Footers and trailers coding agents append to what they write. The
+          # list is a signal, not a blocklist: a leftover footer is the reliable
+          # tell that a description went up unread. Add tools as they appear.
+          agents='Claude|Codex|Copilot|Cursor|Devin|Aider|Gemini|Windsurf|Cline|OpenHands|Jules\[bot\]'
+          pattern="(Generated (with|by)[[:space:]]*\[?(${agents})|🤖 Generated (with|by)|Co-authored-by:.*(${agents}))"
+          if printf '%s\n%s' "$PR_TITLE" "$PR_BODY" | grep -qiE "$pattern"; then
+            cat <<'EOF'
+          Thanks for the contribution! This description still carries a coding
+          agent's generated footer, so it looks like it went up unedited.
+
+          Plenty of projects reject tool-assisted contributions outright. This
+          one doesn't. Write the code however you work best. What we ask is
+          that you read your own change and summarize it yourself, following
+          .github/pull_request_template.md: one sentence on why it exists,
+          then a few bullets on what it does.
+
+          That summary is the whole ask, and it is deliberately a small one.
+          Every PR spends a maintainer's attention, and a description in your
+          own words is the cheapest way to show that attention is warranted.
+          You can't summarize what you don't understand, which is exactly why
+          we ask for the summary rather than for a promise.
+
+          Edit the description and this check runs again automatically.
+          EOF
+            exit 1
+          fi
+          echo "Description looks hand-written. Thanks!"
