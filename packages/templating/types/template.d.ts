@@ -3,6 +3,25 @@ import { EventHandler, Query, QueryOptions } from '@semantic-ui/query';
 import { Matcher, Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
 import { TemplateHelpers } from './template-helpers.js';
 
+/**
+ * The value a declared property holds, derived from its `type` constructor.
+ * `properties` is authored as definitions (`{ count: { type: Number } }`) but
+ * reaches a component as coerced values, so settings report `number` rather
+ * than the definition object.
+ */
+export type PropertyValue<TDefinition> = TDefinition extends { type: NumberConstructor; } ? number
+  : TDefinition extends { type: StringConstructor; } ? string
+  : TDefinition extends { type: BooleanConstructor; } ? boolean
+  : TDefinition extends { type: ArrayConstructor; } ? any[]
+  : TDefinition extends { type: ObjectConstructor; } ? Record<string, any>
+  : TDefinition extends { type: FunctionConstructor; } ? (...args: any[]) => any
+  : any;
+
+/** Maps a `properties` definition object onto the values a component receives. */
+export type PropertyValues<TProperties> = {
+  [Key in keyof TProperties]: PropertyValue<TProperties[Key]>;
+};
+
 /** Anything the `$` and `$$` helpers accept as a starting point for a query. */
 export type QuerySelector =
   | string
@@ -352,7 +371,7 @@ export interface CallParams<
    *
    * @see https://next.semantic-ui.com/docs/guides/components/settings
    */
-  settings: TSettings & TProperties;
+  settings: TSettings & PropertyValues<TProperties>;
 
   /**
    * Reactive state variables for the component.
