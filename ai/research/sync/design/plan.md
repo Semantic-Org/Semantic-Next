@@ -270,13 +270,73 @@ The client invariant: **visible state = synced ⊕ pending** — server-confirme
 
 ## Ephemeral Collections (True Realtime)
 
-The third timescale: live cursors, presence, typing indicators — 15-30Hz throttled updates where staleness is the only sin and history is anti-valuable (a late cursor position must be dropped, never delivered; replay would animate ghosts). The durable pipeline is correct but mispriced by orders of magnitude here: IDB outbox writes per mousemove, ledger dedup for harmless duplicates, storage persistence of ephemera, a channel log faithfully recording movement history.
+The third timescale: live cursors, presence, typing indicators — 15-30Hz throttled
+updates where staleness is the only sin and history is anti-valuable (a late cursor
+position must be dropped, never delivered; replay would animate ghosts). The durable
+pipeline is correct but mispriced by orders of magnitude here: IDB outbox writes per
+mousemove, ledger dedup for harmless duplicates, storage persistence of ephemera, a
+channel log faithfully recording movement history.
 
-One flag re-prices it: `collection('cursors', { ephemeral: true, expires: 'connection' })`. Server holds an in-memory latest-per-key map per channel instance (late-joiner snapshot = the map), fans out immediately, **conflates under backpressure** (a slow consumer's pending frame is replaced, never queued — the presence-system discipline, inverse of durable). Writes fire-and-forget, no cursor (no log to have a position in), no ack, keys expire with connection liveness. Client surface unchanged: `{#each cursor in Cursors.find()}` — same templates, same per-field deps; one peer's move = one field dep = one style write. Client-side interpolation (render 60fps, network 20Hz) is app-space.
+One flag re-prices it: `collection('cursors', { ephemeral: true })` — the shorthand
+for all defaults; the expanded form `ephemeral: { lifetime, cadence }` holds the
+tier's two knobs, which exist nowhere else.
+Server holds an in-memory latest-per-key map per channel instance (late-joiner
+snapshot = the map), fans out on a coalesced tick, **conflates under backpressure** (a
+slow consumer's pending frame is replaced, never queued — the presence-system
+discipline, inverse of durable). Writes fire-and-forget, no cursor (no log to have a
+position in), no ack. Client surface unchanged: `{#each cursor in Cursors.find()}` —
+same templates, same per-field deps; one peer's move = one field dep = one style
+write. Client-side interpolation over the network rate is app-space.
 
-Load: 5 movers × 20Hz × 10 subscribers ≈ 1,000 tiny sends/sec server-side — trivial. Client peak ~100 single-field dep fires/sec — krausest-grade.
+**The tick is the declared `cadence`.** `'standard'` is the default — the 30Hz
+envelope, the scenario's stated presence cadence. `'animated'` declares the 60fps
+tier (live cursors, the case where delivery latency IS the product). A **number is
+Hz**, bounded [1, 144] (the ceiling aligns to the high-refresh display tier), for
+authors who build around their own loop — set it to your game loop or half your game
+loop. The number exists because the deployment profile is the author's knowledge, not
+the framework's: a multiserver intranet and a global single box have different
+budgets, and realtime + ephemeral + canvas/webgl is a real build tier for some apps.
+Stated by the author who knows the collection's physics — never inferred from load —
+and the declaration is what any future load management protects by stated need.
 
-**Graduation rule**: data that must survive reconnect (the durable grade correction, not the cursor that drew it) moves tiers by deleting the flag. The full timescale ladder: ephemeral (15-30Hz, conflated, connection-scoped) → durable realtime (debounced mutators, synced ⊕ pending) → refresh (seconds, polled). Three physics, one client surface.
+**Single-writer-per-key is the tier's correctness contract.** A key is owned by the
+connection that writes it; multi-device presence is multiple keys by construction,
+never multiple metas under one key. Per key there is exactly one writer, so
+latest-wins is correct with no vector clocks, no merge function, no reconciliation —
+the invariant that deletes the presence CRDT.
+
+**Expiry is liveness-scoped, with staleness TTL as the mechanism.** `lifetime:
+'connection'` keys (the default) die with the AUTHOR's connection; duration-form keys
+(`lifetime: '30s'`) expire when not refreshed within the duration. The TTL kills both ghost classes with one
+mechanism: dead-node keys and the background-tab keys whose throttled writer went
+silent without its connection dying. Staleness-is-the-only-sin is the tier's own
+physics, so expiry-by-staleness is the native idiom.
+
+**Throttled at source, conflated at the declared tick regardless.** The tier's
+cadence is server-guaranteed physics, not app-space courtesy: the server coalesces
+outbound per key on the collection's declared cadence — standard, animated, or the
+author's own Hz — so above-tick inbound just overwrites the latest-per-key entry and
+conflates away at parse-plus-map-set cost.
+
+**Offline writes drop, never queue.** The durable tier queues to the outbox while
+disconnected; ephemeral writes while disconnected are dropped silently and by design
+(dev-disclosed) — replaying a queued cursor move is the ghost-animation failure the
+tier exists to delete. The graduation flag is also the offline-durability flag.
+
+**Multi-node carry, named.** Redis pub/sub (not streams — no log to have a position
+in) fans ephemeral writes cross-node into each node's local conflation maps; remote
+nodes blind-overwrite per key, correct with no CRDT because of single-writer-per-key.
+No stream, no watermark, no reconciliation events.
+
+Load: 5 movers × 20Hz × 10 subscribers ≈ 1,000 tiny sends/sec server-side at per-write
+fan — and the emit tick conflates below even that, with write-to-peer-apply latency a
+tick-width. Client peak ~100 single-field dep fires/sec — krausest-grade.
+
+**Graduation rule**: data that must survive reconnect (the durable grade correction,
+not the cursor that drew it) moves tiers by deleting the flag. The full timescale
+ladder: ephemeral (the declared cadence, conflated, liveness-scoped) → durable realtime (debounced
+mutators, synced ⊕ pending) → refresh (seconds, polled). Three physics, one client
+surface.
 
 ## Channels (Publications and Permissions)
 

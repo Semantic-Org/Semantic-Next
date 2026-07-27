@@ -433,6 +433,96 @@ The guard is honest about its coverage: `beforeunload` fires on tab and window c
 
 Dev builds render a non-blocking corner overlay when the sync server drops: status, attempt count, `nextRetryAt` countdown (Vite's `server connection lost` register). It verifies liveness before clearing (a `welcome`, not a TCP connect — confirm the server is actually serving before declaring recovery), and never blocks the page: the app keeps running on pool data, which is itself the offline-tolerance demo. Past 10s of outage the overlay turns playable — a one-canvas paddle game against the reconnect timer (the Chrome dino precedent). Dev-only, tree-shaken, zero bytes shipped.
 
+## Ephemeral Channels — the True-Realtime Tier
+
+The third timescale on the wire (plan.md, Ephemeral Collections): presence, live
+cursors, typing — state where staleness is the only sin and history is anti-valuable.
+An ephemeral channel has **no cursor, no log, no replay, and no persistence**: the
+server holds a latest-per-key conflation map per channel instance, and delivery is a
+coalesced tick, not a per-write fan. Everything below is the additive frame family the
+`ephemeral` capability negotiates; the durable contract (§2-§5) is untouched.
+
+**The fan frame.** One frame per channel per tick:
+
+```json
+{ "type": "ephemeral", "channel": "cursors.byBoard?{...}", "set": { "<key>": { ...fields } }, "gone": ["<key>"] }
+```
+
+- `set` maps each dirty key to its **full latest source fields** — absolute state, not
+  a delta. A receiver replaces its copy of the key wholesale; there is no position to
+  order by and no gap to detect, because conflation already made delivery
+  latest-wins. `set` and `gone` are disjoint within a frame.
+- `gone` lists keys removed since the last tick — explicit removal, connection death,
+  or staleness expiry. A receiver drops its copy.
+- Both halves are optional; a frame carries whichever the tick produced. Fields are
+  plain JSON (encode value-driven, decode schema-driven — the same wire-revival rule
+  every frame follows); server bookkeeping (owner, freshness stamps) never rides the
+  wire.
+
+**The join.** Subscribing to an ephemeral channel is answered by an `ephemeral` frame
+marked **`replace: true`** carrying the complete map (`set` = every live key, sent
+even when empty), and readiness rides it — there is no `snapshot`/`live` choreography
+and no cursor in the `sub` frame. The marker is MANDATORY on the frame answering a
+subscribe *(conformance: the join-marker assertions in the forward-compat case)* — it
+is the version-skew defense the choreography rests on. Frames marked `replace` carry
+the complete set: the receiver's copy of the channel converges to `set`, absent keys
+evict, and **replace frames omit `gone`** (any `gone` on one is ignored — a composing
+sender must not evict what the same frame delivers). Frames without the marker
+**merge** their `set`/`gone`, and tick frames never carry it — so a live frame
+already in flight across a resubscribe merges harmlessly, and the receiver never has
+to guess which inbound frame answers its sub.
+Resume after any disconnect is a fresh map, never a replay; `subscription.state` runs
+`loading` then `current`, never `stale` — without a cursor there is nothing to be
+stale relative to, and a refresh or wake resubscribe keeps the sub `current` while its
+fresh map is in flight.
+
+**The write carriage.** Ephemeral writes ride the existing `call` frame in a
+**no-result form**: `{ "type": "call", "name", "docId", "args" }` with **no `id`** —
+fire-and-forget has nothing to ack, so the call allocates no ledger entry, no
+idempotency memo, and no `result` frame. `docId` is the key. The server runs the
+normal operation gates (permission, args, validate/coerce) and lands the write in the
+map; a refused write is disclosed server-side, never answered on the wire. Writes
+while disconnected are **dropped, never queued** — replaying a stale cursor move is
+the ghost-animation failure this tier exists to delete.
+
+**Single-writer-per-key.** A key is owned by the connection that writes it; a write to
+another live connection's key is refused. A new connection presenting the **same
+clientID** supersedes its predecessor's ownership immediately (the reconnect reclaim —
+recovery is instant, not an idle-timeout wait). Multi-device presence is multiple keys
+by construction, never multiple writers of one key — this is what makes cross-node
+carry a blind per-key overwrite with no CRDT.
+
+**Delivery discipline.** The tick is the collection's **declared `cadence`**:
+`'standard'` (the 30Hz presence envelope, the default), `'animated'` (the 60fps
+cursor tier), or a number in Hz for authors who build around their own loop — the
+author states the collection's physics, and the declaration is what any future load
+management protects by stated need. The server coalesces outbound per channel on
+that declared tick and **conflates under backpressure**: a slow consumer's
+undelivered frame is replaced (merged latest-per-key), never queued. Delivery counts
+are therefore not part of the contract — only convergence is. Fan-out skips hidden
+connections (visibility metadata, §2) and skips the writer's own keys (the writer's
+local apply is its own truth; an echo is a feedback loop).
+
+**Expiry.** Key lifetime is **liveness-scoped**: `lifetime: 'connection'` keys (the
+default) leave the map when the AUTHOR's connection dies (the removal fans as
+`gone`), and duration-form keys (`lifetime: '30s'`) additionally expire when not
+refreshed within the duration — the staleness TTL, which also reaps the keys of a
+throttled or frozen tab whose connection never cleanly died.
+
+**Capability staging.** The frame family activates per connection via the `ephemeral`
+capability (`hello.caps` / `welcome.caps`). The server MUST NOT send `ephemeral`
+frames to a connection that did not declare it, and MUST refuse that connection's
+subscribe to an ephemeral channel with a `nosub` naming the missing capability — a
+loud denial, never a silently idle channel. A client that does not speak the tier
+keeps its full §8 tolerance behavior *(conformance: `forward-compat-ephemeral`)*.
+
+**Transports.** The tier is push-only. A stateless poll transport MUST refuse an
+ephemeral publication loudly — never serve an empty snapshot in its place, which
+would be precisely the silently-idle channel the staging rule forbids. The refusal
+SHOULD name the tier (the poll-shaped analog of the capability `nosub`); a
+publication whose collection is only knowable once a channel has been built MAY
+refuse generically until then. What it must never do is serve.
+
 ## 8. Protocol Evolution
 
 **Version negotiation.** `hello.protocol` is the highest version the client speaks; the server replies `welcome.protocol` with the version it will speak (≤ client's). No overlap → `rejected 4001` with `reason` naming the supported range. One integer, no semver — breaking changes bump it, everything else rides capabilities.
@@ -441,7 +531,13 @@ Dev builds render a non-blocking corner overlay when the sync server drops: stat
 
 **Unknown-message tolerance.** Within a major version: unknown `type` is ignored, unknown fields in known types are ignored, both sides. New server pushes degrade silently against old clients, new client fields degrade silently against old servers. Dev builds log what they drop. This is what makes capabilities cheap.
 
-**The `ephemeral` reservation.** The type name `ephemeral` is reserved for the true-realtime tier (presence, cursors, typing — no cursor, no log, no replay, conflated under backpressure). **Name only**: the frame schema is the ephemeral-collections design's to define, staged as a capability candidate — unknown-type tolerance makes it purely additive, and the reservation pins the forward-compat behavior now: a v2 client MUST silently ignore `ephemeral` frames it does not speak *(conformance: `forward-compat-ephemeral`)*.
+**The `ephemeral` frame.** The type name `ephemeral` — reserved here since the freeze
+for the true-realtime tier (presence, cursors, typing — no cursor, no log, no replay,
+conflated under backpressure) — is now defined (§ Ephemeral Channels), staged as the
+`ephemeral` capability. Unknown-type tolerance keeps it purely additive, and the
+forward-compat behavior pinned at reservation time still binds: a v2 client MUST
+silently ignore `ephemeral` frames it does not speak *(conformance:
+`forward-compat-ephemeral`)*.
 
 **Capability flags.** `hello.caps` / `welcome.caps`, string arrays; the intersection is active. The core message set (§2) is mandatory and never cap-gated. Capabilities are additive behaviors negotiated per connection — candidates: `encoding:msgpack` (the pluggable wire encoding), `compress:permessage-deflate` policy, `redirect` (4501 handling), `ephemeral` (once its schema lands). The result cache is **not** here — v1 staged it as a capability, v2 makes it core (§4). `caps` also carries the app's schema/bundle version token, which is how a stale bundle learns to surface a reload affordance (§5) instead of collecting mysterious rejections. A capability every implementation ends up requiring graduates into the next protocol version — caps are the staging area, the version is the contract.
 
