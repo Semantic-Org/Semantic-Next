@@ -774,6 +774,44 @@ RENDER_TARGETS.forEach(({ name, target }) => {
         externalTarget.remove();
       });
 
+      it('passes options to query rather than leaking them onto the global document', async () => {
+        // `$` takes (selector, options), so passing `document` positionally put it
+        // in the options slot: query then wrote `root` onto the global Document
+        // and the caller's querySettings were dropped on the floor.
+        const handler = vi.fn();
+        const fixture = await mountTemplate({ target });
+        const externalTarget = document.createElement('div');
+        document.body.appendChild(externalTarget);
+        try {
+          fixture.template.attachEvent(externalTarget, 'click', handler);
+          expect(Object.hasOwn(document, 'root')).toBe(false);
+        }
+        finally {
+          externalTarget.remove();
+          fixture.cleanup();
+        }
+      });
+
+      it('reaches into a shadow root, since querySettings defaults to pierceShadow', async () => {
+        const handler = vi.fn();
+        const fixture = await mountTemplate({ target });
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const shadow = host.attachShadow({ mode: 'open' });
+        const inner = document.createElement('button');
+        inner.className = 'inside-shadow';
+        shadow.appendChild(inner);
+        try {
+          fixture.template.attachEvent('.inside-shadow', 'click', handler);
+          clickOn(inner);
+          expect(handler).toHaveBeenCalledTimes(1);
+        }
+        finally {
+          host.remove();
+          fixture.cleanup();
+        }
+      });
+
       it('binds a listener attached from inside onCreated and cleans up on destroy', async () => {
         // onCreated fires before attachEvents() sets up eventController. The auto-cleanup
         // contract still has to hold — attachEvent ties to the template's lifetime
