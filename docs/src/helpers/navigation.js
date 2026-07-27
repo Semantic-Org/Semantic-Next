@@ -202,15 +202,27 @@ export const removeTrailingSlash = (url = '') => {
     : url;
 };
 
+/*
+  Whether a path is a menu url or sits beneath it. Prefix tests need the
+  separator: without it /examples/context-menu reads as a child of
+  /examples/context and lights up both sections at once.
+*/
+export const isPathWithin = (currentPath, url) => {
+  if (!isString(currentPath) || !isString(url)) { return false; }
+  currentPath = removeTrailingSlash(currentPath);
+  url = removeTrailingSlash(url);
+  return currentPath === url || currentPath.startsWith(`${url}/`);
+};
+
 /* Gets active section from topbar display menu based on current URL */
 export const getActiveTopbarSection = async (activeURL = '') => {
   activeURL = removeTrailingSlash(activeURL);
   const topbarMenuWithLinks = await getTopbarMenu();
   const isActive = (item) => {
-    if (isArray(item.baseURLs) && any(item.baseURLs, baseURL => activeURL.startsWith(baseURL))) {
+    if (isArray(item.baseURLs) && any(item.baseURLs, baseURL => isPathWithin(activeURL, baseURL))) {
       return true;
     }
-    if (item.baseURL && activeURL.startsWith(item.baseURL)) {
+    if (item.baseURL && isPathWithin(activeURL, item.baseURL)) {
       return true;
     }
     if (item?.url === activeURL) {
@@ -268,7 +280,7 @@ const isInSectionMenu = (sectionId, currentPath) => {
 
   // Check if current path matches any URL in the menu or its nested pages
   return any(menu, section => {
-    if (currentPath.startsWith(section.url)) {
+    if (isPathWithin(currentPath, section.url)) {
       return true;
     }
     // Check nested pages
@@ -276,9 +288,9 @@ const isInSectionMenu = (sectionId, currentPath) => {
       return any(section.pages, page => {
         if (isArray(page.pages)) {
           // Handle subcategories
-          return any(page.pages, subpage => currentPath.startsWith(subpage.url));
+          return any(page.pages, subpage => isPathWithin(currentPath, subpage.url));
         }
-        return currentPath.startsWith(page.url);
+        return isPathWithin(currentPath, page.url);
       });
     }
     return false;
@@ -295,14 +307,14 @@ export const getActiveSidebarSection = (currentPath) => {
       return any(item._ids, id => {
         const section = firstMatch(topbarMenu, m => m._id === id);
         return section && (
-          currentPath.startsWith(section.url)
+          isPathWithin(currentPath, section.url)
           || isInSectionMenu(section._id, currentPath)
         );
       });
     }
     // For single sections, check if URL matches the section or its menu items
     return item._id && (
-      currentPath.startsWith(item.url)
+      isPathWithin(currentPath, item.url)
       || isInSectionMenu(item._id, currentPath)
     );
   });
@@ -334,7 +346,7 @@ export const getSidebarNavMenu = (activeSection, currentPath) => {
             label: section.name,
             href: section.url,
             icon: section.icon,
-            active: currentPath.startsWith(section.url) || isInSectionMenu(section._id, currentPath),
+            active: isPathWithin(currentPath, section.url) || isInSectionMenu(section._id, currentPath),
           }
           : null;
       })
