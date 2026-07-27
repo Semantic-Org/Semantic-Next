@@ -1,0 +1,13 @@
+<ui-button primary>Toggle ({indeterminate})</ui-button>
+
+<label>
+  <input type="checkbox" indeterminate={indeterminate}>
+  <code>indeterminate={indeterminate}</code>
+  <span class="note">attribute, but no such attribute exists</span>
+</label>
+
+<label>
+  <input type="checkbox" .indeterminate={indeterminate}>
+  <code>.indeterminate={indeterminate}</code>
+  <span class="note">property, shows the mixed state</span>
+</label>
