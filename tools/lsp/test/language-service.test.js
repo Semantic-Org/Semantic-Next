@@ -85,6 +85,49 @@ describe('LanguageService', () => {
     });
   });
 
+  describe('template references', () => {
+    it('resolves {>name} to the snippet in context, not the data variable', () => {
+      const service2 = new LanguageService({});
+      const text = '{#snippet row}<td>hi</td>{/snippet}\n{#each row in rows}{> row}{/each}';
+      service2.didOpen('file:///ref.html', text, 1);
+      const hover = service2.getHover('file:///ref.html', {
+        line: 1,
+        character: text.split('\n')[1].indexOf('{> row}') + 4,
+      });
+      expect(hover.contents.value).toContain('snippet defined in this template');
+      expect(hover.contents.value).not.toContain('current item');
+    });
+
+    it('treats name and data as reserved keys of the verbose form', () => {
+      const service2 = new LanguageService({});
+      const text = '{#each rows as row}{> template\n  name=rowTemplate\n  data=row\n}{/each}';
+      service2.didOpen('file:///ref3.html', text, 1);
+      const name = service2.getHover('file:///ref3.html', { line: 1, character: 3 });
+      expect(name.contents.value).toContain('Selects which template');
+      const data = service2.getHover('file:///ref3.html', { line: 2, character: 3 });
+      expect(data.contents.value).toContain('Sets the data context');
+      // the values stay expressions in this template's scope
+      const value = service2.getHover('file:///ref3.html', { line: 2, character: 8 });
+      expect(value.contents.value).toContain('current item of `rows`');
+      // and shorthand references keep `name` as an ordinary data key
+      const short = new LanguageService({});
+      short.didOpen('file:///ref4.html', '{>userProfile name=user.name}', 1);
+      const shortName = short.getHover('file:///ref4.html', { line: 0, character: 15 });
+      expect(shortName.contents.value).toContain('Defines `name` in the data context');
+    });
+
+    it('explains a data key as a fresh name in the subtemplate scope', () => {
+      const service2 = new LanguageService({});
+      const text = '{#each row in rows}{>row row=row company=company}{/each}';
+      service2.didOpen('file:///ref2.html', text, 1);
+      const hover = service2.getHover('file:///ref2.html', { line: 0, character: text.indexOf('row=row') + 1 });
+      expect(hover.contents.value).toContain('Defines `row` in the data context of `{>row}`');
+      // the value side still resolves in this template's scope
+      const value = service2.getHover('file:///ref2.html', { line: 0, character: text.indexOf('row=row') + 5 });
+      expect(value.contents.value).toContain('current item of `rows`');
+    });
+  });
+
   describe('diagnostics', () => {
     it('reports recoverable compile errors with in-bounds ranges', async () => {
       const { TemplateCompiler } = await import('@semantic-ui/compiler');

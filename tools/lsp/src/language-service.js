@@ -8,6 +8,7 @@ import {
   getHelperCallAtOffset,
   getIdentifierAtOffset,
   getScopeVariables,
+  getTemplateReferenceAtOffset,
   getWordAtOffset,
 } from './server-helpers.js';
 import { SpecRegistry } from './spec-registry.js';
@@ -262,6 +263,34 @@ function computeCompletions(text, offset, model, specRegistry) {
       return context.joiners.map(j => ({ label: j, kind: Kind.Keyword, detail: `${context.keyword} ... ${j}` }));
     case 'reference':
       return getReferenceCompletions(text, model);
+    case 'reference-data': {
+      // keys name fresh entries in the invoked template's data context, so the
+      // parent scope has nothing to offer. The reserved keys complete: `data`
+      // everywhere, `name` in the verbose {>template} form
+      const items = [];
+      if (context.template === 'template') {
+        items.push({
+          label: 'name',
+          kind: Kind.Property,
+          detail: 'template to render',
+          documentation: {
+            kind: Markdown,
+            value:
+              'Selects which template `{>template}` renders. Accepts a template name or an expression resolving to one.',
+          },
+        });
+      }
+      items.push({
+        label: 'data',
+        kind: Kind.Property,
+        detail: 'data context for the rendered template',
+        documentation: {
+          kind: Markdown,
+          value: 'Sets the data context for the rendered template. Accepts an expression or an inline object.',
+        },
+      });
+      return items;
+    }
     case 'html-attribute':
       return getAttributeCompletions(context.tagName, specRegistry);
     case 'attribute-value':
@@ -465,6 +494,13 @@ function computeHover(text, offset, model) {
     return { contents: { kind: Markdown, value: formatBlockDoc(blockKeyword.name, blockKeyword.tag) } };
   }
 
+  // {>name} resolves against subtemplates and snippets, never the data scope,
+  // even when a data variable shares the name
+  const reference = getTemplateReferenceAtOffset(text, offset);
+  if (reference) {
+    return { contents: { kind: Markdown, value: formatReferenceHover(reference, text, model) } };
+  }
+
   const attributeBinding = getAttributeBindingAtOffset(text, offset);
   if (attributeBinding) {
     const { kind, name } = attributeBinding;
@@ -521,9 +557,7 @@ function computeHover(text, offset, model) {
       return {
         contents: {
           kind: Markdown,
-          value: `**${word}**: Signal\\<${stateField.inferredType}\\>\n\nState (default: ${
-            JSON.stringify(stateField.defaultValue)
-          })`,
+          value: `**${word}**: Signal\\<${stateField.inferredType}\\>\n\nState${formatDefault(stateField)}`,
         },
       };
     }
@@ -532,9 +566,7 @@ function computeHover(text, offset, model) {
       return {
         contents: {
           kind: Markdown,
-          value: `**${word}**: ${settingField.inferredType}\n\nSetting (default: ${
-            JSON.stringify(settingField.defaultValue)
-          })`,
+          value: `**${word}**: ${settingField.inferredType}\n\nSetting${formatDefault(settingField)}`,
         },
       };
     }
@@ -567,6 +599,47 @@ function computeSignatureHelp(text, offset) {
       ? Math.min(call.argIndex, helper.params.length - 1)
       : call.argIndex,
   };
+}
+
+/* a default that could not be materialized statically stays silent — no `undefined` in hovers */
+function formatDefault(field) {
+  return field.defaultValue !== undefined ? ` (default: ${JSON.stringify(field.defaultValue)})` : '';
+}
+
+function formatReferenceHover(reference, text, model) {
+  if (reference.kind === 'key') {
+    // `data` sets the whole context in both forms; `name` selects the template
+    // only in the verbose {>template} form, elsewhere it is an ordinary key
+    if (reference.template === 'template' && reference.name === 'name') {
+      return `**name**\n\nSelects which template \`{>template}\` renders. Accepts a template name or an `
+        + `expression resolving to one.\n\n[docs](/docs/guides/templates/subtemplates)`;
+    }
+    if (reference.name === 'data') {
+      return `**data**\n\nSets the data context for the rendered template. Accepts an expression or an `
+        + `inline object.\n\n[docs](/docs/guides/templates/subtemplates)`;
+    }
+    return `**${reference.name}**\n\nDefines \`${reference.name}\` in the data context of \`{>${reference.template}}\`. `
+      + `The value right of \`=\` is evaluated in this template's scope.\n\n[docs](/docs/guides/templates/subtemplates)`;
+  }
+  const { name } = reference;
+  if (name === 'template') {
+    return `**{>template}**\n\nVerbose subtemplate reference, for dynamic names and explicit data: `
+      + `\`{>template name='x' data={...}}\`\n\n[docs](/docs/guides/templates/subtemplates)`;
+  }
+  if (name === 'slot') {
+    return `**{>slot}**\n\nContent projection slot. Renders content placed between the component's tags.`
+      + `\n\n[docs](/docs/guides/templates/slots)`;
+  }
+  if (new RegExp(`\\{#snippet\\s+${name}[\\s}]`).test(text)) {
+    return `**{>${name}}**\n\nRenders the \`${name}\` snippet defined in this template`
+      + `\n\n[docs](/docs/guides/templates/snippets)`;
+  }
+  if (model?.subTemplates?.[name]) {
+    return `**{>${name}}**\n\nRenders the \`${name}\` subtemplate from the component definition`
+      + `\n\n[docs](/docs/guides/templates/subtemplates)`;
+  }
+  return `**{>${name}}**\n\nRenders the \`${name}\` subtemplate or snippet`
+    + `\n\n[docs](/docs/guides/templates/subtemplates)`;
 }
 
 /*******************************

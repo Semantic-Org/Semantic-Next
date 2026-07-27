@@ -7,6 +7,7 @@ import {
   getHelperCallAtOffset,
   getOpenBlocks,
   getScopeVariables,
+  getTemplateReferenceAtOffset,
   getWordAtOffset,
 } from '../src/server-helpers.js';
 
@@ -159,12 +160,18 @@ describe('getCompletionContext', () => {
       expect(getCompletionContext(text, offset)).toEqual({ type: 'reference' });
     });
 
-    it('returns expression context for reference argument area', () => {
-      // After the reference name + space, cursor is in the data-binding area
-      // where expression completions are appropriate, not reference completions
+    it('treats a key position as a fresh name, not parent scope', () => {
+      // {>highlight |text=...} — the key names a new entry in the invoked
+      // template's data context, so parent-scope completions do not apply
       const text = '{>highlight text=title match=titleHighlight}';
       const offset = 12; // after ">highlight "
-      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
+      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'reference-data', template: 'highlight' });
+    });
+
+    it('returns expression context for a key value', () => {
+      const text = '{>row row=ro}';
+      const offset = 12; // after "row=ro"
+      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression', prefix: 'ro' });
     });
   });
 
@@ -487,6 +494,33 @@ describe('getScopeVariables', () => {
     const nested = '{#each item in outer}{#each item in item.children}{|}{/each}{/each}';
     const item = at(nested).find(variable => variable.name === 'item');
     expect(item.description).toBe('current item of `item.children`');
+  });
+});
+
+describe('getTemplateReferenceAtOffset', () => {
+  const at = (text, marker = '|') => {
+    const offset = text.indexOf(marker);
+    return getTemplateReferenceAtOffset(text.replace(marker, ''), offset);
+  };
+
+  it('resolves the reference name, including the spaced form', () => {
+    expect(at('{>ro|w row=row}')).toEqual({ kind: 'name', name: 'row' });
+    expect(at('{> ro|w}')).toEqual({ kind: 'name', name: 'row' });
+  });
+
+  it('resolves a key left of = as a fresh data name', () => {
+    expect(at('{>row ro|w=row company=company}')).toEqual({ kind: 'key', name: 'row', template: 'row' });
+    expect(at('{>row row=row comp|any=company}')).toEqual({ kind: 'key', name: 'company', template: 'row' });
+  });
+
+  it('lets value positions fall through to expression resolution', () => {
+    expect(at('{>row row=ro|w}')).toBeNull();
+    expect(at('{>row company=comp|any}')).toBeNull();
+  });
+
+  it('ignores plain expressions', () => {
+    expect(at('{ro|w}')).toBeNull();
+    expect(at('{#each ro|w in rows}')).toBeNull();
   });
 });
 

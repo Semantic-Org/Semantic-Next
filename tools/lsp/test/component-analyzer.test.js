@@ -99,6 +99,21 @@ describe('ComponentAnalyzer', () => {
       // no default beats a wrong default
       expect(field('dynamic').defaultValue).toBeUndefined();
     });
+
+    it('types class instances as their class', () => {
+      const model = analyzeComponent(
+        `
+        import { defineComponent } from '@semantic-ui/component';
+        import { Template } from '@semantic-ui/templating';
+        const defaultSettings = { rowTemplate: new Template() };
+        defineComponent({ tagName: 'class-defaults', defaultSettings });
+      `,
+        '/virtual/class-defaults.js',
+      );
+      const rowTemplate = model.settings.find(s => s.name === 'rowTemplate');
+      expect(rowTemplate.inferredType).toBe('Template');
+      expect(rowTemplate.defaultValue).toBeUndefined();
+    });
   });
 
   describe('menu (complex, self-referential)', () => {

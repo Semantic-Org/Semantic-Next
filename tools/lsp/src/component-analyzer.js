@@ -410,6 +410,8 @@ function inferTypeFromValue(node) {
   if (node.type === 'ArrayExpression') { return 'array'; }
   if (node.type === 'ObjectExpression') { return 'object'; }
   if (node.type === 'ArrowFunctionExpression' || node.type === 'FunctionExpression') { return 'function'; }
+  // a class instance reads best as its class: rowTemplate: new Template()
+  if (node.type === 'NewExpression' && node.callee?.type === 'Identifier') { return node.callee.name; }
   return 'any';
 }
 

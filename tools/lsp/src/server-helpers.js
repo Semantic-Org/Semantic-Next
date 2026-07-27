@@ -82,9 +82,15 @@ export function getCompletionContext(text, offset) {
             // {>slot name} — no key=value syntax, just an optional slot name
             return { type: 'none' };
           }
-          // {>templateName key=value} or {>template name='x'}
+          // {>templateName key=value} — a key names a fresh entry in the
+          // invoked template's data scope, only the value side reads the
+          // parent scope
           const refPrefix = afterRef.match(/(\w*)$/)?.[1] || '';
-          return { type: 'expression', prefix: refPrefix };
+          const beforePrefix = afterRef.slice(0, afterRef.length - refPrefix.length);
+          if (/=\s*$/.test(beforePrefix)) {
+            return { type: 'expression', prefix: refPrefix };
+          }
+          return { type: 'reference-data', template: refName, prefix: refPrefix };
         }
         // Extract the current word being typed for filtering
         const prefix = afterBrace.match(/(\w*)$/)?.[1] || '';
@@ -450,6 +456,37 @@ export function getAttributeBindingAtOffset(text, offset) {
   const before = text.substring(0, start - 1);
   if (before.lastIndexOf('<') <= before.lastIndexOf('>')) { return null; }
   return { kind: prefix === '@' ? 'event' : 'property', name };
+}
+
+/*
+  The template reference an offset sits inside: {>row key=value}. The name
+  resolves against subtemplates and snippets, never the data scope, and a key
+  left of = names a fresh entry in the invoked template's data context. Value
+  positions return null so normal expression resolution applies.
+*/
+export function getTemplateReferenceAtOffset(text, offset) {
+  const open = findExpressionStart(text, offset);
+  if (open === -1) { return null; }
+  const content = readTagContent(text, open + 1);
+  const arrow = content.match(/^(\s*)>(\s*)([\w-]*)/);
+  if (!arrow) { return null; }
+  const [, leadingSpace, arrowSpace, name] = arrow;
+  const nameStart = open + 1 + leadingSpace.length + 1 + arrowSpace.length;
+  const nameEnd = nameStart + name.length;
+  if (offset >= nameStart && offset <= nameEnd) {
+    return name ? { kind: 'name', name } : null;
+  }
+  if (!name || name === 'slot') { return null; }
+  const keyPattern = /([\w$-]+)\s*=/g;
+  const rest = content.slice(nameEnd - (open + 1));
+  let match;
+  while ((match = keyPattern.exec(rest)) !== null) {
+    const keyStart = nameEnd + match.index;
+    if (offset >= keyStart && offset <= keyStart + match[1].length) {
+      return { kind: 'key', name: match[1], template: name };
+    }
+  }
+  return null;
 }
 
 /*
