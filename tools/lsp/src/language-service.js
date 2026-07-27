@@ -343,6 +343,7 @@ function getExpressionCompletions(model, prefix = '', sections = [], scopeVariab
         label: field.name,
         kind: Kind.Property,
         detail: `state: ${field.inferredType}${def}`,
+        documentation: field.description ? { kind: Markdown, value: `*${field.description}*` } : undefined,
         sortText: '1' + field.name,
       });
     }
@@ -352,6 +353,7 @@ function getExpressionCompletions(model, prefix = '', sections = [], scopeVariab
         label: field.name,
         kind: Kind.Property,
         detail: `setting: ${field.inferredType}${def}`,
+        documentation: field.description ? { kind: Markdown, value: `*${field.description}*` } : undefined,
         sortText: '1' + field.name,
       });
     }
@@ -557,7 +559,8 @@ function computeHover(text, offset, model) {
       return {
         contents: {
           kind: Markdown,
-          value: `**${word}**: Signal\\<${stateField.inferredType}\\>\n\nState${formatDefault(stateField)}`,
+          value: `**${word}**: Signal\\<${stateField.inferredType}\\>\n\nState${formatDefault(stateField)}`
+            + formatDescription(stateField),
         },
       };
     }
@@ -566,7 +569,8 @@ function computeHover(text, offset, model) {
       return {
         contents: {
           kind: Markdown,
-          value: `**${word}**: ${settingField.inferredType}\n\nSetting${formatDefault(settingField)}`,
+          value: `**${word}**: ${settingField.inferredType}\n\nSetting${formatDefault(settingField)}`
+            + formatDescription(settingField),
         },
       };
     }
@@ -604,6 +608,11 @@ function computeSignatureHelp(text, offset) {
 /* a default that could not be materialized statically stays silent — no `undefined` in hovers */
 function formatDefault(field) {
   return field.defaultValue !== undefined ? ` (default: ${JSON.stringify(field.defaultValue)})` : '';
+}
+
+/* the trailing comment on a field's declaration, when the author left one */
+function formatDescription(field) {
+  return field.description ? `\n\n*${field.description}*` : '';
 }
 
 function formatReferenceHover(reference, text, model) {

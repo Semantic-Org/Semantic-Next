@@ -9,11 +9,15 @@ import * as acorn from 'acorn';
 
 export function analyzeComponent(source, filePath) {
   let ast;
+  const comments = [];
   try {
     ast = acorn.parse(source, {
       ecmaVersion: 'latest',
       sourceType: 'module',
       allowAwaitOutsideFunction: true,
+      onComment: (isBlock, text, start, end) => {
+        if (!isBlock) { comments.push({ text: text.trim(), start, end }); }
+      },
     });
   }
   catch {
@@ -52,10 +56,10 @@ export function analyzeComponent(source, filePath) {
         model.instance = extractCreateComponentMethods(resolved, source);
         break;
       case 'defaultState':
-        model.state = extractObjectFields(resolved);
+        model.state = extractObjectFields(resolved, source, comments);
         break;
       case 'defaultSettings':
-        model.settings = extractObjectFields(resolved);
+        model.settings = extractObjectFields(resolved, source, comments);
         break;
       case 'events':
         model.events = extractEventKeys(resolved);
@@ -227,7 +231,7 @@ function findReturnExpression(block) {
   State may be a raw value or a `{ value, options }` signal config.
   Configs unwrap to the inner `value` so the type reflects the default.
 */
-function extractObjectFields(node) {
+function extractObjectFields(node, source = '', comments = []) {
   const fields = [];
   if (!node || node.type !== 'ObjectExpression') { return fields; }
 
@@ -241,10 +245,26 @@ function extractObjectFields(node) {
       name,
       inferredType: inferTypeFromValue(valueNode),
       defaultValue: getLiteralValue(valueNode),
+      description: trailingComment(source, comments, prop),
     });
   }
 
   return fields;
+}
+
+/*
+  The line comment to the right of a field is its description:
+    rows: [], // the row content
+  Trailing only — a leading comment often heads a group of fields, and
+  attributing it to the first one would misdescribe it.
+*/
+function trailingComment(source, comments, prop) {
+  for (const comment of comments) {
+    if (comment.start < prop.end) { continue; }
+    const between = source.slice(prop.end, comment.start);
+    return /^[,\s]*$/.test(between) && !between.includes('\n') ? comment.text : undefined;
+  }
+  return undefined;
 }
 
 /*

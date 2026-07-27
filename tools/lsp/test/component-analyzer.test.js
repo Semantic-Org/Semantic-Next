@@ -100,6 +100,30 @@ describe('ComponentAnalyzer', () => {
       expect(field('dynamic').defaultValue).toBeUndefined();
     });
 
+    it('captures trailing comments as descriptions', () => {
+      const model = analyzeComponent(
+        `
+        import { defineComponent } from '@semantic-ui/component';
+        const defaultSettings = {
+          rowTemplate: null, // row template to display
+          headers: [], // the header rows of the table
+          rows: [],
+        };
+        const defaultState = {
+          // a leading comment heads a group, not the field below it
+          openSections: [], // array of indexes that are open
+        };
+        defineComponent({ tagName: 'described', defaultSettings, defaultState });
+      `,
+        '/virtual/described.js',
+      );
+      const setting = (name) => model.settings.find(s => s.name === name);
+      expect(setting('rowTemplate').description).toBe('row template to display');
+      expect(setting('headers').description).toBe('the header rows of the table');
+      expect(setting('rows').description).toBeUndefined();
+      expect(model.state[0].description).toBe('array of indexes that are open');
+    });
+
     it('types class instances as their class', () => {
       const model = analyzeComponent(
         `

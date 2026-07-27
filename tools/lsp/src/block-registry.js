@@ -251,7 +251,7 @@ export function formatBlockTag(name) {
 export function formatBlockDoc(name, tag = formatBlockTag(name)) {
   const block = blocks[name];
   if (!block) { return null; }
-  let doc = `**${tag}**\n\n${block.description}\n\n`;
+  let doc = `**${tag}**\n\n*${block.description}*\n\n`;
   doc += `\`\`\`html\n${block.example.join('\n')}\n\`\`\``;
   if (block.docsPath) { doc += `\n\n[docs](${block.docsPath})`; }
   return doc;
