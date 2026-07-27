@@ -49,7 +49,7 @@ export interface ResourceOptions<T> extends SignalOptions<T> {
  * and the rest of the Signal surface apply.
  * @see {@link https://next.semantic-ui.com/docs/api/reactivity/resource Resource Documentation}
  */
-export class Resource<T> extends Signal<T> {
+export class Resource<T> extends Signal<T | undefined> {
   /**
    * Creates a Resource backed by a fetcher. The fetcher runs immediately as an
    * async reaction and receives the backing Reaction as its argument. A promise

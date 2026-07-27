@@ -1,4 +1,3 @@
-import { $ } from '@semantic-ui/query';
 import { MARKER_VERSION } from '@semantic-ui/renderer';
 import { adoptStylesheet, isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
 
@@ -375,15 +374,28 @@ class WebComponentBase extends HTMLElementBase {
             DOM Helpers
   *******************************/
 
-  $(selector, { root = this.renderRoot || this.shadowRoot } = {}) {
-    if (!root) {
+  /*
+    el.$ and el.$$ are the consumer-facing DOM API, deliberately on the element
+    so they are discoverable without reaching through the internal el.template.
+    They delegate so external callers get the same template-range filtering an
+    author gets, rather than a raw renderRoot query that can return a sibling
+    subtemplate's nodes. The template only exists once the element upgrades, so
+    querying before that is a real mistake and says so.
+  */
+  $(...args) {
+    if (!this.template) {
       console.error('Cannot query DOM until element has rendered.');
+      return;
     }
-    return $(selector, { root });
+    return this.template.$(...args);
   }
 
-  $$(selector) {
-    return $(selector, { root: this.originalDOM.content });
+  $$(...args) {
+    if (!this.template) {
+      console.error('Cannot query DOM until element has rendered.');
+      return;
+    }
+    return this.template.$$(...args);
   }
 
   call(

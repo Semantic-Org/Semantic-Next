@@ -989,7 +989,7 @@ export const Template = class Template {
   // 4th arg matches the native addEventListener shape (passive/capture/once/...);
   // querySettings is the only namespaced key.
   attachEvent(selector, eventName, eventHandler, { querySettings = { pierceShadow: true }, ...eventSettings } = {}) {
-    return $(selector, document, querySettings).on(eventName, eventHandler, {
+    return $(selector, { root: document, ...querySettings }).on(eventName, eventHandler, {
       abortController: this.abortController,
       returnHandler: true,
       eventSettings,

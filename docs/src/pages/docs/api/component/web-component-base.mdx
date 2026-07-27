@@ -5,7 +5,7 @@ title: Web Component Base
 icon: box
 description: API reference for the WebComponentBase class in Semantic UI Component system
 package: "@semantic-ui/component"
-methods: ["getProperties", "getPropertySettings", "addRenderCallback", "setDefaultSettings", "getSettingsFromConfig", "createSettingsProxy", "getUIClasses", "getContent", "isDarkMode", "$", "$$", "call"]
+methods: ["getProperties", "getPropertySettings", "addRenderCallback", "setDefaultSettings", "getSettingsFromConfig", "createSettingsProxy", "getUIClasses", "isDarkMode", "$", "$$", "call"]
 ---
 
 `WebComponentBase` is the base web component class used to create web components with `defineComponent`. It handles internal utilities related to component lifecycle and other internals of the framework.
@@ -20,10 +20,10 @@ import { WebComponentBase } from '@semantic-ui/component';
 
 ## Static Properties
 
-| Name                | Type   | Description                                          |
-|---------------------|--------|------------------------------------------------------|
-| shadowRootOptions   | Object | Options for the shadow root, including delegatesFocus |
-| scopedStyleSheet    | CSSStyleSheet | Scoped stylesheet for use with light DOM rendering |
+| Name              | Type    | Description                                                     |
+|-------------------|---------|-----------------------------------------------------------------|
+| delegatesFocus    | boolean | Passed to `attachShadow` when the element creates its shadow root |
+| shadowRootOptions | Object  | Shadow root options. `lit` engine only                            |
 
 ## Instance Properties
 
@@ -111,7 +111,7 @@ const propConfig = WebComponentBase.getPropertySettings(
 addRenderCallback(callback)
 ```
 
-Adds a callback to be executed after rendering.
+Adds a callback to be executed after rendering. Only available on the `lit` engine — the native engine, which is the default, does not implement it.
 
 #### Parameters
 
@@ -238,32 +238,6 @@ const classes = this.getUIClasses({
 });
 ```
 
-### getContent
-
-```javascript
-getContent({componentSpec})
-```
-
-Retrieves slotted content from a component.
-
-#### Parameters
-
-| Name          | Type   | Description                    |
-|---------------|--------|--------------------------------|
-| componentSpec | Object | Component specification object |
-
-#### Returns
-
-An object containing slotted content.
-
-#### Example
-
-```javascript
-const content = this.getContent({
-  componentSpec: mySpec
-});
-```
-
 ### isDarkMode
 
 ```javascript
@@ -290,7 +264,7 @@ if (this.isDarkMode()) {
 $(selector, { root } = {})
 ```
 
-Queries the component's render root.
+Queries the component's rendered DOM, scoped to the nodes this component owns. Use `$$` to descend into nested components' shadow roots.
 
 #### Parameters
 
@@ -301,9 +275,10 @@ Queries the component's render root.
 
 #### Options Object
 
-| Name | Type    | Description          |
-|------|---------|---------------------|
-| root | Element | Root to query from  |
+| Name         | Type    | Description                                     |
+|--------------|---------|-------------------------------------------------|
+| root         | Element | Root to query from                              |
+| pierceShadow | boolean | Descend into nested shadow roots                |
 
 #### Returns
 
@@ -312,7 +287,7 @@ Query result set.
 #### Example
 
 ```javascript
-const buttons = this.$('button');
+const buttons = el.$('button');
 ```
 
 ### $$(selector)
@@ -321,7 +296,7 @@ const buttons = this.$('button');
 $$(selector)
 ```
 
-Queries the original DOM content.
+Queries the component's rendered DOM, descending into nested components' shadow roots. Use `$` to stay inside your own component and `$$` to reach an element inside one you render.
 
 #### Parameters
 
@@ -336,7 +311,7 @@ Query result set.
 #### Example
 
 ```javascript
-const content = this.$$('.content');
+const buried = el.$$('.inside-a-child-component');
 ```
 
 ### call

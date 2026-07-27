@@ -381,7 +381,7 @@ export class Query {
   /**
    * Returns the index of the first element in the current set,
    * relative to its siblings (optionally filtered by a selector).
-   * @see https://next.semantic-ui.com/docs/api/query/size-and-position#index
+   * @see https://next.semantic-ui.com/docs/api/query/collections#index
    * @param siblingFilter - Optional CSS selector, predicate, element(s) or Query to filter the siblings.
    * @returns The index of the element, or -1 if not found.
    */
@@ -389,7 +389,7 @@ export class Query {
 
   /**
    * Find the index of the first element matching the filter within current Query set.
-   * @see https://next.semantic-ui.com/docs/api/query/size-and-position#index
+   * @see https://next.semantic-ui.com/docs/api/query/collections#index
    * @param filter - Optional CSS selector, predicate, element(s) or Query to identify element within selection.
    * @returns The index of the element, or -1 if not found.
    */
@@ -917,28 +917,28 @@ export class Query {
 
   /**
    * Returns the first element in the current set.
-   * @see https://next.semantic-ui.com/docs/api/query/utilities#el
+   * @see https://next.semantic-ui.com/docs/api/query/dom-access#el
    * @returns The first element, or `undefined` if the set is empty.
    */
   el(): Element | undefined;
 
   /**
    * Gets the element at the specified index.
-   * @see https://next.semantic-ui.com/docs/api/query/utilities#get
+   * @see https://next.semantic-ui.com/docs/api/query/dom-access#get
    * @param index - The index of the element to retrieve.
    * @returns The element at the specified index, or `undefined` when the index is out of range.
    */
   get(index: number): Element | undefined;
   /**
    * Gets every element in the current set.
-   * @see https://next.semantic-ui.com/docs/api/query/utilities#get
+   * @see https://next.semantic-ui.com/docs/api/query/dom-access#get
    * @returns An array of all elements.
    */
   get(): Element[];
 
   /**
    * Gets a new Query instance containing the element at the specified index.
-   * @see https://next.semantic-ui.com/docs/api/query/utilities#eq
+   * @see https://next.semantic-ui.com/docs/api/query/collections#eq
    * @param index - The index of the element.
    * @returns A new Query instance containing the element at the specified index.
    */
@@ -946,21 +946,21 @@ export class Query {
 
   /**
    * Gets a new Query instance containing the first element in the current set.
-   * @see https://next.semantic-ui.com/docs/api/query/utilities#first
+   * @see https://next.semantic-ui.com/docs/api/query/collections#first
    * @returns A new Query instance containing the first element.
    */
   first(): Query;
 
   /**
    * Gets a new Query instance containing the last element in the current set.
-   * @see https://next.semantic-ui.com/docs/api/query/utilities#last
+   * @see https://next.semantic-ui.com/docs/api/query/collections#last
    * @returns A new Query instance containing the last element.
    */
   last(): Query;
 
   /**
    * Sets a property on each element in the current set.
-   * @see https://next.semantic-ui.com/docs/api/query/utilities#prop
+   * @see https://next.semantic-ui.com/docs/api/query/dom-access#prop
    * @param name - The name of the property.
    * @param value - The value to set.
    * @returns The Query instance for chaining.
@@ -968,7 +968,7 @@ export class Query {
   prop(name: string, value: any): this;
   /**
    * Get a property of the first element in the set.
-   * @see https://next.semantic-ui.com/docs/api/query/utilities#prop
+   * @see https://next.semantic-ui.com/docs/api/query/dom-access#prop
    * @param name Name of the property to get.
    * @returns The property of the *first* element, or an array of values when the set holds more than one element.
    */
@@ -1101,7 +1101,7 @@ export class Query {
 
   /**
    * Creates a new Query collection combining the current elements with elements from the provided selector.
-   * @see https://next.semantic-ui.com/docs/api/query/utilities#add
+   * @see https://next.semantic-ui.com/docs/api/query/collections#add
    * @param selector - The selector, elements, or Query instance to add to the current collection.
    * @returns A new Query instance containing the combined elements with duplicates removed.
    */
@@ -1257,7 +1257,7 @@ export class Query {
 
   /**
    * Gets the number of elements in the current set.  Alias for `length`.
-   * @see https://next.semantic-ui.com/docs/api/query/size-and-position#count
+   * @see https://next.semantic-ui.com/docs/api/query/collections#count
    * @returns The number of elements.
    */
   count(): number;
@@ -1321,7 +1321,7 @@ export class Query {
 
   /**
    * Gets or sets data attributes on elements in the current set.
-   * @see https://next.semantic-ui.com/docs/api/query/data#data
+   * @see https://next.semantic-ui.com/docs/api/query/attributes#data
    * @param key - The data attribute key.
    * @param value - The value to set.
    * @returns If setting, the Query instance for chaining. If getting, the value(s).
@@ -1636,7 +1636,7 @@ export class Query {
 
   /**
    * Gets elements assigned to a named slot in a shadow DOM component.
-   * @see https://next.semantic-ui.com/docs/api/query/shadow-dom#getslot
+   * @see https://next.semantic-ui.com/docs/api/query/content#getslot
    * @param name - The slot name. If omitted, gets the default slot.
    * @returns The combined HTML content of the elements assigned to the slot.
    */
@@ -1644,7 +1644,7 @@ export class Query {
 
   /**
    * Sets content into a named slot.
-   * @see https://next.semantic-ui.com/docs/api/query/shadow-dom#setslot
+   * @see https://next.semantic-ui.com/docs/api/query/content#setslot
    * @param nameOrHTML - Slot name (when newHTML provided) or HTML string (for default slot).
    * @param newHTML - HTML content to set into the named slot.
    * @returns The Query instance for chaining.
@@ -1653,7 +1653,7 @@ export class Query {
 
   /**
    * Checks if a container element contains a target element, piercing shadow DOM boundaries.
-   * @see https://next.semantic-ui.com/docs/api/query/shadow-dom#containsdeep
+   * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#contains
    * @param container - The potential container element.
    * @param target - The element to check for containment.
    * @returns `true` if container contains target (crossing shadow boundaries), `false` otherwise.
