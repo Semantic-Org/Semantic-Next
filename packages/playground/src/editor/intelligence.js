@@ -29,21 +29,97 @@ const completionTypes = {
   alias: 'type',
 };
 
+const createLink = ({ url, label }, resolveLink) => {
+  const anchor = document.createElement('a');
+  anchor.href = resolveLink ? resolveLink(url) : url;
+  anchor.target = '_blank';
+  anchor.rel = 'noopener';
+  anchor.textContent = label;
+  // keep editor focus so the surrounding tooltip survives long enough to open the link
+  anchor.addEventListener('mousedown', event => event.preventDefault());
+  return anchor;
+};
+
 const renderLinks = (links, resolveLink) => {
   const row = document.createElement('div');
   row.className = 'cm-intelligence-links';
   for (const link of links) {
-    const anchor = document.createElement('a');
-    anchor.href = resolveLink ? resolveLink(link.url) : link.url;
-    anchor.target = '_blank';
-    anchor.rel = 'noopener';
     // a symbol name reads as a reference, not an exit — 'docs' says where the click goes
-    anchor.textContent = links.length === 1 ? 'docs' : `${link.label} docs`;
-    // keep editor focus so the surrounding tooltip survives long enough to open the link
-    anchor.addEventListener('mousedown', event => event.preventDefault());
-    row.appendChild(anchor);
+    const label = links.length === 1 ? 'docs' : `${link.label} docs`;
+    row.appendChild(createLink({ url: link.url, label }, resolveLink));
   }
   return row;
+};
+
+// `code`, **bold**, *italic*, [label](url) — ordered so ** wins over *
+const appendInline = (parent, text, resolveLink) => {
+  // built per call: emphasis recurses, and a shared /g/ regex would have its
+  // lastIndex reset by the inner scan and rematch the same span forever
+  const inlineMarkdown = /`([^`]+)`|\*\*([\s\S]+?)\*\*|\*([^*\n]+)\*|\[([^\]]+)\]\s*\(([^)\s]+)\)/g;
+  let last = 0;
+  let match;
+  while ((match = inlineMarkdown.exec(text)) !== null) {
+    if (match.index > last) {
+      parent.appendChild(document.createTextNode(text.slice(last, match.index)));
+    }
+    const [full, code, bold, italic, label, url] = match;
+    if (code !== undefined) {
+      const element = document.createElement('code');
+      element.textContent = code;
+      parent.appendChild(element);
+    }
+    else if (bold !== undefined || italic !== undefined) {
+      const element = document.createElement(bold !== undefined ? 'strong' : 'em');
+      appendInline(element, bold ?? italic, resolveLink);
+      parent.appendChild(element);
+    }
+    else {
+      parent.appendChild(createLink({ url, label }, resolveLink));
+    }
+    last = match.index + full.length;
+  }
+  if (last < text.length) {
+    parent.appendChild(document.createTextNode(text.slice(last)));
+  }
+};
+
+/*
+  JSDoc bodies are markdown, and TypeScript hands them over verbatim. Renders
+  the subset that shows up in practice as DOM nodes rather than innerHTML, so a
+  package's documentation can never inject markup into the editor.
+*/
+export const renderMarkdown = (text, resolveLink) => {
+  const dom = document.createElement('div');
+  // fenced blocks split first so their contents never reach the inline pass
+  const segments = text.split(/```/);
+  segments.forEach((segment, index) => {
+    if (index % 2) {
+      const block = document.createElement('pre');
+      // a fence may open with a language tag
+      block.textContent = segment.replace(/^[\w-]*\n/, '').replace(/\s+$/, '');
+      dom.appendChild(block);
+      return;
+    }
+    for (const block of segment.split(/\n{2,}/)) {
+      const lines = block.split('\n').map(line => line.trim()).filter(Boolean);
+      if (!lines.length) { continue; }
+      if (lines.every(line => /^[-*+]\s+/.test(line))) {
+        const list = document.createElement('ul');
+        for (const line of lines) {
+          const item = document.createElement('li');
+          appendInline(item, line.replace(/^[-*+]\s+/, ''), resolveLink);
+          list.appendChild(item);
+        }
+        dom.appendChild(list);
+        continue;
+      }
+      // markdown soft-wraps: a single newline is a space, a blank line is a break
+      const element = document.createElement('p');
+      appendInline(element, lines.join(' '), resolveLink);
+      dom.appendChild(element);
+    }
+  });
+  return dom;
 };
 
 const renderInfo = (className, { text, documentation, links }, resolveLink) => {
@@ -53,9 +129,8 @@ const renderInfo = (className, { text, documentation, links }, resolveLink) => {
   signature.textContent = text;
   dom.appendChild(signature);
   if (documentation) {
-    const docs = document.createElement('div');
+    const docs = renderMarkdown(documentation, resolveLink);
     docs.className = 'cm-intelligence-docs';
-    docs.textContent = documentation;
     dom.appendChild(docs);
   }
   if (links?.length) {
@@ -136,9 +211,8 @@ const signatureHelp = ({ provider, fileName, resolveLink }) => {
     dom.appendChild(signature);
     const documentation = item.parameters[activeParameter]?.documentation || item.documentation;
     if (documentation) {
-      const docs = document.createElement('div');
+      const docs = renderMarkdown(documentation, resolveLink);
       docs.className = 'cm-intelligence-docs';
-      docs.textContent = documentation;
       dom.appendChild(docs);
     }
     if (parameterShape) {
