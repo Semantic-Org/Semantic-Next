@@ -414,9 +414,36 @@ function inferTypeFromValue(node) {
 }
 
 function getLiteralValue(node) {
-  if (!node) { return undefined; }
+  const value = literalValue(node);
+  return value === nonLiteral ? undefined : value;
+}
+
+/*
+  Materializes fully-literal defaults, including nested arrays and objects. One
+  dynamic element poisons the whole value — no default beats a wrong default.
+*/
+const nonLiteral = Symbol('non-literal');
+
+function literalValue(node) {
+  if (!node) { return nonLiteral; }
   if (node.type === 'Literal') { return node.value; }
   if (isNegativeNumeric(node)) { return -node.argument.value; }
-  if (node.type === 'ArrayExpression' && node.elements.length === 0) { return []; }
-  return undefined;
+  if (node.type === 'ArrayExpression') {
+    const values = node.elements.map(literalValue);
+    return values.includes(nonLiteral) ? nonLiteral : values;
+  }
+  if (node.type === 'ObjectExpression') {
+    const result = {};
+    for (const property of node.properties) {
+      if (property.type !== 'Property' || property.computed) { return nonLiteral; }
+      const key = property.key.type === 'Identifier'
+        ? property.key.name
+        : (property.key.type === 'Literal' ? String(property.key.value) : null);
+      const value = literalValue(property.value);
+      if (key === null || value === nonLiteral) { return nonLiteral; }
+      result[key] = value;
+    }
+    return result;
+  }
+  return nonLiteral;
 }

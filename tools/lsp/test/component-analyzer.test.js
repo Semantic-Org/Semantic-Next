@@ -71,6 +71,36 @@ describe('ComponentAnalyzer', () => {
     });
   });
 
+  describe('literal defaults', () => {
+    const source = `
+      import { defineComponent } from '@semantic-ui/component';
+      const defaultState = {
+        notifications: ['Welcome!', 'New message'],
+        emptyList: [],
+        config: { retries: 3, tags: ['a', 'b'] },
+        dynamic: [Date.now()],
+      };
+      defineComponent({ tagName: 'literal-defaults', defaultState });
+    `;
+    const model = analyzeComponent(source, '/virtual/literal-defaults.js');
+    const field = (name) => model.state.find(s => s.name === name);
+
+    it('materializes populated array defaults', () => {
+      expect(field('notifications').inferredType).toBe('array');
+      expect(field('notifications').defaultValue).toEqual(['Welcome!', 'New message']);
+    });
+
+    it('materializes nested object defaults', () => {
+      expect(field('config').defaultValue).toEqual({ retries: 3, tags: ['a', 'b'] });
+    });
+
+    it('keeps empty arrays and refuses dynamic values', () => {
+      expect(field('emptyList').defaultValue).toEqual([]);
+      // no default beats a wrong default
+      expect(field('dynamic').defaultValue).toBeUndefined();
+    });
+  });
+
   describe('menu (complex, self-referential)', () => {
     const model = analyze('src/primitives/menu/menu.js');
 
