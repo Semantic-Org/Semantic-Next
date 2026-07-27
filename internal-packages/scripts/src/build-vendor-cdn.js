@@ -1,5 +1,5 @@
 import * as esbuild from 'esbuild';
-import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 
 import { resolveBareImports } from '@semantic-ui/esbuild-resolve-bare-imports';
@@ -14,6 +14,15 @@ import { CDN_CONFIG } from './lib/config.js';
 
 const ROOT = process.env.BASE_DIR || process.cwd();
 const OUT_DIR = join(ROOT, 'dist', 'vendor-cdn');
+
+// An export path is server-only when a whole segment is "server" or "node" (./server, ./node),
+// not merely when one contains those words
+function isServerOnlyPath(exportPath) {
+  return exportPath
+    .replace(/^\.\/?/, '')
+    .split('/')
+    .some(segment => segment === 'server' || segment === 'node');
+}
 
 // Vendor packages and their entry points to build
 // Each entry maps sub-paths to source files relative to node_modules
@@ -79,8 +88,10 @@ function getVendorEntries() {
 
     // Walk exports to find all JS entry points
     for (const [exportPath, conditions] of Object.entries(exports)) {
-      // Skip server-only export paths
-      if (exportPath.includes('server') || exportPath.includes('node')) { continue; }
+      // Skip server-only export paths. match whole segments, since a substring test also
+      // catches browser-safe entries that merely contain the word (lit-html's ./is-server.js,
+      // lit's ./decorators/query-assigned-nodes.js)
+      if (isServerOnlyPath(exportPath)) { continue; }
 
       let source;
       if (typeof conditions === 'string') {
@@ -89,8 +100,11 @@ function getVendorEntries() {
       else if (typeof conditions === 'object') {
         // Skip exports that only have node/default (no browser entry)
         if (conditions.node && !conditions.browser && !conditions.import) { continue; }
-        // Prefer browser-compatible entry
-        source = conditions.browser || conditions.import || conditions.module || conditions.default;
+        // cdn/jsdelivr/importmap first, matching the entry the URL rewriter resolves in
+        // lib/config.js. these conditions point at prebuilt browser bundles, and if the two
+        // disagree the rewritten import references a vendor file this build never emits
+        source = conditions.cdn || conditions.jsdelivr || conditions.importmap
+          || conditions.browser || conditions.import || conditions.module || conditions.default;
         // Handle nested conditions (e.g., lit's browser.development/default)
         if (typeof source === 'object') {
           source = source.default || source.development || source.production;
@@ -98,7 +112,10 @@ function getVendorEntries() {
       }
 
       if (!source || typeof source !== 'string') { continue; }
-      if (!source.endsWith('.js') && !source.endsWith('.mjs')) { continue; }
+      // stylesheets are imported with ?raw by vendor bundles (tailwindcss-iso pulls in
+      // tailwind's preflight/theme/utilities), so they ship verbatim rather than bundled
+      const isStyle = source.endsWith('.css');
+      if (!isStyle && !source.endsWith('.js') && !source.endsWith('.mjs')) { continue; }
       // Skip types
       if (source.includes('.d.')) { continue; }
 
@@ -113,11 +130,28 @@ function getVendorEntries() {
         subpath: exportPath,
         source: sourcePath,
         outfile: outPath,
+        copy: isStyle,
       });
     }
   }
 
   return entries;
+}
+
+// prebuilt browser bundles can reference sibling assets as runtime strings rather than imports
+// (tailwindcss-iso's dist bundle holds "./tailwindcss_oxide_bg-<hash>.wasm?url"), which esbuild
+// cannot see and will not emit. copy them so the reference resolves once served from /vendor/
+function copySiblingAssets(sourcePath, outfile) {
+  const sourceDir = dirname(sourcePath);
+  const outDir = dirname(outfile);
+
+  for (const file of readdirSync(sourceDir, { withFileTypes: true })) {
+    if (!file.isFile() || !file.name.endsWith('.wasm')) { continue; }
+    const dest = join(outDir, file.name);
+    // esbuild's file loader already emits anything reachable by import
+    if (existsSync(dest)) { continue; }
+    copyFileSync(join(sourceDir, file.name), dest);
+  }
 }
 
 // Collect all vendor dependencies and their versions for the resolver
@@ -184,6 +218,11 @@ async function buildVendorCDN() {
   for (const entry of entries) {
     mkdirSync(dirname(entry.outfile), { recursive: true });
 
+    if (entry.copy) {
+      copyFileSync(entry.source, entry.outfile);
+      continue;
+    }
+
     // Merge all deps: SUI deps + this vendor package's own deps
     const vendorPkgJson = JSON.parse(readFileSync(
       join(ROOT, 'node_modules', ...entry.packageName.split('/'), 'package.json'),
@@ -236,6 +275,8 @@ async function buildVendorCDN() {
       console.warn(`  Failed to build ${entry.packageName}/${entry.subpath}: ${err.message}`);
       continue;
     }
+
+    copySiblingAssets(entry.source, entry.outfile);
   }
 
   console.log(`Vendor CDN build complete → dist/vendor-cdn/`);

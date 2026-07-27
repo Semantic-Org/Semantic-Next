@@ -26,6 +26,7 @@ export const sidebarMenuFramework = [
       { name: 'DOM', url: '/docs/guides/components/dom' },
       { name: 'Styling', url: '/docs/guides/components/styling' },
       { name: 'Key Bindings', url: '/docs/guides/components/keys' },
+      { name: 'Server Side Rendering', url: '/docs/guides/components/ssr' },
       { name: 'Specs', url: '/docs/guides/components/specs' },
     ],
   },
@@ -86,8 +87,8 @@ export const sidebarMenuFramework = [
     url: '/docs/guides/advanced',
     icon: 'server',
     pages: [
+      { name: 'Server Compilation', url: '/docs/guides/advanced/compilation' },
       { name: 'Common Issues', url: '/docs/guides/advanced/common-issues' },
-      { name: 'Server Side Rendering', url: '/docs/guides/advanced/ssr' },
     ],
   },
 ];
@@ -222,8 +223,10 @@ export const sidebarMenuAPI = [
     url: '/docs/api/renderer',
     icon: 'brush',
     pages: [
+      { name: 'Rendering Engines', url: '/docs/api/renderer/engines' },
+      { name: 'Native Renderer', url: '/docs/api/renderer/native' },
+      { name: 'Server Rendering', url: '/docs/api/renderer/server-rendering' },
       { name: 'Lit Renderer', url: '/docs/api/renderer/lit-renderer' },
-      { name: 'Lit Directives', url: '/docs/api/renderer/lit-directives' },
     ],
   },
 ];

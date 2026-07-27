@@ -112,11 +112,12 @@ schema supplies the **meaning** a bound field carries, and only that:
 
 ## Computed fields
 
-`computed` fields are **stored, derived, and writable**, there is no virtual tier (an unstored
-derivation is a helper). The body runs at write time on changed-path intersection with the field's
-inputs (`deps` as the governor/skip-hint), persists in the same transaction, and the field is ordinary
-thereafter (projected, synced, indexed, queryable, zero read-time cost, a stored generated column with
-the expression in the schema). Overridable by default (derived values exist to be corrected). Override
+`computed` fields are **stored, derived, and writable** — the document-layer form of a SQL generated
+column (`GENERATED ALWAYS AS ... STORED`), and the same bargain: pay at write, read for free. There is
+no virtual tier (an unstored derivation is a helper). The body runs at write time on changed-path
+intersection with the field's inputs (`deps` as the governor/skip-hint), persists in the same
+transaction, and the field is ordinary thereafter (projected, synced, indexed, queryable, zero
+read-time cost). Overridable by default (derived values exist to be corrected). Override
 state lives in a single reserved `_overrides` subdoc mirroring the field path (`a.b.c` ->
 `_overrides.a.b.c: true`), queryable, one reserved key instead of a minted sibling per overridable
 field. A direct write flips the flag and the derivation

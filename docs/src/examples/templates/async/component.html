@@ -1,6 +1,6 @@
-<h4>Async As (success)</h4>
+<h4>Async as (success)</h4>
 {#async fetchData as data}
-  <p>✓ {data.message}</p>
+  <p>{data.message}</p>
   <p>Time: {data.timestamp}</p>
 {loading}
   <p>Loading data...</p>
@@ -10,16 +10,23 @@
 
 <h4>Async as (error)</h4>
 {#async fetchError as errorData}
-  <p>This should not show</p>
+  <p>{errorData}</p>
 {loading}
   <p>Loading (will fail)...</p>
 {error as e}
-  <p class="error">✓ Caught error: {e.message}</p>
+  <p class="error">Caught error: {e.message}</p>
 {/async}
-
 
 <h4>Async (this)</h4>
 {#async fetchData}
-  <p>✓ {this.message}</p>
+  <p>{this.message}</p>
   <p>Time: {this.timestamp}</p>
+{/async}
+
+<h4>Async (destructuring)</h4>
+{#async fetchUser as {name, email, ...rest}}
+  <p>{name} ({email})</p>
+  <p>{rest.role} on {rest.team}</p>
+{loading}
+  <p>Loading user...</p>
 {/async}

@@ -327,14 +327,6 @@ export class TemplateCompiler {
   compile(templateString?: string, options?: CompileOptions): ASTNode[];
 
   /**
-   * Extracts value
-   * @internal
-   * @param expression string containing value
-   * @returns the value, with `true`, `false`, and numeric literals coerced
-   */
-  getValue(expression?: string): ASTValue | undefined;
-
-  /**
    * Splits a rerender expression into its tracked expression and optional `key=`.
    * @internal
    * @param content the text inside `{#rerender}` or `{#guard}`

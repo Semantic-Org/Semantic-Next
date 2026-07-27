@@ -1,0 +1,16 @@
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--padding);
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.count {
+  padding: var(--padding-xs) var(--padding-s);
+  border-radius: var(--border-radius);
+  background: var(--primary-5);
+  color: var(--primary-text-color);
+  cursor: pointer;
+}

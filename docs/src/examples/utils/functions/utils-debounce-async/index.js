@@ -23,3 +23,14 @@ setTimeout(async () => {
   const result = await debouncedSave('data4');
   console.log('New result:', result);
 }, 400);
+
+// pending() reports a scheduled call, not a save in flight
+setTimeout(() => {
+  const save = debounce(saveData, 200);
+  save('draft').catch(error => console.log('Awaiting caller:', error.code));
+  console.log('Pending:', save.pending());
+
+  // cancel() in onDestroyed drops the scheduled call and rejects everyone awaiting it
+  save.cancel();
+  console.log('Pending:', save.pending());
+}, 800);

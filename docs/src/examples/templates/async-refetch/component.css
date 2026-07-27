@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  font-family: var(--page-font);
+}
+
+.panes {
+  display: flex;
+  gap: var(--gap);
+  margin-top: var(--margin);
+
+  .pane {
+    flex: 1;
+    min-height: 100px;
+    padding: var(--padding);
+    border: var(--border);
+    border-radius: var(--border-radius);
+
+    h4 {
+      margin-bottom: var(--margin-s);
+      color: var(--standard-40);
+      font-size: var(--small);
+      font-weight: var(--bold);
+    }
+
+    .name {
+      font-weight: var(--bold);
+    }
+
+    .role,
+    .waiting {
+      color: var(--standard-50);
+    }
+  }
+}

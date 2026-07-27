@@ -248,7 +248,19 @@ export const debounce = (func, wait, options = {}) => {
     if (timeoutId === undefined) {
       return result;
     }
-    return invokeFunc(lastThis, lastArgs);
+    // clear the scheduled run before invoking. leaving it armed lets the pending
+    // timer reach trailingEdge with lastArgs still set, firing the call a second time
+    clearTimeout(timeoutId);
+    timeoutId = undefined;
+    if (maxTimeoutId !== undefined) {
+      clearTimeout(maxTimeoutId);
+      maxTimeoutId = undefined;
+    }
+    leadingInvoked = false;
+    const args = lastArgs;
+    const thisArg = lastThis;
+    lastArgs = lastThis = undefined;
+    return invokeFunc(thisArg, args);
   };
 
   const pending = () => {
@@ -483,7 +495,15 @@ export const throttle = (func, wait, options = {}) => {
     if (timeoutId === undefined) {
       return result;
     }
-    return invokeFunc(lastThis, lastArgs);
+    // clear the scheduled run before invoking. leaving it armed lets the pending
+    // timer reach timerExpired with lastArgs still set, firing the call a second time
+    clearTimeout(timeoutId);
+    timeoutId = undefined;
+    trailingInvoked = false;
+    const args = lastArgs;
+    const thisArg = lastThis;
+    lastArgs = lastThis = undefined;
+    return invokeFunc(thisArg, args);
   };
 
   const pending = () => {

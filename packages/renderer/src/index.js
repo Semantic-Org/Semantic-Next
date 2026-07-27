@@ -1,7 +1,10 @@
-// shared
+// shared, reusable by any engine
 export { analyzePosition, buildHTMLString, MAIN_BRANCH_INDEX, MARKER_VERSION } from './build-html-string.js';
 export { ExpressionEvaluator } from './expression-evaluator.js';
 export { isRecovery, isTracing, setRecovery, setTracing } from './helpers.js';
+// list identity, so an engine reconciles {#each} the same way the shipped ones do
+export { decodeItemKey, encodeItemKey, getCollectionType, getEachData, getItemId } from './shared/each.js';
+export { lisIndices } from './shared/lis.js';
 
 // engine registry
 export { getEngine, registerEngine } from './engine-registry.js';

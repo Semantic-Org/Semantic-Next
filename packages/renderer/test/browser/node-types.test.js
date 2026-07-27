@@ -99,6 +99,38 @@ RENDERING_ENGINES.forEach(engine => {
   });
 
   /*******************************
+       Literal Expressions
+  *******************************/
+
+  describe('literal expression rendering', () => {
+    it('should render literals written directly in the template', async () => {
+      const tag = uniqueTag();
+      defineComponent({
+        tagName: tag,
+        renderingEngine: engine,
+        template: "<div>{true}|{false}|{1}|{0}|{-7}|{'baz'}</div>",
+      });
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      await waitForUpdate(el);
+      expect(el.shadowRoot.querySelector('div').textContent).toBe('true|false|1|0|-7|baz');
+    });
+
+    it('should branch on a literal condition', async () => {
+      const tag = uniqueTag();
+      defineComponent({
+        tagName: tag,
+        renderingEngine: engine,
+        template: '<div>{#if true}yes{/if}{#if false}no{/if}</div>',
+      });
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      await waitForUpdate(el);
+      expect(el.shadowRoot.querySelector('div').textContent).toBe('yes');
+    });
+  });
+
+  /*******************************
      Literal Value ({#fn})
   *******************************/
 

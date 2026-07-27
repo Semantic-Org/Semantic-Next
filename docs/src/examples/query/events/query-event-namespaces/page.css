@@ -1,0 +1,21 @@
+.pad {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 140px;
+  margin-bottom: var(--margin);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-family: var(--code-font);
+  cursor: crosshair;
+  transition: var(--transition);
+
+  &.marked {
+    border-color: var(--primary-color);
+    background: var(--primary-10);
+  }
+}
+
+ui-button {
+  margin-right: var(--gap);
+}

@@ -1,0 +1,16 @@
+h2 {
+  margin: var(--padding-l) 0 var(--padding-xs);
+  color: var(--muted-text-color);
+  font-size: var(--text-s);
+  font-weight: var(--bold);
+  text-transform: uppercase;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+ui-stat {
+  margin-right: var(--gap-xs);
+  vertical-align: top;
+}

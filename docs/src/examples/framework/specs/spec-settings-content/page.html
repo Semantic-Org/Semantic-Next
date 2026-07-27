@@ -1,0 +1,12 @@
+<h2>Content as an attribute or a slot</h2>
+<ui-stat label="Requests" count="1284" unit="/s"></ui-stat>
+<ui-stat count="12" unit="ms">
+  <span slot="label">Median <b>latency</b></span>
+</ui-stat>
+
+<h2>Defaults come from the spec</h2>
+<ui-stat label="Queued"></ui-stat>
+
+<h2>Variations still become classes</h2>
+<ui-stat small label="Retries" count="3"></ui-stat>
+<ui-stat large label="Retries" count="3"></ui-stat>

@@ -4,6 +4,20 @@ import { page } from 'vitest/browser';
 const CDN = 'https://cdn.semantic-ui.com';
 const VERSION = 'canary';
 
+// mirrors SUI_PACKAGES in worker/index.js, the entry points the vendor graph is reachable from
+const SUI_PACKAGES = [
+  'compiler',
+  'component',
+  'core',
+  'query',
+  'reactivity',
+  'renderer',
+  'specs',
+  'tailwind',
+  'templating',
+  'utils',
+];
+
 /**
  * Load components via a combo endpoint URL and wait for them to register.
  * Mirrors real user usage: a single script tag pointing at the live CDN.
@@ -233,6 +247,43 @@ describe('CDN Vendor Chain', () => {
     const res = await fetch(`${CDN}/vendor/@lit/reactive-element@2.1.1/reactive-element.js`);
     expect(res.ok).toBe(true);
     expect(res.headers.get('content-type')).toContain('javascript');
+  });
+
+  // Walks the whole vendor graph rather than spot-checking known URLs. a vendor file can import
+  // another vendor file (tailwindcss-iso pulls tailwind's stylesheets), so a one-level check
+  // still misses the case where a published bundle references something never uploaded
+  it('every vendor URL reachable from published bundles resolves', async () => {
+    const vendorUrls = (body) => body.match(/https:\/\/cdn\.semantic-ui\.com\/vendor\/[^"'`)\s]+/g) || [];
+
+    const queue = [];
+    for (const pkg of SUI_PACKAGES) {
+      const res = await fetch(`${CDN}/${pkg}@${VERSION}`);
+      // not every package publishes a bare entry point (core is combo-only)
+      if (!res.ok) { continue; }
+      queue.push(...vendorUrls(await res.text()));
+    }
+
+    const seen = new Set();
+    const broken = [];
+
+    while (queue.length > 0) {
+      const url = queue.shift().split('?')[0];
+      if (seen.has(url)) { continue; }
+      seen.add(url);
+
+      const res = await fetch(url);
+      if (!res.ok) {
+        broken.push(`${res.status} ${url}`);
+        continue;
+      }
+      if (url.endsWith('.js') || url.endsWith('.mjs')) {
+        queue.push(...vendorUrls(await res.text()));
+      }
+    }
+
+    // a crawl that finds nothing would pass vacuously, which is the failure mode this replaces
+    expect(seen.size, 'crawl reached no vendor URLs').toBeGreaterThan(0);
+    expect(broken, `unresolvable vendor URLs:\n${broken.join('\n')}`).toEqual([]);
   });
 });
 

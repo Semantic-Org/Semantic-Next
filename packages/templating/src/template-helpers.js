@@ -4,6 +4,7 @@ import {
   capitalize,
   each,
   escapeHTML,
+  extend,
   first,
   formatDate,
   isClient,
@@ -183,14 +184,16 @@ export const TemplateHelpers = {
   },
 
   // Date & Number helpers
-  formatDate(date = new Date(), format = 'L', options = { timezone: 'local' }) {
-    return formatDate(date, format, options);
+  // merged rather than defaulted, a whole-object default is replaced by any options the
+  // caller passes and the timezone silently reverts to the util's UTC
+  formatDate(date = new Date(), format = 'L', options = {}) {
+    return formatDate(date, format, extend({ timezone: 'local' }, options));
   },
-  formatDateTime(date = new Date(), format = 'LLL', options = { timezone: 'local' }) {
-    return formatDate(date, format, options);
+  formatDateTime(date = new Date(), format = 'LLL', options = {}) {
+    return formatDate(date, format, extend({ timezone: 'local' }, options));
   },
-  formatTime(date = new Date(), format = 'LTS', options = { timezone: 'local' }) {
-    return formatDate(date, format, options);
+  formatTime(date = new Date(), format = 'LTS', options = {}) {
+    return formatDate(date, format, extend({ timezone: 'local' }, options));
   },
   roundNumber(number, precision) {
     return roundNumber(number, precision);

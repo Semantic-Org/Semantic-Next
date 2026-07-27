@@ -1,0 +1,8 @@
+.log {
+  padding: var(--padding-s);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  background: var(--standard-5);
+  color: var(--muted-text-color);
+  font-family: var(--code-font);
+}

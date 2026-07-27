@@ -1,0 +1,12 @@
+<ul class="entries">
+  {#each entry in entries}
+    <li>
+      <b>{entry.name}</b>
+      {#if isLarge entry}
+        <span class="badge large">large</span>
+      {else}
+        <span class="badge small">small</span>
+      {/if}
+    </li>
+  {/each}
+</ul>

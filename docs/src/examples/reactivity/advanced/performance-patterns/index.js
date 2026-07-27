@@ -1,38 +1,19 @@
-// Performance: Optimizing reactive computations
 import { afterFlush, flush, reaction, signal } from '@semantic-ui/reactivity';
 
-const data = signal([1, 2, 3, 4, 5]);
-const triggerUpdate = signal(false);
+const rows = signal(['alpha', 'beta']);
+const widths = signal([5, 4]);
 
-// Expensive computation that we want to optimize
-function expensiveCalculation(arr) {
-  console.log('Running expensive calculation...');
-  return arr.reduce((sum, num) => sum + num * num, 0);
-}
-
-// Unoptimized: runs expensive calculation every time
+// the body runs on every pass of the queue, intermediate states included
 reaction(() => {
-  if (triggerUpdate.get()) {
-    const result = expensiveCalculation(data.peek()); // Use peek to avoid dependency
-    console.log('Unoptimized result:', result);
-  }
+  console.log(`pass: ${rows.get().length} rows, ${widths.get().length} widths`);
 });
 
-// Optimized: use afterFlush to batch expensive operations
-let needsRecalc = false;
-reaction(() => {
-  if (triggerUpdate.get()) {
-    needsRecalc = true;
-    afterFlush(() => {
-      if (needsRecalc) {
-        const result = expensiveCalculation(data.peek());
-        console.log('Optimized result:', result);
-        needsRecalc = false;
-      }
-    });
-  }
-});
+// this feeds the reaction above, so one write drains in more than one pass
+reaction(() => widths.set(rows.get().map(row => row.length)));
 
-// Trigger the calculations
-triggerUpdate.set(true);
+rows.push('gamma');
+
+// registered once at the write site, so the expensive part runs once
+afterFlush(() => console.log(`settled: ${rows.peek().length} rows, ${widths.peek().length} widths`));
+
 flush();

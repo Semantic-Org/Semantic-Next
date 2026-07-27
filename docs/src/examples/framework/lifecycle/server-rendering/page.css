@@ -1,0 +1,11 @@
+.source {
+  margin: var(--margin-s) 0 var(--margin);
+  padding: var(--padding-s);
+  border-radius: var(--border-radius);
+  background: var(--standard-5);
+  color: var(--muted-text-color);
+  font-family: var(--code-font);
+  font-size: var(--text-xs);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}

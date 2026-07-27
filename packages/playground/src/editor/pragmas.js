@@ -2,24 +2,24 @@ import { RangeSetBuilder, StateEffect, StateField } from '@codemirror/state';
 import { Decoration, EditorView, WidgetType } from '@codemirror/view';
 
 /*
-  Pragma regions — special comments that shape what the editor shows without
-  ever changing what builds. Canonical keywords are sui-hide / sui-fold;
-  playground-hide / playground-fold remain as aliases since they appear
-  literally in example sources and shared links.
+  Pragma regions, special comments that shape what the editor shows without
+  ever changing what builds. Write playground-hide / playground-fold. The
+  sui- spellings are accepted so old sources and shared links keep working,
+  but they are not the form to reach for.
 
     hide: invisible in the editor, present in output (injected scaffolding)
-    fold: collapsed behind a "…" widget; expanding reveals the region and the
-          marker comments stay invisible — the reader never sees a pragma
+    fold: collapsed behind a "…" widget. expanding reveals the region and the
+          marker comments stay invisible, so the reader never sees a pragma
 
   Modes: 'on' (hide and fold), 'off' (regions visible, markers hidden),
   'off-visible' (markers shown as literal text).
 */
 
 const keywords = {
-  'sui-hide': 'hide',
   'playground-hide': 'hide',
-  'sui-fold': 'fold',
   'playground-fold': 'fold',
+  'sui-hide': 'hide',
+  'sui-fold': 'fold',
 };
 
 const markerPattern = new RegExp(

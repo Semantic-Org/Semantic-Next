@@ -286,7 +286,7 @@ Represents SVG content, which may require special handling during rendering.
 
 ## Rendering Engines
 
-Semantic UI ships with a Lit rendering engine, but Semantic UI templates can hypothetically be used with any custom renderering engine that supports dynamic expressions.
+The AST is engine agnostic. Two [rendering engines](/docs/api/renderer/engines) ship with the framework, and a custom one only has to walk this structure and produce output.
 
 For example, a basic renderer might:
 

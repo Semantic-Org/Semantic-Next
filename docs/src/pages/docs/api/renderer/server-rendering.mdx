@@ -1,0 +1,80 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+icon: server
+title: Server Rendering
+description: How server rendering and hydration work in Semantic UI
+---
+
+Server rendering turns a component into an HTML string and wraps its shadow content in [Declarative Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM), a `<template shadowrootmode="open">` element that the HTML parser converts into a real shadow root without running any JavaScript.
+
+A web component is otherwise empty markup until its script loads, defines the element, and mounts it. Delivered this way it is on screen at first paint, and the only work left for the client is attaching reactivity to DOM that already exists.
+
+> **Usage Guide** See the [server rendering guide](/docs/guides/components/ssr) for setting server rendering up in a project.
+
+## The Pipeline
+
+```
+renderToString()      HTML string with markers, wrapped in <template shadowrootmode="open">
+      |
+      v
+browser parse         shadow root created, content visible, no JavaScript yet
+      |
+      v
+element upgrade       custom element defined, existing shadow root detected
+      |
+      v
+hydrate()             reactions wired to the existing DOM
+```
+
+The definition is the same on both sides. `createComponent` runs on the server and again on the client, so a component is written once and the environment decides what happens.
+
+## Server Rendering
+
+`ServerRenderer` walks the same AST as the client renderer and shares its expression evaluator, but produces a string. Nothing it emits is reactive, because nothing on the server changes after it is sent.
+
+It stamps a marker at each dynamic position so the client can find it later.
+
+| Position | Server output |
+|------|------|
+| Text expression | `<!--sui:v1:3-->Hello` |
+| Block open | `<!--sui-block:v1:5-->` |
+| Block close | `<!--/sui-block:v1:5:b1000-->` |
+| Attribute expression | evaluated inline, no marker |
+
+Block close markers carry which branch was taken, so the client knows what the server chose without re-evaluating the condition.
+
+Two behaviours follow from having no reactivity. `{#async}` renders its `loading` branch and never awaits the promise, because the server has no way to update what it already sent. Timers and listeners registered through the callback params are no-ops.
+
+Nested components expand recursively. The renderer scans its own output for custom element tags, looks each one up in the registry, and renders it as nested Declarative Shadow DOM.
+
+## Declarative Shadow DOM
+
+The parser attaches the shadow root, moves the content into it, and drops the template element.
+
+Component CSS travels inside that template as a `<style>` tag, since `adoptedStyleSheets` cannot cross the network. Hydration removes the tag once the stylesheet has been adopted.
+
+## Hydration
+
+Hydration trusts the server. It walks the markers and wires a reaction to each position, without re-rendering or checking the result against what the client would have produced.
+
+The first run of every wired reaction evaluates but does not write:
+
+```javascript
+if (comp.firstRun && hydrating) {
+  compute(state);   // read the signals, registering dependencies
+  return;           // leave the DOM alone
+}
+```
+
+Reading a signal inside a running reaction is the only way to register a dependency on it, so the evaluation cannot be skipped. The write can be, because the server already produced that value. Every run after the first writes normally.
+
+Markers are removed after wiring completes. The reactions hold references to real text nodes and elements rather than to the comments, so nothing depends on them once binding is done.
+
+## Version Mismatch
+
+Markers carry a version. Before hydrating, the client reads the first marker it finds and compares it against the version it was built with.
+
+On a mismatch it discards the server content and renders from scratch. A stale payload costs one render, rather than producing a tree whose bindings point at positions that have since moved.
+
+An element carrying an `ssr` attribute is skipped entirely. Its markup stays as delivered and no JavaScript claims it.

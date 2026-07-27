@@ -278,7 +278,7 @@ debouncedFunction.flush();   // Execute immediately with latest args
 debouncedFunction.pending(); // Check if execution is scheduled
 ```
 
-> **Promise Semantics** All pending promises resolve with the result of the eventual execution. For async functions, the debounced function returns promises that resolve when the debounced execution completes.
+> **Promise Semantics** Pending promises resolve with the result of the eventual execution. `cancel()` rejects them with code `CANCELLED`, and `rejectSkipped` rejects superseded calls with code `DEBOUNCED`, so an awaited debounced call needs a catch.
 
 ### throttle
 

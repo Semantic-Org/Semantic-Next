@@ -143,10 +143,14 @@ export const createFilteredExampleMenu = (categoryFilter) => {
 
     // Sort subcategories based on predefined order
     const sortOrder = subCategorySortOrder[categoryFilter] || [];
-    const subcategoriesWithOrder = subcategories.map(subcategory => ({
-      ...subcategory,
-      sortIndex: sortOrder.indexOf(subcategory.name),
-    }));
+    const subcategoriesWithOrder = subcategories.map(subcategory => {
+      const order = sortOrder.indexOf(subcategory.name);
+      return {
+        ...subcategory,
+        // unregistered subcategories sort last, indexOf's -1 would float them to the top
+        sortIndex: (order === -1) ? Infinity : order,
+      };
+    });
 
     const sorted = sortBy(subcategoriesWithOrder, 'sortIndex');
 

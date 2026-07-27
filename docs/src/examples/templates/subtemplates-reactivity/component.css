@@ -1,0 +1,12 @@
+h2 {
+  font-size: 1em;
+  color: var(--muted-text-color);
+}
+
+.badge {
+  display: inline-block;
+  padding: var(--padding-2xs) var(--padding-xs);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-weight: var(--bold);
+}

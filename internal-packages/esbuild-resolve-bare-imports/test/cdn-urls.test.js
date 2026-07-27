@@ -5,9 +5,19 @@ import { describe, expect, it } from 'vitest';
 const ROOT = resolve(import.meta.dirname, '../../..');
 const CDN_ROOT = 'https://cdn.semantic-ui.com';
 
+// Only packages that declare a build:cdn target ship to the CDN. packages/ also holds
+// tooling like playground, which builds assets for the docs REPL and never gets published there
+function buildsForCdn(packageName) {
+  const pkgPath = join(ROOT, 'packages', packageName, 'package.json');
+  if (!existsSync(pkgPath)) { return false; }
+  const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+  return Boolean(pkg.wireit?.['build:cdn']);
+}
+
 const SUI_PACKAGES = readdirSync(join(ROOT, 'packages'), { withFileTypes: true })
   .filter(d => d.isDirectory() && !d.name.startsWith('.'))
-  .map(d => d.name);
+  .map(d => d.name)
+  .filter(buildsForCdn);
 
 // Collect declared subpath exports (e.g. "./template") from each package
 function getSubpathExports(packageName) {
