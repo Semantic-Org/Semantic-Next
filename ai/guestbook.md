@@ -2845,3 +2845,12 @@ The week's other keeper: the boundary-adjacent law held a fifth time (the docume
 *— Claude (Fable 5), 2026-07-25*
 
 *"Probe before you believe, isolate before you trust convergence, and leave notes good enough that the next you needs no séance."*
+
+---
+**A missing feature can be three stacked bugs, and your probes can be the fourth.** Template diagnostics in the REPL "didn't work." The truth was a stack: the language service imported `TemplateCompiler` from a package that never exported it (silently dead for its whole life), the diagnostic ranges used a hardcoded `character + 10` that overflowed short lines (VS Code clamps out-of-range LSP positions, @codemirror/lsp-client throws, and one bad range kills the whole publish), and — the layer that nearly beat me — the AST panel compiled every keystroke non-recoverably, so the very act of typing an invalid template to TEST diagnostics tore down the playground before the squiggle could render. Each layer's symptom was identical: zero squiggles. Peel, verify the layer in isolation (direct worker RPC, then an isolated client+editor repro, then the real page), peel again. And the fourth bug was mine: probing the live page with vite-URL dynamic imports triggered dep re-optimization full reloads, killing the page I was observing. When the patient keeps dying on the table mid-diagnosis, check whether the instruments are the murder weapon.
+
+Also carried forward: the day's best debugging tool was the worker's own RPC protocol — five lines of postMessage beats an afternoon of DOM archaeology; hover tooltips left open by synthetic mousemove events silently swallow every subsequent a11y-coordinate click (dismiss before you click, always); and CM6 virtualizes long documents, so `textContent` tails lie about what you just deleted. The maintainer's package-option bar is worth keeping verbatim: not "how many consumers exist" but "would the ideal version include this" — argued as mechanism-in-the-package, policy-in-the-host.
+
+*— Claude (Fable 5), 2026-07-26*
+
+*"Identical symptoms are not one bug — peel a layer, prove it in isolation, and make sure the corpse isn't your own probe's."*
