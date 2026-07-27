@@ -9,11 +9,15 @@ import * as acorn from 'acorn';
 
 export function analyzeComponent(source, filePath) {
   let ast;
+  const comments = [];
   try {
     ast = acorn.parse(source, {
       ecmaVersion: 'latest',
       sourceType: 'module',
       allowAwaitOutsideFunction: true,
+      onComment: (isBlock, text, start, end) => {
+        if (!isBlock) { comments.push({ text: text.trim(), start, end }); }
+      },
     });
   }
   catch {
@@ -52,10 +56,10 @@ export function analyzeComponent(source, filePath) {
         model.instance = extractCreateComponentMethods(resolved, source);
         break;
       case 'defaultState':
-        model.state = extractObjectFields(resolved);
+        model.state = extractObjectFields(resolved, source, comments);
         break;
       case 'defaultSettings':
-        model.settings = extractObjectFields(resolved);
+        model.settings = extractObjectFields(resolved, source, comments);
         break;
       case 'events':
         model.events = extractEventKeys(resolved);
@@ -227,7 +231,7 @@ function findReturnExpression(block) {
   State may be a raw value or a `{ value, options }` signal config.
   Configs unwrap to the inner `value` so the type reflects the default.
 */
-function extractObjectFields(node) {
+function extractObjectFields(node, source = '', comments = []) {
   const fields = [];
   if (!node || node.type !== 'ObjectExpression') { return fields; }
 
@@ -241,10 +245,26 @@ function extractObjectFields(node) {
       name,
       inferredType: inferTypeFromValue(valueNode),
       defaultValue: getLiteralValue(valueNode),
+      description: trailingComment(source, comments, prop),
     });
   }
 
   return fields;
+}
+
+/*
+  The line comment to the right of a field is its description:
+    rows: [], // the row content
+  Trailing only — a leading comment often heads a group of fields, and
+  attributing it to the first one would misdescribe it.
+*/
+function trailingComment(source, comments, prop) {
+  for (const comment of comments) {
+    if (comment.start < prop.end) { continue; }
+    const between = source.slice(prop.end, comment.start);
+    return /^[,\s]*$/.test(between) && !between.includes('\n') ? comment.text : undefined;
+  }
+  return undefined;
 }
 
 /*
@@ -410,13 +430,42 @@ function inferTypeFromValue(node) {
   if (node.type === 'ArrayExpression') { return 'array'; }
   if (node.type === 'ObjectExpression') { return 'object'; }
   if (node.type === 'ArrowFunctionExpression' || node.type === 'FunctionExpression') { return 'function'; }
+  // a class instance reads best as its class: rowTemplate: new Template()
+  if (node.type === 'NewExpression' && node.callee?.type === 'Identifier') { return node.callee.name; }
   return 'any';
 }
 
 function getLiteralValue(node) {
-  if (!node) { return undefined; }
+  const value = literalValue(node);
+  return value === nonLiteral ? undefined : value;
+}
+
+/*
+  Materializes fully-literal defaults, including nested arrays and objects. One
+  dynamic element poisons the whole value — no default beats a wrong default.
+*/
+const nonLiteral = Symbol('non-literal');
+
+function literalValue(node) {
+  if (!node) { return nonLiteral; }
   if (node.type === 'Literal') { return node.value; }
   if (isNegativeNumeric(node)) { return -node.argument.value; }
-  if (node.type === 'ArrayExpression' && node.elements.length === 0) { return []; }
-  return undefined;
+  if (node.type === 'ArrayExpression') {
+    const values = node.elements.map(literalValue);
+    return values.includes(nonLiteral) ? nonLiteral : values;
+  }
+  if (node.type === 'ObjectExpression') {
+    const result = {};
+    for (const property of node.properties) {
+      if (property.type !== 'Property' || property.computed) { return nonLiteral; }
+      const key = property.key.type === 'Identifier'
+        ? property.key.name
+        : (property.key.type === 'Literal' ? String(property.key.value) : null);
+      const value = literalValue(property.value);
+      if (key === null || value === nonLiteral) { return nonLiteral; }
+      result[key] = value;
+    }
+    return result;
+  }
+  return nonLiteral;
 }

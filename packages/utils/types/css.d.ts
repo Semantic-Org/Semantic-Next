@@ -1,4 +1,23 @@
 /**
+ * Adds vendor prefixes to the CSS properties that still require them in modern
+ * browsers, emitting the prefixed declaration above the original so the
+ * unprefixed standard wins where supported. Matching is line-based, so a
+ * declaration must sit on its own line. A declaration already written with a
+ * vendor prefix is left alone, and CSS with nothing prefixable is returned
+ * unchanged. The rule list shrinks over time as browsers adopt the standards.
+ *
+ * @param css - The CSS string to prefix
+ * @returns The CSS with vendor-prefixed declarations inserted
+ *
+ * @example
+ * ```ts
+ * prefixCSS('.a {\n  user-select: none;\n}')
+ * // '.a {\n  -webkit-user-select: none;\n  user-select: none;\n}'
+ * ```
+ */
+export function prefixCSS(css: string): string;
+
+/**
  * Options for adoptStylesheet function
  */
 export interface AdoptStylesheetOptions {
@@ -24,7 +43,7 @@ export interface ScopeStylesOptions {
  * @see {@link https://next.semantic-ui.com/examples/utils-adoptstylesheet Example}
  *
  * @param css - The CSS string to adopt
- * @param adoptedElement - The document or shadow root to adopt the stylesheet to (defaults to document)
+ * @param adoptedElement - The document or shadow root to adopt the stylesheet to (defaults to document). An element resolves to its root node
  * @param options - Options for stylesheet adoption and caching
  * @returns void
  *
@@ -32,12 +51,13 @@ export interface ScopeStylesOptions {
  * ```ts
  * adoptStylesheet('.button { color: blue; }')
  * adoptStylesheet('.scoped { margin: 10px; }', shadowRoot)
+ * adoptStylesheet('.scoped { margin: 10px; }', element) // adopts into the element's root
  * adoptStylesheet(css, document, { cacheStylesheet: false })
  * ```
  */
 export function adoptStylesheet(
   css: string,
-  adoptedElement?: Document | ShadowRoot,
+  adoptedElement?: Document | ShadowRoot | Element,
   options?: AdoptStylesheetOptions,
 ): void;
 
@@ -51,6 +71,28 @@ export interface ExtractCSSOptions {
   exactMatch?: boolean;
 }
 
+/**
+ * The stylesheet sources {@link extractCSS} accepts: raw CSS text, a document, a
+ * single stylesheet, an array of stylesheets, or any host exposing `styleSheets`
+ * or `adoptedStyleSheets`.
+ */
+export type ExtractCSSSource =
+  | string
+  | Document
+  | CSSStyleSheet
+  | CSSStyleSheet[]
+  | { styleSheets: StyleSheetList; }
+  | { adoptedStyleSheets: CSSStyleSheet[]; };
+
+/**
+ * Extracts CSS rules matching a selector, returning them as CSS text
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/css#extractcss extractCSS}
+ */
+export function extractCSS(
+  selector: string,
+  source: ExtractCSSSource | undefined,
+  options: ExtractCSSOptions & { returnText: true; },
+): string;
 /**
  * Extracts CSS rules matching a selector from various stylesheet sources
  * @see {@link https://next.semantic-ui.com/docs/api/utils/css#extractcss extractCSS}
@@ -72,9 +114,17 @@ export interface ExtractCSSOptions {
  */
 export function extractCSS(
   selector: string,
-  source?: string | Document | CSSStyleSheet | CSSStyleSheet[] | { styleSheets: StyleSheetList; } | {
-    adoptedStyleSheets: CSSStyleSheet[];
-  },
+  source?: ExtractCSSSource,
+  options?: ExtractCSSOptions & { returnText?: false; },
+): CSSStyleSheet;
+/**
+ * Extracts CSS rules matching a selector, returning a stylesheet or CSS text
+ * depending on `returnText`
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/css#extractcss extractCSS}
+ */
+export function extractCSS(
+  selector: string,
+  source?: ExtractCSSSource,
   options?: ExtractCSSOptions,
 ): CSSStyleSheet | string;
 

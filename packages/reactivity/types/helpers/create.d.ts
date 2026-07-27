@@ -21,7 +21,7 @@ export function signal<T>(initialValue?: T, options?: SignalOptions<T>): Signal<
  * @returns The created Reaction
  */
 export function reaction(
-  callback: (computation: Reaction) => void,
+  callback: (computation: Reaction) => void | Promise<void>,
   options?: { context?: Record<string, any>; firstRun?: boolean; },
 ): Reaction;
 

@@ -465,10 +465,7 @@ body {
 });
 </code></pre>
         <pre id="src-card-search-1" hidden><code class="hljs language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;component&quot;</span>&gt;</span>
-  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;actions&quot;</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">ui-menu</span> <span class="hljs-attr">inset</span> <span class="hljs-attr">selection</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;{filter}&quot;</span> <span class="hljs-attr">items</span>=<span class="hljs-string">&quot;{filters}&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;menu&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ui-menu</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">ui-input</span> <span class="hljs-attr">search</span> <span class="hljs-attr">tiny</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;Search friends...&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{searchTerm}</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;search&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ui-input</span>&gt;</span>
-  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  {&gt; actions}
   <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;cards&quot;</span>&gt;</span>
     {#each friend in getVisibleFriends}
       {&gt; card
@@ -483,6 +480,13 @@ body {
     {/each}
   <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+{#snippet actions}
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;actions&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">ui-menu</span> <span class="hljs-attr">inset</span> <span class="hljs-attr">selection</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;{filter}&quot;</span> <span class="hljs-attr">items</span>=<span class="hljs-string">&quot;{filters}&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;menu&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ui-menu</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">ui-input</span> <span class="hljs-attr">search</span> <span class="hljs-attr">tiny</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;Search friends...&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{searchTerm}</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;search&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ui-input</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+{/snippet}
 </code></pre>
         <pre id="src-card-search-2" hidden><code class="hljs language-css">
 <span class="hljs-selector-pseudo">:host</span> {

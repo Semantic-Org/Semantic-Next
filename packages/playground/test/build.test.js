@@ -22,6 +22,27 @@ describe('buildFiles', () => {
     expect(find(result, 'component.html').content).toBe('<b>Count: {count}</b>');
   });
 
+  it('injects headHTML into documents only, after the import map', async () => {
+    const headHTML = '<script>document.documentElement.classList.add("dark");</script>';
+    const result = await buildFiles({
+      cdnBaseUrl,
+      importMap,
+      headHTML,
+      files: [
+        {
+          name: 'page.html',
+          content: '<!DOCTYPE html><html><head></head><body></body></html>',
+          contentType: 'text/html',
+        },
+        { name: 'component.html', content: '<b>Count: {count}</b>', contentType: 'text/html' },
+      ],
+    });
+    const page = find(result, 'page.html').content;
+    expect(page).toContain(headHTML);
+    expect(page.indexOf(headHTML)).toBeLessThan(page.indexOf('importmap'));
+    expect(find(result, 'component.html').content).toBe('<b>Count: {count}</b>');
+  });
+
   it('does not mistake a fragment containing <header> for a document', async () => {
     const content = '<header class="hero">{title}</header>';
     const result = await buildFiles({

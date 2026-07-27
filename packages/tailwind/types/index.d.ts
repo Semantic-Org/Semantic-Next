@@ -1,5 +1,3 @@
-import type { GenerateTailwindCSSOptions } from 'tailwindcss-iso';
-
 /**
  * Content extracted from a component definition for Tailwind class scanning
  */
@@ -17,12 +15,15 @@ export interface ExtractedContent {
 /**
  * Semantic UI component definition that can be processed by TailwindPlugin.
  * Includes the properties that TailwindPlugin scans for Tailwind classes.
+ * Any other `defineComponent` option passes through untouched.
  */
 export interface ComponentDefinition {
   /** HTML template string */
   template?: string;
   /** CSS styles string */
   css?: string;
+  /** Document-level CSS, where generated `@property` rules are appended */
+  pageCSS?: string;
   /** Component creation function */
   createComponent?: Function;
   /** Lifecycle callback functions */
@@ -35,11 +36,20 @@ export interface ComponentDefinition {
   events?: Record<string, Function>;
   /** Key binding handlers object */
   keys?: Record<string, Function>;
-  /** Sub-template definitions */
-  subTemplates?: Record<string, {
-    template?: string;
-    css?: string;
-  }>;
+  /**
+   * Sub-template definitions, scanned recursively so classes anywhere in the tree
+   * are found. Each value is either a nested definition or the `Template` that
+   * `defineComponent` returns when called without a `tagName`.
+   */
+  subTemplates?: Record<string, ComponentDefinition | object>;
+}
+
+/**
+ * Options accepted by {@link TailwindPlugin}.
+ */
+export interface TailwindPluginOptions {
+  /** Add vendor prefixes to the generated CSS. Defaults to `true`. */
+  autoprefix?: boolean;
 }
 
 /**
@@ -81,7 +91,9 @@ export function extractDefinitionContent(definition: ComponentDefinition): Extra
  * 1. Scans all component content for Tailwind class usage
  * 2. Generates optimized CSS using the appropriate engine (WASM in browser, native in Node.js)
  * 3. Replaces the component's CSS with the generated Tailwind CSS
- * 4. Preserves all other component definition properties
+ * 4. Moves generated `@property` rules into `pageCSS`, where they register at the
+ *    document level instead of being ignored inside the shadow root
+ * 5. Preserves all other component definition properties
  *
  * The generated CSS is optimized for shadow DOM and includes:
  * - Tailwind utilities for detected classes
@@ -89,8 +101,11 @@ export function extractDefinitionContent(definition: ComponentDefinition): Extra
  * - Custom @utility definitions
  * - Existing component CSS integrated with Tailwind
  *
+ * The input definition is never mutated, and is returned as-is when it has no
+ * scannable content or when Tailwind produces no CSS for it.
+ *
  * @param definition - The component definition to transform
- * @param options - Optional Tailwind generation options
+ * @param options - Plugin options
  * @returns Promise that resolves to the transformed component definition
  *
  * @example
@@ -120,7 +135,7 @@ export function extractDefinitionContent(definition: ComponentDefinition): Extra
  * );
  * ```
  */
-export function TailwindPlugin(
-  definition: ComponentDefinition,
-  options?: Partial<GenerateTailwindCSSOptions>,
-): Promise<ComponentDefinition>;
+export function TailwindPlugin<T extends ComponentDefinition>(
+  definition: T,
+  options?: TailwindPluginOptions,
+): Promise<T & { css?: string; pageCSS?: string; }>;

@@ -41,11 +41,11 @@ const rpc = createRpc({
   },
 });
 
-rpc.handle('build', async ({ sessionId, files, importMap, cdnBaseUrl }) => {
+rpc.handle('build', async ({ sessionId, files, importMap, cdnBaseUrl, headHTML }) => {
   const session = getSession(sessionId);
   session.files = files;
   session.languageService?.bumpVersion();
-  return buildFiles({ files, importMap, cdnBaseUrl });
+  return buildFiles({ files, importMap, cdnBaseUrl, headHTML });
 });
 
 rpc.handle('updateFile', ({ sessionId, name, content }) => {
@@ -60,6 +60,16 @@ rpc.handle('updateFile', ({ sessionId, name, content }) => {
 rpc.handle('getCompletions', async ({ sessionId, file, offset }) => {
   const service = await getLanguageService(getSession(sessionId));
   return service.getCompletions(file, offset);
+});
+
+rpc.handle('getCompletionDetail', async ({ sessionId, file, offset, name }) => {
+  const service = await getLanguageService(getSession(sessionId));
+  return service.getCompletionDetail(file, offset, name);
+});
+
+rpc.handle('getSignatureHelp', async ({ sessionId, file, offset }) => {
+  const service = await getLanguageService(getSession(sessionId));
+  return service.getSignatureHelp(file, offset);
 });
 
 rpc.handle('getHover', async ({ sessionId, file, offset }) => {

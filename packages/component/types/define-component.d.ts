@@ -1,7 +1,6 @@
+import { ASTNode } from '@semantic-ui/compiler';
 import { CallParams, FactoryParams, Template } from '@semantic-ui/templating';
-import { CSSResult } from 'lit';
-import { PropertyValues } from 'lit';
-import { WebComponentBase } from './engines/native/base.js';
+import { ComponentConfig, PropertyConfig, WebComponentBase } from './engines/native/base.js';
 
 /**
  * Extended call parameters for event handlers, including event-specific data.
@@ -11,7 +10,7 @@ import { WebComponentBase } from './engines/native/base.js';
  * @template TState - Raw state types (before Signal wrapping)
  * @template TSettings - Type of the component's configuration settings
  * @template TComponentInstance - Type of the component instance created by createComponent
- * @template TProperties - Type of the properties for Lit components
+ * @template TProperties - Type of the properties declared on the component
  *
  * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
  */
@@ -90,7 +89,7 @@ export interface EventCallParams<
  * @template TState - Type of the component's reactive state variables
  * @template TSettings - Type of the component's configuration settings
  * @template TComponentInstance - Type of the component instance created by createComponent
- * @template TProperties - Type of the properties for Lit components
+ * @template TProperties - Type of the properties declared on the component
  *
  * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
  * @see https://next.semantic-ui.com/docs/guides/components/keys
@@ -158,24 +157,87 @@ export interface KeyCallParams<
 }
 
 /**
- * Defines a custom element (web component) with the given options.
- *
- * TypeScript infers generic parameters automatically:
- * - `M` from the return type of `createComponent` (component instance methods)
- * - `S` from `defaultSettings` (component settings)
- * - `St` from `defaultState` (raw state types, auto-wrapped in Signal<T>)
- *
- * Inside `createComponent`'s returned object, `this` is typed as the full instance
- * via ThisType<M>. In events and lifecycle hooks, both `this` and `self` are typed.
- *
- * @see {@link https://next.semantic-ui.com/docs/components Creating Components}
+ * Options the engine factory receives when building a component class.
  */
-export function defineComponent<
+export interface ComponentFactoryOptions {
+  /** Prototype template every instance clones from. */
+  prototypeTemplate: Template;
+  /** Property definitions resolved from settings, spec, and explicit properties. */
+  resolvedProperties: Record<string, PropertyConfig>;
+  /** Shadow DOM styles, including styles collected from subtemplates. */
+  css: string;
+  /** Whether the shadow root is created with `delegatesFocus`. */
+  delegatesFocus: boolean;
+  /** Component spec for Semantic UI states (modifiers, variations, etc.). */
+  componentSpec?: any;
+  /** Default settings declared in `defineComponent`. */
+  defaultSettings?: Record<string, any>;
+  /** Whether this is the plural form of a spec-driven component. */
+  plural?: boolean;
+  /** Callback invoked when an observed attribute changes. */
+  onAttributeChanged?: (attributeName: string, oldValue: string | null, newValue: string | null) => void;
+  /** Engine name or engine object the component was defined with. */
+  renderingEngine?: string | EngineDefinition;
+}
+
+/**
+ * A rendering engine registered with the renderer's engine registry.
+ * The native engine is registered by importing `@semantic-ui/component`;
+ * the Lit engine is opt-in via `@semantic-ui/component/lit`.
+ */
+export interface EngineDefinition {
+  /** Client renderer class the template uses to produce DOM. */
+  renderer: new(...args: any[]) => any;
+  /** Server renderer class used to produce HTML strings. Native engine only. */
+  serverRenderer?: new(...args: any[]) => any;
+  /** Builds the custom element class for a component definition. */
+  factory: (options: ComponentFactoryOptions) => ComponentConstructor;
+}
+
+/**
+ * The custom element class `defineComponent` returns when given a `tagName`.
+ *
+ * @template M - Type of the component instance created by createComponent
+ */
+export interface ComponentConstructor<M extends Record<string, any> = Record<string, any>> {
+  new(): WebComponentBase & { component: M; };
+
+  /** Prototype template every instance clones from. */
+  template: Template;
+
+  /** Tag name the class was registered under. */
+  componentTagName: string;
+
+  /** Serializable form of the component's template definition. */
+  toDefinition(): Record<string, any>;
+
+  /** Whether the shadow root is created with `delegatesFocus`. */
+  delegatesFocus: boolean;
+
+  /** Resolved configuration the base class reads at runtime. */
+  config: ComponentConfig;
+
+  /** Property definitions keyed by camelCase property name. */
+  properties: Record<string, PropertyConfig>;
+
+  /** Attributes reported to the browser so they reach `attributeChangedCallback`. */
+  readonly observedAttributes: string[];
+}
+
+/**
+ * Configuration accepted by {@link defineComponent}.
+ *
+ * @template M - Instance methods and properties returned by `createComponent`
+ * @template S - Component settings, inferred from `defaultSettings`
+ * @template St - Raw state types, inferred from `defaultState`
+ * @template P - Component properties
+ */
+export interface DefineComponentOptions<
   M extends Record<string, any> = Record<string, any>,
   S extends Record<string, any> = {},
   St extends Record<string, any> = {},
   P extends Record<string, any> = {},
->(options: {
+> {
   /**
    * The HTML tag name for the custom element (e.g., 'my-component').
    * If omitted, returns a template instance for use as a subtemplate.
@@ -188,7 +250,12 @@ export function defineComponent<
    */
   template?: string;
   /** Pre-compiled AST of the template. If provided, the template string is not compiled. */
-  ast?: any;
+  ast?: ASTNode[];
+  /**
+   * Keep template whitespace instead of condensing it. `'auto'` (the default)
+   * preserves whitespace only when `css` makes it significant.
+   */
+  preserveWhitespace?: boolean | 'auto';
   /**
    * CSS styles scoped to the component's shadow DOM.
    * @see {@link https://next.semantic-ui.com/docs/guides/components/create#css CSS}
@@ -207,67 +274,68 @@ export function defineComponent<
   /**
    * Factory function that creates the component's instance methods and properties.
    *
-   * Inside the returned object, `this` is typed as the full instance (all methods)
-   * plus the factory params (settings, state, $, etc.) via ThisType.
-   * `self` is available but untyped in this callback — use `this` for typed self-reference.
-   * In events and lifecycle hooks, `self` IS fully typed.
+   * Inside the returned object, `this` is the instance itself (all methods) via ThisType.
+   * The factory params (settings, state, $, etc.) are closure variables, not properties
+   * of the instance, so reach for them directly rather than through `this`.
+   * In events and lifecycle hooks, `self` is fully typed.
    *
    * @see {@link https://next.semantic-ui.com/docs/guides/components/create#create-component Creating Components}
    */
-  createComponent?: (params: FactoryParams<St, S, P>) => M & ThisType<M & FactoryParams<St, S, P>>;
+  createComponent?: (params: FactoryParams<St, S, P>) => M & ThisType<M>;
 
   /**
    * Event handlers keyed by event DSL strings (e.g., "click .button", "deep click menu-item").
-   * Both `this` and `self` (via params) are typed as the component instance.
+   * `this` is the element that matched the selector; `self` (via params) is the component instance.
    *
    * @see {@link https://next.semantic-ui.com/docs/guides/components/events Events}
    */
   events?: Record<
     string,
-    (this: M, params: EventCallParams<St, S, M, P>) => void
+    (this: HTMLElement, params: EventCallParams<St, S, M, P>) => void
   >;
 
   /**
    * Key binding handlers keyed by key sequences (e.g., "Ctrl+S", "Escape").
-   * Both `this` and `self` (via params) are typed as the component instance.
+   * Returning `true` leaves the browser default in place; anything else calls preventDefault.
+   * `this` is the component's element; `self` (via params) is the component instance.
    *
    * @see {@link https://next.semantic-ui.com/docs/guides/components/keys Keys}
    */
   keys?: Record<
     string,
-    (this: M, params: KeyCallParams<St, S, M, P>) => void | boolean
+    (this: WebComponentBase, params: KeyCallParams<St, S, M, P>) => void | boolean
   >;
 
   /**
    * Lifecycle callback invoked after the component is created.
    * @see {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#oncreated onCreated}
    */
-  onCreated?: (this: M, params: CallParams<St, S, M, P>) => void;
+  onCreated?: (this: WebComponentBase, params: CallParams<St, S, M, P>) => void;
   /**
    * Lifecycle callback invoked after the component is rendered.
    * @see {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#onrendered onRendered}
    */
-  onRendered?: (this: M, params: CallParams<St, S, M, P>) => void;
-  /**
-   * Lifecycle callback invoked after the component is updated.
-   * @see {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#onupdated onUpdated}
-   */
-  onUpdated?: (this: M, params: CallParams<St, S, M, P>) => void;
+  onRendered?: (this: WebComponentBase, params: CallParams<St, S, M, P>) => void;
   /**
    * Lifecycle callback invoked after the component is destroyed.
    * @see {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#ondestroyed onDestroyed}
    */
-  onDestroyed?: (this: M, params: CallParams<St, S, M, P>) => void;
+  onDestroyed?: (this: WebComponentBase, params: CallParams<St, S, M, P>) => void;
   /**
    * Lifecycle callback invoked after the theme changes.
    * @see {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#onthemechanged onThemeChanged}
    */
-  onThemeChanged?: (this: M, params: CallParams<St, S, M, P>) => void;
+  onThemeChanged?: (this: WebComponentBase, params: CallParams<St, S, M, P>) => void;
   /**
    * Lifecycle callback invoked when an observed attribute changes.
    * @see {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#onattributechanged onAttributeChanged}
    */
-  onAttributeChanged?: (attributeName: string, oldValue: string | null, newValue: string | null) => void;
+  onAttributeChanged?: (
+    this: WebComponentBase,
+    attributeName: string,
+    oldValue: string | null,
+    newValue: string | null,
+  ) => void;
 
   /**
    * Reactive settings that can be modified from outside the component.
@@ -283,12 +351,17 @@ export function defineComponent<
 
   /**
    * Subtemplates available in the template via `{>name}`.
+   * Values are either a `Template` (the return of `defineComponent` without a `tagName`)
+   * or a component definition to be created inline.
    * @see {@link https://next.semantic-ui.com/docs/guides/templates/subtemplates Subtemplates}
    */
-  subTemplates?: Record<string, Function>;
-  /** Rendering engine. Only 'lit' is currently implemented. */
-  renderingEngine?: string;
-  /** Lit properties for porting existing components. */
+  subTemplates?: Record<string, Template | DefineComponentOptions>;
+  /**
+   * Rendering engine name or engine object. Defaults to `'native'`.
+   * `'lit'` becomes available once `@semantic-ui/component/lit` is imported.
+   */
+  renderingEngine?: string | EngineDefinition;
+  /** Property definitions, for components that declare properties directly instead of through settings. */
   properties?: P;
   /** Component spec for Semantic UI states (modifiers, variations, etc.). */
   componentSpec?: any;
@@ -296,130 +369,40 @@ export function defineComponent<
   plural?: boolean;
   /** Tag name of the singular form (for plural components). */
   singularTag?: string;
-}): any;
+}
 
 /**
- * The base class for the generated web components.
- * Extends LitElement and provides common functionality.  You don't use this
- * directly; `defineComponent` generates a subclass of this.
- * See {@link https://next.semantic-ui.com/docs/components Components} for more details.
+ * Defines a custom element (web component) with the given options.
+ *
+ * TypeScript infers generic parameters automatically:
+ * - `M` from the return type of `createComponent` (component instance methods)
+ * - `S` from `defaultSettings` (component settings)
+ * - `St` from `defaultState` (raw state types, auto-wrapped in Signal<T>)
+ *
+ * Inside `createComponent`'s returned object, `this` is typed as the full instance
+ * via ThisType<M>. In events and lifecycle hooks, `self` is typed as the instance.
+ *
+ * @see {@link https://next.semantic-ui.com/docs/components Creating Components}
  */
-export declare class UIWebComponent extends WebComponentBase {
-  /**
-   * Styles.
-   * See {@link https://next.semantic-ui.com/docs/guides/components/create#css CSS} for more details.
-   */
-  static styles: CSSResult;
-  /**
-   * Template.
-   * See {@link https://next.semantic-ui.com/docs/guides/components/create#template Template} for more details.
-   */
-  static template: Template;
-  /**
-   * properties
-   */
-  static properties: Record<string, any>;
-  /**
-   * Default settings
-   */
-  defaultSettings: Record<string, any>;
+export function defineComponent<
+  M extends Record<string, any> = Record<string, any>,
+  S extends Record<string, any> = {},
+  St extends Record<string, any> = {},
+  P extends Record<string, any> = {},
+>(options: DefineComponentOptions<M, S, St, P> & { tagName: string; }): ComponentConstructor<M>;
 
-  /**
-   * CSS
-   */
-  css: string;
-  /**
-   * component spec
-   */
-  componentSpec: any; // Define the type
-
-  /**
-   * Settings Proxy
-   */
-  settings: Record<string, any>;
-  /**
-   * The template.
-   * See {@link https://next.semantic-ui.com/docs/templates Template} for more details.
-   */
-  template?: Template;
-  /**
-   * Component
-   */
-  component: any; // Define
-  /**
-   * Data Context
-   */
-  dataContext: Record<string, any>;
-  /**
-   * constructor
-   */
-  constructor();
-  /**
-   * Connected callback.
-   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle Lifecycle} for more information.
-   */
-  connectedCallback(): void;
-  /**
-   * Trigger attribute change
-   */
-  triggerAttributeChange(): void;
-  /**
-   * Will update.
-   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle Lifecycle} for more information.
-   * @param _changedProperties
-   */
-  willUpdate(_changedProperties: PropertyValues): void;
-
-  /**
-   * Lit First updated callback
-   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-sequence Rendering} for more information.
-   */
-  firstUpdated(): void;
-  /**
-   * Lit Updated callback
-   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-sequence Rendering} for more information.
-   */
-  updated(): void;
-  /**
-   * Lit Disconnected callback.
-   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-sequence Rendering} for more information.
-   */
-  disconnectedCallback(): void;
-  /**
-   * Lit Adopted callback
-   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-sequence Rendering} for more information.
-   */
-  adoptedCallback(): void;
-  /**
-   * Lit callback when attribute changes..
-   * @param attribute - The name of the attribute that changed.
-   * @param oldValue - The previous value of the attribute.
-   * @param newValue - The new value of the attribute.
-   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle Lifecycle} for more information.
-   */
-  attributeChangedCallback(attribute: string, oldValue: string | null, newValue: string | null): void;
-  /**
-   * Gets settings
-   * @returns {Record<string, any>} Returns settings
-   */
-  getSettings(): Record<string, any>;
-
-  /**
-   * Sets settings
-   * @param name
-   * @param value
-   */
-  setSetting(name: string, value: any): void;
-  /**
-   * Creates the data context for the template instance
-   * @returns Returns data context
-   */
-  getData(): Record<string, any>;
-
-  /**
-   * Renders the component.
-   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-sequence Rendering} for more information.
-   * @returns {any} Returns rendered element
-   */
-  render(): any;
-}
+/**
+ * Defines a subtemplate with the given options.
+ *
+ * Without a `tagName` no custom element is registered. The returned `Template`
+ * is passed through the `subTemplates` option of another component and rendered
+ * with `{>name}`.
+ *
+ * @see {@link https://next.semantic-ui.com/docs/guides/templates/subtemplates Subtemplates}
+ */
+export function defineComponent<
+  M extends Record<string, any> = Record<string, any>,
+  S extends Record<string, any> = {},
+  St extends Record<string, any> = {},
+  P extends Record<string, any> = {},
+>(options?: DefineComponentOptions<M, S, St, P>): Template;

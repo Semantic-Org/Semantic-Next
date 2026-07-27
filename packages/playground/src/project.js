@@ -32,12 +32,16 @@ export class PlaygroundProject {
     sandboxUrl = '/sandbox/',
     workerUrl,
     serving,
+    // HTML injected into the <head> of every served document at build time,
+    // including documents the project authors itself — editor source is untouched
+    headHTML,
     sessionId = generateId(),
   } = {}) {
     const scope = sandboxUrl.endsWith('/') ? sandboxUrl : `${sandboxUrl}/`;
     this.sessionId = sessionId;
     this.importMap = importMap;
     this.cdnBaseUrl = cdnBaseUrl;
+    this.headHTML = headHTML;
     this.files = normalizeFiles(files);
     this.diagnostics = {};
     this.listeners = new Map();
@@ -111,6 +115,7 @@ export class PlaygroundProject {
         files: this.files,
         importMap: this.importMap,
         cdnBaseUrl: this.cdnBaseUrl,
+        headHTML: this.headHTML,
       }, { timeout: 30000 });
       if (sequence !== this.buildCounter) {
         return;
@@ -138,6 +143,14 @@ export class PlaygroundProject {
 
   async getCompletions(file, offset) {
     return this.worker.request('getCompletions', { sessionId: this.sessionId, file, offset });
+  }
+
+  async getCompletionDetail(file, offset, name) {
+    return this.worker.request('getCompletionDetail', { sessionId: this.sessionId, file, offset, name });
+  }
+
+  async getSignatureHelp(file, offset) {
+    return this.worker.request('getSignatureHelp', { sessionId: this.sessionId, file, offset });
   }
 
   async getHover(file, offset) {

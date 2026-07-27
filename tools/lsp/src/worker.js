@@ -1,5 +1,7 @@
-import { LanguageService } from './language-service.js';
+import { TemplateCompiler } from '@semantic-ui/compiler';
+
 import { analyzeComponent } from './component-analyzer.js';
+import { LanguageService } from './language-service.js';
 
 /*
   Browser Worker entry point for the SUI LSP.
@@ -15,9 +17,10 @@ const service = new LanguageService({
   resolver: {
     readFile: (p) => files.get(p) ?? null,
     exists: (p) => files.has(p),
-    listDir: (dir) => [...files.keys()]
-      .filter(k => k.startsWith(dir + '/') && !k.substring(dir.length + 1).includes('/'))
-      .map(k => k.substring(k.lastIndexOf('/') + 1)),
+    listDir: (dir) =>
+      [...files.keys()]
+        .filter(k => k.startsWith(dir + '/') && !k.substring(dir.length + 1).includes('/'))
+        .map(k => k.substring(k.lastIndexOf('/') + 1)),
     resolve: (from, rel) => {
       const dir = from.substring(0, from.lastIndexOf('/'));
       return dir + '/' + rel.replace(/^\.\//, '');
@@ -25,6 +28,9 @@ const service = new LanguageService({
     glob: () => [...files.keys()],
   },
   analyzer: (source, filePath) => analyzeComponent(source, filePath),
+  // injected statically — a dynamic bare-specifier import inside a bundled
+  // worker resolves unpredictably across dev servers and builds
+  compiler: TemplateCompiler,
 });
 
 self.onmessage = async (event) => {
@@ -64,6 +70,13 @@ async function handleRequest(method, params) {
             triggerCharacters: ['{', '#', '>', '<', '@', '"', "'", ' ', '.'],
           },
           hoverProvider: true,
+          signatureHelpProvider: {
+            // space opens the hints on {formatDate date 'h:mm a'}, paren on the
+            // {formatDate(date, 'h:mm a')} form. Everything that isn't a helper
+            // call answers null, so the extra requests never surface a tooltip
+            triggerCharacters: [' ', '(', ','],
+            retriggerCharacters: [')'],
+          },
         },
       };
 
@@ -77,6 +90,12 @@ async function handleRequest(method, params) {
 
     case 'textDocument/hover':
       return service.getHover(
+        params.textDocument.uri,
+        params.position,
+      );
+
+    case 'textDocument/signatureHelp':
+      return service.getSignatureHelp(
         params.textDocument.uri,
         params.position,
       );

@@ -106,8 +106,8 @@ export interface TrackWritesOptions {
   keyed?: boolean;
   /** Identity fields for keyed paths, first present wins (default ['id', '_id', 'hash', 'key']) */
   keys?: string[];
-  /** Fires per observed write with the key path from the root. Implies the proxy strategy under 'auto', so its paths are positional. */
-  onWrite?: (path: string[], target: object, key: string) => void;
+  /** Fires per observed write with the key path from the root. Implies the proxy strategy under 'auto', so its paths are positional. A symbol key has no dot-path form, so it reaches `onWrite` but never the returned `paths`. */
+  onWrite?: (path: Array<string | symbol>, target: object, key: string | symbol) => void;
   /** Clone used for snapshots (defaults to clone) */
   clone?: (value: unknown) => unknown;
   /** Equality deciding what counts as a change across the snapshot path diff, the no-paths fast path, and exotic snapshots (defaults to isEqual). The same option detectChanges takes */
@@ -115,7 +115,8 @@ export interface TrackWritesOptions {
 }
 
 /**
- * Result of trackWrites
+ * Result of trackWrites when paths are collected (the default). With
+ * `returnPaths: false` only `changed` and `result` come back.
  */
 export interface TrackWritesResult<R> {
   /** Whether the callback changed the value */
@@ -129,7 +130,7 @@ export interface TrackWritesResult<R> {
    * net leaf differences (id-addressed `field[#id]` for keyed arrays by default).
    * A wholesale change to a non-container value reports path ''.
    */
-  paths?: string[];
+  paths: string[];
 }
 
 /**
@@ -180,7 +181,7 @@ export function trackWrites<T, R = unknown>(
   value: T,
   callback: (value: T) => R,
   options?: TrackWritesOptions,
-): { changed: boolean; result: R; paths: string[]; };
+): TrackWritesResult<R>;
 
 /** The kind of read an onRead event reports */
 export type ReadType = 'value' | 'has' | 'structure';
@@ -441,8 +442,10 @@ export function extend<T extends object, S extends object[]>(
  * Options for deep extend operations
  */
 export interface DeepExtendOptions {
-  /** Preserve custom class instances instead of flattening them to plain objects */
+  /** Preserve custom class instances instead of flattening them to plain objects (default true) */
   preserveNonCloneable?: boolean;
+  /** Preserve DOM nodes by reference instead of cloning them (default true) */
+  preserveDOM?: boolean;
 }
 
 /**
@@ -506,7 +509,7 @@ export interface AssignInPlaceOptions {
 export function assignInPlace<T extends object, S extends object>(
   target: T,
   source: S,
-  options?: AssignInPlaceOptions & { returnChanged: true; },
+  options: AssignInPlaceOptions & { returnChanged: true; },
 ): boolean;
 export function assignInPlace<T extends object, S extends object>(
   target: T,

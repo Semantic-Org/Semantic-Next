@@ -1,3 +1,17 @@
+import type { Dependency } from './dependency.js';
+import type { Reaction } from './reaction.js';
+
+/**
+ * The value shape a Signal accepts on write. Object values, including the
+ * elements of an object array, accept a partial with extra keys so a caller can
+ * hand back a reshaped record. Primitive values are written as themselves.
+ * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#set set}
+ */
+export type SignalWriteValue<T> = T extends null | undefined ? any
+  : T extends Array<infer Element> ? Array<Element extends object ? Partial<Element> & Record<string, any> : Element>
+  : T extends object ? Partial<T> & Record<string, any>
+  : T;
+
 /**
  * Configuration options for creating a new Signal instance.
  * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#options Signal Options}
@@ -83,11 +97,31 @@ export class Signal<T> {
 
   /**
    * Creates a new Signal with an initial value.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#constructor constructor}
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#signal constructor}
    * @param initialValue - The initial value to store in the signal
    * @param options - Configuration options for the signal's behavior
    */
   constructor(initialValue?: T, options?: SignalOptions<T>);
+
+  /**
+   * The dependency tracking every reaction subscribed to this signal. `depend()`
+   * and `notify()` are the supported way to reach it.
+   */
+  readonly dependency: Dependency;
+
+  /**
+   * The backing reaction of a derived or computed signal, `null` on a plain
+   * signal. `stop()` tears it down.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived-signals#stop stop}
+   */
+  reaction: Reaction | null;
+
+  /**
+   * Debugging context for the signal, populated only when tracing is enabled.
+   * Carries the current `value` alongside anything passed to `setContext`.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/debugging Debugging Reactivity}
+   */
+  readonly context: Record<string, any> | undefined;
 
   /**
    * Sets debugging context on the signal, replacing any existing context.
@@ -124,12 +158,7 @@ export class Signal<T> {
    * Notifies all reactive contexts that depend on this Signal to re-run.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#value value}
    */
-  set value(
-    newValue: T extends null | undefined ? any
-      : T extends Array<any> ? Array<Partial<T[number]> & Record<string, any>>
-      : T extends object ? Partial<T> & Record<string, any>
-      : T,
-  );
+  set value(newValue: SignalWriteValue<T>);
 
   /**
    * Gets the current value and establishes a reactive dependency.
@@ -144,12 +173,7 @@ export class Signal<T> {
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#set set}
    * @param newValue - The new value to set
    */
-  set(
-    newValue: T extends null | undefined ? any
-      : T extends Array<any> ? Array<Partial<T[number]> & Record<string, any>>
-      : T extends object ? Partial<T> & Record<string, any>
-      : T,
-  ): void;
+  set(newValue: SignalWriteValue<T>): void;
 
   /**
    * Registers this signal as a dependency in the current reactive context
@@ -177,7 +201,7 @@ export class Signal<T> {
   /**
    * Stops the backing reaction of a derived or computed signal. A no-op on a
    * plain signal, which has no producer to tear down.
-   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#stop stop}
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/derived-signals#stop stop}
    */
   stop(): void;
 
@@ -404,7 +428,7 @@ export class Signal<T> {
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#removeitem removeItem}
    * @param id - Id of the object to remove
    */
-  removeItem(id: string): void;
+  removeItem<U extends any[]>(this: Signal<U>, id: string): void;
 
   // Boolean method (only available when T is or extends boolean)
   /**
@@ -453,6 +477,14 @@ export class Signal<T> {
    * @returns Array of the id values found
    */
   getIds(item: { _id?: string; id?: string; hash?: string; key?: string; }): string[];
+
+  /**
+   * A primitive item carries no id fields, so it is returned wrapped in a
+   * single-element array.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getids getIds}
+   * @param item - Primitive to wrap
+   * @returns The item as a single-element array
+   */
   getIds(item: string): [string];
 
   /**
@@ -463,6 +495,13 @@ export class Signal<T> {
    * @returns The resolved id, or undefined if none is present
    */
   getId(item: { _id?: string; id?: string; hash?: string; key?: string; }): string | undefined;
+
+  /**
+   * A primitive item is its own id and is returned unchanged.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getid getId}
+   * @param item - Primitive to read an id from
+   * @returns The item itself
+   */
   getId(item: string): string;
 
   /**

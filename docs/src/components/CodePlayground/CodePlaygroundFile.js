@@ -33,7 +33,11 @@ const createComponent = ({ self, settings, state, data, reaction, findParent, di
       return intelligence({
         fileName: filename,
         completions: (file, offset) => parent.project.getCompletions(file, offset),
+        completionDetail: (file, offset, name) => parent.project.getCompletionDetail(file, offset, name),
+        signatures: (file, offset) => parent.project.getSignatureHelp(file, offset),
         hover: (file, offset) => parent.project.getHover(file, offset),
+        // jsdoc @link urls point at production docs; serve them from the current host
+        resolveLink: (url) => url.replace(/^https:\/\/next\.semantic-ui\.com(?=\/)/, ''),
       });
     }
     return [];
@@ -61,6 +65,14 @@ const createComponent = ({ self, settings, state, data, reaction, findParent, di
       },
       getFileExtensions: self.getFileExtensions,
       theme: codeMirrorCSS,
+    });
+    // lsp tooltips render markdown links; open them in a new tab so the session survives
+    parent.addEventListener('click', (event) => {
+      const anchor = event.target.closest?.('a');
+      if (anchor && anchor.closest('.cm-lsp-documentation')) {
+        event.preventDefault();
+        window.open(anchor.getAttribute('href'), '_blank', 'noopener');
+      }
     });
   },
 

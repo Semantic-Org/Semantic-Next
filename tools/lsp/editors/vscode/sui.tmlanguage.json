@@ -45,11 +45,11 @@
       "patterns": [
         {
           "name": "keyword.control.sui",
-          "match": "#(if|each|async|snippet|rerender|guard|html)\\b"
+          "match": "#(if|each|match|async|snippet|rerender|guard|html|fn)\\b"
         },
         {
           "name": "keyword.control.sui",
-          "match": "\\/(if|each|async|snippet|rerender|guard)\\b"
+          "match": "\\/(if|each|match|async|snippet|rerender|guard)\\b"
         },
         {
           "name": "keyword.control.sui",
@@ -308,7 +308,7 @@
         },
         {
           "name": "meta.block.close.sui",
-          "match": "(\\{)\\s*(\\/(?:if|each|async|snippet|rerender|guard))\\s*(\\})",
+          "match": "(\\{)\\s*(\\/(?:if|each|match|async|snippet|rerender|guard))\\s*(\\})",
           "captures": {
             "1": { "name": "punctuation.definition.block.begin.sui" },
             "2": { "name": "keyword.control.sui" },

@@ -1,5 +1,13 @@
-<h2>Attribute: copied through JSON</h2>
-<event-log entries={entries}></event-log>
+<ui-button primary>Toggle ({indeterminate})</ui-button>
 
-<h2>Property: the value itself</h2>
-<event-log .entries={entries}></event-log>
+<label>
+  <input type="checkbox" indeterminate={indeterminate}>
+  <code>indeterminate={indeterminate}</code>
+  <span class="note">attribute, but no such attribute exists</span>
+</label>
+
+<label>
+  <input type="checkbox" .indeterminate={indeterminate}>
+  <code>.indeterminate={indeterminate}</code>
+  <span class="note">property, shows the mixed state</span>
+</label>

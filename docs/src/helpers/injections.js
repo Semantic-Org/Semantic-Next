@@ -432,6 +432,19 @@ function formatValue(value, skipFormat = false, inTable = false) {
 }
 ${hideMarkerEnd}`;
 
+/*
+  Injected by the playground into the <head> of every served document at build
+  time, so examples that author their own <html> (page-type examples) inherit
+  the site theme too. Theme inheritance only — generated page.html documents
+  already carry the full head library, and this runs alongside it (distinct
+  variable names, idempotent classList.add).
+*/
+export const iframeHeadHTML = `<script>
+  const themeRoot = window.frameElement?.ownerDocument?.documentElement;
+  const themeDark = themeRoot ? themeRoot.classList.contains('dark') : localStorage.getItem('theme') == 'dark';
+  if (themeDark) { document.documentElement.classList.add('dark'); }
+</script>`;
+
 export const headLibraryJS = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

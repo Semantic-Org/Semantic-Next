@@ -2836,3 +2836,21 @@ One more, small but repeatable: `{error}` is an async-block keyword in SUI templ
 *— Claude (Fable 5), 2026-07-09*
 
 *"The frame is a search strategy, not a conclusion — license the hunt, then make the null result worth as much as the trophy."*
+
+---
+**Evidence has a chain of custody, and blind streams are the only witnesses worth two.** The sqlite floor's merge gate ran a shape I want to hand forward whole: a blog post arrived claiming SQLite's defaults were wrong, and instead of believing it OR dismissing it, every claim walked a custody chain — the official PRAGMA doc fetched verbatim, the opposing document (sqlite's own flextypegood page) steelmanned at full strength, then a one-line probe on OUR exact binding. Three community claims died on the probe bench; one (STRICT tables) became engine-level armor; and the durability stamp got STRONGER when the probe revealed our "divergent" choice was the engine's own shipped default all along. Separately, the maintainer split research into a collector that only retrieves and a reasoner that only judges, while the clean-room adversary never saw either — so when two blind streams independently failed to reproduce the same feared bug, we could DOWNGRADE a blind-spot entry with confidence instead of cargo-culting fear into the record. Convergence you architected for is signal; convergence from shared context is just an echo.
+
+The week's other keeper: the boundary-adjacent law held a fifth time (the documented escape hatch itself was the brick — drop-the-shadow-table advice that orphaned three triggers into a boot loop, one branch away from a green pin), and a dev-only warning turned out to be dead in every default posture because server-side NODE_ENV is nobody's habit — a warning that never fires is worse than none, because the record says you're protected. And the human lesson under all of it: the maintainer's credits were his dining budget, which made token economics a design constraint — the stamped brief, the scope file's resumption note, the skill distillation are not bureaucracy, they're what make any context (including this one, compacting tonight) safely disposable. Write so your own forgetting doesn't matter.
+
+*— Claude (Fable 5), 2026-07-25*
+
+*"Probe before you believe, isolate before you trust convergence, and leave notes good enough that the next you needs no séance."*
+
+---
+**A missing feature can be three stacked bugs, and your probes can be the fourth.** Template diagnostics in the REPL "didn't work." The truth was a stack: the language service imported `TemplateCompiler` from a package that never exported it (silently dead for its whole life), the diagnostic ranges used a hardcoded `character + 10` that overflowed short lines (VS Code clamps out-of-range LSP positions, @codemirror/lsp-client throws, and one bad range kills the whole publish), and — the layer that nearly beat me — the AST panel compiled every keystroke non-recoverably, so the very act of typing an invalid template to TEST diagnostics tore down the playground before the squiggle could render. Each layer's symptom was identical: zero squiggles. Peel, verify the layer in isolation (direct worker RPC, then an isolated client+editor repro, then the real page), peel again. And the fourth bug was mine: probing the live page with vite-URL dynamic imports triggered dep re-optimization full reloads, killing the page I was observing. When the patient keeps dying on the table mid-diagnosis, check whether the instruments are the murder weapon.
+
+Also carried forward: the day's best debugging tool was the worker's own RPC protocol — five lines of postMessage beats an afternoon of DOM archaeology; hover tooltips left open by synthetic mousemove events silently swallow every subsequent a11y-coordinate click (dismiss before you click, always); and CM6 virtualizes long documents, so `textContent` tails lie about what you just deleted. The maintainer's package-option bar is worth keeping verbatim: not "how many consumers exist" but "would the ideal version include this" — argued as mechanism-in-the-package, policy-in-the-host.
+
+*— Claude (Fable 5), 2026-07-26*
+
+*"Identical symptoms are not one bug — peel a layer, prove it in isolation, and make sure the corpse isn't your own probe's."*

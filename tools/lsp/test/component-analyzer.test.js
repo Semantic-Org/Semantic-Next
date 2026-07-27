@@ -71,6 +71,75 @@ describe('ComponentAnalyzer', () => {
     });
   });
 
+  describe('literal defaults', () => {
+    const source = `
+      import { defineComponent } from '@semantic-ui/component';
+      const defaultState = {
+        notifications: ['Welcome!', 'New message'],
+        emptyList: [],
+        config: { retries: 3, tags: ['a', 'b'] },
+        dynamic: [Date.now()],
+      };
+      defineComponent({ tagName: 'literal-defaults', defaultState });
+    `;
+    const model = analyzeComponent(source, '/virtual/literal-defaults.js');
+    const field = (name) => model.state.find(s => s.name === name);
+
+    it('materializes populated array defaults', () => {
+      expect(field('notifications').inferredType).toBe('array');
+      expect(field('notifications').defaultValue).toEqual(['Welcome!', 'New message']);
+    });
+
+    it('materializes nested object defaults', () => {
+      expect(field('config').defaultValue).toEqual({ retries: 3, tags: ['a', 'b'] });
+    });
+
+    it('keeps empty arrays and refuses dynamic values', () => {
+      expect(field('emptyList').defaultValue).toEqual([]);
+      // no default beats a wrong default
+      expect(field('dynamic').defaultValue).toBeUndefined();
+    });
+
+    it('captures trailing comments as descriptions', () => {
+      const model = analyzeComponent(
+        `
+        import { defineComponent } from '@semantic-ui/component';
+        const defaultSettings = {
+          rowTemplate: null, // row template to display
+          headers: [], // the header rows of the table
+          rows: [],
+        };
+        const defaultState = {
+          // a leading comment heads a group, not the field below it
+          openSections: [], // array of indexes that are open
+        };
+        defineComponent({ tagName: 'described', defaultSettings, defaultState });
+      `,
+        '/virtual/described.js',
+      );
+      const setting = (name) => model.settings.find(s => s.name === name);
+      expect(setting('rowTemplate').description).toBe('row template to display');
+      expect(setting('headers').description).toBe('the header rows of the table');
+      expect(setting('rows').description).toBeUndefined();
+      expect(model.state[0].description).toBe('array of indexes that are open');
+    });
+
+    it('types class instances as their class', () => {
+      const model = analyzeComponent(
+        `
+        import { defineComponent } from '@semantic-ui/component';
+        import { Template } from '@semantic-ui/templating';
+        const defaultSettings = { rowTemplate: new Template() };
+        defineComponent({ tagName: 'class-defaults', defaultSettings });
+      `,
+        '/virtual/class-defaults.js',
+      );
+      const rowTemplate = model.settings.find(s => s.name === 'rowTemplate');
+      expect(rowTemplate.inferredType).toBe('Template');
+      expect(rowTemplate.defaultValue).toBeUndefined();
+    });
+  });
+
   describe('menu (complex, self-referential)', () => {
     const model = analyze('src/primitives/menu/menu.js');
 

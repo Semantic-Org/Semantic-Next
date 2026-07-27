@@ -26,7 +26,11 @@ export class Scheduler {
   static afterFlushCallbacks: Array<() => void>;
 
   /** Deferred backing the pending `settled()` promise, or null when nobody waits. */
-  static settledDeferred: { promise: Promise<void>; resolve: () => void; } | null;
+  static settledDeferred: {
+    promise: Promise<void>;
+    resolve: () => void;
+    reject: (reason?: any) => void;
+  } | null;
 
   /** Whether a flush is scheduled on the microtask queue. */
   static isFlushScheduled: boolean;

@@ -1,5 +1,7 @@
-import { LanguageService } from './language-service.js';
+import { TemplateCompiler } from '@semantic-ui/compiler';
+
 import { analyzeComponent } from './component-analyzer.js';
+import { LanguageService } from './language-service.js';
 
 /*
   Browser entry point — in-memory file resolver for environments without fs.
@@ -33,9 +35,10 @@ export function createService(files) {
   return new LanguageService({
     resolver,
     analyzer: (source, filePath) => analyzeComponent(source, filePath),
+    compiler: TemplateCompiler,
   });
 }
 
-export { LanguageService } from './language-service.js';
 export { analyzeComponent } from './component-analyzer.js';
+export { LanguageService } from './language-service.js';
 export { SpecRegistry } from './spec-registry.js';

@@ -19,6 +19,7 @@
       "importmap": "./dist/cdn/index.min.js"
     },
     "./template": {
+      "types": "./types/template.d.ts",
       "import": "./src/template.js"
     }
   },

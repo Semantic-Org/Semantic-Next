@@ -1,3 +1,4 @@
+import { iframeHeadHTML } from '@helpers/injections.js';
 import { defineComponent } from '@semantic-ui/component';
 import { PlaygroundProject } from '@semantic-ui/playground';
 
@@ -31,6 +32,7 @@ const createComponent = ({ self, el, settings, state, $, isServer }) => ({
     self.project = settings.project ?? new PlaygroundProject({
       files: settings.files,
       sandboxUrl: settings.sandboxURL,
+      headHTML: iframeHeadHTML,
     });
     self.unsubscribe = [
       self.project.on('buildDone', () => self.showPreview()),

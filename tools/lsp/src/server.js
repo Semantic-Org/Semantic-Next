@@ -1,13 +1,8 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import {
-  createConnection,
-  ProposedFeatures,
-  TextDocuments,
-  TextDocumentSyncKind,
-} from 'vscode-languageserver/node.js';
+import { createConnection, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node.js';
 
-import { LanguageService, uriToPath } from './language-service.js';
 import { analyzeComponent } from './component-analyzer.js';
+import { LanguageService, uriToPath } from './language-service.js';
 import { createNodeResolver } from './node.js';
 
 /*
@@ -37,6 +32,13 @@ connection.onInitialize((params) => {
         triggerCharacters: ['{', '#', '>', '<', '@', '"', "'", ' ', '.'],
       },
       hoverProvider: true,
+      signatureHelpProvider: {
+        // space opens the hints on {formatDate date 'h:mm a'}, paren on the
+        // {formatDate(date, 'h:mm a')} form. Everything that isn't a helper
+        // call answers null, so the extra requests never surface a tooltip
+        triggerCharacters: [' ', '(', ','],
+        retriggerCharacters: [')'],
+      },
     },
   };
 });
@@ -70,6 +72,13 @@ connection.onHover((params) => {
   if (!document) { return null; }
   service.didOpen(document.uri, document.getText(), document.version);
   return service.getHover(document.uri, params.position);
+});
+
+connection.onSignatureHelp((params) => {
+  const document = documents.get(params.textDocument.uri);
+  if (!document) { return null; }
+  service.didOpen(document.uri, document.getText(), document.version);
+  return service.getSignatureHelp(document.uri, params.position);
 });
 
 documents.listen(connection);

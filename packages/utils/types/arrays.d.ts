@@ -32,6 +32,11 @@ export type MatchProperties<T> = {
 };
 
 /**
+ * An array nested to any depth, the input {@link flatten} accepts
+ */
+export type NestedArray<T> = Array<T | NestedArray<T>>;
+
+/**
  * Removes duplicates from an array
  * @see {@link https://next.semantic-ui.com/docs/api/utils/arrays#unique unique}
  *
@@ -185,12 +190,12 @@ export function findIndex<T>(array: T[], callbackOrValue: T | ArrayCallback<T>):
  *
  * @param array - The array to modify
  * @param callbackOrValue - Value to remove or function to test elements
- * @returns true if an element was removed
+ * @returns How many elements were removed
  *
  * @example
  * ```ts
- * remove([1, 2, 3], 2) // removes 2 from array
- * remove([1, 2, 3], x => x > 2) // removes 3 from array
+ * remove([1, 2, 3], 2) // removes 2 from array, returns 1
+ * remove([1, 2, 3], x => x > 2) // removes 3 from array, returns 1
  * ```
  */
 export function remove<T>(array: T[], callbackOrValue: T | ArrayCallback<T>): number;
@@ -291,18 +296,19 @@ export function sum(values: number[]): number;
 export function where<T extends object>(array: T[], properties: MatchProperties<T>): T[];
 
 /**
- * Flattens a nested array structure
+ * Flattens a nested array structure to any depth
  * @see {@link https://next.semantic-ui.com/docs/api/utils/arrays#flatten flatten}
  *
  * @param arr - The array to flatten
- * @returns A new flattened array
+ * @returns A new fully flattened array
  *
  * @example
  * ```ts
  * flatten([1, [2, 3], [4, [5]]]) // returns [1, 2, 3, 4, 5]
+ * flatten([1, [2, [3, [4]]]]) // returns [1, 2, 3, 4]
  * ```
  */
-export function flatten<T>(arr: (T | T[])[]): T[];
+export function flatten<T>(arr: NestedArray<T>): T[];
 
 /**
  * Tests whether at least one element in the array passes the test
@@ -333,8 +339,8 @@ export const any: typeof some;
  *
  * @param arr - Array to sort
  * @param key - Key or array of keys to sort by
- * @param comparator - Optional custom comparison function. For multi-key sorting, receives key index as fifth parameter
- * @returns A new sorted array
+ * @param comparator - Optional custom comparison function, always called with the index of the key being compared as its fifth argument
+ * @returns A new sorted array (the input is not mutated)
  *
  * @example
  * ```ts
@@ -355,7 +361,7 @@ export const any: typeof some;
 export function sortBy<T>(
   arr: T[],
   key: keyof T | (keyof T)[],
-  comparator?: (a: T[keyof T], b: T[keyof T], objA: T, objB: T, keyIndex?: number) => number,
+  comparator?: (a: T[keyof T], b: T[keyof T], objA: T, objB: T, keyIndex: number) => number,
 ): T[];
 
 /**

@@ -1,4 +1,4 @@
-import { hoverTooltips, LSPClient, serverCompletion, serverDiagnostics } from '@codemirror/lsp-client';
+import { hoverTooltips, LSPClient, serverCompletion, serverDiagnostics, signatureHelp } from '@codemirror/lsp-client';
 
 /*
   Browser LSP client — connects to the SUI language server Worker.
@@ -49,6 +49,7 @@ export function createClient({ timeout = 10000 } = {}) {
       serverCompletion(),
       hoverTooltips(),
       serverDiagnostics(),
+      signatureHelp(),
     ],
   }).connect(transport);
 

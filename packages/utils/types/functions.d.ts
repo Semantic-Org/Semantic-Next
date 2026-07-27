@@ -48,7 +48,8 @@ export interface DebouncedFunction<T extends (...args: any[]) => any> {
   (
     ...args: Parameters<T>
   ): ReturnType<T> extends Promise<any> ? Promise<Awaited<ReturnType<T>>> : Promise<ReturnType<T>> | ReturnType<T>;
-  cancel(): void;
+  /** Drops the pending invocation and rejects every outstanding call with a `CANCELLED` error */
+  cancel(): Promise<void>;
   flush(): ReturnType<T> extends Promise<any> ? Promise<Awaited<ReturnType<T>>> : ReturnType<T>;
   pending(): boolean;
 }
@@ -60,7 +61,8 @@ export interface ThrottledFunction<T extends (...args: any[]) => any> {
   (
     ...args: Parameters<T>
   ): ReturnType<T> extends Promise<any> ? Promise<Awaited<ReturnType<T>>> : Promise<ReturnType<T>> | ReturnType<T>;
-  cancel(): void;
+  /** Drops the pending invocation and rejects every outstanding call with a `CANCELLED` error */
+  cancel(): Promise<void>;
   flush(): ReturnType<T> extends Promise<any> ? Promise<Awaited<ReturnType<T>>> : ReturnType<T>;
   pending(): boolean;
 }
@@ -88,6 +90,41 @@ export function noop(...args: any[]): void;
  * ```
  */
 export function identity<T>(value: T): T;
+
+/**
+ * Always returns true. A shared predicate for "accept everything" slots, so a
+ * callsite passing it allocates nothing.
+ *
+ * @example
+ * ```ts
+ * const shouldRender = filter ?? returnsTrue;
+ * ```
+ */
+export function returnsTrue(): true;
+
+/**
+ * Always returns false. The counterpart to {@link returnsTrue}, and what an
+ * equality slot takes to declare every comparison unequal.
+ *
+ * @example
+ * ```ts
+ * // never treat two values as equal, so every write notifies
+ * signal(value, { equality: returnsFalse });
+ * ```
+ */
+export function returnsFalse(): false;
+
+/**
+ * Alias of {@link identity}. Returns its first argument unchanged, named for
+ * slots that read as "pass the value through".
+ */
+export const returnsSelf: typeof identity;
+
+/**
+ * Alias of {@link noop}. Swallows its arguments and returns undefined, named for
+ * slots that read as "produce nothing".
+ */
+export const returnsUndefined: typeof noop;
 
 /**
  * Wraps a value in a function if it isn't already a function
@@ -130,8 +167,8 @@ export function configured<F, C>(fn: F, config: C): F & { config: C; };
  * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#memoize memoize}
  *
  * @param fn - Function to memoize
- * @param hashFunction - Optional function to generate cache keys
- * @returns Memoized function
+ * @param hashFunction - Receives the whole argument list as one array and returns the cache key (defaults to hashing the JSON form)
+ * @returns Memoized function. The cache is closed over, so it lives as long as the returned function
  *
  * @example
  * ```ts
@@ -146,7 +183,7 @@ export function configured<F, C>(fn: F, config: C): F & { config: C; };
 export function memoize<T extends (...args: any[]) => any>(
   fn: T,
   hashFunction?: (args: Parameters<T>) => string | number,
-): T & { cache: Map<string | number, ReturnType<T>>; };
+): T;
 
 /**
  * Options for the wait function

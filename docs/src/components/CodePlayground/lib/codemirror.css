@@ -5,6 +5,13 @@
 
 /* Editor chrome */
 .cm-editor {
+  /* tooltips mount inside the editor element, so intelligence UI vars live here */
+  --font-family: var(--page-font, sans-serif);
+  --hairline: rgba(255, 255, 255, 0.08);
+  --ac-fg: #cdd6f4;
+  --ac-fg-dim: #9399b2;
+  --ac-accent: #89b4fa;
+
   background: var(--playground-code-background);
   color: var(--playground-code-default-color);
   font-size: var(--playground-code-font-size);
@@ -101,28 +108,25 @@
 
 /* Tooltips */
 .cm-tooltip.cm-tooltip {
-  border: var(--border);
+  border: 1px solid var(--hairline);
   border-radius: var(--border-radius);
   padding: var(--padding-2xs) var(--padding-xs);
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  box-shadow: var(--raised-shadow);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   background: var(--black) var(--subtle-angled-gradient);
 
 &.cm-tooltip-autocomplete.cm-tooltip {
   min-width: 340px;
   max-width: 500px;
   border-radius: 6px;
-  padding: 4px 0;
+  padding: 3px 0;
   z-index: 10;
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.04);
 
   & > ul {
     list-style: none;
     margin: 0;
     padding: 0;
-    max-height: 220px;
+    max-height: 230px;
     overflow-y: auto;
 
     &::-webkit-scrollbar {
@@ -141,12 +145,12 @@
     & > li {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 2px 8px;
+      gap: 7px;
+      padding: 1px 8px;
       cursor: default;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      line-height: 24px;
+      font-size: 12.5px;
+      line-height: 21px;
       color: var(--ac-fg);
       min-width: 0;
 
@@ -158,15 +162,21 @@
         background: #152d37;
       }
 
+      .cm-completionMatchedText {
+        text-decoration: none;
+        color: var(--ac-accent);
+        font-weight: 600;
+      }
+
       .cm-completionIcon {
         flex-shrink: 0;
-        border-radius: 4px;
-        width: 20px;
-        height: 20px;
+        border-radius: 3px;
+        width: 16px;
+        height: 16px;
         display: none;
         align-items: center;
         justify-content: center;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 600;
         font-style: normal;
         opacity: 1;
@@ -295,6 +305,157 @@
   }
 }
 
+}
+
+/* Intelligence tooltips - hover, completion info panel, signature help */
+.cm-tooltip.cm-completionInfo {
+  max-width: 440px;
+  margin-left: 4px;
+  padding: 7px 9px;
+}
+.cm-intelligence-hover,
+.cm-intelligence-info,
+.cm-intelligence-signature {
+  max-width: 440px;
+  font-size: 12.5px;
+  line-height: 1.5;
+
+  & > code {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--ac-fg);
+  }
+
+  .cm-intelligence-docs {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--hairline);
+    font-family: var(--font-family);
+    color: var(--ac-fg-dim);
+
+    p, ul {
+      margin: 0;
+    }
+    p + p, p + ul, ul + p {
+      margin-top: 6px;
+    }
+    ul {
+      padding-left: 18px;
+    }
+    strong {
+      color: var(--ac-fg);
+    }
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--ac-fg);
+    }
+    pre {
+      margin: 6px 0 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--ac-fg);
+    }
+    a {
+      color: var(--ac-accent);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .cm-intelligence-shape {
+    display: block;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--hairline);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    color: var(--ac-fg);
+  }
+
+  .cm-intelligence-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--hairline);
+    font-family: var(--font-family);
+    font-size: 13px;
+
+    a {
+      color: var(--ac-accent);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+.cm-signature-activeParameter {
+  color: var(--ac-accent);
+  font-weight: 600;
+}
+
+/* LSP tooltips (template files) - same typography as the intelligence tooltips */
+.cm-lsp-documentation {
+  max-width: 440px;
+  font-family: var(--font-family);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ac-fg-dim);
+
+  p {
+    margin: 0;
+  }
+  p + p {
+    margin-top: 6px;
+  }
+  strong {
+    color: var(--ac-fg);
+  }
+  em {
+    /* descriptions read a step lighter than the header line */
+    color: color-mix(in srgb, var(--ac-fg-dim) 72%, transparent);
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ac-fg);
+  }
+  pre {
+    margin: 6px 0 0;
+    padding-top: 6px;
+    border-top: 1px solid var(--hairline);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  a {
+    color: var(--ac-accent);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+.cm-tooltip.cm-lsp-signature-tooltip {
+  max-width: 440px;
+
+  .cm-lsp-active-parameter {
+    color: var(--ac-accent);
+    font-weight: 600;
+  }
 }
 
 
