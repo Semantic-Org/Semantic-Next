@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   formatAttributeDoc,
+  getAttributeBindingAtOffset,
   getBlockKeywordAtOffset,
   getCompletionContext,
   getHelperCallAtOffset,
@@ -486,6 +487,31 @@ describe('getScopeVariables', () => {
     const nested = '{#each item in outer}{#each item in item.children}{|}{/each}{/each}';
     const item = at(nested).find(variable => variable.name === 'item');
     expect(item.description).toBe('current item of `item.children`');
+  });
+});
+
+describe('getAttributeBindingAtOffset', () => {
+  const at = (text, marker = '|') => {
+    const offset = text.indexOf(marker);
+    return getAttributeBindingAtOffset(text.replace(marker, ''), offset);
+  };
+
+  it('resolves an @event binding in attribute position', () => {
+    expect(at('<div class="toggle" @cl|ick={toggleCheckbox}>')).toEqual({ kind: 'event', name: 'click' });
+  });
+
+  it('resolves a .property binding in attribute position', () => {
+    expect(at('<ui-chart .da|ta={getComplexData}>')).toEqual({ kind: 'property', name: 'data' });
+  });
+
+  it('ignores dotted paths inside expressions', () => {
+    expect(at('<li>{fruit.ta|ste}</li>')).toBeNull();
+    expect(at('<div @click={handlers.on|Click}>')).toBeNull();
+  });
+
+  it('ignores plain attributes and text', () => {
+    expect(at('<div cla|ss="toggle">')).toBeNull();
+    expect(at('<div>email@exa|mple.com</div>')).toBeNull();
   });
 });
 

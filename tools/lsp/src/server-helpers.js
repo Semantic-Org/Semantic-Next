@@ -432,6 +432,27 @@ export function getWordAtOffset(text, offset) {
 }
 
 /*
+  The @event or .property attribute an offset lands on: <div @click={fn}> or
+  <input .value={text}>. Only in attribute position — inside a tag, outside
+  braces — so {fruit.taste} stays an expression and never reads as a property
+  binding. Mirrors the renderer's analyzePosition rule (whitespace, prefix, name).
+*/
+export function getAttributeBindingAtOffset(text, offset) {
+  if (findExpressionStart(text, offset) !== -1) { return null; }
+  let start = offset;
+  while (start > 0 && /[\w-]/.test(text[start - 1])) { start--; }
+  let end = offset;
+  while (end < text.length && /[\w-]/.test(text[end])) { end++; }
+  const name = text.substring(start, end);
+  const prefix = text[start - 1];
+  if (!name || (prefix !== '@' && prefix !== '.')) { return null; }
+  if (!/\s/.test(text[start - 2] ?? '')) { return null; }
+  const before = text.substring(0, start - 1);
+  if (before.lastIndexOf('<') <= before.lastIndexOf('>')) { return null; }
+  return { kind: prefix === '@' ? 'event' : 'property', name };
+}
+
+/*
   The single path segment under the cursor: hovering fruit in {fruit.taste}
   yields fruit. Only a head segment can name a binding, helper, or field —
   anything after a dot is a property access on it.

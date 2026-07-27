@@ -2,6 +2,7 @@ import { formatBlockDoc, getBlock, getBlockKeywords } from './block-registry.js'
 import { formatHelperSignature, getHelper, getHelperSignature, helpers } from './helper-registry.js';
 import {
   formatAttributeDoc,
+  getAttributeBindingAtOffset,
   getBlockKeywordAtOffset,
   getCompletionContext,
   getHelperCallAtOffset,
@@ -462,6 +463,20 @@ function computeHover(text, offset, model) {
   const blockKeyword = getBlockKeywordAtOffset(text, offset);
   if (blockKeyword) {
     return { contents: { kind: Markdown, value: formatBlockDoc(blockKeyword.name, blockKeyword.tag) } };
+  }
+
+  const attributeBinding = getAttributeBindingAtOffset(text, offset);
+  if (attributeBinding) {
+    const { kind, name } = attributeBinding;
+    const value = kind === 'event'
+      ? `**@${name}**\n\nBinds a \`${name}\` event from inside the template. The expression names the handler, `
+        + `like a setting or template method.\n\n\`\`\`html\n<div @${name}={doSomething}></div>\n\`\`\`\n\n`
+        + `[docs](/docs/guides/components/events#event-handler)`
+      : `**.${name}**\n\nPasses the value as the \`${name}\` property instead of an attribute. Useful for `
+        + `unserializable content like functions, or for modifying raw DOM properties directly.\n\n`
+        + `\`\`\`html\n<ui-chart .${name}={getComplexData}>\n\`\`\`\n\n`
+        + `[docs](/docs/guides/templates/expressions#properties)`;
+    return { contents: { kind: Markdown, value } };
   }
 
   let word = getWordAtOffset(text, offset);
