@@ -391,6 +391,10 @@
   strong {
     color: var(--ac-fg);
   }
+  em {
+    /* descriptions read a step lighter than the header line */
+    color: color-mix(in srgb, var(--ac-fg-dim) 72%, transparent);
+  }
   code {
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
