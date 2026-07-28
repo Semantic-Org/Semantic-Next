@@ -323,6 +323,19 @@ disconnected; ephemeral writes while disconnected are dropped silently and by de
 (dev-disclosed) — replaying a queued cursor move is the ghost-animation failure the
 tier exists to delete. The graduation flag is also the offline-durability flag.
 
+**Late frames drop at the receiver — freeze-then-snap.** The pipe itself can hold
+seconds of history (an intermediary's buffer is invisible to both endpoints), and
+delivering that tape as live motion is the same ghost the tier refuses everywhere
+else. Every ephemeral frame carries its server send time (`sentAt`); the client
+estimates the clock offset (founded two-sided on the handshake, tightened by a
+windowed min over stamped frames) and discards a stale frame's `set` before apply —
+removals still apply, and a `replace` join re-founds the map on recovery. Under a
+clogged pipe the correct rendering is freeze, then snap to current — never a replay
+of the interim. The server half of the same physics: a consumer whose heartbeat
+pong lags is skipped entirely (never stashed), trickled its `gone`s, and re-founded
+with a `replace` on recovery. The wire choreography lives in ws-protocol
+(§ Ephemeral Channels).
+
 **Multi-node carry, named.** Redis pub/sub (not streams — no log to have a position
 in) fans ephemeral writes cross-node into each node's local conflation maps; remote
 nodes blind-overwrite per key, correct with no CRDT because of single-writer-per-key.
