@@ -23,7 +23,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash tools/hooks/pr-description"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/tools/hooks/pr-description\""
           }
         ]
       }
