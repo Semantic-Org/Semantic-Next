@@ -27,6 +27,7 @@ const build = (tagName, template) => {
       addOne: (v = 0) => v + 1,
       value: 1,
       list: ['Apple', 'Banana', 'Blueberry'],
+      getFiltered: () => ['Apple', 'Banana', 'Blueberry'].filter((n) => n.startsWith('B')),
       ratingPercentage: () => 60,
       board: () => {
         boardCalls += 1;
@@ -91,6 +92,15 @@ describe('native — data functions inside JS-style expressions', () => {
 
   it('still calls a framework helper written with arguments', async () => {
     expect(await render('jsx-helper-callee', '{activeIf(value == 1)}')).toBe('active');
+  });
+
+  // a bare identifier handed to a higher-order method resolves like any other, so
+  // it arrives as its value and the call fails. no template in the corpus writes
+  // that shape — every one uses an inline arrow — and a computed is the way to
+  // pass a function through. the degraded output is an artifact of the fallback
+  // chain, so only the working form is pinned
+  it('passes a function through a computed', async () => {
+    expect(await render('jsx-graduated', '{getFiltered.length}')).toBe('2');
   });
 
   it('leaves an inline arrow argument alone', async () => {

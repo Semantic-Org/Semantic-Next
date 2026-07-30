@@ -31,7 +31,12 @@ export class ExpressionEvaluator {
   static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[a-zA-Z_$][0-9a-zA-Z_$]*)*$/;
   static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
   static QUOTED_STRING_REGEXP = /('[^']*'|"[^"]*")/g;
+  static CALLEE_REGEXP = /([A-Za-z_$][0-9a-zA-Z_$]*)\s*\(/g;
   static fnCache = createCache({ maxSize: 5000, eviction: 'flush' });
+
+  // Identifiers written with a call in a given expression. Deterministic per
+  // expression string, same as the parse and classify caches.
+  static calleeCache = createCache({ maxSize: 5000, eviction: 'flush' });
 
   // Expression classification cache — shared across all instances since
   // classification depends only on the expression string, not data context
@@ -52,6 +57,8 @@ export class ExpressionEvaluator {
 
     // Reusable Proxy for JS expression evaluation — avoids per-eval spread + new Proxy
     this.jsContext = null;
+    this.jsCallees = new Set();
+    this.jsResolved = null;
     this.jsProxy = new Proxy(
       // Dummy target — the handler reads from jsContext/helpers directly
       Object.create(null),
@@ -67,6 +74,9 @@ export class ExpressionEvaluator {
             : this.helpers[prop];
           if (value instanceof Signal) {
             return value.get();
+          }
+          if (typeof value === 'function' && !this.jsCallees.has(prop)) {
+            return this.resolveJsIdentifier(prop, value);
           }
           return unwrap(value);
         },
@@ -166,6 +176,7 @@ export class ExpressionEvaluator {
       // Reuse the cached Proxy — just swap which context object it reads from
       if (includeHelpers) {
         this.jsContext = context || null;
+        this.jsCallees = this.getCallees(code);
       }
       const proxy = includeHelpers ? this.jsProxy : new Proxy(context || {}, jsNoHelpersHandler);
       let fn = ExpressionEvaluator.fnCache.get(code);
@@ -180,8 +191,40 @@ export class ExpressionEvaluator {
     }
     finally {
       this.jsContext = null;
+      this.jsResolved = null;
     }
     return result;
+  }
+
+  getCallees(code) {
+    let callees = ExpressionEvaluator.calleeCache.get(code);
+    if (callees !== undefined) {
+      return callees;
+    }
+    callees = new Set();
+    const stripped = code.replace(ExpressionEvaluator.QUOTED_STRING_REGEXP, '');
+    for (const match of stripped.matchAll(ExpressionEvaluator.CALLEE_REGEXP)) {
+      callees.add(match[1]);
+    }
+    ExpressionEvaluator.calleeCache.set(code, callees);
+    return callees;
+  }
+
+  // a function in the data context is an accessor here, same as in path syntax.
+  // memoized for the evaluation so an identifier written twice still runs its
+  // side effects once
+  resolveJsIdentifier(name, accessor) {
+    const resolved = (this.jsResolved ??= new Map());
+    if (resolved.has(name)) {
+      return resolved.get(name);
+    }
+    let value = accessor();
+    if (value instanceof Signal) {
+      value = value.get();
+    }
+    value = unwrap(value);
+    resolved.set(name, value);
+    return value;
   }
 
   lookupExpressionValue(expression = '', data = {}, visited) {
@@ -318,6 +361,7 @@ export class ExpressionEvaluator {
   // receiver unwraps
   lookupDottedValue(data, token) {
     const segments = this.getPathSegments(token);
+    if (segments === null) { return undefined; }
     const last = segments.length - 1;
 
     let container = this.walkPath(data, segments, last);
@@ -330,12 +374,15 @@ export class ExpressionEvaluator {
     return (value instanceof Signal) ? value.value : value;
   }
 
+  // null for anything that isn't a pure dotted path. a JS expression can carry a
+  // dot ({board.count + 1}) and walking it speculatively would run an accessor
+  // that the JS evaluator is about to run properly
   getPathSegments(path) {
     let segments = ExpressionEvaluator.pathSegmentsCache.get(path);
     if (segments !== undefined) {
       return segments;
     }
-    segments = path.split('.');
+    segments = ExpressionEvaluator.SIMPLE_PATH_REGEXP.test(path) ? path.split('.') : null;
     ExpressionEvaluator.pathSegmentsCache.set(path, segments);
     return segments;
   }
@@ -351,6 +398,7 @@ export class ExpressionEvaluator {
     }
 
     const segments = this.getPathSegments(path);
+    if (segments === null) { return undefined; }
     return this.walkPath(obj, segments, segments.length);
   }
 
