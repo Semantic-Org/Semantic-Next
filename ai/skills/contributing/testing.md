@@ -183,24 +183,34 @@ ps aux | grep -iE "vitest|chrome-headless" | grep -v grep | wc -l   # should be 
 
 Common signs of a stuck watcher: tests hang past the 2-minute budget, "Failed to fetch
 dynamically imported module" errors at random files (port collisions), or vitest output
-just never appears.
+just never appears. If `ps` comes back empty and the symptom persists, it is not a watcher
+— check `df -h` and read the next section.
 
-### Flaky setup vs real test failures
+### Read the file count, not the test total
 
-Browser tests on WSL2 hosts sometimes fail at setup with `Failed to fetch dynamically imported module` or `Cannot connect to the iframe ... CORS`. These are infrastructure races during vitest's browser bootstrap, not test-body failures, and they appear non-deterministically — different files fail on each run.
+**The gate is `Test Files N passed (N)`.** A file that fails at setup takes its whole test count out of the run, and the total that remains still looks healthy. In `packages/renderer` a full run is `Test Files 31 passed (31)` with `1473 passed`. A run that dropped files reported `829 passed` — a four-digit green number covering 56% of the suite. The test total cannot tell you this. The file count can.
 
-**The dismissive trap:** when failing test names match the scope of what you just committed, that is a real bug, not the host flaking. The give-away: a setup flake fails at *import* before any test runs and the failed files shift each run; a real bug fails inside an `expect(...)` and the same named tests fail every time. Persistent failures whose names map to your diff are ground truth — CI is the gate, do not retry expecting silence.
+A run that dropped files is not a pass, and reporting it as one is how a broken suite stays broken.
+
+### Setup failures point at the machine, not the code
+
+Browser files that fail at *setup* (`Failed to fetch dynamically imported module`, `Cannot connect to the iframe ... CORS`) with a set of files that shifts between runs are an environment failure.
+
+**Check `df -h` first.** Disk pressure reproduces this on demand. Measured on one machine, one commit, one session: at 98% full the renderer suite dropped 1-4 files on every run; at 91% it passed 31/31 on eight consecutive runs. Filling the disk back up brought the failures straight back, and freeing it cleared them again. Free space and re-run before reaching for any other explanation, and do not attribute it to the host OS — this reproduces on a plain Ubuntu desktop.
+
+**The dismissive trap:** when failing test names match the scope of what you just committed, that is a real bug, not the machine. The give-away: an environment failure hits at *import* before any test runs and the failed files shift each run; a real bug fails inside an `expect(...)` and the same named tests fail every time. Persistent failures whose names map to your diff are ground truth — CI is the gate, do not retry expecting silence.
 
 Quick disambiguation:
 
-| | flake | real failure |
+| | environment | real failure |
 |---|---|---|
-| Which files fail | different files each run | same tests every run |
+| `Test Files` line | fewer than the total, and which ones shifts each run | all files ran |
 | Failure surface | module-fetch / iframe-CORS at setup | assertion failure inside test body |
 | Scope match | unrelated to recent edits | tests cover what you just touched |
 | Resolves on isolation re-run | usually yes | no |
+| First thing to check | `df -h` | your diff |
 
-When in doubt, re-run the suspect files in isolation. A setup flake clears, a real failure persists. If a CI run reports failures on tests whose names track the area of your change, trust CI even when local runs look noisy.
+When in doubt, re-run the suspect files in isolation. An environment failure clears, a real failure persists. If a CI run reports failures on tests whose names track the area of your change, trust CI even when local runs look noisy.
 
 ### Watch mode
 
