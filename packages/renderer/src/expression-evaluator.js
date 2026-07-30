@@ -2,31 +2,6 @@ import { Signal } from '@semantic-ui/reactivity';
 import { createCache } from '@semantic-ui/utils';
 import { unwrap } from './helpers.js';
 
-// Fallback handler for the rare includeHelpers: false path
-const jsNoHelpersHandler = {
-  has(target, key) {
-    return key in target;
-  },
-  get(target, prop) {
-    const value = target[prop];
-    if (value instanceof Signal) {
-      return value.get();
-    }
-    return unwrap(value);
-  },
-};
-
-// Identifiers written with a call. {addOne(1)} needs the function itself, not
-// the value it returns with no arguments.
-const calleesFrom = (code) => {
-  const callees = new Set();
-  const stripped = code.replace(/('[^']*'|"[^"]*")/g, '');
-  for (const match of stripped.matchAll(/([A-Za-z_$][0-9a-zA-Z_$]*)\s*\(/g)) {
-    callees.add(match[1]);
-  }
-  return callees;
-};
-
 // Rough expression distribution (2026-04-12) — weight optimizations by hot paths:
 //
 //   ~60%  simple identifier   — direct property lookup
@@ -42,6 +17,7 @@ export class ExpressionEvaluator {
   static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[a-zA-Z_$][0-9a-zA-Z_$]*)*$/;
   static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
   static QUOTED_STRING_REGEXP = /('[^']*'|"[^"]*")/g;
+  static CALLEE_REGEXP = /([a-zA-Z_$][0-9a-zA-Z_$]*)\s*\(/g;
   static fnCache = createCache({ maxSize: 5000, eviction: 'flush' });
 
   // Expression classification cache — shared across all instances since
@@ -55,6 +31,20 @@ export class ExpressionEvaluator {
   // Pre-split segments for dotted paths. getDeepDataValue is called per
   // expression read; caching avoids the per-call substring + intern cost.
   static pathSegmentsCache = createCache({ maxSize: 5000, eviction: 'flush' });
+
+  // Fallback handler for the rare includeHelpers: false path
+  static noHelpersHandler = {
+    has(target, key) {
+      return key in target;
+    },
+    get(target, prop) {
+      const value = target[prop];
+      if (value instanceof Signal) {
+        return value.get();
+      }
+      return unwrap(value);
+    },
+  };
 
   constructor({ data, helpers, dataVersion } = {}) {
     this.data = data;
@@ -179,12 +169,12 @@ export class ExpressionEvaluator {
   evaluateJavascript(code, context, { includeHelpers = true } = {}) {
     let result;
     try {
-      const proxy = includeHelpers ? this.jsProxy : new Proxy(context || {}, jsNoHelpersHandler);
+      const proxy = includeHelpers ? this.jsProxy : new Proxy(context || {}, ExpressionEvaluator.noHelpersHandler);
       let fn = ExpressionEvaluator.fnCache.get(code);
       if (!fn) {
         fn = new Function('ctx', `with(ctx){return ${code}}`);
         // rides on the compiled function so the hot path pays one cache lookup
-        fn.callees = calleesFrom(code);
+        fn.callees = this.calleesFrom(code);
         ExpressionEvaluator.fnCache.set(code, fn);
       }
       // Reuse the cached Proxy — just swap which context object it reads from
@@ -202,6 +192,17 @@ export class ExpressionEvaluator {
       this.jsResolved = null;
     }
     return result;
+  }
+
+  // identifiers written with a call. {addOne(1)} needs the function itself, not
+  // the value it returns with no arguments
+  calleesFrom(code) {
+    const callees = new Set();
+    const stripped = code.replace(ExpressionEvaluator.QUOTED_STRING_REGEXP, '');
+    for (const match of stripped.matchAll(ExpressionEvaluator.CALLEE_REGEXP)) {
+      callees.add(match[1]);
+    }
+    return callees;
   }
 
   // a function in the data context is an accessor here, same as in path syntax.
