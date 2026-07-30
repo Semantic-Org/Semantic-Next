@@ -39,6 +39,8 @@ A CI-gated bench is three files working together:
 
 The `build-ci.js` script bundles the bench JS files with esbuild into `dist/current/` and `dist/baseline/` (baseline uses the PR's base-branch `packages/*/src/`). The CI workflow at `.github/workflows/benchmarks.yml` spawns one parallel matrix cell per `tachometer-ci*.json` config discovered in changed packages.
 
+**A metric you add in a PR does not run on that PR.** The workflow checks out `packages/*/bench/` from `origin/main` for both sides, so bench code, tachometer configs, and `build-ci.js` always come from main and the PR contributes only `packages/*/src/`. That's what stops a PR from tuning the benchmark it's being judged by. A new metric starts measuring once it lands on main, which makes the local floor read below the only signal you get before merging.
+
 ---
 
 ## The Authoring Pattern
@@ -353,15 +355,20 @@ node build-ci.js baseline             # same source both sides → zero delta
 npx tachometer --config tachometer-ci-<suite>.json
 ```
 
-`tachometer --config <file>` honors every knob in the JSON. Override at the CLI when iterating:
+`tachometer --config <file>` takes every knob from the JSON and rejects the CLI flags that would contradict it. `--root`, `--browser`, `--sample-size`, `--timeout`, `--auto-sample-conditions`, `--measure`, `--resolve-bare-modules`, and `--window-size` each throw `cannot be specified when using --config`. Change the value in a scratch copy of the JSON instead:
 
-| CLI flag | Config key | Use locally for |
-|---|---|---|
-| `--sample-size=N` / `-n N` | `sampleSize` | Quicker passes during iteration. Drop below 30 only for a smoke test, never for committed numbers |
-| `--timeout=M` | `timeout` (minutes) | Cap wall-clock per config |
-| `--auto-sample-conditions=0%` | `autoSampleConditions` | Zero-delta dry runs converge fastest with `0%` |
-| `--json-file=out.json` | — | Save raw output for offline inspection |
-| `--csv-file=stats.csv` | — | Per-metric summary table |
+| Config key | Use locally for |
+|---|---|
+| `sampleSize` | Quicker passes during iteration. Drop below 30 only for a smoke test, never for committed numbers |
+| `timeout` | Cap wall-clock per config, in minutes |
+| `autoSampleConditions` | `["0%"]` for a zero-delta dry run |
+
+Two output flags do compose with `--config`:
+
+| CLI flag | Use locally for |
+|---|---|
+| `--json-file=out.json` | Save raw output for offline inspection |
+| `--csv-file=stats.csv` | Per-metric summary table |
 
 ### Reading the zero-delta output
 
@@ -378,12 +385,13 @@ The headline number to record is **CI half-width as a percentage of the mean**. 
 For a fast read on whether a single new metric is shaped right (without sampling the whole suite):
 
 ```sh
-# temporary tachometer-noise-floor.json that lists ONLY the new metrics
-# in both this-change and tip-of-tree arrays; don't commit it
-npx tachometer --config tachometer-noise-floor.json --auto-sample-conditions=0% --timeout=2
+# temporary tachometer-noise-floor.json listing ONLY the new metrics in both
+# this-change and tip-of-tree arrays, with "autoSampleConditions": ["0%"] and
+# "timeout": 2 set inside it. don't commit it
+npx tachometer --config tachometer-noise-floor.json
 ```
 
-This converges in under two minutes on a typical metric and reads the floor without re-running everything in the suite. Delete the temporary config before pushing.
+Two minutes gets a usable floor on a typical metric without re-running the suite. `["0%"]` asks for a resolution no run can reach, so this always ends on `Hit 2 minute auto-sample timeout` — that line is the loop working as intended, not a failure. Read the CI half-width it printed and ignore the note. Delete the temporary config before pushing.
 
 ### Environment gotchas
 

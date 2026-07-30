@@ -23,6 +23,13 @@ const createComponent = ({ settings, self, interval }) => ({
   getValue(obj = {}, prop) {
     return obj[prop];
   },
+  pet: () => ({
+    name: 'Simon',
+    treats: 3,
+    describe() {
+      return `${this.name} has ${this.treats} treats`;
+    },
+  }),
 });
 
 export const TestComponent = defineComponent({
