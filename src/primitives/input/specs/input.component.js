@@ -76,6 +76,7 @@ export default {
     "name": "string",
     "type": "string",
     "debounced": "boolean",
+    "debounce-interval": "number",
     "clearable": "string",
     "value": "string"
   },

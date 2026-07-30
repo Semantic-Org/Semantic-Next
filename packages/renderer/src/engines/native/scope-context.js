@@ -55,11 +55,7 @@ function getLayer(owner) {
   if (!keys) {
     return data;
   }
-  // an arg passed as a bare as-key ({>row row=row}) reads back as the each
-  // block's item-tracking proxy, a live view that empties when reconcile
-  // disposes the record behind it. a handler keeps what it captures, so the
-  // item has to leave the framework here. getEventData runs nonreactive, so
-  // the unwrap read registers no dependency
+  // a handler keeps what it captures, so it gets the item not the tracking proxy
   const layer = {};
   for (const key of keys) {
     layer[key] = unwrap(data[key]);

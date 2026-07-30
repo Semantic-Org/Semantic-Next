@@ -1239,6 +1239,124 @@ RENDERING_ENGINES.forEach(engine => {
         expect(after.taste).toBe('Amazing');
       });
 
+      // the item travels to the element as the tracking proxy, which is what
+      // carries the wakeup. resolving it to the item here costs this update
+      it('property binding keeps the element current when a field mutates in place', async () => {
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each fruit in fruits}<span class="target" .item={fruit}></span>{/each}',
+          createComponent: ({ signal }) => {
+            const fruits = signal([{ _id: 'apple', name: 'Apple' }], { safety: 'reference' });
+            return {
+              fruits,
+              ripen: () => fruits.setItemProperty('apple', 'name', 'Fuji'),
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(el.shadowRoot.querySelector('.target').item.name).toBe('Apple');
+
+        const updated = $(el).onNext('updated');
+        el.component.ripen();
+        await updated;
+
+        expect(el.shadowRoot.querySelector('.target').item.name).toBe('Fuji');
+      });
+
+      // a bound property lands in the child's settings (filter-list in the
+      // expressions-fn example), so this path feeds the same wake channel
+      it('property-bound item keeps a child settings closure current on in-place mutation', async () => {
+        const childTag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: childTag,
+          template: '<span class="out">{readName}</span>',
+          defaultSettings: { item: null },
+          createComponent: ({ settings }) => ({
+            readName() {
+              return settings.item?.name ?? '';
+            },
+          }),
+        });
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: `{#each fruit in fruits}<${childTag} class="child" .item={fruit}></${childTag}>{/each}`,
+          createComponent: ({ signal }) => {
+            const fruits = signal([{ _id: 'apple', name: 'Apple' }], { safety: 'reference' });
+            return {
+              fruits,
+              ripen: () => fruits.setItemProperty('apple', 'name', 'Fuji'),
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        const readChild = () => el.shadowRoot.querySelector('.child')?.shadowRoot?.querySelector('.out')?.textContent;
+        expect(readChild()).toBe('Apple');
+
+        const updated = $(el).onNext('updated');
+        el.component.ripen();
+        await updated;
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(readChild()).toBe('Fuji');
+      });
+
+      // `settings.fruit.name` registers a per-field dep through the item proxy,
+      // so settings is a propagation channel and cannot be resolved to the item
+      it('settings-reading closure wakes when the item field mutates in place', async () => {
+        let lastSeen;
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<span class="out">{readName}</span>',
+          defaultSettings: { fruit: null },
+          createComponent: ({ settings }) => ({
+            readName() {
+              lastSeen = settings.fruit?.name;
+              return lastSeen ?? '';
+            },
+          }),
+        });
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each fruit in fruits}{>child fruit=fruit}{/each}',
+          subTemplates: { child },
+          createComponent: ({ signal }) => {
+            const fruits = signal([{ _id: 'apple', name: 'Apple' }], { safety: 'reference' });
+            return {
+              fruits,
+              ripen: () => fruits.setItemProperty('apple', 'name', 'Fuji'),
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(lastSeen).toBe('Apple');
+
+        const updated = $(el).onNext('updated');
+        el.component.ripen();
+        await updated;
+
+        expect(lastSeen).toBe('Fuji');
+        expect(el.shadowRoot.querySelector('.out').textContent).toBe('Fuji');
+      });
+
       it('replacing a primitive item with an object on the same key wakes the binding', async () => {
         // Edge: array as-mode where items[i] morphs primitive → object
         // at the same key. getItemId for both falls back to indexOrKey
