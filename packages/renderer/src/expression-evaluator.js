@@ -354,8 +354,7 @@ export class ExpressionEvaluator {
   accessTokenValue(tokenValue, token, data) {
     if (typeof tokenValue === 'function' && token.includes('.')) {
       const lastDot = token.lastIndexOf('.');
-      const thisContext = this.getDeepDataValue(data, token.substring(0, lastDot));
-      tokenValue = tokenValue.bind(thisContext);
+      tokenValue = tokenValue.bind(this.getThisContext(data, token.substring(0, lastDot)));
     }
 
     if (tokenValue !== undefined) {
@@ -364,6 +363,15 @@ export class ExpressionEvaluator {
         : tokenValue;
     }
     return undefined;
+  }
+
+  // getDeepDataValue unwraps what it walks through but not what it lands on, and an
+  // {#each x in xs} as-key lands on the item proxy. neither is the receiver
+  getThisContext(data, path) {
+    let parent = this.getDeepDataValue(data, path);
+    if (parent instanceof Signal) { parent = parent.value; }
+    else if (typeof parent === 'function') { parent = parent(); }
+    return unwrap(parent);
   }
 
   addParensToExpression(expression = '') {
