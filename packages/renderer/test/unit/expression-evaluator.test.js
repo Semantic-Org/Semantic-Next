@@ -475,6 +475,59 @@ describe('helper methods reached through a parent accessor', () => {
 });
 
 /*******************************
+     Parent Path Depth
+*******************************/
+
+describe('binding a method whose parent path ends in a container', () => {
+  // the walk already unwraps a container it passes through, so a shallow fix can look
+  // complete. the gap is the last segment of the parent path: wherever a container sits
+  // there, `this` lands on the wrapper instead of the row, at any depth
+  const ee = make();
+  const model = {
+    greeting: 'hi',
+    greet() {
+      return this.greeting;
+    },
+  };
+
+  it('depth 1: accessor at the parent', () => {
+    expect(ee.evaluate('row.greet', { row: () => model })).toBe('hi');
+  });
+
+  it('depth 1: signal at the parent', () => {
+    expect(ee.evaluate('row.greet', { row: new Signal(model) })).toBe('hi');
+  });
+
+  it('depth 2: accessor at the end of the parent path', () => {
+    expect(ee.evaluate('a.row.greet', { a: { row: () => model } })).toBe('hi');
+  });
+
+  it('depth 2: signal at the end of the parent path', () => {
+    expect(ee.evaluate('a.row.greet', { a: { row: new Signal(model) } })).toBe('hi');
+  });
+
+  it('depth 2: accessor passed through, plain object at the end', () => {
+    expect(ee.evaluate('a.row.greet', { a: () => ({ row: model }) })).toBe('hi');
+  });
+
+  it('depth 2: accessor at both segments', () => {
+    expect(ee.evaluate('a.row.greet', { a: () => ({ row: () => model }) })).toBe('hi');
+  });
+
+  it('depth 3: accessor at the end of the parent path', () => {
+    expect(ee.evaluate('a.b.row.greet', { a: { b: { row: () => model } } })).toBe('hi');
+  });
+
+  it('depth 3: signal at the end of the parent path', () => {
+    expect(ee.evaluate('a.b.row.greet', { a: { b: { row: new Signal(model) } } })).toBe('hi');
+  });
+
+  it('depth 3: plain fields resolve through the same deep accessor', () => {
+    expect(ee.evaluate('a.b.row.greeting', { a: { b: { row: () => model } } })).toBe('hi');
+  });
+});
+
+/*******************************
     lookupExpressionValue
 *******************************/
 
