@@ -1431,5 +1431,99 @@ RENDERING_ENGINES.forEach(engine => {
         expect(fires.title).toBe(1);
       });
     });
+
+    describe.skipIf(isLit)('FGR contract: whole-item subtemplate arg', () => {
+      // `{>rowItem row=row}` hands the entire as-key item across the boundary.
+      // the bench-todo composition above passes fields instead, so its child
+      // reads land on primitives and never touch the item-tracking proxy
+      it('mutating one item field re-fires only the child binding reading that field', async () => {
+        let nameFires = 0;
+        let doneFires = 0;
+        const rowItem = defineComponent({
+          renderingEngine: engine,
+          template: '<span>{readName}</span><span>{readDone}</span>',
+          createComponent: ({ data }) => ({
+            readName() {
+              nameFires++;
+              return data.row.name;
+            },
+            readDone() {
+              doneFires++;
+              return String(data.row.done);
+            },
+          }),
+        });
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{#each row in getRows}{>rowItem row=row}{/each}',
+          subTemplates: { rowItem },
+          createComponent: ({ signal }) => {
+            const rows = signal([{ _id: 'a', name: 'first', done: false }]);
+            return {
+              rows,
+              getRows: () => rows.get(),
+              toggle: () => rows.toggleItemProperty('a', 'done'),
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(nameFires).toBe(1);
+        expect(doneFires).toBe(1);
+
+        const updated = $(el).onNext('updated');
+        el.component.toggle();
+        await updated;
+
+        expect(doneFires).toBe(2);
+        expect(nameFires).toBe(1);
+      });
+
+      // a reactiveData key that matches a declared defaultSetting activates the
+      // settings mirror, a second write path carrying the same whole-item arg
+      it('renders an in-place field mutation when the child declares the arg as a setting', async () => {
+        const rowItem = defineComponent({
+          renderingEngine: engine,
+          template: '<li class="row">{row.name}</li>',
+          defaultSettings: { row: null },
+        });
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '<ul>{#each row in getRows}{>rowItem row=row}{/each}</ul>',
+          subTemplates: { rowItem },
+          createComponent: ({ signal }) => {
+            const rows = signal([
+              { _id: 'a', name: 'Alpha' },
+              { _id: 'b', name: 'Beta' },
+            ]);
+            return {
+              rows,
+              getRows: () => rows.get(),
+              rename: () => rows.setItemProperty('b', 'name', 'Beta v2'),
+            };
+          },
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(shadowText(el)).toContain('Beta');
+
+        const updated = $(el).onNext('updated');
+        el.component.rename();
+        await updated;
+
+        expect(shadowText(el)).toContain('Beta v2');
+        expect(shadowText(el)).toContain('Alpha');
+      });
+    });
   }); // describe(engine)
 }); // RENDERING_ENGINES.forEach
