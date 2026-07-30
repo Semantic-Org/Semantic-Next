@@ -31,6 +31,8 @@
 
 */
 
+import { unwrap } from '../../helpers.js';
+
 export const SCOPE_OWNER = Symbol('sui-scope-owner');
 export const SCOPE_END = Symbol('sui-scope-end');
 
@@ -53,9 +55,14 @@ function getLayer(owner) {
   if (!keys) {
     return data;
   }
+  // an arg passed as a bare as-key ({>row row=row}) reads back as the each
+  // block's item-tracking proxy, a live view that empties when reconcile
+  // disposes the record behind it. a handler keeps what it captures, so the
+  // item has to leave the framework here. getEventData runs nonreactive, so
+  // the unwrap read registers no dependency
   const layer = {};
   for (const key of keys) {
-    layer[key] = data[key];
+    layer[key] = unwrap(data[key]);
   }
   return layer;
 }

@@ -116,6 +116,42 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(captured.item.name).toBe('Beta v2');
       });
 
+      // what a handler keeps is the item, not a view onto a record that
+      // reconcile can retire out from under it
+      it.skipIf(isLit)('hands over the item itself, so a captured row outlives its removal', async () => {
+        const tag = uniqueTag();
+        let captured;
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<ul>{#each item in items}<li class="row">{item.name}</li>{/each}</ul>',
+          defaultState: {
+            items: [
+              { id: 'a', name: 'Alpha' },
+              { id: 'b', name: 'Beta' },
+              { id: 'c', name: 'Gamma' },
+            ],
+          },
+          events: {
+            'click .row'({ data }) {
+              captured = data.item;
+            },
+          },
+        });
+        const el = await mount(tag);
+        clickOn(el.shadowRoot.querySelectorAll('.row')[1]);
+        expect(captured).toEqual({ id: 'b', name: 'Beta' });
+
+        el.template.state.items.set([
+          { id: 'a', name: 'Alpha' },
+          { id: 'c', name: 'Gamma' },
+        ]);
+        await waitForUpdate(el);
+
+        expect(Object.keys(captured)).toEqual(['id', 'name']);
+        expect(captured.id).toBe('b');
+      });
+
       it.skipIf(isLit)('resolves nested each with the inner layer winning', async () => {
         const tag = uniqueTag();
         let captured;
@@ -316,6 +352,87 @@ RENDERING_ENGINES.forEach((engine) => {
         expect(el.shadowRoot.querySelector('.lbl')).toBeNull();
         clickOn(el.shadowRoot.querySelector('.after'));
         expect(captured).toEqual({});
+      });
+
+      // the arg record's getters run at dispatch, so the layer reports the row
+      // sitting there now, not the one bound when the subtemplate mounted
+      it.skipIf(isLit)('reads a whole-item arg at dispatch, not at mount', async () => {
+        const tag = uniqueTag();
+        const a = { id: 'a', name: 'Alpha' };
+        const b = { id: 'b', name: 'Beta' };
+        let captured;
+        const rowItem = defineComponent({
+          renderingEngine: engine,
+          template: '<li class="row">{row.name}</li>',
+        });
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<ul>{#each row in rows}{>rowItem row=row}{/each}</ul>',
+          subTemplates: { rowItem },
+          defaultState: { rows: [a, b] },
+          events: {
+            'click .row'({ data }) {
+              captured = data.row;
+            },
+          },
+        });
+        const el = await mount(tag);
+
+        el.template.state.rows.set([b, a]);
+        await waitForUpdate(el);
+        clickOn(el.shadowRoot.querySelectorAll('.row')[0]);
+        expect(captured.id).toBe('b');
+
+        el.template.state.rows.peek()[0].name = 'Beta v2';
+        el.template.state.rows.notify();
+        await waitForUpdate(el);
+        clickOn(el.shadowRoot.querySelectorAll('.row')[0]);
+        expect(captured.name).toBe('Beta v2');
+      });
+
+      // as-mode routes the item through a tracking proxy so dotted reads
+      // register per-field deps. that proxy is a live view onto the record:
+      // reaching a handler, it would read back empty once reconcile disposes
+      // the row it fronts
+      it.skipIf(isLit)('hands over the item itself when a whole-item arg crosses the boundary', async () => {
+        const tag = uniqueTag();
+        let captured;
+        const rowItem = defineComponent({
+          renderingEngine: engine,
+          template: '<li class="row">{row.name}</li>',
+          defaultSettings: { row: null },
+        });
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<ul>{#each row in rows}{>rowItem row=row}{/each}</ul>',
+          subTemplates: { rowItem },
+          defaultState: {
+            rows: [
+              { id: 'a', name: 'Alpha' },
+              { id: 'b', name: 'Beta' },
+              { id: 'c', name: 'Gamma' },
+            ],
+          },
+          events: {
+            'click .row'({ data }) {
+              captured = data.row;
+            },
+          },
+        });
+        const el = await mount(tag);
+        clickOn(el.shadowRoot.querySelectorAll('.row')[1]);
+        expect(captured).toEqual({ id: 'b', name: 'Beta' });
+
+        el.template.state.rows.set([
+          { id: 'a', name: 'Alpha' },
+          { id: 'c', name: 'Gamma' },
+        ]);
+        await waitForUpdate(el);
+
+        expect(Object.keys(captured)).toEqual(['id', 'name']);
+        expect(captured.id).toBe('b');
       });
     });
 
