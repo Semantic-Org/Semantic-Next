@@ -290,8 +290,7 @@ export class ExpressionEvaluator {
       }
     }
     else {
-      let dataValue = this.getDeepDataValue(data, token);
-      let value = this.accessTokenValue(dataValue, token, data);
+      const value = this.lookupDottedValue(data, token);
       if (value !== undefined) {
         return value;
       }
@@ -312,6 +311,23 @@ export class ExpressionEvaluator {
     if (jsValue !== undefined) {
       return this.accessTokenValue(jsValue, token, data);
     }
+  }
+
+  // one walk, so an accessor on the path runs once per expression. the last segment
+  // reads off the container to keep an {#each} item's per-field dep, and only the
+  // receiver unwraps
+  lookupDottedValue(data, token) {
+    const segments = this.getPathSegments(token);
+    const last = segments.length - 1;
+
+    let container = this.walkPath(data, segments, last);
+    if (container instanceof Signal) { container = container.get(); }
+    else if (typeof container === 'function') { container = container(); }
+    if (container == null) { return undefined; }
+
+    const value = container[segments[last]];
+    if (typeof value === 'function') { return value.bind(unwrap(container)); }
+    return (value instanceof Signal) ? value.value : value;
   }
 
   getPathSegments(path) {
@@ -335,8 +351,12 @@ export class ExpressionEvaluator {
     }
 
     const segments = this.getPathSegments(path);
+    return this.walkPath(obj, segments, segments.length);
+  }
+
+  walkPath(obj, segments, count) {
     let current = obj;
-    for (let i = 0; i < segments.length; i++) {
+    for (let i = 0; i < count; i++) {
       if (current instanceof Signal) {
         current = current.get();
       }
@@ -354,7 +374,8 @@ export class ExpressionEvaluator {
   accessTokenValue(tokenValue, token, data) {
     if (typeof tokenValue === 'function' && token.includes('.')) {
       const lastDot = token.lastIndexOf('.');
-      tokenValue = tokenValue.bind(this.getThisContext(data, token.substring(0, lastDot)));
+      const thisContext = this.getThisContext(data, token.substring(0, lastDot));
+      tokenValue = tokenValue.bind(thisContext);
     }
 
     if (tokenValue !== undefined) {
