@@ -153,6 +153,29 @@ const data = {
   });
 }
 
+// expr-dotted-method-25k — dotted path landing on a method, reached through
+// a computed accessor. Only this shape walks for a receiver and binds, and
+// only here can a path accessor be invoked more than once per expression.
+// The plain field alongside it holds the same walk without the bind.
+{
+  const board = {
+    id: 'main',
+    count: 2,
+    cheerCount() {
+      return this.count;
+    },
+  };
+  const boardData = { ...data, board: () => board };
+  const evaluator = new ExpressionEvaluator({ data: boardData, helpers });
+  // purpose: Evaluates a dotted method and a dotted field through an accessor 100000 times each. Receiver walk and bind.
+  await measureOp('expr-dotted-method-100k', () => {
+    for (let i = 0; i < 100_000; i++) {
+      evaluator.evaluate('board.cheerCount', boardData);
+      evaluator.evaluate('board.id', boardData);
+    }
+  });
+}
+
 /*******************************
       buildHTMLString throughput
 *******************************/
