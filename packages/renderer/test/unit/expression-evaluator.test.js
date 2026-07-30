@@ -425,6 +425,53 @@ describe('accessTokenValue', () => {
     // Should be bound — calling it returns the parent's value
     expect(result()).toBe('hi');
   });
+
+  it('binds dotted method whose parent is an accessor', () => {
+    const row = {
+      greeting: 'hi',
+      greet() {
+        return this.greeting;
+      },
+    };
+    const result = ee.accessTokenValue(row.greet, 'parent.greet', { parent: () => row });
+    expect(result()).toBe('hi');
+  });
+});
+
+/*******************************
+   Helpers Behind An Accessor
+*******************************/
+
+describe('helper methods reached through a parent accessor', () => {
+  // a collection row reaches the data context behind a zero-arg accessor, and its
+  // helpers read `this`. bound to the accessor instead of the row they still return a
+  // plausible value rather than throwing — a count of zero, a flag of false — so a
+  // wrong `this` reads as real data all the way to the screen
+  const cheers = [{ boardId: 'main' }, { boardId: 'main' }];
+  const row = {
+    id: 'main',
+    closedAt: new Date(),
+    cheerCount() {
+      return cheers.filter((cheer) => cheer.boardId === this.id).length;
+    },
+    isClosed() {
+      return this.closedAt != null;
+    },
+  };
+  const boardData = { board: () => row };
+  const ee = make({ data: boardData });
+
+  it('counts through the accessor instead of reporting zero', () => {
+    expect(ee.evaluate('board.cheerCount', boardData)).toBe(2);
+  });
+
+  it('reads a flag through the accessor instead of reporting false', () => {
+    expect(ee.evaluate('board.isClosed', boardData)).toBe(true);
+  });
+
+  it('resolves a plain field through the same accessor', () => {
+    expect(ee.evaluate('board.id', boardData)).toBe('main');
+  });
 });
 
 /*******************************
