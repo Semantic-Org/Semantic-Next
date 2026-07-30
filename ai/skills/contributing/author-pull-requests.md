@@ -141,7 +141,7 @@ Same as Medium, plus:
 
 The single most common drift in AI-authored bullets is verbosity. A bullet that takes 15 words to say what 5 words could say is performing thoroughness. Humans don't write that way when describing state — they say the thing and stop.
 
-### Three terseness rules
+### Four terseness rules
 
 **1. Cut justification clauses.** When you remove something, don't explain why in the bullet. The "why" goes in the commit message or PR conversation if it matters. Bullets just name the thing.
 
@@ -169,6 +169,20 @@ If a bullet's outcome is the obvious consequence of bullets above it, drop it.
 | CI-only bench tooling lives under `tools/ci/bench/` so the top-level `tools/` directory only contains developer-runnable harnesses. | CI bench tooling lives under `tools/ci/bench/`. |
 
 If the framing sentence has a "so that" / "plus the X that follows" / "in order to" tail, the tail is usually padding.
+
+A syntax or API change frames itself with the before/after, so the reader gets the new form in hand instead of a description of it.
+
+| ❌ Describes the fix | ✅ Shows the gain |
+|---|---|
+| Template expressions written in JS syntax never resolved a data-context function, so `{getIndex + 1}` rendered the function source. | Instead of the verbose `{getIndex() + 1}` you can now write `{getIndex + 1}`. |
+
+**4. Cut machinery bullets.** One feature is one bullet. A memoization, a redundant walk you removed, a cache keyed differently — those are how the single outcome works, not outcomes of their own. They live in the diff, and anyone who wants them reads there.
+
+| ❌ Machinery as features | ✅ The feature |
+|---|---|
+| - Resolve data-context functions in JS expressions, except in callee position<br>- Memoize per evaluation so an identifier written twice still invokes once<br>- Skip the speculative path walk for tokens that aren't pure dotted paths | - Data-context functions now resolve in JS expressions when not in callee positions |
+
+This is the hardest class to spot in your own draft: after hours inside the machinery it reads as the achievement. Test: would this bullet exist if the feature had been trivial to build? If not, it's machinery.
 
 ### Subgroup long sections
 
