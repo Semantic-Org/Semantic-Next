@@ -153,7 +153,7 @@ const data = {
   });
 }
 
-// expr-dotted-method-25k — dotted path landing on a method, reached through
+// expr-dotted-method-100k — dotted path landing on a method, reached through
 // a computed accessor. Only this shape walks for a receiver and binds, and
 // only here can a path accessor be invoked more than once per expression.
 // The plain field alongside it holds the same walk without the bind.
