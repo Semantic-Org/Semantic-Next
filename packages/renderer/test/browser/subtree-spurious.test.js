@@ -98,6 +98,82 @@ RENDERING_ENGINES.forEach(engine => {
     });
 
     /*******************************
+         Accessor call counts
+    *******************************/
+
+    describe('accessor invoked once per expression', () => {
+      // an accessor is user code and can log, fetch, or mutate. calling it twice for
+      // one expression reads as a spurious render and sends people hunting for one
+      const board = {
+        id: 'main',
+        title: 'Main',
+        cheerCount() {
+          return this.id === 'main' ? 2 : 0;
+        },
+        isClosed() {
+          return this.id === 'archive';
+        },
+      };
+
+      function spanText(el) {
+        return Array.from(el.shadowRoot.querySelectorAll('span')).map((node) => node.textContent);
+      }
+
+      it('calls an accessor once per expression, not once more per method read', async () => {
+        let calls = 0;
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: [
+            '<span>{board.cheerCount}</span>',
+            '<span>{board.isClosed}</span>',
+            '<span>{board.id}</span>',
+            '<span>{board.title}</span>',
+          ].join(''),
+          createComponent: () => ({
+            board: () => {
+              calls++;
+              return board;
+            },
+          }),
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(spanText(el)).toEqual(['2', 'false', 'main', 'Main']);
+        expect(calls).toBe(4);
+      });
+
+      it('calls an accessor sitting mid path once per expression', async () => {
+        let calls = 0;
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<span>{outer.board.cheerCount}</span><span>{outer.board.id}</span>',
+          createComponent: () => ({
+            outer: {
+              board: () => {
+                calls++;
+                return board;
+              },
+            },
+          }),
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        expect(spanText(el)).toEqual(['2', 'main']);
+        expect(calls).toBe(2);
+      });
+    });
+
+    /*******************************
         Outside vs inside each
     *******************************/
 

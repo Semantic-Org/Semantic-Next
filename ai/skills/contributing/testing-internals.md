@@ -34,7 +34,8 @@ tests/configs/vitest/
 ├── projects/                    # Composable environment definitions
 │   ├── node.js                  # test/unit/ + test/*.test — pure Node
 │   ├── jsdom.js                 # test/dom/ — simulated DOM (no Shadow DOM)
-│   └── browser.js               # test/browser/ — real Chromium via Playwright
+│   ├── browser.js               # test/browser/ — real Chromium via Playwright
+│   └── exclude.js               # shared exclusions, spread by all three
 ├── vitest.config.js             # npm test (watch: false)
 ├── vitest-watch.config.js       # npm run test:watch
 ├── vitest-all.config.js         # npm run test:all (HTML reporter + coverage UI)
@@ -98,6 +99,8 @@ This must be in configs (not setup files) because it operates at the Vitest leve
 **Setup files:** `tests/setup/{node,dom,browser}-setup.js` exist as empty stubs referenced by project files. Add setup logic there when needed.
 
 **Coverage provider:** Istanbul (not v8). Coverage includes only `packages/**/src/**/*.js`.
+
+**Shared exclusions:** every project spreads `exclude` from `projects/exclude.js`, which carries Vitest's `configDefaults.exclude` plus `.claude/**` and `docs/**`. The `.claude/**` entry is load-bearing: agent worktrees live at `.claude/worktrees/<name>` as whole repo checkouts, and Vitest does not read `.gitignore`, so an include glob like `**/test/unit/**` otherwise collects the entire suite a second time from whatever branch is checked out there. Package configs need no equivalent — their root is the package directory, out of reach of the repo-root `.claude/`.
 
 ---
 

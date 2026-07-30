@@ -425,6 +425,106 @@ describe('accessTokenValue', () => {
     // Should be bound — calling it returns the parent's value
     expect(result()).toBe('hi');
   });
+
+  it('binds dotted method whose parent is an accessor', () => {
+    const row = {
+      greeting: 'hi',
+      greet() {
+        return this.greeting;
+      },
+    };
+    const result = ee.accessTokenValue(row.greet, 'parent.greet', { parent: () => row });
+    expect(result()).toBe('hi');
+  });
+});
+
+/*******************************
+   Helpers Behind An Accessor
+*******************************/
+
+describe('helper methods reached through a parent accessor', () => {
+  // a collection row reaches the data context behind a zero-arg accessor, and its
+  // helpers read `this`. bound to the accessor instead of the row they still return a
+  // plausible value rather than throwing — a count of zero, a flag of false — so a
+  // wrong `this` reads as real data all the way to the screen
+  const cheers = [{ boardId: 'main' }, { boardId: 'main' }];
+  const row = {
+    id: 'main',
+    closedAt: new Date(),
+    cheerCount() {
+      return cheers.filter((cheer) => cheer.boardId === this.id).length;
+    },
+    isClosed() {
+      return this.closedAt != null;
+    },
+  };
+  const boardData = { board: () => row };
+  const ee = make({ data: boardData });
+
+  it('counts through the accessor instead of reporting zero', () => {
+    expect(ee.evaluate('board.cheerCount', boardData)).toBe(2);
+  });
+
+  it('reads a flag through the accessor instead of reporting false', () => {
+    expect(ee.evaluate('board.isClosed', boardData)).toBe(true);
+  });
+
+  it('resolves a plain field through the same accessor', () => {
+    expect(ee.evaluate('board.id', boardData)).toBe('main');
+  });
+});
+
+/*******************************
+     Parent Path Depth
+*******************************/
+
+describe('binding a method whose parent path ends in a container', () => {
+  // the walk already unwraps a container it passes through, so a shallow fix can look
+  // complete. the gap is the last segment of the parent path: wherever a container sits
+  // there, `this` lands on the wrapper instead of the row, at any depth
+  const ee = make();
+  const model = {
+    greeting: 'hi',
+    greet() {
+      return this.greeting;
+    },
+  };
+
+  it('depth 1: accessor at the parent', () => {
+    expect(ee.evaluate('row.greet', { row: () => model })).toBe('hi');
+  });
+
+  it('depth 1: signal at the parent', () => {
+    expect(ee.evaluate('row.greet', { row: new Signal(model) })).toBe('hi');
+  });
+
+  it('depth 2: accessor at the end of the parent path', () => {
+    expect(ee.evaluate('a.row.greet', { a: { row: () => model } })).toBe('hi');
+  });
+
+  it('depth 2: signal at the end of the parent path', () => {
+    expect(ee.evaluate('a.row.greet', { a: { row: new Signal(model) } })).toBe('hi');
+  });
+
+  it('depth 2: accessor passed through, plain object at the end', () => {
+    expect(ee.evaluate('a.row.greet', { a: () => ({ row: model }) })).toBe('hi');
+  });
+
+  it('depth 2: accessor at both segments', () => {
+    expect(ee.evaluate('a.row.greet', { a: () => ({ row: () => model }) })).toBe('hi');
+  });
+
+  it('depth 3: accessor at the end of the parent path', () => {
+    expect(ee.evaluate('a.b.row.greet', { a: { b: { row: () => model } } })).toBe('hi');
+  });
+
+  it('depth 3: signal at the end of the parent path', () => {
+    expect(ee.evaluate('a.b.row.greet', { a: { b: { row: new Signal(model) } } })).toBe('hi');
+  });
+
+  it('depth 3: plain fields resolve through the same deep accessor', () => {
+    expect(ee.evaluate('a.b.row.greeting', { a: { b: { row: () => model } } })).toBe('hi');
+  });
 });
 
 /*******************************
