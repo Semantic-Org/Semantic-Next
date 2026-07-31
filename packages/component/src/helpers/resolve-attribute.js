@@ -52,7 +52,7 @@ export const resolveAllowedValue = ({ attribute, optionValue, componentSpec }) =
 
   const matchingAttribute = get(componentSpec.optionAttributes, matchingValue);
 
-  // extract canonical value from compound alias (e.g. "chevron-down-icon" → "chevron-down")
+  // extract canonical value from compound alias (e.g. "link-icon" → "link")
   if (matchingValue.includes('-')) {
     const prefix = `${matchingAttribute}-`;
     const suffix = `-${matchingAttribute}`;

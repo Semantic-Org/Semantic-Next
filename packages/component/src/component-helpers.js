@@ -291,7 +291,7 @@ export function createSettingsProxy(el) {
   "Alias" here means any non-canonical form that maps to a spec attribute:
     - Value fuzzing: icon="down chevron" → icon="chevron-down" (spaces, reversed segments)
     - Bare attributes: <ui-icon chevron-down> → icon="chevron-down" (optionAttributes lookup)
-    - Compound aliases: <ui-icon chevron-down-icon> → icon="chevron-down" (suffix extraction)
+    - Compound aliases: <ui-icon link-icon> → icon="link" (suffix extraction)
     - Class dialect: class="chevron-down primary" → icon="chevron-down", emphasis="primary"
 
   Mutates and returns the same object. Shared across SSR (renderToString),

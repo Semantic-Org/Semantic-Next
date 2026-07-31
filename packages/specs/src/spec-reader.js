@@ -6,7 +6,7 @@ import {
   inArray,
   isEmpty,
   isString,
-  mapObject,
+  keys,
   noop,
   reverseKeys,
   unique,
@@ -428,27 +428,57 @@ export class SpecReader {
   }
 
   /*
+    Every part of a spec that carries options — content, types, states, variations.
+  */
+  getSpecParts(spec) {
+    if (!spec) {
+      return [];
+    }
+    return [...(spec.content || []), ...(spec.types || []), ...(spec.states || []), ...(spec.variations || [])];
+  }
+
+  /*
     Builds the optionAttributes lookup from allowedValues.
-    Handles three cases:
+    Handles four cases:
     - Bare values: unique values get direct lookup (e.g. "primary" → "emphasis")
     - Auto-detected collisions: values appearing in multiple attributes get compound forms
       (e.g. "subtle" in styled + positive → "subtle-styled", "subtle-positive")
     - Manual compoundAliases: parts opt-in to compound forms for readability
       (e.g. animated → "vertical-animated", "fade-animated")
+    - Open vocabularies: parts that borrow an external namespace defer to the curated one
+      (e.g. the icon list yields "link" to the link variation, keeping "link-icon")
   */
   buildOptionAttributes({ componentSpec, spec }) {
-    // step 1: base lookup via reverseKeys
-    let options = mapObject(componentSpec.allowedValues, (values, key) => {
-      return values = values.filter(value => isString(value));
+    // an open vocabulary is someone else's namespace (2400 icon names) rather than a curated
+    // design system one, so it sits out collision detection. otherwise a single unlucky alias
+    // marks its whole attribute as colliding and rewrites every sibling's class name
+    const openAttributes = new Set();
+    each(this.getSpecParts(spec), (part) => {
+      if (part.openVocabulary) {
+        openAttributes.add(this.getPropertyName(part));
+      }
     });
-    componentSpec.optionAttributes = reverseKeys(options);
+    const curatedValues = {};
+    const openValues = {};
+    each(componentSpec.allowedValues, (allowedValues, attr) => {
+      const stringValues = allowedValues.filter(value => isString(value));
+      if (openAttributes.has(attr)) {
+        openValues[attr] = stringValues;
+      }
+      else {
+        curatedValues[attr] = stringValues;
+      }
+    });
+
+    // step 1: base lookup via reverseKeys
+    componentSpec.optionAttributes = reverseKeys(curatedValues);
 
     // step 2: detect which specific values collide across attributes
     // skip identity values (value === attr) as they are boolean-style attributes
     // track first attribute to register each value — it "owns" the bare form
     const valueCounts = {};
     const firstOwner = {};
-    each(componentSpec.allowedValues, (allowedValues, attr) => {
+    each(curatedValues, (allowedValues, attr) => {
       each(allowedValues, (value) => {
         if (isString(value) && value !== attr) {
           if (!valueCounts[value]) {
@@ -474,7 +504,7 @@ export class SpecReader {
     // → attached also generates "top-attached", "bottom-attached" for consistency
     // colliding bare entries point to the first-owner attribute
     // non-colliding siblings keep their bare form pointing to their own attribute
-    each(componentSpec.allowedValues, (allowedValues, attr) => {
+    each(curatedValues, (allowedValues, attr) => {
       if (!collidingAttributes.has(attr)) {
         return;
       }
@@ -494,30 +524,49 @@ export class SpecReader {
 
     // step 4: add compound aliases for parts that manually opt-in (e.g. animated)
     // compounds all non-identity, non-colliding values on the part
-    if (spec) {
-      const partsWithOptions = [...(spec.types || []), ...(spec.states || []), ...(spec.variations || [])];
-      each(partsWithOptions, (part) => {
-        if (!part.compoundAliases) {
+    each(this.getSpecParts(spec), (part) => {
+      if (!part.compoundAliases) {
+        return;
+      }
+      const attr = this.getPropertyName(part);
+      const allowedValues = componentSpec.allowedValues[attr];
+      if (!allowedValues) {
+        return;
+      }
+      each(allowedValues, (value) => {
+        if (!isString(value) || value === attr || collidingValues.has(value)) {
           return;
         }
-        const attr = part.attribute || part.name?.toLowerCase();
-        const allowedValues = componentSpec.allowedValues[attr];
-        if (!allowedValues) {
-          return;
+        if (part.prefixCompound) {
+          componentSpec.optionAttributes[`${attr}-${value}`] = attr;
         }
-        each(allowedValues, (value) => {
-          if (!isString(value) || value === attr || collidingValues.has(value)) {
-            return;
-          }
-          if (part.prefixCompound) {
-            componentSpec.optionAttributes[`${attr}-${value}`] = attr;
-          }
-          else {
-            componentSpec.optionAttributes[`${value}-${attr}`] = attr;
-          }
-          delete componentSpec.optionAttributes[value];
-        });
+        else {
+          componentSpec.optionAttributes[`${value}-${attr}`] = attr;
+        }
+        delete componentSpec.optionAttributes[value];
       });
-    }
+    });
+
+    // step 5: open vocabularies claim whatever bare names are left over. a value that clashes
+    // with an attribute name or a curated option keeps only its compound form, so <ui-icon link>
+    // stays the link variation while <ui-icon link-icon> is still the glyph
+    const claimedNames = new Set([
+      ...keys(componentSpec.optionAttributes),
+      ...componentSpec.attributes,
+      ...componentSpec.properties,
+    ]);
+    each(openValues, (allowedValues, attr) => {
+      each(allowedValues, (value) => {
+        if (value === attr) {
+          return;
+        }
+        if (claimedNames.has(value)) {
+          componentSpec.optionAttributes[`${value}-${attr}`] = attr;
+        }
+        else {
+          componentSpec.optionAttributes[value] = attr;
+        }
+      });
+    });
   }
 }

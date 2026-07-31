@@ -21,6 +21,7 @@ export default {
       attribute: 'icon',
       description: 'specify what icon should appear',
       usageLevel: 1,
+      openVocabulary: true,
       options: ICON_OPTIONS,
     },
   ],

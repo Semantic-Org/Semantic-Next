@@ -1323,7 +1323,7 @@ export const iconMappings = {
   },
   'loader': {
     category: 'status',
-    aliases: ['spinner', 'loading', 'spinner-gap', 'autorenew', 'busy'],
+    aliases: ['spinner', 'spinner-gap', 'autorenew', 'busy'],
     description: 'Loading spinner',
     visual: 'Eight short lines radiating outward from a center point like sun rays, evenly spaced.',
     usage: 'loading spinners, processing states, busy indicators, refreshing content',
@@ -6031,7 +6031,7 @@ export const iconMappings = {
   },
   'leaf': {
     category: 'misc',
-    aliases: ['eco', 'nature', 'plant', 'organic', 'green', 'environment'],
+    aliases: ['eco', 'nature', 'plant', 'organic', 'environment'],
     description: 'Nature or eco-friendly',
     visual: 'A single leaf — a teardrop-shaped leaf outline with a pointed tip and a short curved stem.',
     usage: 'Eco or sustainability feature, nature theme, organic product label, green energy section',

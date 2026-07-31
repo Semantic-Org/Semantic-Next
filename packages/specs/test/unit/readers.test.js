@@ -565,6 +565,85 @@ describe('SpecReader.getWebComponentSpec — option attribute collisions', () =>
 });
 
 /* ==================================================================
+   openVocabulary — a part that borrows an external namespace (the icon
+   list) defers to the curated design system vocabulary around it.
+   ================================================================== */
+
+/* Icon-shape spec: a large borrowed value list alongside curated attributes.
+   "link" is both a real icon and a variation, "green" both an icon and a color. */
+const iconShapeSpec = () => ({
+  name: 'Icon',
+  tagName: 'ui-icon',
+  content: [
+    {
+      name: 'Icon',
+      attribute: 'icon',
+      openVocabulary: true,
+      options: [
+        { name: 'Check', value: 'check' },
+        { name: 'Chevron Down', value: 'chevron-down' },
+        { name: 'Link', value: 'link' },
+        { name: 'Green', value: 'green' },
+      ],
+    },
+  ],
+  variations: [
+    {
+      name: 'Link',
+      description: 'be formatted as a link',
+    },
+    {
+      name: 'Colored',
+      attribute: 'color',
+      options: [
+        { name: 'Red', value: 'red' },
+        { name: 'Green', value: 'green' },
+      ],
+    },
+  ],
+});
+
+describe('SpecReader.getWebComponentSpec — open vocabularies', () => {
+  it('keeps bare forms for borrowed values that clash with nothing', () => {
+    const reader = new SpecReader(iconShapeSpec());
+    const componentSpec = reader.getWebComponentSpec();
+    expect(componentSpec.optionAttributes.check).toBe('icon');
+    expect(componentSpec.optionAttributes['chevron-down']).toBe('icon');
+  });
+
+  it('yields the bare form to a curated attribute of the same name', () => {
+    const reader = new SpecReader(iconShapeSpec());
+    const componentSpec = reader.getWebComponentSpec();
+    /* <ui-icon link> is the link variation, not the link glyph */
+    expect(componentSpec.optionAttributes.link).toBeUndefined();
+    expect(componentSpec.optionAttributes['link-icon']).toBe('icon');
+  });
+
+  it('yields the bare form to a curated option value of the same name', () => {
+    const reader = new SpecReader(iconShapeSpec());
+    const componentSpec = reader.getWebComponentSpec();
+    expect(componentSpec.optionAttributes.green).toBe('color');
+    expect(componentSpec.optionAttributes['green-icon']).toBe('icon');
+  });
+
+  it('does not drag curated siblings into compound forms when a borrowed value collides', () => {
+    const reader = new SpecReader(iconShapeSpec());
+    const componentSpec = reader.getWebComponentSpec();
+    /* "green" overlapping the icon list must not rename every other color */
+    expect(componentSpec.optionAttributes.red).toBe('color');
+    expect(componentSpec.optionAttributes['red-color']).toBeUndefined();
+    expect(componentSpec.optionAttributes['green-color']).toBeUndefined();
+  });
+
+  it('leaves borrowed values without blanket compound forms', () => {
+    const reader = new SpecReader(iconShapeSpec());
+    const componentSpec = reader.getWebComponentSpec();
+    expect(componentSpec.optionAttributes['check-icon']).toBeUndefined();
+    expect(componentSpec.optionAttributes['chevron-down-icon']).toBeUndefined();
+  });
+});
+
+/* ==================================================================
    Plural mode — pluralShared* gates singular inheritance.
    ================================================================== */
 
