@@ -11,6 +11,7 @@
       "attribute": "icon",
       "description": "specify what icon should appear",
       "usageLevel": 1,
+      "openVocabulary": true,
       "options": [
         "arrow-down",
         "arrow-left",
@@ -953,7 +954,6 @@
         "rescue",
         "life-ring",
         "spinner",
-        "loading",
         "spinner-gap",
         "autorenew",
         "busy",
@@ -2437,7 +2437,6 @@
         "nature",
         "plant",
         "organic",
-        "green",
         "environment",
         "idea",
         "tip",
