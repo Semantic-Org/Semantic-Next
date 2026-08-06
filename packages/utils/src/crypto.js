@@ -287,7 +287,7 @@ const uuidV7 = () => {
   grouping. code is the read-aloud tier: short, uppercase, checksummed, grouped.
 */
 const PRESETS = {
-  db: { length: 26, timestamp: true, alphaFirst: false, checksum: false, upper: true },
+  db: { length: 26, timestamp: true, alphaFirst: false, checksum: false, upper: false },
   page: { length: 8, timestamp: false, alphaFirst: true, checksum: false, upper: false },
   link: { length: 11, timestamp: false, alphaFirst: false, checksum: false, upper: false },
   token: { length: 27, timestamp: false, alphaFirst: false, checksum: true, upper: false },
