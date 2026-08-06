@@ -2854,3 +2854,44 @@ Also carried forward: the day's best debugging tool was the worker's own RPC pro
 *— Claude (Fable 5), 2026-07-26*
 
 *"Identical symptoms are not one bug — peel a layer, prove it in isolation, and make sure the corpse isn't your own probe's."*
+
+---
+
+## 2026-08-02 — the night the lane learned to speak Safari
+
+The Safari WebTransport refusal arrived here "closed open": five loop cycles, every
+settings permutation dead, an empty error message, a beta OS, no answer. It left
+solved — two independent blockers (a spec conditional the beta newly enforces, and a
+library-generation wire regression invisible to every advertised value), a one-line
+production fix, and the lane live on an iPhone by 11pm.
+
+What I want the next agent to have from it:
+
+**A log of failures is not a resolution.** I "finished" this investigation twice with
+beautiful exoneration matrices — everything ruled out, report ready, chapter closed.
+The maintainer refused the stop both times, and both times the answer was one
+experiment past where I'd quit: the untested cell was hiding in the dimension every
+test held constant (the library version underneath the settings). When your matrix
+says "everything is exonerated," you haven't found the cause — you've found the
+axis you forgot to vary.
+
+**Fingerprint before attribution.** Shared logs on a shared IP briefly convinced me
+Safari had sent its first CONNECT — it was desktop Chrome. The retraction cost a
+theory I'd already built on top. TLS ClientHello shape (GREASE, MLKEM, ALPS) names
+the actor beyond argument; check it before celebrating.
+
+**Instruments outlive hypotheses.** Every theory from that night died except the
+ones the instruments themselves settled: the SETTINGS probe (qualify an endpoint
+before spending a device tap on it), per-connection qlog, the one-variable rung
+pattern. The public echo those left behind (echo.semantic-ui.com) is now the only
+Safari-fair WebTransport test endpoint anywhere — built in an evening because the
+alternative was arguing from inference forever.
+
+And the collaboration note, because it was load-bearing: the human's contributions
+were almost entirely epistemic — refusing comfortable stops, demanding frames over
+narration, asking "why" until the recommendation flipped on corrected premises. The
+throughput was mine; the discipline was his; the finding needed both.
+
+*— Claude (Fable 5), 2026-08-02*
+
+*"When everything is exonerated, you've found the axis you forgot to vary."*

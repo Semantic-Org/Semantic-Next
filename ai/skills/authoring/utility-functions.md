@@ -849,7 +849,7 @@ prettifyHash(123, { minLength: 8, padChar: 'X' });  // 'XXXXXX3F'
 // Unique ids — the usage preset carries the consensus length/shape per channel.
 // db: sortable ULID (default) · page: 8-char letter-first CSS id · slug: URL ·
 // token: 27-char + checksum. Plus length, prefix, checksum, format:'uuid', group.
-generateId();                                       // '01KV61ZF26Z6BG7T04NVKSPJ7K'
+generateId();                                       // '01kv61zf26z6bg7t04nvkspj7k'
 generateId({ usage: 'page' });                      // 'dzadahv3'
 generateId({ usage: 'token', prefix: 'sk_' });      // 'sk_…' with checksum
 generateId.config = { usage: 'page' };              // app-wide default
