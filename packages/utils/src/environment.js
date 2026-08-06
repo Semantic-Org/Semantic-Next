@@ -2,15 +2,15 @@
       Constants
 --------------------*/
 
-export const isServer = (() => {
-  return typeof window === 'undefined';
-})();
-
-export const isClient = (() => {
-  return typeof window !== 'undefined';
-})();
-
-export const isDevelopment = (() => {
+/*
+  isDevelopment leads the module and reads __DEV__ FIRST so a bundler define
+  (__DEV__: false) folds it to a literal and every gated dev branch dead-code-
+  eliminates across the fleet. the fold is order-fragile: an IIFE above this
+  const defeats cross-module inlining, so this stays the leading declaration.
+  precedence is deliberate: an explicit build define outranks environment
+  sniffing; with no define, detection below behaves exactly as before.
+*/
+const detectDevelopment = () => {
   if (typeof process !== 'undefined' && process.env) {
     const env = process.env;
 
@@ -62,13 +62,18 @@ export const isDevelopment = (() => {
     }
   }
 
-  // Check global __DEV__ flag (React Native, some bundlers)
-  if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    return true;
-  }
-
   // Default to false (production)
   return false;
+};
+
+export const isDevelopment = typeof __DEV__ !== 'undefined' ? !!__DEV__ : detectDevelopment();
+
+export const isServer = (() => {
+  return typeof window === 'undefined';
+})();
+
+export const isClient = (() => {
+  return typeof window !== 'undefined';
 })();
 
 export const isCI = (() => {
