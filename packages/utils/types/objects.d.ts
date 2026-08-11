@@ -104,7 +104,7 @@ export interface TrackWritesOptions {
    * behaviour on a large value where it matters more than id-addressing.
    */
   keyed?: boolean;
-  /** Identity fields for keyed paths, first present wins (default ['id', '_id', 'hash', 'key']) */
+  /** Identity fields for keyed paths, first present wins (default `elementKey.config.fields`) */
   fields?: string[];
   /** Fires per observed write with the key path from the root. Implies the proxy strategy under 'auto', so its paths are positional. A symbol key has no dot-path form, so it reaches `onWrite` but never the returned `paths`. */
   onWrite?: (path: Array<string | symbol>, target: object, key: string | symbol) => void;
@@ -204,7 +204,7 @@ export interface TrackReadsOptions {
    * proxy itself. Set false for positional paths.
    */
   keyed?: boolean;
-  /** Identity fields for keyed paths, first present wins (default ['id', '_id', 'hash', 'key']) */
+  /** Identity fields for keyed paths, first present wins (default `elementKey.config.fields`) */
   fields?: string[];
   /**
    * Fires per observed read with the path from the root, the read type
@@ -317,7 +317,7 @@ export interface DetectChangesOptions {
    * legacy positional output.
    */
   keyed?: boolean;
-  /** Identity fields a keyed element is matched on, first present wins (default ['id', '_id', 'hash', 'key']) */
+  /** Identity fields a keyed element is matched on, first present wins (default `elementKey.config.fields`) */
   fields?: string[];
   /**
    * Comparator that decides whether two leaf values count as changed (default

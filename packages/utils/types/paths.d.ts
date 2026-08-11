@@ -215,7 +215,7 @@ export function eachPath(
  *
  * @param obj - The object to traverse
  * @param path - The path string (e.g., 'a.b.c', 'items[0].name', or 'items[#id].name')
- * @param fields - Identity fields for keyed `[#id]` segments (default ['id', '_id', 'hash', 'key'])
+ * @param fields - Identity fields for keyed `[#id]` segments (default `elementKey.config.fields`)
  * @returns The value at the path or undefined if not found
  *
  * @example
@@ -244,7 +244,7 @@ export function get<T extends object, V = any>(
  *
  * @param obj - The object to traverse
  * @param path - The path string (e.g., 'a.b.c', 'items[0].name', or 'items[#id].name')
- * @param fields - Identity fields for keyed `[#id]` segments (default ['id', '_id', 'hash', 'key'])
+ * @param fields - Identity fields for keyed `[#id]` segments (default `elementKey.config.fields`)
  * @returns True when the path resolves to a stored location, false otherwise
  *
  * @example
@@ -278,7 +278,7 @@ export function has<T extends object>(
  * @param obj - The object to write into
  * @param path - The path string (e.g., 'a.b.c', 'items.0.name', 'items[0].name', or 'items[#id]')
  * @param value - The value to set at the path
- * @param fields - Identity fields for keyed `[#id]` segments (default ['id', '_id', 'hash', 'key'])
+ * @param fields - Identity fields for keyed `[#id]` segments (default `elementKey.config.fields`)
  * @returns The same object reference
  *
  * @example
@@ -309,7 +309,7 @@ export function set<T extends object>(
  *
  * @param obj - The object to remove from
  * @param path - The path string (e.g., 'a.b.c', 'items.0', or 'items[#id]')
- * @param fields - Identity fields for keyed `[#id]` segments (default ['id', '_id', 'hash', 'key'])
+ * @param fields - Identity fields for keyed `[#id]` segments (default `elementKey.config.fields`)
  * @returns The same object reference
  *
  * @example
@@ -336,7 +336,7 @@ export function unset<T extends object>(
  *
  * @param obj - The object the path addresses
  * @param path - The path string (e.g., 'items.0.qty' or 'items[1]')
- * @param fields - Identity fields for keyed segments (default ['id', '_id', 'hash', 'key'])
+ * @param fields - Identity fields for keyed segments (default `elementKey.config.fields`)
  * @returns The keyed spelling, or the input path when nothing rewrites
  *
  * @example
