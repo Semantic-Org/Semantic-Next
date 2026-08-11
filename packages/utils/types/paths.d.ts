@@ -60,21 +60,21 @@ export type PathSegment = FieldSegment | KeySegment | IndexSegment | WildcardSeg
 /** The identity vocabulary every keyed default resolves from. */
 export interface ElementKeyConfig {
   /** Candidate identity fields, first present wins. Default `['id', '_id', 'hash', 'key']`. */
-  keys: string[];
+  fields: string[];
 }
 
 /**
- * Identity of an array element: the value of the first present field in `keys`,
+ * Identity of an array element: the value of the first present field in `fields`,
  * or undefined for a scalar or an object carrying none of them. What the keyed
  * `detectChanges` mode and the keyed `get`/`set`/`unset` path grammar match on. The field vocabulary is the one
  * identity config for the whole keyed grammar, set once at app boot
- * (`elementKey.config.keys.unshift('sku')`) — every `keys` default reads it
- * live, per-call `keys` still wins.
+ * (`elementKey.config.fields.unshift('sku')`) — every `fields` default reads it
+ * live, per-call `fields` still wins.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/paths#elementkey elementKey}
  * @see {@link https://next.semantic-ui.com/examples/utils-elementkey Example}
  *
  * @param item - The array element to read identity from
- * @param keys - Candidate identity fields, first present wins (default `elementKey.config.keys`)
+ * @param fields - Candidate identity fields, first present wins (default `elementKey.config.fields`)
  * @returns The identity value, or undefined when none of the fields are present
  *
  * @example
@@ -84,7 +84,7 @@ export interface ElementKeyConfig {
  * elementKey({ sku: 's1' }, ['sku']) // returns 's1'
  * ```
  */
-export function elementKey(item: unknown, keys?: string[]): unknown;
+export function elementKey(item: unknown, fields?: string[]): unknown;
 export namespace elementKey {
   let config: ElementKeyConfig;
 }
@@ -123,7 +123,7 @@ export function isPathKey(key: unknown): boolean;
  * @see {@link https://next.semantic-ui.com/examples/utils-pathkey Example}
  *
  * @param item - The array element to spell a key for
- * @param keys - Candidate identity fields, first present wins (default `elementKey.config.keys`)
+ * @param fields - Candidate identity fields, first present wins (default `elementKey.config.fields`)
  * @returns The key text, or null when the element is unkeyed or its key carries `]`
  *
  * @example
@@ -135,7 +135,7 @@ export function isPathKey(key: unknown): boolean;
  * pathKey({ sku: 'A1' }, ['sku']) // returns 'A1'
  * ```
  */
-export function pathKey(item: unknown, keys?: string[]): string | null;
+export function pathKey(item: unknown, fields?: string[]): string | null;
 
 /**
  * Split a path into its dot-separated parts, the textual reading beside
@@ -215,7 +215,7 @@ export function eachPath(
  *
  * @param obj - The object to traverse
  * @param path - The path string (e.g., 'a.b.c', 'items[0].name', or 'items[#id].name')
- * @param keys - Identity fields for keyed `[#id]` segments (default ['id', '_id', 'hash', 'key'])
+ * @param fields - Identity fields for keyed `[#id]` segments (default `elementKey.config.fields`)
  * @returns The value at the path or undefined if not found
  *
  * @example
@@ -230,7 +230,7 @@ export function eachPath(
 export function get<T extends object, V = any>(
   obj: T,
   path?: string,
-  keys?: string[],
+  fields?: string[],
 ): V | undefined;
 
 /**
@@ -244,7 +244,7 @@ export function get<T extends object, V = any>(
  *
  * @param obj - The object to traverse
  * @param path - The path string (e.g., 'a.b.c', 'items[0].name', or 'items[#id].name')
- * @param keys - Identity fields for keyed `[#id]` segments (default ['id', '_id', 'hash', 'key'])
+ * @param fields - Identity fields for keyed `[#id]` segments (default `elementKey.config.fields`)
  * @returns True when the path resolves to a stored location, false otherwise
  *
  * @example
@@ -257,7 +257,7 @@ export function get<T extends object, V = any>(
 export function has<T extends object>(
   obj: T,
   path?: string,
-  keys?: string[],
+  fields?: string[],
 ): boolean;
 
 /**
@@ -278,7 +278,7 @@ export function has<T extends object>(
  * @param obj - The object to write into
  * @param path - The path string (e.g., 'a.b.c', 'items.0.name', 'items[0].name', or 'items[#id]')
  * @param value - The value to set at the path
- * @param keys - Identity fields for keyed `[#id]` segments (default ['id', '_id', 'hash', 'key'])
+ * @param fields - Identity fields for keyed `[#id]` segments (default `elementKey.config.fields`)
  * @returns The same object reference
  *
  * @example
@@ -293,7 +293,7 @@ export function set<T extends object>(
   obj: T,
   path: string,
   value: unknown,
-  keys?: string[],
+  fields?: string[],
 ): T;
 
 /**
@@ -309,7 +309,7 @@ export function set<T extends object>(
  *
  * @param obj - The object to remove from
  * @param path - The path string (e.g., 'a.b.c', 'items.0', or 'items[#id]')
- * @param keys - Identity fields for keyed `[#id]` segments (default ['id', '_id', 'hash', 'key'])
+ * @param fields - Identity fields for keyed `[#id]` segments (default `elementKey.config.fields`)
  * @returns The same object reference
  *
  * @example
@@ -321,7 +321,7 @@ export function set<T extends object>(
 export function unset<T extends object>(
   obj: T,
   path: string,
-  keys?: string[],
+  fields?: string[],
 ): T;
 
 /**
@@ -336,7 +336,7 @@ export function unset<T extends object>(
  *
  * @param obj - The object the path addresses
  * @param path - The path string (e.g., 'items.0.qty' or 'items[1]')
- * @param keys - Identity fields for keyed segments (default ['id', '_id', 'hash', 'key'])
+ * @param fields - Identity fields for keyed segments (default `elementKey.config.fields`)
  * @returns The keyed spelling, or the input path when nothing rewrites
  *
  * @example
@@ -347,7 +347,7 @@ export function unset<T extends object>(
 export function keyedPath(
   obj: object,
   path: string,
-  keys?: string[],
+  fields?: string[],
 ): string;
 
 /** How many parsed paths the shared segment cache holds. */
@@ -532,8 +532,8 @@ export interface ExpandPathOptions {
   from?: string;
   /** The document a `*` enumerates arrays from. Required when the path carries a wildcard */
   doc?: object;
-  /** Identity fields for spelling enumerated elements (default `elementKey.config.keys`) */
-  keys?: string[];
+  /** Identity fields for spelling enumerated elements (default `elementKey.config.fields`) */
+  fields?: string[];
 }
 
 /**

@@ -20,32 +20,34 @@ import { isArray, isObject } from './types.js';
 // the identity fields a keyed array element is matched on, first present wins —
 // identity of an array element, shared by every keyed helper, vocabulary adjustable at boot
 export const elementKey = /* @__PURE__ */ configured(
-  (item, keys = elementKey.config.keys) => {
+  (item, fields = elementKey.config.fields) => {
     if (!isObject(item)) {
       return undefined;
     }
     // fast track the default vocabulary, a static chain instead of the field loop
-    if (keys.length === 4 && keys[0] === 'id' && keys[1] === '_id' && keys[2] === 'hash' && keys[3] === 'key') {
+    if (
+      fields.length === 4 && fields[0] === 'id' && fields[1] === '_id' && fields[2] === 'hash' && fields[3] === 'key'
+    ) {
       return item.id ?? item._id ?? item.hash ?? item.key;
     }
-    for (const field of keys) {
+    for (const field of fields) {
       if (item[field] != null) {
         return item[field];
       }
     }
     return undefined;
   },
-  { keys: ['id', '_id', 'hash', 'key'] },
+  { fields: ['id', '_id', 'hash', 'key'] },
 );
 
 // resolve a keyed array segment to a live index, -1 if absent. identity compares
 // String-coerced because the path carries a string and ids may be number or string
-const findKeyed = (array, keyValue, keys = elementKey.config.keys) => {
+const findKeyed = (array, keyValue, fields = elementKey.config.fields) => {
   if (!isArray(array)) {
     return -1;
   }
   for (let i = 0; i < array.length; i++) {
-    const id = elementKey(array[i], keys);
+    const id = elementKey(array[i], fields);
     if (id != null && String(id) === keyValue) {
       return i;
     }
@@ -67,8 +69,8 @@ export const isPathKey = (key) => String(key).indexOf(']') === -1;
   The item-to-path route: every keyed path the emitters produce goes
   through this check, so an emitted path always parses back through get.
 */
-export const pathKey = (item, keys = elementKey.config.keys) => {
-  const id = elementKey(item, keys);
+export const pathKey = (item, fields = elementKey.config.fields) => {
+  const id = elementKey(item, fields);
   if (id == null) {
     return null;
   }
@@ -167,7 +169,7 @@ export const eachPath = (path, callback, { self = true } = {}) => {
 // resolves as undefined, so has can tell it apart from a missing path
 const MISSING = Symbol('missing');
 
-const resolvePath = (obj, path, keys) => {
+const resolvePath = (obj, path, fields) => {
   if (obj === null || !isObject(obj)) {
     return MISSING;
   }
@@ -193,7 +195,7 @@ const resolvePath = (obj, path, keys) => {
       if (!isArray(array)) {
         return MISSING;
       }
-      const index = 'keyValue' in access ? findKeyed(array, access.keyValue, keys) : access.index;
+      const index = 'keyValue' in access ? findKeyed(array, access.keyValue, fields) : access.index;
       if (index < 0 || index >= array.length) {
         return MISSING;
       }
@@ -231,7 +233,7 @@ const resolvePath = (obj, path, keys) => {
 /*
   Access a nested object field from a string, like 'a.b.c'
 */
-export const get = function(obj, path = '', keys = elementKey.config.keys) {
+export const get = function(obj, path = '', fields = elementKey.config.fields) {
   if (typeof path !== 'string') {
     return undefined;
   }
@@ -239,7 +241,7 @@ export const get = function(obj, path = '', keys = elementKey.config.keys) {
   if (path.indexOf('.') === -1 && path.indexOf('[') === -1) {
     return (obj !== null && isObject(obj)) ? obj[path] : undefined;
   }
-  const value = resolvePath(obj, path, keys);
+  const value = resolvePath(obj, path, fields);
   return value === MISSING ? undefined : value;
 };
 
@@ -248,7 +250,7 @@ export const get = function(obj, path = '', keys = elementKey.config.keys) {
   even one holding undefined. get() conflates a missing path with a stored
   undefined, has() is how callers tell them apart.
 */
-export const has = function(obj, path = '', keys = elementKey.config.keys) {
+export const has = function(obj, path = '', fields = elementKey.config.fields) {
   if (typeof path !== 'string') {
     return false;
   }
@@ -256,7 +258,7 @@ export const has = function(obj, path = '', keys = elementKey.config.keys) {
   if (path.indexOf('.') === -1 && path.indexOf('[') === -1) {
     return obj !== null && isObject(obj) && path in obj;
   }
-  return resolvePath(obj, path, keys) !== MISSING;
+  return resolvePath(obj, path, fields) !== MISSING;
 };
 
 // set and unset act only on a real path into a real object, and refuse
@@ -277,7 +279,7 @@ const isWritablePath = (obj, path) =>
   paths from trackWrites and detectChanges apply back. Creates missing
   intermediates — arrays when the next segment is an index, objects otherwise.
 */
-export const set = function(obj, path, value, keys = elementKey.config.keys) {
+export const set = function(obj, path, value, fields = elementKey.config.fields) {
   if (!isWritablePath(obj, path)) {
     return obj;
   }
@@ -316,7 +318,7 @@ export const set = function(obj, path, value, keys = elementKey.config.keys) {
         array = currentObject[access.key];
       }
       if ('keyValue' in access) {
-        const index = findKeyed(array, access.keyValue, keys);
+        const index = findKeyed(array, access.keyValue, fields);
         if (isLast) {
           if (index === -1) {
             array.push(value); // keyed add: an absent key appends a new element
@@ -385,7 +387,7 @@ export const set = function(obj, path, value, keys = elementKey.config.keys) {
   than splicing, so sibling index paths stay valid when applying several
   removals at once.
 */
-export const unset = function(obj, path, keys = elementKey.config.keys) {
+export const unset = function(obj, path, fields = elementKey.config.fields) {
   if (!isWritablePath(obj, path)) {
     return obj;
   }
@@ -414,7 +416,7 @@ export const unset = function(obj, path, keys = elementKey.config.keys) {
         return obj;
       }
       if ('keyValue' in access) {
-        const index = findKeyed(array, access.keyValue, keys);
+        const index = findKeyed(array, access.keyValue, fields);
         if (index === -1) {
           return obj;
         }
@@ -476,7 +478,7 @@ export const unset = function(obj, path, keys = elementKey.config.keys) {
 // nothing rewrites, so callers compare by reference
 const HAS_POSITIONAL_SEGMENT = /(^|\.|\[)\d/;
 
-export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
+export const keyedPath = (obj, path, fields = elementKey.config.fields) => {
   // the probe reads pathShape so a digit inside a keyed id (items[#200.40.50])
   // doesn't look like a positional segment
   if (typeof path !== 'string' || !HAS_POSITIONAL_SEGMENT.test(pathShape(path)) || obj === null || !isObject(obj)) {
@@ -505,13 +507,13 @@ export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
       if (!isArray(array)) {
         return path;
       }
-      const index = 'keyValue' in access ? findKeyed(array, access.keyValue, keys) : access.index;
+      const index = 'keyValue' in access ? findKeyed(array, access.keyValue, fields) : access.index;
       const element = array[index];
       if ('keyValue' in access) {
         out.push(part);
       }
       else {
-        const keyValue = pathKey(element, keys);
+        const keyValue = pathKey(element, fields);
         if (keyValue !== null) {
           out.push(`${access.key}[#${keyValue}]`);
           changed = true;
@@ -524,7 +526,7 @@ export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
     }
     else if (isIndexSegment(part) && isArray(currentObject)) {
       const element = currentObject[Number(part)];
-      const keyValue = pathKey(element, keys);
+      const keyValue = pathKey(element, fields);
       if (keyValue !== null) {
         out[out.length - 1] += `[#${keyValue}]`;
         changed = true;
@@ -780,7 +782,7 @@ export const wildcardPath = (path) => {
   Both spellings compose in one call. A path with neither returns itself as
   one element, so callers destructure uniformly.
 */
-export const expandPath = (path, { from, doc, keys = elementKey.config.keys } = {}) => {
+export const expandPath = (path, { from, doc, fields = elementKey.config.fields } = {}) => {
   if (typeof path !== 'string') {
     throw new TypeError('expandPath: path must be a string');
   }
@@ -823,12 +825,12 @@ export const expandPath = (path, { from, doc, keys = elementKey.config.keys } = 
       continue;
     }
     paths = paths.flatMap((currentPath) => {
-      const array = currentPath === '' ? doc : get(doc, currentPath, keys);
+      const array = currentPath === '' ? doc : get(doc, currentPath, fields);
       if (!isArray(array)) {
         return [];
       }
       return array.map((element, position) => {
-        const key = pathKey(element, keys);
+        const key = pathKey(element, fields);
         if (key !== null) {
           return `${currentPath}[#${key}]`;
         }

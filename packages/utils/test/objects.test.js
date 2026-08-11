@@ -590,11 +590,11 @@ describe('Object Utilities', () => {
         expect(paths).toEqual(['todos.0.x']);
       });
 
-      it('honors a custom key list for the emitted paths', () => {
+      it('honors a custom field list for the emitted paths', () => {
         const db = { rows: [{ sku: 's1', q: 1 }, { sku: 's2', q: 1 }] };
         const { paths } = trackWrites(db, (d) => {
           d.rows[1].q = 2;
-        }, { keys: ['sku'] });
+        }, { fields: ['sku'] });
         expect(paths).toEqual(['rows[#s2].q']);
       });
 
@@ -771,9 +771,9 @@ describe('Object Utilities', () => {
         expect(reads).toEqual(['todos.0.done', 'todos.1.done']);
       });
 
-      it('honors a custom key list', () => {
+      it('honors a custom field list', () => {
         const db = { rows: [{ sku: 's1', qty: 1 }] };
-        const { reads } = trackReads(db, (value) => value.rows[0].qty, { keys: ['sku'] });
+        const { reads } = trackReads(db, (value) => value.rows[0].qty, { fields: ['sku'] });
         expect(reads).toEqual(['rows[#s1].qty']);
       });
 
@@ -1111,10 +1111,10 @@ describe('Object Utilities', () => {
           .toEqual(['rows[#r1].tags[#t1].on']);
       });
 
-      it('honors a custom key list', () => {
+      it('honors a custom field list', () => {
         const before = { a: [{ sku: 's1', q: 1 }] };
         const after = { a: [{ sku: 's1', q: 2 }] };
-        expect(detectChanges(before, after, { keyed: true, keys: ['sku'] }).changed)
+        expect(detectChanges(before, after, { keyed: true, fields: ['sku'] }).changed)
           .toEqual(['a[#s1].q']);
       });
 

@@ -38,7 +38,7 @@ describe('Path Utilities', () => {
       expect(elementKey({ name: 'n' })).toBeUndefined();
     });
 
-    it('honors a custom key list', () => {
+    it('honors a custom field list', () => {
       expect(elementKey({ sku: 's1' }, ['sku'])).toBe('s1');
       expect(elementKey({ id: 'a', sku: 's1' }, ['sku', 'id'])).toBe('s1');
     });
@@ -173,7 +173,7 @@ describe('Path Utilities', () => {
         expect(doc.items[0].n).toBe(9);
       });
 
-      it('honors a custom key list', () => {
+      it('honors a custom field list', () => {
         const doc = { a: [{ sku: 's1', q: 1 }] };
         set(doc, 'a[#s1].q', 9, ['sku']);
         expect(doc.a[0].q).toBe(9);
@@ -281,7 +281,7 @@ describe('Path Utilities', () => {
         expect(doc.items[0]).toEqual({ id: 'a', n: 1 });
       });
 
-      it('honors a custom key list', () => {
+      it('honors a custom field list', () => {
         const doc = { a: [{ sku: 's1' }, { sku: 's2' }] };
         unset(doc, 'a[#s1]', ['sku']);
         expect(doc.a.map((x) => x.sku)).toEqual(['s2']);
@@ -313,6 +313,7 @@ describe('Path Utilities', () => {
       expect(has(obj, 'items[#x].missing')).toBe(false);
       expect(has(obj, 'items[#z]')).toBe(false);
       expect(has({ u: [{ id: 'a@b.co', v: undefined }] }, 'u[#a@b.co].v')).toBe(true);
+      expect(has({ u: [{ sku: 's1', v: undefined }] }, 'u[#s1].v', ['sku'])).toBe(true);
     });
 
     it('resolves literal dotted keys like get does', () => {
@@ -442,7 +443,7 @@ describe('Path Utilities', () => {
         expect(get({ a: [{ id: 7, v: 'seven' }] }, 'a[#7].v')).toBe('seven');
       });
 
-      it('honors a custom key list', () => {
+      it('honors a custom field list', () => {
         const doc = { a: [{ sku: 's1', q: 1 }] };
         expect(get(doc, 'a[#s1].q', ['sku'])).toBe(1);
       });
@@ -649,22 +650,22 @@ describe('malformed bracket segments', () => {
   });
 });
 
-describe('elementKey.config.keys', () => {
+describe('elementKey.config.fields', () => {
   it('the vocabulary extends by mutation like every configured util, the fast path stays true', () => {
-    elementKey.config.keys.push('sku');
+    elementKey.config.fields.push('sku');
     try {
       expect(elementKey({ sku: 'A1' })).toBe('A1');
       expect(elementKey({ id: 'x', sku: 'A1' })).toBe('x');
     }
     finally {
-      elementKey.config.keys.pop();
+      elementKey.config.fields.pop();
     }
     expect(elementKey({ sku: 'A1' })).toBe(undefined);
   });
 
   it('the configured vocabulary reaches the whole keyed grammar, per-call keys still win', () => {
-    const original = [...elementKey.config.keys];
-    elementKey.config.keys = ['sku', ...original];
+    const original = [...elementKey.config.fields];
+    elementKey.config.fields = ['sku', ...original];
     try {
       const doc = { rows: [{ sku: 'A1', qty: 1 }] };
       expect(elementKey(doc.rows[0])).toBe('A1');
@@ -677,7 +678,7 @@ describe('elementKey.config.keys', () => {
       expect(elementKey(doc.rows[0], ['qty'])).toBe(2);
     }
     finally {
-      elementKey.config.keys = original;
+      elementKey.config.fields = original;
     }
   });
 });
@@ -809,7 +810,7 @@ describe('pathKey', () => {
     expect(pathKey(null)).toBeNull();
   });
 
-  it('honors a custom key list', () => {
+  it('honors a custom field list', () => {
     expect(pathKey({ sku: 'A1' }, ['sku'])).toBe('A1');
   });
 
@@ -916,9 +917,9 @@ describe('expandPath', () => {
     expect(expandPath('lines.*.rates.*.n', { doc })).toEqual(['lines[#a].rates.0.n']);
   });
 
-  it('honors a custom key list during enumeration', () => {
+  it('honors a custom field list during enumeration', () => {
     const bySku = { rows: [{ sku: 'A1', q: 1 }] };
-    expect(expandPath('rows.*.q', { doc: bySku, keys: ['sku'] })).toEqual(['rows[#A1].q']);
+    expect(expandPath('rows.*.q', { doc: bySku, fields: ['sku'] })).toEqual(['rows[#A1].q']);
   });
 
   it('throws when the spelling needs context it was not given', () => {
