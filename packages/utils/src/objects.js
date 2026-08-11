@@ -84,10 +84,10 @@ const overBudget = (value) => spendBudget(value, autoBudget) < 0;
 // (caller falls back to the positional walk) when an element is unkeyed, two share
 // a key, or a key value can't ride the dot-bracket path grammar — so detectChanges
 // never emits a keyed path get/set/unset can't parse
-const keyedMap = (array, keys) => {
+const keyedMap = (array, fields) => {
   const map = new Map();
   for (const item of array) {
-    const keyValue = pathKey(item, keys);
+    const keyValue = pathKey(item, fields);
     if (keyValue === null || map.has(keyValue)) {
       return null;
     }
@@ -98,7 +98,7 @@ const keyedMap = (array, keys) => {
 
 export const detectChanges = (before, after, {
   keyed = true,
-  keys = elementKey.config.keys,
+  fields = elementKey.config.fields,
   equality = isEqual,
   ignoreKeys = null,
   collapseKeys = null,
@@ -120,8 +120,8 @@ export const detectChanges = (before, after, {
     // emits the field[#key] form get/set/unset apply; falls back to the positional
     // walk below when an array isn't cleanly keyed (keyedMap returns null)
     if (keyed && isArray(a) && isArray(b)) {
-      const mapA = keyedMap(a, keys);
-      const mapB = keyedMap(b, keys);
+      const mapA = keyedMap(a, fields);
+      const mapB = keyedMap(b, fields);
       if (mapA && mapB) {
         for (const [keyValue, itemA] of mapA) {
           const path = `${prefix}[#${keyValue}]`;
@@ -280,7 +280,7 @@ export const trackWrites = (value, callback, {
   onWrite,
   returnPaths = true,
   keyed = true,
-  keys = elementKey.config.keys,
+  fields = elementKey.config.fields,
   clone: cloneFunction = clone,
   equality = isEqual,
 } = {}) => {
@@ -298,7 +298,7 @@ export const trackWrites = (value, callback, {
     if (!returnPaths) {
       return { changed: !equality(before, value), result };
     }
-    const diff = detectChanges(before, value, { keyed, keys, equality });
+    const diff = detectChanges(before, value, { keyed, fields, equality });
     const paths = [...diff.added, ...diff.changed, ...diff.removed];
     return { changed: paths.length > 0, result, paths };
   }
@@ -489,7 +489,7 @@ export const trackReads = (value, callback, {
   onRead,
   returnPaths = true,
   keyed = true,
-  keys = elementKey.config.keys,
+  fields = elementKey.config.fields,
 } = {}) => {
   // a non-container has no paths to read, and a frozen tree is immutable so it
   // has no dependencies worth tracking (a proxy also can't stand in for its
@@ -516,7 +516,7 @@ export const trackReads = (value, callback, {
   // dependency matches the write side and survives a reorder
   const childPath = (parentPath, parent, key, childValue) => {
     if (keyed && isArray(parent)) {
-      const keyValue = pathKey(childValue, keys);
+      const keyValue = pathKey(childValue, fields);
       if (keyValue !== null) {
         return `${parentPath}[#${keyValue}]`;
       }

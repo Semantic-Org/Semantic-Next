@@ -8,7 +8,7 @@ console.log(elementKey({ _id: 'b' }));
 console.log(elementKey('plain'));
 console.log(elementKey({ name: 'n' }));
 
-// Custom key list — match your own identity field
+// Custom field list — match your own identity field
 console.log(elementKey({ sku: 's1' }, ['sku']));
 
 // detectChanges diffs arrays of keyed objects by identity by default, not by

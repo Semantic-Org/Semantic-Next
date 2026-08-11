@@ -165,7 +165,7 @@ const cart = { items: [{ id: 'a', qty: 1 }, { id: 'b', qty: 2 }] };
 get(cart, 'items[#b].qty');                  // 2 (by id, survives a reorder)
 set(cart, 'items[#c]', { id: 'c', qty: 3 }); // appends, no element had id 'c'
 unset(cart, 'items[#a]');                    // splices out the 'a' element
-set(cart, 'items[#x].qty', 9, ['sku']);      // 4th arg overrides the id field list
+set(cart, 'items[#x].qty', 9, ['sku']);      // trailing fields argument overrides the identity vocabulary
 
 // The id may be any string without ']' — a dot inside a bracket belongs to the id
 const team = { members: [{ id: 'jack@semantic-ui.com', role: 'owner' }] };

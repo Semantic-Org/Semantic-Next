@@ -24,7 +24,7 @@ A key rides between `[#` and `]` and carries any character except `]`, the one c
 ### get
 
 ```javascript
-function get(obj, path = '', keys = ['id', '_id', 'hash', 'key'])
+function get(obj, path = '', fields = elementKey.config.fields)
 ```
 
 Access a nested object field from a string path, like 'a.b.c'.
@@ -35,7 +35,7 @@ Access a nested object field from a string path, like 'a.b.c'.
 |------|----------|-------------|
 | obj  | object   | The object to access |
 | path | string   | The path to the desired property |
-| keys | string[] | Identity fields for keyed `[#id]` segments |
+| fields | string[] | Identity fields for keyed `[#id]` segments |
 
 #### Returns
 
@@ -68,7 +68,7 @@ console.log(get(team, 'members[#jack@semantic-ui.com].role')); // 'owner'
 ### has
 
 ```javascript
-function has(obj, path = '', keys = ['id', '_id', 'hash', 'key'])
+function has(obj, path = '', fields = elementKey.config.fields)
 ```
 
 Existence twin of [`get`](#get). Returns `true` when the path resolves to a real location, even one holding `undefined`. `get` reports a missing path and a stored `undefined` the same way, so `has` is how you tell them apart.
@@ -79,7 +79,7 @@ Existence twin of [`get`](#get). Returns `true` when the path resolves to a real
 |------|----------|-------------|
 | obj  | object   | The object to check |
 | path | string   | The path to test for |
-| keys | string[] | Identity fields for keyed `[#id]` segments |
+| fields | string[] | Identity fields for keyed `[#id]` segments |
 
 #### Returns
 
@@ -107,7 +107,7 @@ console.log(has(doc, 'items[#a].note')); // false
 ### set
 
 ```javascript
-function set(obj, path, value, keys = ['id', '_id', 'hash', 'key'])
+function set(obj, path, value, fields = elementKey.config.fields)
 ```
 
 Set a nested object field from a string path, the write twin of [`get`](#get). Creates missing intermediates — arrays when the next segment is a numeric index, objects otherwise.
@@ -119,7 +119,7 @@ Set a nested object field from a string path, the write twin of [`get`](#get). C
 | obj   | object   | The object to write into |
 | path  | string   | The path string (e.g., 'a.b.c', 'items.0.name', 'items[0].name', or 'items[#id]') |
 | value | any      | The value to set at the path |
-| keys  | string[] | Identity fields for keyed `[#id]` segments |
+| fields  | string[] | Identity fields for keyed `[#id]` segments |
 
 #### Returns
 
@@ -152,7 +152,7 @@ set(doc, 'items[#b]', { id: 'b', n: 2 });   // appends, no element had id 'b'
 ### unset
 
 ```javascript
-function unset(obj, path, keys = ['id', '_id', 'hash', 'key'])
+function unset(obj, path, fields = elementKey.config.fields)
 ```
 
 Remove a nested object field from a string path, the delete twin of [`get`](#get) and [`set`](#set).
@@ -163,7 +163,7 @@ Remove a nested object field from a string path, the delete twin of [`get`](#get
 |------|----------|-------------|
 | obj  | object   | The object to remove from |
 | path | string   | The path string (e.g., 'a.b.c', 'items.0', or 'items[#id]') |
-| keys | string[] | Identity fields for keyed `[#id]` segments |
+| fields | string[] | Identity fields for keyed `[#id]` segments |
 
 #### Returns
 
@@ -195,17 +195,17 @@ diff.removed.forEach((path) => unset(replica, path));
 ### elementKey
 
 ```javascript
-function elementKey(item, keys = ['id', '_id', 'hash', 'key'])
+function elementKey(item, fields = elementKey.config.fields)
 ```
 
-The identity of an array element — the value of the first present field in `keys`, or `undefined` for a scalar or an object carrying none of them. The same convention as reactivity's `Signal.id` and the renderer's `getItemId`, and what the keyed [`detectChanges`](/docs/api/utils/objects#detectchanges) mode and the keyed [`get`](#get) / [`set`](#set) / [`unset`](#unset) grammar match on.
+The identity of an array element — the value of the first present field in `fields`, or `undefined` for a scalar or an object carrying none of them. The same convention as reactivity's `Signal.id` and the renderer's `getItemId`, and what the keyed [`detectChanges`](/docs/api/utils/objects#detectchanges) mode and the keyed [`get`](#get) / [`set`](#set) / [`unset`](#unset) grammar match on.
 
 #### Parameters
 
 | Name | Type     | Description |
 |------|----------|-------------|
 | item | any      | The array element to read identity from |
-| keys | string[] | Candidate identity fields, first present wins |
+| fields | string[] | Candidate identity fields, first present wins |
 
 #### Returns
 
@@ -225,10 +225,24 @@ console.log(elementKey({ name: 'n' }));         // undefined
 console.log(elementKey({ sku: 's1' }, ['sku'])); // 's1'
 ```
 
+#### elementKey.config
+
+```javascript
+elementKey.config.fields  // ['id', '_id', 'hash', 'key']
+```
+
+The identity vocabulary for the whole keyed grammar, set once at app boot — every `fields` default across `get`/`set`/`has`/`unset`, `keyedPath`, `pathKey`, `expandPath`, and the keyed `detectChanges`/`trackWrites`/`trackReads` modes reads it live, and a per-call `fields` argument still wins.
+
+```javascript
+import { elementKey } from '@semantic-ui/utils';
+
+elementKey.config.fields.unshift('sku'); // sku now outranks id everywhere
+```
+
 ### pathKey
 
 ```javascript
-function pathKey(item, keys = ['id', '_id', 'hash', 'key'])
+function pathKey(item, fields = elementKey.config.fields)
 ```
 
 An element's key as it can appear in a path — the text that rides between `[#` and `]` — or `null` when the element is unkeyed or its identity can't ride the grammar.
@@ -238,7 +252,7 @@ An element's key as it can appear in a path — the text that rides between `[#`
 | Name | Type     | Description |
 |------|----------|-------------|
 | item | any      | The array element to read identity from |
-| keys | string[] | Candidate identity fields, first present wins |
+| fields | string[] | Candidate identity fields, first present wins |
 
 #### Returns
 
@@ -545,7 +559,7 @@ console.log(get({ team }, elementPath('team.members', { key: 'jack@semantic-ui.c
 ### keyedPath
 
 ```javascript
-function keyedPath(obj, path, keys = ['id', '_id', 'hash', 'key'])
+function keyedPath(obj, path, fields = elementKey.config.fields)
 ```
 
 The keyed spelling of a positional path — rewrites each positional array segment (`items.0` or `items[1]`) to its `[#id]` form where the addressed element carries a path-safe identity, resolved against `obj` at call time. A positional address is only stable while the array doesn't move, the keyed address survives a reorder — the same identity [`detectChanges`](/docs/api/utils/objects#detectchanges) emits in its keyed mode.
@@ -556,7 +570,7 @@ The keyed spelling of a positional path — rewrites each positional array segme
 |------|----------|-------------|
 | obj  | object   | The object the path addresses |
 | path | string   | The path string (e.g., 'items.0.qty' or 'items[1]') |
-| keys | string[] | Identity fields for keyed `[#id]` segments |
+| fields | string[] | Identity fields for keyed `[#id]` segments |
 
 #### Returns
 
@@ -628,7 +642,7 @@ console.log(pathCovers(wildcardPath('lines[#a1].tax'), 'lines[#a1].tax')); // tr
 ### expandPath
 
 ```javascript
-function expandPath(path, { from, doc, keys = ['id', '_id', 'hash', 'key'] } = {})
+function expandPath(path, { from, doc, fields = elementKey.config.fields } = {})
 ```
 
 Expand a path spelling into the concrete paths it addresses, always as an array.
@@ -646,7 +660,7 @@ Expand a path spelling into the concrete paths it addresses, always as an array.
 |------|----------|-----------|-------------|
 | from | string   | undefined | The path a leading-dot spelling resolves against |
 | doc  | object   | undefined | The value a `*` enumerates |
-| keys | string[] | `['id', '_id', 'hash', 'key']` | Identity fields used while enumerating |
+| fields | string[] | `elementKey.config.fields` | Identity fields used while enumerating |
 
 #### Returns
 
