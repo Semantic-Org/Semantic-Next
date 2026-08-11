@@ -1,4 +1,24 @@
-import { detectChanges, eachPath, elementKey, get, has, keyedPath, set, trackWrites, unset } from '@semantic-ui/utils';
+import {
+  detectChanges,
+  eachPath,
+  elementKey,
+  elementPath,
+  expandPath,
+  get,
+  has,
+  isPathKey,
+  keyedPath,
+  parsePath,
+  pathCovers,
+  pathFrom,
+  pathKey,
+  pathsOverlap,
+  patternFrom,
+  set,
+  splitPath,
+  trackWrites,
+  unset,
+} from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 
@@ -659,5 +679,248 @@ describe('elementKey.config.keys', () => {
     finally {
       elementKey.config.keys = original;
     }
+  });
+});
+
+describe('splitPath', () => {
+  it('splits on dots outside brackets only', () => {
+    expect(splitPath('a.b.c')).toEqual(['a', 'b', 'c']);
+    expect(splitPath('users[#jack@semantic-ui.com].role')).toEqual(['users[#jack@semantic-ui.com]', 'role']);
+    expect(splitPath('items[2].qty')).toEqual(['items[2]', 'qty']);
+  });
+
+  it('segments are contiguous substrings of the source', () => {
+    const path = 'a[#x.y].b.c';
+    expect(splitPath(path).join('.')).toBe(path);
+  });
+});
+
+describe('parsePath', () => {
+  it('parses fields, keys, indexes, and wildcards', () => {
+    expect(parsePath('lines[#a.b].tax')).toEqual([
+      { type: 'field', name: 'lines' },
+      { type: 'key', key: 'a.b' },
+      { type: 'field', name: 'tax' },
+    ]);
+    expect(parsePath('items.2')).toEqual([
+      { type: 'field', name: 'items' },
+      { type: 'index', index: 2 },
+    ]);
+    expect(parsePath('lines.*.cost')).toEqual([
+      { type: 'field', name: 'lines' },
+      { type: 'wildcard' },
+      { type: 'field', name: 'cost' },
+    ]);
+  });
+
+  it('bracket and dot index spellings parse to the same segment', () => {
+    expect(parsePath('items[2].qty')).toEqual(parsePath('items.2.qty'));
+  });
+
+  it('a key carries any character except "]"', () => {
+    expect(parsePath('users[#jack@semantic-ui.com].role')[1]).toEqual({
+      type: 'key',
+      key: 'jack@semantic-ui.com',
+    });
+    expect(parsePath('items[#a[0]')[1]).toEqual({ type: 'key', key: 'a[0' });
+  });
+
+  it('chained brackets in one part parse in order', () => {
+    expect(parsePath('a[#x][#y].b')).toEqual([
+      { type: 'field', name: 'a' },
+      { type: 'key', key: 'x' },
+      { type: 'key', key: 'y' },
+      { type: 'field', name: 'b' },
+    ]);
+  });
+
+  it('a leading bracket parses without a field', () => {
+    expect(parsePath('[#a].done')).toEqual([
+      { type: 'key', key: 'a' },
+      { type: 'field', name: 'done' },
+    ]);
+  });
+
+  it('a path that does not parse is null, not a guess', () => {
+    expect(parsePath('items[#a')).toBeNull(); // unclosed
+    expect(parsePath('items[abc]')).toBeNull(); // positional body that is not an index
+    expect(parsePath('items[0]x.y')).toBeNull(); // trailing text after a bracket
+    expect(parsePath('a..b')).toBeNull(); // empty part
+    expect(parsePath(42)).toBeNull();
+  });
+
+  it('the empty path parses to no segments', () => {
+    expect(parsePath('')).toEqual([]);
+  });
+
+  it('repeated parses return the same shared segments', () => {
+    expect(parsePath('a.b[#x].c')).toBe(parsePath('a.b[#x].c'));
+  });
+});
+
+describe('pathFrom', () => {
+  it('inverts parsePath', () => {
+    for (const path of ['a.b.c', 'users[#jack@semantic-ui.com].role', 'lines.*.cost', '[#a].done', 'a[#x][#y].b']) {
+      expect(pathFrom(parsePath(path))).toBe(path);
+    }
+  });
+
+  it('normalizes a bracket index to the dot form', () => {
+    expect(pathFrom(parsePath('items[2].qty'))).toBe('items.2.qty');
+  });
+
+  it('inverts splitPath, and accepts mixed strings and segments', () => {
+    expect(pathFrom(splitPath('a[#x.y].b'))).toBe('a[#x.y].b');
+    expect(pathFrom(['order.lines', { type: 'key', key: 'a1' }, 'qty'])).toBe('order.lines[#a1].qty');
+  });
+});
+
+describe('elementPath', () => {
+  it('addresses by key in bracket form, by index in dot form', () => {
+    expect(elementPath('order.lines', { key: 'a1' })).toBe('order.lines[#a1]');
+    expect(elementPath('order.lines', { index: 2 })).toBe('order.lines.2');
+  });
+
+  it('a key and an index are different address spaces', () => {
+    expect(elementPath('a', { key: '2' })).toBe('a[#2]');
+    expect(elementPath('a', { index: 2 })).toBe('a.2');
+  });
+
+  it('an empty list path addresses the root', () => {
+    expect(elementPath('', { key: 'a1' })).toBe('[#a1]');
+    expect(elementPath('', { index: 2 })).toBe('2');
+  });
+
+  it('throws on a key carrying "]" and on a missing flavor', () => {
+    expect(() => elementPath('a', { key: 'x]y' })).toThrow(/can't appear in a path/);
+    expect(() => elementPath('a', {})).toThrow(/key.*or.*index/);
+  });
+});
+
+describe('pathKey', () => {
+  it('spells an element key for a path, String-coerced', () => {
+    expect(pathKey({ id: 'jack@semantic-ui.com' })).toBe('jack@semantic-ui.com');
+    expect(pathKey({ id: 7 })).toBe('7');
+  });
+
+  it('null for an unkeyed element or a key that cannot ride', () => {
+    expect(pathKey({ name: 'n' })).toBeNull();
+    expect(pathKey({ id: 'a]b' })).toBeNull();
+    expect(pathKey(null)).toBeNull();
+  });
+
+  it('honors a custom key list', () => {
+    expect(pathKey({ sku: 'A1' }, ['sku'])).toBe('A1');
+  });
+
+  it('isPathKey accepts whatever pathKey returned', () => {
+    expect(isPathKey(pathKey({ id: 'jack@semantic-ui.com' }))).toBe(true);
+    expect(isPathKey('a]b')).toBe(false);
+    expect(isPathKey(7)).toBe(true);
+  });
+});
+
+describe('pathCovers', () => {
+  it('a covers b at or under it, segment-aligned', () => {
+    expect(pathCovers('contact', 'contact.taxId')).toBe(true);
+    expect(pathCovers('contact', 'contacts')).toBe(false);
+    expect(pathCovers('items', 'items[#r7].amount')).toBe(true);
+    expect(pathCovers('a.b.c', 'a.b')).toBe(false);
+    expect(pathCovers('a.b', 'a.b')).toBe(true);
+  });
+
+  it('a wildcard covers any single segment', () => {
+    expect(pathCovers('lines.*.cost', 'lines[#a].cost')).toBe(true);
+    expect(pathCovers('lines.*.cost', 'lines.2.cost')).toBe(true);
+    expect(pathCovers('lines.*.cost', 'lines[#a].fee')).toBe(false);
+  });
+
+  it('keyed and positional indexes stay apart — [#7] never means [7]', () => {
+    expect(pathCovers('a[#7]', 'a[#7].x')).toBe(true);
+    expect(pathCovers('a[#7]', 'a.7.x')).toBe(false);
+  });
+
+  it('covers through keys carrying dots', () => {
+    expect(pathCovers('users', 'users[#jack@semantic-ui.com].role')).toBe(true);
+    expect(pathCovers('users[#jack@semantic-ui.com]', 'users[#jack@semantic-ui.com].role')).toBe(true);
+  });
+
+  it('no relation to a path that does not parse', () => {
+    expect(pathCovers('a', 'a[#x')).toBe(false);
+    expect(pathCovers('a[#x', 'a')).toBe(false);
+  });
+});
+
+describe('pathsOverlap', () => {
+  it('true when the paths lie on one line, either direction', () => {
+    expect(pathsOverlap('items', 'items[#r7].amount')).toBe(true);
+    expect(pathsOverlap('items[#r7].amount', 'items')).toBe(true);
+    expect(pathsOverlap('items', 'itemsLog')).toBe(false);
+    expect(pathsOverlap('a.b', 'a.c')).toBe(false);
+  });
+});
+
+describe('patternFrom', () => {
+  it('collapses element addresses to the wildcard, keeps fields', () => {
+    expect(patternFrom('lines[#a].tax')).toBe('lines.*.tax');
+    expect(patternFrom('lines.2.tax')).toBe('lines.*.tax');
+    expect(patternFrom('a.b.c')).toBe('a.b.c');
+  });
+
+  it('the collapsed pattern covers the concrete path it came from', () => {
+    const path = 'users[#jack@semantic-ui.com].role';
+    expect(pathCovers(patternFrom(path), path)).toBe(true);
+  });
+});
+
+describe('expandPath', () => {
+  const doc = {
+    lines: [
+      { id: 'a', cost: 1, rates: [{ n: 1 }] },
+      { id: 'b', cost: 2, rates: [] },
+    ],
+    plain: [{ n: 1 }, { n: 2 }],
+  };
+
+  it('a path with no relative dots or wildcards returns itself', () => {
+    expect(expandPath('a.b.c')).toEqual(['a.b.c']);
+  });
+
+  it('resolves a relative spelling against from, one dot per trailing segment', () => {
+    expect(expandPath('.tax', { from: 'lines[#a].qty' })).toEqual(['lines[#a].tax']);
+    expect(expandPath('..total', { from: 'lines[#a].qty' })).toEqual(['lines.total']);
+    expect(expandPath('...total', { from: 'lines[#a].qty' })).toEqual(['total']);
+  });
+
+  it('a keyed segment counts one level, whatever its key carries', () => {
+    expect(expandPath('.role', { from: 'users[#jack@semantic-ui.com].plan' }))
+      .toEqual(['users[#jack@semantic-ui.com].role']);
+  });
+
+  it('a wildcard enumerates keyed elements by key, keyless by position', () => {
+    expect(expandPath('lines.*.cost', { doc })).toEqual(['lines[#a].cost', 'lines[#b].cost']);
+    expect(expandPath('plain.*.n', { doc })).toEqual(['plain.0.n', 'plain.1.n']);
+  });
+
+  it('relative and wildcard compose in one call', () => {
+    expect(expandPath('..*.cost', { from: 'lines[#a].qty', doc })).toEqual([
+      'lines[#a].cost',
+      'lines[#b].cost',
+    ]);
+  });
+
+  it('a level that is not an array contributes nothing', () => {
+    expect(expandPath('missing.*.x', { doc })).toEqual([]);
+    expect(expandPath('lines.*.rates.*.n', { doc })).toEqual(['lines[#a].rates.0.n']);
+  });
+
+  it('honors a custom key list during enumeration', () => {
+    const bySku = { rows: [{ sku: 'A1', q: 1 }] };
+    expect(expandPath('rows.*.q', { doc: bySku, keys: ['sku'] })).toEqual(['rows[#A1].q']);
+  });
+
+  it('throws when the spelling needs context it was not given', () => {
+    expect(() => expandPath('.tax', {})).toThrow(/needs \{ from \}/);
+    expect(() => expandPath('lines.*.cost', {})).toThrow(/need \{ doc \}/);
   });
 });

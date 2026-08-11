@@ -1,7 +1,7 @@
 import { clone } from './cloning.js';
 import { isEqual } from './equality.js';
 import { each } from './loops.js';
-import { eachPath, elementKey, get, keyValueFrom } from './paths.js';
+import { eachPath, elementKey, get, pathKey } from './paths.js';
 import { escapeRegExp } from './regexp.js';
 import { isArray, isMap, isObject, isPlainObject, isSet, isString } from './types.js';
 
@@ -87,7 +87,7 @@ const overBudget = (value) => spendBudget(value, autoBudget) < 0;
 const keyedMap = (array, keys) => {
   const map = new Map();
   for (const item of array) {
-    const keyValue = keyValueFrom(item, keys);
+    const keyValue = pathKey(item, keys);
     if (keyValue === null || map.has(keyValue)) {
       return null;
     }
@@ -516,7 +516,7 @@ export const trackReads = (value, callback, {
   // dependency matches the write side and survives a reorder
   const childPath = (parentPath, parent, key, childValue) => {
     if (keyed && isArray(parent)) {
-      const keyValue = keyValueFrom(childValue, keys);
+      const keyValue = pathKey(childValue, keys);
       if (keyValue !== null) {
         return `${parentPath}[#${keyValue}]`;
       }

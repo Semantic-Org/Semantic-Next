@@ -1,3 +1,5 @@
+import { createCache } from './cache.js';
+import { isDevelopment } from './environment.js';
 import { configured } from './functions.js';
 import { isArray, isObject } from './types.js';
 
@@ -6,10 +8,13 @@ import { isArray, isObject } from './types.js';
 --------------------*/
 
 /*
-  The path grammar's one home: dot-joined parts, [2] positional and [#id]
-  keyed array indexes. A keyed id carries any character except ']'.
-  Addressing (get/set/has/unset), spelling (keyedPath), and traversal
-  (splitPath, eachPath) all read one boundary rule.
+  The path grammar's one home: dot-joined parts, [2] positional and [#key]
+  keyed array indexes, '*' the pattern wildcard. A key carries any character
+  except ']'. Addressing (get/set/has/unset), spelling (keyedPath), traversal
+  (splitPath, eachPath, parsePath), building (pathFrom, elementPath),
+  relations (pathCovers, pathsOverlap), and expansion (expandPath) all read
+  one boundary rule — one lexer, each consumer collapses the detail it
+  doesn't need.
 */
 
 // the identity fields a keyed array element is matched on, first present wins —
@@ -48,21 +53,27 @@ const findKeyed = (array, keyValue, keys = elementKey.config.keys) => {
   return -1;
 };
 
-// a key value can ride the dot-bracket path grammar unless it carries ']', the
-// one character that closes a keyed selector. dots, '@', '[' and a leading '#'
-// all round-trip (items[#jack@semantic-ui.com]). shared by the keyed diff and
-// the keyed read paths so an emitted path always parses back through get
-export const isKeyedPathSafe = (keyValue) => keyValue.indexOf(']') === -1;
+/*
+  A key can ride the dot-bracket path grammar unless it carries ']', the one
+  character that closes a keyed selector. Dots, '@', '[' and a leading '#'
+  all round-trip (items[#jack@semantic-ui.com]). The guard for a key that
+  exists before any item does — a user-typed id at a form boundary.
+*/
+export const isPathKey = (key) => String(key).indexOf(']') === -1;
 
-// an element's identity spelled for a path, null when the element is unkeyed
-// or its key can't ride the grammar
-export const keyValueFrom = (element, keys) => {
-  const id = elementKey(element, keys);
+/*
+  An element's key as it can appear in a path — the text between [# and ] —
+  or null when the element is unkeyed or its key can't ride the grammar.
+  The item-to-path route: every keyed path the emitters produce goes
+  through this check, so an emitted path always parses back through get.
+*/
+export const pathKey = (item, keys = elementKey.config.keys) => {
+  const id = elementKey(item, keys);
   if (id == null) {
     return null;
   }
-  const keyValue = String(id);
-  return isKeyedPathSafe(keyValue) ? keyValue : null;
+  const key = String(id);
+  return isPathKey(key) ? key : null;
 };
 
 const INDEX_SEGMENT = /^\d+$/;
@@ -500,7 +511,7 @@ export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
         out.push(part);
       }
       else {
-        const keyValue = keyValueFrom(element, keys);
+        const keyValue = pathKey(element, keys);
         if (keyValue !== null) {
           out.push(`${access.key}[#${keyValue}]`);
           changed = true;
@@ -513,7 +524,7 @@ export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
     }
     else if (isIndexSegment(part) && isArray(currentObject)) {
       const element = currentObject[Number(part)];
-      const keyValue = keyValueFrom(element, keys);
+      const keyValue = pathKey(element, keys);
       if (keyValue !== null) {
         out[out.length - 1] += `[#${keyValue}]`;
         changed = true;
@@ -534,4 +545,295 @@ export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
     }
   }
   return changed ? out.join('.') : path;
+};
+
+const BRACKET_BODY = /\[([^\]]*)\]/g;
+
+// one dot-part into segments, false when the part is malformed — empty, an
+// unclosed bracket, trailing text after a bracket, or a positional body that
+// isn't a whole index. a segment can chain brackets (a[#x][#y]), and [^\]]*
+// is exact because ']' is the one character a key can't carry
+const lexSegment = (part, segments) => {
+  if (part === '*') {
+    segments.push({ type: 'wildcard' });
+    return true;
+  }
+  const bracket = part.indexOf('[');
+  if (bracket === -1) {
+    if (part === '') {
+      return false;
+    }
+    segments.push(
+      isIndexSegment(part)
+        ? { type: 'index', index: Number(part) }
+        : { type: 'field', name: part },
+    );
+    return true;
+  }
+  if (bracket > 0) {
+    segments.push({ type: 'field', name: part.slice(0, bracket) });
+  }
+  BRACKET_BODY.lastIndex = bracket;
+  let cursor = bracket;
+  let match;
+  while ((match = BRACKET_BODY.exec(part)) !== null) {
+    if (match.index !== cursor) {
+      return false;
+    }
+    const body = match[1];
+    if (body === '*') {
+      segments.push({ type: 'wildcard' });
+    }
+    else if (body.charCodeAt(0) === 35) {
+      segments.push({ type: 'key', key: body.slice(1) });
+    }
+    else if (isIndexSegment(body)) {
+      segments.push({ type: 'index', index: Number(body) });
+    }
+    else {
+      return false;
+    }
+    cursor = match.index + match[0].length;
+  }
+  return cursor === part.length;
+};
+
+// parsed paths repeat heavily on hot fan paths, and client-minted keys make
+// the input space adversarial — a bounded cache, sized via parsePath.config
+let segmentCache = null;
+
+/*
+  Parse a path into its segments — { type: 'field', name }, { type: 'key', key },
+  { type: 'index', index }, { type: 'wildcard' } — the semantic reading beside
+  splitPath's textual one. null when the path doesn't parse, so a relation
+  over garbage reads as no relation. Results are cached and shared: treat
+  returned segments as immutable (frozen in development).
+*/
+export const parsePath = /* @__PURE__ */ configured(
+  (path) => {
+    if (typeof path !== 'string') {
+      return null;
+    }
+    segmentCache ??= createCache({ maxSize: parsePath.config.cacheSize });
+    let segments = segmentCache.get(path);
+    if (segments === undefined) {
+      segments = [];
+      if (path !== '') {
+        for (const part of splitPath(path)) {
+          if (!lexSegment(part, segments)) {
+            segments = null;
+            break;
+          }
+        }
+      }
+      if (isDevelopment && segments !== null) {
+        for (const segment of segments) {
+          Object.freeze(segment);
+        }
+        Object.freeze(segments);
+      }
+      segmentCache.set(path, segments);
+    }
+    return segments;
+  },
+  { cacheSize: 4096 },
+);
+
+// one segment appended to a path under the emission contract: fields,
+// positional indexes, and wildcards join with dots, keys append as [#key]
+const appendSegment = (path, segment) => {
+  if (typeof segment === 'string') {
+    return path === '' ? segment : `${path}.${segment}`;
+  }
+  if (segment.type === 'key') {
+    return `${path}[#${segment.key}]`;
+  }
+  let text;
+  if (segment.type === 'field') {
+    text = segment.name;
+  }
+  else if (segment.type === 'index') {
+    text = String(segment.index);
+  }
+  else {
+    text = '*';
+  }
+  return path === '' ? text : `${path}.${text}`;
+};
+
+/*
+  The path from segments — the inverse of parsePath, and of splitPath: the
+  array may mix parsed segments and plain segment strings. Positional indexes
+  emit the dot form (items.2), so pathFrom(parsePath(path)) normalizes a
+  bracket spelling rather than preserving it.
+*/
+export const pathFrom = (segments) => {
+  let path = '';
+  for (const segment of segments) {
+    path = appendSegment(path, segment);
+  }
+  return path;
+};
+
+/*
+  The path of one element under a list path — by key in the [#key] form, by
+  index in the dot form. The birth point of a path from raw data, so the key
+  contract is enforced here: a key carrying ']' throws instead of emitting a
+  path nothing can parse. Route items through pathKey first.
+*/
+export const elementPath = (listPath, { key, index } = {}) => {
+  if (key !== undefined) {
+    const keyText = String(key);
+    if (!isPathKey(keyText)) {
+      throw new TypeError(
+        `elementPath: key '${keyText}' can't appear in a path — a key carries any character except ']'`,
+      );
+    }
+    return `${listPath}[#${keyText}]`;
+  }
+  if (index !== undefined) {
+    return listPath === '' ? String(index) : `${listPath}.${index}`;
+  }
+  throw new TypeError('elementPath: pass { key } or { index } to address an element');
+};
+
+// one segment against one segment. a wildcard matches any single segment;
+// keyed and positional indexes stay apart ([#7] never means [7])
+const segmentMatches = (a, b) => {
+  if (a.type === 'wildcard' || b.type === 'wildcard') {
+    return true;
+  }
+  if (a.type !== b.type) {
+    return false;
+  }
+  if (a.type === 'field') {
+    return a.name === b.name;
+  }
+  return a.type === 'key' ? a.key === b.key : a.index === b.index;
+};
+
+/*
+  Does path a cover path b — b at or under a, segment-aligned: 'contact'
+  covers 'contact.taxId' but never 'contacts', 'items' covers
+  'items[#r7].amount', 'lines.*.cost' covers 'lines[#a].cost'. The one
+  covering relation a projection, a write guard, and an invalidation check
+  all read.
+*/
+export const pathCovers = (a, b) => {
+  if (a === b) {
+    return true;
+  }
+  const aSegments = parsePath(a);
+  const bSegments = parsePath(b);
+  if (aSegments === null || bSegments === null || aSegments.length > bSegments.length) {
+    return false;
+  }
+  for (let i = 0; i < aSegments.length; i++) {
+    if (!segmentMatches(aSegments[i], bSegments[i])) {
+      return false;
+    }
+  }
+  return true;
+};
+
+/*
+  Do two paths lie on one line — a at or under b, or b at or under a, with
+  segment alignment ('items' overlaps 'items[#r7].amount', never 'itemsLog').
+*/
+export const pathsOverlap = (a, b) => {
+  const aSegments = parsePath(a);
+  const bSegments = parsePath(b);
+  if (aSegments === null || bSegments === null) {
+    return false;
+  }
+  const shared = Math.min(aSegments.length, bSegments.length);
+  for (let i = 0; i < shared; i++) {
+    if (!segmentMatches(aSegments[i], bSegments[i])) {
+      return false;
+    }
+  }
+  return true;
+};
+
+/*
+  Collapse a concrete path to its pattern spelling — lines[#a].tax becomes
+  lines.*.tax — so per-element paths group under one dependency pattern.
+  A path that doesn't parse passes through unchanged.
+*/
+export const patternFrom = (path) => {
+  const segments = parsePath(path);
+  if (segments === null) {
+    return path;
+  }
+  return segments.map((segment) => segment.type === 'field' ? segment.name : '*').join('.');
+};
+
+/*
+  Expand a path spelling into the concrete paths it addresses, always as an
+  array. A leading-dot relative spelling resolves against { from } — '..tax'
+  from 'lines[#a].qty' is 'lines[#a].tax', each dot stripping one trailing
+  segment, a keyed segment counting one like any other. A '*' enumerates the
+  array at that level of { doc }: an element with a path key takes the [#key]
+  spelling so a derived write respects a keyed override, a keyless element
+  stays positional, and a level that isn't an array contributes nothing.
+  Both spellings compose in one call. A path with neither returns itself as
+  one element, so callers destructure uniformly.
+*/
+export const expandPath = (path, { from, doc, keys = elementKey.config.keys } = {}) => {
+  if (typeof path !== 'string') {
+    throw new TypeError('expandPath: path must be a string');
+  }
+  let absolute = path;
+  if (path.charCodeAt(0) === 46) {
+    if (typeof from !== 'string') {
+      throw new TypeError(`expandPath: the relative path '${path}' needs { from } to resolve against`);
+    }
+    let depth = 1;
+    while (path.charCodeAt(depth) === 46) {
+      depth += 1;
+    }
+    const suffix = path.slice(depth);
+    const fromSegments = parsePath(from);
+    if (fromSegments === null) {
+      throw new TypeError(`expandPath: can't parse the from path '${from}'`);
+    }
+    const prefix = pathFrom(fromSegments.slice(0, Math.max(0, fromSegments.length - depth)));
+    if (prefix === '' || suffix === '') {
+      absolute = prefix || suffix;
+    }
+    else {
+      absolute = `${prefix}.${suffix}`;
+    }
+  }
+  const segments = parsePath(absolute);
+  if (segments === null) {
+    throw new TypeError(`expandPath: can't parse the path '${absolute}'`);
+  }
+  if (!segments.some((segment) => segment.type === 'wildcard')) {
+    return [absolute];
+  }
+  if (doc === null || !isObject(doc)) {
+    throw new TypeError(`expandPath: the wildcards in '${absolute}' need { doc } to enumerate`);
+  }
+  let paths = [''];
+  for (const segment of segments) {
+    if (segment.type !== 'wildcard') {
+      paths = paths.map((currentPath) => appendSegment(currentPath, segment));
+      continue;
+    }
+    paths = paths.flatMap((currentPath) => {
+      const array = currentPath === '' ? doc : get(doc, currentPath, keys);
+      if (!isArray(array)) {
+        return [];
+      }
+      return array.map((element, position) => {
+        const key = pathKey(element, keys);
+        if (key !== null) {
+          return `${currentPath}[#${key}]`;
+        }
+        return currentPath === '' ? String(position) : `${currentPath}.${position}`;
+      });
+    });
+  }
+  return paths;
 };
