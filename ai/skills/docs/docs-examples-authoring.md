@@ -133,13 +133,16 @@ title: 'Query .focus()'
 description: 'Demonstrates using .focus() to focus elements'
 ```
 
-**Tips** add non-obvious framework-specific insight, or are omitted entirely:
+**Tips** add non-obvious framework-specific insight, or are omitted entirely. A tip renders inline next to the title in the REPL, so it fits 5-15 words — one insight, not a paragraph:
 ```yaml
 # ✅ Non-obvious detail
 tip: 'Unlike remove(), detached elements can be reattached with events intact'
 
 # ❌ States the obvious
 tip: 'Use addClass() to add CSS classes to elements'
+
+# ❌ Too long for the inline slot — pick the one insight
+tip: 'Pass self: false to visit only ancestors — the walk a subsumption check needs, since a write at any ancestor covers the path, and returning false stops early'
 ```
 
 Verify framework-specific claims in source code (`/packages/{package}/src/`) before writing tips.
