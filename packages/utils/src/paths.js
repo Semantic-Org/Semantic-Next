@@ -9,7 +9,7 @@ import { isArray, isObject } from './types.js';
 
 /*
   The path grammar's one home: dot-joined parts, [2] positional and [#key]
-  keyed array indexes, '*' the pattern wildcard. A key carries any character
+  keyed array indexes, '*' the wildcard. A key carries any character
   except ']'. Addressing (get/set/has/unset), spelling (keyedPath), traversal
   (splitPath, eachPath, parsePath), building (pathFrom, elementPath),
   relations (pathCovers, pathsOverlap), and expansion (expandPath) all read
@@ -757,11 +757,11 @@ export const pathsOverlap = (a, b) => {
 };
 
 /*
-  Collapse a concrete path to its pattern spelling — lines[#a].tax becomes
-  lines.*.tax — so per-element paths group under one dependency pattern.
-  A path that doesn't parse passes through unchanged.
+  The wildcard path of a concrete path — lines[#a].tax becomes lines.*.tax,
+  the same address written at list grain — so per-element paths group under
+  one spelling. A path that doesn't parse passes through unchanged.
 */
-export const patternFrom = (path) => {
+export const wildcardPath = (path) => {
   const segments = parsePath(path);
   if (segments === null) {
     return path;

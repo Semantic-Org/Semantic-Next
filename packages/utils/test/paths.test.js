@@ -13,11 +13,11 @@ import {
   pathFrom,
   pathKey,
   pathsOverlap,
-  patternFrom,
   set,
   splitPath,
   trackWrites,
   unset,
+  wildcardPath,
 } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
@@ -862,16 +862,16 @@ describe('pathsOverlap', () => {
   });
 });
 
-describe('patternFrom', () => {
+describe('wildcardPath', () => {
   it('collapses element addresses to the wildcard, keeps fields', () => {
-    expect(patternFrom('lines[#a].tax')).toBe('lines.*.tax');
-    expect(patternFrom('lines.2.tax')).toBe('lines.*.tax');
-    expect(patternFrom('a.b.c')).toBe('a.b.c');
+    expect(wildcardPath('lines[#a].tax')).toBe('lines.*.tax');
+    expect(wildcardPath('lines.2.tax')).toBe('lines.*.tax');
+    expect(wildcardPath('a.b.c')).toBe('a.b.c');
   });
 
-  it('the collapsed pattern covers the concrete path it came from', () => {
+  it('the wildcard path covers the concrete path it came from', () => {
     const path = 'users[#jack@semantic-ui.com].role';
-    expect(pathCovers(patternFrom(path), path)).toBe(true);
+    expect(pathCovers(wildcardPath(path), path)).toBe(true);
   });
 });
 

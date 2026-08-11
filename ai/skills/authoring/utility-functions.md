@@ -130,7 +130,7 @@ sum([1, 2, 3, 4]);                   // 10
 ```javascript
 import {
   get, has, set, unset, keyedPath, eachPath, splitPath, parsePath, pathFrom,
-  elementPath, pathKey, isPathKey, pathCovers, pathsOverlap, patternFrom,
+  elementPath, pathKey, isPathKey, pathCovers, pathsOverlap, wildcardPath,
   expandPath, keys, values, hasProperty,
 } from '@semantic-ui/utils';
 
@@ -201,7 +201,7 @@ elementPath('order.lines', { index: 2 });    // 'order.lines.2'
 pathCovers('items', 'items[#r7].amount');    // true ('itemsLog' would be false)
 pathCovers('lines.*.cost', 'lines[#a].cost'); // true
 pathsOverlap('a.b', 'a.c');                  // false
-patternFrom('lines[#a].tax');                // 'lines.*.tax'
+wildcardPath('lines[#a].tax');                // 'lines.*.tax'
 
 // expandPath — relative and wildcard spellings to concrete paths, always an array
 expandPath('.tax', { from: 'lines[#a].qty' }); // ['lines[#a].tax']

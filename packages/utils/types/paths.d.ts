@@ -37,7 +37,7 @@ export interface IndexSegment {
 }
 
 /**
- * The `*` of a pattern, in either spelling (`lines.*.cost` or `lines[*].cost`).
+ * The `*` wildcard, in either spelling (`lines.*.cost` or `lines[*].cost`).
  * Matches any single segment under {@link pathCovers} and enumerates a level
  * under {@link expandPath}.
  */
@@ -503,26 +503,26 @@ export function pathCovers(a: string, b: string): boolean;
 export function pathsOverlap(a: string, b: string): boolean;
 
 /**
- * Collapse a concrete path to its pattern spelling: every element address
- * becomes `*`, so keyed and positional readings of the same field group under
- * one dependency pattern. The pattern covers the path it came from
- * ({@link pathCovers}), so a collapsed key is still a usable subscription. A
+ * The wildcard path of a concrete path: every element address becomes `*`, so
+ * keyed and positional readings of the same field share one spelling — the
+ * same address written at list grain. The wildcard path covers the path it
+ * came from ({@link pathCovers}), so it is still a usable subscription. A
  * path that doesn't parse passes through unchanged.
- * @see {@link https://next.semantic-ui.com/docs/api/utils/paths#patternfrom patternFrom}
- * @see {@link https://next.semantic-ui.com/examples/utils-patternfrom Example}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/paths#wildcardpath wildcardPath}
+ * @see {@link https://next.semantic-ui.com/examples/utils-wildcardpath Example}
  *
  * @param path - The concrete path to collapse
- * @returns The pattern spelling, or the input path when it doesn't parse
+ * @returns The wildcard path, or the input path when it doesn't parse
  *
  * @example
  * ```ts
- * patternFrom('lines[#a1].tax') // 'lines.*.tax'
- * patternFrom('lines.2.tax') // 'lines.*.tax'
- * patternFrom('users[#jack@semantic-ui.com].role') // 'users.*.role'
- * patternFrom('a.b.c') // 'a.b.c'
+ * wildcardPath('lines[#a1].tax') // 'lines.*.tax'
+ * wildcardPath('lines.2.tax') // 'lines.*.tax'
+ * wildcardPath('users[#jack@semantic-ui.com].role') // 'users.*.role'
+ * wildcardPath('a.b.c') // 'a.b.c'
  * ```
  */
-export function patternFrom(path: string): string;
+export function wildcardPath(path: string): string;
 
 /**
  * Options for expandPath

@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Path Utilities
 package: "@semantic-ui/utils"
-methods: [get, has, set, unset, elementKey, pathKey, isPathKey, splitPath, parsePath, eachPath, pathFrom, elementPath, keyedPath, patternFrom, expandPath, pathCovers, pathsOverlap]
+methods: [get, has, set, unset, elementKey, pathKey, isPathKey, splitPath, parsePath, eachPath, pathFrom, elementPath, keyedPath, wildcardPath, expandPath, pathCovers, pathsOverlap]
 icon: route
 description: API reference for addressing nested values by string path
 ---
@@ -586,43 +586,43 @@ console.log(get(doc, 'items.1.qty')); // 1 (positional now hits a)
 console.log(get(doc, target));        // 2 (keyed still hits b)
 ```
 
-### patternFrom
+### wildcardPath
 
 ```javascript
-function patternFrom(path)
+function wildcardPath(path)
 ```
 
-Collapse a concrete path to its pattern spelling — `lines[#a1].tax` becomes `lines.*.tax`.
+The wildcard path of a concrete path — `lines[#a1].tax` becomes `lines.*.tax`, the same address written at list grain.
 
 #### Parameters
 
 | Name | Type   | Description |
 |------|--------|-------------|
-| path | string | The concrete path to collapse |
+| path | string | The concrete path |
 
 #### Returns
 
-The pattern spelling, or the input path unchanged when it doesn't parse.
+The wildcard path, or the input path unchanged when it doesn't parse.
 
 #### Notes
 
-Every element address collapses, keyed and positional alike, so per-element paths group under one dependency pattern instead of one entry per element. The resulting pattern always [covers](#pathcovers) the path it came from.
+Every element address becomes `*`, keyed and positional alike, so per-element paths share one spelling instead of one entry per element. The wildcard path always [covers](#pathcovers) the path it came from, so it is still a usable subscription.
 
 #### Example
 
 ```javascript
-import { pathCovers, patternFrom } from '@semantic-ui/utils';
+import { pathCovers, wildcardPath } from '@semantic-ui/utils';
 
-console.log(patternFrom('lines[#jack@semantic-ui.com].tax')); // 'lines.*.tax'
-console.log(patternFrom('lines.2.tax'));                      // 'lines.*.tax'
-console.log(patternFrom('invoice.total'));                    // 'invoice.total'
+console.log(wildcardPath('lines[#jack@semantic-ui.com].tax')); // 'lines.*.tax'
+console.log(wildcardPath('lines.2.tax'));                      // 'lines.*.tax'
+console.log(wildcardPath('invoice.total'));                    // 'invoice.total'
 
-// per-element writes group under one pattern
+// per-element writes group under one wildcard path
 const written = ['lines[#a1].tax', 'lines[#a2].tax', 'lines[#a1].qty'];
-console.log([...new Set(written.map(patternFrom))]); // ['lines.*.tax', 'lines.*.qty']
+console.log([...new Set(written.map(wildcardPath))]); // ['lines.*.tax', 'lines.*.qty']
 
-// the pattern still covers the concrete path it came from
-console.log(pathCovers(patternFrom('lines[#a1].tax'), 'lines[#a1].tax')); // true
+// the wildcard path still covers the concrete path it came from
+console.log(pathCovers(wildcardPath('lines[#a1].tax'), 'lines[#a1].tax')); // true
 ```
 
 ### expandPath
