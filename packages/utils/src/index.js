@@ -16,6 +16,7 @@ export * from './html.js';
 export * from './loops.js';
 export * from './numbers.js';
 export * from './objects.js';
+export * from './paths.js';
 export * from './regexp.js';
 export * from './strings.js';
 export * from './types.js';

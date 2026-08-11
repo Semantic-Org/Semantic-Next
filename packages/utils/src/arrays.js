@@ -1,6 +1,6 @@
 import { isEqual } from './equality.js';
 import { each } from './loops.js';
-import { get } from './objects.js';
+import { get } from './paths.js';
 import { isFunction } from './types.js';
 
 /*-------------------

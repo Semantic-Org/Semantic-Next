@@ -202,6 +202,7 @@ export const sidebarMenuAPI = [
       { name: 'Looping', url: '/docs/api/utils/looping' },
       { name: 'Numbers', url: '/docs/api/utils/numbers' },
       { name: 'Objects', url: '/docs/api/utils/objects' },
+      { name: 'Paths', url: '/docs/api/utils/paths' },
       { name: 'Types', url: '/docs/api/utils/types' },
       { name: 'Regular Expressions', url: '/docs/api/utils/regex' },
       { name: 'Strings', url: '/docs/api/utils/strings' },
