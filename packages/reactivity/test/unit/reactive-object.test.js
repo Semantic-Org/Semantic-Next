@@ -384,6 +384,37 @@ describe('ReactiveObject', () => {
       aDone.stop();
       bDone.stop();
     });
+
+    it('cells address ids carrying dots — emails, compound ids', () => {
+      const ro = reactiveObject({
+        users: [
+          { id: 'jack@semantic-ui.com', role: 'admin' },
+          { id: '200.40.50', role: 'editor' },
+        ],
+      });
+      const jack = trackPath(ro, 'users[#jack@semantic-ui.com].role');
+      const compound = trackPath(ro, 'users[#200.40.50].role');
+      const all = trackPath(ro, 'users');
+      ro.set('users[#jack@semantic-ui.com].role', 'owner');
+      flush();
+      expect(jack.runs).toBe(2);
+      expect(jack.last).toBe('owner');
+      expect(compound.runs).toBe(1); // disjoint keyed element untouched
+      expect(all.runs).toBe(2); // ancestor wakes through the keyed segment
+      jack.stop();
+      compound.stop();
+      all.stop();
+    });
+
+    it('a wholesale array write wakes a dotted-id descendant whose value changed', () => {
+      const ro = reactiveObject({ users: [{ id: 'jack@semantic-ui.com', role: 'admin' }] });
+      const role = trackPath(ro, 'users[#jack@semantic-ui.com].role');
+      ro.set('users', [{ id: 'jack@semantic-ui.com', role: 'owner' }]);
+      flush();
+      expect(role.runs).toBe(2);
+      expect(role.last).toBe('owner');
+      role.stop();
+    });
   });
 
   describe('options', () => {
@@ -442,6 +473,16 @@ describe('ReactiveObject', () => {
       flush();
       expect(keyed.runs).toBe(2);
       expect(keyed.last).toBe(true);
+      keyed.stop();
+    });
+
+    it('a positional write wakes the keyed reader of a dotted-id element', () => {
+      const ro = reactiveObject({ users: [{ id: 'jack@semantic-ui.com', role: 'admin' }] });
+      const keyed = trackPath(ro, 'users[#jack@semantic-ui.com].role');
+      expect(ro.set('users.0.role', 'owner')).toBe(true);
+      flush();
+      expect(keyed.runs).toBe(2);
+      expect(keyed.last).toBe('owner');
       keyed.stop();
     });
 

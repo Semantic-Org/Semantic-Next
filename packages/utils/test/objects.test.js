@@ -5,6 +5,7 @@ import {
   clone,
   deepExtend,
   detectChanges,
+  eachAncestorPath,
   elementKey,
   extend,
   filterObject,
@@ -550,6 +551,14 @@ describe('Object Utilities', () => {
         expect(paths).toEqual(['todos[#z]']);
       });
 
+      it('id-addresses records whose ids carry dots', () => {
+        const db = { users: [{ id: 'jack@semantic-ui.com', role: 'admin' }] };
+        const { paths } = trackWrites(db, (d) => {
+          d.users[0].role = 'owner';
+        });
+        expect(paths).toEqual(['users[#jack@semantic-ui.com].role']);
+      });
+
       it('forces the snapshot strategy on a large value when keyed paths are wanted', () => {
         // 200 records clears the auto budget, but keyed paths come from the
         // snapshot diff, so the callback still sees the real object
@@ -782,6 +791,12 @@ describe('Object Utilities', () => {
         const db = { todos: [{ id: 'a', done: false }, { id: 'b', done: true }] };
         const { reads } = trackReads(db, (value) => value.todos.map((t) => t.done));
         expect(reads.map((path) => get(db, path))).toEqual([false, true]);
+      });
+
+      it('id-addresses ids carrying dots, and a deeper read still subsumes ancestors', () => {
+        const db = { users: [{ id: 'jack@semantic-ui.com', role: 'admin' }] };
+        const { reads } = trackReads(db, (value) => value.users[0].role);
+        expect(reads).toEqual(['users[#jack@semantic-ui.com].role']);
       });
     });
 
@@ -1150,9 +1165,15 @@ describe('Object Utilities', () => {
         expect(detectChanges(before, after, { keyed: true }).added).toEqual(['a.1']);
       });
 
-      it('falls back to positional emit when a key value carries a dot', () => {
-        const before = { a: [{ id: 'x.y', v: 1 }] };
-        const after = { a: [{ id: 'x.y', v: 2 }] };
+      it('emits keyed paths for ids carrying dots or @ — emails, versions, compound ids', () => {
+        const before = { users: [{ id: 'jack@semantic-ui.com', role: 'admin' }] };
+        const after = { users: [{ id: 'jack@semantic-ui.com', role: 'owner' }] };
+        expect(detectChanges(before, after).changed).toEqual(['users[#jack@semantic-ui.com].role']);
+      });
+
+      it('falls back to positional emit when a key value carries "]"', () => {
+        const before = { a: [{ id: 'x]y', v: 1 }] };
+        const after = { a: [{ id: 'x]y', v: 2 }] };
         expect(detectChanges(before, after, { keyed: true }).changed).toEqual(['a.0.v']);
       });
 
@@ -1175,6 +1196,17 @@ describe('Object Utilities', () => {
           { id: 'a', qty: 1 },
           { id: 'z', qty: 9 },
         ]);
+      });
+
+      it('round-trips keyed deltas whose ids carry dots', () => {
+        const before = { users: [{ id: 'jack@semantic-ui.com', role: 'admin' }, { id: '200.40.50', role: 'editor' }] };
+        const after = { users: [{ id: '200.40.50', role: 'viewer' }, { id: 'jack@semantic-ui.com', role: 'admin' }] };
+        const diff = detectChanges(before, after);
+        const replica = structuredClone(before);
+        [...diff.added, ...diff.changed].forEach((path) => set(replica, path, get(after, path)));
+        diff.removed.forEach((path) => unset(replica, path));
+        expect(get(replica, 'users[#200.40.50].role')).toBe('viewer');
+        expect(get(replica, 'users[#jack@semantic-ui.com].role')).toBe('admin');
       });
     });
   });
@@ -1514,6 +1546,20 @@ describe('Object Utilities', () => {
         expect({}.polluted).toBeUndefined();
         expect(Object.prototype.polluted).toBeUndefined();
       });
+
+      it('writes through ids carrying dots', () => {
+        const doc = { users: [{ id: 'jack@semantic-ui.com', role: 'admin' }, { id: '200.40.50', role: 'editor' }] };
+        set(doc, 'users[#jack@semantic-ui.com].role', 'owner');
+        set(doc, 'users[#200.40.50].role', 'viewer');
+        expect(doc.users.map((u) => u.role)).toEqual(['owner', 'viewer']);
+      });
+
+      it('a dotted id carrying a prototype word is identity, not a climb', () => {
+        const doc = { users: [{ id: 'mail.constructor.dev', role: 'admin' }] };
+        set(doc, 'users[#mail.constructor.dev].role', 'owner');
+        expect(doc.users[0].role).toBe('owner');
+        expect(Object.prototype.polluted).toBeUndefined();
+      });
     });
   });
 
@@ -1598,6 +1644,12 @@ describe('Object Utilities', () => {
         unset(doc, 'a[#s1]', ['sku']);
         expect(doc.a.map((x) => x.sku)).toEqual(['s2']);
       });
+
+      it('splices through an id carrying dots', () => {
+        const doc = { users: [{ id: 'jack@semantic-ui.com' }, { id: 'sara@semantic-ui.com' }] };
+        unset(doc, 'users[#jack@semantic-ui.com]');
+        expect(doc.users.map((u) => u.id)).toEqual(['sara@semantic-ui.com']);
+      });
     });
   });
 
@@ -1618,6 +1670,7 @@ describe('Object Utilities', () => {
       expect(has(obj, 'items[#x].done')).toBe(true);
       expect(has(obj, 'items[#x].missing')).toBe(false);
       expect(has(obj, 'items[#z]')).toBe(false);
+      expect(has({ u: [{ id: 'a@b.co', v: undefined }] }, 'u[#a@b.co].v')).toBe(true);
     });
 
     it('resolves literal dotted keys like get does', () => {
@@ -1755,6 +1808,31 @@ describe('Object Utilities', () => {
       it('recurses through nested keyed arrays', () => {
         const doc = { rows: [{ id: 'r1', tags: [{ id: 't1', on: true }] }] };
         expect(get(doc, 'rows[#r1].tags[#t1].on')).toBe(true);
+      });
+
+      it('an id may carry any character except "]"', () => {
+        const doc = {
+          items: [
+            { id: '200.40.50', n: 1 },
+            { id: 'jack@semantic-ui.com', n: 2 },
+            { id: 'a[0', n: 3 },
+            { id: 'v 2.0 (beta)', n: 4 },
+          ],
+        };
+        expect(get(doc, 'items[#200.40.50].n')).toBe(1);
+        expect(get(doc, 'items[#jack@semantic-ui.com].n')).toBe(2);
+        expect(get(doc, 'items[#a[0].n')).toBe(3);
+        expect(get(doc, 'items[#v 2.0 (beta)].n')).toBe(4);
+      });
+
+      it('a leading "#" in an id doubles in the path — [##launch] matches id "#launch"', () => {
+        const doc = { tags: [{ id: '#launch', n: 1 }] };
+        expect(get(doc, 'tags[##launch].n')).toBe(1);
+      });
+
+      it('recurses through nested keyed arrays with dotted ids', () => {
+        const doc = { teams: [{ id: 'core.ui', members: [{ id: 'jack@semantic-ui.com', role: 'owner' }] }] };
+        expect(get(doc, 'teams[#core.ui].members[#jack@semantic-ui.com].role')).toBe('owner');
       });
     });
   });
@@ -2338,11 +2416,49 @@ describe('keyedPath', () => {
     expect(keyedPath(doc(), unresolvable)).toBe(unresolvable);
   });
 
-  it('leaves an unsafe or absent identity positional', () => {
+  it('rewrites to ids carrying dots', () => {
     const dotted = { rows: [{ id: 'a.b' }] };
-    expect(keyedPath(dotted, 'rows.0')).toBe('rows.0');
+    expect(keyedPath(dotted, 'rows.0')).toBe('rows[#a.b]');
+    const team = { members: [{ id: 'jack@semantic-ui.com', role: 'owner' }] };
+    expect(keyedPath(team, 'members.0.role')).toBe('members[#jack@semantic-ui.com].role');
+  });
+
+  it('a digit inside a keyed id is not a positional segment', () => {
+    const doc = { items: [{ id: '200.40.50', qty: 1 }] };
+    const keyed = 'items[#200.40.50].qty';
+    expect(keyedPath(doc, keyed)).toBe(keyed);
+  });
+
+  it('leaves an unsafe or absent identity positional', () => {
+    const unsafe = { rows: [{ id: 'a]b' }] };
+    expect(keyedPath(unsafe, 'rows.0')).toBe('rows.0');
     const holes = { rows: [undefined] };
     expect(keyedPath(holes, 'rows.0')).toBe('rows.0');
+  });
+});
+
+describe('eachAncestorPath', () => {
+  const ancestors = (path) => {
+    const visited = [];
+    eachAncestorPath(path, (ancestor) => visited.push(ancestor));
+    return visited;
+  };
+
+  it('visits each ancestor prefix, shortest first', () => {
+    expect(ancestors('a.b.c')).toEqual(['a', 'a.b']);
+    expect(ancestors('todos[#a].done')).toEqual(['todos', 'todos[#a]']);
+    expect(ancestors('items[2].qty')).toEqual(['items', 'items[2]']);
+  });
+
+  it('a dot inside a keyed id is identity, not an ancestor boundary', () => {
+    expect(ancestors('users[#jack@semantic-ui.com].role')).toEqual([
+      'users',
+      'users[#jack@semantic-ui.com]',
+    ]);
+  });
+
+  it('a bare key has no ancestors', () => {
+    expect(ancestors('title')).toEqual([]);
   });
 });
 

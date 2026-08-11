@@ -1,4 +1,15 @@
-import { clone, get, has, isEqual, isObject, keyedPath, returnsFalse, set, unset } from '@semantic-ui/utils';
+import {
+  clone,
+  eachAncestorPath,
+  get,
+  has,
+  isEqual,
+  isObject,
+  keyedPath,
+  returnsFalse,
+  set,
+  unset,
+} from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
 import { IS_REACTIVE_OBJECT } from './helpers/identity.js';
@@ -211,14 +222,9 @@ export class ReactiveObject {
     this.cells.get(path)?.changed();
 
     // ancestors are guaranteed to have changed
-    let cut = path.length;
-    while (cut > 0) {
-      cut = Math.max(path.lastIndexOf('.', cut - 1), path.lastIndexOf('[', cut - 1));
-      if (cut <= 0) {
-        break;
-      }
-      this.cells.get(path.slice(0, cut))?.changed();
-    }
+    eachAncestorPath(path, (ancestor) => {
+      this.cells.get(ancestor)?.changed();
+    });
 
     // if old/new value are not containers safe to stop here
     if (!force && !isObject(previous) && !isObject(next)) {
