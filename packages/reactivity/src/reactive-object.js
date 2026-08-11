@@ -1,15 +1,4 @@
-import {
-  clone,
-  eachAncestorPath,
-  get,
-  has,
-  isEqual,
-  isObject,
-  keyedPath,
-  returnsFalse,
-  set,
-  unset,
-} from '@semantic-ui/utils';
+import { clone, eachPath, get, has, isEqual, isObject, keyedPath, returnsFalse, set, unset } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
 import { IS_REACTIVE_OBJECT } from './helpers/identity.js';
@@ -219,11 +208,9 @@ export class ReactiveObject {
   }
 
   wake(path, previous, next, force = false) {
-    this.cells.get(path)?.changed();
-
-    // ancestors are guaranteed to have changed
-    eachAncestorPath(path, (ancestor) => {
-      this.cells.get(ancestor)?.changed();
+    // the written path and every ancestor above it have changed
+    eachPath(path, (containing) => {
+      this.cells.get(containing)?.changed();
     });
 
     // if old/new value are not containers safe to stop here

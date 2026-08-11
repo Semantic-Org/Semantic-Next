@@ -344,9 +344,9 @@ export interface DetectChangesOptions {
    * whole-element add/remove/replace, `field[#b].qty` for a field change — so a
    * prepend or reorder is one add by key, not a positional cascade of rewrites.
    * Any array that isn't cleanly keyed (an unkeyed element, a duplicate key, or
-   * a key value carrying `.` `[` `]` or a leading `#`) falls back to the
-   * positional walk, so an emitted keyed path always parses back through
-   * get/set/unset. Pass `false` for the legacy positional output.
+   * a key value carrying `]`) falls back to the positional walk, so an emitted
+   * keyed path always parses back through get/set/unset. Pass `false` for the
+   * legacy positional output.
    */
   keyed?: boolean;
   /** Identity fields a keyed element is matched on, first present wins (default ['id', '_id', 'hash', 'key']) */
@@ -539,7 +539,9 @@ export function pick<T extends object, K extends keyof T>(
  * Access a nested object field with a string path. A bracket segment whose body
  * starts with `#` selects an array element by identity (`items[#id]`) rather
  * than position (`items[0]`); identity is matched String-coerced via
- * {@link elementKey}.
+ * {@link elementKey}. An id may contain any character except `]` —
+ * `items[#jack@semantic-ui.com]` and `items[#200.40.50]` are valid selectors,
+ * dots inside a bracket belong to the id.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#get get}
  *
  * @param obj - The object to traverse
@@ -654,8 +656,8 @@ export function unset<T extends object>(
 
 /**
  * The keyed spelling of a positional path: rewrites each positional array segment to its `[#id]`
- * form where the addressed element carries a path-safe identity, resolving against the object at
- * call time (`items.0.qty` -> `items[#a].qty`). A positional address is only stable while the
+ * form where the addressed element carries a path-safe identity (any id without `]`), resolving
+ * against the object at call time (`items.0.qty` -> `items[#a].qty`). A positional address is only stable while the
  * array doesn't move; the keyed address survives reordering. Segments over keyless arrays,
  * unresolvable paths, and already-keyed spellings pass through. Returns the input string itself
  * when nothing rewrites, so callers can compare by reference.
@@ -675,6 +677,48 @@ export function keyedPath(
   obj: object,
   path: string,
   keys?: string[],
+): string;
+
+/**
+ * Options for eachPath
+ */
+export interface EachPathOptions {
+  /** Include the full path itself as the final visit (default true). Pass false to visit only the ancestors above the target */
+  self?: boolean;
+}
+
+/**
+ * Walk the paths a path passes through, shortest first — `'todos[#a].done'`
+ * visits `'todos'`, `'todos[#a]'`, `'todos[#a].done'`. Every visited value is
+ * itself a resolvable path: a bracket splits its segment into container and
+ * element, and a dot inside a keyed id belongs to the id, never a boundary.
+ * Pass `self: false` for only the ancestors above the target — the walk a
+ * subsumption check or an invalidation pass over path-addressed state needs.
+ * Return false from the callback to break the iteration early, like each.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#eachpath eachPath}
+ * @see {@link https://next.semantic-ui.com/examples/utils-eachpath Example}
+ *
+ * @param path - The path string to walk
+ * @param callback - Called per containing path, shortest first
+ * @param options - Whether to include the path itself
+ * @returns The path string
+ *
+ * @example
+ * ```ts
+ * eachPath('todos[#a].done', (path) => console.log(path));
+ * // 'todos'
+ * // 'todos[#a]'
+ * // 'todos[#a].done'
+ *
+ * eachPath('todos[#a].done', (ancestor) => console.log(ancestor), { self: false });
+ * // 'todos'
+ * // 'todos[#a]'
+ * ```
+ */
+export function eachPath(
+  path: string,
+  callback: (containingPath: string, index: number, path: string) => boolean | void,
+  options?: EachPathOptions,
 ): string;
 
 /**

@@ -13,6 +13,10 @@ const bySku = { rows: [{ sku: 'A1', qty: 1 }] };
 console.log(keyedPath(bySku, 'rows.0.qty'));
 console.log(keyedPath(bySku, 'rows.0.qty', ['sku']));
 
+// the id can be any string without ']' — an email or compound id rewrites too
+const team = { members: [{ id: 'jack@semantic-ui.com', role: 'owner' }] };
+console.log(keyedPath(team, 'members.0.role'));
+
 const cart = { items: [{ id: 'a', qty: 1 }, { id: 'b', qty: 2 }] };
 const target = keyedPath(cart, 'items.1.qty');
 cart.items.unshift({ id: 'z', qty: 9 });

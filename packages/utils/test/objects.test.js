@@ -5,7 +5,7 @@ import {
   clone,
   deepExtend,
   detectChanges,
-  eachAncestorPath,
+  eachPath,
   elementKey,
   extend,
   filterObject,
@@ -2437,28 +2437,42 @@ describe('keyedPath', () => {
   });
 });
 
-describe('eachAncestorPath', () => {
-  const ancestors = (path) => {
+describe('eachPath', () => {
+  const walk = (path, options) => {
     const visited = [];
-    eachAncestorPath(path, (ancestor) => visited.push(ancestor));
+    eachPath(path, (containing) => visited.push(containing), options);
     return visited;
   };
 
-  it('visits each ancestor prefix, shortest first', () => {
-    expect(ancestors('a.b.c')).toEqual(['a', 'a.b']);
-    expect(ancestors('todos[#a].done')).toEqual(['todos', 'todos[#a]']);
-    expect(ancestors('items[2].qty')).toEqual(['items', 'items[2]']);
+  it('visits each path a path passes through, shortest first', () => {
+    expect(walk('a.b.c')).toEqual(['a', 'a.b', 'a.b.c']);
+    expect(walk('todos[#a].done')).toEqual(['todos', 'todos[#a]', 'todos[#a].done']);
+    expect(walk('items[2].qty')).toEqual(['items', 'items[2]', 'items[2].qty']);
   });
 
-  it('a dot inside a keyed id is identity, not an ancestor boundary', () => {
-    expect(ancestors('users[#jack@semantic-ui.com].role')).toEqual([
+  it('self: false visits only the ancestors above the target', () => {
+    expect(walk('todos[#a].done', { self: false })).toEqual(['todos', 'todos[#a]']);
+    expect(walk('title', { self: false })).toEqual([]);
+  });
+
+  it('a dot inside a keyed id is identity, not a boundary', () => {
+    expect(walk('users[#jack@semantic-ui.com].role')).toEqual([
       'users',
       'users[#jack@semantic-ui.com]',
+      'users[#jack@semantic-ui.com].role',
     ]);
   });
 
-  it('a bare key has no ancestors', () => {
-    expect(ancestors('title')).toEqual([]);
+  it('passes the index and full path, and returning false stops the walk', () => {
+    const seen = [];
+    eachPath('a.b.c', (containing, index, path) => {
+      seen.push([containing, index, path]);
+      return index < 1;
+    });
+    expect(seen).toEqual([
+      ['a', 0, 'a.b.c'],
+      ['a.b', 1, 'a.b.c'],
+    ]);
   });
 });
 

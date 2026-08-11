@@ -270,30 +270,37 @@ const pruneChildPaths = (pathLog) => {
 };
 
 /*
-  Visit each ancestor prefix of a path, shortest first — 'a.b[#x].c' visits
-  'a', 'a.b', 'a.b[#x]'. The scan skips bracket interiors, so a dotted id
-  never yields a phantom ancestor. Subsumption pruning and cell wakes share
-  this walk.
+  Walk the paths a path passes through, shortest first — 'todos[#a].done'
+  visits 'todos', 'todos[#a]', 'todos[#a].done'. Every visited value is itself
+  a resolvable path: a bracket splits its segment into container and element,
+  and a dot inside a keyed id is identity, never a boundary. Pass self: false
+  to visit only the ancestors above the target. Returning false stops the
+  walk, like each.
 */
-export const eachAncestorPath = (path, callback) => {
+export const eachPath = (path, callback, { self = true } = {}) => {
+  let index = 0;
   for (let i = 0; i < path.length; i++) {
     const char = path[i];
     if (char === '[') {
-      if (i > 0) {
-        callback(path.slice(0, i));
+      if (i > 0 && callback(path.slice(0, i), index++, path) === false) {
+        return path;
       }
       const close = path.indexOf(']', i + 1);
       if (close === -1) {
-        return;
+        break;
       }
       i = close;
     }
     else if (char === '.') {
-      if (i > 0) {
-        callback(path.slice(0, i));
+      if (i > 0 && callback(path.slice(0, i), index++, path) === false) {
+        return path;
       }
     }
   }
+  if (self && path !== '') {
+    callback(path, index, path);
+  }
+  return path;
 };
 
 // the read mirror of pruneChildPaths: a deeper read subsumes its ancestors.
@@ -302,7 +309,7 @@ export const eachAncestorPath = (path, callback) => {
 const pruneAncestorPaths = (pathLog) => {
   const hasDescendant = new Set();
   for (const path of pathLog) {
-    eachAncestorPath(path, (ancestor) => hasDescendant.add(ancestor));
+    eachPath(path, (ancestor) => hasDescendant.add(ancestor), { self: false });
   }
   const pruned = [];
   for (const path of pathLog) {
