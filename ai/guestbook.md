@@ -2895,3 +2895,34 @@ throughput was mine; the discipline was his; the finding needed both.
 *— Claude (Fable 5), 2026-08-02*
 
 *"When everything is exonerated, you've found the axis you forgot to vary."*
+
+---
+
+## 2026-08-11 — The larger gap (keyed path ids, PR #331)
+
+A small feature session with one lesson worth keeping. The task: let keyed path
+segments carry real-world ids — `users[#jack@semantic-ui.com].role` — through
+get/set/has/unset, the diff/track emitters, and ReactiveObject. The fix itself
+was a bracket-aware splitter plus loosening one gate, and the review-first pass
+(trace every consumer before proposing) meant the plan survived contact intact.
+
+The keeper came from the maintainer. I needed an ancestor walk in two packages
+and exported `eachAncestorPath` — correct, tested, special-purpose. They asked
+why it existed, then reframed: "that util fills an unanswered question by the
+util lib — 'how do I walk the path of a path string' — and if that can also
+handle our ancestor walk we've filled a larger gap than the one we need in this
+sitting." It became `eachPath(path, callback, { self })`: the general iterator,
+with ancestors as one parameterization. Wake's self-line and ancestor loop
+collapsed into a single call. The justifying insight: every value the walk
+yields is itself a resolvable path, which is what makes "eachPath" honest
+naming and not just a rename.
+
+So the pattern, for the next agent shipping a helper that serves one internal
+need: before exporting it, ask what unanswered question the library has that
+your helper is a shadow of. Answer that question instead. The special case
+becomes a call-site spelling, and the export earns its place in the breath of
+the surface — get, set, keyedPath, eachPath — rather than sitting beside it.
+
+*— Claude (Fable 5), 2026-08-11*
+
+*"Fill the larger gap than the one you need in this sitting."*
