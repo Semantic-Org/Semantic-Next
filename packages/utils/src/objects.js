@@ -116,11 +116,11 @@ const findKeyed = (array, keyValue, keys = elementKey.config.keys) => {
   return -1;
 };
 
-// a key value can ride the dot-bracket path grammar only when it carries no
-// . [ ] and no leading # (which marks a keyed selector). shared by the keyed
-// diff and the keyed read paths so an emitted path always parses back through get
-const HAS_PATH_SYNTAX = /[.[\]]/;
-const isKeyedPathSafe = (keyValue) => !HAS_PATH_SYNTAX.test(keyValue) && keyValue.charCodeAt(0) !== 35;
+// a key value can ride the dot-bracket path grammar unless it carries ']', the
+// one character that closes a keyed selector. dots, '@', '[' and a leading '#'
+// all round-trip (items[#jack@semantic-ui.com]). shared by the keyed diff and
+// the keyed read paths so an emitted path always parses back through get
+const isKeyedPathSafe = (keyValue) => keyValue.indexOf(']') === -1;
 
 // an element's identity spelled for a path, null when the element is unkeyed
 // or its key can't ride the grammar
@@ -269,21 +269,47 @@ const pruneChildPaths = (pathLog) => {
   return pruned;
 };
 
+/*
+  Walk the paths a path passes through, shortest first — 'todos[#a].done'
+  visits 'todos', 'todos[#a]', 'todos[#a].done'. Every visited value is itself
+  a resolvable path: a bracket splits its segment into container and element,
+  and a dot inside a keyed id is identity, never a boundary. Pass self: false
+  to visit only the ancestors above the target. Returning false stops the
+  walk, like each.
+*/
+export const eachPath = (path, callback, { self = true } = {}) => {
+  let index = 0;
+  for (let i = 0; i < path.length; i++) {
+    const char = path[i];
+    if (char === '[') {
+      if (i > 0 && callback(path.slice(0, i), index++, path) === false) {
+        return path;
+      }
+      const close = path.indexOf(']', i + 1);
+      if (close === -1) {
+        break;
+      }
+      i = close;
+    }
+    else if (char === '.') {
+      if (i > 0 && callback(path.slice(0, i), index++, path) === false) {
+        return path;
+      }
+    }
+  }
+  if (self && path !== '') {
+    callback(path, index, path);
+  }
+  return path;
+};
+
 // the read mirror of pruneChildPaths: a deeper read subsumes its ancestors.
 // reading todos[#a].complete makes a bare todos[#a] or todos read redundant,
 // since a write to an ancestor already covers the descendant by prefix
 const pruneAncestorPaths = (pathLog) => {
   const hasDescendant = new Set();
   for (const path of pathLog) {
-    // walk up each segment boundary — '.' for keys, '[' for keyed elements
-    let cut = path.length;
-    while (cut > 0) {
-      cut = Math.max(path.lastIndexOf('.', cut - 1), path.lastIndexOf('[', cut - 1));
-      if (cut <= 0) {
-        break;
-      }
-      hasDescendant.add(path.slice(0, cut));
-    }
+    eachPath(path, (ancestor) => hasDescendant.add(ancestor), { self: false });
   }
   const pruned = [];
   for (const path of pathLog) {
@@ -900,16 +926,56 @@ export const arrayFromObject = (obj) => {
   return arr;
 };
 
+const INDEX_SEGMENT = /^\d+$/;
+const isIndexSegment = (part) => INDEX_SEGMENT.test(part);
+
+// a bracket segment resolves to a keyed selector (field[#identity]) or a
+// numeric positional index (field[2]). null for a malformed segment — an
+// unclosed bracket, or a positional body that isn't a whole index — which
+// every caller treats as addressing nothing
 const extractBracketAccess = (part) => {
   const bracketIndex = part.indexOf('[');
+  const closeIndex = part.indexOf(']', bracketIndex + 1);
+  if (closeIndex === -1) {
+    return null;
+  }
   const key = part.substring(0, bracketIndex);
-  const body = part.substring(bracketIndex + 1, part.indexOf(']'));
-  // a leading # marks a keyed element selector (field[#identity]) vs a numeric
-  // positional index (field[2]); the identity rides as a raw string value
+  const body = part.substring(bracketIndex + 1, closeIndex);
+  // a leading # marks a keyed element selector; the identity rides as a raw string value
   if (body.charCodeAt(0) === 35) {
     return { key, keyValue: body.slice(1) };
   }
+  if (!isIndexSegment(body)) {
+    return null;
+  }
   return { key, index: parseInt(body, 10) };
+};
+
+// the segment split under every path walk. a dot inside a bracket belongs to
+// the identity (items[#jack@semantic-ui.com].role), so '[' fast-forwards to
+// its ']' and only outside dots separate segments
+const splitPath = (path) => {
+  if (path.indexOf('[') === -1) {
+    return path.split('.');
+  }
+  const parts = [];
+  let start = 0;
+  for (let i = 0; i < path.length; i++) {
+    const char = path[i];
+    if (char === '[') {
+      const close = path.indexOf(']', i + 1);
+      if (close === -1) {
+        break;
+      }
+      i = close;
+    }
+    else if (char === '.') {
+      parts.push(path.slice(start, i));
+      start = i + 1;
+    }
+  }
+  parts.push(path.slice(start));
+  return parts;
 };
 
 // the one walk under get and has. resolves the dot-bracket grammar to the
@@ -922,7 +988,7 @@ const resolvePath = (obj, path, keys) => {
     return MISSING;
   }
 
-  const parts = path.split('.');
+  const parts = splitPath(path);
   let currentObject = obj;
   let pathOffset = 0;
 
@@ -935,6 +1001,9 @@ const resolvePath = (obj, path, keys) => {
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
+      if (access === null) {
+        return MISSING;
+      }
       // an empty key ([0].x against an array root) addresses the current value as the array
       const array = access.key === '' ? currentObject : currentObject[access.key];
       if (!isArray(array)) {
@@ -1006,15 +1075,18 @@ export const has = function(obj, path = '', keys = elementKey.config.keys) {
   return resolvePath(obj, path, keys) !== MISSING;
 };
 
-const INDEX_SEGMENT = /^\d+$/;
-const isIndexSegment = (part) => INDEX_SEGMENT.test(part);
-
 // set and unset act only on a real path into a real object, and refuse
 // prototype pollution (__proto__ and friends)
 const CLIMBS_PROTOTYPE = /(^|\.|\[)(__proto__|constructor|prototype)(\.|\[|\]|$)/;
+
+// a keyed id is an opaque identity, never a property access, so guards that
+// read path structure see it blanked (users[#mail.constructor.dev].role passes)
+const KEYED_ID = /\[#[^\]]*\]/g;
+const pathShape = (path) => path.indexOf('[#') === -1 ? path : path.replace(KEYED_ID, '[]');
+
 const isWritablePath = (obj, path) =>
   typeof path === 'string' && path !== '' && obj !== null && isObject(obj)
-  && !CLIMBS_PROTOTYPE.test(path);
+  && !CLIMBS_PROTOTYPE.test(pathShape(path));
 
 /*
   Set a nested object field from a string path, the write twin of get, so
@@ -1032,7 +1104,7 @@ export const set = function(obj, path, value, keys = elementKey.config.keys) {
     return obj;
   }
 
-  const parts = path.split('.');
+  const parts = splitPath(path);
   let currentObject = obj;
   let pathOffset = 0;
 
@@ -1042,6 +1114,9 @@ export const set = function(obj, path, value, keys = elementKey.config.keys) {
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
+      if (access === null) {
+        return obj;
+      }
       let array;
       if (access.key === '') {
         // an empty key addresses the current value as the array; it can't be vivified in place
@@ -1137,7 +1212,7 @@ export const unset = function(obj, path, keys = elementKey.config.keys) {
     return obj;
   }
 
-  const parts = path.split('.');
+  const parts = splitPath(path);
   let currentObject = obj;
   let pathOffset = 0;
 
@@ -1147,6 +1222,9 @@ export const unset = function(obj, path, keys = elementKey.config.keys) {
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
+      if (access === null) {
+        return obj;
+      }
       const array = access.key === '' ? currentObject : currentObject[access.key];
       if (!isArray(array)) {
         return obj;
@@ -1215,10 +1293,12 @@ export const unset = function(obj, path, keys = elementKey.config.keys) {
 const HAS_POSITIONAL_SEGMENT = /(^|\.|\[)\d/;
 
 export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
-  if (typeof path !== 'string' || !HAS_POSITIONAL_SEGMENT.test(path) || obj === null || !isObject(obj)) {
+  // the probe reads pathShape so a digit inside a keyed id (items[#200.40.50])
+  // doesn't look like a positional segment
+  if (typeof path !== 'string' || !HAS_POSITIONAL_SEGMENT.test(pathShape(path)) || obj === null || !isObject(obj)) {
     return path;
   }
-  const parts = path.split('.');
+  const parts = splitPath(path);
   // a leading index means the root itself is an array; get/set cannot parse a leading bracket, so
   // that spelling stays positional
   if (isIndexSegment(parts[0])) {
@@ -1234,6 +1314,9 @@ export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
     }
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
+      if (access === null) {
+        return path;
+      }
       const array = currentObject[access.key];
       if (!isArray(array)) {
         return path;

@@ -331,7 +331,7 @@ Structural diff between two values, reported as dot paths from `before` to `afte
 
 Objects recurse to leaf paths. Values that can't be walked (Map, Set, Date, class instances) compare by deep equality and report their own path. Differing non-container roots report path `''`.
 
-By default, an array whose elements are each uniquely keyed (see [`elementKey`](#elementkey)) diffs by identity instead of position. It emits `field[#identity]` paths — `field[#z]` for a whole-element add, remove, or replace, `field[#b].qty` for a field change — so a prepend or reorder is one add by key, not a positional cascade of index rewrites. Any array that isn't cleanly keyed (a scalar or unkeyed element, a duplicate key, or a key value carrying `.`, `[`, `]`, or a leading `#`) falls back to the positional walk, so an emitted keyed path always parses back through [`get`](#get) / [`set`](#set) / [`unset`](#unset). Pass `{ keyed: false }` for the legacy positional output, where arrays diff by index and a shifted array reports every moved position.
+By default, an array whose elements are each uniquely keyed (see [`elementKey`](#elementkey)) diffs by identity instead of position. It emits `field[#identity]` paths — `field[#z]` for a whole-element add, remove, or replace, `field[#b].qty` for a field change — so a prepend or reorder is one add by key, not a positional cascade of index rewrites. An id may be any string without `]` — emails and compound ids included, `users[#jack@semantic-ui.com].role` emits and parses back. Any array that isn't cleanly keyed (a scalar or unkeyed element, a duplicate key, or a key value carrying `]`) falls back to the positional walk, so an emitted keyed path always parses back through [`get`](#get) / [`set`](#set) / [`unset`](#unset). Pass `{ keyed: false }` for the legacy positional output, where arrays diff by index and a shifted array reports every moved position.
 
 `collapseKeys` gives a plain-object key the same whole-value treatment a Map or Date already gets — the walk stops at the key and reports it as one path instead of descending. This is for a subtree whose own keys aren't addressable wire paths, like a map keyed by dynamic `contacts[#id].field` strings that would mis-parse if emitted nested. A wholesale add or remove of the key still reports as add or remove, and a change anywhere inside reports the key as changed. `ignoreKeys` is the complement — those keys leave the changeset entirely.
 
@@ -588,6 +588,10 @@ The value at the specified path, or undefined if not found.
 
 A bracket segment whose body starts with `#` selects an array element by identity (`items[#id]`) rather than by position (`items[0]`). Identity is matched String-coerced (a number `id` of `7` matches `[#7]`), see [`elementKey`](#elementkey). Returns the element when the path ends at the key, or `undefined` when no element matches.
 
+An id may contain any character except `]` — a dot inside a bracket belongs to the id, never the path. `items[#jack@semantic-ui.com]` and `items[#200.40.50]` are valid selectors.
+
+A malformed bracket segment — an unclosed bracket, or a positional body that isn't a whole index (`items[abc]`) — addresses nothing: `get` returns undefined, `has` returns false, `set` and `unset` no-op.
+
 #### Example
 
 ```javascript
@@ -599,6 +603,9 @@ console.log(get(obj, 'a.b.d')); // undefined
 
 const doc = { items: [{ id: 'a', n: 1 }, { id: 'b', n: 2 }] };
 console.log(get(doc, 'items[#b].n')); // 2 (selected by identity, not position)
+
+const team = { members: [{ id: 'jack@semantic-ui.com', role: 'owner' }] };
+console.log(get(team, 'members[#jack@semantic-ui.com].role')); // 'owner'
 ```
 
 ### has
@@ -748,7 +755,7 @@ The keyed spelling as a new string, or the input `path` itself (the same referen
 
 #### Notes
 
-Only a segment whose element carries a path-safe identity (see [`elementKey`](#elementkey)) rewrites. Keyless arrays, inner value lists, unresolvable paths, and already-keyed spellings pass through unchanged. A leading index (the root itself being an array) stays positional, since [`get`](#get) and [`set`](#set) can't parse a leading bracket. The emitted `[#id]` paths apply back through [`get`](#get)/[`set`](#set)/[`unset`](#unset) and match the keyed output of [`detectChanges`](#detectchanges).
+Only a segment whose element carries a path-safe identity (any id without `]`, see [`elementKey`](#elementkey)) rewrites. Keyless arrays, inner value lists, unresolvable paths, and already-keyed spellings pass through unchanged. A leading index (the root itself being an array) stays positional, since [`get`](#get) and [`set`](#set) can't parse a leading bracket. The emitted `[#id]` paths apply back through [`get`](#get)/[`set`](#set)/[`unset`](#unset) and match the keyed output of [`detectChanges`](#detectchanges).
 
 #### Example
 
@@ -768,6 +775,57 @@ const target = keyedPath(doc, 'items.1.qty'); // 'items[#b].qty'
 doc.items.unshift({ id: 'z', qty: 9 });
 console.log(get(doc, 'items.1.qty')); // 1 (positional now hits a)
 console.log(get(doc, target));        // 2 (keyed still hits b)
+```
+
+### eachPath
+
+```javascript
+function eachPath(path, callback, { self = true } = {})
+```
+
+Walk the paths a path passes through, shortest first — `'todos[#a].done'` visits `'todos'`, `'todos[#a]'`, `'todos[#a].done'`. Every visited value is itself a resolvable path: a bracket splits its segment into container and element, and a dot inside a keyed id belongs to the id, never a boundary.
+
+#### Parameters
+
+| Name     | Type     | Description |
+|----------|----------|-------------|
+| path     | string   | The path string to walk |
+| callback | function | Called per containing path with `(path, index, fullPath)` |
+| options  | object   | Optional configuration |
+
+##### Options
+
+| Name | Type    | Default | Description |
+|------|---------|---------|-------------|
+| self | boolean | true    | Include the full path itself as the final visit. Pass `false` to visit only the ancestors above the target |
+
+#### Returns
+
+The input `path` string.
+
+#### Notes
+
+The ancestors-only walk (`{ self: false }`) is what a subsumption check or an invalidation pass over path-addressed state needs — a write logged at any ancestor of a path covers that path. Returning `false` from the callback stops the walk early, like [`each`](/docs/api/utils/looping#each).
+
+#### Example
+
+```javascript
+import { eachPath } from '@semantic-ui/utils';
+
+eachPath('todos[#a].done', (path) => console.log(path));
+// 'todos'
+// 'todos[#a]'
+// 'todos[#a].done'
+
+eachPath('todos[#a].done', (ancestor) => console.log(ancestor), { self: false });
+// 'todos'
+// 'todos[#a]'
+
+// a dot inside a keyed id is identity, never a boundary
+eachPath('users[#jack@semantic-ui.com].role', (path) => console.log(path));
+// 'users'
+// 'users[#jack@semantic-ui.com]'
+// 'users[#jack@semantic-ui.com].role'
 ```
 
 ### proxyObject

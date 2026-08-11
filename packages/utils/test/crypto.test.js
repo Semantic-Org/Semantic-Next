@@ -167,10 +167,10 @@ describe('ID/Hashing Functions', () => {
     });
 
     describe('presets', () => {
-      it('defaults to a 26-char uppercase ULID', () => {
+      it('defaults to a 26-char lowercase ULID', () => {
         const id = generateId();
         expect(id).toHaveLength(26);
-        expect(id).toMatch(CROCKFORD_UPPER);
+        expect(id).toMatch(CROCKFORD);
       });
 
       it('page is 8 chars, lowercase, always letter-first', () => {

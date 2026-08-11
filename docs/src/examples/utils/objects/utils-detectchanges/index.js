@@ -32,6 +32,14 @@ console.log(
   ),
 );
 
+// The id can be any string without ']' — emails and compound ids included
+console.log(
+  detectChanges(
+    { users: [{ id: 'jack@semantic-ui.com', role: 'admin' }] },
+    { users: [{ id: 'jack@semantic-ui.com', role: 'owner' }] },
+  ).changed,
+);
+
 // equality — a custom comparator decides what counts as changed
 console.log(detectChanges({ a: 1 }, { a: '1' }, { equality: (x, y) => x == y }));
 
