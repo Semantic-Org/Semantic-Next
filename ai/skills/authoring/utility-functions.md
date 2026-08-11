@@ -128,7 +128,7 @@ sum([1, 2, 3, 4]);                   // 10
 
 ### Property Access
 ```javascript
-import { get, has, set, unset, keyedPath, keys, values, hasProperty } from '@semantic-ui/utils';
+import { get, has, set, unset, keyedPath, eachPath, keys, values, hasProperty } from '@semantic-ui/utils';
 
 const data = {
   user: {
@@ -163,12 +163,21 @@ set(cart, 'items[#c]', { id: 'c', qty: 3 }); // appends, no element had id 'c'
 unset(cart, 'items[#a]');                    // splices out the 'a' element
 set(cart, 'items[#x].qty', 9, ['sku']);      // 4th arg overrides the id field list
 
+// The id may be any string without ']' — a dot inside a bracket belongs to the id
+const team = { members: [{ id: 'jack@semantic-ui.com', role: 'owner' }] };
+get(team, 'members[#jack@semantic-ui.com].role'); // 'owner'
+
 // keyedPath — rewrite a positional path to the keyed [#id] spelling, resolved
 // against the object now, so it survives a later reorder (the form detectChanges
 // emits in keyed mode). Returns the input string itself when nothing rewrites
 const order = { items: [{ id: 'a', qty: 1 }, { id: 'b', qty: 2 }] };
 keyedPath(order, 'items.0.qty');             // 'items[#a].qty'
 keyedPath(order, 'plain.0.n');               // 'plain.0.n' unchanged (unresolved, same ref)
+
+// eachPath — walk the paths a path passes through, shortest first. A bracket
+// splits its segment into container and element. self: false for ancestors only
+eachPath('todos[#a].done', (path) => {});    // visits 'todos', 'todos[#a]', 'todos[#a].done'
+eachPath('todos[#a].done', (ancestor) => {}, { self: false }); // 'todos', 'todos[#a]'
 
 // hasProperty checks own properties only (shallow, no dot paths)
 hasProperty(data, 'user');                   // true
@@ -285,8 +294,9 @@ elementKey({ sku: 's1' }, ['sku']);          // 's1' (custom key list)
 // detectChanges diffs arrays of keyed objects by identity by DEFAULT, not by
 // index, so a prepend is one add by key instead of a positional cascade. Emits
 // field[#id] paths that apply back through get/set/unset and survive a reorder.
-// Any array that isn't cleanly keyed (scalar, unkeyed, duplicate, or a key with
-// . [ ] or #) falls back to positional. { keyed: false } forces the index walk
+// Ids may be any string without ']' (emails, compound ids). Any array that isn't
+// cleanly keyed (scalar, unkeyed, duplicate, or a key with ']') falls back to
+// positional. { keyed: false } forces the index walk
 const before = { lineItems: [{ id: 'a', qty: 1 }, { id: 'b', qty: 1 }] };
 const after = { lineItems: [{ id: 'z', qty: 9 }, { id: 'a', qty: 1 }, { id: 'b', qty: 5 }] };
 detectChanges(before, after);
