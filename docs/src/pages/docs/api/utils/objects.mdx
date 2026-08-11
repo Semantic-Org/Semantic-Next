@@ -590,6 +590,8 @@ A bracket segment whose body starts with `#` selects an array element by identit
 
 An id may contain any character except `]` — a dot inside a bracket belongs to the id, never the path. `items[#jack@semantic-ui.com]` and `items[#200.40.50]` are valid selectors.
 
+A malformed bracket segment — an unclosed bracket, or a positional body that isn't a whole index (`items[abc]`) — addresses nothing: `get` returns undefined, `has` returns false, `set` and `unset` no-op.
+
 #### Example
 
 ```javascript

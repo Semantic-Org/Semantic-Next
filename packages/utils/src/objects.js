@@ -926,14 +926,27 @@ export const arrayFromObject = (obj) => {
   return arr;
 };
 
+const INDEX_SEGMENT = /^\d+$/;
+const isIndexSegment = (part) => INDEX_SEGMENT.test(part);
+
+// a bracket segment resolves to a keyed selector (field[#identity]) or a
+// numeric positional index (field[2]). null for a malformed segment — an
+// unclosed bracket, or a positional body that isn't a whole index — which
+// every caller treats as addressing nothing
 const extractBracketAccess = (part) => {
   const bracketIndex = part.indexOf('[');
+  const closeIndex = part.indexOf(']', bracketIndex + 1);
+  if (closeIndex === -1) {
+    return null;
+  }
   const key = part.substring(0, bracketIndex);
-  const body = part.substring(bracketIndex + 1, part.indexOf(']'));
-  // a leading # marks a keyed element selector (field[#identity]) vs a numeric
-  // positional index (field[2]); the identity rides as a raw string value
+  const body = part.substring(bracketIndex + 1, closeIndex);
+  // a leading # marks a keyed element selector; the identity rides as a raw string value
   if (body.charCodeAt(0) === 35) {
     return { key, keyValue: body.slice(1) };
+  }
+  if (!isIndexSegment(body)) {
+    return null;
   }
   return { key, index: parseInt(body, 10) };
 };
@@ -988,6 +1001,9 @@ const resolvePath = (obj, path, keys) => {
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
+      if (access === null) {
+        return MISSING;
+      }
       // an empty key ([0].x against an array root) addresses the current value as the array
       const array = access.key === '' ? currentObject : currentObject[access.key];
       if (!isArray(array)) {
@@ -1059,9 +1075,6 @@ export const has = function(obj, path = '', keys = elementKey.config.keys) {
   return resolvePath(obj, path, keys) !== MISSING;
 };
 
-const INDEX_SEGMENT = /^\d+$/;
-const isIndexSegment = (part) => INDEX_SEGMENT.test(part);
-
 // set and unset act only on a real path into a real object, and refuse
 // prototype pollution (__proto__ and friends)
 const CLIMBS_PROTOTYPE = /(^|\.|\[)(__proto__|constructor|prototype)(\.|\[|\]|$)/;
@@ -1101,6 +1114,9 @@ export const set = function(obj, path, value, keys = elementKey.config.keys) {
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
+      if (access === null) {
+        return obj;
+      }
       let array;
       if (access.key === '') {
         // an empty key addresses the current value as the array; it can't be vivified in place
@@ -1206,6 +1222,9 @@ export const unset = function(obj, path, keys = elementKey.config.keys) {
 
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
+      if (access === null) {
+        return obj;
+      }
       const array = access.key === '' ? currentObject : currentObject[access.key];
       if (!isArray(array)) {
         return obj;
@@ -1295,6 +1314,9 @@ export const keyedPath = (obj, path, keys = elementKey.config.keys) => {
     }
     if (part.includes('[')) {
       const access = extractBracketAccess(part);
+      if (access === null) {
+        return path;
+      }
       const array = currentObject[access.key];
       if (!isArray(array)) {
         return path;

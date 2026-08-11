@@ -2505,6 +2505,27 @@ describe('array-root bracket paths', () => {
   });
 });
 
+describe('malformed bracket segments', () => {
+  it('an unclosed bracket is not a path — nothing resolves, nothing writes', () => {
+    const doc = { items: [{ id: 'a', n: 1 }] };
+    expect(get(doc, 'items[#a')).toBeUndefined();
+    expect(has(doc, 'items[#a')).toBe(false);
+    expect(set(doc, 'items[#a', 9)).toBe(doc);
+    unset(doc, 'items[#a');
+    expect(doc.items).toEqual([{ id: 'a', n: 1 }]);
+  });
+
+  it('a positional body that is not a whole index addresses nothing', () => {
+    const doc = { items: [{ id: 'a', n: 1 }] };
+    expect(has(doc, 'items[abc]')).toBe(false);
+    expect(get(doc, 'items[1x].n')).toBeUndefined();
+    set(doc, 'items[abc]', 9);
+    // no junk 'NaN' or 'abc' key lands on the array
+    expect(Object.keys(doc.items)).toEqual(['0']);
+    expect(keyedPath(doc, 'items[abc].n')).toBe('items[abc].n');
+  });
+});
+
 describe('elementKey.config.keys', () => {
   it('the vocabulary extends by mutation like every configured util, the fast path stays true', () => {
     elementKey.config.keys.push('sku');
