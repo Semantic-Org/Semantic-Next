@@ -1,0 +1,776 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Path Utilities
+package: "@semantic-ui/utils"
+methods: [get, has, set, unset, elementKey, pathKey, isPathKey, splitPath, parsePath, eachPath, pathFrom, elementPath, keyedPath, patternFrom, expandPath, pathCovers, pathsOverlap]
+icon: route
+description: API reference for addressing nested values by string path
+---
+
+Address a nested value by string path, and build, walk, and compare the paths themselves.
+
+| Spelling | Addresses |
+|----------|-----------|
+| `contact.taxId` | a field, dot joined |
+| `lines.2` or `lines[2]` | an array element by position |
+| `lines[#a1]` | an array element by identity |
+| `lines.*.cost` | a wildcard standing for any single segment |
+
+A key rides between `[#` and `]` and carries any character except `]`, the one character that closes the selector. Emails and compound ids address cleanly — `users[#jack@semantic-ui.com].role`, `items[#200.40.50].qty` — because a dot inside a bracket belongs to the key, never to the path.
+
+## Addressing
+
+### get
+
+```javascript
+function get(obj, path = '', keys = ['id', '_id', 'hash', 'key'])
+```
+
+Access a nested object field from a string path, like 'a.b.c'.
+
+#### Parameters
+
+| Name | Type     | Description |
+|------|----------|-------------|
+| obj  | object   | The object to access |
+| path | string   | The path to the desired property |
+| keys | string[] | Identity fields for keyed `[#id]` segments |
+
+#### Returns
+
+The value at the specified path, or undefined if not found.
+
+#### Notes
+
+A bracket segment whose body starts with `#` selects an array element by identity (`items[#id]`) rather than by position (`items[0]`). Identity is matched String-coerced (a number `id` of `7` matches `[#7]`), see [`elementKey`](#elementkey). Returns the element when the path ends at the key, or `undefined` when no element matches.
+
+An id may contain any character except `]` — a dot inside a bracket belongs to the id, never the path. `items[#jack@semantic-ui.com]` and `items[#200.40.50]` are valid selectors.
+
+A malformed bracket segment — an unclosed bracket, or a positional body that isn't a whole index (`items[abc]`) — addresses nothing: `get` returns undefined, `has` returns false, `set` and `unset` no-op.
+
+#### Example
+
+```javascript
+import { get } from '@semantic-ui/utils';
+
+const obj = { a: { b: { c: 42 } } };
+console.log(get(obj, 'a.b.c')); // 42
+console.log(get(obj, 'a.b.d')); // undefined
+
+const doc = { items: [{ id: 'a', n: 1 }, { id: 'b', n: 2 }] };
+console.log(get(doc, 'items[#b].n')); // 2 (selected by identity, not position)
+
+const team = { members: [{ id: 'jack@semantic-ui.com', role: 'owner' }] };
+console.log(get(team, 'members[#jack@semantic-ui.com].role')); // 'owner'
+```
+
+### has
+
+```javascript
+function has(obj, path = '', keys = ['id', '_id', 'hash', 'key'])
+```
+
+Existence twin of [`get`](#get). Returns `true` when the path resolves to a real location, even one holding `undefined`. `get` reports a missing path and a stored `undefined` the same way, so `has` is how you tell them apart.
+
+#### Parameters
+
+| Name | Type     | Description |
+|------|----------|-------------|
+| obj  | object   | The object to check |
+| path | string   | The path to test for |
+| keys | string[] | Identity fields for keyed `[#id]` segments |
+
+#### Returns
+
+`true` when the path resolves to a stored location, `false` otherwise.
+
+#### Notes
+
+Understands the same path grammar as [`get`](#get): dotted keys, `[0]` indices, `[#id]` keyed segments (see [`elementKey`](#elementkey)), and literal dotted-key fallbacks. A non-object root or a non-string path returns `false`.
+
+#### Example
+
+```javascript
+import { has, get } from '@semantic-ui/utils';
+
+const preferences = { theme: 'dark', notifications: undefined };
+console.log(get(preferences, 'notifications')); // undefined
+console.log(has(preferences, 'notifications')); // true (key exists, value is undefined)
+console.log(has(preferences, 'timezone'));      // false (never set)
+
+const doc = { items: [{ id: 'a', done: undefined }] };
+console.log(has(doc, 'items[#a].done')); // true (resolves to a stored undefined)
+console.log(has(doc, 'items[#a].note')); // false
+```
+
+### set
+
+```javascript
+function set(obj, path, value, keys = ['id', '_id', 'hash', 'key'])
+```
+
+Set a nested object field from a string path, the write twin of [`get`](#get). Creates missing intermediates — arrays when the next segment is a numeric index, objects otherwise.
+
+#### Parameters
+
+| Name  | Type     | Description |
+|-------|----------|-------------|
+| obj   | object   | The object to write into |
+| path  | string   | The path string (e.g., 'a.b.c', 'items.0.name', 'items[0].name', or 'items[#id]') |
+| value | any      | The value to set at the path |
+| keys  | string[] | Identity fields for keyed `[#id]` segments |
+
+#### Returns
+
+The same object reference.
+
+#### Notes
+
+Paths from [`trackWrites`](/docs/api/utils/objects#trackwrites) and [`detectChanges`](/docs/api/utils/objects#detectchanges) apply back directly. Prototype-climbing segments (`__proto__`, `constructor`, `prototype`) are refused, and a non-string or empty path is a no-op.
+
+A `[#id]` segment addresses an array element by identity (see [`elementKey`](#elementkey)): a present key replaces the element in place (or writes the field through it), an absent key appends a new element (a field write through an absent key is a no-op). The prototype-pollution guard is intentionally not extended to keyed bodies — a `[#__proto__]` value is only `===`-compared against element identities, it is never used as a property name, so it appends an inert element rather than touching `Object.prototype`.
+
+#### Example
+
+```javascript
+import { set, get, trackWrites } from '@semantic-ui/utils';
+
+console.log(set({}, 'a.b.c', 1)); // { a: { b: { c: 1 } } }
+console.log(set({}, 'items.0.name', 'first')); // { items: [{ name: 'first' }] }
+
+// sync changes between objects
+const { paths } = trackWrites(source, mutator);
+paths.forEach((path) => set(replica, path, get(source, path)));
+
+// keyed addressing — replace by identity, append when absent
+const doc = { items: [{ id: 'a', n: 1 }] };
+set(doc, 'items[#a]', { id: 'a', n: 100 }); // replaces in place
+set(doc, 'items[#b]', { id: 'b', n: 2 });   // appends, no element had id 'b'
+```
+
+### unset
+
+```javascript
+function unset(obj, path, keys = ['id', '_id', 'hash', 'key'])
+```
+
+Remove a nested object field from a string path, the delete twin of [`get`](#get) and [`set`](#set).
+
+#### Parameters
+
+| Name | Type     | Description |
+|------|----------|-------------|
+| obj  | object   | The object to remove from |
+| path | string   | The path string (e.g., 'a.b.c', 'items.0', or 'items[#id]') |
+| keys | string[] | Identity fields for keyed `[#id]` segments |
+
+#### Returns
+
+The same object reference.
+
+#### Notes
+
+A missing path is a no-op. A removed array index leaves a hole rather than splicing, so sibling index paths stay valid when applying several removals at once. Prototype-climbing segments (`__proto__`, `constructor`, `prototype`) are refused. Pairs with [`detectChanges`](/docs/api/utils/objects#detectchanges) — apply `removed` paths with `unset` and the rest with `set`.
+
+A `[#id]` segment removes the matched array element by identity (see [`elementKey`](#elementkey)), splicing it out — there are no sibling index paths to keep valid, so the splice is safe.
+
+#### Example
+
+```javascript
+import { unset, set, get, detectChanges } from '@semantic-ui/utils';
+
+const obj = { a: { b: 1, c: 2 } };
+unset(obj, 'a.b');
+console.log(obj); // { a: { c: 2 } }
+
+// apply a full diff
+const diff = detectChanges(before, after);
+[...diff.added, ...diff.changed].forEach((path) => set(replica, path, get(after, path)));
+diff.removed.forEach((path) => unset(replica, path));
+```
+
+## Element Identity
+
+### elementKey
+
+```javascript
+function elementKey(item, keys = ['id', '_id', 'hash', 'key'])
+```
+
+The identity of an array element — the value of the first present field in `keys`, or `undefined` for a scalar or an object carrying none of them. The same convention as reactivity's `Signal.id` and the renderer's `getItemId`, and what the keyed [`detectChanges`](/docs/api/utils/objects#detectchanges) mode and the keyed [`get`](#get) / [`set`](#set) / [`unset`](#unset) grammar match on.
+
+#### Parameters
+
+| Name | Type     | Description |
+|------|----------|-------------|
+| item | any      | The array element to read identity from |
+| keys | string[] | Candidate identity fields, first present wins |
+
+#### Returns
+
+The identity value, or `undefined` when none of the fields are present.
+
+#### Notes
+
+The value comes back raw: a number stays a number, and a string is returned whether or not it can ride the path grammar. Use [`pathKey`](#pathkey) wherever that identity becomes part of a path, since it String-coerces the value and returns `null` for the ids a path can't carry. Read `elementKey` when you want the identity itself — comparing two elements, keying a Map, matching against a record.
+
+#### Example
+
+```javascript
+import { elementKey } from '@semantic-ui/utils';
+
+console.log(elementKey({ id: 'a', _id: 'x' })); // 'a'
+console.log(elementKey({ name: 'n' }));         // undefined
+console.log(elementKey({ sku: 's1' }, ['sku'])); // 's1'
+```
+
+### pathKey
+
+```javascript
+function pathKey(item, keys = ['id', '_id', 'hash', 'key'])
+```
+
+An element's key as it can appear in a path — the text that rides between `[#` and `]` — or `null` when the element is unkeyed or its identity can't ride the grammar.
+
+#### Parameters
+
+| Name | Type     | Description |
+|------|----------|-------------|
+| item | any      | The array element to read identity from |
+| keys | string[] | Candidate identity fields, first present wins |
+
+#### Returns
+
+The key as a string, or `null` when the element carries no identity or its identity carries `]`.
+
+#### Notes
+
+This is the item-to-path route. [`elementKey`](#elementkey) answers what an element's identity is and hands back the raw value, which may be a number or a string carrying `]`. `pathKey` answers how that identity spells inside a path, and refuses the values that would emit a path nothing can parse — so a keyed path that came through here always reads back through [`get`](#get).
+
+A `null` result is the signal to address the element by position instead. Pair it with [`elementPath`](#elementpath), which takes `{ key }` or `{ index }` and throws on exactly the keys `pathKey` rejects.
+
+#### Example
+
+```javascript
+import { elementPath, pathKey } from '@semantic-ui/utils';
+
+console.log(pathKey({ id: 'jack@semantic-ui.com' })); // 'jack@semantic-ui.com'
+console.log(pathKey({ id: 7 }));        // '7' (String-coerced)
+console.log(pathKey({ id: 'lot]7' }));  // null (can't ride the grammar)
+console.log(pathKey({ name: 'n' }));    // null (no identity field)
+
+// the route from an item to its path, positional when there is no usable key
+const address = (item, index) => {
+  const key = pathKey(item);
+  return key === null
+    ? elementPath('members', { index })
+    : elementPath('members', { key });
+};
+console.log(address({ id: 'jack@semantic-ui.com' }, 0)); // 'members[#jack@semantic-ui.com]'
+console.log(address({ name: 'anonymous' }, 3));          // 'members.3'
+```
+
+### isPathKey
+
+```javascript
+function isPathKey(key)
+```
+
+Whether a key can ride the path grammar — true for any value whose string form omits `]`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| key  | any  | The candidate key, String-coerced before testing |
+
+#### Returns
+
+`true` when the key can appear between `[#` and `]`, `false` otherwise.
+
+#### Notes
+
+Dots, `@`, `[`, and a leading `#` all round-trip, so `jack@semantic-ui.com` and `200.40.50` are valid keys. Only `]` is refused, since it closes the selector.
+
+This is the guard for a key that exists before any item does — a user-typed id at a form boundary, an id arriving over the wire — where there is no element to hand [`pathKey`](#pathkey) yet.
+
+#### Example
+
+```javascript
+import { isPathKey } from '@semantic-ui/utils';
+
+console.log(isPathKey('jack@semantic-ui.com')); // true
+console.log(isPathKey('200.40.50'));            // true
+console.log(isPathKey('v 2.0 (beta)'));         // true
+console.log(isPathKey('lot]7'));                // false
+```
+
+## Reading Paths
+
+### splitPath
+
+```javascript
+function splitPath(path)
+```
+
+Split a path into its dot separated segments, the textual read under every path walk.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| path | string | The path string to split |
+
+#### Returns
+
+An array of segment strings.
+
+#### Notes
+
+Only the dots outside brackets separate segments, so a dot inside a keyed id belongs to the id: `users[#jack@semantic-ui.com].role` splits in two, not three. Segments are contiguous substrings of the input, so joining them on `.` rebuilds the path exactly.
+
+For what each segment means rather than where it starts and ends, use [`parsePath`](#parsepath).
+
+#### Example
+
+```javascript
+import { splitPath } from '@semantic-ui/utils';
+
+console.log(splitPath('order.customer.email'));
+// ['order', 'customer', 'email']
+
+console.log(splitPath('users[#jack@semantic-ui.com].role'));
+// ['users[#jack@semantic-ui.com]', 'role']
+
+const path = 'teams[#core.ui].members[#200.40.50].role';
+console.log(splitPath(path).join('.') === path); // true
+```
+
+### parsePath
+
+```javascript
+function parsePath(path)
+```
+
+Parse a path into typed segments, the semantic read beside [`splitPath`](#splitpath)'s textual one.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| path | string | The path string to parse |
+
+#### Returns
+
+An array of segments, or `null` when the path doesn't parse.
+
+| Type | Shape | Spelling |
+|------|-------|----------|
+| field | `{ type: 'field', name }` | `lines` |
+| key | `{ type: 'key', key }` | `[#a1]` |
+| index | `{ type: 'index', index }` | `2` or `[2]` |
+| wildcard | `{ type: 'wildcard' }` | `*` |
+
+#### Notes
+
+Both index spellings parse to the same segment, so `items[2].qty` and `items.2.qty` are indistinguishable once parsed. A path that doesn't parse — an unclosed bracket, a positional body that isn't a whole index, an empty part, a non-string — returns `null` rather than a guess, so a relation over garbage reads as no relation rather than a false match. The empty path parses to no segments.
+
+Results are cached and shared: repeated parses of one path hand back the same array, so treat segments as immutable. They are frozen in development to catch a write. The cache is bounded and sized through `parsePath.config.cacheSize`.
+
+#### Example
+
+```javascript
+import { parsePath } from '@semantic-ui/utils';
+
+console.log(parsePath('lines[#a1].tax'));
+// [{ type: 'field', name: 'lines' }, { type: 'key', key: 'a1' }, { type: 'field', name: 'tax' }]
+
+console.log(parsePath('lines.*.tax'));
+// [{ type: 'field', name: 'lines' }, { type: 'wildcard' }, { type: 'field', name: 'tax' }]
+
+// a key carries any character except ']'
+console.log(parsePath('users[#jack@semantic-ui.com].role')[1]);
+// { type: 'key', key: 'jack@semantic-ui.com' }
+
+// a path that doesn't parse is null, never a guess
+console.log(parsePath('lines[#a1'));  // null (unclosed)
+console.log(parsePath('lines[abc]')); // null (positional body that isn't an index)
+```
+
+### eachPath
+
+```javascript
+function eachPath(path, callback, { self = true } = {})
+```
+
+Walk the paths a path passes through, shortest first — `'todos[#a].done'` visits `'todos'`, `'todos[#a]'`, `'todos[#a].done'`. Every visited value is itself a resolvable path: a bracket splits its segment into container and element, and a dot inside a keyed id belongs to the id, never a boundary.
+
+#### Parameters
+
+| Name     | Type     | Description |
+|----------|----------|-------------|
+| path     | string   | The path string to walk |
+| callback | function | Called per containing path with `(path, index, fullPath)` |
+| options  | object   | Optional configuration |
+
+##### Options
+
+| Name | Type    | Default | Description |
+|------|---------|---------|-------------|
+| self | boolean | true    | Include the full path itself as the final visit. Pass `false` to visit only the ancestors above the target |
+
+#### Returns
+
+The input `path` string.
+
+#### Notes
+
+The ancestors-only walk (`{ self: false }`) is what a subsumption check or an invalidation pass over path-addressed state needs — a write logged at any ancestor of a path covers that path. Returning `false` from the callback stops the walk early, like [`each`](/docs/api/utils/looping#each).
+
+#### Example
+
+```javascript
+import { eachPath } from '@semantic-ui/utils';
+
+eachPath('todos[#a].done', (path) => console.log(path));
+// 'todos'
+// 'todos[#a]'
+// 'todos[#a].done'
+
+eachPath('todos[#a].done', (ancestor) => console.log(ancestor), { self: false });
+// 'todos'
+// 'todos[#a]'
+
+// a dot inside a keyed id is identity, never a boundary
+eachPath('users[#jack@semantic-ui.com].role', (path) => console.log(path));
+// 'users'
+// 'users[#jack@semantic-ui.com]'
+// 'users[#jack@semantic-ui.com].role'
+```
+
+## Building Paths
+
+### pathFrom
+
+```javascript
+function pathFrom(segments)
+```
+
+Join segments back into a path, the inverse of [`parsePath`](#parsepath) and of [`splitPath`](#splitpath).
+
+#### Parameters
+
+| Name     | Type  | Description |
+|----------|-------|-------------|
+| segments | array | Parsed segments, plain segment strings, or a mix of both |
+
+#### Returns
+
+The path string.
+
+#### Notes
+
+Fields, positional indexes, and wildcards join with dots, and a key appends as `[#key]`. Positional indexes emit the dot form, so `pathFrom(parsePath('items[2].qty'))` normalizes to `items.2.qty` rather than preserving the bracket spelling. Keyed spellings round-trip exactly.
+
+Accepting plain strings alongside parsed segments means a path can be assembled from a known prefix and a computed tail without parsing the prefix first.
+
+#### Example
+
+```javascript
+import { parsePath, pathFrom, splitPath } from '@semantic-ui/utils';
+
+console.log(pathFrom(parsePath('users[#jack@semantic-ui.com].role')));
+// 'users[#jack@semantic-ui.com].role'
+
+console.log(pathFrom(splitPath('teams[#core.ui].members')));
+// 'teams[#core.ui].members'
+
+// segments and plain strings mix in one array
+console.log(pathFrom(['order.lines', { type: 'key', key: 'a1' }, 'qty']));
+// 'order.lines[#a1].qty'
+
+// a positional index emits the dot form
+console.log(pathFrom(parsePath('lines[2].qty'))); // 'lines.2.qty'
+```
+
+### elementPath
+
+```javascript
+function elementPath(listPath, { key, index } = {})
+```
+
+The path of one element under a list path — by key in the `[#key]` form, by index in the dot form.
+
+#### Parameters
+
+| Name     | Type   | Description |
+|----------|--------|-------------|
+| listPath | string | The path of the array the element lives in |
+| options  | object | The element's address, either `key` or `index` |
+
+##### Options
+
+| Name  | Type             | Default   | Description |
+|-------|------------------|-----------|-------------|
+| key   | string \| number | undefined | Address by identity, emitting `listPath[#key]` |
+| index | number           | undefined | Address by position, emitting `listPath.index` |
+
+#### Returns
+
+The element's path.
+
+#### Notes
+
+This is where a path is born from raw data, so the key contract is enforced here: a key carrying `]` throws rather than emitting a path nothing can parse. Route items through [`pathKey`](#pathkey) first — it returns `null` for exactly the identities this rejects, leaving `{ index }` as the fallback.
+
+A key and an index are different address spaces. `{ key: '2' }` gives `a[#2]`, which matches the element whose id is `'2'`, while `{ index: 2 }` gives `a.2`, the third element whatever its id. An empty `listPath` addresses an array root. Passing neither `key` nor `index` throws.
+
+#### Example
+
+```javascript
+import { elementPath, get } from '@semantic-ui/utils';
+
+console.log(elementPath('team.members', { key: 'a1' }));  // 'team.members[#a1]'
+console.log(elementPath('team.members', { index: 1 }));   // 'team.members.1'
+
+// different address spaces — by id '1', not the second element
+console.log(elementPath('team.members', { key: '1' }));   // 'team.members[#1]'
+
+const team = { members: [{ id: 'jack@semantic-ui.com', role: 'editor' }] };
+console.log(get({ team }, elementPath('team.members', { key: 'jack@semantic-ui.com' })));
+// { id: 'jack@semantic-ui.com', role: 'editor' }
+```
+
+### keyedPath
+
+```javascript
+function keyedPath(obj, path, keys = ['id', '_id', 'hash', 'key'])
+```
+
+The keyed spelling of a positional path — rewrites each positional array segment (`items.0` or `items[1]`) to its `[#id]` form where the addressed element carries a path-safe identity, resolved against `obj` at call time. A positional address is only stable while the array doesn't move, the keyed address survives a reorder — the same identity [`detectChanges`](/docs/api/utils/objects#detectchanges) emits in its keyed mode.
+
+#### Parameters
+
+| Name | Type     | Description |
+|------|----------|-------------|
+| obj  | object   | The object the path addresses |
+| path | string   | The path string (e.g., 'items.0.qty' or 'items[1]') |
+| keys | string[] | Identity fields for keyed `[#id]` segments |
+
+#### Returns
+
+The keyed spelling as a new string, or the input `path` itself (the same reference) when nothing rewrites — so `keyedPath(obj, path) === path` cheaply tells you the address was already stable.
+
+#### Notes
+
+Only a segment whose element carries a path-safe identity (any id without `]`, see [`pathKey`](#pathkey)) rewrites. Keyless arrays, inner value lists, unresolvable paths, and already-keyed spellings pass through unchanged. A leading index (the root itself being an array) stays positional, since [`get`](#get) and [`set`](#set) can't parse a leading bracket. The emitted `[#id]` paths apply back through [`get`](#get)/[`set`](#set)/[`unset`](#unset) and match the keyed output of [`detectChanges`](/docs/api/utils/objects#detectchanges).
+
+#### Example
+
+```javascript
+import { keyedPath, get } from '@semantic-ui/utils';
+
+const doc = { items: [{ id: 'a', qty: 1 }, { id: 'b', qty: 2 }] };
+console.log(keyedPath(doc, 'items.0.qty')); // 'items[#a].qty'
+console.log(keyedPath(doc, 'items[1]'));    // 'items[#b]'
+
+// keyless and unresolvable paths pass through — same reference when nothing rewrites
+const path = 'plain.0.n';
+console.log(keyedPath({ plain: [{ n: 1 }] }, path) === path); // true
+
+// the keyed address survives a reorder that shifts every positional index
+const target = keyedPath(doc, 'items.1.qty'); // 'items[#b].qty'
+doc.items.unshift({ id: 'z', qty: 9 });
+console.log(get(doc, 'items.1.qty')); // 1 (positional now hits a)
+console.log(get(doc, target));        // 2 (keyed still hits b)
+```
+
+### patternFrom
+
+```javascript
+function patternFrom(path)
+```
+
+Collapse a concrete path to its pattern spelling — `lines[#a1].tax` becomes `lines.*.tax`.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| path | string | The concrete path to collapse |
+
+#### Returns
+
+The pattern spelling, or the input path unchanged when it doesn't parse.
+
+#### Notes
+
+Every element address collapses, keyed and positional alike, so per-element paths group under one dependency pattern instead of one entry per element. The resulting pattern always [covers](#pathcovers) the path it came from.
+
+#### Example
+
+```javascript
+import { pathCovers, patternFrom } from '@semantic-ui/utils';
+
+console.log(patternFrom('lines[#jack@semantic-ui.com].tax')); // 'lines.*.tax'
+console.log(patternFrom('lines.2.tax'));                      // 'lines.*.tax'
+console.log(patternFrom('invoice.total'));                    // 'invoice.total'
+
+// per-element writes group under one pattern
+const written = ['lines[#a1].tax', 'lines[#a2].tax', 'lines[#a1].qty'];
+console.log([...new Set(written.map(patternFrom))]); // ['lines.*.tax', 'lines.*.qty']
+
+// the pattern still covers the concrete path it came from
+console.log(pathCovers(patternFrom('lines[#a1].tax'), 'lines[#a1].tax')); // true
+```
+
+### expandPath
+
+```javascript
+function expandPath(path, { from, doc, keys = ['id', '_id', 'hash', 'key'] } = {})
+```
+
+Expand a path spelling into the concrete paths it addresses, always as an array.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| path    | string | The spelling to expand, which may lead with dots or carry wildcards |
+| options | object | The context the spelling resolves against |
+
+##### Options
+
+| Name | Type     | Default   | Description |
+|------|----------|-----------|-------------|
+| from | string   | undefined | The path a leading-dot spelling resolves against |
+| doc  | object   | undefined | The value a `*` enumerates |
+| keys | string[] | `['id', '_id', 'hash', 'key']` | Identity fields used while enumerating |
+
+#### Returns
+
+An array of concrete paths. A spelling with neither leading dots nor wildcards returns itself as the single element, so callers destructure uniformly.
+
+#### Notes
+
+A leading dot resolves against `from`, each dot stripping one trailing segment: `.tax` from `lines[#a1].qty` is `lines[#a1].tax`, `..total` is `lines.total`. A keyed segment counts as one level like any other, whatever its key carries.
+
+A `*` enumerates the array at that level of `doc`. An element with a [`pathKey`](#pathkey) takes the `[#key]` spelling, so a derived write respects a keyed override rather than a position that may move. A keyless element stays positional, and a level that isn't an array contributes nothing — the expansion comes back short, or empty, rather than carrying a path that addresses nowhere. Both spellings compose in one call.
+
+Throws when the spelling needs context it wasn't given: a relative path without `from`, a wildcard without `doc`, or a path that doesn't parse.
+
+#### Example
+
+```javascript
+import { expandPath } from '@semantic-ui/utils';
+
+const invoice = {
+  lines: [{ id: 'a1', cost: 10 }, { id: 'jack@semantic-ui.com', cost: 40 }],
+  drafts: [{ qty: 1 }, { qty: 3 }],
+};
+
+// no leading dots and no wildcard — the path addresses itself
+console.log(expandPath('invoice.total')); // ['invoice.total']
+
+// a leading dot resolves against from, one dot per trailing segment
+console.log(expandPath('.cost', { from: 'lines[#a1].qty' }));   // ['lines[#a1].cost']
+console.log(expandPath('..total', { from: 'lines[#a1].qty' })); // ['lines.total']
+
+// a wildcard enumerates doc — keyed elements by key, keyless by position
+console.log(expandPath('lines.*.cost', { doc: invoice }));
+// ['lines[#a1].cost', 'lines[#jack@semantic-ui.com].cost']
+console.log(expandPath('drafts.*.qty', { doc: invoice }));
+// ['drafts.0.qty', 'drafts.1.qty']
+
+// both spellings compose, and a level that isn't an array contributes nothing
+console.log(expandPath('..*.cost', { from: 'lines[#a1].qty', doc: invoice }));
+// ['lines[#a1].cost', 'lines[#jack@semantic-ui.com].cost']
+console.log(expandPath('missing.*.x', { doc: invoice })); // []
+```
+
+## Path Relations
+
+### pathCovers
+
+```javascript
+function pathCovers(a, b)
+```
+
+Whether `a` covers `b` — `b` sitting at or under `a`, aligned segment by segment.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| a    | string | The covering path |
+| b    | string | The path tested for sitting at or under `a` |
+
+#### Returns
+
+`true` when `b` lies at or under `a`, `false` otherwise.
+
+#### Notes
+
+Alignment is per segment, not per character, so `contact` covers `contact.taxId` but never `contacts`. The relation is directional: a parent covers its children, never the reverse. A path covers itself.
+
+A wildcard covers any single segment, so `lines.*.cost` covers both `lines[#a1].cost` and `lines.2.cost`. Keyed and positional addresses stay apart — `a[#7]` never covers `a.7.x`, since an id of `7` and the eighth element are different things. A path that doesn't [parse](#parsepath) has no relation to anything, in either position.
+
+This is the one covering relation a projection, a write guard, and an invalidation check all read.
+
+#### Example
+
+```javascript
+import { pathCovers } from '@semantic-ui/utils';
+
+console.log(pathCovers('contact', 'contact.taxId'));       // true
+console.log(pathCovers('contact', 'contacts'));            // false
+console.log(pathCovers('lines', 'lines[#a1].amount'));     // true
+console.log(pathCovers('lines[#a1].amount', 'lines'));     // false (direction matters)
+
+// a wildcard covers any single segment
+console.log(pathCovers('lines.*.cost', 'lines[#a1].cost')); // true
+console.log(pathCovers('lines.*.cost', 'lines[#a1].fee'));  // false
+
+// keyed and positional stay apart
+console.log(pathCovers('lines[#7]', 'lines[#7].cost')); // true
+console.log(pathCovers('lines[#7]', 'lines.7.cost'));   // false
+```
+
+### pathsOverlap
+
+```javascript
+function pathsOverlap(a, b)
+```
+
+Whether two paths lie on one line — `a` at or under `b`, or `b` at or under `a`.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| a    | string | The first path |
+| b    | string | The second path |
+
+#### Returns
+
+`true` when either path covers the other, `false` otherwise.
+
+#### Notes
+
+The symmetric read of [`pathCovers`](#pathcovers), for when direction doesn't matter. A subscription on `invoice.lines[#a1]` is touched by a write to `invoice.lines` above it and by a write to `invoice.lines[#a1].qty` below it alike, but not by `invoice.lines[#a2].qty` beside it.
+
+Segment alignment is the same, so `items` overlaps `items[#r7].amount` and never `itemsLog`.
+
+#### Example
+
+```javascript
+import { pathsOverlap } from '@semantic-ui/utils';
+
+console.log(pathsOverlap('lines', 'lines[#a1].amount')); // true
+console.log(pathsOverlap('lines[#a1].amount', 'lines')); // true (either direction)
+
+// siblings never meet, and a prefix of the text is not a prefix of the path
+console.log(pathsOverlap('lines[#a1].amount', 'lines[#a2].amount')); // false
+console.log(pathsOverlap('lines', 'linesLog'));                      // false
+```

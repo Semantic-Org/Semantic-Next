@@ -128,7 +128,11 @@ sum([1, 2, 3, 4]);                   // 10
 
 ### Property Access
 ```javascript
-import { get, has, set, unset, keyedPath, eachPath, keys, values, hasProperty } from '@semantic-ui/utils';
+import {
+  get, has, set, unset, keyedPath, eachPath, splitPath, parsePath, pathFrom,
+  elementPath, pathKey, isPathKey, pathCovers, pathsOverlap, patternFrom,
+  expandPath, keys, values, hasProperty,
+} from '@semantic-ui/utils';
 
 const data = {
   user: {
@@ -178,6 +182,30 @@ keyedPath(order, 'plain.0.n');               // 'plain.0.n' unchanged (unresolve
 // splits its segment into container and element. self: false for ancestors only
 eachPath('todos[#a].done', (path) => {});    // visits 'todos', 'todos[#a]', 'todos[#a].done'
 eachPath('todos[#a].done', (ancestor) => {}, { self: false }); // 'todos', 'todos[#a]'
+
+// parsePath — the semantic reading (null when the path doesn't parse);
+// pathFrom builds it back, normalizing indexes to the dot form
+parsePath('lines[#a.b].tax');
+// [{ type: 'field', name: 'lines' }, { type: 'key', key: 'a.b' }, { type: 'field', name: 'tax' }]
+pathFrom(parsePath('items[2].qty'));         // 'items.2.qty'
+
+// pathKey — an element's key as it can appear in a path, the item-to-path route
+// (elementKey returns the raw identity, which may be a number or carry ']')
+pathKey({ id: 'jack@semantic-ui.com' });     // 'jack@semantic-ui.com'
+pathKey({ id: 'a]b' });                      // null, ']' is the one excluded character
+isPathKey('200.40.50');                      // true
+elementPath('order.lines', { key: 'a1' });   // 'order.lines[#a1]'
+elementPath('order.lines', { index: 2 });    // 'order.lines.2'
+
+// relations — segment-aligned, '*' matches one segment, [#7] never means [7]
+pathCovers('items', 'items[#r7].amount');    // true ('itemsLog' would be false)
+pathCovers('lines.*.cost', 'lines[#a].cost'); // true
+pathsOverlap('a.b', 'a.c');                  // false
+patternFrom('lines[#a].tax');                // 'lines.*.tax'
+
+// expandPath — relative and wildcard spellings to concrete paths, always an array
+expandPath('.tax', { from: 'lines[#a].qty' }); // ['lines[#a].tax']
+expandPath('lines.*.cost', { doc });           // ['lines[#a].cost', 'lines[#b].cost']
 
 // hasProperty checks own properties only (shallow, no dot paths)
 hasProperty(data, 'user');                   // true
