@@ -845,9 +845,11 @@ describe('pathCovers', () => {
     expect(pathCovers('users[#jack@semantic-ui.com]', 'users[#jack@semantic-ui.com].role')).toBe(true);
   });
 
-  it('no relation to a path that does not parse', () => {
+  it('no relation to a path that does not parse, itself included', () => {
     expect(pathCovers('a', 'a[#x')).toBe(false);
     expect(pathCovers('a[#x', 'a')).toBe(false);
+    expect(pathCovers('a[#x', 'a[#x')).toBe(false);
+    expect(pathsOverlap('a[#x', 'a[#x')).toBe(false);
   });
 });
 

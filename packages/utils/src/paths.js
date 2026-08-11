@@ -720,8 +720,9 @@ const segmentMatches = (a, b) => {
   all read.
 */
 export const pathCovers = (a, b) => {
+  // identity still parses: a path that doesn't parse covers nothing, itself included
   if (a === b) {
-    return true;
+    return parsePath(a) !== null;
   }
   const aSegments = parsePath(a);
   const bSegments = parsePath(b);
@@ -770,7 +771,7 @@ export const patternFrom = (path) => {
 
 /*
   Expand a path spelling into the concrete paths it addresses, always as an
-  array. A leading-dot relative spelling resolves against { from } — '..tax'
+  array. A leading-dot relative spelling resolves against { from } — '.tax'
   from 'lines[#a].qty' is 'lines[#a].tax', each dot stripping one trailing
   segment, a keyed segment counting one like any other. A '*' enumerates the
   array at that level of { doc }: an element with a path key takes the [#key]
