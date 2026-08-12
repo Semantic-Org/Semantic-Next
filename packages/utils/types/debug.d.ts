@@ -14,6 +14,9 @@ export interface ErrorOptions {
   explanation?: string | 0;
   /** Structured data attached to the error as `error.detail` */
   detail?: any;
+  /** The line's verb — any word, the layer's own classification of the line.
+   * Nullish falls back to `'refused'` */
+  verb?: string;
 }
 
 /**
@@ -36,8 +39,8 @@ export interface CodedError extends Error {
  */
 export interface ErrorReporter {
   (code: string, at: string, options?: ErrorOptions): CodedError;
-  /** The production one-liner alone — `<layer> refused [<code>] <at>` — for console seats */
-  line(code: string, at: string): string;
+  /** The production one-liner alone — `<layer> <verb> [<code>] <at>` — for console seats */
+  line(code: string, at: string, options?: { verb?: string; }): string;
 }
 
 /**
@@ -63,8 +66,10 @@ export interface CreateErrorsOptions {
 /**
  * Creates a layer-bound error toolset: `error` reports through the error
  * channel and continues, `throwError` throws, and `error.line` renders the
- * uniform production line `<layer> refused [<code>] <at>` (parseable with
- * `/^(\S+) refused \[([\w-]+)\] (.*)$/m`). Every message leads with that line;
+ * uniform production line `<layer> <verb> [<code>] <at>` (parseable with
+ * `/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m`). The verb is a stable token position
+ * carrying the layer's own classification — any word, `refused` when not
+ * given — so grepping a word filters lines by class. Every message leads with that line;
  * development appends the teaching `explanation` beneath it, and explanations
  * are meant to fold out of production builds at the callsite: a bundler define
  * folds branches, never arguments, so the ternary

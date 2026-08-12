@@ -1014,8 +1014,11 @@ error.line('storageChanged', 'db-1 -> db-2');  // 'sync refused [storageChanged]
 
 `code` is the stable routable identifier. `at` is **where** it happened — the greppable
 address (`todos:secret.field`, `db-1 -> db-2`), never why; why goes in `explanation`.
-Production messages are one uniform line, `<layer> refused [<code>] <at>`, parseable with
-`/^(\S+) refused \[([\w-]+)\] (.*)$/`.
+Production messages are one uniform line, `<layer> <verb> [<code>] <at>`, parseable with
+`/^(\S+) (\S+) \[([\w-]+)\] (.*)$/`. The verb rides the options bag and
+`error.line(code, at, { verb })` — any word, a stable token position for the layer's
+own classification of the line, falling back to `refused` when nullish. Grepping a
+verb filters lines by class.
 
 ### The Fold Rule — Development Prose Rides a Callsite Ternary
 **A bundler define folds BRANCHES, never ARGUMENTS.** A string literal in argument

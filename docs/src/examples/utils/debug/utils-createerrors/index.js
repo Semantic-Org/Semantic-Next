@@ -7,8 +7,12 @@ const { error, throwError } = createErrors({ layer: 'component', ErrorClass: Typ
 // one, and throws when none is installed, so a report is never lost
 globalThis.onError = (reported) => console.log(`onError: ${reported.message}`);
 
-// production ships one greppable line: <layer> refused [<code>] <at>
+// production ships one greppable line: <layer> <verb> [<code>] <at>
 console.log(error.line('engineNotRegistered', 'lit'));
+
+// the verb is any word — your own classification of the line — and grepping
+// it filters a console by class. refused is only the default
+console.log(error.line('slowRender', 'invoice-list', { verb: 'measured' }));
 
 // development ships the explanation in its place, and both carry code and detail
 const reported = error('engineNotRegistered', 'lit', {

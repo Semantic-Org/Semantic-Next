@@ -69,14 +69,67 @@ describe('createErrors', () => {
     it('should stay greppable by the documented pattern', () => {
       const { error } = createErrors({ layer: 'query' });
       const parsed = error.line('unknown-field', 'select(user.nmae)')
-        .match(/^(\S+) refused \[([\w-]+)\] (.*)$/m);
-      expect(parsed.slice(1)).toEqual(['query', 'unknown-field', 'select(user.nmae)']);
+        .match(/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m);
+      expect(parsed.slice(1)).toEqual(['query', 'refused', 'unknown-field', 'select(user.nmae)']);
     });
 
     it('should match the message the builders produce', () => {
       const { error, throwError } = createErrors({ layer: 'demo' });
       const line = error.line('unknown-field', 'select()');
       expect(() => throwError('unknown-field', 'select()')).toThrow(line);
+    });
+  });
+
+  describe('verb', () => {
+    it('should default to refused', () => {
+      const { error } = createErrors({ layer: 'demo' });
+      expect(error.line('code', 'at')).toBe('demo refused [code] at');
+      expect(error('code', 'at').message).toBe('demo refused [code] at');
+    });
+
+    it('should render any word the caller mints', () => {
+      const { error } = createErrors({ layer: 'game' });
+      expect(error.line('entity-gone', 'sprite:7', { verb: 'despawned' }))
+        .toBe('game despawned [entity-gone] sprite:7');
+    });
+
+    it('should carry the verb through both builders', () => {
+      const { error, throwError } = createErrors({ layer: 'payments' });
+      expect(() => throwError('card-expired', 'charge()', { verb: 'declined' }))
+        .toThrow('payments declined [card-expired] charge()');
+      const returned = error('card-expired', 'charge()', { verb: 'declined' });
+      expect(returned.message).toBe('payments declined [card-expired] charge()');
+    });
+
+    it('should fall back to refused on a nullish verb', () => {
+      const { error } = createErrors({ layer: 'demo' });
+      expect(error.line('code', 'at', { verb: null })).toBe('demo refused [code] at');
+      expect(error.line('code', 'at', { verb: undefined })).toBe('demo refused [code] at');
+    });
+
+    it('should parse any verb with the documented pattern', () => {
+      const pattern = /^(\S+) (\S+) \[([\w-]+)\] (.*)$/m;
+      const { error } = createErrors({ layer: 'sync' });
+      for (const verb of ['refused', 'despawned', 'declined']) {
+        const parsed = error.line('write-conflict', 'commit()', { verb }).match(pattern);
+        expect(parsed.slice(1)).toEqual(['sync', verb, 'write-conflict', 'commit()']);
+      }
+    });
+
+    it('should parse the first line of a development message', () => {
+      const { throwError } = createErrors({ layer: 'game' });
+      let thrown;
+      try {
+        throwError('entity-gone', 'sprite:7', {
+          verb: 'despawned',
+          explanation: 'the sprite left the scene before the handler ran',
+        });
+      }
+      catch (caught) {
+        thrown = caught;
+      }
+      const parsed = thrown.message.match(/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m);
+      expect(parsed.slice(1)).toEqual(['game', 'despawned', 'entity-gone', 'sprite:7']);
     });
   });
 
@@ -120,8 +173,8 @@ describe('createErrors', () => {
         'demo refused [unknown-field] select()\nno field named nmae on todos, did you mean name?',
       );
       // the first line stays the documented greppable shape in development
-      const parsed = thrown.message.match(/^(\S+) refused \[([\w-]+)\] (.*)$/m);
-      expect(parsed.slice(1)).toEqual(['demo', 'unknown-field', 'select()']);
+      const parsed = thrown.message.match(/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m);
+      expect(parsed.slice(1)).toEqual(['demo', 'refused', 'unknown-field', 'select()']);
     });
 
     it('should fall back to the line when the explanation folds away', () => {
