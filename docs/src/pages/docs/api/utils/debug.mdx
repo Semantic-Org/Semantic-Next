@@ -86,7 +86,7 @@ function createErrors({ layer = '', ErrorClass = Error } = {})
 
 Creates a layer-bound error toolset. Bind it once per layer and every refusal that layer raises reads the same way: a stable `code` you can route on, an address (`at`) that says where it happened — both riding the error as properties — and a development `explanation` that folds out of production builds.
 
-Every message leads with one uniform line, `<layer> refused [<code>] <at>`, parseable with `/^(\S+) refused \[([\w-]+)\] (.*)$/m` — so a support ticket carrying a pasted error still names the layer, the code, and the address. In development the explanation follows on its own line; in production the line is the whole message.
+Every message leads with one uniform line, `<layer> <verb> [<code>] <at>`, parseable with `/^(\S+) (refused|caught|noted) \[([\w-]+)\] (.*)$/m` — so a support ticket carrying a pasted error still names the layer, the code, and the address. The verb classifies the line: `refused` means a rule declined the action, `caught` means your code threw and the layer reports the seat, `noted` is an observation, informational — `refused` is the default. In development the explanation follows on its own line; in production the line is the whole message.
 
 #### Parameters
 
@@ -152,6 +152,7 @@ Returned by [`createErrors`](#createerrors). Reports a coded error through the e
 |-------------|---------------|-----------|-------------|
 | explanation | string \| `0` | undefined | The development teaching message. When present it follows the production line on its own line; when folded away the line is the whole message. See [Development Messages](#development-messages) |
 | detail      | any           | undefined | Structured data attached to the error as `error.detail` |
+| verb        | string        | `'refused'` | The line's verb — `'refused'`, `'caught'`, or `'noted'`. A verb outside the vocabulary falls back to `'refused'` |
 
 #### Returns
 
@@ -215,21 +216,22 @@ const parseField = (name, spec) => {
 ### error.line
 
 ```javascript
-error.line(code, at)
+error.line(code, at, { verb } = {})
 ```
 
 Renders the production line by itself, without building or reporting an Error — for console seats and log messages that want the same greppable shape as a real refusal.
 
 #### Parameters
 
-| Name | Type   | Description |
-|------|--------|-------------|
-| code | string | The refusal code |
-| at   | string | The address it happened at |
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| code    | string | The refusal code |
+| at      | string | The address it happened at |
+| options | object | Optional configuration — `verb` selects the line's verb, defaulting to `'refused'` |
 
 #### Returns
 
-The string `<layer> refused [<code>] <at>`, or `refused [<code>] <at>` when the toolset was created without a `layer`.
+The string `<layer> <verb> [<code>] <at>`, or `<verb> [<code>] <at>` when the toolset was created without a `layer`.
 
 #### Example
 
@@ -241,9 +243,12 @@ const { error } = createErrors({ layer: 'sync' });
 console.warn(error.line('storageChanged', 'db-1 -> db-2'));
 // 'sync refused [storageChanged] db-1 -> db-2'
 
+console.info(error.line('cursorReset', 'todos@41', { verb: 'noted' }));
+// 'sync noted [cursorReset] todos@41'
+
 // the same line parses back out of a pasted log
-const [, layer, code, at] = 'sync refused [storageChanged] db-1 -> db-2'
-  .match(/^(\S+) refused \[([\w-]+)\] (.*)$/m);
+const [, layer, verb, code, at] = 'sync refused [storageChanged] db-1 -> db-2'
+  .match(/^(\S+) (refused|caught|noted) \[([\w-]+)\] (.*)$/m);
 ```
 
 ## Development Messages

@@ -86,8 +86,12 @@ export const log = (
 
 /*
   Coded errors with a development/production message split. Every message leads
-  with one uniform, greppable line — `<layer> refused [<code>] <at>` —
-  parseable with /^(\S+) refused \[([\w-]+)\] (.*)$/m. Production carries the
+  with one uniform, greppable line — `<layer> <verb> [<code>] <at>` —
+  parseable with /^(\S+) (refused|caught|noted) \[([\w-]+)\] (.*)$/m. The verb
+  classifies the line: `refused` (a rule declined the action), `caught` (the
+  caller's code threw and the layer reports the seat), `noted` (an observation,
+  informational). It defaults to `refused`, and a verb outside the vocabulary
+  falls back to it so every line stays parseable. Production carries the
   line alone; development appends the teaching explanation on its own line, so
   the address prints in every posture and explanations never restate it. The
   explanation is meant to fold out of production builds at the CALLSITE
@@ -97,14 +101,19 @@ export const log = (
   bytes of a ~2KB pool; the inline ternary reclaimed all of it.
 */
 
-const refusalLine = (layer, code, at) => `${layer ? `${layer} ` : ''}refused [${code}] ${at}`;
+const verbs = ['refused', 'caught', 'noted'];
+
+const errorLine = (layer, verb, code, at) => {
+  const spoken = verbs.includes(verb) ? verb : 'refused';
+  return `${layer ? `${layer} ` : ''}${spoken} [${code}] ${at}`;
+};
 
 export const createErrors = ({
   layer = '',
   ErrorClass = Error,
 } = {}) => {
-  const build = (code, at, { explanation, detail } = {}) => {
-    const line = refusalLine(layer, code, at);
+  const build = (code, at, { explanation, detail, verb } = {}) => {
+    const line = errorLine(layer, verb, code, at);
     const built = new ErrorClass(explanation ? `${line}\n${explanation}` : line);
     built.code = code;
     built.at = at;
@@ -137,7 +146,7 @@ export const createErrors = ({
   };
 
   // the production one-liner alone, for console seats
-  error.line = (code, at) => refusalLine(layer, code, at);
+  error.line = (code, at, { verb } = {}) => errorLine(layer, verb, code, at);
 
   // the throwing form: same arguments, never returns
   const throwError = (code, at, options) => {

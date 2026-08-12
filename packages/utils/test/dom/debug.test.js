@@ -69,14 +69,68 @@ describe('createErrors', () => {
     it('should stay greppable by the documented pattern', () => {
       const { error } = createErrors({ layer: 'query' });
       const parsed = error.line('unknown-field', 'select(user.nmae)')
-        .match(/^(\S+) refused \[([\w-]+)\] (.*)$/m);
-      expect(parsed.slice(1)).toEqual(['query', 'unknown-field', 'select(user.nmae)']);
+        .match(/^(\S+) (refused|caught|noted) \[([\w-]+)\] (.*)$/m);
+      expect(parsed.slice(1)).toEqual(['query', 'refused', 'unknown-field', 'select(user.nmae)']);
     });
 
     it('should match the message the builders produce', () => {
       const { error, throwError } = createErrors({ layer: 'demo' });
       const line = error.line('unknown-field', 'select()');
       expect(() => throwError('unknown-field', 'select()')).toThrow(line);
+    });
+  });
+
+  describe('verb', () => {
+    it('should default to refused', () => {
+      const { error } = createErrors({ layer: 'demo' });
+      expect(error.line('code', 'at')).toBe('demo refused [code] at');
+      expect(error('code', 'at').message).toBe('demo refused [code] at');
+    });
+
+    it('should speak caught and noted when asked', () => {
+      const { error } = createErrors({ layer: 'demo' });
+      expect(error.line('handler-threw', 'onSave()', { verb: 'caught' }))
+        .toBe('demo caught [handler-threw] onSave()');
+      expect(error.line('cursor-reset', 'todos@41', { verb: 'noted' }))
+        .toBe('demo noted [cursor-reset] todos@41');
+    });
+
+    it('should carry the verb through both builders', () => {
+      const { error, throwError } = createErrors({ layer: 'demo' });
+      expect(() => throwError('handler-threw', 'onSave()', { verb: 'caught' }))
+        .toThrow('demo caught [handler-threw] onSave()');
+      const returned = error('cursor-reset', 'todos@41', { verb: 'noted' });
+      expect(returned.message).toBe('demo noted [cursor-reset] todos@41');
+    });
+
+    it('should fall back to refused on a verb outside the vocabulary', () => {
+      const { error } = createErrors({ layer: 'demo' });
+      expect(error.line('code', 'at', { verb: 'exploded' })).toBe('demo refused [code] at');
+    });
+
+    it('should parse every verb with the documented pattern', () => {
+      const pattern = /^(\S+) (refused|caught|noted) \[([\w-]+)\] (.*)$/m;
+      const { error } = createErrors({ layer: 'sync' });
+      for (const verb of ['refused', 'caught', 'noted']) {
+        const parsed = error.line('write-conflict', 'commit()', { verb }).match(pattern);
+        expect(parsed.slice(1)).toEqual(['sync', verb, 'write-conflict', 'commit()']);
+      }
+    });
+
+    it('should parse the first line of a development message', () => {
+      const { throwError } = createErrors({ layer: 'demo' });
+      let thrown;
+      try {
+        throwError('handler-threw', 'onSave()', {
+          verb: 'caught',
+          explanation: 'the onSave handler threw, the write was not applied',
+        });
+      }
+      catch (caught) {
+        thrown = caught;
+      }
+      const parsed = thrown.message.match(/^(\S+) (refused|caught|noted) \[([\w-]+)\] (.*)$/m);
+      expect(parsed.slice(1)).toEqual(['demo', 'caught', 'handler-threw', 'onSave()']);
     });
   });
 
@@ -120,8 +174,8 @@ describe('createErrors', () => {
         'demo refused [unknown-field] select()\nno field named nmae on todos, did you mean name?',
       );
       // the first line stays the documented greppable shape in development
-      const parsed = thrown.message.match(/^(\S+) refused \[([\w-]+)\] (.*)$/m);
-      expect(parsed.slice(1)).toEqual(['demo', 'unknown-field', 'select()']);
+      const parsed = thrown.message.match(/^(\S+) (refused|caught|noted) \[([\w-]+)\] (.*)$/m);
+      expect(parsed.slice(1)).toEqual(['demo', 'refused', 'unknown-field', 'select()']);
     });
 
     it('should fall back to the line when the explanation folds away', () => {
