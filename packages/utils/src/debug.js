@@ -164,8 +164,8 @@ export const throwError = (code, at, options) => {
 
 // the binder over the pair, mirroring createLogger over log — pre-fills the
 // options into every call, callsite options win
-export const createErrors = ({ layer = '', ...defaults } = {}) => {
-  const merged = (options) => ({ namespace: layer, ...defaults, ...options });
+export const createErrors = (defaults = {}) => {
+  const merged = (options) => ({ ...defaults, ...options });
   const bound = (code, at, options) => error(code, at, merged(options));
   bound.line = (code, at, options) => error.line(code, at, merged(options));
   return {

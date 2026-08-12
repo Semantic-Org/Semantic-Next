@@ -7,7 +7,7 @@ import { isItemContext } from '../reactive-context.js';
 import { DECLARED_KEYS, markScopeRange } from '../scope-context.js';
 import { registerBlock } from './registry.js';
 
-const { throwError } = createErrors({ layer: 'renderer' });
+const { throwError } = createErrors({ namespace: 'renderer' });
 
 /*
 

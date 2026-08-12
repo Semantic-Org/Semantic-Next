@@ -8,7 +8,7 @@ icon: bug
 description: API reference for logging and coded error handling utility functions
 ---
 
-The Debug utilities provide the two reporting doors a layer needs: `log` for styled console output — with `createLogger` binding it to a namespace once — and `createErrors` for coded errors that lead with one uniform, greppable line and carry a teaching explanation beneath it in development.
+The Debug utilities provide the two reporting doors a library needs: `log` for styled console output — with `createLogger` binding it to a namespace once — and `createErrors` for coded errors that lead with one uniform, greppable line and carry a teaching explanation beneath it in development.
 
 ## Functions
 
@@ -114,7 +114,7 @@ Both debug families export an `error`. A file that binds both renames one at the
 import { createLogger, createErrors, isDevelopment } from '@semantic-ui/utils';
 
 const { info, warn, error: logError } = createLogger({ namespace: 'sync' });
-const { error, throwError } = createErrors({ layer: 'sync' });
+const { error, throwError } = createErrors({ namespace: 'sync' });
 
 info('connected');                                  // sync connected
 warn('reconnecting', { data: { attempt: 2 } });
@@ -129,29 +129,29 @@ error('writeRejected', 'todos:a7f2', {
 ### createErrors
 
 ```javascript
-function createErrors({ layer = '', ...defaults } = {})
+function createErrors({ namespace = '', ...defaults } = {})
 ```
 
-The binder over [`error`](#error) and [`throwError`](#throwerror), mirroring `createLogger` over `log`: pre-fills the options into every call (callsite options win) and returns the bound pair. Bind it once per layer and every refusal raised under it reads the same way: a stable `code` you can route on, an address (`at`) that says where it happened — both riding the error as properties — and a development `explanation` that folds out of production builds.
+The binder over [`error`](#error) and [`throwError`](#throwerror), mirroring `createLogger` over `log`: pre-fills the options into every call (callsite options win) and returns the bound pair. Bind it once per namespace and every refusal raised under it reads the same way: a stable `code` you can route on, an address (`at`) that says where it happened — both riding the error as properties — and a development `explanation` that folds out of production builds.
 
-Every message leads with one uniform line, `<layer> <verb> [<code>] <at>`, parseable with `/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m` — so a support ticket carrying a pasted error still names the layer, the code, and the address. The verb gives every line a searchable classification surface: a stable token position carrying your own taxonomy of error, whatever it is. Grep a word and you have filtered a console by class; the pattern's verb group gives the same axis programmatically. The vocabulary is yours — any word renders, a game engine might say `despawned` where a payments layer says `declined` — and `refused` is the default when none is given. In development the explanation follows on its own line; in production the line is the whole message.
+Every message leads with one uniform line, `<namespace> <verb> [<code>] <at>`, parseable with `/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m` — so a support ticket carrying a pasted error still names the namespace, the code, and the address. The verb gives every line a searchable classification surface: a stable token position carrying your own taxonomy of error, whatever it is. Grep a word and you have filtered a console by class; the pattern's verb group gives the same axis programmatically. The vocabulary is yours — any word renders, a game engine might say `despawned` where a payments library says `declined` — and `refused` is the default when none is given. In development the explanation follows on its own line; in production the line is the whole message.
 
 #### Parameters
 
 | Name    | Type   | Description |
 |---------|--------|-------------|
-| options | object | The layer binding |
+| options | object | The namespace binding |
 
 ##### Options
 
 | Name       | Type     | Default | Description |
 |------------|----------|---------|-------------|
-| layer      | string   | `''`    | The layer's public name, leading the production line (e.g. `sync`, `component`) — pre-filled as the pair's `namespace` |
+| namespace  | string   | `''`    | The display identity leading the production line (e.g. `sync`, `component`) |
 | ...defaults | object  |         | Any [`error` option](#error) to pre-fill — `ErrorClass`, a default `verb`, whatever every call should carry |
 
 #### Returns
 
-`{ error, throwError }` — the reporting door and the throwing door, both bound to the layer.
+`{ error, throwError }` — the reporting door and the throwing door, both bound to the namespace.
 
 | Name                                                | Returns | Description |
 |-----------------------------------------------------|---------|-------------|
@@ -164,7 +164,7 @@ Every message leads with one uniform line, `<layer> <verb> [<code>] <at>`, parse
 ```javascript
 import { createErrors, isDevelopment } from '@semantic-ui/utils';
 
-const { error, throwError } = createErrors({ layer: 'sync' });
+const { error, throwError } = createErrors({ namespace: 'sync' });
 
 // report and continue
 error('forbidden', 'todos:secret.field', {
@@ -216,7 +216,7 @@ The `Error` it reported, carrying `code`, `at`, and (when given) `detail`. Retur
 ```javascript
 import { createErrors, isDevelopment } from '@semantic-ui/utils';
 
-const { error } = createErrors({ layer: 'sync' });
+const { error } = createErrors({ namespace: 'sync' });
 
 // an app that installs a channel gets the report there
 globalThis.onError = (err) => reportToService(err.code, err.message, err.detail);
@@ -258,7 +258,7 @@ Never returns.
 ```javascript
 import { createErrors, isDevelopment } from '@semantic-ui/utils';
 
-const { throwError } = createErrors({ layer: 'schema', ErrorClass: TypeError });
+const { throwError } = createErrors({ namespace: 'schema', ErrorClass: TypeError });
 
 const parseField = (name, spec) => {
   if (!spec.type) {
@@ -296,7 +296,7 @@ The string `<namespace> <verb> [<code>] <at>`, or `<verb> [<code>] <at>` when th
 ```javascript
 import { createErrors } from '@semantic-ui/utils';
 
-const { error } = createErrors({ layer: 'sync' });
+const { error } = createErrors({ namespace: 'sync' });
 
 console.warn(error.line('storageChanged', 'db-1 -> db-2'));
 // 'sync refused [storageChanged] db-1 -> db-2'
@@ -305,7 +305,7 @@ console.info(error.line('cursorReset', 'todos@41', { verb: 'recovered' }));
 // 'sync recovered [cursorReset] todos@41'
 
 // the same line parses back out of a pasted log
-const [, layer, verb, code, at] = 'sync refused [storageChanged] db-1 -> db-2'
+const [, namespace, verb, code, at] = 'sync refused [storageChanged] db-1 -> db-2'
   .match(/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m);
 ```
 

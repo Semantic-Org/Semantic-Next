@@ -1018,8 +1018,8 @@ error.line('storageChanged', 'db-1 -> db-2', { namespace: 'sync' });  // 'sync r
 throwError('unknownCollection', 'invoices', { namespace: 'db' });     // throws synchronously
 
 // createErrors binds the same pair — pre-fills the options, callsite wins
-const { error: syncError, throwError: syncThrow } = createErrors({ layer: 'sync' });
-const { throwError: typeError } = createErrors({ layer: 'schema', ErrorClass: TypeError });
+const { error: syncError, throwError: syncThrow } = createErrors({ namespace: 'sync' });
+const { throwError: typeError } = createErrors({ namespace: 'schema', ErrorClass: TypeError });
 
 // report and continue — raises asynchronously through globalThis.onError when an
 // app installs one, falls back to console.error otherwise. returns the Error it reported

@@ -93,15 +93,6 @@ export interface ErrorTools {
 }
 
 /**
- * Options for createErrors — the per-call error options as defaults, with the
- * namespace under its binder name
- */
-export interface CreateErrorsOptions extends ErrorReportOptions {
-  /** The display identity pre-filled into every call (e.g. 'sync', 'component') */
-  layer?: string;
-}
-
-/**
  * The binder over `error` and `throwError`, mirroring `createLogger` over
  * `log`: pre-fills the options into every call (callsite options win) and
  * returns the bound pair. Every message leads with the uniform production line
@@ -117,12 +108,12 @@ export interface CreateErrorsOptions extends ErrorReportOptions {
  * @see {@link https://next.semantic-ui.com/docs/api/utils/debug#createerrors createErrors}
  * @see {@link https://next.semantic-ui.com/examples/utils-createerrors Example}
  *
- * @param options - The defaults to pre-fill
+ * @param defaults - The defaults to pre-fill (`namespace` among them)
  * @returns The bound `{ error, throwError }` toolset
  *
  * @example
  * ```ts
- * const { error, throwError } = createErrors({ layer: 'sync' });
+ * const { error, throwError } = createErrors({ namespace: 'sync' });
  *
  * throwError('forbidden', 'todos:secret.field', {
  *   explanation: isDevelopment ? 'the field is private — write the fields you mean' : 0,
@@ -131,7 +122,7 @@ export interface CreateErrorsOptions extends ErrorReportOptions {
  * console.warn(error.line('storageChanged', 'db-1 -> db-2'));
  * ```
  */
-export function createErrors(options?: CreateErrorsOptions): ErrorTools;
+export function createErrors(defaults?: ErrorReportOptions): ErrorTools;
 
 /**
  * Log levels supported by the logging utility

@@ -41,7 +41,7 @@ describe('createErrors', () => {
 
   describe('bundle', () => {
     it('should return the reporting and throwing forms', () => {
-      const errors = createErrors({ layer: 'demo' });
+      const errors = createErrors({ namespace: 'demo' });
       expect(Object.keys(errors).sort()).toEqual(['error', 'throwError']);
       expect(typeof errors.error).toBe('function');
       expect(typeof errors.throwError).toBe('function');
@@ -97,13 +97,13 @@ describe('createErrors', () => {
     });
 
     it('should be what the binder pre-fills', () => {
-      const { error: bound, throwError: boundThrow } = createErrors({ layer: 'demo' });
+      const { error: bound, throwError: boundThrow } = createErrors({ namespace: 'demo' });
       expect(bound.line('code', 'at')).toBe(topError.line('code', 'at', { namespace: 'demo' }));
       expect(() => boundThrow('code', 'at')).toThrow('demo refused [code] at');
     });
 
     it('should let callsite options win through the binder', () => {
-      const { error: bound } = createErrors({ layer: 'demo' });
+      const { error: bound } = createErrors({ namespace: 'demo' });
       expect(bound.line('code', 'at', { namespace: 'other' })).toBe('other refused [code] at');
       const returned = bound('code', 'at', { namespace: 'other', report: false });
       expect(returned.message).toBe('other refused [code] at');
@@ -112,24 +112,24 @@ describe('createErrors', () => {
 
   describe('line', () => {
     it('should format the production line', () => {
-      const { error } = createErrors({ layer: 'demo' });
+      const { error } = createErrors({ namespace: 'demo' });
       expect(error.line('code', 'at')).toBe('demo refused [code] at');
     });
 
-    it('should drop the leading token when the layer is empty', () => {
+    it('should drop the leading token when the namespace is empty', () => {
       const { error } = createErrors();
       expect(error.line('code', 'at')).toBe('refused [code] at');
     });
 
     it('should stay greppable by the documented pattern', () => {
-      const { error } = createErrors({ layer: 'query' });
+      const { error } = createErrors({ namespace: 'query' });
       const parsed = error.line('unknown-field', 'select(user.nmae)')
         .match(/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m);
       expect(parsed.slice(1)).toEqual(['query', 'refused', 'unknown-field', 'select(user.nmae)']);
     });
 
     it('should match the message the builders produce', () => {
-      const { error, throwError } = createErrors({ layer: 'demo' });
+      const { error, throwError } = createErrors({ namespace: 'demo' });
       const line = error.line('unknown-field', 'select()');
       expect(() => throwError('unknown-field', 'select()')).toThrow(line);
     });
@@ -137,19 +137,19 @@ describe('createErrors', () => {
 
   describe('verb', () => {
     it('should default to refused', () => {
-      const { error } = createErrors({ layer: 'demo' });
+      const { error } = createErrors({ namespace: 'demo' });
       expect(error.line('code', 'at')).toBe('demo refused [code] at');
       expect(error('code', 'at').message).toBe('demo refused [code] at');
     });
 
     it('should render any word the caller mints', () => {
-      const { error } = createErrors({ layer: 'game' });
+      const { error } = createErrors({ namespace: 'game' });
       expect(error.line('entity-gone', 'sprite:7', { verb: 'despawned' }))
         .toBe('game despawned [entity-gone] sprite:7');
     });
 
     it('should carry the verb through both builders', () => {
-      const { error, throwError } = createErrors({ layer: 'payments' });
+      const { error, throwError } = createErrors({ namespace: 'payments' });
       expect(() => throwError('card-expired', 'charge()', { verb: 'declined' }))
         .toThrow('payments declined [card-expired] charge()');
       const returned = error('card-expired', 'charge()', { verb: 'declined' });
@@ -157,14 +157,14 @@ describe('createErrors', () => {
     });
 
     it('should fall back to refused on a nullish verb', () => {
-      const { error } = createErrors({ layer: 'demo' });
+      const { error } = createErrors({ namespace: 'demo' });
       expect(error.line('code', 'at', { verb: null })).toBe('demo refused [code] at');
       expect(error.line('code', 'at', { verb: undefined })).toBe('demo refused [code] at');
     });
 
     it('should parse any verb with the documented pattern', () => {
       const pattern = /^(\S+) (\S+) \[([\w-]+)\] (.*)$/m;
-      const { error } = createErrors({ layer: 'sync' });
+      const { error } = createErrors({ namespace: 'sync' });
       for (const verb of ['refused', 'despawned', 'declined']) {
         const parsed = error.line('write-conflict', 'commit()', { verb }).match(pattern);
         expect(parsed.slice(1)).toEqual(['sync', verb, 'write-conflict', 'commit()']);
@@ -172,7 +172,7 @@ describe('createErrors', () => {
     });
 
     it('should parse the first line of a development message', () => {
-      const { throwError } = createErrors({ layer: 'game' });
+      const { throwError } = createErrors({ namespace: 'game' });
       let thrown;
       try {
         throwError('entity-gone', 'sprite:7', {
@@ -192,12 +192,12 @@ describe('createErrors', () => {
     class DemoError extends Error {}
 
     it('should throw synchronously as the configured class', () => {
-      const { throwError } = createErrors({ layer: 'demo', ErrorClass: DemoError });
+      const { throwError } = createErrors({ namespace: 'demo', ErrorClass: DemoError });
       expect(() => throwError('missing-collection', 'find()')).toThrow(DemoError);
     });
 
     it('should carry the code, the address, and the detail', () => {
-      const { throwError } = createErrors({ layer: 'demo', ErrorClass: DemoError });
+      const { throwError } = createErrors({ namespace: 'demo', ErrorClass: DemoError });
       let thrown;
       try {
         throwError('missing-collection', 'find()', { detail: { name: 'todos' } });
@@ -214,7 +214,7 @@ describe('createErrors', () => {
     });
 
     it('should lead with the line and stack the explanation beneath it', () => {
-      const { throwError } = createErrors({ layer: 'demo' });
+      const { throwError } = createErrors({ namespace: 'demo' });
       let thrown;
       try {
         throwError('unknown-field', 'select()', {
@@ -233,13 +233,13 @@ describe('createErrors', () => {
     });
 
     it('should fall back to the line when the explanation folds away', () => {
-      const { throwError } = createErrors({ layer: 'demo' });
+      const { throwError } = createErrors({ namespace: 'demo' });
       expect(() => throwError('unknown-field', 'select()', { explanation: 0 }))
         .toThrow('demo refused [unknown-field] select()');
     });
 
     it('should leave detail off when none is given', () => {
-      const { throwError } = createErrors({ layer: 'demo' });
+      const { throwError } = createErrors({ namespace: 'demo' });
       let thrown;
       try {
         throwError('unknown-field', 'select()');
@@ -251,7 +251,7 @@ describe('createErrors', () => {
     });
 
     it('should keep a falsy detail', () => {
-      const { throwError } = createErrors({ layer: 'demo' });
+      const { throwError } = createErrors({ namespace: 'demo' });
       let thrown;
       try {
         throwError('bad-index', 'at()', { detail: 0 });
@@ -265,7 +265,7 @@ describe('createErrors', () => {
 
   describe('error', () => {
     it('should return the built error synchronously', () => {
-      const { error } = createErrors({ layer: 'demo' });
+      const { error } = createErrors({ namespace: 'demo' });
       const returned = error('write-conflict', 'commit()', { detail: { id: 7 } });
       expect(returned).toBeInstanceOf(Error);
       expect(returned.message).toBe('demo refused [write-conflict] commit()');
@@ -277,7 +277,7 @@ describe('createErrors', () => {
     });
 
     it('should route the report to globalThis.onError asynchronously', async () => {
-      const { error } = createErrors({ layer: 'demo' });
+      const { error } = createErrors({ namespace: 'demo' });
       const returned = error('write-conflict', 'commit()');
       expect(globalThis.onError).not.toHaveBeenCalled();
       await flushMicrotasks();
@@ -287,7 +287,7 @@ describe('createErrors', () => {
 
     it('should build with the configured class when reporting', async () => {
       class DemoError extends Error {}
-      const { error } = createErrors({ layer: 'demo', ErrorClass: DemoError });
+      const { error } = createErrors({ namespace: 'demo', ErrorClass: DemoError });
       const returned = error('write-conflict', 'commit()');
       expect(returned).toBeInstanceOf(DemoError);
       await flushMicrotasks();
@@ -300,7 +300,7 @@ describe('createErrors', () => {
       // one expected report so anything past it still trips the guard
       errorSpy.mockClear();
       errorSpy.mockImplementationOnce(() => {});
-      const { error } = createErrors({ layer: 'demo' });
+      const { error } = createErrors({ namespace: 'demo' });
       const returned = error('write-conflict', 'commit()');
       expect(returned.message).toBe('demo refused [write-conflict] commit()');
       // still deferred, so the calling stack completes first
@@ -311,7 +311,7 @@ describe('createErrors', () => {
     });
 
     it('should only build when report is false', async () => {
-      const { error } = createErrors({ layer: 'demo' });
+      const { error } = createErrors({ namespace: 'demo' });
       const returned = error('write-conflict', 'commit()', { report: false, detail: { id: 7 } });
       expect(returned).toBeInstanceOf(Error);
       expect(returned.message).toBe('demo refused [write-conflict] commit()');
@@ -327,14 +327,14 @@ describe('createErrors', () => {
       // the suite-wide spy throws on stray console.error calls, so a leaked
       // report would fail the test on its own — the count makes it explicit
       errorSpy.mockClear();
-      const { error } = createErrors({ layer: 'demo' });
+      const { error } = createErrors({ namespace: 'demo' });
       error('write-conflict', 'commit()', { report: false });
       await flushMicrotasks();
       expect(errorSpy).not.toHaveBeenCalled();
     });
 
     it('should build report: false errors identical to reported ones', async () => {
-      const { error } = createErrors({ layer: 'demo' });
+      const { error } = createErrors({ namespace: 'demo' });
       const options = {
         verb: 'declined',
         explanation: 'the server refused the write',
