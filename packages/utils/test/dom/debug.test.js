@@ -1,4 +1,4 @@
-import { createErrors, createLogger, log } from '@semantic-ui/utils';
+import { createErrors, createLogger, error as topError, log, throwError as topThrowError } from '@semantic-ui/utils';
 
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -52,6 +52,61 @@ describe('createErrors', () => {
       const { error, throwError } = createErrors();
       expect(typeof error).toBe('function');
       expect(typeof throwError).toBe('function');
+    });
+  });
+
+  describe('top-level forms', () => {
+    it('should export the unbound pair', () => {
+      expect(typeof topError).toBe('function');
+      expect(typeof topThrowError).toBe('function');
+      expect(typeof topError.line).toBe('function');
+    });
+
+    it('should take the namespace in the options bag', () => {
+      expect(() => topThrowError('code', 'at', { namespace: 'sync' }))
+        .toThrow('sync refused [code] at');
+      const returned = topError('code', 'at', { namespace: 'sync', report: false });
+      expect(returned.message).toBe('sync refused [code] at');
+    });
+
+    it('should compose the line clean when the namespace is empty', () => {
+      expect(topError.line('code', 'at')).toBe('refused [code] at');
+      const returned = topError('code', 'at', { report: false });
+      expect(returned.message).toBe('refused [code] at');
+      expect(() => topThrowError('code', 'at')).toThrow(/^refused \[code\] at$/);
+    });
+
+    it('should take ErrorClass per call', () => {
+      class DemoError extends Error {}
+      expect(() => topThrowError('code', 'at', { namespace: 'demo', ErrorClass: DemoError }))
+        .toThrow(DemoError);
+      const returned = topError('code', 'at', { ErrorClass: DemoError, report: false });
+      expect(returned).toBeInstanceOf(DemoError);
+    });
+
+    it('should render the line with namespace and verb', () => {
+      expect(topError.line('cursorReset', 'todos@41', { namespace: 'sync', verb: 'recovered' }))
+        .toBe('sync recovered [cursorReset] todos@41');
+    });
+
+    it('should report through the channel like the bound form', async () => {
+      const returned = topError('write-conflict', 'commit()', { namespace: 'demo' });
+      expect(globalThis.onError).not.toHaveBeenCalled();
+      await flushMicrotasks();
+      expect(globalThis.onError).toHaveBeenCalledWith(returned);
+    });
+
+    it('should be what the binder pre-fills', () => {
+      const { error: bound, throwError: boundThrow } = createErrors({ layer: 'demo' });
+      expect(bound.line('code', 'at')).toBe(topError.line('code', 'at', { namespace: 'demo' }));
+      expect(() => boundThrow('code', 'at')).toThrow('demo refused [code] at');
+    });
+
+    it('should let callsite options win through the binder', () => {
+      const { error: bound } = createErrors({ layer: 'demo' });
+      expect(bound.line('code', 'at', { namespace: 'other' })).toBe('other refused [code] at');
+      const returned = bound('code', 'at', { namespace: 'other', report: false });
+      expect(returned.message).toBe('other refused [code] at');
     });
   });
 

@@ -99,7 +99,7 @@ export const createLogger = (defaults = {}) => {
 
 /*
   Coded errors with a development/production message split. Every message leads
-  with one uniform, greppable line — `<layer> <verb> [<code>] <at>` —
+  with one uniform, greppable line — `<namespace> <verb> [<code>] <at>` —
   parseable with /^(\S+) (\S+) \[([\w-]+)\] (.*)$/m. The verb is a stable
   token position carrying the caller's own classification of the line — any
   word, with a nullish verb falling back to `refused`. Production carries the
@@ -112,58 +112,64 @@ export const createLogger = (defaults = {}) => {
   bytes of a ~2KB pool; the inline ternary reclaimed all of it.
 */
 
-const errorLine = (layer, verb, code, at) => `${layer ? `${layer} ` : ''}${verb ?? 'refused'} [${code}] ${at}`;
+const errorLine = (namespace, verb, code, at) =>
+  `${namespace ? `${namespace} ` : ''}${verb ?? 'refused'} [${code}] ${at}`;
 
-export const createErrors = ({
-  layer = '',
-  ErrorClass = Error,
-} = {}) => {
-  const build = (code, at, { explanation, detail, verb } = {}) => {
-    const line = errorLine(layer, verb, code, at);
-    const built = new ErrorClass(explanation ? `${line}\n${explanation}` : line);
-    built.code = code;
-    built.at = at;
-    if (detail !== undefined) {
-      built.detail = detail;
-    }
+const build = (code, at, { namespace = '', ErrorClass = Error, explanation, detail, verb } = {}) => {
+  const line = errorLine(namespace, verb, code, at);
+  const built = new ErrorClass(explanation ? `${line}\n${explanation}` : line);
+  built.code = code;
+  built.at = at;
+  if (detail !== undefined) {
+    built.detail = detail;
+  }
+  return built;
+};
+
+// report through the error channel and continue — log's sibling for errors.
+// the raise is asynchronous so the current call stack completes: it routes to
+// globalThis.onError when an app installs one, and falls back to
+// console.error otherwise so a report is never silently lost. returns the
+// Error it reported. report: false builds and returns without raising — for
+// when the error is a value (a rejection, a result) and reporting is the
+// consumer's job.
+export const error = (code, at, options) => {
+  const built = build(code, at, options);
+  if (options?.report === false) {
     return built;
-  };
-
-  // report through the error channel and continue — log's sibling for errors.
-  // the raise is asynchronous so the current call stack completes: it routes to
-  // globalThis.onError when an app installs one, and falls back to
-  // console.error otherwise so a report is never silently lost. returns the
-  // Error it reported. report: false builds and returns without raising — for
-  // when the error is a value (a rejection, a result) and reporting is the
-  // consumer's job.
-  const error = (code, at, options) => {
-    const built = build(code, at, options);
-    if (options?.report === false) {
-      return built;
+  }
+  const raise = () => {
+    if (typeof globalThis.onError === 'function') {
+      globalThis.onError(built);
+      return;
     }
-    const raise = () => {
-      if (typeof globalThis.onError === 'function') {
-        globalThis.onError(built);
-        return;
-      }
-      console.error(built);
-    };
-    if (typeof queueMicrotask === 'function') {
-      queueMicrotask(raise);
-    }
-    else {
-      setTimeout(raise, 0);
-    }
-    return built;
+    console.error(built);
   };
+  if (typeof queueMicrotask === 'function') {
+    queueMicrotask(raise);
+  }
+  else {
+    setTimeout(raise, 0);
+  }
+  return built;
+};
 
-  // the production one-liner alone, for console seats
-  error.line = (code, at, { verb } = {}) => errorLine(layer, verb, code, at);
+// the production one-liner alone, for console seats
+error.line = (code, at, { namespace = '', verb } = {}) => errorLine(namespace, verb, code, at);
 
-  // the throwing form: same arguments, never returns
-  const throwError = (code, at, options) => {
-    throw build(code, at, options);
+// the throwing form: same arguments, never returns
+export const throwError = (code, at, options) => {
+  throw build(code, at, options);
+};
+
+// the binder over the pair, mirroring createLogger over log — pre-fills the
+// options into every call, callsite options win
+export const createErrors = ({ layer = '', ...defaults } = {}) => {
+  const merged = (options) => ({ namespace: layer, ...defaults, ...options });
+  const bound = (code, at, options) => error(code, at, merged(options));
+  bound.line = (code, at, options) => error.line(code, at, merged(options));
+  return {
+    error: bound,
+    throwError: (code, at, options) => throwError(code, at, merged(options)),
   };
-
-  return { error, throwError };
 };

@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Debug Utilities
 package: "@semantic-ui/utils"
-methods: [log, createLogger, createErrors]
+methods: [log, createLogger, createErrors, error, throwError]
 icon: bug
 description: API reference for logging and coded error handling utility functions
 ---
@@ -129,10 +129,10 @@ error('writeRejected', 'todos:a7f2', {
 ### createErrors
 
 ```javascript
-function createErrors({ layer = '', ErrorClass = Error } = {})
+function createErrors({ layer = '', ...defaults } = {})
 ```
 
-Creates a layer-bound error toolset. Bind it once per layer and every refusal that layer raises reads the same way: a stable `code` you can route on, an address (`at`) that says where it happened — both riding the error as properties — and a development `explanation` that folds out of production builds.
+The binder over [`error`](#error) and [`throwError`](#throwerror), mirroring `createLogger` over `log`: pre-fills the options into every call (callsite options win) and returns the bound pair. Bind it once per layer and every refusal raised under it reads the same way: a stable `code` you can route on, an address (`at`) that says where it happened — both riding the error as properties — and a development `explanation` that folds out of production builds.
 
 Every message leads with one uniform line, `<layer> <verb> [<code>] <at>`, parseable with `/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m` — so a support ticket carrying a pasted error still names the layer, the code, and the address. The verb gives every line a searchable classification surface: a stable token position carrying your own taxonomy of error, whatever it is. Grep a word and you have filtered a console by class; the pattern's verb group gives the same axis programmatically. The vocabulary is yours — any word renders, a game engine might say `despawned` where a payments layer says `declined` — and `refused` is the default when none is given. In development the explanation follows on its own line; in production the line is the whole message.
 
@@ -146,8 +146,8 @@ Every message leads with one uniform line, `<layer> <verb> [<code>] <at>`, parse
 
 | Name       | Type     | Default | Description |
 |------------|----------|---------|-------------|
-| layer      | string   | `''`    | The layer's public name, leading the production line (e.g. `sync`, `component`) |
-| ErrorClass | function | `Error` | The constructor every refusal builds with |
+| layer      | string   | `''`    | The layer's public name, leading the production line (e.g. `sync`, `component`) — pre-filled as the pair's `namespace` |
+| ...defaults | object  |         | Any [`error` option](#error) to pre-fill — `ErrorClass`, a default `verb`, whatever every call should carry |
 
 #### Returns
 
@@ -181,10 +181,10 @@ throwError('unknownCollection', 'invoices', {
 ### error
 
 ```javascript
-error(code, at, { explanation, detail } = {})
+error(code, at, { namespace, explanation, detail, verb, report, ErrorClass } = {})
 ```
 
-Returned by [`createErrors`](#createerrors). Reports a coded error through the error channel **without interrupting the caller** — `log`'s sibling for things that went wrong. The raise is asynchronous, so the current call stack completes first: it routes to `globalThis.onError` when an app installs one, and falls back to `console.error` otherwise, so a report is never silently lost.
+Exported top-level, and returned bound by [`createErrors`](#createerrors) with the options pre-filled. Reports a coded error through the error channel **without interrupting the caller** — `log`'s sibling for things that went wrong. The raise is asynchronous, so the current call stack completes first: it routes to `globalThis.onError` when an app installs one, and falls back to `console.error` otherwise, so a report is never silently lost.
 
 Sometimes the error is a value — handed to a promise rejection, attached to a result — and reporting is someone else's job. `report: false` builds and returns the same coded error without reporting it, making `error` the family's builder without a third function.
 
@@ -200,10 +200,12 @@ Sometimes the error is a value — handed to a promise rejection, attached to a 
 
 | Name        | Type          | Default   | Description |
 |-------------|---------------|-----------|-------------|
+| namespace   | string        | `''`      | The display identity leading the line — empty composes the line without a leading token. The bound form pre-fills it |
 | explanation | string \| `0` | undefined | The development teaching message. When present it follows the production line on its own line; when folded away the line is the whole message. See [Development Messages](#development-messages) |
 | detail      | any           | undefined | Structured data attached to the error as `error.detail` |
 | verb        | string        | `'refused'` | The line's verb — any word, your classification of the line. Nullish falls back to `'refused'` |
 | report      | boolean       | `true`    | Set `false` to build and return the coded error without reporting it — no `onError` routing, no console fallback |
+| ErrorClass  | function      | `Error`   | The constructor to build with |
 
 #### Returns
 
@@ -238,10 +240,10 @@ const timeout = new Promise((resolve, reject) => {
 ### throwError
 
 ```javascript
-throwError(code, at, { explanation, detail } = {})
+throwError(code, at, { namespace, explanation, detail, verb, ErrorClass } = {})
 ```
 
-Returned by [`createErrors`](#createerrors). Same arguments as [`error`](#error), thrown synchronously — for the refusal that must stop the caller where it stands.
+Exported top-level, and returned bound by [`createErrors`](#createerrors) with the options pre-filled. Same arguments as [`error`](#error), thrown synchronously — for the refusal that must stop the caller where it stands.
 
 #### Parameters
 
@@ -272,10 +274,10 @@ const parseField = (name, spec) => {
 ### error.line
 
 ```javascript
-error.line(code, at, { verb } = {})
+error.line(code, at, { namespace, verb } = {})
 ```
 
-Renders the production line by itself, without building or reporting an Error — for console seats and log messages that want the same greppable shape as a real refusal.
+Renders the production line by itself, without building or reporting an Error — for console seats and log messages that want the same greppable shape as a real refusal. Rides the top-level `error` export and the bound form alike; the bound form pre-fills the `namespace`.
 
 #### Parameters
 
@@ -283,11 +285,11 @@ Renders the production line by itself, without building or reporting an Error �
 |---------|--------|-------------|
 | code    | string | The refusal code |
 | at      | string | The address it happened at |
-| options | object | Optional configuration — `verb` sets the line's verb, any word, defaulting to `'refused'` |
+| options | object | Optional configuration — `verb` sets the line's verb, any word, defaulting to `'refused'`; `namespace` sets the leading token |
 
 #### Returns
 
-The string `<layer> <verb> [<code>] <at>`, or `<verb> [<code>] <at>` when the toolset was created without a `layer`.
+The string `<namespace> <verb> [<code>] <at>`, or `<verb> [<code>] <at>` when there is no namespace.
 
 #### Example
 
