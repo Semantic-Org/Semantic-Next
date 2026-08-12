@@ -34,8 +34,9 @@ export interface CodedError extends Error {
 /**
  * The reporting door: builds the coded error and reports it through the error
  * channel WITHOUT interrupting the caller. The raise is asynchronous — it
- * routes to `globalThis.onError` when an app installs one and throws otherwise
- * so a report is never silently lost. Returns the Error it reported.
+ * routes to `globalThis.onError` when an app installs one and falls back to
+ * `console.error` otherwise so a report is never silently lost. Returns the
+ * Error it reported.
  */
 export interface ErrorReporter {
   (code: string, at: string, options?: ErrorOptions): CodedError;

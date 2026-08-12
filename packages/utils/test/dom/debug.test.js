@@ -239,22 +239,20 @@ describe('createErrors', () => {
       expect(globalThis.onError).toHaveBeenCalledWith(returned);
     });
 
-    it('should throw the report when no handler is installed', () => {
+    it('should fall back to console.error when no handler is installed', async () => {
       delete globalThis.onError;
-      // the raise lands in a microtask, so the test has to own the queue to catch
-      // it: faking queueMicrotask lets runAllTicks run the job on this stack
-      vi.useFakeTimers({ toFake: ['queueMicrotask'] });
+      // the suite-wide spy throws on stray console.error calls — absorb the
+      // one expected report so anything past it still trips the guard
+      errorSpy.mockClear();
+      errorSpy.mockImplementationOnce(() => {});
       const { error } = createErrors({ layer: 'demo' });
       const returned = error('write-conflict', 'commit()');
-      let thrown;
-      try {
-        vi.runAllTicks();
-      }
-      catch (caught) {
-        thrown = caught;
-      }
-      vi.useRealTimers();
-      expect(thrown).toBe(returned);
+      expect(returned.message).toBe('demo refused [write-conflict] commit()');
+      // still deferred, so the calling stack completes first
+      expect(errorSpy).not.toHaveBeenCalled();
+      await flushMicrotasks();
+      expect(errorSpy).toHaveBeenCalledTimes(1);
+      expect(errorSpy).toHaveBeenCalledWith(returned);
     });
   });
 });

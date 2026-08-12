@@ -118,8 +118,9 @@ export const createErrors = ({
 
   // report through the error channel and continue — log's sibling for errors.
   // the raise is asynchronous so the current call stack completes: it routes to
-  // globalThis.onError when an app installs one, and throws otherwise so a
-  // report is never silently lost. returns the Error it reported.
+  // globalThis.onError when an app installs one, and falls back to
+  // console.error otherwise so a report is never silently lost. returns the
+  // Error it reported.
   const error = (code, at, options) => {
     const built = build(code, at, options);
     const raise = () => {
@@ -127,7 +128,7 @@ export const createErrors = ({
         globalThis.onError(built);
         return;
       }
-      throw built;
+      console.error(built);
     };
     if (typeof queueMicrotask === 'function') {
       queueMicrotask(raise);
