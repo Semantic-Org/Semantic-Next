@@ -266,6 +266,13 @@ const customResult = newFunc(input, options);      // 'custom output'
 - **Enhancement** - Improvements to existing functions
 - **Bug** - Bug fixes
 
+### The release-delta rule
+
+Categories describe the delta against the **last release**, never against the branch.
+A fix or follow-up to work sitting in the same unreleased block adds **no new bullet**
+- amend the feature's existing bullet only if the shipped surface changed. A release
+reader never saw the interim behavior, so there is no Bug or Enhancement to report.
+
 ### Pattern
 ```markdown
 ### Utils
