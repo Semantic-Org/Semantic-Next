@@ -136,7 +136,7 @@ throwError('unknownCollection', 'invoices', {
 error(code, at, { explanation, detail } = {})
 ```
 
-Returned by [`createErrors`](#createerrors). Reports a coded error through the error channel **without interrupting the caller** — `log`'s sibling for things that went wrong. The raise is asynchronous, so the current call stack completes first: it routes to `globalThis.onError` when an app installs one, and throws otherwise, so a report is never silently lost.
+Returned by [`createErrors`](#createerrors). Reports a coded error through the error channel **without interrupting the caller** — `log`'s sibling for things that went wrong. The raise is asynchronous, so the current call stack completes first: it routes to `globalThis.onError` when an app installs one, and falls back to `console.error` otherwise, so a report is never silently lost.
 
 #### Parameters
 
