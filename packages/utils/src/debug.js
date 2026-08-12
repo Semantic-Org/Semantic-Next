@@ -87,11 +87,9 @@ export const log = (
 /*
   Coded errors with a development/production message split. Every message leads
   with one uniform, greppable line — `<layer> <verb> [<code>] <at>` —
-  parseable with /^(\S+) (refused|caught|noted) \[([\w-]+)\] (.*)$/m. The verb
-  classifies the line: `refused` (a rule declined the action), `caught` (the
-  caller's code threw and the layer reports the seat), `noted` (an observation,
-  informational). It defaults to `refused`, and a verb outside the vocabulary
-  falls back to it so every line stays parseable. Production carries the
+  parseable with /^(\S+) (\S+) \[([\w-]+)\] (.*)$/m. The verb is a stable
+  token position carrying the caller's own classification of the line — any
+  word, with a nullish verb falling back to `refused`. Production carries the
   line alone; development appends the teaching explanation on its own line, so
   the address prints in every posture and explanations never restate it. The
   explanation is meant to fold out of production builds at the CALLSITE
@@ -101,12 +99,7 @@ export const log = (
   bytes of a ~2KB pool; the inline ternary reclaimed all of it.
 */
 
-const verbs = ['refused', 'caught', 'noted'];
-
-const errorLine = (layer, verb, code, at) => {
-  const spoken = verbs.includes(verb) ? verb : 'refused';
-  return `${layer ? `${layer} ` : ''}${spoken} [${code}] ${at}`;
-};
+const errorLine = (layer, verb, code, at) => `${layer ? `${layer} ` : ''}${verb ?? 'refused'} [${code}] ${at}`;
 
 export const createErrors = ({
   layer = '',
