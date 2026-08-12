@@ -1,5 +1,3 @@
-import { toTitleCase } from './strings.js';
-
 /*-------------------
        Logging
 --------------------*/
@@ -22,7 +20,7 @@ export const log = (
     format = 'standard',
     consoleMethod = null,
     silent = false,
-    title = toTitleCase(namespace),
+    title = namespace,
     showTitle = true,
     titleColor = null,
     color = 'inherit',
@@ -78,6 +76,21 @@ export const log = (
   }
 
   console[method](...logArgs);
+};
+
+// binds log to shared defaults — namespace, timestamp, any log option — and
+// returns flat functions for destructuring. the level wrappers absorb the
+// level slot only; callsite options shallow-merge over the defaults and win
+export const createLogger = (defaults = {}) => {
+  const merged = (options) => ({ ...defaults, ...options });
+  const leveled = (level) => (message, options) => log(message, level, merged(options));
+  return {
+    log: (message, level, options) => log(message, level, merged(options)),
+    debug: leveled('debug'),
+    info: leveled('info'),
+    warn: leveled('warn'),
+    error: leveled('error'),
+  };
 };
 
 /*-------------------

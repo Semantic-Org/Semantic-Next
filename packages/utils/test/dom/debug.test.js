@@ -1,4 +1,4 @@
-import { createErrors, log } from '@semantic-ui/utils';
+import { createErrors, createLogger, log } from '@semantic-ui/utils';
 
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -411,10 +411,19 @@ describe('log', () => {
     expect(call.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
   });
 
-  it('should use namespace as default title', () => {
+  it('should use the namespace verbatim as the default title', () => {
     log('message', 'log', { namespace: 'testNamespace' });
     expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining('%cTestnamespace%c message'),
+      expect.stringContaining('%ctestNamespace%c message'),
+      expect.any(String),
+      expect.any(String),
+    );
+  });
+
+  it('should never case-transform the namespace', () => {
+    log('booted', 'info', { namespace: 'db' });
+    expect(consoleSpy.info).toHaveBeenCalledWith(
+      expect.stringContaining('%cdb%c booted'),
       expect.any(String),
       expect.any(String),
     );
@@ -456,5 +465,115 @@ describe('log', () => {
   it('should fallback to info level for unknown levels', () => {
     log('message', 'invalidLevel');
     expect(consoleSpy.info).toHaveBeenCalled();
+  });
+});
+
+describe('createLogger', () => {
+  let consoleSpy;
+
+  beforeEach(() => {
+    consoleSpy = {
+      log: vi.spyOn(console, 'log').mockImplementation(() => {}),
+      debug: vi.spyOn(console, 'debug').mockImplementation(() => {}),
+      info: vi.spyOn(console, 'info').mockImplementation(() => {}),
+      warn: vi.spyOn(console, 'warn').mockImplementation(() => {}),
+      error: vi.spyOn(console, 'error').mockImplementation(() => {}),
+    };
+  });
+
+  afterEach(() => {
+    Object.values(consoleSpy).forEach(spy => spy.mockRestore());
+  });
+
+  it('should return the flat bundle', () => {
+    const logger = createLogger({ namespace: 'sync' });
+    expect(Object.keys(logger).sort()).toEqual(['debug', 'error', 'info', 'log', 'warn']);
+    Object.values(logger).forEach(fn => expect(typeof fn).toBe('function'));
+  });
+
+  it('should work with no options at all', () => {
+    const { log: boundLog } = createLogger();
+    boundLog('message');
+    expect(consoleSpy.log).toHaveBeenCalledWith('message');
+  });
+
+  it('should route each wrapper to its console method', () => {
+    const { debug, info, warn, error } = createLogger();
+    debug('a');
+    expect(consoleSpy.debug).toHaveBeenCalledWith('a');
+    info('b');
+    expect(consoleSpy.info).toHaveBeenCalledWith('b');
+    warn('c');
+    expect(consoleSpy.warn).toHaveBeenCalledWith('c');
+    error('d');
+    expect(consoleSpy.error).toHaveBeenCalledWith('d');
+  });
+
+  it('should keep the level slot on the bound log', () => {
+    const { log: boundLog } = createLogger();
+    boundLog('message', 'warn');
+    expect(consoleSpy.warn).toHaveBeenCalledWith('message');
+    expect(consoleSpy.log).not.toHaveBeenCalled();
+  });
+
+  it('should apply the factory defaults on every call', () => {
+    const { info } = createLogger({ namespace: 'sync', titleColor: '#123456' });
+    info('connected');
+    expect(consoleSpy.info).toHaveBeenCalledWith(
+      expect.stringContaining('%csync%c connected'),
+      expect.stringContaining('color: #123456; font-weight: bold;'),
+      expect.any(String),
+    );
+  });
+
+  it('should let callsite options win over the defaults', () => {
+    const { info } = createLogger({ namespace: 'sync', silent: true });
+    info('suppressed');
+    expect(consoleSpy.info).not.toHaveBeenCalled();
+    info('spoken', { silent: false, title: 'override' });
+    expect(consoleSpy.info).toHaveBeenCalledWith(
+      expect.stringContaining('%coverride%c spoken'),
+      expect.any(String),
+      expect.any(String),
+    );
+  });
+
+  it('should merge callsite options with unrelated defaults intact', () => {
+    const data = { attempt: 2 };
+    const { warn } = createLogger({ namespace: 'sync' });
+    warn('retrying', { data });
+    expect(consoleSpy.warn).toHaveBeenCalledWith(
+      expect.stringContaining('%csync%c retrying'),
+      expect.any(String),
+      expect.any(String),
+      data,
+    );
+  });
+
+  it('should not let options retag a wrapper level', () => {
+    const { info } = createLogger();
+    info('message', { level: 'error' });
+    expect(consoleSpy.info).toHaveBeenCalled();
+    expect(consoleSpy.error).not.toHaveBeenCalled();
+  });
+
+  it('should print the namespace verbatim', () => {
+    const { info } = createLogger({ namespace: 'db' });
+    info('booted');
+    expect(consoleSpy.info).toHaveBeenCalledWith(
+      expect.stringContaining('%cdb%c booted'),
+      expect.any(String),
+      expect.any(String),
+    );
+  });
+
+  it('should carry the wrapper level into json output', () => {
+    const { warn } = createLogger({ namespace: 'sync', format: 'json' });
+    warn('retrying');
+    expect(consoleSpy.warn).toHaveBeenCalledWith({
+      level: 'warn',
+      namespace: 'sync',
+      message: 'retrying',
+    });
   });
 });

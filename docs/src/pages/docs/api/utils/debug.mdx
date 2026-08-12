@@ -3,19 +3,19 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Debug Utilities
 package: "@semantic-ui/utils"
-methods: [log, createErrors]
+methods: [log, createLogger, createErrors]
 icon: bug
 description: API reference for logging and coded error handling utility functions
 ---
 
-The Debug utilities provide the two reporting doors a layer needs: `log` for styled console output, and `createErrors` for coded errors that lead with one uniform, greppable line and carry a teaching explanation beneath it in development.
+The Debug utilities provide the two reporting doors a layer needs: `log` for styled console output — with `createLogger` binding it to a namespace once — and `createErrors` for coded errors that lead with one uniform, greppable line and carry a teaching explanation beneath it in development.
 
 ## Functions
 
 ### log
 
 ```javascript
-function log(message, level = 'log', { namespace = '', data = undefined, color = 'inherit', timestamp = false, format = 'standard', consoleMethod = null, silent = false, title = toTitleCase(namespace), showTitle = true, titleColor = null } = {})
+function log(message, level = 'log', { namespace = '', data = undefined, color = 'inherit', timestamp = false, format = 'standard', consoleMethod = null, silent = false, title = namespace, showTitle = true, titleColor = null } = {})
 ```
 
 A flexible logging utility with formatting, namespacing, and multiple output options. Supports colored output, timestamps, structured JSON format, and configurable titles.
@@ -32,14 +32,14 @@ A flexible logging utility with formatting, namespacing, and multiple output opt
 
 | Name          | Type    | Default              | Description |
 |---------------|---------|----------------------|-------------|
-| namespace     | string  | ''                   | Namespace for grouping related logs (used as default title) |
+| namespace     | string  | ''                   | Namespace for grouping related logs — prints verbatim as the default title |
 | data          | any     | undefined            | Additional data to include with the log message. Accepts arrays and objects |
 | color         | string  | 'inherit'            | Text color for the message |
 | timestamp     | boolean | false                | Whether to include timestamp in the output |
 | format        | string  | 'standard'           | Output format ('standard' or 'json') |
 | consoleMethod | string  | null                 | Override the console method used for output |
 | silent        | boolean | false                | Suppress all output when true |
-| title         | string  | toTitleCase(namespace) | Title/label to display before the message |
+| title         | string  | namespace            | Title/label to display before the message |
 | showTitle     | boolean | true                 | Whether to show the title/label |
 | titleColor    | string  | null                 | Color for the title/label (defaults to level color) |
 
@@ -75,6 +75,54 @@ log('Important notice', 'warn', {
   title: 'NOTICE',
   titleColor: '#FF6B35',
   timestamp: true
+});
+```
+
+### createLogger
+
+```javascript
+function createLogger({ namespace = '', timestamp = false, ...defaults } = {})
+```
+
+Binds `log` to shared defaults once and returns the narration bundle — flat functions made for destructuring. Every member calls `log` with the factory defaults shallow-merged beneath the callsite options, so a call site can still override anything. The four level wrappers absorb the level slot only: `info(message, options)` is `log(message, 'info', options)` with the defaults underneath. The bound `log` keeps its level parameter for the occasional dynamic level.
+
+The namespace prints verbatim — `db` shows as `db`, never `Db`. Granularity belongs in the value itself: `createLogger({ namespace: 'physics:collision' })`.
+
+#### Parameters
+
+| Name     | Type   | Description |
+|----------|--------|-------------|
+| defaults | object | Any [`log` option](#options) — `namespace`, `timestamp`, `format`, `titleColor`, and the rest — applied to every call from the bundle |
+
+#### Returns
+
+`{ log, debug, info, warn, error }` — flat bound functions.
+
+| Name                          | Description |
+|-------------------------------|-------------|
+| `log(message, level, options)` | `log` with the defaults merged in, level slot intact |
+| `debug(message, options)`      | Logs at `debug` level |
+| `info(message, options)`       | Logs at `info` level |
+| `warn(message, options)`       | Logs at `warn` level |
+| `error(message, options)`      | Logs at `error` level |
+
+#### Example
+
+Both debug families export an `error`. A file that binds both renames one at the destructure — the consumer picks the name, no third export needed:
+
+```javascript
+import { createLogger, createErrors, isDevelopment } from '@semantic-ui/utils';
+
+const { info, warn, error: logError } = createLogger({ namespace: 'sync' });
+const { error, throwError } = createErrors({ layer: 'sync' });
+
+info('connected');                                  // sync connected
+warn('reconnecting', { data: { attempt: 2 } });
+logError('socket closed unexpectedly');             // console.error, nothing thrown
+
+// the coded family still owns real refusals
+error('writeRejected', 'todos:a7f2', {
+  explanation: isDevelopment ? 'the server refused the write' : 0,
 });
 ```
 

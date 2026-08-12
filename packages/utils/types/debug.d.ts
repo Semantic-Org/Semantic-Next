@@ -121,7 +121,7 @@ export type LogFormat = 'standard' | 'json';
  * Options for the log function
  */
 export interface LogOptions {
-  /** Namespace for grouping related logs (used as default title) */
+  /** Namespace for grouping related logs — prints verbatim as the default title */
   namespace?: string;
   /** Additional data to include with the log message — accepts arrays or single objects */
   data?: any;
@@ -135,7 +135,7 @@ export interface LogOptions {
   consoleMethod?: 'log' | 'debug' | 'info' | 'warn' | 'error';
   /** Suppress all output when true */
   silent?: boolean;
-  /** Title/label to display before the message */
+  /** Title/label to display before the message (defaults to the namespace) */
   title?: string;
   /** Whether to show the title/label */
   showTitle?: boolean;
@@ -181,3 +181,43 @@ export interface LogOptions {
  * ```
  */
 export function log(message: string, level?: LogLevel, options?: LogOptions): void;
+
+/**
+ * The narration bundle bound to one set of log defaults — flat functions for
+ * destructuring
+ */
+export interface Logger {
+  /** The bound `log` — same signature, the factory defaults shallow-merged
+   * beneath the callsite options */
+  log(message: string, level?: LogLevel, options?: LogOptions): void;
+  /** Logs at `debug` level; options merge over the factory defaults */
+  debug(message: string, options?: LogOptions): void;
+  /** Logs at `info` level; options merge over the factory defaults */
+  info(message: string, options?: LogOptions): void;
+  /** Logs at `warn` level; options merge over the factory defaults */
+  warn(message: string, options?: LogOptions): void;
+  /** Logs at `error` level; options merge over the factory defaults */
+  error(message: string, options?: LogOptions): void;
+}
+
+/**
+ * Creates a logging bundle bound to shared defaults — a namespace, a
+ * timestamp switch, any `log` option. Every member calls `log` with the
+ * factory defaults shallow-merged beneath the callsite options (callsite
+ * wins). The four level wrappers absorb the level slot only; the bound `log`
+ * keeps it. The namespace prints verbatim.
+ *
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/debug#createlogger createLogger}
+ *
+ * @param defaults - Log options applied to every call from the bundle
+ * @returns The bound `{ log, debug, info, warn, error }` bundle
+ *
+ * @example
+ * ```ts
+ * const { info, warn, error: logError } = createLogger({ namespace: 'sync' });
+ *
+ * info('connected');
+ * warn('retrying', { data: { attempt: 2 } });
+ * ```
+ */
+export function createLogger(defaults?: LogOptions): Logger;

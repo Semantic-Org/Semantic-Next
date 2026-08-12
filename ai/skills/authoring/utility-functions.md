@@ -988,6 +988,26 @@ log('Warning', 'warn', { timestamp: true, title: 'SYSTEM', titleColor: '#FF6B35'
 log('API response', 'info', { format: 'json', namespace: 'API', timestamp: true });
 ```
 
+### createLogger — log, Bound to Shared Defaults
+```javascript
+import { createLogger } from '@semantic-ui/utils';
+
+// bind once, destructure flat — any log option rides as a default
+const { log, debug, info, warn, error } = createLogger({ namespace: 'sync', timestamp: true });
+
+info('connected');                            // sync connected — namespace prints VERBATIM, never cased
+warn('reconnecting', { data: { attempt: 2 } });  // callsite options merge over the defaults and win
+log('custom', 'debug');                       // the bound log keeps its level slot
+
+// the level wrappers absorb the LEVEL slot only — info(m, options) is
+// log(m, 'info', options). granularity is the namespace value's business:
+createLogger({ namespace: 'physics:collision' });
+```
+
+Both debug families export an `error` — a file binding both aliases at the destructure,
+`const { error: logError } = createLogger(...)` beside `createErrors`' `error`. No third
+export.
+
 ### createErrors — Coded Errors, Bound to a Layer
 ```javascript
 import { createErrors, isDevelopment } from '@semantic-ui/utils';
