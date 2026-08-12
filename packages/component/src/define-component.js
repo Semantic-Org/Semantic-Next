@@ -2,7 +2,7 @@ import { getEngine } from '@semantic-ui/renderer';
 import { TemplateCompiler } from '@semantic-ui/compiler';
 // direct import avoids circular chunk dependency between component ↔ templating
 import { Template } from '@semantic-ui/templating/template';
-import { adoptStylesheet, createErrors, each, identity, isClient, isObject, kebabToCamel, noop } from '@semantic-ui/utils';
+import { adoptStylesheet, createErrors, each, identity, isClient, isDevelopment, isObject, kebabToCamel, noop } from '@semantic-ui/utils';
 
 import { getProperties } from './component-helpers.js';
 
@@ -52,8 +52,10 @@ export const defineComponent = ({
 
   if (!engine) {
     throwError('engineNotRegistered', String(renderingEngine), {
-      explanation: `Rendering engine "${renderingEngine}" not registered.`
-        + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`,
+      explanation: isDevelopment
+        ? `Rendering engine "${renderingEngine}" not registered.`
+          + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`
+        : 0,
     });
   }
 

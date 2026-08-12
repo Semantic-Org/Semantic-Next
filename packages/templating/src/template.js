@@ -25,6 +25,7 @@ import {
   getKeyFromEvent,
   inArray,
   isClient,
+  isDevelopment,
   isEqual,
   isFunction,
   isObject,
@@ -339,8 +340,10 @@ export const Template = class Template {
       // a synchronous throw on purpose: the async report let execution fall
       // through to a second, accidental error on the missing engine
       throwError('engineNotRegistered', String(this.renderingEngine), {
-        explanation: `Renderer "${this.renderingEngine}" not registered.`
-          + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`,
+        explanation: isDevelopment
+          ? `Renderer "${this.renderingEngine}" not registered.`
+            + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`
+          : 0,
       });
     }
 
@@ -551,7 +554,9 @@ export const Template = class Template {
 
   attachEvents(events = this.events) {
     if (!this.parentNode || !this.renderRoot) {
-      throwError('parentRequired', 'attachEvents', { explanation: 'You must set a parent before attaching events' });
+      throwError('parentRequired', 'attachEvents', {
+        explanation: isDevelopment ? 'You must set a parent before attaching events' : 0,
+      });
     }
     this.removeEvents();
 
