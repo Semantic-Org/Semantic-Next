@@ -138,6 +138,8 @@ error(code, at, { explanation, detail } = {})
 
 Returned by [`createErrors`](#createerrors). Reports a coded error through the error channel **without interrupting the caller** — `log`'s sibling for things that went wrong. The raise is asynchronous, so the current call stack completes first: it routes to `globalThis.onError` when an app installs one, and falls back to `console.error` otherwise, so a report is never silently lost.
 
+Sometimes the error is a value — handed to a promise rejection, attached to a result — and reporting is someone else's job. `report: false` builds and returns the same coded error without reporting it, making `error` the family's builder without a third function.
+
 #### Parameters
 
 | Name    | Type   | Description |
@@ -153,6 +155,7 @@ Returned by [`createErrors`](#createerrors). Reports a coded error through the e
 | explanation | string \| `0` | undefined | The development teaching message. When present it follows the production line on its own line; when folded away the line is the whole message. See [Development Messages](#development-messages) |
 | detail      | any           | undefined | Structured data attached to the error as `error.detail` |
 | verb        | string        | `'refused'` | The line's verb — any word, your classification of the line. Nullish falls back to `'refused'` |
+| report      | boolean       | `true`    | Set `false` to build and return the coded error without reporting it — no `onError` routing, no console fallback |
 
 #### Returns
 
@@ -177,6 +180,11 @@ console.log(reported.code);    // 'writeRejected'
 console.log(reported.at);      // 'todos:a7f2'
 console.log(reported.message); // 'sync refused [writeRejected] todos:a7f2',
                                // with the explanation beneath it in development
+
+// the error as a value — built, never reported: the rejection is the report
+const timeout = new Promise((resolve, reject) => {
+  setTimeout(() => reject(error('timedOut', 'todos:pull', { report: false })), 5000);
+});
 ```
 
 ### throwError
@@ -189,7 +197,7 @@ Returned by [`createErrors`](#createerrors). Same arguments as [`error`](#error)
 
 #### Parameters
 
-Identical to [`error`](#error).
+Identical to [`error`](#error), minus `report` — the throw is the delivery.
 
 #### Returns
 

@@ -120,9 +120,14 @@ export const createErrors = ({
   // the raise is asynchronous so the current call stack completes: it routes to
   // globalThis.onError when an app installs one, and falls back to
   // console.error otherwise so a report is never silently lost. returns the
-  // Error it reported.
+  // Error it reported. report: false builds and returns without raising — for
+  // when the error is a value (a rejection, a result) and reporting is the
+  // consumer's job.
   const error = (code, at, options) => {
     const built = build(code, at, options);
+    if (options?.report === false) {
+      return built;
+    }
     const raise = () => {
       if (typeof globalThis.onError === 'function') {
         globalThis.onError(built);

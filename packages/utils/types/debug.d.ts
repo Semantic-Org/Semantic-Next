@@ -32,14 +32,26 @@ export interface CodedError extends Error {
 }
 
 /**
+ * Options for the reporting door — the construction options plus the report
+ * switch
+ */
+export interface ErrorReportOptions extends ErrorOptions {
+  /** Set `false` to build and return the coded error without reporting it —
+   * no `onError` routing, no console fallback — for when the error is a value
+   * (a rejection, a result) and reporting is the consumer's job */
+  report?: boolean;
+}
+
+/**
  * The reporting door: builds the coded error and reports it through the error
  * channel WITHOUT interrupting the caller. The raise is asynchronous — it
  * routes to `globalThis.onError` when an app installs one and falls back to
  * `console.error` otherwise so a report is never silently lost. Returns the
- * Error it reported.
+ * Error it reported. `report: false` skips the raise and returns the built
+ * error alone.
  */
 export interface ErrorReporter {
-  (code: string, at: string, options?: ErrorOptions): CodedError;
+  (code: string, at: string, options?: ErrorReportOptions): CodedError;
   /** The production one-liner alone — `<layer> <verb> [<code>] <at>` — for console seats */
   line(code: string, at: string, options?: { verb?: string; }): string;
 }
