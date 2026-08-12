@@ -10,7 +10,7 @@
  * (`tooltipText: isDevelopment ? '...' : 0`).
  */
 export interface TimelineDressing {
-  /** 'track-entry' for measures and spans (default), 'marker' for marks */
+  /** 'track-entry' for measures (default), 'marker' for marks */
   dataType?: 'track-entry' | 'marker';
   /** The custom track's name in the performance panel */
   track?: string;
@@ -25,7 +25,8 @@ export interface TimelineDressing {
 }
 
 /** A detail value, a dressing bag, or a thunk producing either — thunks are
- * evaluated inside the guard so a throwing builder never breaks the caller */
+ * evaluated inside the guard at record-time so a throwing builder never breaks
+ * the caller */
 export type TimelineDetail =
   | TimelineDressing
   | Record<string, unknown>
@@ -33,51 +34,74 @@ export type TimelineDetail =
   | (() => TimelineDressing | Record<string, unknown> | 0);
 
 /**
- * Options for timeline.mark
+ * Options for markTimeline
  */
-export interface TimelineMarkOptions {
+export interface MarkTimelineOptions {
   detail?: TimelineDetail;
 }
 
 /**
- * Options for timeline.measure
+ * Options for measureTimeline
  */
-export interface TimelineMeasureOptions {
-  /** The start mark's name, or a timestamp; omitted measures from the time origin */
+export interface MeasureTimelineOptions {
+  /** The start mark's name, or a timestamp. Defaults to the call instant
+   * (performance.now()); a named mark on the closer form resolves at done-time */
   from?: string | number;
-  /** The end mark's name, or a timestamp */
-  to?: string | number;
+  /** The end mark's name, a timestamp, or the reserved 'now' for this instant.
+   * Omit it to receive an idempotent done() closer instead */
+  to?: string | number | 'now';
   detail?: TimelineDetail;
 }
 
+/** The closer returned by measureTimeline when `to` is omitted — idempotent,
+ * records the measure on its first call; a detail passed here wins over the
+ * open's */
+export type MeasureTimelineCloser = (close?: { detail?: TimelineDetail; }) => void;
+
 /**
- * Guarded performance-timeline instrumentation. Every entry point is
- * throw-safe: a runtime without the performance API, a measure whose endpoint
- * mark never fired, or a throwing detail builder never breaks the code being
- * instrumented.
+ * Records a point on the performance timeline (performance.mark). Throw-safe:
+ * a runtime without the performance API or a throwing detail builder never
+ * breaks the code being instrumented.
  *
- * @see {@link https://next.semantic-ui.com/docs/api/utils/timeline timeline}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/timeline#marktimeline markTimeline}
  * @see {@link https://next.semantic-ui.com/examples/utils-timeline Example}
  *
  * @example
  * ```ts
- * timeline.mark('app:boot');
- * timeline.measure('app:startup', { from: 'app:boot', to: 'app:ready', detail: {
+ * markTimeline('app:boot');
+ * ```
+ */
+export function markTimeline(name: string, options?: MarkTimelineOptions): void;
+
+/**
+ * Records a duration on the performance timeline (performance.measure), two
+ * forms split on `to`. With `to` — a mark name, a timestamp, or the reserved
+ * 'now' for this instant — the measure records immediately. Without `to` it
+ * returns an idempotent done() closer that captures its own start, immune to
+ * the mistyped-mark silent no-op. Throw-safe: an endpoint whose mark never
+ * fired emits nothing rather than throwing.
+ *
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/timeline#measuretimeline measureTimeline}
+ * @see {@link https://next.semantic-ui.com/examples/utils-timeline Example}
+ *
+ * @example
+ * ```ts
+ * markTimeline('app:boot');
+ * measureTimeline('app:startup', { from: 'app:boot', to: 'app:ready', detail: {
  *   track: 'boot', color: 'primary',
  *   tooltipText: isDevelopment ? 'transfer, parse, and first render' : 0,
  * } });
  *
- * const done = timeline.span('app:query');
+ * const done = measureTimeline('app:query');
  * await runQuery();
  * done();
  * ```
  */
-export declare const timeline: {
-  /** A point on the timeline (performance.mark) */
-  mark(name: string, options?: TimelineMarkOptions): void;
-  /** A duration between two named marks or timestamps (performance.measure) */
-  measure(name: string, options?: TimelineMeasureOptions): void;
-  /** A self-closing duration: captures its own start, returns an idempotent
-   * closer — immune to the mistyped-mark silent no-op */
-  span(name: string, options?: TimelineMarkOptions): (close?: TimelineMarkOptions) => void;
-};
+export function measureTimeline(
+  name: string,
+  options: MeasureTimelineOptions & { to: string | number; },
+): void;
+export function measureTimeline(
+  name: string,
+  options?: Omit<MeasureTimelineOptions, 'to'>,
+): MeasureTimelineCloser;

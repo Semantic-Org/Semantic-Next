@@ -10,12 +10,12 @@ import { isFunction, isPlainObject } from './types.js';
   endpoint mark never fired, or a throwing detail builder must never break the
   code being instrumented — instrumentation observes, it does not participate.
 
-  `detail` may be a value or a thunk; thunks are evaluated inside the guard.
-  When the resolved value speaks the DevTools extensibility vocabulary (track,
-  trackGroup, color, tooltipText, properties, dataType), the `{ devtools }`
-  envelope is composed here — dataType defaults to 'track-entry' for measures
-  and spans, 'marker' for marks. Structural keys are cheap and belong in every
-  build; tooltipText is prose and belongs behind the consumer's own
+  `detail` may be a value or a thunk; thunks are evaluated inside the guard at
+  record-time. When the resolved value speaks the DevTools extensibility
+  vocabulary (track, trackGroup, color, tooltipText, properties, dataType), the
+  `{ devtools }` envelope is composed here — dataType defaults to 'track-entry'
+  for measures, 'marker' for marks. Structural keys are cheap and belong in
+  every build; tooltipText is prose and belongs behind the consumer's own
   development ternary (`tooltipText: isDevelopment ? '...' : 0`) — a bundler
   define folds branches, never arguments, so the ternary lives at the callsite
   and a folded tooltip drops out of the envelope here.
@@ -44,61 +44,63 @@ const composeDetail = (detail, dataType) => {
   };
 };
 
-export const timeline = {
-  // a point on the timeline (performance.mark)
-  mark(name, { detail } = {}) {
-    try {
-      const composed = composeDetail(detail, 'marker');
-      performance.mark(name, composed === undefined ? undefined : { detail: composed });
-    }
-    catch {
-      // no performance runtime, or a throwing detail builder — never propagate
-    }
-  },
+// a point on the timeline (performance.mark)
+export const markTimeline = (name, { detail } = {}) => {
+  try {
+    const composed = composeDetail(detail, 'marker');
+    performance.mark(name, composed === undefined ? undefined : { detail: composed });
+  }
+  catch {
+    // no performance runtime, or a throwing detail builder — never propagate
+  }
+};
 
-  // a duration between two named marks (performance.measure). an omitted `from`
-  // measures from the time origin; an endpoint whose mark never fired emits
-  // nothing rather than throwing
-  measure(name, { from, to, detail } = {}) {
+// a duration on the timeline (performance.measure), two forms split on `to`.
+// with `to` — a mark name, a timestamp, or the reserved 'now' for this instant —
+// the measure records immediately; an endpoint whose mark never fired emits
+// nothing rather than throwing. without `to` it returns an idempotent done()
+// closer that records at close, so there is no end mark to mistype. `from`
+// defaults to performance.now() at call; a named `from` on the closer form
+// resolves at done-time, so its mark may fire after this call. `detail` may
+// ride the open or the close, and the close's wins
+export const measureTimeline = (name, { from, to, detail } = {}) => {
+  if (to !== undefined) {
     try {
       performance.measure(name, {
-        start: from,
-        end: to,
+        start: from ?? performance.now(),
+        end: to === 'now' ? performance.now() : to,
         detail: composeDetail(detail, 'track-entry'),
       });
     }
     catch {
       // an endpoint mark never fired, or no performance runtime
     }
-  },
-
-  // a self-closing duration: captures its own start and returns a closer, so a
-  // mistyped or never-fired mark name cannot silently no-op the measurement.
-  // the closer is idempotent; `detail` may ride the open or the close
-  span(name, { detail } = {}) {
-    let start;
+    return;
+  }
+  let start = from;
+  if (start === undefined) {
     try {
       start = performance.now();
     }
     catch {
       return () => {};
     }
-    let closed = false;
-    return ({ detail: closeDetail } = {}) => {
-      if (closed) {
-        return;
-      }
-      closed = true;
-      try {
-        performance.measure(name, {
-          start,
-          end: performance.now(),
-          detail: composeDetail(closeDetail ?? detail, 'track-entry'),
-        });
-      }
-      catch {
-        // no performance runtime — the span dies quietly with it
-      }
-    };
-  },
+  }
+  let closed = false;
+  return ({ detail: closeDetail } = {}) => {
+    if (closed) {
+      return;
+    }
+    closed = true;
+    try {
+      performance.measure(name, {
+        start,
+        end: performance.now(),
+        detail: composeDetail(closeDetail ?? detail, 'track-entry'),
+      });
+    }
+    catch {
+      // a named `from` whose mark never fired, or no performance runtime
+    }
+  };
 };

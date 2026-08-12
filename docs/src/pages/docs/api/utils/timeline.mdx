@@ -3,21 +3,23 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Timeline Utilities
 package: "@semantic-ui/utils"
-methods: [timeline]
+methods: [markTimeline, measureTimeline]
 icon: activity
 description: API reference for guarded performance timeline instrumentation
 ---
 
-The `timeline` namespace is guarded instrumentation over the browser's performance timeline — `mark` for a point, `measure` for a duration between two points, and `span` for a duration that closes itself. Entries land in the DevTools performance panel and in `performance.getEntries()`, and can dress themselves onto their own named track.
+The timeline utilities are guarded instrumentation over the browser's performance timeline — `markTimeline` for a point, `measureTimeline` for a duration, recorded immediately between two endpoints or closed by the `done()` closer it returns. Entries land in the DevTools performance panel and in `performance.getEntries()`, and can dress themselves onto their own named track.
 
 Every entry point is **throw-safe by contract**. A runtime without the performance API, a measure whose endpoint mark never fired, or a `detail` builder that throws must never break the code being instrumented: instrumentation observes, it does not participate. There is no error path to handle and nothing to wrap in a `try`.
 
+The names deliberately do not mirror `performance.mark` and `performance.measure`: the contracts differ — an options bag, `from`/`to`, the reserved `'now'` endpoint, a returned closer, the never-throw guard — and a name echoing the native API would promise the native signature. For the underlying primitives, see [`performance.mark`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/mark) and [`performance.measure`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/measure) on MDN.
+
 ## Functions
 
-### timeline.mark
+### markTimeline
 
 ```javascript
-timeline.mark(name, { detail } = {})
+markTimeline(name, { detail } = {})
 ```
 
 Records a point on the timeline, wrapping `performance.mark`.
@@ -26,7 +28,7 @@ Records a point on the timeline, wrapping `performance.mark`.
 
 | Name    | Type   | Description |
 |---------|--------|-------------|
-| name    | string | The mark's name. Also the handle `measure` uses as a `from` or `to` |
+| name    | string | The mark's name. Also the handle `measureTimeline` uses as a `from` or `to` |
 | options | object | Optional configuration |
 
 ##### Options
@@ -42,21 +44,26 @@ This function does not return a value.
 #### Example
 
 ```javascript
-import { timeline } from '@semantic-ui/utils';
+import { markTimeline } from '@semantic-ui/utils';
 
-timeline.mark('app:boot');
-timeline.mark('app:ready');
+markTimeline('app:boot');
+markTimeline('app:ready');
 ```
 
-### timeline.measure
+### measureTimeline
 
 ```javascript
-timeline.measure(name, { from, to, detail } = {})
+measureTimeline(name, { from, to, detail } = {})
 ```
 
-Records a duration between two points, wrapping `performance.measure`. An omitted `from` measures from the time origin, an omitted `to` measures to now.
+Records a duration on the timeline, wrapping `performance.measure`. The call takes one of two forms, split on `to`:
 
-An endpoint whose mark never fired emits nothing rather than throwing — which is exactly why a mistyped mark name is a silent no-op here. Reach for [`span`](#timelinespan) when a measurement is important enough that losing it should be impossible.
+- **With `to`** — a mark name, a timestamp, or `'now'` — the measure records immediately. An endpoint whose mark never fired emits nothing rather than throwing, which is why a mistyped mark name is a silent no-op in this form.
+- **Without `to`** — the call returns an idempotent `done()` closer and records when it is called. The start is captured at call time, so there are no mark names to keep in sync and no way for a typo to quietly drop the measurement.
+
+`'now'` is a reserved endpoint meaning this instant — a mark literally named `now` cannot be addressed as a `to`.
+
+`from` defaults to the call instant (`performance.now()`) in both forms. A named `from` on the closer form resolves at done-time, so its mark may fire after the call. The default is nullish — an explicit `from: 0` measures from the time origin (page navigation), the deliberate spelling for whole-page durations.
 
 #### Parameters
 
@@ -69,24 +76,26 @@ An endpoint whose mark never fired emits nothing rather than throwing — which 
 
 | Name   | Type                      | Default   | Description |
 |--------|---------------------------|-----------|-------------|
-| from   | string \| number          | time origin | The start mark's name, or a timestamp |
-| to     | string \| number          | now       | The end mark's name, or a timestamp |
-| detail | object \| function \| `0` | undefined | Data to attach to the entry, or a thunk producing it. See [DevTools Dressing](#devtools-dressing) |
+| from   | string \| number          | call instant | The start mark's name, or a timestamp |
+| to     | string \| number \| `'now'` | — | The end mark's name, a timestamp, or `'now'` for this instant. Omit it to receive the closer |
+| detail | object \| function \| `0` | undefined | Data to attach to the entry, or a thunk producing it. Thunks are evaluated at record-time inside the guard. See [DevTools Dressing](#devtools-dressing) |
 
 #### Returns
 
-This function does not return a value.
+With `to`, this function does not return a value.
+
+Without `to`, it returns `done(options?)` — the closer. It records the measure the first time it is called and does nothing after that, which makes it safe on a path that can settle more than once. It accepts the same `{ detail }` bag, so detail known only at the end (a row count, an outcome) can ride the close, where it wins over the open's.
 
 #### Example
 
 ```javascript
-import { timeline, isDevelopment } from '@semantic-ui/utils';
+import { markTimeline, measureTimeline, isDevelopment } from '@semantic-ui/utils';
 
-timeline.mark('app:boot');
+markTimeline('app:boot');
 await start();
-timeline.mark('app:ready');
+markTimeline('app:ready');
 
-timeline.measure('app:startup', {
+measureTimeline('app:startup', {
   from: 'app:boot',
   to: 'app:ready',
   detail: {
@@ -95,39 +104,17 @@ timeline.measure('app:startup', {
     tooltipText: isDevelopment ? 'transfer, parse, and first render' : 0,
   },
 });
+
+// to: 'now' closes an open-ended measure at this instant
+measureTimeline('app:boot-so-far', { from: 'app:boot', to: 'now' });
 ```
 
-### timeline.span
+The closer form:
 
 ```javascript
-timeline.span(name, { detail } = {})
-```
+import { measureTimeline, isDevelopment } from '@semantic-ui/utils';
 
-A self-closing duration. `span` captures its own start and returns a closer, so there are no mark names to keep in sync and no way for a typo to quietly drop the measurement. The closer is **idempotent** — calling it twice records one entry — which makes it safe on a path that can settle more than once.
-
-#### Parameters
-
-| Name    | Type   | Description |
-|---------|--------|-------------|
-| name    | string | The measure's name, as it appears in the timeline |
-| options | object | Optional configuration |
-
-##### Options
-
-| Name   | Type                      | Default   | Description |
-|--------|---------------------------|-----------|-------------|
-| detail | object \| function \| `0` | undefined | Data to attach to the entry, or a thunk producing it. May also ride the close, where it overrides the open's |
-
-#### Returns
-
-`done(options?)` — the closer. Records the measure the first time it is called and does nothing after that. It accepts the same `{ detail }` bag, so detail known only at the end (a row count, an outcome) can ride the close.
-
-#### Example
-
-```javascript
-import { timeline, isDevelopment } from '@semantic-ui/utils';
-
-const done = timeline.span('db:query');
+const done = measureTimeline('db:query');
 const rows = await runQuery();
 done({
   detail: {
@@ -144,7 +131,7 @@ An entry can name its own track, color, and tooltip in the DevTools performance 
 
 | Name       | Type   | Description |
 |------------|--------|-------------|
-| dataType   | string | `'track-entry'` for measures and spans (the default), `'marker'` for marks |
+| dataType   | string | `'track-entry'` for measures (the default), `'marker'` for marks |
 | track      | string | The custom track's name in the performance panel |
 | trackGroup | string | Groups several tracks under one header |
 | color      | string | A DevTools palette color name (`'primary'`, `'secondary-light'`, `'error'`, …) |
@@ -160,8 +147,9 @@ Composition is opt-in and never gets in the way:
 - a `tooltipText` folded to `0` drops out of the envelope, leaving the structural dressing intact
 
 ```javascript
-timeline.measure('sync:apply', {
+measureTimeline('sync:apply', {
   from: 'sync:apply:start',
+  to: 'now',
   detail: {
     track: 'sync',
     trackGroup: 'semantic',
@@ -175,7 +163,7 @@ timeline.measure('sync:apply', {
 Because `detail` accepts a thunk, work needed only to describe an entry can be deferred until the entry is actually built, and a thunk that throws is swallowed by the same guard:
 
 ```javascript
-timeline.mark('pool:resize', { detail: () => ({ properties: [['size', pool.measure()]] }) });
+markTimeline('pool:resize', { detail: () => ({ properties: [['size', pool.measure()]] }) });
 ```
 
 ## Development Messages

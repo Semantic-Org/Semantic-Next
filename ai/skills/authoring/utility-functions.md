@@ -1038,24 +1038,28 @@ reclaimed all of it. Structural keys (`code`, `at`, `detail`, and the timeline's
 ## Timeline Utilities (timeline.js)
 
 ```javascript
-import { timeline, isDevelopment } from '@semantic-ui/utils';
+import { markTimeline, measureTimeline, isDevelopment } from '@semantic-ui/utils';
 
 // a point (performance.mark)
-timeline.mark('app:boot');
+markTimeline('app:boot');
 
-// a duration between two marks (performance.measure). omitted `from` measures from the
-// time origin; an endpoint mark that never fired emits nothing rather than throwing
-timeline.measure('app:startup', { from: 'app:boot', to: 'app:ready' });
+// with `to` — a mark name, a timestamp, or the reserved 'now' for this instant —
+// the measure records immediately. an endpoint mark that never fired emits
+// nothing rather than throwing
+measureTimeline('app:startup', { from: 'app:boot', to: 'app:ready' });
+measureTimeline('app:boot-so-far', { from: 'app:boot', to: 'now' });
 
-// a self-closing duration — captures its own start, returns an idempotent closer.
-// no mark names to keep in sync, so a typo cannot silently drop the measurement
-const done = timeline.span('db:query');
+// without `to`, it returns an idempotent done() closer — the start is captured
+// at call (a named `from` resolves at done-time), so there is no end mark to
+// mistype and no way to silently drop the measurement
+const done = measureTimeline('db:query');
 const rows = await runQuery();
 done({ detail: { properties: [['rows', rows.length]] } });  // close detail wins over open
 
 // DevTools dressing composes into the `{ devtools }` envelope automatically
-timeline.measure('sync:apply', {
+measureTimeline('sync:apply', {
   from: 'sync:apply:start',
+  to: 'now',
   detail: {
     track: 'sync',
     trackGroup: 'semantic',
@@ -1065,15 +1069,19 @@ timeline.measure('sync:apply', {
   },
 });
 
-// `detail` may be a thunk, evaluated inside the guard
-timeline.mark('pool:resize', { detail: () => ({ properties: [['size', pool.measure()]] }) });
+// `detail` may be a thunk, evaluated inside the guard at record-time
+markTimeline('pool:resize', { detail: () => ({ properties: [['size', pool.measure()]] }) });
 ```
 
 **Throw-safe by contract.** No performance API, a missing endpoint mark, a throwing detail
 builder — none of it propagates. Instrumentation observes, it does not participate, so
 there is nothing to wrap in a `try`.
 
-Dressing keys: `dataType` (defaults `'track-entry'` for measure/span, `'marker'` for mark),
+**Verb-first on purpose.** The names do not mirror `performance.mark`/`performance.measure`
+because the contracts differ — options bag, `from`/`to`, the `'now'` endpoint, the closer
+return, never-throw — and an echoed name would promise the native signature.
+
+Dressing keys: `dataType` (defaults `'track-entry'` for measures, `'marker'` for marks),
 `track`, `trackGroup`, `color`, `properties` (structural, ship always) and `tooltipText`
 (prose, folds — see the fold rule above). A `detail` with no dressing keys, one that already
 carries `devtools`, or a non-object passes through untouched; a falsy `detail` (a folded `0`)
