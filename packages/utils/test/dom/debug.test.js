@@ -254,6 +254,48 @@ describe('createErrors', () => {
       expect(errorSpy).toHaveBeenCalledTimes(1);
       expect(errorSpy).toHaveBeenCalledWith(returned);
     });
+
+    it('should only build when report is false', async () => {
+      const { error } = createErrors({ layer: 'demo' });
+      const returned = error('write-conflict', 'commit()', { report: false, detail: { id: 7 } });
+      expect(returned).toBeInstanceOf(Error);
+      expect(returned.message).toBe('demo refused [write-conflict] commit()');
+      expect(returned.code).toBe('write-conflict');
+      expect(returned.at).toBe('commit()');
+      expect(returned.detail).toEqual({ id: 7 });
+      await flushMicrotasks();
+      expect(globalThis.onError).not.toHaveBeenCalled();
+    });
+
+    it('should skip the console fallback when report is false', async () => {
+      delete globalThis.onError;
+      // the suite-wide spy throws on stray console.error calls, so a leaked
+      // report would fail the test on its own — the count makes it explicit
+      errorSpy.mockClear();
+      const { error } = createErrors({ layer: 'demo' });
+      error('write-conflict', 'commit()', { report: false });
+      await flushMicrotasks();
+      expect(errorSpy).not.toHaveBeenCalled();
+    });
+
+    it('should build report: false errors identical to reported ones', async () => {
+      const { error } = createErrors({ layer: 'demo' });
+      const options = {
+        verb: 'declined',
+        explanation: 'the server refused the write',
+        detail: { id: 7 },
+      };
+      const reported = error('write-conflict', 'commit()', options);
+      const returned = error('write-conflict', 'commit()', { ...options, report: false });
+      expect(returned.message).toBe(reported.message);
+      expect(returned.code).toBe(reported.code);
+      expect(returned.at).toBe(reported.at);
+      expect(returned.detail).toEqual(reported.detail);
+      await flushMicrotasks();
+      // only the reported one reaches the channel
+      expect(globalThis.onError).toHaveBeenCalledTimes(1);
+      expect(globalThis.onError).toHaveBeenCalledWith(reported);
+    });
   });
 });
 
