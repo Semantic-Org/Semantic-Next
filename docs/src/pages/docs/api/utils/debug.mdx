@@ -8,7 +8,7 @@ icon: bug
 description: API reference for logging and coded error handling utility functions
 ---
 
-The Debug utilities provide the two reporting doors a layer needs: `log` for styled console output, and `createErrors` for coded errors that carry a teaching message in development and one uniform, greppable line in production.
+The Debug utilities provide the two reporting doors a layer needs: `log` for styled console output, and `createErrors` for coded errors that lead with one uniform, greppable line and carry a teaching explanation beneath it in development.
 
 ## Functions
 
@@ -84,9 +84,9 @@ log('Important notice', 'warn', {
 function createErrors({ layer = '', ErrorClass = Error } = {})
 ```
 
-Creates a layer-bound error toolset. Bind it once per layer and every refusal that layer raises reads the same way: a stable `code` you can route on, an address (`at`) that says where it happened, and a development `explanation` that folds out of production builds.
+Creates a layer-bound error toolset. Bind it once per layer and every refusal that layer raises reads the same way: a stable `code` you can route on, an address (`at`) that says where it happened — both riding the error as properties — and a development `explanation` that folds out of production builds.
 
-Production keeps one uniform line, `<layer> refused [<code>] <at>`, parseable with `/^(\S+) refused \[([\w-]+)\] (.*)$/` — so a support ticket carrying a pasted error still names the layer, the code, and the address.
+Every message leads with one uniform line, `<layer> refused [<code>] <at>`, parseable with `/^(\S+) refused \[([\w-]+)\] (.*)$/m` — so a support ticket carrying a pasted error still names the layer, the code, and the address. In development the explanation follows on its own line; in production the line is the whole message.
 
 #### Parameters
 
@@ -143,19 +143,19 @@ Returned by [`createErrors`](#createerrors). Reports a coded error through the e
 | Name    | Type   | Description |
 |---------|--------|-------------|
 | code    | string | A stable identifier for this refusal, routable in code. Never rephrase one in place — the code is the contract, the prose is not |
-| at      | string | **Where** it happened: the greppable address, like `todos:secret.field` or `db-1 -> db-2`. Say **why** in the explanation |
+| at      | string | **Where** it happened: the greppable address, like `todos:secret.field` or `db-1 -> db-2`, riding the error as `error.at`. Say **why** in the explanation |
 | options | object | Optional configuration |
 
 ##### Options
 
 | Name        | Type          | Default   | Description |
 |-------------|---------------|-----------|-------------|
-| explanation | string \| `0` | undefined | The development teaching message. When present it becomes the error's message; when folded away the message is the production line. See [Development Messages](#development-messages) |
+| explanation | string \| `0` | undefined | The development teaching message. When present it follows the production line on its own line; when folded away the line is the whole message. See [Development Messages](#development-messages) |
 | detail      | any           | undefined | Structured data attached to the error as `error.detail` |
 
 #### Returns
 
-The `Error` it reported, carrying `code` and (when given) `detail`. Returning it lets a caller attach it to local state or a result envelope without building a second one.
+The `Error` it reported, carrying `code`, `at`, and (when given) `detail`. Returning it lets a caller attach it to local state or a result envelope without building a second one.
 
 #### Example
 
@@ -173,7 +173,9 @@ const reported = error('writeRejected', 'todos:a7f2', {
 });
 
 console.log(reported.code);    // 'writeRejected'
-console.log(reported.message); // 'sync refused [writeRejected] todos:a7f2' in production
+console.log(reported.at);      // 'todos:a7f2'
+console.log(reported.message); // 'sync refused [writeRejected] todos:a7f2',
+                               // with the explanation beneath it in development
 ```
 
 ### throwError
@@ -241,12 +243,12 @@ console.warn(error.line('storageChanged', 'db-1 -> db-2'));
 
 // the same line parses back out of a pasted log
 const [, layer, code, at] = 'sync refused [storageChanged] db-1 -> db-2'
-  .match(/^(\S+) refused \[([\w-]+)\] (.*)$/);
+  .match(/^(\S+) refused \[([\w-]+)\] (.*)$/m);
 ```
 
 ## Development Messages
 
-`explanation` is teaching prose. It belongs in a development build and nowhere else, so fold it **at the callsite**, in argument position:
+`explanation` is teaching prose. In development it rides beneath the production line — the message still leads with the greppable address, so the explanation never needs to restate where it happened. It belongs in a development build and nowhere else, so fold it **at the callsite**, in argument position:
 
 ```javascript
 error('forbidden', 'todos:secret.field', {

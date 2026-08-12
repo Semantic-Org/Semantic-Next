@@ -85,15 +85,16 @@ export const log = (
 --------------------*/
 
 /*
-  Coded errors with a development/production message split. Development carries a
-  teaching explanation; production carries one uniform, greppable line —
-  `<layer> refused [<code>] <at>` — parseable with
-  /^(\S+) refused \[([\w-]+)\] (.*)$/. The explanation is meant to fold out of
-  production builds at the CALLSITE (`explanation: isDevelopment ? '...' : 0`):
-  a bundler define folds branches, never arguments, so the ternary must live
-  where the string does. Measured on a real corpus: deferring explanations
-  behind a helper or thunk reclaimed 37 bytes of a ~2KB pool; the inline
-  ternary reclaimed all of it.
+  Coded errors with a development/production message split. Every message leads
+  with one uniform, greppable line — `<layer> refused [<code>] <at>` —
+  parseable with /^(\S+) refused \[([\w-]+)\] (.*)$/m. Production carries the
+  line alone; development appends the teaching explanation on its own line, so
+  the address prints in every posture and explanations never restate it. The
+  explanation is meant to fold out of production builds at the CALLSITE
+  (`explanation: isDevelopment ? '...' : 0`): a bundler define folds branches,
+  never arguments, so the ternary must live where the string does. Measured on
+  a real corpus: deferring explanations behind a helper or thunk reclaimed 37
+  bytes of a ~2KB pool; the inline ternary reclaimed all of it.
 */
 
 const refusalLine = (layer, code, at) => `${layer ? `${layer} ` : ''}refused [${code}] ${at}`;
@@ -103,8 +104,10 @@ export const createErrors = ({
   ErrorClass = Error,
 } = {}) => {
   const build = (code, at, { explanation, detail } = {}) => {
-    const built = new ErrorClass(explanation || refusalLine(layer, code, at));
+    const line = refusalLine(layer, code, at);
+    const built = new ErrorClass(explanation ? `${line}\n${explanation}` : line);
     built.code = code;
+    built.at = at;
     if (detail !== undefined) {
       built.detail = detail;
     }
