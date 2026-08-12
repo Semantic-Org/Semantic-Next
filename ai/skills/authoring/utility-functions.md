@@ -997,13 +997,16 @@ const { error, throwError } = createErrors({ layer: 'sync' });       // ErrorCla
 const { throwError: typeError } = createErrors({ layer: 'schema', ErrorClass: TypeError });
 
 // report and continue — raises asynchronously through globalThis.onError when an
-// app installs one, throws otherwise. returns the Error it reported
+// app installs one, falls back to console.error otherwise. returns the Error it reported
 const reported = error('forbidden', 'todos:secret.field', {
   explanation: isDevelopment ? 'the field is private — write the fields you mean' : 0,
   detail: { collection: 'todos', field: 'secret.field' },
 });
 reported.code;    // 'forbidden'
 reported.detail;  // { collection: 'todos', field: 'secret.field' }
+
+// the error as a value — report: false builds and returns without reporting
+const rejection = error('timedOut', 'todos:pull', { report: false });
 
 // same arguments, throws synchronously
 throwError('unknownCollection', 'invoices');
