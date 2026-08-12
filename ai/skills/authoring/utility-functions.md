@@ -976,24 +976,108 @@ await asyncMap({ a: 1, b: 2 }, async (v, k) => v + 1);               // { a: 2, 
 
 ## Debug Utilities (debug.js)
 
+### log — Styled Console Output
 ```javascript
-import { log, fatal } from '@semantic-ui/utils';
+import { log } from '@semantic-ui/utils';
 
-// Styled console logging
 log('App started');                                     // console.log
 log('User action', 'debug', { namespace: 'UserService' });
 log('Warning', 'warn', { timestamp: true, title: 'SYSTEM', titleColor: '#FF6B35' });
 
 // JSON format for structured output
 log('API response', 'info', { format: 'json', namespace: 'API', timestamp: true });
-
-// Async fatal error (thrown via queueMicrotask)
-fatal('Critical error', {
-  errorType: TypeError,
-  metadata: { code: 'SYS_ERROR' },
-  removeStackLines: 1,
-});
 ```
+
+### createErrors — Coded Errors, Bound to a Layer
+```javascript
+import { createErrors, isDevelopment } from '@semantic-ui/utils';
+
+// bind once per layer
+const { error, throwError } = createErrors({ layer: 'sync' });       // ErrorClass: Error
+const { throwError: typeError } = createErrors({ layer: 'schema', ErrorClass: TypeError });
+
+// report and continue — raises asynchronously through globalThis.onError when an
+// app installs one, throws otherwise. returns the Error it reported
+const reported = error('forbidden', 'todos:secret.field', {
+  explanation: isDevelopment ? 'the field is private — write the fields you mean' : 0,
+  detail: { collection: 'todos', field: 'secret.field' },
+});
+reported.code;    // 'forbidden'
+reported.detail;  // { collection: 'todos', field: 'secret.field' }
+
+// same arguments, throws synchronously
+throwError('unknownCollection', 'invoices');
+
+// the production line alone, for console seats
+error.line('storageChanged', 'db-1 -> db-2');  // 'sync refused [storageChanged] db-1 -> db-2'
+```
+
+`code` is the stable routable identifier. `at` is **where** it happened — the greppable
+address (`todos:secret.field`, `db-1 -> db-2`), never why; why goes in `explanation`.
+Production messages are one uniform line, `<layer> refused [<code>] <at>`, parseable with
+`/^(\S+) refused \[([\w-]+)\] (.*)$/`.
+
+### The Fold Rule — Development Prose Rides a Callsite Ternary
+**A bundler define folds BRANCHES, never ARGUMENTS.** A string literal in argument
+position ships in production even when the callee never reads it. So teaching prose —
+`explanation` here, `tooltipText` on the timeline — must ride an expression-position
+ternary at the CALLSITE:
+
+```javascript
+explanation: isDevelopment ? 'the field is private — write the fields you mean' : 0,   // folds
+explanation: explainForbidden(field),                                                  // ships
+```
+
+Deferring the prose behind a helper or a thunk does not recover it. Measured on a real
+corpus: the helper reclaimed 37 bytes of a ~2KB pool, the inline callsite ternary
+reclaimed all of it. Structural keys (`code`, `at`, `detail`, and the timeline's `track`,
+`color`, `properties`) are cheap and belong in every build — only the prose folds.
+
+---
+
+## Timeline Utilities (timeline.js)
+
+```javascript
+import { timeline, isDevelopment } from '@semantic-ui/utils';
+
+// a point (performance.mark)
+timeline.mark('app:boot');
+
+// a duration between two marks (performance.measure). omitted `from` measures from the
+// time origin; an endpoint mark that never fired emits nothing rather than throwing
+timeline.measure('app:startup', { from: 'app:boot', to: 'app:ready' });
+
+// a self-closing duration — captures its own start, returns an idempotent closer.
+// no mark names to keep in sync, so a typo cannot silently drop the measurement
+const done = timeline.span('db:query');
+const rows = await runQuery();
+done({ detail: { properties: [['rows', rows.length]] } });  // close detail wins over open
+
+// DevTools dressing composes into the `{ devtools }` envelope automatically
+timeline.measure('sync:apply', {
+  from: 'sync:apply:start',
+  detail: {
+    track: 'sync',
+    trackGroup: 'semantic',
+    color: 'primary',
+    properties: [['docs', 42]],
+    tooltipText: isDevelopment ? 'applying a server delta to the local pool' : 0,
+  },
+});
+
+// `detail` may be a thunk, evaluated inside the guard
+timeline.mark('pool:resize', { detail: () => ({ properties: [['size', pool.measure()]] }) });
+```
+
+**Throw-safe by contract.** No performance API, a missing endpoint mark, a throwing detail
+builder — none of it propagates. Instrumentation observes, it does not participate, so
+there is nothing to wrap in a `try`.
+
+Dressing keys: `dataType` (defaults `'track-entry'` for measure/span, `'marker'` for mark),
+`track`, `trackGroup`, `color`, `properties` (structural, ship always) and `tooltipText`
+(prose, folds — see the fold rule above). A `detail` with no dressing keys, one that already
+carries `devtools`, or a non-object passes through untouched; a falsy `detail` (a folded `0`)
+attaches nothing.
 
 ---
 

@@ -4,35 +4,86 @@
  */
 
 /**
- * Options for the fatal error function
+ * Options for a coded error's construction
  */
-export interface FatalOptions {
-  /** The error constructor to use (defaults to Error) */
-  errorType?: ErrorConstructor;
-  /** Additional metadata to attach to the error */
-  metadata?: Record<string, any>;
-  /** Optional callback to intercept the error — when provided, prevents the error from being thrown */
-  onError?: (error: Error) => void;
-  /** Number of stack trace lines to remove (defaults to 1) */
-  removeStackLines?: number;
+export interface ErrorOptions {
+  /** The development explanation — the teaching message. Meant to fold out of
+   * production builds via a callsite ternary (`isDevelopment ? '...' : 0`);
+   * when absent, the message is the uniform production line */
+  explanation?: string | 0;
+  /** Structured data attached to the error as `error.detail` */
+  detail?: any;
 }
 
 /**
- * Throws an error asynchronously with enhanced error handling capabilities.
- * The error is thrown in the next microtask to avoid interrupting the current execution context.
+ * A coded Error with the layer's uniform message split
+ */
+export interface CodedError extends Error {
+  /** The stable, programmatically routable refusal code */
+  code: string;
+  /** Structured data attached at the callsite */
+  detail?: any;
+}
+
+/**
+ * The reporting door: builds the coded error and reports it through the error
+ * channel WITHOUT interrupting the caller. The raise is asynchronous — it
+ * routes to `globalThis.onError` when an app installs one and throws otherwise
+ * so a report is never silently lost. Returns the Error it reported.
+ */
+export interface ErrorReporter {
+  (code: string, at: string, options?: ErrorOptions): CodedError;
+  /** The production one-liner alone — `<layer> refused [<code>] <at>` — for console seats */
+  line(code: string, at: string): string;
+}
+
+/**
+ * The error tools bound to one layer's identity
+ */
+export interface ErrorTools {
+  /** Report through the error channel and continue; returns the reported Error */
+  error: ErrorReporter;
+  /** Same arguments, throws synchronously, never returns */
+  throwError(code: string, at: string, options?: ErrorOptions): never;
+}
+
+/**
+ * Options for createErrors
+ */
+export interface CreateErrorsOptions {
+  /** The layer's public name, leading the production line (e.g. 'sync', 'component') */
+  layer?: string;
+  /** The error constructor every refusal builds with (defaults to Error) */
+  ErrorClass?: ErrorConstructor;
+}
+
+/**
+ * Creates a layer-bound error toolset: `error` reports through the error
+ * channel and continues, `throwError` throws, and `error.line` renders the
+ * uniform production line `<layer> refused [<code>] <at>` (parseable with
+ * `/^(\S+) refused \[([\w-]+)\] (.*)$/`). Development messages ride the
+ * `explanation` option and are meant to fold out of production builds at the
+ * callsite: a bundler define folds branches, never arguments, so the ternary
+ * (`explanation: isDevelopment ? '...' : 0`) must live where the string does.
  *
- * @param message - The error message
- * @param options - Configuration options for the error
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/debug#createerrors createErrors}
+ * @see {@link https://next.semantic-ui.com/examples/utils-createerrors Example}
+ *
+ * @param options - The layer binding
+ * @returns The bound `{ error, throwError }` toolset
  *
  * @example
  * ```ts
- * fatal("Invalid configuration", {
- *   metadata: { code: "CONFIG_ERROR" },
- *   onError: (err) => logError(err)
+ * const { error, throwError } = createErrors({ layer: 'sync' });
+ *
+ * throwError('forbidden', 'todos:secret.field', {
+ *   explanation: isDevelopment ? 'the field is private — write the fields you mean' : 0,
  * });
+ *
+ * console.warn(error.line('storageChanged', 'db-1 -> db-2'));
  * ```
  */
-export function fatal(message: string, options?: FatalOptions): void;
+export function createErrors(options?: CreateErrorsOptions): ErrorTools;
 
 /**
  * Log levels supported by the logging utility

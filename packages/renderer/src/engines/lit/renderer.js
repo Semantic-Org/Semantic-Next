@@ -3,8 +3,8 @@ import { html, svg } from 'lit';
 import { nonreactive, signal } from '@semantic-ui/reactivity';
 import {
   assignInPlace,
+  createErrors,
   each,
-  fatal,
   filterObject,
   hashCode,
   inArray,
@@ -16,6 +16,8 @@ import {
   mapObject,
   wrapFunction,
 } from '@semantic-ui/utils';
+
+const { throwError } = createErrors({ layer: 'renderer' });
 
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
 
@@ -411,7 +413,7 @@ export class LitRenderer {
     const inheritsData = true;
 
     if (!snippet) {
-      fatal(`Snippet "${snippetName}" not found`);
+      throwError('snippetNotFound', String(snippetName), { explanation: `Snippet "${snippetName}" not found` });
     }
     const snippetData = this.getPackedNodeData(node, data, { inheritsData });
     return this.renderContent({

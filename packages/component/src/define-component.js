@@ -2,9 +2,11 @@ import { getEngine } from '@semantic-ui/renderer';
 import { TemplateCompiler } from '@semantic-ui/compiler';
 // direct import avoids circular chunk dependency between component ↔ templating
 import { Template } from '@semantic-ui/templating/template';
-import { adoptStylesheet, each, fatal, identity, isClient, isObject, kebabToCamel, noop } from '@semantic-ui/utils';
+import { adoptStylesheet, createErrors, each, identity, isClient, isObject, kebabToCamel, noop } from '@semantic-ui/utils';
 
 import { getProperties } from './component-helpers.js';
+
+const { throwError } = createErrors({ layer: 'component' });
 import { registerComponent } from './component-registry.js';
 
 // user css can make whitespace significant, keep the template intact when it might
@@ -49,8 +51,10 @@ export const defineComponent = ({
     : getEngine(renderingEngine);
 
   if (!engine) {
-    fatal(`Rendering engine "${renderingEngine}" not registered.`
-      + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`);
+    throwError('engineNotRegistered', String(renderingEngine), {
+      explanation: `Rendering engine "${renderingEngine}" not registered.`
+        + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`,
+    });
   }
 
   if (!ast) {

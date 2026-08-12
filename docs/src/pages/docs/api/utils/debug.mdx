@@ -3,12 +3,12 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Debug Utilities
 package: "@semantic-ui/utils"
-methods: [log, fatal]
+methods: [log, createErrors]
 icon: bug
-description: API reference for debugging, logging, and error handling utility functions
+description: API reference for logging and coded error handling utility functions
 ---
 
-The Debug utilities provide functions for logging, debugging, and enhanced error handling in JavaScript.
+The Debug utilities provide the two reporting doors a layer needs: `log` for styled console output, and `createErrors` for coded errors that carry a teaching message in development and one uniform, greppable line in production.
 
 ## Functions
 
@@ -78,45 +78,186 @@ log('Important notice', 'warn', {
 });
 ```
 
-### fatal
+### createErrors
 
 ```javascript
-function fatal(message, { errorType = Error, metadata = {}, onError = null, removeStackLines = 1 } = {})
+function createErrors({ layer = '', ErrorClass = Error } = {})
 ```
 
-Throws an error with enhanced control over the error type, metadata, and stack trace.
+Creates a layer-bound error toolset. Bind it once per layer and every refusal that layer raises reads the same way: a stable `code` you can route on, an address (`at`) that says where it happened, and a development `explanation` that folds out of production builds.
 
-> **Asynchronous Error Throwing** This function uses `queueMicrotask` to throw the error asynchronously, allowing the current execution context to complete.
+Production keeps one uniform line, `<layer> refused [<code>] <at>`, parseable with `/^(\S+) refused \[([\w-]+)\] (.*)$/` — so a support ticket carrying a pasted error still names the layer, the code, and the address.
 
 #### Parameters
 
 | Name    | Type   | Description |
 |---------|--------|-------------|
-| message | string | The error message |
-| options | object | Optional configuration |
+| options | object | The layer binding |
 
 ##### Options
 
-| Name             | Type     | Default | Description |
-|------------------|----------|---------|-------------|
-| errorType        | function | Error   | The type of error to throw |
-| metadata         | object   | {}      | Additional data to attach to the error |
-| onError          | function | null    | Callback to intercept the error. When provided, the error is passed to this callback and the throw is prevented |
-| removeStackLines | number   | 1       | Number of stack trace lines to remove |
+| Name       | Type     | Default | Description |
+|------------|----------|---------|-------------|
+| layer      | string   | `''`    | The layer's public name, leading the production line (e.g. `sync`, `component`) |
+| ErrorClass | function | `Error` | The constructor every refusal builds with |
+
+#### Returns
+
+`{ error, throwError }` — the reporting door and the throwing door, both bound to the layer.
+
+| Name                                                | Returns | Description |
+|-----------------------------------------------------|---------|-------------|
+| [`error(code, at, options)`](#error)                 | Error   | Reports through the error channel and lets the caller continue |
+| [`error.line(code, at)`](#errorline)                 | string  | The production line alone, for console seats |
+| [`throwError(code, at, options)`](#throwerror)       | never   | Throws synchronously |
 
 #### Example
 
 ```javascript
-import { fatal } from '@semantic-ui/utils';
+import { createErrors, isDevelopment } from '@semantic-ui/utils';
 
-// Throws asynchronously via queueMicrotask
-fatal("Something went wrong", {
-  errorType: TypeError,
-  metadata: { code: "ERR_001" },
+const { error, throwError } = createErrors({ layer: 'sync' });
+
+// report and continue
+error('forbidden', 'todos:secret.field', {
+  explanation: isDevelopment ? 'the field is private — write the fields you mean' : 0,
+  detail: { collection: 'todos', field: 'secret.field' },
 });
 
-// Using onError to intercept and prevent the throw
-fatal("Handled error", {
-  onError: (err) => console.log("Intercepted:", err.message)
+// refuse outright
+throwError('unknownCollection', 'invoices', {
+  explanation: isDevelopment ? 'no collection named invoices is registered on this client' : 0,
 });
 ```
+
+### error
+
+```javascript
+error(code, at, { explanation, detail } = {})
+```
+
+Returned by [`createErrors`](#createerrors). Reports a coded error through the error channel **without interrupting the caller** — `log`'s sibling for things that went wrong. The raise is asynchronous, so the current call stack completes first: it routes to `globalThis.onError` when an app installs one, and throws otherwise, so a report is never silently lost.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| code    | string | A stable identifier for this refusal, routable in code. Never rephrase one in place — the code is the contract, the prose is not |
+| at      | string | **Where** it happened: the greppable address, like `todos:secret.field` or `db-1 -> db-2`. Say **why** in the explanation |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name        | Type          | Default   | Description |
+|-------------|---------------|-----------|-------------|
+| explanation | string \| `0` | undefined | The development teaching message. When present it becomes the error's message; when folded away the message is the production line. See [Development Messages](#development-messages) |
+| detail      | any           | undefined | Structured data attached to the error as `error.detail` |
+
+#### Returns
+
+The `Error` it reported, carrying `code` and (when given) `detail`. Returning it lets a caller attach it to local state or a result envelope without building a second one.
+
+#### Example
+
+```javascript
+import { createErrors, isDevelopment } from '@semantic-ui/utils';
+
+const { error } = createErrors({ layer: 'sync' });
+
+// an app that installs a channel gets the report there
+globalThis.onError = (err) => reportToService(err.code, err.message, err.detail);
+
+const reported = error('writeRejected', 'todos:a7f2', {
+  explanation: isDevelopment ? 'the server refused the write, the optimistic value was rolled back' : 0,
+  detail: { docId: 'a7f2', reason: 'version-conflict' },
+});
+
+console.log(reported.code);    // 'writeRejected'
+console.log(reported.message); // 'sync refused [writeRejected] todos:a7f2' in production
+```
+
+### throwError
+
+```javascript
+throwError(code, at, { explanation, detail } = {})
+```
+
+Returned by [`createErrors`](#createerrors). Same arguments as [`error`](#error), thrown synchronously — for the refusal that must stop the caller where it stands.
+
+#### Parameters
+
+Identical to [`error`](#error).
+
+#### Returns
+
+Never returns.
+
+#### Example
+
+```javascript
+import { createErrors, isDevelopment } from '@semantic-ui/utils';
+
+const { throwError } = createErrors({ layer: 'schema', ErrorClass: TypeError });
+
+const parseField = (name, spec) => {
+  if (!spec.type) {
+    throwError('missingType', `fields.${name}`, {
+      explanation: isDevelopment ? `field "${name}" has no type — every field declares one` : 0,
+      detail: { field: name },
+    });
+  }
+  return spec;
+};
+```
+
+### error.line
+
+```javascript
+error.line(code, at)
+```
+
+Renders the production line by itself, without building or reporting an Error — for console seats and log messages that want the same greppable shape as a real refusal.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| code | string | The refusal code |
+| at   | string | The address it happened at |
+
+#### Returns
+
+The string `<layer> refused [<code>] <at>`, or `refused [<code>] <at>` when the toolset was created without a `layer`.
+
+#### Example
+
+```javascript
+import { createErrors } from '@semantic-ui/utils';
+
+const { error } = createErrors({ layer: 'sync' });
+
+console.warn(error.line('storageChanged', 'db-1 -> db-2'));
+// 'sync refused [storageChanged] db-1 -> db-2'
+
+// the same line parses back out of a pasted log
+const [, layer, code, at] = 'sync refused [storageChanged] db-1 -> db-2'
+  .match(/^(\S+) refused \[([\w-]+)\] (.*)$/);
+```
+
+## Development Messages
+
+`explanation` is teaching prose. It belongs in a development build and nowhere else, so fold it **at the callsite**, in argument position:
+
+```javascript
+error('forbidden', 'todos:secret.field', {
+  explanation: isDevelopment ? 'the field is private — write the fields you mean' : 0,
+});
+```
+
+The reason the ternary has to sit there, and not one layer in: **a bundler define folds branches, never arguments.** `isDevelopment` (and `__DEV__`, and `process.env.NODE_ENV`) collapses an `if` or a `?:` at build time, but a string literal sitting in argument position is just a value being passed — it ships in production whole, even when the callee never reads it. The ternary must live where the string does.
+
+Deferring the prose behind a helper or a thunk does not recover it. Measured on a real corpus: moving explanations behind a helper reclaimed 37 bytes of a ~2KB pool, while the inline callsite ternary reclaimed all of it.
+
+Everything structural — `code`, `at`, `detail` — is cheap and belongs in every build. Those are what production debugging runs on. Only the prose folds.
+
+The same rule governs `tooltipText` on the [timeline](/docs/api/utils/timeline) utilities, and [`isDevelopment`](/docs/api/utils/environment#isdevelopment) is the define to fold against.

@@ -16,10 +16,10 @@ import {
   assignInPlace,
   capitalize,
   clone,
+  createErrors,
   debounce,
   each,
   extend,
-  fatal,
   generateId,
   get,
   getKeyFromEvent,
@@ -35,6 +35,8 @@ import {
   remove,
   wrapFunction,
 } from '@semantic-ui/utils';
+
+const { throwError } = createErrors({ layer: 'templating' });
 
 import { TemplateCompiler } from '@semantic-ui/compiler';
 import { getEngine } from '@semantic-ui/renderer';
@@ -334,10 +336,12 @@ export const Template = class Template {
       ? this.renderingEngine
       : getEngine(this.renderingEngine);
     if (!engine) {
-      fatal(
-        `Renderer "${this.renderingEngine}" not registered.`
+      // a synchronous throw on purpose: the async report let execution fall
+      // through to a second, accidental error on the missing engine
+      throwError('engineNotRegistered', String(this.renderingEngine), {
+        explanation: `Renderer "${this.renderingEngine}" not registered.`
           + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`,
-      );
+      });
     }
 
     const RendererClass = (Template.isServer && engine.serverRenderer)
@@ -547,7 +551,7 @@ export const Template = class Template {
 
   attachEvents(events = this.events) {
     if (!this.parentNode || !this.renderRoot) {
-      fatal('You must set a parent before attaching events');
+      throwError('parentRequired', 'attachEvents', { explanation: 'You must set a parent before attaching events' });
     }
     this.removeEvents();
 
