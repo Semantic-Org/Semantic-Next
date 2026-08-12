@@ -64,7 +64,7 @@ export type MeasureTimelineCloser = (close?: { detail?: TimelineDetail; }) => vo
  * breaks the code being instrumented.
  *
  * @see {@link https://next.semantic-ui.com/docs/api/utils/timeline#marktimeline markTimeline}
- * @see {@link https://next.semantic-ui.com/examples/utils-timeline Example}
+ * @see {@link https://next.semantic-ui.com/examples/utils-marktimeline Example}
  *
  * @example
  * ```ts
@@ -82,7 +82,7 @@ export function markTimeline(name: string, options?: MarkTimelineOptions): void;
  * fired emits nothing rather than throwing.
  *
  * @see {@link https://next.semantic-ui.com/docs/api/utils/timeline#measuretimeline measureTimeline}
- * @see {@link https://next.semantic-ui.com/examples/utils-timeline Example}
+ * @see {@link https://next.semantic-ui.com/examples/utils-measuretimeline Example}
  *
  * @example
  * ```ts
