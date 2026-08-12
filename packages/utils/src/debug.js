@@ -84,39 +84,62 @@ export const log = (
        Errors
 --------------------*/
 
-export const fatal = (
-  message,
-  {
-    errorType = Error,
-    metadata = {},
-    onError,
-    removeStackLines = 1,
-  } = {},
-) => {
-  const error = new errorType(message);
-  Object.assign(error, metadata);
+/*
+  Coded errors with a development/production message split. Development carries a
+  teaching explanation; production carries one uniform, greppable line —
+  `<layer> refused [<code>] <at>` — parseable with
+  /^(\S+) refused \[([\w-]+)\] (.*)$/. The explanation is meant to fold out of
+  production builds at the CALLSITE (`explanation: isDevelopment ? '...' : 0`):
+  a bundler define folds branches, never arguments, so the ternary must live
+  where the string does. Measured on a real corpus: deferring explanations
+  behind a helper or thunk reclaimed 37 bytes of a ~2KB pool; the inline
+  ternary reclaimed all of it.
+*/
 
-  if (error.stack) {
-    const stackLines = error.stack.split('\n');
-    stackLines.splice(1, removeStackLines);
-    error.stack = stackLines.join('\n');
-  }
+const refusalLine = (layer, code, at) => `${layer ? `${layer} ` : ''}refused [${code}] ${at}`;
 
-  const throwError = () => {
-    if (onError) {
-      onError(error);
-      return;
+export const createErrors = ({
+  layer = '',
+  ErrorClass = Error,
+} = {}) => {
+  const build = (code, at, { explanation, detail } = {}) => {
+    const built = new ErrorClass(explanation || refusalLine(layer, code, at));
+    built.code = code;
+    if (detail !== undefined) {
+      built.detail = detail;
     }
-    if (typeof globalThis.onError === 'function') {
-      globalThis.onError(error);
-    }
-    throw error;
+    return built;
   };
 
-  if (typeof queueMicrotask === 'function') {
-    queueMicrotask(throwError);
-  }
-  else {
-    setTimeout(throwError, 0);
-  }
+  // report through the error channel and continue — log's sibling for errors.
+  // the raise is asynchronous so the current call stack completes: it routes to
+  // globalThis.onError when an app installs one, and throws otherwise so a
+  // report is never silently lost. returns the Error it reported.
+  const error = (code, at, options) => {
+    const built = build(code, at, options);
+    const raise = () => {
+      if (typeof globalThis.onError === 'function') {
+        globalThis.onError(built);
+        return;
+      }
+      throw built;
+    };
+    if (typeof queueMicrotask === 'function') {
+      queueMicrotask(raise);
+    }
+    else {
+      setTimeout(raise, 0);
+    }
+    return built;
+  };
+
+  // the production one-liner alone, for console seats
+  error.line = (code, at) => refusalLine(layer, code, at);
+
+  // the throwing form: same arguments, never returns
+  const throwError = (code, at, options) => {
+    throw build(code, at, options);
+  };
+
+  return { error, throwError };
 };

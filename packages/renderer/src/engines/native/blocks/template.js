@@ -1,10 +1,13 @@
 import { nonreactive } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
-import { each, extend, fatal, isPlainObject, isString } from '@semantic-ui/utils';
+import { createErrors, each, extend, isDevelopment, isPlainObject, isString } from '@semantic-ui/utils';
+
 import { defineBlock } from '../define-block.js';
 import { isItemContext } from '../reactive-context.js';
 import { DECLARED_KEYS, markScopeRange } from '../scope-context.js';
 import { registerBlock } from './registry.js';
+
+const { throwError } = createErrors({ layer: 'renderer' });
 
 /*
 
@@ -206,7 +209,11 @@ function resolveSnippet(nameExpr, data, self) {
 
 function prepareSnippet({ node, data, self }) {
   const snippet = resolveSnippet(node.name, data, self);
-  if (!snippet) { fatal(`Snippet name resolved to a missing snippet`); }
+  if (!snippet) {
+    throwError('snippetNotFound', String(node.name), {
+      explanation: isDevelopment ? 'Snippet name resolved to a missing snippet' : 0,
+    });
+  }
   self.currentSnippet = snippet;
   const snippetData = buildArgsRecord({ node, parentData: data, evaluator: self.evaluator, target: data });
   return { snippet, snippetData };

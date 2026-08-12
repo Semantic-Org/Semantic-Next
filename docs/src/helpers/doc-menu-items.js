@@ -206,6 +206,7 @@ export const sidebarMenuAPI = [
       { name: 'Types', url: '/docs/api/utils/types' },
       { name: 'Regular Expressions', url: '/docs/api/utils/regex' },
       { name: 'Strings', url: '/docs/api/utils/strings' },
+      { name: 'Timeline', url: '/docs/api/utils/timeline' },
     ],
   },
   {

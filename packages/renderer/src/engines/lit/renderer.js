@@ -3,12 +3,13 @@ import { html, svg } from 'lit';
 import { nonreactive, signal } from '@semantic-ui/reactivity';
 import {
   assignInPlace,
+  createErrors,
   each,
-  fatal,
   filterObject,
   hashCode,
   inArray,
   isArray,
+  isDevelopment,
   isFunction,
   isPlainObject,
   isString,
@@ -26,6 +27,8 @@ import { reactiveEach } from './directives/reactive-each.js';
 import { reactiveMatch } from './directives/reactive-match.js';
 import { reactiveRerender } from './directives/reactive-rerender.js';
 import { renderTemplate } from './directives/render-template.js';
+
+const { throwError } = createErrors({ layer: 'renderer' });
 
 export class LitRenderer {
   static html = html;
@@ -411,7 +414,9 @@ export class LitRenderer {
     const inheritsData = true;
 
     if (!snippet) {
-      fatal(`Snippet "${snippetName}" not found`);
+      throwError('snippetNotFound', String(snippetName), {
+        explanation: isDevelopment ? `Snippet "${snippetName}" not found` : 0,
+      });
     }
     const snippetData = this.getPackedNodeData(node, data, { inheritsData });
     return this.renderContent({

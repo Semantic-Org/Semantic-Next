@@ -19,4 +19,5 @@ export * from './objects.js';
 export * from './paths.js';
 export * from './regexp.js';
 export * from './strings.js';
+export * from './timeline.js';
 export * from './types.js';

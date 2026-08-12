@@ -1,4 +1,4 @@
-import { fatal, log } from '@semantic-ui/utils';
+import { createErrors, log } from '@semantic-ui/utils';
 
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -14,56 +14,184 @@ afterAll(() => {
   errorSpy.mockRestore();
 });
 
-describe('fatal', () => {
+describe('createErrors', () => {
   let originalOnError;
+
+  const flushMicrotasks = () =>
+    new Promise((resolve) => {
+      queueMicrotask(resolve);
+    });
+
   beforeEach(() => {
-    originalOnError = global.onError;
-    global.onError = vi.fn();
+    originalOnError = globalThis.onError;
+    globalThis.onError = vi.fn();
   });
 
-  afterEach(() => {
-    global.onError = originalOnError;
+  afterEach(async () => {
+    // real timers before the flush: a faked queueMicrotask never resolves the promise
+    vi.useRealTimers();
+    await flushMicrotasks();
+    if (originalOnError === undefined) {
+      delete globalThis.onError;
+    }
+    else {
+      globalThis.onError = originalOnError;
+    }
   });
 
-  it('should exist', () => {
-    expect(typeof fatal).toBe('function');
-  });
+  describe('bundle', () => {
+    it('should return the reporting and throwing forms', () => {
+      const errors = createErrors({ layer: 'demo' });
+      expect(Object.keys(errors).sort()).toEqual(['error', 'throwError']);
+      expect(typeof errors.error).toBe('function');
+      expect(typeof errors.throwError).toBe('function');
+      expect(typeof errors.error.line).toBe('function');
+    });
 
-  /* Testing errors is flakey
-
-  it('should throw an error with the provided message', async () => {
-    await expect(new Promise((resolve, reject) => {
-      try {
-        fatal('Test error', { onError: reject });
-      } catch (error) {
-        reject(error);
-      }
-    })).rejects.toThrow('Test error');
-  });
-
-  it('should attach provided metadata to the error', async () => {
-    const metadata = { code: 'ERR_TEST' };
-    await expect(new Promise((resolve, reject) => {
-      try {
-        fatal('Test error', { metadata, onError: reject });
-      } catch (error) {
-        reject(error);
-      }
-    })).rejects.toHaveProperty('code', 'ERR_TEST');
-  });
-
-  it('should modify the error stack based on removeStackLines option', async () => {
-    await expect(new Promise((resolve, reject) => {
-      try {
-        fatal('Test error', { removeStackLines: 2, onError: reject });
-      } catch (error) {
-        reject(error);
-      }
-    })).rejects.toSatisfy((error) => {
-      return error.stack.split('\n').length < new Error().stack.split('\n').length;
+    it('should work with no options at all', () => {
+      const { error, throwError } = createErrors();
+      expect(typeof error).toBe('function');
+      expect(typeof throwError).toBe('function');
     });
   });
-  */
+
+  describe('line', () => {
+    it('should format the production line', () => {
+      const { error } = createErrors({ layer: 'demo' });
+      expect(error.line('code', 'at')).toBe('demo refused [code] at');
+    });
+
+    it('should drop the leading token when the layer is empty', () => {
+      const { error } = createErrors();
+      expect(error.line('code', 'at')).toBe('refused [code] at');
+    });
+
+    it('should stay greppable by the documented pattern', () => {
+      const { error } = createErrors({ layer: 'query' });
+      const parsed = error.line('unknown-field', 'select(user.nmae)')
+        .match(/^(\S+) refused \[([\w-]+)\] (.*)$/);
+      expect(parsed.slice(1)).toEqual(['query', 'unknown-field', 'select(user.nmae)']);
+    });
+
+    it('should match the message the builders produce', () => {
+      const { error, throwError } = createErrors({ layer: 'demo' });
+      const line = error.line('unknown-field', 'select()');
+      expect(() => throwError('unknown-field', 'select()')).toThrow(line);
+    });
+  });
+
+  describe('throwError', () => {
+    class DemoError extends Error {}
+
+    it('should throw synchronously as the configured class', () => {
+      const { throwError } = createErrors({ layer: 'demo', ErrorClass: DemoError });
+      expect(() => throwError('missing-collection', 'find()')).toThrow(DemoError);
+    });
+
+    it('should carry the code and the detail', () => {
+      const { throwError } = createErrors({ layer: 'demo', ErrorClass: DemoError });
+      let thrown;
+      try {
+        throwError('missing-collection', 'find()', { detail: { name: 'todos' } });
+      }
+      catch (caught) {
+        thrown = caught;
+      }
+      expect(thrown).toBeInstanceOf(DemoError);
+      expect(thrown).toBeInstanceOf(Error);
+      expect(thrown.message).toBe('demo refused [missing-collection] find()');
+      expect(thrown.code).toBe('missing-collection');
+      expect(thrown.detail).toEqual({ name: 'todos' });
+    });
+
+    it('should prefer the explanation over the line', () => {
+      const { throwError } = createErrors({ layer: 'demo' });
+      expect(() =>
+        throwError('unknown-field', 'select()', {
+          explanation: 'no field named nmae on todos, did you mean name?',
+        })
+      ).toThrow('no field named nmae on todos, did you mean name?');
+    });
+
+    it('should fall back to the line when the explanation folds away', () => {
+      const { throwError } = createErrors({ layer: 'demo' });
+      expect(() => throwError('unknown-field', 'select()', { explanation: 0 }))
+        .toThrow('demo refused [unknown-field] select()');
+    });
+
+    it('should leave detail off when none is given', () => {
+      const { throwError } = createErrors({ layer: 'demo' });
+      let thrown;
+      try {
+        throwError('unknown-field', 'select()');
+      }
+      catch (caught) {
+        thrown = caught;
+      }
+      expect('detail' in thrown).toBe(false);
+    });
+
+    it('should keep a falsy detail', () => {
+      const { throwError } = createErrors({ layer: 'demo' });
+      let thrown;
+      try {
+        throwError('bad-index', 'at()', { detail: 0 });
+      }
+      catch (caught) {
+        thrown = caught;
+      }
+      expect(thrown.detail).toBe(0);
+    });
+  });
+
+  describe('error', () => {
+    it('should return the built error synchronously', () => {
+      const { error } = createErrors({ layer: 'demo' });
+      const returned = error('write-conflict', 'commit()', { detail: { id: 7 } });
+      expect(returned).toBeInstanceOf(Error);
+      expect(returned.message).toBe('demo refused [write-conflict] commit()');
+      expect(returned.code).toBe('write-conflict');
+      expect(returned.detail).toEqual({ id: 7 });
+      // the report is deferred, so the calling stack completes first
+      expect(globalThis.onError).not.toHaveBeenCalled();
+    });
+
+    it('should route the report to globalThis.onError asynchronously', async () => {
+      const { error } = createErrors({ layer: 'demo' });
+      const returned = error('write-conflict', 'commit()');
+      expect(globalThis.onError).not.toHaveBeenCalled();
+      await flushMicrotasks();
+      expect(globalThis.onError).toHaveBeenCalledTimes(1);
+      expect(globalThis.onError).toHaveBeenCalledWith(returned);
+    });
+
+    it('should build with the configured class when reporting', async () => {
+      class DemoError extends Error {}
+      const { error } = createErrors({ layer: 'demo', ErrorClass: DemoError });
+      const returned = error('write-conflict', 'commit()');
+      expect(returned).toBeInstanceOf(DemoError);
+      await flushMicrotasks();
+      expect(globalThis.onError).toHaveBeenCalledWith(returned);
+    });
+
+    it('should throw the report when no handler is installed', () => {
+      delete globalThis.onError;
+      // the raise lands in a microtask, so the test has to own the queue to catch
+      // it: faking queueMicrotask lets runAllTicks run the job on this stack
+      vi.useFakeTimers({ toFake: ['queueMicrotask'] });
+      const { error } = createErrors({ layer: 'demo' });
+      const returned = error('write-conflict', 'commit()');
+      let thrown;
+      try {
+        vi.runAllTicks();
+      }
+      catch (caught) {
+        thrown = caught;
+      }
+      vi.useRealTimers();
+      expect(thrown).toBe(returned);
+    });
+  });
 });
 
 describe('log', () => {

@@ -1,0 +1,179 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Timeline Utilities
+package: "@semantic-ui/utils"
+methods: [markTimeline, measureTimeline]
+icon: activity
+description: API reference for guarded performance timeline instrumentation
+---
+
+The timeline utilities are guarded instrumentation over the browser's performance timeline — `markTimeline` for a point, `measureTimeline` for a duration, recorded immediately between two endpoints or closed by the `done()` closer it returns. Entries land in the DevTools performance panel and in `performance.getEntries()`, and can dress themselves onto their own named track.
+
+Every entry point is **throw-safe by contract**. A runtime without the performance API, a measure whose endpoint mark never fired, or a `detail` builder that throws must never break the code being instrumented: instrumentation observes, it does not participate. There is no error path to handle and nothing to wrap in a `try`.
+
+The names deliberately do not mirror `performance.mark` and `performance.measure`: the contracts differ — an options bag, `from`/`to`, the reserved `'now'` endpoint, a returned closer, the never-throw guard — and a name echoing the native API would promise the native signature. For the underlying primitives, see [`performance.mark`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/mark) and [`performance.measure`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/measure) on MDN.
+
+## Functions
+
+### markTimeline
+
+```javascript
+markTimeline(name, { detail } = {})
+```
+
+Records a point on the timeline, wrapping `performance.mark`.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| name    | string | The mark's name. Also the handle `measureTimeline` uses as a `from` or `to` |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name   | Type                    | Default   | Description |
+|--------|-------------------------|-----------|-------------|
+| detail | object \| function \| `0` | undefined | Data to attach to the entry, or a thunk producing it. Thunks are evaluated inside the guard. Dressing keys are composed into a DevTools envelope — see [DevTools Dressing](#devtools-dressing) |
+
+#### Returns
+
+This function does not return a value.
+
+#### Example
+
+```javascript
+import { markTimeline } from '@semantic-ui/utils';
+
+markTimeline('app:boot');
+markTimeline('app:ready');
+```
+
+### measureTimeline
+
+```javascript
+measureTimeline(name, { from, to, detail } = {})
+```
+
+Records a duration on the timeline, wrapping `performance.measure`. The call takes one of two forms, split on `to`:
+
+- **With `to`** — a mark name, a timestamp, or `'now'` — the measure records immediately. An endpoint whose mark never fired emits nothing rather than throwing, which is why a mistyped mark name is a silent no-op in this form.
+- **Without `to`** — the call returns an idempotent `done()` closer and records when it is called. The start is captured at call time, so there are no mark names to keep in sync and no way for a typo to quietly drop the measurement.
+
+`'now'` is a reserved endpoint meaning this instant — a mark literally named `now` cannot be addressed as a `to`.
+
+`from` defaults to the call instant (`performance.now()`) in both forms. A named `from` on the closer form resolves at done-time, so its mark may fire after the call. The default is nullish — an explicit `from: 0` measures from the time origin (page navigation), the deliberate spelling for whole-page durations.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| name    | string | The measure's name, as it appears in the timeline |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name   | Type                      | Default   | Description |
+|--------|---------------------------|-----------|-------------|
+| from   | string \| number          | call instant | The start mark's name, or a timestamp |
+| to     | string \| number \| `'now'` | — | The end mark's name, a timestamp, or `'now'` for this instant. Omit it to receive the closer |
+| detail | object \| function \| `0` | undefined | Data to attach to the entry, or a thunk producing it. Thunks are evaluated at record-time inside the guard. See [DevTools Dressing](#devtools-dressing) |
+
+#### Returns
+
+With `to`, this function does not return a value.
+
+Without `to`, it returns `done(options?)` — the closer. It records the measure the first time it is called and does nothing after that, which makes it safe on a path that can settle more than once. It accepts the same `{ detail }` bag, so detail known only at the end (a row count, an outcome) can ride the close, where it wins over the open's.
+
+#### Example
+
+```javascript
+import { markTimeline, measureTimeline, isDevelopment } from '@semantic-ui/utils';
+
+markTimeline('app:boot');
+await start();
+markTimeline('app:ready');
+
+measureTimeline('app:startup', {
+  from: 'app:boot',
+  to: 'app:ready',
+  detail: {
+    track: 'boot',
+    color: 'primary',
+    tooltipText: isDevelopment ? 'transfer, parse, and first render' : 0,
+  },
+});
+
+// to: 'now' closes an open-ended measure at this instant
+measureTimeline('app:boot-so-far', { from: 'app:boot', to: 'now' });
+```
+
+The closer form:
+
+```javascript
+import { measureTimeline, isDevelopment } from '@semantic-ui/utils';
+
+const done = measureTimeline('db:query');
+const rows = await runQuery();
+done({
+  detail: {
+    track: 'data',
+    properties: [['rows', rows.length]],
+    tooltipText: isDevelopment ? 'the full read: plan, fetch, and hydrate' : 0,
+  },
+});
+```
+
+## DevTools Dressing
+
+An entry can name its own track, color, and tooltip in the DevTools performance panel. Pass those keys flat on `detail` and the `{ devtools }` envelope is composed for you.
+
+| Name       | Type   | Description |
+|------------|--------|-------------|
+| dataType   | string | `'track-entry'` for measures (the default), `'marker'` for marks |
+| track      | string | The custom track's name in the performance panel |
+| trackGroup | string | Groups several tracks under one header |
+| color      | string | A DevTools palette color name (`'primary'`, `'secondary-light'`, `'error'`, …) |
+| properties | array  | `[key, value]` rows shown in the entry's tooltip. Data, not prose |
+| tooltipText | string \| `0` | Teaching prose shown on hover. Development builds only, by convention — see [Development Messages](#development-messages) |
+
+Composition is opt-in and never gets in the way:
+
+- a `detail` carrying none of these keys is attached as-is
+- a `detail` that already has its own `devtools` key passes through untouched
+- a non-object `detail` passes through untouched
+- a falsy `detail` (including a folded `0`) attaches nothing at all
+- a `tooltipText` folded to `0` drops out of the envelope, leaving the structural dressing intact
+
+```javascript
+measureTimeline('sync:apply', {
+  from: 'sync:apply:start',
+  to: 'now',
+  detail: {
+    track: 'sync',
+    trackGroup: 'semantic',
+    color: 'primary',
+    properties: [['docs', 42], ['channel', 'invoices']],
+    tooltipText: isDevelopment ? 'applying a server delta to the local pool' : 0,
+  },
+});
+```
+
+Because `detail` accepts a thunk, work needed only to describe an entry can be deferred until the entry is actually built, and a thunk that throws is swallowed by the same guard:
+
+```javascript
+markTimeline('pool:resize', { detail: () => ({ properties: [['size', pool.measure()]] }) });
+```
+
+## Development Messages
+
+`tooltipText` is teaching prose. It belongs in a development build and nowhere else, so fold it **at the callsite**, in argument position:
+
+```javascript
+tooltipText: isDevelopment ? 'applying a server delta to the local pool' : 0,
+```
+
+The reason the ternary has to sit there, and not one layer in: **a bundler define folds branches, never arguments.** `isDevelopment` (and `__DEV__`, and `process.env.NODE_ENV`) collapses an `if` or a `?:` at build time, but a string literal sitting in argument position is just a value being passed — it ships in production whole, even when the callee never reads it. The ternary must live where the string does, and deferring the prose behind a helper or a thunk does not recover it: measured on a real corpus, moving prose behind a helper reclaimed 37 bytes of a ~2KB pool, while the inline callsite ternary reclaimed all of it.
+
+The structural dressing is the opposite case. `track`, `trackGroup`, `color`, and `properties` are small, and they are what makes a production profile readable — ship them in every build. Only the prose folds. The same rule governs `explanation` on [`createErrors`](/docs/api/utils/debug#createerrors), and [`isDevelopment`](/docs/api/utils/environment#isdevelopment) is the define to fold against.
