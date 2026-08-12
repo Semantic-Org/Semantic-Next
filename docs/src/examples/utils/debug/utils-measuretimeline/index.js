@@ -1,25 +1,22 @@
-import { isDevelopment, markTimeline, measureTimeline } from '@semantic-ui/utils';
-
-// a mark is a point on the timeline
-markTimeline('parse:start');
-const rows = Array.from({ length: 20000 }, (_, index) => ({ id: index, total: index * 2 }));
-markTimeline('parse:end');
+import { isDevelopment, measureTimeline } from '@semantic-ui/utils';
 
 // with `to`, a measure records immediately between two endpoints, and reads
 // back off the performance timeline
+performance.mark('parse:start');
+const rows = Array.from({ length: 20000 }, (_, index) => ({ id: index, total: index * 2 }));
+performance.mark('parse:end');
+
 measureTimeline('parse', { from: 'parse:start', to: 'parse:end' });
 const [parse] = performance.getEntriesByName('parse');
 console.log(parse.entryType, `${parse.duration.toFixed(2)}ms`);
 
-// devtools dressing composes into the { devtools } envelope for you. the
-// structural keys are cheap enough for every build, tooltipText is prose, so it
-// rides a development ternary and folds out of production. to: 'now' is the
-// reserved endpoint for this instant
-markTimeline('total:start');
+// to: 'now' is the reserved endpoint for this instant, and devtools dressing
+// composes into the { devtools } envelope — structural keys in every build,
+// prose tooltipText behind a development ternary
 const total = rows.reduce((sum, row) => sum + row.total, 0);
 
 measureTimeline('total', {
-  from: 'total:start',
+  from: 'parse:start',
   to: 'now',
   detail: {
     track: 'Semantic UI',

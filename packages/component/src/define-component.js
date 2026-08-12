@@ -6,7 +6,7 @@ import { adoptStylesheet, createErrors, each, identity, isClient, isDevelopment,
 
 import { getProperties } from './component-helpers.js';
 
-const { throwError } = createErrors({ layer: 'component' });
+const { throwError } = createErrors({ namespace: 'component' });
 import { registerComponent } from './component-registry.js';
 
 // user css can make whitespace significant, keep the template intact when it might

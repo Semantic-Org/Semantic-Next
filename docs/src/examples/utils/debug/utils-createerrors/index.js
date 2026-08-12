@@ -1,13 +1,13 @@
 import { createErrors, isDevelopment } from '@semantic-ui/utils';
 
-// one binding per layer, and every refusal it builds is stamped with that name
-const { error, throwError } = createErrors({ layer: 'component', ErrorClass: TypeError });
+// one binding per namespace, and every refusal it builds is stamped with that name
+const { error, throwError } = createErrors({ namespace: 'component', ErrorClass: TypeError });
 
 // error() reports asynchronously through globalThis.onError when an app installs
 // one, and throws when none is installed, so a report is never lost
 globalThis.onError = (reported) => console.log(`onError: ${reported.message}`);
 
-// production ships one greppable line: <layer> <verb> [<code>] <at>
+// production ships one greppable line: <namespace> <verb> [<code>] <at>
 console.log(error.line('engineNotRegistered', 'lit'));
 
 // the verb is any word — your own classification of the line — and grepping

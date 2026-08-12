@@ -14,13 +14,18 @@ export interface ErrorOptions {
   explanation?: string | 0;
   /** Structured data attached to the error as `error.detail` */
   detail?: any;
-  /** The line's verb — any word, the layer's own classification of the line.
+  /** The line's verb — any word, the caller's own classification of the line.
    * Nullish falls back to `'refused'` */
   verb?: string;
+  /** The display identity leading the line (e.g. 'sync', 'component') — when
+   * empty the line composes without a leading token. The binder pre-fills it */
+  namespace?: string;
+  /** The error constructor to build with (defaults to Error) */
+  ErrorClass?: ErrorConstructor;
 }
 
 /**
- * A coded Error with the layer's uniform message split
+ * A coded Error with the family's uniform message split
  */
 export interface CodedError extends Error {
   /** The stable, programmatically routable refusal code */
@@ -52,12 +57,33 @@ export interface ErrorReportOptions extends ErrorOptions {
  */
 export interface ErrorReporter {
   (code: string, at: string, options?: ErrorReportOptions): CodedError;
-  /** The production one-liner alone — `<layer> <verb> [<code>] <at>` — for console seats */
-  line(code: string, at: string, options?: { verb?: string; }): string;
+  /** The production one-liner alone — `<namespace> <verb> [<code>] <at>` — for console seats */
+  line(code: string, at: string, options?: { namespace?: string; verb?: string; }): string;
 }
 
 /**
- * The error tools bound to one layer's identity
+ * The reporting door, exported unbound: builds the coded error and reports it
+ * through the error channel WITHOUT interrupting the caller — `namespace` and
+ * `ErrorClass` ride the options bag per call, exactly as `log` takes its
+ * namespace. `createErrors` binds this same function.
+ *
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/debug#error error}
+ * @see {@link https://next.semantic-ui.com/examples/utils-error Example}
+ */
+export const error: ErrorReporter;
+
+/**
+ * The throwing door, exported unbound: same options as `error`, thrown
+ * synchronously — `namespace` and `ErrorClass` ride the options bag per call.
+ * `createErrors` binds this same function.
+ *
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/debug#throwerror throwError}
+ * @see {@link https://next.semantic-ui.com/examples/utils-throwerror Example}
+ */
+export function throwError(code: string, at: string, options?: ErrorOptions): never;
+
+/**
+ * The error tools bound to one namespace
  */
 export interface ErrorTools {
   /** Report through the error channel and continue; returns the reported Error */
@@ -67,36 +93,27 @@ export interface ErrorTools {
 }
 
 /**
- * Options for createErrors
- */
-export interface CreateErrorsOptions {
-  /** The layer's public name, leading the production line (e.g. 'sync', 'component') */
-  layer?: string;
-  /** The error constructor every refusal builds with (defaults to Error) */
-  ErrorClass?: ErrorConstructor;
-}
-
-/**
- * Creates a layer-bound error toolset: `error` reports through the error
- * channel and continues, `throwError` throws, and `error.line` renders the
- * uniform production line `<layer> <verb> [<code>] <at>` (parseable with
+ * The binder over `error` and `throwError`, mirroring `createLogger` over
+ * `log`: pre-fills the options into every call (callsite options win) and
+ * returns the bound pair. Every message leads with the uniform production line
+ * `<namespace> <verb> [<code>] <at>` (parseable with
  * `/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m`). The verb is a stable token position
- * carrying the layer's own classification — any word, `refused` when not
- * given — so grepping a word filters lines by class. Every message leads with that line;
- * development appends the teaching `explanation` beneath it, and explanations
- * are meant to fold out of production builds at the callsite: a bundler define
- * folds branches, never arguments, so the ternary
- * (`explanation: isDevelopment ? '...' : 0`) must live where the string does.
+ * carrying the caller's own classification — any word, `refused` when not
+ * given — so grepping a word filters lines by class. Development appends the
+ * teaching `explanation` beneath the line, and explanations are meant to fold
+ * out of production builds at the callsite: a bundler define folds branches,
+ * never arguments, so the ternary (`explanation: isDevelopment ? '...' : 0`)
+ * must live where the string does.
  *
  * @see {@link https://next.semantic-ui.com/docs/api/utils/debug#createerrors createErrors}
  * @see {@link https://next.semantic-ui.com/examples/utils-createerrors Example}
  *
- * @param options - The layer binding
+ * @param defaults - The defaults to pre-fill (`namespace` among them)
  * @returns The bound `{ error, throwError }` toolset
  *
  * @example
  * ```ts
- * const { error, throwError } = createErrors({ layer: 'sync' });
+ * const { error, throwError } = createErrors({ namespace: 'sync' });
  *
  * throwError('forbidden', 'todos:secret.field', {
  *   explanation: isDevelopment ? 'the field is private — write the fields you mean' : 0,
@@ -105,7 +122,7 @@ export interface CreateErrorsOptions {
  * console.warn(error.line('storageChanged', 'db-1 -> db-2'));
  * ```
  */
-export function createErrors(options?: CreateErrorsOptions): ErrorTools;
+export function createErrors(defaults?: ErrorReportOptions): ErrorTools;
 
 /**
  * Log levels supported by the logging utility
@@ -121,7 +138,7 @@ export type LogFormat = 'standard' | 'json';
  * Options for the log function
  */
 export interface LogOptions {
-  /** Namespace for grouping related logs (used as default title) */
+  /** Namespace for grouping related logs — prints verbatim as the default title */
   namespace?: string;
   /** Additional data to include with the log message — accepts arrays or single objects */
   data?: any;
@@ -135,7 +152,7 @@ export interface LogOptions {
   consoleMethod?: 'log' | 'debug' | 'info' | 'warn' | 'error';
   /** Suppress all output when true */
   silent?: boolean;
-  /** Title/label to display before the message */
+  /** Title/label to display before the message (defaults to the namespace) */
   title?: string;
   /** Whether to show the title/label */
   showTitle?: boolean;
@@ -181,3 +198,44 @@ export interface LogOptions {
  * ```
  */
 export function log(message: string, level?: LogLevel, options?: LogOptions): void;
+
+/**
+ * The narration bundle bound to one set of log defaults — flat functions for
+ * destructuring
+ */
+export interface Logger {
+  /** The bound `log` — same signature, the factory defaults shallow-merged
+   * beneath the callsite options */
+  log(message: string, level?: LogLevel, options?: LogOptions): void;
+  /** Logs at `debug` level; options merge over the factory defaults */
+  debug(message: string, options?: LogOptions): void;
+  /** Logs at `info` level; options merge over the factory defaults */
+  info(message: string, options?: LogOptions): void;
+  /** Logs at `warn` level; options merge over the factory defaults */
+  warn(message: string, options?: LogOptions): void;
+  /** Logs at `error` level; options merge over the factory defaults */
+  error(message: string, options?: LogOptions): void;
+}
+
+/**
+ * Creates a logging bundle bound to shared defaults — a namespace, a
+ * timestamp switch, any `log` option. Every member calls `log` with the
+ * factory defaults shallow-merged beneath the callsite options (callsite
+ * wins). The four level wrappers absorb the level slot only; the bound `log`
+ * keeps it. The namespace prints verbatim.
+ *
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/debug#createlogger createLogger}
+ * @see {@link https://next.semantic-ui.com/examples/utils-createlogger Example}
+ *
+ * @param defaults - Log options applied to every call from the bundle
+ * @returns The bound `{ log, debug, info, warn, error }` bundle
+ *
+ * @example
+ * ```ts
+ * const { info, warn, error: logError } = createLogger({ namespace: 'sync' });
+ *
+ * info('connected');
+ * warn('retrying', { data: { attempt: 2 } });
+ * ```
+ */
+export function createLogger(defaults?: LogOptions): Logger;

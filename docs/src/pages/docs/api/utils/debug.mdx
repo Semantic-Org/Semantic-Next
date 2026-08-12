@@ -3,19 +3,19 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Debug Utilities
 package: "@semantic-ui/utils"
-methods: [log, createErrors]
+methods: [log, createLogger, createErrors, error, throwError]
 icon: bug
 description: API reference for logging and coded error handling utility functions
 ---
 
-The Debug utilities provide the two reporting doors a layer needs: `log` for styled console output, and `createErrors` for coded errors that lead with one uniform, greppable line and carry a teaching explanation beneath it in development.
+The Debug utilities provide the two reporting doors a library needs: `log` for styled console output — with `createLogger` binding it to a namespace once — and `createErrors` for coded errors that lead with one uniform, greppable line and carry a teaching explanation beneath it in development.
 
 ## Functions
 
 ### log
 
 ```javascript
-function log(message, level = 'log', { namespace = '', data = undefined, color = 'inherit', timestamp = false, format = 'standard', consoleMethod = null, silent = false, title = toTitleCase(namespace), showTitle = true, titleColor = null } = {})
+function log(message, level = 'log', { namespace = '', data = undefined, color = 'inherit', timestamp = false, format = 'standard', consoleMethod = null, silent = false, title = namespace, showTitle = true, titleColor = null } = {})
 ```
 
 A flexible logging utility with formatting, namespacing, and multiple output options. Supports colored output, timestamps, structured JSON format, and configurable titles.
@@ -32,14 +32,14 @@ A flexible logging utility with formatting, namespacing, and multiple output opt
 
 | Name          | Type    | Default              | Description |
 |---------------|---------|----------------------|-------------|
-| namespace     | string  | ''                   | Namespace for grouping related logs (used as default title) |
+| namespace     | string  | ''                   | Namespace for grouping related logs — prints verbatim as the default title |
 | data          | any     | undefined            | Additional data to include with the log message. Accepts arrays and objects |
 | color         | string  | 'inherit'            | Text color for the message |
 | timestamp     | boolean | false                | Whether to include timestamp in the output |
 | format        | string  | 'standard'           | Output format ('standard' or 'json') |
 | consoleMethod | string  | null                 | Override the console method used for output |
 | silent        | boolean | false                | Suppress all output when true |
-| title         | string  | toTitleCase(namespace) | Title/label to display before the message |
+| title         | string  | namespace            | Title/label to display before the message |
 | showTitle     | boolean | true                 | Whether to show the title/label |
 | titleColor    | string  | null                 | Color for the title/label (defaults to level color) |
 
@@ -78,32 +78,80 @@ log('Important notice', 'warn', {
 });
 ```
 
+### createLogger
+
+```javascript
+function createLogger({ namespace = '', timestamp = false, ...defaults } = {})
+```
+
+Binds `log` to shared defaults once and returns the narration bundle — flat functions made for destructuring. Every member calls `log` with the factory defaults shallow-merged beneath the callsite options, so a call site can still override anything. The four level wrappers absorb the level slot only: `info(message, options)` is `log(message, 'info', options)` with the defaults underneath. The bound `log` keeps its level parameter for the occasional dynamic level.
+
+The namespace prints verbatim — `db` shows as `db`, never `Db`. Granularity belongs in the value itself: `createLogger({ namespace: 'physics:collision' })`.
+
+#### Parameters
+
+| Name     | Type   | Description |
+|----------|--------|-------------|
+| defaults | object | Any [`log` option](#options) — `namespace`, `timestamp`, `format`, `titleColor`, and the rest — applied to every call from the bundle |
+
+#### Returns
+
+`{ log, debug, info, warn, error }` — flat bound functions.
+
+| Name                          | Description |
+|-------------------------------|-------------|
+| `log(message, level, options)` | `log` with the defaults merged in, level slot intact |
+| `debug(message, options)`      | Logs at `debug` level |
+| `info(message, options)`       | Logs at `info` level |
+| `warn(message, options)`       | Logs at `warn` level |
+| `error(message, options)`      | Logs at `error` level |
+
+#### Example
+
+Both debug families export an `error`. A file that binds both renames one at the destructure — the consumer picks the name, no third export needed:
+
+```javascript
+import { createLogger, createErrors, isDevelopment } from '@semantic-ui/utils';
+
+const { info, warn, error: logError } = createLogger({ namespace: 'sync' });
+const { error, throwError } = createErrors({ namespace: 'sync' });
+
+info('connected');                                  // sync connected
+warn('reconnecting', { data: { attempt: 2 } });
+logError('socket closed unexpectedly');             // console.error, nothing thrown
+
+// the coded family still owns real refusals
+error('writeRejected', 'todos:a7f2', {
+  explanation: isDevelopment ? 'the server refused the write' : 0,
+});
+```
+
 ### createErrors
 
 ```javascript
-function createErrors({ layer = '', ErrorClass = Error } = {})
+function createErrors({ namespace = '', ...defaults } = {})
 ```
 
-Creates a layer-bound error toolset. Bind it once per layer and every refusal that layer raises reads the same way: a stable `code` you can route on, an address (`at`) that says where it happened — both riding the error as properties — and a development `explanation` that folds out of production builds.
+The binder over [`error`](#error) and [`throwError`](#throwerror), mirroring `createLogger` over `log`: pre-fills the options into every call (callsite options win) and returns the bound pair. Bind it once per namespace and every refusal raised under it reads the same way: a stable `code` you can route on, an address (`at`) that says where it happened — both riding the error as properties — and a development `explanation` that folds out of production builds.
 
-Every message leads with one uniform line, `<layer> <verb> [<code>] <at>`, parseable with `/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m` — so a support ticket carrying a pasted error still names the layer, the code, and the address. The verb gives every line a searchable classification surface: a stable token position carrying your own taxonomy of error, whatever it is. Grep a word and you have filtered a console by class; the pattern's verb group gives the same axis programmatically. The vocabulary is yours — any word renders, a game engine might say `despawned` where a payments layer says `declined` — and `refused` is the default when none is given. In development the explanation follows on its own line; in production the line is the whole message.
+Every message leads with one uniform line, `<namespace> <verb> [<code>] <at>`, parseable with `/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m` — so a support ticket carrying a pasted error still names the namespace, the code, and the address. The verb gives every line a searchable classification surface: a stable token position carrying your own taxonomy of error, whatever it is. Grep a word and you have filtered a console by class; the pattern's verb group gives the same axis programmatically. The vocabulary is yours — any word renders, a game engine might say `despawned` where a payments library says `declined` — and `refused` is the default when none is given. In development the explanation follows on its own line; in production the line is the whole message.
 
 #### Parameters
 
 | Name    | Type   | Description |
 |---------|--------|-------------|
-| options | object | The layer binding |
+| options | object | The namespace binding |
 
 ##### Options
 
 | Name       | Type     | Default | Description |
 |------------|----------|---------|-------------|
-| layer      | string   | `''`    | The layer's public name, leading the production line (e.g. `sync`, `component`) |
-| ErrorClass | function | `Error` | The constructor every refusal builds with |
+| namespace  | string   | `''`    | The display identity leading the production line (e.g. `sync`, `component`) |
+| ...defaults | object  |         | Any [`error` option](#error) to pre-fill — `ErrorClass`, a default `verb`, whatever every call should carry |
 
 #### Returns
 
-`{ error, throwError }` — the reporting door and the throwing door, both bound to the layer.
+`{ error, throwError }` — the reporting door and the throwing door, both bound to the namespace.
 
 | Name                                                | Returns | Description |
 |-----------------------------------------------------|---------|-------------|
@@ -116,7 +164,7 @@ Every message leads with one uniform line, `<layer> <verb> [<code>] <at>`, parse
 ```javascript
 import { createErrors, isDevelopment } from '@semantic-ui/utils';
 
-const { error, throwError } = createErrors({ layer: 'sync' });
+const { error, throwError } = createErrors({ namespace: 'sync' });
 
 // report and continue
 error('forbidden', 'todos:secret.field', {
@@ -133,10 +181,10 @@ throwError('unknownCollection', 'invoices', {
 ### error
 
 ```javascript
-error(code, at, { explanation, detail } = {})
+error(code, at, { namespace, explanation, detail, verb, report, ErrorClass } = {})
 ```
 
-Returned by [`createErrors`](#createerrors). Reports a coded error through the error channel **without interrupting the caller** — `log`'s sibling for things that went wrong. The raise is asynchronous, so the current call stack completes first: it routes to `globalThis.onError` when an app installs one, and falls back to `console.error` otherwise, so a report is never silently lost.
+Exported top-level, and returned bound by [`createErrors`](#createerrors) with the options pre-filled. Reports a coded error through the error channel **without interrupting the caller** — `log`'s sibling for things that went wrong. The raise is asynchronous, so the current call stack completes first: it routes to `globalThis.onError` when an app installs one, and falls back to `console.error` otherwise, so a report is never silently lost.
 
 Sometimes the error is a value — handed to a promise rejection, attached to a result — and reporting is someone else's job. `report: false` builds and returns the same coded error without reporting it, making `error` the family's builder without a third function.
 
@@ -152,10 +200,12 @@ Sometimes the error is a value — handed to a promise rejection, attached to a 
 
 | Name        | Type          | Default   | Description |
 |-------------|---------------|-----------|-------------|
+| namespace   | string        | `''`      | The display identity leading the line — empty composes the line without a leading token. The bound form pre-fills it |
 | explanation | string \| `0` | undefined | The development teaching message. When present it follows the production line on its own line; when folded away the line is the whole message. See [Development Messages](#development-messages) |
 | detail      | any           | undefined | Structured data attached to the error as `error.detail` |
 | verb        | string        | `'refused'` | The line's verb — any word, your classification of the line. Nullish falls back to `'refused'` |
 | report      | boolean       | `true`    | Set `false` to build and return the coded error without reporting it — no `onError` routing, no console fallback |
+| ErrorClass  | function      | `Error`   | The constructor to build with |
 
 #### Returns
 
@@ -166,7 +216,7 @@ The `Error` it reported, carrying `code`, `at`, and (when given) `detail`. Retur
 ```javascript
 import { createErrors, isDevelopment } from '@semantic-ui/utils';
 
-const { error } = createErrors({ layer: 'sync' });
+const { error } = createErrors({ namespace: 'sync' });
 
 // an app that installs a channel gets the report there
 globalThis.onError = (err) => reportToService(err.code, err.message, err.detail);
@@ -190,10 +240,10 @@ const timeout = new Promise((resolve, reject) => {
 ### throwError
 
 ```javascript
-throwError(code, at, { explanation, detail } = {})
+throwError(code, at, { namespace, explanation, detail, verb, ErrorClass } = {})
 ```
 
-Returned by [`createErrors`](#createerrors). Same arguments as [`error`](#error), thrown synchronously — for the refusal that must stop the caller where it stands.
+Exported top-level, and returned bound by [`createErrors`](#createerrors) with the options pre-filled. Same arguments as [`error`](#error), thrown synchronously — for the refusal that must stop the caller where it stands.
 
 #### Parameters
 
@@ -208,7 +258,7 @@ Never returns.
 ```javascript
 import { createErrors, isDevelopment } from '@semantic-ui/utils';
 
-const { throwError } = createErrors({ layer: 'schema', ErrorClass: TypeError });
+const { throwError } = createErrors({ namespace: 'schema', ErrorClass: TypeError });
 
 const parseField = (name, spec) => {
   if (!spec.type) {
@@ -224,10 +274,10 @@ const parseField = (name, spec) => {
 ### error.line
 
 ```javascript
-error.line(code, at, { verb } = {})
+error.line(code, at, { namespace, verb } = {})
 ```
 
-Renders the production line by itself, without building or reporting an Error — for console seats and log messages that want the same greppable shape as a real refusal.
+Renders the production line by itself, without building or reporting an Error — for console seats and log messages that want the same greppable shape as a real refusal. Rides the top-level `error` export and the bound form alike; the bound form pre-fills the `namespace`.
 
 #### Parameters
 
@@ -235,18 +285,18 @@ Renders the production line by itself, without building or reporting an Error �
 |---------|--------|-------------|
 | code    | string | The refusal code |
 | at      | string | The address it happened at |
-| options | object | Optional configuration — `verb` sets the line's verb, any word, defaulting to `'refused'` |
+| options | object | Optional configuration — `verb` sets the line's verb, any word, defaulting to `'refused'`; `namespace` sets the leading token |
 
 #### Returns
 
-The string `<layer> <verb> [<code>] <at>`, or `<verb> [<code>] <at>` when the toolset was created without a `layer`.
+The string `<namespace> <verb> [<code>] <at>`, or `<verb> [<code>] <at>` when there is no namespace.
 
 #### Example
 
 ```javascript
 import { createErrors } from '@semantic-ui/utils';
 
-const { error } = createErrors({ layer: 'sync' });
+const { error } = createErrors({ namespace: 'sync' });
 
 console.warn(error.line('storageChanged', 'db-1 -> db-2'));
 // 'sync refused [storageChanged] db-1 -> db-2'
@@ -255,7 +305,7 @@ console.info(error.line('cursorReset', 'todos@41', { verb: 'recovered' }));
 // 'sync recovered [cursorReset] todos@41'
 
 // the same line parses back out of a pasted log
-const [, layer, verb, code, at] = 'sync refused [storageChanged] db-1 -> db-2'
+const [, namespace, verb, code, at] = 'sync refused [storageChanged] db-1 -> db-2'
   .match(/^(\S+) (\S+) \[([\w-]+)\] (.*)$/m);
 ```
 

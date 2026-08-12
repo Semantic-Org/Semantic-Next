@@ -37,7 +37,7 @@ import {
   wrapFunction,
 } from '@semantic-ui/utils';
 
-const { throwError } = createErrors({ layer: 'templating' });
+const { throwError } = createErrors({ namespace: 'templating' });
 
 import { TemplateCompiler } from '@semantic-ui/compiler';
 import { getEngine } from '@semantic-ui/renderer';

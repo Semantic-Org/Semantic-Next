@@ -28,7 +28,7 @@ import { reactiveMatch } from './directives/reactive-match.js';
 import { reactiveRerender } from './directives/reactive-rerender.js';
 import { renderTemplate } from './directives/render-template.js';
 
-const { throwError } = createErrors({ layer: 'renderer' });
+const { throwError } = createErrors({ namespace: 'renderer' });
 
 export class LitRenderer {
   static html = html;

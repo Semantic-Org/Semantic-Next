@@ -988,38 +988,55 @@ log('Warning', 'warn', { timestamp: true, title: 'SYSTEM', titleColor: '#FF6B35'
 log('API response', 'info', { format: 'json', namespace: 'API', timestamp: true });
 ```
 
-### createErrors — Coded Errors, Bound to a Layer
+### createLogger — log, Bound to Shared Defaults
 ```javascript
-import { createErrors, isDevelopment } from '@semantic-ui/utils';
+import { createLogger } from '@semantic-ui/utils';
 
-// bind once per layer
-const { error, throwError } = createErrors({ layer: 'sync' });       // ErrorClass: Error
-const { throwError: typeError } = createErrors({ layer: 'schema', ErrorClass: TypeError });
+// bind once, destructure flat — any log option rides as a default
+const { log, debug, info, warn, error } = createLogger({ namespace: 'sync', timestamp: true });
+
+info('connected');                            // sync connected — namespace prints VERBATIM, never cased
+warn('reconnecting', { data: { attempt: 2 } });  // callsite options merge over the defaults and win
+log('custom', 'debug');                       // the bound log keeps its level slot
+
+// the level wrappers absorb the LEVEL slot only — info(m, options) is
+// log(m, 'info', options). granularity is the namespace value's business:
+createLogger({ namespace: 'physics:collision' });
+```
+
+Both debug families export an `error` — a file binding both aliases at the destructure,
+`const { error: logError } = createLogger(...)` beside `createErrors`' `error`. No third
+export.
+
+### error, throwError — Coded Errors (createErrors Binds Them)
+```javascript
+import { createErrors, error, isDevelopment, throwError } from '@semantic-ui/utils';
+
+// the top-level doors take namespace (and ErrorClass) per call, exactly as log does
+const rejection = error('timedOut', 'todos:pull', { namespace: 'sync', report: false });
+error.line('storageChanged', 'db-1 -> db-2', { namespace: 'sync' });  // 'sync refused [storageChanged] db-1 -> db-2'
+throwError('unknownCollection', 'invoices', { namespace: 'db' });     // throws synchronously
+
+// createErrors binds the same pair — pre-fills the options, callsite wins
+const { error: syncError, throwError: syncThrow } = createErrors({ namespace: 'sync' });
+const { throwError: typeError } = createErrors({ namespace: 'schema', ErrorClass: TypeError });
 
 // report and continue — raises asynchronously through globalThis.onError when an
 // app installs one, falls back to console.error otherwise. returns the Error it reported
-const reported = error('forbidden', 'todos:secret.field', {
+const reported = syncError('forbidden', 'todos:secret.field', {
   explanation: isDevelopment ? 'the field is private — write the fields you mean' : 0,
   detail: { collection: 'todos', field: 'secret.field' },
 });
 reported.code;    // 'forbidden'
 reported.detail;  // { collection: 'todos', field: 'secret.field' }
-
-// the error as a value — report: false builds and returns without reporting
-const rejection = error('timedOut', 'todos:pull', { report: false });
-
-// same arguments, throws synchronously
-throwError('unknownCollection', 'invoices');
-
-// the production line alone, for console seats
-error.line('storageChanged', 'db-1 -> db-2');  // 'sync refused [storageChanged] db-1 -> db-2'
 ```
 
 `code` is the stable routable identifier. `at` is **where** it happened — the greppable
 address (`todos:secret.field`, `db-1 -> db-2`), never why; why goes in `explanation`.
-Production messages are one uniform line, `<layer> <verb> [<code>] <at>`, parseable with
+Production messages are one uniform line, `<namespace> <verb> [<code>] <at>` (no leading
+token when the namespace is empty), parseable with
 `/^(\S+) (\S+) \[([\w-]+)\] (.*)$/`. The verb rides the options bag and
-`error.line(code, at, { verb })` — any word, a stable token position for the layer's
+`error.line(code, at, { verb })` — any word, a stable token position for the caller's
 own classification of the line, falling back to `refused` when nullish. Grepping a
 verb filters lines by class.
 
