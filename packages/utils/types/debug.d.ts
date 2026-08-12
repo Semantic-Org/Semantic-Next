@@ -7,9 +7,10 @@
  * Options for a coded error's construction
  */
 export interface ErrorOptions {
-  /** The development explanation — the teaching message. Meant to fold out of
-   * production builds via a callsite ternary (`isDevelopment ? '...' : 0`);
-   * when absent, the message is the uniform production line */
+  /** The development explanation — the teaching message, appended beneath the
+   * production line. Meant to fold out of production builds via a callsite
+   * ternary (`isDevelopment ? '...' : 0`); when folded away, the line is the
+   * whole message */
   explanation?: string | 0;
   /** Structured data attached to the error as `error.detail` */
   detail?: any;
@@ -21,6 +22,8 @@ export interface ErrorOptions {
 export interface CodedError extends Error {
   /** The stable, programmatically routable refusal code */
   code: string;
+  /** The address the refusal happened at, as given at the callsite */
+  at: string;
   /** Structured data attached at the callsite */
   detail?: any;
 }
@@ -61,9 +64,10 @@ export interface CreateErrorsOptions {
  * Creates a layer-bound error toolset: `error` reports through the error
  * channel and continues, `throwError` throws, and `error.line` renders the
  * uniform production line `<layer> refused [<code>] <at>` (parseable with
- * `/^(\S+) refused \[([\w-]+)\] (.*)$/`). Development messages ride the
- * `explanation` option and are meant to fold out of production builds at the
- * callsite: a bundler define folds branches, never arguments, so the ternary
+ * `/^(\S+) refused \[([\w-]+)\] (.*)$/m`). Every message leads with that line;
+ * development appends the teaching `explanation` beneath it, and explanations
+ * are meant to fold out of production builds at the callsite: a bundler define
+ * folds branches, never arguments, so the ternary
  * (`explanation: isDevelopment ? '...' : 0`) must live where the string does.
  *
  * @see {@link https://next.semantic-ui.com/docs/api/utils/debug#createerrors createErrors}

@@ -69,7 +69,7 @@ describe('createErrors', () => {
     it('should stay greppable by the documented pattern', () => {
       const { error } = createErrors({ layer: 'query' });
       const parsed = error.line('unknown-field', 'select(user.nmae)')
-        .match(/^(\S+) refused \[([\w-]+)\] (.*)$/);
+        .match(/^(\S+) refused \[([\w-]+)\] (.*)$/m);
       expect(parsed.slice(1)).toEqual(['query', 'unknown-field', 'select(user.nmae)']);
     });
 
@@ -88,7 +88,7 @@ describe('createErrors', () => {
       expect(() => throwError('missing-collection', 'find()')).toThrow(DemoError);
     });
 
-    it('should carry the code and the detail', () => {
+    it('should carry the code, the address, and the detail', () => {
       const { throwError } = createErrors({ layer: 'demo', ErrorClass: DemoError });
       let thrown;
       try {
@@ -101,16 +101,27 @@ describe('createErrors', () => {
       expect(thrown).toBeInstanceOf(Error);
       expect(thrown.message).toBe('demo refused [missing-collection] find()');
       expect(thrown.code).toBe('missing-collection');
+      expect(thrown.at).toBe('find()');
       expect(thrown.detail).toEqual({ name: 'todos' });
     });
 
-    it('should prefer the explanation over the line', () => {
+    it('should lead with the line and stack the explanation beneath it', () => {
       const { throwError } = createErrors({ layer: 'demo' });
-      expect(() =>
+      let thrown;
+      try {
         throwError('unknown-field', 'select()', {
           explanation: 'no field named nmae on todos, did you mean name?',
-        })
-      ).toThrow('no field named nmae on todos, did you mean name?');
+        });
+      }
+      catch (caught) {
+        thrown = caught;
+      }
+      expect(thrown.message).toBe(
+        'demo refused [unknown-field] select()\nno field named nmae on todos, did you mean name?',
+      );
+      // the first line stays the documented greppable shape in development
+      const parsed = thrown.message.match(/^(\S+) refused \[([\w-]+)\] (.*)$/m);
+      expect(parsed.slice(1)).toEqual(['demo', 'unknown-field', 'select()']);
     });
 
     it('should fall back to the line when the explanation folds away', () => {
@@ -151,6 +162,7 @@ describe('createErrors', () => {
       expect(returned).toBeInstanceOf(Error);
       expect(returned.message).toBe('demo refused [write-conflict] commit()');
       expect(returned.code).toBe('write-conflict');
+      expect(returned.at).toBe('commit()');
       expect(returned.detail).toEqual({ id: 7 });
       // the report is deferred, so the calling stack completes first
       expect(globalThis.onError).not.toHaveBeenCalled();
