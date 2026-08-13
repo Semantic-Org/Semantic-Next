@@ -542,6 +542,37 @@ truncate('Cut here exactly', 10, { wordBoundary: false });     // 'Cut here e…
 truncate('こんにちは世界です', 8, { locale: 'ja' });          // 'こんにちは…'
 ```
 
+### String Similarity
+```javascript
+import { editDistance, similarity, suggest } from '@semantic-ui/utils';
+
+// single-character edits between two strings (Levenshtein, Unicode-aware:
+// NFC-normalized, astral chars are one edit)
+editDistance('kitten', 'sitting');                   // 3
+editDistance('teh', 'the', { swaps: true });         // 1 (adjacent swap reads as one typo)
+editDistance('banana', 'orange', { max: 2 });        // Infinity (capped search, cheap filtering)
+editDistance('Color', 'colour', { ignoreCase: true }); // 1
+editDistance('👩🏽‍🚀', '🧑🏻‍🚀', { grapheme: true });   // 1 (grapheme clusters as units)
+// weighted variants via insertCost / deleteCost / replaceCost / swapCost
+
+// normalized 0..1 score: 1 - distance / longer length
+similarity('kitten', 'sitting');                     // 0.571…
+similarity('JavaScript', 'javascript', { ignoreCase: true }); // 1
+similarity('abc', 'xyz', { min: 0.7 });              // 0 (early exit below the floor)
+
+// nearest candidate for a did-you-mean message, null when nothing is close —
+// a suggestion is optional by nature. returns the word, never prose: the
+// caller owns the sentence
+suggest('stirng', ['string', 'number']);             // 'string'
+suggest('colr', { color: 1, size: 2 });              // 'color' (object/Map keys, Set/array values)
+suggest('xyz', ['string', 'number']);                // null
+suggest('FORCE', ['force']);                         // 'force' (case and swaps read as typos)
+suggest('kitten', ['sitting'], { threshold: 0.5 });  // 'sitting' (default bar is 0.6)
+suggest('stirng', ['strong', 'string'], { count: 3 }); // ['string', 'strong'] best-first, [] when none
+// to rank everything under an explicit edit cap, filter with editDistance + max —
+// suggest is the confidence judgment, editDistance is the ruler
+```
+
 ---
 
 ## Coercion Utilities (coercion.js)
@@ -895,6 +926,11 @@ generateId.config = { usage: 'page' };              // app-wide default
 // Validate offline before a lookup, parse the parts back out
 isValidId(id, { usage: 'token', prefix: 'sk_' });   // checksum + shape, reads loose
 parseId(dbId, { usage: 'db' });                     // { prefix, body, checksum, timestamp }
+
+// ignoreConfig resolves without the app-wide config layer (options > preset only) —
+// library code whose id/hash shapes must not bend to host-app defaults
+generateId({ ignoreConfig: true });                 // 26-char ULID even under generateId.config
+hashCode('key', { ignoreConfig: true });            // stable key shape even under hashCode.config
 
 getRandomSeed();                                    // cryptographically random uint32
 ```
