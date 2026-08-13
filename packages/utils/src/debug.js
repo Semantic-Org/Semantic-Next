@@ -151,6 +151,10 @@ const build = (code, at, { namespace = '', ErrorClass = Error, explanation, deta
 // consumer's job.
 export const error = (code, at, options) => {
   const built = build(code, at, options);
+  // open the stack at the caller — captureStackTrace (V8) drops every frame
+  // above and including the named function, so each public door captures
+  // against itself. engines without it keep the full stack
+  Error.captureStackTrace?.(built, error);
   if (options?.report === false) {
     return built;
   }
@@ -175,17 +179,29 @@ error.line = (code, at, { namespace = '', verb } = {}) => errorLine(namespace, v
 
 // the throwing form: same arguments, never returns
 export const throwError = (code, at, options) => {
-  throw build(code, at, options);
+  const built = build(code, at, options);
+  Error.captureStackTrace?.(built, throwError);
+  throw built;
 };
 
 // the binder over the pair, mirroring createLogger over log — pre-fills the
-// options into every call, callsite options win
+// options into every call, callsite options win. the bound forms capture the
+// stack against themselves so the wrapper frame folds away too
 export const createErrors = (defaults = {}) => {
   const merged = (options) => ({ ...defaults, ...options });
-  const bound = (code, at, options) => error(code, at, merged(options));
+  const bound = (code, at, options) => {
+    const built = error(code, at, merged(options));
+    Error.captureStackTrace?.(built, bound);
+    return built;
+  };
   bound.line = (code, at, options) => error.line(code, at, merged(options));
+  const boundThrow = (code, at, options) => {
+    const built = build(code, at, merged(options));
+    Error.captureStackTrace?.(built, boundThrow);
+    throw built;
+  };
   return {
     error: bound,
-    throwError: (code, at, options) => throwError(code, at, merged(options)),
+    throwError: boundThrow,
   };
 };
