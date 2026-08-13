@@ -1,4 +1,4 @@
-import { createLogger, isServer, log } from '@semantic-ui/utils';
+import { createErrors, createLogger, error, isServer, log, throwError } from '@semantic-ui/utils';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -57,5 +57,85 @@ describe('log (server posture)', () => {
       namespace: 'test',
       message: 'message',
     });
+  });
+});
+
+// node runs on V8, where Error.captureStackTrace trims the library's own
+// construction frames — the stack opens at the caller. engines without it
+// (no captureStackTrace) keep the full stack, so these pins live here
+
+describe('coded error stacks (V8 posture)', () => {
+  const firstFrame = (built) => built.stack.split('\n').find((line) => line.trim().startsWith('at '));
+
+  let originalOnError;
+
+  beforeEach(() => {
+    originalOnError = globalThis.onError;
+    globalThis.onError = vi.fn();
+  });
+
+  afterEach(async () => {
+    // let the deferred report flush before the handler is restored
+    await new Promise((resolve) => queueMicrotask(resolve));
+    if (originalOnError === undefined) {
+      delete globalThis.onError;
+    }
+    else {
+      globalThis.onError = originalOnError;
+    }
+  });
+
+  it('should open at the caller from error()', () => {
+    const frame = firstFrame(error('code', 'at', { namespace: 'demo' }));
+    expect(frame).not.toContain('debug.js');
+    expect(frame).toContain('debug.test.js');
+  });
+
+  it('should open at the caller from throwError()', () => {
+    let thrown;
+    try {
+      throwError('code', 'at', { namespace: 'demo' });
+    }
+    catch (caught) {
+      thrown = caught;
+    }
+    const frame = firstFrame(thrown);
+    expect(frame).not.toContain('debug.js');
+    expect(frame).toContain('debug.test.js');
+  });
+
+  it('should open at the caller from the bound error', () => {
+    const { error: bound } = createErrors({ namespace: 'demo' });
+    const frame = firstFrame(bound('code', 'at'));
+    expect(frame).not.toContain('debug.js');
+    expect(frame).toContain('debug.test.js');
+  });
+
+  it('should open at the caller from the bound throwError', () => {
+    const { throwError: bound } = createErrors({ namespace: 'demo' });
+    let thrown;
+    try {
+      bound('code', 'at');
+    }
+    catch (caught) {
+      thrown = caught;
+    }
+    const frame = firstFrame(thrown);
+    expect(frame).not.toContain('debug.js');
+    expect(frame).toContain('debug.test.js');
+  });
+
+  it('should carry the trimmed stack on a report: false build', () => {
+    const frame = firstFrame(error('code', 'at', { namespace: 'demo', report: false }));
+    expect(frame).not.toContain('debug.js');
+    expect(frame).toContain('debug.test.js');
+  });
+
+  it('should keep the stack present and the message shape intact', () => {
+    const built = error('write-conflict', 'commit()', { namespace: 'demo', report: false });
+    expect(typeof built.stack).toBe('string');
+    expect(built.stack.length).toBeGreaterThan(0);
+    expect(built.message).toBe('demo refused [write-conflict] commit()');
+    expect(built.stack.startsWith('Error: demo refused [write-conflict] commit()')).toBe(true);
   });
 });

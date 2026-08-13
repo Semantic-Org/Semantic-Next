@@ -193,6 +193,8 @@ Exported top-level, and returned bound by [`createErrors`](#createerrors) with t
 
 Sometimes the error is a value — handed to a promise rejection, attached to a result — and reporting is someone else's job. `report: false` builds and returns the same coded error without reporting it, making `error` the family's builder without a third function.
 
+On engines with `Error.captureStackTrace` (V8 among them) the stack opens at your callsite, with the library's own construction frames trimmed — other engines keep the full stack.
+
 #### Parameters
 
 | Name    | Type   | Description |
