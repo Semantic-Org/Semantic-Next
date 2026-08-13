@@ -17,3 +17,4 @@ console.log('uuid:', generateId({ format: 'uuid' }));
 console.log('\n--- App-wide default ---');
 generateId.config = { usage: 'page' };
 console.log('config = page:', generateId());
+console.log('ignoreConfig (library code):', generateId({ ignoreConfig: true }));

@@ -1,4 +1,14 @@
-import { configured, debounce, identity, memoize, noop, throttle, wait, wrapFunction } from '@semantic-ui/utils';
+import {
+  configured,
+  debounce,
+  hashCode,
+  identity,
+  memoize,
+  noop,
+  throttle,
+  wait,
+  wrapFunction,
+} from '@semantic-ui/utils';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -67,6 +77,20 @@ describe('function utilities', () => {
       const result3 = memoizedFunction(2, 3);
       expect(result3).toBe(6);
       expect(originalFunction).toHaveBeenCalledTimes(2); // Should not be called again for (2, 3)
+    });
+
+    it('default cache keys are unaffected by hashCode.config', () => {
+      hashCode.config = { usage: 'secure' };
+      try {
+        const originalFunction = vi.fn((x) => x * 2);
+        const memoizedFunction = memoize(originalFunction);
+        expect(memoizedFunction(2)).toBe(4);
+        expect(memoizedFunction(2)).toBe(4);
+        expect(originalFunction).toHaveBeenCalledTimes(1);
+      }
+      finally {
+        hashCode.config = {};
+      }
     });
 
     it('should memoize functions with no arguments', () => {

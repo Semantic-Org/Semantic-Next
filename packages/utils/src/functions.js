@@ -35,7 +35,9 @@ export const configured = (fn, config) => Object.assign(fn, { config });
 /*
   Memoize
 */
-export const memoize = (fn, hashFunction = (args) => hashCode(JSON.stringify(args))) => {
+// ignoreConfig pins the default key shape — an app-wide hashCode.config must
+// not change how memoize keys (usage 'secure' would even make keys async)
+export const memoize = (fn, hashFunction = (args) => hashCode(JSON.stringify(args), { ignoreConfig: true })) => {
   const cache = new Map();
 
   return function(...args) {

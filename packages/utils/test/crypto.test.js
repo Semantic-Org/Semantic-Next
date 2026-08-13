@@ -145,6 +145,20 @@ describe('ID/Hashing Functions', () => {
         hashCode.config = { usage: 'content' };
         expect(typeof hashCode('hello', { usage: 'hash' })).toBe('number');
       });
+
+      it('ignoreConfig resolves as if no global config were set', () => {
+        const plain = hashCode('hello');
+        hashCode.config = { usage: 'content', seed: 99 };
+        expect(typeof hashCode('hello')).toBe('string');
+        expect(hashCode('hello', { ignoreConfig: true })).toBe(plain);
+      });
+
+      it('call options still apply under ignoreConfig', () => {
+        hashCode.config = { seed: 99 };
+        expect(hashCode('hello', { usage: 'content', ignoreConfig: true }))
+          .toBe(hashCode('hello', { usage: 'content', ignoreConfig: true }));
+        expect(typeof hashCode('hello', { usage: 'content', ignoreConfig: true })).toBe('string');
+      });
     });
   });
 
@@ -259,6 +273,27 @@ describe('ID/Hashing Functions', () => {
       it('an explicit false checksum overrides the token preset default', () => {
         const plain = generateId({ usage: 'token', checksum: false });
         expect(plain).toHaveLength(27);
+      });
+
+      it('ignoreConfig resolves as if no global config were set', () => {
+        generateId.config = { usage: 'page', prefix: 'app_', length: 20 };
+        const id = generateId({ ignoreConfig: true });
+        expect(id).toHaveLength(26);
+        expect(id.startsWith('app_')).toBe(false);
+      });
+
+      it('call options still win under ignoreConfig', () => {
+        generateId.config = { prefix: 'app_' };
+        expect(generateId({ usage: 'page', ignoreConfig: true })).toHaveLength(8);
+      });
+
+      it('isValidId and parseId honor ignoreConfig, matching a config-free mint', () => {
+        generateId.config = { prefix: 'app_' };
+        const id = generateId({ ignoreConfig: true });
+        // the ambient prefix makes the plain id read invalid — the hazard ignoreConfig exists for
+        expect(isValidId(id)).toBe(false);
+        expect(isValidId(id, { ignoreConfig: true })).toBe(true);
+        expect(parseId(id, { ignoreConfig: true })).not.toBeNull();
       });
     });
 
