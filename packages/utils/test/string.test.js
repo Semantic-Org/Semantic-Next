@@ -2,12 +2,15 @@ import {
   camelToKebab,
   capitalize,
   capitalizeWords,
+  editDistance,
   escapeHTML,
   getArticle,
   humanize,
   joinWords,
   kebabToCamel,
   reverseString,
+  similarity,
+  suggest,
   tokenize,
   toTitleCase,
   truncate,
@@ -581,5 +584,379 @@ describe('humanize', () => {
     finally {
       humanize.config.terms = savedTerms;
     }
+  });
+});
+
+describe('editDistance', () => {
+  // full-matrix Wagner-Fischer with the OSA swap extension, the slow reference
+  // the optimized engines are fuzzed against
+  const referenceDistance = (a, b, options = {}) => {
+    const {
+      swaps = false,
+      insertCost = 1,
+      deleteCost = 1,
+      replaceCost = 1,
+      swapCost = 1,
+    } = options;
+    a = Array.from(a);
+    b = Array.from(b);
+    const m = a.length;
+    const n = b.length;
+    const d = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+    for (let i = 0; i <= m; i++) {
+      d[i][0] = i * deleteCost;
+    }
+    for (let j = 0; j <= n; j++) {
+      d[0][j] = j * insertCost;
+    }
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        let cost = Math.min(
+          d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : replaceCost),
+          d[i - 1][j] + deleteCost,
+          d[i][j - 1] + insertCost,
+        );
+        if (swaps && i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+          cost = Math.min(cost, d[i - 2][j - 2] + swapCost);
+        }
+        d[i][j] = cost;
+      }
+    }
+    return d[m][n];
+  };
+
+  // deterministic LCG so fuzz failures reproduce
+  let lcgSeed = 42;
+  const rand = (limit) => {
+    lcgSeed = (lcgSeed * 1103515245 + 12345) % 2147483648;
+    return lcgSeed % limit;
+  };
+  const randomString = (alphabet, maxLength) => {
+    const length = rand(maxLength + 1);
+    let out = '';
+    for (let i = 0; i < length; i++) {
+      out += alphabet[rand(alphabet.length)];
+    }
+    return out;
+  };
+
+  it('counts single-character edits', () => {
+    expect(editDistance('kitten', 'sitting')).toBe(3);
+    expect(editDistance('saturday', 'sunday')).toBe(3);
+    expect(editDistance('flaw', 'lawn')).toBe(2);
+    expect(editDistance('banana', 'orange')).toBe(5);
+  });
+
+  it('returns 0 for identical strings', () => {
+    expect(editDistance('hello', 'hello')).toBe(0);
+    expect(editDistance('', '')).toBe(0);
+  });
+
+  it('is symmetric under default costs', () => {
+    expect(editDistance('kitten', 'sitting')).toBe(editDistance('sitting', 'kitten'));
+    expect(editDistance('abc', '')).toBe(editDistance('', 'abc'));
+  });
+
+  it('handles empty strings as pure insertions or deletions', () => {
+    expect(editDistance('', 'abc')).toBe(3);
+    expect(editDistance('abc', '')).toBe(3);
+  });
+
+  it('treats nullish as empty and stringifies other input', () => {
+    expect(editDistance(null, 'ab')).toBe(2);
+    expect(editDistance(undefined, undefined)).toBe(0);
+    expect(editDistance(42, '42')).toBe(0);
+    expect(editDistance(true, 'true')).toBe(0);
+  });
+
+  it('supports ignoreCase', () => {
+    expect(editDistance('Color', 'colour')).toBe(2);
+    expect(editDistance('Color', 'colour', { ignoreCase: true })).toBe(1);
+    expect(editDistance('ABC', 'abc', { ignoreCase: true })).toBe(0);
+  });
+
+  it('normalizes canonically equivalent spellings by default', () => {
+    expect(editDistance('café', 'café')).toBe(0);
+    expect(editDistance('café', 'café', { normalize: false })).toBe(2);
+  });
+
+  it('compares code points, not code units, when astral characters are present', () => {
+    expect(editDistance('👍', '👎')).toBe(1);
+    expect(editDistance('a👍b', 'ab')).toBe(1);
+    expect(editDistance('👍', '')).toBe(1);
+  });
+
+  it('compares grapheme clusters with grapheme: true', () => {
+    expect(editDistance('👩🏽‍🚀', '🧑🏻‍🚀')).toBe(2);
+    expect(editDistance('👩🏽‍🚀', '🧑🏻‍🚀', { grapheme: true })).toBe(1);
+    expect(editDistance('🇺🇸', '', { grapheme: true })).toBe(1);
+  });
+
+  it('caps the search with max, returning Infinity beyond it', () => {
+    expect(editDistance('banana', 'orange', { max: 2 })).toBe(Infinity);
+    expect(editDistance('banana', 'orange', { max: 5 })).toBe(5);
+    expect(editDistance('kitten', 'sitting', { max: 3 })).toBe(3);
+    expect(editDistance('abc', 'abc', { max: 0 })).toBe(0);
+    expect(editDistance('abc', 'abd', { max: 0 })).toBe(Infinity);
+  });
+
+  it('rejects on length difference alone under max', () => {
+    expect(editDistance('ab', 'a'.repeat(100), { max: 3 })).toBe(Infinity);
+  });
+
+  it('treats a non-numeric max as no cap', () => {
+    expect(editDistance('abc', 'xyz', { max: NaN })).toBe(3);
+    expect(editDistance('abc', 'xyz', { max: '2' })).toBe(3);
+  });
+
+  it('counts adjacent swaps as one edit with swaps: true', () => {
+    expect(editDistance('teh', 'the')).toBe(2);
+    expect(editDistance('teh', 'the', { swaps: true })).toBe(1);
+    expect(editDistance('recieve', 'receive', { swaps: true })).toBe(1);
+    expect(editDistance('ab', 'ba', { swaps: true })).toBe(1);
+  });
+
+  it('uses the restricted (OSA) swap reading, never editing a swapped pair again', () => {
+    expect(editDistance('ca', 'abc', { swaps: true })).toBe(3);
+  });
+
+  it('supports weighted operation costs', () => {
+    expect(editDistance('abc', 'ab', { deleteCost: 5 })).toBe(5);
+    expect(editDistance('ab', 'abc', { deleteCost: 5 })).toBe(1);
+    expect(editDistance('a', 'b', { replaceCost: 3 })).toBe(2);
+    expect(editDistance('abc', 'adc', { replaceCost: 3 })).toBe(2);
+    expect(editDistance('a', 'b', { replaceCost: 2 })).toBe(2);
+    expect(editDistance('ab', 'ba', { swaps: true, swapCost: 0.5 })).toBe(0.5);
+  });
+
+  it('throws on negative costs', () => {
+    expect(() => editDistance('a', 'b', { insertCost: -1 })).toThrow();
+    expect(() => editDistance('a', 'b', { swapCost: -0.5 })).toThrow();
+  });
+
+  it('crosses the 32-unit bit-parallel boundary correctly', () => {
+    const base = 'abcdefghijklmnopqrstuvwxyzabcdef';
+    expect(base).toHaveLength(32);
+    expect(editDistance(base, base.slice(0, 31) + 'x')).toBe(1);
+    expect(editDistance(base + 'g', base)).toBe(1);
+    expect(editDistance(base + 'g', base + 'h')).toBe(1);
+    expect(editDistance('x'.repeat(40), 'y'.repeat(40))).toBe(40);
+  });
+
+  it('matches a reference implementation on random inputs', () => {
+    for (let i = 0; i < 800; i++) {
+      const alphabet = i % 2 === 0 ? ['a', 'b'] : ['a', 'b', 'c', 'd'];
+      const a = randomString(alphabet, 12);
+      const b = randomString(alphabet, 12);
+      const swaps = rand(2) === 1;
+      expect(editDistance(a, b, { swaps }), `"${a}" vs "${b}" swaps ${swaps}`)
+        .toBe(referenceDistance(a, b, { swaps }));
+    }
+  });
+
+  it('matches a reference implementation on random weighted costs', () => {
+    const costs = [0.5, 1, 2, 3];
+    for (let i = 0; i < 400; i++) {
+      const options = {
+        swaps: rand(2) === 1,
+        insertCost: costs[rand(4)],
+        deleteCost: costs[rand(4)],
+        replaceCost: costs[rand(4)],
+        swapCost: costs[rand(4)],
+      };
+      const a = randomString(['a', 'b', 'c'], 10);
+      const b = randomString(['a', 'b', 'c'], 10);
+      expect(editDistance(a, b, options), `"${a}" vs "${b}" ${JSON.stringify(options)}`)
+        .toBe(referenceDistance(a, b, options));
+    }
+  });
+
+  it('matches a reference implementation under a max cap', () => {
+    for (let i = 0; i < 400; i++) {
+      const a = randomString(['a', 'b', 'c'], 12);
+      const b = randomString(['a', 'b', 'c'], 12);
+      const swaps = rand(2) === 1;
+      const max = rand(6);
+      const expected = referenceDistance(a, b, { swaps });
+      expect(editDistance(a, b, { swaps, max }), `"${a}" vs "${b}" max ${max} swaps ${swaps}`)
+        .toBe(expected > max ? Infinity : expected);
+    }
+  });
+
+  it('matches a reference implementation on long strings past the bit-parallel path', () => {
+    for (let i = 0; i < 60; i++) {
+      const a = randomString(['a', 'b', 'c', 'd', 'e'], 45);
+      const b = randomString(['a', 'b', 'c', 'd', 'e'], 45);
+      expect(editDistance(a, b), `"${a}" vs "${b}"`).toBe(referenceDistance(a, b));
+    }
+  });
+});
+
+describe('similarity', () => {
+  it('scores 0..1 against the longer string', () => {
+    expect(similarity('kitten', 'sitting')).toBeCloseTo(1 - 3 / 7, 10);
+    expect(similarity('abc', 'xyz')).toBe(0);
+    expect(similarity('ab', 'abcd')).toBeCloseTo(0.5, 10);
+  });
+
+  it('returns 1 for identical strings, including empty', () => {
+    expect(similarity('hello', 'hello')).toBe(1);
+    expect(similarity('', '')).toBe(1);
+    expect(similarity(null, undefined)).toBe(1);
+  });
+
+  it('returns 0 when one string is empty', () => {
+    expect(similarity('abc', '')).toBe(0);
+    expect(similarity('', 'abc')).toBe(0);
+  });
+
+  it('supports the shared text options', () => {
+    expect(similarity('JavaScript', 'javascript', { ignoreCase: true })).toBe(1);
+    expect(similarity('café', 'café')).toBe(1);
+    expect(similarity('teh', 'the', { swaps: true })).toBeCloseTo(1 - 1 / 3, 10);
+  });
+
+  it('stops early below the min floor and reports 0', () => {
+    expect(similarity('abc', 'xyz', { min: 0.7 })).toBe(0);
+    expect(similarity('kitten', 'sitting', { min: 0.9 })).toBe(0);
+    expect(similarity('kitten', 'sitting', { min: 0.5 })).toBeCloseTo(1 - 3 / 7, 10);
+  });
+
+  it('returns a boundary-exact score at min, not 0', () => {
+    expect(similarity('aaaaaaaaaa', 'aaaaaaaaab', { min: 0.9 })).toBeCloseTo(0.9, 10);
+  });
+
+  it('scores graphemes as units with grapheme: true', () => {
+    expect(similarity('👩🏽‍🚀', '🧑🏻‍🚀', { grapheme: true })).toBe(0);
+    expect(similarity('👩🏽‍🚀x', '🧑🏻‍🚀x', { grapheme: true })).toBeCloseTo(0.5, 10);
+  });
+});
+
+describe('suggest', () => {
+  it('returns the nearest candidate', () => {
+    expect(suggest('stirng', ['string', 'number', 'boolean'])).toBe('string');
+    expect(suggest('bolean', ['string', 'number', 'boolean'])).toBe('boolean');
+  });
+
+  it('returns null when nothing reads close enough', () => {
+    expect(suggest('xyz', ['string', 'number'])).toBe(null);
+    expect(suggest('q', ['string', 'number'])).toBe(null);
+  });
+
+  it('a later, strictly closer candidate replaces an earlier one', () => {
+    expect(suggest('recieve', ['recede', 'receive'])).toBe('receive');
+  });
+
+  it('ties keep the earlier candidate', () => {
+    expect(suggest('teh', ['the', 'tea'])).toBe('the');
+    expect(suggest('teh', ['tea', 'the'])).toBe('tea');
+  });
+
+  it('reads case differences as typos by default, returning the candidate verbatim', () => {
+    expect(suggest('FORCE', ['force', 'quiet'])).toBe('force');
+    expect(suggest('FORCE', ['force'], { ignoreCase: false })).toBe(null);
+  });
+
+  it('reads adjacent swaps as typos by default', () => {
+    expect(suggest('sroted', ['sorted', 'sordid'])).toBe('sorted');
+    expect(suggest('teh', ['the', 'tea'], { swaps: false })).toBe('tea');
+  });
+
+  it('returns an exact candidate as-is', () => {
+    expect(suggest('force', ['force', 'quiet'])).toBe('force');
+  });
+
+  it('threshold tightens or loosens the suggestion bar', () => {
+    expect(suggest('kitten', ['sitting'])).toBe(null);
+    expect(suggest('kitten', ['sitting'], { threshold: 0.5 })).toBe('sitting');
+    expect(suggest('stirng', ['string'], { threshold: 0.9 })).toBe(null);
+  });
+
+  it('threshold 0 returns the nearest candidate sharing anything at all', () => {
+    expect(suggest('zzz', ['abc', 'zbc'], { threshold: 0 })).toBe('zbc');
+    expect(suggest('zzz', ['abc'], { threshold: 0 })).toBe(null);
+  });
+
+  it('reads a plain object or Map as its keys', () => {
+    expect(suggest('colr', { color: '#f00', size: 'large' })).toBe('color');
+    expect(suggest('colr', new Map([['color', 1], ['size', 2]]))).toBe('color');
+  });
+
+  it('reads a Set, a lone string, and any iterable', () => {
+    expect(suggest('colr', new Set(['color', 'size']))).toBe('color');
+    expect(suggest('colr', 'color')).toBe('color');
+    function* names() {
+      yield 'color';
+      yield 'size';
+    }
+    expect(suggest('colr', names())).toBe('color');
+  });
+
+  it('skips nullish candidates and stringifies the rest', () => {
+    expect(suggest('colr', ['color', null, undefined])).toBe('color');
+    expect(suggest('41', [42, 41])).toBe('41');
+  });
+
+  it('handles empty and nullish input', () => {
+    expect(suggest('word', [])).toBe(null);
+    expect(suggest('word', null)).toBe(null);
+    expect(suggest(null, ['null'])).toBe(null);
+    expect(suggest('', ['color'])).toBe(null);
+  });
+});
+
+describe('suggest — count', () => {
+  it('count returns the plausible candidates as an array, best-first', () => {
+    expect(suggest('stirng', ['strong', 'string', 'number'], { count: 5 })).toEqual(['string', 'strong']);
+  });
+
+  it('count caps the list length', () => {
+    expect(suggest('stirng', ['strong', 'string', 'number'], { count: 1 })).toEqual(['string']);
+    expect(suggest('stirng', ['strong', 'string'], { count: 0 })).toEqual([]);
+    expect(suggest('stirng', ['strong', 'string'], { count: Infinity })).toEqual(['string', 'strong']);
+  });
+
+  it('count returns [] when nothing reads close enough', () => {
+    expect(suggest('xyz', ['string', 'number'], { count: 3 })).toEqual([]);
+    expect(suggest('word', [], { count: 3 })).toEqual([]);
+    expect(suggest('word', null, { count: 3 })).toEqual([]);
+  });
+
+  it('equal scores keep candidate order', () => {
+    expect(suggest('teh', ['the', 'tea'], { count: 2 })).toEqual(['the', 'tea']);
+    expect(suggest('teh', ['tea', 'the'], { count: 2 })).toEqual(['tea', 'the']);
+  });
+
+  it('keeps the confidence gate and options in plural mode', () => {
+    expect(suggest('kitten', ['sitting'], { count: 3 })).toEqual([]);
+    expect(suggest('kitten', ['sitting'], { count: 3, threshold: 0.5 })).toEqual(['sitting']);
+    expect(suggest('FORCE', ['force', 'quiet'], { count: 3 })).toEqual(['force']);
+    expect(suggest('FORCE', ['force'], { count: 3, ignoreCase: false })).toEqual([]);
+  });
+
+  it('reads the same generous candidate shapes', () => {
+    expect(suggest('colr', { color: '#f00', colour: '#f00', size: 'large' }, { count: 3 })).toEqual([
+      'color',
+      'colour',
+    ]);
+    expect(suggest('colr', new Set(['color', 'size']), { count: 3 })).toEqual(['color']);
+  });
+
+  it('drops exact duplicate and nullish candidates', () => {
+    expect(suggest('colr', ['color', 'color', 'size'], { count: 3 })).toEqual(['color']);
+    expect(suggest('colr', ['color', null, undefined], { count: 3 })).toEqual(['color']);
+  });
+
+  it('an exact match leads the list', () => {
+    expect(suggest('force', ['forces', 'force'], { count: 3 })).toEqual(['force', 'forces']);
+  });
+
+  it('threshold 0 still requires sharing something', () => {
+    expect(suggest('zzz', ['abc', 'zbc'], { count: 3, threshold: 0 })).toEqual(['zbc']);
+  });
+
+  it('a non-numeric count keeps the singular shape', () => {
+    expect(suggest('stirng', ['string'], { count: undefined })).toBe('string');
+    expect(suggest('stirng', ['string'], { count: NaN })).toBe('string');
   });
 });

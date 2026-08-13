@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: String Utilities
 package: "@semantic-ui/utils"
-methods: [kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase, humanize, joinWords, getArticle, truncate, tokenize, escapeHTML, unescapeHTML, reverseString]
+methods: [kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase, humanize, joinWords, getArticle, truncate, tokenize, escapeHTML, unescapeHTML, reverseString, editDistance, similarity, suggest]
 icon: type
 description: API reference for string manipulation functions
 ---
@@ -538,6 +538,169 @@ console.log(reverseString('🎉🎊🎈')); // '🎈🎊🎉'
 // Preserves complex grapheme clusters
 console.log(reverseString('🇺🇸🇬🇧')); // '🇬🇧🇺🇸' (flag emojis)
 console.log(reverseString('Hello 👋🏽')); // '👋🏽 olleH' (emoji with skin tone)
+```
+
+### editDistance
+
+```javascript
+function editDistance(a, b, options = {})
+```
+
+Counts the single-character edits (inserts, deletes, replacements, and optionally adjacent swaps) that turn one string into the other. `0` means identical. Comparison is Unicode-aware: strings are NFC-normalized first and astral characters count as one edit, with full grapheme cluster comparison behind the `grapheme` option.
+
+For filtering many candidates, `max` caps the search: the comparison stops as soon as the distance provably exceeds it and returns `Infinity`, so `editDistance(a, b, { max: 2 }) <= 2` stays cheap on far-apart strings.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| a       | string | The first string (nullish reads as empty, other input is stringified) |
+| b       | string | The second string |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name        | Type    | Default  | Description |
+|-------------|---------|----------|-------------|
+| max         | number  | Infinity | Stop once the distance provably exceeds this and return `Infinity` |
+| ignoreCase  | boolean | false    | Lowercase both strings before comparing |
+| normalize   | boolean | true     | Apply Unicode NFC normalization first, so canonically equivalent spellings read as identical |
+| grapheme    | boolean | false    | Compare grapheme clusters via `Intl.Segmenter`, so a flag or family emoji is one unit |
+| locale      | string  | 'en'     | Locale for grapheme segmentation |
+| swaps       | boolean | false    | Count an adjacent swap as one edit (the restricted Damerau-Levenshtein reading) |
+| insertCost  | number  | 1        | Cost of inserting a character |
+| deleteCost  | number  | 1        | Cost of deleting a character |
+| replaceCost | number  | 1        | Cost of replacing a character |
+| swapCost    | number  | 1        | Cost of an adjacent swap when `swaps` is on |
+
+#### Returns
+
+The edit distance as a number, or `Infinity` when it exceeds `max`. With custom costs the measure is directional: it transforms `a` into `b`, so deletions remove characters of `a` and insertions add characters of `b`.
+
+#### Example
+
+```javascript
+import { editDistance } from '@semantic-ui/utils';
+
+console.log(editDistance('kitten', 'sitting')); // 3
+console.log(editDistance('Color', 'colour', { ignoreCase: true })); // 1
+
+// the classic typo reads as one edit with swaps
+console.log(editDistance('teh', 'the')); // 2
+console.log(editDistance('teh', 'the', { swaps: true })); // 1
+
+// cap the search for cheap candidate filtering
+console.log(editDistance('banana', 'orange', { max: 2 })); // Infinity
+
+// unicode-aware by default
+console.log(editDistance('café', 'cafe\u0301')); // 0 (NFC-normalized)
+console.log(editDistance('👍', '👎')); // 1 (code points, not surrogate halves)
+console.log(editDistance('👩🏽‍🚀', '🧑🏻‍🚀', { grapheme: true })); // 1
+```
+
+### similarity
+
+```javascript
+function similarity(a, b, options = {})
+```
+
+Scores how alike two strings read, from `0` (nothing shared) to `1` (identical): one minus the edit distance over the longer string's length. Unit edit costs by definition, with the same text options as `editDistance`.
+
+`min` sets a score floor: a comparison that cannot reach it stops early and reports `0`, which keeps fuzzy-match loops cheap.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| a       | string | The first string (nullish reads as empty, other input is stringified) |
+| b       | string | The second string |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name       | Type    | Default | Description |
+|------------|---------|---------|-------------|
+| min        | number  | 0       | Score floor for early exit — below it the comparison stops and reports `0` |
+| ignoreCase | boolean | false   | Lowercase both strings before comparing |
+| normalize  | boolean | true    | Apply Unicode NFC normalization first |
+| grapheme   | boolean | false   | Compare grapheme clusters via `Intl.Segmenter` |
+| locale     | string  | 'en'    | Locale for grapheme segmentation |
+| swaps      | boolean | false   | Count an adjacent swap as one edit |
+
+#### Returns
+
+A score from `0` to `1`. Two empty strings score `1`.
+
+#### Example
+
+```javascript
+import { similarity } from '@semantic-ui/utils';
+
+console.log(similarity('kitten', 'sitting')); // 0.571…
+console.log(similarity('hello', 'hello')); // 1
+console.log(similarity('abc', 'xyz')); // 0
+
+console.log(similarity('JavaScript', 'javascript', { ignoreCase: true })); // 1
+console.log(similarity('recieve', 'receive', { swaps: true })); // 0.857…
+
+// early-exit floor for fuzzy filtering
+console.log(similarity('kitten', 'sitting', { min: 0.9 })); // 0
+```
+
+### suggest
+
+```javascript
+function suggest(word, candidates, options = {})
+```
+
+Suggests the nearest candidate to a mistyped word, or `null` when nothing reads close enough to say confidently — the lookup behind a did-you-mean teaching message. A suggestion is optional by nature, so returning `null` on a weak match is the point. It returns the candidate verbatim, never prose, so the caller owns the sentence around it.
+
+Candidates read generously: an array or `Set` of names, a lone name, or the keys of a plain object or `Map` — the vocabularies callers already hold. Case differences and adjacent swaps read as typos by default.
+
+Pass `count` for the plausible candidates as an array, best-first, up to `count` of them (`[]` when none) — the same confidence gate, for messages that offer choices. To rank everything under an explicit edit cap instead, filter with `editDistance` and `max`: `suggest` is the judgment call, `editDistance` is the ruler.
+
+#### Parameters
+
+| Name       | Type                          | Description |
+|------------|-------------------------------|-------------|
+| word       | string                        | The mistyped word |
+| candidates | array, string, object, Map, Set | The known vocabulary. Objects and Maps read as their keys, nullish entries are skipped |
+| options    | object                        | Optional configuration |
+
+##### Options
+
+| Name       | Type    | Default | Description |
+|------------|---------|---------|-------------|
+| threshold  | number  | 0.6     | Minimum similarity (0..1) a candidate must reach to be suggested, so the bar scales with word length |
+| ignoreCase | boolean | true    | Read case differences as typos |
+| swaps      | boolean | true    | Read adjacent swaps as single typos |
+| count      | number  | —       | Return the plausible candidates as an array, best-first, up to this many |
+
+#### Returns
+
+The nearest candidate as a string, or `null` when none reaches the threshold. With `count`, an array of candidates best-first, `[]` when none. Ties keep the earlier candidate, so order candidates by preference when it matters.
+
+#### Example
+
+```javascript
+import { suggest } from '@semantic-ui/utils';
+
+console.log(suggest('stirng', ['string', 'number', 'boolean'])); // 'string'
+console.log(suggest('xyz', ['string', 'number'])); // null
+
+// a config's options or a registry's keys are already a vocabulary
+console.log(suggest('colr', { color: '#f00', size: 'large' })); // 'color'
+
+// case and swap typos resolve to the canonical spelling
+console.log(suggest('FORCE', ['force', 'quiet'])); // 'force'
+console.log(suggest('sroted', ['sorted', 'sordid'])); // 'sorted'
+
+// count offers choices, best-first
+console.log(suggest('stirng', ['strong', 'string'], { count: 3 })); // ['string', 'strong']
+
+// the caller owns the sentence
+const match = suggest('paddign', ['padding', 'margin']);
+const hint = match ? `, did you mean '${match}'?` : '';
 ```
 
 These string utilities provide helpful tools for working with strings and text manipulation in JavaScript, enhancing string processing capabilities and security in web applications.

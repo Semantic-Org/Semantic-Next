@@ -39,6 +39,13 @@ interface HashCodeOptions {
    * @default 0
    */
   seed?: number;
+  /**
+   * Resolve as if no global `hashCode.config` were set — call options and
+   * presets only. For library code that needs the same output shape regardless
+   * of host-app defaults.
+   * @default false
+   */
+  ignoreConfig?: boolean;
 }
 
 /**
@@ -69,7 +76,7 @@ export function hashCode(input: HashInput, options: HashCodeOptions & { usage: '
 export function hashCode(input: HashInput, options: HashCodeOptions): string;
 export namespace hashCode {
   /** Global defaults, lowest precedence (call options > config > preset). */
-  let config: HashCodeOptions;
+  let config: Omit<HashCodeOptions, 'ignoreConfig'>;
 }
 
 /**
@@ -136,6 +143,13 @@ interface GenerateIDOptions {
    * hyphens. Defaults to the preset's setting (4 for `code`, off otherwise).
    */
   group?: number | false;
+  /**
+   * Resolve as if no global `generateId.config` were set — call options and
+   * presets only. For library code whose id shapes must not bend to host-app
+   * defaults. An id minted with it validates with it.
+   * @default false
+   */
+  ignoreConfig?: boolean;
 }
 
 /**
@@ -175,7 +189,7 @@ interface ParsedId {
 export function generateId(options?: GenerateIDOptions): string;
 export namespace generateId {
   /** Global defaults, lowest precedence (call options > config > preset). */
-  let config: GenerateIDOptions;
+  let config: Omit<GenerateIDOptions, 'ignoreConfig'>;
 }
 
 /**

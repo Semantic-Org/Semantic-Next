@@ -136,7 +136,12 @@ const HASH_PRESETS = {
 const HASH_FORMATS = new Set(['number', 'crockford', 'hex']);
 
 const resolveHashConfig = (options) => {
-  const globalConfig = hashCode.config;
+  // ignoreConfig resolves as if no app-wide config were set (call options >
+  // preset only) so library code gets the same output shape regardless of host
+  // defaults. it exists here because config is a pure defaults layer over the
+  // presets — the vocabulary configs (humanize, toBoolean, …) ARE their
+  // baseline behavior, so they carry no such opt-out
+  const globalConfig = options.ignoreConfig ? {} : hashCode.config;
   const usage = options.usage ?? globalConfig.usage ?? 'hash';
   const preset = HASH_PRESETS[usage];
   if (!preset) {
@@ -342,7 +347,9 @@ const group = (id, size) => {
 };
 
 const resolveConfig = (options) => {
-  const globalConfig = generateId.config;
+  // ignoreConfig skips the ambient layer, see resolveHashConfig. isValidId and
+  // parseId resolve here too, so an id minted config-free validates config-free
+  const globalConfig = options.ignoreConfig ? {} : generateId.config;
   const usage = options.usage ?? globalConfig.usage ?? 'db';
   const preset = PRESETS[usage];
   if (!preset) {

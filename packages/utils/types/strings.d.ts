@@ -367,3 +367,151 @@ export namespace humanize {
   /** Global defaults and term vocabulary. Set once at app boot and every call inherits it */
   let config: HumanizeConfig;
 }
+
+/**
+ * Options for computing edit distance between two strings
+ */
+export interface EditDistanceOptions {
+  /** Stop once the distance provably exceeds this and return Infinity (default: Infinity) */
+  max?: number;
+  /** Lowercase both strings before comparing (default: false) */
+  ignoreCase?: boolean;
+  /** Apply Unicode NFC normalization first, so canonically equivalent spellings read as identical (default: true) */
+  normalize?: boolean;
+  /** Compare grapheme clusters via Intl.Segmenter, so a flag or family emoji is one unit (default: false) */
+  grapheme?: boolean;
+  /** Locale for grapheme segmentation (default: "en") */
+  locale?: string;
+  /** Count an adjacent swap as one edit, the restricted Damerau-Levenshtein reading (default: false) */
+  swaps?: boolean;
+  /** Cost of inserting a character (default: 1) */
+  insertCost?: number;
+  /** Cost of deleting a character (default: 1) */
+  deleteCost?: number;
+  /** Cost of replacing a character (default: 1) */
+  replaceCost?: number;
+  /** Cost of an adjacent swap when swaps is on (default: 1) */
+  swapCost?: number;
+}
+
+/**
+ * Options for scoring string similarity
+ */
+export interface SimilarityOptions {
+  /** Score floor for early exit — a comparison that cannot reach it stops and reports 0 (default: 0) */
+  min?: number;
+  /** Lowercase both strings before comparing (default: false) */
+  ignoreCase?: boolean;
+  /** Apply Unicode NFC normalization first (default: true) */
+  normalize?: boolean;
+  /** Compare grapheme clusters via Intl.Segmenter (default: false) */
+  grapheme?: boolean;
+  /** Locale for grapheme segmentation (default: "en") */
+  locale?: string;
+  /** Count an adjacent swap as one edit (default: false) */
+  swaps?: boolean;
+}
+
+/**
+ * Options for suggesting the nearest candidates to a mistyped word
+ */
+export interface SuggestOptions {
+  /** Minimum similarity (0..1) a candidate must reach to be suggested (default: 0.6) */
+  threshold?: number;
+  /** Read case differences as typos (default: true) */
+  ignoreCase?: boolean;
+  /** Read adjacent swaps as single typos (default: true) */
+  swaps?: boolean;
+  /** Return the plausible candidates as an array, best-first, up to this many ([] when none) */
+  count?: number;
+}
+
+/** A candidate vocabulary: an array or Set of names, a lone name, or the keys of a plain object or Map */
+export type SuggestCandidates =
+  | ReadonlyArray<unknown>
+  | string
+  | ReadonlySet<unknown>
+  | ReadonlyMap<unknown, unknown>
+  | Record<string, unknown>
+  | Iterable<unknown>;
+
+/**
+ * Computes how many single-character edits (inserts, deletes, replacements, and
+ * optionally adjacent swaps) turn one string into the other — 0 means identical
+ * Compares Unicode code points after NFC normalization by default, grapheme clusters with `grapheme: true`
+ * `max` caps the search and returns Infinity once the distance provably exceeds it, the cheap-rejection shape for fuzzy-match loops
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#editdistance editDistance}
+ * @see {@link https://next.semantic-ui.com/examples/utils-editdistance Example}
+ *
+ * @param a - The first string (nullish reads as empty, other input is stringified)
+ * @param b - The second string
+ * @param options - Comparison options
+ * @returns The edit distance, or Infinity when it exceeds `max`
+ *
+ * @example
+ * ```ts
+ * editDistance('kitten', 'sitting') // returns 3
+ * editDistance('teh', 'the', { swaps: true }) // returns 1
+ * editDistance('banana', 'orange', { max: 2 }) // returns Infinity
+ * editDistance('café', 'café') // returns 0 (NFC-normalized)
+ * ```
+ */
+export function editDistance(a: unknown, b: unknown, options?: EditDistanceOptions): number;
+
+/**
+ * Scores how alike two strings read, 0..1, where 1 is identical — 1 minus the
+ * edit distance over the longer string's length
+ * `min` is a score floor that lets the comparison stop early and report 0
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#similarity similarity}
+ * @see {@link https://next.semantic-ui.com/examples/utils-similarity Example}
+ *
+ * @param a - The first string (nullish reads as empty, other input is stringified)
+ * @param b - The second string
+ * @param options - Comparison options
+ * @returns A score from 0 (nothing shared) to 1 (identical)
+ *
+ * @example
+ * ```ts
+ * similarity('kitten', 'sitting') // returns 0.571…
+ * similarity('JavaScript', 'javascript', { ignoreCase: true }) // returns 1
+ * similarity('abc', 'xyz', { min: 0.7 }) // returns 0 (early exit below the floor)
+ * ```
+ */
+export function similarity(a: unknown, b: unknown, options?: SimilarityOptions): number;
+
+/**
+ * Suggests the nearest candidate to a mistyped word, or null when nothing reads
+ * close enough — the lookup behind a did-you-mean teaching message
+ * Returns the candidate verbatim, never prose, so the caller owns the sentence around it
+ * Candidates read generously: an array or Set of names, a lone name, or the keys of a plain object or Map
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#suggest suggest}
+ * @see {@link https://next.semantic-ui.com/examples/utils-suggest Example}
+ *
+ * With `count`, returns the plausible candidates as an array instead, best-first,
+ * up to `count` of them ([] when none) — same confidence gate. To rank everything
+ * under an explicit edit cap, filter with {@link editDistance} and `max` instead
+ *
+ * @param word - The mistyped word (nullish reads as empty)
+ * @param candidates - The known vocabulary to suggest from
+ * @param options - Suggestion options
+ * @returns The nearest candidate or null — with `count`, an array best-first
+ *
+ * @example
+ * ```ts
+ * suggest('stirng', ['string', 'number', 'boolean']) // returns 'string'
+ * suggest('colr', { color: '#f00', size: 'large' }) // returns 'color' (object keys)
+ * suggest('xyz', ['string', 'number']) // returns null
+ * suggest('FORCE', ['force']) // returns 'force' (case reads as a typo)
+ * suggest('stirng', ['strong', 'string'], { count: 3 }) // returns ['string', 'strong']
+ * ```
+ */
+export function suggest(
+  word: unknown,
+  candidates: SuggestCandidates,
+  options?: SuggestOptions & { count?: undefined; },
+): string | null;
+export function suggest(
+  word: unknown,
+  candidates: SuggestCandidates,
+  options: SuggestOptions & { count: number; },
+): string[];

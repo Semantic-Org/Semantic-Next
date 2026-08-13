@@ -43,8 +43,9 @@ Deterministic content hash: the same input always produces the same output. Pick
 | usage  | string | `'hash'`   | A usage preset: `hash`, `content`, `fingerprint`, or `secure` |
 | format | string | preset's   | Output encoding: `'crockford'`, `'hex'`, or `'number'`. `'number'` is only valid at or below 53 bits |
 | seed   | number | 0          | Namespacing seed. The same input under two seeds yields independent hashes |
+| ignoreConfig | boolean | false | Resolve as if no global config were set: call options and presets only |
 
-Defaults can be set globally on the mutable `hashCode.config` object (precedence: call options > config > preset).
+Defaults can be set globally on the mutable `hashCode.config` object (precedence: call options > config > preset). `ignoreConfig` opts a call out of that global layer — for library code that needs the same output shape regardless of host-app defaults.
 
 #### Returns
 
@@ -95,8 +96,9 @@ Generates a unique id. Defaults to a sortable 26-char [ULID](https://github.com/
 | upper    | boolean          | preset's     | Emit uppercase Crockford, overriding the preset case. Validation is case-insensitive either way |
 | format   | string           | `'crockford'`| `'uuid'` emits an RFC UUIDv7; other Crockford options are then ignored except `prefix` |
 | group    | number \| false  | preset's     | Hyphenate the output every n characters for display. `4` for `code`, off otherwise |
+| ignoreConfig | boolean | false | Resolve as if no global config were set: call options and presets only |
 
-Defaults can be set globally on the mutable `generateId.config` object (precedence: call options > config > preset).
+Defaults can be set globally on the mutable `generateId.config` object (precedence: call options > config > preset). `ignoreConfig` opts a call out of that global layer — for library code whose id shapes must not bend to host-app defaults. `isValidId` and `parseId` take it too, so an id minted config-free validates config-free.
 
 #### Returns
 
@@ -117,6 +119,9 @@ console.log(generateId({ format: 'uuid' }));                // RFC UUIDv7
 
 // global default for a whole app
 generateId.config = { usage: 'page' };
+
+// library code opts out of the global layer
+console.log(generateId({ ignoreConfig: true }));            // 26-char ULID, config ignored
 ```
 
 ### isValidId
