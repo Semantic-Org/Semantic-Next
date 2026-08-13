@@ -15,10 +15,10 @@ The Debug utilities provide the two reporting doors a library needs: `log` for s
 ### log
 
 ```javascript
-function log(message, level = 'log', { namespace = '', data = undefined, color = 'inherit', timestamp = false, format = 'standard', consoleMethod = null, silent = false, title = namespace, showTitle = true, titleColor = null } = {})
+function log(message, level = 'log', { namespace = '', data = undefined, color = 'inherit', timestamp = false, format = 'standard', consoleMethod = null, silent = false, title = namespace, showTitle = true, titleColor = null, noColor = isServer } = {})
 ```
 
-A flexible logging utility with formatting, namespacing, and multiple output options. Supports colored output, timestamps, structured JSON format, and configurable titles.
+A flexible logging utility with formatting, namespacing, and multiple output options. Supports colored output, timestamps, structured JSON format, and configurable titles. Styling is browser-only by default — `noColor` defaults to [`isServer`](/docs/api/utils/environment#isserver), so server output is plain text with no `%c` directives or style arguments.
 
 #### Parameters
 
@@ -36,12 +36,13 @@ A flexible logging utility with formatting, namespacing, and multiple output opt
 | data          | any     | undefined            | Additional data to include with the log message. Accepts arrays and objects |
 | color         | string  | 'inherit'            | Text color for the message |
 | timestamp     | boolean | false                | Whether to include timestamp in the output |
-| format        | string  | 'standard'           | Output format ('standard' or 'json') |
+| format        | string  | 'standard'           | Output format ('standard' or 'json' — json emits each record as one JSON-serialized line) |
 | consoleMethod | string  | null                 | Override the console method used for output |
 | silent        | boolean | false                | Suppress all output when true |
 | title         | string  | namespace            | Title/label to display before the message |
 | showTitle     | boolean | true                 | Whether to show the title/label |
 | titleColor    | string  | null                 | Color for the title/label (defaults to level color) |
+| noColor       | boolean | isServer             | Skip the `%c` style directives and style arguments — plain text, title still present. Pass `false` to force styling on the server |
 
 #### Returns
 
@@ -62,13 +63,14 @@ log('User login successful', 'info', {
   data: [{ userId: 123, timestamp: new Date() }]
 });
 
-// JSON format for structured logging
+// JSON format for structured logging — one JSON line per record
 log('API response received', 'info', {
   format: 'json',
   namespace: 'ApiClient',
   timestamp: true,
   data: [{ status: 200, endpoint: '/api/users' }]
 });
+// {"timestamp":"2026-08-12T10:24:00.000Z","level":"info","namespace":"ApiClient","message":"API response received","data":[...]}
 
 // Custom styling
 log('Important notice', 'warn', {
@@ -76,6 +78,9 @@ log('Important notice', 'warn', {
   titleColor: '#FF6B35',
   timestamp: true
 });
+
+// Force plain output anywhere (the server default)
+log('Job finished', 'info', { namespace: 'worker', noColor: true });
 ```
 
 ### createLogger

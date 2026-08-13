@@ -984,8 +984,13 @@ log('App started');                                     // console.log
 log('User action', 'debug', { namespace: 'UserService' });
 log('Warning', 'warn', { timestamp: true, title: 'SYSTEM', titleColor: '#FF6B35' });
 
-// JSON format for structured output
+// JSON format for structured output — one JSON.stringify'd line per record
 log('API response', 'info', { format: 'json', namespace: 'API', timestamp: true });
+// {"timestamp":"...","level":"info","namespace":"API","message":"API response"}
+
+// styling is browser-only by default: noColor defaults to isServer, so node
+// output is plain text with no %c — pass noColor: false to force styling
+log('booted', 'info', { namespace: 'db' });             // "db booted" on the server
 ```
 
 ### createLogger — log, Bound to Shared Defaults

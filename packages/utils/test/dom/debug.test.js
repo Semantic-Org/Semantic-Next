@@ -439,7 +439,7 @@ describe('log', () => {
     );
   });
 
-  it('should output JSON format when requested', () => {
+  it('should emit one JSON-parseable line when format is json', () => {
     const testData = { key: 'value' };
     log('message', 'log', {
       format: 'json',
@@ -447,7 +447,9 @@ describe('log', () => {
       namespace: 'test',
     });
 
-    expect(consoleSpy.log).toHaveBeenCalledWith({
+    const line = consoleSpy.log.mock.calls[0][0];
+    expect(typeof line).toBe('string');
+    expect(JSON.parse(line)).toEqual({
       level: 'log',
       namespace: 'test',
       message: 'message',
@@ -461,9 +463,9 @@ describe('log', () => {
       timestamp: true,
     });
 
-    const call = consoleSpy.log.mock.calls[0][0];
-    expect(call).toHaveProperty('timestamp');
-    expect(call.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    const record = JSON.parse(consoleSpy.log.mock.calls[0][0]);
+    expect(record).toHaveProperty('timestamp');
+    expect(record.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
   });
 
   it('should use the namespace verbatim as the default title', () => {
@@ -520,6 +522,36 @@ describe('log', () => {
   it('should fallback to info level for unknown levels', () => {
     log('message', 'invalidLevel');
     expect(consoleSpy.info).toHaveBeenCalled();
+  });
+
+  describe('noColor', () => {
+    it('should default to styled output in the browser', () => {
+      // jsdom posture: isServer is false, so %c styling stays on by default
+      log('message', 'log', { title: 'TestComponent' });
+      expect(consoleSpy.log).toHaveBeenCalledWith(
+        expect.stringContaining('%cTestComponent%c message'),
+        expect.any(String),
+        expect.any(String),
+      );
+    });
+
+    it('should compose plain text without %c or style args', () => {
+      log('message', 'log', { title: 'TestComponent', noColor: true });
+      expect(consoleSpy.log).toHaveBeenCalledWith('TestComponent message');
+    });
+
+    it('should render the timestamp plain', () => {
+      log('message', 'log', { timestamp: true, noColor: true });
+      expect(consoleSpy.log).toHaveBeenCalledWith(
+        expect.stringMatching(/^\[\d{2}:\d{2}:\d{2}\.\d{3}\] message$/),
+      );
+    });
+
+    it('should keep data alongside the plain line', () => {
+      const data = { attempt: 2 };
+      log('retrying', 'warn', { title: 'sync', noColor: true, data });
+      expect(consoleSpy.warn).toHaveBeenCalledWith('sync retrying', data);
+    });
   });
 });
 
@@ -625,10 +657,26 @@ describe('createLogger', () => {
   it('should carry the wrapper level into json output', () => {
     const { warn } = createLogger({ namespace: 'sync', format: 'json' });
     warn('retrying');
-    expect(consoleSpy.warn).toHaveBeenCalledWith({
+    expect(JSON.parse(consoleSpy.warn.mock.calls[0][0])).toEqual({
       level: 'warn',
       namespace: 'sync',
       message: 'retrying',
     });
+  });
+
+  it('should pass noColor through as a factory default', () => {
+    const { info } = createLogger({ namespace: 'sync', noColor: true });
+    info('connected');
+    expect(consoleSpy.info).toHaveBeenCalledWith('sync connected');
+  });
+
+  it('should let a callsite re-enable styling over a noColor default', () => {
+    const { info } = createLogger({ namespace: 'sync', noColor: true });
+    info('connected', { noColor: false });
+    expect(consoleSpy.info).toHaveBeenCalledWith(
+      expect.stringContaining('%csync%c connected'),
+      expect.any(String),
+      expect.any(String),
+    );
   });
 });

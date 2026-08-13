@@ -1,3 +1,5 @@
+import { isServer } from './environment.js';
+
 /*-------------------
        Logging
 --------------------*/
@@ -24,6 +26,9 @@ export const log = (
     showTitle = true,
     titleColor = null,
     color = 'inherit',
+    // node consumes %c silently, so styling is dead weight in server output —
+    // plain text keeps the style args out of structured logs
+    noColor = isServer,
   } = {},
 ) => {
   if (silent) {
@@ -41,31 +46,42 @@ export const log = (
   const logArgs = [];
   let logFormat = '';
 
-  // JSON output
+  // JSON output — one serialized record per line, for process managers and
+  // log aggregators
   if (format === 'json') {
-    console[method]({
+    console[method](JSON.stringify({
       ...(timestamp) ? { timestamp: new Date().toISOString() } : {},
       level,
       namespace,
       message,
       ...(data !== undefined && (!Array.isArray(data) || data.length > 0)) ? { data } : {},
-    });
+    }));
     return;
   }
 
   // Standard output
   if (timestamp) {
     const time = new Date().toISOString().split('T')[1].slice(0, 12);
-    logFormat += `%c[${time}]%c `;
-    logArgs.push('color: #999999;', 'color: inherit;');
+    if (noColor) {
+      logFormat += `[${time}] `;
+    }
+    else {
+      logFormat += `%c[${time}]%c `;
+      logArgs.push('color: #999999;', 'color: inherit;');
+    }
   }
 
   if (title && showTitle) {
-    logFormat += `%c${title}%c `;
-    logArgs.push(
-      `color: ${titleColor}; font-weight: bold;`,
-      `color: ${color};`,
-    );
+    if (noColor) {
+      logFormat += `${title} `;
+    }
+    else {
+      logFormat += `%c${title}%c `;
+      logArgs.push(
+        `color: ${titleColor}; font-weight: bold;`,
+        `color: ${color};`,
+      );
+    }
   }
 
   logFormat += message;

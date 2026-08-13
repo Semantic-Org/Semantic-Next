@@ -146,7 +146,8 @@ export interface LogOptions {
   color?: string;
   /** Whether to include timestamp in the output */
   timestamp?: boolean;
-  /** Output format - 'standard' for formatted console output, 'json' for structured data */
+  /** Output format - 'standard' for formatted console output, 'json' to emit
+   * each record as one JSON-serialized line */
   format?: LogFormat;
   /** Override the console method used for output */
   consoleMethod?: 'log' | 'debug' | 'info' | 'warn' | 'error';
@@ -158,6 +159,10 @@ export interface LogOptions {
   showTitle?: boolean;
   /** Color for the title/label */
   titleColor?: string;
+  /** Skip the `%c` style directives and style arguments — plain text, title
+   * still present. Defaults to `isServer`, keeping style tokens out of Node
+   * output and structured logs; pass `false` to force styling on the server */
+  noColor?: boolean;
 }
 
 /**
