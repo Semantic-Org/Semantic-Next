@@ -10,6 +10,16 @@ import { isArray, isBoolean, isDate, isNumber, isObject, isString } from './type
 // client), returned as a UTC instant, matching what native new Date does with an <input type=datetime-local>
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/;
 
+// one number, an optional space, one optional unit, mirroring the ecosystem's ms(). a compound form
+// like '1h 30m' is a different grammar and reads as junk here
+const DURATION_RE = /^([+-]?(?:\d+(?:\.\d+)?|\.\d+))\s*([a-z]*)$/i;
+
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+const WEEK = 7 * DAY;
+
 // fold -0 to 0 so a coerced value never trips Object.is or 1/x downstream
 const normalizeZero = (number) => (number === 0 ? 0 : number);
 
@@ -112,6 +122,60 @@ export const toDate = (value, { onInvalid = 'null', epoch = 'milliseconds' } = {
   return onInvalidResult(value, onInvalid);
 };
 
+// only fixed-length spans are listed. a week is always 7 days, but a year is a pick (ms() reads it
+// as 365.25 days) and a month has no length at all, so neither is guessed here. add one at boot with
+// toDuration.config.units.y = 365 * 24 * 60 * 60 * 1000, where keys are matched lowercase
+export const toDuration = /* @__PURE__ */ configured(
+  (value, { onInvalid = 'null' } = {}) => {
+    // a number is already milliseconds, the unit taken by timers, TTLs, and animation APIs
+    if (isNumber(value)) { return Number.isFinite(value) ? normalizeZero(value) : onInvalidResult(value, onInvalid); }
+    if (isString(value)) {
+      const match = DURATION_RE.exec(value.trim());
+      if (match) {
+        const units = toDuration.config.units;
+        const unit = match[2].toLowerCase() || 'ms';
+        // an inherited key ('5constructor') or a 300-digit overflow would otherwise produce NaN or
+        // Infinity, which this family never returns
+        if (Object.hasOwn(units, unit)) {
+          const milliseconds = Number(match[1]) * units[unit];
+          if (Number.isFinite(milliseconds)) { return normalizeZero(milliseconds); }
+        }
+      }
+    }
+    return onInvalidResult(value, onInvalid);
+  },
+  {
+    units: {
+      ms: 1,
+      msec: 1,
+      msecs: 1,
+      millisecond: 1,
+      milliseconds: 1,
+      s: SECOND,
+      sec: SECOND,
+      secs: SECOND,
+      second: SECOND,
+      seconds: SECOND,
+      m: MINUTE,
+      min: MINUTE,
+      mins: MINUTE,
+      minute: MINUTE,
+      minutes: MINUTE,
+      h: HOUR,
+      hr: HOUR,
+      hrs: HOUR,
+      hour: HOUR,
+      hours: HOUR,
+      d: DAY,
+      day: DAY,
+      days: DAY,
+      w: WEEK,
+      week: WEEK,
+      weeks: WEEK,
+    },
+  },
+);
+
 export const toString = (value, { loose = false, onInvalid = 'null' } = {}) => {
   if (isString(value)) { return value; }
   if (value == null) { return onInvalidResult(value, onInvalid); }
@@ -135,4 +199,5 @@ export const coerceBoolean = toBoolean;
 export const coerceNumber = toNumber;
 export const coerceInteger = toInteger;
 export const coerceDate = toDate;
+export const coerceDuration = toDuration;
 export const coerceString = toString;

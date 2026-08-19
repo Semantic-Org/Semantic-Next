@@ -65,6 +65,23 @@ export interface ToDateSettings {
 }
 
 /**
+ * Options for duration coercion
+ */
+export interface ToDurationSettings {
+  /** How a failed coercion resolves (default: 'null') */
+  onInvalid?: OnInvalid;
+}
+
+/**
+ * The unit table read by every {@link toDuration} call. Set once at app boot
+ * (e.g. `toDuration.config.units.y = 365 * 24 * 60 * 60 * 1000`), with keys matched lowercase.
+ */
+export interface ToDurationConfig {
+  /** Milliseconds per unit, keyed by the lowercase spelling accepted after the number */
+  units: Record<string, number>;
+}
+
+/**
  * Options for string coercion
  */
 export interface ToStringSettings {
@@ -173,6 +190,37 @@ export function toDate<T>(value: T, settings: ToDateSettings & { onInvalid: 'pas
  */
 export function toDate(value: unknown, settings?: ToDateSettings): Date | null;
 
+/** Coerces to a duration in milliseconds, returning the original value on failure. @see {@link toDuration} */
+export function toDuration<T>(value: T, settings: ToDurationSettings & { onInvalid: 'passthrough'; }): number | T;
+/**
+ * Coerces a duration expression to milliseconds, or `null` when it reads as no duration at all.
+ * Numbers are already milliseconds, and a string takes one number and one optional unit (`'5s'`, `'1.5h'`,
+ * `'10 minutes'`, `'300msecs'`), case-insensitively, with an optional space between the two, reading as
+ * milliseconds when the unit is left off. Milliseconds, seconds, minutes, hours, days, and weeks are
+ * built in, the sign is kept, and compound forms like `'1h 30m'` return `null`. Years and months have no
+ * fixed length, so they are absent until named in {@link ToDurationConfig}. `onInvalid` chooses how a
+ * failed coercion resolves.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/coercion#toduration toDuration}
+ * @see {@link https://next.semantic-ui.com/examples/utils-toduration Example}
+ *
+ * @param value - The value to coerce
+ * @param settings - Coercion options
+ * @returns The duration in milliseconds, or `null` if unreadable
+ *
+ * @example
+ * ```ts
+ * toDuration('5s') // 5000
+ * toDuration('1.5h') // 5400000
+ * toDuration('1h 30m') // null
+ * setTimeout(retry, toDuration(config.retryAfter) ?? 1000)
+ * ```
+ */
+export function toDuration(value: unknown, settings?: ToDurationSettings): number | null;
+export namespace toDuration {
+  /** The unit table, keyed by lowercase spelling. Set once at app boot */
+  let config: ToDurationConfig;
+}
+
 /** Coerces to a string, returning the original value on failure. @see {@link toString} */
 export function toString<T>(value: T, settings: ToStringSettings & { onInvalid: 'passthrough'; }): string | T;
 /**
@@ -205,5 +253,7 @@ export const coerceNumber: typeof toNumber;
 export const coerceInteger: typeof toInteger;
 /** Alias of {@link toDate} */
 export const coerceDate: typeof toDate;
+/** Alias of {@link toDuration} */
+export const coerceDuration: typeof toDuration;
 /** Alias of {@link toString} */
 export const coerceString: typeof toString;
