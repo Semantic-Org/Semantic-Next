@@ -577,10 +577,10 @@ suggest('stirng', ['strong', 'string'], { count: 3 }); // ['string', 'strong'] b
 
 ## Coercion Utilities (coercion.js)
 
-Best-effort conversion of loose input (attribute strings, query params, JSON) to a target type. Each returns the type or `null` when there is no clean reading, so results compose with `??`. Also exported as `coerceBoolean`/`coerceNumber`/`coerceInteger`/`coerceDate`/`coerceString`.
+Best-effort conversion of loose input (attribute strings, query params, JSON) to a target type. Each returns the type or `null` when there is no clean reading, so results compose with `??`. Also exported as `coerceBoolean`/`coerceNumber`/`coerceInteger`/`coerceDate`/`coerceDuration`/`coerceString`.
 
 ```javascript
-import { toBoolean, toNumber, toInteger, toDate, toString } from '@semantic-ui/utils';
+import { toBoolean, toNumber, toInteger, toDate, toDuration, toString } from '@semantic-ui/utils';
 
 toBoolean('yes');                       // true (generous: true/t/yes/y/on/enabled, false/f/no/n/off/disabled, numeric)
 toBoolean('banana');                    // null (unrecognized, composes with ??)
@@ -601,6 +601,13 @@ toInteger(Infinity);                    // null
 toDate('2024-01-01');                   // Date (ISO strings, epoch-ms numbers, Dates only)
 toDate(1700000000, { epoch: 'seconds' }); // Date from a unix-second timestamp (a JWT exp)
 toDate('01/15/2024');                   // null (ambiguous format, never a guessed date)
+
+toDuration('5s');                       // 5000 (ms/s/m/h/d/w, plus word and abbreviation spellings)
+toDuration('10 minutes');               // 600000 (case-insensitive, space optional)
+toDuration('1500');                     // 1500 (no unit reads as milliseconds, same as the number)
+toDuration('1h 30m');                   // null (compound expressions are a different grammar)
+// years and months have no fixed length, so neither is built in. name your own value once at boot
+toDuration.config.units.y = 365 * 24 * 60 * 60 * 1000;
 
 toString(42);                           // '42'
 toString({ a: 1 });                     // null (never "[object Object]")

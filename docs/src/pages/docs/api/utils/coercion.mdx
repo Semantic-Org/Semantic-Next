@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Coercion Utilities
 package: "@semantic-ui/utils"
-methods: [toBoolean, toNumber, toInteger, toDate, toString]
+methods: [toBoolean, toNumber, toInteger, toDate, toDuration, toString]
 icon: replace
 description: API reference for best-effort type coercion functions
 ---
@@ -15,7 +15,7 @@ const page = toNumber(params.get('page')) ?? 1;
 const when = toDate(input.value) ?? new Date();
 ```
 
-Each helper is also exported as `coerceBoolean`, `coerceNumber`, `coerceInteger`, `coerceDate`, and `coerceString` for callers who think in coercion terms.
+Each helper is also exported as `coerceBoolean`, `coerceNumber`, `coerceInteger`, `coerceDate`, `coerceDuration`, and `coerceString` for callers who think in coercion terms.
 
 Every helper accepts an `onInvalid` setting. It defaults to `'null'` (the failed coercion returns `null`, composing with `??`). Pass `{ onInvalid: 'passthrough' }` to return the *original* value instead, so a schema or validator can flag the bad input rather than see an erasing `null` — and the TypeScript return widens to include the input type (`number | string` for `toNumber(str, { onInvalid: 'passthrough' })`).
 
@@ -190,6 +190,68 @@ console.log(toDate('01/15/2024')); // null (ambiguous format)
 console.log(toDate('banana')); // null (never an Invalid Date)
 
 const when = toDate(userInput) ?? new Date();
+```
+
+### toDuration
+
+```javascript
+function toDuration(value, { onInvalid = 'null' } = {})
+```
+
+Coerces a duration expression to milliseconds, or `null` when it reads as no duration at all. A number is already milliseconds, and a string takes one number followed by one optional unit, case-insensitively, with an optional space between the two: `'5s'`, `'1.5h'`, `'10 minutes'`, `'2hrs'`, `'300msecs'`, `'.5d'`. Leave the unit off and the number reads as milliseconds, so `'1500'` and `1500` agree.
+
+The sign is kept, so `'-1.5h'` is `-5400000`. Compound expressions like `'1h 30m'` are a different grammar and return `null` rather than a partial reading, as do unknown units, bare numbers with trailing junk, and exponent notation.
+
+#### Units
+
+| Unit | Accepted spellings |
+|------|--------------------|
+| Milliseconds | `ms`, `msec`, `msecs`, `millisecond`, `milliseconds` |
+| Seconds | `s`, `sec`, `secs`, `second`, `seconds` |
+| Minutes | `m`, `min`, `mins`, `minute`, `minutes` |
+| Hours | `h`, `hr`, `hrs`, `hour`, `hours` |
+| Days | `d`, `day`, `days` |
+| Weeks | `w`, `week`, `weeks` |
+
+Every unit here is a fixed span. Years and months are absent because neither has one: a year is a judgment call (the `ms` package reads it as 365.25 days) and a month has no length without a calendar date to anchor it. Name your own value in `toDuration.config.units` rather than inheriting someone else's guess.
+
+#### Parameters
+
+| Name     | Type    | Description |
+|----------|---------|-------------|
+| value    | unknown | The value to coerce |
+| settings | object  | Optional configuration (`onInvalid`, see above) |
+
+#### Returns
+
+The duration in milliseconds, or `null` if unreadable.
+
+#### Example
+
+```javascript
+import { toDuration } from '@semantic-ui/utils';
+
+console.log(toDuration('5s')); // 5000
+console.log(toDuration('1.5h')); // 5400000
+console.log(toDuration('10 minutes')); // 600000
+console.log(toDuration(1500)); // 1500 (already milliseconds)
+console.log(toDuration('1500')); // 1500 (no unit reads as milliseconds)
+console.log(toDuration('1h 30m')); // null (compound expressions are a different grammar)
+
+setTimeout(retry, toDuration(config.retryAfter) ?? 1000);
+```
+
+#### toDuration.config
+
+`toDuration.config.units` holds the milliseconds per unit, keyed by the lowercase spelling accepted after the number. Edit it once at app boot to teach the grammar a unit your domain uses, and every call inherits it.
+
+```javascript
+import { toDuration } from '@semantic-ui/utils';
+
+toDuration.config.units.y = 365 * 24 * 60 * 60 * 1000;
+toDuration.config.units.years = toDuration.config.units.y;
+
+console.log(toDuration('1y')); // 31536000000
 ```
 
 ### toString

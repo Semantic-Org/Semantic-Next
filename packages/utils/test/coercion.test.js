@@ -1,11 +1,13 @@
 import {
   coerceBoolean,
   coerceDate,
+  coerceDuration,
   coerceInteger,
   coerceNumber,
   coerceString,
   toBoolean,
   toDate,
+  toDuration,
   toInteger,
   toNumber,
   toString,
@@ -264,6 +266,118 @@ describe('toDate', () => {
   });
 });
 
+describe('toDuration', () => {
+  it('reads a number as milliseconds and rejects the poison values', () => {
+    expect(toDuration(1500)).toBe(1500);
+    expect(toDuration(0)).toBe(0);
+    expect(toDuration(1.5)).toBe(1.5);
+    expect(toDuration(NaN)).toBe(null);
+    expect(toDuration(Infinity)).toBe(null);
+    expect(toDuration(-Infinity)).toBe(null);
+  });
+
+  it('converts each unit suffix', () => {
+    expect(toDuration('500ms')).toBe(500);
+    expect(toDuration('5s')).toBe(5000);
+    expect(toDuration('5m')).toBe(300000);
+    expect(toDuration('24h')).toBe(86400000);
+    expect(toDuration('2d')).toBe(172800000);
+    expect(toDuration('1w')).toBe(604800000);
+  });
+
+  it('accepts unit words and abbreviations, case-insensitively and with an optional space', () => {
+    expect(toDuration('10 minutes')).toBe(600000);
+    expect(toDuration('2hrs')).toBe(7200000);
+    expect(toDuration('300msecs')).toBe(300);
+    expect(toDuration('1 Hour')).toBe(3600000);
+    expect(toDuration('5MS')).toBe(5);
+    expect(toDuration('3 Days')).toBe(259200000);
+    expect(toDuration('  90 SEC  ')).toBe(90000);
+  });
+
+  it('reads decimals and a unitless string as milliseconds', () => {
+    expect(toDuration('1.5h')).toBe(5400000);
+    expect(toDuration('.5s')).toBe(500);
+    expect(toDuration('0.5d')).toBe(43200000);
+    expect(toDuration('1500')).toBe(1500);
+    expect(toDuration('1.5')).toBe(1.5);
+  });
+
+  it('keeps the sign, so a duration can point backwards', () => {
+    expect(toDuration('-1.5h')).toBe(-5400000);
+    expect(toDuration(-1500)).toBe(-1500);
+    expect(toDuration('+5s')).toBe(5000);
+  });
+
+  it('normalizes negative zero', () => {
+    expect(Object.is(toDuration('-0s'), 0)).toBe(true);
+    expect(Object.is(toDuration(-0), 0)).toBe(true);
+  });
+
+  it('returns null for junk rather than a guessed span', () => {
+    expect(toDuration('1h 30m')).toBe(null);
+    expect(toDuration('1y')).toBe(null);
+    expect(toDuration('1mo')).toBe(null);
+    expect(toDuration('5x')).toBe(null);
+    expect(toDuration('5e3')).toBe(null);
+    expect(toDuration('ms')).toBe(null);
+    expect(toDuration('1.2.3')).toBe(null);
+    expect(toDuration('')).toBe(null);
+    expect(toDuration('   ')).toBe(null);
+    expect(toDuration('soon')).toBe(null);
+  });
+
+  it('returns null for non-numeric, non-string input', () => {
+    expect(toDuration(null)).toBe(null);
+    expect(toDuration(undefined)).toBe(null);
+    expect(toDuration(true)).toBe(null);
+    expect(toDuration({})).toBe(null);
+    expect(toDuration([5])).toBe(null);
+    expect(toDuration(new Date())).toBe(null);
+  });
+
+  it('never yields NaN or Infinity, whatever the input spells', () => {
+    // an inherited key would resolve to a function on the unit table
+    expect(toDuration('5constructor')).toBe(null);
+    expect(toDuration('5toString')).toBe(null);
+    // a number long enough to overflow the multiply
+    expect(toDuration('1'.padEnd(320, '0') + 'd')).toBe(null);
+  });
+
+  it('composes with ?? for a default', () => {
+    expect(toDuration('nonsense') ?? 1000).toBe(1000);
+    expect(toDuration('2s') ?? 1000).toBe(2000);
+  });
+
+  it('onInvalid: passthrough returns the original value on failure, null stays the default', () => {
+    const obj = {};
+    expect(toDuration('1h 30m')).toBe(null);
+    expect(toDuration('1h 30m', { onInvalid: 'null' })).toBe(null);
+    expect(toDuration('1h 30m', { onInvalid: 'passthrough' })).toBe('1h 30m');
+    expect(toDuration(Infinity, { onInvalid: 'passthrough' })).toBe(Infinity);
+    expect(toDuration(obj, { onInvalid: 'passthrough' })).toBe(obj);
+    // a readable duration is unaffected by either setting
+    expect(toDuration('5s', { onInvalid: 'null' })).toBe(5000);
+    expect(toDuration('5s', { onInvalid: 'passthrough' })).toBe(5000);
+  });
+
+  it('takes units the app names in toDuration.config, matched lowercase', () => {
+    const savedUnits = toDuration.config.units;
+    toDuration.config.units = { ...savedUnits, y: 365 * 86400000, fortnight: 14 * 86400000 };
+    try {
+      expect(toDuration('1y')).toBe(31536000000);
+      expect(toDuration('2 Fortnights')).toBe(null);
+      expect(toDuration('2 fortnight')).toBe(2419200000);
+      // the built-in units keep working alongside
+      expect(toDuration('5s')).toBe(5000);
+    }
+    finally {
+      toDuration.config.units = savedUnits;
+    }
+    expect(toDuration('1y')).toBe(null);
+  });
+});
+
 describe('toString', () => {
   it('passes strings and stringifies scalars', () => {
     expect(toString('x')).toBe('x');
@@ -318,6 +432,7 @@ describe('coerce aliases', () => {
     expect(coerceNumber).toBe(toNumber);
     expect(coerceInteger).toBe(toInteger);
     expect(coerceDate).toBe(toDate);
+    expect(coerceDuration).toBe(toDuration);
     expect(coerceString).toBe(toString);
   });
 });
