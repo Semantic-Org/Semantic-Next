@@ -52,7 +52,7 @@ jobs:
           git checkout origin/main -- tools/ci/size/ 2>/dev/null || true
 
       - name: Download size snapshots
-        uses: dawidd6/action-download-artifact@v21
+        uses: dawidd6/action-download-artifact@v23
         with:
           github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
