@@ -609,14 +609,16 @@ toDuration('1h 30m');                   // null (compound expressions are a diff
 // years and months have no fixed length, so neither is built in. name your own value once at boot
 toDuration.config.units.y = 365 * 24 * 60 * 60 * 1000;
 
-toByteSize('10mb');                     // 10485760 (same grammar as toDuration, kb/mb/gb/tb/pb at 1024)
-toByteSize('1.5 KB');                   // 1536 (words, single letters, plurals, case-insensitive)
+toByteSize('10mb');                     // 10485760 (same grammar as toDuration, b/kb/mb/gb/tb/pb at 1024)
+toByteSize('1.5 KB');                   // 1536 (case-insensitive, space optional)
 toByteSize('10mib');                    // 10485760 (IEC spellings are always 1024, whatever base says)
 toByteSize('10mb', { base: 1000 });     // 10000000 (SI per call, or toByteSize.config.base = 1000 at boot)
 toByteSize(1500);                       // 1500 (a number is already bytes, a byte is whole so results round)
 toByteSize('1h');                       // null (a duration is a different quantity, so are bits: '10mbit')
-// units are exponents of the base, so a new one is one line
-toByteSize.config.units.eb = 6;
+toByteSize('10 megabytes');             // null (abbreviations only, the bytes() grammar: every importer pays per spelling)
+// units are exponents of the base, so a spelling is one line at boot
+toByteSize.config.units.megabytes = 2;
+toByteSize.config.units.m = 2;
 
 // toBytes is the Uint8Array coercion, the trunk every encoder in bytes.js reads through.
 // a string is TEXT (its UTF-8 bytes), never an encoding: decoding is fromBase64's job

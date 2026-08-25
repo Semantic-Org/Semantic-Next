@@ -7,7 +7,7 @@ import { isString } from './types.js';
        Bytes
 --------------------*/
 
-const textDecoder = new TextDecoder();
+const textDecoder = /* @__PURE__ */ new TextDecoder();
 
 export const byteLength = (value) => toBytes(value)?.byteLength ?? null;
 

@@ -14,7 +14,7 @@ const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\
 // compound form like '1h 30m' is a different grammar and reads as junk here
 const QUANTITY_RE = /^([+-]?(?:\d+(?:\.\d+)?|\.\d+))\s*([a-z]*)$/i;
 
-const textEncoder = new TextEncoder();
+const textEncoder = /* @__PURE__ */ new TextEncoder();
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
@@ -180,7 +180,9 @@ export const toDuration = /* @__PURE__ */ configured(
 
 // values are exponents of the base, so kb/mb/gb follow one base knob and a new unit is one line
 // (toByteSize.config.units.eb = 6). the IEC spellings are 1024-based by definition and sit in their own
-// table so base can never move them. kb reading as 1024 is the judgment call, and it is the setting
+// table so base can never move them. kb reading as 1024 is the judgment call, and it is the setting.
+// abbreviations only, mirroring the ecosystem's bytes() where toDuration mirrors ms(): sizes in a
+// config are spelled short, and every importer pays for each spelling in this table
 export const toByteSize = /* @__PURE__ */ configured(
   (value, { onInvalid = 'null', base } = {}) => {
     // a number is already bytes, the unit every size API takes
@@ -209,48 +211,8 @@ export const toByteSize = /* @__PURE__ */ configured(
   },
   {
     base: 1024,
-    units: {
-      b: 0,
-      byte: 0,
-      bytes: 0,
-      k: 1,
-      kb: 1,
-      kilobyte: 1,
-      kilobytes: 1,
-      m: 2,
-      mb: 2,
-      megabyte: 2,
-      megabytes: 2,
-      g: 3,
-      gb: 3,
-      gigabyte: 3,
-      gigabytes: 3,
-      t: 4,
-      tb: 4,
-      terabyte: 4,
-      terabytes: 4,
-      p: 5,
-      pb: 5,
-      petabyte: 5,
-      petabytes: 5,
-    },
-    iecUnits: {
-      kib: 1,
-      kibibyte: 1,
-      kibibytes: 1,
-      mib: 2,
-      mebibyte: 2,
-      mebibytes: 2,
-      gib: 3,
-      gibibyte: 3,
-      gibibytes: 3,
-      tib: 4,
-      tebibyte: 4,
-      tebibytes: 4,
-      pib: 5,
-      pebibyte: 5,
-      pebibytes: 5,
-    },
+    units: { b: 0, kb: 1, mb: 2, gb: 3, tb: 4, pb: 5 },
+    iecUnits: { kib: 1, mib: 2, gib: 3, tib: 4, pib: 5 },
   },
 );
 

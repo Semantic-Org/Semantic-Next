@@ -93,7 +93,7 @@ export interface ToByteSizeSettings {
 
 /**
  * The base and unit tables read by every {@link toByteSize} call. Set once at app boot
- * (e.g. `toByteSize.config.base = 1000` or `toByteSize.config.units.eb = 6`), with keys matched lowercase.
+ * (e.g. `toByteSize.config.base = 1000` or `toByteSize.config.units.megabytes = 2`), with keys matched lowercase.
  */
 export interface ToByteSizeConfig {
   /** What `units` scale by, 1024 (default) or 1000 */
@@ -260,10 +260,11 @@ export function toByteSize<T>(value: T, settings: ToByteSizeSettings & { onInval
 /**
  * Coerces a byte size expression to a whole number of bytes, or `null` when it reads as no size at all.
  * Numbers are already bytes, and a string takes one number and one optional unit (`'10mb'`, `'1.5 KB'`,
- * `'2 gigabytes'`, `'512k'`), case-insensitively, with an optional space between the two, reading as bytes
- * when the unit is left off. `kb` through `pb` scale by `base` (1024 unless configured), the IEC spellings
- * `kib` through `pib` are always 1024, and a byte is whole so the result rounds to the nearest one. The
- * sign is kept, bits and compound forms like `'1mb 512kb'` return `null`. `onInvalid` chooses how a
+ * `'2 GiB'`), case-insensitively, with an optional space between the two, reading as bytes when the unit
+ * is left off. `b`, `kb` through `pb` scale by `base` (1024 unless configured), the IEC `kib` through `pib`
+ * are always 1024, and a byte is whole so the result rounds to the nearest one. Abbreviations only, the
+ * ecosystem's `bytes()` grammar, with words and single letters one {@link ToByteSizeConfig} line away.
+ * The sign is kept, bits and compound forms like `'1mb 512kb'` return `null`. `onInvalid` chooses how a
  * failed coercion resolves.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/coercion#tobytesize toByteSize}
  * @see {@link https://next.semantic-ui.com/examples/utils-tobytesize Example}

@@ -167,7 +167,7 @@ describe('formatByteSize', () => {
     expect(formatByteSize(1536, { unit: 'mb' })).toBe('0 MB');
     expect(formatByteSize(1536, { unit: 'mb', decimals: 3 })).toBe('0.001 MB');
     expect(formatByteSize(10485760, { unit: 'KB' })).toBe('10240 KB');
-    expect(formatByteSize(10485760, { unit: 'megabytes' })).toBe('10 MB');
+    expect(formatByteSize(1073741824, { unit: 'gb' })).toBe('1 GB');
     expect(formatByteSize(1073741824, { unit: 'mb' })).toBe('1024 MB');
     expect(formatByteSize(10, { unit: 'b' })).toBe('10 B');
   });

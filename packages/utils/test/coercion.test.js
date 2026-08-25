@@ -400,27 +400,33 @@ describe('toByteSize', () => {
     expect(toByteSize('1pb')).toBe(1125899906842624);
   });
 
-  it('accepts unit words, single letters, and plurals, case-insensitively and with an optional space', () => {
+  it('reads the abbreviations case-insensitively and with an optional space', () => {
     expect(toByteSize('10 MB')).toBe(10485760);
-    expect(toByteSize('10 megabytes')).toBe(10485760);
-    expect(toByteSize('1 Megabyte')).toBe(1048576);
-    expect(toByteSize('10m')).toBe(10485760);
-    expect(toByteSize('512k')).toBe(524288);
-    expect(toByteSize('4 Bytes')).toBe(4);
+    expect(toByteSize('10Mb')).toBe(10485760);
+    expect(toByteSize('4 B')).toBe(4);
     expect(toByteSize('  2 GB  ')).toBe(2147483648);
+  });
+
+  it('reads abbreviations only, so words and single letters are a config line, not a built-in', () => {
+    expect(toByteSize('10 megabytes')).toBe(null);
+    expect(toByteSize('1 megabyte')).toBe(null);
+    expect(toByteSize('10m')).toBe(null);
+    expect(toByteSize('512k')).toBe(null);
+    expect(toByteSize('4 bytes')).toBe(null);
   });
 
   it('reads the IEC spellings as 1024-based whatever base says', () => {
     expect(toByteSize('10mib')).toBe(10485760);
     expect(toByteSize('1 KiB')).toBe(1024);
-    expect(toByteSize('2 gibibytes')).toBe(2147483648);
+    expect(toByteSize('2 GiB')).toBe(2147483648);
+    expect(toByteSize('2 gibibytes')).toBe(null);
     expect(toByteSize('10mib', { base: 1000 })).toBe(10485760);
   });
 
   it('reads the ambiguous units at base 1000 when asked', () => {
     expect(toByteSize('10mb', { base: 1000 })).toBe(10000000);
     expect(toByteSize('1kb', { base: 1000 })).toBe(1000);
-    expect(toByteSize('1 gigabyte', { base: 1000 })).toBe(1000000000);
+    expect(toByteSize('1 gb', { base: 1000 })).toBe(1000000000);
   });
 
   it('reads decimals and a unitless string as bytes', () => {
@@ -501,11 +507,12 @@ describe('toByteSize', () => {
   it('takes a base and units the app names in toByteSize.config', () => {
     const saved = { base: toByteSize.config.base, units: toByteSize.config.units };
     toByteSize.config.base = 1000;
-    toByteSize.config.units = { ...saved.units, eb: 6, exabytes: 6 };
+    toByteSize.config.units = { ...saved.units, eb: 6, m: 2, megabytes: 2 };
     try {
       expect(toByteSize('1kb')).toBe(1000);
       expect(toByteSize('1eb')).toBe(1e18);
-      expect(toByteSize('2 exabytes')).toBe(2e18);
+      expect(toByteSize('10m')).toBe(10000000);
+      expect(toByteSize('2 Megabytes')).toBe(2000000);
       // a per-call base still wins over the config base
       expect(toByteSize('1kb', { base: 1024 })).toBe(1024);
       // the IEC table does not move
