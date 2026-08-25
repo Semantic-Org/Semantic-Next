@@ -577,10 +577,10 @@ suggest('stirng', ['strong', 'string'], { count: 3 }); // ['string', 'strong'] b
 
 ## Coercion Utilities (coercion.js)
 
-Best-effort conversion of loose input (attribute strings, query params, JSON) to a target type. Each returns the type or `null` when there is no clean reading, so results compose with `??`. Also exported as `coerceBoolean`/`coerceNumber`/`coerceInteger`/`coerceDate`/`coerceDuration`/`coerceString`.
+Best-effort conversion of loose input (attribute strings, query params, JSON) to a target type. Each returns the type or `null` when there is no clean reading, so results compose with `??`. Also exported as `coerceBoolean`/`coerceNumber`/`coerceInteger`/`coerceDate`/`coerceDuration`/`coerceByteSize`/`coerceBytes`/`coerceString`.
 
 ```javascript
-import { toBoolean, toNumber, toInteger, toDate, toDuration, toString } from '@semantic-ui/utils';
+import { toBoolean, toNumber, toInteger, toDate, toDuration, toByteSize, toBytes, toString } from '@semantic-ui/utils';
 
 toBoolean('yes');                       // true (generous: true/t/yes/y/on/enabled, false/f/no/n/off/disabled, numeric)
 toBoolean('banana');                    // null (unrecognized, composes with ??)
@@ -609,6 +609,23 @@ toDuration('1h 30m');                   // null (compound expressions are a diff
 // years and months have no fixed length, so neither is built in. name your own value once at boot
 toDuration.config.units.y = 365 * 24 * 60 * 60 * 1000;
 
+toByteSize('10mb');                     // 10485760 (same grammar as toDuration, kb/mb/gb/tb/pb at 1024)
+toByteSize('1.5 KB');                   // 1536 (words, single letters, plurals, case-insensitive)
+toByteSize('10mib');                    // 10485760 (IEC spellings are always 1024, whatever base says)
+toByteSize('10mb', { base: 1000 });     // 10000000 (SI per call, or toByteSize.config.base = 1000 at boot)
+toByteSize(1500);                       // 1500 (a number is already bytes, a byte is whole so results round)
+toByteSize('1h');                       // null (a duration is a different quantity, so are bits: '10mbit')
+// units are exponents of the base, so a new one is one line
+toByteSize.config.units.eb = 6;
+
+// toBytes is the Uint8Array coercion, the trunk every encoder in bytes.js reads through.
+// a string is TEXT (its UTF-8 bytes), never an encoding: decoding is fromBase64's job
+toBytes('héllo');                       // Uint8Array [104, 195, 169, 108, 108, 111]
+toBytes(new Float32Array([1]));         // a Uint8Array view over the same 4 bytes, no copy
+toBytes([1, 2, 3]);                     // Uint8Array [1, 2, 3] (copied)
+toBytes([1, 2, 300]);                   // null (300 is not a byte, never silently wrapped)
+toBytes(5);                             // null (a number is not a length)
+
 toString(42);                           // '42'
 toString({ a: 1 });                     // null (never "[object Object]")
 toString({ a: 1 }, { loose: true });    // '{"a":1}' (render objects for display)
@@ -622,10 +639,26 @@ toNumber('5px', { onInvalid: 'passthrough' });  // '5px'
 
 ## Bytes Utilities (bytes.js)
 
-Unicode-safe base64 encode/decode, the pair `btoa`/`atob` never were (they only speak Latin1).
+Measure, format, and encode bytes. Everything here reads its input through `toBytes` or `toByteSize` (coercion.js). `toBase64`/`fromBase64` are the unicode-safe pair `btoa`/`atob` never were (they only speak Latin1).
 
 ```javascript
-import { toBase64, fromBase64 } from '@semantic-ui/utils';
+import { byteLength, formatByteSize, toBase64, fromBase64 } from '@semantic-ui/utils';
+
+byteLength('héllo');                    // 6 (UTF-8 bytes, not characters: what a quota or Content-Length measures)
+byteLength(new Float32Array(2));        // 8 (by the view)
+byteLength({});                         // null
+byteLength(body) > toByteSize('1mb');   // the comparison the two halves exist for
+
+formatByteSize(1536);                   // '1.5 KB' (largest unit filled, sign kept)
+formatByteSize(10485760);               // '10 MB' (decimals is a maximum, never '10.0 MB')
+formatByteSize(1234567, { decimals: 2 }); // '1.18 MB'
+formatByteSize(10485760, { iec: true }); // '10 MiB' (pins base to 1024, the only base those labels are true at)
+formatByteSize(1536, { unit: 'mb', decimals: 3 }); // '0.001 MB' (hold one unit down a column)
+formatByteSize(1500, { base: 1000 });   // '1.5 KB' (set toByteSize.config.base too so it reads back)
+formatByteSize(1536, { locale: 'de-DE' }); // '1,5 KB'
+formatByteSize('10mb');                 // '10 MB' (accepts anything toByteSize reads, at the same base)
+formatByteSize('banana');               // null
+formatByteSize.config.labels[1] = 'kB'; // labels are editable at boot for the SI-lowercase camp
 
 toBase64('héllo 👋');                    // 'aMOpbGxvIPCfkYs=' (UTF-8, emoji and accents survive)
 toBase64(new Uint8Array([1, 2, 3]));    // 'AQID' (string, ArrayBuffer, or typed array)

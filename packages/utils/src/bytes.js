@@ -1,24 +1,74 @@
-import { isArray, isString } from './types.js';
+import { toBytes, toByteSize } from './coercion.js';
+import { configured } from './functions.js';
+import { roundDecimal } from './numbers.js';
+import { isString } from './types.js';
 
 /*-------------------
        Bytes
 --------------------*/
 
-const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
-// btoa/atob only speak Latin1, so a string round-trips through its UTF-8 bytes to stay unicode-safe.
-// input outside the accepted types returns null, a bare number would otherwise read as a Uint8Array
-// LENGTH and silently encode zero-fill garbage
-const toBytes = (input) => {
-  if (isString(input)) { return textEncoder.encode(input); }
-  if (input instanceof Uint8Array) { return input; }
-  if (input instanceof ArrayBuffer) { return new Uint8Array(input); }
-  if (ArrayBuffer.isView(input)) { return new Uint8Array(input.buffer, input.byteOffset, input.byteLength); }
-  if (isArray(input)) { return new Uint8Array(input); }
-  return null;
-};
+export const byteLength = (value) => toBytes(value)?.byteLength ?? null;
 
+// the IEC labels are only truthful at 1024, so iec pins the base rather than letting the two
+// settings contradict each other. labels are editable for the kB-not-KB camp
+export const formatByteSize = /* @__PURE__ */ configured(
+  (value, options = {}) => {
+    const config = formatByteSize.config;
+    const decimals = options.decimals ?? config.decimals;
+    let iec = options.iec ?? config.iec;
+    let exponent;
+    if (options.unit != null) {
+      const unit = String(options.unit).toLowerCase();
+      const { units, iecUnits } = toByteSize.config;
+      if (Object.hasOwn(units, unit)) { exponent = units[unit]; }
+      else if (Object.hasOwn(iecUnits, unit)) {
+        exponent = iecUnits[unit];
+        iec = true;
+      }
+      else { return null; }
+    }
+    const base = iec ? 1024 : (options.base ?? config.base);
+    const bytes = toByteSize(value, { base });
+    if (bytes === null) { return null; }
+    const labels = iec ? config.iecLabels : config.labels;
+    const magnitude = Math.abs(bytes);
+    let scaled;
+    if (exponent === undefined) {
+      // walk rather than take a log, log(1048576)/log(1024) lands a hair under 2 and floors wrong
+      exponent = 0;
+      scaled = magnitude;
+      while (scaled >= base && exponent < labels.length - 1) {
+        scaled /= base;
+        exponent++;
+      }
+      // 1023.96 KB rounds up to 1024 KB, which is a whole unit
+      if (roundDecimal(scaled, decimals) >= base && exponent < labels.length - 1) {
+        scaled /= base;
+        exponent++;
+      }
+    }
+    else {
+      if (exponent >= labels.length) { return null; }
+      scaled = magnitude / Math.pow(base, exponent);
+    }
+    const rounded = roundDecimal(scaled, decimals);
+    const number = options.locale
+      ? rounded.toLocaleString(options.locale, { maximumFractionDigits: decimals })
+      : String(rounded);
+    return (bytes < 0 ? '-' : '') + number + ' ' + labels[exponent];
+  },
+  {
+    base: 1024,
+    decimals: 1,
+    iec: false,
+    labels: ['B', 'KB', 'MB', 'GB', 'TB', 'PB'],
+    iecLabels: ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'],
+  },
+);
+
+// btoa/atob only speak Latin1, so a string round-trips through its UTF-8 bytes to stay unicode-safe
 export const toBase64 = (input, { urlSafe = false } = {}) => {
   const bytes = toBytes(input);
   if (bytes === null) { return null; }

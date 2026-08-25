@@ -1,5 +1,5 @@
 import { configured } from './functions.js';
-import { isArray, isBoolean, isDate, isNumber, isObject, isString } from './types.js';
+import { isArray, isBinary, isBoolean, isDate, isNumber, isObject, isString } from './types.js';
 
 /*-------------------
       Coercion
@@ -10,9 +10,11 @@ import { isArray, isBoolean, isDate, isNumber, isObject, isString } from './type
 // client), returned as a UTC instant, matching what native new Date does with an <input type=datetime-local>
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/;
 
-// one number, an optional space, one optional unit, mirroring the ecosystem's ms(). a compound form
-// like '1h 30m' is a different grammar and reads as junk here
-const DURATION_RE = /^([+-]?(?:\d+(?:\.\d+)?|\.\d+))\s*([a-z]*)$/i;
+// one number, an optional space, one optional unit, mirroring the ecosystem's ms() and bytes(). a
+// compound form like '1h 30m' is a different grammar and reads as junk here
+const QUANTITY_RE = /^([+-]?(?:\d+(?:\.\d+)?|\.\d+))\s*([a-z]*)$/i;
+
+const textEncoder = new TextEncoder();
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
@@ -130,7 +132,7 @@ export const toDuration = /* @__PURE__ */ configured(
     // a number is already milliseconds, the unit taken by timers, TTLs, and animation APIs
     if (isNumber(value)) { return Number.isFinite(value) ? normalizeZero(value) : onInvalidResult(value, onInvalid); }
     if (isString(value)) {
-      const match = DURATION_RE.exec(value.trim());
+      const match = QUANTITY_RE.exec(value.trim());
       if (match) {
         const units = toDuration.config.units;
         const unit = match[2].toLowerCase() || 'ms';
@@ -176,6 +178,104 @@ export const toDuration = /* @__PURE__ */ configured(
   },
 );
 
+// values are exponents of the base, so kb/mb/gb follow one base knob and a new unit is one line
+// (toByteSize.config.units.eb = 6). the IEC spellings are 1024-based by definition and sit in their own
+// table so base can never move them. kb reading as 1024 is the judgment call, and it is the setting
+export const toByteSize = /* @__PURE__ */ configured(
+  (value, { onInvalid = 'null', base } = {}) => {
+    // a number is already bytes, the unit every size API takes
+    if (isNumber(value)) {
+      return Number.isFinite(value)
+        ? normalizeZero(Math.round(value))
+        : onInvalidResult(value, onInvalid);
+    }
+    if (isString(value)) {
+      const match = QUANTITY_RE.exec(value.trim());
+      if (match) {
+        const config = toByteSize.config;
+        const unit = match[2].toLowerCase() || 'b';
+        let scale;
+        if (Object.hasOwn(config.units, unit)) { scale = Math.pow(base ?? config.base, config.units[unit]); }
+        else if (Object.hasOwn(config.iecUnits, unit)) { scale = Math.pow(1024, config.iecUnits[unit]); }
+        if (scale !== undefined) {
+          // a byte is indivisible, so the count is whole. this also folds the float noise a decimal
+          // multiplier leaves behind (1.1 * 1000000 is 1100000.0000000002)
+          const bytes = Math.round(Number(match[1]) * scale);
+          if (Number.isFinite(bytes)) { return normalizeZero(bytes); }
+        }
+      }
+    }
+    return onInvalidResult(value, onInvalid);
+  },
+  {
+    base: 1024,
+    units: {
+      b: 0,
+      byte: 0,
+      bytes: 0,
+      k: 1,
+      kb: 1,
+      kilobyte: 1,
+      kilobytes: 1,
+      m: 2,
+      mb: 2,
+      megabyte: 2,
+      megabytes: 2,
+      g: 3,
+      gb: 3,
+      gigabyte: 3,
+      gigabytes: 3,
+      t: 4,
+      tb: 4,
+      terabyte: 4,
+      terabytes: 4,
+      p: 5,
+      pb: 5,
+      petabyte: 5,
+      petabytes: 5,
+    },
+    iecUnits: {
+      kib: 1,
+      kibibyte: 1,
+      kibibytes: 1,
+      mib: 2,
+      mebibyte: 2,
+      mebibytes: 2,
+      gib: 3,
+      gibibyte: 3,
+      gibibytes: 3,
+      tib: 4,
+      tebibyte: 4,
+      tebibytes: 4,
+      pib: 5,
+      pebibyte: 5,
+      pebibytes: 5,
+    },
+  },
+);
+
+// a string reads as text (its UTF-8 bytes), never as an encoding. decoding is fromBase64's job, and
+// the spelling that returns bytes from base64 is fromBase64(s, { as: 'bytes' })
+export const toBytes = (value, { onInvalid = 'null' } = {}) => {
+  if (isString(value)) { return textEncoder.encode(value); }
+  if (value instanceof Uint8Array) { return value; }
+  // a view shares its buffer and keeps its bounds, so no copy is made
+  if (isBinary(value)) {
+    return value instanceof ArrayBuffer
+      ? new Uint8Array(value)
+      : new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+  }
+  if (isArray(value)) {
+    // Uint8Array would wrap [300] to 44 silently, which is no clean reading
+    for (const byte of value) {
+      if (!Number.isInteger(byte) || byte < 0 || byte > 255) { return onInvalidResult(value, onInvalid); }
+    }
+    return new Uint8Array(value);
+  }
+  // a bare number lands here on purpose, Uint8Array would read it as a LENGTH and encode zero-fill
+  return onInvalidResult(value, onInvalid);
+};
+
 export const toString = (value, { loose = false, onInvalid = 'null' } = {}) => {
   if (isString(value)) { return value; }
   if (value == null) { return onInvalidResult(value, onInvalid); }
@@ -200,4 +300,6 @@ export const coerceNumber = toNumber;
 export const coerceInteger = toInteger;
 export const coerceDate = toDate;
 export const coerceDuration = toDuration;
+export const coerceByteSize = toByteSize;
+export const coerceBytes = toBytes;
 export const coerceString = toString;

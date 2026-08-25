@@ -3,18 +3,116 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Bytes Utilities
 package: "@semantic-ui/utils"
-methods: [toBase64, fromBase64]
+methods: [byteLength, formatByteSize, toBase64, fromBase64]
 icon: binary
-description: API reference for byte encoding functions
+description: API reference for byte measurement, formatting, and encoding functions
 ---
 
-The Bytes utilities encode and decode binary data. `toBase64` and `fromBase64` are the unicode-safe pair that `btoa`/`atob` never were — a string round-trips through its UTF-8 bytes, so emoji and accents survive, and they read and write the URL-safe alphabet transparently.
+The Bytes utilities measure, format, and encode binary data. `byteLength` counts the bytes a value holds, `formatByteSize` prints a count for display, and `toBase64`/`fromBase64` are the unicode-safe pair that `btoa`/`atob` never were — a string round-trips through its UTF-8 bytes, so emoji and accents survive, and they read and write the URL-safe alphabet transparently.
 
 ```javascript
+formatByteSize(byteLength(body)); // '1.5 KB'
 fromBase64(toBase64('héllo 👋')); // 'héllo 👋'
 ```
 
+Every function here reads its input through [`toBytes`](/docs/api/utils/coercion#tobytes) or [`toByteSize`](/docs/api/utils/coercion#tobytesize), the two byte coercions. `toBytes` turns text, a buffer, a typed array, or an array of byte values into a `Uint8Array`. `toByteSize` turns `'10mb'` into `10485760`.
+
 ## Functions
+
+### byteLength
+
+```javascript
+function byteLength(value)
+```
+
+The number of bytes a value holds, or `null` when it holds none. A string counts its UTF-8 bytes, not its characters, which is what an upload limit, a storage quota, or a `Content-Length` header measures. Binary input counts by its view, so a typed array over part of a buffer reports the part. Accepts anything `toBytes` reads.
+
+#### Parameters
+
+| Name  | Type    | Description |
+|-------|---------|-------------|
+| value | unknown | The value to measure |
+
+#### Returns
+
+The byte count, or `null` if the value holds no bytes.
+
+#### Example
+
+```javascript
+import { byteLength, toByteSize } from '@semantic-ui/utils';
+
+console.log(byteLength('hello')); // 5
+console.log(byteLength('héllo')); // 6 (5 characters)
+console.log(byteLength('👋')); // 4
+console.log(byteLength(new Float32Array(2))); // 8
+console.log(byteLength({})); // null
+
+if (byteLength(JSON.stringify(doc)) > toByteSize('1mb')) { warn('large document'); }
+```
+
+### formatByteSize
+
+```javascript
+function formatByteSize(value, { base, decimals, unit, iec, locale } = {})
+```
+
+Formats a byte count for display in the largest unit it fills, or `null` when there is no size to format. `1536` prints as `'1.5 KB'`, `10485760` as `'10 MB'`, and the sign is kept. Accepts anything `toByteSize` reads, at the same base, so a config value like `'10mb'` prints back as `'10 MB'` without a conversion in between.
+
+`decimals` is a maximum, so `'10 MB'` never prints as `'10.0 MB'`, and a value that rounds up to a whole unit promotes (`1048575` is `'1 MB'` at one decimal). `unit` holds one unit so a column reads down in the same scale. `iec` prints `KiB`/`MiB` and pins the base to 1024, since those labels are only truthful there. `locale` formats the number for a locale.
+
+#### Parameters
+
+| Name     | Type    | Description |
+|----------|---------|-------------|
+| value    | unknown | The byte count, or a size expression |
+| settings | object  | Optional configuration |
+
+##### Options
+
+| Name     | Type    | Default | Description |
+|----------|---------|---------|-------------|
+| base     | number  | `formatByteSize.config.base` (1024) | What the units scale by, 1024 or 1000 |
+| decimals | number  | `formatByteSize.config.decimals` (1) | Maximum decimal places, trailing zeros drop |
+| unit     | string  | largest unit filled | Hold one unit, any spelling `toByteSize` reads (`'mb'`, `'KB'`, `'mib'`) |
+| iec      | boolean | `formatByteSize.config.iec` (false) | Print `KiB`/`MiB` labels, pinning `base` to 1024 |
+| locale   | string  | none | Format the number for a locale (`'de-DE'` prints `1,5 KB`) |
+
+#### Returns
+
+The formatted size, or `null` if there is no size to format.
+
+#### Example
+
+```javascript
+import { formatByteSize } from '@semantic-ui/utils';
+
+console.log(formatByteSize(512)); // '512 B'
+console.log(formatByteSize(1536)); // '1.5 KB'
+console.log(formatByteSize(10485760)); // '10 MB'
+console.log(formatByteSize(1234567, { decimals: 2 })); // '1.18 MB'
+console.log(formatByteSize(10485760, { iec: true })); // '10 MiB'
+console.log(formatByteSize(1536, { unit: 'mb', decimals: 3 })); // '0.001 MB'
+console.log(formatByteSize(1500, { base: 1000 })); // '1.5 KB'
+console.log(formatByteSize(1536, { locale: 'de-DE' })); // '1,5 KB'
+console.log(formatByteSize('10mb')); // '10 MB'
+console.log(formatByteSize('banana')); // null
+```
+
+#### formatByteSize.config
+
+`formatByteSize.config` holds the defaults for `base`, `decimals`, and `iec`, plus the `labels` and `iecLabels` arrays indexed by exponent, bytes first. Edit it once at app boot and every call inherits it. Per-call settings still win.
+
+```javascript
+import { formatByteSize } from '@semantic-ui/utils';
+
+formatByteSize.config.labels[1] = 'kB'; // the SI lowercase k
+formatByteSize.config.base = 1000; // match a macOS-style display
+
+console.log(formatByteSize(1500)); // '1.5 kB'
+```
+
+Set `toByteSize.config.base` to the same value when the app also parses sizes, so what it formats reads back to the same number.
 
 ### toBase64
 
@@ -22,7 +120,7 @@ fromBase64(toBase64('héllo 👋')); // 'héllo 👋'
 function toBase64(input, { urlSafe = false } = {})
 ```
 
-Encodes a string or binary data to a base64 string. A string is encoded as its UTF-8 bytes, so `btoa`'s Latin1-only limit never bites. `input` may be a string, an `ArrayBuffer`, any typed array, or an array of byte values. Anything else returns `null` rather than encoding garbage — a bare number would otherwise read as a buffer length and silently encode zero-fill.
+Encodes a string or binary data to a base64 string. A string is encoded as its UTF-8 bytes, so `btoa`'s Latin1-only limit never bites. `input` may be anything `toBytes` reads: a string, an `ArrayBuffer`, any typed array, or an array of byte values. Anything else returns `null` rather than encoding garbage — a bare number would otherwise read as a buffer length and silently encode zero-fill, and an array holding a non-byte would wrap it.
 
 #### Parameters
 

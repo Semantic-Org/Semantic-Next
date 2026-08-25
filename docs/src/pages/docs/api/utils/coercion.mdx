@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Coercion Utilities
 package: "@semantic-ui/utils"
-methods: [toBoolean, toNumber, toInteger, toDate, toDuration, toString]
+methods: [toBoolean, toNumber, toInteger, toDate, toDuration, toByteSize, toBytes, toString]
 icon: replace
 description: API reference for best-effort type coercion functions
 ---
@@ -15,7 +15,7 @@ const page = toNumber(params.get('page')) ?? 1;
 const when = toDate(input.value) ?? new Date();
 ```
 
-Each helper is also exported as `coerceBoolean`, `coerceNumber`, `coerceInteger`, `coerceDate`, `coerceDuration`, and `coerceString` for callers who think in coercion terms.
+Each helper is also exported as `coerceBoolean`, `coerceNumber`, `coerceInteger`, `coerceDate`, `coerceDuration`, `coerceByteSize`, `coerceBytes`, and `coerceString` for callers who think in coercion terms.
 
 Every helper accepts an `onInvalid` setting. It defaults to `'null'` (the failed coercion returns `null`, composing with `??`). Pass `{ onInvalid: 'passthrough' }` to return the *original* value instead, so a schema or validator can flag the bad input rather than see an erasing `null` — and the TypeScript return widens to include the input type (`number | string` for `toNumber(str, { onInvalid: 'passthrough' })`).
 
@@ -252,6 +252,114 @@ toDuration.config.units.y = 365 * 24 * 60 * 60 * 1000;
 toDuration.config.units.years = toDuration.config.units.y;
 
 console.log(toDuration('1y')); // 31536000000
+```
+
+### toByteSize
+
+```javascript
+function toByteSize(value, { onInvalid = 'null', base } = {})
+```
+
+Coerces a byte size expression to a whole number of bytes, or `null` when it reads as no size at all. A number is already bytes, and a string takes one number followed by one optional unit, case-insensitively, with an optional space between the two: `'10mb'`, `'1.5 KB'`, `'2 gigabytes'`, `'512k'`, `'.5gb'`. Leave the unit off and the number reads as bytes, so `'1500'` and `1500` agree. The same grammar as `toDuration`, for the other quantity a config file spells with a unit.
+
+`kb` through `pb` scale by `base`, 1024 unless configured, because that is what every config that accepts `'10mb'` already means (nginx, Docker, upload limits). The IEC spellings `kib` through `pib` are 1024 by definition and never move. A byte is indivisible, so the result rounds to the nearest whole byte, which also folds the float noise a decimal multiplier leaves (`'1.1mb'` at base 1000 is `1100000`, not `1100000.0000000002`).
+
+The sign is kept, so `'-2mb'` is a delta. Bits are not bytes and `'10mbit'` returns `null`, as do compound forms like `'1mb 512kb'`, unknown units, and exponent notation. Matching is case-insensitive, so `'Mb'` reads as megabytes, not megabits.
+
+#### Units
+
+| Unit | Accepted spellings | Scales by |
+|------|--------------------|-----------|
+| Bytes | `b`, `byte`, `bytes` | 1 |
+| Kilobytes | `k`, `kb`, `kilobyte`, `kilobytes` | base¹ |
+| Megabytes | `m`, `mb`, `megabyte`, `megabytes` | base² |
+| Gigabytes | `g`, `gb`, `gigabyte`, `gigabytes` | base³ |
+| Terabytes | `t`, `tb`, `terabyte`, `terabytes` | base⁴ |
+| Petabytes | `p`, `pb`, `petabyte`, `petabytes` | base⁵ |
+| IEC | `kib`, `mib`, `gib`, `tib`, `pib`, and `kibibyte(s)` through `pebibyte(s)` | 1024ⁿ, always |
+
+#### Parameters
+
+| Name     | Type    | Description |
+|----------|---------|-------------|
+| value    | unknown | The value to coerce |
+| settings | object  | Optional configuration |
+
+##### Options
+
+| Name      | Type   | Default | Description |
+|-----------|--------|---------|-------------|
+| base      | number | `toByteSize.config.base` (1024) | What `kb`/`mb`/`gb` scale by for this call, 1024 or 1000 |
+| onInvalid | string | `'null'` | How a failed coercion resolves, see above |
+
+#### Returns
+
+The size in bytes, or `null` if unreadable.
+
+#### Example
+
+```javascript
+import { toByteSize, byteLength } from '@semantic-ui/utils';
+
+console.log(toByteSize('10mb')); // 10485760
+console.log(toByteSize('1.5 KB')); // 1536
+console.log(toByteSize('10mib')); // 10485760 (whatever base says)
+console.log(toByteSize('10mb', { base: 1000 })); // 10000000
+console.log(toByteSize(1500)); // 1500 (already bytes)
+console.log(toByteSize('1h')); // null (a duration is a different quantity)
+
+const maxUpload = toByteSize(config.maxUpload) ?? toByteSize('10mb');
+if (byteLength(body) > maxUpload) { reject(); }
+```
+
+#### toByteSize.config
+
+`toByteSize.config.base` is what the ambiguous units scale by, and `toByteSize.config.units` holds the exponent of that base per unit, keyed by the lowercase spelling accepted after the number. Values are exponents rather than multipliers so a new unit is one line and follows the base. `toByteSize.config.iecUnits` is the same shape over 1024 and is never moved by `base`. Edit any of them once at app boot and every call inherits it.
+
+```javascript
+import { toByteSize } from '@semantic-ui/utils';
+
+toByteSize.config.base = 1000; // SI everywhere, to match a macOS-style display
+toByteSize.config.units.eb = 6;
+toByteSize.config.units.exabytes = 6;
+
+console.log(toByteSize('1kb')); // 1000
+console.log(toByteSize('1eb')); // 1000000000000000000
+```
+
+### toBytes
+
+```javascript
+function toBytes(value, { onInvalid = 'null' } = {})
+```
+
+Coerces a value to a `Uint8Array`, or `null` when it holds no bytes. A string reads as its UTF-8 text, a `Uint8Array` returns as the same reference, an `ArrayBuffer` or any other typed array or `DataView` becomes a view over the same memory bounded to the view (no copy), and an array of integers 0..255 is copied into a new array.
+
+A string is always text, never an encoding. Decoding is `fromBase64`'s job, and the spelling that returns bytes from base64 is `fromBase64(s, { as: 'bytes' })`. A bare number returns `null` rather than reading as a length, and an array holding a non-byte (`[300]`, `[1.5]`) returns `null` rather than wrapping it, since neither is a clean reading.
+
+#### Parameters
+
+| Name     | Type    | Description |
+|----------|---------|-------------|
+| value    | unknown | The value to coerce |
+| settings | object  | Optional configuration (`onInvalid`, see above) |
+
+#### Returns
+
+The `Uint8Array`, or `null` if the value holds no bytes.
+
+#### Example
+
+```javascript
+import { toBytes } from '@semantic-ui/utils';
+
+console.log(toBytes('héllo')); // Uint8Array [104, 195, 169, 108, 108, 111]
+console.log(toBytes(new Float32Array([1]))); // Uint8Array over the same 4 bytes
+console.log(toBytes([1, 2, 3])); // Uint8Array [1, 2, 3]
+console.log(toBytes([1, 2, 300])); // null (300 is not a byte)
+console.log(toBytes(5)); // null (a number is not a length)
+
+await crypto.subtle.digest('SHA-256', toBytes(payload));
 ```
 
 ### toString
