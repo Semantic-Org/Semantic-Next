@@ -1,11 +1,15 @@
 import {
   coerceBoolean,
+  coerceBytes,
+  coerceByteSize,
   coerceDate,
   coerceDuration,
   coerceInteger,
   coerceNumber,
   coerceString,
   toBoolean,
+  toBytes,
+  toByteSize,
   toDate,
   toDuration,
   toInteger,
@@ -378,6 +382,217 @@ describe('toDuration', () => {
   });
 });
 
+describe('toByteSize', () => {
+  it('reads a number as bytes and rejects the poison values', () => {
+    expect(toByteSize(1500)).toBe(1500);
+    expect(toByteSize(0)).toBe(0);
+    expect(toByteSize(NaN)).toBe(null);
+    expect(toByteSize(Infinity)).toBe(null);
+    expect(toByteSize(-Infinity)).toBe(null);
+  });
+
+  it('converts each unit suffix at base 1024', () => {
+    expect(toByteSize('512b')).toBe(512);
+    expect(toByteSize('1kb')).toBe(1024);
+    expect(toByteSize('10mb')).toBe(10485760);
+    expect(toByteSize('2gb')).toBe(2147483648);
+    expect(toByteSize('1tb')).toBe(1099511627776);
+    expect(toByteSize('1pb')).toBe(1125899906842624);
+  });
+
+  it('reads the abbreviations case-insensitively and with an optional space', () => {
+    expect(toByteSize('10 MB')).toBe(10485760);
+    expect(toByteSize('10Mb')).toBe(10485760);
+    expect(toByteSize('4 B')).toBe(4);
+    expect(toByteSize('  2 GB  ')).toBe(2147483648);
+  });
+
+  it('reads abbreviations only, so words and single letters are a config line, not a built-in', () => {
+    expect(toByteSize('10 megabytes')).toBe(null);
+    expect(toByteSize('1 megabyte')).toBe(null);
+    expect(toByteSize('10m')).toBe(null);
+    expect(toByteSize('512k')).toBe(null);
+    expect(toByteSize('4 bytes')).toBe(null);
+  });
+
+  it('reads the IEC spellings as 1024-based whatever base says', () => {
+    expect(toByteSize('10mib')).toBe(10485760);
+    expect(toByteSize('1 KiB')).toBe(1024);
+    expect(toByteSize('2 GiB')).toBe(2147483648);
+    expect(toByteSize('2 gibibytes')).toBe(null);
+    expect(toByteSize('10mib', { base: 1000 })).toBe(10485760);
+  });
+
+  it('reads the ambiguous units at base 1000 when asked', () => {
+    expect(toByteSize('10mb', { base: 1000 })).toBe(10000000);
+    expect(toByteSize('1kb', { base: 1000 })).toBe(1000);
+    expect(toByteSize('1 gb', { base: 1000 })).toBe(1000000000);
+  });
+
+  it('reads decimals and a unitless string as bytes', () => {
+    expect(toByteSize('1.5kb')).toBe(1536);
+    expect(toByteSize('.5kb')).toBe(512);
+    expect(toByteSize('0.5mb')).toBe(524288);
+    expect(toByteSize('1500')).toBe(1500);
+  });
+
+  it('rounds to a whole byte, folding the float noise a decimal multiplier leaves', () => {
+    expect(toByteSize('1.1mb', { base: 1000 })).toBe(1100000);
+    expect(toByteSize('1.1kb')).toBe(1126);
+    expect(toByteSize(1024.7)).toBe(1025);
+    expect(toByteSize('1.5b')).toBe(2);
+  });
+
+  it('keeps the sign, so a size can be a delta', () => {
+    expect(toByteSize('-2mb')).toBe(-2097152);
+    expect(toByteSize(-1500)).toBe(-1500);
+    expect(toByteSize('+1kb')).toBe(1024);
+  });
+
+  it('normalizes negative zero', () => {
+    expect(Object.is(toByteSize('-0b'), 0)).toBe(true);
+    expect(Object.is(toByteSize(-0), 0)).toBe(true);
+    expect(Object.is(toByteSize('-0.4b'), 0)).toBe(true);
+  });
+
+  it('returns null for junk rather than a guessed size', () => {
+    expect(toByteSize('1h')).toBe(null);
+    expect(toByteSize('10mbit')).toBe(null);
+    expect(toByteSize('1mb 512kb')).toBe(null);
+    expect(toByteSize('5x')).toBe(null);
+    expect(toByteSize('5e3')).toBe(null);
+    expect(toByteSize('mb')).toBe(null);
+    expect(toByteSize('1.2.3')).toBe(null);
+    expect(toByteSize('')).toBe(null);
+    expect(toByteSize('   ')).toBe(null);
+    expect(toByteSize('large')).toBe(null);
+  });
+
+  it('returns null for non-numeric, non-string input', () => {
+    expect(toByteSize(null)).toBe(null);
+    expect(toByteSize(undefined)).toBe(null);
+    expect(toByteSize(true)).toBe(null);
+    expect(toByteSize({})).toBe(null);
+    expect(toByteSize([5])).toBe(null);
+    expect(toByteSize(new Uint8Array(5))).toBe(null);
+  });
+
+  it('never yields NaN or Infinity, whatever the input spells', () => {
+    // an inherited key would resolve to a function on the unit table
+    expect(toByteSize('5constructor')).toBe(null);
+    expect(toByteSize('5toString')).toBe(null);
+    // a number long enough to overflow the multiply
+    expect(toByteSize('1'.padEnd(320, '0') + 'pb')).toBe(null);
+    // a base that cannot scale anything
+    expect(toByteSize('1kb', { base: 'ten' })).toBe(null);
+  });
+
+  it('composes with ?? for a default', () => {
+    expect(toByteSize('nonsense') ?? 1048576).toBe(1048576);
+    expect(toByteSize('2mb') ?? 1048576).toBe(2097152);
+  });
+
+  it('onInvalid: passthrough returns the original value on failure, null stays the default', () => {
+    const obj = {};
+    expect(toByteSize('1h')).toBe(null);
+    expect(toByteSize('1h', { onInvalid: 'null' })).toBe(null);
+    expect(toByteSize('1h', { onInvalid: 'passthrough' })).toBe('1h');
+    expect(toByteSize(Infinity, { onInvalid: 'passthrough' })).toBe(Infinity);
+    expect(toByteSize(obj, { onInvalid: 'passthrough' })).toBe(obj);
+    // a readable size is unaffected by either setting
+    expect(toByteSize('1kb', { onInvalid: 'null' })).toBe(1024);
+    expect(toByteSize('1kb', { onInvalid: 'passthrough' })).toBe(1024);
+  });
+
+  it('takes a base and units the app names in toByteSize.config', () => {
+    const saved = { base: toByteSize.config.base, units: toByteSize.config.units };
+    toByteSize.config.base = 1000;
+    toByteSize.config.units = { ...saved.units, eb: 6, m: 2, megabytes: 2 };
+    try {
+      expect(toByteSize('1kb')).toBe(1000);
+      expect(toByteSize('1eb')).toBe(1e18);
+      expect(toByteSize('10m')).toBe(10000000);
+      expect(toByteSize('2 Megabytes')).toBe(2000000);
+      // a per-call base still wins over the config base
+      expect(toByteSize('1kb', { base: 1024 })).toBe(1024);
+      // the IEC table does not move
+      expect(toByteSize('1kib')).toBe(1024);
+    }
+    finally {
+      toByteSize.config.base = saved.base;
+      toByteSize.config.units = saved.units;
+    }
+    expect(toByteSize('1kb')).toBe(1024);
+    expect(toByteSize('1eb')).toBe(null);
+  });
+});
+
+describe('toBytes', () => {
+  it('reads a string as its UTF-8 bytes', () => {
+    expect(Array.from(toBytes('hi'))).toEqual([104, 105]);
+    expect(Array.from(toBytes('héllo'))).toEqual([104, 195, 169, 108, 108, 111]);
+    expect(Array.from(toBytes('👋'))).toEqual([240, 159, 145, 139]);
+    expect(toBytes('').length).toBe(0);
+  });
+
+  it('returns a Uint8Array as the same reference', () => {
+    const bytes = new Uint8Array([1, 2, 3]);
+    expect(toBytes(bytes)).toBe(bytes);
+  });
+
+  it('views an ArrayBuffer without copying', () => {
+    const buffer = new Uint8Array([1, 2, 3]).buffer;
+    const bytes = toBytes(buffer);
+    expect(Array.from(bytes)).toEqual([1, 2, 3]);
+    expect(bytes.buffer).toBe(buffer);
+  });
+
+  it('views any typed array or DataView, bounded to the view, without copying', () => {
+    const buffer = new Uint8Array([1, 2, 3, 4, 5, 6]).buffer;
+    const view = new Uint8Array(buffer, 2, 3);
+    expect(Array.from(toBytes(new Int8Array(buffer, 2, 3)))).toEqual([3, 4, 5]);
+    expect(Array.from(toBytes(new DataView(buffer, 2, 3)))).toEqual([3, 4, 5]);
+    expect(toBytes(new Float32Array(buffer, 0, 1)).length).toBe(4);
+    expect(toBytes(view.subarray(0, 2)).buffer).toBe(buffer);
+  });
+
+  it('copies an array of byte values', () => {
+    const array = [1, 2, 255];
+    const bytes = toBytes(array);
+    expect(Array.from(bytes)).toEqual([1, 2, 255]);
+    array[0] = 9;
+    expect(bytes[0]).toBe(1);
+    expect(toBytes([]).length).toBe(0);
+  });
+
+  it('returns null for an array holding a non-byte rather than wrapping it', () => {
+    expect(toBytes([300])).toBe(null);
+    expect(toBytes([-1])).toBe(null);
+    expect(toBytes([1.5])).toBe(null);
+    expect(toBytes(['1'])).toBe(null);
+    expect(toBytes([1, null])).toBe(null);
+  });
+
+  it('returns null for input outside the accepted types, including a bare number', () => {
+    expect(toBytes(5)).toBe(null);
+    expect(toBytes(0)).toBe(null);
+    expect(toBytes(true)).toBe(null);
+    expect(toBytes({})).toBe(null);
+    expect(toBytes(null)).toBe(null);
+    expect(toBytes(undefined)).toBe(null);
+    expect(toBytes(new Set([1]))).toBe(null);
+  });
+
+  it('onInvalid: passthrough returns the original value on failure, null stays the default', () => {
+    const obj = {};
+    expect(toBytes(obj)).toBe(null);
+    expect(toBytes(obj, { onInvalid: 'null' })).toBe(null);
+    expect(toBytes(obj, { onInvalid: 'passthrough' })).toBe(obj);
+    expect(toBytes([300], { onInvalid: 'passthrough' })).toEqual([300]);
+    expect(Array.from(toBytes('hi', { onInvalid: 'passthrough' }))).toEqual([104, 105]);
+  });
+});
+
 describe('toString', () => {
   it('passes strings and stringifies scalars', () => {
     expect(toString('x')).toBe('x');
@@ -433,6 +648,8 @@ describe('coerce aliases', () => {
     expect(coerceInteger).toBe(toInteger);
     expect(coerceDate).toBe(toDate);
     expect(coerceDuration).toBe(toDuration);
+    expect(coerceByteSize).toBe(toByteSize);
+    expect(coerceBytes).toBe(toBytes);
     expect(coerceString).toBe(toString);
   });
 });

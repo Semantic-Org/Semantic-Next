@@ -1,4 +1,4 @@
-import { fromBase64, toBase64 } from '@semantic-ui/utils';
+import { byteLength, formatByteSize, fromBase64, toBase64, toByteSize } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 
@@ -29,6 +29,7 @@ describe('toBase64', () => {
     expect(toBase64({})).toBe(null);
     expect(toBase64(null)).toBe(null);
     expect(toBase64(undefined)).toBe(null);
+    expect(toBase64([300])).toBe(null); // a non-byte would otherwise wrap silently
   });
 
   it('emits the url-safe alphabet with no padding under urlSafe', () => {
@@ -83,5 +84,147 @@ describe('base64 round-trip', () => {
     const back = fromBase64(toBase64(big), { as: 'bytes' });
     expect(back.length).toBe(70000);
     expect(back.every((byte, index) => byte === index % 256)).toBe(true);
+  });
+});
+
+describe('byteLength', () => {
+  it('counts the UTF-8 bytes of a string, not its characters', () => {
+    expect(byteLength('hello')).toBe(5);
+    expect(byteLength('héllo')).toBe(6);
+    expect(byteLength('👋')).toBe(4);
+    expect(byteLength('')).toBe(0);
+  });
+
+  it('counts binary input by its view, not its backing buffer', () => {
+    expect(byteLength(new Uint8Array([1, 2, 3]))).toBe(3);
+    expect(byteLength(new Uint8Array(8).buffer)).toBe(8);
+    expect(byteLength(new Float32Array(2))).toBe(8);
+    expect(byteLength(new Uint8Array(new Uint8Array(6).buffer, 2, 3))).toBe(3);
+    expect(byteLength([1, 2, 3])).toBe(3);
+  });
+
+  it('returns null when there are no bytes to count', () => {
+    expect(byteLength(5)).toBe(null);
+    expect(byteLength({})).toBe(null);
+    expect(byteLength(null)).toBe(null);
+    expect(byteLength(undefined)).toBe(null);
+    expect(byteLength([300])).toBe(null);
+  });
+});
+
+describe('formatByteSize', () => {
+  it('picks the largest unit the value fills at base 1024', () => {
+    expect(formatByteSize(0)).toBe('0 B');
+    expect(formatByteSize(512)).toBe('512 B');
+    expect(formatByteSize(1024)).toBe('1 KB');
+    expect(formatByteSize(1536)).toBe('1.5 KB');
+    expect(formatByteSize(10485760)).toBe('10 MB');
+    expect(formatByteSize(2147483648)).toBe('2 GB');
+    expect(formatByteSize(1099511627776)).toBe('1 TB');
+    expect(formatByteSize(1125899906842624)).toBe('1 PB');
+  });
+
+  it('caps at the last label rather than inventing a unit', () => {
+    expect(formatByteSize(2 ** 60)).toBe('1024 PB');
+  });
+
+  it('rounds to decimals as a maximum, dropping trailing zeros', () => {
+    expect(formatByteSize(1536, { decimals: 0 })).toBe('2 KB');
+    expect(formatByteSize(1536, { decimals: 3 })).toBe('1.5 KB');
+    expect(formatByteSize(1234567)).toBe('1.2 MB');
+    expect(formatByteSize(1234567, { decimals: 2 })).toBe('1.18 MB');
+    expect(formatByteSize(1234567, { decimals: 0 })).toBe('1 MB');
+  });
+
+  it('promotes a value that rounds up to a whole unit', () => {
+    expect(formatByteSize(1048575)).toBe('1 MB');
+    expect(formatByteSize(1048570, { decimals: 0 })).toBe('1 MB');
+    expect(formatByteSize(1048575, { decimals: 3 })).toBe('1023.999 KB');
+    expect(formatByteSize(1048575, { decimals: 2 })).toBe('1 MB');
+  });
+
+  it('keeps the sign', () => {
+    expect(formatByteSize(-1572864)).toBe('-1.5 MB');
+    expect(formatByteSize(-512)).toBe('-512 B');
+    expect(formatByteSize(-0)).toBe('0 B');
+  });
+
+  it('formats at base 1000 when asked', () => {
+    expect(formatByteSize(1500, { base: 1000 })).toBe('1.5 KB');
+    expect(formatByteSize(1000000, { base: 1000 })).toBe('1 MB');
+    expect(formatByteSize(1048576, { base: 1000 })).toBe('1 MB'); // 1.048576 rounds at one decimal
+    expect(formatByteSize(1048576, { base: 1000, decimals: 2 })).toBe('1.05 MB');
+  });
+
+  it('prints the IEC labels under iec, pinning the base to 1024', () => {
+    expect(formatByteSize(1536, { iec: true })).toBe('1.5 KiB');
+    expect(formatByteSize(10485760, { iec: true })).toBe('10 MiB');
+    expect(formatByteSize(512, { iec: true })).toBe('512 B');
+    expect(formatByteSize(1536, { iec: true, base: 1000 })).toBe('1.5 KiB');
+  });
+
+  it('holds one unit for a column when asked', () => {
+    expect(formatByteSize(1536, { unit: 'mb' })).toBe('0 MB');
+    expect(formatByteSize(1536, { unit: 'mb', decimals: 3 })).toBe('0.001 MB');
+    expect(formatByteSize(10485760, { unit: 'KB' })).toBe('10240 KB');
+    expect(formatByteSize(1073741824, { unit: 'gb' })).toBe('1 GB');
+    expect(formatByteSize(1073741824, { unit: 'mb' })).toBe('1024 MB');
+    expect(formatByteSize(10, { unit: 'b' })).toBe('10 B');
+  });
+
+  it('reads an IEC unit as both the exponent and the label', () => {
+    expect(formatByteSize(10485760, { unit: 'mib' })).toBe('10 MiB');
+    expect(formatByteSize(10485760, { unit: 'MiB', base: 1000 })).toBe('10 MiB');
+  });
+
+  it('accepts anything toByteSize reads, at the same base', () => {
+    expect(formatByteSize('10mb')).toBe('10 MB');
+    expect(formatByteSize('1536')).toBe('1.5 KB');
+    expect(formatByteSize('10mb', { base: 1000 })).toBe('10 MB');
+    expect(formatByteSize('10mib', { base: 1000 })).toBe('10.5 MB');
+  });
+
+  it('formats the number for a locale when asked', () => {
+    expect(formatByteSize(1536, { locale: 'de-DE' })).toBe('1,5 KB');
+    expect(formatByteSize(10485760, { unit: 'kb', locale: 'en-US' })).toBe('10,240 KB');
+  });
+
+  it('returns null when there is no size to format', () => {
+    expect(formatByteSize(NaN)).toBe(null);
+    expect(formatByteSize(Infinity)).toBe(null);
+    expect(formatByteSize('banana')).toBe(null);
+    expect(formatByteSize(null)).toBe(null);
+    expect(formatByteSize(undefined)).toBe(null);
+    expect(formatByteSize({})).toBe(null);
+    expect(formatByteSize(10, { unit: 'lightyears' })).toBe(null);
+  });
+
+  it('takes defaults and labels the app names in formatByteSize.config', () => {
+    const saved = { ...formatByteSize.config };
+    formatByteSize.config.labels = ['B', 'kB', 'MB', 'GB', 'TB', 'PB'];
+    formatByteSize.config.decimals = 2;
+    formatByteSize.config.base = 1000;
+    try {
+      expect(formatByteSize(1500)).toBe('1.5 kB');
+      expect(formatByteSize(1234567)).toBe('1.23 MB');
+      // per-call settings still win
+      expect(formatByteSize(1536, { base: 1024, decimals: 1 })).toBe('1.5 kB');
+    }
+    finally {
+      Object.assign(formatByteSize.config, saved);
+    }
+    expect(formatByteSize(1536)).toBe('1.5 KB');
+  });
+});
+
+describe('byte size round-trip', () => {
+  it('reads back what it formats at the same base', () => {
+    for (const bytes of [0, 512, 1024, 1536, 10485760, 2147483648]) {
+      expect(toByteSize(formatByteSize(bytes))).toBe(bytes);
+      expect(toByteSize(formatByteSize(bytes, { iec: true }))).toBe(bytes);
+    }
+    for (const bytes of [0, 512, 1000, 1500, 10000000, 2500000000]) {
+      expect(toByteSize(formatByteSize(bytes, { base: 1000 }), { base: 1000 })).toBe(bytes);
+    }
   });
 });

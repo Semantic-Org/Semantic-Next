@@ -82,6 +82,40 @@ export interface ToDurationConfig {
 }
 
 /**
+ * Options for byte size coercion
+ */
+export interface ToByteSizeSettings {
+  /** How a failed coercion resolves (default: 'null') */
+  onInvalid?: OnInvalid;
+  /** What `kb`/`mb`/`gb` scale by for this call, 1024 or 1000 (default: the config base, 1024). IEC spellings (`kib`, `mib`) are always 1024 */
+  base?: number;
+}
+
+/**
+ * The base and unit tables read by every {@link toByteSize} call. Set once at app boot
+ * (e.g. `toByteSize.config.base = 1000` or `toByteSize.config.units.megabytes = 2`), with keys matched lowercase.
+ */
+export interface ToByteSizeConfig {
+  /** What `units` scale by, 1024 (default) or 1000 */
+  base: number;
+  /** Exponent of `base` per unit, keyed by the lowercase spelling accepted after the number (`kb: 1`, `mb: 2`) */
+  units: Record<string, number>;
+  /** Exponent of 1024 per IEC unit (`kib: 1`, `mib: 2`), never moved by `base` */
+  iecUnits: Record<string, number>;
+}
+
+/**
+ * Options for bytes coercion
+ */
+export interface ToBytesSettings {
+  /** How a failed coercion resolves (default: 'null') */
+  onInvalid?: OnInvalid;
+}
+
+/** Input {@link toBytes} reads: text, a buffer, any typed array or DataView, or an array of byte values */
+export type BytesLike = string | ArrayBuffer | ArrayBufferView | number[];
+
+/**
  * Options for string coercion
  */
 export interface ToStringSettings {
@@ -221,6 +255,64 @@ export namespace toDuration {
   let config: ToDurationConfig;
 }
 
+/** Coerces to a byte count, returning the original value on failure. @see {@link toByteSize} */
+export function toByteSize<T>(value: T, settings: ToByteSizeSettings & { onInvalid: 'passthrough'; }): number | T;
+/**
+ * Coerces a byte size expression to a whole number of bytes, or `null` when it reads as no size at all.
+ * Numbers are already bytes, and a string takes one number and one optional unit (`'10mb'`, `'1.5 KB'`,
+ * `'2 GiB'`), case-insensitively, with an optional space between the two, reading as bytes when the unit
+ * is left off. `b`, `kb` through `pb` scale by `base` (1024 unless configured), the IEC `kib` through `pib`
+ * are always 1024, and a byte is whole so the result rounds to the nearest one. Abbreviations only, the
+ * ecosystem's `bytes()` grammar, with words and single letters one {@link ToByteSizeConfig} line away.
+ * The sign is kept, bits and compound forms like `'1mb 512kb'` return `null`. `onInvalid` chooses how a
+ * failed coercion resolves.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/coercion#tobytesize toByteSize}
+ * @see {@link https://next.semantic-ui.com/examples/utils-tobytesize Example}
+ *
+ * @param value - The value to coerce
+ * @param settings - Coercion options
+ * @returns The size in bytes, or `null` if unreadable
+ *
+ * @example
+ * ```ts
+ * toByteSize('10mb') // 10485760
+ * toByteSize('10mb', { base: 1000 }) // 10000000
+ * toByteSize('10mib') // 10485760 (whatever base says)
+ * toByteSize('1h') // null
+ * if (byteLength(body) > (toByteSize(config.maxUpload) ?? Infinity)) reject()
+ * ```
+ */
+export function toByteSize(value: unknown, settings?: ToByteSizeSettings): number | null;
+export namespace toByteSize {
+  /** The base and unit tables. Set once at app boot */
+  let config: ToByteSizeConfig;
+}
+
+/** Coerces to bytes, returning the original value on failure. @see {@link toBytes} */
+export function toBytes<T>(value: T, settings: ToBytesSettings & { onInvalid: 'passthrough'; }): Uint8Array | T;
+/**
+ * Coerces a value to a `Uint8Array`, or `null` when it holds no bytes. A string reads as its UTF-8 text
+ * (never as an encoding, decoding is `fromBase64`'s job), a `Uint8Array` returns as the same reference,
+ * an `ArrayBuffer` or any other typed array or `DataView` becomes a view over the same memory bounded to
+ * the view, and an array of integers 0..255 is copied. A bare number, an array holding a non-byte, and
+ * everything else return `null`. `onInvalid` chooses how a failed coercion resolves.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/coercion#tobytes toBytes}
+ * @see {@link https://next.semantic-ui.com/examples/utils-tobytes Example}
+ *
+ * @param value - The value to coerce
+ * @param settings - Coercion options
+ * @returns The bytes, or `null` if the value holds none
+ *
+ * @example
+ * ```ts
+ * toBytes('héllo') // Uint8Array [104, 195, 169, 108, 108, 111]
+ * toBytes(new Float32Array([1])) // Uint8Array over the same 4 bytes
+ * toBytes([1, 2, 300]) // null (300 is not a byte)
+ * toBytes(5) // null (a number is not a length)
+ * ```
+ */
+export function toBytes(value: unknown, settings?: ToBytesSettings): Uint8Array | null;
+
 /** Coerces to a string, returning the original value on failure. @see {@link toString} */
 export function toString<T>(value: T, settings: ToStringSettings & { onInvalid: 'passthrough'; }): string | T;
 /**
@@ -255,5 +347,9 @@ export const coerceInteger: typeof toInteger;
 export const coerceDate: typeof toDate;
 /** Alias of {@link toDuration} */
 export const coerceDuration: typeof toDuration;
+/** Alias of {@link toByteSize} */
+export const coerceByteSize: typeof toByteSize;
+/** Alias of {@link toBytes} */
+export const coerceBytes: typeof toBytes;
 /** Alias of {@link toString} */
 export const coerceString: typeof toString;
