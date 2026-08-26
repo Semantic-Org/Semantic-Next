@@ -1,7 +1,7 @@
 ---
 title: Utility Functions Reference
 description: Complete reference for @semantic-ui/utils — a standalone utility library providing functions for arrays, objects, strings, type checking, colors, dates, and more. Use this before reimplementing common operations.
-keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, each, range, sequence, remove, noop, isDate, isRegExp]
+keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, formatDuration, each, range, sequence, remove, noop, isDate, isRegExp]
 audience: authoring
 skill: utility-functions
 type: skill
@@ -910,6 +910,30 @@ formatDate.config.timezones.IST = 'Asia/Jerusalem'; // shorthand aliases are edi
 **Available tokens:** `YYYY`, `YY`, `MMMM`, `MMM`, `MM`, `M`, `DD`, `D`, `Do`, `dddd`, `ddd`, `HH`, `hh`, `h`, `mm`, `ss`, `a`
 
 **Preset formats:** `LT`, `LTS`, `L`, `l`, `LL`, `ll`, `LLL`, `lll`, `LLLL`, `llll`
+
+```javascript
+import { formatDuration, toDuration } from '@semantic-ui/utils';
+
+// formatDuration is the inverse of toDuration: one grammar, both directions.
+// it prints one quantity in the largest unit filled, never a compound '1h 30m'
+formatDuration(300000);               // '5m'
+formatDuration(90000);                // '1.5m' (decimals is a maximum, never '5.0m')
+formatDuration(3598200);              // '1h' (a value that rounds up to a whole unit promotes)
+formatDuration(-90000);               // '-1.5m'
+formatDuration('90s');                // '1.5m' (reads anything toDuration reads)
+formatDuration(90000, { unit: 's' }); // '90s' (hold one unit down a column, printed as spelled)
+formatDuration('banana');             // null
+
+// the default rounds, so 100000 prints '1.7m' and reads back as 102000. lossless picks the
+// largest unit that reads back exactly, the print a config or debug view wants
+formatDuration(100000);                       // '1.7m'
+formatDuration(100000, { lossless: true });   // '100s'
+toDuration(formatDuration(100000, { lossless: true })); // 100000
+
+// the ladder is spelled in toDuration's vocabulary, so a unit is added to both
+toDuration.config.units.y = 365.25 * 86400000;
+formatDuration.config.units.unshift('y');
+```
 
 ---
 

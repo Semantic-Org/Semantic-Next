@@ -1,4 +1,6 @@
+import { toDuration } from './coercion.js';
 import { configured } from './functions.js';
+import { roundDecimal } from './numbers.js';
 
 /*-------------------
         Dates
@@ -150,3 +152,47 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
     SGT: 'Asia/Singapore',
   },
 });
+
+// the ladder is spelled in toDuration's vocabulary and reads its spans from there, so every string
+// this prints reads back through toDuration. a unit is added to both: toDuration.config.units.y for
+// the span, formatDuration.config.units.unshift('y') for its place in the walk
+export const formatDuration = /* @__PURE__ */ configured(
+  (value, options = {}) => {
+    const config = formatDuration.config;
+    const decimals = options.decimals ?? config.decimals;
+    const lossless = options.lossless ?? config.lossless;
+    const spans = toDuration.config.units;
+    const ms = toDuration(value);
+    if (ms === null) { return null; }
+    const magnitude = Math.abs(ms);
+    let unit;
+    if (options.unit != null) {
+      unit = String(options.unit).toLowerCase();
+      if (!Object.hasOwn(spans, unit)) { return null; }
+    }
+    else {
+      const ladder = config.units;
+      let index = 0;
+      let span = spans[ladder[0]];
+      // walk largest first to the first unit the value fills. lossless walks on to the first one
+      // whose rounded print reads back to the same value, the product toDuration itself computes
+      while (
+        index < ladder.length - 1
+        && (magnitude < span || (lossless && roundDecimal(magnitude / span, decimals) * span !== magnitude))
+      ) {
+        span = spans[ladder[++index]];
+      }
+      // 59.97m rounds to 60m, which is a whole hour. a lossless pick is exact and never promotes
+      if (
+        !lossless && index > 0 && roundDecimal(magnitude / span, decimals) * span >= spans[ladder[index - 1]]
+      ) { index--; }
+      unit = ladder[index];
+    }
+    return (ms < 0 ? '-' : '') + roundDecimal(magnitude / spans[unit], decimals) + unit;
+  },
+  {
+    decimals: 1,
+    lossless: false,
+    units: ['w', 'd', 'h', 'm', 's', 'ms'],
+  },
+);

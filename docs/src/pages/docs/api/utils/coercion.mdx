@@ -202,6 +202,8 @@ Coerces a duration expression to milliseconds, or `null` when it reads as no dur
 
 The sign is kept, so `'-1.5h'` is `-5400000`. Compound expressions like `'1h 30m'` are a different grammar and return `null` rather than a partial reading, as do unknown units, bare numbers with trailing junk, and exponent notation.
 
+[`formatDuration`](/docs/api/utils/dates#formatduration) is the inverse, printing milliseconds back in this grammar (`300000` as `'5m'`), so a config can read `'5m'` on the way in and show `'5m'` on the way out.
+
 #### Units
 
 | Unit | Accepted spellings |

@@ -188,3 +188,57 @@ export namespace formatDate {
   /** The timezone alias vocabulary. Set once at app boot; full IANA names bypass it */
   let config: FormatDateConfig;
 }
+
+/**
+ * Options for duration formatting
+ */
+export interface FormatDurationSettings {
+  /** Maximum decimal places, trailing zeros drop (default: the config decimals, 1) */
+  decimals?: number;
+  /** Hold one unit instead of picking the largest the value fills, printed as spelled, any spelling `toDuration` reads (`'s'`, `'minutes'`, `'hr'`) */
+  unit?: string;
+  /** Pick the largest unit whose print reads back through `toDuration` to the same value, for a config view (default: the config lossless, false) */
+  lossless?: boolean;
+}
+
+/**
+ * The defaults and unit ladder read by every {@link formatDuration} call. Set once at app boot
+ * (e.g. `formatDuration.config.decimals = 0`); per-call settings still win over it.
+ */
+export interface FormatDurationConfig {
+  /** Default for `decimals` */
+  decimals: number;
+  /** Default for `lossless` */
+  lossless: boolean;
+  /** The units to pick from, largest first, each a spelling `toDuration.config.units` holds (`['w', 'd', 'h', 'm', 's', 'ms']`) */
+  units: string[];
+}
+
+/**
+ * Formats a duration for display in the largest unit it fills (`'5m'`, `'1.5h'`, `'500ms'`), or `null`
+ * when there is no duration to format. The inverse of {@link toDuration}: it reads anything `toDuration`
+ * reads, and every string it prints reads back through `toDuration`. `decimals` is a maximum and
+ * trailing zeros drop, `unit` holds one unit for a column, and `lossless` picks the largest unit that
+ * reads back to exactly the same value, so a config view never shows `'1.7m'` for `100000`. The sign is kept.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/dates#formatduration formatDuration}
+ * @see {@link https://next.semantic-ui.com/examples/utils-formatduration Example}
+ *
+ * @param value - The milliseconds, or a duration expression
+ * @param settings - Formatting options
+ * @returns The formatted duration, or `null` if there is no duration to format
+ *
+ * @example
+ * ```ts
+ * formatDuration(300000) // '5m'
+ * formatDuration(90000) // '1.5m'
+ * formatDuration(100000) // '1.7m'
+ * formatDuration(100000, { lossless: true }) // '100s'
+ * formatDuration(90000, { unit: 's' }) // '90s'
+ * formatDuration('90s') // '1.5m'
+ * ```
+ */
+export function formatDuration(value: unknown, settings?: FormatDurationSettings): string | null;
+export namespace formatDuration {
+  /** The defaults and unit ladder. Set once at app boot; per-call settings win */
+  let config: FormatDurationConfig;
+}
