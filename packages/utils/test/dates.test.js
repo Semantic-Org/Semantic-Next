@@ -384,6 +384,13 @@ describe('formatDuration', () => {
     expect(formatDuration(3598200, { unit: 'm' })).toBe('60m');
   });
 
+  it('puts a separator between the number and the unit when asked', () => {
+    expect(formatDuration(90000, { separator: ' ' })).toBe('1.5 m');
+    expect(formatDuration(90000, { unit: 'minutes', separator: ' ' })).toBe('1.5 minutes');
+    expect(formatDuration(-90000, { separator: ' ' })).toBe('-1.5 m');
+    expect(toDuration(formatDuration(90000, { unit: 'minutes', separator: ' ' }))).toBe(90000);
+  });
+
   describe('lossless', () => {
     it('walks on to the largest unit that reads back exactly', () => {
       expect(formatDuration(100000, { lossless: true })).toBe('100s');
@@ -434,13 +441,15 @@ describe('formatDuration', () => {
 
   describe('config', () => {
     it('reads its defaults from formatDuration.config', () => {
-      const { decimals, lossless } = formatDuration.config;
+      const { decimals, lossless, separator } = formatDuration.config;
       formatDuration.config.decimals = 0;
       formatDuration.config.lossless = true;
-      expect(formatDuration(90000)).toBe('90s');
-      expect(formatDuration(90000, { decimals: 1 })).toBe('1.5m');
-      expect(formatDuration(100000, { lossless: false, decimals: 1 })).toBe('1.7m');
-      Object.assign(formatDuration.config, { decimals, lossless });
+      formatDuration.config.separator = ' ';
+      expect(formatDuration(90000)).toBe('90 s');
+      expect(formatDuration(90000, { decimals: 1 })).toBe('1.5 m');
+      expect(formatDuration(100000, { lossless: false, decimals: 1 })).toBe('1.7 m');
+      expect(formatDuration(90000, { separator: '' })).toBe('90s');
+      Object.assign(formatDuration.config, { decimals, lossless, separator });
     });
 
     it('takes a unit added to both toDuration and the ladder', () => {

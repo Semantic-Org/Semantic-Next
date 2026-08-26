@@ -922,6 +922,7 @@ formatDuration(3598200);              // '1h' (a value that rounds up to a whole
 formatDuration(-90000);               // '-1.5m'
 formatDuration('90s');                // '1.5m' (reads anything toDuration reads)
 formatDuration(90000, { unit: 's' }); // '90s' (hold one unit down a column, printed as spelled)
+formatDuration(90000, { unit: 'minutes', separator: ' ' }); // '1.5 minutes' (a space reads back, toDuration allows one there)
 formatDuration('banana');             // null
 
 // the default rounds, so 100000 prints '1.7m' and reads back as 102000. lossless picks the

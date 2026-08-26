@@ -152,14 +152,14 @@ console.log(formatDate(date, '[Today is] dddd, MMMM Do, YYYY')); // "Today is Mo
 ### formatDuration
 
 ```javascript
-function formatDuration(value, { decimals, unit, lossless } = {})
+function formatDuration(value, { decimals, unit, lossless, separator } = {})
 ```
 
 Formats a duration for display in the largest unit it fills, or `null` when there is no duration to format. `300000` prints as `'5m'`, `90000` as `'1.5m'`, `500` as `'500ms'`, and the sign is kept. Accepts anything `toDuration` reads, so `'90s'` prints as `'1.5m'` with no conversion in between.
 
 This is the inverse of `toDuration` and the two share one grammar: every string `formatDuration` prints reads back through `toDuration`, and the unit ladder is spelled in `toDuration`'s vocabulary. It prints one quantity, never a compound `'1h 30m'`, because `toDuration` reads one quantity.
 
-`decimals` is a maximum, so `'5m'` never prints as `'5.0m'`, and a value that rounds up to a whole unit promotes (`3598200` is `'1h'` at one decimal, not `'60m'`). `unit` holds one unit so a column reads down in the same scale, printed as spelled, so `'minutes'` gives `'1.5minutes'`.
+`decimals` is a maximum, so `'5m'` never prints as `'5.0m'`, and a value that rounds up to a whole unit promotes (`3598200` is `'1h'` at one decimal, not `'60m'`). `unit` holds one unit so a column reads down in the same scale, printed as spelled. `separator` goes between the number and the unit, so `{ unit: 'minutes', separator: ' ' }` gives `'1.5 minutes'`. A space is the one separator `toDuration` reads back, since its grammar allows one there and nothing else.
 
 `lossless` is for a config view. The default picks the largest unit the value fills and rounds, so `100000` prints as `'1.7m'`, which reads back as `102000`. Under `lossless` the walk continues to the largest unit whose print reads back to exactly the same value, `'100s'`, where the check is the very product `toDuration` computes. A value with no short exact form prints in a small unit (`93784000` is `'93784s'`), which is the honest answer for a value nobody configured by hand.
 
@@ -177,6 +177,7 @@ This is the inverse of `toDuration` and the two share one grammar: every string 
 | decimals | number  | `formatDuration.config.decimals` (1) | Maximum decimal places, trailing zeros drop |
 | unit     | string  | largest unit filled | Hold one unit, printed as spelled, any spelling `toDuration` reads (`'s'`, `'minutes'`, `'hr'`) |
 | lossless | boolean | `formatDuration.config.lossless` (false) | Pick the largest unit that reads back through `toDuration` to the same value |
+| separator | string | `formatDuration.config.separator` (`''`) | Text between the number and the unit, `' '` for `'1.5 minutes'` |
 
 #### Returns
 
@@ -195,6 +196,7 @@ console.log(formatDuration(-90000)); // '-1.5m'
 console.log(formatDuration(1234567, { decimals: 3 })); // '20.576m'
 console.log(formatDuration(3598200)); // '1h'
 console.log(formatDuration(90000, { unit: 's' })); // '90s'
+console.log(formatDuration(90000, { unit: 'minutes', separator: ' ' })); // '1.5 minutes'
 console.log(formatDuration('90s')); // '1.5m'
 console.log(formatDuration(100000)); // '1.7m'
 console.log(formatDuration(100000, { lossless: true })); // '100s'
@@ -207,7 +209,7 @@ console.log(formatDuration(reuseAfter, { lossless: true })); // '5m'
 
 #### formatDuration.config
 
-`formatDuration.config` holds the defaults for `decimals` and `lossless`, plus `units`, the ladder walked largest first. Each entry is a spelling `toDuration.config.units` holds, which is where the span comes from, so a unit is added to both. Edit it once at app boot and every call inherits it. Per-call settings still win.
+`formatDuration.config` holds the defaults for `decimals`, `lossless`, and `separator`, plus `units`, the ladder walked largest first. Each entry is a spelling `toDuration.config.units` holds, which is where the span comes from, so a unit is added to both. Edit it once at app boot and every call inherits it. Per-call settings still win.
 
 ```javascript
 import { formatDuration, toDuration } from '@semantic-ui/utils';

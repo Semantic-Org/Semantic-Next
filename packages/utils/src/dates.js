@@ -161,6 +161,7 @@ export const formatDuration = /* @__PURE__ */ configured(
     const config = formatDuration.config;
     const decimals = options.decimals ?? config.decimals;
     const lossless = options.lossless ?? config.lossless;
+    const separator = options.separator ?? config.separator;
     const spans = toDuration.config.units;
     const ms = toDuration(value);
     if (ms === null) { return null; }
@@ -188,11 +189,12 @@ export const formatDuration = /* @__PURE__ */ configured(
       ) { index--; }
       unit = ladder[index];
     }
-    return (ms < 0 ? '-' : '') + roundDecimal(magnitude / spans[unit], decimals) + unit;
+    return (ms < 0 ? '-' : '') + roundDecimal(magnitude / spans[unit], decimals) + separator + unit;
   },
   {
     decimals: 1,
     lossless: false,
+    separator: '',
     units: ['w', 'd', 'h', 'm', 's', 'ms'],
   },
 );
