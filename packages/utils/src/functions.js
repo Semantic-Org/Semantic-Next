@@ -27,9 +27,11 @@ export const wrapFunction = (x) => {
   return isFunction(x) ? x : () => x;
 };
 
-// attach an editable config to a function as one expression. annotate the callsite as
-// /* @__PURE__ */ configured(fn, {...}) so a bundle that never imports the function drops the pair
+// attach an editable config to a function as one expression. annotate the callsite with
+// the bundlers' pure annotation so a bundle that never imports the function drops the pair
 // together. a bare fn.config assignment is a side effect bundlers keep for every module consumer
+// (the annotation token itself can't be written here: rollup reads it in any comment and
+// warns when it isn't in call position)
 export const configured = (fn, config) => Object.assign(fn, { config });
 
 /*
