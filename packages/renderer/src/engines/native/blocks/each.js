@@ -772,15 +772,15 @@ const eachBlock = defineBlock({
       // server drew is the ordinary hydration-mismatch class, and it heals
       // here the ordinary way: the keyed re-render
       if (serverGroups.length > 0) {
-        let insertAfter = region.anchor;
         for (const group of serverGroups) {
+          // in place: nothing moves, unlike adoption (whose hydrateInnerContent
+          // detaches nodes into a fragment). the anchors take the positions the
+          // server's own markup dictates
           const startMarker = document.createTextNode('');
           const endMarker = document.createTextNode('');
           group.startComment.replaceWith(startMarker);
-          const fragment = document.createDocumentFragment();
-          fragment.append(startMarker, ...group.nodes, endMarker);
-          insertAfter.after(fragment);
-          insertAfter = endMarker;
+          const lastNode = group.nodes.length > 0 ? group.nodes[group.nodes.length - 1] : startMarker;
+          lastNode.after(endMarker);
           const record = {
             key: group.key,
             item: undefined,
