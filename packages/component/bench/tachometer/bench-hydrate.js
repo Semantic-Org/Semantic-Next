@@ -17,6 +17,14 @@ import { ServerRenderer } from '@semantic-ui/renderer';
   `<template shadowrootmode>`, plain `innerHTML` does not.
 */
 
+// The mount windows measure ADOPTION, so the client must resolve the same
+// items the server rendered — items land in defaultState, not just the SSR
+// clone's data. With defaultState [] the each resolves empty at hydrate and
+// the mount window silently measures the cold hold instead of per-item wiring
+// (and, before the hold existed, measured a bare return over DOM the mutate
+// op then corrupted).
+const listItems = makeItems(1000);
+
 defineComponent({
   tagName: 'bench-hydrate-list',
   renderingEngine: 'native',
@@ -32,7 +40,7 @@ defineComponent({
     </ul>
   `,
   defaultState: {
-    items: [],
+    items: listItems,
   },
   createComponent({ state }) {
     return {
@@ -127,7 +135,7 @@ async function measureOp(name, run) {
 // shadow root), connectedCallback, the hydrate microtask, and the
 // post-hydrate rAF that strips data-sui-bind. Per-item Reactions wire
 // here; subsequent updates exercise the already-wired graph.
-const itemsForMount = makeItems(1000);
+const itemsForMount = listItems;
 const dsdHTMLForMount = ssrList(itemsForMount);
 // purpose: Hydrates a server-rendered 1000-item list and waits for it to become interactive without re-rendering.
 await measureOp('each-100-mount', async () => {
@@ -157,6 +165,8 @@ container.innerHTML = '';
        reads external state)
 *******************************/
 
+const helperItems = makeItems(1000);
+
 defineComponent({
   tagName: 'bench-hydrate-helper',
   renderingEngine: 'native',
@@ -171,7 +181,7 @@ defineComponent({
   `,
   defaultState: {
     activeId: null,
-    items: [],
+    items: helperItems,
   },
   createComponent({ self, state }) {
     return {
@@ -207,7 +217,6 @@ function ssrHelperList(items) {
 // Same mount-window shape as above, but with a per-item attribute that
 // calls a helper closing over external `state.activeId`. Sensitive to
 // regressions in per-item Reaction wiring at hydrate time.
-const helperItems = makeItems(1000);
 const dsdHTMLForHelper = ssrHelperList(helperItems);
 // purpose: Hydrates a 1000-item list where each item calls a helper that reads state shared across the list.
 await measureOp('helper-100-mount', async () => {
@@ -233,6 +242,77 @@ await measureOp('helper-100-state-change-1k', () => {
     elHelper.component.setActive(`id-${i}`);
     flushWork();
   }
+});
+container.innerHTML = '';
+
+/*******************************
+      Hydrate Each-100 — Cold
+      (db-resource shape: server
+       rendered, client data pending)
+*******************************/
+
+// The db-backed workload, deliberate where it was once this file's accident:
+// the server rendered from data the client does not have at hydrate — a sync
+// pool before its snapshot, a fetch in flight. The mount window measures the
+// HOLD (server item markers converted to the block's own anchors, nothing
+// wired); the arrival window measures the keyed materialize when the data
+// lands — the naive update path aimed into the held anchors.
+defineComponent({
+  tagName: 'bench-hydrate-cold',
+  renderingEngine: 'native',
+  template: `
+    <ul class="list">
+      {#each item in items}
+        <li class="card {item.completed ? 'done' : 'todo'}" data-id="{item.id}">
+          <span class="title">{item.title}</span>
+          <span class="meta">{item.priority} · {item.tag}</span>
+          <button class="action">{item.completed ? 'Undo' : 'Done'}</button>
+        </li>
+      {/each}
+    </ul>
+  `,
+  defaultState: {
+    items: [],
+  },
+  createComponent({ state }) {
+    return {
+      setItems(items) {
+        state.items.set(items);
+      },
+    };
+  },
+});
+
+const ColdCtor = customElements.get('bench-hydrate-cold');
+
+function ssrColdList(items) {
+  const cloned = ColdCtor.template.clone({ data: { items }, renderingEngine: 'native' });
+  cloned.initialize();
+  const server = new ServerRenderer({
+    ast: cloned.ast,
+    data: cloned.getDataContext(),
+    subTemplates: cloned.subTemplates,
+  });
+  const innerHTML = server.render();
+  return `<bench-hydrate-cold>`
+    + `<template shadowrootmode="open">${innerHTML}</template>`
+    + `</bench-hydrate-cold>`;
+}
+
+const coldItems = makeItems(1000);
+const dsdHTMLForCold = ssrColdList(coldItems);
+// purpose: Hydrates a server-rendered 1000-item list whose data has not arrived on the client — the hold window.
+await measureOp('each-100-cold-mount', async () => {
+  container.setHTMLUnsafe(dsdHTMLForCold);
+  await drainMicrotasks();
+  await flush();
+});
+const elCold = container.firstElementChild;
+
+// purpose: Delivers the pending data to a cold-held 1000-item list — each item renders keyed into its held anchor.
+await measureOp('each-100-cold-arrival', async () => {
+  elCold.component.setItems(coldItems);
+  await flush();
 });
 container.innerHTML = '';
 
