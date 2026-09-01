@@ -3,28 +3,82 @@
   "root": "../../../..",
   "sampleSize": 50,
   "timeout": 3,
-  "autoSampleConditions": ["2%"],
+  "autoSampleConditions": [
+    "2%"
+  ],
   "benchmarks": [
     {
       "name": "this-change",
       "url": "ci-current-hydrate.html",
-      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "addArguments": [
+          "--js-flags=--expose-gc"
+        ]
+      },
       "measurement": [
-        { "mode": "performance", "entryName": "each-100-mount" },
-        { "mode": "performance", "entryName": "each-100" },
-        { "mode": "performance", "entryName": "helper-100-mount" },
-        { "mode": "performance", "entryName": "helper-100-state-change-1k" }
+        {
+          "mode": "performance",
+          "entryName": "each-100-mount"
+        },
+        {
+          "mode": "performance",
+          "entryName": "each-100"
+        },
+        {
+          "mode": "performance",
+          "entryName": "helper-100-mount"
+        },
+        {
+          "mode": "performance",
+          "entryName": "helper-100-state-change-1k"
+        },
+        {
+          "mode": "performance",
+          "entryName": "each-100-cold-mount"
+        },
+        {
+          "mode": "performance",
+          "entryName": "each-100-cold-arrival"
+        }
       ]
     },
     {
       "name": "tip-of-tree",
       "url": "ci-baseline-hydrate.html",
-      "browser": { "name": "chrome", "headless": true, "addArguments": ["--js-flags=--expose-gc"] },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "addArguments": [
+          "--js-flags=--expose-gc"
+        ]
+      },
       "measurement": [
-        { "mode": "performance", "entryName": "each-100-mount" },
-        { "mode": "performance", "entryName": "each-100" },
-        { "mode": "performance", "entryName": "helper-100-mount" },
-        { "mode": "performance", "entryName": "helper-100-state-change-1k" }
+        {
+          "mode": "performance",
+          "entryName": "each-100-mount"
+        },
+        {
+          "mode": "performance",
+          "entryName": "each-100"
+        },
+        {
+          "mode": "performance",
+          "entryName": "helper-100-mount"
+        },
+        {
+          "mode": "performance",
+          "entryName": "helper-100-state-change-1k"
+        },
+        {
+          "mode": "performance",
+          "entryName": "each-100-cold-mount"
+        },
+        {
+          "mode": "performance",
+          "entryName": "each-100-cold-arrival"
+        }
       ]
     }
   ]
