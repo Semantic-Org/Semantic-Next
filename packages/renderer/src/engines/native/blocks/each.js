@@ -115,7 +115,7 @@ function extractRangeToFragment(startMarker, endMarker, fragment) {
 
 function clearRecords(records) {
   for (const record of records) {
-    record.scope.dispose();
+    record.scope?.dispose();
     if (record.dataContext) { record.dataContext.dispose(); }
     disposeRecordDOM(record);
   }
@@ -193,9 +193,34 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
 }
 
 function disposeRecord(record) {
-  record.scope.dispose();
+  // a held record disposes with nothing wired: no scope, no data context
+  record.scope?.dispose();
   if (record.dataContext) { record.dataContext.dispose(); }
   disposeRecordDOM(record);
+}
+
+// a held record (server DOM between its anchors, nothing wired) meets its
+// first data: build the item's context and scope and render into the existing
+// markers — the naive update path, aimed at the anchors the hold minted
+function materializeRecord(record, { item, index, collectionType, node, data, scope, renderAST, isSVG }) {
+  const eachData = getEachData(item, index, collectionType, node);
+  const itemScope = scope.child();
+  const dataContext = new ReactiveDataContext(data, {
+    registerItemContext: true,
+    sealKeysAfterReplace: !!node.as,
+    asKey: node.as,
+  });
+  dataContext.replace(eachData);
+  const fragment = renderAST({ ast: node.content, data: dataContext.proxy, scope: itemScope, isSVG });
+  removeRangeContent(record.startMarker, record.endMarker);
+  record.startMarker.after(fragment);
+  record.item = item;
+  record.index = index;
+  record.dataContext = dataContext;
+  record.scope = itemScope;
+  record.snapshot = snapshotForRecord(item, collectionType);
+  record.fresh = false;
+  markScopeRange(record.startMarker, record.endMarker, record);
 }
 
 // Survivors to leave untouched in Phase 2: the LIS of their old DOM positions.
@@ -407,6 +432,10 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   for (let i = 0; i < newRecords.length; i++) {
     const record = newRecords[i];
     const item = items[i];
+    if (record.dataContext === null && !record.isElse) {
+      materializeRecord(record, { item, index: i, collectionType, node, data, scope, renderAST, isSVG });
+      continue;
+    }
     const refChanged = record.item !== item || record.index !== i;
     const isObjectItem = typeof item === 'object' && item !== null;
 
@@ -731,6 +760,48 @@ const eachBlock = defineBlock({
     const { items, collectionType } = resolveItems(node, lookupExpression);
 
     if (items.length === 0) {
+      const serverGroups = extractServerItemGroups(region.ownedNodes);
+      // the server drew items the client cannot resolve yet (a fetch still in
+      // flight, a sync snapshot not yet applied). convert each group's comment
+      // handshake into the block's own text-node anchors NOW — the durable
+      // references every record lives by — and keep the server DOM on screen
+      // between them, unwired. the resolveItems read above registered the
+      // items dependency, so the first real change reconciles by the server's
+      // own keys and renders each item into its anchors exactly like the
+      // naive non-SSR update path. a client resolving different data than the
+      // server drew is the ordinary hydration-mismatch class, and it heals
+      // here the ordinary way: the keyed re-render
+      if (serverGroups.length > 0) {
+        let insertAfter = region.anchor;
+        for (const group of serverGroups) {
+          const startMarker = document.createTextNode('');
+          const endMarker = document.createTextNode('');
+          group.startComment.replaceWith(startMarker);
+          const fragment = document.createDocumentFragment();
+          fragment.append(startMarker, ...group.nodes, endMarker);
+          insertAfter.after(fragment);
+          insertAfter = endMarker;
+          const record = {
+            key: group.key,
+            item: undefined,
+            index: -1,
+            // no data context and no scope: nothing is wired. the first
+            // reconcile renders into the markers and builds both
+            dataContext: null,
+            startMarker,
+            endMarker,
+            fragment: null,
+            scope: null,
+            isElse: false,
+            snapshot: null,
+            fresh: true,
+          };
+          self.records.push(record);
+        }
+        return;
+      }
+      // no item markers: the server resolved empty too and rendered the else
+      // branch (or nothing) — hydrate what it actually drew
       if (node.elseContent) {
         const elseScope = hydrateInto({ innerAST: node.elseContent });
         self.records.push({
@@ -782,7 +853,7 @@ const eachBlock = defineBlock({
       }
       for (const record of self.records) {
         if (record.isElse) { continue; }
-        record.scope.dispose();
+        record.scope?.dispose();
         if (record.dataContext) { record.dataContext.dispose(); }
         disposeRecordDOM(record);
       }
