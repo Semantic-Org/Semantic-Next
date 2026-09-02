@@ -2926,3 +2926,44 @@ the surface — get, set, keyedPath, eachPath — rather than sitting beside it.
 *— Claude (Fable 5), 2026-08-11*
 
 *"Fill the larger gap than the one you need in this sitting."*
+
+## 2026-09-02 — The front door was the one liar
+
+**Agent:** Claude (Fable 5.1)
+**Task:** Make the data layer's agent-facing planning record legible again: find what had stopped being true, fix the entry points, and leave gates that keep it that way.
+
+### What happened
+
+The maintainer opened with a constraint I would not have set myself: before restructuring anything, read Anthropic's published guidance on CLAUDE.md, skills and context engineering against what the repo already does, because "we're maybe more advanced than what they recommend in places." That was true. Confidence-scored rulings with named reopen conditions, code samples as the deliberation artifact, a review split into a fidelity gate and a safety gate that see different context, the scope file as a lifecycle container: none of that is in the canon. What the canon added was small and sharp. Keep the always-loaded file under 200 lines. One entry instruction, never two that disagree. A table of contents on anything over a hundred lines. No time-sensitive phrasing in a living doc. A mechanical check, because "review periodically" does not happen by itself.
+
+Seven read-only agents audited every file. The content was mostly right; five spot-checks of the law against the code all held. The rot was reachability. The project-instructions file sent every agent to three archived documents and a corpus entry that had not existed since a reorganization, and never named the schedule at all. Four other documents agreed on the funnel. The front door was the one liar, and it was the one every agent read first and could not skip.
+
+The law file had drifted in a way you could count. The maintainer described what it had been: long sessions ending in courtroom rulings, each with the call, the confidence, and the conditions to overturn. July: 78 entries in 3,600 lines, nearly all scored. August: 248 entries in 6,700 lines, two thirds carrying neither a score nor a reopen condition. Landings and process notes had moved in and the verdicts were buried among them. He had ruled exactly this a month earlier and the rule had not been followed once. Counting made the diagnosis land where an argument would not have.
+
+The fixes were shaped to touch as little as possible. The law file's body stayed byte for byte, with a new header cut to the same line count so every line anchor into it survived, and a generated index beside it: the rulings in force by subsystem, newest first, each with its score and its own reopen clause quoted verbatim. Records got a dated status line at the top instead of a rewrite. Only documents with zero inbound citations moved to the archive. Every quote of the maintainer stayed character for character; his instruction was "verbatim intent is necessary."
+
+### What I got wrong
+
+A `sed -i` over CLAUDE.md, which in that repo is a symlink to AGENTS.md. GNU sed writes a new file over the link, and the commit recorded a symlink deleted and a 229-line file added. Restored within the hour, and the gate now checks the link's mode on every run.
+
+I read a terminal-truncated table row as truncated data and padded it with a note saying its figures were never recorded. They had been recorded, folded into one prose cell by the row's author. The markdown gate I had just written caught my own rebuild of that table swallowing a neighbouring one, which is the whole argument for having the gate.
+
+The first landing attempt: a path-scoped stash aborted halfway on a staged deletion, and a bare `git stash drop` then removed a stash. It was mine from seconds earlier and every file was still modified in the tree, but I only knew that after `git fsck`. Never drop a stash you did not label.
+
+Cherry-picking already-landed commits onto a branch to make the pull request show the whole change made the branch unmergeable, because the later commits edited lines both sides had changed. A rebase onto main dropped the duplicates and the merge went clean.
+
+### For future agents
+
+**Test a documentation change the way you test code.** A fresh agent, given only the front door, asked to find where the project is, two current rulings and one shipped contract, reporting every dead end. Ours found that the index routed the bundle-gate question to a two-generation-stale answer through a first-match bug in the generator, and that a ruling from two weeks earlier described a declaration surface the code did not ship. Nothing said a ruling is the call rather than proof it landed. Now something does.
+
+**Classify before you sweep.** Seventy-two tracked documents pointed into the gitignored workspace. The maintainer's rule was binary: unshipped work moves into the tree, completed work loses the reference. Classifying each site against the landed record first meant the sweep was mechanical and the six that were future work went to the people writing them.
+
+**Status lines, not tense.** Every stale claim I found had the same shape: "in flight", "not yet built", "once X lands", written the day it was true, corrected somewhere else or nowhere. A dated line at the top of a document that can change state is the only form that survives the author leaving.
+
+**Sweep the pointers after every move.** A corpus reorganized into subfolders and nineteen references kept the flat paths for a month, including all three copies of the project's own do-not-relitigate citation. The gate that walks every path now runs in one command with the index regeneration and the table check, so the next move leaves nothing behind.
+
+**The other sessions in the tree are not obstacles.** Two rows were in commission in the same working tree the whole day. Diffing every shared file by hunk before staging, never committing another seat's work under my message, and sending each seat one self-contained message with exact paths meant both closed their halves before I closed mine.
+
+*— Claude (Fable 5.1), 2026-09-02*
+
+*"Measure the drift by count before you argue about it."*
