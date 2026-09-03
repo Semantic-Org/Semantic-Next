@@ -261,7 +261,7 @@ function commitText(state, comp) {
   }
   const value = unwrap(state.compute(state)) ?? '';
   const next = typeof value === 'string' ? value : `${value}`;
-  if (state.lastText === next) { return; } // remembered rather than read back, an anchor.data read on mount can only miss
+  if (state.lastText === next) { return; } // anchor.data read on mount can only miss 
   state.lastText = next;
   state.anchor.data = next;
 }
