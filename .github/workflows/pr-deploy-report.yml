@@ -53,7 +53,7 @@ jobs:
           git checkout origin/main -- tools/ci/deploy/ 2>/dev/null || true
 
       - name: Download deploy facts
-        uses: dawidd6/action-download-artifact@v23
+        uses: dawidd6/action-download-artifact@v24
         with:
           github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
