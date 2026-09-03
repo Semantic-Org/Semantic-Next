@@ -1,4 +1,5 @@
 import { nonreactive, reaction } from '@semantic-ui/reactivity';
+import { isString } from '@semantic-ui/utils';
 import { isRecovery, isTracing, unwrap } from '../../helpers.js';
 import { makePlace, UNSAFE_HTML } from './commit-hooks.js';
 
@@ -260,7 +261,7 @@ function commitText(state, comp) {
     return;
   }
   const value = unwrap(state.compute(state)) ?? '';
-  const next = typeof value === 'string' ? value : `${value}`;
+  const next = isString(value) ? value : `${value}`;
   if (state.lastText === next) { return; } // remembered rather than read back, an anchor.data read on mount can only miss
   state.lastText = next;
   state.anchor.data = next;
