@@ -1,6 +1,6 @@
 import { Signal } from '@semantic-ui/reactivity';
 import { existsSync } from 'node:fs';
-import { bench, describe } from 'vitest';
+import { test } from 'vitest';
 import { ExpressionEvaluator } from '../src/expression-evaluator.js';
 
 // A/B comparison: populate bench/baseline/expression-evaluator.js to enable.
@@ -121,297 +121,334 @@ const current = new ExpressionEvaluator({ data, helpers });
 const currentSignal = new ExpressionEvaluator({ data: signalData, helpers });
 const baseline = hasBaseline ? new ExpressionEvaluatorBaseline({ data, helpers }) : null;
 
+// A/B group with an optional baseline: 'current' always runs, 'baseline' joins
+// the comparison only when bench/baseline/expression-evaluator.js is populated.
+// bench.compare() requires at least 2 benchmarks, so without a baseline this
+// just runs 'current' alone.
+async function compareWithOptionalBaseline(bench, currentFn, baselineFn) {
+  if (!baseline) {
+    await bench('current', currentFn).run();
+    return;
+  }
+  await bench.compare(
+    bench('current', currentFn),
+    bench('baseline', baselineFn),
+  );
+}
+
 /*******************************
      Simple identifier (most common)
 *******************************/
 
-describe('simple identifier — {count}', () => {
-  bench('current', () => {
-    current.evaluate('count', data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('simple identifier — {count}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate('count', data);
+    },
+    () => {
       baseline.evaluate('count', data);
-    });
-  }
+    },
+  );
 });
 
-describe('simple identifier — {label}', () => {
-  bench('current', () => {
-    current.evaluate('label', data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('simple identifier — {label}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate('label', data);
+    },
+    () => {
       baseline.evaluate('label', data);
-    });
-  }
+    },
+  );
 });
 
 /*******************************
      Dotted path
 *******************************/
 
-describe('dotted path — {user.name}', () => {
-  bench('current', () => {
-    current.evaluate('user.name', data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('dotted path — {user.name}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate('user.name', data);
+    },
+    () => {
       baseline.evaluate('user.name', data);
-    });
-  }
+    },
+  );
 });
 
-describe('deep dotted path — {user.settings.theme}', () => {
-  bench('current', () => {
-    current.evaluate('user.settings.theme', data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('deep dotted path — {user.settings.theme}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate('user.settings.theme', data);
+    },
+    () => {
       baseline.evaluate('user.settings.theme', data);
-    });
-  }
+    },
+  );
 });
 
 /*******************************
      JS expressions
 *******************************/
 
-describe('JS expression — {count + 1}', () => {
-  bench('current', () => {
-    current.evaluate('count + 1', data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('JS expression — {count + 1}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate('count + 1', data);
+    },
+    () => {
       baseline.evaluate('count + 1', data);
-    });
-  }
+    },
+  );
 });
 
-describe('JS ternary — {isOpen ? "open" : "closed"}', () => {
-  bench('current', () => {
-    current.evaluate('isOpen ? "open" : "closed"', data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('JS ternary — {isOpen ? "open" : "closed"}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate('isOpen ? "open" : "closed"', data);
+    },
+    () => {
       baseline.evaluate('isOpen ? "open" : "closed"', data);
-    });
-  }
+    },
+  );
 });
 
 /*******************************
      Lisp-style helper calls
 *******************************/
 
-describe('helper call — {classIf isActive "active"}', () => {
-  bench('current', () => {
-    current.evaluate("classIf isActive 'active'", data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('helper call — {classIf isActive "active"}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate("classIf isActive 'active'", data);
+    },
+    () => {
       baseline.evaluate("classIf isActive 'active'", data);
-    });
-  }
+    },
+  );
 });
 
-describe('helper call — {maybe disabled "off" "on"}', () => {
-  bench('current', () => {
-    current.evaluate("maybe disabled 'off' 'on'", data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('helper call — {maybe disabled "off" "on"}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate("maybe disabled 'off' 'on'", data);
+    },
+    () => {
       baseline.evaluate("maybe disabled 'off' 'on'", data);
-    });
-  }
+    },
+  );
 });
 
 /*******************************
      Parenthesized sub-expressions
 *******************************/
 
-describe('order of operations — {(value + 2) * 5}', () => {
-  bench('current', () => {
-    current.evaluate('(value + 2) * 5', data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('order of operations — {(value + 2) * 5}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate('(value + 2) * 5', data);
+    },
+    () => {
       baseline.evaluate('(value + 2) * 5', data);
-    });
-  }
+    },
+  );
 });
 
 /*******************************
      Mixed Lisp + JS (the hard path)
 *******************************/
 
-describe('mixed — {concat "my " "friend " (isDog ? "simon" : "pookie")}', () => {
-  bench('current', () => {
-    current.evaluate("concat 'my ' 'friend ' (isDog ? 'simon' : 'pookie')", data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('mixed — {concat "my " "friend " (isDog ? "simon" : "pookie")}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate("concat 'my ' 'friend ' (isDog ? 'simon' : 'pookie')", data);
+    },
+    () => {
       baseline.evaluate("concat 'my ' 'friend ' (isDog ? 'simon' : 'pookie')", data);
-    });
-  }
+    },
+  );
 });
 
-describe('Lisp helper with nested parens — {maybe (not disabled) "on" "off"}', () => {
-  bench('current', () => {
-    current.evaluate("maybe (not disabled) 'on' 'off'", data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('Lisp helper with nested parens — {maybe (not disabled) "on" "off"}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate("maybe (not disabled) 'on' 'off'", data);
+    },
+    () => {
       baseline.evaluate("maybe (not disabled) 'on' 'off'", data);
-    });
-  }
+    },
+  );
 });
 
 /*******************************
      JS method calls with computed args
 *******************************/
 
-describe('JS method call — {addOne(value + 1)}', () => {
-  bench('current', () => {
-    current.evaluate('addOne(value + 1)', data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('JS method call — {addOne(value + 1)}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate('addOne(value + 1)', data);
+    },
+    () => {
       baseline.evaluate('addOne(value + 1)', data);
-    });
-  }
+    },
+  );
 });
 
-describe('JS equality + helper — {activeIf(value == 1)}', () => {
-  bench('current', () => {
-    current.evaluate('activeIf(value == 1)', data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('JS equality + helper — {activeIf(value == 1)}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate('activeIf(value == 1)', data);
+    },
+    () => {
       baseline.evaluate('activeIf(value == 1)', data);
-    });
-  }
+    },
+  );
 });
 
 /*******************************
      Inline objects and arrays
 *******************************/
 
-describe('inline object — {getValue {one: "two"} "one"}', () => {
-  bench('current', () => {
-    current.evaluate("getValue {one: 'two'} 'one'", data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('inline object — {getValue {one: "two"} "one"}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate("getValue {one: 'two'} 'one'", data);
+    },
+    () => {
       baseline.evaluate("getValue {one: 'two'} 'one'", data);
-    });
-  }
+    },
+  );
 });
 
-describe('inline array — {join ["1", "2", "3"] " and "}', () => {
-  bench('current', () => {
-    current.evaluate("join ['1', '2', '3'] ' and '", data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('inline array — {join ["1", "2", "3"] " and "}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate("join ['1', '2', '3'] ' and '", data);
+    },
+    () => {
       baseline.evaluate("join ['1', '2', '3'] ' and '", data);
-    });
-  }
+    },
+  );
 });
 
-describe('classMap with inline object — {classMap { one: true, two: true, three: isActive }}', () => {
-  bench('current', () => {
-    current.evaluate('classMap { one: true, two: true, three: isActive }', data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('classMap with inline object — {classMap { one: true, two: true, three: isActive }}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate('classMap { one: true, two: true, three: isActive }', data);
+    },
+    () => {
       baseline.evaluate('classMap { one: true, two: true, three: isActive }', data);
-    });
-  }
+    },
+  );
 });
 
 /*******************************
      Signal comparison in JS
 *******************************/
 
-describe('signal equality — {fruit == "cherry" ? "yum" : "yuck"}', () => {
-  bench('current', () => {
-    current.evaluate("fruit == 'cherry' ? 'yum' : 'yuck'", data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('signal equality — {fruit == "cherry" ? "yum" : "yuck"}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate("fruit == 'cherry' ? 'yum' : 'yuck'", data);
+    },
+    () => {
       baseline.evaluate("fruit == 'cherry' ? 'yum' : 'yuck'", data);
-    });
-  }
+    },
+  );
 });
 
 /*******************************
      Lisp helper call — spaced arg is data lookup
 *******************************/
 
-describe('Lisp data arg — {addOne value}', () => {
-  bench('current', () => {
-    current.evaluate('addOne value', data);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('Lisp data arg — {addOne value}', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      current.evaluate('addOne value', data);
+    },
+    () => {
       baseline.evaluate('addOne value', data);
-    });
-  }
+    },
+  );
 });
 
 /*******************************
      Signal unwrapping
 *******************************/
 
-describe('signal identifier — {count} (Signal)', () => {
-  bench('current', () => {
-    currentSignal.evaluate('count', signalData);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('signal identifier — {count} (Signal)', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      currentSignal.evaluate('count', signalData);
+    },
+    () => {
       baseline.evaluate('count', signalData);
-    });
-  }
+    },
+  );
 });
 
-describe('signal dotted path — {user.name} (Signal)', () => {
-  bench('current', () => {
-    currentSignal.evaluate('user.name', signalData);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('signal dotted path — {user.name} (Signal)', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      currentSignal.evaluate('user.name', signalData);
+    },
+    () => {
       baseline.evaluate('user.name', signalData);
-    });
-  }
+    },
+  );
 });
 
-describe('signal vs plain — {label} (plain in mixed context)', () => {
-  bench('current', () => {
-    currentSignal.evaluate('label', signalData);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('signal vs plain — {label} (plain in mixed context)', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      currentSignal.evaluate('label', signalData);
+    },
+    () => {
       baseline.evaluate('label', signalData);
-    });
-  }
+    },
+  );
 });
 
-describe('signal ternary — {isOpen ? "open" : "closed"} (Signal)', () => {
-  bench('current', () => {
-    currentSignal.evaluate('isOpen ? "open" : "closed"', signalData);
-  });
-  if (baseline) {
-    bench('baseline', () => {
+test('signal ternary — {isOpen ? "open" : "closed"} (Signal)', async ({ bench }) => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      currentSignal.evaluate('isOpen ? "open" : "closed"', signalData);
+    },
+    () => {
       baseline.evaluate('isOpen ? "open" : "closed"', signalData);
-    });
-  }
+    },
+  );
 });
 
 /*******************************
      Mixed batch (realistic component render)
 *******************************/
 
-describe('mixed batch — 12 expressions (simulating a component render)', () => {
+test('mixed batch — 12 expressions (simulating a component render)', async ({ bench }) => {
   const expressions = [
     'label',
     'icon',
@@ -427,22 +464,22 @@ describe('mixed batch — 12 expressions (simulating a component render)', () =>
     "fruit == 'cherry' ? 'yum' : 'yuck'",
   ];
 
-  bench('current', () => {
-    for (let i = 0; i < expressions.length; i++) {
-      current.evaluate(expressions[i], data);
-    }
-  });
-
-  if (baseline) {
-    bench('baseline', () => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      for (let i = 0; i < expressions.length; i++) {
+        current.evaluate(expressions[i], data);
+      }
+    },
+    () => {
       for (let i = 0; i < expressions.length; i++) {
         baseline.evaluate(expressions[i], data);
       }
-    });
-  }
+    },
+  );
 });
 
-describe('mixed batch — 12 expressions (Signal context)', () => {
+test('mixed batch — 12 expressions (Signal context)', async ({ bench }) => {
   const expressions = [
     'label',
     'icon',
@@ -458,17 +495,17 @@ describe('mixed batch — 12 expressions (Signal context)', () => {
     "fruit == 'cherry' ? 'yum' : 'yuck'",
   ];
 
-  bench('current', () => {
-    for (let i = 0; i < expressions.length; i++) {
-      currentSignal.evaluate(expressions[i], signalData);
-    }
-  });
-
-  if (baseline) {
-    bench('baseline', () => {
+  await compareWithOptionalBaseline(
+    bench,
+    () => {
+      for (let i = 0; i < expressions.length; i++) {
+        currentSignal.evaluate(expressions[i], signalData);
+      }
+    },
+    () => {
       for (let i = 0; i < expressions.length; i++) {
         baseline.evaluate(expressions[i], signalData);
       }
-    });
-  }
+    },
+  );
 });

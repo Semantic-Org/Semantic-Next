@@ -1,4 +1,4 @@
-import { bench, describe } from 'vitest';
+import { test } from 'vitest';
 import { isArray, isEmpty, isEqual, isPlainObject } from '../src/types.js';
 
 /*******************************
@@ -17,41 +17,45 @@ const dateInstance = new Date();
          Benchmarks
 *******************************/
 
-describe('isEmpty', () => {
-  bench('empty object', () => {
-    isEmpty(emptyObj);
-  });
-  bench('5-key object', () => {
-    isEmpty(filledObj);
-  });
-  bench('null-values object', () => {
-    isEmpty(nullValObj);
-  });
-  bench('empty array', () => {
-    isEmpty(emptyArr);
-  });
-  bench('5-element array', () => {
-    isEmpty(filledArr);
-  });
-  bench('null', () => {
-    isEmpty(null);
-  });
-  bench('empty string', () => {
-    isEmpty('');
-  });
+test('isEmpty', async ({ bench }) => {
+  await bench.compare(
+    bench('empty object', () => {
+      isEmpty(emptyObj);
+    }),
+    bench('5-key object', () => {
+      isEmpty(filledObj);
+    }),
+    bench('null-values object', () => {
+      isEmpty(nullValObj);
+    }),
+    bench('empty array', () => {
+      isEmpty(emptyArr);
+    }),
+    bench('5-element array', () => {
+      isEmpty(filledArr);
+    }),
+    bench('null', () => {
+      isEmpty(null);
+    }),
+    bench('empty string', () => {
+      isEmpty('');
+    }),
+  );
 });
 
-describe('type checks (hot guards)', () => {
-  bench('isPlainObject — plain', () => {
-    isPlainObject(plainObj);
-  });
-  bench('isPlainObject — Date', () => {
-    isPlainObject(dateInstance);
-  });
-  bench('isArray — array', () => {
-    isArray(filledArr);
-  });
-  bench('isArray — object', () => {
-    isArray(plainObj);
-  });
+test('type checks (hot guards)', async ({ bench }) => {
+  await bench.compare(
+    bench('isPlainObject — plain', () => {
+      isPlainObject(plainObj);
+    }),
+    bench('isPlainObject — Date', () => {
+      isPlainObject(dateInstance);
+    }),
+    bench('isArray — array', () => {
+      isArray(filledArr);
+    }),
+    bench('isArray — object', () => {
+      isArray(plainObj);
+    }),
+  );
 });

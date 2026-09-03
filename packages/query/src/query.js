@@ -1866,7 +1866,9 @@ export class Query {
 
       // Check if element uses CSS anchor positioning
       const style = window.getComputedStyle(el);
-      const hasAnchor = style.positionAnchor && !inArray(style.positionAnchor, ['none', 'auto']);
+      // 'normal' is the spec's initial value (renamed from an earlier draft's 'auto');
+      // check both so a plain absolutely-positioned element isn't misread as anchored
+      const hasAnchor = style.positionAnchor && !inArray(style.positionAnchor, ['none', 'auto', 'normal']);
       const isPositioned = inArray(style.position, ['absolute', 'fixed']);
       const isAnchored = hasAnchor && isPositioned;
       const containRegex = isAnchored ? /layout|paint|strict/ : /paint|layout|size|strict/;

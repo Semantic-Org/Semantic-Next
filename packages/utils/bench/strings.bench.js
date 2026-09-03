@@ -1,4 +1,4 @@
-import { bench, describe } from 'vitest';
+import { test } from 'vitest';
 import { camelToKebab, escapeHTML, kebabToCamel, tokenize } from '../src/strings.js';
 
 /*******************************
@@ -44,35 +44,41 @@ const componentNames = [
          Benchmarks
 *******************************/
 
-describe('camelToKebab', () => {
-  bench('single attr', () => {
-    camelToKebab('backgroundColor');
-  });
-  bench('8 attrs', () => {
-    for (let i = 0; i < camelAttrs.length; i++) { camelToKebab(camelAttrs[i]); }
-  });
+test('camelToKebab', async ({ bench }) => {
+  await bench.compare(
+    bench('single attr', () => {
+      camelToKebab('backgroundColor');
+    }),
+    bench('8 attrs', () => {
+      for (let i = 0; i < camelAttrs.length; i++) { camelToKebab(camelAttrs[i]); }
+    }),
+  );
 });
 
-describe('kebabToCamel', () => {
-  bench('single attr', () => {
-    kebabToCamel('background-color');
-  });
-  bench('8 attrs', () => {
-    for (let i = 0; i < kebabAttrs.length; i++) { kebabToCamel(kebabAttrs[i]); }
-  });
+test('kebabToCamel', async ({ bench }) => {
+  await bench.compare(
+    bench('single attr', () => {
+      kebabToCamel('background-color');
+    }),
+    bench('8 attrs', () => {
+      for (let i = 0; i < kebabAttrs.length; i++) { kebabToCamel(kebabAttrs[i]); }
+    }),
+  );
 });
 
-describe('escapeHTML', () => {
-  bench('clean string (no escapes)', () => {
-    escapeHTML(cleanText);
-  });
-  bench('dirty string (needs escaping)', () => {
-    escapeHTML(dirtyText);
-  });
+test('escapeHTML', async ({ bench }) => {
+  await bench.compare(
+    bench('clean string (no escapes)', () => {
+      escapeHTML(cleanText);
+    }),
+    bench('dirty string (needs escaping)', () => {
+      escapeHTML(dirtyText);
+    }),
+  );
 });
 
-describe('tokenize', () => {
-  bench('5 component names', () => {
+test('tokenize', async ({ bench }) => {
+  await bench('5 component names', () => {
     for (let i = 0; i < componentNames.length; i++) { tokenize(componentNames[i]); }
-  });
+  }).run();
 });

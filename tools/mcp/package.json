@@ -23,16 +23,16 @@
     }
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@semantic-ui/reactivity": "*",
     "@semantic-ui/specs": "*",
     "@semantic-ui/compiler": "*",
     "@semantic-ui/utils": "*",
-    "zod": "^4.3.6"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@types/node": "^25.6.0",
-    "esbuild": "^0.28.0",
-    "typescript": "^6.0.3"
+    "@types/node": "^26.4.1",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
   }
 }

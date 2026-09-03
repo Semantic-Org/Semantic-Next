@@ -36,10 +36,10 @@
     "@semantic-ui/esbuild-log": "^0.18.0",
     "@semantic-ui/esbuild-resolve-bare-imports": "^0.18.0",
     "@semantic-ui/specs": "^0.18.0",
-    "esbuild": "^0.28.0",
+    "esbuild": "^0.28.2",
     "tiny-glob": "^0.2.9"
   },
   "devDependencies": {
-    "@chialab/esbuild-plugin-worker": "^0.19.1"
+    "@chialab/esbuild-plugin-worker": "^0.19.2"
   }
 }

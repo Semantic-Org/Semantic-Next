@@ -6,11 +6,11 @@ describe('Browser Utilities', () => {
   describe('copyText', () => {
     it('should call navigator.clipboard.writeText with the provided text', () => {
       const writeTextMock = vi.fn();
-      global.navigator = {
+      vi.stubGlobal('navigator', {
         clipboard: {
           writeText: writeTextMock,
         },
-      };
+      });
       const text = 'Test text';
       copyText(text);
       expect(writeTextMock).toHaveBeenCalledWith(text);
