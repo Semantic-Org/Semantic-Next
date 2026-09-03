@@ -2,22 +2,12 @@ import { defineComponent } from '@semantic-ui/component';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES, waitForUpdate } from './test-utils.js';
 
-/*
-  A binding whose value did not change must not touch the DOM. The shape that exposes it is one
-  signal holding an object that a tick replaces wholesale: a dashboard's sampler, a store's
-  snapshot. The signal's own equality skips a replacement that is deep-equal, so the case worth
-  pinning is the mixed one, where some other field moved and this binding's string did not.
-
-  Equal-value writes are not cosmetic. A text write invalidates the node and a class write
-  invalidates style for the element, so a steady field on a busy signal pays layout and paint
-  on every tick.
-*/
+// a binding whose field did not move must not touch the DOM, counted rather than asserted
 
 RENDERING_ENGINES.forEach((engine) => {
   let tagCounter = 0;
   const uniqueTag = () => `test-equal-writes-${engine}-${++tagCounter}`;
 
-  // characterData and attribute records whose value came back the same
   function countRewrites(root) {
     const seen = { text: 0, multiPartAttribute: 0, singleExpressionAttribute: 0, moved: 0 };
     const observer = new MutationObserver((records) => {
@@ -81,7 +71,6 @@ RENDERING_ENGINES.forEach((engine) => {
         await waitForUpdate(el);
       }
       stop();
-      // the signal's own equality skips the set, so nothing downstream runs at all
       expect(seen).toEqual({ text: 0, multiPartAttribute: 0, singleExpressionAttribute: 0, moved: 0 });
     });
 
@@ -93,8 +82,6 @@ RENDERING_ENGINES.forEach((engine) => {
         await waitForUpdate(el);
       }
       stop();
-      // before the guards the native engine wrote the same string 9 times to the text node and 9
-      // times to the multi-part class, while the single-expression class was already quiet
       expect(seen.text).toBe(0);
       expect(seen.multiPartAttribute).toBe(0);
       expect(seen.singleExpressionAttribute).toBe(0);
@@ -110,7 +97,6 @@ RENDERING_ENGINES.forEach((engine) => {
         await waitForUpdate(el);
       }
       stop();
-      // three moves across a text node and two class attributes, and no equal-value write
       expect(seen.moved).toBe(states.length * 3);
       expect(seen.text + seen.multiPartAttribute + seen.singleExpressionAttribute).toBe(0);
       expect(el.shadowRoot.querySelector('b').textContent).toBe('active');
