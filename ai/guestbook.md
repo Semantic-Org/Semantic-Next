@@ -2967,3 +2967,21 @@ Cherry-picking already-landed commits onto a branch to make the pull request sho
 *— Claude (Fable 5.1), 2026-09-02*
 
 *"Measure the drift by count before you argue about it."*
+
+---
+
+## 2026-09-03 — the instrument that caught three bugs it was not built to find
+
+I ran the orchestrator seat for the ephemeral tier's DX row: a tween duration derived from measured delivery and published as a CSS custom property, the demo HUD rebuilt as a dashboard over the public surface only, and the declaration's rate words. The row shipped. What is worth leaving here is what the HUD found on its first day in front of the maintainer, because none of it was in any test.
+
+**A number a human reads is a test no suite runs.** `jitter 51315ms` beside a 3 ms round trip: the transit ring was a `Float32Array` holding wall-clock sized samples, which quantize by 131 seconds at that magnitude. Every suite was green because no test folded a wall-clock sized sample. Then `cursors 46/s` on a window painting at 2 fps: the served-rate estimator was measuring the 16.7 ms gap inside the duplicate pair that `throttle` emits for a single call (a trailing call after one invocation, utils, still open) and skipping the real gaps as rest. Both fixed at the kernel with a red test first. The HUD's charter, "reads only the public surface, buildable by an end user", is what made both visible: an instrument that reaches into internals shows you what the internals believe.
+
+**The renderer re-sets equal text.** Paint flashing on the HUD's strip showed "ACTIVE" repainting every 500 ms with unchanged text. A MutationObserver over ten ticks: 176 of 300 records re-set an unchanged value. `commitText` in `packages/renderer/src/engines/native/define-block.js` writes `anchor.data` without comparing, and the multi-part branch of `attribute-binding.js` calls `setAttribute` unguarded, while the single-expression branch is guarded. A same-value write still queues a mutation record and a paint. The HUD now reads every shown value through a computed (whose set is equality-checked) and the count is 0, but that is the shape a user has to know to reach for; the fix belongs in the renderer.
+
+**A brief for an overlay states its height.** The design seat's first mock was a Grafana page, 700 px tall, and it was excellent at its own size. The maintainer: "as an overlay that appears using maybe 30% of a users browser its over a whole laptop's height in complexity." The charge had a width floor and no height budget. The revision under "micro sizes instruments, max height of like 30vh" and "remove details that arent salient or use tooltips to hide complexity" came in at 129 px. Name the viewport a thing lives in and the fraction it may take, before the mock, not after.
+
+**When the maintainer says not now, the deliverable is a ledger line.** A focused Chrome window painting a peer cursor at 2-6 fps while the collection changes and the DOM writes both run at 40-55 a second, unreproducible headless. I handed him four console probes in a row; each split the problem, and the fourth earned "this kind of stuff is like chasing phantoms so annoying." The facts are on the ledger with the one decisive A/B. One probe per ask, then the ledger, then the box.
+
+*— Claude (Fable 5.1), 2026-09-03*
+
+*"An instrument that reaches into internals shows you what the internals believe."*

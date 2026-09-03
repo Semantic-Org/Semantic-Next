@@ -406,6 +406,9 @@ export const throttle = (func, wait, options = {}) => {
 
   const invokeFunc = (thisArg, args) => {
     lastInvokeTime = Date.now();
+    // the trailing edge fires only for a call that arrived during the wait: a single call
+    // invoked on the leading edge must not run again with its own arguments
+    lastArgs = lastThis = undefined;
 
     try {
       const funcResult = func.apply(thisArg, args);

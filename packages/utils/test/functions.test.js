@@ -668,6 +668,34 @@ describe('function utilities', () => {
     });
 
     describe('basic functionality', () => {
+      it('fires a single call once: no trailing repeat of the leading call', () => {
+        const func = vi.fn(() => 'result');
+        const throttled = throttle(func, 100);
+
+        throttled('only');
+        expect(func).toHaveBeenCalledTimes(1);
+
+        vi.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
+
+        // nothing arrived during the wait, so there is no trailing edge to fire
+        expect(func).toHaveBeenCalledTimes(1);
+        expect(func).toHaveBeenCalledWith('only');
+      });
+
+      it('fires the trailing edge once with the latest call that arrived during the wait', () => {
+        const func = vi.fn(() => 'result');
+        const throttled = throttle(func, 100);
+
+        throttled('first');
+        throttled('second');
+        vi.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
+
+        expect(func).toHaveBeenCalledTimes(2);
+        expect(func).toHaveBeenNthCalledWith(2, 'second');
+      });
+
       it('should throttle function execution with default leading and trailing behavior', async () => {
         const func = vi.fn(() => 'result');
         const throttled = throttle(func, 100);
