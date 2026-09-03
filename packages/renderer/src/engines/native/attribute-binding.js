@@ -124,7 +124,9 @@ export function bindAttribute({
           value += evaluateMarkerToString(entries[part.markerId], data, renderer);
         }
       }
-      element.setAttribute(attrName, value);
+      // the single-expression branch above compares before it writes, and a multi-part value is a
+      // string all the same: an equal write invalidates style for the element for nothing
+      if (element.getAttribute(attrName) !== value) { element.setAttribute(attrName, value); }
     });
   }
 }

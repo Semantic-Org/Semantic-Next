@@ -259,7 +259,12 @@ function commitText(state, comp) {
     state.compute(state);
     return;
   }
-  state.anchor.data = unwrap(state.compute(state)) ?? '';
+  const value = unwrap(state.compute(state)) ?? '';
+  // a signal holding an object notifies every binding that reads it, so a field that did not move
+  // still re-fires here. writing the same data invalidates the text node, so compare first, and
+  // coerce the way the assignment would (a template literal throws on a Symbol exactly as it does)
+  const next = typeof value === 'string' ? value : `${value}`;
+  if (state.anchor.data !== next) { state.anchor.data = next; }
 }
 
 // mutable fields (ownedNodes, endAnchor) live on state so re-fires can update them
