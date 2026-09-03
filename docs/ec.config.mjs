@@ -14,6 +14,8 @@ const sui = {
 
 export default defineEcConfig({
   themes: [semanticLight, semanticDark],
+  // ec strips every shiki bundled theme not named here, which empties the table code-sample loads at runtime
+  removeUnusedThemes: false,
   useDarkModeMediaQuery: false,
   themeCssSelector: (theme) => {
     // Map themes to html.dark class-based switching
