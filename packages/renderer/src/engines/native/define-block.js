@@ -261,10 +261,14 @@ function commitText(state, comp) {
   }
   const value = unwrap(state.compute(state)) ?? '';
   // a signal holding an object notifies every binding that reads it, so a field that did not move
-  // still re-fires here. writing the same data invalidates the text node, so compare first, and
-  // coerce the way the assignment would (a template literal throws on a Symbol exactly as it does)
+  // still re-fires here, and writing the same data invalidates the text node for nothing. compare
+  // against what this binding last wrote rather than against anchor.data: the anchor is ours between
+  // the markers, and a cached string costs nothing on the first render where a DOM read can only miss.
+  // coerce the way the assignment would, so a Symbol still throws exactly where it did
   const next = typeof value === 'string' ? value : `${value}`;
-  if (state.anchor.data !== next) { state.anchor.data = next; }
+  if (state.lastText === next) { return; }
+  state.lastText = next;
+  state.anchor.data = next;
 }
 
 // mutable fields (ownedNodes, endAnchor) live on state so re-fires can update them

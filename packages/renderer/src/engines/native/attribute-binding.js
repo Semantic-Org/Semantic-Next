@@ -103,6 +103,10 @@ export function bindAttribute({
     });
   }
   else {
+    // what this binding last wrote, so a re-fire that computes the same string skips the write
+    // without a getAttribute: on a first render the read can only miss, and these bindings are
+    // created by the thousand
+    let lastValue;
     scope.reaction(element, (comp) => {
       if (skipFirstWrite && comp.firstRun) {
         // Evaluate all markers to register Signal dependencies, skip DOM
@@ -124,9 +128,9 @@ export function bindAttribute({
           value += evaluateMarkerToString(entries[part.markerId], data, renderer);
         }
       }
-      // the single-expression branch above compares before it writes, and a multi-part value is a
-      // string all the same: an equal write invalidates style for the element for nothing
-      if (element.getAttribute(attrName) !== value) { element.setAttribute(attrName, value); }
+      if (lastValue === value) { return; }
+      lastValue = value;
+      element.setAttribute(attrName, value);
     });
   }
 }
