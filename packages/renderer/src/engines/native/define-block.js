@@ -259,7 +259,11 @@ function commitText(state, comp) {
     state.compute(state);
     return;
   }
-  state.anchor.data = unwrap(state.compute(state)) ?? '';
+  const value = unwrap(state.compute(state)) ?? '';
+  const next = typeof value === 'string' ? value : `${value}`;
+  if (state.lastText === next) { return; } // anchor.data read on mount can only miss 
+  state.lastText = next;
+  state.anchor.data = next;
 }
 
 // mutable fields (ownedNodes, endAnchor) live on state so re-fires can update them
@@ -361,6 +365,7 @@ function defineValueBlock(config) {
       self,
       ownedNodes,
       endAnchor: null,
+      lastText: undefined,
     };
 
     // Static dispatches skip Reaction wiring. Hydration is a no-op —

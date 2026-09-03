@@ -103,6 +103,7 @@ export function bindAttribute({
     });
   }
   else {
+    let lastValue; // remembered rather than read back, a getAttribute on mount can only miss
     scope.reaction(element, (comp) => {
       if (skipFirstWrite && comp.firstRun) {
         // Evaluate all markers to register Signal dependencies, skip DOM
@@ -124,6 +125,8 @@ export function bindAttribute({
           value += evaluateMarkerToString(entries[part.markerId], data, renderer);
         }
       }
+      if (lastValue === value) { return; }
+      lastValue = value;
       element.setAttribute(attrName, value);
     });
   }
