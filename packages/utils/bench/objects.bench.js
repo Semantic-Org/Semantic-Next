@@ -1,4 +1,4 @@
-import { bench, describe } from 'vitest';
+import { test } from 'vitest';
 import { deepExtend, get, weightedObjectSearch } from '../src/objects.js';
 
 /*******************************
@@ -48,42 +48,48 @@ const searchData = Array.from({ length: 200 }, (_, i) => ({
          Benchmarks
 *******************************/
 
-describe('deepExtend', () => {
-  bench('shallow merge (no nesting)', () => {
-    deepExtend({}, { a: 1, b: 2, c: 3 }, { d: 4, e: 5 });
-  });
-  bench('component defaults + user settings', () => {
-    deepExtend({}, defaults, userSettings);
-  });
+test('deepExtend', async ({ bench }) => {
+  await bench.compare(
+    bench('shallow merge (no nesting)', () => {
+      deepExtend({}, { a: 1, b: 2, c: 3 }, { d: 4, e: 5 });
+    }),
+    bench('component defaults + user settings', () => {
+      deepExtend({}, defaults, userSettings);
+    }),
+  );
 });
 
-describe('get — property access', () => {
-  bench('simple key', () => {
-    get(componentState, 'ui');
-  });
-  bench('3-level path', () => {
-    get(componentState, 'ui.dropdown.settings');
-  });
-  bench('deep path', () => {
-    get(componentState, 'ui.dropdown.state.selected');
-  });
-  bench('dotted key fallback', () => {
-    get(componentState, 'dotted.key.nested');
-  });
-  bench('miss (undefined)', () => {
-    get(componentState, 'ui.nonexistent.path');
-  });
+test('get — property access', async ({ bench }) => {
+  await bench.compare(
+    bench('simple key', () => {
+      get(componentState, 'ui');
+    }),
+    bench('3-level path', () => {
+      get(componentState, 'ui.dropdown.settings');
+    }),
+    bench('deep path', () => {
+      get(componentState, 'ui.dropdown.state.selected');
+    }),
+    bench('dotted key fallback', () => {
+      get(componentState, 'dotted.key.nested');
+    }),
+    bench('miss (undefined)', () => {
+      get(componentState, 'ui.nonexistent.path');
+    }),
+  );
 });
 
-describe('weightedObjectSearch', () => {
-  bench('single word, 200 items', () => {
-    weightedObjectSearch('component', searchData, {
-      propertiesToMatch: ['name', 'description', 'category'],
-    });
-  });
-  bench('multi word, 200 items', () => {
-    weightedObjectSearch('primary forms', searchData, {
-      propertiesToMatch: ['name', 'description', 'category'],
-    });
-  });
+test('weightedObjectSearch', async ({ bench }) => {
+  await bench.compare(
+    bench('single word, 200 items', () => {
+      weightedObjectSearch('component', searchData, {
+        propertiesToMatch: ['name', 'description', 'category'],
+      });
+    }),
+    bench('multi word, 200 items', () => {
+      weightedObjectSearch('primary forms', searchData, {
+        propertiesToMatch: ['name', 'description', 'category'],
+      });
+    }),
+  );
 });

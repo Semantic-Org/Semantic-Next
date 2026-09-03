@@ -21,10 +21,10 @@
     "sui-lsp": "bin/sui-lsp.js"
   },
   "dependencies": {
-    "acorn": "^8.16.0",
+    "acorn": "^8.18.0",
     "glob": "^13.0.6",
-    "vscode-languageserver": "^9.0.1",
-    "vscode-languageserver-textdocument": "^1.0.12"
+    "vscode-languageserver": "^10.1.1",
+    "vscode-languageserver-textdocument": "^1.0.14"
   },
   "devDependencies": {
     "@semantic-ui/compiler": "*"

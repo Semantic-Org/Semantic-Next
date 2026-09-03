@@ -4,6 +4,14 @@ import ts from 'typescript';
   Lazy-loaded half of the tooling worker — everything that needs the TypeScript
   module. Loaded on first .ts file or first intelligence request, never for
   render-only JS sessions.
+
+  typescript is pinned to ^6.0.3 in package.json, one major below the
+  installed one elsewhere in the repo. TS 7 ships with no classic compiler
+  API at all (no transpileModule, no language service) — only AST-manipulation
+  helpers and a sync/async bridge that spawns a native binary per platform,
+  neither usable from a browser worker. 6.0.3 is the last release with the
+  classic API this file depends on. Revisit once TS 7.1 ships its replacement
+  API and it covers transpile/diagnostics.
 */
 
 const compilerOptions = {
@@ -163,7 +171,7 @@ export const createLanguageService = (getFiles) => {
         properties: properties.map(property => ({
           name: property.getName(),
           optional: Boolean(property.flags & ts.SymbolFlags.Optional),
-          type: checker.typeToString(checker.getTypeOfSymbolAtLocation(property, call)),
+          type: checker.typeToString(checker.getNonNullableType(checker.getTypeOfSymbolAtLocation(property, call))),
         })),
       };
     }

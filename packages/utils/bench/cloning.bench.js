@@ -1,4 +1,4 @@
-import { bench, describe } from 'vitest';
+import { test } from 'vitest';
 import { clone } from '../src/cloning.js';
 
 /*******************************
@@ -92,56 +92,68 @@ const typedData = {
 // Grouped by shape so vitest's comparative reporter shows clone vs
 // structuredClone relative within each block.
 
-describe('flat 8-key object', () => {
-  bench('clone', () => {
-    clone(flatSettings);
-  });
-  bench('structuredClone', () => {
-    structuredClone(flatSettings);
-  });
+test('flat 8-key object', async ({ bench }) => {
+  await bench.compare(
+    bench('clone', () => {
+      clone(flatSettings);
+    }),
+    bench('structuredClone', () => {
+      structuredClone(flatSettings);
+    }),
+  );
 });
 
-describe('20-key wide object', () => {
-  bench('clone', () => {
-    clone(wideSettings);
-  });
-  bench('structuredClone', () => {
-    structuredClone(wideSettings);
-  });
+test('20-key wide object', async ({ bench }) => {
+  await bench.compare(
+    bench('clone', () => {
+      clone(wideSettings);
+    }),
+    bench('structuredClone', () => {
+      structuredClone(wideSettings);
+    }),
+  );
 });
 
-describe('nested state with arrays', () => {
-  bench('clone', () => {
-    clone(nestedState);
-  });
-  bench('structuredClone', () => {
-    structuredClone(nestedState);
-  });
+test('nested state with arrays', async ({ bench }) => {
+  await bench.compare(
+    bench('clone', () => {
+      clone(nestedState);
+    }),
+    bench('structuredClone', () => {
+      structuredClone(nestedState);
+    }),
+  );
 });
 
-describe('mixed types (Date, RegExp, Set, Map)', () => {
-  bench('clone', () => {
-    clone(mixedTypes);
-  });
-  bench('structuredClone', () => {
-    structuredClone(mixedTypes);
-  });
+test('mixed types (Date, RegExp, Set, Map)', async ({ bench }) => {
+  await bench.compare(
+    bench('clone', () => {
+      clone(mixedTypes);
+    }),
+    bench('structuredClone', () => {
+      structuredClone(mixedTypes);
+    }),
+  );
 });
 
-describe('deep tree (depth 10)', () => {
-  bench('clone', () => {
-    clone(deepTree);
-  });
-  bench('structuredClone', () => {
-    structuredClone(deepTree);
-  });
+test('deep tree (depth 10)', async ({ bench }) => {
+  await bench.compare(
+    bench('clone', () => {
+      clone(deepTree);
+    }),
+    bench('structuredClone', () => {
+      structuredClone(deepTree);
+    }),
+  );
 });
 
-describe('typed arrays (correctness contrast)', () => {
-  bench('clone', () => {
-    clone(typedData);
-  });
-  bench('structuredClone', () => {
-    structuredClone(typedData);
-  });
+test('typed arrays (correctness contrast)', async ({ bench }) => {
+  await bench.compare(
+    bench('clone', () => {
+      clone(typedData);
+    }),
+    bench('structuredClone', () => {
+      structuredClone(typedData);
+    }),
+  );
 });

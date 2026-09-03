@@ -1,4 +1,4 @@
-import { bench, describe } from 'vitest';
+import { test } from 'vitest';
 import { isEqual } from '../src/equality.js';
 
 /*******************************
@@ -44,44 +44,52 @@ const str = 'hello world';
          Benchmarks
 *******************************/
 
-describe('isEqual — same reference (signal unchanged)', () => {
-  bench('object ref', () => {
-    isEqual(settingsA, settingsA);
-  });
-  bench('array ref', () => {
-    isEqual(stateA.items, stateA.items);
-  });
-  bench('primitive number', () => {
-    isEqual(num, num);
-  });
-  bench('primitive string', () => {
-    isEqual(str, str);
-  });
+test('isEqual — same reference (signal unchanged)', async ({ bench }) => {
+  await bench.compare(
+    bench('object ref', () => {
+      isEqual(settingsA, settingsA);
+    }),
+    bench('array ref', () => {
+      isEqual(stateA.items, stateA.items);
+    }),
+    bench('primitive number', () => {
+      isEqual(num, num);
+    }),
+    bench('primitive string', () => {
+      isEqual(str, str);
+    }),
+  );
 });
 
-describe('isEqual — shallow equal objects', () => {
-  bench('10-key equal', () => {
-    isEqual(settingsA, settingsB);
-  });
-  bench('10-key not equal', () => {
-    isEqual(settingsA, settingsDiff);
-  });
+test('isEqual — shallow equal objects', async ({ bench }) => {
+  await bench.compare(
+    bench('10-key equal', () => {
+      isEqual(settingsA, settingsB);
+    }),
+    bench('10-key not equal', () => {
+      isEqual(settingsA, settingsDiff);
+    }),
+  );
 });
 
-describe('isEqual — nested structures', () => {
-  bench('nested equal', () => {
-    isEqual(stateA, stateB);
-  });
-  bench('nested diff in array', () => {
-    isEqual(stateA, stateDiff);
-  });
+test('isEqual — nested structures', async ({ bench }) => {
+  await bench.compare(
+    bench('nested equal', () => {
+      isEqual(stateA, stateB);
+    }),
+    bench('nested diff in array', () => {
+      isEqual(stateA, stateDiff);
+    }),
+  );
 });
 
-describe('isEqual — with options', () => {
-  bench('ignoreKeys (top-level)', () => {
-    isEqual(settingsA, settingsDiff, { ignoreKeys: ['variant'] });
-  });
-  bench('partial match', () => {
-    isEqual({ type: 'button' }, settingsA, { partial: true });
-  });
+test('isEqual — with options', async ({ bench }) => {
+  await bench.compare(
+    bench('ignoreKeys (top-level)', () => {
+      isEqual(settingsA, settingsDiff, { ignoreKeys: ['variant'] });
+    }),
+    bench('partial match', () => {
+      isEqual({ type: 'button' }, settingsA, { partial: true });
+    }),
+  );
 });
