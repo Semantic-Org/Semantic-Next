@@ -262,9 +262,9 @@ function commitText(state, comp) {
   const value = unwrap(state.compute(state)) ?? '';
   // a signal holding an object notifies every binding that reads it, so a field that did not move
   // still re-fires here, and writing the same data invalidates the text node for nothing. compare
-  // against what this binding last wrote rather than against anchor.data: the anchor is ours between
-  // the markers, and a cached string costs nothing on the first render where a DOM read can only miss.
-  // coerce the way the assignment would, so a Symbol still throws exactly where it did
+  // against what this binding last wrote rather than against anchor.data: the anchor is ours
+  // between the markers, and a DOM read on a first render can only miss. coerce the way the
+  // assignment would, so a Symbol still throws exactly where it did
   const next = typeof value === 'string' ? value : `${value}`;
   if (state.lastText === next) { return; }
   state.lastText = next;
@@ -370,6 +370,9 @@ function defineValueBlock(config) {
       self,
       ownedNodes,
       endAnchor: null,
+      // declared here, not on first write: a property added later moves out of the object's
+      // shape and every access after it pays the indirection
+      lastText: undefined,
     };
 
     // Static dispatches skip Reaction wiring. Hydration is a no-op —
