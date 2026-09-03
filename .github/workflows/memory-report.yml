@@ -53,7 +53,7 @@ jobs:
           git checkout origin/main -- tools/ci/memory/ 2>/dev/null || true
 
       - name: Download memory snapshots
-        uses: dawidd6/action-download-artifact@v23
+        uses: dawidd6/action-download-artifact@v24
         with:
           github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}

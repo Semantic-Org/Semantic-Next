@@ -53,7 +53,7 @@ jobs:
           git checkout origin/main -- tools/ci/bench/reporter/ 2>/dev/null || true
 
       - name: Download bench artifacts
-        uses: dawidd6/action-download-artifact@v23
+        uses: dawidd6/action-download-artifact@v24
         with:
           github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
@@ -172,7 +172,7 @@ jobs:
           node-version-file: '.node-version'
 
       - name: Download bench artifacts
-        uses: dawidd6/action-download-artifact@v23
+        uses: dawidd6/action-download-artifact@v24
         with:
           github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
