@@ -1,5 +1,8 @@
+import { toString } from './coercion.js';
 import { configured, identity } from './functions.js';
-import { isArray, isFunction, isIterable, isMap, isNumber, isPlainObject, isString } from './types.js';
+import { get } from './paths.js';
+import { escapeRegExp } from './regexp.js';
+import { isArray, isFunction, isIterable, isMap, isNumber, isObject, isPlainObject, isString } from './types.js';
 
 /*-------------------
        Strings
@@ -352,6 +355,80 @@ export const tokenize = (str = '') => {
     .replace(NON_WORD_RE, '')
     .replace(UNDERSCORE_RE, '-')
     .toLowerCase();
+};
+
+const PLACEHOLDER_RE = /\{([^{}]*)\}/g;
+const placeholderCache = new Map();
+
+// the default pattern refuses a nested opening brace, so a stray '{' in prose cannot swallow
+// the placeholder that follows it. a custom delimiter pair runs to the nearest closing one
+const placeholderPattern = (open, close) => {
+  if (open === '{' && close === '}') {
+    return PLACEHOLDER_RE;
+  }
+  const cacheKey = `${open}\u0000${close}`;
+  let pattern = placeholderCache.get(cacheKey);
+  if (!pattern) {
+    pattern = new RegExp(`${escapeRegExp(String(open))}([\\s\\S]*?)${escapeRegExp(String(close))}`, 'g');
+    placeholderCache.set(cacheKey, pattern);
+  }
+  return pattern;
+};
+
+// an own key first, so a key spelled with a dot ('user.name' held flat) wins over traversal
+// and an inherited member ('constructor', 'toString') never reads as a value
+const readValue = (values, key) => {
+  if (!isObject(values)) {
+    return undefined;
+  }
+  if (Object.hasOwn(values, key)) {
+    return values[key];
+  }
+  return (key.indexOf('.') === -1 && key.indexOf('[') === -1) ? undefined : get(values, key);
+};
+
+// the default when a key resolves to nothing: a visible '{chosenName}' names the key that went
+// unfilled, where a blank says nothing and reads as finished copy
+const keepPlaceholder = (key, placeholder) => placeholder;
+
+/*
+  Fill bracketed placeholders in a string from a values object, the shape a copy table
+  takes: a whole sentence stays one editable string and its variable parts are named.
+  Values resolve from the call's object first and its defaults second, and a key that
+  resolves to nothing leaves its placeholder in place, so a typo shows itself in the UI
+  instead of shipping a blank. Keys read the path grammar, so '{user.name}' reaches into
+  a nested object. Substitution runs once and is never rescanned, so a filled value
+  carrying '{secret}' cannot reach a second key. Values a string can't faithfully hold
+  (an object, a Date, NaN) read as missing, and transform is where an app says how those
+  should print
+*/
+export const fill = (template, values, {
+  defaults,
+  transform,
+  missing = keepPlaceholder,
+  open = '{',
+  close = '}',
+} = {}) => {
+  if (!isString(template)) {
+    return '';
+  }
+  if (!open || !close || template.indexOf(open) === -1) {
+    return template;
+  }
+  return template.replace(placeholderPattern(open, close), (placeholder, key) => {
+    let value = readValue(values, key);
+    if (value == null) {
+      value = readValue(defaults, key);
+    }
+    if (value != null && isFunction(transform)) {
+      value = transform(value, key);
+    }
+    const text = toString(value);
+    if (text === null) {
+      return isFunction(missing) ? missing(key, placeholder) : missing;
+    }
+    return text;
+  });
 };
 
 /*-------------------

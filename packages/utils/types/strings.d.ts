@@ -339,6 +339,50 @@ export function reverseString(str?: string, options?: ReverseStringOptions): str
  */
 export function tokenize(str?: string): string;
 
+/** A values bag for fill: a plain object keyed by name, or an array read positionally */
+export type FillValues = Record<string, unknown> | readonly unknown[];
+
+/**
+ * Options for filling placeholders in a string
+ */
+export interface FillOptions {
+  /** Values used when a key is absent or nullish in `values` */
+  defaults?: FillValues;
+  /** Applied to each resolved value before it is stringified, where an app says how a Date or a custom type prints */
+  transform?: (value: any, key: string) => unknown;
+  /** What stands in for a placeholder whose key resolves to nothing (default: the placeholder is left in place) */
+  missing?: string | ((key: string, placeholder: string) => string);
+  /** Opening delimiter (default: "{") */
+  open?: string;
+  /** Closing delimiter (default: "}") */
+  close?: string;
+}
+
+/**
+ * Fills bracketed placeholders in a string from a values object, the shape a copy table takes
+ * Values resolve from `values` first and `defaults` second, and a key that resolves to nothing
+ * leaves its placeholder in place, so a typo shows itself in the UI instead of shipping a blank
+ * Keys read the path grammar, so `{user.name}` reaches into a nested object
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#fill fill}
+ * @see {@link https://next.semantic-ui.com/examples/utils-fill Example}
+ *
+ * @param template - The string carrying placeholders (a non-string reads as empty)
+ * @param values - The values to fill from, keyed by placeholder name
+ * @param options - Fill options
+ * @returns The filled string
+ *
+ * @example
+ * ```ts
+ * fill('Name {chosenName} is already taken', { chosenName: 'jack' }) // returns 'Name jack is already taken'
+ * fill('Hello {nmae}', { name: 'jack' }) // returns 'Hello {nmae}' (the typo shows itself)
+ * fill('Hello {name}', {}, { missing: 'friend' }) // returns 'Hello friend'
+ * fill('{appName} v{version}', { version: 2 }, { defaults: { appName: 'Semantic' } }) // returns 'Semantic v2'
+ * fill('{user.name} signed in', { user: { name: 'jack' } }) // returns 'jack signed in'
+ * fill('Hello ${name}', { name: 'jack' }, { open: '${', close: '}' }) // returns 'Hello jack'
+ * ```
+ */
+export function fill(template: string, values?: FillValues | null, options?: FillOptions): string;
+
 /**
  * Converts a machine identifier into human-readable label text, the display-side inverse of tokenize
  * Splits snake_case, kebab-case, camelCase, and PascalCase, keeping acronym runs intact (HTTP, XML)

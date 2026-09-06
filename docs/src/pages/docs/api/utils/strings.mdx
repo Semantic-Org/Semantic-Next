@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: String Utilities
 package: "@semantic-ui/utils"
-methods: [kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase, humanize, joinWords, getArticle, truncate, tokenize, escapeHTML, unescapeHTML, reverseString, editDistance, similarity, suggest]
+methods: [kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase, humanize, joinWords, getArticle, truncate, tokenize, fill, escapeHTML, unescapeHTML, reverseString, editDistance, similarity, suggest]
 icon: type
 description: API reference for string manipulation functions
 ---
@@ -362,6 +362,74 @@ import { tokenize } from '@semantic-ui/utils';
 
 console.log(tokenize("Hello World!")); // "hello-world"
 console.log(tokenize("User's Name_123")); // "users-name-123"
+```
+
+### fill
+
+```javascript
+function fill(template, values, { defaults, transform, missing, open = '{', close = '}' } = {})
+```
+
+Fills bracketed placeholders in a string from a values object — the shape a copy table takes, where a whole sentence stays one editable string and only its variable parts are named. Keeping the sentence whole is what lets a later translation pass swap it, which joining fragments at runtime does not.
+
+Values resolve from `values` first and `defaults` second, so a copy table can carry default values and a call override the ones it knows. A key that resolves to nothing leaves its placeholder in place, so a typo in a copy table shows itself in the UI rather than shipping a blank sentence. Pass `missing` to choose otherwise.
+
+Keys read the [path grammar](/docs/api/utils/paths), so `{user.name}` reaches into a nested object and an array of values reads positionally (`{0}`). A key held flat wins over traversal, so `{ 'user.name': 'jack' }` also resolves `{user.name}`.
+
+Substitution runs once and the result is never rescanned, so a filled value carrying `{other}` cannot reach a second key.
+
+A value a string cannot faithfully hold — a plain object, a `Date`, `NaN`, `Infinity`, a function — reads as missing rather than as `[object Object]`. `transform` is where an app says how those print, usually through `formatDate` or its own display helper.
+
+This is a fill, not a template engine: `{key}` is a name, never an expression, and there is no escape for a literal brace. Under the default policy none is needed, since a `{...}` that names nothing is left exactly as written.
+
+#### Parameters
+
+| Name     | Type          | Description |
+|----------|---------------|-------------|
+| template | string        | The string carrying placeholders. A non-string reads as empty |
+| values   | object, array | The values to fill from, keyed by placeholder name. An array reads positionally |
+| options  | object        | Optional configuration |
+
+##### Options
+
+| Name      | Type              | Default | Description |
+|-----------|-------------------|---------|-------------|
+| defaults  | object, array     | —       | Values used when a key is absent or nullish in `values` |
+| transform | function          | —       | `(value, key)` applied to each resolved value before it is stringified |
+| missing   | string, function  | —       | What stands in for a placeholder whose key resolves to nothing. A string substitutes verbatim, a function receives `(key, placeholder)`. By default the placeholder is left in place |
+| open      | string            | `{`     | Opening delimiter |
+| close     | string            | `}`     | Closing delimiter |
+
+#### Returns
+
+The filled string.
+
+#### Example
+
+```javascript
+import { fill, formatDate } from '@semantic-ui/utils';
+
+console.log(fill('Name {chosenName} is already taken', { chosenName: 'jack' })); // 'Name jack is already taken'
+
+// an unresolved key keeps its placeholder, so the typo shows itself
+console.log(fill('Welcome back, {frist}', { first: 'jack' })); // 'Welcome back, {frist}'
+console.log(fill('Welcome back, {first}', {}, { missing: 'friend' })); // 'Welcome back, friend'
+
+// values first, defaults second
+const copy = { appName: 'Semantic', plan: 'free' };
+console.log(fill('{appName} on the {plan} plan', { plan: 'pro' }, { defaults: copy })); // 'Semantic on the pro plan'
+
+// keys read the path grammar
+console.log(fill('{user.name} signed in', { user: { name: 'jack' } })); // 'jack signed in'
+
+// transform says how a value prints
+console.log(fill('Renews {date}', { date: new Date('2026-01-02') })); // 'Renews {date}'
+console.log(fill('Renews {date}', { date: new Date('2026-01-02') }, {
+  transform: (value) => formatDate(value, 'LL'),
+})); // 'Renews January 2, 2026'
+
+// another placeholder grammar
+console.log(fill('Hello ${name}', { name: 'jack' }, { open: '${', close: '}' })); // 'Hello jack'
 ```
 
 ### humanize

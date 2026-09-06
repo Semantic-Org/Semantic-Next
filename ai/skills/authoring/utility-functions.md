@@ -531,6 +531,37 @@ reverseString('hello');                             // 'olleh'
 reverseString('Hello 👋');                          // '👋 olleH'
 ```
 
+### Placeholder Filling
+```javascript
+import { fill } from '@semantic-ui/utils';
+
+// a copy table holds whole sentences, named placeholders fill them
+fill('Name {chosenName} is already taken', { chosenName: 'jack' }); // 'Name jack is already taken'
+
+// an unresolved key keeps its placeholder, so a copy typo shows itself instead of shipping a blank
+fill('Welcome back, {frist}', { first: 'jack' });         // 'Welcome back, {frist}'
+fill('Welcome back, {first}', {}, { missing: 'friend' }); // 'Welcome back, friend'
+fill('Welcome back, {first}', {}, { missing: '' });       // 'Welcome back, '
+
+// values first, defaults second (the copy table's own default values)
+fill('{appName} v{version}', { version: 2 }, { defaults: { appName: 'Semantic' } }); // 'Semantic v2'
+
+// keys read the path grammar, an array of values reads positionally
+fill('{user.name} invited {user.guests[0]}', { user: { name: 'jack', guests: ['mira'] } }); // 'jack invited mira'
+fill('{0} of {1}', ['one', 'two']);                       // 'one of two'
+
+// a value a string can't faithfully hold (a plain object, a Date, NaN) reads as missing,
+// never as '[object Object]'. transform is where the app says how those print
+fill('Renews {date}', { date: renewsAt });                                          // 'Renews {date}'
+fill('Renews {date}', { date: renewsAt }, { transform: (v) => formatDate(v, 'LL') }); // 'Renews January 2, 2026'
+
+// another placeholder grammar, for copy that already speaks one
+fill('Hello ${name}', { name: 'jack' }, { open: '${', close: '}' }); // 'Hello jack'
+
+// one pass, never rescanned, so a filled value can't reach a second key
+fill('{note}', { note: '{secret}', secret: 'hunter2' });  // '{secret}'
+```
+
 ### Text Truncation
 ```javascript
 import { truncate } from '@semantic-ui/utils';

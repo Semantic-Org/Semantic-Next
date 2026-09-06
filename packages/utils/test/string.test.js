@@ -4,6 +4,7 @@ import {
   capitalizeWords,
   editDistance,
   escapeHTML,
+  fill,
   getArticle,
   humanize,
   joinWords,
@@ -958,5 +959,144 @@ describe('suggest — count', () => {
   it('a non-numeric count keeps the singular shape', () => {
     expect(suggest('stirng', ['string'], { count: undefined })).toBe('string');
     expect(suggest('stirng', ['string'], { count: NaN })).toBe('string');
+  });
+});
+
+describe('fill', () => {
+  it('fills a placeholder from the values object', () => {
+    expect(fill('Name {chosenName} is already taken', { chosenName: 'jack' })).toBe('Name jack is already taken');
+  });
+
+  it('fills every occurrence of a key', () => {
+    expect(fill('{a} and {b} and {a}', { a: 'x', b: 'y' })).toBe('x and y and x');
+  });
+
+  it('returns text without placeholders untouched', () => {
+    expect(fill('Sign in', { name: 'jack' })).toBe('Sign in');
+    expect(fill('', {})).toBe('');
+  });
+
+  it('leaves an unresolved placeholder in place, so a typo in a copy table shows itself', () => {
+    expect(fill('Hello {chosenNmae}', { chosenName: 'jack' })).toBe('Hello {chosenNmae}');
+    expect(fill('Hello {name}')).toBe('Hello {name}');
+    expect(fill('Hello {name}', null)).toBe('Hello {name}');
+  });
+
+  it('missing replaces an unresolved placeholder with a string', () => {
+    expect(fill('Hello {name}', {}, { missing: '' })).toBe('Hello ');
+    expect(fill('Hello {name}', {}, { missing: 'friend' })).toBe('Hello friend');
+  });
+
+  it('missing as a function receives the key and the placeholder it stands in for', () => {
+    const seen = [];
+    const filled = fill('{a} {b}', { a: 1 }, {
+      missing: (key, placeholder) => {
+        seen.push([key, placeholder]);
+        return key.toUpperCase();
+      },
+    });
+    expect(filled).toBe('1 B');
+    expect(seen).toEqual([['b', '{b}']]);
+  });
+
+  it('defaults resolve a key the values object does not carry', () => {
+    const defaults = { appName: 'Semantic', plan: 'free' };
+    expect(fill('{appName} on the {plan} plan', { plan: 'pro' }, { defaults })).toBe('Semantic on the pro plan');
+    expect(fill('{appName}', {}, { defaults })).toBe('Semantic');
+  });
+
+  it('a nullish value falls through to defaults, an empty string does not', () => {
+    const defaults = { name: 'friend' };
+    expect(fill('{name}', { name: null }, { defaults })).toBe('friend');
+    expect(fill('{name}', { name: undefined }, { defaults })).toBe('friend');
+    expect(fill('{name}', { name: '' }, { defaults })).toBe('');
+  });
+
+  it('reads nested keys through the path grammar', () => {
+    const values = { user: { name: 'jack', tags: ['owner', 'admin'] } };
+    expect(fill('{user.name} is an {user.tags[1]}', values)).toBe('jack is an admin');
+    expect(fill('{user.missing}', values)).toBe('{user.missing}');
+  });
+
+  it('a key held flat wins over traversal', () => {
+    expect(fill('{user.name}', { 'user.name': 'flat', user: { name: 'nested' } })).toBe('flat');
+  });
+
+  it('reads an array of values positionally', () => {
+    expect(fill('{0} of {1}', ['one', 'two'])).toBe('one of two');
+  });
+
+  it('never reads an inherited member as a value', () => {
+    expect(fill('{constructor}', {})).toBe('{constructor}');
+    expect(fill('{toString}', {})).toBe('{toString}');
+    expect(fill('{__proto__}', {})).toBe('{__proto__}');
+  });
+
+  it('stringifies numbers, booleans and bigints, zero and false included', () => {
+    expect(fill('{n} {zero} {flag} {off} {big}', { n: 3.5, zero: 0, flag: true, off: false, big: 10n }))
+      .toBe('3.5 0 true false 10');
+  });
+
+  it('a value with no faithful string form reads as missing', () => {
+    expect(fill('{v}', { v: {} })).toBe('{v}');
+    expect(fill('{v}', { v: [1, 2] })).toBe('{v}');
+    expect(fill('{v}', { v: new Date() })).toBe('{v}');
+    expect(fill('{v}', { v: NaN })).toBe('{v}');
+    expect(fill('{v}', { v: Infinity })).toBe('{v}');
+    expect(fill('{v}', { v: () => 'x' })).toBe('{v}');
+  });
+
+  it('transform is where an app says how a value prints', () => {
+    const values = { due: new Date(Date.UTC(2026, 0, 2)), count: 3 };
+    const transform = (value, key) => (key === 'due' ? value.toISOString().slice(0, 10) : value);
+    expect(fill('{count} left, due {due}', values, { transform })).toBe('3 left, due 2026-01-02');
+  });
+
+  it('transform sees resolved values only, never a missing key', () => {
+    const keys = [];
+    fill('{a} {b}', { a: 1 }, {
+      transform: (value, key) => {
+        keys.push(key);
+        return value;
+      },
+    });
+    expect(keys).toEqual(['a']);
+  });
+
+  it('a filled value is never rescanned, so it cannot reach a second key', () => {
+    expect(fill('{note}', { note: '{secret}', secret: 'hunter2' })).toBe('{secret}');
+  });
+
+  it('open and close read another placeholder grammar', () => {
+    expect(fill('Hello ${name}', { name: 'jack' }, { open: '${', close: '}' })).toBe('Hello jack');
+    expect(fill('Hello {{name}}', { name: 'jack' }, { open: '{{', close: '}}' })).toBe('Hello jack');
+    expect(fill('Hello %{name}', { name: 'jack' }, { open: '%{', close: '}' })).toBe('Hello jack');
+    expect(fill('Hello <%= name %>', { ' name ': 'jack' }, { open: '<%=', close: '%>' })).toBe('Hello jack');
+  });
+
+  it('a cached pattern refills correctly on a second call', () => {
+    expect(fill('${a}-${b}', { a: 1, b: 2 }, { open: '${', close: '}' })).toBe('1-2');
+    expect(fill('${a}-${b}', { a: 3, b: 4 }, { open: '${', close: '}' })).toBe('3-4');
+  });
+
+  it('keeps braces that name nothing, so literal braces survive the default policy', () => {
+    expect(fill('use {} for an empty object', {})).toBe('use {} for an empty object');
+    expect(fill('{"a": 1}', {})).toBe('{"a": 1}');
+    expect(fill('an unclosed { brace and {name}', { name: 'jack' })).toBe('an unclosed { brace and jack');
+  });
+
+  it('returns an empty string for a template that is not a string', () => {
+    expect(fill(null, { a: 1 })).toBe('');
+    expect(fill(undefined)).toBe('');
+    expect(fill(42, { a: 1 })).toBe('');
+  });
+
+  it('an empty delimiter fills nothing rather than throwing', () => {
+    expect(fill('{a}', { a: 1 }, { open: '' })).toBe('{a}');
+    expect(fill('{a}', { a: 1 }, { close: '' })).toBe('{a}');
+  });
+
+  it('a non-function transform is ignored rather than throwing', () => {
+    expect(fill('{a}', { a: 1 }, { transform: 'nope' })).toBe('1');
   });
 });
