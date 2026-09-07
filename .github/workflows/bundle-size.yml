@@ -67,8 +67,11 @@ jobs:
       # measure. node_modules is reused — a faithful-enough baseline, since
       # dep bumps rarely move first-party bundle bytes. Files the PR adds are
       # dropped so the lines-of-code delta counts new files honestly, and the
-      # empty directories they leave behind are pruned: a build script that
-      # walks packages/ trips on a package folder with no package.json.
+      # directories that leaves empty are removed, those and no others. The new
+      # package's folder itself survives on its build output, and that is fine:
+      # what tripped was the playground's asset build, which takes any folder
+      # holding a types/ directory for a package and reads its package.json, and
+      # the emptied types/ folder is gone.
       #
       # Root package.json and the lockfile are swapped too: build:packages
       # lists each package's :build explicitly, so a PR that adds (or removes)
@@ -82,7 +85,7 @@ jobs:
           git checkout FETCH_HEAD -- packages src internal-packages package.json package-lock.json 2>/dev/null || true
           if [ -n "$ADDED" ]; then
             echo "$ADDED" | xargs -r rm -f
-            find packages src internal-packages -type d -empty -delete
+            echo "$ADDED" | xargs -r -n1 dirname | sort -ur | xargs -r rmdir -p --ignore-fail-on-non-empty 2>/dev/null || true
           fi
           npm run build
           node tools/ci/size/collect.js --root . --label baseline --out results/baseline.json
