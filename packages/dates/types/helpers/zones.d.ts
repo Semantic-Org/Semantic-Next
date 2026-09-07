@@ -7,6 +7,8 @@ export interface Settings {
   locale?: Locale | null;
   /** The first day of the week for `startOf('week')` (default: monday) */
   weekStart?: Weekday;
+  /** Read a loose numeric date day first, `07.09.2026` as the 7th of September (default: false, the engine's month-first order) */
+  dayFirst?: boolean;
   /** Names a zone answers to, on top of cities and abbreviations: `{ hq: 'Europe/Berlin' }` */
   zoneAliases?: Record<string, Zone>;
 }
@@ -16,5 +18,6 @@ export function configure(settings?: Settings): {
   zone: string | undefined;
   locale: string | undefined;
   weekStart: number;
+  dayFirst: boolean;
   zoneAliases: Record<string, string>;
 };

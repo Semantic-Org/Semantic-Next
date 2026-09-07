@@ -73,6 +73,8 @@ export interface ReadOptions {
   zone?: Zone;
   /** Read whatever this engine's `Date` reads, and return null instead of throwing for what even `Date` cannot read */
   loose?: boolean;
+  /** Read a numeric date like `07.09.2026` day first, as most of the world writes it (default: the configured `dayFirst`, else month first, the engine's order) */
+  dayFirst?: boolean;
 }
 
 /** Duration fields, plural, as Temporal spells them */

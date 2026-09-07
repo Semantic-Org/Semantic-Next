@@ -4,7 +4,7 @@ import { guard, refuse } from './errors.js';
 import { weekdayNumber } from './units.js';
 
 // process-wide defaults, zoneAliases being the names a zone answers to
-const settings = { zone: undefined, locale: undefined, weekStart: 1, zoneAliases: {} };
+const settings = { zone: undefined, locale: undefined, weekStart: 1, dayFirst: false, zoneAliases: {} };
 const resolved = new Map([['UTC', 'UTC']]);
 
 // utils' own abbreviation table is the base, editable at boot in either package. these override
@@ -125,7 +125,7 @@ export const zoneId = (id) => {
   return found;
 };
 
-export const configure = ({ zone, locale, weekStart, zoneAliases } = {}) => {
+export const configure = ({ zone, locale, weekStart, dayFirst, zoneAliases } = {}) => {
   if (zoneAliases !== undefined) {
     if (!isPlainObject(zoneAliases)) {
       refuse('unknownZone', String(zoneAliases), {
@@ -146,6 +146,9 @@ export const configure = ({ zone, locale, weekStart, zoneAliases } = {}) => {
   }
   if (weekStart !== undefined) {
     settings.weekStart = weekdayNumber(weekStart);
+  }
+  if (dayFirst !== undefined) {
+    settings.dayFirst = !!dayFirst;
   }
   return { ...settings, zoneAliases: { ...settings.zoneAliases } };
 };
@@ -169,4 +172,5 @@ const checkedLocale = (tag) => {
 };
 
 export const locale = (override) => (override === undefined ? settings.locale : checkedLocale(override));
-export const weekStart = () => settings.weekStart;
+export const dayFirst = (override) => (override === undefined ? settings.dayFirst : !!override);
+export const weekStart = (override) => (override === undefined ? settings.weekStart : weekdayNumber(override));

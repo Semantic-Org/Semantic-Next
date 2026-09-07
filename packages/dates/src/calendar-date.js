@@ -1,7 +1,7 @@
 import { isDate, isDevelopment, isNumber, isPlainObject, isString } from '@semantic-ui/utils';
 
 import { DateTime } from './date-time.js';
-import { anchored } from './duration.js';
+import { anchored, duration } from './duration.js';
 import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
 import { fieldsFrom, temporalDurationOf } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions, relativeDays } from './helpers/format.js';
@@ -115,7 +115,7 @@ export class CalendarDate {
         if (!settings.loose || (error.code !== 'notADate' && error.code !== 'unreadableDate')) {
           throw error;
         }
-        const zoned = looseZoned(input, settings.zone);
+        const zoned = looseZoned(input, settings.zone, settings.dayFirst);
         if (!zoned) {
           throw error;
         }
@@ -227,7 +227,8 @@ export class CalendarDate {
     );
   }
 
-  startOf(name) {
+  // a week starts on the configured first day, or on the one given: a picker's first day is a prop
+  startOf(name, firstDay) {
     switch (unit(name)) {
       case 'year':
         return new CalendarDate(this.#plain.with({ month: 1, day: 1 }));
@@ -236,7 +237,7 @@ export class CalendarDate {
       case 'month':
         return new CalendarDate(this.#plain.with({ day: 1 }));
       case 'week':
-        return new CalendarDate(this.#plain.subtract({ days: (this.weekday - weekStart() + 7) % 7 }));
+        return new CalendarDate(this.#plain.subtract({ days: (this.weekday - weekStart(firstDay) + 7) % 7 }));
       case 'day':
         return this;
       default:
@@ -246,8 +247,8 @@ export class CalendarDate {
     }
   }
 
-  endOf(name) {
-    return this.startOf(name).plus(stepOf(unit(name))).minus({ days: 1 });
+  endOf(name, firstDay) {
+    return this.startOf(name, firstDay).plus(stepOf(unit(name))).minus({ days: 1 });
   }
 
   next(weekday) {
@@ -280,11 +281,11 @@ export class CalendarDate {
     return this.#compare(other) > 0;
   }
 
-  isSame(other, name) {
+  isSame(other, name, firstDay) {
     if (name === undefined) {
       return this.equals(other);
     }
-    return this.startOf(name).equals(new CalendarDate(other).startOf(name));
+    return this.startOf(name, firstDay).equals(new CalendarDate(other).startOf(name, firstDay));
   }
 
   isPast(zone) {
@@ -326,12 +327,12 @@ export class CalendarDate {
     return new DateTime(this.#plain.toZonedDateTime({ timeZone: zoneId(zone), plainTime }));
   }
 
-  to(end) {
-    return new DateRange(this, end);
+  to(end, name) {
+    return new DateRange(this, name === undefined ? end : duration(end, name));
   }
 
-  range(name) {
-    return new DateRange(this.startOf(name), this.endOf(name));
+  range(name, firstDay) {
+    return new DateRange(this.startOf(name, firstDay), this.endOf(name, firstDay));
   }
 
   // a day is a range of time, so it walks and splits like one: today().split('hour') is the day's hours

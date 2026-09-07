@@ -44,9 +44,10 @@ export class CalendarDate {
   minus(amount: DurationInput, unit?: Unit): CalendarDate;
   set(fields: Pick<DateTimeFields, 'year' | 'month' | 'day'>): CalendarDate;
   set(unit: Unit, value: number): CalendarDate;
-  startOf(unit: DateUnit): CalendarDate;
+  /** The first day of the unit around this value. A week starts on the configured first day, or on `firstDay` */
+  startOf(unit: DateUnit, firstDay?: Weekday): CalendarDate;
   /** The last day of the unit, so endOf('month') is the 28th, 30th or 31st */
-  endOf(unit: DateUnit): CalendarDate;
+  endOf(unit: DateUnit, firstDay?: Weekday): CalendarDate;
   /** The next such weekday strictly after this one */
   next(weekday: Weekday): CalendarDate;
   previous(weekday: Weekday): CalendarDate;
@@ -54,7 +55,7 @@ export class CalendarDate {
   equals(other: CalendarDateInput): boolean;
   isBefore(other: CalendarDateInput): boolean;
   isAfter(other: CalendarDateInput): boolean;
-  isSame(other: CalendarDateInput, unit?: DateUnit): boolean;
+  isSame(other: CalendarDateInput, unit?: DateUnit, firstDay?: Weekday): boolean;
   /** Today depends on where you stand, so these take the zone to judge from */
   isPast(zone?: Zone): boolean;
   isFuture(zone?: Zone): boolean;
@@ -71,8 +72,9 @@ export class CalendarDate {
   at(time?: TimeInput, zone?: Zone): DateTime;
   /** A range from this date through another, both included */
   to(end: CalendarDateInput | DurationInput): DateRange;
+  to(count: number, unit: Unit): DateRange;
   /** Every day of the unit containing this date, first through last */
-  range(unit: DateUnit): DateRange;
+  range(unit: DateUnit, firstDay?: Weekday): DateRange;
   /** The day's points by a step, as datetimes in the zone: `today().points('hour')` */
   points(step: Unit | DurationInput, zone?: Zone): DateTime[];
   /** The day cut into ranges by a step, as datetime ranges in the zone: `today().split('hour')` */

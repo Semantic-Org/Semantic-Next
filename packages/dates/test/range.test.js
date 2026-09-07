@@ -115,6 +115,12 @@ describe('dateRange', () => {
     );
   });
 
+  it("reads a text field's own separators", () => {
+    expect(timeRange('9am - 5pm').toString()).toBe('09:00:00/17:00:00');
+    expect(dateRange('Sep 1 2026 to Sep 7 2026', { loose: true }).toString()).toBe('2026-09-01/2026-09-07');
+    expect(dateRange('2026-09-01 – 2026-09-07').toString()).toBe('2026-09-01/2026-09-07');
+  });
+
   it('splits an interval string outside its bracketed zones', () => {
     const bracketed = '2026-09-06T14:30[America/New_York]/2026-09-06T16:30[America/New_York]';
     expect(datetimeRange(bracketed).duration.total('hours')).toBe(2);

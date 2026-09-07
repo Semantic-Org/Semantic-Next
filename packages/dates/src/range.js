@@ -41,10 +41,16 @@ const isOptions = (value) =>
   isPlainObject(value) && Object.keys(value).length > 0
   && Object.keys(value).every((key) => key === 'loose' || key === 'zone');
 
-// an interval string splits on its slash, and never on the one inside a bracketed zone
+// an interval string splits on its slash, never on the one inside a bracketed zone, and a text field's
+// own separators read too: '9am - 5pm', 'Sep 1 to Sep 7'
 const splitInterval = (text) => {
-  const at = text.replace(/\[[^\]]*\]/g, (zone) => ' '.repeat(zone.length)).indexOf('/');
-  return at === -1 ? [text] : [text.slice(0, at), text.slice(at + 1)];
+  const blanked = text.replace(/\[[^\]]*\]/g, (zone) => ' '.repeat(zone.length));
+  const at = blanked.indexOf('/');
+  if (at !== -1) {
+    return [text.slice(0, at), text.slice(at + 1)];
+  }
+  const dash = blanked.match(/\s(?:-|–|to)\s/);
+  return dash ? [text.slice(0, dash.index), text.slice(dash.index + dash[0].length)] : [text];
 };
 
 // the shared body. the three exported classes seal it to a kind, so a value names what it holds

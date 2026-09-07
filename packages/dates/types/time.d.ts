@@ -55,6 +55,7 @@ export class Time {
   on(day: CalendarDateInput, zone?: Zone): DateTime;
   /** A range from this time until another, the end excluded */
   to(end: TimeInput | DurationInput): TimeRange;
+  to(count: number, unit: Unit): TimeRange;
 
   format(spec?: FormatSpec, locale?: Locale): string;
   /** ISO 8601, `'17:30:00'` */

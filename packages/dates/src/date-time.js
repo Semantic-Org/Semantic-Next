@@ -1,7 +1,7 @@
 import { isDate, isDevelopment, isNumber, isPlainObject, isString } from '@semantic-ui/utils';
 
 import { CalendarDate, today } from './calendar-date.js';
-import { anchored } from './duration.js';
+import { anchored, duration } from './duration.js';
 import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
 import { temporalDurationFrom } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions, relativeSeconds } from './helpers/format.js';
@@ -66,7 +66,7 @@ export class DateTime {
     Object.freeze(this);
   }
 
-  static #read(input, { zone, loose } = {}) {
+  static #read(input, { zone, loose, dayFirst } = {}) {
     // the zone resolves first so a bad one throws even when the input turns out unreadable
     const timeZone = zoneId(zone);
     if (input === undefined || input === null) {
@@ -92,7 +92,7 @@ export class DateTime {
       return Temporal.Instant.fromEpochMilliseconds(epoch).toZonedDateTimeISO(timeZone);
     }
     if (isString(input)) {
-      return DateTime.#parse(input, zone, loose);
+      return DateTime.#parse(input, zone, loose, dayFirst);
     }
     if (isZonedDateTime(input)) {
       return zone === undefined ? input : input.withTimeZone(timeZone);
@@ -120,7 +120,7 @@ export class DateTime {
     });
   }
 
-  static #parse(text, zone, loose) {
+  static #parse(text, zone, loose, dayFirst) {
     const trimmed = text.trim();
     try {
       return guard(
@@ -147,7 +147,7 @@ export class DateTime {
       if (!loose || error.code !== 'unreadableDateTime') {
         throw error;
       }
-      const zoned = looseZoned(trimmed, zone);
+      const zoned = looseZoned(trimmed, zone, dayFirst);
       if (!zoned) {
         throw error;
       }
@@ -234,7 +234,8 @@ export class DateTime {
     return new DateTime(this.#zoned.withTimeZone(zoneId(zone)));
   }
 
-  startOf(name) {
+  // a week starts on the configured first day, or on the one given: a picker's first day is a prop
+  startOf(name, firstDay) {
     const target = unit(name);
     switch (target) {
       case 'year':
@@ -244,7 +245,7 @@ export class DateTime {
       case 'month':
         return new DateTime(this.#zoned.with({ day: 1 }).startOfDay());
       case 'week':
-        return new DateTime(this.#zoned.subtract({ days: (this.weekday - weekStart() + 7) % 7 }).startOfDay());
+        return new DateTime(this.#zoned.subtract({ days: (this.weekday - weekStart(firstDay) + 7) % 7 }).startOfDay());
       case 'day':
         return new DateTime(this.#zoned.startOfDay());
       default:
@@ -253,8 +254,8 @@ export class DateTime {
   }
 
   // the last millisecond, the precision of Date and of now(). for a query bound prefer range(unit)
-  endOf(name) {
-    return this.startOf(name).plus(stepOf(unit(name))).minus({ milliseconds: 1 });
+  endOf(name, firstDay) {
+    return this.startOf(name, firstDay).plus(stepOf(unit(name))).minus({ milliseconds: 1 });
   }
 
   round(increment, name) {
@@ -312,11 +313,11 @@ export class DateTime {
     return this.#compare(other) > 0;
   }
 
-  isSame(other, name) {
+  isSame(other, name, firstDay) {
     if (name === undefined) {
       return this.equals(other);
     }
-    return this.startOf(name).equals(new DateTime(other, this.zone).startOf(name));
+    return this.startOf(name, firstDay).equals(new DateTime(other, this.zone).startOf(name, firstDay));
   }
 
   isPast() {
@@ -355,12 +356,12 @@ export class DateTime {
     return new DateTime(other, this.zone).until(this, name);
   }
 
-  to(end) {
-    return new DateTimeRange(this, end);
+  to(end, name) {
+    return new DateTimeRange(this, name === undefined ? end : duration(end, name));
   }
 
-  range(name) {
-    const start = this.startOf(name);
+  range(name, firstDay) {
+    const start = this.startOf(name, firstDay);
     return new DateTimeRange(start, start.plus(stepOf(unit(name))));
   }
 
@@ -442,5 +443,9 @@ export const datetime = (input, options) => {
 // millisecond precision, the precision of Date, so a value survives a JSON round trip unchanged
 export const now = (zone) =>
   new DateTime(Temporal.Instant.fromEpochMilliseconds(Date.now()).toZonedDateTimeISO(zoneId(zone)));
+
+// the two bounds a query for today writes most
+export const startOfToday = (zone) => now(zone).startOf('day');
+export const endOfToday = (zone) => now(zone).endOf('day');
 
 export const isDateTime = (value) => value instanceof DateTime;

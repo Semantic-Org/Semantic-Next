@@ -3,7 +3,7 @@ import { isDevelopment, isPlainObject, isString } from '@semantic-ui/utils';
 import { guard, refuse } from './errors.js';
 import { dateTimeFormat, relativeTimeFormat } from './intl.js';
 import { ordinal, pad } from './units.js';
-import { locale as pickLocale } from './zones.js';
+import { locale as pickLocale, weekStart } from './zones.js';
 
 // longest spelling first so MMMM never reads as four Ms
 const tokenPattern =
@@ -105,6 +105,19 @@ const needs = {
   x: 'epoch',
 };
 
+// the tables the tokens read, for a picker's headers and a month dropdown. weekdays start where the
+// week does, so the header row matches the grid
+export const weekdayNames = (locale, style = 'short', firstDay) => {
+  const table = names(pickLocale(locale))[style === 'long' ? 'dddd' : 'ddd'];
+  const first = weekStart(firstDay) - 1;
+  return [...table.slice(first), ...table.slice(0, first)];
+};
+
+export const monthNames = (
+  locale,
+  style = 'long',
+) => [...names(pickLocale(locale))[style === 'short' ? 'MMM' : 'MMMM']];
+
 export const formatTokens = (parts, pattern, locale) => {
   const resolved = pickLocale(locale);
   return pattern.replace(tokenPattern, (token, literal) => {
@@ -128,12 +141,14 @@ const presets = {
     full: { dateStyle: 'full', timeStyle: 'short' },
     date: { dateStyle: 'medium' },
     time: { timeStyle: 'short' },
+    month: { month: 'long', year: 'numeric' },
   },
   date: {
     short: { dateStyle: 'short' },
     medium: { dateStyle: 'medium' },
     long: { dateStyle: 'long' },
     full: { dateStyle: 'full' },
+    month: { month: 'long', year: 'numeric' },
   },
   time: {
     default: { timeStyle: 'short' },

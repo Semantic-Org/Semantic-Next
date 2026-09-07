@@ -5,7 +5,7 @@ export { DateRange, DateTimeRange, TimeRange } from './range.js';
 export { Time } from './time.js';
 
 export { date, today, tomorrow, yesterday } from './calendar-date.js';
-export { datetime, now } from './date-time.js';
+export { datetime, endOfToday, now, startOfToday } from './date-time.js';
 export { days, duration, hours, milliseconds, minutes, months, seconds, weeks, years } from './duration.js';
 export { dateRange, datetimeRange, timeRange } from './range.js';
 export { time } from './time.js';
@@ -14,6 +14,7 @@ export { isCalendarDate } from './calendar-date.js';
 export { isDateTime } from './date-time.js';
 export { isDuration } from './duration.js';
 export { compare, earliest, kindOf, latest } from './helpers/compare.js';
+export { monthNames, weekdayNames } from './helpers/format.js';
 export {
   IS_CALENDAR_DATE,
   IS_DATE_RANGE,
@@ -24,6 +25,7 @@ export {
   IS_TIME,
   IS_TIME_RANGE,
 } from './helpers/identity.js';
+export { weekdayNumber as weekday } from './helpers/units.js';
 export { configure } from './helpers/zones.js';
 export { isDateRange, isDateTimeRange, isTimeRange } from './range.js';
 export { isTime } from './time.js';

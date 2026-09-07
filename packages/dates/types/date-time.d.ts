@@ -66,9 +66,10 @@ export class DateTime {
   at(time: TimeInput): DateTime;
   /** The same instant read in another zone */
   in(zone: Zone): DateTime;
-  startOf(unit: Unit): DateTime;
+  /** The first instant of the unit around this value. A week starts on the configured first day, or on `firstDay` */
+  startOf(unit: Unit, firstDay?: Weekday): DateTime;
   /** The last millisecond of the unit. For a query bound prefer `range(unit)` */
-  endOf(unit: Unit): DateTime;
+  endOf(unit: Unit, firstDay?: Weekday): DateTime;
   round(unit: Unit): DateTime;
   round(increment: number, unit: Unit): DateTime;
   floor(unit: Unit): DateTime;
@@ -84,7 +85,7 @@ export class DateTime {
   isBefore(other: DateTimeInput): boolean;
   isAfter(other: DateTimeInput): boolean;
   /** Same to the unit, judged in this datetime's zone */
-  isSame(other: DateTimeInput, unit?: Unit): boolean;
+  isSame(other: DateTimeInput, unit?: Unit, firstDay?: Weekday): boolean;
   isPast(): boolean;
   isFuture(): boolean;
   isToday(): boolean;
@@ -98,8 +99,9 @@ export class DateTime {
   since(other: DateTimeInput, unit: Unit): number;
   /** A range from this moment until another, the end excluded */
   to(end: DateTimeInput | DurationInput): DateTimeRange;
+  to(count: number, unit: Unit): DateTimeRange;
   /** The unit containing this moment as a half-open range, its start until the next start */
-  range(unit: Unit): DateTimeRange;
+  range(unit: Unit, firstDay?: Weekday): DateTimeRange;
 
   /** A preset ('short', 'medium', 'long', 'full', 'date', 'time'), an Intl options bag, or day.js tokens. No argument reads as the locale's medium date and short time */
   format(spec?: FormatSpec, locale?: Locale): string;
@@ -126,5 +128,9 @@ export function datetime(input: unknown, options: ReadOptions & { loose: true; }
 
 /** The current moment at millisecond precision, in the zone or the configured default */
 export function now(zone?: Zone): DateTime;
+/** `now(zone).startOf('day')`, the bound a query for today writes */
+export function startOfToday(zone?: Zone): DateTime;
+/** `now(zone).endOf('day')`, the last millisecond of today */
+export function endOfToday(zone?: Zone): DateTime;
 
 export function isDateTime(value: unknown): value is DateTime;

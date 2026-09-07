@@ -71,7 +71,7 @@ out in the error. A missing value refuses too, `now()` and `today()` are the doo
 engine's `Date` reads, RFC 2822 and locale strings included, and gives null rather than a throw for
 what cannot be read: a point that is not one, a length that is not one, a range with such an end. What
 reads but is wrong, a backwards range or an unknown zone, still throws, since that is a mistake in the
-code rather than in the data's form. A `Date` object is read everywhere without asking.
+code rather than in the data's form. A `Date` object is read everywhere without asking. Numeric dates read in the engine's order, `07.09.2026` is July 9th, unless `configure({ dayFirst: true })` or `{ loose: true, dayFirst: true }` says the app's users write the day first, the one knob most of the world needs.
 
 **Nouns are properties, questions and verbs are calls.** `dt.year`, `dt.date`, `range.duration` and
 `slot.start` read as data, and the parts are real properties, so a value prints them in a console without
@@ -84,7 +84,7 @@ that takes another point also takes anything its factory reads, so `dt.isBefore(
 ## datetime
 
 ```js
-now(zone?)      datetime(input, zone?)      datetime(input, { zone, loose })
+now(zone?)  startOfToday(zone?)  endOfToday(zone?)     datetime(input, zone?)  datetime(input, { zone, loose })
 ```
 
 Input: an ISO string (`'2026-09-06T14:30Z'`, `'2026-09-06T14:30'` as a wall clock in the zone,
@@ -118,11 +118,11 @@ unless `{ loose: true, zone }` says which, or `datetime(text, zone).date` choose
 
 | read | `year` `month` `day` `weekday` `quarter` `dayOfYear` `weekOfYear` `daysInMonth` `daysInYear` |
 | --- | --- |
-| move | `plus` `minus` (years, months, weeks, days) `set` `startOf('week')` `endOf('month')` the last day, `next('monday')` `previous('friday')` |
+| move | `plus` `minus` (years, months, weeks, days) `set` `startOf('week')` `startOf('week', 'sunday')` `endOf('month')` the last day, `next('monday')` `previous('friday')` |
 | ask | `equals` `isBefore` `isAfter` `isSame(other, 'month')` `isPast(zone?)` `isFuture()` `isToday()` `isTomorrow()` `isYesterday()` `isWeekend()` `isWeekday()` `isLeapYear()` |
-| combine | `at(time, zone?)` a datetime, `to(end)` `range('month')` a range, `points('hour', zone?)` `split(minutes(30), zone?)` the day's slots as datetimes |
+| combine | `at(time, zone?)` a datetime, `to(end)` `to(42, 'days')` `range('month')` `range('week', 'sunday')` a range, `points('hour', zone?)` `split(minutes(30), zone?)` the day's slots as datetimes |
 | measure | `until(other)` `since(other)` `until(other, 'days')` |
-| show | `format()` `format('long')` `format('MMMM Do, YYYY')` `formatRelative()` yesterday, tomorrow, in 2 weeks |
+| show | `format()` `format('long')` `format('month')` September 2026, `format('MMMM Do, YYYY')` `formatRelative()` yesterday, tomorrow, in 2 weeks |
 | out | `toString()` `toJSON()` `'2026-09-06'`, `toJSDate(zone?)` `toTemporal()` |
 
 ## time
@@ -178,11 +178,13 @@ keeps the fields as written. A count written as text reads beside its unit: `day
 ```js
 dateRange(start, end)  datetimeRange(start, duration)  timeRange('09:00/17:00')  start.to(end)
 dateRange(start, end, zone)  dateRange(start, end, { loose: true, zone })   // null for an end that cannot be read
+dateRange('2026-09-01 - 2026-09-07')  timeRange('9am to 5pm')             // a text field's own separators read
 dt.range('day')  date.range('month')       // the unit around a point, as its kind's range
 ```
 
 A range is named by what it holds, the way Postgres names `daterange` and `tstzrange`, so a reader
-knows the kind at the callsite and a `range` from another library never collides. An end reads through
+knows the kind at the callsite and a `range` from another library never collides. `start.to(length)`
+covers the length from its start, so `date.to(days(42))` is 42 days, the last one included. An end reads through
 the range's own kind first, `'5pm'` is a time and `dateRange(datetime, datetime)` is the range of their
 dates, and as a length when written as one, `'2h'`, `{ hours: 2 }` or a duration. `{ zone }` reads a
 datetime range's start in that zone.
@@ -204,7 +206,9 @@ out in two pieces, `twoPieces`, since one range cannot hold both.
 ```js
 compare(a, b)                 // a sort comparator across any one kind, ranges by start then end
 earliest(...points)  latest(...points)
-configure({ zone: 'UTC', locale: 'en-GB', weekStart: 'sunday', zoneAliases: { hq: 'Europe/Berlin' } })   // each checked at boot
+weekdayNames(locale?, 'short' | 'long', firstDay?)  monthNames(locale?, 'short' | 'long')   // a picker's header row, a month dropdown
+weekday('sunday')             // 7, the ISO number of a weekday from any spelling
+configure({ zone: 'UTC', locale: 'en-GB', weekStart: 'sunday', dayFirst: true, zoneAliases: { hq: 'Europe/Berlin' } })   // each checked at boot
 isDateTime(x) isCalendarDate(x) isTime(x) isDuration(x) isDateRange(x) isDateTimeRange(x) isTimeRange(x) kindOf(x)
 IS_DATE_TIME IS_CALENDAR_DATE IS_TIME IS_DURATION IS_RANGE IS_DATE_RANGE IS_DATE_TIME_RANGE IS_TIME_RANGE
 ```

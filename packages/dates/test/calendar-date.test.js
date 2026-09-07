@@ -35,6 +35,17 @@ describe('date', () => {
     expect(() => date('2026-02-01').set({ day: 30 })).toThrow(/cannotSet/);
   });
 
+  it('reads a numeric date day first when the app says so, per call or at boot', () => {
+    expect(date('07.09.2026', { loose: true }).toString()).toBe('2026-07-09');
+    expect(date('07.09.2026', { loose: true, dayFirst: true }).toString()).toBe('2026-09-07');
+    expect(date('7/9/26', { loose: true, dayFirst: true }).toString()).toBe('2026-09-07');
+    configure({ dayFirst: true });
+    expect(date('07.09.2026', { loose: true }).toString()).toBe('2026-09-07');
+    expect(date('07.09.2026', { loose: true, dayFirst: false }).toString()).toBe('2026-07-09');
+    expect(datetime('07.09.2026 5:30 PM', { loose: true }).format('YYYY-MM-DD HH:mm')).toBe('2026-09-07 17:30');
+    configure({ dayFirst: false });
+  });
+
   it('keeps the day of a wall-clock string and refuses an instant until told the zone', () => {
     expect(date('2026-09-06T23:30').toString()).toBe('2026-09-06');
     expect(() => date('2026-09-06T23:30:00Z')).toThrow(/notADate/);
@@ -109,6 +120,18 @@ describe('date', () => {
     expect(visit.zone).toBe('America/Los_Angeles');
     expect(date('2026-11-03').at(undefined, 'UTC').toString()).toBe('2026-11-03T00:00:00.000Z');
     expect(date('2026-11-03').toJSDate('UTC').toISOString()).toBe('2026-11-03T00:00:00.000Z');
+  });
+
+  it('starts the week on the day a caller names, without touching the configured one', () => {
+    const day = date('2026-09-09');
+    expect(day.startOf('week').toString()).toBe('2026-09-07');
+    expect(day.startOf('week', 'sunday').toString()).toBe('2026-09-06');
+    expect(day.endOf('week', 'sunday').toString()).toBe('2026-09-12');
+    expect(day.range('week', 'sunday').toString()).toBe('2026-09-06/2026-09-12');
+    expect(day.isSame('2026-09-06', 'week', 'sunday')).toBe(true);
+    expect(day.isSame('2026-09-06', 'week')).toBe(false);
+    expect(day.to(42, 'days').points('day')).toHaveLength(42);
+    expect(day.format('month')).toBe('September 2026');
   });
 
   it('walks and splits as the day it is, in a zone', () => {

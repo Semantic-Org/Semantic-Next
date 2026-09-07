@@ -1,4 +1,15 @@
-import { configure, datetime, days, hours, minutes, now, today } from '@semantic-ui/dates';
+import {
+  configure,
+  date,
+  datetime,
+  days,
+  endOfToday,
+  hours,
+  minutes,
+  now,
+  startOfToday,
+  today,
+} from '@semantic-ui/dates';
 
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -40,6 +51,12 @@ describe('datetime', () => {
     expect(datetime('2026-09-06T14:30Z').toJSON()).toBe('2026-09-06T14:30:00.000Z');
     expect(datetime('2026-09-06T14:30:00.123456Z').toString()).toBe('2026-09-06T14:30:00.123456Z');
     expect(JSON.stringify({ at: datetime('2026-09-06T14:30Z') })).toBe('{"at":"2026-09-06T14:30:00.000Z"}');
+  });
+
+  it('bounds today in one word each', () => {
+    expect(startOfToday().equals(now().startOf('day'))).toBe(true);
+    expect(endOfToday('Asia/Tokyo').hour).toBe(23);
+    expect(startOfToday('Asia/Tokyo').zone).toBe('Asia/Tokyo');
   });
 
   it('now() is millisecond precision so it survives a JSON round trip', () => {
@@ -121,6 +138,14 @@ describe('datetime', () => {
     expect(moment.plus('30', 'days').toString()).toBe('2026-10-06T14:30:00.000Z');
     expect(moment.round('15', 'minutes').toString()).toBe('2026-09-06T14:30:00.000Z');
     expect(moment.startOf('M').equals(moment.startOf('month'))).toBe(true);
+  });
+
+  it('reads a partial ISO shape loosely as the day it names, and an impossible day as nothing', () => {
+    configure({ zone: 'America/Los_Angeles' });
+    expect(date('2026', { loose: true }).toString()).toBe('2026-01-01');
+    expect(date('2026-09', { loose: true }).toString()).toBe('2026-09-01');
+    expect(date('2026-02-30', { loose: true })).toBeNull();
+    expect(datetime('2026-09', { loose: true }).format('YYYY-MM-DD HH:mm')).toBe('2026-09-01 00:00');
   });
 
   it('is a string under + and a number under < and -, the way Date decides', () => {

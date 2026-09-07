@@ -1,5 +1,5 @@
 export { CalendarDate, date, isCalendarDate, today, tomorrow, yesterday } from './calendar-date.js';
-export { DateTime, datetime, isDateTime, now } from './date-time.js';
+export { DateTime, datetime, endOfToday, isDateTime, now, startOfToday } from './date-time.js';
 export {
   days,
   Duration,
@@ -14,6 +14,7 @@ export {
   years,
 } from './duration.js';
 export { compare, earliest, kindOf, latest, Point, Range } from './helpers/compare.js';
+export { monthNames, weekdayNames } from './helpers/format.js';
 export {
   IS_CALENDAR_DATE,
   IS_DATE_RANGE,
@@ -24,6 +25,7 @@ export {
   IS_TIME,
   IS_TIME_RANGE,
 } from './helpers/identity.js';
+export { weekday } from './helpers/units.js';
 export { configure, Settings } from './helpers/zones.js';
 export type {
   CalendarDateInput,

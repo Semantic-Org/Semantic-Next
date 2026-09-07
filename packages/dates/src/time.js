@@ -2,7 +2,7 @@ import { isDate, isDevelopment, isNumber, isPlainObject, isString } from '@seman
 
 import { CalendarDate } from './calendar-date.js';
 import { DateTime } from './date-time.js';
-import { anchored } from './duration.js';
+import { anchored, duration } from './duration.js';
 import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
 import { temporalDurationFrom } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions } from './helpers/format.js';
@@ -104,7 +104,7 @@ export class Time {
         if (!settings.loose || error.code !== 'unreadableTime') {
           throw error;
         }
-        const zoned = looseZoned(input, settings.zone);
+        const zoned = looseZoned(input, settings.zone, settings.dayFirst);
         if (!zoned) {
           throw error;
         }
@@ -285,8 +285,8 @@ export class Time {
     return new CalendarDate(day).at(this, zone);
   }
 
-  to(end) {
-    return new TimeRange(this, end);
+  to(end, name) {
+    return new TimeRange(this, name === undefined ? end : duration(end, name));
   }
 
   /*******************************
