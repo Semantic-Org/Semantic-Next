@@ -1014,11 +1014,16 @@ prettifyHash(123456);                               // '002N9C'
 prettifyHash(123, { minLength: 8, padChar: 'X' });  // 'XXXXXX3F'
 
 // Unique ids — the usage preset carries the consensus length/shape per channel.
-// db: sortable ULID (default) · page: 8-char letter-first CSS id · slug: URL ·
-// token: 27-char + checksum. Plus length, prefix, checksum, format:'uuid', group.
+// db: sortable ULID (default) · page: 8-char letter-first CSS id · link: 11-char URL ·
+// token: 27 chars + checksum, 130 bits · secret: 53 chars + checksum, 260 bits (clears
+// the 256-bit bar — the Copenhagen Book floors at 112, shipped auth libraries sit near
+// 190) · code: grouped uppercase, read-aloud. Plus length, bits, prefix, checksum,
+// format:'uuid', group.
 generateId();                                       // '01kv61zf26z6bg7t04nvkspj7k'
 generateId({ usage: 'page' });                      // 'dzadahv3'
 generateId({ usage: 'token', prefix: 'sk_' });      // 'sk_…' with checksum
+generateId({ usage: 'secret' });                    // 256-bit session secret
+generateId({ usage: 'secret', bits: 512 });         // bits is the width dial on any preset
 generateId.config = { usage: 'page' };              // app-wide default
 
 // Validate offline before a lookup, parse the parts back out

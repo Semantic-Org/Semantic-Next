@@ -70,7 +70,7 @@ hashCode.config = { usage: 'content' };
 ### generateId
 
 ```javascript
-function generateId({ usage = 'db', length, prefix, checksum, upper, format = 'crockford', group } = {})
+function generateId({ usage = 'db', length, bits, prefix, checksum, upper, format = 'crockford', group } = {})
 ```
 
 Generates a unique id. Defaults to a sortable 26-char [ULID](https://github.com/ulid/spec) (usage `db`). Each `usage` preset names what the id is for and carries the length, alphabet, and structure that fits that channel. The inverse is [isValidId](#isvalidid) and [parseId](#parseid).
@@ -83,7 +83,10 @@ Generates a unique id. Defaults to a sortable 26-char [ULID](https://github.com/
 | `page`  | 8 chars, always letter-first | DOM/CSS ids and ephemeral in-memory keys |
 | `link`  | 11 chars | URLs and shareable links |
 | `token` | 27 chars with a checksum, never timestamped | unguessable ids (reset links, capability URLs) |
+| `secret`| 256 bits (53 chars) with a checksum | session secrets and the tokens derived from them |
 | `code`  | 12 uppercase chars, grouped, checksummed | human-typed codes (license, redemption, backup) |
+
+A preset states its width in the unit its channel is chosen by. `link` is 11 characters because a link has to fit somewhere. `secret` is 256 bits because that is the number a security review asks for, and it clears the field: the [Copenhagen Book](https://thecopenhagenbook.com) floors server-side tokens at 112 bits, a 32-byte secret is the common recommendation, and shipped implementations sit near 190. Rounding up to a whole Crockford character emits 260 bits over 52 random characters, with the 53rd holding the check character. Both tiers are unguessable. Reach for `token` where the id also travels in a URL and gets read back by a person, `secret` where it is a credential.
 
 #### Options
 
@@ -91,6 +94,7 @@ Generates a unique id. Defaults to a sortable 26-char [ULID](https://github.com/
 |----------|------------------|--------------|-------------|
 | usage    | string           | `'db'`       | A usage preset: `db`, `page`, `link`, `token`, or `code` |
 | length   | number           | preset's     | Total characters after the prefix. Overrides the preset width |
+| bits     | number           | preset's     | Entropy budget, the same width dial as `length` in another unit. Rounds up to a whole character. The highest precedence layer naming either one decides |
 | prefix   | string           | `''`         | A verbatim prefix (typed-id convention, e.g. `usr_`). Not counted in length |
 | checksum | boolean          | preset's     | Append a trailing check character that catches typos. On by default for `token` and `code` |
 | upper    | boolean          | preset's     | Emit uppercase Crockford, overriding the preset case. Validation is case-insensitive either way |
@@ -98,7 +102,7 @@ Generates a unique id. Defaults to a sortable 26-char [ULID](https://github.com/
 | group    | number \| false  | preset's     | Hyphenate the output every n characters for display. `4` for `code`, off otherwise |
 | ignoreConfig | boolean | false | Resolve as if no global config were set: call options and presets only |
 
-Defaults can be set globally on the mutable `generateId.config` object (precedence: call options > config > preset). `ignoreConfig` opts a call out of that global layer — for library code whose id shapes must not bend to host-app defaults. `isValidId` and `parseId` take it too, so an id minted config-free validates config-free.
+Defaults can be set globally on the mutable `generateId.config` object (precedence: call options > config > preset). `ignoreConfig` opts a call out of that global layer — for library code whose id shapes must not bend to host-app defaults. `isValidId` and `parseId` take it too, so an id minted config-free validates config-free. Width follows the same precedence, so an app-wide `length` narrows `secret` like any other preset. Code that mints a credential and must hold its own width passes `ignoreConfig: true`.
 
 #### Returns
 
@@ -113,8 +117,10 @@ console.log(generateId());                                  // '01KV61ZF26Z6BG7T
 console.log(generateId({ usage: 'page' }));                 // 'dzadahv3'
 console.log(generateId({ usage: 'link' }));                 // '9zv38gp9ybm'
 console.log(generateId({ usage: 'token', prefix: 'sk_' })); // 'sk_…' with a checksum
+console.log(generateId({ usage: 'secret' }));               // 53-char, 256-bit session secret
 console.log(generateId({ usage: 'code' }));                 // 'ABCD-EFGH-JKLM' grouped, checksummed
 console.log(generateId({ length: 17 }));                    // 17-char id
+console.log(generateId({ usage: 'secret', bits: 512 }));    // wider, same shape
 console.log(generateId({ format: 'uuid' }));                // RFC UUIDv7
 
 // global default for a whole app

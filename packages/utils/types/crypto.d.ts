@@ -100,9 +100,10 @@ export function getRandomSeed(): number;
  * - `page` — DOM/CSS ids and ephemeral keys: 8 chars, always letter-first
  * - `link` — URLs and share links: 11 chars
  * - `token` — unguessable ids: 27 chars with a checksum, never timestamped
+ * - `secret` — session secrets and derived tokens: 256 bits (53 chars) with a checksum
  * - `code` — human-typed codes (license, redemption, backup): 12 chars, uppercase, checksummed, grouped
  */
-export type IdUsage = 'db' | 'page' | 'link' | 'token' | 'code';
+export type IdUsage = 'db' | 'page' | 'link' | 'token' | 'secret' | 'code';
 
 /**
  * Options for {@link generateId}, {@link isValidId}, and {@link parseId}.
@@ -118,6 +119,15 @@ interface GenerateIDOptions {
    * checksum, when on, spends the last character so width stays constant.
    */
   length?: number;
+  /**
+   * Entropy budget, the same width dial as `length` in the unit a guessing
+   * budget is argued in. Rounds up to a whole character (5 bits of Crockford,
+   * log2(22) for a letter-first lead), on top of the clock and check characters,
+   * which carry no entropy. The highest precedence layer naming either `bits` or
+   * `length` decides the width. Throws under `format: 'uuid'`, whose width is
+   * fixed.
+   */
+  bits?: number;
   /**
    * A verbatim prefix (typed-id convention, e.g. 'usr_'). Not counted in length.
    */
@@ -168,8 +178,8 @@ interface ParsedId {
 
 /**
  * Generate a unique id. Defaults to a sortable 26-char ULID (usage `db`). Pass
- * a usage preset, an explicit length, a typed prefix, a trailing checksum, or
- * format 'uuid' for an RFC UUIDv7. See {@link isValidId} / {@link parseId} for
+ * a usage preset, an explicit length or bits budget, a typed prefix, a trailing
+ * checksum, or format 'uuid' for an RFC UUIDv7. See {@link isValidId} / {@link parseId} for
  * the inverse. Override defaults globally via the mutable `generateId.config`.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#generateid generateId}
  * @see {@link https://next.semantic-ui.com/examples/utils-generateid Example}
@@ -182,6 +192,8 @@ interface ParsedId {
  * generateId()                                  // '01KV61ZF26Z6BG7T04NVKSPJ7K'
  * generateId({ usage: 'page' })                 // 'dzadahv3'
  * generateId({ usage: 'token', prefix: 'sk_' }) // 'sk_…' with checksum
+ * generateId({ usage: 'secret' })               // 53-char, 256-bit session secret
+ * generateId({ usage: 'secret', bits: 512 })    // wider, same shape
  * generateId({ usage: 'code' })                 // 'ABCD-EFGH-JKLM' grouped, checksummed
  * generateId({ format: 'uuid' })                // RFC UUIDv7
  * ```
