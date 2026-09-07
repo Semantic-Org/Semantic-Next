@@ -94,7 +94,10 @@ jobs:
           BASELINE_SHA=$(git rev-parse FETCH_HEAD)
           ADDED=$(git diff --name-only --diff-filter=A FETCH_HEAD HEAD -- packages package.json package-lock.json || true)
           git checkout FETCH_HEAD -- packages package.json package-lock.json 2>/dev/null || true
-          if [ -n "$ADDED" ]; then echo "$ADDED" | xargs -r rm -f; fi
+          if [ -n "$ADDED" ]; then
+            echo "$ADDED" | xargs -r rm -f
+            find packages -type d -empty -delete
+          fi
           # Keep the bench driver from the PR head on both sides: it's the
           # measurement instrument, not the measured code, and on a PR that
           # first adds it the base ref has no bench-memory.js at all. Only the
