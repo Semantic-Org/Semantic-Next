@@ -135,17 +135,30 @@ jobs:
       # a sidecar (baseline-sha.txt). The reporter pins each metric's
       # percent_delta_ci to that SHA — required for cross-iteration drift
       # detection (see tools/ci/bench/reporter/reporter.js:computeBaselineDrift).
+      #
+      # Only the source directories the baseline has are checked out: a package
+      # the PR adds has none there, and one missing path fails the whole
+      # pathspec. Files the PR adds inside an existing package are dropped, and
+      # the directories that leaves empty removed, so the baseline bundle is the
+      # baseline's.
       - name: Build baseline
         run: |
           if [ '${{ github.event_name }}' = 'push' ]; then
             # Fetch enough history to reach the parent commit locally.
             git fetch origin main --depth=2
             BASELINE_SHA=$(git rev-parse HEAD~1)
-            git checkout HEAD~1 -- packages/*/src/
           else
             git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
             BASELINE_SHA=$(git rev-parse FETCH_HEAD)
-            git checkout FETCH_HEAD -- packages/*/src/
+          fi
+          SRC=$(git ls-tree -d --name-only "$BASELINE_SHA" -- packages/*/src)
+          if [ -n "$SRC" ]; then
+            git checkout "$BASELINE_SHA" -- $SRC
+          fi
+          ADDED=$(git diff --name-only --diff-filter=A "$BASELINE_SHA" HEAD -- packages/*/src || true)
+          if [ -n "$ADDED" ]; then
+            echo "$ADDED" | xargs -r rm -f
+            echo "$ADDED" | xargs -r -n1 dirname | sort -ur | xargs -r rmdir -p --ignore-fail-on-non-empty 2>/dev/null || true
           fi
           node packages/${{ matrix.entry.package }}/bench/tachometer/build-ci.js baseline
           git checkout HEAD -- packages/*/src/

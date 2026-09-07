@@ -83,7 +83,9 @@ jobs:
           node tools/ci/memory/collect.js --label current --side current --out results/current.json
 
       # Swap shipped source to the merge base, rebuild the baseline bundle, and
-      # measure. node_modules is reused. Files the PR adds are dropped, and the empty directories they leave behind: a build script that walks packages/ trips on a package folder with no package.json.
+      # measure. node_modules is reused. Files the PR adds are dropped, and the
+      # directories that leaves empty removed, those and no others: a build
+      # script that walks packages/ trips on a package folder with no package.json.
       #
       # Root package.json and the lockfile are swapped too (the #264 fix): a PR
       # that adds or removes a package would otherwise leave the base build
@@ -96,7 +98,7 @@ jobs:
           git checkout FETCH_HEAD -- packages package.json package-lock.json 2>/dev/null || true
           if [ -n "$ADDED" ]; then
             echo "$ADDED" | xargs -r rm -f
-            find packages -type d -empty -delete
+            echo "$ADDED" | xargs -r -n1 dirname | sort -ur | xargs -r rmdir -p --ignore-fail-on-non-empty 2>/dev/null || true
           fi
           # Keep the bench driver from the PR head on both sides: it's the
           # measurement instrument, not the measured code, and on a PR that
