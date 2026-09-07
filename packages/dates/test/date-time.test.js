@@ -100,6 +100,20 @@ describe('datetime', () => {
     expect(moment.at('9am').toString()).toBe('2026-09-06T09:00:00.000Z');
   });
 
+  it('refuses a field out of range in set, like the factory does', () => {
+    const moment = datetime('2026-09-06T14:30Z');
+    expect(() => moment.set('minute', 60)).toThrow(/cannotSet/);
+    expect(() => moment.set({ day: 31 })).toThrow(/cannotSet/);
+    expect(() => datetime({ year: 2026, month: 9, day: 31 }, 'UTC')).toThrow(/unreadableDateTime/);
+  });
+
+  it('reads a loose string naming an instant, honours a zone in the options, and refuses a bad format or unit', () => {
+    expect(datetime('Sat, 06 Sep 2026 14:30:00 GMT', { loose: true }).toString()).toBe('2026-09-06T14:30:00.000Z');
+    expect(datetime('2026-09-06T14:30Z').format({ timeStyle: 'short', timeZone: 'Asia/Tokyo' })).toBe('11:30 PM');
+    expect(() => datetime('2026-09-06T14:30Z').format(null)).toThrow(/unknownFormat/);
+    expect(() => datetime('2026-09-06T14:30Z').startOf('constructor')).toThrow(/unknownUnit/);
+  });
+
   it('compares as the same instant whatever zone each side reads it in', () => {
     const moment = datetime('2026-09-06T14:30Z');
     expect(moment.equals(moment.in('Asia/Tokyo'))).toBe(true);

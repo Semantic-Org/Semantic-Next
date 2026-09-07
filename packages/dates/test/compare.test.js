@@ -38,6 +38,13 @@ describe('compare', () => {
     expect(() => compare(q1, timeRange('09:00', '17:00'))).toThrow(/mixedKinds/);
   });
 
+  it("reads a raw value beside a point as the point's kind", () => {
+    const moment = datetime('2026-09-06T12:00Z');
+    expect(compare(moment, '2026-09-07')).toBe(-1);
+    expect(earliest(moment, '2026-09-07')).toBe(moment);
+    expect(compare(date('2026-09-06'), '2026-09-07')).toBe(-1);
+  });
+
   it('refuses to compare across kinds', () => {
     expect(() => compare(date('2026-09-06'), datetime('2026-09-06T14:30Z'))).toThrow(/mixedKinds/);
   });

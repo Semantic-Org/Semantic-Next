@@ -6,6 +6,7 @@ import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
 import { fieldsFrom, temporalDurationOf } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions, relativeDays } from './helpers/format.js';
 import { IS_CALENDAR_DATE } from './helpers/identity.js';
+import { looseZoned } from './helpers/loose.js';
 import {
   inspect,
   isPlainDate,
@@ -18,6 +19,8 @@ import {
   timeUnits,
   unit,
   weekdayNumber,
+  wholeNumbers,
+  withParts,
 } from './helpers/units.js';
 import { weekStart, zoneId } from './helpers/zones.js';
 import { DateRange } from './range.js';
@@ -42,12 +45,16 @@ export class CalendarDate {
 
   #plain;
 
-  // date(2026, 9, 6), or date(input, { zone, loose })
+  // date(2026, 9, 6), date(input, zone), or date(input, { zone, loose })
   constructor(input, monthOrOptions, day) {
-    const hasOptions = isPlainObject(monthOrOptions);
+    const settings = isPlainObject(monthOrOptions)
+      ? monthOrOptions
+      : isString(monthOrOptions)
+      ? { zone: monthOrOptions }
+      : {};
     this.#plain = isPlainDate(input)
       ? input
-      : CalendarDate.#read(input, hasOptions ? undefined : monthOrOptions, day, hasOptions ? monthOrOptions : {});
+      : CalendarDate.#read(input, isNumber(monthOrOptions) ? monthOrOptions : undefined, day, settings);
     Object.freeze(this);
   }
 
@@ -64,7 +71,12 @@ export class CalendarDate {
     }
     if (isNumber(input) && isNumber(month)) {
       return guard(
-        () => Temporal.PlainDate.from({ year: input, month, day: day ?? 1 }, { overflow: 'reject' }),
+        () => {
+          if (!wholeNumbers([input, month, day])) {
+            throw new RangeError('a date reads whole numbers');
+          }
+          return Temporal.PlainDate.from({ year: input, month, day: day ?? 1 }, { overflow: 'reject' });
+        },
         'unreadableDate',
         `${input}-${month}-${day}`,
       );
@@ -93,7 +105,11 @@ export class CalendarDate {
         if (!settings.loose || (error.code !== 'notADate' && error.code !== 'unreadableDate')) {
           throw error;
         }
-        return new DateTime(input, settings).toTemporal().toPlainDate();
+        const zoned = looseZoned(input, settings.zone);
+        if (!zoned) {
+          throw error;
+        }
+        return zoned.toPlainDate();
       }
     }
     if (isZonedDateTime(input) || isPlainDateTime(input)) {
@@ -208,7 +224,9 @@ export class CalendarDate {
 
   set(fields, value) {
     const changes = isString(fields) ? { [unit(fields)]: value } : singularKeys(fields);
-    return new CalendarDate(guard(() => this.#plain.with(changes), 'cannotSet', JSON.stringify(changes)));
+    return new CalendarDate(
+      guard(() => withParts(this.#plain, changes), 'cannotSet', JSON.stringify(changes)),
+    );
   }
 
   startOf(name) {

@@ -20,6 +20,15 @@ describe('time', () => {
     expect(time(new Date('2026-09-06T14:30:00Z'), { zone: 'Asia/Tokyo' }).toString()).toBe('23:30:00');
   });
 
+  it('keeps the clock a loose string names whatever zone is configured, and takes a bare zone', () => {
+    configure({ zone: 'America/Los_Angeles' });
+    expect(time('September 6, 2026 5:30 PM', { loose: true }).toString()).toBe('17:30:00');
+    expect(time(new Date('2026-09-06T23:30Z'), 'Tokyo').toString()).toBe('08:30:00');
+    expect(() => time('09:00').set('minute', 75)).toThrow(/cannotSet/);
+    expect(() => time(9.5)).toThrow(/unreadableTime/);
+    expect(() => time('09:00').set('hour', 9.5)).toThrow(/cannotSet/);
+  });
+
   it('refuses a clock it cannot read, and reads a datetime through the loose door', () => {
     expect(() => time('13pm')).toThrow(/unreadableTime/);
     expect(() => time('25:00')).toThrow(/unreadableTime/);

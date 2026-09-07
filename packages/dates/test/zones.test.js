@@ -14,6 +14,10 @@ describe('brands', () => {
 });
 
 describe('zones', () => {
+  it('folds the accents off a city', () => {
+    expect(datetime('2026-09-06T12:00Z', 'São Paulo').zone).toBe('America/Sao_Paulo');
+  });
+
   const visit = datetime('2026-11-03T09:30', 'America/Los_Angeles');
 
   it('answers to IANA names in any case and spacing', () => {

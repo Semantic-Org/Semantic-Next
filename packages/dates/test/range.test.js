@@ -107,6 +107,19 @@ describe('dateRange', () => {
     );
   });
 
+  it('reads loose ends the way Date reads them, and takes a bare zone third', () => {
+    expect(dateRange('Sep 1 2026', 'Sep 7 2026', { loose: true }).toString()).toBe('2026-09-01/2026-09-07');
+    expect(() => dateRange('2026-09-01', '2026-09-07', { zone: 'Nowhere' })).toThrow(/unknownZone/);
+    expect(dateRange(new Date('2026-09-06T23:30Z'), new Date('2026-09-07T23:30Z'), 'Tokyo').toString()).toBe(
+      '2026-09-07/2026-09-08',
+    );
+  });
+
+  it('splits an interval string outside its bracketed zones', () => {
+    const bracketed = '2026-09-06T14:30[America/New_York]/2026-09-06T16:30[America/New_York]';
+    expect(datetimeRange(bracketed).duration.total('hours')).toBe(2);
+  });
+
   it('refuses a range that runs backwards and a copy across kinds', () => {
     expect(() => dateRange('2026-09-07', '2026-09-01')).toThrow(/backwards/);
     expect(() => new DateRange(timeRange('09:00', '17:00'))).toThrow(/mixedRange/);
@@ -166,6 +179,40 @@ describe('timeRange', () => {
     expect(timeRange('00:00', '23:30').points('hour')).toHaveLength(24);
     expect(timeRange('09:00', '17:00').points('24h').map(String)).toEqual(['09:00:00']);
     expect(timeRange('00:00', '23:59').split('hour')).toHaveLength(24);
+  });
+
+  it('crosses midnight, so the night shift is one range', () => {
+    const night = timeRange('22:00', '06:00');
+    expect(night.duration.total('hours')).toBe(8);
+    expect(night.contains('23:00')).toBe(true);
+    expect(night.contains('01:00')).toBe(true);
+    expect(night.contains('22:00')).toBe(true);
+    expect(night.contains('06:00')).toBe(false);
+    expect(night.contains('12:00')).toBe(false);
+    expect(night.overlaps(timeRange('05:00', '09:00'))).toBe(true);
+    expect(night.overlaps(timeRange('07:00', '21:00'))).toBe(false);
+    expect(night.intersection(timeRange('05:00', '09:00')).toString()).toBe('05:00:00/06:00:00');
+    expect(() => night.intersection(timeRange('05:00', '23:00'))).toThrow(/twoPieces/);
+    expect(night.contains(timeRange('23:00', '02:00'))).toBe(true);
+    expect(timeRange('09:00', '17:00').contains(night)).toBe(false);
+    expect(night.points('hour').map(String)).toEqual([
+      '22:00:00',
+      '23:00:00',
+      '00:00:00',
+      '01:00:00',
+      '02:00:00',
+      '03:00:00',
+      '04:00:00',
+      '05:00:00',
+    ]);
+    expect(night.split(hours(4)).map(String)).toEqual(['22:00:00/02:00:00', '02:00:00/06:00:00']);
+    expect(night.format()).toMatch(/10:00 PM.*6:00 AM/);
+    expect(timeRange(night.toString()).equals(night)).toBe(true);
+  });
+
+  it('reads its ends loosely, and refuses an unknown zone', () => {
+    expect(timeRange('9 o clock', '5pm', { loose: true })).toBeNull();
+    expect(() => timeRange('09:00', '17:00', { zone: 'Nowhere' })).toThrow(/unknownZone/);
   });
 
   it('has no zone to place in', () => {

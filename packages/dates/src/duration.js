@@ -13,6 +13,7 @@ import { locale as pickLocale } from './helpers/zones.js';
 */
 
 const subsecond = fieldNames.indexOf('milliseconds');
+const styles = ['long', 'short', 'narrow', 'digital'];
 
 export class Duration {
   // brand duration
@@ -124,16 +125,29 @@ export class Duration {
   // saving change. an anchored duration knows its calendar, so days are its ceiling until asked for
   // weeks, months or years, and an explicit unit is taken at its word either way
   balance(largest) {
-    if (largest === undefined && !this.#anchor) {
-      return Duration.#balancedClock(this);
-    }
-    const target = unit(largest ?? 'day');
-    if (!this.#anchor && (target === 'week' || target === 'month' || target === 'year')) {
-      Duration.#requireAnchor(this, `balance to ${target}`);
+    if (!this.#anchor) {
+      Duration.#requireAnchor(this, 'balance');
+      if (largest === undefined) {
+        return Duration.#balancedClock(this);
+      }
+      const target = unit(largest);
+      if (target === 'week') {
+        return Duration.#balancedWeeks(this);
+      }
+      if (target === 'month' || target === 'quarter' || target === 'year') {
+        refuse('needsAnchor', `balance to ${target}`, {
+          explanation: isDevelopment
+            ? 'a month has no fixed length. balance a duration taken from a.until(b), which knows its calendar'
+            : 0,
+        });
+      }
+      return new Duration(
+        guard(() => Duration.#fixed(this).round({ largestUnit: target }), 'cannotBalance', String(this)),
+      );
     }
     return new Duration(
       guard(
-        () => Duration.#fixed(this).round({ largestUnit: target, relativeTo: this.#anchor }),
+        () => this.#temporal.round({ largestUnit: unit(largest ?? 'day'), relativeTo: this.#anchor }),
         'cannotBalance',
         String(this),
       ),
@@ -174,6 +188,14 @@ export class Duration {
     return new Duration(temporalDurationOf(days ? { days, ...balanced } : balanced));
   }
 
+  // a week is seven days in the ISO calendar, so it needs no anchor: the days fold in sevens
+  static #balancedWeeks(duration) {
+    const { days = 0, ...clock } = fieldsOf(Duration.#fixed(duration).round({ largestUnit: 'day' }));
+    const weeks = Math.trunc(days / 7);
+    const rest = days - weeks * 7;
+    return new Duration(temporalDurationOf({ ...(weeks && { weeks }), ...(rest && { days: rest }), ...clock }));
+  }
+
   static #requireAnchor(duration, verb) {
     const fields = duration.fields();
     if (!duration.anchor && (fields.years || fields.months)) {
@@ -191,8 +213,15 @@ export class Duration {
 
   total(name) {
     const target = unit(name);
+    if (target === 'quarter') {
+      return this.total('month') / 3;
+    }
     if (this.#anchor) {
-      return this.#temporal.total({ unit: target, relativeTo: this.#anchor });
+      return guard(
+        () => this.#temporal.total({ unit: target, relativeTo: this.#anchor }),
+        'cannotTotal',
+        `${this} in ${target}`,
+      );
     }
     Duration.#requireAnchor(this, `total in ${target}`);
     if (target === 'year' || target === 'month') {
@@ -203,7 +232,11 @@ export class Duration {
       });
     }
     const fixed = Duration.#fixed(this);
-    return target === 'week' ? fixed.total('day') / 7 : fixed.total(target);
+    return guard(
+      () => (target === 'week' ? fixed.total('day') / 7 : fixed.total(target)),
+      'cannotTotal',
+      `${this} in ${target}`,
+    );
   }
 
   compare(other) {
@@ -231,6 +264,11 @@ export class Duration {
   // Intl.DurationFormat, and the sub-second fields only show when nothing larger is set, so a
   // wall-clock difference reads as hours and minutes and a timer reads as milliseconds
   format(style = 'long', locale) {
+    if (!styles.includes(style)) {
+      refuse('unknownFormat', String(style), {
+        explanation: isDevelopment ? "a duration formats as 'long', 'short', 'narrow' or 'digital'" : 0,
+      });
+    }
     const fields = this.fields();
     const large = fieldNames.slice(0, subsecond).some((field) => fields[field]);
     const shown = {};

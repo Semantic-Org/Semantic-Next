@@ -6,6 +6,7 @@ import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
 import { temporalDurationFrom } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions, relativeSeconds } from './helpers/format.js';
 import { IS_DATE_TIME } from './helpers/identity.js';
+import { looseZoned } from './helpers/loose.js';
 import {
   inspect,
   isInstant,
@@ -17,6 +18,7 @@ import {
   stepOf,
   unit,
   weekdayNumber,
+  withParts,
   zoneOptions,
 } from './helpers/units.js';
 import { weekStart, zoneId } from './helpers/zones.js';
@@ -92,7 +94,7 @@ export class DateTime {
     }
     if (isPlainObject(input)) {
       return guard(
-        () => Temporal.ZonedDateTime.from({ ...singularKeys(input), timeZone }),
+        () => Temporal.ZonedDateTime.from({ ...singularKeys(input), timeZone }, { overflow: 'reject' }),
         'unreadableDateTime',
         JSON.stringify(input),
       );
@@ -131,13 +133,11 @@ export class DateTime {
       if (!loose || error.code !== 'unreadableDateTime') {
         throw error;
       }
-      // whatever this engine's Date reads, RFC 2822 and locale strings included, read the way Date reads
-      // them, a locale string in the machine's zone
-      const epoch = Date.parse(trimmed);
-      if (Number.isNaN(epoch)) {
+      const zoned = looseZoned(trimmed, zone);
+      if (!zoned) {
         throw error;
       }
-      return Temporal.Instant.fromEpochMilliseconds(epoch).toZonedDateTimeISO(zoneId(zone));
+      return zoned.withTimeZone(zoneId(zone));
     }
   }
 
@@ -240,7 +240,9 @@ export class DateTime {
 
   set(fields, value) {
     const changes = isString(fields) ? { [unit(fields)]: value } : singularKeys(fields);
-    return new DateTime(guard(() => this.#zoned.with(changes), 'cannotSet', JSON.stringify(changes)));
+    return new DateTime(
+      guard(() => withParts(this.#zoned, changes), 'cannotSet', JSON.stringify(changes)),
+    );
   }
 
   at(when) {

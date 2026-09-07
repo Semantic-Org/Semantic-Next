@@ -7,7 +7,18 @@ import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
 import { temporalDurationFrom } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions } from './helpers/format.js';
 import { IS_TIME } from './helpers/identity.js';
-import { inspect, isPlainDateTime, isPlainTime, isZonedDateTime, singularKeys, stepOf, unit } from './helpers/units.js';
+import { looseZoned } from './helpers/loose.js';
+import {
+  inspect,
+  isPlainDateTime,
+  isPlainTime,
+  isZonedDateTime,
+  singularKeys,
+  stepOf,
+  unit,
+  wholeNumbers,
+  withParts,
+} from './helpers/units.js';
 import { zoneId } from './helpers/zones.js';
 import { TimeRange } from './range.js';
 
@@ -24,12 +35,16 @@ export class Time {
 
   #plain;
 
-  // time(9, 30), or time(input, { zone, loose })
+  // time(9, 30), time(input, zone), or time(input, { zone, loose })
   constructor(input, minuteOrOptions, second) {
-    const hasOptions = isPlainObject(minuteOrOptions);
+    const settings = isPlainObject(minuteOrOptions)
+      ? minuteOrOptions
+      : isString(minuteOrOptions)
+      ? { zone: minuteOrOptions }
+      : {};
     this.#plain = isPlainTime(input)
       ? input
-      : Time.#read(input, hasOptions ? undefined : minuteOrOptions, second, hasOptions ? minuteOrOptions : {});
+      : Time.#read(input, isNumber(minuteOrOptions) ? minuteOrOptions : undefined, second, settings);
     Object.freeze(this);
   }
 
@@ -46,8 +61,14 @@ export class Time {
     }
     if (isNumber(input)) {
       return guard(
-        () =>
-          Temporal.PlainTime.from({ hour: input, minute: minute ?? 0, second: second ?? 0 }, { overflow: 'reject' }),
+        () => {
+          if (!wholeNumbers([input, minute, second])) {
+            throw new RangeError('a clock reads whole numbers');
+          }
+          return Temporal.PlainTime.from({ hour: input, minute: minute ?? 0, second: second ?? 0 }, {
+            overflow: 'reject',
+          });
+        },
         'unreadableTime',
         `${input}:${minute ?? 0}`,
       );
@@ -69,7 +90,11 @@ export class Time {
         if (!settings.loose || error.code !== 'unreadableTime') {
           throw error;
         }
-        return new DateTime(input, settings).toTemporal().toPlainTime();
+        const zoned = looseZoned(input, settings.zone);
+        if (!zoned) {
+          throw error;
+        }
+        return zoned.toPlainTime();
       }
     }
     if (isZonedDateTime(input) || isPlainDateTime(input)) {
@@ -175,7 +200,9 @@ export class Time {
 
   set(fields, value) {
     const changes = isString(fields) ? { [unit(fields)]: value } : singularKeys(fields);
-    return new Time(guard(() => this.#plain.with(changes), 'cannotSet', JSON.stringify(changes)));
+    return new Time(
+      guard(() => withParts(this.#plain, changes), 'cannotSet', JSON.stringify(changes)),
+    );
   }
 
   startOf(name) {

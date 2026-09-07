@@ -79,7 +79,8 @@ export const units = [
 export const timeUnits = ['hour', 'minute', 'second', 'millisecond', 'microsecond', 'nanosecond'];
 
 export const unit = (input) => {
-  const found = isString(input) && spellings[input.trim().toLowerCase()];
+  const key = isString(input) ? input.trim().toLowerCase() : '';
+  const found = Object.hasOwn(spellings, key) && spellings[key];
   return found || refuse('unknownUnit', String(input), {
     explanation: isDevelopment
       ? `units are ${units.join(', ')} or quarter, singular or plural, or an abbreviation like h, min, d`
@@ -113,6 +114,17 @@ export const isPlainTime = (value) => value instanceof Temporal.PlainTime;
 export const isTemporalDuration = (value) => value instanceof Temporal.Duration;
 
 export const pad = (value, width = 2) => String(Math.abs(value)).padStart(width, '0');
+
+// Temporal truncates 9.5 to 9 before it checks a range, so a fraction is refused before it gets there
+export const wholeNumbers = (values) => values.every((value) => !isNumber(value) || Number.isInteger(value));
+
+// set() replaces parts as strictly as a factory reads them: whole numbers, in range
+export const withParts = (temporal, changes) => {
+  if (!wholeNumbers(Object.values(changes))) {
+    throw new RangeError('a part is a whole number');
+  }
+  return temporal.with(changes, { overflow: 'reject' });
+};
 
 export const ordinal = (number) => {
   const tens = number % 100;

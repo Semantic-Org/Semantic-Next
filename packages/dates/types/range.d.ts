@@ -44,24 +44,24 @@ declare abstract class Range<Point, Input> {
 
 /** Two calendar dates, both included: the 1st through the 7th is seven days */
 export class DateRange extends Range<CalendarDate, CalendarDateInput> {
-  constructor(start: CalendarDateInput, end: CalendarDateInput | DurationInput, options?: ReadOptions);
-  constructor(interval: string, options?: ReadOptions);
+  constructor(start: CalendarDateInput, end: CalendarDateInput | DurationInput, options?: Zone | ReadOptions);
+  constructor(interval: string, options?: Zone | ReadOptions);
   /** The datetime range covering these days in a zone, midnight through the midnight after the last day */
   in(zone?: Zone): DateTimeRange;
 }
 
 /** Two moments, the end excluded: nine until ten and ten until eleven do not overlap */
 export class DateTimeRange extends Range<DateTime, DateTimeInput> {
-  constructor(start: DateTimeInput, end: DateTimeInput | DurationInput, options?: ReadOptions);
-  constructor(interval: string, options?: ReadOptions);
+  constructor(start: DateTimeInput, end: DateTimeInput | DurationInput, options?: Zone | ReadOptions);
+  constructor(interval: string, options?: Zone | ReadOptions);
   /** Both ends read in another zone */
   in(zone?: Zone): DateTimeRange;
 }
 
 /** Two times of day, the end excluded: the door closes at the stroke of five */
 export class TimeRange extends Range<Time, TimeInput> {
-  constructor(start: TimeInput, end: TimeInput | DurationInput, options?: ReadOptions);
-  constructor(interval: string, options?: ReadOptions);
+  constructor(start: TimeInput, end: TimeInput | DurationInput, options?: Zone | ReadOptions);
+  constructor(interval: string, options?: Zone | ReadOptions);
 }
 
 export function dateRange(
@@ -69,7 +69,7 @@ export function dateRange(
   end: CalendarDateInput | DurationInput,
   options?: ReadOptions,
 ): DateRange;
-export function dateRange(interval: string, options?: ReadOptions): DateRange;
+export function dateRange(interval: string, options?: Zone | ReadOptions): DateRange;
 /** With `loose`, null when either end cannot be read */
 export function dateRange(start: unknown, end: unknown, options: ReadOptions & { loose: true; }): DateRange | null;
 export function datetimeRange(
@@ -77,14 +77,14 @@ export function datetimeRange(
   end: DateTimeInput | DurationInput,
   options?: ReadOptions,
 ): DateTimeRange;
-export function datetimeRange(interval: string, options?: ReadOptions): DateTimeRange;
+export function datetimeRange(interval: string, options?: Zone | ReadOptions): DateTimeRange;
 export function datetimeRange(
   start: unknown,
   end: unknown,
   options: ReadOptions & { loose: true; },
 ): DateTimeRange | null;
-export function timeRange(start: TimeInput, end: TimeInput | DurationInput, options?: ReadOptions): TimeRange;
-export function timeRange(interval: string, options?: ReadOptions): TimeRange;
+export function timeRange(start: TimeInput, end: TimeInput | DurationInput, options?: Zone | ReadOptions): TimeRange;
+export function timeRange(interval: string, options?: Zone | ReadOptions): TimeRange;
 export function timeRange(start: unknown, end: unknown, options: ReadOptions & { loose: true; }): TimeRange | null;
 
 export function isDateRange(value: unknown): value is DateRange;

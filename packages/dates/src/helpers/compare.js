@@ -84,6 +84,18 @@ const sameKind = (left, right) => {
   }
 };
 
+// a raw value beside a point reads as that point's kind, the way the point's own methods read it
+const asKindOf = (left, value) => {
+  if (kindOf(value) !== undefined) {
+    return value;
+  }
+  const kind = kindOf(left);
+  if (kind === 'datetime') {
+    return new DateTime(value, left.zone);
+  }
+  return kind === 'date' ? new CalendarDate(value) : new Time(value);
+};
+
 // a sort comparator. both sides must be the same kind of thing, a raw value reads as the first's kind.
 // ranges order by their start, then by their end, the order a database gives its range types
 export const compare = (a, b) => {
@@ -95,16 +107,18 @@ export const compare = (a, b) => {
     return compare(a.start, b.start) || compare(a.end, b.end);
   }
   const left = point(a);
-  const right = b?.[IS_DURATION] ? b : point(b);
+  const right = asKindOf(left, b);
   sameKind(left, right);
   return left.isBefore(right) ? -1 : left.isAfter(right) ? 1 : 0;
 };
 
 const pick = (values, verb, wins) => {
-  const points = (values.length === 1 && isArray(values[0]) ? values[0] : values).map(point);
-  if (!points.length) {
+  const raw = values.length === 1 && isArray(values[0]) ? values[0] : values;
+  if (!raw.length) {
     refuse('noPoints', verb, { explanation: isDevelopment ? `${verb}() needs at least one point` : 0 });
   }
+  const head = point(raw[0]);
+  const points = raw.map((value, index) => (index === 0 ? head : asKindOf(head, value)));
   return points.reduce((best, next) => (wins(compare(next, best)) ? next : best));
 };
 

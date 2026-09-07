@@ -95,7 +95,9 @@ export class CalendarDate {
 export function date(input: CalendarDateInput, options?: ReadOptions): CalendarDate;
 export function date(year: number, month: number, day?: number): CalendarDate;
 /** With `{ loose: true }`, null for what cannot be read */
-export function date(input: CalendarDateInput, options: ReadOptions & { loose: true; }): CalendarDate | null;
+export function date(input: unknown, options: ReadOptions & { loose: true; }): CalendarDate | null;
+/** Read in a zone, which matters for a `Date` */
+export function date(input: CalendarDateInput, zone: Zone): CalendarDate;
 
 export function today(zone?: Zone): CalendarDate;
 export function tomorrow(zone?: Zone): CalendarDate;

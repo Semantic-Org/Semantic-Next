@@ -42,7 +42,8 @@ const abbreviations = {
   z: 'UTC',
 };
 
-const normalize = (text) => text.trim().toLowerCase().replace(/[\s_-]+/g, ' ');
+const normalize = (text) =>
+  text.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\s_-]+/g, ' ');
 
 const canonical = (id) => {
   try {

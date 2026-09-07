@@ -69,6 +69,8 @@ export class Time {
 export function time(input: TimeInput, options?: ReadOptions): Time;
 export function time(hour: number, minute?: number, second?: number): Time;
 /** With `{ loose: true }`, null for what cannot be read */
-export function time(input: TimeInput, options: ReadOptions & { loose: true; }): Time | null;
+export function time(input: unknown, options: ReadOptions & { loose: true; }): Time | null;
+/** Read in a zone, which matters for a `Date` */
+export function time(input: TimeInput, zone: Zone): Time;
 
 export function isTime(value: unknown): value is Time;

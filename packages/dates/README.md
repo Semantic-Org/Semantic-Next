@@ -58,7 +58,8 @@ milliseconds when it has no months or years, or when it came from `until()` and 
 
 **A date range runs through its end. A datetime or time range runs until it.** The 1st through the 7th
 is seven days, both included, which is how people write dates. Nine until five excludes five o'clock,
-which is how shifts and bookings abut without a conflict.
+which is how shifts and bookings abut without a conflict. A time range may cross midnight:
+`timeRange('22:00', '06:00')` is the night shift, eight hours long, and `contains('01:00')` is true.
 
 **Fields are balanced parts, `total(unit)` is the whole.** `a.until(b)` gives years down to
 nanoseconds, so `.months` is the months part. `a.until(b, 'days')` and `.total('days')` give the count.
@@ -95,12 +96,14 @@ Input: an ISO string (`'2026-09-06T14:30Z'`, `'2026-09-06T14:30'` as a wall cloc
 
 `plus` and `minus` take a duration, a fields object `{ days: 3 }`, a phrase `'1h 30m'`, or a number and
 unit `(3, 'days')`. Adding days keeps the wall clock across a daylight saving change, adding hours
-counts hours.
+counts hours. `set` refuses a part out of range, `set('minute', 60)` is `cannotSet`, the way every
+factory refuses one. `round`, `floor` and `ceil` snap the wall clock, so on the repeated hour of a
+fall-back night they land on its second pass. An Intl options object may name its own `timeZone`.
 
 ## date
 
 ```js
-today(zone?)  tomorrow(zone?)  yesterday(zone?)     date(input)  date(2026, 9, 6)  date(input, { zone, loose })
+today(zone?)  tomorrow(zone?)  yesterday(zone?)     date(input)  date(2026, 9, 6)  date(input, zone)  date(input, { zone, loose })
 ```
 
 Input: `'2026-09-06'`, three numbers, a fields object, a datetime (its date in its zone), a `Date` (its
@@ -120,7 +123,7 @@ unless `{ loose: true, zone }` says which, or `datetime(text, zone).date` choose
 ## time
 
 ```js
-time(input)  time(9, 30)  time(input, { zone, loose })
+time(input)  time(9, 30)  time(input, zone)  time(input, { zone, loose })
 ```
 
 Input: `'09:00'`, `'9am'`, `'5:30 pm'`, `'17:30:15.250'`, numbers, a fields object, a datetime, a `Date`
@@ -150,8 +153,10 @@ phrase with mixed signs, `'1h -30m'`, since a length has one sign.
 Fields stay as written: `duration('90m')` prints `PT90M` until `balance()` makes it `PT1H30M`. A length
 balances to hours and never to days, because a day is a calendar unit that only an anchor or an explicit
 `balance('day')` makes from clock time, and folding 36 hours into a day would move a deadline across a
-daylight saving change. Two durations that `equals()` can therefore print differently, so a stored
-length is its `toMilliseconds()`.
+daylight saving change. `plus` and `minus` keep the same line: `days(1).plus(hours(25))` is `P1DT25H`,
+and `days(1).minus(hours(1))` refuses, since a day less an hour has no one length. Two durations that
+`equals()` can therefore print differently, so a stored length is its `toMilliseconds()`. A bare number
+is milliseconds, fractions included, so `duration(performance.now() - start)` reads.
 
 | read | `years` `months` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `sign` `isZero` `isNegative` |
 | --- | --- |
@@ -165,7 +170,7 @@ length is its `toMilliseconds()`.
 
 ```js
 dateRange(start, end)  datetimeRange(start, duration)  timeRange('09:00/17:00')  start.to(end)
-dateRange(start, end, { loose: true, zone })         // null for an end that cannot be read
+dateRange(start, end, zone)  dateRange(start, end, { loose: true, zone })   // null for an end that cannot be read
 dt.range('day')  date.range('month')       // the unit around a point, as its kind's range
 ```
 
@@ -177,13 +182,15 @@ datetime range's start in that zone.
 
 | read | `start` `end` `kind` `duration` `isEmpty` |
 | --- | --- |
-| ask | `contains(point)` `contains(range)` `overlaps(other)` `equals` |
+| ask | `contains(point)` `contains(range)` `overlaps(other)` `equals`, all around the clock for a time range |
 | move | `intersection(other)` or null, `in(zone)` a date range becomes the datetime bounds for a query |
 | walk | `points('day')` `points(minutes(15))` the points, `split('week')` `split(hours(1))` the sub-ranges |
 | show | `format()` `'Sep 1 – 7, 2026'`, `format('time')` `'9:00 – 10:00 AM'` |
 | out | `toString()` `toJSON()` `'start/end'` |
 
-Steps count out from the start, so monthly from the 31st lands on each month's last day.
+Steps count out from the start, so monthly from the 31st lands on each month's last day. A time range
+across midnight walks through it. Its intersection with another range refuses when the overlap comes
+out in two pieces, `twoPieces`, since one range cannot hold both.
 
 ## helpers
 
@@ -215,7 +222,7 @@ when reading, so a change to the zone's rules moves the instant and not the meet
 
 Every refusal is a coded `RangeError` or `TypeError` built with utils' `createErrors`, one line in
 production (`dates refused [notADate] 2026-09-06T14:00Z`) with the way out appended in development.
-Codes: `backwards` `cannotAdd` `cannotBalance` `cannotRound` `cannotSet` `cannotSubtract` `emptyStep` `fractionalMonth` `mixedKinds` `mixedRange` `mixedSigns` `needsAnchor` `noField` `noPoints` `noTemporal` `noTokens` `noZone` `notADate` `notADateTime` `notADateUnit` `notADuration` `notANumber` `notAPoint` `notATime` `notFinite` `unknownUnit` `unknownWeekday` `unknownZone` `unreadableDate` `unreadableDateTime` `unreadableDuration` `unreadableTime`.
+Codes: `backwards` `cannotAdd` `cannotBalance` `cannotRound` `cannotSet` `cannotSubtract` `cannotTotal` `emptyStep` `fractionalMonth` `mixedKinds` `mixedRange` `mixedSigns` `needsAnchor` `noField` `noPoints` `noTemporal` `noTokens` `noZone` `notADate` `notADateTime` `notADateUnit` `notADuration` `notANumber` `notAPoint` `notATime` `notFinite` `twoPieces` `unknownFormat` `unknownUnit` `unknownWeekday` `unknownZone` `unreadableDate` `unreadableDateTime` `unreadableDuration` `unreadableTime`.
 
 ## not here, on purpose
 

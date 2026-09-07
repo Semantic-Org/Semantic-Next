@@ -15,6 +15,14 @@ describe('date', () => {
     expect(date(new Date('2026-09-06T23:30:00Z'), { zone: 'Asia/Tokyo' }).toString()).toBe('2026-09-07');
   });
 
+  it('keeps the day a loose string names whatever zone is configured, and takes a bare zone', () => {
+    configure({ zone: 'America/Los_Angeles' });
+    expect(date('September 6, 2026', { loose: true }).toString()).toBe('2026-09-06');
+    expect(date('9/6/2026', { loose: true }).toString()).toBe('2026-09-06');
+    expect(date(new Date('2026-09-06T23:30Z'), 'Tokyo').toString()).toBe('2026-09-07');
+    expect(() => date('2026-02-01').set({ day: 30 })).toThrow(/cannotSet/);
+  });
+
   it('keeps the day of a wall-clock string and refuses an instant until told the zone', () => {
     expect(date('2026-09-06T23:30').toString()).toBe('2026-09-06');
     expect(() => date('2026-09-06T23:30:00Z')).toThrow(/notADate/);
@@ -111,6 +119,8 @@ describe('date', () => {
   it('formats a year under one hundred as written', () => {
     expect(date(50, 1, 1).format()).not.toMatch(/1950/);
     expect(date(50, 1, 1).format('YYYY-MM-DD')).toBe('0050-01-01');
+    expect(date('-000050-01-01').format('YYYY')).toBe('-0050');
+    expect(() => date(2026, 9.5, 6)).toThrow(/unreadableDate/);
   });
 
   it('refuses a bare number, which is a year or an instant depending on who wrote it', () => {

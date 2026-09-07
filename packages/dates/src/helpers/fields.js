@@ -65,19 +65,24 @@ export const fieldsOf = (temporal) => {
   return fields;
 };
 
-const quantity = /(-?\d+(?:\.\d+)?)\s*([a-zµ]+)/g;
+const quantity = /([-+]?)(\d+(?:\.\d+)?)\s*([a-zµ]+)/g;
 
 // '1h 30m', '2 weeks and 3 days', '90 minutes', '1500' (milliseconds, as toDuration reads it).
-// a leading minus negates the whole phrase, the way a person means '-1h 30m'
+// a leading minus with the rest unsigned negates the whole phrase, the way a person means '-1h 30m',
+// and a sign on each quantity is taken as written
 const parseWords = (text) => {
   const phrase = text.trim().toLowerCase().replace(/,|\band\b/g, ' ');
-  if (/^-?\d+(\.\d+)?$/.test(phrase)) {
-    return { milliseconds: Number(phrase) };
+  if (!phrase) {
+    refuse('unreadableDuration', text, {
+      explanation: isDevelopment ? 'an empty string is not a length. duration(0) is zero' : 0,
+    });
   }
-  const negate = phrase.startsWith('-');
-  const fields = {};
-  const rest = (negate ? phrase.slice(1) : phrase).replace(quantity, (_, amount, name) => {
-    spill(fields, unit(name), Number(amount));
+  if (/^-?\d+(\.\d+)?$/.test(phrase)) {
+    return spill({}, 'millisecond', Number(phrase));
+  }
+  const found = [];
+  const rest = phrase.replace(quantity, (_, sign, amount, name) => {
+    found.push([sign, Number(amount), unit(name)]);
     return '';
   });
   if (rest.trim()) {
@@ -87,10 +92,10 @@ const parseWords = (text) => {
         : 0,
     });
   }
-  if (negate) {
-    for (const field of Object.keys(fields)) {
-      fields[field] = -fields[field];
-    }
+  const negateAll = found[0]?.[0] === '-' && found.slice(1).every(([sign]) => sign === '');
+  const fields = {};
+  for (const [sign, amount, name] of found) {
+    spill(fields, name, negateAll || sign === '-' ? -amount : amount);
   }
   return fields;
 };
@@ -111,13 +116,20 @@ const oneSign = (fields, at) => {
 // every shape a duration can be written as, as plural Temporal fields
 export const fieldsFrom = (input, name) => {
   if (input?.[IS_DURATION]) {
+    if (name !== undefined) {
+      refuseType('notADuration', `${input} ${name}`, {
+        explanation: isDevelopment
+          ? "a duration already has its units. a unit goes with a number: duration(90, 'minutes')"
+          : 0,
+      });
+    }
     return input.fields();
   }
   if (isTemporalDuration(input)) {
     return fieldsOf(input);
   }
   if (isNumber(input)) {
-    return name === undefined ? { milliseconds: input } : spill({}, unit(name), input);
+    return spill({}, name === undefined ? 'millisecond' : unit(name), input);
   }
   if (isString(input)) {
     return /^[-+]?P/i.test(input.trim())
@@ -140,7 +152,7 @@ export const fieldsFrom = (input, name) => {
 
 const clockFields = (fields) => {
   const clock = {};
-  for (const field of fieldNames.slice(3)) {
+  for (const field of fieldNames.slice(4)) {
     if (fields[field]) {
       clock[field] = fields[field];
     }
@@ -148,11 +160,12 @@ const clockFields = (fields) => {
   return clock;
 };
 
-// years, months and weeks stay field-wise, they have no fixed length to balance through. days and
-// below combine through Temporal so a subtraction balances to one sign: 2h minus 30m is 1h 30m
+// years, months, weeks and days stay field-wise: they are calendar units, and folding 25 hours into a
+// day would move a deadline across a daylight saving change. hours and below combine through Temporal
+// so a subtraction balances to one sign: 2h minus 30m is 1h 30m
 export const addFields = (a, b, sign) => {
   const fields = {};
-  for (const field of ['years', 'months', 'weeks']) {
+  for (const field of ['years', 'months', 'weeks', 'days']) {
     const sum = (a[field] ?? 0) + sign * (b[field] ?? 0);
     if (sum) {
       fields[field] = sum;

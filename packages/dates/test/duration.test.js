@@ -1,6 +1,7 @@
 import {
   configure,
   date,
+  datetime,
   days,
   duration,
   hours,
@@ -85,18 +86,42 @@ describe('duration', () => {
   it('refuses a phrase or a fields object with mixed signs, with a code', () => {
     expect(() => duration('1h -30m')).toThrow(/mixedSigns/);
     expect(() => duration({ hours: 1, minutes: -30 })).toThrow(/mixedSigns/);
+    expect(duration('-1h 30m').toString()).toBe('-PT1H30M');
+    expect(duration('-1h -30m').toString()).toBe('-PT1H30M');
+    expect(() => duration(days(1), 'hours')).toThrow(/notADuration/);
   });
 
   it('adds, subtracts, multiplies, negates and takes the absolute', () => {
     expect(hours(2).plus(minutes(30)).toString()).toBe('PT2H30M');
     expect(hours(2).minus('30m').toString()).toBe('PT1H30M');
-    expect(days(1).minus(hours(1)).toString()).toBe('PT23H');
+    expect(() => days(1).minus(hours(1))).toThrow(/mixedSigns/);
     expect(() => months(1).minus(days(3))).toThrow(/mixedSigns/);
     expect(days(1).times(3).toString()).toBe('P3D');
     expect(months(1).plus(days(3)).toString()).toBe('P1M3D');
     expect(hours(2).negated().isNegative).toBe(true);
     expect(hours(-2).abs().toString()).toBe('PT2H');
     expect(duration(0).isZero).toBe(true);
+  });
+
+  it('keeps days apart from hours, since a day is a calendar unit', () => {
+    expect(days(1).plus(hours(25)).toString()).toBe('P1DT25H');
+    expect(hours(25).plus(minutes(1)).toString()).toBe('PT25H1M');
+    const start = datetime('2026-03-06T12:00', 'America/New_York');
+    expect(start.plus(days(1).plus(hours(25))).toString()).toBe(start.plus(days(1)).plus(hours(25)).toString());
+  });
+
+  it('reads a bare number as milliseconds with a fraction, and refuses an empty string', () => {
+    expect(duration(1500.5).toString()).toBe('PT1.5005S');
+    expect(() => duration(NaN)).toThrow(/notFinite/);
+    expect(() => duration('')).toThrow(/unreadableDuration/);
+  });
+
+  it('balances to weeks without an anchor, and names the anchor a month needs', () => {
+    expect(duration('10d').balance('week').toString()).toBe('P1W3D');
+    expect(() => duration('P1M').balance('day')).toThrow(/needsAnchor/);
+    expect(() => duration('P1D').total('quarter')).toThrow(/needsAnchor/);
+    expect(datetime('2026-01-31T00:00Z').until('2026-07-31T00:00Z', 'quarter')).toBe(2);
+    expect(() => hours(1).format('medium')).toThrow(/unknownFormat/);
   });
 
   it('compares by length, using the anchor for calendar units', () => {

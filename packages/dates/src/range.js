@@ -2,12 +2,12 @@ import { isDevelopment, isPlainObject, isString } from '@semantic-ui/utils';
 
 import { CalendarDate } from './calendar-date.js';
 import { DateTime } from './date-time.js';
-import { days, duration } from './duration.js';
+import { days, duration, hours } from './duration.js';
 import { isUnreadable, loosely, refuse, refuseType, unreadable } from './helpers/errors.js';
 import { isDurationFields } from './helpers/fields.js';
 import { formatIntlRange, intlOptions } from './helpers/format.js';
 import { IS_DATE_RANGE, IS_DATE_TIME_RANGE, IS_DURATION, IS_RANGE, IS_TIME_RANGE } from './helpers/identity.js';
-import { inspect, isTemporalDuration } from './helpers/units.js';
+import { inspect, isTemporalDuration, zoneOptions } from './helpers/units.js';
 import { Time } from './time.js';
 
 /*
@@ -18,10 +18,34 @@ import { Time } from './time.js';
 
 const factoryNames = { date: 'dateRange', datetime: 'datetimeRange', time: 'timeRange' };
 
+// the clock is a circle, so a time range may cross midnight: the night shift runs from 22:00 until
+// 06:00. its ends map to nanoseconds since midnight with an end past midnight carried a day forward,
+// and another range is laid beside it a day either side, so an overlap across midnight shows on one
+const DAY = 86_400e9;
+const midnight = Temporal.PlainTime.from('00:00');
+const sinceMidnight = (time) => midnight.until(time.toTemporal()).total('nanosecond');
+const spanOf = (range) => {
+  const start = sinceMidnight(range.start);
+  const end = sinceMidnight(range.end);
+  return [start, end < start ? end + DAY : end];
+};
+const besides = (range) => {
+  const [start, end] = spanOf(range);
+  return [-DAY, 0, DAY].map((shift) => [start + shift, end + shift]);
+};
+const timeAt = (nanos) => new Time(midnight.add({ nanoseconds: ((nanos % DAY) + DAY) % DAY }));
+
 // dateRange('a/b', { loose }) has no end, so an options bag can sit second. a fields object end has
 // unit keys, and this has only the two option keys, so the two never read as each other
 const isOptions = (value) =>
-  isPlainObject(value) && Object.keys(value).every((key) => key === 'loose' || key === 'zone');
+  isPlainObject(value) && Object.keys(value).length > 0
+  && Object.keys(value).every((key) => key === 'loose' || key === 'zone');
+
+// an interval string splits on its slash, and never on the one inside a bracketed zone
+const splitInterval = (text) => {
+  const at = text.replace(/\[[^\]]*\]/g, (zone) => ' '.repeat(zone.length)).indexOf('/');
+  return at === -1 ? [text] : [text.slice(0, at), text.slice(at + 1)];
+};
 
 // the shared body. the three exported classes seal it to a kind, so a value names what it holds
 class Range {
@@ -36,12 +60,13 @@ class Range {
   #start;
   #end;
 
-  // (start, end, { zone, loose }), or (interval, { zone, loose })
-  constructor(start, end, options = {}) {
+  // (start, end, zone), (start, end, { zone, loose }), or (interval, { zone, loose })
+  constructor(start, end, options) {
     const kind = this.constructor.kind;
     if (isOptions(end)) {
       [end, options] = [undefined, end];
     }
+    const settings = zoneOptions(options);
     if (start instanceof Range && end === undefined) {
       if (start.kind !== kind) {
         refuseType('mixedRange', `${factoryNames[start.kind]} as ${factoryNames[kind]}`, {
@@ -53,11 +78,12 @@ class Range {
       return start;
     }
     if (isString(start) && end === undefined) {
-      [start, end] = start.split('/');
+      [start, end] = splitInterval(start);
     }
-    this.#start = Range.#read(kind, start, undefined, options.zone);
-    this.#end = Range.#readEnd(kind, end, this.#start);
-    if (this.#end.isBefore(this.#start)) {
+    this.#start = Range.#read(kind, start, undefined, settings);
+    this.#end = Range.#readEnd(kind, end, this.#start, settings);
+    // a time range whose end comes first crosses midnight. the other kinds run forward
+    if (kind !== 'time' && this.#end.isBefore(this.#start)) {
       refuse('backwards', `${this.#start} to ${this.#end}`, {
         explanation: isDevelopment ? 'a range runs forward. swap the ends, or use earliest() and latest()' : 0,
       });
@@ -65,24 +91,25 @@ class Range {
     Object.freeze(this);
   }
 
-  // an end reads through the kind's own factory, and a datetime end reads in the start's zone
-  static #read(kind, value, start, zone) {
+  // an end reads through the kind's own factory with the range's options, and a datetime end reads in
+  // the start's zone
+  static #read(kind, value, start, { zone, loose } = {}) {
     if (kind === 'date') {
-      return new CalendarDate(value);
+      return new CalendarDate(value, { zone, loose });
     }
     if (kind === 'datetime') {
-      return new DateTime(value, start?.zone ?? zone);
+      return new DateTime(value, { zone: start?.zone ?? zone, loose });
     }
-    return new Time(value);
+    return new Time(value, { zone, loose });
   }
 
   // an end is a length when written as one, otherwise a point of the kind, and a string or fields
   // object the kind cannot read is tried as a length: '5pm' is a time, '2h' is two hours
-  static #readEnd(kind, value, start) {
+  static #readEnd(kind, value, start, options) {
     let unread;
     if (!(value?.[IS_DURATION] || isTemporalDuration(value) || isDurationFields(value))) {
       try {
-        return Range.#read(kind, value, start);
+        return Range.#read(kind, value, start, options);
       }
       catch (error) {
         if (!(isString(value) || isPlainObject(value)) || !isUnreadable(error)) {
@@ -119,9 +146,17 @@ class Range {
     return this.kind !== 'date' && this.#start.equals(this.#end);
   }
 
-  // the whole length, anchored at the start so months and years total. a date range counts its last day
+  // the whole length, anchored at the start so months and years total. a date range counts its last
+  // day, and a time range across midnight measures the long way round
   get duration() {
-    return this.kind === 'date' ? this.#start.until(this.#end.plus(days(1))) : this.#start.until(this.#end);
+    if (this.kind === 'date') {
+      return this.#start.until(this.#end.plus(days(1)));
+    }
+    return this.#wraps() ? hours(24).plus(this.#start.until(this.#end)) : this.#start.until(this.#end);
+  }
+
+  #wraps() {
+    return this.kind === 'time' && this.#end.isBefore(this.#start);
   }
 
   /*******************************
@@ -131,6 +166,10 @@ class Range {
   contains(value) {
     if (value instanceof Range) {
       const rival = this.#make(this.kind, value);
+      if (this.kind === 'time') {
+        const [start, end] = spanOf(this);
+        return besides(rival).some(([rivalStart, rivalEnd]) => rivalStart >= start && rivalEnd <= end);
+      }
       return !rival.start.isBefore(this.#start) && !rival.end.isAfter(this.#end);
     }
     return this.#holds(value);
@@ -138,6 +177,9 @@ class Range {
 
   #holds(value) {
     const at = Range.#read(this.kind, value, this.#start);
+    if (this.#wraps()) {
+      return !at.isBefore(this.#start) || at.isBefore(this.#end);
+    }
     if (at.isBefore(this.#start)) {
       return false;
     }
@@ -150,6 +192,10 @@ class Range {
 
   overlaps(other) {
     const rival = this.#make(this.kind, other);
+    if (this.kind === 'time') {
+      const [start, end] = spanOf(this);
+      return besides(rival).some(([rivalStart, rivalEnd]) => rivalStart < end && start < rivalEnd);
+    }
     if (this.#inclusive()) {
       return !this.#start.isAfter(rival.end) && !rival.start.isAfter(this.#end);
     }
@@ -171,6 +217,9 @@ class Range {
 
   intersection(other) {
     const rival = this.#make(this.kind, other);
+    if (this.kind === 'time') {
+      return this.#clockIntersection(rival);
+    }
     if (!this.overlaps(rival)) {
       return null;
     }
@@ -179,13 +228,38 @@ class Range {
     return this.#make(this.kind, start, end);
   }
 
-  // a time wraps at midnight and lands behind the last point, which is where its walk ends
+  // two time ranges across midnight can overlap in two pieces, 22:00 until 06:00 with 05:00 until 23:00,
+  // and one range cannot hold both
+  #clockIntersection(rival) {
+    const [start, end] = spanOf(this);
+    const pieces = besides(rival)
+      .map(([rivalStart, rivalEnd]) => [Math.max(start, rivalStart), Math.min(end, rivalEnd)])
+      .filter(([from, to]) => from < to);
+    if (!pieces.length) {
+      return null;
+    }
+    if (pieces.length > 1) {
+      refuse('twoPieces', `${this} with ${rival}`, {
+        explanation: isDevelopment ? 'the overlap crosses midnight in two pieces. intersect each half of the range' : 0,
+      });
+    }
+    return this.#make('time', timeAt(pieces[0][0]), timeAt(pieces[0][1]));
+  }
+
+  // a time range walks by elapsed length, so the walk crosses midnight and ends where the range does
   points(step) {
     const size = Range.#step(step);
     const points = [];
+    if (this.kind === 'time') {
+      const length = this.duration.total('nanosecond');
+      for (let i = 0; size.times(i).total('nanosecond') < length; i++) {
+        points.push(this.#start.plus(size.times(i)));
+      }
+      return points;
+    }
     for (let i = 0;; i++) {
       const next = this.#start.plus(size.times(i));
-      if (!this.#holds(next) || (i > 0 && !next.isAfter(points[i - 1]))) {
+      if (!this.#holds(next)) {
         return points;
       }
       points.push(next);
@@ -245,7 +319,15 @@ class Range {
     if (this.kind === 'datetime') {
       return formatIntlRange('datetime', this.#start.epoch, this.#end.epoch, options, locale, this.#start.zone);
     }
-    return formatIntlRange(this.kind, this.#start.toTemporal(), this.#end.toTemporal(), options, locale);
+    return formatIntlRange(
+      this.kind,
+      this.#start.toTemporal(),
+      this.#end.toTemporal(),
+      options,
+      locale,
+      undefined,
+      this.#wraps() ? 1 : 0,
+    );
   }
 
   toString() {
@@ -303,7 +385,7 @@ export class TimeRange extends Range {
 const byKind = { date: DateRange, datetime: DateTimeRange, time: TimeRange };
 
 const build = (Kind, start, end, options) => {
-  const settings = isOptions(end) ? end : options ?? {};
+  const settings = isOptions(end) ? end : zoneOptions(options);
   const make = () => new Kind(start, end, options);
   return settings.loose ? loosely(make, unreadable.range) : make();
 };
