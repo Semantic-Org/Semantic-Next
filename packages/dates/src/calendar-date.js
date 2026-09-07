@@ -144,7 +144,7 @@ export class CalendarDate {
   static #parse(text) {
     const trimmed = text.trim();
     if (hasTime.test(trimmed) && hasOffset.test(trimmed)) {
-      refuse('notADate', text, {
+      refuseType('notADate', text, {
         explanation: isDevelopment
           ? 'that string is an instant. datetime(text, zone).date chooses its day in a zone, and so does { loose: true, zone } here'
           : 0,
@@ -399,6 +399,11 @@ export class CalendarDate {
         ? 'a date is not a point on the number line. compare with isBefore, isAfter or equals, or measure with until'
         : 0,
     });
+  }
+
+  // + gives the string, while < and - still refuse through valueOf
+  [Symbol.toPrimitive](hint) {
+    return hint === 'number' ? this.valueOf() : this.toString();
   }
 
   [inspect]() {

@@ -19,10 +19,10 @@ beforeEach(() => {
 describe('names', () => {
   it('lists the weekdays from the first day of the week, and the months, in the locale', () => {
     expect(weekdayNames()).toEqual(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
-    expect(weekdayNames('de-DE', 'long', 'sunday')[0]).toBe('Sonntag');
-    expect(weekdayNames(undefined, 'short', 'sunday')).toEqual(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']);
+    expect(weekdayNames('long', 'sunday', 'de-DE')[0]).toBe('Sonntag');
+    expect(weekdayNames('short', 'sunday')).toEqual(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']);
     expect(monthNames()).toHaveLength(12);
-    expect(monthNames('fr', 'short')[0]).toBe('janv.');
+    expect(monthNames('short', 'fr')[0]).toBe('janv.');
     expect(weekday('sunday')).toBe(7);
     expect(weekday('Mon')).toBe(1);
     expect(() => weekday('someday')).toThrow(/unknownWeekday/);

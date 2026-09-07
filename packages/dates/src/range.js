@@ -344,6 +344,11 @@ class Range {
     });
   }
 
+  // + gives the string, while < and - still refuse through valueOf
+  [Symbol.toPrimitive](hint) {
+    return hint === 'number' ? this.valueOf() : this.toString();
+  }
+
   [inspect]() {
     return `${this.constructor.name}(${this.start} ${this.#inclusive() ? 'through' : 'until'} ${this.end})`;
   }

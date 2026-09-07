@@ -4,7 +4,7 @@ import { CalendarDate } from './calendar-date.js';
 import { DateTime } from './date-time.js';
 import { anchored, duration } from './duration.js';
 import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
-import { temporalDurationFrom } from './helpers/fields.js';
+import { fieldsFrom, temporalDurationOf } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions } from './helpers/format.js';
 import { IS_TIME } from './helpers/identity.js';
 import { looseZoned } from './helpers/loose.js';
@@ -186,14 +186,28 @@ export class Time {
   // arithmetic wraps like a clock face: 23:00 plus two hours is 01:00
   plus(amount, name) {
     return new Time(
-      guard(() => this.#plain.add(temporalDurationFrom(amount, name)), 'cannotAdd', `${amount} ${name ?? ''}`),
+      guard(() => this.#plain.add(Time.#clockFields(amount, name)), 'cannotAdd', `${amount} ${name ?? ''}`),
     );
+  }
+
+  // a clock has no calendar, so a day added to a time is refused rather than wrapped away
+  static #clockFields(amount, name) {
+    const fields = fieldsFrom(amount, name);
+    const calendar = ['years', 'months', 'weeks', 'days'].find((field) => fields[field]);
+    if (calendar) {
+      refuse('notATimeUnit', calendar, {
+        explanation: isDevelopment
+          ? 'a time has no calendar. add hours or minutes, or place it on a date first: time.on(date, zone).plus(days)'
+          : 0,
+      });
+    }
+    return temporalDurationOf(fields);
   }
 
   minus(amount, name) {
     return new Time(
       guard(
-        () => this.#plain.subtract(temporalDurationFrom(amount, name)),
+        () => this.#plain.subtract(Time.#clockFields(amount, name)),
         'cannotSubtract',
         `${amount} ${name ?? ''}`,
       ),
@@ -328,6 +342,11 @@ export class Time {
         ? 'a time of day is not a point on the number line. compare with isBefore, isAfter or equals, or measure with until'
         : 0,
     });
+  }
+
+  // + gives the string, while < and - still refuse through valueOf
+  [Symbol.toPrimitive](hint) {
+    return hint === 'number' ? this.valueOf() : this.toString();
   }
 
   [inspect]() {

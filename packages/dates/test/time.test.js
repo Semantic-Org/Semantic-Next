@@ -1,4 +1,4 @@
-import { configure, datetime, hours, minutes, time } from '@semantic-ui/dates';
+import { configure, datetime, days, hours, minutes, time } from '@semantic-ui/dates';
 
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -49,6 +49,11 @@ describe('time', () => {
     expect(time('17:30:15.250').toJSON()).toBe('17:30:15.250');
     expect(time('17:30:15.25').toJSON()).toBe('17:30:15.250');
     expect(time('17:30:15.000250').toJSON()).toBe('17:30:15.000250');
+  });
+
+  it('refuses a calendar unit, the mirror of a date refusing a clock unit', () => {
+    expect(() => time('09:00').plus(days(1))).toThrow(/notATimeUnit/);
+    expect(() => time('09:00').minus({ weeks: 1 })).toThrow(/notATimeUnit/);
   });
 
   it('wraps like a clock face', () => {

@@ -107,15 +107,15 @@ const needs = {
 
 // the tables the tokens read, for a picker's headers and a month dropdown. weekdays start where the
 // week does, so the header row matches the grid
-export const weekdayNames = (locale, style = 'short', firstDay) => {
+export const weekdayNames = (style = 'short', firstDay, locale) => {
   const table = names(pickLocale(locale))[style === 'long' ? 'dddd' : 'ddd'];
   const first = weekStart(firstDay) - 1;
   return [...table.slice(first), ...table.slice(0, first)];
 };
 
 export const monthNames = (
-  locale,
   style = 'long',
+  locale,
 ) => [...names(pickLocale(locale))[style === 'short' ? 'MMM' : 'MMMM']];
 
 export const formatTokens = (parts, pattern, locale) => {

@@ -132,7 +132,7 @@ time(input)  time(9, 30)  time(input, zone)  time(input, { zone, loose })
 ```
 
 Input: `'09:00'`, `'9am'`, `'5:30 pm'`, `'17:30:15.250'`, numbers, a fields object, a datetime, a `Date`
-(its clock in the zone). Arithmetic wraps like a clock face. `until` is signed within the day.
+(its clock in the zone). Arithmetic wraps like a clock face, and a calendar unit refuses, since a clock has no days. `until` is signed within the day.
 
 | read | `hour` `minute` `second` `millisecond` |
 | --- | --- |
@@ -206,7 +206,7 @@ out in two pieces, `twoPieces`, since one range cannot hold both.
 ```js
 compare(a, b)                 // a sort comparator across any one kind, ranges by start then end
 earliest(...points)  latest(...points)
-weekdayNames(locale?, 'short' | 'long', firstDay?)  monthNames(locale?, 'short' | 'long')   // a picker's header row, a month dropdown
+weekdayNames('short' | 'long', firstDay?, locale?)  monthNames('short' | 'long', locale?)   // a picker's header row, a month dropdown
 weekday('sunday')             // 7, the ISO number of a weekday from any spelling
 configure({ zone: 'UTC', locale: 'en-GB', weekStart: 'sunday', dayFirst: true, zoneAliases: { hq: 'Europe/Berlin' } })   // each checked at boot
 isDateTime(x) isCalendarDate(x) isTime(x) isDuration(x) isDateRange(x) isDateTimeRange(x) isTimeRange(x) kindOf(x)
@@ -233,7 +233,7 @@ when reading, so a change to the zone's rules moves the instant and not the meet
 
 Every refusal is a coded `RangeError` or `TypeError` built with utils' `createErrors`, one line in
 production (`dates refused [notADate] 2026-09-06T14:00Z`) with the way out appended in development.
-Codes: `backwards` `cannotAdd` `cannotBalance` `cannotRound` `cannotSet` `cannotSubtract` `cannotTotal` `emptyStep` `fractionalMonth` `mixedKinds` `mixedRange` `mixedSigns` `needsAnchor` `noField` `noPoints` `noTemporal` `noTokens` `noZone` `notADate` `notADateTime` `notADateUnit` `notADuration` `notANumber` `notAPoint` `notATime` `notFinite` `twoPieces` `unknownFormat` `unknownLocale` `unknownUnit` `unknownWeekday` `unknownZone` `unreadableDate` `unreadableDateTime` `unreadableDuration` `unreadableTime`.
+Codes: `backwards` `cannotAdd` `cannotBalance` `cannotRound` `cannotSet` `cannotSubtract` `cannotTotal` `emptyStep` `fractionalMonth` `mixedKinds` `mixedRange` `mixedSigns` `needsAnchor` `noField` `noPoints` `noTemporal` `noTokens` `noZone` `notADate` `notADateTime` `notADateUnit` `notADuration` `notANumber` `notAPoint` `notATime` `notATimeUnit` `notFinite` `twoPieces` `unknownFormat` `unknownLocale` `unknownUnit` `unknownWeekday` `unknownZone` `unreadableDate` `unreadableDateTime` `unreadableDuration` `unreadableTime`.
 
 ## not here, on purpose
 
