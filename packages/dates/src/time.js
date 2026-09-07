@@ -4,10 +4,10 @@ import { CalendarDate } from './calendar-date.js';
 import { DateTime } from './date-time.js';
 import { anchored } from './duration.js';
 import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
-import { temporalDurationOf } from './helpers/fields.js';
+import { temporalDurationFrom } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions } from './helpers/format.js';
 import { IS_TIME } from './helpers/identity.js';
-import { inspect, isPlainDateTime, isPlainTime, isZonedDateTime, singularKeys, unit } from './helpers/units.js';
+import { inspect, isPlainDateTime, isPlainTime, isZonedDateTime, singularKeys, stepOf, unit } from './helpers/units.js';
 import { zoneId } from './helpers/zones.js';
 import { TimeRange } from './range.js';
 
@@ -25,11 +25,11 @@ export class Time {
   #plain;
 
   // time(9, 30), or time(input, { zone, loose })
-  constructor(input, second, third) {
-    const settings = isPlainObject(second) ? second : {};
+  constructor(input, minuteOrOptions, second) {
+    const hasOptions = isPlainObject(minuteOrOptions);
     this.#plain = isPlainTime(input)
       ? input
-      : Time.#read(input, isPlainObject(second) ? undefined : second, third, settings);
+      : Time.#read(input, hasOptions ? undefined : minuteOrOptions, second, hasOptions ? minuteOrOptions : {});
     Object.freeze(this);
   }
 
@@ -125,7 +125,7 @@ export class Time {
       text,
       isDevelopment
         ? "write a clock time: '09:00', '5:30pm', '17:30:15.250'. { loose: true } reads a datetime the way Date reads it and keeps the clock"
-        : undefined,
+        : 0,
     );
   }
 
@@ -159,13 +159,17 @@ export class Time {
   // arithmetic wraps like a clock face: 23:00 plus two hours is 01:00
   plus(amount, name) {
     return new Time(
-      guard(() => this.#plain.add(temporalDurationOf(amount, name)), 'cannotAdd', `${amount} ${name ?? ''}`),
+      guard(() => this.#plain.add(temporalDurationFrom(amount, name)), 'cannotAdd', `${amount} ${name ?? ''}`),
     );
   }
 
   minus(amount, name) {
     return new Time(
-      guard(() => this.#plain.subtract(temporalDurationOf(amount, name)), 'cannotSubtract', `${amount} ${name ?? ''}`),
+      guard(
+        () => this.#plain.subtract(temporalDurationFrom(amount, name)),
+        'cannotSubtract',
+        `${amount} ${name ?? ''}`,
+      ),
     );
   }
 
@@ -181,7 +185,7 @@ export class Time {
   }
 
   endOf(name) {
-    return this.startOf(name).plus({ [`${unit(name)}s`]: 1 }).minus({ milliseconds: 1 });
+    return this.startOf(name).plus(stepOf(unit(name))).minus({ milliseconds: 1 });
   }
 
   round(increment, name) {
@@ -300,9 +304,9 @@ export class Time {
   }
 }
 
-export const time = (input, second, third) => {
-  const build = () => (input instanceof Time ? input : new Time(input, second, third));
-  return isPlainObject(second) && second.loose ? loosely(build) : build();
+export const time = (input, minuteOrOptions, second) => {
+  const build = () => (input instanceof Time ? input : new Time(input, minuteOrOptions, second));
+  return isPlainObject(minuteOrOptions) && minuteOrOptions.loose ? loosely(build) : build();
 };
 
 export const isTime = (value) => value instanceof Time;

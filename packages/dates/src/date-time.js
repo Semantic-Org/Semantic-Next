@@ -3,7 +3,7 @@ import { isDate, isDevelopment, isNumber, isPlainObject, isString } from '@seman
 import { CalendarDate, today } from './calendar-date.js';
 import { anchored } from './duration.js';
 import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
-import { temporalDurationOf } from './helpers/fields.js';
+import { temporalDurationFrom } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions, relativeSeconds } from './helpers/format.js';
 import { IS_DATE_TIME } from './helpers/identity.js';
 import {
@@ -124,7 +124,7 @@ export class DateTime {
         text,
         isDevelopment
           ? "write ISO 8601: '2026-09-06T14:30:00Z', '2026-09-06T14:30' for a wall clock in the zone, or '2026-09-06'. { loose: true } reads what Date reads"
-          : undefined,
+          : 0,
       );
     }
     catch (error) {
@@ -224,13 +224,17 @@ export class DateTime {
 
   plus(amount, name) {
     return new DateTime(
-      guard(() => this.#zoned.add(temporalDurationOf(amount, name)), 'cannotAdd', `${amount} ${name ?? ''}`),
+      guard(() => this.#zoned.add(temporalDurationFrom(amount, name)), 'cannotAdd', `${amount} ${name ?? ''}`),
     );
   }
 
   minus(amount, name) {
     return new DateTime(
-      guard(() => this.#zoned.subtract(temporalDurationOf(amount, name)), 'cannotSubtract', `${amount} ${name ?? ''}`),
+      guard(
+        () => this.#zoned.subtract(temporalDurationFrom(amount, name)),
+        'cannotSubtract',
+        `${amount} ${name ?? ''}`,
+      ),
     );
   }
 
@@ -311,8 +315,10 @@ export class DateTime {
     return this.#compare(other) === 0;
   }
 
+  // exact time only, so another DateTime compares as it is and never re-zones
   #compare(other) {
-    return Temporal.ZonedDateTime.compare(this.#zoned, new DateTime(other, this.zone).toTemporal());
+    const rival = other instanceof DateTime ? other : new DateTime(other, this.zone);
+    return Temporal.ZonedDateTime.compare(this.#zoned, rival.toTemporal());
   }
 
   isBefore(other) {

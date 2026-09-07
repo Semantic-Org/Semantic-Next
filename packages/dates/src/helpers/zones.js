@@ -1,4 +1,4 @@
-import { isPlainObject, isString, timezones } from '@semantic-ui/utils';
+import { capitalize, isDevelopment, isPlainObject, isString, timezones } from '@semantic-ui/utils';
 
 import { refuse } from './errors.js';
 import { weekdayNumber } from './units.js';
@@ -72,7 +72,7 @@ const cities = () => {
 // put to Temporal, which knows every link
 const regions = ['Africa', 'America', 'Antarctica', 'Asia', 'Atlantic', 'Australia', 'Europe', 'Indian', 'Pacific'];
 const rebuilt = (key) => {
-  const city = key.split(' ').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join('_');
+  const city = key.split(' ').map(capitalize).join('_');
   for (const region of regions) {
     const found = canonical(`${region}/${city}`);
     if (found) {
@@ -101,8 +101,9 @@ export const zoneId = (id) => {
   }
   if (!isString(id)) {
     refuse('unknownZone', String(id), {
-      explanation:
-        'a zone is an IANA name like America/New_York, a city like Berlin, an abbreviation like PT, a fixed offset like +05:30, or UTC',
+      explanation: isDevelopment
+        ? 'a zone is an IANA name like America/New_York, a city like Berlin, an abbreviation like PT, a fixed offset like +05:30, or UTC'
+        : 0,
     });
   }
   const known = resolved.get(id);
@@ -114,8 +115,9 @@ export const zoneId = (id) => {
     ?? rebuilt(key);
   if (!found) {
     refuse('unknownZone', id, {
-      explanation:
-        "a zone is an IANA name like America/New_York, a city like Berlin or los angeles, an abbreviation like PT or CET, a fixed offset like +05:30, or UTC. name your own once: configure({ zones: { hq: 'Europe/Berlin' } })",
+      explanation: isDevelopment
+        ? "a zone is an IANA name like America/New_York, a city like Berlin or los angeles, an abbreviation like PT or CET, a fixed offset like +05:30, or UTC. name your own once: configure({ zones: { hq: 'Europe/Berlin' } })"
+        : 0,
     });
   }
   resolved.set(id, found);
@@ -126,7 +128,7 @@ export const configure = ({ zone, locale, weekStart, zones } = {}) => {
   if (zones !== undefined) {
     if (!isPlainObject(zones)) {
       refuse('unknownZone', String(zones), {
-        explanation: "zones is an object of names to zones: { hq: 'Europe/Berlin' }",
+        explanation: isDevelopment ? "zones is an object of names to zones: { hq: 'Europe/Berlin' }" : 0,
       });
     }
     for (const [name, target] of Object.entries(zones)) {

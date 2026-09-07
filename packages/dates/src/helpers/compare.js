@@ -1,4 +1,4 @@
-import { isArray, isDate, isString } from '@semantic-ui/utils';
+import { isArray, isDate, isDevelopment, isString } from '@semantic-ui/utils';
 
 import { CalendarDate } from '../calendar-date.js';
 import { DateTime } from '../date-time.js';
@@ -44,7 +44,7 @@ export const point = (input) => {
     return new Time(input);
   }
   return refuseType('notAPoint', String(input), {
-    explanation: 'a point is a datetime, a date or a time, or a string that reads as one',
+    explanation: isDevelopment ? 'a point is a datetime, a date or a time, or a string that reads as one' : 0,
   });
 };
 
@@ -82,8 +82,9 @@ export const compare = (a, b) => {
   const right = b?.[IS_DURATION] ? b : point(b);
   if (kindOf(left) !== kindOf(right)) {
     refuseType('mixedKinds', `${kindOf(left)} with ${kindOf(right)}`, {
-      explanation:
-        'compare a datetime with a datetime, a date with a date. convert first: datetime.date, date.at(time, zone)',
+      explanation: isDevelopment
+        ? 'compare a datetime with a datetime, a date with a date. convert first: datetime.date, date.at(time, zone)'
+        : 0,
     });
   }
   return left.isBefore(right) ? -1 : left.isAfter(right) ? 1 : 0;
@@ -92,7 +93,7 @@ export const compare = (a, b) => {
 const pick = (values, verb, wins) => {
   const points = (values.length === 1 && isArray(values[0]) ? values[0] : values).map(point);
   if (!points.length) {
-    refuse('noPoints', verb, { explanation: `${verb}() needs at least one point` });
+    refuse('noPoints', verb, { explanation: isDevelopment ? `${verb}() needs at least one point` : 0 });
   }
   return points.reduce((best, next) => (wins(compare(next, best)) ? next : best));
 };

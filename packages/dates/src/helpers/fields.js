@@ -76,12 +76,11 @@ const parseWords = (text) => {
   }
   const negate = phrase.startsWith('-');
   const fields = {};
-  const rest = phrase.replace(negate ? phrase.slice(1) : phrase, (body) =>
-    body.replace(quantity, (_, amount, name) => {
-      spill(fields, unit(name), Number(amount));
-      return '';
-    }));
-  if (rest.replace(/^-/, '').trim()) {
+  const rest = (negate ? phrase.slice(1) : phrase).replace(quantity, (_, amount, name) => {
+    spill(fields, unit(name), Number(amount));
+    return '';
+  });
+  if (rest.trim()) {
     refuse('unreadableDuration', text, {
       explanation: isDevelopment
         ? "write quantities with units, '1h 30m' or '2 weeks 3 days', or an ISO duration like PT1H30M"
@@ -159,19 +158,19 @@ export const addFields = (a, b, sign) => {
       fields[field] = sum;
     }
   }
-  const clockA = temporalDurationFrom(clockFields(a));
-  const clockB = temporalDurationFrom(clockFields(b));
+  const clockA = temporalDurationOf(clockFields(a));
+  const clockB = temporalDurationOf(clockFields(b));
   Object.assign(fields, fieldsOf(sign > 0 ? clockA.add(clockB) : clockA.subtract(clockB)));
   return oneSign(fields, JSON.stringify(fields));
 };
 
 // Temporal refuses an empty fields object, and a zero duration has no nonzero field to offer it
-export const temporalDurationFrom = (fields) =>
+export const temporalDurationOf = (fields) =>
   Object.keys(fields).length
     ? guard(() => Temporal.Duration.from(fields), 'unreadableDuration', JSON.stringify(fields))
     : new Temporal.Duration();
 
-export const temporalDurationOf = (input, name) => temporalDurationFrom(fieldsFrom(input, name));
+export const temporalDurationFrom = (input, name) => temporalDurationOf(fieldsFrom(input, name));
 
 // plural keys are how Temporal writes a length, singular keys how it writes a point, so { hours: 2 }
 // is two hours where { hour: 2 } is two o'clock

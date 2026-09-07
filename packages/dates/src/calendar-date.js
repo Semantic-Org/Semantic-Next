@@ -3,7 +3,7 @@ import { isDate, isDevelopment, isNumber, isPlainObject, isString } from '@seman
 import { DateTime } from './date-time.js';
 import { anchored } from './duration.js';
 import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
-import { fieldsFrom, temporalDurationFrom } from './helpers/fields.js';
+import { fieldsFrom, temporalDurationOf } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions, relativeDays } from './helpers/format.js';
 import { IS_CALENDAR_DATE } from './helpers/identity.js';
 import {
@@ -11,6 +11,7 @@ import {
   isPlainDate,
   isPlainDateTime,
   isZonedDateTime,
+  plural,
   quarterStart,
   singularKeys,
   stepOf,
@@ -42,11 +43,11 @@ export class CalendarDate {
   #plain;
 
   // date(2026, 9, 6), or date(input, { zone, loose })
-  constructor(input, second, third) {
-    const settings = isPlainObject(second) ? second : {};
+  constructor(input, monthOrOptions, day) {
+    const hasOptions = isPlainObject(monthOrOptions);
     this.#plain = isPlainDate(input)
       ? input
-      : CalendarDate.#read(input, isPlainObject(second) ? undefined : second, third, settings);
+      : CalendarDate.#read(input, hasOptions ? undefined : monthOrOptions, day, hasOptions ? monthOrOptions : {});
     Object.freeze(this);
   }
 
@@ -127,7 +128,7 @@ export class CalendarDate {
       () => Temporal.PlainDate.from(trimmed),
       'unreadableDate',
       text,
-      isDevelopment ? "write ISO 8601: '2026-09-06'. { loose: true } reads what Date reads" : undefined,
+      isDevelopment ? "write ISO 8601: '2026-09-06'. { loose: true } reads what Date reads" : 0,
     );
   }
 
@@ -194,7 +195,7 @@ export class CalendarDate {
 
   static #dateFields(amount, name) {
     const fields = fieldsFrom(amount, name);
-    const clock = timeUnits.find((time) => fields[`${time}s`]);
+    const clock = timeUnits.find((time) => fields[plural(time)]);
     if (clock) {
       refuse('notADateUnit', `${clock}s`, {
         explanation: isDevelopment
@@ -202,7 +203,7 @@ export class CalendarDate {
           : 0,
       });
     }
-    return temporalDurationFrom(fields);
+    return temporalDurationOf(fields);
   }
 
   set(fields, value) {
@@ -371,9 +372,9 @@ export class CalendarDate {
   }
 }
 
-export const date = (input, second, third) => {
-  const build = () => (input instanceof CalendarDate ? input : new CalendarDate(input, second, third));
-  return isPlainObject(second) && second.loose ? loosely(build) : build();
+export const date = (input, monthOrOptions, day) => {
+  const build = () => (input instanceof CalendarDate ? input : new CalendarDate(input, monthOrOptions, day));
+  return isPlainObject(monthOrOptions) && monthOrOptions.loose ? loosely(build) : build();
 };
 
 export const today = (zone) => new CalendarDate(Temporal.Now.plainDateISO(zoneId(zone)));

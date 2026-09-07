@@ -1,6 +1,7 @@
-import { isPlainObject, isString } from '@semantic-ui/utils';
+import { isDevelopment, isPlainObject, isString } from '@semantic-ui/utils';
 
 import { refuse } from './errors.js';
+import { dateTimeFormat, relativeTimeFormat } from './intl.js';
 import { ordinal, pad } from './units.js';
 import { locale as pickLocale } from './zones.js';
 
@@ -17,13 +18,13 @@ const names = (locale) => {
     const month = (style) =>
       Array.from(
         { length: 12 },
-        (_, i) => new Intl.DateTimeFormat(locale, { month: style, timeZone: 'UTC' }).format(Date.UTC(2000, i, 1)),
+        (_, i) => dateTimeFormat(locale, { month: style, timeZone: 'UTC' }).format(Date.UTC(2000, i, 1)),
       );
     // 2024-01-01 fell on a monday, so index 0 is monday to match ISO weekday numbering
     const weekday = (style) =>
       Array.from(
         { length: 7 },
-        (_, i) => new Intl.DateTimeFormat(locale, { weekday: style, timeZone: 'UTC' }).format(Date.UTC(2024, 0, 1 + i)),
+        (_, i) => dateTimeFormat(locale, { weekday: style, timeZone: 'UTC' }).format(Date.UTC(2024, 0, 1 + i)),
       );
     nameCache.set(key, { MMM: month('short'), MMMM: month('long'), ddd: weekday('short'), dddd: weekday('long') });
   }
@@ -31,7 +32,7 @@ const names = (locale) => {
 };
 
 const zoneName = (parts, locale, style) =>
-  new Intl.DateTimeFormat(locale, { timeZoneName: style, timeZone: parts.zone })
+  dateTimeFormat(locale, { timeZoneName: style, timeZone: parts.zone })
     .formatToParts(parts.epoch)
     .find((part) => part.type === 'timeZoneName')?.value;
 
@@ -112,7 +113,7 @@ export const formatTokens = (parts, pattern, locale) => {
     }
     if (parts[needs[token]] === undefined) {
       refuse('noField', `${token} in '${pattern}'`, {
-        explanation: `a ${parts.kind} has no ${needs[token]}. combine it into a datetime first`,
+        explanation: isDevelopment ? `a ${parts.kind} has no ${needs[token]}. combine it into a datetime first` : 0,
       });
     }
     return tokens[token](parts, resolved);
@@ -170,7 +171,7 @@ const epochOf = (kind, subject) => {
 };
 
 const formatter = (kind, options, locale, zone) =>
-  new Intl.DateTimeFormat(pickLocale(locale), { ...options, timeZone: kind === 'datetime' ? zone : 'UTC' });
+  dateTimeFormat(pickLocale(locale), { ...options, timeZone: kind === 'datetime' ? zone : 'UTC' });
 
 export const formatIntl = (kind, subject, options, locale, zone) =>
   formatter(kind, options, locale, zone).format(epochOf(kind, subject));
@@ -208,7 +209,7 @@ const pickUnit = (seconds) => {
 export const relativeSeconds = (seconds, locale) => {
   const [name, size] = pickUnit(seconds);
   const value = Math.round(seconds / size);
-  return new Intl.RelativeTimeFormat(pickLocale(locale), { numeric: 'auto' }).format(value, name);
+  return relativeTimeFormat(pickLocale(locale)).format(value, name);
 };
 
 // Intl supplies yesterday and tomorrow
@@ -221,5 +222,5 @@ export const relativeDays = (days, locale) => {
     : size < 320
     ? ['month', Math.round(days / 30.436875)]
     : ['year', Math.round(days / 365.2425)];
-  return new Intl.RelativeTimeFormat(pickLocale(locale), { numeric: 'auto' }).format(value, name);
+  return relativeTimeFormat(pickLocale(locale)).format(value, name);
 };

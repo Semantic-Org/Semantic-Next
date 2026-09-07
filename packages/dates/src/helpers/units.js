@@ -1,10 +1,12 @@
-import { isNumber, isPlainObject, isString } from '@semantic-ui/utils';
+import { isDevelopment, isNumber, isPlainObject, isString } from '@semantic-ui/utils';
 
 import { refuse } from './errors.js';
 
 if (!globalThis.Temporal) {
   refuse('noTemporal', 'globalThis.Temporal', {
-    explanation: 'this library wraps the Temporal API. load a polyfill before importing it on a runtime without one',
+    explanation: isDevelopment
+      ? 'this library wraps the Temporal API. load a polyfill before importing it on a runtime without one'
+      : 0,
   });
 }
 
@@ -79,7 +81,9 @@ export const timeUnits = ['hour', 'minute', 'second', 'millisecond', 'microsecon
 export const unit = (input) => {
   const found = isString(input) && spellings[input.trim().toLowerCase()];
   return found || refuse('unknownUnit', String(input), {
-    explanation: `units are ${units.join(', ')} or quarter, singular or plural, or an abbreviation like h, min, d`,
+    explanation: isDevelopment
+      ? `units are ${units.join(', ')} or quarter, singular or plural, or an abbreviation like h, min, d`
+      : 0,
   });
 };
 
@@ -96,7 +100,7 @@ export const weekdayNumber = (input) => {
   const index = key.length === 3 ? weekdays.findIndex((name) => name.startsWith(key)) : -1;
   return index === -1
     ? refuse('unknownWeekday', String(input), {
-      explanation: `weekdays are ${weekdays.join(', ')} or 1 through 7 from monday`,
+      explanation: isDevelopment ? `weekdays are ${weekdays.join(', ')} or 1 through 7 from monday` : 0,
     })
     : index + 1;
 };

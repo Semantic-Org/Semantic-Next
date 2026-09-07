@@ -1,8 +1,9 @@
 import { isDevelopment } from '@semantic-ui/utils';
 
 import { guard, refuse } from './helpers/errors.js';
-import { addFields, fieldNames, fieldsFrom, fieldsOf, spill, temporalDurationFrom } from './helpers/fields.js';
+import { addFields, fieldNames, fieldsFrom, fieldsOf, spill, temporalDurationOf } from './helpers/fields.js';
 import { IS_DURATION } from './helpers/identity.js';
+import { durationFormat, numberFormat } from './helpers/intl.js';
 import { inspect, isTemporalDuration, unit } from './helpers/units.js';
 import { locale as pickLocale } from './helpers/zones.js';
 
@@ -10,6 +11,8 @@ import { locale as pickLocale } from './helpers/zones.js';
   a length of time. fields stay as written (90 minutes is 90 minutes until you balance it), and a
   duration that came from until() or since() remembers where it started, so months and years total
 */
+
+const subsecond = fieldNames.indexOf('milliseconds');
 
 export class Duration {
   // brand duration
@@ -24,7 +27,7 @@ export class Duration {
   #anchor;
 
   constructor(input, name, anchor) {
-    this.#temporal = isTemporalDuration(input) ? input : temporalDurationFrom(fieldsFrom(input, name));
+    this.#temporal = isTemporalDuration(input) ? input : temporalDurationOf(fieldsFrom(input, name));
     this.#anchor = anchor;
     Object.freeze(this);
   }
@@ -86,7 +89,7 @@ export class Duration {
 
   plus(other, name) {
     return new Duration(
-      temporalDurationFrom(addFields(this.fields(), fieldsFrom(other, name), 1)),
+      temporalDurationOf(addFields(this.fields(), fieldsFrom(other, name), 1)),
       undefined,
       this.#anchor,
     );
@@ -94,7 +97,7 @@ export class Duration {
 
   minus(other, name) {
     return new Duration(
-      temporalDurationFrom(addFields(this.fields(), fieldsFrom(other, name), -1)),
+      temporalDurationOf(addFields(this.fields(), fieldsFrom(other, name), -1)),
       undefined,
       this.#anchor,
     );
@@ -105,7 +108,7 @@ export class Duration {
     for (const [field, value] of Object.entries(this.fields())) {
       spill(fields, unit(field), value * factor);
     }
-    return new Duration(temporalDurationFrom(fields), undefined, this.#anchor);
+    return new Duration(temporalDurationOf(fields), undefined, this.#anchor);
   }
 
   negated() {
@@ -155,7 +158,7 @@ export class Duration {
     if (duration.anchor || !temporal.weeks) {
       return temporal;
     }
-    return temporalDurationFrom(addFields({ ...duration.fields(), weeks: 0 }, { days: temporal.weeks * 7 }, 1));
+    return temporalDurationOf(addFields({ ...duration.fields(), weeks: 0 }, { days: temporal.weeks * 7 }, 1));
   }
 
   static #requireAnchor(duration, verb) {
@@ -216,10 +219,10 @@ export class Duration {
   // wall-clock difference reads as hours and minutes and a timer reads as milliseconds
   format(style = 'long', locale) {
     const fields = this.fields();
-    const large = fieldNames.slice(0, 7).some((field) => fields[field]);
+    const large = fieldNames.slice(0, subsecond).some((field) => fields[field]);
     const shown = {};
-    for (const field of fieldNames) {
-      if (fields[field] && (!large || fieldNames.indexOf(field) < 7)) {
+    for (const [index, field] of fieldNames.entries()) {
+      if (fields[field] && (!large || index < subsecond)) {
         shown[field] = fields[field];
       }
     }
@@ -227,10 +230,10 @@ export class Duration {
     if (this.isZero) {
       const unitDisplay = style === 'long' ? 'long' : style === 'narrow' ? 'narrow' : 'short';
       return style === 'digital'
-        ? new Intl.DurationFormat(pickLocale(locale), { style, hoursDisplay: 'always' }).format({ hours: 0 })
-        : new Intl.NumberFormat(pickLocale(locale), { style: 'unit', unit: 'second', unitDisplay }).format(0);
+        ? durationFormat(pickLocale(locale), { style, hoursDisplay: 'always' }).format({ hours: 0 })
+        : numberFormat(pickLocale(locale), { style: 'unit', unit: 'second', unitDisplay }).format(0);
     }
-    return new Intl.DurationFormat(pickLocale(locale), { style }).format(shown);
+    return durationFormat(pickLocale(locale), { style }).format(shown);
   }
 
   toString() {

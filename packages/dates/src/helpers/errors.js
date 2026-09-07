@@ -12,7 +12,7 @@ export const guard = (attempt, code, at, explanation) => {
     if (error?.code) {
       throw error;
     }
-    return refuse(code, at, { explanation: explanation ?? error.message.replace(/^Temporal error: /, '') });
+    return refuse(code, at, { explanation: explanation || error.message.replace(/^Temporal error: /, '') });
   }
 };
 
