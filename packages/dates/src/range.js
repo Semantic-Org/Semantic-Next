@@ -3,7 +3,7 @@ import { isDevelopment, isPlainObject, isString } from '@semantic-ui/utils';
 import { CalendarDate } from './calendar-date.js';
 import { DateTime } from './date-time.js';
 import { days, duration } from './duration.js';
-import { isUnreadable, refuse, refuseType } from './helpers/errors.js';
+import { isUnreadable, loosely, refuse, refuseType, unreadable } from './helpers/errors.js';
 import { isDurationFields } from './helpers/fields.js';
 import { formatIntlRange, intlOptions } from './helpers/format.js';
 import { IS_DATE_RANGE, IS_DATE_TIME_RANGE, IS_DURATION, IS_RANGE, IS_TIME_RANGE } from './helpers/identity.js';
@@ -18,6 +18,11 @@ import { Time } from './time.js';
 
 const factoryNames = { date: 'dateRange', datetime: 'datetimeRange', time: 'timeRange' };
 
+// dateRange('a/b', { loose }) has no end, so an options bag can sit second. a fields object end has
+// unit keys, and this has only the two option keys, so the two never read as each other
+const isOptions = (value) =>
+  isPlainObject(value) && Object.keys(value).every((key) => key === 'loose' || key === 'zone');
+
 // the shared body. the three exported classes seal it to a kind, so a value names what it holds
 class Range {
   // brand range
@@ -31,8 +36,12 @@ class Range {
   #start;
   #end;
 
-  constructor(start, end) {
+  // (start, end, { zone, loose }), or (interval, { zone, loose })
+  constructor(start, end, options = {}) {
     const kind = this.constructor.kind;
+    if (isOptions(end)) {
+      [end, options] = [undefined, end];
+    }
     if (start instanceof Range && end === undefined) {
       if (start.kind !== kind) {
         refuseType('mixedRange', `${factoryNames[start.kind]} as ${factoryNames[kind]}`, {
@@ -46,7 +55,7 @@ class Range {
     if (isString(start) && end === undefined) {
       [start, end] = start.split('/');
     }
-    this.#start = Range.#read(kind, start);
+    this.#start = Range.#read(kind, start, undefined, options.zone);
     this.#end = Range.#readEnd(kind, end, this.#start);
     if (this.#end.isBefore(this.#start)) {
       refuse('backwards', `${this.#start} to ${this.#end}`, {
@@ -57,12 +66,12 @@ class Range {
   }
 
   // an end reads through the kind's own factory, and a datetime end reads in the start's zone
-  static #read(kind, value, start) {
+  static #read(kind, value, start, zone) {
     if (kind === 'date') {
       return new CalendarDate(value);
     }
     if (kind === 'datetime') {
-      return new DateTime(value, start?.zone);
+      return new DateTime(value, start?.zone ?? zone);
     }
     return new Time(value);
   }
@@ -293,9 +302,15 @@ export class TimeRange extends Range {
 
 const byKind = { date: DateRange, datetime: DateTimeRange, time: TimeRange };
 
-export const dateRange = (start, end) => new DateRange(start, end);
-export const datetimeRange = (start, end) => new DateTimeRange(start, end);
-export const timeRange = (start, end) => new TimeRange(start, end);
+const build = (Kind, start, end, options) => {
+  const settings = isOptions(end) ? end : options ?? {};
+  const make = () => new Kind(start, end, options);
+  return settings.loose ? loosely(make, unreadable.range) : make();
+};
+
+export const dateRange = (start, end, options) => build(DateRange, start, end, options);
+export const datetimeRange = (start, end, options) => build(DateTimeRange, start, end, options);
+export const timeRange = (start, end, options) => build(TimeRange, start, end, options);
 
 export const isDateRange = (value) => value instanceof DateRange;
 export const isDateTimeRange = (value) => value instanceof DateTimeRange;

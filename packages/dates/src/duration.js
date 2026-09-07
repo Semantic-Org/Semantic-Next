@@ -1,6 +1,6 @@
-import { isDevelopment } from '@semantic-ui/utils';
+import { isDevelopment, isPlainObject } from '@semantic-ui/utils';
 
-import { guard, refuse } from './helpers/errors.js';
+import { guard, loosely, refuse, unreadable } from './helpers/errors.js';
 import { addFields, fieldNames, fieldsFrom, fieldsOf, spill, temporalDurationOf } from './helpers/fields.js';
 import { IS_DURATION } from './helpers/identity.js';
 import { durationFormat, numberFormat } from './helpers/intl.js';
@@ -119,10 +119,15 @@ export class Duration {
     return new Duration(this.#temporal.abs(), undefined, this.#anchor);
   }
 
-  // carries overflow upward: 90 minutes balances to an hour and a half. days are the ceiling until
-  // the duration knows its calendar, then weeks, months and years open up
-  balance(largest = 'day') {
-    const target = unit(largest);
+  // carries overflow upward: 90 minutes balances to an hour and a half. a length stops at hours, since
+  // a day is a calendar unit and folding 36 hours into one would move a deadline across a daylight
+  // saving change. an anchored duration knows its calendar, so days are its ceiling until asked for
+  // weeks, months or years, and an explicit unit is taken at its word either way
+  balance(largest) {
+    if (largest === undefined && !this.#anchor) {
+      return Duration.#balancedClock(this);
+    }
+    const target = unit(largest ?? 'day');
     if (!this.#anchor && (target === 'week' || target === 'month' || target === 'year')) {
       Duration.#requireAnchor(this, `balance to ${target}`);
     }
@@ -159,6 +164,14 @@ export class Duration {
       return temporal;
     }
     return temporalDurationOf(addFields({ ...duration.fields(), weeks: 0 }, { days: temporal.weeks * 7 }, 1));
+  }
+
+  // weeks are already days here, and months or years were refused, so days are the one calendar field left
+  static #balancedClock(duration) {
+    Duration.#requireAnchor(duration, 'balance');
+    const { days, ...clock } = fieldsOf(Duration.#fixed(duration));
+    const balanced = fieldsOf(temporalDurationOf(clock).round({ largestUnit: 'hour' }));
+    return new Duration(temporalDurationOf(days ? { days, ...balanced } : balanced));
   }
 
   static #requireAnchor(duration, verb) {
@@ -248,8 +261,12 @@ export class Duration {
     return this.#temporal;
   }
 
-  valueOf() {
+  toMilliseconds() {
     return this.total('millisecond');
+  }
+
+  valueOf() {
+    return this.toMilliseconds();
   }
 
   [inspect]() {
@@ -257,10 +274,13 @@ export class Duration {
   }
 }
 
-export const duration = (
-  input,
-  name,
-) => (input instanceof Duration && name === undefined ? input : new Duration(input, name));
+// duration(input, unit), or duration(input, { loose })
+export const duration = (input, unitOrOptions) => {
+  const hasOptions = isPlainObject(unitOrOptions);
+  const name = hasOptions ? undefined : unitOrOptions;
+  const build = () => (input instanceof Duration && name === undefined ? input : new Duration(input, name));
+  return hasOptions && unitOrOptions.loose ? loosely(build, unreadable.length) : build();
+};
 
 // a duration that remembers the point it was measured from, so months and years can total
 export const anchored = (temporal, anchor) => new Duration(temporal, undefined, anchor);

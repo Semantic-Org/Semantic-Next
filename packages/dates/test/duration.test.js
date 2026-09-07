@@ -54,10 +54,26 @@ describe('duration', () => {
 
   it('balances overflow upward and rounds down to a unit', () => {
     expect(minutes(150).balance().toString()).toBe('PT2H30M');
-    expect(hours(50).balance().toString()).toBe('P2DT2H');
     expect(seconds(3661).balance('hour').toString()).toBe('PT1H1M1S');
     expect(duration('1 day 6 hours').balance().toString()).toBe('P1DT6H');
     expect(minutes(90).round('hour').toString()).toBe('PT2H');
+  });
+
+  it('balances a length to hours, since a day is a calendar unit, unless asked for days', () => {
+    expect(hours(50).balance().toString()).toBe('PT50H');
+    expect(duration('36h').balance().toString()).toBe('PT36H');
+    expect(duration('36h').balance('day').toString()).toBe('P1DT12H');
+    expect(weeks(1).balance().toString()).toBe('P7D');
+    expect(duration('1.5 days').balance().toString()).toBe('P1DT12H');
+    expect(duration('PT90M').balance().equals(duration('PT5400S').balance())).toBe(true);
+    expect(duration('PT90M').balance().toString()).toBe(duration(5400000).balance().toString());
+  });
+
+  it('reads a length loosely, giving null for what is not one', () => {
+    expect(duration('garbage', { loose: true })).toBeNull();
+    expect(duration('5 foos', { loose: true })).toBeNull();
+    expect(duration('2h', { loose: true }).toString()).toBe('PT2H');
+    expect(hours(1).toMilliseconds()).toBe(3600000);
   });
 
   it('scales by a fraction, spilling into the unit below', () => {

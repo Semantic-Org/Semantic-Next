@@ -10,6 +10,7 @@ import {
   IS_DATE_TIME,
   IS_DATE_TIME_RANGE,
   IS_DURATION,
+  IS_RANGE,
   IS_TIME,
   IS_TIME_RANGE,
 } from './identity.js';
@@ -73,13 +74,7 @@ export const kindOf = (value) => {
   return undefined;
 };
 
-// a sort comparator. both sides must be the same kind of thing, a raw value reads as the first's kind
-export const compare = (a, b) => {
-  const left = a?.[IS_DURATION] ? a : point(a);
-  if (left[IS_DURATION]) {
-    return left.compare(b);
-  }
-  const right = b?.[IS_DURATION] ? b : point(b);
+const sameKind = (left, right) => {
   if (kindOf(left) !== kindOf(right)) {
     refuseType('mixedKinds', `${kindOf(left)} with ${kindOf(right)}`, {
       explanation: isDevelopment
@@ -87,6 +82,21 @@ export const compare = (a, b) => {
         : 0,
     });
   }
+};
+
+// a sort comparator. both sides must be the same kind of thing, a raw value reads as the first's kind.
+// ranges order by their start, then by their end, the order a database gives its range types
+export const compare = (a, b) => {
+  if (a?.[IS_DURATION]) {
+    return a.compare(b);
+  }
+  if (a?.[IS_RANGE]) {
+    sameKind(a, b);
+    return compare(a.start, b.start) || compare(a.end, b.end);
+  }
+  const left = point(a);
+  const right = b?.[IS_DURATION] ? b : point(b);
+  sameKind(left, right);
   return left.isBefore(right) ? -1 : left.isAfter(right) ? 1 : 0;
 };
 

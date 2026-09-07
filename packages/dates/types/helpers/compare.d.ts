@@ -1,13 +1,16 @@
 import type { CalendarDate } from '../calendar-date.js';
 import type { DateTime } from '../date-time.js';
 import type { Duration } from '../duration.js';
+import type { DateRange, DateTimeRange, TimeRange } from '../range.js';
 import type { Time } from '../time.js';
 
 /** A datetime, a date or a time, or a string that reads as one */
 export type Point = DateTime | CalendarDate | Time | Date | string;
 
-/** A sort comparator over points of one kind, or durations. A raw value reads as the first's kind */
-export function compare(a: Point | Duration, b: Point | Duration): -1 | 0 | 1;
+/** A sort comparator over points of one kind, durations, or ranges of one kind, which order by start then end. A raw value reads as the first's kind */
+export function compare(a: Point | Duration | Range, b: Point | Duration | Range): -1 | 0 | 1;
+
+export type Range = DateRange | DateTimeRange | TimeRange;
 
 /** The point that comes first, from several arguments or one array */
 export function earliest<T extends Point>(

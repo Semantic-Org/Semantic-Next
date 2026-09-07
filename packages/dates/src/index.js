@@ -14,6 +14,16 @@ export { isCalendarDate } from './calendar-date.js';
 export { isDateTime } from './date-time.js';
 export { isDuration } from './duration.js';
 export { compare, earliest, kindOf, latest } from './helpers/compare.js';
+export {
+  IS_CALENDAR_DATE,
+  IS_DATE_RANGE,
+  IS_DATE_TIME,
+  IS_DATE_TIME_RANGE,
+  IS_DURATION,
+  IS_RANGE,
+  IS_TIME,
+  IS_TIME_RANGE,
+} from './helpers/identity.js';
 export { configure } from './helpers/zones.js';
 export { isDateRange, isDateTimeRange, isTimeRange } from './range.js';
 export { isTime } from './time.js';

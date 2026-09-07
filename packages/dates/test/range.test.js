@@ -97,6 +97,16 @@ describe('dateRange', () => {
     expect(() => week.overlaps(datetimeRange(datetime('2026-09-07T09:00Z'), hours(8)))).toThrow(/mixedRange/);
   });
 
+  it('reads loosely, giving null for an end it cannot read, and takes a zone for the start', () => {
+    expect(dateRange('garbage', '2026-09-07', { loose: true })).toBeNull();
+    expect(dateRange('garbage/2026-09-07', { loose: true })).toBeNull();
+    expect(dateRange('2026-09-01', '2026-09-07', { loose: true }).toString()).toBe('2026-09-01/2026-09-07');
+    expect(datetimeRange('2026-09-07T09:00', '2h', { zone: 'Europe/Berlin' }).start.zone).toBe('Europe/Berlin');
+    expect(datetimeRange('2026-09-07T09:00/2026-09-07T17:00', { zone: 'Europe/Berlin' }).end.zone).toBe(
+      'Europe/Berlin',
+    );
+  });
+
   it('refuses a range that runs backwards and a copy across kinds', () => {
     expect(() => dateRange('2026-09-07', '2026-09-01')).toThrow(/backwards/);
     expect(() => new DateRange(timeRange('09:00', '17:00'))).toThrow(/mixedRange/);

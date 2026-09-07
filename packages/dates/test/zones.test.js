@@ -1,9 +1,16 @@
-import { configure, date, datetime, now, today } from '@semantic-ui/dates';
+import { configure, date, datetime, IS_DATE_TIME, now, today } from '@semantic-ui/dates';
 
 import { beforeEach, describe, expect, it } from 'vitest';
 
 beforeEach(() => {
   configure({ zone: 'UTC', locale: 'en-US', weekStart: 'monday' });
+});
+
+describe('brands', () => {
+  it('are exported, so a value is recognised without the class', () => {
+    expect(datetime('2026-09-06T14:30Z')[IS_DATE_TIME]).toBe(true);
+    expect(IS_DATE_TIME).toBe(Symbol.for('semantic-ui/DateTime'));
+  });
 });
 
 describe('zones', () => {

@@ -279,12 +279,14 @@ export class Time {
     };
   }
 
+  // a fraction prints in groups of three, the width its precision needs, so one precision is one width
   toString() {
-    return this.#plain.toString();
+    const digits = this.nanosecond ? 9 : this.microsecond ? 6 : this.millisecond ? 3 : 0;
+    return this.#plain.toString({ fractionalSecondDigits: digits });
   }
 
   toJSON() {
-    return this.#plain.toString();
+    return this.toString();
   }
 
   toTemporal() {

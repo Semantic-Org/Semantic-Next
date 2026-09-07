@@ -29,9 +29,16 @@ describe('time', () => {
   });
 
   it('reads a fraction of a second behind a single-digit hour', () => {
-    expect(time('9:00:00.5').toString()).toBe('09:00:00.5');
+    expect(time('9:00:00.5').toString()).toBe('09:00:00.500');
     expect(time('9:00:00.250').millisecond).toBe(250);
     expect(time('9:00:00.000000001').nanosecond).toBe(1);
+  });
+
+  it('prints a fraction in groups of three, one width per precision', () => {
+    expect(time('17:30').toJSON()).toBe('17:30:00');
+    expect(time('17:30:15.250').toJSON()).toBe('17:30:15.250');
+    expect(time('17:30:15.25').toJSON()).toBe('17:30:15.250');
+    expect(time('17:30:15.000250').toJSON()).toBe('17:30:15.000250');
   });
 
   it('wraps like a clock face', () => {

@@ -2,6 +2,7 @@ import {
   compare,
   configure,
   date,
+  dateRange,
   datetime,
   earliest,
   hours,
@@ -27,6 +28,14 @@ describe('compare', () => {
     expect(compare(datetime('2026-09-06T14:30Z'), '2026-09-06T14:30:00Z')).toBe(0);
     expect(compare(time('5pm'), '9am')).toBe(1);
     expect(compare(hours(1), '90m')).toBe(-1);
+  });
+
+  it('sorts ranges of one kind by start, then by end', () => {
+    const q1 = dateRange('2026-01-01', '2026-03-31');
+    const january = dateRange('2026-01-01', '2026-01-31');
+    const q2 = dateRange('2026-04-01', '2026-06-30');
+    expect([q2, q1, january].sort(compare)).toEqual([january, q1, q2]);
+    expect(() => compare(q1, timeRange('09:00', '17:00'))).toThrow(/mixedKinds/);
   });
 
   it('refuses to compare across kinds', () => {

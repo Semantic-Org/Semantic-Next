@@ -33,6 +33,7 @@ export class Duration {
   negated(): Duration;
   abs(): Duration;
   /** Carries overflow upward: 90 minutes becomes an hour and a half. Weeks, months and years need the anchor */
+  /** Carry overflow upward. A length stops at hours, an anchored duration at days, an explicit unit is taken as given */
   balance(largest?: Unit): Duration;
   /** Rounds to the nearest whole unit */
   round(smallest: Unit): Duration;
@@ -50,11 +51,16 @@ export class Duration {
   toJSON(): string;
   toTemporal(): TemporalValue;
   /** Milliseconds, so a duration drops into setTimeout. Months and years refuse unless anchored */
+  /** The whole length in milliseconds, months and years only when anchored */
+  toMilliseconds(): number;
   valueOf(): number;
 }
 
 /** Reads a phrase, an ISO string, a fields object, or a number with a unit. A bare number is milliseconds */
 export function duration(input: DurationInput, unit?: Unit): Duration;
+export function duration(input: DurationInput, options: { loose?: false; }): Duration;
+/** With `loose`, null for input that does not read as a length instead of a throw */
+export function duration(input: unknown, options: { loose: true; }): Duration | null;
 
 export function years(count: number): Duration;
 export function months(count: number): Duration;
