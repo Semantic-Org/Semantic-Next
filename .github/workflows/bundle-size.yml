@@ -66,7 +66,9 @@ jobs:
       # Swap shipped source and build scripts to the merge base, rebuild, and
       # measure. node_modules is reused — a faithful-enough baseline, since
       # dep bumps rarely move first-party bundle bytes. Files the PR adds are
-      # dropped so the lines-of-code delta counts new files honestly.
+      # dropped so the lines-of-code delta counts new files honestly, and the
+      # empty directories they leave behind are pruned: a build script that
+      # walks packages/ trips on a package folder with no package.json.
       #
       # Root package.json and the lockfile are swapped too: build:packages
       # lists each package's :build explicitly, so a PR that adds (or removes)
@@ -78,7 +80,10 @@ jobs:
           BASELINE_SHA=$(git rev-parse FETCH_HEAD)
           ADDED=$(git diff --name-only --diff-filter=A FETCH_HEAD HEAD -- packages src internal-packages || true)
           git checkout FETCH_HEAD -- packages src internal-packages package.json package-lock.json 2>/dev/null || true
-          if [ -n "$ADDED" ]; then echo "$ADDED" | xargs -r rm -f; fi
+          if [ -n "$ADDED" ]; then
+            echo "$ADDED" | xargs -r rm -f
+            find packages src internal-packages -type d -empty -delete
+          fi
           npm run build
           node tools/ci/size/collect.js --root . --label baseline --out results/baseline.json
           echo "$BASELINE_SHA" > results/baseline-sha.txt
