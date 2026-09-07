@@ -67,9 +67,11 @@ jobs:
       # measure. node_modules is reused — a faithful-enough baseline, since
       # dep bumps rarely move first-party bundle bytes. Files the PR adds are
       # dropped so the lines-of-code delta counts new files honestly, and the
-      # directories that leaves empty are removed, those and no others, since a
-      # build script that walks packages/ trips on a package folder with no
-      # package.json.
+      # directories that leaves empty are removed, those and no others. The new
+      # package's folder itself survives on its build output, and that is fine:
+      # what tripped was the playground's asset build, which takes any folder
+      # holding a types/ directory for a package and reads its package.json, and
+      # the emptied types/ folder is gone.
       #
       # Root package.json and the lockfile are swapped too: build:packages
       # lists each package's :build explicitly, so a PR that adds (or removes)

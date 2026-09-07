@@ -84,8 +84,9 @@ jobs:
 
       # Swap shipped source to the merge base, rebuild the baseline bundle, and
       # measure. node_modules is reused. Files the PR adds are dropped, and the
-      # directories that leaves empty removed, those and no others: a build
-      # script that walks packages/ trips on a package folder with no package.json.
+      # directories that leaves empty removed, those and no others. What tripped
+      # was the playground's asset build, which takes any folder holding a types/
+      # directory for a package and reads its package.json.
       #
       # Root package.json and the lockfile are swapped too (the #264 fix): a PR
       # that adds or removes a package would otherwise leave the base build
