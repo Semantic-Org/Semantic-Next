@@ -9,6 +9,7 @@ import { IS_CALENDAR_DATE } from './helpers/identity.js';
 import { looseZoned } from './helpers/loose.js';
 import {
   inspect,
+  isDigits,
   isPlainDate,
   isPlainDateTime,
   isZonedDateTime,
@@ -47,6 +48,9 @@ export class CalendarDate {
 
   // date(2026, 9, 6), date(input, zone), or date(input, { zone, loose })
   constructor(input, monthOrOptions, day) {
+    if (isDigits(input) && (isNumber(monthOrOptions) || isDigits(monthOrOptions))) {
+      [input, monthOrOptions, day] = [Number(input), Number(monthOrOptions), day === undefined ? day : Number(day)];
+    }
     const settings = isPlainObject(monthOrOptions)
       ? monthOrOptions
       : isString(monthOrOptions)
@@ -338,12 +342,19 @@ export class CalendarDate {
 
   // a day is a range of time, so it walks and splits like one: today().split('hour') is the day's hours
   // in the zone, 23 or 25 of them on a transition day, which only the zone knows
-  points(step, zone) {
-    return this.at('00:00', zone).range('day').points(step);
+  points(step, ...rest) {
+    const [name, zone] = CalendarDate.#stepArguments(step, rest);
+    return this.at('00:00', zone).range('day').points(step, name);
   }
 
-  split(step, zone) {
-    return this.at('00:00', zone).range('day').split(step);
+  split(step, ...rest) {
+    const [name, zone] = CalendarDate.#stepArguments(step, rest);
+    return this.at('00:00', zone).range('day').split(step, name);
+  }
+
+  // points('hour', zone), or points(30, 'minutes', zone): a count brings its unit before the zone
+  static #stepArguments(step, [second, third]) {
+    return isNumber(step) || isDigits(step) ? [second, third] : [undefined, second];
   }
 
   /*******************************

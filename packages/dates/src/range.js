@@ -247,8 +247,8 @@ class Range {
   }
 
   // a time range walks by elapsed length, so the walk crosses midnight and ends where the range does
-  points(step) {
-    const size = Range.#step(step);
+  points(step, name) {
+    const size = Range.#step(step, name);
     const points = [];
     if (this.kind === 'time') {
       const length = this.duration.total('nanosecond');
@@ -268,8 +268,12 @@ class Range {
 
   // points(unit) walks by whole units, points(duration) by that length. either way the steps count out from
   // the start, so monthly from the 31st lands on each month's last day rather than drifting to the 28th
-  static #step(step) {
-    const size = isString(step) && !/\d/.test(step) ? duration(1, step) : duration(step);
+  static #step(step, name) {
+    const size = name !== undefined
+      ? duration(step, name)
+      : isString(step) && !/\d/.test(step)
+      ? duration(1, step)
+      : duration(step);
     if (size.isZero || size.isNegative) {
       refuse('emptyStep', String(size), {
         explanation: isDevelopment ? 'a range walks forward, the step must be positive' : 0,
@@ -278,8 +282,8 @@ class Range {
     return size;
   }
 
-  split(step) {
-    const points = this.points(step);
+  split(step, name) {
+    const points = this.points(step, name);
     return points.map((start, i) => {
       const following = points[i + 1];
       if (following === undefined) {
@@ -326,7 +330,7 @@ class Range {
       options,
       locale,
       undefined,
-      this.#wraps() ? 1 : 0,
+      this.#wraps(),
     );
   }
 

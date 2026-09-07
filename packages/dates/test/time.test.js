@@ -15,6 +15,7 @@ describe('time', () => {
     expect(time('12pm').toString()).toBe('12:00:00');
     expect(time('17:30:15.250').millisecond).toBe(250);
     expect(time(9, 30).toString()).toBe('09:30:00');
+    expect(time('9', '30').toString()).toBe('09:30:00');
     expect(time({ hours: 17 }).toString()).toBe('17:00:00');
     expect(time(datetime('2026-09-06T14:30Z')).toString()).toBe('14:30:00');
     expect(time(new Date('2026-09-06T14:30:00Z'), { zone: 'Asia/Tokyo' }).toString()).toBe('23:30:00');

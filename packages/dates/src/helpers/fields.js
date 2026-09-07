@@ -2,7 +2,7 @@ import { isDevelopment, isNumber, isPlainObject, isString } from '@semantic-ui/u
 
 import { guard, refuse, refuseType } from './errors.js';
 import { IS_DURATION } from './identity.js';
-import { isTemporalDuration, plural, unit } from './units.js';
+import { isDigits, isTemporalDuration, plural, unit } from './units.js';
 
 export const fieldNames = [
   'years',
@@ -65,13 +65,13 @@ export const fieldsOf = (temporal) => {
   return fields;
 };
 
-const quantity = /([-+]?)(\d+(?:\.\d+)?)\s*([a-zµ]+)/g;
+const quantity = /([-+]?)(\d+(?:\.\d+)?)\s*([a-zµ]+)/gi;
 
 // '1h 30m', '2 weeks and 3 days', '90 minutes', '1500' (milliseconds, as toDuration reads it).
 // a leading minus with the rest unsigned negates the whole phrase, the way a person means '-1h 30m',
 // and a sign on each quantity is taken as written
 const parseWords = (text) => {
-  const phrase = text.trim().toLowerCase().replace(/,|\band\b/g, ' ');
+  const phrase = text.trim().replace(/,|\band\b/gi, ' ');
   if (!phrase) {
     refuse('unreadableDuration', text, {
       explanation: isDevelopment ? 'an empty string is not a length. duration(0) is zero' : 0,
@@ -132,6 +132,10 @@ export const fieldsFrom = (input, name) => {
     return spill({}, name === undefined ? 'millisecond' : unit(name), input);
   }
   if (isString(input)) {
+    // a count from a form or a query string is text, and '30' beside 'days' is thirty days
+    if (name !== undefined && isDigits(input)) {
+      return spill({}, unit(name), Number(input));
+    }
     return /^[-+]?P/i.test(input.trim())
       ? fieldsOf(guard(() => Temporal.Duration.from(input.trim()), 'unreadableDuration', input))
       : oneSign(parseWords(input), input);
@@ -150,7 +154,7 @@ export const fieldsFrom = (input, name) => {
   });
 };
 
-const clockFields = (fields) => {
+export const clockFields = (fields) => {
   const clock = {};
   for (const field of fieldNames.slice(4)) {
     if (fields[field]) {

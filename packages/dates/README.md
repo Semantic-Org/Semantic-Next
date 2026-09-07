@@ -22,7 +22,7 @@ const due = date('2026-09-01').plus(days(30));                           // a du
 const visit = date('2026-11-03').at('9:30am', 'America/Los_Angeles');    // date + time + zone = datetime
 const open = timeRange(time('9am'), time('5:30pm'));                      // hours are times
 open.contains(now().in('Chicago').time);                                  // the store is open
-now().since(visit).format();                                              // '2 months, 3 days, 4 hours'
+now().since(visit).round('hour').format();                                // '2 months, 3 days, 4 hours'
 ```
 
 ## Installation
@@ -52,7 +52,7 @@ fixed offset, or a name of your own from `configure({ zoneAliases: { hq: 'Europe
 and spacing. The 418 canonical cities are all distinct, so a city is never a guess.
 
 **Only a datetime is a number.** `valueOf()` gives epoch milliseconds, so datetimes sort with
-`(a, b) => a - b` and compare with `<`. A date, a time and a range refuse `valueOf` with the method to
+`(a, b) => a - b` and compare with `<`, while `'Due ' + dt` gives the string, as `Date` decides it. A date, a time and a range refuse `valueOf` with the method to
 use instead, so `due < now()` throws rather than being silently always true. A duration is
 milliseconds when it has no months or years, or when it came from `until()` and knows its calendar.
 
@@ -91,13 +91,14 @@ Input: an ISO string (`'2026-09-06T14:30Z'`, `'2026-09-06T14:30'` as a wall cloc
 | move | `plus(x)` `minus(x)` `set({ hour: 9 })` `set('hour', 9)` `at('9am')` `in('Asia/Tokyo')` `startOf('month')` `endOf('day')` `round(15, 'minutes')` `floor('hour')` `ceil('hour')` `next('friday')` `previous('monday')` |
 | ask | `equals` `isBefore` `isAfter` `isSame(other, 'day')` `isPast` `isFuture` `isToday` `isTomorrow` `isYesterday` |
 | measure | `until(other)` `since(other)` a duration, `until(other, 'hours')` a number, `to(end)` `range('week')` a range |
-| show | `format()` medium date and short time, `format('short' \| 'long' \| 'full' \| 'date' \| 'time')`, `format({ dateStyle: 'medium' })`, `format('YYYY-MM-DD h:mm a z')`, `formatRelative()` |
+| show | `format()` medium date and short time, `format('short' \| 'long' \| 'full' \| 'date' \| 'time')`, `format({ dateStyle: 'medium' })`, `format('YYYY-MM-DD h:mm a z')` in day.js tokens, where the presets stand in for `L` and `LLL`, `formatRelative()` |
 | out | `toString()` `toJSON()` the instant in UTC, `toJSDate()` `toTemporal()` `valueOf()` epoch milliseconds |
 
 `plus` and `minus` take a duration, a fields object `{ days: 3 }`, a phrase `'1h 30m'`, or a number and
 unit `(3, 'days')`. Adding days keeps the wall clock across a daylight saving change, adding hours
-counts hours. `set` refuses a part out of range, `set('minute', 60)` is `cannotSet`, the way every
-factory refuses one. `round`, `floor` and `ceil` snap the wall clock, so on the repeated hour of a
+counts hours. A count written as text reads as its number beside a unit, so `plus('30', 'days')` from
+a form is thirty days. `set` refuses a part out of range, `set('minute', 60)` is `cannotSet`, the way
+every factory refuses one. `round`, `floor` and `ceil` snap the wall clock, so on the repeated hour of a
 fall-back night they land on its second pass. An Intl options object may name its own `timeZone`.
 
 ## date
@@ -156,7 +157,9 @@ balances to hours and never to days, because a day is a calendar unit that only 
 daylight saving change. `plus` and `minus` keep the same line: `days(1).plus(hours(25))` is `P1DT25H`,
 and `days(1).minus(hours(1))` refuses, since a day less an hour has no one length. Two durations that
 `equals()` can therefore print differently, so a stored length is its `toMilliseconds()`. A bare number
-is milliseconds, fractions included, so `duration(performance.now() - start)` reads.
+is milliseconds, fractions included, so `duration(performance.now() - start)` reads, and `format()`
+prints the clock balanced, so `duration(stored).format()` reads as hours and minutes while `toString()`
+keeps the fields as written. A count written as text reads beside its unit: `days('30')` is thirty days.
 
 | read | `years` `months` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `sign` `isZero` `isNegative` |
 | --- | --- |
@@ -197,7 +200,7 @@ out in two pieces, `twoPieces`, since one range cannot hold both.
 ```js
 compare(a, b)                 // a sort comparator across any one kind, ranges by start then end
 earliest(...points)  latest(...points)
-configure({ zone: 'UTC', locale: 'en-GB', weekStart: 'sunday', zoneAliases: { hq: 'Europe/Berlin' } })
+configure({ zone: 'UTC', locale: 'en-GB', weekStart: 'sunday', zoneAliases: { hq: 'Europe/Berlin' } })   // each checked at boot
 isDateTime(x) isCalendarDate(x) isTime(x) isDuration(x) isDateRange(x) isDateTimeRange(x) isTimeRange(x) kindOf(x)
 IS_DATE_TIME IS_CALENDAR_DATE IS_TIME IS_DURATION IS_RANGE IS_DATE_RANGE IS_DATE_TIME_RANGE IS_TIME_RANGE
 ```
@@ -222,7 +225,7 @@ when reading, so a change to the zone's rules moves the instant and not the meet
 
 Every refusal is a coded `RangeError` or `TypeError` built with utils' `createErrors`, one line in
 production (`dates refused [notADate] 2026-09-06T14:00Z`) with the way out appended in development.
-Codes: `backwards` `cannotAdd` `cannotBalance` `cannotRound` `cannotSet` `cannotSubtract` `cannotTotal` `emptyStep` `fractionalMonth` `mixedKinds` `mixedRange` `mixedSigns` `needsAnchor` `noField` `noPoints` `noTemporal` `noTokens` `noZone` `notADate` `notADateTime` `notADateUnit` `notADuration` `notANumber` `notAPoint` `notATime` `notFinite` `twoPieces` `unknownFormat` `unknownUnit` `unknownWeekday` `unknownZone` `unreadableDate` `unreadableDateTime` `unreadableDuration` `unreadableTime`.
+Codes: `backwards` `cannotAdd` `cannotBalance` `cannotRound` `cannotSet` `cannotSubtract` `cannotTotal` `emptyStep` `fractionalMonth` `mixedKinds` `mixedRange` `mixedSigns` `needsAnchor` `noField` `noPoints` `noTemporal` `noTokens` `noZone` `notADate` `notADateTime` `notADateUnit` `notADuration` `notANumber` `notAPoint` `notATime` `notFinite` `twoPieces` `unknownFormat` `unknownLocale` `unknownUnit` `unknownWeekday` `unknownZone` `unreadableDate` `unreadableDateTime` `unreadableDuration` `unreadableTime`.
 
 ## not here, on purpose
 

@@ -124,6 +124,25 @@ describe('duration', () => {
     expect(() => hours(1).format('medium')).toThrow(/unknownFormat/);
   });
 
+  it('reads a count written as text beside its unit, the way a form sends one', () => {
+    expect(days('30').toString()).toBe('P30D');
+    expect(duration('90', 'minutes').toString()).toBe('PT90M');
+    expect(duration('1M').toString()).toBe('P1M');
+  });
+
+  it('calls a month equal to a month without an anchor', () => {
+    expect(months(1).equals(months(1))).toBe(true);
+    expect(duration('P1M').equals(months(1))).toBe(true);
+    expect(() => months(1).equals(days(30))).toThrow(/needsAnchor/);
+  });
+
+  it('formats a stored count of milliseconds as hours and minutes, and gives + its string', () => {
+    expect(duration(93784512).format()).toBe('26 hours, 3 minutes, 4 seconds');
+    expect(duration(93784512).toString()).toBe('PT93784.512S');
+    expect('Takes ' + hours(2)).toBe('Takes PT2H');
+    expect(hours(2) - hours(1)).toBe(3600000);
+  });
+
   it('compares by length, using the anchor for calendar units', () => {
     expect(hours(1).compare(minutes(90))).toBe(-1);
     expect(hours(1).equals(minutes(60))).toBe(true);
@@ -138,7 +157,7 @@ describe('duration', () => {
     expect(length.format('narrow')).toBe('2h 30m');
     expect(length.format('digital')).toBe('2:30:00');
     expect(milliseconds(250).format()).toBe('250 milliseconds');
-    expect(seconds(90).plus(milliseconds(5)).format()).toBe('90 seconds');
+    expect(seconds(90).plus(milliseconds(5)).format()).toBe('1 minute, 30 seconds');
     expect(duration(0).format()).toBe('0 seconds');
     expect(hours(2).plus(minutes(5)).format('long', 'ja')).toBe('2 時間 5 分');
   });

@@ -1,7 +1,15 @@
 import { isDevelopment, isPlainObject } from '@semantic-ui/utils';
 
 import { guard, loosely, refuse, unreadable } from './helpers/errors.js';
-import { addFields, fieldNames, fieldsFrom, fieldsOf, spill, temporalDurationOf } from './helpers/fields.js';
+import {
+  addFields,
+  clockFields,
+  fieldNames,
+  fieldsFrom,
+  fieldsOf,
+  spill,
+  temporalDurationOf,
+} from './helpers/fields.js';
 import { IS_DURATION } from './helpers/identity.js';
 import { durationFormat, numberFormat } from './helpers/intl.js';
 import { inspect, isTemporalDuration, unit } from './helpers/units.js';
@@ -241,16 +249,17 @@ export class Duration {
 
   compare(other) {
     const rival = other instanceof Duration ? other : new Duration(other);
+    const [mine, theirs] = [Duration.#fixed(this), Duration.#fixed(rival)];
+    // the same fields are the same length in any calendar, so a month equals a month without an anchor
+    if (mine.toString() === theirs.toString()) {
+      return 0;
+    }
     const anchor = this.#anchor ?? rival.anchor;
     if (!anchor) {
       Duration.#requireAnchor(this, 'compare');
       Duration.#requireAnchor(rival, 'compare');
     }
-    return Temporal.Duration.compare(
-      Duration.#fixed(this),
-      Duration.#fixed(rival),
-      anchor ? { relativeTo: anchor } : undefined,
-    );
+    return Temporal.Duration.compare(mine, theirs, anchor ? { relativeTo: anchor } : undefined);
   }
 
   equals(other) {
@@ -261,15 +270,18 @@ export class Duration {
               Output
   *******************************/
 
-  // Intl.DurationFormat, and the sub-second fields only show when nothing larger is set, so a
-  // wall-clock difference reads as hours and minutes and a timer reads as milliseconds
+  // Intl.DurationFormat over the calendar fields as written and the clock balanced, so a stored count of
+  // milliseconds reads as hours and minutes. the sub-second fields only show when nothing larger is set,
+  // so a wall-clock difference reads as hours and minutes and a timer reads as milliseconds
   format(style = 'long', locale) {
     if (!styles.includes(style)) {
       refuse('unknownFormat', String(style), {
         explanation: isDevelopment ? "a duration formats as 'long', 'short', 'narrow' or 'digital'" : 0,
       });
     }
-    const fields = this.fields();
+    const written = this.fields();
+    const clock = fieldsOf(temporalDurationOf(clockFields(written)).round({ largestUnit: 'hour' }));
+    const fields = { ...written, ...Object.fromEntries(fieldNames.slice(4).map((field) => [field, clock[field]])) };
     const large = fieldNames.slice(0, subsecond).some((field) => fields[field]);
     const shown = {};
     for (const [index, field] of fieldNames.entries()) {
@@ -305,6 +317,11 @@ export class Duration {
 
   valueOf() {
     return this.toMilliseconds();
+  }
+
+  // + gives the string and < and - the number, the way Date decides
+  [Symbol.toPrimitive](hint) {
+    return hint === 'number' ? this.toMilliseconds() : this.toString();
   }
 
   [inspect]() {

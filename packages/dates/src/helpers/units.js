@@ -78,8 +78,12 @@ export const units = [
 ];
 export const timeUnits = ['hour', 'minute', 'second', 'millisecond', 'microsecond', 'nanosecond'];
 
+// a number written as text, the way a form or a query string carries one
+export const isDigits = (value) => isString(value) && /^\s*[-+]?\d+(?:\.\d+)?\s*$/.test(value);
+
+// day.js keeps M for month and m for minute, and the tokens here do too, so the one capital is kept
 export const unit = (input) => {
-  const key = isString(input) ? input.trim().toLowerCase() : '';
+  const key = input === 'M' ? 'month' : isString(input) ? input.trim().toLowerCase() : '';
   const found = Object.hasOwn(spellings, key) && spellings[key];
   return found || refuse('unknownUnit', String(input), {
     explanation: isDevelopment

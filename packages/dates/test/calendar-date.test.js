@@ -117,6 +117,9 @@ describe('date', () => {
     expect(date('2026-09-07').points('hour', 'Europe/Berlin')[0].toString()).toBe('2026-09-06T22:00:00.000Z');
     expect(date('2026-03-08').split('hour', 'America/New_York')).toHaveLength(23);
     expect(date('2026-09-07').split('day').map(String)).toEqual(['2026-09-07T00:00:00.000Z/2026-09-08T00:00:00.000Z']);
+    expect(date('2026-09-07').points(30, 'minutes')).toHaveLength(48);
+    expect(date('2026-09-07').points(30, 'minutes', 'Europe/Berlin')[0].toString()).toBe('2026-09-06T22:00:00.000Z');
+    expect(date('2026', '9', '6').toString()).toBe('2026-09-06');
   });
 
   it('gives the inclusive range of the unit around it', () => {

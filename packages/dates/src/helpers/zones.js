@@ -1,6 +1,6 @@
 import { capitalize, isDevelopment, isPlainObject, isString, timezones } from '@semantic-ui/utils';
 
-import { refuse } from './errors.js';
+import { guard, refuse } from './errors.js';
 import { weekdayNumber } from './units.js';
 
 // process-wide defaults, zoneAliases being the names a zone answers to
@@ -142,7 +142,7 @@ export const configure = ({ zone, locale, weekStart, zoneAliases } = {}) => {
     settings.zone = zone === null ? undefined : zoneId(zone);
   }
   if (locale !== undefined) {
-    settings.locale = locale ?? undefined;
+    settings.locale = locale === null ? undefined : checkedLocale(locale);
   }
   if (weekStart !== undefined) {
     settings.weekStart = weekdayNumber(weekStart);
@@ -150,5 +150,23 @@ export const configure = ({ zone, locale, weekStart, zoneAliases } = {}) => {
   return { ...settings, zoneAliases: { ...settings.zoneAliases } };
 };
 
-export const locale = (override) => override ?? settings.locale;
+// an Accept-Language header is the classic first attempt, and Intl would refuse it far from the cause
+const knownLocales = new Set();
+const checkedLocale = (tag) => {
+  const key = String(tag);
+  if (!knownLocales.has(key)) {
+    guard(
+      () => Intl.getCanonicalLocales(tag),
+      'unknownLocale',
+      key,
+      isDevelopment
+        ? "a locale is a BCP 47 tag like 'en-US' or 'de', or a list of them. pick one out of an Accept-Language header"
+        : 0,
+    );
+    knownLocales.add(key);
+  }
+  return tag;
+};
+
+export const locale = (override) => (override === undefined ? settings.locale : checkedLocale(override));
 export const weekStart = () => settings.weekStart;

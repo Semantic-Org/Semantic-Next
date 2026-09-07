@@ -9,6 +9,7 @@ import { IS_DATE_TIME } from './helpers/identity.js';
 import { looseZoned } from './helpers/loose.js';
 import {
   inspect,
+  isDigits,
   isInstant,
   isPlainDate,
   isPlainDateTime,
@@ -137,7 +138,7 @@ export class DateTime {
       if (!zoned) {
         throw error;
       }
-      return zoned.withTimeZone(zoneId(zone));
+      return zoned;
     }
   }
 
@@ -289,7 +290,7 @@ export class DateTime {
   }
 
   #round(increment, name, mode) {
-    const [count, target] = isString(increment) ? [1, increment] : [increment, name];
+    const [count, target] = isString(increment) && !isDigits(increment) ? [1, increment] : [Number(increment), name];
     return new DateTime(
       guard(
         () => this.#zoned.round({ smallestUnit: unit(target), roundingIncrement: count, roundingMode: mode }),
@@ -438,6 +439,11 @@ export class DateTime {
 
   valueOf() {
     return this.epoch;
+  }
+
+  // + gives the string and < and - the number, the way Date decides
+  [Symbol.toPrimitive](hint) {
+    return hint === 'number' ? this.epoch : this.toString();
   }
 
   [inspect]() {

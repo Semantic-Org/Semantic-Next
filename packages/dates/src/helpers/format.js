@@ -1,6 +1,6 @@
 import { isDevelopment, isPlainObject, isString } from '@semantic-ui/utils';
 
-import { refuse } from './errors.js';
+import { guard, refuse } from './errors.js';
 import { dateTimeFormat, relativeTimeFormat } from './intl.js';
 import { ordinal, pad } from './units.js';
 import { locale as pickLocale } from './zones.js';
@@ -164,7 +164,7 @@ export const intlOptions = (kind, spec) => {
 
 // Intl gets epoch milliseconds and a zone on every engine. a date is its UTC midnight read in UTC, a
 // time is that clock on the epoch day, so the fields print unshifted whether Temporal is native or not
-const epochOf = (kind, subject, dayOffset = 0) => {
+const epochOf = (kind, subject) => {
   if (kind === 'date') {
     // Date.UTC reads a year under 100 as the 1900s, setUTCFullYear reads it as written
     const stamp = new Date(0);
@@ -172,7 +172,7 @@ const epochOf = (kind, subject, dayOffset = 0) => {
     return stamp.getTime();
   }
   if (kind === 'time') {
-    return Date.UTC(1970, 0, 1 + dayOffset, subject.hour, subject.minute, subject.second, subject.millisecond);
+    return Date.UTC(1970, 0, 1, subject.hour, subject.minute, subject.second, subject.millisecond);
   }
   return subject;
 };
@@ -180,17 +180,32 @@ const epochOf = (kind, subject, dayOffset = 0) => {
 // a datetime prints in its zone unless the options name one. a date or a time has no instant, so its
 // fields print through UTC whatever the options say
 const formatter = (kind, options, locale, zone) =>
-  dateTimeFormat(
-    pickLocale(locale),
-    kind === 'datetime' ? { timeZone: zone, ...options } : { ...options, timeZone: 'UTC' },
+  guard(
+    () =>
+      dateTimeFormat(
+        pickLocale(locale),
+        kind === 'datetime' ? { timeZone: zone, ...options } : { ...options, timeZone: 'UTC' },
+      ),
+    'unknownFormat',
+    JSON.stringify(options),
   );
 
 export const formatIntl = (kind, subject, options, locale, zone) =>
   formatter(kind, options, locale, zone).format(epochOf(kind, subject));
 
-// a time range across midnight ends on the next day, so its end prints a day forward
-export const formatIntlRange = (kind, start, end, options, locale, zone, endDay = 0) =>
-  formatter(kind, options, locale, zone).formatRange(epochOf(kind, start), epochOf(kind, end, endDay));
+// Intl adds the date to a range once its ends fall on different days, whatever the options say, so a
+// time range across midnight prints each end on its own and joins them the way the locale joins a range
+const sameDay = [Date.UTC(1970, 0, 1, 9), Date.UTC(1970, 0, 1, 10)];
+export const formatIntlRange = (kind, start, end, options, locale, zone, wraps = false) => {
+  const format = formatter(kind, options, locale, zone);
+  if (!wraps) {
+    return format.formatRange(epochOf(kind, start), epochOf(kind, end));
+  }
+  const joint = format.formatRangeToParts(...sameDay).find((part) =>
+    part.source === 'shared' && part.type === 'literal'
+  );
+  return `${format.format(epochOf(kind, start))}${joint?.value ?? ' – '}${format.format(epochOf(kind, end))}`;
+};
 
 const minuteSeconds = 60;
 const hourSeconds = 3600;

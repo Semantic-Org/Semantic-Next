@@ -207,12 +207,21 @@ describe('timeRange', () => {
     ]);
     expect(night.split(hours(4)).map(String)).toEqual(['22:00:00/02:00:00', '02:00:00/06:00:00']);
     expect(night.format()).toMatch(/10:00 PM.*6:00 AM/);
+    expect(night.format()).not.toMatch(/1970/);
+    expect(night.format(undefined, 'de-DE')).not.toMatch(/1970/);
     expect(timeRange(night.toString()).equals(night)).toBe(true);
   });
 
   it('reads its ends loosely, and refuses an unknown zone', () => {
     expect(timeRange('9 o clock', '5pm', { loose: true })).toBeNull();
     expect(() => timeRange('09:00', '17:00', { zone: 'Nowhere' })).toThrow(/unknownZone/);
+  });
+
+  it('walks by a count and a unit, the way plus and round are written', () => {
+    const shift = timeRange('09:00', '17:00');
+    expect(shift.points(30, 'minutes')).toHaveLength(16);
+    expect(shift.split(30, 'minutes')).toHaveLength(16);
+    expect(shift.points('30', 'minutes')).toHaveLength(16);
   });
 
   it('has no zone to place in', () => {

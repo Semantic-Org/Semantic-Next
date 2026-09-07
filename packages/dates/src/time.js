@@ -10,6 +10,7 @@ import { IS_TIME } from './helpers/identity.js';
 import { looseZoned } from './helpers/loose.js';
 import {
   inspect,
+  isDigits,
   isPlainDateTime,
   isPlainTime,
   isZonedDateTime,
@@ -37,6 +38,13 @@ export class Time {
 
   // time(9, 30), time(input, zone), or time(input, { zone, loose })
   constructor(input, minuteOrOptions, second) {
+    if (isDigits(input) && (isNumber(minuteOrOptions) || isDigits(minuteOrOptions))) {
+      [input, minuteOrOptions, second] = [
+        Number(input),
+        Number(minuteOrOptions),
+        second === undefined ? second : Number(second),
+      ];
+    }
     const settings = isPlainObject(minuteOrOptions)
       ? minuteOrOptions
       : isString(minuteOrOptions)
@@ -228,7 +236,7 @@ export class Time {
   }
 
   #round(increment, name, mode) {
-    const [count, target] = isString(increment) ? [1, increment] : [increment, name];
+    const [count, target] = isString(increment) && !isDigits(increment) ? [1, increment] : [Number(increment), name];
     return new Time(
       guard(
         () => this.#plain.round({ smallestUnit: unit(target), roundingIncrement: count, roundingMode: mode }),

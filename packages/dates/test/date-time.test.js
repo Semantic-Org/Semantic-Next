@@ -114,6 +114,30 @@ describe('datetime', () => {
     expect(() => datetime('2026-09-06T14:30Z').startOf('constructor')).toThrow(/unknownUnit/);
   });
 
+  it('stands a loose wall clock in the configured zone, and takes a count as text', () => {
+    configure({ zone: 'America/Los_Angeles' });
+    expect(datetime('September 6, 2026 5:30 PM', { loose: true }).format('HH:mm z')).toBe('17:30 PDT');
+    const moment = datetime('2026-09-06T14:30Z');
+    expect(moment.plus('30', 'days').toString()).toBe('2026-10-06T14:30:00.000Z');
+    expect(moment.round('15', 'minutes').toString()).toBe('2026-09-06T14:30:00.000Z');
+    expect(moment.startOf('M').equals(moment.startOf('month'))).toBe(true);
+  });
+
+  it('is a string under + and a number under < and -, the way Date decides', () => {
+    const moment = datetime('2026-09-06T14:30Z');
+    expect('Due ' + moment).toBe('Due 2026-09-06T14:30:00.000Z');
+    expect(moment - datetime('2026-09-06T14:00Z')).toBe(1800000);
+    expect(moment < datetime('2026-09-06T15:00Z')).toBe(true);
+  });
+
+  it('refuses a locale Intl cannot read at configure and per call, and a bad Intl bag with a code', () => {
+    expect(() => configure({ locale: 'en-US,en;q=0.9' })).toThrow(/unknownLocale/);
+    expect(() => datetime('2026-09-06T14:30Z').format(undefined, '')).toThrow(/unknownLocale/);
+    expect(() => datetime('2026-09-06T14:30Z').format({ timeStyle: 'short', timeZoneName: 'short' })).toThrow(
+      /unknownFormat/,
+    );
+  });
+
   it('compares as the same instant whatever zone each side reads it in', () => {
     const moment = datetime('2026-09-06T14:30Z');
     expect(moment.equals(moment.in('Asia/Tokyo'))).toBe(true);
