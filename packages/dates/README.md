@@ -115,7 +115,7 @@ unless `{ loose: true, zone }` says which, or `datetime(text, zone).date` choose
 | --- | --- |
 | move | `plus` `minus` (years, months, weeks, days) `set` `startOf('week')` `endOf('month')` the last day, `next('monday')` `previous('friday')` |
 | ask | `equals` `isBefore` `isAfter` `isSame(other, 'month')` `isPast(zone?)` `isFuture` `isToday` `isTomorrow` `isYesterday` |
-| combine | `at(time, zone?)` a datetime, `to(end)` `range('month')` a range |
+| combine | `at(time, zone?)` a datetime, `to(end)` `range('month')` a range, `points('hour', zone?)` `split(minutes(30), zone?)` the day's slots as datetimes |
 | measure | `until(other)` `since(other)` `until(other, 'days')` |
 | show | `format()` `format('long')` `format('MMMM Do, YYYY')` `formatRelative()` yesterday, tomorrow, in 2 weeks |
 | out | `toString()` `toJSON()` `'2026-09-06'`, `toJSDate(zone?)` `toTemporal()` |

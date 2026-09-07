@@ -336,6 +336,16 @@ export class CalendarDate {
     return new DateRange(this.startOf(name), this.endOf(name));
   }
 
+  // a day is a range of time, so it walks and splits like one: today().split('hour') is the day's hours
+  // in the zone, 23 or 25 of them on a transition day, which only the zone knows
+  points(step, zone) {
+    return this.at('00:00', zone).range('day').points(step);
+  }
+
+  split(step, zone) {
+    return this.at('00:00', zone).range('day').split(step);
+  }
+
   /*******************************
               Output
   *******************************/

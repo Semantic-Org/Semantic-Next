@@ -14,7 +14,7 @@ import type {
   Weekday,
   Zone,
 } from './inputs.js';
-import type { DateRange } from './range.js';
+import type { DateRange, DateTimeRange } from './range.js';
 
 /**
  * A calendar date with no time and no zone: a due date, a birthday, a booking night. It is not a
@@ -73,6 +73,10 @@ export class CalendarDate {
   to(end: CalendarDateInput | DurationInput): DateRange;
   /** Every day of the unit containing this date, first through last */
   range(unit: DateUnit): DateRange;
+  /** The day's points by a step, as datetimes in the zone: `today().points('hour')` */
+  points(step: Unit | DurationInput, zone?: Zone): DateTime[];
+  /** The day cut into ranges by a step, as datetime ranges in the zone: `today().split('hour')` */
+  split(step: Unit | DurationInput, zone?: Zone): DateTimeRange[];
 
   format(spec?: FormatSpec, locale?: Locale): string;
   /** `'yesterday'`, `'in 3 weeks'`, `'last month'`, measured against today unless told otherwise */
