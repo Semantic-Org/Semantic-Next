@@ -161,7 +161,7 @@ describe('datetime', () => {
     expect(start.until(end).toString()).toBe('P3M4DT6H7M');
     expect(start.until(end, 'hours')).toBeCloseTo(2262.1167, 4);
     expect(end.since(start, 'days')).toBeCloseTo(94.255, 3);
-    expect(end.until(start).isNegative).toBe(true);
+    expect(end.until(start).isNegative()).toBe(true);
   });
 
   it('gives the half-open range of the unit around it', () => {

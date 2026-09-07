@@ -35,9 +35,9 @@ export class CalendarDate {
   readonly weekOfYear: number;
   readonly daysInMonth: number;
   readonly daysInYear: number;
-  readonly isLeapYear: boolean;
-  readonly isWeekend: boolean;
-  readonly isWeekday: boolean;
+  isLeapYear(): boolean;
+  isWeekend(): boolean;
+  isWeekday(): boolean;
 
   /** Adds years, months, weeks or days. A clock unit refuses */
   plus(amount: DurationInput, unit?: Unit): CalendarDate;

@@ -19,13 +19,13 @@ export class Duration {
   readonly nanoseconds: number;
   /** 1, 0 or -1 */
   readonly sign: number;
-  readonly isZero: boolean;
-  readonly isNegative: boolean;
+  isZero(): boolean;
+  isNegative(): boolean;
   /** The point this duration was measured from, when it came from `until()` or `since()` */
   readonly anchor: TemporalValue | undefined;
 
   /** The nonzero fields as a plain object */
-  fields(): DurationFields;
+  toFields(): DurationFields;
 
   plus(other: DurationInput, unit?: Unit): Duration;
   minus(other: DurationInput, unit?: Unit): Duration;

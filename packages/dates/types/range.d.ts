@@ -19,7 +19,7 @@ declare abstract class Range<Point, Input> {
   readonly start: Point;
   readonly end: Point;
   readonly kind: 'date' | 'datetime' | 'time';
-  readonly isEmpty: boolean;
+  isEmpty(): boolean;
   /** The whole length, anchored at the start. A date range counts its last day */
   readonly duration: Duration;
 

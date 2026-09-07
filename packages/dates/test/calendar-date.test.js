@@ -78,11 +78,11 @@ describe('date', () => {
   it('reads the calendar facts around it', () => {
     const day = date('2026-09-06');
     expect(day.weekday).toBe(7);
-    expect(day.isWeekend).toBe(true);
+    expect(day.isWeekend()).toBe(true);
     expect(day.quarter).toBe(3);
     expect(day.weekOfYear).toBe(36);
     expect(day.daysInMonth).toBe(30);
-    expect(date('2028-02-01').isLeapYear).toBe(true);
+    expect(date('2028-02-01').isLeapYear()).toBe(true);
   });
 
   it('compares with raw strings and by unit', () => {

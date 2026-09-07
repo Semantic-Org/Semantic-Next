@@ -49,9 +49,9 @@ export class DateTime {
   readonly daysInYear: number;
   /** 23, 24 or 25 across a daylight saving change */
   readonly hoursInDay: number;
-  readonly isLeapYear: boolean;
-  readonly isWeekend: boolean;
-  readonly isWeekday: boolean;
+  isLeapYear(): boolean;
+  isWeekend(): boolean;
+  isWeekday(): boolean;
   /** The calendar date in this zone */
   readonly date: CalendarDate;
   /** The time of day in this zone */

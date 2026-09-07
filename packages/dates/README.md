@@ -73,6 +73,10 @@ what cannot be read: a point that is not one, a length that is not one, a range 
 reads but is wrong, a backwards range or an unknown zone, still throws, since that is a mistake in the
 code rather than in the data's form. A `Date` object is read everywhere without asking.
 
+**Nouns are properties, questions and verbs are calls.** `dt.year`, `dt.date`, `range.duration` and
+`slot.start` read as data, and the parts are real properties, so a value prints them in a console without
+a click. `isWeekend()`, `isPast()`, `plus()` and `toFields()` are calls, whatever they need to answer.
+
 **Same verbs everywhere.** `plus`, `minus`, `set`, `startOf`, `endOf`, `round`, `floor`, `ceil`,
 `isBefore`, `isAfter`, `equals`, `isSame`, `until`, `since`, `to`, `format`, `formatRelative`. Every method
 that takes another point also takes anything its factory reads, so `dt.isBefore('2027-01-01')` works.
@@ -86,10 +90,10 @@ now(zone?)      datetime(input, zone?)      datetime(input, { zone, loose })
 Input: an ISO string (`'2026-09-06T14:30Z'`, `'2026-09-06T14:30'` as a wall clock in the zone,
 `'2026-09-06'` as midnight), a `Date`, epoch milliseconds, a fields object, a date, a Temporal value.
 
-| read | `year` `month` `day` `weekday` (1 monday to 7 sunday) `hour` `minute` `second` `millisecond` `zone` `offset` `epoch` `quarter` `dayOfYear` `weekOfYear` `daysInMonth` `daysInYear` `hoursInDay` `isLeapYear` `isWeekend` `isWeekday` `date` `time` |
+| read | `year` `month` `day` `weekday` (1 monday to 7 sunday) `hour` `minute` `second` `millisecond` `zone` `offset` `epoch` `quarter` `dayOfYear` `weekOfYear` `daysInMonth` `daysInYear` `hoursInDay` `date` `time` |
 | --- | --- |
 | move | `plus(x)` `minus(x)` `set({ hour: 9 })` `set('hour', 9)` `at('9am')` `in('Asia/Tokyo')` `startOf('month')` `endOf('day')` `round(15, 'minutes')` `floor('hour')` `ceil('hour')` `next('friday')` `previous('monday')` |
-| ask | `equals` `isBefore` `isAfter` `isSame(other, 'day')` `isPast` `isFuture` `isToday` `isTomorrow` `isYesterday` |
+| ask | `equals` `isBefore` `isAfter` `isSame(other, 'day')` `isPast()` `isFuture()` `isToday()` `isTomorrow()` `isYesterday()` `isWeekend()` `isWeekday()` `isLeapYear()` |
 | measure | `until(other)` `since(other)` a duration, `until(other, 'hours')` a number, `to(end)` `range('week')` a range |
 | show | `format()` medium date and short time, `format('short' \| 'long' \| 'full' \| 'date' \| 'time')`, `format({ dateStyle: 'medium' })`, `format('YYYY-MM-DD h:mm a z')` in day.js tokens, where the presets stand in for `L` and `LLL`, `formatRelative()` |
 | out | `toString()` `toJSON()` the instant in UTC, `toJSDate()` `toTemporal()` `valueOf()` epoch milliseconds |
@@ -112,10 +116,10 @@ date in the zone), a Temporal value. A wall-clock string keeps its day: `date('2
 the 6th. A string carrying Z or an offset is an instant whose day depends on the zone, so it refuses
 unless `{ loose: true, zone }` says which, or `datetime(text, zone).date` chooses it.
 
-| read | `year` `month` `day` `weekday` `quarter` `dayOfYear` `weekOfYear` `daysInMonth` `daysInYear` `isLeapYear` `isWeekend` `isWeekday` |
+| read | `year` `month` `day` `weekday` `quarter` `dayOfYear` `weekOfYear` `daysInMonth` `daysInYear` |
 | --- | --- |
 | move | `plus` `minus` (years, months, weeks, days) `set` `startOf('week')` `endOf('month')` the last day, `next('monday')` `previous('friday')` |
-| ask | `equals` `isBefore` `isAfter` `isSame(other, 'month')` `isPast(zone?)` `isFuture` `isToday` `isTomorrow` `isYesterday` |
+| ask | `equals` `isBefore` `isAfter` `isSame(other, 'month')` `isPast(zone?)` `isFuture()` `isToday()` `isTomorrow()` `isYesterday()` `isWeekend()` `isWeekday()` `isLeapYear()` |
 | combine | `at(time, zone?)` a datetime, `to(end)` `range('month')` a range, `points('hour', zone?)` `split(minutes(30), zone?)` the day's slots as datetimes |
 | measure | `until(other)` `since(other)` `until(other, 'days')` |
 | show | `format()` `format('long')` `format('MMMM Do, YYYY')` `formatRelative()` yesterday, tomorrow, in 2 weeks |
@@ -161,10 +165,10 @@ is milliseconds, fractions included, so `duration(performance.now() - start)` re
 prints the clock balanced, so `duration(stored).format()` reads as hours and minutes while `toString()`
 keeps the fields as written. A count written as text reads beside its unit: `days('30')` is thirty days.
 
-| read | `years` `months` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `sign` `isZero` `isNegative` |
+| read | `years` `months` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `sign` `anchor`, `toFields()` the nonzero ones |
 | --- | --- |
 | move | `plus` `minus` `times(n)` `negated()` `abs()` `balance()` 90 minutes to an hour and a half, `balance('day')` `round('minute')` |
-| ask | `equals` `compare` |
+| ask | `equals` `compare` `isZero()` `isNegative()` |
 | measure | `total('hours')` the whole in one unit, fractional, `toMilliseconds()` |
 | show | `format()` `'2 hours, 30 minutes'`, `format('short' \| 'narrow' \| 'digital')` `'2 hr, 30 min'` `'2h 30m'` `'2:30:00'` |
 | out | `toString()` `toJSON()` `'PT2H30M'` as written, `toTemporal()` `valueOf()` milliseconds |
@@ -183,9 +187,9 @@ the range's own kind first, `'5pm'` is a time and `dateRange(datetime, datetime)
 dates, and as a length when written as one, `'2h'`, `{ hours: 2 }` or a duration. `{ zone }` reads a
 datetime range's start in that zone.
 
-| read | `start` `end` `kind` `duration` `isEmpty` |
+| read | `start` `end` `kind` `duration` |
 | --- | --- |
-| ask | `contains(point)` `contains(range)` `overlaps(other)` `equals`, all around the clock for a time range |
+| ask | `contains(point)` `contains(range)` `overlaps(other)` `equals` `isEmpty()`, all around the clock for a time range |
 | move | `intersection(other)` or null, `in(zone)` a date range becomes the datetime bounds for a query |
 | walk | `points('day')` `points(minutes(15))` the points, `split('week')` `split(hours(1))` the sub-ranges |
 | show | `format()` `'Sep 1 – 7, 2026'`, `format('time')` `'9:00 – 10:00 AM'` |

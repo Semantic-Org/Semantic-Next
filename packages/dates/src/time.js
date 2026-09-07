@@ -53,6 +53,12 @@ export class Time {
     this.#plain = isPlainTime(input)
       ? input
       : Time.#read(input, isNumber(minuteOrOptions) ? minuteOrOptions : undefined, second, settings);
+    // the parts are own properties, so a value prints them in a console without a click
+    const plain = this.#plain;
+    this.hour = plain.hour;
+    this.minute = plain.minute;
+    this.second = plain.second;
+    this.millisecond = plain.millisecond;
     Object.freeze(this);
   }
 
@@ -166,18 +172,6 @@ export class Time {
               Reads
   *******************************/
 
-  get hour() {
-    return this.#plain.hour;
-  }
-  get minute() {
-    return this.#plain.minute;
-  }
-  get second() {
-    return this.#plain.second;
-  }
-  get millisecond() {
-    return this.#plain.millisecond;
-  }
   get microsecond() {
     return this.#plain.microsecond;
   }

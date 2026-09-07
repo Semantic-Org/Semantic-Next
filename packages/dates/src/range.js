@@ -57,12 +57,11 @@ class Range {
     return !!value?.[IS_RANGE];
   }
 
-  #start;
-  #end;
-
   // (start, end, zone), (start, end, { zone, loose }), or (interval, { zone, loose })
   constructor(start, end, options) {
     const kind = this.constructor.kind;
+    // the ends and the kind are own properties, so a range prints them in a console without a click
+    this.kind = kind;
     if (isOptions(end)) {
       [end, options] = [undefined, end];
     }
@@ -80,11 +79,11 @@ class Range {
     if (isString(start) && end === undefined) {
       [start, end] = splitInterval(start);
     }
-    this.#start = Range.#read(kind, start, undefined, settings);
-    this.#end = Range.#readEnd(kind, end, this.#start, settings);
+    this.start = Range.#read(kind, start, undefined, settings);
+    this.end = Range.#readEnd(kind, end, this.start, settings);
     // a time range whose end comes first crosses midnight. the other kinds run forward
-    if (kind !== 'time' && this.#end.isBefore(this.#start)) {
-      refuse('backwards', `${this.#start} to ${this.#end}`, {
+    if (kind !== 'time' && this.end.isBefore(this.start)) {
+      refuse('backwards', `${this.start} to ${this.end}`, {
         explanation: isDevelopment ? 'a range runs forward. swap the ends, or use earliest() and latest()' : 0,
       });
     }
@@ -133,30 +132,21 @@ class Range {
               Reads
   *******************************/
 
-  get start() {
-    return this.#start;
-  }
-  get end() {
-    return this.#end;
-  }
-  get kind() {
-    return this.constructor.kind;
-  }
-  get isEmpty() {
-    return this.kind !== 'date' && this.#start.equals(this.#end);
+  isEmpty() {
+    return this.kind !== 'date' && this.start.equals(this.end);
   }
 
   // the whole length, anchored at the start so months and years total. a date range counts its last
   // day, and a time range across midnight measures the long way round
   get duration() {
     if (this.kind === 'date') {
-      return this.#start.until(this.#end.plus(days(1)));
+      return this.start.until(this.end.plus(days(1)));
     }
-    return this.#wraps() ? hours(24).plus(this.#start.until(this.#end)) : this.#start.until(this.#end);
+    return this.#wraps() ? hours(24).plus(this.start.until(this.end)) : this.start.until(this.end);
   }
 
   #wraps() {
-    return this.kind === 'time' && this.#end.isBefore(this.#start);
+    return this.kind === 'time' && this.end.isBefore(this.start);
   }
 
   /*******************************
@@ -170,20 +160,20 @@ class Range {
         const [start, end] = spanOf(this);
         return besides(rival).some(([rivalStart, rivalEnd]) => rivalStart >= start && rivalEnd <= end);
       }
-      return !rival.start.isBefore(this.#start) && !rival.end.isAfter(this.#end);
+      return !rival.start.isBefore(this.start) && !rival.end.isAfter(this.end);
     }
     return this.#holds(value);
   }
 
   #holds(value) {
-    const at = Range.#read(this.kind, value, this.#start);
+    const at = Range.#read(this.kind, value, this.start);
     if (this.#wraps()) {
-      return !at.isBefore(this.#start) || at.isBefore(this.#end);
+      return !at.isBefore(this.start) || at.isBefore(this.end);
     }
-    if (at.isBefore(this.#start)) {
+    if (at.isBefore(this.start)) {
       return false;
     }
-    return this.#inclusive() ? !at.isAfter(this.#end) : at.isBefore(this.#end);
+    return this.#inclusive() ? !at.isAfter(this.end) : at.isBefore(this.end);
   }
 
   #inclusive() {
@@ -197,9 +187,9 @@ class Range {
       return besides(rival).some(([rivalStart, rivalEnd]) => rivalStart < end && start < rivalEnd);
     }
     if (this.#inclusive()) {
-      return !this.#start.isAfter(rival.end) && !rival.start.isAfter(this.#end);
+      return !this.start.isAfter(rival.end) && !rival.start.isAfter(this.end);
     }
-    return this.#start.isBefore(rival.end) && rival.start.isBefore(this.#end);
+    return this.start.isBefore(rival.end) && rival.start.isBefore(this.end);
   }
 
   #make(kind, start, end) {
@@ -208,7 +198,7 @@ class Range {
 
   equals(other) {
     const rival = this.#make(this.kind, other);
-    return this.#start.equals(rival.start) && this.#end.equals(rival.end);
+    return this.start.equals(rival.start) && this.end.equals(rival.end);
   }
 
   /*******************************
@@ -223,8 +213,8 @@ class Range {
     if (!this.overlaps(rival)) {
       return null;
     }
-    const start = this.#start.isAfter(rival.start) ? this.#start : rival.start;
-    const end = this.#end.isBefore(rival.end) ? this.#end : rival.end;
+    const start = this.start.isAfter(rival.start) ? this.start : rival.start;
+    const end = this.end.isBefore(rival.end) ? this.end : rival.end;
     return this.#make(this.kind, start, end);
   }
 
@@ -253,12 +243,12 @@ class Range {
     if (this.kind === 'time') {
       const length = this.duration.total('nanosecond');
       for (let i = 0; size.times(i).total('nanosecond') < length; i++) {
-        points.push(this.#start.plus(size.times(i)));
+        points.push(this.start.plus(size.times(i)));
       }
       return points;
     }
     for (let i = 0;; i++) {
-      const next = this.#start.plus(size.times(i));
+      const next = this.start.plus(size.times(i));
       if (!this.#holds(next)) {
         return points;
       }
@@ -274,7 +264,7 @@ class Range {
       : isString(step) && !/\d/.test(step)
       ? duration(1, step)
       : duration(step);
-    if (size.isZero || size.isNegative) {
+    if (size.isZero() || size.isNegative()) {
       refuse('emptyStep', String(size), {
         explanation: isDevelopment ? 'a range walks forward, the step must be positive' : 0,
       });
@@ -287,7 +277,7 @@ class Range {
     return points.map((start, i) => {
       const following = points[i + 1];
       if (following === undefined) {
-        return this.#make(this.kind, start, this.#end);
+        return this.#make(this.kind, start, this.end);
       }
       return this.#make(this.kind, start, this.#inclusive() ? following.minus(days(1)) : following);
     });
@@ -297,10 +287,10 @@ class Range {
   // which is the bound a database query wants: midnight through the midnight after the last day
   in(zone) {
     if (this.kind === 'date') {
-      return this.#make('datetime', this.#start.at('00:00', zone), this.#end.plus(days(1)).at('00:00', zone));
+      return this.#make('datetime', this.start.at('00:00', zone), this.end.plus(days(1)).at('00:00', zone));
     }
     if (this.kind === 'datetime') {
-      return this.#make('datetime', this.#start.in(zone), this.#end.in(zone));
+      return this.#make('datetime', this.start.in(zone), this.end.in(zone));
     }
     return refuse('noZone', String(this), {
       explanation: isDevelopment
@@ -321,12 +311,12 @@ class Range {
       });
     }
     if (this.kind === 'datetime') {
-      return formatIntlRange('datetime', this.#start.epoch, this.#end.epoch, options, locale, this.#start.zone);
+      return formatIntlRange('datetime', this.start.epoch, this.end.epoch, options, locale, this.start.zone);
     }
     return formatIntlRange(
       this.kind,
-      this.#start.toTemporal(),
-      this.#end.toTemporal(),
+      this.start.toTemporal(),
+      this.end.toTemporal(),
       options,
       locale,
       undefined,
@@ -335,7 +325,7 @@ class Range {
   }
 
   toString() {
-    return `${this.#start}/${this.#end}`;
+    return `${this.start}/${this.end}`;
   }
 
   toJSON() {
@@ -349,7 +339,7 @@ class Range {
   }
 
   [inspect]() {
-    return `${this.constructor.name}(${this.#start} ${this.#inclusive() ? 'through' : 'until'} ${this.#end})`;
+    return `${this.constructor.name}(${this.start} ${this.#inclusive() ? 'through' : 'until'} ${this.end})`;
   }
 }
 

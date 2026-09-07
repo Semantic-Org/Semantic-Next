@@ -50,6 +50,19 @@ export class DateTime {
   constructor(input, options) {
     const settings = zoneOptions(options);
     this.#zoned = isZonedDateTime(input) && settings.zone === undefined ? input : DateTime.#read(input, settings);
+    // the parts are own properties, so a value prints them in a console without a click and reads them without a call
+    const zoned = this.#zoned;
+    this.year = zoned.year;
+    this.month = zoned.month;
+    this.day = zoned.day;
+    this.weekday = zoned.dayOfWeek;
+    this.hour = zoned.hour;
+    this.minute = zoned.minute;
+    this.second = zoned.second;
+    this.millisecond = zoned.millisecond;
+    this.zone = zoned.timeZoneId;
+    this.offset = zoned.offset;
+    this.epoch = zoned.epochMilliseconds;
     Object.freeze(this);
   }
 
@@ -146,44 +159,11 @@ export class DateTime {
               Reads
   *******************************/
 
-  get year() {
-    return this.#zoned.year;
-  }
-  get month() {
-    return this.#zoned.month;
-  }
-  get day() {
-    return this.#zoned.day;
-  }
-  get weekday() {
-    return this.#zoned.dayOfWeek;
-  }
-  get hour() {
-    return this.#zoned.hour;
-  }
-  get minute() {
-    return this.#zoned.minute;
-  }
-  get second() {
-    return this.#zoned.second;
-  }
-  get millisecond() {
-    return this.#zoned.millisecond;
-  }
   get microsecond() {
     return this.#zoned.microsecond;
   }
   get nanosecond() {
     return this.#zoned.nanosecond;
-  }
-  get zone() {
-    return this.#zoned.timeZoneId;
-  }
-  get offset() {
-    return this.#zoned.offset;
-  }
-  get epoch() {
-    return this.#zoned.epochMilliseconds;
   }
   get quarter() {
     return Math.ceil(this.#zoned.month / 3);
@@ -203,13 +183,13 @@ export class DateTime {
   get hoursInDay() {
     return this.#zoned.hoursInDay;
   }
-  get isLeapYear() {
+  isLeapYear() {
     return this.#zoned.inLeapYear;
   }
-  get isWeekend() {
+  isWeekend() {
     return this.#zoned.dayOfWeek >= 6;
   }
-  get isWeekday() {
+  isWeekday() {
     return this.#zoned.dayOfWeek < 6;
   }
   get date() {

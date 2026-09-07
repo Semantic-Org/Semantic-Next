@@ -123,7 +123,7 @@ export const fieldsFrom = (input, name) => {
           : 0,
       });
     }
-    return input.fields();
+    return input.toFields();
   }
   if (isTemporalDuration(input)) {
     return fieldsOf(input);

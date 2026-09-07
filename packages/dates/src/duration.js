@@ -38,6 +38,18 @@ export class Duration {
   constructor(input, name, anchor) {
     this.#temporal = isTemporalDuration(input) ? input : temporalDurationOf(fieldsFrom(input, name));
     this.#anchor = anchor;
+    // the parts are own properties, so a value prints them in a console without a click
+    const temporal = this.#temporal;
+    this.years = temporal.years;
+    this.months = temporal.months;
+    this.weeks = temporal.weeks;
+    this.days = temporal.days;
+    this.hours = temporal.hours;
+    this.minutes = temporal.minutes;
+    this.seconds = temporal.seconds;
+    this.milliseconds = temporal.milliseconds;
+    this.sign = temporal.sign;
+    this.anchor = anchor;
     Object.freeze(this);
   }
 
@@ -45,50 +57,20 @@ export class Duration {
               Reads
   *******************************/
 
-  get years() {
-    return this.#temporal.years;
-  }
-  get months() {
-    return this.#temporal.months;
-  }
-  get weeks() {
-    return this.#temporal.weeks;
-  }
-  get days() {
-    return this.#temporal.days;
-  }
-  get hours() {
-    return this.#temporal.hours;
-  }
-  get minutes() {
-    return this.#temporal.minutes;
-  }
-  get seconds() {
-    return this.#temporal.seconds;
-  }
-  get milliseconds() {
-    return this.#temporal.milliseconds;
-  }
   get microseconds() {
     return this.#temporal.microseconds;
   }
   get nanoseconds() {
     return this.#temporal.nanoseconds;
   }
-  get sign() {
-    return this.#temporal.sign;
-  }
-  get isZero() {
+  isZero() {
     return this.#temporal.blank;
   }
-  get isNegative() {
+  isNegative() {
     return this.#temporal.sign < 0;
   }
-  get anchor() {
-    return this.#anchor;
-  }
 
-  fields() {
+  toFields() {
     return fieldsOf(this.#temporal);
   }
 
@@ -98,7 +80,7 @@ export class Duration {
 
   plus(other, name) {
     return new Duration(
-      temporalDurationOf(addFields(this.fields(), fieldsFrom(other, name), 1)),
+      temporalDurationOf(addFields(this.toFields(), fieldsFrom(other, name), 1)),
       undefined,
       this.#anchor,
     );
@@ -106,7 +88,7 @@ export class Duration {
 
   minus(other, name) {
     return new Duration(
-      temporalDurationOf(addFields(this.fields(), fieldsFrom(other, name), -1)),
+      temporalDurationOf(addFields(this.toFields(), fieldsFrom(other, name), -1)),
       undefined,
       this.#anchor,
     );
@@ -114,7 +96,7 @@ export class Duration {
 
   times(factor) {
     const fields = {};
-    for (const [field, value] of Object.entries(this.fields())) {
+    for (const [field, value] of Object.entries(this.toFields())) {
       spill(fields, unit(field), value * factor);
     }
     return new Duration(temporalDurationOf(fields), undefined, this.#anchor);
@@ -185,7 +167,7 @@ export class Duration {
     if (duration.anchor || !temporal.weeks) {
       return temporal;
     }
-    return temporalDurationOf(addFields({ ...duration.fields(), weeks: 0 }, { days: temporal.weeks * 7 }, 1));
+    return temporalDurationOf(addFields({ ...duration.toFields(), weeks: 0 }, { days: temporal.weeks * 7 }, 1));
   }
 
   // weeks are already days here, and months or years were refused, so days are the one calendar field left
@@ -205,7 +187,7 @@ export class Duration {
   }
 
   static #requireAnchor(duration, verb) {
-    const fields = duration.fields();
+    const fields = duration.toFields();
     if (!duration.anchor && (fields.years || fields.months)) {
       refuse('needsAnchor', `${verb} of ${duration}`, {
         explanation: isDevelopment
@@ -279,7 +261,7 @@ export class Duration {
         explanation: isDevelopment ? "a duration formats as 'long', 'short', 'narrow' or 'digital'" : 0,
       });
     }
-    const written = this.fields();
+    const written = this.toFields();
     const clock = fieldsOf(temporalDurationOf(clockFields(written)).round({ largestUnit: 'hour' }));
     const fields = { ...written, ...Object.fromEntries(fieldNames.slice(4).map((field) => [field, clock[field]])) };
     const large = fieldNames.slice(0, subsecond).some((field) => fields[field]);
@@ -290,7 +272,7 @@ export class Duration {
       }
     }
     // Intl.DurationFormat prints nothing for a zero duration, so zero is spelled out as seconds
-    if (this.isZero) {
+    if (this.isZero()) {
       const unitDisplay = style === 'long' ? 'long' : style === 'narrow' ? 'narrow' : 'short';
       return style === 'digital'
         ? durationFormat(pickLocale(locale), { style, hoursDisplay: 'always' }).format({ hours: 0 })

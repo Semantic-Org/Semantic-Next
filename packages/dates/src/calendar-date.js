@@ -59,6 +59,12 @@ export class CalendarDate {
     this.#plain = isPlainDate(input)
       ? input
       : CalendarDate.#read(input, isNumber(monthOrOptions) ? monthOrOptions : undefined, day, settings);
+    // the parts are own properties, so a value prints them in a console without a click
+    const plain = this.#plain;
+    this.year = plain.year;
+    this.month = plain.month;
+    this.day = plain.day;
+    this.weekday = plain.dayOfWeek;
     Object.freeze(this);
   }
 
@@ -156,18 +162,6 @@ export class CalendarDate {
               Reads
   *******************************/
 
-  get year() {
-    return this.#plain.year;
-  }
-  get month() {
-    return this.#plain.month;
-  }
-  get day() {
-    return this.#plain.day;
-  }
-  get weekday() {
-    return this.#plain.dayOfWeek;
-  }
   get quarter() {
     return Math.ceil(this.#plain.month / 3);
   }
@@ -183,13 +177,13 @@ export class CalendarDate {
   get daysInYear() {
     return this.#plain.daysInYear;
   }
-  get isLeapYear() {
+  isLeapYear() {
     return this.#plain.inLeapYear;
   }
-  get isWeekend() {
+  isWeekend() {
     return this.#plain.dayOfWeek >= 6;
   }
-  get isWeekday() {
+  isWeekday() {
     return this.#plain.dayOfWeek < 6;
   }
 

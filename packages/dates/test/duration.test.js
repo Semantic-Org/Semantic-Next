@@ -98,9 +98,9 @@ describe('duration', () => {
     expect(() => months(1).minus(days(3))).toThrow(/mixedSigns/);
     expect(days(1).times(3).toString()).toBe('P3D');
     expect(months(1).plus(days(3)).toString()).toBe('P1M3D');
-    expect(hours(2).negated().isNegative).toBe(true);
+    expect(hours(2).negated().isNegative()).toBe(true);
     expect(hours(-2).abs().toString()).toBe('PT2H');
-    expect(duration(0).isZero).toBe(true);
+    expect(duration(0).isZero()).toBe(true);
   });
 
   it('keeps days apart from hours, since a day is a calendar unit', () => {

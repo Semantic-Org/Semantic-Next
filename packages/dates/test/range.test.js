@@ -147,7 +147,7 @@ describe('datetimeRange', () => {
   });
 
   it('is empty when the ends meet, and re-reads in another zone', () => {
-    expect(datetimeRange(datetime('2026-09-06T09:00Z'), '2026-09-06T09:00Z').isEmpty).toBe(true);
+    expect(datetimeRange(datetime('2026-09-06T09:00Z'), '2026-09-06T09:00Z').isEmpty()).toBe(true);
     expect(datetimeRange(datetime('2026-09-06T09:00Z'), hours(1)).in('Asia/Tokyo').start.hour).toBe(18);
   });
 
