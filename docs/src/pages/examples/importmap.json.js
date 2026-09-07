@@ -7,6 +7,7 @@ import { isProductionBuild, isStaticBuild, packageBase } from '@helpers/injectio
 export const npmPackages = [
   '@semantic-ui/core',
   '@semantic-ui/component',
+  '@semantic-ui/dates',
   '@semantic-ui/reactivity',
   '@semantic-ui/templating',
   '@semantic-ui/renderer',
@@ -21,6 +22,7 @@ export const npmPackages = [
 export const localPackages = [
   '@semantic-ui/core',
   '@semantic-ui/core/packages/component',
+  '@semantic-ui/core/packages/dates',
   '@semantic-ui/core/packages/templating',
   '@semantic-ui/core/packages/renderer',
   '@semantic-ui/core/packages/query',
@@ -34,6 +36,7 @@ export const localPackages = [
 const bundleNames = {
   '@semantic-ui/core': 'semantic-ui',
   '@semantic-ui/component': 'component',
+  '@semantic-ui/dates': 'dates',
   '@semantic-ui/reactivity': 'reactivity',
   '@semantic-ui/templating': 'templating',
   '@semantic-ui/renderer': 'renderer',
