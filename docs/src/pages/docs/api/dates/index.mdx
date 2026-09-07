@@ -1,0 +1,76 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates
+icon: calendar
+description: Datetimes, dates, times, durations and ranges over Temporal, with plain-English verbs
+---
+
+Five words cover what business logic says about time. Each one is a Temporal type underneath and one call away from it.
+
+| Word | What it is | Class | Temporal underneath |
+|------|------------|-------|---------------------|
+| `datetime` | an exact moment, with a zone to read it in | `DateTime` | `ZonedDateTime` |
+| `date` | a calendar day, no clock, no zone | `CalendarDate` | `PlainDate` |
+| `time` | a time of day, no date | `Time` | `PlainTime` |
+| `duration` | a length of time | `Duration` | `Duration` |
+| `dateRange` `datetimeRange` `timeRange` | a span between two points, named by what it holds | `DateRange` `DateTimeRange` `TimeRange` | two of the above |
+
+The lowercase word is the factory. The class is exported beside it, for `instanceof` and for a schema that takes a constructor.
+
+```javascript
+import { date, days, datetime, now, time, timeRange } from '@semantic-ui/dates';
+
+const due = date('2026-09-01').plus(days(30)); // a due date is a date
+const visit = date('2026-11-03').at('9:30am', 'America/Los_Angeles'); // date + time + zone = datetime
+const open = timeRange(time('9am'), time('5:30pm')); // hours are times
+
+open.contains(now().in('Chicago').time); // the store is open
+now().since(visit).round('hour').format(); // '2 months, 3 days, 4 hours'
+```
+
+## Installation
+
+```bash
+npm install @semantic-ui/dates
+```
+
+The library wraps the runtime's own `Temporal`. Node 26 and current Chromium, Firefox and Safari ship it. See [Temporal Support](/docs/api/dates/setup#temporal-support) for a runtime without one.
+
+## The Rules
+
+Three plain words compose into the fourth. `date.at(time, zone)` and `time.on(date, zone)` make a datetime, `datetime.date` and `datetime.time` take one apart. A date never carries a clock, so `date.plus(hours(3))` refuses and says to combine first.
+
+A zone is a view, an instant is the value. `toString()` and `toJSON()` print a datetime in UTC, so two clients storing the same moment store the same bytes. See [Zones](/docs/api/dates/zones).
+
+A date range runs through its end. A datetime or time range runs until it. See [Range Bounds](/docs/api/dates/range-bounds).
+
+Fields are balanced parts, `total(unit)` is the whole. See [Durations](/docs/api/dates/durations).
+
+Strict by default, loose on request. The factories read ISO 8601 and refuse the rest, with the way out in the error. `{ loose: true }` reads what `Date` reads and gives null for what cannot be read. See [Reading Values](/docs/api/dates/reading-values).
+
+Nouns are properties, questions and verbs are calls. `dt.year`, `range.duration` and `slot.start` read as data. `isWeekend()`, `plus()` and `toFields()` are calls.
+
+Same verbs everywhere. `plus`, `minus`, `set`, `startOf`, `endOf`, `round`, `isBefore`, `isAfter`, `equals`, `isSame`, `until`, `since`, `to`, `format`. Every method that takes another point also takes anything its factory reads, so `dt.isBefore('2027-01-01')` works.
+
+Only a datetime is a number. `valueOf()` gives epoch milliseconds, so datetimes sort with `(a, b) => a - b`. A date, a time and a range refuse `valueOf`, so `due < now()` throws rather than being silently always true.
+
+## Sections
+
+- **[Setup](/docs/api/dates/setup)** - Importing, Temporal support, and `configure()`.
+- **[Reading Values](/docs/api/dates/reading-values)** - Strict reading, the loose door, and day-first numeric dates.
+- **[Zones](/docs/api/dates/zones)** - A zone as a view, the names a zone answers to, and daylight saving.
+- **[Range Bounds](/docs/api/dates/range-bounds)** - Through and until, and a time range across midnight.
+- **[Durations](/docs/api/dates/durations)** - Fields as written, balancing, and anchors.
+- **[Wire Forms](/docs/api/dates/wire-forms)** - What `toJSON()` prints and what does not travel.
+- **[Errors](/docs/api/dates/errors)** - Every refusal code.
+- **[Datetime](/docs/api/dates/datetime)** - `datetime()`, `now()`, `startOfToday()`, `endOfToday()` and the `DateTime` methods.
+- **[Date](/docs/api/dates/date)** - `date()`, `today()`, `tomorrow()`, `yesterday()` and the `CalendarDate` methods.
+- **[Time](/docs/api/dates/time)** - `time()` and the `Time` methods.
+- **[Duration](/docs/api/dates/duration)** - `duration()`, the unit shorthands and the `Duration` methods.
+- **[Ranges](/docs/api/dates/ranges)** - `dateRange()`, `datetimeRange()`, `timeRange()` and the range methods.
+- **[Helpers](/docs/api/dates/helpers)** - Comparators, kind guards, names and the brand symbols.
+
+## Not Here, on Purpose
+
+Free-form parsing by default: strict reads ISO 8601, and `{ loose: true }` reads what `Date` reads. Calendar phrases like `'Today at 2:30 PM'`, business days, recurrence rules, and format-string parsing are each a real feature with its own design, not a method.

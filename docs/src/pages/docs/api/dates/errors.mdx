@@ -1,0 +1,107 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Errors
+icon: shield-alert
+description: The shape of a refusal and every code it can carry
+package: "@semantic-ui/dates"
+---
+
+Every refusal is a coded `RangeError` or `TypeError` built with `createErrors` from `@semantic-ui/utils`. It is one line in production, with the way out appended in development.
+
+## Shape
+
+```
+dates refused [notADate] 2026
+```
+
+The error carries the code and the input it refused as properties, so a handler branches on the code rather than the text.
+
+```javascript
+try {
+  date(2026);
+}
+catch (error) {
+  error.code; // 'notADate'
+  error.at; // '2026'
+  error instanceof TypeError; // true
+}
+```
+
+A `TypeError` says the value is the wrong kind of thing. A `RangeError` says it is the right kind but cannot be read or done. `{ loose: true }` turns the reading refusals into null and leaves the rest to throw. See [Reading Values](/docs/api/dates/reading-values#the-loose-door).
+
+## Reading
+
+| Code | Class | When |
+|------|-------|------|
+| `notADateTime` | TypeError | `datetime()` given nothing, null, or a value of a kind it cannot read |
+| `notADate` | TypeError | `date()` given nothing, a bare number, or a kind it cannot read. A RangeError for an instant string carrying `Z` or an offset, since the text is a date's shape read in the wrong kind |
+| `notATime` | TypeError | `time()` given nothing or a kind it cannot read |
+| `notADuration` | TypeError | `duration()` given a kind it cannot read, or a duration beside a unit |
+| `notAPoint` | TypeError | `compare()`, `earliest()` or `latest()` given a value that is not a point |
+| `unreadableDateTime` | RangeError | text or fields that do not read as a datetime, `datetime('banana')` |
+| `unreadableDate` | RangeError | text, numbers or fields that do not read as a date, `date(2026, 2, 30)` |
+| `unreadableTime` | RangeError | text, numbers or fields that do not read as a time, `time('25:00')` |
+| `unreadableDuration` | RangeError | text or fields that do not read as a length, `duration('banana')` |
+| `notFinite` | RangeError | an invalid `Date`, `NaN` or an infinite number |
+| `fractionalMonth` | RangeError | a fraction of a month or year, `duration('1.5 months')` |
+| `mixedSigns` | RangeError | a phrase or fields with both signs, `duration('1h -30m')`, or a subtraction that would produce them |
+
+## Zones and Locales
+
+| Code | Class | When |
+|------|-------|------|
+| `unknownZone` | RangeError | a name that is not a zone, in a factory, `in()`, `configure({ zone })` or `configure({ zoneAliases })` |
+| `unknownLocale` | RangeError | a locale Intl cannot read, in `configure({ locale })` or a `format()` call |
+| `noZone` | RangeError | `timeRange.in(zone)`, since a time range has no zone to place in |
+
+## Units
+
+| Code | Class | When |
+|------|-------|------|
+| `unknownUnit` | RangeError | a unit name that is not one, `plus(7, 'fortnights')` |
+| `unknownWeekday` | RangeError | a weekday name that is not one, `next('someday')` |
+| `notADateUnit` | RangeError | a clock unit on a date, `date.plus(hours(3))` or `date.startOf('hour')` |
+| `emptyStep` | RangeError | a zero-length step in `points()` or `split()` |
+
+## Arithmetic
+
+| Code | Class | When |
+|------|-------|------|
+| `cannotAdd` | RangeError | `plus()` when Temporal refuses the sum underneath, a result outside the representable range |
+| `cannotSubtract` | RangeError | `minus()` when Temporal refuses the difference underneath |
+| `cannotSet` | RangeError | `set()` with a part out of range, `set('minute', 60)` or `set({ day: 31 })` in a short month |
+| `cannotRound` | RangeError | `round()`, `floor()` or `ceil()` with a unit or increment the value cannot snap to |
+| `cannotBalance` | RangeError | `balance()` when Temporal refuses the carry underneath |
+| `cannotTotal` | RangeError | `total()` or `toMilliseconds()` when Temporal refuses the total underneath |
+| `needsAnchor` | RangeError | months or years asked to total, balance, compare or become a number without a duration from `until()` |
+
+## Ranges
+
+| Code | Class | When |
+|------|-------|------|
+| `backwards` | RangeError | a date or datetime range whose end comes before its start |
+| `mixedRange` | TypeError | a range of one kind given where another is expected, `week.contains(datetimeRange(...))` |
+| `twoPieces` | RangeError | an intersection across midnight that comes out in two pieces |
+| `mixedKinds` | TypeError | `compare()` across kinds, `compare(date, datetime)` |
+| `noPoints` | RangeError | `earliest()` or `latest()` given nothing |
+
+## Formatting
+
+| Code | Class | When |
+|------|-------|------|
+| `unknownFormat` | RangeError | a `format()` spec that is not a preset, an Intl options object or a token pattern, or an Intl options object Intl refuses |
+| `noField` | RangeError | a token the kind has no field for, `date.format('HH:mm')` |
+| `noTokens` | RangeError | a token pattern given to a range, which formats with a preset or Intl options |
+
+## Numbers
+
+| Code | Class | When |
+|------|-------|------|
+| `notANumber` | RangeError | `valueOf()` on a date, a time or a range, so `due < now()` throws rather than being silently true |
+
+## Runtime
+
+| Code | Class | When |
+|------|-------|------|
+| `noTemporal` | RangeError | the first call on a runtime without `Temporal`. See [Temporal Support](/docs/api/dates/setup#temporal-support) |

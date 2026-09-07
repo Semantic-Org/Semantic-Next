@@ -1,0 +1,156 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Reading Values
+icon: file-input
+description: What each factory reads strictly, what the loose door reads, and day-first numeric dates
+package: "@semantic-ui/dates"
+---
+
+The factories read ISO 8601 and refuse the rest, with the way out in the error. `{ loose: true }` reads whatever the engine's `Date` reads and gives null for what cannot be read.
+
+## Strict by Default
+
+Every factory takes the value first, then a zone or an options object.
+
+```javascript
+datetime(input, zone);
+datetime(input, { zone, loose, dayFirst });
+```
+
+A missing value refuses too. `now()` and `today()` are the doors for the present, so an absent field never silently becomes now.
+
+### Datetimes
+
+```javascript
+datetime('2026-09-06T14:30Z'); // an instant
+datetime('2026-09-06T14:30:00+09:00'); // an instant, the offset never becomes the zone
+datetime('2026-09-06T14:30', 'Asia/Tokyo'); // a wall clock in the zone
+datetime('2026-09-06T14:30:00+09:00[Asia/Tokyo]'); // a bracketed zone is the zone
+datetime('2026-09-06', 'UTC'); // midnight
+```
+
+### Dates
+
+```javascript
+date('2026-09-06');
+date(2026, 9, 6);
+date('2026-09-06T23:30'); // a wall-clock string keeps its day
+```
+
+A string carrying `Z` or an offset is an instant whose day depends on the zone, so `date('2026-09-06T23:30Z')` refuses. `datetime(text, zone).date` chooses the zone, and so does `{ loose: true, zone }`.
+
+A bare number refuses as well, since `date(2026)` is a year to one reader and epoch milliseconds to another. Epoch milliseconds are a datetime, `datetime(n).date`.
+
+### Times
+
+```javascript
+time('09:00');
+time('9am');
+time('5:30 pm');
+time('17:30:15.250');
+time(9, 30);
+```
+
+### Durations
+
+```javascript
+duration('1h 30m');
+duration('2 weeks and 3 days');
+duration('PT1H30M');
+duration(90, 'minutes');
+duration(1500); // a bare number is milliseconds
+```
+
+Every spelling `toDuration` in `@semantic-ui/utils` reads is read here, plus compounds, calendar units and fractions. `'1.5 days'` is a day and twelve hours. A fraction of a month refuses, and so does a phrase with mixed signs like `'1h -30m'`, since a length has one sign.
+
+### Ranges
+
+```javascript
+dateRange('2026-09-01', '2026-09-07');
+dateRange('2026-09-01/2026-09-07'); // ISO interval notation
+dateRange('2026-09-01 - 2026-09-07'); // a text field's own separators read
+timeRange('9am to 5pm');
+dateRange('2026-09-01', '1 week'); // an end written as a length is one
+```
+
+An end reads through the range's own kind first, so `'5pm'` is a time, and as a length when written as one, `'2h'`, `{ hours: 2 }` or a duration.
+
+## The Loose Door
+
+`{ loose: true }` is the options form of the last argument on all seven factories.
+
+```javascript
+date('September 6, 2026', { loose: true }).toString(); // '2026-09-06'
+date('9/6/2026', { loose: true }).toString(); // '2026-09-06'
+datetime('Sat, 06 Sep 2026 14:30:00 GMT', { loose: true }).toString(); // '2026-09-06T14:30:00.000Z'
+time('September 6, 2026 5:30 PM', { loose: true }).toString(); // '17:30:00'
+duration('2h', { loose: true }).toString(); // 'PT2H'
+```
+
+### What Returns Null
+
+A point that is not one, a length that is not one, and a range with such an end give null rather than a throw, so a form field reads in one line.
+
+```javascript
+date('someday', { loose: true }); // null
+datetime(undefined, { loose: true }); // null
+duration('5 foos', { loose: true }); // null
+dateRange('garbage', '2026-09-07', { loose: true }); // null
+```
+
+A loose wall clock stands in the zone it is read in, and a loose string that names its own instant keeps it.
+
+```javascript
+configure({ zone: 'America/Los_Angeles' });
+datetime('September 6, 2026 5:30 PM', { loose: true }).format('HH:mm z'); // '17:30 PDT'
+```
+
+### What Still Throws
+
+What reads but is wrong is a mistake in the code rather than in the data's form, so it still throws under `loose`: a backwards range, an unknown zone, a unit that is not one.
+
+```javascript
+datetime('banana', { loose: true, zone: 'Mars/Olympus' }); // throws unknownZone
+```
+
+## Day First
+
+A numeric date reads in the engine's order, so `07.09.2026` is July 9th. `dayFirst` says the app's users write the day first, the one knob most of the world needs.
+
+```javascript
+date('07.09.2026', { loose: true }).toString(); // '2026-07-09'
+date('07.09.2026', { loose: true, dayFirst: true }).toString(); // '2026-09-07'
+
+configure({ dayFirst: true });
+date('7/9/26', { loose: true }).toString(); // '2026-09-07'
+datetime('07.09.2026 5:30 PM', { loose: true }).format('YYYY-MM-DD HH:mm'); // '2026-09-07 17:30'
+```
+
+## Other Inputs
+
+A `Date` object is read everywhere without asking. It is an instant, so its day and clock depend on the zone it is read in.
+
+```javascript
+datetime(new Date(0), 'UTC').toString(); // '1970-01-01T00:00:00.000Z'
+date(new Date('2026-09-06T23:30:00Z'), 'Asia/Tokyo').toString(); // '2026-09-07'
+time(new Date('2026-09-06T14:30:00Z'), 'Asia/Tokyo').toString(); // '23:30:00'
+```
+
+A fields object reads with singular keys for a point and plural keys for a length, as Temporal spells them.
+
+```javascript
+datetime({ year: 2026, month: 9, day: 6, hour: 9 }, 'UTC');
+date({ year: 2026, month: 2, day: 28 });
+duration({ hours: 1, minutes: 30 });
+```
+
+A value of another kind reads where it makes sense: a datetime gives its date or its time in its zone, a date reads as its midnight in a zone, and a Temporal value of the matching type reads as itself.
+
+```javascript
+date(datetime('2026-09-06T23:30Z').in('Asia/Tokyo')).toString(); // '2026-09-07'
+time(datetime('2026-09-06T14:30Z', 'UTC')).toString(); // '14:30:00'
+datetime(Temporal.Instant.from('2026-09-06T09:00:00Z'), 'UTC').hour; // 9
+```
+
+Every method that takes another point takes the same inputs as its factory, so `dt.isBefore('2027-01-01')` and `range.contains('2026-09-07')` read the string through the kind's own rules.

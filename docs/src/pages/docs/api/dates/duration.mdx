@@ -1,0 +1,665 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Duration
+icon: hourglass
+description: API reference for duration, a length of time
+package: "@semantic-ui/dates"
+methods: [duration, years, months, weeks, days, hours, minutes, seconds, milliseconds, plus, minus, times, negated, abs, balance, round, total, compare, equals, isZero, isNegative, toFields, toMilliseconds, format, toString, toJSON, toTemporal, valueOf]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+A length of time. Fields stay as written until balanced, and a duration measured with `until()` or `since()` remembers where it started, so months and years can total. The class is `Duration`, a `Temporal.Duration` underneath. See [Durations](/docs/api/dates/durations) for the rules.
+
+## Creating
+
+### duration
+
+```javascript
+duration(phrase);
+duration(iso);
+duration(fields);
+duration(count, unit);
+duration(milliseconds);
+duration(input, { loose: true });
+```
+
+Reads a phrase, an ISO string, a fields object, a number with a unit, or a bare number as milliseconds. Every spelling `toDuration` in `@semantic-ui/utils` reads is read here, plus compounds, calendar units and fractions.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| input | string \| object \| number \| Temporal | `'1h 30m'`, `'2 weeks and 3 days'`, `'PT1H30M'`, `{ hours: 1, minutes: 30 }`, `1500` as milliseconds, or a `Temporal.Duration` |
+| unit | string | The unit for a count, `duration(90, 'minutes')` |
+| options | object | `{ loose: true }` gives null for what is not a length |
+
+#### Returns
+
+A `Duration`, or `null` under `{ loose: true }` for input that cannot be read.
+
+#### Usage
+
+```javascript
+duration('1h 30m').toString(); // 'PT1H30M'
+duration('2 weeks and 3 days').toString(); // 'P2W3D'
+duration({ hours: 1, minutes: 30 }).toString(); // 'PT1H30M'
+duration(90, 'minutes').toString(); // 'PT90M'
+duration(1500).toString(); // 'PT1.5S'
+duration(1.5, 'days').toString(); // 'P1DT12H'
+duration('soon', { loose: true }); // null
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration" direction="horizontal"></PlaygroundExample>
+
+### years, months, weeks, days, hours, minutes, seconds, milliseconds
+
+```javascript
+years(count);
+months(count);
+weeks(count);
+days(count);
+hours(count);
+minutes(count);
+seconds(count);
+milliseconds(count);
+```
+
+One duration of a unit, so arithmetic reads as a sentence: `date.plus(days(30))`, `hours(2).plus(minutes(30))`. A count written as text reads as its number, the way a form sends one.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| count | number \| string | How many, `days(30)` or `days('30')` |
+
+#### Returns
+
+A `Duration`.
+
+#### Usage
+
+```javascript
+days(30).toString(); // 'P30D'
+minutes(90).toString(); // 'PT90M'
+days('30').toString(); // 'P30D'
+hours(2).plus(minutes(30)).format(); // '2 hours, 30 minutes'
+date('2026-09-01').plus(days(30)).toString(); // '2026-10-01'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-units" direction="horizontal"></PlaygroundExample>
+
+## Properties
+
+The fields are real properties, as written, so a value prints them in a console without a click. Every property is read-only.
+
+| Name | Type | Description |
+|------|------|-------------|
+| years | number | |
+| months | number | |
+| weeks | number | |
+| days | number | |
+| hours | number | |
+| minutes | number | |
+| seconds | number | |
+| milliseconds | number | |
+| microseconds | number | |
+| nanoseconds | number | |
+| sign | number | 1, 0 or -1 |
+| anchor | Temporal \| undefined | The point this duration was measured from, when it came from `until()` or `since()` |
+
+#### Usage
+
+```javascript
+const length = duration('1h 30m 15s');
+
+length.hours; // 1
+length.minutes; // 30
+length.days; // 0
+length.sign; // 1
+duration('2h').anchor; // undefined
+String(date('2026-01-01').until('2026-03-01').anchor); // '2026-01-01'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-properties" direction="horizontal"></PlaygroundExample>
+
+## Arithmetic
+
+### plus
+
+```javascript
+duration.plus(other);
+duration.plus(count, unit);
+```
+
+Adds a duration in any spelling, keeping the fields as written. Days stay apart from hours, since a day is a calendar unit.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Duration \| object \| string \| number | A duration, a fields object, a phrase, or a count with a unit |
+| unit | string | The unit for a count |
+
+#### Returns
+
+A new `Duration`.
+
+#### Usage
+
+```javascript
+hours(2).plus(minutes(30)).toString(); // 'PT2H30M'
+hours(2).plus('30m').toString(); // 'PT2H30M'
+days(1).plus(hours(25)).toString(); // 'P1DT25H'
+months(1).plus(days(3)).toString(); // 'P1M3D'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-plus" direction="horizontal"></PlaygroundExample>
+
+### minus
+
+```javascript
+duration.minus(other);
+duration.minus(count, unit);
+```
+
+Subtracts a duration. A result whose fields would carry both signs refuses with `mixedSigns`, since a day less an hour has no one length.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Duration \| object \| string \| number | A duration, a fields object, a phrase, or a count with a unit |
+| unit | string | The unit for a count |
+
+#### Returns
+
+A new `Duration`.
+
+#### Usage
+
+```javascript
+hours(2).minus(minutes(30)).toString(); // 'PT1H30M'
+minutes(30).minus(hours(2)).toString(); // '-PT1H30M'
+days(1).minus(hours(1)); // throws mixedSigns
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-minus" direction="horizontal"></PlaygroundExample>
+
+### times
+
+```javascript
+duration.times(factor);
+```
+
+Scales by a factor, spilling a fraction into the unit below.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| factor | number | The multiplier, fractions and negatives included |
+
+#### Returns
+
+A new `Duration`.
+
+#### Usage
+
+```javascript
+hours(1).times(3).toString(); // 'PT3H'
+hours(1).times(1.5).toString(); // 'PT1H30M'
+days(1).times(-1.5).toString(); // '-P1DT12H'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-times" direction="horizontal"></PlaygroundExample>
+
+### negated
+
+```javascript
+duration.negated();
+```
+
+The same length with the opposite sign.
+
+#### Returns
+
+A new `Duration`.
+
+#### Usage
+
+```javascript
+hours(2).negated().toString(); // '-PT2H'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-negated" direction="horizontal"></PlaygroundExample>
+
+### abs
+
+```javascript
+duration.abs();
+```
+
+The same length, made positive.
+
+#### Returns
+
+A new `Duration`.
+
+#### Usage
+
+```javascript
+hours(-2).abs().toString(); // 'PT2H'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-abs" direction="horizontal"></PlaygroundExample>
+
+## Balancing
+
+### balance
+
+```javascript
+duration.balance();
+duration.balance(largest);
+```
+
+Carries overflow upward. A length stops at hours, since a day is a calendar unit. An anchored duration stops at days. An explicit unit is taken as given, and a month or year needs a duration from `until()`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| largest | string | The unit to carry up to, `'day'`, `'week'`, `'month'`, `'year'` |
+
+#### Returns
+
+A new `Duration`.
+
+#### Usage
+
+```javascript
+minutes(150).balance().toString(); // 'PT2H30M'
+hours(36).balance().toString(); // 'PT36H'
+hours(36).balance('day').toString(); // 'P1DT12H'
+duration('10d').balance('week').toString(); // 'P1W3D'
+months(1).balance('day'); // throws needsAnchor
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-balance" direction="horizontal"></PlaygroundExample>
+
+### round
+
+```javascript
+duration.round(smallest);
+```
+
+Rounds to the nearest whole unit.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| smallest | string | The unit to round to, `'hour'`, `'minute'` |
+
+#### Returns
+
+A new `Duration`.
+
+#### Usage
+
+```javascript
+minutes(90).round('hour').toString(); // 'PT2H'
+seconds(95).round('minute').toString(); // 'PT2M'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-round" direction="horizontal"></PlaygroundExample>
+
+## Measuring
+
+### total
+
+```javascript
+duration.total(unit);
+```
+
+The whole duration in one unit, fractional. Months and years need the anchor a duration from `until()` carries, and refuse with `needsAnchor` without it.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| unit | string | `'years'`, `'months'`, `'weeks'`, `'days'`, `'hours'`, `'minutes'`, `'seconds'`, `'milliseconds'` |
+
+#### Returns
+
+A number.
+
+#### Usage
+
+```javascript
+minutes(90).total('hours'); // 1.5
+days(14).total('weeks'); // 2
+date('2026-01-01').until('2026-07-01').total('months'); // 6
+months(1).total('days'); // throws needsAnchor
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-total" direction="horizontal"></PlaygroundExample>
+
+### toMilliseconds
+
+```javascript
+duration.toMilliseconds();
+```
+
+The whole length in milliseconds, the number to store. Months and years need the anchor.
+
+#### Returns
+
+A number.
+
+#### Usage
+
+```javascript
+hours(1).toMilliseconds(); // 3600000
+duration('1h 30m').toMilliseconds(); // 5400000
+date('2026-01-01').until('2026-02-01').toMilliseconds(); // 2678400000
+months(1).toMilliseconds(); // throws needsAnchor
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-tomilliseconds" direction="horizontal"></PlaygroundExample>
+
+## Comparing
+
+### compare
+
+```javascript
+duration.compare(other);
+```
+
+The order by length, -1, 0 or 1, as a sort comparator would return. A measured duration compares through its calendar.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Duration \| object \| string \| number | Anything `duration()` reads |
+
+#### Returns
+
+`-1`, `0` or `1`.
+
+#### Usage
+
+```javascript
+hours(1).compare(minutes(90)); // -1
+hours(1).compare('60m'); // 0
+date('2026-02-01').until('2026-03-01').compare(days(31)); // -1
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-compare" direction="horizontal"></PlaygroundExample>
+
+### equals
+
+```javascript
+duration.equals(other);
+```
+
+The same length, whatever the fields. `duration('90m')` equals `'1h 30m'` though the two print differently.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Duration \| object \| string \| number | Anything `duration()` reads |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+hours(1).equals(minutes(60)); // true
+duration('PT90M').equals('1h 30m'); // true
+hours(1).equals(minutes(61)); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-equals" direction="horizontal"></PlaygroundExample>
+
+### isZero
+
+```javascript
+duration.isZero();
+```
+
+Whether the duration has no length.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+duration(0).isZero(); // true
+hours(1).minus('60m').isZero(); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-iszero" direction="horizontal"></PlaygroundExample>
+
+### isNegative
+
+```javascript
+duration.isNegative();
+```
+
+Whether the duration runs backwards.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+hours(-2).isNegative(); // true
+date('2026-03-01').until('2026-01-01').isNegative(); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-isnegative" direction="horizontal"></PlaygroundExample>
+
+## Formatting
+
+### format
+
+```javascript
+duration.format();
+duration.format(style);
+duration.format(style, locale);
+```
+
+Words in the locale, through `Intl.DurationFormat`. The clock prints balanced, so a stored count of milliseconds reads as hours and minutes.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| style | string | `'long'`, `'short'`, `'narrow'` or `'digital'`. Default `'long'` |
+| locale | string | A BCP 47 tag for this call |
+
+##### Styles
+
+| Style | Prints |
+|-------|--------|
+| `'long'` | `2 hours, 30 minutes` |
+| `'short'` | `2 hr, 30 min` |
+| `'narrow'` | `2h 30m` |
+| `'digital'` | `2:30:00` |
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+const length = hours(2).plus(minutes(30));
+
+length.format(); // '2 hours, 30 minutes'
+length.format('narrow'); // '2h 30m'
+length.format('digital'); // '2:30:00'
+length.format('long', 'de'); // '2 Stunden, 30 Minuten'
+duration(93784512).format(); // '26 hours, 3 minutes, 4 seconds'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-format" direction="horizontal"></PlaygroundExample>
+
+## Converting
+
+### toFields
+
+```javascript
+duration.toFields();
+```
+
+The nonzero fields as a plain object, plural keys as Temporal spells them.
+
+#### Returns
+
+An object.
+
+#### Usage
+
+```javascript
+duration('1h 30m').toFields(); // { hours: 1, minutes: 30 }
+duration('P1Y2M3DT4H').toFields(); // { years: 1, months: 2, days: 3, hours: 4 }
+duration(0).toFields(); // {}
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-tofields" direction="horizontal"></PlaygroundExample>
+
+### toString
+
+```javascript
+duration.toString();
+```
+
+ISO 8601, the fields as written. `balance()` first for the folded form.
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+duration('90m').toString(); // 'PT90M'
+duration('90m').balance().toString(); // 'PT1H30M'
+duration(1500).toString(); // 'PT1.5S'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-tostring" direction="horizontal"></PlaygroundExample>
+
+### toJSON
+
+```javascript
+duration.toJSON();
+```
+
+The wire form, ISO 8601 as written, which `duration()` reads back exactly. The anchor does not travel, so a stored length is `toMilliseconds()`. See [Wire Forms](/docs/api/dates/wire-forms).
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+JSON.stringify({ ttl: duration('1h 30m') }); // '{"ttl":"PT1H30M"}'
+weeks(1).toJSON(); // 'P1W'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-tojson" direction="horizontal"></PlaygroundExample>
+
+### toTemporal
+
+```javascript
+duration.toTemporal();
+```
+
+The `Temporal.Duration` underneath.
+
+#### Returns
+
+A `Temporal.Duration`.
+
+#### Usage
+
+```javascript
+hours(1).toTemporal().total('minutes'); // 60
+```
+
+#### Example
+
+<PlaygroundExample id="dates-duration-totemporal" direction="horizontal"></PlaygroundExample>
+
+### valueOf
+
+```javascript
+duration.valueOf();
+```
+
+Milliseconds, so a duration drops into `setTimeout` and subtracts with `-`. Months and years need the anchor, and `+months(1)` refuses with `needsAnchor`.
+
+#### Returns
+
+A number.
+
+#### Usage
+
+```javascript
++hours(2); // 7200000
+hours(2) - hours(1); // 3600000
+setTimeout(save, minutes(5));
+```

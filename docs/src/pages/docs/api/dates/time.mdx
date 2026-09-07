@@ -1,0 +1,719 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Time
+icon: timer
+description: API reference for time, a time of day with no date
+package: "@semantic-ui/dates"
+methods: [time, plus, minus, set, startOf, endOf, round, floor, ceil, equals, isBefore, isAfter, isSame, until, since, on, to, format, toString, toJSON, toTemporal, valueOf]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+A time of day with no date: opening hours, a daily reminder. Arithmetic wraps at midnight like a clock face. The class is `Time`, a `Temporal.PlainTime` underneath.
+
+## Creating
+
+### time
+
+```javascript
+time(input);
+time(hour, minute, second);
+time(input, zone);
+time(input, { zone, loose });
+```
+
+Reads `'09:00'`, `'9am'`, `'5:30 pm'`, `'17:30:15.250'`, numbers, a fields object, a datetime (its clock in its zone), or a `Date` (its clock in the zone).
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| input | string \| object \| DateTime \| Date \| Temporal | A clock in any spelling, `{ hours, minutes }`, a datetime, a `Date`, or a Temporal value |
+| hour, minute, second | number | Numbers, `time(9, 30)` |
+| zone | string | The zone a `Date` is read in |
+| options | object | `{ zone, loose }`. See [Reading Values](/docs/api/dates/reading-values) |
+
+#### Returns
+
+A `Time`, or `null` under `{ loose: true }` for input that cannot be read.
+
+#### Usage
+
+```javascript
+time('9am').toString(); // '09:00:00'
+time('5:30 pm').toString(); // '17:30:00'
+time('17:30:15.250').millisecond; // 250
+time(9, 30).toString(); // '09:30:00'
+time(datetime('2026-09-06T14:30Z', 'UTC')).toString(); // '14:30:00'
+time(new Date('2026-09-06T14:30:00Z'), 'Asia/Tokyo').toString(); // '23:30:00'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time" direction="horizontal"></PlaygroundExample>
+
+## Properties
+
+Every property is read-only.
+
+| Name | Type | Description |
+|------|------|-------------|
+| hour | number | 0 through 23 |
+| minute | number | |
+| second | number | |
+| millisecond | number | |
+| microsecond | number | |
+| nanosecond | number | |
+
+#### Usage
+
+```javascript
+const moment = time('17:30:15.250');
+
+moment.hour; // 17
+moment.minute; // 30
+moment.millisecond; // 250
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-properties" direction="horizontal"></PlaygroundExample>
+
+## Moving
+
+### plus
+
+```javascript
+time.plus(duration);
+time.plus(fields);
+time.plus(phrase);
+time.plus(count, unit);
+```
+
+Adds a duration, wrapping at midnight.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| amount | Duration \| object \| string \| number | A duration, a fields object like `{ minutes: 45 }`, a phrase like `'1h 30m'`, or a count with a unit |
+| unit | string | The unit for a count, `'hours'`, `'minutes'`, `'seconds'` |
+
+#### Returns
+
+A new `Time`.
+
+#### Usage
+
+```javascript
+time('09:00').plus(hours(2)).toString(); // '11:00:00'
+time('09:00').plus('1h 30m').toString(); // '10:30:00'
+time('23:00').plus(hours(2)).toString(); // '01:00:00'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-plus" direction="horizontal"></PlaygroundExample>
+
+### minus
+
+```javascript
+time.minus(duration);
+time.minus(fields);
+time.minus(phrase);
+time.minus(count, unit);
+```
+
+Subtracts a duration, wrapping at midnight.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| amount | Duration \| object \| string \| number | A duration, a fields object, a phrase, or a count with a unit |
+| unit | string | The unit for a count |
+
+#### Returns
+
+A new `Time`.
+
+#### Usage
+
+```javascript
+time('17:30').minus(minutes(45)).toString(); // '16:45:00'
+time('00:30').minus(minutes(45)).toString(); // '23:45:00'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-minus" direction="horizontal"></PlaygroundExample>
+
+### set
+
+```javascript
+time.set(fields);
+time.set(unit, value);
+```
+
+Replaces parts. A part out of range refuses with `cannotSet`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| fields | object | Singular keys, `{ minute: 30 }` |
+| unit | string | `'hour'`, `'minute'`, `'second'` or `'millisecond'` |
+| value | number | Its new value |
+
+#### Returns
+
+A new `Time`.
+
+#### Usage
+
+```javascript
+time('09:00').set({ minute: 30 }).toString(); // '09:30:00'
+time('09:00').set('hour', 17).toString(); // '17:00:00'
+time('09:00').set('minute', 75); // throws cannotSet
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-set" direction="horizontal"></PlaygroundExample>
+
+### startOf
+
+```javascript
+time.startOf(unit);
+```
+
+The first moment of the unit around this time.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| unit | string | `'hour'`, `'minute'`, `'second'` |
+
+#### Returns
+
+A new `Time`.
+
+#### Usage
+
+```javascript
+time('14:37:42.500').startOf('hour').toString(); // '14:00:00'
+time('14:37:42.500').startOf('minute').toString(); // '14:37:00'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-startof" direction="horizontal"></PlaygroundExample>
+
+### endOf
+
+```javascript
+time.endOf(unit);
+```
+
+The last millisecond of the unit around this time.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| unit | string | `'hour'`, `'minute'`, `'second'` |
+
+#### Returns
+
+A new `Time`.
+
+#### Usage
+
+```javascript
+time('14:37:42').endOf('hour').toString(); // '14:59:59.999'
+time('14:37:42').endOf('minute').toString(); // '14:37:59.999'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-endof" direction="horizontal"></PlaygroundExample>
+
+### round
+
+```javascript
+time.round(unit);
+time.round(increment, unit);
+```
+
+Rounds to the nearest unit or increment.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| increment | number | A count of the unit to snap to, `30` for half hours |
+| unit | string | `'hour'`, `'minute'`, `'second'`, `'millisecond'` |
+
+#### Returns
+
+A new `Time`.
+
+#### Usage
+
+```javascript
+time('14:37').round('hour').toString(); // '15:00:00'
+time('14:37').round(30, 'minutes').toString(); // '14:30:00'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-round" direction="horizontal"></PlaygroundExample>
+
+### floor
+
+```javascript
+time.floor(unit);
+time.floor(increment, unit);
+```
+
+Rounds down to a unit or increment.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| increment | number | A count of the unit to snap to |
+| unit | string | `'hour'`, `'minute'`, `'second'`, `'millisecond'` |
+
+#### Returns
+
+A new `Time`.
+
+#### Usage
+
+```javascript
+time('14:37:42').floor('hour').toString(); // '14:00:00'
+time('14:37:42').floor(15, 'minutes').toString(); // '14:30:00'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-floor" direction="horizontal"></PlaygroundExample>
+
+### ceil
+
+```javascript
+time.ceil(unit);
+time.ceil(increment, unit);
+```
+
+Rounds up to a unit or increment.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| increment | number | A count of the unit to snap to |
+| unit | string | `'hour'`, `'minute'`, `'second'`, `'millisecond'` |
+
+#### Returns
+
+A new `Time`.
+
+#### Usage
+
+```javascript
+time('14:37:42').ceil('hour').toString(); // '15:00:00'
+time('14:37:42').ceil(15, 'minutes').toString(); // '14:45:00'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-ceil" direction="horizontal"></PlaygroundExample>
+
+## Comparing
+
+Every comparison takes anything `time()` reads, and orders within the day, so `'22:00'` comes after `'02:00'`.
+
+### equals
+
+```javascript
+time.equals(other);
+```
+
+The same time of day.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Time \| string \| object | Anything `time()` reads |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+time('9am').equals('09:00'); // true
+time('9am').equals(time(9, 0)); // true
+time('9am').equals('9:01'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-equals" direction="horizontal"></PlaygroundExample>
+
+### isBefore
+
+```javascript
+time.isBefore(other);
+```
+
+Whether this time comes earlier in the day than another.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Time \| string \| object | Anything `time()` reads |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+time('9am').isBefore('5pm'); // true
+time('5pm').isBefore('9am'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-isbefore" direction="horizontal"></PlaygroundExample>
+
+### isAfter
+
+```javascript
+time.isAfter(other);
+```
+
+Whether this time comes later in the day than another.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Time \| string \| object | Anything `time()` reads |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+time('5pm').isAfter('9am'); // true
+time('9am').isAfter('5pm'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-isafter" direction="horizontal"></PlaygroundExample>
+
+### isSame
+
+```javascript
+time.isSame(other);
+time.isSame(other, unit);
+```
+
+Whether two times share a unit. Without a unit it is `equals()`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Time \| string \| object | Anything `time()` reads |
+| unit | string | `'hour'`, `'minute'`, `'second'` |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+time('9am').isSame('09:59', 'hour'); // true
+time('9am').isSame('10:00', 'hour'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-issame" direction="horizontal"></PlaygroundExample>
+
+## Measuring
+
+### until
+
+```javascript
+time.until(other);
+time.until(other, unit);
+```
+
+The signed length until another time within the day, or that length as a number in one unit. An earlier time comes out negative, the clock does not wrap here.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Time \| string \| object | Anything `time()` reads |
+| unit | string | A unit to total in, `'hours'`, `'minutes'` |
+
+#### Returns
+
+A `Duration`, or a number with a unit.
+
+#### Usage
+
+```javascript
+time('09:00').until('17:30').toString(); // 'PT8H30M'
+time('09:00').until('17:30', 'hours'); // 8.5
+time('22:00').until('02:00', 'hours'); // -20
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-until" direction="horizontal"></PlaygroundExample>
+
+### since
+
+```javascript
+time.since(other);
+time.since(other, unit);
+```
+
+The signed length since another time within the day, `other.until(this)`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Time \| string \| object | Anything `time()` reads |
+| unit | string | A unit to total in |
+
+#### Returns
+
+A `Duration`, or a number with a unit.
+
+#### Usage
+
+```javascript
+time('17:00').since('9am').toString(); // 'PT8H'
+time('17:00').since('9am', 'minutes'); // 480
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-since" direction="horizontal"></PlaygroundExample>
+
+## Combining
+
+### on
+
+```javascript
+time.on(date, zone);
+time.on(date);
+```
+
+This time on a date in a zone, the mirror of `date.at(time, zone)`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| date | CalendarDate \| string \| object | Anything `date()` reads |
+| zone | string | The zone the wall clock is in. Default the configured zone |
+
+#### Returns
+
+A `DateTime`.
+
+#### Usage
+
+```javascript
+time('9am').on('2026-09-06', 'America/New_York').toString(); // '2026-09-06T13:00:00.000Z'
+time('5:30pm').on(date('2026-09-06'), 'UTC').toString(); // '2026-09-06T17:30:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-on" direction="horizontal"></PlaygroundExample>
+
+### to
+
+```javascript
+time.to(end);
+time.to(duration);
+time.to(count, unit);
+```
+
+A range from this time until another, or covering a length, the end excluded. An end before the start crosses midnight. See [Range Bounds](/docs/api/dates/range-bounds).
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| end | Time \| string \| object \| Duration | Another time, or a length as a duration, fields or phrase |
+| count | number | A count with a unit |
+| unit | string | The unit for a count |
+
+#### Returns
+
+A `TimeRange`.
+
+#### Usage
+
+```javascript
+time('9am').to('5:30 pm').toString(); // '09:00:00/17:30:00'
+time('9am').to(minutes(90)).toString(); // '09:00:00/10:30:00'
+time('9am').to(8, 'hours').contains('17:00'); // false
+time('22:00').to('06:00').duration.format(); // '8 hours'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-to" direction="horizontal"></PlaygroundExample>
+
+## Formatting
+
+### format
+
+```javascript
+time.format();
+time.format(preset);
+time.format(options);
+time.format(tokens);
+time.format(spec, locale);
+```
+
+Prints in the configured locale or one given. No argument is the locale's short time.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| spec | string \| object | A preset, an `Intl.DateTimeFormat` options object, or a day.js token pattern. See the [datetime tokens](/docs/api/dates/datetime#format) |
+| locale | string | A BCP 47 tag for this call |
+
+##### Presets
+
+| Preset | Prints |
+|--------|--------|
+| `'short'` | `5:30 PM`, the default |
+| `'medium'` | `5:30:00 PM` |
+| `'long'` | `5:30:00 PM UTC` |
+| `'full'` | `5:30:00 PM Coordinated Universal Time` |
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+const moment = time('17:30');
+
+moment.format(); // '5:30 PM'
+moment.format('medium'); // '5:30:00 PM'
+moment.format({ hour: '2-digit', minute: '2-digit', hour12: false }); // '17:30'
+moment.format('h:mm a'); // '5:30 pm'
+moment.format('short', 'de-DE'); // '17:30'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-format" direction="horizontal"></PlaygroundExample>
+
+## Converting
+
+### toString
+
+```javascript
+time.toString();
+```
+
+ISO 8601, `'17:30:00'`, with a fraction of a second in groups of three. A time is not a number, so `<` refuses with `notANumber`.
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+time('17:30').toString(); // '17:30:00'
+time('17:30:15.25').toString(); // '17:30:15.250'
+time('17:30:15.000250').toString(); // '17:30:15.000250'
+time('9am') < time('5pm'); // throws notANumber
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-tostring" direction="horizontal"></PlaygroundExample>
+
+### toJSON
+
+```javascript
+time.toJSON();
+```
+
+The wire form, the ISO clock, which `time()` reads back exactly.
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+JSON.stringify({ opens: time('9am') }); // '{"opens":"09:00:00"}'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-tojson" direction="horizontal"></PlaygroundExample>
+
+### toTemporal
+
+```javascript
+time.toTemporal();
+```
+
+The `Temporal.PlainTime` underneath.
+
+#### Returns
+
+A `Temporal.PlainTime`.
+
+#### Usage
+
+```javascript
+time('17:30').toTemporal().toString(); // '17:30:00'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-time-totemporal" direction="horizontal"></PlaygroundExample>
+
+### valueOf
+
+```javascript
+time.valueOf();
+```
+
+Throws `notANumber`. A time of day is not a point on the number line. Compare with `isBefore()`, `isAfter()` or `equals()`, or measure with `until()`.
