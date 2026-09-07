@@ -49,11 +49,11 @@ describe('zones', () => {
   });
 
   it('answers to a name set once with configure', () => {
-    configure({ zones: { hq: 'Berlin' } });
+    configure({ zoneAliases: { hq: 'Berlin' } });
     expect(visit.in('hq').zone).toBe('Europe/Berlin');
     expect(date('2026-09-06').at('9am', 'hq').zone).toBe('Europe/Berlin');
-    expect(configure().zones.hq).toBe('Europe/Berlin');
-    expect(() => configure({ zones: { nowhere: 'Nowhere/Land' } })).toThrow(/unknownZone/);
+    expect(configure().zoneAliases.hq).toBe('Europe/Berlin');
+    expect(() => configure({ zoneAliases: { nowhere: 'Nowhere/Land' } })).toThrow(/unknownZone/);
   });
 
   it('refuses a name that is not a zone', () => {

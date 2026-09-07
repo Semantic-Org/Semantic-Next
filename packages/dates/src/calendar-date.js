@@ -338,7 +338,7 @@ export class CalendarDate {
     };
   }
 
-  relative(to, locale) {
+  formatRelative(to, locale) {
     const reference = to === undefined ? today() : new CalendarDate(to);
     return relativeDays(reference.until(this, 'day'), locale);
   }

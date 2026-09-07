@@ -169,7 +169,7 @@ class Range {
              Measure
   *******************************/
 
-  intersect(other) {
+  intersection(other) {
     const rival = this.#make(this.kind, other);
     if (!this.overlaps(rival)) {
       return null;
@@ -180,7 +180,7 @@ class Range {
   }
 
   // a time wraps at midnight and lands behind the last point, which is where its walk ends
-  each(step) {
+  points(step) {
     const size = Range.#step(step);
     const points = [];
     for (let i = 0;; i++) {
@@ -192,7 +192,7 @@ class Range {
     }
   }
 
-  // each(unit) walks by whole units, each(duration) by that length. either way the steps count out from
+  // points(unit) walks by whole units, points(duration) by that length. either way the steps count out from
   // the start, so monthly from the 31st lands on each month's last day rather than drifting to the 28th
   static #step(step) {
     const size = isString(step) && !/\d/.test(step) ? duration(1, step) : duration(step);
@@ -205,7 +205,7 @@ class Range {
   }
 
   split(step) {
-    const points = this.each(step);
+    const points = this.points(step);
     return points.map((start, i) => {
       const following = points[i + 1];
       if (following === undefined) {

@@ -29,17 +29,17 @@ describe('dateRange', () => {
     expect(week.contains('2026-09-07')).toBe(true);
     expect(week.contains('2026-09-08')).toBe(false);
     expect(week.duration.total('days')).toBe(7);
-    expect(week.each('day').length).toBe(7);
+    expect(week.points('day').length).toBe(7);
     expect(dateRange('2026-09-06', '2026-09-06').duration.total('days')).toBe(1);
   });
 
   it('covers a length from its start', () => {
     expect(dateRange(date('2026-09-06'), days(7)).toString()).toBe('2026-09-06/2026-09-12');
-    expect(dateRange('2026-09-06', '1 week').each('day').length).toBe(7);
+    expect(dateRange('2026-09-06', '1 week').points('day').length).toBe(7);
   });
 
   it('steps from the start, so monthly from the 31st lands on each month end', () => {
-    const renewals = dateRange(date('2026-01-31'), months(6)).each('month').map(String);
+    const renewals = dateRange(date('2026-01-31'), months(6)).points('month').map(String);
     expect(renewals).toEqual(['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30', '2026-05-31', '2026-06-30']);
   });
 
@@ -60,8 +60,8 @@ describe('dateRange', () => {
     expect(september.overlaps(dateRange('2026-10-01', '2026-10-05'))).toBe(false);
     expect(september.contains(dateRange('2026-09-10', '2026-09-20'))).toBe(true);
     expect(september.contains(dateRange('2026-09-10', '2026-10-20'))).toBe(false);
-    expect(september.intersect(dateRange('2026-09-20', '2026-10-20')).toString()).toBe('2026-09-20/2026-09-30');
-    expect(september.intersect(dateRange('2026-10-01', '2026-10-05'))).toBeNull();
+    expect(september.intersection(dateRange('2026-09-20', '2026-10-20')).toString()).toBe('2026-09-20/2026-09-30');
+    expect(september.intersection(dateRange('2026-10-01', '2026-10-05'))).toBeNull();
   });
 
   it('becomes the half-open datetime bounds a query wants', () => {
@@ -110,7 +110,7 @@ describe('dateRange', () => {
   it('refuses a range that runs backwards and a copy across kinds', () => {
     expect(() => dateRange('2026-09-07', '2026-09-01')).toThrow(/backwards/);
     expect(() => new DateRange(timeRange('09:00', '17:00'))).toThrow(/mixedRange/);
-    expect(() => dateRange('2026-09-01', '2026-09-07').each(days(0))).toThrow(/emptyStep/);
+    expect(() => dateRange('2026-09-01', '2026-09-07').points(days(0))).toThrow(/emptyStep/);
   });
 });
 
@@ -121,7 +121,7 @@ describe('datetimeRange', () => {
     expect(booked.overlaps(requested)).toBe(false);
     expect(booked.contains('2026-09-06T10:00Z')).toBe(false);
     expect(booked.overlaps(datetimeRange(datetime('2026-09-06T09:30Z'), minutes(45)))).toBe(true);
-    expect(booked.intersect(datetimeRange(datetime('2026-09-06T09:30Z'), minutes(45))).toString())
+    expect(booked.intersection(datetimeRange(datetime('2026-09-06T09:30Z'), minutes(45))).toString())
       .toBe('2026-09-06T09:30:00.000Z/2026-09-06T10:00:00.000Z');
   });
 
@@ -129,7 +129,7 @@ describe('datetimeRange', () => {
     const shift = datetimeRange(datetime('2026-09-06T09:00', 'Asia/Tokyo'), '2026-09-06T17:00');
     expect(shift.end.zone).toBe('Asia/Tokyo');
     expect(shift.duration.total('hours')).toBe(8);
-    expect(shift.each(hours(2)).length).toBe(4);
+    expect(shift.points(hours(2)).length).toBe(4);
     expect(shift.split(hours(3)).map((slot) => slot.duration.total('hours'))).toEqual([3, 3, 2]);
   });
 
@@ -150,7 +150,7 @@ describe('timeRange', () => {
     expect(open.contains('5:30pm')).toBe(false);
     expect(open.duration.format()).toBe('8 hours, 30 minutes');
     expect(open.split(minutes(30)).length).toBe(17);
-    expect(timeRange('09:00/17:00').each(hours(4)).map(String)).toEqual(['09:00:00', '13:00:00']);
+    expect(timeRange('09:00/17:00').points(hours(4)).map(String)).toEqual(['09:00:00', '13:00:00']);
     expect(timeRange(time('9am'), minutes(90)).end.format('h:mm a')).toBe('10:30 am');
   });
 
@@ -163,8 +163,8 @@ describe('timeRange', () => {
   });
 
   it('walks by the hour without wrapping past midnight', () => {
-    expect(timeRange('00:00', '23:30').each('hour')).toHaveLength(24);
-    expect(timeRange('09:00', '17:00').each('24h').map(String)).toEqual(['09:00:00']);
+    expect(timeRange('00:00', '23:30').points('hour')).toHaveLength(24);
+    expect(timeRange('09:00', '17:00').points('24h').map(String)).toEqual(['09:00:00']);
     expect(timeRange('00:00', '23:59').split('hour')).toHaveLength(24);
   });
 

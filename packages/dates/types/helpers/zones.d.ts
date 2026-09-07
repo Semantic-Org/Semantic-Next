@@ -8,7 +8,7 @@ export interface Settings {
   /** The first day of the week for `startOf('week')` (default: monday) */
   weekStart?: Weekday;
   /** Names a zone answers to, on top of cities and abbreviations: `{ hq: 'Europe/Berlin' }` */
-  zones?: Record<string, Zone>;
+  zoneAliases?: Record<string, Zone>;
 }
 
 /** Sets package-wide defaults once at app boot. Returns the settings in effect */
@@ -16,5 +16,5 @@ export function configure(settings?: Settings): {
   zone: string | undefined;
   locale: string | undefined;
   weekStart: number;
-  zones: Record<string, string>;
+  zoneAliases: Record<string, string>;
 };

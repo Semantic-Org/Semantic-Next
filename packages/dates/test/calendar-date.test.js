@@ -95,7 +95,7 @@ describe('date', () => {
     const month = date('2026-09-15').range('month');
     expect(month.toString()).toBe('2026-09-01/2026-09-30');
     expect(month.contains('2026-09-30')).toBe(true);
-    expect(month.each('week').length).toBe(5);
+    expect(month.points('week').length).toBe(5);
   });
 
   it('formats with presets and tokens, and refuses a clock token', () => {
@@ -121,12 +121,12 @@ describe('date', () => {
 
   it('phrases the distance in days, weeks, months and years', () => {
     const reference = '2026-09-07';
-    expect(date('2026-09-06').relative(reference)).toBe('yesterday');
-    expect(date('2026-09-07').relative(reference)).toBe('today');
-    expect(date('2026-09-08').relative(reference)).toBe('tomorrow');
-    expect(date('2026-09-21').relative(reference)).toBe('in 2 weeks');
-    expect(date('2026-11-01').relative(reference)).toBe('in 2 months');
-    expect(date('2020-01-01').relative(reference)).toBe('7 years ago');
+    expect(date('2026-09-06').formatRelative(reference)).toBe('yesterday');
+    expect(date('2026-09-07').formatRelative(reference)).toBe('today');
+    expect(date('2026-09-08').formatRelative(reference)).toBe('tomorrow');
+    expect(date('2026-09-21').formatRelative(reference)).toBe('in 2 weeks');
+    expect(date('2026-11-01').formatRelative(reference)).toBe('in 2 months');
+    expect(date('2020-01-01').formatRelative(reference)).toBe('7 years ago');
   });
 
   it('is not a number, and says which method to use instead', () => {

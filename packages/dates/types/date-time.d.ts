@@ -104,7 +104,7 @@ export class DateTime {
   /** A preset ('short', 'medium', 'long', 'full', 'date', 'time'), an Intl options bag, or day.js tokens. No argument reads as the locale's medium date and short time */
   format(spec?: FormatSpec, locale?: Locale): string;
   /** `'3 hours ago'`, `'in 2 days'`, `'yesterday'`, measured against now unless told otherwise */
-  relative(to?: DateTimeInput, locale?: Locale): string;
+  formatRelative(to?: DateTimeInput, locale?: Locale): string;
   /** The instant in UTC, `'2026-09-06T14:30:00.000Z'` */
   toString(): string;
   toJSON(): string;

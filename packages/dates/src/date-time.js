@@ -410,7 +410,7 @@ export class DateTime {
     };
   }
 
-  relative(to, locale) {
+  formatRelative(to, locale) {
     const reference = to === undefined ? now(this.zone) : new DateTime(to, this.zone);
     return relativeSeconds((this.epoch - reference.epoch) / 1000, locale);
   }

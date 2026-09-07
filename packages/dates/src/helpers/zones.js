@@ -3,8 +3,8 @@ import { capitalize, isDevelopment, isPlainObject, isString, timezones } from '@
 import { refuse } from './errors.js';
 import { weekdayNumber } from './units.js';
 
-// process-wide defaults, zones being the names a zone answers to
-const settings = { zone: undefined, locale: undefined, weekStart: 1, zones: {} };
+// process-wide defaults, zoneAliases being the names a zone answers to
+const settings = { zone: undefined, locale: undefined, weekStart: 1, zoneAliases: {} };
 const resolved = new Map([['UTC', 'UTC']]);
 
 // utils' own abbreviation table is the base, editable at boot in either package. these override
@@ -83,7 +83,7 @@ const rebuilt = (key) => {
 };
 
 const alias = (key) => {
-  for (const table of [settings.zones, timezones]) {
+  for (const table of [settings.zoneAliases, timezones]) {
     for (const [name, target] of Object.entries(table)) {
       if (normalize(name) === key) {
         return target;
@@ -93,7 +93,7 @@ const alias = (key) => {
   return abbreviations[key];
 };
 
-// an IANA name, an offset, an abbreviation, a city, or a name set with configure({ zones }), in any
+// an IANA name, an offset, an abbreviation, a city, or a name set with configure({ zoneAliases }), in any
 // case and spacing. resolves once per spelling and hands back the canonical id
 export const zoneId = (id) => {
   if (id === undefined || id === null) {
@@ -116,7 +116,7 @@ export const zoneId = (id) => {
   if (!found) {
     refuse('unknownZone', id, {
       explanation: isDevelopment
-        ? "a zone is an IANA name like America/New_York, a city like Berlin or los angeles, an abbreviation like PT or CET, a fixed offset like +05:30, or UTC. name your own once: configure({ zones: { hq: 'Europe/Berlin' } })"
+        ? "a zone is an IANA name like America/New_York, a city like Berlin or los angeles, an abbreviation like PT or CET, a fixed offset like +05:30, or UTC. name your own once: configure({ zoneAliases: { hq: 'Europe/Berlin' } })"
         : 0,
     });
   }
@@ -124,15 +124,15 @@ export const zoneId = (id) => {
   return found;
 };
 
-export const configure = ({ zone, locale, weekStart, zones } = {}) => {
-  if (zones !== undefined) {
-    if (!isPlainObject(zones)) {
-      refuse('unknownZone', String(zones), {
-        explanation: isDevelopment ? "zones is an object of names to zones: { hq: 'Europe/Berlin' }" : 0,
+export const configure = ({ zone, locale, weekStart, zoneAliases } = {}) => {
+  if (zoneAliases !== undefined) {
+    if (!isPlainObject(zoneAliases)) {
+      refuse('unknownZone', String(zoneAliases), {
+        explanation: isDevelopment ? "zoneAliases is an object of names to zones: { hq: 'Europe/Berlin' }" : 0,
       });
     }
-    for (const [name, target] of Object.entries(zones)) {
-      settings.zones[name] = zoneId(target);
+    for (const [name, target] of Object.entries(zoneAliases)) {
+      settings.zoneAliases[name] = zoneId(target);
     }
     resolved.clear();
     resolved.set('UTC', 'UTC');
@@ -146,7 +146,7 @@ export const configure = ({ zone, locale, weekStart, zones } = {}) => {
   if (weekStart !== undefined) {
     settings.weekStart = weekdayNumber(weekStart);
   }
-  return { ...settings, zones: { ...settings.zones } };
+  return { ...settings, zoneAliases: { ...settings.zoneAliases } };
 };
 
 export const locale = (override) => override ?? settings.locale;

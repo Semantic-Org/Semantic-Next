@@ -145,11 +145,11 @@ describe('datetime', () => {
 
   it('phrases the distance from a reference', () => {
     const reference = '2026-09-07T14:00Z';
-    expect(datetime('2026-09-07T13:59:30Z').relative(reference)).toBe('30 seconds ago');
-    expect(datetime('2026-09-07T13:00Z').relative(reference)).toBe('1 hour ago');
-    expect(datetime('2026-09-06T14:00Z').relative(reference)).toBe('yesterday');
-    expect(datetime('2026-09-09T14:00Z').relative(reference)).toBe('in 2 days');
-    expect(datetime('2026-08-01T14:00Z').relative(reference)).toBe('last month');
+    expect(datetime('2026-09-07T13:59:30Z').formatRelative(reference)).toBe('30 seconds ago');
+    expect(datetime('2026-09-07T13:00Z').formatRelative(reference)).toBe('1 hour ago');
+    expect(datetime('2026-09-06T14:00Z').formatRelative(reference)).toBe('yesterday');
+    expect(datetime('2026-09-09T14:00Z').formatRelative(reference)).toBe('in 2 days');
+    expect(datetime('2026-08-01T14:00Z').formatRelative(reference)).toBe('last month');
   });
 
   it('is a number under the operators Date users know', () => {

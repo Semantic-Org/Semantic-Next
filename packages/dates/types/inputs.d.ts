@@ -63,7 +63,7 @@ export type Weekday =
 /**
  * A zone in any spelling: an IANA name (`'America/New_York'`), a city (`'Berlin'`, `'los angeles'`), an
  * abbreviation (`'PT'`, `'CET'`), a fixed offset (`'+05:30'`), `'UTC'`, or a name set with
- * `configure({ zones })`
+ * `configure({ zoneAliases })`
  */
 export type Zone = string;
 

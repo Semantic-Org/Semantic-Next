@@ -44,7 +44,7 @@ storing the same moment store the same bytes.
 
 **A zone answers to its names.** Anywhere a zone is read it may be an IANA name, a city (`'Berlin'`,
 `'los angeles'`), an abbreviation (`'PT'`, `'CET'`, utils' `timezones` table is the floor), a
-fixed offset, or a name of your own from `configure({ zones: { hq: 'Europe/Berlin' } })`, in any case
+fixed offset, or a name of your own from `configure({ zoneAliases: { hq: 'Europe/Berlin' } })`, in any case
 and spacing. The 418 canonical cities are all distinct, so a city is never a guess.
 
 **Only a datetime is a number.** `valueOf()` gives epoch milliseconds, so datetimes sort with
@@ -67,7 +67,7 @@ RFC 2822 and locale strings included, and gives null rather than a throw for wha
 read. A `Date` object is read everywhere without asking.
 
 **Same verbs everywhere.** `plus`, `minus`, `set`, `startOf`, `endOf`, `round`, `floor`, `ceil`,
-`isBefore`, `isAfter`, `equals`, `isSame`, `until`, `since`, `to`, `format`, `relative`. Every method
+`isBefore`, `isAfter`, `equals`, `isSame`, `until`, `since`, `to`, `format`, `formatRelative`. Every method
 that takes another point also takes anything its factory reads, so `dt.isBefore('2027-01-01')` works.
 
 ## datetime
@@ -84,7 +84,7 @@ Input: an ISO string (`'2026-09-06T14:30Z'`, `'2026-09-06T14:30'` as a wall cloc
 | move | `plus(x)` `minus(x)` `set({ hour: 9 })` `set('hour', 9)` `at('9am')` `in('Asia/Tokyo')` `startOf('month')` `endOf('day')` `round(15, 'minutes')` `floor('hour')` `ceil('hour')` `next('friday')` `previous('monday')` |
 | ask | `equals` `isBefore` `isAfter` `isSame(other, 'day')` `isPast` `isFuture` `isToday` `isTomorrow` `isYesterday` |
 | measure | `until(other)` `since(other)` a duration, `until(other, 'hours')` a number, `to(end)` `range('week')` a range |
-| show | `format()` medium date and short time, `format('short' \| 'long' \| 'full' \| 'date' \| 'time')`, `format({ dateStyle: 'medium' })`, `format('YYYY-MM-DD h:mm a z')`, `relative()` |
+| show | `format()` medium date and short time, `format('short' \| 'long' \| 'full' \| 'date' \| 'time')`, `format({ dateStyle: 'medium' })`, `format('YYYY-MM-DD h:mm a z')`, `formatRelative()` |
 | out | `toString()` `toJSON()` the instant in UTC, `toJSDate()` `toTemporal()` `valueOf()` epoch milliseconds |
 
 `plus` and `minus` take a duration, a fields object `{ days: 3 }`, a phrase `'1h 30m'`, or a number and
@@ -108,7 +108,7 @@ unless `{ loose: true, zone }` says which, or `datetime(text, zone).date` choose
 | ask | `equals` `isBefore` `isAfter` `isSame(other, 'month')` `isPast(zone?)` `isFuture` `isToday` `isTomorrow` `isYesterday` |
 | combine | `at(time, zone?)` a datetime, `to(end)` `range('month')` a range |
 | measure | `until(other)` `since(other)` `until(other, 'days')` |
-| show | `format()` `format('long')` `format('MMMM Do, YYYY')` `relative()` yesterday, tomorrow, in 2 weeks |
+| show | `format()` `format('long')` `format('MMMM Do, YYYY')` `formatRelative()` yesterday, tomorrow, in 2 weeks |
 | out | `toString()` `toJSON()` `'2026-09-06'`, `toJSDate(zone?)` `toTemporal()` |
 
 ## time
@@ -162,8 +162,8 @@ a loose end through its own kind: `dateRange(datetime, datetime)` is the range o
 | read | `start` `end` `kind` `duration` `isEmpty` |
 | --- | --- |
 | ask | `contains(point)` `contains(range)` `overlaps(other)` `equals` |
-| move | `intersect(other)` or null, `in(zone)` a date range becomes the datetime bounds for a query |
-| walk | `each('day')` `each(minutes(15))` the points, `split('week')` `split(hours(1))` the sub-ranges |
+| move | `intersection(other)` or null, `in(zone)` a date range becomes the datetime bounds for a query |
+| walk | `points('day')` `points(minutes(15))` the points, `split('week')` `split(hours(1))` the sub-ranges |
 | show | `format()` `'Sep 1 – 7, 2026'`, `format('time')` `'9:00 – 10:00 AM'` |
 | out | `toString()` `toJSON()` `'start/end'` |
 
@@ -174,7 +174,7 @@ Steps count out from the start, so monthly from the 31st lands on each month's l
 ```js
 compare(a, b)                 // a sort comparator across any one kind
 earliest(...points)  latest(...points)
-configure({ zone: 'UTC', locale: 'en-GB', weekStart: 'sunday', zones: { hq: 'Europe/Berlin' } })
+configure({ zone: 'UTC', locale: 'en-GB', weekStart: 'sunday', zoneAliases: { hq: 'Europe/Berlin' } })
 isDateTime(x) isCalendarDate(x) isTime(x) isDuration(x) isDateRange(x) isDateTimeRange(x) isTimeRange(x) kindOf(x)
 ```
 

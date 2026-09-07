@@ -76,7 +76,7 @@ export class CalendarDate {
 
   format(spec?: FormatSpec, locale?: Locale): string;
   /** `'yesterday'`, `'in 3 weeks'`, `'last month'`, measured against today unless told otherwise */
-  relative(to?: CalendarDateInput, locale?: Locale): string;
+  formatRelative(to?: CalendarDateInput, locale?: Locale): string;
   /** ISO 8601, `'2026-09-06'` */
   toString(): string;
   toJSON(): string;

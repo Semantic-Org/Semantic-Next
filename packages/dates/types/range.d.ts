@@ -27,10 +27,10 @@ declare abstract class Range<Point, Input> {
   contains(value: Input | this): boolean;
   overlaps(other: this | string): boolean;
   /** The shared part, or null when they do not meet */
-  intersect(other: this | string): this | null;
+  intersection(other: this | string): this | null;
   equals(other: this | string): boolean;
   /** Every point from the start, stepping by a unit or a duration, as far as the range reaches */
-  each(step: Unit | DurationInput): Point[];
+  points(step: Unit | DurationInput): Point[];
   /** Consecutive sub-ranges of the step, the last one cut to the end: a day in hour slots, a year in months */
   split(step: Unit | DurationInput): this[];
   /** Intl's range formatting, `'Sep 1 – 7, 2026'` */
