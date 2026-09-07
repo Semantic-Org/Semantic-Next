@@ -101,7 +101,7 @@ Single sitting. The order matters; each step gates the next:
 ```
 utils                         (zero deps)
   ↓
-reactivity, query             (depend only on utils)
+reactivity, query, dates      (depend only on utils)
   ↓
 compiler                      (depends on utils)
   ↓

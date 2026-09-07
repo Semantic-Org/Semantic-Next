@@ -53,7 +53,7 @@ Resolved during scoping:
 
 5. **Wire the staging canary playground** (~1–2h, agent). See [staging-canary-playground.md](../staging-canary-playground.md). Slotted here on purpose — adds an `isStagingBuild` mode to `docs/src/pages/examples/importmap.json.js` pointing at `cdn.semantic-ui.com/<pkg>@canary`. Once it deploys, `staging.semantic-ui.com/playground` becomes a real pre-tag smoke surface running main-HEAD code. The next session uses it to verify the framework works end-to-end *before* publishing to npm — cheaper than discovering an export gap or broken bundle after the deprecate-and-patch cycle has started.
 
-6. **Version sweep.** Confirm all 9 framework packages and root sit at `0.18.0`. Bump `integrations/astro` from `0.1.0` to `0.18.0`. Verify `internal-packages/*` versions are intentional (private packages don't publish but should still version-bump if they're part of the dep graph). Run the existing `update-version` script if it exists; otherwise hand-edit and re-run `npm install` to refresh the lockfile.
+6. **Version sweep.** Confirm all 10 framework packages and root sit at `0.18.0`. Bump `integrations/astro` from `0.1.0` to `0.18.0`. Verify `internal-packages/*` versions are intentional (private packages don't publish but should still version-bump if they're part of the dep graph). Run the existing `update-version` script if it exists; otherwise hand-edit and re-run `npm install` to refresh the lockfile.
 
 7. **Build artifacts.** Run the full build from clean — `npm install && npm run build` (or whatever `prepublishOnly` exercises). Confirm `dist/` outputs exist for every published package and the umbrella `@semantic-ui/core` bundle. Smoke-test bundle size against last release if there's a baseline.
 
@@ -63,7 +63,7 @@ Resolved during scoping:
 
 10. **Publish to npm.** Use the existing `publish` script. Order matters because of workspace deps:
    - `utils` first
-   - `reactivity`, `query`, `specs` (depend only on utils)
+   - `reactivity`, `query`, `specs`, `dates` (depend only on utils)
    - `compiler` (depends on utils)
    - `renderer` (depends on reactivity, utils)
    - `templating` (depends on compiler, renderer, reactivity, query, utils)

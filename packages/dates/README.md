@@ -3,13 +3,17 @@
 **Temporal, spoken plainly.** Five words cover what business logic says about time, each one a
 Temporal type underneath and one call away from it.
 
-| word | what it is | Temporal underneath |
-| --- | --- | --- |
-| `datetime` | an exact moment, with a zone to read it in | `ZonedDateTime` |
-| `date` | a calendar day, no clock, no zone | `PlainDate` |
-| `time` | a time of day, no date | `PlainTime` |
-| `duration` | a length of time | `Duration` |
-| `dateRange` `datetimeRange` `timeRange` | a span between two points, named by what it holds | two of the above |
+| word | what it is | class | Temporal underneath |
+| --- | --- | --- | --- |
+| `datetime` | an exact moment, with a zone to read it in | `DateTime` | `ZonedDateTime` |
+| `date` | a calendar day, no clock, no zone | `CalendarDate` | `PlainDate` |
+| `time` | a time of day, no date | `Time` | `PlainTime` |
+| `duration` | a length of time | `Duration` | `Duration` |
+| `dateRange` `datetimeRange` `timeRange` | a span between two points, named by what it holds | `DateRange` `DateTimeRange` `TimeRange` | two of the above |
+
+The lowercase word is the factory and the class is exported beside it, for `instanceof` and for a
+schema that takes a constructor. The brands are exported too, `IS_DATE_TIME` and its siblings, keyed
+with `Symbol.for` so a package recognises a value from any copy of this library without bundling it.
 
 ```js
 import { date, days, datetime, now, time, timeRange } from '@semantic-ui/dates';
@@ -62,9 +66,11 @@ A duration from `until()` remembers where it started, so months and years total 
 
 **Strict by default, loose on request.** The factories read ISO 8601 and refuse the rest, with the way
 out in the error. A missing value refuses too, `now()` and `today()` are the doors for the present.
-`{ loose: true }` as the options form of the second argument reads whatever the engine's `Date` reads,
-RFC 2822 and locale strings included, and gives null rather than a throw for what even `Date` cannot
-read. A `Date` object is read everywhere without asking.
+`{ loose: true }`, the options form of the last argument on all seven factories, reads whatever the
+engine's `Date` reads, RFC 2822 and locale strings included, and gives null rather than a throw for
+what cannot be read: a point that is not one, a length that is not one, a range with such an end. What
+reads but is wrong, a backwards range or an unknown zone, still throws, since that is a mistake in the
+code rather than in the data's form. A `Date` object is read everywhere without asking.
 
 **Same verbs everywhere.** `plus`, `minus`, `set`, `startOf`, `endOf`, `round`, `floor`, `ceil`,
 `isBefore`, `isAfter`, `equals`, `isSame`, `until`, `since`, `to`, `format`, `formatRelative`. Every method
@@ -126,38 +132,48 @@ Input: `'09:00'`, `'9am'`, `'5:30 pm'`, `'17:30:15.250'`, numbers, a fields obje
 | ask | `equals` `isBefore` `isAfter` `isSame(other, 'hour')` |
 | combine | `on(date, zone?)` a datetime, `to(end)` a range |
 | show | `format()` short, `format('HH:mm')` |
-| out | `toString()` `toJSON()` `'17:30:00'`, `toTemporal()` |
+| out | `toString()` `toJSON()` `'17:30:00'` `'17:30:15.250'` a fraction in groups of three, `toTemporal()` |
 
 ## duration
 
 ```js
 duration('1h 30m')  duration('2 weeks and 3 days')  duration('PT1H30M')  duration({ hours: 1, minutes: 30 })
 duration(90, 'minutes')  duration(1500)              // milliseconds, as utils' toDuration reads it
+duration(input, { loose: true })                     // null for what is not a length
 years(1) months(1) weeks(1) days(1) hours(1) minutes(1) seconds(1) milliseconds(1)
 ```
 
 Every spelling `toDuration` in `@semantic-ui/utils` reads is read here, plus compounds, calendar units
 and fractions: `1.5 days` is a day and twelve hours. A fraction of a month is refused, and so is a
-subtraction that would leave months and days with opposite signs.
+phrase with mixed signs, `'1h -30m'`, since a length has one sign.
+
+Fields stay as written: `duration('90m')` prints `PT90M` until `balance()` makes it `PT1H30M`. A length
+balances to hours and never to days, because a day is a calendar unit that only an anchor or an explicit
+`balance('day')` makes from clock time, and folding 36 hours into a day would move a deadline across a
+daylight saving change. Two durations that `equals()` can therefore print differently, so a stored
+length is its `toMilliseconds()`.
 
 | read | `years` `months` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `sign` `isZero` `isNegative` |
 | --- | --- |
-| move | `plus` `minus` `times(n)` `negated()` `abs()` `balance()` 90 minutes to an hour and a half, `balance('hour')` `round('minute')` |
+| move | `plus` `minus` `times(n)` `negated()` `abs()` `balance()` 90 minutes to an hour and a half, `balance('day')` `round('minute')` |
 | ask | `equals` `compare` |
-| measure | `total('hours')` the whole in one unit, fractional |
+| measure | `total('hours')` the whole in one unit, fractional, `toMilliseconds()` |
 | show | `format()` `'2 hours, 30 minutes'`, `format('short' \| 'narrow' \| 'digital')` `'2 hr, 30 min'` `'2h 30m'` `'2:30:00'` |
-| out | `toString()` `toJSON()` `'PT2H30M'`, `toTemporal()` `valueOf()` milliseconds |
+| out | `toString()` `toJSON()` `'PT2H30M'` as written, `toTemporal()` `valueOf()` milliseconds |
 
 ## dateRange, datetimeRange, timeRange
 
 ```js
 dateRange(start, end)  datetimeRange(start, duration)  timeRange('09:00/17:00')  start.to(end)
+dateRange(start, end, { loose: true, zone })         // null for an end that cannot be read
 dt.range('day')  date.range('month')       // the unit around a point, as its kind's range
 ```
 
 A range is named by what it holds, the way Postgres names `daterange` and `tstzrange`, so a reader
-knows the kind at the callsite and a `range` from another library never collides. Each factory reads
-a loose end through its own kind: `dateRange(datetime, datetime)` is the range of their dates.
+knows the kind at the callsite and a `range` from another library never collides. An end reads through
+the range's own kind first, `'5pm'` is a time and `dateRange(datetime, datetime)` is the range of their
+dates, and as a length when written as one, `'2h'`, `{ hours: 2 }` or a duration. `{ zone }` reads a
+datetime range's start in that zone.
 
 | read | `start` `end` `kind` `duration` `isEmpty` |
 | --- | --- |
@@ -172,20 +188,34 @@ Steps count out from the start, so monthly from the 31st lands on each month's l
 ## helpers
 
 ```js
-compare(a, b)                 // a sort comparator across any one kind
+compare(a, b)                 // a sort comparator across any one kind, ranges by start then end
 earliest(...points)  latest(...points)
 configure({ zone: 'UTC', locale: 'en-GB', weekStart: 'sunday', zoneAliases: { hq: 'Europe/Berlin' } })
 isDateTime(x) isCalendarDate(x) isTime(x) isDuration(x) isDateRange(x) isDateTimeRange(x) isTimeRange(x) kindOf(x)
+IS_DATE_TIME IS_CALENDAR_DATE IS_TIME IS_DURATION IS_RANGE IS_DATE_RANGE IS_DATE_TIME_RANGE IS_TIME_RANGE
 ```
+
+## what survives the wire
+
+`toJSON()` is the wire form, and each factory reads its own back exactly. Two things do not travel.
+
+| kind | prints | does not travel |
+| --- | --- | --- |
+| `datetime` | the instant in UTC, `2026-09-06T14:30:00.000Z`, six or nine fraction digits only when the value has them | the zone, which is a view. `datetime(text, zone)` or `configure({ zone })` chooses it on the reading side |
+| `date` | `2026-09-06` | |
+| `time` | `17:30:00`, a fraction in groups of three | |
+| `duration` | the fields as written, `PT90M` | the anchor from `until()`, so months and years lose their calendar. A stored length is `toMilliseconds()` |
+| the ranges | `start/end` | as their ends |
+
+A meeting at 9am in Berlin next March is a wall clock plus a zone, and that pair is not a type here.
+Store the day, the time and the zone as their own fields and compose them with `date.at(time, zone)`
+when reading, so a change to the zone's rules moves the instant and not the meeting.
 
 ## errors
 
 Every refusal is a coded `RangeError` or `TypeError` built with utils' `createErrors`, one line in
 production (`dates refused [notADate] 2026-09-06T14:00Z`) with the way out appended in development.
-Codes: `unreadableDateTime` `unreadableDate` `unreadableTime` `unreadableDuration` `notADateTime`
-`notADate` `notATime` `notADateUnit` `notANumber` `needsAnchor` `fractionalMonth` `mixedSigns`
-`mixedKinds` `mixedRange` `backwards` `unknownUnit` `unknownWeekday` `unknownZone` `noField`
-`cannotAdd` `cannotRound` `cannotSet`.
+Codes: `backwards` `cannotAdd` `cannotBalance` `cannotRound` `cannotSet` `cannotSubtract` `emptyStep` `fractionalMonth` `mixedKinds` `mixedRange` `mixedSigns` `needsAnchor` `noField` `noPoints` `noTemporal` `noTokens` `noZone` `notADate` `notADateTime` `notADateUnit` `notADuration` `notANumber` `notAPoint` `notATime` `notFinite` `unknownUnit` `unknownWeekday` `unknownZone` `unreadableDate` `unreadableDateTime` `unreadableDuration` `unreadableTime`.
 
 ## not here, on purpose
 
