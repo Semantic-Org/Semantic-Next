@@ -1,12 +1,6 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  parseRoute,
-  getContentType,
-  cacheHeaders,
-  corsHeaders,
-  getSuiEntrypoint,
-} from '../../worker/index.js';
+import { cacheHeaders, corsHeaders, getContentType, getSuiEntrypoint, parseRoute } from '../../worker/index.js';
 import worker from '../../worker/index.js';
 
 /*----------------------------------------------
@@ -1291,7 +1285,19 @@ describe('parseRoute — edge cases', () => {
   });
 
   it('all SUI packages are recognized', () => {
-    const packages = ['compiler', 'component', 'core', 'query', 'reactivity', 'renderer', 'specs', 'tailwind', 'templating', 'utils'];
+    const packages = [
+      'compiler',
+      'component',
+      'core',
+      'dates',
+      'query',
+      'reactivity',
+      'renderer',
+      'specs',
+      'tailwind',
+      'templating',
+      'utils',
+    ];
     for (const pkg of packages) {
       const route = parseRoute(`/${pkg}@1.0.0`);
       expect(route.type, `${pkg} should be type "sui"`).toBe('sui');

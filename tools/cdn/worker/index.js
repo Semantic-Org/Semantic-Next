@@ -11,6 +11,7 @@ const SUI_PACKAGES = new Set([
   'compiler',
   'component',
   'core',
+  'dates',
   'query',
   'reactivity',
   'renderer',

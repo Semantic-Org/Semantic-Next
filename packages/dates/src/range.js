@@ -1,0 +1,286 @@
+import { isDevelopment, isString } from '@semantic-ui/utils';
+
+import { CalendarDate } from './calendar-date.js';
+import { DateTime } from './date-time.js';
+import { days, duration } from './duration.js';
+import { refuse, refuseType } from './helpers/errors.js';
+import { isDurationLike } from './helpers/fields.js';
+import { formatIntlRange, intlOptions } from './helpers/format.js';
+import { IS_DATE_RANGE, IS_DATE_TIME_RANGE, IS_RANGE, IS_TIME_RANGE } from './helpers/identity.js';
+import { inspect } from './helpers/units.js';
+import { Time } from './time.js';
+
+/*
+  a span between two points, named by what it holds. a date range runs through its end, both days
+  included, because that is how people write dates: the 1st through the 7th is seven days. a datetime
+  or time range runs until its end, the end excluded, because that is how bookings and shifts abut
+*/
+
+const factoryNames = { date: 'dateRange', datetime: 'datetimeRange', time: 'timeRange' };
+
+// the shared body. the three exported classes seal it to a kind, so a value names what it holds
+class Range {
+  // brand range
+  get [IS_RANGE]() {
+    return true;
+  }
+  static [Symbol.hasInstance](value) {
+    return !!value?.[IS_RANGE];
+  }
+
+  #start;
+  #end;
+
+  constructor(start, end) {
+    const kind = this.constructor.kind;
+    if (start instanceof Range && end === undefined) {
+      if (start.kind !== kind) {
+        refuseType('mixedRange', `${factoryNames[start.kind]} as ${factoryNames[kind]}`, {
+          explanation: isDevelopment
+            ? 'a range keeps its kind. convert the ends: datetime.date, date.at(time, zone), or dateRange.in(zone)'
+            : 0,
+        });
+      }
+      return start;
+    }
+    if (isString(start) && end === undefined) {
+      [start, end] = start.split('/');
+    }
+    this.#start = Range.#read(kind, start);
+    if (isDurationLike(end)) {
+      const length = duration(end);
+      this.#end = kind === 'date' ? this.#start.plus(length).minus(days(1)) : this.#start.plus(length);
+    }
+    else {
+      this.#end = Range.#read(kind, end, this.#start);
+    }
+    if (this.#end.isBefore(this.#start)) {
+      refuse('backwards', `${this.#start} to ${this.#end}`, {
+        explanation: isDevelopment ? 'a range runs forward. swap the ends, or use earliest() and latest()' : 0,
+      });
+    }
+    Object.freeze(this);
+  }
+
+  // an end reads through the kind's own factory, and a datetime end reads in the start's zone
+  static #read(kind, value, start) {
+    if (kind === 'date') {
+      return new CalendarDate(value);
+    }
+    if (kind === 'datetime') {
+      return new DateTime(value, start?.zone);
+    }
+    return new Time(value);
+  }
+
+  /*******************************
+              Reads
+  *******************************/
+
+  get start() {
+    return this.#start;
+  }
+  get end() {
+    return this.#end;
+  }
+  get kind() {
+    return this.constructor.kind;
+  }
+  get isEmpty() {
+    return this.kind !== 'date' && this.#start.equals(this.#end);
+  }
+
+  // the whole length, anchored at the start so months and years total. a date range counts its last day
+  get duration() {
+    return this.kind === 'date' ? this.#start.until(this.#end.plus(days(1))) : this.#start.until(this.#end);
+  }
+
+  /*******************************
+            Comparison
+  *******************************/
+
+  // a point inside, or a range wholly inside
+  contains(value) {
+    if (value instanceof Range) {
+      return !value.start.isBefore(this.#start) && !value.end.isAfter(this.#end);
+    }
+    return this.#holds(value);
+  }
+
+  #holds(value) {
+    const at = Range.#read(this.kind, value, this.#start);
+    if (at.isBefore(this.#start)) {
+      return false;
+    }
+    return this.#inclusive() ? !at.isAfter(this.#end) : at.isBefore(this.#end);
+  }
+
+  #inclusive() {
+    return this.kind === 'date';
+  }
+
+  overlaps(other) {
+    const rival = this.#make(this.kind, other);
+    if (this.#inclusive()) {
+      return !this.#start.isAfter(rival.end) && !rival.start.isAfter(this.#end);
+    }
+    return this.#start.isBefore(rival.end) && rival.start.isBefore(this.#end);
+  }
+
+  #make(kind, start, end) {
+    return new byKind[kind](start, end);
+  }
+
+  equals(other) {
+    const rival = this.#make(this.kind, other);
+    return this.#start.equals(rival.start) && this.#end.equals(rival.end);
+  }
+
+  /*******************************
+             Measure
+  *******************************/
+
+  // the shared part, or null when they do not meet
+  intersect(other) {
+    const rival = this.#make(this.kind, other);
+    if (!this.overlaps(rival)) {
+      return null;
+    }
+    const start = this.#start.isAfter(rival.start) ? this.#start : rival.start;
+    const end = this.#end.isBefore(rival.end) ? this.#end : rival.end;
+    return this.#make(this.kind, start, end);
+  }
+
+  // every point from the start, stepping by a unit or a duration, as far as the range reaches
+  each(step) {
+    const size = Range.#step(step);
+    const points = [];
+    for (let i = 0;; i++) {
+      const next = this.#start.plus(size.times(i));
+      if (!this.#holds(next)) {
+        return points;
+      }
+      points.push(next);
+    }
+  }
+
+  // each(unit) walks by whole units, each(duration) by that length. either way the steps count out from
+  // the start, so monthly from the 31st lands on each month's last day rather than drifting to the 28th
+  static #step(step) {
+    const size = isString(step) && !/\d/.test(step) ? duration(1, step) : duration(step);
+    if (size.isZero || size.isNegative) {
+      refuse('emptyStep', String(size), {
+        explanation: isDevelopment ? 'a range walks forward, the step must be positive' : 0,
+      });
+    }
+    return size;
+  }
+
+  // consecutive sub-ranges of the step, the last one cut to the end: a day in hour slots, a year in months
+  split(step) {
+    const points = this.each(step);
+    return points.map((start, i) => {
+      const following = points[i + 1];
+      if (following === undefined) {
+        return this.#make(this.kind, start, this.#end);
+      }
+      return this.#make(this.kind, start, this.#inclusive() ? following.minus(days(1)) : following);
+    });
+  }
+
+  // datetimes re-read in a zone. a date range becomes the datetime range covering those days there,
+  // which is the bound a database query wants: midnight through the midnight after the last day
+  in(zone) {
+    if (this.kind === 'date') {
+      return this.#make('datetime', this.#start.at('00:00', zone), this.#end.plus(days(1)).at('00:00', zone));
+    }
+    if (this.kind === 'datetime') {
+      return this.#make('datetime', this.#start.in(zone), this.#end.in(zone));
+    }
+    return refuse('noZone', String(this), {
+      explanation: isDevelopment
+        ? 'a time range has no date to place in a zone. use time.on(date, zone) for each end'
+        : 0,
+    });
+  }
+
+  /*******************************
+              Output
+  *******************************/
+
+  // Intl's range formatting: 'Sep 1 – 7, 2026', '9:00 – 5:00 PM'
+  format(spec, locale) {
+    const options = intlOptions(this.kind, spec);
+    if (!options) {
+      refuse('noTokens', String(spec), {
+        explanation: isDevelopment ? 'a range formats with a preset or Intl options. format each end for tokens' : 0,
+      });
+    }
+    if (this.kind === 'datetime') {
+      return formatIntlRange('datetime', this.#start.epoch, this.#end.epoch, options, locale, this.#start.zone);
+    }
+    return formatIntlRange(this.kind, this.#start.toTemporal(), this.#end.toTemporal(), options, locale);
+  }
+
+  // ISO 8601 interval notation, start/end, and the kind's factory reads it back
+  toString() {
+    return `${this.#start}/${this.#end}`;
+  }
+
+  toJSON() {
+    return this.toString();
+  }
+
+  valueOf() {
+    return refuse('notANumber', String(this), {
+      explanation: isDevelopment ? 'a range is not a number. read its duration, or compare its start and end' : 0,
+    });
+  }
+
+  [inspect]() {
+    return `${this.constructor.name}(${this.#start} ${this.#inclusive() ? 'through' : 'until'} ${this.#end})`;
+  }
+}
+
+export class DateRange extends Range {
+  // brand date range
+  get [IS_DATE_RANGE]() {
+    return true;
+  }
+  static [Symbol.hasInstance](value) {
+    return !!value?.[IS_DATE_RANGE];
+  }
+  static kind = 'date';
+}
+
+export class DateTimeRange extends Range {
+  // brand datetime range
+  get [IS_DATE_TIME_RANGE]() {
+    return true;
+  }
+  static [Symbol.hasInstance](value) {
+    return !!value?.[IS_DATE_TIME_RANGE];
+  }
+  static kind = 'datetime';
+}
+
+export class TimeRange extends Range {
+  // brand time range
+  get [IS_TIME_RANGE]() {
+    return true;
+  }
+  static [Symbol.hasInstance](value) {
+    return !!value?.[IS_TIME_RANGE];
+  }
+  static kind = 'time';
+}
+
+const byKind = { date: DateRange, datetime: DateTimeRange, time: TimeRange };
+
+export const dateRange = (start, end) => new DateRange(start, end);
+export const datetimeRange = (start, end) => new DateTimeRange(start, end);
+export const timeRange = (start, end) => new TimeRange(start, end);
+
+export const isDateRange = (value) => value instanceof DateRange;
+export const isDateTimeRange = (value) => value instanceof DateTimeRange;
+export const isTimeRange = (value) => value instanceof TimeRange;

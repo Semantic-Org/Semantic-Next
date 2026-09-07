@@ -184,6 +184,9 @@ xx.xx.xxxx
 * **Bug** - Fixed issues with object pollution from weightedObjectSearch.
 * **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
 
+### Dates
+* **Feature** - New `@semantic-ui/dates` package, a plain-English layer over the runtime's Temporal. `datetime`, `date`, `time`, `duration` and the `dateRange`, `datetimeRange`, `timeRange` family share one verb set (`plus`, `minus`, `until`, `since`, `startOf`, `format`, `relative`), every value serializes to one ISO string its own factory reads back, and every refusal names the way out. Zones answer to cities and abbreviations, `{ loose: true }` reads whatever `Date` reads, and adding days across a daylight saving change keeps the wall clock
+
 ### CSS Tokens
 * **Bug** - Fixed solid color scales (`--black-solid-*`, `--white-solid-*`) not matching their alpha equivalents. The naive `oklch(L 0 0)` mapping diverged from alpha compositing due to the sRGB gamma curve. Now uses `color-mix(in srgb)` so solid and alpha tokens are visually identical by definition.
 * **Feature** - Added `--title-{size}` scale (3xs→3xl) for display typography with `--title-size` default.
