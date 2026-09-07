@@ -167,7 +167,6 @@ export class Duration {
              Measure
   *******************************/
 
-  // the whole duration in one unit, fractional. weeks, months and years need the anchor
   total(name) {
     const target = unit(name);
     if (this.#anchor) {
@@ -236,7 +235,6 @@ export class Duration {
     return this.#temporal;
   }
 
-  // milliseconds, so a duration drops into setTimeout and arithmetic. calendar units refuse unless anchored
   valueOf() {
     return this.total('millisecond');
   }

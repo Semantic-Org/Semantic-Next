@@ -96,7 +96,7 @@ const parseWords = (text) => {
   return fields;
 };
 
-// every shape a caller can hand to plus(), minus() or duration(), as plural Temporal fields
+// every shape a duration can be written as, as plural Temporal fields
 export const fieldsFrom = (input, name) => {
   if (input?.[IS_DURATION]) {
     return input.fields();

@@ -181,7 +181,7 @@ const daySeconds = 86400;
 const monthSeconds = 30.436875 * daySeconds;
 const yearSeconds = 365.2425 * daySeconds;
 
-// day.js thresholds: 44 seconds is seconds, 45 minutes is minutes, 21 hours is hours, 25 days is days
+// thresholds: 44 seconds is seconds, 44 minutes is minutes, 21 hours is hours, 25 days is days
 const pickUnit = (seconds) => {
   const size = Math.abs(seconds);
   if (size < 45) {
@@ -208,7 +208,7 @@ export const relativeSeconds = (seconds, locale) => {
   return new Intl.RelativeTimeFormat(pickLocale(locale), { numeric: 'auto' }).format(value, name);
 };
 
-// calendar distance reads in days, weeks, months, years, and Intl supplies yesterday and tomorrow
+// Intl supplies yesterday and tomorrow
 export const relativeDays = (days, locale) => {
   const size = Math.abs(days);
   const [name, value] = size < 7

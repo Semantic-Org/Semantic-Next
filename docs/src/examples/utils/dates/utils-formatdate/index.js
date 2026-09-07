@@ -24,7 +24,7 @@ console.log(formatDate(date, '[Posted] MMM D [at] h:mm a'));
 // locale swaps the month and weekday names, the token string still fixes the order
 console.log(formatDate(date, 'MMMM DD, YYYY', { locale: 'fr-FR' }));
 
-// full IANA names, or a shorthand from the timezones table
+// full IANA names, or a shorthand from the timezones export
 console.log(formatDate(date, 'YYYY-MM-DD HH:mm', { timezone: 'America/New_York' }));
 console.log(formatDate(date, 'YYYY-MM-DD HH:mm', { timezone: 'PT' }));
 

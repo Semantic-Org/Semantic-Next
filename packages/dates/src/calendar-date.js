@@ -222,7 +222,6 @@ export class CalendarDate {
     }
   }
 
-  // the last day of the unit: endOf('month') is the 28th, 30th or 31st
   endOf(name) {
     return this.startOf(name).plus(stepOf(unit(name))).minus({ days: 1 });
   }
@@ -264,7 +263,6 @@ export class CalendarDate {
     return this.startOf(name).equals(new CalendarDate(other).startOf(name));
   }
 
-  // today depends on where you stand, so these take the zone to judge from
   isPast(zone) {
     return this.isBefore(today(zone));
   }
@@ -299,7 +297,6 @@ export class CalendarDate {
     return new CalendarDate(other).until(this, name);
   }
 
-  // this date at a time of day in a zone: the moment an appointment happens
   at(when, zone) {
     const plainTime = new Time(when ?? '00:00').toTemporal();
     return new DateTime(this.#plain.toZonedDateTime({ timeZone: zoneId(zone), plainTime }));
@@ -309,7 +306,6 @@ export class CalendarDate {
     return new DateRange(this, end);
   }
 
-  // every day of the unit containing this date, first through last
   range(name) {
     return new DateRange(this.startOf(name), this.endOf(name));
   }
@@ -334,7 +330,6 @@ export class CalendarDate {
     };
   }
 
-  // 'tomorrow', 'in 3 weeks', 'last month'. measured against today unless told otherwise
   relative(to, locale) {
     const reference = to === undefined ? today() : new CalendarDate(to);
     return relativeDays(reference.until(this, 'day'), locale);

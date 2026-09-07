@@ -31,6 +31,8 @@ Formats a date according to the specified format string and options.
 `formatDate` accepts shorthand timezone aliases alongside full IANA names. The aliases are the `timezones` export, a shorthand-to-IANA map, and the same object `formatDate.config.timezones` holds, so a package that only needs the table imports it without the formatter. Abbreviations are ambiguous by nature (`IST` is Kolkata, Jerusalem, or Dublin depending on who you ask), so the picks are yours to remap once at app boot, through either name. Full IANA names always pass through untouched.
 
 ```javascript
+import { formatDate, timezones } from '@semantic-ui/utils';
+
 formatDate.config.timezones = {
   // North America
   ET: 'America/New_York',
@@ -66,8 +68,6 @@ formatDate.config.timezones = {
 };
 
 // remap an ambiguous alias for your app, once, through either name
-import { timezones } from '@semantic-ui/utils';
-
 timezones.IST = 'Asia/Jerusalem';
 formatDate.config.timezones.IST; // 'Asia/Jerusalem'
 ```

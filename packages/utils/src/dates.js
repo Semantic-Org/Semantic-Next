@@ -30,8 +30,7 @@ const getOrdinal = (d) => d + ((d >= 11 && d <= 13) ? 'th' : (ordinalSuffix[d % 
 
 // timezone abbreviations are ambiguous by nature (IST is Kolkata, Jerusalem, or Dublin depending on
 // who you ask), so the picks are editable once at app boot (timezones.IST = 'Asia/Jerusalem'). full
-// IANA names always pass through untouched. its own export, so a package that only needs the table
-// imports it without the formatter
+// IANA names always pass through untouched
 export const timezones = {
   ET: 'America/New_York',
   CT: 'America/Chicago',
@@ -153,7 +152,7 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
     return escaped !== undefined ? escaped : tokens[match];
   });
 }, {
-  // reassigning the table keeps the shared object, so both names read one vocabulary
+  // reassigning replaces the contents so both names stay one object
   get timezones() {
     return timezones;
   },

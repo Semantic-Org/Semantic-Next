@@ -99,7 +99,6 @@ class Range {
             Comparison
   *******************************/
 
-  // a point inside, or a range wholly inside
   contains(value) {
     if (value instanceof Range) {
       return !value.start.isBefore(this.#start) && !value.end.isAfter(this.#end);
@@ -140,7 +139,6 @@ class Range {
              Measure
   *******************************/
 
-  // the shared part, or null when they do not meet
   intersect(other) {
     const rival = this.#make(this.kind, other);
     if (!this.overlaps(rival)) {
@@ -151,7 +149,6 @@ class Range {
     return this.#make(this.kind, start, end);
   }
 
-  // every point from the start, stepping by a unit or a duration, as far as the range reaches
   each(step) {
     const size = Range.#step(step);
     const points = [];
@@ -176,7 +173,6 @@ class Range {
     return size;
   }
 
-  // consecutive sub-ranges of the step, the last one cut to the end: a day in hour slots, a year in months
   split(step) {
     const points = this.each(step);
     return points.map((start, i) => {
@@ -208,7 +204,6 @@ class Range {
               Output
   *******************************/
 
-  // Intl's range formatting: 'Sep 1 – 7, 2026', '9:00 – 5:00 PM'
   format(spec, locale) {
     const options = intlOptions(this.kind, spec);
     if (!options) {
@@ -222,7 +217,6 @@ class Range {
     return formatIntlRange(this.kind, this.#start.toTemporal(), this.#end.toTemporal(), options, locale);
   }
 
-  // ISO 8601 interval notation, start/end, and the kind's factory reads it back
   toString() {
     return `${this.#start}/${this.#end}`;
   }

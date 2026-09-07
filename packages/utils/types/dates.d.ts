@@ -184,8 +184,9 @@ export function formatDate(date: Date, format?: string, options?: DateFormatOpti
 export const timezones: Record<string, string>;
 
 /**
- * The timezone alias vocabulary for {@link formatDate}. `timezones` is the same object as the
- * {@link timezones} export, and assigning a new table replaces its contents so both names stay one vocabulary.
+ * The timezone alias vocabulary for {@link formatDate}. Its `timezones` property is the
+ * {@link timezones} export itself, and assigning a new table replaces that object's contents,
+ * so both names stay one table.
  */
 export interface FormatDateConfig {
   /** Shorthand abbreviation mapped to its IANA zone, the {@link timezones} export */

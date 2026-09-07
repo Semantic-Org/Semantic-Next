@@ -87,7 +87,7 @@ export const plural = (name) => `${name}s`;
 
 const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-// ISO numbering, monday is 1 and sunday is 7. names match on their first three letters
+// ISO numbering, monday is 1 and sunday is 7
 export const weekdayNumber = (input) => {
   if (isNumber(input) && Number.isInteger(input) && input >= 1 && input <= 7) {
     return input;
@@ -127,7 +127,7 @@ export const singularKeys = (fields) => {
 
 export const quarterStart = (month) => Math.floor((month - 1) / 3) * 3 + 1;
 
-// one whole unit as duration fields, the step startOf() and range() move by
+// one whole unit as duration fields
 export const stepOf = (name) => (name === 'quarter' ? { months: 3 } : { [plural(name)]: 1 });
 
 // the second argument of a factory is a zone, or an options bag { zone, loose }

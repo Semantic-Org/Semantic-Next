@@ -131,8 +131,8 @@ export class DateTime {
       if (!loose || error.code !== 'unreadableDateTime') {
         throw error;
       }
-      // the loose door: whatever this engine's Date reads, RFC 2822 and locale strings included, read
-      // the way Date reads them, a locale string in the machine's zone
+      // whatever this engine's Date reads, RFC 2822 and locale strings included, read the way Date reads
+      // them, a locale string in the machine's zone
       const epoch = Date.parse(trimmed);
       if (Number.isNaN(epoch)) {
         throw error;
@@ -239,12 +239,10 @@ export class DateTime {
     return new DateTime(guard(() => this.#zoned.with(changes), 'cannotSet', JSON.stringify(changes)));
   }
 
-  // the same date and zone at another time of day
   at(when) {
     return this.date.at(when, this.zone);
   }
 
-  // the same instant read in another zone
   in(zone) {
     return new DateTime(this.#zoned.withTimeZone(zoneId(zone)));
   }
@@ -295,7 +293,6 @@ export class DateTime {
     );
   }
 
-  // the next such weekday strictly after this one, at the same time of day
   next(weekday) {
     const delta = (weekdayNumber(weekday) - this.weekday + 7) % 7 || 7;
     return this.plus({ days: delta });
@@ -310,7 +307,6 @@ export class DateTime {
             Comparison
   *******************************/
 
-  // the same instant, whatever zone each side reads it in
   equals(other) {
     return this.#compare(other) === 0;
   }
@@ -327,7 +323,6 @@ export class DateTime {
     return this.#compare(other) > 0;
   }
 
-  // same to the unit, judged in this datetime's zone
   isSame(other, name) {
     if (name === undefined) {
       return this.equals(other);
@@ -375,7 +370,6 @@ export class DateTime {
     return new DateTimeRange(this, end);
   }
 
-  // the unit containing this moment, as a half-open range: startOf(unit) until the next one
   range(name) {
     const start = this.startOf(name);
     return new DateTimeRange(start, start.plus(stepOf(unit(name))));
@@ -385,8 +379,6 @@ export class DateTime {
               Output
   *******************************/
 
-  // a preset ('short', 'long', 'date', 'time'), an Intl options bag, or day.js tokens. no argument
-  // reads as the locale's medium date and short time
   format(spec, locale) {
     const options = intlOptions('datetime', spec);
     return options
@@ -412,7 +404,6 @@ export class DateTime {
     };
   }
 
-  // '3 hours ago', 'in 2 days', 'yesterday'. measured against now unless told otherwise
   relative(to, locale) {
     const reference = to === undefined ? now(this.zone) : new DateTime(to, this.zone);
     return relativeSeconds((this.epoch - reference.epoch) / 1000, locale);
@@ -437,7 +428,6 @@ export class DateTime {
     return this.#zoned;
   }
 
-  // epoch milliseconds, so datetimes sort, subtract and compare with the operators Date users know
   valueOf() {
     return this.epoch;
   }
@@ -447,7 +437,7 @@ export class DateTime {
   }
 }
 
-// the factory is the loose door: with { loose: true } an unreadable input is null, never a throw
+// with { loose: true } an unreadable input is null, never a throw
 export const datetime = (input, options) => {
   const settings = zoneOptions(options);
   const build =

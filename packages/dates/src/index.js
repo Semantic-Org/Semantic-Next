@@ -1,26 +1,14 @@
-/*******************************
-             Values
-*******************************/
-
 export { CalendarDate } from './calendar-date.js';
 export { DateTime } from './date-time.js';
 export { Duration } from './duration.js';
 export { DateRange, DateTimeRange, TimeRange } from './range.js';
 export { Time } from './time.js';
 
-/*******************************
-            Factories
-*******************************/
-
 export { date, today, tomorrow, yesterday } from './calendar-date.js';
 export { datetime, now } from './date-time.js';
 export { days, duration, hours, milliseconds, minutes, months, seconds, weeks, years } from './duration.js';
 export { dateRange, datetimeRange, timeRange } from './range.js';
 export { time } from './time.js';
-
-/*******************************
-             Helpers
-*******************************/
 
 export { isCalendarDate } from './calendar-date.js';
 export { isDateTime } from './date-time.js';

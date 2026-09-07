@@ -45,7 +45,7 @@ export class CalendarDate {
   set(fields: Pick<DateTimeFields, 'year' | 'month' | 'day'>): CalendarDate;
   set(unit: Unit, value: number): CalendarDate;
   startOf(unit: DateUnit): CalendarDate;
-  /** The last day of the unit */
+  /** The last day of the unit, so endOf('month') is the 28th, 30th or 31st */
   endOf(unit: DateUnit): CalendarDate;
   /** The next such weekday strictly after this one */
   next(weekday: Weekday): CalendarDate;

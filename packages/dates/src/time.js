@@ -11,8 +11,6 @@ import { inspect, isPlainDateTime, isPlainTime, isZonedDateTime, singularKeys, u
 import { zoneId } from './helpers/zones.js';
 import { TimeRange } from './range.js';
 
-// a time of day with no date: opening hours, a daily reminder, a shift start. it wraps at midnight
-
 const clock = /^(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?\s*([ap]\.?m\.?)?$/i;
 
 export class Time {
@@ -241,7 +239,6 @@ export class Time {
     return new Time(other).until(this, name);
   }
 
-  // this time on a date in a zone. the mirror of date.at(time, zone)
   on(day, zone) {
     return new CalendarDate(day).at(this, zone);
   }

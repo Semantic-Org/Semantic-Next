@@ -3,11 +3,11 @@ import { isPlainObject, isString, timezones } from '@semantic-ui/utils';
 import { refuse } from './errors.js';
 import { weekdayNumber } from './units.js';
 
-// process-wide defaults: the zone, the locale, the first day of the week, and the names a zone answers to
+// process-wide defaults, zones being the names a zone answers to
 const settings = { zone: undefined, locale: undefined, weekStart: 1, zones: {} };
 const resolved = new Map([['UTC', 'UTC']]);
 
-// utils' own abbreviation table is the floor, editable at boot in either package. these ride above
+// utils' own abbreviation table is the base, editable at boot in either package. these override
 // it with the daylight-observing reading of each US abbreviation, because the bare IANA 'EST' is a
 // fixed offset that never springs forward, and nobody who types it means that
 const abbreviations = {
@@ -53,8 +53,8 @@ const canonical = (id) => {
   }
 };
 
-// every IANA id the engine knows, by its loose full spelling and by its city. the 418 canonical
-// cities are unique, so 'los angeles' and 'sao paulo' each name exactly one zone
+// every IANA id the engine knows, by its loose full spelling and by its city. the canonical cities
+// are unique, so 'los angeles' and 'sao paulo' each name exactly one zone
 let index;
 const cities = () => {
   if (!index) {

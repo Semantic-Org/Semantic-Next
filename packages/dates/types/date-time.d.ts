@@ -101,7 +101,7 @@ export class DateTime {
   /** The unit containing this moment as a half-open range, its start until the next start */
   range(unit: Unit): DateTimeRange;
 
-  /** A preset, an Intl options bag, or day.js tokens. No argument reads as the locale's medium date and short time */
+  /** A preset ('short', 'medium', 'long', 'full', 'date', 'time'), an Intl options bag, or day.js tokens. No argument reads as the locale's medium date and short time */
   format(spec?: FormatSpec, locale?: Locale): string;
   /** `'3 hours ago'`, `'in 2 days'`, `'yesterday'`, measured against now unless told otherwise */
   relative(to?: DateTimeInput, locale?: Locale): string;
@@ -117,7 +117,7 @@ export class DateTime {
 /**
  * Reads an ISO string (`'2026-09-06T14:30Z'`, `'2026-09-06T14:30'` as a wall clock in the zone,
  * `'2026-09-06'` as midnight), a Date, epoch milliseconds, a fields object, a date, or a Temporal value.
- * A missing value refuses, `now()` is the door for the current moment
+ * A missing value refuses, `now()` reads the current moment
  */
 export function datetime(input: DateTimeInput, zone?: Zone): DateTime;
 export function datetime(input: DateTimeInput, options?: ReadOptions): DateTime;

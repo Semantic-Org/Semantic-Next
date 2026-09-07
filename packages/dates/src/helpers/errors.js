@@ -16,7 +16,7 @@ export const guard = (attempt, code, at, explanation) => {
   }
 };
 
-// the loose door gives null for input that cannot be read, and only for that. a bad zone or a bad
+// { loose: true } gives null for input that cannot be read, and only for that. a bad zone or a bad
 // unit is a mistake in the code, not in the data, and still throws
 const unreadable = new Set([
   'unreadableDateTime',

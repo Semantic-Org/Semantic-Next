@@ -30,11 +30,11 @@ declare abstract class Range<Point, Input> {
   equals(other: this | string): boolean;
   /** Every point from the start, stepping by a unit or a duration, as far as the range reaches */
   each(step: Unit | DurationInput): Point[];
-  /** Consecutive sub-ranges of the step, the last one cut to the end */
+  /** Consecutive sub-ranges of the step, the last one cut to the end: a day in hour slots, a year in months */
   split(step: Unit | DurationInput): this[];
   /** Intl's range formatting, `'Sep 1 – 7, 2026'` */
   format(spec?: FormatSpec, locale?: Locale): string;
-  /** ISO 8601 interval notation, `start/end` */
+  /** ISO 8601 interval notation, `start/end`, and the kind's factory reads it back */
   toString(): string;
   toJSON(): string;
   /** Throws. A range is not a number */

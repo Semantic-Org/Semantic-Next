@@ -83,7 +83,7 @@ jobs:
           node tools/ci/memory/collect.js --label current --side current --out results/current.json
 
       # Swap shipped source to the merge base, rebuild the baseline bundle, and
-      # measure. node_modules is reused. Files the PR adds are dropped.
+      # measure. node_modules is reused. Files the PR adds are dropped, and the empty directories they leave behind: a build script that walks packages/ trips on a package folder with no package.json.
       #
       # Root package.json and the lockfile are swapped too (the #264 fix): a PR
       # that adds or removes a package would otherwise leave the base build
