@@ -108,6 +108,17 @@ describe('date', () => {
     expect(() => day.format('HH:mm')).toThrow(/noField/);
   });
 
+  it('formats a year under one hundred as written', () => {
+    expect(date(50, 1, 1).format()).not.toMatch(/1950/);
+    expect(date(50, 1, 1).format('YYYY-MM-DD')).toBe('0050-01-01');
+  });
+
+  it('refuses a bare number, which is a year or an instant depending on who wrote it', () => {
+    expect(() => date(2026)).toThrow(/notADate/);
+    expect(() => date(0)).toThrow(/notADate/);
+    expect(date(2026, 9, 6).toString()).toBe('2026-09-06');
+  });
+
   it('phrases the distance in days, weeks, months and years', () => {
     const reference = '2026-09-07';
     expect(date('2026-09-06').relative(reference)).toBe('yesterday');

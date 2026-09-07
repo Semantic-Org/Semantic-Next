@@ -1,13 +1,13 @@
-import { isDevelopment, isString } from '@semantic-ui/utils';
+import { isDevelopment, isPlainObject, isString } from '@semantic-ui/utils';
 
 import { CalendarDate } from './calendar-date.js';
 import { DateTime } from './date-time.js';
 import { days, duration } from './duration.js';
-import { refuse, refuseType } from './helpers/errors.js';
-import { isDurationLike } from './helpers/fields.js';
+import { isUnreadable, refuse, refuseType } from './helpers/errors.js';
+import { isDurationFields } from './helpers/fields.js';
 import { formatIntlRange, intlOptions } from './helpers/format.js';
-import { IS_DATE_RANGE, IS_DATE_TIME_RANGE, IS_RANGE, IS_TIME_RANGE } from './helpers/identity.js';
-import { inspect } from './helpers/units.js';
+import { IS_DATE_RANGE, IS_DATE_TIME_RANGE, IS_DURATION, IS_RANGE, IS_TIME_RANGE } from './helpers/identity.js';
+import { inspect, isTemporalDuration } from './helpers/units.js';
 import { Time } from './time.js';
 
 /*
@@ -47,13 +47,7 @@ class Range {
       [start, end] = start.split('/');
     }
     this.#start = Range.#read(kind, start);
-    if (isDurationLike(end)) {
-      const length = duration(end);
-      this.#end = kind === 'date' ? this.#start.plus(length).minus(days(1)) : this.#start.plus(length);
-    }
-    else {
-      this.#end = Range.#read(kind, end, this.#start);
-    }
+    this.#end = Range.#readEnd(kind, end, this.#start);
     if (this.#end.isBefore(this.#start)) {
       refuse('backwards', `${this.#start} to ${this.#end}`, {
         explanation: isDevelopment ? 'a range runs forward. swap the ends, or use earliest() and latest()' : 0,
@@ -71,6 +65,32 @@ class Range {
       return new DateTime(value, start?.zone);
     }
     return new Time(value);
+  }
+
+  // an end is a length when written as one, otherwise a point of the kind, and a string or fields
+  // object the kind cannot read is tried as a length: '5pm' is a time, '2h' is two hours
+  static #readEnd(kind, value, start) {
+    let unread;
+    if (!(value?.[IS_DURATION] || isTemporalDuration(value) || isDurationFields(value))) {
+      try {
+        return Range.#read(kind, value, start);
+      }
+      catch (error) {
+        if (!(isString(value) || isPlainObject(value)) || !isUnreadable(error)) {
+          throw error;
+        }
+        unread = error;
+      }
+    }
+    let length;
+    try {
+      length = duration(value);
+    }
+    catch (error) {
+      // an end is a point first, so what reads as neither is refused as the point it was meant to be
+      throw unread ?? error;
+    }
+    return kind === 'date' ? start.plus(length).minus(days(1)) : start.plus(length);
   }
 
   /*******************************
@@ -101,7 +121,8 @@ class Range {
 
   contains(value) {
     if (value instanceof Range) {
-      return !value.start.isBefore(this.#start) && !value.end.isAfter(this.#end);
+      const rival = this.#make(this.kind, value);
+      return !rival.start.isBefore(this.#start) && !rival.end.isAfter(this.#end);
     }
     return this.#holds(value);
   }
@@ -149,12 +170,13 @@ class Range {
     return this.#make(this.kind, start, end);
   }
 
+  // a time wraps at midnight and lands behind the last point, which is where its walk ends
   each(step) {
     const size = Range.#step(step);
     const points = [];
     for (let i = 0;; i++) {
       const next = this.#start.plus(size.times(i));
-      if (!this.#holds(next)) {
+      if (!this.#holds(next) || (i > 0 && !next.isAfter(points[i - 1]))) {
         return points;
       }
       points.push(next);

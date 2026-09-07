@@ -41,6 +41,11 @@ describe('compare', () => {
     expect(latest(time('9am'), time('5pm')).toString()).toBe('17:00:00');
   });
 
+  it('refuses to pick from nothing, with a code', () => {
+    expect(() => earliest([])).toThrow(/noPoints/);
+    expect(() => latest()).toThrow(/noPoints/);
+  });
+
   it('names the kind of any value', () => {
     expect(kindOf(datetime('2026-09-06T14:30Z'))).toBe('datetime');
     expect(kindOf(date('2026-09-06'))).toBe('date');

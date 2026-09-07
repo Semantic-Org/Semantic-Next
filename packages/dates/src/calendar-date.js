@@ -74,7 +74,14 @@ export class CalendarDate {
     if (input instanceof DateTime) {
       return input.toTemporal().toPlainDate();
     }
-    if (isDate(input) || isNumber(input)) {
+    if (isNumber(input)) {
+      return refuseType('notADate', String(input), {
+        explanation: isDevelopment
+          ? 'a number alone is ambiguous. epoch milliseconds are a datetime, datetime(n).date, and a year needs its month and day, date(2026, 9, 6)'
+          : 0,
+      });
+    }
+    if (isDate(input)) {
       return new DateTime(input, settings).toTemporal().toPlainDate();
     }
     if (isString(input)) {

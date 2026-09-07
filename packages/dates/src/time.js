@@ -11,7 +11,7 @@ import { inspect, isPlainDateTime, isPlainTime, isZonedDateTime, singularKeys, u
 import { zoneId } from './helpers/zones.js';
 import { TimeRange } from './range.js';
 
-const clock = /^(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?\s*([ap]\.?m\.?)?$/i;
+const clock = /^(\d{1,2})(?::(\d{2}))?(?::(\d{2})(?:\.(\d{1,9}))?)?\s*([ap]\.?m\.?)?$/i;
 
 export class Time {
   // brand time
@@ -93,7 +93,7 @@ export class Time {
   static #parse(text) {
     const match = clock.exec(text.trim());
     if (match) {
-      const [, hourText, minute = '0', second = '0', meridiem] = match;
+      const [, hourText, minute = '0', second = '0', fraction = '', meridiem] = match;
       let hour = Number(hourText);
       if (meridiem) {
         const afternoon = meridiem[0].toLowerCase() === 'p';
@@ -104,8 +104,17 @@ export class Time {
         }
         hour = (hour % 12) + (afternoon ? 12 : 0);
       }
+      const nanos = fraction.padEnd(9, '0');
       return guard(
-        () => Temporal.PlainTime.from({ hour, minute: Number(minute), second: Number(second) }, { overflow: 'reject' }),
+        () =>
+          Temporal.PlainTime.from({
+            hour,
+            minute: Number(minute),
+            second: Number(second),
+            millisecond: Number(nanos.slice(0, 3)),
+            microsecond: Number(nanos.slice(3, 6)),
+            nanosecond: Number(nanos.slice(6)),
+          }, { overflow: 'reject' }),
         'unreadableTime',
         text,
       );

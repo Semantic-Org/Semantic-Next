@@ -3,7 +3,7 @@ import { isArray, isDate, isString } from '@semantic-ui/utils';
 import { CalendarDate } from '../calendar-date.js';
 import { DateTime } from '../date-time.js';
 import { Time } from '../time.js';
-import { refuseType } from './errors.js';
+import { refuse, refuseType } from './errors.js';
 import {
   IS_CALENDAR_DATE,
   IS_DATE_RANGE,
@@ -89,10 +89,14 @@ export const compare = (a, b) => {
   return left.isBefore(right) ? -1 : left.isAfter(right) ? 1 : 0;
 };
 
-const spread = (values) => (values.length === 1 && isArray(values[0]) ? values[0] : values);
+const pick = (values, verb, wins) => {
+  const points = (values.length === 1 && isArray(values[0]) ? values[0] : values).map(point);
+  if (!points.length) {
+    refuse('noPoints', verb, { explanation: `${verb}() needs at least one point` });
+  }
+  return points.reduce((best, next) => (wins(compare(next, best)) ? next : best));
+};
 
-export const earliest = (...values) =>
-  spread(values).map(point).reduce((best, next) => (compare(next, best) < 0 ? next : best));
+export const earliest = (...values) => pick(values, 'earliest', (order) => order < 0);
 
-export const latest = (...values) =>
-  spread(values).map(point).reduce((best, next) => (compare(next, best) > 0 ? next : best));
+export const latest = (...values) => pick(values, 'latest', (order) => order > 0);

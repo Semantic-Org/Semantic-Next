@@ -28,12 +28,14 @@ const unreadable = new Set([
   'notFinite',
 ]);
 
+export const isUnreadable = (error) => unreadable.has(error?.code);
+
 export const loosely = (build) => {
   try {
     return build();
   }
   catch (error) {
-    if (unreadable.has(error?.code)) {
+    if (isUnreadable(error)) {
       return null;
     }
     throw error;

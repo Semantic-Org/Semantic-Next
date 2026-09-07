@@ -85,6 +85,18 @@ describe('dateRange', () => {
     );
   });
 
+  it('reads a fields object end as a day when its keys are singular and as a length when plural', () => {
+    expect(dateRange('2026-09-01', { year: 2026, month: 9, day: 30 }).toString()).toBe('2026-09-01/2026-09-30');
+    expect(dateRange('2026-09-01', { days: 7 }).toString()).toBe('2026-09-01/2026-09-07');
+    expect(dateRange('2026-09-01', { weeks: 1 }).toString()).toBe('2026-09-01/2026-09-07');
+  });
+
+  it('refuses to test a range of another kind for containment, like its siblings', () => {
+    const week = dateRange('2026-09-01', '2026-09-07');
+    expect(() => week.contains(datetimeRange(datetime('2026-09-07T09:00Z'), hours(8)))).toThrow(/mixedRange/);
+    expect(() => week.overlaps(datetimeRange(datetime('2026-09-07T09:00Z'), hours(8)))).toThrow(/mixedRange/);
+  });
+
   it('refuses a range that runs backwards and a copy across kinds', () => {
     expect(() => dateRange('2026-09-07', '2026-09-01')).toThrow(/backwards/);
     expect(() => new DateRange(timeRange('09:00', '17:00'))).toThrow(/mixedRange/);
@@ -130,6 +142,20 @@ describe('timeRange', () => {
     expect(open.split(minutes(30)).length).toBe(17);
     expect(timeRange('09:00/17:00').each(hours(4)).map(String)).toEqual(['09:00:00', '13:00:00']);
     expect(timeRange(time('9am'), minutes(90)).end.format('h:mm a')).toBe('10:30 am');
+  });
+
+  it('reads a clock end with am or pm as a time, and a length as a length', () => {
+    expect(timeRange('9am', '5pm').end.toString()).toBe('17:00:00');
+    expect(time('9am').to('5:30 pm').end.toString()).toBe('17:30:00');
+    expect(timeRange('9am', '90m').end.toString()).toBe('10:30:00');
+    expect(timeRange('09:00', { hours: 2 }).end.toString()).toBe('11:00:00');
+    expect(timeRange('09:00', { hour: 17 }).end.toString()).toBe('17:00:00');
+  });
+
+  it('walks by the hour without wrapping past midnight', () => {
+    expect(timeRange('00:00', '23:30').each('hour')).toHaveLength(24);
+    expect(timeRange('09:00', '17:00').each('24h').map(String)).toEqual(['09:00:00']);
+    expect(timeRange('00:00', '23:59').split('hour')).toHaveLength(24);
   });
 
   it('has no zone to place in', () => {

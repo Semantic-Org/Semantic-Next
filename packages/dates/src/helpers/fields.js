@@ -96,6 +96,19 @@ const parseWords = (text) => {
   return fields;
 };
 
+// a duration has one sign. '1h -30m' has no meaning until it is subtracted from a point
+const oneSign = (fields, at) => {
+  const signs = new Set(Object.values(fields).filter(Boolean).map(Math.sign));
+  if (signs.size > 1) {
+    refuse('mixedSigns', at, {
+      explanation: isDevelopment
+        ? 'a duration has one sign. subtract from a point instead: start.plus(months(1)).minus(days(3))'
+        : 0,
+    });
+  }
+  return fields;
+};
+
 // every shape a duration can be written as, as plural Temporal fields
 export const fieldsFrom = (input, name) => {
   if (input?.[IS_DURATION]) {
@@ -110,14 +123,14 @@ export const fieldsFrom = (input, name) => {
   if (isString(input)) {
     return /^[-+]?P/i.test(input.trim())
       ? fieldsOf(guard(() => Temporal.Duration.from(input.trim()), 'unreadableDuration', input))
-      : parseWords(input);
+      : oneSign(parseWords(input), input);
   }
   if (isPlainObject(input)) {
     const fields = {};
     for (const [key, value] of Object.entries(input)) {
       spill(fields, unit(key), value);
     }
-    return fields;
+    return oneSign(fields, JSON.stringify(input));
   }
   return refuseType('notADuration', String(input), {
     explanation: isDevelopment
@@ -149,26 +162,18 @@ export const addFields = (a, b, sign) => {
   const clockA = temporalDurationFrom(clockFields(a));
   const clockB = temporalDurationFrom(clockFields(b));
   Object.assign(fields, fieldsOf(sign > 0 ? clockA.add(clockB) : clockA.subtract(clockB)));
-  const signs = new Set(Object.values(fields).map(Math.sign));
-  if (signs.size > 1) {
-    refuse('mixedSigns', JSON.stringify(fields), {
-      explanation: isDevelopment
-        ? 'a duration has one sign. subtract from a point instead: start.plus(months(1)).minus(days(3))'
-        : 0,
-    });
-  }
-  return fields;
+  return oneSign(fields, JSON.stringify(fields));
 };
 
 // Temporal refuses an empty fields object, and a zero duration has no nonzero field to offer it
-export const temporalDurationFrom = (
-  fields,
-) => (Object.keys(fields).length ? Temporal.Duration.from(fields) : new Temporal.Duration());
+export const temporalDurationFrom = (fields) =>
+  Object.keys(fields).length
+    ? guard(() => Temporal.Duration.from(fields), 'unreadableDuration', JSON.stringify(fields))
+    : new Temporal.Duration();
 
 export const temporalDurationOf = (input, name) => temporalDurationFrom(fieldsFrom(input, name));
 
-const looksLikeDuration = /^\s*(?:[-+]?P|-?\d+(?:\.\d+)?\s*[a-zµ])/i;
-
-export const isDurationLike = (value) =>
-  !!value?.[IS_DURATION] || isTemporalDuration(value) || isPlainObject(value)
-  || (isString(value) && looksLikeDuration.test(value));
+// plural keys are how Temporal writes a length, singular keys how it writes a point, so { hours: 2 }
+// is two hours where { hour: 2 } is two o'clock
+export const isDurationFields = (value) =>
+  isPlainObject(value) && Object.keys(value).length > 0 && Object.keys(value).every((key) => fieldNames.includes(key));

@@ -1,7 +1,7 @@
 import { isDevelopment } from '@semantic-ui/utils';
 
 import { guard, refuse } from './helpers/errors.js';
-import { addFields, fieldNames, fieldsFrom, fieldsOf, temporalDurationFrom } from './helpers/fields.js';
+import { addFields, fieldNames, fieldsFrom, fieldsOf, spill, temporalDurationFrom } from './helpers/fields.js';
 import { IS_DURATION } from './helpers/identity.js';
 import { inspect, isTemporalDuration, unit } from './helpers/units.js';
 import { locale as pickLocale } from './helpers/zones.js';
@@ -103,7 +103,7 @@ export class Duration {
   times(factor) {
     const fields = {};
     for (const [field, value] of Object.entries(this.fields())) {
-      fields[field] = value * factor;
+      spill(fields, unit(field), value * factor);
     }
     return new Duration(temporalDurationFrom(fields), undefined, this.#anchor);
   }
@@ -125,7 +125,7 @@ export class Duration {
     }
     return new Duration(
       guard(
-        () => this.#fixed().round({ largestUnit: target, relativeTo: this.#anchor }),
+        () => Duration.#fixed(this).round({ largestUnit: target, relativeTo: this.#anchor }),
         'cannotBalance',
         String(this),
       ),
@@ -137,19 +137,25 @@ export class Duration {
   round(smallest) {
     const target = unit(smallest);
     return new Duration(
-      guard(() => this.#fixed().round({ smallestUnit: target, relativeTo: this.#anchor }), 'cannotRound', String(this)),
+      guard(
+        () => Duration.#fixed(this).round({ smallestUnit: target, relativeTo: this.#anchor }),
+        'cannotRound',
+        String(this),
+      ),
       undefined,
       this.#anchor,
     );
   }
 
   // Temporal treats a week as seven days only when told where it starts. in the ISO calendar that is
-  // always true, so an unanchored duration folds weeks into days before it totals or balances
-  #fixed() {
-    if (this.#anchor || !this.#temporal.weeks) {
-      return this.#temporal;
+  // always true, so an unanchored duration folds weeks into days before it totals or balances. reads
+  // through the public face, so a duration from another copy of this package fixes the same way
+  static #fixed(duration) {
+    const temporal = duration.toTemporal();
+    if (duration.anchor || !temporal.weeks) {
+      return temporal;
     }
-    return temporalDurationFrom(addFields({ ...this.fields(), weeks: 0 }, { days: this.#temporal.weeks * 7 }, 1));
+    return temporalDurationFrom(addFields({ ...duration.fields(), weeks: 0 }, { days: temporal.weeks * 7 }, 1));
   }
 
   static #requireAnchor(duration, verb) {
@@ -180,7 +186,7 @@ export class Duration {
           : 0,
       });
     }
-    const fixed = this.#fixed();
+    const fixed = Duration.#fixed(this);
     return target === 'week' ? fixed.total('day') / 7 : fixed.total(target);
   }
 
@@ -191,7 +197,11 @@ export class Duration {
       Duration.#requireAnchor(this, 'compare');
       Duration.#requireAnchor(rival, 'compare');
     }
-    return Temporal.Duration.compare(this.#fixed(), rival.#fixed(), anchor ? { relativeTo: anchor } : undefined);
+    return Temporal.Duration.compare(
+      Duration.#fixed(this),
+      Duration.#fixed(rival),
+      anchor ? { relativeTo: anchor } : undefined,
+    );
   }
 
   equals(other) {

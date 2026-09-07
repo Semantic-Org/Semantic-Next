@@ -28,6 +28,12 @@ describe('time', () => {
     expect(() => time()).toThrow(/notATime/);
   });
 
+  it('reads a fraction of a second behind a single-digit hour', () => {
+    expect(time('9:00:00.5').toString()).toBe('09:00:00.5');
+    expect(time('9:00:00.250').millisecond).toBe(250);
+    expect(time('9:00:00.000000001').nanosecond).toBe(1);
+  });
+
   it('wraps like a clock face', () => {
     expect(time('23:00').plus(hours(2)).toString()).toBe('01:00:00');
     expect(time('00:30').minus(minutes(45)).toString()).toBe('23:45:00');

@@ -115,7 +115,7 @@ export interface DateTimeFields {
 export type DateTimeInput = DateTime | CalendarDate | Date | number | string | DateTimeFields | TemporalValue;
 
 /** Anything that reads as a calendar date: `'2026-09-06'`, a fields object, a `DateTime`, a `Date`, or a Temporal value */
-export type CalendarDateInput = CalendarDate | DateTime | Date | number | string | DateTimeFields | TemporalValue;
+export type CalendarDateInput = CalendarDate | DateTime | Date | string | DateTimeFields | TemporalValue;
 
 /** Anything that reads as a time of day: `'09:00'`, `'5:30pm'`, a fields object, a `DateTime`, a `Date`, or a Temporal value */
 export type TimeInput = Time | DateTime | Date | string | DateTimeFields | TemporalValue;

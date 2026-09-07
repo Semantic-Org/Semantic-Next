@@ -60,6 +60,17 @@ describe('duration', () => {
     expect(minutes(90).round('hour').toString()).toBe('PT2H');
   });
 
+  it('scales by a fraction, spilling into the unit below', () => {
+    expect(hours(1).times(1.5).toString()).toBe('PT1H30M');
+    expect(hours(1).times(0.5).toString()).toBe('PT30M');
+    expect(days(1).times(-1.5).toString()).toBe('-P1DT12H');
+  });
+
+  it('refuses a phrase or a fields object with mixed signs, with a code', () => {
+    expect(() => duration('1h -30m')).toThrow(/mixedSigns/);
+    expect(() => duration({ hours: 1, minutes: -30 })).toThrow(/mixedSigns/);
+  });
+
   it('adds, subtracts, multiplies, negates and takes the absolute', () => {
     expect(hours(2).plus(minutes(30)).toString()).toBe('PT2H30M');
     expect(hours(2).minus('30m').toString()).toBe('PT1H30M');

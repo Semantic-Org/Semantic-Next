@@ -158,7 +158,10 @@ export const intlOptions = (kind, spec) => {
 // time is that clock on the epoch day, so the fields print unshifted whether Temporal is native or not
 const epochOf = (kind, subject) => {
   if (kind === 'date') {
-    return Date.UTC(subject.year, subject.month - 1, subject.day);
+    // Date.UTC reads a year under 100 as the 1900s, setUTCFullYear reads it as written
+    const stamp = new Date(0);
+    stamp.setUTCFullYear(subject.year, subject.month - 1, subject.day);
+    return stamp.getTime();
   }
   if (kind === 'time') {
     return Date.UTC(1970, 0, 1, subject.hour, subject.minute, subject.second, subject.millisecond);
