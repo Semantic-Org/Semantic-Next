@@ -342,7 +342,7 @@ weekday('sunday'); // 7
 
 ```javascript
 weekdayNames();
-weekdayNames(locale, style, firstDay);
+weekdayNames(style, firstDay, locale);
 ```
 
 The weekday names in the locale, starting on the configured first day or on `firstDay`, so a picker's header row matches its grid.
@@ -351,9 +351,9 @@ The weekday names in the locale, starting on the configured first day or on `fir
 
 | Name | Type | Description |
 |------|------|-------------|
-| locale | string | A BCP 47 tag. Default the configured locale |
 | style | string | `'short'` or `'long'`. Default `'short'` |
 | firstDay | string \| number | The weekday to start on. Default the configured week start |
+| locale | string | A BCP 47 tag. Default the configured locale |
 
 #### Returns
 
@@ -363,8 +363,8 @@ An array of seven strings.
 
 ```javascript
 weekdayNames(); // ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-weekdayNames(undefined, 'short', 'sunday'); // ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-weekdayNames('de-DE', 'long', 'sunday')[0]; // 'Sonntag'
+weekdayNames('short', 'sunday'); // ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+weekdayNames('long', 'sunday', 'de-DE')[0]; // 'Sonntag'
 ```
 
 #### Example
@@ -375,7 +375,7 @@ weekdayNames('de-DE', 'long', 'sunday')[0]; // 'Sonntag'
 
 ```javascript
 monthNames();
-monthNames(locale, style);
+monthNames(style, locale);
 ```
 
 The twelve month names in the locale, for a month dropdown.
@@ -384,8 +384,8 @@ The twelve month names in the locale, for a month dropdown.
 
 | Name | Type | Description |
 |------|------|-------------|
-| locale | string | A BCP 47 tag. Default the configured locale |
 | style | string | `'long'` or `'short'`. Default `'long'` |
+| locale | string | A BCP 47 tag. Default the configured locale |
 
 #### Returns
 
@@ -395,7 +395,7 @@ An array of twelve strings.
 
 ```javascript
 monthNames()[8]; // 'September'
-monthNames(undefined, 'short')[8]; // 'Sep'
+monthNames('short')[8]; // 'Sep'
 monthNames('fr', 'short')[0]; // 'janv.'
 ```
 

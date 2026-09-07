@@ -1,7 +1,7 @@
 import { weekdayNames } from '@semantic-ui/dates';
 
 console.log(weekdayNames());
-console.log(weekdayNames(undefined, 'long'));
-console.log(weekdayNames(undefined, 'short', 'sunday'));
-console.log(weekdayNames('de-DE', 'long', 'sunday'));
-console.log(weekdayNames('fr', 'short'));
+console.log(weekdayNames('long'));
+console.log(weekdayNames('short', 'sunday'));
+console.log(weekdayNames('long', 'sunday', 'de-DE'));
+console.log(weekdayNames('short', undefined, 'fr'));
