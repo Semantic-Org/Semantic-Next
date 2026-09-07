@@ -1,4 +1,4 @@
-import { formatDate } from '@semantic-ui/utils';
+import { formatDate, timezones } from '@semantic-ui/utils';
 
 const date = new Date('2023-12-25T15:30:00Z');
 
@@ -24,7 +24,7 @@ console.log(formatDate(date, '[Posted] MMM D [at] h:mm a'));
 // locale swaps the month and weekday names, the token string still fixes the order
 console.log(formatDate(date, 'MMMM DD, YYYY', { locale: 'fr-FR' }));
 
-// full IANA names, or a shorthand from formatDate.config.timezones
+// full IANA names, or a shorthand from the timezones table
 console.log(formatDate(date, 'YYYY-MM-DD HH:mm', { timezone: 'America/New_York' }));
 console.log(formatDate(date, 'YYYY-MM-DD HH:mm', { timezone: 'PT' }));
 
@@ -32,3 +32,7 @@ console.log(formatDate(date, 'YYYY-MM-DD HH:mm', { timezone: 'PT' }));
 // timezone: 'local', so in a template the same call reads the browser clock
 console.log(formatDate(date, 'LTS'));
 console.log(formatDate(date, 'LTS', { timezone: 'local' }));
+
+// the shorthand table is its own export, the same object as formatDate.config.timezones
+console.log(timezones.PT);
+console.log(timezones === formatDate.config.timezones);

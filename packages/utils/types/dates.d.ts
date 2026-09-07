@@ -174,13 +174,21 @@ export function formatDate(date: Date, format: DatePreset | DateToken, options?:
 export function formatDate(date: Date, format?: string, options?: DateFormatOptionsCustom): string;
 
 /**
- * The timezone alias vocabulary for {@link formatDate} — shorthand abbreviation mapped to an IANA
- * zone. Abbreviations are ambiguous by nature (IST is Kolkata, Jerusalem, or Dublin depending on
- * who you ask), so the picks are editable once at app boot
- * (e.g. `formatDate.config.timezones.IST = 'Asia/Jerusalem'`). Full IANA names always pass through.
+ * The shorthand timezone table {@link formatDate} reads, abbreviation mapped to an IANA zone, and
+ * the same object `formatDate.config.timezones` holds, so an edit through either name reaches both.
+ * Abbreviations are ambiguous by nature (IST is Kolkata, Jerusalem, or Dublin depending on who you
+ * ask), so the picks are editable once at app boot (e.g. `timezones.IST = 'Asia/Jerusalem'`). Full
+ * IANA names always pass through.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/dates#timezone-shorthand Timezone Shorthand}
+ */
+export const timezones: Record<string, string>;
+
+/**
+ * The timezone alias vocabulary for {@link formatDate}. `timezones` is the same object as the
+ * {@link timezones} export, and assigning a new table replaces its contents so both names stay one vocabulary.
  */
 export interface FormatDateConfig {
-  /** Shorthand abbreviation mapped to its IANA zone */
+  /** Shorthand abbreviation mapped to its IANA zone, the {@link timezones} export */
   timezones: Record<string, string>;
 }
 

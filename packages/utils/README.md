@@ -75,6 +75,7 @@ Utility includes the following helpers:
 
 ### Date
 - `formatDate(date, format)` - Formats a date object into a string based on the provided format
+- `timezones` - The shorthand timezone table `formatDate` reads, abbreviation to IANA zone, editable once at boot
 
 ### Functions
 - `noop()` - A no-operation function for use as a default callback

@@ -1,4 +1,4 @@
-import { formatDate, formatDuration, toDuration } from '@semantic-ui/utils';
+import { formatDate, formatDuration, timezones, toDuration } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 
@@ -176,6 +176,25 @@ describe('Date Utilities', () => {
     it('should handle timezone shorthand (ET, PT, etc)', () => {
       expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'ET' })).toBe('2023-05-18 11:34:56');
       expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'PT' })).toBe('2023-05-18 08:34:56');
+    });
+
+    it('exports the shorthand table as timezones, the same object formatDate.config.timezones reads', () => {
+      expect(timezones).toBe(formatDate.config.timezones);
+      expect(timezones.PT).toBe('America/Los_Angeles');
+    });
+
+    it('keeps one table when formatDate.config.timezones is reassigned', () => {
+      const saved = { ...timezones };
+      formatDate.config.timezones = { HQ: 'Europe/Berlin' };
+      try {
+        expect(timezones.HQ).toBe('Europe/Berlin');
+        expect(timezones.PT).toBeUndefined();
+        expect(formatDate(date, 'HH:mm', { timezone: 'HQ' })).toBe('17:34');
+      }
+      finally {
+        formatDate.config.timezones = saved;
+      }
+      expect(formatDate(date, 'HH:mm', { timezone: 'PT' })).toBe('08:34');
     });
 
     it('reads shorthand aliases from formatDate.config.timezones, editable at boot', () => {

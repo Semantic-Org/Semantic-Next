@@ -43,7 +43,7 @@ boundary needs the real one. `toString()` and `toJSON()` print the instant in UT
 storing the same moment store the same bytes.
 
 **A zone answers to its names.** Anywhere a zone is read it may be an IANA name, a city (`'Berlin'`,
-`'los angeles'`), an abbreviation (`'PT'`, `'CET'`, the table utils' `formatDate` uses is the floor), a
+`'los angeles'`), an abbreviation (`'PT'`, `'CET'`, utils' `timezones` table is the floor), a
 fixed offset, or a name of your own from `configure({ zones: { hq: 'Europe/Berlin' } })`, in any case
 and spacing. The 418 canonical cities are all distinct, so a city is never a guess.
 

@@ -1,4 +1,4 @@
-import { formatDate, isPlainObject, isString } from '@semantic-ui/utils';
+import { isPlainObject, isString, timezones } from '@semantic-ui/utils';
 
 import { refuse } from './errors.js';
 import { weekdayNumber } from './units.js';
@@ -83,7 +83,7 @@ const rebuilt = (key) => {
 };
 
 const alias = (key) => {
-  for (const table of [settings.zones, formatDate.config.timezones]) {
+  for (const table of [settings.zones, timezones]) {
     for (const [name, target] of Object.entries(table)) {
       if (normalize(name) === key) {
         return target;
