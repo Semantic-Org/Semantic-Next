@@ -209,6 +209,24 @@ describe('ID/Hashing Functions', () => {
         expect(isValidId(id, { usage: 'token' })).toBe(true);
       });
 
+      it('secret is 53 lowercase chars carrying at least 256 bits, self-validating', () => {
+        const id = generateId({ usage: 'secret' });
+        // 52 random base32 chars at 5 bits each is 260, the narrowest crockford
+        // width that clears the 256-bit bar. The 53rd char is the checksum
+        expect(id).toHaveLength(53);
+        expect(id).toMatch(CROCKFORD);
+        expect((id.length - 1) * 5).toBeGreaterThanOrEqual(256);
+        expect(isValidId(id, { usage: 'secret' })).toBe(true);
+      });
+
+      it('secret ids are unique across many mints', () => {
+        const seen = new Set();
+        for (let i = 0; i < 1000; i++) {
+          seen.add(generateId({ usage: 'secret' }));
+        }
+        expect(seen.size).toBe(1000);
+      });
+
       it('code is 12 uppercase chars, grouped in fours, self-validating', () => {
         const id = generateId({ usage: 'code' });
         // 'ABCD-EFGH-JKLM' — the last char is the checksum, validation folds the hyphens
@@ -256,6 +274,69 @@ describe('ID/Hashing Functions', () => {
       // emit a 10-char id that isValidId then rejects, so fail loud instead
       it('throws when length is below the timestamp floor for db', () => {
         expect(() => generateId({ usage: 'db', length: 9 })).toThrow(/at least 11/);
+      });
+    });
+
+    describe('bits', () => {
+      it('widens the preset width and stays self-validating', () => {
+        const id = generateId({ usage: 'secret', bits: 512 });
+        expect(id).toHaveLength(104);
+        expect(isValidId(id, { usage: 'secret', bits: 512 })).toBe(true);
+      });
+
+      it('spends every char on entropy when the checksum is off', () => {
+        expect(generateId({ usage: 'secret', checksum: false })).toHaveLength(52);
+      });
+
+      it('sizes any preset, rounding up to a whole char', () => {
+        expect(generateId({ usage: 'link', bits: 80 })).toHaveLength(16);
+        expect(generateId({ usage: 'link', bits: 78 })).toHaveLength(16);
+      });
+
+      it('buys chars on top of the db clock, which carries no entropy', () => {
+        expect(generateId({ usage: 'db', bits: 80 })).toHaveLength(26);
+      });
+
+      // the letter-first lead draws from 22 symbols, not 32, so counting it as a
+      // full char would report 5 bits the id does not have
+      it('discounts the alphaFirst lead to log2(22)', () => {
+        expect(generateId({ usage: 'page', bits: 40 })).toHaveLength(9);
+        // a budget the lead already covers buys no further chars
+        expect(generateId({ usage: 'page', bits: 3 })).toHaveLength(1);
+      });
+
+      it('throws on a width uuid cannot carry', () => {
+        expect(() => generateId({ usage: 'secret', format: 'uuid' })).toThrow(/fixed width/);
+      });
+
+      it('throws on a bits value that is not a positive number', () => {
+        expect(() => generateId({ bits: 0 })).toThrow(/positive number/);
+        expect(() => generateId({ bits: 'wide' })).toThrow(/positive number/);
+      });
+
+      it('an explicit length overrides the preset bits', () => {
+        expect(generateId({ usage: 'secret', length: 20 })).toHaveLength(20);
+      });
+
+      it('a call bits budget wins over a config length', () => {
+        generateId.config = { length: 20 };
+        expect(generateId({ usage: 'secret', bits: 256 })).toHaveLength(53);
+        expect(generateId({ usage: 'token', bits: 128 })).toHaveLength(27);
+      });
+
+      // config outranks the preset for width like it does for every other
+      // option, so an ambient length narrows a secret too. ignoreConfig is the
+      // door for code whose width must not bend to a host app
+      it('an ambient config length narrows the preset, ignoreConfig holds it', () => {
+        generateId.config = { length: 20 };
+        expect(generateId({ usage: 'secret' })).toHaveLength(20);
+        expect(generateId({ usage: 'secret', ignoreConfig: true })).toHaveLength(53);
+      });
+
+      it('a config bits budget sets the width for every preset', () => {
+        generateId.config = { bits: 128 };
+        expect(generateId({ usage: 'token' })).toHaveLength(27);
+        expect(generateId({ usage: 'link' })).toHaveLength(26);
       });
     });
 
@@ -320,7 +401,7 @@ describe('ID/Hashing Functions', () => {
 
   describe('isValidId', () => {
     it('round-trips every preset against its own config', () => {
-      for (const usage of ['db', 'page', 'link', 'token', 'code']) {
+      for (const usage of ['db', 'page', 'link', 'token', 'secret', 'code']) {
         expect(isValidId(generateId({ usage }), { usage })).toBe(true);
       }
     });
@@ -418,6 +499,15 @@ describe('ID/Hashing Functions', () => {
       expect(parsed.prefix).toBe('sk_');
       expect(parsed.body).toHaveLength(26);
       expect(parsed.checksum).toHaveLength(1);
+    });
+
+    it('splits a secret into its 52-char body and check char', () => {
+      const id = generateId({ usage: 'secret', prefix: 'sess_' });
+      const parsed = parseId(id, { usage: 'secret', prefix: 'sess_' });
+      expect(parsed.prefix).toBe('sess_');
+      expect(parsed.body).toHaveLength(52);
+      expect(parsed.checksum).toHaveLength(1);
+      expect(parsed.timestamp).toBeUndefined();
     });
 
     it('decodes the db timestamp to within a second of now', () => {

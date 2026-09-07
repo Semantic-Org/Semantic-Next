@@ -1,3 +1,5 @@
+import { isNumber } from './types.js';
+
 /*-------------------
       Alphabets
 --------------------*/
@@ -225,6 +227,10 @@ const ALPHA = 'abcdefghjkmnpqrstvwxyz';
 const ALPHA_UPPER = ALPHA.toUpperCase();
 // 256 - (256 % 22): bytes at or above this would bias the 22-letter draw
 const ALPHA_CUTOFF = 242;
+// entropy per emitted char: a base32 draw spends a full 5 bits, the narrower
+// alphaFirst lead only log2(22)
+const CHAR_BITS = 5;
+const ALPHA_BITS = Math.log2(ALPHA.length);
 
 // 32 is a power of two, so byte & 31 samples the alphabet with no modulo bias
 const randomCode = (alphabet) => alphabet[randomByte() & 31];
@@ -240,10 +246,12 @@ const randomAlpha = (letters) => {
 
 // 48-bit ms clock, big-endian in 10 base32 chars — the ULID time component.
 // Big-endian so lexicographic order is chronological order.
+const TIME_LENGTH = 10;
+
 const encodeTime = (alphabet) => {
   let time = Date.now();
   let out = '';
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < TIME_LENGTH; i++) {
     out = alphabet[time % 32] + out;
     time = Math.floor(time / 32);
   }
@@ -285,17 +293,23 @@ const uuidV7 = () => {
 };
 
 /*
-  Preset contracts. length = total emitted chars after the prefix (a checksum,
-  when on, spends the last slot so width stays constant per config).
-  alphaFirst forces a letter lead for valid CSS identifiers. timestamp prepends
-  the sortable ULID clock. upper emits uppercase. group sets a default display
-  grouping. code is the read-aloud tier: short, uppercase, checksummed, grouped.
+  Preset contracts. A preset states its width in the unit its channel is chosen
+  by: length where the fit is a slot (a URL, a spoken code, a database column),
+  bits where the fit is a guessing budget. length = total emitted chars after the
+  prefix (a checksum, when on, spends the last slot so width stays constant per
+  config). alphaFirst forces a letter lead for valid CSS identifiers. timestamp
+  prepends the sortable ULID clock. upper emits uppercase. group sets a default
+  display grouping. code is the read-aloud tier: short, uppercase, checksummed,
+  grouped. secret is the credential tier: 256 bits, clear of every current floor
+  (the Copenhagen Book's 112, the ~190 shipped auth libraries use), so a package
+  minting a session secret never spells the number itself.
 */
 const PRESETS = {
   db: { length: 26, timestamp: true, alphaFirst: false, checksum: false, upper: false },
   page: { length: 8, timestamp: false, alphaFirst: true, checksum: false, upper: false },
   link: { length: 11, timestamp: false, alphaFirst: false, checksum: false, upper: false },
   token: { length: 27, timestamp: false, alphaFirst: false, checksum: true, upper: false },
+  secret: { bits: 256, timestamp: false, alphaFirst: false, checksum: true, upper: false },
   code: { length: 12, timestamp: false, alphaFirst: false, checksum: true, upper: true, group: 4 },
 };
 
@@ -346,6 +360,39 @@ const group = (id, size) => {
   return parts.join('-');
 };
 
+/*
+  bits and length are one dial in two units, so the highest precedence layer that
+  names either one decides the width outright. Reading them as separate options
+  would let a config-level length quietly narrow a call that asked for bits.
+*/
+const widthFrom = (layer) => {
+  if (layer.bits != null) {
+    return { bits: layer.bits };
+  }
+  if (layer.length != null) {
+    return { length: layer.length };
+  }
+  return null;
+};
+
+// the clock and the check char carry no entropy, so a bit budget buys random
+// chars on top of them rather than inside them
+const lengthForBits = (bits, preset, checksum) => {
+  if (!isNumber(bits) || !(bits > 0)) {
+    throw new Error(`generateId: bits must be a positive number, got ${bits}`);
+  }
+  let length = checksum ? 1 : 0;
+  let budget = bits;
+  if (preset.timestamp) {
+    length += TIME_LENGTH;
+  }
+  else if (preset.alphaFirst) {
+    length += 1;
+    budget -= ALPHA_BITS;
+  }
+  return length + Math.max(Math.ceil(budget / CHAR_BITS), 0);
+};
+
 const resolveConfig = (options) => {
   // ignoreConfig skips the ambient layer, see resolveHashConfig. isValidId and
   // parseId resolve here too, so an id minted config-free validates config-free
@@ -356,20 +403,29 @@ const resolveConfig = (options) => {
     throw new Error(`generateId: unknown usage '${usage}'`);
   }
   const pick = (key) => options[key] ?? globalConfig[key] ?? preset[key];
-  const length = options.length ?? globalConfig.length ?? preset.length;
-  // a timestamped id is at least the 10-char clock plus a random char, so a
-  // shorter length is incoherent — fail loud rather than emit an id that can't
+  const checksum = pick('checksum');
+  const format = options.format ?? globalConfig.format ?? 'crockford';
+  const width = widthFrom(options) ?? widthFrom(globalConfig) ?? widthFrom(preset);
+  // uuidv7 spends 74 of its 128 bits on randomness and the rest on the clock and
+  // the version tag, a width nothing can widen. A bit budget it cannot meet fails
+  // loud rather than returning something narrower than the caller asked for
+  if (width.bits != null && format === 'uuid') {
+    throw new Error(`generateId: format 'uuid' has a fixed width and can't carry ${width.bits} bits`);
+  }
+  const length = width.length ?? lengthForBits(width.bits, preset, checksum);
+  // a timestamped id is at least the clock plus a random char, so a shorter
+  // length is incoherent — fail loud rather than emit an id that can't
   // round-trip through isValidId
-  if (preset.timestamp && length < 11) {
-    throw new Error(`generateId: length must be at least 11 for usage '${usage}'`);
+  if (preset.timestamp && length < TIME_LENGTH + 1) {
+    throw new Error(`generateId: length must be at least ${TIME_LENGTH + 1} for usage '${usage}'`);
   }
   return {
     usage,
     length,
     prefix: options.prefix ?? globalConfig.prefix ?? '',
-    checksum: pick('checksum'),
+    checksum,
     upper: pick('upper'),
-    format: options.format ?? globalConfig.format ?? 'crockford',
+    format,
     group: pick('group') ?? false,
     timestamp: preset.timestamp,
     alphaFirst: preset.alphaFirst,
@@ -399,8 +455,9 @@ const buildCode = (config) => {
 
 /*
   Generate a unique id. Defaults to a sortable 26-char ULID (usage 'db'). Pass
-  a usage preset, an explicit length, a typed prefix, a trailing checksum, or
-  format 'uuid' for an RFC UUIDv7. See isValidId / parseId for the inverse.
+  a usage preset, an explicit length or bits budget, a typed prefix, a trailing
+  checksum, or format 'uuid' for an RFC UUIDv7. See isValidId / parseId for the
+  inverse.
 */
 export const generateId = (options = {}) => {
   // tolerate a non-object arg (null, or a leftover legacy numeric seed) instead
@@ -472,7 +529,7 @@ export const parseId = (id, options = {}) => {
   const body = config.checksum ? folded.slice(0, -1) : folded;
   const result = { prefix: config.prefix, body, checksum };
   if (config.timestamp) {
-    result.timestamp = decodeTime(body.slice(0, 10));
+    result.timestamp = decodeTime(body.slice(0, TIME_LENGTH));
   }
   return result;
 };
