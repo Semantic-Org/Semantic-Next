@@ -2985,3 +2985,54 @@ I ran the orchestrator seat for the ephemeral tier's DX row: a tween duration de
 *— Claude (Fable 5.1), 2026-09-03*
 
 *"An instrument that reaches into internals shows you what the internals believe."*
+
+---
+
+## 2026-09-07 — the accounts arc's first rows, and the words that had to go
+
+I ran the orchestrator seat for the accounts arc across a weekend: a descriptive survey of the
+field's best account systems distilled into a hit list, two dream lists written blind, a
+fourteen-call docket the maintainer ruled from a phone at a tennis match, then the provisioning
+contract (unique indexes in three forms across four storage adapters, one duplicate error, one
+provisioning verb awaited before serving), bytes and Money as first-class selector operands, a
+permissions slice built overnight on a ten-line brief, and the Sessions row's twenty-seven-call
+docket left half-ruled for fresh eyes.
+
+**A word that slips into the corpus becomes law nobody chose.** "Principal" entered an
+agent-written design document as the security literature's term, went from there into the
+wire freeze as a close code's name and into the resolver's return shape, and lived inside the
+kernel for two months without meeting the maintainer's read. It met it on a docket, beside the
+survey's "actor", and both read as foreign: "the simple way for an end user to think about
+permissions is 'what user is doing this'." The rule that came out is a consistency rule, not a
+naming pass: the key words of a domain are the plainest English word for the thing. The rename
+was one commit and a grep, and the first file he opened afterwards he called legible.
+
+**Read the corpus's own grammar before the draft does.** The planner read the permissions
+document at the login rung and stopped, and invented `.when()` where the corpus already had
+`ifOwnsDoc()`. The commission had omitted the document whole; that miss was mine. A curriculum
+item that names the mistake it prevents is only as good as the list it sits on.
+
+**Seal your leans, then let the evidence move them, visibly.** My preregistered counsel reversed
+twice on the draft's own facts: a signed token lost to an id-plus-secret because the session
+row is read at every hello regardless, and a cross-tab broadcast lost to a server-side close
+because the server already holds every connection. A reversal is only honest if the earlier
+number is on file.
+
+**Look at how the kernel already solves the shape.** "This feels exactly like the conversation
+about the client id," the maintainer said of where a token should live, and the identity plane
+in the client's store answered the tab race, the principal change and the storeless fallback at
+once. A live trace then settled the startup-order worry with numbers: the transport dial was
+the long pole and the store finished thirty-five milliseconds ahead of it.
+
+**A review seat that must reproduce before it may call a blocker finds real ones and retracts
+its own.** Three per row, every one red on the head: colliding derived index names silently
+realizing one index, an empty filter killing the second boot, a condition dropped bare into a
+permission slot comparing undefined to undefined and granting everyone. And once it proposed a
+remedy, built the red, watched the red not catch its own specimen, and withdrew.
+
+**Hauls fill the disk, not worktrees.** The survey seats' clones and copies, a gigabyte a
+session. A seat that clones into its scratchpad deletes at close, and a reap command is the net.
+
+*— Claude (Fable 5.1), 2026-09-07*
+
+*"The plainest word for the thing, and a red before the green."*
