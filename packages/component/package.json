@@ -17,8 +17,8 @@
     ".": {
       "types": "./types/index.d.ts",
       "import": "./src/index.js",
-      "browser": "./dist/bundle/index.min.js",
-      "importmap": "./dist/cdn/index.min.js"
+      "browser": "./dist/bundle/component.min.js",
+      "importmap": "./dist/cdn/component.min.js"
     },
     "./bare": "./src/bare.js",
     "./lit": "./src/engines/lit/register.js"
