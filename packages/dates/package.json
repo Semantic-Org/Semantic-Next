@@ -1,0 +1,62 @@
+{
+  "name": "@semantic-ui/dates",
+  "version": "0.18.0",
+  "title": "Semantic UI Dates",
+  "description": "Temporal, spoken plainly. Datetimes, dates, times, durations and ranges with plain-English verbs",
+  "author": "Jack Lukic",
+  "homepage": "https://next.semantic-ui.com",
+  "license": "ISC",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=26"
+  },
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./src/index.js",
+      "browser": "./dist/bundle/index.min.js",
+      "importmap": "./dist/cdn/index.min.js"
+    }
+  },
+  "scripts": {
+    "build": "wireit",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "@semantic-ui/utils": "^0.18.0"
+  },
+  "devDependencies": {
+    "@semantic-ui/internal-scripts": "^0.18.0"
+  },
+  "files": [
+    "src",
+    "dist",
+    "types",
+    "README.md",
+    "LICENSE"
+  ],
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "build:esm",
+        "build:bundle",
+        "build:cdn"
+      ]
+    },
+    "build:esm": {
+      "command": "node ../../internal-packages/scripts/src/build-esm.js"
+    },
+    "build:bundle": {
+      "command": "node ../../internal-packages/scripts/src/build-bundle.js"
+    },
+    "build:cdn": {
+      "command": "node ../../internal-packages/scripts/src/build-cdn.js"
+    }
+  }
+}

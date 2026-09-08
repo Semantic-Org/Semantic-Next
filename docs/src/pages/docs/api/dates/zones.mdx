@@ -1,0 +1,102 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Zones
+icon: globe
+description: A zone as a view on an instant, the names a zone answers to, and arithmetic across daylight saving
+package: "@semantic-ui/dates"
+---
+
+A zone is a view, an instant is the value. Only a datetime has one. A date and a time carry no zone, and combine into a datetime by naming one.
+
+## A Zone Is a View
+
+`datetime('...Z')` fixes the instant. The zone it is read in is the explicit argument, else a bracketed zone in the string, else the configured default, else the machine's.
+
+```javascript
+const moment = datetime('2026-09-06T14:30Z', 'UTC');
+
+moment.in('America/New_York').hour; // 10
+moment.in('Asia/Tokyo').hour; // 23
+moment.in('Asia/Tokyo').equals(moment); // true, the instant did not move
+```
+
+An offset in a string never becomes the zone, because arithmetic across a daylight saving boundary needs the real one. The offset a database prints is a view.
+
+```javascript
+datetime('2026-09-06T14:30:00+09:00', 'UTC').toString(); // '2026-09-06T05:30:00.000Z'
+datetime('2026-09-06T14:30:00+09:00', 'UTC').zone; // 'UTC'
+datetime('2026-09-06T14:30:00+09:00[Asia/Tokyo]').zone; // 'Asia/Tokyo'
+```
+
+`toString()` and `toJSON()` print the instant in UTC, so two clients storing the same moment store the same bytes. The zone does not travel. See [Wire Forms](/docs/api/dates/wire-forms).
+
+## Naming a Zone
+
+Anywhere a zone is read it may be an IANA name, a city, an abbreviation, a fixed offset, or a name of your own, in any case and spacing.
+
+```javascript
+moment.in('America/New_York').zone; // 'America/New_York'
+moment.in('america/los angeles').zone; // 'America/Los_Angeles'
+moment.in('Berlin').zone; // 'Europe/Berlin'
+moment.in('sao paulo').zone; // 'America/Sao_Paulo', accents fold
+moment.in('PT').zone; // 'America/Los_Angeles'
+moment.in('CET').zone; // 'Europe/Paris'
+moment.in('+05:30').zone; // '+05:30'
+moment.in('utc').zone; // 'UTC'
+```
+
+The 418 canonical cities are all distinct, so a city is never a guess. An abbreviation resolves to its daylight-observing zone, with the `timezones` table in `@semantic-ui/utils` as the floor.
+
+A name of your own is set once at boot.
+
+```javascript
+configure({ zoneAliases: { hq: 'Europe/Berlin' } });
+
+moment.in('hq').zone; // 'Europe/Berlin'
+date('2026-09-06').at('9am', 'hq').zone; // 'Europe/Berlin'
+```
+
+A name that is not a zone refuses with `unknownZone`, under `loose` as well, since a bad zone is a mistake in the code rather than in the data.
+
+## Where a Zone Is Read
+
+| Call | What the zone does |
+|------|--------------------|
+| `datetime(input, zone)` | reads a wall clock in the zone, or views an instant in it |
+| `now(zone)` `startOfToday(zone)` `endOfToday(zone)` | the present, viewed in the zone |
+| `today(zone)` `tomorrow(zone)` `yesterday(zone)` | the calendar day it is in the zone |
+| `date(input, zone)` `time(input, zone)` | the day or clock a `Date` or instant has in the zone |
+| `date.at(time, zone)` `time.on(date, zone)` | the moment that wall clock is in the zone |
+| `date.points(step, zone)` `date.split(step, zone)` | the day's slots as datetimes in the zone |
+| `date.isToday(zone)` and its siblings | which day counts as today |
+| `date.toJSDate(zone)` | midnight of the day in the zone |
+| `dateRange.in(zone)` `datetimeRange.in(zone)` | the datetime bounds in the zone, or both ends viewed in it |
+| `datetime.in(zone)` | the same instant viewed in the zone |
+| `format({ timeZone })` | an Intl options object may name its own |
+
+## Daylight Saving
+
+Adding days keeps the wall clock across a daylight saving change. Adding hours counts hours.
+
+```javascript
+const friday = datetime('2026-03-06T17:00', 'America/New_York');
+
+friday.plus(days(3)).format('dddd h:mm a'); // 'Monday 5:00 pm'
+friday.plus(hours(72)).format('dddd h:mm a'); // 'Monday 6:00 pm'
+friday.plus(days(2)).hoursInDay; // 23
+```
+
+A wall clock that does not exist on the spring-forward morning moves forward.
+
+```javascript
+datetime('2026-03-08T02:30', 'America/New_York').format('h:mm A z'); // '3:30 AM EDT'
+```
+
+`round`, `floor` and `ceil` snap the wall clock, so on the repeated hour of a fall-back night they land on its second pass. A day cut with `date.split('hour', zone)` has 23 or 25 slots on those days.
+
+```javascript
+date('2026-03-08').split('hour', 'America/New_York').length; // 23
+```
+
+The same rule reaches durations: a length balances to hours and never to days, because folding 36 hours into a day would move a deadline across a change. See [Durations](/docs/api/dates/durations).

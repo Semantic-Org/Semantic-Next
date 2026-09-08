@@ -1,0 +1,1214 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Date
+icon: calendar-days
+description: API reference for date, a calendar day with no clock and no zone
+package: "@semantic-ui/dates"
+methods: [date, today, tomorrow, yesterday, plus, minus, set, startOf, endOf, next, previous, equals, isBefore, isAfter, isSame, isPast, isFuture, isToday, isTomorrow, isYesterday, isWeekend, isWeekday, isLeapYear, until, since, at, to, range, points, split, format, formatRelative, toString, toJSON, toJSDate, toTemporal, valueOf]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+A calendar date with no time and no zone: a due date, a birthday, a booking night. It is not a moment, so it never shifts when read from another zone. The class is `CalendarDate`, a `Temporal.PlainDate` underneath.
+
+## Creating
+
+### date
+
+```javascript
+date(input);
+date(year, month, day);
+date(input, zone);
+date(input, { zone, loose, dayFirst });
+```
+
+Reads `'2026-09-06'`, three numbers, a fields object, a datetime (its date in its zone), a `Date` (its date in the zone), or a Temporal value. A wall-clock string keeps its day.
+
+A string carrying `Z` or an offset is an instant whose day depends on the zone, so it refuses unless `{ loose: true, zone }` says which, or `datetime(text, zone).date` chooses it. A bare number refuses too, since it is a year to one reader and epoch milliseconds to another.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| input | string \| object \| DateTime \| Date \| Temporal | `'2026-09-06'`, `{ year, month, day }`, a datetime, a `Date`, or a Temporal value |
+| year, month, day | number | Three numbers, `date(2026, 9, 6)`. The day defaults to 1 |
+| zone | string | The zone a `Date` is read in |
+| options | object | `{ zone, loose, dayFirst }`. See [Reading Values](/docs/api/dates/reading-values) |
+
+#### Returns
+
+A `CalendarDate`, or `null` under `{ loose: true }` for input that cannot be read.
+
+#### Usage
+
+```javascript
+date('2026-09-06').toString(); // '2026-09-06'
+date(2026, 9, 6).toString(); // '2026-09-06'
+date('2026-09-06T23:30').toString(); // '2026-09-06'
+date(datetime('2026-09-06T23:30Z').in('Asia/Tokyo')).toString(); // '2026-09-07'
+date(new Date('2026-09-06T23:30:00Z'), 'Asia/Tokyo').toString(); // '2026-09-07'
+date('September 6, 2026', { loose: true }).toString(); // '2026-09-06'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date" direction="horizontal"></PlaygroundExample>
+
+### today
+
+```javascript
+today();
+today(zone);
+```
+
+Today's date, in the zone or the configured default. Today depends on where you stand.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone whose today counts |
+
+#### Returns
+
+A `CalendarDate`.
+
+#### Usage
+
+```javascript
+today().format('full'); // 'Monday, September 7, 2026'
+today('Asia/Tokyo').toString(); // '2026-09-08'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-today" direction="horizontal"></PlaygroundExample>
+
+### tomorrow
+
+```javascript
+tomorrow();
+tomorrow(zone);
+```
+
+Tomorrow's date, in the zone or the configured default.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone whose today counts |
+
+#### Returns
+
+A `CalendarDate`.
+
+#### Usage
+
+```javascript
+tomorrow().since(today(), 'days'); // 1
+```
+
+#### Example
+
+<PlaygroundExample id="dates-tomorrow" direction="horizontal"></PlaygroundExample>
+
+### yesterday
+
+```javascript
+yesterday();
+yesterday(zone);
+```
+
+Yesterday's date, in the zone or the configured default.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone whose today counts |
+
+#### Returns
+
+A `CalendarDate`.
+
+#### Usage
+
+```javascript
+today().since(yesterday(), 'days'); // 1
+```
+
+#### Example
+
+<PlaygroundExample id="dates-yesterday" direction="horizontal"></PlaygroundExample>
+
+## Properties
+
+The parts are real properties, so a value prints them in a console without a click. Every property is read-only.
+
+| Name | Type | Description |
+|------|------|-------------|
+| year | number | |
+| month | number | 1 through 12 |
+| day | number | |
+| weekday | number | ISO, 1 for monday through 7 for sunday |
+| quarter | number | 1 through 4 |
+| dayOfYear | number | |
+| weekOfYear | number | ISO week number |
+| daysInMonth | number | |
+| daysInYear | number | |
+
+#### Usage
+
+```javascript
+const day = date('2026-09-06');
+
+day.year; // 2026
+day.weekday; // 7
+day.quarter; // 3
+day.weekOfYear; // 36
+day.daysInMonth; // 30
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-properties" direction="horizontal"></PlaygroundExample>
+
+## Moving
+
+### plus
+
+```javascript
+date.plus(duration);
+date.plus(fields);
+date.plus(phrase);
+date.plus(count, unit);
+```
+
+Adds years, months, weeks or days, staying within the days a month has. A date has no clock, so a clock unit refuses with `notADateUnit`. Combine with `at()` first.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| amount | Duration \| object \| string \| number | A duration, a fields object like `{ weeks: 2 }`, a phrase like `'1 month'`, or a count with a unit |
+| unit | string | The unit for a count, `'days'`, `'weeks'`, `'months'`, `'years'` |
+
+#### Returns
+
+A new `CalendarDate`.
+
+#### Usage
+
+```javascript
+const day = date('2026-09-06');
+
+day.plus(days(30)).toString(); // '2026-10-06'
+day.plus('1 month').toString(); // '2026-10-06'
+day.plus(1, 'year').toString(); // '2027-09-06'
+date('2026-01-31').plus(months(1)).toString(); // '2026-02-28'
+day.plus(hours(3)); // throws notADateUnit
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-plus" direction="horizontal"></PlaygroundExample>
+
+### minus
+
+```javascript
+date.minus(duration);
+date.minus(fields);
+date.minus(phrase);
+date.minus(count, unit);
+```
+
+Subtracts years, months, weeks or days.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| amount | Duration \| object \| string \| number | A duration, a fields object, a phrase, or a count with a unit |
+| unit | string | The unit for a count |
+
+#### Returns
+
+A new `CalendarDate`.
+
+#### Usage
+
+```javascript
+const day = date('2026-09-06');
+
+day.minus(days(7)).toString(); // '2026-08-30'
+day.minus('2 weeks').toString(); // '2026-08-23'
+date('2026-03-01').minus(days(1)).toString(); // '2026-02-28'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-minus" direction="horizontal"></PlaygroundExample>
+
+### set
+
+```javascript
+date.set(fields);
+date.set(unit, value);
+```
+
+Replaces the year, month or day. A day the month cannot hold refuses with `cannotSet`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| fields | object | Singular keys, `{ day: 1 }` |
+| unit | string | `'year'`, `'month'` or `'day'` |
+| value | number | Its new value |
+
+#### Returns
+
+A new `CalendarDate`.
+
+#### Usage
+
+```javascript
+const day = date('2026-09-06');
+
+day.set({ day: 1 }).toString(); // '2026-09-01'
+day.set('month', 12).toString(); // '2026-12-06'
+date('2026-02-01').set({ day: 30 }); // throws cannotSet
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-set" direction="horizontal"></PlaygroundExample>
+
+### startOf
+
+```javascript
+date.startOf(unit);
+date.startOf('week', firstDay);
+```
+
+The first day of the unit around this date. A week starts on the configured first day, or on `firstDay`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| unit | string | `'year'`, `'quarter'`, `'month'`, `'week'` |
+| firstDay | string \| number | The weekday a week starts on, for `'week'` |
+
+#### Returns
+
+A new `CalendarDate`.
+
+#### Usage
+
+```javascript
+const sunday = date('2026-09-06');
+
+sunday.startOf('week').toString(); // '2026-08-31'
+sunday.startOf('week', 'sunday').toString(); // '2026-09-06'
+sunday.startOf('quarter').toString(); // '2026-07-01'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-startof" direction="horizontal"></PlaygroundExample>
+
+### endOf
+
+```javascript
+date.endOf(unit);
+date.endOf('week', firstDay);
+```
+
+The last day of the unit around this date, so `endOf('month')` is the 28th, 30th or 31st.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| unit | string | `'year'`, `'quarter'`, `'month'`, `'week'` |
+| firstDay | string \| number | The weekday a week starts on, for `'week'` |
+
+#### Returns
+
+A new `CalendarDate`.
+
+#### Usage
+
+```javascript
+const sunday = date('2026-09-06');
+
+sunday.endOf('week').toString(); // '2026-09-06'
+sunday.endOf('month').toString(); // '2026-09-30'
+date('2026-02-10').endOf('month').toString(); // '2026-02-28'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-endof" direction="horizontal"></PlaygroundExample>
+
+### next
+
+```javascript
+date.next(weekday);
+```
+
+The next such weekday strictly after this date.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| weekday | string \| number | A name in any spelling, `'monday'`, `'Fri'`, or the ISO number |
+
+#### Returns
+
+A new `CalendarDate`.
+
+#### Usage
+
+```javascript
+const sunday = date('2026-09-06');
+
+sunday.next('monday').toString(); // '2026-09-07'
+sunday.next('sunday').toString(); // '2026-09-13'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-next" direction="horizontal"></PlaygroundExample>
+
+### previous
+
+```javascript
+date.previous(weekday);
+```
+
+The previous such weekday strictly before this date.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| weekday | string \| number | A name in any spelling, or the ISO number |
+
+#### Returns
+
+A new `CalendarDate`.
+
+#### Usage
+
+```javascript
+const sunday = date('2026-09-06');
+
+sunday.previous('friday').toString(); // '2026-09-04'
+sunday.previous('sunday').toString(); // '2026-08-30'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-previous" direction="horizontal"></PlaygroundExample>
+
+## Comparing
+
+Every comparison takes anything `date()` reads.
+
+### equals
+
+```javascript
+date.equals(other);
+```
+
+The same calendar day.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | CalendarDate \| string \| object | Anything `date()` reads |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+const day = date('2026-09-06');
+
+day.equals('2026-09-06'); // true
+day.equals(date(2026, 9, 6)); // true
+day.equals('2026-09-07'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-equals" direction="horizontal"></PlaygroundExample>
+
+### isBefore
+
+```javascript
+date.isBefore(other);
+```
+
+Whether this date comes before another.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | CalendarDate \| string \| object | Anything `date()` reads |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+date('2026-09-06').isBefore('2026-09-07'); // true
+date('2026-09-06').isBefore('2026-09-06'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-isbefore" direction="horizontal"></PlaygroundExample>
+
+### isAfter
+
+```javascript
+date.isAfter(other);
+```
+
+Whether this date comes after another.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | CalendarDate \| string \| object | Anything `date()` reads |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+date('2026-09-06').isAfter('2026-09-05'); // true
+date('2026-09-06').isAfter(date('2027-01-01')); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-isafter" direction="horizontal"></PlaygroundExample>
+
+### isSame
+
+```javascript
+date.isSame(other);
+date.isSame(other, unit);
+date.isSame(other, 'week', firstDay);
+```
+
+Whether two dates share a unit. Without a unit it is `equals()`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | CalendarDate \| string \| object | Anything `date()` reads |
+| unit | string | `'year'`, `'quarter'`, `'month'`, `'week'` |
+| firstDay | string \| number | The weekday a week starts on, for `'week'` |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+const day = date('2026-09-06');
+
+day.isSame('2026-09-30', 'month'); // true
+day.isSame('2026-10-01', 'month'); // false
+day.isSame('2026-09-01', 'week'); // true
+day.isSame('2026-09-01', 'week', 'sunday'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-issame" direction="horizontal"></PlaygroundExample>
+
+### isPast
+
+```javascript
+date.isPast();
+date.isPast(zone);
+```
+
+Whether this date is before today. Today depends on where you stand, so the zone to judge from may be given.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone whose today counts |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+yesterday().isPast(); // true
+tomorrow().isPast(); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-ispast" direction="horizontal"></PlaygroundExample>
+
+### isFuture
+
+```javascript
+date.isFuture();
+date.isFuture(zone);
+```
+
+Whether this date is after today.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone whose today counts |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+tomorrow().isFuture(); // true
+tomorrow('UTC').isFuture('UTC'); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-isfuture" direction="horizontal"></PlaygroundExample>
+
+### isToday
+
+```javascript
+date.isToday();
+date.isToday(zone);
+```
+
+Whether this date is today.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone whose today counts |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+today().isToday(); // true
+today('Asia/Tokyo').isToday('Asia/Tokyo'); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-istoday" direction="horizontal"></PlaygroundExample>
+
+### isTomorrow
+
+```javascript
+date.isTomorrow();
+date.isTomorrow(zone);
+```
+
+Whether this date is tomorrow.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone whose today counts |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+tomorrow().isTomorrow(); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-istomorrow" direction="horizontal"></PlaygroundExample>
+
+### isYesterday
+
+```javascript
+date.isYesterday();
+date.isYesterday(zone);
+```
+
+Whether this date is yesterday.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone whose today counts |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+yesterday().isYesterday(); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-isyesterday" direction="horizontal"></PlaygroundExample>
+
+### isWeekend
+
+```javascript
+date.isWeekend();
+```
+
+Whether this date is a saturday or sunday.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+date('2026-09-06').isWeekend(); // true
+date('2026-09-07').isWeekend(); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-isweekend" direction="horizontal"></PlaygroundExample>
+
+### isWeekday
+
+```javascript
+date.isWeekday();
+```
+
+Whether this date is monday through friday.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+date('2026-09-07').isWeekday(); // true
+date('2026-09-12').isWeekday(); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-isweekday" direction="horizontal"></PlaygroundExample>
+
+### isLeapYear
+
+```javascript
+date.isLeapYear();
+```
+
+Whether this date falls in a leap year.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+date('2028-02-01').isLeapYear(); // true
+date('2026-02-01').isLeapYear(); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-isleapyear" direction="horizontal"></PlaygroundExample>
+
+## Measuring
+
+### until
+
+```javascript
+date.until(other);
+date.until(other, unit);
+```
+
+The duration from this date to another, balanced from years down, or the whole length as a number in one unit. The duration remembers this date, so its months and years total. See [Durations](/docs/api/dates/durations#anchors).
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | CalendarDate \| string \| object | Anything `date()` reads |
+| unit | string | A unit to total in, `'days'`, `'weeks'`, `'months'` |
+
+#### Returns
+
+A `Duration`, or a number with a unit. Negative when `other` comes first.
+
+#### Usage
+
+```javascript
+const start = date('2026-01-01');
+
+start.until('2027-04-05').toString(); // 'P1Y3M4D'
+start.until('2027-04-05').format(); // '1 year, 3 months, 4 days'
+start.until('2027-04-05', 'days'); // 459
+start.until('2026-07-01').total('months'); // 6
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-until" direction="horizontal"></PlaygroundExample>
+
+### since
+
+```javascript
+date.since(other);
+date.since(other, unit);
+```
+
+The duration from another date to this one, `other.until(this)`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | CalendarDate \| string \| object | Anything `date()` reads |
+| unit | string | A unit to total in |
+
+#### Returns
+
+A `Duration`, or a number with a unit.
+
+#### Usage
+
+```javascript
+date('2027-04-05').since('2026-01-01').toString(); // 'P1Y3M4D'
+date('2027-04-05').since('2026-01-01', 'days'); // 459
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-since" direction="horizontal"></PlaygroundExample>
+
+## Combining
+
+### at
+
+```javascript
+date.at(time, zone);
+date.at(time);
+date.at();
+```
+
+This date at a time of day in a zone, the moment an appointment happens. No time means midnight, no zone means the configured default.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| time | string \| Time \| object | Anything `time()` reads, `'9:30am'`, `'17:00'`. Default midnight |
+| zone | string | The zone the wall clock is in. Default the configured zone |
+
+#### Returns
+
+A `DateTime`.
+
+#### Usage
+
+```javascript
+const visit = date('2026-11-03').at('9:30am', 'America/Los_Angeles');
+
+visit.toString(); // '2026-11-03T17:30:00.000Z'
+visit.zone; // 'America/Los_Angeles'
+date('2026-11-03').at(time('17:00'), 'UTC').toString(); // '2026-11-03T17:00:00.000Z'
+date('2026-11-03').at().hour; // 0
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-at" direction="horizontal"></PlaygroundExample>
+
+### to
+
+```javascript
+date.to(end);
+date.to(duration);
+date.to(count, unit);
+```
+
+A range from this date through another, or covering a length, the last day included. See [Range Bounds](/docs/api/dates/range-bounds).
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| end | CalendarDate \| string \| object \| Duration | Another date, or a length as a duration, fields or phrase |
+| count | number | A count with a unit |
+| unit | string | The unit for a count |
+
+#### Returns
+
+A `DateRange`.
+
+#### Usage
+
+```javascript
+const start = date('2026-09-01');
+
+start.to('2026-09-07').toString(); // '2026-09-01/2026-09-07'
+start.to(days(7)).toString(); // '2026-09-01/2026-09-07'
+start.to(42, 'days').toString(); // '2026-09-01/2026-10-12'
+start.to(days(7)).contains('2026-09-07'); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-to" direction="horizontal"></PlaygroundExample>
+
+### range
+
+```javascript
+date.range(unit);
+date.range('week', firstDay);
+```
+
+Every day of the unit containing this date, first through last.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| unit | string | `'year'`, `'quarter'`, `'month'`, `'week'` |
+| firstDay | string \| number | The weekday a week starts on, for `'week'` |
+
+#### Returns
+
+A `DateRange`.
+
+#### Usage
+
+```javascript
+const day = date('2026-09-15');
+
+day.range('month').toString(); // '2026-09-01/2026-09-30'
+day.range('week').toString(); // '2026-09-14/2026-09-20'
+day.range('week', 'sunday').toString(); // '2026-09-13/2026-09-19'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-range" direction="horizontal"></PlaygroundExample>
+
+### points
+
+```javascript
+date.points(step);
+date.points(step, zone);
+date.points(count, unit, zone);
+```
+
+The day's points by a step, as datetimes in the zone. `today().points('hour')` is the day's hours, `today().points(minutes(30))` its half hours.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| step | string \| Duration \| object | A unit name or a length |
+| count | number | A count with a unit |
+| unit | string | The unit for a count |
+| zone | string | The zone whose midnight starts the day. Default the configured zone |
+
+#### Returns
+
+An array of `DateTime`.
+
+#### Usage
+
+```javascript
+const day = date('2026-09-07');
+
+day.points('hour').length; // 24
+day.points(minutes(30)).length; // 48
+day.points(6, 'hours', 'UTC').map(String); // ['2026-09-07T00:00:00.000Z', '2026-09-07T06:00:00.000Z', ...]
+day.points('hour', 'Europe/Berlin')[0].toString(); // '2026-09-06T22:00:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-points" direction="horizontal"></PlaygroundExample>
+
+### split
+
+```javascript
+date.split(step);
+date.split(step, zone);
+date.split(count, unit, zone);
+```
+
+The day cut into ranges by a step, as datetime ranges in the zone. A day across a daylight saving change has 23 or 25 hour slots.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| step | string \| Duration \| object | A unit name or a length |
+| count | number | A count with a unit |
+| unit | string | The unit for a count |
+| zone | string | The zone whose midnight starts the day. Default the configured zone |
+
+#### Returns
+
+An array of `DateTimeRange`.
+
+#### Usage
+
+```javascript
+const day = date('2026-09-07');
+
+day.split('hour').length; // 24
+day.split(8, 'hours', 'UTC').map(String); // ['2026-09-07T00:00:00.000Z/2026-09-07T08:00:00.000Z', ...]
+date('2026-03-08').split('hour', 'America/New_York').length; // 23
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-split" direction="horizontal"></PlaygroundExample>
+
+## Formatting
+
+### format
+
+```javascript
+date.format();
+date.format(preset);
+date.format(options);
+date.format(tokens);
+date.format(spec, locale);
+```
+
+Prints in the configured locale or one given. A date has no clock, so a clock token refuses with `noField`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| spec | string \| object | A preset, an `Intl.DateTimeFormat` options object, or a day.js token pattern. See the [datetime tokens](/docs/api/dates/datetime#format) |
+| locale | string | A BCP 47 tag for this call |
+
+##### Presets
+
+| Preset | Prints |
+|--------|--------|
+| `'short'` | `9/6/26` |
+| `'medium'` | `Sep 6, 2026`, the default |
+| `'long'` | `September 6, 2026` |
+| `'full'` | `Sunday, September 6, 2026` |
+| `'month'` | `September 2026` |
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+const day = date('2026-09-06');
+
+day.format(); // 'Sep 6, 2026'
+day.format('full'); // 'Sunday, September 6, 2026'
+day.format('month'); // 'September 2026'
+day.format({ weekday: 'long', month: 'long', day: 'numeric' }); // 'Sunday, September 6'
+day.format('MMMM Do, YYYY'); // 'September 6th, 2026'
+day.format('ddd D MMM', 'fr'); // 'dim. 6 sept.'
+day.format('HH:mm'); // throws noField
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-format" direction="horizontal"></PlaygroundExample>
+
+### formatRelative
+
+```javascript
+date.formatRelative();
+date.formatRelative(to);
+date.formatRelative(to, locale);
+```
+
+The distance in words, `'yesterday'`, `'in 3 weeks'`, `'last month'`, measured against today unless another date is given.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| to | CalendarDate \| string \| object | The date to measure against, default today |
+| locale | string | A BCP 47 tag for this call |
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+const reference = date('2026-09-07');
+
+date('2026-09-06').formatRelative(reference); // 'yesterday'
+date('2026-09-21').formatRelative(reference); // 'in 2 weeks'
+date('2020-01-01').formatRelative(reference); // '7 years ago'
+date('2026-09-21').formatRelative(reference, 'de'); // 'in 2 Wochen'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-formatrelative" direction="horizontal"></PlaygroundExample>
+
+## Converting
+
+### toString
+
+```javascript
+date.toString();
+```
+
+ISO 8601, `'2026-09-06'`. A date is not a number, so `<` refuses with `notANumber` rather than being silently wrong.
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+date('2026-09-06').toString(); // '2026-09-06'
+`Due ${date('2026-09-06')}`; // 'Due 2026-09-06'
+date('2026-09-06') < date('2026-09-07'); // throws notANumber
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-tostring" direction="horizontal"></PlaygroundExample>
+
+### toJSON
+
+```javascript
+date.toJSON();
+```
+
+The wire form, the ISO day, which `date()` reads back exactly.
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+JSON.stringify({ on: date('2026-09-06') }); // '{"on":"2026-09-06"}'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-tojson" direction="horizontal"></PlaygroundExample>
+
+### toJSDate
+
+```javascript
+date.toJSDate();
+date.toJSDate(zone);
+```
+
+Midnight of this date in the zone, as a JavaScript `Date`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone whose midnight. Default the configured zone |
+
+#### Returns
+
+A `Date`.
+
+#### Usage
+
+```javascript
+date('2026-11-03').toJSDate('UTC').toISOString(); // '2026-11-03T00:00:00.000Z'
+date('2026-11-03').toJSDate('America/Los_Angeles').toISOString(); // '2026-11-03T08:00:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-tojsdate" direction="horizontal"></PlaygroundExample>
+
+### toTemporal
+
+```javascript
+date.toTemporal();
+```
+
+The `Temporal.PlainDate` underneath.
+
+#### Returns
+
+A `Temporal.PlainDate`.
+
+#### Usage
+
+```javascript
+date('2026-09-06').toTemporal().dayOfWeek; // 7
+```
+
+#### Example
+
+<PlaygroundExample id="dates-date-totemporal" direction="horizontal"></PlaygroundExample>
+
+### valueOf
+
+```javascript
+date.valueOf();
+```
+
+Throws `notANumber`. A date is not a point on the number line, so `due < today()` refuses rather than being silently always true. Compare with `isBefore()`, `isAfter()` or `equals()`, or measure with `until()`.

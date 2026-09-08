@@ -85,9 +85,15 @@ const deepEqual = (a, b, loose, ignored, deepIgnore, partial) => {
     return true;
   }
 
-  // Custom valueOf / toString
+  // Custom valueOf / toString. Temporal's plain types, and value classes built like them, refuse
+  // valueOf so that `<` cannot lie about them, and their string is the value to compare
   if (isFunction(a.valueOf) && a.valueOf !== objectValueOf) {
-    return a.valueOf() === b.valueOf();
+    try {
+      return a.valueOf() === b.valueOf();
+    }
+    catch {
+      // compared by string below
+    }
   }
   if (isFunction(a.toString) && a.toString !== objectToString) {
     return a.toString() === b.toString();

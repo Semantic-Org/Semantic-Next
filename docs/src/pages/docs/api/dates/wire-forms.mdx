@@ -1,0 +1,76 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Wire Forms
+icon: send
+description: What toJSON() prints for each kind, and what does not travel
+package: "@semantic-ui/dates"
+---
+
+`toJSON()` is the wire form, and each factory reads its own back exactly. Two things do not travel.
+
+## What Prints
+
+| Kind | Prints | Does not travel |
+|------|--------|-----------------|
+| `datetime` | the instant in UTC, `2026-09-06T14:30:00.000Z`, six or nine fraction digits only when the value has them | the zone, which is a view |
+| `date` | `2026-09-06` | |
+| `time` | `17:30:00`, a fraction in groups of three | |
+| `duration` | the fields as written, `PT90M` | the anchor from `until()` |
+| the ranges | `start/end` | as their ends |
+
+```javascript
+JSON.stringify({
+  at: datetime('2026-09-06T14:30', 'America/New_York'),
+  on: date('2026-09-06'),
+  opens: time('9am'),
+  ttl: duration('1h 30m'),
+  week: dateRange('2026-09-01', '2026-09-07'),
+});
+// {"at":"2026-09-06T18:30:00.000Z","on":"2026-09-06","opens":"09:00:00","ttl":"PT1H30M","week":"2026-09-01/2026-09-07"}
+```
+
+`toString()` prints the same text, so a template literal and a log line show the wire form too.
+
+## Reading Back
+
+Each factory reads its own form, and `equals()` holds across the round trip.
+
+```javascript
+const moment = datetime('2026-09-06T14:30', 'America/New_York');
+const stored = JSON.parse(JSON.stringify({ at: moment }));
+
+datetime(stored.at).equals(moment); // true
+date(JSON.parse(JSON.stringify(date('2026-09-06')))).equals('2026-09-06'); // true
+duration(JSON.parse(JSON.stringify(duration('1h 30m')))).equals('1h 30m'); // true
+dateRange('2026-09-01/2026-09-07').toJSON(); // '2026-09-01/2026-09-07'
+```
+
+## What Does Not Travel
+
+The zone is a view. `datetime(text, zone)` or `configure({ zone })` chooses it on the reading side.
+
+```javascript
+datetime(stored.at).zone; // the configured zone, or the machine's
+datetime(stored.at, 'America/New_York').format('long'); // 'September 6, 2026 at 2:30 PM'
+```
+
+The anchor from `until()` is the duration's calendar. Without it months and years cannot total, so a stored length is `toMilliseconds()`.
+
+```javascript
+const span = date('2026-01-01').until('2026-04-01');
+
+span.total('days'); // 90
+duration(span.toJSON()).total('days'); // throws needsAnchor
+span.toMilliseconds(); // 7776000000, the number to store
+```
+
+## A Wall Clock Plus a Zone
+
+A meeting at 9am in Berlin next March is a wall clock plus a zone, and that pair is not a type here. Store the day, the time and the zone as their own fields and compose them with `date.at(time, zone)` when reading, so a change to the zone's rules moves the instant and not the meeting.
+
+```javascript
+const meeting = { on: '2027-03-15', at: '09:00:00', zone: 'Europe/Berlin' };
+
+date(meeting.on).at(meeting.at, meeting.zone).toString(); // '2027-03-15T08:00:00.000Z'
+```

@@ -40,6 +40,7 @@ const exampleCategorySortOrder = [
   'Reactivity',
   'Query',
   'Utils',
+  'Dates',
 ];
 
 /* Define sort order for subcategories within each category */
@@ -133,6 +134,15 @@ const subCategorySortOrder = {
     'Colors',
     'Debug',
   ],
+  'Dates': [
+    'Setup',
+    'Datetime',
+    'Date',
+    'Time',
+    'Duration',
+    'Ranges',
+    'Helpers',
+  ],
 };
 
 /* Standardized Icons across Subsections for Sidebar Menu */
@@ -169,6 +179,7 @@ export const standardMenuIcons = {
   'API Reference': 'code',
   'Reference Docs': 'code',
   'Utils': 'tool',
+  'Dates': 'calendar',
 };
 
 /* Export subcategory sort order for use in navigation.js */

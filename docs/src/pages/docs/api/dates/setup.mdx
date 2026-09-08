@@ -1,0 +1,114 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Setup
+icon: package
+description: Importing @semantic-ui/dates, Temporal support, and package-wide defaults
+package: "@semantic-ui/dates"
+methods: ["configure"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Import the factories you use, make sure the runtime has `Temporal`, and set defaults once at boot.
+
+## Importing
+
+### ESM Usage
+
+```javascript
+import { date, days } from '@semantic-ui/dates';
+
+const due = date('2026-09-01').plus(days(30));
+```
+
+Every factory, class, guard and brand is a named export. The package has no default export.
+
+<PlaygroundExample id="dates-esm-usage" direction="horizontal"></PlaygroundExample>
+
+### Browser Usage
+
+```html
+<script type="importmap">
+{
+  "imports": {
+    "@semantic-ui/dates": "https://cdn.jsdelivr.net/npm/@semantic-ui/dates/+esm"
+  }
+}
+</script>
+
+<script type="module">
+  import { now } from '@semantic-ui/dates';
+  document.querySelector('.clock').textContent = now().format('time');
+</script>
+```
+
+The CDN build resolves `@semantic-ui/utils` on its own. Pin a version in the URL for production.
+
+### Temporal Support
+
+The library wraps the runtime's own `Temporal`. Node 26 and current Chromium, Firefox and Safari ship it, and the first call refuses with `noTemporal` on a runtime without one.
+
+For an older runtime, load a polyfill before the first import:
+
+```javascript
+import 'temporal-polyfill/global';
+import { datetime } from '@semantic-ui/dates';
+```
+
+Every value hands back the Temporal object underneath through `toTemporal()`, and every factory reads a Temporal value, so code can step down to `Temporal` and back at any point.
+
+## Configuration
+
+### configure
+
+```javascript
+configure(settings);
+configure();
+```
+
+Sets package-wide defaults once at app boot and returns the settings in effect. Each setting is checked as it is set, so a bad zone or locale refuses at boot rather than at the first call that uses it.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| settings | object | The defaults to set. Omit them all to read the settings in effect |
+
+##### Settings
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| zone | string \| null | the machine's zone | The zone every factory reads in. `null` resets to the machine's |
+| locale | string \| null | the runtime's locale | The locale `format()` prints in. `null` resets to the runtime's |
+| weekStart | string \| number | `'monday'` | The first day of the week for `startOf('week')`, `range('week')` and `weekdayNames()` |
+| dayFirst | boolean | `false` | Read a loose numeric date like `07.09.2026` day first, as most of the world writes it |
+| zoneAliases | object | `{}` | Names of your own that a zone answers to, `{ hq: 'Europe/Berlin' }` |
+
+#### Returns
+
+The settings in effect, with `weekStart` as its ISO number and `zoneAliases` resolved to canonical zone ids.
+
+#### Usage
+
+```javascript
+import { configure, date, datetime, now } from '@semantic-ui/dates';
+
+configure({ zone: 'Europe/Berlin', locale: 'de-DE', weekStart: 'sunday' });
+
+now().zone; // 'Europe/Berlin'
+datetime('2026-09-06T14:30Z').format('long'); // '6. September 2026 um 16:30'
+date('2026-09-09').startOf('week').toString(); // '2026-09-06'
+
+configure({ dayFirst: true });
+date('07.09.2026', { loose: true }).toString(); // '2026-09-07'
+
+configure({ zoneAliases: { hq: 'America/Los_Angeles' } });
+datetime('2026-09-06T14:30Z').in('hq').zone; // 'America/Los_Angeles'
+
+configure({ zone: null, locale: null }); // back to the machine's
+```
+
+#### Example
+
+<PlaygroundExample id="dates-configure" direction="horizontal"></PlaygroundExample>

@@ -3,6 +3,23 @@ import { isEqual } from '@semantic-ui/utils';
 import { describe, expect, it } from 'vitest';
 
 describe('isEqual', () => {
+  it('compares by string when valueOf refuses, the way Temporal plain types do', () => {
+    const refusing = (text) => ({
+      valueOf() {
+        throw new TypeError('not a number');
+      },
+      toString() {
+        return text;
+      },
+    });
+    expect(isEqual(refusing('2026-09-06'), refusing('2026-09-06'))).toBe(true);
+    expect(isEqual(refusing('2026-09-06'), refusing('2026-09-07'))).toBe(false);
+    if (globalThis.Temporal) {
+      expect(isEqual(Temporal.PlainDate.from('2026-09-06'), Temporal.PlainDate.from('2026-09-06'))).toBe(true);
+      expect(isEqual(Temporal.PlainDate.from('2026-09-06'), Temporal.PlainDate.from('2026-09-07'))).toBe(false);
+    }
+  });
+
   describe('Various types', () => {
     // Primitives
     it('should return true for equal strings', () => {

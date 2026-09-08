@@ -32,7 +32,7 @@
   You are working on the open source repository — downstream users of published packages are the primary audience. **This is fundamentally different than most repositories you will work in.**
 
   This is a monorepo with two layers:
-  - packages/  — Core framework source (compiler, component, reactivity, templating, query, renderer, utils, specs, tailwind)
+  - packages/  — Core framework source (compiler, component, reactivity, templating, query, renderer, utils, specs, tailwind, dates)
   - src/{primitives,components,behaviors} — First-party UI components built WITH the framework (the design system)
   - src/css/tokens — Underlying css tokens used for theming
   - docs/ — Astro documentation site

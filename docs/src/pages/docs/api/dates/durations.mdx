@@ -1,0 +1,106 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Durations
+icon: hourglass
+description: Fields as written, balancing, and the anchor a measured duration keeps
+package: "@semantic-ui/dates"
+---
+
+A duration is a length of time. Its fields stay as written until balanced, and a duration measured with `until()` or `since()` remembers where it started, so months and years can total.
+
+## As Written
+
+`duration('90m')` prints `PT90M` until `balance()` makes it `PT1H30M`. Two durations that `equals()` can therefore print differently, so a stored length is its `toMilliseconds()`, not its string.
+
+```javascript
+duration('90m').toString(); // 'PT90M'
+duration('90m').balance().toString(); // 'PT1H30M'
+duration('90m').equals('1h 30m'); // true
+duration('90m').toMilliseconds(); // 5400000
+```
+
+`plus` and `minus` keep the same line. `days(1).plus(hours(25))` is `P1DT25H`, and `days(1).minus(hours(1))` refuses with `mixedSigns`, since a day less an hour has no one length.
+
+```javascript
+days(1).plus(hours(25)).toString(); // 'P1DT25H'
+hours(2).minus('30m').toString(); // 'PT1H30M'
+days(1).minus(hours(1)); // throws mixedSigns
+```
+
+A bare number is milliseconds, fractions included, so `duration(performance.now() - start)` reads. `format()` prints the clock balanced while `toString()` keeps the fields as written.
+
+```javascript
+duration(93784512).format(); // '26 hours, 3 minutes, 4 seconds'
+duration(93784512).toString(); // 'PT93784.512S'
+```
+
+## Balancing
+
+`balance()` carries overflow upward. A length balances to hours and never to days, because a day is a calendar unit that only an anchor or an explicit `balance('day')` makes from clock time, and folding 36 hours into a day would move a deadline across a daylight saving change.
+
+```javascript
+minutes(150).balance().toString(); // 'PT2H30M'
+hours(36).balance().toString(); // 'PT36H'
+hours(36).balance('day').toString(); // 'P1DT12H'
+duration('10d').balance('week').toString(); // 'P1W3D'
+months(1).balance('day'); // throws needsAnchor
+```
+
+`round(unit)` rounds to the nearest whole unit.
+
+```javascript
+minutes(90).round('hour').toString(); // 'PT2H'
+```
+
+## Anchors
+
+`a.until(b)` gives years down to nanoseconds, balanced, and the result remembers `a`. That anchor is what lets months and years total, compare and convert, since a month has no fixed length on its own.
+
+```javascript
+const growth = date('2026-01-01').until('2027-04-05');
+
+growth.toString(); // 'P1Y3M4D'
+growth.months; // 3, the months part
+growth.total('months'); // 15.133333333333333, the whole
+String(growth.anchor); // '2026-01-01'
+
+months(1).total('days'); // throws needsAnchor
+```
+
+An anchored duration is also a number, so a measured span drops into `setTimeout` or a subtraction.
+
+```javascript
++date('2026-01-01').until('2026-02-01'); // 2678400000
++months(1); // throws needsAnchor
+```
+
+The anchor does not travel. `toJSON()` prints the fields as written, so a duration read back from the wire has lost its calendar. See [Wire Forms](/docs/api/dates/wire-forms).
+
+## Totals
+
+Fields are the balanced parts, `total(unit)` is the whole in one unit, fractional. `a.until(b, 'days')` is the same number in one call.
+
+```javascript
+minutes(90).total('hours'); // 1.5
+duration('1w').total('days'); // 7
+date('2026-01-01').until('2027-04-05', 'days'); // 459
+```
+
+## Signs and Fractions
+
+A length has one sign. A phrase or a fields object with mixed signs refuses, and `negated()` and `abs()` flip the whole.
+
+```javascript
+duration('-1h 30m').toString(); // '-PT1H30M'
+duration('1h -30m'); // throws mixedSigns
+hours(-2).abs().toString(); // 'PT2H'
+```
+
+A fraction spills into the unit below. A fraction of a month refuses, since a month has no fixed length to split.
+
+```javascript
+duration(1.5, 'days').toString(); // 'P1DT12H'
+hours(1).times(1.5).toString(); // 'PT1H30M'
+duration('1.5 months'); // throws fractionalMonth
+```

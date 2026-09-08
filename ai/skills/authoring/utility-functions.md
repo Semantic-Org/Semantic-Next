@@ -915,7 +915,7 @@ const allIPs = await getIPAddress({ type: 'all' });        // [...local, ...publ
 ## Date Formatting (dates.js)
 
 ```javascript
-import { formatDate } from '@semantic-ui/utils';
+import { formatDate, timezones } from '@semantic-ui/utils';
 
 const date = new Date('2023-12-25T15:30:00');
 
@@ -935,7 +935,8 @@ formatDate(date, 'dddd, MMMM D');     // 'Monday, December 25'
 formatDate(date, 'MMMM DD, YYYY', { locale: 'fr-FR', timezone: 'Europe/Paris' });
 formatDate(date, 'LT', { timezone: 'local' });   // use browser's local timezone
 formatDate(date, 'LT', { timezone: 'PT' });       // shorthand timezone aliases supported
-formatDate.config.timezones.IST = 'Asia/Jerusalem'; // shorthand aliases are editable at boot, IANA names pass through
+timezones.IST = 'Asia/Jerusalem';                  // shorthand aliases are editable at boot, IANA names pass through
+formatDate.config.timezones === timezones;         // the same object, so a package that only needs the table imports it without the formatter
 ```
 
 **Available tokens:** `YYYY`, `YY`, `MMMM`, `MMM`, `MM`, `M`, `DD`, `D`, `Do`, `dddd`, `ddd`, `HH`, `hh`, `h`, `mm`, `ss`, `a`

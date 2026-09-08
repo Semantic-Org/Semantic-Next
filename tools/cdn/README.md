@@ -98,6 +98,7 @@ CDN format — all bare imports rewritten to full `cdn.semantic-ui.com` URLs. De
 | `https://cdn.semantic-ui.com/renderer@0.18.0` | `renderer.min.js` |
 | `https://cdn.semantic-ui.com/compiler@0.18.0` | `compiler.min.js` |
 | `https://cdn.semantic-ui.com/utils@0.18.0` | `utils.min.js` |
+| `https://cdn.semantic-ui.com/dates@0.18.0` | `dates.min.js` |
 | `https://cdn.semantic-ui.com/specs@0.18.0` | `specs.min.js` |
 | `https://cdn.semantic-ui.com/tailwind@0.18.0` | `tailwind.min.js` |
 

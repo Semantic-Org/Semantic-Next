@@ -1,0 +1,1282 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Datetime
+icon: clock
+description: API reference for datetime, an exact moment with a zone to read it in
+package: "@semantic-ui/dates"
+methods: [datetime, now, startOfToday, endOfToday, plus, minus, set, at, in, startOf, endOf, round, floor, ceil, next, previous, equals, isBefore, isAfter, isSame, isPast, isFuture, isToday, isTomorrow, isYesterday, isWeekend, isWeekday, isLeapYear, until, since, to, range, format, formatRelative, toString, toJSON, toJSDate, toTemporal, valueOf]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+An exact moment with a zone to read it in, one type for timestamps, appointments and deadlines. The class is `DateTime`, a `Temporal.ZonedDateTime` underneath.
+
+## Creating
+
+### datetime
+
+```javascript
+datetime(input);
+datetime(input, zone);
+datetime(input, { zone, loose, dayFirst });
+```
+
+Reads an ISO string, a `Date`, epoch milliseconds, a fields object, a date, or a Temporal value. A missing value refuses, `now()` reads the current moment.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| input | string \| Date \| number \| object \| CalendarDate \| Temporal | `'2026-09-06T14:30Z'` as an instant, `'2026-09-06T14:30'` as a wall clock in the zone, `'2026-09-06'` as midnight, a `Date`, epoch milliseconds, `{ year, month, day, hour }`, a date at its midnight, or a Temporal value |
+| zone | string | The zone to read in, else a bracketed zone in the string, else the configured default, else the machine's |
+| options | object | `{ zone, loose, dayFirst }`. See [Reading Values](/docs/api/dates/reading-values) |
+
+#### Returns
+
+A `DateTime`, or `null` under `{ loose: true }` for input that cannot be read.
+
+#### Usage
+
+```javascript
+datetime('2026-09-06T14:30Z', 'America/New_York').format('long'); // 'September 6, 2026 at 10:30 AM'
+datetime('2026-09-06T14:30', 'Asia/Tokyo').toString(); // '2026-09-06T05:30:00.000Z'
+datetime('2026-09-06', 'UTC').toString(); // '2026-09-06T00:00:00.000Z'
+datetime('2026-09-06T14:30:00+09:00[Asia/Tokyo]').zone; // 'Asia/Tokyo'
+datetime(0, 'UTC').toString(); // '1970-01-01T00:00:00.000Z'
+datetime({ year: 2026, month: 9, day: 6, hour: 9 }, 'UTC').toString(); // '2026-09-06T09:00:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime" direction="horizontal"></PlaygroundExample>
+
+### now
+
+```javascript
+now();
+now(zone);
+```
+
+The current moment at millisecond precision, in the zone or the configured default.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone to read in |
+
+#### Returns
+
+A `DateTime`.
+
+#### Usage
+
+```javascript
+now().format(); // 'Sep 7, 2026, 6:14 PM'
+now('Asia/Tokyo').zone; // 'Asia/Tokyo'
+now().microsecond; // 0
+```
+
+#### Example
+
+<PlaygroundExample id="dates-now" direction="horizontal"></PlaygroundExample>
+
+### startOfToday
+
+```javascript
+startOfToday();
+startOfToday(zone);
+```
+
+Midnight today, `now(zone).startOf('day')`. The lower bound a query for today writes.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone whose today counts |
+
+#### Returns
+
+A `DateTime`.
+
+#### Usage
+
+```javascript
+startOfToday().equals(now().startOf('day')); // true
+startOfToday('Asia/Tokyo').hour; // 0
+```
+
+#### Example
+
+<PlaygroundExample id="dates-startoftoday" direction="horizontal"></PlaygroundExample>
+
+### endOfToday
+
+```javascript
+endOfToday();
+endOfToday(zone);
+```
+
+The last millisecond of today, `now(zone).endOf('day')`. For a query bound prefer `now(zone).range('day')`, whose end is the next midnight.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone whose today counts |
+
+#### Returns
+
+A `DateTime`.
+
+#### Usage
+
+```javascript
+endOfToday().hour; // 23
+endOfToday().millisecond; // 999
+endOfToday('Asia/Tokyo').format('HH:mm:ss.SSS z'); // '23:59:59.999 GMT+9'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-endoftoday" direction="horizontal"></PlaygroundExample>
+
+## Properties
+
+The parts are real properties, so a value prints them in a console without a click. Every property is read-only.
+
+| Name | Type | Description |
+|------|------|-------------|
+| year | number | |
+| month | number | 1 through 12 |
+| day | number | |
+| weekday | number | ISO, 1 for monday through 7 for sunday |
+| hour | number | |
+| minute | number | |
+| second | number | |
+| millisecond | number | |
+| microsecond | number | |
+| nanosecond | number | |
+| zone | string | The canonical zone id, `'America/New_York'` |
+| offset | string | The UTC offset in effect, `'-04:00'` |
+| epoch | number | Epoch milliseconds |
+| quarter | number | 1 through 4 |
+| dayOfYear | number | |
+| weekOfYear | number | ISO week number |
+| daysInMonth | number | |
+| daysInYear | number | |
+| hoursInDay | number | 23, 24 or 25 across a daylight saving change |
+| date | CalendarDate | The calendar date in this zone |
+| time | Time | The time of day in this zone |
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30:15.250', 'America/New_York');
+
+moment.year; // 2026
+moment.weekday; // 7
+moment.zone; // 'America/New_York'
+moment.offset; // '-04:00'
+moment.epoch; // 1788719415250
+moment.date.toString(); // '2026-09-06'
+moment.time.toString(); // '14:30:15.250'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-properties" direction="horizontal"></PlaygroundExample>
+
+## Moving
+
+### plus
+
+```javascript
+datetime.plus(duration);
+datetime.plus(fields);
+datetime.plus(phrase);
+datetime.plus(count, unit);
+```
+
+Adds a duration. Adding days keeps the wall clock across a daylight saving change, adding hours counts hours.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| amount | Duration \| object \| string \| number | A duration, a fields object like `{ days: 3 }`, a phrase like `'1h 30m'`, or a count with a unit. A count written as text reads as its number |
+| unit | string | The unit for a count, `'days'`, `'hours'`, `'weeks'` |
+
+#### Returns
+
+A new `DateTime`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30', 'UTC');
+
+moment.plus(days(3)).toString(); // '2026-09-09T14:30:00.000Z'
+moment.plus({ hours: 1, minutes: 30 }).toString(); // '2026-09-06T16:00:00.000Z'
+moment.plus('1h 30m').toString(); // '2026-09-06T16:00:00.000Z'
+moment.plus(2, 'weeks').toString(); // '2026-09-20T14:30:00.000Z'
+
+const friday = datetime('2026-03-06T17:00', 'America/New_York');
+friday.plus(days(3)).format('dddd h:mm a'); // 'Monday 5:00 pm'
+friday.plus(hours(72)).format('dddd h:mm a'); // 'Monday 6:00 pm'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-plus" direction="horizontal"></PlaygroundExample>
+
+### minus
+
+```javascript
+datetime.minus(duration);
+datetime.minus(fields);
+datetime.minus(phrase);
+datetime.minus(count, unit);
+```
+
+Subtracts a duration, in the same spellings `plus()` takes.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| amount | Duration \| object \| string \| number | A duration, a fields object, a phrase, or a count with a unit |
+| unit | string | The unit for a count |
+
+#### Returns
+
+A new `DateTime`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30', 'UTC');
+
+moment.minus(months(1)).toString(); // '2026-08-06T14:30:00.000Z'
+moment.minus('45m').toString(); // '2026-09-06T13:45:00.000Z'
+moment.minus(1, 'year').toString(); // '2025-09-06T14:30:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-minus" direction="horizontal"></PlaygroundExample>
+
+### set
+
+```javascript
+datetime.set(fields);
+datetime.set(unit, value);
+```
+
+Replaces parts. A part out of range refuses with `cannotSet` rather than rolling over, the way the factory refuses one.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| fields | object | Singular keys, `{ hour: 9, minute: 0 }` |
+| unit | string | One part to replace, `'year'`, `'hour'` |
+| value | number | Its new value |
+
+#### Returns
+
+A new `DateTime`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30', 'UTC');
+
+moment.set({ hour: 9, minute: 0 }).toString(); // '2026-09-06T09:00:00.000Z'
+moment.set('year', 2030).toString(); // '2030-09-06T14:30:00.000Z'
+moment.set('minute', 60); // throws cannotSet
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-set" direction="horizontal"></PlaygroundExample>
+
+### at
+
+```javascript
+datetime.at(time);
+```
+
+The same date and zone at another time of day.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| time | string \| Time \| object | Anything `time()` reads, `'9am'`, `'17:45'` |
+
+#### Returns
+
+A new `DateTime`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30', 'America/New_York');
+
+moment.at('9am').format('long'); // 'September 6, 2026 at 9:00 AM'
+moment.at('17:45').toString(); // '2026-09-06T21:45:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-at" direction="horizontal"></PlaygroundExample>
+
+### in
+
+```javascript
+datetime.in(zone);
+```
+
+The same instant read in another zone. The zone may be an IANA name, a city, an abbreviation, an offset or a configured alias. See [Zones](/docs/api/dates/zones).
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone to read in |
+
+#### Returns
+
+A new `DateTime` for the same instant.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30Z', 'UTC');
+
+moment.in('America/New_York').format('long'); // 'September 6, 2026 at 10:30 AM'
+moment.in('Berlin').zone; // 'Europe/Berlin'
+moment.in('PT').zone; // 'America/Los_Angeles'
+moment.in('Asia/Tokyo').equals(moment); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-in" direction="horizontal"></PlaygroundExample>
+
+### startOf
+
+```javascript
+datetime.startOf(unit);
+datetime.startOf('week', firstDay);
+```
+
+The first instant of the unit around this moment. A week starts on the configured first day, or on `firstDay`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| unit | string | `'year'`, `'quarter'`, `'month'`, `'week'`, `'day'`, `'hour'`, `'minute'`, `'second'` |
+| firstDay | string \| number | The weekday a week starts on, for `'week'` |
+
+#### Returns
+
+A new `DateTime`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:37:42', 'UTC');
+
+moment.startOf('day').toString(); // '2026-09-06T00:00:00.000Z'
+moment.startOf('quarter').toString(); // '2026-07-01T00:00:00.000Z'
+moment.startOf('week').toString(); // '2026-08-31T00:00:00.000Z'
+moment.startOf('week', 'sunday').toString(); // '2026-09-06T00:00:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-startof" direction="horizontal"></PlaygroundExample>
+
+### endOf
+
+```javascript
+datetime.endOf(unit);
+datetime.endOf('week', firstDay);
+```
+
+The last millisecond of the unit around this moment. For a query bound prefer `range(unit)`, whose end is the next start.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| unit | string | `'year'`, `'quarter'`, `'month'`, `'week'`, `'day'`, `'hour'`, `'minute'`, `'second'` |
+| firstDay | string \| number | The weekday a week starts on, for `'week'` |
+
+#### Returns
+
+A new `DateTime`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:37:42', 'UTC');
+
+moment.endOf('day').toString(); // '2026-09-06T23:59:59.999Z'
+moment.endOf('month').toString(); // '2026-09-30T23:59:59.999Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-endof" direction="horizontal"></PlaygroundExample>
+
+### round
+
+```javascript
+datetime.round(unit);
+datetime.round(increment, unit);
+```
+
+Rounds to the nearest unit or increment. The wall clock snaps, so on the repeated hour of a fall-back night it lands on the second pass.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| increment | number | A count of the unit to snap to, `15` for quarter hours |
+| unit | string | `'day'`, `'hour'`, `'minute'`, `'second'`, `'millisecond'` |
+
+#### Returns
+
+A new `DateTime`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:37:42', 'UTC');
+
+moment.round('hour').toString(); // '2026-09-06T15:00:00.000Z'
+moment.round(15, 'minutes').toString(); // '2026-09-06T14:45:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-round" direction="horizontal"></PlaygroundExample>
+
+### floor
+
+```javascript
+datetime.floor(unit);
+datetime.floor(increment, unit);
+```
+
+Rounds down to a unit or increment.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| increment | number | A count of the unit to snap to |
+| unit | string | `'day'`, `'hour'`, `'minute'`, `'second'`, `'millisecond'` |
+
+#### Returns
+
+A new `DateTime`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:37:42', 'UTC');
+
+moment.floor('hour').toString(); // '2026-09-06T14:00:00.000Z'
+moment.floor(15, 'minutes').toString(); // '2026-09-06T14:30:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-floor" direction="horizontal"></PlaygroundExample>
+
+### ceil
+
+```javascript
+datetime.ceil(unit);
+datetime.ceil(increment, unit);
+```
+
+Rounds up to a unit or increment.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| increment | number | A count of the unit to snap to |
+| unit | string | `'day'`, `'hour'`, `'minute'`, `'second'`, `'millisecond'` |
+
+#### Returns
+
+A new `DateTime`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:37:42', 'UTC');
+
+moment.ceil('hour').toString(); // '2026-09-06T15:00:00.000Z'
+moment.ceil(15, 'minutes').toString(); // '2026-09-06T14:45:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-ceil" direction="horizontal"></PlaygroundExample>
+
+### next
+
+```javascript
+datetime.next(weekday);
+```
+
+The next such weekday strictly after this moment, at the same time of day.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| weekday | string \| number | A name in any spelling, `'friday'`, `'Fri'`, or the ISO number, 1 for monday through 7 for sunday |
+
+#### Returns
+
+A new `DateTime`.
+
+#### Usage
+
+```javascript
+const sunday = datetime('2026-09-06T14:30', 'UTC');
+
+sunday.next('friday').toString(); // '2026-09-11T14:30:00.000Z'
+sunday.next('sunday').toString(); // '2026-09-13T14:30:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-next" direction="horizontal"></PlaygroundExample>
+
+### previous
+
+```javascript
+datetime.previous(weekday);
+```
+
+The previous such weekday strictly before this moment, at the same time of day.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| weekday | string \| number | A name in any spelling, or the ISO number |
+
+#### Returns
+
+A new `DateTime`.
+
+#### Usage
+
+```javascript
+const sunday = datetime('2026-09-06T14:30', 'UTC');
+
+sunday.previous('friday').toString(); // '2026-09-04T14:30:00.000Z'
+sunday.previous('sunday').toString(); // '2026-08-30T14:30:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-previous" direction="horizontal"></PlaygroundExample>
+
+## Comparing
+
+Every comparison takes anything `datetime()` reads, read in this moment's zone.
+
+### equals
+
+```javascript
+datetime.equals(other);
+```
+
+The same instant, whatever zone each side reads it in.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | DateTime \| string \| Date \| number | Anything `datetime()` reads |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30Z', 'UTC');
+
+moment.equals('2026-09-06T14:30:00Z'); // true
+moment.equals(moment.in('Asia/Tokyo')); // true
+moment.equals('2026-09-06T14:31Z'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-equals" direction="horizontal"></PlaygroundExample>
+
+### isBefore
+
+```javascript
+datetime.isBefore(other);
+```
+
+Whether this moment comes before another.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | DateTime \| string \| Date \| number | Anything `datetime()` reads |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30Z', 'UTC');
+
+moment.isBefore('2026-09-07T00:00Z'); // true
+moment.isBefore(new Date('2026-09-06T15:00:00Z')); // true
+moment.isBefore('2026-09-07'); // true, a date reads as its midnight in this zone
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-isbefore" direction="horizontal"></PlaygroundExample>
+
+### isAfter
+
+```javascript
+datetime.isAfter(other);
+```
+
+Whether this moment comes after another.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | DateTime \| string \| Date \| number | Anything `datetime()` reads |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30Z', 'UTC');
+
+moment.isAfter('2026-09-06T00:00Z'); // true
+moment.isAfter(datetime('2027-01-01T00:00Z')); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-isafter" direction="horizontal"></PlaygroundExample>
+
+### isSame
+
+```javascript
+datetime.isSame(other);
+datetime.isSame(other, unit);
+datetime.isSame(other, 'week', firstDay);
+```
+
+Whether two moments share a unit, judged in this moment's zone. Without a unit it is `equals()`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | DateTime \| string \| Date \| number | Anything `datetime()` reads |
+| unit | string | `'year'`, `'quarter'`, `'month'`, `'week'`, `'day'`, `'hour'`, `'minute'`, `'second'` |
+| firstDay | string \| number | The weekday a week starts on, for `'week'` |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30Z', 'UTC');
+
+moment.isSame('2026-09-06T23:00Z', 'day'); // true
+moment.in('Asia/Tokyo').isSame('2026-09-06T23:00Z', 'day'); // false, already tomorrow in Tokyo
+moment.isSame('2026-09-01T00:00Z', 'week'); // true
+moment.isSame('2026-09-01T00:00Z', 'week', 'sunday'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-issame" direction="horizontal"></PlaygroundExample>
+
+### isPast
+
+```javascript
+datetime.isPast();
+```
+
+Whether this moment is before now.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+now().minus(days(1)).isPast(); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-ispast" direction="horizontal"></PlaygroundExample>
+
+### isFuture
+
+```javascript
+datetime.isFuture();
+```
+
+Whether this moment is after now.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+now().plus(days(1)).isFuture(); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-isfuture" direction="horizontal"></PlaygroundExample>
+
+### isToday
+
+```javascript
+datetime.isToday();
+```
+
+Whether this moment falls on today, in its zone.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+now().isToday(); // true
+now().plus(days(1)).isToday(); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-istoday" direction="horizontal"></PlaygroundExample>
+
+### isTomorrow
+
+```javascript
+datetime.isTomorrow();
+```
+
+Whether this moment falls on tomorrow, in its zone.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+now().plus(days(1)).isTomorrow(); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-istomorrow" direction="horizontal"></PlaygroundExample>
+
+### isYesterday
+
+```javascript
+datetime.isYesterday();
+```
+
+Whether this moment falls on yesterday, in its zone.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+now().minus(days(1)).isYesterday(); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-isyesterday" direction="horizontal"></PlaygroundExample>
+
+### isWeekend
+
+```javascript
+datetime.isWeekend();
+```
+
+Whether this moment falls on a saturday or sunday, in its zone.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+datetime('2026-09-06T14:30', 'UTC').isWeekend(); // true
+
+const evening = datetime('2026-09-06T23:00', 'America/New_York');
+evening.isWeekend(); // true
+evening.in('Asia/Tokyo').isWeekend(); // false, already monday in Tokyo
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-isweekend" direction="horizontal"></PlaygroundExample>
+
+### isWeekday
+
+```javascript
+datetime.isWeekday();
+```
+
+Whether this moment falls on monday through friday, in its zone.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+datetime('2026-09-07T09:00', 'UTC').isWeekday(); // true
+datetime('2026-09-12T09:00', 'UTC').isWeekday(); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-isweekday" direction="horizontal"></PlaygroundExample>
+
+### isLeapYear
+
+```javascript
+datetime.isLeapYear();
+```
+
+Whether this moment falls in a leap year.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+datetime('2028-02-01T00:00', 'UTC').isLeapYear(); // true
+datetime('2026-02-01T00:00', 'UTC').isLeapYear(); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-isleapyear" direction="horizontal"></PlaygroundExample>
+
+## Measuring
+
+### until
+
+```javascript
+datetime.until(other);
+datetime.until(other, unit);
+```
+
+The duration from this moment to another, balanced from years down, or the whole length as a number in one unit. The duration remembers this moment, so its months and years total. See [Durations](/docs/api/dates/durations#anchors).
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | DateTime \| string \| Date \| number | Anything `datetime()` reads |
+| unit | string | A unit to total in, `'hours'`, `'days'`, `'months'` |
+
+#### Returns
+
+A `Duration`, or a number with a unit. Negative when `other` comes first.
+
+#### Usage
+
+```javascript
+const start = datetime('2026-01-01T00:00Z', 'UTC');
+const end = datetime('2026-04-05T06:07Z', 'UTC');
+
+start.until(end).toString(); // 'P3M4DT6H7M'
+start.until(end).format(); // '3 months, 4 days, 6 hours, 7 minutes'
+start.until(end, 'hours'); // 2262.116666666667
+end.until(start).toString(); // '-P3M4DT6H7M'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-until" direction="horizontal"></PlaygroundExample>
+
+### since
+
+```javascript
+datetime.since(other);
+datetime.since(other, unit);
+```
+
+The duration from another moment to this one, `other.until(this)`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | DateTime \| string \| Date \| number | Anything `datetime()` reads |
+| unit | string | A unit to total in |
+
+#### Returns
+
+A `Duration`, or a number with a unit.
+
+#### Usage
+
+```javascript
+const end = datetime('2026-04-05T06:07Z', 'UTC');
+
+end.since('2026-01-01T00:00Z').toString(); // 'P3M4DT6H7M'
+end.since('2026-01-01T00:00Z', 'days'); // 94.25486111111111
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-since" direction="horizontal"></PlaygroundExample>
+
+## Ranges
+
+### to
+
+```javascript
+datetime.to(end);
+datetime.to(duration);
+datetime.to(count, unit);
+```
+
+A range from this moment until another, or covering a length, the end excluded. See [Range Bounds](/docs/api/dates/range-bounds).
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| end | DateTime \| string \| Date \| number \| Duration \| object | Another moment, read in this zone, or a length as a duration, fields or phrase |
+| count | number | A count with a unit |
+| unit | string | The unit for a count |
+
+#### Returns
+
+A `DateTimeRange`.
+
+#### Usage
+
+```javascript
+const start = datetime('2026-09-06T09:00', 'UTC');
+
+start.to('2026-09-06T17:00').toString(); // '2026-09-06T09:00:00.000Z/2026-09-06T17:00:00.000Z'
+start.to(hours(8)).toString(); // '2026-09-06T09:00:00.000Z/2026-09-06T17:00:00.000Z'
+start.to(90, 'minutes').toString(); // '2026-09-06T09:00:00.000Z/2026-09-06T10:30:00.000Z'
+start.to(hours(8)).contains('2026-09-06T17:00Z'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-to" direction="horizontal"></PlaygroundExample>
+
+### range
+
+```javascript
+datetime.range(unit);
+datetime.range('week', firstDay);
+```
+
+The unit containing this moment as a half-open range, its start until the next start. The bounds a query for the day, week or month writes.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| unit | string | `'year'`, `'quarter'`, `'month'`, `'week'`, `'day'`, `'hour'` |
+| firstDay | string \| number | The weekday a week starts on, for `'week'` |
+
+#### Returns
+
+A `DateTimeRange`.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30', 'UTC');
+
+moment.range('day').toString(); // '2026-09-06T00:00:00.000Z/2026-09-07T00:00:00.000Z'
+moment.range('month').toString(); // '2026-09-01T00:00:00.000Z/2026-10-01T00:00:00.000Z'
+moment.range('day').contains('2026-09-07T00:00Z'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-range" direction="horizontal"></PlaygroundExample>
+
+## Formatting
+
+### format
+
+```javascript
+datetime.format();
+datetime.format(preset);
+datetime.format(options);
+datetime.format(tokens);
+datetime.format(spec, locale);
+```
+
+Prints in the configured locale or one given. No argument is the locale's medium date and short time.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| spec | string \| object | A preset, an `Intl.DateTimeFormat` options object, or a day.js token pattern |
+| locale | string | A BCP 47 tag for this call, `'de'`, `'fr-FR'` |
+
+##### Presets
+
+| Preset | Prints |
+|--------|--------|
+| `'short'` | `9/6/26, 2:30 PM` |
+| `'medium'` | `Sep 6, 2026, 2:30 PM`, the default |
+| `'long'` | `September 6, 2026 at 2:30 PM` |
+| `'full'` | `Sunday, September 6, 2026 at 2:30 PM` |
+| `'date'` | `Sep 6, 2026` |
+| `'time'` | `2:30 PM` |
+| `'month'` | `September 2026` |
+
+##### Tokens
+
+| Token | Prints | Token | Prints |
+|-------|--------|-------|--------|
+| `YYYY` `YY` | `2026` `26` | `HH` `H` | `14` `14` |
+| `MMMM` `MMM` `MM` `M` | `September` `Sep` `09` `9` | `hh` `h` | `02` `2` |
+| `DD` `D` `Do` | `06` `6` `6th` | `mm` `m` | `30` `30` |
+| `dddd` `ddd` `dd` | `Sunday` `Sun` `Su` | `ss` `s` `SSS` | `00` `0` `000` |
+| `Q` `W` | `3` `36` | `A` `a` | `PM` `pm` |
+| `X` `x` | epoch seconds, epoch milliseconds | `Z` `ZZ` | `+00:00` `+0000` |
+| `[text]` | passes through | `z` `zzzz` | `UTC` `Coordinated Universal Time` |
+
+The presets stand in for day.js's `L` and `LLL`. An Intl options object may name its own `timeZone`.
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30', 'UTC');
+
+moment.format(); // 'Sep 6, 2026, 2:30 PM'
+moment.format('long'); // 'September 6, 2026 at 2:30 PM'
+moment.format({ weekday: 'long', hour: 'numeric' }); // 'Sunday 2 PM'
+moment.format({ timeStyle: 'short', timeZone: 'Asia/Tokyo' }); // '11:30 PM'
+moment.format('dddd, MMMM Do YYYY [at] h:mm a'); // 'Sunday, September 6th 2026 at 2:30 pm'
+moment.format('long', 'fr-FR'); // '6 septembre 2026 à 14:30'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-format" direction="horizontal"></PlaygroundExample>
+
+### formatRelative
+
+```javascript
+datetime.formatRelative();
+datetime.formatRelative(to);
+datetime.formatRelative(to, locale);
+```
+
+The distance in words, `'3 hours ago'`, `'in 2 days'`, `'yesterday'`, measured against now unless another moment is given.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| to | DateTime \| string \| Date \| number | The moment to measure against, default now |
+| locale | string | A BCP 47 tag for this call |
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+const reference = datetime('2026-09-07T14:00Z', 'UTC');
+
+datetime('2026-09-07T13:00Z').formatRelative(reference); // '1 hour ago'
+datetime('2026-09-06T14:00Z').formatRelative(reference); // 'yesterday'
+datetime('2026-09-09T14:00Z').formatRelative(reference); // 'in 2 days'
+datetime('2026-09-09T14:00Z').formatRelative(reference, 'es'); // 'pasado mañana'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-formatrelative" direction="horizontal"></PlaygroundExample>
+
+## Converting
+
+### toString
+
+```javascript
+datetime.toString();
+```
+
+The instant in UTC, `'2026-09-06T14:30:00.000Z'`, so two clients storing the same moment store the same bytes. Six or nine fraction digits print only when the value has them.
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+datetime('2026-09-06T10:30', 'America/New_York').toString(); // '2026-09-06T14:30:00.000Z'
+datetime('2026-09-06T14:30:00.123456Z').toString(); // '2026-09-06T14:30:00.123456Z'
+`Due ${datetime('2026-09-06T14:30Z')}`; // 'Due 2026-09-06T14:30:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-tostring" direction="horizontal"></PlaygroundExample>
+
+### toJSON
+
+```javascript
+datetime.toJSON();
+```
+
+The wire form, the same text as `toString()`, which `datetime()` reads back exactly. The zone does not travel. See [Wire Forms](/docs/api/dates/wire-forms).
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30', 'America/New_York');
+
+JSON.stringify({ at: moment }); // '{"at":"2026-09-06T18:30:00.000Z"}'
+datetime(JSON.parse(JSON.stringify({ at: moment })).at).equals(moment); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-tojson" direction="horizontal"></PlaygroundExample>
+
+### toJSDate
+
+```javascript
+datetime.toJSDate();
+```
+
+The same instant as a JavaScript `Date`.
+
+#### Returns
+
+A `Date`.
+
+#### Usage
+
+```javascript
+datetime('2026-09-06T14:30', 'UTC').toJSDate().toISOString(); // '2026-09-06T14:30:00.000Z'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-tojsdate" direction="horizontal"></PlaygroundExample>
+
+### toTemporal
+
+```javascript
+datetime.toTemporal();
+```
+
+The `Temporal.ZonedDateTime` underneath.
+
+#### Returns
+
+A `Temporal.ZonedDateTime`.
+
+#### Usage
+
+```javascript
+datetime('2026-09-06T14:30', 'Asia/Tokyo').toTemporal().toString(); // '2026-09-06T14:30:00+09:00[Asia/Tokyo]'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-totemporal" direction="horizontal"></PlaygroundExample>
+
+### valueOf
+
+```javascript
+datetime.valueOf();
+```
+
+Epoch milliseconds, so datetimes sort with `(a, b) => a - b` and compare with `<`, while `'Due ' + dt` gives the string, as `Date` decides it. A date, a time and a range refuse `valueOf`. See [the rules](/docs/api/dates#the-rules).
+
+#### Returns
+
+A number.
+
+#### Usage
+
+```javascript
+const later = datetime('2026-09-06T14:35Z');
+const earlier = datetime('2026-09-06T14:30Z');
+
+later - earlier; // 300000
+later > earlier; // true
+[later, earlier].sort((a, b) => a - b)[0] === earlier; // true
+```

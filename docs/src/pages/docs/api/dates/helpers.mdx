@@ -1,0 +1,433 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Helpers
+icon: wrench
+description: Comparators, kind guards, weekday and month names, and the brand symbols
+package: "@semantic-ui/dates"
+methods: [compare, earliest, latest, kindOf, isDateTime, isCalendarDate, isTime, isDuration, isDateRange, isDateTimeRange, isTimeRange, weekday, weekdayNames, monthNames]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Functions beside the factories: ordering values of one kind, asking what kind a value is, the names a picker needs, and the brands a value carries.
+
+## Ordering
+
+### compare
+
+```javascript
+compare(a, b);
+```
+
+A sort comparator across any one kind: points, durations, or ranges, which order by start then end. A raw value beside a point reads as the point's kind. Kinds do not compare with each other, and refuse with `mixedKinds`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| a, b | DateTime \| CalendarDate \| Time \| Duration \| Range \| string | Two values of one kind, or one value and a string its factory reads |
+
+#### Returns
+
+`-1`, `0` or `1`.
+
+#### Usage
+
+```javascript
+['2026-03-01', '2026-01-01', '2026-02-01'].map(date).sort(compare).map(String); // ['2026-01-01', '2026-02-01', '2026-03-01']
+compare(time('5pm'), '9am'); // 1
+compare(hours(1), '90m'); // -1
+compare(date('2026-09-06'), datetime('2026-09-06T14:30Z')); // throws mixedKinds
+```
+
+#### Example
+
+<PlaygroundExample id="dates-compare" direction="horizontal"></PlaygroundExample>
+
+### earliest
+
+```javascript
+earliest(...points);
+earliest(points);
+```
+
+The point that comes first, from several arguments or one array. Nothing refuses with `noPoints`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| points | DateTime \| CalendarDate \| Time \| string | Points of one kind, spread or in an array |
+
+#### Returns
+
+The earliest of them, as given. Strings alone read as dates.
+
+#### Usage
+
+```javascript
+earliest('2026-09-06', '2026-01-01', '2027-01-01').toString(); // '2026-01-01'
+earliest([date('2026-09-06'), date('2026-01-01')]).toString(); // '2026-01-01'
+earliest(time('9am'), time('5pm')).toString(); // '09:00:00'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-earliest" direction="horizontal"></PlaygroundExample>
+
+### latest
+
+```javascript
+latest(...points);
+latest(points);
+```
+
+The point that comes last, from several arguments or one array.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| points | DateTime \| CalendarDate \| Time \| string | Points of one kind, spread or in an array |
+
+#### Returns
+
+The latest of them, as given.
+
+#### Usage
+
+```javascript
+latest('2026-09-06', '2026-01-01', '2027-01-01').toString(); // '2027-01-01'
+latest(time('9am'), time('5pm')).toString(); // '17:00:00'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-latest" direction="horizontal"></PlaygroundExample>
+
+## Kinds
+
+### kindOf
+
+```javascript
+kindOf(value);
+```
+
+The kind of a value from this library, or `undefined` for anything else.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| value | unknown | Any value |
+
+#### Returns
+
+`'datetime'`, `'date'`, `'time'`, `'duration'`, `'dateRange'`, `'datetimeRange'`, `'timeRange'`, or `undefined`.
+
+#### Usage
+
+```javascript
+kindOf(datetime('2026-09-06T14:30Z')); // 'datetime'
+kindOf(hours(1)); // 'duration'
+kindOf(timeRange('09:00', '17:00')); // 'timeRange'
+kindOf('2026-09-06'); // undefined
+```
+
+#### Example
+
+<PlaygroundExample id="dates-kindof" direction="horizontal"></PlaygroundExample>
+
+### isDateTime
+
+```javascript
+isDateTime(value);
+```
+
+Whether a value is a `DateTime`, from any copy of this package. Each guard reads the value's brand, so it holds across bundles and realms where `instanceof` alone would not.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+isDateTime(now()); // true
+isDateTime(date('2026-09-06')); // false
+isDateTime(new Date()); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-isdatetime" direction="horizontal"></PlaygroundExample>
+
+### isCalendarDate
+
+```javascript
+isCalendarDate(value);
+```
+
+Whether a value is a `CalendarDate`.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+isCalendarDate(today()); // true
+isCalendarDate(datetime('2026-09-06T14:30Z')); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-iscalendardate" direction="horizontal"></PlaygroundExample>
+
+### isTime
+
+```javascript
+isTime(value);
+```
+
+Whether a value is a `Time`.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+isTime(time('9am')); // true
+isTime(datetime('2026-09-06T14:30Z').time); // true
+isTime('09:00'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-istime" direction="horizontal"></PlaygroundExample>
+
+### isDuration
+
+```javascript
+isDuration(value);
+```
+
+Whether a value is a `Duration`, measured or not.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+isDuration(hours(1)); // true
+isDuration(date('2026-01-01').until('2026-02-01')); // true
+isDuration('PT1H'); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-isduration" direction="horizontal"></PlaygroundExample>
+
+### isDateRange
+
+```javascript
+isDateRange(value);
+```
+
+Whether a value is a `DateRange`.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+isDateRange(dateRange('2026-09-01', '2026-09-07')); // true
+isDateRange(date('2026-09-15').range('month')); // true
+isDateRange(timeRange('09:00', '17:00')); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-isdaterange" direction="horizontal"></PlaygroundExample>
+
+### isDateTimeRange
+
+```javascript
+isDateTimeRange(value);
+```
+
+Whether a value is a `DateTimeRange`.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+isDateTimeRange(datetimeRange(datetime('2026-09-06T09:00Z'), hours(1))); // true
+isDateTimeRange(dateRange('2026-09-01', '2026-09-07').in('UTC')); // true
+isDateTimeRange(dateRange('2026-09-01', '2026-09-07')); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-isdatetimerange" direction="horizontal"></PlaygroundExample>
+
+### isTimeRange
+
+```javascript
+isTimeRange(value);
+```
+
+Whether a value is a `TimeRange`.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+isTimeRange(timeRange('09:00', '17:00')); // true
+isTimeRange(time('9am').to('5pm')); // true
+isTimeRange(dateRange('2026-09-01', '2026-09-07')); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-istimerange" direction="horizontal"></PlaygroundExample>
+
+## Names
+
+### weekday
+
+```javascript
+weekday(day);
+```
+
+The ISO number of a weekday from any spelling, 1 for monday through 7 for sunday. A number passes through. A name that is not a weekday refuses with `unknownWeekday`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| day | string \| number | `'monday'`, `'Fri'`, `'sunday'`, or 1 through 7 |
+
+#### Returns
+
+A number.
+
+#### Usage
+
+```javascript
+weekday('monday'); // 1
+weekday('Fri'); // 5
+weekday('sunday'); // 7
+```
+
+#### Example
+
+<PlaygroundExample id="dates-weekday" direction="horizontal"></PlaygroundExample>
+
+### weekdayNames
+
+```javascript
+weekdayNames();
+weekdayNames(style, firstDay, locale);
+```
+
+The weekday names in the locale, starting on the configured first day or on `firstDay`, so a picker's header row matches its grid.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| style | string | `'short'` or `'long'`. Default `'short'` |
+| firstDay | string \| number | The weekday to start on. Default the configured week start |
+| locale | string | A BCP 47 tag. Default the configured locale |
+
+#### Returns
+
+An array of seven strings.
+
+#### Usage
+
+```javascript
+weekdayNames(); // ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+weekdayNames('short', 'sunday'); // ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+weekdayNames('long', 'sunday', 'de-DE')[0]; // 'Sonntag'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-weekdaynames" direction="horizontal"></PlaygroundExample>
+
+### monthNames
+
+```javascript
+monthNames();
+monthNames(style, locale);
+```
+
+The twelve month names in the locale, for a month dropdown.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| style | string | `'long'` or `'short'`. Default `'long'` |
+| locale | string | A BCP 47 tag. Default the configured locale |
+
+#### Returns
+
+An array of twelve strings.
+
+#### Usage
+
+```javascript
+monthNames()[8]; // 'September'
+monthNames('short')[8]; // 'Sep'
+monthNames('fr', 'short')[0]; // 'janv.'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-monthnames" direction="horizontal"></PlaygroundExample>
+
+## Brands
+
+Every value carries a brand, a symbol keyed with `Symbol.for`, so a package recognises a value from any copy of this library without bundling it. `value[IS_DATE_TIME]` is `true` for a `DateTime` from any copy, and `instanceof` reads the same brand.
+
+| Symbol | Key | Carried by |
+|--------|-----|------------|
+| `IS_DATE_TIME` | `'semantic-ui/DateTime'` | a datetime |
+| `IS_CALENDAR_DATE` | `'semantic-ui/CalendarDate'` | a date |
+| `IS_TIME` | `'semantic-ui/Time'` | a time |
+| `IS_DURATION` | `'semantic-ui/Duration'` | a duration |
+| `IS_RANGE` | `'semantic-ui/Range'` | every range kind |
+| `IS_DATE_RANGE` | `'semantic-ui/DateRange'` | a date range |
+| `IS_DATE_TIME_RANGE` | `'semantic-ui/DateTimeRange'` | a datetime range |
+| `IS_TIME_RANGE` | `'semantic-ui/TimeRange'` | a time range |
+
+#### Usage
+
+```javascript
+import { IS_DATE_TIME, IS_RANGE } from '@semantic-ui/dates';
+
+datetime('2026-09-06T14:30Z')[IS_DATE_TIME]; // true
+dateRange('2026-09-01', '2026-09-07')[IS_RANGE]; // true
+IS_DATE_TIME === Symbol.for('semantic-ui/DateTime'); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-brands" direction="horizontal"></PlaygroundExample>

@@ -28,6 +28,7 @@ This guide assumes familiarity with the concepts in `ai/skills/essentials/mental
 @semantic-ui/utils          ← zero dependencies, used by everything
 @semantic-ui/reactivity     ← depends on utils only
 @semantic-ui/query           ← depends on utils only
+@semantic-ui/dates           ← depends on utils only
 @semantic-ui/specs           ← depends on utils only
 @semantic-ui/compiler        ← depends on utils only
 @semantic-ui/renderer        ← depends on reactivity, templating, utils, lit (optional peer)

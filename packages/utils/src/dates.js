@@ -29,8 +29,33 @@ const pad2 = (n) => (n < 10 ? '0' + n : '' + n);
 const getOrdinal = (d) => d + ((d >= 11 && d <= 13) ? 'th' : (ordinalSuffix[d % 10] || 'th'));
 
 // timezone abbreviations are ambiguous by nature (IST is Kolkata, Jerusalem, or Dublin depending on
-// who you ask), so the picks are editable once at app boot (formatDate.config.timezones.IST =
-// 'Asia/Jerusalem'). full IANA names always pass through untouched
+// who you ask), so the picks are editable once at app boot (timezones.IST = 'Asia/Jerusalem'). full
+// IANA names always pass through untouched
+export const timezones = {
+  ET: 'America/New_York',
+  CT: 'America/Chicago',
+  MT: 'America/Denver',
+  PT: 'America/Los_Angeles',
+  AKT: 'America/Anchorage',
+  HT: 'Pacific/Honolulu',
+  AT: 'America/Halifax',
+  UK: 'Europe/London',
+  WET: 'Europe/London',
+  CET: 'Europe/Paris',
+  ECT: 'Europe/Paris',
+  EET: 'Europe/Helsinki',
+  IRST: 'Europe/Dublin',
+  AET: 'Australia/Sydney',
+  ACT: 'Australia/Adelaide',
+  AWT: 'Australia/Perth',
+  NZT: 'Pacific/Auckland',
+  BRT: 'America/Sao_Paulo',
+  IST: 'Asia/Kolkata',
+  INST: 'Asia/Kolkata',
+  JST: 'Asia/Tokyo',
+  SGT: 'Asia/Singapore',
+};
+
 export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
   locale = 'default',
   hour12 = true,
@@ -127,29 +152,15 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
     return escaped !== undefined ? escaped : tokens[match];
   });
 }, {
-  timezones: {
-    ET: 'America/New_York',
-    CT: 'America/Chicago',
-    MT: 'America/Denver',
-    PT: 'America/Los_Angeles',
-    AKT: 'America/Anchorage',
-    HT: 'Pacific/Honolulu',
-    AT: 'America/Halifax',
-    UK: 'Europe/London',
-    WET: 'Europe/London',
-    CET: 'Europe/Paris',
-    ECT: 'Europe/Paris',
-    EET: 'Europe/Helsinki',
-    IRST: 'Europe/Dublin',
-    AET: 'Australia/Sydney',
-    ACT: 'Australia/Adelaide',
-    AWT: 'Australia/Perth',
-    NZT: 'Pacific/Auckland',
-    BRT: 'America/Sao_Paulo',
-    IST: 'Asia/Kolkata',
-    INST: 'Asia/Kolkata',
-    JST: 'Asia/Tokyo',
-    SGT: 'Asia/Singapore',
+  // reassigning replaces the contents so both names stay one object
+  get timezones() {
+    return timezones;
+  },
+  set timezones(table) {
+    for (const key of Object.keys(timezones)) {
+      delete timezones[key];
+    }
+    Object.assign(timezones, table);
   },
 });
 

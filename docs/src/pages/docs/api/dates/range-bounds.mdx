@@ -1,0 +1,106 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Range Bounds
+icon: arrow-left-right
+description: Where a range's ends sit, and how a time range crosses midnight
+package: "@semantic-ui/dates"
+---
+
+A date range runs through its end. A datetime or time range runs until it. A time range may cross midnight.
+
+## Through and Until
+
+The 1st through the 7th is seven days, both included, which is how people write dates.
+
+```javascript
+const week = dateRange('2026-09-01', '2026-09-07');
+
+week.contains('2026-09-07'); // true
+week.contains('2026-09-08'); // false
+week.duration.total('days'); // 7
+week.points('day').length; // 7
+dateRange('2026-09-06', '2026-09-06').duration.total('days'); // 1
+```
+
+Nine until five excludes five o'clock, which is how shifts and bookings abut without a conflict.
+
+```javascript
+const booked = datetimeRange(datetime('2026-09-06T09:00', 'UTC'), hours(1));
+const requested = datetimeRange(datetime('2026-09-06T10:00', 'UTC'), hours(1));
+
+booked.contains('2026-09-06T10:00Z'); // false
+booked.overlaps(requested); // false
+timeRange('9am', '5:30pm').contains('5:30pm'); // false
+```
+
+A datetime or time range whose ends meet is empty. A date range never is, since it holds its last day.
+
+```javascript
+datetimeRange(datetime('2026-09-06T09:00Z', 'UTC'), '2026-09-06T09:00Z').isEmpty(); // true
+dateRange('2026-09-06', '2026-09-06').isEmpty(); // false
+```
+
+The same bound holds for the unit ranges a point makes. `date.range('month')` is the first through the last day, `datetime.range('day')` is midnight until the next midnight.
+
+```javascript
+date('2026-09-15').range('month').toString(); // '2026-09-01/2026-09-30'
+datetime('2026-09-06T14:30', 'UTC').range('day').toString(); // '2026-09-06T00:00:00.000Z/2026-09-07T00:00:00.000Z'
+```
+
+## A Start and a Length
+
+`start.to(length)` and a factory given a length cover the length from the start. For a date range the last day is included, so a week from the 1st ends on the 7th.
+
+```javascript
+date('2026-09-01').to(days(7)).toString(); // '2026-09-01/2026-09-07'
+date('2026-09-01').to(42, 'days').points('day').length; // 42
+datetime('2026-09-06T09:00', 'UTC').to(hours(8)).toString(); // '2026-09-06T09:00:00.000Z/2026-09-06T17:00:00.000Z'
+```
+
+## Across Midnight
+
+A time range whose end comes before its start crosses midnight. `timeRange('22:00', '06:00')` is the night shift, eight hours long. The other kinds run forward, and a backwards range refuses.
+
+```javascript
+const night = timeRange('22:00', '06:00');
+
+night.duration.total('hours'); // 8
+night.contains('23:00'); // true
+night.contains('01:00'); // true
+night.contains('06:00'); // false
+night.contains('12:00'); // false
+night.points('hour').map(String); // ['22:00:00', '23:00:00', '00:00:00', ..., '05:00:00']
+night.split(hours(4)).map(String); // ['22:00:00/02:00:00', '02:00:00/06:00:00']
+```
+
+Its intersection with another range refuses with `twoPieces` when the overlap comes out in two pieces, since one range cannot hold both.
+
+```javascript
+night.intersection(timeRange('05:00', '09:00')).toString(); // '05:00:00/06:00:00'
+night.intersection(timeRange('05:00', '23:00')); // throws twoPieces
+```
+
+## Stepping
+
+Steps count out from the start, so monthly from the 31st lands on each month's last day, and `split` cuts the last piece to the end.
+
+```javascript
+dateRange(date('2026-01-31'), months(6)).points('month').map(String);
+// ['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30', '2026-05-31', '2026-06-30']
+
+datetimeRange(datetime('2026-09-06T09:00', 'UTC'), hours(8)).split(hours(3)).map((slot) => slot.duration.total('hours'));
+// [3, 3, 2]
+```
+
+## Query Bounds
+
+A database query wants half-open datetime bounds. `dateRange.in(zone)` gives midnight of the first day until the midnight after the last, and `startOfToday()` and `datetime.range('day')` give today's.
+
+```javascript
+dateRange('2026-09-01', '2026-09-07').in('UTC').toString();
+// '2026-09-01T00:00:00.000Z/2026-09-08T00:00:00.000Z'
+
+const today = now('America/New_York').range('day');
+// where: { at: { $gte: today.start, $lt: today.end } }
+```

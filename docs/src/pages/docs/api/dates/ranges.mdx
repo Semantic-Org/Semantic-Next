@@ -1,0 +1,504 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Ranges
+icon: calendar-range
+description: API reference for dateRange, datetimeRange and timeRange, a span between two points named by what it holds
+package: "@semantic-ui/dates"
+methods: [dateRange, datetimeRange, timeRange, contains, overlaps, intersection, equals, isEmpty, points, split, in, format, toString, toJSON, valueOf]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+A span between two points, named by what it holds, the way Postgres names `daterange` and `tstzrange`. The classes are `DateRange`, `DateTimeRange` and `TimeRange`, and every method takes another range of the same kind. A date range runs through its end, the others until it. See [Range Bounds](/docs/api/dates/range-bounds).
+
+## Creating
+
+Each factory takes two ends, a start and a length, or an interval string. An end reads through the range's own kind first, so `'5pm'` is a time, and as a length when written as one, `'2h'`, `{ hours: 2 }` or a duration.
+
+### dateRange
+
+```javascript
+dateRange(start, end);
+dateRange(start, duration);
+dateRange(interval);
+dateRange(start, end, zone);
+dateRange(start, end, { zone, loose });
+```
+
+Two calendar dates, both included. The 1st through the 7th is seven days.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| start | CalendarDate \| string \| DateTime \| Date | Anything `date()` reads. A datetime reads as its date |
+| end | CalendarDate \| string \| Duration \| object | The last day, or a length from the start, `days(7)`, `'1 week'`, `{ weeks: 1 }` |
+| interval | string | `'2026-09-01/2026-09-07'`, or a text field's own separators, `'2026-09-01 - 2026-09-07'`, `'Sep 1 to Sep 7'` |
+| zone | string | The zone a `Date` end is read in |
+| options | object | `{ zone, loose }`. Under `loose`, null for an end that cannot be read |
+
+#### Returns
+
+A `DateRange`, or `null` under `{ loose: true }`.
+
+#### Usage
+
+```javascript
+dateRange('2026-09-01', '2026-09-07').toString(); // '2026-09-01/2026-09-07'
+dateRange(date('2026-09-06'), days(7)).toString(); // '2026-09-06/2026-09-12'
+dateRange('2026-09-01/2026-09-07').toString(); // '2026-09-01/2026-09-07'
+dateRange('Sep 1 2026 to Sep 7 2026', { loose: true }).toString(); // '2026-09-01/2026-09-07'
+dateRange('garbage', '2026-09-07', { loose: true }); // null
+```
+
+#### Example
+
+<PlaygroundExample id="dates-daterange" direction="horizontal"></PlaygroundExample>
+
+### datetimeRange
+
+```javascript
+datetimeRange(start, end);
+datetimeRange(start, duration);
+datetimeRange(interval);
+datetimeRange(start, end, zone);
+datetimeRange(start, end, { zone, loose });
+```
+
+Two moments, the end excluded. Nine until ten and ten until eleven do not overlap. The end reads in the start's zone.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| start | DateTime \| string \| Date \| number | Anything `datetime()` reads |
+| end | DateTime \| string \| Duration \| object | The end, read in the start's zone, or a length from the start, `hours(8)`, `'2h'` |
+| interval | string | `'2026-09-06T09:00Z/2026-09-06T17:00Z'` |
+| zone | string | The zone a wall-clock start is read in |
+| options | object | `{ zone, loose }` |
+
+#### Returns
+
+A `DateTimeRange`, or `null` under `{ loose: true }`.
+
+#### Usage
+
+```javascript
+const start = datetime('2026-09-06T09:00', 'UTC');
+
+datetimeRange(start, hours(8)).toString(); // '2026-09-06T09:00:00.000Z/2026-09-06T17:00:00.000Z'
+datetimeRange(start, '2026-09-06T17:00').toString(); // '2026-09-06T09:00:00.000Z/2026-09-06T17:00:00.000Z'
+datetimeRange('2026-09-07T09:00', '2h', { zone: 'Europe/Berlin' }).start.zone; // 'Europe/Berlin'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetimerange" direction="horizontal"></PlaygroundExample>
+
+### timeRange
+
+```javascript
+timeRange(start, end);
+timeRange(start, duration);
+timeRange(interval);
+```
+
+Two times of day, the end excluded. An end before the start crosses midnight, so `timeRange('22:00', '06:00')` is the night shift, eight hours long.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| start | Time \| string \| object | Anything `time()` reads |
+| end | Time \| string \| Duration \| object | The end, or a length from the start, `minutes(90)`, `'90m'`, `{ hours: 2 }` |
+| interval | string | `'09:00/17:00'`, or a text field's own separators, `'9am - 5pm'`, `'9am to 5pm'` |
+
+#### Returns
+
+A `TimeRange`.
+
+#### Usage
+
+```javascript
+timeRange(time('9am'), time('5:30pm')).toString(); // '09:00:00/17:30:00'
+timeRange('9am - 5pm').toString(); // '09:00:00/17:00:00'
+timeRange('9am', minutes(90)).toString(); // '09:00:00/10:30:00'
+timeRange('22:00', '06:00').duration.format(); // '8 hours'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-timerange" direction="horizontal"></PlaygroundExample>
+
+## Properties
+
+The ends and the kind are real properties, so a range prints them in a console without a click. Every property is read-only.
+
+| Name | Type | Description |
+|------|------|-------------|
+| start | CalendarDate \| DateTime \| Time | The first point |
+| end | CalendarDate \| DateTime \| Time | The last day of a date range, or the excluded end of the others |
+| kind | string | `'date'`, `'datetime'` or `'time'` |
+| duration | Duration | The whole length, anchored at the start. A date range counts its last day, a time range across midnight measures the long way round |
+
+#### Usage
+
+```javascript
+const week = dateRange('2026-09-01', '2026-09-07');
+
+week.start.toString(); // '2026-09-01'
+week.kind; // 'date'
+week.duration.total('days'); // 7
+timeRange('22:00', '06:00').duration.total('hours'); // 8
+```
+
+#### Example
+
+<PlaygroundExample id="dates-range-properties" direction="horizontal"></PlaygroundExample>
+
+## Testing
+
+### contains
+
+```javascript
+range.contains(point);
+range.contains(other);
+```
+
+A point inside, or a range wholly inside, by the kind's own bounds. A time range across midnight holds the small hours.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| point | CalendarDate \| DateTime \| Time \| string | Anything the kind's factory reads |
+| other | Range | A range of the same kind |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+dateRange('2026-09-01', '2026-09-07').contains('2026-09-07'); // true
+datetimeRange(datetime('2026-09-06T09:00', 'UTC'), hours(1)).contains('2026-09-06T10:00Z'); // false
+timeRange('22:00', '06:00').contains('01:00'); // true
+timeRange('22:00', '06:00').contains(timeRange('23:00', '02:00')); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-range-contains" direction="horizontal"></PlaygroundExample>
+
+### overlaps
+
+```javascript
+range.overlaps(other);
+```
+
+Whether two ranges of one kind share any point. Back to back bookings do not.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Range \| string | A range of the same kind, or its interval string |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+const booked = datetimeRange(datetime('2026-09-06T09:00', 'UTC'), hours(1));
+
+booked.overlaps(datetimeRange(datetime('2026-09-06T10:00', 'UTC'), hours(1))); // false
+booked.overlaps(datetimeRange(datetime('2026-09-06T09:30', 'UTC'), hours(1))); // true
+timeRange('22:00', '06:00').overlaps(timeRange('05:00', '09:00')); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-range-overlaps" direction="horizontal"></PlaygroundExample>
+
+### equals
+
+```javascript
+range.equals(other);
+```
+
+The same two ends.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Range \| string | A range of the same kind, or its interval string |
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+const week = dateRange('2026-09-01', '2026-09-07');
+
+week.equals('2026-09-01/2026-09-07'); // true
+week.equals(dateRange('2026-09-01', days(7))); // true
+```
+
+#### Example
+
+<PlaygroundExample id="dates-range-equals" direction="horizontal"></PlaygroundExample>
+
+### isEmpty
+
+```javascript
+range.isEmpty();
+```
+
+Whether the ends meet. A date range never is, since it holds its last day.
+
+#### Returns
+
+`true` or `false`.
+
+#### Usage
+
+```javascript
+timeRange('09:00', '09:00').isEmpty(); // true
+dateRange('2026-09-06', '2026-09-06').isEmpty(); // false
+```
+
+#### Example
+
+<PlaygroundExample id="dates-range-isempty" direction="horizontal"></PlaygroundExample>
+
+## Combining
+
+### intersection
+
+```javascript
+range.intersection(other);
+```
+
+The shared part, or null when the ranges do not meet. An overlap across midnight that comes out in two pieces refuses with `twoPieces`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| other | Range \| string | A range of the same kind, or its interval string |
+
+#### Returns
+
+A range of the same kind, or `null`.
+
+#### Usage
+
+```javascript
+const september = dateRange('2026-09-01', '2026-09-30');
+
+september.intersection(dateRange('2026-09-20', '2026-10-20')).toString(); // '2026-09-20/2026-09-30'
+september.intersection(dateRange('2026-10-01', '2026-10-05')); // null
+timeRange('22:00', '06:00').intersection(timeRange('05:00', '23:00')); // throws twoPieces
+```
+
+#### Example
+
+<PlaygroundExample id="dates-range-intersection" direction="horizontal"></PlaygroundExample>
+
+### in
+
+```javascript
+dateRange.in(zone);
+datetimeRange.in(zone);
+```
+
+For a date range, the datetime bounds covering its days in a zone, midnight through the midnight after the last day, which a query wants. For a datetime range, both ends read in another zone. A time range has no zone and refuses with `noZone`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| zone | string | The zone to place in. Default the configured zone |
+
+#### Returns
+
+A `DateTimeRange`.
+
+#### Usage
+
+```javascript
+dateRange('2026-09-01', '2026-09-07').in('UTC').toString(); // '2026-09-01T00:00:00.000Z/2026-09-08T00:00:00.000Z'
+dateRange('2026-09-01', '2026-09-07').in('UTC').duration.total('hours'); // 168
+datetimeRange(datetime('2026-09-06T09:00', 'UTC'), hours(1)).in('Asia/Tokyo').start.format('long'); // 'September 6, 2026 at 6:00 PM'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-range-in" direction="horizontal"></PlaygroundExample>
+
+## Walking
+
+### points
+
+```javascript
+range.points(step);
+range.points(count, unit);
+```
+
+Every point from the start, stepping by a unit or a duration, as far as the range reaches. Steps count from the start, so monthly from the 31st lands on each month's last day.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| step | string \| Duration \| object | A unit name, `'day'`, `'month'`, or a length |
+| count | number | A count with a unit, `points(30, 'minutes')` |
+| unit | string | The unit for a count |
+
+#### Returns
+
+An array of the kind's points.
+
+#### Usage
+
+```javascript
+dateRange('2026-09-01', '2026-09-07').points('day').length; // 7
+dateRange(date('2026-01-31'), months(6)).points('month').map(String); // ['2026-01-31', '2026-02-28', '2026-03-31', ...]
+timeRange('22:00', '06:00').points('hour').map(String); // ['22:00:00', '23:00:00', '00:00:00', ...]
+```
+
+#### Example
+
+<PlaygroundExample id="dates-range-points" direction="horizontal"></PlaygroundExample>
+
+### split
+
+```javascript
+range.split(step);
+range.split(count, unit);
+```
+
+Consecutive sub-ranges of the step, the last one cut to the end: a year in quarters, a shift in hour slots.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| step | string \| Duration \| object | A unit name or a length |
+| count | number | A count with a unit |
+| unit | string | The unit for a count |
+
+#### Returns
+
+An array of ranges of the same kind.
+
+#### Usage
+
+```javascript
+date('2026-01-01').range('year').split('quarter').map(String); // ['2026-01-01/2026-03-31', '2026-04-01/2026-06-30', ...]
+datetimeRange(datetime('2026-09-06T09:00', 'UTC'), hours(8)).split(hours(3)).map((slot) => slot.duration.total('hours')); // [3, 3, 2]
+timeRange('22:00', '06:00').split(hours(4)).map(String); // ['22:00:00/02:00:00', '02:00:00/06:00:00']
+```
+
+#### Example
+
+<PlaygroundExample id="dates-range-split" direction="horizontal"></PlaygroundExample>
+
+## Formatting
+
+### format
+
+```javascript
+range.format();
+range.format(preset);
+range.format(options);
+range.format(spec, locale);
+```
+
+Intl's range formatting, both ends in one phrase. A range takes a preset or an Intl options object. For tokens, format each end.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| spec | string \| object | A preset of the kind, or an `Intl.DateTimeFormat` options object |
+| locale | string | A BCP 47 tag for this call |
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+dateRange('2026-09-01', '2026-09-07').format(); // 'Sep 1 – 7, 2026'
+dateRange('2026-09-01', '2026-09-07').format({ month: 'short', day: 'numeric' }); // 'Sep 1 – 7'
+datetimeRange(datetime('2026-09-06T09:00', 'UTC'), hours(1)).format('time'); // '9:00 – 10:00 AM'
+timeRange('22:00', '06:00').format(); // '10:00 PM – 6:00 AM'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-range-format" direction="horizontal"></PlaygroundExample>
+
+## Converting
+
+### toString
+
+```javascript
+range.toString();
+```
+
+ISO 8601 interval notation, `start/end`, which the kind's factory reads back. A range is not a number, so `<` refuses with `notANumber`.
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+dateRange('2026-09-01', '2026-09-07').toString(); // '2026-09-01/2026-09-07'
+timeRange('9am', '5pm').toString(); // '09:00:00/17:00:00'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-range-tostring" direction="horizontal"></PlaygroundExample>
+
+### toJSON
+
+```javascript
+range.toJSON();
+```
+
+The wire form, `start/end`, as the ends print. See [Wire Forms](/docs/api/dates/wire-forms).
+
+#### Returns
+
+A string.
+
+#### Usage
+
+```javascript
+JSON.stringify({ week: dateRange('2026-09-01', '2026-09-07') }); // '{"week":"2026-09-01/2026-09-07"}'
+```
+
+#### Example
+
+<PlaygroundExample id="dates-range-tojson" direction="horizontal"></PlaygroundExample>
+
+### valueOf
+
+```javascript
+range.valueOf();
+```
+
+Throws `notANumber`. A range is not a number. Compare with `equals()`, `overlaps()` or `contains()`, or read `duration`.

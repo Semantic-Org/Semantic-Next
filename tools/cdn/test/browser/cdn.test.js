@@ -9,6 +9,7 @@ const SUI_PACKAGES = [
   'compiler',
   'component',
   'core',
+  'dates',
   'query',
   'reactivity',
   'renderer',
