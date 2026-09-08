@@ -93,6 +93,13 @@ export const getESBuildConfig = async function({
     platform,
   };
 
+  // the browser artifacts fold isDevelopment at build time: the readable build keeps every
+  // explanation and the minified one drops them. the esm output stays undefined, so a bundler's
+  // own define decides for the app it builds
+  if (type == 'javascript' && (bundle || cdn)) {
+    config.define = { __DEV__: minify ? 'false' : 'true', ...config.define };
+  }
+
   if ((cdn || readEntrypoints || addBanner || addLog || addOutfile) && !packageFile) {
     packageFile = await getPackageFile();
   }
