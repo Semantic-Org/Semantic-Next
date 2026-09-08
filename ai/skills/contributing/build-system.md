@@ -88,7 +88,7 @@ CDN format uses the `esbuild-resolve-bare-imports` plugin to rewrite bare import
 // input
 import { Signal } from '@semantic-ui/reactivity';
 // output (version from package.json dependencies)
-import { Signal } from 'https://cdn.jsdelivr.net/npm/@semantic-ui/reactivity@0.18.0/dist/cdn/index.min.js';
+import { Signal } from 'https://cdn.jsdelivr.net/npm/@semantic-ui/reactivity@0.18.0/dist/cdn/reactivity.min.js';
 ```
 
 Each format builds both minified and unminified (e.g., `dist/semantic-ui.js` + `dist/semantic-ui.min.js`).
@@ -158,8 +158,8 @@ export default {
   ".": {
     "types": "./types/index.d.ts",
     "import": "./src/index.js",
-    "browser": "./dist/bundle/index.min.js",
-    "importmap": "./dist/cdn/index.min.js"
+    "browser": "./dist/bundle/reactivity.min.js",
+    "importmap": "./dist/cdn/reactivity.min.js"
   }
 }
 ```

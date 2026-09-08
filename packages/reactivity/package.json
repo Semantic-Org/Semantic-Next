@@ -17,8 +17,8 @@
     ".": {
       "types": "./types/index.d.ts",
       "import": "./src/index.js",
-      "browser": "./dist/bundle/index.min.js",
-      "importmap": "./dist/cdn/index.min.js"
+      "browser": "./dist/bundle/reactivity.min.js",
+      "importmap": "./dist/cdn/reactivity.min.js"
     }
   },
   "scripts": {

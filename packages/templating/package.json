@@ -15,8 +15,8 @@
     ".": {
       "types": "./types/index.d.ts",
       "import": "./src/index.js",
-      "browser": "./dist/bundle/index.min.js",
-      "importmap": "./dist/cdn/index.min.js"
+      "browser": "./dist/bundle/templating.min.js",
+      "importmap": "./dist/cdn/templating.min.js"
     },
     "./template": {
       "types": "./types/template.d.ts",
