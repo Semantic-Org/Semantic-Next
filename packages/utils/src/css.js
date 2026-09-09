@@ -676,55 +676,36 @@ export const extractCSS = (selector, source = document, { returnText = false, ex
 export const scopeStyles = (css, scopeSelector = '', { replaceHost = false, appendToRootElements = true } = {}) => {
   scopeSelector = scopeSelector.trim();
 
-  const scopeRule = (rule, scopeSelector) => {
-    if (rule.type === CSSRule.STYLE_RULE) {
-      let selectorText = rule.selectorText;
-
-      // Handle :host replacement
-      if (replaceHost && selectorText.includes(':host')) {
-        selectorText = selectorText
-          .replace(/:host\(([^)]+)\)/g, `${scopeSelector}$1`) // :host(.class) -> .scope.class
-          .replace(/:host/g, scopeSelector); // :host -> .scope
-        return `${selectorText} { ${rule.style.cssText} }`;
-      }
-
-      // Handle html/body - append scope instead of prepend
-      const lower = selectorText.toLowerCase();
-      if (appendToRootElements && (lower === 'html' || lower === 'body')) {
-        return `${selectorText} ${scopeSelector} { ${rule.style.cssText} }`;
-      }
-
-      // Default: prepend scope
-      return `${scopeSelector} ${selectorText} { ${rule.style.cssText} }`;
+  const scope = (selector) => {
+    if (!scopeSelector) {
+      return selector;
     }
-    else if (rule.type === CSSRule.MEDIA_RULE || rule.type === CSSRule.SUPPORTS_RULE) {
-      let scopedInnerRules = [];
-      each(rule.cssRules, (innerRule) => {
-        scopedInnerRules.push(scopeRule(innerRule, scopeSelector));
-      });
-      return `@${rule.type === CSSRule.MEDIA_RULE ? 'media' : 'supports'} ${rule.conditionText || ''} { ${
-        scopedInnerRules.join(' ')
-      } }`;
+    if (replaceHost && selector.includes(':host')) {
+      return selector
+        .replace(/:host\(([^)]+)\)/g, `${scopeSelector}$1`) // :host(.class) -> .scope.class
+        .replace(/:host/g, scopeSelector); // :host -> .scope
     }
-    else if (rule.type === CSSRule.LAYER_STATEMENT_RULE || (rule.type === 0 && rule.cssRules)) {
-      let scopedInnerRules = [];
-      each(rule.cssRules, (innerRule) => {
-        scopedInnerRules.push(scopeRule(innerRule, scopeSelector));
-      });
-      return `@layer ${rule.name} { ${scopedInnerRules.join(' ')} }`;
+    const lower = selector.toLowerCase();
+    if (appendToRootElements && (lower === 'html' || lower === 'body')) {
+      return `${selector} ${scopeSelector}`;
     }
-    else {
-      return rule.cssText;
-    }
+    return `${scopeSelector} ${selector}`;
   };
 
-  const styleSheet = new CSSStyleSheet();
-  styleSheet.replaceSync(css);
+  // nested rules read relative to their parent, so only the outermost selector takes the scope.
+  // keyframe selectors are offsets, not elements
+  const walk = (nodes) => {
+    each(nodes, (node) => {
+      if (node.type === 'rule') {
+        node.selectors = node.selectors.map(scope);
+      }
+      else if (node.children && !node.name.endsWith('keyframes')) {
+        walk(node.children);
+      }
+    });
+  };
 
-  let modifiedRules = [];
-  each(styleSheet.cssRules, (rule) => {
-    modifiedRules.push(scopeRule(rule, scopeSelector));
-  });
-
-  return modifiedRules.join('\n');
+  const nodes = parseCSS(css);
+  walk(nodes);
+  return stringifyCSS(nodes);
 };
