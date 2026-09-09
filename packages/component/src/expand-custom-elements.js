@@ -1,6 +1,8 @@
+// the registry by package name, so a bundle per entry reads the one the root writes
+import { getComponent } from '@semantic-ui/component';
 import { isString, unescapeHTML } from '@semantic-ui/utils';
+
 import { resolveAttributeAliases } from './component-helpers.js';
-import { getComponent } from './component-registry.js';
 
 const MAX_DEPTH = 10;
 

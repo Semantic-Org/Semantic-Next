@@ -238,17 +238,21 @@ export function resolveBareImports(options = {}) {
           }
         }
 
+        // a package importing itself by name, the ESM self-reference, maps to its own root,
+        // so a subpath entry shares the root's modules by url instead of carrying copies
+        const isSelf = packageName === packageJson.name;
+
         // Skip packages not in the dependency list
-        if (onlyDependencies && !dependencies[packageName]) {
+        if (!isSelf && onlyDependencies && !dependencies[packageName]) {
           log.verbose(`Skipping ${importPath} (not in onlyDependencies)`);
           return null;
         }
-        if (!dependencies[packageName]) {
+        if (!isSelf && !dependencies[packageName]) {
           log.verbose(`Skipping ${importPath} (not a dependency)`);
           return null;
         }
 
-        const declaredVersion = dependencies[packageName] || 'latest';
+        const declaredVersion = isSelf ? packageJson.version : dependencies[packageName] || 'latest';
         const version = getVersion(packageName, declaredVersion);
 
         if (subPath) {
@@ -260,7 +264,9 @@ export function resolveBareImports(options = {}) {
 
         // Main entrypoint
         const entrypoints = await entrypointsPromise;
-        const entrypoint = entrypoints[packageName] ?? 'dist/index.min.js';
+        const entrypoint = isSelf
+          ? await getEntrypoint(packageName, version)
+          : entrypoints[packageName] ?? 'dist/index.min.js';
         const resolvedUrl = resolveUrl(packageName, version, entrypoint);
         log.verbose(`Resolved: ${packageName} -> ${resolvedUrl}`);
 
