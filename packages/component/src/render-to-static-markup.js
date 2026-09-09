@@ -1,6 +1,6 @@
 import { each, filterEmpty } from '@semantic-ui/utils';
-import { createServerTemplate } from './component-helpers.js';
 import { expandCustomElements } from './expand-custom-elements.js';
+import { createServerTemplate } from './server-template.js';
 
 /*
   Render a component to the markup of its template alone, as a mail client, a feed,

@@ -7,7 +7,12 @@
   edge. The component self-hydrates from the DSD once its JS loads.
 */
 
-import { expandCustomElements, getComponent, renderToStaticMarkup, renderToString } from '@semantic-ui/component';
+import {
+  expandCustomElements,
+  getComponent,
+  renderToStaticMarkup,
+  renderToString,
+} from '@semantic-ui/component/server';
 import { isString } from '@semantic-ui/utils';
 
 /*

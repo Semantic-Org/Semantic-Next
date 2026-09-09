@@ -1,4 +1,4 @@
-import { defineComponent, renderToString } from '@semantic-ui/component';
+import { defineComponent, renderToString } from '@semantic-ui/component/server';
 import { $ } from '@semantic-ui/query';
 import { Template } from '@semantic-ui/templating';
 import { beforeEach, describe, expect, it } from 'vitest';

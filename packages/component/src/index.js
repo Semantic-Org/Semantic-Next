@@ -7,7 +7,4 @@ export { getComponent, hasComponent, registerComponent } from './component-regis
 export { defineComponent } from './define-component.js';
 export { WebComponentBase } from './engines/native/base.js';
 export { NativeEngine } from './engines/native/register.js';
-export { expandCustomElements } from './expand-custom-elements.js';
 export { setRecovery, setStackCapture, setTracing } from './helpers.js';
-export { renderToStaticMarkup } from './render-to-static-markup.js';
-export { renderToString } from './render-to-string.js';

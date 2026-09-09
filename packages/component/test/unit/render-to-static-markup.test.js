@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { defineComponent, renderToStaticMarkup, renderToString } from '@semantic-ui/component';
+import { defineComponent, renderToStaticMarkup, renderToString } from '@semantic-ui/component/server';
 
 const Card = defineComponent({
   tagName: 'static-card',

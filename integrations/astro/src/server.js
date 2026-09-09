@@ -7,7 +7,7 @@
   on the client — SSR-rendering them would cause double hydration.
 */
 
-import { renderToString } from '@semantic-ui/component';
+import { renderToString } from '@semantic-ui/component/server';
 
 export default {
   name: '@semantic-ui/astro',

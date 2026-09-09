@@ -1,4 +1,4 @@
-import { renderToString } from '@semantic-ui/component';
+import { renderToString } from '@semantic-ui/component/server';
 import { Template } from '@semantic-ui/templating';
 
 import { Card } from './component.js';

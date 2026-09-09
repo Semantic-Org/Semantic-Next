@@ -1,6 +1,6 @@
 import { camelToKebab, each, escapeHTML, isFunction } from '@semantic-ui/utils';
-import { createServerTemplate } from './component-helpers.js';
 import { expandCustomElements } from './expand-custom-elements.js';
+import { createServerTemplate } from './server-template.js';
 
 /*
   Server-side render a component to a DSD HTML string.

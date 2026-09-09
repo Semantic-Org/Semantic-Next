@@ -1,4 +1,4 @@
-import { defineComponent, renderToString } from '@semantic-ui/component';
+import { defineComponent, renderToString } from '@semantic-ui/component/server';
 import { $ } from '@semantic-ui/query';
 import { flush, signal } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
