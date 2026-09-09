@@ -136,6 +136,9 @@ xx.xx.xxxx
 * **Bug** - Boolean attributes now read the generous vocabulary — `active="no"`, `"off"`, and `"disabled"` parse as `false` where the raw `Boolean()` fallback read any non-empty string as `true`. Presence (`<my-el active>`) still reads `true`, and a vocabulary added via `toBoolean.config` at boot applies to attribute parsing too
 * **Bug** - Number attributes land `null` instead of a poison value for unparseable input — `count="abc"` was `NaN`, `count=""` was `0`
 * **Bug** - Reflecting a circular object value drops the attribute instead of throwing mid-render
+* **Feature** - Added `renderToStaticMarkup(Component, data, { slots, text, css })`, rendering a component to its template's markup alone with no shadow root or hydration markers. Slots fill in place, nested components render flat, `text: true` renders plain text, `css: true` returns `{ html, css }` with the css of every component reached, and a definition without a `tagName` renders the same way
+* **BREAKING** - `renderToString`, `renderToStaticMarkup` and `expandCustomElements` now import from `@semantic-ui/component/server`. The root entry is the browser surface and no longer exports them
+* **Enhancement** - The server renderer no longer ships to the browser. It joins the native engine when `@semantic-ui/component/server` loads, and the framework bundle is 1.58 KB brotli smaller
 
 ### Behaviors
 * **Feature** - Add new popup optimized animations `pop-x` for all directions of a popup
@@ -220,7 +223,8 @@ xx.xx.xxxx
 * **Feature** - Added `@semantic-ui/server` for rendering components to Declarative Shadow DOM on any server (Express, Hono, node:http)
 * **Feature** - Added `@semantic-ui/eleventy` to expand Semantic UI tags to DSD at build time
 * **Feature** - Added `@semantic-ui/vite`, `@semantic-ui/esbuild`, `@semantic-ui/rollup`, and `@semantic-ui/build` with `?raw` and `?ast` loaders for component templates across every bundler, where `?ast` precompiles a template to its AST at build time
-* **Feature** - Exported `expandCustomElements` from `@semantic-ui/component` for server and static rendering
+* **Feature** - Exported `expandCustomElements` from `@semantic-ui/component/server` for server and static rendering
+* **Feature** - Added `renderStatic(component, props, { slots, text, css })` to `@semantic-ui/server` beside `render` and `renderHTML`, returning a component's static markup by class or registered tag name
 
 ## 0.17.0
 
