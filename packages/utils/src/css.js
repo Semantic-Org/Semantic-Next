@@ -97,6 +97,9 @@ const IMPORTANT = /\s*!\s*important$/i;
 const AT_NAME = /^@[-\w]*/;
 const WHITESPACE = /\s+/g;
 
+// keyframe selectors are offsets, never elements, so a keyframes block never sits under a selector
+const isKeyframes = (name) => name.endsWith('keyframes');
+
 // the scanners are index loops over the text, one visit per character
 
 // past the string opened at index, or at its unescaped newline (the spec's bad-string), or end
@@ -431,7 +434,8 @@ const flattenNodes = (nodes, parents = null, out = []) => {
     }
     else {
       flush();
-      out.push(node.children ? { ...node, children: flattenNodes(node.children, parents) } : { ...node });
+      const inside = isKeyframes(node.name) ? null : parents;
+      out.push(node.children ? { ...node, children: flattenNodes(node.children, inside) } : { ...node });
     }
   });
   flush();
@@ -749,14 +753,13 @@ export const scopeStyles = (css, scopeSelector = '', { replaceHost = false, appe
     return `${scopeSelector} ${selector}`;
   };
 
-  // nested rules read relative to their parent, so only the outermost selector takes the scope.
-  // keyframe selectors are offsets, not elements
+  // nested rules read relative to their parent, so only the outermost selector takes the scope
   const walk = (nodes) => {
     each(nodes, (node) => {
       if (node.type === 'rule') {
         node.selectors = node.selectors.map(scope);
       }
-      else if (node.children && !node.name.endsWith('keyframes')) {
+      else if (node.children && !isKeyframes(node.name)) {
         walk(node.children);
       }
     });
