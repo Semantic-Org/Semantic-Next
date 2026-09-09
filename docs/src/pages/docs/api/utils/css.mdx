@@ -8,7 +8,7 @@ icon: palette
 description: API reference for CSS utility functions
 ---
 
-The CSS utilities provide functions for working with stylesheets: reading one into plain nodes and writing it back with no DOM, scoring selectors, scoping a sheet for component isolation, and in the browser adopting stylesheets to documents and shadow roots and extracting rules from them.
+The CSS utilities provide functions for working with stylesheets: reading one into plain nodes and writing it back with no DOM, scoring selectors, and in the browser scoping a sheet for component isolation, adopting stylesheets to documents and shadow roots, and extracting rules from them.
 
 ## Functions
 
@@ -110,14 +110,14 @@ const widgetRules = extractCSS('.widget', [sheet1, sheet2]);
 function scopeStyles(css, scopeSelector, { replaceHost, appendToRootElements } = {})
 ```
 
-Scopes a stylesheet under a selector, with configurable options for web component integration and root element handling. It reads the sheet through `parseCSS`, so it runs on the server as well as in the browser, and nested rules stay under their scoped parent. Every selector in a top-level rule and in the rules inside any at-rule block gains the scope, `@keyframes` excepted. The output is written in the canonical layout of `stringifyCSS`.
+Scopes CSS rules by prepending a selector to all rules with configurable options for web component integration and root element handling. It reads the sheet through `CSSStyleSheet`, so it runs in the browser, and a rule's nested rules stay under their scoped parent.
 
 #### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
 | css | string | The CSS string to scope |
-| scopeSelector | string | The selector to scope under, kept as written. Defaults to empty string, which leaves selectors unchanged |
+| scopeSelector | string | The selector to scope under, kept as written. Defaults to empty string |
 | options | object | Optional configuration |
 
 ##### Options
@@ -136,30 +136,23 @@ The scoped CSS string with all rules modified according to the scoping strategy.
 ```javascript
 import { scopeStyles } from '@semantic-ui/utils';
 
-// Basic scoping - prepends .my-component to every selector
-const scoped = scopeStyles('.button, .link { color: red; }', '.my-component');
-// .my-component .button, .my-component .link {
-//   color: red;
-// }
+// Basic scoping - prepends .my-component to all selectors
+const scoped = scopeStyles('.button { color: red; }', '.my-component');
+// Result: .my-component .button { color: red; }
 
 // Nested rules stay under the scoped parent
 const nested = scopeStyles('.button { color: red; &:hover { color: blue; } }', '.my-component');
-// .my-component .button {
-//   color: red;
-//   &:hover {
-//     color: blue;
-//   }
-// }
+// Result: .my-component .button { color: red; &:hover { color: blue; } }
 
 // Replace :host selectors for web component CSS porting
 const hostCSS = ':host { display: block; } :host(.active) { opacity: 1; }';
 const ported = scopeStyles(hostCSS, '.widget', { replaceHost: true });
-// .widget { display: block; } and .widget.active { opacity: 1; }
+// Result: .widget { display: block; } .widget.active { opacity: 1; }
 
 // Handle root elements with prepending
 const rootCSS = 'html { font-size: 16px; } body { margin: 0; }';
 const rootScoped = scopeStyles(rootCSS, '.app', { appendToRootElements: false });
-// .app html { font-size: 16px; } and .app body { margin: 0; }
+// Result: .app html { font-size: 16px; } .app body { margin: 0; }
 ```
 
 > **Web Component Integration** Use `replaceHost: true` when porting existing web component CSS to scoped styles. The function handles both `:host` and `:host(.class)` syntax correctly.

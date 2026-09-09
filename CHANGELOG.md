@@ -131,7 +131,7 @@ xx.xx.xxxx
 * **Bug** - Fixed `clone()` mangling typed arrays, `ArrayBuffer`, and `DataView` into index-keyed plain objects — these now clone into independent buffers of the correct type
 * **Feature** - Added [`parseCSS`](https://next.semantic-ui.com/docs/api/utils/css#parsecss) and [`stringifyCSS`](https://next.semantic-ui.com/docs/api/utils/css#stringifycss) — a stylesheet read into plain nodes and written back, with no DOM and no dependency. Nesting is kept as written or flattened with `{ flatten: true }`, every at-rule reads as a node, comments are dropped, `!important` and custom properties read like any declaration, and malformed input never throws. Every one of the framework's own stylesheets round-trips
 * **Feature** - Added [`selectorSpecificity`](https://next.semantic-ui.com/docs/api/utils/css#selectorspecificity) — a selector's specificity as `[ids, classes, elements]` per Selectors Level 4, `:is()`, `:not()`, `:where()` and `:host()` included
-* **Enhancement** - `scopeStyles` reads through `parseCSS`, so it runs on the server, scopes every selector in a list, and keeps nested rules under their scoped parent (they were dropped)
+* **Enhancement** - `scopeStyles` keeps a rule's nested rules under the scoped parent (they were dropped)
 
 ### Component
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.

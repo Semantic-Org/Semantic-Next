@@ -869,10 +869,9 @@ extractCSS('.button', cssString, { returnText: true });      // returns CSS text
 extractCSS('.btn', stylesheet, { exactMatch: true });        // exact selector match
 extractCSS('.widget', [sheet1, sheet2]);                     // from array of sheets
 
-// Scope CSS rules under a selector. Reads through parseCSS, so it runs on the server, keeps
-// nested rules under the scoped parent, and writes stringifyCSS's layout
+// Scope CSS rules under a selector (browser, via CSSStyleSheet), nested rules kept
 scopeStyles('.button { color: red; }', '.my-scope');
-// '.my-scope .button {\n  color: red;\n}'
+// '.my-scope .button { color: red; }'
 
 // Replace :host for web component CSS porting
 scopeStyles(':host(.active) { background: blue; }', '.widget', { replaceHost: true });
