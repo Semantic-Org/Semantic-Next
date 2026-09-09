@@ -171,6 +171,18 @@ describe('parseCSS', () => {
       ]);
     });
 
+    it('keeps the whitespace inside a string as written', () => {
+      expect(parseCSS('.a[title="hello  world"] { c: d }')[0].selectors).toEqual(['.a[title="hello  world"]']);
+      expect(parseCSS('@import url("a  b.css");')[0].prelude).toBe('url("a  b.css")');
+      expect(parseCSS('.a { content: "x  y" }')[0].children[0].value).toBe('"x  y"');
+    });
+
+    it('reads an escaped delimiter as part of the token', () => {
+      expect(parseCSS('.a\\{b { c: d }')).toEqual([rule(['.a\\{b'], [declaration('c', 'd')])]);
+      expect(parseCSS('.a\\,b, .c { d: e }')[0].selectors).toEqual(['.a\\,b', '.c']);
+      expect(parseCSS('.a { b: c\\; d: e }')[0].children).toEqual([declaration('b', 'c\\; d: e')]);
+    });
+
     it('reads declaration blocks and keyframes by what they hold', () => {
       const css =
         '@font-face { font-family: Lato } @property --p { syntax: "<length>"; inherits: true } @keyframes spin { from { a: b } to { a: c } }';
@@ -259,6 +271,33 @@ describe('parseCSS', () => {
       expect(parseCSS('.empty {} .a { .b { c: d } }', { flatten: true })).toEqual([
         rule(['.empty']),
         rule(['.a .b'], [declaration('c', 'd')]),
+      ]);
+    });
+
+    it('keeps the parent when & sits inside a string or is escaped', () => {
+      expect(parseCSS('.a { [title="x&y"] { c: d } }', { flatten: true })[0].selectors).toEqual(['.a [title="x&y"]']);
+      expect(parseCSS('.a { &[title="&"] { c: d } }', { flatten: true })[0].selectors).toEqual(['.a[title="&"]']);
+      expect(parseCSS('.a { .b\\& { c: d } }', { flatten: true })[0].selectors).toEqual(['.a .b\\&']);
+    });
+
+    it('lifts a nested keyframes block whole', () => {
+      expect(parseCSS('.a { @keyframes spin { from { o: 0 } to { o: 1 } } }', { flatten: true })).toEqual([
+        at('keyframes', 'spin', [rule(['from'], [declaration('o', '0')]), rule(['to'], [declaration('o', '1')])]),
+      ]);
+    });
+
+    it('multiplies every & over the parent list', () => {
+      expect(parseCSS('.a, .b { & + & { c: d } }', { flatten: true })[0].selectors).toEqual([
+        '.a + .a',
+        '.a + .b',
+        '.b + .a',
+        '.b + .b',
+      ]);
+      expect(parseCSS('.a, .b { .c, &.d { e: f } }', { flatten: true })[0].selectors).toEqual([
+        '.a .c',
+        '.a.d',
+        '.b .c',
+        '.b.d',
       ]);
     });
   });
