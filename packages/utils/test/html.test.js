@@ -383,6 +383,22 @@ describe('parseHTML', () => {
         { type: 'comment', value: '[if mso]><table></table><![endif]', start: 0, end: 40 },
       ]);
       expect(parseHTML('<!-- open')).toEqual([{ type: 'comment', value: ' open', start: 0, end: 9 }]);
+      expect(parseHTML('<!-->x<p>y</p>')).toEqual([
+        { type: 'comment', value: '', start: 0, end: 5 },
+        text('x', 5, 6),
+        {
+          type: 'element',
+          name: 'p',
+          attributes: [],
+          children: [text('y', 9, 10)],
+          selfClosing: false,
+          start: 6,
+          end: 14,
+          innerStart: 9,
+          innerEnd: 10,
+        },
+      ]);
+      expect(parseHTML('<!--->')).toEqual([{ type: 'comment', value: '', start: 0, end: 6 }]);
     });
 
     it('should read a doctype as written and keep CDATA and processing instructions as text', () => {

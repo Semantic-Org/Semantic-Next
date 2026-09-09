@@ -198,7 +198,8 @@ export const parseHTML = (html, { closeOnSlash = true } = {}) => {
 
     if (lead === 33 || lead === 63) {
       if (lead === 33 && html.charCodeAt(tagStart + 2) === 45 && html.charCodeAt(tagStart + 3) === 45) {
-        const close = html.indexOf('-->', tagStart + 4);
+        // from the dashes themselves, so <!--> and <!---> read as the empty comments the spec makes them
+        const close = html.indexOf('-->', tagStart + 2);
         const end = close === -1 ? length : close + 3;
         flushText(tagStart);
         siblings.push({
