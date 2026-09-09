@@ -99,13 +99,46 @@ export const log = (
 // level slot only; callsite options shallow-merge over the defaults and win
 export const createLogger = (defaults = {}) => {
   const merged = (options) => ({ ...defaults, ...options });
+  const bound = (message, level, options) => log(message, level, merged(options));
   const leveled = (level) => (message, options) => log(message, level, merged(options));
+
+  // the once forms speak the first time this logger sees a key and never again.
+  // one memory for the whole family: a condition seen once is one line, whatever
+  // level voices it, and a fresh logger is the clean slate. no development gate
+  // here, the callsite's isDevelopment && folds the call and its message together
+  const seen = new Set();
+  const firstTime = (key) => {
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  };
+  const once = (emit) => (key, message = key, options) => {
+    if (firstTime(key)) {
+      emit(message, options);
+    }
+  };
+
+  const debug = leveled('debug');
+  const info = leveled('info');
+  const warn = leveled('warn');
+  const error = leveled('error');
   return {
-    log: (message, level, options) => log(message, level, merged(options)),
-    debug: leveled('debug'),
-    info: leveled('info'),
-    warn: leveled('warn'),
-    error: leveled('error'),
+    log: bound,
+    debug,
+    info,
+    warn,
+    error,
+    logOnce: (key, message = key, level, options) => {
+      if (firstTime(key)) {
+        bound(message, level, options);
+      }
+    },
+    debugOnce: once(debug),
+    infoOnce: once(info),
+    warnOnce: once(warn),
+    errorOnce: once(error),
   };
 };
 
