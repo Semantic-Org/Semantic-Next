@@ -1171,6 +1171,18 @@ log('custom', 'debug');                       // the bound log keeps its level s
 // the level wrappers absorb the LEVEL slot only — info(m, options) is
 // log(m, 'info', options). granularity is the namespace value's business:
 createLogger({ namespace: 'physics:collision' });
+
+// every member has a once form: the first call with a key prints what the plain member
+// prints, every later call with that key on this logger is silent. the key names the
+// CONDITION, never the text. one memory for the whole family, a fresh logger is the reset
+const { warnOnce, errorOnce, logOnce } = createLogger({ namespace: 'sync' });
+warnOnce('plainCookie', 'the session cookie is set over plain http');  // prints
+warnOnce('plainCookie', 'a different wording');                        // silent, the key decides
+errorOnce('plainCookie', 'redis pubsub failed');                       // silent, seen at warn is seen at error
+warnOnce(`liveDep:${publication}:${collection}`, 'reads undeclared'); // once per entity, stable parts only
+warnOnce('booted from the in-memory adapter');                         // a key alone is its own message
+isDevelopment && warnOnce('unmounted', 'the plane did not mount');     // the callsite guard folds call and message together
+logOnce('handshake', 'handshake detail', 'debug');                     // the bound log's once form keeps its level slot
 ```
 
 Both debug families export an `error` — a file binding both aliases at the destructure,
