@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { Template } from '@semantic-ui/templating';
 
 describe('Template', () => {
-
   /*******************************
       Symbol.hasInstance (instanceof)
   *******************************/

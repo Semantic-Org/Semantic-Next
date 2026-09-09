@@ -9,6 +9,12 @@ export interface ExpandCustomElementsOptions {
   /** Whether the expanded output should hydrate on the client. */
   hydrate?: boolean;
   /**
+   * Assign each element's children to its slots by their `slot` attribute
+   * before rendering it, as the flat render does. The DSD path leaves that to
+   * the browser.
+   */
+  assignSlots?: boolean;
+  /**
    * Renderer used for each registered element found in the HTML.
    * Pass {@link renderToString}; the indirection is what keeps the two modules
    * free of a circular import. Without it nothing is expanded.

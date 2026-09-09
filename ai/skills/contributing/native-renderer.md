@@ -335,7 +335,7 @@ renderer.bumpDataVersion()       // dataDep.changed() + notifyUpdate (coalesced 
 
 ## SSR Pipeline
 
-`renderToString()` in `packages/component/src/render-to-string.js` orchestrates server render. `expandCustomElements()` walks the input markup and recursively renders each registered component into Declarative Shadow DOM (`<template shadowrootmode="open">`). The rendered HTML carries the same versioned markers and `data-sui-bind` stamps the client expects.
+`renderToString()` in `packages/component/src/server/render-to-string.js` orchestrates server render. `expandCustomElements()` walks the input markup and recursively renders each registered component into Declarative Shadow DOM (`<template shadowrootmode="open">`). The rendered HTML carries the same versioned markers and `data-sui-bind` stamps the client expects.
 
 `ServerRenderer` lives at `packages/renderer/src/engines/native/server.js`. It evaluates AST nodes inline as strings — no DOM. Block-shaped nodes dispatch to per-block server logic that emits open/close marker pairs around their evaluated content; closing markers carry metadata where the client needs it (e.g. `:b<branchIndex>` for `{#if}`, `sui-each-item:v1:KEY` for per-item `{#each}` keys).
 

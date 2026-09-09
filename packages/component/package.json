@@ -8,6 +8,7 @@
   "type": "module",
   "sideEffects": [
     "./src/index.js",
+    "./src/server/index.js",
     "./src/engines/*/register.js"
   ],
   "main": "src/index.js",
@@ -21,7 +22,11 @@
       "importmap": "./dist/cdn/component.min.js"
     },
     "./bare": "./src/bare.js",
-    "./lit": "./src/engines/lit/register.js"
+    "./lit": "./src/engines/lit/register.js",
+    "./server": {
+      "types": "./types/server/index.d.ts",
+      "import": "./src/server/index.js"
+    }
   },
   "scripts": {
     "build": "wireit",

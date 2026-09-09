@@ -48,6 +48,23 @@ Two behaviours follow from having no reactivity. `{#async}` renders its `loading
 
 Nested components expand recursively. The renderer scans its own output for custom element tags, looks each one up in the registry, and renders it as nested Declarative Shadow DOM.
 
+## Static Markup
+
+`renderToStaticMarkup` renders the same definition for a destination that never runs its JavaScript. The renderer makes the same walk with its markers off, so the result is the template's own markup alone. The `<template shadowrootmode>` wrapper, the `<style>` and the hydration comments and bind attributes of the web form are all absent, and a mail client, a feed reader or a static page holds it as delivered.
+
+```javascript
+import { renderToStaticMarkup } from '@semantic-ui/component/server';
+
+const html = renderToStaticMarkup(Card, { title: 'Hello' });
+// <div class="card">Hello</div>
+```
+
+Slots fill in place from the `slots` option, there being no light DOM to project. A nested component renders where its tag sat, with its children assigned to its slots by their `slot` attribute. A definition without a `tagName` renders the same way, so a mail or a static page needs no custom element.
+
+Both functions are exported from `@semantic-ui/component/server`, the package's server entry, which is also what gives the native engine its server renderer. The root entry is the browser's and carries neither.
+
+`text: true` renders plain text, where nothing is escaped and `{#html}` is raw either way. `css: true` returns `{ html, css }`, the css being that of every component the render reached, parent first, for a mail inliner or a page's `<style>`.
+
 ## Declarative Shadow DOM
 
 The parser attaches the shadow root, moves the content into it, and drops the template element.

@@ -1,12 +1,13 @@
-import { camelToKebab, each, escapeHTML, isFunction, kebabToCamel } from '@semantic-ui/utils';
-import { getUIClasses, resolveAttributeAliases } from './component-helpers.js';
+import { camelToKebab, each, escapeHTML, isFunction } from '@semantic-ui/utils';
 import { expandCustomElements } from './expand-custom-elements.js';
+import { createServerTemplate } from './server-template.js';
 
 /*
   Server-side render a component to a DSD HTML string.
 
   Usage:
-    import { defineComponent, renderToString } from '@semantic-ui/component';
+    import { defineComponent } from '@semantic-ui/component';
+    import { renderToString } from '@semantic-ui/component/server';
 
     const MyCard = defineComponent({ tagName: 'my-card', template, css, ... });
     const html = renderToString(MyCard, { title: 'Hello' });
@@ -22,47 +23,7 @@ export function renderToString(ComponentClass, attrs = {}, { slots = null, depth
   if (!tagName) {
     throw new Error('renderToString requires a component with a tagName');
   }
-
-  const proto = ComponentClass.template;
-  if (!proto) {
-    throw new Error(`Component ${tagName} has no template`);
-  }
-
-  const css = ComponentClass.config?.css || '';
-  const defaultSettings = ComponentClass.config?.defaultSettings || {};
-  const componentSpec = ComponentClass.config?.componentSpec;
-  const resolvedProperties = ComponentClass.config?.resolvedProperties || ComponentClass.properties || {};
-
-  // Normalize kebab-case attribute names to camelCase property names.
-  // fromAttribute converters are already applied by deserializeAttrs (expandCustomElements path)
-  // or not needed (direct Astro path where attrs arrive pre-typed).
-  const normalizedAttrs = {};
-  each(attrs, (value, key) => {
-    normalizedAttrs[kebabToCamel(key)] = value;
-  });
-
-  // Resolve attribute aliases (value fuzzing, bare attrs, class splitting)
-  resolveAttributeAliases(normalizedAttrs, componentSpec);
-
-  // Merge spec defaults, component defaults, and attributes
-  const specDefaults = componentSpec?.defaultValues || {};
-  const data = { ...specDefaults, ...defaultSettings, ...normalizedAttrs };
-
-  // Clone prototype template with the data context.
-  // Force native engine — ServerRenderer handles string output.
-  const template = proto.clone({ data, renderingEngine: 'native' });
-
-  // Provide settings for createComponent — no web component element in SSR,
-  // so the Template won't have settings from an element or subtemplate proxy.
-  template.settings = data;
-
-  template.initialize();
-
-  // Compute {uiClasses} class string AFTER initialize() — createComponent can modify
-  // settings (e.g. input's configureSearch sets icon) which affect {uiClasses} classes
-  if (componentSpec) {
-    data.uiClasses = getUIClasses(data, { componentSpec, properties: resolvedProperties });
-  }
+  const { template, normalizedAttrs, resolvedProperties, css } = createServerTemplate(ComponentClass, attrs);
 
   let html = template.render();
 

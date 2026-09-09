@@ -1,6 +1,8 @@
-import { unescapeHTML } from '@semantic-ui/utils';
-import { resolveAttributeAliases } from './component-helpers.js';
-import { getComponent } from './component-registry.js';
+// the registry by package name, so a bundle per entry reads the one the root writes
+import { getComponent } from '@semantic-ui/component';
+import { isString, unescapeHTML } from '@semantic-ui/utils';
+
+import { resolveAttributeAliases } from '../component-helpers.js';
 
 const MAX_DEPTH = 10;
 
@@ -16,7 +18,7 @@ const MAX_DEPTH = 10;
   Only tags registered in the component registry are expanded.
   The `renderFn` parameter breaks the circular dependency with renderToString.
 */
-export function expandCustomElements(html, { depth = 0, hydrate = true, renderFn } = {}) {
+export function expandCustomElements(html, { depth = 0, hydrate = true, renderFn, assignSlots = false } = {}) {
   if (depth >= MAX_DEPTH) { return html; }
 
   let result = '';
@@ -78,8 +80,9 @@ export function expandCustomElements(html, { depth = 0, hydrate = true, renderFn
     // Convert parsed attributes to a props object using the component's property types
     const attrs = deserializeAttrs(openTag.attrs, ComponentClass);
 
+    // the DSD path leaves slot assignment to the browser, the flat path has no browser
     const rendered = renderFn(ComponentClass, attrs, {
-      slots: children ? { default: children } : null,
+      slots: children ? (assignSlots ? slotsFrom(children) : { default: children }) : null,
       depth: depth + 1,
       hydrate,
     });
@@ -126,12 +129,12 @@ function findNextCustomElement(html, start) {
 }
 
 /*
-  Parse an opening tag starting at `pos`.
-  Returns { tagName, attrs: { key: value }, end, selfClosing } or null.
+  Parse an opening tag starting at `pos`, any element name since slot assignment
+  reads plain tags too. Returns { tagName, attrs: { key: value }, end, selfClosing } or null.
 */
 function parseOpenTag(html, pos) {
   // Read tag name
-  const nameMatch = html.slice(pos + 1).match(/^([a-z][a-z0-9]*-[a-z0-9-]*)/);
+  const nameMatch = html.slice(pos + 1).match(/^([a-zA-Z][\w:-]*)/);
   if (!nameMatch) { return null; }
 
   const tagName = nameMatch[1];
@@ -268,4 +271,45 @@ function deserializeAttrs(rawAttrs, ComponentClass) {
   resolveAttributeAliases(attrs, ComponentClass.config?.componentSpec);
 
   return attrs;
+}
+
+/*
+  Assign an element's children to its slots the way the browser would: a top-level
+  child carrying slot="name" is that slot's content, everything else the default's.
+  Elements stay whole, so a slot attribute deeper down belongs to its own element.
+*/
+function slotsFrom(children) {
+  const slots = {};
+  const assign = (name, content) => {
+    if (content) {
+      slots[name] = (slots[name] || '') + content;
+    }
+  };
+  let pos = 0;
+  while (pos < children.length) {
+    const tagStart = children.indexOf('<', pos);
+    if (tagStart === -1) {
+      assign('default', children.slice(pos));
+      break;
+    }
+    assign('default', children.slice(pos, tagStart));
+    if (children.startsWith('<!--', tagStart)) {
+      const commentEnd = children.indexOf('-->', tagStart + 4);
+      pos = commentEnd === -1 ? children.length : commentEnd + 3;
+      assign('default', children.slice(tagStart, pos));
+      continue;
+    }
+    const openTag = parseOpenTag(children, tagStart);
+    if (!openTag) {
+      assign('default', children[tagStart]);
+      pos = tagStart + 1;
+      continue;
+    }
+    // a void element has no closing tag, so its extent is the open tag alone
+    const close = openTag.selfClosing ? null : findClosingTag(children, openTag.end, openTag.tagName);
+    const end = close && close.start < children.length ? close.end : openTag.end;
+    assign(isString(openTag.attrs.slot) ? openTag.attrs.slot : 'default', children.slice(tagStart, end));
+    pos = end;
+  }
+  return slots;
 }

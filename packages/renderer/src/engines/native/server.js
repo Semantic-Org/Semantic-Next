@@ -4,6 +4,9 @@
   one or the other based on isServer. The only difference is render()
   returns an HTML string instead of a DocumentFragment.
 
+  The static and text forms are the same walk with the hydration markers off,
+  slot content in place of the slot element and, for text, the escaping off too.
+
   No DOM, no Reactions, no DynamicRegion. Pure string manipulation.
   Runs in Node, Deno (--allow-eval), Bun, Cloudflare Workers (unsafe-eval).
 */
@@ -150,7 +153,7 @@ function scanHtmlChunk(chunk, scope) {
 
       const selfClosing = j > 0 && chunk.charAt(j - 1) === '/';
       const bindingKeys = Object.keys(scope.tagBindings);
-      if (bindingKeys.length > 0) {
+      if (scope.markers && bindingKeys.length > 0) {
         const payload = bindingKeys.map((k) => `${k}=${scope.tagBindings[k]}`).join(',');
         const bindAttr = ` ${DATA_SUI_BIND}="${payload}"`;
         if (selfClosing) {
@@ -190,6 +193,11 @@ export class ServerRenderer {
     this.helpers = helpers || {};
     this.isSVG = isSVG;
     this.protectedKeys = protectedKeys;
+    // the server forms set these on the template before initialize, the web form leaves them unset
+    const { markers = true, text = false, slots = null } = template?.renderOptions || {};
+    this.markers = markers;
+    this.text = text;
+    this.slots = slots;
 
     this.evaluator = new ExpressionEvaluator({
       data: this.data,
@@ -220,6 +228,11 @@ export class ServerRenderer {
     // No-op on server — no reactive subscriptions to notify
   }
 
+  // every hydration marker passes here, so the static and text forms drop them in one place
+  marker(body) {
+    return this.markers ? `<!--${body}-->` : '';
+  }
+
   /*******************************
          AST → HTML String
   *******************************/
@@ -234,6 +247,7 @@ export class ServerRenderer {
         currentAttrName: null,
         tagBindings: {},
         insideRawText: false,
+        markers: this.markers,
       };
     }
 
@@ -242,6 +256,9 @@ export class ServerRenderer {
     // when inside raw-text, marker must land right after the close tag (not at chunk end)
     // since subsequent siblings often share the same html node
     const appendHtml = (chunk) => {
+      if (this.text) {
+        return chunk;
+      }
       const stamped = scanHtmlChunk(chunk, scope);
       if (scope.insideRawText) {
         const closeMatch = stamped.match(RAW_TEXT_CLOSE);
@@ -254,7 +271,7 @@ export class ServerRenderer {
           if (after && isInsideRawText(scope.htmlBuffer)) {
             scope.insideRawText = true;
           }
-          return stamped.slice(0, splitAt) + `<!--${RAW_TEXT_MARKER}${id}-->` + after;
+          return stamped.slice(0, splitAt) + this.marker(`${RAW_TEXT_MARKER}${id}`) + after;
         }
         return stamped;
       }
@@ -283,8 +300,15 @@ export class ServerRenderer {
           break;
 
         case 'slot':
-          html += node.name ? `<slot name="${node.name}"></slot>` : '<slot></slot>';
-          scope.htmlBuffer += '<slot>';
+          // given slot content stands in for the element, there being no shadow root to project into
+          if (this.slots) {
+            const content = this.slots[node.name || 'default'];
+            html += appendHtml(content ? String(content) : '');
+          }
+          else {
+            html += node.name ? `<slot name="${node.name}"></slot>` : '<slot></slot>';
+            scope.htmlBuffer += '<slot>';
+          }
           break;
 
         case 'if':
@@ -321,8 +345,11 @@ export class ServerRenderer {
   *******************************/
 
   renderExpression(node, data, scope) {
-    const classification = analyzePosition(scope.htmlBuffer);
     const value = this.evaluator.lookupExpressionValue(node.value, data);
+    if (this.text) {
+      return String(value ?? '');
+    }
+    const classification = analyzePosition(scope.htmlBuffer);
 
     // inside raw-text, expressions emit literal text since comment markers would corrupt CSS/JS or be visible
     if (scope.insideRawText && !classification.insideTag) {
@@ -388,7 +415,7 @@ export class ServerRenderer {
     }
 
     // Text position — hydration marker + evaluated value
-    let result = `<!--${COMMENT_MARKER}${id}-->`;
+    let result = this.marker(`${COMMENT_MARKER}${id}`);
     if (node.unsafeHTML) {
       result += String(value ?? '');
     }
@@ -486,11 +513,11 @@ export class ServerRenderer {
       return this.emitAttributeBlock(id, inner, scope);
     }
 
-    let html = `<!--${BLOCK_MARKER}${id}-->`;
+    let html = this.marker(`${BLOCK_MARKER}${id}`);
     if (matchedAST) {
       html += this.renderNodes(matchedAST, data);
     }
-    html += `<!--${formatBlockClose(id, { branchIndex })}-->`;
+    html += this.marker(formatBlockClose(id, { branchIndex }));
     return html;
   }
 
@@ -536,11 +563,11 @@ export class ServerRenderer {
       return this.emitAttributeBlock(id, inner, scope);
     }
 
-    let html = `<!--${BLOCK_MARKER}${id}-->`;
+    let html = this.marker(`${BLOCK_MARKER}${id}`);
     if (matchedAST) {
       html += this.renderNodes(matchedAST, data);
     }
-    html += `<!--${formatBlockClose(id, { branchIndex })}-->`;
+    html += this.marker(formatBlockClose(id, { branchIndex }));
     return html;
   }
 
@@ -552,7 +579,7 @@ export class ServerRenderer {
           + 'Use a method or computed signal that returns a string.',
       );
     }
-    let html = `<!--${BLOCK_MARKER}${id}-->`;
+    let html = this.marker(`${BLOCK_MARKER}${id}`);
 
     const rawItems = this.evaluator.lookupExpressionValue(node.over, data) || [];
     const collectionType = isArray(rawItems) ? 'array' : 'object';
@@ -567,12 +594,12 @@ export class ServerRenderer {
         const eachData = getEachData(items[i], i, collectionType, node);
         const itemData = childContext(data, eachData);
         const key = getItemId(items[i], i, collectionType);
-        html += `<!--${SUI_ITEM_MARKER}${encodeItemKey(key)}-->`;
+        html += this.marker(`${SUI_ITEM_MARKER}${encodeItemKey(key)}`);
         html += this.renderNodes(node.content, itemData);
       }
     }
 
-    html += `<!--${formatBlockClose(id)}-->`;
+    html += this.marker(formatBlockClose(id));
     return html;
   }
 
@@ -584,14 +611,14 @@ export class ServerRenderer {
           + 'Use a method or computed signal that returns a string.',
       );
     }
-    let html = `<!--${BLOCK_MARKER}${id}-->`;
+    let html = this.marker(`${BLOCK_MARKER}${id}`);
 
     // SSR: render loading content only, never await
     if (node.loadingContent?.length) {
       html += this.renderNodes(node.loadingContent, data);
     }
 
-    html += `<!--${formatBlockClose(id)}-->`;
+    html += this.marker(formatBlockClose(id));
     return html;
   }
 
@@ -606,11 +633,11 @@ export class ServerRenderer {
       return this.emitAttributeBlock(id, inner, scope);
     }
 
-    let html = `<!--${BLOCK_MARKER}${id}-->`;
+    let html = this.marker(`${BLOCK_MARKER}${id}`);
     if (node.content) {
       html += this.renderNodes(node.content, data);
     }
-    html += `<!--${formatBlockClose(id)}-->`;
+    html += this.marker(formatBlockClose(id));
     return html;
   }
 
@@ -626,7 +653,7 @@ export class ServerRenderer {
       );
     }
     const id = scope.entryId++;
-    let html = `<!--${BLOCK_MARKER}${id}-->`;
+    let html = this.marker(`${BLOCK_MARKER}${id}`);
 
     const templateName = this.evaluator.lookupExpressionValue(node.name, data);
 
@@ -650,7 +677,7 @@ export class ServerRenderer {
       }
     }
 
-    html += `<!--${formatBlockClose(id)}-->`;
+    html += this.marker(formatBlockClose(id));
     return html;
   }
 
@@ -664,6 +691,7 @@ export class ServerRenderer {
         subTemplates: this.subTemplates,
         parentTemplate: this.template,
       });
+      instance.renderOptions = { markers: this.markers, text: this.text, slots: this.slots };
       instance.initialize();
       return instance.render();
     }

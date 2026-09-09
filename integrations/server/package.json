@@ -28,6 +28,7 @@
     ".": "./src/index.js"
   },
   "dependencies": {
-    "@semantic-ui/component": "*"
+    "@semantic-ui/component": "*",
+    "@semantic-ui/utils": "*"
   }
 }

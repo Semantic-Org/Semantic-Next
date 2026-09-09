@@ -141,12 +141,13 @@ A server-rendered component passes through five phases from definition to intera
 
 ### renderToString
 
-`packages/component/src/render-to-string.js`
+`packages/component/src/server/render-to-string.js`
 
 The entry point for SSR. Takes a component class (returned by `defineComponent` with a `tagName`) and an attributes object, returns a complete DSD HTML string.
 
 ```js
-import { defineComponent, renderToString } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
+import { renderToString } from '@semantic-ui/component/server';
 
 const MyCard = defineComponent({ tagName: 'my-card', template, css, ... });
 const html = renderToString(MyCard, { title: 'Hello' });
@@ -224,7 +225,7 @@ For `{#async}`, the server always renders `loadingContent` (never awaits the pro
 
 ### expandCustomElements
 
-`packages/component/src/expand-custom-elements.js`
+`packages/component/src/server/expand-custom-elements.js`
 
 After the top-level component renders, its HTML may contain nested custom element tags (e.g., `<ui-icon icon="star">` inside a button template). This function:
 
@@ -581,8 +582,11 @@ TESTING / BENCHING TRAPS (silent failures)
 
 ```
 packages/component/src/
-├── render-to-string.js           renderToString — SSR entry point
-├── expand-custom-elements.js     Recursive custom element expansion
+├── server/index.js               @semantic-ui/component/server, the server functions and the server renderer's registration
+├── server/render-to-string.js    renderToString, the DSD render
+├── server/render-to-static-markup.js   renderToStaticMarkup, the markup alone
+├── server/server-template.js     createServerTemplate, the server instance both renders start from
+├── server/expand-custom-elements.js    Recursive custom element expansion
 ├── component-helpers.js          Shared: resolveAttributeAliases, getUIClasses
 ├── engines/native/base.js        WebComponentBase — hydrate(), canHydrate(), fullRender()
 └── engines/native/factory.js     Creates web component class with observedAttributes

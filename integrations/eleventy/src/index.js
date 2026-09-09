@@ -9,7 +9,7 @@
   expandCustomElements is pure synchronous string work.
 */
 
-import { expandCustomElements, renderToString } from '@semantic-ui/component';
+import { expandCustomElements, renderToString } from '@semantic-ui/component/server';
 
 export default function semanticUI(eleventyConfig, options = {}) {
   const { components = [], hydrate = true } = options;

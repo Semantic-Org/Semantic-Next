@@ -1,4 +1,4 @@
-import { ComponentConstructor } from './define-component.js';
+import { ComponentConstructor } from '../define-component.js';
 
 /**
  * Options for a single {@link renderToString} pass.

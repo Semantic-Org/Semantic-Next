@@ -23,7 +23,7 @@
   for the parallel native-engine internals file.
 */
 
-import { defineComponent, renderToString } from '@semantic-ui/component';
+import { defineComponent, renderToString } from '@semantic-ui/component/server';
 import { Reaction } from '@semantic-ui/reactivity';
 import { LitRenderer } from '@semantic-ui/renderer/lit';
 import { Template } from '@semantic-ui/templating';

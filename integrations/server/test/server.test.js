@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { describe, expect, it } from 'vitest';
 
-import { render, renderHTML } from '../src/index.js';
+import { render, renderHTML, renderStatic } from '../src/index.js';
 
 const Card = defineComponent({
   tagName: 'test-card',
@@ -37,5 +37,16 @@ describe('@semantic-ui/server', () => {
   it('marks hydrate:false output with the ssr attribute', () => {
     const html = render(Card, { title: 'Static' }, { hydrate: false });
     expect(html).toMatch(/<test-card\s+ssr/);
+  });
+
+  it('renders a component to static markup without a shadow root', () => {
+    expect(renderStatic(Card, { title: 'Plain' })).toBe('<div class="card">Plain</div>');
+  });
+
+  it('renders static markup by registered tag name, with css on request', () => {
+    expect(renderStatic('test-card', { title: 'Tagged' }, { css: true })).toEqual({
+      html: '<div class="card">Tagged</div>',
+      css: '.card { padding: 8px; }',
+    });
   });
 });

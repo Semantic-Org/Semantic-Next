@@ -46,6 +46,19 @@ export interface ServerRendererSettings {
 }
 
 /**
+ * The static and text forms, set on a template as `renderOptions` before it
+ * initializes. The web form leaves them unset.
+ */
+export interface ServerRenderOptions {
+  /** Emit hydration markers and bind attributes. Off for the static and text forms. */
+  markers?: boolean;
+  /** Render plain text: no tag scanning, no escaping. */
+  text?: boolean;
+  /** Content per slot name, filled in where `{>slot}` sits in place of a `<slot>` element. */
+  slots?: Record<string, string> | null;
+}
+
+/**
  * Renders a template AST to an HTML string.
  *
  * Same interface as the client `Renderer`, which a template creates instead
@@ -77,6 +90,12 @@ export class ServerRenderer {
   isSVG: boolean;
   /** Keys a data update may not overwrite. */
   protectedKeys?: string[];
+  /** Whether hydration markers and bind attributes are emitted, per the template's {@link ServerRenderOptions}. */
+  markers: boolean;
+  /** Whether the render is plain text, with no tag scanning or escaping. */
+  text: boolean;
+  /** Content per slot name, filled in where `{>slot}` sits, or null to emit `<slot>` elements. */
+  slots: Record<string, string> | null;
   /** Evaluator every expression in this render resolves through. */
   evaluator: ExpressionEvaluator;
 
@@ -106,6 +125,13 @@ export class ServerRenderer {
 
   /** No-op. Nothing subscribes to a server render. */
   bumpDataVersion(): void;
+
+  /**
+   * Wraps a marker body as an HTML comment, or returns an empty string when
+   * {@link markers} is off. Every hydration marker the render emits passes here.
+   * @param body - Marker text, such as `sui:v1:3`
+   */
+  marker(body: string): string;
 
   /**
    * Renders a list of AST nodes to HTML. Called recursively for block contents,

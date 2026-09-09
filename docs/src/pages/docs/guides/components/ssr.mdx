@@ -35,10 +35,11 @@ Your client bundle needs no hydration code. A component detects the server's sha
 
 ## Rendering on the Server
 
-The adapters are built on `renderToString`, exported from `@semantic-ui/component`. It takes a component and its attributes and returns the element with its shadow DOM inlined.
+The adapters are built on `renderToString`, exported from `@semantic-ui/component/server`, the package's server entry. The root entry stays the browser's, so a client bundle carries none of the server rendering. `renderToString` takes a component and its attributes and returns the element with its shadow DOM inlined.
 
 ```javascript {6}
-import { defineComponent, renderToString } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
+import { renderToString } from '@semantic-ui/component/server';
 
 const Card = defineComponent({ tagName: 'my-card', template, css });
 
@@ -60,7 +61,7 @@ Nested components are expanded for you. A template containing `<ui-icon>` produc
 
 <PlaygroundExample id="server-rendering" direction="horizontal"></PlaygroundExample>
 
-### Static Output
+### Server-Only Output
 
 Pass `hydrate: false` for markup that should never become interactive.
 
@@ -69,6 +70,22 @@ const html = renderToString(Card, { title: 'Hello' }, { hydrate: false });
 ```
 
 The element receives an `ssr` attribute and the client leaves it alone.
+
+## Rendering Static Markup
+
+Some destinations never run a component's JavaScript: an email, a feed, a static page. `renderToStaticMarkup` renders the same component to the markup of its template alone, leaving out the shadow root, the style and the hydration markers.
+
+```javascript {4}
+import { defineComponent } from '@semantic-ui/component';
+import { renderToStaticMarkup } from '@semantic-ui/component/server';
+
+const html = renderToStaticMarkup(Card, { title: 'Hello' });
+// <div class="card">Hello</div>
+```
+
+Slot content passes in as `slots` and fills in where each `{>slot}` sits. Nested components render in place. A definition without a `tagName` renders the same way, so an email or a snippet needs no custom element. Pass `text: true` for a plain text version with nothing escaped, and `css: true` to receive `{ html, css }` with the css of every component used, ready for an inliner.
+
+[`@semantic-ui/server`](https://github.com/Semantic-Org/Semantic-Next/tree/main/integrations/server) exposes this as `renderStatic`.
 
 ## Building Components for SSR
 

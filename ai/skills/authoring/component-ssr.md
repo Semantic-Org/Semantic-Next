@@ -251,7 +251,7 @@ const createComponent = ({ isClient }) => ({
 
 ## SSR Pipeline
 
-SUI server-renders through its own native renderer. No Lit, no DOM shim. The published `@semantic-ui/astro` integration is a thin adapter whose `renderToStaticMarkup` calls `renderToString` from `@semantic-ui/component`. The host framework only emits the server HTML and loads the component JS. it never hydrates the component itself.
+SUI server-renders through its own native renderer. No Lit, no DOM shim. The published `@semantic-ui/astro` integration is a thin adapter whose `renderToStaticMarkup` calls `renderToString` from `@semantic-ui/component/server`. The host framework only emits the server HTML and loads the component JS. it never hydrates the component itself.
 
 ### Server Render Flow
 
