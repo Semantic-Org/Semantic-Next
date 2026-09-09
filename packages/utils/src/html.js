@@ -103,7 +103,8 @@ export const indentHTML = (html, options = {}) => {
 const isSpace = (code) => code === 32 || code === 10 || code === 9 || code === 13 || code === 12;
 const isLetter = (code) => (code > 96 && code < 123) || (code > 64 && code < 91);
 const endsName = (code) => isSpace(code) || code === 62 || code === 47;
-const endsAttributeName = (code) => endsName(code) || code === 61 || code === 34 || code === 39;
+// a quote never ends a name, the spec keeps it as a name character
+const endsAttributeName = (code) => endsName(code) || code === 61;
 
 const DOCTYPE = 'doctype';
 const isDoctypeAt = (html, position) => {
@@ -136,11 +137,13 @@ const readAttributes = (html, position, attributes) => {
     }
     if (code === 62) { return { end: position + 1, selfClosing: false }; }
     if (code === 47 && html.charCodeAt(position + 1) === 62) { return { end: position + 2, selfClosing: true }; }
-    if (endsAttributeName(code)) {
+    // a stray slash is the one byte the spec drops inside a tag
+    if (code === 47) {
       position++;
       continue;
     }
-    const nameStart = position;
+    // whatever else stands here starts the name, an = or a quote included
+    const nameStart = position++;
     while (position < length && !endsAttributeName(html.charCodeAt(position))) { position++; }
     const name = html.slice(nameStart, position);
     let scan = position;

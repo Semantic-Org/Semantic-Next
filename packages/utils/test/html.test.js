@@ -307,6 +307,24 @@ describe('parseHTML', () => {
       ]);
     });
 
+    it('should start an attribute name with = or a quote and never end one at a quote, as the spec reads them', () => {
+      expect(parseHTML("<hr role={getAriaProp 'role'}>")[0].attributes).toEqual([
+        attribute('role', '{getAriaProp', ''),
+        attribute("'role'}", null, ''),
+      ]);
+      expect(parseHTML('<div "x">')[0].attributes).toEqual([attribute('"x"', null, '')]);
+      expect(parseHTML('<a =b>')[0].attributes).toEqual([attribute('=b', null, '')]);
+      expect(parseHTML('<b primary={filter == filterName}>')[0].attributes).toEqual([
+        attribute('primary', '{filter', ''),
+        attribute('=', 'filterName}', ''),
+      ]);
+      expect(parseHTML('<a b"c=1>')[0].attributes).toEqual([attribute('b"c', '1', '')]);
+    });
+
+    it('should drop only a stray slash inside a tag', () => {
+      expect(parseHTML('<a / b>')[0].attributes).toEqual([attribute('b', null, '')]);
+    });
+
     it('should keep duplicate attributes in order and entities undecoded', () => {
       const [element] = parseHTML('<a class="x" class="y" title="&amp;&quot;">');
       expect(element.attributes).toEqual([
@@ -504,12 +522,14 @@ describe('parseHTML', () => {
 
     it('should never throw on markup soup', () => {
       each(
-        ['<', '<>', '</>', '<!', '<!-', '<a =', '<a ="', '<a/', '<a /', '<<<', '<a b=c d>>', '<div "x">'],
+        ['<', '<>', '</>', '<!', '<!-', '<a =', '<a ="', '<a/', '<a /', '<<<', '<hr "x">', '<div "x"></div>'],
         (soup) => {
           expect(() => parseHTML(soup)).not.toThrow();
-          expect(stringifyHTML(parseHTML(soup))).toBeTypeOf('string');
+          expect(stringifyHTML(parseHTML(soup))).toBe(soup);
         },
       );
+      // the one open element grows its close tag on the way back
+      expect(stringifyHTML(parseHTML('<a b=c d>>'))).toBe('<a b=c d>></a>');
     });
   });
 });
@@ -521,6 +541,13 @@ describe('stringifyHTML', () => {
     const html = '<!DOCTYPE html>\n<div class="a" id=b data-x=\'y\' hidden>\n  <p>Hi <b>there</b> &amp; you</p>\n'
       + '  <!-- note -->\n  <img src="x.png" alt="">\n  <br />\n  <script>if (a < b) {}</script>\n</div>\n';
     expect(roundTrip(html)).toBe(html);
+  });
+
+  it('should keep the bytes of a template expression in an attribute', () => {
+    expect(roundTrip("<hr role={getAriaProp 'role'}>")).toBe("<hr role={getAriaProp 'role'}>");
+    expect(roundTrip('<div "x"></div>')).toBe('<div "x"></div>');
+    expect(roundTrip('<a =b></a>')).toBe('<a =b></a>');
+    expect(roundTrip('<b primary={filter == filterName}></b>')).toBe('<b primary={filter ==filterName}></b>');
   });
 
   it('should write a self closing tag with a space before the slash', () => {
