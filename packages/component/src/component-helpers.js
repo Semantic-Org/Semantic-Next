@@ -403,6 +403,46 @@ export function getUIClasses(el, { componentSpec, properties }) {
   return classString;
 }
 
+/*
+  The server instance of a component. Attributes arrive by their html names, so
+  they are read as property names and aliased through the spec before the defaults
+  merge under them. The prototype clones with that data and initializes, so
+  createComponent runs with isServer. renderOptions reach the renderer as given.
+*/
+export function createServerTemplate(ComponentClass, attrs = {}, { renderOptions } = {}) {
+  const tagName = ComponentClass.componentTagName;
+  if (!tagName) {
+    throw new Error('a server render needs a component defined with a tagName');
+  }
+  const proto = ComponentClass.template;
+  if (!proto) {
+    throw new Error(`Component ${tagName} has no template`);
+  }
+  const defaultSettings = ComponentClass.config?.defaultSettings || {};
+  const componentSpec = ComponentClass.config?.componentSpec;
+  const resolvedProperties = ComponentClass.config?.resolvedProperties || ComponentClass.properties || {};
+
+  // fromAttribute converters already ran wherever attributes came from markup
+  const normalizedAttrs = {};
+  each(attrs, (value, key) => {
+    normalizedAttrs[kebabToCamel(key)] = value;
+  });
+  resolveAttributeAliases(normalizedAttrs, componentSpec);
+
+  const specDefaults = componentSpec?.defaultValues || {};
+  const data = { ...specDefaults, ...defaultSettings, ...normalizedAttrs };
+  const template = proto.clone({ data, renderingEngine: 'native', renderOptions });
+  // no host element on the server, so the settings are the data itself
+  template.settings = data;
+  template.initialize();
+
+  // after initialize, since createComponent can change the settings {uiClasses} reads
+  if (componentSpec) {
+    data.uiClasses = getUIClasses(data, { componentSpec, properties: resolvedProperties });
+  }
+  return { template, normalizedAttrs, resolvedProperties };
+}
+
 export function isDarkMode(el) {
   return (isServer)
     ? undefined

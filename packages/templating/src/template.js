@@ -80,6 +80,7 @@ export const Template = class Template {
     createComponent,
     parentTemplate, // the parent template when nested
     renderingEngine = 'native',
+    renderOptions, // read by the engine's renderer, forwarded as given
     isPrototype = false,
     attachStyles = false, // whether to construct css stylesheet and attach to renderRoot
     onCreated = noop,
@@ -124,6 +125,7 @@ export const Template = class Template {
     this.attachStyles = attachStyles;
     this.element = element;
     this.renderingEngine = renderingEngine;
+    this.renderOptions = renderOptions;
     if (renderRoot) {
       this.attach(renderRoot);
     }
@@ -357,6 +359,7 @@ export const Template = class Template {
       subTemplates: this.subTemplates,
       helpers: TemplateHelpers,
       receivesData: this.isSubtemplate(),
+      ...this.renderOptions,
     });
 
     this.callParams = this.buildCallParams();
