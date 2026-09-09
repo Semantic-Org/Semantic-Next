@@ -412,6 +412,13 @@ describe('parseHTML', () => {
       expect(div.children[0]).toMatchObject({ name: 'p' });
     });
 
+    it('should read an unquoted value through a slash, as a browser does', () => {
+      expect(parseHTML('<img src=x/>')[0]).toMatchObject({
+        attributes: [attribute('src', 'x/', '')],
+        selfClosing: false,
+      });
+    });
+
     it('should nest self-closed elements inside svg', () => {
       const [svg] = parseHTML('<svg viewBox="0 0 1 1"><circle cx="1"/><path d="M0 0"/></svg>');
       expect(svg.children.map((child) => child.name)).toEqual(['circle', 'path']);
@@ -482,8 +489,8 @@ describe('parseHTML', () => {
       expect(parseHTML('a <b')).toEqual([text('a <b', 0, 4)]);
     });
 
-    it('should read an unterminated quoted value to the end of the string', () => {
-      expect(parseHTML('<a href="x>')[0]).toMatchObject({ attributes: [attribute('href', 'x>')], end: 11 });
+    it('should keep a tag whose quote never closes as text', () => {
+      expect(parseHTML('<a href="x>')).toEqual([text('<a href="x>', 0, 11)]);
     });
   });
 
@@ -518,7 +525,7 @@ describe('stringifyHTML', () => {
 
   it('should write a self closing tag with a space before the slash', () => {
     expect(roundTrip('<br/>')).toBe('<br />');
-    expect(roundTrip('<img src=x/>')).toBe('<img src=x />');
+    expect(roundTrip('<img src="x"/>')).toBe('<img src="x" />');
     expect(roundTrip('<my-el a="1" />')).toBe('<my-el a="1" />');
   });
 
