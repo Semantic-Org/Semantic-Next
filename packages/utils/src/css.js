@@ -743,23 +743,25 @@ export const scopeStyles = (css, scopeSelector = '', { replaceHost = false, appe
   const scopeRule = (rule, scopeSelector) => {
     if (rule.type === CSSRule.STYLE_RULE) {
       let selectorText = rule.selectorText;
+      // the engine's cssText holds the nested rules too, so only the selector head changes
+      const body = rule.cssText.slice(selectorText.length);
 
       // Handle :host replacement
       if (replaceHost && selectorText.includes(':host')) {
         selectorText = selectorText
           .replace(/:host\(([^)]+)\)/g, `${scopeSelector}$1`) // :host(.class) -> .scope.class
           .replace(/:host/g, scopeSelector); // :host -> .scope
-        return `${selectorText} { ${rule.style.cssText} }`;
+        return selectorText + body;
       }
 
       // Handle html/body - append scope instead of prepend
       const lower = selectorText.toLowerCase();
       if (appendToRootElements && (lower === 'html' || lower === 'body')) {
-        return `${selectorText} ${scopeSelector} { ${rule.style.cssText} }`;
+        return `${selectorText} ${scopeSelector}${body}`;
       }
 
       // Default: prepend scope
-      return `${scopeSelector} ${selectorText} { ${rule.style.cssText} }`;
+      return `${scopeSelector} ${selectorText}${body}`;
     }
     else if (rule.type === CSSRule.MEDIA_RULE || rule.type === CSSRule.SUPPORTS_RULE) {
       let scopedInnerRules = [];
