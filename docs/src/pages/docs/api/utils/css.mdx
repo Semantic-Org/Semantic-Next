@@ -3,12 +3,12 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: CSS Utilities
 package: "@semantic-ui/utils"
-methods: [adoptStylesheet, extractCSS, scopeStyles]
+methods: [parseCSS, stringifyCSS, selectorSpecificity, scopeStyles, adoptStylesheet, extractCSS]
 icon: palette
 description: API reference for CSS utility functions
 ---
 
-The CSS utilities provide functions for working with stylesheets, including adoption to documents and shadow roots, extraction of rules, and scoping for component isolation.
+The CSS utilities provide functions for working with stylesheets: reading one into plain nodes and writing it back with no DOM, scoring selectors, scoping a sheet for component isolation, and in the browser adopting stylesheets to documents and shadow roots and extracting rules from them.
 
 ## Functions
 
@@ -110,14 +110,14 @@ const widgetRules = extractCSS('.widget', [sheet1, sheet2]);
 function scopeStyles(css, scopeSelector, { replaceHost, appendToRootElements } = {})
 ```
 
-Scopes CSS rules by prepending a selector to all rules with configurable options for web component integration and root element handling.
+Scopes a stylesheet under a selector, with configurable options for web component integration and root element handling. It reads the sheet through `parseCSS`, so it runs on the server as well as in the browser, and nested rules stay under their scoped parent. Every selector in a top-level rule and in the rules inside `@media`, `@supports`, `@layer` and `@container` blocks gains the scope, while keyframe selectors are left alone. The output is written in the canonical layout of `stringifyCSS`.
 
 #### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
 | css | string | The CSS string to scope |
-| scopeSelector | string | The selector to use for scoping (case-insensitive). Defaults to empty string |
+| scopeSelector | string | The selector to scope under, kept as written. Defaults to empty string, which leaves selectors unchanged |
 | options | object | Optional configuration |
 
 ##### Options
@@ -136,19 +136,168 @@ The scoped CSS string with all rules modified according to the scoping strategy.
 ```javascript
 import { scopeStyles } from '@semantic-ui/utils';
 
-// Basic scoping - prepends .my-component to all selectors
-const scoped = scopeStyles('.button { color: red; }', '.my-component');
-// Result: .my-component .button { color: red; }
+// Basic scoping - prepends .my-component to every selector
+const scoped = scopeStyles('.button, .link { color: red; }', '.my-component');
+// .my-component .button, .my-component .link {
+//   color: red;
+// }
+
+// Nested rules stay under the scoped parent
+const nested = scopeStyles('.button { color: red; &:hover { color: blue; } }', '.my-component');
+// .my-component .button {
+//   color: red;
+//   &:hover {
+//     color: blue;
+//   }
+// }
 
 // Replace :host selectors for web component CSS porting
 const hostCSS = ':host { display: block; } :host(.active) { opacity: 1; }';
 const ported = scopeStyles(hostCSS, '.widget', { replaceHost: true });
-// Result: .widget { display: block; } .widget.active { opacity: 1; }
+// .widget { display: block; } and .widget.active { opacity: 1; }
 
 // Handle root elements with prepending
 const rootCSS = 'html { font-size: 16px; } body { margin: 0; }';
 const rootScoped = scopeStyles(rootCSS, '.app', { appendToRootElements: false });
-// Result: .app html { font-size: 16px; } .app body { margin: 0; }
+// .app html { font-size: 16px; } and .app body { margin: 0; }
 ```
 
 > **Web Component Integration** Use `replaceHost: true` when porting existing web component CSS to scoped styles. The function handles both `:host` and `:host(.class)` syntax correctly.
+
+### parseCSS
+
+```javascript
+function parseCSS(css, { flatten = false } = {})
+```
+
+Reads a stylesheet into plain nodes with nesting kept as written, on the server as in a browser. Comments are dropped, `!important` is read off each declaration, custom properties read like any other declaration, and every at-rule reads as a node. Malformed input never throws: the sheet reads as far as it parses, the way a browser recovers.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| css | string | The CSS text to read |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| flatten | boolean | false | Flatten nesting the way a preprocessor writes it: `&` becomes the parent selector, a nested selector without `&` a descendant, a selector list times a list multiplies out, and an at-rule nested in a rule lifts out with the rule rebuilt inside it. Rules keep their declarations and their written order |
+
+#### Returns
+
+An array of the stylesheet's top-level nodes. Three node shapes appear in a tree:
+
+| Node | Shape |
+|------|-------|
+| rule | `{ type: 'rule', selectors: string[], children: [...] }`, the selector list split on top-level commas |
+| at-rule | `{ type: 'at', name, prelude, children: [...] }` for a block (`@media`, `@layer name`, `@font-face`), `{ type: 'at', name, prelude }` for a statement (`@import`, `@layer a, b;`) |
+| declaration | `{ type: 'declaration', property, value, important }`, the property and value as written |
+
+A rule's `children` hold its declarations, nested rules and nested at-rules in the order written, so a consumer filters by `type`.
+
+#### Example
+
+```javascript
+import { parseCSS } from '@semantic-ui/utils';
+
+parseCSS('.a { color: red; &:hover { color: blue } }');
+// [{ type: 'rule', selectors: ['.a'], children: [
+//   { type: 'declaration', property: 'color', value: 'red', important: false },
+//   { type: 'rule', selectors: ['&:hover'], children: [
+//     { type: 'declaration', property: 'color', value: 'blue', important: false },
+//   ] },
+// ] }]
+
+parseCSS('.a { color: red; &:hover { color: blue } }', { flatten: true });
+// [{ type: 'rule', selectors: ['.a'], children: [...] },
+//  { type: 'rule', selectors: ['.a:hover'], children: [...] }]
+
+parseCSS('@media (min-width: 40em) { .a { gap: 1rem } }');
+// [{ type: 'at', name: 'media', prelude: '(min-width: 40em)', children: [
+//   { type: 'rule', selectors: ['.a'], children: [...] },
+// ] }]
+
+parseCSS('@import url("x.css") layer(base);');
+// [{ type: 'at', name: 'import', prelude: 'url("x.css") layer(base)' }]
+
+// the tree is plain data
+const custom = parseCSS(css)
+  .filter((node) => node.type === 'rule' && node.selectors.includes(':host'))
+  .flatMap((rule) => rule.children.filter((child) => child.type === 'declaration' && child.property.startsWith('--')));
+```
+
+### stringifyCSS
+
+```javascript
+function stringifyCSS(nodes, { indent = '  ' } = {})
+```
+
+Writes a tree of nodes back to CSS text in one canonical layout, with one declaration per line and nested blocks indented per level. `parseCSS(stringifyCSS(nodes))` reads back as the same tree.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| nodes | array | The nodes to write, as `parseCSS` returns them or built by hand |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| indent | string | `'  '` | The indentation per nesting level |
+
+#### Returns
+
+The CSS text, with no trailing newline.
+
+#### Example
+
+```javascript
+import { parseCSS, stringifyCSS } from '@semantic-ui/utils';
+
+stringifyCSS(parseCSS('.a{color:red}'));
+// .a {
+//   color: red;
+// }
+
+const nodes = parseCSS('.a { color: red }');
+nodes[0].selectors = ['.b'];
+stringifyCSS(nodes);
+// .b {
+//   color: red;
+// }
+
+stringifyCSS(nodes, { indent: '\t' });
+```
+
+### selectorSpecificity
+
+```javascript
+function selectorSpecificity(selector)
+```
+
+The specificity of one selector as `[ids, classes, elements]`, following Selectors Level 4: `:is()`, `:not()` and `:has()` count their most specific argument, `:where()` counts nothing, `:host()` and `::slotted()` add their argument. A selector list is not one selector, so pass each selector on its own.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | One selector |
+
+#### Returns
+
+A three-number array, compared left to right. An empty selector reads as `[0, 0, 0]`.
+
+#### Example
+
+```javascript
+import { selectorSpecificity } from '@semantic-ui/utils';
+
+selectorSpecificity('li'); // [0, 0, 1]
+selectorSpecificity('#nav .item a:hover'); // [1, 2, 1]
+selectorSpecificity(':is(#a, .b) span'); // [1, 0, 1]
+selectorSpecificity(':where(.reset) *'); // [0, 0, 0]
+```
