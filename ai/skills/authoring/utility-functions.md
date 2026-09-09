@@ -833,7 +833,31 @@ throttled.pending();
 ## CSS Utilities (css.js)
 
 ```javascript
-import { adoptStylesheet, extractCSS, scopeStyles } from '@semantic-ui/utils';
+import { adoptStylesheet, extractCSS, parseCSS, scopeStyles, selectorSpecificity, stringifyCSS } from '@semantic-ui/utils';
+
+// Read a stylesheet into plain nodes, no DOM, nesting as written. A rule holds its
+// selectors and its children (declarations, nested rules, nested at-rules) in source order
+parseCSS('.a { color: red; &:hover { color: blue } }');
+// [{ type: 'rule', selectors: ['.a'], children: [
+//   { type: 'declaration', property: 'color', value: 'red', important: false },
+//   { type: 'rule', selectors: ['&:hover'], children: [...] },
+// ] }]
+parseCSS('@import url("x.css");');   // [{ type: 'at-rule', name: 'import', prelude: 'url("x.css")' }] — a statement has no children
+parseCSS('@media (x) { .a {} }');     // [{ type: 'at-rule', name: 'media', prelude: '(x)', children: [...] }]
+
+// flatten nesting the way a preprocessor writes it: & is the parent, a bare nested selector a
+// descendant, lists multiply, a nested at-rule lifts out with the rule rebuilt inside. Order is kept
+parseCSS('.a, .b { .c { d: e } }', { flatten: true });
+// [{ type: 'rule', selectors: ['.a .c', '.b .c'], children: [...] }]
+
+// write a tree back in one canonical layout. parseCSS(stringifyCSS(nodes)) is the same tree
+stringifyCSS(parseCSS('.a{color:red}'));   // '.a {\n  color: red;\n}'
+stringifyCSS(nodes, { indent: '\t' });
+
+// specificity per Selectors 4, one selector at a time
+selectorSpecificity('#nav .item a:hover');  // [1, 2, 1]
+selectorSpecificity(':is(#a, .b) span');    // [1, 0, 1]
+selectorSpecificity(':where(.reset) *');    // [0, 0, 0]
 
 // Adopt CSS via constructable stylesheets with dedup caching
 adoptStylesheet('.button { color: white; }');                // adopts to document
@@ -845,7 +869,7 @@ extractCSS('.button', cssString, { returnText: true });      // returns CSS text
 extractCSS('.btn', stylesheet, { exactMatch: true });        // exact selector match
 extractCSS('.widget', [sheet1, sheet2]);                     // from array of sheets
 
-// Scope CSS rules under a selector
+// Scope CSS rules under a selector (browser, via CSSStyleSheet), nested rules kept
 scopeStyles('.button { color: red; }', '.my-scope');
 // '.my-scope .button { color: red; }'
 
