@@ -176,6 +176,28 @@ const Page = defineComponent({
 const pageHTML = '<div><span class="part">x</span><span class="part">y</span>'
   + '<section><header><h2 slot="title">T</h2></header><p>body</p></section></div>';
 
+// a custom tag inside script text is text to a browser, so the expander leaves it alone
+const Scripted = defineComponent({
+  tagName: 'static-scripted',
+  template:
+    '<script>var markup = "<static-part label=no></static-part>";</script><static-part label="yes"></static-part>',
+});
+const scriptText = '<script>var markup = "<static-part label=no></static-part>";</script>';
+
+describe('custom element tags inside raw text', () => {
+  it('stay text under renderToString', () => {
+    const html = renderToString(Scripted);
+    expect(html).toContain(scriptText);
+    expect(html).toContain('<static-part label="yes"><template shadowrootmode="open">');
+  });
+
+  it('stay text under renderToStaticMarkup', () => {
+    const html = renderToStaticMarkup(Scripted);
+    expect(html).toContain(scriptText);
+    expect(html).toContain('<span class="part">yes</span>');
+  });
+});
+
 describe('renderToStaticMarkup with nested components', () => {
   it('renders a nested component flat where its tag sat, its children assigned to its slots', () => {
     const html = renderToStaticMarkup(Page);

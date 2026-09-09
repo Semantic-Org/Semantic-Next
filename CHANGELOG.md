@@ -135,6 +135,7 @@ xx.xx.xxxx
 * **Enhancement** - `scopeStyles` keeps a rule's nested rules under the scoped parent (they were dropped)
 
 ### Component
+* **Bug** - Server rendering no longer expands a custom element tag that sits inside `<script>`, `<style>`, `<textarea>` or `<title>` text, which a browser reads as text
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
 * **Bug** - Fix reactions on `settings` would not trigger reactions when settings updated via attribute.
 * **Bug** - Boolean attributes now read the generous vocabulary — `active="no"`, `"off"`, and `"disabled"` parse as `false` where the raw `Boolean()` fallback read any non-empty string as `true`. Presence (`<my-el active>`) still reads `true`, and a vocabulary added via `toBoolean.config` at boot applies to attribute parsing too

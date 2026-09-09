@@ -1,271 +1,84 @@
 // the registry by package name, so a bundle per entry reads the one the root writes
 import { getComponent } from '@semantic-ui/component';
-import { isString, unescapeHTML } from '@semantic-ui/utils';
+import { each, isString, parseHTML, unescapeHTML } from '@semantic-ui/utils';
 
 import { resolveAttributeAliases } from '../component-helpers.js';
 
 const MAX_DEPTH = 10;
 
+// a custom element name as the browser registers one, lowercase with a hyphen
+const CUSTOM_TAG = /^[a-z][a-z0-9]*-/;
+
 /*
-  Phase 2 of SSR: scan rendered HTML for custom element tags,
-  look them up in the component registry, and recursively render
-  their shadow DOM as DSD.
+  Phase 2 of SSR: read the rendered HTML into a tree, look every custom element tag up in the
+  component registry, and recursively render the registered ones as DSD in place. The tree's
+  spans splice the original string, so everything not expanded passes through byte for byte,
+  and a tag inside script or style text is text.
 
   Input:  '<div><ui-icon icon="home"></ui-icon></div>'
   Output: '<div><ui-icon icon="home"><template shadowrootmode="open">...</template></ui-icon></div>'
 
-  Custom element tags are identified by containing a hyphen (per spec).
-  Only tags registered in the component registry are expanded.
   The `renderFn` parameter breaks the circular dependency with renderToString.
 */
 export function expandCustomElements(html, { depth = 0, hydrate = true, renderFn, assignSlots = false } = {}) {
   if (depth >= MAX_DEPTH) { return html; }
 
   let result = '';
-  let pos = 0;
+  let cursor = 0;
 
-  while (pos < html.length) {
-    const tagStart = findNextCustomElement(html, pos);
-    if (tagStart === -1) {
-      result += html.slice(pos);
-      break;
-    }
-
-    // Copy everything before the custom element
-    result += html.slice(pos, tagStart);
-
-    // Parse the opening tag
-    const openTag = parseOpenTag(html, tagStart);
-    if (!openTag) {
-      // Malformed — pass through the '<' and continue
-      result += html[tagStart];
-      pos = tagStart + 1;
-      continue;
-    }
-
-    const ComponentClass = getComponent(openTag.tagName);
-    if (!ComponentClass) {
-      // Not a registered component — pass through as-is
-      result += html.slice(tagStart, openTag.end);
-      pos = openTag.end;
-      // If not self-closing, find and pass through the closing tag too
-      if (!openTag.selfClosing) {
-        const close = findClosingTag(html, openTag.end, openTag.tagName);
-        result += html.slice(openTag.end, close.end);
-        pos = close.end;
+  const expand = (nodes) => {
+    each(nodes, (node) => {
+      if (node.type !== 'element') { return; }
+      if (!CUSTOM_TAG.test(node.name)) {
+        expand(node.children);
+        return;
       }
-      continue;
-    }
+      // an unregistered custom element passes through whole, its children with it
+      const ComponentClass = getComponent(node.name);
+      if (!ComponentClass) { return; }
 
-    // Extract children (light DOM content between open and close tags)
-    let children = '';
-    let afterElement;
-    if (openTag.selfClosing) {
-      afterElement = openTag.end;
-    }
-    else {
-      const close = findClosingTag(html, openTag.end, openTag.tagName);
-      children = html.slice(openTag.end, close.start);
-      afterElement = close.end;
-    }
+      // Astro pre-renders child components before passing them as slot content to parents
+      const children = html.slice(node.innerStart, node.innerEnd);
+      if (children.trimStart().startsWith('<template shadowrootmode')) { return; }
 
-    // Skip elements that already have a DSD — Astro pre-renders child
-    // components before passing them as slot content to parents
-    if (children.trimStart().startsWith('<template shadowrootmode')) {
-      result += html.slice(tagStart, afterElement);
-      pos = afterElement;
-      continue;
-    }
-
-    // Convert parsed attributes to a props object using the component's property types
-    const attrs = deserializeAttrs(openTag.attrs, ComponentClass);
-
-    // the DSD path leaves slot assignment to the browser, the flat path has no browser
-    const rendered = renderFn(ComponentClass, attrs, {
-      slots: children ? (assignSlots ? slotsFrom(children) : { default: children }) : null,
-      depth: depth + 1,
-      hydrate,
+      const rendered = renderFn(ComponentClass, deserializeAttrs(node.attributes, ComponentClass), {
+        // the DSD path leaves slot assignment to the browser, the flat path has no browser
+        slots: children ? (assignSlots ? slotsFrom(node, html) : { default: children }) : null,
+        depth: depth + 1,
+        hydrate,
+      });
+      result += html.slice(cursor, node.start) + rendered;
+      cursor = node.end;
     });
+  };
 
-    result += rendered;
-    pos = afterElement;
-  }
-
-  return result;
+  expand(parseHTML(html));
+  return result + html.slice(cursor);
 }
 
 /*
-  Find the start position of the next custom element tag (contains a hyphen).
-  Skips HTML comments and non-custom-element tags.
-*/
-function findNextCustomElement(html, start) {
-  let pos = start;
-  while (pos < html.length) {
-    const idx = html.indexOf('<', pos);
-    if (idx === -1) { return -1; }
-
-    // Skip comments
-    if (html.startsWith('<!--', idx)) {
-      const end = html.indexOf('-->', idx + 4);
-      pos = end === -1 ? html.length : end + 3;
-      continue;
-    }
-
-    // Skip closing tags
-    if (html[idx + 1] === '/') {
-      pos = idx + 2;
-      continue;
-    }
-
-    // Try to read a tag name
-    const nameMatch = html.slice(idx + 1).match(/^([a-z][a-z0-9]*-[a-z0-9-]*)/);
-    if (nameMatch) {
-      return idx;
-    }
-
-    pos = idx + 1;
-  }
-  return -1;
-}
-
-/*
-  Parse an opening tag starting at `pos`, any element name since slot assignment
-  reads plain tags too. Returns { tagName, attrs: { key: value }, end, selfClosing } or null.
-*/
-function parseOpenTag(html, pos) {
-  // Read tag name
-  const nameMatch = html.slice(pos + 1).match(/^([a-zA-Z][\w:-]*)/);
-  if (!nameMatch) { return null; }
-
-  const tagName = nameMatch[1];
-  let i = pos + 1 + tagName.length;
-  const attrs = {};
-
-  // Parse attributes until we hit > or />
-  while (i < html.length) {
-    // Skip whitespace
-    while (i < html.length && /\s/.test(html[i])) { i++; }
-
-    // End of tag?
-    if (html[i] === '>') {
-      return { tagName, attrs, end: i + 1, selfClosing: false };
-    }
-    if (html[i] === '/' && html[i + 1] === '>') {
-      return { tagName, attrs, end: i + 2, selfClosing: true };
-    }
-
-    // Read attribute name
-    const attrStart = i;
-    while (i < html.length && !/[\s=/>]/.test(html[i])) { i++; }
-    const attrName = html.slice(attrStart, i);
-    if (!attrName) { break; }
-
-    // Skip whitespace
-    while (i < html.length && /\s/.test(html[i])) { i++; }
-
-    // No value — boolean attribute
-    if (html[i] !== '=') {
-      attrs[attrName] = true;
-      continue;
-    }
-
-    // Skip '='
-    i++;
-    while (i < html.length && /\s/.test(html[i])) { i++; }
-
-    // Read value
-    const quote = html[i];
-    if (quote === '"' || quote === "'") {
-      i++; // skip opening quote
-      const valueStart = i;
-      while (i < html.length && html[i] !== quote) { i++; }
-      attrs[attrName] = unescapeHTML(html.slice(valueStart, i));
-      i++; // skip closing quote
-    }
-    else {
-      // Unquoted value
-      const valueStart = i;
-      while (i < html.length && !/[\s>]/.test(html[i])) { i++; }
-      attrs[attrName] = unescapeHTML(html.slice(valueStart, i));
-    }
-  }
-
-  return null; // Reached end of string without closing >
-}
-
-/*
-  Find the matching closing tag, handling nested elements of the same tag name.
-  Returns { start, end } where start is the '<' of </tagName> and end is after '>'.
-*/
-function findClosingTag(html, start, tagName) {
-  let depth = 1;
-  let pos = start;
-  const openPattern = `<${tagName}`;
-  const closePattern = `</${tagName}`;
-
-  while (pos < html.length && depth > 0) {
-    // Skip HTML comments — they may contain tag-like content
-    if (html.startsWith('<!--', pos)) {
-      const commentEnd = html.indexOf('-->', pos + 4);
-      pos = commentEnd === -1 ? html.length : commentEnd + 3;
-      continue;
-    }
-
-    const nextOpen = html.indexOf(openPattern, pos);
-    const nextClose = html.indexOf(closePattern, pos);
-
-    if (nextClose === -1) {
-      // No closing tag found — treat rest of string as content
-      return { start: html.length, end: html.length };
-    }
-
-    if (nextOpen !== -1 && nextOpen < nextClose) {
-      // Check it's actually a tag open (not just a substring match)
-      const charAfter = html[nextOpen + openPattern.length];
-      if (charAfter && /[\s/>]/.test(charAfter)) {
-        depth++;
-      }
-      pos = nextOpen + openPattern.length;
-    }
-    else {
-      // Check it's actually a tag close
-      const charAfter = html[nextClose + closePattern.length];
-      if (charAfter && /[\s>]/.test(charAfter)) {
-        depth--;
-        if (depth === 0) {
-          const closeEnd = html.indexOf('>', nextClose) + 1;
-          return { start: nextClose, end: closeEnd || html.length };
-        }
-      }
-      pos = nextClose + closePattern.length;
-    }
-  }
-
-  return { start: html.length, end: html.length };
-}
-
-/*
-  Convert parsed attribute strings to typed values using the component's
+  Convert the attributes as written to typed values using the component's
   property definitions.
 */
-function deserializeAttrs(rawAttrs, ComponentClass) {
+function deserializeAttrs(attributes, ComponentClass) {
   const resolvedProperties = ComponentClass.config?.resolvedProperties || ComponentClass.properties || {};
   const attrs = {};
 
-  for (const [attrName, rawValue] of Object.entries(rawAttrs)) {
+  each(attributes, ({ name, value }) => {
     // Convert kebab attribute names to camelCase property names
-    const propName = attrName.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    const propName = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    const rawValue = value === null ? true : unescapeHTML(value);
 
-    const propConfig = resolvedProperties[propName] || resolvedProperties[attrName];
+    const propConfig = resolvedProperties[propName] || resolvedProperties[name];
 
     // Use fromAttribute converter if available
-    if (propConfig?.converter?.fromAttribute && typeof rawValue === 'string') {
+    if (propConfig?.converter?.fromAttribute && isString(rawValue)) {
       attrs[propName] = propConfig.converter.fromAttribute(rawValue);
     }
     else {
       attrs[propName] = rawValue;
     }
-  }
+  });
 
   // Resolve option attributes (e.g. tiny → size="tiny")
   resolveAttributeAliases(attrs, ComponentClass.config?.componentSpec);
@@ -278,38 +91,15 @@ function deserializeAttrs(rawAttrs, ComponentClass) {
   child carrying slot="name" is that slot's content, everything else the default's.
   Elements stay whole, so a slot attribute deeper down belongs to its own element.
 */
-function slotsFrom(children) {
+function slotsFrom(element, html) {
   const slots = {};
-  const assign = (name, content) => {
+  each(element.children, (child) => {
+    const slot = child.type === 'element' ? child.attributes.find((attribute) => attribute.name === 'slot') : null;
+    const name = slot && isString(slot.value) ? slot.value : 'default';
+    const content = html.slice(child.start, child.end);
     if (content) {
       slots[name] = (slots[name] || '') + content;
     }
-  };
-  let pos = 0;
-  while (pos < children.length) {
-    const tagStart = children.indexOf('<', pos);
-    if (tagStart === -1) {
-      assign('default', children.slice(pos));
-      break;
-    }
-    assign('default', children.slice(pos, tagStart));
-    if (children.startsWith('<!--', tagStart)) {
-      const commentEnd = children.indexOf('-->', tagStart + 4);
-      pos = commentEnd === -1 ? children.length : commentEnd + 3;
-      assign('default', children.slice(tagStart, pos));
-      continue;
-    }
-    const openTag = parseOpenTag(children, tagStart);
-    if (!openTag) {
-      assign('default', children[tagStart]);
-      pos = tagStart + 1;
-      continue;
-    }
-    // a void element has no closing tag, so its extent is the open tag alone
-    const close = openTag.selfClosing ? null : findClosingTag(children, openTag.end, openTag.tagName);
-    const end = close && close.start < children.length ? close.end : openTag.end;
-    assign(isString(openTag.attrs.slot) ? openTag.attrs.slot : 'default', children.slice(tagStart, end));
-    pos = end;
-  }
+  });
   return slots;
 }
