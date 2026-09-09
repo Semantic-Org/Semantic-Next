@@ -127,16 +127,21 @@ const findRawTextClose = (html, from, name) => {
   return -1;
 };
 
-const readAttributes = (html, position, attributes) => {
+// the attributes and the end of an open tag, read from just after its name, null when the
+// source runs out before the tag closes
+const openTagFrom = (html, position) => {
   const length = html.length;
+  const attributes = [];
   while (position < length) {
     const code = html.charCodeAt(position);
     if (isSpace(code)) {
       position++;
       continue;
     }
-    if (code === 62) { return { end: position + 1, selfClosing: false }; }
-    if (code === 47 && html.charCodeAt(position + 1) === 62) { return { end: position + 2, selfClosing: true }; }
+    if (code === 62) { return { attributes, end: position + 1, selfClosing: false }; }
+    if (code === 47 && html.charCodeAt(position + 1) === 62) {
+      return { attributes, end: position + 2, selfClosing: true };
+    }
     // a stray slash is the one byte the spec drops inside a tag
     if (code === 47) {
       position++;
@@ -265,8 +270,7 @@ export const parseHTML = (html, { closeOnSlash = true } = {}) => {
     let position = tagStart + 1;
     while (position < length && !endsName(html.charCodeAt(position))) { position++; }
     const name = html.slice(tagStart + 1, position);
-    const attributes = [];
-    const tag = readAttributes(html, position, attributes);
+    const tag = openTagFrom(html, position);
     if (tag === null) { break; }
 
     const lowerName = name.toLowerCase();
@@ -274,7 +278,7 @@ export const parseHTML = (html, { closeOnSlash = true } = {}) => {
     const node = {
       type: 'element',
       name,
-      attributes,
+      attributes: tag.attributes,
       children: [],
       selfClosing: tag.selfClosing,
       start: tagStart,
