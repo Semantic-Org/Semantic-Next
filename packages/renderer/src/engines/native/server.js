@@ -183,19 +183,7 @@ function scanHtmlChunk(chunk, scope) {
 
 export class ServerRenderer {
   constructor(
-    {
-      ast,
-      data,
-      template,
-      subTemplates,
-      snippets,
-      helpers,
-      isSVG = false,
-      protectedKeys,
-      markers = true,
-      text = false,
-      slots = null,
-    } = {},
+    { ast, data, template, subTemplates, snippets, helpers, isSVG = false, protectedKeys } = {},
   ) {
     this.ast = ast || [];
     this.data = data;
@@ -205,6 +193,8 @@ export class ServerRenderer {
     this.helpers = helpers || {};
     this.isSVG = isSVG;
     this.protectedKeys = protectedKeys;
+    // the server forms set these on the template before initialize, the web form leaves them unset
+    const { markers = true, text = false, slots = null } = template?.renderOptions || {};
     this.markers = markers;
     this.text = text;
     this.slots = slots;
@@ -700,8 +690,8 @@ export class ServerRenderer {
         data,
         subTemplates: this.subTemplates,
         parentTemplate: this.template,
-        renderOptions: { markers: this.markers, text: this.text, slots: this.slots },
       });
+      instance.renderOptions = { markers: this.markers, text: this.text, slots: this.slots };
       instance.initialize();
       return instance.render();
     }

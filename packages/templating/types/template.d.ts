@@ -68,8 +68,6 @@ export interface TemplateSettings {
   parentTemplate?: Template;
   /** The rendering engine — 'native' (default), 'lit', or an engine object. */
   renderingEngine?: string | object;
-  /** Options the engine's renderer reads, forwarded as given. */
-  renderOptions?: Record<string, any>;
   /** Indicates if this is a prototype template. */
   isPrototype?: boolean;
   /** Whether to automatically attach styles to the renderRoot. */
@@ -739,8 +737,6 @@ export class Template {
   renderRoot?: ShadowRoot | HTMLElement;
   /** The rendering engine — 'native' (default), 'lit', or an engine object. */
   renderingEngine: string | object;
-  /** Options the engine's renderer reads, forwarded as given. */
-  renderOptions?: Record<string, any>;
   /** The renderer instance for the active engine. Engines supply their own class, so this stays open. */
   renderer: any;
   /** The most recent `render()` result: a DocumentFragment on the client, markup on the server. */

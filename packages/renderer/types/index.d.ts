@@ -30,4 +30,4 @@ export type { DynamicRegion, ReactionScope, RendererSettings } from './engines/n
 
 // server renderer
 export { ServerRenderer } from './engines/native/server.js';
-export type { ServerRendererSettings, ServerRenderScope } from './engines/native/server.js';
+export type { ServerRendererSettings, ServerRenderOptions, ServerRenderScope } from './engines/native/server.js';

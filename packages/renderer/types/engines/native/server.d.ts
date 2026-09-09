@@ -43,6 +43,13 @@ export interface ServerRendererSettings {
   isSVG?: boolean;
   /** Keys a data update may not overwrite, such as each and async variables. */
   protectedKeys?: string[];
+}
+
+/**
+ * The static and text forms, set on a template as `renderOptions` before it
+ * initializes. The web form leaves them unset.
+ */
+export interface ServerRenderOptions {
   /** Emit hydration markers and bind attributes. Off for the static and text forms. */
   markers?: boolean;
   /** Render plain text: no tag scanning, no escaping. */
@@ -83,7 +90,7 @@ export class ServerRenderer {
   isSVG: boolean;
   /** Keys a data update may not overwrite. */
   protectedKeys?: string[];
-  /** Whether hydration markers and bind attributes are emitted. */
+  /** Whether hydration markers and bind attributes are emitted, per the template's {@link ServerRenderOptions}. */
   markers: boolean;
   /** Whether the render is plain text, with no tag scanning or escaping. */
   text: boolean;

@@ -435,9 +435,11 @@ export function createServerTemplate(definition, attrs = {}, { renderOptions } =
 
   const specDefaults = componentSpec?.defaultValues || {};
   const data = { ...specDefaults, ...defaultSettings, ...normalizedAttrs };
-  const template = proto.clone({ data, renderingEngine: 'native', renderOptions });
-  // no host element on the server, so the settings are the data itself
+  const template = proto.clone({ data, renderingEngine: 'native' });
+  // no host element on the server, so the settings are the data itself, and the
+  // render options sit on the instance for its renderer to read
   template.settings = data;
+  template.renderOptions = renderOptions;
   template.initialize();
 
   // after initialize, since createComponent can change the settings {uiClasses} reads
