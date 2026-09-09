@@ -36,17 +36,16 @@ Adds an engine to the registry.
 #### Usage
 
 ```javascript
-import { registerEngine, Renderer, ServerRenderer } from '@semantic-ui/renderer';
+import { registerEngine, Renderer } from '@semantic-ui/renderer';
 import { createComponent } from './factory.js';
 
 registerEngine('native', {
   factory: createComponent,
   renderer: Renderer,
-  serverRenderer: ServerRenderer,
 });
 ```
 
-Registration is a side effect of importing the module that calls it. `@semantic-ui/component` registers `native` on import. The Lit engine registers only when you import it:
+Registration is a side effect of importing the module that calls it. `@semantic-ui/component` registers `native` on import, and `@semantic-ui/component/server` adds the engine's `serverRenderer` when it loads, so a browser bundle carries no server renderer. The Lit engine registers only when you import it:
 
 ```javascript
 import '@semantic-ui/component/engines/lit/register.js';

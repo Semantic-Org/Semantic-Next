@@ -77,9 +77,11 @@ An engine object has:
 
 ```js
 // packages/component/src/engines/native/register.js
-const NativeEngine = { renderer: Renderer, serverRenderer: ServerRenderer, factory: createComponent };
+const NativeEngine = { renderer: Renderer, factory: createComponent };
 registerEngine('native', NativeEngine);
 ```
+
+`@semantic-ui/component/server` adds `serverRenderer: ServerRenderer` to that same object when it loads, so a browser bundle built from the root never carries the server renderer.
 
 ### Engine Selection
 
@@ -110,8 +112,8 @@ this.renderer = new RendererClass({ ast, data, template: this, ... });
 **Native** (default) — `packages/component/src/engines/native/` + `packages/renderer/src/engines/native/`
 - `WebComponentBase` extends `HTMLElement` directly — zero framework dependencies
 - `Renderer` uses a 3-phase pipeline: HTML string assembly -> DOM parsing -> marker binding
-- `ServerRenderer` renders AST to HTML string with hydration markers
-- Imported automatically when you `import { defineComponent } from '@semantic-ui/component'`
+- `ServerRenderer` renders AST to HTML string with hydration markers, joining the engine on `import '@semantic-ui/component/server'`
+- Imported automatically when you `import { defineComponent } from '@semantic-ui/component'`. `renderToString` and `renderToStaticMarkup` come from `@semantic-ui/component/server`
 
 **Lit** — `packages/component/src/engines/lit/` + `packages/renderer/src/engines/lit/`
 - `LitWebComponentBase` extends `LitElement`
