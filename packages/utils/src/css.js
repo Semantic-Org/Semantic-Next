@@ -481,8 +481,8 @@ export const stringifyCSS = (nodes, { indent = '  ' } = {}) => {
   more specific side, so one walk serves a whole selector and the argument list of :is() :not() :has()
 */
 
-const AS_ARGUMENT = new Set(['is', 'not', 'has', 'matches']);
-const LEGACY_PSEUDO_ELEMENTS = new Set(['before', 'after', 'first-line', 'first-letter']);
+const AS_ARGUMENT = /* @__PURE__ */ new Set(['is', 'not', 'has', 'matches']);
+const LEGACY_PSEUDO_ELEMENTS = /* @__PURE__ */ new Set(['before', 'after', 'first-line', 'first-letter']);
 const NTH_OF = /^\s*(?:[-+\d\sn]+|even|odd)\s+of\s+/i;
 
 const isIdentCode = (code) =>
