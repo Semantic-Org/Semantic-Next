@@ -40,3 +40,8 @@ export function renderToStaticMarkup(
   attrs?: Record<string, any>,
   options?: RenderToStaticMarkupOptions & { css?: false; },
 ): string;
+export function renderToStaticMarkup(
+  ComponentClass: ComponentConstructor,
+  attrs?: Record<string, any>,
+  options?: RenderToStaticMarkupOptions,
+): string | StaticMarkup;
