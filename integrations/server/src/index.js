@@ -7,21 +7,35 @@
   edge. The component self-hydrates from the DSD once its JS loads.
 */
 
-import { expandCustomElements, getComponent, renderToString } from '@semantic-ui/component';
+import { expandCustomElements, getComponent, renderToStaticMarkup, renderToString } from '@semantic-ui/component';
 
 /*
   Render one component to a DSD string. Accepts a component class or the tag
-  name of an already-registered component. Pass hydrate:false for static
-  markup that should never be claimed by the client runtime.
+  name of an already-registered component. Pass hydrate:false for server-only
+  output the client runtime never claims.
 */
 export function render(component, props = {}, { slots = null, hydrate = true } = {}) {
+  return renderToString(componentFrom(component), props, { slots, hydrate });
+}
+
+/*
+  Render one component to its markup alone, with no shadow root, style or
+  hydration markers: what mail, feeds and static pages take. text:true renders
+  plain text, css:true returns { html, css } with the css of every component reached.
+*/
+export function renderStatic(component, props = {}, { slots = null, text = false, css = false } = {}) {
+  return renderToStaticMarkup(componentFrom(component), props, { slots, text, css });
+}
+
+// a class passes through, a tag name reads from the registry
+function componentFrom(component) {
   const ComponentClass = typeof component === 'string' ? getComponent(component) : component;
   if (!ComponentClass) {
     throw new Error(
       `@semantic-ui/server: "${component}" is not a registered component. Import its module before rendering it.`,
     );
   }
-  return renderToString(ComponentClass, props, { slots, hydrate });
+  return ComponentClass;
 }
 
 /*
