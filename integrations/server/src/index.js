@@ -8,6 +8,7 @@
 */
 
 import { expandCustomElements, getComponent, renderToStaticMarkup, renderToString } from '@semantic-ui/component';
+import { isString } from '@semantic-ui/utils';
 
 /*
   Render one component to a DSD string. Accepts a component class or the tag
@@ -29,7 +30,7 @@ export function renderStatic(component, props = {}, { slots = null, text = false
 
 // a class passes through, a tag name reads from the registry
 function componentFrom(component) {
-  const ComponentClass = typeof component === 'string' ? getComponent(component) : component;
+  const ComponentClass = isString(component) ? getComponent(component) : component;
   if (!ComponentClass) {
     throw new Error(
       `@semantic-ui/server: "${component}" is not a registered component. Import its module before rendering it.`,
