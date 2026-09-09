@@ -344,33 +344,57 @@ export const parseCSS = (css, { flatten = false } = {}) => {
   every node is new and every rule keeps its declarations and their written order
 */
 
-// every & outside a string becomes the parent
-const nest = (child, parent) => {
-  const end = child.length;
-  let out = '';
+// the child split at every & outside a string, null when it has none. an escaped \& is a literal
+const segmentsAtAmpersands = (selector) => {
+  const end = selector.length;
+  let segments = null;
   let start = 0;
   let index = 0;
   while (index < end) {
-    const code = child.charCodeAt(index);
+    const code = selector.charCodeAt(index);
     if (code === QUOTE || code === APOS) {
-      index = skipString(child, index, end);
+      index = skipString(selector, index, end);
     }
-    else if (code === AMP) {
-      out += child.slice(start, index) + parent;
-      start = ++index;
+    else if (code === BACKSLASH) {
+      index += 2;
     }
     else {
+      if (code === AMP) {
+        (segments ??= []).push(selector.slice(start, index));
+        start = index + 1;
+      }
       index++;
     }
   }
-  return out + child.slice(start);
+  if (segments) {
+    segments.push(selector.slice(start));
+  }
+  return segments;
 };
 
+// a parent list times a child list, parent-major. every & in a child takes each parent in turn, so
+// `& + &` under `.a, .b` multiplies out to four, the way :is() and a preprocessor read it
 const combineSelectors = (parents, children) => {
   const selectors = [];
+  const segments = children.map(segmentsAtAmpersands);
   each(parents, (parent) => {
-    each(children, (child) => {
-      selectors.push(child.indexOf('&') < 0 ? `${parent} ${child}` : nest(child, parent));
+    each(children, (child, at) => {
+      const parts = segments[at];
+      if (!parts) {
+        selectors.push(`${parent} ${child}`);
+        return;
+      }
+      let combos = [parts[0] + parent + parts[1]];
+      for (let next = 2; next < parts.length; next++) {
+        const grown = [];
+        each(combos, (prefix) => {
+          each(parents, (other) => {
+            grown.push(prefix + other + parts[next]);
+          });
+        });
+        combos = grown;
+      }
+      selectors.push(...combos);
     });
   });
   return selectors;
