@@ -191,3 +191,35 @@ describe('renderToStaticMarkup with nested components', () => {
     });
   });
 });
+
+const RowText = defineComponent({ template: '- {label}\n', preserveWhitespace: true });
+const ListText = defineComponent({
+  template: 'Hi {name} & {link}\n{#each item in items}{>row label=item}{/each}',
+  preserveWhitespace: true,
+  defaultSettings: { name: 'nobody', items: ['a', 'b'] },
+  subTemplates: { row: RowText },
+});
+const Bare = defineComponent({
+  template: '<table>{>row label=x}</table><static-part label="z"></static-part>',
+  defaultSettings: { x: 'd' },
+  subTemplates: { row: { template: '<tr><td>{label}</td></tr>' } },
+});
+
+describe('renderToStaticMarkup with a tag-less definition', () => {
+  it('renders the prototype template with its own defaults and subtemplates', () => {
+    expect(renderToStaticMarkup(Bare)).toBe('<table><tr><td>d</td></tr></table><span class="part">z</span>');
+    expect(renderToStaticMarkup(Bare, { x: 'x1' })).toContain('<td>x1</td>');
+  });
+
+  it('renders text mode the same way', () => {
+    expect(renderToStaticMarkup(ListText, { link: '<x>' }, { text: true })).toBe('Hi nobody & <x>\n- a\n- b\n');
+  });
+
+  it('collects the css of the definition and of what it expanded', () => {
+    expect(renderToStaticMarkup(Bare, {}, { css: true }).css).toBe('.part { color: red; }');
+  });
+
+  it('is refused by renderToString, which needs a tag to wrap', () => {
+    expect(() => renderToString(Bare)).toThrow('renderToString requires a component with a tagName');
+  });
+});
