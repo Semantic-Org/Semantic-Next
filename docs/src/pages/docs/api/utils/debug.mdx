@@ -140,7 +140,7 @@ error('writeRejected', 'todos:a7f2', {
 warnOnce(key, message = key, options)
 ```
 
-Returned by [`createLogger`](#createlogger) beside `debugOnce`, `infoOnce`, `errorOnce`, and `logOnce`: the once form of every level member. The first call with a key prints exactly what the plain member prints, and every later call with that key on the same logger is silent, whatever its message. The key is a word for the condition (`'plainCookie'`), or a template of stable parts for a condition per entity (`\`liveDep:${publication}:${collection}\``), never the message text: a count or an id in the key would make every call a new condition.
+Returned by [`createLogger`](#createlogger) beside `debugOnce`, `infoOnce`, `errorOnce`, and `logOnce`: the once form of every level member. The first call with a key prints exactly what the plain member prints, and every later call with that key on the same logger is silent, whatever its message. The key is a word for the condition (`'plainCookie'`), or a template of stable parts for a condition per entity (`` `liveDep:${publication}:${collection}` ``), never the message text: a count or an id in the key would make every call a new condition.
 
 One memory serves the whole family, so a condition seen at `warn` is seen at `error`. There is no reset: a fresh logger is the clean slate. The memory is unbounded, so key on things of bounded cardinality (a collection, a role, a route pattern) and never on a request id.
 
