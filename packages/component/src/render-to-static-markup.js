@@ -18,29 +18,31 @@ import { expandCustomElements } from './expand-custom-elements.js';
   Slot content fills in where each {>slot} sits, there being no light DOM to project,
   and a nested component renders where its tag sat with its children assigned to its
   slots. css: true adds the css of every component the render reached, parent first.
+  A definition without a tagName, the prototype Template itself, renders the same way.
 */
-export function renderToStaticMarkup(ComponentClass, attrs = {}, { slots = null, text = false, css = false } = {}) {
-  const { html, components } = renderFlat(ComponentClass, attrs, { slots, text });
+export function renderToStaticMarkup(definition, attrs = {}, { slots = null, text = false, css = false } = {}) {
+  const { html, styles } = renderFlat(definition, attrs, { slots, text });
   if (!css) {
     return html;
   }
-  return { html, css: filterEmpty(Array.from(components, (component) => component.config?.css)).join('\n') };
+  return { html, css: filterEmpty(Array.from(styles.values())).join('\n') };
 }
 
-// one flat render and the components it reached, in document order so their css cascades as written
-function renderFlat(ComponentClass, attrs, { slots, text, depth = 0 }) {
-  const { template } = createServerTemplate(ComponentClass, attrs, {
+// one flat render and the css of every definition it reached, keyed by definition so a
+// component used twice counts once, in document order so the css cascades as written
+function renderFlat(definition, attrs, { slots, text, depth = 0 }) {
+  const { template, css } = createServerTemplate(definition, attrs, {
     renderOptions: { markers: false, text, slots: slots || {} },
   });
-  const components = new Set([ComponentClass]);
+  const styles = new Map([[definition, css]]);
   const html = expandCustomElements(template.render(), {
     depth,
     assignSlots: true,
     renderFn: (NestedClass, nestedAttrs, nested) => {
       const rendered = renderFlat(NestedClass, nestedAttrs, { slots: nested.slots, text, depth: nested.depth });
-      each(rendered.components, (component) => components.add(component));
+      each(rendered.styles, (nestedCSS, nestedDefinition) => styles.set(nestedDefinition, nestedCSS));
       return rendered.html;
     },
   });
-  return { html, components };
+  return { html, styles };
 }

@@ -192,9 +192,10 @@ describe('renderToStaticMarkup with nested components', () => {
   });
 });
 
-const RowText = defineComponent({ template: '- {label}\n', preserveWhitespace: true });
+// the compiler trims a template's ends even under preserveWhitespace, so the row's newline sits mid-template
+const RowText = defineComponent({ template: '- {label}', preserveWhitespace: true });
 const ListText = defineComponent({
-  template: 'Hi {name} & {link}\n{#each item in items}{>row label=item}{/each}',
+  template: 'Hi {name} & {link}\n{#each item in items}{>row label=item}\n{/each}',
   preserveWhitespace: true,
   defaultSettings: { name: 'nobody', items: ['a', 'b'] },
   subTemplates: { row: RowText },

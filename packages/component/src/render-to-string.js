@@ -18,9 +18,11 @@ import { expandCustomElements } from './expand-custom-elements.js';
 */
 
 export function renderToString(ComponentClass, attrs = {}, { slots = null, depth = 0, hydrate = true } = {}) {
-  const { template, normalizedAttrs, resolvedProperties } = createServerTemplate(ComponentClass, attrs);
   const tagName = ComponentClass.componentTagName;
-  const css = ComponentClass.config?.css || '';
+  if (!tagName) {
+    throw new Error('renderToString requires a component with a tagName');
+  }
+  const { template, normalizedAttrs, resolvedProperties, css } = createServerTemplate(ComponentClass, attrs);
 
   let html = template.render();
 
