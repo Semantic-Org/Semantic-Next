@@ -352,6 +352,31 @@ describe('CSS Utilities', () => {
       });
     });
 
+    describe('nested rules', () => {
+      // the engine serializes nested children inside the parent's cssText, and a scoped parent must keep them
+      it('keeps nested rules under the scoped parent', () => {
+        const css = '.a { color: red; &:hover { color: blue; } .b { padding: 0; } @media (x) { color: green; } }';
+        const scoped = scopeStyles(css, '.scope');
+
+        expect(scoped).toContain('.scope .a {');
+        expect(scoped).toContain('&:hover');
+        expect(scoped).toContain('color: blue');
+        expect(scoped).toContain('& .b');
+        expect(scoped).toContain('@media (x)');
+        expect(scoped).toContain('color: green');
+      });
+
+      it('keeps nested rules when :host is replaced', () => {
+        const scoped = scopeStyles(':host { display: block; &:hover { opacity: 1; } }', '.widget', {
+          replaceHost: true,
+        });
+
+        expect(scoped).toContain('.widget {');
+        expect(scoped).toContain('&:hover');
+        expect(scoped).toContain('opacity: 1');
+      });
+    });
+
     describe('scoping options', () => {
       it('should replace :host when replaceHost is true', () => {
         const css = `
