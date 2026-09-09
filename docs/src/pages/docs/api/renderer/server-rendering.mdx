@@ -59,7 +59,7 @@ const html = renderToStaticMarkup(Card, { title: 'Hello' });
 // <div class="card">Hello</div>
 ```
 
-Slots fill in place from the `slots` option, there being no light DOM to project. A nested component renders where its tag sat, with its children assigned to its slots by their `slot` attribute.
+Slots fill in place from the `slots` option, there being no light DOM to project. A nested component renders where its tag sat, with its children assigned to its slots by their `slot` attribute. A definition without a `tagName` renders the same way, so a mail or a static page needs no custom element.
 
 `text: true` renders plain text, where nothing is escaped and `{#html}` is raw either way. `css: true` returns `{ html, css }`, the css being that of every component the render reached, parent first, for a mail inliner or a page's `<style>`.
 

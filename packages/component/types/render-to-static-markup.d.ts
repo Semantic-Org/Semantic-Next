@@ -1,3 +1,5 @@
+import type { Template } from '@semantic-ui/templating';
+
 import { ComponentConstructor } from './define-component.js';
 
 /**
@@ -22,6 +24,8 @@ export interface StaticMarkup {
  * Renders a component to the markup of its template alone, as a mail client,
  * a feed reader or a static page holds it. Nested registered components render
  * flat where their tags sat, their children assigned to slots by `slot` attribute.
+ * A tag-less definition, the prototype Template `defineComponent` returns
+ * without a `tagName`, renders the same way.
  *
  * @throws when the class was defined without a `tagName`, or has no template.
  *
@@ -31,17 +35,17 @@ export interface StaticMarkup {
  * @see {@link https://next.semantic-ui.com/docs/api/renderer/server-rendering#static-markup Static Markup}
  */
 export function renderToStaticMarkup(
-  ComponentClass: ComponentConstructor,
+  definition: ComponentConstructor | Template,
   attrs: Record<string, any>,
   options: RenderToStaticMarkupOptions & { css: true; },
 ): StaticMarkup;
 export function renderToStaticMarkup(
-  ComponentClass: ComponentConstructor,
+  definition: ComponentConstructor | Template,
   attrs?: Record<string, any>,
   options?: RenderToStaticMarkupOptions & { css?: false; },
 ): string;
 export function renderToStaticMarkup(
-  ComponentClass: ComponentConstructor,
+  definition: ComponentConstructor | Template,
   attrs?: Record<string, any>,
   options?: RenderToStaticMarkupOptions,
 ): string | StaticMarkup;

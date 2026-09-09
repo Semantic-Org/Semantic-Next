@@ -81,7 +81,7 @@ const html = renderToStaticMarkup(Card, { title: 'Hello' });
 // <div class="card">Hello</div>
 ```
 
-Slot content passes in as `slots` and fills in where each `{>slot}` sits. Nested components render in place. Pass `text: true` for a plain text version with nothing escaped, and `css: true` to receive `{ html, css }` with the css of every component used, ready for an inliner.
+Slot content passes in as `slots` and fills in where each `{>slot}` sits. Nested components render in place. A definition without a `tagName` renders the same way, so an email or a snippet needs no custom element. Pass `text: true` for a plain text version with nothing escaped, and `css: true` to receive `{ html, css }` with the css of every component used, ready for an inliner.
 
 [`@semantic-ui/server`](https://github.com/Semantic-Org/Semantic-Next/tree/main/integrations/server) exposes this as `renderStatic`.
 
