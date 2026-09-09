@@ -35,10 +35,11 @@ Your client bundle needs no hydration code. A component detects the server's sha
 
 ## Rendering on the Server
 
-The adapters are built on `renderToString`, exported from `@semantic-ui/component`. It takes a component and its attributes and returns the element with its shadow DOM inlined.
+The adapters are built on `renderToString`, exported from `@semantic-ui/component/server`, the package's server entry. The root entry stays the browser's, so a client bundle carries none of the server rendering. `renderToString` takes a component and its attributes and returns the element with its shadow DOM inlined.
 
 ```javascript {6}
-import { defineComponent, renderToString } from '@semantic-ui/component';
+import { defineComponent } from '@semantic-ui/component';
+import { renderToString } from '@semantic-ui/component/server';
 
 const Card = defineComponent({ tagName: 'my-card', template, css });
 
@@ -74,8 +75,9 @@ The element receives an `ssr` attribute and the client leaves it alone.
 
 Some destinations never run a component's JavaScript: an email, a feed, a static page. `renderToStaticMarkup` renders the same component to the markup of its template alone, leaving out the shadow root, the style and the hydration markers.
 
-```javascript {3}
-import { defineComponent, renderToStaticMarkup } from '@semantic-ui/component';
+```javascript {4}
+import { defineComponent } from '@semantic-ui/component';
+import { renderToStaticMarkup } from '@semantic-ui/component/server';
 
 const html = renderToStaticMarkup(Card, { title: 'Hello' });
 // <div class="card">Hello</div>
