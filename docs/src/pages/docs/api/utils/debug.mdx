@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Debug Utilities
 package: "@semantic-ui/utils"
-methods: [log, createLogger, createErrors, error, throwError]
+methods: [log, createLogger, warnOnce, createErrors, error, throwError]
 icon: bug
 description: API reference for logging and coded error handling utility functions
 ---
@@ -101,7 +101,7 @@ The namespace prints verbatim — `db` shows as `db`, never `Db`. Granularity be
 
 #### Returns
 
-`{ log, debug, info, warn, error }` — flat bound functions.
+`{ log, debug, info, warn, error, logOnce, debugOnce, infoOnce, warnOnce, errorOnce }` — flat bound functions, each level member with its once form.
 
 | Name                          | Description |
 |-------------------------------|-------------|
@@ -110,6 +110,9 @@ The namespace prints verbatim — `db` shows as `db`, never `Db`. Granularity be
 | `info(message, options)`       | Logs at `info` level |
 | `warn(message, options)`       | Logs at `warn` level |
 | `error(message, options)`      | Logs at `error` level |
+| [`warnOnce(key, message, options)`](#warnonce) | Logs at `warn` level the first time this logger sees `key`, silent after |
+| `debugOnce`, `infoOnce`, `errorOnce` | The same once form at the other levels, one memory shared by all |
+| `logOnce(key, message, level, options)` | The bound `log`'s once form, level slot intact |
 
 #### Example
 
@@ -129,6 +132,55 @@ logError('socket closed unexpectedly');             // console.error, nothing th
 error('writeRejected', 'todos:a7f2', {
   explanation: isDevelopment ? 'the server refused the write' : 0,
 });
+```
+
+### warnOnce
+
+```javascript
+warnOnce(key, message = key, options)
+```
+
+Returned by [`createLogger`](#createlogger) beside `debugOnce`, `infoOnce`, `errorOnce`, and `logOnce`: the once form of every level member. The first call with a key prints exactly what the plain member prints, and every later call with that key on the same logger is silent, whatever its message. The key is a word for the condition (`'plainCookie'`), or a template of stable parts for a condition per entity (`` `liveDep:${publication}:${collection}` ``), never the message text: a count or an id in the key would make every call a new condition.
+
+One memory serves the whole family, so a condition seen at `warn` is seen at `error`. There is no reset: a fresh logger is the clean slate. The memory is unbounded, so key on things of bounded cardinality (a collection, a role, a route pattern) and never on a request id.
+
+Development advice keeps its guard at the callsite, `isDevelopment && warnOnce(...)`, so a bundler folds the call and its message string out of a production build together (see [Development Messages](#development-messages)). An operational line that must reach production calls it bare.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| key     | string | The condition's name, the identity the once-ness keys on |
+| message | string | The line to print. Defaults to the key, so a one-argument call dedupes on its own text |
+| options | object | Any [`log` option](#options), merged over the logger's defaults exactly as the plain member merges them |
+
+`logOnce(key, message = key, level, options)` keeps the bound `log`'s level slot, with the key in front.
+
+#### Returns
+
+This function does not return a value.
+
+#### Example
+
+```javascript
+import { createLogger, isDevelopment } from '@semantic-ui/utils';
+
+const { warnOnce, errorOnce } = createLogger({ namespace: 'sync' });
+
+warnOnce('plainCookie', 'the session cookie is set over plain http'); // sync the session cookie is set over plain http
+warnOnce('plainCookie', 'the session cookie is set over plain http'); // silent
+errorOnce('plainCookie', 'seen at warn is seen at error');            // silent
+
+// once per entity
+for (const collection of ['todos', 'todos', 'posts']) {
+  warnOnce(`search:${collection}`, `"${collection}" falls back to the reference floor`);
+}
+
+// a key alone is its own message
+warnOnce('booted from the in-memory adapter');
+
+// the guard at the callsite folds the call and the message out of production
+isDevelopment && warnOnce('unmounted', 'no accounts key was named, so the accounts plane did not mount');
 ```
 
 ### createErrors

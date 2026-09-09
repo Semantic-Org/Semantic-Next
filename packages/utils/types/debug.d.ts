@@ -206,7 +206,8 @@ export function log(message: string, level?: LogLevel, options?: LogOptions): vo
 
 /**
  * The narration bundle bound to one set of log defaults — flat functions for
- * destructuring
+ * destructuring. The once forms print the first time this logger sees a key
+ * and stay silent after, one memory for the whole family
  */
 export interface Logger {
   /** The bound `log` — same signature, the factory defaults shallow-merged
@@ -220,6 +221,31 @@ export interface Logger {
   warn(message: string, options?: LogOptions): void;
   /** Logs at `error` level; options merge over the factory defaults */
   error(message: string, options?: LogOptions): void;
+  /** The bound `log`'s once form: prints the first time this logger sees
+   * `key`, the level slot kept. `message` defaults to the key */
+  logOnce(key: string, message?: string, level?: LogLevel, options?: LogOptions): void;
+  /** Logs at `debug` level the first time this logger sees `key`, silent
+   * after. `message` defaults to the key */
+  debugOnce(key: string, message?: string, options?: LogOptions): void;
+  /** Logs at `info` level the first time this logger sees `key`, silent
+   * after. `message` defaults to the key */
+  infoOnce(key: string, message?: string, options?: LogOptions): void;
+  /**
+   * Logs at `warn` level the first time this logger sees `key`, silent after.
+   * The key names the condition (`'plainCookie'`, or a template of stable
+   * parts per entity), never the message text, and `message` defaults to it.
+   * One memory serves every once form on this logger, and a fresh logger is
+   * the clean slate. Guard development advice at the callsite
+   * (`isDevelopment && warnOnce(...)`) so a bundler folds the call and its
+   * message together.
+   *
+   * @see {@link https://next.semantic-ui.com/docs/api/utils/debug#warnonce warnOnce}
+   * @see {@link https://next.semantic-ui.com/examples/utils-warnonce Example}
+   */
+  warnOnce(key: string, message?: string, options?: LogOptions): void;
+  /** Logs at `error` level the first time this logger sees `key`, silent
+   * after. `message` defaults to the key */
+  errorOnce(key: string, message?: string, options?: LogOptions): void;
 }
 
 /**
@@ -227,13 +253,15 @@ export interface Logger {
  * timestamp switch, any `log` option. Every member calls `log` with the
  * factory defaults shallow-merged beneath the callsite options (callsite
  * wins). The four level wrappers absorb the level slot only; the bound `log`
- * keeps it. The namespace prints verbatim.
+ * keeps it. Every member has a once form (`warnOnce(key, message, options)`,
+ * `logOnce` with the level slot) that prints the first time this logger sees
+ * a key. The namespace prints verbatim.
  *
  * @see {@link https://next.semantic-ui.com/docs/api/utils/debug#createlogger createLogger}
  * @see {@link https://next.semantic-ui.com/examples/utils-createlogger Example}
  *
  * @param defaults - Log options applied to every call from the bundle
- * @returns The bound `{ log, debug, info, warn, error }` bundle
+ * @returns The bound `{ log, debug, info, warn, error }` bundle with its once forms
  *
  * @example
  * ```ts
@@ -241,6 +269,7 @@ export interface Logger {
  *
  * info('connected');
  * warn('retrying', { data: { attempt: 2 } });
+ * warnOnce('plainCookie', 'the session cookie is set over plain http'); // once per logger
  * ```
  */
 export function createLogger(defaults?: LogOptions): Logger;

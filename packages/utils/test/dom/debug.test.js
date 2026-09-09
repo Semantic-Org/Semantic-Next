@@ -574,7 +574,18 @@ describe('createLogger', () => {
 
   it('should return the flat bundle', () => {
     const logger = createLogger({ namespace: 'sync' });
-    expect(Object.keys(logger).sort()).toEqual(['debug', 'error', 'info', 'log', 'warn']);
+    expect(Object.keys(logger).sort()).toEqual([
+      'debug',
+      'debugOnce',
+      'error',
+      'errorOnce',
+      'info',
+      'infoOnce',
+      'log',
+      'logOnce',
+      'warn',
+      'warnOnce',
+    ]);
     Object.values(logger).forEach(fn => expect(typeof fn).toBe('function'));
   });
 

@@ -139,3 +139,88 @@ describe('coded error stacks (V8 posture)', () => {
     expect(built.stack.startsWith('Error: demo refused [write-conflict] commit()')).toBe(true);
   });
 });
+
+describe('createLogger once family', () => {
+  let consoleSpy;
+
+  beforeEach(() => {
+    consoleSpy = {
+      log: vi.spyOn(console, 'log').mockImplementation(() => {}),
+      debug: vi.spyOn(console, 'debug').mockImplementation(() => {}),
+      info: vi.spyOn(console, 'info').mockImplementation(() => {}),
+      warn: vi.spyOn(console, 'warn').mockImplementation(() => {}),
+      error: vi.spyOn(console, 'error').mockImplementation(() => {}),
+    };
+  });
+
+  afterEach(() => {
+    Object.values(consoleSpy).forEach((spy) => spy.mockRestore());
+  });
+
+  it('should print the first call and silence the second on the same key', () => {
+    const { warnOnce } = createLogger({ namespace: 'sync' });
+    warnOnce('plainCookie', 'the session cookie is set over plain http');
+    warnOnce('plainCookie', 'the session cookie is set over plain http');
+    expect(consoleSpy.warn).toHaveBeenCalledTimes(1);
+    expect(consoleSpy.warn).toHaveBeenCalledWith('sync the session cookie is set over plain http');
+  });
+
+  it('should key on the caller word, never the text', () => {
+    const { warnOnce } = createLogger();
+    warnOnce('plainCookie', 'first wording');
+    warnOnce('plainCookie', 'second wording');
+    expect(consoleSpy.warn).toHaveBeenCalledTimes(1);
+    expect(consoleSpy.warn).toHaveBeenCalledWith('first wording');
+  });
+
+  it('should print again on a different key', () => {
+    const { warnOnce } = createLogger();
+    warnOnce('sqliteSearch:adapter:todos', 'todos falls back to the reference floor');
+    warnOnce('sqliteSearch:adapter:posts', 'posts falls back to the reference floor');
+    expect(consoleSpy.warn).toHaveBeenCalledTimes(2);
+  });
+
+  it('should print the key itself when it is the whole message', () => {
+    const { warnOnce } = createLogger({ namespace: 'sync' });
+    warnOnce('the session cookie is set over plain http');
+    warnOnce('the session cookie is set over plain http');
+    expect(consoleSpy.warn).toHaveBeenCalledTimes(1);
+    expect(consoleSpy.warn).toHaveBeenCalledWith('sync the session cookie is set over plain http');
+  });
+
+  it('should share one memory across the family', () => {
+    const { debugOnce, infoOnce, warnOnce, errorOnce, logOnce } = createLogger();
+    warnOnce('redis:pubsub', 'redis pubsub failed');
+    errorOnce('redis:pubsub', 'redis pubsub failed');
+    infoOnce('redis:pubsub', 'redis pubsub failed');
+    debugOnce('redis:pubsub', 'redis pubsub failed');
+    logOnce('redis:pubsub', 'redis pubsub failed', 'error');
+    expect(consoleSpy.warn).toHaveBeenCalledTimes(1);
+    expect(consoleSpy.error).not.toHaveBeenCalled();
+    expect(consoleSpy.info).not.toHaveBeenCalled();
+    expect(consoleSpy.debug).not.toHaveBeenCalled();
+  });
+
+  it('should start a fresh logger with a clean slate', () => {
+    createLogger().warnOnce('plainCookie', 'first logger');
+    createLogger().warnOnce('plainCookie', 'second logger');
+    expect(consoleSpy.warn).toHaveBeenCalledTimes(2);
+  });
+
+  it('should print exactly what the plain member prints', () => {
+    const { warn, warnOnce } = createLogger({ namespace: 'db' });
+    warnOnce('retry', 'retrying', { data: { attempt: 2 } });
+    warn('retrying', { data: { attempt: 2 } });
+    expect(consoleSpy.warn.mock.calls[0]).toEqual(consoleSpy.warn.mock.calls[1]);
+  });
+
+  it('should keep the level slot on logOnce', () => {
+    const { logOnce } = createLogger();
+    logOnce('handshake', 'handshake detail', 'warn');
+    logOnce('handshake', 'handshake detail', 'warn');
+    logOnce('booted', 'booted');
+    expect(consoleSpy.warn).toHaveBeenCalledTimes(1);
+    expect(consoleSpy.warn).toHaveBeenCalledWith('handshake detail');
+    expect(consoleSpy.log).toHaveBeenCalledWith('booted');
+  });
+});
