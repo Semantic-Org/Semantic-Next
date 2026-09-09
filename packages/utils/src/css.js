@@ -219,17 +219,17 @@ const atNode = (head, children) => {
   return children ? { type: 'at', name, prelude, children } : { type: 'at', name, prelude };
 };
 
-const pushDeclaration = (children, head) => {
+const declarationFrom = (head) => {
   const colon = head.indexOf(':');
   if (colon < 0) {
-    return;
+    return null;
   }
   let value = head.slice(colon + 1).trim();
   const bang = IMPORTANT.exec(value);
   if (bang) {
     value = value.slice(0, bang.index);
   }
-  children.push({ type: 'declaration', property: head.slice(0, colon).trim(), value, important: !!bang });
+  return { type: 'declaration', property: head.slice(0, colon).trim(), value, important: !!bang };
 };
 
 export const parseCSS = (css, { flatten = false } = {}) => {
@@ -268,7 +268,7 @@ export const parseCSS = (css, { flatten = false } = {}) => {
       else if (code === SLASH && css.charCodeAt(index + 1) === STAR) {
         head += css.slice(start, index);
         index = skipComment(css, index, length);
-        // a comment separates tokens the way whitespace does, so it leaves exactly one space behind
+        // a comment is a token boundary, so one space keeps the tokens apart where none was written
         if (head.charCodeAt(head.length - 1) <= SPACE) {
           while (index < length && css.charCodeAt(index) <= SPACE) {
             index++;
@@ -325,7 +325,10 @@ export const parseCSS = (css, { flatten = false } = {}) => {
           children.push(atNode(collapseSpace(head)));
         }
         else if (!top) {
-          pushDeclaration(children, head);
+          const declaration = declarationFrom(head);
+          if (declaration) {
+            children.push(declaration);
+          }
         }
         if (terminator === CLOSE) {
           return;
@@ -404,12 +407,12 @@ const combineSelectors = (parents, children) => {
 };
 
 // parents is the enclosing rule's selector list, null at the top and inside a top-level at-rule
-const flattenNodes = (nodes, parents = null, out = []) => {
+const flattenNodes = (nodes, parents = null, flat = []) => {
   let run = null;
   // each run of declarations between nested blocks is one rule for the parent, in the order written
   const flush = () => {
     if (run) {
-      out.push({ type: 'rule', selectors: parents.slice(), children: run });
+      flat.push({ type: 'rule', selectors: parents.slice(), children: run });
       run = null;
     }
   };
@@ -419,27 +422,27 @@ const flattenNodes = (nodes, parents = null, out = []) => {
         (run ??= []).push({ ...node });
       }
       else {
-        out.push({ ...node });
+        flat.push({ ...node });
       }
     }
     else if (node.type === 'rule') {
       flush();
       const selectors = parents ? combineSelectors(parents, node.selectors) : node.selectors.slice();
       if (node.children.length === 0) {
-        out.push({ type: 'rule', selectors, children: [] });
+        flat.push({ type: 'rule', selectors, children: [] });
       }
       else {
-        flattenNodes(node.children, selectors, out);
+        flattenNodes(node.children, selectors, flat);
       }
     }
     else {
       flush();
       const inside = isKeyframes(node.name) ? null : parents;
-      out.push(node.children ? { ...node, children: flattenNodes(node.children, inside) } : { ...node });
+      flat.push(node.children ? { ...node, children: flattenNodes(node.children, inside) } : { ...node });
     }
   });
   flush();
-  return out;
+  return flat;
 };
 
 export const stringifyCSS = (nodes, { indent = '  ' } = {}) => {
@@ -502,7 +505,7 @@ const identEnd = (text, index, end) => {
   return index;
 };
 
-const moreSpecific = (a, b) => (a[0] - b[0] || a[1] - b[1] || a[2] - b[2]) > 0;
+const moreSpecific = (left, right) => (left[0] - right[0] || left[1] - right[1] || left[2] - right[2]) > 0;
 
 const specificityOf = (text, index, end) => {
   let ids = 0;
@@ -510,10 +513,10 @@ const specificityOf = (text, index, end) => {
   let elements = 0;
   let best = null;
   const add = (from, to) => {
-    const [a, b, c] = specificityOf(text, from, to);
-    ids += a;
-    classes += b;
-    elements += c;
+    const [moreIds, moreClasses, moreElements] = specificityOf(text, from, to);
+    ids += moreIds;
+    classes += moreClasses;
+    elements += moreElements;
   };
   while (index < end) {
     const code = text.charCodeAt(index);
