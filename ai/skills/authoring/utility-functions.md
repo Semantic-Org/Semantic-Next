@@ -883,7 +883,36 @@ scopeStyles(':host(.active) { background: blue; }', '.widget', { replaceHost: tr
 ## HTML Utilities (html.js)
 
 ```javascript
-import { indentLines, indentHTML } from '@semantic-ui/utils';
+import { indentHTML, indentLines, parseHTML, rawTextElements, stringifyHTML, voidElements } from '@semantic-ui/utils';
+
+// Read html into plain nodes with source spans, no DOM, everything as written: case, quotes,
+// attribute order, entities, whitespace, comments. A raw text element (script, style, textarea,
+// title) holds its content as one text child, a void element takes none. Never throws, never
+// drops bytes, and no browser recovery (no implied tbody, no auto-closed p)
+parseHTML('<p class="a">Hi <b>there</b></p>');
+// [{ type: 'element', name: 'p', attributes: [{ name: 'class', value: 'a', quote: '"' }],
+//    children: [{ type: 'text', value: 'Hi ', start: 13, end: 16 }, { type: 'element', name: 'b', ... }],
+//    selfClosing: false, start: 0, end: 32, innerStart: 13, innerEnd: 28 }]
+parseHTML('<img src=a.png alt="" hidden>')[0].attributes;
+// [{ name: 'src', value: 'a.png', quote: '' }, { name: 'alt', value: '', quote: '"' }, { name: 'hidden', value: null, quote: '' }]
+parseHTML('<!-- note --><!doctype html>');   // [{ type: 'comment', value: ' note ', ... }, { type: 'doctype', value: 'doctype html', ... }]
+parseHTML('<my-el/><p>a</p>').length;        // 2, a self-closing tag closes a custom element as its author meant
+parseHTML('<div/><p>a</p>', { closeOnSlash: false }); // the browser's reading, the p inside the div
+
+// spans slice the source, so a caller splices the original bytes instead of re-serializing
+const [element] = parseHTML(html);
+html.slice(element.start, element.end);           // the element as written
+html.slice(element.innerStart, element.innerEnd); // its content as written
+
+// write nodes back. untouched input comes back byte for byte, the whitespace inside a tag
+// being the one thing normalized. values are written verbatim, quoting a set value is yours
+stringifyHTML(parseHTML(html)) === html;
+nodes[0].attributes[0].value = '/y'; stringifyHTML(nodes);   // only that attribute's bytes move
+stringifyHTML({ type: 'element', name: 'br', attributes: [], children: [], selfClosing: true }); // '<br />'
+
+// the spec's two element sets, held once here for every scanner in the framework
+voidElements.has('br');          // true (area base br col embed hr img input link meta param source track wbr)
+rawTextElements.has('script');   // true (script style textarea title xmp iframe noembed noframes plaintext)
 
 // Add uniform indentation to all lines
 indentLines('line 1\nline 2', 4);    // '    line 1\n    line 2'

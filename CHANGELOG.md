@@ -131,6 +131,7 @@ xx.xx.xxxx
 * **Bug** - Fixed `clone()` mangling typed arrays, `ArrayBuffer`, and `DataView` into index-keyed plain objects — these now clone into independent buffers of the correct type
 * **Feature** - Added [`parseCSS`](https://next.semantic-ui.com/docs/api/utils/css#parsecss) and [`stringifyCSS`](https://next.semantic-ui.com/docs/api/utils/css#stringifycss) — a stylesheet read into plain nodes and written back with no DOM, nesting kept as written or flattened with `{ flatten: true }`, every at-rule a node, comments dropped, `!important` and custom properties read like any declaration, malformed input never throwing
 * **Feature** - Added [`selectorSpecificity`](https://next.semantic-ui.com/docs/api/utils/css#selectorspecificity) — a selector's specificity as `[ids, classes, elements]` per Selectors Level 4, `:is()`, `:not()`, `:where()` and `:host()` included
+* **Feature** - Added [`parseHTML`](https://next.semantic-ui.com/docs/api/utils/html#parsehtml) and [`stringifyHTML`](https://next.semantic-ui.com/docs/api/utils/html#stringifyhtml) — html read into plain nodes with source spans, everything as written and nothing decoded, no browser recovery and never a throw, and written back byte for byte, on the server as in a browser. `voidElements` and `rawTextElements` are exported beside them, the spec's two element sets held once for every scanner in the framework
 * **Enhancement** - `scopeStyles` keeps a rule's nested rules under the scoped parent (they were dropped)
 
 ### Component
@@ -140,7 +141,7 @@ xx.xx.xxxx
 * **Bug** - Number attributes land `null` instead of a poison value for unparseable input — `count="abc"` was `NaN`, `count=""` was `0`
 * **Bug** - Reflecting a circular object value drops the attribute instead of throwing mid-render
 * **Feature** - Added `renderToStaticMarkup(Component, data, { slots, text, css })`, rendering a component to its template's markup alone with no shadow root or hydration markers. Slots fill in place, nested components render flat, `text: true` renders plain text, `css: true` returns `{ html, css }` with the css of every component reached, and a definition without a `tagName` renders the same way
-* **Feature** - Added `@semantic-ui/component/server`, the server entry carrying `renderToString`, `renderToStaticMarkup` and `expandCustomElements`. The root entry stays the browser surface
+* **Feature** - Added `@semantic-ui/component/server`, the server entry carrying `renderToString`, `renderToStaticMarkup` and `expandCustomElements`. The root entry stays the browser surface. A custom element tag inside `<script>`, `<style>`, `<textarea>` or `<title>` text stays text, and a render on the client renderer throws a named error, `Template.isServer = true` being the door
 
 ### Behaviors
 * **Feature** - Add new popup optimized animations `pop-x` for all directions of a popup

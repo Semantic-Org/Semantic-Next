@@ -3,13 +3,13 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: HTML Utilities
 package: "@semantic-ui/utils"
-methods: [indentLines, indentHTML]
+methods: [parseHTML, stringifyHTML, indentLines, indentHTML, voidElements, rawTextElements]
 icon: code
-description: API reference for HTML and text formatting utility functions
+description: API reference for HTML parsing, serializing and formatting utility functions
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Functions for indenting text and HTML markup.
+Functions for reading html into plain nodes and writing it back with no DOM, and for indenting text and markup.
 
 ## indentLines
 
@@ -61,3 +61,66 @@ Handles void elements (`img`, `br`, `hr`, `input`), self-closing tags (`<compone
 
 ### Example
 <PlaygroundExample id="utils-indenthtml" direction="horizontal"></PlaygroundExample>
+
+## parseHTML
+
+Reads html, a fragment or a whole document, into plain nodes with source spans. Everything stays as written: tag and attribute case, quote style, attribute order, entities, whitespace and comments. A void element takes no children, a raw text element (`script`, `style`, `textarea`, `title` and the rest of the spec set) holds its content as one text child, and a close tag closes the nearest open element of its name. There is no browser recovery beyond that: no implied `tbody`, no auto-closed `p`, no invented `html` or `body`. Malformed input never throws and never loses bytes, a tag cut off by the end of the string and a close tag with no open element both stay text.
+
+### Syntax
+```javascript
+parseHTML(html, { closeOnSlash = true } = {})
+```
+
+### Parameters
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| html    | string | The html to read |
+| options | object | Optional configuration |
+
+#### Options
+| Name         | Type    | Default | Description |
+|--------------|---------|---------|-------------|
+| closeOnSlash | boolean | true    | Close a non-void element at `/>` the way template, svg and custom element authors mean it. `false` reads `/>` the way a browser does, as an open tag whose content follows |
+
+### Returns
+An array of the top-level nodes in order, an empty array for non-string input. Four node shapes appear in a tree, every one carrying `start` and `end` source offsets (`end` exclusive) so `html.slice(node.start, node.end)` is the node exactly as written:
+
+| Node | Shape |
+|------|-------|
+| element | `{ type: 'element', name, attributes, children, selfClosing, start, end, innerStart, innerEnd }`, `innerStart` and `innerEnd` bracketing the content between the tags |
+| text | `{ type: 'text', value, start, end }`, whitespace runs included |
+| comment | `{ type: 'comment', value, start, end }`, `value` being everything between `<!--` and `-->` |
+| doctype | `{ type: 'doctype', value, start, end }`, `value` being everything between `<!` and `>` |
+
+An attribute is `{ name, value, quote }`: the name as written (`@click`, `:value`, `viewBox` all survive), the value as written with entities undecoded, `''` for `alt=""` and `null` for a valueless attribute like `disabled`, and the quote character used, `''` when there was none.
+
+### Example
+<PlaygroundExample id="utils-parsehtml" direction="horizontal"></PlaygroundExample>
+
+## stringifyHTML
+
+Writes nodes back to html. Names and values are written as stored with no escaping, attributes separated by single spaces, a self-closing element as `<name />`, a void element with no close tag, and every other element with a close tag respelled from its open tag. For ordinary markup `stringifyHTML(parseHTML(html))` is `html` byte for byte, the whitespace inside a tag being the one thing normalized. A value set by hand is written verbatim, so quoting it is the caller's.
+
+### Syntax
+```javascript
+stringifyHTML(nodes)
+```
+
+### Parameters
+| Name  | Type           | Description |
+|-------|----------------|-------------|
+| nodes | object, array  | A node or a list of nodes from `parseHTML`, or built by hand |
+
+### Returns
+The html. Returns an empty string for anything that is not a node or a list of nodes.
+
+### Example
+<PlaygroundExample id="utils-stringifyhtml" direction="horizontal"></PlaygroundExample>
+
+## voidElements
+
+A `Set` of the elements that never take children or a close tag, per the HTML spec: `area base br col embed hr img input link meta param source track wbr`. The one copy every scanner in the framework reads.
+
+## rawTextElements
+
+A `Set` of the elements whose content is text and never markup, per the HTML spec: `script style textarea title xmp iframe noembed noframes plaintext`.
