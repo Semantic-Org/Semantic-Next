@@ -142,7 +142,11 @@ const scoped = scopeStyles('.button { color: red; }', '.my-component');
 
 // Nested rules stay under the scoped parent
 const nested = scopeStyles('.button { color: red; &:hover { color: blue; } }', '.my-component');
-// Result: .my-component .button { color: red; &:hover { color: blue; } }
+// Result:
+// .my-component .button {
+//   color: red;
+//   &:hover { color: blue; }
+// }
 
 // Replace :host selectors for web component CSS porting
 const hostCSS = ':host { display: block; } :host(.active) { opacity: 1; }';
