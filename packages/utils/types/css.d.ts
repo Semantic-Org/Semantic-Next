@@ -267,11 +267,10 @@ export function extractCSS(
 ): CSSStyleSheet | string;
 
 /**
- * Scopes a stylesheet under a selector, with no DOM needed. Every selector in a
- * top-level rule and in the rules inside `@media`, `@supports`, `@layer` and
- * `@container` blocks gains the scope, nested rules stay under their scoped parent,
- * and keyframe selectors are left alone. The output is written in the canonical
- * layout of `stringifyCSS`
+ * Scopes a stylesheet under a selector, on the server as in a browser. Every selector
+ * in a top-level rule and in the rules inside any at-rule block gains the scope,
+ * `@keyframes` excepted, and nested rules stay under their scoped parent. The output
+ * is written in the canonical layout of `stringifyCSS`
  * @see {@link https://next.semantic-ui.com/docs/api/utils/css#scopestyles scopeStyles}
  * @see {@link https://next.semantic-ui.com/examples/utils-scopestyles Example}
  *

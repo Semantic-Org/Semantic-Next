@@ -110,7 +110,7 @@ const widgetRules = extractCSS('.widget', [sheet1, sheet2]);
 function scopeStyles(css, scopeSelector, { replaceHost, appendToRootElements } = {})
 ```
 
-Scopes a stylesheet under a selector, with configurable options for web component integration and root element handling. It reads the sheet through `parseCSS`, so it runs on the server as well as in the browser, and nested rules stay under their scoped parent. Every selector in a top-level rule and in the rules inside `@media`, `@supports`, `@layer` and `@container` blocks gains the scope, while keyframe selectors are left alone. The output is written in the canonical layout of `stringifyCSS`.
+Scopes a stylesheet under a selector, with configurable options for web component integration and root element handling. It reads the sheet through `parseCSS`, so it runs on the server as well as in the browser, and nested rules stay under their scoped parent. Every selector in a top-level rule and in the rules inside any at-rule block gains the scope, `@keyframes` excepted. The output is written in the canonical layout of `stringifyCSS`.
 
 #### Parameters
 
