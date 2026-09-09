@@ -136,6 +136,7 @@ xx.xx.xxxx
 
 ### Component
 * **Bug** - Server rendering no longer expands a custom element tag that sits inside `<script>`, `<style>`, `<textarea>` or `<title>` text, which a browser reads as text
+* **Bug** - `renderToString` throws a clear error when the client renderer is active, where it rendered an empty shadow root before. Set `Template.isServer = true` to render in a browser
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
 * **Bug** - Fix reactions on `settings` would not trigger reactions when settings updated via attribute.
 * **Bug** - Boolean attributes now read the generous vocabulary — `active="no"`, `"off"`, and `"disabled"` parse as `false` where the raw `Boolean()` fallback read any non-empty string as `true`. Presence (`<my-el active>`) still reads `true`, and a vocabulary added via `toBoolean.config` at boot applies to attribute parsing too
