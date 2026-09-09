@@ -1,4 +1,4 @@
-import { camelToKebab, each, escapeHTML, isFunction, isString } from '@semantic-ui/utils';
+import { camelToKebab, each, escapeHTML, isFunction } from '@semantic-ui/utils';
 import { expandCustomElements } from './expand-custom-elements.js';
 import { createServerTemplate } from './server-template.js';
 
@@ -26,12 +26,6 @@ export function renderToString(ComponentClass, attrs = {}, { slots = null, depth
   const { template, normalizedAttrs, resolvedProperties, css } = createServerTemplate(ComponentClass, attrs);
 
   let html = template.render();
-  // a fragment means the client renderer ran
-  if (!isString(html)) {
-    throw new TypeError(
-      'renderToString: the template rendered on the client renderer. Set Template.isServer = true to render in a browser',
-    );
-  }
 
   // Phase 2: expand nested custom elements recursively
   html = expandCustomElements(html, { depth, hydrate, renderFn: renderToString });

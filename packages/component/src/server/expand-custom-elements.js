@@ -21,6 +21,12 @@ const CUSTOM_TAG = /^[a-z][a-z0-9]*-/;
   The `renderFn` parameter breaks the circular dependency with renderToString.
 */
 export function expandCustomElements(html, { depth = 0, hydrate = true, renderFn, assignSlots = false } = {}) {
+  // a fragment means the client renderer ran
+  if (!isString(html)) {
+    throw new TypeError(
+      'expandCustomElements: the template rendered on the client renderer, not to a string. Set Template.isServer = true to render in a browser',
+    );
+  }
   if (depth >= MAX_DEPTH) { return html; }
 
   let result = '';
