@@ -13,11 +13,11 @@ import { describe, expect, it } from 'vitest';
 
 const declaration = (property, value, important = false) => ({ type: 'declaration', property, value, important });
 const rule = (selectors, children = []) => ({ type: 'rule', selectors, children });
-const at = (
+const atRule = (
   name,
   prelude,
   children,
-) => (children ? { type: 'at', name, prelude, children } : { type: 'at', name, prelude });
+) => (children ? { type: 'at-rule', name, prelude, children } : { type: 'at-rule', name, prelude });
 
 describe('prefixCSS', () => {
   it('should add -webkit-user-select prefix', () => {
@@ -109,13 +109,13 @@ describe('parseCSS', () => {
 
     it('reads a block at-rule with its prelude', () => {
       expect(parseCSS('@media (min-width: 40em) { .a { gap: 1rem } }')).toEqual([
-        at('media', '(min-width: 40em)', [rule(['.a'], [declaration('gap', '1rem')])]),
+        atRule('media', '(min-width: 40em)', [rule(['.a'], [declaration('gap', '1rem')])]),
       ]);
     });
 
     it('reads a statement at-rule with no body', () => {
-      expect(parseCSS('@import url("x.css") layer(base);')).toEqual([at('import', 'url("x.css") layer(base)')]);
-      expect(parseCSS('@layer a, b;')).toEqual([at('layer', 'a, b')]);
+      expect(parseCSS('@import url("x.css") layer(base);')).toEqual([atRule('import', 'url("x.css") layer(base)')]);
+      expect(parseCSS('@layer a, b;')).toEqual([atRule('layer', 'a, b')]);
     });
 
     it('drops comments, keeps custom properties and reads !important', () => {
@@ -140,7 +140,7 @@ describe('parseCSS', () => {
       const css = '.a { @starting-style { opacity: 0 } opacity: 1; &.in { color: red } }';
       expect(parseCSS(css)).toEqual([
         rule(['.a'], [
-          at('starting-style', '', [declaration('opacity', '0')]),
+          atRule('starting-style', '', [declaration('opacity', '0')]),
           declaration('opacity', '1'),
           rule(['&.in'], [declaration('color', 'red')]),
         ]),
@@ -187,9 +187,9 @@ describe('parseCSS', () => {
       const css =
         '@font-face { font-family: Lato } @property --p { syntax: "<length>"; inherits: true } @keyframes spin { from { a: b } to { a: c } }';
       expect(parseCSS(css)).toEqual([
-        at('font-face', '', [declaration('font-family', 'Lato')]),
-        at('property', '--p', [declaration('syntax', '"<length>"'), declaration('inherits', 'true')]),
-        at('keyframes', 'spin', [rule(['from'], [declaration('a', 'b')]), rule(['to'], [declaration('a', 'c')])]),
+        atRule('font-face', '', [declaration('font-family', 'Lato')]),
+        atRule('property', '--p', [declaration('syntax', '"<length>"'), declaration('inherits', 'true')]),
+        atRule('keyframes', 'spin', [rule(['from'], [declaration('a', 'b')]), rule(['to'], [declaration('a', 'c')])]),
       ]);
     });
 
@@ -219,7 +219,7 @@ describe('parseCSS', () => {
       expect(parseCSS(css, { flatten: true })).toEqual([
         rule(['.a', '.b'], [declaration('color', 'red')]),
         rule(['.a .c', '.a > .d', '.b .c', '.b > .d'], [declaration('color', 'blue')]),
-        at('media', 'print', [rule(['.a', '.b'], [declaration('display', 'none')])]),
+        atRule('media', 'print', [rule(['.a', '.b'], [declaration('display', 'none')])]),
       ]);
     });
 
@@ -236,7 +236,7 @@ describe('parseCSS', () => {
     it('keeps trailing declarations after a nested block in written order', () => {
       const css = '.a { @starting-style { opacity: 0 } opacity: 1; &.in { color: red } }';
       expect(parseCSS(css, { flatten: true })).toEqual([
-        at('starting-style', '', [rule(['.a'], [declaration('opacity', '0')])]),
+        atRule('starting-style', '', [rule(['.a'], [declaration('opacity', '0')])]),
         rule(['.a'], [declaration('opacity', '1')]),
         rule(['.a.in'], [declaration('color', 'red')]),
       ]);
@@ -244,7 +244,7 @@ describe('parseCSS', () => {
 
     it('lifts a nested at-rule holding declarations and rules', () => {
       expect(parseCSS('.a { @media (x) { color: red; .b { color: blue } } }', { flatten: true })).toEqual([
-        at('media', '(x)', [
+        atRule('media', '(x)', [
           rule(['.a'], [declaration('color', 'red')]),
           rule(['.a .b'], [declaration('color', 'blue')]),
         ]),
@@ -261,9 +261,9 @@ describe('parseCSS', () => {
       const css =
         '@keyframes spin { from { a: b } to { a: c } } @media print { .a { .b { c: d } } } @import url(x.css);';
       expect(parseCSS(css, { flatten: true })).toEqual([
-        at('keyframes', 'spin', [rule(['from'], [declaration('a', 'b')]), rule(['to'], [declaration('a', 'c')])]),
-        at('media', 'print', [rule(['.a .b'], [declaration('c', 'd')])]),
-        at('import', 'url(x.css)'),
+        atRule('keyframes', 'spin', [rule(['from'], [declaration('a', 'b')]), rule(['to'], [declaration('a', 'c')])]),
+        atRule('media', 'print', [rule(['.a .b'], [declaration('c', 'd')])]),
+        atRule('import', 'url(x.css)'),
       ]);
     });
 
@@ -282,7 +282,7 @@ describe('parseCSS', () => {
 
     it('lifts a nested keyframes block whole', () => {
       expect(parseCSS('.a { @keyframes spin { from { o: 0 } to { o: 1 } } }', { flatten: true })).toEqual([
-        at('keyframes', 'spin', [rule(['from'], [declaration('o', '0')]), rule(['to'], [declaration('o', '1')])]),
+        atRule('keyframes', 'spin', [rule(['from'], [declaration('o', '0')]), rule(['to'], [declaration('o', '1')])]),
       ]);
     });
 

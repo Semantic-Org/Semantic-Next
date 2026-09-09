@@ -842,8 +842,8 @@ parseCSS('.a { color: red; &:hover { color: blue } }');
 //   { type: 'declaration', property: 'color', value: 'red', important: false },
 //   { type: 'rule', selectors: ['&:hover'], children: [...] },
 // ] }]
-parseCSS('@import url("x.css");');   // [{ type: 'at', name: 'import', prelude: 'url("x.css")' }] — a statement has no children
-parseCSS('@media (x) { .a {} }');     // [{ type: 'at', name: 'media', prelude: '(x)', children: [...] }]
+parseCSS('@import url("x.css");');   // [{ type: 'at-rule', name: 'import', prelude: 'url("x.css")' }] — a statement has no children
+parseCSS('@media (x) { .a {} }');     // [{ type: 'at-rule', name: 'media', prelude: '(x)', children: [...] }]
 
 // flatten nesting the way a preprocessor writes it: & is the parent, a bare nested selector a
 // descendant, lists multiply, a nested at-rule lifts out with the rule rebuilt inside. Order is kept

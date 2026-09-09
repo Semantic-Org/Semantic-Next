@@ -192,7 +192,7 @@ An array of the stylesheet's top-level nodes. Three node shapes appear in a tree
 | Node | Shape |
 |------|-------|
 | rule | `{ type: 'rule', selectors: string[], children: [...] }`, the selector list split on top-level commas |
-| at-rule | `{ type: 'at', name, prelude, children: [...] }` for a block (`@media`, `@layer name`, `@font-face`), `{ type: 'at', name, prelude }` for a statement (`@import`, `@layer a, b;`) |
+| at-rule | `{ type: 'at-rule', name, prelude, children: [...] }` for a block (`@media`, `@layer name`, `@font-face`), `{ type: 'at-rule', name, prelude }` for a statement (`@import`, `@layer a, b;`) |
 | declaration | `{ type: 'declaration', property, value, important }`, the property and value as written |
 
 A rule's `children` hold its declarations, nested rules and nested at-rules in the order written, so a consumer filters by `type`.
@@ -215,12 +215,12 @@ parseCSS('.a { color: red; &:hover { color: blue } }', { flatten: true });
 //  { type: 'rule', selectors: ['.a:hover'], children: [...] }]
 
 parseCSS('@media (min-width: 40em) { .a { gap: 1rem } }');
-// [{ type: 'at', name: 'media', prelude: '(min-width: 40em)', children: [
+// [{ type: 'at-rule', name: 'media', prelude: '(min-width: 40em)', children: [
 //   { type: 'rule', selectors: ['.a'], children: [...] },
 // ] }]
 
 parseCSS('@import url("x.css") layer(base);');
-// [{ type: 'at', name: 'import', prelude: 'url("x.css") layer(base)' }]
+// [{ type: 'at-rule', name: 'import', prelude: 'url("x.css") layer(base)' }]
 
 // the tree is plain data
 const custom = parseCSS(css)

@@ -216,7 +216,7 @@ const atNode = (head, children) => {
   const [at] = AT_NAME.exec(head);
   const name = at.slice(1);
   const prelude = head.slice(at.length).trim();
-  return children ? { type: 'at', name, prelude, children } : { type: 'at', name, prelude };
+  return children ? { type: 'at-rule', name, prelude, children } : { type: 'at-rule', name, prelude };
 };
 
 const declarationFrom = (head) => {
@@ -461,7 +461,7 @@ export const stringifyCSS = (nodes, { indent = '  ' } = {}) => {
         : node.prelude
         ? `@${node.name} ${node.prelude}`
         : `@${node.name}`;
-      if (node.type === 'at' && !node.children) {
+      if (node.type === 'at-rule' && !node.children) {
         lines.push(`${pad}${head};`);
         return;
       }

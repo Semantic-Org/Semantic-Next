@@ -46,7 +46,7 @@ export interface CSSRuleNode {
  * carries children, a statement (`@import`, `@layer a, b;`) has none
  */
 export interface CSSAtRuleNode {
-  type: 'at';
+  type: 'at-rule';
   /** The name without the `@` */
   name: string;
   /** The text between the name and the block or the `;`, `''` when there is none */
@@ -111,7 +111,7 @@ export interface StringifyCSSOptions {
  * //   { type: 'rule', selectors: ['&:hover'], children: [...] },
  * // ] }]
  * parseCSS(css, { flatten: true }) // '.a:hover' as its own rule
- * parseCSS('@import url("x.css");') // [{ type: 'at', name: 'import', prelude: 'url("x.css")' }]
+ * parseCSS('@import url("x.css");') // [{ type: 'at-rule', name: 'import', prelude: 'url("x.css")' }]
  * ```
  */
 export function parseCSS(css: string, options?: ParseCSSOptions): CSSNode[];
