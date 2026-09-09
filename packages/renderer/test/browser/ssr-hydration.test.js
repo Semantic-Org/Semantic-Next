@@ -845,13 +845,14 @@ describe('SSR hydration — contract', () => {
       template: '<div>test</div>',
     });
     // the server renderer, as ssrAndHydrate selects it, so the markup carries the shadow root
+    const wasServer = Template.isServer;
     Template.isServer = true;
     let html;
     try {
       html = renderToString(Component);
     }
     finally {
-      Template.isServer = false;
+      Template.isServer = wasServer;
     }
     const wrapper = document.createElement('div');
     wrapper.innerHTML = html;
