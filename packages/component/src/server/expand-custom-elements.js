@@ -2,7 +2,7 @@
 import { getComponent } from '@semantic-ui/component';
 import { isString, unescapeHTML } from '@semantic-ui/utils';
 
-import { resolveAttributeAliases } from './component-helpers.js';
+import { resolveAttributeAliases } from '../component-helpers.js';
 
 const MAX_DEPTH = 10;
 

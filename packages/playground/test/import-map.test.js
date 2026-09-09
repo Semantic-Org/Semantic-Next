@@ -28,7 +28,7 @@ describe('the examples import map', () => {
 
   it('serves the component server entry from the file each mode ships', () => {
     const entry = (mode) => mapFor(mode).imports['@semantic-ui/component/server'];
-    expect(entry('local')).toBe('/base/@semantic-ui/core/packages/component/src/server.js');
+    expect(entry('local')).toBe('/base/@semantic-ui/core/packages/component/src/server/index.js');
     expect(entry('static')).toBe('/base/@semantic-ui/component/dist/cdn/server.js');
     expect(entry('production')).toBe('/base/@semantic-ui/component@0.18.0/server/+esm');
   });

@@ -50,7 +50,7 @@ const bundleNames = {
 // subpath entries an example imports, with the file each mode serves. The browser
 // matches an import map key exactly, so a subpath is its own line
 export const subpaths = {
-  '@semantic-ui/component/server': { local: 'src/server.js', static: 'dist/cdn/server.js' },
+  '@semantic-ui/component/server': { local: 'src/server/index.js', static: 'dist/cdn/server.js' },
 };
 
 // mode is production, static or local. readPackage returns a package.json for a

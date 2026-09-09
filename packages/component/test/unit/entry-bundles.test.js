@@ -14,7 +14,10 @@ const outdir = path.resolve(packageDir, '../../node_modules/.cache/semantic-ui/e
 // the server entry each carry their own copy of the engine registration
 beforeAll(async () => {
   await build({
-    entryPoints: [path.join(packageDir, 'src/index.js'), path.join(packageDir, 'src/server.js')],
+    entryPoints: [
+      { in: path.join(packageDir, 'src/index.js'), out: 'index' },
+      { in: path.join(packageDir, 'src/server/index.js'), out: 'server' },
+    ],
     outdir,
     bundle: true,
     format: 'esm',

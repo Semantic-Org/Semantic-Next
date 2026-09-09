@@ -1,4 +1,4 @@
-export * from './index.js';
+export * from '../index.js';
 
 export { expandCustomElements } from './expand-custom-elements.js';
 export { renderToStaticMarkup } from './render-to-static-markup.js';

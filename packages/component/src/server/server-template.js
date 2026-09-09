@@ -2,7 +2,7 @@
 import { Template } from '@semantic-ui/templating/template';
 import { each, kebabToCamel } from '@semantic-ui/utils';
 
-import { getUIClasses, resolveAttributeAliases } from './component-helpers.js';
+import { getUIClasses, resolveAttributeAliases } from '../component-helpers.js';
 
 /*
   The server instance of a definition, the class a tagged defineComponent returns

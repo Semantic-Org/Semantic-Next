@@ -1,6 +1,6 @@
 import type { Template } from '@semantic-ui/templating';
 
-import { ComponentConstructor } from './define-component.js';
+import { ComponentConstructor } from '../define-component.js';
 
 /**
  * Options for a single {@link renderToStaticMarkup} pass.
