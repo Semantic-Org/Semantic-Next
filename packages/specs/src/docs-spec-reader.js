@@ -9,6 +9,7 @@ import {
   tokenize,
   toTitleCase,
   values,
+  voidElements,
 } from '@semantic-ui/utils';
 
 import { StringScanner } from '@semantic-ui/compiler';
@@ -729,21 +730,8 @@ export class DocsSpecReader extends SpecReader {
     for SSR rendering of nested web components
   -----------------------------------------------*/
 
-  static VOID_ELEMENTS = new Set([
-    'area',
-    'base',
-    'br',
-    'col',
-    'embed',
-    'hr',
-    'img',
-    'input',
-    'link',
-    'meta',
-    'source',
-    'track',
-    'wbr',
-  ]);
+  // the spec set utils holds, one copy for every scanner in the framework
+  static VOID_ELEMENTS = voidElements;
 
   /* Returns true if a tag is a web component (all custom elements require a hyphen) */
   isComponentTag(tag) {
