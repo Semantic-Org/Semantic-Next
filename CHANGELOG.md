@@ -135,15 +135,13 @@ xx.xx.xxxx
 * **Enhancement** - `scopeStyles` keeps a rule's nested rules under the scoped parent (they were dropped)
 
 ### Component
-* **Bug** - Server rendering no longer expands a custom element tag that sits inside `<script>`, `<style>`, `<textarea>` or `<title>` text, which a browser reads as text
-* **Bug** - `renderToString` throws a clear error when the client renderer is active, where it rendered an empty shadow root before. Set `Template.isServer = true` to render in a browser
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
 * **Bug** - Fix reactions on `settings` would not trigger reactions when settings updated via attribute.
 * **Bug** - Boolean attributes now read the generous vocabulary — `active="no"`, `"off"`, and `"disabled"` parse as `false` where the raw `Boolean()` fallback read any non-empty string as `true`. Presence (`<my-el active>`) still reads `true`, and a vocabulary added via `toBoolean.config` at boot applies to attribute parsing too
 * **Bug** - Number attributes land `null` instead of a poison value for unparseable input — `count="abc"` was `NaN`, `count=""` was `0`
 * **Bug** - Reflecting a circular object value drops the attribute instead of throwing mid-render
 * **Feature** - Added `renderToStaticMarkup(Component, data, { slots, text, css })`, rendering a component to its template's markup alone with no shadow root or hydration markers. Slots fill in place, nested components render flat, `text: true` renders plain text, `css: true` returns `{ html, css }` with the css of every component reached, and a definition without a `tagName` renders the same way
-* **Feature** - Added `@semantic-ui/component/server`, the server entry carrying `renderToString`, `renderToStaticMarkup` and `expandCustomElements`. The root entry stays the browser surface
+* **Feature** - Added `@semantic-ui/component/server`, the server entry carrying `renderToString`, `renderToStaticMarkup` and `expandCustomElements`. The root entry stays the browser surface. A custom element tag inside `<script>`, `<style>`, `<textarea>` or `<title>` text stays text, and a render on the client renderer throws a named error, `Template.isServer = true` being the door
 
 ### Behaviors
 * **Feature** - Add new popup optimized animations `pop-x` for all directions of a popup
