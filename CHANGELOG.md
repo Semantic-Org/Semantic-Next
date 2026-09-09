@@ -137,7 +137,7 @@ xx.xx.xxxx
 * **Bug** - Number attributes land `null` instead of a poison value for unparseable input — `count="abc"` was `NaN`, `count=""` was `0`
 * **Bug** - Reflecting a circular object value drops the attribute instead of throwing mid-render
 * **Feature** - Added `renderToStaticMarkup(Component, data, { slots, text, css })`, rendering a component to its template's markup alone with no shadow root or hydration markers. Slots fill in place, nested components render flat, `text: true` renders plain text, `css: true` returns `{ html, css }` with the css of every component reached, and a definition without a `tagName` renders the same way
-* **BREAKING** - `renderToString`, `renderToStaticMarkup` and `expandCustomElements` now import from `@semantic-ui/component/server`. The root entry is the browser surface and no longer exports them
+* **Feature** - Added `@semantic-ui/component/server`, the server entry carrying `renderToString`, `renderToStaticMarkup` and `expandCustomElements`. The root entry stays the browser surface
 * **Enhancement** - The server renderer no longer ships to the browser. It joins the native engine when `@semantic-ui/component/server` loads, and the framework bundle is 1.58 KB brotli smaller
 
 ### Behaviors
