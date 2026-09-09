@@ -129,7 +129,7 @@ xx.xx.xxxx
 * **Feature** - Added `unescapeHTML()` for converting HTML entities back to characters — the inverse of `escapeHTML`
 * **Bug** - Fixed `escapeHTML()` producing entities without semicolons (e.g. `&amp` instead of `&amp;`)
 * **Bug** - Fixed `clone()` mangling typed arrays, `ArrayBuffer`, and `DataView` into index-keyed plain objects — these now clone into independent buffers of the correct type
-* **Feature** - Added [`parseCSS`](https://next.semantic-ui.com/docs/api/utils/css#parsecss) and [`stringifyCSS`](https://next.semantic-ui.com/docs/api/utils/css#stringifycss) — a stylesheet read into plain nodes and written back, with no DOM and no dependency. Nesting is kept as written or flattened with `{ flatten: true }`, every at-rule reads as a node, comments are dropped, `!important` and custom properties read like any declaration, and malformed input never throws. Every one of the framework's own stylesheets round-trips
+* **Feature** - Added [`parseCSS`](https://next.semantic-ui.com/docs/api/utils/css#parsecss) and [`stringifyCSS`](https://next.semantic-ui.com/docs/api/utils/css#stringifycss) — a stylesheet read into plain nodes and written back with no DOM, nesting kept as written or flattened with `{ flatten: true }`, every at-rule a node, comments dropped, `!important` and custom properties read like any declaration, malformed input never throwing
 * **Feature** - Added [`selectorSpecificity`](https://next.semantic-ui.com/docs/api/utils/css#selectorspecificity) — a selector's specificity as `[ids, classes, elements]` per Selectors Level 4, `:is()`, `:not()`, `:where()` and `:host()` included
 * **Enhancement** - `scopeStyles` keeps a rule's nested rules under the scoped parent (they were dropped)
 

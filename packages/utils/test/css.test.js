@@ -1,11 +1,4 @@
-import {
-  adoptStylesheet,
-  parseCSS,
-  prefixCSS,
-  scopeStyles,
-  selectorSpecificity,
-  stringifyCSS,
-} from '@semantic-ui/utils';
+import { adoptStylesheet, parseCSS, prefixCSS, selectorSpecificity, stringifyCSS } from '@semantic-ui/utils';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
