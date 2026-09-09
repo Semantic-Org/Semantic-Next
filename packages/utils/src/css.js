@@ -142,6 +142,32 @@ const closingIndex = (text, index, end, open, close) => {
   return end;
 };
 
+// whitespace runs outside strings become one space, a string keeps its own
+const collapseSpace = (text) => {
+  if (text.indexOf('"') < 0 && text.indexOf("'") < 0) {
+    return text.replace(WHITESPACE, ' ');
+  }
+  const end = text.length;
+  let collapsed = '';
+  let start = 0;
+  let index = 0;
+  while (index < end) {
+    const code = text.charCodeAt(index);
+    if (code === QUOTE || code === APOS) {
+      const close = skipString(text, index, end);
+      collapsed += text.slice(start, index).replace(WHITESPACE, ' ') + text.slice(index, close);
+      start = index = close;
+    }
+    else if (code === BACKSLASH) {
+      index += 2;
+    }
+    else {
+      index++;
+    }
+  }
+  return collapsed + text.slice(start).replace(WHITESPACE, ' ');
+};
+
 const splitSelectors = (text) => {
   if (text.indexOf(',') < 0) {
     return text ? [text] : [];
@@ -161,6 +187,10 @@ const splitSelectors = (text) => {
     const code = text.charCodeAt(index);
     if (code === QUOTE || code === APOS) {
       index = skipString(text, index, end);
+      continue;
+    }
+    if (code === BACKSLASH) {
+      index += 2;
       continue;
     }
     if (code === LPAREN || code === LBRACKET) {
@@ -246,6 +276,9 @@ export const parseCSS = (css, { flatten = false } = {}) => {
         }
         start = index;
       }
+      else if (code === BACKSLASH) {
+        index += 2;
+      }
       else if (code === LPAREN) {
         depth++;
         index++;
@@ -279,14 +312,14 @@ export const parseCSS = (css, { flatten = false } = {}) => {
       const terminator = index < length ? css.charCodeAt(index++) : CLOSE;
       const isAt = head.charCodeAt(0) === AT;
       if (terminator === OPEN) {
-        const text = head.replace(WHITESPACE, ' ');
+        const text = collapseSpace(head);
         const node = isAt ? atNode(text, []) : { type: 'rule', selectors: splitSelectors(text), children: [] };
         parseBlock(node.children);
         children.push(node);
       }
       else {
         if (isAt) {
-          children.push(atNode(head.replace(WHITESPACE, ' ')));
+          children.push(atNode(collapseSpace(head)));
         }
         else if (!top) {
           pushDeclaration(children, head);
