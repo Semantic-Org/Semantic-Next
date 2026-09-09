@@ -312,7 +312,8 @@ export class ServerRenderer {
         case 'slot':
           // given slot content stands in for the element, there being no shadow root to project into
           if (this.slots) {
-            html += appendHtml(this.slots[node.name || 'default'] ?? '');
+            const content = this.slots[node.name || 'default'];
+            html += appendHtml(content ? String(content) : '');
           }
           else {
             html += node.name ? `<slot name="${node.name}"></slot>` : '<slot></slot>';
