@@ -1217,3 +1217,33 @@ describe('htmlBuffer accuracy under blocks', () => {
     expect(html).toContain('class="tag"');
   });
 });
+
+describe('render options on the template', () => {
+  it('reads markers and slots from the template it renders for', () => {
+    const ast = compile('<p>{name}</p>{>slot}');
+    const renderer = new ServerRenderer({
+      ast,
+      data: { name: 'x' },
+      helpers: TemplateHelpers,
+      template: { renderOptions: { markers: false, slots: { default: '<b>slotted</b>' } } },
+    });
+    expect(renderer.render()).toBe('<p>x</p><b>slotted</b>');
+  });
+
+  it('renders text without escaping when the template asks for text', () => {
+    const ast = compile('Hi {value}');
+    const renderer = new ServerRenderer({
+      ast,
+      data: { value: '&<' },
+      helpers: TemplateHelpers,
+      template: { renderOptions: { text: true } },
+    });
+    expect(renderer.render()).toBe('Hi &<');
+  });
+
+  it('renders the web form when the template carries no options', () => {
+    const ast = compile('<p>{name}</p>{>slot}');
+    const renderer = new ServerRenderer({ ast, data: { name: 'x' }, helpers: TemplateHelpers, template: {} });
+    expect(renderer.render()).toBe('<p><!--sui:v1:0-->x</p><slot></slot>');
+  });
+});
