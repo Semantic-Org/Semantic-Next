@@ -27,7 +27,7 @@ export interface StaticMarkup {
  * A tag-less definition, the prototype Template `defineComponent` returns
  * without a `tagName`, renders the same way.
  *
- * @throws when the class was defined without a `tagName`, or has no template.
+ * @throws when a class carries no template.
  *
  * @example
  * const html = renderToStaticMarkup(MyCard, { title: 'Hello' });

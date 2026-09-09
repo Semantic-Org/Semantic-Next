@@ -6,7 +6,8 @@ import { createServerTemplate } from './server-template.js';
   Server-side render a component to a DSD HTML string.
 
   Usage:
-    import { defineComponent, renderToString } from '@semantic-ui/component';
+    import { defineComponent } from '@semantic-ui/component';
+    import { renderToString } from '@semantic-ui/component/server';
 
     const MyCard = defineComponent({ tagName: 'my-card', template, css, ... });
     const html = renderToString(MyCard, { title: 'Hello' });

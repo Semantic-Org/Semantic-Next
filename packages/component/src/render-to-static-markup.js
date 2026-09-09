@@ -8,7 +8,8 @@ import { createServerTemplate } from './server-template.js';
   hydration markers are left out.
 
   Usage:
-    import { defineComponent, renderToStaticMarkup } from '@semantic-ui/component';
+    import { defineComponent } from '@semantic-ui/component';
+    import { renderToStaticMarkup } from '@semantic-ui/component/server';
 
     const Welcome = defineComponent({ tagName: 'welcome-mail', template, css });
     const html = renderToStaticMarkup(Welcome, { name: 'jack' });
