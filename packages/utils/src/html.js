@@ -99,12 +99,32 @@ export const indentHTML = (html, options = {}) => {
   leaves unterminated stays text, a close tag with no open element stays text
 */
 
+// the scanner is an index loop over the text, one visit per character, with text runs and
+// quoted values skipped by indexOf
+const TAB = 9,
+  NEWLINE = 10,
+  FORM_FEED = 12,
+  RETURN = 13,
+  SPACE = 32,
+  BANG = 33,
+  QUOTE = 34,
+  APOS = 39,
+  DASH = 45,
+  SLASH = 47,
+  EQUALS = 61,
+  GREATER = 62,
+  QUESTION = 63,
+  UPPER_A = 65,
+  UPPER_Z = 90,
+  LOWER_A = 97,
+  LOWER_Z = 122;
+
 // vertical tab is not html whitespace, the usual 9..13 range gets that wrong
-const isSpace = (code) => code === 32 || code === 10 || code === 9 || code === 13 || code === 12;
-const isLetter = (code) => (code > 96 && code < 123) || (code > 64 && code < 91);
-const endsName = (code) => isSpace(code) || code === 62 || code === 47;
+const isSpace = (code) => code === SPACE || code === NEWLINE || code === TAB || code === RETURN || code === FORM_FEED;
+const isLetter = (code) => (code >= LOWER_A && code <= LOWER_Z) || (code >= UPPER_A && code <= UPPER_Z);
+const endsName = (code) => isSpace(code) || code === GREATER || code === SLASH;
 // a quote never ends a name, the spec keeps it as a name character
-const endsAttributeName = (code) => endsName(code) || code === 61;
+const endsAttributeName = (code) => endsName(code) || code === EQUALS;
 
 const DOCTYPE = 'doctype';
 const isDoctypeAt = (html, position) => {
@@ -138,12 +158,12 @@ const openTagFrom = (html, position) => {
       position++;
       continue;
     }
-    if (code === 62) { return { attributes, end: position + 1, selfClosing: false }; }
-    if (code === 47 && html.charCodeAt(position + 1) === 62) {
+    if (code === GREATER) { return { attributes, end: position + 1, selfClosing: false }; }
+    if (code === SLASH && html.charCodeAt(position + 1) === GREATER) {
       return { attributes, end: position + 2, selfClosing: true };
     }
     // a stray slash is the one byte the spec drops inside a tag
-    if (code === 47) {
+    if (code === SLASH) {
       position++;
       continue;
     }
@@ -153,22 +173,22 @@ const openTagFrom = (html, position) => {
     const name = html.slice(nameStart, position);
     let scan = position;
     while (scan < length && isSpace(html.charCodeAt(scan))) { scan++; }
-    if (html.charCodeAt(scan) !== 61) {
+    if (html.charCodeAt(scan) !== EQUALS) {
       attributes.push({ name, value: null, quote: '' });
       continue;
     }
     scan++;
     while (scan < length && isSpace(html.charCodeAt(scan))) { scan++; }
     const opener = html.charCodeAt(scan);
-    if (opener === 34 || opener === 39) {
-      const quote = opener === 34 ? '"' : "'";
+    if (opener === QUOTE || opener === APOS) {
+      const quote = opener === QUOTE ? '"' : "'";
       const close = html.indexOf(quote, scan + 1);
       attributes.push({ name, value: html.slice(scan + 1, close === -1 ? length : close), quote });
       position = close === -1 ? length : close + 1;
     }
     else {
       const valueStart = scan;
-      while (scan < length && !isSpace(html.charCodeAt(scan)) && html.charCodeAt(scan) !== 62) { scan++; }
+      while (scan < length && !isSpace(html.charCodeAt(scan)) && html.charCodeAt(scan) !== GREATER) { scan++; }
       attributes.push({ name, value: html.slice(valueStart, scan), quote: '' });
       position = scan;
     }
@@ -201,8 +221,8 @@ export const parseHTML = (html, { closeOnSlash = true } = {}) => {
     if (tagStart === -1) { break; }
     const lead = html.charCodeAt(tagStart + 1);
 
-    if (lead === 33 || lead === 63) {
-      if (lead === 33 && html.charCodeAt(tagStart + 2) === 45 && html.charCodeAt(tagStart + 3) === 45) {
+    if (lead === BANG || lead === QUESTION) {
+      if (lead === BANG && html.charCodeAt(tagStart + 2) === DASH && html.charCodeAt(tagStart + 3) === DASH) {
         // from the dashes themselves, so <!--> and <!---> read as the empty comments the spec makes them
         const close = html.indexOf('-->', tagStart + 2);
         const end = close === -1 ? length : close + 3;
@@ -215,7 +235,7 @@ export const parseHTML = (html, { closeOnSlash = true } = {}) => {
         });
         cursor = textStart = end;
       }
-      else if (lead === 33 && isDoctypeAt(html, tagStart + 2)) {
+      else if (lead === BANG && isDoctypeAt(html, tagStart + 2)) {
         const close = html.indexOf('>', tagStart + 2);
         const end = close === -1 ? length : close + 1;
         flushText(tagStart);
@@ -235,7 +255,7 @@ export const parseHTML = (html, { closeOnSlash = true } = {}) => {
       continue;
     }
 
-    if (lead === 47) {
+    if (lead === SLASH) {
       let position = tagStart + 2;
       let depth = -1;
       if (isLetter(html.charCodeAt(position))) {
