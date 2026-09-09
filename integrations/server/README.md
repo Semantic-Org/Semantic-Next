@@ -47,6 +47,20 @@ import '@semantic-ui/core/button';
 const html = render('ui-button', { emphasis: 'primary' });
 ```
 
+## Render static markup
+
+`renderStatic` returns the markup of a component's template alone, without the shadow root wrapper or hydration markers, for an email, a feed or a static page. Slots fill in from the `slots` option and nested components render in place.
+
+```js
+import { renderStatic } from '@semantic-ui/server';
+
+const page = renderStatic('app-card', { title: 'Hello' });
+// <div class="card">Hello</div>
+
+const text = renderStatic('app-card', { title: 'Hello' }, { text: true }); // plain text, nothing escaped
+const styled = renderStatic('app-card', { title: 'Hello' }, { css: true }); // { html, css } for an inliner
+```
+
 ## With Express
 
 ```js

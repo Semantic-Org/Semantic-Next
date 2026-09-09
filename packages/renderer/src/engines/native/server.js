@@ -5,7 +5,7 @@
   returns an HTML string instead of a DocumentFragment.
 
   The static and text forms are the same walk with the hydration markers off,
-  slot content standing in for the slot element and, for text, no escaping.
+  slot content in place of the slot element and, for text, the escaping off too.
 
   No DOM, no Reactions, no DynamicRegion. Pure string manipulation.
   Runs in Node, Deno (--allow-eval), Bun, Cloudflare Workers (unsafe-eval).

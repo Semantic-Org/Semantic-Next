@@ -19,9 +19,9 @@ export function render(component, props = {}, { slots = null, hydrate = true } =
 }
 
 /*
-  Render one component to its markup alone, with no shadow root, style or
-  hydration markers: what mail, feeds and static pages take. text:true renders
-  plain text, css:true returns { html, css } with the css of every component reached.
+  Render one component to the markup of its template alone, what mail, feeds and
+  static pages take. text:true renders plain text, css:true returns { html, css }
+  with the css of every component reached.
 */
 export function renderStatic(component, props = {}, { slots = null, text = false, css = false } = {}) {
   return renderToStaticMarkup(componentFrom(component), props, { slots, text, css });

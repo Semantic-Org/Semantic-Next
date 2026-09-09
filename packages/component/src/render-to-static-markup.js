@@ -3,8 +3,9 @@ import { createServerTemplate } from './component-helpers.js';
 import { expandCustomElements } from './expand-custom-elements.js';
 
 /*
-  Render a component to its markup alone: no shadow root, no style, no hydration
-  markers. What a mail client, a feed, a static page or a snippet holds as it is.
+  Render a component to the markup of its template alone, as a mail client, a feed,
+  a static page or a snippet holds it. The web form's shadow root wrapper, style and
+  hydration markers are left out.
 
   Usage:
     import { defineComponent, renderToStaticMarkup } from '@semantic-ui/component';
