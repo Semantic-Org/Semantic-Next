@@ -224,3 +224,10 @@ describe('renderToStaticMarkup with a tag-less definition', () => {
     expect(() => renderToString(Bare)).toThrow('renderToString requires a component with a tagName');
   });
 });
+
+describe('renderToStaticMarkup slot content', () => {
+  it('renders non-string content as text, the way renderToString does', () => {
+    expect(renderToStaticMarkup(Slotted, {}, { slots: { default: 42 } })).toBe('<header></header><main>42</main>');
+    expect(renderToString(Slotted, {}, { slots: { default: 42 } })).toContain('42');
+  });
+});
