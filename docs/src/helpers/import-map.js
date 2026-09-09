@@ -47,6 +47,12 @@ const bundleNames = {
   '@semantic-ui/utils': 'utils',
 };
 
+// subpath entries an example imports, with the file each mode serves. The browser
+// matches an import map key exactly, so a subpath is its own line
+export const subpaths = {
+  '@semantic-ui/component/server': { local: 'src/server.js', static: 'dist/cdn/server.js' },
+};
+
 // mode is production, static or local. readPackage returns a package.json for a
 // local package name, or null when it is not installed
 export const buildImportMap = ({ mode, packageBase, version, readPackage }) => {
@@ -90,6 +96,25 @@ export const buildImportMap = ({ mode, packageBase, version, readPackage }) => {
     catch (error) {
       console.error(`Error processing package ${pkg}:`, error);
     }
+  }
+
+  for (const [specifier, files] of Object.entries(subpaths)) {
+    const pkg = specifier.split('/').slice(0, 2).join('/');
+    const subpath = specifier.slice(pkg.length + 1);
+    if (mode === 'production') {
+      imports[specifier] = `${packageBase}/${pkg}@${version}/${subpath}/+esm`;
+      continue;
+    }
+    if (mode === 'static') {
+      imports[specifier] = `${packageBase}/${pkg}/${files.static}`;
+      continue;
+    }
+    const local = localPackages.find((name) => name.endsWith(`/packages/${pkg.split('/')[1]}`));
+    if (!local) {
+      console.warn(`No local package for ${specifier}`);
+      continue;
+    }
+    imports[specifier] = `${packageBase}/${local}/${files.local}`;
   }
 
   // production CDN: tailwind needs the bundle (has external deps)
