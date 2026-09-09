@@ -154,3 +154,40 @@ describe('renderToString', () => {
     );
   });
 });
+
+const Part = defineComponent({
+  tagName: 'static-part',
+  template: '<span class="part">{label}</span>',
+  css: '.part { color: red; }',
+});
+
+const Panel = defineComponent({
+  tagName: 'static-panel',
+  template: '<section><header>{>slot title}</header>{>slot}</section>',
+  css: '.panel { border: 0; }',
+});
+
+const Page = defineComponent({
+  tagName: 'static-page',
+  template: '<div><static-part label="x"></static-part><static-part label="y"></static-part>'
+    + '<static-panel><h2 slot="title">T</h2><p>body</p></static-panel></div>',
+  css: '.page { margin: 0; }',
+});
+const pageHTML = '<div><span class="part">x</span><span class="part">y</span>'
+  + '<section><header><h2 slot="title">T</h2></header><p>body</p></section></div>';
+
+describe('renderToStaticMarkup with nested components', () => {
+  it('renders a nested component flat where its tag sat, its children assigned to its slots', () => {
+    const html = renderToStaticMarkup(Page);
+    expect(html).toBe(pageHTML);
+    expect(html).not.toContain('<static-');
+    expect(html).not.toContain('shadowrootmode');
+  });
+
+  it('returns the css of every component it reached under css: true, each once, parent first', () => {
+    expect(renderToStaticMarkup(Page, {}, { css: true })).toEqual({
+      html: pageHTML,
+      css: '.page { margin: 0; }\n.part { color: red; }\n.panel { border: 0; }',
+    });
+  });
+});
