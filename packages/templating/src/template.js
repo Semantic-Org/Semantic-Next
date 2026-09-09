@@ -352,14 +352,15 @@ export const Template = class Template {
     const RendererClass = (Template.isServer && engine.serverRenderer)
       ? engine.serverRenderer
       : engine.renderer;
+    // the bag spreads first, so a caller's key never displaces the renderer's own
     this.renderer = new RendererClass({
+      ...this.renderOptions,
       ast: this.ast,
       data: this.overlaySettingsSignals(this.getDataContext()),
       template: this,
       subTemplates: this.subTemplates,
       helpers: TemplateHelpers,
       receivesData: this.isSubtemplate(),
-      ...this.renderOptions,
     });
 
     this.callParams = this.buildCallParams();
