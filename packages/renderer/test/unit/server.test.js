@@ -1,5 +1,6 @@
 import { TemplateCompiler } from '@semantic-ui/compiler';
 import { TemplateHelpers } from '@semantic-ui/templating';
+import { escapeHTML } from '@semantic-ui/utils';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -188,6 +189,35 @@ describe('renderToString', () => {
       const content = stripMarkers(dsdContent(result));
       expect(content).not.toContain('disabled');
       expect(content).toContain('Go');
+    });
+
+    it('escapes > in a bound attribute value so the next binding stays in the tag', () => {
+      const ast = compile('<div first="{first}" second="{second}">x</div>');
+      const html = render({ ast, data: { first: 'a>b', second: 'ok' } });
+      // a raw > in the tag buffer reads as the tag's end to analyzePosition, which
+      // pushes `second` into text position: a marker and String(value) inside the tag
+      expect(html).toContain('first="a&gt;b"');
+      expect(html).toContain('second="ok"');
+      expect(html).toContain(`${DATA_SUI_BIND}="first=0,second=1"`);
+      expect(html).not.toContain(COMMENT_MARKER);
+    });
+
+    it('escapes a bound attribute value as escapeHTML does', () => {
+      const value = 'a<b>c"d&e';
+      const ast = compile('<div first="{first}" second="{second}">x</div>');
+      const html = render({ ast, data: { first: value, second: 'ok' } });
+      // a raw < moves the quote count's start, so `second` was wrapped again: second=""ok""
+      expect(html).toContain(`first="${escapeHTML(value)}"`);
+      expect(html).toContain('second="ok"');
+    });
+
+    it('escapes a block value in attribute position the same way', () => {
+      const ast = compile('<div first="{#if on}{first}{/if}" second="{second}">x</div>');
+      const html = render({ ast, data: { on: true, first: 'a>b', second: 'ok' } });
+      expect(html).toContain('first="a&gt;b"');
+      expect(html).toContain('second="ok"');
+      expect(html).toContain(`${DATA_SUI_BIND}="first=0,second=1"`);
+      expect(html).not.toContain(COMMENT_MARKER);
     });
   });
 
@@ -649,7 +679,7 @@ describe('attribute value escaping', () => {
   it('escapes double quotes inside attribute values', () => {
     const ast = compile('<div title="{name}">x</div>');
     const html = render({ ast, data: { name: 'a"b' } });
-    // Anchor: server.js — .replace(/"/g, '&quot;')
+    // Anchor: server.js — emitAttributeValue, escapeHTML
     expect(html).toContain('title="a&quot;b"');
     expect(html).not.toContain('title="a"b"');
   });
@@ -660,14 +690,14 @@ describe('attribute value escaping', () => {
     expect(html).toContain('href="https://x.com/?a=1&amp;b=2"');
   });
 
-  it('keeps quotes intact when value contains < or > (browser parses quoted attribute literally)', () => {
-    // HTML5 quoted-attribute parsing treats `<` and `>` as literal text
-    // inside a quoted attribute. The server's escape chain (only `&` and
-    // `"`) is therefore sufficient. Document the safety contract.
+  it('escapes < and > in attribute values so the tag scanner never sees a raw >', () => {
+    // HTML5 parses a quoted attribute's < and > as literal text, so the browser
+    // alone would be safe with only & and " escaped. The server's own position
+    // scanner is not: a raw > reads as the tag's end and the element's next
+    // binding lands in text position. The entities decode to the same value.
     const ast = compile('<div title="{name}">x</div>');
     const html = render({ ast, data: { name: '<script>alert(1)</script>' } });
-    // The quote stays closed; the value is HTML-safe.
-    expect(html).toContain('title="<script>alert(1)</script>"');
+    expect(html).toContain('title="&lt;script&gt;alert(1)&lt;/script&gt;"');
     // No unescaped & — that would be the actual escape gap.
     const ast2 = compile('<div title="{name}">x</div>');
     const html2 = render({ ast: ast2, data: { name: 'a&b' } });

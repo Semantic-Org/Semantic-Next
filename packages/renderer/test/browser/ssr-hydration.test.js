@@ -194,6 +194,32 @@ describe('SSR hydration — attribute expressions', () => {
 
     expect(el.shadowRoot.querySelector('div').getAttribute('class')).toBe('base extra');
   });
+
+  it('hydrates a bound attribute carrying > to the value the server wrote', async () => {
+    const el = await ssrAndHydrate({
+      template: '<div first="{first}" second="{second}">text</div>',
+      defaultState: { first: 'a>b', second: 'ok' },
+      createComponent: ({ state }) => ({
+        swap() {
+          state.first.set('c<d>e');
+          state.second.set('changed');
+        },
+      }),
+    });
+
+    const div = el.shadowRoot.querySelector('div');
+    expect(div.getAttribute('first')).toBe('a>b');
+    expect(div.getAttribute('second')).toBe('ok');
+
+    // the client writes with setAttribute, which stores the string as is with
+    // no re-parse, so the escaping lives in the server renderer alone
+    const updated = $(el).onNext('updated');
+    el.component.swap();
+    await updated;
+
+    expect(div.getAttribute('first')).toBe('c<d>e');
+    expect(div.getAttribute('second')).toBe('changed');
+  });
 });
 
 /*******************************

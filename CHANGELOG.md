@@ -53,6 +53,7 @@ xx.xx.xxxx
 * **Bug** - Fixed `checked` and `selected` attributes not syncing DOM properties after user interaction — programmatic updates via reactivity (e.g. toggle-all) now correctly update checkbox/select state
 * **Bug** - Fixed `{#async}` blocks without `{loading}` or `{error}` sections briefly clearing visible content when reactive dependencies changed
 * **Bug** - Fixed `{#async}` blocks showing stale data when reactive dependencies changed rapidly before a previous request resolved
+* **Bug** - Fixed a bound attribute value containing `<` or `>` corrupting server-rendered output — the raw character read as the tag's end, so the element's next binding was emitted as text with a hydration marker inside the tag. Bound attribute values are now escaped with the full HTML entity set
 
 ### Reactivity
 * **Bug** - Fixed `instanceof` brand check on `Signal` to use prototype getter instead of class field — ensures cross-realm and prototype-created instances pass `instanceof` reliably.
