@@ -1,5 +1,6 @@
 import { TemplateCompiler } from '@semantic-ui/compiler';
 import { TemplateHelpers } from '@semantic-ui/templating';
+import { escapeHTML } from '@semantic-ui/utils';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -188,6 +189,35 @@ describe('renderToString', () => {
       const content = stripMarkers(dsdContent(result));
       expect(content).not.toContain('disabled');
       expect(content).toContain('Go');
+    });
+
+    it('escapes > in a bound attribute value so the next binding stays in the tag', () => {
+      const ast = compile('<div first="{first}" second="{second}">x</div>');
+      const html = render({ ast, data: { first: 'a>b', second: 'ok' } });
+      // a raw > in the tag buffer reads as the tag's end to analyzePosition, which
+      // pushes `second` into text position: a marker and String(value) inside the tag
+      expect(html).toContain('first="a&gt;b"');
+      expect(html).toContain('second="ok"');
+      expect(html).toContain(`${DATA_SUI_BIND}="first=0,second=1"`);
+      expect(html).not.toContain(COMMENT_MARKER);
+    });
+
+    it('escapes a bound attribute value as escapeHTML does', () => {
+      const value = 'a<b>c"d&e';
+      const ast = compile('<div first="{first}" second="{second}">x</div>');
+      const html = render({ ast, data: { first: value, second: 'ok' } });
+      // a raw < moves the quote count's start, so `second` was wrapped again: second=""ok""
+      expect(html).toContain(`first="${escapeHTML(value)}"`);
+      expect(html).toContain('second="ok"');
+    });
+
+    it('escapes a block value in attribute position the same way', () => {
+      const ast = compile('<div first="{#if on}{first}{/if}" second="{second}">x</div>');
+      const html = render({ ast, data: { on: true, first: 'a>b', second: 'ok' } });
+      expect(html).toContain('first="a&gt;b"');
+      expect(html).toContain('second="ok"');
+      expect(html).toContain(`${DATA_SUI_BIND}="first=0,second=1"`);
+      expect(html).not.toContain(COMMENT_MARKER);
     });
   });
 
