@@ -679,7 +679,7 @@ describe('attribute value escaping', () => {
   it('escapes double quotes inside attribute values', () => {
     const ast = compile('<div title="{name}">x</div>');
     const html = render({ ast, data: { name: 'a"b' } });
-    // Anchor: server.js — .replace(/"/g, '&quot;')
+    // Anchor: server.js — emitAttributeValue, escapeHTML
     expect(html).toContain('title="a&quot;b"');
     expect(html).not.toContain('title="a"b"');
   });
@@ -690,14 +690,14 @@ describe('attribute value escaping', () => {
     expect(html).toContain('href="https://x.com/?a=1&amp;b=2"');
   });
 
-  it('keeps quotes intact when value contains < or > (browser parses quoted attribute literally)', () => {
-    // HTML5 quoted-attribute parsing treats `<` and `>` as literal text
-    // inside a quoted attribute. The server's escape chain (only `&` and
-    // `"`) is therefore sufficient. Document the safety contract.
+  it('escapes < and > in attribute values so the tag scanner never sees a raw >', () => {
+    // HTML5 parses a quoted attribute's < and > as literal text, so the browser
+    // alone would be safe with only & and " escaped. The server's own position
+    // scanner is not: a raw > reads as the tag's end and the element's next
+    // binding lands in text position. The entities decode to the same value.
     const ast = compile('<div title="{name}">x</div>');
     const html = render({ ast, data: { name: '<script>alert(1)</script>' } });
-    // The quote stays closed; the value is HTML-safe.
-    expect(html).toContain('title="<script>alert(1)</script>"');
+    expect(html).toContain('title="&lt;script&gt;alert(1)&lt;/script&gt;"');
     // No unescaped & — that would be the actual escape gap.
     const ast2 = compile('<div title="{name}">x</div>');
     const html2 = render({ ast: ast2, data: { name: 'a&b' } });

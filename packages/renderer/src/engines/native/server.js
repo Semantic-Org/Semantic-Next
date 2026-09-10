@@ -394,24 +394,7 @@ export class ServerRenderer {
         return REMOVE_ATTR;
       }
 
-      let strValue = stringifyAttrValue(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-
-      // Check if we're inside a quoted attribute value by counting quotes
-      // in the current tag fragment. Odd count = inside quotes, even = unquoted.
-      const tagStart = scope.htmlBuffer.lastIndexOf('<');
-      const tagFragment = scope.htmlBuffer.slice(tagStart);
-      const doubleQuotes = (tagFragment.match(/"/g) || []).length;
-      const insideQuotes = doubleQuotes % 2 === 1;
-
-      // Unquoted attribute (e.g. style={expr}) — wrap in quotes so the
-      // value survives HTML parsing when it contains spaces or newlines
-      if (!insideQuotes) {
-        scope.htmlBuffer += `"${strValue}"`;
-        return `"${strValue}"`;
-      }
-
-      scope.htmlBuffer += strValue;
-      return strValue;
+      return this.emitAttributeValue(stringifyAttrValue(value), scope);
     }
 
     // Text position — hydration marker + evaluated value
@@ -440,7 +423,7 @@ export class ServerRenderer {
   // Emit a block's evaluated string value inline as an attribute value.
   // Mirrors renderExpression's insideTag branch: registers the entry in
   // scope.tagBindings so data-sui-bind gets stamped on the element, then
-  // escapes and emits the value with the quote-aware wrapping.
+  // hands the string to emitAttributeValue.
   emitAttributeBlock(id, value, scope) {
     const classification = analyzePosition(scope.htmlBuffer);
     if (classification.type === 'property' || classification.type === 'event') {
@@ -457,21 +440,24 @@ export class ServerRenderer {
       scope.tagBindings[resolvedAttr] = id;
     }
 
-    const strValue = String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/"/g, '&quot;');
+    return this.emitAttributeValue(String(value ?? ''), scope);
+  }
 
+  // escapes the full escapeHTML set, not only & and ": a raw > in the tag buffer
+  // reads as the tag's end to analyzePosition and pushes the element's next
+  // binding into text position, and a raw < moves where the quote count starts.
+  // an odd count of " in the current tag fragment means the value sits inside
+  // quotes, an unquoted attribute (style={expr}) is wrapped so the value survives
+  // parsing when it holds spaces or newlines
+  emitAttributeValue(strValue, scope) {
+    const escaped = escapeHTML(strValue);
     const tagStart = scope.htmlBuffer.lastIndexOf('<');
     const tagFragment = scope.htmlBuffer.slice(tagStart);
     const doubleQuotes = (tagFragment.match(/"/g) || []).length;
     const insideQuotes = doubleQuotes % 2 === 1;
-
-    if (!insideQuotes) {
-      scope.htmlBuffer += `"${strValue}"`;
-      return `"${strValue}"`;
-    }
-    scope.htmlBuffer += strValue;
-    return strValue;
+    const out = insideQuotes ? escaped : `"${escaped}"`;
+    scope.htmlBuffer += out;
+    return out;
   }
 
   renderConditional(node, data, scope) {
