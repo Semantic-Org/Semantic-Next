@@ -458,9 +458,36 @@ describe('formatDuration', () => {
     });
   });
 
+  describe('mixed', () => {
+    it('prints the clock form, whole units and the remainder in the next', () => {
+      expect(formatDuration(390000, { mixed: true })).toBe('6:30');
+      expect(formatDuration(300000, { mixed: true })).toBe('5:00');
+      expect(formatDuration(288000, { mixed: true })).toBe('4:48');
+      expect(formatDuration(3900000, { mixed: true })).toBe('1:05:00');
+      expect(formatDuration(3600000, { mixed: true })).toBe('1:00:00');
+      expect(formatDuration(90061000, { mixed: true })).toBe('25:01:01');
+      expect(formatDuration(49000, { mixed: true })).toBe('49s');
+      expect(formatDuration(400, { mixed: true })).toBe('400ms');
+      expect(formatDuration('6.5m', { mixed: true })).toBe('6:30');
+      expect(formatDuration(-390000, { mixed: true })).toBe('-6:30');
+      expect(formatDuration(49000, { mixed: true, separator: ' ' })).toBe('49 s');
+      expect(formatDuration('banana', { mixed: true })).toBe(null);
+    });
+
+    it('rounds to the whole second, promotes, and never prints zero for a positive value', () => {
+      expect(formatDuration(49400, { mixed: true })).toBe('49s');
+      expect(formatDuration(49600, { mixed: true })).toBe('50s');
+      expect(formatDuration(59600, { mixed: true })).toBe('1:00');
+      expect(formatDuration(3599600, { mixed: true })).toBe('1:00:00');
+      expect(formatDuration(999.6, { mixed: true })).toBe('1s');
+      expect(formatDuration(0.4, { mixed: true })).toBe('1ms');
+      expect(formatDuration(0, { mixed: true })).toBe('0ms');
+    });
+  });
+
   describe('config', () => {
     it('reads its defaults from formatDuration.config', () => {
-      const { decimals, lossless, separator } = formatDuration.config;
+      const { decimals, lossless, mixed, separator } = formatDuration.config;
       formatDuration.config.decimals = 0;
       formatDuration.config.lossless = true;
       formatDuration.config.separator = ' ';
@@ -468,7 +495,10 @@ describe('formatDuration', () => {
       expect(formatDuration(90000, { decimals: 1 })).toBe('1.5 m');
       expect(formatDuration(100000, { lossless: false, decimals: 1 })).toBe('1.7 m');
       expect(formatDuration(90000, { separator: '' })).toBe('90s');
-      Object.assign(formatDuration.config, { decimals, lossless, separator });
+      formatDuration.config.mixed = true;
+      expect(formatDuration(390000)).toBe('6:30');
+      expect(formatDuration(390000, { mixed: false, decimals: 1 })).toBe('6.5 m');
+      Object.assign(formatDuration.config, { decimals, lossless, mixed, separator });
     });
 
     it('takes a unit added to both toDuration and the ladder', () => {

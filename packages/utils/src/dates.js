@@ -172,10 +172,12 @@ export const formatDuration = /* @__PURE__ */ configured(
     const config = formatDuration.config;
     const decimals = options.decimals ?? config.decimals;
     const lossless = options.lossless ?? config.lossless;
+    const mixed = options.mixed ?? config.mixed;
     const separator = options.separator ?? config.separator;
     const spans = toDuration.config.units;
     const ms = toDuration(value);
     if (ms === null) { return null; }
+    if (mixed) { return clockDuration(ms, separator, spans); }
     const magnitude = Math.abs(ms);
     let unit;
     if (options.unit != null) {
@@ -205,7 +207,25 @@ export const formatDuration = /* @__PURE__ */ configured(
   {
     decimals: 1,
     lossless: false,
+    mixed: false,
     separator: '',
     units: ['w', 'd', 'h', 'm', 's', 'ms'],
   },
 );
+
+// the clock form: whole seconds below a minute, m:ss to an hour, h:mm:ss past it with the hours unbounded, rounded to the
+// second and never a zero for a positive value. the one print that does not read back through toDuration
+function clockDuration(ms, separator, spans) {
+  const sign = ms < 0 ? '-' : '';
+  const magnitude = Math.abs(ms);
+  if (magnitude < spans.s) {
+    const whole = Math.round(magnitude);
+    if (whole < spans.s) { return sign + (whole === 0 && magnitude > 0 ? 1 : whole) + separator + 'ms'; }
+  }
+  const seconds = Math.round(magnitude / spans.s);
+  if (seconds < 60) { return sign + seconds + separator + 's'; }
+  const minutes = Math.floor(seconds / 60);
+  const rest = pad2(seconds % 60);
+  return sign
+    + (minutes < 60 ? minutes + ':' + rest : Math.floor(minutes / 60) + ':' + pad2(minutes % 60) + ':' + rest);
+}

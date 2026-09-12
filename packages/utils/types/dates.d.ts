@@ -208,6 +208,8 @@ export interface FormatDurationSettings {
   unit?: string;
   /** Pick the largest unit whose print reads back through `toDuration` to the same value, for a config view (default: the config lossless, false) */
   lossless?: boolean;
+  /** Print the clock form, whole units and the remainder in the next: `'6:30'`, `'1:05:00'`, `'49s'` below a minute, rounded to the second (default: the config mixed, false) */
+  mixed?: boolean;
   /** Text between the number and the unit, `' '` for `'1.5 minutes'` (default: the config separator, `''`) */
   separator?: string;
 }
@@ -221,6 +223,8 @@ export interface FormatDurationConfig {
   decimals: number;
   /** Default for `lossless` */
   lossless: boolean;
+  /** Default for `mixed` */
+  mixed: boolean;
   /** Default for `separator` */
   separator: string;
   /** The units to pick from, largest first, each a spelling `toDuration.config.units` holds (`['w', 'd', 'h', 'm', 's', 'ms']`) */
@@ -233,7 +237,9 @@ export interface FormatDurationConfig {
  * reads, and every string it prints reads back through `toDuration`. `decimals` is a maximum and
  * trailing zeros drop, `unit` holds one unit for a column, and `lossless` picks the largest unit that
  * reads back to exactly the same value, so a config view never shows `'1.7m'` for `100000`. `separator`
- * goes between the number and the unit. The sign is kept.
+ * goes between the number and the unit. The sign is kept. `mixed` prints the clock form instead, whole
+ * units and the remainder in the next (`'6:30'`, `'1:05:00'`, `'49s'` below a minute), the one print that
+ * does not read back through `toDuration`.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/dates#formatduration formatDuration}
  * @see {@link https://next.semantic-ui.com/examples/utils-formatduration Example}
  *
@@ -249,6 +255,7 @@ export interface FormatDurationConfig {
  * formatDuration(100000, { lossless: true }) // '100s'
  * formatDuration(90000, { unit: 's' }) // '90s'
  * formatDuration(90000, { unit: 'minutes', separator: ' ' }) // '1.5 minutes'
+ * formatDuration(390000, { mixed: true }) // '6:30'
  * formatDuration('90s') // '1.5m'
  * ```
  */
