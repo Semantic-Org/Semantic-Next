@@ -341,38 +341,40 @@ describe('formatDuration', () => {
     expect(formatDuration(31449600000)).toBe('52w');
   });
 
-  it('rounds to decimals as a maximum, dropping trailing zeros', () => {
-    expect(formatDuration(90000)).toBe('1.5m');
-    expect(formatDuration(90000, { decimals: 0 })).toBe('2m');
-    expect(formatDuration(90000, { decimals: 3 })).toBe('1.5m');
-    expect(formatDuration(1234567)).toBe('20.6m');
-    expect(formatDuration(1234567, { decimals: 3 })).toBe('20.576m');
-    expect(formatDuration(1234567, { decimals: 0 })).toBe('21m');
+  it('the decimal form rounds to decimals as a maximum, dropping trailing zeros', () => {
+    expect(formatDuration(90000, { format: 'decimal' })).toBe('1.5m');
+    expect(formatDuration(90000, { format: 'decimal', decimals: 0 })).toBe('2m');
+    expect(formatDuration(90000, { format: 'decimal', decimals: 3 })).toBe('1.5m');
+    expect(formatDuration(1234567, { format: 'decimal' })).toBe('20.6m');
+    expect(formatDuration(1234567, { format: 'decimal', decimals: 3 })).toBe('20.576m');
+    expect(formatDuration(1234567, { format: 'decimal', decimals: 0 })).toBe('21m');
   });
 
-  it('promotes a value that rounds up to a whole unit', () => {
-    expect(formatDuration(3598200)).toBe('1h');
-    expect(formatDuration(3598200, { decimals: 3 })).toBe('59.97m');
-    expect(formatDuration(999.96)).toBe('1s');
-    expect(formatDuration(59.5, { decimals: 0 })).toBe('60ms');
+  it('the decimal form promotes a value that rounds up to a whole unit', () => {
+    expect(formatDuration(3598200, { format: 'decimal' })).toBe('1h');
+    expect(formatDuration(3598200, { format: 'decimal', decimals: 3 })).toBe('59.97m');
+    expect(formatDuration(999.96, { format: 'decimal' })).toBe('1s');
+    expect(formatDuration(59.5, { format: 'decimal', decimals: 0 })).toBe('60ms');
   });
 
   it('keeps the sign', () => {
-    expect(formatDuration(-90000)).toBe('-1.5m');
+    expect(formatDuration(-90000)).toBe('-1m 30s');
+    expect(formatDuration(-90000, { format: 'decimal' })).toBe('-1.5m');
     expect(formatDuration(-500)).toBe('-500ms');
     expect(formatDuration(-0)).toBe('0ms');
   });
 
-  it('prints sub-millisecond values', () => {
-    expect(formatDuration(0.5)).toBe('0.5ms');
-    expect(formatDuration(0.04)).toBe('0ms');
+  it('the decimal form prints sub-millisecond values', () => {
+    expect(formatDuration(0.5, { format: 'decimal' })).toBe('0.5ms');
+    expect(formatDuration(0.04, { format: 'decimal' })).toBe('0ms');
   });
 
   it('reads anything toDuration reads', () => {
-    expect(formatDuration('90s')).toBe('1.5m');
-    expect(formatDuration('1.5h')).toBe('1.5h');
+    expect(formatDuration('90s')).toBe('1m 30s');
+    expect(formatDuration('1.5h')).toBe('1h 30m');
     expect(formatDuration('10 minutes')).toBe('10m');
-    expect(formatDuration('1500')).toBe('1.5s');
+    expect(formatDuration('1500')).toBe('2s');
+    expect(formatDuration('90s', { format: 'decimal' })).toBe('1.5m');
   });
 
   it('returns null when there is no duration to format', () => {
@@ -385,50 +387,51 @@ describe('formatDuration', () => {
     expect(formatDuration({})).toBe(null);
   });
 
-  it('holds one unit for a column when asked', () => {
-    expect(formatDuration(90000, { unit: 's' })).toBe('90s');
-    expect(formatDuration(1500, { unit: 'ms' })).toBe('1500ms');
-    expect(formatDuration(5400000, { unit: 'd', decimals: 3 })).toBe('0.063d');
-    expect(formatDuration(5400000, { unit: 'd' })).toBe('0.1d');
-    expect(formatDuration(-90000, { unit: 's' })).toBe('-90s');
+  it('the decimal form holds one unit for a column when asked', () => {
+    expect(formatDuration(90000, { format: 'decimal', unit: 's' })).toBe('90s');
+    expect(formatDuration(1500, { format: 'decimal', unit: 'ms' })).toBe('1500ms');
+    expect(formatDuration(5400000, { format: 'decimal', unit: 'd', decimals: 3 })).toBe('0.063d');
+    expect(formatDuration(5400000, { format: 'decimal', unit: 'd' })).toBe('0.1d');
+    expect(formatDuration(-90000, { format: 'decimal', unit: 's' })).toBe('-90s');
   });
 
-  it('prints the unit as spelled, any spelling toDuration reads', () => {
-    expect(formatDuration(90000, { unit: 'minutes' })).toBe('1.5minutes');
-    expect(formatDuration(5400000, { unit: 'HR' })).toBe('1.5hr');
-    expect(formatDuration(5400000, { unit: 'fortnight' })).toBe(null);
+  it('the decimal form prints the unit as spelled, any spelling toDuration reads', () => {
+    expect(formatDuration(90000, { format: 'decimal', unit: 'minutes' })).toBe('1.5minutes');
+    expect(formatDuration(5400000, { format: 'decimal', unit: 'HR' })).toBe('1.5hr');
+    expect(formatDuration(5400000, { format: 'decimal', unit: 'fortnight' })).toBe(null);
   });
 
-  it('holds a unit without promoting', () => {
-    expect(formatDuration(3598200, { unit: 'm' })).toBe('60m');
+  it('the decimal form holds a unit without promoting', () => {
+    expect(formatDuration(3598200, { format: 'decimal', unit: 'm' })).toBe('60m');
   });
 
   it('puts a separator between the number and the unit when asked', () => {
-    expect(formatDuration(90000, { separator: ' ' })).toBe('1.5 m');
-    expect(formatDuration(90000, { unit: 'minutes', separator: ' ' })).toBe('1.5 minutes');
-    expect(formatDuration(-90000, { separator: ' ' })).toBe('-1.5 m');
-    expect(toDuration(formatDuration(90000, { unit: 'minutes', separator: ' ' }))).toBe(90000);
+    expect(formatDuration(90000, { separator: ' ' })).toBe('1 m 30 s');
+    expect(formatDuration(90000, { format: 'decimal', separator: ' ' })).toBe('1.5 m');
+    expect(formatDuration(90000, { format: 'decimal', unit: 'minutes', separator: ' ' })).toBe('1.5 minutes');
+    expect(formatDuration(-90000, { format: 'decimal', separator: ' ' })).toBe('-1.5 m');
+    expect(toDuration(formatDuration(90000, { format: 'decimal', unit: 'minutes', separator: ' ' }))).toBe(90000);
   });
 
-  describe('lossless', () => {
+  describe('lossless, a decimal form', () => {
     it('walks on to the largest unit that reads back exactly', () => {
-      expect(formatDuration(100000, { lossless: true })).toBe('100s');
-      expect(formatDuration(93784000, { lossless: true })).toBe('93784s');
-      expect(formatDuration(3598200, { lossless: true })).toBe('3598.2s');
-      expect(formatDuration(777600000, { lossless: true })).toBe('9d');
+      expect(formatDuration(100000, { format: 'decimal', lossless: true })).toBe('100s');
+      expect(formatDuration(93784000, { format: 'decimal', lossless: true })).toBe('93784s');
+      expect(formatDuration(3598200, { format: 'decimal', lossless: true })).toBe('3598.2s');
+      expect(formatDuration(777600000, { format: 'decimal', lossless: true })).toBe('9d');
     });
 
     it('keeps the short print when it already reads back', () => {
-      expect(formatDuration(300000, { lossless: true })).toBe('5m');
-      expect(formatDuration(2500, { lossless: true })).toBe('2.5s');
-      expect(formatDuration(1100, { lossless: true })).toBe('1.1s');
-      expect(formatDuration(0.5, { lossless: true })).toBe('0.5ms');
-      expect(formatDuration(0, { lossless: true })).toBe('0ms');
+      expect(formatDuration(300000, { format: 'decimal', lossless: true })).toBe('5m');
+      expect(formatDuration(2500, { format: 'decimal', lossless: true })).toBe('2.5s');
+      expect(formatDuration(1100, { format: 'decimal', lossless: true })).toBe('1.1s');
+      expect(formatDuration(0.5, { format: 'decimal', lossless: true })).toBe('0.5ms');
+      expect(formatDuration(0, { format: 'decimal', lossless: true })).toBe('0ms');
     });
 
     it('honors decimals as the precision a unit may print at', () => {
-      expect(formatDuration(2500, { lossless: true, decimals: 0 })).toBe('2500ms');
-      expect(formatDuration(1234567, { lossless: true, decimals: 3 })).toBe('1234.567s');
+      expect(formatDuration(2500, { format: 'decimal', lossless: true, decimals: 0 })).toBe('2500ms');
+      expect(formatDuration(1234567, { format: 'decimal', lossless: true, decimals: 3 })).toBe('1234.567s');
     });
 
     it('round-trips through toDuration', () => {
@@ -453,13 +456,15 @@ describe('formatDuration', () => {
         -90000,
       ];
       for (const value of values) {
-        expect(toDuration(formatDuration(value, { lossless: true }))).toBe(value);
+        expect(toDuration(formatDuration(value, { format: 'decimal', lossless: true }))).toBe(value);
       }
     });
   });
 
   describe('format', () => {
-    it('is decimal by default, and a word outside the three answers null like an unknown unit', () => {
+    it('is units by default, decimal on request, and a word outside the three answers null like an unknown unit', () => {
+      expect(formatDuration(390000)).toBe('6m 30s');
+      expect(formatDuration(242100)).toBe('4m 2s');
       expect(formatDuration(390000, { format: 'decimal' })).toBe('6.5m');
       expect(formatDuration(390000, { format: 'decimal', decimals: 0 })).toBe('7m');
       expect(formatDuration(100000, { format: 'decimal', lossless: true })).toBe('100s');
@@ -520,6 +525,7 @@ describe('formatDuration', () => {
   describe('config', () => {
     it('reads its defaults from formatDuration.config', () => {
       const { decimals, format, lossless, separator } = formatDuration.config;
+      formatDuration.config.format = 'decimal';
       formatDuration.config.decimals = 0;
       formatDuration.config.lossless = true;
       formatDuration.config.separator = ' ';
@@ -537,12 +543,14 @@ describe('formatDuration', () => {
       toDuration.config.units.y = 365.25 * 86400000;
       formatDuration.config.units.unshift('y');
       expect(formatDuration(365.25 * 86400000 * 2)).toBe('2y');
-      expect(formatDuration(86400000 * 400)).toBe('1.1y');
-      expect(formatDuration(86400000 * 400, { lossless: true })).toBe('400d');
+      expect(formatDuration(86400000 * 400)).toBe('1y 5w');
+      expect(formatDuration(86400000 * 400, { format: 'decimal' })).toBe('1.1y');
+      expect(formatDuration(86400000 * 400, { format: 'decimal', lossless: true })).toBe('400d');
       expect(toDuration(formatDuration(365.25 * 86400000 * 2))).toBe(365.25 * 86400000 * 2);
       formatDuration.config.units.shift();
       delete toDuration.config.units.y;
-      expect(formatDuration(365.25 * 86400000 * 2)).toBe('104.4w');
+      expect(formatDuration(365.25 * 86400000 * 2)).toBe('104w 3d');
+      expect(formatDuration(365.25 * 86400000 * 2, { format: 'decimal' })).toBe('104.4w');
     });
   });
 });
