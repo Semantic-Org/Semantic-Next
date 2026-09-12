@@ -172,12 +172,14 @@ export const formatDuration = /* @__PURE__ */ configured(
     const config = formatDuration.config;
     const decimals = options.decimals ?? config.decimals;
     const lossless = options.lossless ?? config.lossless;
-    const mixed = options.mixed ?? config.mixed;
+    const format = options.format ?? config.format;
     const separator = options.separator ?? config.separator;
     const spans = toDuration.config.units;
     const ms = toDuration(value);
     if (ms === null) { return null; }
-    if (mixed) { return clockDuration(ms, separator, spans); }
+    if (format === 'clock') { return clockDuration(ms, separator, spans); }
+    if (format === 'units') { return unitsDuration(ms, separator, spans, config.units); }
+    if (format !== 'decimal') { return null; }
     const magnitude = Math.abs(ms);
     let unit;
     if (options.unit != null) {
@@ -206,21 +208,26 @@ export const formatDuration = /* @__PURE__ */ configured(
   },
   {
     decimals: 1,
+    format: 'decimal',
     lossless: false,
-    mixed: false,
     separator: '',
     units: ['w', 'd', 'h', 'm', 's', 'ms'],
   },
 );
 
-// the clock form: whole seconds below a minute, m:ss to an hour, h:mm:ss past it with the hours unbounded, rounded to the
-// second and never a zero for a positive value. the one print that does not read back through toDuration
+// the clock and units forms share the rounding: whole milliseconds below a second, whole seconds from there, and a
+// positive value never prints as zero. neither reads back through toDuration, which reads one quantity
+function wholeMilliseconds(magnitude) {
+  const whole = Math.round(magnitude);
+  return whole === 0 && magnitude > 0 ? 1 : whole;
+}
+
+// m:ss to an hour, h:mm:ss past it with the hours unbounded
 function clockDuration(ms, separator, spans) {
   const sign = ms < 0 ? '-' : '';
   const magnitude = Math.abs(ms);
-  if (magnitude < spans.s) {
-    const whole = Math.round(magnitude);
-    if (whole < spans.s) { return sign + (whole === 0 && magnitude > 0 ? 1 : whole) + separator + 'ms'; }
+  if (magnitude < spans.s && wholeMilliseconds(magnitude) < spans.s) {
+    return sign + wholeMilliseconds(magnitude) + separator + 'ms';
   }
   const seconds = Math.round(magnitude / spans.s);
   if (seconds < 60) { return sign + seconds + separator + 's'; }
@@ -228,4 +235,29 @@ function clockDuration(ms, separator, spans) {
   const rest = pad2(seconds % 60);
   return sign
     + (minutes < 60 ? minutes + ':' + rest : Math.floor(minutes / 60) + ':' + pad2(minutes % 60) + ':' + rest);
+}
+
+// the two largest non-zero units of the ladder, the value rounded to the smaller one, so a carry can promote (59m 59.6s reads 1h)
+function unitsDuration(ms, separator, spans, ladder) {
+  const sign = ms < 0 ? '-' : '';
+  let magnitude = Math.abs(ms);
+  if (magnitude < spans.s && wholeMilliseconds(magnitude) < spans.s) {
+    return sign + wholeMilliseconds(magnitude) + separator + 'ms';
+  }
+  magnitude = Math.round(magnitude / spans.s) * spans.s;
+  const parts = () => {
+    let rest = magnitude;
+    return ladder.map((unit) => {
+      const count = Math.floor(rest / spans[unit]);
+      rest -= count * spans[unit];
+      return [unit, count];
+    }).filter(([, count]) => count > 0).slice(0, 2);
+  };
+  let shown = parts();
+  if (shown.length === 2) {
+    const smallest = spans[shown[1][0]];
+    magnitude = Math.round(magnitude / smallest) * smallest;
+    shown = parts();
+  }
+  return sign + shown.map(([unit, count]) => count + separator + unit).join(' ');
 }

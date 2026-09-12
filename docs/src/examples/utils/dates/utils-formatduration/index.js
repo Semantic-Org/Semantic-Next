@@ -24,9 +24,11 @@ console.log(formatDuration(100000));
 console.log(formatDuration(100000, { lossless: true }));
 console.log(toDuration(formatDuration(100000, { lossless: true })));
 
-// mixed prints the clock form, the way a person reads a wait or a lap time
-console.log(formatDuration(390000, { mixed: true }));
-console.log(formatDuration(3900000, { mixed: true }));
-console.log(formatDuration(49400, { mixed: true }));
+// the clock and units forms, the way a person reads a wait or a lap time
+console.log(formatDuration(390000, { format: 'clock' }));
+console.log(formatDuration(3900000, { format: 'clock' }));
+console.log(formatDuration(390000, { format: 'units' }));
+console.log(formatDuration(3900000, { format: 'units' }));
+console.log(formatDuration(49400, { format: 'units' }));
 
 console.log(formatDuration('banana'));
