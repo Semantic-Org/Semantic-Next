@@ -458,9 +458,68 @@ describe('formatDuration', () => {
     });
   });
 
+  describe('format', () => {
+    it('is decimal by default, and a word outside the three answers null like an unknown unit', () => {
+      expect(formatDuration(390000, { format: 'decimal' })).toBe('6.5m');
+      expect(formatDuration(390000, { format: 'decimal', decimals: 0 })).toBe('7m');
+      expect(formatDuration(100000, { format: 'decimal', lossless: true })).toBe('100s');
+      expect(formatDuration(390000, { format: 'digital' })).toBe(null);
+      expect(formatDuration(390000, { format: '' })).toBe(null);
+    });
+
+    it('clock prints whole units and the remainder in the next, the way a lap time reads', () => {
+      expect(formatDuration(390000, { format: 'clock' })).toBe('6:30');
+      expect(formatDuration(300000, { format: 'clock' })).toBe('5:00');
+      expect(formatDuration(288000, { format: 'clock' })).toBe('4:48');
+      expect(formatDuration(3900000, { format: 'clock' })).toBe('1:05:00');
+      expect(formatDuration(3600000, { format: 'clock' })).toBe('1:00:00');
+      expect(formatDuration(90061000, { format: 'clock' })).toBe('25:01:01');
+      expect(formatDuration(49000, { format: 'clock' })).toBe('49s');
+      expect(formatDuration(400, { format: 'clock' })).toBe('400ms');
+      expect(formatDuration('6.5m', { format: 'clock' })).toBe('6:30');
+      expect(formatDuration(-390000, { format: 'clock' })).toBe('-6:30');
+      expect(formatDuration(49000, { format: 'clock', separator: ' ' })).toBe('49 s');
+      expect(formatDuration('banana', { format: 'clock' })).toBe(null);
+    });
+
+    it('units prints the two largest non-zero whole units', () => {
+      expect(formatDuration(390000, { format: 'units' })).toBe('6m 30s');
+      expect(formatDuration(365000, { format: 'units' })).toBe('6m 5s');
+      expect(formatDuration(3900000, { format: 'units' })).toBe('1h 5m');
+      expect(formatDuration(3601000, { format: 'units' })).toBe('1h 1s');
+      expect(formatDuration(3600000, { format: 'units' })).toBe('1h');
+      expect(formatDuration(90061000, { format: 'units' })).toBe('1d 1h');
+      expect(formatDuration(86700000, { format: 'units' })).toBe('1d 5m');
+      expect(formatDuration(1814400000, { format: 'units' })).toBe('3w');
+      expect(formatDuration(49000, { format: 'units' })).toBe('49s');
+      expect(formatDuration(400, { format: 'units' })).toBe('400ms');
+      expect(formatDuration('6.5m', { format: 'units' })).toBe('6m 30s');
+      expect(formatDuration(-390000, { format: 'units' })).toBe('-6m 30s');
+      expect(formatDuration(390000, { format: 'units', separator: ' ' })).toBe('6 m 30 s');
+      expect(formatDuration('banana', { format: 'units' })).toBe(null);
+    });
+
+    it('both round to the whole second, promote on a carry, and never print zero for a positive value', () => {
+      for (const format of ['clock', 'units']) {
+        expect(formatDuration(49400, { format })).toBe('49s');
+        expect(formatDuration(49600, { format })).toBe('50s');
+        expect(formatDuration(999.6, { format })).toBe('1s');
+        expect(formatDuration(0.4, { format })).toBe('1ms');
+        expect(formatDuration(0, { format })).toBe('0ms');
+      }
+      expect(formatDuration(59600, { format: 'clock' })).toBe('1:00');
+      expect(formatDuration(3599600, { format: 'clock' })).toBe('1:00:00');
+      expect(formatDuration(59600, { format: 'units' })).toBe('1m');
+      expect(formatDuration(3580000, { format: 'units' })).toBe('59m 40s');
+      expect(formatDuration(3599600, { format: 'units' })).toBe('1h');
+      expect(formatDuration(86730000, { format: 'units' })).toBe('1d 6m');
+      expect(formatDuration(172770000, { format: 'units' })).toBe('2d');
+    });
+  });
+
   describe('config', () => {
     it('reads its defaults from formatDuration.config', () => {
-      const { decimals, lossless, separator } = formatDuration.config;
+      const { decimals, format, lossless, separator } = formatDuration.config;
       formatDuration.config.decimals = 0;
       formatDuration.config.lossless = true;
       formatDuration.config.separator = ' ';
@@ -468,7 +527,10 @@ describe('formatDuration', () => {
       expect(formatDuration(90000, { decimals: 1 })).toBe('1.5 m');
       expect(formatDuration(100000, { lossless: false, decimals: 1 })).toBe('1.7 m');
       expect(formatDuration(90000, { separator: '' })).toBe('90s');
-      Object.assign(formatDuration.config, { decimals, lossless, separator });
+      formatDuration.config.format = 'clock';
+      expect(formatDuration(390000)).toBe('6:30');
+      expect(formatDuration(390000, { format: 'decimal', decimals: 1 })).toBe('6.5 m');
+      Object.assign(formatDuration.config, { decimals, format, lossless, separator });
     });
 
     it('takes a unit added to both toDuration and the ladder', () => {

@@ -1016,6 +1016,15 @@ formatDuration(100000);                       // '1.7m'
 formatDuration(100000, { lossless: true });   // '100s'
 toDuration(formatDuration(100000, { lossless: true })); // 100000
 
+// format picks the form, the word formatDate takes: 'decimal' (the default) is the above, 'clock' and
+// 'units' are the prints a wait or a lap time wants, and neither reads back through toDuration
+formatDuration(390000, { format: 'clock' });     // '6:30' (the default reads '6.5m')
+formatDuration(3900000, { format: 'clock' });    // '1:05:00'
+formatDuration(390000, { format: 'units' });     // '6m 30s' (the two largest non-zero whole units)
+formatDuration(3900000, { format: 'units' });    // '1h 5m'
+formatDuration(49400, { format: 'units' });      // '49s' (both round to the second, never a zero for a positive value)
+formatDuration(390000, { format: 'digital' });   // null (a word outside the three, like an unknown unit)
+
 // the ladder is spelled in toDuration's vocabulary, so a unit is added to both
 toDuration.config.units.y = 365.25 * 86400000;
 formatDuration.config.units.unshift('y');

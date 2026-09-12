@@ -208,6 +208,8 @@ export interface FormatDurationSettings {
   unit?: string;
   /** Pick the largest unit whose print reads back through `toDuration` to the same value, for a config view (default: the config lossless, false) */
   lossless?: boolean;
+  /** The form: `'decimal'` prints one unit with decimals (`'6.5m'`), `'clock'` whole units and the remainder in the next (`'6:30'`, `'1:05:00'`), `'units'` the two largest non-zero whole units (`'6m 30s'`, `'1h 5m'`); both of the latter read `'49s'` below a minute and round to the second (default: the config format, `'decimal'`) */
+  format?: 'decimal' | 'clock' | 'units';
   /** Text between the number and the unit, `' '` for `'1.5 minutes'` (default: the config separator, `''`) */
   separator?: string;
 }
@@ -221,6 +223,8 @@ export interface FormatDurationConfig {
   decimals: number;
   /** Default for `lossless` */
   lossless: boolean;
+  /** Default for `format` */
+  format: 'decimal' | 'clock' | 'units';
   /** Default for `separator` */
   separator: string;
   /** The units to pick from, largest first, each a spelling `toDuration.config.units` holds (`['w', 'd', 'h', 'm', 's', 'ms']`) */
@@ -233,7 +237,10 @@ export interface FormatDurationConfig {
  * reads, and every string it prints reads back through `toDuration`. `decimals` is a maximum and
  * trailing zeros drop, `unit` holds one unit for a column, and `lossless` picks the largest unit that
  * reads back to exactly the same value, so a config view never shows `'1.7m'` for `100000`. `separator`
- * goes between the number and the unit. The sign is kept.
+ * goes between the number and the unit. The sign is kept. `format` picks the form: `'decimal'` is the
+ * default, `'clock'` prints whole units and the remainder in the next (`'6:30'`, `'1:05:00'`), `'units'`
+ * the two largest non-zero whole units (`'6m 30s'`, `'1h 5m'`), both `'49s'` below a minute and neither
+ * reading back through `toDuration`; `decimals`, `lossless` and `unit` apply to the decimal form alone.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/dates#formatduration formatDuration}
  * @see {@link https://next.semantic-ui.com/examples/utils-formatduration Example}
  *
@@ -249,6 +256,8 @@ export interface FormatDurationConfig {
  * formatDuration(100000, { lossless: true }) // '100s'
  * formatDuration(90000, { unit: 's' }) // '90s'
  * formatDuration(90000, { unit: 'minutes', separator: ' ' }) // '1.5 minutes'
+ * formatDuration(390000, { format: 'clock' }) // '6:30'
+ * formatDuration(390000, { format: 'units' }) // '6m 30s'
  * formatDuration('90s') // '1.5m'
  * ```
  */
