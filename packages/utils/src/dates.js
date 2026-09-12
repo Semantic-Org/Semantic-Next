@@ -165,8 +165,8 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
 });
 
 // the ladder is spelled in toDuration's vocabulary and reads its spans from there, so every string
-// this prints reads back through toDuration. a unit is added to both: toDuration.config.units.y for
-// the span, formatDuration.config.units.unshift('y') for its place in the walk
+// the decimal form prints reads back through toDuration. a unit is added to both: toDuration.config.units.y
+// for the span, formatDuration.config.units.unshift('y') for its place in the walk
 export const formatDuration = /* @__PURE__ */ configured(
   (value, options = {}) => {
     const config = formatDuration.config;
@@ -208,7 +208,7 @@ export const formatDuration = /* @__PURE__ */ configured(
   },
   {
     decimals: 1,
-    format: 'decimal',
+    format: 'units',
     lossless: false,
     separator: '',
     units: ['w', 'd', 'h', 'm', 's', 'ms'],
@@ -237,27 +237,27 @@ function clockDuration(ms, separator, spans) {
     + (minutes < 60 ? minutes + ':' + rest : Math.floor(minutes / 60) + ':' + pad2(minutes % 60) + ':' + rest);
 }
 
-// the two largest non-zero units of the ladder, the value rounded to the smaller one, so a carry can promote (59m 59.6s reads 1h)
+// the two largest non-zero units of the ladder, the remainder rounded to the smaller one and a carry re-decomposed, so
+// 59m 59.6s reads 1h. the remainder and not the whole, since a span need not divide the one above it (a year in weeks)
 function unitsDuration(ms, separator, spans, ladder) {
   const sign = ms < 0 ? '-' : '';
-  let magnitude = Math.abs(ms);
+  const magnitude = Math.abs(ms);
   if (magnitude < spans.s && wholeMilliseconds(magnitude) < spans.s) {
     return sign + wholeMilliseconds(magnitude) + separator + 'ms';
   }
-  magnitude = Math.round(magnitude / spans.s) * spans.s;
-  const parts = () => {
-    let rest = magnitude;
+  const parts = (value) => {
+    let rest = value;
     return ladder.map((unit) => {
-      const count = Math.floor(rest / spans[unit]);
+      const count = Math.floor(rest / spans[unit] + 1e-9);
       rest -= count * spans[unit];
       return [unit, count];
     }).filter(([, count]) => count > 0).slice(0, 2);
   };
-  let shown = parts();
+  let shown = parts(Math.round(magnitude / spans.s) * spans.s);
   if (shown.length === 2) {
-    const smallest = spans[shown[1][0]];
-    magnitude = Math.round(magnitude / smallest) * smallest;
-    shown = parts();
+    const [[first, count], [second]] = shown;
+    const rest = Math.round((magnitude - count * spans[first]) / spans[second]) * spans[second];
+    shown = parts(count * spans[first] + rest);
   }
   return sign + shown.map(([unit, count]) => count + separator + unit).join(' ');
 }

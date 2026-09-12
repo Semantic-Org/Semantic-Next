@@ -999,31 +999,30 @@ formatDate.config.timezones === timezones;         // the same object, so a pack
 ```javascript
 import { formatDuration, toDuration } from '@semantic-ui/utils';
 
-// formatDuration is the inverse of toDuration: one grammar, both directions.
-// it prints one quantity in the largest unit filled, never a compound '1h 30m'
+// formatDuration prints a duration the way a person reads it: the two largest non-zero whole units
+formatDuration(242100);               // '4m 2s'
 formatDuration(300000);               // '5m'
-formatDuration(90000);                // '1.5m' (decimals is a maximum, never '5.0m')
-formatDuration(3598200);              // '1h' (a value that rounds up to a whole unit promotes)
-formatDuration(-90000);               // '-1.5m'
-formatDuration('90s');                // '1.5m' (reads anything toDuration reads)
-formatDuration(90000, { unit: 's' }); // '90s' (hold one unit down a column, printed as spelled)
-formatDuration(90000, { unit: 'minutes', separator: ' ' }); // '1.5 minutes' (a space reads back, toDuration allows one there)
+formatDuration(3900000);              // '1h 5m'
+formatDuration(49400);                // '49s' (rounded to the second, never a zero for a positive value)
+formatDuration(-90000);               // '-1m 30s'
+formatDuration('90s');                // '1m 30s' (reads anything toDuration reads)
 formatDuration('banana');             // null
 
-// the default rounds, so 100000 prints '1.7m' and reads back as 102000. lossless picks the
-// largest unit that reads back exactly, the print a config or debug view wants
-formatDuration(100000);                       // '1.7m'
-formatDuration(100000, { lossless: true });   // '100s'
-toDuration(formatDuration(100000, { lossless: true })); // 100000
-
-// format picks the form, the word formatDate takes: 'decimal' (the default) is the above, 'clock' and
-// 'units' are the prints a wait or a lap time wants, and neither reads back through toDuration
-formatDuration(390000, { format: 'clock' });     // '6:30' (the default reads '6.5m')
+// format picks the form, the word formatDate takes: 'units' (the default), 'clock' for a lap time,
+// 'decimal' for one unit with decimals. a word outside the three answers null like an unknown unit
+formatDuration(390000, { format: 'clock' });     // '6:30'
 formatDuration(3900000, { format: 'clock' });    // '1:05:00'
-formatDuration(390000, { format: 'units' });     // '6m 30s' (the two largest non-zero whole units)
-formatDuration(3900000, { format: 'units' });    // '1h 5m'
-formatDuration(49400, { format: 'units' });      // '49s' (both round to the second, never a zero for a positive value)
-formatDuration(390000, { format: 'digital' });   // null (a word outside the three, like an unknown unit)
+formatDuration(90000, { format: 'decimal' });    // '1.5m' (decimals is a maximum, never '5.0m')
+formatDuration(3598200, { format: 'decimal' });  // '1h' (a value that rounds up to a whole unit promotes)
+formatDuration(390000, { format: 'digital' });   // null
+
+// the decimal form is the inverse of toDuration, one grammar both directions, and the only form that
+// reads back. decimals, unit and lossless apply to it alone
+formatDuration(90000, { format: 'decimal', unit: 's' }); // '90s' (hold one unit down a column, printed as spelled)
+formatDuration(90000, { format: 'decimal', unit: 'minutes', separator: ' ' }); // '1.5 minutes' (a space reads back, toDuration allows one there)
+formatDuration(100000, { format: 'decimal' });                  // '1.7m' (rounds, and reads back as 102000)
+formatDuration(100000, { format: 'decimal', lossless: true });  // '100s' (the largest unit that reads back exactly, a config view's print)
+toDuration(formatDuration(100000, { format: 'decimal', lossless: true })); // 100000
 
 // the ladder is spelled in toDuration's vocabulary, so a unit is added to both
 toDuration.config.units.y = 365.25 * 86400000;
