@@ -1,4 +1,5 @@
 import { TemplateCompiler } from '@semantic-ui/compiler';
+import { defineComponent, renderToString as renderComponent } from '@semantic-ui/component/server';
 import { TemplateHelpers } from '@semantic-ui/templating';
 import { escapeHTML } from '@semantic-ui/utils';
 import { describe, expect, it } from 'vitest';
@@ -903,6 +904,38 @@ describe('subtemplate rendering', () => {
     // Block markers should still be present in the output
     expect(html).toContain(`<!--${BLOCK_MARKER}`);
     expect(stripMarkers(html)).toBe('<div></div>');
+  });
+});
+
+describe('nested subtemplates', () => {
+  let tagCounter = 0;
+  const uniqueTag = () => `server-nested-${++tagCounter}`;
+  const rendered = (Component) => stripMarkers(dsdContent(renderComponent(Component)));
+
+  it('resolves {>name} through the subtemplate that declares it, not the caller', () => {
+    const inner = defineComponent({ template: '<i>inner</i>' });
+    const middle = defineComponent({ template: '<m>{>inner}</m>', subTemplates: { inner } });
+    const Outer = defineComponent({
+      tagName: uniqueTag(),
+      template: '<o>{>middle}</o>',
+      subTemplates: { middle },
+    });
+    expect(rendered(Outer)).toBe('<o><m><i>inner</i></m></o>');
+  });
+
+  it('renders a subtemplate nested inside a template mounted with data=', () => {
+    const part = defineComponent({ template: '<i>part sees {name}</i>' });
+    const type = defineComponent({
+      template: '<t>type sees {name} · {>part name=name}</t>',
+      subTemplates: { part },
+    });
+    const Mounted = defineComponent({
+      tagName: uniqueTag(),
+      template: '<div>{>template name=type data=ctx}</div>',
+      defaultState: { ctx: { name: 'ada' } },
+      createComponent: () => ({ type }),
+    });
+    expect(rendered(Mounted)).toBe('<div><t>type sees ada · <i>part sees ada</i></t></div>');
   });
 });
 

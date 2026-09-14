@@ -568,6 +568,39 @@ describe('SSR hydration — subtemplates', () => {
     expect('secret' in captured).toBe(false);
     expect('rowId' in captured).toBe(false);
   });
+
+  it('hydrates a nested subtemplate that only the middle subtemplate declares', async () => {
+    const inner = defineComponent({ renderingEngine: 'native', template: '<i>inner</i>' });
+    const middle = defineComponent({
+      renderingEngine: 'native',
+      template: '<m>{>inner}</m>',
+      subTemplates: { inner },
+    });
+
+    const el = await ssrAndHydrate({
+      template: '<o>{>middle}</o>',
+      subTemplates: { middle },
+    });
+
+    expect(shadowHTML(el)).toBe('<o><m><i>inner</i></m></o>');
+  });
+
+  it('hydrates a subtemplate nested inside a template mounted with data=', async () => {
+    const part = defineComponent({ renderingEngine: 'native', template: '<i>part sees {name}</i>' });
+    const type = defineComponent({
+      renderingEngine: 'native',
+      template: '<t>type sees {name} · {>part name=name}</t>',
+      subTemplates: { part },
+    });
+
+    const el = await ssrAndHydrate({
+      template: '<div>{>template name=type data=ctx}</div>',
+      defaultState: { ctx: { name: 'ada' } },
+      createComponent: () => ({ type }),
+    });
+
+    expect(shadowHTML(el)).toBe('<div><t>type sees ada · <i>part sees ada</i></t></div>');
+  });
 });
 
 /*******************************
