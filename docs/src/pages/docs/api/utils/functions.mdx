@@ -236,6 +236,7 @@ Creates a debounced version of a function that delays execution until after wait
 | trailing        | boolean         | true    | Execute after wait period |
 | maxWait         | number          | undefined | Maximum time to wait before forcing execution |
 | abortController | AbortController | undefined | AbortController for cancellation |
+| rejectOnAbort   | boolean         | false   | Reject pending calls with `AbortError` when aborted. By default an abort settles them with `undefined` |
 
 #### Returns
 
@@ -270,7 +271,7 @@ const searchFunctionAlt = debounce(search, {
 // AbortController integration
 const controller = new AbortController();
 const abortableDebounce = debounce(apiCall, 500, { abortController: controller });
-controller.abort(); // Cancels pending execution
+controller.abort(); // Drops the pending execution, pending calls resolve to undefined
 
 // Methods
 debouncedFunction.cancel();  // Cancel pending execution
@@ -278,7 +279,7 @@ debouncedFunction.flush();   // Execute immediately with latest args
 debouncedFunction.pending(); // Check if execution is scheduled
 ```
 
-> **Promise Semantics** Pending promises resolve with the result of the eventual execution. `cancel()` rejects them with code `CANCELLED`, and `rejectSkipped` rejects superseded calls with code `DEBOUNCED`, so an awaited debounced call needs a catch.
+> **Promise Semantics** Pending promises resolve with the result of the eventual execution. `cancel()` rejects them with code `CANCELLED`, and `rejectSkipped` rejects superseded calls with code `DEBOUNCED`, so an awaited debounced call needs a catch. An abort through `abortController` drops the pending execution and resolves pending calls to `undefined`, the shape a component teardown wants when nothing is listening for an error. Pass `rejectOnAbort: true` to reject them with an `AbortError` instead. The signal is not handed to `func`, so work already in flight is the caller's to cancel.
 
 ### throttle
 
@@ -308,6 +309,7 @@ Creates a throttled version of a function that only invokes the function at most
 | leading         | boolean         | true    | Execute immediately on first call |
 | trailing        | boolean         | true    | Execute once more after wait period if calls occurred |
 | abortController | AbortController | undefined | AbortController for cancellation |
+| rejectOnAbort   | boolean         | false   | Reject pending calls with `AbortError` when aborted. By default an abort settles them with `undefined` |
 
 #### Returns
 
@@ -342,13 +344,15 @@ rateLimitedAPI('/comments'); // Replaces previous trailing call
 // AbortController integration
 const controller = new AbortController();
 const abortableThrottle = throttle(expensiveOperation, 1000, { abortController: controller });
-controller.abort(); // Cancels pending execution
+controller.abort(); // Drops the pending execution, pending calls resolve to undefined
 
 // Methods
 throttledFunction.cancel();  // Cancel pending execution
 throttledFunction.flush();   // Execute immediately with latest args
 throttledFunction.pending(); // Check if execution is scheduled
 ```
+
+> **Promise Semantics** Queued calls resolve with the result of the trailing execution. `cancel()` rejects them with code `CANCELLED`, and `rejectSkipped` rejects skipped calls with code `THROTTLED`. An abort through `abortController` drops the queued execution and resolves pending calls to `undefined`. Pass `rejectOnAbort: true` to reject them with an `AbortError` instead. The signal is not handed to `func`, so work already in flight is the caller's to cancel.
 
 > **Use Cases** Throttling is ideal for high-frequency events like scroll, resize, mousemove, and API rate limiting. Unlike debouncing which waits for calm periods, throttling ensures regular execution during continuous activity.
 

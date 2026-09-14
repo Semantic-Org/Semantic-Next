@@ -16,6 +16,8 @@ xx.xx.xxxx
 * **Feature** - Added `{#match}` blocks for value-based branching — name a discriminant once and list `{is value}` cases (loose `==`) or `{isExactly value}` cases (strict `===`, to tell `undefined` from `null` or split the falsy set), replacing repetitive `{#if is x 'a'}{else if is x 'b'}` chains
 * **Enhancement** - `{#async}` blocks in both engines are backed by the resource primitive — same behavior, one shared lifecycle, and the lit engine now holds the last value through a rejection like the native engine
 * **Feature** - Added `inheritsData` to subtemplate calls, `{> userProfile theme=theme inheritsData}`, which gives the subtemplate its caller's data context the way a snippet has it, settings and state live per key, with the call's own props on top
+* **Bug** - Fixed `instanceof` brand check on `Template` to use prototype getter instead of class field — same fix as Signal and Query.
+* **Bug** - Fixed shorthand subtemplate `{>name data=expr}` routing the helper return through `reactiveData` instead of the data context — now matches the verbose `{> template name='child' data=expr}` form and the documented contract.
 
 ### Reactivity
 * **Enhancement** - `mutate()` on large values now detects changes by tracking writes through a proxy instead of clone-and-compare, so editing one row of a big list costs the writes, not the list. The callback sees a tracked wrapper at that scale (shows as `Proxy(Object)` in the console), and the wrapper is only valid inside the callback. Small values keep the previous snapshot behavior and see the real object
@@ -48,6 +50,7 @@ xx.xx.xxxx
 * **Feature** - Added `concurrency` to resource options — `'latest'` (default) serializes runs with abort-and-coalesce, `'overlap'` starts every fetch immediately with newest-settle-wins for fetchers that cannot cooperate with cancellation
 * **Feature** - Added `Resource` class export for `instanceof` checks and subclassing
 * **Enhancement** - `computed` and `derive` warn in development when the compute function returns a promise
+* **Bug** - Fixed `instanceof` brand check on `Signal` to use prototype getter instead of class field — ensures cross-realm and prototype-created instances pass `instanceof` reliably.
 
 ### Renderer
 * **Bug** - Fixed property bindings (`.prop={expr}`) incorrectly defaulting to literal mode — properties now evaluate expressions like other bindings, use `{#fn expr}` to pass function references
@@ -59,17 +62,30 @@ xx.xx.xxxx
 * **Bug** - Fixed the server handing a subtemplate its caller's whole data context, so a bare `{>name}` call rendered the caller's values on the server and nothing on the client. Both engines now render it from the subtemplate's own settings and state, its `defaultSettings` apply on the server, and `settings` in its callbacks falls back to the host there as documented
 * **Bug** - Fixed a subtemplate mounted with `data=expr` not passing a later replacement of that data on to a nested subtemplate it feeds through props. A prop now follows the caller's data context as a unit, and per-prop reactivity stays as granular as before
 
-### Reactivity
-* **Bug** - Fixed `instanceof` brand check on `Signal` to use prototype getter instead of class field — ensures cross-realm and prototype-created instances pass `instanceof` reliably.
-
-### Templates
-* **Bug** - Fixed `instanceof` brand check on `Template` to use prototype getter instead of class field — same fix as Signal and Query.
-* **Bug** - Fixed shorthand subtemplate `{>name data=expr}` routing the helper return through `reactiveData` instead of the data context — now matches the verbose `{> template name='child' data=expr}` form and the documented contract.
-
 ### Query
 * **Bug** - Fixed `instanceof` checks failing for `Query.wrap()` instances — brand property was a class field (set only in constructor) but `wrap()` uses `Object.create()`. Moved to prototype getter so all prototype-chain objects pass the check regardless of construction path.
 * **Bug** - Fixed `.position({ type: 'global' })` placing elements with the wrong offset when a CSS containing block (transform/filter/perspective/etc.) lived outside the element's shadow DOM — `positioningParent` now pierces shadow boundaries so the math matches what the browser actually uses. `isInView` now does the same for its default clipping viewport.
 * **Feature** - Added `includeMargin`, `includePadding`, and `includeBorder` options to `naturalWidth()` and `naturalHeight()` — allows measuring unconstrained intrinsic dimensions while preserving the element's box model.
+* **Feature** - Added [`addAttr()`](https://next.semantic-ui.com/api/query/attributes#addattr) method for adding one or more attributes with empty string values. Useful shorthand for boolean attributes common in web components.
+* **Feature** - Added `pierceShadow` option to `scrollParent()`, `clippingParent()`, and `positioningParent()` to optionally walk parents across shadow DOM boundaries.
+* **Bug** - Fixed `toggleClass()` with multiple classes passing second class as `force` parameter to `classList.toggle()` instead of toggling each class independently.
+* **Bug** - Fixed `off(handler)` crashing when called with a function but no event name — `eventNames` was not cleared after reassignment.
+* **Bug** - Fixed `one()` wrapping handler in arrow function which prevented `this` from being set to the matched element in delegated event handlers.
+* **Bug** - Fixed `onNext()` timeout failing to remove event listener because `off()` couldn't match the wrapped handler — now uses shared `AbortController` for cleanup.
+* **Bug** - Fixed `naturalWidth()` / `naturalHeight()` `preserveMaxWidth` / `preserveMaxHeight` options being no-ops due to inverted conditional logic.
+* **Bug** - Fixed constructor leaking `options` and `prevObject` when wrapping a Query instance (e.g. `$($deep)`) — `Object.assign` copied all source properties, overwriting the new instance's intended options.
+* **Performance** - Hoisted `naturalDisplay()` tag-to-display lookup to a static class property, avoiding object recreation on every call.
+* **Performance** - Added early return in `querySelectorAllDeep` to skip text and comment nodes during recursive shadow DOM traversal.
+* **Performance** - Inlined `getBoundingClientRect()` in `dimensions()` to avoid allocating a throwaway `Query` instance per element.
+* **Performance** - Optimized `containsDeep()` to skip redundant `contains()` calls on light DOM children already checked by the parent scope.
+* **Feature** - Query collections are now iterable, supporting `for...of`, spread syntax, and destructuring.
+* **Feature** - `parent()` now crosses shadow DOM boundaries when `pierceShadow` is enabled.
+* **Bug** - Fixed `dimensions()`, `height()`, `width()`, and `bounds()` not recognizing raw `window` from `scrollParent()` results.
+* **Bug** - Fixed `one()` not propagating handler return values through the wrapper chain.
+* **Feature** - Added `capture` and `passive` as top-level options for `on()` and `one()`, no longer requiring `eventSettings` nesting.
+* **Feature** - `scroll` and `resize` events are now passive by default for better performance. Override with `{ passive: false }`.
+* **Feature** - Event handlers can `return false` to call `stopPropagation()` or `return 'cancel'` to call `preventDefault()`.
+* **Feature** - Added [`intercept()`](https://next.semantic-ui.com/docs/api/query/events#intercept) for capture-phase event listeners. Events fire top-down, letting parents handle events before children. Supports delegation.
 
 ### Utils
 * **Bug** - `isEqual` compares by string when a value's `valueOf` throws, the way Temporal's plain types and value classes built like them refuse a numeric reading, so `detectChanges` no longer throws on a document holding one
@@ -87,8 +103,6 @@ xx.xx.xxxx
 * **Feature** - Added `noColor` option to [`log`](https://next.semantic-ui.com/docs/api/utils/debug#log) — skips the `%c` style directives and style arguments for plain-text output, title still present. Defaults to `isServer`, so server output carries no style tokens by default; pass `noColor: false` to force styling
 * **Enhancement** - `log`'s `format: 'json'` now emits each record as one `JSON.stringify`'d line (`timestamp` when configured, `level`, `namespace`, `message`, `data`) instead of logging a raw object — the shape process managers and log aggregators parse
 * **Feature** - Added [`markTimeline`](https://next.semantic-ui.com/docs/api/utils/timeline#marktimeline) and [`measureTimeline`](https://next.semantic-ui.com/docs/api/utils/timeline#measuretimeline) — guarded instrumentation over the performance timeline. `markTimeline(name, { detail })` records a point; `measureTimeline(name, { from, to, detail })` records a duration — with `to` (a mark name, a timestamp, or the reserved `'now'` for this instant) it records immediately, without `to` it returns an idempotent `done()` closer that captures its own start (immune to the mistyped-mark silent no-op), with `from` defaulting to the call instant in both forms. Every door is throw-safe by contract, `detail` thunks evaluate inside the guard at record-time, and a detail speaking the DevTools extensibility vocabulary (`track`, `trackGroup`, `color`, `properties`, `tooltipText`) is composed into the `devtools` envelope — structural keys belong in every build, prose `tooltipText` behind the consumer's development ternary
-
-### Utils
 * **Breaking** - `detectChanges` and `trackWrites` now diff arrays of uniquely-keyed objects by element identity **by default** (was index-positional). The reported paths for such arrays change from `field.0.qty` to `field[#id].qty`, so a prepend or reorder reads back as one add by key instead of a positional cascade of id rewrites — the shape a sync layer or component change-feed wants. Arrays that aren't cleanly keyed (scalars, unkeyed or duplicate-keyed elements, or a key carrying `]`) still emit positional paths. Pass `{ keyed: false }` for the previous index-positional output. See [`detectChanges`](https://next.semantic-ui.com/docs/api/utils/objects#detectchanges)
 * **Feature** - Added [`elementKey`](https://next.semantic-ui.com/docs/api/utils/paths#elementkey) — the identity of an array element, the value of the first present field in `['id', '_id', 'hash', 'key']` (overridable via `elementKey.config.fields`), or undefined for an unkeyed element. The shared element-identity convention behind reactivity's `Signal.id` and the renderer's `getItemId`
 * **Feature** - `detectChanges` takes a `keyed` mode (default true) that diffs cleanly-keyed arrays by element identity, emitting `field[#id]` paths (`lineItems[#z]` for a whole-element add/remove/replace, `lineItems[#b].qty` for a field change). `fields` overrides the identity fields. See [`detectChanges`](https://next.semantic-ui.com/docs/api/utils/objects#detectchanges)
@@ -139,6 +153,15 @@ xx.xx.xxxx
 * **Feature** - Added [`selectorSpecificity`](https://next.semantic-ui.com/docs/api/utils/css#selectorspecificity) — a selector's specificity as `[ids, classes, elements]` per Selectors Level 4, `:is()`, `:not()`, `:where()` and `:host()` included
 * **Feature** - Added [`parseHTML`](https://next.semantic-ui.com/docs/api/utils/html#parsehtml) and [`stringifyHTML`](https://next.semantic-ui.com/docs/api/utils/html#stringifyhtml) — html read into plain nodes with source spans, everything as written and nothing decoded, no browser recovery and never a throw, and written back byte for byte, on the server as in a browser. `voidElements` and `rawTextElements` are exported beside them, the spec's two element sets held once for every scanner in the framework
 * **Enhancement** - `scopeStyles` keeps a rule's nested rules under the scoped parent (they were dropped)
+* **Enhancement** - `firstMatch()` and `findIndex()` now accept a value in addition to a callback, matching the `remove()` API. Values are compared using deep equality.
+* **Feature** - Added [`wait()`](https://next.semantic-ui.com/docs/api/utils/functions#wait) for creating async delays with `await wait(ms)`. Supports `AbortSignal` for cancellable waits — aborts reject with `AbortError` by default (matching web platform conventions). Set `rejectOnAbort: false` to resolve early instead.
+* **Feature** - Added [`indentHTML()`](https://next.semantic-ui.com/docs/api/utils/html#indenthtml) for intelligently indenting HTML markup with proper nesting awareness. Handles void elements, self-closing tags, and comments correctly. Perfect for cleaning up HTML extracted from template literals.
+* **Feature** - Added [`indentLines()`](https://next.semantic-ui.com/docs/api/utils/html#indentlines) for adding consistent indentation to every line of text. Useful for formatting code snippets and template processing.
+* **Feature** - Added `reverseString()` for reversing strings with Unicode grapheme cluster handling using Intl.Segmenter. Preserves emojis, flag sequences, skin tone modifiers, and combined diacritics.
+* **Bug** - Fixed `weightedObjectSearch()` regex pattern escaping where multi-word queries with `matchAllWords: false` returned no results. Template string was using `\W` (literal 'W') instead of `\\W` (non-word character class), breaking word boundary matching.
+* **Bug** - Fixed issues with object pollution from weightedObjectSearch.
+* **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
+* **Breaking** - Aborting a `debounce` or `throttle` through `abortController` now resolves its pending calls to `undefined` instead of rejecting them with `AbortError`. The common abort is a component teardown, where the controller says the call must not fire and nothing is listening for an error, so every queued call rejecting was noise. Pass `rejectOnAbort: true` for the previous rejecting behavior, the same option `wait()` takes. The signal is not handed to the wrapped function, so work already in flight stays the caller's to cancel
 
 ### Component
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
@@ -165,38 +188,6 @@ xx.xx.xxxx
 * **Feature** - Added node export path with tools for writing `componentSpec` to disk
 * **Feature** - Added `DocsSpecReader` class that extends `SpecReader` with documentation-specific methods — definition generation, code examples, HTML parsing, and component tree building for SSR
 * **Refactor** - Moved all documentation-related methods out of `SpecReader` into `DocsSpecReader` to reduce bundle size for runtime consumers
-
-### Query
-* **Feature** - Added [`addAttr()`](https://next.semantic-ui.com/api/query/attributes#addattr) method for adding one or more attributes with empty string values. Useful shorthand for boolean attributes common in web components.
-* **Feature** - Added `pierceShadow` option to `scrollParent()`, `clippingParent()`, and `positioningParent()` to optionally walk parents across shadow DOM boundaries.
-* **Bug** - Fixed `toggleClass()` with multiple classes passing second class as `force` parameter to `classList.toggle()` instead of toggling each class independently.
-* **Bug** - Fixed `off(handler)` crashing when called with a function but no event name — `eventNames` was not cleared after reassignment.
-* **Bug** - Fixed `one()` wrapping handler in arrow function which prevented `this` from being set to the matched element in delegated event handlers.
-* **Bug** - Fixed `onNext()` timeout failing to remove event listener because `off()` couldn't match the wrapped handler — now uses shared `AbortController` for cleanup.
-* **Bug** - Fixed `naturalWidth()` / `naturalHeight()` `preserveMaxWidth` / `preserveMaxHeight` options being no-ops due to inverted conditional logic.
-* **Bug** - Fixed constructor leaking `options` and `prevObject` when wrapping a Query instance (e.g. `$($deep)`) — `Object.assign` copied all source properties, overwriting the new instance's intended options.
-* **Performance** - Hoisted `naturalDisplay()` tag-to-display lookup to a static class property, avoiding object recreation on every call.
-* **Performance** - Added early return in `querySelectorAllDeep` to skip text and comment nodes during recursive shadow DOM traversal.
-* **Performance** - Inlined `getBoundingClientRect()` in `dimensions()` to avoid allocating a throwaway `Query` instance per element.
-* **Performance** - Optimized `containsDeep()` to skip redundant `contains()` calls on light DOM children already checked by the parent scope.
-* **Feature** - Query collections are now iterable, supporting `for...of`, spread syntax, and destructuring.
-* **Feature** - `parent()` now crosses shadow DOM boundaries when `pierceShadow` is enabled.
-* **Bug** - Fixed `dimensions()`, `height()`, `width()`, and `bounds()` not recognizing raw `window` from `scrollParent()` results.
-* **Bug** - Fixed `one()` not propagating handler return values through the wrapper chain.
-* **Feature** - Added `capture` and `passive` as top-level options for `on()` and `one()`, no longer requiring `eventSettings` nesting.
-* **Feature** - `scroll` and `resize` events are now passive by default for better performance. Override with `{ passive: false }`.
-* **Feature** - Event handlers can `return false` to call `stopPropagation()` or `return 'cancel'` to call `preventDefault()`.
-* **Feature** - Added [`intercept()`](https://next.semantic-ui.com/docs/api/query/events#intercept) for capture-phase event listeners. Events fire top-down, letting parents handle events before children. Supports delegation.
-
-### Utils
-* **Enhancement** - `firstMatch()` and `findIndex()` now accept a value in addition to a callback, matching the `remove()` API. Values are compared using deep equality.
-* **Feature** - Added [`wait()`](https://next.semantic-ui.com/docs/api/utils/functions#wait) for creating async delays with `await wait(ms)`. Supports `AbortSignal` for cancellable waits — aborts reject with `AbortError` by default (matching web platform conventions). Set `rejectOnAbort: false` to resolve early instead.
-* **Feature** - Added [`indentHTML()`](https://next.semantic-ui.com/docs/api/utils/html#indenthtml) for intelligently indenting HTML markup with proper nesting awareness. Handles void elements, self-closing tags, and comments correctly. Perfect for cleaning up HTML extracted from template literals.
-* **Feature** - Added [`indentLines()`](https://next.semantic-ui.com/docs/api/utils/html#indentlines) for adding consistent indentation to every line of text. Useful for formatting code snippets and template processing.
-* **Feature** - Added `reverseString()` for reversing strings with Unicode grapheme cluster handling using Intl.Segmenter. Preserves emojis, flag sequences, skin tone modifiers, and combined diacritics.
-* **Bug** - Fixed `weightedObjectSearch()` regex pattern escaping where multi-word queries with `matchAllWords: false` returned no results. Template string was using `\W` (literal 'W') instead of `\\W` (non-word character class), breaking word boundary matching.
-* **Bug** - Fixed issues with object pollution from weightedObjectSearch.
-* **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
 
 ### Dates
 * **Feature** - New [`@semantic-ui/dates`](https://next.semantic-ui.com/docs/api/dates) package, a plain-English layer over the runtime's Temporal. Five words cover what business logic says about time, [`datetime`](https://next.semantic-ui.com/docs/api/dates/datetime) an instant with a zone to read it in, [`date`](https://next.semantic-ui.com/docs/api/dates/date) a calendar day, [`time`](https://next.semantic-ui.com/docs/api/dates/time) a clock reading, [`duration`](https://next.semantic-ui.com/docs/api/dates/duration) a length, and the [`dateRange`, `datetimeRange`, `timeRange`](https://next.semantic-ui.com/docs/api/dates/ranges) family, each a Temporal type underneath and one call away from it. One verb set across all of them: `plus`, `minus`, `set`, `startOf`, `endOf`, `round`, `until`, `since`, `to`, `format`, `formatRelative`. Nouns are properties and questions are calls, and the parts are real properties, so a value prints them in a console
