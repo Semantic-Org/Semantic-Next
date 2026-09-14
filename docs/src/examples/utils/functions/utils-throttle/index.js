@@ -34,3 +34,12 @@ setTimeout(() => {
     setTimeout(() => throttledInput(`input${i}`), i * 30);
   }
 }, 1000);
+
+// abortController - a teardown drops the queued trailing call, its promise resolves to undefined
+setTimeout(() => {
+  const controller = new AbortController();
+  const abortable = throttle(trackEvent, 200, { abortController: controller });
+  abortable('mounted'); // executes immediately
+  abortable('unmounted').then((result) => console.log(`Aborted resolved with: ${result}`));
+  controller.abort(); // trailing call never runs
+}, 1400);

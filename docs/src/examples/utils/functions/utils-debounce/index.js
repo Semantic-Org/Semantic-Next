@@ -28,3 +28,11 @@ setTimeout(() => {
   // input5 triggers a new debounce cycle after maxWait
   setTimeout(() => maxWaitDebounce('input5'), 600); // executes 300ms later
 }, 600);
+
+// abortController - a teardown drops the pending call, its promise resolves to undefined
+setTimeout(() => {
+  const controller = new AbortController();
+  const abortable = debounce(search, 200, { abortController: controller });
+  abortable('unmounted').then((result) => console.log(`Aborted resolved with: ${result}`));
+  controller.abort(); // search never runs
+}, 1700);

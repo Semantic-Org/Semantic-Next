@@ -161,6 +161,7 @@ xx.xx.xxxx
 * **Bug** - Fixed `weightedObjectSearch()` regex pattern escaping where multi-word queries with `matchAllWords: false` returned no results. Template string was using `\W` (literal 'W') instead of `\\W` (non-word character class), breaking word boundary matching.
 * **Bug** - Fixed issues with object pollution from weightedObjectSearch.
 * **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
+* **Breaking** - Aborting a `debounce` or `throttle` through `abortController` now resolves its pending calls to `undefined` instead of rejecting them with `AbortError`. The common abort is a component teardown, where the controller says the call must not fire and nothing is listening for an error, so every queued call rejecting was noise. Pass `rejectOnAbort: true` for the previous rejecting behavior, the same option `wait()` takes. The signal is not handed to the wrapped function, so work already in flight stays the caller's to cancel
 
 ### Component
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.

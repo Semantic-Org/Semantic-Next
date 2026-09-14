@@ -83,6 +83,7 @@ export const debounce = (func, wait, options = {}) => {
 
   const {
     rejectSkipped = false,
+    rejectOnAbort = false,
     leading = false,
     trailing = true,
     maxWait,
@@ -114,12 +115,19 @@ export const debounce = (func, wait, options = {}) => {
 
   const handleAbort = () => {
     cancel();
-    const abortError = new DOMException('The operation was aborted', 'AbortError');
-    pendingPromises.forEach(({ reject }) => reject(abortError));
+    if (rejectOnAbort) {
+      const abortError = new DOMException('The operation was aborted', 'AbortError');
+      pendingPromises.forEach(({ reject }) => reject(abortError));
+    }
+    else {
+      pendingPromises.forEach(({ resolve }) => resolve());
+    }
     pendingPromises = [];
     cleanupListener();
   };
 
+  // a signal already aborted at construction is a wiring error, not an abort to handle,
+  // so it throws regardless of rejectOnAbort
   if (signal?.aborted) {
     throw new DOMException('The operation was aborted', 'AbortError');
   }
@@ -284,6 +292,9 @@ export const debounce = (func, wait, options = {}) => {
     }
 
     if (signal?.aborted) {
+      if (!rejectOnAbort) {
+        return Promise.resolve();
+      }
       const error = new DOMException('The operation was aborted', 'AbortError');
       return Promise.reject(error);
     }
@@ -365,6 +376,7 @@ export const throttle = (func, wait, options = {}) => {
 
   const {
     rejectSkipped = false,
+    rejectOnAbort = false,
     leading = true,
     trailing = true,
     abortController,
@@ -393,12 +405,19 @@ export const throttle = (func, wait, options = {}) => {
 
   const handleAbort = () => {
     cancel();
-    const abortError = new DOMException('The operation was aborted', 'AbortError');
-    pendingPromises.forEach(({ reject }) => reject(abortError));
+    if (rejectOnAbort) {
+      const abortError = new DOMException('The operation was aborted', 'AbortError');
+      pendingPromises.forEach(({ reject }) => reject(abortError));
+    }
+    else {
+      pendingPromises.forEach(({ resolve }) => resolve());
+    }
     pendingPromises = [];
     cleanupListener();
   };
 
+  // a signal already aborted at construction is a wiring error, not an abort to handle,
+  // so it throws regardless of rejectOnAbort
   if (signal?.aborted) {
     throw new DOMException('The operation was aborted', 'AbortError');
   }
@@ -526,6 +545,9 @@ export const throttle = (func, wait, options = {}) => {
     lastCallTime = time;
 
     if (signal?.aborted) {
+      if (!rejectOnAbort) {
+        return Promise.resolve();
+      }
       const error = new DOMException('The operation was aborted', 'AbortError');
       return Promise.reject(error);
     }

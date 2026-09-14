@@ -15,6 +15,8 @@ export interface DebounceOptions {
   wait?: number;
   /** Whether to reject skipped calls (default: false) */
   rejectSkipped?: boolean;
+  /** Reject pending calls with `AbortError` when the signal aborts, instead of resolving them to `undefined` (default: false) */
+  rejectOnAbort?: boolean;
   /** Execute on first call (default: false) */
   leading?: boolean;
   /** Execute after wait period (default: true) */
@@ -33,6 +35,8 @@ export interface ThrottleOptions {
   wait?: number;
   /** Whether to reject skipped calls (default: false) */
   rejectSkipped?: boolean;
+  /** Reject pending calls with `AbortError` when the signal aborts, instead of resolving them to `undefined` (default: false) */
+  rejectOnAbort?: boolean;
   /** Execute immediately on first call (default: true) */
   leading?: boolean;
   /** Execute once more after wait period if calls occurred (default: true) */
@@ -253,7 +257,7 @@ export function wait(ms?: number, options?: WaitOptions): Promise<void>;
  * // AbortController integration
  * const controller = new AbortController();
  * const debouncedFetch = debounce(fetchData, 500, { abortController: controller });
- * controller.abort(); // Cancels pending execution
+ * controller.abort(); // Drops the pending execution, pending calls resolve to undefined
  *
  * // Promise handling
  * const results = await Promise.all([
@@ -309,7 +313,7 @@ export function debounce<T extends (...args: any[]) => any>(
  * // AbortController integration
  * const controller = new AbortController();
  * const throttledAPI = throttle(apiCall, 2000, { abortController: controller });
- * controller.abort(); // Cancels pending execution
+ * controller.abort(); // Drops the pending execution, pending calls resolve to undefined
  *
  * // Methods
  * throttledFunction.cancel(); // Cancel pending execution

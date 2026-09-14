@@ -800,7 +800,8 @@ const debouncedSave = debounce(async (data) => {
   trailing: true,         // default: execute after wait
   maxWait: 1000,          // force execution after 1s max
   rejectSkipped: false,   // reject promises for skipped calls
-  abortController: ctrl,  // cancel with AbortController
+  abortController: ctrl,  // an abort drops the pending call, its promises resolve to undefined
+  rejectOnAbort: false,   // true rejects them with AbortError instead
 });
 
 // All calls share the same promise
@@ -820,7 +821,8 @@ const throttled = throttle(handleScroll, 100, {
   leading: true,           // default: execute on first call
   trailing: true,          // default: execute after wait
   rejectSkipped: false,    // reject promises for skipped calls
-  abortController: ctrl,
+  abortController: ctrl,   // an abort drops the queued call, its promises resolve to undefined
+  rejectOnAbort: false,    // true rejects them with AbortError instead
 });
 
 throttled.cancel();        // same control methods as debounce

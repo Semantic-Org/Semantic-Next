@@ -516,7 +516,7 @@ describe('function utilities', () => {
     });
 
     describe('AbortController integration', () => {
-      it('should handle aborted signals', async () => {
+      it('should settle pending calls without invoking when aborted', async () => {
         const controller = new AbortController();
         const func = vi.fn(() => 'result');
         const debounced = debounce(func, 100, { abortController: controller });
@@ -524,7 +524,56 @@ describe('function utilities', () => {
         const promise = debounced('arg');
         controller.abort();
 
-        await expect(promise).rejects.toThrow('The operation was aborted');
+        await expect(promise).resolves.toBeUndefined();
+        vi.advanceTimersByTime(100);
+        expect(func).not.toHaveBeenCalled();
+        expect(debounced.pending()).toBe(false);
+      });
+
+      it('should not replay a prior result into an aborted call', async () => {
+        const controller = new AbortController();
+        const func = vi.fn(() => 'result');
+        const debounced = debounce(func, 100, { abortController: controller });
+
+        debounced('first');
+        vi.advanceTimersByTime(100);
+        expect(func).toHaveBeenCalledTimes(1);
+
+        const promise = debounced('second');
+        controller.abort();
+
+        await expect(promise).resolves.toBeUndefined();
+        expect(func).toHaveBeenCalledTimes(1);
+      });
+
+      it('should leave an in-flight leading call to settle with its own result', async () => {
+        const controller = new AbortController();
+        let finish;
+        const func = vi.fn(() =>
+          new Promise((resolve) => {
+            finish = resolve;
+          })
+        );
+        const debounced = debounce(func, 100, { leading: true, abortController: controller });
+
+        const inFlight = debounced('first');
+        const queued = debounced('second');
+        controller.abort();
+
+        await expect(queued).resolves.toBeUndefined();
+        finish('saved');
+        await expect(inFlight).resolves.toBe('saved');
+        expect(func).toHaveBeenCalledTimes(1);
+      });
+
+      it('should settle calls made after abort without invoking', async () => {
+        const controller = new AbortController();
+        const func = vi.fn(() => 'result');
+        const debounced = debounce(func, 100, { abortController: controller });
+
+        controller.abort();
+        await expect(debounced('late')).resolves.toBeUndefined();
+        vi.advanceTimersByTime(100);
         expect(func).not.toHaveBeenCalled();
       });
 
@@ -535,23 +584,46 @@ describe('function utilities', () => {
         expect(() => {
           debounce(() => {}, 100, { abortController: controller });
         }).toThrow('The operation was aborted');
+        expect(() => {
+          debounce(() => {}, 100, { abortController: controller, rejectOnAbort: false });
+        }).toThrow('The operation was aborted');
       });
 
-      it('should still abort after a successful invocation', async () => {
-        const controller = new AbortController();
-        const func = vi.fn(() => 'result');
-        const debounced = debounce(func, 100, { abortController: controller });
+      describe('rejectOnAbort', () => {
+        it('should reject pending calls with AbortError', async () => {
+          const controller = new AbortController();
+          const func = vi.fn(() => 'result');
+          const debounced = debounce(func, 100, { abortController: controller, rejectOnAbort: true });
 
-        // First call — let it invoke successfully
-        debounced('first');
-        vi.advanceTimersByTime(100);
-        expect(func).toHaveBeenCalledTimes(1);
+          const promise = debounced('arg');
+          controller.abort();
 
-        // Second call — then abort before it fires
-        const promise = debounced('second');
-        controller.abort();
+          await expect(promise).rejects.toThrow('The operation was aborted');
+          expect(func).not.toHaveBeenCalled();
+        });
 
-        await expect(promise).rejects.toThrow('The operation was aborted');
+        it('should still reject after a successful invocation', async () => {
+          const controller = new AbortController();
+          const func = vi.fn(() => 'result');
+          const debounced = debounce(func, 100, { abortController: controller, rejectOnAbort: true });
+
+          debounced('first');
+          vi.advanceTimersByTime(100);
+          expect(func).toHaveBeenCalledTimes(1);
+
+          const promise = debounced('second');
+          controller.abort();
+
+          await expect(promise).rejects.toThrow('The operation was aborted');
+        });
+
+        it('should reject calls made after abort', async () => {
+          const controller = new AbortController();
+          const debounced = debounce(vi.fn(), 100, { abortController: controller, rejectOnAbort: true });
+
+          controller.abort();
+          await expect(debounced('late')).rejects.toThrow('The operation was aborted');
+        });
       });
     });
 
@@ -799,18 +871,65 @@ describe('function utilities', () => {
     });
 
     describe('AbortController integration', () => {
-      it('should handle aborted signals', async () => {
+      it('should settle a queued trailing call without invoking when aborted', async () => {
         const controller = new AbortController();
         const func = vi.fn(() => 'result');
         const throttled = throttle(func, 100, { abortController: controller });
 
-        const promise = throttled('arg');
+        expect(throttled('first')).toBe('result');
+        const queued = throttled('second');
         controller.abort();
 
-        // For leading execution, it might complete before abort
-        // For non-leading calls:
-        const promise2 = throttled('arg2');
-        await expect(promise2).rejects.toThrow('The operation was aborted');
+        await expect(queued).resolves.toBeUndefined();
+        vi.advanceTimersByTime(100);
+        expect(func).toHaveBeenCalledTimes(1);
+        expect(throttled.pending()).toBe(false);
+      });
+
+      it('should settle calls made after abort without invoking', async () => {
+        const controller = new AbortController();
+        const func = vi.fn(() => 'result');
+        const throttled = throttle(func, 100, { abortController: controller });
+
+        controller.abort();
+        await expect(throttled('late')).resolves.toBeUndefined();
+        vi.advanceTimersByTime(100);
+        expect(func).not.toHaveBeenCalled();
+      });
+
+      it('should throw immediately if signal is already aborted', () => {
+        const controller = new AbortController();
+        controller.abort();
+
+        expect(() => {
+          throttle(() => {}, 100, { abortController: controller });
+        }).toThrow('The operation was aborted');
+        expect(() => {
+          throttle(() => {}, 100, { abortController: controller, rejectOnAbort: false });
+        }).toThrow('The operation was aborted');
+      });
+
+      describe('rejectOnAbort', () => {
+        it('should reject a queued trailing call with AbortError', async () => {
+          const controller = new AbortController();
+          const func = vi.fn(() => 'result');
+          const throttled = throttle(func, 100, { abortController: controller, rejectOnAbort: true });
+
+          throttled('first');
+          const queued = throttled('second');
+          controller.abort();
+
+          await expect(queued).rejects.toThrow('The operation was aborted');
+          expect(func).toHaveBeenCalledTimes(1);
+        });
+
+        it('should reject calls made after abort', async () => {
+          const controller = new AbortController();
+          const throttled = throttle(vi.fn(), 100, { abortController: controller, rejectOnAbort: true });
+
+          controller.abort();
+          await expect(throttled('late')).rejects.toThrow('The operation was aborted');
+        });
       });
     });
 
