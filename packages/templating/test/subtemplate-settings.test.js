@@ -428,6 +428,23 @@ describe('Subtemplate settings — parent element fallback', () => {
     expect(child.settings.ownProp).toBe('X');
     expect(child.settings.missingKey).toBeUndefined();
   });
+
+  // the server has no element: the root template holds the settings as its data
+  it("falls back to the root template's settings when no element exists", () => {
+    const root = new Template({ template: '<div></div>', renderingEngine: realEngine });
+    root.settings = { brand: 'root-brand' };
+    const middle = new Template({ template: '<span></span>', renderingEngine: realEngine });
+    middle.setParent(root);
+    const child = new Template({
+      template: '<span></span>',
+      renderingEngine: realEngine,
+      defaultSettings: { ownProp: 'X' },
+    });
+    child.setParent(middle);
+    child.initialize();
+    expect(child.settings.ownProp).toBe('X');
+    expect(child.settings.brand).toBe('root-brand');
+  });
 });
 
 /*******************************

@@ -601,6 +601,25 @@ describe('SSR hydration — subtemplates', () => {
 
     expect(shadowHTML(el)).toBe('<div><t>type sees ada · <i>part sees ada</i></t></div>');
   });
+
+  // a server render and a client render of one template can only differ here
+  it('renders a bare subtemplate call to the same bytes on the server and the client', async () => {
+    const inner = defineComponent({ renderingEngine: 'native', template: '<i>inner sees {name}</i>' });
+
+    const hydrated = await ssrAndHydrate({
+      template: '<o>{>inner}</o>',
+      defaultSettings: { name: 'ada' },
+      subTemplates: { inner },
+    });
+
+    const fresh = document.createElement(hydrated.tagName.toLowerCase());
+    const rendered = $(fresh).onNext('rendered');
+    document.body.appendChild(fresh);
+    await rendered;
+
+    expect(shadowHTML(hydrated)).toBe('<o><i>inner sees </i></o>');
+    expect(shadowHTML(fresh)).toBe(shadowHTML(hydrated));
+  });
 });
 
 /*******************************

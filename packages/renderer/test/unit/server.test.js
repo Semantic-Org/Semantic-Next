@@ -939,6 +939,63 @@ describe('nested subtemplates', () => {
   });
 });
 
+describe('subtemplate data context', () => {
+  let tagCounter = 0;
+  const uniqueTag = () => `server-context-${++tagCounter}`;
+  const rendered = (Component) => stripMarkers(dsdContent(renderComponent(Component)));
+
+  it("renders a bare {>name} call from the subtemplate's own settings, not the caller's", () => {
+    const inner = defineComponent({ template: '<i>{name}</i>', defaultSettings: { name: 'own' } });
+    const Outer = defineComponent({
+      tagName: uniqueTag(),
+      template: '<o>{>inner}</o>',
+      defaultSettings: { name: 'ada' },
+      subTemplates: { inner },
+    });
+    expect(rendered(Outer)).toBe('<o><i>own</i></o>');
+  });
+
+  it('shows a bare call nothing of the caller when the subtemplate declares no settings', () => {
+    const inner = defineComponent({ template: '<i>inner sees {name}</i>' });
+    const Outer = defineComponent({
+      tagName: uniqueTag(),
+      template: '<o>{>inner}</o>',
+      defaultSettings: { name: 'ada' },
+      subTemplates: { inner },
+    });
+    expect(rendered(Outer)).toBe('<o><i>inner sees </i></o>');
+  });
+
+  it('passes a caller value through an explicit prop', () => {
+    const inner = defineComponent({ template: '<i>inner sees {name}</i>' });
+    const Outer = defineComponent({
+      tagName: uniqueTag(),
+      template: '<o>{>inner name=name}</o>',
+      defaultSettings: { name: 'ada' },
+      subTemplates: { inner },
+    });
+    expect(rendered(Outer)).toBe('<o><i>inner sees ada</i></o>');
+  });
+
+  it("gives JS callbacks the subtemplate's own settings, falling back to the host for the rest", () => {
+    const reader = defineComponent({
+      template: '<i>{ownTheme}|{hostLabel}</i>',
+      defaultSettings: { theme: 'light' },
+      createComponent: ({ settings }) => ({
+        ownTheme: () => settings.theme,
+        hostLabel: () => settings.parentLabel,
+      }),
+    });
+    const Host = defineComponent({
+      tagName: uniqueTag(),
+      template: '<o>{>reader}</o>',
+      defaultSettings: { parentLabel: 'from-host' },
+      subTemplates: { reader },
+    });
+    expect(rendered(Host)).toBe('<o><i>light|from-host</i></o>');
+  });
+});
+
 /*****************************************************************
   Rerender / guard blocks — server emits markers and content but
   does not actually maintain reactivity (server is single-pass).
