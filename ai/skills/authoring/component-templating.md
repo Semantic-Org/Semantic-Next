@@ -344,7 +344,7 @@ Render a separate `defineComponent` (without `tagName`) from inside another temp
 
 **Key rules:**
 - **No inherited data context.** A bare `{>name}` renders from the subtemplate's own `defaultSettings` and `defaultState`, on the server as on the client. Pass what it needs: `{>userProfile theme=theme name=user.name}`
-- **`inheritsData` opts in.** `{>userProfile theme=theme inheritsData}` gives the subtemplate its caller's context the way a snippet has it, settings and state live per key, the call's own props on top
+- **`inheritsData` opts in.** `{>userProfile theme=theme inheritsData}` gives the subtemplate its caller's context the way a snippet has it, settings and state live per key, the call's own props on top. Off by default because the common subtemplate is a list item rendered once per item and inheriting copies the caller's context per instance, and because a context that is what the call hands it is what makes a subtemplate a component rather than a fragment, the line between it and a snippet
 - **Own `subTemplates`.** Each subtemplate resolves `{>name}` through the map it declares, never its caller's
 - **`settings` in JS callbacks** falls back to the host component's settings for keys the subtemplate did not declare
 
