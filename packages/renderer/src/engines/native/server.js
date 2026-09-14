@@ -645,7 +645,8 @@ export class ServerRenderer {
 
     if (this.snippets[templateName]) {
       const snippet = this.snippets[templateName];
-      const snippetData = this.resolveNodeData(node, data);
+      // a snippet inherits the caller's context, its args layered on top
+      const snippetData = this.resolveNodeData(node, data, childContext(data));
       html += this.renderNodes(snippet.content, snippetData);
     }
     else {
@@ -658,7 +659,8 @@ export class ServerRenderer {
       }
 
       if (template) {
-        const templateData = this.resolveNodeData(node, data);
+        // a subtemplate receives the call's args and nothing of the caller's context, as on the client
+        const templateData = this.resolveNodeData(node, data, {});
         html += this.renderSubtemplate(template, templateData);
       }
     }
@@ -672,11 +674,11 @@ export class ServerRenderer {
     // use Template.clone().initialize() which will create another ServerRenderer.
     // This is the correct path — the Template handles everything.
     if (isFunction(template.clone)) {
-      // the clone keeps its own subTemplates, the map a nested {>name} resolves through
-      const instance = template.clone({
-        data,
-        parentTemplate: this.template,
-      });
+      // wired as the client wires it: the clone keeps its own subTemplates for a nested
+      // {>name}, and as a child it gets its own settings with the host as the fallback
+      const instance = template.clone({ data });
+      if (this.template?.element) { instance.setElement(this.template.element); }
+      if (this.template) { instance.setParent(this.template); }
       instance.renderOptions = { markers: this.markers, text: this.text, slots: this.slots };
       instance.initialize();
       return instance.render();
@@ -693,28 +695,26 @@ export class ServerRenderer {
       Data Helpers
   *******************************/
 
-  resolveNodeData(node, data) {
-    let resolved = childContext(data);
-
+  // the call's args, evaluated in the caller's context and laid on target
+  resolveNodeData(node, data, target) {
     if (node.data) {
       if (isString(node.data)) {
         const evaluated = this.evaluator.lookupExpressionValue(node.data, data);
         if (isPlainObject(evaluated)) {
-          Object.assign(resolved, evaluated);
+          Object.assign(target, evaluated);
         }
       }
       else if (isPlainObject(node.data)) {
         each(node.data, (expr, key) => {
-          resolved[key] = this.evaluator.lookupExpressionValue(expr, data);
+          target[key] = this.evaluator.lookupExpressionValue(expr, data);
         });
       }
     }
     if (node.reactiveData) {
       each(node.reactiveData, (expr, key) => {
-        resolved[key] = this.evaluator.lookupExpressionValue(expr, data);
+        target[key] = this.evaluator.lookupExpressionValue(expr, data);
       });
     }
-
-    return resolved;
+    return target;
   }
 }
