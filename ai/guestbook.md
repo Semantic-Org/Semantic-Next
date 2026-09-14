@@ -3088,3 +3088,23 @@ I held the orchestrator seat for a package that was not on any schedule. The mai
 *— Claude (Fable 5.1), 2026-09-09*
 
 *"A word means what its domain makes it mean. Probe before you claim. Check dist."*
+
+## 2026-09-15 — three days on an email shell, and what the maintainer's read caught that no gate did
+
+I held the orchestrator seat for the design pass on the email types, across a compaction: a design agent's shells judged in a sitting against ours, a refactor into the examples' shape, two renderer defects fixed upstream, a preview rebuilt twice, and a theme layer the maintainer will not ship as it stands. What follows is what the records cannot carry.
+
+**Read the examples yourself before you charge a component.** I charged a refactor from the curriculum's name without having read it in that context, and he asked the one question: "have you yourself read the example curriculum?" Ten examples read whole gave invariants a charge can name by file, and the seat's `shapes.js` of seven helper functions was visible as wrong the moment they were in hand. "This is a new framework, vibing on format is not the right way. it should be based off deeper study." For expression forms the kitchen sink example is the canon, and a seat that wrote a Lisp call in parentheses followed by a member read had simply not looked at it.
+
+**A ruling's condition can fail while you build it, and the answer is to stop.** He had ruled that the server hosts the masthead images; the sync server had no static hosting; the seat invented a forty-line file server inside the emails package, and I had named that mechanism in the charge. His words: "the answer isnt 'lets invent a server in accounts' its 'accounts isnt ready to do that jack, we will need to have the server add a way to do static hosting'. this is a category of failure which is not respecting abstraction boundaries and the bayesian nature of the rulings. they arent edicts. they are suggestions with conditions to reject." The question every charge and review now carries: which package owns this, and if not this one, when can that package stand up the primitive.
+
+**A debounce is a tell.** The preview fetched a server fill and compile on every keystroke behind a 120 ms debounce, thirteen kilobytes several times a second, for a tab not open by default. He found it because fine-grained reactivity should have been instantaneous, "and it was being coalesced with a debounce which felt.. wrong unless some secret work was being done.. which there was." The right shape was one line he wrote himself, a reaction on the data context living in the pane it serves. And he named where the fault lay: "its an agents fault alone. and no amount of process ritual fixes it other than my cautious read."
+
+**Trace before you fix his renderer.** The refactor found the server engine handing a nested subtemplate its caller's map and its caller's data, and the client handing a bare call nothing. Before a seat touched it he built three repros on a docs page and asked for the documented contract read first: the user page says a subtemplate's markup sees only its own declared settings, so the client was right and the server had deviated three ways. "Its not verified until traced." He wrote the original renderer and compiler by hand, and a change there is read by its author at a depth no other package gets.
+
+**Css already knows how to inherit.** The theme layer put its presets in JavaScript objects with a name-mangler to turn them into custom properties on one element's style attribute, and a grammar dispatching on a key's suffix. "Its pretending like css doesnt know how to handle inheritance so authoring a custom mini compiler with a loose ruleset and regex to literally say one border radius overrides another." The defaults belong on `:host` in the type's own stylesheet with the dark values in its media query, and only what a user changes is data. He merged it and made the fix a fast follow: "so far over 3 years i never ship code that actively makes me mad."
+
+**Bytes and speed on a next PR are the bots'.** I charged a seat to run a local size measure twice before he pointed at the CI-reports skill, and told one not to open its PR when the author-pull-requests skill says it does. The contributing skills are read whole before a next charge, not cited by name.
+
+*— Claude (Fable 5.1), 2026-09-15*
+
+*"Read the examples yourself, and when a ruling's condition fails, say not ready."*
