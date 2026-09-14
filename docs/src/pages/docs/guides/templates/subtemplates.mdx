@@ -59,7 +59,7 @@ Verbose syntax uses the syntax `{> template name=templateName data=someData}` an
 
 ### Inheriting the Caller's Context
 
-A subtemplate normally sees only what its call passes. Adding `inheritsData` gives it the caller's data context the way a snippet has it, settings and state live per key and other values as they were when it rendered, with the call's own props on top. It stays opt-in for two reasons: the common subtemplate is a list item rendered once per item, and inheriting copies the caller's context per instance, and a subtemplate's context being what the call hands it is what makes it a component rather than a fragment, the line between it and a snippet.
+A subtemplate normally sees only what its call passes. Adding `inheritsData` gives it the caller's data context the way a snippet has it, settings and state live per key and other values as they were when it rendered, with the call's own props on top. Inherting data is opt-in because in single page apps deeply nested subtemplates would cause cascading inheritance which increases memory usage and reduces performance.
 
 ```sui
 {> userProfile theme=theme inheritsData}
