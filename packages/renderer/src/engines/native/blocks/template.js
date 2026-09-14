@@ -33,14 +33,15 @@ const { throwError } = createErrors({ namespace: 'renderer' });
   a lazy-getter record (buildArgsRecord), a plain object inheriting
   from the parent context, with declared keys defined as native ES
   getter descriptors. Each reactiveData entry's getter evaluates its
-  expression through the caller's renderer at access time, so source-signal
-  deps register on whichever Reaction is current at that read, the binding's
-  own Reaction. When the caller is itself a subtemplate its data version
-  registers there too, which is how a replacement of the caller's context
-  as a unit (its own data= call) reaches the props it passed on. Per-key
-  isolation is structural. A binding that reads record.label registers
-  labelVal, a sibling binding reading record.status registers statusVal,
-  and mutating labelVal wakes only the label binding.
+  expression at access time, so source-signal deps register on whichever
+  Reaction is current at that read, the binding's own Reaction. A
+  subtemplate's record under a subtemplate caller also registers the
+  caller's data version, which is how a replacement of the caller's
+  context as a unit (its own data= call) reaches the props it passed on.
+  A snippet's bindings run on the caller's renderer and track that version
+  already. Per-key isolation is structural. A binding that reads
+  record.label registers labelVal, a sibling binding reading record.status
+  registers statusVal, and mutating labelVal wakes only the label binding.
 
   Subtemplates carry the lifecycle layer (clone, createComponent, settings,
   onCreated/etc.) on top of this same propagation. The record is installed
@@ -121,7 +122,7 @@ function unpackBlobData(node, data, evaluator) {
 
 const ABSORB_SET = () => {};
 
-function buildArgsRecord({ node, parentData, lookupExpression, target }) {
+function buildArgsRecord({ node, parentData, evaluator, target, callerDep = null }) {
   // Declared-key collection. Two flavors: static (eager value) and
   // expression (lazy lookup). Parallel arrays avoid an object allocation
   // per declared key.
@@ -142,7 +143,7 @@ function buildArgsRecord({ node, parentData, lookupExpression, target }) {
 
   if (node.data) {
     if (isString(node.data)) {
-      const evaluated = lookupExpression(node.data, parentData);
+      const evaluated = evaluator.lookupExpressionValue(node.data, parentData);
       if (isPlainObject(evaluated)) {
         each(evaluated, (val, key) => declare(key, 's', val));
       }
@@ -176,7 +177,12 @@ function buildArgsRecord({ node, parentData, lookupExpression, target }) {
       enumerable: true,
       get: kinds[i] === 's'
         ? () => val
-        : () => lookupExpression(val, parentData),
+        : callerDep
+        ? () => {
+          callerDep.depend();
+          return evaluator.lookupExpressionValue(val, parentData);
+        }
+        : () => evaluator.lookupExpressionValue(val, parentData),
       set: ABSORB_SET,
     });
   }
@@ -218,12 +224,7 @@ function prepareSnippet({ node, data, self }) {
     });
   }
   self.currentSnippet = snippet;
-  const snippetData = buildArgsRecord({
-    node,
-    parentData: data,
-    lookupExpression: self.lookupExpression,
-    target: data,
-  });
+  const snippetData = buildArgsRecord({ node, parentData: data, evaluator: self.evaluator, target: data });
   return { snippet, snippetData };
 }
 
@@ -273,8 +274,9 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
     const record = buildArgsRecord({
       node,
       parentData,
-      lookupExpression: self.lookupExpression,
+      evaluator: self.evaluator,
       target: instance.data,
+      callerDep: self.callerDep,
     });
     instance.data = record;
   }
@@ -323,9 +325,10 @@ function setupSettingsMirror({ node, data, scope, region, self }) {
 
   self.settingsScope = scope.child();
   self.settingsScope.reaction(region.anchor, () => {
+    self.callerDep?.depend();
     for (const key of settingsKeys) {
       const expr = node.reactiveData[key];
-      settingsProxy[key] = self.lookupExpression(expr, data);
+      settingsProxy[key] = self.evaluator.lookupExpressionValue(expr, data);
     }
   }, { message: 'subtemplate-settings' });
 }
@@ -367,12 +370,12 @@ const templateBlock = defineBlock({
   create({ renderer }) {
     return {
       evaluator: renderer.evaluator,
-      // the caller's lookup, so a passed prop follows the caller's data version too
-      lookupExpression: (expression, data) => renderer.lookupExpression(expression, data),
       subTemplates: renderer.subTemplates,
       snippets: renderer.snippets,
       parentTemplate: renderer.template,
       dataDep: renderer.dataDep,
+      // the data version a passed prop follows when the caller is itself a subtemplate
+      callerDep: renderer.receivesData ? renderer.dataDep : null,
       templateType: null,
       currentTemplateId: null,
       currentSnippet: null,
