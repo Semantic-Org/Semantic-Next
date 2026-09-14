@@ -54,6 +54,9 @@ xx.xx.xxxx
 * **Bug** - Fixed `{#async}` blocks without `{loading}` or `{error}` sections briefly clearing visible content when reactive dependencies changed
 * **Bug** - Fixed `{#async}` blocks showing stale data when reactive dependencies changed rapidly before a previous request resolved
 * **Bug** - Fixed a bound attribute value containing `<` or `>` corrupting server-rendered output — the raw character read as the tag's end, so the element's next binding was emitted as text with a hydration marker inside the tag. Bound attribute values are now escaped with the full HTML entity set
+* **Bug** - Fixed a nested subtemplate rendering empty on the server when only the subtemplate calling it declares it in `subTemplates`. The server clone now resolves `{>name}` through its own map, as the client does
+* **Bug** - Fixed the server handing a subtemplate its caller's whole data context, so a bare `{>name}` call rendered the caller's values on the server and nothing on the client. Both engines now render it from the subtemplate's own settings and state, its `defaultSettings` apply on the server, and `settings` in its callbacks falls back to the host there as documented
+* **Bug** - Fixed a subtemplate mounted with `data=expr` not passing a later replacement of that data on to a nested subtemplate it feeds through props. A prop now follows the caller's data context as a unit, and per-prop reactivity stays as granular as before
 
 ### Reactivity
 * **Bug** - Fixed `instanceof` brand check on `Signal` to use prototype getter instead of class field — ensures cross-realm and prototype-created instances pass `instanceof` reliably.

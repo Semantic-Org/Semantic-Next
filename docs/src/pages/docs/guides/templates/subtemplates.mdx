@@ -59,7 +59,7 @@ Verbose syntax uses the syntax `{> template name=templateName data=someData}` an
 
 ## Inherited Settings
 
-Inside JS callbacks, `settings` falls back to the host component's settings for keys the subtemplate didn't declare. In template expressions only the subtemplate's own declared settings are reactive; pass host settings explicitly to use them in markup.
+Inside JS callbacks, `settings` falls back to the host component's settings for keys the subtemplate didn't declare. In template expressions only the subtemplate's own declared settings are reactive; pass host settings explicitly to use them in markup. A subtemplate's markup never reads its caller's data context, so a bare `{> userProfile}` renders from the subtemplate's own settings and state alone, on the server as on the client.
 
 ```sui
 {> userProfile theme=theme name=user.name}
