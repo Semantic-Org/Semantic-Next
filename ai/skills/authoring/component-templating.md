@@ -344,6 +344,7 @@ Render a separate `defineComponent` (without `tagName`) from inside another temp
 
 **Key rules:**
 - **No inherited data context.** A bare `{>name}` renders from the subtemplate's own `defaultSettings` and `defaultState`, on the server as on the client. Pass what it needs: `{>userProfile theme=theme name=user.name}`
+- **`inheritsData` opts in.** `{>userProfile theme=theme inheritsData}` gives the subtemplate its caller's context the way a snippet has it, settings and state live per key, the call's own props on top
 - **Own `subTemplates`.** Each subtemplate resolves `{>name}` through the map it declares, never its caller's
 - **`settings` in JS callbacks** falls back to the host component's settings for keys the subtemplate did not declare
 
@@ -355,6 +356,7 @@ Render a separate `defineComponent` (without `tagName`) from inside another temp
 | **Shorthand + data** | `{>templateName data=(getData user)}` | Reactive as a unit |
 | **Verbose + data expression** | `{>template name='templateName' data=getData}` | Reactive as a unit |
 | **Verbose + data object** | `{>template name='templateName' data={...}}` | Static, `reactiveData` opts values in |
+| **Inherits data** | `{>templateName prop=value inheritsData}` | The caller's context per key, the props on top |
 
 ```html
 <!-- Shorthand: inline props, each tracked on its own -->
@@ -574,6 +576,7 @@ SUBTEMPLATES
   {>template name='x' data={...}}     verbose (static data)
   {>template name=expr reactiveData={...}}  dynamic + reactive
   {>templateName}                      bare, own settings and state only
+  {>templateName inheritsData}         the caller's context, as a snippet has it
 
 SLOTS
   {>slot}                              default slot

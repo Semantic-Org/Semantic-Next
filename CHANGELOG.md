@@ -15,6 +15,7 @@ xx.xx.xxxx
 * **Feature** - Added `{#fn expression}` directive to pass values as-is without auto-invoking functions — mirrors `{#html}` pattern, useful for passing callbacks through property bindings
 * **Feature** - Added `{#match}` blocks for value-based branching — name a discriminant once and list `{is value}` cases (loose `==`) or `{isExactly value}` cases (strict `===`, to tell `undefined` from `null` or split the falsy set), replacing repetitive `{#if is x 'a'}{else if is x 'b'}` chains
 * **Enhancement** - `{#async}` blocks in both engines are backed by the resource primitive — same behavior, one shared lifecycle, and the lit engine now holds the last value through a rejection like the native engine
+* **Feature** - Added `inheritsData` to subtemplate calls, `{> userProfile theme=theme inheritsData}`, which gives the subtemplate its caller's data context the way a snippet has it, settings and state live per key, with the call's own props on top
 
 ### Reactivity
 * **Enhancement** - `mutate()` on large values now detects changes by tracking writes through a proxy instead of clone-and-compare, so editing one row of a big list costs the writes, not the list. The callback sees a tracked wrapper at that scale (shows as `Proxy(Object)` in the console), and the wrapper is only valid inside the callback. Small values keep the previous snapshot behavior and see the real object

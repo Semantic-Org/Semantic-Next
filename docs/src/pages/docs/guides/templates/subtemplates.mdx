@@ -57,6 +57,14 @@ Verbose syntax uses the syntax `{> template name=templateName data=someData}` an
 }
 ```
 
+### Inheriting the Caller's Context
+
+A subtemplate normally sees only what its call passes. Adding `inheritsData` gives it the caller's data context the way a snippet has it, settings and state live per key and other values as they were when it rendered, with the call's own props on top.
+
+```sui
+{> userProfile theme=theme inheritsData}
+```
+
 ## Inherited Settings
 
 Inside JS callbacks, `settings` falls back to the host component's settings for keys the subtemplate didn't declare. In template expressions only the subtemplate's own declared settings are reactive; pass host settings explicitly to use them in markup. A subtemplate's markup never reads its caller's data context, so a bare `{> userProfile}` renders from the subtemplate's own settings and state alone, on the server as on the client.
