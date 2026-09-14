@@ -29,15 +29,19 @@ const { throwError } = createErrors({ namespace: 'renderer' });
                   attach. Updates re-evaluate name + blob, swap instance
                   if name changed.
 
-  Snippets and subtemplates share the same data-propagation primitive:
-  a lazy-getter record (buildArgsRecord) — a plain object inheriting
+  Snippets and subtemplates share the same data-propagation primitive,
+  a lazy-getter record (buildArgsRecord), a plain object inheriting
   from the parent context, with declared keys defined as native ES
-  getter descriptors. Each reactiveData entry's getter calls
-  evaluator.lookupExpressionValue at access time, so source-signal deps
-  register on whichever Reaction is current at that read — the binding's
-  own Reaction. Per-key isolation is structural: a binding that reads
-  record.label registers labelVal; a sibling binding reading record.status
-  registers statusVal; mutating labelVal wakes only the label binding.
+  getter descriptors. Each reactiveData entry's getter evaluates its
+  expression at access time, so source-signal deps register on whichever
+  Reaction is current at that read, the binding's own Reaction. A
+  subtemplate's record under a subtemplate caller also registers the
+  caller's data version, which is how a replacement of the caller's
+  context as a unit (its own data= call) reaches the props it passed on.
+  A snippet's bindings run on the caller's renderer and track that version
+  already. Per-key isolation is structural. A binding that reads
+  record.label registers labelVal, a sibling binding reading record.status
+  registers statusVal, and mutating labelVal wakes only the label binding.
 
   Subtemplates carry the lifecycle layer (clone, createComponent, settings,
   onCreated/etc.) on top of this same propagation. The record is installed
@@ -118,7 +122,7 @@ function unpackBlobData(node, data, evaluator) {
 
 const ABSORB_SET = () => {};
 
-function buildArgsRecord({ node, parentData, evaluator, target }) {
+function buildArgsRecord({ node, parentData, evaluator, target, callerDep = null }) {
   // Declared-key collection. Two flavors: static (eager value) and
   // expression (lazy lookup). Parallel arrays avoid an object allocation
   // per declared key.
@@ -173,6 +177,11 @@ function buildArgsRecord({ node, parentData, evaluator, target }) {
       enumerable: true,
       get: kinds[i] === 's'
         ? () => val
+        : callerDep
+        ? () => {
+          callerDep.depend();
+          return evaluator.lookupExpressionValue(val, parentData);
+        }
         : () => evaluator.lookupExpressionValue(val, parentData),
       set: ABSORB_SET,
     });
@@ -262,7 +271,13 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
   // with the blob's own descriptors via `extend`, so blob keys read
   // through the same record alongside the declared reactiveData getters.
   if (node?.reactiveData) {
-    const record = buildArgsRecord({ node, parentData, evaluator: self.evaluator, target: instance.data });
+    const record = buildArgsRecord({
+      node,
+      parentData,
+      evaluator: self.evaluator,
+      target: instance.data,
+      callerDep: self.callerDep,
+    });
     instance.data = record;
   }
   else {
@@ -310,6 +325,7 @@ function setupSettingsMirror({ node, data, scope, region, self }) {
 
   self.settingsScope = scope.child();
   self.settingsScope.reaction(region.anchor, () => {
+    self.callerDep?.depend();
     for (const key of settingsKeys) {
       const expr = node.reactiveData[key];
       settingsProxy[key] = self.evaluator.lookupExpressionValue(expr, data);
@@ -358,6 +374,8 @@ const templateBlock = defineBlock({
       snippets: renderer.snippets,
       parentTemplate: renderer.template,
       dataDep: renderer.dataDep,
+      // the data version a passed prop follows when the caller is itself a subtemplate
+      callerDep: renderer.receivesData ? renderer.dataDep : null,
       templateType: null,
       currentTemplateId: null,
       currentSnippet: null,

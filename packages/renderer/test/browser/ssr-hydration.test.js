@@ -568,6 +568,83 @@ describe('SSR hydration — subtemplates', () => {
     expect('secret' in captured).toBe(false);
     expect('rowId' in captured).toBe(false);
   });
+
+  it('hydrates a nested subtemplate that only the middle subtemplate declares', async () => {
+    const inner = defineComponent({ renderingEngine: 'native', template: '<i>inner</i>' });
+    const middle = defineComponent({
+      renderingEngine: 'native',
+      template: '<m>{>inner}</m>',
+      subTemplates: { inner },
+    });
+
+    const el = await ssrAndHydrate({
+      template: '<o>{>middle}</o>',
+      subTemplates: { middle },
+    });
+
+    expect(shadowHTML(el)).toBe('<o><m><i>inner</i></m></o>');
+  });
+
+  it('hydrates a subtemplate nested inside a template mounted with data=', async () => {
+    const part = defineComponent({ renderingEngine: 'native', template: '<i>part sees {name}</i>' });
+    const type = defineComponent({
+      renderingEngine: 'native',
+      template: '<t>type sees {name} · {>part name=name}</t>',
+      subTemplates: { part },
+    });
+
+    const el = await ssrAndHydrate({
+      template: '<div>{>template name=type data=ctx}</div>',
+      defaultState: { ctx: { name: 'ada' } },
+      createComponent: () => ({ type }),
+    });
+
+    expect(shadowHTML(el)).toBe('<div><t>type sees ada · <i>part sees ada</i></t></div>');
+  });
+
+  it('an update through data= after hydration reaches the nested subtemplate', async () => {
+    const part = defineComponent({ renderingEngine: 'native', template: '<i>part sees {name}</i>' });
+    const type = defineComponent({
+      renderingEngine: 'native',
+      template: '<t>type sees {name} · {>part name=name}</t>',
+      subTemplates: { part },
+    });
+
+    const el = await ssrAndHydrate({
+      template: '<div>{>template name=type data=ctx}</div>',
+      defaultState: { ctx: { name: 'ada' } },
+      createComponent: () => ({ type }),
+    });
+
+    let updated = $(el).onNext('updated');
+    el.template.state.ctx.set({ name: 'grace' });
+    await updated;
+    expect(shadowHTML(el)).toBe('<div><t>type sees grace · <i>part sees grace</i></t></div>');
+
+    updated = $(el).onNext('updated');
+    el.template.state.ctx.set({ name: 'lin' });
+    await updated;
+    expect(shadowHTML(el)).toBe('<div><t>type sees lin · <i>part sees lin</i></t></div>');
+  });
+
+  // a server render and a client render of one template can only differ here
+  it('renders a bare subtemplate call to the same bytes on the server and the client', async () => {
+    const inner = defineComponent({ renderingEngine: 'native', template: '<i>inner sees {name}</i>' });
+
+    const hydrated = await ssrAndHydrate({
+      template: '<o>{>inner}</o>',
+      defaultSettings: { name: 'ada' },
+      subTemplates: { inner },
+    });
+
+    const fresh = document.createElement(hydrated.tagName.toLowerCase());
+    const rendered = $(fresh).onNext('rendered');
+    document.body.appendChild(fresh);
+    await rendered;
+
+    expect(shadowHTML(hydrated)).toBe('<o><i>inner sees </i></o>');
+    expect(shadowHTML(fresh)).toBe(shadowHTML(hydrated));
+  });
 });
 
 /*******************************

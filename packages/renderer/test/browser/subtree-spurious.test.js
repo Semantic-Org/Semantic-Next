@@ -1487,6 +1487,62 @@ RENDERING_ENGINES.forEach(engine => {
       });
     });
 
+    describe.skipIf(isLit)('FGR contract: props call with the caller in view', () => {
+      // counts the accessors behind the props, so the probe is the caller's code
+      it('changing the signal behind one prop re-evaluates that prop alone, the other prop and the caller untouched', async () => {
+        let oneCalls = 0;
+        let twoCalls = 0;
+        let siblingCalls = 0;
+        const part = defineComponent({
+          renderingEngine: engine,
+          template: '<span class="one">{one}</span><span class="two">{two}</span>',
+        });
+        const tag = uniqueTag();
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '<span class="sibling">{siblingExpr}</span>{>part one=getOne two=getTwo}',
+          subTemplates: { part },
+          defaultState: { oneVal: 'a', twoVal: 'b', other: 'fixed' },
+          createComponent: ({ state }) => ({
+            getOne: () => {
+              oneCalls++;
+              return state.oneVal.get();
+            },
+            getTwo: () => {
+              twoCalls++;
+              return state.twoVal.get();
+            },
+            siblingExpr: () => {
+              siblingCalls++;
+              return `sibling:${state.other.get()}`;
+            },
+          }),
+        });
+        const el = document.createElement(tag);
+        const rendered = $(el).onNext('rendered');
+        document.body.appendChild(el);
+        await rendered;
+
+        const read = (selector) => el.shadowRoot.querySelector(selector).textContent;
+        expect(read('.one')).toBe('a');
+        expect(read('.two')).toBe('b');
+        const oneAfterRender = oneCalls;
+        const twoAfterRender = twoCalls;
+        const siblingAfterRender = siblingCalls;
+
+        const updated = $(el).onNext('updated');
+        el.template.state.oneVal.set('changed');
+        await updated;
+
+        expect(read('.one')).toBe('changed');
+        expect(read('.two')).toBe('b');
+        expect(oneCalls).toBe(oneAfterRender + 1);
+        expect(twoCalls).toBe(twoAfterRender);
+        expect(siblingCalls).toBe(siblingAfterRender);
+      });
+    });
+
     describe.skipIf(isLit)('FGR contract: subtemplate-inside-each composition (bench-todo)', () => {
       // Same as-mode per-FIELD gap surfaced through a subtemplate boundary.
       // Inside `{#each todo in todos}`, mutating one field of an item fires

@@ -1065,7 +1065,13 @@ export const Template = class Template {
 
   createSubtemplateSettings() {
     const template = this;
-    const parentSettings = this.element?.settings;
+    // the host is the fallback: its element on the client, the root template on the
+    // server where the settings are the data itself
+    let host = this.parentTemplate;
+    while (host?.parentTemplate) {
+      host = host.parentTemplate;
+    }
+    const parentSettings = this.element?.settings ?? host?.settings;
     const ownSettings = {};
     template.settingsVars = new Map();
 

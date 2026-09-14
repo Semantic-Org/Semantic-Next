@@ -1,4 +1,5 @@
 import { TemplateCompiler } from '@semantic-ui/compiler';
+import { defineComponent, renderToString as renderComponent } from '@semantic-ui/component/server';
 import { TemplateHelpers } from '@semantic-ui/templating';
 import { escapeHTML } from '@semantic-ui/utils';
 import { describe, expect, it } from 'vitest';
@@ -903,6 +904,95 @@ describe('subtemplate rendering', () => {
     // Block markers should still be present in the output
     expect(html).toContain(`<!--${BLOCK_MARKER}`);
     expect(stripMarkers(html)).toBe('<div></div>');
+  });
+});
+
+describe('nested subtemplates', () => {
+  let tagCounter = 0;
+  const uniqueTag = () => `server-nested-${++tagCounter}`;
+  const rendered = (Component) => stripMarkers(dsdContent(renderComponent(Component)));
+
+  it('resolves {>name} through the subtemplate that declares it, not the caller', () => {
+    const inner = defineComponent({ template: '<i>inner</i>' });
+    const middle = defineComponent({ template: '<m>{>inner}</m>', subTemplates: { inner } });
+    const Outer = defineComponent({
+      tagName: uniqueTag(),
+      template: '<o>{>middle}</o>',
+      subTemplates: { middle },
+    });
+    expect(rendered(Outer)).toBe('<o><m><i>inner</i></m></o>');
+  });
+
+  it('renders a subtemplate nested inside a template mounted with data=', () => {
+    const part = defineComponent({ template: '<i>part sees {name}</i>' });
+    const type = defineComponent({
+      template: '<t>type sees {name} · {>part name=name}</t>',
+      subTemplates: { part },
+    });
+    const Mounted = defineComponent({
+      tagName: uniqueTag(),
+      template: '<div>{>template name=type data=ctx}</div>',
+      defaultState: { ctx: { name: 'ada' } },
+      createComponent: () => ({ type }),
+    });
+    expect(rendered(Mounted)).toBe('<div><t>type sees ada · <i>part sees ada</i></t></div>');
+  });
+});
+
+describe('subtemplate data context', () => {
+  let tagCounter = 0;
+  const uniqueTag = () => `server-context-${++tagCounter}`;
+  const rendered = (Component) => stripMarkers(dsdContent(renderComponent(Component)));
+
+  it("renders a bare {>name} call from the subtemplate's own settings, not the caller's", () => {
+    const inner = defineComponent({ template: '<i>{name}</i>', defaultSettings: { name: 'own' } });
+    const Outer = defineComponent({
+      tagName: uniqueTag(),
+      template: '<o>{>inner}</o>',
+      defaultSettings: { name: 'ada' },
+      subTemplates: { inner },
+    });
+    expect(rendered(Outer)).toBe('<o><i>own</i></o>');
+  });
+
+  it('shows a bare call nothing of the caller when the subtemplate declares no settings', () => {
+    const inner = defineComponent({ template: '<i>inner sees {name}</i>' });
+    const Outer = defineComponent({
+      tagName: uniqueTag(),
+      template: '<o>{>inner}</o>',
+      defaultSettings: { name: 'ada' },
+      subTemplates: { inner },
+    });
+    expect(rendered(Outer)).toBe('<o><i>inner sees </i></o>');
+  });
+
+  it('passes a caller value through an explicit prop', () => {
+    const inner = defineComponent({ template: '<i>inner sees {name}</i>' });
+    const Outer = defineComponent({
+      tagName: uniqueTag(),
+      template: '<o>{>inner name=name}</o>',
+      defaultSettings: { name: 'ada' },
+      subTemplates: { inner },
+    });
+    expect(rendered(Outer)).toBe('<o><i>inner sees ada</i></o>');
+  });
+
+  it("gives JS callbacks the subtemplate's own settings, falling back to the host for the rest", () => {
+    const reader = defineComponent({
+      template: '<i>{ownTheme}|{hostLabel}</i>',
+      defaultSettings: { theme: 'light' },
+      createComponent: ({ settings }) => ({
+        ownTheme: () => settings.theme,
+        hostLabel: () => settings.parentLabel,
+      }),
+    });
+    const Host = defineComponent({
+      tagName: uniqueTag(),
+      template: '<o>{>reader}</o>',
+      defaultSettings: { parentLabel: 'from-host' },
+      subTemplates: { reader },
+    });
+    expect(rendered(Host)).toBe('<o><i>light|from-host</i></o>');
   });
 });
 

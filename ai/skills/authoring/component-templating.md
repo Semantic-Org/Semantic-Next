@@ -342,19 +342,25 @@ Inline reusable template fragments. Defined with `{#snippet}`, invoked with `{>n
 
 Render a separate `defineComponent` (without `tagName`) from inside another template. Must be registered via `subTemplates` in `defineComponent`.
 
+**Key rules:**
+- **No inherited data context.** A bare `{>name}` renders from the subtemplate's own `defaultSettings` and `defaultState`, on the server as on the client. Pass what it needs: `{>userProfile theme=theme name=user.name}`
+- **Own `subTemplates`.** Each subtemplate resolves `{>name}` through the map it declares, never its caller's
+- **`settings` in JS callbacks** falls back to the host component's settings for keys the subtemplate did not declare
+
 ### Syntax Forms
 
 | Form | Syntax | Data reactivity |
 |------|--------|-----------------|
-| **Shorthand** | `{>templateName prop=value}` | Reactive by default |
-| **Shorthand + data** | `{>templateName data=(getData user)}` | Reactive by default |
-| **Verbose** | `{>template name='templateName' data={...}}` | Non-reactive by default |
+| **Shorthand** | `{>templateName prop=value}` | Reactive per prop |
+| **Shorthand + data** | `{>templateName data=(getData user)}` | Reactive as a unit |
+| **Verbose + data expression** | `{>template name='templateName' data=getData}` | Reactive as a unit |
+| **Verbose + data object** | `{>template name='templateName' data={...}}` | Static, `reactiveData` opts values in |
 
 ```html
-<!-- Shorthand: inline data, reactive by default -->
+<!-- Shorthand: inline props, each tracked on its own -->
 {>userProfile name=(getFullname user.id) age=user.age}
 
-<!-- Verbose: explicit name + data object, non-reactive -->
+<!-- Verbose: explicit name + data object, static -->
 {>template name='userProfile' data={name: user.name}}
 
 <!-- Dynamic template name (verbose only) -->
@@ -563,9 +569,11 @@ SNIPPETS
   {>name key=value}                    invoke with data
 
 SUBTEMPLATES
-  {>templateName prop=val}             shorthand (reactive data)
-  {>template name='x' data={...}}     verbose (non-reactive data)
+  {>templateName prop=val}             shorthand (reactive per prop)
+  {>templateName data=expr}            shorthand (reactive as a unit)
+  {>template name='x' data={...}}     verbose (static data)
   {>template name=expr reactiveData={...}}  dynamic + reactive
+  {>templateName}                      bare, own settings and state only
 
 SLOTS
   {>slot}                              default slot
