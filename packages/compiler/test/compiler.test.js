@@ -1472,6 +1472,31 @@ describe('TemplateCompiler', () => {
       expect(shorthand[0].reactiveData ?? {}).toEqual(verbose[0].reactiveData ?? {});
     });
 
+    it('lifts a bare inheritsData onto the node, never into the data', () => {
+      const compiler = new TemplateCompiler();
+      const flagged = { type: 'template', name: "'child'", reactiveData: { baz: 'bar' }, inheritsData: true };
+      expect(compiler.compile(`{>child baz=bar inheritsData}`)).toEqual([flagged]);
+      expect(compiler.compile(`{>child inheritsData baz=bar}`)).toEqual([flagged]);
+      expect(compiler.compile(`{>child inheritsData}`)).toEqual([
+        { type: 'template', name: "'child'", reactiveData: {}, inheritsData: true },
+      ]);
+    });
+
+    it('lifts inheritsData=true onto the node in both notations', () => {
+      const compiler = new TemplateCompiler();
+      expect(compiler.compile(`{>child inheritsData=true baz=bar}`)).toEqual([
+        { type: 'template', name: "'child'", reactiveData: { baz: 'bar' }, inheritsData: true },
+      ]);
+      expect(compiler.compile(`{>template name='child' inheritsData=true data={a: b}}`)).toEqual([
+        { type: 'template', name: "'child'", data: { a: 'b' }, inheritsData: true },
+      ]);
+    });
+
+    it('leaves a call without inheritsData without the flag', () => {
+      const compiler = new TemplateCompiler();
+      expect(compiler.compile(`{>child baz=bar}`)[0]).not.toHaveProperty('inheritsData');
+    });
+
     it('should compile a template with a partial and reactive data', () => {
       const compiler = new TemplateCompiler();
       const template = `
