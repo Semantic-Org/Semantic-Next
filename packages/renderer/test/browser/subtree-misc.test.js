@@ -823,5 +823,60 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('Updated');
       });
     });
+
+    /*******************************
+     Subtemplate under a data= unit
+    *******************************/
+
+    describe('subtemplate nested under a data= unit', () => {
+      it('an update through data=expr reaches a nested subtemplate fed by props, and nothing outside the unit', async () => {
+        const tag = uniqueTag();
+        let outsideCount = 0;
+        const part = defineComponent({
+          renderingEngine: engine,
+          template: '<i class="part">{name}</i>',
+        });
+        const type = defineComponent({
+          renderingEngine: engine,
+          template: '<t><span class="type">{name}</span>{>part name=name}</t>',
+          subTemplates: { part },
+        });
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '<span class="outside">{outsideSpy}</span>{>template name=type data=ctx}',
+          defaultState: { ctx: { name: 'ada' } },
+          createComponent: () => ({
+            type,
+            outsideSpy: () => {
+              outsideCount++;
+              return 'outside';
+            },
+          }),
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        const read = (selector) => el.shadowRoot.querySelector(selector).textContent;
+        expect(read('.type')).toBe('ada');
+        expect(read('.part')).toBe('ada');
+        const countAfterRender = outsideCount;
+
+        el.template.state.ctx.set({ name: 'grace' });
+        await waitForUpdate(el);
+
+        expect(read('.type')).toBe('grace');
+        expect(read('.part')).toBe('grace');
+
+        // a second replacement, so a one-time re-fire cannot pass for the contract
+        el.template.state.ctx.set({ name: 'lin' });
+        await waitForUpdate(el);
+
+        expect(read('.type')).toBe('lin');
+        expect(read('.part')).toBe('lin');
+        expect(outsideCount).toBe(countAfterRender);
+      });
+    });
   }); // describe(engine)
 }); // RENDERING_ENGINES.forEach

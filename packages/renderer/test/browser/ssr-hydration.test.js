@@ -602,6 +602,31 @@ describe('SSR hydration — subtemplates', () => {
     expect(shadowHTML(el)).toBe('<div><t>type sees ada · <i>part sees ada</i></t></div>');
   });
 
+  it('an update through data= after hydration reaches the nested subtemplate', async () => {
+    const part = defineComponent({ renderingEngine: 'native', template: '<i>part sees {name}</i>' });
+    const type = defineComponent({
+      renderingEngine: 'native',
+      template: '<t>type sees {name} · {>part name=name}</t>',
+      subTemplates: { part },
+    });
+
+    const el = await ssrAndHydrate({
+      template: '<div>{>template name=type data=ctx}</div>',
+      defaultState: { ctx: { name: 'ada' } },
+      createComponent: () => ({ type }),
+    });
+
+    let updated = $(el).onNext('updated');
+    el.template.state.ctx.set({ name: 'grace' });
+    await updated;
+    expect(shadowHTML(el)).toBe('<div><t>type sees grace · <i>part sees grace</i></t></div>');
+
+    updated = $(el).onNext('updated');
+    el.template.state.ctx.set({ name: 'lin' });
+    await updated;
+    expect(shadowHTML(el)).toBe('<div><t>type sees lin · <i>part sees lin</i></t></div>');
+  });
+
   // a server render and a client render of one template can only differ here
   it('renders a bare subtemplate call to the same bytes on the server and the client', async () => {
     const inner = defineComponent({ renderingEngine: 'native', template: '<i>inner sees {name}</i>' });
