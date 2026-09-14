@@ -145,6 +145,7 @@ class TemplateCompiler {
     VERBOSE_KEYWORD: /^(template|snippet)\W/g,
     VERBOSE_PROPERTIES: /(\w+)\s*=\s*(((?!\w+\s*=).)+)/gms,
     STANDARD: /(\w+)\s*=\s*((?:(?!\n|$|\w+\s*=).)+)/g,
+    INHERITS_DATA: /(^|\s)inheritsData(?:\s*=\s*true)?(?=\s|$)/, // {>name inheritsData} or inheritsData=true
     DATA_OBJECT: /(\w+)\s*:\s*([^,}]+)/g, // parses { one: 'two' }
     SINGLE_QUOTES: /\'/g,
     AS_KEYWORD: /\bas\b/,
@@ -763,6 +764,13 @@ class TemplateCompiler {
     // quicker to compile regexp once
     const regExp = TemplateCompiler.templateRegExp;
     let templateInfo = {};
+
+    // a flag on the node, never a key in the data, lifted before the args are matched
+    const inheritsData = regExp.INHERITS_DATA.test(expression);
+    if (inheritsData) {
+      expression = expression.replace(regExp.INHERITS_DATA, '$1');
+      templateInfo.inheritsData = true;
+    }
 
     regExp.VERBOSE_KEYWORD.lastIndex = 0;
     if (regExp.VERBOSE_KEYWORD.test(expression)) {

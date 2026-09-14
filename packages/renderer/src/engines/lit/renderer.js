@@ -428,7 +428,11 @@ export class LitRenderer {
   }
 
   evaluateSubTemplate(node, data = {}) {
-    const templateData = this.getPackedNodeData(node, data);
+    let templateData = this.getPackedNodeData(node, data);
+    // the directive unpacks every value by calling it, so inherited keys are packed as getters too
+    if (node.inheritsData && isPlainObject(templateData)) {
+      templateData = { ...mapObject(data, (value) => () => value), ...templateData };
+    }
     return renderTemplate({
       subTemplates: this.subTemplates,
       templateName: node.name,
