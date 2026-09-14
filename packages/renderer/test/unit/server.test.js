@@ -977,6 +977,19 @@ describe('subtemplate data context', () => {
     expect(rendered(Outer)).toBe('<o><i>inner sees ada</i></o>');
   });
 
+  it("renders an inheritsData call from the caller's context with its own props on top", () => {
+    const inner = defineComponent({ template: '<i>{name}|{visits}|{baz}</i>' });
+    const Outer = defineComponent({
+      tagName: uniqueTag(),
+      template: '<o>{>inner baz=extra inheritsData}</o>',
+      defaultSettings: { name: 'ada' },
+      defaultState: { visits: 1 },
+      createComponent: () => ({ extra: 'passed' }),
+      subTemplates: { inner },
+    });
+    expect(rendered(Outer)).toBe('<o><i>ada|1|passed</i></o>');
+  });
+
   it("gives JS callbacks the subtemplate's own settings, falling back to the host for the rest", () => {
     const reader = defineComponent({
       template: '<i>{ownTheme}|{hostLabel}</i>',

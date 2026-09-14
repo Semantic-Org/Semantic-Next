@@ -878,5 +878,60 @@ RENDERING_ENGINES.forEach(engine => {
         expect(outsideCount).toBe(countAfterRender);
       });
     });
+
+    /*******************************
+       Subtemplate with inheritsData
+    *******************************/
+
+    describe('subtemplate with inheritsData', () => {
+      const define = (tag, template) => {
+        const inner = defineComponent({
+          renderingEngine: engine,
+          template: '<i>{name}|{visits}|{baz}</i>',
+        });
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template,
+          defaultSettings: { name: 'ada' },
+          defaultState: { visits: 1 },
+          createComponent: () => ({ extra: 'passed' }),
+          subTemplates: { inner },
+        });
+      };
+
+      it("reads the caller's context with its own props on top", async () => {
+        const tag = uniqueTag();
+        define(tag, '<o>{>inner baz=extra inheritsData}</o>');
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        expect(shadowText(el)).toBe('<o><i>ada|1|passed</i></o>');
+      });
+
+      it('follows an inherited signal key as it changes', async () => {
+        const tag = uniqueTag();
+        define(tag, '<o>{>inner baz=extra inheritsData}</o>');
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        el.template.state.visits.set(2);
+        await waitForUpdate(el);
+
+        expect(shadowText(el)).toBe('<o><i>ada|2|passed</i></o>');
+      });
+
+      it('leaves a call without the flag on its own context', async () => {
+        const tag = uniqueTag();
+        define(tag, '<o>{>inner baz=extra}</o>');
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        expect(shadowText(el)).toBe('<o><i>||passed</i></o>');
+      });
+    });
   }); // describe(engine)
 }); // RENDERING_ENGINES.forEach

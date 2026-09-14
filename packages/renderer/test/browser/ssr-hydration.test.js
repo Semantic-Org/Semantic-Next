@@ -627,6 +627,26 @@ describe('SSR hydration — subtemplates', () => {
     expect(shadowHTML(el)).toBe('<div><t>type sees lin · <i>part sees lin</i></t></div>');
   });
 
+  it('renders an inheritsData subtemplate call to the same bytes on the server and the client', async () => {
+    const inner = defineComponent({ renderingEngine: 'native', template: '<i>{name}|{visits}|{baz}</i>' });
+
+    const hydrated = await ssrAndHydrate({
+      template: '<o>{>inner baz=extra inheritsData}</o>',
+      defaultSettings: { name: 'ada' },
+      defaultState: { visits: 1 },
+      createComponent: () => ({ extra: 'passed' }),
+      subTemplates: { inner },
+    });
+
+    const fresh = document.createElement(hydrated.tagName.toLowerCase());
+    const rendered = $(fresh).onNext('rendered');
+    document.body.appendChild(fresh);
+    await rendered;
+
+    expect(shadowHTML(hydrated)).toBe('<o><i>ada|1|passed</i></o>');
+    expect(shadowHTML(fresh)).toBe(shadowHTML(hydrated));
+  });
+
   // a server render and a client render of one template can only differ here
   it('renders a bare subtemplate call to the same bytes on the server and the client', async () => {
     const inner = defineComponent({ renderingEngine: 'native', template: '<i>inner sees {name}</i>' });

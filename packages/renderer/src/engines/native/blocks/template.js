@@ -270,20 +270,22 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
   // the instance's data ref. `target: instance.data` seeds the record
   // with the blob's own descriptors via `extend`, so blob keys read
   // through the same record alongside the declared reactiveData getters.
-  if (node?.reactiveData) {
-    const record = buildArgsRecord({
+  // With inheritsData the record is built over the caller's context, as
+  // a snippet's is, the blob on top.
+  const blob = instance.data;
+  if (node?.reactiveData || node?.inheritsData) {
+    instance.data = buildArgsRecord({
       node,
       parentData,
       evaluator: self.evaluator,
-      target: instance.data,
+      target: node.inheritsData ? extend({}, parentData, blob) : blob,
       callerDep: self.callerDep,
     });
-    instance.data = record;
   }
-  else {
+  if (!Object.hasOwn(instance.data, DECLARED_KEYS)) {
     // blob keys recorded before setDataContext merges the full context
     // onto this object — reading them later would leak it into the layer
-    Object.defineProperty(instance.data, DECLARED_KEYS, { value: Object.keys(instance.data) });
+    Object.defineProperty(instance.data, DECLARED_KEYS, { value: Object.keys(blob) });
   }
 
   nonreactive(() => instance.initialize());

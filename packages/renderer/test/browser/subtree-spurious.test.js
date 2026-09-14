@@ -583,6 +583,55 @@ RENDERING_ENGINES.forEach(engine => {
       });
     });
 
+    describe('inherited keys per-key granularity', () => {
+      // the snippet probe above, through a subtemplate that inherits its caller's context
+      it('changing one inherited signal does not fire markers in adjacent expressions', async () => {
+        let labelEvalCount = 0;
+        let statusEvalCount = 0;
+        const tag = uniqueTag();
+
+        const card = defineComponent({
+          renderingEngine: engine,
+          template: '<span>{markLabel}{label}</span><span>{markStatus}{status}</span>',
+        });
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{>card inheritsData}',
+          subTemplates: { card },
+          defaultState: { label: 'hello', status: 'active' },
+          createComponent: () => ({
+            markLabel: () => {
+              labelEvalCount++;
+              return '';
+            },
+            markStatus: () => {
+              statusEvalCount++;
+              return '';
+            },
+          }),
+        });
+
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+
+        expect(shadowText(el)).toContain('hello');
+        expect(shadowText(el)).toContain('active');
+        const labelCountAfterRender = labelEvalCount;
+        const statusCountAfterRender = statusEvalCount;
+
+        const updated = $(el).onNext('updated');
+        el.template.state.label.set('changed');
+        await updated;
+
+        expect(shadowText(el)).toContain('changed');
+        expect(shadowText(el)).toContain('active');
+        expect(labelEvalCount).toBe(labelCountAfterRender);
+        expect(statusEvalCount).toBe(statusCountAfterRender);
+      });
+    });
+
     describe.skipIf(isLit)('reactiveData per-key granularity', () => {
       // Per-key isolation on reactiveData: changing one field's source
       // re-fires only bindings that read that field. Marker bindings

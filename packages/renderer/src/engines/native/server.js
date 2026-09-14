@@ -659,8 +659,9 @@ export class ServerRenderer {
       }
 
       if (template) {
-        // a subtemplate receives the call's args and nothing of the caller's context, as on the client
-        const templateData = this.resolveNodeData(node, data, {});
+        // a subtemplate receives the call's args and nothing of the caller's context, as on the
+        // client. with inheritsData it starts from a snippet's context instead
+        const templateData = this.resolveNodeData(node, data, node.inheritsData ? childContext(data) : {});
         html += this.renderSubtemplate(template, templateData);
       }
     }
