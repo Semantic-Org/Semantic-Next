@@ -672,9 +672,9 @@ export class ServerRenderer {
     // use Template.clone().initialize() which will create another ServerRenderer.
     // This is the correct path — the Template handles everything.
     if (isFunction(template.clone)) {
+      // the clone keeps its own subTemplates, the map a nested {>name} resolves through
       const instance = template.clone({
         data,
-        subTemplates: this.subTemplates,
         parentTemplate: this.template,
       });
       instance.renderOptions = { markers: this.markers, text: this.text, slots: this.slots };
