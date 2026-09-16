@@ -33,6 +33,8 @@ export interface ValueProtocol<Value, Key extends number | bigint | string> {
   readonly ordered: boolean;
   /** The seven classes, so a schema that names one registers them all */
   readonly family: readonly Function[];
+  /** `Duration` alone declares it. `toJSON()` after the refusal a length counting months or years earns, `calendarDuration` */
+  encode?(value: Value): string;
   /**
    * `DateTime` alone declares it. A calendar day reads as that whole day in the configured zone, a
    * half-open pair. Undefined for any other operand, `noZone` with no zone configured

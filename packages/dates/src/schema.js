@@ -11,8 +11,9 @@ import { Time, time } from './time.js';
 /*
   the value protocol, what a schema reads off a class to store, compare and order its values:
   the kind's name, a strict read for the wire and a read for a write, a primitive key injective
-  over equals(), whether the kind orders, and the family that registers together. the reads throw
-  this library's own refusal. attached here, in a subpath of its own, so the bare entry has none
+  over equals(), whether the kind orders, and the family that registers together. a kind whose
+  wire form is not always toJSON() declares encode, and the instant kind declares span, the read
+  of a calendar day as a whole day. the reads throw this library's own refusal. attached here, in a subpath of its own, so the bare entry has none
   of it and a schema that names one class is the whole opt-in
 */
 
@@ -34,7 +35,7 @@ const clock = (value) =>
 
 // a month has no length without the calendar it was measured against, and the calendar does not
 // travel, so a stored or compared length is written in days and below
-const length = (value) => {
+const assertLength = (value) => {
   if (value.years || value.months) {
     refuse('calendarDuration', String(value), {
       explanation: isDevelopment
@@ -42,8 +43,10 @@ const length = (value) => {
         : 0,
     });
   }
-  return value.toMilliseconds();
+  return value;
 };
+
+const length = (value) => assertLength(value).toMilliseconds();
 
 const text = (value) => value.toJSON();
 
@@ -72,7 +75,9 @@ declare(DateTime, 'datetime', datetime, instant, true, {
 });
 declare(CalendarDate, 'date', date, day, true);
 declare(Time, 'time', time, clock, true);
-declare(Duration, 'duration', duration, length, true);
+declare(Duration, 'duration', duration, length, true, {
+  encode: (value) => assertLength(value).toJSON(),
+});
 declare(DateRange, 'dateRange', dateRange, text, false);
 declare(DateTimeRange, 'datetimeRange', datetimeRange, text, false);
 declare(TimeRange, 'timeRange', timeRange, text, false);

@@ -255,7 +255,8 @@ DateRange[VALUE].ordered;                        // false, a span has no single 
 `parse` reads what the factory reads and `decode` reads the wire form back, both throwing the coded
 refusal for the rest. `key` is a primitive that is equal exactly when `equals()` holds and orders as the
 kind orders. A duration counting months or years has no key, since their length depends on a calendar
-that does not travel. `family` lists the seven classes, so a schema that names one registers them all.
+that does not travel. `family` lists the seven classes, so a schema that names one registers them all. `Duration` alone declares `encode`,
+the wire form after the same refusal, so a month never reaches a column.
 On `DateTime` only, `span(day)` reads a calendar day as that whole day in the configured zone, a
 half-open pair for a query, and refuses `noZone` when none is configured.
 
