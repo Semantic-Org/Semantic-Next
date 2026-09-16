@@ -48,7 +48,7 @@ Every class declares one frozen object.
 | family | array | The seven classes, so a schema that names one registers them all |
 | encode | function | On `Duration` only. `toJSON()` after the refusal a length counting months or years earns, so a month never reaches a column |
 | summable | boolean | On `Duration` only. Lengths add, so a sum over a column of them totals the key's milliseconds |
-| span | function | On `DateTime` only. A calendar day reads as that whole day in the configured zone, a half-open pair |
+| condition | function | On `DateTime` only. What a field of the kind means for a calendar day, per operator: an `$or` of operator maps on the field, the day half-open in the configured zone |
 
 ### parse
 
@@ -122,34 +122,34 @@ Duration[VALUE].key(months(2)); // throws calendarDuration
 DateRange[VALUE].key(dateRange('2026-09-01', '2026-09-07')); // '2026-09-01/2026-09-07'
 ```
 
-### span
+### condition
 
 ```javascript
-DateTime[VALUE].span(operand);
+DateTime[VALUE].condition(operator, operand);
 ```
 
-A calendar day read against an instant is that whole day in the configured zone. The pair is half-open, midnight through the next midnight, so a day across a daylight saving change is 23 or 25 hours as the calendar says. Any other operand reads as `undefined`, and no configured zone refuses `noZone`, since the client and the server must read one day.
+What a field of instants means for a calendar day. The day is that whole day in the configured zone, half-open from midnight to the next midnight, so a day across a daylight saving change is 23 or 25 hours as the calendar says. Each operator reads it in those terms: `eq` is the day, `$ne` its complement, `$gte` and `$lt` bound at its first instant, `$lte` and `$gt` at the next day's. A data layer splices the answer into the field's condition and pushes it to an engine as two bounds. Any other operator or operand answers `undefined`, so the data layer reads the operand through `parse` instead, and no configured zone refuses `noZone`, since the client and the server must read one day.
 
 #### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
+| operator | string | `eq`, `$ne`, `$gte`, `$gt`, `$lt` or `$lte` |
 | operand | CalendarDate | The day |
 
 #### Returns
 
-`[start, end]` as two `DateTime` values, or `undefined`.
+An array of operator maps whose `$or` is the condition, one map where one suffices, each bound a `DateTime`. `undefined` when the kind has no answer.
 
 #### Usage
 
 ```javascript
 configure({ zone: 'America/New_York' });
 
-const [start, end] = DateTime[VALUE].span(date('2026-03-08'));
-start.toString(); // '2026-03-08T05:00:00.000Z'
-end.toString(); // '2026-03-09T04:00:00.000Z'
-start.until(end, 'hours'); // 23
-DateTime[VALUE].span('2026-03-08'); // undefined
+DateTime[VALUE].condition('eq', date('2026-03-08')); // [{ $gte: 2026-03-08T05:00:00.000Z, $lt: 2026-03-09T04:00:00.000Z }]
+DateTime[VALUE].condition('$ne', date('2026-03-08')); // [{ $lt: 2026-03-08T05:00:00.000Z }, { $gte: 2026-03-09T04:00:00.000Z }]
+DateTime[VALUE].condition('$gt', date('2026-03-08')); // [{ $gte: 2026-03-09T04:00:00.000Z }]
+DateTime[VALUE].condition('eq', '2026-03-08'); // undefined
 ```
 
 #### Example

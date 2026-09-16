@@ -38,10 +38,13 @@ export interface ValueProtocol<Value, Key extends number | bigint | string> {
   /** `Duration` alone declares it. A length adds, so a sum over a column of them totals the key's milliseconds */
   readonly summable?: boolean;
   /**
-   * `DateTime` alone declares it. A calendar day reads as that whole day in the configured zone, a
-   * half-open pair. Undefined for any other operand, `noZone` with no zone configured
+   * `DateTime` alone declares it. What a field of this kind means for an operand of another kind,
+   * a calendar day: an `$or` of operator maps on the field, one map where one suffices, the day
+   * half-open in the configured zone. `eq`, `$ne`, `$gte`, `$gt`, `$lt` and `$lte` answer for a
+   * day. Anything else is undefined, so a data layer reads the operand through `parse` instead.
+   * `noZone` with no zone configured
    */
-  span?(operand: unknown): [DateTime, DateTime] | undefined;
+  condition?(operator: string, operand: unknown): Array<Record<string, DateTime>> | undefined;
 }
 
 export interface Declared<Value, Key extends number | bigint | string> {
