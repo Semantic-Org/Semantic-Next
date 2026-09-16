@@ -5,7 +5,7 @@ title: Dates - Datetime
 icon: clock
 description: API reference for datetime, an exact moment with a zone to read it in
 package: "@semantic-ui/dates"
-methods: [datetime, now, startOfToday, endOfToday, plus, minus, set, at, in, startOf, endOf, round, floor, ceil, next, previous, equals, isBefore, isAfter, isSame, isPast, isFuture, isToday, isTomorrow, isYesterday, isWeekend, isWeekday, isLeapYear, until, since, to, range, format, formatRelative, toString, toJSON, toJSDate, toTemporal, valueOf]
+methods: [datetime, now, startOfToday, endOfToday, plus, minus, set, at, in, startOf, endOf, round, floor, ceil, next, previous, equals, isBefore, isAfter, isSame, isPast, isFuture, isToday, isTomorrow, isYesterday, isWeekend, isWeekday, isLeapYear, until, since, to, range, format, formatRelative, toString, toJSON, toJSDate, toTemporal, valueOf, getTime, getTimezoneOffset, toISOString, toLocaleString, toLocaleDateString, toLocaleTimeString]
 ---
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
@@ -162,6 +162,7 @@ The parts are real properties, so a value prints them in a console without a cli
 | zone | string | The canonical zone id, `'America/New_York'` |
 | offset | string | The UTC offset in effect, `'-04:00'` |
 | epoch | number | Epoch milliseconds |
+| epochNanoseconds | bigint | The exact instant as epoch nanoseconds, the key two datetimes a nanosecond apart still tell apart on |
 | quarter | number | 1 through 4 |
 | dayOfYear | number | |
 | weekOfYear | number | ISO week number |
@@ -1280,3 +1281,39 @@ later - earlier; // 300000
 later > earlier; // true
 [later, earlier].sort((a, b) => a - b)[0] === earlier; // true
 ```
+
+## Date Reads
+
+What a `Date` caller reads, so code that never heard of Temporal keeps working on a `DateTime`. `Date`'s own conventions hold, `getMonth()` counts from 0, `getDay()` gives sunday as 0, `getTimezoneOffset()` is minutes west of UTC. The local family answers in the value's zone, the UTC family in UTC.
+
+| Method | Description |
+|--------|-------------|
+| getTime | Epoch milliseconds, the same number `valueOf()` gives |
+| getFullYear, getMonth, getDate, getDay | The date in the value's zone, month from 0, sunday as 0 |
+| getHours, getMinutes, getSeconds, getMilliseconds | The clock in the value's zone |
+| getTimezoneOffset | Minutes west of UTC in the value's zone, 240 for New York in September |
+| getUTCFullYear, getUTCMonth, getUTCDate, getUTCDay, getUTCHours, getUTCMinutes, getUTCSeconds, getUTCMilliseconds | The same instant read in UTC |
+| toISOString | `Date`'s millisecond form, `'2026-09-06T18:30:15.250Z'`, where `toString()` keeps finer digits |
+| toLocaleString, toLocaleDateString, toLocaleTimeString | As `Date` prints them, in the value's zone unless the options name one |
+
+Every setter a `Date` has refuses with `immutable`, since a `DateTime` never changes in place. `set()` and `plus()` give a new value.
+
+#### Usage
+
+```javascript
+const moment = datetime('2026-09-06T14:30:15.250', 'America/New_York');
+
+moment.getTime(); // 1788719415250
+moment.getMonth(); // 8
+moment.getDay(); // 0
+moment.getHours(); // 14
+moment.getUTCHours(); // 18
+moment.getTimezoneOffset(); // 240
+moment.toISOString(); // '2026-09-06T18:30:15.250Z'
+moment.toLocaleTimeString('en-US'); // '2:30:15 PM'
+moment.setHours(9); // throws immutable
+```
+
+#### Example
+
+<PlaygroundExample id="dates-datetime-date-reads" direction="horizontal"></PlaygroundExample>

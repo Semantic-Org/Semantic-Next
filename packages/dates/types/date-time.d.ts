@@ -180,6 +180,63 @@ export class DateTime {
    * @see https://next.semantic-ui.com/docs/api/dates/datetime#valueof
    */
   valueOf(): number;
+
+  /**
+   * The exact instant as epoch nanoseconds, the key two datetimes a nanosecond apart still tell apart on
+   * @see https://next.semantic-ui.com/docs/api/dates/datetime#properties
+   */
+  readonly epochNanoseconds: bigint;
+
+  /**
+   * What a `Date` caller reads, with `Date`'s own conventions: `getMonth()` from 0, `getDay()` with
+   * sunday as 0, `getTimezoneOffset()` in minutes west of UTC. The local family answers in the value's
+   * zone, the UTC family in UTC
+   * @see https://next.semantic-ui.com/docs/api/dates/datetime#date-reads
+   */
+  getTime(): number;
+  getFullYear(): number;
+  getMonth(): number;
+  getDate(): number;
+  getDay(): number;
+  getHours(): number;
+  getMinutes(): number;
+  getSeconds(): number;
+  getMilliseconds(): number;
+  getTimezoneOffset(): number;
+  getUTCFullYear(): number;
+  getUTCMonth(): number;
+  getUTCDate(): number;
+  getUTCDay(): number;
+  getUTCHours(): number;
+  getUTCMinutes(): number;
+  getUTCSeconds(): number;
+  getUTCMilliseconds(): number;
+  /** `Date`'s millisecond form, where `toString()` keeps the finer digits a value has */
+  toISOString(): string;
+  /** As `Date` prints it, in the value's zone unless the options name one */
+  toLocaleString(locales?: Locale, options?: Intl.DateTimeFormatOptions): string;
+  toLocaleDateString(locales?: Locale, options?: Intl.DateTimeFormatOptions): string;
+  toLocaleTimeString(locales?: Locale, options?: Intl.DateTimeFormatOptions): string;
+
+  /**
+   * Every setter a `Date` has refuses with `immutable`. `set()` and `plus()` give a new value
+   * @see https://next.semantic-ui.com/docs/api/dates/datetime#date-reads
+   */
+  setTime(value: number): never;
+  setFullYear(year: number, month?: number, date?: number): never;
+  setMonth(month: number, date?: number): never;
+  setDate(date: number): never;
+  setHours(hours: number, minutes?: number, seconds?: number, milliseconds?: number): never;
+  setMinutes(minutes: number, seconds?: number, milliseconds?: number): never;
+  setSeconds(seconds: number, milliseconds?: number): never;
+  setMilliseconds(milliseconds: number): never;
+  setUTCFullYear(year: number, month?: number, date?: number): never;
+  setUTCMonth(month: number, date?: number): never;
+  setUTCDate(date: number): never;
+  setUTCHours(hours: number, minutes?: number, seconds?: number, milliseconds?: number): never;
+  setUTCMinutes(minutes: number, seconds?: number, milliseconds?: number): never;
+  setUTCSeconds(seconds: number, milliseconds?: number): never;
+  setUTCMilliseconds(milliseconds: number): never;
 }
 
 /**

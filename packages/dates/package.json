@@ -7,7 +7,9 @@
   "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./src/schema.js"
+  ],
   "engines": {
     "node": ">=26"
   },
@@ -20,6 +22,10 @@
       "import": "./src/index.js",
       "browser": "./dist/bundle/dates.min.js",
       "importmap": "./dist/cdn/dates.min.js"
+    },
+    "./schema": {
+      "types": "./types/schema.d.ts",
+      "import": "./src/schema.js"
     }
   },
   "scripts": {
