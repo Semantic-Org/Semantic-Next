@@ -4,6 +4,11 @@
  * @see https://next.semantic-ui.com/docs/api/dates/helpers#brands
  */
 export const IS_DATE_TIME: unique symbol;
+/**
+ * Every kind of this library, so a package reads any of the seven with one property
+ * @see https://next.semantic-ui.com/docs/api/dates/helpers#brands
+ */
+export const IS_TEMPORAL: unique symbol;
 /** @see https://next.semantic-ui.com/docs/api/dates/helpers#brands */
 export const IS_CALENDAR_DATE: unique symbol;
 /** @see https://next.semantic-ui.com/docs/api/dates/helpers#brands */

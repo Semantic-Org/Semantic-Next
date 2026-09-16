@@ -5,7 +5,7 @@ import { anchored, duration } from './duration.js';
 import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
 import { temporalDurationFrom } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions, relativeSeconds } from './helpers/format.js';
-import { IS_DATE_TIME } from './helpers/identity.js';
+import { IS_DATE_TIME, IS_TEMPORAL } from './helpers/identity.js';
 import { looseZoned } from './helpers/loose.js';
 import {
   inspect,
@@ -39,6 +39,9 @@ const hasOffset = /(?:[zZ]|[+-]\d{2}(?::?\d{2})?)$/;
 export class DateTime {
   // brand datetime
   get [IS_DATE_TIME]() {
+    return true;
+  }
+  get [IS_TEMPORAL]() {
     return true;
   }
   static [Symbol.hasInstance](value) {

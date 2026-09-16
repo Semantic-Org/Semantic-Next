@@ -6,7 +6,7 @@ import { anchored, duration } from './duration.js';
 import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
 import { fieldsFrom, temporalDurationOf } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions } from './helpers/format.js';
-import { IS_TIME } from './helpers/identity.js';
+import { IS_TEMPORAL, IS_TIME } from './helpers/identity.js';
 import { looseZoned } from './helpers/loose.js';
 import {
   inspect,
@@ -28,6 +28,9 @@ const clock = /^(\d{1,2})(?::(\d{2}))?(?::(\d{2})(?:\.(\d{1,9}))?)?\s*([ap]\.?m\
 export class Time {
   // brand time
   get [IS_TIME]() {
+    return true;
+  }
+  get [IS_TEMPORAL]() {
     return true;
   }
   static [Symbol.hasInstance](value) {

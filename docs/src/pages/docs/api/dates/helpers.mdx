@@ -409,6 +409,7 @@ Every value carries a brand, a symbol keyed with `Symbol.for`, so a package reco
 
 | Symbol | Key | Carried by |
 |--------|-----|------------|
+| `IS_TEMPORAL` | `'semantic-ui/Temporal'` | every kind, one read for the whole family |
 | `IS_DATE_TIME` | `'semantic-ui/DateTime'` | a datetime |
 | `IS_CALENDAR_DATE` | `'semantic-ui/CalendarDate'` | a date |
 | `IS_TIME` | `'semantic-ui/Time'` | a time |
@@ -421,10 +422,11 @@ Every value carries a brand, a symbol keyed with `Symbol.for`, so a package reco
 #### Usage
 
 ```javascript
-import { IS_DATE_TIME, IS_RANGE } from '@semantic-ui/dates';
+import { IS_DATE_TIME, IS_RANGE, IS_TEMPORAL } from '@semantic-ui/dates';
 
 datetime('2026-09-06T14:30Z')[IS_DATE_TIME]; // true
 dateRange('2026-09-01', '2026-09-07')[IS_RANGE]; // true
+duration('PT1H')[IS_TEMPORAL]; // true, as is every kind
 IS_DATE_TIME === Symbol.for('semantic-ui/DateTime'); // true
 ```
 

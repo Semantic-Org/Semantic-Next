@@ -10,7 +10,7 @@ import {
   spill,
   temporalDurationOf,
 } from './helpers/fields.js';
-import { IS_DURATION } from './helpers/identity.js';
+import { IS_DURATION, IS_TEMPORAL } from './helpers/identity.js';
 import { durationFormat, numberFormat } from './helpers/intl.js';
 import { inspect, isTemporalDuration, unit } from './helpers/units.js';
 import { locale as pickLocale } from './helpers/zones.js';
@@ -26,6 +26,9 @@ const styles = ['long', 'short', 'narrow', 'digital'];
 export class Duration {
   // brand duration
   get [IS_DURATION]() {
+    return true;
+  }
+  get [IS_TEMPORAL]() {
     return true;
   }
   static [Symbol.hasInstance](value) {

@@ -6,7 +6,14 @@ import { days, duration, hours } from './duration.js';
 import { isUnreadable, loosely, refuse, refuseType, unreadable } from './helpers/errors.js';
 import { isDurationFields } from './helpers/fields.js';
 import { formatIntlRange, intlOptions } from './helpers/format.js';
-import { IS_DATE_RANGE, IS_DATE_TIME_RANGE, IS_DURATION, IS_RANGE, IS_TIME_RANGE } from './helpers/identity.js';
+import {
+  IS_DATE_RANGE,
+  IS_DATE_TIME_RANGE,
+  IS_DURATION,
+  IS_RANGE,
+  IS_TEMPORAL,
+  IS_TIME_RANGE,
+} from './helpers/identity.js';
 import { inspect, isTemporalDuration, zoneOptions } from './helpers/units.js';
 import { Time } from './time.js';
 
@@ -57,6 +64,9 @@ const splitInterval = (text) => {
 class Range {
   // brand range
   get [IS_RANGE]() {
+    return true;
+  }
+  get [IS_TEMPORAL]() {
     return true;
   }
   static [Symbol.hasInstance](value) {

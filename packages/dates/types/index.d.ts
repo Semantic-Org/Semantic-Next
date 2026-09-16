@@ -22,6 +22,7 @@ export {
   IS_DATE_TIME_RANGE,
   IS_DURATION,
   IS_RANGE,
+  IS_TEMPORAL,
   IS_TIME,
   IS_TIME_RANGE,
 } from './helpers/identity.js';

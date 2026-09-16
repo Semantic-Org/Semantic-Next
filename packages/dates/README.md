@@ -13,7 +13,8 @@ Temporal type underneath and one call away from it.
 
 The lowercase word is the factory and the class is exported beside it, for `instanceof` and for a
 schema that takes a constructor. The brands are exported too, `IS_DATE_TIME` and its siblings, keyed
-with `Symbol.for` so a package recognises a value from any copy of this library without bundling it.
+with `Symbol.for` so a package recognises a value from any copy of this library without bundling it, and
+`IS_TEMPORAL` marks every kind at once.
 
 ```js
 import { date, days, datetime, now, time, timeRange } from '@semantic-ui/dates';
@@ -211,7 +212,7 @@ weekdayNames('short' | 'long', firstDay?, locale?)  monthNames('short' | 'long',
 weekday('sunday')             // 7, the ISO number of a weekday from any spelling
 configure({ zone: 'UTC', locale: 'en-GB', weekStart: 'sunday', dayFirst: true, zoneAliases: { hq: 'Europe/Berlin' } })   // each checked at boot
 isDateTime(x) isCalendarDate(x) isTime(x) isDuration(x) isDateRange(x) isDateTimeRange(x) isTimeRange(x) kindOf(x)
-IS_DATE_TIME IS_CALENDAR_DATE IS_TIME IS_DURATION IS_RANGE IS_DATE_RANGE IS_DATE_TIME_RANGE IS_TIME_RANGE
+IS_TEMPORAL IS_DATE_TIME IS_CALENDAR_DATE IS_TIME IS_DURATION IS_RANGE IS_DATE_RANGE IS_DATE_TIME_RANGE IS_TIME_RANGE
 ```
 
 ## what survives the wire
