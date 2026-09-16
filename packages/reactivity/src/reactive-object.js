@@ -30,7 +30,7 @@ export class ReactiveObject {
 
   // permit user to adjust defaults globally
   static equality = isEqual;
-  static clone = (value) => clone(value, { preserveNonCloneable: true });
+  static clone = (value) => clone(value);
   static safety = 'reference';
 
   constructor(initialValue = {}, {
