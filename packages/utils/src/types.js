@@ -50,18 +50,12 @@ export const isRegExp = (x) => {
 
 const toString = Object.prototype.toString;
 
-// a datetime, date, time, duration or range from @semantic-ui/dates by the Symbol.for brand it
-// declares, or a native Temporal value by its tag, so a value from any bundle reads without
-// importing either. an immutable value, its own equals(), never a Date
-const temporalBrands = ['DateTime', 'CalendarDate', 'Time', 'Duration', 'DateRange', 'DateTimeRange', 'TimeRange']
-  .map((name) => Symbol.for(`semantic-ui/${name}`));
-
+// a native Temporal value names its type in the tag its prototype carries, so one property read
+// tells and no string is built. a Date is never one
 export const isTemporal = (x) => {
   if (!isObject(x)) { return false; }
-  for (const brand of temporalBrands) {
-    if (x[brand] === true) { return true; }
-  }
-  return toString.call(x).startsWith('[object Temporal.');
+  const tag = x[Symbol.toStringTag];
+  return isString(tag) && tag.startsWith('Temporal.');
 };
 
 export const isArguments = (obj) => {

@@ -1,15 +1,4 @@
-import {
-  isArray,
-  isBinary,
-  isClassInstance,
-  isDate,
-  isMap,
-  isObject,
-  isPlainObject,
-  isRegExp,
-  isSet,
-  isTemporal,
-} from './types.js';
+import { isArray, isBinary, isDate, isMap, isObject, isPlainObject, isRegExp, isSet } from './types.js';
 
 /*-------------------
         Cloning
@@ -105,16 +94,15 @@ const cloneValue = (src, preserveDOM, preserveNonCloneable, seen) => {
     copy = structuredClone(src);
     seen.set(src, copy);
   }
-  // a temporal value is frozen, so the reference is the copy. walking it would hand back a plain
-  // object of its parts, a silent downgrade
-  else if (isTemporal(src)) {
-    return src;
-  }
   else if (isObject(src)) {
-    if (preserveNonCloneable && isClassInstance(src)) {
+    const plain = isPlainObject(src);
+    // a class instance is a leaf, handed back by reference. a walk over its own properties would
+    // hand back a plain object without its prototype or its private fields, and an immutable value
+    // needs no copy at all. preserveNonCloneable: false asks for that walk
+    if (!plain && preserveNonCloneable) {
       return src;
     }
-    copy = isPlainObject(src) && Object.getPrototypeOf(src) === null
+    copy = plain && Object.getPrototypeOf(src) === null
       ? Object.create(null)
       : {};
     seen.set(src, copy);
@@ -128,6 +116,6 @@ const cloneValue = (src, preserveDOM, preserveNonCloneable, seen) => {
   return copy;
 };
 
-export const clone = (src, { preserveDOM = false, preserveNonCloneable = false } = {}) => {
+export const clone = (src, { preserveDOM = false, preserveNonCloneable = true } = {}) => {
   return cloneValue(src, preserveDOM, preserveNonCloneable, new WeakMap());
 };

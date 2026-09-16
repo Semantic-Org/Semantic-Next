@@ -1,22 +1,22 @@
 import { formatDate, formatDuration, timezones, toDuration } from '@semantic-ui/utils';
 
-import { date as calendarDate, datetime } from '@semantic-ui/dates';
-
 import { describe, expect, it } from 'vitest';
 
 describe('Date Utilities', () => {
   describe('formatDate', () => {
-    it('prints a datetime from @semantic-ui/dates in its own zone, and a Temporal value the same way', () => {
-      const moment = datetime('2026-09-06T14:30:15Z', 'America/New_York');
+    it('prints a value that hands its instant over through toJSDate in its own zone, and a Temporal value the same way', () => {
+      const moment = { toJSDate: () => new Date('2026-09-06T14:30:15Z'), timeZoneId: 'America/New_York' };
       expect(formatDate(moment, 'h:mm a')).toBe('10:30 am');
       expect(formatDate(moment, 'YYYY-MM-DD HH:mm:ss')).toBe('2026-09-06 10:30:15');
       expect(formatDate(moment, 'h:mm a', { timezone: 'UTC' })).toBe('2:30 pm');
       expect(formatDate(moment, 'h:mm a', { timezone: 'JST' })).toBe('11:30 pm');
+      expect(formatDate({ toJSDate: () => new Date('2026-09-06T14:30:15Z') }, 'HH:mm')).toBe('14:30');
       expect(formatDate(Temporal.ZonedDateTime.from('2026-09-06T23:30:00+09:00[Asia/Tokyo]'), 'YYYY-MM-DD HH:mm')).toBe(
         '2026-09-06 23:30',
       );
       expect(formatDate(Temporal.Instant.from('2026-09-06T14:30:00Z'), 'HH:mm')).toBe('14:30');
-      expect(formatDate(calendarDate('2026-09-06'))).toBe('Invalid Date');
+      expect(formatDate(Temporal.PlainDate.from('2026-09-06'))).toBe('Invalid Date');
+      expect(formatDate({ toJSDate: () => new Date(NaN) })).toBe('Invalid Date');
       expect(formatDate('2026-09-06')).toBe('Invalid Date');
     });
 

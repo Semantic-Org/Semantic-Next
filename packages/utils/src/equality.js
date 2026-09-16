@@ -1,4 +1,4 @@
-import { isArray, isDate, isFunction, isMap, isRegExp, isSet, isTemporal } from './types.js';
+import { isArray, isDate, isFunction, isMap, isRegExp, isSet } from './types.js';
 
 /*-------------------
       Equality
@@ -38,7 +38,8 @@ const deepEqual = (a, b, loose, ignored, deepIgnore, partial) => {
   if (typeof a !== 'object' || typeof b !== 'object') { return false; }
 
   // Prototype comparison — safer than constructor for Object.create(null)
-  if (getProto(a) !== getProto(b)) { return false; }
+  const proto = getProto(a);
+  if (proto !== getProto(b)) { return false; }
 
   // Only propagate ignored keys into children when deepIgnore is on
   const childIgnored = deepIgnore ? ignored : null;
@@ -85,16 +86,10 @@ const deepEqual = (a, b, loose, ignored, deepIgnore, partial) => {
     return true;
   }
 
-  // a temporal value compares by its own equals, exact to the nanosecond where valueOf below
-  // would round a datetime to milliseconds. a length counting months has no equals without its
-  // calendar and falls through to its string
-  if (isTemporal(a)) {
-    try {
-      return a.equals(b);
-    }
-    catch {
-      // compared by string below
-    }
+  // a class instance compares by its own equals when both carry one, the convention Temporal,
+  // Immutable.js and Luxon share. exact where valueOf below would round to a number
+  if (proto !== Object.prototype && proto !== null && isFunction(a.equals) && isFunction(b.equals)) {
+    return a.equals(b);
   }
 
   // Custom valueOf / toString. Temporal's plain types, and value classes built like them, refuse

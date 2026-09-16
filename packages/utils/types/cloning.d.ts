@@ -9,13 +9,17 @@
 export interface CloneOptions {
   /** Preserve DOM nodes by reference instead of cloning them (default: false) */
   preserveDOM?: boolean;
-  /** Preserve custom class instances by reference instead of flattening to plain objects (default: false) */
+  /**
+   * Keep a class instance by reference, a leaf the clone does not walk (default: true).
+   * `false` walks its own properties into a plain object, without its prototype or private fields
+   */
   preserveNonCloneable?: boolean;
 }
 
 /**
  * Creates a deep clone of a value
- * Handles arrays, objects, dates, regular expressions, maps, sets, DOM nodes, and primitive types
+ * Handles arrays, objects, dates, regular expressions, maps, sets, DOM nodes, and primitive types.
+ * A class instance it does not recognise, a value class among them, comes back by reference
  * Uses WeakMap for circular reference detection and preserves null-prototype objects
  * @see {@link https://next.semantic-ui.com/docs/api/utils/cloning#clone clone}
  *
@@ -32,11 +36,12 @@ export interface CloneOptions {
  * const withDOM = clone({ el: document.body }, { preserveDOM: true });
  * // withDOM.el === document.body (same reference)
  *
- * // Preserve custom class instances
+ * // A class instance comes back by reference
  * class MyClass { value = 42; }
  * const instance = new MyClass();
- * const preserved = clone({ custom: instance }, { preserveNonCloneable: true });
- * // preserved.custom === instance (same reference)
+ * clone({ custom: instance }).custom === instance; // true
+ * // ...unless asked to flatten it into a plain object
+ * clone({ custom: instance }, { preserveNonCloneable: false }).custom; // { value: 42 }
  * ```
  */
 export function clone<T>(src: T, options?: CloneOptions): T;

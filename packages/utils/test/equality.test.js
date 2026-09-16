@@ -1,7 +1,5 @@
 import { isEqual } from '@semantic-ui/utils';
 
-import { date, dateRange, datetime, duration } from '@semantic-ui/dates';
-
 import { describe, expect, it } from 'vitest';
 
 describe('isEqual', () => {
@@ -22,21 +20,38 @@ describe('isEqual', () => {
     }
   });
 
-  it('compares a temporal value by its own equals, exact to the nanosecond, a length by its size', () => {
-    const exact = datetime('2026-09-06T14:30:00.000000001Z', 'America/New_York');
-    expect(isEqual(exact, datetime('2026-09-06T14:30:00.000000001Z', 'Asia/Tokyo'))).toBe(true);
-    expect(isEqual(exact, datetime('2026-09-06T14:30:00Z'))).toBe(false);
-    expect(isEqual({ at: exact }, { at: datetime(exact.epoch) })).toBe(false);
-    expect(isEqual(date('2026-09-06'), date('2026-09-06'))).toBe(true);
-    expect(isEqual(duration('PT90M'), duration('PT1H30M'))).toBe(true);
-    expect(isEqual(duration('P1M'), duration('P1M'))).toBe(true);
-    expect(isEqual(duration('P1M'), duration('P2M'))).toBe(false);
-    expect(isEqual(dateRange('2026-09-01', '2026-09-07'), dateRange('2026-09-01', '2026-09-07'))).toBe(true);
-    expect(isEqual(dateRange('2026-09-01', '2026-09-07'), dateRange('2026-09-01', '2026-09-08'))).toBe(false);
-    expect(isEqual(exact, date('2026-09-06'))).toBe(false);
+  it('compares a class instance by its own equals when both carry one, exact where valueOf would round', () => {
+    class Moment {
+      #nanoseconds;
+      constructor(nanoseconds) {
+        this.#nanoseconds = nanoseconds;
+      }
+      valueOf() {
+        return Number(this.#nanoseconds / 1_000_000n);
+      }
+      equals(other) {
+        return this.#nanoseconds === other.#nanoseconds;
+      }
+    }
+    const exact = new Moment(1_000_000_001n);
+    expect(isEqual(exact, new Moment(1_000_000_001n))).toBe(true);
+    // the same millisecond through valueOf, a nanosecond apart through equals
+    expect(isEqual(exact, new Moment(1_000_000_000n))).toBe(false);
+    expect(isEqual({ at: exact }, { at: new Moment(1_000_000_000n) })).toBe(false);
+    expect(isEqual([exact], [new Moment(1_000_000_001n)])).toBe(true);
+
+    // a plain object with an equals key is data, compared key by key
+    expect(isEqual({ equals: () => true }, { equals: () => true })).toBe(false);
+
+    // the native Temporal types carry equals, and a Duration, which does not, compares by its string
     expect(isEqual(Temporal.Instant.from('2026-09-06T14:30:00Z'), Temporal.Instant.from('2026-09-06T14:30:00Z'))).toBe(
       true,
     );
+    expect(
+      isEqual(Temporal.Instant.from('2026-09-06T14:30:00.000000001Z'), Temporal.Instant.from('2026-09-06T14:30:00Z')),
+    ).toBe(false);
+    expect(isEqual(Temporal.Duration.from('PT90M'), Temporal.Duration.from('PT90M'))).toBe(true);
+    expect(isEqual(Temporal.Duration.from('PT90M'), Temporal.Duration.from('PT1H30M'))).toBe(false);
   });
 
   describe('Various types', () => {

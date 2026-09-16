@@ -82,17 +82,16 @@ export function isPromise(x: unknown): x is Promise<any>;
 export function isDate(x: unknown): x is Date;
 
 /**
- * Checks if the value is a temporal value: a datetime, date, time, duration or range from
- * `@semantic-ui/dates`, read by the `Symbol.for` brand it declares, or a native Temporal value, read by
- * its tag. Neither import is needed, and a `Date` is never one
+ * Checks if the value is a native Temporal value, an Instant, a ZonedDateTime, a PlainDate and the
+ * rest, read by the tag its prototype carries. A `Date` is never one
  * @see {@link https://next.semantic-ui.com/docs/api/utils/types#istemporal isTemporal}
  * @param x - The value to check
- * @returns True if the value is a temporal value, false otherwise
+ * @returns True if the value is a Temporal value, false otherwise
  *
  * @example
  * ```typescript
- * isTemporal(datetime('2026-09-06T14:30Z'));   // true
  * isTemporal(Temporal.Now.instant());           // true
+ * isTemporal(Temporal.PlainDate.from('2026-09-06')); // true
  * isTemporal(new Date());                       // false
  * ```
  */

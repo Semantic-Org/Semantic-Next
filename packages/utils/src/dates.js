@@ -1,7 +1,7 @@
-import { toDate, toDuration } from './coercion.js';
+import { toDuration } from './coercion.js';
 import { configured } from './functions.js';
 import { roundDecimal } from './numbers.js';
-import { isDate, isTemporal } from './types.js';
+import { isFunction, isNumber, isTemporal } from './types.js';
 
 /*-------------------
         Dates
@@ -63,10 +63,13 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
   timezone: zone,
   ...additionalOptions
 } = {}) => {
-  // a datetime from @semantic-ui/dates or a Temporal value prints in its own zone unless told one
-  const asDate = isDate(date) ? date : (isTemporal(date) ? toDate(date) : null);
-  if (asDate == null || isNaN(asDate.getTime())) { return 'Invalid Date'; }
-  const timezone = zone ?? (isTemporal(date) ? date.zone ?? date.timeZoneId : undefined) ?? 'UTC';
+  // a value that hands its instant over as a Date, the convention Luxon set, or a Temporal value
+  // holding one, prints in its own zone unless told one, the zone by the name Temporal gives it
+  const asDate = isFunction(date?.toJSDate)
+    ? date.toJSDate()
+    : (isTemporal(date) && isNumber(date.epochMilliseconds) ? new Date(date.epochMilliseconds) : date);
+  if (asDate == null || isNaN(asDate.getTime?.())) { return 'Invalid Date'; }
+  const timezone = zone ?? date.timeZoneId ?? 'UTC';
 
   const timezones = formatDate.config.timezones;
   const resolvedTimezone = timezone === 'local'

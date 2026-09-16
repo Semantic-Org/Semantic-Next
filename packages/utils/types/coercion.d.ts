@@ -204,8 +204,9 @@ export function toInteger(value: unknown, settings?: ToIntegerSettings): number 
 export function toDate<T>(value: T, settings: ToDateSettings & { onInvalid: 'passthrough'; }): Date | T;
 /**
  * Coerces a value to a Date, or `null` when it cannot be parsed, never an Invalid Date.
- * Accepts a Date, a number as epoch milliseconds, an ISO-8601 string, a datetime from `@semantic-ui/dates`
- * or a Temporal value holding an instant. Ambiguous or locale-dependent
+ * Accepts a Date, a number as epoch milliseconds, an ISO-8601 string, any value that hands its instant
+ * over through `toJSDate()`, or a Temporal value holding an instant (an Instant or a ZonedDateTime, never
+ * a PlainDate). Ambiguous or locale-dependent
  * spellings (bare years, slash or text dates, day overflow) return `null` rather than a guessed date.
  * A zoneless datetime resolves in the ambient timezone (the user's zone on the client), returned as a UTC
  * instant. `onInvalid` chooses how a failed coercion resolves.

@@ -1,7 +1,5 @@
 import { configured } from './functions.js';
-import { isArray, isBinary, isBoolean, isDate, isNumber, isObject, isString, isTemporal } from './types.js';
-
-const DATE_TIME = Symbol.for('semantic-ui/DateTime');
+import { isArray, isBinary, isBoolean, isDate, isFunction, isNumber, isObject, isString, isTemporal } from './types.js';
 
 /*-------------------
       Coercion
@@ -100,9 +98,13 @@ export const toInteger = (value, { onInvalid = 'null' } = {}) => {
 export const toDate = (value, { onInvalid = 'null', epoch = 'milliseconds' } = {}) => {
   // isDate admits Invalid Date, so reject it explicitly. a poisoned Date must never escape
   if (isDate(value)) { return Number.isNaN(value.getTime()) ? onInvalidResult(value, onInvalid) : value; }
-  // a datetime from @semantic-ui/dates hands back its instant, and so do the Temporal values that hold
-  // one. a plain date, time or duration is not a moment and reads as nothing
-  if (value?.[DATE_TIME] === true) { return value.toJSDate(); }
+  // a value that hands its instant over as a Date, the convention Luxon set, reads through it. a
+  // Temporal value holding an instant reads by that, and one without, a plain date or time, reads
+  // as nothing
+  if (isFunction(value?.toJSDate)) {
+    const date = value.toJSDate();
+    return isDate(date) && !Number.isNaN(date.getTime()) ? date : onInvalidResult(value, onInvalid);
+  }
   if (isTemporal(value)) {
     return isNumber(value.epochMilliseconds) ? new Date(value.epochMilliseconds) : onInvalidResult(value, onInvalid);
   }
