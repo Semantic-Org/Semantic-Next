@@ -214,7 +214,7 @@ console.log(isDate('2024-01-01')); // false
 function isTemporal(x)
 ```
 
-Checks if the given value is a temporal value: a datetime, date, time, duration or range from `@semantic-ui/dates`, read by the `Symbol.for` brand it declares, or a native Temporal value, read by its tag. Neither import is needed, and a `Date` is never one.
+Checks if the given value is a native Temporal value, an `Instant`, a `ZonedDateTime`, a `PlainDate` and the rest, read by the tag its prototype carries. A `Date` is never one.
 
 #### Parameters
 
@@ -224,16 +224,15 @@ Checks if the given value is a temporal value: a datetime, date, time, duration 
 
 #### Returns
 
-`boolean` - True if the value is a temporal value, false otherwise.
+`boolean` - True if the value is a Temporal value, false otherwise.
 
 #### Example
 
 ```javascript
 import { isTemporal } from '@semantic-ui/utils';
-import { datetime } from '@semantic-ui/dates';
 
-console.log(isTemporal(datetime('2026-09-06T14:30Z'))); // true
 console.log(isTemporal(Temporal.Now.instant())); // true
+console.log(isTemporal(Temporal.PlainDate.from('2026-09-06'))); // true
 console.log(isTemporal(new Date())); // false
 ```
 

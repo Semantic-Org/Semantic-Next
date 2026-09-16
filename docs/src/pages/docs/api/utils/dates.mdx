@@ -76,7 +76,7 @@ formatDate.config.timezones.IST; // 'Asia/Jerusalem'
 
 | Name    | Type   | Default | Description |
 |---------|--------|---------|-------------|
-| date    | Date \| DateTime \| Temporal |         | The date to format. A datetime from `@semantic-ui/dates` or a Temporal value prints in its own zone unless `timezone` names one |
+| date    | Date \| object |         | The date to format. A Temporal value holding an instant prints in its own `timeZoneId`, and a value that hands its instant over through `toJSDate()` reads the same way, unless `timezone` names a zone |
 | format  | string | 'LLL'   | The format string (e.g., 'YYYY-MM-DD', 'LT', 'LL') |
 | options | object | {}      | Additional formatting options |
 
@@ -150,6 +150,10 @@ console.log(formatDate(date, 'hh:mm a', { hour12: false })); // "14:30 "
 
 // Escaped literal text
 console.log(formatDate(date, '[Today is] dddd, MMMM Do, YYYY')); // "Today is Monday, May 15th, 2023"
+
+// A Temporal value prints in its own timeZoneId
+console.log(formatDate(Temporal.ZonedDateTime.from('2023-05-15T23:30:00+09:00[Asia/Tokyo]'), 'LT')); // "11:30 pm"
+console.log(formatDate(Temporal.Instant.from('2023-05-15T14:30:00Z'), 'LT')); // "2:30 pm" (an Instant has no zone, so UTC)
 ```
 
 ### formatDuration

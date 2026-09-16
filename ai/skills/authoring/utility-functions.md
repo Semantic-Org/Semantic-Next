@@ -423,11 +423,11 @@ import { isDate, isRegExp } from '@semantic-ui/utils';
 isDate(new Date());                 // true
 isRegExp(/pattern/i);               // true
 
-// a datetime, date, time, duration or range from @semantic-ui/dates, or a native Temporal value,
-// read by brand and tag without importing either. a Date is never one, and isDate stays false for these
-isTemporal(datetime('2026-09-06T14:30Z'));   // true
-isTemporal(Temporal.Now.instant());           // true
-isTemporal(new Date());                       // false
+// a native Temporal value, read by the tag its prototype carries. a Date is never one, and isDate
+// stays false for a Temporal value
+isTemporal(Temporal.Now.instant());                // true
+isTemporal(Temporal.PlainDate.from('2026-09-06')); // true
+isTemporal(new Date());                            // false
 ```
 
 ### Special Types
@@ -638,8 +638,8 @@ toInteger(Infinity);                    // null
 toDate('2024-01-01');                   // Date (ISO strings, epoch-ms numbers, Dates only)
 toDate(1700000000, { epoch: 'seconds' }); // Date from a unix-second timestamp (a JWT exp)
 toDate('01/15/2024');                   // null (ambiguous format, never a guessed date)
-toDate(datetime('2026-09-06T14:30Z'));  // Date for the same instant (a @semantic-ui/dates DateTime, or a Temporal Instant / ZonedDateTime)
-toDate(date('2026-09-06'));             // null (a calendar day, a time or a duration is not a moment)
+toDate(Temporal.Now.instant());         // Date for the same instant (an Instant or ZonedDateTime, or any value with toJSDate())
+toDate(Temporal.PlainDate.from('2026-09-06')); // null (a calendar day, a time or a duration holds no instant)
 
 toDuration('5s');                       // 5000 (ms/s/m/h/d/w, plus word and abbreviation spellings)
 toDuration('10 minutes');               // 600000 (case-insensitive, space optional)
@@ -998,7 +998,7 @@ formatDate(date, 'dddd, MMMM D');     // 'Monday, December 25'
 formatDate(date, 'MMMM DD, YYYY', { locale: 'fr-FR', timezone: 'Europe/Paris' });
 formatDate(date, 'LT', { timezone: 'local' });   // use browser's local timezone
 formatDate(date, 'LT', { timezone: 'PT' });       // shorthand timezone aliases supported
-formatDate(datetime('2026-09-06T14:30Z', 'Asia/Tokyo'), 'LT'); // '11:30 pm', a DateTime or Temporal value prints in its own zone unless timezone names one
+formatDate(Temporal.ZonedDateTime.from('2026-09-06T23:30:00+09:00[Asia/Tokyo]'), 'LT'); // '11:30 pm', a Temporal value prints in its timeZoneId unless timezone names one
 timezones.IST = 'Asia/Jerusalem';                  // shorthand aliases are editable at boot, IANA names pass through
 formatDate.config.timezones === timezones;         // the same object, so a package that only needs the table imports it without the formatter
 ```
@@ -1136,11 +1136,10 @@ isEqual(
 );                                                   // true — a is a subset of b
 
 // Deep clone (handles Date, RegExp, Array, Map, Set, DOM nodes, plain objects)
-const cloned = clone(obj);
+const cloned = clone(obj);                          // a class instance inside comes back by reference
 clone(obj, { preserveDOM: true });                  // keep DOM node references
-clone(obj, { preserveNonCloneable: true });         // keep class instance references
-clone({ at: datetime('2026-09-06T14:30Z') }).at;    // the same DateTime, a temporal value is frozen and never flattened
-isEqual(datetime('2026-09-06T14:30Z', 'UTC'), datetime('2026-09-06T14:30Z', 'Asia/Tokyo')); // true, a temporal value compares by its own equals()
+clone(obj, { preserveNonCloneable: false });        // walk class instances into plain objects
+isEqual(Temporal.Instant.from('2026-09-06T14:30Z'), Temporal.Instant.from('2026-09-06T14:30Z')); // true, a class instance compares by its own equals()
 
 // Deep freeze in place — returns same reference, recursively frozen
 // Only walks arrays and plain objects; Date/Map/Set/RegExp/DOM/class instances
@@ -1415,7 +1414,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `isPlainObject` | Object literals and `Object.create(null)` |
 | `isArray`, `isString`, `isNumber`, `isBoolean`, `isFunction` | Standard checks |
 | `isDate` | Tag dispatch, cross-realm safe |
-| `isTemporal` | A `@semantic-ui/dates` value by its `Symbol.for` brand, or a native Temporal value by tag, with no dependency |
+| `isTemporal` | A native Temporal value, by the tag its prototype carries |
 | `isRegExp` | Tag dispatch, cross-realm safe |
 | `isBinary` | TypedArrays and ArrayBuffer |
 | `isEmpty` | null, undefined, empty string/array, object with only nullish values |
