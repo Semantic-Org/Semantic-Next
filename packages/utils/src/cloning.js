@@ -8,6 +8,7 @@ import {
   isPlainObject,
   isRegExp,
   isSet,
+  isTemporal,
 } from './types.js';
 
 /*-------------------
@@ -103,6 +104,11 @@ const cloneValue = (src, preserveDOM, preserveNonCloneable, seen) => {
     // loses out to handrolled for other code-shapes see <cloning.bench.js>
     copy = structuredClone(src);
     seen.set(src, copy);
+  }
+  // a temporal value is frozen, so the reference is the copy. walking it would hand back a plain
+  // object of its parts, a silent downgrade
+  else if (isTemporal(src)) {
+    return src;
   }
   else if (isObject(src)) {
     if (preserveNonCloneable && isClassInstance(src)) {

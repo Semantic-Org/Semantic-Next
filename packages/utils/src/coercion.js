@@ -1,5 +1,7 @@
 import { configured } from './functions.js';
-import { isArray, isBinary, isBoolean, isDate, isNumber, isObject, isString } from './types.js';
+import { isArray, isBinary, isBoolean, isDate, isNumber, isObject, isString, isTemporal } from './types.js';
+
+const DATE_TIME = Symbol.for('semantic-ui/DateTime');
 
 /*-------------------
       Coercion
@@ -98,6 +100,12 @@ export const toInteger = (value, { onInvalid = 'null' } = {}) => {
 export const toDate = (value, { onInvalid = 'null', epoch = 'milliseconds' } = {}) => {
   // isDate admits Invalid Date, so reject it explicitly. a poisoned Date must never escape
   if (isDate(value)) { return Number.isNaN(value.getTime()) ? onInvalidResult(value, onInvalid) : value; }
+  // a datetime from @semantic-ui/dates hands back its instant, and so do the Temporal values that hold
+  // one. a plain date, time or duration is not a moment and reads as nothing
+  if (value?.[DATE_TIME] === true) { return value.toJSDate(); }
+  if (isTemporal(value)) {
+    return isNumber(value.epochMilliseconds) ? new Date(value.epochMilliseconds) : onInvalidResult(value, onInvalid);
+  }
   // numbers are epoch milliseconds unless the caller declares seconds (a JWT exp, most unix
   // timestamps), where the ms reading would produce a valid but wrong date in 1970.
   // a timestamp passed as a string is rejected below, on purpose

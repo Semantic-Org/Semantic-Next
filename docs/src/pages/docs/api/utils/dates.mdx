@@ -76,7 +76,7 @@ formatDate.config.timezones.IST; // 'Asia/Jerusalem'
 
 | Name    | Type   | Default | Description |
 |---------|--------|---------|-------------|
-| date    | Date   |         | The date to format |
+| date    | Date \| DateTime \| Temporal |         | The date to format. A datetime from `@semantic-ui/dates` or a Temporal value prints in its own zone unless `timezone` names one |
 | format  | string | 'LLL'   | The format string (e.g., 'YYYY-MM-DD', 'LT', 'LL') |
 | options | object | {}      | Additional formatting options |
 

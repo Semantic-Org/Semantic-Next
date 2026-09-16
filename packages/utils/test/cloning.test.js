@@ -1,5 +1,7 @@
 import { clone, deepFreeze } from '@semantic-ui/utils';
 
+import { date, datetime } from '@semantic-ui/dates';
+
 import { describe, expect, it } from 'vitest';
 
 describe('clone', () => {
@@ -9,6 +11,18 @@ describe('clone', () => {
     expect(clonedDate).toEqual(originalDate);
     expect(clonedDate).not.toBe(originalDate);
     expect(clonedDate.getTime()).toBe(originalDate.getTime());
+  });
+
+  it('returns a temporal value as is, the reference being the copy of a frozen value', () => {
+    const moment = datetime('2026-09-06T14:30Z', 'Asia/Tokyo');
+    const day = date('2026-09-06');
+    const instant = Temporal.Instant.from('2026-09-06T14:30:00Z');
+    const copied = clone({ at: moment, on: day, then: instant, list: [moment] });
+    expect(copied.at).toBe(moment);
+    expect(copied.on).toBe(day);
+    expect(copied.then).toBe(instant);
+    expect(copied.list[0]).toBe(moment);
+    expect(copied.at.zone).toBe('Asia/Tokyo');
   });
 
   it('should return the input value if it is not an object or a function', () => {

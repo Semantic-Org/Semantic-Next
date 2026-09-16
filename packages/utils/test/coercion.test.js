@@ -17,6 +17,8 @@ import {
   toString,
 } from '@semantic-ui/utils';
 
+import { date as calendarDate, datetime, duration } from '@semantic-ui/dates';
+
 import { describe, expect, it } from 'vitest';
 
 describe('toBoolean', () => {
@@ -224,6 +226,21 @@ describe('toDate', () => {
   it('passes a valid Date through by reference', () => {
     const date = new Date('2024-06-30');
     expect(toDate(date)).toBe(date);
+  });
+
+  it('reads a datetime from @semantic-ui/dates and the Temporal values that hold an instant, and refuses the rest', () => {
+    const moment = datetime('2026-09-06T14:30:00.000000001Z', 'Asia/Tokyo');
+    expect(toDate(moment)?.toISOString()).toBe('2026-09-06T14:30:00.000Z');
+    expect(toDate(Temporal.Instant.from('2026-09-06T14:30:00Z'))?.toISOString()).toBe('2026-09-06T14:30:00.000Z');
+    expect(toDate(Temporal.ZonedDateTime.from('2026-09-06T23:30:00+09:00[Asia/Tokyo]'))?.toISOString()).toBe(
+      '2026-09-06T14:30:00.000Z',
+    );
+    expect(toDate(calendarDate('2026-09-06'))).toBe(null);
+    expect(toDate(Temporal.PlainDate.from('2026-09-06'))).toBe(null);
+    expect(toDate(Temporal.PlainTime.from('09:00'))).toBe(null);
+    expect(toDate(duration('PT1H'))).toBe(null);
+    const day = calendarDate('2026-09-06');
+    expect(toDate(day, { onInvalid: 'passthrough' })).toBe(day);
   });
 
   it('rejects ambiguous, loose, and impossible dates rather than guessing', () => {

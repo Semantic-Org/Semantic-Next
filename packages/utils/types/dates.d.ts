@@ -170,8 +170,12 @@ interface DateFormatOptionsCustom extends Omit<Intl.DateTimeFormatOptions, 'time
  *
  * Use square brackets to escape text: `[Today is] DD`
  */
-export function formatDate(date: Date, format: DatePreset | DateToken, options?: DateFormatOptionsPreset): string;
-export function formatDate(date: Date, format?: string, options?: DateFormatOptionsCustom): string;
+export function formatDate(
+  date: Date | object,
+  format: DatePreset | DateToken,
+  options?: DateFormatOptionsPreset,
+): string;
+export function formatDate(date: Date | object, format?: string, options?: DateFormatOptionsCustom): string;
 
 /**
  * The shorthand timezone table {@link formatDate} reads, abbreviation mapped to an IANA zone, and

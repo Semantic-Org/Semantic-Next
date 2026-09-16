@@ -1,6 +1,7 @@
-import { toDuration } from './coercion.js';
+import { toDate, toDuration } from './coercion.js';
 import { configured } from './functions.js';
 import { roundDecimal } from './numbers.js';
+import { isDate, isTemporal } from './types.js';
 
 /*-------------------
         Dates
@@ -59,10 +60,13 @@ export const timezones = {
 export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
   locale = 'default',
   hour12 = true,
-  timezone = 'UTC',
+  timezone: zone,
   ...additionalOptions
 } = {}) => {
-  if (date == null || isNaN(date.getTime?.())) { return 'Invalid Date'; }
+  // a datetime from @semantic-ui/dates or a Temporal value prints in its own zone unless told one
+  const at = isDate(date) ? date : (isTemporal(date) ? toDate(date) : null);
+  if (at == null || isNaN(at.getTime())) { return 'Invalid Date'; }
+  const timezone = zone ?? (isTemporal(date) ? date.zone ?? date.timeZoneId : undefined) ?? 'UTC';
 
   const timezones = formatDate.config.timezones;
   const resolvedTimezone = timezone === 'local'
@@ -92,7 +96,7 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
     formatterCache.set(cacheKey, formatter);
   }
 
-  const dateParts = formatter.formatToParts(date).reduce((acc, part) => {
+  const dateParts = formatter.formatToParts(at).reduce((acc, part) => {
     acc[part.type] = part.value;
     return acc;
   }, {});
@@ -111,7 +115,7 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
       });
       monthFormatterCache.set(monthKey, monthFormatter);
     }
-    const monthParts = monthFormatter.formatToParts(date);
+    const monthParts = monthFormatter.formatToParts(at);
     for (let i = 0; i < monthParts.length; i++) {
       if (monthParts[i].type === 'month') {
         numericMonth = parseInt(monthParts[i].value, 10);

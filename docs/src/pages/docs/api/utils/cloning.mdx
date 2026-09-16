@@ -20,7 +20,7 @@ function clone(src, options?)
 
 Creates a deep clone of the provided value.
 
-> **Handling Complex Structures** This function can clone arrays, objects, dates, regular expressions, maps, sets, and null-prototype objects. It uses a WeakMap internally to handle circular references and prevent infinite recursion.
+> **Handling Complex Structures** This function can clone arrays, objects, dates, regular expressions, maps, sets, and null-prototype objects. It uses a WeakMap internally to handle circular references and prevent infinite recursion. A temporal value, a datetime from `@semantic-ui/dates` or a native Temporal value, is frozen and comes back as is, never flattened to a plain object.
 
 #### Parameters
 

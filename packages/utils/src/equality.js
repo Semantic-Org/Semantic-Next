@@ -1,4 +1,4 @@
-import { isArray, isDate, isFunction, isMap, isRegExp, isSet } from './types.js';
+import { isArray, isDate, isFunction, isMap, isRegExp, isSet, isTemporal } from './types.js';
 
 /*-------------------
       Equality
@@ -83,6 +83,18 @@ const deepEqual = (a, b, loose, ignored, deepIgnore, partial) => {
       if (a[i] !== b[i]) { return false; }
     }
     return true;
+  }
+
+  // a temporal value compares by its own equals, exact to the nanosecond where valueOf below
+  // would round a datetime to milliseconds. a length counting months has no equals without its
+  // calendar and falls through to its string
+  if (isTemporal(a)) {
+    try {
+      return a.equals(b);
+    }
+    catch {
+      // compared by string below
+    }
   }
 
   // Custom valueOf / toString. Temporal's plain types, and value classes built like them, refuse
