@@ -1,0 +1,155 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Dates - Schema
+icon: database
+description: The value protocol a data layer reads to store, compare and order the seven kinds
+package: "@semantic-ui/dates"
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+`@semantic-ui/dates/schema` exports the same seven classes with a value protocol attached, so a schema or a query engine can store, compare and order them without knowing this library. The bare entry has none of it.
+
+## The Subpath
+
+```javascript
+import { CalendarDate, DateRange, DateTime, DateTimeRange, Duration, Time, TimeRange, VALUE } from '@semantic-ui/dates/schema';
+```
+
+The classes are the same objects `@semantic-ui/dates` exports, so `instanceof` and the brands hold across the two imports. A bundle that never imports the subpath never pays for the protocol.
+
+### VALUE
+
+```javascript
+Kind[VALUE];
+```
+
+`Symbol.for('semantic-ui/value')`, the key the protocol is under on each class. A `Symbol.for` key is the same symbol in every bundle and realm, so a data layer reads it without importing this package.
+
+#### Usage
+
+```javascript
+CalendarDate[VALUE].kind; // 'date'
+DateTime[VALUE] === DateTime[Symbol.for('semantic-ui/value')]; // true
+```
+
+## The Protocol
+
+Every class declares one frozen object.
+
+| Name | Type | Description |
+|------|------|-------------|
+| kind | string | The kind's lowercase word, the one `kindOf` spells |
+| parse | function | Reads a written value the way the factory does, and throws the coded refusal for the rest |
+| decode | function | Reads the wire form back, `toJSON()`'s own text, and throws for anything else |
+| key | function | A primitive that is equal exactly when `equals()` holds, and orders as the kind orders when `ordered` |
+| ordered | boolean | Whether the kind orders, so a range and a sort make sense on it |
+| family | array | The seven classes, so a schema that names one registers them all |
+| span | function | On `DateTime` only. A calendar day reads as that whole day in the configured zone, a half-open pair |
+
+### parse
+
+```javascript
+Kind[VALUE].parse(input);
+```
+
+What the factory reads, `date(input)` for a `CalendarDate`. A `Date`, a fields object, a datetime and a Temporal value read as they do there. The refusal is this library's own, so a caller sees `dates refused [unreadableDate] next tuesday` and not a schema's paraphrase.
+
+#### Returns
+
+A value of the kind, or a throw with the factory's code.
+
+#### Usage
+
+```javascript
+CalendarDate[VALUE].parse('2026-09-06').toString(); // '2026-09-06'
+CalendarDate[VALUE].parse(new Date('2026-09-06T12:00:00Z')); // its day in the configured zone
+CalendarDate[VALUE].parse('next tuesday'); // throws unreadableDate
+```
+
+### decode
+
+```javascript
+Kind[VALUE].decode(text);
+```
+
+The wire form read back, the text `toJSON()` printed. It never reaches the loose door or the `dayFirst` setting, so a stored value reads the same on every side.
+
+#### Returns
+
+A value of the kind, or a throw with the factory's code.
+
+#### Usage
+
+```javascript
+DateTime[VALUE].decode('2026-09-06T14:30:00.000Z').equals(datetime('2026-09-06T14:30Z')); // true
+Duration[VALUE].decode('PT90M').equals('1h 30m'); // true
+DateRange[VALUE].decode('2026-09-07/2026-09-01'); // throws backwards
+```
+
+### key
+
+```javascript
+Kind[VALUE].key(value);
+```
+
+The primitive a data layer compares and orders on.
+
+| Kind | Key | Order |
+|------|-----|-------|
+| `datetime` | epoch nanoseconds, a `BigInt`. A `Date` keys on the same line, so the two compare in one pool | yes |
+| `date` | `year * 10000 + month * 100 + day` | yes |
+| `time` | nanoseconds since midnight | yes |
+| `duration` | `toMilliseconds()`. A length counting months or years refuses, `calendarDuration`, since their length depends on a calendar that does not travel | yes |
+| `dateRange` `datetimeRange` `timeRange` | the wire text, `start/end` | no |
+
+#### Returns
+
+A number, a `BigInt` or a string.
+
+#### Usage
+
+```javascript
+CalendarDate[VALUE].key(date('2026-09-06')); // 20260906
+DateTime[VALUE].key(datetime('2026-09-06T14:30Z')); // 1788705000000000000n
+DateTime[VALUE].key(new Date('2026-09-06T14:30:00Z')); // 1788705000000000000n
+Time[VALUE].key(time('17:30:15.250')); // 63015250000000
+Duration[VALUE].key(duration('PT90M')); // 5400000
+Duration[VALUE].key(months(2)); // throws calendarDuration
+DateRange[VALUE].key(dateRange('2026-09-01', '2026-09-07')); // '2026-09-01/2026-09-07'
+```
+
+### span
+
+```javascript
+DateTime[VALUE].span(operand);
+```
+
+A calendar day read against an instant is that whole day in the configured zone. The pair is half-open, midnight through the next midnight, so a day across a daylight saving change is 23 or 25 hours as the calendar says. Any other operand reads as `undefined`, and no configured zone refuses `noZone`, since the client and the server must read one day.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| operand | CalendarDate | The day |
+
+#### Returns
+
+`[start, end]` as two `DateTime` values, or `undefined`.
+
+#### Usage
+
+```javascript
+configure({ zone: 'America/New_York' });
+
+const [start, end] = DateTime[VALUE].span(date('2026-03-08'));
+start.toString(); // '2026-03-08T05:00:00.000Z'
+end.toString(); // '2026-03-09T04:00:00.000Z'
+start.until(end, 'hours'); // 23
+DateTime[VALUE].span('2026-03-08'); // undefined
+```
+
+#### Example
+
+<PlaygroundExample id="dates-schema-protocol" direction="horizontal"></PlaygroundExample>

@@ -76,6 +76,8 @@ A `TypeError` says the value is the wrong kind of thing. A `RangeError` says it 
 | `cannotBalance` | RangeError | `balance()` when Temporal refuses the carry underneath |
 | `cannotTotal` | RangeError | `total()` or `toMilliseconds()` when Temporal refuses the total underneath |
 | `needsAnchor` | RangeError | months or years asked to total, balance, compare or become a number without a duration from `until()` |
+| `calendarDuration` | RangeError | a duration counting months or years asked for its key by a schema, anchored or not, since their length depends on a calendar that does not travel. See [Schema](/docs/api/dates/schema#key) |
+| `immutable` | RangeError | a `Date` setter on a datetime, `setHours(9)`. `set()` and `plus()` give a new value |
 
 ## Ranges
 
