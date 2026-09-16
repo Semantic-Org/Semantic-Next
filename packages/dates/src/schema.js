@@ -12,8 +12,8 @@ import { Time, time } from './time.js';
   the value protocol, what a schema reads off a class to store, compare and order its values:
   the kind's name, a strict read for the wire and a read for a write, a primitive key injective
   over equals(), whether the kind orders, and the family that registers together. a length declares
-  summable and a wire form stricter than toJSON(), and the instant kind declares span, the read of
-  a calendar day as a whole day. the reads throw this library's own refusal. attached here, in a subpath of its own, so the bare entry has none
+  summable and a wire form stricter than toJSON(), and the instant kind declares condition, what a
+  field of it means for a calendar day. the reads throw this library's own refusal. attached here, in a subpath of its own, so the bare entry has none
   of it and a schema that names one class is the whole opt-in
 */
 
@@ -50,8 +50,12 @@ const length = (value) => assertLength(value).toMilliseconds();
 
 const text = (value) => value.toJSON();
 
-// a calendar day against an instant field is that whole day in the app's zone, half-open. the
-// zone is configured once in shared code, so the client and the server read the same day
+// a calendar day against an instant field means that whole day in the app's zone, half-open, and
+// each operator reads it in those terms: the day for eq, its complement for $ne, its first instant
+// for $gte and $lt, the next day's for $lte and $gt. the answer is an $or of operator maps on the
+// field, one map where one suffices, and anything else answers undefined so a data layer reads the
+// operand through the factory instead. the zone is configured once in shared code, so the client
+// and the server read one day
 const dayBounds = (day) => {
   const { zone } = configure();
   if (zone === undefined) {
@@ -64,15 +68,26 @@ const dayBounds = (day) => {
   return [day.at('00:00', zone), day.plus({ days: 1 }).at('00:00', zone)];
 };
 
+const DAY = {
+  eq: ([start, end]) => [{ $gte: start, $lt: end }],
+  $ne: ([start, end]) => [{ $lt: start }, { $gte: end }],
+  $gte: ([start]) => [{ $gte: start }],
+  $lt: ([start]) => [{ $lt: start }],
+  $lte: ([, end]) => [{ $lt: end }],
+  $gt: ([, end]) => [{ $gte: end }],
+};
+
+const condition = (operator, operand) => (
+  DAY[operator] && operand instanceof CalendarDate ? DAY[operator](dayBounds(operand)) : undefined
+);
+
 const family = Object.freeze([DateTime, CalendarDate, Time, Duration, DateRange, DateTimeRange, TimeRange]);
 
 const declare = (Kind, kind, read, key, ordered, extra) => {
   Kind[VALUE] = Object.freeze({ kind, parse: read, decode: read, key, ordered, family, ...extra });
 };
 
-declare(DateTime, 'datetime', datetime, instant, true, {
-  span: (operand) => (operand instanceof CalendarDate ? dayBounds(operand) : undefined),
-});
+declare(DateTime, 'datetime', datetime, instant, true, { condition });
 declare(CalendarDate, 'date', date, day, true);
 declare(Time, 'time', time, clock, true);
 // a length adds, so a sum over a column of them totals milliseconds

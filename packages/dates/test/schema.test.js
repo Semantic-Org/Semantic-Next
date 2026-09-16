@@ -111,15 +111,27 @@ describe('the value protocol', () => {
     expect([DateRange, DateTimeRange, TimeRange].every((Kind) => Kind[VALUE].ordered === false)).toBe(true);
   });
 
-  it('reads a calendar day against an instant as that whole day in the configured zone, half-open', () => {
-    expect(() => DateTime[VALUE].span(date('2026-03-08'))).toThrow(/noZone/);
+  it('states what an instant field means for a calendar day, per operator, half-open in the configured zone', () => {
+    const day = date('2026-03-08');
+    expect(() => DateTime[VALUE].condition('eq', day)).toThrow(/noZone/);
     configure({ zone: 'America/New_York' });
-    const [start, end] = DateTime[VALUE].span(date('2026-03-08'));
-    expect([start.toString(), end.toString()]).toEqual(['2026-03-08T05:00:00.000Z', '2026-03-09T04:00:00.000Z']);
-    expect(start.until(end, 'hours')).toBe(23);
-    expect(DateTime[VALUE].span(date('2026-11-01'))[0].until(DateTime[VALUE].span(date('2026-11-01'))[1], 'hours'))
-      .toBe(25);
-    expect(DateTime[VALUE].span('2026-03-08')).toBeUndefined();
-    expect(DateTime[VALUE].span(datetime('2026-03-08T12:00Z'))).toBeUndefined();
+    const spelled = (maps) =>
+      maps.map((map) => Object.fromEntries(Object.entries(map).map(([operator, at]) => [operator, at.toString()])));
+    const start = '2026-03-08T05:00:00.000Z';
+    const end = '2026-03-09T04:00:00.000Z';
+    expect(spelled(DateTime[VALUE].condition('eq', day))).toEqual([{ $gte: start, $lt: end }]);
+    expect(spelled(DateTime[VALUE].condition('$ne', day))).toEqual([{ $lt: start }, { $gte: end }]);
+    expect(spelled(DateTime[VALUE].condition('$gte', day))).toEqual([{ $gte: start }]);
+    expect(spelled(DateTime[VALUE].condition('$lt', day))).toEqual([{ $lt: start }]);
+    expect(spelled(DateTime[VALUE].condition('$lte', day))).toEqual([{ $lt: end }]);
+    expect(spelled(DateTime[VALUE].condition('$gt', day))).toEqual([{ $gte: end }]);
+    const [{ $gte: springStart, $lt: springEnd }] = DateTime[VALUE].condition('eq', day);
+    expect(springStart.until(springEnd, 'hours')).toBe(23);
+    const [{ $gte: fallStart, $lt: fallEnd }] = DateTime[VALUE].condition('eq', date('2026-11-01'));
+    expect(fallStart.until(fallEnd, 'hours')).toBe(25);
+    expect(DateTime[VALUE].condition('eq', '2026-03-08')).toBeUndefined();
+    expect(DateTime[VALUE].condition('eq', datetime('2026-03-08T12:00Z'))).toBeUndefined();
+    expect(DateTime[VALUE].condition('$in', [day])).toBeUndefined();
+    expect(DateTime[VALUE].span).toBeUndefined();
   });
 });
