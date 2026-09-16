@@ -64,8 +64,8 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
   ...additionalOptions
 } = {}) => {
   // a datetime from @semantic-ui/dates or a Temporal value prints in its own zone unless told one
-  const at = isDate(date) ? date : (isTemporal(date) ? toDate(date) : null);
-  if (at == null || isNaN(at.getTime())) { return 'Invalid Date'; }
+  const asDate = isDate(date) ? date : (isTemporal(date) ? toDate(date) : null);
+  if (asDate == null || isNaN(asDate.getTime())) { return 'Invalid Date'; }
   const timezone = zone ?? (isTemporal(date) ? date.zone ?? date.timeZoneId : undefined) ?? 'UTC';
 
   const timezones = formatDate.config.timezones;
@@ -96,7 +96,7 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
     formatterCache.set(cacheKey, formatter);
   }
 
-  const dateParts = formatter.formatToParts(at).reduce((acc, part) => {
+  const dateParts = formatter.formatToParts(asDate).reduce((acc, part) => {
     acc[part.type] = part.value;
     return acc;
   }, {});
@@ -115,7 +115,7 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
       });
       monthFormatterCache.set(monthKey, monthFormatter);
     }
-    const monthParts = monthFormatter.formatToParts(at);
+    const monthParts = monthFormatter.formatToParts(asDate);
     for (let i = 0; i < monthParts.length; i++) {
       if (monthParts[i].type === 'month') {
         numericMonth = parseInt(monthParts[i].value, 10);
