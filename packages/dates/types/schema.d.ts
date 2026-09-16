@@ -35,6 +35,8 @@ export interface ValueProtocol<Value, Key extends number | bigint | string> {
   readonly family: readonly Function[];
   /** `Duration` alone declares it. `toJSON()` after the refusal a length counting months or years earns, `calendarDuration` */
   encode?(value: Value): string;
+  /** `Duration` alone declares it. A length adds, so a sum over a column of them totals the key's milliseconds */
+  readonly summable?: boolean;
   /**
    * `DateTime` alone declares it. A calendar day reads as that whole day in the configured zone, a
    * half-open pair. Undefined for any other operand, `noZone` with no zone configured

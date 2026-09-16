@@ -96,6 +96,8 @@ describe('the value protocol', () => {
     expect(() => Duration[VALUE].key(months(2))).toThrow(/calendarDuration/);
     expect(() => Duration[VALUE].key(date('2026-01-31').until('2026-03-31'))).toThrow(/calendarDuration/);
     expect(Duration[VALUE].ordered).toBe(true);
+    expect(Duration[VALUE].summable).toBe(true);
+    expect(DateTime[VALUE].summable).toBeUndefined();
     expect(Duration[VALUE].encode(duration('PT90M'))).toBe('PT90M');
     expect(() => Duration[VALUE].encode(months(2))).toThrow(/calendarDuration/);
     expect(DateTime[VALUE].encode).toBeUndefined();

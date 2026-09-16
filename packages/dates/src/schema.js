@@ -11,9 +11,9 @@ import { Time, time } from './time.js';
 /*
   the value protocol, what a schema reads off a class to store, compare and order its values:
   the kind's name, a strict read for the wire and a read for a write, a primitive key injective
-  over equals(), whether the kind orders, and the family that registers together. a kind whose
-  wire form is not always toJSON() declares encode, and the instant kind declares span, the read
-  of a calendar day as a whole day. the reads throw this library's own refusal. attached here, in a subpath of its own, so the bare entry has none
+  over equals(), whether the kind orders, and the family that registers together. a length declares
+  summable and a wire form stricter than toJSON(), and the instant kind declares span, the read of
+  a calendar day as a whole day. the reads throw this library's own refusal. attached here, in a subpath of its own, so the bare entry has none
   of it and a schema that names one class is the whole opt-in
 */
 
@@ -75,8 +75,10 @@ declare(DateTime, 'datetime', datetime, instant, true, {
 });
 declare(CalendarDate, 'date', date, day, true);
 declare(Time, 'time', time, clock, true);
+// a length adds, so a sum over a column of them totals milliseconds
 declare(Duration, 'duration', duration, length, true, {
   encode: (value) => assertLength(value).toJSON(),
+  summable: true,
 });
 declare(DateRange, 'dateRange', dateRange, text, false);
 declare(DateTimeRange, 'datetimeRange', datetimeRange, text, false);

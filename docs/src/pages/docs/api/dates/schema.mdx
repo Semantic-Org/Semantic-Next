@@ -47,6 +47,7 @@ Every class declares one frozen object.
 | ordered | boolean | Whether the kind orders, so a range and a sort make sense on it |
 | family | array | The seven classes, so a schema that names one registers them all |
 | encode | function | On `Duration` only. `toJSON()` after the refusal a length counting months or years earns, so a month never reaches a column |
+| summable | boolean | On `Duration` only. Lengths add, so a sum over a column of them totals the key's milliseconds |
 | span | function | On `DateTime` only. A calendar day reads as that whole day in the configured zone, a half-open pair |
 
 ### parse
