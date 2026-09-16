@@ -246,4 +246,80 @@ describe('datetime', () => {
     expect(moment.date.equals(today('Asia/Tokyo')) === moment.isToday()).toBe(true);
     expect(moment.plus(minutes(30)).minute).toBe(0);
   });
+
+  it('reads the exact instant as epoch nanoseconds', () => {
+    expect(datetime('2026-09-06T14:30:00.000000001Z').epochNanoseconds).toBe(1788705000000000001n);
+    expect(datetime('2026-09-06T14:30Z').epochNanoseconds).toBe(
+      BigInt(datetime('2026-09-06T14:30Z').epoch) * 1_000_000n,
+    );
+  });
+});
+
+describe('a datetime read as a Date', () => {
+  const moment = datetime('2026-09-06T14:30:15.250', 'America/New_York');
+  const js = moment.toJSDate();
+
+  it('answers the local family in its own zone with Date conventions, a month from 0 and sunday as 0', () => {
+    expect(moment.getTime()).toBe(js.getTime());
+    expect([moment.getFullYear(), moment.getMonth(), moment.getDate(), moment.getDay()]).toEqual([2026, 8, 6, 0]);
+    expect([moment.getHours(), moment.getMinutes(), moment.getSeconds(), moment.getMilliseconds()]).toEqual([
+      14,
+      30,
+      15,
+      250,
+    ]);
+    expect(moment.getTimezoneOffset()).toBe(240);
+    expect(datetime('2026-01-06T09:00', 'Asia/Kolkata').getTimezoneOffset()).toBe(-330);
+  });
+
+  it('answers the UTC family exactly as the same instant does as a Date', () => {
+    const reads = [
+      'getUTCFullYear',
+      'getUTCMonth',
+      'getUTCDate',
+      'getUTCDay',
+      'getUTCHours',
+      'getUTCMinutes',
+      'getUTCSeconds',
+      'getUTCMilliseconds',
+    ];
+    expect(reads.map((name) => moment[name]())).toEqual(reads.map((name) => js[name]()));
+    expect(moment.getUTCHours()).toBe(18);
+  });
+
+  it("prints as a Date prints, in the value's zone unless the options name one", () => {
+    expect(moment.toISOString()).toBe('2026-09-06T18:30:15.250Z');
+    expect(datetime('2026-09-06T14:30:00.000000001Z').toISOString()).toBe('2026-09-06T14:30:00.000Z');
+    expect(moment.toLocaleString('en-US')).toBe(js.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    expect(moment.toLocaleDateString('en-US')).toBe('9/6/2026');
+    expect(moment.toLocaleTimeString('en-US')).toBe('2:30:15 PM');
+    expect(moment.toLocaleTimeString('en-US', { timeZone: 'UTC' })).toBe('6:30:15 PM');
+  });
+
+  it('refuses every setter naming set() and plus(), and never wears the Date tag', () => {
+    for (
+      const name of [
+        'setTime',
+        'setFullYear',
+        'setMonth',
+        'setDate',
+        'setHours',
+        'setMinutes',
+        'setSeconds',
+        'setMilliseconds',
+        'setUTCFullYear',
+        'setUTCMonth',
+        'setUTCDate',
+        'setUTCHours',
+        'setUTCMinutes',
+        'setUTCSeconds',
+        'setUTCMilliseconds',
+      ]
+    ) {
+      expect(() => moment[name](9)).toThrow(/immutable/);
+    }
+    expect(moment.hour).toBe(14);
+    expect(Object.prototype.toString.call(moment)).not.toBe('[object Date]');
+    expect(moment instanceof Date).toBe(false);
+  });
 });

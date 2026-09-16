@@ -220,6 +220,7 @@ export const sidebarMenuAPI = [
       { name: 'Range Bounds', url: '/docs/api/dates/range-bounds' },
       { name: 'Durations', url: '/docs/api/dates/durations' },
       { name: 'Wire Forms', url: '/docs/api/dates/wire-forms' },
+      { name: 'Schema', url: '/docs/api/dates/schema' },
       { name: 'Errors', url: '/docs/api/dates/errors' },
       { name: 'Datetime', url: '/docs/api/dates/datetime' },
       { name: 'Date', url: '/docs/api/dates/date' },

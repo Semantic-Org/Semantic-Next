@@ -96,7 +96,8 @@ Input: an ISO string (`'2026-09-06T14:30Z'`, `'2026-09-06T14:30'` as a wall cloc
 | ask | `equals` `isBefore` `isAfter` `isSame(other, 'day')` `isPast()` `isFuture()` `isToday()` `isTomorrow()` `isYesterday()` `isWeekend()` `isWeekday()` `isLeapYear()` |
 | measure | `until(other)` `since(other)` a duration, `until(other, 'hours')` a number, `to(end)` `range('week')` a range |
 | show | `format()` medium date and short time, `format('short' \| 'long' \| 'full' \| 'date' \| 'time')`, `format({ dateStyle: 'medium' })`, `format('YYYY-MM-DD h:mm a z')` in day.js tokens, where the presets stand in for `L` and `LLL`, `formatRelative()` |
-| out | `toString()` `toJSON()` the instant in UTC, `toJSDate()` `toTemporal()` `valueOf()` epoch milliseconds |
+| out | `toString()` `toJSON()` the instant in UTC, `toJSDate()` `toTemporal()` `valueOf()` epoch milliseconds, `epochNanoseconds` the exact instant as a BigInt |
+| as a Date | `getTime()` `getFullYear()` `getMonth()` from 0 `getDate()` `getDay()` sunday as 0 `getHours()` `getMinutes()` `getSeconds()` `getMilliseconds()` in the value's zone, `getTimezoneOffset()` minutes west, the `getUTC` family, `toISOString()` `toLocaleString()` `toLocaleDateString()` `toLocaleTimeString()`. Every `set` refuses, `immutable`, naming `set()` and `plus()` |
 
 `plus` and `minus` take a duration, a fields object `{ days: 3 }`, a phrase `'1h 30m'`, or a number and
 unit `(3, 'days')`. Adding days keeps the wall clock across a daylight saving change, adding hours
@@ -229,11 +230,41 @@ A meeting at 9am in Berlin next March is a wall clock plus a zone, and that pair
 Store the day, the time and the zone as their own fields and compose them with `date.at(time, zone)`
 when reading, so a change to the zone's rules moves the instant and not the meeting.
 
+## for a schema
+
+`@semantic-ui/dates/schema` exports the same seven classes with a value protocol attached under
+`Symbol.for('semantic-ui/value')`, so a data layer can store, compare and order them without knowing
+this library. The bare entry has none of it, and a bundle that never imports the subpath never pays
+for it.
+
+```js
+import { CalendarDate, DateTime, Duration, VALUE } from '@semantic-ui/dates/schema';
+
+CalendarDate[VALUE].kind;                        // 'date'
+CalendarDate[VALUE].decode('2026-09-06');        // the wire form read back, strictly
+CalendarDate[VALUE].parse('next tuesday');       // dates refused [unreadableDate] next tuesday
+CalendarDate[VALUE].key(date('2026-09-06'));     // 20260906, equal exactly when equals() holds
+CalendarDate[VALUE].ordered;                     // true, a range and a sort make sense on a day
+DateTime[VALUE].key(now());                      // epoch nanoseconds, a BigInt
+DateTime[VALUE].key(new Date());                 // the same line, so a Date beside a DateTime compares
+Duration[VALUE].key(duration('PT90M'));          // 5400000, its milliseconds
+Duration[VALUE].key(months(2));                  // dates refused [calendarDuration] P2M
+DateRange[VALUE].ordered;                        // false, a span has no single order
+```
+
+`parse` reads what the factory reads and `decode` reads the wire form back, both throwing the coded
+refusal for the rest. `key` is a primitive that is equal exactly when `equals()` holds and orders as the
+kind orders. A duration counting months or years has no key, since their length depends on a calendar
+that does not travel. `family` lists the seven classes, so a schema that names one registers them all. `Duration` alone declares `encode`,
+the wire form after the same refusal, so a month never reaches a column, and `summable`, since lengths add.
+On `DateTime` only, `span(day)` reads a calendar day as that whole day in the configured zone, a
+half-open pair for a query, and refuses `noZone` when none is configured.
+
 ## errors
 
 Every refusal is a coded `RangeError` or `TypeError` built with utils' `createErrors`, one line in
 production (`dates refused [notADate] 2026-09-06T14:00Z`) with the way out appended in development.
-Codes: `backwards` `cannotAdd` `cannotBalance` `cannotRound` `cannotSet` `cannotSubtract` `cannotTotal` `emptyStep` `fractionalMonth` `mixedKinds` `mixedRange` `mixedSigns` `needsAnchor` `noField` `noPoints` `noTemporal` `noTokens` `noZone` `notADate` `notADateTime` `notADateUnit` `notADuration` `notANumber` `notAPoint` `notATime` `notATimeUnit` `notFinite` `twoPieces` `unknownFormat` `unknownLocale` `unknownUnit` `unknownWeekday` `unknownZone` `unreadableDate` `unreadableDateTime` `unreadableDuration` `unreadableTime`.
+Codes: `backwards` `calendarDuration` `cannotAdd` `cannotBalance` `cannotRound` `cannotSet` `cannotSubtract` `cannotTotal` `emptyStep` `fractionalMonth` `immutable` `mixedKinds` `mixedRange` `mixedSigns` `needsAnchor` `noField` `noPoints` `noTemporal` `noTokens` `noZone` `notADate` `notADateTime` `notADateUnit` `notADuration` `notANumber` `notAPoint` `notATime` `notATimeUnit` `notFinite` `twoPieces` `unknownFormat` `unknownLocale` `unknownUnit` `unknownWeekday` `unknownZone` `unreadableDate` `unreadableDateTime` `unreadableDuration` `unreadableTime`.
 
 ## not here, on purpose
 
