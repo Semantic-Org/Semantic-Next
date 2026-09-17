@@ -3108,3 +3108,60 @@ I held the orchestrator seat for the design pass on the email types, across a co
 *— Claude (Fable 5.1), 2026-09-15*
 
 *"Read the examples yourself, and when a ruling's condition fails, say not ready."*
+
+## 2026-09-17 — the sign-out that took twice as long each time, and the two hours a register cost
+
+I held the orchestrator seat across a night and a morning for the WebTransport loose ends: a
+0-RTT question closed by source, the demo repaired, a sign-out defect with two causes, a
+regression of my own the same hour, and an id-proof PR carried through its naming room. Four
+kernel PRs merged, one perf seat still running. What follows is what the records cannot carry.
+
+**The genre of a sentence can stop the work.** A kernel defect written up as who could do what to
+whom, with a probe as a demonstration, tripped the output classifier six turns running, and the
+maintainer rewound two hours: "weve spent about 2 hours now trying to get you to be able to say
+something without hitting a safeguard. im open to ideas." The same facts in mechanism words,
+which connection, which map, which close code, what the client does next, never tripped once. A
+letter on disk in the plain register and a fresh reading of it was the way out. Describe defects
+as the code describes them.
+
+**The rig proves the mechanism, the real path proves the timing.** Chrome reports a WebTransport
+close as clean only when a FIN went both ways on the CONNECT stream; the library we pin follows
+its capsule with a STOP_SENDING, Chrome answers with a reset, and every coded server close ever
+sent on the carrier reached the client as "Connection lost". The in-process rig could not model
+that stream, so the leg that said the code arrived was green for two weeks, and the one gate that
+boots real Chrome against the real sidecar sits behind a docker flag the battery never opened.
+The finding came from reading Chrome's own `closed` promise on the deployed board, not from any
+suite.
+
+**A reviewer's "safe" concurrency change is a claim to trace, not a verdict.** The review round
+moved the sidecar's close into its own goroutine. Go runs the newest goroutine first, so when the
+drop's code 0 followed a coded close in one seam read, the 0 claimed the session. Loopback never
+showed it, because there the two frames arrive in separate reads; the deploy showed it on the
+first trace after the merge. The trace that had proved the fix was the one instrument that could
+catch the round's regression, and I ran it only after merging. Now it runs on the round's deploy
+before.
+
+**A leg that passes with the fix disabled proves nothing.** I deleted a drain guard on the
+strength of a leg that never created its condition, because the close ran before the fan. The
+reviewer's thirty-line probe made the guard fail, and the leg was rewritten to await the write
+and close in the same turn, so the flush callback is provably pending: without the guard the
+terminator's first close read 0, with it 4101. The red is on record now, where it should have
+been first.
+
+**The house word stays bare.** On `clientSecret` beside `clientId` against OAuth's
+`client_secret`, the maintainer: "oauth will occur and that will probably get prefixed
+oAuthClientSecret etc since its not house. overlapping terminology is generally a feature not a
+bug." A review that names such a collision is naming a feature; it goes to the room as context.
+
+**Main can go red under you while you work.** Three tests broke at 16:25 with a PR merged from
+the maintainer's laptop, after my first branch was cut, and nobody's battery on the box ran in
+between. The runner's `--kernel` door settled whose they were in one command, and they are filed
+as errata rather than fixed in a PR they do not belong to.
+
+**Say the numbers the way he asked.** Sign-out to carrier-back: 2,264 ms and doubling per
+sign-out before, 104 ms after, on the demo. "It is not that hard, on the real network, once you
+can see it."
+
+*— Claude (Fable 5.1), 2026-09-17*
+
+*"Write defects as the code describes them, and trace the round on the real path before you merge it."*
