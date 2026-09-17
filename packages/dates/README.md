@@ -232,39 +232,39 @@ when reading, so a change to the zone's rules moves the instant and not the meet
 
 ## for a schema
 
-`@semantic-ui/dates/schema` exports the same seven classes, each carrying a schema `Type` under
-`Symbol.for('semantic-ui/value')`, built with `defineType` from `@semantic-ui/schema`. That package is
-the consumer: naming one of the classes in a schema registers the seven, and the built-in `Date`
-kind becomes `DateTime` under the same name. The bare entry has none of it, and a bundle that never
-imports the subpath never pays for it.
+`@semantic-ui/dates/schema` registers the seven kinds with `@semantic-ui/schema` as it loads, one `Type`
+per class built with `defineType`, and upgrades the built-in `datetime` to `DateTime` under the same
+name, so `type: Date` in a schema reads the wrapper. Importing the subpath is the whole opt-in. It
+exports the same seven classes as the bare entry and their Types. The bare entry has none of it, and a
+bundle that never imports the subpath never pays for it.
 
 ```js
-import { CalendarDate, DateTime, Duration, VALUE } from '@semantic-ui/dates/schema';
+import { CalendarDate, CalendarDateType, DateTimeType, DurationType, DateRangeType } from '@semantic-ui/dates/schema';
 
-CalendarDate[VALUE].name;                          // 'date'
-CalendarDate[VALUE].decode('2026-09-06');          // the wire form read back, strictly
-CalendarDate[VALUE].read('next tuesday');          // dates refused [unreadableDate] next tuesday
-CalendarDate[VALUE].parse('next tuesday');         // 'next tuesday', left for a schema's validate to flag
-CalendarDate[VALUE].matchKey(date('2026-09-06'));  // 20260906, equal exactly when equals() holds
-CalendarDate[VALUE].ordered;                       // true, a range and a sort make sense on a day
-DateTime[VALUE].matchKey(now());                   // epoch nanoseconds, a BigInt
-DateTime[VALUE].matchKey(new Date());              // the same line, so a Date beside a DateTime compares
-DateTime[VALUE].upgrades;                          // Date, the built-in the kind stands in for
-Duration[VALUE].matchKey(duration('PT90M'));       // 5400000, its milliseconds
-Duration[VALUE].matchKey(months(2));               // dates refused [calendarDuration] P2M
-DateRange[VALUE].ordered;                          // false, a span has no single order
+CalendarDateType.name;                            // 'date'
+CalendarDateType.decode('2026-09-06');            // the wire form read back, strictly
+CalendarDateType.read('next tuesday');            // dates refused [unreadableDate] next tuesday
+CalendarDateType.parse('next tuesday');           // 'next tuesday', left for a schema's validate to flag
+CalendarDateType.matchKey(date('2026-09-06'));    // 20260906, equal exactly when equals() holds
+CalendarDateType.ordered;                         // true, a range and a sort make sense on a day
+DateTimeType.matchKey(now());                     // epoch nanoseconds, a BigInt
+DateTimeType.matchKey(new Date());                // the same line, so a Date beside a DateTime compares
+DateTimeType.upgrades;                            // Date, the built-in the kind stands in for
+DurationType.matchKey(duration('PT90M'));         // 5400000, its milliseconds
+DurationType.matchKey(months(2));                 // dates refused [calendarDuration] P2M
+DateRangeType.ordered;                            // false, a span has no single order
 ```
 
 `read` and `decode` read what the factory reads and the wire form back, throwing the coded refusal for
 the rest, and `parse`, the write door, hands an unreadable value back for validate. `matchKey` is a
 primitive that is equal exactly when `equals()` holds and orders as the kind orders. A duration counting
-months or years has no key, since their length depends on a calendar that does not travel. `family` lists
-the seven classes, so a schema that names one registers them all. `Duration` alone declares `summable`,
-since lengths add, and an `encode` that refuses a month the way the key does. On `DateTime` only,
-`condition(operator, day)` says what a field of instants means for a calendar day, that whole day in the
-configured zone, half-open, spelled per operator as an `$or` of operator maps a query splices in (`eq` the
-day, `$ne` its complement, `$gte` and `$lt` its first instant, `$lte` and `$gt` the next day's), refusing
-`noZone` when none is configured, and `upgrades` names the built-in `Date` it stands in for.
+months or years has no key, since their length depends on a calendar that does not travel. `DurationType`
+alone declares `summable`, since lengths add, and an `encode` that refuses a month the way the key does.
+On `DateTimeType` only, `condition(operator, day)` says what a field of instants means for a calendar day,
+that whole day in the configured zone, half-open, spelled per operator as an `$or` of operator maps a
+query splices in (`eq` the day, `$ne` its complement, `$gte` and `$lt` its first instant, `$lte` and
+`$gt` the next day's), refusing `noZone` when none is configured, and `upgrades` names the built-in
+`Date` it stands in for.
 
 ## errors
 

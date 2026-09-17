@@ -1,15 +1,17 @@
-import { defineType } from '@semantic-ui/schema';
+import { defineType, registerType } from '@semantic-ui/schema';
 
+import { lenient, text } from '../helpers/types.js';
 import { Time, time } from '../time.js';
-import { clock, family, lenient, text, VALUE } from './protocol.js';
 
-Time[VALUE] = defineType(Time, {
+export const TimeType = registerType(defineType(Time, {
   name: 'time',
   parse: lenient(time),
   read: time,
   decode: time,
   encode: text,
-  matchKey: clock,
+  // nanoseconds since midnight, under 2^53
+  matchKey: (value) =>
+    ((value.hour * 60 + value.minute) * 60 + value.second) * 1e9 + value.millisecond * 1e6 + value.microsecond * 1e3
+    + value.nanosecond,
   ordered: true,
-  family,
-});
+}));

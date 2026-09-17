@@ -3,38 +3,27 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Dates - Schema
 icon: database
-description: The seven classes with a schema Type each, for the schema package to register
+description: The subpath that registers the seven kinds with the schema package and upgrades the built-in datetime
 package: "@semantic-ui/dates"
 ---
 
-`@semantic-ui/dates/schema` exports the same seven classes as the bare entry, each carrying a schema `Type` built with `defineType` from `@semantic-ui/schema`. That package is the consumer: naming one of the classes in a schema registers all seven, and the built-in `Date` kind becomes `DateTime` under the same name. The bare entry has none of it.
+`@semantic-ui/dates/schema` registers the seven kinds with `@semantic-ui/schema` as it loads, one `Type` per class built with `defineType`, and upgrades the built-in `datetime` to `DateTime` under the same name, so `type: Date` in a schema reads the wrapper. Importing the subpath is the whole opt-in. The bare entry has none of it.
 
 ## The Subpath
 
 ```javascript
-import { CalendarDate, DateRange, DateTime, DateTimeRange, Duration, Time, TimeRange, VALUE } from '@semantic-ui/dates/schema';
+import '@semantic-ui/dates/schema';
 ```
-
-The classes are the same objects `@semantic-ui/dates` exports, so `instanceof` and the brands hold across the two imports. A bundle that never imports the subpath never pays for it. `@semantic-ui/schema` is an optional peer, needed by the subpath alone.
-
-### VALUE
 
 ```javascript
-Kind[VALUE];
+import { CalendarDate, CalendarDateType, DateTime, DateTimeType, DurationType } from '@semantic-ui/dates/schema';
 ```
 
-`Symbol.for('semantic-ui/value')`, the key each class carries its Type under. A `Symbol.for` key is the same symbol in every bundle and realm, so a data layer reads it without importing this package.
+The classes are the same objects `@semantic-ui/dates` exports, so `instanceof` and the brands hold across the two imports. Each `Type` is the registered one, the object `@semantic-ui/schema` resolves a field of that class to. A bundle that never imports the subpath never pays for it. `@semantic-ui/schema` is an optional peer, needed by the subpath alone.
 
-#### Usage
+## The Types
 
-```javascript
-CalendarDate[VALUE].name; // 'date'
-DateTime[VALUE] === DateTime[Symbol.for('semantic-ui/value')]; // true
-```
-
-## The Type
-
-Each class carries one `Type`, the same object the schema package's `defineType` builds for any kind. The words it carries for this library:
+Each kind's `Type` is built with `defineType`, the same shape any kind in the schema package takes. The words it carries for this library:
 
 | Name | Type | Description |
 |------|------|-------------|
@@ -42,13 +31,12 @@ Each class carries one `Type`, the same object the schema package's `defineType`
 | parse | function | The write door. Reads a written value the way the factory does, and hands back what it cannot read for a schema's validate to flag |
 | read | function | Reads a written value the way the factory does, and throws the coded refusal for the rest |
 | decode | function | Reads the wire form back, `toJSON()`'s own text, and throws for anything else |
-| encode | function | The wire form, `toJSON()`. On `Duration` it refuses a length counting months or years first, so a month never reaches a column |
+| encode | function | The wire form, `toJSON()`. On `DurationType` it refuses a length counting months or years first, so a month never reaches a column |
 | matchKey | function | A primitive that is equal exactly when `equals()` holds, and orders as the kind orders when `ordered` |
 | ordered | boolean | Whether the kind orders, so a range and a sort make sense on it. The three ranges do not |
-| family | array | The seven classes, so a schema that names one registers them all |
-| summable | boolean | On `Duration` only. Lengths add, so a sum over a column of them totals the key's milliseconds |
-| condition | function | On `DateTime` only. What a field of the kind means for a calendar day, per operator: an `$or` of operator maps on the field, the day half-open in the configured zone |
-| upgrades | constructor | On `DateTime` only. The built-in it stands in for, `Date`, so a schema upgrades its `Date` kind to the class under the same name |
+| summable | boolean | On `DurationType` only. Lengths add, so a sum over a column of them totals the key's milliseconds |
+| condition | function | On `DateTimeType` only. What a field of the kind means for a calendar day, per operator: an `$or` of operator maps on the field, the day half-open in the configured zone |
+| upgrades | constructor | On `DateTimeType` only. The built-in it stands in for, `Date`, so the schema package upgrades its `datetime` kind to the class under the same name |
 
 ### matchKey
 
@@ -63,7 +51,7 @@ Each class carries one `Type`, the same object the schema package's `defineType`
 ### condition
 
 ```javascript
-DateTime[VALUE].condition(operator, operand);
+DateTimeType.condition(operator, operand);
 ```
 
 What a field of instants means for a calendar day. The day is that whole day in the configured zone, half-open from midnight to the next midnight, so a day across a daylight saving change is 23 or 25 hours as the calendar says. Each operator reads it in those terms: `eq` is the day, `$ne` its complement, `$gte` and `$lt` bound at its first instant, `$lte` and `$gt` at the next day's. A data layer splices the answer into the field's condition and pushes it to an engine as two bounds. Any other operator or operand answers `undefined`, so the data layer reads the operand through `read` instead, and no configured zone refuses `noZone`, since the client and the server must read one day.

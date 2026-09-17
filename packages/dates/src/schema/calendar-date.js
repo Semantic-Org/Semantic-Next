@@ -1,15 +1,14 @@
-import { defineType } from '@semantic-ui/schema';
+import { defineType, registerType } from '@semantic-ui/schema';
 
 import { CalendarDate, date } from '../calendar-date.js';
-import { day, family, lenient, text, VALUE } from './protocol.js';
+import { lenient, text } from '../helpers/types.js';
 
-CalendarDate[VALUE] = defineType(CalendarDate, {
+export const CalendarDateType = registerType(defineType(CalendarDate, {
   name: 'date',
   parse: lenient(date),
   read: date,
   decode: date,
   encode: text,
-  matchKey: day,
+  matchKey: (value) => value.year * 10000 + value.month * 100 + value.day,
   ordered: true,
-  family,
-});
+}));
