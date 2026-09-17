@@ -7,13 +7,24 @@
   importing this subpath is the whole opt-in
 */
 
-export { CalendarDateType } from './calendar-date.js';
-export { DateRangeType } from './date-range.js';
-export { DateTimeType } from './date-time.js';
-export { DateTimeRangeType } from './datetime-range.js';
-export { DurationType } from './duration.js';
-export { TimeRangeType } from './time-range.js';
-export { TimeType } from './time.js';
+import { registerType } from '@semantic-ui/schema';
+
+import { CalendarDateType as calendarDate } from './calendar-date.js';
+import { DateRangeType as dateRange } from './date-range.js';
+import { DateTimeType as dateTime } from './date-time.js';
+import { DateTimeRangeType as dateTimeRange } from './datetime-range.js';
+import { DurationType as duration } from './duration.js';
+import { TimeRangeType as timeRange } from './time-range.js';
+import { TimeType as time } from './time.js';
+
+// registered here, once each. the instant's registration upgrades the built-in datetime and hands that Type back
+export const DateTimeType = registerType(dateTime);
+export const CalendarDateType = registerType(calendarDate);
+export const TimeType = registerType(time);
+export const DurationType = registerType(duration);
+export const DateRangeType = registerType(dateRange);
+export const DateTimeRangeType = registerType(dateTimeRange);
+export const TimeRangeType = registerType(timeRange);
 
 export { CalendarDate } from '../calendar-date.js';
 export { DateTime } from '../date-time.js';

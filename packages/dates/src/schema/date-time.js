@@ -1,4 +1,4 @@
-import { defineType, registerType } from '@semantic-ui/schema';
+import { defineType } from '@semantic-ui/schema';
 import { isDate, isDevelopment } from '@semantic-ui/utils';
 
 import { CalendarDate } from '../calendar-date.js';
@@ -39,7 +39,7 @@ const condition = (operator, operand) => (
 );
 
 // the instant kind alone states what a calendar day means for it, and upgrades the built-in Date it stands in for
-export const DateTimeType = registerType(defineType(DateTime, {
+export const DateTimeType = defineType(DateTime, {
   name: 'datetime',
   parse: lenient(datetime),
   read: datetime,
@@ -50,4 +50,4 @@ export const DateTimeType = registerType(defineType(DateTime, {
   ordered: true,
   condition,
   upgrades: Date,
-}));
+});

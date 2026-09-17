@@ -1,4 +1,4 @@
-import { defineType, registerType } from '@semantic-ui/schema';
+import { defineType } from '@semantic-ui/schema';
 import { isDevelopment } from '@semantic-ui/utils';
 
 import { Duration, duration } from '../duration.js';
@@ -20,7 +20,7 @@ const assertLength = (value) => {
 
 // a length adds, so a sum over a column of them totals milliseconds, and the wire form refuses a
 // month or a year the way the key does
-export const DurationType = registerType(defineType(Duration, {
+export const DurationType = defineType(Duration, {
   name: 'duration',
   parse: lenient(duration),
   read: duration,
@@ -29,4 +29,4 @@ export const DurationType = registerType(defineType(Duration, {
   matchKey: (value) => assertLength(value).toMilliseconds(),
   ordered: true,
   summable: true,
-}));
+});

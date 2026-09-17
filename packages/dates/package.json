@@ -8,7 +8,7 @@
   "license": "ISC",
   "type": "module",
   "sideEffects": [
-    "./src/schema/*.js"
+    "./src/schema/index.js"
   ],
   "engines": {
     "node": ">=26"
