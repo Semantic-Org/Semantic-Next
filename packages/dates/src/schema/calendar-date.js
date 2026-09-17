@@ -1,4 +1,15 @@
-import { CalendarDate, date } from '../calendar-date.js';
-import { day, family, VALUE } from './protocol.js';
+import { defineType } from '@semantic-ui/schema';
 
-CalendarDate[VALUE] = Object.freeze({ kind: 'date', parse: date, decode: date, key: day, ordered: true, family });
+import { CalendarDate, date } from '../calendar-date.js';
+import { day, family, lenient, text, VALUE } from './protocol.js';
+
+CalendarDate[VALUE] = defineType(CalendarDate, {
+  name: 'date',
+  parse: lenient(date),
+  read: date,
+  decode: date,
+  encode: text,
+  matchKey: day,
+  ordered: true,
+  family,
+});

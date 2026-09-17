@@ -1,8 +1,11 @@
 /**
- * The value protocol, what a schema reads off a class to store, compare and order its values.
- * This subpath attaches it to the seven classes and re-exports them. The bare entry has none of it
+ * The seven classes with a schema Type each, carried under the value symbol. The bare entry has
+ * none of it, and `@semantic-ui/schema` is the consumer: naming one class in a schema registers
+ * the seven
  * @see https://next.semantic-ui.com/docs/api/dates/schema
  */
+
+import type { Type } from '@semantic-ui/schema';
 
 import type { CalendarDate } from './calendar-date.js';
 import type { DateTime } from './date-time.js';
@@ -11,56 +14,24 @@ import type { DateRange, DateTimeRange, TimeRange } from './range.js';
 import type { Time } from './time.js';
 
 /**
- * `Symbol.for('semantic-ui/value')`, the key of the protocol on each class
+ * `Symbol.for('semantic-ui/value')`, the key each class carries its Type under
  * @see https://next.semantic-ui.com/docs/api/dates/schema#value
  */
 export const VALUE: unique symbol;
 
-/**
- * What one class declares
- * @see https://next.semantic-ui.com/docs/api/dates/schema#the-protocol
- */
-export interface ValueProtocol<Value, Key extends number | bigint | string> {
-  /** The kind's lowercase word, `kindOf` spells the same one */
-  readonly kind: 'datetime' | 'date' | 'time' | 'duration' | 'dateRange' | 'datetimeRange' | 'timeRange';
-  /** Reads a written value, throwing this library's own refusal for what it cannot read */
-  parse(input: unknown): Value;
-  /** Reads the wire form back, `toJSON()`'s own text, throwing for anything else */
-  decode(input: unknown): Value;
-  /** A primitive that is equal exactly when `equals()` holds, and orders as the kind orders when `ordered` */
-  key(value: Value): Key;
-  /** Whether the kind orders, so a range and a sort make sense on it */
-  readonly ordered: boolean;
-  /** The seven classes, so a schema that names one registers them all */
-  readonly family: readonly Function[];
-  /** `Duration` alone declares it. `toJSON()` after the refusal a length counting months or years earns, `calendarDuration` */
-  encode?(value: Value): string;
-  /** `Duration` alone declares it. A length adds, so a sum over a column of them totals the key's milliseconds */
-  readonly summable?: boolean;
-  /**
-   * `DateTime` alone declares it. What a field of this kind means for an operand of another kind,
-   * a calendar day: an `$or` of operator maps on the field, one map where one suffices, the day
-   * half-open in the configured zone. `eq`, `$ne`, `$gte`, `$gt`, `$lt` and `$lte` answer for a
-   * day. Anything else is undefined, so a data layer reads the operand through `parse` instead.
-   * `noZone` with no zone configured
-   */
-  condition?(operator: string, operand: unknown): Array<Record<string, DateTime>> | undefined;
-  /** `DateTime` alone declares it. The built-in constructor the kind stands in for, so a schema upgrades its `Date` kind to this class under the same name */
-  readonly upgrades?: Function;
+/** A class carrying its Type, built with `defineType` from `@semantic-ui/schema` */
+export interface Declared {
+  readonly [VALUE]: Type;
 }
 
-export interface Declared<Value, Key extends number | bigint | string> {
-  readonly [VALUE]: ValueProtocol<Value, Key>;
-}
-
-/** The classes with their protocol attached, the same objects the bare entry exports */
-export const DateTime: typeof import('./date-time.js').DateTime & Declared<DateTime | Date, bigint>;
-export const CalendarDate: typeof import('./calendar-date.js').CalendarDate & Declared<CalendarDate, number>;
-export const Time: typeof import('./time.js').Time & Declared<Time, number>;
-export const Duration: typeof import('./duration.js').Duration & Declared<Duration, number>;
-export const DateRange: typeof import('./range.js').DateRange & Declared<DateRange, string>;
-export const DateTimeRange: typeof import('./range.js').DateTimeRange & Declared<DateTimeRange, string>;
-export const TimeRange: typeof import('./range.js').TimeRange & Declared<TimeRange, string>;
+/** The classes with their Types attached, the same objects the bare entry exports */
+export const DateTime: typeof import('./date-time.js').DateTime & Declared;
+export const CalendarDate: typeof import('./calendar-date.js').CalendarDate & Declared;
+export const Time: typeof import('./time.js').Time & Declared;
+export const Duration: typeof import('./duration.js').Duration & Declared;
+export const DateRange: typeof import('./range.js').DateRange & Declared;
+export const DateTimeRange: typeof import('./range.js').DateTimeRange & Declared;
+export const TimeRange: typeof import('./range.js').TimeRange & Declared;
 
 export type {
   CalendarDate as CalendarDateValue,

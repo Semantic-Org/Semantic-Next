@@ -38,6 +38,14 @@
   "dependencies": {
     "@semantic-ui/utils": "^0.18.0"
   },
+  "peerDependencies": {
+    "@semantic-ui/schema": "*"
+  },
+  "peerDependenciesMeta": {
+    "@semantic-ui/schema": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@semantic-ui/internal-scripts": "^0.18.0"
   },

@@ -1,10 +1,11 @@
+import { defineType } from '@semantic-ui/schema';
 import { isDevelopment } from '@semantic-ui/utils';
 
 import { CalendarDate } from '../calendar-date.js';
 import { DateTime, datetime } from '../date-time.js';
 import { refuse } from '../helpers/errors.js';
 import { configure } from '../helpers/zones.js';
-import { family, instant, VALUE } from './protocol.js';
+import { family, instant, lenient, text, VALUE } from './protocol.js';
 
 // a calendar day against an instant field means that whole day in the app's zone, half-open, and
 // each operator reads it in those terms: the day for eq, its complement for $ne, its first instant
@@ -38,11 +39,13 @@ const condition = (operator, operand) => (
 );
 
 // the instant kind alone declares condition, and upgrades, the built-in Date it stands in for
-DateTime[VALUE] = Object.freeze({
-  kind: 'datetime',
-  parse: datetime,
+DateTime[VALUE] = defineType(DateTime, {
+  name: 'datetime',
+  parse: lenient(datetime),
+  read: datetime,
   decode: datetime,
-  key: instant,
+  encode: text,
+  matchKey: instant,
   ordered: true,
   family,
   condition,

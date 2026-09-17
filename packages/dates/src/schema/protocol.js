@@ -7,7 +7,7 @@ import { refuse } from '../helpers/errors.js';
 import { DateRange, DateTimeRange, TimeRange } from '../range.js';
 import { Time } from '../time.js';
 
-// the key the protocol sits under on each class, a Symbol.for so every bundle and realm reads the same one
+// the key each class carries its Type under, a Symbol.for so every bundle and realm reads the same one
 export const VALUE = Symbol.for('semantic-ui/value');
 
 // the seven classes register together, so a schema that names one registers them all
@@ -43,3 +43,13 @@ export const assertLength = (value) => {
 export const length = (value) => assertLength(value).toMilliseconds();
 
 export const text = (value) => value.toJSON();
+
+// the write door hands back what the factory refuses, for a schema's validate to flag. read and decode throw the refusal
+export const lenient = (read) => (input) => {
+  try {
+    return read(input);
+  }
+  catch {
+    return input;
+  }
+};

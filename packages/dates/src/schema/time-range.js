@@ -1,11 +1,15 @@
-import { TimeRange, timeRange } from '../range.js';
-import { family, text, VALUE } from './protocol.js';
+import { defineType } from '@semantic-ui/schema';
 
-TimeRange[VALUE] = Object.freeze({
-  kind: 'timeRange',
-  parse: timeRange,
+import { TimeRange, timeRange } from '../range.js';
+import { family, lenient, text, VALUE } from './protocol.js';
+
+// a span keys by its wire text and has no single order
+TimeRange[VALUE] = defineType(TimeRange, {
+  name: 'timeRange',
+  parse: lenient(timeRange),
+  read: timeRange,
   decode: timeRange,
-  key: text,
-  ordered: false,
+  encode: text,
+  matchKey: text,
   family,
 });
