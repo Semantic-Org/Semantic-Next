@@ -134,4 +134,11 @@ describe('the value protocol', () => {
     expect(DateTime[VALUE].condition('$in', [day])).toBeUndefined();
     expect(DateTime[VALUE].span).toBeUndefined();
   });
+
+  it('declares on DateTime alone the built-in it upgrades', () => {
+    expect(DateTime[VALUE].upgrades).toBe(Date);
+    for (const Kind of [CalendarDate, Time, Duration, DateRange, DateTimeRange, TimeRange]) {
+      expect(Kind[VALUE].upgrades).toBeUndefined();
+    }
+  });
 });

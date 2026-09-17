@@ -260,7 +260,8 @@ the wire form after the same refusal, so a month never reaches a column, and `su
 On `DateTime` only, `condition(operator, day)` says what a field of instants means for a calendar day:
 that whole day in the configured zone, half-open, spelled per operator as an `$or` of operator maps a
 query splices in (`eq` the day, `$ne` its complement, `$gte` and `$lt` its first instant, `$lte` and
-`$gt` the next day's), and refuses `noZone` when none is configured.
+`$gt` the next day's), and refuses `noZone` when none is configured. `DateTime` also declares `upgrades`,
+the built-in `Date` it stands in for, so a schema upgrades its `Date` kind to the class under the same name.
 
 ## errors
 

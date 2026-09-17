@@ -45,6 +45,8 @@ export interface ValueProtocol<Value, Key extends number | bigint | string> {
    * `noZone` with no zone configured
    */
   condition?(operator: string, operand: unknown): Array<Record<string, DateTime>> | undefined;
+  /** `DateTime` alone declares it. The built-in constructor the kind stands in for, so a schema upgrades its `Date` kind to this class under the same name */
+  readonly upgrades?: Function;
 }
 
 export interface Declared<Value, Key extends number | bigint | string> {
