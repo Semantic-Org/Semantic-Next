@@ -8,7 +8,7 @@
   "license": "ISC",
   "type": "module",
   "sideEffects": [
-    "./src/schema.js"
+    "./src/schema/index.js"
   ],
   "engines": {
     "node": ">=26"
@@ -25,7 +25,7 @@
     },
     "./schema": {
       "types": "./types/schema.d.ts",
-      "import": "./src/schema.js"
+      "import": "./src/schema/index.js"
     }
   },
   "scripts": {
@@ -36,6 +36,14 @@
   },
   "dependencies": {
     "@semantic-ui/utils": "^0.18.0"
+  },
+  "peerDependencies": {
+    "@semantic-ui/schema": "*"
+  },
+  "peerDependenciesMeta": {
+    "@semantic-ui/schema": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@semantic-ui/internal-scripts": "^0.18.0"
