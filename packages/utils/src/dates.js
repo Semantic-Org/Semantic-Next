@@ -1,6 +1,7 @@
 import { toDuration } from './coercion.js';
 import { configured } from './functions.js';
 import { roundDecimal } from './numbers.js';
+import { isFunction, isNumber, isTemporal } from './types.js';
 
 /*-------------------
         Dates
@@ -59,10 +60,16 @@ export const timezones = {
 export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
   locale = 'default',
   hour12 = true,
-  timezone = 'UTC',
+  timezone: zone,
   ...additionalOptions
 } = {}) => {
-  if (date == null || isNaN(date.getTime?.())) { return 'Invalid Date'; }
+  // a value that hands its instant over as a Date, the convention Luxon set, or a Temporal value
+  // holding one, prints in its own zone unless told one, the zone by the name Temporal gives it
+  const asDate = isFunction(date?.toJSDate)
+    ? date.toJSDate()
+    : (isTemporal(date) && isNumber(date.epochMilliseconds) ? new Date(date.epochMilliseconds) : date);
+  if (asDate == null || isNaN(asDate.getTime?.())) { return 'Invalid Date'; }
+  const timezone = zone ?? date.timeZoneId ?? 'UTC';
 
   const timezones = formatDate.config.timezones;
   const resolvedTimezone = timezone === 'local'
@@ -92,7 +99,7 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
     formatterCache.set(cacheKey, formatter);
   }
 
-  const dateParts = formatter.formatToParts(date).reduce((acc, part) => {
+  const dateParts = formatter.formatToParts(asDate).reduce((acc, part) => {
     acc[part.type] = part.value;
     return acc;
   }, {});
@@ -111,7 +118,7 @@ export const formatDate = /* @__PURE__ */ configured((date, format = 'LLL', {
       });
       monthFormatterCache.set(monthKey, monthFormatter);
     }
-    const monthParts = monthFormatter.formatToParts(date);
+    const monthParts = monthFormatter.formatToParts(asDate);
     for (let i = 0; i < monthParts.length; i++) {
       if (monthParts[i].type === 'month') {
         numericMonth = parseInt(monthParts[i].value, 10);

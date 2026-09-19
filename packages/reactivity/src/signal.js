@@ -27,7 +27,7 @@ export class Signal {
   static equality = isEqual;
 
   // permits non cloneables like CustomClass() to be stored in signals
-  static clone = (value) => clone(value, { preserveNonCloneable: true });
+  static clone = (value) => clone(value);
 
   static id = (item) => item.id ?? item._id ?? item.hash ?? item.key;
   static safety = 'reference';

@@ -226,6 +226,25 @@ describe('toDate', () => {
     expect(toDate(date)).toBe(date);
   });
 
+  it('reads a value that hands its instant over through toJSDate, and a Temporal value that holds one', () => {
+    const instant = new Date('2026-09-06T14:30:00Z');
+    expect(toDate({ toJSDate: () => instant })).toBe(instant);
+    expect(toDate(Temporal.Instant.from('2026-09-06T14:30:00Z'))?.toISOString()).toBe('2026-09-06T14:30:00.000Z');
+    expect(toDate(Temporal.ZonedDateTime.from('2026-09-06T23:30:00+09:00[Asia/Tokyo]'))?.toISOString()).toBe(
+      '2026-09-06T14:30:00.000Z',
+    );
+    // a plain date, a time or a duration holds no instant
+    expect(toDate(Temporal.PlainDate.from('2026-09-06'))).toBe(null);
+    expect(toDate(Temporal.PlainTime.from('09:00'))).toBe(null);
+    expect(toDate(Temporal.Duration.from('PT1H'))).toBe(null);
+    const day = Temporal.PlainDate.from('2026-09-06');
+    expect(toDate(day, { onInvalid: 'passthrough' })).toBe(day);
+    // an invalid Date handed over is refused the way a poisoned Date is
+    const poisoned = { toJSDate: () => new Date(NaN) };
+    expect(toDate(poisoned)).toBe(null);
+    expect(toDate(poisoned, { onInvalid: 'passthrough' })).toBe(poisoned);
+  });
+
   it('rejects ambiguous, loose, and impossible dates rather than guessing', () => {
     expect(toDate('2024')).toBe(null);
     expect(toDate('01/15/2024')).toBe(null);

@@ -675,7 +675,7 @@ export const extend = (obj, ...sources) => {
   return obj;
 };
 
-const deepExtendDefaults = { preserveNonCloneable: true, preserveDOM: true };
+const deepExtendDefaults = { preserveDOM: true };
 
 export const deepExtend = (target, ...args) => {
   if (!isObject(target)) {

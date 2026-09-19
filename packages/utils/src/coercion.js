@@ -1,5 +1,5 @@
 import { configured } from './functions.js';
-import { isArray, isBinary, isBoolean, isDate, isNumber, isObject, isString } from './types.js';
+import { isArray, isBinary, isBoolean, isDate, isFunction, isNumber, isObject, isString, isTemporal } from './types.js';
 
 /*-------------------
       Coercion
@@ -98,6 +98,16 @@ export const toInteger = (value, { onInvalid = 'null' } = {}) => {
 export const toDate = (value, { onInvalid = 'null', epoch = 'milliseconds' } = {}) => {
   // isDate admits Invalid Date, so reject it explicitly. a poisoned Date must never escape
   if (isDate(value)) { return Number.isNaN(value.getTime()) ? onInvalidResult(value, onInvalid) : value; }
+  // a value that hands its instant over as a Date, the convention Luxon set, reads through it. a
+  // Temporal value holding an instant reads by that, and one without, a plain date or time, reads
+  // as nothing
+  if (isFunction(value?.toJSDate)) {
+    const date = value.toJSDate();
+    return isDate(date) && !Number.isNaN(date.getTime()) ? date : onInvalidResult(value, onInvalid);
+  }
+  if (isTemporal(value)) {
+    return isNumber(value.epochMilliseconds) ? new Date(value.epochMilliseconds) : onInvalidResult(value, onInvalid);
+  }
   // numbers are epoch milliseconds unless the caller declares seconds (a JWT exp, most unix
   // timestamps), where the ms reading would produce a valid but wrong date in 1970.
   // a timestamp passed as a string is rejected below, on purpose

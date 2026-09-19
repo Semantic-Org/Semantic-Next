@@ -50,6 +50,14 @@ export const isRegExp = (x) => {
 
 const toString = Object.prototype.toString;
 
+// a native Temporal value names its type in the tag its prototype carries, so one property read
+// tells and no string is built. a Date is never one
+export const isTemporal = (x) => {
+  if (!isObject(x)) { return false; }
+  const tag = x[Symbol.toStringTag];
+  return isString(tag) && tag.startsWith('Temporal.');
+};
+
 export const isArguments = (obj) => {
   return toString.call(obj) === '[object Arguments]';
 };

@@ -17,6 +17,7 @@ import {
   isRegExp,
   isSet,
   isString,
+  isTemporal,
 } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
@@ -279,6 +280,18 @@ describe('type checkers — additional coverage', () => {
   it('isDate should identify Date objects', () => {
     expect(isDate(new Date())).toBe(true);
     expect(isDate('2024-01-01')).toBe(false);
+  });
+
+  it('isTemporal reads a native Temporal value by its tag, never a Date or a value class of our own', () => {
+    expect(isTemporal(Temporal.Now.instant())).toBe(true);
+    expect(isTemporal(Temporal.PlainDate.from('2026-09-06'))).toBe(true);
+    expect(isTemporal(Temporal.Duration.from('PT1H'))).toBe(true);
+    expect(isTemporal(new Date())).toBe(false);
+    expect(isDate(Temporal.Now.instant())).toBe(false);
+    expect(isTemporal({ toJSDate: () => new Date() })).toBe(false);
+    expect(isTemporal({})).toBe(false);
+    expect(isTemporal('2026-09-06')).toBe(false);
+    expect(isTemporal(null)).toBe(false);
   });
 
   it('isRegExp should identify RegExp objects', () => {

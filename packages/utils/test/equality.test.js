@@ -20,6 +20,40 @@ describe('isEqual', () => {
     }
   });
 
+  it('compares a class instance by its own equals when both carry one, exact where valueOf would round', () => {
+    class Moment {
+      #nanoseconds;
+      constructor(nanoseconds) {
+        this.#nanoseconds = nanoseconds;
+      }
+      valueOf() {
+        return Number(this.#nanoseconds / 1_000_000n);
+      }
+      equals(other) {
+        return this.#nanoseconds === other.#nanoseconds;
+      }
+    }
+    const exact = new Moment(1_000_000_001n);
+    expect(isEqual(exact, new Moment(1_000_000_001n))).toBe(true);
+    // the same millisecond through valueOf, a nanosecond apart through equals
+    expect(isEqual(exact, new Moment(1_000_000_000n))).toBe(false);
+    expect(isEqual({ at: exact }, { at: new Moment(1_000_000_000n) })).toBe(false);
+    expect(isEqual([exact], [new Moment(1_000_000_001n)])).toBe(true);
+
+    // a plain object with an equals key is data, compared key by key
+    expect(isEqual({ equals: () => true }, { equals: () => true })).toBe(false);
+
+    // the native Temporal types carry equals, and a Duration, which does not, compares by its string
+    expect(isEqual(Temporal.Instant.from('2026-09-06T14:30:00Z'), Temporal.Instant.from('2026-09-06T14:30:00Z'))).toBe(
+      true,
+    );
+    expect(
+      isEqual(Temporal.Instant.from('2026-09-06T14:30:00.000000001Z'), Temporal.Instant.from('2026-09-06T14:30:00Z')),
+    ).toBe(false);
+    expect(isEqual(Temporal.Duration.from('PT90M'), Temporal.Duration.from('PT90M'))).toBe(true);
+    expect(isEqual(Temporal.Duration.from('PT90M'), Temporal.Duration.from('PT1H30M'))).toBe(false);
+  });
+
   describe('Various types', () => {
     // Primitives
     it('should return true for equal strings', () => {

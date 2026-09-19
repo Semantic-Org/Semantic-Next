@@ -11,6 +11,29 @@ describe('clone', () => {
     expect(clonedDate.getTime()).toBe(originalDate.getTime());
   });
 
+  it('hands a class instance back by reference, a value class with private fields and a Temporal value among them', () => {
+    class Moment {
+      #epoch;
+      constructor(epoch) {
+        this.#epoch = epoch;
+      }
+      get epoch() {
+        return this.#epoch;
+      }
+    }
+    const moment = new Moment(1_757_169_000_000);
+    const instant = Temporal.Instant.from('2026-09-06T14:30:00Z');
+    const failure = new Error('kept as is');
+    const copied = clone({ at: moment, then: instant, failure, list: [moment], nested: { at: moment } });
+    expect(copied.at).toBe(moment);
+    expect(copied.then).toBe(instant);
+    expect(copied.failure).toBe(failure);
+    expect(copied.list[0]).toBe(moment);
+    expect(copied.nested.at).toBe(moment);
+    expect(copied.nested).not.toBe(moment);
+    expect(copied.at.epoch).toBe(1_757_169_000_000);
+  });
+
   it('should return the input value if it is not an object or a function', () => {
     expect(clone(123)).toBe(123);
     expect(clone('hello')).toBe('hello');
@@ -120,7 +143,7 @@ describe('clone', () => {
     expect(clonedObject.circularRef).toBe(clonedObject);
   });
 
-  it('should flatten custom class instances by default', () => {
+  it('keeps a custom class instance by reference by default, and flattens it only when asked', () => {
     class CustomClass {
       constructor(value) {
         this.value = value;
@@ -136,19 +159,17 @@ describe('clone', () => {
       custom: instance,
     };
 
-    // Default behavior - should flatten custom classes to plain objects
     const clonedDefault = clone(obj);
-    expect(clonedDefault.custom).not.toBe(instance);
-    expect(clonedDefault.custom instanceof CustomClass).toBe(false);
-    expect(clonedDefault.custom.value).toBe(42);
-    expect(clonedDefault.custom.getValue).toBeUndefined();
+    expect(clonedDefault).not.toBe(obj);
+    expect(clonedDefault.regular).not.toBe(obj.regular);
+    expect(clonedDefault.custom).toBe(instance);
 
-    // Explicit false should behave the same
-    const clonedExplicitFalse = clone(obj, { preserveNonCloneable: false });
-    expect(clonedExplicitFalse.custom).not.toBe(instance);
-    expect(clonedExplicitFalse.custom instanceof CustomClass).toBe(false);
-    expect(clonedExplicitFalse.custom.value).toBe(42);
-    expect(clonedExplicitFalse.custom.getValue).toBeUndefined();
+    // preserveNonCloneable: false walks the instance into a plain object, its prototype gone
+    const flattened = clone(obj, { preserveNonCloneable: false });
+    expect(flattened.custom).not.toBe(instance);
+    expect(flattened.custom instanceof CustomClass).toBe(false);
+    expect(flattened.custom.value).toBe(42);
+    expect(flattened.custom.getValue).toBeUndefined();
   });
 
   it('should preserve custom class instances when preserveNonCloneable is true', () => {

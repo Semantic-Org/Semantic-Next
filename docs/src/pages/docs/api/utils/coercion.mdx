@@ -158,7 +158,7 @@ console.log(toInteger(Infinity)); // null
 function toDate(value, { onInvalid = 'null', epoch = 'milliseconds' } = {})
 ```
 
-Coerces a value to a Date, or `null` when it can't be parsed — never an `Invalid Date`. Accepts a Date, a number read as epoch milliseconds, or an **ISO-8601 string**. Ambiguous or locale-dependent spellings return `null` rather than a guessed date: bare years, slash and text dates, and day overflow all reject, so `'01/15/2024'` and `'2024-02-30'` never become a wrong Date. A zoneless datetime resolves in the ambient timezone (the user's zone on the client) and is returned as a UTC instant, the same as native `new Date` on an `<input type="datetime-local">` value. A date-only string is read as UTC, and a timestamp passed as a string is rejected, so pass a number for epoch ms.
+Coerces a value to a Date, or `null` when it can't be parsed — never an `Invalid Date`. Accepts a Date, a number read as epoch milliseconds, an **ISO-8601 string**, any value that hands its instant over through `toJSDate()`, or a Temporal value holding an instant, an `Instant` or a `ZonedDateTime`. A `PlainDate`, a `PlainTime` or a `Duration` holds no instant and reads as `null`. Ambiguous or locale-dependent spellings return `null` rather than a guessed date: bare years, slash and text dates, and day overflow all reject, so `'01/15/2024'` and `'2024-02-30'` never become a wrong Date. A zoneless datetime resolves in the ambient timezone (the user's zone on the client) and is returned as a UTC instant, the same as native `new Date` on an `<input type="datetime-local">` value. A date-only string is read as UTC, and a timestamp passed as a string is rejected, so pass a number for epoch ms.
 
 #### Parameters
 
@@ -188,6 +188,10 @@ console.log(toDate(1700000000000)); // Date from epoch ms
 console.log(toDate(payload.exp, { epoch: 'seconds' })); // Date from a unix-second JWT exp
 console.log(toDate('01/15/2024')); // null (ambiguous format)
 console.log(toDate('banana')); // null (never an Invalid Date)
+console.log(toDate(Temporal.Now.instant())); // Date for the same instant
+console.log(toDate(Temporal.ZonedDateTime.from('2026-09-06T23:30:00+09:00[Asia/Tokyo]'))); // Date for the same instant
+console.log(toDate(Temporal.PlainDate.from('2026-09-06'))); // null (a calendar day holds no instant)
+console.log(toDate({ toJSDate: () => new Date(0) })); // Date at the epoch, through toJSDate()
 
 const when = toDate(userInput) ?? new Date();
 ```

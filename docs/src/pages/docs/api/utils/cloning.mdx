@@ -20,7 +20,7 @@ function clone(src, options?)
 
 Creates a deep clone of the provided value.
 
-> **Handling Complex Structures** This function can clone arrays, objects, dates, regular expressions, maps, sets, and null-prototype objects. It uses a WeakMap internally to handle circular references and prevent infinite recursion.
+> **Handling Complex Structures** This function can clone arrays, objects, dates, regular expressions, maps, sets, and null-prototype objects. It uses a WeakMap internally to handle circular references and prevent infinite recursion. A class instance it does not recognise, a store, a client or a value class such as a Temporal `Instant`, comes back by reference, since a walk over its properties would hand back a plain object without its prototype or its private fields.
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Creates a deep clone of the provided value.
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
 | preserveDOM | boolean | `false` | Preserve DOM nodes by reference instead of cloning them |
-| preserveNonCloneable | boolean | `false` | Preserve custom class instances by reference instead of flattening to plain objects |
+| preserveNonCloneable | boolean | `true` | Keep class instances by reference. `false` walks each into a plain object of its own properties |
 
 #### Returns
 
@@ -75,21 +75,23 @@ console.log(cloned.value === data.value); // true
 console.log(cloned !== data); // true
 ```
 
-#### Preserving Class Instances
+#### Class Instances
 
-When `preserveNonCloneable` is `true`, custom class instances are kept by reference instead of being flattened to plain objects.
+A class instance is kept by reference. Settings passed to `defineComponent()` can carry one, a store or an API client, into the component's data context, and a clone that walked it would hand the template a plain object with its methods and private fields gone. Pass `preserveNonCloneable: false` for a plain-data copy.
 
 ```javascript
 import { clone } from '@semantic-ui/utils';
 
 class Store { value = 42; }
-const store = new Store();
+const settings = { store: new Store(), config: { a: 1 } };
 
-const data = { store, config: { a: 1 } };
-const cloned = clone(data, { preserveNonCloneable: true });
+const cloned = clone(settings);
+console.log(cloned.store === settings.store); // true (same instance)
+console.log(cloned.config !== settings.config); // true (deep cloned)
 
-console.log(cloned.store === store); // true (same reference)
-console.log(cloned.config !== data.config); // true (deep cloned)
+const flattened = clone(settings, { preserveNonCloneable: false });
+console.log(flattened.store instanceof Store); // false
+console.log(flattened.store); // { value: 42 }
 ```
 
 ### deepFreeze

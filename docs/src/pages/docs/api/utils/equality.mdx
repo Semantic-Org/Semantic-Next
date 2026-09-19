@@ -20,7 +20,7 @@ function isEqual(a, b, options?)
 
 Performs a deep equality comparison between two values.
 
-> **Deep Comparison** This function performs a recursive comparison for objects and arrays, ensuring that nested structures are also checked for equality. It handles various edge cases, including `NaN` comparisons.
+> **Deep Comparison** This function performs a recursive comparison for objects and arrays, ensuring that nested structures are also checked for equality. It handles various edge cases, including `NaN` comparisons. A class instance compares by its own `equals()` when both operands carry one, the convention Temporal, Immutable.js and Luxon share, so two `Temporal.Instant` values are equal when they mark the same instant.
 
 #### Parameters
 
@@ -53,6 +53,7 @@ console.log(isEqual([1, 2, 3], [1, 2, 3])); // true
 console.log(isEqual({a: 1, b: 2}, {b: 2, a: 1})); // true
 console.log(isEqual(NaN, NaN)); // true
 console.log(isEqual({a: 1, b: 2}, {a: 1, b: 3})); // false
+console.log(isEqual(Temporal.Instant.from('2026-09-06T14:30Z'), Temporal.Instant.from('2026-09-06T14:30Z'))); // true (by its own equals)
 ```
 
 #### Loose Comparison

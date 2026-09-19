@@ -124,7 +124,8 @@ interface DateFormatOptionsCustom extends Omit<Intl.DateTimeFormatOptions, 'time
  *
  * @see {@link https://next.semantic-ui.com/docs/api/utils/dates#formatdate formatDate}
  *
- * @param date - The date to format
+ * @param date - The date to format. A value that hands its instant over through `toJSDate()`, or a
+ *   Temporal value holding one, prints in its own zone unless `timezone` says otherwise
  * @param format - Predefined format string or custom format pattern (default `'LLL'`)
  * @param options - Formatting options including locale, timezone, hour12, and any
  *   additional `Intl.DateTimeFormatOptions` passed through to the formatter
@@ -170,8 +171,12 @@ interface DateFormatOptionsCustom extends Omit<Intl.DateTimeFormatOptions, 'time
  *
  * Use square brackets to escape text: `[Today is] DD`
  */
-export function formatDate(date: Date, format: DatePreset | DateToken, options?: DateFormatOptionsPreset): string;
-export function formatDate(date: Date, format?: string, options?: DateFormatOptionsCustom): string;
+export function formatDate(
+  date: Date | object,
+  format: DatePreset | DateToken,
+  options?: DateFormatOptionsPreset,
+): string;
+export function formatDate(date: Date | object, format?: string, options?: DateFormatOptionsCustom): string;
 
 /**
  * The shorthand timezone table {@link formatDate} reads, abbreviation mapped to an IANA zone, and

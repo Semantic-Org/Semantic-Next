@@ -82,6 +82,22 @@ export function isPromise(x: unknown): x is Promise<any>;
 export function isDate(x: unknown): x is Date;
 
 /**
+ * Checks if the value is a native Temporal value, an Instant, a ZonedDateTime, a PlainDate and the
+ * rest, read by the tag its prototype carries. A `Date` is never one
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/types#istemporal isTemporal}
+ * @param x - The value to check
+ * @returns True if the value is a Temporal value, false otherwise
+ *
+ * @example
+ * ```typescript
+ * isTemporal(Temporal.Now.instant());           // true
+ * isTemporal(Temporal.PlainDate.from('2026-09-06')); // true
+ * isTemporal(new Date());                       // false
+ * ```
+ */
+export function isTemporal(x: unknown): boolean;
+
+/**
  * Checks if the value is a RegExp instance (cross-realm safe)
  * @see {@link https://next.semantic-ui.com/docs/api/utils/types#isregexp isRegExp}
  * @param x - The value to check

@@ -208,6 +208,34 @@ console.log(isDate(Date.now())); // false
 console.log(isDate('2024-01-01')); // false
 ```
 
+### isTemporal
+
+```javascript
+function isTemporal(x)
+```
+
+Checks if the given value is a native Temporal value, an `Instant`, a `ZonedDateTime`, a `PlainDate` and the rest, read by the tag its prototype carries. A `Date` is never one.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| x    | any  | Any value to check |
+
+#### Returns
+
+`boolean` - True if the value is a Temporal value, false otherwise.
+
+#### Example
+
+```javascript
+import { isTemporal } from '@semantic-ui/utils';
+
+console.log(isTemporal(Temporal.Now.instant())); // true
+console.log(isTemporal(Temporal.PlainDate.from('2026-09-06'))); // true
+console.log(isTemporal(new Date())); // false
+```
+
 ### isRegExp
 
 ```javascript
