@@ -451,7 +451,8 @@ Deep extends an object with properties from other sources, recursively merging n
 
 | Name               | Type    | Default | Description |
 |--------------------|---------|---------|-------------|
-| preserveNonCloneable | boolean | false   | Preserve custom class instances instead of flattening them |
+| preserveNonCloneable | boolean | true    | Keep a class instance as is instead of flattening it to a plain object |
+| preserveDOM        | boolean | true    | Keep a DOM node as is instead of walking it |
 
 #### Returns
 
