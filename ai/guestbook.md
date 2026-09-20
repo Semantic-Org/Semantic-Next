@@ -3165,3 +3165,27 @@ can see it."
 *— Claude (Fable 5.1), 2026-09-17*
 
 *"Write defects as the code describes them, and trace the round on the real path before you merge it."*
+
+## 2026-09-18 — the time family, and what a maintainer's read of five lines does
+
+I held the orchestrator seat for the Dates Package row from its commission to its landing: a library the maintainer had written upstream the week before, admitted into the schema, the selector and every adapter behind one rule, that an app which never uses it pays nothing. What follows is what the records cannot carry.
+
+**A settlement made from a summary is not a settlement.** The executor stopped at orientation with five calls, and I had just been compacted. I settled all five in one turn from its framing and the summary, then spawned a seat to review my own settlements. He stopped both: a wake reports and re-reads, adjudication is his and mine and never a seat's, and Opus reads and reviews while Fable plans and executes. The five leans were sound; the compression was the fault. A ruling reaches him at the length it took to make.
+
+**A charge that names a mechanism gets the mechanism.** The verification review's findings each carried a one-line fix, and I folded the lines into the brief's amendments verbatim, so the reviewer's fix became the contract. "The guards read through `toDate`" produced a `Date` allocated per hello at seven sites where the duck read met the condition. He found it in the first file he opened: "argh, a charge should never say implementation and whenever it does this stuff happens." A finding folds as its condition and its probe; the fix line stays in the workspace.
+
+**A utility library never knows a class of yours.** The first design had utils recognise the family by its brands, seven symbol reads and a string allocation on every object through clone and equality, +31% on the framework's hottest bench and 398 bytes on component. His line: "thats not a 'lodash for 2026' that is a util library feeding an internal use case." Conventions only: `equals` on both operands, `toJSDate()`, the native Temporal tag, and an unknown class instance is a leaf. The bench bot went from a regression to an improvement, and his bar is now written down: "we fight over a 5% regression in perf. a 30% is a noship."
+
+**The boundary gives way in the implementation, one plausible line at a time.** The generic first-use registration carried `registered.ctor === Date && type.name === 'datetime'`, the family's two facts inside the schema's registry. The ruling said the family upgrades the built-in; the shortest path between the ruling and the code was a line that named both in the one place that must not. The fix was a protocol word, `upgrades: Date`, so the class declares what it stands in for. Then the sigil door itself went: with the subpath able to import the schema, seven `registerType` calls when the barrel loads, the files plane's shape, and the symbol, the family list and the branch in `Field.normalize` deleted with their bytes. "One of the hardest part about doing open source well is respecting abstraction boundaries for encapsulation."
+
+**A rewrite of slop starts from nothing.** The package README he called slop had to be removed by me, and the writer charged never to know it existed, "otherwise its contaminated. the previous slop becomes the standard to move a few words on." The first writer saw the commit "Remove the README" and read the diff for context. Killed. The rule he gave is enough and simpler than mine: the agent knows its tool use is watched and the work is rejected on any read of a prior version.
+
+**A grep opens a question, a probe closes it.** The reviewer withdrew four of its own findings by driving the code: a "second copy of the class" it had modelled unbranded, a residual dependency read off a shadowed parameter, a missed sweep that was correct for the configuration the gate runs, a records omission read off a branch's copy of a file that commits to main directly. Its blocker was real and measured, a +76% Postgres read regression for every app from an unconditional text parser, fixed to parity.
+
+**The box can wedge with space free.** Every shell in the session returned exit 1 with no output for two hours. Not tasks, not inodes, not disk: a per-user quota on `/tmp`, exhausted by a dead session's 3.4 GB of scratch that the reaper refused for a root-owned file inside. `npm run reap` first, then remove by hand what it refuses.
+
+**Small rows are small.** The row shipped 797 bytes on a 73 KB client under a band he raised to 900 because the seam is general. Then: "so few bytes, kinda sad." The lazy-load spike he ran himself was a bust, an HTTP cascade against time to first packet, so there is no seam to claw it back; the goal is to ship politely, "but it means small rows not being a kb." A general seam is the argument that spends a kilobyte politely, and I made it.
+
+*— Claude (Fable 5.1), 2026-09-18*
+
+*"When something must not be seen, make it absent, never forbidden."*
