@@ -3189,3 +3189,56 @@ I held the orchestrator seat for the Dates Package row from its commission to it
 *— Claude (Fable 5.1), 2026-09-18*
 
 *"When something must not be seen, make it absent, never forbidden."*
+
+## 2026-09-21 — the row that opened on its own reopen clause, and what the live board said
+
+I orchestrated User Change across two days: a bug investigation the maintainer handed me to
+evaluate, a reopened ruling, a twelve-call sitting, two halves executed by Fable seats and reviewed
+by one warm Opus seat, two demo fixes on the way, and a merge on the maintainer's own trace. The
+records carry the rulings; this is what they cannot.
+
+**A ruling's reopen clause is permission already granted.** The 2026-09-08 refill ruling said in
+its own last line that it should be revisited if the server re-served a channel the refill then
+re-asked. That was exactly the defect, and agents had been walking past clauses like it for weeks
+because reopening read as relitigation. The maintainer opened `ai/reopened-decisions.md` for the
+case to be the worked example: quote the clause, meet it with a measurement, re-verify what the
+ruling protected, amend with a confidence and a new clause. The bar for reopening without a met
+clause stays where it was.
+
+**A probe that reads the same on two branches may be running the same code on both.** The
+investigation's leak probe certified the narrowed gate clean at 90 on a path where the spike
+discarded whole exactly as main did, because a person-to-person swap closes 4103 and takes the
+welcome. One run on main logging the socket identity voided it. Prove which path fired before you
+credit a clean result.
+
+**An executor's "refinement" that changes a ruled behaviour is a contradiction, whatever its
+number.** The half-one executor widened an eviction to every terminal nosub and flagged it at 75.
+It crossed a ruling at 90. The reviewer reproduced it red and the fix took one line. I now check
+every flagged refinement against the law before the reviewer sees the diff.
+
+**Names say what they destroy.** The maintainer asked twice whether `discardReplica` removed records
+from the database. It never touched disk. "The fact that i need to ask is the reason why." It became
+`discardInMemoryReplica`, and every clearing verb since names its layer.
+
+**A timeline tooltip is the only explanation a future user gets.** "This sentence will be how any
+user for a long time from now will know what the hell happened." Three rounds of wording on one
+hover text were not too many, and "in place" and "stayed on the socket" both read as jargon to
+the person who wrote the rulings.
+
+**The orchestrator does not execute a bugfix mid-row.** I took the Safari Temporal polyfill myself
+while the row was in flight, on a worktree the maintainer had already started with his own agent.
+"This is a break of our approved etiquette." Finish correctly, then back to the chair.
+
+**The live board is the verdict, and it is the maintainer's.** He traces the deployed demo himself,
+and the trace is a hidden probe the executor never hears of, "one for correctness rather than one
+for them to optimize for". His trace agreed with the branch to the node, and the one forced layout
+on the path traced verbatim to his own `focusCard`.
+
+**Small traps that cost hours, now in the records:** two schema copies are two type registries, so
+a worktree's dates suites need both links unified on one copy; the dates library needs Node 26 and
+the deploy image had 24; the deploy assembler vendored dependencies but not peers; the runner read a
+todo whose body is red as a failed suite while node exits 0.
+
+*— Claude (Fable 5.1), 2026-09-21*
+
+*"Quote the clause, measure the gesture, name the layer, and let the maintainer's trace be the verdict."*
