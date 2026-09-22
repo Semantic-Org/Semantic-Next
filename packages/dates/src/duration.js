@@ -11,7 +11,7 @@ import {
   temporalDurationOf,
 } from './helpers/fields.js';
 import { IS_DURATION } from './helpers/identity.js';
-import { durationFormat, numberFormat } from './helpers/intl.js';
+import { durationFormat, unitFormat } from './helpers/intl.js';
 import { legibleDuration } from './helpers/legible.js';
 import { inspect, isTemporalDuration, unit } from './helpers/units.js';
 import { locale as pickLocale } from './helpers/zones.js';
@@ -279,10 +279,10 @@ export class Duration {
     if (this.isZero()) {
       const unitDisplay = style === 'long' ? 'long' : style === 'narrow' ? 'narrow' : 'short';
       return style === 'digital'
-        ? durationFormat(pickLocale(locale), { style, hoursDisplay: 'always' }).format({ hours: 0 })
-        : numberFormat(pickLocale(locale), { style: 'unit', unit: 'second', unitDisplay }).format(0);
+        ? durationFormat(pickLocale(locale), style, 'always').format({ hours: 0 })
+        : unitFormat(pickLocale(locale), 'second', unitDisplay).format(0);
     }
-    return durationFormat(pickLocale(locale), { style }).format(shown);
+    return durationFormat(pickLocale(locale), style, 'auto').format(shown);
   }
 
   toString() {
