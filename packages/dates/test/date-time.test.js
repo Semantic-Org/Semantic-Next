@@ -254,26 +254,23 @@ describe('datetime', () => {
     );
   });
 
-  it('leads its own properties with the text a Date prints, in its own zone', () => {
+  it('leads its own properties with format(text), the configured locale in its own zone', () => {
     const moment = datetime('2026-09-06T14:30:15.250-04:00[America/New_York]');
-    expect(moment.text).toBe('Sun Sep 06 2026 14:30:15 GMT-0400 (Eastern Daylight Time)');
+    expect(moment.text).toBe('Sep 6, 2026, 2:30 PM EDT');
+    expect(moment.text).toBe(moment.format('text'));
     expect(Object.keys(moment).slice(0, 5)).toEqual(['text', 'month', 'day', 'year', 'weekday']);
-    expect(moment.in('Asia/Tokyo').text).toBe('Mon Sep 07 2026 03:30:15 GMT+0900 (Japan Standard Time)');
-    expect(moment.in('UTC').text).toBe('Sun Sep 06 2026 18:30:15 GMT+0000 (Coordinated Universal Time)');
-    expect(datetime('2026-01-05T09:00', 'Asia/Kolkata').text).toBe(
-      'Mon Jan 05 2026 09:00:00 GMT+0530 (India Standard Time)',
-    );
-    expect(moment.plus(hours(10)).text).toBe('Mon Sep 07 2026 00:30:15 GMT-0400 (Eastern Daylight Time)');
+    expect(moment.in('Asia/Tokyo').text).toBe('Sep 7, 2026, 3:30 AM GMT+9');
+    expect(moment.in('UTC').text).toBe('Sep 6, 2026, 6:30 PM UTC');
+    expect(datetime('2026-01-05T09:00', 'Asia/Kolkata').text).toBe('Jan 5, 2026, 9:00 AM GMT+5:30');
+    expect(moment.plus(hours(10)).text).toBe('Sep 7, 2026, 12:30 AM EDT');
     expect(Object.isFrozen(moment)).toBe(true);
+    configure({ locale: 'de-DE' });
+    expect(datetime('2026-09-06T14:30', 'America/New_York').text).toBe('6. Sept. 2026, 14:30 GMT-4');
   });
 
   it('names the zone for the hour a transition repeats, once at each offset', () => {
-    expect(datetime('2026-11-01T01:30:00-04:00[America/New_York]').text).toBe(
-      'Sun Nov 01 2026 01:30:00 GMT-0400 (Eastern Daylight Time)',
-    );
-    expect(datetime('2026-11-01T01:30:00-05:00[America/New_York]').text).toBe(
-      'Sun Nov 01 2026 01:30:00 GMT-0500 (Eastern Standard Time)',
-    );
+    expect(datetime('2026-11-01T01:30:00-04:00[America/New_York]').text).toBe('Nov 1, 2026, 1:30 AM EDT');
+    expect(datetime('2026-11-01T01:30:00-05:00[America/New_York]').text).toBe('Nov 1, 2026, 1:30 AM EST');
   });
 });
 

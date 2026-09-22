@@ -146,6 +146,14 @@ const presets = {
     date: { dateStyle: 'medium' },
     time: { timeStyle: 'short' },
     month: { month: 'long', year: 'numeric' },
+    text: {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    },
   },
   date: {
     short: { dateStyle: 'short' },

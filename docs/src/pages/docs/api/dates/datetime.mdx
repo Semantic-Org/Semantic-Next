@@ -145,11 +145,11 @@ endOfToday('Asia/Tokyo').format('HH:mm:ss.SSS z'); // '23:59:59.999 GMT+9'
 
 ## Properties
 
-The parts are real properties, so a value prints them in a console without a click, and `text` leads them spelled the way a `Date` prints, so a preview reads as a date. Every property is read-only.
+The parts are real properties, so a value prints them in a console without a click, and `text` leads them in the configured locale's common form, so a preview reads as a date. Every property is read-only.
 
 | Name | Type | Description |
 |------|------|-------------|
-| text | string | What a `Date` prints, `'Sun Sep 06 2026 14:30:15 GMT-0400 (Eastern Daylight Time)'` |
+| text | string | The value in the configured locale's common form, `'Sep 6, 2026, 2:30 PM EDT'`, what `format('text')` prints |
 | month | number | 1 through 12 |
 | day | number | |
 | year | number | |
@@ -178,7 +178,7 @@ The parts are real properties, so a value prints them in a console without a cli
 ```javascript
 const moment = datetime('2026-09-06T14:30:15.250', 'America/New_York');
 
-moment.text; // 'Sun Sep 06 2026 14:30:15 GMT-0400 (Eastern Daylight Time)'
+moment.text; // 'Sep 6, 2026, 2:30 PM EDT'
 moment.year; // 2026
 moment.weekday; // 7
 moment.zone; // 'America/New_York'
@@ -1094,6 +1094,7 @@ Prints in the configured locale or one given. No argument is the locale's medium
 | `'date'` | `Sep 6, 2026` |
 | `'time'` | `2:30 PM` |
 | `'month'` | `September 2026` |
+| `'text'` | `Sep 6, 2026, 2:30 PM EDT`, the form `text` holds |
 
 ##### Tokens
 

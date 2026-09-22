@@ -87,11 +87,12 @@ describe('time', () => {
     expect(time(JSON.parse(JSON.stringify(time('9am')))).equals('9am')).toBe(true);
   });
 
-  it('leads its own properties with the clock the way a Date prints it', () => {
+  it('leads its own properties with format(), the clock in the configured locale', () => {
     const clock = time('17:30:15.250');
-    expect(clock.text).toBe('17:30:15');
+    expect(clock.text).toBe('5:30 PM');
+    expect(clock.text).toBe(clock.format());
     expect(Object.keys(clock)[0]).toBe('text');
-    expect(time('9am').text).toBe('09:00:00');
-    expect(clock.plus(hours(7)).text).toBe('00:30:15');
+    expect(time('9am').text).toBe('9:00 AM');
+    expect(clock.plus(hours(7)).text).toBe('12:30 AM');
   });
 });

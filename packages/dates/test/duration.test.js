@@ -169,11 +169,12 @@ describe('duration', () => {
     expect(weeks(1).toJSON()).toBe('P1W');
   });
 
-  it('leads its own properties with the fields as written, spelled out', () => {
+  it('leads its own properties with format(long), the length in the configured locale', () => {
     const length = duration('1h 30m 15s');
     expect(length.text).toBe('1 hour, 30 minutes, 15 seconds');
+    expect(length.text).toBe(length.format('long'));
     expect(Object.keys(length)[0]).toBe('text');
-    expect(minutes(90).text).toBe('90 minutes');
+    expect(minutes(90).text).toBe('1 hour, 30 minutes');
     expect(days(1).plus(hours(2)).text).toBe('1 day, 2 hours');
     expect(hours(1).negated().text).toBe('-1 hour');
     expect(duration(0).text).toBe('0 seconds');

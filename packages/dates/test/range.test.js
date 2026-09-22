@@ -245,14 +245,15 @@ describe('range kinds', () => {
     expect(() => timeRange('09:00', '17:00') < 5).toThrow(/notANumber/);
   });
 
-  it('lead their own properties with both ends spelled the way a Date prints', () => {
+  it('lead their own properties with format(), the span in the configured locale', () => {
     const week = dateRange('2026-09-01', '2026-09-07');
-    expect(week.text).toBe('Tue Sep 01 2026 to Mon Sep 07 2026');
+    expect(week.text).toMatch(/^Sep 1\s*[–-]\s*7, 2026$/);
+    expect(week.text).toBe(week.format());
     expect(Object.keys(week)[0]).toBe('text');
-    expect(datetimeRange(datetime('2026-09-06T09:00', 'UTC'), hours(8)).text).toBe(
-      'Sun Sep 06 2026 09:00:00 GMT+0000 (Coordinated Universal Time) to Sun Sep 06 2026 17:00:00 GMT+0000 (Coordinated Universal Time)',
-    );
-    expect(timeRange('22:00', '06:00').text).toBe('22:00:00 to 06:00:00');
+    const shift = datetimeRange(datetime('2026-09-06T09:00', 'UTC'), hours(8));
+    expect(shift.text).toMatch(/^Sep 6, 2026, 9:00 AM\s*[–-]\s*5:00 PM UTC$/);
+    expect(shift.text).toBe(shift.format('text'));
+    expect(timeRange('22:00', '06:00').text).toMatch(/^10:00 PM\s*[–-]\s*6:00 AM$/);
     expect(Object.isFrozen(week)).toBe(true);
   });
 });

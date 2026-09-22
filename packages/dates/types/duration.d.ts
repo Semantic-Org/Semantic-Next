@@ -8,7 +8,7 @@ import type { DurationFields, DurationInput, Locale, TemporalValue, Unit } from 
 export class Duration {
   constructor(input: DurationInput, unit?: Unit);
 
-  /** The fields as written, spelled out, `'1 hour, 30 minutes'`, the line a console preview leads with */
+  /** The length in the configured locale's common form, `'1 hour, 30 minutes'`, what `format('long')` prints */
   readonly text: string;
   readonly years: number;
   readonly months: number;
