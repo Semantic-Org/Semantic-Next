@@ -26,7 +26,6 @@ const cached = (make) => {
   };
 };
 
-export const dateTimeFormat = cached((locale, options) => new Intl.DateTimeFormat(locale, options));
 // a datetime prints in its zone unless the options name one. a date or a time has no instant, so its
 // fields print through UTC whatever the options say. an unknown option throws as the formatter is built,
 // so the refusal wraps the build alone and a call that finds its formatter pays nothing for it
