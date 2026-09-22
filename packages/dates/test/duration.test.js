@@ -168,4 +168,16 @@ describe('duration', () => {
     expect(duration(JSON.parse(JSON.stringify(length))).equals(length)).toBe(true);
     expect(weeks(1).toJSON()).toBe('P1W');
   });
+
+  it('leads its own properties with the fields as written, spelled out', () => {
+    const length = duration('1h 30m 15s');
+    expect(length.text).toBe('1 hour, 30 minutes, 15 seconds');
+    expect(Object.keys(length)[0]).toBe('text');
+    expect(minutes(90).text).toBe('90 minutes');
+    expect(days(1).plus(hours(2)).text).toBe('1 day, 2 hours');
+    expect(hours(1).negated().text).toBe('-1 hour');
+    expect(duration(0).text).toBe('0 seconds');
+    expect(date('2026-01-01').until('2026-03-01').text).toBe('2 months');
+    expect(Object.isFrozen(length)).toBe(true);
+  });
 });

@@ -86,4 +86,12 @@ describe('time', () => {
     expect(JSON.stringify({ opens: time('9am') })).toBe('{"opens":"09:00:00"}');
     expect(time(JSON.parse(JSON.stringify(time('9am')))).equals('9am')).toBe(true);
   });
+
+  it('leads its own properties with the clock the way a Date prints it', () => {
+    const clock = time('17:30:15.250');
+    expect(clock.text).toBe('17:30:15');
+    expect(Object.keys(clock)[0]).toBe('text');
+    expect(time('9am').text).toBe('09:00:00');
+    expect(clock.plus(hours(7)).text).toBe('00:30:15');
+  });
 });

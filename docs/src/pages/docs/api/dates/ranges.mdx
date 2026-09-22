@@ -133,10 +133,11 @@ timeRange('22:00', '06:00').duration.format(); // '8 hours'
 
 ## Properties
 
-The ends and the kind are real properties, so a range prints them in a console without a click. Every property is read-only.
+The ends and the kind are real properties, so a range prints them in a console without a click, and `text` leads them with both ends spelled the way a `Date` prints, so a preview reads as a span. Every property is read-only.
 
 | Name | Type | Description |
 |------|------|-------------|
+| text | string | Both ends' `text` joined with `to`, `'Tue Sep 01 2026 to Mon Sep 07 2026'` |
 | start | CalendarDate \| DateTime \| Time | The first point |
 | end | CalendarDate \| DateTime \| Time | The last day of a date range, or the excluded end of the others |
 | kind | string | `'date'`, `'datetime'` or `'time'` |
@@ -147,6 +148,7 @@ The ends and the kind are real properties, so a range prints them in a console w
 ```javascript
 const week = dateRange('2026-09-01', '2026-09-07');
 
+week.text; // 'Tue Sep 01 2026 to Mon Sep 07 2026'
 week.start.toString(); // '2026-09-01'
 week.kind; // 'date'
 week.duration.total('days'); // 7

@@ -145,13 +145,14 @@ today().since(yesterday(), 'days'); // 1
 
 ## Properties
 
-The parts are real properties, so a value prints them in a console without a click. Every property is read-only.
+The parts are real properties, so a value prints them in a console without a click, and `text` leads them spelled the way a `Date` prints, so a preview reads as a date. Every property is read-only.
 
 | Name | Type | Description |
 |------|------|-------------|
-| year | number | |
+| text | string | What a `Date` prints for the day alone, `'Sun Sep 06 2026'` |
 | month | number | 1 through 12 |
 | day | number | |
+| year | number | |
 | weekday | number | ISO, 1 for monday through 7 for sunday |
 | quarter | number | 1 through 4 |
 | dayOfYear | number | |
@@ -164,6 +165,7 @@ The parts are real properties, so a value prints them in a console without a cli
 ```javascript
 const day = date('2026-09-06');
 
+day.text; // 'Sun Sep 06 2026'
 day.year; // 2026
 day.weekday; // 7
 day.quarter; // 3

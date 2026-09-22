@@ -201,4 +201,12 @@ describe('date', () => {
     expect(JSON.stringify({ on: day })).toBe('{"on":"2026-09-06"}');
     expect(date(JSON.parse(JSON.stringify(day))).equals(day)).toBe(true);
   });
+
+  it('leads its own properties with the day the way a Date prints it, with no clock', () => {
+    const day = date('2026-09-06');
+    expect(day.text).toBe('Sun Sep 06 2026');
+    expect(Object.keys(day)).toEqual(['text', 'month', 'day', 'year', 'weekday']);
+    expect(day.plus(days(1)).text).toBe('Mon Sep 07 2026');
+    expect(date('0999-01-01').text).toBe('Tue Jan 01 0999');
+  });
 });

@@ -7,6 +7,7 @@ import { isUnreadable, loosely, refuse, refuseType, unreadable } from './helpers
 import { isDurationFields } from './helpers/fields.js';
 import { formatIntlRange, intlOptions } from './helpers/format.js';
 import { IS_DATE_RANGE, IS_DATE_TIME_RANGE, IS_DURATION, IS_RANGE, IS_TIME_RANGE } from './helpers/identity.js';
+import { legibleRange } from './helpers/legible.js';
 import { inspect, isTemporalDuration, zoneOptions } from './helpers/units.js';
 import { Time } from './time.js';
 
@@ -66,7 +67,9 @@ class Range {
   // (start, end, zone), (start, end, { zone, loose }), or (interval, { zone, loose })
   constructor(start, end, options) {
     const kind = this.constructor.kind;
-    // the ends and the kind are own properties, so a range prints them in a console without a click
+    // the ends and the kind are own properties, so a range prints them in a console without a click. the
+    // legible text is keyed first so a preview leads with it, and filled once the ends are read
+    this.text = undefined;
     this.kind = kind;
     if (isOptions(end)) {
       [end, options] = [undefined, end];
@@ -93,6 +96,7 @@ class Range {
         explanation: isDevelopment ? 'a range runs forward. swap the ends, or use earliest() and latest()' : 0,
       });
     }
+    this.text = legibleRange(this);
     Object.freeze(this);
   }
 

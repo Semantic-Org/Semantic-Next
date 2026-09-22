@@ -22,6 +22,8 @@ export class Time {
   constructor(input: TimeInput, options?: ReadOptions);
   constructor(hour: number, minute?: number, second?: number);
 
+  /** The clock the way a `Date` prints it, `'17:30:15'`, the line a console preview leads with */
+  readonly text: string;
   readonly hour: number;
   readonly minute: number;
   readonly second: number;
