@@ -6,7 +6,6 @@ import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
 import { fieldsFrom, temporalDurationOf } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions, relativeDays } from './helpers/format.js';
 import { IS_CALENDAR_DATE } from './helpers/identity.js';
-import { legibleDate } from './helpers/legible.js';
 import { looseZoned } from './helpers/loose.js';
 import {
   inspect,
@@ -61,14 +60,14 @@ export class CalendarDate {
       ? input
       : CalendarDate.#read(input, isNumber(monthOrOptions) ? monthOrOptions : undefined, day, settings);
     // the parts are own properties, so a value prints them in a console without a click, in the order a
-    // preview reads: the legible text first, filled once the parts it reads are in, then month, day, year
+    // preview reads: the text first, filled once the parts it reads are in, then month, day, year
     this.text = undefined;
     const plain = this.#plain;
     this.month = plain.month;
     this.day = plain.day;
     this.year = plain.year;
     this.weekday = plain.dayOfWeek;
-    this.text = legibleDate(this);
+    this.text = this.format();
     Object.freeze(this);
   }
 

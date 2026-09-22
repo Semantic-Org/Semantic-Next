@@ -11,8 +11,7 @@ import {
   temporalDurationOf,
 } from './helpers/fields.js';
 import { IS_DURATION } from './helpers/identity.js';
-import { durationFormat, numberFormat } from './helpers/intl.js';
-import { legibleDuration } from './helpers/legible.js';
+import { durationFormat, unitFormat } from './helpers/intl.js';
 import { inspect, isTemporalDuration, unit } from './helpers/units.js';
 import { locale as pickLocale } from './helpers/zones.js';
 
@@ -39,8 +38,8 @@ export class Duration {
   constructor(input, name, anchor) {
     this.#temporal = isTemporalDuration(input) ? input : temporalDurationOf(fieldsFrom(input, name));
     this.#anchor = anchor;
-    // the parts are own properties, so a value prints them in a console without a click. the legible
-    // text is keyed first so a preview leads with it
+    // the parts are own properties, so a value prints them in a console without a click. the text is
+    // keyed first so a preview leads with it
     this.text = undefined;
     const temporal = this.#temporal;
     this.years = temporal.years;
@@ -53,7 +52,7 @@ export class Duration {
     this.milliseconds = temporal.milliseconds;
     this.sign = temporal.sign;
     this.anchor = anchor;
-    this.text = legibleDuration(temporal);
+    this.text = this.format('long');
     Object.freeze(this);
   }
 
@@ -279,10 +278,10 @@ export class Duration {
     if (this.isZero()) {
       const unitDisplay = style === 'long' ? 'long' : style === 'narrow' ? 'narrow' : 'short';
       return style === 'digital'
-        ? durationFormat(pickLocale(locale), { style, hoursDisplay: 'always' }).format({ hours: 0 })
-        : numberFormat(pickLocale(locale), { style: 'unit', unit: 'second', unitDisplay }).format(0);
+        ? durationFormat(pickLocale(locale), style, 'always').format({ hours: 0 })
+        : unitFormat(pickLocale(locale), 'second', unitDisplay).format(0);
     }
-    return durationFormat(pickLocale(locale), { style }).format(shown);
+    return durationFormat(pickLocale(locale), style, 'auto').format(shown);
   }
 
   toString() {

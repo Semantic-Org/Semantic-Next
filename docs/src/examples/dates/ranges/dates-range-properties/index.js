@@ -2,7 +2,7 @@ import { dateRange, datetime, datetimeRange, hours, timeRange } from '@semantic-
 
 const week = dateRange('2026-09-01', '2026-09-07');
 
-// both ends spelled the way a Date prints, the line a console preview leads with
+// the configured locale's common form, the line a console preview leads with
 console.log(week.text);
 console.log(week.start.toString(), week.end.toString());
 console.log(week.kind);

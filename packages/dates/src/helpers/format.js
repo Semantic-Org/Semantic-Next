@@ -1,7 +1,7 @@
 import { isDevelopment, isPlainObject, isString } from '@semantic-ui/utils';
 
-import { guard, refuse } from './errors.js';
-import { dateTimeFormat, relativeTimeFormat } from './intl.js';
+import { refuse } from './errors.js';
+import { plainDateTimeFormat, relativeTimeFormat, zonedDateTimeFormat } from './intl.js';
 import { ordinal, pad } from './units.js';
 import { locale as pickLocale, weekStart } from './zones.js';
 
@@ -18,21 +18,25 @@ const names = (locale) => {
     const month = (style) =>
       Array.from(
         { length: 12 },
-        (_, i) => dateTimeFormat(locale, { month: style, timeZone: 'UTC' }).format(Date.UTC(2000, i, 1)),
+        (_, i) => plainDateTimeFormat(locale, { month: style }).format(Date.UTC(2000, i, 1)),
       );
     // 2024-01-01 fell on a monday, so index 0 is monday to match ISO weekday numbering
     const weekday = (style) =>
       Array.from(
         { length: 7 },
-        (_, i) => dateTimeFormat(locale, { weekday: style, timeZone: 'UTC' }).format(Date.UTC(2024, 0, 1 + i)),
+        (_, i) => plainDateTimeFormat(locale, { weekday: style }).format(Date.UTC(2024, 0, 1 + i)),
       );
     nameCache.set(key, { MMM: month('short'), MMMM: month('long'), ddd: weekday('short'), dddd: weekday('long') });
   }
   return nameCache.get(key);
 };
 
+const zoneNameOptions = {
+  short: Object.freeze({ timeZoneName: 'short' }),
+  long: Object.freeze({ timeZoneName: 'long' }),
+};
 const zoneName = (parts, locale, style) =>
-  dateTimeFormat(locale, { timeZoneName: style, timeZone: parts.zone })
+  zonedDateTimeFormat(locale, zoneNameOptions[style], parts.zone)
     .formatToParts(parts.epoch)
     .find((part) => part.type === 'timeZoneName')?.value;
 
@@ -142,6 +146,14 @@ const presets = {
     date: { dateStyle: 'medium' },
     time: { timeStyle: 'short' },
     month: { month: 'long', year: 'numeric' },
+    text: {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    },
   },
   date: {
     short: { dateStyle: 'short' },
@@ -158,6 +170,13 @@ const presets = {
     full: { timeStyle: 'full' },
   },
 };
+
+// frozen, so a preset keys its formatter by identity and a format call serializes nothing
+for (const kind of Object.values(presets)) {
+  for (const options of Object.values(kind)) {
+    Object.freeze(options);
+  }
+}
 
 // a preset name or an Intl options bag resolves to Intl options, a token pattern resolves to undefined
 export const intlOptions = (kind, spec) => {
@@ -192,18 +211,10 @@ const epochOf = (kind, subject) => {
   return subject;
 };
 
-// a datetime prints in its zone unless the options name one. a date or a time has no instant, so its
-// fields print through UTC whatever the options say
 const formatter = (kind, options, locale, zone) =>
-  guard(
-    () =>
-      dateTimeFormat(
-        pickLocale(locale),
-        kind === 'datetime' ? { timeZone: zone, ...options } : { ...options, timeZone: 'UTC' },
-      ),
-    'unknownFormat',
-    JSON.stringify(options),
-  );
+  kind === 'datetime'
+    ? zonedDateTimeFormat(pickLocale(locale), options, zone)
+    : plainDateTimeFormat(pickLocale(locale), options);
 
 export const formatIntl = (kind, subject, options, locale, zone) =>
   formatter(kind, options, locale, zone).format(epochOf(kind, subject));

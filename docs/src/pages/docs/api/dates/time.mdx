@@ -55,11 +55,11 @@ time(new Date('2026-09-06T14:30:00Z'), 'Asia/Tokyo').toString(); // '23:30:00'
 
 ## Properties
 
-The parts are real properties, and `text` leads them spelled the way a `Date` prints its clock, so a preview reads as a time. Every property is read-only.
+The parts are real properties, and `text` leads them in the configured locale's common form, so a preview reads as a time. Every property is read-only.
 
 | Name | Type | Description |
 |------|------|-------------|
-| text | string | The clock the way a `Date` prints it, `'17:30:15'` |
+| text | string | The clock in the configured locale's common form, `'5:30 PM'`, what `format()` prints |
 | hour | number | 0 through 23 |
 | minute | number | |
 | second | number | |
@@ -72,7 +72,7 @@ The parts are real properties, and `text` leads them spelled the way a `Date` pr
 ```javascript
 const moment = time('17:30:15.250');
 
-moment.text; // '17:30:15'
+moment.text; // '5:30 PM'
 moment.hour; // 17
 moment.minute; // 30
 moment.millisecond; // 250

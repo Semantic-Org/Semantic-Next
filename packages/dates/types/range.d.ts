@@ -19,7 +19,7 @@ import type { Time } from './time.js';
  * @see {@link https://next.semantic-ui.com/docs/api/dates/ranges Range}
  */
 declare abstract class Range<Point, Input> {
-  /** Both ends' `text` joined with `to`, `'Tue Sep 01 2026 to Mon Sep 07 2026'`, the line a console preview leads with */
+  /** The span in the configured locale's common form, `'Sep 1 – 7, 2026'`, what `format()` prints, `format('text')` for a datetime range */
   readonly text: string;
   readonly start: Point;
   readonly end: Point;

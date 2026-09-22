@@ -6,7 +6,6 @@ import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
 import { temporalDurationFrom } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions, relativeSeconds } from './helpers/format.js';
 import { IS_DATE_TIME } from './helpers/identity.js';
-import { legibleDateTime } from './helpers/legible.js';
 import { looseZoned } from './helpers/loose.js';
 import {
   inspect,
@@ -52,7 +51,7 @@ export class DateTime {
     const settings = zoneOptions(options);
     this.#zoned = isZonedDateTime(input) && settings.zone === undefined ? input : DateTime.#read(input, settings);
     // the parts are own properties, so a value prints them in a console without a click and reads them without a call,
-    // in the order a preview reads: the legible text first, filled once the parts it reads are in, then month, day, year
+    // in the order a preview reads: the text first, filled once the parts it reads are in, then month, day, year
     this.text = undefined;
     const zoned = this.#zoned;
     this.month = zoned.month;
@@ -66,7 +65,7 @@ export class DateTime {
     this.zone = zoned.timeZoneId;
     this.offset = zoned.offset;
     this.epoch = zoned.epochMilliseconds;
-    this.text = legibleDateTime(this);
+    this.text = this.format('text');
     Object.freeze(this);
   }
 

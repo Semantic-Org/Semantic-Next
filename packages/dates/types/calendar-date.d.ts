@@ -25,7 +25,7 @@ export class CalendarDate {
   constructor(input: CalendarDateInput, options?: ReadOptions);
   constructor(year: number, month: number, day?: number);
 
-  /** What a `Date` prints for the day alone, `'Sun Sep 06 2026'`, the line a console preview leads with */
+  /** The day in the configured locale's common form, `'Sep 6, 2026'`, what `format()` prints */
   readonly text: string;
   readonly month: number;
   readonly day: number;

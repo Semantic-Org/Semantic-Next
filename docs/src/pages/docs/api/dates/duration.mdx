@@ -96,11 +96,11 @@ date('2026-09-01').plus(days(30)).toString(); // '2026-10-01'
 
 ## Properties
 
-The fields are real properties, as written, so a value prints them in a console without a click, and `text` leads them spelled out, so a preview reads as a length. Every property is read-only.
+The fields are real properties, as written, so a value prints them in a console without a click, and `text` leads them in the configured locale's common form, so a preview reads as a length. Every property is read-only.
 
 | Name | Type | Description |
 |------|------|-------------|
-| text | string | The fields as written, spelled out, `'1 hour, 30 minutes, 15 seconds'` |
+| text | string | The length in the configured locale's common form, `'1 hour, 30 minutes, 15 seconds'`, what `format('long')` prints |
 | years | number | |
 | months | number | |
 | weeks | number | |

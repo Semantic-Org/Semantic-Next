@@ -25,7 +25,7 @@ export class DateTime {
   constructor(input: DateTimeInput, zone?: Zone);
   constructor(input: DateTimeInput, options?: ReadOptions);
 
-  /** What a `Date` prints, `'Sun Sep 06 2026 14:30:15 GMT-0400 (Eastern Daylight Time)'`, the line a console preview leads with */
+  /** The value in the configured locale's common form, `'Sep 6, 2026, 2:30 PM EDT'`, what `format('text')` prints */
   readonly text: string;
   readonly month: number;
   readonly day: number;

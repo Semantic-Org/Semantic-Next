@@ -133,6 +133,7 @@ export type FormatSpec =
   | 'full'
   | 'date'
   | 'time'
+  | 'text'
   | Intl.DateTimeFormatOptions
   | (string & {});
 
