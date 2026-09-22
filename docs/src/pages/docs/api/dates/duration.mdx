@@ -96,10 +96,11 @@ date('2026-09-01').plus(days(30)).toString(); // '2026-10-01'
 
 ## Properties
 
-The fields are real properties, as written, so a value prints them in a console without a click. Every property is read-only.
+The fields are real properties, as written, so a value prints them in a console without a click, and `text` leads them spelled out, so a preview reads as a length. Every property is read-only.
 
 | Name | Type | Description |
 |------|------|-------------|
+| text | string | The fields as written, spelled out, `'1 hour, 30 minutes, 15 seconds'` |
 | years | number | |
 | months | number | |
 | weeks | number | |
@@ -118,6 +119,7 @@ The fields are real properties, as written, so a value prints them in a console 
 ```javascript
 const length = duration('1h 30m 15s');
 
+length.text; // '1 hour, 30 minutes, 15 seconds'
 length.hours; // 1
 length.minutes; // 30
 length.days; // 0

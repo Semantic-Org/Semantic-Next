@@ -7,6 +7,7 @@ import { guard, loosely, refuse, refuseType } from './helpers/errors.js';
 import { fieldsFrom, temporalDurationOf } from './helpers/fields.js';
 import { formatIntl, formatTokens, intlOptions } from './helpers/format.js';
 import { IS_TIME } from './helpers/identity.js';
+import { legibleTime } from './helpers/legible.js';
 import { looseZoned } from './helpers/loose.js';
 import {
   inspect,
@@ -53,12 +54,15 @@ export class Time {
     this.#plain = isPlainTime(input)
       ? input
       : Time.#read(input, isNumber(minuteOrOptions) ? minuteOrOptions : undefined, second, settings);
-    // the parts are own properties, so a value prints them in a console without a click
+    // the parts are own properties, so a value prints them in a console without a click. the legible
+    // text is keyed first so a preview leads with it, and filled once the parts it reads are in
+    this.text = undefined;
     const plain = this.#plain;
     this.hour = plain.hour;
     this.minute = plain.minute;
     this.second = plain.second;
     this.millisecond = plain.millisecond;
+    this.text = legibleTime(this);
     Object.freeze(this);
   }
 

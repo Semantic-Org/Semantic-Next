@@ -8,6 +8,8 @@ import type { DurationFields, DurationInput, Locale, TemporalValue, Unit } from 
 export class Duration {
   constructor(input: DurationInput, unit?: Unit);
 
+  /** The fields as written, spelled out, `'1 hour, 30 minutes'`, the line a console preview leads with */
+  readonly text: string;
   readonly years: number;
   readonly months: number;
   readonly weeks: number;

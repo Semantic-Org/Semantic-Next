@@ -2,6 +2,9 @@ import { date, duration } from '@semantic-ui/dates';
 
 const length = duration('1h 30m 15s');
 
+// the fields as written, spelled out, the line a console preview leads with
+console.log(length.text);
+
 console.log(length.hours, length.minutes, length.seconds);
 console.log(length.days, length.milliseconds);
 console.log(length.sign);

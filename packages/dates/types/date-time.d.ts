@@ -25,6 +25,8 @@ export class DateTime {
   constructor(input: DateTimeInput, zone?: Zone);
   constructor(input: DateTimeInput, options?: ReadOptions);
 
+  /** What a `Date` prints, `'Sun Sep 06 2026 14:30:15 GMT-0400 (Eastern Daylight Time)'`, the line a console preview leads with */
+  readonly text: string;
   readonly year: number;
   readonly month: number;
   readonly day: number;

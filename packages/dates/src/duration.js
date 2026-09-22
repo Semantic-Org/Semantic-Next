@@ -12,6 +12,7 @@ import {
 } from './helpers/fields.js';
 import { IS_DURATION } from './helpers/identity.js';
 import { durationFormat, numberFormat } from './helpers/intl.js';
+import { legibleDuration } from './helpers/legible.js';
 import { inspect, isTemporalDuration, unit } from './helpers/units.js';
 import { locale as pickLocale } from './helpers/zones.js';
 
@@ -38,7 +39,9 @@ export class Duration {
   constructor(input, name, anchor) {
     this.#temporal = isTemporalDuration(input) ? input : temporalDurationOf(fieldsFrom(input, name));
     this.#anchor = anchor;
-    // the parts are own properties, so a value prints them in a console without a click
+    // the parts are own properties, so a value prints them in a console without a click. the legible
+    // text is keyed first so a preview leads with it
+    this.text = undefined;
     const temporal = this.#temporal;
     this.years = temporal.years;
     this.months = temporal.months;
@@ -50,6 +53,7 @@ export class Duration {
     this.milliseconds = temporal.milliseconds;
     this.sign = temporal.sign;
     this.anchor = anchor;
+    this.text = legibleDuration(temporal);
     Object.freeze(this);
   }
 

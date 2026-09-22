@@ -2,6 +2,9 @@ import { datetime } from '@semantic-ui/dates';
 
 const moment = datetime('2026-09-06T14:30:15.250', 'America/New_York');
 
+// spelled the way a Date prints, the line a console preview leads with
+console.log(moment.text);
+
 console.log(moment.year, moment.month, moment.day);
 console.log(moment.hour, moment.minute, moment.second, moment.millisecond);
 

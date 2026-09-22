@@ -145,10 +145,11 @@ endOfToday('Asia/Tokyo').format('HH:mm:ss.SSS z'); // '23:59:59.999 GMT+9'
 
 ## Properties
 
-The parts are real properties, so a value prints them in a console without a click. Every property is read-only.
+The parts are real properties, so a value prints them in a console without a click, and `text` leads them spelled the way a `Date` prints, so a preview reads as a date. Every property is read-only.
 
 | Name | Type | Description |
 |------|------|-------------|
+| text | string | What a `Date` prints, `'Sun Sep 06 2026 14:30:15 GMT-0400 (Eastern Daylight Time)'` |
 | year | number | |
 | month | number | 1 through 12 |
 | day | number | |
@@ -177,6 +178,7 @@ The parts are real properties, so a value prints them in a console without a cli
 ```javascript
 const moment = datetime('2026-09-06T14:30:15.250', 'America/New_York');
 
+moment.text; // 'Sun Sep 06 2026 14:30:15 GMT-0400 (Eastern Daylight Time)'
 moment.year; // 2026
 moment.weekday; // 7
 moment.zone; // 'America/New_York'
