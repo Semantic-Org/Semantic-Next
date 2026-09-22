@@ -27,9 +27,9 @@ export class CalendarDate {
 
   /** What a `Date` prints for the day alone, `'Sun Sep 06 2026'`, the line a console preview leads with */
   readonly text: string;
-  readonly year: number;
   readonly month: number;
   readonly day: number;
+  readonly year: number;
   /** ISO, 1 for monday through 7 for sunday */
   readonly weekday: number;
   readonly quarter: number;

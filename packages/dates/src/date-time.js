@@ -51,13 +51,13 @@ export class DateTime {
   constructor(input, options) {
     const settings = zoneOptions(options);
     this.#zoned = isZonedDateTime(input) && settings.zone === undefined ? input : DateTime.#read(input, settings);
-    // the parts are own properties, so a value prints them in a console without a click and reads them without a call.
-    // the legible text is keyed first so a preview leads with it, and filled once the parts it reads are in
+    // the parts are own properties, so a value prints them in a console without a click and reads them without a call,
+    // in the order a preview reads: the legible text first, filled once the parts it reads are in, then month, day, year
     this.text = undefined;
     const zoned = this.#zoned;
-    this.year = zoned.year;
     this.month = zoned.month;
     this.day = zoned.day;
+    this.year = zoned.year;
     this.weekday = zoned.dayOfWeek;
     this.hour = zoned.hour;
     this.minute = zoned.minute;

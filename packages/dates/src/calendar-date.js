@@ -60,13 +60,13 @@ export class CalendarDate {
     this.#plain = isPlainDate(input)
       ? input
       : CalendarDate.#read(input, isNumber(monthOrOptions) ? monthOrOptions : undefined, day, settings);
-    // the parts are own properties, so a value prints them in a console without a click. the legible
-    // text is keyed first so a preview leads with it, and filled once the parts it reads are in
+    // the parts are own properties, so a value prints them in a console without a click, in the order a
+    // preview reads: the legible text first, filled once the parts it reads are in, then month, day, year
     this.text = undefined;
     const plain = this.#plain;
-    this.year = plain.year;
     this.month = plain.month;
     this.day = plain.day;
+    this.year = plain.year;
     this.weekday = plain.dayOfWeek;
     this.text = legibleDate(this);
     Object.freeze(this);

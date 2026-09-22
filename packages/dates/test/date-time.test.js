@@ -257,7 +257,7 @@ describe('datetime', () => {
   it('leads its own properties with the text a Date prints, in its own zone', () => {
     const moment = datetime('2026-09-06T14:30:15.250-04:00[America/New_York]');
     expect(moment.text).toBe('Sun Sep 06 2026 14:30:15 GMT-0400 (Eastern Daylight Time)');
-    expect(Object.keys(moment)[0]).toBe('text');
+    expect(Object.keys(moment).slice(0, 5)).toEqual(['text', 'month', 'day', 'year', 'weekday']);
     expect(moment.in('Asia/Tokyo').text).toBe('Mon Sep 07 2026 03:30:15 GMT+0900 (Japan Standard Time)');
     expect(moment.in('UTC').text).toBe('Sun Sep 06 2026 18:30:15 GMT+0000 (Coordinated Universal Time)');
     expect(datetime('2026-01-05T09:00', 'Asia/Kolkata').text).toBe(
