@@ -51,7 +51,7 @@ defineCollection('trips', {
 
 Realized through a new adapter-contract method **`ensureIndex(collection, spec)`**, called by the server at registration. Postgres builds a composite btree from the *same* per-key direction/`NULLS`/`COLLATE` mapping its `ORDER BY` emits (so the planner uses it for the keyset), and a GIN/`tsvector` (or vector) index for a search `type`; the in-memory adapter no-ops (it scans); a future dedicated search adapter realizes its own. One `type` field spans `btree` (sort/keyset) and `fulltext`/`vector` (text/search) — the `id` tiebreak and `COLLATE` are implied so the index matches the adapter's own ordering. Declare-explicit — an index is a write-cost choice — with a framework diagnostic when a published sort or a `searchIndex` query has no matching index, not blind auto-derivation.
 
-**Status:** the sort/limit/keyset pushdown is built + panel-reviewed in the prototype Postgres adapter (sync-poc). The collection `indexes:` config is the sole index-declaration surface (ruled 2026-07-04), realized at registration through `ensureIndex` (declared = created, degrade-not-crash), with search text-mode fields warning hard and ensuring the index. The declaration + `ensureIndex` seam land with the **schema** package (separate PR).
+**Status:** the sort/limit/keyset pushdown is built + panel-reviewed in the prototype Postgres adapter (the sync repo). The collection `indexes:` config is the sole index-declaration surface (ruled 2026-07-04), realized at registration through `ensureIndex` (declared = created, degrade-not-crash), with search text-mode fields warning hard and ensuring the index. The declaration + `ensureIndex` seam land with the **schema** package (separate PR).
 
 ## The one fork: who owns the write path
 

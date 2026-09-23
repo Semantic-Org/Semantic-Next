@@ -115,7 +115,7 @@ One schema in `@semantic-ui/schema` drives five consumers: wire revival, form bi
 
 ## Validation state
 
-The decisions read as closed because they were adversarially tested. A working prototype (sync-poc) proved the spine at 200k docs and cleared both Tier-1 spikes: rebase against the scheduler, and query re-run, where the collapse axis turned out to be sort under churn, fixed by incremental order maintenance (IVM's kernel idea without a planner). A five-lens vetting pass returned revise-then-build. A 28-amendment comparison against Zero, Supabase Realtime, and Convex flipped no architectural decision, and its rejected-attacks section is the tested armor. The five R2 design briefs are all ruled. Do not reopen a settled item without beating the rejected-attacks section in writing. See **`reference-comparison.md`** and **`vetting-report.md`**.
+The decisions read as closed because they were adversarially tested. A working prototype (the sync repo) proved the spine at 200k docs and cleared both Tier-1 spikes: rebase against the scheduler, and query re-run, where the collapse axis turned out to be sort under churn, fixed by incremental order maintenance (IVM's kernel idea without a planner). A five-lens vetting pass returned revise-then-build. A 28-amendment comparison against Zero, Supabase Realtime, and Convex flipped no architectural decision, and its rejected-attacks section is the tested armor. The five R2 design briefs are all ruled. Do not reopen a settled item without beating the rejected-attacks section in writing. See **`reference-comparison.md`** and **`vetting-report.md`**.
 
 ## Build sequence and what is not in v1
 
