@@ -272,7 +272,7 @@ why the deadline is server-enforced.
 
 reactive authorization revocation is rejected, consistent with the non-reactive permissions ruling. a
 channel re-evaluating its handler on every membership or permission change widens the settled ruling
-(`sync-poc/ai/decisions.md` 7.4(b)) that deliberately deleted the reactive-on-permissions sub-problem
+(`sync/ai/decisions.md` 7.4(b)) that deliberately deleted the reactive-on-permissions sub-problem
 and healed mid-session permission change by resubscribe / reload. explicit `server.revoke` plus the
 server-enforced timer bound the urgent cases without reopening it: revoking access is bounded by the
 timer rather than unbounded, which is all the taxonomy demands.

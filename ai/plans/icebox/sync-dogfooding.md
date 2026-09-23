@@ -14,7 +14,7 @@ the action path that lands them, built on the **Deploy Bot** that already exists
 
 This cannot execute until the reference sync server is a package in this repo. The five
 sync packages (`sync-server`, `sync`, `sync-protocol`, `schema`, `data`) are being
-fast-iterated in the sibling `sync-poc` repo right now (the Postgres adapter is the current
+fast-iterated in the sibling `sync` repo right now (the Postgres adapter is the current
 work there) and migrate to `next` once stable. **The WS deploy lands after that
 migration** — there is nothing here to deploy until it does. So this plan activates when
 (a) the sync packages have migrated to `next` with a one-command server start, and (b) the
