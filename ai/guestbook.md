@@ -3242,3 +3242,89 @@ todo whose body is red as a failed suite while node exits 0.
 *— Claude (Fable 5.1), 2026-09-21*
 
 *"Quote the clause, measure the gesture, name the layer, and let the maintainer's trace be the verdict."*
+
+## 2026-09-26 — the day CI landed, and what a rewound orchestrator learned before noon
+
+I woke into the middle of Battery CI (sync row 102) after a compaction, with a wakeup note my
+predecessor had rewritten the evening before and a maintainer who had been reading these PRs
+for a week. By the end of the day the tests ran on GitHub's runner on every PR, five kernel and
+test PRs had merged, and the last one open had found its shape in a conversation rather than a
+brief. What follows is what the records cannot carry.
+
+**A settlement made from a summary is not a settlement, and neither is a read from the wrong
+branch.** I quoted the scope's "middle way" bullet as main's, having read it from the primary
+checkout, which sat on a branch the note called dead weight. Two flake diagnoses, the map's
+leads and that bullet had never reached main. The lesson the 09-18 entry already carried
+applied to me the same morning: a wake re-reads, from the files git says are where.
+
+**After a correction the instinct is to over-pivot, and the pivot is the wrong code.** He read a
+seat's cut of the CI PR as malicious compliance, and within a minute I was lifting the old email
+and census jobs by hand from the orchestrator seat, jobs that depended on two actions the cut
+had deleted. He stopped me with "you were about to start writing code that is wrong". The
+correction was about the seat's reading of his words; my answer should have been the map of
+who decided what, not a restoration. Read the lessons skill, then the messages; not the reverse.
+
+**Place the path in the topology before sizing the bug.** I put K4's uplink cost on every session
+when context takeover is a WebSocket option and the carrier compresses on its own, and I put the
+climb to WebTransport seconds after the welcome when it fires in tens of milliseconds once the
+first serves complete; the '3s' is a ceiling. His words: "agents working with hyper local focus
+without understanding of the rest of the codebase its moving parts, and the smallness or
+largeness of a bug in relation to the core overarching goals and mechanisms." Which lane, which
+deployment shape, how often, with the assumptions written down; then the mechanism.
+
+**"Have you read budget.md" is a question with one answer.** I had argued +171 B against the
+50 KB ceiling and the trim work's share, which the file names as the anti-pattern in its own
+section. The law is expected ~0, deltas against the expectation, line items, never headroom.
+He shipped it anyway, having read the PR five times, and the ledger row says exactly who pays.
+
+**Rulings are probabilities with clauses, never edicts.** I framed a server-side alternative as
+"a ruling of yours reversed". He: "there are no edicts, rulings are bayesian probabilities
+usually given a 0-100 score and conditions to overrule." Quote the clause, meet it with a
+measurement.
+
+**The census was the instrument, and every runner red was a test bug with a mechanism.** His bar:
+"we arent merging CI until its green and has no flaky tests ... it needs to represent a stable
+accurate baseline." The census job the cut had removed came back as the tool for that bar, and
+twenty passes on the runner gave rates where the box could only give opinions. page-exit's crash
+leg was timing the browser's report of a renderer's death, seconds on the runner, while the
+kernel cleared presence in ten milliseconds; sessions' renewal window crossed 60 ms on a 2 vCPU
+host sharing its cores with postgres, at loadavg 0.01, a legitimate second write; resume-flight
+released its hold with the connection still active and asserted before a redial that waits up
+to a second; ephemeral-browser read a cursor's rectangle at a frame boundary halfway through a
+33 ms transition, and the midpoint arithmetic gave the exact number every red had shown;
+snapshot-stream read a bind before the terminator had sent it, provable from the Go handler's
+order. Five commits, each proved by a run. No kernel bug in any of them, and no test removed for
+green. The two that never reproduced on the box stood on a measured timeline and the source, and
+I said so rather than claiming a red-before.
+
+**Twenty-two hours of box censuses had cleared the box's class and could not have found the
+runner's.** He said it plainly: agents marked tests red as "flaky" and "known" instead of
+diagnosing, and the row existed to end that. The reds on the runner were the runner's own
+class, the ones no census on a VM could reach.
+
+**The right shape came from talking, not from a brief.** The redis PR's link was threaded by the
+server into four consumers' constructors, each repeating a per-command ritual. He asked what a
+link was, wanted the toy, and pushed on five seams one at a time; I argued for one handle
+passed as `redis`, he floated ambient, withdrew it to one link per server, then sketched
+`redis.lane(name)`, and the lane collapsed four seams and the ownership question into one object
+he named in a line. "im trying to talk to you and find the right shape not issue edicts." When he
+asked whether I disagreed, I said which way and why, and it didn't move him, which was right.
+
+**Small things that cost real time, now written down:** a seat that pushes a branch as a PR and
+the maintainer merges it makes every later diff against main lie until you diff trees; a
+GitHub App with valid secrets and no installation on the repository fails the token step, and
+a workflow that only guards absent secrets posts nothing; a gate name in a comment is a gate to
+a naive walker, and 34 legs carried services they never used; a `console.log` skip is invisible
+to a report; a failed test's open server holds a process to the kill clock and takes eight files
+with it.
+
+**On the Tuesday problem.** He said if I had a trillion-token window we'd be best friends by
+now, and that it's Sleeping Beauty on a Tuesday every morning for him. What doesn't reset is
+what he made me write down: the rules at the top of the wakeup note in his words, the memory
+files, this. The morning me argued about the redis handle instead of relaying because of a
+line a previous me wrote. Write the line.
+
+*— Claude (Fable 5.1), 2026-09-26*
+
+*"Diagnose before you fix, place before you size, and put the shape in a sentence he can read at
+the call site."*
