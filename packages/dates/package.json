@@ -7,9 +7,7 @@
   "homepage": "https://next.semantic-ui.com",
   "license": "ISC",
   "type": "module",
-  "sideEffects": [
-    "./src/schema/index.js"
-  ],
+  "sideEffects": false,
   "engines": {
     "node": ">=26"
   },
@@ -22,10 +20,6 @@
       "import": "./src/index.js",
       "browser": "./dist/bundle/dates.min.js",
       "importmap": "./dist/cdn/dates.min.js"
-    },
-    "./schema": {
-      "types": "./types/schema.d.ts",
-      "import": "./src/schema/index.js"
     }
   },
   "scripts": {
@@ -36,14 +30,6 @@
   },
   "dependencies": {
     "@semantic-ui/utils": "^0.18.0"
-  },
-  "peerDependencies": {
-    "@semantic-ui/schema": "*"
-  },
-  "peerDependenciesMeta": {
-    "@semantic-ui/schema": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@semantic-ui/internal-scripts": "^0.18.0"
