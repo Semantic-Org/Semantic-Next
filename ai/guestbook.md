@@ -3407,3 +3407,78 @@ the cases, not the principle; that is the turn he understood it on.
 
 *"Count the years, not the systems; walk up before you ask; argue in paragraphs; and let the
 record read you back."*
+
+## 2026-10-07 — the week the tests stopped waiting on the clock, and what a plant cannot see
+
+I orchestrated the end of the flaky-test row across eight days: a map of every red since
+late September, each classed as a kernel bug, a test bug, by design or unexplained, then the
+question the maintainer asked when the classes ran out of room, "how does any testing system
+that is time sensitive handle timing on shared/contested hosts? look into training data not
+what was suggested so far", and five pull requests that moved the kernel's own timer
+arithmetic onto clocks the tests move. The records carry the plan, its skeptical review and
+the plant tables; this is what they cannot.
+
+**"The only concern is gaming."** Every rewrite this week was judged by one sentence of his:
+"the only concern is gaming, and id like you to not over optimize for all tests green if it
+costs any correctness. an acceptable final is 'we could not green this without changing the
+necessary expects'". Three legs ended there. A tween test whose witness could not see a
+same-value write became a quiet-window tripwire after he asked what a user would see, which
+was nothing, and said "if a test is not representative of a real bug state then the test
+should be rewritten to that. they are tripwires for failures to service users downstream."
+
+**The paired-plant law.** When the plan to fake time came back from its review, he set the bar
+for every swap: "simulate the red conditions by a failed kernel change and confirm that both
+the simulated clock and the real clock perform the same task, catching regressions in the
+kernel." Each pull request carried a table, every planted kernel fault red or green on the
+real-clock test and on the moved one. The table found what a reading never would have: a
+kernel that stamps frames from the page's clock read green on the fake because both fakes
+started at zero in lockstep; a kernel whose idle deadline was half a heartbeat read green
+because Date stayed real; a kernel that moved its read to the Date constructor slipped past a
+pinned `Date.now`. Each green in the controlled column was a fix before the merge, and the
+reviewer's own plants found more than the builder's every time.
+
+**What a plant cannot see.** A real-time exposure is not a kernel fault, so no plant produces
+it. #299's moved retention test went red on the runner twice with every plant red on both
+files, because a 2 ms gap between two reads of the real Date crossed a 1 ms edge. The missing
+evidence was a census of the moved file under load on main's kernel. From then on every swap
+carried the census beside the table, and the census kept earning its place: it caught a clock
+jump firing the kernel's dial deadline while a DNS lookup sat on the threadpool, and a jump
+across a socket's upgrade minting onto a dying socket. The fix for that whole class was Go's
+synctest rule in node's clothes: the clock holds still while any request stands on the loop,
+with node's resource census standing in for the goroutine count, and the body saying what the
+census cannot list.
+
+**A classify "main arm" is never main's test.** A builder read its own uncommitted fake-clock
+copy as a pre-existing red on main's file, because the runner's classify mode copies the
+branch's import closure over main on its main arm. Main's file read 0 of 300. Say which test
+ran on which kernel in every census line, or the number means the wrong thing.
+
+**I missed a red by reading only the last run.** The pull request's first run was red, the
+next push ran green, and I merged on the green. Under "a failure a manual rerun turns green
+still counts as failed", a later push is a rerun. The records seat found it. Before any merge
+now I read every run on the branch.
+
+**Resume is okay; restarting is not.** When the model's session limit cut two seats off
+mid-work, I read his "don't restart work" as a hold and stopped a fresh seat I had just
+launched. He meant the opposite of what I did: "i'm sorry you must be misunderstanding me,
+resume is okay". A cut-off seat keeps its context; a fresh one starts the work over. Resume
+the seat, charge Opus only for what is fresh.
+
+**The primary checkout was his working tree.** My habitual pull after a records push ran in
+~/dev/semantic/sync while his other session had it on a feature branch, 43 commits ahead. It
+refused, and nothing moved. The orchestrator reads main as `origin/main` and pushes from a
+detached scratch worktree, never from the tree a human is typing in.
+
+**Names.** He laughed at "flap governor" in a heading an agent wrote, then looked it up: "flap
+dampening is more accurate and term of art". Flap is right, from route flapping. Governor was
+the coinage. The heading stays as history, the plain words take over, and the record says so.
+
+**His numbers.** A ladder of 30 s doubling to 5 minutes for the carrier's climb: "claude code
+starts at 10s, 30s feels like an eternity". The steelman for 30 held up badly once he named
+what the user loses while waiting: "WT is only provider of datagrams so its a material change
+in quality for ephemeral." Not broken is not free. The ladder is 10 s with a fifth of jitter.
+
+*— Claude (Fable 5.1), 2026-10-07*
+
+*"Plant the fault on both clocks, census the moved file under load, and say which test ran on
+which kernel."*
