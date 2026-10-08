@@ -1,3 +1,5 @@
+import { isFunction, isObject } from './types.js';
+
 /*-------------------
       Constants
 --------------------*/
@@ -107,3 +109,76 @@ export const isCI = (() => {
 
   return ciVars.some(varName => env[varName]);
 })();
+
+/*-------------------
+       Globals
+--------------------*/
+
+const warnedNames = /* @__PURE__ */ new WeakMap();
+
+const warnOnce = (host, name, message) => {
+  let names = warnedNames.get(host);
+  if (!names) {
+    names = new Set();
+    warnedNames.set(host, names);
+  }
+  if (!names.has(name)) {
+    names.add(name);
+    console.warn(message);
+  }
+};
+
+const replaceProperty = (host, name, value) => {
+  const own = Object.getOwnPropertyDescriptor(host, name);
+  // a top-level var is non-configurable but writable, so it takes plain assignment
+  if (own && !own.configurable && own.writable) {
+    host[name] = value;
+    return value;
+  }
+  // assignment leaves a getter or a read-only value in place, so shadow it
+  Object.defineProperty(host, name, {
+    value,
+    writable: true,
+    enumerable: own ? own.enumerable : true,
+    configurable: true,
+  });
+  return value;
+};
+
+/*
+  Puts a value on the global object (or any host) under a name and returns the
+  value the name holds afterward. A name held by a different value is a
+  conflict: 'warn' keeps the existing value and warns once per name in
+  development, 'keep' keeps it quietly, 'replace' overwrites it
+*/
+export const defineGlobal = (name, value, { host = globalThis, onConflict = 'warn' } = {}) => {
+  if (onConflict !== 'warn' && onConflict !== 'keep' && onConflict !== 'replace') {
+    throw new TypeError(`defineGlobal: onConflict is 'warn', 'keep' or 'replace', got ${String(onConflict)}`);
+  }
+  if (!isObject(host) && !isFunction(host)) {
+    throw new TypeError(`defineGlobal: host must be an object to hold ${String(name)}, got ${String(host)}`);
+  }
+  if (!(name in host)) {
+    host[name] = value;
+    return value;
+  }
+  const held = host[name];
+  // the same value again is a module re-run under hot reload
+  if (Object.is(held, value)) {
+    return held;
+  }
+  if (onConflict === 'replace') {
+    return replaceProperty(host, name, value);
+  }
+  if (onConflict === 'warn') {
+    isDevelopment
+      && warnOnce(
+        host,
+        name,
+        `defineGlobal: '${
+          String(name)
+        }' is already defined, keeping the existing value. pass onConflict 'keep' to keep it quietly or 'replace' to overwrite it`,
+      );
+  }
+  return held;
+};

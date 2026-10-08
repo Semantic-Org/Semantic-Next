@@ -1,7 +1,7 @@
 ---
 title: Utility Functions Reference
 description: Complete reference for @semantic-ui/utils — a standalone utility library providing functions for arrays, objects, strings, type checking, colors, dates, and more. Use this before reimplementing common operations.
-keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, formatDuration, each, range, sequence, remove, noop, isDate, isRegExp, isTemporal]
+keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, formatDuration, each, range, sequence, remove, noop, isDate, isRegExp, isTemporal, assertOptions, defineGlobal]
 audience: authoring
 skill: utility-functions
 type: skill
@@ -252,6 +252,25 @@ filterObject({ a: 1, b: 5, c: 3 }, (value, key) => value > 2); // { b: 5, c: 3 }
 mapObject({ a: 1, b: 2 }, (value, key) => value * 2);           // { a: 2, b: 4 }
 ```
 
+### Options Checking
+```javascript
+import { assertOptions, isDevelopment, isFunction, isNumber } from '@semantic-ui/utils';
+
+// spec maps each permitted key to true (any value, never "required") or a predicate.
+// returns the same object, throws one TypeError (with .problems) listing every problem
+const spec = { retries: isNumber, timeout: isNumber, onError: isFunction, meta: true };
+assertOptions({ retires: 3 }, spec, { name: 'createClient' });
+// "createClient: unknown key 'retires', did you mean 'retries'?" (suggest, development only)
+assertOptions({ timeout: '5s' }, spec, { hints: isDevelopment ? { timeout: 'a number of milliseconds' } : undefined });
+// "'timeout' expects a number of milliseconds, received '5s'" (fold hints at the callsite)
+
+assertOptions({ timeout: undefined }, spec);              // passes, undefined is not provided (the key name is still judged)
+assertOptions(undefined, spec);                           // undefined, an omitted bag
+assertOptions(options, spec, { onInvalid: 'warn' });      // console.warn, returns the object
+assertOptions(options, spec, { onInvalid: (problems) => {} }); // [{ key, kind, value, suggestion, message }]
+assertOptions(process.env, { PORT: isNumeric }, { allowUnknown: true }); // only listed keys judged
+```
+
 ### Change Detection
 ```javascript
 import { trackWrites, trackReads, detectChanges, elementKey, get } from '@semantic-ui/utils';
@@ -469,6 +488,21 @@ if (isClient) { ... }
 if (isServer) { ... }
 if (isDevelopment) { ... }  // detects NODE_ENV, Vite DEV, Vercel preview, etc.
 if (isCI) { ... }           // detects GitHub Actions, GitLab CI, Jenkins, etc.
+```
+
+### defineGlobal — A Value on the Global Object
+```javascript
+import { defineGlobal, isDevelopment } from '@semantic-ui/utils';
+
+// returns the value the name holds afterward. the same value again is quiet (hot reload)
+isDevelopment && defineGlobal('store', store);   // for the console, fold at the callsite
+defineGlobal('store', other);                    // store kept, one development warning per name
+
+// onConflict: 'warn' (default) | 'keep' (quiet get-or-create) | 'replace' (getters and read-only too)
+const db = defineGlobal('db', createClient(), { onConflict: 'keep' });  // survives dev hot reloads
+defineGlobal('dataLayer', [], { onConflict: 'keep' }).push(event);     // the page's queue when present
+defineGlobal('fetch', mockFetch, { onConflict: 'replace' });            // test setup
+defineGlobal('plugins', [], { host: MyLibrary });                       // any host object
 ```
 
 ---
@@ -1396,6 +1430,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `deepExtend` | `(target, ...sources, opts?)` | Deep merged (mutates target) |
 | `pick` | `(obj, ...keys)` | New object with selected keys |
 | `onlyKeys` | `(obj, keysArray)` | New object with selected keys |
+| `assertOptions` | `(obj, spec, opts?)` | Same object, or throws one TypeError listing every unknown key (did-you-mean) and refused value; `onInvalid`, `allowUnknown`, `hints`, `name` |
 | `filterObject` | `(obj, fn(val,key))` | Filtered object |
 | `mapObject` | `(obj, fn(val,key))` | Transformed object |
 | `trackWrites` | `(value, callback, opts?)` | `{ changed, paths, result }` (keyed `field[#id]` paths by default) |
@@ -1426,6 +1461,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `isMap`, `isSet` | `instanceof` checks |
 | `isArguments` | Arguments object |
 | `isServer`, `isClient`, `isDevelopment`, `isCI` | **Boolean constants** (no parens) |
+| `defineGlobal` | `(name, value, { host, onConflict })` — the value the name holds afterward; `'warn'` / `'keep'` / `'replace'` |
 
 ### Equality & Cloning (equality.js, cloning.js)
 | Function | Signature | Returns |

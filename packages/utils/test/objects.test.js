@@ -1,6 +1,7 @@
 import {
   any,
   arrayFromObject,
+  assertOptions,
   assignInPlace,
   clone,
   deepExtend,
@@ -9,6 +10,9 @@ import {
   filterObject,
   get,
   hasProperty,
+  isDevelopment,
+  isFunction,
+  isNumber,
   keys,
   mapObject,
   onlyKeys,
@@ -1894,5 +1898,151 @@ describe('deepExtend — preserveNonCloneable option', () => {
     deepExtend(target, { custom: inst }, { preserveNonCloneable: false });
     expect(target.custom).not.toBe(inst);
     expect(target.custom.v).toBe(1);
+  });
+});
+
+describe('assertOptions', () => {
+  const spec = { retries: isNumber, timeout: isNumber, onError: isFunction, meta: true };
+
+  it('should return the same object when nothing is wrong', () => {
+    const options = { retries: 3, meta: { anything: true } };
+    expect(assertOptions(options, spec)).toBe(options);
+  });
+
+  it('should accept any value for a key mapped to true', () => {
+    expect(() => assertOptions({ meta: 'x' }, spec)).not.toThrow();
+    expect(() => assertOptions({ meta: null }, spec)).not.toThrow();
+  });
+
+  it('should name the nearest known key for a typo', () => {
+    expect(isDevelopment).toBe(true);
+    expect(() => assertOptions({ retires: 3 }, spec, { name: 'createClient' }))
+      .toThrow("createClient: unknown key 'retires', did you mean 'retries'?");
+  });
+
+  it('should list the known keys when nothing is close', () => {
+    expect(() => assertOptions({ banana: 1 }, spec, { name: 'createClient' }))
+      .toThrow("createClient: unknown key 'banana', expected one of retries, timeout, onError, meta");
+  });
+
+  it('should say what was expected from a hint', () => {
+    expect(() =>
+      assertOptions({ timeout: '5s' }, spec, { name: 'createClient', hints: { timeout: 'a number of milliseconds' } })
+    )
+      .toThrow("createClient: 'timeout' expects a number of milliseconds, received '5s'");
+  });
+
+  it('should read a hint function with the refused value', () => {
+    const hints = { timeout: (value) => `a number, not ${typeof value}` };
+    expect(() => assertOptions({ timeout: true }, spec, { hints }))
+      .toThrow("'timeout' expects a number, not boolean, received true");
+  });
+
+  it('should fall back to a plain sentence without a hint', () => {
+    expect(() => assertOptions({ onError: 5 }, spec)).toThrow("'onError' received an invalid value 5");
+  });
+
+  it('should leave the prefix off without a name', () => {
+    expect(() => assertOptions({ banana: 1 }, spec)).toThrow(/^unknown key 'banana'/);
+  });
+
+  it('should report every problem in one TypeError with the structured problems attached', () => {
+    let thrown;
+    try {
+      assertOptions({ retires: 3, timeout: '5s' }, spec, { name: 'createClient' });
+    }
+    catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(TypeError);
+    expect(thrown.message.split('\n')).toHaveLength(2);
+    expect(thrown.problems).toEqual([
+      expect.objectContaining({ key: 'retires', kind: 'unknown', value: 3, suggestion: 'retries' }),
+      expect.objectContaining({ key: 'timeout', kind: 'invalid', value: '5s', suggestion: null }),
+    ]);
+  });
+
+  it('should treat an undefined value as not provided but still judge its key', () => {
+    expect(() => assertOptions({ timeout: undefined }, spec)).not.toThrow();
+    expect(() => assertOptions({ timeot: undefined }, spec)).toThrow(/did you mean 'timeout'/);
+  });
+
+  it('should judge own keys of the spec only', () => {
+    expect(() => assertOptions({ constructor: 1 }, spec)).toThrow(/unknown key 'constructor'/);
+    expect(() => assertOptions({ toString: 1 }, spec)).toThrow(/unknown key 'toString'/);
+  });
+
+  it('should read a nullish object as an omitted options bag', () => {
+    expect(assertOptions(undefined, spec)).toBeUndefined();
+    expect(assertOptions(null, spec)).toBeNull();
+  });
+
+  it('should refuse a value that is not a plain object', () => {
+    expect(() => assertOptions(5, spec, { name: 'createClient' })).toThrow(
+      'createClient: expected a plain object, received 5',
+    );
+    expect(() => assertOptions([], spec)).toThrow('expected a plain object, received []');
+    expect(() => assertOptions('opts', spec)).toThrow("expected a plain object, received 'opts'");
+  });
+
+  it('should accept an object with a null prototype', () => {
+    const options = Object.assign(Object.create(null), { retries: 1 });
+    expect(assertOptions(options, spec)).toBe(options);
+  });
+
+  it('should warn and return the object with onInvalid warn', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const options = { retires: 3, timeout: 'x' };
+    expect(assertOptions(options, spec, { onInvalid: 'warn' })).toBe(options);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0].split('\n')).toHaveLength(2);
+    warn.mockRestore();
+  });
+
+  it('should hand the problems to an onInvalid callback and return the object', () => {
+    const onInvalid = vi.fn();
+    const options = { retires: 3 };
+    expect(assertOptions(options, spec, { onInvalid })).toBe(options);
+    expect(onInvalid).toHaveBeenCalledWith([
+      {
+        key: 'retires',
+        kind: 'unknown',
+        value: 3,
+        suggestion: 'retries',
+        message: "unknown key 'retires', did you mean 'retries'?",
+      },
+    ]);
+  });
+
+  it('should not call the callback when nothing is wrong', () => {
+    const onInvalid = vi.fn();
+    assertOptions({ retries: 1 }, spec, { onInvalid });
+    expect(onInvalid).not.toHaveBeenCalled();
+  });
+
+  it('should judge only the listed keys with allowUnknown', () => {
+    const env = { PORT: '3000', HOME: '/root', PATH: '/bin' };
+    const isNumeric = (value) => /^\d+$/.test(value);
+    expect(assertOptions(env, { PORT: isNumeric }, { allowUnknown: true })).toBe(env);
+    expect(() => assertOptions({ PORT: 'eighty' }, { PORT: isNumeric }, { allowUnknown: true }))
+      .toThrow("'PORT' received an invalid value 'eighty'");
+  });
+
+  it('should show refused values without throwing', () => {
+    const circular = {};
+    circular.self = circular;
+    expect(() => assertOptions({ retries: circular }, spec)).toThrow(
+      "'retries' received an invalid value [object Object]",
+    );
+    expect(() => assertOptions({ retries: () => {} }, spec)).toThrow("'retries' received an invalid value a function");
+    expect(() => assertOptions({ retries: 'x'.repeat(100) }, spec)).toThrow(`'${'x'.repeat(40)}...'`);
+    expect(() => assertOptions({ retries: Symbol('s') }, spec)).toThrow('Symbol(s)');
+  });
+
+  it('should let an error from a predicate propagate', () => {
+    const explode = () => {
+      throw new Error('predicate broke');
+    };
+    expect(() => assertOptions({ retries: 1 }, { retries: explode })).toThrow('predicate broke');
   });
 });

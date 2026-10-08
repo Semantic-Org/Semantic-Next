@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Object Utilities
 package: "@semantic-ui/utils"
-methods: [keys, values, filterObject, mapObject, trackWrites, trackReads, detectChanges, extend, assignInPlace, deepExtend, pick, arrayFromObject, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
+methods: [keys, values, filterObject, mapObject, trackWrites, trackReads, detectChanges, extend, assignInPlace, deepExtend, pick, arrayFromObject, proxyObject, onlyKeys, assertOptions, hasProperty, reverseKeys, weightedObjectSearch]
 icon: box
 description: API reference for object manipulation functions
 ---
@@ -596,6 +596,69 @@ import { onlyKeys } from '@semantic-ui/utils';
 const obj = { a: 1, b: 2, c: 3, d: 4 };
 const result = onlyKeys(obj, ['a', 'c']);
 console.log(result); // { a: 1, c: 3 }
+```
+
+### assertOptions
+
+```javascript
+function assertOptions(object, spec, { name = '', hints, onInvalid = 'throw', allowUnknown = false } = {})
+```
+
+Judges an options object against the keys it may hold, so a misspelled key fails loudly instead of silently running the default. `spec` maps each permitted key to `true` (any value) or a predicate the value must pass. An unknown key names its nearest known key, found with [`suggest`](/docs/api/utils/strings#suggest), or lists the known keys when nothing is close. A refused value names what was expected, from `hints`. Every problem is reported at once, one sentence per line.
+
+A key set to `undefined` counts as not provided, which is what spreading an optional value produces, but its name is still judged, so `{ timeot: undefined }` is still a typo. `true` in the spec means any value, never required. A nullish object is an omitted options bag and comes back as given.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| object  | object | The options object to judge |
+| spec    | object | Each permitted key mapped to `true` or a predicate `(value) => boolean` |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name         | Type                        | Default   | Description |
+|--------------|-----------------------------|-----------|-------------|
+| name         | string                      | `''`      | The surface the object was passed to, leading every sentence (`createClient: ...`) |
+| hints        | object                      | none      | What each key expects, as a phrase (`'a number of milliseconds'`) or a function of the refused value |
+| onInvalid    | string \| function          | `'throw'` | `'throw'` one `TypeError` carrying `problems`, `'warn'` one `console.warn`, or a function given the problems. The last two return the object |
+| allowUnknown | boolean                     | `false`   | Judge only the keys the spec lists and pass any other key through, for a bag that is mostly someone else's (`process.env`, options forwarded to `fetch`) |
+
+Each problem is `{ key, kind, value, suggestion, message }`, with `kind` one of `'unknown'`, `'invalid'` or `'notObject'`. The callback form is the door for a caller's own wording or an overlay.
+
+#### Returns
+
+The same object, whenever it does not throw.
+
+#### Production
+
+The did-you-mean lookup runs in development only, so a production define folds the suggestion engine out of the bundle and an unknown key lists the known keys instead. Hints are teaching prose, so fold them at the callsite: `hints: isDevelopment ? { ... } : undefined`. See [Development Messages](/docs/api/utils/debug#development-messages).
+
+#### Example
+
+```javascript
+import { assertOptions, isDevelopment, isFunction, isNumber } from '@semantic-ui/utils';
+
+const spec = { retries: isNumber, timeout: isNumber, onError: isFunction, meta: true };
+
+export const createClient = (options) => {
+  assertOptions(options, spec, {
+    name: 'createClient',
+    hints: isDevelopment ? { timeout: 'a number of milliseconds' } : undefined,
+  });
+  // ...
+};
+
+createClient({ retires: 3 });
+// TypeError: createClient: unknown key 'retires', did you mean 'retries'?
+
+createClient({ timeout: '5s' });
+// TypeError: createClient: 'timeout' expects a number of milliseconds, received '5s'
+
+// warn and carry on, or hand the problems to your own reporting
+assertOptions(options, spec, { onInvalid: 'warn' });
+assertOptions(options, spec, { onInvalid: (problems) => overlay.show(problems) });
 ```
 
 ### hasProperty

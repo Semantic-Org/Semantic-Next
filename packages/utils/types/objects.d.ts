@@ -544,6 +544,80 @@ export function onlyKeys<T extends object, K extends keyof T>(
 ): Pick<T, K>;
 
 /**
+ * A spec for assertOptions: each permitted key maps to `true` (any value) or a predicate
+ * the value must pass. `true` does not mean required, a key may always be left out
+ */
+export type OptionsSpec = Record<string, true | ((value: any) => boolean)>;
+
+/**
+ * One problem assertOptions found
+ */
+export interface OptionsProblem {
+  /** The offending key, null when the value passed was not a plain object */
+  key: string | null;
+  /** `'unknown'` a key the spec does not list, `'invalid'` a value its predicate refused, `'notObject'` not a plain object */
+  kind: 'unknown' | 'invalid' | 'notObject';
+  /** The value found */
+  value: unknown;
+  /** The nearest known key for an unknown key, development only, otherwise null */
+  suggestion: string | null;
+  /** The problem as one sentence, prefixed with the name when one was given */
+  message: string;
+}
+
+/**
+ * A TypeError thrown by assertOptions, carrying every problem it found
+ */
+export interface OptionsError extends TypeError {
+  problems: OptionsProblem[];
+}
+
+/**
+ * Options for assertOptions
+ */
+export interface AssertOptionsOptions {
+  /** The surface the object was passed to, leading every sentence (e.g. 'createClient') */
+  name?: string;
+  /** What each key expects, as a phrase or a function of the refused value. Fold it at the callsite: `isDevelopment ? { ... } : undefined` */
+  hints?: Record<string, string | ((value: unknown) => string)>;
+  /** `'throw'` (default) one TypeError with every problem, `'warn'` one console.warn, or a function given the problems. Both of the last return the object */
+  onInvalid?: 'throw' | 'warn' | ((problems: OptionsProblem[]) => void);
+  /** Judge only the keys the spec lists and pass any other key through (default: false) */
+  allowUnknown?: boolean;
+}
+
+/**
+ * Judges an options object against the keys it may hold, so a misspelled key fails loudly
+ * instead of silently running the default. An unknown key names its nearest known key (in
+ * development), a refused value names what was expected, and every problem is reported at
+ * once. A key set to undefined counts as not provided, though its name is still judged.
+ * A nullish object is an omitted options bag and comes back as given
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#assertoptions assertOptions}
+ * @see {@link https://next.semantic-ui.com/examples/utils-assertoptions Example}
+ *
+ * @param object - The options object to judge
+ * @param spec - Each permitted key mapped to true (any value) or a predicate
+ * @param options - The surface name, hints and the failure mode
+ * @returns The same object, whenever it does not throw
+ * @throws OptionsError (a TypeError with `problems`) on any problem, unless onInvalid says otherwise
+ *
+ * @example
+ * ```ts
+ * const spec = { retries: isNumber, timeout: isNumber, meta: true };
+ * assertOptions({ retires: 3 }, spec, { name: 'createClient' });
+ * // throws "createClient: unknown key 'retires', did you mean 'retries'?"
+ * assertOptions({ timeout: '5s' }, spec, { hints: { timeout: 'a number of milliseconds' } });
+ * // throws "'timeout' expects a number of milliseconds, received '5s'"
+ * assertOptions(process.env, { PORT: isNumeric }, { allowUnknown: true });
+ * ```
+ */
+export function assertOptions<T extends object | null | undefined>(
+  object: T,
+  spec: OptionsSpec,
+  options?: AssertOptionsOptions,
+): T;
+
+/**
  * Checks if an object has a specific property
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#hasproperty hasProperty}
  *

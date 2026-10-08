@@ -1,9 +1,11 @@
 import { clone } from './cloning.js';
+import { isDevelopment } from './environment.js';
 import { isEqual } from './equality.js';
 import { each } from './loops.js';
 import { eachPath, elementKey, get, pathKey } from './paths.js';
 import { escapeRegExp } from './regexp.js';
-import { isArray, isMap, isObject, isPlainObject, isSet, isString } from './types.js';
+import { suggest } from './strings.js';
+import { isArray, isBoolean, isFunction, isMap, isNumber, isObject, isPlainObject, isSet, isString } from './types.js';
 
 /*-------------------
        Objects
@@ -858,6 +860,105 @@ export const onlyKeys = (obj, keysToKeep) => {
     }
     return accumulator;
   }, {});
+};
+
+const PREVIEW_LENGTH = 40;
+const clip = (text) => (text.length > PREVIEW_LENGTH ? `${text.slice(0, PREVIEW_LENGTH)}...` : text);
+
+// a refused value is shown in the sentence, so showing it never throws
+const showValue = (value) => {
+  if (isString(value)) {
+    return `'${clip(value)}'`;
+  }
+  if (value == null || isNumber(value) || isBoolean(value)) {
+    return String(value);
+  }
+  if (isFunction(value)) {
+    return 'a function';
+  }
+  try {
+    return clip(JSON.stringify(value) ?? String(value));
+  }
+  catch {
+    return Object.prototype.toString.call(value);
+  }
+};
+
+const reportProblems = (problems, onInvalid, object) => {
+  if (isFunction(onInvalid)) {
+    onInvalid(problems);
+    return object;
+  }
+  const message = problems.map((problem) => problem.message).join('\n');
+  if (onInvalid === 'warn') {
+    console.warn(message);
+    return object;
+  }
+  throw Object.assign(new TypeError(message), { problems });
+};
+
+/*
+  Judges an options object against a spec of the keys it may hold, each mapped
+  to true (any value) or a predicate. An unknown key names its nearest known
+  key, a refused value names what was expected (hints), every problem in one
+  report. Throws a TypeError by default, or warns or hands the problems to a
+  callback and returns the object. An undefined value counts as not provided
+*/
+export const assertOptions = (object, spec, {
+  name = '',
+  hints,
+  onInvalid = 'throw',
+  allowUnknown = false,
+} = {}) => {
+  // an omitted options argument is an empty bag
+  if (object == null) {
+    return object;
+  }
+  const prefix = name ? `${name}: ` : '';
+  if (!isPlainObject(object)) {
+    const message = `${prefix}expected a plain object, received ${showValue(object)}`;
+    return reportProblems(
+      [{ key: null, kind: 'notObject', value: object, suggestion: null, message }],
+      onInvalid,
+      object,
+    );
+  }
+  const keys = Object.keys(object);
+  let problems;
+  for (let index = 0; index < keys.length; index++) {
+    const key = keys[index];
+    const value = object[key];
+    // own keys only, so a stray 'constructor' or 'toString' is still unknown
+    if (!Object.hasOwn(spec, key)) {
+      if (allowUnknown) {
+        continue;
+      }
+      // folds under a production define and takes the suggestion engine with it
+      const suggestion = isDevelopment ? suggest(key, Object.keys(spec)) : null;
+      const tail = suggestion
+        ? `did you mean '${suggestion}'?`
+        : `expected one of ${Object.keys(spec).join(', ')}`;
+      (problems ??= []).push({
+        key,
+        kind: 'unknown',
+        value,
+        suggestion,
+        message: `${prefix}unknown key '${key}', ${tail}`,
+      });
+      continue;
+    }
+    const rule = spec[key];
+    if (value === undefined || !isFunction(rule) || rule(value)) {
+      continue;
+    }
+    const hint = hints?.[key];
+    const phrase = isFunction(hint) ? hint(value) : hint;
+    const message = phrase
+      ? `${prefix}'${key}' expects ${phrase}, received ${showValue(value)}`
+      : `${prefix}'${key}' received an invalid value ${showValue(value)}`;
+    (problems ??= []).push({ key, kind: 'invalid', value, suggestion: null, message });
+  }
+  return problems ? reportProblems(problems, onInvalid, object) : object;
 };
 
 /*
