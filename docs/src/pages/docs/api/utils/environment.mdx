@@ -141,16 +141,18 @@ const timeout = isCI ? 30000 : 5000;
 ### defineGlobal
 
 ```javascript
-function defineGlobal(name, value, { host = globalThis, onConflict = 'warn' } = {})
+function defineGlobal(name, value, { host = globalThis, onConflict = 'warn', onWarn } = {})
 ```
 
 Puts a value on the global object, or any host object, under a name and returns the value the name holds afterward. Defining the same value again is no conflict, so a module re-run under hot reload stays quiet. A name already held by a different value is a conflict, and `onConflict` decides what happens:
 
-- `'warn'` keeps the existing value and warns once per name in development. This is the default, for a value exposed to the console where a collision usually means a second copy of a library
+- `'warn'` keeps the existing value and, in development, hands `onWarn` a message. This is the default, for a value exposed to the console where a collision usually means a second copy of a library
 - `'keep'` keeps the existing value quietly. Polyfills, get-or-create singletons that survive hot reloads, and shared queues like `dataLayer` all want the value that is already there
-- `'replace'` overwrites it, including a getter or a read-only property that plain assignment cannot change, as test setup does with `fetch` or `navigator`
+- `'replace'` overwrites it, including a getter or a read-only configurable property that plain assignment cannot change, as test setup does with `fetch` or `navigator`
 
 A name counts as held when `name in host` is true, so a built-in on the prototype chain (`window.status`, `window.location`) is never clobbered by default. The function attaches in every build. When the value is for the console only, fold the call at the callsite with [`isDevelopment`](#isdevelopment).
+
+`onWarn` defaults to `console.warn`, which warns on every conflicting call. For one warning per name, pass the `warnOnce` of a [`createLogger`](/docs/api/utils/debug#createlogger), which also prints under your namespace.
 
 #### Parameters
 
@@ -162,22 +164,25 @@ A name counts as held when `name in host` is true, so a built-in on the prototyp
 
 ##### Options
 
-| Name       | Type   | Default      | Description |
-|------------|--------|--------------|-------------|
-| host       | object | `globalThis` | The object to define on, a library namespace for instance |
-| onConflict | string | `'warn'`     | `'warn'`, `'keep'` or `'replace'`. Any other value throws a `TypeError` |
+| Name       | Type     | Default        | Description |
+|------------|----------|----------------|-------------|
+| host       | object   | `globalThis`   | The object to define on, a library namespace for instance |
+| onConflict | string   | `'warn'`       | `'warn'`, `'keep'` or `'replace'` |
+| onWarn     | function | `console.warn` | Receives the conflict message under `'warn'`, in development only |
 
 #### Returns
 
-The value the name holds after the call: the given value, or the existing one when it was kept. Throws a `TypeError` for an unknown `onConflict`, a host that cannot hold a property, or a replace over a non-configurable read-only property.
+The value the name holds after the call: the given value, or the existing one when it was kept.
 
 #### Example
 
 ```javascript
-import { defineGlobal, isDevelopment } from '@semantic-ui/utils';
+import { createLogger, defineGlobal, isDevelopment } from '@semantic-ui/utils';
 
-// reach the store from the devtools console, development builds only
-isDevelopment && defineGlobal('store', store);
+const { warnOnce } = createLogger({ namespace: 'app' });
+
+// reach the store from the devtools console, development builds only, one warning per name
+isDevelopment && defineGlobal('store', store, { onWarn: warnOnce });
 
 // get-or-create, a database client that survives dev hot reloads
 const db = defineGlobal('db', createClient(), { onConflict: 'keep' });

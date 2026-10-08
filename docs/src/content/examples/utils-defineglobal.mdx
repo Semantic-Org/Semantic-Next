@@ -8,5 +8,5 @@ subcategory: 'Environment'
 description: 'Puts a value on the global object under a name without clobbering what is already there'
 tags: ['utils', 'environment', 'defineglobal', 'globalthis', 'devtools', 'singleton', 'polyfill']
 selectedFile: 'index.js'
-tip: 'Pair it with isDevelopment at the callsite, isDevelopment && defineGlobal(...), when the value is for the console only'
+tip: 'Pass onWarn: warnOnce from createLogger for one warning per name, and pair the call with isDevelopment when the value is for the console only'
 ---

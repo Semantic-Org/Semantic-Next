@@ -1,11 +1,11 @@
-import { assertOptions, isFunction, isNumber } from '@semantic-ui/utils';
+import { assertOptions, isFunction, isNumber, suggest } from '@semantic-ui/utils';
 
 const spec = { retries: isNumber, timeout: isNumber, onError: isFunction, meta: true };
 
 // a valid bag comes back as the same object
 console.log(assertOptions({ retries: 3, meta: { team: 'ui' } }, spec));
 
-// a typo names the nearest known key
+// an unknown key lists the known ones
 try {
   assertOptions({ retires: 3 }, spec, { name: 'createClient' });
 }
@@ -13,28 +13,24 @@ catch (error) {
   console.log(error.message);
 }
 
-// a hint says what a refused value should have been
+// hand it suggest and the message names the nearest key instead
 try {
-  assertOptions({ timeout: '5s' }, spec, { name: 'createClient', hints: { timeout: 'a number of milliseconds' } });
+  assertOptions({ retires: 3 }, spec, { name: 'createClient', suggest });
 }
 catch (error) {
   console.log(error.message);
 }
 
-// every problem at once, each with its structured form
+// a hint says what a refused value should have been, every problem on its own line
 try {
-  assertOptions({ retires: 3, onError: 'log' }, spec);
+  assertOptions({ timeout: '5s', onError: 'log' }, spec, { hints: { timeout: 'a number of milliseconds' } });
 }
 catch (error) {
-  console.log(error.problems.map(({ key, kind }) => `${kind} ${key}`));
+  console.log(error.message);
 }
 
 // an undefined value counts as not provided, the spread-an-optional idiom
 console.log(assertOptions({ timeout: undefined }, spec));
 
-// warn reports and carries on, a callback gets the problems to render
-assertOptions({ retires: 3 }, spec, { onInvalid: 'warn' });
-assertOptions({ retires: 3 }, spec, { onInvalid: (problems) => console.log(problems[0].suggestion) });
-
-// allowUnknown judges only the listed keys, for a bag that is mostly someone else's
-console.log(assertOptions({ PORT: 3000, HOME: '/root' }, { PORT: isNumber }, { allowUnknown: true }));
+// onInvalid takes the message instead of the throw, console.warn for an advisory check
+assertOptions({ retires: 3 }, spec, { onInvalid: console.warn });

@@ -1,4 +1,4 @@
-import { defineGlobal, isDevelopment } from '@semantic-ui/utils';
+import { createLogger, defineGlobal, isDevelopment } from '@semantic-ui/utils';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -26,13 +26,8 @@ describe('defineGlobal', () => {
     const store = { count: 1 };
     expect(defineGlobal(name, store)).toBe(store);
     expect(globalThis[name]).toBe(store);
-  });
-
-  it('should make a plain writable enumerable configurable property', () => {
-    const name = fresh('shape');
-    defineGlobal(name, 1);
     expect(Object.getOwnPropertyDescriptor(globalThis, name)).toEqual({
-      value: 1,
+      value: store,
       writable: true,
       enumerable: true,
       configurable: true,
@@ -47,26 +42,33 @@ describe('defineGlobal', () => {
     expect(warn).not.toHaveBeenCalled();
   });
 
-  it('should keep the existing value and warn once per name by default', () => {
+  it('should keep the existing value and warn through console.warn by default', () => {
     expect(isDevelopment).toBe(true);
     const name = fresh('taken');
     const first = {};
     defineGlobal(name, first);
     expect(defineGlobal(name, {})).toBe(first);
-    expect(defineGlobal(name, {})).toBe(first);
     expect(globalThis[name]).toBe(first);
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0][0]).toContain(`'${name}' is already defined`);
+    expect(warn.mock.calls[0][0]).toBe(`'${name}' is already defined, keeping the existing value`);
   });
 
-  it('should warn separately for each name', () => {
-    const one = fresh('one');
-    const two = fresh('two');
-    defineGlobal(one, 1);
-    defineGlobal(two, 2);
-    defineGlobal(one, 'x');
-    defineGlobal(two, 'x');
-    expect(warn).toHaveBeenCalledTimes(2);
+  it('should hand the message to a supplied onWarn instead of console.warn', () => {
+    const name = fresh('onWarn');
+    const onWarn = vi.fn();
+    defineGlobal(name, 1);
+    defineGlobal(name, 2, { onWarn });
+    expect(onWarn).toHaveBeenCalledWith(`'${name}' is already defined, keeping the existing value`);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('should warn once per name with a logger warnOnce as onWarn', () => {
+    const name = fresh('once');
+    const { warnOnce } = createLogger();
+    defineGlobal(name, 1);
+    defineGlobal(name, 2, { onWarn: warnOnce });
+    defineGlobal(name, 3, { onWarn: warnOnce });
+    expect(warn).toHaveBeenCalledTimes(1);
   });
 
   it('should count a held undefined as defined', () => {
@@ -80,7 +82,9 @@ describe('defineGlobal', () => {
     const name = fresh('keep');
     const queue = [1];
     globalThis[name] = queue;
-    expect(defineGlobal(name, [], { onConflict: 'keep' })).toBe(queue);
+    const onWarn = vi.fn();
+    expect(defineGlobal(name, [], { onConflict: 'keep', onWarn })).toBe(queue);
+    expect(onWarn).not.toHaveBeenCalled();
     expect(warn).not.toHaveBeenCalled();
   });
 
@@ -90,28 +94,28 @@ describe('defineGlobal', () => {
     expect(defineGlobal(name, { id: 2 }, { onConflict: 'keep' })).toBe(created);
   });
 
-  it('should keep a built-in by default', () => {
+  it('should keep a built-in', () => {
     expect(defineGlobal('structuredClone', () => 'polyfill', { onConflict: 'keep' })).toBe(structuredClone);
     expect(defineGlobal('Array', class {})).toBe(Array);
   });
 
-  it('should overwrite with onConflict replace', () => {
+  it('should overwrite with onConflict replace, silently', () => {
     const name = fresh('replace');
     globalThis[name] = 'real';
-    expect(defineGlobal(name, 'mock', { onConflict: 'replace' })).toBe('mock');
+    const onWarn = vi.fn();
+    expect(defineGlobal(name, 'mock', { onConflict: 'replace', onWarn })).toBe('mock');
     expect(globalThis[name]).toBe('mock');
-    expect(warn).not.toHaveBeenCalled();
+    expect(onWarn).not.toHaveBeenCalled();
   });
 
   it('should replace a getter or a read-only value that assignment cannot', () => {
     const host = {};
-    Object.defineProperty(host, 'navigator', { get: () => 'node', configurable: true, enumerable: false });
+    Object.defineProperty(host, 'navigator', { get: () => 'node', configurable: true });
     Object.defineProperty(host, 'version', { value: 1, writable: false, configurable: true });
     expect(defineGlobal('navigator', 'mock', { host, onConflict: 'replace' })).toBe('mock');
     expect(defineGlobal('version', 2, { host, onConflict: 'replace' })).toBe(2);
     expect(host.navigator).toBe('mock');
     expect(host.version).toBe(2);
-    expect(Object.getOwnPropertyDescriptor(host, 'navigator').enumerable).toBe(false);
   });
 
   it('should throw when replacing a property that cannot change', () => {
@@ -127,24 +131,10 @@ describe('defineGlobal', () => {
     expect(defineGlobal('plugins', [], { host: library, onConflict: 'keep' })).toBe(plugins);
   });
 
-  it('should accept a function as a host', () => {
-    const Library = () => {};
-    defineGlobal('register', 1, { host: Library });
-    expect(Library.register).toBe(1);
-  });
-
   it('should see a name inherited by the host as taken', () => {
     const host = Object.create({ inherited: 'parent' });
     expect(defineGlobal('inherited', 'child', { host })).toBe('parent');
     expect(Object.hasOwn(host, 'inherited')).toBe(false);
-  });
-
-  it('should warn once per host, not once per name across hosts', () => {
-    const first = { shared: 1 };
-    const second = { shared: 1 };
-    defineGlobal('shared', 2, { host: first });
-    defineGlobal('shared', 2, { host: second });
-    expect(warn).toHaveBeenCalledTimes(2);
   });
 
   it('should accept a symbol name', () => {
@@ -156,12 +146,7 @@ describe('defineGlobal', () => {
     expect(warn.mock.calls[0][0]).toContain('Symbol(hook)');
   });
 
-  it('should refuse an unknown onConflict', () => {
-    expect(() => defineGlobal(fresh('typo'), 1, { onConflict: 'replce' }))
-      .toThrow("defineGlobal: onConflict is 'warn', 'keep' or 'replace', got replce");
-  });
-
-  it('should refuse a host that cannot hold a property', () => {
+  it('should throw natively for a host that cannot hold a property', () => {
     expect(() => defineGlobal('x', 1, { host: null })).toThrow(TypeError);
     expect(() => defineGlobal('x', 1, { host: 5 })).toThrow(TypeError);
   });

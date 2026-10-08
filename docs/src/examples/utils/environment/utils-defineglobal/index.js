@@ -1,4 +1,4 @@
-import { defineGlobal } from '@semantic-ui/utils';
+import { createLogger, defineGlobal } from '@semantic-ui/utils';
 
 const store = { todos: ['write docs'] };
 
@@ -8,8 +8,12 @@ console.log(defineGlobal('store', store) === globalThis.store);
 // the same value again is quiet, the shape of a module re-run under hot reload
 console.log(defineGlobal('store', store) === store);
 
-// a different value keeps what is there and warns once in development
+// a different value keeps what is there and warns in development
 console.log(defineGlobal('store', { todos: [] }) === store);
+
+// onWarn takes the warning, a logger's warnOnce makes it once per name
+const { warnOnce } = createLogger({ namespace: 'app' });
+defineGlobal('store', { todos: [] }, { onWarn: warnOnce });
 
 // keep is get-or-create, the first definition wins without a word
 const bus = defineGlobal('eventBus', new EventTarget(), { onConflict: 'keep' });

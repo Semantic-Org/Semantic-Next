@@ -601,10 +601,10 @@ console.log(result); // { a: 1, c: 3 }
 ### assertOptions
 
 ```javascript
-function assertOptions(object, spec, { name = '', hints, onInvalid = 'throw', allowUnknown = false } = {})
+function assertOptions(object, spec, { name, hints, suggest, onInvalid } = {})
 ```
 
-Judges an options object against the keys it may hold, so a misspelled key fails loudly instead of silently running the default. `spec` maps each permitted key to `true` (any value) or a predicate the value must pass. An unknown key names its nearest known key, found with [`suggest`](/docs/api/utils/strings#suggest), or lists the known keys when nothing is close. A refused value names what was expected, from `hints`. Every problem is reported at once, one sentence per line.
+Judges an options object against the keys it may hold, so a misspelled key fails loudly instead of silently running the default. `spec` maps each permitted key to `true` (any value) or a predicate the value must pass. It throws one `TypeError` with a line per problem: an unknown key lists the known keys, and a refused value says what was expected, from `hints`, and what was received.
 
 A key set to `undefined` counts as not provided, which is what spreading an optional value produces, but its name is still judged, so `{ timeot: undefined }` is still a typo. `true` in the spec means any value, never required. A nullish object is an omitted options bag and comes back as given.
 
@@ -618,27 +618,25 @@ A key set to `undefined` counts as not provided, which is what spreading an opti
 
 ##### Options
 
-| Name         | Type                        | Default   | Description |
-|--------------|-----------------------------|-----------|-------------|
-| name         | string                      | `''`      | The surface the object was passed to, leading every sentence (`createClient: ...`) |
-| hints        | object                      | none      | What each key expects, as a phrase (`'a number of milliseconds'`) or a function of the refused value |
-| onInvalid    | string \| function          | `'throw'` | `'throw'` one `TypeError` carrying `problems`, `'warn'` one `console.warn`, or a function given the problems. The last two return the object |
-| allowUnknown | boolean                     | `false`   | Judge only the keys the spec lists and pass any other key through, for a bag that is mostly someone else's (`process.env`, options forwarded to `fetch`) |
-
-Each problem is `{ key, kind, value, suggestion, message }`, with `kind` one of `'unknown'`, `'invalid'` or `'notObject'`. The callback form is the door for a caller's own wording or an overlay.
+| Name      | Type     | Default | Description |
+|-----------|----------|---------|-------------|
+| name      | string   | none    | The surface the object was passed to, leading every line (`createClient: ...`) |
+| hints     | object   | none    | What each key expects, a phrase like `'a number of milliseconds'` |
+| suggest   | function | none    | `(key, knownKeys) => string \| null`, the nearest known key for a did-you-mean. [`suggest`](/docs/api/utils/strings#suggest) fits as is |
+| onInvalid | function | none    | Receives the message instead of the throw, `console.warn` for an advisory check |
 
 #### Returns
 
 The same object, whenever it does not throw.
 
-#### Production
+#### Bytes
 
-The did-you-mean lookup runs in development only, so a production define folds the suggestion engine out of the bundle and an unknown key lists the known keys instead. Hints are teaching prose, so fold them at the callsite: `hints: isDevelopment ? { ... } : undefined`. See [Development Messages](/docs/api/utils/debug#development-messages).
+The check itself is under 400 bytes brotli, about what a hand-written one costs. The did-you-mean is the expensive part, an edit-distance engine of about 1.6 KB, so it is opt-in: pass `suggest` and the bundle carries it, leave it out and the message lists the known keys instead. Pass it where bytes are free, on a server or in a dev-only entry. An `isDevelopment ? suggest : undefined` ternary does not drop it, since esbuild decides what a bundle keeps before it folds the branch. Hints are prose strings, so they do fold at the callsite with `isDevelopment ? { ... } : undefined`. See [Development Messages](/docs/api/utils/debug#development-messages).
 
 #### Example
 
 ```javascript
-import { assertOptions, isDevelopment, isFunction, isNumber } from '@semantic-ui/utils';
+import { assertOptions, isDevelopment, isFunction, isNumber, suggest } from '@semantic-ui/utils';
 
 const spec = { retries: isNumber, timeout: isNumber, onError: isFunction, meta: true };
 
@@ -651,14 +649,17 @@ export const createClient = (options) => {
 };
 
 createClient({ retires: 3 });
-// TypeError: createClient: unknown key 'retires', did you mean 'retries'?
+// TypeError: createClient: unknown key 'retires', expected one of retries, timeout, onError, meta
 
 createClient({ timeout: '5s' });
 // TypeError: createClient: 'timeout' expects a number of milliseconds, received '5s'
 
-// warn and carry on, or hand the problems to your own reporting
-assertOptions(options, spec, { onInvalid: 'warn' });
-assertOptions(options, spec, { onInvalid: (problems) => overlay.show(problems) });
+// on a server, where bytes are free, add the did-you-mean
+assertOptions(config, spec, { name: 'app.config.js', suggest });
+// TypeError: app.config.js: unknown key 'retires', did you mean 'retries'?
+
+// warn and carry on
+assertOptions(options, spec, { onInvalid: console.warn });
 ```
 
 ### hasProperty
