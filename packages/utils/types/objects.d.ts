@@ -544,6 +544,55 @@ export function onlyKeys<T extends object, K extends keyof T>(
 ): Pick<T, K>;
 
 /**
+ * A spec for checkOptions: each permitted key maps to `true` (any value) or a predicate
+ * the value must pass. `true` does not mean required, a key may always be left out
+ */
+export type OptionsSpec = Record<string, true | ((value: any) => boolean)>;
+
+/**
+ * Options for checkOptions
+ */
+export interface CheckOptionsOptions {
+  /** The surface the object was passed to, leading every line (e.g. 'createClient') */
+  name?: string;
+  /** What each key expects, a phrase like 'a number of milliseconds'. Fold it at the callsite: `isDevelopment ? { ... } : undefined` */
+  hints?: Record<string, string>;
+  /** Finds the nearest known key for an unknown one, utils' `suggest` fits as is. Without it the known keys are listed */
+  suggest?: (key: string, known: string[]) => string | null | undefined;
+  /** Receives the message instead of the throw, `console.warn` for an advisory check. The object is returned */
+  onInvalid?: (message: string) => void;
+}
+
+/**
+ * Judges an options object against the keys it may hold, so a misspelled key fails loudly
+ * instead of silently running the default. Throws one TypeError, one line per unknown key
+ * or refused value. A key set to undefined counts as not provided, though its name is still
+ * judged. A nullish object is an omitted options bag and comes back as given
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#checkoptions checkOptions}
+ * @see {@link https://next.semantic-ui.com/examples/utils-checkoptions Example}
+ *
+ * @param object - The options object to judge
+ * @param spec - Each permitted key mapped to true (any value) or a predicate
+ * @param options - The surface name, hints, a did-you-mean lookup and the failure door
+ * @returns The same object, whenever it does not throw
+ *
+ * @example
+ * ```ts
+ * const spec = { retries: isNumber, timeout: isNumber, meta: true };
+ * checkOptions({ retires: 3 }, spec, { name: 'createClient', suggest });
+ * // throws "createClient: unknown key 'retires', did you mean 'retries'?"
+ * checkOptions({ timeout: '5s' }, spec, { hints: { timeout: 'a number of milliseconds' } });
+ * // throws "'timeout' expects a number of milliseconds, received '5s'"
+ * checkOptions(options, spec, { onInvalid: console.warn });
+ * ```
+ */
+export function checkOptions<T extends object | null | undefined>(
+  object: T,
+  spec: OptionsSpec,
+  options?: CheckOptionsOptions,
+): T;
+
+/**
  * Checks if an object has a specific property
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#hasproperty hasProperty}
  *

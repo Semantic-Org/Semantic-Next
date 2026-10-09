@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Object Utilities
 package: "@semantic-ui/utils"
-methods: [keys, values, filterObject, mapObject, trackWrites, trackReads, detectChanges, extend, assignInPlace, deepExtend, pick, arrayFromObject, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
+methods: [keys, values, filterObject, mapObject, trackWrites, trackReads, detectChanges, extend, assignInPlace, deepExtend, pick, arrayFromObject, proxyObject, onlyKeys, checkOptions, hasProperty, reverseKeys, weightedObjectSearch]
 icon: box
 description: API reference for object manipulation functions
 ---
@@ -596,6 +596,70 @@ import { onlyKeys } from '@semantic-ui/utils';
 const obj = { a: 1, b: 2, c: 3, d: 4 };
 const result = onlyKeys(obj, ['a', 'c']);
 console.log(result); // { a: 1, c: 3 }
+```
+
+### checkOptions
+
+```javascript
+function checkOptions(object, spec, { name, hints, suggest, onInvalid } = {})
+```
+
+Judges an options object against the keys it may hold, so a misspelled key fails loudly instead of silently running the default. `spec` maps each permitted key to `true` (any value) or a predicate the value must pass. It throws one `TypeError` with a line per problem: an unknown key lists the known keys, and a refused value says what was expected, from `hints`, and what was received.
+
+A key set to `undefined` counts as not provided, which is what spreading an optional value produces, but its name is still judged, so `{ timeot: undefined }` is still a typo. `true` in the spec means any value, never required. A nullish object is an omitted options bag and comes back as given.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| object  | object | The options object to judge |
+| spec    | object | Each permitted key mapped to `true` or a predicate `(value) => boolean` |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name      | Type     | Default | Description |
+|-----------|----------|---------|-------------|
+| name      | string   | none    | The surface the object was passed to, leading every line (`createClient: ...`) |
+| hints     | object   | none    | What each key expects, a phrase like `'a number of milliseconds'` |
+| suggest   | function | none    | `(key, knownKeys) => string \| null`, the nearest known key for a did-you-mean. [`suggest`](/docs/api/utils/strings#suggest) fits as is |
+| onInvalid | function | none    | Receives the message instead of the throw, `console.warn` for an advisory check |
+
+#### Returns
+
+The same object, whenever it does not throw.
+
+#### Bytes
+
+The check itself is under 400 bytes brotli, about what a hand-written one costs. The did-you-mean is the expensive part, an edit-distance engine of about 1.6 KB, so it is opt-in: pass `suggest` and the bundle carries it, leave it out and the message lists the known keys instead. Pass it where bytes are free, on a server or in a dev-only entry. An `isDevelopment ? suggest : undefined` ternary does not drop it, since esbuild decides what a bundle keeps before it folds the branch. Hints are prose strings, so they do fold at the callsite with `isDevelopment ? { ... } : undefined`. See [Development Messages](/docs/api/utils/debug#development-messages).
+
+#### Example
+
+```javascript
+import { checkOptions, isDevelopment, isFunction, isNumber, suggest } from '@semantic-ui/utils';
+
+const spec = { retries: isNumber, timeout: isNumber, onError: isFunction, meta: true };
+
+export const createClient = (options) => {
+  checkOptions(options, spec, {
+    name: 'createClient',
+    hints: isDevelopment ? { timeout: 'a number of milliseconds' } : undefined,
+  });
+  // ...
+};
+
+createClient({ retires: 3 });
+// TypeError: createClient: unknown key 'retires', expected one of retries, timeout, onError, meta
+
+createClient({ timeout: '5s' });
+// TypeError: createClient: 'timeout' expects a number of milliseconds, received '5s'
+
+// on a server, where bytes are free, add the did-you-mean
+checkOptions(config, spec, { name: 'app.config.js', suggest });
+// TypeError: app.config.js: unknown key 'retires', did you mean 'retries'?
+
+// warn and carry on
+checkOptions(options, spec, { onInvalid: console.warn });
 ```
 
 ### hasProperty

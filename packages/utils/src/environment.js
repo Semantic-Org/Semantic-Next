@@ -107,3 +107,35 @@ export const isCI = (() => {
 
   return ciVars.some(varName => env[varName]);
 })();
+
+/*-------------------
+       Globals
+--------------------*/
+
+/*
+  Puts a value on the global object (or any host) under a name and returns the
+  value the name holds afterward. A name held by a different value is a
+  conflict: 'warn' keeps the existing value and hands onWarn (console.warn by
+  default) a message in development, 'keep' keeps it quietly, 'replace'
+  overwrites it
+*/
+export const defineGlobal = (name, value, { host = globalThis, onConflict = 'warn', onWarn } = {}) => {
+  if (!(name in host)) {
+    host[name] = value;
+    return value;
+  }
+  const held = host[name];
+  // the same value again is a module re-run under hot reload
+  if (Object.is(held, value)) {
+    return held;
+  }
+  if (onConflict === 'replace') {
+    // shadows a getter or a read-only value that assignment cant change
+    Object.defineProperty(host, name, { value, writable: true, enumerable: true, configurable: true });
+    return value;
+  }
+  if (isDevelopment && onConflict === 'warn') {
+    (onWarn ?? console.warn)(`'${String(name)}' is already defined, keeping the existing value`);
+  }
+  return held;
+};
