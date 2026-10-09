@@ -866,7 +866,7 @@ export const onlyKeys = (obj, keysToKeep) => {
   unknown key and refused value. onInvalid takes the message instead of the
   throw. An undefined value counts as not provided
 */
-export const assertOptions = (object, spec, { name, hints, suggest, onInvalid } = {}) => {
+export const checkOptions = (object, spec, { name, hints, suggest, onInvalid } = {}) => {
   // an omitted options argument is an empty bag
   if (object == null) {
     return object;

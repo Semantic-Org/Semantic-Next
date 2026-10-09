@@ -1,7 +1,7 @@
 ---
 title: Utility Functions Reference
 description: Complete reference for @semantic-ui/utils — a standalone utility library providing functions for arrays, objects, strings, type checking, colors, dates, and more. Use this before reimplementing common operations.
-keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, formatDuration, each, range, sequence, remove, noop, isDate, isRegExp, isTemporal, assertOptions, defineGlobal]
+keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, formatDuration, each, range, sequence, remove, noop, isDate, isRegExp, isTemporal, checkOptions, defineGlobal]
 audience: authoring
 skill: utility-functions
 type: skill
@@ -254,23 +254,23 @@ mapObject({ a: 1, b: 2 }, (value, key) => value * 2);           // { a: 2, b: 4 
 
 ### Options Checking
 ```javascript
-import { assertOptions, isDevelopment, isFunction, isNumber, suggest } from '@semantic-ui/utils';
+import { checkOptions, isDevelopment, isFunction, isNumber, suggest } from '@semantic-ui/utils';
 
 // spec maps each permitted key to true (any value, never "required") or a predicate.
 // returns the same object, or throws one TypeError, a line per problem. under 400 B brotli
 const spec = { retries: isNumber, timeout: isNumber, onError: isFunction, meta: true };
-assertOptions({ retires: 3 }, spec, { name: 'createClient' });
+checkOptions({ retires: 3 }, spec, { name: 'createClient' });
 // "createClient: unknown key 'retires', expected one of retries, timeout, onError, meta"
-assertOptions({ timeout: '5s' }, spec, { hints: isDevelopment ? { timeout: 'a number of milliseconds' } : undefined });
+checkOptions({ timeout: '5s' }, spec, { hints: isDevelopment ? { timeout: 'a number of milliseconds' } : undefined });
 // "'timeout' expects a number of milliseconds, received '5s'" (fold hints at the callsite)
 
 // the did-you-mean is opt-in, suggest is ~1.6 KB: pass it where bytes are free (a server).
 // an isDevelopment ? suggest : undefined ternary does NOT shake it out under esbuild
-assertOptions(config, spec, { suggest });                 // "did you mean 'retries'?"
+checkOptions(config, spec, { suggest });                 // "did you mean 'retries'?"
 
-assertOptions({ timeout: undefined }, spec);              // passes, undefined is not provided (the key name is still judged)
-assertOptions(undefined, spec);                           // undefined, an omitted bag
-assertOptions(options, spec, { onInvalid: console.warn }); // the message instead of the throw, returns the object
+checkOptions({ timeout: undefined }, spec);              // passes, undefined is not provided (the key name is still judged)
+checkOptions(undefined, spec);                           // undefined, an omitted bag
+checkOptions(options, spec, { onInvalid: console.warn }); // the message instead of the throw, returns the object
 ```
 
 ### Change Detection
@@ -1436,7 +1436,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `deepExtend` | `(target, ...sources, opts?)` | Deep merged (mutates target) |
 | `pick` | `(obj, ...keys)` | New object with selected keys |
 | `onlyKeys` | `(obj, keysArray)` | New object with selected keys |
-| `assertOptions` | `(obj, spec, opts?)` | Same object, or throws one TypeError, a line per unknown key and refused value; `name`, `hints`, `suggest` (opt-in did-you-mean), `onInvalid` |
+| `checkOptions` | `(obj, spec, opts?)` | Same object, or throws one TypeError, a line per unknown key and refused value; `name`, `hints`, `suggest` (opt-in did-you-mean), `onInvalid` |
 | `filterObject` | `(obj, fn(val,key))` | Filtered object |
 | `mapObject` | `(obj, fn(val,key))` | Transformed object |
 | `trackWrites` | `(value, callback, opts?)` | `{ changed, paths, result }` (keyed `field[#id]` paths by default) |

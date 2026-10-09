@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Object Utilities
 package: "@semantic-ui/utils"
-methods: [keys, values, filterObject, mapObject, trackWrites, trackReads, detectChanges, extend, assignInPlace, deepExtend, pick, arrayFromObject, proxyObject, onlyKeys, assertOptions, hasProperty, reverseKeys, weightedObjectSearch]
+methods: [keys, values, filterObject, mapObject, trackWrites, trackReads, detectChanges, extend, assignInPlace, deepExtend, pick, arrayFromObject, proxyObject, onlyKeys, checkOptions, hasProperty, reverseKeys, weightedObjectSearch]
 icon: box
 description: API reference for object manipulation functions
 ---
@@ -598,10 +598,10 @@ const result = onlyKeys(obj, ['a', 'c']);
 console.log(result); // { a: 1, c: 3 }
 ```
 
-### assertOptions
+### checkOptions
 
 ```javascript
-function assertOptions(object, spec, { name, hints, suggest, onInvalid } = {})
+function checkOptions(object, spec, { name, hints, suggest, onInvalid } = {})
 ```
 
 Judges an options object against the keys it may hold, so a misspelled key fails loudly instead of silently running the default. `spec` maps each permitted key to `true` (any value) or a predicate the value must pass. It throws one `TypeError` with a line per problem: an unknown key lists the known keys, and a refused value says what was expected, from `hints`, and what was received.
@@ -636,12 +636,12 @@ The check itself is under 400 bytes brotli, about what a hand-written one costs.
 #### Example
 
 ```javascript
-import { assertOptions, isDevelopment, isFunction, isNumber, suggest } from '@semantic-ui/utils';
+import { checkOptions, isDevelopment, isFunction, isNumber, suggest } from '@semantic-ui/utils';
 
 const spec = { retries: isNumber, timeout: isNumber, onError: isFunction, meta: true };
 
 export const createClient = (options) => {
-  assertOptions(options, spec, {
+  checkOptions(options, spec, {
     name: 'createClient',
     hints: isDevelopment ? { timeout: 'a number of milliseconds' } : undefined,
   });
@@ -655,11 +655,11 @@ createClient({ timeout: '5s' });
 // TypeError: createClient: 'timeout' expects a number of milliseconds, received '5s'
 
 // on a server, where bytes are free, add the did-you-mean
-assertOptions(config, spec, { name: 'app.config.js', suggest });
+checkOptions(config, spec, { name: 'app.config.js', suggest });
 // TypeError: app.config.js: unknown key 'retires', did you mean 'retries'?
 
 // warn and carry on
-assertOptions(options, spec, { onInvalid: console.warn });
+checkOptions(options, spec, { onInvalid: console.warn });
 ```
 
 ### hasProperty

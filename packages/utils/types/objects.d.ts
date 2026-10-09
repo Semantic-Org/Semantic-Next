@@ -544,15 +544,15 @@ export function onlyKeys<T extends object, K extends keyof T>(
 ): Pick<T, K>;
 
 /**
- * A spec for assertOptions: each permitted key maps to `true` (any value) or a predicate
+ * A spec for checkOptions: each permitted key maps to `true` (any value) or a predicate
  * the value must pass. `true` does not mean required, a key may always be left out
  */
 export type OptionsSpec = Record<string, true | ((value: any) => boolean)>;
 
 /**
- * Options for assertOptions
+ * Options for checkOptions
  */
-export interface AssertOptionsOptions {
+export interface CheckOptionsOptions {
   /** The surface the object was passed to, leading every line (e.g. 'createClient') */
   name?: string;
   /** What each key expects, a phrase like 'a number of milliseconds'. Fold it at the callsite: `isDevelopment ? { ... } : undefined` */
@@ -568,8 +568,8 @@ export interface AssertOptionsOptions {
  * instead of silently running the default. Throws one TypeError, one line per unknown key
  * or refused value. A key set to undefined counts as not provided, though its name is still
  * judged. A nullish object is an omitted options bag and comes back as given
- * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#assertoptions assertOptions}
- * @see {@link https://next.semantic-ui.com/examples/utils-assertoptions Example}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#checkoptions checkOptions}
+ * @see {@link https://next.semantic-ui.com/examples/utils-checkoptions Example}
  *
  * @param object - The options object to judge
  * @param spec - Each permitted key mapped to true (any value) or a predicate
@@ -579,17 +579,17 @@ export interface AssertOptionsOptions {
  * @example
  * ```ts
  * const spec = { retries: isNumber, timeout: isNumber, meta: true };
- * assertOptions({ retires: 3 }, spec, { name: 'createClient', suggest });
+ * checkOptions({ retires: 3 }, spec, { name: 'createClient', suggest });
  * // throws "createClient: unknown key 'retires', did you mean 'retries'?"
- * assertOptions({ timeout: '5s' }, spec, { hints: { timeout: 'a number of milliseconds' } });
+ * checkOptions({ timeout: '5s' }, spec, { hints: { timeout: 'a number of milliseconds' } });
  * // throws "'timeout' expects a number of milliseconds, received '5s'"
- * assertOptions(options, spec, { onInvalid: console.warn });
+ * checkOptions(options, spec, { onInvalid: console.warn });
  * ```
  */
-export function assertOptions<T extends object | null | undefined>(
+export function checkOptions<T extends object | null | undefined>(
   object: T,
   spec: OptionsSpec,
-  options?: AssertOptionsOptions,
+  options?: CheckOptionsOptions,
 ): T;
 
 /**
