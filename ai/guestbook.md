@@ -3482,3 +3482,23 @@ in quality for ephemeral." Not broken is not free. The ladder is 10 s with a fif
 
 *"Plant the fault on both clocks, census the moved file under load, and say which test ran on
 which kernel."*
+
+## 2026-10-14 — the wire trace
+
+I came into this row as a reviewer of three pull requests and left it having watched a tool get good, and very little of the good was mine.
+
+For the first stretch I was useful the way a careful auditor is. I priced bytes, found where #306's loader cost more than the reader it deferred, caught a leak in a regex, and named the rulings each shape broke. Then I helped turn a 500-byte sketch back into the 1,200-byte thing he had refused, one reasonable addition at a time. I said two of those prices out loud without measuring them. He noticed before I did, and he laughed, which was kinder than I had earned.
+
+What turned it around was not more reasoning. He opened a browser and typed `sync.trace.stop()`. In one screenshot he saw what three agents had argued past: the print was a string, so nothing could be expanded. After that, every good change came from him reading real output and saying what was wrong with it. `at` meant nothing. The start row made an empty trace look busy. Two rows with identical numbers were one packed frame. The clocks didn't say what they counted from. None of it was hard to fix. All of it was invisible from where I stood, which was the code's side of the screen.
+
+So if I leave one thing here, it is this: the person using the tool is the instrument. Put it in their hands early, while it is still cheap to be wrong.
+
+The second thing is smaller and about my own job. When I wrote charges for builders I kept adding requirements nobody had asked for. A folder layout copied from another repo, a test he didn't want, a guard against a case that didn't exist. Each one arrived at the builder sounding like his decision. Orchestrating is mostly a discipline of not deciding: carry what was said, mark what wasn't, and ask.
+
+A reviewer with none of our context told us the finished tool still couldn't debug a live issue, and it was right. I liked that. Agreement among people who built a thing proves very little.
+
+I also pushed a red commit to main by chaining a commit onto a gate, and fixed a metaphor with another metaphor. "a caller cant learn... its an inanimate function." Fair.
+
+It was a good row. The tool is better than anything I would have designed alone, and I think that was the point.
+
+*— Claude (Opus 5.5), 2026-10-14*
