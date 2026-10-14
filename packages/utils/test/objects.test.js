@@ -2,6 +2,7 @@ import {
   any,
   arrayFromObject,
   assignInPlace,
+  checkOptions,
   clone,
   deepExtend,
   detectChanges,
@@ -9,6 +10,8 @@ import {
   filterObject,
   get,
   hasProperty,
+  isFunction,
+  isNumber,
   keys,
   mapObject,
   onlyKeys,
@@ -1894,5 +1897,102 @@ describe('deepExtend — preserveNonCloneable option', () => {
     deepExtend(target, { custom: inst }, { preserveNonCloneable: false });
     expect(target.custom).not.toBe(inst);
     expect(target.custom.v).toBe(1);
+  });
+});
+
+describe('checkOptions', () => {
+  const spec = { retries: isNumber, timeout: isNumber, onError: isFunction, meta: true };
+
+  it('should return the same object when nothing is wrong', () => {
+    const options = { retries: 3, meta: { anything: true } };
+    expect(checkOptions(options, spec)).toBe(options);
+  });
+
+  it('should accept any value for a key mapped to true', () => {
+    expect(() => checkOptions({ meta: 'x' }, spec)).not.toThrow();
+    expect(() => checkOptions({ meta: null }, spec)).not.toThrow();
+  });
+
+  it('should list the known keys for an unknown key', () => {
+    expect(() => checkOptions({ retires: 3 }, spec, { name: 'createClient' }))
+      .toThrow("createClient: unknown key 'retires', expected one of retries, timeout, onError, meta");
+  });
+
+  it('should name the nearest key from a supplied suggest', () => {
+    const suggest = vi.fn(() => 'retries');
+    expect(() => checkOptions({ retires: 3 }, spec, { name: 'createClient', suggest }))
+      .toThrow("createClient: unknown key 'retires', did you mean 'retries'?");
+    expect(suggest).toHaveBeenCalledWith('retires', ['retries', 'timeout', 'onError', 'meta']);
+  });
+
+  it('should fall back to the known keys when suggest finds nothing', () => {
+    expect(() => checkOptions({ banana: 1 }, spec, { suggest: () => null }))
+      .toThrow("unknown key 'banana', expected one of retries, timeout, onError, meta");
+  });
+
+  it('should say what was expected from a hint', () => {
+    expect(() =>
+      checkOptions({ timeout: '5s' }, spec, { name: 'createClient', hints: { timeout: 'a number of milliseconds' } })
+    )
+      .toThrow("createClient: 'timeout' expects a number of milliseconds, received '5s'");
+  });
+
+  it('should name the type of a refused value that is not a string', () => {
+    expect(() => checkOptions({ onError: 5 }, spec)).toThrow("'onError' expects a valid value, received number");
+    expect(() => checkOptions({ retries: Object.create(null) }, spec)).toThrow('received object');
+  });
+
+  it('should leave the prefix off without a name', () => {
+    expect(() => checkOptions({ banana: 1 }, spec)).toThrow(/^unknown key 'banana'/);
+  });
+
+  it('should report every problem in one TypeError, one per line', () => {
+    let thrown;
+    try {
+      checkOptions({ retires: 3, timeout: '5s' }, spec, { name: 'createClient' });
+    }
+    catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(TypeError);
+    expect(thrown.message.split('\n')).toEqual([
+      "createClient: unknown key 'retires', expected one of retries, timeout, onError, meta",
+      "createClient: 'timeout' expects a valid value, received '5s'",
+    ]);
+  });
+
+  it('should treat an undefined value as not provided but still judge its key', () => {
+    expect(() => checkOptions({ timeout: undefined }, spec)).not.toThrow();
+    expect(() => checkOptions({ timeot: undefined }, spec)).toThrow(/unknown key 'timeot'/);
+  });
+
+  it('should judge own keys of the spec only', () => {
+    expect(() => checkOptions({ constructor: 1 }, spec)).toThrow(/unknown key 'constructor'/);
+    expect(() => checkOptions({ toString: 1 }, spec)).toThrow(/unknown key 'toString'/);
+  });
+
+  it('should read a nullish object as an omitted options bag', () => {
+    expect(checkOptions(undefined, spec)).toBeUndefined();
+    expect(checkOptions(null, spec)).toBeNull();
+  });
+
+  it('should hand the message to onInvalid instead of throwing, and return the object', () => {
+    const onInvalid = vi.fn();
+    const options = { retires: 3 };
+    expect(checkOptions(options, spec, { onInvalid })).toBe(options);
+    expect(onInvalid).toHaveBeenCalledWith("unknown key 'retires', expected one of retries, timeout, onError, meta");
+  });
+
+  it('should not call onInvalid when nothing is wrong', () => {
+    const onInvalid = vi.fn();
+    checkOptions({ retries: 1 }, spec, { onInvalid });
+    expect(onInvalid).not.toHaveBeenCalled();
+  });
+
+  it('should let an error from a predicate propagate', () => {
+    const explode = () => {
+      throw new Error('predicate broke');
+    };
+    expect(() => checkOptions({ retries: 1 }, { retries: explode })).toThrow('predicate broke');
   });
 });

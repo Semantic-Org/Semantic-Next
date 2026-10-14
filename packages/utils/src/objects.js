@@ -861,6 +861,46 @@ export const onlyKeys = (obj, keysToKeep) => {
 };
 
 /*
+  Judges an options object against a spec of the keys it may hold, each mapped
+  to true (any value) or a predicate, and throws one TypeError naming every
+  unknown key and refused value. onInvalid takes the message instead of the
+  throw. An undefined value counts as not provided
+*/
+export const checkOptions = (object, spec, { name, hints, suggest, onInvalid } = {}) => {
+  // an omitted options argument is an empty bag
+  if (object == null) {
+    return object;
+  }
+  const known = Object.keys(spec);
+  const problems = [];
+  for (const key of Object.keys(object)) {
+    const value = object[key];
+    // own keys only, so a stray 'constructor' is still unknown
+    if (!Object.hasOwn(spec, key)) {
+      const nearest = suggest?.(key, known);
+      problems.push(
+        `unknown key '${key}', ${nearest ? `did you mean '${nearest}'?` : `expected one of ${known.join(', ')}`}`,
+      );
+    }
+    else if (value !== undefined && spec[key] !== true && !spec[key](value)) {
+      problems.push(
+        `'${key}' expects ${hints?.[key] ?? 'a valid value'}, received ${
+          isString(value) ? `'${value}'` : typeof value
+        }`,
+      );
+    }
+  }
+  if (problems.length) {
+    const message = problems.map((problem) => (name ? `${name}: ${problem}` : problem)).join('\n');
+    if (!onInvalid) {
+      throw new TypeError(message);
+    }
+    onInvalid(message);
+  }
+  return object;
+};
+
+/*
   Return true if non-inherited property. Thin re-export of Object.hasOwn
   (ES2022) — safe on Object.create(null) and objects that shadow hasOwnProperty.
 */

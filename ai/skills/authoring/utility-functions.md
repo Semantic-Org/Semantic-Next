@@ -1,7 +1,7 @@
 ---
 title: Utility Functions Reference
 description: Complete reference for @semantic-ui/utils — a standalone utility library providing functions for arrays, objects, strings, type checking, colors, dates, and more. Use this before reimplementing common operations.
-keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, formatDuration, each, range, sequence, remove, noop, isDate, isRegExp, isTemporal]
+keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, formatDuration, each, range, sequence, remove, noop, isDate, isRegExp, isTemporal, checkOptions, defineGlobal]
 audience: authoring
 skill: utility-functions
 type: skill
@@ -252,6 +252,27 @@ filterObject({ a: 1, b: 5, c: 3 }, (value, key) => value > 2); // { b: 5, c: 3 }
 mapObject({ a: 1, b: 2 }, (value, key) => value * 2);           // { a: 2, b: 4 }
 ```
 
+### Options Checking
+```javascript
+import { checkOptions, isDevelopment, isFunction, isNumber, suggest } from '@semantic-ui/utils';
+
+// spec maps each permitted key to true (any value, never "required") or a predicate.
+// returns the same object, or throws one TypeError, a line per problem. under 400 B brotli
+const spec = { retries: isNumber, timeout: isNumber, onError: isFunction, meta: true };
+checkOptions({ retires: 3 }, spec, { name: 'createClient' });
+// "createClient: unknown key 'retires', expected one of retries, timeout, onError, meta"
+checkOptions({ timeout: '5s' }, spec, { hints: isDevelopment ? { timeout: 'a number of milliseconds' } : undefined });
+// "'timeout' expects a number of milliseconds, received '5s'" (fold hints at the callsite)
+
+// the did-you-mean is opt-in, suggest is ~1.6 KB: pass it where bytes are free (a server).
+// an isDevelopment ? suggest : undefined ternary does NOT shake it out under esbuild
+checkOptions(config, spec, { suggest });                 // "did you mean 'retries'?"
+
+checkOptions({ timeout: undefined }, spec);              // passes, undefined is not provided (the key name is still judged)
+checkOptions(undefined, spec);                           // undefined, an omitted bag
+checkOptions(options, spec, { onInvalid: console.warn }); // the message instead of the throw, returns the object
+```
+
 ### Change Detection
 ```javascript
 import { trackWrites, trackReads, detectChanges, elementKey, get } from '@semantic-ui/utils';
@@ -469,6 +490,25 @@ if (isClient) { ... }
 if (isServer) { ... }
 if (isDevelopment) { ... }  // detects NODE_ENV, Vite DEV, Vercel preview, etc.
 if (isCI) { ... }           // detects GitHub Actions, GitLab CI, Jenkins, etc.
+```
+
+### defineGlobal — A Value on the Global Object
+```javascript
+import { createLogger, defineGlobal, isDevelopment } from '@semantic-ui/utils';
+
+// returns the value the name holds afterward. the same value again is quiet (hot reload)
+isDevelopment && defineGlobal('store', store);   // for the console, fold at the callsite
+defineGlobal('store', other);                    // store kept, console.warn in development
+
+// onWarn takes the warning, a logger's warnOnce makes it one per name under your namespace
+const { warnOnce } = createLogger({ namespace: 'app' });
+defineGlobal('store', other, { onWarn: warnOnce });
+
+// onConflict: 'warn' (default) | 'keep' (quiet get-or-create) | 'replace' (getters and read-only too)
+const db = defineGlobal('db', createClient(), { onConflict: 'keep' });  // survives dev hot reloads
+defineGlobal('dataLayer', [], { onConflict: 'keep' }).push(event);     // the page's queue when present
+defineGlobal('fetch', mockFetch, { onConflict: 'replace' });            // test setup
+defineGlobal('plugins', [], { host: MyLibrary });                       // any host object
 ```
 
 ---
@@ -1396,6 +1436,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `deepExtend` | `(target, ...sources, opts?)` | Deep merged (mutates target) |
 | `pick` | `(obj, ...keys)` | New object with selected keys |
 | `onlyKeys` | `(obj, keysArray)` | New object with selected keys |
+| `checkOptions` | `(obj, spec, opts?)` | Same object, or throws one TypeError, a line per unknown key and refused value; `name`, `hints`, `suggest` (opt-in did-you-mean), `onInvalid` |
 | `filterObject` | `(obj, fn(val,key))` | Filtered object |
 | `mapObject` | `(obj, fn(val,key))` | Transformed object |
 | `trackWrites` | `(value, callback, opts?)` | `{ changed, paths, result }` (keyed `field[#id]` paths by default) |
@@ -1426,6 +1467,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `isMap`, `isSet` | `instanceof` checks |
 | `isArguments` | Arguments object |
 | `isServer`, `isClient`, `isDevelopment`, `isCI` | **Boolean constants** (no parens) |
+| `defineGlobal` | `(name, value, { host, onConflict, onWarn })` — the value the name holds afterward; `'warn'` / `'keep'` / `'replace'` |
 
 ### Equality & Cloning (equality.js, cloning.js)
 | Function | Signature | Returns |
