@@ -12,6 +12,7 @@ import {
   signal,
 } from '@semantic-ui/reactivity';
 import {
+  adoptStylesheet,
   any,
   assignInPlace,
   capitalize,
@@ -26,7 +27,6 @@ import {
   inArray,
   isClient,
   isDevelopment,
-  isEqual,
   isFunction,
   isObject,
   isServer,
@@ -434,28 +434,10 @@ export const Template = class Template {
   }
 
   async adoptStylesheet() {
-    if (!this.css) {
+    if (!this.css || !this.renderRoot?.adoptedStyleSheets) {
       return;
     }
-    if (!this.renderRoot || !this.renderRoot.adoptedStyleSheets) {
-      return;
-    }
-    const cssString = this.css;
-    if (!this.stylesheet) {
-      this.stylesheet = new CSSStyleSheet();
-      await this.stylesheet.replace(cssString);
-    }
-    let styles = Array.from(this.renderRoot.adoptedStyleSheets);
-
-    // check if already adopted
-    let hasStyles = styles.some((style) => isEqual(style.cssRules, this.stylesheet.cssRules));
-
-    if (!hasStyles) {
-      this.renderRoot.adoptedStyleSheets = [
-        ...this.renderRoot.adoptedStyleSheets,
-        this.stylesheet,
-      ];
-    }
+    adoptStylesheet(this.css, this.renderRoot);
   }
 
   clone(settings) {
