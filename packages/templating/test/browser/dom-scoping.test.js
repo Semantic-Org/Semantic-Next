@@ -541,4 +541,47 @@ describe('Template — DOM scoping (shadow only)', () => {
       expect(fixture.template.isNodeInTemplate(ctx.endNode)).toBe(false);
     });
   });
+
+  describe('adoptStylesheet', () => {
+    it('adopts multiple distinct stylesheets with the same top-level rule count onto one renderRoot', async () => {
+      const host = document.createElement('div');
+      const shadow = host.attachShadow({ mode: 'open' });
+      document.body.appendChild(host);
+      cleanups.push(() => host.remove());
+
+      const first = new Template({
+        template: '<div id="first"></div>',
+        css: '#first { display: grid; }',
+        attachStyles: true,
+        renderingEngine: realEngine,
+        element: host,
+      });
+      const second = new Template({
+        template: '<div id="second"></div>',
+        css: '#second { display: flex; }',
+        attachStyles: true,
+        renderingEngine: realEngine,
+        element: host,
+      });
+      cleanups.push(() => {
+        first.onDestroyed();
+        second.onDestroyed();
+      });
+
+      first.initialize();
+      await first.attach(shadow);
+      second.initialize();
+      await second.attach(shadow);
+
+      const el1 = document.createElement('div');
+      el1.id = 'first';
+      const el2 = document.createElement('div');
+      el2.id = 'second';
+      shadow.append(el1, el2);
+
+      expect(shadow.adoptedStyleSheets.length).toBe(2);
+      expect(getComputedStyle(el1).display).toBe('grid');
+      expect(getComputedStyle(el2).display).toBe('flex');
+    });
+  });
 });
