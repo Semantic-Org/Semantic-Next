@@ -5,6 +5,54 @@ import { unwrap } from './helpers.js';
 // a function on the Lisp or path route may hand back a Signal, which reads like any other
 const unwrapSignal = (value) => (value instanceof Signal ? value.get() : value);
 
+const isQuote = (char) => char === "'" || char === '"' || char === '`';
+const isBoundary = (text, index) => index < 0 || index >= text.length || /\s/.test(text[index]);
+
+// index of the quote closing the one at start, or the end of the text
+const closingQuote = (text, start) => {
+  const quote = text[start];
+  for (let i = start + 1; i < text.length; i++) {
+    if (text[i] === '\\') { i++; }
+    else if (text[i] === quote) { return i; }
+  }
+  return text.length;
+};
+
+// index of the bracket closing the one at start, nested brackets counted and quoted text
+// skipped, or -1 when nothing closes it
+const closingBracket = (text, start) => {
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    const char = text[i];
+    if (isQuote(char)) { i = closingQuote(text, i); }
+    else if (char === '(' || char === '[' || char === '{') { depth++; }
+    else if ((char === ')' || char === ']' || char === '}') && --depth === 0) { return i; }
+  }
+  return -1;
+};
+
+// replaces each (..) outside quotes with a placeholder and collects what it holds, so a paren
+// inside a string, {concat name ' (' role ')'}, stays text
+const liftGroups = (text, groups) => {
+  let lifted = '';
+  let copied = 0;
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (isQuote(char)) {
+      i = closingQuote(text, i);
+      continue;
+    }
+    if (char !== '(') { continue; }
+    const close = closingBracket(text, i);
+    if (close === -1) { break; }
+    lifted += `${text.slice(copied, i)}__GROUP${groups.length}__`;
+    groups.push(text.slice(i + 1, close));
+    copied = close + 1;
+    i = close;
+  }
+  return lifted + text.slice(copied);
+};
+
 // Rough expression distribution (2026-04-12) — weight optimizations by hot paths:
 //
 //   ~60%  simple identifier   — direct property lookup
@@ -13,10 +61,7 @@ const unwrapSignal = (value) => (value instanceof Signal ? value.get() : value);
 //    ~2%  JS eval             — new Function + Proxy
 //    <1%  complex Lisp        — inline objects/arrays
 export class ExpressionEvaluator {
-  static PARENS_REGEXP = /\((?:[^()]*|\((?:[^()]*|\([^()]*\))*\))*\)/g;
   static TOKEN_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
-  // the close is a lookahead so adjacent literals, {a: 1} {b: 2}, each get wrapped
-  static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(?=\s|$)/g;
   static WHITESPACE_REGEXP = /\s/;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
   // a segment after the first may be an index, {items.0}
@@ -142,11 +187,7 @@ export class ExpressionEvaluator {
   // parses an expression like 'maybe (isEven number)' to ['maybe, ['isEven', 'number']]
   getExpressionArray(expr) {
     const groups = [];
-    const processedExpr = expr.replace(ExpressionEvaluator.PARENS_REGEXP, match => {
-      const placeholder = `__GROUP${groups.length}__`;
-      groups.push(match.slice(1, -1));
-      return placeholder;
-    });
+    const processedExpr = liftGroups(expr, groups);
 
     const tokens = processedExpr.match(ExpressionEvaluator.TOKEN_REGEXP) || [];
     // a group glued to an identifier is a JS call, kept whole so it evaluates as one token
@@ -461,14 +502,30 @@ export class ExpressionEvaluator {
     return unwrap(parent);
   }
 
+  // wraps each inline [..] or {..} in parens so the group lift reads it as one argument. a scan
+  // rather than a regex: the close has to be the matching one, so a nested literal, a space
+  // before a close and a literal spanning lines survive, and a bracket inside quotes is text
   addParensToExpression(expression = '') {
     if (!expression) { return ''; }
     if (expression.indexOf('[') === -1 && expression.indexOf('{') === -1) {
       return expression;
     }
-    return String(expression).replace(ExpressionEvaluator.WRAPPED_EXPRESSION, (match, before, brackets) => {
-      return `${before}(${brackets})`;
-    });
+    let wrapped = '';
+    let copied = 0;
+    for (let i = 0; i < expression.length; i++) {
+      const char = expression[i];
+      if (isQuote(char)) {
+        i = closingQuote(expression, i);
+        continue;
+      }
+      if ((char !== '[' && char !== '{') || !isBoundary(expression, i - 1)) { continue; }
+      const close = closingBracket(expression, i);
+      if (close === -1 || !isBoundary(expression, close + 1)) { continue; }
+      wrapped += `${expression.slice(copied, i)}(${expression.slice(i, close + 1)})`;
+      copied = close + 1;
+      i = close;
+    }
+    return wrapped + expression.slice(copied);
   }
 
   getLiteralValue(token) {
