@@ -185,6 +185,10 @@ describe('addParensToExpression', () => {
     expect(ee.addParensToExpression('fn {a: 1}')).toBe('fn ({a: 1})');
   });
 
+  it('wraps each of two adjacent objects', () => {
+    expect(ee.addParensToExpression("fn 'a' {x: 1} {y: 2}")).toBe("fn 'a' ({x: 1}) ({y: 2})");
+  });
+
   it('leaves expressions without inline objects/arrays unchanged', () => {
     expect(ee.addParensToExpression('addOne value')).toBe('addOne value');
   });
@@ -755,6 +759,15 @@ describe('inline objects and arrays', () => {
     expect(
       ee.evaluate('classMap { one: true, two: true, three: isActive }', data),
     ).toBe('one two three');
+  });
+
+  it('passes two inline objects to one helper', () => {
+    const ee2 = make({ helpers: { ...helpers, list: (...args) => args } });
+    expect(ee2.evaluate("list 'member' {userId: 'u42'} {exact: true}", data)).toEqual([
+      'member',
+      { userId: 'u42' },
+      { exact: true },
+    ]);
   });
 });
 

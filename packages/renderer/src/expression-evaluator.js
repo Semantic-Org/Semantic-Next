@@ -12,7 +12,8 @@ import { unwrap } from './helpers.js';
 export class ExpressionEvaluator {
   static PARENS_REGEXP = /\((?:[^()]*|\((?:[^()]*|\([^()]*\))*\))*\)/g;
   static TOKEN_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
-  static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(\s|$)/g;
+  // the close is a lookahead so adjacent literals, {a: 1} {b: 2}, each get wrapped
+  static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(?=\s|$)/g;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
   static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[a-zA-Z_$][0-9a-zA-Z_$]*)*$/;
   static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
@@ -450,8 +451,8 @@ export class ExpressionEvaluator {
     if (expression.indexOf('[') === -1 && expression.indexOf('{') === -1) {
       return expression;
     }
-    return String(expression).replace(ExpressionEvaluator.WRAPPED_EXPRESSION, (match, before, brackets, after) => {
-      return `${before}(${brackets})${after}`;
+    return String(expression).replace(ExpressionEvaluator.WRAPPED_EXPRESSION, (match, before, brackets) => {
+      return `${before}(${brackets})`;
     });
   }
 
