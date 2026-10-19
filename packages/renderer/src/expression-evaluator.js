@@ -349,9 +349,10 @@ export class ExpressionEvaluator {
       }
     }
 
+    // a helper may be a value, isServer among the built-ins
     const helper = this.helpers[token];
-    if (typeof helper === 'function') {
-      return helper;
+    if (helper !== undefined) {
+      return helper instanceof Signal ? helper.value : helper;
     }
 
     // Simple identifiers and dotted paths are fully resolved by
