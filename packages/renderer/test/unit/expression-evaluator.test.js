@@ -398,6 +398,28 @@ describe('lookupTokenValue', () => {
     expect(withSignals.lookupTokenValue('session.prefs.theme', data)).toBe('dark');
   });
 
+  it('walks nested functions and binds a method reached through a registered helper', () => {
+    const withNested = make({
+      helpers: {
+        ...helpers,
+        account: () => ({
+          pet: () => ({
+            name: 'Simon',
+            treats: 3,
+            describe() {
+              return `${this.name} has ${this.treats} treats`;
+            },
+          }),
+          owner: () => ({ address: () => ({ city: 'Portland' }) }),
+        }),
+      },
+    });
+    expect(withNested.lookupTokenValue('account.pet.name', data)).toBe('Simon');
+    expect(withNested.lookupTokenValue('account.owner.address.city', data)).toBe('Portland');
+    expect(withNested.lookupTokenValue('account.pet.describe', data)()).toBe('Simon has 3 treats');
+    expect(withNested.lookupTokenValue('account.missing.name', data)).toBeUndefined();
+  });
+
   it('falls through to JS eval for complex expressions', () => {
     expect(ee.lookupTokenValue('count + 1', data)).toBe(43);
   });
