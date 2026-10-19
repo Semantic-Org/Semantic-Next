@@ -2,6 +2,9 @@ import { Signal } from '@semantic-ui/reactivity';
 import { createCache } from '@semantic-ui/utils';
 import { unwrap } from './helpers.js';
 
+// a function on the Lisp or path route may hand back a Signal, which reads like any other
+const unwrapSignal = (value) => (value instanceof Signal ? value.get() : value);
+
 // Rough expression distribution (2026-04-12) — weight optimizations by hot paths:
 //
 //   ~60%  simple identifier   — direct property lookup
@@ -258,7 +261,7 @@ export class ExpressionEvaluator {
               return value;
             }
           }
-          return typeof value === 'function' ? value() : value;
+          return typeof value === 'function' ? unwrapSignal(value()) : value;
         }
       }
     }
@@ -303,10 +306,10 @@ export class ExpressionEvaluator {
             for (let a = 0; a < argCount; a++) {
               args[a] = unwrap(results[index + 1 + a]);
             }
-            result = tokenValue(...args);
+            result = unwrapSignal(tokenValue(...args));
           }
           else {
-            result = tokenValue();
+            result = unwrapSignal(tokenValue());
           }
         }
         else {
@@ -372,8 +375,8 @@ export class ExpressionEvaluator {
     const last = segments.length - 1;
 
     let container = this.walkPath(this.getPathRoot(data, segments[0]), segments, last, 1);
+    if (typeof container === 'function') { container = container(); }
     if (container instanceof Signal) { container = container.get(); }
-    else if (typeof container === 'function') { container = container(); }
     if (container == null) { return undefined; }
 
     const value = container[segments[last]];
@@ -419,11 +422,11 @@ export class ExpressionEvaluator {
   walkPath(obj, segments, count, start = 0) {
     let current = obj;
     for (let i = start; i < count; i++) {
+      if (typeof current === 'function') {
+        current = current();
+      }
       if (current instanceof Signal) {
         current = current.get();
-      }
-      else if (typeof current === 'function') {
-        current = current();
       }
       if (current == null) {
         return undefined;
@@ -452,8 +455,8 @@ export class ExpressionEvaluator {
   // {#each x in xs} as-key lands on the item proxy. neither is the receiver
   getThisContext(data, path) {
     let parent = this.getDeepDataValue(data, path);
+    if (typeof parent === 'function') { parent = parent(); }
     if (parent instanceof Signal) { parent = parent.value; }
-    else if (typeof parent === 'function') { parent = parent(); }
     return unwrap(parent);
   }
 
