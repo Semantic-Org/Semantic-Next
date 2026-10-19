@@ -61,7 +61,7 @@ const liftGroups = (text, groups) => {
 //    ~2%  JS eval             — new Function + Proxy
 //    <1%  complex Lisp        — inline objects/arrays
 export class ExpressionEvaluator {
-  static TOKEN_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
+  static TOKEN_REGEXP = /('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|\(|\)|[^\s()]+)/g;
   static WHITESPACE_REGEXP = /\s/;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
   // a segment after the first may be an index, {items.0}
@@ -69,7 +69,7 @@ export class ExpressionEvaluator {
   static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
   // the operators spelled as words, {'name' in user}
   static JS_KEYWORD_REGEXP = /\b(?:in|instanceof|typeof|new|void)\b/;
-  static QUOTED_STRING_REGEXP = /('[^']*'|"[^"]*")/g;
+  static QUOTED_STRING_REGEXP = /('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g;
   static CALLEE_REGEXP = /([a-zA-Z_$][0-9a-zA-Z_$]*)\s*\(/g;
   static fnCache = createCache({ maxSize: 5000, eviction: 'flush' });
 
