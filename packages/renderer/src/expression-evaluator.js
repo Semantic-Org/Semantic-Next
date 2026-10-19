@@ -14,6 +14,7 @@ export class ExpressionEvaluator {
   static TOKEN_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
   // the close is a lookahead so adjacent literals, {a: 1} {b: 2}, each get wrapped
   static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(?=\s|$)/g;
+  static WHITESPACE_REGEXP = /\s/;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
   // a segment after the first may be an index, {items.0}
   static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[0-9a-zA-Z_$]+)*$/;
@@ -111,7 +112,7 @@ export class ExpressionEvaluator {
     const stripped = hasQuotes
       ? expression.replace(ExpressionEvaluator.QUOTED_STRING_REGEXP, '')
       : expression;
-    result = stripped.includes(' ')
+    result = ExpressionEvaluator.WHITESPACE_REGEXP.test(stripped)
       && !ExpressionEvaluator.JS_OPERATOR_REGEXP.test(stripped)
       && !ExpressionEvaluator.JS_KEYWORD_REGEXP.test(stripped);
 
@@ -240,9 +241,9 @@ export class ExpressionEvaluator {
     }
 
     if (typeof expression === 'string') {
-      // No space = single token (identifier, dotted path, or JS call).
-      // Skip classify cache — Lisp-style needs at least one space.
-      const isMultiTokenLisp = expression.includes(' ')
+      // no whitespace means one token (identifier, dotted path, or JS call), so the classify
+      // cache is skipped. a Lisp call separates its tokens with a space or a newline
+      const isMultiTokenLisp = ExpressionEvaluator.WHITESPACE_REGEXP.test(expression)
         && this.classifyExpression(expression);
 
       if (!isMultiTokenLisp) {
