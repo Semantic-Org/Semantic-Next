@@ -6,14 +6,16 @@ const template = await getText('./component.html');
 const defaultSettings = {
   value: 1,
   date: new Date(),
+  numbers: [5, 10, 15],
 };
 
 const defaultState = {
   timezone: 'PST',
   fruit: 'cherry',
+  profile: { name: 'Jack' },
 };
 
-const createComponent = ({ settings, self, interval }) => ({
+const createComponent = ({ settings, state, self, interval }) => ({
   initialize: () => interval(() => settings.date = new Date(), 1000),
   isTrue: () => true,
   isDog: () => self.isTrue(),
@@ -23,6 +25,8 @@ const createComponent = ({ settings, self, interval }) => ({
   getValue(obj = {}, prop) {
     return obj[prop];
   },
+  getFruit: () => state.fruit,
+  countArgs: (...args) => args.length,
   pet: () => ({
     name: 'Simon',
     treats: 3,
