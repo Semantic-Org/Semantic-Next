@@ -359,7 +359,12 @@ export class ExpressionEvaluator {
     if (segments === null) { return undefined; }
     const last = segments.length - 1;
 
-    let container = this.walkPath(data, segments, last);
+    // the first segment resolves like a bare token, data then a registered helper, so a path
+    // reaches through a helper's result the way it reaches through a method's
+    const root = data[segments[0]] === undefined && typeof this.helpers[segments[0]] === 'function'
+      ? this.helpers
+      : data;
+    let container = this.walkPath(root, segments, last);
     if (container instanceof Signal) { container = container.get(); }
     else if (typeof container === 'function') { container = container(); }
     if (container == null) { return undefined; }

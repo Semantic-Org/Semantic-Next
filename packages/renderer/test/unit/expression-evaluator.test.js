@@ -381,6 +381,15 @@ describe('lookupTokenValue', () => {
     expect(ee.lookupTokenValue('foo.bar.baz', data)).toBeUndefined();
   });
 
+  it('walks a dotted path through a registered helper, the way a bare token finds one', () => {
+    const withRoute = make({ helpers: { ...helpers, currentRoute: () => ({ name: 'home', url: { pathname: '/' } }) } });
+    expect(withRoute.lookupTokenValue('currentRoute.name', data)).toBe('home');
+    expect(withRoute.lookupTokenValue('currentRoute.url.pathname', data)).toBe('/');
+    expect(withRoute.lookupTokenValue('currentRoute.name', { ...data, currentRoute: { name: 'data first' } })).toBe(
+      'data first',
+    );
+  });
+
   it('falls through to JS eval for complex expressions', () => {
     expect(ee.lookupTokenValue('count + 1', data)).toBe(43);
   });
