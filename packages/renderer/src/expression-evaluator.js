@@ -182,7 +182,9 @@ export class ExpressionEvaluator {
       const proxy = includeHelpers ? this.jsProxy : new Proxy(context || {}, ExpressionEvaluator.noHelpersHandler);
       let fn = ExpressionEvaluator.fnCache.get(code);
       if (!fn) {
-        fn = new Function('ctx', `with(ctx){return ${code}}`);
+        // parens hold a multi-line expression together. bare, {classMap\n {a: true}} returns
+        // the function and reads the object as a block
+        fn = new Function('ctx', `with(ctx){return (${code})}`);
         // rides on the compiled function so the hot path pays one cache lookup
         fn.callees = this.calleesFrom(code);
         ExpressionEvaluator.fnCache.set(code, fn);
