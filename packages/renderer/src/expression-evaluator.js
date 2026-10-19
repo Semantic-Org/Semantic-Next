@@ -15,7 +15,8 @@ export class ExpressionEvaluator {
   // the close is a lookahead so adjacent literals, {a: 1} {b: 2}, each get wrapped
   static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(?=\s|$)/g;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
-  static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[a-zA-Z_$][0-9a-zA-Z_$]*)*$/;
+  // a segment after the first may be an index, {items.0}
+  static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[0-9a-zA-Z_$]+)*$/;
   static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
   static QUOTED_STRING_REGEXP = /('[^']*'|"[^"]*")/g;
   static CALLEE_REGEXP = /([a-zA-Z_$][0-9a-zA-Z_$]*)\s*\(/g;
