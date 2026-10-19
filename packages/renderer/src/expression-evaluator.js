@@ -359,7 +359,7 @@ export class ExpressionEvaluator {
     if (segments === null) { return undefined; }
     const last = segments.length - 1;
 
-    let container = this.walkPath(data, segments, last);
+    let container = this.walkPath(this.getPathRoot(data, segments[0]), segments, last, 1);
     if (container instanceof Signal) { container = container.get(); }
     else if (typeof container === 'function') { container = container(); }
     if (container == null) { return undefined; }
@@ -385,7 +385,7 @@ export class ExpressionEvaluator {
   getDeepDataValue(obj, path) {
     // Fast path: simple identifier (no dots)
     if (path.indexOf('.') === -1) {
-      const value = obj[path];
+      const value = this.getPathRoot(obj, path);
       if (value instanceof Signal) {
         return value.get();
       }
@@ -394,12 +394,19 @@ export class ExpressionEvaluator {
 
     const segments = this.getPathSegments(path);
     if (segments === null) { return undefined; }
-    return this.walkPath(obj, segments, segments.length);
+    return this.walkPath(this.getPathRoot(obj, segments[0]), segments, segments.length, 1);
   }
 
-  walkPath(obj, segments, count) {
+  // a path's first segment resolves like a bare token, data then a registered helper, read once
+  // so an accessor or a reactive context on the root runs once per expression
+  getPathRoot(data, first) {
+    const value = data[first];
+    return value === undefined && typeof this.helpers[first] === 'function' ? this.helpers[first] : value;
+  }
+
+  walkPath(obj, segments, count, start = 0) {
     let current = obj;
-    for (let i = 0; i < count; i++) {
+    for (let i = start; i < count; i++) {
       if (current instanceof Signal) {
         current = current.get();
       }

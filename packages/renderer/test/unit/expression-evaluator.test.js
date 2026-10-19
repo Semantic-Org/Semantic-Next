@@ -381,6 +381,69 @@ describe('lookupTokenValue', () => {
     expect(ee.lookupTokenValue('foo.bar.baz', data)).toBeUndefined();
   });
 
+  it('walks a dotted path through a registered helper, the way a bare token finds one', () => {
+    const withRoute = make({ helpers: { ...helpers, currentRoute: () => ({ name: 'home', url: { pathname: '/' } }) } });
+    expect(withRoute.lookupTokenValue('currentRoute.name', data)).toBe('home');
+    expect(withRoute.lookupTokenValue('currentRoute.url.pathname', data)).toBe('/');
+    expect(withRoute.lookupTokenValue('currentRoute.name', { ...data, currentRoute: { name: 'data first' } })).toBe(
+      'data first',
+    );
+  });
+
+  it("unwraps a Signal inside a registered helper's result, at the end of the path and along it", () => {
+    const withSignals = make({
+      helpers: { ...helpers, session: () => ({ user: new Signal('baz'), prefs: new Signal({ theme: 'dark' }) }) },
+    });
+    expect(withSignals.lookupTokenValue('session.user', data)).toBe('baz');
+    expect(withSignals.lookupTokenValue('session.prefs.theme', data)).toBe('dark');
+  });
+
+  it('walks nested functions and binds a method reached through a registered helper', () => {
+    const withNested = make({
+      helpers: {
+        ...helpers,
+        account: () => ({
+          pet: () => ({
+            name: 'Simon',
+            treats: 3,
+            describe() {
+              return `${this.name} has ${this.treats} treats`;
+            },
+          }),
+          owner: () => ({ address: () => ({ city: 'Portland' }) }),
+        }),
+      },
+    });
+    expect(withNested.lookupTokenValue('account.pet.name', data)).toBe('Simon');
+    expect(withNested.lookupTokenValue('account.owner.address.city', data)).toBe('Portland');
+    expect(withNested.lookupTokenValue('account.pet.describe', data)()).toBe('Simon has 3 treats');
+    expect(withNested.lookupTokenValue('account.missing.name', data)).toBeUndefined();
+  });
+
+  it('reads the root of a dotted path once, so an accessor on it runs once per expression', () => {
+    let reads = 0;
+    const counted = {
+      get user() {
+        reads += 1;
+        return { name: 'Jack' };
+      },
+    };
+    expect(ee.lookupTokenValue('user.name', counted)).toBe('Jack');
+    expect(reads).toBe(1);
+  });
+
+  it('binds a method reached through a registered helper on the JS route as it does from data', () => {
+    const pet = () => ({
+      name: 'Simon',
+      describe() {
+        return `${this.name} purrs`;
+      },
+    });
+    const withPet = make({ helpers: { ...helpers, cat: pet } });
+    expect(withPet.evaluate('cat.describe ?? 0', { cat: pet() })).toBe('Simon purrs');
+    expect(withPet.evaluate('cat.describe ?? 0', {})).toBe('Simon purrs');
+  });
+
   it('falls through to JS eval for complex expressions', () => {
     expect(ee.lookupTokenValue('count + 1', data)).toBe(43);
   });
