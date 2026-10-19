@@ -12,7 +12,8 @@ import { unwrap } from './helpers.js';
 export class ExpressionEvaluator {
   static PARENS_REGEXP = /\((?:[^()]*|\((?:[^()]*|\([^()]*\))*\))*\)/g;
   static TOKEN_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
-  static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(\s|$)/g;
+  // the close is a lookahead so adjacent literals, {a: 1} {b: 2}, each get wrapped
+  static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(?=\s|$)/g;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
   static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[a-zA-Z_$][0-9a-zA-Z_$]*)*$/;
   static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
@@ -140,9 +141,13 @@ export class ExpressionEvaluator {
     });
 
     const tokens = processedExpr.match(ExpressionEvaluator.TOKEN_REGEXP) || [];
+    // a group glued to an identifier is a JS call, kept whole so it evaluates as one token
     const getValue = (token) => {
-      const match = token.match(/__GROUP(\d+)__/);
-      return match ? groups[parseInt(match[1], 10)] : token;
+      const match = token.match(/^__GROUP(\d+)__$/);
+      if (match) {
+        return groups[parseInt(match[1], 10)];
+      }
+      return token.replace(/__GROUP(\d+)__/g, (_, index) => `(${groups[index]})`);
     };
 
     // Index-based iteration avoids O(n) shift() per token
@@ -450,8 +455,8 @@ export class ExpressionEvaluator {
     if (expression.indexOf('[') === -1 && expression.indexOf('{') === -1) {
       return expression;
     }
-    return String(expression).replace(ExpressionEvaluator.WRAPPED_EXPRESSION, (match, before, brackets, after) => {
-      return `${before}(${brackets})${after}`;
+    return String(expression).replace(ExpressionEvaluator.WRAPPED_EXPRESSION, (match, before, brackets) => {
+      return `${before}(${brackets})`;
     });
   }
 
