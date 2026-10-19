@@ -71,6 +71,7 @@ export class ExpressionEvaluator {
   static JS_KEYWORD_REGEXP = /\b(?:in|instanceof|typeof|new|void)\b/;
   static QUOTED_STRING_REGEXP = /('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g;
   static CALLEE_REGEXP = /([a-zA-Z_$][0-9a-zA-Z_$]*)\s*\(/g;
+  static THIS_REGEXP = /\bthis\b/;
   static fnCache = createCache({ maxSize: 5000, eviction: 'flush' });
 
   // Expression classification cache — shared across all instances since
@@ -231,6 +232,7 @@ export class ExpressionEvaluator {
         fn = new Function('ctx', `with(ctx){return (${code})}`);
         // rides on the compiled function so the hot path pays one cache lookup
         fn.callees = this.calleesFrom(code);
+        fn.usesThis = ExpressionEvaluator.THIS_REGEXP.test(code);
         ExpressionEvaluator.fnCache.set(code, fn);
       }
       // Reuse the cached Proxy — just swap which context object it reads from
@@ -238,7 +240,9 @@ export class ExpressionEvaluator {
         this.jsContext = context || null;
         this.jsCallees = fn.callees;
       }
-      result = fn(proxy);
+      // {#each items} puts the item at data.this, and a JS-style expression reads it the way a
+      // path does
+      result = fn.usesThis ? fn.call(context?.this, proxy) : fn(proxy);
     }
     catch (e) {
       // this token is not valid javascript
