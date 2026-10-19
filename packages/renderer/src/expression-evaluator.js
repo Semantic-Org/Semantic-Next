@@ -18,6 +18,8 @@ export class ExpressionEvaluator {
   // a segment after the first may be an index, {items.0}
   static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[0-9a-zA-Z_$]+)*$/;
   static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
+  // the operators spelled as words, {'name' in user}
+  static JS_KEYWORD_REGEXP = /\b(?:in|instanceof|typeof|new|void)\b/;
   static QUOTED_STRING_REGEXP = /('[^']*'|"[^"]*")/g;
   static CALLEE_REGEXP = /([a-zA-Z_$][0-9a-zA-Z_$]*)\s*\(/g;
   static fnCache = createCache({ maxSize: 5000, eviction: 'flush' });
@@ -110,7 +112,8 @@ export class ExpressionEvaluator {
       ? expression.replace(ExpressionEvaluator.QUOTED_STRING_REGEXP, '')
       : expression;
     result = stripped.includes(' ')
-      && !ExpressionEvaluator.JS_OPERATOR_REGEXP.test(stripped);
+      && !ExpressionEvaluator.JS_OPERATOR_REGEXP.test(stripped)
+      && !ExpressionEvaluator.JS_KEYWORD_REGEXP.test(stripped);
 
     ExpressionEvaluator.classifyCache.set(expression, result);
     return result;
