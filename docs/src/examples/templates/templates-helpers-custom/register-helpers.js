@@ -12,6 +12,7 @@ registerHelper('formatMoney', (amount, currency = 'USD') => {
 registerHelpers({
   initials: (name) => name.split(' ').map(n => n[0]).join('').toUpperCase(),
   randomId: () => Math.random().toString(36).substr(2, 9),
+  viewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
   timeAgo: (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
     if (seconds < 60) { return 'just now'; }
