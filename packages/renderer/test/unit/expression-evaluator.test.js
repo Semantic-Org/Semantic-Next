@@ -420,6 +420,30 @@ describe('lookupTokenValue', () => {
     expect(withNested.lookupTokenValue('account.missing.name', data)).toBeUndefined();
   });
 
+  it('reads the root of a dotted path once, so an accessor on it runs once per expression', () => {
+    let reads = 0;
+    const counted = {
+      get user() {
+        reads += 1;
+        return { name: 'Jack' };
+      },
+    };
+    expect(ee.lookupTokenValue('user.name', counted)).toBe('Jack');
+    expect(reads).toBe(1);
+  });
+
+  it('binds a method reached through a registered helper on the JS route as it does from data', () => {
+    const pet = () => ({
+      name: 'Simon',
+      describe() {
+        return `${this.name} purrs`;
+      },
+    });
+    const withPet = make({ helpers: { ...helpers, cat: pet } });
+    expect(withPet.evaluate('cat.describe ?? 0', { cat: pet() })).toBe('Simon purrs');
+    expect(withPet.evaluate('cat.describe ?? 0', {})).toBe('Simon purrs');
+  });
+
   it('falls through to JS eval for complex expressions', () => {
     expect(ee.lookupTokenValue('count + 1', data)).toBe(43);
   });
