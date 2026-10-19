@@ -235,6 +235,13 @@ describe('getExpressionArray', () => {
   it('handles single token', () => {
     expect(ee.getExpressionArray('count')).toEqual(['count']);
   });
+
+  it('keeps a JS call whole instead of lifting its parens into a group', () => {
+    expect(ee.getExpressionArray("activeIf isCurrentRoute('team')")).toEqual([
+      'activeIf',
+      "isCurrentRoute('team')",
+    ]);
+  });
 });
 
 /*******************************
@@ -798,6 +805,37 @@ describe('JS expressions inside Lisp structure', () => {
 
   it('JS call inside Lisp parens — concat "a" (addOne(1))', () => {
     expect(ee.evaluate("concat 'a' (addOne(1))", data)).toBe('a2');
+  });
+
+  it('JS call as a Lisp argument is called, not passed through', () => {
+    const seen = [];
+    const ee2 = make({
+      helpers: {
+        ...helpers,
+        isCurrentRoute: (...args) => {
+          seen.push(args);
+          return false;
+        },
+      },
+    });
+    expect(ee2.evaluate("activeIf isCurrentRoute('team')", data)).toBe('');
+    expect(ee2.evaluate("activeIf isCurrentRoute('team', {exact: true})", data)).toBe('');
+    expect(seen).toEqual([['team'], ['team', { exact: true }]]);
+  });
+
+  it('parenthesized JS call as a Lisp argument', () => {
+    const seen = [];
+    const ee2 = make({
+      helpers: {
+        ...helpers,
+        isCurrentRoute: (name) => {
+          seen.push(name);
+          return false;
+        },
+      },
+    });
+    expect(ee2.evaluate("activeIf (isCurrentRoute('team'))", data)).toBe('');
+    expect(seen).toEqual(['team']);
   });
 
   it('JS ternary inside Lisp parens with helper — maybe (value > 0) "pos" "neg"', () => {

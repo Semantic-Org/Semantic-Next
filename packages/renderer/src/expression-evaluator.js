@@ -141,9 +141,13 @@ export class ExpressionEvaluator {
     });
 
     const tokens = processedExpr.match(ExpressionEvaluator.TOKEN_REGEXP) || [];
+    // a group glued to an identifier is a JS call, kept whole so it evaluates as one token
     const getValue = (token) => {
-      const match = token.match(/__GROUP(\d+)__/);
-      return match ? groups[parseInt(match[1], 10)] : token;
+      const match = token.match(/^__GROUP(\d+)__$/);
+      if (match) {
+        return groups[parseInt(match[1], 10)];
+      }
+      return token.replace(/__GROUP(\d+)__/g, (_, index) => `(${groups[index]})`);
     };
 
     // Index-based iteration avoids O(n) shift() per token
