@@ -390,6 +390,14 @@ describe('lookupTokenValue', () => {
     );
   });
 
+  it("unwraps a Signal inside a registered helper's result, at the end of the path and along it", () => {
+    const withSignals = make({
+      helpers: { ...helpers, session: () => ({ user: new Signal('baz'), prefs: new Signal({ theme: 'dark' }) }) },
+    });
+    expect(withSignals.lookupTokenValue('session.user', data)).toBe('baz');
+    expect(withSignals.lookupTokenValue('session.prefs.theme', data)).toBe('dark');
+  });
+
   it('falls through to JS eval for complex expressions', () => {
     expect(ee.lookupTokenValue('count + 1', data)).toBe(43);
   });
