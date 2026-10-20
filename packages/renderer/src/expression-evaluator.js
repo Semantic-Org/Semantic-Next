@@ -21,7 +21,6 @@ export class ExpressionEvaluator {
     /[*\/%=<>!&|?:~^`()[\]{}]|(?<!\s)[+-]|[+-](?!\.?\d)|\b(?:in|instanceof|typeof|new|void)\b/;
   static QUOTED_STRING_REGEXP = /('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g;
   static CALLEE_REGEXP = /([a-zA-Z_$][0-9a-zA-Z_$]*)\s*\(/g;
-  static THIS_REGEXP = /('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`)|(?<!\.)\bthis\b/g;
   static fnCache = createCache({ maxSize: 5000, eviction: 'flush' });
 
   // Expression classification cache — shared across all instances since
@@ -205,13 +204,12 @@ export class ExpressionEvaluator {
       let fn = ExpressionEvaluator.fnCache.get(code);
       if (fn === undefined) {
         try {
-          // {#each items} puts the item at data.this; reading ctx.this routes through the proxy
-          // without sloppy-mode primitive boxing
-          const expr = code.includes('this')
-            ? code.replace(ExpressionEvaluator.THIS_REGEXP, (match, quoted) => quoted || 'ctx.this')
-            : code;
-          // parens hold a multi-line expression together across newlines
-          fn = new Function('ctx', `with(ctx){return (${expr})}`);
+          // {#each items} puts the item at data.this; an inner strict function binds `this`
+          // from ctx.this without sloppy-mode primitive boxing
+          const body = code.includes('this')
+            ? `(function(){"use strict";return (${code})}).call(ctx.this)`
+            : `(${code})`;
+          fn = new Function('ctx', `with(ctx){return ${body}}`);
           // rides on the compiled function so the hot path pays one cache lookup
           fn.callees = this.calleesFrom(code);
         }
@@ -278,9 +276,9 @@ export class ExpressionEvaluator {
     }
 
     if (typeof expression === 'string') {
-      // no whitespace means one token (identifier, dotted path, or JS call), so the classify
-      // cache is skipped. a Lisp call separates its tokens with a space or a newline
-      const isMultiTokenLisp = (expression.includes(' ') || expression.includes('\n'))
+      // No space = single token (identifier, dotted path, or JS call).
+      // Skip classify cache — Lisp-style needs at least one space.
+      const isMultiTokenLisp = expression.includes(' ')
         && this.classifyExpression(expression);
 
       if (!isMultiTokenLisp) {
