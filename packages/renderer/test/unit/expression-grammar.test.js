@@ -53,6 +53,7 @@ const data = {
   stats: { total: 42, successCount: 28 },
   user: { name: 'Jack', role: 'admin', settings: { theme: 'dark' }, roles: ['admin', 'editor'] },
   profile: new Signal({ name: 'Sig', prefs: new Signal({ theme: 'light' }) }),
+  getAccount: () => ({ loggedIn: new Signal(true) }),
   getFilterFn: () => (item) => item.length <= 5,
 };
 
@@ -180,6 +181,7 @@ describe('dotted paths', () => {
   pin('array index deeper in', 'user.roles.1', 'editor');
   pin('array index as a Lisp argument', 'list numbers.0 numbers.1', [5, 10]);
   pin('through a function', 'pet.treats', 3);
+  pin('through a function returning an object with a signal', 'getAccount.loggedIn', true);
   pin('through a signal', 'profile.name', 'Sig');
   pin('through a signal along the path', 'profile.prefs.theme', 'light');
   pin('through a registered helper', 'currentRoute.name', 'home');
@@ -203,6 +205,7 @@ describe('Lisp-style calls', () => {
   pin('double-quoted string argument', 'concat "a" "b"', 'ab');
   pin('number argument', 'addOne 5', 6);
   pin('decimal argument', 'addOne 1.5', 2.5);
+  pin('negative number as the only argument', 'double -5', -10);
   pin('negative number among arguments', 'list -1 2', [-1, 2]);
   pin('boolean arguments', 'list true false', [true, false]);
   pin('null and undefined arguments', 'list null undefined', [null, undefined]);
@@ -236,13 +239,6 @@ describe('Lisp-style calls', () => {
   pin('string containing double quotes', "concat 'say \"hi\"' '!'", 'say "hi"!');
   pin('string containing an escaped quote', "concat 'it\\'s' ' ok'", "it's ok");
   pin('strings containing operator characters', "concat 'a: ' 'b, ' 'c => d'", 'a: b, c => d');
-  pin('a head that is not a function keeps its value', "label 'ignored'", 'Submit');
-
-  // a signed number as the only Lisp argument also reads as a JS subtraction, and {count -1}
-  // needs that reading, so the grammar is ambiguous here and the fix is a ruling, not code
-  it.fails('a negative number as the only argument: {double -5}', () => {
-    expect(read('double -5')).toEqual(-10);
-  });
 });
 
 /*******************************
@@ -287,6 +283,8 @@ describe('mixed style, Lisp outside and JS inside', () => {
 
 describe('JS expressions', () => {
   pin('arithmetic', 'count + 1', 43);
+  pin('subtraction', 'count - 1', 41);
+  pin('subtraction without space after minus', 'count -1', 41);
   pin('arithmetic on a path', 'numbers.length * 2', 6);
   pin('comparison', 'count > 1', true);
   pin('strict equality', "status === 'success'", true);
@@ -361,6 +359,7 @@ describe('inside {#each}', () => {
   const person = { name: 'Al', age: 1 };
   const direct = { ...person, this: person, index: 0 };
   const primitive = { this: 'ab', index: 1 };
+  const numeric = { this: 5, index: 0 };
   const named = { item: person, index: 0 };
   const indexed = { product: person, i: 2 };
   const entry = { value: 1, key: 'a' };
@@ -376,6 +375,10 @@ describe('inside {#each}', () => {
   pin('primitive item, this', 'this', 'ab', primitive);
   pin('primitive item, a path on this', 'this.length', 2, primitive);
   pin('primitive item, a method on this', 'this.toUpperCase()', 'AB', primitive);
+  pin('primitive item, strict equality on this', "this === 'ab'", true, primitive);
+  pin('primitive item, typeof this', 'typeof this', 'string', primitive);
+  pin('numeric item, arithmetic on this', 'this * 2', 10, numeric);
+  pin('numeric item, strict equality on this', 'this === 5', true, numeric);
   pin('named item', 'item.name', 'Al', named);
   pin('named item in JS', 'item.age + 1', 2, named);
   pin('custom index', 'i + 1', 3, indexed);

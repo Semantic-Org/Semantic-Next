@@ -172,10 +172,10 @@
       <td>Jack</td>
     </tr>
     <tr>
-      <td>Method returning a signal</td>
-      <td>getFruit</td>
-      <td>{getFruit}</td>
-      <td>cherry</td>
+      <td>Path through an object exposing a signal</td>
+      <td>getAccount.loggedIn</td>
+      <td>{getAccount.loggedIn}</td>
+      <td>true</td>
     </tr>
     <tr>
       <td>JS call as a Lisp argument</td>
@@ -185,15 +185,15 @@
     </tr>
     <tr>
       <td>Several inline objects</td>
-      <td>{#html "countArgs 'member' {userId: 'u42'} {exact: true}"}</td>
-      <td>{countArgs 'member' {userId: 'u42'} {exact: true}}</td>
-      <td>3</td>
+      <td>{#html "lookup { a: 'one' } { b: 'two' } 'b'"}</td>
+      <td>{lookup { a: 'one' } { b: 'two' } 'b'}</td>
+      <td>two</td>
     </tr>
     <tr>
       <td>Nested object with a space before its close</td>
-      <td>{#html "classMap { one: true, nested: {deep: true} }"}</td>
-      <td>{classMap { one: true, nested: {deep: true} }}</td>
-      <td>one nested</td>
+      <td>{#html "stringify { user: { name: 'Simon' } }"}</td>
+      <td>{stringify { user: { name: 'Simon' } }}</td>
+      <td>{#html '{"user":{"name":"Simon"}}'}</td>
     </tr>
     <tr>
       <td>JS keyword operator</td>

@@ -2,57 +2,6 @@ import { Signal } from '@semantic-ui/reactivity';
 import { createCache } from '@semantic-ui/utils';
 import { unwrap } from './helpers.js';
 
-// a function on the Lisp or path route may hand back a Signal, which reads like any other
-const unwrapSignal = (value) => (value instanceof Signal ? value.get() : value);
-
-const isQuote = (char) => char === "'" || char === '"' || char === '`';
-const isBoundary = (text, index) => index < 0 || index >= text.length || /\s/.test(text[index]);
-
-// index of the quote closing the one at start, or the end of the text
-const closingQuote = (text, start) => {
-  const quote = text[start];
-  for (let i = start + 1; i < text.length; i++) {
-    if (text[i] === '\\') { i++; }
-    else if (text[i] === quote) { return i; }
-  }
-  return text.length;
-};
-
-// index of the bracket closing the one at start, nested brackets counted and quoted text
-// skipped, or -1 when nothing closes it
-const closingBracket = (text, start) => {
-  let depth = 0;
-  for (let i = start; i < text.length; i++) {
-    const char = text[i];
-    if (isQuote(char)) { i = closingQuote(text, i); }
-    else if (char === '(' || char === '[' || char === '{') { depth++; }
-    else if ((char === ')' || char === ']' || char === '}') && --depth === 0) { return i; }
-  }
-  return -1;
-};
-
-// replaces each (..) outside quotes with a placeholder and collects what it holds, so a paren
-// inside a string, {concat name ' (' role ')'}, stays text
-const liftGroups = (text, groups) => {
-  let lifted = '';
-  let copied = 0;
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    if (isQuote(char)) {
-      i = closingQuote(text, i);
-      continue;
-    }
-    if (char !== '(') { continue; }
-    const close = closingBracket(text, i);
-    if (close === -1) { break; }
-    lifted += `${text.slice(copied, i)}__GROUP${groups.length}__`;
-    groups.push(text.slice(i + 1, close));
-    copied = close + 1;
-    i = close;
-  }
-  return lifted + text.slice(copied);
-};
-
 // Rough expression distribution (2026-04-12) — weight optimizations by hot paths:
 //
 //   ~60%  simple identifier   — direct property lookup
@@ -61,17 +10,18 @@ const liftGroups = (text, groups) => {
 //    ~2%  JS eval             — new Function + Proxy
 //    <1%  complex Lisp        — inline objects/arrays
 export class ExpressionEvaluator {
-  static TOKEN_REGEXP = /('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|\(|\)|[^\s()]+)/g;
+  // the close is a lookahead so adjacent literals, {a: 1} {b: 2}, each get wrapped
+  static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(?=\s|$)/g;
   static WHITESPACE_REGEXP = /\s/;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
   // a segment after the first may be an index, {items.0}
   static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[0-9a-zA-Z_$]+)*$/;
-  static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
-  // the operators spelled as words, {'name' in user}
-  static JS_KEYWORD_REGEXP = /\b(?:in|instanceof|typeof|new|void)\b/;
+  // a signed number after whitespace ({double -5}) is a Lisp argument, not subtraction
+  static JS_OPERATOR_REGEXP =
+    /[*\/%=<>!&|?:~^`()[\]{}]|(?<!\s)[+-]|[+-](?!\.?\d)|\b(?:in|instanceof|typeof|new|void)\b/;
   static QUOTED_STRING_REGEXP = /('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g;
   static CALLEE_REGEXP = /([a-zA-Z_$][0-9a-zA-Z_$]*)\s*\(/g;
-  static THIS_REGEXP = /\bthis\b/;
+  static THIS_REGEXP = /('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`)|(?<!\.)\bthis\b/g;
   static fnCache = createCache({ maxSize: 5000, eviction: 'flush' });
 
   // Expression classification cache — shared across all instances since
@@ -162,90 +112,127 @@ export class ExpressionEvaluator {
       ? expression.replace(ExpressionEvaluator.QUOTED_STRING_REGEXP, '')
       : expression;
     result = ExpressionEvaluator.WHITESPACE_REGEXP.test(stripped)
-      && !ExpressionEvaluator.JS_OPERATOR_REGEXP.test(stripped)
-      && !ExpressionEvaluator.JS_KEYWORD_REGEXP.test(stripped);
+      && !ExpressionEvaluator.JS_OPERATOR_REGEXP.test(stripped);
 
     ExpressionEvaluator.classifyCache.set(expression, result);
     return result;
   }
 
-  // Returns a cached parsed expression array. The result of
-  // addParensToExpression + getExpressionArray is deterministic for a
-  // given expression string — no need to re-parse on every render.
+  // Returns a cached parsed expression array — deterministic for a given
+  // expression string, so no need to re-parse on every render.
   getParsedExpression(expression) {
     let parsed = ExpressionEvaluator.parseCache.get(expression);
     if (parsed !== undefined) {
       return parsed;
     }
 
-    const wrapped = this.addParensToExpression(expression);
-    parsed = this.getExpressionArray(wrapped);
+    parsed = this.getExpressionArray(expression);
 
     ExpressionEvaluator.parseCache.set(expression, parsed);
     return parsed;
   }
 
-  // parses an expression like 'maybe (isEven number)' to ['maybe, ['isEven', 'number']]
+  // scans a Lisp-style expression into top-level tokens, unwrapping outer parens
+  // on (sub-expressions) while keeping quotes, [arrays], {objects}, and glued
+  // calls like fn(x) whole
   getExpressionArray(expr) {
-    const groups = [];
-    const processedExpr = liftGroups(expr, groups);
+    const tokens = [];
+    const len = expr.length;
+    let i = 0;
 
-    const tokens = processedExpr.match(ExpressionEvaluator.TOKEN_REGEXP) || [];
-    // a group glued to an identifier is a JS call, kept whole so it evaluates as one token
-    const getValue = (token) => {
-      const match = token.match(/^__GROUP(\d+)__$/);
-      if (match) {
-        return groups[parseInt(match[1], 10)];
+    while (i < len) {
+      if (ExpressionEvaluator.WHITESPACE_REGEXP.test(expr[i])) {
+        i++;
+        continue;
       }
-      return token.replace(/__GROUP(\d+)__/g, (_, index) => `(${groups[index]})`);
-    };
-
-    // Index-based iteration avoids O(n) shift() per token
-    let pos = 0;
-    const parse = () => {
-      const result = [];
-      while (pos < tokens.length) {
-        const token = tokens[pos++];
-        if (token === '(') {
-          result.push(parse());
+      const start = i;
+      let groupEnd = -1;
+      while (i < len && !ExpressionEvaluator.WHITESPACE_REGEXP.test(expr[i])) {
+        const char = expr[i];
+        if (char === "'" || char === '"' || char === '`') {
+          i = this.findClosingQuote(expr, i) + 1;
         }
-        else if (token === ')') {
-          return result;
+        else if (char === '(' || char === '[' || char === '{') {
+          const close = this.findClosingBracket(expr, i);
+          if (close === -1) {
+            i = len;
+          }
+          else {
+            if (i === start && char === '(') {
+              groupEnd = close;
+            }
+            i = close + 1;
+          }
         }
         else {
-          result.push(getValue(token));
+          i++;
         }
       }
-      return result;
-    };
-    return parse();
+      tokens.push(groupEnd === i - 1 ? expr.slice(start + 1, i - 1) : expr.slice(start, i));
+    }
+    return tokens;
+  }
+
+  findClosingQuote(text, start) {
+    const quote = text[start];
+    for (let i = start + 1; i < text.length; i++) {
+      if (text[i] === '\\') { i++; }
+      else if (text[i] === quote) { return i; }
+    }
+    return text.length - 1;
+  }
+
+  findClosingBracket(text, start) {
+    let depth = 0;
+    for (let i = start; i < text.length; i++) {
+      const char = text[i];
+      if (char === "'" || char === '"' || char === '`') {
+        i = this.findClosingQuote(text, i);
+      }
+      else if (char === '(' || char === '[' || char === '{') {
+        depth++;
+      }
+      else if ((char === ')' || char === ']' || char === '}') && --depth === 0) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   evaluateJavascript(code, context, { includeHelpers = true } = {}) {
     let result;
     try {
-      const proxy = includeHelpers ? this.jsProxy : new Proxy(context || {}, ExpressionEvaluator.noHelpersHandler);
       let fn = ExpressionEvaluator.fnCache.get(code);
-      if (!fn) {
-        // parens hold a multi-line expression together. bare, {classMap\n {a: true}} returns
-        // the function and reads the object as a block
-        fn = new Function('ctx', `with(ctx){return (${code})}`);
-        // rides on the compiled function so the hot path pays one cache lookup
-        fn.callees = this.calleesFrom(code);
-        fn.usesThis = ExpressionEvaluator.THIS_REGEXP.test(code);
+      if (fn === undefined) {
+        try {
+          // {#each items} puts the item at data.this; reading ctx.this routes through the proxy
+          // without sloppy-mode primitive boxing
+          const expr = code.includes('this')
+            ? code.replace(ExpressionEvaluator.THIS_REGEXP, (match, quoted) => quoted || 'ctx.this')
+            : code;
+          // parens hold a multi-line expression together across newlines
+          fn = new Function('ctx', `with(ctx){return (${expr})}`);
+          // rides on the compiled function so the hot path pays one cache lookup
+          fn.callees = this.calleesFrom(code);
+        }
+        catch {
+          fn = null;
+        }
         ExpressionEvaluator.fnCache.set(code, fn);
       }
+      if (!fn) {
+        return undefined;
+      }
+      const proxy = includeHelpers ? this.jsProxy : new Proxy(context || {}, ExpressionEvaluator.noHelpersHandler);
       // Reuse the cached Proxy — just swap which context object it reads from
       if (includeHelpers) {
         this.jsContext = context || null;
         this.jsCallees = fn.callees;
       }
-      // {#each items} puts the item at data.this, and a JS-style expression reads it the way a
-      // path does
-      result = fn.usesThis ? fn.call(context?.this, proxy) : fn(proxy);
+      result = fn(proxy);
     }
     catch (e) {
-      // this token is not valid javascript
+      // runtime error during evaluation
     }
     finally {
       this.jsContext = null;
@@ -306,7 +293,11 @@ export class ExpressionEvaluator {
               return value;
             }
           }
-          return typeof value === 'function' ? unwrapSignal(value()) : value;
+          if (typeof value === 'function') {
+            const result = value();
+            return (result instanceof Signal) ? result.get() : result;
+          }
+          return value;
         }
       }
     }
@@ -351,11 +342,17 @@ export class ExpressionEvaluator {
             for (let a = 0; a < argCount; a++) {
               args[a] = unwrap(results[index + 1 + a]);
             }
-            result = unwrapSignal(tokenValue(...args));
+            result = tokenValue(...args);
           }
           else {
-            result = unwrapSignal(tokenValue());
+            result = tokenValue();
           }
+          if (result instanceof Signal) {
+            result = result.get();
+          }
+        }
+        else if (index === 0 && len > 1 && typeof expression === 'string') {
+          result = this.lookupTokenValue(expression, data);
         }
         else {
           result = tokenValue;
@@ -378,26 +375,11 @@ export class ExpressionEvaluator {
       return literalValue;
     }
 
-    if (!token.includes('.')) {
-      let value = data[token];
-      if (value instanceof Signal) {
-        return value.value;
-      }
-      if (value !== undefined) {
-        return value;
-      }
-    }
-    else {
-      const value = this.lookupDottedValue(data, token);
-      if (value !== undefined) {
-        return value;
-      }
-    }
-
-    // a helper may be a value, isServer among the built-ins
-    const helper = this.helpers[token];
-    if (helper !== undefined) {
-      return helper instanceof Signal ? helper.value : helper;
+    const value = token.includes('.')
+      ? this.lookupDottedValue(data, token)
+      : this.getPathRoot(data, token);
+    if (value !== undefined) {
+      return (value instanceof Signal) ? value.value : value;
     }
 
     // Simple identifiers and dotted paths are fully resolved by
@@ -458,11 +440,10 @@ export class ExpressionEvaluator {
     return this.walkPath(this.getPathRoot(obj, segments[0]), segments, segments.length, 1);
   }
 
-  // a path's first segment resolves like a bare token, data then a registered helper, read once
-  // so an accessor or a reactive context on the root runs once per expression
-  getPathRoot(data, first) {
-    const value = data[first];
-    return value === undefined && typeof this.helpers[first] === 'function' ? this.helpers[first] : value;
+  // a bare token or a path's first segment resolves from data, then registered helpers
+  getPathRoot(data, key) {
+    const value = data[key];
+    return value !== undefined ? value : this.helpers[key];
   }
 
   walkPath(obj, segments, count, start = 0) {
@@ -506,30 +487,14 @@ export class ExpressionEvaluator {
     return unwrap(parent);
   }
 
-  // wraps each inline [..] or {..} in parens so the group lift reads it as one argument. a scan
-  // rather than a regex: the close has to be the matching one, so a nested literal, a space
-  // before a close and a literal spanning lines survive, and a bracket inside quotes is text
   addParensToExpression(expression = '') {
     if (!expression) { return ''; }
     if (expression.indexOf('[') === -1 && expression.indexOf('{') === -1) {
       return expression;
     }
-    let wrapped = '';
-    let copied = 0;
-    for (let i = 0; i < expression.length; i++) {
-      const char = expression[i];
-      if (isQuote(char)) {
-        i = closingQuote(expression, i);
-        continue;
-      }
-      if ((char !== '[' && char !== '{') || !isBoundary(expression, i - 1)) { continue; }
-      const close = closingBracket(expression, i);
-      if (close === -1 || !isBoundary(expression, close + 1)) { continue; }
-      wrapped += `${expression.slice(copied, i)}(${expression.slice(i, close + 1)})`;
-      copied = close + 1;
-      i = close;
-    }
-    return wrapped + expression.slice(copied);
+    return String(expression).replace(ExpressionEvaluator.WRAPPED_EXPRESSION, (match, before, brackets) => {
+      return `${before}(${brackets})`;
+    });
   }
 
   getLiteralValue(token) {
