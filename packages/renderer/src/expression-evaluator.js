@@ -280,7 +280,7 @@ export class ExpressionEvaluator {
     if (typeof expression === 'string') {
       // no whitespace means one token (identifier, dotted path, or JS call), so the classify
       // cache is skipped. a Lisp call separates its tokens with a space or a newline
-      const isMultiTokenLisp = ExpressionEvaluator.WHITESPACE_REGEXP.test(expression)
+      const isMultiTokenLisp = (expression.includes(' ') || expression.includes('\n'))
         && this.classifyExpression(expression);
 
       if (!isMultiTokenLisp) {
@@ -295,7 +295,7 @@ export class ExpressionEvaluator {
           }
           if (typeof value === 'function') {
             const result = value();
-            return (result instanceof Signal) ? result.get() : result;
+            return (typeof result === 'object' && result instanceof Signal) ? result.get() : result;
           }
           return value;
         }
@@ -347,7 +347,7 @@ export class ExpressionEvaluator {
           else {
             result = tokenValue();
           }
-          if (result instanceof Signal) {
+          if (typeof result === 'object' && result instanceof Signal) {
             result = result.get();
           }
         }
@@ -375,11 +375,23 @@ export class ExpressionEvaluator {
       return literalValue;
     }
 
-    const value = token.includes('.')
-      ? this.lookupDottedValue(data, token)
-      : this.getPathRoot(data, token);
-    if (value !== undefined) {
-      return (value instanceof Signal) ? value.value : value;
+    if (!token.includes('.')) {
+      const value = data[token];
+      if (value !== undefined) {
+        return (typeof value === 'object' && value instanceof Signal) ? value.value : value;
+      }
+    }
+    else {
+      const value = this.lookupDottedValue(data, token);
+      if (value !== undefined) {
+        return value;
+      }
+    }
+
+    // a helper may be a function or a constant value like isServer
+    const helper = this.helpers[token];
+    if (helper !== undefined) {
+      return (typeof helper === 'object' && helper instanceof Signal) ? helper.value : helper;
     }
 
     // Simple identifiers and dotted paths are fully resolved by
@@ -403,13 +415,20 @@ export class ExpressionEvaluator {
     const last = segments.length - 1;
 
     let container = this.walkPath(this.getPathRoot(data, segments[0]), segments, last, 1);
-    if (typeof container === 'function') { container = container(); }
-    if (container instanceof Signal) { container = container.get(); }
+    if (typeof container === 'object' && container instanceof Signal) {
+      container = container.get();
+    }
+    else if (typeof container === 'function') {
+      container = container();
+      if (typeof container === 'object' && container instanceof Signal) {
+        container = container.get();
+      }
+    }
     if (container == null) { return undefined; }
 
     const value = container[segments[last]];
     if (typeof value === 'function') { return value.bind(unwrap(container)); }
-    return (value instanceof Signal) ? value.value : value;
+    return (typeof value === 'object' && value instanceof Signal) ? value.value : value;
   }
 
   // null for anything that isn't a pure dotted path. a JS expression can carry a
@@ -429,7 +448,7 @@ export class ExpressionEvaluator {
     // Fast path: simple identifier (no dots)
     if (path.indexOf('.') === -1) {
       const value = this.getPathRoot(obj, path);
-      if (value instanceof Signal) {
+      if (typeof value === 'object' && value instanceof Signal) {
         return value.get();
       }
       return value;
@@ -440,7 +459,7 @@ export class ExpressionEvaluator {
     return this.walkPath(this.getPathRoot(obj, segments[0]), segments, segments.length, 1);
   }
 
-  // a bare token or a path's first segment resolves from data, then registered helpers
+  // a path's first segment resolves like a bare token, data then a registered helper
   getPathRoot(data, key) {
     const value = data[key];
     return value !== undefined ? value : this.helpers[key];
@@ -449,11 +468,14 @@ export class ExpressionEvaluator {
   walkPath(obj, segments, count, start = 0) {
     let current = obj;
     for (let i = start; i < count; i++) {
-      if (typeof current === 'function') {
-        current = current();
-      }
-      if (current instanceof Signal) {
+      if (typeof current === 'object' && current instanceof Signal) {
         current = current.get();
+      }
+      else if (typeof current === 'function') {
+        current = current();
+        if (typeof current === 'object' && current instanceof Signal) {
+          current = current.get();
+        }
       }
       if (current == null) {
         return undefined;
@@ -471,7 +493,7 @@ export class ExpressionEvaluator {
     }
 
     if (tokenValue !== undefined) {
-      return (tokenValue instanceof Signal)
+      return (typeof tokenValue === 'object' && tokenValue instanceof Signal)
         ? tokenValue.value
         : tokenValue;
     }
@@ -482,8 +504,15 @@ export class ExpressionEvaluator {
   // {#each x in xs} as-key lands on the item proxy. neither is the receiver
   getThisContext(data, path) {
     let parent = this.getDeepDataValue(data, path);
-    if (typeof parent === 'function') { parent = parent(); }
-    if (parent instanceof Signal) { parent = parent.value; }
+    if (typeof parent === 'object' && parent instanceof Signal) {
+      parent = parent.value;
+    }
+    else if (typeof parent === 'function') {
+      parent = parent();
+      if (typeof parent === 'object' && parent instanceof Signal) {
+        parent = parent.value;
+      }
+    }
     return unwrap(parent);
   }
 
@@ -499,7 +528,8 @@ export class ExpressionEvaluator {
 
   getLiteralValue(token) {
     if (token.length > 1 && (token[0] === "'" || token[0] === '"') && token[0] === token[token.length - 1]) {
-      return token.slice(1, -1).replace(/\\(['"])/g, '$1');
+      const inner = token.slice(1, -1);
+      return inner.includes('\\') ? inner.replace(/\\(['"])/g, '$1') : inner;
     }
 
     if (token === 'true') { return true; }
