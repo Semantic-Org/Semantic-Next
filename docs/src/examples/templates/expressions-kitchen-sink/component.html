@@ -141,5 +141,71 @@
       <td>{>test obj={a: 1}}</td>
       <td>1</td>
     </tr>
+    <tr>
+      <td>Strings in either quote style</td>
+      <td>concat "it's" ' ok'</td>
+      <td>{concat "it's" ' ok'}</td>
+      <td>it's ok</td>
+    </tr>
+    <tr>
+      <td>Escaped quote inside a string</td>
+      <td>concat 'it\'s' ' fine'</td>
+      <td>{concat 'it\'s' ' fine'}</td>
+      <td>it's fine</td>
+    </tr>
+    <tr>
+      <td>Braces inside a string</td>
+      <td>{#html "concat 'left {brace} right'"}</td>
+      <td>{concat 'left {brace} right'}</td>
+      <td>{#html "left {brace} right"}</td>
+    </tr>
+    <tr>
+      <td>Array index in a path</td>
+      <td>numbers.1</td>
+      <td>{numbers.1}</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <td>Path through a state signal</td>
+      <td>profile.name</td>
+      <td>{profile.name}</td>
+      <td>Jack</td>
+    </tr>
+    <tr>
+      <td>Path through an object exposing a signal</td>
+      <td>getAccount.loggedIn</td>
+      <td>{getAccount.loggedIn}</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td>JS call as a Lisp argument</td>
+      <td>concat 'next: ' addOne(value)</td>
+      <td>{concat 'next: ' addOne(value)}</td>
+      <td>next: 2</td>
+    </tr>
+    <tr>
+      <td>Several inline objects</td>
+      <td>{#html "lookup { a: 'one' } { b: 'two' } 'b'"}</td>
+      <td>{lookup { a: 'one' } { b: 'two' } 'b'}</td>
+      <td>two</td>
+    </tr>
+    <tr>
+      <td>Nested object with a space before its close</td>
+      <td>{#html "stringify { user: { name: 'Simon' } }"}</td>
+      <td>{stringify { user: { name: 'Simon' } }}</td>
+      <td>{#html '{"user":{"name":"Simon"}}'}</td>
+    </tr>
+    <tr>
+      <td>JS keyword operator</td>
+      <td>typeof value</td>
+      <td>{typeof value}</td>
+      <td>number</td>
+    </tr>
+    <tr>
+      <td>JS on the each item</td>
+      <td>{#html `{#each numbers}{this * 2} {/each}`}</td>
+      <td>{#each numbers}{this * 2} {/each}</td>
+      <td>10 20 30</td>
+    </tr>
   </tbody>
 </table>

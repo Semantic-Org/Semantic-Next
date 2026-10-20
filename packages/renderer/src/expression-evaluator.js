@@ -10,14 +10,16 @@ import { unwrap } from './helpers.js';
 //    ~2%  JS eval             — new Function + Proxy
 //    <1%  complex Lisp        — inline objects/arrays
 export class ExpressionEvaluator {
-  static PARENS_REGEXP = /\((?:[^()]*|\((?:[^()]*|\([^()]*\))*\))*\)/g;
-  static TOKEN_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
   // the close is a lookahead so adjacent literals, {a: 1} {b: 2}, each get wrapped
   static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(?=\s|$)/g;
+  static WHITESPACE_REGEXP = /\s/;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
-  static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[a-zA-Z_$][0-9a-zA-Z_$]*)*$/;
-  static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
-  static QUOTED_STRING_REGEXP = /('[^']*'|"[^"]*")/g;
+  // a segment after the first may be an index, {items.0}
+  static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[0-9a-zA-Z_$]+)*$/;
+  // a signed number after whitespace ({double -5}) is a Lisp argument, not subtraction
+  static JS_OPERATOR_REGEXP =
+    /[*\/%=<>!&|?:~^`()[\]{}]|(?<!\s)[+-]|[+-](?!\.?\d)|\b(?:in|instanceof|typeof|new|void)\b/;
+  static QUOTED_STRING_REGEXP = /('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g;
   static CALLEE_REGEXP = /([a-zA-Z_$][0-9a-zA-Z_$]*)\s*\(/g;
   static fnCache = createCache({ maxSize: 5000, eviction: 'flush' });
 
@@ -108,80 +110,118 @@ export class ExpressionEvaluator {
     const stripped = hasQuotes
       ? expression.replace(ExpressionEvaluator.QUOTED_STRING_REGEXP, '')
       : expression;
-    result = stripped.includes(' ')
+    result = ExpressionEvaluator.WHITESPACE_REGEXP.test(stripped)
       && !ExpressionEvaluator.JS_OPERATOR_REGEXP.test(stripped);
 
     ExpressionEvaluator.classifyCache.set(expression, result);
     return result;
   }
 
-  // Returns a cached parsed expression array. The result of
-  // addParensToExpression + getExpressionArray is deterministic for a
-  // given expression string — no need to re-parse on every render.
+  // Returns a cached parsed expression array — deterministic for a given
+  // expression string, so no need to re-parse on every render.
   getParsedExpression(expression) {
     let parsed = ExpressionEvaluator.parseCache.get(expression);
     if (parsed !== undefined) {
       return parsed;
     }
 
-    const wrapped = this.addParensToExpression(expression);
-    parsed = this.getExpressionArray(wrapped);
+    parsed = this.getExpressionArray(expression);
 
     ExpressionEvaluator.parseCache.set(expression, parsed);
     return parsed;
   }
 
-  // parses an expression like 'maybe (isEven number)' to ['maybe, ['isEven', 'number']]
+  // scans a Lisp-style expression into top-level tokens, unwrapping outer parens
+  // on (sub-expressions) while keeping quotes, [arrays], {objects}, and glued
+  // calls like fn(x) whole
   getExpressionArray(expr) {
-    const groups = [];
-    const processedExpr = expr.replace(ExpressionEvaluator.PARENS_REGEXP, match => {
-      const placeholder = `__GROUP${groups.length}__`;
-      groups.push(match.slice(1, -1));
-      return placeholder;
-    });
+    const tokens = [];
+    const len = expr.length;
+    let i = 0;
 
-    const tokens = processedExpr.match(ExpressionEvaluator.TOKEN_REGEXP) || [];
-    // a group glued to an identifier is a JS call, kept whole so it evaluates as one token
-    const getValue = (token) => {
-      const match = token.match(/^__GROUP(\d+)__$/);
-      if (match) {
-        return groups[parseInt(match[1], 10)];
+    while (i < len) {
+      if (ExpressionEvaluator.WHITESPACE_REGEXP.test(expr[i])) {
+        i++;
+        continue;
       }
-      return token.replace(/__GROUP(\d+)__/g, (_, index) => `(${groups[index]})`);
-    };
-
-    // Index-based iteration avoids O(n) shift() per token
-    let pos = 0;
-    const parse = () => {
-      const result = [];
-      while (pos < tokens.length) {
-        const token = tokens[pos++];
-        if (token === '(') {
-          result.push(parse());
+      const start = i;
+      let groupEnd = -1;
+      while (i < len && !ExpressionEvaluator.WHITESPACE_REGEXP.test(expr[i])) {
+        const char = expr[i];
+        if (char === "'" || char === '"' || char === '`') {
+          i = this.findClosingQuote(expr, i) + 1;
         }
-        else if (token === ')') {
-          return result;
+        else if (char === '(' || char === '[' || char === '{') {
+          const close = this.findClosingBracket(expr, i);
+          if (close === -1) {
+            i = len;
+          }
+          else {
+            if (i === start && char === '(') {
+              groupEnd = close;
+            }
+            i = close + 1;
+          }
         }
         else {
-          result.push(getValue(token));
+          i++;
         }
       }
-      return result;
-    };
-    return parse();
+      tokens.push(groupEnd === i - 1 ? expr.slice(start + 1, i - 1) : expr.slice(start, i));
+    }
+    return tokens;
+  }
+
+  findClosingQuote(text, start) {
+    const quote = text[start];
+    for (let i = start + 1; i < text.length; i++) {
+      if (text[i] === '\\') { i++; }
+      else if (text[i] === quote) { return i; }
+    }
+    return text.length - 1;
+  }
+
+  findClosingBracket(text, start) {
+    let depth = 0;
+    for (let i = start; i < text.length; i++) {
+      const char = text[i];
+      if (char === "'" || char === '"' || char === '`') {
+        i = this.findClosingQuote(text, i);
+      }
+      else if (char === '(' || char === '[' || char === '{') {
+        depth++;
+      }
+      else if ((char === ')' || char === ']' || char === '}') && --depth === 0) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   evaluateJavascript(code, context, { includeHelpers = true } = {}) {
     let result;
     try {
-      const proxy = includeHelpers ? this.jsProxy : new Proxy(context || {}, ExpressionEvaluator.noHelpersHandler);
       let fn = ExpressionEvaluator.fnCache.get(code);
-      if (!fn) {
-        fn = new Function('ctx', `with(ctx){return ${code}}`);
-        // rides on the compiled function so the hot path pays one cache lookup
-        fn.callees = this.calleesFrom(code);
+      if (fn === undefined) {
+        try {
+          // {#each items} puts the item at data.this; an inner strict function binds `this`
+          // from ctx.this without sloppy-mode primitive boxing
+          const body = code.includes('this')
+            ? `(function(){"use strict";return (${code})}).call(ctx.this)`
+            : `(${code})`;
+          fn = new Function('ctx', `with(ctx){return ${body}}`);
+          // rides on the compiled function so the hot path pays one cache lookup
+          fn.callees = this.calleesFrom(code);
+        }
+        catch {
+          fn = null;
+        }
         ExpressionEvaluator.fnCache.set(code, fn);
       }
+      if (!fn) {
+        return undefined;
+      }
+      const proxy = includeHelpers ? this.jsProxy : new Proxy(context || {}, ExpressionEvaluator.noHelpersHandler);
       // Reuse the cached Proxy — just swap which context object it reads from
       if (includeHelpers) {
         this.jsContext = context || null;
@@ -190,7 +230,7 @@ export class ExpressionEvaluator {
       result = fn(proxy);
     }
     catch (e) {
-      // this token is not valid javascript
+      // runtime error during evaluation
     }
     finally {
       this.jsContext = null;
@@ -251,7 +291,11 @@ export class ExpressionEvaluator {
               return value;
             }
           }
-          return typeof value === 'function' ? value() : value;
+          if (typeof value === 'function') {
+            const result = value();
+            return (typeof result === 'object' && result instanceof Signal) ? result.get() : result;
+          }
+          return value;
         }
       }
     }
@@ -301,6 +345,12 @@ export class ExpressionEvaluator {
           else {
             result = tokenValue();
           }
+          if (typeof result === 'object' && result instanceof Signal) {
+            result = result.get();
+          }
+        }
+        else if (index === 0 && len > 1 && typeof expression === 'string') {
+          result = this.lookupTokenValue(expression, data);
         }
         else {
           result = tokenValue;
@@ -324,12 +374,9 @@ export class ExpressionEvaluator {
     }
 
     if (!token.includes('.')) {
-      let value = data[token];
-      if (value instanceof Signal) {
-        return value.value;
-      }
+      const value = data[token];
       if (value !== undefined) {
-        return value;
+        return (typeof value === 'object' && value instanceof Signal) ? value.value : value;
       }
     }
     else {
@@ -339,9 +386,10 @@ export class ExpressionEvaluator {
       }
     }
 
+    // a helper may be a function or a constant value like isServer
     const helper = this.helpers[token];
-    if (typeof helper === 'function') {
-      return helper;
+    if (helper !== undefined) {
+      return (typeof helper === 'object' && helper instanceof Signal) ? helper.value : helper;
     }
 
     // Simple identifiers and dotted paths are fully resolved by
@@ -365,13 +413,20 @@ export class ExpressionEvaluator {
     const last = segments.length - 1;
 
     let container = this.walkPath(this.getPathRoot(data, segments[0]), segments, last, 1);
-    if (container instanceof Signal) { container = container.get(); }
-    else if (typeof container === 'function') { container = container(); }
+    if (typeof container === 'object' && container instanceof Signal) {
+      container = container.get();
+    }
+    else if (typeof container === 'function') {
+      container = container();
+      if (typeof container === 'object' && container instanceof Signal) {
+        container = container.get();
+      }
+    }
     if (container == null) { return undefined; }
 
     const value = container[segments[last]];
     if (typeof value === 'function') { return value.bind(unwrap(container)); }
-    return (value instanceof Signal) ? value.value : value;
+    return (typeof value === 'object' && value instanceof Signal) ? value.value : value;
   }
 
   // null for anything that isn't a pure dotted path. a JS expression can carry a
@@ -391,7 +446,7 @@ export class ExpressionEvaluator {
     // Fast path: simple identifier (no dots)
     if (path.indexOf('.') === -1) {
       const value = this.getPathRoot(obj, path);
-      if (value instanceof Signal) {
+      if (typeof value === 'object' && value instanceof Signal) {
         return value.get();
       }
       return value;
@@ -402,21 +457,23 @@ export class ExpressionEvaluator {
     return this.walkPath(this.getPathRoot(obj, segments[0]), segments, segments.length, 1);
   }
 
-  // a path's first segment resolves like a bare token, data then a registered helper, read once
-  // so an accessor or a reactive context on the root runs once per expression
-  getPathRoot(data, first) {
-    const value = data[first];
-    return value === undefined && typeof this.helpers[first] === 'function' ? this.helpers[first] : value;
+  // a path's first segment resolves like a bare token, data then a registered helper
+  getPathRoot(data, key) {
+    const value = data[key];
+    return value !== undefined ? value : this.helpers[key];
   }
 
   walkPath(obj, segments, count, start = 0) {
     let current = obj;
     for (let i = start; i < count; i++) {
-      if (current instanceof Signal) {
+      if (typeof current === 'object' && current instanceof Signal) {
         current = current.get();
       }
       else if (typeof current === 'function') {
         current = current();
+        if (typeof current === 'object' && current instanceof Signal) {
+          current = current.get();
+        }
       }
       if (current == null) {
         return undefined;
@@ -434,7 +491,7 @@ export class ExpressionEvaluator {
     }
 
     if (tokenValue !== undefined) {
-      return (tokenValue instanceof Signal)
+      return (typeof tokenValue === 'object' && tokenValue instanceof Signal)
         ? tokenValue.value
         : tokenValue;
     }
@@ -445,8 +502,15 @@ export class ExpressionEvaluator {
   // {#each x in xs} as-key lands on the item proxy. neither is the receiver
   getThisContext(data, path) {
     let parent = this.getDeepDataValue(data, path);
-    if (parent instanceof Signal) { parent = parent.value; }
-    else if (typeof parent === 'function') { parent = parent(); }
+    if (typeof parent === 'object' && parent instanceof Signal) {
+      parent = parent.value;
+    }
+    else if (typeof parent === 'function') {
+      parent = parent();
+      if (typeof parent === 'object' && parent instanceof Signal) {
+        parent = parent.value;
+      }
+    }
     return unwrap(parent);
   }
 
@@ -462,7 +526,8 @@ export class ExpressionEvaluator {
 
   getLiteralValue(token) {
     if (token.length > 1 && (token[0] === "'" || token[0] === '"') && token[0] === token[token.length - 1]) {
-      return token.slice(1, -1).replace(/\\(['"])/g, '$1');
+      const inner = token.slice(1, -1);
+      return inner.includes('\\') ? inner.replace(/\\(['"])/g, '$1') : inner;
     }
 
     if (token === 'true') { return true; }
