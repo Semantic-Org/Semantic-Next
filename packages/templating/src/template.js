@@ -257,32 +257,15 @@ export const Template = class Template {
     if (isFunction(this.createComponent)) {
       instance = this.call(this.createComponent, { thisContext: this.instance }) || {};
       if (instance.self === this.instance) {
-        // default identity createComponent returns the call bag itself, strip plugin
-        // lifecycleParams so getters arent copied onto instance
-        if (this.pluginCallParams) {
-          for (const key in this.pluginCallParams) {
-            if (!Object.hasOwn(this.instance, key)) {
-              delete instance[key];
-            }
-          }
-        }
-        extend(template.instance, instance);
-      }
-      else {
-        extend(template.instance, instance);
-        // component methods take precedence over plugin lifecycleParams on collision
-        if (this.pluginCallParams) {
-          for (const key in this.pluginCallParams) {
-            if (Object.hasOwn(template.instance, key)) {
-              Object.defineProperty(
-                this.pluginCallParams,
-                key,
-                Object.getOwnPropertyDescriptor(template.instance, key),
-              );
-            }
-          }
+        // default identity createComponent returns the call bag, strip plugin params from instance
+        for (const key in this.pluginCallParams) {
+          delete instance[key];
         }
       }
+      else if (this.pluginCallParams) {
+        extend(this.pluginCallParams, instance);
+      }
+      extend(template.instance, instance);
     }
     if (isFunction(template.instance.initialize)) {
       this.call(template.instance.initialize.bind(template));

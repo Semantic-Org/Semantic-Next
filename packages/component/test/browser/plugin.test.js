@@ -579,10 +579,9 @@ describe('Component Plugins', () => {
       expect(elB.$('.s').text()).toBe('rendered:1');
     });
 
-    it('tracks dynamic undeclared keys on instance settings proxy and supports logPerformance', async () => {
+    it('tracks dynamic undeclared keys on instance settings proxy', async () => {
       addPlugin(registerPlugin({
-        namespace: 'perfAndDynamic',
-        logPerformance: true,
+        namespace: 'dynamicSettings',
         createPlugin: ({ settings }) => ({
           computeLabel(suffix) {
             return `${settings.dynamicKey || 'init'}:${suffix}`;
@@ -602,12 +601,10 @@ describe('Component Plugins', () => {
 
       expect(el.$('.dyn').text()).toBe('init:ok');
 
-      el.perfAndDynamic.setDynamic('updated');
+      el.dynamicSettings.setDynamic('updated');
       flush();
 
       expect(el.$('.dyn').text()).toBe('updated:ok');
-      const measures = performance.getEntriesByName('perfAndDynamic:computeLabel', 'measure');
-      expect(measures.length).toBeGreaterThan(0);
     });
   });
 

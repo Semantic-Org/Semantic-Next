@@ -4,20 +4,17 @@ import { registerHelpers, TemplateHelpers } from '@semantic-ui/templating';
 import { Template } from '@semantic-ui/templating/template';
 import {
   any,
+  clone,
   createErrors,
-  createLogger,
-  deepExtend,
   each,
   extend,
   isArray,
-  isClassInstance,
   isDevelopment,
   isFunction,
   isObject,
   isPlainObject,
   isString,
   keys,
-  noop,
 } from '@semantic-ui/utils';
 
 const { throwError } = createErrors({ namespace: 'component' });
@@ -25,51 +22,10 @@ const { throwError } = createErrors({ namespace: 'component' });
 let extendCount = 0;
 
 /*******************************
-         Plugin Helpers
+         Settings Proxy
 *******************************/
 
-function createPluginLogger(namespace) {
-  const logger = createLogger({ namespace });
-  const wrap = (emit) => (message, ...data) => {
-    const options = data.length === 1 && isPlainObject(data[0])
-      ? data[0]
-      : (data.length ? { data } : undefined);
-    return emit(message, options);
-  };
-  return {
-    ...logger,
-    log: wrap((message, options) => logger.log(message, 'log', options)),
-    debug: wrap(logger.debug),
-    info: wrap(logger.info),
-    warn: wrap(logger.warn),
-    error: wrap(logger.error),
-  };
-}
-
-function createPerformanceProxy(target, namespace) {
-  return new Proxy(target, {
-    get(obj, prop) {
-      if (!isString(prop) || prop === 'constructor' || prop.startsWith('_')) {
-        return obj[prop];
-      }
-      const value = obj[prop];
-      if (!isFunction(value) || isClassInstance(value)) {
-        return value;
-      }
-      return (...args) => {
-        const startMark = `${namespace}:${prop}-start`;
-        const endMark = `${namespace}:${prop}-end`;
-        performance.mark(startMark);
-        const result = value.apply(obj, args);
-        performance.mark(endMark);
-        performance.measure(`${namespace}:${prop}`, startMark, endMark);
-        return result;
-      };
-    },
-  });
-}
-
-function createSettingsProxy(target, settingsVars, fallbackProxy, fallbackBase) {
+function createSettingsProxy(target, settingsVars = new Map(), fallbackProxy, fallbackBase) {
   return new Proxy(target, {
     get(obj, prop) {
       if (!isString(prop)) {
@@ -176,9 +132,8 @@ function detachElementPlugin(template, namespace, self) {
   }
 }
 
-function resolveInstanceSettings(template, entry, config, componentSettings) {
-  const { definition, baseSettings, pluginSettings, sharedState, logger } = entry;
-  const namespace = definition.namespace;
+function resolveInstanceSettings(baseParams, entry, config, componentSettings) {
+  const { definition, baseSettings, pluginSettings, sharedState } = entry;
 
   if (
     config !== undefined
@@ -189,53 +144,32 @@ function resolveInstanceSettings(template, entry, config, componentSettings) {
     return config;
   }
 
-  const ownSettings = {};
+  let ownSettings = {};
   if (config !== undefined) {
     if (isFunction(definition.resolveSettings)) {
-      const seedTarget = isPlainObject(config) ? deepExtend({}, config) : {};
-      // proxy reads baseSettings as fallback while {...settings} only spreads own overrides
-      const seed = new Proxy(seedTarget, {
-        get(target, prop) {
-          if (!isString(prop) || Object.hasOwn(target, prop)) {
-            return target[prop];
-          }
-          return baseSettings[prop];
-        },
-      });
-      const resolveBag = extend({}, template.buildCallParams(), {
+      // prototype fallback reads baseSettings while {...settings} only spreads own overrides
+      const seed = Object.assign(
+        Object.create(baseSettings),
+        isPlainObject(config) ? clone(config) : null,
+      );
+      const resolved = definition.resolveSettings(extend({}, baseParams, {
         self: sharedState,
         plugin: sharedState,
         settings: seed,
         config,
         componentSettings,
-        namespace,
-        ...logger,
-      });
-      const resolved = definition.resolveSettings(resolveBag);
-      if (isPlainObject(resolved)) {
-        deepExtend(ownSettings, resolved);
+        namespace: definition.namespace,
+      }));
+      if (isObject(resolved)) {
+        ownSettings = clone({ ...resolved });
       }
     }
     else if (isPlainObject(config)) {
-      deepExtend(ownSettings, config);
+      ownSettings = clone(config);
     }
   }
 
   return createSettingsProxy(ownSettings, new Map(), pluginSettings, baseSettings);
-}
-
-function syncPluginBagParams(template) {
-  if (!template.pluginCallParams || !template._activePlugins) {
-    return;
-  }
-  each(template._activePlugins, ({ pluginBag }) => {
-    for (const key in template.pluginCallParams) {
-      const desc = Object.getOwnPropertyDescriptor(template.pluginCallParams, key);
-      if (desc) {
-        Object.defineProperty(pluginBag, key, desc);
-      }
-    }
-  });
 }
 
 function initializeTemplatePlugins(template) {
@@ -245,16 +179,17 @@ function initializeTemplatePlugins(template) {
 
   const definitionOptions = template.definitionOptions || {};
   const componentSettings = template.settings || template.element?.settings;
+  const baseParams = template.buildCallParams();
 
   for (const [namespace, entry] of Template.plugins) {
-    const { definition, sharedState, logger } = entry;
+    const { definition, sharedState } = entry;
     const config = definitionOptions[namespace];
 
     if (!isFunction(definition.appliesTo) && !matchesAppliesTo(template, definition.appliesTo, config)) {
       continue;
     }
 
-    const settings = resolveInstanceSettings(template, entry, config, componentSettings);
+    const settings = resolveInstanceSettings(baseParams, entry, config, componentSettings);
 
     if (
       isFunction(definition.appliesTo)
@@ -263,12 +198,8 @@ function initializeTemplatePlugins(template) {
       continue;
     }
 
-    const rawSelf = Object.create(isObject(sharedState) ? sharedState : null);
-    const self = definition.logPerformance
-      ? createPerformanceProxy(rawSelf, namespace)
-      : rawSelf;
-
-    const pluginBag = extend({}, template.buildCallParams(), {
+    const self = Object.create(isObject(sharedState) ? sharedState : null);
+    const pluginBag = extend({}, baseParams, {
       self,
       plugin: self,
       settings,
@@ -281,13 +212,12 @@ function initializeTemplatePlugins(template) {
       get helpers() {
         return template.helpers || TemplateHelpers;
       },
-      ...logger,
     });
 
     if (isFunction(definition.createPlugin)) {
       const instanceMethods = definition.createPlugin.call(self, pluginBag);
       if (isObject(instanceMethods)) {
-        extend(rawSelf, instanceMethods);
+        extend(self, instanceMethods);
       }
     }
 
@@ -295,8 +225,8 @@ function initializeTemplatePlugins(template) {
     template.plugins[namespace] = self;
     attachElementPlugin(template, namespace, self);
 
-    if (isFunction(rawSelf.initialize)) {
-      rawSelf.initialize.call(self, pluginBag);
+    if (isFunction(self.initialize)) {
+      self.initialize.call(self, pluginBag);
     }
 
     if (definition.lifecycleParams) {
@@ -326,17 +256,12 @@ function initializeTemplatePlugins(template) {
   }
 
   if (template._activePlugins?.length) {
-    syncPluginBagParams(template);
-
     template.runPlugins = (hook) => {
-      if (hook === 'onCreated') {
-        syncPluginBagParams(template);
-      }
       each(template._activePlugins, ({ namespace, definition, self, pluginBag }) => {
         if (hook === 'onRendered') {
           attachElementPlugin(template, namespace, self);
         }
-        if (isFunction(definition[hook]) && definition[hook] !== noop) {
+        if (isFunction(definition[hook])) {
           definition[hook].call(self, pluginBag);
         }
         if (hook === 'onDestroyed') {
@@ -363,16 +288,7 @@ export const registerPlugin = (plugin = {}) => {
 
   const definition = {
     defaultSettings: {},
-    resolveSettings: undefined,
-    setup: undefined,
-    createPlugin: undefined,
-    lifecycleParams: undefined,
-    templateHelpers: undefined,
-    onCreated: noop,
-    onRendered: noop,
-    onDestroyed: noop,
     appliesTo: 'components',
-    logPerformance: false,
     ...plugin,
     namespace,
   };
@@ -389,14 +305,9 @@ export const removePlugin = (PluginOrNamespace) => {
   if (!entry) {
     return false;
   }
-  if (entry.previousHelpers) {
-    entry.previousHelpers.forEach((desc, key) => {
-      if (desc) {
-        Object.defineProperty(TemplateHelpers, key, desc);
-      }
-      else {
-        delete TemplateHelpers[key];
-      }
+  if (isPlainObject(entry.definition.templateHelpers)) {
+    each(keys(entry.definition.templateHelpers), (key) => {
+      delete TemplateHelpers[key];
     });
   }
   Template.plugins.delete(namespace);
@@ -404,8 +315,7 @@ export const removePlugin = (PluginOrNamespace) => {
 };
 
 export const clearPlugins = () => {
-  const activeNamespaces = [...Template.plugins.keys()].reverse();
-  each(activeNamespaces, (namespace) => removePlugin(namespace));
+  each([...Template.plugins.keys()], (namespace) => removePlugin(namespace));
   Template.registeredPlugins.clear();
 };
 
@@ -437,10 +347,9 @@ export const addPlugin = (PluginOrNamespace, appSettings = {}) => {
     removePlugin(namespace);
   }
 
-  const baseSettings = deepExtend({}, definition.defaultSettings, appSettings);
+  const baseSettings = clone({ ...definition.defaultSettings, ...appSettings });
   const settingsVars = new Map();
   const pluginSettings = createSettingsProxy(baseSettings, settingsVars);
-  const logger = createPluginLogger(namespace);
 
   let sharedState = {};
   if (isFunction(definition.setup)) {
@@ -449,16 +358,10 @@ export const addPlugin = (PluginOrNamespace, appSettings = {}) => {
       isServer: Template.isServer,
       isClient: !Template.isServer,
       namespace,
-      ...logger,
     }) || {};
   }
 
-  let previousHelpers;
   if (isPlainObject(definition.templateHelpers)) {
-    previousHelpers = new Map();
-    each(keys(definition.templateHelpers), (key) => {
-      previousHelpers.set(key, Object.getOwnPropertyDescriptor(TemplateHelpers, key));
-    });
     registerHelpers(definition.templateHelpers);
   }
 
@@ -469,8 +372,6 @@ export const addPlugin = (PluginOrNamespace, appSettings = {}) => {
     pluginSettings,
     settingsVars,
     sharedState,
-    logger,
-    previousHelpers,
   };
 
   Template.initializePlugins = initializeTemplatePlugins;

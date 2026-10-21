@@ -1,19 +1,6 @@
 import { CallParams, Template } from '@semantic-ui/templating';
 
-export interface PluginLogger {
-  log: (message: string, ...data: any[]) => void;
-  debug: (message: string, ...data: any[]) => void;
-  info: (message: string, ...data: any[]) => void;
-  warn: (message: string, ...data: any[]) => void;
-  error: (message: string, ...data: any[]) => void;
-  logOnce: (key: string, message?: string, level?: string, options?: Record<string, any>) => void;
-  debugOnce: (key: string, message?: string, options?: Record<string, any>) => void;
-  infoOnce: (key: string, message?: string, options?: Record<string, any>) => void;
-  warnOnce: (key: string, message?: string, options?: Record<string, any>) => void;
-  errorOnce: (key: string, message?: string, options?: Record<string, any>) => void;
-}
-
-export interface PluginSetupParams<TSettings extends Record<string, any> = Record<string, any>> extends PluginLogger {
+export interface PluginSetupParams<TSettings extends Record<string, any> = Record<string, any>> {
   settings: TSettings;
   isServer: boolean;
   isClient: boolean;
@@ -24,7 +11,7 @@ export interface PluginCallParams<
   TSettings extends Record<string, any> = Record<string, any>,
   TSelf extends Record<string, any> = Record<string, any>,
   TConfig = any,
-> extends Omit<CallParams, 'self' | 'settings'>, PluginLogger {
+> extends Omit<CallParams, 'self' | 'settings'> {
   self: TSelf;
   plugin: TSelf;
   settings: TSettings;
@@ -81,7 +68,6 @@ export interface PluginDefinition<
   onRendered?: (params: PluginCallParams<TSettings, TShared & TInstance, TConfig>) => void;
   onDestroyed?: (params: PluginCallParams<TSettings, TShared & TInstance, TConfig>) => void;
   appliesTo?: PluginAppliesTo<TSettings, TConfig>;
-  logPerformance?: boolean;
 }
 
 export interface InstalledPluginEntry<
@@ -95,7 +81,6 @@ export interface InstalledPluginEntry<
   pluginSettings: TSettings;
   settingsVars: Map<string, any>;
   sharedState: TShared;
-  logger: PluginLogger;
 }
 
 export function registerPlugin<
