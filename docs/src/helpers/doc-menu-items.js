@@ -27,6 +27,7 @@ export const sidebarMenuFramework = [
       { name: 'Styling', url: '/docs/guides/components/styling' },
       { name: 'Key Bindings', url: '/docs/guides/components/keys' },
       { name: 'Server Side Rendering', url: '/docs/guides/components/ssr' },
+      { name: 'Plugins', url: '/docs/guides/components/plugins' },
       { name: 'Specs', url: '/docs/guides/components/specs' },
     ],
   },
@@ -100,6 +101,7 @@ export const sidebarMenuAPI = [
     icon: 'package',
     pages: [
       { name: 'Define Component', url: '/docs/api/component/define-component' },
+      { name: 'Plugins', url: '/docs/api/component/plugins' },
       { name: 'Utility Functions', url: '/docs/api/component/utilities' },
       { name: 'Base Class', url: '/docs/api/component/web-component-base' },
     ],

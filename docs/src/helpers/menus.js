@@ -54,6 +54,7 @@ const subCategorySortOrder = {
     'Keybinding',
     'Communication',
     'Styling',
+    'Plugins',
     'Specs',
   ],
   'UI Components': [

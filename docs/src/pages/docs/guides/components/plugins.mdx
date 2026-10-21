@@ -1,0 +1,206 @@
+---
+layout: '@layouts/Guide.astro'
+title: Component Plugins
+icon: plug
+description: Extending components with plugins, callback parameters, and template helpers
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Plugins extend `defineComponent` with custom configuration options, callback parameters, and template helpers across your application.
+
+> See the [Component Plugins API Reference](/docs/api/component/plugins) for full method signatures and options.
+
+## Using Plugins
+
+### Adding a Plugin
+
+Call `addPlugin` once at application startup to enable a plugin and configure its application-wide settings.
+
+```javascript {5-8}
+import { addPlugin } from '@semantic-ui/component';
+import { I18n } from './i18n-plugin.js';
+import { strings } from './locales.js';
+
+addPlugin(I18n, {
+  locale: 'en',
+  strings,
+});
+```
+
+### Configuring Components
+
+Once installed, the plugin's `namespace` becomes a top-level option on `defineComponent`, and any template helpers it provides can be used directly in your template.
+
+```javascript {3}
+defineComponent({
+  tagName: 'checkout-summary',
+  i18n: 'checkout',
+  template: `<h3>{t 'title'}</h3>`,
+});
+```
+
+Parameters provided by the plugin can also be destructured in component callbacks such as `createComponent`, `events`, and lifecycle hooks:
+
+```javascript {2}
+const events = {
+  'click ui-button'({ t }) {
+    console.log(t('placeOrder'));
+  },
+};
+```
+
+### Calling from the DOM
+
+Each active plugin attaches its instance to the component's DOM element at `el[namespace]` (and `el.plugins[namespace]`).
+
+```javascript {2}
+const summary = document.querySelector('checkout-summary');
+summary.i18n.setLocale('es');
+```
+
+### Interactive Example
+
+Click the locale buttons in the preview to update the plugin's reactive `locale` setting across the component, or switch to `i18n-plugin.js` to inspect the plugin definition.
+
+<PlaygroundExample id="component-plugins" height="460" direction="horizontal"></PlaygroundExample>
+
+## Extending Callbacks
+
+### Static Parameters
+
+When you only need to pass shared services into component callbacks (`createComponent`, `events`, `keys`, `onCreated`, `onRendered`, `onDestroyed`), use `extendParams` instead of writing a full plugin.
+
+```javascript {4}
+import { extendParams } from '@semantic-ui/component';
+import { api } from './api.js';
+
+extendParams({ api });
+```
+
+Every component and subtemplate can then destructure `api` from its callback arguments:
+
+```javascript {1}
+const createComponent = ({ api, state }) => ({
+  async loadOrders() {
+    state.orders.set(await api.get('/orders'));
+  },
+});
+```
+
+### Instance Parameters
+
+Pass a function to `extendParams` when the injected values need access to the component's own callback arguments, such as `el` or `state`.
+
+```javascript {1-3}
+extendParams(({ el }) => ({
+  track: (event, data) => analytics.send(el?.tagName, event, data),
+}));
+```
+
+## Authoring Plugins
+
+### Defining a Namespace
+
+Use `registerPlugin` with a `namespace` and a `createPlugin` factory that returns the methods and properties for each component's plugin instance (`self`). You can also pass a plain plugin object directly to `addPlugin` without calling `registerPlugin` first.
+
+```javascript {4-13}
+import { registerPlugin } from '@semantic-ui/component';
+import { get } from '@semantic-ui/utils';
+
+export const I18n = registerPlugin({
+  namespace: 'i18n',
+  createPlugin({ settings }) {
+    return {
+      t: (key) => get(settings.strings[settings.locale], key) ?? key,
+      setLocale(locale) {
+        settings.locale = locale;
+      },
+    };
+  },
+});
+```
+
+If `createPlugin` returns an `initialize()` method, it runs automatically when the component is created. For state created once per `addPlugin` call rather than per component, define `setup({ settings, isServer })` — its return value becomes the prototype of every instance's `self`.
+
+### Injecting Helpers
+
+Use `lifecycleParams` to expose plugin methods or state in component callbacks, and `templateHelpers` to expose helpers inside component templates.
+
+```javascript {4-9}
+export const I18n = registerPlugin({
+  namespace: 'i18n',
+  // ...
+  lifecycleParams({ self }) {
+    return { t: self.t, i18n: self };
+  },
+  templateHelpers({ self }) {
+    return { t: self.t };
+  },
+});
+```
+
+> **Global vs Scoped Helpers** Passing a plain object to `templateHelpers` registers helpers globally when `addPlugin` runs. Passing a function scopes the helpers to each component instance so they can read that component's `self` and `settings`.
+
+### Reactive Settings
+
+`defaultSettings` defines the baseline settings for the plugin. Values merged in `addPlugin` are wrapped in a reactive proxy: reading `settings.locale` inside a template helper or `reaction` tracks it as a dependency, and assigning `settings.locale = 'es'` re-renders every subscribed component.
+
+```javascript {3-13}
+export const I18n = registerPlugin({
+  namespace: 'i18n',
+  defaultSettings: {
+    locale: 'en',
+    strings: {},
+    prefix: '',
+  },
+  resolveSettings({ settings, config }) {
+    if (isString(config)) {
+      return { ...settings, prefix: config };
+    }
+    return settings;
+  },
+});
+```
+
+`resolveSettings` normalizes the per-component `config` passed to `defineComponent({ i18n: 'checkout' })`. Keys overridden by a component stay local to that instance, while unoverridden keys read and write through to the shared plugin settings.
+
+### Lifecycle Hooks
+
+Plugins can define `onCreated`, `onRendered`, and `onDestroyed` callbacks. Plugin `onCreated` and `onRendered` run after the component's own hook, while plugin `onDestroyed` runs before the component's `onDestroyed` hook.
+
+```javascript {3-9}
+export const ResizePlugin = registerPlugin({
+  namespace: 'resize',
+  onRendered({ self, el }) {
+    self.observer = new ResizeObserver(() => self.onResize());
+    self.observer.observe(el);
+  },
+  onDestroyed({ self }) {
+    self.observer?.disconnect();
+  },
+});
+```
+
+### Scoping Targets
+
+By default (`appliesTo: 'components'`), a plugin runs on all top-level web components and on any subtemplate that explicitly configures `[namespace]`. Set `appliesTo` to change which instances receive the plugin:
+
+| Value                    | Matches                                                                      |
+|--------------------------|------------------------------------------------------------------------------|
+| `'components'` (default) | Top-level web components, plus subtemplates that configure `[namespace]`     |
+| `'configured'`           | Only components or subtemplates that pass `[namespace]` in `defineComponent` |
+| `'all'`                  | Every web component and subtemplate                                          |
+| `string` or `string[]`   | Specific `tagName` or `templateName` values (e.g. `['ui-modal', 'ui-popup']`)|
+| `Function`               | Custom predicate `({ config, tagName, isSubtemplate, settings }) => boolean` |
+
+For example, `appliesTo: 'configured'` restricts a plugin to components that opt in:
+
+```javascript {3}
+export const TooltipPlugin = registerPlugin({
+  namespace: 'tooltip',
+  appliesTo: 'configured',
+  onRendered({ el, config }) {
+    el.setAttribute('title', config);
+  },
+});
+```
