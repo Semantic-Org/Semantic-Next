@@ -1,4 +1,9 @@
+import { createErrors, isDevelopment, isObject, isString } from '@semantic-ui/utils';
+
 import { Plugin } from './plugin.js';
+import { getRegisteredPlugin, registerPlugin } from './register-plugin.js';
+
+const { throwError } = createErrors({ namespace: 'component' });
 
 /*******************************
           User Plugins
@@ -6,17 +11,19 @@ import { Plugin } from './plugin.js';
 
 /* These are plugins enabled by a user with configs */
 
-const userPlugins = new Map();
+export const userPlugins = new Map();
 export const addUserPlugin = (name, plugin) => userPlugins.set(name, plugin);
-export const getUserPlugin = (name, plugin) => userPlugins.set(name, plugin);
+export const getUserPlugin = (name) => userPlugins.get(name);
+export const clearUserPlugins = () => userPlugins.clear();
 
 /*******************************
           Add Plugin
 *******************************/
 
 export const addPlugin = (plugin, userSettings = {}) => {
+  let definition;
   if (isString(plugin)) {
-    plugin = getRegisteredPlugin(plugin);
+    definition = getRegisteredPlugin(plugin);
     if (!definition) {
       throwError('pluginNotRegistered', plugin, {
         explanation: isDevelopment
@@ -26,7 +33,7 @@ export const addPlugin = (plugin, userSettings = {}) => {
     }
   }
   else if (isObject(plugin)) {
-    plugin = registerPlugin(plugin);
+    definition = registerPlugin(plugin);
   }
   else {
     throwError('invalidPlugin', String(plugin), {
@@ -36,19 +43,11 @@ export const addPlugin = (plugin, userSettings = {}) => {
     });
   }
 
-  const { namespace } = plugin;
-
-  // create the settings and wrap them in signals
-  const settings = createSettingsProxy({
-    ...plugin.defaultSettings,
-    ...userSettings,
-  });
+  const { namespace } = definition;
 
   const userPlugin = new Plugin({
-    ...plugin,
-    namespace,
-    templateHelpers: plugin.templateHelpers,
-    params: plugin.params,
+    ...definition,
+    userSettings,
   });
 
   addUserPlugin(namespace, userPlugin);

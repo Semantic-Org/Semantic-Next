@@ -1,12 +1,15 @@
-import { isClient, isServer } from '@semantic-ui/utils';
+import { createErrors, isDevelopment, isString } from '@semantic-ui/utils';
+
+const { throwError } = createErrors({ namespace: 'component' });
 
 /*******************************
             Plugins
 *******************************/
 
-const plugins = new Map();
+export const plugins = new Map();
 export const addRegisteredPlugin = (name, plugin) => plugins.set(name, plugin);
 export const getRegisteredPlugin = (name) => plugins.get(name);
+export const clearRegisteredPlugins = () => plugins.clear();
 
 /*******************************
        Available Plugins
@@ -14,8 +17,8 @@ export const getRegisteredPlugin = (name) => plugins.get(name);
 
 export const registerPlugin = (plugin = {}) => {
   // namespace defaults to name if not specified
-  plugin.namespace = plugin?.namespace || plugin?.name;
-  if (!isString(plugin.namespace)) {
+  const namespace = plugin?.namespace || plugin?.name;
+  if (!namespace || !isString(namespace)) {
     throwError('pluginNamespaceRequired', String(namespace ?? ''), {
       explanation: isDevelopment
         ? 'registerPlugin requires a namespace string.'
@@ -28,9 +31,10 @@ export const registerPlugin = (plugin = {}) => {
     appliesTo: 'components',
   };
 
-  plugin = {
+  const definition = {
     ...defaults,
     ...plugin,
+    namespace,
   };
 
   // register it globally

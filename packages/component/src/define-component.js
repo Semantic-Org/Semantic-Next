@@ -2,12 +2,13 @@ import { getEngine } from '@semantic-ui/renderer';
 import { TemplateCompiler } from '@semantic-ui/compiler';
 // direct import avoids circular chunk dependency between component and templating
 import { Template } from '@semantic-ui/templating/template';
-import { adoptStylesheet, createErrors, each, identity, isClient, isDevelopment, isObject, kebabToCamel, noop } from '@semantic-ui/utils';
+import { adoptStylesheet, createErrors, each, isClient, isDevelopment, isObject, kebabToCamel, noop } from '@semantic-ui/utils';
 
 import { getProperties } from './component-helpers.js';
+import { registerComponent } from './component-registry.js';
+import { extendedParams, userPlugins } from './plugins/index.js';
 
 const { throwError } = createErrors({ namespace: 'component' });
-import { registerComponent } from './component-registry.js';
 
 // user css can make whitespace significant, keep the template intact when it might
 const WHITESPACE_SENSITIVE_CSS = /white-space(?:-collapse)?\s*:\s*(?:pre|preserve|break-spaces)/;
@@ -22,7 +23,7 @@ export const defineComponent = ({
   delegatesFocus = false,
   templateName = kebabToCamel(tagName),
 
-  createComponent: createComponentFn = identity,
+  createComponent: createComponentFn = noop,
   events = {},
   keys = {},
 
@@ -89,6 +90,8 @@ export const defineComponent = ({
   let prototypeTemplate = new Template({
     templateName,
     tagName,
+    userPlugins,
+    extendedParams,
     pluginOptions,
     isPrototype: true,
     renderingEngine,

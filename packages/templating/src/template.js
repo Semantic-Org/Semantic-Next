@@ -68,6 +68,8 @@ export const Template = class Template {
   constructor({
     templateName,
     tagName,
+    userPlugins,
+    extendedParams,
     pluginOptions,
     ast,
     template,
@@ -111,7 +113,10 @@ export const Template = class Template {
     this.state = this.createReactiveState(defaultState, data) || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.tagName = tagName;
+    this.userPlugins = userPlugins;
+    this.extendedParams = extendedParams;
     this.pluginOptions = pluginOptions;
+    this.plugins = [];
     this.subTemplates = subTemplates;
     this.createComponent = createComponent;
     this.onCreated = noop;
@@ -248,9 +253,7 @@ export const Template = class Template {
       this.createSubtemplateSettings();
     }
 
-    if (Template.initializePlugins) {
-      Template.initializePlugins(this);
-    }
+    this.initializePlugins();
 
     if (isFunction(this.createComponent)) {
       instance = this.call(this.createComponent, { thisContext: this.instance }) || {};
@@ -272,7 +275,7 @@ export const Template = class Template {
       );
 
     this.onCreated = () => {
-      this.runPlugins?.('onCreated');
+      each(this.plugins, (plugin) => plugin.onCreated());
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
       this.resolveLifecyclePromise('created');
@@ -282,7 +285,7 @@ export const Template = class Template {
       }
     };
     this.onRendered = () => {
-      this.runPlugins?.('onRendered');
+      each(this.plugins, (plugin) => plugin.onRendered());
       this.call(this.onRenderedCallback);
       // allow a single hook for after render
       // this is used for binding events that cant use event delegation
@@ -324,7 +327,7 @@ export const Template = class Template {
       this.removeEvents();
       this.removeObservers();
       this.removeParent();
-      this.runPlugins?.('onDestroyed');
+      each(this.plugins, (plugin) => plugin.onDestroyed());
       this.call(this.onDestroyedCallback);
       this.resolveLifecyclePromise('destroyed');
       dispatchLifecycle('destroyed');
@@ -454,10 +457,49 @@ export const Template = class Template {
     adoptStylesheet(this.css, this.renderRoot);
   }
 
+  initializePlugins() {
+    if (this.extendedParams?.length) {
+      const baseParams = this.buildCallParams();
+      each(this.extendedParams, (params) => {
+        const resolved = isFunction(params) ? params(baseParams) : params;
+        this.addParams(resolved);
+      });
+    }
+    if (!this.userPlugins?.size) {
+      return;
+    }
+    const pluginOptions = this.pluginOptions || {};
+    this.userPlugins.forEach((plugin, namespace) => {
+      plugin.applyTo(this, pluginOptions[namespace]);
+    });
+  }
+
+  addPlugin(plugin) {
+    this.plugins.push(plugin);
+  }
+
+  addParams(params) {
+    if (!isObject(params)) {
+      return;
+    }
+    this.pluginCallParams ??= {};
+    extend(this.pluginCallParams, params);
+  }
+
+  addHelpers(helpers) {
+    if (!isObject(helpers)) {
+      return;
+    }
+    this.helpers ??= Object.create(TemplateHelpers);
+    extend(this.helpers, helpers);
+  }
+
   clone(settings) {
     const cloneDefaults = {
       templateName: this.templateName,
       tagName: this.tagName,
+      userPlugins: this.userPlugins,
+      extendedParams: this.extendedParams,
       pluginOptions: this.pluginOptions,
       element: this.element,
       ast: this.ast,
