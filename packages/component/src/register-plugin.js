@@ -297,28 +297,6 @@ export const registerPlugin = (plugin = {}) => {
   return definition;
 };
 
-export const removePlugin = (PluginOrNamespace) => {
-  const namespace = isString(PluginOrNamespace)
-    ? PluginOrNamespace
-    : (PluginOrNamespace?.namespace || PluginOrNamespace?.name);
-  const entry = Template.plugins.get(namespace);
-  if (!entry) {
-    return false;
-  }
-  if (isPlainObject(entry.definition.templateHelpers)) {
-    each(keys(entry.definition.templateHelpers), (key) => {
-      delete TemplateHelpers[key];
-    });
-  }
-  Template.plugins.delete(namespace);
-  return true;
-};
-
-export const clearPlugins = () => {
-  each([...Template.plugins.keys()], (namespace) => removePlugin(namespace));
-  Template.registeredPlugins.clear();
-};
-
 export const addPlugin = (PluginOrNamespace, appSettings = {}) => {
   let definition;
   if (isString(PluginOrNamespace)) {
@@ -343,10 +321,6 @@ export const addPlugin = (PluginOrNamespace, appSettings = {}) => {
   }
 
   const { namespace } = definition;
-  if (Template.plugins.has(namespace)) {
-    removePlugin(namespace);
-  }
-
   const baseSettings = clone({ ...definition.defaultSettings, ...appSettings });
   const settingsVars = new Map();
   const pluginSettings = createSettingsProxy(baseSettings, settingsVars);
@@ -375,7 +349,6 @@ export const addPlugin = (PluginOrNamespace, appSettings = {}) => {
   };
 
   Template.initializePlugins = initializeTemplatePlugins;
-  Template.clearPlugins = clearPlugins;
   Template.plugins.set(namespace, entry);
   return entry;
 };

@@ -1,15 +1,9 @@
 import { $ } from '@semantic-ui/query';
 import { flush, signal } from '@semantic-ui/reactivity';
+import { Template } from '@semantic-ui/templating';
 import { each, fill, get, isArray, isBoolean, isEmpty, isFunction, isPlainObject, isString } from '@semantic-ui/utils';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-  addPlugin,
-  clearPlugins,
-  defineComponent,
-  extendParams,
-  registerPlugin,
-  removePlugin,
-} from '../../src/index.js';
+import { afterEach, describe, expect, it } from 'vitest';
+import { addPlugin, defineComponent, extendParams, registerPlugin } from '../../src/index.js';
 
 let tagCounter = 0;
 const uniqueTag = (prefix = 'plugin-test') => `${prefix}-${++tagCounter}`;
@@ -32,11 +26,12 @@ afterEach(() => {
     const el = mountedElements.pop();
     el.remove();
   }
-  clearPlugins();
+  Template.plugins.clear();
+  Template.registeredPlugins.clear();
 });
 
 describe('Component Plugins', () => {
-  describe('registerPlugin, addPlugin, removePlugin & extendParams', () => {
+  describe('registerPlugin, addPlugin & extendParams', () => {
     it('validates plugin namespace on registration', () => {
       expect(() => registerPlugin({})).toThrow(/pluginNamespaceRequired/);
       expect(() => registerPlugin({ namespace: '' })).toThrow(/pluginNamespaceRequired/);
@@ -122,28 +117,6 @@ describe('Component Plugins', () => {
         appName: 'Semantic',
         callerTag: 'from:myWidget',
       });
-    });
-
-    it('cleans up static templateHelpers when removePlugin or clearPlugins is called', async () => {
-      const HelperPlugin = registerPlugin({
-        namespace: 'tempHelper',
-        templateHelpers: {
-          customBanner: () => 'hello-banner',
-        },
-      });
-      addPlugin(HelperPlugin);
-
-      const { el: el1 } = await mount({
-        template: '<span class="txt">{customBanner}</span>',
-      });
-      expect(el1.$('.txt').text()).toBe('hello-banner');
-
-      removePlugin(HelperPlugin);
-
-      const { el: el2 } = await mount({
-        template: '<span class="txt">{customBanner}</span>',
-      });
-      expect(el2.$('.txt').text()).toBe('');
     });
   });
 

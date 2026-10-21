@@ -8,4 +8,4 @@ export { defineComponent } from './define-component.js';
 export { WebComponentBase } from './engines/native/base.js';
 export { NativeEngine } from './engines/native/register.js';
 export { setRecovery, setStackCapture, setTracing } from './helpers.js';
-export { addPlugin, clearPlugins, extendParams, registerPlugin, removePlugin } from './register-plugin.js';
+export { addPlugin, extendParams, registerPlugin } from './register-plugin.js';

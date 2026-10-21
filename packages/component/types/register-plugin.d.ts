@@ -101,10 +101,6 @@ export function addPlugin<
   appSettings?: Partial<TSettings>,
 ): InstalledPluginEntry<TSettings, TShared, TInstance>;
 
-export function removePlugin(pluginOrNamespace: PluginDefinition | string): boolean;
-
-export function clearPlugins(): void;
-
 export function extendParams(
   params: Record<string, any> | ((params: PluginCallParams) => Record<string, any>),
 ): InstalledPluginEntry;

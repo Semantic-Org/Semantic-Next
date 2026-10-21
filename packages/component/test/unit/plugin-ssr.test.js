@@ -1,8 +1,10 @@
+import { Template } from '@semantic-ui/templating';
 import { afterEach, describe, expect, it } from 'vitest';
-import { addPlugin, clearPlugins, defineComponent, registerPlugin, renderToString } from '../../src/server/index.js';
+import { addPlugin, defineComponent, registerPlugin, renderToString } from '../../src/server/index.js';
 
 afterEach(() => {
-  clearPlugins();
+  Template.plugins.clear();
+  Template.registeredPlugins.clear();
 });
 
 describe('Component Plugins (SSR)', () => {
