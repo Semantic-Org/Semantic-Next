@@ -46,6 +46,10 @@ addPlugin(I18n, {
 });
 ```
 
+#### Example
+
+<PlaygroundExample id="component-plugins" height="400" direction="horizontal"></PlaygroundExample>
+
 ### extendParams
 
 ```javascript
@@ -84,6 +88,10 @@ extendParams(({ el }) => ({
   track: (event, data) => analytics.send(el?.tagName, event, data),
 }));
 ```
+
+#### Example
+
+<PlaygroundExample id="extend-params" height="410" direction="horizontal"></PlaygroundExample>
 
 ## Authoring Plugins
 
@@ -157,21 +165,21 @@ The normalized plugin definition object.
 
 ```javascript
 import { registerPlugin } from '@semantic-ui/component';
-import { get } from '@semantic-ui/utils';
 
-export const I18n = registerPlugin({
-  namespace: 'i18n',
-  defaultSettings: { locale: 'en', strings: {} },
-  createPlugin({ settings }) {
-    return {
-      t: (key) => get(settings.strings[settings.locale], key) ?? key,
-    };
+export const Persist = registerPlugin({
+  namespace: 'persist',
+  appliesTo: 'configured',
+  onCreated({ state, config, reaction, isClient }) {
+    if (!isClient) {
+      return;
+    }
+    for (const key of config) {
+      reaction(() => localStorage.setItem(key, JSON.stringify(state[key].get())));
+    }
   },
-  lifecycleParams: ({ self }) => ({ t: self.t, i18n: self }),
-  templateHelpers: ({ self }) => ({ t: self.t }),
 });
 ```
 
 #### Example
 
-<PlaygroundExample id="component-plugins" height="460" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="persist-plugin" height="410" direction="horizontal"></PlaygroundExample>

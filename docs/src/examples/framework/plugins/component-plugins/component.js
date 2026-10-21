@@ -35,16 +35,14 @@ addPlugin(I18n, {
   strings,
 });
 
-const events = {
-  'click .locales ui-button'({ i18n, data }) {
-    i18n.setLocale(data.locale);
-  },
-};
-
 defineComponent({
   tagName: 'checkout-summary',
   i18n: 'checkout',
   template,
   css,
-  events,
+  events: {
+    'click .locales ui-button'({ i18n, data }) {
+      i18n.setLocale(data.locale);
+    },
+  },
 });
