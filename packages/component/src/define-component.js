@@ -1,6 +1,6 @@
 import { getEngine } from '@semantic-ui/renderer';
 import { TemplateCompiler } from '@semantic-ui/compiler';
-// direct import avoids circular chunk dependency between component ↔ templating
+// direct import avoids circular chunk dependency between component and templating
 import { Template } from '@semantic-ui/templating/template';
 import { adoptStylesheet, createErrors, each, identity, isClient, isDevelopment, isObject, kebabToCamel, noop } from '@semantic-ui/utils';
 
@@ -43,6 +43,7 @@ export const defineComponent = ({
   componentSpec = false,
   plural = false,
   singularTag,
+  ...definitionOptions
 } = {}) => {
 
   // Resolve engine: accepts an engine object or a string name from the registry
@@ -84,6 +85,8 @@ export const defineComponent = ({
 
   let prototypeTemplate = new Template({
     templateName,
+    tagName,
+    definitionOptions,
     isPrototype: true,
     renderingEngine,
     template,

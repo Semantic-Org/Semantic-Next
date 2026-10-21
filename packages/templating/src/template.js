@@ -27,6 +27,7 @@ import {
   inArray,
   isClient,
   isDevelopment,
+  isEmpty,
   isFunction,
   isObject,
   isServer,
@@ -58,6 +59,9 @@ export const Template = class Template {
 
   static isServer = isServer;
 
+  static plugins = new Map();
+  static registeredPlugins = new Map();
+
   rendered = false;
   destroyed = false;
   lifecycleResolvers = {};
@@ -65,6 +69,8 @@ export const Template = class Template {
 
   constructor({
     templateName,
+    tagName,
+    definitionOptions,
     ast,
     template,
     preserveWhitespace = false,
@@ -106,6 +112,8 @@ export const Template = class Template {
     this.defaultSettings = defaultSettings;
     this.state = this.createReactiveState(defaultState, data) || {};
     this.templateName = templateName || this.getGenericTemplateName();
+    this.tagName = tagName;
+    this.definitionOptions = definitionOptions;
     this.subTemplates = subTemplates;
     this.createComponent = createComponent;
     this.onCreated = noop;
@@ -131,6 +139,7 @@ export const Template = class Template {
 
   toDefinition() {
     return {
+      ...this.definitionOptions,
       template: this.template,
       css: this.css,
       createComponent: this.createComponent,
@@ -241,9 +250,39 @@ export const Template = class Template {
       this.createSubtemplateSettings();
     }
 
+    if (Template.initializePlugins) {
+      Template.initializePlugins(this);
+    }
+
     if (isFunction(this.createComponent)) {
       instance = this.call(this.createComponent, { thisContext: this.instance }) || {};
-      extend(template.instance, instance);
+      if (instance.self === this.instance) {
+        // default identity createComponent returns the call bag itself, strip plugin
+        // lifecycleParams so getters arent copied onto instance
+        if (this.pluginCallParams) {
+          for (const key in this.pluginCallParams) {
+            if (!Object.hasOwn(this.instance, key)) {
+              delete instance[key];
+            }
+          }
+        }
+        extend(template.instance, instance);
+      }
+      else {
+        extend(template.instance, instance);
+        // component methods take precedence over plugin lifecycleParams on collision
+        if (this.pluginCallParams) {
+          for (const key in this.pluginCallParams) {
+            if (Object.hasOwn(template.instance, key)) {
+              Object.defineProperty(
+                this.pluginCallParams,
+                key,
+                Object.getOwnPropertyDescriptor(template.instance, key),
+              );
+            }
+          }
+        }
+      }
     }
     if (isFunction(template.instance.initialize)) {
       this.call(template.instance.initialize.bind(template));
@@ -261,6 +300,7 @@ export const Template = class Template {
       );
 
     this.onCreated = () => {
+      this.runPlugins?.('onCreated');
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
       this.resolveLifecyclePromise('created');
@@ -270,6 +310,7 @@ export const Template = class Template {
       }
     };
     this.onRendered = () => {
+      this.runPlugins?.('onRendered');
       this.call(this.onRenderedCallback);
       // allow a single hook for after render
       // this is used for binding events that cant use event delegation
@@ -311,6 +352,7 @@ export const Template = class Template {
       this.removeEvents();
       this.removeObservers();
       this.removeParent();
+      this.runPlugins?.('onDestroyed');
       this.call(this.onDestroyedCallback);
       this.resolveLifecyclePromise('destroyed');
       dispatchLifecycle('destroyed');
@@ -355,7 +397,7 @@ export const Template = class Template {
       data: this.overlaySettingsSignals(this.getDataContext()),
       template: this,
       subTemplates: this.subTemplates,
-      helpers: TemplateHelpers,
+      helpers: this.helpers || TemplateHelpers,
       receivesData: this.isSubtemplate(),
     });
 
@@ -443,6 +485,8 @@ export const Template = class Template {
   clone(settings) {
     const cloneDefaults = {
       templateName: this.templateName,
+      tagName: this.tagName,
+      definitionOptions: this.definitionOptions,
       element: this.element,
       ast: this.ast,
       css: this.css,
@@ -907,8 +951,9 @@ export const Template = class Template {
     }
     if (!params) {
       if (this.callParams) {
+        // extend keeps getters live on callParams when merging event/key data
         params = additionalData
-          ? { ...this.callParams, ...additionalData }
+          ? extend({}, this.callParams, additionalData)
           : this.callParams;
       }
       else {
@@ -927,7 +972,7 @@ export const Template = class Template {
   buildCallParams(additionalData = {}) {
     const element = this.element;
     const template = this;
-    return {
+    const baseParams = {
       el: element,
       tpl: this.instance,
       self: this.instance,
@@ -953,7 +998,7 @@ export const Template = class Template {
       isServer: Template.isServer,
       isClient: !Template.isServer,
       get isHydrating() {
-        return template.isHydrating || false;
+        return Boolean(template.isHydrating || element?.isHydrating);
       },
       rerender: () => element?.requestUpdate(),
       dispatchEvent: this.dispatchEvent.bind(this),
@@ -961,7 +1006,7 @@ export const Template = class Template {
       bindKey: this.bindKey.bind(this),
       unbindKey: this.unbindKey.bind(this),
       abortController: this.abortController,
-      helpers: TemplateHelpers,
+      helpers: this.helpers || TemplateHelpers,
       template: this,
       templateName: this.templateName,
       templates: Template.renderedTemplates,
@@ -973,8 +1018,11 @@ export const Template = class Template {
       get darkMode() {
         return element?.isDarkMode?.();
       },
-      ...additionalData,
     };
+    if (!this.pluginCallParams && isEmpty(additionalData)) {
+      return baseParams;
+    }
+    return extend({}, this.pluginCallParams, baseParams, additionalData);
   }
 
   // 4th arg matches the native addEventListener shape (passive/capture/once/...);

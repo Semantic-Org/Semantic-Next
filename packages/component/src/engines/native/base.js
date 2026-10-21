@@ -127,8 +127,8 @@ class WebComponentBase extends HTMLElementBase {
       element: this,
     });
 
-    this.template.initialize();
     this.template.isHydrating = true;
+    this.template.initialize();
     this.component = this.template.instance;
     this.dataContext = this.template.getDataContext();
 

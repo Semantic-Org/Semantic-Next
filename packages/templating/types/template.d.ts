@@ -38,6 +38,10 @@ export type LifecycleEvent = 'created' | 'rendered' | 'updated' | 'destroyed';
 export interface TemplateSettings {
   /** The name of the template. */
   templateName?: string;
+  /** The custom element tag name when backing a web component. */
+  tagName?: string;
+  /** Additional options passed to defineComponent for component plugins. */
+  definitionOptions?: Record<string, any>;
   /** The compiled Abstract Syntax Tree (AST) of the template. */
   ast?: ASTNode[];
   /** The raw template string. Compiled to an AST when `ast` is not supplied. */

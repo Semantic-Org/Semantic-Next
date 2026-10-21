@@ -237,5 +237,5 @@ export const registerHelper = (name, fn) => {
 
 // Register multiple helpers
 export const registerHelpers = (helpers) => {
-  Object.assign(TemplateHelpers, helpers);
+  extend(TemplateHelpers, helpers);
 };

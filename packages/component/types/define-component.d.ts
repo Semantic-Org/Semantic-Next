@@ -369,6 +369,8 @@ export interface DefineComponentOptions<
   plural?: boolean;
   /** Tag name of the singular form (for plural components). */
   singularTag?: string;
+  /** Additional plugin configuration keyed by plugin namespace. */
+  [pluginNamespace: string]: any;
 }
 
 /**

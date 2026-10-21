@@ -6,6 +6,7 @@ export { defineComponent } from './define-component.js';
 export { WebComponentBase } from './engines/native/base.js';
 export { NativeEngine } from './engines/native/register.js';
 export { setRecovery, setStackCapture, setTracing } from './helpers.js';
+export { addPlugin, clearPlugins, extendParams, registerPlugin, removePlugin } from './register-plugin.js';
 
 export type {
   ComponentConstructor,
@@ -16,3 +17,12 @@ export type {
   KeyCallParams,
 } from './define-component.js';
 export type { ComponentConfig, GetPropertiesOptions, PropertyConfig } from './engines/native/base.js';
+export type {
+  InstalledPluginEntry,
+  PluginAppliesTo,
+  PluginAppliesToParams,
+  PluginCallParams,
+  PluginDefinition,
+  PluginLogger,
+  PluginSetupParams,
+} from './register-plugin.js';
