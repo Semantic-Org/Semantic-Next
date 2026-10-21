@@ -31,22 +31,24 @@ addPlugin(I18n, {
 
 Once installed, the plugin's `namespace` becomes a top-level option on `defineComponent`, and its helpers and callback parameters are available inside the component.
 
-```javascript {3-4,6}
+```javascript {2,9}
+const events = {
+  'click ui-button'({ i18n, data }) {
+    i18n.setLocale(data.locale);
+  },
+};
+
 defineComponent({
   tagName: 'checkout-summary',
-  i18n: 'checkout',
+  i18n: 'checkout', // scopes {t} lookups to checkout strings
   template: `<h3>{t 'title'}</h3>`,
-  events: {
-    'click ui-button'({ i18n, data }) {
-      i18n.setLocale(data.locale);
-    },
-  },
+  events,
 });
 ```
 
 Active plugins also attach their instance to the DOM element at `el[namespace]` (`document.querySelector('checkout-summary').i18n.setLocale('es')`).
 
-<PlaygroundExample id="component-plugins" height="400" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="component-plugins" height="440" direction="horizontal"></PlaygroundExample>
 
 ## Extending Callbacks
 
@@ -57,6 +59,7 @@ Use `extendParams` to add shared utilities or services directly to the destructu
 ```javascript {4-6}
 import { extendParams } from '@semantic-ui/component';
 
+// available in all component callbacks
 extendParams({
   setCurrency: (code) => currency.set(code),
   formatPrice: (usd) => format(usd, currency.get()),
@@ -73,7 +76,7 @@ extendParams(({ el }) => ({
 }));
 ```
 
-<PlaygroundExample id="extend-params" height="410" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="extend-params" height="440" direction="horizontal"></PlaygroundExample>
 
 ## Authoring Plugins
 
@@ -84,37 +87,37 @@ extendParams(({ el }) => ({
 ```javascript {3}
 defineComponent({
   tagName: 'sticky-note',
-  persist: ['note'],
+  persist: ['note'], // syncs state.note to localStorage
   defaultState: { note: '' },
 });
 ```
 
-In the example below, `plugin.js` implements the `persist` option in 15 lines by syncing each listed `state` signal to `localStorage`:
+In the example below, `plugin.js` implements the `persist` option by restoring and syncing each listed `state` signal to `localStorage`:
 
-<PlaygroundExample id="persist-plugin" height="410" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="persist-plugin" height="460" direction="horizontal"></PlaygroundExample>
 
 ### Instance Helpers & Params
 
 To expose per-component methods, return them from `createPlugin`, then map them into callbacks with `lifecycleParams` and into templates with `templateHelpers`.
 
-```javascript {3-9,11-16}
-export const I18n = registerPlugin({
-  namespace: 'i18n',
-  createPlugin({ settings }) {
-    return {
-      t(key) {
-        const { locale, prefix, strings } = settings;
-        const path = prefix ? `${prefix}.${key}` : key;
-        return get(strings[locale], path) ?? key;
-      },
-    };
+```javascript {10-16}
+const createPlugin = ({ settings }) => ({
+  t(key) {
+    const { locale, prefix, strings } = settings;
+    const path = prefix ? `${prefix}.${key}` : key;
+    return get(strings[locale], path) ?? key;
   },
-  lifecycleParams({ self }) {
-    return { t: self.t, i18n: self };
-  },
-  templateHelpers({ self }) {
-    return { t: self.t };
-  },
+});
+
+// expose { t, i18n } in component callbacks
+const lifecycleParams = ({ self }) => ({
+  t: self.t,
+  i18n: self,
+});
+
+// expose {t 'key'} in component templates
+const templateHelpers = ({ self }) => ({
+  t: self.t,
 });
 ```
 
@@ -124,21 +127,20 @@ Because `templateHelpers` is a function here, `{t 'title'}` is scoped to each co
 
 `defaultSettings` merged in `addPlugin` are wrapped in a reactive proxy, while `resolveSettings` maps shorthand component config (like `i18n: 'checkout'`) onto that component's settings.
 
-```javascript {2-6,7-12}
-export const I18n = registerPlugin({
-  namespace: 'i18n',
-  defaultSettings: {
-    locale: 'en',
-    strings: {},
-    prefix: '',
-  },
-  resolveSettings({ settings, config }) {
-    if (isString(config)) {
-      return { ...settings, prefix: config };
-    }
-    return settings;
-  },
-});
+```javascript {8-13}
+const defaultSettings = {
+  locale: 'en',
+  strings: {},
+  prefix: '',
+};
+
+// allow shorthand config like i18n: 'checkout'
+const resolveSettings = ({ settings, config }) => {
+  if (isString(config)) {
+    return { ...settings, prefix: config };
+  }
+  return settings;
+};
 ```
 
 Keys overridden by a component (`prefix: 'checkout'`) stay local to that component, while unoverridden keys (`locale`) read and write through to the shared plugin settings across the page.

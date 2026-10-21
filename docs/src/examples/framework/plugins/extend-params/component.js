@@ -13,21 +13,28 @@ const format = (usd, code) => (
 );
 /* playground-fold-end */
 
+// inject shared helpers into all component callbacks
 extendParams({
   setCurrency: (code) => currency.set(code),
   formatPrice: (usd) => format(usd, currency.get()),
 });
 
+// destructure formatPrice from callback arguments
+const createComponent = ({ formatPrice }) => ({
+  formatPrice,
+});
+
+const events = {
+  // destructure setCurrency from callback arguments
+  'click .currencies ui-button'({ setCurrency, data }) {
+    setCurrency(data.currency);
+  },
+};
+
 defineComponent({
   tagName: 'pricing-card',
   template,
   css,
-  createComponent: ({ formatPrice }) => ({
-    formatPrice,
-  }),
-  events: {
-    'click ui-button'({ setCurrency, data }) {
-      setCurrency(data.currency);
-    },
-  },
+  createComponent,
+  events,
 });

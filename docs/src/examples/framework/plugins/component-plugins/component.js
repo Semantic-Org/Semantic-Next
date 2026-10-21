@@ -30,19 +30,23 @@ const strings = {
 };
 /* playground-fold-end */
 
+// install plugin with app-wide locale strings
 addPlugin(I18n, {
   locale: 'en',
   strings,
 });
 
+const events = {
+  // i18n is injected into callbacks by the plugin
+  'click .locales ui-button'({ i18n, data }) {
+    i18n.setLocale(data.locale);
+  },
+};
+
 defineComponent({
   tagName: 'checkout-summary',
-  i18n: 'checkout',
+  i18n: 'checkout', // scopes {t} lookups to strings[locale].checkout
   template,
   css,
-  events: {
-    'click .locales ui-button'({ i18n, data }) {
-      i18n.setLocale(data.locale);
-    },
-  },
+  events,
 });
