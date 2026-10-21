@@ -277,8 +277,9 @@ function initializeTemplatePlugins(template) {
 *******************************/
 
 export const registerPlugin = (plugin = {}) => {
-  const namespace = plugin?.namespace || plugin?.name;
-  if (!namespace || !isString(namespace)) {
+  // need somewhere to store
+  plugin.namespace = plugin?.namespace || plugin?.name;
+  if (!isString(plugin.namespace)) {
     throwError('pluginNamespaceRequired', String(namespace ?? ''), {
       explanation: isDevelopment
         ? 'registerPlugin requires a namespace string.'
@@ -286,21 +287,24 @@ export const registerPlugin = (plugin = {}) => {
     });
   }
 
-  const definition = {
+  const defaults = {
     defaultSettings: {},
     appliesTo: 'components',
-    ...plugin,
-    namespace,
   };
 
-  Template.registeredPlugins.set(namespace, definition);
+  const definition = {
+    ...defaults,
+    ...plugin,
+  };
+
+  Template.plugins.set(namespace, definition);
   return definition;
 };
 
 export const addPlugin = (PluginOrNamespace, appSettings = {}) => {
   let definition;
   if (isString(PluginOrNamespace)) {
-    definition = Template.registeredPlugins.get(PluginOrNamespace);
+    definition = Template.plugins.get(PluginOrNamespace);
     if (!definition) {
       throwError('pluginNotRegistered', PluginOrNamespace, {
         explanation: isDevelopment

@@ -11,6 +11,7 @@ import {
   Signal,
   signal,
 } from '@semantic-ui/reactivity';
+
 import {
   adoptStylesheet,
   any,
@@ -58,9 +59,6 @@ export const Template = class Template {
   static templateCount = 0;
 
   static isServer = isServer;
-
-  static plugins = new Map();
-  static registeredPlugins = new Map();
 
   rendered = false;
   destroyed = false;
@@ -256,15 +254,6 @@ export const Template = class Template {
 
     if (isFunction(this.createComponent)) {
       instance = this.call(this.createComponent, { thisContext: this.instance }) || {};
-      if (instance.self === this.instance) {
-        // default identity createComponent returns the call bag, strip plugin params from instance
-        for (const key in this.pluginCallParams) {
-          delete instance[key];
-        }
-      }
-      else if (this.pluginCallParams) {
-        extend(this.pluginCallParams, instance);
-      }
       extend(template.instance, instance);
     }
     if (isFunction(template.instance.initialize)) {
