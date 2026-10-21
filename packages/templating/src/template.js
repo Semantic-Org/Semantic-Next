@@ -70,7 +70,7 @@ export const Template = class Template {
   constructor({
     templateName,
     tagName,
-    definitionOptions,
+    pluginOptions,
     ast,
     template,
     preserveWhitespace = false,
@@ -113,7 +113,7 @@ export const Template = class Template {
     this.state = this.createReactiveState(defaultState, data) || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.tagName = tagName;
-    this.definitionOptions = definitionOptions;
+    this.pluginOptions = pluginOptions;
     this.subTemplates = subTemplates;
     this.createComponent = createComponent;
     this.onCreated = noop;
@@ -139,7 +139,7 @@ export const Template = class Template {
 
   toDefinition() {
     return {
-      ...this.definitionOptions,
+      ...this.pluginOptions,
       template: this.template,
       css: this.css,
       createComponent: this.createComponent,
@@ -469,7 +469,7 @@ export const Template = class Template {
     const cloneDefaults = {
       templateName: this.templateName,
       tagName: this.tagName,
-      definitionOptions: this.definitionOptions,
+      pluginOptions: this.pluginOptions,
       element: this.element,
       ast: this.ast,
       css: this.css,

@@ -43,7 +43,10 @@ export const defineComponent = ({
   componentSpec = false,
   plural = false,
   singularTag,
-  ...definitionOptions
+
+  // anything not known might be a plugin option. pass it through naively
+  ...pluginOptions
+
 } = {}) => {
 
   // Resolve engine: accepts an engine object or a string name from the registry
@@ -86,7 +89,7 @@ export const defineComponent = ({
   let prototypeTemplate = new Template({
     templateName,
     tagName,
-    definitionOptions,
+    pluginOptions,
     isPrototype: true,
     renderingEngine,
     template,
