@@ -253,6 +253,7 @@ export const Template = class Template {
       this.createSubtemplateSettings();
     }
 
+    this.initializeParams();
     this.initializePlugins();
 
     if (isFunction(this.createComponent)) {
@@ -457,14 +458,18 @@ export const Template = class Template {
     adoptStylesheet(this.css, this.renderRoot);
   }
 
-  initializePlugins() {
-    if (this.extendedParams?.length) {
-      const baseParams = this.buildCallParams();
-      each(this.extendedParams, (params) => {
-        const resolved = isFunction(params) ? params(baseParams) : params;
-        this.addParams(resolved);
-      });
+  initializeParams() {
+    if (!this.extendedParams?.length) {
+      return;
     }
+    const baseParams = this.buildCallParams();
+    each(this.extendedParams, (params) => {
+      const resolved = isFunction(params) ? params(baseParams) : params;
+      this.addParams(resolved);
+    });
+  }
+
+  initializePlugins() {
     if (!this.userPlugins?.size) {
       return;
     }
