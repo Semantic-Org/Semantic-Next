@@ -45,8 +45,8 @@ export const defineComponent = ({
   plural = false,
   singularTag,
 
-  // anything not known might be a plugin option. pass it through naively
-  ...pluginOptions
+  // anything not known might be a plugin config. pass it through naively
+  ...pluginConfig
 
 } = {}) => {
 
@@ -92,7 +92,7 @@ export const defineComponent = ({
     tagName,
     availablePlugins,
     extendedParams,
-    pluginOptions,
+    pluginConfig,
     isPrototype: true,
     renderingEngine,
     template,

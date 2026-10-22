@@ -70,7 +70,7 @@ export const Template = class Template {
     tagName,
     availablePlugins,
     extendedParams,
-    pluginOptions,
+    pluginConfig,
     ast,
     template,
     preserveWhitespace = false,
@@ -115,7 +115,7 @@ export const Template = class Template {
     this.tagName = tagName;
     this.availablePlugins = availablePlugins;
     this.extendedParams = extendedParams;
-    this.pluginOptions = pluginOptions;
+    this.pluginConfig = pluginConfig;
     this.plugins = [];
     this.subTemplates = subTemplates;
     this.createComponent = createComponent;
@@ -142,7 +142,7 @@ export const Template = class Template {
 
   toDefinition() {
     return {
-      ...this.pluginOptions,
+      ...this.pluginConfig,
       template: this.template,
       css: this.css,
       createComponent: this.createComponent,
@@ -368,13 +368,12 @@ export const Template = class Template {
     const RendererClass = (Template.isServer && engine.serverRenderer)
       ? engine.serverRenderer
       : engine.renderer;
-    this.helpers ??= Object.create(TemplateHelpers);
     this.renderer = new RendererClass({
       ast: this.ast,
       data: this.overlaySettingsSignals(this.getDataContext()),
       template: this,
       subTemplates: this.subTemplates,
-      helpers: this.helpers,
+      helpers: this.helpers || TemplateHelpers,
       receivesData: this.isSubtemplate(),
     });
 
@@ -474,9 +473,9 @@ export const Template = class Template {
     if (!this.availablePlugins?.size) {
       return;
     }
-    const pluginOptions = this.pluginOptions || {};
+    const pluginConfig = this.pluginConfig || {};
     this.availablePlugins.forEach((plugin, namespace) => {
-      plugin.applyTo(this, pluginOptions[namespace]);
+      plugin.applyTo(this, pluginConfig[namespace]);
     });
   }
 
@@ -488,8 +487,8 @@ export const Template = class Template {
     if (!isObject(params)) {
       return;
     }
-    this.pluginCallParams ??= {};
-    extend(this.pluginCallParams, params);
+    this.customParams ??= {};
+    extend(this.customParams, params);
     if (this.callParams) {
       this.callParams = this.buildCallParams();
     }
@@ -501,7 +500,16 @@ export const Template = class Template {
     }
     this.helpers ??= Object.create(TemplateHelpers);
     extend(this.helpers, helpers);
-    this.renderer?.bumpDataVersion?.();
+    if (this.renderer) {
+      this.renderer.helpers = this.helpers;
+      if (this.renderer.evaluator) {
+        this.renderer.evaluator.helpers = this.helpers;
+      }
+      this.renderer.bumpDataVersion?.();
+    }
+    if (this.callParams) {
+      this.callParams = this.buildCallParams();
+    }
   }
 
   clone(settings) {
@@ -510,7 +518,7 @@ export const Template = class Template {
       tagName: this.tagName,
       availablePlugins: this.availablePlugins,
       extendedParams: this.extendedParams,
-      pluginOptions: this.pluginOptions,
+      pluginConfig: this.pluginConfig,
       element: this.element,
       ast: this.ast,
       css: this.css,
@@ -1043,10 +1051,10 @@ export const Template = class Template {
         return element?.isDarkMode?.();
       },
     };
-    if (!this.pluginCallParams && isEmpty(additionalData)) {
+    if (!this.customParams && isEmpty(additionalData)) {
       return baseParams;
     }
-    return extend({}, this.pluginCallParams, baseParams, additionalData);
+    return extend({}, this.customParams, baseParams, additionalData);
   }
 
   // 4th arg matches the native addEventListener shape (passive/capture/once/...);
