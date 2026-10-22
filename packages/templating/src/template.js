@@ -11,6 +11,7 @@ import {
   Signal,
   signal,
 } from '@semantic-ui/reactivity';
+
 import {
   adoptStylesheet,
   any,
@@ -27,6 +28,7 @@ import {
   inArray,
   isClient,
   isDevelopment,
+  isEmpty,
   isFunction,
   isObject,
   isServer,
@@ -65,6 +67,10 @@ export const Template = class Template {
 
   constructor({
     templateName,
+    tagName,
+    availablePlugins,
+    extendedParams,
+    pluginConfig,
     ast,
     template,
     preserveWhitespace = false,
@@ -106,6 +112,11 @@ export const Template = class Template {
     this.defaultSettings = defaultSettings;
     this.state = this.createReactiveState(defaultState, data) || {};
     this.templateName = templateName || this.getGenericTemplateName();
+    this.tagName = tagName;
+    this.availablePlugins = availablePlugins;
+    this.extendedParams = extendedParams;
+    this.pluginConfig = pluginConfig;
+    this.plugins = [];
     this.subTemplates = subTemplates;
     this.createComponent = createComponent;
     this.onCreated = noop;
@@ -131,6 +142,7 @@ export const Template = class Template {
 
   toDefinition() {
     return {
+      ...this.pluginConfig,
       template: this.template,
       css: this.css,
       createComponent: this.createComponent,
@@ -241,6 +253,9 @@ export const Template = class Template {
       this.createSubtemplateSettings();
     }
 
+    this.initializeParams();
+    this.initializePlugins();
+
     if (isFunction(this.createComponent)) {
       instance = this.call(this.createComponent, { thisContext: this.instance }) || {};
       extend(template.instance, instance);
@@ -261,6 +276,7 @@ export const Template = class Template {
       );
 
     this.onCreated = () => {
+      each(this.plugins, (plugin) => plugin.onCreated());
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
       this.resolveLifecyclePromise('created');
@@ -270,6 +286,7 @@ export const Template = class Template {
       }
     };
     this.onRendered = () => {
+      each(this.plugins, (plugin) => plugin.onRendered());
       this.call(this.onRenderedCallback);
       // allow a single hook for after render
       // this is used for binding events that cant use event delegation
@@ -311,6 +328,7 @@ export const Template = class Template {
       this.removeEvents();
       this.removeObservers();
       this.removeParent();
+      each(this.plugins, (plugin) => plugin.onDestroyed());
       this.call(this.onDestroyedCallback);
       this.resolveLifecyclePromise('destroyed');
       dispatchLifecycle('destroyed');
@@ -355,7 +373,7 @@ export const Template = class Template {
       data: this.overlaySettingsSignals(this.getDataContext()),
       template: this,
       subTemplates: this.subTemplates,
-      helpers: TemplateHelpers,
+      helpers: this.helpers || TemplateHelpers,
       receivesData: this.isSubtemplate(),
     });
 
@@ -440,9 +458,67 @@ export const Template = class Template {
     adoptStylesheet(this.css, this.renderRoot);
   }
 
+  initializeParams() {
+    if (!this.extendedParams?.length) {
+      return;
+    }
+    const baseParams = this.buildCallParams();
+    each(this.extendedParams, (params) => {
+      const resolved = isFunction(params) ? params(baseParams) : params;
+      this.addParams(resolved);
+    });
+  }
+
+  initializePlugins() {
+    if (!this.availablePlugins?.size) {
+      return;
+    }
+    const pluginConfig = this.pluginConfig || {};
+    this.availablePlugins.forEach((plugin, namespace) => {
+      plugin.applyTo(this, pluginConfig[namespace]);
+    });
+  }
+
+  addPlugin(plugin) {
+    this.plugins.push(plugin);
+  }
+
+  addParams(params) {
+    if (!isObject(params)) {
+      return;
+    }
+    this.customParams ??= {};
+    extend(this.customParams, params);
+    if (this.callParams) {
+      this.callParams = this.buildCallParams();
+    }
+  }
+
+  addHelpers(helpers) {
+    if (!isObject(helpers)) {
+      return;
+    }
+    this.helpers ??= Object.create(TemplateHelpers);
+    extend(this.helpers, helpers);
+    if (this.renderer) {
+      this.renderer.helpers = this.helpers;
+      if (this.renderer.evaluator) {
+        this.renderer.evaluator.helpers = this.helpers;
+      }
+      this.renderer.bumpDataVersion?.();
+    }
+    if (this.callParams) {
+      this.callParams = this.buildCallParams();
+    }
+  }
+
   clone(settings) {
     const cloneDefaults = {
       templateName: this.templateName,
+      tagName: this.tagName,
+      availablePlugins: this.availablePlugins,
+      extendedParams: this.extendedParams,
+      pluginConfig: this.pluginConfig,
       element: this.element,
       ast: this.ast,
       css: this.css,
@@ -907,8 +983,9 @@ export const Template = class Template {
     }
     if (!params) {
       if (this.callParams) {
+        // extend keeps getters live on callParams when merging event/key data
         params = additionalData
-          ? { ...this.callParams, ...additionalData }
+          ? extend({}, this.callParams, additionalData)
           : this.callParams;
       }
       else {
@@ -927,7 +1004,7 @@ export const Template = class Template {
   buildCallParams(additionalData = {}) {
     const element = this.element;
     const template = this;
-    return {
+    const baseParams = {
       el: element,
       tpl: this.instance,
       self: this.instance,
@@ -953,7 +1030,7 @@ export const Template = class Template {
       isServer: Template.isServer,
       isClient: !Template.isServer,
       get isHydrating() {
-        return template.isHydrating || false;
+        return Boolean(template.isHydrating || element?.isHydrating);
       },
       rerender: () => element?.requestUpdate(),
       dispatchEvent: this.dispatchEvent.bind(this),
@@ -961,7 +1038,7 @@ export const Template = class Template {
       bindKey: this.bindKey.bind(this),
       unbindKey: this.unbindKey.bind(this),
       abortController: this.abortController,
-      helpers: TemplateHelpers,
+      helpers: this.helpers || TemplateHelpers,
       template: this,
       templateName: this.templateName,
       templates: Template.renderedTemplates,
@@ -973,8 +1050,11 @@ export const Template = class Template {
       get darkMode() {
         return element?.isDarkMode?.();
       },
-      ...additionalData,
     };
+    if (!this.customParams && isEmpty(additionalData)) {
+      return baseParams;
+    }
+    return extend({}, this.customParams, baseParams, additionalData);
   }
 
   // 4th arg matches the native addEventListener shape (passive/capture/once/...);
