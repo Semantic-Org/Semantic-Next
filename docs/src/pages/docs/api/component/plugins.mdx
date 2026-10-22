@@ -30,7 +30,7 @@ Installs a plugin into the component runtime with optional application-wide sett
 
 #### Returns
 
-An available `Plugin` instance (`isPrototype: true`) containing the resolved `namespace`, reactive `settings`, and `sharedState`.
+The configured `Plugin` instance.
 
 #### Usage
 
@@ -56,7 +56,7 @@ addPlugin(I18n, {
 extendParams(params);
 ```
 
-Merges custom properties into the callback arguments (`customParams`) received by every component and subtemplate (`createComponent`, `onCreated`, `onRendered`, `onDestroyed`, `events`, `keys`).
+Adds custom properties to the callback arguments received by every component and subtemplate (`createComponent`, `onCreated`, `onRendered`, `onDestroyed`, `events`, `keys`).
 
 #### Parameters
 
@@ -109,39 +109,39 @@ Registers a plugin definition by its `namespace` and returns the normalized defi
 
 | Name            | Type               | Default        | Description                                                                                             |
 |-----------------|--------------------|----------------|---------------------------------------------------------------------------------------------------------|
-| namespace       | string             | —              | Unique key used for top-level `defineComponent` configuration, `template.pluginConfig[namespace]`, `el.plugins[namespace]`, and `el[namespace]` (`name` is accepted as an alias) |
-| defaultSettings | Object             | `{}`           | Default plugin settings merged with `addPlugin` `userSettings` and wrapped in a reactive proxy          |
-| resolveSettings | Function           | `undefined`    | Normalizes the per-component `defineComponent({ [namespace]: config })` value into instance `settings`  |
-| setup           | Function           | `undefined`    | Runs once when `addPlugin` is called; its return value (`sharedState`) becomes the prototype of every instance's `self` |
-| createPlugin    | Function           | `undefined`    | Runs once per matching component instance; its returned methods are attached to `self` and `el[namespace]` |
-| lifecycleParams | Object \| Function | `undefined`    | Properties or factory `({ self, settings, ... }) => ({ ... })` merged into component callback arguments (`params` is accepted as an alias) |
-| templateHelpers | Object \| Function | `undefined`    | Global helpers object or per-instance factory `({ self, settings, ... }) => ({ ... })`                  |
-| onCreated       | Function           | `undefined`    | Runs before the component's `onCreated` callback                                                        |
-| onRendered      | Function           | `undefined`    | Runs before the component's `onRendered` callback                                                       |
-| onDestroyed     | Function           | `undefined`    | Runs before the component's `onDestroyed` callback                                                      |
+| namespace       | string             | —              | Unique name used to configure the plugin on `defineComponent` and access it at `el[namespace]` (`name` is accepted as an alias) |
+| defaultSettings | Object             | `{}`           | Default reactive settings for the plugin, overridable globally in `addPlugin` or per component in `defineComponent` |
+| resolveSettings | Function           | `undefined`    | Resolver function that returns the resolved `settings` from a user's `config`                           |
+| setup           | Function           | `undefined`    | Runs once when `addPlugin` is called to return shared state or methods across all instances             |
+| createPlugin    | Function           | `undefined`    | Runs once per matching component to return methods attached to `self` and `el[namespace]`               |
+| lifecycleParams | Object \| Function | `undefined`    | Properties or factory `({ self, settings, ... }) => ({ ... })` added to component callback arguments (`params` is accepted as an alias) |
+| templateHelpers | Object \| Function | `undefined`    | Global helpers object or per-component factory `({ self, settings, ... }) => ({ ... })`                 |
+| onCreated       | Function           | `undefined`    | Runs when a matching component is created                                                               |
+| onRendered      | Function           | `undefined`    | Runs when a matching component is rendered                                                              |
+| onDestroyed     | Function           | `undefined`    | Runs when a matching component is destroyed                                                             |
 | appliesTo       | string \| string[] \| Function | `'components'` | Controls which components or subtemplates receive the plugin                                |
 
 ##### Setup Arguments
 
-| Name      | Type    | Description                                            |
-|-----------|---------|--------------------------------------------------------|
-| settings  | Proxy   | Reactive proxy over the plugin's application settings  |
-| isServer  | boolean | `true` when running during server-side rendering       |
-| isClient  | boolean | `true` when running in a browser environment           |
-| namespace | string  | The plugin's registered `namespace`                    |
+| Name      | Type    | Description                                           |
+|-----------|---------|-------------------------------------------------------|
+| settings  | Object  | Reactive plugin settings configured in `addPlugin`    |
+| isServer  | boolean | `true` when running during server-side rendering      |
+| isClient  | boolean | `true` when running in a browser environment          |
+| namespace | string  | The plugin's registered `namespace`                   |
 
 ##### Callback Arguments
 
 In addition to all standard [component callback arguments](/docs/guides/components/lifecycle#callback-arguments) (`state`, `el`, `$`, `$$`, `reaction`, `signal`, `afterFlush`, `attachEvent`, `bindKey`, `dispatchEvent`, `isServer`, `isClient`), plugin callbacks receive:
 
-| Name              | Type   | Description                                                                                      |
-|-------------------|--------|--------------------------------------------------------------------------------------------------|
-| self              | Object | The plugin instance (inherits from `setup()` return value and holds `createPlugin()` methods)    |
-| plugin            | Object | Alias for `self`                                                                                 |
-| settings          | Proxy  | Reactive settings for this component instance, falling back to the plugin's application settings |
-| config            | any    | Raw value passed at `defineComponent({ [namespace]: config })`                                   |
-| componentSettings | Proxy  | The host component's own `settings`                                                              |
-| namespace         | string | The plugin's registered `namespace`                                                              |
+| Name              | Type   | Description                                                                       |
+|-------------------|--------|-----------------------------------------------------------------------------------|
+| self              | Object | The plugin instance containing methods returned by `createPlugin` and `setup`     |
+| plugin            | Object | Alias for `self`                                                                  |
+| settings          | Object | Reactive plugin settings for this component                                       |
+| config            | any    | Value passed for this plugin in `defineComponent({ [namespace]: config })`        |
+| componentSettings | Object | The component's own `settings`                                                    |
+| namespace         | string | The plugin's registered `namespace`                                               |
 
 ##### Scoping Values
 
