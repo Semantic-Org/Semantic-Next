@@ -1,9 +1,9 @@
 import { $ } from '@semantic-ui/query';
 import { flush, signal } from '@semantic-ui/reactivity';
-import { Template } from '@semantic-ui/templating';
 import { each, fill, get, isArray, isBoolean, isEmpty, isFunction, isPlainObject, isString } from '@semantic-ui/utils';
 import { afterEach, describe, expect, it } from 'vitest';
 import { addPlugin, defineComponent, extendParams, registerPlugin } from '../../src/index.js';
+import { clearAvailablePlugins, clearExtendedParams, clearRegisteredPlugins } from '../../src/plugins/index.js';
 
 let tagCounter = 0;
 const uniqueTag = (prefix = 'plugin-test') => `${prefix}-${++tagCounter}`;
@@ -26,8 +26,9 @@ afterEach(() => {
     const el = mountedElements.pop();
     el.remove();
   }
-  Template.plugins.clear();
-  Template.registeredPlugins.clear();
+  clearAvailablePlugins();
+  clearRegisteredPlugins();
+  clearExtendedParams();
 });
 
 describe('Component Plugins', () => {
@@ -117,6 +118,33 @@ describe('Component Plugins', () => {
         appName: 'Semantic',
         callerTag: 'from:myWidget',
       });
+    });
+
+    it('supports calling el.template.addHelpers and el.template.addParams directly from the DOM', async () => {
+      let clickedWithParam;
+      const { el } = await mount({
+        template: '<button class="act">{shout label}</button>',
+        defaultState: { label: 'hello' },
+        events: {
+          'click .act'({ domInjected }) {
+            clickedWithParam = domInjected;
+          },
+        },
+      });
+
+      el.template.addHelpers({
+        shout: (val) => `${String(val).toUpperCase()}!`,
+      });
+      el.template.addParams({
+        domInjected: 'from-dom',
+      });
+      el.template.state.label.set('ready');
+      flush();
+
+      expect(el.$('.act').text()).toBe('READY!');
+
+      el.$('.act').click();
+      expect(clickedWithParam).toBe('from-dom');
     });
   });
 
@@ -280,8 +308,8 @@ describe('Component Plugins', () => {
           };
         },
         events: {
-          'click .btn'({ currentMode, setMode, formatLabel }) {
-            seenInClick.push(`${currentMode}:${formatLabel()}`);
+          'click .btn'({ self, currentMode, setMode }) {
+            seenInClick.push(`${currentMode}:${self.formatLabel()}`);
             setMode(currentMode === 'light' ? 'dark' : 'light');
           },
         },
@@ -539,8 +567,7 @@ describe('Component Plugins', () => {
 
       // Mutating nested config on elA's plugin settings must not mutate elB's config
       elA.isolatedConfig; // instance exists
-      const bagA = elA.template._activePlugins[0].pluginBag;
-      bagA.settings.meta.count = 99;
+      elA.template.plugins[0].settings.meta.count = 99;
 
       expect(elB.$('.s').text()).toBe('false:1');
 
