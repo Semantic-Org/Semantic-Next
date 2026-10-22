@@ -3,7 +3,7 @@ import { flush, signal } from '@semantic-ui/reactivity';
 import { each, fill, get, isArray, isBoolean, isEmpty, isFunction, isPlainObject, isString } from '@semantic-ui/utils';
 import { afterEach, describe, expect, it } from 'vitest';
 import { addPlugin, defineComponent, extendParams, registerPlugin } from '../../src/index.js';
-import { clearExtendedParams, clearRegisteredPlugins, clearUserPlugins } from '../../src/plugins/index.js';
+import { clearAvailablePlugins, clearExtendedParams, clearRegisteredPlugins } from '../../src/plugins/index.js';
 
 let tagCounter = 0;
 const uniqueTag = (prefix = 'plugin-test') => `${prefix}-${++tagCounter}`;
@@ -26,7 +26,7 @@ afterEach(() => {
     const el = mountedElements.pop();
     el.remove();
   }
-  clearUserPlugins();
+  clearAvailablePlugins();
   clearRegisteredPlugins();
   clearExtendedParams();
 });

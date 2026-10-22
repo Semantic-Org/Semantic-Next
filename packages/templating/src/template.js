@@ -68,7 +68,7 @@ export const Template = class Template {
   constructor({
     templateName,
     tagName,
-    userPlugins,
+    availablePlugins,
     extendedParams,
     pluginOptions,
     ast,
@@ -113,7 +113,7 @@ export const Template = class Template {
     this.state = this.createReactiveState(defaultState, data) || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.tagName = tagName;
-    this.userPlugins = userPlugins;
+    this.availablePlugins = availablePlugins;
     this.extendedParams = extendedParams;
     this.pluginOptions = pluginOptions;
     this.plugins = [];
@@ -471,11 +471,11 @@ export const Template = class Template {
   }
 
   initializePlugins() {
-    if (!this.userPlugins?.size) {
+    if (!this.availablePlugins?.size) {
       return;
     }
     const pluginOptions = this.pluginOptions || {};
-    this.userPlugins.forEach((plugin, namespace) => {
+    this.availablePlugins.forEach((plugin, namespace) => {
       plugin.applyTo(this, pluginOptions[namespace]);
     });
   }
@@ -508,7 +508,7 @@ export const Template = class Template {
     const cloneDefaults = {
       templateName: this.templateName,
       tagName: this.tagName,
-      userPlugins: this.userPlugins,
+      availablePlugins: this.availablePlugins,
       extendedParams: this.extendedParams,
       pluginOptions: this.pluginOptions,
       element: this.element,

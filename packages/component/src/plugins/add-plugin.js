@@ -6,15 +6,15 @@ import { getRegisteredPlugin, registerPlugin } from './register-plugin.js';
 const { throwError } = createErrors({ namespace: 'component' });
 
 /*******************************
-          User Plugins
+        Available Plugins
 *******************************/
 
 /* These are plugins enabled by a user with configs */
 
-export const userPlugins = new Map();
-export const addUserPlugin = (name, plugin) => userPlugins.set(name, plugin);
-export const getUserPlugin = (name) => userPlugins.get(name);
-export const clearUserPlugins = () => userPlugins.clear();
+export const availablePlugins = new Map();
+export const addAvailablePlugin = (name, plugin) => availablePlugins.set(name, plugin);
+export const getAvailablePlugin = (name) => availablePlugins.get(name);
+export const clearAvailablePlugins = () => availablePlugins.clear();
 
 /*******************************
           Add Plugin
@@ -45,12 +45,12 @@ export const addPlugin = (plugin, userSettings = {}) => {
 
   const { namespace } = definition;
 
-  const userPlugin = new Plugin({
+  const availablePlugin = new Plugin({
     ...definition,
     userSettings,
   });
 
-  addUserPlugin(namespace, userPlugin);
+  addAvailablePlugin(namespace, availablePlugin);
 
-  return userPlugin;
+  return availablePlugin;
 };

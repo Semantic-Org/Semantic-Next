@@ -6,7 +6,7 @@ import { adoptStylesheet, createErrors, each, isClient, isDevelopment, isObject,
 
 import { getProperties } from './component-helpers.js';
 import { registerComponent } from './component-registry.js';
-import { extendedParams, userPlugins } from './plugins/index.js';
+import { availablePlugins, extendedParams } from './plugins/index.js';
 
 const { throwError } = createErrors({ namespace: 'component' });
 
@@ -90,7 +90,7 @@ export const defineComponent = ({
   let prototypeTemplate = new Template({
     templateName,
     tagName,
-    userPlugins,
+    availablePlugins,
     extendedParams,
     pluginOptions,
     isPrototype: true,

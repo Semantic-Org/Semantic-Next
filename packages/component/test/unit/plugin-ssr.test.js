@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { clearExtendedParams, clearRegisteredPlugins, clearUserPlugins } from '../../src/plugins/index.js';
+import { clearAvailablePlugins, clearExtendedParams, clearRegisteredPlugins } from '../../src/plugins/index.js';
 import { addPlugin, defineComponent, registerPlugin, renderToString } from '../../src/server/index.js';
 
 afterEach(() => {
-  clearUserPlugins();
+  clearAvailablePlugins();
   clearRegisteredPlugins();
   clearExtendedParams();
 });

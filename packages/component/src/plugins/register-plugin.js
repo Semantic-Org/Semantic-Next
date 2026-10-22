@@ -3,16 +3,16 @@ import { createErrors, isDevelopment, isString } from '@semantic-ui/utils';
 const { throwError } = createErrors({ namespace: 'component' });
 
 /*******************************
-            Plugins
+       Registered Plugins
 *******************************/
 
-export const plugins = new Map();
-export const addRegisteredPlugin = (name, plugin) => plugins.set(name, plugin);
-export const getRegisteredPlugin = (name) => plugins.get(name);
-export const clearRegisteredPlugins = () => plugins.clear();
+export const registeredPlugins = new Map();
+export const addRegisteredPlugin = (name, plugin) => registeredPlugins.set(name, plugin);
+export const getRegisteredPlugin = (name) => registeredPlugins.get(name);
+export const clearRegisteredPlugins = () => registeredPlugins.clear();
 
 /*******************************
-       Available Plugins
+        Register Plugin
 *******************************/
 
 export const registerPlugin = (plugin = {}) => {
