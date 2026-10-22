@@ -8,7 +8,7 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 In most component frameworks, sharing cross-cutting features like internationalization, state persistence, or analytics across components means wrapping your tree in context providers or repeating boilerplate hooks inside every file.
 
-In Semantic UI, plugins extend [`defineComponent`](/docs/guides/components/create#defining-components) directly — letting you add new top-level component options, [callback arguments](/docs/guides/components/lifecycle#callback-arguments), [template helpers](/docs/guides/templates/helpers), and [instance methods](/docs/guides/components/instances) across your application.
+In Semantic UI, plugins extend [`defineComponent`](/docs/guides/components/create#defining-components) directly, letting you add new top-level component options, [callback arguments](/docs/guides/components/lifecycle#callback-arguments), [template helpers](/docs/guides/templates/helpers), and [instance methods](/docs/guides/components/instances) across your application.
 
 > See the [Component Plugins API Reference](/docs/api/component/plugins) for method signatures and options.
 
@@ -60,7 +60,7 @@ document.querySelector('checkout-summary').i18n.setLocale('es');
 
 ### Shared Parameters
 
-Every Semantic UI callback — [`createComponent`](/docs/guides/components/instances#create-component), [event handlers](/docs/guides/components/events), [keybindings](/docs/guides/components/keys), and [lifecycle events](/docs/guides/components/lifecycle) — receives a single destructurable [callback arguments](/docs/guides/components/lifecycle#callback-arguments) object so you can pull in what a function needs without managing imports or `this` context.
+Every Semantic UI callback ([`createComponent`](/docs/guides/components/instances#create-component), [event handlers](/docs/guides/components/events), [keybindings](/docs/guides/components/keys), and [lifecycle events](/docs/guides/components/lifecycle)) receives a single destructurable [callback arguments](/docs/guides/components/lifecycle#callback-arguments) object so you can pull in what a function needs without managing imports or `this` context.
 
 If you want to add shared application utilities or services to that argument bag across all components without authoring a full plugin, use [`extendParams`](/docs/api/component/plugins#extendparams):
 
@@ -76,7 +76,7 @@ extendParams({
 
 ### Per-Component Parameters
 
-If the injected helper needs context from the component itself — such as its DOM element `el`, [`state`](/docs/guides/components/state), or [`settings`](/docs/guides/components/settings) — pass a function to `extendParams`:
+If the injected helper needs context from the component itself, such as its DOM element `el`, [`state`](/docs/guides/components/state), or [`settings`](/docs/guides/components/settings), pass a function to `extendParams`:
 
 ```javascript {1-3}
 extendParams(({ el }) => ({
@@ -108,7 +108,7 @@ Setting `appliesTo: 'configured'` runs the plugin only on components that specif
 
 ### Plugin Instances
 
-`createPlugin` works just like [`createComponent`](/docs/guides/components/instances#create-component) — it returns the methods and properties that make up the plugin's instance (`self`) for each component.
+`createPlugin` works just like [`createComponent`](/docs/guides/components/instances#create-component), returning the methods and properties that make up the plugin's instance (`self`) for each component.
 
 ```javascript title="i18n-plugin.js"
 const createPlugin = ({ settings }) => ({
@@ -171,7 +171,7 @@ const templateHelpers = ({ self }) => ({
 
 Plugin settings behave identically to [component settings](/docs/guides/components/settings) and specify reactive settings available across all downstream components.
 
-If you want to resolve runtime settings using custom logic — for example, letting a component pass a shorthand like `i18n: 'checkout'` instead of an object — you can specify a [`resolveSettings`](/docs/api/component/plugins#options) function that returns the resolved settings from a user's `config`:
+If you want to resolve runtime settings using custom logic, such as letting a component pass a shorthand like `i18n: 'checkout'` instead of an object, you can specify a [`resolveSettings`](/docs/api/component/plugins#options) function that returns the resolved settings from a user's `config`:
 
 ```javascript {8-13}
 const defaultSettings = {
