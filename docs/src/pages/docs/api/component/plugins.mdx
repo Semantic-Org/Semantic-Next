@@ -1,0 +1,182 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Component - Plugins
+icon: plug
+description: API reference for registering and installing component plugins
+package: "@semantic-ui/component"
+methods: ["addPlugin", "extendParams", "registerPlugin"]
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Install plugins into the component runtime, inject callback parameters, and register reusable plugin definitions. See the [Component Plugins guide](/docs/guides/components/plugins) for usage patterns.
+
+## Installing Plugins
+
+### addPlugin
+
+```javascript
+addPlugin(plugin, userSettings);
+```
+
+Installs a plugin into the component runtime with optional application-wide settings.
+
+#### Parameters
+
+| Name         | Type             | Required | Description                                                          |
+|--------------|------------------|----------|----------------------------------------------------------------------|
+| plugin       | Object \| string | Yes      | A plugin definition object or the `namespace` of a registered plugin |
+| userSettings | Object           | No       | Application-level settings merged over the plugin's `defaultSettings` |
+
+#### Returns
+
+The configured `Plugin` instance.
+
+#### Usage
+
+```javascript
+import { addPlugin } from '@semantic-ui/component';
+import { I18n } from './i18n-plugin.js';
+
+addPlugin(I18n, {
+  locale: 'en',
+  strings: {
+    en: { checkout: { title: 'Order Summary' } },
+  },
+});
+```
+
+#### Example
+
+<PlaygroundExample id="component-plugins" height="400" direction="horizontal"></PlaygroundExample>
+
+### extendParams
+
+```javascript
+extendParams(params);
+```
+
+Adds custom properties to the callback arguments received by every component and subtemplate (`createComponent`, `onCreated`, `onRendered`, `onDestroyed`, `events`, `keys`).
+
+#### Parameters
+
+| Name   | Type               | Required | Description                                                                                      |
+|--------|--------------------|----------|--------------------------------------------------------------------------------------------------|
+| params | Object \| Function | Yes      | An object of properties to inject, or a function `({ el, state, ... }) => ({ ... })` per instance |
+
+#### Usage
+
+##### Static Object
+
+```javascript
+import { extendParams } from '@semantic-ui/component';
+import { api } from './api.js';
+
+extendParams({ api });
+```
+
+##### Per-Instance Factory
+
+```javascript
+import { extendParams } from '@semantic-ui/component';
+
+extendParams(({ el }) => ({
+  track: (event, data) => analytics.send(el?.tagName, event, data),
+}));
+```
+
+#### Example
+
+<PlaygroundExample id="extend-params" height="410" direction="horizontal"></PlaygroundExample>
+
+## Authoring Plugins
+
+### registerPlugin
+
+```javascript
+registerPlugin(definition);
+```
+
+Registers a plugin definition by its `namespace` and returns the normalized definition object. Passing a plain definition object directly to `addPlugin` calls `registerPlugin` automatically.
+
+#### Parameters
+
+| Name       | Type   | Required | Description                        |
+|------------|--------|----------|------------------------------------|
+| definition | Object | Yes      | Plugin configuration and callbacks |
+
+##### Options
+
+| Name            | Type               | Default        | Description                                                                                             |
+|-----------------|--------------------|----------------|---------------------------------------------------------------------------------------------------------|
+| namespace       | string             | —              | Unique name used to configure the plugin on `defineComponent` and access it at `el[namespace]` (`name` is accepted as an alias) |
+| defaultSettings | Object             | `{}`           | Default reactive settings for the plugin, overridable globally in `addPlugin` or per component in `defineComponent` |
+| resolveSettings | Function           | `undefined`    | Resolver function that returns the resolved `settings` from a user's `config`                           |
+| setup           | Function           | `undefined`    | Runs once when `addPlugin` is called to return shared state or methods across all instances             |
+| createPlugin    | Function           | `undefined`    | Runs once per matching component to return methods attached to `self` and `el[namespace]`               |
+| lifecycleParams | Object \| Function | `undefined`    | Properties or factory `({ self, settings, ... }) => ({ ... })` added to component callback arguments (`params` is accepted as an alias) |
+| templateHelpers | Object \| Function | `undefined`    | Global helpers object or per-component factory `({ self, settings, ... }) => ({ ... })`                 |
+| onCreated       | Function           | `undefined`    | Runs when a matching component is created                                                               |
+| onRendered      | Function           | `undefined`    | Runs when a matching component is rendered                                                              |
+| onDestroyed     | Function           | `undefined`    | Runs when a matching component is destroyed                                                             |
+| appliesTo       | string \| string[] \| Function | `'components'` | Controls which components or subtemplates receive the plugin                                |
+
+##### Setup Arguments
+
+| Name      | Type    | Description                                           |
+|-----------|---------|-------------------------------------------------------|
+| settings  | Object  | Reactive plugin settings configured in `addPlugin`    |
+| isServer  | boolean | `true` when running during server-side rendering      |
+| isClient  | boolean | `true` when running in a browser environment          |
+| namespace | string  | The plugin's registered `namespace`                   |
+
+##### Callback Arguments
+
+In addition to all standard [component callback arguments](/docs/guides/components/lifecycle#callback-arguments) (`state`, `el`, `$`, `$$`, `reaction`, `signal`, `afterFlush`, `attachEvent`, `bindKey`, `dispatchEvent`, `isServer`, `isClient`), plugin callbacks receive:
+
+| Name              | Type   | Description                                                                       |
+|-------------------|--------|-----------------------------------------------------------------------------------|
+| self              | Object | The plugin instance containing methods returned by `createPlugin` and `setup`     |
+| plugin            | Object | Alias for `self`                                                                  |
+| settings          | Object | Reactive plugin settings for this component                                       |
+| config            | any    | Value passed for this plugin in `defineComponent({ [namespace]: config })`        |
+| componentSettings | Object | The component's own `settings`                                                    |
+| namespace         | string | The plugin's registered `namespace`                                               |
+
+##### Scoping Values
+
+| Value                     | Behavior                                                                                  |
+|---------------------------|-------------------------------------------------------------------------------------------|
+| `'components'` (default)  | Top-level web components, plus subtemplates that explicitly set `[namespace]`             |
+| `'all'` or `'templates'`  | Every web component and subtemplate                                                       |
+| `'configured'`            | Only components or subtemplates that pass `[namespace]` in `defineComponent`              |
+| `string` or `string[]`    | Components matching the given `tagName` or `templateName`                                 |
+| `Function`                | Predicate `({ config, tagName, templateName, isSubtemplate, settings, componentSettings, el, template }) => boolean` |
+
+#### Returns
+
+The normalized plugin definition object.
+
+#### Usage
+
+```javascript
+import { registerPlugin } from '@semantic-ui/component';
+import { each, intersection, keys } from '@semantic-ui/utils';
+
+const onCreated = ({ state, config, reaction }) => {
+  const persistedKeys = intersection(keys(state), config);
+  each(persistedKeys, (key) => {
+    reaction(() => localStorage.setItem(key, JSON.stringify(state[key].get())));
+  });
+};
+
+export const Persist = registerPlugin({
+  onCreated,
+  namespace: 'persist',
+  appliesTo: 'configured',
+});
+```
+
+#### Example
+
+<PlaygroundExample id="persist-plugin" height="460" direction="horizontal"></PlaygroundExample>

@@ -12,9 +12,9 @@ type: skill
 > **Skill:** `docs-page-guide`
 > **Purpose:** How to write instructional guide pages — pages that teach concepts with progressive complexity
 
-**Golden rule: one sentence of prose per code block, not one paragraph.** The code is the lesson. Prose provides the minimum context to understand what the code demonstrates and why it matters. If the reader needs more than a sentence to understand the example, the example is too complex for that point in the page.
+**Golden rule: write like an email to an executive — one single-line sentence (~15 words, ~100 chars) per ≤10-line code block, written from the user's callsite and never from the source code.** Gloss every line of code that isn't the lesson (`tagName, createComponent, // rest`). If the prose wraps past a line or the code exceeds ~10 lines, split the concept.
 
-**Prerequisites:** Load `docs-authoring-standards` for heading hierarchy and frontmatter.
+**Prerequisites:** Load `docs-authoring-standards` for heading hierarchy and frontmatter, and see `docs-page-guide-examples` ([real before/after rewrites](./docs-page-guide-examples.md)) before writing a new guide page from scratch.
 
 ---
 
@@ -142,6 +142,74 @@ Selectors are scoped to the component's Shadow DOM. Events on elements outside t
 
 ---
 
+## Audience Modeling & Section Ordering
+
+Before writing a single heading, model **who is arriving on this page and what they want to read first**. Agents default to organizing pages by how the code is architected internally (`registerPlugin` → `addPlugin` → `extendParams`). Readers arrive with a task, not an architecture diagram.
+
+### 1. Identify If There Are Multiple Audiences (Bifurcate or `2 + Addendum`)
+
+Many features serve more than one distinct reader:
+- **Audience 1 (The Consumer)**: Wants to use an existing feature/plugin/component right now (90% of readers).
+- **Audience 2 (The Author)**: Wants to build their own plugin/behavior/custom primitive (10% of readers).
+- **Addendum (The Escape Hatch)**: Wants a lightweight alternative without the full ceremony (e.g. `extendParams` when they don't need a full plugin).
+
+When a topic has both consumers and authors, **bifurcate the page**:
+1. **`## Using X`** (Consumer first — installing a 3rd-party package, local import, configuring on a component)
+2. **`## Authoring X`** (Author second — registering, creating the instance, scoping, settings)
+3. **`## Lightweight Alternative`** (Addendum at the end — placed last so it doesn't derail either primary flow)
+
+### 2. Order Sections Within Each Audience
+
+Choose the rhetorical ordering that fits the material:
+- **By what you write first vs. least often**: Start with the first line a user has to write (installing/enabling), then configuring a component, and save power-user hooks (`resolveSettings`, custom `appliesTo` predicates) for later subsections.
+- **By simplest to most complex**: Show the default declarative case (`defaultSettings: { lang: 'en' }`) before the custom runtime resolver (`resolveSettings`).
+- **By the anatomy of the definition**: When teaching an options-bag API (`defineComponent`, `registerPlugin`, `registerBehavior`), show a commented skeleton of the whole object first, then dedicate one `###` subsection to each key.
+
+---
+
+## Hard Rules for Code Samples & Perspective
+
+These three rules hold on **every** guide page without exception:
+
+### 1. Gloss Anything Unrelated to What the Snippet Teaches
+
+Every line in a code block that isn't part of the current lesson is visual noise. Use shorthand identifiers or comments (`tagName, createComponent, // rest`) or omit unrelated keys entirely. Never make the reader parse setup boilerplate to find the 2 lines that matter. (See `docs-page-guide-examples` for side-by-side comparisons.)
+
+### 2. Maximum ~10 Lines per Code Sample
+
+Code samples in guides should be **at most ~10 lines**, and only that many when the lines are short. If a snippet grows past ~10 lines, one of three things is wrong:
+1. Unrelated setup wasn't glossed (`tagName, createComponent, // rest`).
+2. Multiple concepts (`createPlugin`, `lifecycleParams`, `templateHelpers`) are crammed into one block instead of split into separate `###` subsections.
+3. It is a full working demo that belongs in a `<PlaygroundExample>`, not an inline snippet.
+
+### 3. Paragraph & Sentence Budget ("Email to an Executive")
+
+Lazy readers scan; they do not read multi-line blocks of text. Telling an agent "write one sentence per code block" fails if the agent cheats by writing a 30-word, 190-character compound sentence that wraps across 3 lines.
+
+Measured across shipped Semantic UI component guides (`settings`, `instances`, `plugins`, `events`, `create`):
+- **80–95% of paragraphs are a single sentence** (1.0–1.2 sentences per paragraph).
+- **Median paragraph length is ~95–110 characters (~15–18 words)** — a single line on desktop.
+- **Target**: Keep lead-in sentences to **one clause, ~15 words, ~80–120 characters**. If a sentence needs a comma + conjunction or a participial clause to pack in a second idea, cut the second idea or move it after the code block.
+
+### 4. Write From the User's Callsite, Never From the Source Code
+
+An agent that just read the implementation will naturally narrate internal mechanisms (*"defaultSettings merged in addPlugin are wrapped in a reactive proxy, while non-overridden keys read through the prototype chain"*). A reader with no familiarity with the internals does not know what "reactive proxy" means and does not care.
+
+- **Explain the user-visible contract**: *"Plugin settings let you specify settings that a downstream user can set on their component."*
+- **Never confuse an idiom with a built-in feature**: If an example `i18n` plugin happens to expose `i18n` via `lifecycleParams` and `{t}` via `templateHelpers`, do not write *"Once added, a plugin's helpers and callback parameters are available inside the component"* as if `addPlugin` does that automatically. Say *"Some plugins might also expose new lifecycle arguments..."*
+
+---
+
+## Bag of Structural Techniques
+
+Use these techniques when they fit the material — they are tools in a kit, **not** a cookie-cutter template to stamp onto every page. See [`docs-page-guide-examples`](./docs-page-guide-examples.md) for side-by-side code comparisons of each:
+
+- **Paired Actor Code Blocks (`title="Plugin"` + `title="User"`, `{line-highlights}`)**: When a concept involves two sides (author vs. consumer, component vs. template, Query vs. Native DOM, `User (Plugin Used)` vs. `User (Plugin Not Used)`), pair two 5–8 line code blocks. The juxtaposition explains the relationship without prose.
+- **Commented Config Skeleton**: When introducing an API that takes an options bag (`defineComponent`, `registerPlugin`, `registerBehavior`), show the whole object shape once with 4–7 word inline comments on each key before breaking each key out into its own `###` subsection.
+- **Varying the Page Opening**: Match the opening to the page's scope (never stamp the same opening onto every page) — a broad multi-feature page can open with 1 sentence + a 3–5 bullet capability list with `#anchor` links, while a single-concept page can open with 1 sentence and go straight into code.
+
+---
+
 ## Structure Template
 
 ```markdown
@@ -253,16 +321,19 @@ Headings become the in-page navigation menu. Readers scan them to decide what to
 
 **Before writing:**
 - Is this a guide page? (Teaching how to use something, reader committed)
-- What page type are adjacent pages? Match the depth and style.
+- Who is the audience, and does the page need to bifurcate (`Using` → `Authoring` → `Addendum`)?
+- Read `docs-page-guide-examples` to calibrate tone, snippet length, and `Plugin`/`User` pairing.
 
 **While writing:**
 - 1 sentence of prose per code block, not 1 paragraph
-- No intros, no outros, no transitions between sections
-- Explain only what the code can't show (the *why*, the non-obvious)
+- Max ~10 lines per code block; gloss everything unrelated (`tagName, createComponent, // rest`)
+- Write from the user's callsite, never narrate source-code internals (`Proxy`, prototype chains)
+- Separate automatic API behavior from optional plugin/component conventions
 - Progressive complexity: one new concept per heading
 
 **Structural:**
 - `##` for main sections, `###` for subsections (both appear in nav)
+- Use `title="..."` and `{line-highlights}` on paired code blocks when showing two sides of an interaction
 - PlaygroundExample for interactive demos, inline code for syntax
 - Link to API reference for method details, don't duplicate signatures
 
@@ -272,6 +343,7 @@ Headings become the in-page navigation menu. Readers scan them to decide what to
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
+| **Guide Rewrite Examples** | `use_skill: docs-page-guide-examples` | Before/after rewrites showing audience modeling, glossing, and paired blocks |
 | **Authoring Standards** | `use_skill: docs-authoring-standards` | Heading hierarchy, frontmatter, code blocks |
 | **Writing Docs** | `use_skill: docs-writing` | Prose quality, anti-patterns, editing strategy |
 | **Target Audience** | `use_skill: docs-target-audience` | Understanding who reads these guides |
