@@ -1,15 +1,21 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { clearAvailablePlugins, clearExtendedParams, clearRegisteredPlugins } from '../../src/plugins/index.js';
-import { addPlugin, defineComponent, registerPlugin, renderToString } from '../../src/server/index.js';
+import {
+  clearAvailablePlugins,
+  clearExtendedData,
+  clearExtendedParams,
+  clearRegisteredPlugins,
+} from '../../src/plugins/index.js';
+import { addPlugin, defineComponent, extendData, registerPlugin, renderToString } from '../../src/server/index.js';
 
 afterEach(() => {
   clearAvailablePlugins();
   clearRegisteredPlugins();
+  clearExtendedData();
   clearExtendedParams();
 });
 
 describe('Component Plugins (SSR)', () => {
-  it('runs plugin initialize, lifecycleParams, and templateHelpers during renderToString', () => {
+  it('runs plugin initialize, lifecycleParams, templateData, and templateHelpers during renderToString', () => {
     const I18n = registerPlugin({
       namespace: 'i18n',
       defaultSettings: {
@@ -29,19 +35,24 @@ describe('Component Plugins (SSR)', () => {
           return settings.locale;
         },
       }),
-      templateHelpers: ({ self, settings }) => ({
-        t: self.t,
+      templateData: ({ settings }) => ({
         get locale() {
           return settings.locale;
         },
       }),
+      templateHelpers: ({ self }) => ({
+        t: self.t,
+      }),
     });
 
     addPlugin(I18n);
+    extendData({
+      user: { name: 'Claire' },
+    });
 
     const Banner = defineComponent({
       tagName: 'ssr-plugin-banner',
-      template: "<h1>{t 'greeting'} ({locale}) - {serverFlag}</h1>",
+      template: "<h1>{t 'greeting'} {user.name} ({#if is locale 'fr'}FR{else}EN{/if}) - {serverFlag}</h1>",
       createComponent({ isServer, t }) {
         return {
           serverFlag: isServer ? t('greeting').toUpperCase() : 'client',
@@ -51,7 +62,9 @@ describe('Component Plugins (SSR)', () => {
 
     const html = renderToString(Banner);
     expect(html).toContain('Bonjour');
-    expect(html).toContain('fr');
+    expect(html).toContain('Claire');
+    expect(html).toContain('FR');
+    expect(html).not.toContain('EN');
     expect(html).toContain('BONJOUR');
   });
 });

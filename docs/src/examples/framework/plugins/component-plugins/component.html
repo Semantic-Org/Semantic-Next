@@ -2,9 +2,9 @@
   <div class="header">
     <h3>{t 'title'}</h3>
     <div class="locales">
-      <ui-button small data-locale="en">EN</ui-button>
-      <ui-button small data-locale="es">ES</ui-button>
-      <ui-button small data-locale="ja">JA</ui-button>
+      <ui-button small active={is locale 'en'} data-locale="en">EN</ui-button>
+      <ui-button small active={is locale 'es'} data-locale="es">ES</ui-button>
+      <ui-button small active={is locale 'ja'} data-locale="ja">JA</ui-button>
     </div>
   </div>
   <div class="line">

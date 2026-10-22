@@ -61,6 +61,15 @@ export interface PluginDefinition<
   lifecycleParams?:
     | Record<string, any>
     | ((params: PluginCallParams<TSettings, TShared & TInstance, TConfig>) => Record<string, any>);
+  params?:
+    | Record<string, any>
+    | ((params: PluginCallParams<TSettings, TShared & TInstance, TConfig>) => Record<string, any>);
+  templateData?:
+    | Record<string, any>
+    | ((params: PluginCallParams<TSettings, TShared & TInstance, TConfig>) => Record<string, any>);
+  data?:
+    | Record<string, any>
+    | ((params: PluginCallParams<TSettings, TShared & TInstance, TConfig>) => Record<string, any>);
   templateHelpers?:
     | Record<string, any>
     | ((params: PluginCallParams<TSettings, TShared & TInstance, TConfig>) => Record<string, any>);
@@ -103,4 +112,8 @@ export function addPlugin<
 
 export function extendParams(
   params: Record<string, any> | ((params: PluginCallParams) => Record<string, any>),
-): InstalledPluginEntry;
+): void;
+
+export function extendData(
+  data: Record<string, any> | ((params: PluginCallParams) => Record<string, any>),
+): void;

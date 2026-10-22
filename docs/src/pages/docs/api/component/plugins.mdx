@@ -5,7 +5,7 @@ title: Component - Plugins
 icon: plug
 description: API reference for registering and installing component plugins
 package: "@semantic-ui/component"
-methods: ["addPlugin", "extendParams", "registerPlugin"]
+methods: ["addPlugin", "extendData", "extendParams", "registerPlugin"]
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
@@ -89,6 +89,29 @@ extendParams(({ el }) => ({
 
 <PlaygroundExample id="extend-params" height="410" direction="horizontal"></PlaygroundExample>
 
+### extendData
+
+```javascript
+extendData(data);
+```
+
+Adds custom properties to the template data context of every component and subtemplate.
+
+#### Parameters
+
+| Name | Type               | Required | Description                                                                                      |
+|------|--------------------|----------|--------------------------------------------------------------------------------------------------|
+| data | Object \| Function | Yes      | An object of properties to inject, or a function `({ el, state, ... }) => ({ ... })` per instance |
+
+#### Usage
+
+```javascript
+import { extendData } from '@semantic-ui/component';
+import { user } from './auth.js';
+
+extendData({ user });
+```
+
 ## Authoring Plugins
 
 ### registerPlugin
@@ -115,6 +138,7 @@ Registers a plugin definition by its `namespace` and returns the normalized defi
 | setup           | Function           | `undefined`    | Runs once when `addPlugin` is called to return shared state or methods across all instances             |
 | createPlugin    | Function           | `undefined`    | Runs once per matching component to return methods attached to `self` and `el[namespace]`               |
 | lifecycleParams | Object \| Function | `undefined`    | Properties or factory `({ self, settings, ... }) => ({ ... })` added to component callback arguments (`params` is accepted as an alias) |
+| templateData    | Object \| Function | `undefined`    | Properties or factory `({ self, settings, ... }) => ({ ... })` added to the template data context (`data` is accepted as an alias) |
 | templateHelpers | Object \| Function | `undefined`    | Global helpers object or per-component factory `({ self, settings, ... }) => ({ ... })`                 |
 | onCreated       | Function           | `undefined`    | Runs when a matching component is created                                                               |
 | onRendered      | Function           | `undefined`    | Runs when a matching component is rendered                                                              |

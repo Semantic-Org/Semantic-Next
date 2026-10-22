@@ -2,8 +2,13 @@ import { $ } from '@semantic-ui/query';
 import { flush, signal } from '@semantic-ui/reactivity';
 import { each, fill, get, isArray, isBoolean, isEmpty, isFunction, isPlainObject, isString } from '@semantic-ui/utils';
 import { afterEach, describe, expect, it } from 'vitest';
-import { addPlugin, defineComponent, extendParams, registerPlugin } from '../../src/index.js';
-import { clearAvailablePlugins, clearExtendedParams, clearRegisteredPlugins } from '../../src/plugins/index.js';
+import { addPlugin, defineComponent, extendData, extendParams, registerPlugin } from '../../src/index.js';
+import {
+  clearAvailablePlugins,
+  clearExtendedData,
+  clearExtendedParams,
+  clearRegisteredPlugins,
+} from '../../src/plugins/index.js';
 
 let tagCounter = 0;
 const uniqueTag = (prefix = 'plugin-test') => `${prefix}-${++tagCounter}`;
@@ -28,6 +33,7 @@ afterEach(() => {
   }
   clearAvailablePlugins();
   clearRegisteredPlugins();
+  clearExtendedData();
   clearExtendedParams();
 });
 
@@ -654,11 +660,13 @@ describe('Component Plugins', () => {
             return settings.locale;
           },
         }),
-        templateHelpers: ({ self, settings }) => ({
-          t: self.t,
+        templateData: ({ settings }) => ({
           get locale() {
             return settings.locale;
           },
+        }),
+        templateHelpers: ({ self }) => ({
+          t: self.t,
         }),
       });
 
@@ -678,7 +686,8 @@ describe('Component Plugins', () => {
       });
 
       const { el } = await mount({
-        template: "<h2>{t 'title' { plan: plan }}</h2><p>30 {t 'days'}</p><button class=\"lang\">{locale}</button>",
+        template:
+          "<h2>{t 'title' { plan: plan }}</h2><p>30 {t 'days'}</p><button class=\"lang\">{locale}</button><span class=\"is-en\">{#if is locale 'en'}EN{else}FR{/if}</span>",
         defaultSettings: { plan: 'Pro' },
         i18n: 'checkout',
         events: {
@@ -691,6 +700,7 @@ describe('Component Plugins', () => {
       expect(el.$('h2').text()).toBe('Forfait Pro');
       expect(el.$('p').text()).toBe('30 jours');
       expect(el.$('.lang').text()).toBe('fr');
+      expect(el.$('.is-en').text()).toBe('FR');
 
       el.$('.lang').click();
       flush();
@@ -698,6 +708,7 @@ describe('Component Plugins', () => {
       expect(el.$('h2').text()).toBe('Plan Pro');
       expect(el.$('p').text()).toBe('30 days');
       expect(el.$('.lang').text()).toBe('en');
+      expect(el.$('.is-en').text()).toBe('EN');
 
       // Runtime bundle injection via setup's addStrings
       el.i18n.addStrings({
@@ -768,7 +779,7 @@ describe('Component Plugins', () => {
           subscribe: self.subscribe,
           subscriptions: self.handles,
         }),
-        templateHelpers: ({ self }) => ({
+        templateData: ({ self }) => ({
           subscriptions: self.handles,
         }),
       });
@@ -992,6 +1003,34 @@ describe('Component Plugins', () => {
       flush();
 
       expect(store.get('sui:filterBar.sort')).toBe(JSON.stringify('newest'));
+    });
+
+    it('6. extendData & templateData: injects reactive data context values and yields to component settings/state/instance', async () => {
+      const currentUser = signal({ name: 'Ada', role: 'admin' });
+
+      extendData({
+        user: () => currentUser.get(),
+        get role() {
+          return currentUser.get().role;
+        },
+        shadowed: 'from-extendData',
+      });
+
+      const { el } = await mount({
+        template:
+          '<span class="user">{user.name}</span><span class="admin">{#if is role \'admin\'}yes{else}no{/if}</span><span class="shadow">{shadowed}</span>',
+        defaultSettings: { shadowed: 'from-component' },
+      });
+
+      expect(el.$('.user').text()).toBe('Ada');
+      expect(el.$('.admin').text()).toBe('yes');
+      expect(el.$('.shadow').text()).toBe('from-component');
+
+      currentUser.set({ name: 'Grace', role: 'member' });
+      flush();
+
+      expect(el.$('.user').text()).toBe('Grace');
+      expect(el.$('.admin').text()).toBe('no');
     });
   });
 });

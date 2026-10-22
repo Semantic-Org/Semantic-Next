@@ -104,6 +104,7 @@ registerPlugin({
   resolveSettings, // custom resolver for user settings
   createPlugin, // instance creation factory
   lifecycleParams, // args to add to lifecycle events
+  templateData, // data values to add to templates
   templateHelpers, // obj of template helpers to add
   onCreated, // runs on component created
   onRendered, // runs on component rendered
@@ -238,6 +239,24 @@ const templateHelpers = ({ self }) => ({
 ```sui title="User Template"
 <h3>{t 'title'}</h3>
 <p>{t 'subtotal'}</p>
+```
+
+### Template Data
+
+Use `templateData` to add values to a component's [data context](/docs/guides/templates/expressions) so they can be read directly inside template expressions.
+
+```javascript title="Plugin" {2-4}
+const templateData = ({ settings }) => ({
+  get locale() {
+    return settings.locale;
+  },
+});
+```
+
+```sui title="User Template" {1}
+{#if is locale 'en'}
+  <span>{locale}</span>
+{/if}
 ```
 
 ### Plugin Settings

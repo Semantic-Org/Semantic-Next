@@ -61,6 +61,8 @@ export class Plugin {
     createPlugin,
     params, // what params should be added to lifecycle events
     lifecycleParams,
+    data, // what data should be added to template data context
+    templateData,
     templateHelpers, // template helpers to be added to templates
     onCreated = noop,
     onRendered = noop,
@@ -80,6 +82,7 @@ export class Plugin {
       sharedState,
       createPlugin,
       params: params || lifecycleParams,
+      templateData: templateData || data,
       templateHelpers,
       onCreated: noop,
       onRendered: noop,
@@ -152,6 +155,15 @@ export class Plugin {
         : this.params;
       if (isObject(params)) {
         template.addParams(params);
+      }
+    }
+
+    if (this.templateData) {
+      const data = isFunction(this.templateData)
+        ? this.templateData.call(this.instance, this.callParams)
+        : this.templateData;
+      if (isObject(data)) {
+        template.addData(data);
       }
     }
 
@@ -296,6 +308,7 @@ export class Plugin {
       namespace: this.namespace,
       appliesTo: this.appliesTo,
       params: this.params,
+      templateData: this.templateData,
       templateHelpers: this.templateHelpers,
       createPlugin: this.createPlugin,
       sharedState: this.sharedState,
