@@ -16,6 +16,28 @@ type: skill
 
 ---
 
+## Measured Prose Cadence ("Email to an Executive")
+
+Agents told to write "one sentence per code block" often cheat by writing a 25–30 word compound sentence (~175 characters) that wraps across 3 lines.
+
+Measured across shipped Semantic UI component guides (`docs/src/pages/docs/guides/components/`):
+
+| Page | Median Paragraph Chars | Avg Words / Paragraph | 1-Sentence Paragraphs | Avg Words / Sentence |
+|------|------------------------|-----------------------|-----------------------|----------------------|
+| `settings.mdx` | 79 chars | 14.0 words | 100% | 14.0 words |
+| `instances.mdx` | 96 chars | 16.5 words | 95% | 15.7 words |
+| `plugins.mdx` (Maintainer rewrite) | 103 chars | 20.6 words | 84% | 17.7 words |
+| `events.mdx` | 109 chars | 19.2 words | 81% | 16.2 words |
+| `create.mdx` | 111 chars | 19.2 words | 79% | 15.9 words |
+| `keys.mdx` | 122 chars | 19.1 words | 67% | 14.3 words |
+| `plugins.mdx` *(Agent draft — rejected)* | *172 chars* | *25.1 words* | *95%* | *23.9 words* |
+
+**Takeaway:** A guide paragraph is a **single line on desktop (~80–120 characters, ~15–18 words)**.
+- ❌ **Agent sentence (198 chars, 28 words):** *"Once added, a plugin can be configured directly on `defineComponent` under its name (`i18n`), and any template helpers or callback arguments it provides are immediately available inside the component."*
+- ✅ **Maintainer sentence (83 chars, 15 words):** *"Plugins can be configured directly from `defineComponent` by passing a key with the plugin's name"*
+
+---
+
 ## 1. Audience Modeling & Section Ordering (`2 + Addendum`)
 
 ### ❌ Agent Draft: Ordered by internal architecture, interrupts consumers with author mechanics

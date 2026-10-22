@@ -173,35 +173,7 @@ These three rules hold on **every** guide page without exception:
 
 ### 1. Gloss Anything Unrelated to What the Snippet Teaches
 
-Every line in a code block that isn't part of the current lesson is visual noise. Use shorthand identifiers or comments (`tagName, createComponent, // rest`) or omit unrelated keys entirely.
-
-❌ **Full boilerplate (reader has to hunt for `i18n`):**
-```javascript
-defineComponent({
-  tagName: 'checkout-summary',
-  template: '<h3>{t "title"}</h3>',
-  css: '.summary { padding: 1rem; }',
-  defaultSettings: { currency: 'USD' },
-  i18n: {
-    lang: 'es',
-  },
-  createComponent({ self }) {
-    return {};
-  },
-});
-```
-
-✅ **Glossed (only the lesson is expanded):**
-```javascript title='User' {2-4}
-defineComponent({
-  i18n: {
-    lang: 'es', // component uses a diff lang
-  },
-  tagName,
-  createComponent,
-  // rest
-});
-```
+Every line in a code block that isn't part of the current lesson is visual noise. Use shorthand identifiers or comments (`tagName, createComponent, // rest`) or omit unrelated keys entirely. Never make the reader parse setup boilerplate to find the 2 lines that matter. (See `docs-page-guide-examples` for side-by-side comparisons.)
 
 ### 2. Maximum ~10 Lines per Code Sample
 
@@ -210,7 +182,16 @@ Code samples in guides should be **at most ~10 lines**, and only that many when 
 2. Multiple concepts (`createPlugin`, `lifecycleParams`, `templateHelpers`) are crammed into one block instead of split into separate `###` subsections.
 3. It is a full working demo that belongs in a `<PlaygroundExample>`, not an inline snippet.
 
-### 3. Write From the User's Callsite, Never From the Source Code
+### 3. Paragraph & Sentence Budget ("Email to an Executive")
+
+Lazy readers scan; they do not read multi-line blocks of text. Telling an agent "write one sentence per code block" fails if the agent cheats by writing a 30-word, 190-character compound sentence that wraps across 3 lines.
+
+Measured across shipped Semantic UI component guides (`settings`, `instances`, `plugins`, `events`, `create`):
+- **80–95% of paragraphs are a single sentence** (1.0–1.2 sentences per paragraph).
+- **Median paragraph length is ~95–110 characters (~15–18 words)** — a single line on desktop.
+- **Target**: Keep lead-in sentences to **one clause, ~15 words, ~80–120 characters**. If a sentence needs a comma + conjunction or a participial clause to pack in a second idea, cut the second idea or move it after the code block.
+
+### 4. Write From the User's Callsite, Never From the Source Code
 
 An agent that just read the implementation will naturally narrate internal mechanisms (*"defaultSettings merged in addPlugin are wrapped in a reactive proxy, while non-overridden keys read through the prototype chain"*). A reader with no familiarity with the internals does not know what "reactive proxy" means and does not care.
 
@@ -221,56 +202,11 @@ An agent that just read the implementation will naturally narrate internal mecha
 
 ## Bag of Structural Techniques
 
-Use these techniques when they fit the material — they are tools in a kit, **not** a cookie-cutter template to stamp onto every page.
+Use these techniques when they fit the material — they are tools in a kit, **not** a cookie-cutter template to stamp onto every page. See [`docs-page-guide-examples`](./docs-page-guide-examples.md) for side-by-side code comparisons of each:
 
-### Paired Actor Code Blocks (`title="..."` + `{line-highlights}`)
-
-When a concept involves two sides (author vs. consumer, component vs. template, Query vs. Native DOM, match vs. non-match), pair two 5–8 line code blocks with `title="Plugin"` and `title="User"` (or `title="User (Plugin Used)"` / `title="User (Plugin Not Used)"`) and `{line-highlights}`. The juxtaposition explains the relationship better than a paragraph of prose.
-
-```javascript title='Plugin' {3-5}
-registerPlugin({
-  name: 'i18n',
-  defaultSettings: {
-    lang: 'en',
-  },
-});
-```
-
-```javascript title='User' {2-4}
-defineComponent({
-  i18n: {
-    lang: 'es', // component uses a diff lang
-  },
-  tagName,
-  createComponent,
-  // rest
-});
-```
-
-### Commented Config Skeleton
-
-When introducing an API that takes an options bag (`defineComponent`, `registerPlugin`, `registerBehavior`), show the whole object shape once with 4–7 word inline comments on each key before breaking each key out into its own `###` subsection:
-
-```javascript
-registerPlugin({
-  namespace, // how its stored on el
-  defaultSettings, // setting a user can write with defaults
-  resolveSettings, // custom resolver for user settings
-  createPlugin, // instance creation factory
-  lifecycleParams, // args to add to lifecycle events
-  templateHelpers, // obj of template helpers to add
-  onCreated, // runs on component created
-  onRendered, // runs on component rendered
-  onDestroyed, // runs on component destroyed
-  appliesTo, // determines which components plugin applies to
-});
-```
-
-### Ways to Open a Guide Page
-
-Vary the opening to match the page's scope (never stamp the same opening structure onto every page):
-- **Broad multi-feature topic** (e.g. `plugins.mdx`, `instances.mdx`): One sentence stating what the feature enables, followed by a 3–5 bullet capability list with `#anchor` links to the sections below.
-- **Focused single-concept topic** (e.g. `settings.mdx`, `state.mdx`): One sentence defining the concept and how it differs from its sibling concept (`Settings` vs `State`), then straight into the first code block.
+- **Paired Actor Code Blocks (`title="Plugin"` + `title="User"`, `{line-highlights}`)**: When a concept involves two sides (author vs. consumer, component vs. template, Query vs. Native DOM, `User (Plugin Used)` vs. `User (Plugin Not Used)`), pair two 5–8 line code blocks. The juxtaposition explains the relationship without prose.
+- **Commented Config Skeleton**: When introducing an API that takes an options bag (`defineComponent`, `registerPlugin`, `registerBehavior`), show the whole object shape once with 4–7 word inline comments on each key before breaking each key out into its own `###` subsection.
+- **Varying the Page Opening**: Match the opening to the page's scope (never stamp the same opening onto every page) — a broad multi-feature page can open with 1 sentence + a 3–5 bullet capability list with `#anchor` links, while a single-concept page can open with 1 sentence and go straight into code.
 
 ---
 
