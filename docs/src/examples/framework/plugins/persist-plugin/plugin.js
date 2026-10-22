@@ -1,6 +1,5 @@
 import { registerPlugin } from '@semantic-ui/component';
-import { reaction } from '@semantic-ui/reactivity';
-import { each, inArray, intersection, keys } from '@semantic-ui/utils';
+import { each, intersection, keys } from '@semantic-ui/utils';
 
 const onCreated = ({ state, config, self, reaction }) => {
   // track only the keys specified in config

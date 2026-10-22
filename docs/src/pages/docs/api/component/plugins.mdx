@@ -16,21 +16,21 @@ Install plugins into the component runtime, inject callback parameters, and regi
 ### addPlugin
 
 ```javascript
-addPlugin(pluginOrNamespace, appSettings);
+addPlugin(plugin, userSettings);
 ```
 
 Installs a plugin into the component runtime with optional application-wide settings.
 
 #### Parameters
 
-| Name              | Type             | Required | Description                                                          |
-|-------------------|------------------|----------|----------------------------------------------------------------------|
-| pluginOrNamespace | Object \| string | Yes      | A plugin definition object or the `namespace` of a registered plugin |
-| appSettings       | Object           | No       | Application-level settings merged over the plugin's `defaultSettings` |
+| Name         | Type             | Required | Description                                                          |
+|--------------|------------------|----------|----------------------------------------------------------------------|
+| plugin       | Object \| string | Yes      | A plugin definition object or the `namespace` of a registered plugin |
+| userSettings | Object           | No       | Application-level settings merged over the plugin's `defaultSettings` |
 
 #### Returns
 
-An installed plugin entry containing the resolved `namespace`, `definition`, reactive `pluginSettings`, and `sharedState`.
+An available `Plugin` instance (`isPrototype: true`) containing the resolved `namespace`, reactive `settings`, and `sharedState`.
 
 #### Usage
 
@@ -56,17 +56,13 @@ addPlugin(I18n, {
 extendParams(params);
 ```
 
-Installs a plugin that merges custom properties into the callback arguments received by every component and subtemplate (`createComponent`, `onCreated`, `onRendered`, `onDestroyed`, `events`, `keys`).
+Merges custom properties into the callback arguments (`customParams`) received by every component and subtemplate (`createComponent`, `onCreated`, `onRendered`, `onDestroyed`, `events`, `keys`).
 
 #### Parameters
 
 | Name   | Type               | Required | Description                                                                                      |
 |--------|--------------------|----------|--------------------------------------------------------------------------------------------------|
 | params | Object \| Function | Yes      | An object of properties to inject, or a function `({ el, state, ... }) => ({ ... })` per instance |
-
-#### Returns
-
-The installed plugin entry.
 
 #### Usage
 
@@ -113,15 +109,15 @@ Registers a plugin definition by its `namespace` and returns the normalized defi
 
 | Name            | Type               | Default        | Description                                                                                             |
 |-----------------|--------------------|----------------|---------------------------------------------------------------------------------------------------------|
-| namespace       | string             | —              | Unique key used for top-level `defineComponent` configuration, `template.plugins[namespace]`, and `el[namespace]` |
-| defaultSettings | Object             | `{}`           | Default plugin settings merged with `addPlugin` settings and wrapped in a reactive proxy                |
-| resolveSettings | Function           | `undefined`    | Normalizes the per-component `defineComponent({ [namespace]: config })` value into instance settings    |
-| setup           | Function           | `undefined`    | Runs once when `addPlugin` is called; its return value becomes the prototype of every instance's `self` |
+| namespace       | string             | —              | Unique key used for top-level `defineComponent` configuration, `template.pluginConfig[namespace]`, `el.plugins[namespace]`, and `el[namespace]` (`name` is accepted as an alias) |
+| defaultSettings | Object             | `{}`           | Default plugin settings merged with `addPlugin` `userSettings` and wrapped in a reactive proxy          |
+| resolveSettings | Function           | `undefined`    | Normalizes the per-component `defineComponent({ [namespace]: config })` value into instance `settings`  |
+| setup           | Function           | `undefined`    | Runs once when `addPlugin` is called; its return value (`sharedState`) becomes the prototype of every instance's `self` |
 | createPlugin    | Function           | `undefined`    | Runs once per matching component instance; its returned methods are attached to `self` and `el[namespace]` |
-| lifecycleParams | Object \| Function | `undefined`    | Properties or factory `({ self, settings, ... }) => ({ ... })` merged into component callback arguments |
+| lifecycleParams | Object \| Function | `undefined`    | Properties or factory `({ self, settings, ... }) => ({ ... })` merged into component callback arguments (`params` is accepted as an alias) |
 | templateHelpers | Object \| Function | `undefined`    | Global helpers object or per-instance factory `({ self, settings, ... }) => ({ ... })`                  |
-| onCreated       | Function           | `undefined`    | Runs after the component's `onCreated` callback                                                         |
-| onRendered      | Function           | `undefined`    | Runs after the component's `onRendered` callback                                                        |
+| onCreated       | Function           | `undefined`    | Runs before the component's `onCreated` callback                                                        |
+| onRendered      | Function           | `undefined`    | Runs before the component's `onRendered` callback                                                       |
 | onDestroyed     | Function           | `undefined`    | Runs before the component's `onDestroyed` callback                                                      |
 | appliesTo       | string \| string[] \| Function | `'components'` | Controls which components or subtemplates receive the plugin                                |
 
