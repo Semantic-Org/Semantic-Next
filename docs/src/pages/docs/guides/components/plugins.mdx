@@ -245,11 +245,9 @@ const templateHelpers = ({ self }) => ({
 
 Use `templateData` to add values to a component's [data context](/docs/guides/templates/expressions) so they can be read directly inside template expressions.
 
-```javascript title="Plugin" {2-4}
+```javascript title="Plugin" {2}
 const templateData = ({ settings }) => ({
-  get locale() {
-    return settings.locale;
-  },
+  locale: () => settings.locale,
 });
 ```
 

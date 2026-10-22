@@ -34,9 +34,7 @@ const lifecycleParams = ({ self }) => ({
 
 // expose { locale } in template expressions
 const templateData = ({ settings }) => ({
-  get locale() {
-    return settings.locale;
-  },
+  locale: () => settings.locale,
 });
 
 // expose {t 'key'} helper in component templates

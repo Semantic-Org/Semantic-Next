@@ -661,9 +661,7 @@ describe('Component Plugins', () => {
           },
         }),
         templateData: ({ settings }) => ({
-          get locale() {
-            return settings.locale;
-          },
+          locale: () => settings.locale,
         }),
         templateHelpers: ({ self }) => ({
           t: self.t,
