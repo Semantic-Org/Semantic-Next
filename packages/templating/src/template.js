@@ -368,12 +368,13 @@ export const Template = class Template {
     const RendererClass = (Template.isServer && engine.serverRenderer)
       ? engine.serverRenderer
       : engine.renderer;
+    this.helpers ??= Object.create(TemplateHelpers);
     this.renderer = new RendererClass({
       ast: this.ast,
       data: this.overlaySettingsSignals(this.getDataContext()),
       template: this,
       subTemplates: this.subTemplates,
-      helpers: this.helpers || TemplateHelpers,
+      helpers: this.helpers,
       receivesData: this.isSubtemplate(),
     });
 
@@ -489,6 +490,9 @@ export const Template = class Template {
     }
     this.pluginCallParams ??= {};
     extend(this.pluginCallParams, params);
+    if (this.callParams) {
+      this.callParams = this.buildCallParams();
+    }
   }
 
   addHelpers(helpers) {
@@ -497,6 +501,7 @@ export const Template = class Template {
     }
     this.helpers ??= Object.create(TemplateHelpers);
     extend(this.helpers, helpers);
+    this.renderer?.bumpDataVersion?.();
   }
 
   clone(settings) {

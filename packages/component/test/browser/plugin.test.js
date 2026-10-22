@@ -119,6 +119,33 @@ describe('Component Plugins', () => {
         callerTag: 'from:myWidget',
       });
     });
+
+    it('supports calling el.template.addHelpers and el.template.addParams directly from the DOM', async () => {
+      let clickedWithParam;
+      const { el } = await mount({
+        template: '<button class="act">{shout label}</button>',
+        defaultState: { label: 'hello' },
+        events: {
+          'click .act'({ domInjected }) {
+            clickedWithParam = domInjected;
+          },
+        },
+      });
+
+      el.template.addHelpers({
+        shout: (val) => `${String(val).toUpperCase()}!`,
+      });
+      el.template.addParams({
+        domInjected: 'from-dom',
+      });
+      el.template.state.label.set('ready');
+      flush();
+
+      expect(el.$('.act').text()).toBe('READY!');
+
+      el.$('.act').click();
+      expect(clickedWithParam).toBe('from-dom');
+    });
   });
 
   describe('Settings Hierarchy, Reactive Proxy & resolveSettings', () => {
