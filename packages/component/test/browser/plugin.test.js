@@ -159,9 +159,8 @@ describe('Component Plugins', () => {
         },
         resolveSettings: ({ settings, config }) => {
           if (isString(config)) {
-            return { ...settings, density: config };
+            settings.density = config;
           }
-          return settings;
         },
         setup: ({ settings }) => ({
           setAccent(next) {
