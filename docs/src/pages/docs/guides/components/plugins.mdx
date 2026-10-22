@@ -6,9 +6,13 @@ description: Extending components with plugins, callback parameters, and templat
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-In most component frameworks, sharing cross-cutting features like internationalization, state persistence, or analytics across components means wrapping your tree in context providers or repeating boilerplate hooks inside every file.
+Plugins in Semantic UI let you extend [`defineComponent`](/docs/guides/components/create#defining-components) directly to give new functionality like [i18n](#usage-example), [state persistence](/examples/persist-plugin), or any other features that enhance what a component can do.
 
-In Semantic UI, plugins extend [`defineComponent`](/docs/guides/components/create#defining-components) directly, letting you add new top-level component options, [callback arguments](/docs/guides/components/lifecycle#callback-arguments), [template helpers](/docs/guides/templates/helpers), and [instance methods](/docs/guides/components/instances) across your application.
+With plugins you can do things like:
+* **Enhance Components** - Add [new config options](#plugin-settings) to `defineComponent` that get passed to your code.
+* **Add Arguments to Lifecycle Callbacks** - Add new top-level lifecycle arguments available to users [callback arguments](/docs/guides/components/lifecycle#callback-arguments)
+* **Add Helpers** - Add custom [template helpers](/docs/guides/templates/helpers)
+* **Run Code on Lifecycle** - Run code on component create, render, destroy, or other lifecycle events
 
 > See the [Component Plugins API Reference](/docs/api/component/plugins) for method signatures and options.
 
@@ -16,9 +20,21 @@ In Semantic UI, plugins extend [`defineComponent`](/docs/guides/components/creat
 
 ### Adding a Plugin
 
-Call [`addPlugin`](/docs/api/component/plugins#addplugin) once in your application setup to enable a plugin and configure its application-wide [settings](/docs/guides/components/settings).
 
-```javascript {5-8}
+To enable a plugin on your app call [`addPlugin`](/docs/api/component/plugins#addplugin) once in your application setup to enable a plugin and configure its application-wide [settings](/docs/guides/components/settings).
+
+Third party plugins can be used from NPM packages by calling `addPlugin`
+
+```javascript {4} title="Third Party Plugins"
+import { addPlugin } from '@semantic-ui/component';
+import { ContainerQueryPlugin } from '@third-party/container-plugin'
+
+addPlugin(ContainerQueryPlugin, { config: 'setting'});
+```
+
+You can also [write your own plugins](#authoring-plugins) and import them locally
+
+```javascript {5-8} title="Local Plugins"
 import { addPlugin } from '@semantic-ui/component';
 import { I18n } from './i18n-plugin.js';
 import { strings } from './locales.js';
@@ -29,86 +45,78 @@ addPlugin(I18n, {
 });
 ```
 
-### Using in a Component
+### Using Plugins in Components
 
-Once added, a plugin can be configured directly on [`defineComponent`](/docs/guides/components/create#defining-components) under its name (`i18n`), and any [template helpers](/docs/guides/templates/helpers) or [callback arguments](/docs/guides/components/lifecycle#callback-arguments) it provides are immediately available inside the component.
+Plugins can be configured directly from `defineComponent` by passing a key with the plugin's name
 
-```javascript {2,9}
+```javascript {6-8}
+defineComponent({
+  tagName: 'my-component',
+  createComponent,
+  onCreated,
+  onDestroyed,
+  i18n: {
+    locale: 'en',
+  },
+});
+```
+
+Some plugins might also expose new lifecycle arguments that you can access to interact with their APIs.
+
+```javascript {3}
 const events = {
   'click ui-button'({ i18n, data }) {
     i18n.setLocale(data.locale);
   },
 };
-
-defineComponent({
-  tagName: 'checkout-summary',
-  i18n: 'checkout', // uses checkout translations for this component
-  template: `<h3>{t 'title'}</h3>`,
-  events,
-});
+```
+Or custom template helpers that are enabled when you activate the plugin
+```sui title='template.html'
+<h3>{t 'title'}</h3>
+<p>{t 'description'}</p>
 ```
 
-Just like methods returned from [`createComponent`](/docs/guides/components/instances#from-dom) are accessible on the [DOM element](/docs/guides/components/dom), a plugin's methods are also attached at `el[namespace]`:
+You can also access the plugin from the DOM from any component
 
 ```javascript
-document.querySelector('checkout-summary').i18n.setLocale('es');
+document.querySelector('my-component').pluginName.method();
 ```
+
+
+### Usage Example
+
+In this example a user has added an i18n plugin which lets them adjust currency, locale, and other configuration then read them in their component.
 
 <PlaygroundExample id="component-plugins" height="440" direction="horizontal"></PlaygroundExample>
 
-## Extending Callbacks
-
-### Shared Parameters
-
-Every Semantic UI callback ([`createComponent`](/docs/guides/components/instances#create-component), [event handlers](/docs/guides/components/events), [keybindings](/docs/guides/components/keys), and [lifecycle events](/docs/guides/components/lifecycle)) receives a single destructurable [callback arguments](/docs/guides/components/lifecycle#callback-arguments) object so you can pull in what a function needs without managing imports or `this` context.
-
-If you want to add shared application utilities or services to that argument bag across all components without authoring a full plugin, use [`extendParams`](/docs/api/component/plugins#extendparams):
-
-```javascript {4-6}
-import { extendParams } from '@semantic-ui/component';
-
-// can now be destructured in any component callback
-extendParams({
-  setCurrency: (code) => currency.set(code),
-  formatPrice: (usd) => format(usd, currency.get()),
-});
-```
-
-### Per-Component Parameters
-
-If the injected helper needs context from the component itself, such as its DOM element `el`, [`state`](/docs/guides/components/state), or [`settings`](/docs/guides/components/settings), pass a function to `extendParams`:
-
-```javascript {1-3}
-extendParams(({ el }) => ({
-  track: (event, data) => analytics.send(el?.tagName, event, data),
-}));
-```
-
-<PlaygroundExample id="extend-params" height="440" direction="horizontal"></PlaygroundExample>
 
 ## Authoring Plugins
 
-### Custom Component Options
+### Registering Plugins
 
-[`registerPlugin`](/docs/api/component/plugins#registerplugin) mirrors the structure of [`defineComponent`](/docs/guides/components/create#standard-component) at the framework level. Its `namespace` becomes a new top-level option that any component can pass to `defineComponent`:
+[`registerPlugin`](/docs/api/component/plugins#registerplugin) lets a component author define their plugin. See the [API Reference](/docs/api/component/plugins) for further details
 
-```javascript {3}
-defineComponent({
-  tagName: 'sticky-note',
-  persist: ['note'], // saves state.note to localStorage
-  defaultState: { note: '' },
+
+```javascript
+registerPlugin({
+  namespace, // how its stored on el
+  defaultSettings, // setting a user can write with defaults
+  resolveSettings, // custom resolver for user settings
+  createPlugin, // instance creation factory
+  lifecycleParams, // args to add to lifecycle events
+  templateHelpers, // obj of template helpers to add
+  onCreated, // runs on component created
+  onRendered, // runs on component rendered
+  onDestroyed, // runs on component destroyed
+  appliesTo, // determines which components plugin applies to
 });
 ```
 
-Whatever value a component passes to `persist` is delivered to your plugin's [lifecycle callbacks](/docs/guides/components/lifecycle#lifecycle-callbacks) (`onCreated`, `onRendered`, `onDestroyed`) as `config`, alongside the component's [`state`](/docs/guides/components/state), [`settings`](/docs/guides/components/settings), and [reactivity helpers](/docs/guides/components/reactivity) (`reaction`, `signal`).
-
-Setting `appliesTo: 'configured'` runs the plugin only on components that specify `persist`, whereas `'components'` (the default) runs on all web components and `'all'` includes [subtemplates](/docs/guides/templates/subtemplates):
-
 <PlaygroundExample id="persist-plugin" height="460" direction="horizontal"></PlaygroundExample>
 
-### Plugin Instances
+### Creating a Plugin
 
-`createPlugin` works just like [`createComponent`](/docs/guides/components/instances#create-component), returning the methods and properties that make up the plugin's instance (`self`) for each component.
+`createPlugin` like [`createComponent`](/docs/guides/components/instances#create-component) lets you create your plugin instance. This is used internally from any callback as `self` and lets you provide an external API for your plugin.
 
 ```javascript title="i18n-plugin.js"
 const createPlugin = ({ settings }) => ({
@@ -123,29 +131,94 @@ const createPlugin = ({ settings }) => ({
 });
 ```
 
-Just like a component instance is attached to its host element, the plugin instance is attached at `el[namespace]` so it can be called from [outside the component](/docs/guides/components/instances#from-dom):
+#### DOM Access
 
-```javascript
+Your plugin instance can be accessed [outside the component](/docs/guides/components/instances#from-dom) from the DOM
+
+```javascript title="Query"
+$('checkout-summary').el().i18n.setLocale('es');
+```
+
+```javascript title="Native"
 document.querySelector('checkout-summary').i18n.setLocale('es');
+```
+
+### Specifying When Plugin Applies
+
+Your plugin can use `appliesTo` to specify when it should be applied. This permits keywords or a function that runs once for each component to determine if its applicable
+
+
+#### Scoping Values
+
+| Value                     | Behavior                                                                                  |
+|---------------------------|-------------------------------------------------------------------------------------------|
+| `'components'` (default)  | Top-level web components, plus subtemplates that explicitly set `[namespace]`             |
+| `'all'` or `'templates'`  | Every web component and subtemplate                                                       |
+| `'configured'`            | Only components or subtemplates that pass `[namespace]` in `defineComponent`              |
+| `tagName` or `tagName[]`    | Components matching the given `tagName`                       |
+| `templateName` or `templateName[]`    | Components matching the given `templateName`                                    |
+
+#### Custom Applies To
+
+You can use a callback for `appliesTo` to determine at run-time whether a plugin should apply
+
+```js title='Plugin' {6-9}
+registerPlugin({
+  name: 'currencyLocale',
+  defaultSettings: {
+    language: 'en',
+  },
+  // apply if a user has `currency` in their own settings
+  appliesTo({ componentSettings }) {
+    return Boolean(componentSettings?.currency);
+  },
+  resolveSettings({ self, componentSettings }) {
+    return {
+      language: self.getLanguage(componentSettings.currency),
+    };
+  },
+});
+```
+
+```js title="User (Plugin Used)" {3-6}
+defineComponent({
+  tagName: 'money-input',
+  // component has currency
+  defaultSettings: {
+    currency: 'usd',
+  },
+});
+```
+
+```js title="User (Plugin Not Used)" {3-6}
+defineComponent({
+  tagName: 'text-input',
+  // not related to currency
+  defaultSettings: {
+    value: '',
+  },
+});
 ```
 
 ### Callback Parameters
 
-Use `lifecycleParams` to add your plugin's methods or properties to the [callback arguments](/docs/guides/components/lifecycle#callback-arguments) received by [`createComponent`](/docs/guides/components/instances#create-component), [event handlers](/docs/guides/components/events), [keybindings](/docs/guides/components/keys), and [lifecycle callbacks](/docs/guides/components/lifecycle):
+`lifecycleParams` lets you pass your plugin's methods or properties to component's [callback arguments](/docs/guides/components/lifecycle#callback-arguments) received by lifecycle events like [`createComponent`](/docs/guides/components/instances#create-component), [event handlers](/docs/guides/components/events), [keybindings](/docs/guides/components/keys), and [lifecycle callbacks](/docs/guides/components/lifecycle)
 
-```javascript title="i18n-plugin.js"
+> [`extendParams`](#extending-callbacks) (see below) can be used by itself to pass through simple functions or helpers without authoring a full plugin.
+
+```javascript title="Plugin" {3}
 const lifecycleParams = ({ self }) => ({
   t: self.t,
-  i18n: self,
+  i18n: self, // expose whole plugin to user
 });
 ```
 
 Components can then destructure `{ t, i18n }` directly inside any callback alongside standard arguments like `state` and `data`:
 
-```javascript title="component.js"
+```javascript title="User" {3}
 const events = {
   'click ui-button'({ i18n, data }) {
-    i18n.setLocale(data.locale);
+    i18n.setLocale(data.locale); // call a plugin API
   },
 };
 ```
@@ -156,37 +229,106 @@ Use `templateHelpers` to register [custom template helpers](/docs/guides/templat
 
 Unlike global helpers registered with [`registerHelpers`](/docs/guides/templates/helpers#multiple-helper-registration), passing a function to `templateHelpers` scopes the helpers to each component instance so `{t 'title'}` automatically resolves against that component's own plugin `settings`:
 
-```javascript title="i18n-plugin.js"
+```javascript title="Plugin"
 const templateHelpers = ({ self }) => ({
   t: self.t,
 });
 ```
 
-```sui title="component.html"
+```sui title="User Template"
 <h3>{t 'title'}</h3>
 <p>{t 'subtotal'}</p>
 ```
 
 ### Plugin Settings
 
-Plugin settings behave identically to [component settings](/docs/guides/components/settings) and specify reactive settings available across all downstream components.
+Plugin settings let you specify settings that a downstream user can set on their component.
 
-If you want to resolve runtime settings using custom logic, such as letting a component pass a shorthand like `i18n: 'checkout'` instead of an object, you can specify a [`resolveSettings`](/docs/api/component/plugins#options) function that returns the resolved settings from a user's `config`:
-
-```javascript {8-13}
-const defaultSettings = {
-  locale: 'en',
-  strings: {},
-  prefix: '',
-};
-
-// allow shorthand config like i18n: 'checkout'
-const resolveSettings = ({ settings, config }) => {
-  if (isString(config)) {
-    return { ...settings, prefix: config };
-  }
-  return settings;
-};
+```javascript title='Plugin' {3-5}
+registerPlugin({
+  name: 'i18n',
+  defaultSettings: {
+    lang: 'en',
+  },
+});
 ```
 
-Settings customized on a single component (like `prefix: 'checkout'`) apply only to that component, while shared settings (like `locale`) stay in sync across every component on the page.
+```javascript title='User' {2-4}
+defineComponent({
+  i18n: {
+    lang: 'es', // component uses a diff lang
+  },
+  tagName,
+  createComponent,
+  // rest
+});
+```
+
+### Advanced Plugin Settings
+
+If you need to customize how a user's settings are applied to your plugin use [`resolveSettings`](/docs/api/component/plugins#options).
+
+
+```javascript title='User' {2}
+defineComponent({
+  i18n: 'es', // shorthand use
+  tagName,
+  createComponent,
+  // rest
+});
+```
+
+```javascript title='Plugin' {6-11}
+registerPlugin({
+  name: 'i18n',
+  defaultSettings: {
+    lang: 'en',
+  },
+  // shorthand supported
+  resolveSettings({ settings, config }) {
+    if (isString(config)) {
+      settings.lang = config;
+    }
+  },
+});
+```
+
+## Extending Callbacks
+
+If you want to just provide additional component lifecycle params without writing a full plugin you can use `extendParams`.
+
+
+```javascript {3} title="Plugin"
+import { extendParams } from '@semantic-ui/component';
+extendParams({
+  setCurrency: (code) => currency.set(code),
+});
+```
+
+Users can then access those new params from any part of a component to call your plugins code.
+
+```javascript title="User" {4}
+defineComponent({
+  events: {
+    'click [data-currency]'({ setCurrency, data }) {
+      setCurrency(data.currency);
+    },
+  },
+});
+```
+
+### Per-Component Parameters
+
+Parameters themselves can use a callback function to make their behavior vary depend on how its called.
+
+This can be used to change behavior based on the DOM `el`, [`state`](/docs/guides/components/state), or [`settings`](/docs/guides/components/settings), or whatever else you can dream up.
+
+```javascript
+extendParams(({ el }) => ({
+  track: (event, data) => analytics.send(el?.tagName, event, data),
+}));
+```
+
+### Extend Params Example
+
+<PlaygroundExample id="extend-params" height="440" direction="horizontal"></PlaygroundExample>

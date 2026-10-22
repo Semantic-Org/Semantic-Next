@@ -10,9 +10,8 @@ const defaultSettings = {
 // allow shorthand config like i18n: 'checkout'
 const resolveSettings = ({ settings, config }) => {
   if (isString(config)) {
-    return { ...settings, prefix: config };
+    settings.prefix = config;
   }
-  return settings;
 };
 
 const createPlugin = ({ settings }) => ({
