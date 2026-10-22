@@ -11,6 +11,7 @@ import {
   Signal,
   signal,
 } from '@semantic-ui/reactivity';
+
 import {
   adoptStylesheet,
   any,
@@ -59,9 +60,6 @@ export const Template = class Template {
 
   static isServer = isServer;
 
-  static plugins = new Map();
-  static registeredPlugins = new Map();
-
   rendered = false;
   destroyed = false;
   lifecycleResolvers = {};
@@ -70,7 +68,9 @@ export const Template = class Template {
   constructor({
     templateName,
     tagName,
-    definitionOptions,
+    availablePlugins,
+    extendedParams,
+    pluginConfig,
     ast,
     template,
     preserveWhitespace = false,
@@ -113,7 +113,10 @@ export const Template = class Template {
     this.state = this.createReactiveState(defaultState, data) || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.tagName = tagName;
-    this.definitionOptions = definitionOptions;
+    this.availablePlugins = availablePlugins;
+    this.extendedParams = extendedParams;
+    this.pluginConfig = pluginConfig;
+    this.plugins = [];
     this.subTemplates = subTemplates;
     this.createComponent = createComponent;
     this.onCreated = noop;
@@ -139,7 +142,7 @@ export const Template = class Template {
 
   toDefinition() {
     return {
-      ...this.definitionOptions,
+      ...this.pluginConfig,
       template: this.template,
       css: this.css,
       createComponent: this.createComponent,
@@ -250,21 +253,11 @@ export const Template = class Template {
       this.createSubtemplateSettings();
     }
 
-    if (Template.initializePlugins) {
-      Template.initializePlugins(this);
-    }
+    this.initializeParams();
+    this.initializePlugins();
 
     if (isFunction(this.createComponent)) {
       instance = this.call(this.createComponent, { thisContext: this.instance }) || {};
-      if (instance.self === this.instance) {
-        // default identity createComponent returns the call bag, strip plugin params from instance
-        for (const key in this.pluginCallParams) {
-          delete instance[key];
-        }
-      }
-      else if (this.pluginCallParams) {
-        extend(this.pluginCallParams, instance);
-      }
       extend(template.instance, instance);
     }
     if (isFunction(template.instance.initialize)) {
@@ -283,7 +276,7 @@ export const Template = class Template {
       );
 
     this.onCreated = () => {
-      this.runPlugins?.('onCreated');
+      each(this.plugins, (plugin) => plugin.onCreated());
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
       this.resolveLifecyclePromise('created');
@@ -293,7 +286,7 @@ export const Template = class Template {
       }
     };
     this.onRendered = () => {
-      this.runPlugins?.('onRendered');
+      each(this.plugins, (plugin) => plugin.onRendered());
       this.call(this.onRenderedCallback);
       // allow a single hook for after render
       // this is used for binding events that cant use event delegation
@@ -335,7 +328,7 @@ export const Template = class Template {
       this.removeEvents();
       this.removeObservers();
       this.removeParent();
-      this.runPlugins?.('onDestroyed');
+      each(this.plugins, (plugin) => plugin.onDestroyed());
       this.call(this.onDestroyedCallback);
       this.resolveLifecyclePromise('destroyed');
       dispatchLifecycle('destroyed');
@@ -465,11 +458,67 @@ export const Template = class Template {
     adoptStylesheet(this.css, this.renderRoot);
   }
 
+  initializeParams() {
+    if (!this.extendedParams?.length) {
+      return;
+    }
+    const baseParams = this.buildCallParams();
+    each(this.extendedParams, (params) => {
+      const resolved = isFunction(params) ? params(baseParams) : params;
+      this.addParams(resolved);
+    });
+  }
+
+  initializePlugins() {
+    if (!this.availablePlugins?.size) {
+      return;
+    }
+    const pluginConfig = this.pluginConfig || {};
+    this.availablePlugins.forEach((plugin, namespace) => {
+      plugin.applyTo(this, pluginConfig[namespace]);
+    });
+  }
+
+  addPlugin(plugin) {
+    this.plugins.push(plugin);
+  }
+
+  addParams(params) {
+    if (!isObject(params)) {
+      return;
+    }
+    this.customParams ??= {};
+    extend(this.customParams, params);
+    if (this.callParams) {
+      this.callParams = this.buildCallParams();
+    }
+  }
+
+  addHelpers(helpers) {
+    if (!isObject(helpers)) {
+      return;
+    }
+    this.helpers ??= Object.create(TemplateHelpers);
+    extend(this.helpers, helpers);
+    if (this.renderer) {
+      this.renderer.helpers = this.helpers;
+      if (this.renderer.evaluator) {
+        this.renderer.evaluator.helpers = this.helpers;
+      }
+      this.renderer.bumpDataVersion?.();
+    }
+    if (this.callParams) {
+      this.callParams = this.buildCallParams();
+    }
+  }
+
   clone(settings) {
     const cloneDefaults = {
       templateName: this.templateName,
       tagName: this.tagName,
-      definitionOptions: this.definitionOptions,
+      availablePlugins: this.availablePlugins,
+      extendedParams: this.extendedParams,
+      pluginConfig: this.pluginConfig,
       element: this.element,
       ast: this.ast,
       css: this.css,
@@ -1002,10 +1051,10 @@ export const Template = class Template {
         return element?.isDarkMode?.();
       },
     };
-    if (!this.pluginCallParams && isEmpty(additionalData)) {
+    if (!this.customParams && isEmpty(additionalData)) {
       return baseParams;
     }
-    return extend({}, this.pluginCallParams, baseParams, additionalData);
+    return extend({}, this.customParams, baseParams, additionalData);
   }
 
   // 4th arg matches the native addEventListener shape (passive/capture/once/...);
