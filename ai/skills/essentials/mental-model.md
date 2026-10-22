@@ -314,4 +314,5 @@ data (settings, external) → state (Signals) → instance (createComponent retu
 | **Component Events** (`component-events`) | Full event system reference |
 | **Query** (`query`) | The `$`/`$$` DOM library and its API |
 | **Query Behaviors** (`query-behaviors`) | Building and using behaviors |
+| **Component Plugins** (`component-plugins`) | Extending components and templates with `registerPlugin`, `extendParams`, and `extendData` |
 | **Component Specs** (`component-specs`) | Writing and reading spec definitions |

@@ -492,5 +492,6 @@ Template → flat lookup:            {name} checks instance → settings → sta
 | `component-html` | HTML structure and class naming patterns |
 | `reactive-state` | Deep dive into signals, reactions, and state management |
 | `component-specs` | Building spec-driven primitives (ui-button, ui-input) |
+| `component-plugins` | Extending `defineComponent` and templates with `registerPlugin`, `addPlugin`, `extendParams`, and `extendData` |
 | `component-theming` | Design tokens and theme integration |
 | `mental-model` | Framework-level understanding of how everything fits together |
