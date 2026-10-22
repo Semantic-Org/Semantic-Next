@@ -32,6 +32,11 @@ const lifecycleParams = ({ self }) => ({
   i18n: self,
 });
 
+// expose { locale } in template expressions
+const templateData = ({ settings }) => ({
+  locale: () => settings.locale,
+});
+
 // expose {t 'key'} helper in component templates
 const templateHelpers = ({ self }) => ({
   t: self.t,
@@ -43,5 +48,6 @@ export const I18n = registerPlugin({
   resolveSettings,
   createPlugin,
   lifecycleParams,
+  templateData,
   templateHelpers,
 });

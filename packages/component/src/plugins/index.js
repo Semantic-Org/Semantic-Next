@@ -5,6 +5,7 @@ export {
   clearAvailablePlugins,
   getAvailablePlugin,
 } from './add-plugin.js';
+export { clearExtendedData, extendData, extendedData } from './extend-data.js';
 export { clearExtendedParams, extendedParams, extendParams } from './extend-params.js';
 export { Plugin } from './plugin.js';
 export {

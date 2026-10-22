@@ -69,6 +69,7 @@ export const Template = class Template {
     templateName,
     tagName,
     availablePlugins,
+    extendedData,
     extendedParams,
     pluginConfig,
     ast,
@@ -114,6 +115,7 @@ export const Template = class Template {
     this.templateName = templateName || this.getGenericTemplateName();
     this.tagName = tagName;
     this.availablePlugins = availablePlugins;
+    this.extendedData = extendedData;
     this.extendedParams = extendedParams;
     this.pluginConfig = pluginConfig;
     this.plugins = [];
@@ -254,6 +256,7 @@ export const Template = class Template {
     }
 
     this.initializeParams();
+    this.initializeData();
     this.initializePlugins();
 
     if (isFunction(this.createComponent)) {
@@ -407,7 +410,7 @@ export const Template = class Template {
   }
 
   getDataContext() {
-    return extend({}, this.data, this.state, this.instance);
+    return extend({}, this.customData, this.data, this.state, this.instance);
   }
 
   // Overlay settings shadow signals so the renderer tracks settings reactively.
@@ -469,6 +472,17 @@ export const Template = class Template {
     });
   }
 
+  initializeData() {
+    if (!this.extendedData?.length) {
+      return;
+    }
+    const baseParams = this.buildCallParams();
+    each(this.extendedData, (data) => {
+      const resolved = isFunction(data) ? data(baseParams) : data;
+      this.addData(resolved);
+    });
+  }
+
   initializePlugins() {
     if (!this.availablePlugins?.size) {
       return;
@@ -491,6 +505,18 @@ export const Template = class Template {
     extend(this.customParams, params);
     if (this.callParams) {
       this.callParams = this.buildCallParams();
+    }
+  }
+
+  addData(data) {
+    if (!isObject(data)) {
+      return;
+    }
+    this.customData ??= {};
+    extend(this.customData, data);
+    if (this.renderer) {
+      this.renderer.setData(this.overlaySettingsSignals(this.getDataContext()));
+      this.renderer.bumpDataVersion?.();
     }
   }
 
@@ -517,6 +543,7 @@ export const Template = class Template {
       templateName: this.templateName,
       tagName: this.tagName,
       availablePlugins: this.availablePlugins,
+      extendedData: this.extendedData,
       extendedParams: this.extendedParams,
       pluginConfig: this.pluginConfig,
       element: this.element,
