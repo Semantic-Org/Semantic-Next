@@ -12,7 +12,7 @@ type: skill
 > **Skill:** `docs-page-guide`
 > **Purpose:** How to write instructional guide pages — pages that teach concepts with progressive complexity
 
-**Golden rule: one sentence of prose per code block, not one paragraph.** The code is the lesson. Prose provides the minimum context to understand what the code demonstrates and why it matters. If the reader needs more than a sentence to understand the example, the example is too complex for that point in the page.
+**Golden rule: write like an email to an executive — one single-line sentence (~15 words, ~100 chars) per ≤10-line code block, written from the user's callsite and never from the source code.** Gloss every line of code that isn't the lesson (`tagName, createComponent, // rest`). If the prose wraps past a line or the code exceeds ~10 lines, split the concept.
 
 **Prerequisites:** Load `docs-authoring-standards` for heading hierarchy and frontmatter, and see `docs-page-guide-examples` ([real before/after rewrites](./docs-page-guide-examples.md)) before writing a new guide page from scratch.
 
