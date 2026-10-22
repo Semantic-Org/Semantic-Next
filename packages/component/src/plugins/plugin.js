@@ -208,6 +208,9 @@ export class Plugin {
         if (isObject(resolved)) {
           ownSettings = clone({ ...resolved });
         }
+        else {
+          ownSettings = clone({ ...seed });
+        }
       }
       else if (isPlainObject(config)) {
         ownSettings = clone(config);
