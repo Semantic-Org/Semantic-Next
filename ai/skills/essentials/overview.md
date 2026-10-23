@@ -194,7 +194,7 @@ A full component can also include settings (external API), event handlers, keybi
   ```js
   createComponent({ state, settings }) {
     return {
-      canSearch() { return settings.searchable.get() && state.query.get().length > 0; },
+      canSearch() { return settings.searchable && state.query.get().length > 0; },
     };
   }
   ```
