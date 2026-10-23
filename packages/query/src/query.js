@@ -16,6 +16,7 @@ import {
   isPlainObject,
   isString,
   keys,
+  remove,
 } from '@semantic-ui/utils';
 
 /*
@@ -76,6 +77,7 @@ export class Query {
   */
   static eventRegistry = new WeakMap(); // Key: Element, Value: Set<HandlerObject>
   static handlerRegistry = new WeakMap(); // Key: HandlerObject, Value: Element
+  static delegatedListeners = new WeakMap(); // Key: Element, Value: Map<event key, { handlers, listener }>
 
   /*
     We keep a map to store registered behaviors
@@ -722,62 +724,34 @@ export class Query {
       }
 
       this.each((el) => {
-        let delegateHandler;
-        if (targetSelector) {
-          delegateHandler = (event) => {
-            let target;
-            // if this event is composed from a web component
-            // this is required to get the original path
-            if (event.composed && event.composedPath) {
-              // look through composed path bubbling into the attached element to see if any match target
-              let path = event.composedPath();
-              const elIndex = findIndex(path, thisEl => thisEl == el);
-              path = path.slice(0, elIndex);
-              target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
-            }
-            else {
-              // target selector is target
-              target = event.target.closest(targetSelector);
-            }
-
-            if (target) {
-              return handler.call(target, event);
-            }
-          };
-        }
-
-        // wrap when handler can return false/'cancel' (explicit return or arrow expression body)
-        const rawListener = delegateHandler || handler;
-        const needsWrapping = delegateHandler || /\breturn\b|=>\s*[^\s{]/.test(handler.toString());
-        const eventListener = needsWrapping
-          ? function(e) {
-            const result = rawListener.call(this, e);
-            if (result === false) {
-              e.stopPropagation();
-            }
-            else if (result === 'cancel') {
-              e.preventDefault();
-            }
-            return result;
-          }
-          : handler;
-
-        // will cause illegal invocation if used from proxy object
-        const domEL = (el == Query.globalThisProxy) ? globalThis : el;
-        if (domEL.addEventListener) {
-          domEL.addEventListener(eventName, eventListener, listenerOptions);
-        }
-
         const eventHandler = {
           el,
           eventName,
           namespaces,
-          eventListener,
+          eventListener: handler,
           abortController,
           delegated: targetSelector !== undefined,
+          targetSelector,
           handler,
           abort: (reason) => abortController.abort(reason),
         };
+
+        // will cause illegal invocation if used from proxy object
+        const domEL = (el == Query.globalThisProxy) ? globalThis : el;
+        if (targetSelector) {
+          eventHandler.eventListener = Query.delegate(domEL, eventHandler, listenerOptions);
+        }
+        else {
+          if (/\breturn\b|=>\s*[^\s{]/.test(handler.toString())) {
+            // wrap when handler can return false/'cancel' (explicit return or arrow expression body)
+            eventHandler.eventListener = function(event) {
+              return Query.applyReturnValue(event, handler.call(this, event));
+            };
+          }
+          if (domEL.addEventListener) {
+            domEL.addEventListener(eventName, eventHandler.eventListener, listenerOptions);
+          }
+        }
         eventHandlers.push(eventHandler);
         registerEvent({ el, eventHandler });
       });
@@ -787,6 +761,106 @@ export class Query {
       return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
     }
     return this;
+  }
+
+  /*
+    delegated handlers on one element share a native listener per event and listener options, so
+    they run the way listeners on the matched elements would: innermost match first, stopPropagation
+    honoured between levels, stopImmediatePropagation ending the run
+  */
+  static delegate(root, eventHandler, { capture = false, passive = false, once = false }) {
+    const { eventName, abortController } = eventHandler;
+    const listeners = Query.delegatedListeners.get(root) || new Map();
+    Query.delegatedListeners.set(root, listeners);
+    const key = `${eventName}|${capture}|${passive}`;
+
+    // the browser drops a once listener after one event, so a once handler never shares one
+    let shared = once ? null : listeners.get(key);
+    if (!shared) {
+      const handlers = [];
+      shared = { handlers, listener: (event) => Query.dispatchDelegated(handlers, root, event, capture) };
+      root.addEventListener(eventName, shared.listener, { capture, passive, once });
+      if (!once) {
+        listeners.set(key, shared);
+      }
+    }
+    shared.handlers.push(eventHandler);
+    abortController.signal.addEventListener('abort', () => {
+      remove(shared.handlers, (other) => other === eventHandler);
+      if (!shared.handlers.length) {
+        root.removeEventListener(eventName, shared.listener, { capture });
+        if (!once) {
+          listeners.delete(key);
+        }
+      }
+    }, { once: true });
+    return shared.listener;
+  }
+
+  static dispatchDelegated(handlers, root, event, capture) {
+    const path = event.composedPath();
+    const nodes = path.slice(0, path.indexOf(root));
+    if (capture) {
+      nodes.reverse(); // capture runs outermost first
+    }
+    const snapshot = handlers.slice(); // a handler added mid-dispatch waits for the next event
+
+    // the two stops a handler can call during this dispatch, tracked apart from any earlier listener's
+    let stopped = false;
+    let stoppedImmediately = false;
+    const { stopPropagation, stopImmediatePropagation } = event;
+    event.stopPropagation = () => {
+      stopped = true;
+      stopPropagation.call(event);
+    };
+    event.stopImmediatePropagation = () => {
+      stopped = stoppedImmediately = true;
+      stopImmediatePropagation.call(event);
+    };
+    let errors;
+    try {
+      for (const node of nodes) {
+        if (!node.matches) {
+          continue;
+        }
+        for (const { targetSelector, handler, abortController } of snapshot) {
+          if (abortController.signal.aborted || !node.matches(targetSelector)) {
+            continue;
+          }
+          try {
+            Query.applyReturnValue(event, handler.call(node, event));
+          }
+          catch (error) {
+            (errors ??= []).push(error);
+          }
+          if (stoppedImmediately) {
+            break;
+          }
+        }
+        if (stopped) {
+          break;
+        }
+      }
+    }
+    finally {
+      delete event.stopImmediatePropagation;
+      delete event.stopPropagation;
+    }
+    // thrown once the others have run, so a handler's error reaches the page the way a listener's does
+    if (errors) {
+      throw errors.length === 1 ? errors[0] : new AggregateError(errors);
+    }
+  }
+
+  // a handler's return value acts on the event: false stops propagation, 'cancel' prevents the default
+  static applyReturnValue(event, value) {
+    if (value === false) {
+      event.stopPropagation();
+    }
+    else if (value === 'cancel') {
+      event.preventDefault();
+    }
+    return value;
   }
 
   one(eventName, targetSelectorOrHandler, handlerOrOptions, options) {
