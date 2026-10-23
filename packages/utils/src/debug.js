@@ -1,4 +1,6 @@
+import { formatServerLog } from '#debug-server';
 import { isServer } from './environment.js';
+import { isArray, isFunction } from './types.js';
 
 /*-------------------
        Logging
@@ -15,32 +17,29 @@ const levelConfig = {
 export const log = (
   message,
   level = 'log',
-  {
+  options = {},
+) => {
+  const {
     namespace = '',
+    formatNamespace = false,
     data = undefined,
     timestamp = false,
     format = 'standard',
     consoleMethod = null,
     silent = false,
-    title = namespace,
+    title = namespace && isFunction(formatNamespace) ? formatNamespace(namespace) : namespace,
     showTitle = true,
-    titleColor = null,
+    titleColor: customTitleColor = null,
     color = 'inherit',
-    // node consumes %c silently, so styling is dead weight in server output —
-    // plain text keeps the style args out of structured logs
-    noColor = isServer,
-  } = {},
-) => {
+    noColor = false,
+  } = options;
   if (silent) {
     return;
   }
 
   const config = levelConfig[level] || levelConfig.info;
   const method = consoleMethod || config.method;
-
-  if (!titleColor) {
-    titleColor = config.titleColor;
-  }
+  const titleColor = customTitleColor || config.titleColor;
 
   // Format message based on options
   const logArgs = [];
@@ -54,40 +53,45 @@ export const log = (
       level,
       namespace,
       message,
-      ...(data !== undefined && (!Array.isArray(data) || data.length > 0)) ? { data } : {},
+      ...(data !== undefined && (!isArray(data) || data.length > 0)) ? { data } : {},
     }));
     return;
   }
 
   // Standard output
-  if (timestamp) {
-    const time = new Date().toISOString().split('T')[1].slice(0, 12);
-    if (noColor) {
-      logFormat += `[${time}] `;
-    }
-    else {
-      logFormat += `%c[${time}]%c `;
-      logArgs.push('color: #999999;', 'color: inherit;');
-    }
+  if (formatServerLog && isServer) {
+    logFormat = formatServerLog(message, level, options);
   }
+  else {
+    if (timestamp) {
+      const time = new Date().toISOString().split('T')[1].slice(0, 12);
+      if (noColor) {
+        logFormat += `[${time}] `;
+      }
+      else {
+        logFormat += `%c[${time}]%c `;
+        logArgs.push('color: #999999;', 'color: inherit;');
+      }
+    }
 
-  if (title && showTitle) {
-    if (noColor) {
-      logFormat += `${title} `;
+    if (title && showTitle) {
+      if (noColor) {
+        logFormat += `${title} `;
+      }
+      else {
+        logFormat += `%c${title}%c `;
+        logArgs.push(
+          `color: ${titleColor}; font-weight: bold;`,
+          `color: ${color};`,
+        );
+      }
     }
-    else {
-      logFormat += `%c${title}%c `;
-      logArgs.push(
-        `color: ${titleColor}; font-weight: bold;`,
-        `color: ${color};`,
-      );
-    }
+
+    logFormat += message;
   }
-
-  logFormat += message;
   logArgs.unshift(logFormat);
 
-  if (data !== undefined && (!Array.isArray(data) || data.length > 0)) {
+  if (data !== undefined && (!isArray(data) || data.length > 0)) {
     logArgs.push(data);
   }
 
@@ -192,13 +196,13 @@ export const error = (code, at, options) => {
     return built;
   }
   const raise = () => {
-    if (typeof globalThis.onError === 'function') {
+    if (isFunction(globalThis.onError)) {
       globalThis.onError(built);
       return;
     }
     console.error(built);
   };
-  if (typeof queueMicrotask === 'function') {
+  if (isFunction(queueMicrotask)) {
     queueMicrotask(raise);
   }
   else {

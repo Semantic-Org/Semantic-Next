@@ -15,10 +15,10 @@ The Debug utilities provide the two reporting doors a library needs: `log` for s
 ### log
 
 ```javascript
-function log(message, level = 'log', { namespace = '', data = undefined, color = 'inherit', timestamp = false, format = 'standard', consoleMethod = null, silent = false, title = namespace, showTitle = true, titleColor = null, noColor = isServer } = {})
+function log(message, level = 'log', { namespace = '', formatNamespace = isServer ? (ns) => `[${ns}]` : false, data = undefined, color = 'inherit', timestamp = isServer, highlight = isServer, fadeSecondary = false, format = 'standard', consoleMethod = null, silent = false, title = namespace, showTitle = true, titleColor = null, noColor = false } = {})
 ```
 
-A flexible logging utility with formatting, namespacing, and multiple output options. Supports colored output, timestamps, structured JSON format, and configurable titles. Styling is browser-only by default — `noColor` defaults to [`isServer`](/docs/api/utils/environment#isserver), so server output is plain text with no `%c` directives or style arguments.
+A flexible logging utility with formatting, namespacing, and multiple output options. Supports `%c` browser styling, OKLCH-derived ANSI server styling with token highlighting, timestamps, structured JSON format, and configurable titles.
 
 #### Parameters
 
@@ -30,19 +30,22 @@ A flexible logging utility with formatting, namespacing, and multiple output opt
 
 ##### Options
 
-| Name          | Type    | Default              | Description |
-|---------------|---------|----------------------|-------------|
-| namespace     | string  | ''                   | Namespace for grouping related logs — prints verbatim as the default title |
-| data          | any     | undefined            | Additional data to include with the log message. Accepts arrays and objects |
-| color         | string  | 'inherit'            | Text color for the message |
-| timestamp     | boolean | false                | Whether to include timestamp in the output |
-| format        | string  | 'standard'           | Output format ('standard' or 'json' — json emits each record as one JSON-serialized line) |
-| consoleMethod | string  | null                 | Override the console method used for output |
-| silent        | boolean | false                | Suppress all output when true |
-| title         | string  | namespace            | Title/label to display before the message |
-| showTitle     | boolean | true                 | Whether to show the title/label |
-| titleColor    | string  | null                 | Color for the title/label (defaults to level color) |
-| noColor       | boolean | isServer             | Skip the `%c` style directives and style arguments — plain text, title still present. Pass `false` to force styling on the server |
+| Name            | Type                | Default   | Description |
+|-----------------|---------------------|-----------|-------------|
+| namespace       | string              | ''        | Namespace for grouping related logs |
+| formatNamespace | function \| boolean | isServer  | Formats `namespace` when computing default `title` (defaults to ``(ns) => `[${ns}]` `` on server, verbatim in browser; pass `false` for verbatim everywhere or a custom `(ns) => string`) |
+| timestamp       | boolean             | isServer  | Include timestamp in standard output (`4:31:20 PM` local 12-hour time on server, `[HH:MM:SS.mmm]` in browser; JSON format keeps ISO-8601 when explicitly `true`) |
+| highlight       | boolean             | isServer  | Highlight inline tokens on server (file paths underlined, `host:port`, `{ ... }` objects, quoted strings, `(ECODE)`, numbers/units) |
+| fadeSecondary   | boolean             | false     | Opt-in two-sentence hierarchy on server: splits at the first `'. '` and renders the second sentence in the 50% `--light-text-color` OKLCH mix |
+| noColor         | boolean             | false     | Disable styling (`%c` in browser, ANSI on server). Server also auto-disables ANSI when `!process.stdout?.isTTY` or `NO_COLOR` is set (unless `FORCE_COLOR` or `noColor: false` is explicitly passed) |
+| data            | any                 | undefined | Additional data to include with the log message. Accepts arrays and objects |
+| color           | string              | 'inherit' | Text color for the message (`#hex`, `rgb(...)`, named color, or ANSI sequence) |
+| format          | string              | 'standard'| Output format ('standard' or 'json' — json emits each record as one JSON-serialized line) |
+| consoleMethod   | string              | null      | Override the console method used for output |
+| silent          | boolean             | false     | Suppress all output when true |
+| title           | string              | namespace | Title/label to display before the message |
+| showTitle       | boolean             | true      | Whether to show the title/label |
+| titleColor      | string              | null      | Color for the title/label (`#hex`, `rgb(...)`, named color, or ANSI sequence; defaults to level color) |
 
 #### Returns
 
@@ -79,19 +82,19 @@ log('Important notice', 'warn', {
   timestamp: true
 });
 
-// Force plain output anywhere (the server default)
+// Force plain output anywhere
 log('Job finished', 'info', { namespace: 'worker', noColor: true });
 ```
 
 ### createLogger
 
 ```javascript
-function createLogger({ namespace = '', timestamp = false, ...defaults } = {})
+function createLogger({ namespace = '', timestamp = isServer, ...defaults } = {})
 ```
 
 Binds `log` to shared defaults once and returns the narration bundle — flat functions made for destructuring. Every member calls `log` with the factory defaults shallow-merged beneath the callsite options, so a call site can still override anything. The four level wrappers absorb the level slot only: `info(message, options)` is `log(message, 'info', options)` with the defaults underneath. The bound `log` keeps its level parameter for the occasional dynamic level.
 
-The namespace prints verbatim — `db` shows as `db`, never `Db`. Granularity belongs in the value itself: `createLogger({ namespace: 'physics:collision' })`.
+The namespace is never case-transformed — `db` shows as `db` in the browser and `[db]` on the server, never `Db`. Granularity belongs in the value itself: `createLogger({ namespace: 'physics:collision' })`.
 
 #### Parameters
 

@@ -1241,19 +1241,19 @@ log('Warning', 'warn', { timestamp: true, title: 'SYSTEM', titleColor: '#FF6B35'
 log('API response', 'info', { format: 'json', namespace: 'API', timestamp: true });
 // {"timestamp":"...","level":"info","namespace":"API","message":"API response"}
 
-// styling is browser-only by default: noColor defaults to isServer, so node
-// output is plain text with no %c — pass noColor: false to force styling
-log('booted', 'info', { namespace: 'db' });             // "db booted" on the server
+// server defaults: 12-hour timestamp (timestamp: isServer), bracketed [ns] (formatNamespace),
+// and ANSI token highlighting in TTYs (noColor: true forces plain text)
+log('booted', 'info', { namespace: 'db' });             // "4:31:20 PM [db] booted" on the server
 ```
 
 ### createLogger — log, Bound to Shared Defaults
 ```javascript
 import { createLogger } from '@semantic-ui/utils';
 
-// bind once, destructure flat — any log option rides as a default
-const { log, debug, info, warn, error } = createLogger({ namespace: 'sync', timestamp: true });
+// bind once, destructure flat — any log option rides as a default (fadeSecondary: true fades 2nd sentence)
+const { log, debug, info, warn, error } = createLogger({ namespace: 'sync', fadeSecondary: true });
 
-info('connected');                            // sync connected — namespace prints VERBATIM, never cased
+info('connected');                            // 4:31:20 PM [sync] connected on server, sync connected in browser
 warn('reconnecting', { data: { attempt: 2 } });  // callsite options merge over the defaults and win
 log('custom', 'debug');                       // the bound log keeps its level slot
 

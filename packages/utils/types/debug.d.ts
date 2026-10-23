@@ -138,14 +138,27 @@ export type LogFormat = 'standard' | 'json';
  * Options for the log function
  */
 export interface LogOptions {
-  /** Namespace for grouping related logs — prints verbatim as the default title */
+  /** Namespace for grouping related logs */
   namespace?: string;
+  /** Formats `namespace` when computing default `title` (brackets `[ns]` on
+   * server, verbatim in browser; pass `false` for verbatim everywhere or a
+   * custom `(ns) => string`) */
+  formatNamespace?: ((namespace: string) => string) | boolean;
   /** Additional data to include with the log message — accepts arrays or single objects */
   data?: any;
-  /** Text color for the message */
+  /** Text color for the message (`#hex`, `rgb(...)`, named color, or ANSI sequence) */
   color?: string;
-  /** Whether to include timestamp in the output */
+  /** Include timestamp in standard output (`4:31:20 PM` local 12-hour time on
+   * server, `[HH:MM:SS.mmm]` in browser; JSON format keeps ISO-8601 when
+   * explicitly `true`). Defaults to `isServer` */
   timestamp?: boolean;
+  /** Highlight inline tokens on server (file paths underlined, `host:port`,
+   * `{ ... }` objects, quoted strings, `(ECODE)`, numbers/units). Defaults to
+   * `isServer` */
+  highlight?: boolean;
+  /** Opt-in two-sentence hierarchy on server: splits at the first `. ` and
+   * renders the second sentence in the 50% `--light-text-color` OKLCH mix */
+  fadeSecondary?: boolean;
   /** Output format - 'standard' for formatted console output, 'json' to emit
    * each record as one JSON-serialized line */
   format?: LogFormat;
@@ -153,15 +166,15 @@ export interface LogOptions {
   consoleMethod?: 'log' | 'debug' | 'info' | 'warn' | 'error';
   /** Suppress all output when true */
   silent?: boolean;
-  /** Title/label to display before the message (defaults to the namespace) */
+  /** Title/label to display before the message (defaults to formatted `namespace`) */
   title?: string;
   /** Whether to show the title/label */
   showTitle?: boolean;
-  /** Color for the title/label */
+  /** Color for the title/label (`#hex`, `rgb(...)`, named color, or ANSI sequence) */
   titleColor?: string;
-  /** Skip the `%c` style directives and style arguments — plain text, title
-   * still present. Defaults to `isServer`, keeping style tokens out of Node
-   * output and structured logs; pass `false` to force styling on the server */
+  /** Disable styling (`%c` in browser, ANSI on server). Server also
+   * auto-disables ANSI when `!process.stdout?.isTTY` or `NO_COLOR` is set
+   * (unless `FORCE_COLOR` or `noColor: false` is explicitly passed) */
   noColor?: boolean;
 }
 
