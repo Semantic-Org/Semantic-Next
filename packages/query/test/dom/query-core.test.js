@@ -892,6 +892,168 @@ describe('query — documented contract', () => {
   });
 
   /***************************************************************
+            Delegated Events — order and propagation
+  ***************************************************************/
+
+  describe('delegated events — order and propagation', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '<div class="root"><div class="card"><button class="btn"></button></div></div>';
+    });
+    const click = (selector) => document.querySelector(selector).click();
+
+    describe.each([
+      ['outer declared first', ['card', 'btn']],
+      ['inner declared first', ['btn', 'card']],
+    ])('%s', (_, declarationOrder) => {
+      const bindHandlers = (fired, { stop = false } = {}) => {
+        const handlers = {
+          card: () => fired.push('card'),
+          btn: (event) => {
+            fired.push('btn');
+            if (stop) {
+              event.stopPropagation();
+            }
+          },
+        };
+        declarationOrder.forEach((name) => $('.root').on('click', `.${name}`, handlers[name]));
+      };
+
+      it('runs the inner handler before the outer, as listeners on the elements would', () => {
+        const fired = [];
+        bindHandlers(fired);
+        click('.btn');
+        expect(fired).toEqual(['btn', 'card']);
+      });
+
+      it('stopPropagation in the inner handler keeps the outer from running', () => {
+        const fired = [];
+        bindHandlers(fired, { stop: true });
+        click('.btn');
+        expect(fired).toEqual(['btn']);
+      });
+    });
+
+    it('binds `this` to the matched element at every level', () => {
+      const contexts = [];
+      $('.root').on('click', '.card', function() {
+        contexts.push(this);
+      });
+      $('.root').on('click', '.btn', function() {
+        contexts.push(this);
+      });
+      click('.btn');
+      expect(contexts).toEqual([document.querySelector('.btn'), document.querySelector('.card')]);
+    });
+
+    it('runs two handlers matching the same element in declaration order', () => {
+      const fired = [];
+      $('.root').on('click', '.btn', () => fired.push('first'));
+      $('.root').on('click', 'button', () => fired.push('second'));
+      click('.btn');
+      expect(fired).toEqual(['first', 'second']);
+    });
+
+    it('stopPropagation in the first of two same-element handlers does not silence the second', () => {
+      const second = vi.fn();
+      $('.root').on('click', '.btn', (event) => event.stopPropagation());
+      $('.root').on('click', 'button', second);
+      click('.btn');
+      expect(second).toHaveBeenCalledTimes(1);
+    });
+
+    it('stopImmediatePropagation in the first of two same-element handlers silences the second', () => {
+      const second = vi.fn();
+      const outer = vi.fn();
+      $('.root').on('click', '.card', outer);
+      $('.root').on('click', '.btn', (event) => event.stopImmediatePropagation());
+      $('.root').on('click', 'button', second);
+      click('.btn');
+      expect(second).not.toHaveBeenCalled();
+      expect(outer).not.toHaveBeenCalled();
+    });
+
+    it('returning false from the inner handler stops the outer', () => {
+      const outer = vi.fn();
+      $('.root').on('click', '.card', outer);
+      $('.root').on('click', '.btn', () => false);
+      click('.btn');
+      expect(outer).not.toHaveBeenCalled();
+    });
+
+    it('returning "cancel" from a delegated handler prevents the default', () => {
+      $('.root').on('click', '.btn', () => 'cancel');
+      const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+      document.querySelector('.btn').dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it('a selector matching nested elements fires once per match, innermost first', () => {
+      document.body.innerHTML = '<div class="root"><div class="card outer"><div class="card inner"></div></div></div>';
+      const fired = [];
+      $('.root').on('click', '.card', function() {
+        fired.push(this.className);
+      });
+      click('.inner');
+      expect(fired).toEqual(['card inner', 'card outer']);
+    });
+
+    it('the same event object dispatched twice runs delegated handlers both times', () => {
+      const inner = vi.fn();
+      const outer = vi.fn();
+      $('.root').on('click', '.card', outer);
+      $('.root').on('click', '.btn', inner);
+      const event = new MouseEvent('click', { bubbles: true });
+      document.querySelector('.btn').dispatchEvent(event);
+      document.querySelector('.btn').dispatchEvent(event);
+      expect(inner).toHaveBeenCalledTimes(2);
+      expect(outer).toHaveBeenCalledTimes(2);
+    });
+
+    it('aborting one delegated handler leaves its sibling on the same root firing', () => {
+      const outer = vi.fn();
+      const controller = new AbortController();
+      $('.root').on('click', '.btn', vi.fn(), { abortController: controller });
+      $('.root').on('click', '.card', outer);
+      controller.abort();
+      click('.btn');
+      expect(outer).toHaveBeenCalledTimes(1);
+    });
+
+    it('.one() beside a sibling fires once while the sibling keeps firing', () => {
+      const once = vi.fn();
+      const always = vi.fn();
+      $('.root').one('click', '.btn', once);
+      $('.root').on('click', '.card', always);
+      click('.btn');
+      click('.btn');
+      expect(once).toHaveBeenCalledTimes(1);
+      expect(always).toHaveBeenCalledTimes(2);
+    });
+
+    it('.off(handler) removes one delegated handler and leaves the other', () => {
+      const inner = vi.fn();
+      const outer = vi.fn();
+      $('.root').on('click', '.btn', inner);
+      $('.root').on('click', '.card', outer);
+      $('.root').off('click', inner);
+      click('.btn');
+      expect(inner).not.toHaveBeenCalled();
+      expect(outer).toHaveBeenCalledTimes(1);
+    });
+
+    it('.intercept() delegation runs outermost first and a stop keeps the inner from running', () => {
+      const fired = [];
+      $('.root').intercept('click', '.btn', () => fired.push('btn'));
+      $('.root').intercept('click', '.card', (event) => {
+        fired.push('card');
+        event.stopPropagation();
+      });
+      click('.btn');
+      expect(fired).toEqual(['card']);
+    });
+  });
+
+  /***************************************************************
                           .onNext()
   ***************************************************************/
 

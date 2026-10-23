@@ -722,62 +722,36 @@ export class Query {
       }
 
       this.each((el) => {
-        let delegateHandler;
-        if (targetSelector) {
-          delegateHandler = (event) => {
-            let target;
-            // if this event is composed from a web component
-            // this is required to get the original path
-            if (event.composed && event.composedPath) {
-              // look through composed path bubbling into the attached element to see if any match target
-              let path = event.composedPath();
-              const elIndex = findIndex(path, thisEl => thisEl == el);
-              path = path.slice(0, elIndex);
-              target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
-            }
-            else {
-              // target selector is target
-              target = event.target.closest(targetSelector);
-            }
-
-            if (target) {
-              return handler.call(target, event);
-            }
-          };
-        }
-
-        // wrap when handler can return false/'cancel' (explicit return or arrow expression body)
-        const rawListener = delegateHandler || handler;
-        const needsWrapping = delegateHandler || /\breturn\b|=>\s*[^\s{]/.test(handler.toString());
-        const eventListener = needsWrapping
-          ? function(e) {
-            const result = rawListener.call(this, e);
-            if (result === false) {
-              e.stopPropagation();
-            }
-            else if (result === 'cancel') {
-              e.preventDefault();
-            }
-            return result;
-          }
-          : handler;
-
-        // will cause illegal invocation if used from proxy object
-        const domEL = (el == Query.globalThisProxy) ? globalThis : el;
-        if (domEL.addEventListener) {
-          domEL.addEventListener(eventName, eventListener, listenerOptions);
-        }
-
         const eventHandler = {
           el,
           eventName,
           namespaces,
-          eventListener,
+          eventListener: handler,
           abortController,
           delegated: targetSelector !== undefined,
+          targetSelector,
+          capture: !!listenerOptions.capture,
+          passive: !!listenerOptions.passive,
+          once: !!listenerOptions.once,
+          dispatchedEvent: null,
           handler,
           abort: (reason) => abortController.abort(reason),
         };
+        if (targetSelector) {
+          eventHandler.eventListener = (event) => Query.dispatchDelegated(eventHandler, event);
+        }
+        else if (/\breturn\b|=>\s*[^\s{]/.test(handler.toString())) {
+          // wrap when handler can return false/'cancel' (explicit return or arrow expression body)
+          eventHandler.eventListener = function(event) {
+            return Query.applyReturnValue(event, handler.call(this, event));
+          };
+        }
+
+        // will cause illegal invocation if used from proxy object
+        const domEL = (el == Query.globalThisProxy) ? globalThis : el;
+        if (domEL.addEventListener) {
+          domEL.addEventListener(eventName, eventHandler.eventListener, listenerOptions);
+        }
         eventHandlers.push(eventHandler);
         registerEvent({ el, eventHandler });
       });
@@ -787,6 +761,74 @@ export class Query {
       return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
     }
     return this;
+  }
+
+  /*
+    delegated handlers on one element share a dispatch so they run the way listeners on the
+    matched elements would: innermost match first, stopPropagation honoured between levels,
+    stopImmediatePropagation ending the run. the first of them the browser invokes runs the
+    whole group and marks the event on the rest, whose own listeners then return
+  */
+  static dispatchDelegated(eventHandler, event) {
+    if (eventHandler.dispatchedEvent === event) {
+      eventHandler.dispatchedEvent = null;
+      return;
+    }
+    const { el, eventName, capture, passive, once } = eventHandler;
+    const handlers = [];
+    for (const other of Query.eventRegistry.get(el)) {
+      const sameListener = other.delegated && other.eventName === eventName
+        && other.capture === capture && other.passive === passive && other.once === once;
+      if (sameListener) {
+        handlers.push(other);
+        if (other !== eventHandler) {
+          other.dispatchedEvent = event;
+        }
+      }
+    }
+
+    const path = event.composedPath();
+    const root = Query.isWindow(el) ? globalThis : el;
+    const nodes = path.slice(0, path.indexOf(root));
+    if (capture) {
+      nodes.reverse(); // capture runs outermost first
+    }
+
+    let stoppedImmediately = false;
+    const { stopImmediatePropagation } = event;
+    event.stopImmediatePropagation = () => {
+      stoppedImmediately = true;
+      stopImmediatePropagation.call(event);
+    };
+    for (const node of nodes) {
+      if (!node.matches) {
+        continue;
+      }
+      for (const { targetSelector, handler, abortController } of handlers) {
+        if (abortController.signal.aborted || !node.matches(targetSelector)) {
+          continue;
+        }
+        Query.applyReturnValue(event, handler.call(node, event));
+        if (stoppedImmediately) {
+          break;
+        }
+      }
+      if (event.cancelBubble) {
+        break;
+      }
+    }
+    delete event.stopImmediatePropagation;
+  }
+
+  // a handler's return value acts on the event: false stops propagation, 'cancel' prevents the default
+  static applyReturnValue(event, value) {
+    if (value === false) {
+      event.stopPropagation();
+    }
+    else if (value === 'cancel') {
+      event.preventDefault();
+    }
+    return value;
   }
 
   one(eventName, targetSelectorOrHandler, handlerOrOptions, options) {

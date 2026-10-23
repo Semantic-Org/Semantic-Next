@@ -79,6 +79,14 @@ export interface EventHandler {
   abortController: AbortController;
   /** Indicates if the event listener is delegated. */
   delegated: boolean;
+  /** The selector a delegated handler matches along the event path. */
+  targetSelector?: string;
+  /** Whether the listener runs in the capture phase. */
+  capture: boolean;
+  /** Whether the listener was added as passive. */
+  passive: boolean;
+  /** Whether the listener removes itself after one event. */
+  once: boolean;
   /** The original handler function provided by the user. */
   handler: Function;
   /** A function to abort the event listener. */

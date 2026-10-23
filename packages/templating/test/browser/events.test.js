@@ -325,6 +325,46 @@ RENDER_TARGETS.forEach(({ name, target }) => {
       });
     });
 
+    describe('events DSL — delegation order', () => {
+      it('runs the inner selector handler before the outer whichever is declared first', async () => {
+        const fired = [];
+        const fixture = await mountTemplate({
+          target,
+          events: {
+            'click .card': () => fired.push('card'),
+            'click .btn': () => fired.push('btn'),
+          },
+        });
+        fixture.renderRoot.innerHTML = '<div class="card"><button class="btn">claim</button></div>';
+        try {
+          clickOn(fixture.renderRoot.querySelector('.btn'));
+          expect(fired).toEqual(['btn', 'card']);
+        }
+        finally {
+          fixture.cleanup();
+        }
+      });
+
+      it('stopPropagation in the inner selector handler keeps the outer from running', async () => {
+        const outer = vi.fn();
+        const fixture = await mountTemplate({
+          target,
+          events: {
+            'click .card': outer,
+            'click .btn': ({ event }) => event.stopPropagation(),
+          },
+        });
+        fixture.renderRoot.innerHTML = '<div class="card"><button class="btn">claim</button></div>';
+        try {
+          clickOn(fixture.renderRoot.querySelector('.btn'));
+          expect(outer).not.toHaveBeenCalled();
+        }
+        finally {
+          fixture.cleanup();
+        }
+      });
+    });
+
     /*******************************
               Deep Keyword
     *******************************/
