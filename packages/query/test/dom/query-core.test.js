@@ -1041,6 +1041,68 @@ describe('query — documented contract', () => {
       expect(outer).toHaveBeenCalledTimes(1);
     });
 
+    it('a handler that dispatches the same event into its root does not rerun the others', () => {
+      document.body.innerHTML =
+        '<div class="root"><div class="card"><button class="btn"></button></div><span class="other"></span></div>';
+      const fired = [];
+      $('.root').on('click', '.btn', () => {
+        fired.push('btn');
+        document.querySelector('.other').click();
+      });
+      $('.root').on('click', '.card', () => fired.push('card'));
+      click('.btn');
+      expect(fired).toEqual(['btn', 'card']);
+    });
+
+    it('a handler that throws is reported and the handlers after it still run', () => {
+      const fired = [];
+      const reported = [];
+      const absorb = (errorEvent) => {
+        reported.push(errorEvent.error.message);
+        errorEvent.preventDefault();
+      };
+      window.addEventListener('error', absorb);
+      $('.root').on('click', '.btn', () => {
+        fired.push('btn');
+        throw new Error('boom');
+      });
+      $('.root').on('click', '.card', () => fired.push('card'));
+      const event = new MouseEvent('click', { bubbles: true });
+      document.querySelector('.btn').dispatchEvent(event);
+      window.removeEventListener('error', absorb);
+      expect(fired).toEqual(['btn', 'card']);
+      expect(reported).toEqual(['boom']);
+      expect(Object.hasOwn(event, 'stopImmediatePropagation')).toBe(false);
+    });
+
+    it('a once handler the browser has dropped does not fire again beside a later one', () => {
+      const fired = [];
+      $('.root').on('click', '.btn', () => fired.push('a'), { eventSettings: { once: true } });
+      click('.btn');
+      $('.root').on('click', '.card', () => fired.push('b'), { eventSettings: { once: true } });
+      click('.btn');
+      expect(fired).toEqual(['a', 'b']);
+    });
+
+    it('a stop from a direct listener on the root leaves the delegated levels alone', () => {
+      const fired = [];
+      $('.root').on('click', (event) => {
+        fired.push('direct');
+        event.stopPropagation();
+      });
+      $('.root').on('click', '.btn', () => fired.push('btn'));
+      $('.root').on('click', '.card', () => fired.push('card'));
+      click('.btn');
+      expect(fired).toEqual(['direct', 'btn', 'card']);
+    });
+
+    it('matches descendants of the root only', () => {
+      const handler = vi.fn();
+      $('.root').on('ping', '.root', handler);
+      document.querySelector('.btn').dispatchEvent(new CustomEvent('ping', { bubbles: true }));
+      expect(handler).not.toHaveBeenCalled();
+    });
+
     it('.intercept() delegation runs outermost first and a stop keeps the inner from running', () => {
       const fired = [];
       $('.root').intercept('click', '.btn', () => fired.push('btn'));
