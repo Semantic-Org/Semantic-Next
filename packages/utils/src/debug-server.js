@@ -1,3 +1,5 @@
+import { isFunction, isString } from './types.js';
+
 const RESET = '\x1b[0m';
 const BOLD = '\x1b[1m';
 const UNDERLINE = '\x1b[4m';
@@ -5,7 +7,7 @@ const UNDERLINE = '\x1b[4m';
 // pre-baked dark-theme oklch tokens from src/css/tokens (muted-blue info badge,
 // neutral grey info prose/tokens, --yellow-70 warn and --red-70 error with 50%
 // --light-text-color secondary mix) so oklchToRgb never rides the logger
-const TIME_COL = '\x1b[38;2;99;99;99m';
+const TIME_COLOR = '\x1b[38;2;99;99;99m';
 
 const PALETTE = {
   debug: {
@@ -57,7 +59,7 @@ const NAMED_ANSI = {
 };
 
 const toAnsiColor = (value) => {
-  if (!value || typeof value !== 'string' || value === 'inherit') {
+  if (!isString(value) || !value || value === 'inherit') {
     return null;
   }
   if (value.startsWith('\x1b[')) {
@@ -95,10 +97,7 @@ const TOKEN_RE =
 const defaultFormatNamespace = (ns) => (ns.startsWith('[') ? ns : `[${ns}]`);
 
 const hasAnsiSupport = () => {
-  if (typeof process === 'undefined' || !process.env) {
-    return false;
-  }
-  if (process.env.NO_COLOR || process.env.FORCE_COLOR === '0') {
+  if (!process?.env || process.env.NO_COLOR || process.env.FORCE_COLOR === '0') {
     return false;
   }
   if (process.env.FORCE_COLOR) {
@@ -111,10 +110,10 @@ const styleClause = (text, proseColor, tokenColor, highlight, boldToken) => {
   if (!highlight) {
     return `${proseColor}${text}${RESET}`;
   }
-  return proseColor + text.replace(TOKEN_RE, (m) => {
-    const u = (m.startsWith('.') || m.startsWith('/')) ? UNDERLINE : '';
-    const b = boldToken ? BOLD : '';
-    return `${RESET}${b}${u}${tokenColor}${m}${RESET}${proseColor}`;
+  return proseColor + text.replace(TOKEN_RE, (match) => {
+    const underline = (match.startsWith('.') || match.startsWith('/')) ? UNDERLINE : '';
+    const bold = boldToken ? BOLD : '';
+    return `${RESET}${bold}${underline}${tokenColor}${match}${RESET}${proseColor}`;
   }) + RESET;
 };
 
@@ -134,11 +133,8 @@ export const formatServerLog = (
     fadeSecondary = false,
   } = {},
 ) => {
-  const resolvedTitle = title !== undefined
-    ? title
-    : (namespace && formatNamespace
-      ? (typeof formatNamespace === 'function' ? formatNamespace(namespace) : defaultFormatNamespace(namespace))
-      : namespace);
+  const format = isFunction(formatNamespace) ? formatNamespace : defaultFormatNamespace;
+  const resolvedTitle = title ?? (namespace && formatNamespace ? format(namespace) : namespace);
 
   const time = timestamp
     ? new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })
@@ -156,27 +152,27 @@ export const formatServerLog = (
     return out + message;
   }
 
-  const pal = PALETTE[level] || PALETTE.info;
-  const badgeCol = toAnsiColor(titleColor) || pal.badge;
-  const prose1Col = toAnsiColor(color) || pal.prose1;
+  const palette = PALETTE[level] || PALETTE.info;
+  const badgeColor = toAnsiColor(titleColor) || palette.badge;
+  const proseColor = toAnsiColor(color) || palette.prose1;
 
   let prefix = '';
   if (time) {
-    prefix += `${TIME_COL}${time}${RESET} `;
+    prefix += `${TIME_COLOR}${time}${RESET} `;
   }
   if (resolvedTitle && showTitle) {
-    prefix += `${BOLD}${badgeCol}${resolvedTitle}${RESET} `;
+    prefix += `${BOLD}${badgeColor}${resolvedTitle}${RESET} `;
   }
 
-  const str = String(message);
-  const dotIdx = fadeSecondary ? str.indexOf('. ') : -1;
-  if (dotIdx !== -1) {
-    const first = str.slice(0, dotIdx + 1);
-    const rest = str.slice(dotIdx + 2);
-    return `${prefix}${styleClause(first, prose1Col, pal.tok1, highlight, pal.boldTok)} ${
-      styleClause(rest, pal.prose2, pal.tok2, highlight, false)
+  const text = String(message);
+  const sentenceEnd = fadeSecondary ? text.indexOf('. ') : -1;
+  if (sentenceEnd !== -1) {
+    const first = text.slice(0, sentenceEnd + 1);
+    const rest = text.slice(sentenceEnd + 2);
+    return `${prefix}${styleClause(first, proseColor, palette.tok1, highlight, palette.boldTok)} ${
+      styleClause(rest, palette.prose2, palette.tok2, highlight, false)
     }`;
   }
 
-  return `${prefix}${styleClause(str, prose1Col, pal.tok1, highlight, pal.boldTok)}`;
+  return `${prefix}${styleClause(text, proseColor, palette.tok1, highlight, palette.boldTok)}`;
 };

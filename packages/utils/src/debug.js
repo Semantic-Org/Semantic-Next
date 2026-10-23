@@ -1,5 +1,6 @@
 import { formatServerLog } from '#debug-server';
 import { isServer } from './environment.js';
+import { isArray, isFunction } from './types.js';
 
 /*-------------------
        Logging
@@ -26,7 +27,7 @@ export const log = (
     format = 'standard',
     consoleMethod = null,
     silent = false,
-    title = namespace && typeof formatNamespace === 'function' ? formatNamespace(namespace) : namespace,
+    title = namespace && isFunction(formatNamespace) ? formatNamespace(namespace) : namespace,
     showTitle = true,
     titleColor: customTitleColor = null,
     color = 'inherit',
@@ -52,7 +53,7 @@ export const log = (
       level,
       namespace,
       message,
-      ...(data !== undefined && (!Array.isArray(data) || data.length > 0)) ? { data } : {},
+      ...(data !== undefined && (!isArray(data) || data.length > 0)) ? { data } : {},
     }));
     return;
   }
@@ -90,7 +91,7 @@ export const log = (
   }
   logArgs.unshift(logFormat);
 
-  if (data !== undefined && (!Array.isArray(data) || data.length > 0)) {
+  if (data !== undefined && (!isArray(data) || data.length > 0)) {
     logArgs.push(data);
   }
 
@@ -195,13 +196,13 @@ export const error = (code, at, options) => {
     return built;
   }
   const raise = () => {
-    if (typeof globalThis.onError === 'function') {
+    if (isFunction(globalThis.onError)) {
       globalThis.onError(built);
       return;
     }
     console.error(built);
   };
-  if (typeof queueMicrotask === 'function') {
+  if (isFunction(queueMicrotask)) {
     queueMicrotask(raise);
   }
   else {
