@@ -96,6 +96,13 @@ const TOKEN_RE =
 
 const defaultFormatNamespace = (ns) => (ns.startsWith('[') ? ns : `[${ns}]`);
 
+const pad2 = (n) => (n < 10 ? `0${n}` : `${n}`);
+
+const formatTime = (date = new Date()) => {
+  const hours = date.getHours();
+  return `${hours % 12 || 12}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())} ${hours < 12 ? 'AM' : 'PM'}`;
+};
+
 const hasAnsiSupport = () => {
   if (!process?.env || process.env.NO_COLOR || process.env.FORCE_COLOR === '0') {
     return false;
@@ -136,9 +143,7 @@ export const formatServerLog = (
   const format = isFunction(formatNamespace) ? formatNamespace : defaultFormatNamespace;
   const resolvedTitle = title ?? (namespace && formatNamespace ? format(namespace) : namespace);
 
-  const time = timestamp
-    ? new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })
-    : '';
+  const time = timestamp ? formatTime() : '';
 
   const plain = noColor !== undefined ? Boolean(noColor) : !hasAnsiSupport();
   if (plain) {
