@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Types Utilities
 package: "@semantic-ui/utils"
-methods: [isObject, isPlainObject, isString, isBoolean, isNumber, isArray, isDate, isRegExp, isBinary, isFunction, isPromise, isArguments, isDOM, isNode, isEmpty, isClassInstance, isSet, isMap]
+methods: [isObject, isPlainObject, isString, isBoolean, isNumber, isArray, isDate, isRegExp, isBinary, isFunction, isPromise, isArguments, isDOM, isNode, isEmpty, isClassInstance, isClassConstructor, isSet, isMap]
 icon: type
 description: API reference for type checking and manipulation functions
 ---
@@ -497,6 +497,40 @@ const myInstance = new MyClass();
 console.log(isClassInstance(myInstance)); // true
 console.log(isClassInstance({})); // false
 console.log(isClassInstance(new Date())); // false
+```
+
+### isClassConstructor
+
+```javascript
+function isClassConstructor(fn)
+```
+
+Checks if the given value is an ES `class` constructor (not a plain function, arrow function, or built-in constructor).
+
+> **Built-in Constructors Exclusion** Like `isClassInstance`, this helper identifies user-authored `class` constructors and returns `false` for built-in constructors and functions such as `Object`, `Array`, `Date`, `String`, and `Symbol`.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| fn   | any  | The value to check |
+
+#### Returns
+
+`boolean` - True if the value is an ES class constructor, false otherwise.
+
+#### Example
+
+```javascript
+import { isClassConstructor } from '@semantic-ui/utils';
+
+class MyClass {}
+function myFunction() {}
+
+console.log(isClassConstructor(MyClass)); // true
+console.log(isClassConstructor(myFunction)); // false
+console.log(isClassConstructor(() => {})); // false
+console.log(isClassConstructor(Date)); // false
 ```
 
 ### isSet
