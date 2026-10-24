@@ -1341,15 +1341,15 @@ export class Query {
     return this.chain(prevSiblings);
   }
 
-  height(value, options) {
-    return this.dimension('height', value, options);
+  height(value, options = {}) {
+    return this.#dimension('height', value, options);
   }
 
-  width(value, options) {
-    return this.dimension('width', value, options);
+  width(value, options = {}) {
+    return this.#dimension('width', value, options);
   }
 
-  dimension(dimension, value, options = {}) {
+  #dimension(dimension, value, options = {}) {
     if (isPlainObject(value)) {
       options = value;
       value = undefined;
@@ -1576,15 +1576,27 @@ export class Query {
     });
   }
 
-  naturalWidth({ preserveMaxWidth = true, ...options } = {}) {
-    return this.naturalDimension('width', { preserveMax: preserveMaxWidth, ...options });
+  naturalWidth({ preserveMaxWidth = true, includeMargin = false, includePadding = false, includeBorder = false } = {}) {
+    return this.#naturalDimension('width', {
+      preserveMax: preserveMaxWidth,
+      includeMargin,
+      includePadding,
+      includeBorder,
+    });
   }
 
-  naturalHeight({ preserveMaxHeight = true, ...options } = {}) {
-    return this.naturalDimension('height', { preserveMax: preserveMaxHeight, ...options });
+  naturalHeight(
+    { preserveMaxHeight = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
+  ) {
+    return this.#naturalDimension('height', {
+      preserveMax: preserveMaxHeight,
+      includeMargin,
+      includePadding,
+      includeBorder,
+    });
   }
 
-  naturalDimension(
+  #naturalDimension(
     dimension,
     { preserveMax = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
   ) {
@@ -1617,7 +1629,7 @@ export class Query {
       $clone
         .insertAfter(el)
         .css(css);
-      const size = $clone.dimension(dimension, { includeMargin, includePadding, includeBorder });
+      const size = $clone.#dimension(dimension, { includeMargin, includePadding, includeBorder });
       $clone.remove();
       return size;
     });
