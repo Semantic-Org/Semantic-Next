@@ -59,9 +59,7 @@ export const idleCallback = (callback) => {
   }
 };
 
-export const microtask = typeof queueMicrotask === 'function'
-  ? (fn) => queueMicrotask(fn)
-  : (fn) => Promise.resolve().then(fn);
+export const microtask = (fn) => queueMicrotask(fn);
 
 const DEFAULT_STUN_SERVER = 'stun:stun.l.google.com:19302';
 const ICE_SERVERS = [{ urls: DEFAULT_STUN_SERVER }];

@@ -202,12 +202,7 @@ export const error = (code, at, options) => {
     }
     console.error(built);
   };
-  if (isFunction(queueMicrotask)) {
-    queueMicrotask(raise);
-  }
-  else {
-    setTimeout(raise, 0);
-  }
+  queueMicrotask(raise);
   return built;
 };
 

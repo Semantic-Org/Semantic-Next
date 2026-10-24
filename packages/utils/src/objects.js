@@ -853,7 +853,7 @@ export const proxyObject = (sourceObj = () => ({}), referenceObj = {}) => {
 
 export const onlyKeys = (obj, keysToKeep) => {
   return keysToKeep.reduce((accumulator, key) => {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.hasOwn(obj, key)) {
       accumulator[key] = obj[key];
     }
     return accumulator;
