@@ -1,7 +1,7 @@
 ---
 title: Utility Functions Reference
 description: Complete reference for @semantic-ui/utils — a standalone utility library providing functions for arrays, objects, strings, type checking, colors, dates, and more. Use this before reimplementing common operations.
-keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, formatDuration, each, range, sequence, remove, noop, isDate, isRegExp, isTemporal, checkOptions, defineGlobal]
+keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, formatDuration, each, range, sequence, remove, noop, isDate, isRegExp, isTemporal, isClassConstructor, checkOptions, defineGlobal]
 audience: authoring
 skill: utility-functions
 type: skill
@@ -454,7 +454,7 @@ isTemporal(new Date());                            // false
 ### Special Types
 ```javascript
 import {
-  isEmpty, isPromise, isDOM, isNode, isClassInstance,
+  isEmpty, isPromise, isDOM, isNode, isClassInstance, isClassConstructor,
   isIterable, isMap, isSet, isArguments
 } from '@semantic-ui/utils';
 
@@ -468,6 +468,7 @@ isPromise(fetch('/api'));        // true (checks for .then method)
 isDOM(document.body);            // true (Element, Document, window, DocumentFragment)
 isNode(document.createTextNode('text')); // true (checks nodeType)
 isClassInstance(new MyClass());  // true (excludes built-in types like Date, Map, Array)
+isClassConstructor(MyClass);     // true (ES class constructor, false for plain/arrow fns and built-ins like Date)
 
 isIterable(new Set());           // true (checks Symbol.iterator)
 isMap(new Map());                // true
@@ -1241,19 +1242,19 @@ log('Warning', 'warn', { timestamp: true, title: 'SYSTEM', titleColor: '#FF6B35'
 log('API response', 'info', { format: 'json', namespace: 'API', timestamp: true });
 // {"timestamp":"...","level":"info","namespace":"API","message":"API response"}
 
-// styling is browser-only by default: noColor defaults to isServer, so node
-// output is plain text with no %c — pass noColor: false to force styling
-log('booted', 'info', { namespace: 'db' });             // "db booted" on the server
+// server defaults: 12-hour timestamp (timestamp: isServer), bracketed [ns] (formatNamespace),
+// and ANSI token highlighting in TTYs (noColor: true forces plain text)
+log('booted', 'info', { namespace: 'db' });             // "4:31:20 PM [db] booted" on the server
 ```
 
 ### createLogger — log, Bound to Shared Defaults
 ```javascript
 import { createLogger } from '@semantic-ui/utils';
 
-// bind once, destructure flat — any log option rides as a default
-const { log, debug, info, warn, error } = createLogger({ namespace: 'sync', timestamp: true });
+// bind once, destructure flat — any log option rides as a default (fadeSecondary: true fades 2nd sentence)
+const { log, debug, info, warn, error } = createLogger({ namespace: 'sync', fadeSecondary: true });
 
-info('connected');                            // sync connected — namespace prints VERBATIM, never cased
+info('connected');                            // 4:31:20 PM [sync] connected on server, sync connected in browser
 warn('reconnecting', { data: { attempt: 2 } });  // callsite options merge over the defaults and win
 log('custom', 'debug');                       // the bound log keeps its level slot
 
@@ -1463,6 +1464,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `isDOM` | Element, Document, window, DocumentFragment |
 | `isNode` | Has `nodeType` |
 | `isClassInstance` | Excludes built-in types |
+| `isClassConstructor` | ES `class` constructor (excludes plain/arrow functions and built-ins) |
 | `isIterable` | Has `Symbol.iterator` |
 | `isMap`, `isSet` | `instanceof` checks |
 | `isArguments` | Arguments object |

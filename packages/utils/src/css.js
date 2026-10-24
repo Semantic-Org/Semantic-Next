@@ -16,8 +16,6 @@ import { isArray, isPlainObject, isString } from './types.js';
 const prefixRules = [
   // Still prefixed in Safari
   { prop: 'user-select', prefix: '-webkit-' },
-  { prop: 'backdrop-filter', prefix: '-webkit-' },
-  { prop: 'print-color-adjust', prefix: '-webkit-' },
 
   // Still prefixed in Firefox
   { prop: 'text-size-adjust', prefix: '-moz-' },

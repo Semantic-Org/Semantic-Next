@@ -22,6 +22,12 @@
       "importmap": "./dist/cdn/utils.min.js"
     }
   },
+  "imports": {
+    "#debug-server": {
+      "browser": "./src/debug-browser.js",
+      "default": "./src/debug-server.js"
+    }
+  },
   "scripts": {
     "build": "wireit",
     "test": "vitest",

@@ -1,9 +1,6 @@
 import {
   camelToKebab,
   each,
-  findIndex,
-  firstMatch,
-  get,
   hashCode,
   inArray,
   isArray,
@@ -16,7 +13,6 @@ import {
   isPlainObject,
   isString,
   keys,
-  remove,
 } from '@semantic-ui/utils';
 
 /*
@@ -77,7 +73,6 @@ export class Query {
   */
   static eventRegistry = new WeakMap(); // Key: Element, Value: Set<HandlerObject>
   static handlerRegistry = new WeakMap(); // Key: HandlerObject, Value: Element
-  static delegatedListeners = new WeakMap(); // Key: Element, Value: Map<event key, { handlers, listener }>
 
   /*
     We keep a map to store registered behaviors
@@ -408,7 +403,7 @@ export class Query {
     const $siblings = this.chain(el.parentNode.children).filter(siblingFilter);
     const siblingEls = $siblings.get();
     const els = this.get();
-    return findIndex(siblingEls, el => inArray(el, els));
+    return siblingEls.findIndex(el => inArray(el, els));
   }
 
   // returns the index of current collection that match filter
@@ -724,34 +719,50 @@ export class Query {
       }
 
       this.each((el) => {
+        // wrap when handler can return false/'cancel' (explicit return or arrow expression body)
+        const needsWrapping = /\breturn\b|=>\s*[^\s{]/.test(handler.toString());
+        const wrappedHandler = needsWrapping
+          ? function(e) {
+            const result = handler.call(this, e);
+            if (result === false) {
+              e.stopPropagation();
+            }
+            else if (result === 'cancel') {
+              e.preventDefault();
+            }
+            return result;
+          }
+          : handler;
+
+        const eventListener = targetSelector
+          ? (event) => {
+            this.#dispatchDelegated(eventHandler, event);
+            if (listenerOptions.once) {
+              abortController.abort();
+            }
+          }
+          : wrappedHandler;
+
+        // will cause illegal invocation if used from proxy object
+        const domEL = (el == Query.globalThisProxy) ? globalThis : el;
+        if (domEL.addEventListener) {
+          domEL.addEventListener(eventName, eventListener, listenerOptions);
+        }
+
         const eventHandler = {
           el,
           eventName,
           namespaces,
-          eventListener: handler,
+          eventListener,
+          wrappedHandler,
           abortController,
           delegated: targetSelector !== undefined,
           targetSelector,
+          capture: Boolean(listenerOptions.capture),
           handler,
           abort: (reason) => abortController.abort(reason),
         };
 
-        // will cause illegal invocation if used from proxy object
-        const domEL = (el == Query.globalThisProxy) ? globalThis : el;
-        if (targetSelector) {
-          eventHandler.eventListener = Query.delegate(domEL, eventHandler, listenerOptions);
-        }
-        else {
-          if (/\breturn\b|=>\s*[^\s{]/.test(handler.toString())) {
-            // wrap when handler can return false/'cancel' (explicit return or arrow expression body)
-            eventHandler.eventListener = function(event) {
-              return Query.applyReturnValue(event, handler.call(this, event));
-            };
-          }
-          if (domEL.addEventListener) {
-            domEL.addEventListener(eventName, eventHandler.eventListener, listenerOptions);
-          }
-        }
         eventHandlers.push(eventHandler);
         registerEvent({ el, eventHandler });
       });
@@ -763,104 +774,60 @@ export class Query {
     return this;
   }
 
-  /*
-    delegated handlers on one element share a native listener per event and listener options, so
-    they run the way listeners on the matched elements would: innermost match first, stopPropagation
-    honoured between levels, stopImmediatePropagation ending the run
-  */
-  static delegate(root, eventHandler, { capture = false, passive = false, once = false }) {
-    const { eventName, abortController } = eventHandler;
-    const listeners = Query.delegatedListeners.get(root) || new Map();
-    Query.delegatedListeners.set(root, listeners);
-    const key = `${eventName}|${capture}|${passive}`;
-
-    // the browser drops a once listener after one event, so a once handler never shares one
-    let shared = once ? null : listeners.get(key);
-    if (!shared) {
-      const handlers = [];
-      shared = { handlers, listener: (event) => Query.dispatchDelegated(handlers, root, event, capture) };
-      root.addEventListener(eventName, shared.listener, { capture, passive, once });
-      if (!once) {
-        listeners.set(key, shared);
-      }
+  // delegated handlers on one element share a dispatch so they run innermost match first
+  // with stopPropagation honoured between levels
+  #dispatchDelegated(eventHandler, event) {
+    if (eventHandler.dispatched?.delete(event)) {
+      return;
     }
-    shared.handlers.push(eventHandler);
-    abortController.signal.addEventListener('abort', () => {
-      remove(shared.handlers, (other) => other === eventHandler);
-      if (!shared.handlers.length) {
-        root.removeEventListener(eventName, shared.listener, { capture });
-        if (!once) {
-          listeners.delete(key);
-        }
-      }
-    }, { once: true });
-    return shared.listener;
-  }
+    const { el, eventName, capture } = eventHandler;
+    const handlers = [...(Query.eventRegistry.get(el) || [])].filter((h) =>
+      h.delegated && h.eventName === eventName && h.capture === capture && !h.abortController.signal.aborted
+    );
 
-  static dispatchDelegated(handlers, root, event, capture) {
     const path = event.composedPath();
+    const root = Query.isWindow(el) ? globalThis : el;
     const nodes = path.slice(0, path.indexOf(root));
     if (capture) {
-      nodes.reverse(); // capture runs outermost first
+      nodes.reverse();
     }
-    const snapshot = handlers.slice(); // a handler added mid-dispatch waits for the next event
 
-    // the two stops a handler can call during this dispatch, tracked apart from any earlier listener's
     let stopped = false;
-    let stoppedImmediately = false;
+    let immediate = false;
     const { stopPropagation, stopImmediatePropagation } = event;
     event.stopPropagation = () => {
       stopped = true;
       stopPropagation.call(event);
     };
     event.stopImmediatePropagation = () => {
-      stopped = stoppedImmediately = true;
+      stopped = immediate = true;
       stopImmediatePropagation.call(event);
     };
-    let errors;
+
     try {
       for (const node of nodes) {
-        if (!node.matches) {
-          continue;
-        }
-        for (const { targetSelector, handler, abortController } of snapshot) {
-          if (abortController.signal.aborted || !node.matches(targetSelector)) {
-            continue;
-          }
-          try {
-            Query.applyReturnValue(event, handler.call(node, event));
-          }
-          catch (error) {
-            (errors ??= []).push(error);
-          }
-          if (stoppedImmediately) {
-            break;
+        for (const h of handlers) {
+          if (!h.abortController.signal.aborted && node.matches?.(h.targetSelector)) {
+            h.wrappedHandler.call(node, event);
+            if (immediate) {
+              return;
+            }
           }
         }
         if (stopped) {
-          break;
+          return;
         }
       }
     }
     finally {
-      delete event.stopImmediatePropagation;
       delete event.stopPropagation;
+      delete event.stopImmediatePropagation;
+      for (const h of handlers) {
+        if (h !== eventHandler) {
+          (h.dispatched ??= new WeakSet()).add(event);
+        }
+      }
     }
-    // thrown once the others have run, so a handler's error reaches the page the way a listener's does
-    if (errors) {
-      throw errors.length === 1 ? errors[0] : new AggregateError(errors);
-    }
-  }
-
-  // a handler's return value acts on the event: false stops propagation, 'cancel' prevents the default
-  static applyReturnValue(event, value) {
-    if (value === false) {
-      event.stopPropagation();
-    }
-    else if (value === 'cancel') {
-      event.preventDefault();
-    }
-    return value;
   }
 
   one(eventName, targetSelectorOrHandler, handlerOrOptions, options) {
@@ -953,7 +920,7 @@ export class Query {
       // this is an exact handler to match
       if (isFunction(handler) && el) {
         const handlerFunc = handler;
-        handler = firstMatch(elementHandlers, thisHandler => thisHandler.handler === handlerFunc);
+        handler = elementHandlers && [...elementHandlers].find(thisHandler => thisHandler.handler === handlerFunc);
       }
 
       // use abort signal to remove from element
@@ -1416,141 +1383,56 @@ export class Query {
   }
 
   height(value, options = {}) {
-    const defaultOptions = {
-      includeMargin: false,
-      includePadding: false,
-      includeBorder: false,
-    };
-
-    // If first argument is an object (settings), treat it as options for getter
-    if (isPlainObject(value)) {
-      options = value;
-      value = undefined; // No value to set
-    }
-
-    // Merge with defaults
-    const { includeMargin, includePadding, includeBorder } = {
-      ...defaultOptions,
-      ...options,
-    };
-
-    // Setter: ignore options, just set height
-    if (value !== undefined) {
-      return this.each(el => {
-        el.style.height = typeof value === 'number' ? `${value}px` : value;
-      });
-    }
-
-    // Getter: calculate height based on options
-    if (this.length === 0) {
-      return undefined;
-    }
-
-    const heights = this.map(el => {
-      // Handle window/global object special case
-      if (Query.isWindow(el)) {
-        return window.innerHeight;
-      }
-
-      // box-sizing agnostic: measure actual rendered dimensions, not CSS interpretations
-      let height = el.offsetHeight; // content + padding + border (total height)
-
-      // Get computed style for all calculations
-      const computedStyle = window.getComputedStyle(el);
-      const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
-      const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
-      const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
-      const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
-      const marginTop = parseFloat(computedStyle.marginTop) || 0;
-      const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
-
-      // Start with total height and subtract what we don't want
-      height -= borderTop + borderBottom; // Remove border to get content + padding
-
-      if (!includePadding) {
-        height -= paddingTop + paddingBottom; // Remove padding to get content only
-      }
-
-      if (includeBorder) {
-        height += borderTop + borderBottom; // Add border back
-      }
-
-      if (includeMargin) {
-        height += marginTop + marginBottom; // Add margin
-      }
-
-      return height;
-    });
-
-    return this.length === 1 ? heights[0] : heights;
+    return this.#dimension('height', value, options);
   }
 
-  width(value, options) {
-    const defaultOptions = {
-      includeMargin: false,
-      includePadding: false,
-      includeBorder: false,
-    };
+  width(value, options = {}) {
+    return this.#dimension('width', value, options);
+  }
 
-    // If first argument is an object (settings), treat it as options for getter
+  #dimension(dimension, value, options = {}) {
     if (isPlainObject(value)) {
       options = value;
-      value = undefined; // No value to set
+      value = undefined;
     }
+    const { includeMargin = false, includePadding = false, includeBorder = false } = options;
 
-    // Get settings
-    const { includeMargin, includePadding, includeBorder } = {
-      ...defaultOptions,
-      ...options,
-    };
-
-    // Setter: ignore options, just set width
     if (value !== undefined) {
-      return this.each(el => {
-        el.style.width = typeof value === 'number' ? `${value}px` : value;
+      return this.each((el) => {
+        el.style[dimension] = isNumber(value) ? `${value}px` : value;
       });
     }
 
-    // Getter: calculate width based on options
     if (this.length === 0) {
       return undefined;
     }
 
-    const widths = this.map(el => {
-      // Handle window/global object special case
+    const isWidth = dimension === 'width';
+    const values = this.map((el) => {
       if (Query.isWindow(el)) {
-        return window.innerWidth;
+        return isWidth ? window.innerWidth : window.innerHeight;
       }
 
-      // box-sizing agnostic: measure actual rendered dimensions, not CSS interpretations
-      let width = el.offsetWidth; // content + padding + border (total width)
-
-      // Get computed style for all calculations
+      // offsetWidth/offsetHeight includes border and padding regardless of box-sizing
+      let size = isWidth ? el.offsetWidth : el.offsetHeight;
       const computedStyle = window.getComputedStyle(el);
-      const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
-      const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
-      const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
-      const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
-      const marginLeft = parseFloat(computedStyle.marginLeft) || 0;
-      const marginRight = parseFloat(computedStyle.marginRight) || 0;
 
-      // Start with total width and subtract what we don't want
       if (!includeBorder) {
-        width -= borderLeft + borderRight; // Remove border to get content + padding
+        size -= (parseFloat(isWidth ? computedStyle.borderLeftWidth : computedStyle.borderTopWidth) || 0)
+          + (parseFloat(isWidth ? computedStyle.borderRightWidth : computedStyle.borderBottomWidth) || 0);
       }
-
       if (!includePadding) {
-        width -= paddingLeft + paddingRight; // Remove padding to get content only
+        size -= (parseFloat(isWidth ? computedStyle.paddingLeft : computedStyle.paddingTop) || 0)
+          + (parseFloat(isWidth ? computedStyle.paddingRight : computedStyle.paddingBottom) || 0);
       }
-
       if (includeMargin) {
-        width += marginLeft + marginRight; // Add margin
+        size += (parseFloat(isWidth ? computedStyle.marginLeft : computedStyle.marginTop) || 0)
+          + (parseFloat(isWidth ? computedStyle.marginRight : computedStyle.marginBottom) || 0);
       }
-
-      return width;
+      return size;
     });
 
-    return this.length === 1 ? widths[0] : widths;
+    return this.length === 1 ? values[0] : values;
   }
 
   innerWidth() {
@@ -1736,45 +1618,31 @@ export class Query {
   }
 
   naturalWidth({ preserveMaxWidth = true, includeMargin = false, includePadding = false, includeBorder = false } = {}) {
-    const widths = this.map((el) => {
-      const includeBoxModel = includeMargin || includePadding || includeBorder;
-      const $clone = this.chain(el).clone();
-      const css = {
-        position: 'absolute',
-        left: '0px',
-        top: '0px',
-        display: 'block',
-        transform: 'translate(-200vw, -200vh)',
-        pointerEvents: 'none',
-        width: 'auto',
-        visibility: 'hidden',
-        isolation: 'isolate',
-        contain: 'layout paint style',
-        maxWidth: 'none',
-      };
-      if (!includeBoxModel) {
-        css.boxSizing = 'content-box';
-        css.padding = '0px';
-        css.margin = '0px';
-        css.border = '0px';
-      }
-      if (preserveMaxWidth) {
-        delete css.maxWidth;
-      }
-      $clone
-        .insertAfter(el)
-        .css(css);
-      const naturalWidth = $clone.width({ includeMargin, includePadding, includeBorder });
-      $clone.remove();
-      return naturalWidth;
+    return this.#naturalDimension('width', {
+      preserveMax: preserveMaxWidth,
+      includeMargin,
+      includePadding,
+      includeBorder,
     });
-    return widths.length > 1 ? widths : widths[0];
   }
 
   naturalHeight(
     { preserveMaxHeight = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
   ) {
-    const height = this.map((el) => {
+    return this.#naturalDimension('height', {
+      preserveMax: preserveMaxHeight,
+      includeMargin,
+      includePadding,
+      includeBorder,
+    });
+  }
+
+  #naturalDimension(
+    dimension,
+    { preserveMax = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
+  ) {
+    const maxProperty = dimension === 'width' ? 'maxWidth' : 'maxHeight';
+    const sizes = this.map((el) => {
       const includeBoxModel = includeMargin || includePadding || includeBorder;
       const $clone = this.chain(el).clone();
       const css = {
@@ -1784,11 +1652,11 @@ export class Query {
         display: 'block',
         transform: 'translate(-200vw, -200vh)',
         pointerEvents: 'none',
-        height: 'auto',
+        [dimension]: 'auto',
         visibility: 'hidden',
         isolation: 'isolate',
         contain: 'layout paint style',
-        maxHeight: 'none',
+        [maxProperty]: 'none',
       };
       if (!includeBoxModel) {
         css.boxSizing = 'content-box';
@@ -1796,17 +1664,17 @@ export class Query {
         css.margin = '0px';
         css.border = '0px';
       }
-      if (preserveMaxHeight) {
-        delete css.maxHeight;
+      if (preserveMax) {
+        delete css[maxProperty];
       }
       $clone
         .insertAfter(el)
         .css(css);
-      const naturalHeight = $clone.height({ includeMargin, includePadding, includeBorder });
+      const size = $clone.#dimension(dimension, { includeMargin, includePadding, includeBorder });
       $clone.remove();
-      return naturalHeight;
+      return size;
     });
-    return height.length > 1 ? height : height[0];
+    return sizes.length > 1 ? sizes : sizes[0];
   }
 
   naturalDisplay({ calculate = true } = {}) {
@@ -2149,7 +2017,7 @@ export class Query {
       if (this.length === 0) {
         return undefined;
       }
-      const values = this.map(el => get(el, `dataset.${key}`));
+      const values = this.map(el => el.dataset?.[key]);
       return this.length === 1
         ? values[0]
         : values;

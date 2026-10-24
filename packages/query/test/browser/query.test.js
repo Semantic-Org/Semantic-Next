@@ -1833,34 +1833,4 @@ describe('query', () => {
       expect(result[0]).toBe(outer);
     });
   });
-
-  describe('delegated events on a shadow root', () => {
-    const mountCard = () => {
-      const host = document.createElement('div');
-      document.body.appendChild(host);
-      const shadow = host.attachShadow({ mode: 'open' });
-      shadow.innerHTML = '<div class="card"><button class="btn"></button></div>';
-      return { host, shadow };
-    };
-
-    it('run innermost first whichever handler was declared first', () => {
-      const { host, shadow } = mountCard();
-      const fired = [];
-      $(shadow).on('click', '.card', () => fired.push('card'));
-      $(shadow).on('click', '.btn', () => fired.push('btn'));
-      shadow.querySelector('.btn').click();
-      expect(fired).toEqual(['btn', 'card']);
-      host.remove();
-    });
-
-    it('honour stopPropagation from the inner handler', () => {
-      const { host, shadow } = mountCard();
-      const outer = vi.fn();
-      $(shadow).on('click', '.card', outer);
-      $(shadow).on('click', '.btn', (event) => event.stopPropagation());
-      shadow.querySelector('.btn').click();
-      expect(outer).not.toHaveBeenCalled();
-      host.remove();
-    });
-  });
 });

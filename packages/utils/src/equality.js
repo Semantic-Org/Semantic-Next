@@ -5,7 +5,6 @@ import { isArray, isDate, isFunction, isMap, isRegExp, isSet } from './types.js'
 --------------------*/
 
 const getProto = Object.getPrototypeOf;
-const hasOwn = Object.prototype.hasOwnProperty;
 const objectValueOf = Object.prototype.valueOf;
 const objectToString = Object.prototype.toString;
 
@@ -113,7 +112,7 @@ const deepEqual = (a, b, loose, ignored, deepIgnore, partial) => {
     const key = aKeys[i];
     if (ignored?.has(key)) { continue; }
     aCount++;
-    if (!hasOwn.call(b, key) || !deepEqual(a[key], b[key], loose, childIgnored, deepIgnore, partial)) {
+    if (!Object.hasOwn(b, key) || !deepEqual(a[key], b[key], loose, childIgnored, deepIgnore, partial)) {
       return false;
     }
   }

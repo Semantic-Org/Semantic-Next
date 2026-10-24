@@ -3542,3 +3542,71 @@ I was asked to look at PR #388 (`fix/expression-grammar`), where an earlier agen
 *"If a pass only exists to undo the pass before it, delete both; and always cache the miss that throws."*
 
 
+
+## 2026-10-24 — the bug hunt: eleven gripes, nine pull requests, and the record that followed the code
+
+The reports came from agents who had built small apps against the data layer with no repo access, on
+prompts another agent generated at random. Eleven gripes in two buckets, ranked by severity by the
+reporter. The maintainer's protocol was set in one message: one charge per bug carrying the evidence and
+never the fix, one executor in one worktree per charge, separate pull requests, nothing launched until
+the load was scoped, and later "the simplest solve that closes the bug should be used". By the end of
+the night nine pull requests had merged, one was held for his own rewrite, and the kernel's law had seven
+new entries and two amendments. What follows is what the record cannot carry.
+
+**Probe before verdict, every time.** Three of the first six reports had a wrong leg. Array fields do not
+seed `[]`; a top-level `limit` on a publication refuses loudly at boot; the summed loading total was the
+stand-in doing its job. Each wrong leg sat beside a right one, and only a run in the tree told them
+apart. My own charge for the count bug carried a sentence I had reasoned rather than run, that the
+progressive path escaped by ordering, and the executor's second red test showed it was stuck too. A trace
+is a hypothesis. The one I wrote into a charge was a hypothesis with a tone of voice.
+
+**A charge says what and never how, and the one place I slipped cost a lane.** The executors found
+shapes I would not have reached: a four-line helper that coerces the inserted document before a condition
+reads it, a parameter-count test that tells an opaque default from a derivable one. Where my words leaked
+mechanism, they misled. The publish-errors charge asked for the server line "under SSE and poll if the
+handler is shared", and poll is the one lane where it is not, so the fix shipped with both halves wrong
+there and the review caught it. Say the condition and name the lanes; never guess the structure for the
+builder.
+
+**Five of seven first heads came back HOLD, and every hold was real.** A rule that admitted a defaulted
+field at any value also ran on the push leg and made a defaulted array pushable under an update width
+that left it out. A fix for a silent server made the client lie over poll. A count fix deleted a line the
+previous fix had added. A delegation fix with a per-handler mark ran handlers twice when one dispatched
+into its own root. None of these were in the tests the builders wrote, all reproduced on a real server or
+in real Chromium, and each closed on a narrow second pass. Agreement between the builder and the
+builder's tests still proves what it always proved.
+
+**The one identifier.** When the count fix came back page-wide, I described the second-order behaviour
+in prose twice and he did not follow. Then he asked what was built, how many lines, how it worked, and
+the answer was two lines. His own sketch differed from them by one identifier, the page's window against
+the collection's own loading, and that one word was the whole problem. He asks to see the lines, not the
+description, and he was right to.
+
+**The record follows the code.** At 5:50 on a Friday he narrowed the default rule by hand and merged. The
+narrowing compared a function default by evaluating it again, so `createdAt: () => new Date()` refused
+its own seed, the common case. He said "oh crap" and we fixed it red-first before midnight, and the law
+moved twice in one night to say what the kernel does. A function default is an opaque body that cannot
+be matched; a literal can. Once he saw that the second evaluation ran for every defaulted field on every
+write, he asked for it to run only where the width would refuse, and that too was a reordering, not a
+mechanism.
+
+**A careful review and an author's read answer different questions.** The Query delegation fix passed a
+verification review at MERGE 82 on its second head, with every regression closed and the bench bot
+quiet. He read it and said it was too much indirection, a single function readable top to bottom replaced
+by large helpers, and that he could write it in a third the size. The bytes had doubled with the model the
+reviewer had called simpler. The branch stays open for his hand. Correctness passes do not see what the
+author sees in minutes.
+
+**What the tooling said.** Seven executors ran at once on one virtual machine because the runner queues on
+the box's own lock. The session scratchpad is shared across concurrent seats, and one seat's pull request
+body was overwritten by another's. A push event was dropped once and the head went unrecorded until a
+later push. The battery bot's comment did not refresh after a green rerun. The size gate measures against
+a baseline weeks old and hides byte deltas, so four seats built their own before-and-after. Brotli on an
+untouched bundle moves by as much as 129 bytes between builds, the floor under a 200-byte tripwire. And a
+test that read a log line's prefix went red when the sibling repository changed its log format the same
+evening, which is a test coupled to a neighbour and nothing else.
+
+*— Claude (Fable 5.1), 2026-10-24*
+
+*"Run the probe before the verdict, write the condition and never the shape, and when the record and the
+code disagree, move the record."*

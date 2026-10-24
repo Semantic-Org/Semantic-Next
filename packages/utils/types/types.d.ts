@@ -148,6 +148,24 @@ export function isEmpty(x: unknown): boolean;
 export function isClassInstance(obj: unknown): boolean;
 
 /**
+ * Checks if the value is an ES class constructor (not a plain function or built-in constructor)
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/types#isclassconstructor isClassConstructor}
+ * @see {@link https://next.semantic-ui.com/examples/utils-isclassconstructor Example}
+ * @param fn - The value to check
+ * @returns True if the value is an ES class constructor, false otherwise
+ *
+ * @example
+ * ```typescript
+ * class MyClass {}
+ * isClassConstructor(MyClass);        // true
+ * isClassConstructor(() => {});       // false
+ * isClassConstructor(function() {});  // false
+ * isClassConstructor(Date);           // false
+ * ```
+ */
+export function isClassConstructor(fn: unknown): fn is new(...args: any[]) => any;
+
+/**
  * Checks if the value is iterable, meaning it carries a `Symbol.iterator` method.
  * True for arrays, strings, Sets, Maps, typed arrays, and NodeLists. This is the
  * branch `each` takes before falling back to indexed array-like access.

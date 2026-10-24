@@ -12,6 +12,8 @@ describe('log (server posture)', () => {
     consoleSpy = {
       log: vi.spyOn(console, 'log').mockImplementation(() => {}),
       info: vi.spyOn(console, 'info').mockImplementation(() => {}),
+      warn: vi.spyOn(console, 'warn').mockImplementation(() => {}),
+      error: vi.spyOn(console, 'error').mockImplementation(() => {}),
     };
   });
 
@@ -23,31 +25,77 @@ describe('log (server posture)', () => {
     expect(isServer).toBe(true);
   });
 
-  it('should default noColor on and compose plain text', () => {
-    log('message', 'log', { title: 'TestComponent' });
+  it('should default timestamp on with 12-hour AM/PM time and compose plain text when noColor is true', () => {
+    log('message', 'log', { title: 'TestComponent', noColor: true });
+    expect(consoleSpy.log).toHaveBeenCalledWith(
+      expect.stringMatching(/^\d{1,2}:\d{2}:\d{2} (AM|PM) TestComponent message$/),
+    );
+  });
+
+  it('should omit timestamp when timestamp is false', () => {
+    log('message', 'log', { title: 'TestComponent', timestamp: false, noColor: true });
     expect(consoleSpy.log).toHaveBeenCalledWith('TestComponent message');
   });
 
-  it('should render the timestamp plain by default', () => {
-    log('message', 'log', { timestamp: true });
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringMatching(/^\[\d{2}:\d{2}:\d{2}\.\d{3}\] message$/),
-    );
-  });
-
-  it('should default the factory bundle to plain text', () => {
-    const { info } = createLogger({ namespace: 'sync' });
+  it('should bracket the namespace by default on the server', () => {
+    const { info } = createLogger({ namespace: 'sync', noColor: true });
     info('connected');
-    expect(consoleSpy.info).toHaveBeenCalledWith('sync connected');
+    expect(consoleSpy.info).toHaveBeenCalledWith(
+      expect.stringMatching(/^\d{1,2}:\d{2}:\d{2} (AM|PM) \[sync\] connected$/),
+    );
   });
 
-  it('should restore styling with noColor: false', () => {
-    log('message', 'log', { title: 'TestComponent', noColor: false });
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining('%cTestComponent%c message'),
-      expect.stringContaining('font-weight: bold'),
-      expect.any(String),
-    );
+  it('should support custom formatNamespace or formatNamespace: false', () => {
+    log('connected', 'info', { namespace: 'sync', formatNamespace: false, timestamp: false, noColor: true });
+    expect(consoleSpy.info).toHaveBeenCalledWith('sync connected');
+
+    log('connected', 'info', {
+      namespace: 'sync',
+      formatNamespace: (ns) => `${ns} -`,
+      timestamp: false,
+      noColor: true,
+    });
+    expect(consoleSpy.info).toHaveBeenCalledWith('sync - connected');
+  });
+
+  it('should apply ANSI colors and token highlighting when noColor is false', () => {
+    log('using sqlite ./app.db on 127.0.0.1:3000', 'info', { namespace: 'sync', noColor: false });
+    const line = consoleSpy.info.mock.calls[0][0];
+    expect(line).toContain('\x1b[38;2;117;158;185m[sync]\x1b[0m');
+    expect(line).toContain('\x1b[4m\x1b[38;2;202;202;202m./app.db\x1b[0m');
+    expect(line).toContain('\x1b[38;2;202;202;202m127.0.0.1:3000\x1b[0m');
+  });
+
+  it('should skip token highlighting when highlight is false', () => {
+    log('using sqlite ./app.db', 'info', { namespace: 'sync', noColor: false, highlight: false, timestamp: false });
+    const line = consoleSpy.info.mock.calls[0][0];
+    expect(line).not.toContain('\x1b[4m');
+    expect(line).toContain('\x1b[38;2;152;152;152musing sqlite ./app.db\x1b[0m');
+  });
+
+  it('should fade the second sentence when fadeSecondary is true', () => {
+    log('first sentence. Second sentence', 'warn', {
+      namespace: 'sync',
+      noColor: false,
+      fadeSecondary: true,
+      timestamp: false,
+    });
+    const line = consoleSpy.warn.mock.calls[0][0];
+    expect(line).toContain('\x1b[38;2;255;232;130mfirst sentence.\x1b[0m');
+    expect(line).toContain('\x1b[38;2;190;164;119mSecond sentence\x1b[0m');
+  });
+
+  it('should honor custom titleColor and color on the server', () => {
+    log('custom styled', 'info', {
+      namespace: 'app',
+      titleColor: '#FF6B35',
+      color: 'rgb(16, 185, 129)',
+      noColor: false,
+      timestamp: false,
+    });
+    const line = consoleSpy.info.mock.calls[0][0];
+    expect(line).toContain('\x1b[1m\x1b[38;2;255;107;53m[app]\x1b[0m');
+    expect(line).toContain('\x1b[38;2;16;185;129mcustom styled\x1b[0m');
   });
 
   it('should emit the same JSON line shape as the browser', () => {
@@ -158,15 +206,15 @@ describe('createLogger once family', () => {
   });
 
   it('should print the first call and silence the second on the same key', () => {
-    const { warnOnce } = createLogger({ namespace: 'sync' });
+    const { warnOnce } = createLogger({ namespace: 'sync', timestamp: false, noColor: true });
     warnOnce('plainCookie', 'the session cookie is set over plain http');
     warnOnce('plainCookie', 'the session cookie is set over plain http');
     expect(consoleSpy.warn).toHaveBeenCalledTimes(1);
-    expect(consoleSpy.warn).toHaveBeenCalledWith('sync the session cookie is set over plain http');
+    expect(consoleSpy.warn).toHaveBeenCalledWith('[sync] the session cookie is set over plain http');
   });
 
   it('should key on the caller word, never the text', () => {
-    const { warnOnce } = createLogger();
+    const { warnOnce } = createLogger({ timestamp: false, noColor: true });
     warnOnce('plainCookie', 'first wording');
     warnOnce('plainCookie', 'second wording');
     expect(consoleSpy.warn).toHaveBeenCalledTimes(1);
@@ -174,22 +222,22 @@ describe('createLogger once family', () => {
   });
 
   it('should print again on a different key', () => {
-    const { warnOnce } = createLogger();
+    const { warnOnce } = createLogger({ noColor: true });
     warnOnce('sqliteSearch:adapter:todos', 'todos falls back to the reference floor');
     warnOnce('sqliteSearch:adapter:posts', 'posts falls back to the reference floor');
     expect(consoleSpy.warn).toHaveBeenCalledTimes(2);
   });
 
   it('should print the key itself when it is the whole message', () => {
-    const { warnOnce } = createLogger({ namespace: 'sync' });
+    const { warnOnce } = createLogger({ namespace: 'sync', timestamp: false, noColor: true });
     warnOnce('the session cookie is set over plain http');
     warnOnce('the session cookie is set over plain http');
     expect(consoleSpy.warn).toHaveBeenCalledTimes(1);
-    expect(consoleSpy.warn).toHaveBeenCalledWith('sync the session cookie is set over plain http');
+    expect(consoleSpy.warn).toHaveBeenCalledWith('[sync] the session cookie is set over plain http');
   });
 
   it('should share one memory across the family', () => {
-    const { debugOnce, infoOnce, warnOnce, errorOnce, logOnce } = createLogger();
+    const { debugOnce, infoOnce, warnOnce, errorOnce, logOnce } = createLogger({ noColor: true });
     warnOnce('redis:pubsub', 'redis pubsub failed');
     errorOnce('redis:pubsub', 'redis pubsub failed');
     infoOnce('redis:pubsub', 'redis pubsub failed');
@@ -202,20 +250,20 @@ describe('createLogger once family', () => {
   });
 
   it('should start a fresh logger with a clean slate', () => {
-    createLogger().warnOnce('plainCookie', 'first logger');
-    createLogger().warnOnce('plainCookie', 'second logger');
+    createLogger({ noColor: true }).warnOnce('plainCookie', 'first logger');
+    createLogger({ noColor: true }).warnOnce('plainCookie', 'second logger');
     expect(consoleSpy.warn).toHaveBeenCalledTimes(2);
   });
 
   it('should print exactly what the plain member prints', () => {
-    const { warn, warnOnce } = createLogger({ namespace: 'db' });
+    const { warn, warnOnce } = createLogger({ namespace: 'db', timestamp: false, noColor: true });
     warnOnce('retry', 'retrying', { data: { attempt: 2 } });
     warn('retrying', { data: { attempt: 2 } });
     expect(consoleSpy.warn.mock.calls[0]).toEqual(consoleSpy.warn.mock.calls[1]);
   });
 
   it('should keep the level slot on logOnce', () => {
-    const { logOnce } = createLogger();
+    const { logOnce } = createLogger({ timestamp: false, noColor: true });
     logOnce('handshake', 'handshake detail', 'warn');
     logOnce('handshake', 'handshake detail', 'warn');
     logOnce('booted', 'booted');

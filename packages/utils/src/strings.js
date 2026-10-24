@@ -262,7 +262,7 @@ export const truncate = (text, length, options = {}) => {
 
   const cutoff = Math.max(0, length - suffixChars.length);
 
-  if (wordBoundary && typeof Intl?.Segmenter === 'function') {
+  if (wordBoundary) {
     const segmenter = getSegmenter(locale, 'word');
     let count = 0;
     let truncated = '';
@@ -282,18 +282,7 @@ export const truncate = (text, length, options = {}) => {
     return truncated.trimEnd() + suffix;
   }
 
-  let truncated = chars.slice(0, cutoff).join('');
-
-  if (wordBoundary) {
-    const boundaryChars = /[\s.,!?;:()-]/g;
-    const matches = [...truncated.matchAll(boundaryChars)];
-    if (matches.length > 0) {
-      // Backtrack to the last found boundary.
-      truncated = truncated.slice(0, matches[matches.length - 1].index);
-    }
-  }
-
-  return truncated.trimEnd() + suffix;
+  return chars.slice(0, cutoff).join('').trimEnd() + suffix;
 };
 
 const htmlEscapes = {
@@ -333,16 +322,9 @@ export const reverseString = (str = '', options = {}) => {
   }
 
   const { locale = 'en' } = options;
-
-  // Use Intl.Segmenter for proper grapheme cluster handling (flags, skin tones, etc.)
-  if (typeof Intl?.Segmenter === 'function') {
-    const segmenter = getSegmenter(locale, 'grapheme');
-    const segments = Array.from(segmenter.segment(str), s => s.segment);
-    return segments.reverse().join('');
-  }
-
-  // Fallback to Array.from for older environments (handles basic emojis)
-  return Array.from(str).reverse().join('');
+  const segmenter = getSegmenter(locale, 'grapheme');
+  const segments = Array.from(segmenter.segment(str), s => s.segment);
+  return segments.reverse().join('');
 };
 
 const WHITESPACE_RE = /\s+/g;
@@ -598,7 +580,7 @@ const computeDistance = (a, b, options) => {
   // halves), raw code units otherwise so the common case converts nothing
   let seqA = a;
   let seqB = b;
-  if (grapheme && typeof Intl?.Segmenter === 'function') {
+  if (grapheme) {
     seqA = Array.from(getSegmenter(locale, 'grapheme').segment(a), (s) => s.segment);
     seqB = Array.from(getSegmenter(locale, 'grapheme').segment(b), (s) => s.segment);
   }
