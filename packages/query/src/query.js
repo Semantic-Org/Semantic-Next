@@ -1390,14 +1390,14 @@ export class Query {
   }
 
   height(value, options = {}) {
-    return this.#dimension('height', value, options);
+    return Query.#dimension.call(this, 'height', value, options);
   }
 
   width(value, options = {}) {
-    return this.#dimension('width', value, options);
+    return Query.#dimension.call(this, 'width', value, options);
   }
 
-  #dimension(dimension, value, options = {}) {
+  static #dimension(dimension, value, options = {}) {
     if (isPlainObject(value)) {
       options = value;
       value = undefined;
@@ -1625,7 +1625,7 @@ export class Query {
   }
 
   naturalWidth({ preserveMaxWidth = true, includeMargin = false, includePadding = false, includeBorder = false } = {}) {
-    return this.#naturalDimension('width', {
+    return Query.#naturalDimension.call(this, 'width', {
       preserveMax: preserveMaxWidth,
       includeMargin,
       includePadding,
@@ -1636,7 +1636,7 @@ export class Query {
   naturalHeight(
     { preserveMaxHeight = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
   ) {
-    return this.#naturalDimension('height', {
+    return Query.#naturalDimension.call(this, 'height', {
       preserveMax: preserveMaxHeight,
       includeMargin,
       includePadding,
@@ -1644,7 +1644,7 @@ export class Query {
     });
   }
 
-  #naturalDimension(
+  static #naturalDimension(
     dimension,
     { preserveMax = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
   ) {
@@ -1677,7 +1677,7 @@ export class Query {
       $clone
         .insertAfter(el)
         .css(css);
-      const size = $clone.#dimension(dimension, { includeMargin, includePadding, includeBorder });
+      const size = Query.#dimension.call($clone, dimension, { includeMargin, includePadding, includeBorder });
       $clone.remove();
       return size;
     });
