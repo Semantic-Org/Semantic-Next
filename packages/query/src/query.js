@@ -717,38 +717,17 @@ export class Query {
       if (inArray(eventName, Query.autoPassiveEvents) && passive !== false) {
         listenerOptions.passive = true;
       }
+      const once = Boolean(listenerOptions.once);
+      if (targetSelector) {
+        delete listenerOptions.once;
+      }
 
       this.each((el) => {
-        let delegateHandler;
-        if (targetSelector) {
-          delegateHandler = (event) => {
-            let target;
-            // if this event is composed from a web component
-            // this is required to get the original path
-            if (event.composed && event.composedPath) {
-              // look through composed path bubbling into the attached element to see if any match target
-              let path = event.composedPath();
-              const elIndex = path.indexOf(el);
-              path = path.slice(0, elIndex);
-              target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
-            }
-            else {
-              // target selector is target
-              target = event.target.closest(targetSelector);
-            }
-
-            if (target) {
-              return handler.call(target, event);
-            }
-          };
-        }
-
         // wrap when handler can return false/'cancel' (explicit return or arrow expression body)
-        const rawListener = delegateHandler || handler;
-        const needsWrapping = delegateHandler || /\breturn\b|=>\s*[^\s{]/.test(handler.toString());
-        const eventListener = needsWrapping
+        const needsWrapping = /\breturn\b|=>\s*[^\s{]/.test(handler.toString());
+        const wrappedHandler = needsWrapping
           ? function(e) {
-            const result = rawListener.call(this, e);
+            const result = handler.call(this, e);
             if (result === false) {
               e.stopPropagation();
             }
@@ -758,6 +737,10 @@ export class Query {
             return result;
           }
           : handler;
+
+        const eventListener = targetSelector
+          ? (event) => Query.#dispatchDelegated(eventHandler, event)
+          : wrappedHandler;
 
         // will cause illegal invocation if used from proxy object
         const domEL = (el == Query.globalThisProxy) ? globalThis : el;
@@ -770,11 +753,16 @@ export class Query {
           eventName,
           namespaces,
           eventListener,
+          wrappedHandler,
           abortController,
           delegated: targetSelector !== undefined,
+          targetSelector,
+          capture: Boolean(listenerOptions.capture),
+          once,
           handler,
           abort: (reason) => abortController.abort(reason),
         };
+
         eventHandlers.push(eventHandler);
         registerEvent({ el, eventHandler });
       });
@@ -784,6 +772,69 @@ export class Query {
       return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
     }
     return this;
+  }
+
+  // delegated handlers on one element share a dispatch so they run innermost match first
+  // with stopPropagation honoured between levels
+  static #dispatchDelegated(eventHandler, event) {
+    if (eventHandler.dispatched?.delete(event)) {
+      return;
+    }
+    const { el, eventName, capture } = eventHandler;
+    const handlers = [...(Query.eventRegistry.get(el) || [])].filter((handler) =>
+      handler.delegated
+      && handler.eventName === eventName
+      && handler.capture === capture
+      && !handler.abortController.signal.aborted
+    );
+
+    const path = event.composedPath();
+    const root = Query.isWindow(el) ? globalThis : el;
+    const nodes = path.slice(0, path.indexOf(root));
+    if (capture) {
+      nodes.reverse();
+    }
+
+    let stopped = false;
+    let immediate = false;
+    const { stopPropagation, stopImmediatePropagation } = event;
+    event.stopPropagation = () => {
+      stopped = true;
+      stopPropagation.call(event);
+    };
+    event.stopImmediatePropagation = () => {
+      stopped = true;
+      immediate = true;
+      stopImmediatePropagation.call(event);
+    };
+
+    try {
+      each(nodes, (node) => {
+        each(handlers, (handler) => {
+          if (!handler.abortController.signal.aborted && node.matches?.(handler.targetSelector)) {
+            if (handler.once) {
+              handler.abort();
+            }
+            handler.wrappedHandler.call(node, event);
+            if (immediate) {
+              return false;
+            }
+          }
+        });
+        if (stopped) {
+          return false;
+        }
+      });
+    }
+    finally {
+      delete event.stopPropagation;
+      delete event.stopImmediatePropagation;
+      each(handlers, (handler) => {
+        if (!immediate && handler !== eventHandler && !handler.abortController.signal.aborted) {
+          (handler.dispatched ??= new WeakSet()).add(event);
+        }
+      });
+    }
   }
 
   one(eventName, targetSelectorOrHandler, handlerOrOptions, options) {

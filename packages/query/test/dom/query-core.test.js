@@ -892,6 +892,97 @@ describe('query — documented contract', () => {
   });
 
   /***************************************************************
+                        Delegated Events
+  ***************************************************************/
+
+  describe('delegated event propagation', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '<div class="root"><div class="card"><button class="btn"></button></div></div>';
+    });
+    const click = (selector = '.btn') => document.querySelector(selector).click();
+
+    it('dispatches innermost match first regardless of declaration order and binds this to each match', () => {
+      const fired = [];
+      $('.root').on('click', '.card', function() {
+        fired.push(['card', this]);
+      });
+      $('.root').on('click', '.btn', function() {
+        fired.push(['btn', this]);
+      });
+      click();
+      expect(fired).toEqual([
+        ['btn', document.querySelector('.btn')],
+        ['card', document.querySelector('.card')],
+      ]);
+    });
+
+    it('stopPropagation runs remaining same-element handlers in declaration order but stops outer matches', () => {
+      const fired = [];
+      $('.root').on('click', '.card', () => fired.push('card'));
+      $('.root').on('click', '.btn', (e) => {
+        fired.push('btn-1');
+        e.stopPropagation();
+      });
+      $('.root').on('click', 'button', () => fired.push('btn-2'));
+      click();
+      expect(fired).toEqual(['btn-1', 'btn-2']);
+    });
+
+    it('stopImmediatePropagation stops both same-element and outer handlers', () => {
+      const fired = [];
+      $('.root').on('click', '.card', () => fired.push('card'));
+      $('.root').on('click', '.btn', (e) => {
+        fired.push('btn-1');
+        e.stopImmediatePropagation();
+      });
+      $('.root').on('click', 'button', () => fired.push('btn-2'));
+      click();
+      expect(fired).toEqual(['btn-1']);
+    });
+
+    it('returning false from an inner handler stops outer matches', () => {
+      const outer = vi.fn();
+      $('.root').on('click', '.card', outer);
+      $('.root').on('click', '.btn', () => false);
+      click();
+      expect(outer).not.toHaveBeenCalled();
+    });
+
+    it('fires once per matching ancestor from innermost to outermost', () => {
+      document.body.innerHTML = '<div class="root"><div class="card outer"><div class="card inner"></div></div></div>';
+      const fired = [];
+      $('.root').on('click', '.card', function() {
+        fired.push(this.className);
+      });
+      click('.inner');
+      expect(fired).toEqual(['card inner', 'card outer']);
+    });
+
+    it('removing or expiring one delegated handler leaves sibling delegated handlers active', () => {
+      const fired = [];
+      const removed = () => fired.push('removed');
+      $('.root').on('click', '.btn', removed);
+      $('.root').one('click', '.btn', () => fired.push('once'));
+      $('.root').on('click', '.card', () => fired.push('card'));
+      $('.root').off('click', removed);
+      click();
+      click();
+      expect(fired).toEqual(['once', 'card', 'card']);
+    });
+
+    it('.intercept() dispatches outermost match first and honours stopPropagation', () => {
+      const fired = [];
+      $('.root').intercept('click', '.btn', () => fired.push('btn'));
+      $('.root').intercept('click', '.card', (e) => {
+        fired.push('card');
+        e.stopPropagation();
+      });
+      click();
+      expect(fired).toEqual(['card']);
+    });
+  });
+
+  /***************************************************************
                           .onNext()
   ***************************************************************/
 
