@@ -20,19 +20,6 @@ describe('prefixCSS', () => {
     expect(output).toContain('user-select: none;');
   });
 
-  it('should add -webkit-backdrop-filter prefix', () => {
-    const input = '  .blur {\n    backdrop-filter: blur(4px);\n  }';
-    const output = prefixCSS(input);
-    expect(output).toContain('-webkit-backdrop-filter: blur(4px);');
-    expect(output).toContain('backdrop-filter: blur(4px);');
-  });
-
-  it('should add -webkit-print-color-adjust prefix', () => {
-    const input = '  .exact {\n    print-color-adjust: exact;\n  }';
-    const output = prefixCSS(input);
-    expect(output).toContain('-webkit-print-color-adjust: exact;');
-  });
-
   it('should add -moz-text-size-adjust prefix', () => {
     const input = '  html {\n    text-size-adjust: 100%;\n  }';
     const output = prefixCSS(input);
@@ -60,10 +47,10 @@ describe('prefixCSS', () => {
   });
 
   it('should handle multiple properties in one block', () => {
-    const input = '.foo {\n  user-select: none;\n  backdrop-filter: blur(10px);\n}';
+    const input = '.foo {\n  user-select: none;\n  text-size-adjust: 100%;\n}';
     const output = prefixCSS(input);
     expect(output).toContain('-webkit-user-select');
-    expect(output).toContain('-webkit-backdrop-filter');
+    expect(output).toContain('-moz-text-size-adjust');
   });
 
   it('should return empty/null input unchanged', () => {

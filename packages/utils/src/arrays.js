@@ -137,7 +137,7 @@ export const remove = (array = [], callbackOrValue) => {
   Check if a value exists in an array
 */
 export const inArray = (value, array = []) => {
-  return array.indexOf(value) > -1;
+  return array.includes(value);
 };
 
 /*
@@ -290,7 +290,7 @@ export const sortBy = (arr = [], key, comparator) => {
     return 0;
   };
 
-  return arr.slice().sort(compare);
+  return arr.toSorted(compare);
 };
 
 /*
