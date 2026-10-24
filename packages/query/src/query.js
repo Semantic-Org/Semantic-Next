@@ -37,6 +37,92 @@ const getParentNode = (node, pierceShadow) => {
   return null;
 };
 
+const getOrSetDimension = (query, prop, offsetProp, windowProp, startSide, endSide, value, options = {}) => {
+  if (isPlainObject(value)) {
+    options = value;
+    value = undefined;
+  }
+  const { includeMargin = false, includePadding = false, includeBorder = false } = options;
+
+  if (value !== undefined) {
+    return query.each(el => {
+      el.style[prop] = typeof value === 'number' ? `${value}px` : value;
+    });
+  }
+
+  if (query.length === 0) {
+    return undefined;
+  }
+
+  const values = query.map(el => {
+    if (Query.isWindow(el)) {
+      return window[windowProp];
+    }
+
+    // offsetWidth/offsetHeight includes border and padding regardless of box-sizing
+    let size = el[offsetProp];
+    const computedStyle = window.getComputedStyle(el);
+
+    if (!includeBorder) {
+      size -= (parseFloat(computedStyle[`border${startSide}Width`]) || 0)
+        + (parseFloat(computedStyle[`border${endSide}Width`]) || 0);
+    }
+    if (!includePadding) {
+      size -= (parseFloat(computedStyle[`padding${startSide}`]) || 0)
+        + (parseFloat(computedStyle[`padding${endSide}`]) || 0);
+    }
+    if (includeMargin) {
+      size += (parseFloat(computedStyle[`margin${startSide}`]) || 0)
+        + (parseFloat(computedStyle[`margin${endSide}`]) || 0);
+    }
+    return size;
+  });
+
+  return query.length === 1 ? values[0] : values;
+};
+
+const measureNaturalDimension = (
+  query,
+  dimProp,
+  maxProp,
+  preserveMax,
+  { includeMargin = false, includePadding = false, includeBorder = false } = {},
+) => {
+  const sizes = query.map((el) => {
+    const includeBoxModel = includeMargin || includePadding || includeBorder;
+    const $clone = query.chain(el).clone();
+    const css = {
+      position: 'absolute',
+      left: '0px',
+      top: '0px',
+      display: 'block',
+      transform: 'translate(-200vw, -200vh)',
+      pointerEvents: 'none',
+      [dimProp]: 'auto',
+      visibility: 'hidden',
+      isolation: 'isolate',
+      contain: 'layout paint style',
+      [maxProp]: 'none',
+    };
+    if (!includeBoxModel) {
+      css.boxSizing = 'content-box';
+      css.padding = '0px';
+      css.margin = '0px';
+      css.border = '0px';
+    }
+    if (preserveMax) {
+      delete css[maxProp];
+    }
+    $clone
+      .insertAfter(el)
+      .css(css);
+    const size = $clone[dimProp]({ includeMargin, includePadding, includeBorder });
+    $clone.remove();
+    return size;
+  });
+  return sizes.length > 1 ? sizes : sizes[0];
+};
+
 const IS_QUERY = Symbol.for('semantic-ui/Query');
 
 export class Query {
@@ -1341,142 +1427,12 @@ export class Query {
     return this.chain(prevSiblings);
   }
 
-  height(value, options = {}) {
-    const defaultOptions = {
-      includeMargin: false,
-      includePadding: false,
-      includeBorder: false,
-    };
-
-    // If first argument is an object (settings), treat it as options for getter
-    if (isPlainObject(value)) {
-      options = value;
-      value = undefined; // No value to set
-    }
-
-    // Merge with defaults
-    const { includeMargin, includePadding, includeBorder } = {
-      ...defaultOptions,
-      ...options,
-    };
-
-    // Setter: ignore options, just set height
-    if (value !== undefined) {
-      return this.each(el => {
-        el.style.height = typeof value === 'number' ? `${value}px` : value;
-      });
-    }
-
-    // Getter: calculate height based on options
-    if (this.length === 0) {
-      return undefined;
-    }
-
-    const heights = this.map(el => {
-      // Handle window/global object special case
-      if (Query.isWindow(el)) {
-        return window.innerHeight;
-      }
-
-      // box-sizing agnostic: measure actual rendered dimensions, not CSS interpretations
-      let height = el.offsetHeight; // content + padding + border (total height)
-
-      // Get computed style for all calculations
-      const computedStyle = window.getComputedStyle(el);
-      const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
-      const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
-      const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
-      const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
-      const marginTop = parseFloat(computedStyle.marginTop) || 0;
-      const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
-
-      // Start with total height and subtract what we don't want
-      height -= borderTop + borderBottom; // Remove border to get content + padding
-
-      if (!includePadding) {
-        height -= paddingTop + paddingBottom; // Remove padding to get content only
-      }
-
-      if (includeBorder) {
-        height += borderTop + borderBottom; // Add border back
-      }
-
-      if (includeMargin) {
-        height += marginTop + marginBottom; // Add margin
-      }
-
-      return height;
-    });
-
-    return this.length === 1 ? heights[0] : heights;
+  height(value, options) {
+    return getOrSetDimension(this, 'height', 'offsetHeight', 'innerHeight', 'Top', 'Bottom', value, options);
   }
 
   width(value, options) {
-    const defaultOptions = {
-      includeMargin: false,
-      includePadding: false,
-      includeBorder: false,
-    };
-
-    // If first argument is an object (settings), treat it as options for getter
-    if (isPlainObject(value)) {
-      options = value;
-      value = undefined; // No value to set
-    }
-
-    // Get settings
-    const { includeMargin, includePadding, includeBorder } = {
-      ...defaultOptions,
-      ...options,
-    };
-
-    // Setter: ignore options, just set width
-    if (value !== undefined) {
-      return this.each(el => {
-        el.style.width = typeof value === 'number' ? `${value}px` : value;
-      });
-    }
-
-    // Getter: calculate width based on options
-    if (this.length === 0) {
-      return undefined;
-    }
-
-    const widths = this.map(el => {
-      // Handle window/global object special case
-      if (Query.isWindow(el)) {
-        return window.innerWidth;
-      }
-
-      // box-sizing agnostic: measure actual rendered dimensions, not CSS interpretations
-      let width = el.offsetWidth; // content + padding + border (total width)
-
-      // Get computed style for all calculations
-      const computedStyle = window.getComputedStyle(el);
-      const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
-      const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
-      const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
-      const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
-      const marginLeft = parseFloat(computedStyle.marginLeft) || 0;
-      const marginRight = parseFloat(computedStyle.marginRight) || 0;
-
-      // Start with total width and subtract what we don't want
-      if (!includeBorder) {
-        width -= borderLeft + borderRight; // Remove border to get content + padding
-      }
-
-      if (!includePadding) {
-        width -= paddingLeft + paddingRight; // Remove padding to get content only
-      }
-
-      if (includeMargin) {
-        width += marginLeft + marginRight; // Add margin
-      }
-
-      return width;
-    });
-
-    return this.length === 1 ? widths[0] : widths;
+    return getOrSetDimension(this, 'width', 'offsetWidth', 'innerWidth', 'Left', 'Right', value, options);
   }
 
   innerWidth() {
@@ -1661,78 +1617,12 @@ export class Query {
     });
   }
 
-  naturalWidth({ preserveMaxWidth = true, includeMargin = false, includePadding = false, includeBorder = false } = {}) {
-    const widths = this.map((el) => {
-      const includeBoxModel = includeMargin || includePadding || includeBorder;
-      const $clone = this.chain(el).clone();
-      const css = {
-        position: 'absolute',
-        left: '0px',
-        top: '0px',
-        display: 'block',
-        transform: 'translate(-200vw, -200vh)',
-        pointerEvents: 'none',
-        width: 'auto',
-        visibility: 'hidden',
-        isolation: 'isolate',
-        contain: 'layout paint style',
-        maxWidth: 'none',
-      };
-      if (!includeBoxModel) {
-        css.boxSizing = 'content-box';
-        css.padding = '0px';
-        css.margin = '0px';
-        css.border = '0px';
-      }
-      if (preserveMaxWidth) {
-        delete css.maxWidth;
-      }
-      $clone
-        .insertAfter(el)
-        .css(css);
-      const naturalWidth = $clone.width({ includeMargin, includePadding, includeBorder });
-      $clone.remove();
-      return naturalWidth;
-    });
-    return widths.length > 1 ? widths : widths[0];
+  naturalWidth({ preserveMaxWidth = true, ...options } = {}) {
+    return measureNaturalDimension(this, 'width', 'maxWidth', preserveMaxWidth, options);
   }
 
-  naturalHeight(
-    { preserveMaxHeight = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
-  ) {
-    const height = this.map((el) => {
-      const includeBoxModel = includeMargin || includePadding || includeBorder;
-      const $clone = this.chain(el).clone();
-      const css = {
-        position: 'absolute',
-        left: '0px',
-        top: '0px',
-        display: 'block',
-        transform: 'translate(-200vw, -200vh)',
-        pointerEvents: 'none',
-        height: 'auto',
-        visibility: 'hidden',
-        isolation: 'isolate',
-        contain: 'layout paint style',
-        maxHeight: 'none',
-      };
-      if (!includeBoxModel) {
-        css.boxSizing = 'content-box';
-        css.padding = '0px';
-        css.margin = '0px';
-        css.border = '0px';
-      }
-      if (preserveMaxHeight) {
-        delete css.maxHeight;
-      }
-      $clone
-        .insertAfter(el)
-        .css(css);
-      const naturalHeight = $clone.height({ includeMargin, includePadding, includeBorder });
-      $clone.remove();
-      return naturalHeight;
-    });
-    return height.length > 1 ? height : height[0];
+  naturalHeight({ preserveMaxHeight = true, ...options } = {}) {
+    return measureNaturalDimension(this, 'height', 'maxHeight', preserveMaxHeight, options);
   }
 
   naturalDisplay({ calculate = true } = {}) {
