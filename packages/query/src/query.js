@@ -781,8 +781,11 @@ export class Query {
       return;
     }
     const { el, eventName, capture } = eventHandler;
-    const handlers = [...(Query.eventRegistry.get(el) || [])].filter((h) =>
-      h.delegated && h.eventName === eventName && h.capture === capture && !h.abortController.signal.aborted
+    const handlers = [...(Query.eventRegistry.get(el) || [])].filter((handler) =>
+      handler.delegated
+      && handler.eventName === eventName
+      && handler.capture === capture
+      && !handler.abortController.signal.aborted
     );
 
     const path = event.composedPath();
@@ -805,31 +808,31 @@ export class Query {
     };
 
     try {
-      for (const node of nodes) {
-        for (const h of handlers) {
-          if (!h.abortController.signal.aborted && node.matches?.(h.targetSelector)) {
-            if (h.once) {
-              h.abort();
+      each(nodes, (node) => {
+        each(handlers, (handler) => {
+          if (!handler.abortController.signal.aborted && node.matches?.(handler.targetSelector)) {
+            if (handler.once) {
+              handler.abort();
             }
-            h.wrappedHandler.call(node, event);
+            handler.wrappedHandler.call(node, event);
             if (immediate) {
-              return;
+              return false;
             }
           }
-        }
+        });
         if (stopped) {
-          return;
+          return false;
         }
-      }
+      });
     }
     finally {
       delete event.stopPropagation;
       delete event.stopImmediatePropagation;
-      for (const h of handlers) {
-        if (!immediate && h !== eventHandler && !h.abortController.signal.aborted) {
-          (h.dispatched ??= new WeakSet()).add(event);
+      each(handlers, (handler) => {
+        if (!immediate && handler !== eventHandler && !handler.abortController.signal.aborted) {
+          (handler.dispatched ??= new WeakSet()).add(event);
         }
-      }
+      });
     }
   }
 
