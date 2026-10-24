@@ -717,6 +717,10 @@ export class Query {
       if (inArray(eventName, Query.autoPassiveEvents) && passive !== false) {
         listenerOptions.passive = true;
       }
+      const once = Boolean(listenerOptions.once);
+      if (targetSelector) {
+        delete listenerOptions.once;
+      }
 
       this.each((el) => {
         // wrap when handler can return false/'cancel' (explicit return or arrow expression body)
@@ -735,12 +739,7 @@ export class Query {
           : handler;
 
         const eventListener = targetSelector
-          ? (event) => {
-            this.#dispatchDelegated(eventHandler, event);
-            if (listenerOptions.once) {
-              abortController.abort();
-            }
-          }
+          ? (event) => Query.#dispatchDelegated(eventHandler, event)
           : wrappedHandler;
 
         // will cause illegal invocation if used from proxy object
@@ -759,6 +758,7 @@ export class Query {
           delegated: targetSelector !== undefined,
           targetSelector,
           capture: Boolean(listenerOptions.capture),
+          once,
           handler,
           abort: (reason) => abortController.abort(reason),
         };
@@ -776,7 +776,7 @@ export class Query {
 
   // delegated handlers on one element share a dispatch so they run innermost match first
   // with stopPropagation honoured between levels
-  #dispatchDelegated(eventHandler, event) {
+  static #dispatchDelegated(eventHandler, event) {
     if (eventHandler.dispatched?.delete(event)) {
       return;
     }
@@ -808,6 +808,9 @@ export class Query {
       for (const node of nodes) {
         for (const h of handlers) {
           if (!h.abortController.signal.aborted && node.matches?.(h.targetSelector)) {
+            if (h.once) {
+              h.abort();
+            }
             h.wrappedHandler.call(node, event);
             if (immediate) {
               return;
@@ -823,7 +826,7 @@ export class Query {
       delete event.stopPropagation;
       delete event.stopImmediatePropagation;
       for (const h of handlers) {
-        if (h !== eventHandler) {
+        if (!immediate && h !== eventHandler && !h.abortController.signal.aborted) {
           (h.dispatched ??= new WeakSet()).add(event);
         }
       }
