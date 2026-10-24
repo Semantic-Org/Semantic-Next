@@ -232,7 +232,7 @@ const ALPHA_CUTOFF = 242;
 // entropy per emitted char: a base32 draw spends a full 5 bits, the narrower
 // alphaFirst lead only log2(22)
 const CHAR_BITS = 5;
-const ALPHA_BITS = /* @__PURE__ */ Math.log2(ALPHA.length);
+const ALPHA_BITS = /* @__PURE__ */ Math.log2(22);
 
 // 32 is a power of two, so byte & 31 samples the alphabet with no modulo bias
 const randomCode = (alphabet) => alphabet[randomByte() & 31];
