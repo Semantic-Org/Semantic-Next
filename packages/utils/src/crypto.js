@@ -7,7 +7,7 @@ import { isNumber } from './types.js';
 // Crockford base32, excludes I L O U for visual clarity and to dodge accidental
 // profanity. Shared by the hash encoders here and the id codes further down.
 const BASE32 = '0123456789abcdefghjkmnpqrstvwxyz';
-const BASE32_UPPER = BASE32.toUpperCase();
+const BASE32_UPPER = /* @__PURE__ */ BASE32.toUpperCase();
 const HEX = '0123456789abcdef';
 
 /*-------------------
@@ -171,28 +171,30 @@ const resolveHashConfig = (options) => {
   the output, and hashCode.config sets global defaults. For unique ids that are
   not derived from content, use generateId.
 */
-export const hashCode = (input, options = {}) => {
-  const config = resolveHashConfig(options);
-  const str = normalizeForHash(input);
+export const hashCode = /* @__PURE__ */ Object.assign(
+  (input, options = {}) => {
+    const config = resolveHashConfig(options);
+    const str = normalizeForHash(input);
 
-  if (config.usage === 'secure') {
-    return sha256(str, config.seed).then((bytes) => config.format === 'hex' ? bytesToHex(bytes) : bytesToBase32(bytes));
-  }
+    if (config.usage === 'secure') {
+      return sha256(str, config.seed).then((bytes) =>
+        config.format === 'hex' ? bytesToHex(bytes) : bytesToBase32(bytes)
+      );
+    }
 
-  if (config.format === 'number') {
-    return cyrb53(str, config.seed);
-  }
-  // string tiers spend the full 64 bits per pass; fingerprint adds a second
-  // seeded pass for 128
-  let bytes = cyrb64Bytes(str, config.seed);
-  if (config.bits > 64) {
-    bytes = bytes.concat(cyrb64Bytes(str, config.seed + 1));
-  }
-  return config.format === 'hex' ? bytesToHex(bytes) : bytesToBase32(bytes);
-};
-
-// global defaults, lowest precedence (call options > config > preset). mirrors generateId.config
-hashCode.config = {};
+    if (config.format === 'number') {
+      return cyrb53(str, config.seed);
+    }
+    // string tiers spend the full 64 bits per pass; fingerprint adds a second
+    // seeded pass for 128
+    let bytes = cyrb64Bytes(str, config.seed);
+    if (config.bits > 64) {
+      bytes = bytes.concat(cyrb64Bytes(str, config.seed + 1));
+    }
+    return config.format === 'hex' ? bytesToHex(bytes) : bytesToBase32(bytes);
+  },
+  { config: {} },
+);
 
 /*-------------------
       Entropy
@@ -224,13 +226,13 @@ const randomByte = () => {
 
 // the 22 letters, for a guaranteed-alpha first char (valid CSS identifier)
 const ALPHA = 'abcdefghjkmnpqrstvwxyz';
-const ALPHA_UPPER = ALPHA.toUpperCase();
+const ALPHA_UPPER = /* @__PURE__ */ ALPHA.toUpperCase();
 // 256 - (256 % 22): bytes at or above this would bias the 22-letter draw
 const ALPHA_CUTOFF = 242;
 // entropy per emitted char: a base32 draw spends a full 5 bits, the narrower
 // alphaFirst lead only log2(22)
 const CHAR_BITS = 5;
-const ALPHA_BITS = Math.log2(ALPHA.length);
+const ALPHA_BITS = /* @__PURE__ */ Math.log2(22);
 
 // 32 is a power of two, so byte & 31 samples the alphabet with no modulo bias
 const randomCode = (alphabet) => alphabet[randomByte() & 31];
@@ -459,21 +461,21 @@ const buildCode = (config) => {
   checksum, or format 'uuid' for an RFC UUIDv7. See isValidId / parseId for the
   inverse.
 */
-export const generateId = (options = {}) => {
-  // tolerate a non-object arg (null, or a leftover legacy numeric seed) instead
-  // of throwing in resolveConfig — it falls through to the default usage
-  if (typeof options !== 'object' || options === null) {
-    options = {};
-  }
-  const config = resolveConfig(options);
-  if (config.format === 'uuid') {
-    return config.prefix + uuidV7();
-  }
-  return config.prefix + buildCode(config);
-};
-
-// global defaults, lowest precedence (call options > config > preset)
-generateId.config = {};
+export const generateId = /* @__PURE__ */ Object.assign(
+  (options = {}) => {
+    // tolerate a non-object arg (null, or a leftover legacy numeric seed) instead
+    // of throwing in resolveConfig — it falls through to the default usage
+    if (typeof options !== 'object' || options === null) {
+      options = {};
+    }
+    const config = resolveConfig(options);
+    if (config.format === 'uuid') {
+      return config.prefix + uuidV7();
+    }
+    return config.prefix + buildCode(config);
+  },
+  { config: {} },
+);
 
 /*
   Offline validation — the cheap rejection before an expensive lookup. Reads
