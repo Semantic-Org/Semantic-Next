@@ -37,92 +37,6 @@ const getParentNode = (node, pierceShadow) => {
   return null;
 };
 
-const getOrSetDimension = (query, prop, offsetProp, windowProp, startSide, endSide, value, options = {}) => {
-  if (isPlainObject(value)) {
-    options = value;
-    value = undefined;
-  }
-  const { includeMargin = false, includePadding = false, includeBorder = false } = options;
-
-  if (value !== undefined) {
-    return query.each(el => {
-      el.style[prop] = typeof value === 'number' ? `${value}px` : value;
-    });
-  }
-
-  if (query.length === 0) {
-    return undefined;
-  }
-
-  const values = query.map(el => {
-    if (Query.isWindow(el)) {
-      return window[windowProp];
-    }
-
-    // offsetWidth/offsetHeight includes border and padding regardless of box-sizing
-    let size = el[offsetProp];
-    const computedStyle = window.getComputedStyle(el);
-
-    if (!includeBorder) {
-      size -= (parseFloat(computedStyle[`border${startSide}Width`]) || 0)
-        + (parseFloat(computedStyle[`border${endSide}Width`]) || 0);
-    }
-    if (!includePadding) {
-      size -= (parseFloat(computedStyle[`padding${startSide}`]) || 0)
-        + (parseFloat(computedStyle[`padding${endSide}`]) || 0);
-    }
-    if (includeMargin) {
-      size += (parseFloat(computedStyle[`margin${startSide}`]) || 0)
-        + (parseFloat(computedStyle[`margin${endSide}`]) || 0);
-    }
-    return size;
-  });
-
-  return query.length === 1 ? values[0] : values;
-};
-
-const measureNaturalDimension = (
-  query,
-  dimProp,
-  maxProp,
-  preserveMax,
-  { includeMargin = false, includePadding = false, includeBorder = false } = {},
-) => {
-  const sizes = query.map((el) => {
-    const includeBoxModel = includeMargin || includePadding || includeBorder;
-    const $clone = query.chain(el).clone();
-    const css = {
-      position: 'absolute',
-      left: '0px',
-      top: '0px',
-      display: 'block',
-      transform: 'translate(-200vw, -200vh)',
-      pointerEvents: 'none',
-      [dimProp]: 'auto',
-      visibility: 'hidden',
-      isolation: 'isolate',
-      contain: 'layout paint style',
-      [maxProp]: 'none',
-    };
-    if (!includeBoxModel) {
-      css.boxSizing = 'content-box';
-      css.padding = '0px';
-      css.margin = '0px';
-      css.border = '0px';
-    }
-    if (preserveMax) {
-      delete css[maxProp];
-    }
-    $clone
-      .insertAfter(el)
-      .css(css);
-    const size = $clone[dimProp]({ includeMargin, includePadding, includeBorder });
-    $clone.remove();
-    return size;
-  });
-  return sizes.length > 1 ? sizes : sizes[0];
-};
-
 const IS_QUERY = Symbol.for('semantic-ui/Query');
 
 export class Query {
@@ -1428,11 +1342,56 @@ export class Query {
   }
 
   height(value, options) {
-    return getOrSetDimension(this, 'height', 'offsetHeight', 'innerHeight', 'Top', 'Bottom', value, options);
+    return this.dimension('height', value, options);
   }
 
   width(value, options) {
-    return getOrSetDimension(this, 'width', 'offsetWidth', 'innerWidth', 'Left', 'Right', value, options);
+    return this.dimension('width', value, options);
+  }
+
+  dimension(dimension, value, options = {}) {
+    if (isPlainObject(value)) {
+      options = value;
+      value = undefined;
+    }
+    const { includeMargin = false, includePadding = false, includeBorder = false } = options;
+
+    if (value !== undefined) {
+      return this.each((el) => {
+        el.style[dimension] = isNumber(value) ? `${value}px` : value;
+      });
+    }
+
+    if (this.length === 0) {
+      return undefined;
+    }
+
+    const isWidth = dimension === 'width';
+    const values = this.map((el) => {
+      if (Query.isWindow(el)) {
+        return isWidth ? window.innerWidth : window.innerHeight;
+      }
+
+      // offsetWidth/offsetHeight includes border and padding regardless of box-sizing
+      let size = isWidth ? el.offsetWidth : el.offsetHeight;
+      const computedStyle = window.getComputedStyle(el);
+
+      if (!includeBorder) {
+        size -= (parseFloat(isWidth ? computedStyle.borderLeftWidth : computedStyle.borderTopWidth) || 0)
+          + (parseFloat(isWidth ? computedStyle.borderRightWidth : computedStyle.borderBottomWidth) || 0);
+      }
+      if (!includePadding) {
+        size -= (parseFloat(isWidth ? computedStyle.paddingLeft : computedStyle.paddingTop) || 0)
+          + (parseFloat(isWidth ? computedStyle.paddingRight : computedStyle.paddingBottom) || 0);
+      }
+      if (includeMargin) {
+        size += (parseFloat(isWidth ? computedStyle.marginLeft : computedStyle.marginTop) || 0)
+          + (parseFloat(isWidth ? computedStyle.marginRight : computedStyle.marginBottom) || 0);
+      }
+      return size;
+    });
+
+    return this.length === 1 ? values[0] : values;
   }
 
   innerWidth() {
@@ -1618,11 +1577,51 @@ export class Query {
   }
 
   naturalWidth({ preserveMaxWidth = true, ...options } = {}) {
-    return measureNaturalDimension(this, 'width', 'maxWidth', preserveMaxWidth, options);
+    return this.naturalDimension('width', { preserveMax: preserveMaxWidth, ...options });
   }
 
   naturalHeight({ preserveMaxHeight = true, ...options } = {}) {
-    return measureNaturalDimension(this, 'height', 'maxHeight', preserveMaxHeight, options);
+    return this.naturalDimension('height', { preserveMax: preserveMaxHeight, ...options });
+  }
+
+  naturalDimension(
+    dimension,
+    { preserveMax = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
+  ) {
+    const maxProperty = dimension === 'width' ? 'maxWidth' : 'maxHeight';
+    const sizes = this.map((el) => {
+      const includeBoxModel = includeMargin || includePadding || includeBorder;
+      const $clone = this.chain(el).clone();
+      const css = {
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        display: 'block',
+        transform: 'translate(-200vw, -200vh)',
+        pointerEvents: 'none',
+        [dimension]: 'auto',
+        visibility: 'hidden',
+        isolation: 'isolate',
+        contain: 'layout paint style',
+        [maxProperty]: 'none',
+      };
+      if (!includeBoxModel) {
+        css.boxSizing = 'content-box';
+        css.padding = '0px';
+        css.margin = '0px';
+        css.border = '0px';
+      }
+      if (preserveMax) {
+        delete css[maxProperty];
+      }
+      $clone
+        .insertAfter(el)
+        .css(css);
+      const size = $clone.dimension(dimension, { includeMargin, includePadding, includeBorder });
+      $clone.remove();
+      return size;
+    });
+    return sizes.length > 1 ? sizes : sizes[0];
   }
 
   naturalDisplay({ calculate = true } = {}) {
