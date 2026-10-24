@@ -1,9 +1,6 @@
 import {
   camelToKebab,
   each,
-  findIndex,
-  firstMatch,
-  get,
   hashCode,
   inArray,
   isArray,
@@ -406,7 +403,7 @@ export class Query {
     const $siblings = this.chain(el.parentNode.children).filter(siblingFilter);
     const siblingEls = $siblings.get();
     const els = this.get();
-    return findIndex(siblingEls, el => inArray(el, els));
+    return siblingEls.findIndex(el => inArray(el, els));
   }
 
   // returns the index of current collection that match filter
@@ -731,7 +728,7 @@ export class Query {
             if (event.composed && event.composedPath) {
               // look through composed path bubbling into the attached element to see if any match target
               let path = event.composedPath();
-              const elIndex = findIndex(path, thisEl => thisEl == el);
+              const elIndex = path.indexOf(el);
               path = path.slice(0, elIndex);
               target = path.find(el => el instanceof Element && el.matches && el.matches(targetSelector));
             }
@@ -879,7 +876,7 @@ export class Query {
       // this is an exact handler to match
       if (isFunction(handler) && el) {
         const handlerFunc = handler;
-        handler = firstMatch(elementHandlers, thisHandler => thisHandler.handler === handlerFunc);
+        handler = elementHandlers && [...elementHandlers].find(thisHandler => thisHandler.handler === handlerFunc);
       }
 
       // use abort signal to remove from element
@@ -2075,7 +2072,7 @@ export class Query {
       if (this.length === 0) {
         return undefined;
       }
-      const values = this.map(el => get(el, `dataset.${key}`));
+      const values = this.map(el => el.dataset?.[key]);
       return this.length === 1
         ? values[0]
         : values;

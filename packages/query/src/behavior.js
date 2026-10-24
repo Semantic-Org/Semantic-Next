@@ -1,7 +1,6 @@
 import {
   adoptStylesheet,
   capitalize,
-  clone,
   each,
   extend,
   identity,
@@ -14,7 +13,6 @@ import {
   log,
   mapObject,
   noop,
-  toTitleCase,
 } from '@semantic-ui/utils';
 
 export class Behavior {
