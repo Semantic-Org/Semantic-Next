@@ -803,7 +803,8 @@ export class Query {
       stopPropagation.call(event);
     };
     event.stopImmediatePropagation = () => {
-      stopped = immediate = true;
+      stopped = true;
+      immediate = true;
       stopImmediatePropagation.call(event);
     };
 
