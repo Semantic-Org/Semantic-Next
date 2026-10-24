@@ -1624,33 +1624,18 @@ export class Query {
     });
   }
 
-  naturalWidth({ preserveMaxWidth = true, includeMargin = false, includePadding = false, includeBorder = false } = {}) {
-    return Query.#naturalDimension.call(this, 'width', {
-      preserveMax: preserveMaxWidth,
-      includeMargin,
-      includePadding,
-      includeBorder,
-    });
+  naturalWidth({ preserveMaxWidth = true, ...options } = {}) {
+    return Query.#naturalDimension.call(this, 'width', preserveMaxWidth, options);
   }
 
-  naturalHeight(
-    { preserveMaxHeight = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
-  ) {
-    return Query.#naturalDimension.call(this, 'height', {
-      preserveMax: preserveMaxHeight,
-      includeMargin,
-      includePadding,
-      includeBorder,
-    });
+  naturalHeight({ preserveMaxHeight = true, ...options } = {}) {
+    return Query.#naturalDimension.call(this, 'height', preserveMaxHeight, options);
   }
 
-  static #naturalDimension(
-    dimension,
-    { preserveMax = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
-  ) {
+  static #naturalDimension(dimension, preserveMax, options) {
     const maxProperty = dimension === 'width' ? 'maxWidth' : 'maxHeight';
+    const includeBoxModel = options.includeMargin || options.includePadding || options.includeBorder;
     const sizes = this.map((el) => {
-      const includeBoxModel = includeMargin || includePadding || includeBorder;
       const $clone = this.chain(el).clone();
       const css = {
         position: 'absolute',
@@ -1677,7 +1662,7 @@ export class Query {
       $clone
         .insertAfter(el)
         .css(css);
-      const size = Query.#dimension.call($clone, dimension, { includeMargin, includePadding, includeBorder });
+      const size = Query.#dimension.call($clone, dimension, options);
       $clone.remove();
       return size;
     });
