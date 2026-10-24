@@ -59,11 +59,12 @@ describe('log (server posture)', () => {
   });
 
   it('should apply ANSI colors and token highlighting when noColor is false', () => {
-    log('using sqlite ./app.db on 127.0.0.1:3000', 'info', { namespace: 'sync', noColor: false });
+    log('using sqlite ./app.db on 127.0.0.1:3000 (0-frame utf-8)', 'info', { namespace: 'sync', noColor: false });
     const line = consoleSpy.info.mock.calls[0][0];
     expect(line).toContain('\x1b[38;2;117;158;185m[sync]\x1b[0m');
     expect(line).toContain('\x1b[4m\x1b[38;2;202;202;202m./app.db\x1b[0m');
     expect(line).toContain('\x1b[38;2;202;202;202m127.0.0.1:3000\x1b[0m');
+    expect(line).toContain('(0-frame utf-8)');
   });
 
   it('should skip token highlighting when highlight is false', () => {
