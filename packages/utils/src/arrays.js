@@ -250,7 +250,7 @@ export const some = (collection, predicate) => {
 };
 export const any = some;
 
-const collator = new Intl.Collator(undefined, { numeric: true });
+const collator = /* @__PURE__ */ new Intl.Collator(undefined, { numeric: true });
 
 /*
   Sort an array of objects by one or more keys
