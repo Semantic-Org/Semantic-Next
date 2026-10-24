@@ -1339,141 +1339,56 @@ export class Query {
   }
 
   height(value, options = {}) {
-    const defaultOptions = {
-      includeMargin: false,
-      includePadding: false,
-      includeBorder: false,
-    };
-
-    // If first argument is an object (settings), treat it as options for getter
-    if (isPlainObject(value)) {
-      options = value;
-      value = undefined; // No value to set
-    }
-
-    // Merge with defaults
-    const { includeMargin, includePadding, includeBorder } = {
-      ...defaultOptions,
-      ...options,
-    };
-
-    // Setter: ignore options, just set height
-    if (value !== undefined) {
-      return this.each(el => {
-        el.style.height = typeof value === 'number' ? `${value}px` : value;
-      });
-    }
-
-    // Getter: calculate height based on options
-    if (this.length === 0) {
-      return undefined;
-    }
-
-    const heights = this.map(el => {
-      // Handle window/global object special case
-      if (Query.isWindow(el)) {
-        return window.innerHeight;
-      }
-
-      // box-sizing agnostic: measure actual rendered dimensions, not CSS interpretations
-      let height = el.offsetHeight; // content + padding + border (total height)
-
-      // Get computed style for all calculations
-      const computedStyle = window.getComputedStyle(el);
-      const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
-      const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
-      const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
-      const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
-      const marginTop = parseFloat(computedStyle.marginTop) || 0;
-      const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
-
-      // Start with total height and subtract what we don't want
-      height -= borderTop + borderBottom; // Remove border to get content + padding
-
-      if (!includePadding) {
-        height -= paddingTop + paddingBottom; // Remove padding to get content only
-      }
-
-      if (includeBorder) {
-        height += borderTop + borderBottom; // Add border back
-      }
-
-      if (includeMargin) {
-        height += marginTop + marginBottom; // Add margin
-      }
-
-      return height;
-    });
-
-    return this.length === 1 ? heights[0] : heights;
+    return this.#dimension('height', value, options);
   }
 
-  width(value, options) {
-    const defaultOptions = {
-      includeMargin: false,
-      includePadding: false,
-      includeBorder: false,
-    };
+  width(value, options = {}) {
+    return this.#dimension('width', value, options);
+  }
 
-    // If first argument is an object (settings), treat it as options for getter
+  #dimension(dimension, value, options = {}) {
     if (isPlainObject(value)) {
       options = value;
-      value = undefined; // No value to set
+      value = undefined;
     }
+    const { includeMargin = false, includePadding = false, includeBorder = false } = options;
 
-    // Get settings
-    const { includeMargin, includePadding, includeBorder } = {
-      ...defaultOptions,
-      ...options,
-    };
-
-    // Setter: ignore options, just set width
     if (value !== undefined) {
-      return this.each(el => {
-        el.style.width = typeof value === 'number' ? `${value}px` : value;
+      return this.each((el) => {
+        el.style[dimension] = isNumber(value) ? `${value}px` : value;
       });
     }
 
-    // Getter: calculate width based on options
     if (this.length === 0) {
       return undefined;
     }
 
-    const widths = this.map(el => {
-      // Handle window/global object special case
+    const isWidth = dimension === 'width';
+    const values = this.map((el) => {
       if (Query.isWindow(el)) {
-        return window.innerWidth;
+        return isWidth ? window.innerWidth : window.innerHeight;
       }
 
-      // box-sizing agnostic: measure actual rendered dimensions, not CSS interpretations
-      let width = el.offsetWidth; // content + padding + border (total width)
-
-      // Get computed style for all calculations
+      // offsetWidth/offsetHeight includes border and padding regardless of box-sizing
+      let size = isWidth ? el.offsetWidth : el.offsetHeight;
       const computedStyle = window.getComputedStyle(el);
-      const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
-      const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
-      const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
-      const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
-      const marginLeft = parseFloat(computedStyle.marginLeft) || 0;
-      const marginRight = parseFloat(computedStyle.marginRight) || 0;
 
-      // Start with total width and subtract what we don't want
       if (!includeBorder) {
-        width -= borderLeft + borderRight; // Remove border to get content + padding
+        size -= (parseFloat(isWidth ? computedStyle.borderLeftWidth : computedStyle.borderTopWidth) || 0)
+          + (parseFloat(isWidth ? computedStyle.borderRightWidth : computedStyle.borderBottomWidth) || 0);
       }
-
       if (!includePadding) {
-        width -= paddingLeft + paddingRight; // Remove padding to get content only
+        size -= (parseFloat(isWidth ? computedStyle.paddingLeft : computedStyle.paddingTop) || 0)
+          + (parseFloat(isWidth ? computedStyle.paddingRight : computedStyle.paddingBottom) || 0);
       }
-
       if (includeMargin) {
-        width += marginLeft + marginRight; // Add margin
+        size += (parseFloat(isWidth ? computedStyle.marginLeft : computedStyle.marginTop) || 0)
+          + (parseFloat(isWidth ? computedStyle.marginRight : computedStyle.marginBottom) || 0);
       }
-
-      return width;
+      return size;
     });
 
-    return this.length === 1 ? widths[0] : widths;
+    return this.length === 1 ? values[0] : values;
   }
 
   innerWidth() {
@@ -1659,45 +1574,31 @@ export class Query {
   }
 
   naturalWidth({ preserveMaxWidth = true, includeMargin = false, includePadding = false, includeBorder = false } = {}) {
-    const widths = this.map((el) => {
-      const includeBoxModel = includeMargin || includePadding || includeBorder;
-      const $clone = this.chain(el).clone();
-      const css = {
-        position: 'absolute',
-        left: '0px',
-        top: '0px',
-        display: 'block',
-        transform: 'translate(-200vw, -200vh)',
-        pointerEvents: 'none',
-        width: 'auto',
-        visibility: 'hidden',
-        isolation: 'isolate',
-        contain: 'layout paint style',
-        maxWidth: 'none',
-      };
-      if (!includeBoxModel) {
-        css.boxSizing = 'content-box';
-        css.padding = '0px';
-        css.margin = '0px';
-        css.border = '0px';
-      }
-      if (preserveMaxWidth) {
-        delete css.maxWidth;
-      }
-      $clone
-        .insertAfter(el)
-        .css(css);
-      const naturalWidth = $clone.width({ includeMargin, includePadding, includeBorder });
-      $clone.remove();
-      return naturalWidth;
+    return this.#naturalDimension('width', {
+      preserveMax: preserveMaxWidth,
+      includeMargin,
+      includePadding,
+      includeBorder,
     });
-    return widths.length > 1 ? widths : widths[0];
   }
 
   naturalHeight(
     { preserveMaxHeight = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
   ) {
-    const height = this.map((el) => {
+    return this.#naturalDimension('height', {
+      preserveMax: preserveMaxHeight,
+      includeMargin,
+      includePadding,
+      includeBorder,
+    });
+  }
+
+  #naturalDimension(
+    dimension,
+    { preserveMax = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
+  ) {
+    const maxProperty = dimension === 'width' ? 'maxWidth' : 'maxHeight';
+    const sizes = this.map((el) => {
       const includeBoxModel = includeMargin || includePadding || includeBorder;
       const $clone = this.chain(el).clone();
       const css = {
@@ -1707,11 +1608,11 @@ export class Query {
         display: 'block',
         transform: 'translate(-200vw, -200vh)',
         pointerEvents: 'none',
-        height: 'auto',
+        [dimension]: 'auto',
         visibility: 'hidden',
         isolation: 'isolate',
         contain: 'layout paint style',
-        maxHeight: 'none',
+        [maxProperty]: 'none',
       };
       if (!includeBoxModel) {
         css.boxSizing = 'content-box';
@@ -1719,17 +1620,17 @@ export class Query {
         css.margin = '0px';
         css.border = '0px';
       }
-      if (preserveMaxHeight) {
-        delete css.maxHeight;
+      if (preserveMax) {
+        delete css[maxProperty];
       }
       $clone
         .insertAfter(el)
         .css(css);
-      const naturalHeight = $clone.height({ includeMargin, includePadding, includeBorder });
+      const size = $clone.#dimension(dimension, { includeMargin, includePadding, includeBorder });
       $clone.remove();
-      return naturalHeight;
+      return size;
     });
-    return height.length > 1 ? height : height[0];
+    return sizes.length > 1 ? sizes : sizes[0];
   }
 
   naturalDisplay({ calculate = true } = {}) {
