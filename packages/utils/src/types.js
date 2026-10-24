@@ -137,3 +137,12 @@ export const isClassInstance = (obj) => {
 
   return !builtInTypes.has(constructorName);
 };
+
+const fnToString = Function.prototype.toString;
+
+// non-writable prototype rejects plain and arrow functions without stringifying, toString excludes built-ins
+export const isClassConstructor = (fn) => {
+  return isFunction(fn)
+    && Object.getOwnPropertyDescriptor(fn, 'prototype')?.writable === false
+    && fnToString.call(fn).startsWith('class');
+};

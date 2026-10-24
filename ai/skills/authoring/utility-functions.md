@@ -1,7 +1,7 @@
 ---
 title: Utility Functions Reference
 description: Complete reference for @semantic-ui/utils — a standalone utility library providing functions for arrays, objects, strings, type checking, colors, dates, and more. Use this before reimplementing common operations.
-keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, formatDuration, each, range, sequence, remove, noop, isDate, isRegExp, isTemporal, checkOptions, defineGlobal]
+keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, formatDuration, each, range, sequence, remove, noop, isDate, isRegExp, isTemporal, isClassConstructor, checkOptions, defineGlobal]
 audience: authoring
 skill: utility-functions
 type: skill
@@ -454,7 +454,7 @@ isTemporal(new Date());                            // false
 ### Special Types
 ```javascript
 import {
-  isEmpty, isPromise, isDOM, isNode, isClassInstance,
+  isEmpty, isPromise, isDOM, isNode, isClassInstance, isClassConstructor,
   isIterable, isMap, isSet, isArguments
 } from '@semantic-ui/utils';
 
@@ -468,6 +468,7 @@ isPromise(fetch('/api'));        // true (checks for .then method)
 isDOM(document.body);            // true (Element, Document, window, DocumentFragment)
 isNode(document.createTextNode('text')); // true (checks nodeType)
 isClassInstance(new MyClass());  // true (excludes built-in types like Date, Map, Array)
+isClassConstructor(MyClass);     // true (ES class constructor, false for plain/arrow fns and built-ins like Date)
 
 isIterable(new Set());           // true (checks Symbol.iterator)
 isMap(new Map());                // true
@@ -1463,6 +1464,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `isDOM` | Element, Document, window, DocumentFragment |
 | `isNode` | Has `nodeType` |
 | `isClassInstance` | Excludes built-in types |
+| `isClassConstructor` | ES `class` constructor (excludes plain/arrow functions and built-ins) |
 | `isIterable` | Has `Symbol.iterator` |
 | `isMap`, `isSet` | `instanceof` checks |
 | `isArguments` | Arguments object |

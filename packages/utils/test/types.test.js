@@ -3,6 +3,7 @@ import {
   isArray,
   isBinary,
   isBoolean,
+  isClassConstructor,
   isClassInstance,
   isDate,
   isEmpty,
@@ -161,6 +162,73 @@ describe('Type Checking Utilities', () => {
       expect(isClassInstance(() => {})).toBe(false);
       function testFunction() {}
       expect(isClassInstance(testFunction)).toBe(false);
+    });
+  });
+
+  describe('isClassConstructor', () => {
+    it('should return true for named, anonymous, and derived ES classes', () => {
+      class MyClass {}
+      class SubClass extends MyClass {}
+      class SubArray extends Array {}
+      const AnonymousClass = class {};
+      expect(isClassConstructor(MyClass)).toBe(true);
+      expect(isClassConstructor(SubClass)).toBe(true);
+      expect(isClassConstructor(SubArray)).toBe(true);
+      expect(isClassConstructor(AnonymousClass)).toBe(true);
+      expect(isClassConstructor(class {})).toBe(true);
+    });
+
+    it('should return false for plain, arrow, async, generator, bound, and method functions', () => {
+      function plainFn() {}
+      function ProtoFn() {}
+      ProtoFn.prototype.render = () => {};
+      class MyClass {}
+      const methods = {
+        run() {},
+        class() {},
+      };
+
+      expect(isClassConstructor(plainFn)).toBe(false);
+      expect(isClassConstructor(ProtoFn)).toBe(false);
+      expect(isClassConstructor(() => {})).toBe(false);
+      expect(isClassConstructor(async () => {})).toBe(false);
+      expect(isClassConstructor(async function() {})).toBe(false);
+      expect(isClassConstructor(function*() {})).toBe(false);
+      expect(isClassConstructor(async function*() {})).toBe(false);
+      expect(isClassConstructor(plainFn.bind(null))).toBe(false);
+      expect(isClassConstructor(MyClass.bind(null))).toBe(false);
+      expect(isClassConstructor(methods.run)).toBe(false);
+      expect(isClassConstructor(methods.class)).toBe(false);
+    });
+
+    it('should return false for built-in constructors and functions', () => {
+      expect(isClassConstructor(Object)).toBe(false);
+      expect(isClassConstructor(Array)).toBe(false);
+      expect(isClassConstructor(Date)).toBe(false);
+      expect(isClassConstructor(RegExp)).toBe(false);
+      expect(isClassConstructor(Map)).toBe(false);
+      expect(isClassConstructor(Set)).toBe(false);
+      expect(isClassConstructor(Error)).toBe(false);
+      expect(isClassConstructor(Promise)).toBe(false);
+      expect(isClassConstructor(Function)).toBe(false);
+      expect(isClassConstructor(String)).toBe(false);
+      expect(isClassConstructor(Number)).toBe(false);
+      expect(isClassConstructor(Boolean)).toBe(false);
+      expect(isClassConstructor(Symbol)).toBe(false);
+      expect(isClassConstructor(BigInt)).toBe(false);
+      expect(isClassConstructor(Uint8Array)).toBe(false);
+    });
+
+    it('should return false for class instances and non-functions', () => {
+      class MyClass {}
+      expect(isClassConstructor(new MyClass())).toBe(false);
+      expect(isClassConstructor({})).toBe(false);
+      expect(isClassConstructor([])).toBe(false);
+      expect(isClassConstructor(null)).toBe(false);
+      expect(isClassConstructor(undefined)).toBe(false);
+      expect(isClassConstructor(42)).toBe(false);
+      expect(isClassConstructor('class MyClass {}')).toBe(false);
+      expect(isClassConstructor(true)).toBe(false);
     });
   });
 
