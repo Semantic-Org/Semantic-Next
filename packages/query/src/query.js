@@ -136,7 +136,7 @@ export class Query {
 
   // This is a fast path for wrapping el for use with $each
   static wrap(el, options) {
-    const $el = Object.create(Query.prototype);
+    const $el = new Query(null, { root: null });
     $el[0] = el;
     $el.length = 1;
     $el.options = options;
@@ -144,11 +144,10 @@ export class Query {
   }
 
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
-    let elements = [];
-
     if (!root) {
       return;
     }
+    let elements = [];
 
     // this is an existing query object
     if (selector instanceof Query) {
@@ -739,7 +738,7 @@ export class Query {
           : handler;
 
         const eventListener = targetSelector
-          ? (event) => Query.#dispatchDelegated(eventHandler, event)
+          ? (event) => this.#dispatchDelegated(eventHandler, event)
           : wrappedHandler;
 
         // will cause illegal invocation if used from proxy object
@@ -776,7 +775,7 @@ export class Query {
 
   // delegated handlers on one element share a dispatch so they run innermost match first
   // with stopPropagation honoured between levels
-  static #dispatchDelegated(eventHandler, event) {
+  #dispatchDelegated(eventHandler, event) {
     if (eventHandler.dispatched?.delete(event)) {
       return;
     }
@@ -1390,14 +1389,14 @@ export class Query {
   }
 
   height(value, options = {}) {
-    return Query.#dimension.call(this, 'height', value, options);
+    return this.#dimension('height', value, options);
   }
 
   width(value, options = {}) {
-    return Query.#dimension.call(this, 'width', value, options);
+    return this.#dimension('width', value, options);
   }
 
-  static #dimension(dimension, value, options = {}) {
+  #dimension(dimension, value, options = {}) {
     if (isPlainObject(value)) {
       options = value;
       value = undefined;
@@ -1625,14 +1624,14 @@ export class Query {
   }
 
   naturalWidth({ preserveMaxWidth = true, ...options } = {}) {
-    return Query.#naturalDimension.call(this, 'width', preserveMaxWidth, options);
+    return this.#naturalDimension('width', preserveMaxWidth, options);
   }
 
   naturalHeight({ preserveMaxHeight = true, ...options } = {}) {
-    return Query.#naturalDimension.call(this, 'height', preserveMaxHeight, options);
+    return this.#naturalDimension('height', preserveMaxHeight, options);
   }
 
-  static #naturalDimension(dimension, preserveMax, options) {
+  #naturalDimension(dimension, preserveMax, options) {
     const maxProperty = dimension === 'width' ? 'maxWidth' : 'maxHeight';
     const includeBoxModel = options.includeMargin || options.includePadding || options.includeBorder;
     const sizes = this.map((el) => {
@@ -1662,7 +1661,7 @@ export class Query {
       $clone
         .insertAfter(el)
         .css(css);
-      const size = Query.#dimension.call($clone, dimension, options);
+      const size = $clone.#dimension(dimension, options);
       $clone.remove();
       return size;
     });
