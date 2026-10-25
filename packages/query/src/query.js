@@ -136,7 +136,7 @@ export class Query {
 
   // This is a fast path for wrapping el for use with $each
   static wrap(el, options) {
-    const $el = Object.create(Query.prototype);
+    const $el = new Query(null, { root: null });
     $el[0] = el;
     $el.length = 1;
     $el.options = options;
@@ -144,11 +144,10 @@ export class Query {
   }
 
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
-    let elements = [];
-
     if (!root) {
       return;
     }
+    let elements = [];
 
     // this is an existing query object
     if (selector instanceof Query) {
@@ -739,7 +738,7 @@ export class Query {
           : handler;
 
         const eventListener = targetSelector
-          ? (event) => Query.#dispatchDelegated(eventHandler, event)
+          ? (event) => this.#dispatchDelegated(eventHandler, event)
           : wrappedHandler;
 
         // will cause illegal invocation if used from proxy object
@@ -776,7 +775,7 @@ export class Query {
 
   // delegated handlers on one element share a dispatch so they run innermost match first
   // with stopPropagation honoured between levels
-  static #dispatchDelegated(eventHandler, event) {
+  #dispatchDelegated(eventHandler, event) {
     if (eventHandler.dispatched?.delete(event)) {
       return;
     }
@@ -1624,33 +1623,18 @@ export class Query {
     });
   }
 
-  naturalWidth({ preserveMaxWidth = true, includeMargin = false, includePadding = false, includeBorder = false } = {}) {
-    return this.#naturalDimension('width', {
-      preserveMax: preserveMaxWidth,
-      includeMargin,
-      includePadding,
-      includeBorder,
-    });
+  naturalWidth({ preserveMaxWidth = true, ...options } = {}) {
+    return this.#naturalDimension('width', preserveMaxWidth, options);
   }
 
-  naturalHeight(
-    { preserveMaxHeight = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
-  ) {
-    return this.#naturalDimension('height', {
-      preserveMax: preserveMaxHeight,
-      includeMargin,
-      includePadding,
-      includeBorder,
-    });
+  naturalHeight({ preserveMaxHeight = true, ...options } = {}) {
+    return this.#naturalDimension('height', preserveMaxHeight, options);
   }
 
-  #naturalDimension(
-    dimension,
-    { preserveMax = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
-  ) {
+  #naturalDimension(dimension, preserveMax, options) {
     const maxProperty = dimension === 'width' ? 'maxWidth' : 'maxHeight';
+    const includeBoxModel = options.includeMargin || options.includePadding || options.includeBorder;
     const sizes = this.map((el) => {
-      const includeBoxModel = includeMargin || includePadding || includeBorder;
       const $clone = this.chain(el).clone();
       const css = {
         position: 'absolute',
@@ -1677,7 +1661,7 @@ export class Query {
       $clone
         .insertAfter(el)
         .css(css);
-      const size = $clone.#dimension(dimension, { includeMargin, includePadding, includeBorder });
+      const size = $clone.#dimension(dimension, options);
       $clone.remove();
       return size;
     });
