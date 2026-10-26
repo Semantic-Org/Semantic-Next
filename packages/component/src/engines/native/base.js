@@ -26,6 +26,13 @@ const HTMLElementBase = isServer ? class {} : HTMLElement;
 class WebComponentBase extends HTMLElementBase {
   constructor() {
     super();
+    this.construct();
+  }
+
+  // the constructor's work on its own: a plain element that mount upgrades with this class
+  // runs it the way the custom elements polyfill ran a definition's constructor after
+  // swapping an element's prototype
+  construct() {
     this.renderCallbacks = [];
     this.properties = new Map();
 

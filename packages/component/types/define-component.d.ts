@@ -217,8 +217,9 @@ export interface ComponentConstructor<M extends Record<string, any> = Record<str
 
   /**
    * Mounts the prototype template into an element the caller owns, so a `mount` call
-   * site survives adding a tag to its definition. Attributes are not observed on a
-   * plain element; settings carry the same values.
+   * site survives adding a tag to its definition. The element is upgraded with this
+   * class while mounted and carries its defaults and spec. Attributes are not observed
+   * on a plain element; settings carry the same values.
    */
   mount(target: Element | ShadowRoot, options?: MountSettings): Template;
 

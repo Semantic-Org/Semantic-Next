@@ -272,6 +272,12 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
       settings[propertyName] = true;
     }
   }
+  // a key a mount declared beyond the class lives only in the store
+  el.properties?.forEach((value, propertyName) => {
+    if (value !== undefined && !(propertyName in settings)) {
+      settings[propertyName] = value;
+    }
+  });
   return settings;
 }
 

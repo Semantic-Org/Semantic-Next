@@ -540,7 +540,7 @@ describe('Template.mount', () => {
       expect(el.shadowRoot.adoptedStyleSheets.length).toBe(1);
     });
 
-    it('mounts from a tagged class through its prototype template', () => {
+    it('mounts from a tagged class with its declared defaults and its spec', () => {
       const Tagged = defineComponent({
         tagName: uniqueTag('mount-tagged'),
         template: '<p class="tagged">{label}</p>',
@@ -548,9 +548,33 @@ describe('Template.mount', () => {
       });
       const el = document.createElement('div');
       document.body.append(el);
-      const instance = Tagged.mount(el, { settings: { label: 'via class' } });
+      const instance = Tagged.mount(el);
       expect(instance).toBeInstanceOf(Template);
-      expect(el.textContent).toContain('via class');
+      // the default the class declared applies without being passed
+      expect(el.textContent).toContain('tagged');
+      instance.settings.label = 'via class';
+      return tick().then(() => {
+        expect(el.textContent).toContain('via class');
+
+        const Primitive = defineComponent({
+          tagName: uniqueTag('mount-primitive'),
+          template: '<button class="{uiClasses}button">{label}</button>',
+          defaultSettings: { label: 'go' },
+          componentSpec: {
+            attributes: ['emphasis'],
+            properties: [],
+            optionAttributes: { primary: 'emphasis', secondary: 'emphasis' },
+            propertyTypes: { emphasis: 'string' },
+            allowedValues: { emphasis: ['primary', 'secondary'] },
+            attributeClasses: [],
+          },
+        });
+        const host = document.createElement('div');
+        document.body.append(host);
+        Primitive.mount(host, { settings: { emphasis: 'primary' } });
+        // the spec the class declared drives uiClasses on a plain element
+        expect(host.querySelector('button').className).toBe('primary button');
+      });
     });
   });
 
@@ -679,7 +703,7 @@ describe('Template.mount', () => {
   });
 
   describe('teardown hygiene', () => {
-    it('leaves no scheduling flag on the element after an unmount in the same tick', async () => {
+    it('neither renders nor leaves a render pending after an unmount in the same tick', async () => {
       const Row = defineRow();
       const el = document.createElement('div');
       document.body.append(el);
@@ -687,8 +711,10 @@ describe('Template.mount', () => {
       row.settings.label = 'late';
       row.unmount();
       await tick();
-      expect('pendingRender' in el).toBe(false);
-      expect('updateScheduled' in el).toBe(false);
+      expect(el.childNodes.length).toBe(0);
+      expect(el.updateScheduled).toBeFalsy();
+      expect(el._pendingRender).toBeFalsy();
+      expect(Object.getPrototypeOf(el)).toBe(HTMLDivElement.prototype);
     });
   });
 

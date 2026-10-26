@@ -706,12 +706,15 @@ export interface MountSettings {
 
 /** What the engine put in place for a mounted template, read back by `unmount`. */
 export interface MountRecord {
-  /** The element that carries `template`, `component` and `dataContext`, and for a bare element its setup. */
+  /** The element that carries `template`, `component` and `dataContext`. */
   el: Element;
   /** Where the content was rendered: the element itself, or a host's shadow root. */
   renderRoot: Element | ShadowRoot;
-  /** Accessor configuration installed on a bare element, `null` when the host set itself up. */
-  properties: Record<string, any> | null;
+  /**
+   * What the upgrade of a bare element has to undo: its original prototype, and accessors
+   * for keys the mount declared beyond the class. `null` when the host built itself.
+   */
+  upgrade: { original: object; extras: Record<string, any> | null; } | null;
 }
 
 export class Template {
@@ -906,10 +909,11 @@ export class Template {
 
   /**
    * Mounts this template into an element the caller owns. A prototype mounts a clone
-   * and returns it; an instance mounts itself once. The element gets the same setup
-   * a host carries, so `el.settings`, Query writes, `findParent` and lifecycle events
-   * behave as they do on a tag. The engine does every touch of the target, and an
-   * engine without a mount refuses with `unsupportedEngine`.
+   * and returns it; an instance mounts itself once. A plain element is upgraded with the
+   * component's class while mounted, so `el.settings`, property and Query writes,
+   * `findParent` and lifecycle events behave as they do on a tag; attributes are not
+   * observed on it. The engine does every touch of the target, and an engine without a
+   * mount refuses with `unsupportedEngine`.
    * @param target - The element to take over, or a host's shadow root
    * @param options - Mount settings
    * @returns The live instance

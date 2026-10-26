@@ -64,6 +64,12 @@ export interface GetPropertiesOptions {
  */
 export declare class WebComponentBase extends HTMLElement {
   /**
+   * The constructor's work on its own: the property store, defaults, settings proxy and
+   * `uiClasses`. Mount runs it on a plain element after giving it this class's prototype.
+   */
+  construct(): void;
+
+  /**
    * Prototype template every instance clones from.
    * Set by the engine factory on the generated subclass.
    */

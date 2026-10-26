@@ -1,21 +1,16 @@
-import { adoptStylesheet, createErrors, each, isDevelopment, isServer, mapObject } from '@semantic-ui/utils';
+import { adoptStylesheet, createErrors, each, isDevelopment, isServer, keys, noop } from '@semantic-ui/utils';
 
-import {
-  createSettingsProxy,
-  defineAccessors,
-  getProperties,
-  getSettingsFromConfig,
-  isDarkMode,
-  setDefaultSettings,
-} from '../../component-helpers.js';
+import { defineAccessors, getProperties } from '../../component-helpers.js';
+import { createComponent } from './factory.js';
 
 const { throwError } = createErrors({ namespace: 'component' });
 
 /*
-  Mounts a template into an element the caller owns. A bare element is set up with what
-  a host's constructor gives a custom element, so adding a tag later changes nothing from
-  inside. The walks find it through the element like any host, and the lifetime stays the
-  caller's through unmount or an AbortSignal.
+  Mounts a template into an element the caller owns. A plain element is upgraded with the
+  component's class for as long as it is mounted, so it carries the accessors, the spec and
+  the methods a tag carries and adding a tag later changes nothing from inside. The walks
+  find it through the element like any host, and the lifetime stays the caller's through
+  unmount or an AbortSignal.
 */
 
 export function mount(template, target, { settings = {}, anchor, signal } = {}) {
@@ -52,8 +47,7 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
   }
 
   // a bare element has no property store, a host built its own in its constructor
-  const bare = !el.properties;
-  const properties = bare ? setupElement(el, template, settings, renderRoot) : null;
+  const upgrade = el.properties ? null : upgradeElement(el, template, settings, renderRoot);
   let instance = template;
   try {
     // a prototype mounts a copy built on the element's data, an instance mounts itself
@@ -86,10 +80,10 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
     renderRoot.replaceChildren(fragment);
   }
   catch (error) {
-    discard(instance, el, properties);
+    discard(instance, el, upgrade);
     throw error;
   }
-  instance.mounted = { el, renderRoot, properties };
+  instance.mounted = { el, renderRoot, upgrade };
 
   if (signal) {
     signal.addEventListener('abort', () => instance.unmount(), { once: true, signal: instance.abortSignal });
@@ -99,7 +93,7 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
 
 // a mount that fails partway leaves nothing behind: the instance's timers and reactions
 // end, the element is as it was, and the error reaches the caller
-function discard(instance, el, properties) {
+function discard(instance, el, upgrade) {
   if (!instance.isPrototype) {
     if (instance.initialized) {
       instance.onDestroyed();
@@ -112,8 +106,8 @@ function discard(instance, el, properties) {
   delete el.template;
   delete el.component;
   delete el.dataContext;
-  if (properties) {
-    restoreElement(el, properties);
+  if (upgrade) {
+    restoreElement(el, upgrade);
   }
 }
 
@@ -131,89 +125,86 @@ export function unmount(instance) {
   delete mounted.el.template;
   delete mounted.el.component;
   delete mounted.el.dataContext;
-  if (mounted.properties) {
-    restoreElement(mounted.el, mounted.properties);
+  if (mounted.upgrade) {
+    restoreElement(mounted.el, mounted.upgrade);
   }
 }
 
 /*******************************
-         Element Setup
+        Element Upgrade
 *******************************/
 
-// what a host's constructor gives a custom element, given to a bare element instead.
-// keys an instance carries or a mount passes count as declared, under the template's own
-// defaults, so each gets an accessor, a seeded store, and a shadow signal the overlay
-// forces, and the element is the one source every render reads
-function setupElement(el, template, settings, renderRoot) {
-  const declared = { ...template.defaultSettings, ...template.data, ...settings };
-  const properties = getProperties({ defaultSettings: declared });
-  el.properties = new Map();
-  each({ ...template.data, ...settings }, (value, name) => {
+// a plain element wears the component's class while mounted, the way the custom elements
+// polyfill upgraded an element: its prototype swapped in, the constructor's work run.
+// nothing is copied onto the element. keys an instance carries or a mount passes beyond
+// the class's declaration get accessors of their own and a signal through the defaults
+function upgradeElement(el, template, settings, renderRoot) {
+  const Host = template.hostClass ??= createHostClass(template);
+  const upgrade = { original: Object.getPrototypeOf(el), extras: null };
+  Object.setPrototypeOf(el, Host.prototype);
+  el.construct();
+  el.renderRoot = renderRoot;
+
+  const carried = { ...template.data, ...settings };
+  const undeclared = {};
+  each(carried, (value, name) => {
+    if (!(name in Host.properties)) {
+      undeclared[name] = value;
+    }
+  });
+  if (keys(undeclared).length) {
+    upgrade.extras = getProperties({ defaultSettings: undeclared });
+    defineAccessors(el, upgrade.extras);
+    each(keys(undeclared), (name) => {
+      el.defaultSettings[name] = undefined;
+    });
+  }
+  // seeded in the store rather than through the accessors, so nothing renders early
+  each(carried, (value, name) => {
     el.properties.set(name, value);
   });
-  el.renderRoot = renderRoot;
-  el.setSetting = function(name, value) {
-    this[name] = value;
-  };
-  el.isDarkMode = function() {
-    return isDarkMode(this);
-  };
-  el.requestUpdate = function() {
-    this.updateScheduled = true;
-    if (this.pendingRender) {
-      return;
-    }
-    this.pendingRender = true;
-    queueMicrotask(() => {
-      // unmounted in the meantime: the element was restored, leave it that way
-      if (!this.template) {
-        return;
-      }
-      this.pendingRender = false;
-      this.template.render(this.getData());
-    });
-  };
-  // the data a host builds per render
-  el.getData = function() {
-    const element = this;
-    const data = getSettingsFromConfig(element, { properties });
-    Object.defineProperty(data, 'darkMode', {
-      get() {
-        return element.isDarkMode();
-      },
-      enumerable: true,
-      configurable: true,
-    });
-    return data;
-  };
-  // every declared key, with the template's own default as its value. a key the mount
-  // declared has none, so clearing it reads as empty rather than as the value it arrived with
-  const defaults = mapObject(declared, (value, name) => template.defaultSettings?.[name]);
-  setDefaultSettings(el, { defaultSettings: defaults });
-  defineAccessors(el, properties);
-  el.settings = createSettingsProxy(el);
-  return properties;
+  return upgrade;
 }
 
-function restoreElement(el, properties) {
-  each(properties, (config, name) => {
-    if (!config.noAccessor) {
-      delete el[name];
-    }
+// a tagless template has no class until it is first mounted: the factory a tag uses,
+// minus the registration
+function createHostClass(template) {
+  return createComponent({
+    prototypeTemplate: template,
+    resolvedProperties: getProperties({ defaultSettings: template.defaultSettings }),
+    css: template.css,
+    delegatesFocus: false,
+    componentSpec: false,
+    defaultSettings: template.defaultSettings,
+    plural: false,
+    onAttributeChanged: noop,
   });
+}
+
+// the constructor's fields stay as names holding nothing: a delete would leave the
+// element in dictionary mode for the rest of its life
+function restoreElement(el, { original, extras }) {
+  if (extras) {
+    each(extras, (config, name) => {
+      if (!config.noAccessor) {
+        delete el[name];
+      }
+    });
+  }
+  Object.setPrototypeOf(el, original);
   each([
+    'renderCallbacks',
     'properties',
-    'renderRoot',
-    'setSetting',
-    'isDarkMode',
-    'requestUpdate',
-    'getData',
-    'defaultSettings',
+    'css',
+    'componentSpec',
     'settings',
     'settingsVars',
+    'uiClasses',
+    'defaultSettings',
+    'renderRoot',
     'updateScheduled',
-    'pendingRender',
+    '_pendingRender',
   ], (name) => {
-    delete el[name];
+    el[name] = undefined;
   });
 }
