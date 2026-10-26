@@ -121,6 +121,7 @@ export class RenderTemplateDirective extends AsyncDirective {
       templateName,
       data: this.unpackData(this.data),
       parentTemplate: this.parentTemplate,
+      nested: true,
     });
   }
 

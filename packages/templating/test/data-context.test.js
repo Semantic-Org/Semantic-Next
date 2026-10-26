@@ -313,6 +313,7 @@ describe('Template — overlaySettingsSignals (subtemplate path)', () => {
     const parent = new Template();
     const child = new Template({
       defaultSettings: { color: 'blue' },
+      nested: true,
     });
     child.setParent(parent);
     const ctx = { existing: 'value' };
@@ -323,7 +324,7 @@ describe('Template — overlaySettingsSignals (subtemplate path)', () => {
 
   it('is a no-op when defaultSettings is missing', () => {
     const parent = new Template();
-    const child = new Template();
+    const child = new Template({ nested: true });
     child.setParent(parent);
     child.settingsVars = new Map([['color', new Signal('red')]]);
     const ctx = {};
@@ -335,6 +336,7 @@ describe('Template — overlaySettingsSignals (subtemplate path)', () => {
     const parent = new Template();
     const child = new Template({
       defaultSettings: { color: 'blue' },
+      nested: true,
     });
     child.setParent(parent);
     // Manual settingsVars wiring stands in for createSubtemplateSettings; the
@@ -352,6 +354,7 @@ describe('Template — overlaySettingsSignals (subtemplate path)', () => {
     const parent = new Template();
     const child = new Template({
       defaultSettings: { color: 'blue' },
+      nested: true,
     });
     child.setParent(parent);
     const colorSignal = new Signal('red');
@@ -589,6 +592,7 @@ describe('Template — subtemplate settings respects falsy data', () => {
       renderingEngine: realEngine,
       defaultSettings: { count: 5 },
       data: { count: 0 },
+      nested: true,
     });
     child.setParent(parent);
     child.initialize();
@@ -602,6 +606,7 @@ describe('Template — subtemplate settings respects falsy data', () => {
       renderingEngine: realEngine,
       defaultSettings: { active: true },
       data: { active: false },
+      nested: true,
     });
     child.setParent(parent);
     child.initialize();
@@ -615,6 +620,7 @@ describe('Template — subtemplate settings respects falsy data', () => {
       renderingEngine: realEngine,
       defaultSettings: { name: 'default' },
       data: { name: '' },
+      nested: true,
     });
     child.setParent(parent);
     child.initialize();
@@ -628,6 +634,7 @@ describe('Template — subtemplate settings respects falsy data', () => {
       renderingEngine: realEngine,
       defaultSettings: { value: 'default' },
       data: { value: null },
+      nested: true,
     });
     child.setParent(parent);
     child.initialize();
@@ -641,6 +648,7 @@ describe('Template — subtemplate settings respects falsy data', () => {
       renderingEngine: realEngine,
       defaultSettings: { value: 'default' },
       data: {},
+      nested: true,
     });
     child.setParent(parent);
     child.initialize();

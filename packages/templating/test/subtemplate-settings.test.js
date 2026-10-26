@@ -26,6 +26,7 @@ function makeSubtemplatePair({
     defaultSettings: childDefaultSettings,
     data: childData,
     element: childElement,
+    nested: true,
   });
   child.setParent(parent);
   return { parent, child };
@@ -54,23 +55,25 @@ describe('Template.isSubtemplate', () => {
     expect(child.isSubtemplate()).toBe(false);
   });
 
-  it('returns true after setParent', () => {
+  it('is declared at construction, not implied by setParent', () => {
+    // a mounted template links its host for the walks and still owns its element
     const parent = new Template();
-    const child = new Template();
-    child.setParent(parent);
-    expect(child.isSubtemplate()).toBe(true);
-    expect(child.parentTemplate).toBe(parent);
+    const linked = new Template();
+    linked.setParent(parent);
+    expect(linked.parentTemplate).toBe(parent);
+    expect(linked.isSubtemplate()).toBe(false);
+
+    const nested = new Template({ nested: true });
+    expect(nested.isSubtemplate()).toBe(true);
   });
 
-  it('returns false after removeParent clears the parent reference', () => {
+  it('survives removeParent, which clears only the link', () => {
     const parent = new Template();
-    const child = new Template();
+    const child = new Template({ nested: true });
     child.setParent(parent);
-    expect(child.isSubtemplate()).toBe(true);
-
     child.removeParent();
     expect(child.parentTemplate).toBeUndefined();
-    expect(child.isSubtemplate()).toBe(false);
+    expect(child.isSubtemplate()).toBe(true);
   });
 });
 
@@ -439,6 +442,7 @@ describe('Subtemplate settings — parent element fallback', () => {
       template: '<span></span>',
       renderingEngine: realEngine,
       defaultSettings: { ownProp: 'X' },
+      nested: true,
     });
     child.setParent(middle);
     child.initialize();
@@ -757,6 +761,7 @@ describe('Template clone + setParent flow', () => {
     const child = proto.clone({
       parentTemplate: parent,
       data: { theme: 'dark' },
+      nested: true,
     });
     child.setElement(fakeElement);
     child.setParent(parent);

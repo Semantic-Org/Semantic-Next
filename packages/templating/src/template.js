@@ -85,7 +85,8 @@ export const Template = class Template {
     defaultSettings,
     subTemplates,
     createComponent,
-    parentTemplate, // the parent template when nested
+    parentTemplate, // tree link read by findParent, set by any door through setParent
+    nested = false, // rendered inside a parent's render, borrowing its host
     renderingEngine = 'native',
     isPrototype = false,
     attachStyles = false, // whether to construct css stylesheet and attach to renderRoot
@@ -131,6 +132,7 @@ export const Template = class Template {
     this.onThemeChangedCallback = onThemeChanged;
     this.id = generateId({ usage: 'page' });
     this.isPrototype = isPrototype;
+    this.nested = nested;
     if (isPrototype) {
       this.template = template;
     }
@@ -206,8 +208,10 @@ export const Template = class Template {
     }
   }
 
+  // a parent link alone is not nesting: a mounted template registers its host for the
+  // walks and still owns its element, settings and lifecycle events
   isSubtemplate() {
-    return this.parentTemplate !== undefined;
+    return this.nested;
   }
 
   setParent(parentTemplate) {
@@ -353,21 +357,7 @@ export const Template = class Template {
       this.reactions.push(stateReaction);
     }
 
-    // Resolve renderer class from engine object or registry
-    const engine = isObject(this.renderingEngine)
-      ? this.renderingEngine
-      : getEngine(this.renderingEngine);
-    if (!engine) {
-      // a synchronous throw on purpose: the async report let execution fall
-      // through to a second, accidental error on the missing engine
-      throwError('engineNotRegistered', String(this.renderingEngine), {
-        explanation: isDevelopment
-          ? `Renderer "${this.renderingEngine}" not registered.`
-            + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`
-          : 0,
-      });
-    }
-
+    const engine = this.resolveEngine();
     const RendererClass = (Template.isServer && engine.serverRenderer)
       ? engine.serverRenderer
       : engine.renderer;
@@ -407,6 +397,45 @@ export const Template = class Template {
     if (this.attachStyles) {
       await this.adoptStylesheet();
     }
+  }
+
+  // the engine supplies the renderer and, on the client, the mount door
+  resolveEngine() {
+    const engine = isObject(this.renderingEngine)
+      ? this.renderingEngine
+      : getEngine(this.renderingEngine);
+    if (!engine) {
+      // a synchronous throw on purpose: the async report let execution fall
+      // through to a second, accidental error on the missing engine
+      throwError('engineNotRegistered', String(this.renderingEngine), {
+        explanation: isDevelopment
+          ? `Renderer "${this.renderingEngine}" not registered.`
+            + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`
+          : 0,
+      });
+    }
+    return engine;
+  }
+
+  // the el door. a prototype mounts a clone and returns it, an instance mounts itself
+  // once. the engine owns every touch of the target, this template never sees it
+  mount(target, options) {
+    const engine = this.resolveEngine();
+    if (!engine.mount) {
+      throwError('mountUnsupported', String(this.renderingEngine), {
+        explanation: isDevelopment
+          ? `Rendering engine "${this.renderingEngine}" has no mount door.`
+          : 0,
+      });
+    }
+    return engine.mount(this, target, options);
+  }
+
+  unmount() {
+    if (!this.mounted) {
+      return;
+    }
+    this.resolveEngine().unmount(this);
   }
 
   getDataContext() {
@@ -559,6 +588,7 @@ export const Template = class Template {
       onThemeChanged: this.onThemeChangedCallback,
       onRendered: this.onRenderedCallback,
       parentTemplate: this.parentTemplate,
+      nested: this.nested,
       onDestroyed: this.onDestroyedCallback,
       createComponent: this.createComponent,
     };
@@ -1375,8 +1405,9 @@ export const Template = class Template {
       return true;
     };
 
-    // First check DOM children (web components) - cascade downward
-    if (template.element?.shadowRoot) {
+    // a tag renders into its shadow root, a mounted el into itself
+    const root = template.element?.renderRoot || template.element?.shadowRoot;
+    if (root) {
       const traverseChildren = (node) => {
         if (node?.children) {
           for (const child of node.children) {
@@ -1394,7 +1425,7 @@ export const Template = class Template {
           }
         }
       };
-      traverseChildren(template.element.shadowRoot);
+      traverseChildren(root);
     }
 
     // Then check subtemplate children (recursive lookup for nested partials)

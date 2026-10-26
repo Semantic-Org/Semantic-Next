@@ -261,6 +261,7 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
     templateName,
     data: templateData,
     parentTemplate: self.parentTemplate,
+    nested: true,
     renderingEngine: 'native',
   });
   if (self.parentTemplate?.element) { instance.setElement(self.parentTemplate.element); }
