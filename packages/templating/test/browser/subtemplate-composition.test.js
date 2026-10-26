@@ -54,7 +54,6 @@ async function mountSubtemplatePair({
     defaultSettings: childDefaultSettings,
     data: childData,
     element: host,
-    nested: true,
   });
   child.setParent(parent);
   child.initialize();
@@ -220,7 +219,6 @@ describe('Subtemplate composition — clone + wire + initialize sequence', () =>
     try {
       child = proto.clone({
         parentTemplate: parentFixture.parent,
-        nested: true,
         data: { theme: 'dark' },
       });
       child.setElement(parentFixture.host);
@@ -258,7 +256,6 @@ describe('Subtemplate composition — clone + wire + initialize sequence', () =>
     try {
       childA = proto.clone({
         parentTemplate: parentFixture.parent,
-        nested: true,
         data: { theme: 'red' },
       });
       childA.setElement(parentFixture.host);
@@ -267,7 +264,6 @@ describe('Subtemplate composition — clone + wire + initialize sequence', () =>
 
       childB = proto.clone({
         parentTemplate: parentFixture.parent,
-        nested: true,
         data: { theme: 'blue' },
       });
       childB.setElement(parentFixture.host);

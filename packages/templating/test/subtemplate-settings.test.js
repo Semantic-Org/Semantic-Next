@@ -26,7 +26,6 @@ function makeSubtemplatePair({
     defaultSettings: childDefaultSettings,
     data: childData,
     element: childElement,
-    nested: true,
   });
   child.setParent(parent);
   return { parent, child };
@@ -55,25 +54,31 @@ describe('Template.isSubtemplate', () => {
     expect(child.isSubtemplate()).toBe(false);
   });
 
-  it('is declared at construction, not implied by setParent', () => {
-    // a mounted template links its host for the walks and still owns its element
-    const parent = new Template();
-    const linked = new Template();
-    linked.setParent(parent);
-    expect(linked.parentTemplate).toBe(parent);
-    expect(linked.isSubtemplate()).toBe(false);
+  it('follows from borrowing the parent element, not from the link alone', () => {
+    const host = { settings: {} };
+    const parent = new Template({ element: host });
 
-    const nested = new Template({ nested: true });
-    expect(nested.isSubtemplate()).toBe(true);
+    // a mounted or tagged template registers its host for the walks and brings its own element
+    const own = new Template({ element: { settings: {} } });
+    own.setParent(parent);
+    expect(own.parentTemplate).toBe(parent);
+    expect(own.isSubtemplate()).toBe(false);
+
+    const borrowed = new Template();
+    borrowed.setElement(host);
+    borrowed.setParent(parent);
+    expect(borrowed.isSubtemplate()).toBe(true);
   });
 
-  it('survives removeParent, which clears only the link', () => {
+  it('returns false after removeParent clears the parent reference', () => {
     const parent = new Template();
-    const child = new Template({ nested: true });
+    const child = new Template();
     child.setParent(parent);
+    expect(child.isSubtemplate()).toBe(true);
+
     child.removeParent();
     expect(child.parentTemplate).toBeUndefined();
-    expect(child.isSubtemplate()).toBe(true);
+    expect(child.isSubtemplate()).toBe(false);
   });
 });
 
@@ -442,7 +447,6 @@ describe('Subtemplate settings — parent element fallback', () => {
       template: '<span></span>',
       renderingEngine: realEngine,
       defaultSettings: { ownProp: 'X' },
-      nested: true,
     });
     child.setParent(middle);
     child.initialize();
@@ -761,7 +765,6 @@ describe('Template clone + setParent flow', () => {
     const child = proto.clone({
       parentTemplate: parent,
       data: { theme: 'dark' },
-      nested: true,
     });
     child.setElement(fakeElement);
     child.setParent(parent);

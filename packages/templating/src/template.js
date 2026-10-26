@@ -86,7 +86,6 @@ export const Template = class Template {
     subTemplates,
     createComponent,
     parentTemplate, // tree link read by findParent, set by any door through setParent
-    nested = false, // rendered inside a parent's render, borrowing its host
     renderingEngine = 'native',
     isPrototype = false,
     attachStyles = false, // whether to construct css stylesheet and attach to renderRoot
@@ -132,7 +131,6 @@ export const Template = class Template {
     this.onThemeChangedCallback = onThemeChanged;
     this.id = generateId({ usage: 'page' });
     this.isPrototype = isPrototype;
-    this.nested = nested;
     if (isPrototype) {
       this.template = template;
     }
@@ -208,10 +206,10 @@ export const Template = class Template {
     }
   }
 
-  // a parent link alone is not nesting: a mounted template registers its host for the
-  // walks and still owns its element, settings and lifecycle events
+  // a subtemplate renders inside its parent's render and borrows the parent's element.
+  // a mounted or tagged template registers a parent for the walks and brings its own
   isSubtemplate() {
-    return this.nested;
+    return this.parentTemplate !== undefined && this.element === this.parentTemplate.element;
   }
 
   setParent(parentTemplate) {
@@ -588,7 +586,6 @@ export const Template = class Template {
       onThemeChanged: this.onThemeChangedCallback,
       onRendered: this.onRenderedCallback,
       parentTemplate: this.parentTemplate,
-      nested: this.nested,
       onDestroyed: this.onDestroyedCallback,
       createComponent: this.createComponent,
     };

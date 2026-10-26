@@ -71,8 +71,6 @@ export interface TemplateSettings {
   createComponent?: (params: FactoryParams) => Record<string, any>;
   /** The parent template for the walks. Set through `setParent` by the renderer or by mount. */
   parentTemplate?: Template;
-  /** Rendered inside a parent's render, borrowing its host. Set by the renderer, never by a caller. */
-  nested?: boolean;
   /** The rendering engine — 'native' (default), 'lit', or an engine object. */
   renderingEngine?: string | object;
   /** Indicates if this is a prototype template. */
@@ -756,8 +754,6 @@ export class Template {
   onThemeChangedCallback: (params: CallParams) => void;
   /** The parent template for the walks. Set through `setParent` by the renderer or by mount. */
   parentTemplate?: Template;
-  /** Rendered inside a parent's render, borrowing its host. A mounted template is not nested. */
-  nested: boolean;
   /** Set by the engine while mounted through {@link mount}, `null` once unmounted. */
   mounted?: MountRecord | null;
   /** Array of reactive reactions associated with the template. */

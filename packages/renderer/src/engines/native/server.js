@@ -677,7 +677,7 @@ export class ServerRenderer {
     if (isFunction(template.clone)) {
       // wired as the client wires it: the clone keeps its own subTemplates for a nested
       // {>name}, and as a child it gets its own settings with the host as the fallback
-      const instance = template.clone({ data, nested: true });
+      const instance = template.clone({ data });
       if (this.template?.element) { instance.setElement(this.template.element); }
       if (this.template) { instance.setParent(this.template); }
       instance.renderOptions = { markers: this.markers, text: this.text, slots: this.slots };
