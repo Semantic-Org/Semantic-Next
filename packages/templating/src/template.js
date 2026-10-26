@@ -33,6 +33,7 @@ import {
   isObject,
   isServer,
   kebabToCamel,
+  keys,
   mapObject,
   noop,
   remove,
@@ -938,7 +939,7 @@ export const Template = class Template {
     }
     const dataContext = extend({}, this.getDataContext(), additionalData);
     this.setDataContext(dataContext, { rerender: false });
-    this.updateSubtemplateSettings(dataContext);
+    this.updateSettings(dataContext);
 
     this.overlaySettingsSignals(dataContext);
     this.renderer.setData(dataContext);
@@ -1211,14 +1212,19 @@ export const Template = class Template {
     });
   }
 
-  // mirrors what a parent passed into the nested template's own store
-  updateSubtemplateSettings(dataContext) {
-    if (!this.isSubtemplate() || !this.settings || !this.defaultSettings) {
+  // writes the declared settings a render carries into the settings store, the nested
+  // template's own or the element's, so the store stays the one source the overlay reads.
+  // only a value the store does not already hold is written: a default stays a default
+  // and never becomes a property, and an unchanged render schedules nothing
+  updateSettings(dataContext) {
+    const settings = this.settings || this.element?.settings;
+    const declared = this.defaultSettings ?? this.element?.defaultSettings;
+    if (!settings || !declared) {
       return;
     }
-    each(this.defaultSettings, (_, name) => {
-      if (name in dataContext) {
-        this.settings[name] = dataContext[name];
+    each(keys(declared), (name) => {
+      if (name in dataContext && dataContext[name] !== settings[name]) {
+        settings[name] = dataContext[name];
       }
     });
   }

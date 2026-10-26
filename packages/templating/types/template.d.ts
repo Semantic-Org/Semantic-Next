@@ -1124,10 +1124,11 @@ export class Template {
   createSubtemplateSettings(): void;
 
   /**
-   * Pushes matching values from a data context into the subtemplate's settings.
+   * Writes the declared settings a render carries into the settings store, a nested
+   * template's own or the element's, so the store stays the one source the overlay reads.
    * @param dataContext - The data context to read from.
    */
-  updateSubtemplateSettings(dataContext: DataContext): void;
+  updateSettings(dataContext: DataContext): void;
 
   /**
    * `setInterval` scoped to the template, cleared when the template is destroyed.
