@@ -137,6 +137,7 @@ export const Template = class Template {
     this.attachStyles = attachStyles;
     this.element = element;
     this.renderingEngine = renderingEngine;
+    // resolved here, not at initialize: mount runs on a prototype, which never initializes
     this.engine = resolveEngine(renderingEngine);
     if (renderRoot) {
       this.attach(renderRoot);
