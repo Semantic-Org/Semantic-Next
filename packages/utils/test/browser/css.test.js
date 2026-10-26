@@ -63,6 +63,18 @@ describe('CSS Utilities', () => {
         expect(shadowRoot.adoptedStyleSheets[0].cssRules[0].selectorText).toBe('.shadow-test');
       });
 
+      it('adopts to the document for a detached element, which has no root that can adopt', () => {
+        const css = '.detached-test { outline: 1px solid; }';
+        const detached = document.createElement('div');
+        const initialCount = document.adoptedStyleSheets.length;
+
+        adoptStylesheet(css, detached);
+
+        expect(document.adoptedStyleSheets.length).toBe(initialCount + 1);
+        const addedSheet = document.adoptedStyleSheets[document.adoptedStyleSheets.length - 1];
+        expect(addedSheet.cssRules[0].selectorText).toBe('.detached-test');
+      });
+
       it('should prevent duplicate stylesheets using hash', () => {
         const css = '.duplicate-test { margin: 10px; }';
         const shadowRoot = testElement.shadowRoot;
