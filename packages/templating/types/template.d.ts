@@ -690,7 +690,11 @@ export interface AttachSettings {
   endNode?: Node;
 }
 
-/** Options for {@link Template.mount}. */
+/**
+ * Options for {@link Template.mount}. The template's css is adopted onto the target's
+ * root. A detached target has no root yet, so its css lands on the document; mount a
+ * connected element to scope it to a shadow root.
+ */
 export interface MountSettings {
   /** Initial settings, declared defaults underneath. A key not declared still reaches the data context. */
   settings?: Record<string, any>;

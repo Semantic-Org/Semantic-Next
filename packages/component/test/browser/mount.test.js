@@ -74,7 +74,7 @@ describe('Template.mount', () => {
       expect(rowColor(el)).toBe('rgb(1, 2, 3)');
     });
 
-    it('mounts into a detached element and keeps its css for when the element lands', () => {
+    it('mounts into a detached element, its css adopted onto the document', () => {
       const Row = defineRow();
       const el = document.createElement('div');
       const row = Row.mount(el, { settings: { label: 'detached' } });
@@ -82,17 +82,6 @@ describe('Template.mount', () => {
       document.body.append(el);
       expect(rowColor(el)).toBe('rgb(1, 2, 3)');
       row.unmount();
-    });
-
-    it('carries its css with a detached element into whatever root it lands in', () => {
-      const Row = defineRow({ css: '.row { color: rgb(13, 14, 15); }' });
-      const el = document.createElement('div');
-      Row.mount(el, { settings: { label: 'late' } });
-      const host = document.createElement('div');
-      const shadow = host.attachShadow({ mode: 'open' });
-      document.body.append(host);
-      shadow.append(el);
-      expect(rowColor(shadow)).toBe('rgb(13, 14, 15)');
     });
 
     it('falls back to declared defaults and accepts undeclared settings', () => {
