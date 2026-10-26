@@ -2,6 +2,13 @@
  * A rendering engine: the classes a template instantiates to draw itself, plus
  * the factory that builds its custom element. Engines are hot-swappable, which
  * is how the optional Lit engine replaces the native one.
+ *
+ * An element an engine hands to a template carries: `settings`, a proxy whose
+ * reads track and whose writes notify; `defaultSettings`; `componentSpec` when
+ * spec-driven; `getData()`, the data a render reads; `requestUpdate()`;
+ * `isDarkMode()`; `renderRoot`; `isHydrating` while adopting server markup; and
+ * after mount the stamps `template`, `component` and `dataContext`. A property
+ * write that bypasses `settings` is reported through it, `el.settings[name] = value`.
  */
 export interface Engine {
   /** Renderer class, instantiated once per template instance. */
