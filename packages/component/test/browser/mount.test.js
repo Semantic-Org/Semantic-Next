@@ -341,12 +341,16 @@ describe('Template.mount', () => {
       expect(children.some((child) => child.clicked)).toBe(true);
     });
 
-    it('finds tagged components rendered inside the mounted content', async () => {
+    it('is found by tagged children upgrading inside its content, from their createComponent on', async () => {
       const Child = defineComponent({
         tagName: uniqueTag('mount-child'),
         template: '<i>child</i>',
+        createComponent: ({ findParent }) => ({
+          parentSeenAtCreate: findParent()?.templateName,
+        }),
       });
       const Wrapper = defineComponent({
+        templateName: 'mountWrapper',
         template: `<div><${Child.componentTagName}></${Child.componentTagName}></div>`,
       });
       const el = document.createElement('div');
@@ -356,9 +360,10 @@ describe('Template.mount', () => {
       const child = el.querySelector(Child.componentTagName);
       await child.rendered;
 
+      // a defined element upgrades during insertion, so the parent must be stamped before render
+      expect(child.component.parentSeenAtCreate).toBe('mountWrapper');
+      expect(child.template.findParent()?.templateName).toBe('mountWrapper');
       expect(wrapper.findChildren().length).toBe(1);
-      expect(child.template.findParent()).toBeDefined();
-      expect(child.template._childTemplates).toBeUndefined();
     });
   });
 

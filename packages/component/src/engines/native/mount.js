@@ -68,6 +68,9 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
   // the settings a callback sees are the element's, handed to the instance so the
   // returned handle talks the same way
   instance.settings = el.settings;
+  // stamped before anything renders: a defined child element upgrades during insertion
+  // and reads these to find its parent
+  el.template = instance;
 
   registerHost(instance, el);
   if (instance.css) {
@@ -75,13 +78,12 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
   }
 
   nonreactive(() => instance.initialize());
+  el.component = instance.instance;
+  el.dataContext = instance.getDataContext();
+
   instance.attach(renderRoot);
   const fragment = nonreactive(() => instance.render(data));
   renderRoot.replaceChildren(fragment);
-
-  el.template = instance;
-  el.component = instance.instance;
-  el.dataContext = instance.getDataContext();
   instance.mounted = { el, renderRoot, properties };
 
   if (signal) {
