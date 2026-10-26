@@ -405,6 +405,9 @@ export const Template = class Template {
   }
 
   unmount() {
+    if (!this.mounted) {
+      return;
+    }
     return nonreactive(() => this.engine.unmount(this));
   }
 

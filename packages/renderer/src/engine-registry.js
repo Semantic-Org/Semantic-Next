@@ -6,10 +6,10 @@ const engines = new Map();
 export const registerEngine = (name, engine) => engines.set(name, engine);
 export const getEngine = (name) => engines.get(name);
 
-// an engine may leave a door out. a template that calls it still gets a named refusal
-const unsupported = (verb) => () => {
-  throwError('unsupportedEngine', `Template.${verb}`, {
-    explanation: isDevelopment ? `the rendering engine does not support \`${verb}()\`` : 0,
+// an engine may leave mount out. a template that calls it still gets a named refusal
+const unsupportedMount = () => {
+  throwError('unsupportedEngine', 'Template.mount', {
+    explanation: isDevelopment ? 'the rendering engine does not support `mount()`' : 0,
   });
 };
 
@@ -23,7 +23,6 @@ export const resolveEngine = (engine) => {
         : 0,
     });
   }
-  resolved.mount ??= unsupported('mount');
-  resolved.unmount ??= unsupported('unmount');
+  resolved.mount ??= unsupportedMount;
   return resolved;
 };

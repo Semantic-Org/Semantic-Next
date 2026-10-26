@@ -35,8 +35,8 @@ export function getEngine(name: string): Engine | undefined;
 /**
  * The engine a template renders through: an engine object as given, or the one
  * registered under a name. Throws `engineNotRegistered` when the name is unknown.
- * A missing `mount` or `unmount` is filled with a function that refuses with
- * `unsupportedEngine`, so engines may leave either out.
+ * A missing `mount` is filled with a function that refuses with `unsupportedEngine`,
+ * so engines may leave it out. `unmount` is only ever asked of the engine that mounted.
  * @param engine - Engine name or engine object
  */
 export function resolveEngine(engine: string | Engine): Engine;
