@@ -288,7 +288,11 @@ export function createSettingsProxy(el) {
   el.settingsVars = new Map();
   return new Proxy({}, {
     get: (target, property) => {
-      const setting = el[property] ?? el.defaultSettings[property];
+      const setting = el[property] ?? el.defaultSettings?.[property];
+      // an element restored by unmount has no signals left, its settings read as it holds them
+      if (!el.settingsVars) {
+        return setting;
+      }
       let settingSignal = el.settingsVars.get(property);
       if (!settingSignal) {
         settingSignal = signal(setting);
@@ -298,6 +302,10 @@ export function createSettingsProxy(el) {
       return setting;
     },
     set: (target, property, value, receiver) => {
+      if (!el.settingsVars) {
+        el[property] = value;
+        return true;
+      }
       el.setSetting(property, value);
       const resolved = value ?? el.defaultSettings[property];
       let settingSignal = el.settingsVars.get(property);
